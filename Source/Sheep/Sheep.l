@@ -1,21 +1,22 @@
 %{
 #include "SheepScanner.h"
 #undef YY_DECL
-#define YY_DECL int Sheep::Scanner::yylex(yy::parser::semantic_type* const lval, yy::parser::location_type* location)
+#define YY_DECL Sheep::Parser::symbol_type Sheep::Scanner::yylex(Sheep::Scanner& scanner, Sheep::Driver& driver)
 
-using token = yy::parser::token;
+using token = Sheep::Parser::token;
+using parser = Sheep::Parser;
 
-#define YY_NO_UNISTD_H
+#define YY_USER_ACTION loc.step(); loc.columns(yyleng);
 
-#define YY_USER_ACTION loc->step(); loc->columns(yyleng);
+#define yyterminate() return parser::make_END(loc)
 %}
 
 %option yyclass="Sheep::Scanner"
-%option noyywrap
 %option c++
+%option noyywrap
 %option yylineno
-%option never-interactive
 %option stack
+%option never-interactive
 
 %s COMMENT
 
@@ -25,57 +26,57 @@ using token = yy::parser::token;
 "//".* { }
 
 <INITIAL>{
-"code"		return token::CODE;
-"symbols"	return token::SYMBOLS;
+"code"		return parser::make_CODE(loc);
+"symbols"	return parser::make_SYMBOLS(loc);
 
-"int"		return token::INTVAR;
-"float"		return token::FLOATVAR;
-"string"	return token::STRINGVAR;
+"int"		return parser::make_INTVAR(loc);
+"float"		return parser::make_FLOATVAR(loc);
+"string"	return parser::make_STRINGVAR(loc);
 
-"return" 	return token::RETURN;
-"wait"		return token::WAIT;
-"if"		return token::IF;
-"else"		return token::ELSE;
-"goto"		return token::GOTO;
+"return" 	return parser::make_RETURN(loc);
+"wait"		return parser::make_WAIT(loc);
+"if"		return parser::make_IF(loc);
+"else"		return parser::make_ELSE(loc);
+"goto"		return parser::make_GOTO(loc);
 
-":"		return token::COLON;
-";"		return token::SEMICOLON;
-","		return token::COMMA;
-"$"		return token::DOLLAR;
-"("		return token::OPENPAREN;
-")"		return token::CLOSEPAREN;
-"{"		return token::OPENBRACKET;
-"}"		return token::CLOSEBRACKET;
+":"		return parser::make_COLON(loc);
+";"		return parser::make_SEMICOLON(loc);
+","		return parser::make_COMMA(loc);
+"$"		return parser::make_DOLLAR(loc);
+"("		return parser::make_OPENPAREN(loc);
+")"		return parser::make_CLOSEPAREN(loc);
+"{"		return parser::make_OPENBRACKET(loc);
+"}"		return parser::make_CLOSEBRACKET(loc);
 
-"\""	return token::QUOTE;
+"\""	return parser::make_QUOTE(loc);
 
-"=="	return token::EQUAL;
-"!="	return token::NOTEQUAL;
-"="		return token::ASSIGN;
+"=="	return parser::make_EQUAL(loc);
+"!="	return parser::make_NOTEQUAL(loc);
+"="		return parser::make_ASSIGN(loc);
 
-"+"		return token::PLUS;
-"-"		return token::MINUS;
-"*"		return token::MULTIPLY;
-"/"		return token::DIVIDE;
+"+"		return parser::make_PLUS(loc);
+"-"		return parser::make_MINUS(loc);
+"*"		return parser::make_MULTIPLY(loc);
+"/"		return parser::make_DIVIDE(loc);
 
-">="	return token::GTE;
-"<="	return token::LTE;
-">"		return token::GT;
-"<"		return token::LT;
+">="	return parser::make_GTE(loc);
+"<="	return parser::make_LTE(loc);
+">"		return parser::make_GT(loc);
+"<"		return parser::make_LT(loc);
 
-"!"		return token::NOT;
-"&&"	return token::AND;
-"||"	return token::OR;
+"!"		return parser::make_NOT(loc);
+"&&"	return parser::make_AND(loc);
+"||"	return parser::make_OR(loc);
 
 
--?([0-9])+\.([0-9])+	{ return token::FLOAT; }
--?([0-9])+				{ return token::INT; }
-\"([^\\\"]|\\.)*\"		{ return token::STRING; }
-\|\<[^\>\|]*\>\|		{ return token::STRING; }
+-?([0-9])+\.([0-9])+	{ return parser::make_FLOAT(loc); }
+-?([0-9])+				{ return parser::make_INT(loc); }
+\"([^\\\"]|\\.)*\"		{ return parser::make_STRING(loc); }
+\|\<[^\>\|]*\>\|		{ return parser::make_STRING(loc); }
 }
 
-[a-zA-Z][a-zA-Z0-9_]*[$] { return token::USERNAME; }
-[a-zA-Z][a-zA-Z0-9_]* { return token::SYSNAME; }
+[a-zA-Z][a-zA-Z0-9_]*[$] { return parser::make_USERNAME(loc); }
+[a-zA-Z][a-zA-Z0-9_]* { return parser::make_SYSNAME(loc); }
 
 <INITIAL>{
 "/*"    BEGIN(COMMENT);

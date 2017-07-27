@@ -48,17 +48,19 @@ void Sheep::Driver::ParseHelper(std::istream &stream)
     try
     {
         scanner = new Scanner(&stream);
-        
-        yy::parser::semantic_type type;
-        yy::parser::location_type location;
-    
-        int val;
-        do
+        while(true)
         {
-            val = scanner->yylex(&type, &location);
-            std::cout << val << std::endl;
+            Sheep::Parser::symbol_type yylookahead(scanner->yylex(*scanner, *this));
+            if(yylookahead.token() == Sheep::Parser::token::END)
+            {
+                std::cout << "EOF" << std::endl;
+                break;
+            }
+            else
+            {
+                std::cout << yylookahead.token() << std::endl;
+            }
         }
-        while(val != 0);
     }
     catch(std::bad_alloc &ba)
     {
@@ -69,10 +71,20 @@ void Sheep::Driver::ParseHelper(std::istream &stream)
     delete parser;
     try
     {
-        parser = new yy::parser(*scanner, *this);
+        parser = new Sheep::Parser(*scanner, *this);
     }
     catch(std::bad_alloc &ba)
     {
         std::cerr << "Failed to allocate parser: (" << ba.what() << "), exiting!\n";
     }
+}
+
+void Sheep::Driver::error(const Sheep::location &l, const std::string &m)
+{
+    std::cerr << l << ": " << m << std::endl;
+}
+
+void Sheep::Driver::error(const std::string &m)
+{
+    std::cerr << m << std::endl;
 }

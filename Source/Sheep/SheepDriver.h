@@ -8,9 +8,11 @@
 #pragma once
 
 #include <istream>
+#include <string>
+#include <map>
 
 #include "SheepScanner.h"
-#include "sheep.tab.hh"
+#include "Sheep.tab.hh"
 
 namespace Sheep
 {
@@ -23,10 +25,14 @@ namespace Sheep
         void Parse(const char* filename);
         void Parse(std::istream& iss);
         
+        // Bison seems to require that these be lowercase.
+        void error(const Sheep::location& l, const std::string& m);
+        void error(const std::string& m);
+        
     private:
         void ParseHelper(std::istream& stream);
         
         Scanner* scanner = nullptr;
-        yy::parser* parser = nullptr;
+        Parser* parser = nullptr;
     };
 }

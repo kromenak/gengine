@@ -4,8 +4,6 @@
 #include "SheepScript.h"
 #define YYSTYPE SheepNode*
 
-//extern SheepScript* gCurrentSheepScript;
-
 char* removeQuotes(char* str)
 {
 	if(str[0] == '"')
@@ -21,53 +19,69 @@ char* removeQuotes(char* str)
 }
 %}
 
-/* Bison declarations */
+/* Tell bison to generate C++ output */
 %skeleton "lalr1.cc"
+
+/* We use features that require Bison 3.0+ */
 %require "3.0"
 
+/* Tell bison to write tokens to .hh file */
 %defines
-/*%define api.namespace {Sheep}*/
-/*%define parser_class_name {Parser}*/
 
+/* Tell bison to output parser named Sheep::Parser, instead of yy::parser */
+%define api.namespace {Sheep}
+%define parser_class_name {Parser}
+
+/* When enabled w/ variants option, creates an actual "symbol" internal class. */
+%define api.token.constructor
+
+/* Use variant implementation of semantic values - fancy! */
+%define api.value.type variant
+
+/* Helps catch invalid uses. */
+%define parse.assert
+
+/* This code is added to the top of the .hh file for the parser. */
 %code requires 
 {
-	namespace Sheep 
+	namespace Sheep
 	{
-		class Driver;
 		class Scanner;
+		class Driver;
 	}
-
-	// The following definitions are missing when %locations isn't used.
-	#ifndef YY_NULLPTR
-	#	if defined __cplusplus && 201103L <= __cplusplus
-	#		define YY_NULLPTR nullptr
-	#	else
-	#		define YY_NULLPTR 0
-	#	endif
-	#endif
 }
 
-%parse-param { Sheep::Scanner& scanner }
-%parse-param { Sheep::Driver& driver }
+%param { Sheep::Scanner& scanner }
+%param { Sheep::Driver& driver }
 
+/* This code is added to the top of the .cc file for the parser. */
 %code
 {
 	#include "SheepDriver.h"
+
+	// When requesting yylex, redirect to scanner.yylex.
 	#undef yylex
 	#define yylex scanner.yylex
 
+	// The C++ yytext is const, but we need to modify to remove
+	// quotes in some cases. So, this is a bit of a hack.
+	#undef yytext
 	#define yytext scanner.GetYYText()
 
-	void yy::parser::error(const location_type& loc, const std::string& msg)
+	void Sheep::Parser::error(const location_type& loc, const std::string& msg)
 	{
-		//g_codeTree->LogError(currentLine, str);
+		driver.error(loc, msg);
 	}
 }
 
-%define api.value.type variant
-%define parse.assert
-
+/* Causes location to be tracked, and yylloc value is populated for use. */
 %locations
+/* TODO: Add %initial-action block to sert filename for location variable */
+
+/* Says that the parser constructor should pass scanner and driver refs */
+/* Why do we do this? Not totally sure yet...*/
+/*%parse-param { Sheep::Scanner& scanner }
+%parse-param { Sheep::Driver& driver } */
 
 /* section keywords */
 %token CODE SYMBOLS
@@ -92,6 +106,8 @@ char* removeQuotes(char* str)
 
 /* Some other keywords outlined in the language doc, but not sure if they are used */
 %token YIELD EXPORT BREAKPOINT SITNSPIN
+
+%token END 0 "end of file"
 
 /* %left dictates left associativity, which means multiple operators at once will group
    to the left first. Ex: x OP y OP z with '%left OP' means ((x OP y) OP z).

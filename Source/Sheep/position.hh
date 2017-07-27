@@ -32,7 +32,7 @@
 
 /**
  ** \file position.hh
- ** Define the yy::position class.
+ ** Define the Sheep::position class.
  */
 
 #ifndef YY_YY_POSITION_HH_INCLUDED
@@ -50,8 +50,8 @@
 #  endif
 # endif
 
-
-namespace yy {
+#line 32 "Sheep.yy" // location.cc:337
+namespace Sheep {
 #line 56 "position.hh" // location.cc:337
   /// Abstract a position.
   class position
@@ -174,7 +174,7 @@ namespace yy {
     return ostr << pos.line << '.' << pos.column;
   }
 
-
-} // yy
+#line 32 "Sheep.yy" // location.cc:337
+} // Sheep
 #line 180 "position.hh" // location.cc:337
 #endif // !YY_YY_POSITION_HH_INCLUDED

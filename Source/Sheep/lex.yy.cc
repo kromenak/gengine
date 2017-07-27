@@ -538,15 +538,16 @@ static yyconst flex_int32_t yy_rule_can_match_eol[48] =
 #line 2 "Sheep.l"
 #include "SheepScanner.h"
 #undef YY_DECL
-#define YY_DECL int Sheep::Scanner::yylex(yy::parser::semantic_type* const lval, yy::parser::location_type* location)
+#define YY_DECL Sheep::Parser::symbol_type Sheep::Scanner::yylex(Sheep::Scanner& scanner, Sheep::Driver& driver)
 
-using token = yy::parser::token;
+using token = Sheep::Parser::token;
+using parser = Sheep::Parser;
 
-#define YY_NO_UNISTD_H
+#define YY_USER_ACTION loc.step(); loc.columns(yyleng);
 
-#define YY_USER_ACTION loc->step(); loc->columns(yyleng);
+#define yyterminate() return parser::make_END(loc)
 
-#line 550 "lex.yy.cc"
+#line 551 "lex.yy.cc"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -647,10 +648,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 22 "Sheep.l"
+#line 23 "Sheep.l"
 
 
-#line 654 "lex.yy.cc"
+#line 655 "lex.yy.cc"
 
 	if ( !(yy_init) )
 		{
@@ -742,248 +743,248 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 24 "Sheep.l"
+#line 25 "Sheep.l"
 { }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 25 "Sheep.l"
+#line 26 "Sheep.l"
 { }
 	YY_BREAK
 
 case 3:
 YY_RULE_SETUP
-#line 28 "Sheep.l"
-return token::CODE;
+#line 29 "Sheep.l"
+return parser::make_CODE(loc);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 29 "Sheep.l"
-return token::SYMBOLS;
+#line 30 "Sheep.l"
+return parser::make_SYMBOLS(loc);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 31 "Sheep.l"
-return token::INTVAR;
+#line 32 "Sheep.l"
+return parser::make_INTVAR(loc);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 32 "Sheep.l"
-return token::FLOATVAR;
+#line 33 "Sheep.l"
+return parser::make_FLOATVAR(loc);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 33 "Sheep.l"
-return token::STRINGVAR;
+#line 34 "Sheep.l"
+return parser::make_STRINGVAR(loc);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 35 "Sheep.l"
-return token::RETURN;
+#line 36 "Sheep.l"
+return parser::make_RETURN(loc);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 36 "Sheep.l"
-return token::WAIT;
+#line 37 "Sheep.l"
+return parser::make_WAIT(loc);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 37 "Sheep.l"
-return token::IF;
+#line 38 "Sheep.l"
+return parser::make_IF(loc);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 38 "Sheep.l"
-return token::ELSE;
+#line 39 "Sheep.l"
+return parser::make_ELSE(loc);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 39 "Sheep.l"
-return token::GOTO;
+#line 40 "Sheep.l"
+return parser::make_GOTO(loc);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 41 "Sheep.l"
-return token::COLON;
+#line 42 "Sheep.l"
+return parser::make_COLON(loc);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 42 "Sheep.l"
-return token::SEMICOLON;
+#line 43 "Sheep.l"
+return parser::make_SEMICOLON(loc);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 43 "Sheep.l"
-return token::COMMA;
+#line 44 "Sheep.l"
+return parser::make_COMMA(loc);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 44 "Sheep.l"
-return token::DOLLAR;
+#line 45 "Sheep.l"
+return parser::make_DOLLAR(loc);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 45 "Sheep.l"
-return token::OPENPAREN;
+#line 46 "Sheep.l"
+return parser::make_OPENPAREN(loc);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 46 "Sheep.l"
-return token::CLOSEPAREN;
+#line 47 "Sheep.l"
+return parser::make_CLOSEPAREN(loc);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 47 "Sheep.l"
-return token::OPENBRACKET;
+#line 48 "Sheep.l"
+return parser::make_OPENBRACKET(loc);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 48 "Sheep.l"
-return token::CLOSEBRACKET;
+#line 49 "Sheep.l"
+return parser::make_CLOSEBRACKET(loc);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 50 "Sheep.l"
-return token::QUOTE;
+#line 51 "Sheep.l"
+return parser::make_QUOTE(loc);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 52 "Sheep.l"
-return token::EQUAL;
+#line 53 "Sheep.l"
+return parser::make_EQUAL(loc);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 53 "Sheep.l"
-return token::NOTEQUAL;
+#line 54 "Sheep.l"
+return parser::make_NOTEQUAL(loc);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 54 "Sheep.l"
-return token::ASSIGN;
+#line 55 "Sheep.l"
+return parser::make_ASSIGN(loc);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 56 "Sheep.l"
-return token::PLUS;
+#line 57 "Sheep.l"
+return parser::make_PLUS(loc);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 57 "Sheep.l"
-return token::MINUS;
+#line 58 "Sheep.l"
+return parser::make_MINUS(loc);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 58 "Sheep.l"
-return token::MULTIPLY;
+#line 59 "Sheep.l"
+return parser::make_MULTIPLY(loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 59 "Sheep.l"
-return token::DIVIDE;
+#line 60 "Sheep.l"
+return parser::make_DIVIDE(loc);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 61 "Sheep.l"
-return token::GTE;
+#line 62 "Sheep.l"
+return parser::make_GTE(loc);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 62 "Sheep.l"
-return token::LTE;
+#line 63 "Sheep.l"
+return parser::make_LTE(loc);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 63 "Sheep.l"
-return token::GT;
+#line 64 "Sheep.l"
+return parser::make_GT(loc);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 64 "Sheep.l"
-return token::LT;
+#line 65 "Sheep.l"
+return parser::make_LT(loc);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 66 "Sheep.l"
-return token::NOT;
+#line 67 "Sheep.l"
+return parser::make_NOT(loc);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 67 "Sheep.l"
-return token::AND;
+#line 68 "Sheep.l"
+return parser::make_AND(loc);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 68 "Sheep.l"
-return token::OR;
+#line 69 "Sheep.l"
+return parser::make_OR(loc);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 71 "Sheep.l"
-{ return token::FLOAT; }
+#line 72 "Sheep.l"
+{ return parser::make_FLOAT(loc); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 72 "Sheep.l"
-{ return token::INT; }
+#line 73 "Sheep.l"
+{ return parser::make_INT(loc); }
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 73 "Sheep.l"
-{ return token::STRING; }
+#line 74 "Sheep.l"
+{ return parser::make_STRING(loc); }
 	YY_BREAK
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 74 "Sheep.l"
-{ return token::STRING; }
+#line 75 "Sheep.l"
+{ return parser::make_STRING(loc); }
 	YY_BREAK
 
 case 40:
 YY_RULE_SETUP
-#line 77 "Sheep.l"
-{ return token::USERNAME; }
+#line 78 "Sheep.l"
+{ return parser::make_USERNAME(loc); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 78 "Sheep.l"
-{ return token::SYSNAME; }
+#line 79 "Sheep.l"
+{ return parser::make_SYSNAME(loc); }
 	YY_BREAK
 
 case 42:
 YY_RULE_SETUP
-#line 81 "Sheep.l"
+#line 82 "Sheep.l"
 BEGIN(COMMENT);
 	YY_BREAK
 
 
 case 43:
 YY_RULE_SETUP
-#line 85 "Sheep.l"
+#line 86 "Sheep.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 86 "Sheep.l"
+#line 87 "Sheep.l"
 // eat comment in chucks
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 87 "Sheep.l"
+#line 88 "Sheep.l"
 // eat the lone star
 	YY_BREAK
 
 case 46:
 YY_RULE_SETUP
-#line 90 "Sheep.l"
+#line 91 "Sheep.l"
 printf("bad input character '%s' at line %d\n", yytext, yylineno);
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 91 "Sheep.l"
+#line 92 "Sheep.l"
 ECHO;
 	YY_BREAK
-#line 987 "lex.yy.cc"
+#line 988 "lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -1892,4 +1893,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 91 "Sheep.l"
+#line 92 "Sheep.l"

@@ -32,7 +32,7 @@
 
 /**
  ** \file Sheep.tab.hh
- ** Define the yy::parser class.
+ ** Define the Sheep::parser class.
  */
 
 // C++ LALR(1) parser skeleton written by Akim Demaille.
@@ -40,24 +40,15 @@
 #ifndef YY_YY_SHEEP_TAB_HH_INCLUDED
 # define YY_YY_SHEEP_TAB_HH_INCLUDED
 // //                    "%code requires" blocks.
-#line 33 "Sheep.yy" // lalr1.cc:392
+#line 46 "Sheep.yy" // lalr1.cc:392
 
-	namespace Sheep 
+	namespace Sheep
 	{
-		class Driver;
 		class Scanner;
+		class Driver;
 	}
 
-	// The following definitions are missing when %locations isn't used.
-	#ifndef YY_NULLPTR
-	#	if defined __cplusplus && 201103L <= __cplusplus
-	#		define YY_NULLPTR nullptr
-	#	else
-	#		define YY_NULLPTR 0
-	#	endif
-	#endif
-
-#line 61 "Sheep.tab.hh" // lalr1.cc:392
+#line 52 "Sheep.tab.hh" // lalr1.cc:392
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -132,9 +123,9 @@
 # define YYDEBUG 0
 #endif
 
-
-namespace yy {
-#line 138 "Sheep.tab.hh" // lalr1.cc:392
+#line 32 "Sheep.yy" // lalr1.cc:392
+namespace Sheep {
+#line 129 "Sheep.tab.hh" // lalr1.cc:392
 
 
 
@@ -294,7 +285,7 @@ namespace yy {
 
 
   /// A Bison parser.
-  class parser
+  class Parser
   {
   public:
 #ifndef YYSTYPE
@@ -322,6 +313,7 @@ namespace yy {
     {
       enum yytokentype
       {
+        END = 0,
         CODE = 258,
         SYMBOLS = 259,
         INTVAR = 260,
@@ -470,6 +462,10 @@ namespace yy {
     typedef basic_symbol<by_type> symbol_type;
 
     // Symbol constructors declarations.
+    static inline
+    symbol_type
+    make_END (const location_type& l);
+
     static inline
     symbol_type
     make_CODE (const location_type& l);
@@ -648,8 +644,8 @@ namespace yy {
 
 
     /// Build a parser object.
-    parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg);
-    virtual ~parser ();
+    Parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg);
+    virtual ~Parser ();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
@@ -679,8 +675,8 @@ namespace yy {
 
   private:
     /// This class is not copyable.
-    parser (const parser&);
-    parser& operator= (const parser&);
+    Parser (const Parser&);
+    Parser& operator= (const Parser&);
 
     /// State numbers.
     typedef int state_type;
@@ -708,7 +704,7 @@ namespace yy {
     static const signed char yytable_ninf_;
 
     /// Convert a scanner token number \a t to a symbol number.
-    static token_number_type yytranslate_ (int t);
+    static token_number_type yytranslate_ (token_type t);
 
     // Tables.
   // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -862,10 +858,499 @@ namespace yy {
     Sheep::Driver& driver;
   };
 
+  // Symbol number corresponding to token number t.
+  inline
+  Parser::token_number_type
+  Parser::yytranslate_ (token_type t)
+  {
+    static
+    const token_number_type
+    translate_table[] =
+    {
+     0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
+       2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
+      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      45,    46
+    };
+    const unsigned int user_token_number_max_ = 301;
+    const token_number_type undef_token_ = 2;
+
+    if (static_cast<int>(t) <= yyeof_)
+      return yyeof_;
+    else if (static_cast<unsigned int> (t) <= user_token_number_max_)
+      return translate_table[t];
+    else
+      return undef_token_;
+  }
+
+  inline
+  Parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
+    : std::runtime_error (m)
+    , location (l)
+  {}
+
+  // basic_symbol.
+  template <typename Base>
+  inline
+  Parser::basic_symbol<Base>::basic_symbol ()
+    : value ()
+  {}
+
+  template <typename Base>
+  inline
+  Parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
+    : Base (other)
+    , value ()
+    , location (other.location)
+  {
+      switch (other.type_get ())
+    {
+      default:
+        break;
+    }
+
+  }
 
 
-} // yy
-#line 869 "Sheep.tab.hh" // lalr1.cc:392
+  template <typename Base>
+  inline
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
+    : Base (t)
+    , value ()
+    , location (l)
+  {
+    (void) v;
+      switch (this->type_get ())
+    {
+      default:
+        break;
+    }
+}
+
+
+  // Implementation of basic_symbol constructor for each type.
+
+  template <typename Base>
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
+    : Base (t)
+    , value ()
+    , location (l)
+  {}
+
+
+  template <typename Base>
+  inline
+  Parser::basic_symbol<Base>::~basic_symbol ()
+  {
+    clear ();
+  }
+
+  template <typename Base>
+  inline
+  void
+  Parser::basic_symbol<Base>::clear ()
+  {
+    // User destructor.
+    symbol_number_type yytype = this->type_get ();
+    basic_symbol<Base>& yysym = *this;
+    (void) yysym;
+    switch (yytype)
+    {
+   default:
+      break;
+    }
+
+    // Type destructor.
+    switch (yytype)
+    {
+      default:
+        break;
+    }
+
+    Base::clear ();
+  }
+
+  template <typename Base>
+  inline
+  bool
+  Parser::basic_symbol<Base>::empty () const
+  {
+    return Base::type_get () == empty_symbol;
+  }
+
+  template <typename Base>
+  inline
+  void
+  Parser::basic_symbol<Base>::move (basic_symbol& s)
+  {
+    super_type::move(s);
+      switch (this->type_get ())
+    {
+      default:
+        break;
+    }
+
+    location = s.location;
+  }
+
+  // by_type.
+  inline
+  Parser::by_type::by_type ()
+    : type (empty_symbol)
+  {}
+
+  inline
+  Parser::by_type::by_type (const by_type& other)
+    : type (other.type)
+  {}
+
+  inline
+  Parser::by_type::by_type (token_type t)
+    : type (yytranslate_ (t))
+  {}
+
+  inline
+  void
+  Parser::by_type::clear ()
+  {
+    type = empty_symbol;
+  }
+
+  inline
+  void
+  Parser::by_type::move (by_type& that)
+  {
+    type = that.type;
+    that.clear ();
+  }
+
+  inline
+  int
+  Parser::by_type::type_get () const
+  {
+    return type;
+  }
+
+  inline
+  Parser::token_type
+  Parser::by_type::token () const
+  {
+    // YYTOKNUM[NUM] -- (External) token number corresponding to the
+    // (internal) symbol number NUM (which must be that of a token).  */
+    static
+    const unsigned short int
+    yytoken_number_[] =
+    {
+       0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
+     265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
+     275,   276,   277,   278,   279,   280,   281,   282,   283,   284,
+     285,   286,   287,   288,   289,   290,   291,   292,   293,   294,
+     295,   296,   297,   298,   299,   300,   301
+    };
+    return static_cast<token_type> (yytoken_number_[type]);
+  }
+  // Implementation of make_symbol for each symbol type.
+  Parser::symbol_type
+  Parser::make_END (const location_type& l)
+  {
+    return symbol_type (token::END, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_CODE (const location_type& l)
+  {
+    return symbol_type (token::CODE, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_SYMBOLS (const location_type& l)
+  {
+    return symbol_type (token::SYMBOLS, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_INTVAR (const location_type& l)
+  {
+    return symbol_type (token::INTVAR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_FLOATVAR (const location_type& l)
+  {
+    return symbol_type (token::FLOATVAR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_STRINGVAR (const location_type& l)
+  {
+    return symbol_type (token::STRINGVAR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_INT (const location_type& l)
+  {
+    return symbol_type (token::INT, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_FLOAT (const location_type& l)
+  {
+    return symbol_type (token::FLOAT, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_STRING (const location_type& l)
+  {
+    return symbol_type (token::STRING, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_IF (const location_type& l)
+  {
+    return symbol_type (token::IF, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_ELSE (const location_type& l)
+  {
+    return symbol_type (token::ELSE, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_GOTO (const location_type& l)
+  {
+    return symbol_type (token::GOTO, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_RETURN (const location_type& l)
+  {
+    return symbol_type (token::RETURN, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_DOLLAR (const location_type& l)
+  {
+    return symbol_type (token::DOLLAR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_USERNAME (const location_type& l)
+  {
+    return symbol_type (token::USERNAME, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_SYSNAME (const location_type& l)
+  {
+    return symbol_type (token::SYSNAME, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_COMMA (const location_type& l)
+  {
+    return symbol_type (token::COMMA, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_COLON (const location_type& l)
+  {
+    return symbol_type (token::COLON, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_SEMICOLON (const location_type& l)
+  {
+    return symbol_type (token::SEMICOLON, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_OPENPAREN (const location_type& l)
+  {
+    return symbol_type (token::OPENPAREN, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_CLOSEPAREN (const location_type& l)
+  {
+    return symbol_type (token::CLOSEPAREN, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_OPENBRACKET (const location_type& l)
+  {
+    return symbol_type (token::OPENBRACKET, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_CLOSEBRACKET (const location_type& l)
+  {
+    return symbol_type (token::CLOSEBRACKET, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_QUOTE (const location_type& l)
+  {
+    return symbol_type (token::QUOTE, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_WAIT (const location_type& l)
+  {
+    return symbol_type (token::WAIT, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_YIELD (const location_type& l)
+  {
+    return symbol_type (token::YIELD, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_EXPORT (const location_type& l)
+  {
+    return symbol_type (token::EXPORT, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_BREAKPOINT (const location_type& l)
+  {
+    return symbol_type (token::BREAKPOINT, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_SITNSPIN (const location_type& l)
+  {
+    return symbol_type (token::SITNSPIN, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_ASSIGN (const location_type& l)
+  {
+    return symbol_type (token::ASSIGN, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_OR (const location_type& l)
+  {
+    return symbol_type (token::OR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_AND (const location_type& l)
+  {
+    return symbol_type (token::AND, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_EQUAL (const location_type& l)
+  {
+    return symbol_type (token::EQUAL, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_NOTEQUAL (const location_type& l)
+  {
+    return symbol_type (token::NOTEQUAL, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_LT (const location_type& l)
+  {
+    return symbol_type (token::LT, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_LTE (const location_type& l)
+  {
+    return symbol_type (token::LTE, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_GT (const location_type& l)
+  {
+    return symbol_type (token::GT, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_GTE (const location_type& l)
+  {
+    return symbol_type (token::GTE, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_PLUS (const location_type& l)
+  {
+    return symbol_type (token::PLUS, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_MINUS (const location_type& l)
+  {
+    return symbol_type (token::MINUS, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_MULTIPLY (const location_type& l)
+  {
+    return symbol_type (token::MULTIPLY, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_DIVIDE (const location_type& l)
+  {
+    return symbol_type (token::DIVIDE, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_MOD (const location_type& l)
+  {
+    return symbol_type (token::MOD, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_NOT (const location_type& l)
+  {
+    return symbol_type (token::NOT, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_NEGATE (const location_type& l)
+  {
+    return symbol_type (token::NEGATE, l);
+  }
+
+
+#line 32 "Sheep.yy" // lalr1.cc:392
+} // Sheep
+#line 1354 "Sheep.tab.hh" // lalr1.cc:392
 
 
 

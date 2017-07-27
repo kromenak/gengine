@@ -39,8 +39,6 @@
 #include "SheepScript.h"
 #define YYSTYPE SheepNode*
 
-//extern SheepScript* gCurrentSheepScript;
-
 char* removeQuotes(char* str)
 {
 	if(str[0] == '"')
@@ -55,7 +53,7 @@ char* removeQuotes(char* str)
 	}
 }
 
-#line 59 "Sheep.tab.cc" // lalr1.cc:404
+#line 57 "Sheep.tab.cc" // lalr1.cc:404
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -69,22 +67,27 @@ char* removeQuotes(char* str)
 
 // User implementation prologue.
 
-#line 73 "Sheep.tab.cc" // lalr1.cc:412
+#line 71 "Sheep.tab.cc" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 54 "Sheep.yy" // lalr1.cc:413
+#line 59 "Sheep.yy" // lalr1.cc:413
 
 	#include "SheepDriver.h"
+
+	// When requesting yylex, redirect to scanner.yylex.
 	#undef yylex
 	#define yylex scanner.yylex
 
+	// The C++ yytext is const, but we need to modify to remove
+	// quotes in some cases. So, this is a bit of a hack.
+	#undef yytext
 	#define yytext scanner.GetYYText()
 
-	void yy::parser::error(const location_type& loc, const std::string& msg)
+	void Sheep::Parser::error(const location_type& loc, const std::string& msg)
 	{
-		//g_codeTree->LogError(currentLine, str);
+		driver.error(loc, msg);
 	}
 
-#line 88 "Sheep.tab.cc" // lalr1.cc:413
+#line 91 "Sheep.tab.cc" // lalr1.cc:413
 
 
 #ifndef YY_
@@ -168,12 +171,12 @@ char* removeQuotes(char* str)
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-
-namespace yy {
-#line 174 "Sheep.tab.cc" // lalr1.cc:479
+#line 32 "Sheep.yy" // lalr1.cc:479
+namespace Sheep {
+#line 177 "Sheep.tab.cc" // lalr1.cc:479
 
   /// Build a parser object.
-  parser::parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg)
+  Parser::Parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg)
     :
 #if YYDEBUG
       yydebug_ (false),
@@ -183,7 +186,7 @@ namespace yy {
       driver (driver_yyarg)
   {}
 
-  parser::~parser ()
+  Parser::~Parser ()
   {}
 
 
@@ -191,454 +194,42 @@ namespace yy {
   | Symbol types.  |
   `---------------*/
 
-  inline
-  parser::syntax_error::syntax_error (const location_type& l, const std::string& m)
-    : std::runtime_error (m)
-    , location (l)
-  {}
-
-  // basic_symbol.
-  template <typename Base>
-  inline
-  parser::basic_symbol<Base>::basic_symbol ()
-    : value ()
-  {}
-
-  template <typename Base>
-  inline
-  parser::basic_symbol<Base>::basic_symbol (const basic_symbol& other)
-    : Base (other)
-    , value ()
-    , location (other.location)
-  {
-      switch (other.type_get ())
-    {
-      default:
-        break;
-    }
-
-  }
-
-
-  template <typename Base>
-  inline
-  parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const semantic_type& v, const location_type& l)
-    : Base (t)
-    , value ()
-    , location (l)
-  {
-    (void) v;
-      switch (this->type_get ())
-    {
-      default:
-        break;
-    }
-}
-
-
-  // Implementation of basic_symbol constructor for each type.
-
-  template <typename Base>
-  parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
-    : Base (t)
-    , value ()
-    , location (l)
-  {}
-
-
-  template <typename Base>
-  inline
-  parser::basic_symbol<Base>::~basic_symbol ()
-  {
-    clear ();
-  }
-
-  template <typename Base>
-  inline
-  void
-  parser::basic_symbol<Base>::clear ()
-  {
-    // User destructor.
-    symbol_number_type yytype = this->type_get ();
-    basic_symbol<Base>& yysym = *this;
-    (void) yysym;
-    switch (yytype)
-    {
-   default:
-      break;
-    }
-
-    // Type destructor.
-    switch (yytype)
-    {
-      default:
-        break;
-    }
-
-    Base::clear ();
-  }
-
-  template <typename Base>
-  inline
-  bool
-  parser::basic_symbol<Base>::empty () const
-  {
-    return Base::type_get () == empty_symbol;
-  }
-
-  template <typename Base>
-  inline
-  void
-  parser::basic_symbol<Base>::move (basic_symbol& s)
-  {
-    super_type::move(s);
-      switch (this->type_get ())
-    {
-      default:
-        break;
-    }
-
-    location = s.location;
-  }
-
-  // by_type.
-  inline
-  parser::by_type::by_type ()
-    : type (empty_symbol)
-  {}
-
-  inline
-  parser::by_type::by_type (const by_type& other)
-    : type (other.type)
-  {}
-
-  inline
-  parser::by_type::by_type (token_type t)
-    : type (yytranslate_ (t))
-  {}
-
-  inline
-  void
-  parser::by_type::clear ()
-  {
-    type = empty_symbol;
-  }
-
-  inline
-  void
-  parser::by_type::move (by_type& that)
-  {
-    type = that.type;
-    that.clear ();
-  }
-
-  inline
-  int
-  parser::by_type::type_get () const
-  {
-    return type;
-  }
-  // Implementation of make_symbol for each symbol type.
-  parser::symbol_type
-  parser::make_CODE (const location_type& l)
-  {
-    return symbol_type (token::CODE, l);
-  }
-
-  parser::symbol_type
-  parser::make_SYMBOLS (const location_type& l)
-  {
-    return symbol_type (token::SYMBOLS, l);
-  }
-
-  parser::symbol_type
-  parser::make_INTVAR (const location_type& l)
-  {
-    return symbol_type (token::INTVAR, l);
-  }
-
-  parser::symbol_type
-  parser::make_FLOATVAR (const location_type& l)
-  {
-    return symbol_type (token::FLOATVAR, l);
-  }
-
-  parser::symbol_type
-  parser::make_STRINGVAR (const location_type& l)
-  {
-    return symbol_type (token::STRINGVAR, l);
-  }
-
-  parser::symbol_type
-  parser::make_INT (const location_type& l)
-  {
-    return symbol_type (token::INT, l);
-  }
-
-  parser::symbol_type
-  parser::make_FLOAT (const location_type& l)
-  {
-    return symbol_type (token::FLOAT, l);
-  }
-
-  parser::symbol_type
-  parser::make_STRING (const location_type& l)
-  {
-    return symbol_type (token::STRING, l);
-  }
-
-  parser::symbol_type
-  parser::make_IF (const location_type& l)
-  {
-    return symbol_type (token::IF, l);
-  }
-
-  parser::symbol_type
-  parser::make_ELSE (const location_type& l)
-  {
-    return symbol_type (token::ELSE, l);
-  }
-
-  parser::symbol_type
-  parser::make_GOTO (const location_type& l)
-  {
-    return symbol_type (token::GOTO, l);
-  }
-
-  parser::symbol_type
-  parser::make_RETURN (const location_type& l)
-  {
-    return symbol_type (token::RETURN, l);
-  }
-
-  parser::symbol_type
-  parser::make_DOLLAR (const location_type& l)
-  {
-    return symbol_type (token::DOLLAR, l);
-  }
-
-  parser::symbol_type
-  parser::make_USERNAME (const location_type& l)
-  {
-    return symbol_type (token::USERNAME, l);
-  }
-
-  parser::symbol_type
-  parser::make_SYSNAME (const location_type& l)
-  {
-    return symbol_type (token::SYSNAME, l);
-  }
-
-  parser::symbol_type
-  parser::make_COMMA (const location_type& l)
-  {
-    return symbol_type (token::COMMA, l);
-  }
-
-  parser::symbol_type
-  parser::make_COLON (const location_type& l)
-  {
-    return symbol_type (token::COLON, l);
-  }
-
-  parser::symbol_type
-  parser::make_SEMICOLON (const location_type& l)
-  {
-    return symbol_type (token::SEMICOLON, l);
-  }
-
-  parser::symbol_type
-  parser::make_OPENPAREN (const location_type& l)
-  {
-    return symbol_type (token::OPENPAREN, l);
-  }
-
-  parser::symbol_type
-  parser::make_CLOSEPAREN (const location_type& l)
-  {
-    return symbol_type (token::CLOSEPAREN, l);
-  }
-
-  parser::symbol_type
-  parser::make_OPENBRACKET (const location_type& l)
-  {
-    return symbol_type (token::OPENBRACKET, l);
-  }
-
-  parser::symbol_type
-  parser::make_CLOSEBRACKET (const location_type& l)
-  {
-    return symbol_type (token::CLOSEBRACKET, l);
-  }
-
-  parser::symbol_type
-  parser::make_QUOTE (const location_type& l)
-  {
-    return symbol_type (token::QUOTE, l);
-  }
-
-  parser::symbol_type
-  parser::make_WAIT (const location_type& l)
-  {
-    return symbol_type (token::WAIT, l);
-  }
-
-  parser::symbol_type
-  parser::make_YIELD (const location_type& l)
-  {
-    return symbol_type (token::YIELD, l);
-  }
-
-  parser::symbol_type
-  parser::make_EXPORT (const location_type& l)
-  {
-    return symbol_type (token::EXPORT, l);
-  }
-
-  parser::symbol_type
-  parser::make_BREAKPOINT (const location_type& l)
-  {
-    return symbol_type (token::BREAKPOINT, l);
-  }
-
-  parser::symbol_type
-  parser::make_SITNSPIN (const location_type& l)
-  {
-    return symbol_type (token::SITNSPIN, l);
-  }
-
-  parser::symbol_type
-  parser::make_ASSIGN (const location_type& l)
-  {
-    return symbol_type (token::ASSIGN, l);
-  }
-
-  parser::symbol_type
-  parser::make_OR (const location_type& l)
-  {
-    return symbol_type (token::OR, l);
-  }
-
-  parser::symbol_type
-  parser::make_AND (const location_type& l)
-  {
-    return symbol_type (token::AND, l);
-  }
-
-  parser::symbol_type
-  parser::make_EQUAL (const location_type& l)
-  {
-    return symbol_type (token::EQUAL, l);
-  }
-
-  parser::symbol_type
-  parser::make_NOTEQUAL (const location_type& l)
-  {
-    return symbol_type (token::NOTEQUAL, l);
-  }
-
-  parser::symbol_type
-  parser::make_LT (const location_type& l)
-  {
-    return symbol_type (token::LT, l);
-  }
-
-  parser::symbol_type
-  parser::make_LTE (const location_type& l)
-  {
-    return symbol_type (token::LTE, l);
-  }
-
-  parser::symbol_type
-  parser::make_GT (const location_type& l)
-  {
-    return symbol_type (token::GT, l);
-  }
-
-  parser::symbol_type
-  parser::make_GTE (const location_type& l)
-  {
-    return symbol_type (token::GTE, l);
-  }
-
-  parser::symbol_type
-  parser::make_PLUS (const location_type& l)
-  {
-    return symbol_type (token::PLUS, l);
-  }
-
-  parser::symbol_type
-  parser::make_MINUS (const location_type& l)
-  {
-    return symbol_type (token::MINUS, l);
-  }
-
-  parser::symbol_type
-  parser::make_MULTIPLY (const location_type& l)
-  {
-    return symbol_type (token::MULTIPLY, l);
-  }
-
-  parser::symbol_type
-  parser::make_DIVIDE (const location_type& l)
-  {
-    return symbol_type (token::DIVIDE, l);
-  }
-
-  parser::symbol_type
-  parser::make_MOD (const location_type& l)
-  {
-    return symbol_type (token::MOD, l);
-  }
-
-  parser::symbol_type
-  parser::make_NOT (const location_type& l)
-  {
-    return symbol_type (token::NOT, l);
-  }
-
-  parser::symbol_type
-  parser::make_NEGATE (const location_type& l)
-  {
-    return symbol_type (token::NEGATE, l);
-  }
-
 
 
   // by_state.
   inline
-  parser::by_state::by_state ()
+  Parser::by_state::by_state ()
     : state (empty_state)
   {}
 
   inline
-  parser::by_state::by_state (const by_state& other)
+  Parser::by_state::by_state (const by_state& other)
     : state (other.state)
   {}
 
   inline
   void
-  parser::by_state::clear ()
+  Parser::by_state::clear ()
   {
     state = empty_state;
   }
 
   inline
   void
-  parser::by_state::move (by_state& that)
+  Parser::by_state::move (by_state& that)
   {
     state = that.state;
     that.clear ();
   }
 
   inline
-  parser::by_state::by_state (state_type s)
+  Parser::by_state::by_state (state_type s)
     : state (s)
   {}
 
   inline
-  parser::symbol_number_type
-  parser::by_state::type_get () const
+  Parser::symbol_number_type
+  Parser::by_state::type_get () const
   {
     if (state == empty_state)
       return empty_symbol;
@@ -647,12 +238,12 @@ namespace yy {
   }
 
   inline
-  parser::stack_symbol_type::stack_symbol_type ()
+  Parser::stack_symbol_type::stack_symbol_type ()
   {}
 
 
   inline
-  parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
+  Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
     : super_type (s, that.location)
   {
       switch (that.type_get ())
@@ -666,8 +257,8 @@ namespace yy {
   }
 
   inline
-  parser::stack_symbol_type&
-  parser::stack_symbol_type::operator= (const stack_symbol_type& that)
+  Parser::stack_symbol_type&
+  Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
     state = that.state;
       switch (that.type_get ())
@@ -684,7 +275,7 @@ namespace yy {
   template <typename Base>
   inline
   void
-  parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
+  Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
     if (yymsg)
       YY_SYMBOL_PRINT (yymsg, yysym);
@@ -693,7 +284,7 @@ namespace yy {
 #if YYDEBUG
   template <typename Base>
   void
-  parser::yy_print_ (std::ostream& yyo,
+  Parser::yy_print_ (std::ostream& yyo,
                                      const basic_symbol<Base>& yysym) const
   {
     std::ostream& yyoutput = yyo;
@@ -713,7 +304,7 @@ namespace yy {
 
   inline
   void
-  parser::yypush_ (const char* m, state_type s, symbol_type& sym)
+  Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
   {
     stack_symbol_type t (s, sym);
     yypush_ (m, t);
@@ -721,7 +312,7 @@ namespace yy {
 
   inline
   void
-  parser::yypush_ (const char* m, stack_symbol_type& s)
+  Parser::yypush_ (const char* m, stack_symbol_type& s)
   {
     if (m)
       YY_SYMBOL_PRINT (m, s);
@@ -730,40 +321,40 @@ namespace yy {
 
   inline
   void
-  parser::yypop_ (unsigned int n)
+  Parser::yypop_ (unsigned int n)
   {
     yystack_.pop (n);
   }
 
 #if YYDEBUG
   std::ostream&
-  parser::debug_stream () const
+  Parser::debug_stream () const
   {
     return *yycdebug_;
   }
 
   void
-  parser::set_debug_stream (std::ostream& o)
+  Parser::set_debug_stream (std::ostream& o)
   {
     yycdebug_ = &o;
   }
 
 
-  parser::debug_level_type
-  parser::debug_level () const
+  Parser::debug_level_type
+  Parser::debug_level () const
   {
     return yydebug_;
   }
 
   void
-  parser::set_debug_level (debug_level_type l)
+  Parser::set_debug_level (debug_level_type l)
   {
     yydebug_ = l;
   }
 #endif // YYDEBUG
 
-  inline parser::state_type
-  parser::yy_lr_goto_state_ (state_type yystate, int yysym)
+  inline Parser::state_type
+  Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
     int yyr = yypgoto_[yysym - yyntokens_] + yystate;
     if (0 <= yyr && yyr <= yylast_ && yycheck_[yyr] == yystate)
@@ -773,19 +364,19 @@ namespace yy {
   }
 
   inline bool
-  parser::yy_pact_value_is_default_ (int yyvalue)
+  Parser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
   inline bool
-  parser::yy_table_value_is_error_ (int yyvalue)
+  Parser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
-  parser::parse ()
+  Parser::parse ()
   {
     // State.
     int yyn;
@@ -843,7 +434,8 @@ namespace yy {
         YYCDEBUG << "Reading a token: ";
         try
           {
-            yyla.type = yytranslate_ (yylex (&yyla.value, &yyla.location));
+            symbol_type yylookahead (yylex (scanner, driver));
+            yyla.move (yylookahead);
           }
         catch (const syntax_error& yyexc)
           {
@@ -917,477 +509,477 @@ namespace yy {
           switch (yyn)
             {
   case 3:
-#line 124 "Sheep.yy" // lalr1.cc:859
+#line 140 "Sheep.yy" // lalr1.cc:859
     { }
-#line 923 "Sheep.tab.cc" // lalr1.cc:859
+#line 515 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 4:
-#line 125 "Sheep.yy" // lalr1.cc:859
+#line 141 "Sheep.yy" // lalr1.cc:859
     { }
-#line 929 "Sheep.tab.cc" // lalr1.cc:859
+#line 521 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 5:
-#line 126 "Sheep.yy" // lalr1.cc:859
+#line 142 "Sheep.yy" // lalr1.cc:859
     { }
-#line 935 "Sheep.tab.cc" // lalr1.cc:859
+#line 527 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 6:
-#line 130 "Sheep.yy" // lalr1.cc:859
+#line 146 "Sheep.yy" // lalr1.cc:859
     { }
-#line 941 "Sheep.tab.cc" // lalr1.cc:859
+#line 533 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 7:
-#line 131 "Sheep.yy" // lalr1.cc:859
+#line 147 "Sheep.yy" // lalr1.cc:859
     { }
-#line 947 "Sheep.tab.cc" // lalr1.cc:859
+#line 539 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 8:
-#line 135 "Sheep.yy" // lalr1.cc:859
+#line 151 "Sheep.yy" // lalr1.cc:859
     { }
-#line 953 "Sheep.tab.cc" // lalr1.cc:859
+#line 545 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 9:
-#line 136 "Sheep.yy" // lalr1.cc:859
+#line 152 "Sheep.yy" // lalr1.cc:859
     { }
-#line 959 "Sheep.tab.cc" // lalr1.cc:859
+#line 551 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 10:
-#line 140 "Sheep.yy" // lalr1.cc:859
+#line 156 "Sheep.yy" // lalr1.cc:859
     { }
-#line 965 "Sheep.tab.cc" // lalr1.cc:859
+#line 557 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 11:
-#line 141 "Sheep.yy" // lalr1.cc:859
+#line 157 "Sheep.yy" // lalr1.cc:859
     { }
-#line 971 "Sheep.tab.cc" // lalr1.cc:859
+#line 563 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 12:
-#line 146 "Sheep.yy" // lalr1.cc:859
+#line 162 "Sheep.yy" // lalr1.cc:859
     { }
-#line 977 "Sheep.tab.cc" // lalr1.cc:859
+#line 569 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 13:
-#line 151 "Sheep.yy" // lalr1.cc:859
+#line 167 "Sheep.yy" // lalr1.cc:859
     { }
-#line 983 "Sheep.tab.cc" // lalr1.cc:859
+#line 575 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 14:
-#line 152 "Sheep.yy" // lalr1.cc:859
+#line 168 "Sheep.yy" // lalr1.cc:859
     { }
-#line 989 "Sheep.tab.cc" // lalr1.cc:859
+#line 581 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 15:
-#line 153 "Sheep.yy" // lalr1.cc:859
+#line 169 "Sheep.yy" // lalr1.cc:859
     { }
-#line 995 "Sheep.tab.cc" // lalr1.cc:859
+#line 587 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 16:
-#line 154 "Sheep.yy" // lalr1.cc:859
+#line 170 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1001 "Sheep.tab.cc" // lalr1.cc:859
+#line 593 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 17:
-#line 158 "Sheep.yy" // lalr1.cc:859
+#line 174 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1007 "Sheep.tab.cc" // lalr1.cc:859
+#line 599 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 18:
-#line 159 "Sheep.yy" // lalr1.cc:859
+#line 175 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1013 "Sheep.tab.cc" // lalr1.cc:859
+#line 605 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 19:
-#line 162 "Sheep.yy" // lalr1.cc:859
+#line 178 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1019 "Sheep.tab.cc" // lalr1.cc:859
+#line 611 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 20:
-#line 165 "Sheep.yy" // lalr1.cc:859
+#line 181 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1025 "Sheep.tab.cc" // lalr1.cc:859
+#line 617 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 21:
-#line 166 "Sheep.yy" // lalr1.cc:859
+#line 182 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1031 "Sheep.tab.cc" // lalr1.cc:859
+#line 623 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 22:
-#line 169 "Sheep.yy" // lalr1.cc:859
+#line 185 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1037 "Sheep.tab.cc" // lalr1.cc:859
+#line 629 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 23:
-#line 172 "Sheep.yy" // lalr1.cc:859
+#line 188 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1043 "Sheep.tab.cc" // lalr1.cc:859
+#line 635 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 24:
-#line 173 "Sheep.yy" // lalr1.cc:859
+#line 189 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1049 "Sheep.tab.cc" // lalr1.cc:859
+#line 641 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 25:
-#line 176 "Sheep.yy" // lalr1.cc:859
+#line 192 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1055 "Sheep.tab.cc" // lalr1.cc:859
+#line 647 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 26:
-#line 177 "Sheep.yy" // lalr1.cc:859
+#line 193 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1061 "Sheep.tab.cc" // lalr1.cc:859
+#line 653 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 27:
-#line 180 "Sheep.yy" // lalr1.cc:859
+#line 196 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1067 "Sheep.tab.cc" // lalr1.cc:859
+#line 659 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 28:
-#line 181 "Sheep.yy" // lalr1.cc:859
+#line 197 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1073 "Sheep.tab.cc" // lalr1.cc:859
+#line 665 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 29:
-#line 184 "Sheep.yy" // lalr1.cc:859
+#line 200 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1079 "Sheep.tab.cc" // lalr1.cc:859
+#line 671 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 30:
-#line 185 "Sheep.yy" // lalr1.cc:859
+#line 201 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1085 "Sheep.tab.cc" // lalr1.cc:859
+#line 677 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 31:
-#line 188 "Sheep.yy" // lalr1.cc:859
+#line 204 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1091 "Sheep.tab.cc" // lalr1.cc:859
+#line 683 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 32:
-#line 189 "Sheep.yy" // lalr1.cc:859
+#line 205 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1097 "Sheep.tab.cc" // lalr1.cc:859
+#line 689 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 33:
-#line 192 "Sheep.yy" // lalr1.cc:859
+#line 208 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1103 "Sheep.tab.cc" // lalr1.cc:859
+#line 695 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 34:
-#line 193 "Sheep.yy" // lalr1.cc:859
+#line 209 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1109 "Sheep.tab.cc" // lalr1.cc:859
+#line 701 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 35:
-#line 194 "Sheep.yy" // lalr1.cc:859
+#line 210 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1115 "Sheep.tab.cc" // lalr1.cc:859
+#line 707 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 36:
-#line 195 "Sheep.yy" // lalr1.cc:859
+#line 211 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1121 "Sheep.tab.cc" // lalr1.cc:859
+#line 713 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 37:
-#line 198 "Sheep.yy" // lalr1.cc:859
+#line 214 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1127 "Sheep.tab.cc" // lalr1.cc:859
+#line 719 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 38:
-#line 199 "Sheep.yy" // lalr1.cc:859
+#line 215 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1133 "Sheep.tab.cc" // lalr1.cc:859
+#line 725 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 39:
-#line 200 "Sheep.yy" // lalr1.cc:859
+#line 216 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1139 "Sheep.tab.cc" // lalr1.cc:859
+#line 731 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 40:
-#line 201 "Sheep.yy" // lalr1.cc:859
+#line 217 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1145 "Sheep.tab.cc" // lalr1.cc:859
+#line 737 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 41:
-#line 202 "Sheep.yy" // lalr1.cc:859
+#line 218 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1151 "Sheep.tab.cc" // lalr1.cc:859
+#line 743 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 42:
-#line 203 "Sheep.yy" // lalr1.cc:859
+#line 219 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1157 "Sheep.tab.cc" // lalr1.cc:859
+#line 749 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 43:
-#line 204 "Sheep.yy" // lalr1.cc:859
+#line 220 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1163 "Sheep.tab.cc" // lalr1.cc:859
+#line 755 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 44:
-#line 205 "Sheep.yy" // lalr1.cc:859
+#line 221 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1169 "Sheep.tab.cc" // lalr1.cc:859
+#line 761 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 45:
-#line 208 "Sheep.yy" // lalr1.cc:859
+#line 224 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1175 "Sheep.tab.cc" // lalr1.cc:859
+#line 767 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 46:
-#line 209 "Sheep.yy" // lalr1.cc:859
+#line 225 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1181 "Sheep.tab.cc" // lalr1.cc:859
+#line 773 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 48:
-#line 213 "Sheep.yy" // lalr1.cc:859
+#line 229 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = yystack_[2].value; }
-#line 1187 "Sheep.tab.cc" // lalr1.cc:859
+#line 779 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 49:
-#line 214 "Sheep.yy" // lalr1.cc:859
+#line 230 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = yystack_[3].value; yylhs.value->SetChild(0, yystack_[1].value); }
-#line 1193 "Sheep.tab.cc" // lalr1.cc:859
+#line 785 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 50:
-#line 217 "Sheep.yy" // lalr1.cc:859
+#line 233 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = yystack_[0].value; }
-#line 1199 "Sheep.tab.cc" // lalr1.cc:859
+#line 791 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 51:
-#line 218 "Sheep.yy" // lalr1.cc:859
+#line 234 "Sheep.yy" // lalr1.cc:859
     { yylhs.value->SetSibling(yystack_[0].value); }
-#line 1205 "Sheep.tab.cc" // lalr1.cc:859
+#line 797 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 52:
-#line 221 "Sheep.yy" // lalr1.cc:859
+#line 237 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = yystack_[0].value; }
-#line 1211 "Sheep.tab.cc" // lalr1.cc:859
+#line 803 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 53:
-#line 222 "Sheep.yy" // lalr1.cc:859
+#line 238 "Sheep.yy" // lalr1.cc:859
     { yylhs.value->SetSibling(yystack_[0].value); }
-#line 1217 "Sheep.tab.cc" // lalr1.cc:859
+#line 809 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 54:
-#line 225 "Sheep.yy" // lalr1.cc:859
+#line 241 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1223 "Sheep.tab.cc" // lalr1.cc:859
+#line 815 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 55:
-#line 226 "Sheep.yy" // lalr1.cc:859
+#line 242 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = yystack_[0].value; }
-#line 1229 "Sheep.tab.cc" // lalr1.cc:859
+#line 821 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 56:
-#line 227 "Sheep.yy" // lalr1.cc:859
+#line 243 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = yystack_[0].value; }
-#line 1235 "Sheep.tab.cc" // lalr1.cc:859
+#line 827 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 57:
-#line 228 "Sheep.yy" // lalr1.cc:859
+#line 244 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = yystack_[1].value; }
-#line 1241 "Sheep.tab.cc" // lalr1.cc:859
+#line 833 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 58:
-#line 229 "Sheep.yy" // lalr1.cc:859
+#line 245 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::Not); 
 		yylhs.value->SetChild(0, yystack_[1].value); }
-#line 1248 "Sheep.tab.cc" // lalr1.cc:859
+#line 840 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 59:
-#line 231 "Sheep.yy" // lalr1.cc:859
+#line 247 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::Negate); 
 		yylhs.value->SetChild(0, yystack_[1].value); }
-#line 1255 "Sheep.tab.cc" // lalr1.cc:859
+#line 847 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 60:
-#line 233 "Sheep.yy" // lalr1.cc:859
+#line 249 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::Add); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1262 "Sheep.tab.cc" // lalr1.cc:859
+#line 854 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 61:
-#line 235 "Sheep.yy" // lalr1.cc:859
+#line 251 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::Subtract); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1269 "Sheep.tab.cc" // lalr1.cc:859
+#line 861 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 62:
-#line 237 "Sheep.yy" // lalr1.cc:859
+#line 253 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::Multiply); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1276 "Sheep.tab.cc" // lalr1.cc:859
+#line 868 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 63:
-#line 239 "Sheep.yy" // lalr1.cc:859
+#line 255 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::Divide); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1283 "Sheep.tab.cc" // lalr1.cc:859
+#line 875 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 64:
-#line 241 "Sheep.yy" // lalr1.cc:859
+#line 257 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::LessThan); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1290 "Sheep.tab.cc" // lalr1.cc:859
+#line 882 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 65:
-#line 243 "Sheep.yy" // lalr1.cc:859
+#line 259 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::LessThanOrEqual); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1297 "Sheep.tab.cc" // lalr1.cc:859
+#line 889 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 66:
-#line 245 "Sheep.yy" // lalr1.cc:859
+#line 261 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::GreaterThan); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1304 "Sheep.tab.cc" // lalr1.cc:859
+#line 896 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 67:
-#line 247 "Sheep.yy" // lalr1.cc:859
+#line 263 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::GreaterThanOrEqual); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1311 "Sheep.tab.cc" // lalr1.cc:859
+#line 903 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 68:
-#line 249 "Sheep.yy" // lalr1.cc:859
+#line 265 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::AreEqual); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1318 "Sheep.tab.cc" // lalr1.cc:859
+#line 910 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 69:
-#line 251 "Sheep.yy" // lalr1.cc:859
+#line 267 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::NotEqual); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1325 "Sheep.tab.cc" // lalr1.cc:859
+#line 917 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 70:
-#line 253 "Sheep.yy" // lalr1.cc:859
+#line 269 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::LogicalOr); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1332 "Sheep.tab.cc" // lalr1.cc:859
+#line 924 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 71:
-#line 255 "Sheep.yy" // lalr1.cc:859
+#line 271 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateOperation(SheepOperationType::LogicalAnd); 
 		yylhs.value->SetChild(0, yystack_[2].value); yylhs.value->SetChild(1, yystack_[0].value); }
-#line 1339 "Sheep.tab.cc" // lalr1.cc:859
+#line 931 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 72:
-#line 260 "Sheep.yy" // lalr1.cc:859
+#line 276 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateIntegerConstant(atoi(yytext)); }
-#line 1345 "Sheep.tab.cc" // lalr1.cc:859
+#line 937 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 73:
-#line 261 "Sheep.yy" // lalr1.cc:859
+#line 277 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateFloatConstant(atof(yytext)); }
-#line 1351 "Sheep.tab.cc" // lalr1.cc:859
+#line 943 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 74:
-#line 262 "Sheep.yy" // lalr1.cc:859
+#line 278 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateStringConstant(removeQuotes(yytext)); }
-#line 1357 "Sheep.tab.cc" // lalr1.cc:859
+#line 949 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 75:
-#line 266 "Sheep.yy" // lalr1.cc:859
+#line 282 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateTypeRef(SheepReferenceType::Int); }
-#line 1363 "Sheep.tab.cc" // lalr1.cc:859
+#line 955 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 76:
-#line 267 "Sheep.yy" // lalr1.cc:859
+#line 283 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateTypeRef(SheepReferenceType::Float); }
-#line 1369 "Sheep.tab.cc" // lalr1.cc:859
+#line 961 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 77:
-#line 268 "Sheep.yy" // lalr1.cc:859
+#line 284 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateTypeRef(SheepReferenceType::String); }
-#line 1375 "Sheep.tab.cc" // lalr1.cc:859
+#line 967 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 78:
-#line 271 "Sheep.yy" // lalr1.cc:859
+#line 287 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateNameRef(yytext, false); }
-#line 1381 "Sheep.tab.cc" // lalr1.cc:859
+#line 973 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 79:
-#line 273 "Sheep.yy" // lalr1.cc:859
+#line 289 "Sheep.yy" // lalr1.cc:859
     { yylhs.value = SheepNode::CreateNameRef(yytext, true); }
-#line 1387 "Sheep.tab.cc" // lalr1.cc:859
+#line 979 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
 
-#line 1391 "Sheep.tab.cc" // lalr1.cc:859
+#line 983 "Sheep.tab.cc" // lalr1.cc:859
             default:
               break;
             }
@@ -1540,25 +1132,25 @@ namespace yy {
   }
 
   void
-  parser::error (const syntax_error& yyexc)
+  Parser::error (const syntax_error& yyexc)
   {
     error (yyexc.location, yyexc.what());
   }
 
   // Generate an error message.
   std::string
-  parser::yysyntax_error_ (state_type, const symbol_type&) const
+  Parser::yysyntax_error_ (state_type, const symbol_type&) const
   {
     return YY_("syntax error");
   }
 
 
-  const signed char parser::yypact_ninf_ = -127;
+  const signed char Parser::yypact_ninf_ = -127;
 
-  const signed char parser::yytable_ninf_ = -1;
+  const signed char Parser::yytable_ninf_ = -1;
 
   const short int
-  parser::yypact_[] =
+  Parser::yypact_[] =
   {
       43,   -19,    -1,    42,    47,  -127,    10,     6,  -127,  -127,
     -127,  -127,    55,    51,  -127,    61,  -127,  -127,  -127,  -127,
@@ -1577,7 +1169,7 @@ namespace yy {
   };
 
   const unsigned char
-  parser::yydefact_[] =
+  Parser::yydefact_[] =
   {
        2,     0,     0,     0,     4,     5,     0,     0,     1,     3,
       78,    17,     0,    19,    20,     0,    75,    76,    77,     6,
@@ -1596,7 +1188,7 @@ namespace yy {
   };
 
   const short int
-  parser::yypgoto_[] =
+  Parser::yypgoto_[] =
   {
     -127,  -127,  -127,  -127,   109,    24,  -127,   134,  -127,  -127,
      124,  -127,  -127,    90,   -56,    12,  -126,  -127,  -127,   -54,
@@ -1604,7 +1196,7 @@ namespace yy {
   };
 
   const signed char
-  parser::yydefgoto_[] =
+  Parser::yydefgoto_[] =
   {
       -1,     3,     4,    20,    21,    22,    30,     5,    12,    13,
       14,    32,    33,    59,    60,    61,    62,    63,    64,    65,
@@ -1612,7 +1204,7 @@ namespace yy {
   };
 
   const unsigned char
-  parser::yytable_[] =
+  Parser::yytable_[] =
   {
       15,   132,    82,    86,     6,   129,    34,    15,   100,   130,
      138,    16,    17,    18,    16,    17,    18,    31,    75,    47,
@@ -1649,7 +1241,7 @@ namespace yy {
   };
 
   const short int
-  parser::yycheck_[] =
+  Parser::yycheck_[] =
   {
        6,   127,    56,    59,    23,    18,    26,    13,    19,    22,
      136,     5,     6,     7,     5,     6,     7,    23,    51,    39,
@@ -1686,7 +1278,7 @@ namespace yy {
   };
 
   const unsigned char
-  parser::yystos_[] =
+  Parser::yystos_[] =
   {
        0,     3,     4,    48,    49,    54,    23,    23,     0,    54,
       16,    24,    55,    56,    57,    72,     5,     6,     7,    24,
@@ -1705,7 +1297,7 @@ namespace yy {
   };
 
   const unsigned char
-  parser::yyr1_[] =
+  Parser::yyr1_[] =
   {
        0,    47,    48,    48,    48,    48,    49,    49,    50,    50,
       51,    51,    52,    53,    53,    53,    53,    54,    54,    55,
@@ -1718,7 +1310,7 @@ namespace yy {
   };
 
   const unsigned char
-  parser::yyr2_[] =
+  Parser::yyr2_[] =
   {
        0,     2,     0,     2,     1,     1,     3,     4,     1,     2,
        1,     2,     3,     1,     3,     3,     5,     3,     4,     1,
@@ -1735,11 +1327,11 @@ namespace yy {
   // YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
   // First, the terminals, then, starting at \a yyntokens_, nonterminals.
   const char*
-  const parser::yytname_[] =
+  const Parser::yytname_[] =
   {
-  "$end", "error", "$undefined", "CODE", "SYMBOLS", "INTVAR", "FLOATVAR",
-  "STRINGVAR", "INT", "FLOAT", "STRING", "IF", "ELSE", "GOTO", "RETURN",
-  "DOLLAR", "USERNAME", "SYSNAME", "COMMA", "COLON", "SEMICOLON",
+  "\"end of file\"", "error", "$undefined", "CODE", "SYMBOLS", "INTVAR",
+  "FLOATVAR", "STRINGVAR", "INT", "FLOAT", "STRING", "IF", "ELSE", "GOTO",
+  "RETURN", "DOLLAR", "USERNAME", "SYSNAME", "COMMA", "COLON", "SEMICOLON",
   "OPENPAREN", "CLOSEPAREN", "OPENBRACKET", "CLOSEBRACKET", "QUOTE",
   "WAIT", "YIELD", "EXPORT", "BREAKPOINT", "SITNSPIN", "ASSIGN", "OR",
   "AND", "EQUAL", "NOTEQUAL", "LT", "LTE", "GT", "GTE", "PLUS", "MINUS",
@@ -1755,21 +1347,21 @@ namespace yy {
 
 
   const unsigned short int
-  parser::yyrline_[] =
+  Parser::yyrline_[] =
   {
-       0,   123,   123,   124,   125,   126,   130,   131,   135,   136,
-     140,   141,   146,   151,   152,   153,   154,   158,   159,   162,
-     165,   166,   169,   172,   173,   176,   177,   180,   181,   184,
-     185,   188,   189,   192,   193,   194,   195,   198,   199,   200,
-     201,   202,   203,   204,   205,   208,   209,   210,   213,   214,
-     217,   218,   221,   222,   225,   226,   227,   228,   229,   231,
-     233,   235,   237,   239,   241,   243,   245,   247,   249,   251,
-     253,   255,   260,   261,   262,   266,   267,   268,   271,   273
+       0,   139,   139,   140,   141,   142,   146,   147,   151,   152,
+     156,   157,   162,   167,   168,   169,   170,   174,   175,   178,
+     181,   182,   185,   188,   189,   192,   193,   196,   197,   200,
+     201,   204,   205,   208,   209,   210,   211,   214,   215,   216,
+     217,   218,   219,   220,   221,   224,   225,   226,   229,   230,
+     233,   234,   237,   238,   241,   242,   243,   244,   245,   247,
+     249,   251,   253,   255,   257,   259,   261,   263,   265,   267,
+     269,   271,   276,   277,   278,   282,   283,   284,   287,   289
   };
 
   // Print the state stack on the debug stream.
   void
-  parser::yystack_print_ ()
+  Parser::yystack_print_ ()
   {
     *yycdebug_ << "Stack now";
     for (stack_type::const_iterator
@@ -1782,7 +1374,7 @@ namespace yy {
 
   // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
-  parser::yy_reduce_print_ (int yyrule)
+  Parser::yy_reduce_print_ (int yyrule)
   {
     unsigned int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
@@ -1796,58 +1388,7 @@ namespace yy {
   }
 #endif // YYDEBUG
 
-  // Symbol number corresponding to token number t.
-  inline
-  parser::token_number_type
-  parser::yytranslate_ (int t)
-  {
-    static
-    const token_number_type
-    translate_table[] =
-    {
-     0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-       2,     2,     2,     2,     2,     2,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
-      25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
-      45,    46
-    };
-    const unsigned int user_token_number_max_ = 301;
-    const token_number_type undef_token_ = 2;
 
-    if (static_cast<int>(t) <= yyeof_)
-      return yyeof_;
-    else if (static_cast<unsigned int> (t) <= user_token_number_max_)
-      return translate_table[t];
-    else
-      return undef_token_;
-  }
-
-
-} // yy
-#line 1854 "Sheep.tab.cc" // lalr1.cc:1167
+#line 32 "Sheep.yy" // lalr1.cc:1167
+} // Sheep
+#line 1395 "Sheep.tab.cc" // lalr1.cc:1167

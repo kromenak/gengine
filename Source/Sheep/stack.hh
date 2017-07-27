@@ -32,7 +32,7 @@
 
 /**
  ** \file stack.hh
- ** Define the yy::stack class.
+ ** Define the Sheep::stack class.
  */
 
 #ifndef YY_YY_STACK_HH_INCLUDED
@@ -40,8 +40,8 @@
 
 # include <vector>
 
-
-namespace yy {
+#line 32 "Sheep.yy" // stack.hh:151
+namespace Sheep {
 #line 46 "stack.hh" // stack.hh:151
   template <class T, class S = std::vector<T> >
   class stack
@@ -150,8 +150,8 @@ namespace yy {
     unsigned int range_;
   };
 
-
-} // yy
+#line 32 "Sheep.yy" // stack.hh:151
+} // Sheep
 #line 156 "stack.hh" // stack.hh:151
 
 #endif // !YY_YY_STACK_HH_INCLUDED
