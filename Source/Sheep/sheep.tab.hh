@@ -291,7 +291,21 @@ namespace Sheep {
 #ifndef YYSTYPE
     /// An auxiliary type to compute the largest semantic type.
     union union_type
-    {};
+    {
+      // FLOAT
+      // float_exp
+      char dummy1[sizeof(float)];
+
+      // INT
+      // expression
+      // int_exp
+      char dummy2[sizeof(int)];
+
+      // STRING
+      // USERNAME
+      // SYSNAME
+      char dummy3[sizeof(std::string)];
+};
 
     /// Symbol semantic values.
     typedef variant<sizeof(union_type)> semantic_type;
@@ -316,32 +330,32 @@ namespace Sheep {
         END = 0,
         CODE = 258,
         SYMBOLS = 259,
-        INTVAR = 260,
-        FLOATVAR = 261,
-        STRINGVAR = 262,
-        INT = 263,
-        FLOAT = 264,
-        STRING = 265,
-        IF = 266,
-        ELSE = 267,
-        GOTO = 268,
-        RETURN = 269,
-        DOLLAR = 270,
-        USERNAME = 271,
-        SYSNAME = 272,
-        COMMA = 273,
-        COLON = 274,
-        SEMICOLON = 275,
-        OPENPAREN = 276,
-        CLOSEPAREN = 277,
-        OPENBRACKET = 278,
-        CLOSEBRACKET = 279,
-        QUOTE = 280,
-        WAIT = 281,
-        YIELD = 282,
-        EXPORT = 283,
-        BREAKPOINT = 284,
-        SITNSPIN = 285,
+        IF = 260,
+        ELSE = 261,
+        GOTO = 262,
+        RETURN = 263,
+        DOLLAR = 264,
+        COMMA = 265,
+        COLON = 266,
+        SEMICOLON = 267,
+        QUOTE = 268,
+        OPENPAREN = 269,
+        CLOSEPAREN = 270,
+        OPENBRACKET = 271,
+        CLOSEBRACKET = 272,
+        WAIT = 273,
+        YIELD = 274,
+        EXPORT = 275,
+        BREAKPOINT = 276,
+        SITNSPIN = 277,
+        INTVAR = 278,
+        FLOATVAR = 279,
+        STRINGVAR = 280,
+        INT = 281,
+        FLOAT = 282,
+        STRING = 283,
+        USERNAME = 284,
+        SYSNAME = 285,
         ASSIGN = 286,
         OR = 287,
         AND = 288,
@@ -394,6 +408,12 @@ namespace Sheep {
       /// Constructor for valueless symbols, and symbols from each type.
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const float v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const int v, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l);
 
 
       /// Constructor for symbols with semantic value.
@@ -476,30 +496,6 @@ namespace Sheep {
 
     static inline
     symbol_type
-    make_INTVAR (const location_type& l);
-
-    static inline
-    symbol_type
-    make_FLOATVAR (const location_type& l);
-
-    static inline
-    symbol_type
-    make_STRINGVAR (const location_type& l);
-
-    static inline
-    symbol_type
-    make_INT (const location_type& l);
-
-    static inline
-    symbol_type
-    make_FLOAT (const location_type& l);
-
-    static inline
-    symbol_type
-    make_STRING (const location_type& l);
-
-    static inline
-    symbol_type
     make_IF (const location_type& l);
 
     static inline
@@ -520,14 +516,6 @@ namespace Sheep {
 
     static inline
     symbol_type
-    make_USERNAME (const location_type& l);
-
-    static inline
-    symbol_type
-    make_SYSNAME (const location_type& l);
-
-    static inline
-    symbol_type
     make_COMMA (const location_type& l);
 
     static inline
@@ -537,6 +525,10 @@ namespace Sheep {
     static inline
     symbol_type
     make_SEMICOLON (const location_type& l);
+
+    static inline
+    symbol_type
+    make_QUOTE (const location_type& l);
 
     static inline
     symbol_type
@@ -553,10 +545,6 @@ namespace Sheep {
     static inline
     symbol_type
     make_CLOSEBRACKET (const location_type& l);
-
-    static inline
-    symbol_type
-    make_QUOTE (const location_type& l);
 
     static inline
     symbol_type
@@ -577,6 +565,38 @@ namespace Sheep {
     static inline
     symbol_type
     make_SITNSPIN (const location_type& l);
+
+    static inline
+    symbol_type
+    make_INTVAR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_FLOATVAR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_STRINGVAR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_INT (const int& v, const location_type& l);
+
+    static inline
+    symbol_type
+    make_FLOAT (const float& v, const location_type& l);
+
+    static inline
+    symbol_type
+    make_STRING (const std::string& v, const location_type& l);
+
+    static inline
+    symbol_type
+    make_USERNAME (const std::string& v, const location_type& l);
+
+    static inline
+    symbol_type
+    make_SYSNAME (const std::string& v, const location_type& l);
 
     static inline
     symbol_type
@@ -709,7 +729,7 @@ namespace Sheep {
     // Tables.
   // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
   // STATE-NUM.
-  static const short int yypact_[];
+  static const signed char yypact_[];
 
   // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
   // Performed when YYTABLE does not specify something else to do.  Zero
@@ -717,7 +737,7 @@ namespace Sheep {
   static const unsigned char yydefact_[];
 
   // YYPGOTO[NTERM-NUM].
-  static const short int yypgoto_[];
+  static const signed char yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
   static const signed char yydefgoto_[];
@@ -727,7 +747,7 @@ namespace Sheep {
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const unsigned char yytable_[];
 
-  static const short int yycheck_[];
+  static const unsigned char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -745,7 +765,7 @@ namespace Sheep {
     static const char* const yytname_[];
 
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned short int yyrline_[];
+  static const unsigned char yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -844,8 +864,8 @@ namespace Sheep {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 315,     ///< Last index in yytable_.
-      yynnts_ = 27,  ///< Number of nonterminal symbols.
+      yylast_ = 9,     ///< Last index in yytable_.
+      yynnts_ = 6,  ///< Number of nonterminal symbols.
       yyfinal_ = 8, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -932,6 +952,23 @@ namespace Sheep {
   {
       switch (other.type_get ())
     {
+      case 27: // FLOAT
+      case 52: // float_exp
+        value.copy< float > (other.value);
+        break;
+
+      case 26: // INT
+      case 50: // expression
+      case 51: // int_exp
+        value.copy< int > (other.value);
+        break;
+
+      case 28: // STRING
+      case 29: // USERNAME
+      case 30: // SYSNAME
+        value.copy< std::string > (other.value);
+        break;
+
       default:
         break;
     }
@@ -949,6 +986,23 @@ namespace Sheep {
     (void) v;
       switch (this->type_get ())
     {
+      case 27: // FLOAT
+      case 52: // float_exp
+        value.copy< float > (v);
+        break;
+
+      case 26: // INT
+      case 50: // expression
+      case 51: // int_exp
+        value.copy< int > (v);
+        break;
+
+      case 28: // STRING
+      case 29: // USERNAME
+      case 30: // SYSNAME
+        value.copy< std::string > (v);
+        break;
+
       default:
         break;
     }
@@ -961,6 +1015,27 @@ namespace Sheep {
   Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
     : Base (t)
     , value ()
+    , location (l)
+  {}
+
+  template <typename Base>
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const float v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const int v, const location_type& l)
+    : Base (t)
+    , value (v)
+    , location (l)
+  {}
+
+  template <typename Base>
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const std::string v, const location_type& l)
+    : Base (t)
+    , value (v)
     , location (l)
   {}
 
@@ -990,6 +1065,23 @@ namespace Sheep {
     // Type destructor.
     switch (yytype)
     {
+      case 27: // FLOAT
+      case 52: // float_exp
+        value.template destroy< float > ();
+        break;
+
+      case 26: // INT
+      case 50: // expression
+      case 51: // int_exp
+        value.template destroy< int > ();
+        break;
+
+      case 28: // STRING
+      case 29: // USERNAME
+      case 30: // SYSNAME
+        value.template destroy< std::string > ();
+        break;
+
       default:
         break;
     }
@@ -1013,6 +1105,23 @@ namespace Sheep {
     super_type::move(s);
       switch (this->type_get ())
     {
+      case 27: // FLOAT
+      case 52: // float_exp
+        value.move< float > (s.value);
+        break;
+
+      case 26: // INT
+      case 50: // expression
+      case 51: // int_exp
+        value.move< int > (s.value);
+        break;
+
+      case 28: // STRING
+      case 29: // USERNAME
+      case 30: // SYSNAME
+        value.move< std::string > (s.value);
+        break;
+
       default:
         break;
     }
@@ -1096,42 +1205,6 @@ namespace Sheep {
   }
 
   Parser::symbol_type
-  Parser::make_INTVAR (const location_type& l)
-  {
-    return symbol_type (token::INTVAR, l);
-  }
-
-  Parser::symbol_type
-  Parser::make_FLOATVAR (const location_type& l)
-  {
-    return symbol_type (token::FLOATVAR, l);
-  }
-
-  Parser::symbol_type
-  Parser::make_STRINGVAR (const location_type& l)
-  {
-    return symbol_type (token::STRINGVAR, l);
-  }
-
-  Parser::symbol_type
-  Parser::make_INT (const location_type& l)
-  {
-    return symbol_type (token::INT, l);
-  }
-
-  Parser::symbol_type
-  Parser::make_FLOAT (const location_type& l)
-  {
-    return symbol_type (token::FLOAT, l);
-  }
-
-  Parser::symbol_type
-  Parser::make_STRING (const location_type& l)
-  {
-    return symbol_type (token::STRING, l);
-  }
-
-  Parser::symbol_type
   Parser::make_IF (const location_type& l)
   {
     return symbol_type (token::IF, l);
@@ -1162,18 +1235,6 @@ namespace Sheep {
   }
 
   Parser::symbol_type
-  Parser::make_USERNAME (const location_type& l)
-  {
-    return symbol_type (token::USERNAME, l);
-  }
-
-  Parser::symbol_type
-  Parser::make_SYSNAME (const location_type& l)
-  {
-    return symbol_type (token::SYSNAME, l);
-  }
-
-  Parser::symbol_type
   Parser::make_COMMA (const location_type& l)
   {
     return symbol_type (token::COMMA, l);
@@ -1189,6 +1250,12 @@ namespace Sheep {
   Parser::make_SEMICOLON (const location_type& l)
   {
     return symbol_type (token::SEMICOLON, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_QUOTE (const location_type& l)
+  {
+    return symbol_type (token::QUOTE, l);
   }
 
   Parser::symbol_type
@@ -1213,12 +1280,6 @@ namespace Sheep {
   Parser::make_CLOSEBRACKET (const location_type& l)
   {
     return symbol_type (token::CLOSEBRACKET, l);
-  }
-
-  Parser::symbol_type
-  Parser::make_QUOTE (const location_type& l)
-  {
-    return symbol_type (token::QUOTE, l);
   }
 
   Parser::symbol_type
@@ -1249,6 +1310,54 @@ namespace Sheep {
   Parser::make_SITNSPIN (const location_type& l)
   {
     return symbol_type (token::SITNSPIN, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_INTVAR (const location_type& l)
+  {
+    return symbol_type (token::INTVAR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_FLOATVAR (const location_type& l)
+  {
+    return symbol_type (token::FLOATVAR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_STRINGVAR (const location_type& l)
+  {
+    return symbol_type (token::STRINGVAR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_INT (const int& v, const location_type& l)
+  {
+    return symbol_type (token::INT, v, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_FLOAT (const float& v, const location_type& l)
+  {
+    return symbol_type (token::FLOAT, v, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_STRING (const std::string& v, const location_type& l)
+  {
+    return symbol_type (token::STRING, v, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_USERNAME (const std::string& v, const location_type& l)
+  {
+    return symbol_type (token::USERNAME, v, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_SYSNAME (const std::string& v, const location_type& l)
+  {
+    return symbol_type (token::SYSNAME, v, l);
   }
 
   Parser::symbol_type
@@ -1350,7 +1459,7 @@ namespace Sheep {
 
 #line 32 "Sheep.yy" // lalr1.cc:392
 } // Sheep
-#line 1354 "Sheep.tab.hh" // lalr1.cc:392
+#line 1463 "Sheep.tab.hh" // lalr1.cc:392
 
 
 

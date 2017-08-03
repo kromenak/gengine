@@ -20,8 +20,10 @@ bool GEngine::Initialize()
     {
         return false;
     }
+    
     Sheep::Driver driver;
-    driver.Parse("/Users/Clark/Dropbox/GK3/Assets/temp.shp");
+    driver.Parse("/Users/Clark/Dropbox/GK3/Assets/test.shp");
+    
     return true;
 }
 

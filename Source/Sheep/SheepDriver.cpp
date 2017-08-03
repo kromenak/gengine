@@ -48,6 +48,7 @@ void Sheep::Driver::ParseHelper(std::istream &stream)
     try
     {
         scanner = new Scanner(&stream);
+        /*
         while(true)
         {
             Sheep::Parser::symbol_type yylookahead(scanner->yylex(*scanner, *this));
@@ -61,6 +62,7 @@ void Sheep::Driver::ParseHelper(std::istream &stream)
                 std::cout << yylookahead.token() << std::endl;
             }
         }
+        */
     }
     catch(std::bad_alloc &ba)
     {
@@ -72,6 +74,7 @@ void Sheep::Driver::ParseHelper(std::istream &stream)
     try
     {
         parser = new Sheep::Parser(*scanner, *this);
+        parser->parse();
     }
     catch(std::bad_alloc &ba)
     {

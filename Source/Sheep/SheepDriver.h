@@ -29,6 +29,10 @@ namespace Sheep
         void error(const Sheep::location& l, const std::string& m);
         void error(const std::string& m);
         
+        std::map<std::string, int> intVariables;
+        std::map<std::string, float> floatVariables;
+        std::map<std::string, std::string> stringVariables;
+        
     private:
         void ParseHelper(std::istream& stream);
         

@@ -1,4 +1,6 @@
 %{
+#include <string>
+#include <cstdlib>
 #include "SheepScanner.h"
 #undef YY_DECL
 #define YY_DECL Sheep::Parser::symbol_type Sheep::Scanner::yylex(Sheep::Scanner& scanner, Sheep::Driver& driver)
@@ -69,14 +71,14 @@ using parser = Sheep::Parser;
 "||"	return parser::make_OR(loc);
 
 
--?([0-9])+\.([0-9])+	{ return parser::make_FLOAT(loc); }
--?([0-9])+				{ return parser::make_INT(loc); }
-\"([^\\\"]|\\.)*\"		{ return parser::make_STRING(loc); }
-\|\<[^\>\|]*\>\|		{ return parser::make_STRING(loc); }
+-?([0-9])+\.([0-9])+	{ return parser::make_FLOAT(strtof(yytext, nullptr), loc); }
+-?([0-9])+				{ return parser::make_INT(strtol(yytext, nullptr, 10), loc); }
+\"([^\\\"]|\\.)*\"		{ return parser::make_STRING(yytext, loc); }
+\|\<[^\>\|]*\>\|		{ return parser::make_STRING(yytext, loc); }
 }
 
-[a-zA-Z][a-zA-Z0-9_]*[$] { return parser::make_USERNAME(loc); }
-[a-zA-Z][a-zA-Z0-9_]* { return parser::make_SYSNAME(loc); }
+[a-zA-Z][a-zA-Z0-9_]*[$] { return parser::make_USERNAME(yytext, loc); }
+[a-zA-Z][a-zA-Z0-9_]* { return parser::make_SYSNAME(yytext, loc); }
 
 <INITIAL>{
 "/*"    BEGIN(COMMENT);
