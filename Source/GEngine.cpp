@@ -7,7 +7,9 @@
 
 #include "GEngine.h"
 #include "SDL/SDL.h"
+
 #include "Sheep/SheepDriver.h"
+#include "Barn/BarnFile.h"
 
 GEngine::GEngine() : mRunning(false)
 {
@@ -21,8 +23,11 @@ bool GEngine::Initialize()
         return false;
     }
     
-    Sheep::Driver driver;
-    driver.Parse("/Users/Clark/Dropbox/GK3/Assets/test.shp");
+    //Sheep::Driver driver;
+    //driver.Parse("/Users/Clark/Dropbox/GK3/Assets/test.shp");
+    
+    BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/core.brn");
+    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/ambient.brn");
     
     return true;
 }

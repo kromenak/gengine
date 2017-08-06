@@ -21,6 +21,8 @@
 		4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */; };
 		4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0E1F25CF08003EC7FE /* SheepScanner.cpp */; };
 		4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */; };
+		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
+		4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -64,6 +66,10 @@
 		4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepScanner.h; path = ../Source/Sheep/SheepScanner.h; sourceTree = "<group>"; };
 		4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepDriver.cpp; path = ../Source/Sheep/SheepDriver.cpp; sourceTree = "<group>"; };
 		4B2ACE121F25D310003EC7FE /* SheepDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepDriver.h; path = ../Source/Sheep/SheepDriver.h; sourceTree = "<group>"; };
+		4B76B57A1F35999B003F63E5 /* BarnFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnFile.cpp; path = ../Source/Barn/BarnFile.cpp; sourceTree = "<group>"; };
+		4B76B57B1F35999B003F63E5 /* BarnFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnFile.h; path = ../Source/Barn/BarnFile.h; sourceTree = "<group>"; };
+		4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryReader.cpp; path = ../Source/Barn/BinaryReader.cpp; sourceTree = "<group>"; };
+		4B76B57F1F35B175003F63E5 /* BinaryReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BinaryReader.h; path = ../Source/Barn/BinaryReader.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -99,6 +105,7 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4B76B57D1F3599A1003F63E5 /* Barn */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
 				4B15A9511F2428C5000A689F /* GEngine.h */,
@@ -134,6 +141,17 @@
 				4B2ACE121F25D310003EC7FE /* SheepDriver.h */,
 			);
 			name = Sheep;
+			sourceTree = "<group>";
+		};
+		4B76B57D1F3599A1003F63E5 /* Barn */ = {
+			isa = PBXGroup;
+			children = (
+				4B76B57A1F35999B003F63E5 /* BarnFile.cpp */,
+				4B76B57B1F35999B003F63E5 /* BarnFile.h */,
+				4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */,
+				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
+			);
+			name = Barn;
 			sourceTree = "<group>";
 		};
 		4BF8A4691F24185300F0FB91 = {
@@ -228,6 +246,8 @@
 				4B2ACE011F25BA6F003EC7FE /* SheepNameRefNode.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */,
+				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
+				4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */,
 				4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
 			);
