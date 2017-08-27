@@ -23,18 +23,47 @@ bool GEngine::Initialize()
         return false;
     }
     
+    if(!mAudio.Initialize())
+    {
+        return false;
+    }
+    
     //Sheep::Driver driver;
     //driver.Parse("/Users/Clark/Dropbox/GK3/Assets/test.shp");
     
-    BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/core.brn");
-    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/ambient.brn");
+    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/core.brn");
+    //barnFile.WriteToFile("E18LCJ44QR1.YAK");
     
+    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/ambient.brn");
+    //barnFile.WriteToFile("R33SNEAKPEEK.WAV");
+    
+    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/day1.brn");
+    //barnFile.WriteToFile("CASH.BMP");
+    
+    //BarnFile barnFile("day1.brn");
+    //barnFile.WriteToFile("CASH.BMP");
+    
+    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/day3.brn");
+    //barnFile.WriteToFile("TE4SUNBUTTON.BMP");
+    
+    
+    mAssetManager.AddSearchPath("Assets/");
+    mAssetManager.LoadBarn("ambient.brn");
+    
+    Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
+    audio->WriteToFile();
+    
+    //mAudio.Play(*audio);
+    
+    //SDL_Log(SDL_GetBasePath());
+    //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     return true;
 }
 
 void GEngine::Shutdown()
 {
     mRenderer.Shutdown();
+    mAudio.Shutdown();
     
     //TODO: Ideally, I don't want the engine to know about SDL.
     SDL_Quit();

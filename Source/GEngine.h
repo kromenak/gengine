@@ -7,6 +7,8 @@
 #pragma once
 
 #include "SDLRenderer.h"
+#include "SDLAudio.h"
+#include "AssetManager.h"
 
 class GEngine
 {
@@ -26,6 +28,9 @@ private:
     void GenerateOutput();
     
     SDLRenderer mRenderer;
+    SDLAudio mAudio;
+    
+    AssetManager mAssetManager;
     
     bool mRunning;
 };

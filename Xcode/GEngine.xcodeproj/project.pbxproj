@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B02A3B21F526529000540A7 /* membuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B01F526529000540A7 /* membuf.cpp */; };
+		4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B31F5269E9000540A7 /* imstream.cpp */; };
 		4B15A94C1F241E2D000A689F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
 		4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
 		4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
@@ -23,6 +25,11 @@
 		4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */; };
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
+		4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */; };
+		4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */; };
+		4B7C3A191F4EB61600BB0922 /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A171F4EB61600BB0922 /* Audio.cpp */; };
+		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
+		4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6EE331F441DC600BB29D5 /* minilzo.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -38,6 +45,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4B02A3B01F526529000540A7 /* membuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = membuf.cpp; path = ../Source/membuf.cpp; sourceTree = "<group>"; };
+		4B02A3B11F526529000540A7 /* membuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = membuf.h; path = ../Source/membuf.h; sourceTree = "<group>"; };
+		4B02A3B31F5269E9000540A7 /* imstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imstream.cpp; path = ../Source/imstream.cpp; sourceTree = "<group>"; };
+		4B02A3B41F5269E9000540A7 /* imstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imstream.h; path = ../Source/imstream.h; sourceTree = "<group>"; };
 		4B15A93F1F24188E000A689F /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../Source/Main.cpp; sourceTree = "<group>"; };
 		4B15A9441F241DC8000A689F /* GEngine-MacOS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-MacOS"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B15A94E1F241FEA000A689F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -66,10 +77,21 @@
 		4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepScanner.h; path = ../Source/Sheep/SheepScanner.h; sourceTree = "<group>"; };
 		4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepDriver.cpp; path = ../Source/Sheep/SheepDriver.cpp; sourceTree = "<group>"; };
 		4B2ACE121F25D310003EC7FE /* SheepDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepDriver.h; path = ../Source/Sheep/SheepDriver.h; sourceTree = "<group>"; };
+		4B2D75A71F53667000900417 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B76B57A1F35999B003F63E5 /* BarnFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnFile.cpp; path = ../Source/Barn/BarnFile.cpp; sourceTree = "<group>"; };
 		4B76B57B1F35999B003F63E5 /* BarnFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnFile.h; path = ../Source/Barn/BarnFile.h; sourceTree = "<group>"; };
 		4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryReader.cpp; path = ../Source/Barn/BinaryReader.cpp; sourceTree = "<group>"; };
 		4B76B57F1F35B175003F63E5 /* BinaryReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BinaryReader.h; path = ../Source/Barn/BinaryReader.h; sourceTree = "<group>"; };
+		4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnAsset.cpp; path = ../Source/Barn/BarnAsset.cpp; sourceTree = "<group>"; };
+		4B76B5821F3788FA003F63E5 /* BarnAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnAsset.h; path = ../Source/Barn/BarnAsset.h; sourceTree = "<group>"; };
+		4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SDLAudio.cpp; path = ../Source/SDLAudio.cpp; sourceTree = "<group>"; };
+		4B7C3A151F4EB07000BB0922 /* SDLAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLAudio.h; path = ../Source/SDLAudio.h; sourceTree = "<group>"; };
+		4B7C3A171F4EB61600BB0922 /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Audio.cpp; path = ../Source/Audio.cpp; sourceTree = "<group>"; };
+		4B7C3A181F4EB61600BB0922 /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio.h; sourceTree = "<group>"; };
+		4BE15CB61F464FD800114779 /* AssetManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AssetManager.cpp; path = ../Source/AssetManager.cpp; sourceTree = "<group>"; };
+		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
+		4BE15CBC1F46620000114779 /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Types.h; path = ../Source/Types.h; sourceTree = "<group>"; };
+		4BE6EE331F441DC600BB29D5 /* minilzo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = minilzo.c; path = ../Libraries/minilzo/minilzo.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,15 +127,29 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4BE15CB61F464FD800114779 /* AssetManager.cpp */,
+				4BE15CB71F464FD800114779 /* AssetManager.h */,
 				4B76B57D1F3599A1003F63E5 /* Barn */,
-				4B15A95D1F245BDC000A689F /* Sheep */,
+				4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */,
+				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
 				4B15A9511F2428C5000A689F /* GEngine.h */,
+				4BE6EE351F441DD100BB29D5 /* Libraries */,
 				4B15A93F1F24188E000A689F /* Main.cpp */,
-				4B15A9541F242C55000A689F /* SDLRenderer.cpp */,
-				4B15A9551F242C55000A689F /* SDLRenderer.h */,
 				4B15A95A1F243349000A689F /* SDLLog.cpp */,
 				4B15A95B1F243349000A689F /* SDLLog.h */,
+				4B15A9541F242C55000A689F /* SDLRenderer.cpp */,
+				4B15A9551F242C55000A689F /* SDLRenderer.h */,
+				4B15A95D1F245BDC000A689F /* Sheep */,
+				4BE15CBC1F46620000114779 /* Types.h */,
+				4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */,
+				4B7C3A151F4EB07000BB0922 /* SDLAudio.h */,
+				4B7C3A171F4EB61600BB0922 /* Audio.cpp */,
+				4B7C3A181F4EB61600BB0922 /* Audio.h */,
+				4B02A3B01F526529000540A7 /* membuf.cpp */,
+				4B02A3B11F526529000540A7 /* membuf.h */,
+				4B02A3B31F5269E9000540A7 /* imstream.cpp */,
+				4B02A3B41F5269E9000540A7 /* imstream.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -148,15 +184,32 @@
 			children = (
 				4B76B57A1F35999B003F63E5 /* BarnFile.cpp */,
 				4B76B57B1F35999B003F63E5 /* BarnFile.h */,
-				4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */,
-				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
+				4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */,
+				4B76B5821F3788FA003F63E5 /* BarnAsset.h */,
 			);
 			name = Barn;
+			sourceTree = "<group>";
+		};
+		4BE6EE351F441DD100BB29D5 /* Libraries */ = {
+			isa = PBXGroup;
+			children = (
+				4BE6EE361F441DDB00BB29D5 /* MiniLZO */,
+			);
+			name = Libraries;
+			sourceTree = "<group>";
+		};
+		4BE6EE361F441DDB00BB29D5 /* MiniLZO */ = {
+			isa = PBXGroup;
+			children = (
+				4BE6EE331F441DC600BB29D5 /* minilzo.c */,
+			);
+			name = MiniLZO;
 			sourceTree = "<group>";
 		};
 		4BF8A4691F24185300F0FB91 = {
 			isa = PBXGroup;
 			children = (
+				4B2D75A71F53667000900417 /* Info.plist */,
 				4B15A9531F2428CD000A689F /* Source */,
 				4B15A9451F241DC8000A689F /* Products */,
 				4B15A94D1F241FEA000A689F /* Frameworks */,
@@ -241,12 +294,19 @@
 				4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
+				4B7C3A191F4EB61600BB0922 /* Audio.cpp in Sources */,
+				4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
 				4B2ACDFB1F25880E003EC7FE /* SheepNode.cpp in Sources */,
 				4B2ACE011F25BA6F003EC7FE /* SheepNameRefNode.cpp in Sources */,
+				4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */,
+				4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
+				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */,
 				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
+				4B02A3B21F526529000540A7 /* membuf.cpp in Sources */,
+				4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */,
 				4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */,
 				4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
@@ -297,7 +357,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/SDL/include",
+					"$(SRCROOT)/../Libraries/minilzo",
+				);
+				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL/lib/mac";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -343,7 +407,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				HEADER_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/SDL/include",
+					"$(SRCROOT)/../Libraries/minilzo",
+				);
+				INFOPLIST_FILE = Info.plist;
 				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL/lib/mac";
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
