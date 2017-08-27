@@ -37,6 +37,7 @@ void SDLRenderer::Shutdown()
 {
     SDL_DestroyRenderer(mRenderer);
     SDL_DestroyWindow(mWindow);
+    SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
 void SDLRenderer::Present()
