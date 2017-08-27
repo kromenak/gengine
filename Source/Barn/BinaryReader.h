@@ -12,10 +12,15 @@ class BinaryReader
 {
 public:
     BinaryReader(const char* filePath);
+    BinaryReader(const char* memory, unsigned int memoryLength);
     ~BinaryReader();
+    
+    bool CanRead() const;
     
     void Seek(int position);
     void Skip(int size);
+    
+    int GetPosition();
     
     void Read(char* charBuffer, int size);
     
@@ -28,7 +33,6 @@ public:
     uint32_t ReadUInt();
     int32_t ReadInt();
     
-    
 private:
-    std::ifstream fileStream;
+    std::istream* stream = nullptr;
 };

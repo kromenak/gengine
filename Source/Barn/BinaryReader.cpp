@@ -7,74 +7,90 @@
 
 #include "BinaryReader.h"
 #include <iostream>
+#include "imstream.h"
 
-BinaryReader::BinaryReader(const char* filePath) :
-    fileStream(filePath, std::ios::in | std::ios::binary)
+BinaryReader::BinaryReader(const char* filePath)
 {
-    if(!fileStream.good())
+    stream = new std::ifstream(filePath, std::ios::in | std::ios::binary);
+    if(!stream->good())
     {
-        std::cout << "File's not good!" << std::endl;
+        std::cout << "BinaryReader can't read from file " << filePath << "!" << std::endl;
     }
+}
+
+BinaryReader::BinaryReader(const char* memory, unsigned int memoryLength)
+{
+    stream = new imstream(memory, memoryLength);
 }
 
 BinaryReader::~BinaryReader()
 {
-    fileStream.close();
+    delete stream;
+}
+
+bool BinaryReader::CanRead() const
+{
+    return stream->good();
 }
 
 void BinaryReader::Seek(int position)
 {
-    fileStream.seekg(position);
+    stream->seekg(position, std::ios::beg);
 }
 
 void BinaryReader::Skip(int size)
 {
-    fileStream.seekg(size, std::ios::seekdir::cur);
+    stream->seekg(size, std::ios::cur);
+}
+
+int BinaryReader::GetPosition()
+{
+    return (int)stream->tellg();
 }
 
 void BinaryReader::Read(char* charBuffer, int size)
 {
-    fileStream.read(charBuffer, size);
+    stream->read(charBuffer, size);
 }
 
 uint8_t BinaryReader::ReadUByte()
 {
     uint8_t val;
-    fileStream.read(reinterpret_cast<char*>(&val), 1);
+    stream->read(reinterpret_cast<char*>(&val), 1);
     return val;
 }
 
 int8_t BinaryReader::ReadByte()
 {
     int8_t val;
-    fileStream.read(reinterpret_cast<char*>(&val), 1);
+    stream->read(reinterpret_cast<char*>(&val), 1);
     return val;
 }
 
 uint16_t BinaryReader::ReadUShort()
 {
     uint16_t val;
-    fileStream.read(reinterpret_cast<char*>(&val), 2);
+    stream->read(reinterpret_cast<char*>(&val), 2);
     return val;
 }
 
 int16_t BinaryReader::ReadShort()
 {
     int16_t val;
-    fileStream.read(reinterpret_cast<char*>(&val), 2);
+    stream->read(reinterpret_cast<char*>(&val), 2);
     return val;
 }
 
 uint32_t BinaryReader::ReadUInt()
 {
     uint32_t val;
-    fileStream.read(reinterpret_cast<char*>(&val), 4);
+    stream->read(reinterpret_cast<char*>(&val), 4);
     return val;
 }
 
 int32_t BinaryReader::ReadInt()
 {
     int32_t val;
-    fileStream.read(reinterpret_cast<char*>(&val), 4);
+    stream->read(reinterpret_cast<char*>(&val), 4);
     return val;
 }
