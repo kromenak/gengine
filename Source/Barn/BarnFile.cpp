@@ -273,6 +273,8 @@ BarnAsset* BarnFile::GetAsset(const std::string assetName)
 
 bool BarnFile::Extract(const std::string assetName, char *buffer, int bufferSize)
 {
+    // Get the asset handle associated with this asset name.
+    // We fail if we can't find the asset with that name.
     BarnAsset* asset = GetAsset(assetName);
     if(asset == nullptr)
     {
@@ -280,37 +282,54 @@ bool BarnFile::Extract(const std::string assetName, char *buffer, int bufferSize
         return false;
     }
     
+    // Make sure this asset actually exists within this barn file, and it isn't a pointer to another barn file.
     if(!asset->barnFileName.empty())
     {
         cout << "Asset " << assetName << " can't be extracted from Barn - it is only an asset pointer!" << endl;
         return false;
     }
     
+    // If the buffer provided is too small for the asset, we can't extract it. Ideally, the buffer is EXACTLY the right size!
+    if(bufferSize < asset->uncompressedSize)
+    {
+        cout << "Buffer is too small to cotain extracted asset." << endl;
+        return false;
+    }
+    
+    // Method used to extract will depend upon the compression type for the asset.
     if(asset->compressionType == CompressionType::None)
     {
-        if(bufferSize < asset->uncompressedSize)
-        {
-            cout << "Buffer is too small to cotain extracted asset." << endl;
-            return false;
-        }
-        
+        // Seek to the data possion and read the data into the buffer. Since it's already uncompressed, we're done!
         cout << "Reading from offset " << mDataOffset + asset->offset << endl;
         cout << "Reading " << asset->uncompressedSize << " bytes " << endl;
         mReader.Seek(mDataOffset + asset->offset);
         mReader.Read(buffer, asset->uncompressedSize);
-        return true;
+    }
+    else if(asset->compressionType == CompressionType::Zlib)
+    {
+        cout << "Zlib compression is not yet supported." << endl;
+        return false;
+    }
+    else if(asset->compressionType == CompressionType::Lzo)
+    {
+        // Make sure LZO library is initialized.
+        lzo_init();
+        
+        // Read compressed data into a buffer.
+        char* compressedBuffer = new char[asset->compressedSize];
+        mReader.Seek(mDataOffset + 8 + asset->offset);
+        mReader.Read(compressedBuffer, asset->compressedSize);
+        
+        // Decompress using LZO library
+        lzo1x_decompress((lzo_bytep)compressedBuffer, (lzo_uint)asset->compressedSize, (lzo_bytep)buffer, (lzo_uintp)&bufferSize, nullptr);
     }
     else
     {
-        if(asset->compressionType == CompressionType::Lzo)
-        {
-            //lzo1x_deco
-        }
-        else if(asset->compressionType == CompressionType::Zlib)
-        {
-        
-        }
+        cout << "Asset " << assetName << " has invalid compression type " << (int)asset->compressionType << endl;
+        return false;
     }
+    
+    // Success!
     return true;
 }
 
@@ -329,28 +348,23 @@ bool BarnFile::WriteToFile(const std::string assetName)
         return false;
     }
     
-    if(asset->compressionType == CompressionType::None)
+    bool result = false;
+    char* assetData = new char[asset->uncompressedSize];
+    if(Extract(assetName, assetData, asset->uncompressedSize))
     {
-        char* assetData = new char[asset->uncompressedSize];
-        if(Extract(assetName, assetData, asset->uncompressedSize))
+        ofstream fileStream(asset->name);
+        if(fileStream.good())
         {
-            ofstream fileStream(asset->name);
-            if(fileStream.good())
-            {
-                fileStream.write(assetData, asset->uncompressedSize);
-                fileStream.close();
-                cout << "Wrote out " << asset->name << endl;
-            }
+            fileStream.write(assetData, asset->uncompressedSize);
+            fileStream.close();
+            cout << "Wrote out " << asset->name << endl;
+            result = true;
         }
-        else
-        {
-            cout << "Error while extracting uncompressed asset." << endl;
-        }
-        delete[] assetData;
     }
     else
     {
-        cout << "Not yet supported." << endl;
+        cout << "Error while extracting uncompressed asset." << endl;
     }
-    return false;
+    delete[] assetData;
+    return result;
 }
