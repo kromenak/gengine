@@ -48,10 +48,13 @@ bool GEngine::Initialize()
     
     
     mAssetManager.AddSearchPath("Assets/");
-    mAssetManager.LoadBarn("ambient.brn");
+    mAssetManager.LoadBarn("common.brn");
     
-    Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
-    audio->WriteToFile();
+    BarnFile* barnFile = mAssetManager.GetBarn("common.brn");
+    barnFile->WriteToFile("GA3HAT.MOD");
+    
+    //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
+    //audio->WriteToFile();
     
     //mAudio.Play(*audio);
     

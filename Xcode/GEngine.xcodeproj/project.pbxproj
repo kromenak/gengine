@@ -26,8 +26,8 @@
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
 		4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */; };
+		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
 		4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */; };
-		4B7C3A191F4EB61600BB0922 /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A171F4EB61600BB0922 /* Audio.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
 		4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6EE331F441DC600BB29D5 /* minilzo.c */; };
 /* End PBXBuildFile section */
@@ -84,10 +84,10 @@
 		4B76B57F1F35B175003F63E5 /* BinaryReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BinaryReader.h; path = ../Source/Barn/BinaryReader.h; sourceTree = "<group>"; };
 		4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnAsset.cpp; path = ../Source/Barn/BarnAsset.cpp; sourceTree = "<group>"; };
 		4B76B5821F3788FA003F63E5 /* BarnAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnAsset.h; path = ../Source/Barn/BarnAsset.h; sourceTree = "<group>"; };
+		4B7AB0431F539EB200CFBE8F /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Audio.cpp; path = ../Source/Audio/Audio.cpp; sourceTree = "<group>"; };
+		4B7AB0441F539EB200CFBE8F /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio/Audio.h; sourceTree = "<group>"; };
 		4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SDLAudio.cpp; path = ../Source/SDLAudio.cpp; sourceTree = "<group>"; };
 		4B7C3A151F4EB07000BB0922 /* SDLAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLAudio.h; path = ../Source/SDLAudio.h; sourceTree = "<group>"; };
-		4B7C3A171F4EB61600BB0922 /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Audio.cpp; path = ../Source/Audio.cpp; sourceTree = "<group>"; };
-		4B7C3A181F4EB61600BB0922 /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio.h; sourceTree = "<group>"; };
 		4BE15CB61F464FD800114779 /* AssetManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AssetManager.cpp; path = ../Source/AssetManager.cpp; sourceTree = "<group>"; };
 		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
 		4BE15CBC1F46620000114779 /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Types.h; path = ../Source/Types.h; sourceTree = "<group>"; };
@@ -129,6 +129,7 @@
 			children = (
 				4BE15CB61F464FD800114779 /* AssetManager.cpp */,
 				4BE15CB71F464FD800114779 /* AssetManager.h */,
+				4B7AB0421F539EA500CFBE8F /* Audio */,
 				4B76B57D1F3599A1003F63E5 /* Barn */,
 				4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */,
 				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
@@ -141,15 +142,8 @@
 				4B15A9541F242C55000A689F /* SDLRenderer.cpp */,
 				4B15A9551F242C55000A689F /* SDLRenderer.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
+				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4BE15CBC1F46620000114779 /* Types.h */,
-				4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */,
-				4B7C3A151F4EB07000BB0922 /* SDLAudio.h */,
-				4B7C3A171F4EB61600BB0922 /* Audio.cpp */,
-				4B7C3A181F4EB61600BB0922 /* Audio.h */,
-				4B02A3B01F526529000540A7 /* membuf.cpp */,
-				4B02A3B11F526529000540A7 /* membuf.h */,
-				4B02A3B31F5269E9000540A7 /* imstream.cpp */,
-				4B02A3B41F5269E9000540A7 /* imstream.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -188,6 +182,28 @@
 				4B76B5821F3788FA003F63E5 /* BarnAsset.h */,
 			);
 			name = Barn;
+			sourceTree = "<group>";
+		};
+		4B7AB0421F539EA500CFBE8F /* Audio */ = {
+			isa = PBXGroup;
+			children = (
+				4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */,
+				4B7C3A151F4EB07000BB0922 /* SDLAudio.h */,
+				4B7AB0431F539EB200CFBE8F /* Audio.cpp */,
+				4B7AB0441F539EB200CFBE8F /* Audio.h */,
+			);
+			name = Audio;
+			sourceTree = "<group>";
+		};
+		4B98D70A1F53D26C009CC2F0 /* STD */ = {
+			isa = PBXGroup;
+			children = (
+				4B02A3B01F526529000540A7 /* membuf.cpp */,
+				4B02A3B11F526529000540A7 /* membuf.h */,
+				4B02A3B31F5269E9000540A7 /* imstream.cpp */,
+				4B02A3B41F5269E9000540A7 /* imstream.h */,
+			);
+			name = STD;
 			sourceTree = "<group>";
 		};
 		4BE6EE351F441DD100BB29D5 /* Libraries */ = {
@@ -294,7 +310,6 @@
 				4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
-				4B7C3A191F4EB61600BB0922 /* Audio.cpp in Sources */,
 				4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
 				4B2ACDFB1F25880E003EC7FE /* SheepNode.cpp in Sources */,
@@ -304,6 +319,7 @@
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */,
+				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
 				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
 				4B02A3B21F526529000540A7 /* membuf.cpp in Sources */,
 				4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */,
@@ -360,13 +376,18 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/SDL/include",
 					"$(SRCROOT)/../Libraries/minilzo",
+					"$(SRCROOT)/../Libraries/libmad/include",
 				);
-				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL/lib/mac";
+				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/SDL/lib/mac",
+					"$(SRCROOT)/../Libraries/libmad/lib/mac",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-lSDL2-2.0.0";
+				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
@@ -410,12 +431,17 @@
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/SDL/include",
 					"$(SRCROOT)/../Libraries/minilzo",
+					"$(SRCROOT)/../Libraries/libmad/include",
 				);
-				INFOPLIST_FILE = Info.plist;
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL/lib/mac";
+				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/SDL/lib/mac",
+					"$(SRCROOT)/../Libraries/libmad/lib/mac",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = "-lSDL2-2.0.0";
+				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 			};
@@ -424,12 +450,14 @@
 		4BF8A46E1F24185300F0FB91 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 			};
 			name = Debug;
 		};
 		4BF8A46F1F24185300F0FB91 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
 			};
 			name = Release;
 		};
