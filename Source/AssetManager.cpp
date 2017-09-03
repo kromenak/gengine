@@ -36,7 +36,7 @@ void AssetManager::LoadBarn(string barnName)
     }
     
     BarnFile* barn = new BarnFile(assetPath.c_str());
-    mLoadedBarns[assetPath] = barn;
+    mLoadedBarns[barnName] = barn;
 }
 
 void AssetManager::UnloadBarn(string barnName)
@@ -53,6 +53,18 @@ void AssetManager::UnloadBarn(string barnName)
     
     // Remove from map.
     mLoadedBarns.erase(barnName);
+}
+
+BarnFile* AssetManager::GetBarn(string barnName)
+{
+    //TODO: Maybe load barn if not loaded?
+ 
+    // If not loaded, we can't get it - return null.
+    auto iter = mLoadedBarns.find(barnName);
+    if(iter == mLoadedBarns.end()) { return nullptr; }
+    
+    // Found it!
+    return iter->second;
 }
 
 Audio* AssetManager::LoadAudio(string audioName)

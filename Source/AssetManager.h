@@ -33,6 +33,7 @@ public:
     
     void LoadBarn(string barnName);
     void UnloadBarn(string barnName);
+    BarnFile* GetBarn(string barnName);
     
     Audio* LoadAudio(string audioName);
     
