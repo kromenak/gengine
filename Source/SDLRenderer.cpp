@@ -42,7 +42,7 @@ void SDLRenderer::Shutdown()
 
 void SDLRenderer::Present()
 {
-    //SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
-    //SDL_RenderClear(mRenderer);
+    SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
+    SDL_RenderClear(mRenderer);
     SDL_RenderPresent(mRenderer);
 }
