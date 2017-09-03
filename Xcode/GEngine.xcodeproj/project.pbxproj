@@ -377,16 +377,21 @@
 					"$(SRCROOT)/../Libraries/SDL/include",
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/libmad/include",
+					"$(SRCROOT)/../Libraries/zlib/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/SDL/lib/mac",
 					"$(SRCROOT)/../Libraries/libmad/lib/mac",
+					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lSDL2-2.0.0";
+				OTHER_LDFLAGS = (
+					"-lSDL2-2.0.0",
+					"-lz",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -432,15 +437,20 @@
 					"$(SRCROOT)/../Libraries/SDL/include",
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/libmad/include",
+					"$(SRCROOT)/../Libraries/zlib/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/SDL/lib/mac",
 					"$(SRCROOT)/../Libraries/libmad/lib/mac",
+					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_LDFLAGS = "-lSDL2-2.0.0";
+				OTHER_LDFLAGS = (
+					"-lSDL2-2.0.0",
+					"-lz",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

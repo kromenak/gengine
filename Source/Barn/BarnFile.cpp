@@ -10,6 +10,7 @@
 #include <fstream>
 #include <vector>
 #include "minilzo.h"
+#include "zlib.h"
 
 using namespace std;
 
@@ -307,21 +308,65 @@ bool BarnFile::Extract(const std::string assetName, char *buffer, int bufferSize
     }
     else if(asset->compressionType == CompressionType::Zlib)
     {
-        cout << "Zlib compression is not yet supported." << endl;
-        return false;
+        // Read compressed data into a buffer.
+        unsigned char* compressedBuffer = new unsigned char[asset->compressedSize];
+        mReader.Seek(mDataOffset + 8 + asset->offset);
+        mReader.Read((char*)compressedBuffer, asset->compressedSize);
+    
+        z_stream strm;
+        strm.next_in = compressedBuffer;
+        strm.avail_in = asset->compressedSize;
+        strm.next_out = (unsigned char*)buffer;
+        strm.avail_out = bufferSize;
+        strm.zalloc = Z_NULL;
+        strm.zfree = Z_NULL;
+        strm.opaque = Z_NULL;
+        
+        // Make sure zlib is initialized for "inflation".
+        int result = inflateInit(&strm);
+        if(result != Z_OK)
+        {
+            cout << "Error when calling inflateInit: " << result << endl;
+            delete[] compressedBuffer;
+            return false;
+        }
+        
+        // Inflate the data!
+        result = inflate(&strm, Z_FINISH);
+        if(result != Z_STREAM_END)
+        {
+            cout << "Inflate didn't inflate entire stream, or an error occurred: " << result << endl;
+            delete[] compressedBuffer;
+            return false;
+        }
+        
+        // Uninit zlib.
+        result = inflateEnd(&strm);
+        if(result != Z_OK)
+        {
+            cout << "Error while ending inflate: " << result << endl;
+            delete[] compressedBuffer;
+            return false;
+        }
+
+        // Delete compressed data buffer.
+        delete[] compressedBuffer;
     }
     else if(asset->compressionType == CompressionType::Lzo)
     {
-        // Make sure LZO library is initialized.
-        lzo_init();
-        
         // Read compressed data into a buffer.
         char* compressedBuffer = new char[asset->compressedSize];
         mReader.Seek(mDataOffset + 8 + asset->offset);
         mReader.Read(compressedBuffer, asset->compressedSize);
         
+        // Make sure LZO library is initialized.
+        lzo_init();
+        
         // Decompress using LZO library
         lzo1x_decompress((lzo_bytep)compressedBuffer, (lzo_uint)asset->compressedSize, (lzo_bytep)buffer, (lzo_uintp)&bufferSize, nullptr);
+        
+        // Delete compressed data buffer.
+        delete[] compressedBuffer;
     }
     else
     {

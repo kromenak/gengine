@@ -46,12 +46,11 @@ bool GEngine::Initialize()
     //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/day3.brn");
     //barnFile.WriteToFile("TE4SUNBUTTON.BMP");
     
-    
     mAssetManager.AddSearchPath("Assets/");
-    mAssetManager.LoadBarn("common.brn");
+    mAssetManager.LoadBarn("day1.brn");
     
-    BarnFile* barnFile = mAssetManager.GetBarn("common.brn");
-    barnFile->WriteToFile("GA3HAT.MOD");
+    BarnFile* barnFile = mAssetManager.GetBarn("day1.brn");
+    barnFile->WriteToFile("GA3_GA3BREATHE.ACT");
     
     //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
     //audio->WriteToFile();
