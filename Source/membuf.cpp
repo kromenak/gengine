@@ -15,6 +15,50 @@ membuf::membuf(const char* data, unsigned int length) :
     
 }
 
+streampos membuf::seekoff(streamoff off, ios_base::seekdir way, ios_base::openmode which)
+{
+    if(way == ios_base::seekdir::beg)
+    {
+        mCurrent = mBegin + off;
+        if(mCurrent > mEnd)
+        {
+            mCurrent = mEnd;
+        }
+    }
+    else if(way == ios_base::seekdir::cur)
+    {
+        mCurrent += off;
+        if(mCurrent > mEnd)
+        {
+            mCurrent = mEnd;
+        }
+    }
+    else if(way == ios_base::seekdir::end)
+    {
+        mCurrent = mEnd - off;
+        if(mCurrent < mBegin)
+        {
+            mCurrent = mBegin;
+        }
+    }
+    return mCurrent - mBegin;
+}
+
+streampos membuf::seekpos(streampos pos, ios_base::openmode which)
+{
+    mCurrent = mBegin + pos;
+    if(mCurrent > mEnd)
+    {
+        mCurrent = mEnd;
+    }
+    return mCurrent - mBegin;
+}
+
+streamsize membuf::showmanyc()
+{
+    return mEnd - mCurrent;
+}
+
 membuf::int_type membuf::underflow()
 {
     if(mCurrent == mEnd)
@@ -42,7 +86,4 @@ membuf::int_type membuf::pbackfail(int_type ch)
     return traits_type::to_int_type(*--mCurrent);
 }
 
-std::streamsize membuf::showmanyc()
-{
-    return mEnd - mCurrent;
-}
+
