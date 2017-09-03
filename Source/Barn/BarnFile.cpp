@@ -311,7 +311,7 @@ bool BarnFile::Extract(const std::string assetName, char *buffer, int bufferSize
         // Read compressed data into a buffer.
         unsigned char* compressedBuffer = new unsigned char[asset->compressedSize];
         mReader.Seek(mDataOffset + 8 + asset->offset);
-        mReader.Read((char*)compressedBuffer, asset->compressedSize);
+        mReader.Read(compressedBuffer, asset->compressedSize);
     
         z_stream strm;
         strm.next_in = compressedBuffer;

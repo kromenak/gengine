@@ -48,9 +48,14 @@ int BinaryReader::GetPosition()
     return (int)stream->tellg();
 }
 
-void BinaryReader::Read(char* charBuffer, int size)
+void BinaryReader::Read(char* buffer, int size)
 {
-    stream->read(charBuffer, size);
+    stream->read(buffer, size);
+}
+
+void BinaryReader::Read(unsigned char* buffer, int size)
+{
+    stream->read((char*)buffer, size);
 }
 
 uint8_t BinaryReader::ReadUByte()

@@ -22,7 +22,8 @@ public:
     
     int GetPosition();
     
-    void Read(char* charBuffer, int size);
+    void Read(char* buffer, int size);
+    void Read(unsigned char* buffer, int size);
     
     uint8_t ReadUByte();
     int8_t ReadByte();
