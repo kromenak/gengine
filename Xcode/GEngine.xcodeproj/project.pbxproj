@@ -23,6 +23,8 @@
 		4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */; };
 		4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0E1F25CF08003EC7FE /* SheepScanner.cpp */; };
 		4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */; };
+		4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED861F5CA5F4000065EF /* Model.cpp */; };
+		4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
 		4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */; };
@@ -78,6 +80,10 @@
 		4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepDriver.cpp; path = ../Source/Sheep/SheepDriver.cpp; sourceTree = "<group>"; };
 		4B2ACE121F25D310003EC7FE /* SheepDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepDriver.h; path = ../Source/Sheep/SheepDriver.h; sourceTree = "<group>"; };
 		4B2D75A71F53667000900417 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4B4EED861F5CA5F4000065EF /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Model.cpp; path = ../Source/Model.cpp; sourceTree = "<group>"; };
+		4B4EED871F5CA5F4000065EF /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Model.h; path = ../Source/Model.h; sourceTree = "<group>"; };
+		4B4EED891F5CACEF000065EF /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3.cpp; path = ../Source/Vector3.cpp; sourceTree = "<group>"; };
+		4B4EED8A1F5CACEF000065EF /* Vector3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector3.h; path = ../Source/Vector3.h; sourceTree = "<group>"; };
 		4B76B57A1F35999B003F63E5 /* BarnFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnFile.cpp; path = ../Source/Barn/BarnFile.cpp; sourceTree = "<group>"; };
 		4B76B57B1F35999B003F63E5 /* BarnFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnFile.h; path = ../Source/Barn/BarnFile.h; sourceTree = "<group>"; };
 		4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryReader.cpp; path = ../Source/Barn/BinaryReader.cpp; sourceTree = "<group>"; };
@@ -127,6 +133,8 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4B4EED891F5CACEF000065EF /* Vector3.cpp */,
+				4B4EED8A1F5CACEF000065EF /* Vector3.h */,
 				4BE15CB61F464FD800114779 /* AssetManager.cpp */,
 				4BE15CB71F464FD800114779 /* AssetManager.h */,
 				4B7AB0421F539EA500CFBE8F /* Audio */,
@@ -144,6 +152,8 @@
 				4B15A95D1F245BDC000A689F /* Sheep */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4BE15CBC1F46620000114779 /* Types.h */,
+				4B4EED861F5CA5F4000065EF /* Model.cpp */,
+				4B4EED871F5CA5F4000065EF /* Model.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -305,6 +315,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
 				4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */,
@@ -322,6 +333,7 @@
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
 				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
 				4B02A3B21F526529000540A7 /* membuf.cpp in Sources */,
+				4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */,
 				4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */,
 				4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */,
 				4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */,
@@ -378,12 +390,14 @@
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/libmad/include",
 					"$(SRCROOT)/../Libraries/zlib/include",
+					"$(SRCROOT)/../Libraries/GLEW/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/SDL/lib/mac",
 					"$(SRCROOT)/../Libraries/libmad/lib/mac",
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
+					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -391,6 +405,7 @@
 				OTHER_LDFLAGS = (
 					"-lSDL2-2.0.0",
 					"-lz",
+					"-lGLEW",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -438,18 +453,21 @@
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/libmad/include",
 					"$(SRCROOT)/../Libraries/zlib/include",
+					"$(SRCROOT)/../Libraries/GLEW/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/SDL/lib/mac",
 					"$(SRCROOT)/../Libraries/libmad/lib/mac",
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
+					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
 					"-lSDL2-2.0.0",
 					"-lz",
+					"-lGLEW",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";

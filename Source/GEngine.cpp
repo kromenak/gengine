@@ -49,8 +49,10 @@ bool GEngine::Initialize()
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("day1.brn");
     
+    Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
+    
     BarnFile* barnFile = mAssetManager.GetBarn("day1.brn");
-    barnFile->WriteToFile("GA3_GA3BREATHE.ACT");
+    barnFile->WriteToFile("SYRUPPACKET.MOD");
     
     //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
     //audio->WriteToFile();
@@ -117,5 +119,7 @@ void GEngine::Update()
 
 void GEngine::GenerateOutput()
 {
+    mRenderer.Clear();
+    mRenderer.Render();
     mRenderer.Present();
 }
