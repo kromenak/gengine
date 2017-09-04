@@ -34,6 +34,9 @@ public:
     uint32_t ReadUInt();
     int32_t ReadInt();
     
+    float ReadFloat();
+    double ReadDouble();
+    
 private:
     std::istream* stream = nullptr;
 };

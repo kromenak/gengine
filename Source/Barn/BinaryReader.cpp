@@ -99,3 +99,17 @@ int32_t BinaryReader::ReadInt()
     stream->read(reinterpret_cast<char*>(&val), 4);
     return val;
 }
+
+float BinaryReader::ReadFloat()
+{
+    float val;
+    stream->read(reinterpret_cast<char*>(&val), 4);
+    return val;
+}
+
+double BinaryReader::ReadDouble()
+{
+    double val;
+    stream->read(reinterpret_cast<char*>(&val), 8);
+    return val;
+}
