@@ -10,6 +10,7 @@
 #include <vector>
 #include "BarnFile.h"
 #include "Audio.h"
+#include "Model.h"
 
 using namespace std;
 
@@ -36,6 +37,7 @@ public:
     BarnFile* GetBarn(string barnName);
     
     Audio* LoadAudio(string audioName);
+    Model* LoadModel(string modelName);
     
 private:
     string GetAssetPath(string fileName);

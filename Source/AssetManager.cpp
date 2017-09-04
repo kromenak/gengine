@@ -94,6 +94,34 @@ Audio* AssetManager::LoadAudio(string audioName)
     return nullptr;
 }
 
+Model* AssetManager::LoadModel(string modelName)
+{
+    // First, see if the asset exists at any asset search path.
+    // If so, we load the asset directly from file.
+    string assetPath = GetAssetPath(modelName);
+    if(!assetPath.empty())
+    {
+        //TODO: Load asset from file.
+        return nullptr;
+    }
+    
+    // If no file to load, we'll get the asset from a barn.
+    BarnFile* barn = GetContainingBarn(modelName);
+    if(barn != nullptr)
+    {
+        BarnAsset* asset = barn->GetAsset(modelName);
+        char* buffer = new char[asset->uncompressedSize];
+        barn->Extract(modelName, buffer, asset->uncompressedSize);
+        
+        Model* model = new Model(modelName, buffer, asset->uncompressedSize);
+        return model;
+    }
+    
+    // Couldn't find this asset!
+    return nullptr;
+
+}
+
 string AssetManager::GetAssetPath(string fileName)
 {
     for(const string& searchPath : mSearchPaths)
