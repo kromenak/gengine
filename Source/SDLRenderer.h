@@ -8,6 +8,8 @@
 
 #include "SDL/SDL.h"
 #include <GL/glew.h>
+#include "GLVertexArray.h"
+#include "GLShader.h"
 
 class SDLRenderer
 {
@@ -20,6 +22,9 @@ private:
     
     // Compiled default shader program.
     GLuint mBasicMeshProgram = GL_NONE;
+    
+    GLShader* mShader = nullptr;
+    GLVertexArray* mVertArray = nullptr;
     
 public:
     bool Initialize();

@@ -11,6 +11,60 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "Matrix4.h"
+
+GLfloat triangle_vertices[] = {
+    0.0f,  0.5f,  0.0f,
+    0.5f, -0.5f,  0.0f,
+    -0.5f, -0.5f,  0.0f
+};
+
+GLfloat cube_vertices[] = {
+    // front
+    -1.0, -1.0,  1.0,
+    1.0, -1.0,  1.0,
+    1.0,  1.0,  1.0,
+    -1.0,  1.0,  1.0,
+    // back
+    -1.0, -1.0, -1.0,
+    1.0, -1.0, -1.0,
+    1.0,  1.0, -1.0,
+    -1.0,  1.0, -1.0
+};
+
+GLfloat cube_colors[] = {
+    // front colors
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 0.0, 1.0,
+    1.0, 1.0, 1.0,
+    // back colors
+    1.0, 0.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 0.0, 1.0,
+    1.0, 1.0, 1.0,
+};
+
+GLushort cube_elements[] = {
+    // front
+    0, 1, 2,
+    2, 3, 0,
+    // top
+    1, 5, 6,
+    6, 2, 1,
+    // back
+    7, 6, 5,
+    5, 4, 7,
+    // bottom
+    4, 0, 3,
+    3, 7, 4,
+    // left
+    4, 5, 1,
+    1, 0, 4,
+    // right
+    3, 2, 6,
+    6, 7, 3,
+};
 
 bool SDLRenderer::Initialize()
 {
@@ -50,7 +104,7 @@ bool SDLRenderer::Initialize()
         return false;
     }
     
-    // Clear any Glew error.
+    // Clear any GLEW error.
     glGetError();
     
     // Initialize frame buffer.
@@ -59,34 +113,12 @@ bool SDLRenderer::Initialize()
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     
-    // Compile default shader program.
-    GLuint vertexShader = LoadAndCompileShaderFromFile("Assets/BasicMesh.vert", GL_VERTEX_SHADER);
-    GLuint fragmentShader = LoadAndCompileShaderFromFile("Assets/BasicMesh.frag", GL_FRAGMENT_SHADER);
-    if(!IsShaderCompiled(vertexShader) || !IsShaderCompiled(fragmentShader))
+    mShader = new GLShader("Assets/Tut.vert", "Assets/Tut.frag");
+    if(!mShader->IsGood())
     {
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
         return false;
     }
-    
-    // Assemble shader program.
-    mBasicMeshProgram = glCreateProgram();
-    glAttachShader(mBasicMeshProgram, vertexShader);
-    glAttachShader(mBasicMeshProgram, fragmentShader);
-    
-    glBindFragDataLocation(mBasicMeshProgram, 0, "outColor");
-    glLinkProgram(mBasicMeshProgram);
-    if(!IsProgramLinked(mBasicMeshProgram))
-    {
-        glDeleteProgram(mBasicMeshProgram);
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        return false;
-    }
-    
-    // Detach shaders after a successful link.
-    glDetachShader(mBasicMeshProgram, vertexShader);
-    glDetachShader(mBasicMeshProgram, fragmentShader);
+    mVertArray = new GLVertexArray(triangle_vertices, 9);
     
     // Init succeeded!
     return true;
@@ -94,7 +126,8 @@ bool SDLRenderer::Initialize()
 
 void SDLRenderer::Shutdown()
 {
-    glDeleteProgram(mBasicMeshProgram);
+    delete mVertArray;
+    delete mShader;
     
     SDL_GL_DeleteContext(mContext);
     SDL_DestroyWindow(mWindow);
@@ -108,6 +141,22 @@ void SDLRenderer::Clear()
 
 void SDLRenderer::Render()
 {
+    mShader->Activate();
+    
+    mVertArray->Draw();
+    
+    /*
+    glUseProgram(mBasicMeshProgram);
+    
+    Matrix4 viewProj;
+    GLuint view = glGetUniformLocation(mBasicMeshProgram, "uViewProj");
+    glUniformMatrix4fv(view, 1, GL_FALSE, viewProj.GetFloatPtr());
+    
+    Matrix4 worldTransform;
+    GLuint world = glGetUniformLocation(mBasicMeshProgram, "uWorldTransform");
+    glUniformMatrix4fv(world, 1, GL_FALSE, worldTransform.GetFloatPtr());
+    */
+    
     //TODO: Draw stuff...
 }
 
