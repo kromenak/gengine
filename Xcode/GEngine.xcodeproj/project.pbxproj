@@ -54,6 +54,8 @@
 		4B02A3B11F526529000540A7 /* membuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = membuf.h; path = ../Source/membuf.h; sourceTree = "<group>"; };
 		4B02A3B31F5269E9000540A7 /* imstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imstream.cpp; path = ../Source/imstream.cpp; sourceTree = "<group>"; };
 		4B02A3B41F5269E9000540A7 /* imstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imstream.h; path = ../Source/imstream.h; sourceTree = "<group>"; };
+		4B0E2A571F74F5650019D4AD /* Tut.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Tut.frag; path = ../Assets/Tut.frag; sourceTree = "<group>"; };
+		4B0E2A581F74F5650019D4AD /* Tut.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Tut.vert; path = ../Assets/Tut.vert; sourceTree = "<group>"; };
 		4B15A93F1F24188E000A689F /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../Source/Main.cpp; sourceTree = "<group>"; };
 		4B15A9441F241DC8000A689F /* GEngine-MacOS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-MacOS"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B15A94E1F241FEA000A689F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -122,6 +124,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4B0E2A561F74F5570019D4AD /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				4B0E2A571F74F5650019D4AD /* Tut.frag */,
+				4B0E2A581F74F5650019D4AD /* Tut.vert */,
+			);
+			name = Assets;
+			sourceTree = "<group>";
+		};
 		4B15A9451F241DC8000A689F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -250,6 +261,7 @@
 		4BF8A4691F24185300F0FB91 = {
 			isa = PBXGroup;
 			children = (
+				4B0E2A561F74F5570019D4AD /* Assets */,
 				4B2D75A71F53667000900417 /* Info.plist */,
 				4B15A9531F2428CD000A689F /* Source */,
 				4B15A9451F241DC8000A689F /* Products */,
