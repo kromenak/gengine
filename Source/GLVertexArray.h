@@ -13,6 +13,8 @@ class GLVertexArray
 {
 public:
     GLVertexArray(const GLfloat* vertPositions, int vertPositionsCount);
+    GLVertexArray(const GLfloat* vertPositions, int vertPositionsCount,
+                  const GLushort* indexes, int indexesCount);
     ~GLVertexArray();
     
     void Activate();
@@ -24,4 +26,5 @@ private:
     GLuint mIBO = GL_NONE;
     
     int mVertexCount = 0;
+    int mIndexesCount = 0;
 };

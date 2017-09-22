@@ -18,11 +18,17 @@ GLVertexArray::GLVertexArray(const GLfloat* vertPositions, int vertPositionsCoun
     glBindBuffer(GL_ARRAY_BUFFER, mVBO);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
     
-    //glGenBuffers(1, &ibo);
-    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-    //glBufferData(GL_ELEMENT_ARRAY_BUFFER, 24 * sizeof(GLushort), cube_elements, GL_STATIC_DRAW);
-
     mVertexCount = vertPositionsCount / 3;
+}
+
+GLVertexArray::GLVertexArray(const GLfloat* vertPositions, int vertPositionsCount,
+                             const GLushort* indexes, int indexesCount)
+: GLVertexArray(vertPositions, vertPositionsCount)
+{
+    glGenBuffers(1, &mIBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexesCount * sizeof(GLushort), indexes, GL_STATIC_DRAW);
+    mIndexesCount = indexesCount;
 }
 
 GLVertexArray::~GLVertexArray()
@@ -44,6 +50,7 @@ GLVertexArray::~GLVertexArray()
 void GLVertexArray::Activate()
 {
     glBindVertexArray(mVAO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
 }
 
 void GLVertexArray::Draw()
@@ -51,7 +58,7 @@ void GLVertexArray::Draw()
     Activate();
     if(mIBO != GL_NONE)
     {
-        //TODO: Draw using indexes.
+        glDrawElements(GL_TRIANGLES, mIndexesCount, GL_UNSIGNED_SHORT, (void*)0);
     }
     else
     {
