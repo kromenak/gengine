@@ -12,7 +12,7 @@
 
 GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
 {
-    // Compile default shader program.
+    // Load vertex and fragment shaders, and compile them.
     GLuint vertexShader = LoadAndCompileShaderFromFile(vertShaderPath, GL_VERTEX_SHADER);
     GLuint fragmentShader = LoadAndCompileShaderFromFile(fragShaderPath, GL_FRAGMENT_SHADER);
     if(!IsShaderCompiled(vertexShader) || !IsShaderCompiled(fragmentShader))
@@ -28,7 +28,7 @@ GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
     glAttachShader(mProgram, vertexShader);
     glAttachShader(mProgram, fragmentShader);
     
-    //glBindFragDataLocation(mBasicMeshProgram, 0, "outColor");
+    // Link the shader program.
     glLinkProgram(mProgram);
     if(!IsProgramLinked(mProgram))
     {
@@ -38,6 +38,10 @@ GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
         mError = true;
         return;
     }
+    
+    // Query for attribute locations.
+    GLint posAttribIndex = glGetAttribLocation(mProgram, "v2p");
+    std::cout << posAttribIndex << std::endl;
     
     // Detach shaders after a successful link.
     glDetachShader(mProgram, vertexShader);
