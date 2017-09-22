@@ -13,6 +13,14 @@
 
 class SDLRenderer
 {
+public:
+    bool Initialize();
+    void Shutdown();
+    
+    void Clear();
+    void Render();
+    void Present();
+    
 private:
     // Handle for the window object (contains the game).
     SDL_Window* mWindow = nullptr;
@@ -25,17 +33,4 @@ private:
     
     GLShader* mShader = nullptr;
     GLVertexArray* mVertArray = nullptr;
-    
-public:
-    bool Initialize();
-    void Shutdown();
-    
-    void Clear();
-    void Render();
-    void Present();
-    
-private:
-    GLuint LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType);
-    bool IsShaderCompiled(GLuint shader);
-    bool IsProgramLinked(GLuint program);
 };
