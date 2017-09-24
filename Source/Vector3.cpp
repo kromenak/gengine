@@ -28,4 +28,3 @@ ostream& operator<<(ostream& os, const Vector3& v3)
     os << "(" << v3.GetX() << ", " << v3.GetY() << ", " << v3.GetZ() << ")";
     return os;
 }
-

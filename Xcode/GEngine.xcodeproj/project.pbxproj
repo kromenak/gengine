@@ -35,6 +35,8 @@
 		4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
 		4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
 		4BF32B8C1F67C434000639FB /* GLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B8A1F67C434000639FB /* GLShader.cpp */; };
+		4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
+		4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -109,6 +111,10 @@
 		4BF32B881F67BC34000639FB /* GLVertexArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLVertexArray.h; path = ../Source/GLVertexArray.h; sourceTree = "<group>"; };
 		4BF32B8A1F67C434000639FB /* GLShader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLShader.cpp; path = ../Source/GLShader.cpp; sourceTree = "<group>"; };
 		4BF32B8B1F67C434000639FB /* GLShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLShader.h; path = ../Source/GLShader.h; sourceTree = "<group>"; };
+		4BF7510D1F7737DD00B79D2F /* Vector4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector4.cpp; path = ../Source/Vector4.cpp; sourceTree = "<group>"; };
+		4BF7510E1F7737DD00B79D2F /* Vector4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector4.h; path = ../Source/Vector4.h; sourceTree = "<group>"; };
+		4BF751101F773E1A00B79D2F /* Vector2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector2.cpp; path = ../Source/Vector2.cpp; sourceTree = "<group>"; };
+		4BF751111F773E1A00B79D2F /* Vector2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector2.h; path = ../Source/Vector2.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -180,6 +186,10 @@
 				4B4EED8A1F5CACEF000065EF /* Vector3.h */,
 				4BF32B8A1F67C434000639FB /* GLShader.cpp */,
 				4BF32B8B1F67C434000639FB /* GLShader.h */,
+				4BF7510D1F7737DD00B79D2F /* Vector4.cpp */,
+				4BF7510E1F7737DD00B79D2F /* Vector4.h */,
+				4BF751101F773E1A00B79D2F /* Vector2.cpp */,
+				4BF751111F773E1A00B79D2F /* Vector2.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -343,6 +353,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */,
+				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
 				4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */,
@@ -352,6 +363,7 @@
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
 				4B2ACDFB1F25880E003EC7FE /* SheepNode.cpp in Sources */,
+				4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */,
 				4B2ACE011F25BA6F003EC7FE /* SheepNameRefNode.cpp in Sources */,
 				4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */,
 				4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */,
