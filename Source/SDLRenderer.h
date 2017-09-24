@@ -11,6 +11,8 @@
 #include "GLVertexArray.h"
 #include "GLShader.h"
 
+class Model;
+
 class SDLRenderer
 {
 public:
@@ -20,6 +22,8 @@ public:
     void Clear();
     void Render();
     void Present();
+    
+    void SetModel(Model* model);
     
 private:
     // Handle for the window object (contains the game).
@@ -32,5 +36,7 @@ private:
     GLuint mBasicMeshProgram = GL_NONE;
     
     GLShader* mShader = nullptr;
+    
+    Model* mModel = nullptr;
     GLVertexArray* mVertArray = nullptr;
 };

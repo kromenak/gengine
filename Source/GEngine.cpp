@@ -46,13 +46,17 @@ bool GEngine::Initialize()
     //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/day3.brn");
     //barnFile.WriteToFile("TE4SUNBUTTON.BMP");
     
-    //mAssetManager.AddSearchPath("Assets/");
-    //mAssetManager.LoadBarn("day1.brn");
+    mAssetManager.AddSearchPath("Assets/");
+    mAssetManager.LoadBarn("day1.brn");
     
-    //Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
+    Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
+    //mRenderer.SetModel(model);
+    
+    //Model* model = mAssetManager.LoadModel("TAX.MOD");
+    //Model* model = mAssetManager.LoadModel("R25HANGER.MOD");
     
     //BarnFile* barnFile = mAssetManager.GetBarn("day1.brn");
-    //barnFile->WriteToFile("SYRUPPACKET.MOD");
+    //barnFile->WriteToFile("WI2BARGLASS.MOD");
     
     //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
     //audio->WriteToFile();

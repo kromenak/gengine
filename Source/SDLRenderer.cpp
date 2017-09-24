@@ -12,6 +12,7 @@
 #include <sstream>
 #include <string>
 #include "Matrix4.h"
+#include "Model.h"
 
 GLfloat triangle_vertices[] = {
     0.0f,  0.5f,  0.0f,
@@ -150,7 +151,10 @@ void SDLRenderer::Render()
 {
     mShader->Activate();
     
-    mVertArray->Draw();
+    if(mVertArray != nullptr)
+    {
+        mVertArray->Draw();
+    }
     
     /*
     glUseProgram(mBasicMeshProgram);
@@ -170,4 +174,20 @@ void SDLRenderer::Render()
 void SDLRenderer::Present()
 {
     SDL_GL_SwapWindow(mWindow);
+}
+
+void SDLRenderer::SetModel(Model *model)
+{
+    if(mVertArray != nullptr)
+    {
+        delete mVertArray;
+        mVertArray = nullptr;
+    }
+    
+    mModel = model;
+    if(mModel != nullptr)
+    {
+        mVertArray = new GLVertexArray(mModel->GetVertexPositions(), mModel->GetVertexCount(),
+                                       mModel->GetIndexes(), mModel->GetIndexCount());
+    }
 }
