@@ -7,7 +7,9 @@
 #include "Model.h"
 #include "BinaryReader.h"
 #include <iostream>
+#include "Vector2.h"
 #include "Vector3.h"
+#include "Vector4.h"
 
 using namespace std;
 
@@ -56,6 +58,8 @@ void Model::ParseFromModFileData(char *data, int dataLength)
     int meshGroupCount = 0;
     for(int i = 0; i < numMeshes; i++)
     {
+        cout << "Mesh " << i << endl;
+        
         // 4 bytes: mesh block identifier "HSEM" (MESH backwards).
         reader.Read(identifier, 4);
         if(!strcmp(identifier, "HSEM"))
@@ -66,6 +70,8 @@ void Model::ParseFromModFileData(char *data, int dataLength)
 
         // The next 48 bytes appear to be floating-point values.
         // Perhaps 4 Vector3(X, Y, Z) values?
+        // The first three values are small values (always less than 1).
+        // The fourth value is always very large numbers: maybe a scale multiplier?
         Vector3 val0(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         Vector3 val1(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         Vector3 val2(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
@@ -80,11 +86,11 @@ void Model::ParseFromModFileData(char *data, int dataLength)
         cout << "Number of mesh groups in mesh: " << numMeshGroups << endl;
         
         // 24 bytes: two more sets of floating point values.
-        // These feel like they might be min/max bounds? Not totally sure.
+        // Based on plot test, seems very likely these are min/max values for the mesh.
         Vector3 val4(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         Vector3 val5(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        cout << "Val4: " << val4 << endl;
-        cout << "Val5: " << val5 << endl;
+        cout << "Min: " << val4 << endl;
+        cout << "Max: " << val5 << endl;
         
         // Now, we iterate over each mesh group in this mesh.
         for(int j = 0; j < numMeshGroups; j++)
@@ -102,12 +108,13 @@ void Model::ParseFromModFileData(char *data, int dataLength)
             reader.Read(meshGroupName, 32);
             cout << "Mesh group name: " << meshGroupName << endl;
             
-            // 4 bytes: always the same value (0x00FFFFFF).
+            // 4 bytes: unknown - often is (0x00FFFFFF), but not always.
+            // Have also seen: 0x03773BB3, 0xFF000000, 0x50261200
             unsigned int val = reader.ReadUInt();
             if(val != 0x00FFFFFF)
             {
                 cout << "Expected 0x00FFFFFF" << endl;
-                return;
+                //return;
             }
 
             // 4 bytes: unknown - seems to always be 1.
@@ -115,27 +122,83 @@ void Model::ParseFromModFileData(char *data, int dataLength)
             
             // 4 bytes: unknown - seems to be a count value.
             // This count seems to indicate groupings of 8 pieces of data later.
-            unsigned int unknownCount1 = reader.ReadUInt();
+            mVertexCount = reader.ReadUInt();
+            mVertexPositions = new float[mVertexCount * 3];
+            mVertexNormals = new float[mVertexCount * 3];
+            mVertexUVs = new float[mVertexCount * 2];
+            cout << "Count 1: " << mVertexCount << endl;
             
             // 4 bytes: unknown - seems to be a count value.
             // This count seems to indicate groupings of 2 pieces of data later.
-            unsigned int unknownCount2 = reader.ReadUInt();
-            
+            mIndexCount = reader.ReadUInt();
+            mVertexIndexes = new unsigned short[mIndexCount * 3];
+            cout << "Count 2: " << mIndexCount << endl;
+
             // 4 bytes: number of LODK blocks in this mesh group. Not uncommon to be 0.
             unsigned int numLodkBlocks = reader.ReadUInt();
             cout << "Number of LODK blocks: " << numLodkBlocks << endl;
             
-            // 4 bytes: unknown
+            // 4 bytes: unknown - always zero thus far.
             reader.ReadUInt();
             
             // The next n bytes represent a certain number of floating point values.
             // My guess is that this is the (X, Y, Z) vertex data for the mesh.
             // The number of bytes is always equal to:
             //  n = (unknownCount1 * 8 * 4) + (unknownCount2 * 2 * 4)
-            // So, unknownCount1 indicates some number of 8-values, 32-bytes elements,
-            // and unknownCount2 indicates some number of 2-values, 8-bytes elements
-            reader.Skip(unknownCount1 * 8 * 4);
-            reader.Skip(unknownCount2 * 2 * 4);
+            
+            // First set of numbers represent positions for each vertex.
+            cout << "Positions: " << endl;
+            for(int k = 0; k < mVertexCount; k++)
+            {
+                Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                cout << v;
+                mVertexPositions[k * 3] = v.GetX();
+                mVertexPositions[k * 3 + 1] = v.GetY();
+                mVertexPositions[k * 3 + 2] = v.GetZ();
+            }
+            cout << endl;
+            
+            // Second set of numbers represent normals for each vertex.
+            cout << "Normals: " << endl;
+            for(int k = 0; k < mVertexCount; k++)
+            {
+                Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                cout << v;
+                mVertexNormals[k * 3] = v.GetX();
+                mVertexNormals[k * 3 + 1] = v.GetY();
+                mVertexNormals[k * 3 + 2] = v.GetZ();
+            }
+            cout << endl;
+            
+            // Possibly UV coordinates?
+            cout << "???: " << endl;
+            for(int k = 0; k < mVertexCount; k++)
+            {
+                Vector2 v(reader.ReadFloat(), reader.ReadFloat());
+                cout << v;
+                mVertexUVs[k * 2] = v.GetX();
+                mVertexUVs[k * 2 + 1] = v.GetY();
+            }
+            cout << endl;
+            
+            // These appear to be unsigned short values (2 bytes each).
+            // I suspect these are the vertex indexes for drawing from an IBO.
+            // Common sequence would be (2, 1, 0) or (5, 4, 3), referring to vertex indexes above.
+            // Every 4th number seems out of place - not sure what they mean.
+            // Seen: 0xF100 (241), 0x0000 (0), 0x0701 (263), 0x7F3F (16255), 0x56B1 (45398),
+            // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
+            cout << "Indexes: " << endl;
+            for(int k = 0; k < mIndexCount; k++)
+            {
+                mVertexIndexes[k * 3] = reader.ReadUShort();
+                mVertexIndexes[k * 3 + 1] = reader.ReadUShort();
+                mVertexIndexes[k * 3 + 2] = reader.ReadUShort();
+                
+                Vector3 v(mVertexIndexes[k * 3], mVertexIndexes[k * 3 + 1], mVertexIndexes[k * 3 + 2]);
+                cout << v;
+                reader.ReadUShort(); // WHAT IS THIS!?
+            }
+            cout << endl;
             
             //TODO: Parse LODK blocks. What do they mean?
         }
