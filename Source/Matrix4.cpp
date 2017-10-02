@@ -17,27 +17,32 @@ Matrix4::Matrix4()
     mVals[3][3] = 1;
 }
 
+Matrix4::Matrix4(float vals[16])
+{
+    memcpy(mVals, vals, 16 * sizeof(float));
+}
+
 Matrix4::Matrix4(float vals[4][4])
 {
     memcpy(mVals, vals, 16 * sizeof(float));
 }
 
-float& Matrix4::operator()(int row, int col)
+const float& Matrix4::operator()(int row, int col) const
 {
     return mVals[row][col];
 }
 
-Matrix4 Matrix4::operator*(const Matrix4& a, const Matrix4& b)
+Matrix4 Matrix4::operator*(const Matrix4& rhs) const
 {
     Matrix4 out;
     for(int row = 0; row < 4; row++)
     {
         for(int col = 0; col < 4; col++)
         {
-            out.mVals[row][col] =   a.mVals[row][0] * b.mVals[0][col] +
-                                    a.mVals[row][1] * b.mVals[1][col] +
-                                    a.mVals[row][2] * b.mVals[2][col] +
-                                    a.mVals[row][3] * b.mVals[3][col];
+            out.mVals[row][col] = mVals[row][0] * rhs.mVals[0][col] +
+                                  mVals[row][1] * rhs.mVals[1][col] +
+                                  mVals[row][2] * rhs.mVals[2][col] +
+                                  mVals[row][3] * rhs.mVals[3][col];
         }
     }
     return out;
@@ -49,7 +54,7 @@ Matrix4 Matrix4::MakeTranslateMatrix(Vector3 position)
     {
         { 1, 0, 0, 0 },
         { 0, 1, 0, 0 },
-        { 0, 0, 1, 0},
+        { 0, 0, 1, 0 },
         { position.GetX(), position.GetY(), position.GetZ(), 1 }
     };
     return Matrix4(vals);
@@ -101,4 +106,13 @@ Matrix4 Matrix4::MakeScaleMatrix(Vector3 scale)
         { 0, 0, 0, 1 }
     };
     return Matrix4(vals);
+}
+
+ostream& operator<<(ostream& os, const Matrix4& m)
+{
+    os << "[" << m(0,0) << ", " << m(0,1) << ", " << m(0,2) << ", " << m(0,3) << endl;
+    os << " " << m(1,0) << ", " << m(1,1) << ", " << m(1,2) << ", " << m(1,3) << endl;
+    os << " " << m(2,0) << ", " << m(2,1) << ", " << m(2,2) << ", " << m(2,3) << endl;
+    os << " " << m(3,0) << ", " << m(3,1) << ", " << m(3,2) << ", " << m(3,3) << "]";
+    return os;
 }

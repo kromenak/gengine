@@ -10,6 +10,9 @@
 		4B02A3B21F526529000540A7 /* membuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B01F526529000540A7 /* membuf.cpp */; };
 		4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B31F5269E9000540A7 /* imstream.cpp */; };
 		4B0B67831F78DCD40023815F /* Actor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0B67811F78DCD40023815F /* Actor.cpp */; };
+		4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112A71F820B0400AFDDFC /* TestMain.cpp */; };
+		4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */; };
+		4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
 		4B15A94C1F241E2D000A689F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
 		4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
 		4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
@@ -41,6 +44,15 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		4B1112991F820A6D00AFDDFC /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		4B15A9421F241DC8000A689F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -61,6 +73,10 @@
 		4B0B67821F78DCD40023815F /* Actor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Actor.h; path = ../Source/Actor.h; sourceTree = "<group>"; };
 		4B0E2A571F74F5650019D4AD /* Tut.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Tut.frag; path = ../Assets/Tut.frag; sourceTree = "<group>"; };
 		4B0E2A581F74F5650019D4AD /* Tut.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Tut.vert; path = ../Assets/Tut.vert; sourceTree = "<group>"; };
+		4B11129B1F820A6D00AFDDFC /* GEngine-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B1112A61F820AC100AFDDFC /* catch.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = catch.hh; path = ../Tests/catch.hh; sourceTree = "<group>"; };
+		4B1112A71F820B0400AFDDFC /* TestMain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TestMain.cpp; path = ../Tests/TestMain.cpp; sourceTree = "<group>"; };
+		4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix4Tests.cpp; path = ../Tests/Matrix4Tests.cpp; sourceTree = "<group>"; };
 		4B15A93F1F24188E000A689F /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../Source/Main.cpp; sourceTree = "<group>"; };
 		4B15A9441F241DC8000A689F /* GEngine-MacOS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-MacOS"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B15A94E1F241FEA000A689F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -121,6 +137,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4B1112981F820A6D00AFDDFC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4B15A9411F241DC8000A689F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -142,10 +165,21 @@
 			name = Assets;
 			sourceTree = "<group>";
 		};
+		4B1112A51F820AAB00AFDDFC /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				4B1112A61F820AC100AFDDFC /* catch.hh */,
+				4B1112A71F820B0400AFDDFC /* TestMain.cpp */,
+				4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */,
+			);
+			name = Tests;
+			sourceTree = "<group>";
+		};
 		4B15A9451F241DC8000A689F /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				4B15A9441F241DC8000A689F /* GEngine-MacOS */,
+				4B11129B1F820A6D00AFDDFC /* GEngine-Tests */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -277,16 +311,34 @@
 			isa = PBXGroup;
 			children = (
 				4B0E2A561F74F5570019D4AD /* Assets */,
-				4B2D75A71F53667000900417 /* Info.plist */,
-				4B15A9531F2428CD000A689F /* Source */,
-				4B15A9451F241DC8000A689F /* Products */,
 				4B15A94D1F241FEA000A689F /* Frameworks */,
+				4B2D75A71F53667000900417 /* Info.plist */,
+				4B15A9451F241DC8000A689F /* Products */,
+				4B15A9531F2428CD000A689F /* Source */,
+				4B1112A51F820AAB00AFDDFC /* Tests */,
 			);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		4B11129A1F820A6D00AFDDFC /* GEngine-Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4B1112A11F820A6D00AFDDFC /* Build configuration list for PBXNativeTarget "GEngine-Tests" */;
+			buildPhases = (
+				4B1112971F820A6D00AFDDFC /* Sources */,
+				4B1112981F820A6D00AFDDFC /* Frameworks */,
+				4B1112991F820A6D00AFDDFC /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "GEngine-Tests";
+			productName = "GEngine-Tests";
+			productReference = 4B11129B1F820A6D00AFDDFC /* GEngine-Tests */;
+			productType = "com.apple.product-type.tool";
+		};
 		4B15A9431F241DC8000A689F /* GEngine-MacOS */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4B15A9491F241DC8000A689F /* Build configuration list for PBXNativeTarget "GEngine-MacOS" */;
@@ -313,6 +365,10 @@
 			attributes = {
 				LastUpgradeCheck = 0830;
 				TargetAttributes = {
+					4B11129A1F820A6D00AFDDFC = {
+						CreatedOnToolsVersion = 9.0;
+						ProvisioningStyle = Automatic;
+					};
 					4B15A9431F241DC8000A689F = {
 						CreatedOnToolsVersion = 8.3.3;
 						ProvisioningStyle = Automatic;
@@ -332,6 +388,7 @@
 			projectRoot = "";
 			targets = (
 				4B15A9431F241DC8000A689F /* GEngine-MacOS */,
+				4B11129A1F820A6D00AFDDFC /* GEngine-Tests */,
 			);
 		};
 /* End PBXProject section */
@@ -353,6 +410,16 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4B1112971F820A6D00AFDDFC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */,
+				4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */,
+				4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4B15A9401F241DC8000A689F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -392,6 +459,111 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		4B11129F1F820A6D00AFDDFC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		4B1112A01F820A6D00AFDDFC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		4B15A94A1F241DC8000A689F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -540,6 +712,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		4B1112A11F820A6D00AFDDFC /* Build configuration list for PBXNativeTarget "GEngine-Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4B11129F1F820A6D00AFDDFC /* Debug */,
+				4B1112A01F820A6D00AFDDFC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		4B15A9491F241DC8000A689F /* Build configuration list for PBXNativeTarget "GEngine-MacOS" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
