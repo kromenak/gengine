@@ -11,6 +11,8 @@
 #include "Sheep/SheepDriver.h"
 #include "Barn/BarnFile.h"
 
+#include "Actor.h"
+
 GEngine::GEngine() : mRunning(false)
 {
     
@@ -46,13 +48,13 @@ bool GEngine::Initialize()
     //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/day3.brn");
     //barnFile.WriteToFile("TE4SUNBUTTON.BMP");
     
-    mAssetManager.AddSearchPath("Assets/");
-    mAssetManager.LoadBarn("day1.brn");
+    //mAssetManager.AddSearchPath("Assets/");
+    //mAssetManager.LoadBarn("day1.brn");
     
     //Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
     //mRenderer.SetModel(model);
     
-    Model* model = mAssetManager.LoadModel("TAX.MOD");
+    //Model* model = mAssetManager.LoadModel("TAX.MOD");
     //Model* model = mAssetManager.LoadModel("R25HANGER.MOD");
     
     //BarnFile* barnFile = mAssetManager.GetBarn("day1.brn");
@@ -65,6 +67,11 @@ bool GEngine::Initialize()
     
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
+    
+    Actor actor;
+    actor.SetScale(Vector3(3.0f, 3.0f, 3.0f));
+    actor.SetRotation(Vector3(1.0f, 1.0f, 1.0f));
+    actor.SetPosition(Vector3(15.0f, -30.0f, 10.0f));
     return true;
 }
 

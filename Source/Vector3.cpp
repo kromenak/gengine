@@ -23,8 +23,8 @@ void Vector3::Clear()
     z = 0.0f;
 }
 
-ostream& operator<<(ostream& os, const Vector3& v3)
+ostream& operator<<(ostream& os, const Vector3& v)
 {
-    os << "(" << v3.GetX() << ", " << v3.GetY() << ", " << v3.GetZ() << ")";
+    os << "(" << v.GetX() << ", " << v.GetY() << ", " << v.GetZ() << ")";
     return os;
 }

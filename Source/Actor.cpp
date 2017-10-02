@@ -10,7 +10,7 @@ Actor::Actor() : mPosition(Vector3(0, 0, 0)),
     mRotation(Vector3(0, 0, 0)),
     mScale(Vector3(1, 1, 1))
 {
-    
+    UpdateWorldTransform();
 }
 
 void Actor::SetPosition(Vector3 position)
@@ -38,7 +38,10 @@ void Actor::UpdateWorldTransform()
     Matrix4 rotateXMatrix = Matrix4::MakeRotateXMatrix(mRotation.GetX());
     Matrix4 rotateYMatrix = Matrix4::MakeRotateYMatrix(mRotation.GetY());
     Matrix4 rotateZMatrix = Matrix4::MakeRotateZMatrix(mRotation.GetZ());
+    Matrix4 rotateMatrix = rotateXMatrix * rotateYMatrix * rotateZMatrix;
     Matrix4 scaleMatrix = Matrix4::MakeScaleMatrix(mScale);
     
+    mWorldTransform = scaleMatrix * rotateMatrix * translateMatrix;
     
+    cout << mWorldTransform << endl;
 }

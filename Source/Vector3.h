@@ -34,4 +34,4 @@ private:
     float z = 0.0f;
 };
 
-ostream& operator<<(ostream& os, const Vector3& v3);
+ostream& operator<<(ostream& os, const Vector3& v);
