@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		4B02A3B21F526529000540A7 /* membuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B01F526529000540A7 /* membuf.cpp */; };
 		4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B31F5269E9000540A7 /* imstream.cpp */; };
+		4B0B67831F78DCD40023815F /* Actor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0B67811F78DCD40023815F /* Actor.cpp */; };
 		4B15A94C1F241E2D000A689F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
 		4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
 		4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
@@ -56,6 +57,8 @@
 		4B02A3B11F526529000540A7 /* membuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = membuf.h; path = ../Source/membuf.h; sourceTree = "<group>"; };
 		4B02A3B31F5269E9000540A7 /* imstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imstream.cpp; path = ../Source/imstream.cpp; sourceTree = "<group>"; };
 		4B02A3B41F5269E9000540A7 /* imstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imstream.h; path = ../Source/imstream.h; sourceTree = "<group>"; };
+		4B0B67811F78DCD40023815F /* Actor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Actor.cpp; path = ../Source/Actor.cpp; sourceTree = "<group>"; };
+		4B0B67821F78DCD40023815F /* Actor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Actor.h; path = ../Source/Actor.h; sourceTree = "<group>"; };
 		4B0E2A571F74F5650019D4AD /* Tut.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Tut.frag; path = ../Assets/Tut.frag; sourceTree = "<group>"; };
 		4B0E2A581F74F5650019D4AD /* Tut.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Tut.vert; path = ../Assets/Tut.vert; sourceTree = "<group>"; };
 		4B15A93F1F24188E000A689F /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../Source/Main.cpp; sourceTree = "<group>"; };
@@ -190,6 +193,8 @@
 				4BF7510E1F7737DD00B79D2F /* Vector4.h */,
 				4BF751101F773E1A00B79D2F /* Vector2.cpp */,
 				4BF751111F773E1A00B79D2F /* Vector2.h */,
+				4B0B67811F78DCD40023815F /* Actor.cpp */,
+				4B0B67821F78DCD40023815F /* Actor.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -353,6 +358,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */,
+				4B0B67831F78DCD40023815F /* Actor.cpp in Sources */,
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,

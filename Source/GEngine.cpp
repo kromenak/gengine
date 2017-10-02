@@ -49,10 +49,10 @@ bool GEngine::Initialize()
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("day1.brn");
     
-    Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
+    //Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
     //mRenderer.SetModel(model);
     
-    //Model* model = mAssetManager.LoadModel("TAX.MOD");
+    Model* model = mAssetManager.LoadModel("TAX.MOD");
     //Model* model = mAssetManager.LoadModel("R25HANGER.MOD");
     
     //BarnFile* barnFile = mAssetManager.GetBarn("day1.brn");
