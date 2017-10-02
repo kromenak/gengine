@@ -9,6 +9,9 @@
 #include "SDLRenderer.h"
 #include "SDLAudio.h"
 #include "AssetManager.h"
+#include <vector>
+
+class Actor;
 
 class GEngine
 {
@@ -33,4 +36,6 @@ private:
     AssetManager mAssetManager;
     
     bool mRunning;
+    
+    std::vector<Actor*> mActors;
 };

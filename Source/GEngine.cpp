@@ -68,15 +68,23 @@ bool GEngine::Initialize()
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
-    Actor actor;
-    actor.SetScale(Vector3(3.0f, 3.0f, 3.0f));
-    actor.SetRotation(Vector3(1.0f, 1.0f, 1.0f));
-    actor.SetPosition(Vector3(15.0f, -30.0f, 10.0f));
+    Actor* actor = new Actor();
+    actor->SetScale(Vector3(3.0f, 3.0f, 3.0f));
+    actor->SetRotation(Vector3(1.0f, 1.0f, 1.0f));
+    actor->SetPosition(Vector3(15.0f, -30.0f, 10.0f));
+    mActors.push_back(actor);
     return true;
 }
 
 void GEngine::Shutdown()
 {
+    // Delete all actors and clear actor list.
+    for(auto& actor : mActors)
+    {
+        delete actor;
+    }
+    mActors.clear();
+    
     mRenderer.Shutdown();
     mAudio.Shutdown();
     
@@ -125,7 +133,11 @@ void GEngine::ProcessInput()
 
 void GEngine::Update()
 {
-    
+    // Update all actors.
+    for(auto& actor : mActors)
+    {
+        actor->Update(0.0f);
+    }
 }
 
 void GEngine::GenerateOutput()

@@ -3,17 +3,25 @@
 //
 // Clark Kromenaker
 //
-// Description goes here!
+// Any object that exists in the game world and
+// has position/rotation/scale.
 //
 
 #pragma once
 #include "Vector3.h"
 #include "Matrix4.h"
+#include <vector>
+
+class Component;
 
 class Actor
 {
 public:
     Actor();
+    
+    virtual void Update(float deltaTime);
+    
+    void AddComponent(Component* component);
     
     Vector3 GetPosition() const { return mPosition; }
     void SetPosition(Vector3 position);
@@ -34,8 +42,8 @@ private:
     Vector3 mPosition;
     Vector3 mRotation;
     Vector3 mScale;
-    
     Matrix4 mWorldTransform;
-    
     void UpdateWorldTransform();
+    
+    std::vector<Component*> mComponents;
 };

@@ -13,6 +13,7 @@
 		4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112A71F820B0400AFDDFC /* TestMain.cpp */; };
 		4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */; };
 		4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
+		4B1112AF1F821FFF00AFDDFC /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
 		4B15A94C1F241E2D000A689F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
 		4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
 		4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
@@ -77,6 +78,8 @@
 		4B1112A61F820AC100AFDDFC /* catch.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = catch.hh; path = ../Tests/catch.hh; sourceTree = "<group>"; };
 		4B1112A71F820B0400AFDDFC /* TestMain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TestMain.cpp; path = ../Tests/TestMain.cpp; sourceTree = "<group>"; };
 		4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix4Tests.cpp; path = ../Tests/Matrix4Tests.cpp; sourceTree = "<group>"; };
+		4B1112AD1F821FFF00AFDDFC /* Component.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Component.cpp; path = ../Source/Component.cpp; sourceTree = "<group>"; };
+		4B1112AE1F821FFF00AFDDFC /* Component.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Component.h; path = ../Source/Component.h; sourceTree = "<group>"; };
 		4B15A93F1F24188E000A689F /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../Source/Main.cpp; sourceTree = "<group>"; };
 		4B15A9441F241DC8000A689F /* GEngine-MacOS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-MacOS"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B15A94E1F241FEA000A689F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -229,6 +232,8 @@
 				4BF751111F773E1A00B79D2F /* Vector2.h */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
+				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
+				4B1112AE1F821FFF00AFDDFC /* Component.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -415,6 +420,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */,
+				4B1112AF1F821FFF00AFDDFC /* Component.cpp in Sources */,
 				4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */,
 				4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */,
 			);

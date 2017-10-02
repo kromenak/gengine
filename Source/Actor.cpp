@@ -5,12 +5,32 @@
 //
 
 #include "Actor.h"
+#include "Component.h"
 
 Actor::Actor() : mPosition(Vector3(0, 0, 0)),
     mRotation(Vector3(0, 0, 0)),
     mScale(Vector3(1, 1, 1))
 {
     UpdateWorldTransform();
+}
+
+void Actor::Update(float deltaTime)
+{
+    // Update all components.
+    for(auto& component : mComponents)
+    {
+        component->Update(deltaTime);
+    }
+}
+
+void Actor::AddComponent(Component* component)
+{
+    // Add to vector, but only if not already added.
+    auto it = std::find(mComponents.begin(), mComponents.end(), component);
+    if(it == mComponents.end())
+    {
+        mComponents.push_back(component);
+    }
 }
 
 void Actor::SetPosition(Vector3 position)
