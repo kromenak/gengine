@@ -3,10 +3,9 @@
 //
 // Clark Kromenaker
 //
-
 #include "Component.h"
 
-Component::Component(Actor* owner) : mOwner(owner)
+Component::Component(Actor* owner) :mOwner(owner)
 {
     
 }

@@ -6,7 +6,6 @@
 // Any object that exists in the game world and
 // has position/rotation/scale.
 //
-
 #pragma once
 #include "Vector3.h"
 #include "Matrix4.h"
@@ -18,6 +17,7 @@ class Actor
 {
 public:
     Actor();
+    ~Actor();
     
     virtual void Update(float deltaTime);
     
@@ -34,6 +34,13 @@ public:
     
     Matrix4 GetWorldTransformMatrix() const { return mWorldTransform; }
     
+    Vector3 GetForward() const
+    {
+        return Vector3(cosf(mRotation.GetZ()) * cosf(mRotation.GetX()),
+                       sinf(mRotation.GetZ()) * cosf(mRotation.GetX()),
+                       sinf(mRotation.GetX()));
+    }
+    
 private:
     // NOTE: Based on GK3 MOD files, it appears that GK3 uses a coordinate system where:
     // Forward = -Y
@@ -42,6 +49,7 @@ private:
     Vector3 mPosition;
     Vector3 mRotation;
     Vector3 mScale;
+    
     Matrix4 mWorldTransform;
     void UpdateWorldTransform();
     

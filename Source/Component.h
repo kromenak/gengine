@@ -6,10 +6,8 @@
 // A component is a reusable bit of functionality
 // that can be attached to an Actor.
 //
-
 #pragma once
-
-class Actor;
+#include "Actor.h"
 
 class Component
 {

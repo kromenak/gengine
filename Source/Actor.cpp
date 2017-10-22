@@ -3,7 +3,6 @@
 //
 // Clark Kromenaker
 //
-
 #include "Actor.h"
 #include "Component.h"
 
@@ -12,6 +11,11 @@ Actor::Actor() : mPosition(Vector3(0, 0, 0)),
     mScale(Vector3(1, 1, 1))
 {
     UpdateWorldTransform();
+}
+
+Actor::~Actor()
+{
+    
 }
 
 void Actor::Update(float deltaTime)
@@ -63,5 +67,5 @@ void Actor::UpdateWorldTransform()
     
     mWorldTransform = scaleMatrix * rotateMatrix * translateMatrix;
     
-    cout << mWorldTransform << endl;
+    std::cout << mWorldTransform << std::endl;
 }
