@@ -5,7 +5,6 @@
 //
 // Tests for the Matrix4 class.
 //
-
 #include "catch.hh"
 #include "Matrix4.h"
 

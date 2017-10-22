@@ -7,13 +7,14 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */; };
+		4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
 		4B02A3B21F526529000540A7 /* membuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B01F526529000540A7 /* membuf.cpp */; };
 		4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B31F5269E9000540A7 /* imstream.cpp */; };
 		4B0B67831F78DCD40023815F /* Actor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0B67811F78DCD40023815F /* Actor.cpp */; };
 		4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112A71F820B0400AFDDFC /* TestMain.cpp */; };
 		4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */; };
 		4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
-		4B1112AF1F821FFF00AFDDFC /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
 		4B15A94C1F241E2D000A689F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
 		4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
 		4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
@@ -33,6 +34,8 @@
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
 		4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */; };
+		4B79F8071F9C09F2008C6FEE /* Vector3Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B79F8061F9C09F2008C6FEE /* Vector3Tests.cpp */; };
+		4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
 		4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
@@ -66,6 +69,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CameraComponent.cpp; path = ../Source/CameraComponent.cpp; sourceTree = "<group>"; };
+		4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CameraComponent.h; path = ../Source/CameraComponent.h; sourceTree = "<group>"; };
 		4B02A3B01F526529000540A7 /* membuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = membuf.cpp; path = ../Source/membuf.cpp; sourceTree = "<group>"; };
 		4B02A3B11F526529000540A7 /* membuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = membuf.h; path = ../Source/membuf.h; sourceTree = "<group>"; };
 		4B02A3B31F5269E9000540A7 /* imstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imstream.cpp; path = ../Source/imstream.cpp; sourceTree = "<group>"; };
@@ -119,10 +124,12 @@
 		4B76B57F1F35B175003F63E5 /* BinaryReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BinaryReader.h; path = ../Source/Barn/BinaryReader.h; sourceTree = "<group>"; };
 		4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnAsset.cpp; path = ../Source/Barn/BarnAsset.cpp; sourceTree = "<group>"; };
 		4B76B5821F3788FA003F63E5 /* BarnAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnAsset.h; path = ../Source/Barn/BarnAsset.h; sourceTree = "<group>"; };
+		4B79F8061F9C09F2008C6FEE /* Vector3Tests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3Tests.cpp; path = ../Tests/Vector3Tests.cpp; sourceTree = "<group>"; };
 		4B7AB0431F539EB200CFBE8F /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Audio.cpp; path = ../Source/Audio/Audio.cpp; sourceTree = "<group>"; };
 		4B7AB0441F539EB200CFBE8F /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio/Audio.h; sourceTree = "<group>"; };
 		4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SDLAudio.cpp; path = ../Source/SDLAudio.cpp; sourceTree = "<group>"; };
 		4B7C3A151F4EB07000BB0922 /* SDLAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLAudio.h; path = ../Source/SDLAudio.h; sourceTree = "<group>"; };
+		4BD9C7DC1F95D1D80066DC89 /* Math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Math.h; path = ../Source/Math.h; sourceTree = "<group>"; };
 		4BE15CB61F464FD800114779 /* AssetManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AssetManager.cpp; path = ../Source/AssetManager.cpp; sourceTree = "<group>"; };
 		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
 		4BE15CBC1F46620000114779 /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Types.h; path = ../Source/Types.h; sourceTree = "<group>"; };
@@ -174,6 +181,7 @@
 				4B1112A61F820AC100AFDDFC /* catch.hh */,
 				4B1112A71F820B0400AFDDFC /* TestMain.cpp */,
 				4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */,
+				4B79F8061F9C09F2008C6FEE /* Vector3Tests.cpp */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -199,18 +207,27 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4B0B67811F78DCD40023815F /* Actor.cpp */,
+				4B0B67821F78DCD40023815F /* Actor.h */,
 				4BE15CB61F464FD800114779 /* AssetManager.cpp */,
 				4BE15CB71F464FD800114779 /* AssetManager.h */,
 				4B7AB0421F539EA500CFBE8F /* Audio */,
 				4B76B57D1F3599A1003F63E5 /* Barn */,
 				4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */,
 				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
+				4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */,
+				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
+				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
+				4B1112AE1F821FFF00AFDDFC /* Component.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
 				4B15A9511F2428C5000A689F /* GEngine.h */,
+				4BF32B8A1F67C434000639FB /* GLShader.cpp */,
+				4BF32B8B1F67C434000639FB /* GLShader.h */,
 				4BF32B871F67BC34000639FB /* GLVertexArray.cpp */,
 				4BF32B881F67BC34000639FB /* GLVertexArray.h */,
 				4BE6EE351F441DD100BB29D5 /* Libraries */,
 				4B15A93F1F24188E000A689F /* Main.cpp */,
+				4BD9C7DC1F95D1D80066DC89 /* Math.h */,
 				4BF32B841F64D4B9000639FB /* Matrix4.cpp */,
 				4BF32B851F64D4B9000639FB /* Matrix4.h */,
 				4B4EED861F5CA5F4000065EF /* Model.cpp */,
@@ -222,18 +239,12 @@
 				4B15A95D1F245BDC000A689F /* Sheep */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4BE15CBC1F46620000114779 /* Types.h */,
-				4B4EED891F5CACEF000065EF /* Vector3.cpp */,
-				4B4EED8A1F5CACEF000065EF /* Vector3.h */,
-				4BF32B8A1F67C434000639FB /* GLShader.cpp */,
-				4BF32B8B1F67C434000639FB /* GLShader.h */,
-				4BF7510D1F7737DD00B79D2F /* Vector4.cpp */,
-				4BF7510E1F7737DD00B79D2F /* Vector4.h */,
 				4BF751101F773E1A00B79D2F /* Vector2.cpp */,
 				4BF751111F773E1A00B79D2F /* Vector2.h */,
-				4B0B67811F78DCD40023815F /* Actor.cpp */,
-				4B0B67821F78DCD40023815F /* Actor.h */,
-				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
-				4B1112AE1F821FFF00AFDDFC /* Component.h */,
+				4B4EED891F5CACEF000065EF /* Vector3.cpp */,
+				4B4EED8A1F5CACEF000065EF /* Vector3.h */,
+				4BF7510D1F7737DD00B79D2F /* Vector4.cpp */,
+				4BF7510E1F7737DD00B79D2F /* Vector4.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -368,7 +379,7 @@
 		4BF8A46A1F24185300F0FB91 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0830;
+				LastUpgradeCheck = 0900;
 				TargetAttributes = {
 					4B11129A1F820A6D00AFDDFC = {
 						CreatedOnToolsVersion = 9.0;
@@ -420,8 +431,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */,
-				4B1112AF1F821FFF00AFDDFC /* Component.cpp in Sources */,
+				4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */,
 				4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */,
+				4B79F8071F9C09F2008C6FEE /* Vector3Tests.cpp in Sources */,
 				4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -446,8 +458,10 @@
 				4B2ACE011F25BA6F003EC7FE /* SheepNameRefNode.cpp in Sources */,
 				4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */,
 				4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */,
+				4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
+				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */,
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
 				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
@@ -704,13 +718,61 @@
 		4BF8A46E1F24185300F0FB91 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Debug;
 		};
 		4BF8A46F1F24185300F0FB91 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 			};
 			name = Release;

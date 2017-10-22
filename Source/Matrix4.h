@@ -39,4 +39,4 @@ private:
     float mVals[4][4];
 };
 
-ostream& operator<<(ostream& os, const Matrix4& v);
+std::ostream& operator<<(std::ostream& os, const Matrix4& v);
