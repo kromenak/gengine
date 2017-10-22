@@ -4,7 +4,6 @@
 //
 //  Created by Clark Kromenaker on 8/5/17.
 //
-
 #pragma once
 #include <fstream>
 
