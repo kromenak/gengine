@@ -133,6 +133,27 @@ void GEngine::ProcessInput()
 
 void GEngine::Update()
 {
+    // Tracks the next "GetTicks" value that is acceptable to perform an update.
+    static int nextTicks = 0;
+    
+    // Tracks the last ticks value each time we run this loop.
+    static Uint32 lastTicks = 0;
+    
+    // Limit the FPS to about 60. nextTicks is always +16 at start of frame.
+    // If we get here again and not 16 frames have passed, we wait.
+    while(!SDL_TICKS_PASSED(SDL_GetTicks(), nextTicks)) { }
+    
+    // Get current ticks and save next ticks as +16. Limits FPS to ~60.
+    Uint32 currentTicks = SDL_GetTicks();
+    nextTicks = currentTicks + 16;
+    
+    // Calculate the time delta.
+    float deltaTime = ((float)(currentTicks - lastTicks)) * 0.001f;
+    lastTicks = currentTicks;
+    
+    // Limit the time delta to, at most, 0.05 seconds.
+    if(deltaTime > 0.05f) { deltaTime = 0.05f; }
+    
     // Update all actors.
     for(auto& actor : mActors)
     {
