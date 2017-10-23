@@ -20,7 +20,7 @@ public:
     Vector2();
     Vector2(float x, float y);
     
-    // Copy some other Vector3 to this object.
+    // Copy
     Vector2(const Vector2& other);
     Vector2& operator=(const Vector2& other);
     
@@ -34,6 +34,8 @@ public:
     
     float GetX() const { return x; }
     float GetY() const { return y; }
+    float& operator[](unsigned int i)       { return (&x)[i]; }
+    float  operator[](unsigned int i) const { return (&x)[i]; }
     
     // Length
     float GetLength() const { return Math::Sqrt(x * x + y * y); }
@@ -59,6 +61,7 @@ public:
     static float Dot(Vector2 lhs, Vector2 rhs);
     
 private:
+    // Vector elements - important that they are in this order. We assume some memory layout stuff.
     float x = 0.0f;
     float y = 0.0f;
 };

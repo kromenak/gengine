@@ -23,7 +23,7 @@ public:
     Vector3();
     Vector3(float x, float y, float z);
     
-    // Copy some other Vector3 to this object.
+    // Copy
     Vector3(const Vector3& other);
     Vector3& operator=(const Vector3& other);
     
@@ -39,6 +39,8 @@ public:
     float GetX() const { return x; }
     float GetY() const { return y; }
     float GetZ() const { return z; }
+    float& operator[](unsigned int i)       { return (&x)[i]; }
+    float  operator[](unsigned int i) const { return (&x)[i]; }
     
     // Length
     float GetLength() const { return Math::Sqrt(x * x + y * y + z * z); }
@@ -65,6 +67,7 @@ public:
     static Vector3 Cross(Vector3 lhs, Vector3 rhs);
     
 private:
+    // Vector elements - important that they are in this order. We assume some memory layout stuff.
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
