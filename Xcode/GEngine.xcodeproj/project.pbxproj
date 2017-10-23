@@ -36,6 +36,7 @@
 		4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */; };
 		4B79F8071F9C09F2008C6FEE /* Vector3Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B79F8061F9C09F2008C6FEE /* Vector3Tests.cpp */; };
 		4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
+		4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
 		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
 		4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
@@ -431,6 +432,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */,
+				4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */,
 				4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */,
 				4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */,
 				4B79F8071F9C09F2008C6FEE /* Vector3Tests.cpp in Sources */,
