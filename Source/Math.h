@@ -34,4 +34,19 @@ namespace Math
     {
         return IsZero(a - b);
     }
+    
+    inline float Sin(float radians)
+    {
+        return std::sinf(radians);
+    }
+    
+    inline float Cos(float radians)
+    {
+        return std::cosf(radians);
+    }
+    
+    inline float Tan(float radians)
+    {
+        return std::tanf(radians);
+    }
 }

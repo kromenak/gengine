@@ -29,6 +29,8 @@
 		4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */; };
 		4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0E1F25CF08003EC7FE /* SheepScanner.cpp */; };
 		4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */; };
+		4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
+		4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
 		4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED861F5CA5F4000065EF /* Model.cpp */; };
 		4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
@@ -115,6 +117,8 @@
 		4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepDriver.cpp; path = ../Source/Sheep/SheepDriver.cpp; sourceTree = "<group>"; };
 		4B2ACE121F25D310003EC7FE /* SheepDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepDriver.h; path = ../Source/Sheep/SheepDriver.h; sourceTree = "<group>"; };
 		4B2D75A71F53667000900417 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4B4300851FB7EE44009EDE58 /* Quaternion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Quaternion.h; path = ../Source/Quaternion.h; sourceTree = "<group>"; };
+		4B4300861FB7EE44009EDE58 /* Quaternion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Quaternion.cpp; path = ../Source/Quaternion.cpp; sourceTree = "<group>"; };
 		4B4EED861F5CA5F4000065EF /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Model.cpp; path = ../Source/Model.cpp; sourceTree = "<group>"; };
 		4B4EED871F5CA5F4000065EF /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Model.h; path = ../Source/Model.h; sourceTree = "<group>"; };
 		4B4EED891F5CACEF000065EF /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3.cpp; path = ../Source/Vector3.cpp; sourceTree = "<group>"; };
@@ -208,6 +212,7 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4B4300841FB7EDFA009EDE58 /* Math */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
 				4BE15CB61F464FD800114779 /* AssetManager.cpp */,
@@ -228,9 +233,6 @@
 				4BF32B881F67BC34000639FB /* GLVertexArray.h */,
 				4BE6EE351F441DD100BB29D5 /* Libraries */,
 				4B15A93F1F24188E000A689F /* Main.cpp */,
-				4BD9C7DC1F95D1D80066DC89 /* Math.h */,
-				4BF32B841F64D4B9000639FB /* Matrix4.cpp */,
-				4BF32B851F64D4B9000639FB /* Matrix4.h */,
 				4B4EED861F5CA5F4000065EF /* Model.cpp */,
 				4B4EED871F5CA5F4000065EF /* Model.h */,
 				4B15A95A1F243349000A689F /* SDLLog.cpp */,
@@ -240,12 +242,6 @@
 				4B15A95D1F245BDC000A689F /* Sheep */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4BE15CBC1F46620000114779 /* Types.h */,
-				4BF751101F773E1A00B79D2F /* Vector2.cpp */,
-				4BF751111F773E1A00B79D2F /* Vector2.h */,
-				4B4EED891F5CACEF000065EF /* Vector3.cpp */,
-				4B4EED8A1F5CACEF000065EF /* Vector3.h */,
-				4BF7510D1F7737DD00B79D2F /* Vector4.cpp */,
-				4BF7510E1F7737DD00B79D2F /* Vector4.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -273,6 +269,24 @@
 				4B2ACE121F25D310003EC7FE /* SheepDriver.h */,
 			);
 			name = Sheep;
+			sourceTree = "<group>";
+		};
+		4B4300841FB7EDFA009EDE58 /* Math */ = {
+			isa = PBXGroup;
+			children = (
+				4BD9C7DC1F95D1D80066DC89 /* Math.h */,
+				4BF32B841F64D4B9000639FB /* Matrix4.cpp */,
+				4BF32B851F64D4B9000639FB /* Matrix4.h */,
+				4BF751101F773E1A00B79D2F /* Vector2.cpp */,
+				4BF751111F773E1A00B79D2F /* Vector2.h */,
+				4B4EED891F5CACEF000065EF /* Vector3.cpp */,
+				4B4EED8A1F5CACEF000065EF /* Vector3.h */,
+				4BF7510D1F7737DD00B79D2F /* Vector4.cpp */,
+				4BF7510E1F7737DD00B79D2F /* Vector4.h */,
+				4B4300851FB7EE44009EDE58 /* Quaternion.h */,
+				4B4300861FB7EE44009EDE58 /* Quaternion.cpp */,
+			);
+			name = Math;
 			sourceTree = "<group>";
 		};
 		4B76B57D1F3599A1003F63E5 /* Barn */ = {
@@ -436,6 +450,7 @@
 				4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */,
 				4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */,
 				4B79F8071F9C09F2008C6FEE /* Vector3Tests.cpp in Sources */,
+				4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -449,6 +464,7 @@
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
+				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
