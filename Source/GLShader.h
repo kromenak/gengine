@@ -18,6 +18,8 @@ public:
     
     bool IsGood();
     
+    GLuint GetProgram() { return mProgram; }
+    
     void Activate();
     
 private:
