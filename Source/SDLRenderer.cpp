@@ -121,10 +121,8 @@ bool SDLRenderer::Initialize()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     
     mShader = new GLShader("Assets/Tut.vert", "Assets/Tut.frag");
-    if(!mShader->IsGood())
-    {
-        return false;
-    }
+    if(!mShader->IsGood()) { return false; }
+    
     mVertArray = new GLVertexArray(triangle_vertices, 9);
     //mVertArray = new GLVertexArray(cube_vertices, 24, cube_elements, 36);
     
@@ -149,7 +147,19 @@ void SDLRenderer::Clear()
 
 void SDLRenderer::Render()
 {
-    mShader->Activate();
+    mShader->Activate(); //glUseProgram(mBasicMeshProgram);
+    
+    Matrix4 viewProj;
+    if(mCameraComponent != nullptr)
+    {
+        
+    }
+    GLuint view = glGetUniformLocation(mShader->GetProgram(), "uViewProj");
+    glUniformMatrix4fv(view, 1, GL_FALSE, viewProj.GetFloatPtr());
+    
+    Matrix4 worldTransform;
+    GLuint world = glGetUniformLocation(mShader->GetProgram(), "uWorldTransform");
+    glUniformMatrix4fv(world, 1, GL_FALSE, worldTransform.GetFloatPtr());
     
     if(mVertArray != nullptr)
     {
@@ -157,8 +167,6 @@ void SDLRenderer::Render()
     }
     
     /*
-    glUseProgram(mBasicMeshProgram);
-    
     Matrix4 viewProj;
     GLuint view = glGetUniformLocation(mBasicMeshProgram, "uViewProj");
     glUniformMatrix4fv(view, 1, GL_FALSE, viewProj.GetFloatPtr());

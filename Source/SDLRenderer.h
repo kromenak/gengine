@@ -11,6 +11,7 @@
 #include "GLVertexArray.h"
 #include "GLShader.h"
 
+class CameraComponent;
 class Model;
 
 class SDLRenderer
@@ -25,6 +26,8 @@ public:
     
     void SetModel(Model* model);
     
+    void SetCamera(CameraComponent* camera) { mCameraComponent = camera; }
+    
 private:
     // Handle for the window object (contains the game).
     SDL_Window* mWindow = nullptr;
@@ -32,11 +35,10 @@ private:
     // Context for rendering in OpenGL.
     SDL_GLContext mContext;
     
-    // Compiled default shader program.
-    GLuint mBasicMeshProgram = GL_NONE;
-    
     GLShader* mShader = nullptr;
     
     Model* mModel = nullptr;
     GLVertexArray* mVertArray = nullptr;
+    
+    CameraComponent* mCameraComponent = nullptr;
 };

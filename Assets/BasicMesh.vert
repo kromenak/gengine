@@ -1,6 +1,5 @@
 // Sprite.vert
 // Vertex shader for texture mapped meshes
-
 #version 150
 #extension GL_ARB_explicit_attrib_location : require
 
