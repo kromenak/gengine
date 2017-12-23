@@ -8,6 +8,7 @@
 #pragma once
 #include <iostream>
 #include "Math.h"
+#include "Vector3.h"
 
 class Vector4
 {
@@ -21,6 +22,7 @@ public:
     
     Vector4();
     Vector4(float x, float y, float z, float w);
+    Vector4(bool isPos);
     
     // Copy
     Vector4(const Vector4& other);
