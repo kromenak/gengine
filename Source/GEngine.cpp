@@ -4,14 +4,18 @@
 //
 //  Created by Clark Kromenaker on 7/22/17.
 //
-
 #include "GEngine.h"
 #include "SDL/SDL.h"
+
+#include "Services.h"
+#include "Actor.h"
 
 #include "Sheep/SheepDriver.h"
 #include "Barn/BarnFile.h"
 
-#include "Actor.h"
+#include "CameraComponent.h"
+
+std::vector<Actor*> GEngine::mActors;
 
 GEngine::GEngine() : mRunning(false)
 {
@@ -20,15 +24,21 @@ GEngine::GEngine() : mRunning(false)
 
 bool GEngine::Initialize()
 {
+    // Initialize renderer.
     if(!mRenderer.Initialize())
     {
         return false;
     }
+    Services::SetRenderer(&mRenderer);
     
+    // Initialize audio.
     if(!mAudio.Initialize())
     {
         return false;
     }
+    
+    // Initialize input.
+    Services::SetInput(&mInputManager);
     
     //Sheep::Driver driver;
     //driver.Parse("/Users/Clark/Dropbox/GK3/Assets/test.shp");
@@ -69,10 +79,9 @@ bool GEngine::Initialize()
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
     Actor* actor = new Actor();
-    actor->SetScale(Vector3(3.0f, 3.0f, 3.0f));
-    actor->SetRotation(Vector3(1.0f, 1.0f, 1.0f));
-    actor->SetPosition(Vector3(15.0f, -30.0f, 10.0f));
-    mActors.push_back(actor);
+    //actor->SetScale(Vector3(3.0f, 3.0f, 3.0f));
+    actor->SetPosition(Vector3(0.0f, 10.0f, 0.0f));
+    actor->AddComponent(new CameraComponent(actor));
     return true;
 }
 
@@ -113,6 +122,8 @@ void GEngine::Quit()
 
 void GEngine::ProcessInput()
 {
+    // We'll poll for events here. Catch the quit event.
+    //TODO: Should this be moved to InputManager?
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
@@ -124,8 +135,12 @@ void GEngine::ProcessInput()
         }
     }
     
-    const Uint8 *state = SDL_GetKeyboardState(NULL);
-    if(state[SDL_SCANCODE_ESCAPE])
+    // Update the input manager.
+    // Retrieve input device states for us to use.
+    mInputManager.Update();
+    
+    // Quit game on escape press for now.
+    if(mInputManager.IsPressed(SDL_SCANCODE_ESCAPE))
     {
         Quit();
     }
@@ -157,7 +172,7 @@ void GEngine::Update()
     // Update all actors.
     for(auto& actor : mActors)
     {
-        actor->Update(0.0f);
+        actor->Update(deltaTime);
     }
 }
 
@@ -166,4 +181,18 @@ void GEngine::GenerateOutput()
     mRenderer.Clear();
     mRenderer.Render();
     mRenderer.Present();
+}
+
+void GEngine::AddActor(Actor *actor)
+{
+    mActors.push_back(actor);
+}
+
+void GEngine::RemoveActor(Actor *actor)
+{
+    auto it = std::find(mActors.begin(), mActors.end(), actor);
+    if(it != mActors.end())
+    {
+        mActors.erase(it);
+    }
 }

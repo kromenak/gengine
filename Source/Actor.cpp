@@ -5,17 +5,19 @@
 //
 #include "Actor.h"
 #include "Component.h"
+#include "GEngine.h"
 
 Actor::Actor() : mPosition(Vector3(0, 0, 0)),
     mRotation(Vector3(0, 0, 0)),
     mScale(Vector3(1, 1, 1))
 {
+    GEngine::AddActor(this);
     UpdateWorldTransform();
 }
 
 Actor::~Actor()
 {
-    
+    GEngine::RemoveActor(this);
 }
 
 void Actor::Update(float deltaTime)
@@ -24,6 +26,12 @@ void Actor::Update(float deltaTime)
     for(auto& component : mComponents)
     {
         component->Update(deltaTime);
+    }
+    
+    if(Services::GetInput()->IsPressed(SDL_SCANCODE_W))
+    {
+        Translate(Vector3(100.0f * deltaTime, 0.0f, 0.0f));
+        std::cout << mPosition << std::endl;
     }
 }
 
@@ -37,13 +45,18 @@ void Actor::AddComponent(Component* component)
     }
 }
 
+void Actor::Translate(Vector3 offset)
+{
+    SetPosition(mPosition + offset);
+}
+
 void Actor::SetPosition(Vector3 position)
 {
     mPosition = position;
     UpdateWorldTransform();
 }
 
-void Actor::SetRotation(Vector3 rotation)
+void Actor::SetRotation(Quaternion rotation)
 {
     mRotation = rotation;
     UpdateWorldTransform();
@@ -58,14 +71,9 @@ void Actor::SetScale(Vector3 scale)
 void Actor::UpdateWorldTransform()
 {
     // Get translate/rotate/scale matrices.
-    Matrix4 translateMatrix = Matrix4::MakeTranslateMatrix(mPosition);
-    Matrix4 rotateXMatrix = Matrix4::MakeRotateXMatrix(mRotation.GetX());
-    Matrix4 rotateYMatrix = Matrix4::MakeRotateYMatrix(mRotation.GetY());
-    Matrix4 rotateZMatrix = Matrix4::MakeRotateZMatrix(mRotation.GetZ());
-    Matrix4 rotateMatrix = rotateXMatrix * rotateYMatrix * rotateZMatrix;
-    Matrix4 scaleMatrix = Matrix4::MakeScaleMatrix(mScale);
-    
+    Matrix4 translateMatrix = Matrix4::MakeTranslate(mPosition);
+    Matrix4 rotateMatrix = Matrix4::MakeRotate(mRotation);
+    Matrix4 scaleMatrix = Matrix4::MakeScale(mScale);
     mWorldTransform = scaleMatrix * rotateMatrix * translateMatrix;
-    
-    std::cout << mWorldTransform << std::endl;
+    //std::cout << mWorldTransform << std::endl;
 }

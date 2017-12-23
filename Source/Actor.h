@@ -7,9 +7,14 @@
 // has position/rotation/scale.
 //
 #pragma once
-#include "Vector3.h"
-#include "Matrix4.h"
 #include <vector>
+
+#include "Vector3.h"
+#include "Quaternion.h"
+#include "Matrix4.h"
+
+#include "Services.h"
+#include "InputManager.h"
 
 class Component;
 
@@ -23,11 +28,13 @@ public:
     
     void AddComponent(Component* component);
     
+    void Translate(Vector3 offset);
+    
     Vector3 GetPosition() const { return mPosition; }
     void SetPosition(Vector3 position);
     
-    Vector3 GetRotation() const { return mRotation; }
-    void SetRotation(Vector3 rotation);
+    Quaternion GetRotation() const { return mRotation; }
+    void SetRotation(Quaternion rotation);
     
     Vector3 GetScale() const { return mScale; }
     void SetScale(Vector3 scale);
@@ -47,11 +54,11 @@ private:
     // Up = +Z
     // Right (when facing +Y) = +X
     Vector3 mPosition;
-    Vector3 mRotation;
+    Quaternion mRotation;
     Vector3 mScale;
-    
     Matrix4 mWorldTransform;
-    void UpdateWorldTransform();
     
     std::vector<Component*> mComponents;
+    
+    void UpdateWorldTransform();
 };

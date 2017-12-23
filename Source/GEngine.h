@@ -9,6 +9,7 @@
 #include "SDLRenderer.h"
 #include "SDLAudio.h"
 #include "AssetManager.h"
+#include "InputManager.h"
 #include <vector>
 
 class Actor;
@@ -18,24 +19,27 @@ class GEngine
 public:
     GEngine();
     
-    //TODO: Return more meaningful status code.
     bool Initialize();
     void Shutdown();
     void Run();
     
     void Quit();
     
+    static void AddActor(Actor* actor);
+    static void RemoveActor(Actor* actor);
+    
 private:
-    void ProcessInput();
-    void Update();
-    void GenerateOutput();
+    static std::vector<Actor*> mActors;
+    
+    bool mRunning;
     
     SDLRenderer mRenderer;
     SDLAudio mAudio;
     
     AssetManager mAssetManager;
+    InputManager mInputManager;
     
-    bool mRunning;
-    
-    std::vector<Actor*> mActors;
+    void ProcessInput();
+    void Update();
+    void GenerateOutput();
 };
