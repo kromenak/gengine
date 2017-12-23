@@ -1,14 +1,14 @@
 //
-// Vector3Tests.cpp
+// VectorTests.cpp
 //
 // Clark Kromenaker
 //
-// Tests for the Vector3 class.
+// Tests for the Vector2/Vector3/Vector4 class.
 //
 #include "catch.hh"
 #include "Vector3.h"
 
-TEST_CASE("Initial Vector3 states are correct")
+TEST_CASE("Vector3 constructors are correct")
 {
     // Check default vector is all zeros.
     Vector3 defVec3;
@@ -21,13 +21,6 @@ TEST_CASE("Initial Vector3 states are correct")
     REQUIRE(customVec3.GetX() == 10.0f);
     REQUIRE(customVec3.GetY() == 12.5f);
     REQUIRE(customVec3.GetZ() == -2.3456f);
- 
-    // Check that predefined vectors have correct values.
-    REQUIRE(Vector3::Zero == Vector3(0.0f, 0.0f, 0.0f));
-    REQUIRE(Vector3::One == Vector3(1.0f, 1.0f, 1.0f));
-    REQUIRE(Vector3::UnitX == Vector3(1.0f, 0.0f, 0.0f));
-    REQUIRE(Vector3::UnitY == Vector3(0.0f, 1.0f, 0.0f));
-    REQUIRE(Vector3::UnitZ == Vector3(0.0f, 0.0f, 1.0f));
 }
 
 TEST_CASE("Vector3 copy operations and equality checks work correctly")
@@ -51,6 +44,15 @@ TEST_CASE("Vector3 copy operations and equality checks work correctly")
     REQUIRE(vec1 == vec3);
 }
 
+TEST_CASE("Vector3 constants are correct")
+{
+    REQUIRE(Vector3::Zero == Vector3(0.0f, 0.0f, 0.0f));
+    REQUIRE(Vector3::One == Vector3(1.0f, 1.0f, 1.0f));
+    REQUIRE(Vector3::UnitX == Vector3(1.0f, 0.0f, 0.0f));
+    REQUIRE(Vector3::UnitY == Vector3(0.0f, 1.0f, 0.0f));
+    REQUIRE(Vector3::UnitZ == Vector3(0.0f, 0.0f, 1.0f));
+}
+
 TEST_CASE("Vector3 getters/setters work correctly")
 {
     // Start out with Zero vector.
@@ -68,7 +70,7 @@ TEST_CASE("Vector3 getters/setters work correctly")
     REQUIRE(Math::AreEqual(vec3.GetZ(), -345.0f));
 }
 
-TEST_CASE("Length and normalization operations work correctly")
+TEST_CASE("Vector3 length and normalization operations work correctly")
 {
     // Length of zero vector should be zero.
     REQUIRE(Math::AreEqual(Vector3::Zero.GetLength(), 0.0f));
@@ -139,7 +141,7 @@ TEST_CASE("Vector3 can be multiplied and divided by a scalar")
     REQUIRE(vec2 == Vector3(-3.9086f, 1.25f, -0.400008f));
 }
 
-TEST_CASE("Vector3 Dot and Cross operations work correctly.")
+TEST_CASE("Vector3 Dot and Cross products work correctly.")
 {
     Vector3 vec1(10.0f, 12.3f, -3.5f);
     Vector3 vec2(-19.543f, 6.25f, -2.0f);
