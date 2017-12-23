@@ -16,17 +16,6 @@ using namespace std;
 class AssetManager
 {
 public:
-    
-private:
-    // A list of paths to search for assets.
-    // In priority order, since we'll search in order, and stop when we find the item.
-    vector<string> mSearchPaths;
-    
-    // A map of loaded barn files. If an asset isn't found on any search path,
-    // we then search each loaded barn file for the asset.
-    unordered_map<string, BarnFile*> mLoadedBarns;
-    
-public:
     AssetManager();
     
     void AddSearchPath(string searchPath);
@@ -39,6 +28,14 @@ public:
     Model* LoadModel(string modelName);
     
 private:
+    // A list of paths to search for assets.
+    // In priority order, since we'll search in order, and stop when we find the item.
+    vector<string> mSearchPaths;
+    
+    // A map of loaded barn files. If an asset isn't found on any search path,
+    // we then search each loaded barn file for the asset.
+    unordered_map<string, BarnFile*> mLoadedBarns;
+    
     string GetAssetPath(string fileName);
     BarnFile* GetContainingBarn(string fileName);
     BarnAsset* GetBarnAsset(string fileName);
