@@ -12,5 +12,7 @@ class CameraComponent : public Component
 public:
     CameraComponent(Actor* owner);
     
+    void Render();
+    
 private:
 };
