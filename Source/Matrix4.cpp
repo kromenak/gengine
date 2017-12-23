@@ -4,6 +4,7 @@
 // Clark Kromenaker
 // 
 #include "Matrix4.h"
+#include "Matrix3.h"
 #include <cstring>
 #include <cmath>
 
@@ -12,33 +13,17 @@ Matrix4::Matrix4(float vals[16])
     memcpy(mVals, vals, 16 * sizeof(float));
 }
 
-Matrix4::Matrix4(float vals[16], bool transpose)
-{
-    // For a 1D array, we usually assume the values are in the right order, for efficiency.
-    // But if desired, we can copy them over and then transpose.
-    
-    // This is helpful because array initialization in C++ looks like row-major order.
-    // ex: float vals[16] = { 1, 2, 3, 4,
-    //                        5, 6, 7, 8,
-    //                        9, 10, 11, 12
-    //                        13, 14, 15, 16 };
-    // However, we actually store the transpose of what that looks like visually:
-    // | 00 04 08 12 |
-    // | 01 05 09 13 |
-    // | 02 06 10 14 |
-    // | 03 07 11 15 |
-    // As a result, if we want the matrix to look like the passed in array, we must transpose.
-    memcpy(mVals, vals, 16 * sizeof(float));
-    Transpose();
-}
-
 Matrix4::Matrix4(float vals[4][4])
 {
-    // Even though values are stored in column-major order, passing 2D array "looks like" row-major order.
-    // So, in this case, we do memcpy, but then we transpose, so the matrix is the same as it looks when you initialize a C++ 2D array.
-    // See explanation in constructor (float[], bool) above.
     memcpy(mVals, vals, 16 * sizeof(float));
-    Transpose();
+}
+
+Matrix4::Matrix4(float vals[4][4], bool convert)
+{
+    memcpy(mVals, vals, 16 * sizeof(float));
+    
+    // Indicates that the matrix passed in needs to be transposed.
+    if(convert) { Transpose(); }
 }
 
 Matrix4::Matrix4(const Matrix4& other)
@@ -128,7 +113,7 @@ Matrix4& Matrix4::Transpose()
     return *this;
 }
 
-Matrix4 Transpose(const Matrix4& matrix)
+Matrix4 Matrix4::Transpose(const Matrix4& matrix)
 {
     Matrix4 result;
     result.mVals[0] = matrix.mVals[0];
@@ -150,9 +135,96 @@ Matrix4 Transpose(const Matrix4& matrix)
     return result;
 }
 
-const float& Matrix4::operator()(int row, int col) const
+void Matrix4::SetRows(const Vector4& row1, const Vector4& row2, const Vector4& row3, const Vector4& row4)
 {
-    return mVals[row + (4 * col)];
+    mVals[0] = row1[0];
+    mVals[4] = row1[1];
+    mVals[8] = row1[2];
+    mVals[12] = row1[3];
+    
+    mVals[1] = row2[0];
+    mVals[5] = row2[1];
+    mVals[9] = row2[2];
+    mVals[13] = row2[3];
+    
+    mVals[2] = row3[0];
+    mVals[6] = row3[1];
+    mVals[10] = row3[2];
+    mVals[14] = row3[3];
+    
+    mVals[3] = row4[0];
+    mVals[7] = row4[1];
+    mVals[11] = row4[2];
+    mVals[15] = row4[3];
+}
+
+void Matrix4::GetRows(Vector4& row1, Vector4& row2, Vector4& row3, Vector4& row4)
+{
+    row1[0] = mVals[0];
+    row1[1] = mVals[4];
+    row1[2] = mVals[8];
+    row1[3] = mVals[12];
+    
+    row2[0] = mVals[1];
+    row2[1] = mVals[5];
+    row2[2] = mVals[9];
+    row2[3] = mVals[13];
+    
+    row3[0] = mVals[2];
+    row3[1] = mVals[6];
+    row3[2] = mVals[10];
+    row3[3] = mVals[14];
+    
+    row4[0] = mVals[3];
+    row4[1] = mVals[7];
+    row4[2] = mVals[11];
+    row4[3] = mVals[15];
+}
+
+void Matrix4::SetColumns(const Vector4& col1, const Vector4& col2, const Vector4& col3, const Vector4& col4)
+{
+    mVals[0] = col1[0];
+    mVals[1] = col1[1];
+    mVals[2] = col1[2];
+    mVals[3] = col1[3];
+    
+    mVals[4] = col2[0];
+    mVals[5] = col2[1];
+    mVals[6] = col2[2];
+    mVals[7] = col2[3];
+    
+    mVals[8] = col3[0];
+    mVals[9] = col3[1];
+    mVals[10] = col3[2];
+    mVals[11] = col3[3];
+    
+    mVals[12] = col4[0];
+    mVals[13] = col4[1];
+    mVals[14] = col4[2];
+    mVals[15] = col4[3];
+}
+
+void Matrix4::GetColumns(Vector4& col1, Vector4& col2, Vector4& col3, Vector4& col4)
+{
+    col1[0] = mVals[0];
+    col1[1] = mVals[1];
+    col1[2] = mVals[2];
+    col1[3] = mVals[3];
+    
+    col2[0] = mVals[4];
+    col2[1] = mVals[5];
+    col2[2] = mVals[6];
+    col2[3] = mVals[7];
+    
+    col3[0] = mVals[8];
+    col3[1] = mVals[9];
+    col3[2] = mVals[10];
+    col4[3] = mVals[11];
+    
+    col4[0] = mVals[12];
+    col4[1] = mVals[13];
+    col4[2] = mVals[14];
+    col4[3] = mVals[15];
 }
 
 Matrix4 Matrix4::operator+(const Matrix4& rhs) const
@@ -282,64 +354,143 @@ Matrix4 operator*(float scalar, const Matrix4& matrix)
     return matrix * scalar;
 }
 
-Matrix4 Matrix4::MakeTranslateMatrix(Vector3 position)
+Matrix4 Matrix4::MakeTranslate(Vector3 translation)
 {
-    float vals[4][4] =
-    {
-        { 1, 0, 0, 0 },
-        { 0, 1, 0, 0 },
-        { 0, 0, 1, 0 },
-        { position.GetX(), position.GetY(), position.GetZ(), 1 }
-    };
-    return Matrix4(vals);
+    Matrix4 m;
+    m.mVals[12] = translation.GetX();
+    m.mVals[13] = translation.GetY();
+    m.mVals[14] = translation.GetZ();
+    return m;
 }
 
-Matrix4 Matrix4::MakeRotateXMatrix(float rotX)
+Matrix4 Matrix4::MakeRotateX(float rotX)
 {
-    float vals[4][4] =
-    {
-        { 1, 0, 0, 0 },
-        { 0, cosf(rotX), sinf(rotX), 0 },
-        { 0, -sinf(rotX), cosf(rotX), 0 },
-        { 0, 0, 0, 1 }
-    };
-    return Matrix4(vals);
+    Matrix4 m;
+    float cos = Math::Cos(rotX);
+    float sin = Math::Sin(rotX);
+    m[5] = cos;
+    m[6] = sin;
+    m[9] = -sin;
+    m[10] = cos;
+    return m;
 }
 
-Matrix4 Matrix4::MakeRotateYMatrix(float rotY)
+Matrix4 Matrix4::MakeRotateY(float rotY)
 {
-    float vals[4][4] =
-    {
-        { cosf(rotY), 0, -sinf(rotY), 0 },
-        { 0, 1, 0, 0 },
-        { sinf(rotY), 0, cosf(rotY), 0 },
-        { 0, 0, 0, 1 }
-    };
-    return Matrix4(vals);
+    Matrix4 m;
+    float cos = Math::Cos(rotY);
+    float sin = Math::Sin(rotY);
+    m[0] = cos;
+    m[2] = -sin;
+    m[8] = sin;
+    m[10] = cos;
+    return m;
 }
 
-Matrix4 Matrix4::MakeRotateZMatrix(float rotZ)
+Matrix4 Matrix4::MakeRotateZ(float rotZ)
 {
-    float vals[4][4] =
-    {
-        { cosf(rotZ), sinf(rotZ), 0, 0 },
-        { -sinf(rotZ), cosf(rotZ), 0, 0 },
-        { 0, 0, 1, 0 },
-        { 0, 0, 0, 1 }
-    };
-    return Matrix4(vals);
+    Matrix4 m;
+    float cos = Math::Cos(rotZ);
+    float sin = Math::Sin(rotZ);
+    m[0] = cos;
+    m[1] = sin;
+    m[4] = -sin;
+    m[5] = cos;
+    return m;
 }
 
-Matrix4 Matrix4::MakeScaleMatrix(Vector3 scale)
+Matrix4 Matrix4::MakeRotate(const Quaternion& quat)
 {
-    float vals[4][4] =
-    {
-        { scale.GetX(), 0, 0, 0 },
-        { 0, scale.GetY(), 0, 0 },
-        { 0, 0, scale.GetZ(), 0 },
-        { 0, 0, 0, 1 }
-    };
-    return Matrix4(vals);
+    float s, xs, ys, zs, wx, wy, wz, xx, xy, xz, yy, yz, zz;
+    s = 2.0f / Quaternion::Dot(quat, quat);
+    
+    xs = s * quat.GetX();
+    ys = s * quat.GetY();
+    zs = s * quat.GetZ();
+    wx = quat.GetW() * xs;
+    wy = quat.GetW() * ys;
+    wz = quat.GetW() * zs;
+    xx = quat.GetX() * xs;
+    xy = quat.GetX() * ys;
+    xz = quat.GetX() * zs;
+    yy = quat.GetY() * ys;
+    yz = quat.GetY() * zs;
+    zz = quat.GetZ() * zs;
+    
+    Matrix4 m;
+    m.mVals[0] = 1.0f - (yy + zz);
+    m.mVals[1] = xy + wz;
+    m.mVals[2] = xz - wy;
+    //m[3] = 0.0f;
+    
+    m.mVals[4] = xy - wz;
+    m.mVals[5] = 1.0f - (xx + zz);
+    m.mVals[6] = yz + wx;
+    //m[7] = 0.0f;
+    
+    m.mVals[8] = xz + wy;
+    m.mVals[9] = yz - wx;
+    m.mVals[10] = 1.0f - (xx + yy);
+    //m[11] = 0.0f;
+    
+    //m[12] = 0.0f;
+    //m[13] = 0.0f;
+    //m[14] = 0.0f;
+    //m[15] = 1.0f;
+    return m;
+}
+
+Matrix4 Matrix4::MakeRotate(const Matrix3& other)
+{
+    Matrix4 m;
+    m[0] = other[0];
+    m[1] = other[1];
+    m[2] = other[2];
+    //m[3] = 0;
+    m[4] = other[3];
+    m[5] = other[4];
+    m[6] = other[5];
+    //m[7] = 0;
+    m[8] = other[6];
+    m[9] = other[7];
+    m[10] = other[8];
+    //...
+    return m;
+}
+
+Matrix4 Matrix4::MakeScale(Vector3 scale)
+{
+    Matrix4 m;
+    m[0] = scale.GetX();
+    m[5] = scale.GetY();
+    m[10] = scale.GetZ();
+    return m;
+}
+
+Matrix4 Matrix4::MakeLookAt(const Vector3 &eye, const Vector3 &lookAt, const Vector3 &up)
+{
+    // Generate view space axes.
+    Vector3 viewDir = lookAt - eye;
+    viewDir.Normalize();
+    
+    Vector3 viewUp = up - Vector3::Dot(up, viewDir) * viewDir;
+    viewUp.Normalize();
+    
+    Vector3 viewSide = Vector3::Cross(viewDir, viewUp);
+    
+    // Generate rotation matrix.
+    Matrix3 rotate;
+    rotate.SetRows(viewSide, viewUp, -viewDir);
+    
+    // Make a 4x4 matrix based on the 3x3 rotation matrix.
+    Matrix4 m = Matrix4::MakeRotate(rotate);
+    
+    // Calculate inverse of eye vector and assign it to 4x4 matrix.
+    Vector3 eyeInv = -(rotate * eye);
+    m(0, 3) = eyeInv.GetX();
+    m(1, 3) = eyeInv.GetY();
+    m(2, 3) = eyeInv.GetZ();
+    return m;
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix4& m)

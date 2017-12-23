@@ -4,8 +4,7 @@
 // Clark Kromenaker
 //
 // For our purposes, a quaternion is a way to
-// represent a rotation in an effective and
-// efficient way.
+// represent a rotation in 3D space.
 //
 #pragma once
 
@@ -21,6 +20,7 @@ public:
     Quaternion(float x, float y, float z, float w);
     Quaternion(const Vector3& axis, float angle);
     explicit Quaternion(const Vector3& vector);
+    //explicit Quaternion(const Matrix33& matrix);
     ~Quaternion() { }
     
     // Copy
