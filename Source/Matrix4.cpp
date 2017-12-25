@@ -493,6 +493,19 @@ Matrix4 Matrix4::MakeLookAt(const Vector3 &eye, const Vector3 &lookAt, const Vec
     return m;
 }
 
+Matrix4 Matrix4::MakePerspective(float fovAngleRad, float aspectRatio, float near, float far)
+{
+    Matrix4 m;
+    float d = 1 / Math::Tan(fovAngleRad / 2.0f);
+    m[0] = d / aspectRatio;
+    m[5] = d;
+    m[10] = (near + far) / (near - far);
+    m[11] = -1.0f;
+    m[14] = (2.0f * near * far) / (near - far);
+    m[15] = 0.0f;
+    return m;
+}
+
 std::ostream& operator<<(std::ostream& os, const Matrix4& m)
 {
     os << "[" << m(0,0) << ", " << m(0,1) << ", " << m(0,2) << ", " << m(0,3) << std::endl;

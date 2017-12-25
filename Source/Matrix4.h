@@ -80,6 +80,7 @@ public:
     static Matrix4 MakeRotate(const Matrix3& matrix3);
     static Matrix4 MakeScale(Vector3 scale);
     static Matrix4 MakeLookAt(const Vector3& eye, const Vector3& lootAt, const Vector3& up);
+    static Matrix4 MakePerspective(float fovAngleRad, float aspectRatio, float near, float far);
     
 private:
     // Elements are stored in a 1D array internally.

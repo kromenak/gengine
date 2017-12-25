@@ -14,5 +14,8 @@ public:
     
     void Render();
     
+    Matrix4 GetLookAtMatrix();
+    Matrix4 GetProjectionMatrix();
+    
 private:
 };
