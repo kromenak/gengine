@@ -13,11 +13,12 @@
 #include <string>
 #include "Matrix4.h"
 #include "Model.h"
+#include "CameraComponent.h"
 
 GLfloat triangle_vertices[] = {
     0.0f,  0.5f,  0.0f,
     0.5f, -0.5f,  0.0f,
-    -0.5f, -0.5f,  0.0f
+    -0.5f, -0.5f, 0.0f
 };
 
 GLfloat triange_colors[] {
@@ -152,7 +153,9 @@ void SDLRenderer::Render()
     Matrix4 viewProj;
     if(mCameraComponent != nullptr)
     {
-        
+        //viewProj = mCameraComponent->GetProjectionMatrix();
+        viewProj = mCameraComponent->GetProjectionMatrix() * mCameraComponent->GetLookAtMatrix();
+        //viewProj = mCameraComponent->GetLookAtMatrix() * mCameraComponent->GetProjectionMatrix();
     }
     GLuint view = glGetUniformLocation(mShader->GetProgram(), "uViewProj");
     glUniformMatrix4fv(view, 1, GL_FALSE, viewProj.GetFloatPtr());
@@ -165,18 +168,6 @@ void SDLRenderer::Render()
     {
         mVertArray->Draw();
     }
-    
-    /*
-    Matrix4 viewProj;
-    GLuint view = glGetUniformLocation(mBasicMeshProgram, "uViewProj");
-    glUniformMatrix4fv(view, 1, GL_FALSE, viewProj.GetFloatPtr());
-    
-    Matrix4 worldTransform;
-    GLuint world = glGetUniformLocation(mBasicMeshProgram, "uWorldTransform");
-    glUniformMatrix4fv(world, 1, GL_FALSE, worldTransform.GetFloatPtr());
-    */
-    
-    //TODO: Draw stuff...
 }
 
 void SDLRenderer::Present()

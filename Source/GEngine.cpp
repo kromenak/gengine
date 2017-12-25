@@ -80,7 +80,7 @@ bool GEngine::Initialize()
     
     Actor* actor = new Actor();
     //actor->SetScale(Vector3(3.0f, 3.0f, 3.0f));
-    actor->SetPosition(Vector3(0.0f, 10.0f, 0.0f));
+    actor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
     actor->AddComponent(new CameraComponent(actor));
     return true;
 }

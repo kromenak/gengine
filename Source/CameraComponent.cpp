@@ -20,14 +20,14 @@ void CameraComponent::Render()
 Matrix4 CameraComponent::GetLookAtMatrix()
 {
     Vector3 eye = mOwner->GetPosition();
-    Vector3 lookAt = mOwner->GetPosition() + Vector3::UnitX * 5.0f;
-    Vector3 up = Vector3::UnitZ;
+    Vector3 lookAt = mOwner->GetPosition() - Vector3::UnitZ * 5.0f;
+    Vector3 up = Vector3::UnitY;
     Matrix4 lookAtMat = Matrix4::MakeLookAt(eye, lookAt, up);
     return lookAtMat;
 }
 
 Matrix4 CameraComponent::GetProjectionMatrix()
 {
-    Matrix4 projMat = Matrix4::MakePerspective(1.5708f, 1.333f, 0.0f, 10000.0f);
+    Matrix4 projMat = Matrix4::MakePerspective(1.74533f, 1.333f, 0.0f, 100.0f);
     return projMat;
 }

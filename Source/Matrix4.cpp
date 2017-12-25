@@ -469,16 +469,22 @@ Matrix4 Matrix4::MakeScale(Vector3 scale)
 
 Matrix4 Matrix4::MakeLookAt(const Vector3 &eye, const Vector3 &lookAt, const Vector3 &up)
 {
-    // Generate view space axes.
+    // Generate view space axes. First, the view direction.
     Vector3 viewDir = lookAt - eye;
     viewDir.Normalize();
     
+    // We can use "Gram-Schmidt Orthogonalization" equation to ensure
+    // that the up axis passed is orthogonal (at a right angle) with our view direction.
     Vector3 viewUp = up - Vector3::Dot(up, viewDir) * viewDir;
     viewUp.Normalize();
     
+    // Once we know the view direction and up, we can use cross product
+    // to generate side axis. Order also has an effect on our view-space coordinate system.
     Vector3 viewSide = Vector3::Cross(viewDir, viewUp);
     
-    // Generate rotation matrix.
+    // Generate rotation matrix. This is where we make some concrete
+    // choices about our view-space coordinate system.
+    // +X is right, +Y is up, -Z is forward.
     Matrix3 rotate;
     rotate.SetRows(viewSide, viewUp, -viewDir);
     
@@ -495,6 +501,9 @@ Matrix4 Matrix4::MakeLookAt(const Vector3 &eye, const Vector3 &lookAt, const Vec
 
 Matrix4 Matrix4::MakePerspective(float fovAngleRad, float aspectRatio, float near, float far)
 {
+    // Note that this doesn't work for all view systems.
+    // I think different values would be required for Direct3D.
+    // This should work in OpenGL though.
     Matrix4 m;
     float d = 1 / Math::Tan(fovAngleRad / 2.0f);
     m[0] = d / aspectRatio;

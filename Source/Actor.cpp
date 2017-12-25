@@ -30,8 +30,12 @@ void Actor::Update(float deltaTime)
     
     if(Services::GetInput()->IsPressed(SDL_SCANCODE_W))
     {
-        Translate(Vector3(100.0f * deltaTime, 0.0f, 0.0f));
-        std::cout << mPosition << std::endl;
+        Translate(Vector3(0.0f, 0.0f, -1.0f * deltaTime));
+        //std::cout << mPosition << std::endl;
+    }
+    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_S))
+    {
+        Translate(Vector3(0.0f, 0.0f, 1.0f * deltaTime));
     }
 }
 
