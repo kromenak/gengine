@@ -12,6 +12,8 @@ class CameraComponent : public Component
 public:
     CameraComponent(Actor* owner);
     
+    void Update(float deltaTime) override;
+    
     void Render();
     
     Matrix4 GetLookAtMatrix();

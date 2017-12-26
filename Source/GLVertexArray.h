@@ -5,7 +5,6 @@
 //
 // Description goes here!
 //
-
 #pragma once
 #include <GL/glew.h>
 

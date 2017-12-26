@@ -12,6 +12,18 @@ CameraComponent::CameraComponent(Actor* owner) : Component(owner)
     Services::GetRenderer()->SetCamera(this);
 }
 
+void CameraComponent::Update(float deltaTime)
+{
+    if(Services::GetInput()->IsPressed(SDL_SCANCODE_W))
+    {
+        mOwner->Translate(Vector3(0.0f, 0.0f, -1.0f * deltaTime));
+    }
+    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_S))
+    {
+        mOwner->Translate(Vector3(0.0f, 0.0f, 1.0f * deltaTime));
+    }
+}
+
 void CameraComponent::Render()
 {
     

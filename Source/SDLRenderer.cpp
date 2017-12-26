@@ -4,7 +4,6 @@
 //
 //  Created by Clark Kromenaker on 7/22/17.
 //
-
 #include "SDLRenderer.h"
 #include <vector>
 #include <iostream>
@@ -14,6 +13,7 @@
 #include "Matrix4.h"
 #include "Model.h"
 #include "CameraComponent.h"
+#include "MeshComponent.h"
 
 GLfloat triangle_vertices[] = {
     0.0f,  0.5f,  0.0f,
@@ -148,31 +148,59 @@ void SDLRenderer::Clear()
 
 void SDLRenderer::Render()
 {
-    mShader->Activate(); //glUseProgram(mBasicMeshProgram);
+    // Activate, for now, our one and only shader.
+    mShader->Activate();
     
+    // Set the combined view/projection matrix based on the assigned camera.
     Matrix4 viewProj;
     if(mCameraComponent != nullptr)
     {
-        //viewProj = mCameraComponent->GetProjectionMatrix();
         viewProj = mCameraComponent->GetProjectionMatrix() * mCameraComponent->GetLookAtMatrix();
-        //viewProj = mCameraComponent->GetLookAtMatrix() * mCameraComponent->GetProjectionMatrix();
     }
     GLuint view = glGetUniformLocation(mShader->GetProgram(), "uViewProj");
     glUniformMatrix4fv(view, 1, GL_FALSE, viewProj.GetFloatPtr());
     
-    Matrix4 worldTransform;
-    GLuint world = glGetUniformLocation(mShader->GetProgram(), "uWorldTransform");
-    glUniformMatrix4fv(world, 1, GL_FALSE, worldTransform.GetFloatPtr());
+    // Render all mesh components.
+    for(auto meshComponent : mMeshComponents)
+    {
+        meshComponent->Render();
+    }
     
+    /*
+    // DEFAULT RENDERING: Set identity world transform (so at origin)
+    // and draw a thingy there (triangle).
+    Matrix4 worldTransform;
+    SetWorldTransformMatrix(worldTransform);
     if(mVertArray != nullptr)
     {
         mVertArray->Draw();
     }
+    */
 }
 
 void SDLRenderer::Present()
 {
     SDL_GL_SwapWindow(mWindow);
+}
+
+void SDLRenderer::SetWorldTransformMatrix(Matrix4& worldTransform)
+{
+    GLuint world = glGetUniformLocation(mShader->GetProgram(), "uWorldTransform");
+    glUniformMatrix4fv(world, 1, GL_FALSE, worldTransform.GetFloatPtr());
+}
+
+void SDLRenderer::AddMeshComponent(MeshComponent *mc)
+{
+    mMeshComponents.push_back(mc);
+}
+
+void SDLRenderer::RemoveMeshComponent(MeshComponent *mc)
+{
+    auto it = std::find(mMeshComponents.begin(), mMeshComponents.end(), mc);
+    if(it != mMeshComponents.end())
+    {
+        mMeshComponents.erase(it);
+    }
 }
 
 void SDLRenderer::SetModel(Model *model)

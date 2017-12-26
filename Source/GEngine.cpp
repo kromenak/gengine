@@ -14,6 +14,11 @@
 #include "Barn/BarnFile.h"
 
 #include "CameraComponent.h"
+#include "MeshComponent.h"
+
+#include "Mesh.h"
+
+extern GLfloat triangle_vertices[];
 
 std::vector<Actor*> GEngine::mActors;
 
@@ -78,10 +83,20 @@ bool GEngine::Initialize()
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
+    // Camera example.
     Actor* actor = new Actor();
-    //actor->SetScale(Vector3(3.0f, 3.0f, 3.0f));
     actor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
     actor->AddComponent(new CameraComponent(actor));
+    
+    // Mesh example.
+    Actor* meshActor = new Actor();
+    meshActor->SetPosition(Vector3(0.0f, 0.0f, -10.0f));
+    meshActor->SetScale(Vector3(5.0f, 5.0f, 5.0f));
+    meshActor->SetRotation(Quaternion());
+    Mesh* mesh = new Mesh(triangle_vertices, 9);
+    MeshComponent* meshComponent = new MeshComponent(meshActor);
+    meshComponent->SetMesh(mesh);
+    meshActor->AddComponent(meshComponent);
     return true;
 }
 

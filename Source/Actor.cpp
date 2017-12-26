@@ -8,7 +8,7 @@
 #include "GEngine.h"
 
 Actor::Actor() : mPosition(Vector3(0, 0, 0)),
-    mRotation(Vector3(0, 0, 0)),
+    mRotation(0, 0, 0, 1),
     mScale(Vector3(1, 1, 1))
 {
     GEngine::AddActor(this);
@@ -18,6 +18,13 @@ Actor::Actor() : mPosition(Vector3(0, 0, 0)),
 Actor::~Actor()
 {
     GEngine::RemoveActor(this);
+    
+    // Delete all components and clear list.
+    for(auto& component : mComponents)
+    {
+        delete component;
+    }
+    mComponents.clear();
 }
 
 void Actor::Update(float deltaTime)
@@ -26,16 +33,6 @@ void Actor::Update(float deltaTime)
     for(auto& component : mComponents)
     {
         component->Update(deltaTime);
-    }
-    
-    if(Services::GetInput()->IsPressed(SDL_SCANCODE_W))
-    {
-        Translate(Vector3(0.0f, 0.0f, -1.0f * deltaTime));
-        //std::cout << mPosition << std::endl;
-    }
-    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_S))
-    {
-        Translate(Vector3(0.0f, 0.0f, 1.0f * deltaTime));
     }
 }
 
@@ -78,6 +75,7 @@ void Actor::UpdateWorldTransform()
     Matrix4 translateMatrix = Matrix4::MakeTranslate(mPosition);
     Matrix4 rotateMatrix = Matrix4::MakeRotate(mRotation);
     Matrix4 scaleMatrix = Matrix4::MakeScale(mScale);
-    mWorldTransform = scaleMatrix * rotateMatrix * translateMatrix;
+    mWorldTransform = translateMatrix * rotateMatrix * scaleMatrix;
+    //mWorldTransform = scaleMatrix * rotateMatrix * translateMatrix;
     //std::cout << mWorldTransform << std::endl;
 }

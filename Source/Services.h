@@ -6,9 +6,9 @@
 // A locator for globally available services in the game.
 //
 #pragma once
+#include "SDLRenderer.h"
 
 class InputManager;
-class SDLRenderer;
 
 class Services
 {
