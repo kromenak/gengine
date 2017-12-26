@@ -21,7 +21,7 @@ GLfloat triangle_vertices[] = {
     -0.5f, -0.5f, 0.0f
 };
 
-GLfloat triange_colors[] {
+GLfloat triangle_colors[] {
     1.0f, 0.0f, 0.0f, 1.0f,
     0.0f, 1.0f, 0.0f, 1.0f,
     0.0f, 0.0f, 1.0f, 1.0f

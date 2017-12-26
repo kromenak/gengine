@@ -19,6 +19,7 @@
 #include "Mesh.h"
 
 extern GLfloat triangle_vertices[];
+extern GLfloat triangle_colors[];
 
 std::vector<Actor*> GEngine::mActors;
 
@@ -89,11 +90,14 @@ bool GEngine::Initialize()
     actor->AddComponent(new CameraComponent(actor));
     
     // Mesh example.
+    Mesh* mesh = new Mesh();
+    mesh->SetPositions(triangle_vertices, 9);
+    mesh->SetColors(triangle_colors, 12);
+    
     Actor* meshActor = new Actor();
     meshActor->SetPosition(Vector3(0.0f, 0.0f, -10.0f));
     meshActor->SetScale(Vector3(5.0f, 5.0f, 5.0f));
-    meshActor->SetRotation(Quaternion());
-    Mesh* mesh = new Mesh(triangle_vertices, 9);
+    
     MeshComponent* meshComponent = new MeshComponent(meshActor);
     meshComponent->SetMesh(mesh);
     meshActor->AddComponent(meshComponent);

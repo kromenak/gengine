@@ -14,7 +14,12 @@ class GLVertexArray;
 class Mesh
 {
 public:
+    Mesh();
     Mesh(GLfloat* positions, int positionCount);
+    
+    void SetPositions(const GLfloat* vertPositions, int count);
+    void SetColors(const GLfloat* vertColors, int count);
+    void SetIndexes(const GLushort* indexes, int count);
     
     GLVertexArray* GetVertexArray() const { return mVertexArray; }
     
