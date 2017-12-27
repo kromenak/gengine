@@ -29,7 +29,7 @@ public:
     void AddComponent(Component* component);
     
     void Translate(Vector3 offset);
-    
+
     Vector3 GetPosition() const { return mPosition; }
     void SetPosition(Vector3 position);
     

@@ -24,11 +24,6 @@ void CameraComponent::Update(float deltaTime)
     }
 }
 
-void CameraComponent::Render()
-{
-    
-}
-
 Matrix4 CameraComponent::GetLookAtMatrix()
 {
     Vector3 eye = mOwner->GetPosition();
@@ -40,6 +35,8 @@ Matrix4 CameraComponent::GetLookAtMatrix()
 
 Matrix4 CameraComponent::GetProjectionMatrix()
 {
-    Matrix4 projMat = Matrix4::MakePerspective(1.74533f, 1.333f, 0.0f, 100.0f);
+    Matrix4 projMat = Matrix4::MakePerspective(fovAngleRad, 1.333f,
+                                               nearClippingPlane,
+                                               farClippingPlane);
     return projMat;
 }

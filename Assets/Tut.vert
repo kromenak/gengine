@@ -14,7 +14,8 @@ uniform mat4 uWorldTransform;
 void main(void)
 {
     // Pass through color attribute.
-    fColor = vColor;
+    fColor = vec4(vPos.x, vPos.y, vPos.z, 1.0f);
+    //fColor = vColor;
     
     // Transform position into world space
     vec4 newPos =  uWorldTransform * vec4(vPos, 1.0f);
