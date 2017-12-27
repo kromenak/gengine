@@ -42,15 +42,15 @@ GLfloat cube_vertices[] = {
 
 GLfloat cube_colors[] = {
     // front colors
-    1.0, 0.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 0.0, 1.0,
-    1.0, 1.0, 1.0,
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0,
     // back colors
-    1.0, 0.0, 0.0,
-    0.0, 1.0, 0.0,
-    0.0, 0.0, 1.0,
-    1.0, 1.0, 1.0,
+    1.0, 0.0, 0.0, 1.0,
+    0.0, 1.0, 0.0, 1.0,
+    0.0, 0.0, 1.0, 1.0,
+    1.0, 1.0, 1.0, 1.0
 };
 
 GLushort cube_elements[] = {
@@ -116,16 +116,13 @@ bool SDLRenderer::Initialize()
     glGetError();
     
     // Initialize frame buffer.
-    glEnable(GL_BLEND);
-    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+    //glEnable(GL_BLEND);
+    //glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     
     mShader = new GLShader("Assets/Tut.vert", "Assets/Tut.frag");
     if(!mShader->IsGood()) { return false; }
-    
-    mVertArray = new GLVertexArray(triangle_vertices, 9);
-    //mVertArray = new GLVertexArray(cube_vertices, 24, cube_elements, 36);
     
     // Init succeeded!
     return true;
@@ -133,7 +130,6 @@ bool SDLRenderer::Initialize()
 
 void SDLRenderer::Shutdown()
 {
-    delete mVertArray;
     delete mShader;
     
     SDL_GL_DeleteContext(mContext);
@@ -148,6 +144,11 @@ void SDLRenderer::Clear()
 
 void SDLRenderer::Render()
 {
+    Clear();
+    
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    
     // Activate, for now, our one and only shader.
     mShader->Activate();
     
@@ -166,16 +167,7 @@ void SDLRenderer::Render()
         meshComponent->Render();
     }
     
-    /*
-    // DEFAULT RENDERING: Set identity world transform (so at origin)
-    // and draw a thingy there (triangle).
-    Matrix4 worldTransform;
-    SetWorldTransformMatrix(worldTransform);
-    if(mVertArray != nullptr)
-    {
-        mVertArray->Draw();
-    }
-    */
+    Present();
 }
 
 void SDLRenderer::Present()
@@ -200,21 +192,5 @@ void SDLRenderer::RemoveMeshComponent(MeshComponent *mc)
     if(it != mMeshComponents.end())
     {
         mMeshComponents.erase(it);
-    }
-}
-
-void SDLRenderer::SetModel(Model *model)
-{
-    if(mVertArray != nullptr)
-    {
-        delete mVertArray;
-        mVertArray = nullptr;
-    }
-    
-    mModel = model;
-    if(mModel != nullptr)
-    {
-        mVertArray = new GLVertexArray(mModel->GetVertexPositions(), mModel->GetVertexCount(),
-                                       mModel->GetIndexes(), mModel->GetIndexCount());
     }
 }

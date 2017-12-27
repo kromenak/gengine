@@ -33,8 +33,6 @@ public:
     void AddMeshComponent(MeshComponent* mc);
     void RemoveMeshComponent(MeshComponent* mc);
     
-    void SetModel(Model* model);
-    
 private:
     // Handle for the window object (contains the game).
     SDL_Window* mWindow = nullptr;
@@ -50,10 +48,4 @@ private:
     
     // List of mesh components to render.
     std::vector<MeshComponent*> mMeshComponents;
-    
-    // TEMP: vertex array for showing off triangle rendering.
-    GLVertexArray* mVertArray = nullptr;
-    
-    // TBD
-    Model* mModel = nullptr;
 };
