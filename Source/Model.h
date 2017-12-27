@@ -6,16 +6,16 @@
 // 3D model asset type. The in-memory representation
 // of .MOD assets.
 //
-
 #pragma once
 #include <string>
+#include <vector>
 
-using namespace std;
+class Mesh;
 
 class Model
 {
 public:
-    Model(string name, char* data, int dataLength);
+    Model(std::string name, char* data, int dataLength);
     
     int GetVertexCount() const { return mVertexCount; }
     float* GetVertexPositions() const { return mVertexPositions; }
@@ -23,8 +23,12 @@ public:
     int GetIndexCount() const { return mIndexCount; }
     unsigned short* GetIndexes() const { return mVertexIndexes; }
     
+    std::vector<Mesh*> GetMeshes() { return mMeshes; }
+    
 private:
-    string mName;
+    std::string mName;
+    
+    std::vector<Mesh*> mMeshes;
     
     int mVertexCount = 0;
     float* mVertexPositions = nullptr;

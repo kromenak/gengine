@@ -3,13 +3,13 @@
 //
 // Clark Kromenaker
 // 
-
 #include "Model.h"
 #include "BinaryReader.h"
 #include <iostream>
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
+#include "Mesh.h"
 
 using namespace std;
 
@@ -32,7 +32,7 @@ void Model::ParseFromModFileData(char *data, int dataLength)
         return;
     }
     
-    // 4 bytes: unknown - has thus far always been 265
+    // 4 bytes: unknown - has thus far always been 265.
     reader.ReadUInt();
     
     // 4 bytes: number of meshes in this model.
@@ -120,6 +120,9 @@ void Model::ParseFromModFileData(char *data, int dataLength)
             // 4 bytes: unknown - seems to always be 1.
             reader.ReadUInt();
             
+            Mesh* mesh = new Mesh();
+            mMeshes.push_back(mesh);
+            
             // 4 bytes: unknown - seems to be a count value.
             // This count seems to indicate groupings of 8 pieces of data later.
             mVertexCount = reader.ReadUInt();
@@ -144,7 +147,7 @@ void Model::ParseFromModFileData(char *data, int dataLength)
             // The next n bytes represent a certain number of floating point values.
             // My guess is that this is the (X, Y, Z) vertex data for the mesh.
             // The number of bytes is always equal to:
-            //  n = (unknownCount1 * 8 * 4) + (unknownCount2 * 2 * 4)
+            // n = (unknownCount1 * 8 * 4) + (unknownCount2 * 2 * 4)
             
             // First set of numbers represent positions for each vertex.
             cout << "Positions: " << endl;
@@ -157,6 +160,7 @@ void Model::ParseFromModFileData(char *data, int dataLength)
                 mVertexPositions[k * 3 + 2] = v.GetZ();
             }
             cout << endl;
+            mesh->SetPositions(&mVertexPositions[0], mVertexCount * 3);
             
             // Second set of numbers represent normals for each vertex.
             cout << "Normals: " << endl;
@@ -199,6 +203,7 @@ void Model::ParseFromModFileData(char *data, int dataLength)
                 reader.ReadUShort(); // WHAT IS THIS!?
             }
             cout << endl;
+            mesh->SetIndexes(mVertexIndexes, mIndexCount * 3);
             
             //TODO: Parse LODK blocks. What do they mean?
         }
@@ -232,4 +237,5 @@ void Model::ParseFromModFileData(char *data, int dataLength)
         // Not yet clear how to derive the size of this block, however.
     }
     */
+    cout << "Mesh count: " << mMeshes.size() << endl;
 }
