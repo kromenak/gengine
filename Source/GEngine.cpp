@@ -20,6 +20,9 @@
 
 extern GLfloat triangle_vertices[];
 extern GLfloat triangle_colors[];
+extern GLfloat cube_vertices[];
+extern GLfloat cube_colors[];
+extern GLushort cube_elements[];
 
 std::vector<Actor*> GEngine::mActors;
 
@@ -64,10 +67,10 @@ bool GEngine::Initialize()
     //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/day3.brn");
     //barnFile.WriteToFile("TE4SUNBUTTON.BMP");
     
-    //mAssetManager.AddSearchPath("Assets/");
-    //mAssetManager.LoadBarn("day1.brn");
+    mAssetManager.AddSearchPath("Assets/");
+    mAssetManager.LoadBarn("day1.brn");
     
-    //Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
+    Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
     //mRenderer.SetModel(model);
     
     //Model* model = mAssetManager.LoadModel("TAX.MOD");
@@ -85,21 +88,25 @@ bool GEngine::Initialize()
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
     // Camera example.
-    Actor* actor = new Actor();
-    actor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
-    actor->AddComponent(new CameraComponent(actor));
+    Actor* camActor = new Actor();
+    camActor->SetPosition(Vector3(0.0f, 0.0f, 2.0f));
+    camActor->AddComponent(new CameraComponent(camActor));
     
     // Mesh example.
     Mesh* mesh = new Mesh();
     mesh->SetPositions(triangle_vertices, 9);
     mesh->SetColors(triangle_colors, 12);
+    //mesh->SetPositions(cube_vertices, 24);
+    //mesh->SetColors(cube_colors, 32);
+    //mesh->SetIndexes(cube_elements, 36);
     
     Actor* meshActor = new Actor();
-    meshActor->SetPosition(Vector3(0.0f, 0.0f, -10.0f));
-    meshActor->SetScale(Vector3(5.0f, 5.0f, 5.0f));
+    meshActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+    //meshActor->SetScale(Vector3(5.0f, 5.0f, 5.0f));
     
     MeshComponent* meshComponent = new MeshComponent(meshActor);
-    meshComponent->SetMesh(mesh);
+    //meshComponent->SetMesh(mesh);
+    meshComponent->SetModel(model);
     meshActor->AddComponent(meshComponent);
     return true;
 }
@@ -197,9 +204,7 @@ void GEngine::Update()
 
 void GEngine::GenerateOutput()
 {
-    mRenderer.Clear();
     mRenderer.Render();
-    mRenderer.Present();
 }
 
 void GEngine::AddActor(Actor *actor)
