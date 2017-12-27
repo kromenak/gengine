@@ -40,6 +40,11 @@ namespace Math
         return IsZero(a - b);
     }
     
+    inline float Mod(float num1, float num2)
+    {
+        return fmod(num1, num2);
+    }
+    
     inline float Sin(float radians)
     {
         return std::sinf(radians);
