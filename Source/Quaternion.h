@@ -59,6 +59,8 @@ public:
     //void Set(const Matrix3& rotation);
     void Set(float xRadians, float yRadians, float zRadians);
     
+    void GetAxisAngle(Vector3& axis, float& angle);
+    
     // Modifiers
     void MakeZero() { x = y = z = w = 0.0f; }
     void MakeIdentity() { x = y = z = 0.0f; w = 1.0f; }

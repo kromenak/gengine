@@ -187,6 +187,26 @@ void Quaternion::Set(float xRadians, float yRadians, float zRadians)
     z = cosX * cosY * sinZ + sinZ * sinY * cosX;
 }
 
+void Quaternion::GetAxisAngle(Vector3& axis, float& angle)
+{
+    angle = 2.0f * acosf(w);
+    
+    float length = Math::Sqrt(1.0f - (w * w));
+    if(Math::IsZero(length))
+    {
+        axis.SetX(0);
+        axis.SetY(0);
+        axis.SetZ(0);
+    }
+    else
+    {
+        length = 1.0f / length;
+        axis.SetX(x * length);
+        axis.SetY(y * length);
+        axis.SetZ(z * length);
+    }
+}
+
 float Quaternion::GetLength() const
 {
     return Math::Sqrt(x*x + y*y + z*z + w*w);
