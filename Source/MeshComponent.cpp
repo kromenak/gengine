@@ -70,10 +70,36 @@ void MeshComponent::SetMesh(Mesh* mesh)
 
 void MeshComponent::SetModel(Model* model)
 {
+    // Populate meshes array.
     mMeshes.clear();
     for(auto& mesh : model->GetMeshes())
     {
         mMeshes.push_back(mesh);
+    }
+    
+    // Retrieve all textures associated with the model.
+    mTextures.clear();
+    for(auto& textureName : model->GetTextureNames())
+    {
+        // If empty, insert a null for no texture and keep indexes aligned.
+        if(textureName.empty())
+        {
+            mTextures.push_back(nullptr);
+            continue;
+        }
+        
+        // Texture names don't include the extension, so we need to add them.
+        //TODO: Should maybe do this in the asset manager?
+        textureName.append(".BMP");
+        
+        // Load texture into memory. We don't really care here whether it is
+        // null or not. If it is null, it'll just look incorrect at runtime.
+        Texture* tex = Services::GetAssets()->LoadTexture(textureName);
+        if(tex == nullptr)
+        {
+            std::cout << "Encountered null texture in MeshComponent" << std::endl;
+        }
+        mTextures.push_back(tex);
     }
 }
 

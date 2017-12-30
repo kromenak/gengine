@@ -120,8 +120,12 @@ void Model::ParseFromModFileData(char *data, int dataLength)
             // 4 bytes: unknown - seems to always be 1.
             reader.ReadUInt();
             
+            // Create mesh object and push onto array.
             Mesh* mesh = new Mesh();
             mMeshes.push_back(mesh);
+            
+            // Also, push group name onto texture name array.
+            mTextureNames.push_back(std::string(meshGroupName));
             
             // 4 bytes: unknown - seems to be a count value.
             // This count seems to indicate groupings of 8 pieces of data later.
