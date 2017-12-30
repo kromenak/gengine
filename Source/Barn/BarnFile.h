@@ -32,6 +32,9 @@ private:
     const int kDDirIdentifier = 0x44446972; // DDir
     const int kDataIdentifier = 0x44617461; // Data
     
+    // The name of the barn file.
+    std::string mName;
+    
     // Binary reader for extracting data.
     BinaryReader mReader;
     

@@ -14,7 +14,9 @@
 
 using namespace std;
 
-BarnFile::BarnFile(const char* filePath) : mReader(filePath)
+BarnFile::BarnFile(const char* filePath) :
+    mName(filePath),
+    mReader(filePath)
 {
     // Make sure we can actually read this file.
     if(!mReader.CanRead())
