@@ -143,6 +143,7 @@
 		4B4EED871F5CA5F4000065EF /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Model.h; path = ../Source/Model.h; sourceTree = "<group>"; };
 		4B4EED891F5CACEF000065EF /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3.cpp; path = ../Source/Vector3.cpp; sourceTree = "<group>"; };
 		4B4EED8A1F5CACEF000065EF /* Vector3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector3.h; path = ../Source/Vector3.h; sourceTree = "<group>"; };
+		4B5497F81FF80E0A00F1EF4F /* StringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringUtil.h; path = ../Source/StringUtil.h; sourceTree = "<group>"; };
 		4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QuaternionTests.cpp; path = ../Tests/QuaternionTests.cpp; sourceTree = "<group>"; };
 		4B76B57A1F35999B003F63E5 /* BarnFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnFile.cpp; path = ../Source/Barn/BarnFile.cpp; sourceTree = "<group>"; };
 		4B76B57B1F35999B003F63E5 /* BarnFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnFile.h; path = ../Source/Barn/BarnFile.h; sourceTree = "<group>"; };
@@ -360,6 +361,7 @@
 				4B02A3B11F526529000540A7 /* membuf.h */,
 				4B02A3B31F5269E9000540A7 /* imstream.cpp */,
 				4B02A3B41F5269E9000540A7 /* imstream.h */,
+				4B5497F81FF80E0A00F1EF4F /* StringUtil.h */,
 			);
 			name = STD;
 			sourceTree = "<group>";
