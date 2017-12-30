@@ -40,8 +40,8 @@ GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
     }
     
     // Query for attribute locations.
-    GLint posAttribIndex = glGetAttribLocation(mProgram, "v2p");
-    std::cout << posAttribIndex << std::endl;
+    //GLint posAttribIndex = glGetAttribLocation(mProgram, "v2p");
+    //std::cout << posAttribIndex << std::endl;
     
     // Detach shaders after a successful link.
     glDetachShader(mProgram, vertexShader);

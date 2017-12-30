@@ -49,6 +49,9 @@ bool GEngine::Initialize()
     // Initialize input.
     Services::SetInput(&mInputManager);
     
+    // Initialize asset manager.
+    Services::SetAssets(&mAssetManager);
+    
     //Sheep::Driver driver;
     //driver.Parse("/Users/Clark/Dropbox/GK3/Assets/test.shp");
     
@@ -69,10 +72,13 @@ bool GEngine::Initialize()
     
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("day1.brn");
+    //mAssetManager.LoadBarn("day123.brn");
     //mAssetManager.LoadBarn("core.brn");
+    //mAssetManager.LoadBarn("common.brn");
     //mAssetManager.LoadBarn("ambient.brn");
     
     Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
+    //Model* model = mAssetManager.LoadModel("MONEY2.MOD");
     //Model* model = mAssetManager.LoadModel("TAX.MOD");
     //Model* model = mAssetManager.LoadModel("R25HANGER.MOD");
     
@@ -84,9 +90,9 @@ bool GEngine::Initialize()
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
-    Texture* topTex = mAssetManager.LoadTexture("SYRUPTOP.BMP");
-    Texture* botTex = mAssetManager.LoadTexture("SYRUPBOT.BMP");
-    Texture* sidTex = mAssetManager.LoadTexture("SYRUPSIDE.BMP");
+    //Texture* topTex = mAssetManager.LoadTexture("SYRUPTOP.BMP");
+    //Texture* botTex = mAssetManager.LoadTexture("SYRUPBOT.BMP");
+    //Texture* sidTex = mAssetManager.LoadTexture("SYRUPSIDE.BMP");
     
     // Camera example.
     Actor* camActor = new Actor();

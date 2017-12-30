@@ -38,6 +38,9 @@ private:
     // we then search each loaded barn file for the asset.
     unordered_map<string, BarnFile*> mLoadedBarns;
     
+    // A list of loaded textures, to avoid loading the same asset multiple times.
+    unordered_map<string, Texture*> mLoadedTextures;
+    
     string GetAssetPath(string fileName);
     BarnFile* GetContainingBarn(string fileName);
     BarnAsset* GetBarnAsset(string fileName);

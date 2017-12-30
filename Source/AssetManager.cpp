@@ -6,6 +6,7 @@
 //
 #include "AssetManager.h"
 #include <iostream>
+#include "StringUtil.h"
 
 AssetManager::AssetManager()
 {
@@ -24,9 +25,15 @@ void AssetManager::AddSearchPath(string searchPath)
 
 void AssetManager::LoadBarn(string barnName)
 {
-    // If the barn is already in the map, then we don't need to load it again.
-    if(mLoadedBarns.find(barnName) != mLoadedBarns.end()) { return; }
+    // We want our dictionary key to be all uppercase.
+    // Avoids confusion with case-sensitive key searches.
+    string dictKey = barnName;
+    StringUtil::ToUpper(dictKey);
     
+    // If the barn is already in the map, then we don't need to load it again.
+    if(mLoadedBarns.find(dictKey) != mLoadedBarns.end()) { return; }
+    
+    // Find path to barn file.
     string assetPath = GetAssetPath(barnName);
     if(assetPath.empty())
     {
@@ -34,32 +41,39 @@ void AssetManager::LoadBarn(string barnName)
         return;
     }
     
+    // Load barn file.
     BarnFile* barn = new BarnFile(assetPath.c_str());
-    mLoadedBarns[barnName] = barn;
+    mLoadedBarns[dictKey] = barn;
 }
 
 void AssetManager::UnloadBarn(string barnName)
 {
+    // We want our dictionary key to be all uppercase.
+    string dictKey = barnName;
+    StringUtil::ToUpper(dictKey);
+    
     // If the barn isn't in the map, we can't unload it!
-    auto iter = mLoadedBarns.find(barnName);
+    auto iter = mLoadedBarns.find(dictKey);
     if(iter == mLoadedBarns.end()) { return; }
-
-    //TODO: Do we need to unload all loaded assets from this barn?
     
     // Delete barn.
     BarnFile* barn = iter->second;
     delete barn;
     
     // Remove from map.
-    mLoadedBarns.erase(barnName);
+    mLoadedBarns.erase(dictKey);
 }
 
 BarnFile* AssetManager::GetBarn(string barnName)
 {
+    // We want our dictionary key to be all uppercase.
+    string dictKey = barnName;
+    StringUtil::ToUpper(dictKey);
+    
     //TODO: Maybe load barn if not loaded?
  
     // If not loaded, we can't get it - return null.
-    auto iter = mLoadedBarns.find(barnName);
+    auto iter = mLoadedBarns.find(dictKey);
     if(iter == mLoadedBarns.end()) { return nullptr; }
     
     // Found it!
@@ -122,6 +136,15 @@ Model* AssetManager::LoadModel(string modelName)
 
 Texture* AssetManager::LoadTexture(string textureName)
 {
+    // See if this texture is already loaded.
+    // If so, we can just return it right away.
+    auto it = mLoadedTextures.find(textureName);
+    if(it != mLoadedTextures.end())
+    {
+        return it->second;
+    }
+    std::cout << "Loading texture " << textureName << std::endl;
+    
     // First, see if the asset exists at any asset search path.
     // If so, we load the asset directly from file.
     string assetPath = GetAssetPath(textureName);
@@ -135,11 +158,14 @@ Texture* AssetManager::LoadTexture(string textureName)
     BarnFile* barn = GetContainingBarn(textureName);
     if(barn != nullptr)
     {
+        // Extract bytes from the barn file contents.
         BarnAsset* asset = barn->GetAsset(textureName);
         char* buffer = new char[asset->uncompressedSize];
         barn->Extract(textureName, buffer, asset->uncompressedSize);
         
+        // Generate texture asset from bytes.
         Texture* texture = new Texture(textureName, buffer, asset->uncompressedSize);
+        mLoadedTextures[textureName] = texture;
         return texture;
     }
     
@@ -152,23 +178,38 @@ string AssetManager::GetAssetPath(string fileName)
     for(const string& searchPath : mSearchPaths)
     {
         string path = searchPath + fileName;
+        
         ifstream f(path.c_str());
-        if(f.good())
-        {
-            return path;
-        }
+        if(f.good()) { return path; }
     }
     return "";
 }
 
 BarnFile* AssetManager::GetContainingBarn(string fileName)
 {
+    // Iterate over all loaded barn files to find the asset.
     for(const auto& entry : mLoadedBarns)
     {
         BarnAsset* asset = entry.second->GetAsset(fileName);
         if(asset != nullptr)
         {
-            return entry.second;
+            // If the asset is a pointer, we need to redirect to the correct BarnFile.
+            if(asset->IsPointer())
+            {
+                auto it = mLoadedBarns.find(asset->barnFileName);
+                if(it != mLoadedBarns.end())
+                {
+                    return it->second;
+                }
+                else
+                {
+                    std::cout << "Asset " << fileName << " exists in Barn " << asset->barnFileName << ", but that Barn is not loaded!" << std::endl;
+                }
+            }
+            else
+            {
+                return entry.second;
+            }
         }
     }
     return nullptr;
