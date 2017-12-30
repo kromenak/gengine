@@ -230,7 +230,7 @@ BarnFile::BarnFile(const char* filePath) : mReader(filePath)
             mAssetMap[asset.name] = asset;
         }
     }
-    //OutputAssetList();
+    OutputAssetList();
 }
 
 bool BarnFile::CanRead() const

@@ -14,7 +14,7 @@
 using namespace std;
 
 Model::Model(string name, char* data, int dataLength) :
-    mName(name)
+    Asset(name)
 {
     ParseFromModFileData(data, dataLength);
 }
@@ -125,17 +125,17 @@ void Model::ParseFromModFileData(char *data, int dataLength)
             
             // 4 bytes: unknown - seems to be a count value.
             // This count seems to indicate groupings of 8 pieces of data later.
-            mVertexCount = reader.ReadUInt();
-            mVertexPositions = new float[mVertexCount * 3];
-            mVertexNormals = new float[mVertexCount * 3];
-            mVertexUVs = new float[mVertexCount * 2];
-            cout << "Count 1: " << mVertexCount << endl;
+            int vertexCount = reader.ReadUInt();
+            float* vertexPositions = new float[vertexCount * 3];
+            float* vertexNormals = new float[vertexCount * 3];
+            float* vertexUVs = new float[vertexCount * 2];
+            cout << "Count 1: " << vertexCount << endl;
             
             // 4 bytes: unknown - seems to be a count value.
             // This count seems to indicate groupings of 2 pieces of data later.
-            mIndexCount = reader.ReadUInt();
-            mVertexIndexes = new unsigned short[mIndexCount * 3];
-            cout << "Count 2: " << mIndexCount << endl;
+            int indexCount = reader.ReadUInt();
+            unsigned short* vertexIndexes = new unsigned short[indexCount * 3];
+            cout << "Count 2: " << indexCount << endl;
 
             // 4 bytes: number of LODK blocks in this mesh group. Not uncommon to be 0.
             unsigned int numLodkBlocks = reader.ReadUInt();
@@ -151,39 +151,40 @@ void Model::ParseFromModFileData(char *data, int dataLength)
             
             // First set of numbers represent positions for each vertex.
             cout << "Positions: " << endl;
-            for(int k = 0; k < mVertexCount; k++)
+            for(int k = 0; k < vertexCount; k++)
             {
                 Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
                 cout << v;
-                mVertexPositions[k * 3] = v.GetX();
-                mVertexPositions[k * 3 + 1] = v.GetY();
-                mVertexPositions[k * 3 + 2] = v.GetZ();
+                vertexPositions[k * 3] = v.GetX();
+                vertexPositions[k * 3 + 1] = v.GetY();
+                vertexPositions[k * 3 + 2] = v.GetZ();
             }
             cout << endl;
-            mesh->SetPositions(&mVertexPositions[0], mVertexCount * 3);
+            mesh->SetPositions(&vertexPositions[0], vertexCount * 3);
             
             // Second set of numbers represent normals for each vertex.
             cout << "Normals: " << endl;
-            for(int k = 0; k < mVertexCount; k++)
+            for(int k = 0; k < vertexCount; k++)
             {
                 Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
                 cout << v;
-                mVertexNormals[k * 3] = v.GetX();
-                mVertexNormals[k * 3 + 1] = v.GetY();
-                mVertexNormals[k * 3 + 2] = v.GetZ();
+                vertexNormals[k * 3] = v.GetX();
+                vertexNormals[k * 3 + 1] = v.GetY();
+                vertexNormals[k * 3 + 2] = v.GetZ();
             }
             cout << endl;
             
             // Possibly UV coordinates?
-            cout << "???: " << endl;
-            for(int k = 0; k < mVertexCount; k++)
+            cout << "UV1: " << endl;
+            for(int k = 0; k < vertexCount; k++)
             {
                 Vector2 v(reader.ReadFloat(), reader.ReadFloat());
                 cout << v;
-                mVertexUVs[k * 2] = v.GetX();
-                mVertexUVs[k * 2 + 1] = v.GetY();
+                vertexUVs[k * 2] = v.GetX();
+                vertexUVs[k * 2 + 1] = v.GetY();
             }
             cout << endl;
+            mesh->SetUV1(vertexUVs, vertexCount * 2);
             
             // These appear to be unsigned short values (2 bytes each).
             // I suspect these are the vertex indexes for drawing from an IBO.
@@ -192,18 +193,18 @@ void Model::ParseFromModFileData(char *data, int dataLength)
             // Seen: 0xF100 (241), 0x0000 (0), 0x0701 (263), 0x7F3F (16255), 0x56B1 (45398),
             // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
             cout << "Indexes: " << endl;
-            for(int k = 0; k < mIndexCount; k++)
+            for(int k = 0; k < indexCount; k++)
             {
-                mVertexIndexes[k * 3] = reader.ReadUShort();
-                mVertexIndexes[k * 3 + 1] = reader.ReadUShort();
-                mVertexIndexes[k * 3 + 2] = reader.ReadUShort();
+                vertexIndexes[k * 3] = reader.ReadUShort();
+                vertexIndexes[k * 3 + 1] = reader.ReadUShort();
+                vertexIndexes[k * 3 + 2] = reader.ReadUShort();
                 
-                Vector3 v(mVertexIndexes[k * 3], mVertexIndexes[k * 3 + 1], mVertexIndexes[k * 3 + 2]);
+                Vector3 v(vertexIndexes[k * 3], vertexIndexes[k * 3 + 1], vertexIndexes[k * 3 + 2]);
                 cout << v;
                 reader.ReadUShort(); // WHAT IS THIS!?
             }
             cout << endl;
-            mesh->SetIndexes(mVertexIndexes, mIndexCount * 3);
+            mesh->SetIndexes(vertexIndexes, indexCount * 3);
             
             //TODO: Parse LODK blocks. What do they mean?
         }

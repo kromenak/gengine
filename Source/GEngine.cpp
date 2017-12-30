@@ -69,15 +69,12 @@ bool GEngine::Initialize()
     
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("day1.brn");
+    //mAssetManager.LoadBarn("core.brn");
+    //mAssetManager.LoadBarn("ambient.brn");
     
     Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
-    //mRenderer.SetModel(model);
-    
     //Model* model = mAssetManager.LoadModel("TAX.MOD");
     //Model* model = mAssetManager.LoadModel("R25HANGER.MOD");
-    
-    //BarnFile* barnFile = mAssetManager.GetBarn("day1.brn");
-    //barnFile->WriteToFile("WI2BARGLASS.MOD");
     
     //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
     //audio->WriteToFile();
@@ -87,15 +84,19 @@ bool GEngine::Initialize()
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
+    Texture* topTex = mAssetManager.LoadTexture("SYRUPTOP.BMP");
+    Texture* botTex = mAssetManager.LoadTexture("SYRUPBOT.BMP");
+    Texture* sidTex = mAssetManager.LoadTexture("SYRUPSIDE.BMP");
+    
     // Camera example.
     Actor* camActor = new Actor();
     camActor->SetPosition(Vector3(0.0f, 0.0f, 2.0f));
     camActor->AddComponent(new CameraComponent(camActor));
     
     // Mesh example.
-    Mesh* mesh = new Mesh();
-    mesh->SetPositions(triangle_vertices, 9);
-    mesh->SetColors(triangle_colors, 12);
+    //Mesh* mesh = new Mesh();
+    //mesh->SetPositions(triangle_vertices, 9);
+    //mesh->SetColors(triangle_colors, 12);
     //mesh->SetPositions(cube_vertices, 24);
     //mesh->SetColors(cube_colors, 32);
     //mesh->SetIndexes(cube_elements, 36);
@@ -107,6 +108,12 @@ bool GEngine::Initialize()
     MeshComponent* meshComponent = new MeshComponent(meshActor);
     //meshComponent->SetMesh(mesh);
     meshComponent->SetModel(model);
+    //meshComponent->AddTexture(sidTex);
+    //meshComponent->AddTexture(sidTex);
+    //meshComponent->AddTexture(sidTex);
+    //meshComponent->AddTexture(topTex);
+    //meshComponent->AddTexture(botTex);
+
     meshActor->AddComponent(meshComponent);
     return true;
 }
@@ -204,7 +211,9 @@ void GEngine::Update()
 
 void GEngine::GenerateOutput()
 {
+    mRenderer.Clear();
     mRenderer.Render();
+    mRenderer.Present();
 }
 
 void GEngine::AddActor(Actor *actor)

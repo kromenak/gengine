@@ -118,7 +118,33 @@ Model* AssetManager::LoadModel(string modelName)
     
     // Couldn't find this asset!
     return nullptr;
+}
 
+Texture* AssetManager::LoadTexture(string textureName)
+{
+    // First, see if the asset exists at any asset search path.
+    // If so, we load the asset directly from file.
+    string assetPath = GetAssetPath(textureName);
+    if(!assetPath.empty())
+    {
+        //TODO: Load asset from file.
+        return nullptr;
+    }
+    
+    // If no file to load, we'll get the asset from a barn.
+    BarnFile* barn = GetContainingBarn(textureName);
+    if(barn != nullptr)
+    {
+        BarnAsset* asset = barn->GetAsset(textureName);
+        char* buffer = new char[asset->uncompressedSize];
+        barn->Extract(textureName, buffer, asset->uncompressedSize);
+        
+        Texture* texture = new Texture(textureName, buffer, asset->uncompressedSize);
+        return texture;
+    }
+    
+    // Couldn't find the asset!
+    return nullptr;
 }
 
 string AssetManager::GetAssetPath(string fileName)

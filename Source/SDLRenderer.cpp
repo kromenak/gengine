@@ -115,10 +115,7 @@ bool SDLRenderer::Initialize()
     // Clear any GLEW error.
     glGetError();
     
-    // Initialize frame buffer.
-    //glEnable(GL_BLEND);
-    //glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-    //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+    // Our clear color will be BLACK!
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     
     mShader = new GLShader("Assets/Tut.vert", "Assets/Tut.frag");
@@ -144,8 +141,6 @@ void SDLRenderer::Clear()
 
 void SDLRenderer::Render()
 {
-    Clear();
-    
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
     
@@ -167,7 +162,10 @@ void SDLRenderer::Render()
         meshComponent->Render();
     }
     
-    Present();
+    //TODO: Enable alpha-blended rendering and render UI elements.
+    //glEnable(GL_BLEND);
+    //glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+    //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 }
 
 void SDLRenderer::Present()

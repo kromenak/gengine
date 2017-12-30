@@ -4,7 +4,6 @@
 //
 //  Created by Clark Kromenaker on 8/17/17.
 //
-
 #pragma once
 
 #include <cstdint>

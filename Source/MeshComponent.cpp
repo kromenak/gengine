@@ -8,6 +8,7 @@
 #include "Model.h"
 #include "Mesh.h"
 #include "Services.h"
+#include "Texture.h"
 
 MeshComponent::MeshComponent(Actor* owner) : Component(owner)
 {
@@ -44,18 +45,19 @@ void MeshComponent::Render()
     Matrix4 worldTransform = mOwner->GetWorldTransformMatrix();
     Services::GetRenderer()->SetWorldTransformMatrix(worldTransform);
     
-    // Draw meshes.
-    //mMeshes[0]->GetVertexArray()->Draw();
-    for(auto& mesh : mMeshes)
+    // Render the things!
+    for(int i = 0; i < mMeshes.size(); i++)
     {
-        if(mesh != nullptr)
+        // See if there's a texture at the same index as this mesh.
+        if(mTextures.size() > i && mTextures[i] != nullptr)
         {
-            GLVertexArray* vertexArray = mesh->GetVertexArray();
-            if(vertexArray != nullptr)
-            {
-                // Render the thing!
-                vertexArray->Draw();
-            }
+            mTextures[i]->Activate();
+        }
+        
+        // Really render it now!
+        if(mMeshes[i] != nullptr)
+        {
+            mMeshes[i]->Render();
         }
     }
 }
@@ -73,4 +75,9 @@ void MeshComponent::SetModel(Model* model)
     {
         mMeshes.push_back(mesh);
     }
+}
+
+void MeshComponent::AddTexture(Texture* texture)
+{
+    mTextures.push_back(texture);
 }

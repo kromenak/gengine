@@ -45,6 +45,12 @@ void GLVertexArray::SetColors(const GLfloat* vertColors, int count)
     mColorCount = count;
 }
 
+void GLVertexArray::SetUV1(const GLfloat* uvs, int count)
+{
+    mUV1 = uvs;
+    mUV1Count = count;
+}
+
 void GLVertexArray::SetIndexes(const GLushort* indexes, int count)
 {
     mIndexes = indexes;
@@ -64,7 +70,8 @@ void GLVertexArray::Build()
     // attributes we need to pass to the shader.
     int positionSize = mPositionCount * sizeof(GLfloat);
     int colorSize = mColorCount * sizeof(GLfloat);
-    int bufferSize = positionSize + colorSize;
+    int uvSize = mUV1Count * sizeof(GLfloat);
+    int bufferSize = positionSize + colorSize + uvSize;
     
     // Create buffer of needed size, but don't initialize data yet.
     // We'll initialize using subdata command below.
@@ -72,10 +79,18 @@ void GLVertexArray::Build()
     glBufferData(GL_ARRAY_BUFFER, bufferSize, NULL, GL_STATIC_DRAW);
     
     // Fill in the created buffer with our data.
-    glBufferSubData(GL_ARRAY_BUFFER, 0, positionSize, mPositions);
+    int offset = 0;
+    glBufferSubData(GL_ARRAY_BUFFER, offset, positionSize, mPositions);
+    offset += positionSize;
     if(mColors != nullptr)
     {
-        glBufferSubData(GL_ARRAY_BUFFER, positionSize, colorSize, mColors);
+        glBufferSubData(GL_ARRAY_BUFFER, offset, colorSize, mColors);
+        offset += colorSize;
+    }
+    if(mUV1 != nullptr)
+    {
+        glBufferSubData(GL_ARRAY_BUFFER, offset, uvSize, mUV1);
+        offset += uvSize;
     }
     
     // Generate and bind vertex array object.
@@ -90,14 +105,26 @@ void GLVertexArray::Build()
     {
         glEnableVertexAttribArray(1);
     }
+    //TODO: Normals
+    if(mUV1 != nullptr)
+    {
+        glEnableVertexAttribArray(3);
+    }
     
     // Indicates that vertex attributes at index 0 (position data)
     // are 3 values (XYZ) per attribute, float value, not normalized,
     // tightly packed, and no offset.
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    offset = 0;
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(offset));
+    offset += positionSize;
     if(mColors != nullptr)
     {
-        glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, 0, BUFFER_OFFSET(positionSize));
+        glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, 0, BUFFER_OFFSET(offset));
+        offset += colorSize;
+    }
+    if(mUV1 != nullptr)
+    {
+        glVertexAttribPointer(3, 2, GL_FLOAT, GL_TRUE, 0, BUFFER_OFFSET(offset));
     }
     
     // Also build the index buffer object if needed.

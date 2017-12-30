@@ -10,6 +10,7 @@
 #include "BarnFile.h"
 #include "Audio.h"
 #include "Model.h"
+#include "Texture.h"
 
 using namespace std;
 
@@ -26,6 +27,7 @@ public:
     
     Audio* LoadAudio(string audioName);
     Model* LoadModel(string modelName);
+    Texture* LoadTexture(string textureName);
     
 private:
     // A list of paths to search for assets.

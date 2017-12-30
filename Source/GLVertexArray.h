@@ -23,6 +23,7 @@ public:
     
     void SetPositions(const GLfloat* vertPositions, int count);
     void SetColors(const GLfloat* vertColors, int count);
+    void SetUV1(const GLfloat* uvs, int count);
     void SetIndexes(const GLushort* indexes, int count);
     void Build();
     
@@ -43,6 +44,10 @@ private:
     // Color data.
     const GLfloat* mColors = nullptr;
     int mColorCount = 0;
+    
+    // UV data.
+    const GLfloat* mUV1 = nullptr;
+    int mUV1Count = 0;
     
     // Index data.
     const GLushort* mIndexes = nullptr;

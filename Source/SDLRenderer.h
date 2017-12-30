@@ -33,6 +33,8 @@ public:
     void AddMeshComponent(MeshComponent* mc);
     void RemoveMeshComponent(MeshComponent* mc);
     
+    GLShader* GetShader() { return mShader; }
+    
 private:
     // Handle for the window object (contains the game).
     SDL_Window* mWindow = nullptr;
