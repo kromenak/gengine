@@ -81,18 +81,14 @@ bool GEngine::Initialize()
     //Model* model = mAssetManager.LoadModel("MONEY2.MOD");
     //Model* model = mAssetManager.LoadModel("TAX.MOD");
     //Model* model = mAssetManager.LoadModel("R25HANGER.MOD");
+    //Model* model = mAssetManager.LoadModel("GAB.MOD");
     
     //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
     //audio->WriteToFile();
-    
     //mAudio.Play(*audio);
     
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
-    
-    //Texture* topTex = mAssetManager.LoadTexture("SYRUPTOP.BMP");
-    //Texture* botTex = mAssetManager.LoadTexture("SYRUPBOT.BMP");
-    //Texture* sidTex = mAssetManager.LoadTexture("SYRUPSIDE.BMP");
     
     // Camera example.
     Actor* camActor = new Actor();
@@ -114,12 +110,6 @@ bool GEngine::Initialize()
     MeshComponent* meshComponent = new MeshComponent(meshActor);
     //meshComponent->SetMesh(mesh);
     meshComponent->SetModel(model);
-    //meshComponent->AddTexture(sidTex);
-    //meshComponent->AddTexture(sidTex);
-    //meshComponent->AddTexture(sidTex);
-    //meshComponent->AddTexture(topTex);
-    //meshComponent->AddTexture(botTex);
-
     meshActor->AddComponent(meshComponent);
     return true;
 }
