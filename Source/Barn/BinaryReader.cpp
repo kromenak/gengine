@@ -57,6 +57,13 @@ void BinaryReader::Read(unsigned char* buffer, int size)
     stream->read((char*)buffer, size);
 }
 
+std::string BinaryReader::ReadString(int length)
+{
+    char* buffer = new char[length];
+    stream->read(buffer, length);
+    return std::string(buffer, length);
+}
+
 uint8_t BinaryReader::ReadUByte()
 {
     uint8_t val;

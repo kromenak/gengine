@@ -24,6 +24,8 @@ public:
     void Read(char* buffer, int size);
     void Read(unsigned char* buffer, int size);
     
+    std::string ReadString(int length);
+    
     uint8_t ReadUByte();
     int8_t ReadByte();
     
