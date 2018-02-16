@@ -72,7 +72,7 @@ bool GEngine::Initialize()
     
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("day1.brn");
-    //mAssetManager.LoadBarn("day123.brn");
+    mAssetManager.LoadBarn("day123.brn");
     //mAssetManager.LoadBarn("core.brn");
     //mAssetManager.LoadBarn("common.brn");
     //mAssetManager.LoadBarn("ambient.brn");
@@ -108,9 +108,10 @@ bool GEngine::Initialize()
     //meshActor->SetScale(Vector3(5.0f, 5.0f, 5.0f));
     
     MeshComponent* meshComponent = new MeshComponent(meshActor);
-    //meshComponent->SetMesh(mesh);
     meshComponent->SetModel(model);
     meshActor->AddComponent(meshComponent);
+    
+    BSP* bsp = mAssetManager.LoadBSP("B25.BSP");
     return true;
 }
 

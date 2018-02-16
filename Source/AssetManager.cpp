@@ -173,6 +173,33 @@ Texture* AssetManager::LoadTexture(string textureName)
     return nullptr;
 }
 
+BSP* AssetManager::LoadBSP(string bspName)
+{
+    // First, see if the asset exists at any asset search path.
+    // If so, we load the asset directly from file.
+    string assetPath = GetAssetPath(bspName);
+    if(!assetPath.empty())
+    {
+        //TODO: Load asset from file.
+        return nullptr;
+    }
+    
+    // If no file to load, we'll get the asset from a barn.
+    BarnFile* barn = GetContainingBarn(bspName);
+    if(barn != nullptr)
+    {
+        BarnAsset* asset = barn->GetAsset(bspName);
+        char* buffer = new char[asset->uncompressedSize];
+        barn->Extract(bspName, buffer, asset->uncompressedSize);
+        
+        BSP* bsp = new BSP(bspName, buffer, asset->uncompressedSize);
+        return bsp;
+    }
+    
+    // Couldn't find this asset!
+    return nullptr;
+}
+
 string AssetManager::GetAssetPath(string fileName)
 {
     for(const string& searchPath : mSearchPaths)

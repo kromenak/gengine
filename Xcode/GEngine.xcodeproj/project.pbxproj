@@ -47,6 +47,7 @@
 		4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
 		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
 		4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */; };
+		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4BD4CCE41FF1F5F5009665C7 /* MeshComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshComponent.cpp */; };
 		4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
@@ -156,6 +157,8 @@
 		4B7AB0441F539EB200CFBE8F /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio/Audio.h; sourceTree = "<group>"; };
 		4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SDLAudio.cpp; path = ../Source/SDLAudio.cpp; sourceTree = "<group>"; };
 		4B7C3A151F4EB07000BB0922 /* SDLAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLAudio.h; path = ../Source/SDLAudio.h; sourceTree = "<group>"; };
+		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
+		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
 		4BD4CCE21FF1F5F5009665C7 /* MeshComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MeshComponent.h; path = ../Source/MeshComponent.h; sourceTree = "<group>"; };
 		4BD4CCE31FF1F5F5009665C7 /* MeshComponent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MeshComponent.cpp; path = ../Source/MeshComponent.cpp; sourceTree = "<group>"; };
 		4BD4CCE51FF1F7E3009665C7 /* Mesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Mesh.h; path = ../Source/Mesh.h; sourceTree = "<group>"; };
@@ -251,6 +254,8 @@
 				4B76B57D1F3599A1003F63E5 /* Barn */,
 				4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */,
 				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
+				4B99229C2031735500184755 /* BSP.cpp */,
+				4B99229B2031735500184755 /* BSP.h */,
 				4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */,
 				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
@@ -509,6 +514,7 @@
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
+				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,

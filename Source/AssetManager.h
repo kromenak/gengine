@@ -11,6 +11,7 @@
 #include "Audio.h"
 #include "Model.h"
 #include "Texture.h"
+#include "BSP.h"
 
 using namespace std;
 
@@ -28,6 +29,7 @@ public:
     Audio* LoadAudio(string audioName);
     Model* LoadModel(string modelName);
     Texture* LoadTexture(string textureName);
+    BSP* LoadBSP(string bspName);
     
 private:
     // A list of paths to search for assets.
