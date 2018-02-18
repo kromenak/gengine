@@ -8,8 +8,7 @@
 #pragma once
 #include "AssetManager.h"
 #include "SDLRenderer.h"
-
-class InputManager;
+#include "InputManager.h"
 
 class Services
 {
