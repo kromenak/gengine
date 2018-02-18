@@ -16,6 +16,8 @@ public:
     
     virtual void Update(float deltaTime) { }
     
+    Actor* GetOwner() { return mOwner; }
+    
 protected:
     Actor* mOwner;
 };
