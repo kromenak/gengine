@@ -29,6 +29,7 @@ public:
     void AddComponent(Component* component);
     
     void Translate(Vector3 offset);
+    void Rotate(Vector3 axis, float angle);
 
     Vector3 GetPosition() const { return mPosition; }
     void SetPosition(Vector3 position);
@@ -43,9 +44,12 @@ public:
     
     Vector3 GetForward() const
     {
+        return mRotation.Rotate(Vector3::UnitX);
+        /*
         return Vector3(cosf(mRotation.GetZ()) * cosf(mRotation.GetX()),
                        sinf(mRotation.GetZ()) * cosf(mRotation.GetX()),
                        sinf(mRotation.GetX()));
+        */
     }
     
 private:
