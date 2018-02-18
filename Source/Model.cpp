@@ -16,10 +16,10 @@ using namespace std;
 Model::Model(string name, char* data, int dataLength) :
     Asset(name)
 {
-    ParseFromModFileData(data, dataLength);
+    ParseFromData(data, dataLength);
 }
 
-void Model::ParseFromModFileData(char *data, int dataLength)
+void Model::ParseFromData(char *data, int dataLength)
 {
     BinaryReader reader(data, dataLength);
     

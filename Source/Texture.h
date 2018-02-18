@@ -33,5 +33,5 @@ private:
     // An ID for the texture object generated in OpenGL.
     GLuint mTextureId = GL_NONE;
     
-    void ParseFromBarnData(char* data, int dataLength);
+    void ParseFromData(char* data, int dataLength);
 };

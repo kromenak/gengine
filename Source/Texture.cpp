@@ -11,7 +11,7 @@ Texture::Texture(std::string name, char* data, int dataLength) :
     Asset(name)
 {
     // Retrieve the data.
-    ParseFromBarnData(data, dataLength);
+    ParseFromData(data, dataLength);
     
     // Generate and bind the texture object in OpenGL.
     glGenTextures(1, &mTextureId);
@@ -32,7 +32,7 @@ void Texture::Activate()
     glBindTexture(GL_TEXTURE_2D, mTextureId);
 }
 
-void Texture::ParseFromBarnData(char *data, int dataLength)
+void Texture::ParseFromData(char *data, int dataLength)
 {
     BinaryReader reader(data, dataLength);
     

@@ -31,5 +31,5 @@ private:
     // It is possible for an entry to be empty - some meshes have no name.
     std::vector<std::string> mTextureNames;
     
-    void ParseFromModFileData(char* data, int dataLength);
+    void ParseFromData(char* data, int dataLength);
 };
