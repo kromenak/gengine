@@ -22,18 +22,7 @@ MeshComponent::~MeshComponent()
 
 void MeshComponent::Update(float deltaTime)
 {
-    Quaternion quat = mOwner->GetRotation();
-    
-    Vector3 axis;
-    float angle;
-    quat.GetAxisAngle(axis, angle);
-    
-    axis = Vector3::UnitY;
-    angle += deltaTime;
-    angle = Math::Mod(angle, Math::k2Pi);
-    quat.Set(axis, angle);
-    
-    mOwner->SetRotation(quat);
+    mOwner->Rotate(Vector3::UnitY, deltaTime);
 }
 
 void MeshComponent::Render()
