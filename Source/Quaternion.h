@@ -7,6 +7,7 @@
 // represent a rotation in 3D space.
 //
 #pragma once
+#include <iostream>
 
 class Vector3;
 
@@ -59,7 +60,7 @@ public:
     //void Set(const Matrix3& rotation);
     void Set(float xRadians, float yRadians, float zRadians);
     
-    void GetAxisAngle(Vector3& axis, float& angle);
+    void GetAxisAngle(Vector3& axis, float& angle) const;
     
     // Modifiers
     void MakeZero() { x = y = z = w = 0.0f; }
@@ -87,6 +88,8 @@ public:
     Quaternion operator*(const Quaternion& other) const;
     Quaternion& operator*=(const Quaternion& other);
     
+    //TODO: Multiply by a Vector.
+    
     // Dot Product
     static float Dot(const Quaternion& quat1, const Quaternion& quat2);
     
@@ -103,3 +106,5 @@ private:
     float z = 0.0f;
     float w = 1.0f;
 };
+
+std::ostream& operator<<(std::ostream& os, const Quaternion& q);

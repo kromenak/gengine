@@ -187,7 +187,7 @@ void Quaternion::Set(float xRadians, float yRadians, float zRadians)
     z = cosX * cosY * sinZ + sinZ * sinY * cosX;
 }
 
-void Quaternion::GetAxisAngle(Vector3& axis, float& angle)
+void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const
 {
     angle = 2.0f * acosf(w);
     
@@ -335,3 +335,25 @@ float Quaternion::Dot(const Quaternion& quat1, const Quaternion& quat2)
     return (quat1.x * quat2.x + quat1.y * quat2.y + quat1.z * quat2.z + quat1.w * quat2.w);
 }
 
+Vector3 Quaternion::Rotate(const Vector3& vector) const
+{
+    //ASSERT( IsUnit() );
+    
+    float vMult = 2.0f * (x * vector.GetX() + y * vector.GetY() + z * vector.GetZ());
+    float crossMult = 2.0f * w;
+    float pMult = crossMult * w - 1.0f;
+    
+    return Vector3(pMult * vector.GetX() + vMult * x + crossMult * (y * vector.GetZ() - z * vector.GetY()),
+                   pMult * vector.GetY() + vMult * y + crossMult * (z * vector.GetX() - x * vector.GetZ()),
+                   pMult * vector.GetZ() + vMult * z + crossMult * (x * vector.GetY() - y * vector.GetX()));
+}
+
+std::ostream& operator<<(std::ostream& os, const Quaternion& q)
+{
+    Vector3 axis;
+    float angle;
+    q.GetAxisAngle(axis, angle);
+    
+    os << axis << ", " << Math::ToDegrees(angle) << std::endl;
+    return os;
+}
