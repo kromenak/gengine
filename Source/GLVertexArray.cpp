@@ -11,8 +11,8 @@ GLVertexArray::GLVertexArray(const GLfloat* vertPositions, int vertPositionsCoun
 }
 
 GLVertexArray::GLVertexArray(const GLfloat* vertPositions, int vertPositionsCount,
-                             const GLushort* indexes, int indexesCount)
-                            : GLVertexArray(vertPositions, vertPositionsCount)
+                             const GLushort* indexes, int indexesCount) :
+    GLVertexArray(vertPositions, vertPositionsCount)
 {
     SetIndexes(indexes, indexesCount);
 }
@@ -166,3 +166,25 @@ void GLVertexArray::Draw()
         glDrawArrays(GL_TRIANGLES, 0, mPositionCount / 3);
     }
 }
+
+void GLVertexArray::Draw(int offset, int count)
+{
+    // Make sure we are activated first.
+    Activate();
+    
+    // Draw the vertices. Draw mode depends on whether
+    // we are using indexed geometry or not.
+    if(mIBO != GL_NONE)
+    {
+        // Draw "count" indices at offset.
+        int trueOffset = offset * sizeof(GLushort);
+        glDrawElements(GL_TRIANGLE_FAN, count, GL_UNSIGNED_SHORT, BUFFER_OFFSET(trueOffset));
+    }
+    else
+    {
+        // Draw "count" triangles at offset.
+        glDrawArrays(GL_TRIANGLES, offset, count);
+    }
+}
+
+

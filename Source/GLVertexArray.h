@@ -29,6 +29,7 @@ public:
     
     void Activate();
     void Draw();
+    void Draw(int offset, int count);
     
 private:
     // Buffer objects for OpenGL - Vertex Buffer Object,
