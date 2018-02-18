@@ -74,4 +74,24 @@ namespace Math
     {
         return std::atanf(ratio);
     }
+    
+    inline float Clamp(float value, float min, float max)
+    {
+        return std::min(max, std::max(value, min));
+    }
+    
+    inline int Clamp(int value, int min, int max)
+    {
+        return std::min(max, std::max(value, min));
+    }
+    
+    inline float ToDegrees(float radians)
+    {
+        return (radians * (180.0f / kPi));
+    }
+    
+    inline float ToRadians(float degrees)
+    {
+        return (degrees * (kPi / 180.0f));
+    }
 }
