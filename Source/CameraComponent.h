@@ -19,7 +19,7 @@ public:
     
 private:
     // Field of view angle, in radians, for perspective projection.
-    float fovAngleRad = 1.74533f;
+    float fovAngleRad = 1.3264f; //1.0472f; //1.74533f;
     
     // Near and far clipping planes, for any projection type.
     float nearClippingPlane = 0.01f;
