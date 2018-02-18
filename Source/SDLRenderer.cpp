@@ -162,6 +162,14 @@ void SDLRenderer::Render()
         meshComponent->Render();
     }
     
+    SetWorldTransformMatrix(Matrix4::Identity);
+    
+    // Render the BSP.
+    if(mBSP != nullptr)
+    {
+        mBSP->Render(mCameraComponent->GetOwner()->GetPosition());
+    }
+    
     //TODO: Enable alpha-blended rendering and render UI elements.
     //glEnable(GL_BLEND);
     //glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);

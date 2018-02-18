@@ -11,8 +11,11 @@
 #include "Asset.h"
 #include "Vector2.h"
 #include "Vector3.h"
+#include "GLVertexArray.h"
 #include <vector>
 #include <string>
+
+class Texture;
 
 // A node in the BSP tree.
 struct BSPNode
@@ -49,8 +52,11 @@ struct BSPPolygon
     // An index into the mVertexIndices array (an index to an index), plus
     // the count of values from that index that are associated with this polygon.
     // These are ALSO offsets into the UV indices array - direct correlation.
-    ushort vertexIndexIndex;
-    ushort vertexIndexCount;
+    ushort vertexIndex;
+    ushort vertexCount;
+    
+    // This is what we will actually render for this polygon.
+    GLVertexArray* vertexArray = nullptr;
 };
 
 struct BSPSurface
@@ -61,6 +67,7 @@ struct BSPSurface
     
     // This correlates exactly to a texture asset name, without the BMP extension.
     std::string textureName;
+    Texture* texture = nullptr;
     
     // Each vertex has a UV coordinate, but a surface can also specify
     // an offset or scale for the texture, so it looks good graphically.
@@ -73,8 +80,19 @@ struct BSPSurface
 
 class BSP : Asset
 {
+    // When identifying the position of a point relative to a plane in the
+    // BSP tree, the result can be Front, Back, or on the plane itself.
+    enum class PointLocation
+    {
+        InFrontOf,
+        Behind,
+        OnPlane
+    };
+    
 public:
     BSP(std::string name, char* data, int dataLength);
+    
+    void Render(Vector3 cameraPosition);
     
 private:
     // Points to the root node in our node list.
@@ -103,7 +121,14 @@ private:
     std::vector<Vector2> mUVs;
     std::vector<uint> mUVIndices;
     
+    GLVertexArray* mVertexArray = nullptr;
+    
     //TODO: bounding spheres?
+    
+    void RenderTree(BSPNode* node, Vector3 cameraPosition);
+    void RenderPolygon(BSPPolygon* polygon);
+    
+    PointLocation GetPointLocation(Vector3 position, BSPPlane* plane);
     
     void ParseFromData(char* data, int dataLength);
 };

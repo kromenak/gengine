@@ -15,6 +15,7 @@
 class CameraComponent;
 class MeshComponent;
 class Model;
+class BSP;
 
 class SDLRenderer
 {
@@ -33,6 +34,8 @@ public:
     void AddMeshComponent(MeshComponent* mc);
     void RemoveMeshComponent(MeshComponent* mc);
     
+    void SetBSP(BSP* bsp) { mBSP = bsp; }
+    
     GLShader* GetShader() { return mShader; }
     
 private:
@@ -50,4 +53,6 @@ private:
     
     // List of mesh components to render.
     std::vector<MeshComponent*> mMeshComponents;
+    
+    BSP* mBSP = nullptr;
 };
