@@ -73,8 +73,8 @@ bool GEngine::Initialize()
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("day1.brn");
     mAssetManager.LoadBarn("day123.brn");
-    //mAssetManager.LoadBarn("core.brn");
-    //mAssetManager.LoadBarn("common.brn");
+    mAssetManager.LoadBarn("core.brn");
+    mAssetManager.LoadBarn("common.brn");
     //mAssetManager.LoadBarn("ambient.brn");
     
     Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
@@ -92,7 +92,7 @@ bool GEngine::Initialize()
     
     // Camera example.
     Actor* camActor = new Actor();
-    camActor->SetPosition(Vector3(0.0f, 0.0f, 2.0f));
+    camActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
     camActor->AddComponent(new CameraComponent(camActor));
     
     // Mesh example.
@@ -104,7 +104,7 @@ bool GEngine::Initialize()
     //mesh->SetIndexes(cube_elements, 36);
     
     Actor* meshActor = new Actor();
-    meshActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+    meshActor->SetPosition(Vector3(5.0f, 0.0f, 0.0f));
     //meshActor->SetScale(Vector3(5.0f, 5.0f, 5.0f));
     
     MeshComponent* meshComponent = new MeshComponent(meshActor);
@@ -112,6 +112,7 @@ bool GEngine::Initialize()
     meshActor->AddComponent(meshComponent);
     
     BSP* bsp = mAssetManager.LoadBSP("B25.BSP");
+    mRenderer.SetBSP(bsp);
     return true;
 }
 
