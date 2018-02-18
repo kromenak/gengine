@@ -51,6 +51,12 @@ void Actor::Translate(Vector3 offset)
     SetPosition(mPosition + offset);
 }
 
+void Actor::Rotate(Vector3 axis, float angle)
+{
+    Quaternion quat2 = Quaternion(axis, angle);
+    SetRotation(quat2 * GetRotation());
+}
+
 void Actor::SetPosition(Vector3 position)
 {
     mPosition = position;
