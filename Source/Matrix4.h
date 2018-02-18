@@ -14,7 +14,9 @@
 class Matrix4
 {
 public:
-    Matrix4() { Identity(); }
+    static Matrix4 Identity;
+    
+    Matrix4() { ToIdentity(); }
     Matrix4(float vals[16]);
     explicit Matrix4(float vals[4][4]);
     explicit Matrix4(float vals[4][4], bool convert);
@@ -40,7 +42,7 @@ public:
     void GetColumns(Vector4& col1, Vector4& col2, Vector4& col3, Vector4& col4);
     
     // Clear matrix to identity.
-    void Identity();
+    void ToIdentity();
     
     // Transpose the matrix.
     Matrix4& Transpose();

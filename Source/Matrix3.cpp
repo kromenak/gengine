@@ -60,7 +60,7 @@ bool Matrix3::operator!=(const Matrix3 &other) const
     return false;
 }
 
-void Matrix3::Identity()
+void Matrix3::ToIdentity()
 {
     mVals[0] = 1.0f;
     mVals[1] = 0.0f;

@@ -8,6 +8,8 @@
 #include <cstring>
 #include <cmath>
 
+Matrix4 Matrix4::Identity;
+
 Matrix4::Matrix4(float vals[16])
 {
     memcpy(mVals, vals, 16 * sizeof(float));
@@ -61,7 +63,7 @@ bool Matrix4::operator!=(const Matrix4 &other) const
     return false;
 }
 
-void Matrix4::Identity()
+void Matrix4::ToIdentity()
 {
     mVals[0] = 1.0f;
     mVals[1] = 0.0f;

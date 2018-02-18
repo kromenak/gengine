@@ -12,7 +12,9 @@
 class Matrix3
 {
 public:
-    Matrix3() { Identity(); }
+    static Matrix3 Identity;
+    
+    Matrix3() { ToIdentity(); }
     Matrix3(float vals[9]);
     explicit Matrix3(float vals[3][3]);
     explicit Matrix3(float vals[3][3], bool convert);
@@ -38,7 +40,7 @@ public:
     void GetColumns(Vector3& col1, Vector3& col2, Vector3& col3);
     
     // Clear matrix to identity.
-    void Identity();
+    void ToIdentity();
     
     // Transpose the matrix.
     Matrix3& Transpose();
