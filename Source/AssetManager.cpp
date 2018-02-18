@@ -136,18 +136,20 @@ Model* AssetManager::LoadModel(string modelName)
 
 Texture* AssetManager::LoadTexture(string textureName)
 {
+    string assetName = textureName;
+    StringUtil::ToUpper(assetName);
+    
     // See if this texture is already loaded.
     // If so, we can just return it right away.
-    auto it = mLoadedTextures.find(textureName);
+    auto it = mLoadedTextures.find(assetName);
     if(it != mLoadedTextures.end())
     {
         return it->second;
     }
-    std::cout << "Loading texture " << textureName << std::endl;
     
     // First, see if the asset exists at any asset search path.
     // If so, we load the asset directly from file.
-    string assetPath = GetAssetPath(textureName);
+    string assetPath = GetAssetPath(assetName);
     if(!assetPath.empty())
     {
         //TODO: Load asset from file.
@@ -155,21 +157,24 @@ Texture* AssetManager::LoadTexture(string textureName)
     }
     
     // If no file to load, we'll get the asset from a barn.
-    BarnFile* barn = GetContainingBarn(textureName);
+    BarnFile* barn = GetContainingBarn(assetName);
     if(barn != nullptr)
     {
         // Extract bytes from the barn file contents.
-        BarnAsset* asset = barn->GetAsset(textureName);
+        BarnAsset* asset = barn->GetAsset(assetName);
         char* buffer = new char[asset->uncompressedSize];
-        barn->Extract(textureName, buffer, asset->uncompressedSize);
+        barn->Extract(assetName, buffer, asset->uncompressedSize);
         
         // Generate texture asset from bytes.
-        Texture* texture = new Texture(textureName, buffer, asset->uncompressedSize);
-        mLoadedTextures[textureName] = texture;
+        Texture* texture = new Texture(assetName, buffer, asset->uncompressedSize);
+        mLoadedTextures[assetName] = texture;
+        
+        std::cout << "Loaded texture " << assetName << std::endl;
         return texture;
     }
     
     // Couldn't find the asset!
+    std::cout << "Texture " << assetName << " could not be loaded." << std::endl;
     return nullptr;
 }
 
