@@ -12,6 +12,8 @@
 #include "Model.h"
 #include "Texture.h"
 #include "BSP.h"
+#include "SIF.h"
+#include "Scene.h"
 
 using namespace std;
 
@@ -19,6 +21,7 @@ class AssetManager
 {
 public:
     AssetManager();
+    ~AssetManager();
     
     void AddSearchPath(string searchPath);
     
@@ -29,6 +32,9 @@ public:
     Audio* LoadAudio(string audioName);
     Model* LoadModel(string modelName);
     Texture* LoadTexture(string textureName);
+    
+    SIF* LoadSIF(string sifName);
+    Scene* LoadScene(string sceneName);
     BSP* LoadBSP(string bspName);
     
 private:
@@ -45,5 +51,6 @@ private:
     
     string GetAssetPath(string fileName);
     BarnFile* GetContainingBarn(string fileName);
-    BarnAsset* GetBarnAsset(string fileName);
+    
+    template<class T> T* LoadAsset(string assetName, unordered_map<string, T*>* cache);
 };

@@ -32,6 +32,10 @@
 		4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */; };
 		4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0E1F25CF08003EC7FE /* SheepScanner.cpp */; };
 		4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */; };
+		4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */; };
+		4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
+		4B2E7A62203A5CB3001A5B9C /* Stage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Stage.cpp */; };
+		4B2E7A65203A6072001A5B9C /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* Scene.cpp */; };
 		4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
 		4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
 		4B4621EB1FF741D800536BA6 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621EA1FF741D800536BA6 /* Texture.cpp */; };
@@ -134,6 +138,14 @@
 		4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepDriver.cpp; path = ../Source/Sheep/SheepDriver.cpp; sourceTree = "<group>"; };
 		4B2ACE121F25D310003EC7FE /* SheepDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepDriver.h; path = ../Source/Sheep/SheepDriver.h; sourceTree = "<group>"; };
 		4B2D75A71F53667000900417 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4B2E7A5A2039FCF0001A5B9C /* IniParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IniParser.h; path = ../Source/IniParser.h; sourceTree = "<group>"; };
+		4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = IniParser.cpp; path = ../Source/IniParser.cpp; sourceTree = "<group>"; };
+		4B2E7A5D203A0425001A5B9C /* SIF.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SIF.h; path = ../Source/SIF.h; sourceTree = "<group>"; };
+		4B2E7A5E203A0425001A5B9C /* SIF.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SIF.cpp; path = ../Source/SIF.cpp; sourceTree = "<group>"; };
+		4B2E7A60203A5CB3001A5B9C /* Stage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Stage.h; path = ../Source/Stage.h; sourceTree = "<group>"; };
+		4B2E7A61203A5CB3001A5B9C /* Stage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Stage.cpp; path = ../Source/Stage.cpp; sourceTree = "<group>"; };
+		4B2E7A63203A6072001A5B9C /* Scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Scene.h; path = ../Source/Scene.h; sourceTree = "<group>"; };
+		4B2E7A64203A6072001A5B9C /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Scene.cpp; path = ../Source/Scene.cpp; sourceTree = "<group>"; };
 		4B4300851FB7EE44009EDE58 /* Quaternion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Quaternion.h; path = ../Source/Quaternion.h; sourceTree = "<group>"; };
 		4B4300861FB7EE44009EDE58 /* Quaternion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Quaternion.cpp; path = ../Source/Quaternion.cpp; sourceTree = "<group>"; };
 		4B4621E91FF741D800536BA6 /* Texture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Texture.h; path = ../Source/Texture.h; sourceTree = "<group>"; };
@@ -266,6 +278,8 @@
 				4BF32B8B1F67C434000639FB /* GLShader.h */,
 				4BF32B871F67BC34000639FB /* GLVertexArray.cpp */,
 				4BF32B881F67BC34000639FB /* GLVertexArray.h */,
+				4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */,
+				4B2E7A5A2039FCF0001A5B9C /* IniParser.h */,
 				4B09182F1FEED86B002991D4 /* InputManager.cpp */,
 				4B0918301FEED86B002991D4 /* InputManager.h */,
 				4BE6EE351F441DD100BB29D5 /* Libraries */,
@@ -277,6 +291,8 @@
 				4BD4CCE21FF1F5F5009665C7 /* MeshComponent.h */,
 				4B4EED861F5CA5F4000065EF /* Model.cpp */,
 				4B4EED871F5CA5F4000065EF /* Model.h */,
+				4B2E7A64203A6072001A5B9C /* Scene.cpp */,
+				4B2E7A63203A6072001A5B9C /* Scene.h */,
 				4B15A95A1F243349000A689F /* SDLLog.cpp */,
 				4B15A95B1F243349000A689F /* SDLLog.h */,
 				4B15A9541F242C55000A689F /* SDLRenderer.cpp */,
@@ -284,6 +300,10 @@
 				4B09182D1FEED84D002991D4 /* Services.cpp */,
 				4B09182C1FEED84D002991D4 /* Services.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
+				4B2E7A5E203A0425001A5B9C /* SIF.cpp */,
+				4B2E7A5D203A0425001A5B9C /* SIF.h */,
+				4B2E7A61203A5CB3001A5B9C /* Stage.cpp */,
+				4B2E7A60203A5CB3001A5B9C /* Stage.h */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4B4621EA1FF741D800536BA6 /* Texture.cpp */,
 				4B4621E91FF741D800536BA6 /* Texture.h */,
@@ -514,11 +534,13 @@
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
+				4B2E7A62203A5CB3001A5B9C /* Stage.cpp in Sources */,
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
+				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
 				4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */,
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
@@ -532,8 +554,10 @@
 				4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */,
 				4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
+				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
+				4B2E7A65203A6072001A5B9C /* Scene.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */,
