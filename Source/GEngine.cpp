@@ -17,6 +17,7 @@
 #include "MeshComponent.h"
 
 #include "Mesh.h"
+#include "Stage.h"
 
 extern GLfloat triangle_vertices[];
 extern GLfloat triangle_colors[];
@@ -111,8 +112,9 @@ bool GEngine::Initialize()
     meshComponent->SetModel(model);
     meshActor->AddComponent(meshComponent);
     
-    BSP* bsp = mAssetManager.LoadBSP("B25.BSP");
-    mRenderer.SetBSP(bsp);
+    //BSP* bsp = mAssetManager.LoadBSP("B25.BSP");
+    //mRenderer.SetBSP(bsp);
+    LoadStage("B25");
     return true;
 }
 
@@ -149,6 +151,18 @@ void GEngine::Run()
 void GEngine::Quit()
 {
     mRunning = false;
+}
+
+void GEngine::LoadStage(std::string name)
+{
+    if(mStage != nullptr)
+    {
+        //TODO: Deinit the current stage.
+        delete mStage;
+        mStage = nullptr;
+    }
+    
+    mStage = new Stage(name, mDay, mTime);
 }
 
 void GEngine::ProcessInput()
