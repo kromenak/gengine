@@ -232,7 +232,7 @@ BarnFile::BarnFile(const char* filePath) :
             mAssetMap[asset.name] = asset;
         }
     }
-    OutputAssetList();
+    //OutputAssetList();
 }
 
 bool BarnFile::CanRead() const
@@ -302,8 +302,8 @@ bool BarnFile::Extract(const std::string assetName, char *buffer, int bufferSize
     if(asset->compressionType == CompressionType::None)
     {
         // Seek to the data possion and read the data into the buffer. Since it's already uncompressed, we're done!
-        cout << "Reading from offset " << mDataOffset + asset->offset << endl;
-        cout << "Reading " << asset->uncompressedSize << " bytes " << endl;
+        //cout << "Reading from offset " << mDataOffset + asset->offset << endl;
+        //cout << "Reading " << asset->uncompressedSize << " bytes " << endl;
         mReader.Seek(mDataOffset + asset->offset);
         mReader.Read(buffer, asset->uncompressedSize);
     }

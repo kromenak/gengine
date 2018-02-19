@@ -45,11 +45,6 @@ public:
     Vector3 GetForward() const
     {
         return mRotation.Rotate(Vector3::UnitX);
-        /*
-        return Vector3(cosf(mRotation.GetZ()) * cosf(mRotation.GetX()),
-                       sinf(mRotation.GetZ()) * cosf(mRotation.GetX()),
-                       sinf(mRotation.GetX()));
-        */
     }
     
 private:

@@ -10,8 +10,7 @@
 #include <iostream>
 #include "Services.h"
 
-BSP::BSP(std::string name, char* data, int dataLength) :
-    Asset(name)
+BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }
@@ -211,7 +210,6 @@ void BSP::ParseFromData(char *data, int dataLength)
     }
     
     // Iterate and read vertices
-    std::cout << "About to read verts: " << reader.GetPosition() << std::endl;
     for(int i = 0; i < vertexCount; i++)
     {
         Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
