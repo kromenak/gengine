@@ -24,9 +24,8 @@ void Model::ParseFromData(char *data, int dataLength)
     BinaryReader reader(data, dataLength);
     
     // First 4 bytes: file identifier "LDOM" (MODL backwards).
-    char identifier[4];
-    reader.Read(identifier, 4);
-    if(!strcmp(identifier, "LDOM"))
+    std::string identifier = reader.ReadString(4);
+    if(identifier != "LDOM")
     {
         cout << "MOD file does not have MODL identifier!" << endl;
         return;
@@ -61,8 +60,8 @@ void Model::ParseFromData(char *data, int dataLength)
         //cout << "Mesh " << i << endl;
         
         // 4 bytes: mesh block identifier "HSEM" (MESH backwards).
-        reader.Read(identifier, 4);
-        if(!strcmp(identifier, "HSEM"))
+        identifier = reader.ReadString(4); //reader.Read(identifier, 4);
+        if(identifier != "HSEM")
         {
             cout << "Expected MESH identifier." << endl;
             return;
@@ -96,8 +95,8 @@ void Model::ParseFromData(char *data, int dataLength)
         for(int j = 0; j < numMeshGroups; j++)
         {
             // 4 bytes: mesh group block identifier "PRGM" (MGRP backwards).
-            reader.Read(identifier, 4);
-            if(!strcmp(identifier, "PRGM"))
+            identifier = reader.ReadString(4); //reader.Read(identifier, 4);
+            if(identifier != "PRGM")
             {
                 cout << "Expected MGRP identifier." << endl;
                 return;
@@ -218,8 +217,8 @@ void Model::ParseFromData(char *data, int dataLength)
     
     // After all meshes and mesh groups, there is some additional data.
     // 4 bytes: identifier "XDOM" (MODX backwards).
-    reader.Read(identifier, 4);
-    if(!strcmp(identifier, "XDOM"))
+    identifier = reader.ReadString(4); //reader.Read(identifier, 4);
+    if(identifier != "XDOM")
     {
         cout << "Expected MODX identifier." << endl;
         return;
