@@ -268,10 +268,9 @@
 				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
 				4B99229C2031735500184755 /* BSP.cpp */,
 				4B99229B2031735500184755 /* BSP.h */,
-				4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */,
-				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
 				4B1112AE1F821FFF00AFDDFC /* Component.h */,
+				4B4A0E52203C0FB300AFA382 /* Components */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
 				4B15A9511F2428C5000A689F /* GEngine.h */,
 				4BF32B8A1F67C434000639FB /* GLShader.cpp */,
@@ -287,8 +286,6 @@
 				4B4300841FB7EDFA009EDE58 /* Math */,
 				4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */,
 				4BD4CCE51FF1F7E3009665C7 /* Mesh.h */,
-				4BD4CCE31FF1F5F5009665C7 /* MeshComponent.cpp */,
-				4BD4CCE21FF1F5F5009665C7 /* MeshComponent.h */,
 				4B4EED861F5CA5F4000065EF /* Model.cpp */,
 				4B4EED871F5CA5F4000065EF /* Model.h */,
 				4B2E7A64203A6072001A5B9C /* Scene.cpp */,
@@ -357,13 +354,24 @@
 			name = Math;
 			sourceTree = "<group>";
 		};
+		4B4A0E52203C0FB300AFA382 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */,
+				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
+				4BD4CCE31FF1F5F5009665C7 /* MeshComponent.cpp */,
+				4BD4CCE21FF1F5F5009665C7 /* MeshComponent.h */,
+			);
+			name = Components;
+			sourceTree = "<group>";
+		};
 		4B76B57D1F3599A1003F63E5 /* Barn */ = {
 			isa = PBXGroup;
 			children = (
-				4B76B57A1F35999B003F63E5 /* BarnFile.cpp */,
-				4B76B57B1F35999B003F63E5 /* BarnFile.h */,
 				4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */,
 				4B76B5821F3788FA003F63E5 /* BarnAsset.h */,
+				4B76B57A1F35999B003F63E5 /* BarnFile.cpp */,
+				4B76B57B1F35999B003F63E5 /* BarnFile.h */,
 			);
 			name = Barn;
 			sourceTree = "<group>";
@@ -371,10 +379,10 @@
 		4B7AB0421F539EA500CFBE8F /* Audio */ = {
 			isa = PBXGroup;
 			children = (
-				4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */,
-				4B7C3A151F4EB07000BB0922 /* SDLAudio.h */,
 				4B7AB0431F539EB200CFBE8F /* Audio.cpp */,
 				4B7AB0441F539EB200CFBE8F /* Audio.h */,
+				4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */,
+				4B7C3A151F4EB07000BB0922 /* SDLAudio.h */,
 			);
 			name = Audio;
 			sourceTree = "<group>";
@@ -382,10 +390,10 @@
 		4B98D70A1F53D26C009CC2F0 /* STD */ = {
 			isa = PBXGroup;
 			children = (
-				4B02A3B01F526529000540A7 /* membuf.cpp */,
-				4B02A3B11F526529000540A7 /* membuf.h */,
 				4B02A3B31F5269E9000540A7 /* imstream.cpp */,
 				4B02A3B41F5269E9000540A7 /* imstream.h */,
+				4B02A3B01F526529000540A7 /* membuf.cpp */,
+				4B02A3B11F526529000540A7 /* membuf.h */,
 				4B5497F81FF80E0A00F1EF4F /* StringUtil.h */,
 			);
 			name = STD;

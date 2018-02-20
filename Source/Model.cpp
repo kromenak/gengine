@@ -63,7 +63,7 @@ void Model::ParseFromData(char *data, int dataLength)
         identifier = reader.ReadString(4); //reader.Read(identifier, 4);
         if(identifier != "HSEM")
         {
-            cout << "Expected MESH identifier." << endl;
+            cout << "Expected MESH identifier. Instead got " << identifier << endl;
             return;
         }
 

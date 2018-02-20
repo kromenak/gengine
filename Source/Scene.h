@@ -16,6 +16,10 @@ class Scene : public Asset
 public:
     Scene(std::string name, char* data, int dataLength);
     
+    std::string GetBSPName();
+    
 private:
+    std::string mBSPNameOverride;
+    
     void ParseFromData(char* data, int dataLength);
 };

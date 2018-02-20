@@ -17,6 +17,9 @@
 #include "Vector3.h"
 #include <vector>
 
+class Texture;
+class Model;
+
 struct SceneCamera
 {
     // The label for this camera.
@@ -55,36 +58,107 @@ struct ScenePosition
     std::string label;
     
     // The target position. If not specified, character won't move, but will still change headings, if specified.
-    Vector3* position = nullptr;
+    Vector3 position ;
     
     // The rotation, in degrees, for the character to face when they get to the position.
     // It not specified, the character keeps their current heading at the target position.
-    float* heading = nullptr;
+    float heading = -1.0f;
     
     // If specified, this camera will be switched to when using this position.
     SceneCamera* camera = nullptr;
 };
 
-struct SceneRegion
+struct SceneRegionOrTrigger
 {
+    // A region and trigger only vary in that the label for a
+    // trigger is a "noun".
     std::string label;
     
     //TODO: Need a Rect structure.
     float x1, z1, x2, z2;
 };
 
-struct SceneTrigger
+struct SceneSkybox
 {
+    Texture* leftTexture = nullptr;
+    Texture* rightTexture = nullptr;
+    Texture* frontTexture = nullptr;
+    Texture* backTexture = nullptr;
+    Texture* upTexture = nullptr;
+    Texture* downTexture = nullptr;
+};
+
+struct ActorDefinition
+{
+    // The model that will represent this actor in the scene.
+    Model* model = nullptr;
+    
+    // The noun associated with this actor, for interactions.
     std::string noun;
     
-    //TODO: Need a Rect structure.
-    float x1, z1, x2, z2;
+    // Initial position of the actor in the scene.
+    // We'll place the actor here, but this might be overwritten
+    // after scene init - maybe due to a Sheep script or something.
+    ScenePosition* position = nullptr;
+    
+    // IDLE GAS FILE
+    // TALK GAS FILE
+    // LISTEN GAS FILE
+    
+    // If true, this actor is hidden at initialization.
+    bool hidden = false;
+    
+    // If true, this actor will be the EGO (player controlled character).
+    bool ego = false;
+};
+
+struct ModelDefinition
+{
+    enum class Type
+    {
+        Scene,
+        Prop,
+        HitTest,
+        GasProp
+    };
+    
+    // Name of the model. For props, this is the name of a MOD file.
+    // For scene models, this is the name of the model in BSP.
+    std::string name;
+    
+    // Pretty important - the model to use.
+    // Could be null for models in the BSP geometry, which are quite common.
+    Model* model = nullptr;
+    
+    // The type of this model. Dictates whether it is part of the BSP geometry or a separate asset.
+    Type type = Type::Scene;
+    
+    // Noun associated with this object, for interactivity.
+    std::string noun;
+    
+    // Usually, verbs are specified in the NVC file. But it is allowed to
+    // specify a verb here if only a single verb response is possible.
+    std::string verb;
+    
+    // First frame of this anim will be applies on initialization.
+    // Only applies to Props. Others will ignore this.
+    //TODO: InitAnim
+    
+    // For GasProps, the gas file to use.
+    //TODO: GasFile
+    
+    // If true, the model is hidden at initialization.
+    bool hidden = false;
 };
 
 class SIF : public Asset
 {
 public:
     SIF(std::string name, char* data, int dataLength);
+    
+    std::string GetSCNName() { return mSceneAssetName; }
+    
+    std::vector<ActorDefinition*> GetActorDefinitions() { return mActorDefinitions; }
     
 private:
     // Name of the Scene asset that is used in conjunction with this SIF.
@@ -102,8 +176,8 @@ private:
     // CAMERA BOUNDS
     // Name of the MOD file that should be used for camera bounds.
     // Whether the camera bounds are static or not. Defaults to static. (When are they not?)
-    std::string mCameraBoundsModel;
-    bool mCameraBoundsStatic = true;
+    std::string mCameraBoundsModelName;
+    bool mCameraBoundsDynamic = false;
     
     // GLOBAL LIGHT
     // Global light position, color, ambience.
@@ -111,32 +185,26 @@ private:
     Vector3 mGlobalLightAmbient = Vector3(0.3f, 0.3f, 0.3f);
     
     // SKYBOX
-    // Textures for each side. It's OK for some, or all, to be empty.
-    std::string mSkyboxLeftTextureName;
-    std::string mSkyboxRightTextureName;
-    std::string mSkyboxFrontTextureName;
-    std::string mSkyboxBackTextureName;
-    std::string mSkyboxUpTextureName;
-    std::string mSkyboxDownTextureName;
+    SceneSkybox mSkybox;
     
     // ACTORS
-    std::vector<std::string> mActorNames;
-    std::vector<std::string> mActorNouns;
-    std::vector<std::string> mActorPositions;
-    std::vector<std::string> mActorIdleGasNames;
-    std::vector<std::string> mActorTalkGasNames;
-    std::vector<std::string> mActorListenGasNames;
-    std::vector<bool> mActorHiddenFlags;
-    std::vector<bool> mActorEgoFlags;
+    std::vector<ActorDefinition*> mActorDefinitions;
     
     // MODELS
-    std::vector<std::string> mModelNames;
-    std::vector<std::string> mModelNouns;
-    std::vector<std::string> mModelTypes;
-    std::vector<std::string> mModelVerbs;
-    std::vector<std::string> mModelInitAnims;
-    std::vector<bool> mModelHiddenFlags;
-    std::vector<std::string> mModelGasNames;
+    std::vector<ModelDefinition*> mModelDefinitions;
+    
+    // CAMERAS
+    std::vector<SceneCamera*> mInspectCameras;
+    std::vector<SceneCamera*> mRoomCameras;
+    std::vector<SceneCamera*> mCinematicCameras;
+    std::vector<DialogueCamera*> mDialogueCameras;
+    
+    // POSITIONS
+    std::vector<ScenePosition*> mPositions;
+    
+    // REGIONS & TRIGGERS
+    std::vector<SceneRegionOrTrigger*> mRegions;
+    std::vector<SceneRegionOrTrigger*> mTriggers;
     
     void ParseFromData(char* data, int dataLength);
 };
