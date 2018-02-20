@@ -17,6 +17,6 @@ public:
     
     std::string GetName() { return mName; }
     
-private:
+protected:
     std::string mName;
 };
