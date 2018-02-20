@@ -106,26 +106,23 @@ bool GEngine::Initialize()
     
     Actor* meshActor = new Actor();
     meshActor->SetPosition(Vector3(5.0f, 0.0f, 0.0f));
-    //meshActor->SetScale(Vector3(5.0f, 5.0f, 5.0f));
     
     MeshComponent* meshComponent = new MeshComponent(meshActor);
     meshComponent->SetModel(model);
     meshActor->AddComponent(meshComponent);
     
-    //BSP* bsp = mAssetManager.LoadBSP("B25.BSP");
-    //mRenderer.SetBSP(bsp);
     LoadStage("B25");
     return true;
 }
 
 void GEngine::Shutdown()
 {
-    // Delete all actors and clear actor list.
-    for(auto& actor : mActors)
+    // Delete all actors. Since actor destructor
+    // removes from this list, can't iterate and delete.s
+    while(!mActors.empty())
     {
-        delete actor;
+        delete mActors.back();
     }
-    mActors.clear();
     
     mRenderer.Shutdown();
     mAudio.Shutdown();
@@ -228,12 +225,12 @@ void GEngine::GenerateOutput()
     mRenderer.Present();
 }
 
-void GEngine::AddActor(Actor *actor)
+void GEngine::AddActor(Actor* actor)
 {
     mActors.push_back(actor);
 }
 
-void GEngine::RemoveActor(Actor *actor)
+void GEngine::RemoveActor(Actor* actor)
 {
     auto it = std::find(mActors.begin(), mActors.end(), actor);
     if(it != mActors.end())
