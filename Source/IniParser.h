@@ -8,6 +8,29 @@
 //
 #pragma once
 #include <fstream>
+#include "Vector2.h"
+#include "Vector3.h"
+#include <vector>
+#include <unordered_map>
+
+struct IniKeyValue
+{
+    std::string key;
+    std::string value;
+    
+    IniKeyValue* next;
+    
+    float GetValueAsFloat() { return (float)atof(value.c_str()); }
+    Vector2 GetValueAsVector2();
+    Vector3 GetValueAsVector3();
+};
+
+struct IniSection
+{
+    std::string name;
+    std::string condition;
+    std::vector<IniKeyValue*> entries;
+};
 
 class IniParser
 {
@@ -16,13 +39,17 @@ public:
     IniParser(const char* memory, unsigned int memoryLength);
     ~IniParser();
     
+    // MODE A: Read it all in at once and use it.
+    void ParseAll();
+    std::vector<IniSection> GetSections(std::string name);
+    
+    // MODE B: Read in small pieces at a time and jump around.
     bool ReadLine();
     std::string GetSection() { return mCurrentSection; }
-    std::string GetLine() { return mCurrentLine; }
+    bool SkipToNextSection();
     
     bool ReadKeyValuePair();
-    std::string GetKey() { return mCurrentKey; }
-    std::string GetValue() { return mCurrentValue; }
+    IniKeyValue GetKeyValue() { return mCurrentKeyValue; }
     
 private:
     // The stream object we use to read in the file contents.
@@ -36,6 +63,7 @@ private:
     
     // Values used when parsing a single line's key/value pairs.
     std::string mCurrentLineWorking;
-    std::string mCurrentKey;
-    std::string mCurrentValue;
+    IniKeyValue mCurrentKeyValue;
+    
+    std::vector<IniSection> mSections;
 };
