@@ -20,11 +20,13 @@ MeshComponent::~MeshComponent()
     Services::GetRenderer()->RemoveMeshComponent(this);
 }
 
+/*
 void MeshComponent::Update(float deltaTime)
 {
     mOwner->Rotate(Vector3::UnitY, deltaTime);
 }
-
+*/
+ 
 void MeshComponent::Render()
 {
     // Early out if nothing to render.
@@ -46,9 +48,20 @@ void MeshComponent::Render()
         // Really render it now!
         if(mMeshes[i] != nullptr)
         {
+            Vector3 offset = mMeshes[i]->GetOffset();
+            Services::GetRenderer()->SetVector3("uOffset", offset);
+            
+            /*
+            Quaternion rot = mMeshes[i]->GetRotation();
+            Matrix4 rotMat = Matrix4::MakeRotate(rot);
+            Services::GetRenderer()->SetMatrix4("uRotation", rotMat);
+            */
+             
             mMeshes[i]->Render();
         }
     }
+    
+    //Services::GetRenderer()->SetMatrix4("uRotation", Matrix4::Identity);
 }
 
 void MeshComponent::SetMesh(Mesh* mesh)
