@@ -10,6 +10,7 @@
 #include <iostream>
 
 class Vector3;
+class Matrix3;
 
 class Quaternion
 {
@@ -21,12 +22,16 @@ public:
     Quaternion(float x, float y, float z, float w);
     Quaternion(const Vector3& axis, float angle);
     explicit Quaternion(const Vector3& vector);
-    //explicit Quaternion(const Matrix33& matrix);
+    explicit Quaternion(const Matrix3& matrix);
     ~Quaternion() { }
     
     // Copy
     Quaternion(const Quaternion& other);
     Quaternion& operator=(const Quaternion& other);
+    
+    // Low-level accessors to (X, Y, Z) vals.
+    inline float& operator[](unsigned int i)         { return (&x)[i]; }
+    inline float operator[](unsigned int i) const    { return (&x)[i]; }
     
     // Equality
     bool operator==(const Quaternion& other) const;
@@ -57,8 +62,10 @@ public:
     }
     void Set(const Vector3& axis, float angle);
     void Set(const Vector3& from, const Vector3& to);
-    //void Set(const Matrix3& rotation);
+    void Set(const Matrix3& rotation);
     void Set(float xRadians, float yRadians, float zRadians);
+    
+    void Set(Vector3 forward, Vector3 up, Vector3 right);
     
     void GetAxisAngle(Vector3& axis, float& angle) const;
     

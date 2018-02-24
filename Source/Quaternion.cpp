@@ -5,6 +5,7 @@
 //
 #include "Quaternion.h"
 #include "Vector3.h"
+#include "Matrix3.h"
 
 Quaternion Quaternion::Zero(0.0f, 0.0f, 0.0f, 0.0f);
 Quaternion Quaternion::Identity(0.0f, 0.0f, 0.0f, 1.0f);
@@ -33,6 +34,11 @@ Quaternion::Quaternion(const Vector3& vector) :
     w(0.0f)
 {
     
+}
+
+Quaternion::Quaternion(const Matrix3& rotation)
+{
+    Set(rotation);
 }
 
 Quaternion::Quaternion(const Quaternion& other)
@@ -158,6 +164,42 @@ void Quaternion::Set(const Vector3& from, const Vector3& to)
     Normalize();
 }
 
+void Quaternion::Set(const Matrix3 &rotation)
+{
+    float trace = rotation.GetTrace();
+    if(trace > 0.0f)
+    {
+        float s = Math::Sqrt(trace + 1.0f);
+        w = s * 0.5f;
+        
+        float recip = 0.5f / s;
+        x = (rotation(2, 1) - rotation(1, 2)) * recip;
+        y = (rotation(0, 2) - rotation(2, 0)) * recip;
+        z = (rotation(1, 0) - rotation(0, 1)) * recip;
+    }
+    else
+    {
+        uint i = 0;
+        if(rotation(1, 1) > rotation(0, 0))
+        {
+            i = 1;
+        }
+        if(rotation(2, 2) > rotation(i, i))
+        {
+            i = 2;
+        }
+        uint j = (i + 1) % 3;
+        uint k = (j + 1) % 3;
+        float s = Math::Sqrt(rotation(i, i) - rotation(j, j) - rotation(k, k) + 1.0f);
+        (*this)[i] = 0.5f * s;
+        
+        float recip = 0.5f / s;
+        w = (rotation(k, j) - rotation(j, k)) * recip;
+        (*this)[j] = (rotation(j, i) + rotation(i, j)) * recip;
+        (*this)[k] = (rotation(k, i) + rotation(i, k)) * recip;
+    }
+}
+
 void Quaternion::Set(float xRadians, float yRadians, float zRadians)
 {
     // Since the internal representation of an angle in a quaternion is
@@ -185,6 +227,34 @@ void Quaternion::Set(float xRadians, float yRadians, float zRadians)
     x = sinX * cosY * cosZ + cosX * sinY * sinZ;
     y = cosX * sinY * cosZ - sinX * cosY * sinZ;
     z = cosX * cosY * sinZ + sinZ * sinY * cosX;
+}
+
+void Quaternion::Set(Vector3 forward, Vector3 up, Vector3 right)
+{
+    /*
+     Vector3 forward = Vector3.Normalize(forward);
+     Vector3 right = Vector3.Normalize(Vector3.Cross(up, forward));
+     Vector3 up = Vector3.Cross(forward, right);
+     var m00 = right.x;
+     var m01 = right.y;
+     var m02 = right.z;
+     var m10 = up.x;
+     var m11 = up.y;
+     var m12 = up.z;
+     var m20 = forward.x;
+     var m21 = forward.y;
+     var m22 = forward.z;
+    */
+    
+    float m00 = right.GetX();
+    float m01 = right.GetY();
+    float m02 = right.GetZ();
+    float m10 = up.GetX();
+    float m11 = up.GetY();
+    float m12 = up.GetZ();
+    float m20 = forward.GetX();
+    float m21 = forward.GetY();
+    float m22 = forward.GetZ();
 }
 
 void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const
