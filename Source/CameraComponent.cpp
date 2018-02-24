@@ -20,12 +20,19 @@ void CameraComponent::Update(float deltaTime)
     if(Services::GetInput()->IsPressed(SDL_SCANCODE_W))
     {
         mOwner->Translate(mOwner->GetForward() * (kCameraSpeed * deltaTime));
-        //mOwner->Translate(Vector3(0.0f, 0.0f, -kCameraSpeed * deltaTime));
     }
     else if(Services::GetInput()->IsPressed(SDL_SCANCODE_S))
     {
         mOwner->Translate(mOwner->GetForward() * (-kCameraSpeed * deltaTime));
-        //mOwner->Translate(Vector3(0.0f, 0.0f, kCameraSpeed * deltaTime));
+    }
+    
+    if(Services::GetInput()->IsPressed(SDL_SCANCODE_Q))
+    {
+        mOwner->Translate(Vector3(0.0f, kCameraSpeed * deltaTime, 0.0f));
+    }
+    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_E))
+    {
+        mOwner->Translate(Vector3(0.0f, -kCameraSpeed * deltaTime, 0.0f));
     }
     
     if(Services::GetInput()->IsPressed(SDL_SCANCODE_A))
