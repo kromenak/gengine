@@ -183,8 +183,19 @@ void SDLRenderer::Present()
 
 void SDLRenderer::SetWorldTransformMatrix(Matrix4& worldTransform)
 {
-    GLuint world = glGetUniformLocation(mShader->GetProgram(), "uWorldTransform");
-    glUniformMatrix4fv(world, 1, GL_FALSE, worldTransform.GetFloatPtr());
+    SetMatrix4("uWorldTransform", worldTransform);
+}
+
+void SDLRenderer::SetVector3(std::string name, Vector3 &vector)
+{
+    GLuint vecLoc = glGetUniformLocation(mShader->GetProgram(), name.c_str());
+    glUniform3f(vecLoc, vector.GetX(), vector.GetY(), vector.GetZ());
+}
+
+void SDLRenderer::SetMatrix4(std::string name, Matrix4 &matrix)
+{
+    GLuint matLoc = glGetUniformLocation(mShader->GetProgram(), name.c_str());
+    glUniformMatrix4fv(matLoc, 1, GL_FALSE, matrix.GetFloatPtr());
 }
 
 void SDLRenderer::AddMeshComponent(MeshComponent *mc)
