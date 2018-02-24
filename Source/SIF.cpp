@@ -404,7 +404,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                (model->type == ModelDefinition::Type::Prop ||
                 model->type == ModelDefinition::Type::GasProp))
             {
-                model->model = model->model = Services::GetAssets()->LoadModel(keyValue->value + ".MOD");
+                model->model = Services::GetAssets()->LoadModel(modelName + ".MOD");
             }
             mModelDefinitions.push_back(model);
         }
