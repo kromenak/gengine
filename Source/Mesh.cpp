@@ -6,7 +6,8 @@
 #include "Mesh.h"
 #include "GLVertexArray.h"
 
-Mesh::Mesh()
+Mesh::Mesh() :
+    mOffset(0, 0, 0)
 {
     mVertexArray = new GLVertexArray();
 }
