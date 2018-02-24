@@ -207,7 +207,7 @@ T* AssetManager::LoadAsset(string assetName, unordered_map<string, T*>* cache)
             (*cache)[upperName] = asset;
         }
         
-        std::cout << "Loaded asset " << upperName << std::endl;
+        //std::cout << "Loaded asset " << upperName << std::endl;
         return asset;
     }
     
