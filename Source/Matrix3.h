@@ -46,6 +46,8 @@ public:
     Matrix3& Transpose();
     static Matrix3 Transpose(const Matrix3& matrix);
     
+    float GetTrace() const;
+    
     // Addition and subtraction
     Matrix3 operator+(const Matrix3& rhs) const;
     Matrix3& operator+=(const Matrix3& rhs);
@@ -77,6 +79,7 @@ public:
     static Matrix3 MakeRotateZ(float rotZ);
     static Matrix3 MakeRotate(const Quaternion& quat);
     static Matrix3 MakeScale(Vector3 scale);
+    static Matrix3 MakeBasis(Vector3 forward, Vector3 up, Vector3 right);
     
 private:
     // Elements are stored in a 1D array internally.

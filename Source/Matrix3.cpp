@@ -106,6 +106,11 @@ Matrix3 Matrix3::Transpose(const Matrix3& matrix)
     return result;
 }
 
+float Matrix3::GetTrace() const
+{
+    return mVals[0] + mVals[4] + mVals[8];
+}
+
 void Matrix3::SetRows(const Vector3& row1, const Vector3& row2, const Vector3& row3)
 {
     mVals[0] = row1[0];
@@ -357,6 +362,13 @@ Matrix3 Matrix3::MakeScale(Vector3 scale)
     m[0] = scale.GetX();
     m[4] = scale.GetY();
     m[8] = scale.GetZ();
+    return m;
+}
+
+Matrix3 Matrix3::MakeBasis(Vector3 forward, Vector3 up, Vector3 right)
+{
+    Matrix3 m;
+    m.SetColumns(forward, up, right);
     return m;
 }
 
