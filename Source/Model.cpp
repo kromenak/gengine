@@ -10,6 +10,8 @@
 #include "Vector3.h"
 #include "Vector4.h"
 #include "Mesh.h"
+#include "Matrix3.h"
+#include "Quaternion.h"
 
 using namespace std;
 
@@ -40,7 +42,7 @@ void Model::ParseFromData(char *data, int dataLength)
     
     // 4 bytes: size of the model data in bytes.
     // Always 48 bytes LESS than the total size (b/c header data is 48 bytes).
-    unsigned int modelSize = reader.ReadUInt();
+    reader.ReadUInt();
     //cout << "Model file size: " << modelSize << endl;
     
     // 4 bytes: unknown - usually zero, but not always (GAB.MOD had 0x0000C842).
@@ -57,7 +59,7 @@ void Model::ParseFromData(char *data, int dataLength)
     int meshGroupCount = 0;
     for(int i = 0; i < numMeshes; i++)
     {
-        //cout << "Mesh " << i << endl;
+        cout << "Mesh " << i << endl;
         
         // 4 bytes: mesh block identifier "HSEM" (MESH backwards).
         identifier = reader.ReadString(4); //reader.Read(identifier, 4);
@@ -67,22 +69,29 @@ void Model::ParseFromData(char *data, int dataLength)
             return;
         }
 
-        // The next 48 bytes appear to be floating-point values.
-        // Perhaps 4 Vector3(X, Y, Z) values?
-        // The first three values are small values (always less than 1).
-        // The fourth value is always very large numbers: maybe a scale multiplier?
-        Vector3 val0(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        Vector3 val1(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        Vector3 val2(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        Vector3 val3(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        //cout << "Val0: " << val0 << endl;
-        //cout << "Val1: " << val1 << endl;
-        //cout << "Val2: " << val2 << endl;
-        //cout << "Val3: " << val3 << endl;
+        // 4 bytes: mesh's x-axis basis vector (i)
+        // 4 bytes: mesh's z-axis basis vector (k)
+        // 4 bytes: mesh's y-axis basis vector (j)
+        Vector3 iBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        Vector3 kBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        Vector3 jBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        cout << "   i: " << iBasis << endl;
+        cout << "   j: " << jBasis << endl;
+        cout << "   k: " << kBasis << endl;
+        
+        Matrix3 rotMat = Matrix3::MakeBasis(iBasis, jBasis, kBasis);
+        Quaternion rotQat(rotMat);
+        
+        // 4 bytes: an (X, Y, Z) offset or position for placing this mesh.
+        // Each mesh within the model has it's local offset from the model origin.
+        // This if vital, for example, if a mesh contains a human's head, legs, arms...
+        // want to position them all correctly relative to one another!
+        Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        cout << "   Mesh Position: " << meshPos << endl;
         
         // 4 bytes: number of mesh group blocks in this mesh.
         unsigned int numMeshGroups = reader.ReadUInt();
-        //cout << "Number of mesh groups in mesh: " << numMeshGroups << endl;
+        cout << "   Number of mesh groups in mesh: " << numMeshGroups << endl;
         
         // 24 bytes: two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max values for the mesh.
@@ -103,9 +112,8 @@ void Model::ParseFromData(char *data, int dataLength)
             }
             
             // 32 bytes: the name of the mesh group.
-            char meshGroupName[32];
-            reader.Read(meshGroupName, 32);
-            //cout << "Mesh group name: " << meshGroupName << endl;
+            std::string meshGroupName = reader.ReadString(32);
+            cout << "       Mesh group name: " << meshGroupName << endl;
             
             // 4 bytes: unknown - often is (0x00FFFFFF), but not always.
             // Have also seen: 0x03773BB3, 0xFF000000, 0x50261200
@@ -113,7 +121,6 @@ void Model::ParseFromData(char *data, int dataLength)
             if(val != 0x00FFFFFF)
             {
                 cout << "Expected 0x00FFFFFF" << endl;
-                //return;
             }
 
             // 4 bytes: unknown - seems to always be 1.
@@ -123,34 +130,34 @@ void Model::ParseFromData(char *data, int dataLength)
             Mesh* mesh = new Mesh();
             mMeshes.push_back(mesh);
             
+            // Save offset to mesh.
+            mesh->SetOffset(meshPos);
+            mesh->SetRotation(rotQat);
+            
             // Also, push group name onto texture name array.
             mTextureNames.push_back(std::string(meshGroupName));
             
-            // 4 bytes: unknown - seems to be a count value.
-            // This count seems to indicate groupings of 8 pieces of data later.
+            // 4 bytes: vertex count for this mesh group.
             int vertexCount = reader.ReadUInt();
+            
+            // Based on vertex count, we can allocate some arrays for data.
             float* vertexPositions = new float[vertexCount * 3];
             float* vertexNormals = new float[vertexCount * 3];
             float* vertexUVs = new float[vertexCount * 2];
-            //cout << "Count 1: " << vertexCount << endl;
             
-            // 4 bytes: unknown - seems to be a count value.
-            // This count seems to indicate groupings of 2 pieces of data later.
+            // 4 bytes: index count, for drawing indexed mesh.
             int indexCount = reader.ReadUInt();
             unsigned short* vertexIndexes = new unsigned short[indexCount * 3];
-            //cout << "Count 2: " << indexCount << endl;
 
             // 4 bytes: number of LODK blocks in this mesh group. Not uncommon to be 0.
-            unsigned int numLodkBlocks = reader.ReadUInt();
+            unsigned int lodkCount = reader.ReadUInt();
             //cout << "Number of LODK blocks: " << numLodkBlocks << endl;
             
             // 4 bytes: unknown - always zero thus far.
             reader.ReadUInt();
             
             // The next n bytes represent a certain number of floating point values.
-            // My guess is that this is the (X, Y, Z) vertex data for the mesh.
-            // The number of bytes is always equal to:
-            // n = (unknownCount1 * 8 * 4) + (unknownCount2 * 2 * 4)
+            // This is the (X, Y, Z) vertex data for the mesh (positions, normals, UVs).
             
             // First set of numbers represent positions for each vertex.
             //cout << "Positions: " << endl;
@@ -159,8 +166,8 @@ void Model::ParseFromData(char *data, int dataLength)
                 Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
                 //cout << v;
                 vertexPositions[k * 3] = v.GetX();
-                vertexPositions[k * 3 + 1] = v.GetY();
-                vertexPositions[k * 3 + 2] = v.GetZ();
+                vertexPositions[k * 3 + 1] = v.GetZ(); //v.GetY();
+                vertexPositions[k * 3 + 2] = v.GetY(); //v.GetZ();
             }
             //cout << endl;
             mesh->SetPositions(&vertexPositions[0], vertexCount * 3);
@@ -189,8 +196,7 @@ void Model::ParseFromData(char *data, int dataLength)
             //cout << endl;
             mesh->SetUV1(vertexUVs, vertexCount * 2);
             
-            // These appear to be unsigned short values (2 bytes each).
-            // I suspect these are the vertex indexes for drawing from an IBO.
+            // Next comes vertex indexes for drawing from an IBO.
             // Common sequence would be (2, 1, 0) or (5, 4, 3), referring to vertex indexes above.
             // Every 4th number seems out of place - not sure what they mean.
             // Seen: 0xF100 (241), 0x0000 (0), 0x0701 (263), 0x7F3F (16255), 0x56B1 (45398),
@@ -209,9 +215,43 @@ void Model::ParseFromData(char *data, int dataLength)
             //cout << endl;
             mesh->SetIndexes(vertexIndexes, indexCount * 3);
             
-            //TODO: Parse LODK blocks. What do they mean?
+            // Next comes LODK blocks for this mesh group.
+            // Not totally sure what these are for, but maybe LOD groups?
+            for(int k = 0; k < lodkCount; k++)
+            {
+                // Identifier should be "KDOL" for this block.
+                identifier = reader.ReadString(4);
+                if(identifier != "KDOL")
+                {
+                    cout << "Expected LODK identifier. Instead found " << identifier << endl;
+                    return;
+                }
+                
+                // First three values in LODK block are counts for
+                // how much data to read after.
+                int unknownCount1 = reader.ReadUInt();
+                int unknownCount2 = reader.ReadUInt();
+                int unknownCount3 = reader.ReadUInt();
+                
+                // Read in all values. Currently don't know what they are though.
+                for(int l = 0; l < unknownCount1; l++)
+                {
+                    reader.ReadUShort();
+                    reader.ReadUShort();
+                    reader.ReadUShort();
+                    reader.ReadUShort();
+                }
+                for(int l = 0; l < unknownCount2; l++)
+                {
+                    reader.ReadUShort();
+                    reader.ReadUShort();
+                }
+                for(int l = 0; l < unknownCount3; l++)
+                {
+                    reader.ReadUShort();
+                }
+            }
         }
-        
         meshGroupCount += numMeshGroups;
     }
     
