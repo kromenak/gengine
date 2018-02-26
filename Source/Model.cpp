@@ -59,7 +59,7 @@ void Model::ParseFromData(char *data, int dataLength)
     int meshGroupCount = 0;
     for(int i = 0; i < numMeshes; i++)
     {
-        cout << "Mesh " << i << endl;
+        //cout << "Mesh " << i << endl;
         
         // 4 bytes: mesh block identifier "HSEM" (MESH backwards).
         identifier = reader.ReadString(4); //reader.Read(identifier, 4);
@@ -69,16 +69,18 @@ void Model::ParseFromData(char *data, int dataLength)
             return;
         }
 
+        // These are in i,k,j order, rather than i,j,k, likely due to 3DS Max conventions.
         // 4 bytes: mesh's x-axis basis vector (i)
         // 4 bytes: mesh's z-axis basis vector (k)
         // 4 bytes: mesh's y-axis basis vector (j)
         Vector3 iBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         Vector3 kBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         Vector3 jBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        cout << "   i: " << iBasis << endl;
-        cout << "   j: " << jBasis << endl;
-        cout << "   k: " << kBasis << endl;
+        //cout << "   i: " << iBasis << endl;
+        //cout << "   j: " << jBasis << endl;
+        //cout << "   k: " << kBasis << endl;
         
+        // These basis vectors are orthogonal and represent a default rotation for the mesh.
         Matrix3 rotMat = Matrix3::MakeBasis(iBasis, jBasis, kBasis);
         Quaternion rotQat(rotMat);
         
@@ -87,11 +89,11 @@ void Model::ParseFromData(char *data, int dataLength)
         // This if vital, for example, if a mesh contains a human's head, legs, arms...
         // want to position them all correctly relative to one another!
         Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        cout << "   Mesh Position: " << meshPos << endl;
+        //cout << "   Mesh Position: " << meshPos << endl;
         
         // 4 bytes: number of mesh group blocks in this mesh.
         unsigned int numMeshGroups = reader.ReadUInt();
-        cout << "   Number of mesh groups in mesh: " << numMeshGroups << endl;
+        //cout << "   Number of mesh groups in mesh: " << numMeshGroups << endl;
         
         // 24 bytes: two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max values for the mesh.
@@ -113,7 +115,7 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // 32 bytes: the name of the mesh group.
             std::string meshGroupName = reader.ReadString(32);
-            cout << "       Mesh group name: " << meshGroupName << endl;
+            //cout << "       Mesh group name: " << meshGroupName << endl;
             
             // 4 bytes: unknown - often is (0x00FFFFFF), but not always.
             // Have also seen: 0x03773BB3, 0xFF000000, 0x50261200

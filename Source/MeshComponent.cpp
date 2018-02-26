@@ -11,9 +11,6 @@
 #include "Texture.h"
 
 extern GLVertexArray* axes;
-//Vector3 g_i(0.725101411, 0.542805076, 0.423781365);
-//Vector3 g_j(-0.627925813, 0.773807108, 0.0832588226);
-//Vector3 g_k(-0.282731682, -0.326474309, 0.901929796);
 
 MeshComponent::MeshComponent(Actor* owner) : Component(owner)
 {
@@ -51,11 +48,10 @@ void MeshComponent::Render()
         // Really render it now!
         if(mMeshes[i] != nullptr)
         {
+            //TODO: Should probably put these in a matrix and just multiply it w/ WorldTransform
+            // I think that would work, and keep the shader generalized.
             Vector3 offset = mMeshes[i]->GetOffset();
             Services::GetRenderer()->SetVector3("uOffset", offset);
-            
-            //Matrix3 rotMatBasis = Matrix3::MakeBasis(g_i, g_j, g_k);
-            //Quaternion rot(rotMatBasis);
             
             Quaternion rot = mMeshes[i]->GetRotation();
             Matrix4 rotMat = Matrix4::MakeRotate(rot);
@@ -63,8 +59,10 @@ void MeshComponent::Render()
             
             mMeshes[i]->Render();
             
-            glBindTexture(GL_TEXTURE_2D, 0);
-            axes->DrawLines();
+            //TODO: This bit draws local axes for the model, for debugging.
+            // Would be cool to turn this on/off as needed.
+            //glBindTexture(GL_TEXTURE_2D, 0);
+            //axes->DrawLines();
         }
     }
     Services::GetRenderer()->SetMatrix4("uRotation", Matrix4::Identity);

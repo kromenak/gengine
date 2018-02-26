@@ -78,12 +78,6 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("common.brn");
     //mAssetManager.LoadBarn("ambient.brn");
     
-    Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
-    //Model* model = mAssetManager.LoadModel("MONEY2.MOD");
-    //Model* model = mAssetManager.LoadModel("TAX.MOD");
-    //Model* model = mAssetManager.LoadModel("R25HANGER.MOD");
-    //Model* model = mAssetManager.LoadModel("GAB.MOD");
-    
     //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
     //audio->WriteToFile();
     //mAudio.Play(*audio);
@@ -96,17 +90,10 @@ bool GEngine::Initialize()
     camActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
     camActor->AddComponent(new CameraComponent(camActor));
     
-    // Mesh example.
-    //Mesh* mesh = new Mesh();
-    //mesh->SetPositions(triangle_vertices, 9);
-    //mesh->SetColors(triangle_colors, 12);
-    //mesh->SetPositions(cube_vertices, 24);
-    //mesh->SetColors(cube_colors, 32);
-    //mesh->SetIndexes(cube_elements, 36);
-    
     Actor* meshActor = new Actor();
     meshActor->SetPosition(Vector3(5.0f, 0.0f, 0.0f));
     
+    Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
     MeshComponent* meshComponent = new MeshComponent(meshActor);
     meshComponent->SetModel(model);
     meshActor->AddComponent(meshComponent);
