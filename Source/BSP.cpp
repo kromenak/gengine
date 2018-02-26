@@ -37,6 +37,14 @@ void BSP::RenderTree(BSPNode *node, Vector3 position)
         {
             RenderPolygon(mPolygons[i]);
         }
+        if(node->polygonIndex2 != 65535 && node->polygonCount2 > 0)
+        {
+            polygonIndex = node->polygonIndex2;
+            for(int i = polygonIndex; i < polygonIndex + node->polygonCount2; i++)
+            {
+                RenderPolygon(mPolygons[i]);
+            }
+        }
         
         int frontNodeIndex = node->frontChildIndex;
         if(frontNodeIndex >= 0 && frontNodeIndex < mNodes.size())
@@ -57,6 +65,14 @@ void BSP::RenderTree(BSPNode *node, Vector3 position)
         for(int i = polygonIndex; i < polygonIndex + node->polygonCount; i++)
         {
             RenderPolygon(mPolygons[i]);
+        }
+        if(node->polygonIndex2 != 65535 && node->polygonCount2 > 0)
+        {
+            polygonIndex = node->polygonIndex2;
+            for(int i = polygonIndex; i < polygonIndex + node->polygonCount2; i++)
+            {
+                RenderPolygon(mPolygons[i]);
+            }
         }
         
         int backNodeIndex = node->backChildIndex;
@@ -155,6 +171,12 @@ void BSP::ParseFromData(char *data, int dataLength)
     {
         BSPSurface* surface = new BSPSurface();
         surface->objectIndex = reader.ReadUInt();
+        
+        if(mObjectNames[surface->objectIndex] == "bth_floor")
+        {
+            std::cout << "Reading in floor surface." << std::endl;
+        }
+        
         surface->textureName = reader.ReadString(32);
         surface->textureName.append(".BMP");
         surface->texture = Services::GetAssets()->LoadTexture(surface->textureName);
@@ -178,11 +200,15 @@ void BSP::ParseFromData(char *data, int dataLength)
         node->planeIndex = reader.ReadUShort();
         
         node->polygonIndex = reader.ReadUShort();
-        reader.ReadUShort(); // Unknown value
+        node->polygonIndex2 = reader.ReadUShort();
         node->polygonCount = reader.ReadUShort();
+        node->polygonCount2 = reader.ReadUShort();
         
-        reader.ReadUShort(); // Unknown value
-        reader.ReadUShort(); // Unknown value
+        ushort val1 = reader.ReadUShort(); // Unknown value
+        
+        //std::cout << "Node " << mNodes.size() << ":" << std::endl;
+        //std::cout << "  Polygon Idx: " << node->polygonIndex << ", Polygon Count: " << node->polygonCount << std::endl;
+        //std::cout << "  Unknown Val 1: " << val1 << std::endl;
         
         mNodes.push_back(node);
     }

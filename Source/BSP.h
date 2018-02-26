@@ -33,6 +33,10 @@ struct BSPNode
     // These are the polygons that should be drawn as part of this node, I guess.
     ushort polygonIndex;
     ushort polygonCount;
+    
+    // Nodes seem to optionally also define a second set of polygons.
+    ushort polygonIndex2;
+    ushort polygonCount2;
 };
 
 // A plane in 3D space, which we can represent with a normal and distance from origin.
