@@ -10,6 +10,11 @@
 #include "Services.h"
 #include "Texture.h"
 
+extern GLVertexArray* axes;
+//Vector3 g_i(0.725101411, 0.542805076, 0.423781365);
+//Vector3 g_j(-0.627925813, 0.773807108, 0.0832588226);
+//Vector3 g_k(-0.282731682, -0.326474309, 0.901929796);
+
 MeshComponent::MeshComponent(Actor* owner) : Component(owner)
 {
     Services::GetRenderer()->AddMeshComponent(this);
@@ -20,13 +25,11 @@ MeshComponent::~MeshComponent()
     Services::GetRenderer()->RemoveMeshComponent(this);
 }
 
-/*
 void MeshComponent::Update(float deltaTime)
 {
-    mOwner->Rotate(Vector3::UnitY, deltaTime);
+    //mOwner->Rotate(Vector3::UnitY, deltaTime);
 }
-*/
- 
+
 void MeshComponent::Render()
 {
     // Early out if nothing to render.
@@ -51,17 +54,20 @@ void MeshComponent::Render()
             Vector3 offset = mMeshes[i]->GetOffset();
             Services::GetRenderer()->SetVector3("uOffset", offset);
             
-            /*
+            //Matrix3 rotMatBasis = Matrix3::MakeBasis(g_i, g_j, g_k);
+            //Quaternion rot(rotMatBasis);
+            
             Quaternion rot = mMeshes[i]->GetRotation();
             Matrix4 rotMat = Matrix4::MakeRotate(rot);
             Services::GetRenderer()->SetMatrix4("uRotation", rotMat);
-            */
-             
+            
             mMeshes[i]->Render();
+            
+            glBindTexture(GL_TEXTURE_2D, 0);
+            axes->DrawLines();
         }
     }
-    
-    //Services::GetRenderer()->SetMatrix4("uRotation", Matrix4::Identity);
+    Services::GetRenderer()->SetMatrix4("uRotation", Matrix4::Identity);
 }
 
 void MeshComponent::SetMesh(Mesh* mesh)

@@ -97,8 +97,8 @@ void Model::ParseFromData(char *data, int dataLength)
         // Based on plot test, seems very likely these are min/max values for the mesh.
         Vector3 val4(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         Vector3 val5(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        //cout << "Min: " << val4 << endl;
-        //cout << "Max: " << val5 << endl;
+        //cout << "   Min: " << val4 << endl;
+        //cout << "   Max: " << val5 << endl;
         
         // Now, we iterate over each mesh group in this mesh.
         for(int j = 0; j < numMeshGroups; j++)

@@ -187,4 +187,9 @@ void GLVertexArray::Draw(int offset, int count)
     }
 }
 
+void GLVertexArray::DrawLines()
+{
+    Activate();
+    glDrawArrays(GL_LINES, 0, mPositionCount / 3);
+}
 

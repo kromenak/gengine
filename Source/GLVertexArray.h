@@ -31,6 +31,8 @@ public:
     void Draw();
     void Draw(int offset, int count);
     
+    void DrawLines();
+    
 private:
     // Buffer objects for OpenGL - Vertex Buffer Object,
     // Vertex Array Object, and Index Buffer Object.

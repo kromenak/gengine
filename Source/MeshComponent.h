@@ -18,7 +18,7 @@ public:
     MeshComponent(Actor* actor);
     ~MeshComponent();
     
-    //void Update(float deltaTime) override;
+    void Update(float deltaTime) override;
     
     void Render();
     

@@ -101,8 +101,8 @@
 		4B0918351FEEEA51002991D4 /* Matrix3.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix3.cpp; path = ../Source/Matrix3.cpp; sourceTree = "<group>"; };
 		4B0B67811F78DCD40023815F /* Actor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Actor.cpp; path = ../Source/Actor.cpp; sourceTree = "<group>"; };
 		4B0B67821F78DCD40023815F /* Actor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Actor.h; path = ../Source/Actor.h; sourceTree = "<group>"; };
-		4B0E2A571F74F5650019D4AD /* Tut.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Tut.frag; path = ../Assets/Tut.frag; sourceTree = "<group>"; };
-		4B0E2A581F74F5650019D4AD /* Tut.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = Tut.vert; path = ../Assets/Tut.vert; sourceTree = "<group>"; };
+		4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Diffuse-Tex.frag"; path = "../Assets/3D-Diffuse-Tex.frag"; sourceTree = "<group>"; };
+		4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Diffuse-Tex.vert"; path = "../Assets/3D-Diffuse-Tex.vert"; sourceTree = "<group>"; };
 		4B11129B1F820A6D00AFDDFC /* GEngine-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B1112A61F820AC100AFDDFC /* catch.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = catch.hh; path = ../Tests/catch.hh; sourceTree = "<group>"; };
 		4B1112A71F820B0400AFDDFC /* TestMain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TestMain.cpp; path = ../Tests/TestMain.cpp; sourceTree = "<group>"; };
@@ -217,8 +217,8 @@
 			children = (
 				4B0918321FEEE24B002991D4 /* BasicMesh.frag */,
 				4B0918331FEEE24B002991D4 /* BasicMesh.vert */,
-				4B0E2A571F74F5650019D4AD /* Tut.frag */,
-				4B0E2A581F74F5650019D4AD /* Tut.vert */,
+				4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */,
+				4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */,
 			);
 			name = Assets;
 			sourceTree = "<group>";

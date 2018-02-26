@@ -15,6 +15,26 @@
 #include "CameraComponent.h"
 #include "MeshComponent.h"
 
+GLfloat axis_vertices[] = {
+    0.0f, 0.0f, 0.0f,
+    5.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 0.0f,
+    0.0f, 5.0f, 0.0f,
+    0.0f, 0.0f, 0.0f,
+    0.0f, 0.0f, 5.0f
+};
+
+GLfloat axis_colors[] = {
+    1.0f, 0.0f, 0.0f, 1.0f,
+    1.0f, 0.0f, 0.0f, 1.0f,
+    0.0f, 1.0f, 0.0f, 1.0f,
+    0.0f, 1.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, 1.0f
+};
+
+GLVertexArray* axes = nullptr;
+
 GLfloat triangle_vertices[] = {
     0.0f,  0.5f,  0.0f,
     0.5f, -0.5f,  0.0f,
@@ -118,8 +138,13 @@ bool SDLRenderer::Initialize()
     // Our clear color will be BLACK!
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     
-    mShader = new GLShader("Assets/Tut.vert", "Assets/Tut.frag");
+    // Create default shader.
+    mShader = new GLShader("Assets/3D-Diffuse-Tex.vert", "Assets/3D-Diffuse-Tex.frag");
     if(!mShader->IsGood()) { return false; }
+    
+    // Create axes mesh, which is helpful for debugging.
+    axes = new GLVertexArray(axis_vertices, 18);
+    axes->SetColors(axis_colors, 24);
     
     // Init succeeded!
     return true;
