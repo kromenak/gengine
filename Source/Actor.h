@@ -48,8 +48,6 @@ public:
     }
     
 private:
-    // NOTE: Based on GK3 MOD files, it appears that GK3 uses a coordinate system where:
-    // Forward = -Y, Up = +Z, Right = -X
     Vector3 mPosition;
     Quaternion mRotation;
     Vector3 mScale;

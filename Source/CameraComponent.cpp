@@ -8,6 +8,7 @@
 #include "SDLRenderer.h"
 
 const float kCameraSpeed = 50.0f;
+const float kRunCameraMultiplier = 2.0f;
 const float kCameraRotationSpeed = 1.0f;
 
 CameraComponent::CameraComponent(Actor* owner) : Component(owner)
@@ -17,22 +18,46 @@ CameraComponent::CameraComponent(Actor* owner) : Component(owner)
 
 void CameraComponent::Update(float deltaTime)
 {
+    float camSpeed = kCameraSpeed;
+    if(Services::GetInput()->IsPressed(SDL_SCANCODE_LSHIFT))
+    {
+        camSpeed = kCameraSpeed * kRunCameraMultiplier;
+    }
+    
     if(Services::GetInput()->IsPressed(SDL_SCANCODE_W))
     {
-        mOwner->Translate(mOwner->GetForward() * (kCameraSpeed * deltaTime));
+        mOwner->Translate(mOwner->GetForward() * (camSpeed * deltaTime));
     }
     else if(Services::GetInput()->IsPressed(SDL_SCANCODE_S))
     {
-        mOwner->Translate(mOwner->GetForward() * (-kCameraSpeed * deltaTime));
+        mOwner->Translate(mOwner->GetForward() * (-camSpeed * deltaTime));
     }
     
-    if(Services::GetInput()->IsPressed(SDL_SCANCODE_Q))
+    if(Services::GetInput()->IsPressed(SDL_SCANCODE_E))
     {
-        mOwner->Translate(Vector3(0.0f, kCameraSpeed * deltaTime, 0.0f));
+        mOwner->Translate(Vector3(0.0f, camSpeed * deltaTime, 0.0f));
     }
-    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_E))
+    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_Q))
     {
-        mOwner->Translate(Vector3(0.0f, -kCameraSpeed * deltaTime, 0.0f));
+        mOwner->Translate(Vector3(0.0f, -camSpeed * deltaTime, 0.0f));
+    }
+    
+    if(Services::GetInput()->IsPressed(SDL_SCANCODE_UP))
+    {
+        mOwner->Translate(Vector3(camSpeed * deltaTime, 0.0f, 0.0f));
+    }
+    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_DOWN))
+    {
+        mOwner->Translate(Vector3(-camSpeed * deltaTime, 0.0f, 0.0f));
+    }
+    
+    if(Services::GetInput()->IsPressed(SDL_SCANCODE_RIGHT))
+    {
+        mOwner->Translate(Vector3(0.0f, 0.0f, camSpeed * deltaTime));
+    }
+    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_LEFT))
+    {
+        mOwner->Translate(Vector3(0.0f, 0.0f, -camSpeed * deltaTime));
     }
     
     if(Services::GetInput()->IsPressed(SDL_SCANCODE_A))
