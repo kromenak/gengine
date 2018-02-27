@@ -91,34 +91,39 @@ BarnFile* AssetManager::GetBarn(string barnName)
     return nullptr;
 }
 
-Audio* AssetManager::LoadAudio(string audioName)
+Audio* AssetManager::LoadAudio(string name)
 {
-    return LoadAsset<Audio>(audioName, nullptr);
+    return LoadAsset<Audio>(name, nullptr);
 }
 
-Model* AssetManager::LoadModel(string modelName)
+Model* AssetManager::LoadModel(string name)
 {
-    return LoadAsset<Model>(modelName, nullptr);
+    return LoadAsset<Model>(name, nullptr);
 }
 
-Texture* AssetManager::LoadTexture(string textureName)
+Texture* AssetManager::LoadTexture(string name)
 {
-    return LoadAsset<Texture>(textureName, &mLoadedTextures);
+    return LoadAsset<Texture>(name, &mLoadedTextures);
 }
 
-SIF* AssetManager::LoadSIF(string sifName)
+SIF* AssetManager::LoadSIF(string name)
 {
-    return LoadAsset<SIF>(sifName, nullptr);
+    return LoadAsset<SIF>(name, nullptr);
 }
 
-Scene* AssetManager::LoadScene(string sceneName)
+Scene* AssetManager::LoadScene(string name)
 {
-    return LoadAsset<Scene>(sceneName, nullptr);
+    return LoadAsset<Scene>(name, nullptr);
 }
 
-BSP* AssetManager::LoadBSP(string bspName)
+NVC* AssetManager::LoadNVC(string name)
 {
-    return LoadAsset<BSP>(bspName, nullptr);
+    return LoadAsset<NVC>(name, nullptr);
+}
+
+BSP* AssetManager::LoadBSP(string name)
+{
+    return LoadAsset<BSP>(name, nullptr);
 }
 
 string AssetManager::GetAssetPath(string fileName)

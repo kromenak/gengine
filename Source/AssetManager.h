@@ -14,6 +14,7 @@
 #include "BSP.h"
 #include "SIF.h"
 #include "Scene.h"
+#include "NVC.h"
 
 using namespace std;
 
@@ -29,13 +30,14 @@ public:
     void UnloadBarn(string barnName);
     BarnFile* GetBarn(string barnName);
     
-    Audio* LoadAudio(string audioName);
-    Model* LoadModel(string modelName);
-    Texture* LoadTexture(string textureName);
+    Audio* LoadAudio(string name);
+    Model* LoadModel(string name);
+    Texture* LoadTexture(string name);
     
-    SIF* LoadSIF(string sifName);
-    Scene* LoadScene(string sceneName);
-    BSP* LoadBSP(string bspName);
+    SIF* LoadSIF(string name);
+    Scene* LoadScene(string name);
+    NVC* LoadNVC(string name);
+    BSP* LoadBSP(string name);
     
 private:
     // A list of paths to search for assets.
