@@ -48,11 +48,19 @@ public:
     }
     
 private:
+    // A parent actor, if any.
+    Actor* mParent = nullptr;
+    
+    // Position, rotation, and scale of the actor in local space.
     Vector3 mPosition;
     Quaternion mRotation;
     Vector3 mScale;
+    
+    // Wold transform matrix, which is calculated from position/rotation/scale
+    // as well as parent position/rotation/scale.
     Matrix4 mWorldTransform;
     
+    // The components that are attached to this actor.
     std::vector<Component*> mComponents;
     
     void UpdateWorldTransform();

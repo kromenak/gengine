@@ -172,11 +172,6 @@ void BSP::ParseFromData(char *data, int dataLength)
         BSPSurface* surface = new BSPSurface();
         surface->objectIndex = reader.ReadUInt();
         
-        if(mObjectNames[surface->objectIndex] == "bth_floor")
-        {
-            std::cout << "Reading in floor surface." << std::endl;
-        }
-        
         surface->textureName = reader.ReadString(32);
         surface->textureName.append(".BMP");
         surface->texture = Services::GetAssets()->LoadTexture(surface->textureName);
@@ -204,7 +199,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         node->polygonCount = reader.ReadUShort();
         node->polygonCount2 = reader.ReadUShort();
         
-        ushort val1 = reader.ReadUShort(); // Unknown value
+        reader.ReadUShort(); // Unknown value
         
         //std::cout << "Node " << mNodes.size() << ":" << std::endl;
         //std::cout << "  Polygon Idx: " << node->polygonIndex << ", Polygon Count: " << node->polygonCount << std::endl;
