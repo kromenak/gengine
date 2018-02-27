@@ -35,6 +35,10 @@ void MeshComponent::Render()
     // Update the world transform for the shader.
     Matrix4 worldTransform = mOwner->GetWorldTransformMatrix();
     Services::GetRenderer()->SetWorldTransformMatrix(worldTransform);
+
+    // Draws a little axes indicator at the position of the actor.
+    glBindTexture(GL_TEXTURE_2D, 0);
+    axes->DrawLines();
     
     // Render the things!
     for(int i = 0; i < mMeshes.size(); i++)
@@ -65,6 +69,7 @@ void MeshComponent::Render()
             //axes->DrawLines();
         }
     }
+    Services::GetRenderer()->SetVector3("uOffset", Vector3::Zero);
     Services::GetRenderer()->SetMatrix4("uRotation", Matrix4::Identity);
 }
 
