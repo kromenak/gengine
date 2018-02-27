@@ -151,8 +151,11 @@ void GEngine::LoadStage(std::string name)
 
 void GEngine::ProcessInput()
 {
+    // Update the input manager.
+    // Retrieve input device states for us to use.
+    mInputManager.Update();
+    
     // We'll poll for events here. Catch the quit event.
-    //TODO: Should this be moved to InputManager?
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
@@ -164,12 +167,8 @@ void GEngine::ProcessInput()
         }
     }
     
-    // Update the input manager.
-    // Retrieve input device states for us to use.
-    mInputManager.Update();
-    
     // Quit game on escape press for now.
-    if(mInputManager.IsPressed(SDL_SCANCODE_ESCAPE))
+    if(mInputManager.IsKeyPressed(SDL_SCANCODE_ESCAPE))
     {
         Quit();
     }

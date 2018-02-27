@@ -19,52 +19,52 @@ CameraComponent::CameraComponent(Actor* owner) : Component(owner)
 void CameraComponent::Update(float deltaTime)
 {
     float camSpeed = kCameraSpeed;
-    if(Services::GetInput()->IsPressed(SDL_SCANCODE_LSHIFT))
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LSHIFT))
     {
         camSpeed = kCameraSpeed * kRunCameraMultiplier;
     }
     
-    if(Services::GetInput()->IsPressed(SDL_SCANCODE_W))
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_W))
     {
         mOwner->Translate(mOwner->GetForward() * (camSpeed * deltaTime));
     }
-    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_S))
+    else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_S))
     {
         mOwner->Translate(mOwner->GetForward() * (-camSpeed * deltaTime));
     }
     
-    if(Services::GetInput()->IsPressed(SDL_SCANCODE_E))
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_E))
     {
         mOwner->Translate(Vector3(0.0f, camSpeed * deltaTime, 0.0f));
     }
-    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_Q))
+    else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_Q))
     {
         mOwner->Translate(Vector3(0.0f, -camSpeed * deltaTime, 0.0f));
     }
     
-    if(Services::GetInput()->IsPressed(SDL_SCANCODE_UP))
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_UP))
     {
         mOwner->Translate(Vector3(camSpeed * deltaTime, 0.0f, 0.0f));
     }
-    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_DOWN))
+    else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_DOWN))
     {
         mOwner->Translate(Vector3(-camSpeed * deltaTime, 0.0f, 0.0f));
     }
     
-    if(Services::GetInput()->IsPressed(SDL_SCANCODE_RIGHT))
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RIGHT))
     {
         mOwner->Translate(Vector3(0.0f, 0.0f, camSpeed * deltaTime));
     }
-    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_LEFT))
+    else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LEFT))
     {
         mOwner->Translate(Vector3(0.0f, 0.0f, -camSpeed * deltaTime));
     }
     
-    if(Services::GetInput()->IsPressed(SDL_SCANCODE_A))
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_A))
     {
         mOwner->Rotate(Vector3::UnitY, kCameraRotationSpeed * deltaTime);
     }
-    else if(Services::GetInput()->IsPressed(SDL_SCANCODE_D))
+    else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_D))
     {
         mOwner->Rotate(Vector3::UnitY, -kCameraRotationSpeed * deltaTime);
     }
