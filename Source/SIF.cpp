@@ -457,4 +457,23 @@ void SIF::ParseFromData(char *data, int dataLength)
             mTriggers.push_back(region);
         }
     }
+    
+    std::vector<IniSection> ambientSections = parser.GetSections("AMBIENT");
+    
+    std::vector<IniSection> actionSections = parser.GetSections("ACTIONS");
+    for(auto& section : actionSections)
+    {
+        for(auto& entry : section.entries)
+        {
+            //TODO: Should only read in NVC files that correspond to the current day.
+            //Will have a number like "1" for day 1.
+            
+            NVC* nvc = Services::GetAssets()->LoadNVC(entry->key);
+            if(nvc != nullptr)
+            {
+                mNVCs.push_back(nvc);
+            }
+        }
+    }
+    
 }

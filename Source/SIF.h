@@ -19,6 +19,7 @@
 
 class Texture;
 class Model;
+class NVC;
 
 struct SceneCamera
 {
@@ -205,6 +206,11 @@ private:
     // REGIONS & TRIGGERS
     std::vector<SceneRegionOrTrigger*> mRegions;
     std::vector<SceneRegionOrTrigger*> mTriggers;
+    
+    // AMBIENT
+    
+    // ACTIONS
+    std::vector<NVC*> mNVCs;
     
     void ParseFromData(char* data, int dataLength);
 };
