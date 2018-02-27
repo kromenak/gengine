@@ -220,6 +220,16 @@ std::vector<IniSection> IniParser::GetSections(std::string name)
     return toReturn;
 }
 
+IniSection IniParser::GetSection(std::string name)
+{
+    std::vector<IniSection> sections = GetSections(name);
+    if(sections.size() > 0)
+    {
+        return GetSections(name)[0];
+    }
+    return IniSection();
+}
+
 bool IniParser::ReadLine()
 {
     if(mStream->eof()) { return false; }

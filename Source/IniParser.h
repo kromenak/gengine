@@ -42,10 +42,10 @@ public:
     // MODE A: Read it all in at once and use it.
     void ParseAll();
     std::vector<IniSection> GetSections(std::string name);
+    IniSection GetSection(std::string name);
     
     // MODE B: Read in small pieces at a time and jump around.
     bool ReadLine();
-    std::string GetSection() { return mCurrentSection; }
     bool SkipToNextSection();
     
     bool ReadKeyValuePair();
