@@ -80,10 +80,6 @@ void Model::ParseFromData(char *data, int dataLength)
         //cout << "   j: " << jBasis << endl;
         //cout << "   k: " << kBasis << endl;
         
-        // These basis vectors are orthogonal and represent a default rotation for the mesh.
-        Matrix3 rotMat = Matrix3::MakeBasis(iBasis, jBasis, kBasis);
-        Quaternion rotQat(rotMat);
-        
         // 4 bytes: an (X, Y, Z) offset or position for placing this mesh.
         // Each mesh within the model has it's local offset from the model origin.
         // This if vital, for example, if a mesh contains a human's head, legs, arms...
@@ -134,6 +130,10 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // Save offset to mesh.
             mesh->SetOffset(meshPos);
+            
+            // These basis vectors are orthogonal and represent a default rotation for the mesh.
+            Matrix3 rotMat = Matrix3::MakeBasis(iBasis, jBasis, kBasis);
+            Quaternion rotQat(rotMat);
             mesh->SetRotation(rotQat);
             
             // Also, push group name onto texture name array.
@@ -168,8 +168,8 @@ void Model::ParseFromData(char *data, int dataLength)
                 Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
                 //cout << v;
                 vertexPositions[k * 3] = v.GetX();
-                vertexPositions[k * 3 + 1] = v.GetZ(); //v.GetY();
-                vertexPositions[k * 3 + 2] = v.GetY(); //v.GetZ();
+                vertexPositions[k * 3 + 1] = v.GetZ();
+                vertexPositions[k * 3 + 2] = v.GetY();
             }
             //cout << endl;
             mesh->SetPositions(&vertexPositions[0], vertexCount * 3);
@@ -186,7 +186,7 @@ void Model::ParseFromData(char *data, int dataLength)
             }
             //cout << endl;
             
-            // Possibly UV coordinates?
+            // UV coordinates.
             //cout << "UV1: " << endl;
             for(int k = 0; k < vertexCount; k++)
             {
