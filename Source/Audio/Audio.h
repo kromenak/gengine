@@ -4,24 +4,14 @@
 //
 //  Created by Clark Kromenaker on 8/24/17.
 //
-
 #pragma once
+#include "Asset.h"
 #include <string>
 
-using namespace std;
-
-class Audio
+class Audio : Asset
 {
 public:
-    
-private:
-    string mName = "";
-    
-    char* mDataBuffer = nullptr;
-    int mDataBufferLength = 0;
-    
-public:
-    Audio(string name, char* dataBuffer, int dataBufferLength);
+    Audio(std::string name, char* dataBuffer, int dataBufferLength);
     
     char* GetDataBuffer() const { return mDataBuffer; }
     int GetDataBufferLength() const { return mDataBufferLength; }
@@ -29,5 +19,8 @@ public:
     void WriteToFile();
     
 private:
-    void ParseFromWaveFileData(char* dataBuffer, int dataBufferLength);
+    char* mDataBuffer = nullptr;
+    int mDataBufferLength = 0;
+    
+    void ParseFromData(char* data, int dataLength);
 };

@@ -7,7 +7,7 @@
 // Includes mouse, keyboard, gamepads, etc.
 //
 #pragma once
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 #include "Vector2.h"
 
 class InputManager

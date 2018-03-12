@@ -4,10 +4,8 @@
 //
 //  Created by Clark Kromenaker on 7/22/17.
 //
-
 #pragma once
-
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 
 class SDLLog
 {

@@ -52,6 +52,8 @@
 		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
 		4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
+		4BB8282A205665680054625A /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
+		4BB8282C205665750054625A /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB8282B205665750054625A /* SDL2_mixer.framework */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4BD4CCE41FF1F5F5009665C7 /* MeshComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshComponent.cpp */; };
 		4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */; };
@@ -96,8 +98,6 @@
 		4B09182D1FEED84D002991D4 /* Services.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Services.cpp; path = ../Source/Services.cpp; sourceTree = "<group>"; };
 		4B09182F1FEED86B002991D4 /* InputManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InputManager.cpp; path = ../Source/InputManager.cpp; sourceTree = "<group>"; };
 		4B0918301FEED86B002991D4 /* InputManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InputManager.h; path = ../Source/InputManager.h; sourceTree = "<group>"; };
-		4B0918321FEEE24B002991D4 /* BasicMesh.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = BasicMesh.frag; path = ../Assets/BasicMesh.frag; sourceTree = "<group>"; };
-		4B0918331FEEE24B002991D4 /* BasicMesh.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = BasicMesh.vert; path = ../Assets/BasicMesh.vert; sourceTree = "<group>"; };
 		4B0918341FEEEA51002991D4 /* Matrix3.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Matrix3.h; path = ../Source/Matrix3.h; sourceTree = "<group>"; };
 		4B0918351FEEEA51002991D4 /* Matrix3.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix3.cpp; path = ../Source/Matrix3.cpp; sourceTree = "<group>"; };
 		4B0B67811F78DCD40023815F /* Actor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Actor.cpp; path = ../Source/Actor.cpp; sourceTree = "<group>"; };
@@ -172,6 +172,8 @@
 		4B7C3A151F4EB07000BB0922 /* SDLAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLAudio.h; path = ../Source/SDLAudio.h; sourceTree = "<group>"; };
 		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
+		4BB82829205665680054625A /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../Libraries/SDL/SDL2.framework; sourceTree = "<group>"; };
+		4BB8282B205665750054625A /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_mixer.framework; path = ../Libraries/SDL/SDL2_mixer.framework; sourceTree = "<group>"; };
 		4BCBCF452043A90F001BE1E0 /* NVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NVC.h; path = ../Source/NVC.h; sourceTree = "<group>"; };
 		4BCBCF462043A90F001BE1E0 /* NVC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NVC.cpp; path = ../Source/NVC.cpp; sourceTree = "<group>"; };
 		4BD4CCE21FF1F5F5009665C7 /* MeshComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MeshComponent.h; path = ../Source/MeshComponent.h; sourceTree = "<group>"; };
@@ -207,6 +209,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4BB8282C205665750054625A /* SDL2_mixer.framework in Frameworks */,
+				4BB8282A205665680054625A /* SDL2.framework in Frameworks */,
 				4B15A9581F242ECF000A689F /* CoreFoundation.framework in Frameworks */,
 				4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */,
 			);
@@ -218,8 +222,6 @@
 		4B0E2A561F74F5570019D4AD /* Assets */ = {
 			isa = PBXGroup;
 			children = (
-				4B0918321FEEE24B002991D4 /* BasicMesh.frag */,
-				4B0918331FEEE24B002991D4 /* BasicMesh.vert */,
 				4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */,
 				4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */,
 			);
@@ -250,6 +252,8 @@
 		4B15A94D1F241FEA000A689F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4BB8282B205665750054625A /* SDL2_mixer.framework */,
+				4BB82829205665680054625A /* SDL2.framework */,
 				4B15A9571F242ECF000A689F /* CoreFoundation.framework */,
 				4B15A94E1F241FEA000A689F /* OpenGL.framework */,
 			);
@@ -725,6 +729,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -740,7 +745,6 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/SDL/include",
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/libmad/include",
 					"$(SRCROOT)/../Libraries/zlib/include",
@@ -748,7 +752,6 @@
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/SDL/lib/mac",
 					"$(SRCROOT)/../Libraries/libmad/lib/mac",
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
@@ -757,7 +760,6 @@
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
-					"-lSDL2-2.0.0",
 					"-lz",
 					"-lGLEW",
 				);
@@ -794,6 +796,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -803,7 +806,6 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/SDL/include",
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/libmad/include",
 					"$(SRCROOT)/../Libraries/zlib/include",
@@ -811,7 +813,6 @@
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/SDL/lib/mac",
 					"$(SRCROOT)/../Libraries/libmad/lib/mac",
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
@@ -819,7 +820,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
-					"-lSDL2-2.0.0",
 					"-lz",
 					"-lGLEW",
 				);

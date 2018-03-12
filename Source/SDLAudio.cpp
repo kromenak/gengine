@@ -4,7 +4,6 @@
 //
 //  Created by Clark Kromenaker on 8/23/17.
 //
-
 #include "SDLAudio.h"
 #include <iostream>
 
@@ -22,7 +21,6 @@ void SDLAudioCallback(void* userdata, unsigned char* stream, int len)
     audio->FillAudioBuffer(stream, len);
 }
 
-
 bool SDLAudio::Initialize()
 {
     // Init audio subsystem.
@@ -31,6 +29,15 @@ bool SDLAudio::Initialize()
         return false;
     }
     
+    int flags = MIX_INIT_MP3;
+    int result = Mix_Init(flags);
+    if((result & flags) != flags)
+    {
+        std::cout << "Mix_Init: failed to init MP3 support." << std::endl;
+        std::cout << "Mix_Init: " << Mix_GetError() << std::endl;
+    }
+    
+    /*
     // Fill in want structure with our desired audio device config.
     SDL_AudioSpec want, have;
     SDL_memset(&want, 0, sizeof(want));
@@ -53,13 +60,15 @@ bool SDLAudio::Initialize()
     
     // Tell audio system it can start playing audio.
     SDL_PauseAudioDevice(mDeviceId, 0);
-    
-    // We are playing audio!
+    */
+     
+    // We initialized audio successfully!
     return true;
 }
 
 void SDLAudio::Shutdown()
 {
+    SDL_PauseAudioDevice(mDeviceId, 1);
     SDL_CloseAudioDevice(mDeviceId);
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }

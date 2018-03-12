@@ -4,19 +4,18 @@
 //
 //  Created by Clark Kromenaker on 8/24/17.
 //
-
 #include "Audio.h"
 #include <iostream>
 #include <fstream>
 #include "BinaryReader.h"
 #include "mad.h"
 
-Audio::Audio(string name, char* dataBuffer, int dataBufferLength) :
-    mName(name),
+Audio::Audio(std::string name, char* dataBuffer, int dataBufferLength) :
+    Asset(name),
     mDataBuffer(dataBuffer),
     mDataBufferLength(dataBufferLength)
 {
-    ParseFromWaveFileData(dataBuffer, dataBufferLength);
+    ParseFromData(dataBuffer, dataBufferLength);
 }
 
 void Audio::WriteToFile()
@@ -30,16 +29,16 @@ void Audio::WriteToFile()
     }
 }
 
-void Audio::ParseFromWaveFileData(char *dataBuffer, int dataBufferLength)
+void Audio::ParseFromData(char* data, int dataLength)
 {
-    BinaryReader reader(dataBuffer, dataBufferLength);
+    BinaryReader reader(data, dataLength);
     
     // First 4 bytes: file identifier "RIFF".
     char identifier[4];
     reader.Read(identifier, 4);
     if(!strcmp(identifier, "RIFF"))
     {
-        cout << "WAV file does not have RIFF identifier!" << endl;
+        std::cout << "WAV file does not have RIFF identifier!" << std::endl;
         return;
     }
     
@@ -51,7 +50,7 @@ void Audio::ParseFromWaveFileData(char *dataBuffer, int dataBufferLength)
     reader.Read(identifier, 4);
     if(!strcmp(identifier, "WAVE"))
     {
-        cout << "WAV file does not have WAVE identifier!" << endl;
+        std::cout << "WAV file does not have WAVE identifier!" << std::endl;
         return;
     }
     
@@ -60,11 +59,11 @@ void Audio::ParseFromWaveFileData(char *dataBuffer, int dataBufferLength)
     reader.Read(identifier, 4);
     if(!strcmp(identifier, "fmt "))
     {
-        cout << "WAV file chunk didn't start with 'fmt ' identifier!" << endl;
+        std::cout << "WAV file chunk didn't start with 'fmt ' identifier!" << std::endl;
         return;
     }
     
-    cout << "Current Position: " << reader.GetPosition() << endl;
+    std::cout << "Current Position: " << reader.GetPosition() << std::endl;
     
     // 4 bytes: length of the format data.
     unsigned int formatChunkSize = reader.ReadUInt();
@@ -77,21 +76,21 @@ void Audio::ParseFromWaveFileData(char *dataBuffer, int dataBufferLength)
     unsigned short format = reader.ReadUShort();
     if(format != 0x0055)
     {
-        cout << "Unknown format tag " << format << endl;
+        std::cout << "Unknown format tag " << format << std::endl;
         return;
     }
     else
     {
-        cout << "Format is correct!" << endl;
+        std::cout << "Format is correct!" << std::endl;
     }
     
     // 2 bytes: the number of channels (1 = mono, 2 = stereo, etc).
     unsigned short numChannels = reader.ReadUShort();
-    cout << "Num channels: " << numChannels << endl;
+    std::cout << "Num channels: " << numChannels << std::endl;
     
     // 4 bytes: the sample rate (e.g. 44100).
     unsigned int samplesPerSec = reader.ReadUInt();
-    cout << "Sample rate: " << samplesPerSec << endl;
+    std::cout << "Sample rate: " << samplesPerSec << std::endl;
     
     // 4 bytes: data rate ((sampleRate * bitsPerSample * channels) / 8).
     unsigned int averageBytesPerSec = reader.ReadUInt();
@@ -114,7 +113,7 @@ void Audio::ParseFromWaveFileData(char *dataBuffer, int dataBufferLength)
         reader.Read(identifier, 4);
         if(!strcmp(identifier, "fact"))
         {
-            cout << "Non-PCM WAV file is missing fact chunk!" << endl;
+            std::cout << "Non-PCM WAV file is missing fact chunk!" << std::endl;
             return;
         }
         
@@ -129,10 +128,10 @@ void Audio::ParseFromWaveFileData(char *dataBuffer, int dataBufferLength)
     reader.Read(identifier, 4);
     if(!strcmp(identifier, "data"))
     {
-        cout << "WAV file is missing data chunk!" << endl;
+        std::cout << "WAV file is missing data chunk!" << std::endl;
         return;
     }
     
     unsigned int dataChunkSize = reader.ReadUInt();
-    cout << "Data chunk size is " << dataChunkSize << endl;
+    std::cout << "Data chunk size is " << dataChunkSize << std::endl;
 }

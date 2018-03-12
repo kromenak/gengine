@@ -5,7 +5,7 @@
 //  Created by Clark Kromenaker on 7/22/17.
 //
 #include "GEngine.h"
-#include "SDL/SDL.h"
+#include <SDL2/SDL.h>
 
 #include "Services.h"
 #include "Actor.h"
