@@ -29,13 +29,13 @@ bool SDLAudio::Initialize()
         return false;
     }
     
-    int flags = MIX_INIT_MP3;
-    int result = Mix_Init(flags);
-    if((result & flags) != flags)
-    {
-        std::cout << "Mix_Init: failed to init MP3 support." << std::endl;
-        std::cout << "Mix_Init: " << Mix_GetError() << std::endl;
-    }
+    //int flags = MIX_INIT_MP3;
+    //int result = Mix_Init(flags);
+    //if((result & flags) != flags)
+    //{
+    //    std::cout << "Mix_Init: failed to init MP3 support." << std::endl;
+    //    std::cout << "Mix_Init: " << Mix_GetError() << std::endl;
+    //}
     
     /*
     // Fill in want structure with our desired audio device config.
