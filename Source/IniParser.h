@@ -21,6 +21,7 @@ struct IniKeyValue
     IniKeyValue* next;
     
     float GetValueAsFloat() { return (float)atof(value.c_str()); }
+    int GetValueAsInt() { return atoi(value.c_str()); }
     Vector2 GetValueAsVector2();
     Vector3 GetValueAsVector3();
 };
@@ -44,10 +45,12 @@ public:
     std::vector<IniSection> GetSections(std::string name);
     IniSection GetSection(std::string name);
     
-    // MODE B: Read in small pieces at a time and jump around.
-    bool ReadLine();
-    bool SkipToNextSection();
+    // MODE B: Read one section at a time.
+    void ResetToTop();
+    bool ReadNextSection(IniSection& sectionOut);
     
+    // MODE C: Read line by line by line.
+    bool ReadLine();
     bool ReadKeyValuePair();
     IniKeyValue GetKeyValue() { return mCurrentKeyValue; }
     
