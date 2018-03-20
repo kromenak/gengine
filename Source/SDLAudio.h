@@ -6,8 +6,10 @@
 //
 #pragma once
 #include <SDL2/SDL.h>
-//#include <SDL2_mixer/SDL_mixer.h>
+#include <SDL2_mixer/SDL_mixer.h>
 #include "Audio.h"
+
+class Soundtrack;
 
 class SDLAudio
 {
@@ -15,18 +17,10 @@ public:
     bool Initialize();
     void Shutdown();
     
-    void Play(Audio& audio);
+    void Update(float deltaTime);
     
-    void FillAudioBuffer(unsigned char* buffer, int bufferLength);
-    
-    SDL_RWops* GetAudioStream() { return audioStream; }
-    unsigned int GetAudioStreamPos() { return audioStreamPos; }
+    void Play(Audio* audio);
+    void Play(Audio* audio, int fadeInMs);
     
 private:
-    // The audio device ID obtained during initialization of the audio system.
-    SDL_AudioDeviceID mDeviceId = 0;
-    
-    SDL_RWops* audioStream = nullptr;
-    unsigned int audioStreamLength = 0;
-    unsigned int audioStreamPos = 0;
 };

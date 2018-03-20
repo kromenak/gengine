@@ -7,8 +7,9 @@
 //
 #pragma once
 #include "AssetManager.h"
-#include "SDLRenderer.h"
 #include "InputManager.h"
+#include "SDLRenderer.h"
+#include "SDLAudio.h"
 
 class Services
 {
@@ -22,8 +23,12 @@ public:
     static SDLRenderer* GetRenderer() { return renderer; }
     static void SetRenderer(SDLRenderer* rend) { renderer = rend; }
     
+    static SDLAudio* GetAudio() { return audio; }
+    static void SetAudio(SDLAudio* aud) { audio = aud; }
+    
 private:
     static AssetManager* assetManager;
     static InputManager* inputManager;
     static SDLRenderer* renderer;
+    static SDLAudio* audio;
 };

@@ -7,20 +7,6 @@
 #include "SDLAudio.h"
 #include <iostream>
 
-void SDLAudioCallback(void* userdata, unsigned char* stream, int len)
-{
-    // If user data isn't set, we can't play anything.
-    if(userdata == nullptr)
-    {
-        SDL_memset(stream, 200, len);
-        return;
-    }
-    
-    // Get pointer to SDLAudio.
-    SDLAudio* audio = (SDLAudio*)userdata;
-    audio->FillAudioBuffer(stream, len);
-}
-
 bool SDLAudio::Initialize()
 {
     // Init audio subsystem.
@@ -29,90 +15,76 @@ bool SDLAudio::Initialize()
         return false;
     }
     
-    //int flags = MIX_INIT_MP3;
-    //int result = Mix_Init(flags);
-    //if((result & flags) != flags)
-    //{
-    //    std::cout << "Mix_Init: failed to init MP3 support." << std::endl;
-    //    std::cout << "Mix_Init: " << Mix_GetError() << std::endl;
-    //}
-    
-    /*
-    // Fill in want structure with our desired audio device config.
-    SDL_AudioSpec want, have;
-    SDL_memset(&want, 0, sizeof(want));
-    want.freq = 48000;
-    want.format = AUDIO_F32;
-    want.channels = 2;
-    want.samples = 4096;
-    want.callback = SDLAudioCallback;
-    want.userdata = this;
-    
-    // Attempt to open device. TODO: Currently using default options.
-    mDeviceId = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
-    if(mDeviceId == 0)
+    // Initialize mixer with MP3 support.
+    int flags = MIX_INIT_MP3;
+    int result = Mix_Init(flags);
+    if((result & flags) != flags)
     {
-        std::cout << "Couldn't open audio device." << std::endl;
-        return false;
+        std::cout << "Mix_Init: " << Mix_GetError() << std::endl;
     }
     
-    //TODO: Verify that obtained audio device meets our needs.
+    // Open audio with just default values.
+    Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
     
-    // Tell audio system it can start playing audio.
-    SDL_PauseAudioDevice(mDeviceId, 0);
+    /*
+    music = Mix_LoadMUS("GRACER25.MP3");
+    if(music == nullptr)
+    {
+        std::cout << "Mix_LoadMUS: " << Mix_GetError() << std::endl;
+    }
+    Mix_PlayMusic(music, 1);
     */
-     
+    
     // We initialized audio successfully!
     return true;
 }
 
 void SDLAudio::Shutdown()
 {
-    SDL_PauseAudioDevice(mDeviceId, 1);
-    SDL_CloseAudioDevice(mDeviceId);
+    Mix_CloseAudio();
+    Mix_Quit();
     SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
-void SDLAudio::Play(Audio &audio)
+void SDLAudio::Update(float deltaTime)
 {
-    if(audioStream != nullptr)
-    {
-        SDL_FreeRW(audioStream);
-        audioStream = nullptr;
-    }
-    audioStream = SDL_RWFromMem(audio.GetDataBuffer(), audio.GetDataBufferLength());
-    audioStreamLength = audio.GetDataBufferLength();
-    audioStreamPos = 0;
+    
 }
 
-void SDLAudio::FillAudioBuffer(unsigned char *buffer, int bufferLength)
+void SDLAudio::Play(Audio* audio)
 {
-    // If no audio to play, just fill with silence.
-    if(audioStream == nullptr)
-    {
-        SDL_memset(buffer, 0, bufferLength);
-        return;
-    }
+    Play(audio, 0);
+}
+
+void SDLAudio::Play(Audio *audio, int fadeInMs)
+{
+    // Can't play nothin'!
+    if(audio == nullptr) { return; }
     
-    // If there's more audio available than the size of the buffer, just fill the whole buffer.
-    if(audioStreamPos + bufferLength < audioStreamLength)
+    // Decide whether this is music or a sound effect...our bulletproof method is whether it's an MP3 or not.
+    SDL_RWops* audioData = SDL_RWFromMem(audio->GetDataBuffer(), audio->GetDataBufferLength());
+    if(audio->IsMusic())
     {
-        SDL_memcpy(buffer, audioStream, bufferLength);
-        audioStreamPos += bufferLength;
+        Mix_Music* music = Mix_LoadMUSType_RW(audioData, MUS_MP3, SDL_FALSE);
+        if(fadeInMs > 0)
+        {
+            Mix_FadeInMusic(music, 1, fadeInMs);
+        }
+        else
+        {
+            Mix_PlayMusic(music, 1);
+        }
     }
     else
     {
-        unsigned int fillLength = audioStreamLength - audioStreamPos;
-        
-        SDL_memcpy(buffer, audioStream, fillLength);
-        unsigned char* silenceBuffer = buffer + fillLength;
-        SDL_memset(silenceBuffer, 0, bufferLength - fillLength);
-        
-        // Since we've played the entire audio stream, we can now delete it.
-        SDL_FreeRW(audioStream);
-        audioStream = nullptr;
+        Mix_Chunk* chunk = Mix_LoadWAV_RW(audioData, SDL_FALSE);
+        if(fadeInMs > 0)
+        {
+            Mix_FadeInChannel(-1, chunk, 0, fadeInMs);
+        }
+        else
+        {
+            Mix_PlayChannel(-1, chunk, 0);
+        }
     }
 }
-
-
-
