@@ -46,6 +46,7 @@ bool GEngine::Initialize()
     {
         return false;
     }
+    Services::SetAudio(&mAudio);
     
     // Initialize input.
     Services::SetInput(&mInputManager);
@@ -76,11 +77,18 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("day123.brn");
     mAssetManager.LoadBarn("core.brn");
     mAssetManager.LoadBarn("common.brn");
-    //mAssetManager.LoadBarn("ambient.brn");
+    mAssetManager.LoadBarn("ambient.brn");
+    
+    //BarnFile* barn = mAssetManager.GetBarn("core.brn");
+    //barn->WriteToFile("R25SNDTRKL.STK");
     
     //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
     //audio->WriteToFile();
     //mAudio.Play(*audio);
+    
+    //Audio* audio = mAssetManager.LoadAudio("R25THEME1.WAV");
+    //std::cout << "Is music? " << audio->IsMusic() << std::endl;
+    //mAudio.Play(audio);
     
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
@@ -88,15 +96,14 @@ bool GEngine::Initialize()
     // Camera example.
     Actor* camActor = new Actor();
     camActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
-    camActor->AddComponent(new CameraComponent(camActor));
+    camActor->AddComponent<CameraComponent>();
     
     Actor* meshActor = new Actor();
     meshActor->SetPosition(Vector3(5.0f, 0.0f, 0.0f));
     
     Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
-    MeshComponent* meshComponent = new MeshComponent(meshActor);
+    MeshComponent* meshComponent = meshActor->AddComponent<MeshComponent>();
     meshComponent->SetModel(model);
-    meshActor->AddComponent(meshComponent);
     
     LoadStage("B25");
     return true;
@@ -202,6 +209,9 @@ void GEngine::Update()
     {
         actor->Update(deltaTime);
     }
+    
+    // Also update audio system (before or after actors?)
+    mAudio.Update(deltaTime);
 }
 
 void GEngine::GenerateOutput()

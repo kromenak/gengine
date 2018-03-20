@@ -26,7 +26,12 @@ public:
     
     virtual void Update(float deltaTime);
     
-    void AddComponent(Component* component);
+    template<class T> T* AddComponent()
+    {
+        T* component = new T(this);
+        mComponents.push_back(component);
+        return component;
+    }
     
     void Translate(Vector3 offset);
     void Rotate(Vector3 axis, float angle);

@@ -36,16 +36,6 @@ void Actor::Update(float deltaTime)
     }
 }
 
-void Actor::AddComponent(Component* component)
-{
-    // Add to vector, but only if not already added.
-    auto it = std::find(mComponents.begin(), mComponents.end(), component);
-    if(it == mComponents.end())
-    {
-        mComponents.push_back(component);
-    }
-}
-
 void Actor::Translate(Vector3 offset)
 {
     SetPosition(mPosition + offset);
@@ -53,8 +43,7 @@ void Actor::Translate(Vector3 offset)
 
 void Actor::Rotate(Vector3 axis, float angle)
 {
-    Quaternion quat2 = Quaternion(axis, angle);
-    SetRotation(quat2 * GetRotation());
+    SetRotation(Quaternion(axis, angle) * GetRotation());
 }
 
 void Actor::SetPosition(Vector3 position)
