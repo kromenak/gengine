@@ -15,6 +15,7 @@
 #include "SIF.h"
 #include "Scene.h"
 #include "NVC.h"
+#include "Soundtrack.h"
 
 using namespace std;
 
@@ -31,6 +32,8 @@ public:
     BarnFile* GetBarn(string barnName);
     
     Audio* LoadAudio(string name);
+    Soundtrack* LoadSoundtrack(string name);
+    
     Model* LoadModel(string name);
     Texture* LoadTexture(string name);
     
@@ -48,8 +51,10 @@ private:
     // we then search each loaded barn file for the asset.
     unordered_map<string, BarnFile*> mLoadedBarns;
     
-    // A list of loaded textures, to avoid loading the same asset multiple times.
+    // A list of loaded assets, so we can just return existing assets if already loaded.
     unordered_map<string, Texture*> mLoadedTextures;
+    unordered_map<string, Audio*> mLoadedAudios;
+    
     
     string GetAssetPath(string fileName);
     BarnFile* GetContainingBarn(string fileName);

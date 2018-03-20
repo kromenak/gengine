@@ -459,6 +459,17 @@ void SIF::ParseFromData(char *data, int dataLength)
     }
     
     std::vector<IniSection> ambientSections = parser.GetSections("AMBIENT");
+    for(auto& section : ambientSections)
+    {
+        for(auto& entry : section.entries)
+        {
+            Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(entry->key);
+            if(soundtrack != nullptr)
+            {
+                mSoundtracks.push_back(soundtrack);
+            }
+        }
+    }
     
     std::vector<IniSection> actionSections = parser.GetSections("ACTIONS");
     for(auto& section : actionSections)

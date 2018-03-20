@@ -20,6 +20,7 @@
 class Texture;
 class Model;
 class NVC;
+class Soundtrack;
 
 struct SceneCamera
 {
@@ -161,6 +162,8 @@ public:
     
     std::vector<ActorDefinition*> GetActorDefinitions() { return mActorDefinitions; }
     
+    std::vector<Soundtrack*> GetSoundtracks() { return mSoundtracks; }
+    
 private:
     // Name of the Scene asset that is used in conjunction with this SIF.
     std::string mSceneAssetName;
@@ -208,6 +211,7 @@ private:
     std::vector<SceneRegionOrTrigger*> mTriggers;
     
     // AMBIENT
+    std::vector<Soundtrack*> mSoundtracks;
     
     // ACTIONS
     std::vector<NVC*> mNVCs;

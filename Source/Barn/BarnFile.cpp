@@ -384,7 +384,7 @@ bool BarnFile::WriteToFile(const std::string assetName)
     BarnAsset* asset = GetAsset(assetName);
     if(asset == nullptr)
     {
-        cout << "No asset named " << assetName << "in Barn file!" << endl;
+        cout << "No asset named " << assetName << " in Barn file!" << endl;
         return false;
     }
     

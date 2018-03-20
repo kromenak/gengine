@@ -41,6 +41,7 @@ void Scene::ParseFromData(char *data, int dataLength)
         }
     }
     
+    /*
     while(parser.ReadLine())
     {
         while(parser.ReadKeyValuePair())
@@ -56,5 +57,6 @@ void Scene::ParseFromData(char *data, int dataLength)
             }
         }
     }
+    */
     std::cout << "Done." << std::endl;
 }

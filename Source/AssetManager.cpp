@@ -93,7 +93,12 @@ BarnFile* AssetManager::GetBarn(string barnName)
 
 Audio* AssetManager::LoadAudio(string name)
 {
-    return LoadAsset<Audio>(name, nullptr);
+    return LoadAsset<Audio>(name, &mLoadedAudios);
+}
+
+Soundtrack* AssetManager::LoadSoundtrack(string name)
+{
+    return LoadAsset<Soundtrack>(name, nullptr);
 }
 
 Model* AssetManager::LoadModel(string name)
