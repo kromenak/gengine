@@ -273,6 +273,10 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             line.resize(line.length() - 1);
         }
         
+        // Trim the line of any whitespaces after getting rid of line breaks.
+        StringUtil::Trim(line);
+        StringUtil::Trim(line, '\t');
+        
         // Ignore empty lines. Need to do this after \r check because some lines might just be '\r'.
         if(line.empty())
         {
@@ -281,7 +285,7 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
         }
         
         // Ignore comment lines.
-        if(line.length() > 2 && line[0] == '/' && line[1] == '/')
+        if(line.length() >= 2 && line[0] == '/' && line[1] == '/')
         {
             currentPos = mStream->tellg();
             continue;
