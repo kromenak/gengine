@@ -49,7 +49,7 @@ public:
     
     Vector3 GetForward() const
     {
-        return mRotation.Rotate(Vector3::UnitX);
+        return mRotation.Rotate(Vector3::UnitZ);
     }
     
 private:

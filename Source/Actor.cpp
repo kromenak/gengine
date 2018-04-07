@@ -7,9 +7,9 @@
 #include "Component.h"
 #include "GEngine.h"
 
-Actor::Actor() : mPosition(Vector3(0, 0, 0)),
+Actor::Actor() : mPosition(0, 0, 0),
     mRotation(0, 0, 0, 1),
-    mScale(Vector3(1, 1, 1))
+    mScale(1, 1, 1)
 {
     GEngine::AddActor(this);
     UpdateWorldTransform();
@@ -71,6 +71,4 @@ void Actor::UpdateWorldTransform()
     Matrix4 rotateMatrix = Matrix4::MakeRotate(mRotation);
     Matrix4 scaleMatrix = Matrix4::MakeScale(mScale);
     mWorldTransform = translateMatrix * rotateMatrix * scaleMatrix;
-    //mWorldTransform = scaleMatrix * rotateMatrix * translateMatrix;
-    //std::cout << mWorldTransform << std::endl;
 }
