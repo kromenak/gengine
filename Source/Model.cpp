@@ -79,6 +79,7 @@ void Model::ParseFromData(char *data, int dataLength)
         //cout << "   i: " << iBasis << endl;
         //cout << "   j: " << jBasis << endl;
         //cout << "   k: " << kBasis << endl;
+        //cout << "   x: " << Vector3::Dot(iBasis, Vector3::Cross(jBasis, kBasis)) << endl;
         
         // 4 bytes: an (X, Y, Z) offset or position for placing this mesh.
         // Each mesh within the model has it's local offset from the model origin.
@@ -133,8 +134,7 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // These basis vectors are orthogonal and represent a default rotation for the mesh.
             Matrix3 rotMat = Matrix3::MakeBasis(iBasis, jBasis, kBasis);
-            Quaternion rotQat(rotMat);
-            mesh->SetRotation(rotQat);
+            mesh->SetRotation(Quaternion(rotMat));
             
             // Also, push group name onto texture name array.
             mTextureNames.push_back(std::string(meshGroupName));
@@ -162,36 +162,29 @@ void Model::ParseFromData(char *data, int dataLength)
             // This is the (X, Y, Z) vertex data for the mesh (positions, normals, UVs).
             
             // First set of numbers represent positions for each vertex.
-            //cout << "Positions: " << endl;
             for(int k = 0; k < vertexCount; k++)
             {
                 Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-                //cout << v;
                 vertexPositions[k * 3] = v.GetX();
                 vertexPositions[k * 3 + 1] = v.GetZ();
                 vertexPositions[k * 3 + 2] = v.GetY();
             }
-            //cout << endl;
             mesh->SetPositions(&vertexPositions[0], vertexCount * 3);
             
             // Second set of numbers represent normals for each vertex.
-            //cout << "Normals: " << endl;
             for(int k = 0; k < vertexCount; k++)
             {
                 Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-                //cout << v;
                 vertexNormals[k * 3] = v.GetX();
-                vertexNormals[k * 3 + 1] = v.GetY();
-                vertexNormals[k * 3 + 2] = v.GetZ();
+                vertexNormals[k * 3 + 1] = v.GetZ();
+                vertexNormals[k * 3 + 2] = v.GetY();
             }
-            //cout << endl;
             
             // UV coordinates.
             //cout << "UV1: " << endl;
             for(int k = 0; k < vertexCount; k++)
             {
                 Vector2 v(reader.ReadFloat(), reader.ReadFloat());
-                //cout << v;
                 vertexUVs[k * 2] = v.GetX();
                 vertexUVs[k * 2 + 1] = v.GetY();
             }
@@ -211,8 +204,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexIndexes[k * 3 + 2] = reader.ReadUShort();
                 
                 Vector3 v(vertexIndexes[k * 3], vertexIndexes[k * 3 + 1], vertexIndexes[k * 3 + 2]);
-                //cout << v;
-                reader.ReadUShort(); // WHAT IS THIS!?
+                reader.ReadUShort(); // WHAT IS IT!?
             }
             //cout << endl;
             mesh->SetIndexes(vertexIndexes, indexCount * 3);
