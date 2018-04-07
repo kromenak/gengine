@@ -30,6 +30,8 @@ public:
     void LoadBarn(string barnName);
     void UnloadBarn(string barnName);
     BarnFile* GetBarn(string barnName);
+    BarnFile* GetBarnContainingAsset(string assetName);
+    void WriteBarnAssetToFile(string assetName);
     
     Audio* LoadAudio(string name);
     Soundtrack* LoadSoundtrack(string name);
@@ -57,7 +59,7 @@ private:
     
     
     string GetAssetPath(string fileName);
-    BarnFile* GetContainingBarn(string fileName);
+    
     
     template<class T> T* LoadAsset(string assetName, unordered_map<string, T*>* cache);
 };

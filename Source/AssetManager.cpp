@@ -91,6 +91,45 @@ BarnFile* AssetManager::GetBarn(string barnName)
     return nullptr;
 }
 
+BarnFile* AssetManager::GetBarnContainingAsset(string fileName)
+{
+    // Iterate over all loaded barn files to find the asset.
+    for(const auto& entry : mLoadedBarns)
+    {
+        BarnAsset* asset = entry.second->GetAsset(fileName);
+        if(asset != nullptr)
+        {
+            // If the asset is a pointer, we need to redirect to the correct BarnFile.
+            if(asset->IsPointer())
+            {
+                auto it = mLoadedBarns.find(asset->barnFileName);
+                if(it != mLoadedBarns.end())
+                {
+                    return it->second;
+                }
+                else
+                {
+                    std::cout << "Asset " << fileName << " exists in Barn " << asset->barnFileName << ", but that Barn is not loaded!" << std::endl;
+                }
+            }
+            else
+            {
+                return entry.second;
+            }
+        }
+    }
+    return nullptr;
+}
+
+void AssetManager::WriteBarnAssetToFile(std::string assetName)
+{
+    BarnFile* barn = GetBarnContainingAsset(assetName);
+    if(barn != nullptr)
+    {
+        barn->WriteToFile(assetName);
+    }
+}
+
 Audio* AssetManager::LoadAudio(string name)
 {
     return LoadAsset<Audio>(name, &mLoadedAudios);
@@ -143,36 +182,6 @@ string AssetManager::GetAssetPath(string fileName)
     return "";
 }
 
-BarnFile* AssetManager::GetContainingBarn(string fileName)
-{
-    // Iterate over all loaded barn files to find the asset.
-    for(const auto& entry : mLoadedBarns)
-    {
-        BarnAsset* asset = entry.second->GetAsset(fileName);
-        if(asset != nullptr)
-        {
-            // If the asset is a pointer, we need to redirect to the correct BarnFile.
-            if(asset->IsPointer())
-            {
-                auto it = mLoadedBarns.find(asset->barnFileName);
-                if(it != mLoadedBarns.end())
-                {
-                    return it->second;
-                }
-                else
-                {
-                    std::cout << "Asset " << fileName << " exists in Barn " << asset->barnFileName << ", but that Barn is not loaded!" << std::endl;
-                }
-            }
-            else
-            {
-                return entry.second;
-            }
-        }
-    }
-    return nullptr;
-}
-
 template<class T>
 T* AssetManager::LoadAsset(string assetName, unordered_map<string, T*>* cache)
 {
@@ -200,7 +209,7 @@ T* AssetManager::LoadAsset(string assetName, unordered_map<string, T*>* cache)
     }
     
     // If no file to load, we'll get the asset from a barn.
-    BarnFile* barn = GetContainingBarn(upperName);
+    BarnFile* barn = GetBarnContainingAsset(upperName);
     if(barn != nullptr)
     {
         // Extract bytes from the barn file contents.
