@@ -17,6 +17,7 @@ public:
     Texture(std::string name, char* data, int dataLength);
     
     void Activate();
+    static void Deactivate();
     
     unsigned int GetWidth() { return mWidth; }
     unsigned int GetHeight() { return mHeight; }

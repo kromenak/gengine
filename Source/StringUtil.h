@@ -33,17 +33,27 @@ namespace StringUtil
         return str;
     }
     
-    inline void Trim(std::string& str)
+    inline void Trim(std::string& str, char trimChar)
     {
-        // Find first non-space character index. If we can't (str is all spaces), just return.
-        size_t first = str.find_first_not_of(' ');
-        if(first == std::string::npos) { return; }
+        // Find first non-space character index.
+        // If we can't (str is all spaces), clear and return it.
+        size_t first = str.find_first_not_of(trimChar);
+        if(first == std::string::npos)
+        {
+            str.clear();
+            return;
+        }
         
         // Find first non-space in the back.
-        size_t last = str.find_last_not_of(' ');
+        size_t last = str.find_last_not_of(trimChar);
         
-        // Finally, trim off the front and back whitespace.
+        // Trim off the front and back whitespace.
         str = str.substr(first, (last - first + 1));
+    }
+    
+    inline void Trim(std::string& str)
+    {
+        Trim(str, ' ');
     }
     
     // Struct that encapsulates a case-insensitive character comparison.

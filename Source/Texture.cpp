@@ -7,6 +7,8 @@
 #include "BinaryReader.h"
 #include <iostream>
 
+
+
 Texture::Texture(std::string name, char* data, int dataLength) :
     Asset(name)
 {
@@ -30,6 +32,11 @@ Texture::Texture(std::string name, char* data, int dataLength) :
 void Texture::Activate()
 {
     glBindTexture(GL_TEXTURE_2D, mTextureId);
+}
+
+void Texture::Deactivate()
+{
+    glBindTexture(GL_TEXTURE_2D, GL_NONE);
 }
 
 void Texture::ParseFromData(char *data, int dataLength)

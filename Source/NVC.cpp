@@ -22,7 +22,7 @@ void NVC::ParseFromData(char *data, int dataLength)
     {
         // The first three items must be the noun, verb, and case.
         std::string noun = entry->key;
-    
+        
         IniKeyValue* keyValue = entry->next;
         std::string verb = keyValue->key;
         

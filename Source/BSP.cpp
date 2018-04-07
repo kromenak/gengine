@@ -97,6 +97,10 @@ void BSP::RenderPolygon(BSPPolygon *polygon)
             {
                 tex->Activate();
             }
+            else
+            {
+                Texture::Deactivate();
+            }
         }
         
         // Draw the polygon.
