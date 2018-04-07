@@ -18,6 +18,7 @@
 
 #include "Mesh.h"
 #include "Stage.h"
+#include "EditorCamera.h"
 
 extern GLfloat triangle_vertices[];
 extern GLfloat triangle_colors[];
@@ -57,46 +58,24 @@ bool GEngine::Initialize()
     //Sheep::Driver driver;
     //driver.Parse("/Users/Clark/Dropbox/GK3/Assets/test.shp");
     
-    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/core.brn");
-    //barnFile.WriteToFile("E18LCJ44QR1.YAK");
-    
-    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/ambient.brn");
-    //barnFile.WriteToFile("R33SNEAKPEEK.WAV");
-    
-    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/day1.brn");
-    //barnFile.WriteToFile("CASH.BMP");
-    
-    //BarnFile barnFile("day1.brn");
-    //barnFile.WriteToFile("CASH.BMP");
-    
-    //BarnFile barnFile("/Users/Clark/Dropbox/GK3/Data/day3.brn");
-    //barnFile.WriteToFile("TE4SUNBUTTON.BMP");
-    
     mAssetManager.AddSearchPath("Assets/");
-    mAssetManager.LoadBarn("day1.brn");
-    mAssetManager.LoadBarn("day123.brn");
-    mAssetManager.LoadBarn("core.brn");
-    mAssetManager.LoadBarn("common.brn");
     mAssetManager.LoadBarn("ambient.brn");
+    mAssetManager.LoadBarn("common.brn");
+    mAssetManager.LoadBarn("core.brn");
+    mAssetManager.LoadBarn("day1.brn");
+    mAssetManager.LoadBarn("day2.brn");
+    mAssetManager.LoadBarn("day3.brn");
+    mAssetManager.LoadBarn("day23.brn");
+    mAssetManager.LoadBarn("day123.brn");
     
-    //BarnFile* barn = mAssetManager.GetBarn("core.brn");
-    //barn->WriteToFile("R25SNDTRKL.STK");
-    
-    //Audio* audio = mAssetManager.LoadAudio("HALLS3.WAV");
-    //audio->WriteToFile();
-    //mAudio.Play(*audio);
-    
-    //Audio* audio = mAssetManager.LoadAudio("R25THEME1.WAV");
-    //std::cout << "Is music? " << audio->IsMusic() << std::endl;
-    //mAudio.Play(audio);
+    //mAssetManager.WriteBarnAssetToFile("R25110A.SIF");
     
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
     // Camera example.
-    Actor* camActor = new Actor();
+    Actor* camActor = new EditorCamera();
     camActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
-    camActor->AddComponent<CameraComponent>();
     
     Actor* meshActor = new Actor();
     meshActor->SetPosition(Vector3(5.0f, 0.0f, 0.0f));
@@ -105,7 +84,7 @@ bool GEngine::Initialize()
     MeshComponent* meshComponent = meshActor->AddComponent<MeshComponent>();
     meshComponent->SetModel(model);
     
-    LoadStage("B25");
+    LoadStage("HAL");
     return true;
 }
 
