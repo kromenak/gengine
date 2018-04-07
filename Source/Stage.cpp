@@ -9,6 +9,8 @@
 #include "Actor.h"
 #include "MeshComponent.h"
 #include "SoundtrackPlayer.h"
+#include "GameCamera.h"
+#include "Math.h"
 
 Stage::Stage(std::string name, int day, int hour) :
     mGeneralName(name)
@@ -31,6 +33,12 @@ Stage::Stage(std::string name, int day, int hour) :
     mSceneBSP = Services::GetAssets()->LoadBSP(mScene->GetBSPName() + ".BSP");
     Services::GetRenderer()->SetBSP(mSceneBSP);
     
+    // Position room camera.
+    SceneCamera* defaultRoomCamera = mGeneralSIF->GetDefaultRoomCamera();
+    GameCamera* gameCamera = new GameCamera();
+    gameCamera->SetPosition(defaultRoomCamera->position);
+    gameCamera->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(defaultRoomCamera->angle.GetX() - 90.0f)));
+    
     // Create actors for the scene.
     std::vector<ActorDefinition*> actorDefinitions = mGeneralSIF->GetActorDefinitions();
     for(auto& actorDef : actorDefinitions)
@@ -40,6 +48,7 @@ Stage::Stage(std::string name, int day, int hour) :
         {
             Vector3 position = actorDef->position->position;
             actor->SetPosition(position);
+            actor->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(actorDef->position->heading)));
         }
         
         MeshComponent* meshComponent = actor->AddComponent<MeshComponent>();
@@ -48,7 +57,7 @@ Stage::Stage(std::string name, int day, int hour) :
     
     // Create soundtrack player and get it playing!
     std::vector<Soundtrack*> soundtracks = mGeneralSIF->GetSoundtracks();
-    if(soundtracks.size() == 0)
+    if(soundtracks.size() == 0 && mSpecificSIF != nullptr)
     {
         soundtracks = mSpecificSIF->GetSoundtracks();
     }

@@ -6,10 +6,11 @@
 #include "Scene.h"
 #include "IniParser.h"
 #include <iostream>
+#include "StringUtil.h"
 
 Scene::Scene(std::string name, char* data, int dataLength) : Asset(name)
 {
-    
+    ParseFromData(data, dataLength);
 }
 
 std::string Scene::GetBSPName()
@@ -34,29 +35,10 @@ void Scene::ParseFromData(char *data, int dataLength)
     {
         for(auto& entry : section.entries)
         {
-            if(entry->value == "BSP")
+            if(StringUtil::EqualsIgnoreCase(entry->key, "bsp"))
             {
-                
+                mBSPNameOverride = entry->value;
             }
         }
     }
-    
-    /*
-    while(parser.ReadLine())
-    {
-        while(parser.ReadKeyValuePair())
-        {
-            IniKeyValue keyValue = parser.GetKeyValue();
-            if(keyValue.value.empty())
-            {
-                std::cout << keyValue.key << std::endl;
-            }
-            else
-            {
-                std::cout << keyValue.key << " = " << keyValue.value << std::endl;
-            }
-        }
-    }
-    */
-    std::cout << "Done." << std::endl;
 }

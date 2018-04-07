@@ -33,9 +33,6 @@ struct SceneCamera
     
     // Camera's position.
     Vector3 position;
-    
-    // Is this the default camera for the room?
-    bool isDefault = false;
 };
 
 struct DialogueCamera : public SceneCamera
@@ -162,6 +159,8 @@ public:
     
     std::vector<ActorDefinition*> GetActorDefinitions() { return mActorDefinitions; }
     
+    SceneCamera* GetDefaultRoomCamera() { return mRoomCameras[mDefaultRoomCameraIndex]; }
+    
     std::vector<Soundtrack*> GetSoundtracks() { return mSoundtracks; }
     
 private:
@@ -199,7 +198,10 @@ private:
     
     // CAMERAS
     std::vector<SceneCamera*> mInspectCameras;
+    
     std::vector<SceneCamera*> mRoomCameras;
+    int mDefaultRoomCameraIndex = 0;
+    
     std::vector<SceneCamera*> mCinematicCameras;
     std::vector<DialogueCamera*> mDialogueCameras;
     

@@ -163,7 +163,8 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 else if(keyValue->key == "default")
                 {
-                    camera->isDefault = true;
+                    // Save index for default room camera. Equals size, since about to add to list.
+                    mDefaultRoomCameraIndex = (int)mRoomCameras.size();
                 }
                 keyValue = keyValue->next;
             }
@@ -335,6 +336,12 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 keyValue = keyValue->next;
             }
+            
+            // If no position was set, try a default for now.
+            if(actor->position == nullptr && mPositions.size() > 0)
+            {
+                actor->position = mPositions[0];
+            }
             mActorDefinitions.push_back(actor);
         }
     }
@@ -427,7 +434,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                 {
                     //TODO: read in rect.
                 }
-                keyValue = entry->next;
+                keyValue = keyValue->next;
             }
             mRegions.push_back(region);
         }
@@ -452,7 +459,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                 {
                     //TODO: read in rect.
                 }
-                keyValue = entry->next;
+                keyValue = keyValue->next;
             }
             mTriggers.push_back(region);
         }
