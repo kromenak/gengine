@@ -34,9 +34,9 @@ void MeshComponent::Render()
     
     // Update the world transform for the shader.
     Matrix4 worldTransform = mOwner->GetWorldTransformMatrix();
-    Services::GetRenderer()->SetWorldTransformMatrix(worldTransform);
-
+    
     // Draws a little axes indicator at the position of the actor.
+    Services::GetRenderer()->SetWorldTransformMatrix(worldTransform);
     glBindTexture(GL_TEXTURE_2D, 0);
     axes->DrawLines();
     
@@ -52,25 +52,21 @@ void MeshComponent::Render()
         // Really render it now!
         if(mMeshes[i] != nullptr)
         {
-            //TODO: Should probably put these in a matrix and just multiply it w/ WorldTransform
-            // I think that would work, and keep the shader generalized.
-            Vector3 offset = mMeshes[i]->GetOffset();
-            Services::GetRenderer()->SetVector3("uOffset", offset);
-            
-            Quaternion rot = mMeshes[i]->GetRotation();
-            Matrix4 rotMat = Matrix4::MakeRotate(rot);
-            Services::GetRenderer()->SetMatrix4("uRotation", rotMat);
+            // Each mesh has it's own local offset and rotation.
+            // So, we'll combine that into the world transform matrix before rendering.
+            Matrix4 transMatrix = Matrix4::MakeTranslate(mMeshes[i]->GetOffset());
+            Matrix4 rotMatrix = Matrix4::MakeRotate(mMeshes[i]->GetRotation());
+            Matrix4 finalMatrix = worldTransform * transMatrix * rotMatrix;
+            Services::GetRenderer()->SetWorldTransformMatrix(finalMatrix);
             
             mMeshes[i]->Render();
             
-            //TODO: This bit draws local axes for the model, for debugging.
-            // Would be cool to turn this on/off as needed.
-            //glBindTexture(GL_TEXTURE_2D, 0);
-            //axes->DrawLines();
+            // This bit draws local axes for the model, for debugging.
+            // TODO: Would be cool to turn this on/off as needed.
+            glBindTexture(GL_TEXTURE_2D, 0);
+            axes->DrawLines();
         }
     }
-    Services::GetRenderer()->SetVector3("uOffset", Vector3::Zero);
-    Services::GetRenderer()->SetMatrix4("uRotation", Matrix4::Identity);
 }
 
 void MeshComponent::SetMesh(Mesh* mesh)
@@ -81,6 +77,12 @@ void MeshComponent::SetMesh(Mesh* mesh)
 
 void MeshComponent::SetModel(Model* model)
 {
+    if(model == nullptr)
+    {
+        std::cout << "Model is null!" << std::endl;
+        return;
+    }
+    
     // Populate meshes array.
     mMeshes.clear();
     for(auto& mesh : model->GetMeshes())
