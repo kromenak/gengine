@@ -12,8 +12,6 @@ class CameraComponent : public Component
 public:
     CameraComponent(Actor* owner);
     
-    void Update(float deltaTime) override;
-    
     Matrix4 GetLookAtMatrix();
     Matrix4 GetProjectionMatrix();
     
@@ -23,5 +21,5 @@ private:
     
     // Near and far clipping planes, for any projection type.
     float nearClippingPlane = 0.01f;
-    float farClippingPlane = 1000.0f;
+    float farClippingPlane = 10000.0f;
 };
