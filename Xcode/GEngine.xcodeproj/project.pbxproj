@@ -25,7 +25,6 @@
 		4B15A9581F242ECF000A689F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A9571F242ECF000A689F /* CoreFoundation.framework */; };
 		4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A95A1F243349000A689F /* SDLLog.cpp */; };
 		4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */; };
-		4B17D704206095B900EBD298 /* EditorCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D703206095B900EBD298 /* EditorCamera.cpp */; };
 		4B17D707206098B100EBD298 /* GameCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D706206098B100EBD298 /* GameCamera.cpp */; };
 		4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */; };
 		4B2ACDFB1F25880E003EC7FE /* SheepNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDF91F25880E003EC7FE /* SheepNode.cpp */; };
@@ -126,8 +125,6 @@
 		4B15A95B1F243349000A689F /* SDLLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLLog.h; path = ../Source/SDLLog.h; sourceTree = "<group>"; };
 		4B17D6FF206072E400EBD298 /* SoundtrackPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoundtrackPlayer.h; path = ../Source/SoundtrackPlayer.h; sourceTree = "<group>"; };
 		4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoundtrackPlayer.cpp; path = ../Source/SoundtrackPlayer.cpp; sourceTree = "<group>"; };
-		4B17D702206095B900EBD298 /* EditorCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EditorCamera.h; path = ../Source/EditorCamera.h; sourceTree = "<group>"; };
-		4B17D703206095B900EBD298 /* EditorCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = EditorCamera.cpp; path = ../Source/EditorCamera.cpp; sourceTree = "<group>"; };
 		4B17D705206098B100EBD298 /* GameCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameCamera.h; path = ../Source/GameCamera.h; sourceTree = "<group>"; };
 		4B17D706206098B100EBD298 /* GameCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GameCamera.cpp; path = ../Source/GameCamera.cpp; sourceTree = "<group>"; };
 		4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScript.cpp; path = ../Source/Sheep/SheepScript.cpp; sourceTree = "<group>"; };
@@ -290,8 +287,6 @@
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
 				4B1112AE1F821FFF00AFDDFC /* Component.h */,
 				4B4A0E52203C0FB300AFA382 /* Components */,
-				4B17D703206095B900EBD298 /* EditorCamera.cpp */,
-				4B17D702206095B900EBD298 /* EditorCamera.h */,
 				4B17D706206098B100EBD298 /* GameCamera.cpp */,
 				4B17D705206098B100EBD298 /* GameCamera.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
@@ -584,7 +579,6 @@
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
-				4B17D704206095B900EBD298 /* EditorCamera.cpp in Sources */,
 				4B4621EB1FF741D800536BA6 /* Texture.cpp in Sources */,
 				4B2ACDFB1F25880E003EC7FE /* SheepNode.cpp in Sources */,
 				4B09182E1FEED84D002991D4 /* Services.cpp in Sources */,
