@@ -59,10 +59,8 @@ void Model::ParseFromData(char *data, int dataLength)
     int meshGroupCount = 0;
     for(int i = 0; i < numMeshes; i++)
     {
-        //cout << "Mesh " << i << endl;
-        
         // 4 bytes: mesh block identifier "HSEM" (MESH backwards).
-        identifier = reader.ReadString(4); //reader.Read(identifier, 4);
+        identifier = reader.ReadString(4);
         if(identifier != "HSEM")
         {
             cout << "Expected MESH identifier. Instead got " << identifier << endl;
@@ -81,11 +79,19 @@ void Model::ParseFromData(char *data, int dataLength)
         //cout << "   k: " << kBasis << endl;
         //cout << "   x: " << Vector3::Dot(iBasis, Vector3::Cross(jBasis, kBasis)) << endl;
         
+        // From the basis vectors, calculate a quaternion representing
+        // a rotation from the standard basis to that basis. We also need to negate some elements
+        // to represent "reflection" from a right-handed rotation to a left-handed rotation.
+        Matrix3 rotMat = Matrix3::MakeBasis(iBasis, jBasis, kBasis);
+        Quaternion rotQuat = Quaternion(rotMat);
+        rotQuat.SetZ(-rotQuat.GetZ());
+        rotQuat.SetW(-rotQuat.GetW());
+        
         // 4 bytes: an (X, Y, Z) offset or position for placing this mesh.
         // Each mesh within the model has it's local offset from the model origin.
         // This if vital, for example, if a mesh contains a human's head, legs, arms...
         // want to position them all correctly relative to one another!
-        Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), -reader.ReadFloat());
         //cout << "   Mesh Position: " << meshPos << endl;
         
         // 4 bytes: number of mesh group blocks in this mesh.
@@ -129,12 +135,9 @@ void Model::ParseFromData(char *data, int dataLength)
             Mesh* mesh = new Mesh();
             mMeshes.push_back(mesh);
             
-            // Save offset to mesh.
+            // Save local offset and rotation of mesh.
             mesh->SetOffset(meshPos);
-            
-            // These basis vectors are orthogonal and represent a default rotation for the mesh.
-            Matrix3 rotMat = Matrix3::MakeBasis(iBasis, jBasis, kBasis);
-            mesh->SetRotation(Quaternion(rotMat));
+            mesh->SetRotation(rotQuat);
             
             // Also, push group name onto texture name array.
             mTextureNames.push_back(std::string(meshGroupName));
@@ -167,7 +170,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
                 vertexPositions[k * 3] = v.GetX();
                 vertexPositions[k * 3 + 1] = v.GetZ();
-                vertexPositions[k * 3 + 2] = v.GetY();
+                vertexPositions[k * 3 + 2] = -v.GetY();
             }
             mesh->SetPositions(&vertexPositions[0], vertexCount * 3);
             
@@ -181,14 +184,12 @@ void Model::ParseFromData(char *data, int dataLength)
             }
             
             // UV coordinates.
-            //cout << "UV1: " << endl;
             for(int k = 0; k < vertexCount; k++)
             {
                 Vector2 v(reader.ReadFloat(), reader.ReadFloat());
                 vertexUVs[k * 2] = v.GetX();
                 vertexUVs[k * 2 + 1] = v.GetY();
             }
-            //cout << endl;
             mesh->SetUV1(vertexUVs, vertexCount * 2);
             
             // Next comes vertex indexes for drawing from an IBO.
@@ -196,17 +197,13 @@ void Model::ParseFromData(char *data, int dataLength)
             // Every 4th number seems out of place - not sure what they mean.
             // Seen: 0xF100 (241), 0x0000 (0), 0x0701 (263), 0x7F3F (16255), 0x56B1 (45398),
             // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
-            //cout << "Indexes: " << endl;
             for(int k = 0; k < indexCount; k++)
             {
                 vertexIndexes[k * 3] = reader.ReadUShort();
                 vertexIndexes[k * 3 + 1] = reader.ReadUShort();
                 vertexIndexes[k * 3 + 2] = reader.ReadUShort();
-                
-                Vector3 v(vertexIndexes[k * 3], vertexIndexes[k * 3 + 1], vertexIndexes[k * 3 + 2]);
                 reader.ReadUShort(); // WHAT IS IT!?
             }
-            //cout << endl;
             mesh->SetIndexes(vertexIndexes, indexCount * 3);
             
             // Next comes LODK blocks for this mesh group.
