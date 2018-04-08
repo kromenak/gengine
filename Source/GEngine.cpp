@@ -18,7 +18,6 @@
 
 #include "Mesh.h"
 #include "Stage.h"
-#include "EditorCamera.h"
 
 extern GLfloat triangle_vertices[];
 extern GLfloat triangle_colors[];
@@ -74,17 +73,16 @@ bool GEngine::Initialize()
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
     // Camera example.
-    Actor* camActor = new EditorCamera();
-    camActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+    //Actor* camActor = new EditorCamera();
+    //camActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
     
-    Actor* meshActor = new Actor();
-    meshActor->SetPosition(Vector3(5.0f, 0.0f, 0.0f));
+    //Actor* meshActor = new Actor();
+    //meshActor->SetPosition(Vector3(5.0f, 0.0f, 0.0f));
+    //Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
+    //MeshComponent* meshComponent = meshActor->AddComponent<MeshComponent>();
+    //meshComponent->SetModel(model);
     
-    Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
-    MeshComponent* meshComponent = meshActor->AddComponent<MeshComponent>();
-    meshComponent->SetModel(model);
-    
-    LoadStage("HAL");
+    LoadStage("R25");
     return true;
 }
 
