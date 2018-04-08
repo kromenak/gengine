@@ -488,7 +488,7 @@ Matrix4 Matrix4::MakeLookAt(const Vector3 &eye, const Vector3 &lookAt, const Vec
     // choices about our view-space coordinate system.
     // +X is right, +Y is up, +Z is forward.
     Matrix3 rotate;
-    rotate.SetRows(viewSide, viewUp, viewDir);
+    rotate.SetRows(-viewSide, viewUp, -viewDir);
     
     // Make a 4x4 matrix based on the 3x3 rotation matrix.
     Matrix4 m = Matrix4::MakeRotate(rotate);

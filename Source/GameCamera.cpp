@@ -27,11 +27,11 @@ void GameCamera::Update(float deltaTime)
     // Forward and backward movement.
     if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_W))
     {
-        Translate(GetForward() * (-camSpeed * deltaTime));
+        Translate(GetForward() * (camSpeed * deltaTime));
     }
     else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_S))
     {
-        Translate(GetForward() * (camSpeed * deltaTime));
+        Translate(GetForward() * (-camSpeed * deltaTime));
     }
     
     // Up and down movement.
