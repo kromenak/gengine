@@ -133,7 +133,10 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 else if(keyValue->key == "angle")
                 {
+                    // Angle will be in degrees, but we want it in radians for internal use.
                     camera->angle = keyValue->GetValueAsVector2();
+                    camera->angle.SetX(Math::ToRadians(camera->angle.GetX()));
+                    camera->angle.SetY(Math::ToRadians(camera->angle.GetY()));
                 }
                 keyValue = keyValue->next;
             }
@@ -160,6 +163,8 @@ void SIF::ParseFromData(char *data, int dataLength)
                 else if(keyValue->key == "angle")
                 {
                     camera->angle = keyValue->GetValueAsVector2();
+                    camera->angle.SetX(Math::ToRadians(camera->angle.GetX()));
+                    camera->angle.SetY(Math::ToRadians(camera->angle.GetY()));
                 }
                 else if(keyValue->key == "default")
                 {
@@ -191,6 +196,8 @@ void SIF::ParseFromData(char *data, int dataLength)
                 else if(keyValue->key == "angle")
                 {
                     camera->angle = keyValue->GetValueAsVector2();
+                    camera->angle.SetX(Math::ToRadians(camera->angle.GetX()));
+                    camera->angle.SetY(Math::ToRadians(camera->angle.GetY()));
                 }
                 keyValue = keyValue->next;
             }
@@ -225,6 +232,8 @@ void SIF::ParseFromData(char *data, int dataLength)
                 else if(keyValue->key == "angle")
                 {
                     camera->angle = keyValue->GetValueAsVector2();
+                    camera->angle.SetX(Math::ToRadians(camera->angle.GetX()));
+                    camera->angle.SetY(Math::ToRadians(camera->angle.GetY()));
                 }
                 else if(keyValue->key == "show")
                 {
@@ -261,7 +270,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 else if(keyValue->key == "heading")
                 {
-                    position->heading = keyValue->GetValueAsFloat();
+                    position->heading = Math::ToRadians(keyValue->GetValueAsFloat());
                 }
                 else if(keyValue->key == "camera")
                 {

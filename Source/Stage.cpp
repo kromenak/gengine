@@ -37,7 +37,7 @@ Stage::Stage(std::string name, int day, int hour) :
     SceneCamera* defaultRoomCamera = mGeneralSIF->GetDefaultRoomCamera();
     GameCamera* gameCamera = new GameCamera();
     gameCamera->SetPosition(defaultRoomCamera->position);
-    gameCamera->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(defaultRoomCamera->angle.GetX() - 90.0f)));
+    gameCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
     
     // Create actors for the scene.
     std::vector<ActorDefinition*> actorDefinitions = mGeneralSIF->GetActorDefinitions();
@@ -48,7 +48,7 @@ Stage::Stage(std::string name, int day, int hour) :
         {
             Vector3 position = actorDef->position->position;
             actor->SetPosition(position);
-            actor->SetRotation(Quaternion(Vector3::UnitY, Math::ToRadians(actorDef->position->heading)));
+            actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading));
         }
         
         MeshComponent* meshComponent = actor->AddComponent<MeshComponent>();
