@@ -122,6 +122,10 @@ void SDLRenderer::Render()
     GLuint view = glGetUniformLocation(mShader->GetProgram(), "uViewProj");
     glUniformMatrix4fv(view, 1, GL_FALSE, viewProj.GetFloatPtr());
     
+    // Render an axis at the world origin.
+    glBindTexture(GL_TEXTURE_2D, 0);
+    axes->DrawLines();
+    
     // Render all mesh components.
     for(auto meshComponent : mMeshComponents)
     {
