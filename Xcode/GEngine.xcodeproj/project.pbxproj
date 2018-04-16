@@ -38,12 +38,15 @@
 		4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
 		4B2E7A62203A5CB3001A5B9C /* Stage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Stage.cpp */; };
 		4B2E7A65203A6072001A5B9C /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* Scene.cpp */; };
+		4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0918351FEEEA51002991D4 /* Matrix3.cpp */; };
+		4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
 		4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
 		4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
 		4B4621EB1FF741D800536BA6 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621EA1FF741D800536BA6 /* Texture.cpp */; };
 		4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621ED1FF7532A00536BA6 /* Asset.cpp */; };
 		4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED861F5CA5F4000065EF /* Model.cpp */; };
 		4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
+		4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B53B0C8207AFE7E00663381 /* Ray.cpp */; };
 		4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */; };
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
@@ -164,6 +167,8 @@
 		4B4EED871F5CA5F4000065EF /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Model.h; path = ../Source/Model.h; sourceTree = "<group>"; };
 		4B4EED891F5CACEF000065EF /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3.cpp; path = ../Source/Vector3.cpp; sourceTree = "<group>"; };
 		4B4EED8A1F5CACEF000065EF /* Vector3.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector3.h; path = ../Source/Vector3.h; sourceTree = "<group>"; };
+		4B53B0C7207AFE7E00663381 /* Ray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Ray.h; path = ../Source/Ray.h; sourceTree = "<group>"; };
+		4B53B0C8207AFE7E00663381 /* Ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = ../Source/Ray.cpp; sourceTree = "<group>"; };
 		4B5497F81FF80E0A00F1EF4F /* StringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringUtil.h; path = ../Source/StringUtil.h; sourceTree = "<group>"; };
 		4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QuaternionTests.cpp; path = ../Tests/QuaternionTests.cpp; sourceTree = "<group>"; };
 		4B76B57A1F35999B003F63E5 /* BarnFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnFile.cpp; path = ../Source/Barn/BarnFile.cpp; sourceTree = "<group>"; };
@@ -272,6 +277,7 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4B53B0CA207B01D500663381 /* Collision */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
 				4B4621ED1FF7532A00536BA6 /* Asset.cpp */,
@@ -385,6 +391,15 @@
 				4B17D6FF206072E400EBD298 /* SoundtrackPlayer.h */,
 			);
 			name = Components;
+			sourceTree = "<group>";
+		};
+		4B53B0CA207B01D500663381 /* Collision */ = {
+			isa = PBXGroup;
+			children = (
+				4B53B0C8207AFE7E00663381 /* Ray.cpp */,
+				4B53B0C7207AFE7E00663381 /* Ray.h */,
+			);
+			name = Collision;
 			sourceTree = "<group>";
 		};
 		4B76B57D1F3599A1003F63E5 /* Barn */ = {
@@ -552,6 +567,8 @@
 				4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */,
 				4B79F8071F9C09F2008C6FEE /* VectorTests.cpp in Sources */,
 				4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */,
+				4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */,
+				4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */,
 				4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */,
 			);
@@ -579,6 +596,7 @@
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
+				4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */,
 				4B4621EB1FF741D800536BA6 /* Texture.cpp in Sources */,
 				4B2ACDFB1F25880E003EC7FE /* SheepNode.cpp in Sources */,
 				4B09182E1FEED84D002991D4 /* Services.cpp in Sources */,

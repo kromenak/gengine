@@ -10,14 +10,76 @@
 #include <iostream>
 #include "Services.h"
 
+BSP* BSP::inst = nullptr;
+
 BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
 {
+    inst = this;
     ParseFromData(data, dataLength);
 }
 
 void BSP::Render(Vector3 fromPosition)
 {
     RenderTree(mNodes[mRootNodeIndex], fromPosition);
+}
+
+bool RayIntersectsTriangle(Vector3 p0, Vector3 p1, Vector3 p2, Ray ray, Vector3& hitPos)
+{
+    Vector3 e1 = p1 - p0;
+    Vector3 e2 = p2 - p0;
+    Vector3 p = Vector3::Cross(ray.GetDirection(), e2);
+    float a = Vector3::Dot(e1, p);
+    
+    // If zero, means ray is parallel to triangle plane, which is not an intersection.
+    if(Math::IsZero(a)) { return false; }
+    
+    float f = 1.0f / a;
+    
+    Vector3 s = ray.GetOrigin() - p0;
+    float u = f * Vector3::Dot(s, p);
+    if(u < 0.0f || u > 1.0f) { return false; }
+    
+    Vector3 q = Vector3::Cross(s, e1);
+    float v = f * Vector3::Dot(ray.GetDirection(), q);
+    if(v < 0.0f || u + v > 1.0f) { return false; }
+    
+    float t = f * Vector3::Dot(e2, q);
+    if(t < 0) { return false; }
+    
+    hitPos = ray.GetPosition(t);
+    return true;
+}
+
+std::string* BSP::Intersects(Ray ray)
+{
+    float closestDist = 9999;
+    std::string* closest = nullptr;
+    for(auto& polygon : mPolygons)
+    {
+        Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
+        for(int i = 1; i < polygon->vertexCount - 1; i++)
+        {
+            Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
+            Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
+            Vector3 hitPoint;
+            if(RayIntersectsTriangle(p0, p1, p2, ray, hitPoint))
+            {
+                float dist = (hitPoint - ray.GetOrigin()).GetLength();
+                if(dist < closestDist)
+                {
+                    closestDist = dist;
+                    
+                    // Find surface for this polygon.
+                    BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
+                    
+                    // And then the object for this surface.
+                    closest = &mObjectNames[surface->objectIndex];
+                    //return &mObjectNames[surface->objectIndex];
+                }
+            }
+        }
+    }
+    return closest;
 }
 
 void BSP::RenderTree(BSPNode *node, Vector3 position)
@@ -167,7 +229,8 @@ void BSP::ParseFromData(char *data, int dataLength)
     // Iterate and read all names.
     for(int i = 0; i < nameCount; i++)
     {
-        mObjectNames.push_back(reader.ReadString(32));
+        std::string name = reader.ReadString(32);
+        mObjectNames.push_back(name);
     }
     
     // Iterate and read surfaces.
@@ -219,9 +282,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         polygon->vertexIndex = reader.ReadUShort();
         reader.ReadUShort(); // Unknown value
         polygon->vertexCount = reader.ReadUShort();
-        
         polygon->surfaceIndex = reader.ReadUShort();
-        
         mPolygons.push_back(polygon);
     }
     

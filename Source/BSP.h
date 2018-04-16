@@ -13,7 +13,9 @@
 #include "Vector3.h"
 #include "GLVertexArray.h"
 #include <vector>
+#include <unordered_map>
 #include <string>
+#include "Ray.h"
 
 class Texture;
 
@@ -58,9 +60,6 @@ struct BSPPolygon
     // These are ALSO offsets into the UV indices array - direct correlation.
     ushort vertexIndex;
     ushort vertexCount;
-    
-    // This is what we will actually render for this polygon.
-    GLVertexArray* vertexArray = nullptr;
 };
 
 struct BSPSurface
@@ -94,9 +93,13 @@ class BSP : Asset
     };
     
 public:
+    static BSP* inst;
+    
     BSP(std::string name, char* data, int dataLength);
     
     void Render(Vector3 cameraPosition);
+    
+    std::string* Intersects(Ray ray);
     
 private:
     // Points to the root node in our node list.
