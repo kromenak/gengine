@@ -137,6 +137,174 @@ Matrix4 Matrix4::Transpose(const Matrix4& matrix)
     return result;
 }
 
+Matrix4 Matrix4::AffineInverse()
+{
+    Matrix4 m;
+    
+    // Compute determinant of the upper-left 3x3 matrix.
+    float val1 = mVals[5] * mVals[10] - mVals[9] * mVals[6];
+    float val2 = mVals[2] * mVals[9] - mVals[1] * mVals[10];
+    float val3 = mVals[1] * mVals[6]  - mVals[5] * mVals[2];
+    float det = mVals[0] * val1 + mVals[4] * val2 + mVals[8] * val3;
+    
+    // If determinant is zero, it means it's not possible to find an inverse, so we must return.
+    if(Math::IsZero(det)) { return m; }
+    
+    // Create adjunct matrix, divided by inverse determinant, to get upper 3x3.
+    float invDet = 1.0f / det;
+    m.mVals[0] = invDet * val1;
+    m.mVals[1] = invDet * val2;
+    m.mVals[2] = invDet * val3;
+    
+    m.mVals[4] = invDet * (mVals[6] * mVals[8] - mVals[4] * mVals[10]);
+    m.mVals[5] = invDet * (mVals[0] * mVals[10] - mVals[2] * mVals[8]);
+    m.mVals[6] = invDet * (mVals[2] * mVals[4] - mVals[0] * mVals[6]);
+    
+    m.mVals[8] = invDet * (mVals[4] * mVals[9] - mVals[5] * mVals[8]);
+    m.mVals[9] = invDet * (mVals[1] * mVals[8] - mVals[0] * mVals[9]);
+    m.mVals[10] = invDet * (mVals[0] * mVals[5] - mVals[1] * mVals[4]);
+    
+    // Multiply negative translation by inverted 3x3 to get these values.
+    m.mVals[12] = -m.mVals[0] * mVals[12] - m.mVals[4] * mVals[13] - m.mVals[8] * mVals[14];
+    m.mVals[13] = -m.mVals[1] * mVals[12] - m.mVals[5] * mVals[13] - m.mVals[9] * mVals[14];
+    m.mVals[14] = -m.mVals[2] * mVals[12] - m.mVals[6] * mVals[13] - m.mVals[10] * mVals[14];
+    
+    return m;
+}
+
+Matrix4 Matrix4::Inverse()
+{
+    Matrix4 m;
+    double inv[16], det;
+    int i;
+    
+    inv[0] = mVals[5]  * mVals[10] * mVals[15] -
+    mVals[5]  * mVals[11] * mVals[14] -
+    mVals[9]  * mVals[6]  * mVals[15] +
+    mVals[9]  * mVals[7]  * mVals[14] +
+    mVals[13] * mVals[6]  * mVals[11] -
+    mVals[13] * mVals[7]  * mVals[10];
+    
+    inv[4] = -mVals[4]  * mVals[10] * mVals[15] +
+    mVals[4]  * mVals[11] * mVals[14] +
+    mVals[8]  * mVals[6]  * mVals[15] -
+    mVals[8]  * mVals[7]  * mVals[14] -
+    mVals[12] * mVals[6]  * mVals[11] +
+    mVals[12] * mVals[7]  * mVals[10];
+    
+    inv[8] = mVals[4] * mVals[9] * mVals[15] -
+    mVals[4]  * mVals[11] * mVals[13] -
+    mVals[8]  * mVals[5] * mVals[15] +
+    mVals[8]  * mVals[7] * mVals[13] +
+    mVals[12] * mVals[5] * mVals[11] -
+    mVals[12] * mVals[7] * mVals[9];
+    
+    inv[12] = -mVals[4]  * mVals[9] * mVals[14] +
+    mVals[4]  * mVals[10] * mVals[13] +
+    mVals[8]  * mVals[5] * mVals[14] -
+    mVals[8]  * mVals[6] * mVals[13] -
+    mVals[12] * mVals[5] * mVals[10] +
+    mVals[12] * mVals[6] * mVals[9];
+    
+    inv[1] = -mVals[1]  * mVals[10] * mVals[15] +
+    mVals[1]  * mVals[11] * mVals[14] +
+    mVals[9]  * mVals[2] * mVals[15] -
+    mVals[9]  * mVals[3] * mVals[14] -
+    mVals[13] * mVals[2] * mVals[11] +
+    mVals[13] * mVals[3] * mVals[10];
+    
+    inv[5] = mVals[0]  * mVals[10] * mVals[15] -
+    mVals[0]  * mVals[11] * mVals[14] -
+    mVals[8]  * mVals[2] * mVals[15] +
+    mVals[8]  * mVals[3] * mVals[14] +
+    mVals[12] * mVals[2] * mVals[11] -
+    mVals[12] * mVals[3] * mVals[10];
+    
+    inv[9] = -mVals[0]  * mVals[9] * mVals[15] +
+    mVals[0]  * mVals[11] * mVals[13] +
+    mVals[8]  * mVals[1] * mVals[15] -
+    mVals[8]  * mVals[3] * mVals[13] -
+    mVals[12] * mVals[1] * mVals[11] +
+    mVals[12] * mVals[3] * mVals[9];
+    
+    inv[13] = mVals[0]  * mVals[9] * mVals[14] -
+    mVals[0]  * mVals[10] * mVals[13] -
+    mVals[8]  * mVals[1] * mVals[14] +
+    mVals[8]  * mVals[2] * mVals[13] +
+    mVals[12] * mVals[1] * mVals[10] -
+    mVals[12] * mVals[2] * mVals[9];
+    
+    inv[2] = mVals[1]  * mVals[6] * mVals[15] -
+    mVals[1]  * mVals[7] * mVals[14] -
+    mVals[5]  * mVals[2] * mVals[15] +
+    mVals[5]  * mVals[3] * mVals[14] +
+    mVals[13] * mVals[2] * mVals[7] -
+    mVals[13] * mVals[3] * mVals[6];
+    
+    inv[6] = -mVals[0]  * mVals[6] * mVals[15] +
+    mVals[0]  * mVals[7] * mVals[14] +
+    mVals[4]  * mVals[2] * mVals[15] -
+    mVals[4]  * mVals[3] * mVals[14] -
+    mVals[12] * mVals[2] * mVals[7] +
+    mVals[12] * mVals[3] * mVals[6];
+    
+    inv[10] = mVals[0]  * mVals[5] * mVals[15] -
+    mVals[0]  * mVals[7] * mVals[13] -
+    mVals[4]  * mVals[1] * mVals[15] +
+    mVals[4]  * mVals[3] * mVals[13] +
+    mVals[12] * mVals[1] * mVals[7] -
+    mVals[12] * mVals[3] * mVals[5];
+    
+    inv[14] = -mVals[0]  * mVals[5] * mVals[14] +
+    mVals[0]  * mVals[6] * mVals[13] +
+    mVals[4]  * mVals[1] * mVals[14] -
+    mVals[4]  * mVals[2] * mVals[13] -
+    mVals[12] * mVals[1] * mVals[6] +
+    mVals[12] * mVals[2] * mVals[5];
+    
+    inv[3] = -mVals[1] * mVals[6] * mVals[11] +
+    mVals[1] * mVals[7] * mVals[10] +
+    mVals[5] * mVals[2] * mVals[11] -
+    mVals[5] * mVals[3] * mVals[10] -
+    mVals[9] * mVals[2] * mVals[7] +
+    mVals[9] * mVals[3] * mVals[6];
+    
+    inv[7] = mVals[0] * mVals[6] * mVals[11] -
+    mVals[0] * mVals[7] * mVals[10] -
+    mVals[4] * mVals[2] * mVals[11] +
+    mVals[4] * mVals[3] * mVals[10] +
+    mVals[8] * mVals[2] * mVals[7] -
+    mVals[8] * mVals[3] * mVals[6];
+    
+    inv[11] = -mVals[0] * mVals[5] * mVals[11] +
+    mVals[0] * mVals[7] * mVals[9] +
+    mVals[4] * mVals[1] * mVals[11] -
+    mVals[4] * mVals[3] * mVals[9] -
+    mVals[8] * mVals[1] * mVals[7] +
+    mVals[8] * mVals[3] * mVals[5];
+    
+    inv[15] = mVals[0] * mVals[5] * mVals[10] -
+    mVals[0] * mVals[6] * mVals[9] -
+    mVals[4] * mVals[1] * mVals[10] +
+    mVals[4] * mVals[2] * mVals[9] +
+    mVals[8] * mVals[1] * mVals[6] -
+    mVals[8] * mVals[2] * mVals[5];
+    
+    det = mVals[0] * inv[0] + mVals[1] * inv[4] + mVals[2] * inv[8] + mVals[3] * inv[12];
+    
+    if(Math::IsZero(det))
+    {
+        return m;
+    }
+    det = 1.0 / det;
+    
+    for(i = 0; i < 16; i++)
+    {
+        m.mVals[i] = inv[i] * det;
+    }
+    return m;
+}
+
 void Matrix4::SetRows(const Vector4& row1, const Vector4& row2, const Vector4& row3, const Vector4& row4)
 {
     mVals[0] = row1[0];
@@ -316,6 +484,20 @@ Matrix4& Matrix4::operator*=(const Matrix4& rhs)
     return *this;
 }
 
+Vector3 Matrix4::operator*(const Vector3& rhs) const
+{
+    return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8] * rhs[2] + mVals[12],
+                   mVals[1] * rhs[0] + mVals[5] * rhs[1] + mVals[9] * rhs[2] + mVals[13],
+                   mVals[2] * rhs[0] + mVals[6] * rhs[1] + mVals[10] * rhs[2] + mVals[14]);
+}
+
+Vector3 operator*(const Vector3& lhs, const Matrix4& rhs)
+{
+    return Vector3(lhs[0] * rhs[0]  + lhs[1] * rhs[1]  + lhs[2] * rhs[2]  + rhs[3],
+                   lhs[0] * rhs[4]  + lhs[1] * rhs[5]  + lhs[2] * rhs[6]  + rhs[7],
+                   lhs[0] * rhs[8]  + lhs[1] * rhs[9]  + lhs[2] * rhs[10] + rhs[11]);
+}
+
 Vector4 Matrix4::operator*(const Vector4& rhs) const
 {
     return Vector4(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2] + mVals[12] * rhs[3],
@@ -469,42 +651,10 @@ Matrix4 Matrix4::MakeScale(Vector3 scale)
     return m;
 }
 
-Matrix4 Matrix4::MakeLookAt(const Vector3 &eye, const Vector3 &lookAt, const Vector3 &up)
-{
-    // Generate view space axes. First, the view direction.
-    Vector3 viewDir = lookAt - eye;
-    viewDir.Normalize();
-    
-    // We can use "Gram-Schmidt Orthogonalization" equation to ensure
-    // that the up axis passed is orthogonal (at a right angle) with our view direction.
-    Vector3 viewUp = up - Vector3::Dot(up, viewDir) * viewDir;
-    viewUp.Normalize();
-    
-    // Once we know the view direction and up, we can use cross product
-    // to generate side axis. Order also has an effect on our view-space coordinate system.
-    Vector3 viewSide = Vector3::Cross(viewDir, viewUp);
-    
-    // Generate rotation matrix. This is where we make some concrete
-    // choices about our view-space coordinate system.
-    // +X is right, +Y is up, +Z is forward.
-    Matrix3 rotate;
-    rotate.SetRows(-viewSide, viewUp, -viewDir);
-    
-    // Make a 4x4 matrix based on the 3x3 rotation matrix.
-    Matrix4 m = Matrix4::MakeRotate(rotate);
-    
-    // Calculate inverse of eye vector and assign it to 4x4 matrix.
-    Vector3 eyeInv = -(rotate * eye);
-    m(0, 3) = eyeInv.GetX();
-    m(1, 3) = eyeInv.GetY();
-    m(2, 3) = eyeInv.GetZ();
-    return m;
-}
-
 Matrix4 Matrix4::MakePerspective(float fovAngleRad, float aspectRatio, float near, float far)
 {
-    // Note that this doesn't work for all view systems.
-    // I think different values would be required for Direct3D.
+    // This doesn't work for all view systems.
+    // Different values would be required for Direct3D.
     // This should work in OpenGL though.
     Matrix4 m;
     float d = 1 / Math::Tan(fovAngleRad / 2.0f);

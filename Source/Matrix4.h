@@ -48,6 +48,11 @@ public:
     Matrix4& Transpose();
     static Matrix4 Transpose(const Matrix4& matrix);
     
+    // Inverse and affine inverse.
+    // Affine inverse is maybe faster, but only works with affine matrices!
+    Matrix4 AffineInverse();
+    Matrix4 Inverse();
+    
     // Addition and subtraction
     Matrix4 operator+(const Matrix4& rhs) const;
     Matrix4& operator+=(const Matrix4& rhs);
@@ -58,6 +63,10 @@ public:
     // Matrix multiplication
     Matrix4 operator*(const Matrix4& rhs) const;
     Matrix4& operator*=(const Matrix4& rhs);
+    
+    // Vector3 multiplication - column-major (rhs) and row-major (lhs)
+    Vector3 operator*(const Vector3& rhs) const;
+    friend Vector3 operator*(const Vector3& lhs, const Matrix4& rhs);
     
     // Vector4 multiplication - column-major (rhs) and row-major (lhs)
     Vector4 operator*(const Vector4& rhs) const;
@@ -81,7 +90,6 @@ public:
     static Matrix4 MakeRotate(const Quaternion& quat);
     static Matrix4 MakeRotate(const Matrix3& matrix3);
     static Matrix4 MakeScale(Vector3 scale);
-    static Matrix4 MakeLookAt(const Vector3& eye, const Vector3& lootAt, const Vector3& up);
     static Matrix4 MakePerspective(float fovAngleRad, float aspectRatio, float near, float far);
     
 private:

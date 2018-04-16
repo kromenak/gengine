@@ -100,3 +100,40 @@ TEST_CASE("Test multiply Vector4 by scale Matrix4")
     REQUIRE(Math::AreEqual(result.GetZ(), 0.5f));
     REQUIRE(Math::AreEqual(result.GetW(), 1.0f));
 }
+
+TEST_CASE("Test calculate the inverse of Matrix4")
+{
+    float vals1[4][4] = {
+        { 1, 1, 1, 23 },
+        { 0, 3, 1, 10 },
+        { 2, 3, 1, 14 },
+        { 0, 0, 0, 1 }
+    };
+    Matrix4 matrix(vals1, true);
+    Matrix4 inverse = matrix.Inverse();
+    
+    // Make sure values are correct in the inverse matrix.
+    REQUIRE(Math::AreEqual(inverse(0,0), 0.0f));
+    REQUIRE(Math::AreEqual(inverse(1,0), -0.5f));
+    REQUIRE(Math::AreEqual(inverse(2,0), 1.5f));
+    REQUIRE(Math::AreEqual(inverse(3,0), 0.0f));
+    
+    REQUIRE(Math::AreEqual(inverse(0,1), -0.5f));
+    REQUIRE(Math::AreEqual(inverse(1,1), 0.25f));
+    REQUIRE(Math::AreEqual(inverse(2,1), 0.25f));
+    REQUIRE(Math::AreEqual(inverse(3,1), 0.0f));
+    
+    REQUIRE(Math::AreEqual(inverse(0,2), 0.5f));
+    REQUIRE(Math::AreEqual(inverse(1,2), 0.25f));
+    REQUIRE(Math::AreEqual(inverse(2,2), -0.75f));
+    REQUIRE(Math::AreEqual(inverse(3,2), 0.0f));
+    
+    REQUIRE(Math::AreEqual(inverse(0,3), -2.0f));
+    REQUIRE(Math::AreEqual(inverse(1,3), 5.5f));
+    REQUIRE(Math::AreEqual(inverse(2,3), -26.5f));
+    REQUIRE(Math::AreEqual(inverse(3,3), 1.0f));
+    
+    // Actually do the math and make sure we get identity.
+    Matrix4 result = matrix * inverse;
+    REQUIRE(result == Matrix4::Identity);
+}
