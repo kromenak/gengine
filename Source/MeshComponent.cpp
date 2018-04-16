@@ -29,9 +29,6 @@ void MeshComponent::Update(float deltaTime)
 
 void MeshComponent::Render()
 {
-    // Early out if nothing to render.
-    if(mMeshes.size() == 0) { return; }
-    
     // Update the world transform for the shader.
     Matrix4 worldTransform = mOwner->GetWorldTransformMatrix();
     
@@ -39,6 +36,9 @@ void MeshComponent::Render()
     Services::GetRenderer()->SetWorldTransformMatrix(worldTransform);
     glBindTexture(GL_TEXTURE_2D, 0);
     axes->DrawLines();
+    
+    // Early out if nothing to render.
+    if(mMeshes.size() == 0) { return; }
     
     // Render the things!
     for(int i = 0; i < mMeshes.size(); i++)
