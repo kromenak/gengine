@@ -4,7 +4,6 @@
 //
 //  Created by Clark Kromenaker on 7/23/17.
 //
-
 #include "SheepScript.h"
 
 SheepScript* gCurrentSheepScript = nullptr;

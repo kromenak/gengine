@@ -4,7 +4,6 @@
 //
 //  Created by Clark Kromenaker on 7/24/17.
 //
-
 #include <fstream>
 #include <cassert>
 

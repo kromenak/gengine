@@ -4,9 +4,7 @@
 //
 //  Created by Clark Kromenaker on 7/23/17.
 //
-
 #pragma once
-
 #include "SheepNode.h"
 
 class SheepNameRefNode : public SheepNode
