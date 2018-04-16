@@ -82,7 +82,7 @@ bool GEngine::Initialize()
     //MeshComponent* meshComponent = meshActor->AddComponent<MeshComponent>();
     //meshComponent->SetModel(model);
     
-    LoadStage("R25");
+    LoadStage("B25");
     return true;
 }
 
@@ -182,9 +182,9 @@ void GEngine::Update()
     if(deltaTime > 0.05f) { deltaTime = 0.05f; }
     
     // Update all actors.
-    for(auto& actor : mActors)
+    for(int i = 0; i < mActors.size(); i++)
     {
-        actor->Update(deltaTime);
+        mActors[i]->Update(deltaTime);
     }
     
     // Also update audio system (before or after actors?)
