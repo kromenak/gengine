@@ -28,6 +28,7 @@ public:
     void Present();
     
     void SetCamera(CameraComponent* camera) { mCameraComponent = camera; }
+    CameraComponent* GetCamera() { return mCameraComponent; }
     
     void SetWorldTransformMatrix(Matrix4& worldTransform);
     
@@ -41,7 +42,14 @@ public:
     
     GLShader* GetShader() { return mShader; }
     
+    int GetWidth() { return mScreenWidth; }
+    int GetHeight() { return mScreenHeight; }
+    
 private:
+    // Screen's width and height, in pixels.
+    int mScreenWidth = 1024;
+    int mScreenHeight = 768;
+    
     // Handle for the window object (contains the game).
     SDL_Window* mWindow = nullptr;
     

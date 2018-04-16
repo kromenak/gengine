@@ -59,7 +59,7 @@ bool SDLRenderer::Initialize()
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
     
     // Create a window.
-    mWindow = SDL_CreateWindow("GK3", 100, 100, 1024, 768, SDL_WINDOW_OPENGL);
+    mWindow = SDL_CreateWindow("GK3", 100, 100, mScreenWidth, mScreenHeight, SDL_WINDOW_OPENGL);
     if(!mWindow) { return false; }
     
     // Create OpenGL context.
