@@ -183,7 +183,7 @@ void GLVertexArray::Draw(int offset, int count)
     else
     {
         // Draw "count" triangles at offset.
-        glDrawArrays(GL_TRIANGLES, offset, count);
+        glDrawArrays(GL_TRIANGLE_FAN, offset, count);
     }
 }
 

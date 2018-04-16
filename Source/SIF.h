@@ -28,7 +28,7 @@ struct SceneCamera
     // This can be an identifier, or (for inspect camera) the noun/model associated.
     std::string label;
     
-    // Camera's angle - I'm guessing this is rotation and pitch.
+    // Camera's angle - yaw and pitch.
     Vector2 angle;
     
     // Camera's position.
