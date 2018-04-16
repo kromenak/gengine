@@ -5,6 +5,8 @@
 //
 #include "GameCamera.h"
 #include "CameraComponent.h"
+#include "BSP.h"
+#include "MeshComponent.h"
 
 const float kCameraSpeed = 100.0f;
 const float kRunCameraMultiplier = 2.0f;
@@ -12,7 +14,7 @@ const float kCameraRotationSpeed = 2.5f;
 
 GameCamera::GameCamera()
 {
-    AddComponent<CameraComponent>();
+    mCamera = AddComponent<CameraComponent>();
 }
 
 void GameCamera::Update(float deltaTime)
@@ -52,5 +54,27 @@ void GameCamera::Update(float deltaTime)
     else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_D))
     {
         Rotate(Vector3::UnitY, kCameraRotationSpeed * deltaTime);
+    }
+    
+    if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))
+    {
+        if(mCamera != nullptr)
+        {
+            Vector2 mousePos = Services::GetInput()->GetMousePosition();
+            Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
+            Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
+            Vector3 dir = (worldPos2 - worldPos).Normalize();
+            
+            Ray ray(worldPos, dir);
+            std::string* name = BSP::inst->Intersects(ray);
+            if(name == nullptr)
+            {
+                std::cout << "Nothing" << std::endl;
+            }
+            else
+            {
+                std::cout << *name << std::endl;
+            }
+        }
     }
 }

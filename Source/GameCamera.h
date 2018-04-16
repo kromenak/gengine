@@ -13,4 +13,7 @@ class GameCamera : public Actor
 public:
     GameCamera();
     void Update(float deltaTime) override;
+    
+private:
+    CameraComponent* mCamera = nullptr;
 };

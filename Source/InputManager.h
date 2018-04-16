@@ -13,6 +13,13 @@
 class InputManager
 {
 public:
+    enum class MouseButton
+    {
+        Left = 1,
+        Middle,
+        Right
+    };
+    
     InputManager();
     
     void Update();
@@ -21,9 +28,9 @@ public:
     bool IsKeyPressed(SDL_Scancode scancode) { return mKeyboardState[scancode] == 1; }
     bool IsKeyUp(SDL_Scancode scancode);
     
-    bool IsMouseButtonDown(int button);
-    bool IsMouseButtonPressed(int button);
-    bool IsMouseButtonUp(int button);
+    bool IsMouseButtonDown(MouseButton button);
+    bool IsMouseButtonPressed(MouseButton button);
+    bool IsMouseButtonUp(MouseButton button);
     
     Vector2 GetMousePosition() { return mMousePosition; }
     Vector2 GetMouseDelta() { return mMousePositionDelta; }
@@ -61,21 +68,21 @@ inline bool InputManager::IsKeyUp(SDL_Scancode scancode)
     return mKeyboardState[scancode] == 0 && mPrevKeyboardState[scancode] == 1;
 }
 
-inline bool InputManager::IsMouseButtonDown(int button)
+inline bool InputManager::IsMouseButtonDown(MouseButton button)
 {
-    bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON(button));
-    bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON(button));
+    bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON((int)button));
+    bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON((int)button));
     return pressedThisFrame && !pressedLastFrame;
 }
 
-inline bool InputManager::IsMouseButtonPressed(int button)
+inline bool InputManager::IsMouseButtonPressed(MouseButton button)
 {
-    return (mMouseButtonState & SDL_BUTTON(button));
+    return (mMouseButtonState & SDL_BUTTON((int)button));
 }
 
-inline bool InputManager::IsMouseButtonUp(int button)
+inline bool InputManager::IsMouseButtonUp(MouseButton button)
 {
-    bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON(button));
-    bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON(button));
+    bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON((int)button));
+    bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON((int)button));
     return !pressedThisFrame && pressedLastFrame;
 }
