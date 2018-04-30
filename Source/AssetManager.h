@@ -16,6 +16,7 @@
 #include "Scene.h"
 #include "NVC.h"
 #include "Soundtrack.h"
+#include "Sheep/SheepScript.h"
 
 using namespace std;
 
@@ -44,6 +45,8 @@ public:
     NVC* LoadNVC(string name);
     BSP* LoadBSP(string name);
     
+    SheepScript* LoadSheep(string name);
+    
 private:
     // A list of paths to search for assets.
     // In priority order, since we'll search in order, and stop when we find the item.
@@ -57,9 +60,7 @@ private:
     unordered_map<string, Texture*> mLoadedTextures;
     unordered_map<string, Audio*> mLoadedAudios;
     
-    
     string GetAssetPath(string fileName);
-    
     
     template<class T> T* LoadAsset(string assetName, unordered_map<string, T*>* cache);
 };

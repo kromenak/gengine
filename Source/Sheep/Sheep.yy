@@ -1,4 +1,5 @@
-%{
+/* This code is added to the top of sheep.tab.cc */
+%code top {
 #include <cstdlib>
 #include <string>
 #include "SheepScript.h"
@@ -41,7 +42,7 @@ char* removeQuotes(char* str)
 /* Helps catch invalid uses. */
 %define parse.assert
 
-/* This code is added to the top of the .hh file for the parser. */
+/* This code is added to the top of sheep.tab.hh. */
 %code requires 
 {
 	namespace Sheep
@@ -90,7 +91,7 @@ char* removeQuotes(char* str)
 %token DOLLAR COMMA COLON SEMICOLON QUOTE
 %token OPENPAREN CLOSEPAREN OPENBRACKET CLOSEBRACKET
 
-/* pretty critical keyword for scripting synchronization (like a Unity coroutine?) */
+/* pretty critical keyword for scripting synchronization */
 %token WAIT
 
 /* Some other keywords outlined in the language doc, but not sure if they are used */
@@ -103,12 +104,10 @@ char* removeQuotes(char* str)
 %token <int> INT
 %token <float> FLOAT
 %token <std::string> STRING
-/*%token INT FLOAT STRING*/
 
 /* symbol dictating a user-defined name (variable or function) */
-%token <std::string> USERNAME
-%token <std::string> SYSNAME
-/*%token USERNAME SYSNAME*/
+%token <std::string> USERID
+%token <std::string> SYSID
 
 %type <int> int_exp
 %type <float> float_exp
@@ -140,47 +139,113 @@ char* removeQuotes(char* str)
 %%
 
 /* Grammer rules */
-
-script: /* empty */
-	| expression_list { }
+script: %empty
+	| symbols
+	| code
+	| symbols code { }
 	;
 
-expression_list: expression { std::cout << $1 << std::endl; }
-	| expression_list expression { std::cout << $2 << std::endl; }
+symbols: SYMBOLS OPENBRACKET variable_decls CLOSEBRACKET { }
+
+variable_decls: variable_decls
+	| variable_decl { }
 	;
 
-expression: int_exp { $$ = $1; }
-	| float_exp { $$ = $1; }
+variable_decl: INTVAR variable_decl_int SEMICOLON
+	| FLOATVAR variable_decl_float SEMICOLON
+	| STRINGVAR variable_decl_string SEMICOLON { }
 	;
 
-int_exp: INT { $$ = $1; }
-	| int_exp PLUS int_exp { $$ = $1 + $3; }
+variable_decl_int: %empty
+	| USERID
+	| USERID COMMA variable_decl_int
+	| USERID ASSIGN INT
+	| USERID ASSIGN INT COMMA variable_decl_int { }
 	;
 
-float_exp: FLOAT { $$ = $1; }
-	| float_exp PLUS float_exp { $$ = $1 + $3; }
+variable_decl_float: %empty
+	| USERID
+	| USERID COMMA variable_decl_float
+	| USERID ASSIGN INT
+	| USERID ASSIGN INT COMMA variable_decl_float { }
+
+variable_decl_string: %empty
+	| USERID
+	| USERID COMMA variable_decl_string
+	| USERID ASSIGN INT
+	| USERID ASSIGN INT COMMA variable_decl_string { }
+
+code: CODE OPENBRACKET functions CLOSEBRACKET { }
+
+functions: %empty
+	| functions
+	| function { }
 	;
 
-/* All possible constants: int, float, string */
-/*
-constant: INT { $$ = $1; }
-	| FLOAT { $$ = $1; }
-	| STRING { $$ = removeQuotes($1); }
+function: USERID OPENPAREN CLOSEPAREN OPENBRACKET statements CLOSEBRACKET { }
 	;
-*/
 
-/*
-user_name: USERNAME { $$ = SheepNode::CreateNameRef(yytext, false); }
-sys_name: SYSNAME { $$ = SheepNode::CreateNameRef(yytext, true); }
-*/
-
-/* All possible symbol types: int, float, string */
-/*
-symbol_type: INTVAR { $$ = SheepNode::CreateTypeRef(SheepReferenceType::Int); }
-	| FLOATVAR { $$ = SheepNode::CreateTypeRef(SheepReferenceType::Float); }
-	| STRINGVAR { $$ = SheepNode::CreateTypeRef(SheepReferenceType::String); }
+statements: %empty
+	| statement { }
 	;
-*/
 
+statement: if_else_block
+	| USERID ASSIGN expr SEMICOLON
+	| expr SEMICOLON
+	| RETURN SEMICOLON
+	| BREAKPOINT SEMICOLON
+	| SITNSPIN SEMICOLON
+	| GOTO USERID SEMICOLON
+	| USERID COLON
+	| WAIT SEMICOLON
+	| WAIT function_call
+	| WAIT OPENBRACKET function_calls CLOSEBRACKET
+	| block_statement { }
+	;
 
+if_else_block: if_statement
+	| if_statement else_statement { }
+	;
+
+if_statement: IF OPENPAREN expr CLOSEPAREN block_statement { }
+	;
+
+else_statement: ELSE block_statement 
+	| ELSE if_else_block { }
+	;
+
+block_statement: OPENBRACKET statements CLOSEBRACKET { }
+	;
+
+function_call: SYSID OPENPAREN expr CLOSEPAREN SEMICOLON
+	| SYSID OPENPAREN expr OPENPAREN CLOSEPAREN SEMICOLON
+	| SYSID OPENPAREN expr OPENPAREN expr CLOSEPAREN SEMICOLON
+	;
+
+expr: function_call
+	| USERID
+	| INT
+	| FLOAT
+	| STRING
+	| OPENPAREN expr CLOSEPAREN
+	| NEGATE expr
+	| NOT expr
+	| expr PLUS expr
+	| expr MINUS expr
+	| expr DIVIDE expr
+	| expr MULTIPLY expr
+	| expr MOD expr
+	| expr LT expr
+	| expr GT expr
+	| expr LTE expr
+	| expr GTE expr
+	| expr NOTEQUAL expr
+	| expr EQUAL expr
+	| expr OR expr
+	| expr AND expr { } 
+	;
+
+%%
+
+/* No epilogue is needed. */
 

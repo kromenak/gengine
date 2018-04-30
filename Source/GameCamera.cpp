@@ -77,4 +77,12 @@ void GameCamera::Update(float deltaTime)
             }
         }
     }
+    
+    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_0))
+    {
+        std::cout << "Execute!" << std::endl;
+        SheepScript* sheepScript = Services::GetAssets()->LoadSheep("B25.SHP");
+        SheepVM vm;
+        vm.Execute(sheepScript);
+    }
 }

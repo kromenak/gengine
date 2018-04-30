@@ -19,17 +19,12 @@
 #include "Mesh.h"
 #include "Stage.h"
 
-extern GLfloat triangle_vertices[];
-extern GLfloat triangle_colors[];
-extern GLfloat cube_vertices[];
-extern GLfloat cube_colors[];
-extern GLushort cube_elements[];
-
+GEngine* GEngine::inst = nullptr;
 std::vector<Actor*> GEngine::mActors;
 
 GEngine::GEngine() : mRunning(false)
 {
-    
+    inst = this;
 }
 
 bool GEngine::Initialize()
@@ -54,8 +49,8 @@ bool GEngine::Initialize()
     // Initialize asset manager.
     Services::SetAssets(&mAssetManager);
     
-    //Sheep::Driver driver;
-    //driver.Parse("/Users/Clark/Dropbox/GK3/Assets/test.shp");
+    Sheep::Driver driver;
+    driver.Parse("/Users/Clark/Dropbox/GK3/Assets/B25.shp");
     
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("ambient.brn");
@@ -67,7 +62,8 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("day23.brn");
     mAssetManager.LoadBarn("day123.brn");
     
-    //mAssetManager.WriteBarnAssetToFile("R25110A.SIF");
+    //mAssetManager.WriteBarnAssetToFile("HAL.SHP");
+    //mAssetManager.LoadSheep("HAL.SHP");
     
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));

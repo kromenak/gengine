@@ -15,6 +15,7 @@ public:
     ~BinaryReader();
     
     bool CanRead() const;
+    bool IsEof() const;
     
     void Seek(int position);
     void Skip(int size);

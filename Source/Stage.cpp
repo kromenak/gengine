@@ -35,9 +35,9 @@ Stage::Stage(std::string name, int day, int hour) :
     
     // Position room camera.
     SceneCamera* defaultRoomCamera = mGeneralSIF->GetDefaultRoomCamera();
-    GameCamera* gameCamera = new GameCamera();
-    gameCamera->SetPosition(defaultRoomCamera->position);
-    gameCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
+    mCamera = new GameCamera();
+    mCamera->SetPosition(defaultRoomCamera->position);
+    mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
     
     // Create actors for the scene.
     std::vector<ActorDefinition*> actorDefinitions = mGeneralSIF->GetActorDefinitions();
@@ -53,6 +53,12 @@ Stage::Stage(std::string name, int day, int hour) :
         
         MeshComponent* meshComponent = actor->AddComponent<MeshComponent>();
         meshComponent->SetModel(actorDef->model);
+        
+        // If this is our ego, save a reference to it.
+        if(actorDef->ego)
+        {
+            mEgo = actor;
+        }
     }
     
     // Create soundtrack player and get it playing!
@@ -66,5 +72,27 @@ Stage::Stage(std::string name, int day, int hour) :
         Actor* actor = new Actor();
         SoundtrackPlayer* soundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
         soundtrackPlayer->Play(soundtracks[0]);
+    }
+}
+
+void Stage::InitEgoPosition(std::string positionName)
+{
+    if(mEgo == nullptr) { return; }
+    
+    ScenePosition* position = mGeneralSIF->GetPosition(positionName);
+    if(position == nullptr) { return; }
+    
+    // Set position and heading.
+    mEgo->SetPosition(position->position);
+    mEgo->SetRotation(Quaternion(Vector3::UnitY, position->heading));
+    
+    if(position->camera != nullptr)
+    {
+        mCamera->SetPosition(position->camera->position);
+        mCamera->SetRotation(Quaternion(Vector3::UnitY, position->camera->angle.GetX()));
+    }
+    else
+    {
+        //TODO: Output a warning.
     }
 }

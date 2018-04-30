@@ -44,6 +44,7 @@
 		4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
 		4B4621EB1FF741D800536BA6 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621EA1FF741D800536BA6 /* Texture.cpp */; };
 		4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621ED1FF7532A00536BA6 /* Asset.cpp */; };
+		4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4B4AE22091B80700391827 /* SheepAPI.cpp */; };
 		4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED861F5CA5F4000065EF /* Model.cpp */; };
 		4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B53B0C8207AFE7E00663381 /* Ray.cpp */; };
@@ -65,6 +66,7 @@
 		4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
 		4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6EE331F441DC600BB29D5 /* minilzo.c */; };
+		4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE75D32208D7E7B007031A3 /* SheepVM.cpp */; };
 		4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
 		4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
 		4BF32B8C1F67C434000639FB /* GLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B8A1F67C434000639FB /* GLShader.cpp */; };
@@ -163,6 +165,9 @@
 		4B4621EA1FF741D800536BA6 /* Texture.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Texture.cpp; path = ../Source/Texture.cpp; sourceTree = "<group>"; };
 		4B4621EC1FF7532A00536BA6 /* Asset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Asset.h; path = ../Source/Asset.h; sourceTree = "<group>"; };
 		4B4621ED1FF7532A00536BA6 /* Asset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Asset.cpp; path = ../Source/Asset.cpp; sourceTree = "<group>"; };
+		4B4B4ADE2091B5A000391827 /* Value.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Value.h; path = ../Source/Value.h; sourceTree = "<group>"; };
+		4B4B4AE12091B80700391827 /* SheepAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepAPI.h; path = ../Source/Sheep/SheepAPI.h; sourceTree = "<group>"; };
+		4B4B4AE22091B80700391827 /* SheepAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepAPI.cpp; path = ../Source/Sheep/SheepAPI.cpp; sourceTree = "<group>"; };
 		4B4EED861F5CA5F4000065EF /* Model.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Model.cpp; path = ../Source/Model.cpp; sourceTree = "<group>"; };
 		4B4EED871F5CA5F4000065EF /* Model.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Model.h; path = ../Source/Model.h; sourceTree = "<group>"; };
 		4B4EED891F5CACEF000065EF /* Vector3.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector3.cpp; path = ../Source/Vector3.cpp; sourceTree = "<group>"; };
@@ -199,6 +204,8 @@
 		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
 		4BE15CBC1F46620000114779 /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Types.h; path = ../Source/Types.h; sourceTree = "<group>"; };
 		4BE6EE331F441DC600BB29D5 /* minilzo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = minilzo.c; path = ../Libraries/minilzo/minilzo.c; sourceTree = "<group>"; };
+		4BE75D31208D7E7B007031A3 /* SheepVM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepVM.h; path = ../Source/Sheep/SheepVM.h; sourceTree = "<group>"; };
+		4BE75D32208D7E7B007031A3 /* SheepVM.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepVM.cpp; path = ../Source/Sheep/SheepVM.cpp; sourceTree = "<group>"; };
 		4BF32B841F64D4B9000639FB /* Matrix4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix4.cpp; path = ../Source/Matrix4.cpp; sourceTree = "<group>"; };
 		4BF32B851F64D4B9000639FB /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix4.h; path = ../Source/Matrix4.h; sourceTree = "<group>"; };
 		4BF32B871F67BC34000639FB /* GLVertexArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLVertexArray.cpp; path = ../Source/GLVertexArray.cpp; sourceTree = "<group>"; };
@@ -356,6 +363,10 @@
 				4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */,
 				4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */,
 				4B2ACE121F25D310003EC7FE /* SheepDriver.h */,
+				4BE75D31208D7E7B007031A3 /* SheepVM.h */,
+				4BE75D32208D7E7B007031A3 /* SheepVM.cpp */,
+				4B4B4AE12091B80700391827 /* SheepAPI.h */,
+				4B4B4AE22091B80700391827 /* SheepAPI.cpp */,
 			);
 			name = Sheep;
 			sourceTree = "<group>";
@@ -434,6 +445,7 @@
 				4B02A3B01F526529000540A7 /* membuf.cpp */,
 				4B02A3B11F526529000540A7 /* membuf.h */,
 				4B5497F81FF80E0A00F1EF4F /* StringUtil.h */,
+				4B4B4ADE2091B5A000391827 /* Value.h */,
 			);
 			name = STD;
 			sourceTree = "<group>";
@@ -510,7 +522,7 @@
 		4BF8A46A1F24185300F0FB91 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0900;
+				LastUpgradeCheck = 0930;
 				TargetAttributes = {
 					4B11129A1F820A6D00AFDDFC = {
 						CreatedOnToolsVersion = 9.0;
@@ -614,6 +626,7 @@
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */,
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
+				4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */,
 				4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */,
 				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
 				4B02A3B21F526529000540A7 /* membuf.cpp in Sources */,
@@ -622,6 +635,7 @@
 				4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
+				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,
 				4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */,
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
@@ -866,11 +880,13 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
@@ -898,11 +914,13 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;

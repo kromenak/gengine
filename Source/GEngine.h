@@ -19,6 +19,7 @@ class GEngine
 public:
     static void AddActor(Actor* actor);
     static void RemoveActor(Actor* actor);
+    static GEngine* inst;
     
     GEngine();
     
@@ -29,6 +30,7 @@ public:
     void Quit();
     
     void LoadStage(std::string name);
+    Stage* GetStage() { return mStage; }
     
 private:
     // A list of all actors that currently exist in the game.

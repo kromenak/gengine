@@ -75,13 +75,6 @@ Matrix4 CameraComponent::MakeLookAt(const Vector3& eye, const Vector3& lookAt, c
     //float result = Vector3::Dot(-viewSide, Vector3::Cross(viewUp, -viewDir));
     //std::cout << result << std::endl;
     
-    // It's convenient for us to also calculate our view -> world matrix at the same time.
-    // So let's do that while we're at it.
-    mViewToWorldMatrix = Matrix4::MakeRotate(rotate);
-    mViewToWorldMatrix(0, 3) = eye.GetX();
-    mViewToWorldMatrix(1, 3) = eye.GetY();
-    mViewToWorldMatrix(2, 3) = eye.GetZ();
-    
     // Make a 4x4 matrix based on the 3x3 rotation matrix.
     rotate.Transpose();
     Matrix4 m = Matrix4::MakeRotate(rotate);

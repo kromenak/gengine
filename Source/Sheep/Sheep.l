@@ -27,7 +27,6 @@ using parser = Sheep::Parser;
 [ \t\n\r]+	{ }
 "//".* { }
 
-<INITIAL>{
 "code"		return parser::make_CODE(loc);
 "symbols"	return parser::make_SYMBOLS(loc);
 
@@ -75,19 +74,14 @@ using parser = Sheep::Parser;
 -?([0-9])+				{ return parser::make_INT(strtol(yytext, nullptr, 10), loc); }
 \"([^\\\"]|\\.)*\"		{ return parser::make_STRING(yytext, loc); }
 \|\<[^\>\|]*\>\|		{ return parser::make_STRING(yytext, loc); }
-}
 
-[a-zA-Z][a-zA-Z0-9_]*[$] { return parser::make_USERNAME(yytext, loc); }
-[a-zA-Z][a-zA-Z0-9_]* { return parser::make_SYSNAME(yytext, loc); }
+[a-zA-Z][a-zA-Z0-9_]*[$] { return parser::make_USERID(yytext, loc); }
+[a-zA-Z][a-zA-Z0-9_]* { return parser::make_SYSID(yytext, loc); }
 
-<INITIAL>{
 "/*"    BEGIN(COMMENT);
-}
 
-<COMMENT>{
-"*/"	BEGIN(INITIAL);
-[^*\n]+ // eat comment in chucks
-"*"     // eat the lone star
-}
+<COMMENT>"*/"	BEGIN(INITIAL);
+<COMMENT>[^*\n]+ // eat comment in chunks
+<COMMENT>"*"     // eat the lone star
 
-.	printf("bad input character '%s' at line %d\n", yytext, yylineno);
+.	printf("bad input character '%s' at line %d\n", yytext, yylineno); yyterminate();

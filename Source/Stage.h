@@ -12,11 +12,15 @@
 class SIF;
 class Scene;
 class BSP;
+class Actor;
+class GameCamera;
 
 class Stage
 {
 public:
     Stage(std::string name, int day, int hour);
+    
+    void InitEgoPosition(std::string positionName);
     
 private:
     // The stage name, both general and specific.
@@ -29,8 +33,11 @@ private:
     SIF* mSpecificSIF = nullptr;
     
     Scene* mScene = nullptr;
-    
     BSP* mSceneBSP = nullptr;
+    
+    GameCamera* mCamera = nullptr;
+    
+    Actor* mEgo = nullptr;
 };
 
 /*

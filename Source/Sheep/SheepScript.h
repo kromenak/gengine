@@ -1,21 +1,61 @@
 //
-//  SheepScript.h
-//  GEngine
+// SheepScript.h
 //
-//  Created by Clark Kromenaker on 7/23/17.
+// Clark Kromenaker
+//
+// A compiled sheep script asset.
 //
 #pragma once
-#include "SheepNode.h"
+#include "Asset.h"
+#include <unordered_map>
+#include <vector>
+#include "SheepVM.h"
 
-class SheepScript
+class BinaryReader;
+
+struct SysImport
 {
-public:
-    static SheepScript* Create(SheepNode* rootNode);
-    
-private:
-    SheepScript(SheepNode* rootNode);
-    
-    // The root node of the script - either the symbols or code sections.
-    SheepNode* mRootNode = nullptr;
+    std::string name;
+    char returnType;
+    std::vector<char> argumentTypes;
 };
 
+class SheepScript : public Asset
+{
+public:
+    SheepScript(std::string name, char* data, int dataLength);
+    
+    SysImport* GetSysImport(int index);
+    
+    std::string GetStringConst(int offset);
+    
+    std::vector<SheepValue> GetVariables() { return mVariables; }
+    
+    char* GetBytecode() { return mBytecode; }
+    int GetBytecodeLength() { return mBytecodeLength; }
+    
+private:
+    std::vector<SysImport> mSysImports;
+    
+    // String constants, keyed by data offset, since that's how bytecode identifies them.
+    std::unordered_map<int, std::string> mStringConsts;
+    
+    // Represents variable ordering, types, and default values.
+    // Bytecode only cares about the index of the variable.
+    std::vector<SheepValue> mVariables;
+    
+    // Maps a function name to it's offset in the bytecode.
+    std::unordered_map<std::string, int> mFunctions;
+    
+    // The bytecode, grabbed directly from the code section.
+    // Just pass this to the VM and aaaaawayyyyy we go!
+    char* mBytecode = nullptr;
+    int mBytecodeLength = 0;
+    
+    void ParseFromData(char* data, int dataLength);
+    void ParseSysImportsSection(BinaryReader& reader);
+    void ParseStringConstsSection(BinaryReader& reader);
+    void ParseVariablesSection(BinaryReader& reader);
+    void ParseFunctionsSection(BinaryReader& reader);
+    void ParseCodeSection(BinaryReader& reader);
+};

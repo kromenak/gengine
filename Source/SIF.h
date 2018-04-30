@@ -161,6 +161,18 @@ public:
     
     SceneCamera* GetDefaultRoomCamera() { return mRoomCameras[mDefaultRoomCameraIndex]; }
     
+    ScenePosition* GetPosition(std::string positionName)
+    {
+        for(int i = 0; i < mPositions.size(); i++)
+        {
+            if(mPositions[i]->label == positionName)
+            {
+                return mPositions[i];
+            }
+        }
+        return nullptr;
+    }
+    
     std::vector<Soundtrack*> GetSoundtracks() { return mSoundtracks; }
     
 private:

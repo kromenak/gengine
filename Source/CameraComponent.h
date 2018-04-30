@@ -25,8 +25,5 @@ private:
     float nearClippingPlane = 0.01f;
     float farClippingPlane = 10000.0f;
     
-    // Matrix used for converting screen from view space to world space.
-    Matrix4 mViewToWorldMatrix;
-    
     Matrix4 MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up);
 };

@@ -11,7 +11,7 @@
 #include <map>
 
 #include "SheepScanner.h"
-#include "Sheep.tab.hh"
+#include "sheep.tab.hh"
 
 namespace Sheep
 {
@@ -22,6 +22,7 @@ namespace Sheep
         virtual ~Driver();
         
         void Parse(const char* filename);
+        void Parse(std::string sheep);
         void Parse(std::istream& iss);
         
         // Bison seems to require that these be lowercase.
@@ -33,9 +34,7 @@ namespace Sheep
         std::map<std::string, std::string> stringVariables;
         
     private:
-        void ParseHelper(std::istream& stream);
-        
-        Scanner* scanner = nullptr;
-        Parser* parser = nullptr;
+        Scanner* mScanner = nullptr;
+        Parser* mParser = nullptr;
     };
 }

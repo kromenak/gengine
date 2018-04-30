@@ -32,6 +32,11 @@ bool BinaryReader::CanRead() const
     return stream->good();
 }
 
+bool BinaryReader::IsEof() const
+{
+    return stream->eof();
+}
+
 void BinaryReader::Seek(int position)
 {
     stream->seekg(position, std::ios::beg);

@@ -170,6 +170,11 @@ BSP* AssetManager::LoadBSP(string name)
     return LoadAsset<BSP>(name, nullptr);
 }
 
+SheepScript* AssetManager::LoadSheep(std::string name)
+{
+    return LoadAsset<SheepScript>(name, nullptr);
+}
+
 string AssetManager::GetAssetPath(string fileName)
 {
     for(const string& searchPath : mSearchPaths)
