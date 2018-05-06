@@ -27,9 +27,6 @@
 		4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */; };
 		4B17D707206098B100EBD298 /* GameCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D706206098B100EBD298 /* GameCamera.cpp */; };
 		4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */; };
-		4B2ACDFB1F25880E003EC7FE /* SheepNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDF91F25880E003EC7FE /* SheepNode.cpp */; };
-		4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDFC1F25B621003EC7FE /* SheepTypeRefNode.cpp */; };
-		4B2ACE011F25BA6F003EC7FE /* SheepNameRefNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDFF1F25BA6F003EC7FE /* SheepNameRefNode.cpp */; };
 		4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */; };
 		4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */; };
 		4B2ACE101F25CF08003EC7FE /* SheepScanner.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0E1F25CF08003EC7FE /* SheepScanner.cpp */; };
@@ -58,6 +55,7 @@
 		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
 		4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
+		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4BCF4B25205672350045EDC8 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
@@ -134,12 +132,6 @@
 		4B17D706206098B100EBD298 /* GameCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GameCamera.cpp; path = ../Source/GameCamera.cpp; sourceTree = "<group>"; };
 		4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScript.cpp; path = ../Source/Sheep/SheepScript.cpp; sourceTree = "<group>"; };
 		4B2ACDF71F25873C003EC7FE /* SheepScript.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepScript.h; path = ../Source/Sheep/SheepScript.h; sourceTree = "<group>"; };
-		4B2ACDF91F25880E003EC7FE /* SheepNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepNode.cpp; path = ../Source/Sheep/SheepNode.cpp; sourceTree = "<group>"; };
-		4B2ACDFA1F25880E003EC7FE /* SheepNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepNode.h; path = ../Source/Sheep/SheepNode.h; sourceTree = "<group>"; };
-		4B2ACDFC1F25B621003EC7FE /* SheepTypeRefNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepTypeRefNode.cpp; path = ../Source/Sheep/SheepTypeRefNode.cpp; sourceTree = "<group>"; };
-		4B2ACDFD1F25B621003EC7FE /* SheepTypeRefNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepTypeRefNode.h; path = ../Source/Sheep/SheepTypeRefNode.h; sourceTree = "<group>"; };
-		4B2ACDFF1F25BA6F003EC7FE /* SheepNameRefNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepNameRefNode.cpp; path = ../Source/Sheep/SheepNameRefNode.cpp; sourceTree = "<group>"; };
-		4B2ACE001F25BA6F003EC7FE /* SheepNameRefNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepNameRefNode.h; path = ../Source/Sheep/SheepNameRefNode.h; sourceTree = "<group>"; };
 		4B2ACE061F25C1FB003EC7FE /* stack.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = stack.hh; path = ../Source/Sheep/stack.hh; sourceTree = "<group>"; };
 		4B2ACE071F25C20B003EC7FE /* location.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = location.hh; path = ../Source/Sheep/location.hh; sourceTree = "<group>"; };
 		4B2ACE081F25C20B003EC7FE /* position.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = position.hh; path = ../Source/Sheep/position.hh; sourceTree = "<group>"; };
@@ -189,6 +181,8 @@
 		4B7C3A151F4EB07000BB0922 /* SDLAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLAudio.h; path = ../Source/SDLAudio.h; sourceTree = "<group>"; };
 		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
+		4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepScriptBuilder.h; path = ../Source/Sheep/SheepScriptBuilder.h; sourceTree = "<group>"; };
+		4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScriptBuilder.cpp; path = ../Source/Sheep/SheepScriptBuilder.cpp; sourceTree = "<group>"; };
 		4BB82829205665680054625A /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../Libraries/SDL/SDL2.framework; sourceTree = "<group>"; };
 		4BB8282B205665750054625A /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_mixer.framework; path = ../Libraries/SDL/SDL2_mixer.framework; sourceTree = "<group>"; };
 		4BBB91B42058E53A007B9375 /* Soundtrack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Soundtrack.h; path = ../Source/Audio/Soundtrack.h; sourceTree = "<group>"; };
@@ -350,23 +344,19 @@
 				4B2ACE081F25C20B003EC7FE /* position.hh */,
 				4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */,
 				4B2ACE0A1F25C20B003EC7FE /* sheep.tab.hh */,
-				4B2ACE061F25C1FB003EC7FE /* stack.hh */,
-				4B2ACDFF1F25BA6F003EC7FE /* SheepNameRefNode.cpp */,
-				4B2ACE001F25BA6F003EC7FE /* SheepNameRefNode.h */,
-				4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */,
-				4B2ACDF71F25873C003EC7FE /* SheepScript.h */,
-				4B2ACDF91F25880E003EC7FE /* SheepNode.cpp */,
-				4B2ACDFA1F25880E003EC7FE /* SheepNode.h */,
-				4B2ACDFC1F25B621003EC7FE /* SheepTypeRefNode.cpp */,
-				4B2ACDFD1F25B621003EC7FE /* SheepTypeRefNode.h */,
-				4B2ACE0E1F25CF08003EC7FE /* SheepScanner.cpp */,
-				4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */,
+				4B4B4AE22091B80700391827 /* SheepAPI.cpp */,
+				4B4B4AE12091B80700391827 /* SheepAPI.h */,
 				4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */,
 				4B2ACE121F25D310003EC7FE /* SheepDriver.h */,
-				4BE75D31208D7E7B007031A3 /* SheepVM.h */,
+				4B2ACE0E1F25CF08003EC7FE /* SheepScanner.cpp */,
+				4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */,
+				4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */,
+				4B2ACDF71F25873C003EC7FE /* SheepScript.h */,
+				4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */,
+				4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */,
 				4BE75D32208D7E7B007031A3 /* SheepVM.cpp */,
-				4B4B4AE12091B80700391827 /* SheepAPI.h */,
-				4B4B4AE22091B80700391827 /* SheepAPI.cpp */,
+				4BE75D31208D7E7B007031A3 /* SheepVM.h */,
+				4B2ACE061F25C1FB003EC7FE /* stack.hh */,
 			);
 			name = Sheep;
 			sourceTree = "<group>";
@@ -599,7 +589,6 @@
 				4B2E7A62203A5CB3001A5B9C /* Stage.cpp in Sources */,
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
-				4B2ACDFE1F25B621003EC7FE /* SheepTypeRefNode.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
@@ -609,11 +598,10 @@
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
 				4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */,
+				4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */,
 				4B4621EB1FF741D800536BA6 /* Texture.cpp in Sources */,
-				4B2ACDFB1F25880E003EC7FE /* SheepNode.cpp in Sources */,
 				4B09182E1FEED84D002991D4 /* Services.cpp in Sources */,
 				4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */,
-				4B2ACE011F25BA6F003EC7FE /* SheepNameRefNode.cpp in Sources */,
 				4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */,
 				4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */,
 				4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */,

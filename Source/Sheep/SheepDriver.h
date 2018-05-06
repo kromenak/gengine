@@ -25,13 +25,9 @@ namespace Sheep
         void Parse(std::string sheep);
         void Parse(std::istream& iss);
         
-        // Bison seems to require that these be lowercase.
+        // Bison requires these to be lowercase.
         void error(const Sheep::location& l, const std::string& m);
         void error(const std::string& m);
-        
-        std::map<std::string, int> intVariables;
-        std::map<std::string, float> floatVariables;
-        std::map<std::string, std::string> stringVariables;
         
     private:
         Scanner* mScanner = nullptr;

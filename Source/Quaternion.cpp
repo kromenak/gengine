@@ -246,6 +246,7 @@ void Quaternion::Set(Vector3 forward, Vector3 up, Vector3 right)
      var m22 = forward.z;
     */
     
+    /*
     float m00 = right.GetX();
     float m01 = right.GetY();
     float m02 = right.GetZ();
@@ -255,6 +256,7 @@ void Quaternion::Set(Vector3 forward, Vector3 up, Vector3 right)
     float m20 = forward.GetX();
     float m21 = forward.GetY();
     float m22 = forward.GetZ();
+    */
 }
 
 void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const

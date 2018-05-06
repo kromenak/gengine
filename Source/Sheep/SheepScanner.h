@@ -18,16 +18,13 @@ namespace Sheep
     class Scanner : public yyFlexLexer
     {
     public:
-        Scanner(std::istream *in) : yyFlexLexer(in)
-        {
-            
-        }
+        Scanner(std::istream *in) : yyFlexLexer(in) { }
         
         char* GetYYText() { return yytext; }
         
-        Sheep::Parser::symbol_type yylex(Sheep::Scanner& scanner, Sheep::Driver& driver);
         // YY_DECL is defined in the Flex source file (Sheep.l)
         // The method body is created by Flex in lex.yy.cc.
+        Sheep::Parser::symbol_type yylex(Sheep::Scanner& scanner, Sheep::Driver& driver, SheepScriptBuilder& builder);
         
     private:
         Sheep::Parser::semantic_type *yylval = nullptr;

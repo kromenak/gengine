@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include "SheepScanner.h"
 #undef YY_DECL
-#define YY_DECL Sheep::Parser::symbol_type Sheep::Scanner::yylex(Sheep::Scanner& scanner, Sheep::Driver& driver)
+#define YY_DECL Sheep::Parser::symbol_type Sheep::Scanner::yylex(Sheep::Scanner& scanner, Sheep::Driver& driver, SheepScriptBuilder& builder)
 
 using token = Sheep::Parser::token;
 using parser = Sheep::Parser;
@@ -20,7 +20,7 @@ using parser = Sheep::Parser;
 %option stack
 %option never-interactive
 
-%s COMMENT
+%x COMMENT
 
 %%
 
@@ -81,7 +81,7 @@ using parser = Sheep::Parser;
 "/*"    BEGIN(COMMENT);
 
 <COMMENT>"*/"	BEGIN(INITIAL);
-<COMMENT>[^*\n]+ // eat comment in chunks
-<COMMENT>"*"     // eat the lone star
+<COMMENT>[^*\n]+ { } // eat comment in chunks
+<COMMENT>"*"     { } // eat the lone star
 
 .	printf("bad input character '%s' at line %d\n", yytext, yylineno); yyterminate();

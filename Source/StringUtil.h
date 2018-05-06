@@ -56,6 +56,26 @@ namespace StringUtil
         Trim(str, ' ');
     }
     
+    inline void RemoveQuotes(std::string& str)
+    {
+        // Remove any whitespace on left/right.
+        Trim(str);
+        if(str.size() == 0) { return; }
+        
+        // Check if first char is a quote, and remove if so.
+        if(str[0] == '"')
+        {
+            str.erase(str.begin());
+        }
+        if(str.size() == 0) { return; }
+        
+        // Check if last char is a quote, and remove if so.
+        if(str[str.size() - 1] == '"')
+        {
+            str.erase(str.end() - 1);
+        }
+    }
+    
     // Struct that encapsulates a case-insensitive character comparison.
     struct iequal
     {

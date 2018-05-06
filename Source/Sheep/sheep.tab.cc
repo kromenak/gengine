@@ -29,31 +29,20 @@
 
 // This special exception was added by the Free Software Foundation in
 // version 2.2 of Bison.
-
-
-// First part of user declarations.
-#line 1 "Sheep.yy" // lalr1.cc:404
+// //                    "%code top" blocks.
+#line 2 "Sheep.yy" // lalr1.cc:397
 
 #include <cstdlib>
 #include <string>
-#include "SheepScript.h"
+#include "SheepScriptBuilder.h"
 //#define YYSTYPE SheepNode*
 
-char* removeQuotes(char* str)
-{
-	if(str[0] == '"')
-	{
-		str[strlen(str)-1] = 0;
-		return str+1;
-	}
-	else // assume "|< >|" strings
-	{
-		str[strlen(str)-2] = 0;
-		return str+2;
-	}
-}
+#line 41 "Sheep.tab.cc" // lalr1.cc:397
 
-#line 57 "Sheep.tab.cc" // lalr1.cc:404
+
+// First part of user declarations.
+
+#line 46 "Sheep.tab.cc" // lalr1.cc:404
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -67,9 +56,9 @@ char* removeQuotes(char* str)
 
 // User implementation prologue.
 
-#line 71 "Sheep.tab.cc" // lalr1.cc:412
+#line 60 "Sheep.tab.cc" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 59 "Sheep.yy" // lalr1.cc:413
+#line 48 "Sheep.yy" // lalr1.cc:413
 
 	#include "SheepDriver.h"
 
@@ -87,7 +76,7 @@ char* removeQuotes(char* str)
 		driver.error(loc, msg);
 	}
 
-#line 91 "Sheep.tab.cc" // lalr1.cc:413
+#line 80 "Sheep.tab.cc" // lalr1.cc:413
 
 
 #ifndef YY_
@@ -171,19 +160,20 @@ char* removeQuotes(char* str)
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-#line 32 "Sheep.yy" // lalr1.cc:479
+#line 19 "Sheep.yy" // lalr1.cc:479
 namespace Sheep {
-#line 177 "Sheep.tab.cc" // lalr1.cc:479
+#line 166 "Sheep.tab.cc" // lalr1.cc:479
 
   /// Build a parser object.
-  Parser::Parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg)
+  Parser::Parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg, SheepScriptBuilder& builder_yyarg)
     :
 #if YYDEBUG
       yydebug_ (false),
       yycdebug_ (&std::cerr),
 #endif
       scanner (scanner_yyarg),
-      driver (driver_yyarg)
+      driver (driver_yyarg),
+      builder (builder_yyarg)
   {}
 
   Parser::~Parser ()
@@ -249,19 +239,19 @@ namespace Sheep {
       switch (that.type_get ())
     {
       case 27: // FLOAT
-      case 52: // float_exp
+      case 67: // float_expr
         value.move< float > (that.value);
         break;
 
       case 26: // INT
-      case 50: // expression
-      case 51: // int_exp
+      case 66: // int_expr
         value.move< int > (that.value);
         break;
 
       case 28: // STRING
-      case 29: // USERNAME
-      case 30: // SYSNAME
+      case 29: // USERID
+      case 30: // SYSID
+      case 69: // string_expr
         value.move< std::string > (that.value);
         break;
 
@@ -281,19 +271,19 @@ namespace Sheep {
       switch (that.type_get ())
     {
       case 27: // FLOAT
-      case 52: // float_exp
+      case 67: // float_expr
         value.copy< float > (that.value);
         break;
 
       case 26: // INT
-      case 50: // expression
-      case 51: // int_exp
+      case 66: // int_expr
         value.copy< int > (that.value);
         break;
 
       case 28: // STRING
-      case 29: // USERNAME
-      case 30: // SYSNAME
+      case 29: // USERID
+      case 30: // SYSID
+      case 69: // string_expr
         value.copy< std::string > (that.value);
         break;
 
@@ -468,7 +458,7 @@ namespace Sheep {
         YYCDEBUG << "Reading a token: ";
         try
           {
-            symbol_type yylookahead (yylex (scanner, driver));
+            symbol_type yylookahead (yylex (scanner, driver, builder));
             yyla.move (yylookahead);
           }
         catch (const syntax_error& yyexc)
@@ -526,19 +516,19 @@ namespace Sheep {
         switch (yyr1_[yyn])
     {
       case 27: // FLOAT
-      case 52: // float_exp
+      case 67: // float_expr
         yylhs.value.build< float > ();
         break;
 
       case 26: // INT
-      case 50: // expression
-      case 51: // int_exp
+      case 66: // int_expr
         yylhs.value.build< int > ();
         break;
 
       case 28: // STRING
-      case 29: // USERNAME
-      case 30: // SYSNAME
+      case 29: // USERID
+      case 30: // SYSID
+      case 69: // string_expr
         yylhs.value.build< std::string > ();
         break;
 
@@ -559,62 +549,296 @@ namespace Sheep {
         {
           switch (yyn)
             {
+  case 2:
+#line 130 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "EMPTY SCRIPT" << std::endl; }
+#line 556 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
   case 3:
-#line 145 "Sheep.yy" // lalr1.cc:859
-    { }
-#line 566 "Sheep.tab.cc" // lalr1.cc:859
+#line 131 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "SYMBOLS ONLY SCRIPT" << std::endl; }
+#line 562 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 4:
-#line 148 "Sheep.yy" // lalr1.cc:859
-    { std::cout << yystack_[0].value.as< int > () << std::endl; }
-#line 572 "Sheep.tab.cc" // lalr1.cc:859
+#line 132 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "CODE ONLY SCRIPT" << std::endl; }
+#line 568 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 5:
-#line 149 "Sheep.yy" // lalr1.cc:859
-    { std::cout << yystack_[0].value.as< int > () << std::endl; }
-#line 578 "Sheep.tab.cc" // lalr1.cc:859
+#line 133 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "SYMBOLS AND CODE SCRIPT" << std::endl; }
+#line 574 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 6:
-#line 152 "Sheep.yy" // lalr1.cc:859
-    { yylhs.value.as< int > () = yystack_[0].value.as< int > (); }
-#line 584 "Sheep.tab.cc" // lalr1.cc:859
+#line 138 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "SYMBOLS" << std::endl; }
+#line 580 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 7:
-#line 153 "Sheep.yy" // lalr1.cc:859
-    { yylhs.value.as< int > () = yystack_[0].value.as< float > (); }
-#line 590 "Sheep.tab.cc" // lalr1.cc:859
+#line 141 "Sheep.yy" // lalr1.cc:859
+    {  }
+#line 586 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 8:
-#line 156 "Sheep.yy" // lalr1.cc:859
-    { yylhs.value.as< int > () = yystack_[0].value.as< int > (); }
-#line 596 "Sheep.tab.cc" // lalr1.cc:859
+#line 142 "Sheep.yy" // lalr1.cc:859
+    {  }
+#line 592 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 9:
-#line 157 "Sheep.yy" // lalr1.cc:859
-    { yylhs.value.as< int > () = yystack_[2].value.as< int > () + yystack_[0].value.as< int > (); }
-#line 602 "Sheep.tab.cc" // lalr1.cc:859
+#line 148 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "INT SYMBOL" << std::endl; }
+#line 598 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 10:
-#line 160 "Sheep.yy" // lalr1.cc:859
-    { yylhs.value.as< float > () = yystack_[0].value.as< float > (); }
-#line 608 "Sheep.tab.cc" // lalr1.cc:859
+#line 149 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "FLOAT SYMBOL" << std::endl; }
+#line 604 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 11:
+#line 150 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "STRING SYMBOL" << std::endl; }
+#line 610 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 12:
+#line 153 "Sheep.yy" // lalr1.cc:859
+    { builder.AddIntVariable(yystack_[0].value.as< std::string > (), 0); std::cout << "SYMBOL " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 616 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 13:
+#line 154 "Sheep.yy" // lalr1.cc:859
+    { builder.AddIntVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< int > ()); std::cout << "SYMBOL " << yystack_[2].value.as< std::string > () << " EQUALS " << yystack_[0].value.as< int > () << std::endl; }
+#line 622 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 14:
+#line 155 "Sheep.yy" // lalr1.cc:859
+    { builder.AddIntVariable(yystack_[0].value.as< std::string > (), 0); std::cout << "AND SYMBOL " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 628 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 15:
+#line 156 "Sheep.yy" // lalr1.cc:859
+    { builder.AddIntVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< int > ()); std::cout << "AND SYMBOL " << yystack_[2].value.as< std::string > () << " EQUALS " << yystack_[0].value.as< int > () << std::endl; }
+#line 634 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 16:
+#line 159 "Sheep.yy" // lalr1.cc:859
+    { builder.AddFloatVariable(yystack_[0].value.as< std::string > (), 0.0f); std::cout << "SYMBOL " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 640 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 17:
+#line 160 "Sheep.yy" // lalr1.cc:859
+    { builder.AddFloatVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< float > ()); std::cout << "SYMBOL " << yystack_[2].value.as< std::string > () << " EQUALS " << yystack_[0].value.as< float > () << std::endl; }
+#line 646 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 18:
 #line 161 "Sheep.yy" // lalr1.cc:859
-    { yylhs.value.as< float > () = yystack_[2].value.as< float > () + yystack_[0].value.as< float > (); }
-#line 614 "Sheep.tab.cc" // lalr1.cc:859
+    { builder.AddFloatVariable(yystack_[0].value.as< std::string > (), 0.0f); std::cout << "AND SYMBOL " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 652 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 19:
+#line 162 "Sheep.yy" // lalr1.cc:859
+    { builder.AddFloatVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< float > ()); std::cout << "AND SYMBOL " << yystack_[2].value.as< std::string > () << " EQUALS " << yystack_[0].value.as< float > () << std::endl; }
+#line 658 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 20:
+#line 165 "Sheep.yy" // lalr1.cc:859
+    { builder.AddStringVariable(yystack_[0].value.as< std::string > (), ""); std::cout << "SYMBOL " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 664 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 21:
+#line 166 "Sheep.yy" // lalr1.cc:859
+    { builder.AddStringVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< std::string > ()); std::cout << "SYMBOL " << yystack_[2].value.as< std::string > () << " EQUALS " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 670 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 22:
+#line 167 "Sheep.yy" // lalr1.cc:859
+    { builder.AddStringVariable(yystack_[0].value.as< std::string > (), ""); std::cout << "AND SYMBOL " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 676 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 23:
+#line 168 "Sheep.yy" // lalr1.cc:859
+    { builder.AddStringVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< std::string > ()); std::cout << "AND SYMBOL " << yystack_[2].value.as< std::string > () << " EQUALS " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 682 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 24:
+#line 174 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "CODE" << std::endl; }
+#line 688 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 25:
+#line 178 "Sheep.yy" // lalr1.cc:859
+    { }
+#line 694 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 26:
+#line 179 "Sheep.yy" // lalr1.cc:859
+    { }
+#line 700 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 27:
+#line 184 "Sheep.yy" // lalr1.cc:859
+    { builder.AddFunction(yystack_[5].value.as< std::string > ()); std::cout << "FUNCTION " << yystack_[5].value.as< std::string > () << std::endl; }
+#line 706 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 30:
+#line 193 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "STMNT USERID ASSIGN expr" << std::endl; }
+#line 712 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 32:
+#line 195 "Sheep.yy" // lalr1.cc:859
+    { builder.ReturnV(); }
+#line 718 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 33:
+#line 196 "Sheep.yy" // lalr1.cc:859
+    { builder.Breakpoint(); }
+#line 724 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 34:
+#line 197 "Sheep.yy" // lalr1.cc:859
+    { builder.SitNSpin(); }
+#line 730 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 37:
+#line 200 "Sheep.yy" // lalr1.cc:859
+    { builder.BeginWait(); builder.EndWait(); }
+#line 736 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 38:
+#line 201 "Sheep.yy" // lalr1.cc:859
+    { builder.BeginWait(); }
+#line 742 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 39:
+#line 201 "Sheep.yy" // lalr1.cc:859
+    { builder.EndWait(); }
+#line 748 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 40:
+#line 202 "Sheep.yy" // lalr1.cc:859
+    { builder.BeginWait(); }
+#line 754 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 41:
+#line 202 "Sheep.yy" // lalr1.cc:859
+    { builder.EndWait(); }
+#line 760 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 43:
+#line 204 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "SEMICOLON" << std::endl; }
+#line 766 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 46:
+#line 214 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "SYSFUNC CALL" << std::endl; }
+#line 772 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 48:
+#line 219 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "SYSFUNC ARG " << std::endl; }
+#line 778 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 50:
+#line 224 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "EXPR SYSFUNC CALL" << std::endl; }
+#line 784 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 51:
+#line 229 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "EXPR NUMBER" << std::endl; }
+#line 790 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 52:
+#line 230 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "EXPR STRING" << std::endl; }
+#line 796 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 53:
+#line 231 "Sheep.yy" // lalr1.cc:859
+    { std::cout << "EXPR (EXPR)" << std::endl; }
+#line 802 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 54:
+#line 250 "Sheep.yy" // lalr1.cc:859
+    { yylhs.value.as< int > () = yystack_[0].value.as< int > (); builder.PushI(yystack_[0].value.as< int > ()); std::cout << "INT " << yystack_[0].value.as< int > () << std::endl; }
+#line 808 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 55:
+#line 251 "Sheep.yy" // lalr1.cc:859
+    { std::cout << yystack_[2].value.as< int > () << " + " << yystack_[0].value.as< int > () << std::endl; }
+#line 814 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 70:
+#line 268 "Sheep.yy" // lalr1.cc:859
+    { yylhs.value.as< float > () = yystack_[0].value.as< float > (); std::cout << "FLOAT " << yystack_[0].value.as< float > () << std::endl; }
+#line 820 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 95:
+#line 297 "Sheep.yy" // lalr1.cc:859
+    { builder.AddStringConst(yystack_[0].value.as< std::string > ()); yylhs.value.as< std::string > () = yystack_[0].value.as< std::string > (); std::cout << "STRING " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 826 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 96:
+#line 298 "Sheep.yy" // lalr1.cc:859
+    { yylhs.value.as< std::string > () = yystack_[0].value.as< std::string > (); std::cout << "USERID " << yystack_[0].value.as< std::string > () << std::endl; }
+#line 832 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 101:
+#line 309 "Sheep.yy" // lalr1.cc:859
+    { }
+#line 838 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
 
-#line 618 "Sheep.tab.cc" // lalr1.cc:859
+#line 842 "Sheep.tab.cc" // lalr1.cc:859
             default:
               break;
             }
@@ -780,67 +1004,202 @@ namespace Sheep {
   }
 
 
-  const signed char Parser::yypact_ninf_ = -38;
+  const signed char Parser::yypact_ninf_ = -119;
 
-  const signed char Parser::yytable_ninf_ = -1;
+  const signed char Parser::yytable_ninf_ = -41;
 
-  const signed char
+  const short int
   Parser::yypact_[] =
   {
-     -26,   -38,   -38,     2,   -26,   -38,   -37,   -36,   -38,   -38,
-     -21,   -20,   -38,   -38
+      29,    31,    44,    16,    60,  -119,  -119,  -119,  -119,  -119,
+       5,   -10,  -119,    50,  -119,  -119,    45,    68,   100,  -119,
+      58,   110,   118,   115,   122,   117,   123,   134,   128,   126,
+    -119,   131,   130,  -119,   132,   138,  -119,  -119,  -119,   139,
+    -119,   140,  -119,   141,   135,   148,   149,   156,   171,   157,
+     181,  -119,    -9,  -119,  -119,    49,   184,   185,  -119,  -119,
+    -119,     0,   188,   -18,   -18,  -119,  -119,  -119,   198,    48,
+     202,  -119,  -119,  -119,   192,  -119,  -119,  -119,    -9,   199,
+    -119,  -119,   197,   161,  -119,   170,   215,  -119,  -119,  -119,
+      -9,    -9,  -119,  -119,  -119,  -119,  -119,   -16,   -16,   -16,
+     -16,   -16,   -16,   -16,   -16,   -18,   -18,   -18,   -18,   -16,
+     -21,   -21,   -21,   -21,   -21,   -21,   -21,   -21,   -18,   -18,
+     -18,   -18,     7,  -119,   296,  -119,  -119,  -119,  -119,  -119,
+     300,    25,  -119,   -16,   -16,   -16,   -16,   -21,   -21,   -21,
+     -21,   -16,   -16,   213,   236,   266,   266,    28,    28,    28,
+      28,    83,   226,    83,   226,  -119,   226,  -119,   226,  -119,
+     -21,   -21,   248,   258,    77,    77,    53,    53,    53,    53,
+     186,    -1,   186,    -1,   186,  -119,   186,  -119,  -119,  -119,
+     297,   187,  -119,    -9,  -119,  -119,  -119,  -119
   };
 
   const unsigned char
   Parser::yydefact_[] =
   {
-       2,     8,    10,     0,     3,     4,     6,     7,     1,     5,
-       0,     0,     9,    11
+       2,     0,     0,     0,     3,     4,    25,     7,     1,     5,
+       0,     0,    24,     0,    26,     6,     0,     0,     0,     8,
+       0,    12,     0,    16,     0,    20,     0,     0,     0,     0,
+       9,     0,     0,    10,     0,     0,    11,    28,    13,    14,
+      17,    18,    21,    22,     0,     0,     0,     0,     0,     0,
+       0,    43,     0,    28,    27,    38,     0,     0,    54,    70,
+      95,    96,     0,     0,     0,    29,    42,    50,     0,    85,
+      86,    51,    52,    44,    97,    15,    19,    23,     0,     0,
+      32,    96,     0,     0,    37,     0,     0,    33,    34,    36,
+       0,    47,    69,    84,    68,    83,    31,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,    98,     0,    35,    53,    45,    39,    28,
+       0,     0,    48,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,    66,    67,    65,    64,    60,    62,    61,
+      63,    55,    87,    56,    89,    57,    91,    58,    93,    59,
+       0,     0,    81,    82,    80,    79,    75,    77,    76,    78,
+      88,    71,    90,    72,    92,    73,    94,    74,   100,   101,
+       0,     0,    30,     0,    46,    99,    41,    49
   };
 
-  const signed char
+  const short int
   Parser::yypgoto_[] =
   {
-     -38,   -38,   -38,     4,    -4,    -2
+    -119,  -119,  -119,  -119,  -119,  -119,  -119,  -119,   310,  -119,
+    -119,   -50,  -119,  -119,  -119,  -118,   230,  -119,   -52,     3,
+     -62,  -119,  -119,   194,  -119,  -119
   };
 
-  const signed char
+  const short int
   Parser::yydefgoto_[] =
   {
-      -1,     3,     4,     5,     6,     7
+      -1,     3,     4,    11,    19,    22,    24,    26,     5,    10,
+      14,    44,    65,    85,    86,    66,    67,   131,    68,    69,
+      70,    71,    72,    73,    74,   123
   };
 
-  const unsigned char
+  const short int
   Parser::yytable_[] =
   {
-       1,     2,     8,    10,    11,     1,    12,     2,     9,    13
+      82,    93,    95,    83,   178,    52,    59,    15,    58,    59,
+      58,    89,    48,    16,    17,    18,     8,    58,    59,    60,
+      81,    62,    12,    53,   160,   161,   124,    63,    64,   141,
+     142,    90,     1,     2,    13,   183,    63,    64,   130,   132,
+     184,   139,   140,   152,   154,   156,   158,     6,   162,   163,
+     164,   165,   166,   167,   168,   169,   171,   173,   175,   177,
+       7,    84,   185,     1,    20,   -40,    92,    94,   133,   134,
+     135,   136,   109,    27,    21,   171,   173,   175,   177,   181,
+      97,    98,    99,   100,   101,   102,   103,   104,   105,   106,
+     107,   108,   109,   137,   138,   139,   140,    23,    93,    95,
+     143,   144,   145,   146,   147,   148,   149,   150,   151,   153,
+     155,   157,   159,   114,   115,   116,   117,   137,   138,   139,
+     140,   170,   172,   174,   176,   135,   136,   109,    29,    25,
+      30,   187,    32,    35,    33,    36,   151,   153,   155,   157,
+      48,    28,    49,    50,    92,    94,    31,    51,    34,    52,
+      37,    53,    54,    55,    38,    39,    56,    57,    40,    41,
+      42,    58,    59,    60,    61,    62,    48,    43,    49,    50,
+      45,    46,    47,    51,    75,    52,    76,    53,   127,    55,
+      63,    64,    56,    57,    77,    78,    79,    58,    59,    60,
+      61,    62,    48,    80,    49,    50,    87,    88,   122,    51,
+      62,    52,    91,    53,   186,    55,    63,    64,    56,    57,
+      96,   125,   126,    58,    59,    60,    61,    62,    97,    98,
+      99,   100,   101,   102,   103,   104,   133,   134,   135,   136,
+     109,   129,    63,    64,   110,   111,   112,   113,   114,   115,
+     116,   117,   118,   119,   120,   121,    98,    99,   100,   101,
+     102,   103,   104,   133,   134,   135,   136,   109,   110,   111,
+     112,   113,   114,   115,   116,   117,   137,   138,   139,   140,
+      99,   100,   101,   102,   103,   104,   133,   134,   135,   136,
+     109,   111,   112,   113,   114,   115,   116,   117,   137,   138,
+     139,   140,   112,   113,   114,   115,   116,   117,   137,   138,
+     139,   140,   101,   102,   103,   104,   133,   134,   135,   136,
+     109,   180,   182,    53,     9,   128,   179
   };
 
   const unsigned char
   Parser::yycheck_[] =
   {
-      26,    27,     0,    40,    40,    26,    10,    27,     4,    11
+      52,    63,    64,    53,   122,    14,    27,    17,    26,    27,
+      26,    11,     5,    23,    24,    25,     0,    26,    27,    28,
+      29,    30,    17,    16,    45,    46,    78,    45,    46,    45,
+      46,    31,     3,     4,    29,    10,    45,    46,    90,    91,
+      15,    42,    43,   105,   106,   107,   108,    16,   110,   111,
+     112,   113,   114,   115,   116,   117,   118,   119,   120,   121,
+      16,    12,   180,     3,    14,    16,    63,    64,    40,    41,
+      42,    43,    44,    15,    29,   137,   138,   139,   140,   129,
+      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    40,    41,    42,    43,    29,   160,   161,
+      97,    98,    99,   100,   101,   102,   103,   104,   105,   106,
+     107,   108,   109,    36,    37,    38,    39,    40,    41,    42,
+      43,   118,   119,   120,   121,    42,    43,    44,    10,    29,
+      12,   183,    10,    10,    12,    12,   133,   134,   135,   136,
+       5,    31,     7,     8,   141,   142,    31,    12,    31,    14,
+      16,    16,    17,    18,    26,    29,    21,    22,    27,    29,
+      28,    26,    27,    28,    29,    30,     5,    29,     7,     8,
+      31,    31,    31,    12,    26,    14,    27,    16,    17,    18,
+      45,    46,    21,    22,    28,    14,    29,    26,    27,    28,
+      29,    30,     5,    12,     7,     8,    12,    12,     6,    12,
+      30,    14,    14,    16,    17,    18,    45,    46,    21,    22,
+      12,    12,    15,    26,    27,    28,    29,    30,    32,    33,
+      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
+      44,    16,    45,    46,    32,    33,    34,    35,    36,    37,
+      38,    39,    40,    41,    42,    43,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    32,    33,
+      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
+      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
+      44,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    36,    37,    38,    39,    40,    41,    42,    43,
+      44,    15,    12,    16,     4,    85,   122
   };
 
   const unsigned char
   Parser::yystos_[] =
   {
-       0,    26,    27,    48,    49,    50,    51,    52,     0,    50,
-      40,    40,    51,    52
+       0,     3,     4,    48,    49,    55,    16,    16,     0,    55,
+      56,    50,    17,    29,    57,    17,    23,    24,    25,    51,
+      14,    29,    52,    29,    53,    29,    54,    15,    31,    10,
+      12,    31,    10,    12,    31,    10,    12,    16,    26,    29,
+      27,    29,    28,    29,    58,    31,    31,    31,     5,     7,
+       8,    12,    14,    16,    17,    18,    21,    22,    26,    27,
+      28,    29,    30,    45,    46,    59,    62,    63,    65,    66,
+      67,    68,    69,    70,    71,    26,    27,    28,    14,    29,
+      12,    29,    65,    58,    12,    60,    61,    12,    12,    11,
+      31,    14,    66,    67,    66,    67,    12,    32,    33,    34,
+      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,     6,    72,    65,    12,    15,    17,    63,    16,
+      65,    64,    65,    40,    41,    42,    43,    40,    41,    42,
+      43,    45,    46,    66,    66,    66,    66,    66,    66,    66,
+      66,    66,    67,    66,    67,    66,    67,    66,    67,    66,
+      45,    46,    67,    67,    67,    67,    67,    67,    67,    67,
+      66,    67,    66,    67,    66,    67,    66,    67,    62,    70,
+      15,    58,    12,    10,    15,    62,    17,    65
   };
 
   const unsigned char
   Parser::yyr1_[] =
   {
-       0,    47,    48,    48,    49,    49,    50,    50,    51,    51,
-      52,    52
+       0,    47,    48,    48,    48,    48,    49,    50,    50,    51,
+      51,    51,    52,    52,    52,    52,    53,    53,    53,    53,
+      54,    54,    54,    54,    55,    56,    56,    57,    58,    58,
+      59,    59,    59,    59,    59,    59,    59,    59,    60,    59,
+      61,    59,    59,    59,    59,    62,    63,    64,    64,    64,
+      65,    65,    65,    65,    66,    66,    66,    66,    66,    66,
+      66,    66,    66,    66,    66,    66,    66,    66,    66,    66,
+      67,    67,    67,    67,    67,    67,    67,    67,    67,    67,
+      67,    67,    67,    67,    67,    68,    68,    68,    68,    68,
+      68,    68,    68,    68,    68,    69,    69,    70,    70,    71,
+      72,    72
   };
 
   const unsigned char
   Parser::yyr2_[] =
   {
-       0,     2,     0,     1,     1,     2,     1,     1,     1,     3,
-       1,     3
+       0,     2,     0,     1,     1,     2,     4,     0,     2,     3,
+       3,     3,     1,     3,     3,     5,     1,     3,     3,     5,
+       1,     3,     3,     5,     4,     0,     2,     6,     0,     2,
+       4,     2,     2,     2,     2,     3,     2,     2,     0,     3,
+       0,     5,     1,     1,     1,     3,     4,     0,     1,     3,
+       1,     1,     1,     3,     1,     3,     3,     3,     3,     3,
+       3,     3,     3,     3,     3,     3,     3,     3,     2,     2,
+       1,     3,     3,     3,     3,     3,     3,     3,     3,     3,
+       3,     3,     3,     2,     2,     1,     1,     3,     3,     3,
+       3,     3,     3,     3,     3,     1,     1,     1,     2,     5,
+       2,     2
   };
 
 
@@ -854,18 +1213,32 @@ namespace Sheep {
   "ELSE", "GOTO", "RETURN", "DOLLAR", "COMMA", "COLON", "SEMICOLON",
   "QUOTE", "OPENPAREN", "CLOSEPAREN", "OPENBRACKET", "CLOSEBRACKET",
   "WAIT", "YIELD", "EXPORT", "BREAKPOINT", "SITNSPIN", "INTVAR",
-  "FLOATVAR", "STRINGVAR", "INT", "FLOAT", "STRING", "USERNAME", "SYSNAME",
+  "FLOATVAR", "STRINGVAR", "INT", "FLOAT", "STRING", "USERID", "SYSID",
   "ASSIGN", "OR", "AND", "EQUAL", "NOTEQUAL", "LT", "LTE", "GT", "GTE",
   "PLUS", "MINUS", "MULTIPLY", "DIVIDE", "MOD", "NOT", "NEGATE", "$accept",
-  "script", "expression_list", "expression", "int_exp", "float_exp", YY_NULLPTR
+  "script", "symbols_section", "symbol_decls", "symbol_decl",
+  "symbol_decl_int", "symbol_decl_float", "symbol_decl_string",
+  "code_section", "functions", "function", "statements", "statement",
+  "$@1", "$@2", "statements_block", "sysfunc_call", "sysfunc_call_args",
+  "expr", "int_expr", "float_expr", "number_expr", "string_expr",
+  "if_else_block", "if_statement", "else_statement", YY_NULLPTR
   };
 
 
-  const unsigned char
+  const unsigned short int
   Parser::yyrline_[] =
   {
-       0,   144,   144,   145,   148,   149,   152,   153,   156,   157,
-     160,   161
+       0,   130,   130,   131,   132,   133,   138,   141,   142,   148,
+     149,   150,   153,   154,   155,   156,   159,   160,   161,   162,
+     165,   166,   167,   168,   174,   178,   179,   184,   188,   189,
+     193,   194,   195,   196,   197,   198,   199,   200,   201,   201,
+     202,   202,   203,   204,   205,   209,   214,   218,   219,   220,
+     224,   229,   230,   231,   250,   251,   252,   253,   254,   255,
+     256,   257,   258,   259,   260,   261,   262,   263,   264,   265,
+     268,   269,   270,   271,   272,   273,   274,   275,   276,   277,
+     278,   279,   280,   281,   282,   285,   286,   287,   288,   289,
+     290,   291,   292,   293,   294,   297,   298,   301,   302,   305,
+     308,   309
   };
 
   // Print the state stack on the debug stream.
@@ -898,6 +1271,11 @@ namespace Sheep {
 #endif // YYDEBUG
 
 
-#line 32 "Sheep.yy" // lalr1.cc:1167
+#line 19 "Sheep.yy" // lalr1.cc:1167
 } // Sheep
-#line 904 "Sheep.tab.cc" // lalr1.cc:1167
+#line 1277 "Sheep.tab.cc" // lalr1.cc:1167
+#line 312 "Sheep.yy" // lalr1.cc:1168
+
+
+/* No epilogue is needed. */
+

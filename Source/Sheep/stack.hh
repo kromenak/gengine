@@ -40,7 +40,7 @@
 
 # include <vector>
 
-#line 32 "Sheep.yy" // stack.hh:151
+#line 19 "Sheep.yy" // stack.hh:151
 namespace Sheep {
 #line 46 "stack.hh" // stack.hh:151
   template <class T, class S = std::vector<T> >
@@ -150,7 +150,7 @@ namespace Sheep {
     unsigned int range_;
   };
 
-#line 32 "Sheep.yy" // stack.hh:151
+#line 19 "Sheep.yy" // stack.hh:151
 } // Sheep
 #line 156 "stack.hh" // stack.hh:151
 

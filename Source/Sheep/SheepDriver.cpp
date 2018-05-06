@@ -9,6 +9,7 @@
 #include <cassert>
 
 #include "SheepDriver.h"
+#include "SheepScriptBuilder.h"
 
 Sheep::Driver::~Driver()
 {
@@ -40,6 +41,7 @@ void Sheep::Driver::Parse(std::istream& stream)
     try
     {
         mScanner = new Scanner(&stream);
+        /*
         while(true)
         {
             Sheep::Parser::symbol_type yylookahead(mScanner->yylex(*mScanner, *this));
@@ -53,6 +55,7 @@ void Sheep::Driver::Parse(std::istream& stream)
                 std::cout << yylookahead.token() << std::endl;
             }
         }
+        */
     }
     catch(std::bad_alloc &ba)
     {
@@ -63,7 +66,8 @@ void Sheep::Driver::Parse(std::istream& stream)
     delete mParser;
     try
     {
-        mParser = new Sheep::Parser(*mScanner, *this);
+        SheepScriptBuilder builder;
+        mParser = new Sheep::Parser(*mScanner, *this, builder);
         mParser->parse();
     }
     catch(std::bad_alloc &ba)
@@ -74,10 +78,10 @@ void Sheep::Driver::Parse(std::istream& stream)
 
 void Sheep::Driver::error(const Sheep::location &l, const std::string &m)
 {
-    std::cerr << l << ": " << m << std::endl;
+    std::cerr << "Sheep Compile Error: " << l << ": " << m << std::endl;
 }
 
 void Sheep::Driver::error(const std::string &m)
 {
-    std::cerr << m << std::endl;
+    std::cerr << "Sheep Compile Error: " << m << std::endl;
 }

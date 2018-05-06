@@ -40,15 +40,16 @@
 #ifndef YY_YY_SHEEP_TAB_HH_INCLUDED
 # define YY_YY_SHEEP_TAB_HH_INCLUDED
 // //                    "%code requires" blocks.
-#line 46 "Sheep.yy" // lalr1.cc:392
+#line 33 "Sheep.yy" // lalr1.cc:392
 
 	namespace Sheep
 	{
 		class Scanner;
 		class Driver;
 	}
+	class SheepScriptBuilder;
 
-#line 52 "Sheep.tab.hh" // lalr1.cc:392
+#line 53 "Sheep.tab.hh" // lalr1.cc:392
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -123,9 +124,9 @@
 # define YYDEBUG 0
 #endif
 
-#line 32 "Sheep.yy" // lalr1.cc:392
+#line 19 "Sheep.yy" // lalr1.cc:392
 namespace Sheep {
-#line 129 "Sheep.tab.hh" // lalr1.cc:392
+#line 130 "Sheep.tab.hh" // lalr1.cc:392
 
 
 
@@ -293,17 +294,17 @@ namespace Sheep {
     union union_type
     {
       // FLOAT
-      // float_exp
+      // float_expr
       char dummy1[sizeof(float)];
 
       // INT
-      // expression
-      // int_exp
+      // int_expr
       char dummy2[sizeof(int)];
 
       // STRING
-      // USERNAME
-      // SYSNAME
+      // USERID
+      // SYSID
+      // string_expr
       char dummy3[sizeof(std::string)];
 };
 
@@ -354,8 +355,8 @@ namespace Sheep {
         INT = 281,
         FLOAT = 282,
         STRING = 283,
-        USERNAME = 284,
-        SYSNAME = 285,
+        USERID = 284,
+        SYSID = 285,
         ASSIGN = 286,
         OR = 287,
         AND = 288,
@@ -592,11 +593,11 @@ namespace Sheep {
 
     static inline
     symbol_type
-    make_USERNAME (const std::string& v, const location_type& l);
+    make_USERID (const std::string& v, const location_type& l);
 
     static inline
     symbol_type
-    make_SYSNAME (const std::string& v, const location_type& l);
+    make_SYSID (const std::string& v, const location_type& l);
 
     static inline
     symbol_type
@@ -664,7 +665,7 @@ namespace Sheep {
 
 
     /// Build a parser object.
-    Parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg);
+    Parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg, SheepScriptBuilder& builder_yyarg);
     virtual ~Parser ();
 
     /// Parse.
@@ -729,7 +730,7 @@ namespace Sheep {
     // Tables.
   // YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
   // STATE-NUM.
-  static const signed char yypact_[];
+  static const short int yypact_[];
 
   // YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
   // Performed when YYTABLE does not specify something else to do.  Zero
@@ -737,15 +738,15 @@ namespace Sheep {
   static const unsigned char yydefact_[];
 
   // YYPGOTO[NTERM-NUM].
-  static const signed char yypgoto_[];
+  static const short int yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
-  static const signed char yydefgoto_[];
+  static const short int yydefgoto_[];
 
   // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
   // positive, shift that token.  If negative, reduce the rule whose
   // number is the opposite.  If YYTABLE_NINF, syntax error.
-  static const unsigned char yytable_[];
+  static const short int yytable_[];
 
   static const unsigned char yycheck_[];
 
@@ -765,7 +766,7 @@ namespace Sheep {
     static const char* const yytname_[];
 
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned char yyrline_[];
+  static const unsigned short int yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -864,8 +865,8 @@ namespace Sheep {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 9,     ///< Last index in yytable_.
-      yynnts_ = 6,  ///< Number of nonterminal symbols.
+      yylast_ = 316,     ///< Last index in yytable_.
+      yynnts_ = 26,  ///< Number of nonterminal symbols.
       yyfinal_ = 8, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -876,6 +877,7 @@ namespace Sheep {
     // User arguments.
     Sheep::Scanner& scanner;
     Sheep::Driver& driver;
+    SheepScriptBuilder& builder;
   };
 
   // Symbol number corresponding to token number t.
@@ -953,19 +955,19 @@ namespace Sheep {
       switch (other.type_get ())
     {
       case 27: // FLOAT
-      case 52: // float_exp
+      case 67: // float_expr
         value.copy< float > (other.value);
         break;
 
       case 26: // INT
-      case 50: // expression
-      case 51: // int_exp
+      case 66: // int_expr
         value.copy< int > (other.value);
         break;
 
       case 28: // STRING
-      case 29: // USERNAME
-      case 30: // SYSNAME
+      case 29: // USERID
+      case 30: // SYSID
+      case 69: // string_expr
         value.copy< std::string > (other.value);
         break;
 
@@ -987,19 +989,19 @@ namespace Sheep {
       switch (this->type_get ())
     {
       case 27: // FLOAT
-      case 52: // float_exp
+      case 67: // float_expr
         value.copy< float > (v);
         break;
 
       case 26: // INT
-      case 50: // expression
-      case 51: // int_exp
+      case 66: // int_expr
         value.copy< int > (v);
         break;
 
       case 28: // STRING
-      case 29: // USERNAME
-      case 30: // SYSNAME
+      case 29: // USERID
+      case 30: // SYSID
+      case 69: // string_expr
         value.copy< std::string > (v);
         break;
 
@@ -1066,19 +1068,19 @@ namespace Sheep {
     switch (yytype)
     {
       case 27: // FLOAT
-      case 52: // float_exp
+      case 67: // float_expr
         value.template destroy< float > ();
         break;
 
       case 26: // INT
-      case 50: // expression
-      case 51: // int_exp
+      case 66: // int_expr
         value.template destroy< int > ();
         break;
 
       case 28: // STRING
-      case 29: // USERNAME
-      case 30: // SYSNAME
+      case 29: // USERID
+      case 30: // SYSID
+      case 69: // string_expr
         value.template destroy< std::string > ();
         break;
 
@@ -1106,19 +1108,19 @@ namespace Sheep {
       switch (this->type_get ())
     {
       case 27: // FLOAT
-      case 52: // float_exp
+      case 67: // float_expr
         value.move< float > (s.value);
         break;
 
       case 26: // INT
-      case 50: // expression
-      case 51: // int_exp
+      case 66: // int_expr
         value.move< int > (s.value);
         break;
 
       case 28: // STRING
-      case 29: // USERNAME
-      case 30: // SYSNAME
+      case 29: // USERID
+      case 30: // SYSID
+      case 69: // string_expr
         value.move< std::string > (s.value);
         break;
 
@@ -1349,15 +1351,15 @@ namespace Sheep {
   }
 
   Parser::symbol_type
-  Parser::make_USERNAME (const std::string& v, const location_type& l)
+  Parser::make_USERID (const std::string& v, const location_type& l)
   {
-    return symbol_type (token::USERNAME, v, l);
+    return symbol_type (token::USERID, v, l);
   }
 
   Parser::symbol_type
-  Parser::make_SYSNAME (const std::string& v, const location_type& l)
+  Parser::make_SYSID (const std::string& v, const location_type& l)
   {
-    return symbol_type (token::SYSNAME, v, l);
+    return symbol_type (token::SYSID, v, l);
   }
 
   Parser::symbol_type
@@ -1457,9 +1459,9 @@ namespace Sheep {
   }
 
 
-#line 32 "Sheep.yy" // lalr1.cc:392
+#line 19 "Sheep.yy" // lalr1.cc:392
 } // Sheep
-#line 1463 "Sheep.tab.hh" // lalr1.cc:392
+#line 1465 "Sheep.tab.hh" // lalr1.cc:392
 
 
 
