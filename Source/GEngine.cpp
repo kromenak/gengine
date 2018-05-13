@@ -49,9 +49,6 @@ bool GEngine::Initialize()
     // Initialize asset manager.
     Services::SetAssets(&mAssetManager);
     
-    Sheep::Driver driver;
-    driver.Parse("/Users/Clark/Dropbox/GK3/Assets/B25.shp");
-    
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("ambient.brn");
     mAssetManager.LoadBarn("common.brn");

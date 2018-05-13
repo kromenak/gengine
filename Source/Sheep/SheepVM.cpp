@@ -29,7 +29,7 @@ void SheepVM::Execute(SheepScript* script)
         char instruction = reader.ReadUByte();
         switch((SheepInstruction)instruction)
         {
-            case SheepInstruction::SitNSpin:
+            case SheepInstruction::SitnSpin:
             {
                 // No-op; do nothing.
                 break;

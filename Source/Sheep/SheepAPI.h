@@ -11,10 +11,17 @@
 #include <string>
 #include "Value.h"
 #include "Types.h"
+#include <initializer_list>
+#include "SheepScript.h"
 
 // Functions for calling functions of various argument lengths.
 Value CallSysFunc(const std::string& name, const Value& x1);
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2);
+
+extern std::vector<SysImport> sysFuncs;
+
+void AddSysImport(const std::string& name, char retType, std::initializer_list<char> argTypes);
+void InitSysImports();
 
 // Macros that register functions of various argument lengths with the system.
 // Creates a function with same name as the actual function, but which uses generic "Value" args and return type.

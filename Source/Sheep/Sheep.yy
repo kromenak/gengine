@@ -3,7 +3,6 @@
 #include <cstdlib>
 #include <string>
 #include "SheepScriptBuilder.h"
-//#define YYSTYPE SheepNode*
 }
 
 /* Tell bison to generate C++ output */
@@ -126,15 +125,15 @@
 /* Grammer rules */
 
 /* script can be empty, just symbols, just code, or both symbols and code */
-script: %empty 								{ std::cout << "EMPTY SCRIPT" << std::endl; }
-	| symbols_section						{ std::cout << "SYMBOLS ONLY SCRIPT" << std::endl; }
-	| code_section 							{ std::cout << "CODE ONLY SCRIPT" << std::endl; }
-	| symbols_section code_section 			{ std::cout << "SYMBOLS AND CODE SCRIPT" << std::endl; }
+script: %empty 								{ }
+	| symbols_section						{ }
+	| code_section 							{ }
+	| symbols_section code_section 			{ }
 	;
 
 /* symbols starts with "symbols {" and ends with "}"
    between brackets is zero or more symbols */
-symbols_section: SYMBOLS OPENBRACKET symbol_decls CLOSEBRACKET { std::cout << "SYMBOLS" << std::endl; }
+symbols_section: SYMBOLS OPENBRACKET symbol_decls CLOSEBRACKET { }
 
 /* zero or more symbols */
 symbol_decls: %empty 				{  }
@@ -144,33 +143,33 @@ symbol_decls: %empty 				{  }
 /* all symbol declarations must start with a value type (int, float, string)
    and end with a semicolon. Between, there must be one or more 
    symbol names and default values specified */
-symbol_decl: INTVAR symbol_decl_int SEMICOLON 		{ std::cout << "INT SYMBOL" << std::endl; }
-	| FLOATVAR symbol_decl_float SEMICOLON 			{ std::cout << "FLOAT SYMBOL" << std::endl; }
-	| STRINGVAR symbol_decl_string SEMICOLON 		{ std::cout << "STRING SYMBOL" << std::endl; }
+symbol_decl: INTVAR symbol_decl_int SEMICOLON 		{ }
+	| FLOATVAR symbol_decl_float SEMICOLON 			{ }
+	| STRINGVAR symbol_decl_string SEMICOLON 		{ }
 	;
 
-symbol_decl_int: USERID 							{ builder.AddIntVariable($1, 0); std::cout << "SYMBOL " << $1 << std::endl; } /* myInt$ */
-	| USERID ASSIGN INT 							{ builder.AddIntVariable($1, $3); std::cout << "SYMBOL " << $1 << " EQUALS " << $3 << std::endl; }	/* myInt$ = 100 */
-	| symbol_decl_int COMMA USERID 					{ builder.AddIntVariable($3, 0); std::cout << "AND SYMBOL " << $3 << std::endl; }	/* <others>, myInt2$ */
-	| symbol_decl_int COMMA USERID ASSIGN INT  		{ builder.AddIntVariable($3, $5); std::cout << "AND SYMBOL " << $3 << " EQUALS " << $5 << std::endl; }	/* <others>, myInt2$ = 10 */
+symbol_decl_int: USERID 							{ builder.AddIntVariable($1, 0); } 		/* myInt$ */
+	| USERID ASSIGN INT 							{ builder.AddIntVariable($1, $3); }		/* myInt$ = 100 */
+	| symbol_decl_int COMMA USERID 					{ builder.AddIntVariable($3, 0); }		/* <others>, myInt2$ */
+	| symbol_decl_int COMMA USERID ASSIGN INT  		{ builder.AddIntVariable($3, $5); }		/* <others>, myInt2$ = 10 */
 	;
 
-symbol_decl_float: USERID 							{ builder.AddFloatVariable($1, 0.0f); std::cout << "SYMBOL " << $1 << std::endl; }
-	| USERID ASSIGN FLOAT 							{ builder.AddFloatVariable($1, $3); std::cout << "SYMBOL " << $1 << " EQUALS " << $3 << std::endl; }
-	| symbol_decl_float COMMA USERID    			{ builder.AddFloatVariable($3, 0.0f); std::cout << "AND SYMBOL " << $3 << std::endl; }
-	| symbol_decl_float COMMA USERID ASSIGN FLOAT   { builder.AddFloatVariable($3, $5); std::cout << "AND SYMBOL " << $3 << " EQUALS " << $5 << std::endl; }
+symbol_decl_float: USERID 							{ builder.AddFloatVariable($1, 0.0f); }
+	| USERID ASSIGN FLOAT 							{ builder.AddFloatVariable($1, $3); }
+	| symbol_decl_float COMMA USERID    			{ builder.AddFloatVariable($3, 0.0f); }
+	| symbol_decl_float COMMA USERID ASSIGN FLOAT   { builder.AddFloatVariable($3, $5); }
 	;
 
-symbol_decl_string: USERID 							{ builder.AddStringVariable($1, ""); std::cout << "SYMBOL " << $1 << std::endl; }
-	| USERID ASSIGN STRING 							{ builder.AddStringVariable($1, $3); std::cout << "SYMBOL " << $1 << " EQUALS " << $3 << std::endl; }
-	| symbol_decl_string COMMA USERID 				{ builder.AddStringVariable($3, ""); std::cout << "AND SYMBOL " << $3 << std::endl; }
-	| symbol_decl_string COMMA USERID ASSIGN STRING { builder.AddStringVariable($3, $5); std::cout << "AND SYMBOL " << $3 << " EQUALS " << $5 << std::endl; }
+symbol_decl_string: USERID 							{ builder.AddStringVariable($1, ""); }
+	| USERID ASSIGN STRING 							{ builder.AddStringVariable($1, $3); }
+	| symbol_decl_string COMMA USERID 				{ builder.AddStringVariable($3, ""); }
+	| symbol_decl_string COMMA USERID ASSIGN STRING { builder.AddStringVariable($3, $5); }
 	;
 
 
 /* code section starts with "code {" and ends with "}"
    between brackets is zero or more functions */
-code_section: CODE OPENBRACKET functions CLOSEBRACKET { std::cout << "CODE" << std::endl; }
+code_section: CODE OPENBRACKET functions CLOSEBRACKET { }
 	;
 
 /* functions in code section is either zero or more function */
@@ -180,7 +179,7 @@ functions: %empty 			{ }
 
 /* all functions start with like "test$() {" and end with "}"
    the internals is zero or more statements */
-function: USERID OPENPAREN CLOSEPAREN OPENBRACKET statements CLOSEBRACKET { builder.AddFunction($1); std::cout << "FUNCTION " << $1 << std::endl; }
+function: USERID OPENPAREN CLOSEPAREN { builder.StartFunction($1); } OPENBRACKET statements CLOSEBRACKET { builder.EndFunction($1); }
 	;
 
 /* statements in a function is either zero or more statement */
@@ -189,18 +188,18 @@ statements: %empty
 	;
 
 /* a statement is any individual line inside of a function */
-statement: USERID ASSIGN expr SEMICOLON 				{ std::cout << "STMNT USERID ASSIGN expr" << std::endl; } /* myInt$ = 2 + 8; */
-	| expr SEMICOLON									/* sys func call */
+statement: USERID ASSIGN expr SEMICOLON 				{ builder.Store($1); } /* myInt$ = 2 + 8; */
+	| expr SEMICOLON									/* sys func call or pointless expression like (2+4); */
 	| RETURN SEMICOLON 									{ builder.ReturnV(); } /* return; */
 	| BREAKPOINT SEMICOLON 								{ builder.Breakpoint(); } /* breakpoint; */
-	| SITNSPIN SEMICOLON 								{ builder.SitNSpin(); } /* sitnspin; */
-	| GOTO USERID SEMICOLON 							/* goto blah$; */
-	| USERID COLON										/* blah$: */
+	| SITNSPIN SEMICOLON 								{ builder.SitnSpin(); } /* sitnspin; */
+	| GOTO USERID SEMICOLON 							{ builder.BranchGoto($2); } /* goto blah$; */
+	| USERID COLON										{ builder.AddGoto($1); } /* blah$: */
 	| WAIT SEMICOLON 									{ builder.BeginWait(); builder.EndWait(); } /* wait; */
 	| WAIT { builder.BeginWait(); } sysfunc_call 		{ builder.EndWait(); } /* wait WalkTo("Gab", "FR_25"); */
-	| WAIT { builder.BeginWait(); } OPENBRACKET statements CLOSEBRACKET 	{ builder.EndWait(); } /* wait { // stuff } */
+	| WAIT { builder.BeginWait(); } OPENBRACKET statements CLOSEBRACKET { builder.EndWait(); } /* wait { // stuff } */
 	| statements_block 									/* { // stuff } */
-	| SEMICOLON 										{ std::cout << "SEMICOLON" << std::endl; } /* ; */
+	| SEMICOLON 										{ } /* ; */
 	| if_else_block										/* if(blah) { } else if(foo) { } else { } */
 	;
 
@@ -210,25 +209,25 @@ statements_block: OPENBRACKET statements CLOSEBRACKET
 
 /* a sysfunc call is like GetEgoName(); or PrintString("Ahh");
    it can have zero or more arguments */
-sysfunc_call: SYSID OPENPAREN sysfunc_call_args CLOSEPAREN { std::cout << "SYSFUNC CALL" << std::endl; }
+sysfunc_call: SYSID OPENPAREN sysfunc_call_args CLOSEPAREN { builder.CallSysFunction($1); }
 	;
 
 /* sysfunc call args are either empty, or a list or args */
-sysfunc_call_args: %empty				/* No arg */
-	| expr 								{ std::cout << "SYSFUNC ARG " << std::endl; } /* 5 + 2 */
-	| sysfunc_call_args COMMA expr 		/* 5 + 2, "Gab", GetCameraFov() */
+sysfunc_call_args: %empty				{ } /* No arg */
+	| expr 								{ } /* 5 + 2 */
+	| sysfunc_call_args COMMA expr 		{ } /* 5 + 2, "Gab", GetCameraFov() */
 	;
 
 /* an expression is any constant value, math operation, system function call */ 
-expr: sysfunc_call 						{ std::cout << "EXPR SYSFUNC CALL" << std::endl; }  /* PrintString("Ahhh") */
-	| USERID 							{ builder.Load($1); std::cout << "EXPR USERID " << $1 << std::endl; } 
+expr: sysfunc_call 						{ }  /* PrintString("Ahhh") */
+	| USERID 							{ builder.Load($1); } 
 	| int_expr 							{ }
 	| float_expr 						{ }
-	| STRING 							{ builder.AddStringConst($1); builder.PushS($1); $$ = $1; std::cout << "STRING " << $1 << std::endl; }
-	| OPENPAREN expr CLOSEPAREN 		{ std::cout << "EXPR (EXPR)" << std::endl; } /* (10 + 12) */
+	| STRING 							{ builder.AddStringConst($1); builder.PushS($1); }
+	| OPENPAREN expr CLOSEPAREN 		{ } /* (10 + 12) */
 	;
 
-int_expr: INT 							{ builder.PushI($1); $$ = $1; std::cout << "INT " << $1 << std::endl; }
+int_expr: INT 							{ builder.PushI($1); $$ = $1; }
 	| int_expr PLUS int_expr			{ builder.AddI(); }
 	| int_expr MINUS int_expr			{ builder.SubtractI(); }
 	| int_expr MULTIPLY int_expr 		{ builder.MultiplyI(); }
@@ -236,10 +235,10 @@ int_expr: INT 							{ builder.PushI($1); $$ = $1; std::cout << "INT " << $1 << 
 	| int_expr MOD int_expr 			{ builder.Modulo(); }
 	| NEGATE int_expr					{ builder.NegateI(); }
 
-	| int_expr LT int_expr 				{ builder.IsLessThanI(); }
-	| int_expr GT int_expr 				{ builder.IsGreaterThanI(); }
-	| int_expr LTE int_expr 			{ builder.IsLessThanEqualI(); }
-	| int_expr GTE int_expr 			{ builder.IsGreaterThanEqualI(); }
+	| int_expr LT int_expr 				{ builder.IsLessI(); }
+	| int_expr GT int_expr 				{ builder.IsGreaterI(); }
+	| int_expr LTE int_expr 			{ builder.IsLessEqualI(); }
+	| int_expr GTE int_expr 			{ builder.IsGreaterEqualI(); }
 	| int_expr NOTEQUAL int_expr      	{ builder.IsNotEqualI(); }
 	| int_expr EQUAL int_expr			{ builder.IsEqualI(); }
 	| int_expr OR int_expr				{ builder.Or(); }
@@ -247,17 +246,17 @@ int_expr: INT 							{ builder.PushI($1); $$ = $1; std::cout << "INT " << $1 << 
 	| NOT int_expr  					{ builder.Not(); }
 	;
 
-float_expr: FLOAT 						{ builder.PushF($1); $$ = $1; std::cout << "FLOAT " << $1 << std::endl; }
+float_expr: FLOAT 						{ builder.PushF($1); $$ = $1; }
 	| float_expr PLUS float_expr       	{ builder.AddF(); }
 	| float_expr MINUS float_expr		{ builder.SubtractF(); }
 	| float_expr MULTIPLY float_expr	{ builder.MultiplyF(); }
 	| float_expr DIVIDE float_expr		{ builder.DivideF(); }
 	| NEGATE float_expr 				{ builder.NegateF(); }
 
-	| float_expr LT float_expr			{ builder.IsLessThanF(); }
-	| float_expr GT float_expr			{ builder.IsGreaterThanF(); }
-	| float_expr LTE float_expr			{ builder.IsLessThanEqualF(); }
-	| float_expr GTE float_expr			{ builder.IsGreaterThanEqualF(); }
+	| float_expr LT float_expr			{ builder.IsLessF(); }
+	| float_expr GT float_expr			{ builder.IsGreaterF(); }
+	| float_expr LTE float_expr			{ builder.IsLessEqualF(); }
+	| float_expr GTE float_expr			{ builder.IsGreaterEqualF(); }
 	| float_expr NOTEQUAL float_expr	{ builder.IsNotEqualF(); }
 	| float_expr EQUAL float_expr		{ builder.IsEqualF(); }
 	| float_expr OR float_expr			{ builder.Or(); }

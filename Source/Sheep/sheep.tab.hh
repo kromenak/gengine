@@ -40,7 +40,7 @@
 #ifndef YY_YY_SHEEP_TAB_HH_INCLUDED
 # define YY_YY_SHEEP_TAB_HH_INCLUDED
 // //                    "%code requires" blocks.
-#line 33 "Sheep.yy" // lalr1.cc:392
+#line 32 "Sheep.yy" // lalr1.cc:392
 
 	namespace Sheep
 	{
@@ -124,7 +124,7 @@
 # define YYDEBUG 0
 #endif
 
-#line 19 "Sheep.yy" // lalr1.cc:392
+#line 18 "Sheep.yy" // lalr1.cc:392
 namespace Sheep {
 #line 130 "Sheep.tab.hh" // lalr1.cc:392
 
@@ -304,7 +304,6 @@ namespace Sheep {
       // STRING
       // USERID
       // SYSID
-      // string_expr
       char dummy3[sizeof(std::string)];
 };
 
@@ -865,8 +864,8 @@ namespace Sheep {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 316,     ///< Last index in yytable_.
-      yynnts_ = 26,  ///< Number of nonterminal symbols.
+      yylast_ = 275,     ///< Last index in yytable_.
+      yynnts_ = 25,  ///< Number of nonterminal symbols.
       yyfinal_ = 8, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -955,19 +954,18 @@ namespace Sheep {
       switch (other.type_get ())
     {
       case 27: // FLOAT
-      case 67: // float_expr
+      case 68: // float_expr
         value.copy< float > (other.value);
         break;
 
       case 26: // INT
-      case 66: // int_expr
+      case 67: // int_expr
         value.copy< int > (other.value);
         break;
 
       case 28: // STRING
       case 29: // USERID
       case 30: // SYSID
-      case 69: // string_expr
         value.copy< std::string > (other.value);
         break;
 
@@ -989,19 +987,18 @@ namespace Sheep {
       switch (this->type_get ())
     {
       case 27: // FLOAT
-      case 67: // float_expr
+      case 68: // float_expr
         value.copy< float > (v);
         break;
 
       case 26: // INT
-      case 66: // int_expr
+      case 67: // int_expr
         value.copy< int > (v);
         break;
 
       case 28: // STRING
       case 29: // USERID
       case 30: // SYSID
-      case 69: // string_expr
         value.copy< std::string > (v);
         break;
 
@@ -1068,19 +1065,18 @@ namespace Sheep {
     switch (yytype)
     {
       case 27: // FLOAT
-      case 67: // float_expr
+      case 68: // float_expr
         value.template destroy< float > ();
         break;
 
       case 26: // INT
-      case 66: // int_expr
+      case 67: // int_expr
         value.template destroy< int > ();
         break;
 
       case 28: // STRING
       case 29: // USERID
       case 30: // SYSID
-      case 69: // string_expr
         value.template destroy< std::string > ();
         break;
 
@@ -1108,19 +1104,18 @@ namespace Sheep {
       switch (this->type_get ())
     {
       case 27: // FLOAT
-      case 67: // float_expr
+      case 68: // float_expr
         value.move< float > (s.value);
         break;
 
       case 26: // INT
-      case 66: // int_expr
+      case 67: // int_expr
         value.move< int > (s.value);
         break;
 
       case 28: // STRING
       case 29: // USERID
       case 30: // SYSID
-      case 69: // string_expr
         value.move< std::string > (s.value);
         break;
 
@@ -1459,9 +1454,9 @@ namespace Sheep {
   }
 
 
-#line 19 "Sheep.yy" // lalr1.cc:392
+#line 18 "Sheep.yy" // lalr1.cc:392
 } // Sheep
-#line 1465 "Sheep.tab.hh" // lalr1.cc:392
+#line 1460 "Sheep.tab.hh" // lalr1.cc:392
 
 
 

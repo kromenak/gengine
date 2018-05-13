@@ -14,26 +14,23 @@
 class SheepScriptBuilder
 {
 public:
-    bool AddSysFuncImport(std::string name);
+    SheepScriptBuilder();
     
     bool AddStringConst(std::string str);
-    
     bool AddIntVariable(std::string name, int defaultValue);
     bool AddFloatVariable(std::string name, float defaultValue);
     bool AddStringVariable(std::string name, std::string defaultValue);
     
-    bool AddFunction(std::string functionName);
+    void StartFunction(std::string functionName);
+    void EndFunction(std::string functionName);
     
+    void AddGoto(std::string labelName);
     
-    
-    void SitNSpin();
+    void SitnSpin();
     void Yield();
-    //CallSysFunctionV
-    //CallSysFunctionI
-    //CallSysFunctionF
-    //CallSysFunctionS
+    void CallSysFunction(std::string sysFuncName);
     //Branch
-    //BranchGoto
+    void BranchGoto(std::string labelName);
     //BranchIfZero
     void BeginWait();
     void EndWait();
@@ -77,11 +74,20 @@ public:
     
     void Breakpoint();
     
+    std::vector<SysImport> GetSysImports() { return mSysImports; }
+    std::unordered_map<int, std::string> GetStringConsts() { return mStringConstsByOffset; }
+    std::vector<SheepValue> GetVariables() { return mVariables; }
+    std::unordered_map<std::string, int> GetFunctions() { return mFunctions; }
+    std::vector<char> GetBytecode() { return mBytecode; }
+    
 private:
+    // Definition for any system functions used.
     std::vector<SysImport> mSysImports;
     
     // String constants, keyed by data offset, since that's how bytecode identifies them.
     std::vector<std::string> mStringConsts;
+    int mStringConstsOffset = 0;
+    std::unordered_map<int, std::string> mStringConstsByOffset;
     
     // Represents variable ordering, types, and default values.
     // Bytecode only cares about the index of the variable.
@@ -90,7 +96,10 @@ private:
     
     // Maps a function name to it's offset in the bytecode.
     std::unordered_map<std::string, int> mFunctions;
-    int mLastFunctionIndex = 0;
+    
+    // For gotos, a map of label to bytecode offset.
+    std::unordered_map<std::string, int> mGotoLabelsToOffsets;
+    std::unordered_map<std::string, std::vector<int>> mGotoLabelsToBeHookedUp;
     
     // A vector for building the bytecode section.
     std::vector<char> mBytecode;

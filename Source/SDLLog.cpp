@@ -4,7 +4,6 @@
 //
 //  Created by Clark Kromenaker on 7/22/17.
 //
-
 #include "SDLLog.h"
 #include <cstdarg>
 

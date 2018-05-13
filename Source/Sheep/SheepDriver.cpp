@@ -10,6 +10,7 @@
 
 #include "SheepDriver.h"
 #include "SheepScriptBuilder.h"
+#include "SheepAPI.h"
 
 Sheep::Driver::~Driver()
 {
@@ -37,25 +38,13 @@ void Sheep::Driver::Parse(std::istream& stream)
 {
     if(!stream.good() || stream.eof()) { return; }
     
+    InitSysImports();
+    
     delete mScanner;
     try
     {
         mScanner = new Scanner(&stream);
-        /*
-        while(true)
-        {
-            Sheep::Parser::symbol_type yylookahead(mScanner->yylex(*mScanner, *this));
-            if(yylookahead.token() == Sheep::Parser::token::END)
-            {
-                std::cout << "EOF" << std::endl;
-                break;
-            }
-            else
-            {
-                std::cout << yylookahead.token() << std::endl;
-            }
-        }
-        */
+        //DebugOutputTokens(mScanner);
     }
     catch(std::bad_alloc &ba)
     {
@@ -68,7 +57,19 @@ void Sheep::Driver::Parse(std::istream& stream)
     {
         SheepScriptBuilder builder;
         mParser = new Sheep::Parser(*mScanner, *this, builder);
-        mParser->parse();
+        int result = mParser->parse();
+        if(result == 0)
+        {
+            std::cout << "Parsed sheep successfully." << std::endl;
+            SheepScript* sheepScript = new SheepScript("", builder);
+            
+            SheepVM vm;
+            vm.Execute(sheepScript);
+        }
+        else
+        {
+            std::cerr << "Failed parsing sheep script with result " << result << std::endl;
+        }
     }
     catch(std::bad_alloc &ba)
     {
@@ -84,4 +85,22 @@ void Sheep::Driver::error(const Sheep::location &l, const std::string &m)
 void Sheep::Driver::error(const std::string &m)
 {
     std::cerr << "Sheep Compile Error: " << m << std::endl;
+}
+
+void Sheep::Driver::DebugOutputTokens(Sheep::Scanner *scanner)
+{
+    SheepScriptBuilder builder;
+    while(true)
+    {
+        Sheep::Parser::symbol_type yylookahead(scanner->yylex(*scanner, *this, builder));
+        if(yylookahead.token() == Sheep::Parser::token::END)
+        {
+            std::cout << "EOF" << std::endl;
+            break;
+        }
+        else
+        {
+            std::cout << yylookahead.token() << std::endl;
+        }
+    }
 }

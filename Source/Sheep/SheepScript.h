@@ -12,6 +12,7 @@
 #include "SheepVM.h"
 
 class BinaryReader;
+class SheepScriptBuilder;
 
 struct SysImport
 {
@@ -24,6 +25,7 @@ class SheepScript : public Asset
 {
 public:
     SheepScript(std::string name, char* data, int dataLength);
+    SheepScript(std::string name, SheepScriptBuilder& builder);
     
     SysImport* GetSysImport(int index);
     
@@ -33,6 +35,8 @@ public:
     
     char* GetBytecode() { return mBytecode; }
     int GetBytecodeLength() { return mBytecodeLength; }
+    
+    void Dump();
     
 private:
     std::vector<SysImport> mSysImports;

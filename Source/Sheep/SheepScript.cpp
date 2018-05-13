@@ -6,11 +6,28 @@
 //
 #include "SheepScript.h"
 #include "BinaryReader.h"
+#include "SheepScriptBuilder.h"
+
 #include <iostream>
 
 SheepScript::SheepScript(std::string name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
+}
+
+SheepScript::SheepScript(std::string name, SheepScriptBuilder& builder) : Asset(name)
+{
+    // Just copy these directly.
+    mSysImports = builder.GetSysImports();
+    mStringConsts = builder.GetStringConsts();
+    mVariables = builder.GetVariables();
+    mFunctions = builder.GetFunctions();
+    
+    // Bytecode needs to convert from std::vector to byte array.
+    std::vector<char> bytecodeVec = builder.GetBytecode();
+    mBytecodeLength = (int)bytecodeVec.size();
+    mBytecode = new char[mBytecodeLength];
+    std::copy(bytecodeVec.begin(), bytecodeVec.end(), mBytecode);
 }
 
 SysImport* SheepScript::GetSysImport(int index)
@@ -27,6 +44,14 @@ std::string SheepScript::GetStringConst(int offset)
         return it->second;
     }
     return std::string();
+}
+
+void SheepScript::Dump()
+{
+    std::cout << "Dumping sheep " << mName << std::endl << std::endl;
+    std::cout << "--------------------------------------------------------------------------" << std::endl;
+    std::cout << "Component   : GK3Sheep" << std::endl;
+    std::cout << "--------------------------------------------------------------------------" << std::endl;
 }
 
 void SheepScript::ParseFromData(char *data, int dataLength)

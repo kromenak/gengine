@@ -7,7 +7,7 @@
 #include "CameraComponent.h"
 #include "BSP.h"
 #include "MeshComponent.h"
-
+#include "SheepDriver.h"
 const float kCameraSpeed = 100.0f;
 const float kRunCameraMultiplier = 2.0f;
 const float kCameraRotationSpeed = 2.5f;
@@ -81,8 +81,11 @@ void GameCamera::Update(float deltaTime)
     if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_0))
     {
         std::cout << "Execute!" << std::endl;
-        SheepScript* sheepScript = Services::GetAssets()->LoadSheep("B25.SHP");
-        SheepVM vm;
-        vm.Execute(sheepScript);
+        //SheepScript* sheepScript = Services::GetAssets()->LoadSheep("B25.SHP");
+        //SheepVM vm;
+        //vm.Execute(sheepScript);
+        
+        Sheep::Driver driver;
+        driver.Parse("/Users/Clark/Dropbox/GK3/Assets/B25.shp");
     }
 }

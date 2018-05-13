@@ -23,7 +23,7 @@ namespace Sheep
         
         void Parse(const char* filename);
         void Parse(std::string sheep);
-        void Parse(std::istream& iss);
+        void Parse(std::istream& stream);
         
         // Bison requires these to be lowercase.
         void error(const Sheep::location& l, const std::string& m);
@@ -32,5 +32,7 @@ namespace Sheep
     private:
         Scanner* mScanner = nullptr;
         Parser* mParser = nullptr;
+        
+        void DebugOutputTokens(Scanner* scanner);
     };
 }

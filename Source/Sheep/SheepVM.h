@@ -30,7 +30,7 @@ struct SheepValue
 
 enum class SheepInstruction
 {
-    SitNSpin            = 0x00,
+    SitnSpin            = 0x00,
     Yield               = 0x01,
     CallSysFunctionV    = 0x02,
     CallSysFunctionI    = 0x03,
