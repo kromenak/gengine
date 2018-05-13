@@ -330,7 +330,7 @@ int yyFlexLexer::yylex()
 	return 0;
 	}
 
-#define YY_DECL int Sheep::Scanner::yylex()
+#define YY_DECL int SheepScanner::yylex()
 
 /* Done after the current pattern has been matched and before the
  * corresponding action - sets up yytext.
@@ -517,7 +517,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[48] =
 #include <cstdlib>
 #include "SheepScanner.h"
 #undef YY_DECL
-#define YY_DECL Sheep::Parser::symbol_type Sheep::Scanner::yylex(Sheep::Scanner& scanner, Sheep::Driver& driver, SheepScriptBuilder& builder)
+#define YY_DECL Sheep::Parser::symbol_type SheepScanner::yylex(SheepScanner& scanner, SheepCompiler& compiler, SheepScriptBuilder& builder)
 
 using token = Sheep::Parser::token;
 using parser = Sheep::Parser;

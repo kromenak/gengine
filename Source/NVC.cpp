@@ -5,6 +5,8 @@
 //
 #include "NVC.h"
 #include "IniParser.h"
+#include "SheepCompiler.h"
+#include "SheepScript.h"
 
 NVC::NVC(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -20,14 +22,16 @@ void NVC::ParseFromData(char *data, int dataLength)
     IniSection mainSection = parser.GetSection("");
     for(auto& entry : mainSection.entries)
     {
+        NVCItem item;
+        
         // The first three items must be the noun, verb, and case.
-        std::string noun = entry->key;
+        item.noun = entry->key;
         
         IniKeyValue* keyValue = entry->next;
-        std::string verb = keyValue->key;
+        item.verb = keyValue->key;
         
         keyValue = keyValue->next;
-        std::string caseVal = keyValue->key;
+        item.condition = keyValue->key;
         
         // From here, we have some optional stuff.
         keyValue = keyValue->next;
@@ -36,24 +40,35 @@ void NVC::ParseFromData(char *data, int dataLength)
             if(keyValue->key == "approach")
             {
                 // Valid options are: WalkTo, Anim, Near, NearModel, Region, TurnTo, TurnToModel, WalkToSee
+                item.approach = keyValue->value;
             }
             else if(keyValue->key == "target")
             {
-                
+                item.target = keyValue->value;
             }
             else if(keyValue->key == "script")
             {
                 // A sheep expression to be evaluated for this item.
+                SheepCompiler compiler;
+                item.script = compiler.Compile(keyValue->value);
             }
             keyValue = keyValue->next;
         }
     }
     
-    // This section just contains one key/value pair per line.
+    // Some "CASE" values are special, and handled by the system (like ALL, GABE_ALL, GRACE_ALL)
+    // But an NVC item can also specify a custom case value. In that case,
+    // this section maps the case value to a sheep expression to evaluate, to see whether the case is met.
     IniSection logicSection = parser.GetSection("LOGIC");
     for(auto& entry : logicSection.entries)
     {
+        // Only add this case entry if it isn't a duplicate entry.
         std::string caseLabel = entry->key;
-        std::string sheepExpression = entry->value;
+        auto it = mCaseToSheep.find(caseLabel);
+        if(it == mCaseToSheep.end())
+        {
+            SheepCompiler compiler;
+            mCaseToSheep[caseLabel] = compiler.Compile(entry->value);
+        }
     }
 }

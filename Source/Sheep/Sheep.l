@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include "SheepScanner.h"
 #undef YY_DECL
-#define YY_DECL Sheep::Parser::symbol_type Sheep::Scanner::yylex(Sheep::Scanner& scanner, Sheep::Driver& driver, SheepScriptBuilder& builder)
+#define YY_DECL Sheep::Parser::symbol_type SheepScanner::yylex(SheepScanner& scanner, SheepCompiler& compiler, SheepScriptBuilder& builder)
 
 using token = Sheep::Parser::token;
 using parser = Sheep::Parser;
@@ -13,7 +13,7 @@ using parser = Sheep::Parser;
 #define yyterminate() return parser::make_END(loc)
 %}
 
-%option yyclass="Sheep::Scanner"
+%option yyclass="SheepScanner"
 %option c++
 %option noyywrap
 %option yylineno

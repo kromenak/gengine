@@ -7,7 +7,8 @@
 #include "CameraComponent.h"
 #include "BSP.h"
 #include "MeshComponent.h"
-#include "SheepDriver.h"
+#include "SheepCompiler.h"
+
 const float kCameraSpeed = 100.0f;
 const float kRunCameraMultiplier = 2.0f;
 const float kCameraRotationSpeed = 2.5f;
@@ -85,7 +86,7 @@ void GameCamera::Update(float deltaTime)
         //SheepVM vm;
         //vm.Execute(sheepScript);
         
-        Sheep::Driver driver;
-        driver.Parse("/Users/Clark/Dropbox/GK3/Assets/B25.shp");
+        SheepCompiler compiler;
+        compiler.Compile("/Users/Clark/Dropbox/GK3/Assets/B25.shp");
     }
 }

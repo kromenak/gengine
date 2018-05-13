@@ -42,14 +42,11 @@
 // //                    "%code requires" blocks.
 #line 32 "Sheep.yy" // lalr1.cc:392
 
-	namespace Sheep
-	{
-		class Scanner;
-		class Driver;
-	}
+	class SheepScanner;
+	class SheepCompiler;
 	class SheepScriptBuilder;
 
-#line 53 "Sheep.tab.hh" // lalr1.cc:392
+#line 50 "Sheep.tab.hh" // lalr1.cc:392
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -126,7 +123,7 @@
 
 #line 18 "Sheep.yy" // lalr1.cc:392
 namespace Sheep {
-#line 130 "Sheep.tab.hh" // lalr1.cc:392
+#line 127 "Sheep.tab.hh" // lalr1.cc:392
 
 
 
@@ -664,7 +661,7 @@ namespace Sheep {
 
 
     /// Build a parser object.
-    Parser (Sheep::Scanner& scanner_yyarg, Sheep::Driver& driver_yyarg, SheepScriptBuilder& builder_yyarg);
+    Parser (SheepScanner& scanner_yyarg, SheepCompiler& compiler_yyarg, SheepScriptBuilder& builder_yyarg);
     virtual ~Parser ();
 
     /// Parse.
@@ -864,9 +861,9 @@ namespace Sheep {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 275,     ///< Last index in yytable_.
+      yylast_ = 294,     ///< Last index in yytable_.
       yynnts_ = 25,  ///< Number of nonterminal symbols.
-      yyfinal_ = 8, ///< Termination state number.
+      yyfinal_ = 10, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
       yyntokens_ = 47  ///< Number of tokens.
@@ -874,8 +871,8 @@ namespace Sheep {
 
 
     // User arguments.
-    Sheep::Scanner& scanner;
-    Sheep::Driver& driver;
+    SheepScanner& scanner;
+    SheepCompiler& compiler;
     SheepScriptBuilder& builder;
   };
 
@@ -1456,7 +1453,7 @@ namespace Sheep {
 
 #line 18 "Sheep.yy" // lalr1.cc:392
 } // Sheep
-#line 1460 "Sheep.tab.hh" // lalr1.cc:392
+#line 1457 "Sheep.tab.hh" // lalr1.cc:392
 
 
 

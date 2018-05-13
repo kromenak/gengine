@@ -13,21 +13,18 @@
 #include "sheep.tab.hh"
 #include "location.hh"
 
-namespace Sheep
+class SheepScanner : public yyFlexLexer
 {
-    class Scanner : public yyFlexLexer
-    {
-    public:
-        Scanner(std::istream *in) : yyFlexLexer(in) { }
-        
-        char* GetYYText() { return yytext; }
-        
-        // YY_DECL is defined in the Flex source file (Sheep.l)
-        // The method body is created by Flex in lex.yy.cc.
-        Sheep::Parser::symbol_type yylex(Sheep::Scanner& scanner, Sheep::Driver& driver, SheepScriptBuilder& builder);
-        
-    private:
-        Sheep::Parser::semantic_type *yylval = nullptr;
-        Sheep::Parser::location_type loc;
-    };
-}
+public:
+    SheepScanner(std::istream *in) : yyFlexLexer(in) { }
+    
+    char* GetYYText() { return yytext; }
+    
+    // YY_DECL is defined in the Flex source file (Sheep.l)
+    // The method body is created by Flex in lex.yy.cc.
+    Sheep::Parser::symbol_type yylex(SheepScanner& scanner, SheepCompiler& compiler, SheepScriptBuilder& builder);
+    
+private:
+    Sheep::Parser::semantic_type *yylval = nullptr;
+    Sheep::Parser::location_type loc;
+};

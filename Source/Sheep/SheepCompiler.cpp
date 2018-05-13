@@ -8,11 +8,11 @@
 #include <sstream>
 #include <cassert>
 
-#include "SheepDriver.h"
+#include "SheepCompiler.h"
 #include "SheepScriptBuilder.h"
 #include "SheepAPI.h"
 
-Sheep::Driver::~Driver()
+SheepCompiler::~SheepCompiler()
 {
     delete mScanner;
     mScanner = nullptr;
@@ -21,35 +21,35 @@ Sheep::Driver::~Driver()
     mParser = nullptr;
 }
 
-void Sheep::Driver::Parse(const char *filename)
+SheepScript* SheepCompiler::Compile(const char *filename)
 {
     assert(filename != nullptr);    
     std::ifstream inFile(filename);
-    Parse(inFile);
+    return Compile(inFile);
 }
 
-void Sheep::Driver::Parse(std::string sheep)
+SheepScript* SheepCompiler::Compile(std::string sheep)
 {
     std::stringstream stringStream(sheep);
-    Parse(stringStream);
+    return Compile(stringStream);
 }
 
-void Sheep::Driver::Parse(std::istream& stream)
+SheepScript* SheepCompiler::Compile(std::istream& stream)
 {
-    if(!stream.good() || stream.eof()) { return; }
+    if(!stream.good() || stream.eof()) { return nullptr; }
     
     InitSysImports();
     
     delete mScanner;
     try
     {
-        mScanner = new Scanner(&stream);
+        mScanner = new SheepScanner(&stream);
         //DebugOutputTokens(mScanner);
     }
     catch(std::bad_alloc &ba)
     {
         std::cerr << "Failed to allocate scanner: (" << ba.what() << "), exiting!\n";
-        exit(EXIT_FAILURE);
+        return nullptr;
     }
     
     delete mParser;
@@ -63,31 +63,34 @@ void Sheep::Driver::Parse(std::istream& stream)
             std::cout << "Parsed sheep successfully." << std::endl;
             SheepScript* sheepScript = new SheepScript("", builder);
             
-            SheepVM vm;
-            vm.Execute(sheepScript);
+            //SheepVM vm;
+            //vm.Execute(sheepScript);
+            return sheepScript;
         }
         else
         {
             std::cerr << "Failed parsing sheep script with result " << result << std::endl;
+            return nullptr;
         }
     }
     catch(std::bad_alloc &ba)
     {
         std::cerr << "Failed to allocate parser: (" << ba.what() << "), exiting!\n";
+        return nullptr;
     }
 }
 
-void Sheep::Driver::error(const Sheep::location &l, const std::string &m)
+void SheepCompiler::error(const Sheep::location &l, const std::string &m)
 {
-    std::cerr << "Sheep Compile Error: " << l << ": " << m << std::endl;
+    std::cerr << "Sheep Compiler Error: " << l << ": " << m << std::endl;
 }
 
-void Sheep::Driver::error(const std::string &m)
+void SheepCompiler::error(const std::string &m)
 {
-    std::cerr << "Sheep Compile Error: " << m << std::endl;
+    std::cerr << "Sheep Compiler Error: " << m << std::endl;
 }
 
-void Sheep::Driver::DebugOutputTokens(Sheep::Scanner *scanner)
+void SheepCompiler::DebugOutputTokens(SheepScanner *scanner)
 {
     SheepScriptBuilder builder;
     while(true)

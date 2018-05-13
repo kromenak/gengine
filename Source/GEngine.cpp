@@ -10,7 +10,7 @@
 #include "Services.h"
 #include "Actor.h"
 
-#include "Sheep/SheepDriver.h"
+#include "Sheep/SheepCompiler.h"
 #include "Barn/BarnFile.h"
 
 #include "CameraComponent.h"

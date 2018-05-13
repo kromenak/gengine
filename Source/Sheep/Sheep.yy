@@ -30,22 +30,19 @@
 /* This code is added to the top of sheep.tab.hh. */
 %code requires 
 {
-	namespace Sheep
-	{
-		class Scanner;
-		class Driver;
-	}
+	class SheepScanner;
+	class SheepCompiler;
 	class SheepScriptBuilder;
 }
 
-%param { Sheep::Scanner& scanner }
-%param { Sheep::Driver& driver }
+%param { SheepScanner& scanner }
+%param { SheepCompiler& compiler }
 %param { SheepScriptBuilder& builder }
 
 /* This code is added to the top of the .cc file for the parser. */
 %code
 {
-	#include "SheepDriver.h"
+	#include "SheepCompiler.h"
 
 	// When requesting yylex, redirect to scanner.yylex.
 	#undef yylex
@@ -58,7 +55,7 @@
 
 	void Sheep::Parser::error(const location_type& loc, const std::string& msg)
 	{
-		driver.error(loc, msg);
+		compiler.error(loc, msg);
 	}
 }
 
@@ -125,10 +122,11 @@
 /* Grammer rules */
 
 /* script can be empty, just symbols, just code, or both symbols and code */
-script: %empty 								{ }
-	| symbols_section						{ }
-	| code_section 							{ }
-	| symbols_section code_section 			{ }
+script: %empty 								{ }	/* just an empty file :( */
+	| symbols_section						{ } /* symbols { } */
+	| code_section 							{ } /* code { } */
+	| symbols_section code_section 			{ } /* symbols { } code { } */
+	| OPENBRACKET statements CLOSEBRACKET   { } /* supports a sheep "snippet" or anonymous function, as used in NVC assets */
 	;
 
 /* symbols starts with "symbols {" and ends with "}"

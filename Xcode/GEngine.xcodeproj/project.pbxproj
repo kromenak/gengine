@@ -29,7 +29,7 @@
 		4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */; };
 		4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */; };
 		4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */; };
-		4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */; };
+		4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */; };
 		4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */; };
 		4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
 		4B2E7A62203A5CB3001A5B9C /* Stage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Stage.cpp */; };
@@ -138,8 +138,8 @@
 		4B2ACE0A1F25C20B003EC7FE /* sheep.tab.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = sheep.tab.hh; path = ../Source/Sheep/sheep.tab.hh; sourceTree = "<group>"; };
 		4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = lex.yy.cc; path = ../Source/Sheep/lex.yy.cc; sourceTree = "<group>"; };
 		4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepScanner.h; path = ../Source/Sheep/SheepScanner.h; sourceTree = "<group>"; };
-		4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepDriver.cpp; path = ../Source/Sheep/SheepDriver.cpp; sourceTree = "<group>"; };
-		4B2ACE121F25D310003EC7FE /* SheepDriver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepDriver.h; path = ../Source/Sheep/SheepDriver.h; sourceTree = "<group>"; };
+		4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepCompiler.cpp; path = ../Source/Sheep/SheepCompiler.cpp; sourceTree = "<group>"; };
+		4B2ACE121F25D310003EC7FE /* SheepCompiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepCompiler.h; path = ../Source/Sheep/SheepCompiler.h; sourceTree = "<group>"; };
 		4B2D75A71F53667000900417 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B2E7A5A2039FCF0001A5B9C /* IniParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IniParser.h; path = ../Source/IniParser.h; sourceTree = "<group>"; };
 		4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = IniParser.cpp; path = ../Source/IniParser.cpp; sourceTree = "<group>"; };
@@ -340,8 +340,8 @@
 				4B85420F20A7C11C00DE8C0D /* FlexBison */,
 				4B4B4AE22091B80700391827 /* SheepAPI.cpp */,
 				4B4B4AE12091B80700391827 /* SheepAPI.h */,
-				4B2ACE111F25D310003EC7FE /* SheepDriver.cpp */,
-				4B2ACE121F25D310003EC7FE /* SheepDriver.h */,
+				4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */,
+				4B2ACE121F25D310003EC7FE /* SheepCompiler.h */,
 				4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */,
 				4B2ACDF71F25873C003EC7FE /* SheepScript.h */,
 				4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */,
@@ -617,7 +617,7 @@
 				4B2E7A65203A6072001A5B9C /* Scene.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
-				4B2ACE131F25D310003EC7FE /* SheepDriver.cpp in Sources */,
+				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
 				4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */,
 				4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */,
