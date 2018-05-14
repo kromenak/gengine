@@ -16,6 +16,7 @@
 #include "Scene.h"
 #include "NVC.h"
 #include "Soundtrack.h"
+#include "Cursor.h"
 #include "Sheep/SheepScript.h"
 
 using namespace std;
@@ -46,6 +47,8 @@ public:
     BSP* LoadBSP(string name);
     
     SheepScript* LoadSheep(string name);
+    
+    Cursor* LoadCursor(string name);
     
 private:
     // A list of paths to search for assets.

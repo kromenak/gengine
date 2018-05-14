@@ -54,6 +54,14 @@ void NVC::ParseFromData(char *data, int dataLength)
             }
             keyValue = keyValue->next;
         }
+        
+        // Add item to map.
+        auto it = mNounToItems.find(item.noun);
+        if(it == mNounToItems.end())
+        {
+            mNounToItems[item.noun] = std::vector<NVCItem>();
+        }
+        mNounToItems[item.noun].push_back(item);
     }
     
     // Some "CASE" values are special, and handled by the system (like ALL, GABE_ALL, GRACE_ALL)
@@ -69,6 +77,10 @@ void NVC::ParseFromData(char *data, int dataLength)
         {
             SheepCompiler compiler;
             mCaseToSheep[caseLabel] = compiler.Compile(entry->value);
+        }
+        else
+        {
+            std::cout << "Multiple case labels for " << caseLabel << std::endl;
         }
     }
 }

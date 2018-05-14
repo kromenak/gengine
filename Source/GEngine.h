@@ -13,6 +13,7 @@
 
 class Actor;
 class Stage;
+class Cursor;
 
 class GEngine
 {
@@ -47,6 +48,8 @@ private:
     
     // The currently active stage. There can be only one at a time.
     Stage* mStage = nullptr;
+    
+    Cursor* mCursor = nullptr;
     
     // Day and time that the game is currently in.
     // GK3 takes place over three days and multiple time blocks.

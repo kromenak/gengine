@@ -175,6 +175,11 @@ SheepScript* AssetManager::LoadSheep(std::string name)
     return LoadAsset<SheepScript>(name, nullptr);
 }
 
+Cursor* AssetManager::LoadCursor(std::string name)
+{
+    return LoadAsset<Cursor>(name, nullptr);
+}
+
 string AssetManager::GetAssetPath(string fileName)
 {
     for(const string& searchPath : mSearchPaths)

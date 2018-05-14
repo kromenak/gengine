@@ -9,11 +9,38 @@
 #include "imstream.h"
 #include "StringUtil.h"
 
+bool IniKeyValue::GetValueAsBool()
+{
+    if(StringUtil::EqualsIgnoreCase(value, "yes"))
+    {
+        return true;
+    }
+    else if(StringUtil::EqualsIgnoreCase(value, "no"))
+    {
+        return false;
+    }
+    else if(StringUtil::EqualsIgnoreCase(value, "true"))
+    {
+        return true;
+    }
+    else if(StringUtil::EqualsIgnoreCase(value, "false"))
+    {
+        return false;
+    }
+    
+    // Unknown - return false?
+    return false;
+}
+
 Vector2 IniKeyValue::GetValueAsVector2()
 {
     // We assume the string form of {4.23, 5.23} as an example.
     // First, let's get rid of the braces.
-    std::string noBraces = value.substr(1, value.length() - 2);
+    std::string noBraces = value;
+    if(noBraces[0] == '{' && noBraces[noBraces.size() - 1] == '}')
+    {
+        noBraces = value.substr(1, value.length() - 2);
+    }
     
     // Find the comma index. If not present,
     // this isn't the right form, so we fail.
@@ -35,7 +62,11 @@ Vector3 IniKeyValue::GetValueAsVector3()
 {
     // We assume the string form of {4.23, 5.23, 10.04} as an example.
     // First, let's get rid of the braces.
-    std::string noBraces = value.substr(1, value.length() - 2);
+    std::string noBraces = value;
+    if(noBraces[0] == '{' && noBraces[noBraces.size() - 1] == '}')
+    {
+        noBraces = value.substr(1, value.length() - 2);
+    }
     
     // Find the two commas.
     std::size_t firstCommaIndex = noBraces.find(',');
@@ -95,131 +126,6 @@ void IniParser::ParseAll()
     {
         mSections.push_back(section);
     }
-    
-    /*
-    // Make sure everything is in a state to read in data.
-    mStream->seekg(0);
-    mSections.clear();
-    
-    // We will use this one section to populate the entire section list.
-    // We just push a copy of this onto the list each time.
-    IniSection section;
-    
-    // Just read the whole file one line at a time...
-    std::string line;
-    while(std::getline(*mStream, line))
-    {
-        // "getline" reads up to the '\n' character in a file, and "eats" the '\n' too.
-        // But Windows line breaks might include the '\r' character too, like "\r\n".
-        // To deal with this semi-elegantly, we'll search for and remove the '\r' here.
-        if(!line.empty() && line[line.length() - 1] == '\r')
-        {
-            line.resize(line.length() - 1);
-        }
-        
-        // Ignore empty lines. Need to do this after \r check because some lines might just be '\r'.
-        if(line.empty()) { continue; }
-        
-        // Ignore comment lines.
-        if(line.length() > 2 && line[0] == '/' && line[1] == '/') { continue; }
-        
-        // Detect headers and react to them, but don't stop parsing.
-        if(line.length() > 2 && line[0] == '[' && line[line.length() - 1] == ']')
-        {
-            if(section.entries.size() > 0)
-            {
-                mSections.push_back(section);
-            }
-            section.condition.clear();
-            section.entries.clear();
-            
-            // Subtract the brackets to get the section name.
-            section.name = line.substr(1, line.length() - 2);
-            
-            // If there's an equals sign, it means this section is conditional.
-            std::size_t equalsIndex = section.name.find('=');
-            if(equalsIndex != std::string::npos)
-            {
-                section.condition = section.name.substr(equalsIndex + 1, std::string::npos);
-                section.name = section.name.substr(0, equalsIndex);
-            }
-            continue;
-        }
-        
-        // From here: just a normal line with key/value pair(s) on it.
-        // So, we need to split it into individual key/value pairs.
-        IniKeyValue* lastOnLine = nullptr;
-        while(!line.empty())
-        {
-            // First, determine the token we want to work with on the current line.
-            // We want the first item, if there are multiple comma-separated values.
-            // Otherwise, we just want the whole remaining line.
-            std::string currentKeyValuePair;
-            
-            // We can't just use string::find because we want to ignore commas that are inside braces.
-            // Ex: pos={10, 20, 30} should NOT be considered multiple key/value pairs.
-            std::size_t found = std::string::npos;
-            int braceDepth = 0;
-            for(int i = 0; i < line.length(); i++)
-            {
-                if(line[i] == '{') { braceDepth++; }
-                if(line[i] == '}') { braceDepth--; }
-                
-                if(line[i] == ',' && braceDepth == 0)
-                {
-                    found = i;
-                    break;
-                }
-            }
-            
-            // If we found a valid comma separator, then we only want to deal with the parts in front of the comma.
-            // If no comma, then the rest of the line is our focus.
-            if(found != std::string::npos)
-            {
-                currentKeyValuePair = line.substr(0, found);
-                line = line.substr(found + 1, std::string::npos);
-            }
-            else
-            {
-                currentKeyValuePair = line;
-                line.clear();
-            }
-            
-            IniKeyValue* keyValue = new IniKeyValue();
-            if(lastOnLine == nullptr)
-            {
-                section.entries.push_back(keyValue);
-            }
-            else
-            {
-                lastOnLine->next = keyValue;
-            }
-            lastOnLine = keyValue;
-            
-            // Trim any whitespace.
-            StringUtil::Trim(currentKeyValuePair);
-            
-            // OK, so now we have a string representing a key/value pair, "model=blahblah" or similar.
-            // But it might also just be a keyword (no value) like "hidden".
-            found = currentKeyValuePair.find('=');
-            if(found != std::string::npos)
-            {
-                keyValue->key = currentKeyValuePair.substr(0, found);
-                keyValue->value = currentKeyValuePair.substr(found + 1, std::string::npos);
-            }
-            else
-            {
-                keyValue->key = currentKeyValuePair;
-            }
-        }
-    }
-    
-    // After we've run out of all lines to read, push the final section on the list, if we have one.
-    if(section.entries.size() > 0)
-    {
-        mSections.push_back(section);
-    }
-    */
 }
 
 std::vector<IniSection> IniParser::GetSections(std::string name)

@@ -59,21 +59,15 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("day23.brn");
     mAssetManager.LoadBarn("day123.brn");
     
-    //mAssetManager.WriteBarnAssetToFile("HAL.SHP");
+    //mAssetManager.WriteBarnAssetToFile("C_GRAB.BMP");
     //mAssetManager.LoadSheep("HAL.SHP");
     
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
-    // Camera example.
-    //Actor* camActor = new EditorCamera();
-    //camActor->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
-    
-    //Actor* meshActor = new Actor();
-    //meshActor->SetPosition(Vector3(5.0f, 0.0f, 0.0f));
-    //Model* model = mAssetManager.LoadModel("SYRUPPACKET.MOD");
-    //MeshComponent* meshComponent = meshActor->AddComponent<MeshComponent>();
-    //meshComponent->SetModel(model);
+    //mCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
+    mCursor = mAssetManager.LoadCursor("C_POINT.CUR");
+    mCursor->Activate();
     
     LoadStage("B25");
     return true;
@@ -182,6 +176,12 @@ void GEngine::Update()
     
     // Also update audio system (before or after actors?)
     mAudio.Update(deltaTime);
+    
+    // Update active cursor.
+    if(mCursor != nullptr)
+    {
+        mCursor->Update(deltaTime);
+    }
 }
 
 void GEngine::GenerateOutput()

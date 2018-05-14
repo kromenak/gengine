@@ -38,17 +38,30 @@ void InitSysImports()
 {
     if(sysFuncs.size() > 0) { return; }
     AddSysImport("InitEgoPosition", 0, { 3 });
+    AddSysImport("StartVoiceOver", 0, { 3, 1 });
 }
 
-shpvoid CallSheep(std::string fileName, std::string functionName)
-{
-    return 0;
-}
 
+// ACTORS
 shpvoid InitEgoPosition(std::string positionName)
 {
     GEngine::inst->GetStage()->InitEgoPosition(positionName);
     return 0;
 }
-
 RegFunc1(InitEgoPosition, std::string);
+
+// ANIMATION AND DIALOGUE
+shpvoid StartVoiceOver(std::string dialogueName, int numLines)
+{
+    std::cout << "Start dialogue " << dialogueName << std::endl;
+    return 0;
+}
+RegFunc2(StartVoiceOver, std::string, int);
+
+// ENGINE
+shpvoid CallSheep(std::string fileName, std::string functionName)
+{
+    return 0;
+}
+
+

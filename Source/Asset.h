@@ -16,6 +16,7 @@ public:
     Asset(std::string name);
     
     std::string GetName() { return mName; }
+    std::string GetNameNoExtension();
     
 protected:
     std::string mName;

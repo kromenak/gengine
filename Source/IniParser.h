@@ -22,6 +22,7 @@ struct IniKeyValue
     
     float GetValueAsFloat() { return (float)atof(value.c_str()); }
     int GetValueAsInt() { return atoi(value.c_str()); }
+    bool GetValueAsBool();
     Vector2 GetValueAsVector2();
     Vector3 GetValueAsVector3();
 };

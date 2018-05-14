@@ -11,6 +11,8 @@
 #include "Asset.h"
 #include <GL/glew.h>
 
+class SDL_Surface;
+
 class Texture : Asset
 {
 public:
@@ -18,6 +20,9 @@ public:
     
     void Activate();
     static void Deactivate();
+    
+    SDL_Surface* GetSurface();
+    SDL_Surface* GetSurface(int x, int y, int width, int height);
     
     unsigned int GetWidth() { return mWidth; }
     unsigned int GetHeight() { return mHeight; }
