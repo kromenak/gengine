@@ -1,5 +1,5 @@
 //
-//  SDLAudio.h
+//  AudioManager.h
 //  GEngine
 //
 //  Created by Clark Kromenaker on 8/23/17.
@@ -7,11 +7,13 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <SDL2_mixer/SDL_mixer.h>
-#include "Audio.h"
 
+#include "fmod.hpp"
+
+class Audio;
 class Soundtrack;
 
-class SDLAudio
+class AudioManager
 {
 public:
     bool Initialize();
@@ -23,4 +25,5 @@ public:
     void Play(Audio* audio, int fadeInMs);
     
 private:
+    FMOD::System* mSystem = nullptr;
 };

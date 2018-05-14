@@ -18,7 +18,9 @@ public:
     char* GetDataBuffer() const { return mDataBuffer; }
     int GetDataBufferLength() const { return mDataBufferLength; }
 
+    void SetIsMusic(bool isMusic) { mIsMusic = isMusic; }
     bool IsMusic() const { return mIsMusic; }
+    
     float GetDuration() const { return mDuration; }
     
 private:

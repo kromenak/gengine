@@ -55,6 +55,8 @@ public:
     bool ReadKeyValuePair();
     IniKeyValue GetKeyValue() { return mCurrentKeyValue; }
     
+    void SetMultipleKeyValuePairsPerLine(bool areThere) { mMultipleKeyValuePairsPerLine = areThere; }
+    
 private:
     // The stream object we use to read in the file contents.
     std::istream* mStream = nullptr;
@@ -69,5 +71,10 @@ private:
     std::string mCurrentLineWorking;
     IniKeyValue mCurrentKeyValue;
     
+    // When we read in all at once or next section, we store all sections here.
     std::vector<IniSection> mSections;
+    
+    // If true, we assume that each line can have multiple key/value pairs.
+    // As a result, we split based on commas. Otherwise, we assume whole line has one key/value pair.
+    bool mMultipleKeyValuePairsPerLine = true;
 };

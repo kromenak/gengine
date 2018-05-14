@@ -37,11 +37,11 @@ bool GEngine::Initialize()
     Services::SetRenderer(&mRenderer);
     
     // Initialize audio.
-    if(!mAudio.Initialize())
+    if(!mAudioManager.Initialize())
     {
         return false;
     }
-    Services::SetAudio(&mAudio);
+    Services::SetAudio(&mAudioManager);
     
     // Initialize input.
     Services::SetInput(&mInputManager);
@@ -59,7 +59,7 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("day23.brn");
     mAssetManager.LoadBarn("day123.brn");
     
-    //mAssetManager.WriteBarnAssetToFile("C_GRAB.BMP");
+    //mAssetManager.WriteBarnAssetToFile("A014ED3S.6JC");
     //mAssetManager.LoadSheep("HAL.SHP");
     
     //SDL_Log(SDL_GetBasePath());
@@ -70,6 +70,12 @@ bool GEngine::Initialize()
     mCursor->Activate();
     
     LoadStage("B25");
+    
+    Audio* vo = mAssetManager.LoadAudio("A014ED3S.6JC");
+    
+    //Audio* vo = mAssetManager.LoadAudio("2JLVH44Q81");
+    mAudioManager.Play(vo);
+    
     return true;
 }
 
@@ -83,7 +89,7 @@ void GEngine::Shutdown()
     }
     
     mRenderer.Shutdown();
-    mAudio.Shutdown();
+    mAudioManager.Shutdown();
     
     //TODO: Ideally, I don't want the engine to know about SDL.
     SDL_Quit();
@@ -175,7 +181,7 @@ void GEngine::Update()
     }
     
     // Also update audio system (before or after actors?)
-    mAudio.Update(deltaTime);
+    mAudioManager.Update(deltaTime);
     
     // Update active cursor.
     if(mCursor != nullptr)

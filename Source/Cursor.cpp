@@ -52,15 +52,17 @@ void Cursor::ParseFromData(char *data, int dataLength)
         return;
     }
     
+    IniParser parser(data, dataLength);
+    parser.SetMultipleKeyValuePairsPerLine(false);
+    
     Vector2 hotspotVal;
     bool hotspotIsPercent = false;
-    IniParser parser(data, dataLength);
+    
     while(parser.ReadLine())
     {
         while(parser.ReadKeyValuePair())
         {
             IniKeyValue keyValue = parser.GetKeyValue();
-            std::cout << keyValue.key << std::endl;
             if(StringUtil::EqualsIgnoreCase(keyValue.key, "hotspot"))
             {
                 if(StringUtil::EqualsIgnoreCase(keyValue.value, "center"))
@@ -112,7 +114,6 @@ void Cursor::ParseFromData(char *data, int dataLength)
     #endif
     
     // Create cursors for each frame.
-    
     for(int i = 0; i < mFrameCount; i++)
     {
         SDL_Rect srcRect;
@@ -122,7 +123,6 @@ void Cursor::ParseFromData(char *data, int dataLength)
         srcRect.h = frameHeight;
         
         SDL_Surface* dstSurface = SDL_CreateRGBSurface(0, frameWidth, frameHeight, 32, rmask, gmask, bmask, amask);
-        
         SDL_BlitSurface(srcSurface, &srcRect, dstSurface, NULL);
         
         Vector2 hotspot = hotspotVal;

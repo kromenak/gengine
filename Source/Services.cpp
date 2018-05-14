@@ -9,4 +9,4 @@
 AssetManager* Services::assetManager = nullptr;
 InputManager* Services::inputManager = nullptr;
 SDLRenderer* Services::renderer = nullptr;
-SDLAudio* Services::audio = nullptr;
+AudioManager* Services::audio = nullptr;

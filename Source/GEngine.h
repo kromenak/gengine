@@ -6,7 +6,7 @@
 //
 #pragma once
 #include "SDLRenderer.h"
-#include "SDLAudio.h"
+#include "AudioManager.h"
 #include "AssetManager.h"
 #include "InputManager.h"
 #include <vector>
@@ -42,7 +42,7 @@ private:
     
     // Subsystems.
     SDLRenderer mRenderer;
-    SDLAudio mAudio;
+    AudioManager mAudioManager;
     AssetManager mAssetManager;
     InputManager mInputManager;
     

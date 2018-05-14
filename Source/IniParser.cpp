@@ -231,28 +231,36 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             // Otherwise, we just want the whole remaining line.
             std::string currentKeyValuePair;
             
-            // We can't just use string::find because we want to ignore commas that are inside braces.
-            // Ex: pos={10, 20, 30} should NOT be considered multiple key/value pairs.
             std::size_t found = std::string::npos;
-            int braceDepth = 0;
-            for(int i = 0; i < line.length(); i++)
+            if(mMultipleKeyValuePairsPerLine)
             {
-                if(line[i] == '{') { braceDepth++; }
-                if(line[i] == '}') { braceDepth--; }
-                
-                if(line[i] == ',' && braceDepth == 0)
+                // We can't just use string::find because we want to ignore commas that are inside braces.
+                // Ex: pos={10, 20, 30} should NOT be considered multiple key/value pairs.
+                int braceDepth = 0;
+                for(int i = 0; i < line.length(); i++)
                 {
-                    found = i;
-                    break;
+                    if(line[i] == '{') { braceDepth++; }
+                    if(line[i] == '}') { braceDepth--; }
+                    
+                    if(line[i] == ',' && braceDepth == 0)
+                    {
+                        found = i;
+                        break;
+                    }
                 }
-            }
-            
-            // If we found a valid comma separator, then we only want to deal with the parts in front of the comma.
-            // If no comma, then the rest of the line is our focus.
-            if(found != std::string::npos)
-            {
-                currentKeyValuePair = line.substr(0, found);
-                line = line.substr(found + 1, std::string::npos);
+                
+                // If we found a valid comma separator, then we only want to deal with the parts in front of the comma.
+                // If no comma, then the rest of the line is our focus.
+                if(found != std::string::npos)
+                {
+                    currentKeyValuePair = line.substr(0, found);
+                    line = line.substr(found + 1, std::string::npos);
+                }
+                else
+                {
+                    currentKeyValuePair = line;
+                    line.clear();
+                }
             }
             else
             {
@@ -342,28 +350,36 @@ bool IniParser::ReadKeyValuePair()
     // Otherwise, we just want the whole remaining line.
     std::string currentKeyValuePair;
     
-    // We can't just use string::find because we want to ignore commans that are inside braces.
-    // Ex: pos={10, 20, 30} should not be considered multiple key/value pairs.
     std::size_t found = std::string::npos;
-    int braceDepth = 0;
-    for(int i = 0; i < mCurrentLineWorking.length(); i++)
+    if(mMultipleKeyValuePairsPerLine)
     {
-        if(mCurrentLineWorking[i] == '{') { braceDepth++; }
-        if(mCurrentLineWorking[i] == '}') { braceDepth--; }
-        
-        if(mCurrentLineWorking[i] == ',' && braceDepth == 0)
+        // We can't just use string::find because we want to ignore commas that are inside braces.
+        // Ex: pos={10, 20, 30} should not be considered multiple key/value pairs.
+        int braceDepth = 0;
+        for(int i = 0; i < mCurrentLineWorking.length(); i++)
         {
-            found = i;
-            break;
+            if(mCurrentLineWorking[i] == '{') { braceDepth++; }
+            if(mCurrentLineWorking[i] == '}') { braceDepth--; }
+            
+            if(mCurrentLineWorking[i] == ',' && braceDepth == 0)
+            {
+                found = i;
+                break;
+            }
         }
-    }
     
-    // If we found a valid comma separator, then we only want to deal with the parts in front of the comma.
-    // If no comma, then the rest of the line is our focus.
-    if(found != std::string::npos)
-    {
-        currentKeyValuePair = mCurrentLineWorking.substr(0, found);
-        mCurrentLineWorking = mCurrentLineWorking.substr(found + 1, std::string::npos);
+        // If we found a valid comma separator, then we only want to deal with the parts in front of the comma.
+        // If no comma, then the rest of the line is our focus.
+        if(found != std::string::npos)
+        {
+            currentKeyValuePair = mCurrentLineWorking.substr(0, found);
+            mCurrentLineWorking = mCurrentLineWorking.substr(found + 1, std::string::npos);
+        }
+        else
+        {
+            currentKeyValuePair = mCurrentLineWorking;
+            mCurrentLineWorking.clear();
+        }
     }
     else
     {

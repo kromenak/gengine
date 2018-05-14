@@ -45,6 +45,7 @@ int SoundNode::Execute()
     // Definitely want to play the sound, if it exists.
     Audio* audio = Services::GetAssets()->LoadAudio(soundName + ".WAV");
     if(audio == nullptr) { return 0; }
+    audio->SetIsMusic(true);
     
     // Play audio and return audio length. Gotta convert seconds to milliseconds.
     Services::GetAudio()->Play(audio, fadeInTimeMs);

@@ -71,7 +71,7 @@ void Audio::ParseFromData(char* data, int dataLength)
     
     // 2 bytes: the format used by the data.
     ushort format = reader.ReadUShort();
-    mIsMusic = (format == kMp3Format);
+    //mIsMusic = (format == kMp3Format);
     
     // 2 bytes: the number of channels (1 = mono, 2 = stereo, etc).
     reader.ReadUShort();

@@ -52,8 +52,9 @@
 		4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
 		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
-		4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */; };
+		4B7C3A161F4EB07000BB0922 /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */; };
 		4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421120A905B600DE8C0D /* Cursor.cpp */; };
+		4B85421520A9276200DE8C0D /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
@@ -176,10 +177,12 @@
 		4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VectorTests.cpp; path = ../Tests/VectorTests.cpp; sourceTree = "<group>"; };
 		4B7AB0431F539EB200CFBE8F /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Audio.cpp; path = ../Source/Audio/Audio.cpp; sourceTree = "<group>"; };
 		4B7AB0441F539EB200CFBE8F /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio/Audio.h; sourceTree = "<group>"; };
-		4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SDLAudio.cpp; path = ../Source/SDLAudio.cpp; sourceTree = "<group>"; };
-		4B7C3A151F4EB07000BB0922 /* SDLAudio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLAudio.h; path = ../Source/SDLAudio.h; sourceTree = "<group>"; };
+		4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioManager.cpp; path = ../Source/AudioManager.cpp; sourceTree = "<group>"; };
+		4B7C3A151F4EB07000BB0922 /* AudioManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioManager.h; path = ../Source/AudioManager.h; sourceTree = "<group>"; };
 		4B85421020A905B600DE8C0D /* Cursor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Cursor.h; path = ../Source/Cursor.h; sourceTree = "<group>"; };
 		4B85421120A905B600DE8C0D /* Cursor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Cursor.cpp; path = ../Source/Cursor.cpp; sourceTree = "<group>"; };
+		4B85421320A9276200DE8C0D /* Yak.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Yak.h; path = ../Source/Audio/Yak.h; sourceTree = "<group>"; };
+		4B85421420A9276200DE8C0D /* Yak.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Yak.cpp; path = ../Source/Audio/Yak.cpp; sourceTree = "<group>"; };
 		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
 		4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepScriptBuilder.h; path = ../Source/Sheep/SheepScriptBuilder.h; sourceTree = "<group>"; };
@@ -415,10 +418,12 @@
 			children = (
 				4B7AB0431F539EB200CFBE8F /* Audio.cpp */,
 				4B7AB0441F539EB200CFBE8F /* Audio.h */,
-				4B7C3A141F4EB07000BB0922 /* SDLAudio.cpp */,
-				4B7C3A151F4EB07000BB0922 /* SDLAudio.h */,
+				4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */,
+				4B7C3A151F4EB07000BB0922 /* AudioManager.h */,
 				4BBB91B52058E53A007B9375 /* Soundtrack.cpp */,
 				4BBB91B42058E53A007B9375 /* Soundtrack.h */,
+				4B85421320A9276200DE8C0D /* Yak.h */,
+				4B85421420A9276200DE8C0D /* Yak.cpp */,
 			);
 			name = Audio;
 			sourceTree = "<group>";
@@ -613,7 +618,7 @@
 				4B4621EB1FF741D800536BA6 /* Texture.cpp in Sources */,
 				4B09182E1FEED84D002991D4 /* Services.cpp in Sources */,
 				4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */,
-				4B7C3A161F4EB07000BB0922 /* SDLAudio.cpp in Sources */,
+				4B7C3A161F4EB07000BB0922 /* AudioManager.cpp in Sources */,
 				4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */,
 				4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
@@ -623,6 +628,7 @@
 				4B2E7A65203A6072001A5B9C /* Scene.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
+				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
 				4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */,
@@ -793,11 +799,13 @@
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/zlib/include",
 					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/fmod/inc",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
+					"$(SRCROOT)/../Libraries/fmod/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
@@ -805,6 +813,7 @@
 				OTHER_LDFLAGS = (
 					"-lz",
 					"-lGLEW.1.12.0",
+					"-lfmod",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -853,17 +862,20 @@
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/zlib/include",
 					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/fmod/inc",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
+					"$(SRCROOT)/../Libraries/fmod/lib",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
 					"-lz",
 					"-lGLEW.1.12.0",
+					"-lfmod",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";

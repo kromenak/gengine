@@ -9,7 +9,7 @@
 #include "AssetManager.h"
 #include "InputManager.h"
 #include "SDLRenderer.h"
-#include "SDLAudio.h"
+#include "AudioManager.h"
 
 class Services
 {
@@ -23,12 +23,12 @@ public:
     static SDLRenderer* GetRenderer() { return renderer; }
     static void SetRenderer(SDLRenderer* rend) { renderer = rend; }
     
-    static SDLAudio* GetAudio() { return audio; }
-    static void SetAudio(SDLAudio* aud) { audio = aud; }
+    static AudioManager* GetAudio() { return audio; }
+    static void SetAudio(AudioManager* aud) { audio = aud; }
     
 private:
     static AssetManager* assetManager;
     static InputManager* inputManager;
     static SDLRenderer* renderer;
-    static SDLAudio* audio;
+    static AudioManager* audio;
 };
