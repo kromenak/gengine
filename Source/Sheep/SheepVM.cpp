@@ -486,14 +486,16 @@ Value SheepVM::CallSysFunc(SysImport* sysFunc)
 {
     // Number on top of stack is argument count.
     int argCount = mStack[mStackSize - 1].intValue;
+    mStackSize--;
     
     //TODO: Make sure SysFunc arg count matches the arg count on the stack.
     
     std::vector<Value> args;
     for(int i = 0; i < argCount; i++)
     {
-        SheepValue sheepValue = mStack[mStackSize - i - 2];
+        SheepValue sheepValue = mStack[mStackSize - (argCount - i)];
         
+        std::string str;
         int argType = sysFunc->argumentTypes[i];
         switch(argType)
         {
@@ -504,6 +506,7 @@ Value SheepVM::CallSysFunc(SysImport* sysFunc)
                 args.push_back(sheepValue.floatValue);
                 break;
             case 3:
+                str = std::string(sheepValue.stringValue);
                 args.push_back(std::string(sheepValue.stringValue));
                 break;
             default:
@@ -511,6 +514,7 @@ Value SheepVM::CallSysFunc(SysImport* sysFunc)
                 break;
         }
     }
+    mStackSize -= argCount;
     
     switch(argCount)
     {

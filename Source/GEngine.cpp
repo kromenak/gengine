@@ -17,7 +17,7 @@
 #include "MeshComponent.h"
 
 #include "Mesh.h"
-#include "Stage.h"
+#include "Scene.h"
 
 GEngine* GEngine::inst = nullptr;
 std::vector<Actor*> GEngine::mActors;
@@ -59,8 +59,8 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("day23.brn");
     mAssetManager.LoadBarn("day123.brn");
     
-    //mAssetManager.WriteBarnAssetToFile("A014ED3S.6JC");
-    //mAssetManager.LoadSheep("HAL.SHP");
+    //mAssetManager.WriteBarnAssetToFile("A014ED3S.6JD");
+    //mAssetManager.WriteOutAssetsOfType("YAK");
     
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
@@ -69,13 +69,15 @@ bool GEngine::Initialize()
     mCursor = mAssetManager.LoadCursor("C_POINT.CUR");
     mCursor->Activate();
     
-    LoadStage("B25");
+    //SheepCompiler compiler;
+    //compiler.Compile("/Users/Clark/Dropbox/GK3/Assets/ArgOrder.shp");
     
-    Audio* vo = mAssetManager.LoadAudio("A014ED3S.6JC");
+    LoadScene("RC3");
     
-    //Audio* vo = mAssetManager.LoadAudio("2JLVH44Q81");
-    mAudioManager.Play(vo);
+    //Audio* vo = mAssetManager.LoadAudio("A014ED3S.6JD");
+    //mAudioManager.Play(vo);
     
+    //Yak* yak = mAssetManager.LoadYak("E014ED3S6J7.YAK");
     return true;
 }
 
@@ -114,16 +116,16 @@ void GEngine::Quit()
     mRunning = false;
 }
 
-void GEngine::LoadStage(std::string name)
+void GEngine::LoadScene(std::string name)
 {
-    if(mStage != nullptr)
+    if(mScene != nullptr)
     {
         //TODO: Deinit the current stage.
-        delete mStage;
-        mStage = nullptr;
+        delete mScene;
+        mScene = nullptr;
     }
     
-    mStage = new Stage(name, mDay, mTime);
+    mScene = new Scene(name, mDay, mTime);
 }
 
 void GEngine::ProcessInput()

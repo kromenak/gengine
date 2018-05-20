@@ -25,6 +25,8 @@ public:
     
     bool WriteToFile(const std::string assetName);
     
+    void WriteAllOfType(const std::string extension);
+    
 private:
     const int kGameIdentifier = 0x21334B47; // GK3!
     const int kBarnIdentifier = 0x6E726142; // Barn

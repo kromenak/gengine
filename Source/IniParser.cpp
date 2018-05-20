@@ -293,6 +293,7 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             else
             {
                 keyValue->key = currentKeyValuePair;
+                keyValue->value = currentKeyValuePair;
             }
         }
         currentPos = mStream->tellg();

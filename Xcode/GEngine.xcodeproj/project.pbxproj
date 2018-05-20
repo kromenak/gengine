@@ -32,8 +32,8 @@
 		4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */; };
 		4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */; };
 		4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
-		4B2E7A62203A5CB3001A5B9C /* Stage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Stage.cpp */; };
-		4B2E7A65203A6072001A5B9C /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* Scene.cpp */; };
+		4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
+		4B2E7A65203A6072001A5B9C /* SceneData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneData.cpp */; };
 		4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0918351FEEEA51002991D4 /* Matrix3.cpp */; };
 		4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
 		4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
@@ -47,7 +47,6 @@
 		4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */; };
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
-		4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */; };
 		4B79F8071F9C09F2008C6FEE /* VectorTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */; };
 		4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
@@ -147,10 +146,10 @@
 		4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = IniParser.cpp; path = ../Source/IniParser.cpp; sourceTree = "<group>"; };
 		4B2E7A5D203A0425001A5B9C /* SIF.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SIF.h; path = ../Source/SIF.h; sourceTree = "<group>"; };
 		4B2E7A5E203A0425001A5B9C /* SIF.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SIF.cpp; path = ../Source/SIF.cpp; sourceTree = "<group>"; };
-		4B2E7A60203A5CB3001A5B9C /* Stage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Stage.h; path = ../Source/Stage.h; sourceTree = "<group>"; };
-		4B2E7A61203A5CB3001A5B9C /* Stage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Stage.cpp; path = ../Source/Stage.cpp; sourceTree = "<group>"; };
-		4B2E7A63203A6072001A5B9C /* Scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Scene.h; path = ../Source/Scene.h; sourceTree = "<group>"; };
-		4B2E7A64203A6072001A5B9C /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Scene.cpp; path = ../Source/Scene.cpp; sourceTree = "<group>"; };
+		4B2E7A60203A5CB3001A5B9C /* Scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Scene.h; path = ../Source/Scene.h; sourceTree = "<group>"; };
+		4B2E7A61203A5CB3001A5B9C /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Scene.cpp; path = ../Source/Scene.cpp; sourceTree = "<group>"; };
+		4B2E7A63203A6072001A5B9C /* SceneData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SceneData.h; path = ../Source/SceneData.h; sourceTree = "<group>"; };
+		4B2E7A64203A6072001A5B9C /* SceneData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SceneData.cpp; path = ../Source/SceneData.cpp; sourceTree = "<group>"; };
 		4B4300851FB7EE44009EDE58 /* Quaternion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Quaternion.h; path = ../Source/Quaternion.h; sourceTree = "<group>"; };
 		4B4300861FB7EE44009EDE58 /* Quaternion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Quaternion.cpp; path = ../Source/Quaternion.cpp; sourceTree = "<group>"; };
 		4B4621E91FF741D800536BA6 /* Texture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Texture.h; path = ../Source/Texture.h; sourceTree = "<group>"; };
@@ -172,7 +171,6 @@
 		4B76B57B1F35999B003F63E5 /* BarnFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnFile.h; path = ../Source/Barn/BarnFile.h; sourceTree = "<group>"; };
 		4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryReader.cpp; path = ../Source/Barn/BinaryReader.cpp; sourceTree = "<group>"; };
 		4B76B57F1F35B175003F63E5 /* BinaryReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BinaryReader.h; path = ../Source/Barn/BinaryReader.h; sourceTree = "<group>"; };
-		4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnAsset.cpp; path = ../Source/Barn/BarnAsset.cpp; sourceTree = "<group>"; };
 		4B76B5821F3788FA003F63E5 /* BarnAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnAsset.h; path = ../Source/Barn/BarnAsset.h; sourceTree = "<group>"; };
 		4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VectorTests.cpp; path = ../Tests/VectorTests.cpp; sourceTree = "<group>"; };
 		4B7AB0431F539EB200CFBE8F /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Audio.cpp; path = ../Source/Audio/Audio.cpp; sourceTree = "<group>"; };
@@ -282,7 +280,6 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				4B53B0CA207B01D500663381 /* Collision */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
 				4B4621ED1FF7532A00536BA6 /* Asset.cpp */,
@@ -295,9 +292,12 @@
 				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
 				4B99229C2031735500184755 /* BSP.cpp */,
 				4B99229B2031735500184755 /* BSP.h */,
+				4B53B0CA207B01D500663381 /* Collision */,
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
 				4B1112AE1F821FFF00AFDDFC /* Component.h */,
 				4B4A0E52203C0FB300AFA382 /* Components */,
+				4B85421120A905B600DE8C0D /* Cursor.cpp */,
+				4B85421020A905B600DE8C0D /* Cursor.h */,
 				4B17D706206098B100EBD298 /* GameCamera.cpp */,
 				4B17D705206098B100EBD298 /* GameCamera.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
@@ -319,8 +319,8 @@
 				4B4EED871F5CA5F4000065EF /* Model.h */,
 				4BCBCF462043A90F001BE1E0 /* NVC.cpp */,
 				4BCBCF452043A90F001BE1E0 /* NVC.h */,
-				4B2E7A64203A6072001A5B9C /* Scene.cpp */,
-				4B2E7A63203A6072001A5B9C /* Scene.h */,
+				4B2E7A64203A6072001A5B9C /* SceneData.cpp */,
+				4B2E7A63203A6072001A5B9C /* SceneData.h */,
 				4B15A95A1F243349000A689F /* SDLLog.cpp */,
 				4B15A95B1F243349000A689F /* SDLLog.h */,
 				4B15A9541F242C55000A689F /* SDLRenderer.cpp */,
@@ -330,14 +330,12 @@
 				4B15A95D1F245BDC000A689F /* Sheep */,
 				4B2E7A5E203A0425001A5B9C /* SIF.cpp */,
 				4B2E7A5D203A0425001A5B9C /* SIF.h */,
-				4B2E7A61203A5CB3001A5B9C /* Stage.cpp */,
-				4B2E7A60203A5CB3001A5B9C /* Stage.h */,
+				4B2E7A61203A5CB3001A5B9C /* Scene.cpp */,
+				4B2E7A60203A5CB3001A5B9C /* Scene.h */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4B4621EA1FF741D800536BA6 /* Texture.cpp */,
 				4B4621E91FF741D800536BA6 /* Texture.h */,
 				4BE15CBC1F46620000114779 /* Types.h */,
-				4B85421020A905B600DE8C0D /* Cursor.h */,
-				4B85421120A905B600DE8C0D /* Cursor.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -405,7 +403,6 @@
 		4B76B57D1F3599A1003F63E5 /* Barn */ = {
 			isa = PBXGroup;
 			children = (
-				4B76B5811F3788FA003F63E5 /* BarnAsset.cpp */,
 				4B76B5821F3788FA003F63E5 /* BarnAsset.h */,
 				4B76B57A1F35999B003F63E5 /* BarnFile.cpp */,
 				4B76B57B1F35999B003F63E5 /* BarnFile.h */,
@@ -422,8 +419,8 @@
 				4B7C3A151F4EB07000BB0922 /* AudioManager.h */,
 				4BBB91B52058E53A007B9375 /* Soundtrack.cpp */,
 				4BBB91B42058E53A007B9375 /* Soundtrack.h */,
-				4B85421320A9276200DE8C0D /* Yak.h */,
 				4B85421420A9276200DE8C0D /* Yak.cpp */,
+				4B85421320A9276200DE8C0D /* Yak.h */,
 			);
 			name = Audio;
 			sourceTree = "<group>";
@@ -431,12 +428,12 @@
 		4B85420F20A7C11C00DE8C0D /* FlexBison */ = {
 			isa = PBXGroup;
 			children = (
-				4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */,
 				4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */,
 				4B2ACE071F25C20B003EC7FE /* location.hh */,
 				4B2ACE081F25C20B003EC7FE /* position.hh */,
 				4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */,
 				4B2ACE0A1F25C20B003EC7FE /* sheep.tab.hh */,
+				4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */,
 				4B2ACE061F25C1FB003EC7FE /* stack.hh */,
 			);
 			name = FlexBison;
@@ -602,7 +599,7 @@
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
-				4B2E7A62203A5CB3001A5B9C /* Stage.cpp in Sources */,
+				4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */,
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,
@@ -619,13 +616,12 @@
 				4B09182E1FEED84D002991D4 /* Services.cpp in Sources */,
 				4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */,
 				4B7C3A161F4EB07000BB0922 /* AudioManager.cpp in Sources */,
-				4B76B5831F3788FA003F63E5 /* BarnAsset.cpp in Sources */,
 				4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
-				4B2E7A65203A6072001A5B9C /* Scene.cpp in Sources */,
+				4B2E7A65203A6072001A5B9C /* SceneData.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,

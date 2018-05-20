@@ -32,6 +32,8 @@ class NVC : public Asset
 public:
     NVC(std::string name, char* data, int dataLength);
     
+    NVCItem* GetNVC(std::string noun, std::string verb);
+    
 private:
     void ParseFromData(char* data, int dataLength);
     

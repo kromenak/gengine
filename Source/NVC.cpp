@@ -13,6 +13,26 @@ NVC::NVC(std::string name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
+NVCItem* NVC::GetNVC(std::string noun, std::string verb)
+{
+    // See if we have an entry for this noun. If not, we're done.
+    auto it = mNounToItems.find(noun);
+    if(it == mNounToItems.end()) { return nullptr; }
+    
+    // See if we have an item with the given verb.
+    std::vector<NVCItem> items = mNounToItems[noun];
+    for(auto& item : items)
+    {
+        if(item.verb == verb)
+        {
+            return &item;
+        }
+    }
+    
+    // Found no matching verb entry.
+    return nullptr;
+}
+
 void NVC::ParseFromData(char *data, int dataLength)
 {
     IniParser parser(data, dataLength);

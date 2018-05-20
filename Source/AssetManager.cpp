@@ -130,6 +130,14 @@ void AssetManager::WriteBarnAssetToFile(std::string assetName)
     }
 }
 
+void AssetManager::WriteOutAssetsOfType(std::string extension)
+{
+    for(auto& entry : mLoadedBarns)
+    {
+        entry.second->WriteAllOfType(extension);
+    }
+}
+
 Audio* AssetManager::LoadAudio(string name)
 {
     return LoadAsset<Audio>(name, &mLoadedAudios);
@@ -138,6 +146,11 @@ Audio* AssetManager::LoadAudio(string name)
 Soundtrack* AssetManager::LoadSoundtrack(string name)
 {
     return LoadAsset<Soundtrack>(name, nullptr);
+}
+
+Yak* AssetManager::LoadYak(string name)
+{
+    return LoadAsset<Yak>(name, nullptr);
 }
 
 Model* AssetManager::LoadModel(string name)
@@ -155,9 +168,9 @@ SIF* AssetManager::LoadSIF(string name)
     return LoadAsset<SIF>(name, nullptr);
 }
 
-Scene* AssetManager::LoadScene(string name)
+SceneData* AssetManager::LoadScene(string name)
 {
-    return LoadAsset<Scene>(name, nullptr);
+    return LoadAsset<SceneData>(name, nullptr);
 }
 
 NVC* AssetManager::LoadNVC(string name)

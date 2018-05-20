@@ -414,3 +414,14 @@ bool BarnFile::WriteToFile(const std::string assetName)
     delete[] assetData;
     return result;
 }
+
+void BarnFile::WriteAllOfType(const std::string extension)
+{
+    for(auto& entry : mAssetMap)
+    {
+        if(entry.first.find(extension) != std::string::npos)
+        {
+            WriteToFile(entry.first);
+        }
+    }
+}

@@ -5,7 +5,8 @@
 //
 #include "GameCamera.h"
 #include "CameraComponent.h"
-#include "BSP.h"
+#include "GEngine.h"
+#include "Scene.h"
 #include "MeshComponent.h"
 #include "SheepCompiler.h"
 
@@ -65,8 +66,11 @@ void GameCamera::Update(float deltaTime)
             Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
             Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
             Vector3 dir = (worldPos2 - worldPos).Normalize();
-            
             Ray ray(worldPos, dir);
+            
+            GEngine::inst->GetScene()->Interact(ray);
+            
+            /*
             std::string* name = BSP::inst->Intersects(ray);
             if(name == nullptr)
             {
@@ -76,6 +80,7 @@ void GameCamera::Update(float deltaTime)
             {
                 std::cout << *name << std::endl;
             }
+            */
         }
     }
     

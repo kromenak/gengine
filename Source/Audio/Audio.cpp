@@ -9,7 +9,7 @@
 #include <fstream>
 #include "BinaryReader.h"
 
-const ushort kMp3Format = 0x0055;
+//const ushort kMp3Format = 0x0055;
 
 Audio::Audio(std::string name, char* data, int dataLength) :
     Asset(name),
@@ -118,5 +118,4 @@ void Audio::ParseFromData(char* data, int dataLength)
     //std::cout << "Data chunk size is " << dataChunkSize << std::endl;
     
     mDuration = dataChunkSize / byteRate;
-    //std::cout << "Duration is " << mDuration << std::endl;
 }

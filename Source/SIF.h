@@ -22,10 +22,10 @@ class Model;
 class NVC;
 class Soundtrack;
 
-struct SceneCamera
+struct SceneCameraData
 {
     // The label for this camera.
-    // This can be an identifier, or (for inspect camera) the noun/model associated.
+    // This can be an identifier, or (for an inspect camera) the noun/model associated.
     std::string label;
     
     // Camera's angle - yaw and pitch.
@@ -35,7 +35,7 @@ struct SceneCamera
     Vector3 position;
 };
 
-struct DialogueCamera : public SceneCamera
+struct DialogueSceneCameraData : public SceneCameraData
 {
     // Specifies name of dialogue for which this camera is used.
     std::string dialogueName;
@@ -51,7 +51,7 @@ struct DialogueCamera : public SceneCamera
     bool isFinal = false;
 };
 
-struct ScenePosition
+struct ScenePositionData
 {
     // Identifier for this position.
     std::string label;
@@ -64,10 +64,10 @@ struct ScenePosition
     float heading = -1.0f;
     
     // If specified, this camera will be switched to when using this position.
-    SceneCamera* camera = nullptr;
+    SceneCameraData* camera = nullptr;
 };
 
-struct SceneRegionOrTrigger
+struct SceneRegionOrTriggerData
 {
     // A region and trigger only vary in that the label for a
     // trigger is a "noun".
@@ -77,7 +77,7 @@ struct SceneRegionOrTrigger
     float x1, z1, x2, z2;
 };
 
-struct SceneSkybox
+struct SceneSkyboxData
 {
     Texture* leftTexture = nullptr;
     Texture* rightTexture = nullptr;
@@ -87,7 +87,7 @@ struct SceneSkybox
     Texture* downTexture = nullptr;
 };
 
-struct ActorDefinition
+struct SceneActorData
 {
     // The model that will represent this actor in the scene.
     Model* model = nullptr;
@@ -98,7 +98,7 @@ struct ActorDefinition
     // Initial position of the actor in the scene.
     // We'll place the actor here, but this might be overwritten
     // after scene init - maybe due to a Sheep script or something.
-    ScenePosition* position = nullptr;
+    ScenePositionData* position = nullptr;
     
     // IDLE GAS FILE
     // TALK GAS FILE
@@ -111,7 +111,7 @@ struct ActorDefinition
     bool ego = false;
 };
 
-struct ModelDefinition
+struct SceneModelData
 {
     enum class Type
     {
@@ -157,23 +157,16 @@ public:
     
     std::string GetSCNName() { return mSceneAssetName; }
     
-    std::vector<ActorDefinition*> GetActorDefinitions() { return mActorDefinitions; }
+    std::vector<SceneActorData*> GetSceneActorDatas() { return mSceneActorDatas; }
+    std::vector<SceneModelData*> GetSceneModelDatas() { return mSceneModelDatas; }
     
-    SceneCamera* GetDefaultRoomCamera() { return mRoomCameras[mDefaultRoomCameraIndex]; }
+    SceneCameraData* GetDefaultRoomCamera() { return mRoomCameras[mDefaultRoomCameraIndex]; }
     
-    ScenePosition* GetPosition(std::string positionName)
-    {
-        for(int i = 0; i < mPositions.size(); i++)
-        {
-            if(mPositions[i]->label == positionName)
-            {
-                return mPositions[i];
-            }
-        }
-        return nullptr;
-    }
+    ScenePositionData* GetPosition(std::string positionName);
     
     std::vector<Soundtrack*> GetSoundtracks() { return mSoundtracks; }
+    
+    std::vector<NVC*> GetNounVerbCases() { return mNVCs; }
     
 private:
     // Name of the Scene asset that is used in conjunction with this SIF.
@@ -200,29 +193,29 @@ private:
     Vector3 mGlobalLightAmbient = Vector3(0.3f, 0.3f, 0.3f);
     
     // SKYBOX
-    SceneSkybox mSkybox;
+    SceneSkyboxData mSkybox;
     
     // ACTORS
-    std::vector<ActorDefinition*> mActorDefinitions;
+    std::vector<SceneActorData*> mSceneActorDatas;
     
     // MODELS
-    std::vector<ModelDefinition*> mModelDefinitions;
+    std::vector<SceneModelData*> mSceneModelDatas;
     
     // CAMERAS
-    std::vector<SceneCamera*> mInspectCameras;
+    std::vector<SceneCameraData*> mInspectCameras;
     
-    std::vector<SceneCamera*> mRoomCameras;
+    std::vector<SceneCameraData*> mRoomCameras;
     int mDefaultRoomCameraIndex = 0;
     
-    std::vector<SceneCamera*> mCinematicCameras;
-    std::vector<DialogueCamera*> mDialogueCameras;
+    std::vector<SceneCameraData*> mCinematicCameras;
+    std::vector<DialogueSceneCameraData*> mDialogueSceneCameraDatas;
     
     // POSITIONS
-    std::vector<ScenePosition*> mPositions;
+    std::vector<ScenePositionData*> mPositions;
     
     // REGIONS & TRIGGERS
-    std::vector<SceneRegionOrTrigger*> mRegions;
-    std::vector<SceneRegionOrTrigger*> mTriggers;
+    std::vector<SceneRegionOrTriggerData*> mRegions;
+    std::vector<SceneRegionOrTriggerData*> mTriggers;
     
     // AMBIENT
     std::vector<Soundtrack*> mSoundtracks;

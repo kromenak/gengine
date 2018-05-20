@@ -14,6 +14,18 @@ SIF::SIF(std::string name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
+ScenePositionData* SIF::GetPosition(std::string positionName)
+{
+    for(int i = 0; i < mPositions.size(); i++)
+    {
+        if(mPositions[i]->label == positionName)
+        {
+            return mPositions[i];
+        }
+    }
+    return nullptr;
+}
+
 void SIF::ParseFromData(char *data, int dataLength)
 {
     IniParser parser(data, dataLength);
@@ -119,7 +131,7 @@ void SIF::ParseFromData(char *data, int dataLength)
         //TODO: Check condition?
         for(auto& entry : section.entries)
         {
-            SceneCamera* camera = new SceneCamera();
+            SceneCameraData* camera = new SceneCameraData();
             IniKeyValue* keyValue = entry;
             while(keyValue != nullptr)
             {
@@ -150,7 +162,7 @@ void SIF::ParseFromData(char *data, int dataLength)
         //TODO: Check condition?
         for(auto& entry : section.entries)
         {
-            SceneCamera* camera = new SceneCamera();
+            SceneCameraData* camera = new SceneCameraData();
             camera->label = entry->key;
             
             IniKeyValue* keyValue = entry->next;
@@ -183,7 +195,7 @@ void SIF::ParseFromData(char *data, int dataLength)
         //TODO: Check condition?
         for(auto& entry : section.entries)
         {
-            SceneCamera* camera = new SceneCamera();
+            SceneCameraData* camera = new SceneCameraData();
             camera->label = entry->key;
             
             IniKeyValue* keyValue = entry->next;
@@ -205,13 +217,13 @@ void SIF::ParseFromData(char *data, int dataLength)
         }
     }
     
-    std::vector<IniSection> dialogueCameras = parser.GetSections("DIALOGUE_CAMERAS");
-    for(auto& section : dialogueCameras)
+    std::vector<IniSection> DialogueSceneCameraDatas = parser.GetSections("DIALOGUE_CAMERAS");
+    for(auto& section : DialogueSceneCameraDatas)
     {
         //TODO: Check condition?
         for(auto& entry : section.entries)
         {
-            DialogueCamera* camera = new DialogueCamera();
+            DialogueSceneCameraData* camera = new DialogueSceneCameraData();
             camera->label = entry->key;
             
             IniKeyValue* keyValue = entry->next;
@@ -245,7 +257,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 keyValue = keyValue->next;
             }
-            mDialogueCameras.push_back(camera);
+            mDialogueSceneCameraDatas.push_back(camera);
         }
     }
     
@@ -257,7 +269,7 @@ void SIF::ParseFromData(char *data, int dataLength)
         for(auto& entry : section.entries)
         {
             // First pair is always the identifier.
-            ScenePosition* position = new ScenePosition();
+            ScenePositionData* position = new ScenePositionData();
             position->label = entry->key;
             
             // Remaining pairs are optional and in any order.
@@ -296,7 +308,7 @@ void SIF::ParseFromData(char *data, int dataLength)
         //TODO: Check condition?
         for(auto& entry : section.entries)
         {
-            ActorDefinition* actor = new ActorDefinition();
+            SceneActorData* actor = new SceneActorData();
             IniKeyValue* keyValue = entry;
             while(keyValue != nullptr)
             {
@@ -351,7 +363,7 @@ void SIF::ParseFromData(char *data, int dataLength)
             {
                 actor->position = mPositions[0];
             }
-            mActorDefinitions.push_back(actor);
+            mSceneActorDatas.push_back(actor);
         }
     }
     
@@ -362,15 +374,14 @@ void SIF::ParseFromData(char *data, int dataLength)
         //TODO: Check condition?
         for(auto& entry : section.entries)
         {
-            ModelDefinition* model = new ModelDefinition();
-            std::string modelName;
+            SceneModelData* model = new SceneModelData();
             
             IniKeyValue* keyValue = entry;
             while(keyValue != nullptr)
             {
                 if(keyValue->key == "model")
                 {
-                    modelName = keyValue->value;
+                    model->name = keyValue->value;
                 }
                 else if(keyValue->key == "noun")
                 {
@@ -380,19 +391,19 @@ void SIF::ParseFromData(char *data, int dataLength)
                 {
                     if(keyValue->value == "scene")
                     {
-                        model->type = ModelDefinition::Type::Scene;
+                        model->type = SceneModelData::Type::Scene;
                     }
                     else if(keyValue->value == "prop")
                     {
-                        model->type = ModelDefinition::Type::Prop;
+                        model->type = SceneModelData::Type::Prop;
                     }
                     else if(keyValue->value == "hittest")
                     {
-                        model->type = ModelDefinition::Type::HitTest;
+                        model->type = SceneModelData::Type::HitTest;
                     }
                     else if(keyValue->value == "gasprop")
                     {
-                        model->type = ModelDefinition::Type::GasProp;
+                        model->type = SceneModelData::Type::GasProp;
                     }
                 }
                 else if(keyValue->key == "verb")
@@ -416,13 +427,13 @@ void SIF::ParseFromData(char *data, int dataLength)
             
             // After parsing all the data, if this is a prop, load the model.
             // For non-props, we don't load a model - the model is baked into the BSP.
-            if(!modelName.empty() &&
-               (model->type == ModelDefinition::Type::Prop ||
-                model->type == ModelDefinition::Type::GasProp))
+            if(!model->name.empty() &&
+               (model->type == SceneModelData::Type::Prop ||
+                model->type == SceneModelData::Type::GasProp))
             {
-                model->model = Services::GetAssets()->LoadModel(modelName + ".MOD");
+                model->model = Services::GetAssets()->LoadModel(model->name + ".MOD");
             }
-            mModelDefinitions.push_back(model);
+            mSceneModelDatas.push_back(model);
         }
     }
     
@@ -433,7 +444,7 @@ void SIF::ParseFromData(char *data, int dataLength)
         //TODO: Check condition?
         for(auto& entry : section.entries)
         {
-            SceneRegionOrTrigger* region = new SceneRegionOrTrigger();
+            SceneRegionOrTriggerData* region = new SceneRegionOrTriggerData();
             region->label = entry->key;
             
             IniKeyValue* keyValue = entry->next;
@@ -455,7 +466,7 @@ void SIF::ParseFromData(char *data, int dataLength)
         //TODO: Check condition?
         for(auto& entry : section.entries)
         {
-            SceneRegionOrTrigger* region = new SceneRegionOrTrigger();
+            SceneRegionOrTriggerData* region = new SceneRegionOrTriggerData();
             
             IniKeyValue* keyValue = entry;
             while(keyValue != nullptr)

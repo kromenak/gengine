@@ -5,7 +5,8 @@
 //
 #include "SheepAPI.h"
 #include "GEngine.h"
-#include "Stage.h"
+#include "Scene.h"
+#include "Services.h"
 
 std::map<std::string, Value (*)(const Value&)> map1;
 std::map<std::string, Value (*)(const Value&, const Value&)> map2;
@@ -41,11 +42,10 @@ void InitSysImports()
     AddSysImport("StartVoiceOver", 0, { 3, 1 });
 }
 
-
 // ACTORS
 shpvoid InitEgoPosition(std::string positionName)
 {
-    GEngine::inst->GetStage()->InitEgoPosition(positionName);
+    GEngine::inst->GetScene()->InitEgoPosition(positionName);
     return 0;
 }
 RegFunc1(InitEgoPosition, std::string);
@@ -53,7 +53,9 @@ RegFunc1(InitEgoPosition, std::string);
 // ANIMATION AND DIALOGUE
 shpvoid StartVoiceOver(std::string dialogueName, int numLines)
 {
-    std::cout << "Start dialogue " << dialogueName << std::endl;
+    std::string yakName = "E" + dialogueName + ".YAK";
+    Yak* yak = Services::GetAssets()->LoadYak(yakName);
+    yak->Play(numLines);
     return 0;
 }
 RegFunc2(StartVoiceOver, std::string, int);

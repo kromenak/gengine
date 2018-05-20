@@ -13,9 +13,10 @@
 #include "Texture.h"
 #include "BSP.h"
 #include "SIF.h"
-#include "Scene.h"
+#include "SceneData.h"
 #include "NVC.h"
 #include "Soundtrack.h"
+#include "Yak.h"
 #include "Cursor.h"
 #include "Sheep/SheepScript.h"
 
@@ -34,15 +35,17 @@ public:
     BarnFile* GetBarn(string barnName);
     BarnFile* GetBarnContainingAsset(string assetName);
     void WriteBarnAssetToFile(string assetName);
+    void WriteOutAssetsOfType(string extension);
     
     Audio* LoadAudio(string name);
     Soundtrack* LoadSoundtrack(string name);
+    Yak* LoadYak(string name);
     
     Model* LoadModel(string name);
     Texture* LoadTexture(string name);
     
     SIF* LoadSIF(string name);
-    Scene* LoadScene(string name);
+    SceneData* LoadScene(string name);
     NVC* LoadNVC(string name);
     BSP* LoadBSP(string name);
     

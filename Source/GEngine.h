@@ -12,7 +12,7 @@
 #include <vector>
 
 class Actor;
-class Stage;
+class Scene;
 class Cursor;
 
 class GEngine
@@ -30,8 +30,8 @@ public:
     
     void Quit();
     
-    void LoadStage(std::string name);
-    Stage* GetStage() { return mStage; }
+    void LoadScene(std::string name);
+    Scene* GetScene() { return mScene; }
     
 private:
     // A list of all actors that currently exist in the game.
@@ -46,8 +46,8 @@ private:
     AssetManager mAssetManager;
     InputManager mInputManager;
     
-    // The currently active stage. There can be only one at a time.
-    Stage* mStage = nullptr;
+    // The currently active scene. There can be only one at a time.
+    Scene* mScene = nullptr;
     
     Cursor* mCursor = nullptr;
     
