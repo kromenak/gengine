@@ -28,6 +28,8 @@ public:
     unsigned int GetHeight() { return mHeight; }
     unsigned char* GetPixelData() const { return mPixels; }
     
+    void WriteToFile(std::string filePath);
+    
 private:
     // Texture width and height.
     unsigned int mWidth = 0;
