@@ -58,6 +58,16 @@ void GameCamera::Update(float deltaTime)
         Rotate(Vector3::UnitY, kCameraRotationSpeed * deltaTime);
     }
     
+    // Rotate up and down movement.
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_C))
+    {
+        Rotate(GetRight(), -kCameraRotationSpeed * deltaTime);
+    }
+    else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_Z))
+    {
+        Rotate(GetRight(), kCameraRotationSpeed * deltaTime);
+    }
+    
     if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))
     {
         if(mCamera != nullptr)

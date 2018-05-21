@@ -52,6 +52,11 @@ public:
         return mRotation.Rotate(Vector3::UnitZ);
     }
     
+    Vector3 GetRight() const
+    {
+        return mRotation.Rotate(Vector3::UnitX);
+    }
+    
 private:
     // A parent actor, if any.
     Actor* mParent = nullptr;
