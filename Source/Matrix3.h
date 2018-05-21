@@ -71,7 +71,7 @@ public:
     // Data accessors for graphics APIs.
     operator float*() { return mVals; }
     operator const float*() const { return mVals; }
-    const float* GetFloatPtr() { return mVals; }
+    const float* GetFloatPtr() const { return mVals; }
     
     // Factory methods for generating certain types of matrices.
     static Matrix3 MakeRotateX(float rotX);
