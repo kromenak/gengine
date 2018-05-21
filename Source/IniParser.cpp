@@ -133,7 +133,7 @@ std::vector<IniSection> IniParser::GetSections(std::string name)
     std::vector<IniSection> toReturn;
     for(auto& section : mSections)
     {
-        if(section.name == name)
+        if(StringUtil::EqualsIgnoreCase(section.name, name))
         {
             toReturn.push_back(section);
         }
