@@ -4,13 +4,13 @@
 //
 //  Created by Clark Kromenaker on 8/4/17.
 //
-
 #include "BarnFile.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include "minilzo.h"
 #include "zlib.h"
+#include "Texture.h"
 
 using namespace std;
 
@@ -398,19 +398,35 @@ bool BarnFile::WriteToFile(const std::string assetName)
     char* assetData = new char[asset->uncompressedSize];
     if(Extract(assetName, assetData, asset->uncompressedSize))
     {
-        ofstream fileStream(asset->name);
-        if(fileStream.good())
+        // Textures can't be written directly to file and open correctly.
+        // Handle those separately (TODO: More modular/extenable way to do this?)
+        if(assetName.find(".BMP") != std::string::npos)
         {
-            fileStream.write(assetData, asset->uncompressedSize);
-            fileStream.close();
-            cout << "Wrote out " << asset->name << endl;
+            Texture tex(assetName, assetData, asset->uncompressedSize);
+            tex.WriteToFile(assetName);
             result = true;
         }
+        else
+        {
+            ofstream fileStream(asset->name);
+            if(fileStream.good())
+            {
+                fileStream.write(assetData, asset->uncompressedSize);
+                fileStream.close();
+                result = true;
+            }
+        }
+    }
+    
+    if(result == true)
+    {
+        cout << "Wrote out " << asset->name << endl;
     }
     else
     {
-        cout << "Error while extracting uncompressed asset." << endl;
+        cout << "Error while extracting asset." << endl;
     }
+    
     delete[] assetData;
     return result;
 }
