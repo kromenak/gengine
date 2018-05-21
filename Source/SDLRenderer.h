@@ -16,6 +16,7 @@ class CameraComponent;
 class MeshComponent;
 class Model;
 class BSP;
+class Skybox;
 
 class SDLRenderer
 {
@@ -39,6 +40,8 @@ public:
     void RemoveMeshComponent(MeshComponent* mc);
     
     void SetBSP(BSP* bsp) { mBSP = bsp; }
+    
+    void SetSkybox(Skybox* skybox) { mSkybox = skybox; }
     
     GLShader* GetShader() { return mShader; }
     
@@ -65,5 +68,12 @@ private:
     // List of mesh components to render.
     std::vector<MeshComponent*> mMeshComponents;
     
+    // A BSP to render.
     BSP* mBSP = nullptr;
+    
+    // A skybox to render.
+    Skybox* mSkybox = nullptr;
+    
+    // Skybox shader.
+    GLShader* mSkyboxShader = nullptr;
 };

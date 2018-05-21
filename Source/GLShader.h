@@ -7,7 +7,10 @@
 //
 
 #pragma once
+#include <string>
 #include <GL/glew.h>
+
+class Matrix4;
 
 class GLShader
 {
@@ -21,6 +24,8 @@ public:
     GLuint GetProgram() { return mProgram; }
     
     void Activate();
+    
+    void SetUniformMatrix4(const char* name, const Matrix4& mat);
     
 private:
     GLuint LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType);

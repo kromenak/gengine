@@ -62,6 +62,8 @@
 		4BCF4B26205672400045EDC8 /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB8282B205665750054625A /* SDL2_mixer.framework */; };
 		4BD4CCE41FF1F5F5009665C7 /* MeshComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshComponent.cpp */; };
 		4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */; };
+		4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673CB20B1119E00795582 /* Skybox.cpp */; };
+		4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D020B2555E00795582 /* BinaryWriter.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
 		4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6EE331F441DC600BB29D5 /* minilzo.c */; };
 		4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE75D32208D7E7B007031A3 /* SheepVM.cpp */; };
@@ -195,6 +197,12 @@
 		4BD4CCE31FF1F5F5009665C7 /* MeshComponent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MeshComponent.cpp; path = ../Source/MeshComponent.cpp; sourceTree = "<group>"; };
 		4BD4CCE51FF1F7E3009665C7 /* Mesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Mesh.h; path = ../Source/Mesh.h; sourceTree = "<group>"; };
 		4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Mesh.cpp; path = ../Source/Mesh.cpp; sourceTree = "<group>"; };
+		4BD673CA20B1119E00795582 /* Skybox.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Skybox.h; path = ../Source/Skybox.h; sourceTree = "<group>"; };
+		4BD673CB20B1119E00795582 /* Skybox.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Skybox.cpp; path = ../Source/Skybox.cpp; sourceTree = "<group>"; };
+		4BD673CD20B239CD00795582 /* 3D-Skybox.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Skybox.vert"; path = "../Assets/3D-Skybox.vert"; sourceTree = "<group>"; };
+		4BD673CE20B23B8800795582 /* 3D-Skybox.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Skybox.frag"; path = "../Assets/3D-Skybox.frag"; sourceTree = "<group>"; };
+		4BD673CF20B2555E00795582 /* BinaryWriter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BinaryWriter.h; path = ../Source/BinaryWriter.h; sourceTree = "<group>"; };
+		4BD673D020B2555E00795582 /* BinaryWriter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryWriter.cpp; path = ../Source/BinaryWriter.cpp; sourceTree = "<group>"; };
 		4BD9C7DC1F95D1D80066DC89 /* Math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Math.h; path = ../Source/Math.h; sourceTree = "<group>"; };
 		4BE15CB61F464FD800114779 /* AssetManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AssetManager.cpp; path = ../Source/AssetManager.cpp; sourceTree = "<group>"; };
 		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
@@ -241,6 +249,8 @@
 			children = (
 				4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */,
 				4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */,
+				4BD673CE20B23B8800795582 /* 3D-Skybox.frag */,
+				4BD673CD20B239CD00795582 /* 3D-Skybox.vert */,
 			);
 			name = Assets;
 			sourceTree = "<group>";
@@ -290,8 +300,8 @@
 				4B76B57D1F3599A1003F63E5 /* Barn */,
 				4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */,
 				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
-				4B99229C2031735500184755 /* BSP.cpp */,
-				4B99229B2031735500184755 /* BSP.h */,
+				4BD673D020B2555E00795582 /* BinaryWriter.cpp */,
+				4BD673CF20B2555E00795582 /* BinaryWriter.h */,
 				4B53B0CA207B01D500663381 /* Collision */,
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
 				4B1112AE1F821FFF00AFDDFC /* Component.h */,
@@ -317,10 +327,7 @@
 				4BD4CCE51FF1F7E3009665C7 /* Mesh.h */,
 				4B4EED861F5CA5F4000065EF /* Model.cpp */,
 				4B4EED871F5CA5F4000065EF /* Model.h */,
-				4BCBCF462043A90F001BE1E0 /* NVC.cpp */,
-				4BCBCF452043A90F001BE1E0 /* NVC.h */,
-				4B2E7A64203A6072001A5B9C /* SceneData.cpp */,
-				4B2E7A63203A6072001A5B9C /* SceneData.h */,
+				4BD673C920B10EB200795582 /* Scene */,
 				4B15A95A1F243349000A689F /* SDLLog.cpp */,
 				4B15A95B1F243349000A689F /* SDLLog.h */,
 				4B15A9541F242C55000A689F /* SDLRenderer.cpp */,
@@ -328,10 +335,8 @@
 				4B09182D1FEED84D002991D4 /* Services.cpp */,
 				4B09182C1FEED84D002991D4 /* Services.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
-				4B2E7A5E203A0425001A5B9C /* SIF.cpp */,
-				4B2E7A5D203A0425001A5B9C /* SIF.h */,
-				4B2E7A61203A5CB3001A5B9C /* Scene.cpp */,
-				4B2E7A60203A5CB3001A5B9C /* Scene.h */,
+				4BD673CB20B1119E00795582 /* Skybox.cpp */,
+				4BD673CA20B1119E00795582 /* Skybox.h */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4B4621EA1FF741D800536BA6 /* Texture.cpp */,
 				4B4621E91FF741D800536BA6 /* Texture.h */,
@@ -450,6 +455,23 @@
 				4B4B4ADE2091B5A000391827 /* Value.h */,
 			);
 			name = STD;
+			sourceTree = "<group>";
+		};
+		4BD673C920B10EB200795582 /* Scene */ = {
+			isa = PBXGroup;
+			children = (
+				4B99229C2031735500184755 /* BSP.cpp */,
+				4B99229B2031735500184755 /* BSP.h */,
+				4BCBCF462043A90F001BE1E0 /* NVC.cpp */,
+				4BCBCF452043A90F001BE1E0 /* NVC.h */,
+				4B2E7A61203A5CB3001A5B9C /* Scene.cpp */,
+				4B2E7A60203A5CB3001A5B9C /* Scene.h */,
+				4B2E7A64203A6072001A5B9C /* SceneData.cpp */,
+				4B2E7A63203A6072001A5B9C /* SceneData.h */,
+				4B2E7A5E203A0425001A5B9C /* SIF.cpp */,
+				4B2E7A5D203A0425001A5B9C /* SIF.h */,
+			);
+			name = Scene;
 			sourceTree = "<group>";
 		};
 		4BE6EE351F441DD100BB29D5 /* Libraries */ = {
@@ -603,6 +625,7 @@
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,
+				4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
 				4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */,
@@ -635,6 +658,7 @@
 				4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */,
 				4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
+				4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */,
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
 				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,

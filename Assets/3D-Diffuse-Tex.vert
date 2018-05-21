@@ -21,6 +21,5 @@ void main()
     fUV1 = vUV1;
     
     // Transform position obj->world->view->proj
-    vec4 newPos = uViewProj * uWorldTransform * vec4(vPos, 1.0f);
-    gl_Position = newPos;
+    gl_Position = uViewProj * uWorldTransform * vec4(vPos, 1.0f);
 }

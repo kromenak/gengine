@@ -3,12 +3,12 @@
 //
 // Clark Kromenaker
 //
-
 #include "GLShader.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include "Matrix4.h"
 
 GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
 {
@@ -64,6 +64,12 @@ bool GLShader::IsGood()
 void GLShader::Activate()
 {
     glUseProgram(mProgram);
+}
+
+void GLShader::SetUniformMatrix4(const char* name, const Matrix4& mat)
+{
+    GLuint loc = glGetUniformLocation(mProgram, name);
+    glUniformMatrix4fv(loc, 1, GL_FALSE, mat.GetFloatPtr());
 }
 
 GLuint GLShader::LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType)

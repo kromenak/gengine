@@ -21,6 +21,14 @@ Matrix4 CameraComponent::GetLookAtMatrix()
     return lookAtMat;
 }
 
+Matrix4 CameraComponent::GetLookAtMatrixNoTranslate()
+{
+    Vector3 lookAt = mOwner->GetForward() * 5.0f;
+    Vector3 up = Vector3::UnitY;
+    Matrix4 lookAtMat = MakeLookAt(Vector3::Zero, lookAt, up);
+    return lookAtMat;
+}
+
 Matrix4 CameraComponent::GetProjectionMatrix()
 {
     Matrix4 projMat = Matrix4::MakePerspective(fovAngleRad, 1.333f,

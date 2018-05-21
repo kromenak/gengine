@@ -33,6 +33,18 @@ Scene::Scene(std::string name, int day, int hour) :
     mSceneBSP = Services::GetAssets()->LoadBSP(mSceneData->GetBSPName() + ".BSP");
     Services::GetRenderer()->SetBSP(mSceneBSP);
     
+    // Figure out if we have a skybox, and set it to be rendered.
+    mSkybox = mSceneData->GetSkybox();
+    if(mSkybox == nullptr)
+    {
+        mSkybox = mSpecificSIF->GetSkybox();
+    }
+    if(mSkybox == nullptr)
+    {
+        mSkybox = mGeneralSIF->GetSkybox();
+    }
+    Services::GetRenderer()->SetSkybox(mSkybox);
+    
     // Create camera and position it at the the default position and heading.
     SceneCameraData* defaultRoomCamera = mGeneralSIF->GetDefaultRoomCamera();
     mCamera = new GameCamera();

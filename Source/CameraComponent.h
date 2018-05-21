@@ -13,6 +13,7 @@ public:
     CameraComponent(Actor* owner);
     
     Matrix4 GetLookAtMatrix();
+    Matrix4 GetLookAtMatrixNoTranslate();
     Matrix4 GetProjectionMatrix();
     
     Vector3 ScreenToWorldPoint(const Vector2& screenPoint, float distance);

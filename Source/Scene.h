@@ -15,6 +15,7 @@ class BSP;
 class Actor;
 class GameCamera;
 class Ray;
+class Skybox;
 
 class Scene
 {
@@ -41,6 +42,9 @@ private:
     
     // The BSP we'll use to render this scene's geometry.
     BSP* mSceneBSP = nullptr;
+    
+    // The skybox this scene uses. Taken from either the SIF or SCN files.
+    Skybox* mSkybox = nullptr;
     
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;

@@ -11,6 +11,8 @@
 #pragma once
 #include "Asset.h"
 
+class Skybox;
+
 class SceneData : public Asset
 {
 public:
@@ -18,8 +20,14 @@ public:
     
     std::string GetBSPName();
     
+    Skybox* GetSkybox() { return mSkybox; }
+    
 private:
+    // Often, the BSP name is equal to the SCN name. But if not, it's here.
     std::string mBSPNameOverride;
+    
+    // A skybox to use for the scene. This might also be specified in the SIF.
+    Skybox* mSkybox = nullptr;
     
     void ParseFromData(char* data, int dataLength);
 };

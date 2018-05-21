@@ -8,6 +8,7 @@
 #include <iostream>
 #include "StringUtil.h"
 #include "Services.h"
+#include "Skybox.h"
 
 SIF::SIF(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -92,31 +93,33 @@ void SIF::ParseFromData(char *data, int dataLength)
             else if(keyValue->key == "skybox")
             {
                 keyValue = keyValue->next;
+                
+                mSkybox = new Skybox();
                 while(keyValue != nullptr)
                 {
                     if(keyValue->key == "left")
                     {
-                        mSkybox.leftTexture = Services::GetAssets()->LoadTexture(keyValue->value + ".BMP");
+                        mSkybox->SetLeftTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
                     }
                     else if(keyValue->key == "right")
                     {
-                        mSkybox.rightTexture = Services::GetAssets()->LoadTexture(keyValue->value + ".BMP");
+                        mSkybox->SetRightTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
                     }
                     else if(keyValue->key == "front")
                     {
-                        mSkybox.frontTexture = Services::GetAssets()->LoadTexture(keyValue->value + ".BMP");
+                        mSkybox->SetFrontTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
                     }
                     else if(keyValue->key == "back")
                     {
-                        mSkybox.backTexture = Services::GetAssets()->LoadTexture(keyValue->value + ".BMP");
+                        mSkybox->SetBackTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
                     }
                     else if(keyValue->key == "up")
                     {
-                        mSkybox.upTexture = Services::GetAssets()->LoadTexture(keyValue->value + ".BMP");
+                        mSkybox->SetUpTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
                     }
                     else if(keyValue->key == "down")
                     {
-                        mSkybox.downTexture = Services::GetAssets()->LoadTexture(keyValue->value + ".BMP");
+                        mSkybox->SetDownTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
                     }
                     keyValue = keyValue->next;
                 }

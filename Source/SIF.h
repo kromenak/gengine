@@ -12,15 +12,17 @@
 // In-memory representation of .SIF files.
 //
 #pragma once
+#include <vector>
+
 #include "Asset.h"
 #include "Vector2.h"
 #include "Vector3.h"
-#include <vector>
 
 class Texture;
 class Model;
 class NVC;
 class Soundtrack;
+class Skybox;
 
 struct SceneCameraData
 {
@@ -75,16 +77,6 @@ struct SceneRegionOrTriggerData
     
     //TODO: Need a Rect structure.
     float x1, z1, x2, z2;
-};
-
-struct SceneSkyboxData
-{
-    Texture* leftTexture = nullptr;
-    Texture* rightTexture = nullptr;
-    Texture* frontTexture = nullptr;
-    Texture* backTexture = nullptr;
-    Texture* upTexture = nullptr;
-    Texture* downTexture = nullptr;
 };
 
 struct SceneActorData
@@ -157,6 +149,8 @@ public:
     
     std::string GetSCNName() { return mSceneAssetName; }
     
+    Skybox* GetSkybox() { return mSkybox; }
+    
     std::vector<SceneActorData*> GetSceneActorDatas() { return mSceneActorDatas; }
     std::vector<SceneModelData*> GetSceneModelDatas() { return mSceneModelDatas; }
     
@@ -193,7 +187,8 @@ private:
     Vector3 mGlobalLightAmbient = Vector3(0.3f, 0.3f, 0.3f);
     
     // SKYBOX
-    SceneSkyboxData mSkybox;
+    // The SIF might specify a skybox. But this can also be set from the SCN file instead.
+    Skybox* mSkybox = nullptr;
     
     // ACTORS
     std::vector<SceneActorData*> mSceneActorDatas;
