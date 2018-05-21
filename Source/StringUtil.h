@@ -87,6 +87,7 @@ namespace StringUtil
     
     inline bool EqualsIgnoreCase(const std::string& str1, const std::string& str2)
     {
+        if(str1.size() != str2.size()) { return false; }
         return std::equal(str1.begin(), str1.end(), str2.begin(), iequal());
     }
 }
