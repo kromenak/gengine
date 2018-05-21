@@ -75,6 +75,36 @@ namespace Math
         return std::atanf(ratio);
     }
     
+    inline float Floor(float val)
+    {
+        return std::floor(val);
+    }
+    
+    inline float Ceil(float val)
+    {
+        return std::ceil(val);
+    }
+    
+    inline float Round(float val)
+    {
+        return std::round(val);
+    }
+    
+    inline int FloorToInt(float val)
+    {
+        return (int)Floor(val);
+    }
+    
+    inline int CeilToInt(float val)
+    {
+        return (int)Ceil(val);
+    }
+    
+    inline int RoundToInt(float val)
+    {
+        return (int)Round(val);
+    }
+    
     inline float Clamp(float value, float min, float max)
     {
         return std::min(max, std::max(value, min));
