@@ -8,6 +8,8 @@
 #include "StringUtil.h"
 #include "SheepAPI.h"
 
+//#define DEBUG_BUILDER
+
 SheepScriptBuilder::SheepScriptBuilder()
 {
     // Always add the empty string as a constant.
@@ -24,7 +26,9 @@ bool SheepScriptBuilder::AddStringConst(std::string str)
         mStringConstsByOffset[mStringConstsOffset] = str;
         mStringConstsOffset += str.size() + 1;
         
+        #ifdef DEBUG_BUILDER
         std::cout << "String Const \"" << str << "\"" << std::endl;
+        #endif
         return true;
     }
     return false;
@@ -39,7 +43,9 @@ bool SheepScriptBuilder::AddIntVariable(std::string name, int defaultValue)
     mVariableIndexByName[name] = (int)mVariables.size();
     mVariables.push_back(sheepValue);
     
+    #ifdef DEBUG_BUILDER
     std::cout << "Int Var " << name << " = " << defaultValue << std::endl;
+    #endif
     return true;
 }
 
@@ -52,7 +58,9 @@ bool SheepScriptBuilder::AddFloatVariable(std::string name, float defaultValue)
     mVariableIndexByName[name] = (int)mVariables.size();
     mVariables.push_back(sheepValue);
     
+    #ifdef DEBUG_BUILDER
     std::cout << "Float Var " << name << " = " << defaultValue << std::endl;
+    #endif
     return true;
 }
 
@@ -67,13 +75,17 @@ bool SheepScriptBuilder::AddStringVariable(std::string name, std::string default
     mVariableIndexByName[name] = (int)mVariables.size();
     mVariables.push_back(sheepValue);
     
+    #ifdef DEBUG_BUILDER
     std::cout << "String Var " << name << " = \"" << defaultValue << "\"" << std::endl;
+    #endif
     return true;
 }
 
 void SheepScriptBuilder::StartFunction(std::string functionName)
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "Function " << functionName << " (" << mBytecode.size() << ")" <<  std::endl;
+    #endif
     mFunctions[functionName] = (int)mBytecode.size();
 }
 
@@ -91,7 +103,10 @@ void SheepScriptBuilder::EndFunction(std::string functionName)
     SitnSpin();
     SitnSpin();
     SitnSpin();
+    
+    #ifdef DEBUG_BUILDER
     std::cout << "End Function " << functionName << std::endl;
+    #endif
 }
 
 void SheepScriptBuilder::AddGoto(std::string labelName)
@@ -127,19 +142,25 @@ void SheepScriptBuilder::AddGoto(std::string labelName)
 
 void SheepScriptBuilder::SitnSpin()
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "SitnSpin" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::SitnSpin);
 }
 
 void SheepScriptBuilder::Yield()
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "Yield" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::Yield);
 }
 
 void SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "SysFunc " << sysFuncName << std::endl;
+    #endif
     for(auto& sysFunc : sysFuncs)
     {
         if(sysFunc.name == sysFuncName)
@@ -152,23 +173,31 @@ void SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
             bool doPop = false;
             if(sysFunc.returnType == 0)
             {
+                #ifdef DEBUG_BUILDER
                 std::cout << "CallSysFunctionV" << std::endl;
+                #endif
                 AddInstruction(SheepInstruction::CallSysFunctionV);
                 doPop = true;
             }
             else if(sysFunc.returnType == 1)
             {
+                #ifdef DEBUG_BUILDER
                 std::cout << "CallSysFunctionI" << std::endl;
+                #endif
                 AddInstruction(SheepInstruction::CallSysFunctionI);
             }
             else if(sysFunc.returnType == 2)
             {
+                #ifdef DEBUG_BUILDER
                 std::cout << "CallSysFunctionF" << std::endl;
+                #endif
                 AddInstruction(SheepInstruction::CallSysFunctionF);
             }
             else if(sysFunc.returnType == 3)
             {
+                #ifdef DEBUG_BUILDER
                 std::cout << "CallSysFunctionS" << std::endl;
+                #endif
                 AddInstruction(SheepInstruction::CallSysFunctionS);
             }
             
@@ -191,7 +220,9 @@ void SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
             // We may also need to do a pop for SysFunctionV calls.
             if(doPop)
             {
+                #ifdef DEBUG_BUILDER
                 std::cout << "Pop" << std::endl;
+                #endif
                 AddInstruction(SheepInstruction::Pop);
             }
         }
@@ -228,19 +259,25 @@ void SheepScriptBuilder::BranchGoto(std::string labelName)
 
 void SheepScriptBuilder::BeginWait()
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "BeginWait" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::BeginWait);
 }
 
 void SheepScriptBuilder::EndWait()
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "EndWait" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::EndWait);
 }
 
 void SheepScriptBuilder::ReturnV()
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "ReturnV" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::ReturnV);
 }
 
@@ -298,14 +335,18 @@ void SheepScriptBuilder::Load(std::string varName)
 
 void SheepScriptBuilder::PushI(int arg)
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "PushI, " << arg << std::endl;
+    #endif
     AddInstruction(SheepInstruction::PushI);
     AddIntArg(arg);
 }
 
 void SheepScriptBuilder::PushF(float arg)
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "PushF, " << arg << std::endl;
+    #endif
     AddInstruction(SheepInstruction::PushF);
     AddFloatArg(arg);
 }
@@ -317,30 +358,40 @@ void SheepScriptBuilder::PushS(std::string arg)
     int offset = GetStringConstOffset(arg);
     if(offset >= 0)
     {
+        #ifdef DEBUG_BUILDER
         std::cout << "PushS, " << offset << std::endl;
+        #endif
         AddInstruction(SheepInstruction::PushS);
         AddIntArg(offset);
         
+        #ifdef DEBUG_BUILDER
         std::cout << "GetString" << std::endl;
+        #endif
         AddInstruction(SheepInstruction::GetString);
     }
 }
 
 void SheepScriptBuilder::AddI()
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "AddI" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::AddI);
 }
 
 void SheepScriptBuilder::AddF()
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "AddF" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::AddF);
 }
 
 void SheepScriptBuilder::SubtractI()
 {
+    #ifdef DEBUG_BUILDER
     std::cout << "SubtractI" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::SubtractI);
 }
 

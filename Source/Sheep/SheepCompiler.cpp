@@ -60,7 +60,7 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
         int result = mParser->parse();
         if(result == 0)
         {
-            std::cout << "Parsed sheep successfully." << std::endl;
+            //std::cout << "Parsed sheep successfully." << std::endl;
             SheepScript* sheepScript = new SheepScript("", builder);
             
             //SheepVM vm;
