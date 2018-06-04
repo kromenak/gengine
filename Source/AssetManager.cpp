@@ -140,57 +140,75 @@ void AssetManager::WriteOutAssetsOfType(std::string extension)
 
 Audio* AssetManager::LoadAudio(string name)
 {
-    return LoadAsset<Audio>(name, &mLoadedAudios);
+    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), &mLoadedAudios);
 }
 
 Soundtrack* AssetManager::LoadSoundtrack(string name)
 {
-    return LoadAsset<Soundtrack>(name, nullptr);
+    return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), nullptr);
 }
 
 Yak* AssetManager::LoadYak(string name)
 {
-    return LoadAsset<Yak>(name, nullptr);
+    return LoadAsset<Yak>(SanitizeAssetName(name, ".YAK"), nullptr);
 }
 
 Model* AssetManager::LoadModel(string name)
 {
-    return LoadAsset<Model>(name, nullptr);
+    return LoadAsset<Model>(SanitizeAssetName(name, ".MOD"), nullptr);
 }
 
 Texture* AssetManager::LoadTexture(string name)
 {
-    return LoadAsset<Texture>(name, &mLoadedTextures);
+    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), &mLoadedTextures);
 }
 
 SIF* AssetManager::LoadSIF(string name)
 {
-    return LoadAsset<SIF>(name, nullptr);
+    return LoadAsset<SIF>(SanitizeAssetName(name, ".SIF"), nullptr);
 }
 
 SceneData* AssetManager::LoadScene(string name)
 {
-    return LoadAsset<SceneData>(name, nullptr);
+    return LoadAsset<SceneData>(SanitizeAssetName(name, ".SCN"), nullptr);
 }
 
 NVC* AssetManager::LoadNVC(string name)
 {
-    return LoadAsset<NVC>(name, nullptr);
+    return LoadAsset<NVC>(SanitizeAssetName(name, ".NVC"), nullptr);
 }
 
 BSP* AssetManager::LoadBSP(string name)
 {
-    return LoadAsset<BSP>(name, nullptr);
+    return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), nullptr);
 }
 
 SheepScript* AssetManager::LoadSheep(std::string name)
 {
-    return LoadAsset<SheepScript>(name, nullptr);
+    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), nullptr);
 }
 
 Cursor* AssetManager::LoadCursor(std::string name)
 {
-    return LoadAsset<Cursor>(name, nullptr);
+    return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), nullptr);
+}
+
+string AssetManager::SanitizeAssetName(std::string assetName, std::string expectedExtension)
+{
+    // First, convert all names to uppercase.
+    string sanitizedName = assetName;
+    StringUtil::ToUpper(sanitizedName);
+    
+    // We want to add the expected extension if it isn't present, and no other extension is present.
+    // There's probably a better way to do this...
+    if(!expectedExtension.empty() && sanitizedName.find(expectedExtension) == std::string::npos)
+    {
+        if(sanitizedName.size() < 4 || sanitizedName[sanitizedName.size() - 4] != '.')
+        {
+            sanitizedName += expectedExtension;
+        }
+    }
+    return sanitizedName;
 }
 
 string AssetManager::GetAssetPath(string fileName)

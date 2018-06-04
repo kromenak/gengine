@@ -66,6 +66,8 @@ private:
     unordered_map<string, Texture*> mLoadedTextures;
     unordered_map<string, Audio*> mLoadedAudios;
     
+    string SanitizeAssetName(string assetName, string expectedExtension);
+    
     string GetAssetPath(string fileName);
     
     template<class T> T* LoadAsset(string assetName, unordered_map<string, T*>* cache);
