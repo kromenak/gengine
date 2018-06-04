@@ -8,6 +8,7 @@
 #include "GEngine.h"
 #include "Scene.h"
 #include "MeshComponent.h"
+#include "AudioListener.h"
 #include "SheepCompiler.h"
 
 const float kCameraSpeed = 100.0f;
@@ -17,10 +18,13 @@ const float kCameraRotationSpeed = 2.5f;
 GameCamera::GameCamera()
 {
     mCamera = AddComponent<CameraComponent>();
+    AddComponent<AudioListener>();
 }
 
 void GameCamera::Update(float deltaTime)
 {
+    Actor::Update(deltaTime);
+    
     // Determine camera speed.
     float camSpeed = kCameraSpeed;
     if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LSHIFT))
@@ -79,29 +83,19 @@ void GameCamera::Update(float deltaTime)
             Ray ray(worldPos, dir);
             
             GEngine::inst->GetScene()->Interact(ray);
-            
-            /*
-            std::string* name = BSP::inst->Intersects(ray);
-            if(name == nullptr)
-            {
-                std::cout << "Nothing" << std::endl;
-            }
-            else
-            {
-                std::cout << *name << std::endl;
-            }
-            */
         }
     }
     
     if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_0))
     {
-        std::cout << "Execute!" << std::endl;
+        std::cout << "My Pos: " << GetPosition() << std::endl;
+        
+        //std::cout << "Execute!" << std::endl;
         //SheepScript* sheepScript = Services::GetAssets()->LoadSheep("B25.SHP");
         //SheepVM vm;
         //vm.Execute(sheepScript);
         
-        SheepCompiler compiler;
-        compiler.Compile("/Users/Clark/Dropbox/GK3/Assets/B25.shp");
+        //SheepCompiler compiler;
+        //compiler.Compile("/Users/Clark/Dropbox/GK3/Assets/B25.shp");
     }
 }

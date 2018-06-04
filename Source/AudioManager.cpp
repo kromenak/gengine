@@ -8,6 +8,7 @@
 #include "AudioManager.h"
 #include "Audio.h"
 #include "fmod_errors.h"
+#include "Vector3.h"
 
 bool AudioManager::Initialize()
 {
@@ -75,6 +76,58 @@ void AudioManager::Play(Audio* audio, int fadeInMs)
     FMOD::Sound* sound1 = nullptr;
     FMOD_RESULT result;
     result = mSystem->createSound((const char*)audio->GetDataBuffer(), FMOD_OPENMEMORY | FMOD_LOOP_OFF, &exinfo, &sound1);
+    if(result != FMOD_OK)
+    {
+        std::cout << FMOD_ErrorString(result) << std::endl;
+        return;
+    }
     
     result = mSystem->playSound(sound1, 0, false, &channel);
+    if(result != FMOD_OK)
+    {
+        std::cout << FMOD_ErrorString(result) << std::endl;
+        return;
+    }
+}
+
+void AudioManager::Play3D(Audio *audio, const Vector3 &position)
+{
+    if(audio == nullptr) { return; }
+    
+    FMOD_CREATESOUNDEXINFO exinfo;
+    memset(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
+    exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
+    exinfo.length = audio->GetDataBufferLength();
+    
+    FMOD::Channel* channel = nullptr;
+    FMOD::Sound* sound1 = nullptr;
+    FMOD_RESULT result;
+    result = mSystem->createSound((const char*)audio->GetDataBuffer(), FMOD_OPENMEMORY | FMOD_LOOP_OFF | FMOD_3D, &exinfo, &sound1);
+    if(result != FMOD_OK)
+    {
+        std::cout << FMOD_ErrorString(result) << std::endl;
+        return;
+    }
+    
+    // Position at the correct location.
+    //channel->set3DAttributes((const FMOD_VECTOR*) &position, (const FMOD_VECTOR*) &Vector3::Zero);
+    //channel->set3DMinMaxDistance(0.0f, 100000.0f);
+    //channel->setLoopCount(100);
+    
+    result = mSystem->playSound(sound1, 0, false, &channel);
+    if(result != FMOD_OK)
+    {
+        std::cout << FMOD_ErrorString(result) << std::endl;
+        return;
+    }
+}
+
+void AudioManager::UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up)
+{
+    FMOD_RESULT result = mSystem->set3DListenerAttributes(0, (const FMOD_VECTOR*) &position, (const FMOD_VECTOR*) &velocity,
+                                                         (const FMOD_VECTOR*) &forward, (const FMOD_VECTOR*) &up);
+    if(result != FMOD_OK)
+    {
+        std::cout << FMOD_ErrorString(result) << std::endl;
+    }
 }

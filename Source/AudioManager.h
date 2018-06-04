@@ -6,12 +6,13 @@
 //
 #pragma once
 #include <SDL2/SDL.h>
-#include <SDL2_mixer/SDL_mixer.h>
-
 #include "fmod.hpp"
 
 class Audio;
 class Soundtrack;
+
+class Vector3;
+class Quaternion;
 
 class AudioManager
 {
@@ -23,6 +24,10 @@ public:
     
     void Play(Audio* audio);
     void Play(Audio* audio, int fadeInMs);
+    
+    void Play3D(Audio* audio, const Vector3& position);
+    
+    void UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up);
     
 private:
     FMOD::System* mSystem = nullptr;
