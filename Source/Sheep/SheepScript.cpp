@@ -46,6 +46,16 @@ std::string SheepScript::GetStringConst(int offset)
     return std::string();
 }
 
+int SheepScript::GetFunctionOffset(std::string functionName)
+{
+    auto it = mFunctions.find(functionName);
+    if(it != mFunctions.end())
+    {
+        return it->second;
+    }
+    return -1;
+}
+
 void SheepScript::Dump()
 {
     std::cout << "Dumping sheep " << mName << std::endl << std::endl;

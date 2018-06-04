@@ -12,6 +12,7 @@
 
 enum class SheepValueType
 {
+    Void,
     Int,
     Float,
     String
@@ -19,13 +20,19 @@ enum class SheepValueType
 
 struct SheepValue
 {
-    SheepValueType type;
+    SheepValueType type = SheepValueType::Int;
     union
     {
         int intValue;
         float floatValue;
         const char* stringValue;
     };
+    
+    SheepValue() { }
+    SheepValue(SheepValueType t) { type = t; }
+    SheepValue(int i) { type = SheepValueType::Int; intValue = i; }
+    SheepValue(float f) { type = SheepValueType::Float; floatValue = f; }
+    SheepValue(const char* s) { type = SheepValueType::String; stringValue = s; }
 };
 
 enum class SheepInstruction
@@ -94,6 +101,9 @@ public:
     SheepVM() { }
     
     void Execute(SheepScript* script);
+    void Execute(SheepScript* script, std::string functionName);
+    
+    bool Evaluate(SheepScript* script);
     
 private:
     static const int kMaxStackSize = 64;
@@ -103,5 +113,9 @@ private:
     
     std::vector<SheepValue> mVariables;
     
+    void Execute(SheepScript* script, int bytecodeOffset);
+    
     Value CallSysFunc(SysImport* sysFunc);
+    
+    SheepValue& GetStack(int index) { return mStack[mStackSize - 1 - index]; }
 };

@@ -36,7 +36,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> generals = parser.GetSections("GENERAL");
     for(auto& section : generals)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             IniKeyValue* keyValue = entry;
@@ -131,7 +140,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> inspectCameras = parser.GetSections("INSPECT_CAMERAS");
     for(auto& section : inspectCameras)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             SceneCameraData* camera = new SceneCameraData();
@@ -162,7 +180,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> roomCameras = parser.GetSections("ROOM_CAMERAS");
     for(auto& section : roomCameras)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             SceneCameraData* camera = new SceneCameraData();
@@ -195,7 +222,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> cinematicCameras = parser.GetSections("CINEMATIC_CAMERAS");
     for(auto& section : cinematicCameras)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             SceneCameraData* camera = new SceneCameraData();
@@ -223,7 +259,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> DialogueSceneCameraDatas = parser.GetSections("DIALOGUE_CAMERAS");
     for(auto& section : DialogueSceneCameraDatas)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             DialogueSceneCameraData* camera = new DialogueSceneCameraData();
@@ -268,7 +313,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> positionSections = parser.GetSections("POSITIONS");
     for(auto& section : positionSections)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             // First pair is always the identifier.
@@ -308,7 +362,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> actorSections = parser.GetSections("ACTORS");
     for(auto& section : actorSections)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             SceneActorData* actor = new SceneActorData();
@@ -374,7 +437,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> modelSections = parser.GetSections("MODELS");
     for(auto& section : modelSections)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             SceneModelData* model = new SceneModelData();
@@ -444,7 +516,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> regionSections = parser.GetSections("REGIONS");
     for(auto& section : regionSections)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             SceneRegionOrTriggerData* region = new SceneRegionOrTriggerData();
@@ -466,7 +547,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> triggerSections = parser.GetSections("TRIGGERS");
     for(auto& section : triggerSections)
     {
-        //TODO: Check condition?
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             SceneRegionOrTriggerData* region = new SceneRegionOrTriggerData();
@@ -491,6 +581,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> ambientSections = parser.GetSections("AMBIENT");
     for(auto& section : ambientSections)
     {
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(entry->key);
@@ -504,6 +604,16 @@ void SIF::ParseFromData(char *data, int dataLength)
     std::vector<IniSection> actionSections = parser.GetSections("ACTIONS");
     for(auto& section : actionSections)
     {
+        // Check condition and early out maybe.
+        if(!section.condition.empty())
+        {
+            SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
+            if(!Services::GetSheep()->Evaluate(sheep))
+            {
+                continue;
+            }
+        }
+        
         for(auto& entry : section.entries)
         {
             //TODO: Should only read in NVC files that correspond to the current day.

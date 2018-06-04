@@ -28,7 +28,7 @@ public:
     
     void SitnSpin();
     void Yield();
-    void CallSysFunction(std::string sysFuncName);
+    SheepValueType CallSysFunction(std::string sysFuncName);
     //Branch
     void BranchGoto(std::string labelName);
     //BranchIfZero
@@ -36,10 +36,24 @@ public:
     void EndWait();
     void ReturnV();
     void Store(std::string varName);
-    void Load(std::string varName);
+    SheepValueType Load(std::string varName);
     void PushI(int arg);
     void PushF(float arg);
     void PushS(std::string arg);
+    
+    SheepValueType Add(SheepValue val1, SheepValue val2);
+    SheepValueType Subtract(SheepValue val1, SheepValue val2);
+    SheepValueType Multiply(SheepValue val1, SheepValue val2);
+    SheepValueType Divide(SheepValue val1, SheepValue val2);
+    void Negate(SheepValue val);
+    SheepValueType IsEqual(SheepValue val1, SheepValue val2);
+    SheepValueType IsNotEqual(SheepValue val1, SheepValue val2);
+    SheepValueType IsGreater(SheepValue val1, SheepValue val2);
+    SheepValueType IsLess(SheepValue val1, SheepValue val2);
+    SheepValueType IsGreaterEqual(SheepValue val1, SheepValue val2);
+    SheepValueType IsLessEqual(SheepValue val1, SheepValue val2);
+    
+    /*
     void AddI();
     void AddF();
     void SubtractI();
@@ -62,11 +76,12 @@ public:
     void IsGreaterEqualF();
     void IsLessEqualI();
     void IsLessEqualF();
+    */
     
-    void IToF(int arg);
-    void FToI(float arg);
+    void IToF(int index);
+    void FToI(int index);
     
-    void Modulo();
+    void Modulo(SheepValue val1, SheepValue val2);
     
     void And();
     void Or();

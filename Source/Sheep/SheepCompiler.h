@@ -5,7 +5,6 @@
 //  Created by Clark Kromenaker on 7/24/17.
 //
 #pragma once
-
 #include <istream>
 #include <string>
 #include <map>
@@ -26,8 +25,8 @@ public:
     SheepScript* Compile(std::istream& stream);
     
     // Bison requires these to be lowercase.
-    void error(const Sheep::location& l, const std::string& m);
-    void error(const std::string& m);
+    void error(const Sheep::location& location, const std::string& message);
+    void error(const std::string& message);
     
 private:
     SheepScanner* mScanner = nullptr;

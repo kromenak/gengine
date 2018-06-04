@@ -1,8 +1,7 @@
 /* This code is added to the top of sheep.tab.cc */
 %code top {
-#include <cstdlib>
-#include <string>
-#include "SheepScriptBuilder.h"
+	#include <cstdlib>
+	#include <string>
 }
 
 /* Tell bison to generate C++ output */
@@ -32,7 +31,8 @@
 {
 	class SheepScanner;
 	class SheepCompiler;
-	class SheepScriptBuilder;
+	#include "SheepScriptBuilder.h"
+	#include "SheepVM.h"
 }
 
 %param { SheepScanner& scanner }
@@ -93,8 +93,14 @@
 %token <std::string> USERID
 %token <std::string> SYSID
 
-%type <int> int_expr
-%type <float> float_expr
+%type <SheepValue> expr
+%type <SheepValue> sysfunc_call
+
+/*
+%type <SheepValue> num_expr
+%type <SheepValue> int_expr
+%type <SheepValue> float_expr
+*/
 
 /* %left dictates left associativity, which means multiple operators at once will group
    to the left first. Ex: x OP y OP z with '%left OP' means ((x OP y) OP z).
@@ -187,7 +193,7 @@ statements: %empty
 
 /* a statement is any individual line inside of a function */
 statement: USERID ASSIGN expr SEMICOLON 				{ builder.Store($1); } /* myInt$ = 2 + 8; */
-	| expr SEMICOLON									/* sys func call or pointless expression like (2+4); */
+	| expr 												{ } /* sys func call or pointless expression like (2+4); */
 	| RETURN SEMICOLON 									{ builder.ReturnV(); } /* return; */
 	| BREAKPOINT SEMICOLON 								{ builder.Breakpoint(); } /* breakpoint; */
 	| SITNSPIN SEMICOLON 								{ builder.SitnSpin(); } /* sitnspin; */
@@ -205,9 +211,38 @@ statement: USERID ASSIGN expr SEMICOLON 				{ builder.Store($1); } /* myInt$ = 2
 statements_block: OPENBRACKET statements CLOSEBRACKET
 	;
 
+/* an expression is any constant value, math operation, system function call */ 
+expr: sysfunc_call 						{ $$ = $1; } 												/* PrintString("Ahhh") */
+	| USERID 							{ auto type = builder.Load($1); $$ = SheepValue(type); } 	/* foo$ */
+	| INT								{ builder.PushI($1); $$ = SheepValue($1); }
+	| FLOAT 							{ builder.PushF($1); $$ = SheepValue($1); }
+	/* | int_expr 							{ } */
+	/* | float_expr 						{ } */
+	| STRING 							{ builder.AddStringConst($1); builder.PushS($1); $$ = SheepValue(""); }
+
+	| expr PLUS expr					{ auto type = builder.Add($1, $3); $$ = SheepValue(type); }
+	| expr MINUS expr					{ auto type = builder.Subtract($1, $3); $$ = SheepValue(type); }
+	| expr MULTIPLY expr				{ auto type = builder.Multiply($1, $3); $$ = SheepValue(type); }
+	| expr DIVIDE expr					{ auto type = builder.Divide($1, $3); $$ = SheepValue(type); }
+	| expr MOD expr						{ builder.Modulo($1, $3); $$ = SheepValue(SheepValueType::Int); } 
+	| NEGATE expr 						{ builder.Negate($2); }
+
+	| expr LT expr 						{ auto type = builder.IsLess($1, $3); $$ = SheepValue(type); }
+	| expr GT expr						{ auto type = builder.IsGreater($1, $3); $$ = SheepValue(type); }
+	| expr LTE expr 					{ auto type = builder.IsLessEqual($1, $3); $$ = SheepValue(type); }
+	| expr GTE expr 					{ auto type = builder.IsGreaterEqual($1, $3); $$ = SheepValue(type); }
+	| expr EQUAL expr 					{ auto type = builder.IsEqual($1, $3); $$ = SheepValue(type); }
+	| expr NOTEQUAL expr 				{ auto type = builder.IsNotEqual($1, $3); $$ = SheepValue(type); }
+	| expr OR expr 						{ }
+	| expr AND expr 					{ }
+	| NOT expr 							{ }
+
+	| OPENPAREN expr CLOSEPAREN 		{ $$ = $2; } /* (10 + 12) */
+	;
+
 /* a sysfunc call is like GetEgoName(); or PrintString("Ahh");
    it can have zero or more arguments */
-sysfunc_call: SYSID OPENPAREN sysfunc_call_args CLOSEPAREN { builder.CallSysFunction($1); }
+sysfunc_call: SYSID OPENPAREN sysfunc_call_args CLOSEPAREN { auto type = builder.CallSysFunction($1); $$ = SheepValue(type); }
 	;
 
 /* sysfunc call args are either empty, or a list or args */
@@ -216,16 +251,28 @@ sysfunc_call_args: %empty				{ } /* No arg */
 	| sysfunc_call_args COMMA expr 		{ } /* 5 + 2, "Gab", GetCameraFov() */
 	;
 
-/* an expression is any constant value, math operation, system function call */ 
-expr: sysfunc_call 						{ }  /* PrintString("Ahhh") */
-	| USERID 							{ builder.Load($1); } 
-	| int_expr 							{ }
-	| float_expr 						{ }
-	| STRING 							{ builder.AddStringConst($1); builder.PushS($1); }
-	| OPENPAREN expr CLOSEPAREN 		{ } /* (10 + 12) */
+/*
+num_expr: INT 							{ builder.PushI($1); $$ = SheepValue($1); }
+	| FLOAT 							{ builder.PushF($1); $$ = SheepValue($1); }
+	| num_expr PLUS num_expr			{ }
+	| num_expr MINUS num_expr			{ }
+	| num_expr MULTIPLY num_expr		{ }
+	| num_expr DIVIDE num_expr			{ }
+	| num_expr MOD num_expr				{ } 
+	| NEGATE num_expr 					{ }
+
+	| num_expr LT num_expr 				{ }
+	| num_expr GT num_expr				{ }
+	| num_expr LTE num_expr 			{ }
+	| num_expr GTE num_expr 			{ }
+	| num_expr EQUAL num_expr 			{ }
+	| num_expr NOTEQUAL num_expr 		{ }
+	| num_expr OR num_expr 				{ }
+	| num_expr AND num_expr 			{ }
+	| NOT num_expr 						{ }
 	;
 
-int_expr: INT 							{ builder.PushI($1); $$ = $1; }
+int_expr: INT 							{ builder.PushI($1); $$ = SheepValue($1); }
 	| int_expr PLUS int_expr			{ builder.AddI(); }
 	| int_expr MINUS int_expr			{ builder.SubtractI(); }
 	| int_expr MULTIPLY int_expr 		{ builder.MultiplyI(); }
@@ -244,7 +291,7 @@ int_expr: INT 							{ builder.PushI($1); $$ = $1; }
 	| NOT int_expr  					{ builder.Not(); }
 	;
 
-float_expr: FLOAT 						{ builder.PushF($1); $$ = $1; }
+float_expr: FLOAT 						{ builder.PushF($1); $$ = SheepValue($1); }
 	| float_expr PLUS float_expr       	{ builder.AddF(); }
 	| float_expr MINUS float_expr		{ builder.SubtractF(); }
 	| float_expr MULTIPLY float_expr	{ builder.MultiplyF(); }
@@ -261,6 +308,7 @@ float_expr: FLOAT 						{ builder.PushF($1); $$ = $1; }
 	| float_expr AND float_expr			{ builder.And(); }
 	| NOT float_expr					{ builder.Not(); }
 	;
+*/
 
 if_else_block: if_statement
 	| if_statement else_statement

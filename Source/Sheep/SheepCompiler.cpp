@@ -30,6 +30,7 @@ SheepScript* SheepCompiler::Compile(const char *filename)
 
 SheepScript* SheepCompiler::Compile(std::string sheep)
 {
+    //std::cout << sheep << std::endl;
     std::stringstream stringStream(sheep);
     return Compile(stringStream);
 }
@@ -62,9 +63,6 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
         {
             //std::cout << "Parsed sheep successfully." << std::endl;
             SheepScript* sheepScript = new SheepScript("", builder);
-            
-            //SheepVM vm;
-            //vm.Execute(sheepScript);
             return sheepScript;
         }
         else
@@ -80,14 +78,14 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
     }
 }
 
-void SheepCompiler::error(const Sheep::location &l, const std::string &m)
+void SheepCompiler::error(const Sheep::location& location, const std::string& message)
 {
-    std::cerr << "Sheep Compiler Error: " << l << ": " << m << std::endl;
+    std::cerr << "Sheep Compiler Error: " << location << ": " << message << std::endl;
 }
 
-void SheepCompiler::error(const std::string &m)
+void SheepCompiler::error(const std::string& message)
 {
-    std::cerr << "Sheep Compiler Error: " << m << std::endl;
+    std::cerr << "Sheep Compiler Error: " << message << std::endl;
 }
 
 void SheepCompiler::DebugOutputTokens(SheepScanner *scanner)

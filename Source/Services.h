@@ -10,6 +10,7 @@
 #include "InputManager.h"
 #include "SDLRenderer.h"
 #include "AudioManager.h"
+#include "SheepManager.h"
 
 class Services
 {
@@ -26,9 +27,13 @@ public:
     static AudioManager* GetAudio() { return audio; }
     static void SetAudio(AudioManager* aud) { audio = aud; }
     
+    static SheepManager* GetSheep() { return sheep; }
+    static void SetSheep(SheepManager* shp) { sheep = shp; }
+    
 private:
     static AssetManager* assetManager;
     static InputManager* inputManager;
     static SDLRenderer* renderer;
     static AudioManager* audio;
+    static SheepManager* sheep;
 };

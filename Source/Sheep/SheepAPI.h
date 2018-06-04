@@ -23,26 +23,48 @@ extern std::vector<SysImport> sysFuncs;
 void AddSysImport(const std::string& name, char retType, std::initializer_list<char> argTypes);
 void InitSysImports();
 
+#define void_TYPE 0
+#define int_TYPE 1
+#define float_TYPE 2
+#define string_TYPE 3
+
 // Macros that register functions of various argument lengths with the system.
 // Creates a function with same name as the actual function, but which uses generic "Value" args and return type.
 // The generic function just calls the real function with correct argument types.
 
 // Also registers an entry in the function map with a pointer to the "generic function".
 // Flow is: Look Up in Map -> Calls Generic Function -> Calls Actual Function
-#define RegFunc1(name, t1)                   \
-    Value name(const Value& x1) {            \
-        return name(x1.to<t1>());            \
-    }                                        \
-    struct name##_ {                         \
-        name##_() { map1[#name]=&name; }     \
+#define RegFunc0(name, ret)                         \
+    Value name(const Value& x1) {                   \
+        return name();                              \
+    }                                               \
+    struct name##_ {                                \
+        name##_() {                                 \
+            map0[#name]=&name;                      \
+            AddSysImport(#name, ret##_TYPE, { }); \
+        }                                           \
     } name##_instance
 
-#define RegFunc2(name, t1, t2)                           \
-    Value name(const Value& x1, const Value& x2) {       \
-        return name(x1.to<t1>(), x2.to<t2>());           \
-    }                                                    \
-    struct name##_ {                                     \
-        name##_() { map2[#name]=&name; }                 \
+#define RegFunc1(name, ret, t1)                     \
+    Value name(const Value& x1) {                   \
+        return name(x1.to<t1>());                   \
+    }                                               \
+    struct name##_ {                                \
+        name##_() {                                 \
+            map1[#name]=&name;                      \
+            AddSysImport(#name, ret##_TYPE, { t1##_TYPE }); \
+        }                                           \
+    } name##_instance
+
+#define RegFunc2(name, ret, t1, t2)                              \
+    Value name(const Value& x1, const Value& x2) {          \
+        return name(x1.to<t1>(), x2.to<t2>());              \
+    }                                                       \
+    struct name##_ {                                        \
+        name##_() {                                         \
+            map2[#name]=&name;                              \
+            AddSysImport(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE }); \
+        }                                                   \
     } name##_instance
 
 #define shpvoid byte
@@ -53,11 +75,13 @@ shpvoid BlinkX(std::string actorName, std::string blinkAnim);
 
 shpvoid ClearMood(std::string actorName);
 
-shpvoid DisableEyeJitter(std::string actorName);
-shpvoid DumpActorPosition(std::string actorName); // DEV
 shpvoid EnableEyeJitter(std::string actorName);
-shpvoid Expression(std::string actorName, std::string expression);
+shpvoid DisableEyeJitter(std::string actorName);
 shpvoid EyeJitter(std::string actorName);
+
+shpvoid DumpActorPosition(std::string actorName); // DEV
+
+shpvoid Expression(std::string actorName, std::string expression);
 
 int GetEgoCurrentLocationCount();
 int GetEgoLocationCount(std::string locationName);
@@ -76,19 +100,15 @@ shpvoid InitEgoPosition(std::string positionName);
 int IsActorAtLocation(std::string actorName, std::string locationName);
 int IsActorNear(std::string actorName, std::string positionName, float distance);
 int IsWalkingActorNear(std::string actorName, std::string positionName, float distance);
+
 int IsActorOffstage(std::string actorName);
+
 int IsCurrentEgo(std::string actorName);
 
 shpvoid LookitActor(std::string actorName, std::string otherActorName,
                     std::string componentsSpec, float durationSec);
 shpvoid LookitActorQuick(std::string actorName, std::string otherActorName,
                          std::string componentsSpec, float durationSec);
-
-shpvoid LookitCameraAngle(std::string actorName, std::string cameraAngleName,
-                          std::string componentsSpec, float durationSec); // DEV
-
-shpvoid LookitCancel(std::string actorName);
-shpvoid LookitLock(std::string actorName, std::string componentsSpec, float durationSec);
 
 shpvoid LookitModel(std::string actorName, std::string modelName,
                     std::string componentsSpec, float durationSec);
@@ -101,18 +121,22 @@ shpvoid LookitModelQuickX(std::string actorName, std::string modelName, int mesh
                           std::string boxModifier, float offsetX, float offsetY, float offsetZ,
                           std::string componentsSpec, float durationSec);
 
-shpvoid LookitMouse(std::string actorName, std::string componentsSpec, float durationSec); // DEV
-
 shpvoid LookitNoun(std::string actorName, std::string nounName,
                    std::string componentsSpec, float durationSec);
 shpvoid LookitNounQuick(std::string actorName, std::string nounName,
                         std::string componentsSpec, float durationSec);
 
-shpvoid LookitPlayer(std::string actorName, std::string componentsSpec, float durationSec); // DEV
-
 shpvoid LookitPoint(std::string actorName, float x, float y, float z,
                     std::string componentsSpec, float durationSec);
 
+shpvoid LookitCameraAngle(std::string actorName, std::string cameraAngleName,
+                          std::string componentsSpec, float durationSec); // DEV
+shpvoid LookitMouse(std::string actorName, std::string componentsSpec, float durationSec); // DEV
+shpvoid LookitPlayer(std::string actorName, std::string componentsSpec, float durationSec); // DEV
+
+shpvoid LookitCancel(std::string actorName);
+
+shpvoid LookitLock(std::string actorName, std::string componentsSpec, float durationSec);
 shpvoid LookitUnlock(std::string actorName, std::string componentsSpec);
 
 shpvoid SetActorLocation(std::string actorName, std::string locationName);
@@ -128,13 +152,12 @@ shpvoid SetEgoLocationCount(std::string locationName, int count); // DEV
 
 shpvoid SetIdleGAS(std::string actorName, std::string gasName); // WAIT
 shpvoid SetListenGAS(std::string actorName, std::string gasName); // WAIT
+shpvoid SetTalkGAS(std::string actorName, std::string gasName); // WAIT
 
 shpvoid SetMood(std::string actorName, std::string moodName);
 
 shpvoid SetNextEgo(); // DEV
 shpvoid SetPrevEgo(); // DEV
-
-shpvoid SetTalkGAS(std::string actorName, std::string gasName); // WAIT
 
 shpvoid SetWalkAnim(std::string actorName, std::string start, std::string cont,
                     std::string startTurnLeft, std::string startTurnRight);
@@ -165,41 +188,37 @@ int WasEgoEverInLocation(std::string locationName);
 shpvoid AddCaptionDefault(std::string captionText); // DEV
 shpvoid AddCaptionEgo(std::string captionText); // DEV
 shpvoid AddCaptionVoiceOver(std::string captionText); // DEV
+shpvoid ClearCaptionText(); // DEV
 
 shpvoid AnimEvent(std::string eventType, std::string eventData); // DEV
 
-shpvoid ClearCaptionText(); // DEV
-
+shpvoid StartDialogue(std::string dialogueName, int numLines); // WAIT
+shpvoid StartDialogueNoFidgets(std::string dialogueName, int numLines); // WAIT
 shpvoid ContinueDialogue(int numLines); // WAIT
 shpvoid ContinueDialogueNoFidgets(int numLines); // WAIT
 
-shpvoid DisableInterpolation(); // DEV
-shpvoid DumpAnimator(); // DEV
 shpvoid EnableInterpolation(); // DEV
+shpvoid DisableInterpolation(); // DEV
 
-shpvoid EndConversation(); // WAIT
-
-shpvoid LoopAnimation(std::string animName);
+shpvoid DumpAnimator(); // DEV
 
 shpvoid SetConversation(std::string conversationName); // WAIT
+shpvoid EndConversation(); // WAIT
 
 shpvoid StartAnimation(std::string animName); // WAIT
+shpvoid LoopAnimation(std::string animName);
+shpvoid StopAnimation(std::string animName);
+shpvoid StopAllAnimations(); // DEV
 
-shpvoid StartDialogue(std::string dialogueName, int numLines); // WAIT
-shpvoid StartDialogueNoFidgets(std::string dialogueName, int numLines); // WAIT
+shpvoid StartMorphAnimation(std::string animName, int animStartFrame, int morphFrames); // WAIT
+shpvoid StopMorphAnimation(std::string animName);
+shpvoid StopAllMorphAnimations(); // DEV
 
 shpvoid StartMom(std::string momAnimName); // WAIT
-shpvoid StartMorphAnimation(std::string animName, int animStartFrame, int morphFrames); // WAIT
 shpvoid StartMoveAnimation(std::string animName); // WAIT
 
 shpvoid StartVoiceOver(std::string dialogueName, int numLines); // WAIT
 shpvoid StartYak(std::string yakAnimName); // DEV, WAIT
-
-shpvoid StopAllAnimations(); // DEV
-shpvoid StopAllMorphAnimations(); // DEV
-
-shpvoid StopAnimation(std::string animName);
-shpvoid StopMorphAnimation(std::string animName);
 
 // APPLICATION
 shpvoid AddPath(std::string pathName); // DEV

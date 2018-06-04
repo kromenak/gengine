@@ -32,16 +32,15 @@
 // //                    "%code top" blocks.
 #line 2 "Sheep.yy" // lalr1.cc:397
 
-#include <cstdlib>
-#include <string>
-#include "SheepScriptBuilder.h"
+	#include <cstdlib>
+	#include <string>
 
-#line 40 "Sheep.tab.cc" // lalr1.cc:397
+#line 39 "Sheep.tab.cc" // lalr1.cc:397
 
 
 // First part of user declarations.
 
-#line 45 "Sheep.tab.cc" // lalr1.cc:404
+#line 44 "Sheep.tab.cc" // lalr1.cc:404
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -55,7 +54,7 @@
 
 // User implementation prologue.
 
-#line 59 "Sheep.tab.cc" // lalr1.cc:412
+#line 58 "Sheep.tab.cc" // lalr1.cc:412
 // Unqualified %code blocks.
 #line 44 "Sheep.yy" // lalr1.cc:413
 
@@ -75,7 +74,7 @@
 		compiler.error(loc, msg);
 	}
 
-#line 79 "Sheep.tab.cc" // lalr1.cc:413
+#line 78 "Sheep.tab.cc" // lalr1.cc:413
 
 
 #ifndef YY_
@@ -159,9 +158,9 @@
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-#line 18 "Sheep.yy" // lalr1.cc:479
+#line 17 "Sheep.yy" // lalr1.cc:479
 namespace Sheep {
-#line 165 "Sheep.tab.cc" // lalr1.cc:479
+#line 164 "Sheep.tab.cc" // lalr1.cc:479
 
   /// Build a parser object.
   Parser::Parser (SheepScanner& scanner_yyarg, SheepCompiler& compiler_yyarg, SheepScriptBuilder& builder_yyarg)
@@ -237,13 +236,16 @@ namespace Sheep {
   {
       switch (that.type_get ())
     {
+      case 64: // expr
+      case 65: // sysfunc_call
+        value.move< SheepValue > (that.value);
+        break;
+
       case 27: // FLOAT
-      case 68: // float_expr
         value.move< float > (that.value);
         break;
 
       case 26: // INT
-      case 67: // int_expr
         value.move< int > (that.value);
         break;
 
@@ -268,13 +270,16 @@ namespace Sheep {
     state = that.state;
       switch (that.type_get ())
     {
+      case 64: // expr
+      case 65: // sysfunc_call
+        value.copy< SheepValue > (that.value);
+        break;
+
       case 27: // FLOAT
-      case 68: // float_expr
         value.copy< float > (that.value);
         break;
 
       case 26: // INT
-      case 67: // int_expr
         value.copy< int > (that.value);
         break;
 
@@ -512,13 +517,16 @@ namespace Sheep {
          when using variants.  */
         switch (yyr1_[yyn])
     {
+      case 64: // expr
+      case 65: // sysfunc_call
+        yylhs.value.build< SheepValue > ();
+        break;
+
       case 27: // FLOAT
-      case 68: // float_expr
         yylhs.value.build< float > ();
         break;
 
       case 26: // INT
-      case 67: // int_expr
         yylhs.value.build< int > ();
         break;
 
@@ -546,499 +554,409 @@ namespace Sheep {
           switch (yyn)
             {
   case 2:
-#line 125 "Sheep.yy" // lalr1.cc:859
+#line 131 "Sheep.yy" // lalr1.cc:859
     { }
-#line 552 "Sheep.tab.cc" // lalr1.cc:859
+#line 560 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 3:
-#line 126 "Sheep.yy" // lalr1.cc:859
+#line 132 "Sheep.yy" // lalr1.cc:859
     { }
-#line 558 "Sheep.tab.cc" // lalr1.cc:859
+#line 566 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 4:
-#line 127 "Sheep.yy" // lalr1.cc:859
+#line 133 "Sheep.yy" // lalr1.cc:859
     { }
-#line 564 "Sheep.tab.cc" // lalr1.cc:859
+#line 572 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 5:
-#line 128 "Sheep.yy" // lalr1.cc:859
+#line 134 "Sheep.yy" // lalr1.cc:859
     { }
-#line 570 "Sheep.tab.cc" // lalr1.cc:859
+#line 578 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 6:
-#line 129 "Sheep.yy" // lalr1.cc:859
+#line 135 "Sheep.yy" // lalr1.cc:859
     { }
-#line 576 "Sheep.tab.cc" // lalr1.cc:859
+#line 584 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 7:
-#line 134 "Sheep.yy" // lalr1.cc:859
+#line 140 "Sheep.yy" // lalr1.cc:859
     { }
-#line 582 "Sheep.tab.cc" // lalr1.cc:859
+#line 590 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 8:
-#line 137 "Sheep.yy" // lalr1.cc:859
+#line 143 "Sheep.yy" // lalr1.cc:859
     {  }
-#line 588 "Sheep.tab.cc" // lalr1.cc:859
+#line 596 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 9:
-#line 138 "Sheep.yy" // lalr1.cc:859
+#line 144 "Sheep.yy" // lalr1.cc:859
     {  }
-#line 594 "Sheep.tab.cc" // lalr1.cc:859
+#line 602 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 10:
-#line 144 "Sheep.yy" // lalr1.cc:859
+#line 150 "Sheep.yy" // lalr1.cc:859
     { }
-#line 600 "Sheep.tab.cc" // lalr1.cc:859
+#line 608 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 11:
-#line 145 "Sheep.yy" // lalr1.cc:859
+#line 151 "Sheep.yy" // lalr1.cc:859
     { }
-#line 606 "Sheep.tab.cc" // lalr1.cc:859
+#line 614 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 12:
-#line 146 "Sheep.yy" // lalr1.cc:859
+#line 152 "Sheep.yy" // lalr1.cc:859
     { }
-#line 612 "Sheep.tab.cc" // lalr1.cc:859
+#line 620 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 13:
-#line 149 "Sheep.yy" // lalr1.cc:859
+#line 155 "Sheep.yy" // lalr1.cc:859
     { builder.AddIntVariable(yystack_[0].value.as< std::string > (), 0); }
-#line 618 "Sheep.tab.cc" // lalr1.cc:859
+#line 626 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 14:
-#line 150 "Sheep.yy" // lalr1.cc:859
+#line 156 "Sheep.yy" // lalr1.cc:859
     { builder.AddIntVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< int > ()); }
-#line 624 "Sheep.tab.cc" // lalr1.cc:859
+#line 632 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 15:
-#line 151 "Sheep.yy" // lalr1.cc:859
+#line 157 "Sheep.yy" // lalr1.cc:859
     { builder.AddIntVariable(yystack_[0].value.as< std::string > (), 0); }
-#line 630 "Sheep.tab.cc" // lalr1.cc:859
+#line 638 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 16:
-#line 152 "Sheep.yy" // lalr1.cc:859
+#line 158 "Sheep.yy" // lalr1.cc:859
     { builder.AddIntVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< int > ()); }
-#line 636 "Sheep.tab.cc" // lalr1.cc:859
+#line 644 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 17:
-#line 155 "Sheep.yy" // lalr1.cc:859
+#line 161 "Sheep.yy" // lalr1.cc:859
     { builder.AddFloatVariable(yystack_[0].value.as< std::string > (), 0.0f); }
-#line 642 "Sheep.tab.cc" // lalr1.cc:859
+#line 650 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 18:
-#line 156 "Sheep.yy" // lalr1.cc:859
+#line 162 "Sheep.yy" // lalr1.cc:859
     { builder.AddFloatVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< float > ()); }
-#line 648 "Sheep.tab.cc" // lalr1.cc:859
+#line 656 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 19:
-#line 157 "Sheep.yy" // lalr1.cc:859
+#line 163 "Sheep.yy" // lalr1.cc:859
     { builder.AddFloatVariable(yystack_[0].value.as< std::string > (), 0.0f); }
-#line 654 "Sheep.tab.cc" // lalr1.cc:859
+#line 662 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 20:
-#line 158 "Sheep.yy" // lalr1.cc:859
+#line 164 "Sheep.yy" // lalr1.cc:859
     { builder.AddFloatVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< float > ()); }
-#line 660 "Sheep.tab.cc" // lalr1.cc:859
+#line 668 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 21:
-#line 161 "Sheep.yy" // lalr1.cc:859
+#line 167 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringVariable(yystack_[0].value.as< std::string > (), ""); }
-#line 666 "Sheep.tab.cc" // lalr1.cc:859
+#line 674 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 22:
-#line 162 "Sheep.yy" // lalr1.cc:859
+#line 168 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< std::string > ()); }
-#line 672 "Sheep.tab.cc" // lalr1.cc:859
+#line 680 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 23:
-#line 163 "Sheep.yy" // lalr1.cc:859
+#line 169 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringVariable(yystack_[0].value.as< std::string > (), ""); }
-#line 678 "Sheep.tab.cc" // lalr1.cc:859
+#line 686 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 24:
-#line 164 "Sheep.yy" // lalr1.cc:859
+#line 170 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< std::string > ()); }
-#line 684 "Sheep.tab.cc" // lalr1.cc:859
+#line 692 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 25:
-#line 170 "Sheep.yy" // lalr1.cc:859
+#line 176 "Sheep.yy" // lalr1.cc:859
     { }
-#line 690 "Sheep.tab.cc" // lalr1.cc:859
+#line 698 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 26:
-#line 174 "Sheep.yy" // lalr1.cc:859
+#line 180 "Sheep.yy" // lalr1.cc:859
     { }
-#line 696 "Sheep.tab.cc" // lalr1.cc:859
+#line 704 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 27:
-#line 175 "Sheep.yy" // lalr1.cc:859
+#line 181 "Sheep.yy" // lalr1.cc:859
     { }
-#line 702 "Sheep.tab.cc" // lalr1.cc:859
+#line 710 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 28:
-#line 180 "Sheep.yy" // lalr1.cc:859
+#line 186 "Sheep.yy" // lalr1.cc:859
     { builder.StartFunction(yystack_[2].value.as< std::string > ()); }
-#line 708 "Sheep.tab.cc" // lalr1.cc:859
+#line 716 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 29:
-#line 180 "Sheep.yy" // lalr1.cc:859
+#line 186 "Sheep.yy" // lalr1.cc:859
     { builder.EndFunction(yystack_[6].value.as< std::string > ()); }
-#line 714 "Sheep.tab.cc" // lalr1.cc:859
+#line 722 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 32:
-#line 189 "Sheep.yy" // lalr1.cc:859
+#line 195 "Sheep.yy" // lalr1.cc:859
     { builder.Store(yystack_[3].value.as< std::string > ()); }
-#line 720 "Sheep.tab.cc" // lalr1.cc:859
+#line 728 "Sheep.tab.cc" // lalr1.cc:859
+    break;
+
+  case 33:
+#line 196 "Sheep.yy" // lalr1.cc:859
+    { }
+#line 734 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 34:
-#line 191 "Sheep.yy" // lalr1.cc:859
+#line 197 "Sheep.yy" // lalr1.cc:859
     { builder.ReturnV(); }
-#line 726 "Sheep.tab.cc" // lalr1.cc:859
+#line 740 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 35:
-#line 192 "Sheep.yy" // lalr1.cc:859
+#line 198 "Sheep.yy" // lalr1.cc:859
     { builder.Breakpoint(); }
-#line 732 "Sheep.tab.cc" // lalr1.cc:859
+#line 746 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 36:
-#line 193 "Sheep.yy" // lalr1.cc:859
+#line 199 "Sheep.yy" // lalr1.cc:859
     { builder.SitnSpin(); }
-#line 738 "Sheep.tab.cc" // lalr1.cc:859
+#line 752 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 37:
-#line 194 "Sheep.yy" // lalr1.cc:859
+#line 200 "Sheep.yy" // lalr1.cc:859
     { builder.BranchGoto(yystack_[1].value.as< std::string > ()); }
-#line 744 "Sheep.tab.cc" // lalr1.cc:859
+#line 758 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 38:
-#line 195 "Sheep.yy" // lalr1.cc:859
+#line 201 "Sheep.yy" // lalr1.cc:859
     { builder.AddGoto(yystack_[1].value.as< std::string > ()); }
-#line 750 "Sheep.tab.cc" // lalr1.cc:859
+#line 764 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 39:
-#line 196 "Sheep.yy" // lalr1.cc:859
+#line 202 "Sheep.yy" // lalr1.cc:859
     { builder.BeginWait(); builder.EndWait(); }
-#line 756 "Sheep.tab.cc" // lalr1.cc:859
+#line 770 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 40:
-#line 197 "Sheep.yy" // lalr1.cc:859
+#line 203 "Sheep.yy" // lalr1.cc:859
     { builder.BeginWait(); }
-#line 762 "Sheep.tab.cc" // lalr1.cc:859
+#line 776 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 41:
-#line 197 "Sheep.yy" // lalr1.cc:859
+#line 203 "Sheep.yy" // lalr1.cc:859
     { builder.EndWait(); }
-#line 768 "Sheep.tab.cc" // lalr1.cc:859
+#line 782 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 42:
-#line 198 "Sheep.yy" // lalr1.cc:859
+#line 204 "Sheep.yy" // lalr1.cc:859
     { builder.BeginWait(); }
-#line 774 "Sheep.tab.cc" // lalr1.cc:859
+#line 788 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 43:
-#line 198 "Sheep.yy" // lalr1.cc:859
+#line 204 "Sheep.yy" // lalr1.cc:859
     { builder.EndWait(); }
-#line 780 "Sheep.tab.cc" // lalr1.cc:859
+#line 794 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 45:
-#line 200 "Sheep.yy" // lalr1.cc:859
+#line 206 "Sheep.yy" // lalr1.cc:859
     { }
-#line 786 "Sheep.tab.cc" // lalr1.cc:859
+#line 800 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 48:
-#line 210 "Sheep.yy" // lalr1.cc:859
-    { builder.CallSysFunction(yystack_[3].value.as< std::string > ()); }
-#line 792 "Sheep.tab.cc" // lalr1.cc:859
+#line 215 "Sheep.yy" // lalr1.cc:859
+    { yylhs.value.as< SheepValue > () = yystack_[0].value.as< SheepValue > (); }
+#line 806 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 49:
-#line 214 "Sheep.yy" // lalr1.cc:859
-    { }
-#line 798 "Sheep.tab.cc" // lalr1.cc:859
+#line 216 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.Load(yystack_[0].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 812 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 50:
-#line 215 "Sheep.yy" // lalr1.cc:859
-    { }
-#line 804 "Sheep.tab.cc" // lalr1.cc:859
+#line 217 "Sheep.yy" // lalr1.cc:859
+    { builder.PushI(yystack_[0].value.as< int > ()); yylhs.value.as< SheepValue > () = SheepValue(yystack_[0].value.as< int > ()); }
+#line 818 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 51:
-#line 216 "Sheep.yy" // lalr1.cc:859
-    { }
-#line 810 "Sheep.tab.cc" // lalr1.cc:859
+#line 218 "Sheep.yy" // lalr1.cc:859
+    { builder.PushF(yystack_[0].value.as< float > ()); yylhs.value.as< SheepValue > () = SheepValue(yystack_[0].value.as< float > ()); }
+#line 824 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 52:
-#line 220 "Sheep.yy" // lalr1.cc:859
-    { }
-#line 816 "Sheep.tab.cc" // lalr1.cc:859
+#line 221 "Sheep.yy" // lalr1.cc:859
+    { builder.AddStringConst(yystack_[0].value.as< std::string > ()); builder.PushS(yystack_[0].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(""); }
+#line 830 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 53:
-#line 221 "Sheep.yy" // lalr1.cc:859
-    { builder.Load(yystack_[0].value.as< std::string > ()); }
-#line 822 "Sheep.tab.cc" // lalr1.cc:859
+#line 223 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.Add(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 836 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 54:
-#line 222 "Sheep.yy" // lalr1.cc:859
-    { }
-#line 828 "Sheep.tab.cc" // lalr1.cc:859
+#line 224 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.Subtract(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 842 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 55:
-#line 223 "Sheep.yy" // lalr1.cc:859
-    { }
-#line 834 "Sheep.tab.cc" // lalr1.cc:859
+#line 225 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.Multiply(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 848 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 56:
-#line 224 "Sheep.yy" // lalr1.cc:859
-    { builder.AddStringConst(yystack_[0].value.as< std::string > ()); builder.PushS(yystack_[0].value.as< std::string > ()); }
-#line 840 "Sheep.tab.cc" // lalr1.cc:859
+#line 226 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.Divide(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 854 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 57:
-#line 225 "Sheep.yy" // lalr1.cc:859
-    { }
-#line 846 "Sheep.tab.cc" // lalr1.cc:859
+#line 227 "Sheep.yy" // lalr1.cc:859
+    { builder.Modulo(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(SheepValueType::Int); }
+#line 860 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 58:
 #line 228 "Sheep.yy" // lalr1.cc:859
-    { builder.PushI(yystack_[0].value.as< int > ()); yylhs.value.as< int > () = yystack_[0].value.as< int > (); }
-#line 852 "Sheep.tab.cc" // lalr1.cc:859
+    { builder.Negate(yystack_[0].value.as< SheepValue > ()); }
+#line 866 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 59:
-#line 229 "Sheep.yy" // lalr1.cc:859
-    { builder.AddI(); }
-#line 858 "Sheep.tab.cc" // lalr1.cc:859
+#line 230 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.IsLess(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 872 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 60:
-#line 230 "Sheep.yy" // lalr1.cc:859
-    { builder.SubtractI(); }
-#line 864 "Sheep.tab.cc" // lalr1.cc:859
+#line 231 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.IsGreater(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 878 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 61:
-#line 231 "Sheep.yy" // lalr1.cc:859
-    { builder.MultiplyI(); }
-#line 870 "Sheep.tab.cc" // lalr1.cc:859
+#line 232 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.IsLessEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 884 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 62:
-#line 232 "Sheep.yy" // lalr1.cc:859
-    { builder.DivideI(); }
-#line 876 "Sheep.tab.cc" // lalr1.cc:859
+#line 233 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.IsGreaterEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 890 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 63:
-#line 233 "Sheep.yy" // lalr1.cc:859
-    { builder.Modulo(); }
-#line 882 "Sheep.tab.cc" // lalr1.cc:859
+#line 234 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.IsEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 896 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 64:
-#line 234 "Sheep.yy" // lalr1.cc:859
-    { builder.NegateI(); }
-#line 888 "Sheep.tab.cc" // lalr1.cc:859
+#line 235 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.IsNotEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 902 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 65:
 #line 236 "Sheep.yy" // lalr1.cc:859
-    { builder.IsLessI(); }
-#line 894 "Sheep.tab.cc" // lalr1.cc:859
+    { }
+#line 908 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 66:
 #line 237 "Sheep.yy" // lalr1.cc:859
-    { builder.IsGreaterI(); }
-#line 900 "Sheep.tab.cc" // lalr1.cc:859
+    { }
+#line 914 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 67:
 #line 238 "Sheep.yy" // lalr1.cc:859
-    { builder.IsLessEqualI(); }
-#line 906 "Sheep.tab.cc" // lalr1.cc:859
+    { }
+#line 920 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 68:
-#line 239 "Sheep.yy" // lalr1.cc:859
-    { builder.IsGreaterEqualI(); }
-#line 912 "Sheep.tab.cc" // lalr1.cc:859
+#line 240 "Sheep.yy" // lalr1.cc:859
+    { yylhs.value.as< SheepValue > () = yystack_[1].value.as< SheepValue > (); }
+#line 926 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 69:
-#line 240 "Sheep.yy" // lalr1.cc:859
-    { builder.IsNotEqualI(); }
-#line 918 "Sheep.tab.cc" // lalr1.cc:859
+#line 245 "Sheep.yy" // lalr1.cc:859
+    { auto type = builder.CallSysFunction(yystack_[3].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
+#line 932 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 70:
-#line 241 "Sheep.yy" // lalr1.cc:859
-    { builder.IsEqualI(); }
-#line 924 "Sheep.tab.cc" // lalr1.cc:859
+#line 249 "Sheep.yy" // lalr1.cc:859
+    { }
+#line 938 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 71:
-#line 242 "Sheep.yy" // lalr1.cc:859
-    { builder.Or(); }
-#line 930 "Sheep.tab.cc" // lalr1.cc:859
+#line 250 "Sheep.yy" // lalr1.cc:859
+    { }
+#line 944 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 72:
-#line 243 "Sheep.yy" // lalr1.cc:859
-    { builder.And(); }
-#line 936 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 73:
-#line 244 "Sheep.yy" // lalr1.cc:859
-    { builder.Not(); }
-#line 942 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 74:
-#line 247 "Sheep.yy" // lalr1.cc:859
-    { builder.PushF(yystack_[0].value.as< float > ()); yylhs.value.as< float > () = yystack_[0].value.as< float > (); }
-#line 948 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 75:
-#line 248 "Sheep.yy" // lalr1.cc:859
-    { builder.AddF(); }
-#line 954 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 76:
-#line 249 "Sheep.yy" // lalr1.cc:859
-    { builder.SubtractF(); }
-#line 960 "Sheep.tab.cc" // lalr1.cc:859
+#line 251 "Sheep.yy" // lalr1.cc:859
+    { }
+#line 950 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 77:
-#line 250 "Sheep.yy" // lalr1.cc:859
-    { builder.MultiplyF(); }
-#line 966 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 78:
-#line 251 "Sheep.yy" // lalr1.cc:859
-    { builder.DivideF(); }
-#line 972 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 79:
-#line 252 "Sheep.yy" // lalr1.cc:859
-    { builder.NegateF(); }
-#line 978 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 80:
-#line 254 "Sheep.yy" // lalr1.cc:859
-    { builder.IsLessF(); }
-#line 984 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 81:
-#line 255 "Sheep.yy" // lalr1.cc:859
-    { builder.IsGreaterF(); }
-#line 990 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 82:
-#line 256 "Sheep.yy" // lalr1.cc:859
-    { builder.IsLessEqualF(); }
-#line 996 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 83:
-#line 257 "Sheep.yy" // lalr1.cc:859
-    { builder.IsGreaterEqualF(); }
-#line 1002 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 84:
-#line 258 "Sheep.yy" // lalr1.cc:859
-    { builder.IsNotEqualF(); }
-#line 1008 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 85:
-#line 259 "Sheep.yy" // lalr1.cc:859
-    { builder.IsEqualF(); }
-#line 1014 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 86:
-#line 260 "Sheep.yy" // lalr1.cc:859
-    { builder.Or(); }
-#line 1020 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 87:
-#line 261 "Sheep.yy" // lalr1.cc:859
-    { builder.And(); }
-#line 1026 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 88:
-#line 262 "Sheep.yy" // lalr1.cc:859
-    { builder.Not(); }
-#line 1032 "Sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 93:
-#line 273 "Sheep.yy" // lalr1.cc:859
+#line 321 "Sheep.yy" // lalr1.cc:859
     { }
-#line 1038 "Sheep.tab.cc" // lalr1.cc:859
+#line 956 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
 
-#line 1042 "Sheep.tab.cc" // lalr1.cc:859
+#line 960 "Sheep.tab.cc" // lalr1.cc:859
             default:
               break;
             }
@@ -1204,31 +1122,28 @@ namespace Sheep {
   }
 
 
-  const signed char Parser::yypact_ninf_ = -74;
+  const signed char Parser::yypact_ninf_ = -61;
 
   const signed char Parser::yytable_ninf_ = -43;
 
   const short int
   Parser::yypact_[] =
   {
-      33,     1,    13,   -74,    41,    48,   -74,   -74,   -74,    73,
-     -74,   -74,    -3,    23,    30,    59,    84,   -74,    -7,   -74,
-     -74,    67,    97,   119,   -74,   -74,   -74,     2,   126,   -21,
-     -21,   -74,   -74,   -74,   122,   172,   188,   -74,   135,   -74,
-     130,   -74,   -74,   116,   124,   127,   -74,    -7,   145,   -74,
-     -74,   143,   121,   -74,   132,   144,   -74,   -74,   -74,    -7,
-      -7,   -74,   -74,   -74,   -74,   -74,   -14,   -14,   -14,   -14,
-     -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -14,   -11,
-     -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11,
-     -11,    -1,   -74,   155,   140,    72,   141,   115,   148,   120,
-     167,   -74,   -74,   -74,   -74,   -74,   171,    35,   -74,   -14,
-     -14,   199,   210,   240,   240,    80,    80,    80,    80,    62,
-      62,   -74,   -74,   -74,   -11,   -11,   222,   232,    74,    74,
-     -32,   -32,   -32,   -32,    50,    50,   -74,   -74,   -74,   -74,
-     -74,   158,   157,   -74,   161,   168,   -74,   170,   256,   -74,
-     180,   147,   -74,    -7,   -74,   201,   -74,   255,   -74,   257,
-     -74,   258,   -74,   -74,   -74,   -74,   261,   263,   264,   173,
-     -74,   -74,   -74,   -74
+       4,    11,    16,   -61,    38,     8,   -61,   -61,   -61,    54,
+     -61,   -61,    -8,     6,    25,    13,    31,   -61,   -11,   -61,
+     -61,    21,    51,    52,   -61,   -61,   -61,    -9,    53,   -11,
+     -11,   -61,   -61,   196,   -61,   -61,    59,   -61,    60,   -61,
+     -61,    44,    57,    61,   -61,   -11,    77,   -61,   -61,   170,
+      80,   -61,    63,    75,   -61,   -61,   -61,   -11,   -11,   -61,
+     -61,   -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11,   -11,
+     -11,   -11,   -11,   -11,    20,   -61,    89,    64,    -6,    81,
+      14,    88,    48,   183,   -61,   -61,   -61,   -61,   -61,   140,
+     196,    -5,   208,   219,   152,   152,    74,    74,    74,    74,
+      35,    35,   -61,   -61,   -61,   -61,   -61,   -61,    79,    82,
+     -61,    94,    95,   -61,   100,   101,   -61,   118,   115,   -61,
+     -11,   -61,   119,   -61,   107,   -61,   108,   -61,   109,   -61,
+     -61,   196,   -61,   121,   123,   126,   141,   -61,   -61,   -61,
+     -61
   };
 
   const unsigned char
@@ -1236,108 +1151,99 @@ namespace Sheep {
   {
        2,     0,     0,    30,     0,     3,     4,    26,     8,     0,
        1,     5,     0,     0,     0,     0,     0,    45,     0,    30,
-       6,    40,     0,     0,    58,    74,    56,    53,     0,     0,
-       0,    31,    44,    52,     0,    54,    55,    46,    89,    25,
-       0,    27,     7,     0,     0,     0,     9,     0,     0,    34,
-      53,     0,     0,    39,     0,     0,    35,    36,    38,     0,
-      49,    73,    88,    64,    79,    33,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,    90,     0,    13,     0,    17,     0,    21,     0,
-       0,    37,    57,    47,    41,    30,     0,     0,    50,     0,
-       0,    71,    72,    70,    69,    65,    67,    66,    68,    59,
-      60,    61,    62,    63,     0,     0,    86,    87,    85,    84,
-      80,    82,    81,    83,    75,    76,    77,    78,    92,    93,
-      28,     0,     0,    10,     0,     0,    11,     0,     0,    12,
-       0,     0,    32,     0,    48,     0,    14,    15,    18,    19,
-      22,    23,    91,    43,    51,    30,     0,     0,     0,     0,
-      16,    20,    24,    29
+       6,    40,     0,     0,    50,    51,    52,    49,     0,     0,
+       0,    31,    44,    33,    48,    46,    73,    25,     0,    27,
+       7,     0,     0,     0,     9,     0,     0,    34,    49,     0,
+       0,    39,     0,     0,    35,    36,    38,     0,    70,    67,
+      58,     0,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,    74,     0,    13,     0,    17,
+       0,    21,     0,     0,    37,    68,    47,    41,    30,     0,
+      71,     0,    65,    66,    63,    64,    59,    61,    60,    62,
+      53,    54,    55,    56,    57,    76,    77,    28,     0,     0,
+      10,     0,     0,    11,     0,     0,    12,     0,     0,    32,
+       0,    69,     0,    14,    15,    18,    19,    22,    23,    75,
+      43,    72,    30,     0,     0,     0,     0,    16,    20,    24,
+      29
   };
 
   const short int
   Parser::yypgoto_[] =
   {
-     -74,   -74,   -74,   -74,   -74,   -74,   -74,   -74,   286,   -74,
-     -74,   -74,   -19,   -74,   -74,   -74,   -73,   239,   -74,   -17,
-      -2,   -27,   203,   -74,   -74
+     -61,   -61,   -61,   -61,   -61,   -61,   -61,   -61,   146,   -61,
+     -61,   -61,   -19,   -61,   -61,   -61,   -60,   -17,   104,   -61,
+      90,   -61,   -61
   };
 
-  const short int
+  const signed char
   Parser::yydefgoto_[] =
   {
-      -1,     4,     5,    13,    46,    95,    97,    99,     6,    12,
-      41,   155,     9,    31,    54,    55,    32,    33,   107,    34,
-      35,    36,    37,    38,    92
+      -1,     4,     5,    13,    44,    78,    80,    82,     6,    12,
+      39,   122,     9,    31,    52,    53,    32,    33,    34,    91,
+      35,    36,    75
   };
 
   const short int
   Parser::yytable_[] =
   {
-      52,    51,    62,    64,    14,    24,    25,    18,    87,    88,
-      89,    90,    24,    58,    39,    19,    25,     7,   138,    24,
-      25,    26,    50,    28,    29,    30,    40,    61,    63,     8,
-     100,   109,   110,    59,   124,   125,     1,     2,    29,    30,
-      42,    10,   106,   108,    47,   153,    43,    44,    45,     3,
-     154,     1,   126,   127,   128,   129,   130,   131,   132,   133,
-     134,   135,   136,   137,   111,   112,   113,   114,   115,   116,
-     117,   118,   119,   120,   121,   122,   123,   162,    14,    53,
-      15,    16,   142,   -42,   143,    17,   151,    18,    48,    19,
-      20,    21,    89,    90,    22,    23,    49,    62,    64,    24,
-      25,    26,    27,    28,    76,    77,    78,    61,    63,    56,
-      83,    84,    85,    86,    87,    88,    89,    90,    29,    30,
-      74,    75,    76,    77,    78,   145,    14,   146,    15,    16,
-     148,    57,   149,    17,    65,    18,   164,    19,   103,    21,
-      60,    91,    22,    23,    93,    94,   169,    24,    25,    26,
-      27,    28,    14,    96,    15,    16,    98,   101,   102,    17,
-     105,    18,    28,    19,   163,    21,    29,    30,    22,    23,
-     140,   141,   144,    24,    25,    26,    27,    28,    14,   147,
-      15,    16,   150,   152,   156,    17,   157,    18,   158,    19,
-     173,    21,    29,    30,    22,    23,    19,   159,   160,    24,
-      25,    26,    27,    28,    66,    67,    68,    69,    70,    71,
-      72,    73,    74,    75,    76,    77,    78,   165,    29,    30,
-      79,    80,    81,    82,    83,    84,    85,    86,    87,    88,
-      89,    90,    67,    68,    69,    70,    71,    72,    73,    74,
-      75,    76,    77,    78,    68,    69,    70,    71,    72,    73,
-      74,    75,    76,    77,    78,    80,    81,    82,    83,    84,
-      85,    86,    87,    88,    89,    90,    81,    82,    83,    84,
-      85,    86,    87,    88,    89,    90,    70,    71,    72,    73,
-      74,    75,    76,    77,    78,   161,   166,   170,   167,   168,
-     171,    11,   172,   104,   139
+      50,    49,    56,    18,   109,   120,   110,     1,     2,    37,
+     121,     1,    59,    60,   105,    24,    25,    26,    48,    28,
+       3,    38,    57,    40,   112,    14,   113,     7,    83,    41,
+      42,    43,     8,    51,    29,    30,    19,   -42,    10,    45,
+      89,    90,    46,    47,    92,    93,    94,    95,    96,    97,
+      98,    99,   100,   101,   102,   103,   104,   129,   115,    14,
+     116,    15,    16,    54,    55,    74,    17,    58,    18,   118,
+      19,    20,    21,    77,    76,    22,    23,    71,    72,    73,
+      24,    25,    26,    27,    28,    14,    79,    15,    16,    84,
+      81,    88,    17,    28,    18,   108,    19,    86,    21,    29,
+      30,    22,    23,   131,   107,   123,    24,    25,    26,    27,
+      28,   124,   111,   136,    69,    70,    71,    72,    73,   114,
+      14,   125,    15,    16,   126,    29,    30,    17,   127,    18,
+     128,    19,   130,    21,    19,   132,    22,    23,   133,   134,
+     135,    24,    25,    26,    27,    28,    14,   137,    15,    16,
+     138,    11,   119,    17,   139,    18,    87,    19,   140,    21,
+      29,    30,    22,    23,   106,     0,     0,    24,    25,    26,
+      27,    28,    61,    62,    63,    64,    65,    66,    67,    68,
+      69,    70,    71,    72,    73,    85,    29,    30,    65,    66,
+      67,    68,    69,    70,    71,    72,    73,     0,   117,     0,
+       0,     0,    61,    62,    63,    64,    65,    66,    67,    68,
+      69,    70,    71,    72,    73,    61,    62,    63,    64,    65,
+      66,    67,    68,    69,    70,    71,    72,    73,    61,    62,
+      63,    64,    65,    66,    67,    68,    69,    70,    71,    72,
+      73,    62,    63,    64,    65,    66,    67,    68,    69,    70,
+      71,    72,    73,    63,    64,    65,    66,    67,    68,    69,
+      70,    71,    72,    73
   };
 
-  const unsigned char
+  const short int
   Parser::yycheck_[] =
   {
-      19,    18,    29,    30,     5,    26,    27,    14,    40,    41,
-      42,    43,    26,    11,    17,    16,    27,    16,    91,    26,
-      27,    28,    29,    30,    45,    46,    29,    29,    30,    16,
-      47,    45,    46,    31,    45,    46,     3,     4,    45,    46,
-      17,     0,    59,    60,    14,    10,    23,    24,    25,    16,
-      15,     3,    79,    80,    81,    82,    83,    84,    85,    86,
-      87,    88,    89,    90,    66,    67,    68,    69,    70,    71,
-      72,    73,    74,    75,    76,    77,    78,   150,     5,    12,
-       7,     8,    10,    16,    12,    12,   105,    14,    29,    16,
-      17,    18,    42,    43,    21,    22,    12,   124,   125,    26,
-      27,    28,    29,    30,    42,    43,    44,   109,   110,    12,
-      36,    37,    38,    39,    40,    41,    42,    43,    45,    46,
-      40,    41,    42,    43,    44,    10,     5,    12,     7,     8,
-      10,    12,    12,    12,    12,    14,   153,    16,    17,    18,
-      14,     6,    21,    22,    14,    29,   165,    26,    27,    28,
-      29,    30,     5,    29,     7,     8,    29,    12,    15,    12,
-      16,    14,    30,    16,    17,    18,    45,    46,    21,    22,
-      15,    31,    31,    26,    27,    28,    29,    30,     5,    31,
-       7,     8,    15,    12,    26,    12,    29,    14,    27,    16,
-      17,    18,    45,    46,    21,    22,    16,    29,    28,    26,
-      27,    28,    29,    30,    32,    33,    34,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    16,    45,    46,
-      32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
-      42,    43,    33,    34,    35,    36,    37,    38,    39,    40,
-      41,    42,    43,    44,    34,    35,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    33,    34,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    34,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    29,    31,    26,    31,    31,
-      27,     5,    28,    54,    91
+      19,    18,    11,    14,    10,    10,    12,     3,     4,    17,
+      15,     3,    29,    30,    74,    26,    27,    28,    29,    30,
+      16,    29,    31,    17,    10,     5,    12,    16,    45,    23,
+      24,    25,    16,    12,    45,    46,    16,    16,     0,    14,
+      57,    58,    29,    12,    61,    62,    63,    64,    65,    66,
+      67,    68,    69,    70,    71,    72,    73,   117,    10,     5,
+      12,     7,     8,    12,    12,     6,    12,    14,    14,    88,
+      16,    17,    18,    29,    14,    21,    22,    42,    43,    44,
+      26,    27,    28,    29,    30,     5,    29,     7,     8,    12,
+      29,    16,    12,    30,    14,    31,    16,    17,    18,    45,
+      46,    21,    22,   120,    15,    26,    26,    27,    28,    29,
+      30,    29,    31,   132,    40,    41,    42,    43,    44,    31,
+       5,    27,     7,     8,    29,    45,    46,    12,    28,    14,
+      29,    16,    17,    18,    16,    16,    21,    22,    31,    31,
+      31,    26,    27,    28,    29,    30,     5,    26,     7,     8,
+      27,     5,    12,    12,    28,    14,    52,    16,    17,    18,
+      45,    46,    21,    22,    74,    -1,    -1,    26,    27,    28,
+      29,    30,    32,    33,    34,    35,    36,    37,    38,    39,
+      40,    41,    42,    43,    44,    15,    45,    46,    36,    37,
+      38,    39,    40,    41,    42,    43,    44,    -1,    15,    -1,
+      -1,    -1,    32,    33,    34,    35,    36,    37,    38,    39,
+      40,    41,    42,    43,    44,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    32,    33,
+      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
+      44,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    44
   };
 
   const unsigned char
@@ -1346,21 +1252,18 @@ namespace Sheep {
        0,     3,     4,    16,    48,    49,    55,    16,    16,    59,
        0,    55,    56,    50,     5,     7,     8,    12,    14,    16,
       17,    18,    21,    22,    26,    27,    28,    29,    30,    45,
-      46,    60,    63,    64,    66,    67,    68,    69,    70,    17,
-      29,    57,    17,    23,    24,    25,    51,    14,    29,    12,
-      29,    66,    59,    12,    61,    62,    12,    12,    11,    31,
-      14,    67,    68,    67,    68,    12,    32,    33,    34,    35,
-      36,    37,    38,    39,    40,    41,    42,    43,    44,    32,
-      33,    34,    35,    36,    37,    38,    39,    40,    41,    42,
-      43,     6,    71,    14,    29,    52,    29,    53,    29,    54,
-      66,    12,    15,    17,    64,    16,    66,    65,    66,    45,
-      46,    67,    67,    67,    67,    67,    67,    67,    67,    67,
-      67,    67,    67,    67,    45,    46,    68,    68,    68,    68,
-      68,    68,    68,    68,    68,    68,    68,    68,    63,    69,
-      15,    31,    10,    12,    31,    10,    12,    31,    10,    12,
-      15,    59,    12,    10,    15,    58,    26,    29,    27,    29,
-      28,    29,    63,    17,    66,    16,    31,    31,    31,    59,
-      26,    27,    28,    17
+      46,    60,    63,    64,    65,    67,    68,    17,    29,    57,
+      17,    23,    24,    25,    51,    14,    29,    12,    29,    64,
+      59,    12,    61,    62,    12,    12,    11,    31,    14,    64,
+      64,    32,    33,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    44,     6,    69,    14,    29,    52,    29,
+      53,    29,    54,    64,    12,    15,    17,    65,    16,    64,
+      64,    66,    64,    64,    64,    64,    64,    64,    64,    64,
+      64,    64,    64,    64,    64,    63,    67,    15,    31,    10,
+      12,    31,    10,    12,    31,    10,    12,    15,    59,    12,
+      10,    15,    58,    26,    29,    27,    29,    28,    29,    63,
+      17,    64,    16,    31,    31,    31,    59,    26,    27,    28,
+      17
   };
 
   const unsigned char
@@ -1370,12 +1273,10 @@ namespace Sheep {
       51,    51,    51,    52,    52,    52,    52,    53,    53,    53,
       53,    54,    54,    54,    54,    55,    56,    56,    58,    57,
       59,    59,    60,    60,    60,    60,    60,    60,    60,    60,
-      61,    60,    62,    60,    60,    60,    60,    63,    64,    65,
-      65,    65,    66,    66,    66,    66,    66,    66,    67,    67,
-      67,    67,    67,    67,    67,    67,    67,    67,    67,    67,
-      67,    67,    67,    67,    68,    68,    68,    68,    68,    68,
-      68,    68,    68,    68,    68,    68,    68,    68,    68,    69,
-      69,    70,    71,    71
+      61,    60,    62,    60,    60,    60,    60,    63,    64,    64,
+      64,    64,    64,    64,    64,    64,    64,    64,    64,    64,
+      64,    64,    64,    64,    64,    64,    64,    64,    64,    65,
+      66,    66,    66,    67,    67,    68,    69,    69
   };
 
   const unsigned char
@@ -1384,13 +1285,11 @@ namespace Sheep {
        0,     2,     0,     1,     1,     2,     3,     4,     0,     2,
        3,     3,     3,     1,     3,     3,     5,     1,     3,     3,
        5,     1,     3,     3,     5,     4,     0,     2,     0,     7,
-       0,     2,     4,     2,     2,     2,     2,     3,     2,     2,
-       0,     3,     0,     5,     1,     1,     1,     3,     4,     0,
-       1,     3,     1,     1,     1,     1,     1,     3,     1,     3,
-       3,     3,     3,     3,     2,     3,     3,     3,     3,     3,
-       3,     3,     3,     2,     1,     3,     3,     3,     3,     2,
-       3,     3,     3,     3,     3,     3,     3,     3,     2,     1,
-       2,     5,     2,     2
+       0,     2,     4,     1,     2,     2,     2,     3,     2,     2,
+       0,     3,     0,     5,     1,     1,     1,     3,     1,     1,
+       1,     1,     1,     3,     3,     3,     3,     3,     2,     3,
+       3,     3,     3,     3,     3,     3,     3,     2,     3,     4,
+       0,     1,     3,     1,     2,     5,     2,     2
   };
 
 
@@ -1410,25 +1309,22 @@ namespace Sheep {
   "script", "symbols_section", "symbol_decls", "symbol_decl",
   "symbol_decl_int", "symbol_decl_float", "symbol_decl_string",
   "code_section", "functions", "function", "$@1", "statements",
-  "statement", "$@2", "$@3", "statements_block", "sysfunc_call",
-  "sysfunc_call_args", "expr", "int_expr", "float_expr", "if_else_block",
-  "if_statement", "else_statement", YY_NULLPTR
+  "statement", "$@2", "$@3", "statements_block", "expr", "sysfunc_call",
+  "sysfunc_call_args", "if_else_block", "if_statement", "else_statement", YY_NULLPTR
   };
 
 
   const unsigned short int
   Parser::yyrline_[] =
   {
-       0,   125,   125,   126,   127,   128,   129,   134,   137,   138,
-     144,   145,   146,   149,   150,   151,   152,   155,   156,   157,
-     158,   161,   162,   163,   164,   170,   174,   175,   180,   180,
-     184,   185,   189,   190,   191,   192,   193,   194,   195,   196,
-     197,   197,   198,   198,   199,   200,   201,   205,   210,   214,
-     215,   216,   220,   221,   222,   223,   224,   225,   228,   229,
-     230,   231,   232,   233,   234,   236,   237,   238,   239,   240,
-     241,   242,   243,   244,   247,   248,   249,   250,   251,   252,
-     254,   255,   256,   257,   258,   259,   260,   261,   262,   265,
-     266,   269,   272,   273
+       0,   131,   131,   132,   133,   134,   135,   140,   143,   144,
+     150,   151,   152,   155,   156,   157,   158,   161,   162,   163,
+     164,   167,   168,   169,   170,   176,   180,   181,   186,   186,
+     190,   191,   195,   196,   197,   198,   199,   200,   201,   202,
+     203,   203,   204,   204,   205,   206,   207,   211,   215,   216,
+     217,   218,   221,   223,   224,   225,   226,   227,   228,   230,
+     231,   232,   233,   234,   235,   236,   237,   238,   240,   245,
+     249,   250,   251,   313,   314,   317,   320,   321
   };
 
   // Print the state stack on the debug stream.
@@ -1461,10 +1357,10 @@ namespace Sheep {
 #endif // YYDEBUG
 
 
-#line 18 "Sheep.yy" // lalr1.cc:1167
+#line 17 "Sheep.yy" // lalr1.cc:1167
 } // Sheep
-#line 1467 "Sheep.tab.cc" // lalr1.cc:1167
-#line 276 "Sheep.yy" // lalr1.cc:1168
+#line 1363 "Sheep.tab.cc" // lalr1.cc:1167
+#line 324 "Sheep.yy" // lalr1.cc:1168
 
 
 /* No epilogue is needed. */

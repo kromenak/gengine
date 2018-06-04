@@ -40,13 +40,14 @@
 #ifndef YY_YY_SHEEP_TAB_HH_INCLUDED
 # define YY_YY_SHEEP_TAB_HH_INCLUDED
 // //                    "%code requires" blocks.
-#line 32 "Sheep.yy" // lalr1.cc:392
+#line 31 "Sheep.yy" // lalr1.cc:392
 
 	class SheepScanner;
 	class SheepCompiler;
-	class SheepScriptBuilder;
+	#include "SheepScriptBuilder.h"
+	#include "SheepVM.h"
 
-#line 50 "Sheep.tab.hh" // lalr1.cc:392
+#line 51 "Sheep.tab.hh" // lalr1.cc:392
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -121,9 +122,9 @@
 # define YYDEBUG 0
 #endif
 
-#line 18 "Sheep.yy" // lalr1.cc:392
+#line 17 "Sheep.yy" // lalr1.cc:392
 namespace Sheep {
-#line 127 "Sheep.tab.hh" // lalr1.cc:392
+#line 128 "Sheep.tab.hh" // lalr1.cc:392
 
 
 
@@ -290,18 +291,20 @@ namespace Sheep {
     /// An auxiliary type to compute the largest semantic type.
     union union_type
     {
+      // expr
+      // sysfunc_call
+      char dummy1[sizeof(SheepValue)];
+
       // FLOAT
-      // float_expr
-      char dummy1[sizeof(float)];
+      char dummy2[sizeof(float)];
 
       // INT
-      // int_expr
-      char dummy2[sizeof(int)];
+      char dummy3[sizeof(int)];
 
       // STRING
       // USERID
       // SYSID
-      char dummy3[sizeof(std::string)];
+      char dummy4[sizeof(std::string)];
 };
 
     /// Symbol semantic values.
@@ -405,6 +408,8 @@ namespace Sheep {
       /// Constructor for valueless symbols, and symbols from each type.
 
   basic_symbol (typename Base::kind_type t, const location_type& l);
+
+  basic_symbol (typename Base::kind_type t, const SheepValue v, const location_type& l);
 
   basic_symbol (typename Base::kind_type t, const float v, const location_type& l);
 
@@ -737,14 +742,14 @@ namespace Sheep {
   static const short int yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
-  static const short int yydefgoto_[];
+  static const signed char yydefgoto_[];
 
   // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
   // positive, shift that token.  If negative, reduce the rule whose
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const short int yytable_[];
 
-  static const unsigned char yycheck_[];
+  static const short int yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -861,8 +866,8 @@ namespace Sheep {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 294,     ///< Last index in yytable_.
-      yynnts_ = 25,  ///< Number of nonterminal symbols.
+      yylast_ = 263,     ///< Last index in yytable_.
+      yynnts_ = 23,  ///< Number of nonterminal symbols.
       yyfinal_ = 10, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -950,13 +955,16 @@ namespace Sheep {
   {
       switch (other.type_get ())
     {
+      case 64: // expr
+      case 65: // sysfunc_call
+        value.copy< SheepValue > (other.value);
+        break;
+
       case 27: // FLOAT
-      case 68: // float_expr
         value.copy< float > (other.value);
         break;
 
       case 26: // INT
-      case 67: // int_expr
         value.copy< int > (other.value);
         break;
 
@@ -983,13 +991,16 @@ namespace Sheep {
     (void) v;
       switch (this->type_get ())
     {
+      case 64: // expr
+      case 65: // sysfunc_call
+        value.copy< SheepValue > (v);
+        break;
+
       case 27: // FLOAT
-      case 68: // float_expr
         value.copy< float > (v);
         break;
 
       case 26: // INT
-      case 67: // int_expr
         value.copy< int > (v);
         break;
 
@@ -1011,6 +1022,13 @@ namespace Sheep {
   Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const location_type& l)
     : Base (t)
     , value ()
+    , location (l)
+  {}
+
+  template <typename Base>
+  Parser::basic_symbol<Base>::basic_symbol (typename Base::kind_type t, const SheepValue v, const location_type& l)
+    : Base (t)
+    , value (v)
     , location (l)
   {}
 
@@ -1061,13 +1079,16 @@ namespace Sheep {
     // Type destructor.
     switch (yytype)
     {
+      case 64: // expr
+      case 65: // sysfunc_call
+        value.template destroy< SheepValue > ();
+        break;
+
       case 27: // FLOAT
-      case 68: // float_expr
         value.template destroy< float > ();
         break;
 
       case 26: // INT
-      case 67: // int_expr
         value.template destroy< int > ();
         break;
 
@@ -1100,13 +1121,16 @@ namespace Sheep {
     super_type::move(s);
       switch (this->type_get ())
     {
+      case 64: // expr
+      case 65: // sysfunc_call
+        value.move< SheepValue > (s.value);
+        break;
+
       case 27: // FLOAT
-      case 68: // float_expr
         value.move< float > (s.value);
         break;
 
       case 26: // INT
-      case 67: // int_expr
         value.move< int > (s.value);
         break;
 
@@ -1451,9 +1475,9 @@ namespace Sheep {
   }
 
 
-#line 18 "Sheep.yy" // lalr1.cc:392
+#line 17 "Sheep.yy" // lalr1.cc:392
 } // Sheep
-#line 1457 "Sheep.tab.hh" // lalr1.cc:392
+#line 1481 "Sheep.tab.hh" // lalr1.cc:392
 
 
 

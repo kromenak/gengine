@@ -62,6 +62,9 @@ bool GEngine::Initialize()
     //mAssetManager.WriteBarnAssetToFile("A014ED3S.6JD");
     //mAssetManager.WriteOutAssetsOfType("YAK");
     
+    // Initialize sheep manager.
+    Services::SetSheep(&mSheepManager);
+    
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
     
@@ -72,10 +75,12 @@ bool GEngine::Initialize()
     //SheepCompiler compiler;
     //compiler.Compile("/Users/Clark/Dropbox/GK3/Assets/ArgOrder.shp");
     
-    LoadScene("RC3");
+    LoadScene("RC1");
     
     //Audio* vo = mAssetManager.LoadAudio("A014ED3S.6JD");
     //mAudioManager.Play(vo);
+    
+    std::cout << (10 / 5.24f) << std::endl;
     
     //Yak* yak = mAssetManager.LoadYak("E014ED3S6J7.YAK");
     return true;

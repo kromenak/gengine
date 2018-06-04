@@ -33,6 +33,8 @@ public:
     
     std::vector<SheepValue> GetVariables() { return mVariables; }
     
+    int GetFunctionOffset(std::string functionName); 
+    
     char* GetBytecode() { return mBytecode; }
     int GetBytecodeLength() { return mBytecodeLength; }
     

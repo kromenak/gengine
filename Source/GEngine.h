@@ -9,6 +9,7 @@
 #include "AudioManager.h"
 #include "AssetManager.h"
 #include "InputManager.h"
+#include "SheepManager.h"
 #include <vector>
 
 class Actor;
@@ -45,6 +46,7 @@ private:
     AudioManager mAudioManager;
     AssetManager mAssetManager;
     InputManager mInputManager;
+    SheepManager mSheepManager;
     
     // The currently active scene. There can be only one at a time.
     Scene* mScene = nullptr;

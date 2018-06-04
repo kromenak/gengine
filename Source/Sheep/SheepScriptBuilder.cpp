@@ -156,7 +156,7 @@ void SheepScriptBuilder::Yield()
     AddInstruction(SheepInstruction::Yield);
 }
 
-void SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
+SheepValueType SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
 {
     #ifdef DEBUG_BUILDER
     std::cout << "SysFunc " << sysFuncName << std::endl;
@@ -170,14 +170,14 @@ void SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
             PushI((int)sysFunc.argumentTypes.size());
             
             // Add appropriate instruction based on function return type.
-            bool doPop = false;
+            SheepValueType valueType;
             if(sysFunc.returnType == 0)
             {
                 #ifdef DEBUG_BUILDER
                 std::cout << "CallSysFunctionV" << std::endl;
                 #endif
                 AddInstruction(SheepInstruction::CallSysFunctionV);
-                doPop = true;
+                valueType = SheepValueType::Void;
             }
             else if(sysFunc.returnType == 1)
             {
@@ -185,6 +185,7 @@ void SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
                 std::cout << "CallSysFunctionI" << std::endl;
                 #endif
                 AddInstruction(SheepInstruction::CallSysFunctionI);
+                valueType = SheepValueType::Int;
             }
             else if(sysFunc.returnType == 2)
             {
@@ -192,6 +193,7 @@ void SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
                 std::cout << "CallSysFunctionF" << std::endl;
                 #endif
                 AddInstruction(SheepInstruction::CallSysFunctionF);
+                valueType = SheepValueType::Float;
             }
             else if(sysFunc.returnType == 3)
             {
@@ -199,34 +201,47 @@ void SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
                 std::cout << "CallSysFunctionS" << std::endl;
                 #endif
                 AddInstruction(SheepInstruction::CallSysFunctionS);
+                valueType = SheepValueType::String;
+            }
+            else
+            {
+                std::cout << "Invalid Return Type!" << std::endl;
+                return SheepValueType::Void;
             }
             
             // The argument for CallSysFunctionX is the index of the system function
-            // that is to be called. So, find the index and add that int arg.
+            // that is to be called. So, find the index or use list size by default
+            int sysFuncIndex = (int)mSysImports.size();
             for(int i = 0; i < mSysImports.size(); i++)
             {
                 if(mSysImports[i].name == sysFuncName)
                 {
-                    AddIntArg(i);
-                    return;
+                    sysFuncIndex = i;
+                    break;
                 }
             }
+            AddIntArg(sysFuncIndex);
             
-            // If we didn't find it, it means we've encountered a new system function call.
-            // Add it to the list and of system function imports and set the int arg.
-            AddIntArg((int)mSysImports.size());
-            mSysImports.push_back(sysFunc);
+            // Add sys func to imports list, if not already present.
+            if(sysFuncIndex == mSysImports.size())
+            {
+                mSysImports.push_back(sysFunc);
+            }
             
             // We may also need to do a pop for SysFunctionV calls.
-            if(doPop)
+            if(valueType == SheepValueType::Void)
             {
                 #ifdef DEBUG_BUILDER
                 std::cout << "Pop" << std::endl;
                 #endif
                 AddInstruction(SheepInstruction::Pop);
             }
+            return valueType;
         }
     }
+    
+    // Default - couldn't find this function, so it's just a void I guess.
+    return SheepValueType::Void;
 }
 
 void SheepScriptBuilder::BranchGoto(std::string labelName)
@@ -307,7 +322,7 @@ void SheepScriptBuilder::Store(std::string varName)
     }
 }
 
-void SheepScriptBuilder::Load(std::string varName)
+SheepValueType SheepScriptBuilder::Load(std::string varName)
 {
     auto it = mVariableIndexByName.find(varName);
     if(it != mVariableIndexByName.end())
@@ -329,8 +344,12 @@ void SheepScriptBuilder::Load(std::string varName)
                 AddInstruction(SheepInstruction::LoadS);
             }
             AddIntArg(varIndex);
+            return value.type;
         }
     }
+    
+    // Default return type is void; this is an error!
+    return SheepValueType::Void;
 }
 
 void SheepScriptBuilder::PushI(int arg)
@@ -371,6 +390,342 @@ void SheepScriptBuilder::PushS(std::string arg)
     }
 }
 
+// float plus int = float
+// int plus float = float
+// float minus int = float
+// int minus float = float
+// float multiply int = float
+// int multiply float = float
+// float divide int = float
+// int divide float = float
+
+SheepValueType SheepScriptBuilder::Add(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::AddF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::AddF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::AddF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::AddI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+SheepValueType SheepScriptBuilder::Subtract(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::SubtractF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::SubtractF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::SubtractF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::SubtractI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+SheepValueType SheepScriptBuilder::Multiply(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::MultiplyF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::MultiplyF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::MultiplyF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::MultiplyI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+SheepValueType SheepScriptBuilder::Divide(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::DivideF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::DivideF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::DivideF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::DivideI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+void SheepScriptBuilder::Negate(SheepValue val)
+{
+    if(val.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::NegateI);
+    }
+    else if(val.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::NegateF);
+    }
+    else
+    {
+        // Unsupported
+    }
+}
+
+SheepValueType SheepScriptBuilder::IsEqual(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::IsEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::IsEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::IsEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::IsEqualI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+SheepValueType SheepScriptBuilder::IsNotEqual(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::IsNotEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::IsNotEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::IsNotEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::IsNotEqualI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+SheepValueType SheepScriptBuilder::IsGreater(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::IsGreaterF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::IsGreaterF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::IsGreaterF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::IsGreaterI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+SheepValueType SheepScriptBuilder::IsLess(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::IsLessF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::IsLessF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::IsLessF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::IsLessI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+SheepValueType SheepScriptBuilder::IsGreaterEqual(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::IsGreaterEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::IsGreaterEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::IsGreaterEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::IsGreaterEqualI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        IToF(1);
+        AddInstruction(SheepInstruction::IsLessEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        IToF(0);
+        AddInstruction(SheepInstruction::IsLessEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        AddInstruction(SheepInstruction::IsLessEqualF);
+        return SheepValueType::Float;
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::IsLessEqualI);
+        return SheepValueType::Int;
+    }
+    else
+    {
+        // Unsupported
+        return SheepValueType::Void;
+    }
+}
+
+/*
 void SheepScriptBuilder::AddI()
 {
     #ifdef DEBUG_BUILDER
@@ -496,12 +851,46 @@ void SheepScriptBuilder::IsLessEqualF()
 {
     AddInstruction(SheepInstruction::IsLessEqualF);
 }
+*/
 
-//ITOF/FTOI
-
-void SheepScriptBuilder::Modulo()
+void SheepScriptBuilder::IToF(int index)
 {
-    AddInstruction(SheepInstruction::Modulo);
+    AddInstruction(SheepInstruction::IToF);
+    AddIntArg(index);
+}
+
+void SheepScriptBuilder::FToI(int index)
+{
+    AddInstruction(SheepInstruction::FToI);
+    AddIntArg(index);
+}
+
+void SheepScriptBuilder::Modulo(SheepValue val1, SheepValue val2)
+{
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        FToI(0);
+        AddInstruction(SheepInstruction::Modulo);
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        FToI(1);
+        AddInstruction(SheepInstruction::Modulo);
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        FToI(0);
+        FToI(1);
+        AddInstruction(SheepInstruction::Modulo);
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::Modulo);
+    }
+    else
+    {
+        // Unsupported
+    }
 }
 
 void SheepScriptBuilder::And()
