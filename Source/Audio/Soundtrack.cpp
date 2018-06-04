@@ -43,12 +43,22 @@ int SoundNode::Execute()
     if(randomCheck > random) { return 0; }
     
     // Definitely want to play the sound, if it exists.
-    Audio* audio = Services::GetAssets()->LoadAudio(soundName + ".WAV");
+    Audio* audio = Services::GetAssets()->LoadAudio(soundName);
     if(audio == nullptr) { return 0; }
     audio->SetIsMusic(true);
     
-    // Play audio and return audio length. Gotta convert seconds to milliseconds.
-    Services::GetAudio()->Play(audio, fadeInTimeMs);
+    // Play the audio correctly.
+    if(is3d)
+    {
+        std::cout << "Play 3D! " << position << std::endl;
+        Services::GetAudio()->Play3D(audio, position);
+    }
+    else
+    {
+        Services::GetAudio()->Play(audio, fadeInTimeMs);
+    }
+    
+    // Return audio length. Gotta convert seconds to milliseconds.
     return (int)(audio->GetDuration() * 1000.0f);
 }
 
@@ -121,6 +131,20 @@ void Soundtrack::ParseFromData(char *data, int dataLength)
             
             // Add it to prs sound nodes.
             prsSoundNodes.push_back(soundNode);
+        }
+        else if(StringUtil::EqualsIgnoreCase(section.name, "SOUNDTRACK"))
+        {
+            for(auto& pair : section.entries)
+            {
+                if(StringUtil::EqualsIgnoreCase(pair->key, "SoundType"))
+                {
+                    // Set soundtype.
+                }
+                else
+                {
+                    std::cout << "Unexpected key: " << pair->key << std::endl;
+                }
+            }
         }
         else
         {
