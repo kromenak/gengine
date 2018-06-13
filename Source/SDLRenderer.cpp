@@ -80,6 +80,9 @@ bool SDLRenderer::Initialize()
     // Our clear color will be BLACK!
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     
+    // For use with alpha blending during render loop.
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
     // Compile default shader.
     mShader = new GLShader("Assets/3D-Diffuse-Tex.vert", "Assets/3D-Diffuse-Tex.frag");
     if(!mShader->IsGood()) { return false; }
@@ -121,21 +124,21 @@ void SDLRenderer::Render()
     Matrix4 viewProjMatrix;
     
     // Draw the skybox first, if we have one.
+    // For skybox, we don't want to write into the depth mask, or else you can ONLY see skybox.
+    // This is because the skybox is actually just a small cube around the camera.
+    glDepthMask(GL_FALSE);
     if(mSkybox != nullptr)
     {
         // To get the "infinite distance" skybox effect, we need to use a look-at
         // matrix that doesn't take the camera's position into account.
         viewProjMatrix = projectionMatrix * mCameraComponent->GetLookAtMatrixNoTranslate();
         
-        glDepthMask(GL_FALSE);
-        
         mSkyboxShader->Activate();
         mSkyboxShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
         
         mSkybox->Render();
-        
-        glDepthMask(GL_TRUE);
     }
+    glDepthMask(GL_TRUE);
     
     // For the rest of rendering, the normal view/proj matrix is fine.
     viewProjMatrix = mCameraComponent->GetProjectionMatrix() * mCameraComponent->GetLookAtMatrix();
@@ -150,17 +153,24 @@ void SDLRenderer::Render()
     // Set the combined view/projection matrix based on the assigned camera.
     mShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
     
-    // Render an axis at the world origin.
+    // Render an axis at the world origin for debugging.
     glBindTexture(GL_TEXTURE_2D, 0);
     axes->DrawLines();
     
-    // Render all mesh components.
+    // Render all mesh components. (should do before or after BSP?)
     for(auto meshComponent : mMeshComponents)
     {
         meshComponent->Render();
     }
     
+    // Reset world matrix to identity for BSP rendering (or for next render cycle).
     SetWorldTransformMatrix(Matrix4::Identity);
+    
+    // From here, we need alpha blending.
+    // Since we render opaque and alpha BSP in one go, it needs to be on for BSP.
+    // And then we certainly need alpha blending for UI rendering.
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
     
     // Render the BSP.
     if(mBSP != nullptr)
@@ -172,6 +182,10 @@ void SDLRenderer::Render()
     //glEnable(GL_BLEND);
     //glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
     //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+    
+    // Reset for next render loop.
+    glDisable(GL_BLEND);
+    glDepthMask(GL_TRUE);
 }
 
 void SDLRenderer::Present()
