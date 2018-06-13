@@ -34,6 +34,8 @@ public:
     void LoadScene(std::string name);
     Scene* GetScene() { return mScene; }
     
+    std::string GetCurrentTimeCode();
+    
 private:
     // A list of all actors that currently exist in the game.
     static std::vector<Actor*> mActors;
@@ -56,7 +58,7 @@ private:
     // Day and time that the game is currently in.
     // GK3 takes place over three days and multiple time blocks.
     int mDay = 1;
-    int mTime = 10; // hour in a 24-hour clock
+    int mHour = 10; // hour in a 24-hour clock
     
     void ProcessInput();
     void Update();

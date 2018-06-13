@@ -12,25 +12,21 @@
 #include "GameCamera.h"
 #include "Math.h"
 
-Scene::Scene(std::string name, int day, int hour) :
+Scene::Scene(std::string name, std::string timeCode) :
     mGeneralName(name)
 {
-    //TODO: Maybe there should be a utility function to do this, or maybe enum is better or something?
-    std::string ampm = (hour <= 11) ? "A" : "P";
-    if(hour > 12) { hour -= 12; }
-    
     // Generate name for specific SIF.
-    mSpecificName = name + std::to_string(day) + std::to_string(hour) + ampm;
+    mSpecificName = name + timeCode;
     
     // Load general and specific SIF assets.
-    mGeneralSIF = Services::GetAssets()->LoadSIF(mGeneralName + ".SIF");
-    mSpecificSIF = Services::GetAssets()->LoadSIF(mSpecificName + ".SIF");
+    mGeneralSIF = Services::GetAssets()->LoadSIF(mGeneralName);
+    mSpecificSIF = Services::GetAssets()->LoadSIF(mSpecificName);
     
     // Load scene data asset.
-    mSceneData = Services::GetAssets()->LoadScene(mGeneralSIF->GetSCNName() + ".SCN");
+    mSceneData = Services::GetAssets()->LoadScene(mGeneralSIF->GetSCNName());
     
     // Load BSP and set it to be rendered.
-    mSceneBSP = Services::GetAssets()->LoadBSP(mSceneData->GetBSPName() + ".BSP");
+    mSceneBSP = Services::GetAssets()->LoadBSP(mSceneData->GetBSPName());
     Services::GetRenderer()->SetBSP(mSceneBSP);
     
     // Figure out if we have a skybox, and set it to be rendered.
@@ -52,8 +48,8 @@ Scene::Scene(std::string name, int day, int hour) :
     mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
     
     // Create actors for the scene.
-    std::vector<SceneActorData*> SceneActorDatas = mGeneralSIF->GetSceneActorDatas();
-    for(auto& actorDef : SceneActorDatas)
+    std::vector<SceneActorData*> sceneActorDatas = mGeneralSIF->GetSceneActorDatas();
+    for(auto& actorDef : sceneActorDatas)
     {
         Actor* actor = new Actor();
         if(actorDef->position != nullptr)
@@ -70,6 +66,21 @@ Scene::Scene(std::string name, int day, int hour) :
         if(actorDef->ego)
         {
             mEgo = actor;
+        }
+    }
+    
+    // Iterate over scene model data and prep the scene.
+    // First, we want to hide and scene models that are set to "hidden".
+    // Second, we want to spawn any non-scene models.
+    std::vector<SceneModelData*> sceneModelDatas = mGeneralSIF->GetSceneModelDatas();
+    for(auto& modelDef : sceneModelDatas)
+    {
+        if(modelDef->type == SceneModelData::Type::Scene)
+        {
+            if(modelDef->hidden)
+            {
+                mSceneBSP->Hide(modelDef->name);
+            }
         }
     }
     

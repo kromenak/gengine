@@ -49,6 +49,7 @@ bool GEngine::Initialize()
     // Initialize asset manager.
     Services::SetAssets(&mAssetManager);
     
+    // For simplicity right now, let's just load all barns at once.
     mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("ambient.brn");
     mAssetManager.LoadBarn("common.brn");
@@ -59,7 +60,7 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("day23.brn");
     mAssetManager.LoadBarn("day123.brn");
     
-    //mAssetManager.WriteBarnAssetToFile("A014ED3S.6JD");
+    //mAssetManager.WriteBarnAssetToFile("DEFAULT.BMP");
     //mAssetManager.WriteOutAssetsOfType("YAK");
     
     // Initialize sheep manager.
@@ -72,17 +73,7 @@ bool GEngine::Initialize()
     mCursor = mAssetManager.LoadCursor("C_POINT.CUR");
     mCursor->Activate();
     
-    //SheepCompiler compiler;
-    //compiler.Compile("/Users/Clark/Dropbox/GK3/Assets/ArgOrder.shp");
-    
-    LoadScene("RC1");
-    
-    //Audio* vo = mAssetManager.LoadAudio("A014ED3S.6JD");
-    //mAudioManager.Play(vo);
-    
-    std::cout << (10 / 5.24f) << std::endl;
-    
-    //Yak* yak = mAssetManager.LoadYak("E014ED3S6J7.YAK");
+    LoadScene("B25");
     return true;
 }
 
@@ -121,6 +112,14 @@ void GEngine::Quit()
     mRunning = false;
 }
 
+std::string GEngine::GetCurrentTimeCode()
+{
+    // Depending on day/hour, returns something like "110A".
+    std::string ampm = (mHour <= 11) ? "A" : "P";
+    int hour = mHour > 12 ? mHour - 12 : mHour;
+    return std::to_string(mDay) + std::to_string(hour) + ampm;
+}
+
 void GEngine::LoadScene(std::string name)
 {
     if(mScene != nullptr)
@@ -130,7 +129,7 @@ void GEngine::LoadScene(std::string name)
         mScene = nullptr;
     }
     
-    mScene = new Scene(name, mDay, mTime);
+    mScene = new Scene(name, GetCurrentTimeCode());
 }
 
 void GEngine::ProcessInput()

@@ -20,7 +20,7 @@ class Skybox;
 class Scene
 {
 public:
-    Scene(std::string name, int day, int hour);
+    Scene(std::string name, std::string timeCode);
     
     void InitEgoPosition(std::string positionName);
     
