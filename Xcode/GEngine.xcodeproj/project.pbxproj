@@ -74,6 +74,7 @@
 		4BF32B8C1F67C434000639FB /* GLShader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B8A1F67C434000639FB /* GLShader.cpp */; };
 		4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
 		4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
+		4BFCD33820CDFFB4004FF9EA /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BFCD33720CDFFB4004FF9EA /* Plane.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -226,6 +227,8 @@
 		4BF7510E1F7737DD00B79D2F /* Vector4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector4.h; path = ../Source/Vector4.h; sourceTree = "<group>"; };
 		4BF751101F773E1A00B79D2F /* Vector2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector2.cpp; path = ../Source/Vector2.cpp; sourceTree = "<group>"; };
 		4BF751111F773E1A00B79D2F /* Vector2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector2.h; path = ../Source/Vector2.h; sourceTree = "<group>"; };
+		4BFCD33620CDFFB4004FF9EA /* Plane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Plane.h; path = ../Source/Plane.h; sourceTree = "<group>"; };
+		4BFCD33720CDFFB4004FF9EA /* Plane.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Plane.cpp; path = ../Source/Plane.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -387,6 +390,8 @@
 				4B4EED8A1F5CACEF000065EF /* Vector3.h */,
 				4BF7510D1F7737DD00B79D2F /* Vector4.cpp */,
 				4BF7510E1F7737DD00B79D2F /* Vector4.h */,
+				4BFCD33620CDFFB4004FF9EA /* Plane.h */,
+				4BFCD33720CDFFB4004FF9EA /* Plane.cpp */,
 			);
 			name = Math;
 			sourceTree = "<group>";
@@ -636,6 +641,7 @@
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B15A9561F242C55000A689F /* SDLRenderer.cpp in Sources */,
+				4BFCD33820CDFFB4004FF9EA /* Plane.cpp in Sources */,
 				4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,

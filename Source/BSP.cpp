@@ -10,17 +10,14 @@
 #include <iostream>
 #include "Services.h"
 
-BSP* BSP::inst = nullptr;
-
 BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
 {
-    inst = this;
     ParseFromData(data, dataLength);
 }
 
-void BSP::Render(Vector3 fromPosition)
+void BSP::Render(Vector3 cameraPosition)
 {
-    RenderTree(mNodes[mRootNodeIndex], fromPosition);
+    RenderTree(mNodes[mRootNodeIndex], cameraPosition);
 }
 
 bool RayIntersectsTriangle(Vector3 p0, Vector3 p1, Vector3 p2, Ray ray, Vector3& hitPos)
@@ -74,7 +71,6 @@ std::string* BSP::Intersects(Ray ray)
                     
                     // And then the object for this surface.
                     closest = &mObjectNames[surface->objectIndex];
-                    //return &mObjectNames[surface->objectIndex];
                 }
             }
         }
@@ -82,9 +78,44 @@ std::string* BSP::Intersects(Ray ray)
     return closest;
 }
 
-void BSP::RenderTree(BSPNode *node, Vector3 position)
+void BSP::Hide(std::string objectName)
 {
+    // Find index of the object name.
+    int index = -1;
+    for(int i = 0; i < mObjectNames.size(); i++)
+    {
+        if(mObjectNames[i] == objectName)
+        {
+            index = i;
+            break;
+        }
+    }
+    
+    // Can't hide an object if the passed name isn't present.
+    if(index == -1) { return; }
+    
+    // All surfaces belonging to this object will be hidden.
+    for(auto& surface : mSurfaces)
+    {
+        if(surface->objectIndex == index)
+        {
+            surface->visible = false;
+        }
+    }
+}
+
+void BSP::RenderTree(BSPNode* node, Vector3 position)
+{
+    // Figure out the location of the camera position relative to the plane.
     PointLocation location = GetPointLocation(position, mPlanes[node->planeIndex]);
+    
+    // Using "Behind" here acts as a "front-to-back" BSP renderer.
+    // Pros: If depth-buffer is enabled, renders opaque graphics most efficiently.
+    // Cons: Can't support non-opaque graphics. Only works if depth-buffer is enabled.
+    
+    // Using "InFrontOf" here acts as a "back-to-front" BSP renderer.
+    // Pros: Without depth-buffer, will render both opaque and non-opaque graphics correctly.
+    // Cons: More overdraw due to pixel redraw without depth-buffer.
     if(location == PointLocation::InFrontOf)
     {
         int backNodeIndex = node->backChildIndex;
@@ -145,35 +176,39 @@ void BSP::RenderTree(BSPNode *node, Vector3 position)
     }
 }
 
-void BSP::RenderPolygon(BSPPolygon *polygon)
+void BSP::RenderPolygon(BSPPolygon* polygon)
 {
-    if(polygon != nullptr)
+    // Can't render a null object DUH.
+    if(polygon == nullptr) { return; }
+    
+    // If we have a valid surface reference, use it to get rendering configured.
+    BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
+    if(surface != nullptr)
     {
-        // If we have a valid surface reference, use it to get rendering configured.
-        BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
-        if(surface != nullptr)
-        {
-            // Retrieve texture and activate it, if possible.
-            Texture* tex = surface->texture;
-            if(tex != nullptr)
-            {
-                tex->Activate();
-            }
-            else
-            {
-                Texture::Deactivate();
-            }
-        }
+        // Not going to render non-visible surfaces.
+        if(!surface->visible) { return; }
         
-        // Draw the polygon.
-        mVertexArray->Draw(polygon->vertexIndex, polygon->vertexCount);
+        // Retrieve texture and activate it, if possible.
+        Texture* tex = surface->texture;
+        if(tex != nullptr)
+        {
+            tex->Activate();
+        }
+        else
+        {
+            Texture::Deactivate();
+        }
     }
+    
+    // Draw the polygon.
+    mVertexArray->Draw(polygon->vertexIndex, polygon->vertexCount);
 }
 
-BSP::PointLocation BSP::GetPointLocation(Vector3 position, BSPPlane* plane)
+BSP::PointLocation BSP::GetPointLocation(Vector3 position, Plane* plane)
 {
     // We can calculate a point on the plane with the normal and distance values.
-    Vector3 pointOnPlane = plane->normal * plane->distance;
+    Vector3 pointOnPlane = plane->FindClosestPointOnPlane(Vector3::Zero);
+    //std::cout << (Vector3::Dot(pointOnPlane, plane->GetNormal()) + plane->GetDistanceFromOrigin()) << std::endl;
     
     // We then get a vector from our position to the plane.
     Vector3 posToPlane = pointOnPlane - position;
@@ -181,7 +216,7 @@ BSP::PointLocation BSP::GetPointLocation(Vector3 position, BSPPlane* plane)
     // If dot product is zero, the point is on the plane.
     // If greater than zero, the vector and normal are generally facing the same way: the point is behind the plane.
     // If less than zero, the vector and normal are facing away from each other: the point is in front of the plane.
-    float dotProduct = Vector3::Dot(posToPlane, plane->normal);
+    float dotProduct = Vector3::Dot(posToPlane, plane->GetNormal());
     if(Math::IsZero(dotProduct))
     {
         return BSP::PointLocation::OnPlane;
@@ -240,14 +275,38 @@ void BSP::ParseFromData(char *data, int dataLength)
         surface->objectIndex = reader.ReadUInt();
         
         surface->textureName = reader.ReadString(32);
-        surface->textureName.append(".BMP");
         surface->texture = Services::GetAssets()->LoadTexture(surface->textureName);
         
         surface->uvOffset = Vector2(reader.ReadFloat(), reader.ReadFloat());
         surface->uvScale = Vector2(reader.ReadFloat(), reader.ReadFloat());
         
         surface->scale = reader.ReadFloat();
-        reader.ReadUInt(); // Flags
+        
+        /*
+         1 => ???
+         2 => ???
+         4 => interactable?
+         8 => invisible?
+         16 => light source?
+         32 => ???
+         64 => ???
+         128 => ???
+         
+         (RC1, rc4_pjcar uses 76 (64+8+4))
+         (RC1, windows often use 12 (8+4))
+         (RC1, street lamps have 16 sometimes)
+         (RC1, luggage has 68 (64+4))
+         (B25, toilet paper has 2)
+         (B25/RC1 - many instances of 0/1 too)
+        */
+        uint flags = reader.ReadUInt();
+        
+        // Combination of flags 8+4 seems to indicate thing is not visible.
+        if(flags == 12)
+        {
+            surface->visible = false;
+        }
+        //std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
         
         mSurfaces.push_back(surface);
     }
@@ -289,9 +348,8 @@ void BSP::ParseFromData(char *data, int dataLength)
     // Iterate and read planes.
     for(int i = 0; i < planeCount; i++)
     {
-        BSPPlane* plane = new BSPPlane();
-        plane->normal = Vector3(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        plane->distance = reader.ReadFloat();
+        Plane* plane = new Plane(reader.ReadFloat(), reader.ReadFloat(),
+                                 reader.ReadFloat(), reader.ReadFloat());
         mPlanes.push_back(plane);
     }
     

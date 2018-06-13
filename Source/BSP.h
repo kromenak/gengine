@@ -11,6 +11,7 @@
 #include "Asset.h"
 #include "Vector2.h"
 #include "Vector3.h"
+#include "Plane.h"
 #include "GLVertexArray.h"
 #include <vector>
 #include <unordered_map>
@@ -39,13 +40,6 @@ struct BSPNode
     // Nodes seem to optionally also define a second set of polygons.
     ushort polygonIndex2;
     ushort polygonCount2;
-};
-
-// A plane in 3D space, which we can represent with a normal and distance from origin.
-struct BSPPlane
-{
-    Vector3 normal;
-    float distance;
 };
 
 // A polygon is a renderable thing, one or more are associated with each BSP node.
@@ -78,7 +72,10 @@ struct BSPSurface
     Vector2 uvScale;
     
     // Not yet sure what this scales - is it an overall scale on top of UV-specific scales???
-    float scale;
+    float scale = 1.0f;
+    
+    // Attributes, derived from flags.
+    bool visible = true;
 };
 
 class BSP : Asset
@@ -93,13 +90,13 @@ class BSP : Asset
     };
     
 public:
-    static BSP* inst;
-    
     BSP(std::string name, char* data, int dataLength);
     
     void Render(Vector3 cameraPosition);
     
     std::string* Intersects(Ray ray);
+    
+    void Hide(std::string objectName);
     
 private:
     // Points to the root node in our node list.
@@ -110,7 +107,7 @@ private:
     std::vector<BSPNode*> mNodes;
     
     // Planes and polygons, referenced by nodes.
-    std::vector<BSPPlane*> mPlanes;
+    std::vector<Plane*> mPlanes;
     std::vector<BSPPolygon*> mPolygons;
     
     // Surfaces are referenced by polygons, define surface properties like texture.
@@ -135,7 +132,7 @@ private:
     void RenderTree(BSPNode* node, Vector3 cameraPosition);
     void RenderPolygon(BSPPolygon* polygon);
     
-    PointLocation GetPointLocation(Vector3 position, BSPPlane* plane);
+    PointLocation GetPointLocation(Vector3 position, Plane* plane);
     
     void ParseFromData(char* data, int dataLength);
 };
