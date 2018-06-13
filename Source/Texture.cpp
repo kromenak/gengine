@@ -154,7 +154,7 @@ void Texture::ParseFromData(char *data, int dataLength)
             mPixels[current + 2] = (unsigned char)(blue * 255 / 31);
             
             // Causes all instances of magenta (R = 255, B = 255) to appear transparent.
-            if(mPixels[current] == 255 && mPixels[current + 2] == 255)
+            if(mPixels[current] > 200 && mPixels[current + 1] < 100 && mPixels[current + 2] > 200)
             {
                 mPixels[current + 3] = 0;
             }
