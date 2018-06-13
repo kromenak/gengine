@@ -53,29 +53,30 @@ void SceneData::ParseFromData(char *data, int dataLength)
     }
     for(auto& entry : skyboxSection.entries)
     {
+        Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
         if(StringUtil::EqualsIgnoreCase(entry->key, "left"))
         {
-            mSkybox->SetLeftTexture(Services::GetAssets()->LoadTexture(entry->value + ".BMP"));
+            mSkybox->SetLeftTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "right"))
         {
-            mSkybox->SetRightTexture(Services::GetAssets()->LoadTexture(entry->value + ".BMP"));
+            mSkybox->SetRightTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "front"))
         {
-            mSkybox->SetFrontTexture(Services::GetAssets()->LoadTexture(entry->value + ".BMP"));
+            mSkybox->SetFrontTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "back"))
         {
-            mSkybox->SetBackTexture(Services::GetAssets()->LoadTexture(entry->value + ".BMP"));
+            mSkybox->SetBackTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "up"))
         {
-            mSkybox->SetUpTexture(Services::GetAssets()->LoadTexture(entry->value + ".BMP"));
+            mSkybox->SetUpTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "down"))
         {
-            mSkybox->SetDownTexture(Services::GetAssets()->LoadTexture(entry->value + ".BMP"));
+            mSkybox->SetDownTexture(texture);
         }
     }
 }

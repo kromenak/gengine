@@ -106,29 +106,30 @@ void SIF::ParseFromData(char *data, int dataLength)
                 mSkybox = new Skybox();
                 while(keyValue != nullptr)
                 {
-                    if(keyValue->key == "left")
+                    Texture* texture = Services::GetAssets()->LoadTexture(keyValue->value);
+                    if(StringUtil::EqualsIgnoreCase(keyValue->key, "left"))
                     {
-                        mSkybox->SetLeftTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
+                        mSkybox->SetLeftTexture(texture);
                     }
-                    else if(keyValue->key == "right")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "right"))
                     {
-                        mSkybox->SetRightTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
+                        mSkybox->SetRightTexture(texture);
                     }
-                    else if(keyValue->key == "front")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "front"))
                     {
-                        mSkybox->SetFrontTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
+                        mSkybox->SetFrontTexture(texture);
                     }
-                    else if(keyValue->key == "back")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "back"))
                     {
-                        mSkybox->SetBackTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
+                        mSkybox->SetBackTexture(texture);
                     }
-                    else if(keyValue->key == "up")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "up"))
                     {
-                        mSkybox->SetUpTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
+                        mSkybox->SetUpTexture(texture);
                     }
-                    else if(keyValue->key == "down")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "down"))
                     {
-                        mSkybox->SetDownTexture(Services::GetAssets()->LoadTexture(keyValue->value + ".BMP"));
+                        mSkybox->SetDownTexture(texture);
                     }
                     keyValue = keyValue->next;
                 }
@@ -380,7 +381,7 @@ void SIF::ParseFromData(char *data, int dataLength)
             {
                 if(keyValue->key == "model")
                 {
-                    actor->model = Services::GetAssets()->LoadModel(keyValue->value + ".MOD");
+                    actor->model = Services::GetAssets()->LoadModel(keyValue->value);
                 }
                 else if(keyValue->key == "noun")
                 {
@@ -443,8 +444,10 @@ void SIF::ParseFromData(char *data, int dataLength)
             SheepScript* sheep = Services::GetSheep()->Compile(section.condition);
             if(!Services::GetSheep()->Evaluate(sheep))
             {
+                //std::cout << "Condition was NOT true: " << section.condition << std::endl;
                 continue;
             }
+            //std::cout << "Condition was true: " << section.condition << std::endl;
         }
         
         for(auto& entry : section.entries)
