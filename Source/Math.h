@@ -115,6 +115,11 @@ namespace Math
         return std::min(max, std::max(value, min));
     }
     
+    inline float Abs(float val)
+    {
+        return std::abs(val);
+    }
+    
     inline float ToDegrees(float radians)
     {
         return (radians * (180.0f / kPi));
