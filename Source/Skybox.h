@@ -14,6 +14,8 @@ class GLVertexArray;
 class Skybox
 {
 public:
+    Skybox();
+    
     void Render();
     
     void SetRightTexture(Texture* texture) { mRightTexture = texture; }

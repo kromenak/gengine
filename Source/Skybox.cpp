@@ -6,6 +6,7 @@
 #include "Skybox.h"
 #include "GLVertexArray.h"
 #include "Texture.h"
+#include "Services.h"
 
 float points[] = {
     // Back
@@ -56,6 +57,19 @@ float points[] = {
     -10.0f, -10.0f,  10.0f,
      10.0f, -10.0f,  10.0f
 };
+
+Skybox::Skybox()
+{
+    // For the skybox to work correctly, all sides must have valid textures.
+    // So, set all to a valid default to start, and they can be overwritten as needed.
+    Texture* defaultTexture = Services::GetAssets()->LoadTexture("DEFAULT.BMP");
+    mRightTexture = defaultTexture;
+    mLeftTexture = defaultTexture;
+    mFrontTexture = defaultTexture;
+    mBackTexture = defaultTexture;
+    mUpTexture = defaultTexture;
+    mDownTexture = defaultTexture;
+}
 
 void Skybox::Render()
 {
