@@ -21,7 +21,6 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2);
 extern std::vector<SysImport> sysFuncs;
 
 void AddSysImport(const std::string& name, char retType, std::initializer_list<char> argTypes);
-void InitSysImports();
 
 #define void_TYPE 0
 #define int_TYPE 1
@@ -462,9 +461,9 @@ int HasTopicsLeft(std::string noun);
 shpvoid SetTopicCount(std::string noun, std::string verb, int count); // DEV
 
 int IsCurrentLocation(std::string location);
-int IsCurrentTime(std::string time);
+int IsCurrentTime(std::string timeCode);
 int WasLastLocation(std::string lastLocation);
-int WasLastTime(std::string lastTime);
+int WasLastTime(std::string lastTimeCode);
 
 shpvoid ResetGameData(); // DEV
 

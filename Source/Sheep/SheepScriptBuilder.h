@@ -83,8 +83,8 @@ public:
     
     void Modulo(SheepValue val1, SheepValue val2);
     
-    void And();
-    void Or();
+    void And(SheepValue val1, SheepValue val2);
+    void Or(SheepValue val1, SheepValue val2);
     void Not();
     
     void Breakpoint();

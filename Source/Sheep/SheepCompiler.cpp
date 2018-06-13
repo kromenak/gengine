@@ -39,8 +39,6 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
 {
     if(!stream.good() || stream.eof()) { return nullptr; }
     
-    InitSysImports();
-    
     delete mScanner;
     try
     {

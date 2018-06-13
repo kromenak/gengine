@@ -893,14 +893,60 @@ void SheepScriptBuilder::Modulo(SheepValue val1, SheepValue val2)
     }
 }
 
-void SheepScriptBuilder::And()
+void SheepScriptBuilder::And(SheepValue val1, SheepValue val2)
 {
-    AddInstruction(SheepInstruction::And);
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        FToI(0);
+        AddInstruction(SheepInstruction::And);
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        FToI(1);
+        AddInstruction(SheepInstruction::And);
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        FToI(0);
+        FToI(1);
+        AddInstruction(SheepInstruction::And);
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::And);
+    }
+    else
+    {
+        // Unsupported
+    }
 }
 
-void SheepScriptBuilder::Or()
+void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2)
 {
-    AddInstruction(SheepInstruction::Or);
+    if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
+    {
+        FToI(0);
+        AddInstruction(SheepInstruction::Or);
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Float)
+    {
+        FToI(1);
+        AddInstruction(SheepInstruction::Or);
+    }
+    else if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Float)
+    {
+        FToI(0);
+        FToI(1);
+        AddInstruction(SheepInstruction::Or);
+    }
+    else if(val1.type == SheepValueType::Int && val2.type == SheepValueType::Int)
+    {
+        AddInstruction(SheepInstruction::Or);
+    }
+    else
+    {
+        // Unsupported
+    }
 }
 
 void SheepScriptBuilder::Not()

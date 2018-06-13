@@ -554,403 +554,403 @@ namespace Sheep {
           switch (yyn)
             {
   case 2:
-#line 131 "Sheep.yy" // lalr1.cc:859
+#line 125 "Sheep.yy" // lalr1.cc:859
     { }
 #line 560 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 3:
-#line 132 "Sheep.yy" // lalr1.cc:859
+#line 126 "Sheep.yy" // lalr1.cc:859
     { }
 #line 566 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 4:
-#line 133 "Sheep.yy" // lalr1.cc:859
+#line 127 "Sheep.yy" // lalr1.cc:859
     { }
 #line 572 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 5:
-#line 134 "Sheep.yy" // lalr1.cc:859
+#line 128 "Sheep.yy" // lalr1.cc:859
     { }
 #line 578 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 6:
-#line 135 "Sheep.yy" // lalr1.cc:859
+#line 129 "Sheep.yy" // lalr1.cc:859
     { }
 #line 584 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 7:
-#line 140 "Sheep.yy" // lalr1.cc:859
+#line 134 "Sheep.yy" // lalr1.cc:859
     { }
 #line 590 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 8:
-#line 143 "Sheep.yy" // lalr1.cc:859
+#line 137 "Sheep.yy" // lalr1.cc:859
     {  }
 #line 596 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 9:
-#line 144 "Sheep.yy" // lalr1.cc:859
+#line 138 "Sheep.yy" // lalr1.cc:859
     {  }
 #line 602 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 10:
-#line 150 "Sheep.yy" // lalr1.cc:859
+#line 144 "Sheep.yy" // lalr1.cc:859
     { }
 #line 608 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 11:
-#line 151 "Sheep.yy" // lalr1.cc:859
+#line 145 "Sheep.yy" // lalr1.cc:859
     { }
 #line 614 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 12:
-#line 152 "Sheep.yy" // lalr1.cc:859
+#line 146 "Sheep.yy" // lalr1.cc:859
     { }
 #line 620 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 13:
-#line 155 "Sheep.yy" // lalr1.cc:859
+#line 149 "Sheep.yy" // lalr1.cc:859
     { builder.AddIntVariable(yystack_[0].value.as< std::string > (), 0); }
 #line 626 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 14:
-#line 156 "Sheep.yy" // lalr1.cc:859
+#line 150 "Sheep.yy" // lalr1.cc:859
     { builder.AddIntVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< int > ()); }
 #line 632 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 15:
-#line 157 "Sheep.yy" // lalr1.cc:859
+#line 151 "Sheep.yy" // lalr1.cc:859
     { builder.AddIntVariable(yystack_[0].value.as< std::string > (), 0); }
 #line 638 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 16:
-#line 158 "Sheep.yy" // lalr1.cc:859
+#line 152 "Sheep.yy" // lalr1.cc:859
     { builder.AddIntVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< int > ()); }
 #line 644 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 17:
-#line 161 "Sheep.yy" // lalr1.cc:859
+#line 155 "Sheep.yy" // lalr1.cc:859
     { builder.AddFloatVariable(yystack_[0].value.as< std::string > (), 0.0f); }
 #line 650 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 18:
-#line 162 "Sheep.yy" // lalr1.cc:859
+#line 156 "Sheep.yy" // lalr1.cc:859
     { builder.AddFloatVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< float > ()); }
 #line 656 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 19:
-#line 163 "Sheep.yy" // lalr1.cc:859
+#line 157 "Sheep.yy" // lalr1.cc:859
     { builder.AddFloatVariable(yystack_[0].value.as< std::string > (), 0.0f); }
 #line 662 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 20:
-#line 164 "Sheep.yy" // lalr1.cc:859
+#line 158 "Sheep.yy" // lalr1.cc:859
     { builder.AddFloatVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< float > ()); }
 #line 668 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 21:
-#line 167 "Sheep.yy" // lalr1.cc:859
+#line 161 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringVariable(yystack_[0].value.as< std::string > (), ""); }
 #line 674 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 22:
-#line 168 "Sheep.yy" // lalr1.cc:859
+#line 162 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< std::string > ()); }
 #line 680 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 23:
-#line 169 "Sheep.yy" // lalr1.cc:859
+#line 163 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringVariable(yystack_[0].value.as< std::string > (), ""); }
 #line 686 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 24:
-#line 170 "Sheep.yy" // lalr1.cc:859
+#line 164 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< std::string > ()); }
 #line 692 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 25:
-#line 176 "Sheep.yy" // lalr1.cc:859
+#line 170 "Sheep.yy" // lalr1.cc:859
     { }
 #line 698 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 26:
-#line 180 "Sheep.yy" // lalr1.cc:859
+#line 174 "Sheep.yy" // lalr1.cc:859
     { }
 #line 704 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 27:
-#line 181 "Sheep.yy" // lalr1.cc:859
+#line 175 "Sheep.yy" // lalr1.cc:859
     { }
 #line 710 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 28:
-#line 186 "Sheep.yy" // lalr1.cc:859
+#line 180 "Sheep.yy" // lalr1.cc:859
     { builder.StartFunction(yystack_[2].value.as< std::string > ()); }
 #line 716 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 29:
-#line 186 "Sheep.yy" // lalr1.cc:859
+#line 180 "Sheep.yy" // lalr1.cc:859
     { builder.EndFunction(yystack_[6].value.as< std::string > ()); }
 #line 722 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 32:
-#line 195 "Sheep.yy" // lalr1.cc:859
+#line 189 "Sheep.yy" // lalr1.cc:859
     { builder.Store(yystack_[3].value.as< std::string > ()); }
 #line 728 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 33:
-#line 196 "Sheep.yy" // lalr1.cc:859
+#line 190 "Sheep.yy" // lalr1.cc:859
     { }
 #line 734 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 34:
-#line 197 "Sheep.yy" // lalr1.cc:859
+#line 191 "Sheep.yy" // lalr1.cc:859
     { builder.ReturnV(); }
 #line 740 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 35:
-#line 198 "Sheep.yy" // lalr1.cc:859
+#line 192 "Sheep.yy" // lalr1.cc:859
     { builder.Breakpoint(); }
 #line 746 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 36:
-#line 199 "Sheep.yy" // lalr1.cc:859
+#line 193 "Sheep.yy" // lalr1.cc:859
     { builder.SitnSpin(); }
 #line 752 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 37:
-#line 200 "Sheep.yy" // lalr1.cc:859
+#line 194 "Sheep.yy" // lalr1.cc:859
     { builder.BranchGoto(yystack_[1].value.as< std::string > ()); }
 #line 758 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 38:
-#line 201 "Sheep.yy" // lalr1.cc:859
+#line 195 "Sheep.yy" // lalr1.cc:859
     { builder.AddGoto(yystack_[1].value.as< std::string > ()); }
 #line 764 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 39:
-#line 202 "Sheep.yy" // lalr1.cc:859
+#line 196 "Sheep.yy" // lalr1.cc:859
     { builder.BeginWait(); builder.EndWait(); }
 #line 770 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 40:
-#line 203 "Sheep.yy" // lalr1.cc:859
+#line 197 "Sheep.yy" // lalr1.cc:859
     { builder.BeginWait(); }
 #line 776 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 41:
-#line 203 "Sheep.yy" // lalr1.cc:859
+#line 197 "Sheep.yy" // lalr1.cc:859
     { builder.EndWait(); }
 #line 782 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 42:
-#line 204 "Sheep.yy" // lalr1.cc:859
+#line 198 "Sheep.yy" // lalr1.cc:859
     { builder.BeginWait(); }
 #line 788 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 43:
-#line 204 "Sheep.yy" // lalr1.cc:859
+#line 198 "Sheep.yy" // lalr1.cc:859
     { builder.EndWait(); }
 #line 794 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 45:
-#line 206 "Sheep.yy" // lalr1.cc:859
+#line 200 "Sheep.yy" // lalr1.cc:859
     { }
 #line 800 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 48:
-#line 215 "Sheep.yy" // lalr1.cc:859
+#line 209 "Sheep.yy" // lalr1.cc:859
     { yylhs.value.as< SheepValue > () = yystack_[0].value.as< SheepValue > (); }
 #line 806 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 49:
-#line 216 "Sheep.yy" // lalr1.cc:859
+#line 210 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.Load(yystack_[0].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 812 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 50:
-#line 217 "Sheep.yy" // lalr1.cc:859
+#line 211 "Sheep.yy" // lalr1.cc:859
     { builder.PushI(yystack_[0].value.as< int > ()); yylhs.value.as< SheepValue > () = SheepValue(yystack_[0].value.as< int > ()); }
 #line 818 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 51:
-#line 218 "Sheep.yy" // lalr1.cc:859
+#line 212 "Sheep.yy" // lalr1.cc:859
     { builder.PushF(yystack_[0].value.as< float > ()); yylhs.value.as< SheepValue > () = SheepValue(yystack_[0].value.as< float > ()); }
 #line 824 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 52:
-#line 221 "Sheep.yy" // lalr1.cc:859
+#line 213 "Sheep.yy" // lalr1.cc:859
     { builder.AddStringConst(yystack_[0].value.as< std::string > ()); builder.PushS(yystack_[0].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(""); }
 #line 830 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 53:
-#line 223 "Sheep.yy" // lalr1.cc:859
+#line 215 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.Add(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 836 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 54:
-#line 224 "Sheep.yy" // lalr1.cc:859
+#line 216 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.Subtract(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 842 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 55:
-#line 225 "Sheep.yy" // lalr1.cc:859
+#line 217 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.Multiply(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 848 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 56:
-#line 226 "Sheep.yy" // lalr1.cc:859
+#line 218 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.Divide(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 854 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 57:
-#line 227 "Sheep.yy" // lalr1.cc:859
+#line 219 "Sheep.yy" // lalr1.cc:859
     { builder.Modulo(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(SheepValueType::Int); }
 #line 860 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 58:
-#line 228 "Sheep.yy" // lalr1.cc:859
+#line 220 "Sheep.yy" // lalr1.cc:859
     { builder.Negate(yystack_[0].value.as< SheepValue > ()); }
 #line 866 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 59:
-#line 230 "Sheep.yy" // lalr1.cc:859
+#line 222 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.IsLess(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 872 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 60:
-#line 231 "Sheep.yy" // lalr1.cc:859
+#line 223 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.IsGreater(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 878 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 61:
-#line 232 "Sheep.yy" // lalr1.cc:859
+#line 224 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.IsLessEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 884 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 62:
-#line 233 "Sheep.yy" // lalr1.cc:859
+#line 225 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.IsGreaterEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 890 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 63:
-#line 234 "Sheep.yy" // lalr1.cc:859
+#line 226 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.IsEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 896 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 64:
-#line 235 "Sheep.yy" // lalr1.cc:859
+#line 227 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.IsNotEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 902 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 65:
-#line 236 "Sheep.yy" // lalr1.cc:859
-    { }
+#line 228 "Sheep.yy" // lalr1.cc:859
+    { builder.Or(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(SheepValueType::Int); }
 #line 908 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 66:
-#line 237 "Sheep.yy" // lalr1.cc:859
-    { }
+#line 229 "Sheep.yy" // lalr1.cc:859
+    { builder.And(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(SheepValueType::Int); }
 #line 914 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 67:
-#line 238 "Sheep.yy" // lalr1.cc:859
-    { }
+#line 230 "Sheep.yy" // lalr1.cc:859
+    { builder.Not(); yylhs.value.as< SheepValue > () = yystack_[0].value.as< SheepValue > (); }
 #line 920 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 68:
-#line 240 "Sheep.yy" // lalr1.cc:859
+#line 232 "Sheep.yy" // lalr1.cc:859
     { yylhs.value.as< SheepValue > () = yystack_[1].value.as< SheepValue > (); }
 #line 926 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 69:
-#line 245 "Sheep.yy" // lalr1.cc:859
+#line 237 "Sheep.yy" // lalr1.cc:859
     { auto type = builder.CallSysFunction(yystack_[3].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
 #line 932 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 70:
-#line 249 "Sheep.yy" // lalr1.cc:859
+#line 241 "Sheep.yy" // lalr1.cc:859
     { }
 #line 938 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 71:
-#line 250 "Sheep.yy" // lalr1.cc:859
+#line 242 "Sheep.yy" // lalr1.cc:859
     { }
 #line 944 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 72:
-#line 251 "Sheep.yy" // lalr1.cc:859
+#line 243 "Sheep.yy" // lalr1.cc:859
     { }
 #line 950 "Sheep.tab.cc" // lalr1.cc:859
     break;
 
   case 77:
-#line 321 "Sheep.yy" // lalr1.cc:859
+#line 254 "Sheep.yy" // lalr1.cc:859
     { }
 #line 956 "Sheep.tab.cc" // lalr1.cc:859
     break;
@@ -1314,17 +1314,17 @@ namespace Sheep {
   };
 
 
-  const unsigned short int
+  const unsigned char
   Parser::yyrline_[] =
   {
-       0,   131,   131,   132,   133,   134,   135,   140,   143,   144,
-     150,   151,   152,   155,   156,   157,   158,   161,   162,   163,
-     164,   167,   168,   169,   170,   176,   180,   181,   186,   186,
-     190,   191,   195,   196,   197,   198,   199,   200,   201,   202,
-     203,   203,   204,   204,   205,   206,   207,   211,   215,   216,
-     217,   218,   221,   223,   224,   225,   226,   227,   228,   230,
-     231,   232,   233,   234,   235,   236,   237,   238,   240,   245,
-     249,   250,   251,   313,   314,   317,   320,   321
+       0,   125,   125,   126,   127,   128,   129,   134,   137,   138,
+     144,   145,   146,   149,   150,   151,   152,   155,   156,   157,
+     158,   161,   162,   163,   164,   170,   174,   175,   180,   180,
+     184,   185,   189,   190,   191,   192,   193,   194,   195,   196,
+     197,   197,   198,   198,   199,   200,   201,   205,   209,   210,
+     211,   212,   213,   215,   216,   217,   218,   219,   220,   222,
+     223,   224,   225,   226,   227,   228,   229,   230,   232,   237,
+     241,   242,   243,   246,   247,   250,   253,   254
   };
 
   // Print the state stack on the debug stream.
@@ -1360,7 +1360,7 @@ namespace Sheep {
 #line 17 "Sheep.yy" // lalr1.cc:1167
 } // Sheep
 #line 1363 "Sheep.tab.cc" // lalr1.cc:1167
-#line 324 "Sheep.yy" // lalr1.cc:1168
+#line 257 "Sheep.yy" // lalr1.cc:1168
 
 
 /* No epilogue is needed. */

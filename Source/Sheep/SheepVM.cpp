@@ -579,7 +579,7 @@ Value SheepVM::CallSysFunc(SysImport* sysFunc)
         case 2:
             return ::CallSysFunc(sysFunc->name, args[0], args[1]);
         default:
-            std::cout << "Invalid arg count: " << argCount << std::endl;
+            std::cout << "SheepVM: Unimplemented arg count: " << argCount << std::endl;
             return Value(0);
     }
 }

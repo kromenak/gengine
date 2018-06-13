@@ -96,12 +96,6 @@
 %type <SheepValue> expr
 %type <SheepValue> sysfunc_call
 
-/*
-%type <SheepValue> num_expr
-%type <SheepValue> int_expr
-%type <SheepValue> float_expr
-*/
-
 /* %left dictates left associativity, which means multiple operators at once will group
    to the left first. Ex: x OP y OP z with '%left OP' means ((x OP y) OP z).
 
@@ -216,8 +210,6 @@ expr: sysfunc_call 						{ $$ = $1; } 												/* PrintString("Ahhh") */
 	| USERID 							{ auto type = builder.Load($1); $$ = SheepValue(type); } 	/* foo$ */
 	| INT								{ builder.PushI($1); $$ = SheepValue($1); }
 	| FLOAT 							{ builder.PushF($1); $$ = SheepValue($1); }
-	/* | int_expr 							{ } */
-	/* | float_expr 						{ } */
 	| STRING 							{ builder.AddStringConst($1); builder.PushS($1); $$ = SheepValue(""); }
 
 	| expr PLUS expr					{ auto type = builder.Add($1, $3); $$ = SheepValue(type); }
@@ -233,9 +225,9 @@ expr: sysfunc_call 						{ $$ = $1; } 												/* PrintString("Ahhh") */
 	| expr GTE expr 					{ auto type = builder.IsGreaterEqual($1, $3); $$ = SheepValue(type); }
 	| expr EQUAL expr 					{ auto type = builder.IsEqual($1, $3); $$ = SheepValue(type); }
 	| expr NOTEQUAL expr 				{ auto type = builder.IsNotEqual($1, $3); $$ = SheepValue(type); }
-	| expr OR expr 						{ }
-	| expr AND expr 					{ }
-	| NOT expr 							{ }
+	| expr OR expr 						{ builder.Or($1, $3); $$ = SheepValue(SheepValueType::Int); }
+	| expr AND expr 					{ builder.And($1, $3); $$ = SheepValue(SheepValueType::Int); }
+	| NOT expr 							{ builder.Not(); $$ = $2; }
 
 	| OPENPAREN expr CLOSEPAREN 		{ $$ = $2; } /* (10 + 12) */
 	;
@@ -250,65 +242,6 @@ sysfunc_call_args: %empty				{ } /* No arg */
 	| expr 								{ } /* 5 + 2 */
 	| sysfunc_call_args COMMA expr 		{ } /* 5 + 2, "Gab", GetCameraFov() */
 	;
-
-/*
-num_expr: INT 							{ builder.PushI($1); $$ = SheepValue($1); }
-	| FLOAT 							{ builder.PushF($1); $$ = SheepValue($1); }
-	| num_expr PLUS num_expr			{ }
-	| num_expr MINUS num_expr			{ }
-	| num_expr MULTIPLY num_expr		{ }
-	| num_expr DIVIDE num_expr			{ }
-	| num_expr MOD num_expr				{ } 
-	| NEGATE num_expr 					{ }
-
-	| num_expr LT num_expr 				{ }
-	| num_expr GT num_expr				{ }
-	| num_expr LTE num_expr 			{ }
-	| num_expr GTE num_expr 			{ }
-	| num_expr EQUAL num_expr 			{ }
-	| num_expr NOTEQUAL num_expr 		{ }
-	| num_expr OR num_expr 				{ }
-	| num_expr AND num_expr 			{ }
-	| NOT num_expr 						{ }
-	;
-
-int_expr: INT 							{ builder.PushI($1); $$ = SheepValue($1); }
-	| int_expr PLUS int_expr			{ builder.AddI(); }
-	| int_expr MINUS int_expr			{ builder.SubtractI(); }
-	| int_expr MULTIPLY int_expr 		{ builder.MultiplyI(); }
-	| int_expr DIVIDE int_expr 			{ builder.DivideI(); }
-	| int_expr MOD int_expr 			{ builder.Modulo(); }
-	| NEGATE int_expr					{ builder.NegateI(); }
-
-	| int_expr LT int_expr 				{ builder.IsLessI(); }
-	| int_expr GT int_expr 				{ builder.IsGreaterI(); }
-	| int_expr LTE int_expr 			{ builder.IsLessEqualI(); }
-	| int_expr GTE int_expr 			{ builder.IsGreaterEqualI(); }
-	| int_expr NOTEQUAL int_expr      	{ builder.IsNotEqualI(); }
-	| int_expr EQUAL int_expr			{ builder.IsEqualI(); }
-	| int_expr OR int_expr				{ builder.Or(); }
-	| int_expr AND int_expr  			{ builder.And(); }
-	| NOT int_expr  					{ builder.Not(); }
-	;
-
-float_expr: FLOAT 						{ builder.PushF($1); $$ = SheepValue($1); }
-	| float_expr PLUS float_expr       	{ builder.AddF(); }
-	| float_expr MINUS float_expr		{ builder.SubtractF(); }
-	| float_expr MULTIPLY float_expr	{ builder.MultiplyF(); }
-	| float_expr DIVIDE float_expr		{ builder.DivideF(); }
-	| NEGATE float_expr 				{ builder.NegateF(); }
-
-	| float_expr LT float_expr			{ builder.IsLessF(); }
-	| float_expr GT float_expr			{ builder.IsGreaterF(); }
-	| float_expr LTE float_expr			{ builder.IsLessEqualF(); }
-	| float_expr GTE float_expr			{ builder.IsGreaterEqualF(); }
-	| float_expr NOTEQUAL float_expr	{ builder.IsNotEqualF(); }
-	| float_expr EQUAL float_expr		{ builder.IsEqualF(); }
-	| float_expr OR float_expr			{ builder.Or(); }
-	| float_expr AND float_expr			{ builder.And(); }
-	| NOT float_expr					{ builder.Not(); }
-	;
-*/
 
 if_else_block: if_statement
 	| if_statement else_statement

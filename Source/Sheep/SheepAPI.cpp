@@ -7,6 +7,7 @@
 #include "GEngine.h"
 #include "Scene.h"
 #include "Services.h"
+#include "StringUtil.h"
 
 // Required for macros to work correctly with "string" instead of "std::string".
 using namespace std;
@@ -80,151 +81,6 @@ void AddSysImport(const std::string& name, char retType, std::initializer_list<c
         sysImport.argumentTypes.push_back(argType);
     }
     sysFuncs.push_back(sysImport);
-}
-
-void InitSysImports()
-{
-    /*
-    if(sysFuncs.size() > 0) { return; }
-    
-    // ACTORS
-    AddSysImport("Blink", 0, { 3 });
-    AddSysImport("BlinkX", 0, { 3, 3 });
-    
-    AddSysImport("ClearMood", 0, { 3 });
-    
-    AddSysImport("EnableEyeJitter", 0, { 3 });
-    AddSysImport("DisableEyeJitter", 0, { 3 });
-    AddSysImport("EyeJitter", 0, { 3 });
-    
-    AddSysImport("DumpActorPosition", 0, { 3 });
-    
-    AddSysImport("Expression", 0, { 3, 3 });
-    
-    AddSysImport("GetEgoCurrentLocationCount", 1, { });
-    AddSysImport("GetEgoLocationCount", 1, { 3 });
-    
-    AddSysImport("GetEgoName", 3, { });
-    
-    AddSysImport("GetIndexedPosition", 3, { 1 });
-    AddSysImport("GetPositionCount", 1, { });
-    
-    AddSysImport("Glance", 0, { 3, 1, 1, 1 });
-    AddSysImport("GlanceX", 0, { 3, 1, 1, 1, 1, 1 });
-    
-    AddSysImport("InitEgoPosition", 0, { 3 });
-    
-    AddSysImport("IsActorAtLocation", 1, { 3, 3 });
-    AddSysImport("IsActorNear", 1, { 3, 3, 2 });
-    AddSysImport("IsWalkingActorNear", 1, { 3, 3, 2 });
-    
-    AddSysImport("IsActorOffstage", 1, { 3 });
-    
-    AddSysImport("IsCurrentEgo", 1, { 3 });
-    
-    AddSysImport("LookitActor", 0, { 3, 3, 3, 2 });
-    AddSysImport("LookitActorQuick", 0, { 3, 3, 3, 2 });
-    
-    AddSysImport("LookitModel", 0, { 3, 3, 3, 2 });
-    AddSysImport("LookitModelQuick", 0, { 3, 3, 3, 2 });
-    AddSysImport("LookitModelX", 0, { 3, 3, 1, 3, 2, 2, 2, 3, 2 });
-    AddSysImport("LookitModelQuickX", 0, { 3, 3, 1, 3, 2, 2, 2, 3, 2 });
-    
-    AddSysImport("LookitNoun", 0, { 3, 3, 3, 2 });
-    AddSysImport("LookitNounQuick", 0, { 3, 3, 3, 2 });
-    
-    AddSysImport("LookitPoint", 0, { 3, 2, 2, 2, 3, 2 });
-    
-    AddSysImport("LookitCameraAngle", 0, { 3, 3, 3, 2 });
-    AddSysImport("LookitMouse", 0, { 3, 3, 2 });
-    AddSysImport("LookitPlayer", 0, { 3, 3, 2 });
-    
-    AddSysImport("LookitCancel", 0, { 3 });
-    
-    AddSysImport("LookitLock", 0, { 3, 3, 2 });
-    AddSysImport("LookitUnlock", 0, { 3, 3 });
-    
-    AddSysImport("SetActorLocation", 0, { 3, 3 });
-    AddSysImport("SetActorOffstage", 0, { 3 });
-    
-    AddSysImport("SetActorPosition", 0, { 3, 3 });
-    
-    AddSysImport("SetEyeOffsets", 0, { 3, 2, 2, 2, 2 });
-    
-    AddSysImport("SetEgo", 0, { 3 });
-    AddSysImport("SetEgoLocationCount", 0, { 3, 1 });
-    
-    AddSysImport("SetIdleGAS", 0, { 3, 3 });
-    AddSysImport("SetListenGAS", 0, { 3, 3 });
-    AddSysImport("SetTalkGAS", 0, { 3, 3 });
-    
-    AddSysImport("SetMood", 0, { 3, 3 });
-    
-    AddSysImport("SetNextEgo", 0, { });
-    AddSysImport("SetPrevEgo", 0, { });
-    
-    AddSysImport("SetWalkAnim", 0, { 3, 3, 3, 3, 3 });
-    
-    AddSysImport("StartIdleFidget", 0, { 3 });
-    AddSysImport("StartListenFidget", 0, { 3 });
-    AddSysImport("StartTalkFidget", 0, { 3 });
-    AddSysImport("StopFidget", 0, { 3 });
-    
-    AddSysImport("TurnHead", 0, { 3, 1, 1, 1 });
-    AddSysImport("TurnToModel", 0, { 3, 3 });
-    
-    AddSysImport("WalkerBoundaryBlockModel", 0, { 3 });
-    AddSysImport("WalkerBoundaryBlockRegion", 0, { 3 });
-    AddSysImport("WalkerBoundaryUnblockModel", 0, { 3 });
-    AddSysImport("WalkerBoundaryUnblockRegion", 0, { 3 });
-    
-    AddSysImport("WalkNear", 0, { 3, 3 });
-    AddSysImport("WalkNearModel", 0, { 3, 3 });
-    AddSysImport("WalkTo", 0, { 3, 3 });
-    AddSysImport("WalkToAnimation", 0, { 3, 3 });
-    AddSysImport("WalkToSeeModel", 0, { 3, 3 });
-    AddSysImport("WalkToXZ", 0, { 2, 2 });
-    
-    AddSysImport("WasEgoEverInLocation", 1, { 3 });
-    
-    // ANIMATION AND DIALOGUE
-    AddSysImport("AddCaptionDefault", 0, { 3 });
-    AddSysImport("AddCaptionEgo", 0, { 3 });
-    AddSysImport("AddCaptionVoiceOver", 0, { 3 });
-    AddSysImport("ClearCaptionText", 0, { });
-    
-    AddSysImport("AnimEvent", 0, { 3, 3 });
-    
-    AddSysImport("StartDialogue", 0, { 3, 1 });
-    AddSysImport("StartDialogueNoFidgets", 0, { 3, 1 });
-    AddSysImport("ContinueDialogue", 0, { 1 });
-    AddSysImport("ContinueDialogueNoFidgets", 0, { 1 });
-    
-    AddSysImport("EnableInterpolation", 0, { });
-    AddSysImport("DisableInterpolation", 0, { });
-    
-    AddSysImport("DumpAnimator", 0, { });
-    
-    AddSysImport("SetConversation", 0, { 3 });
-    AddSysImport("EndConversation", 0, { });
-    
-    AddSysImport("StartAnimation", 0, { 3 });
-    AddSysImport("LoopAnimation", 0, { 3 });
-    AddSysImport("StopAnimation", 0, { 3 });
-    AddSysImport("StopAllAnimations", 0, { });
-    
-    AddSysImport("StartMorphAnimation", 0, { 3, 1, 1 });
-    AddSysImport("StopMorphAnimation", 0, { 3 });
-    AddSysImport("StopAllMorphAnimations", 0, { });
-    
-    AddSysImport("StartMom", 0, { 3 });
-    AddSysImport("StartMoveAnimation", 0, { 3 });
-    
-    AddSysImport("StartVoiceOver", 0, { 3, 1 });
-    AddSysImport("StartYak", 0, { 3 });
-    
-    AddSysImport("IsCurrentTime", 1, { 3 });
-    */
 }
 
 // ACTORS
@@ -344,10 +200,11 @@ shpvoid CallSheep(std::string fileName, std::string functionName)
 RegFunc2(CallSheep, void, string, string);
 
 // GAME LOGIC
-int IsCurrentTime(std::string time)
+int IsCurrentTime(std::string timeCode)
 {
-    return 0;
+    std::string currentTimeCode = GEngine::inst->GetCurrentTimeCode();
+    return StringUtil::EqualsIgnoreCase(currentTimeCode, timeCode);
 }
-RegFunc1(IsCurrentTime, void, string);
+RegFunc1(IsCurrentTime, int, string);
 
 
