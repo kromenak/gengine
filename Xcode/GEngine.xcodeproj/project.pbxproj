@@ -66,6 +66,7 @@
 		4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673CB20B1119E00795582 /* Skybox.cpp */; };
 		4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D020B2555E00795582 /* BinaryWriter.cpp */; };
 		4BD673D420B26F0C00795582 /* AudioListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D320B26F0C00795582 /* AudioListener.cpp */; };
+		4BDDCD5E20D6C4BC00701A89 /* ACT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
 		4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6EE331F441DC600BB29D5 /* minilzo.c */; };
 		4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE75D32208D7E7B007031A3 /* SheepVM.cpp */; };
@@ -211,6 +212,8 @@
 		4BD673D220B26F0C00795582 /* AudioListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioListener.h; path = ../Source/AudioListener.h; sourceTree = "<group>"; };
 		4BD673D320B26F0C00795582 /* AudioListener.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioListener.cpp; path = ../Source/AudioListener.cpp; sourceTree = "<group>"; };
 		4BD9C7DC1F95D1D80066DC89 /* Math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Math.h; path = ../Source/Math.h; sourceTree = "<group>"; };
+		4BDDCD5C20D6C4BC00701A89 /* ACT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ACT.h; path = ../Source/ACT.h; sourceTree = "<group>"; };
+		4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ACT.cpp; path = ../Source/ACT.cpp; sourceTree = "<group>"; };
 		4BE15CB61F464FD800114779 /* AssetManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AssetManager.cpp; path = ../Source/AssetManager.cpp; sourceTree = "<group>"; };
 		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
 		4BE15CBC1F46620000114779 /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Types.h; path = ../Source/Types.h; sourceTree = "<group>"; };
@@ -299,6 +302,8 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */,
+				4BDDCD5C20D6C4BC00701A89 /* ACT.h */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
 				4B4621ED1FF7532A00536BA6 /* Asset.cpp */,
@@ -636,6 +641,7 @@
 				4B0B67831F78DCD40023815F /* Actor.cpp in Sources */,
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
+				4BDDCD5E20D6C4BC00701A89 /* ACT.cpp in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
 				4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */,
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
