@@ -33,9 +33,6 @@ public:
     
     void SetWorldTransformMatrix(Matrix4& worldTransform);
     
-    void SetVector3(std::string name, Vector3& vector);
-    void SetMatrix4(std::string name, Matrix4& matrix);
-    
     void AddMeshComponent(MeshComponent* mc);
     void RemoveMeshComponent(MeshComponent* mc);
     

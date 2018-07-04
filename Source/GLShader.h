@@ -9,6 +9,7 @@
 #include <string>
 #include <GL/glew.h>
 
+class Vector3;
 class Matrix4;
 
 class GLShader
@@ -19,10 +20,12 @@ public:
     
     void Activate();
     
+    GLuint GetAttributeLocation(const char* name);
+    
+    void SetUniformVector3(const char* name, const Vector3& vector);
     void SetUniformMatrix4(const char* name, const Matrix4& mat);
     
     bool IsGood() { return !mError; }
-    GLuint GetProgram() { return mProgram; }
     
 private:
     // Handle to the compiled and linked GL shader program.

@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include "Matrix4.h"
+#include "Vector3.h"
 
 GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
 {
@@ -41,10 +42,6 @@ GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
         return;
     }
     
-    // Query for attribute locations.
-    GLint posAttribIndex = glGetAttribLocation(mProgram, "fdsf");
-    std::cout << posAttribIndex << std::endl;
-    
     // Detach shaders after a successful link.
     glDetachShader(mProgram, vertexShader);
     glDetachShader(mProgram, fragmentShader);
@@ -52,15 +49,23 @@ GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
 
 GLShader::~GLShader()
 {
-    if(mProgram != GL_NONE)
-    {
-        glDeleteProgram(mProgram);
-    }
+    glDeleteProgram(mProgram);
 }
 
 void GLShader::Activate()
 {
     glUseProgram(mProgram);
+}
+
+GLuint GLShader::GetAttributeLocation(const char* name)
+{
+    return glGetAttribLocation(mProgram, name);
+}
+
+void GLShader::SetUniformVector3(const char* name, const Vector3& vector)
+{
+    GLuint vecLoc = glGetUniformLocation(mProgram, name);
+    glUniform3f(vecLoc, vector.GetX(), vector.GetY(), vector.GetZ());
 }
 
 void GLShader::SetUniformMatrix4(const char* name, const Matrix4& mat)

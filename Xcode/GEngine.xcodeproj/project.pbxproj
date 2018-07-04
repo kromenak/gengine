@@ -302,6 +302,7 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4B364C3520ECADBE00EFC50C /* Rendering */,
 				4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */,
 				4BDDCD5C20D6C4BC00701A89 /* ACT.h */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
@@ -326,10 +327,6 @@
 				4B17D705206098B100EBD298 /* GameCamera.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
 				4B15A9511F2428C5000A689F /* GEngine.h */,
-				4BF32B8A1F67C434000639FB /* GLShader.cpp */,
-				4BF32B8B1F67C434000639FB /* GLShader.h */,
-				4BF32B871F67BC34000639FB /* GLVertexArray.cpp */,
-				4BF32B881F67BC34000639FB /* GLVertexArray.h */,
 				4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */,
 				4B2E7A5A2039FCF0001A5B9C /* IniParser.h */,
 				4B09182F1FEED86B002991D4 /* InputManager.cpp */,
@@ -344,8 +341,6 @@
 				4BD673C920B10EB200795582 /* Scene */,
 				4B15A95A1F243349000A689F /* SDLLog.cpp */,
 				4B15A95B1F243349000A689F /* SDLLog.h */,
-				4B15A9541F242C55000A689F /* SDLRenderer.cpp */,
-				4B15A9551F242C55000A689F /* SDLRenderer.h */,
 				4B09182D1FEED84D002991D4 /* Services.cpp */,
 				4B09182C1FEED84D002991D4 /* Services.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
@@ -377,6 +372,19 @@
 				4B294CE020B9E8BC00039F48 /* SheepManager.cpp */,
 			);
 			name = Sheep;
+			sourceTree = "<group>";
+		};
+		4B364C3520ECADBE00EFC50C /* Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				4BF32B8A1F67C434000639FB /* GLShader.cpp */,
+				4BF32B8B1F67C434000639FB /* GLShader.h */,
+				4BF32B871F67BC34000639FB /* GLVertexArray.cpp */,
+				4BF32B881F67BC34000639FB /* GLVertexArray.h */,
+				4B15A9541F242C55000A689F /* SDLRenderer.cpp */,
+				4B15A9551F242C55000A689F /* SDLRenderer.h */,
+			);
+			name = Rendering;
 			sourceTree = "<group>";
 		};
 		4B4300841FB7EDFA009EDE58 /* Math */ = {
