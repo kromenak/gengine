@@ -18,10 +18,7 @@ Mesh::Mesh(GLfloat* positions, int positionCount)
 
 void Mesh::Render()
 {
-    if(mVertexArray != nullptr)
-    {
-        mVertexArray->Draw();
-    }
+    mVertexArray->Draw();
 }
 
 void Mesh::SetPositions(const GLfloat* vertPositions, int count)

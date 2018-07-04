@@ -87,6 +87,7 @@ void GLVertexArray::Build()
         glBufferSubData(GL_ARRAY_BUFFER, offset, colorSize, mColors);
         offset += colorSize;
     }
+    //TODO: Normals
     if(mUV1 != nullptr)
     {
         glBufferSubData(GL_ARRAY_BUFFER, offset, uvSize, mUV1);

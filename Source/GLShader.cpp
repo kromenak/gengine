@@ -15,6 +15,8 @@ GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
     // Load vertex and fragment shaders, and compile them.
     GLuint vertexShader = LoadAndCompileShaderFromFile(vertShaderPath, GL_VERTEX_SHADER);
     GLuint fragmentShader = LoadAndCompileShaderFromFile(fragShaderPath, GL_FRAGMENT_SHADER);
+    
+    // If either shader could not be compiled successfully, fail with an error.
     if(!IsShaderCompiled(vertexShader) || !IsShaderCompiled(fragmentShader))
     {
         glDeleteShader(vertexShader);
@@ -40,8 +42,8 @@ GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
     }
     
     // Query for attribute locations.
-    //GLint posAttribIndex = glGetAttribLocation(mProgram, "v2p");
-    //std::cout << posAttribIndex << std::endl;
+    GLint posAttribIndex = glGetAttribLocation(mProgram, "fdsf");
+    std::cout << posAttribIndex << std::endl;
     
     // Detach shaders after a successful link.
     glDetachShader(mProgram, vertexShader);
@@ -54,11 +56,6 @@ GLShader::~GLShader()
     {
         glDeleteProgram(mProgram);
     }
-}
-
-bool GLShader::IsGood()
-{
-    return !mError;
 }
 
 void GLShader::Activate()

@@ -60,7 +60,7 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("day23.brn");
     mAssetManager.LoadBarn("day123.brn");
     
-    //mAssetManager.WriteBarnAssetToFile("DEFAULT.BMP");
+    //mAssetManager.WriteBarnAssetToFile("CANDY.MOD");
     //mAssetManager.WriteOutAssetsOfType("YAK");
     
     // Initialize sheep manager.
@@ -72,6 +72,9 @@ bool GEngine::Initialize()
     //mCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
     mCursor = mAssetManager.LoadCursor("C_POINT.CUR");
     mCursor->Activate();
+    
+    //mAssetManager.LoadACT("GAB_GABBREATH1.ACT");
+    mAssetManager.LoadACT("CAT_CATRUN.ACT");
     
     LoadScene("B25");
     return true;

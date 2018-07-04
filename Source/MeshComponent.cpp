@@ -101,10 +101,6 @@ void MeshComponent::SetModel(Model* model)
             continue;
         }
         
-        // Texture names don't include the extension, so we need to add them.
-        //TODO: Should maybe do this in the asset manager?
-        textureName.append(".BMP");
-        
         // Load texture into memory. We don't really care here whether it is
         // null or not. If it is null, it'll just look incorrect at runtime.
         Texture* tex = Services::GetAssets()->LoadTexture(textureName);

@@ -13,9 +13,7 @@
 #include "Matrix3.h"
 #include "Quaternion.h"
 
-using namespace std;
-
-Model::Model(string name, char* data, int dataLength) :
+Model::Model(std::string name, char* data, int dataLength) :
     Asset(name)
 {
     ParseFromData(data, dataLength);
@@ -23,22 +21,23 @@ Model::Model(string name, char* data, int dataLength) :
 
 void Model::ParseFromData(char *data, int dataLength)
 {
+    //std::cout << "MOD " << mName << std::endl;
     BinaryReader reader(data, dataLength);
     
     // First 4 bytes: file identifier "LDOM" (MODL backwards).
     std::string identifier = reader.ReadString(4);
     if(identifier != "LDOM")
     {
-        cout << "MOD file does not have MODL identifier!" << endl;
+        std::cout << "MOD file does not have MODL identifier!" << std::endl;
         return;
     }
     
-    // 4 bytes: unknown - has thus far always been 265.
+    // 4 bytes: first 2 are a major/minor version number. Next 2 unknown.
     reader.ReadUInt();
     
     // 4 bytes: number of meshes in this model.
     unsigned int numMeshes = reader.ReadUInt();
-    //cout << "Number of meshes: " << numMeshes << endl;
+    //std::cout << "  Number of meshes: " << numMeshes << std::endl;
     
     // 4 bytes: size of the model data in bytes.
     // Always 48 bytes LESS than the total size (b/c header data is 48 bytes).
@@ -59,11 +58,13 @@ void Model::ParseFromData(char *data, int dataLength)
     int meshGroupCount = 0;
     for(int i = 0; i < numMeshes; i++)
     {
+        //std::cout << "  Mesh " << i << std::endl;
+        
         // 4 bytes: mesh block identifier "HSEM" (MESH backwards).
         identifier = reader.ReadString(4);
         if(identifier != "HSEM")
         {
-            cout << "Expected MESH identifier. Instead got " << identifier << endl;
+            std::cout << "Expected MESH identifier. Instead got " << identifier << std::endl;
             return;
         }
 
@@ -82,8 +83,7 @@ void Model::ParseFromData(char *data, int dataLength)
         // From the basis vectors, calculate a quaternion representing
         // a rotation from the standard basis to that basis. We also need to negate some elements
         // to represent "reflection" from a right-handed rotation to a left-handed rotation.
-        Matrix3 rotMat = Matrix3::MakeBasis(iBasis, jBasis, kBasis);
-        Quaternion rotQuat = Quaternion(rotMat);
+        Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
         rotQuat.SetZ(-rotQuat.GetZ());
         rotQuat.SetW(-rotQuat.GetW());
         
@@ -92,41 +92,39 @@ void Model::ParseFromData(char *data, int dataLength)
         // This if vital, for example, if a mesh contains a human's head, legs, arms...
         // want to position them all correctly relative to one another!
         Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), -reader.ReadFloat());
-        //cout << "   Mesh Position: " << meshPos << endl;
+        //std::cout << "    Mesh Position: " << meshPos << std::endl;
         
         // 4 bytes: number of mesh group blocks in this mesh.
         unsigned int numMeshGroups = reader.ReadUInt();
-        //cout << "   Number of mesh groups in mesh: " << numMeshGroups << endl;
+        //std::cout << "    Number of mesh groups in mesh: " << numMeshGroups << std::endl;
         
         // 24 bytes: two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max values for the mesh.
-        Vector3 val4(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        Vector3 val5(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        //cout << "   Min: " << val4 << endl;
-        //cout << "   Max: " << val5 << endl;
+        Vector3 minVal(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        Vector3 maxVal(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         
         // Now, we iterate over each mesh group in this mesh.
         for(int j = 0; j < numMeshGroups; j++)
         {
+            //std::cout << "    Mesh Group " << j << std::endl;
+            
             // 4 bytes: mesh group block identifier "PRGM" (MGRP backwards).
-            identifier = reader.ReadString(4); //reader.Read(identifier, 4);
+            identifier = reader.ReadString(4);
             if(identifier != "PRGM")
             {
-                cout << "Expected MGRP identifier." << endl;
+                std::cout << "Expected MGRP identifier." << std::endl;
                 return;
             }
             
-            // 32 bytes: the name of the mesh group.
-            std::string meshGroupName = reader.ReadString(32);
-            //cout << "       Mesh group name: " << meshGroupName << endl;
+            // 32 bytes: the name of the texture for this mesh group
+            std::string textureName = reader.ReadString(32);
+            mTextureNames.push_back(textureName);
+            //std::cout << "      Texture name: " << textureName << std::endl;
             
             // 4 bytes: unknown - often is (0x00FFFFFF), but not always.
             // Have also seen: 0x03773BB3, 0xFF000000, 0x50261200
-            unsigned int val = reader.ReadUInt();
-            if(val != 0x00FFFFFF)
-            {
-                cout << "Expected 0x00FFFFFF" << endl;
-            }
+            // Maybe a color value?
+            reader.ReadUInt();
 
             // 4 bytes: unknown - seems to always be 1.
             reader.ReadUInt();
@@ -139,11 +137,9 @@ void Model::ParseFromData(char *data, int dataLength)
             mesh->SetOffset(meshPos);
             mesh->SetRotation(rotQuat);
             
-            // Also, push group name onto texture name array.
-            mTextureNames.push_back(std::string(meshGroupName));
-            
             // 4 bytes: vertex count for this mesh group.
             int vertexCount = reader.ReadUInt();
+            //std::cout << "      Vertex count: " << vertexCount << std::endl;
             
             // Based on vertex count, we can allocate some arrays for data.
             float* vertexPositions = new float[vertexCount * 3];
@@ -153,55 +149,57 @@ void Model::ParseFromData(char *data, int dataLength)
             // 4 bytes: index count, for drawing indexed mesh.
             int indexCount = reader.ReadUInt();
             unsigned short* vertexIndexes = new unsigned short[indexCount * 3];
-
+            //std::cout << "      Index count: " << indexCount << std::endl;
+            
             // 4 bytes: number of LODK blocks in this mesh group. Not uncommon to be 0.
             unsigned int lodkCount = reader.ReadUInt();
-            //cout << "Number of LODK blocks: " << numLodkBlocks << endl;
+            //std::cout << "      LODK count: " << lodkCount << std::endl;
             
             // 4 bytes: unknown - always zero thus far.
             reader.ReadUInt();
             
-            // The next n bytes represent a certain number of floating point values.
-            // This is the (X, Y, Z) vertex data for the mesh (positions, normals, UVs).
+            // The next n bytes represent a number of floating point values.
+            // This is the vertex data for the mesh (positions, normals, UVs).
             
-            // First set of numbers represent positions for each vertex.
+            // Vertex positions.
             for(int k = 0; k < vertexCount; k++)
             {
-                Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-                vertexPositions[k * 3] = v.GetX();
-                vertexPositions[k * 3 + 1] = v.GetZ();
-                vertexPositions[k * 3 + 2] = -v.GetY();
+                Vector3 pos(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                vertexPositions[k * 3] = pos.GetX();
+                vertexPositions[k * 3 + 1] = pos.GetZ();
+                vertexPositions[k * 3 + 2] = -pos.GetY();
             }
             mesh->SetPositions(&vertexPositions[0], vertexCount * 3);
             
-            // Second set of numbers represent normals for each vertex.
+            // Vertex normals.
             for(int k = 0; k < vertexCount; k++)
             {
-                Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-                vertexNormals[k * 3] = v.GetX();
-                vertexNormals[k * 3 + 1] = v.GetZ();
-                vertexNormals[k * 3 + 2] = v.GetY();
+                Vector3 normal(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                vertexNormals[k * 3] = normal.GetX();
+                vertexNormals[k * 3 + 1] = normal.GetZ();
+                vertexNormals[k * 3 + 2] = normal.GetY();
             }
             
-            // UV coordinates.
+            // Vertex UV coordinates.
             for(int k = 0; k < vertexCount; k++)
             {
-                Vector2 v(reader.ReadFloat(), reader.ReadFloat());
-                vertexUVs[k * 2] = v.GetX();
-                vertexUVs[k * 2 + 1] = v.GetY();
+                Vector2 uv(reader.ReadFloat(), reader.ReadFloat());
+                vertexUVs[k * 2] = uv.GetX();
+                vertexUVs[k * 2 + 1] = uv.GetY();
             }
             mesh->SetUV1(vertexUVs, vertexCount * 2);
             
             // Next comes vertex indexes for drawing from an IBO.
             // Common sequence would be (2, 1, 0) or (5, 4, 3), referring to vertex indexes above.
-            // Every 4th number seems out of place - not sure what they mean.
-            // Seen: 0xF100 (241), 0x0000 (0), 0x0701 (263), 0x7F3F (16255), 0x56B1 (45398),
-            // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
             for(int k = 0; k < indexCount; k++)
             {
                 vertexIndexes[k * 3] = reader.ReadUShort();
                 vertexIndexes[k * 3 + 1] = reader.ReadUShort();
                 vertexIndexes[k * 3 + 2] = reader.ReadUShort();
+                
+                // Every 4th number seems out of place - not sure what they mean.
+                // Seen: 0xF100 (241), 0x0000 (0), 0x0701 (263), 0x7F3F (16255), 0x56B1 (45398),
+                // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
                 reader.ReadUShort(); // WHAT IS IT!?
             }
             mesh->SetIndexes(vertexIndexes, indexCount * 3);
@@ -214,7 +212,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 identifier = reader.ReadString(4);
                 if(identifier != "KDOL")
                 {
-                    cout << "Expected LODK identifier. Instead found " << identifier << endl;
+                    std::cout << "Expected LODK identifier. Instead found " << identifier << std::endl;
                     return;
                 }
                 
@@ -223,6 +221,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 int unknownCount1 = reader.ReadUInt();
                 int unknownCount2 = reader.ReadUInt();
                 int unknownCount3 = reader.ReadUInt();
+                //std::cout << k << ": " << unknownCount1 << ", " << unknownCount2 << ", " << unknownCount3 << std::endl;
                 
                 // Read in all values. Currently don't know what they are though.
                 for(int l = 0; l < unknownCount1; l++)
@@ -248,29 +247,31 @@ void Model::ParseFromData(char *data, int dataLength)
     
     // After all meshes and mesh groups, there is some additional data.
     // 4 bytes: identifier "XDOM" (MODX backwards).
-    identifier = reader.ReadString(4); //reader.Read(identifier, 4);
+    identifier = reader.ReadString(4);
     if(identifier != "XDOM")
     {
-        cout << "Expected MODX identifier." << endl;
+        std::cout << "Expected MODX identifier." << std::endl;
         return;
     }
     
+    /*
     // There seems to always be exactly one GRPX block for each MGRP block earlier.
     // Each GRPX block's size correlates in some way to the size of the earlier MGRP block...
-    /*
     for(int i = 0; i < meshGroupCount; i++)
     {
         // 4 bytes: identifier "XPRG" (GRPX backwards).
-        reader.Read(identifier, 4);
-        if(!strcmp(identifier, "XPRG"))
+        identifier = reader.ReadString(4);
+        if(identifier != "XPRG")
         {
             cout << "Expected GRPX identifier." << endl;
             return;
         }
         
+        // 4 bytes: vertex count (why, what good is that?)
+        uint vertexCount = reader.ReadUInt();
+        
         // The next n bytes represent a certain number of ushort values.
         // Not yet clear how to derive the size of this block, however.
     }
     */
-    //cout << "Mesh count: " << mMeshes.size() << endl;
 }

@@ -18,6 +18,7 @@
 #include "Soundtrack.h"
 #include "Yak.h"
 #include "Cursor.h"
+#include "ACT.h"
 #include "Sheep/SheepScript.h"
 
 using namespace std;
@@ -43,6 +44,8 @@ public:
     
     Model* LoadModel(string name);
     Texture* LoadTexture(string name);
+    
+    ACT* LoadACT(string name);
     
     SIF* LoadSIF(string name);
     SceneData* LoadScene(string name);

@@ -3,9 +3,8 @@
 //
 // Clark Kromenaker
 //
-// Description goes here!
+// A compiled and linked GLSL shader program.
 //
-
 #pragma once
 #include <string>
 #include <GL/glew.h>
@@ -15,22 +14,15 @@ class Matrix4;
 class GLShader
 {
 public:
-    //GLShader(const char* shaderName);
     GLShader(const char* vertShaderPath, const char* fragShaderPath);
     ~GLShader();
-    
-    bool IsGood();
-    
-    GLuint GetProgram() { return mProgram; }
     
     void Activate();
     
     void SetUniformMatrix4(const char* name, const Matrix4& mat);
     
-private:
-    GLuint LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType);
-    bool IsShaderCompiled(GLuint shader);
-    bool IsProgramLinked(GLuint program);
+    bool IsGood() { return !mError; }
+    GLuint GetProgram() { return mProgram; }
     
 private:
     // Handle to the compiled and linked GL shader program.
@@ -38,4 +30,8 @@ private:
     
     // Did we encounter an error during compile/linking?
     bool mError = false;
+    
+    GLuint LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType);
+    bool IsShaderCompiled(GLuint shader);
+    bool IsProgramLinked(GLuint program);
 };

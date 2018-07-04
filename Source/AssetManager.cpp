@@ -163,6 +163,11 @@ Texture* AssetManager::LoadTexture(string name)
     return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), &mLoadedTextures);
 }
 
+ACT* AssetManager::LoadACT(std::string name)
+{
+    return LoadAsset<ACT>(SanitizeAssetName(name, ".ACT"), nullptr);
+}
+
 SIF* AssetManager::LoadSIF(string name)
 {
     return LoadAsset<SIF>(SanitizeAssetName(name, ".SIF"), nullptr);
