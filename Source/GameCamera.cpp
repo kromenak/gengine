@@ -7,7 +7,6 @@
 #include "CameraComponent.h"
 #include "GEngine.h"
 #include "Scene.h"
-#include "MeshComponent.h"
 #include "AudioListener.h"
 #include "SheepCompiler.h"
 

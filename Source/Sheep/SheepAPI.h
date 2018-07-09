@@ -66,7 +66,7 @@ void AddSysImport(const std::string& name, char retType, std::initializer_list<c
         }                                                   \
     } name##_instance
 
-#define shpvoid byte
+#define shpvoid uint8_t
 
 // ACTORS
 shpvoid Blink(std::string actorName);

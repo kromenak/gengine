@@ -16,6 +16,15 @@ Cursor::Cursor(std::string name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
+Cursor::~Cursor()
+{
+    for(auto& frame : mCursorFrames)
+    {
+        SDL_FreeCursor(frame);
+    }
+    mCursorFrames.clear();
+}
+
 void Cursor::Activate()
 {
     if(mCursorFrames.size() > 0)

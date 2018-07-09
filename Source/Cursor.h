@@ -18,6 +18,7 @@ class Cursor : public Asset
 {
 public:
     Cursor(std::string name, char* data, int dataLength);
+    ~Cursor();
     
     void Activate();
     

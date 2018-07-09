@@ -173,8 +173,6 @@ shpvoid GlanceX(std::string actorName, int leftPercentX, int leftPercentY,
     return 0;
 }
 
-
-
 shpvoid InitEgoPosition(std::string positionName)
 {
     GEngine::inst->GetScene()->InitEgoPosition(positionName);
@@ -207,4 +205,10 @@ int IsCurrentTime(std::string timeCode)
 }
 RegFunc1(IsCurrentTime, int, string);
 
+// INVENTORY
+int DoesGraceHaveInvItem(std::string itemName)
+{
+    return 0;
+}
+RegFunc1(DoesGraceHaveInvItem, int, string);
 

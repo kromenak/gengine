@@ -19,10 +19,10 @@ class BarnAsset
 public:
     // Name of barn file containing this asset.
     // If not empty, it means this Asset handle is a pointer to another barn file.
-    std::string barnFileName = "";
+    std::string barnFileName;
     
     // The name of the asset itself.
-    std::string name = "";
+    std::string name;
     
     // Offset of this asset within the Barn file data blob.
     unsigned int offset = 0;
