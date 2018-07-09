@@ -19,11 +19,5 @@ typedef int32_t int32;
 
 // Some helpful aliases, from my C# work.
 typedef uint8_t uchar;
-typedef uint8_t byte;
-typedef int8_t sbyte;
-
 typedef uint16_t ushort;
-//"short" is already defined
-
 typedef uint32_t uint;
-//"int" is already defined
