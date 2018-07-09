@@ -1,5 +1,5 @@
 //
-// MeshComponent.h
+// MeshRenderer.h
 //
 // Clark Kromenaker
 //
@@ -8,31 +8,32 @@
 #pragma once
 #include <vector>
 #include "Component.h"
+#include "Material.h"
+#include "RenderPacket.h"
 
 class Mesh;
 class Texture;
 
-class MeshComponent : public Component
+class MeshRenderer : public Component
 {
 public:
-    MeshComponent(Actor* actor);
-    ~MeshComponent();
-    
-    void Update(float deltaTime) override;
+    MeshRenderer(Actor* actor);
+    ~MeshRenderer();
     
     void Render();
+    std::vector<RenderPacket> GetRenderPackets();
     
     void SetModel(Model* model);
-    void SetMesh(Mesh* mesh);
     
-    void AddTexture(Texture* texture);
+    void SetMesh(Mesh* mesh);
+    void AddMesh(Mesh* mesh);
     
 private:
     // A mesh component can render one or more meshes.
     // If more than one is specified, they will be rendered in order.
     std::vector<Mesh*> mMeshes;
     
-    // Textures to pass to the shader.
-    // If more than one is specified, they will be passed in order.
-    std::vector<Texture*> mTextures;
+    // A material describes how to render a mesh.
+    // Each mesh *must have* a material!
+    std::vector<Material> mMaterials;
 };

@@ -7,7 +7,7 @@
 #include <iostream>
 #include "Services.h"
 #include "Actor.h"
-#include "MeshComponent.h"
+#include "MeshRenderer.h"
 #include "SoundtrackPlayer.h"
 #include "GameCamera.h"
 #include "Math.h"
@@ -59,8 +59,8 @@ Scene::Scene(std::string name, std::string timeCode) :
             actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading));
         }
         
-        MeshComponent* meshComponent = actor->AddComponent<MeshComponent>();
-        meshComponent->SetModel(actorDef->model);
+        MeshRenderer* renderer = actor->AddComponent<MeshRenderer>();
+        renderer->SetModel(actorDef->model);
         
         // If this is our ego, save a reference to it.
         if(actorDef->ego)

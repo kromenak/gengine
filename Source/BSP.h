@@ -12,7 +12,7 @@
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Plane.h"
-#include "GLVertexArray.h"
+#include "Mesh.h"
 #include <vector>
 #include <unordered_map>
 #include <string>
@@ -125,7 +125,8 @@ private:
     std::vector<Vector2> mUVs;
     std::vector<uint> mUVIndices;
     
-    GLVertexArray* mVertexArray = nullptr;
+    // Mesh for rendering BSP.
+    Mesh* mMesh = nullptr;
     
     //TODO: bounding spheres?
     

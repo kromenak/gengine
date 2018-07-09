@@ -5,7 +5,7 @@
 //  Created by Clark Kromenaker on 7/22/17.
 //
 #pragma once
-#include "SDLRenderer.h"
+#include "Renderer.h"
 #include "AudioManager.h"
 #include "AssetManager.h"
 #include "InputManager.h"
@@ -44,7 +44,7 @@ private:
     bool mRunning;
     
     // Subsystems.
-    SDLRenderer mRenderer;
+    Renderer mRenderer;
     AudioManager mAudioManager;
     AssetManager mAssetManager;
     InputManager mInputManager;

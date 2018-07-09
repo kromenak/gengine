@@ -4,7 +4,7 @@
 // Clark Kromenaker
 //
 #include "Skybox.h"
-#include "GLVertexArray.h"
+#include "Mesh.h"
 #include "Texture.h"
 #include "Services.h"
 
@@ -73,10 +73,13 @@ Skybox::Skybox()
 
 void Skybox::Render()
 {
-    if(mVertexArray == nullptr)
+    // Generate submesh on the fly, if not yet generated.
+    if(mSkyboxMesh == nullptr)
     {
-        mVertexArray = new GLVertexArray(points, 108);
+        mSkyboxMesh = new Mesh(36, 3 * sizeof(float), MeshUsage::Static);
+        mSkyboxMesh->SetPositions(points);
     }
+    
     if(mCubemapTextureId == GL_NONE)
     {
         glActiveTexture(GL_TEXTURE0);
@@ -142,5 +145,5 @@ void Skybox::Render()
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, mCubemapTextureId);
     
-    mVertexArray->Draw();
+    mSkyboxMesh->Render();
 }

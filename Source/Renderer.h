@@ -1,5 +1,5 @@
 //
-//  SDLRenderer.h
+//  Renderer.h
 //  GEngine
 //
 //  Created by Clark Kromenaker on 7/22/17.
@@ -7,18 +7,18 @@
 #pragma once
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
-#include "GLVertexArray.h"
-#include "GLShader.h"
+
 #include "Matrix4.h"
 #include <vector>
 
+class Shader;
 class CameraComponent;
-class MeshComponent;
+class MeshRenderer;
 class Model;
 class BSP;
 class Skybox;
 
-class SDLRenderer
+class Renderer
 {
 public:
     bool Initialize();
@@ -33,14 +33,14 @@ public:
     
     void SetWorldTransformMatrix(Matrix4& worldTransform);
     
-    void AddMeshComponent(MeshComponent* mc);
-    void RemoveMeshComponent(MeshComponent* mc);
+    void AddMeshRenderer(MeshRenderer* mc);
+    void RemoveMeshRenderer(MeshRenderer* mc);
     
     void SetBSP(BSP* bsp) { mBSP = bsp; }
     
     void SetSkybox(Skybox* skybox) { mSkybox = skybox; }
     
-    GLShader* GetShader() { return mShader; }
+    Shader* GetShader() { return mDefaultShader; }
     
     int GetWidth() { return mScreenWidth; }
     int GetHeight() { return mScreenHeight; }
@@ -57,13 +57,13 @@ private:
     SDL_GLContext mContext;
     
     // Default shader.
-    GLShader* mShader = nullptr;
+    Shader* mDefaultShader = nullptr;
     
     // Our camera in the scene - we currently only support one.
     CameraComponent* mCameraComponent = nullptr;
     
     // List of mesh components to render.
-    std::vector<MeshComponent*> mMeshComponents;
+    std::vector<MeshRenderer*> mMeshRenderers;
     
     // A BSP to render.
     BSP* mBSP = nullptr;
@@ -72,5 +72,5 @@ private:
     Skybox* mSkybox = nullptr;
     
     // Skybox shader.
-    GLShader* mSkyboxShader = nullptr;
+    Shader* mSkyboxShader = nullptr;
 };

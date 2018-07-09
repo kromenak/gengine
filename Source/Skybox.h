@@ -9,7 +9,7 @@
 #include <GL/glew.h>
 
 class Texture;
-class GLVertexArray;
+class Mesh;
 
 class Skybox
 {
@@ -40,7 +40,7 @@ private:
     float mAzimuth = 0.0f;
     
     // Vertex array for the big cube we will render the skybox onto.
-    GLVertexArray* mVertexArray = nullptr;
+    Mesh* mSkyboxMesh = nullptr;
     
     // An ID for the texture object generated in OpenGL.
     GLuint mCubemapTextureId = GL_NONE;

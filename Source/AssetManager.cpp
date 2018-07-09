@@ -23,7 +23,7 @@ AssetManager::~AssetManager()
     mLoadedBarns.clear();
 }
 
-void AssetManager::AddSearchPath(string searchPath)
+void AssetManager::AddSearchPath(std::string searchPath)
 {
     // If the search path already exists in the list, don't add it again.
     if(find(mSearchPaths.begin(), mSearchPaths.end(), searchPath) != mSearchPaths.end())
@@ -33,21 +33,21 @@ void AssetManager::AddSearchPath(string searchPath)
     mSearchPaths.push_back(searchPath);
 }
 
-void AssetManager::LoadBarn(string barnName)
+void AssetManager::LoadBarn(std::string barnName)
 {
     // We want our dictionary key to be all uppercase.
     // Avoids confusion with case-sensitive key searches.
-    string dictKey = barnName;
+    std::string dictKey = barnName;
     StringUtil::ToUpper(dictKey);
     
     // If the barn is already in the map, then we don't need to load it again.
     if(mLoadedBarns.find(dictKey) != mLoadedBarns.end()) { return; }
     
     // Find path to barn file.
-    string assetPath = GetAssetPath(barnName);
+    std::string assetPath = GetAssetPath(barnName);
     if(assetPath.empty())
     {
-        cout << "Barn doesn't exist at any search path." << endl;
+        std::cout << "Barn doesn't exist at any search path." << std::endl;
         return;
     }
     
@@ -56,10 +56,10 @@ void AssetManager::LoadBarn(string barnName)
     mLoadedBarns[dictKey] = barn;
 }
 
-void AssetManager::UnloadBarn(string barnName)
+void AssetManager::UnloadBarn(std::string barnName)
 {
     // We want our dictionary key to be all uppercase.
-    string dictKey = barnName;
+    std::string dictKey = barnName;
     StringUtil::ToUpper(dictKey);
     
     // If the barn isn't in the map, we can't unload it!
@@ -74,10 +74,10 @@ void AssetManager::UnloadBarn(string barnName)
     mLoadedBarns.erase(dictKey);
 }
 
-BarnFile* AssetManager::GetBarn(string barnName)
+BarnFile* AssetManager::GetBarn(std::string barnName)
 {
     // We want our dictionary key to be all uppercase.
-    string dictKey = barnName;
+    std::string dictKey = barnName;
     StringUtil::ToUpper(dictKey);
     
     // If we find it, return it.
@@ -91,7 +91,7 @@ BarnFile* AssetManager::GetBarn(string barnName)
     return nullptr;
 }
 
-BarnFile* AssetManager::GetBarnContainingAsset(string fileName)
+BarnFile* AssetManager::GetBarnContainingAsset(std::string fileName)
 {
     // Iterate over all loaded barn files to find the asset.
     for(const auto& entry : mLoadedBarns)
@@ -138,27 +138,27 @@ void AssetManager::WriteOutAssetsOfType(std::string extension)
     }
 }
 
-Audio* AssetManager::LoadAudio(string name)
+Audio* AssetManager::LoadAudio(std::string name)
 {
     return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), &mLoadedAudios);
 }
 
-Soundtrack* AssetManager::LoadSoundtrack(string name)
+Soundtrack* AssetManager::LoadSoundtrack(std::string name)
 {
     return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), nullptr);
 }
 
-Yak* AssetManager::LoadYak(string name)
+Yak* AssetManager::LoadYak(std::string name)
 {
     return LoadAsset<Yak>(SanitizeAssetName(name, ".YAK"), nullptr);
 }
 
-Model* AssetManager::LoadModel(string name)
+Model* AssetManager::LoadModel(std::string name)
 {
     return LoadAsset<Model>(SanitizeAssetName(name, ".MOD"), nullptr);
 }
 
-Texture* AssetManager::LoadTexture(string name)
+Texture* AssetManager::LoadTexture(std::string name)
 {
     return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), &mLoadedTextures);
 }
@@ -168,22 +168,22 @@ ACT* AssetManager::LoadACT(std::string name)
     return LoadAsset<ACT>(SanitizeAssetName(name, ".ACT"), nullptr);
 }
 
-SIF* AssetManager::LoadSIF(string name)
+SIF* AssetManager::LoadSIF(std::string name)
 {
     return LoadAsset<SIF>(SanitizeAssetName(name, ".SIF"), nullptr);
 }
 
-SceneData* AssetManager::LoadScene(string name)
+SceneData* AssetManager::LoadScene(std::string name)
 {
     return LoadAsset<SceneData>(SanitizeAssetName(name, ".SCN"), nullptr);
 }
 
-NVC* AssetManager::LoadNVC(string name)
+NVC* AssetManager::LoadNVC(std::string name)
 {
     return LoadAsset<NVC>(SanitizeAssetName(name, ".NVC"), nullptr);
 }
 
-BSP* AssetManager::LoadBSP(string name)
+BSP* AssetManager::LoadBSP(std::string name)
 {
     return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), nullptr);
 }
@@ -198,10 +198,29 @@ Cursor* AssetManager::LoadCursor(std::string name)
     return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), nullptr);
 }
 
-string AssetManager::SanitizeAssetName(std::string assetName, std::string expectedExtension)
+Shader* AssetManager::LoadShader(std::string name)
+{
+    auto it = mLoadedShaders.find(name);
+    if(it != mLoadedShaders.end())
+    {
+        return it->second;
+    }
+    
+    std::string vertFilePath = GetAssetPath(name + ".vert");
+    std::string fragFilePath = GetAssetPath(name + ".frag");
+    
+    Shader* shader = new Shader(vertFilePath.c_str(), fragFilePath.c_str());
+    if(shader->IsGood())
+    {
+        mLoadedShaders[name] = shader;
+    }
+    return shader;
+}
+
+std::string AssetManager::SanitizeAssetName(std::string assetName, std::string expectedExtension)
 {
     // First, convert all names to uppercase.
-    string sanitizedName = assetName;
+    std::string sanitizedName = assetName;
     StringUtil::ToUpper(sanitizedName);
     
     // We want to add the expected extension if it isn't present, and no other extension is present.
@@ -216,22 +235,22 @@ string AssetManager::SanitizeAssetName(std::string assetName, std::string expect
     return sanitizedName;
 }
 
-string AssetManager::GetAssetPath(string fileName)
+std::string AssetManager::GetAssetPath(std::string fileName)
 {
-    for(const string& searchPath : mSearchPaths)
+    for(const std::string& searchPath : mSearchPaths)
     {
-        string path = searchPath + fileName;
+        std::string path = searchPath + fileName;
         
-        ifstream f(path.c_str());
+        std::ifstream f(path.c_str());
         if(f.good()) { return path; }
     }
     return "";
 }
 
 template<class T>
-T* AssetManager::LoadAsset(string assetName, unordered_map<string, T*>* cache)
+T* AssetManager::LoadAsset(std::string assetName, std::unordered_map<std::string, T*>* cache)
 {
-    string upperName = assetName;
+    std::string upperName = assetName;
     StringUtil::ToUpper(upperName);
     
     // See if this asset is already loaded in the cache
@@ -247,7 +266,7 @@ T* AssetManager::LoadAsset(string assetName, unordered_map<string, T*>* cache)
     
     // First, see if the asset exists at any asset search path.
     // If so, we load the asset directly from file.
-    string assetPath = GetAssetPath(upperName);
+    std::string assetPath = GetAssetPath(upperName);
     if(!assetPath.empty())
     {
         //TODO: Load asset from file.

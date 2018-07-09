@@ -3,56 +3,67 @@
 //
 // Clark Kromenaker
 //
-// Description goes here!
+// A chunk of geometry, potentially indexed, that can be rendered by OpenGL.
 //
 #pragma once
 #include <GL/glew.h>
-
-// Some OpenGL calls take in array indexes/offsets as pointers.
-// This macro just makes the syntax clearer for the reader.
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
+#include "Types.h"
+#include "Mesh.h"
 
 class GLVertexArray
 {
 public:
-    GLVertexArray() { };
-    GLVertexArray(const GLfloat* vertPositions, int vertPositionsCount);
-    GLVertexArray(const GLfloat* vertPositions, int vertPositionsCount,
-                  const GLushort* indexes, int indexesCount);
+    GLVertexArray(uint vertexCount, uint vertexSize, MeshUsage usage);
     ~GLVertexArray();
     
-    void SetPositions(const GLfloat* vertPositions, int count);
-    void SetColors(const GLfloat* vertColors, int count);
-    void SetUV1(const GLfloat* uvs, int count);
-    void SetIndexes(const GLushort* indexes, int count);
-    void Build();
+    void SetPositions(const float* positions);
+    void SetColors(const float* colors);
+    void SetNormals(const float* normals);
+    void SetUV1(const float* uvs);
     
-    void Activate();
-    void Draw();
-    void Draw(int offset, int count);
+    void SetIndexes(const ushort* indexes, uint count);
+    
+    void DrawTriangles();
+    void DrawTriangles(uint offset, uint count);
+    
+    void DrawTriangleFans();
+    void DrawTriangleFans(uint offset, uint count);
     
     void DrawLines();
+    void DrawLines(uint offset, uint count);
+    
+    void Draw(GLenum mode);
+    void Draw(GLenum mode, uint offset, uint count);
     
 private:
-    // Buffer objects for OpenGL - Vertex Buffer Object,
-    // Vertex Array Object, and Index Buffer Object.
+    // Number of vertices in the mesh.
+    uint mVertexCount = 0;
+    
+    // The VBO (vertex buffer object) holds all per-vertex data (position, color, normals, etc).
     GLuint mVBO = GL_NONE;
-    GLuint mVAO = GL_NONE;
+    
+    // The IBO (index buffer object) holds index values for indexed geometry.
+    // It's optional, but improves performance.
     GLuint mIBO = GL_NONE;
     
-    // Position data.
-    const GLfloat* mPositions = nullptr;
-    int mPositionCount = 0;
+    // The VAO (vertex array object) provides mapping info for the VBO.
+    // The VBO is just a big chunk of memory. The VAO dictates what chunk holds
+    // positions vs. colors vs whatever, and whether the data is separate or interleaved.
+    GLuint mVAO = GL_NONE;
     
-    // Color data.
-    const GLfloat* mColors = nullptr;
-    int mColorCount = 0;
+    // Indicates that we need to update some aspect of the VBO.
+    uint mVboUpdateMask = 0;
     
-    // UV data.
-    const GLfloat* mUV1 = nullptr;
-    int mUV1Count = 0;
+    // Vertex data
+    const float* mPositions = nullptr;
+    const float* mColors = nullptr;
+    const float* mNormals = nullptr;
+    const float* mUV1 = nullptr;
     
-    // Index data.
-    const GLushort* mIndexes = nullptr;
-    int mIndexCount = 0;
+    // Index data
+    const ushort* mIndexes = nullptr;
+    uint mIndexCount = 0;
+    
+    void BuildVBO();
+    void UpdateVBO();
 };

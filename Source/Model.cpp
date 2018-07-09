@@ -94,6 +94,11 @@ void Model::ParseFromData(char *data, int dataLength)
         Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), -reader.ReadFloat());
         //std::cout << "    Mesh Position: " << meshPos << std::endl;
         
+        // Use mesh position offset and rotation values to create a local transform matrix.
+        Matrix4 transMatrix = Matrix4::MakeTranslate(meshPos);
+        Matrix4 rotMatrix = Matrix4::MakeRotate(rotQuat);
+        Matrix4 localTransformMatrix = transMatrix * rotMatrix;
+        
         // 4 bytes: number of mesh group blocks in this mesh.
         unsigned int numMeshGroups = reader.ReadUInt();
         //std::cout << "    Number of mesh groups in mesh: " << numMeshGroups << std::endl;
@@ -118,7 +123,6 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // 32 bytes: the name of the texture for this mesh group
             std::string textureName = reader.ReadString(32);
-            mTextureNames.push_back(textureName);
             //std::cout << "      Texture name: " << textureName << std::endl;
             
             // 4 bytes: unknown - often is (0x00FFFFFF), but not always.
@@ -129,17 +133,19 @@ void Model::ParseFromData(char *data, int dataLength)
             // 4 bytes: unknown - seems to always be 1.
             reader.ReadUInt();
             
-            // Create mesh object and push onto array.
-            Mesh* mesh = new Mesh();
-            mMeshes.push_back(mesh);
-            
-            // Save local offset and rotation of mesh.
-            mesh->SetOffset(meshPos);
-            mesh->SetRotation(rotQuat);
-            
             // 4 bytes: vertex count for this mesh group.
             int vertexCount = reader.ReadUInt();
             //std::cout << "      Vertex count: " << vertexCount << std::endl;
+            
+            // Create mesh object and push onto array.
+            Mesh* mesh = new Mesh(vertexCount, 8 * sizeof(float), MeshUsage::Static);
+            mMeshes.push_back(mesh);
+            
+            // Save local offset and rotation of mesh.
+            mesh->SetLocalTransformMatrix(localTransformMatrix);
+            
+            // Save texture name.
+            mesh->SetTextureName(textureName);
             
             // Based on vertex count, we can allocate some arrays for data.
             float* vertexPositions = new float[vertexCount * 3];
@@ -169,7 +175,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexPositions[k * 3 + 1] = pos.GetZ();
                 vertexPositions[k * 3 + 2] = -pos.GetY();
             }
-            mesh->SetPositions(&vertexPositions[0], vertexCount * 3);
+            mesh->SetPositions(vertexPositions);
             
             // Vertex normals.
             for(int k = 0; k < vertexCount; k++)
@@ -179,6 +185,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexNormals[k * 3 + 1] = normal.GetZ();
                 vertexNormals[k * 3 + 2] = normal.GetY();
             }
+            mesh->SetNormals(vertexNormals);
             
             // Vertex UV coordinates.
             for(int k = 0; k < vertexCount; k++)
@@ -187,7 +194,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexUVs[k * 2] = uv.GetX();
                 vertexUVs[k * 2 + 1] = uv.GetY();
             }
-            mesh->SetUV1(vertexUVs, vertexCount * 2);
+            mesh->SetUV1(vertexUVs);
             
             // Next comes vertex indexes for drawing from an IBO.
             // Common sequence would be (2, 1, 0) or (5, 4, 3), referring to vertex indexes above.

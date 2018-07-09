@@ -8,32 +8,32 @@
 #pragma once
 #include "AssetManager.h"
 #include "InputManager.h"
-#include "SDLRenderer.h"
+#include "Renderer.h"
 #include "AudioManager.h"
 #include "SheepManager.h"
 
 class Services
 {
 public:
-    static AssetManager* GetAssets() { return assetManager; }
-    static void SetAssets(AssetManager* assets) { assetManager = assets; }
+    static AssetManager* GetAssets() { return sAssetManager; }
+    static void SetAssets(AssetManager* assets) { sAssetManager = assets; }
     
-    static InputManager* GetInput() { return inputManager; }
-    static void SetInput(InputManager* input) { inputManager = input; }
+    static InputManager* GetInput() { return sInputManager; }
+    static void SetInput(InputManager* input) { sInputManager = input; }
     
-    static SDLRenderer* GetRenderer() { return renderer; }
-    static void SetRenderer(SDLRenderer* rend) { renderer = rend; }
+    static Renderer* GetRenderer() { return sRenderer; }
+    static void SetRenderer(Renderer* rend) { sRenderer = rend; }
     
-    static AudioManager* GetAudio() { return audio; }
-    static void SetAudio(AudioManager* aud) { audio = aud; }
+    static AudioManager* GetAudio() { return sAudio; }
+    static void SetAudio(AudioManager* aud) { sAudio = aud; }
     
-    static SheepManager* GetSheep() { return sheep; }
-    static void SetSheep(SheepManager* shp) { sheep = shp; }
+    static SheepManager* GetSheep() { return sSheep; }
+    static void SetSheep(SheepManager* shp) { sSheep = shp; }
     
 private:
-    static AssetManager* assetManager;
-    static InputManager* inputManager;
-    static SDLRenderer* renderer;
-    static AudioManager* audio;
-    static SheepManager* sheep;
+    static AssetManager* sAssetManager;
+    static InputManager* sInputManager;
+    static Renderer* sRenderer;
+    static AudioManager* sAudio;
+    static SheepManager* sSheep;
 };

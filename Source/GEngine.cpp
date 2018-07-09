@@ -14,9 +14,7 @@
 #include "Barn/BarnFile.h"
 
 #include "CameraComponent.h"
-#include "MeshComponent.h"
 
-#include "Mesh.h"
 #include "Scene.h"
 
 GEngine* GEngine::inst = nullptr;
@@ -29,6 +27,15 @@ GEngine::GEngine() : mRunning(false)
 
 bool GEngine::Initialize()
 {
+    // Initialize asset manager.
+    Services::SetAssets(&mAssetManager);
+    
+    // Add "Assets" directory as a possible location for any file.
+    mAssetManager.AddSearchPath("Assets/");
+    
+    // Initialize input.
+    Services::SetInput(&mInputManager);
+    
     // Initialize renderer.
     if(!mRenderer.Initialize())
     {
@@ -43,14 +50,7 @@ bool GEngine::Initialize()
     }
     Services::SetAudio(&mAudioManager);
     
-    // Initialize input.
-    Services::SetInput(&mInputManager);
-    
-    // Initialize asset manager.
-    Services::SetAssets(&mAssetManager);
-    
     // For simplicity right now, let's just load all barns at once.
-    mAssetManager.AddSearchPath("Assets/");
     mAssetManager.LoadBarn("ambient.brn");
     mAssetManager.LoadBarn("common.brn");
     mAssetManager.LoadBarn("core.brn");
@@ -59,9 +59,6 @@ bool GEngine::Initialize()
     mAssetManager.LoadBarn("day3.brn");
     mAssetManager.LoadBarn("day23.brn");
     mAssetManager.LoadBarn("day123.brn");
-    
-    //mAssetManager.WriteBarnAssetToFile("CANDY.MOD");
-    //mAssetManager.WriteOutAssetsOfType("YAK");
     
     // Initialize sheep manager.
     Services::SetSheep(&mSheepManager);
@@ -73,17 +70,20 @@ bool GEngine::Initialize()
     mCursor = mAssetManager.LoadCursor("C_POINT.CUR");
     mCursor->Activate();
     
-    //mAssetManager.LoadACT("GAB_GABBREATH1.ACT");
-    mAssetManager.LoadACT("CAT_CATRUN.ACT");
+    //mAssetManager.WriteBarnAssetToFile("CANDY.MOD");
+    //mAssetManager.WriteOutAssetsOfType("YAK");
     
-    LoadScene("B25");
+    //mAssetManager.LoadACT("GAB_GABBREATH1.ACT");
+    //mAssetManager.LoadACT("CAT_CATRUN.ACT");
+    
+    LoadScene("R25");
     return true;
 }
 
 void GEngine::Shutdown()
 {
     // Delete all actors. Since actor destructor
-    // removes from this list, can't iterate and delete.s
+    // removes from this list, can't iterate and delete.
     while(!mActors.empty())
     {
         delete mActors.back();

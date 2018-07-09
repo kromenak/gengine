@@ -201,7 +201,7 @@ void BSP::RenderPolygon(BSPPolygon* polygon)
     }
     
     // Draw the polygon.
-    mVertexArray->Draw(polygon->vertexIndex, polygon->vertexCount);
+    mMesh->Render(polygon->vertexIndex, polygon->vertexCount);
 }
 
 BSP::PointLocation BSP::GetPointLocation(Vector3 position, Plane* plane)
@@ -330,7 +330,6 @@ void BSP::ParseFromData(char *data, int dataLength)
         //std::cout << "Node " << mNodes.size() << ":" << std::endl;
         //std::cout << "  Polygon Idx: " << node->polygonIndex << ", Polygon Count: " << node->polygonCount << std::endl;
         //std::cout << "  Unknown Val 1: " << val1 << std::endl;
-        
         mNodes.push_back(node);
     }
     
@@ -395,11 +394,14 @@ void BSP::ParseFromData(char *data, int dataLength)
     }
     
     // Create the vertex array from the verts and vert indexes.
-    mVertexArray = new GLVertexArray(vertsPtr, (int)(mVertices.size() * 3), vertIndexesPtr, (int)mVertexIndices.size());
+    mMesh = new Mesh((uint)mVertices.size(), 5 * sizeof(float), MeshUsage::Static);
+    mMesh->SetRenderMode(RenderMode::TriangleFan);
+    mMesh->SetPositions(vertsPtr);
+    mMesh->SetIndexes(vertIndexesPtr, (uint)mVertexIndices.size());
     
     // Also pass along UV data.
     float* uvsPtr = (float*)&mUVs[0];
-    mVertexArray->SetUV1(uvsPtr, (int)(mUVs.size() * 2));
+    mMesh->SetUV1(uvsPtr);
     
     /*
     //CK: Don't currently need this bounding sphere stuff.

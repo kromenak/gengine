@@ -1,9 +1,9 @@
 //
-// GLShader.h
+// Shader.h
 //
 // Clark Kromenaker
 //
-// A compiled and linked GLSL shader program.
+// A compiled and linked shader program.
 //
 #pragma once
 #include <string>
@@ -12,11 +12,11 @@
 class Vector3;
 class Matrix4;
 
-class GLShader
+class Shader
 {
 public:
-    GLShader(const char* vertShaderPath, const char* fragShaderPath);
-    ~GLShader();
+    Shader(const char* vertShaderPath, const char* fragShaderPath);
+    ~Shader();
     
     void Activate();
     

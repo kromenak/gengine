@@ -20,8 +20,7 @@
 #include "Cursor.h"
 #include "ACT.h"
 #include "Sheep/SheepScript.h"
-
-using namespace std;
+#include "Shader.h"
 
 class AssetManager
 {
@@ -29,49 +28,53 @@ public:
     AssetManager();
     ~AssetManager();
     
-    void AddSearchPath(string searchPath);
+    void AddSearchPath(std::string searchPath);
     
-    void LoadBarn(string barnName);
-    void UnloadBarn(string barnName);
-    BarnFile* GetBarn(string barnName);
-    BarnFile* GetBarnContainingAsset(string assetName);
-    void WriteBarnAssetToFile(string assetName);
-    void WriteOutAssetsOfType(string extension);
+    void LoadBarn(std::string barnName);
+    void UnloadBarn(std::string barnName);
+    BarnFile* GetBarn(std::string barnName);
+    BarnFile* GetBarnContainingAsset(std::string assetName);
+    void WriteBarnAssetToFile(std::string assetName);
+    void WriteOutAssetsOfType(std::string extension);
     
-    Audio* LoadAudio(string name);
-    Soundtrack* LoadSoundtrack(string name);
-    Yak* LoadYak(string name);
+    Audio* LoadAudio(std::string name);
+    Soundtrack* LoadSoundtrack(std::string name);
+    Yak* LoadYak(std::string name);
     
-    Model* LoadModel(string name);
-    Texture* LoadTexture(string name);
+    Model* LoadModel(std::string name);
+    Texture* LoadTexture(std::string name);
     
-    ACT* LoadACT(string name);
+    ACT* LoadACT(std::string name);
     
-    SIF* LoadSIF(string name);
-    SceneData* LoadScene(string name);
-    NVC* LoadNVC(string name);
-    BSP* LoadBSP(string name);
+    SIF* LoadSIF(std::string name);
+    SceneData* LoadScene(std::string name);
+    NVC* LoadNVC(std::string name);
+    BSP* LoadBSP(std::string name);
     
-    SheepScript* LoadSheep(string name);
+    SheepScript* LoadSheep(std::string name);
     
-    Cursor* LoadCursor(string name);
+    Cursor* LoadCursor(std::string name);
+    
+    Shader* LoadShader(std::string name);
     
 private:
     // A list of paths to search for assets.
     // In priority order, since we'll search in order, and stop when we find the item.
-    vector<string> mSearchPaths;
+    std::vector<std::string> mSearchPaths;
     
     // A map of loaded barn files. If an asset isn't found on any search path,
     // we then search each loaded barn file for the asset.
-    unordered_map<string, BarnFile*> mLoadedBarns;
+    std::unordered_map<std::string, BarnFile*> mLoadedBarns;
     
     // A list of loaded assets, so we can just return existing assets if already loaded.
-    unordered_map<string, Texture*> mLoadedTextures;
-    unordered_map<string, Audio*> mLoadedAudios;
+    std::unordered_map<std::string, Audio*> mLoadedAudios;
+    std::unordered_map<std::string, Texture*> mLoadedTextures;
     
-    string SanitizeAssetName(string assetName, string expectedExtension);
+    std::unordered_map<std::string, Shader*> mLoadedShaders;
     
-    string GetAssetPath(string fileName);
+    std::string SanitizeAssetName(std::string assetName, std::string expectedExtension);
     
-    template<class T> T* LoadAsset(string assetName, unordered_map<string, T*>* cache);
+    std::string GetAssetPath(std::string fileName);
+    
+    template<class T> T* LoadAsset(std::string assetName, std::unordered_map<std::string, T*>* cache);
 };

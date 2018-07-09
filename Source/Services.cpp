@@ -6,8 +6,8 @@
 #include "Services.h"
 
 // Define static variables for Services here.
-AssetManager* Services::assetManager = nullptr;
-InputManager* Services::inputManager = nullptr;
-SDLRenderer* Services::renderer = nullptr;
-AudioManager* Services::audio = nullptr;
-SheepManager* Services::sheep = nullptr;
+AssetManager* Services::sAssetManager = nullptr;
+InputManager* Services::sInputManager = nullptr;
+Renderer* Services::sRenderer = nullptr;
+AudioManager* Services::sAudio = nullptr;
+SheepManager* Services::sSheep = nullptr;

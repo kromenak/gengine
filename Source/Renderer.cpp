@@ -1,19 +1,20 @@
 //
-//  SDLRenderer.cpp
+//  Renderer.cpp
 //  GEngine
 //
 //  Created by Clark Kromenaker on 7/22/17.
 //
-#include "SDLRenderer.h"
+#include "Renderer.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
 #include "Matrix4.h"
+#include "Shader.h"
 #include "Model.h"
 #include "CameraComponent.h"
-#include "MeshComponent.h"
+#include "MeshRenderer.h"
 #include "Skybox.h"
 
 GLfloat axis_vertices[] = {
@@ -34,9 +35,9 @@ GLfloat axis_colors[] = {
     0.0f, 0.0f, 1.0f, 1.0f
 };
 
-GLVertexArray* axes = nullptr;
+Mesh* axes = nullptr;
 
-bool SDLRenderer::Initialize()
+bool Renderer::Initialize()
 {
     // Init video subsystem.
     if(SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
@@ -84,24 +85,29 @@ bool SDLRenderer::Initialize()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
     // Compile default shader.
-    mShader = new GLShader("Assets/3D-Diffuse-Tex.vert", "Assets/3D-Diffuse-Tex.frag");
-    if(!mShader->IsGood()) { return false; }
+    mDefaultShader = Services::GetAssets()->LoadShader("3D-Diffuse-Tex");
+    if(!mDefaultShader->IsGood()) { return false; }
+    
+    // Set default shader in material.
+    Material::sDefaultShader = mDefaultShader;
     
     // Compile skybox shader.
-    mSkyboxShader = new GLShader("Assets/3D-Skybox.vert", "Assets/3D-Skybox.frag");
+    mSkyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
     if(!mSkyboxShader->IsGood()) { return false; }
     
     // Create axes mesh, which is helpful for debugging.
-    axes = new GLVertexArray(axis_vertices, 18);
-    axes->SetColors(axis_colors, 24);
+    axes = new Mesh(6, 7 * sizeof(float), MeshUsage::Static);
+    axes->SetRenderMode(RenderMode::Lines);
+    axes->SetPositions(axis_vertices);
+    axes->SetColors(axis_colors);
     
     // Init succeeded!
     return true;
 }
 
-void SDLRenderer::Shutdown()
+void Renderer::Shutdown()
 {
-    delete mShader;
+    delete mDefaultShader;
     delete mSkyboxShader;
     
     SDL_GL_DeleteContext(mContext);
@@ -109,13 +115,14 @@ void SDLRenderer::Shutdown()
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-void SDLRenderer::Clear()
+void Renderer::Clear()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void SDLRenderer::Render()
+void Renderer::Render()
 {
+    // Don't render if there's no camera.
     if(mCameraComponent == nullptr) { return; }
     
     // We'll need the projection matrix a few times below.
@@ -126,7 +133,7 @@ void SDLRenderer::Render()
     // Draw the skybox first, if we have one.
     // For skybox, we don't want to write into the depth mask, or else you can ONLY see skybox.
     // This is because the skybox is actually just a small cube around the camera.
-    glDepthMask(GL_FALSE);
+    glDepthMask(GL_FALSE); // stops writing to depth buffer
     if(mSkybox != nullptr)
     {
         // To get the "infinite distance" skybox effect, we need to use a look-at
@@ -138,29 +145,38 @@ void SDLRenderer::Render()
         
         mSkybox->Render();
     }
-    glDepthMask(GL_TRUE);
+    glDepthMask(GL_TRUE); // start writing to depth buffer
     
     // For the rest of rendering, the normal view/proj matrix is fine.
     viewProjMatrix = mCameraComponent->GetProjectionMatrix() * mCameraComponent->GetLookAtMatrix();
     
     // Enable depth test and disable blend to draw opaque 3D geometry.
-    glEnable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST); // do depth comparisons and update the depth buffer
+    glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
     
     // Activate, for now, our one and only shader.
-    mShader->Activate();
+    mDefaultShader->Activate();
     
     // Set the combined view/projection matrix based on the assigned camera.
-    mShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
+    mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
     
     // Render an axis at the world origin for debugging.
     glBindTexture(GL_TEXTURE_2D, 0);
-    axes->DrawLines();
+    axes->Render();
     
     // Render all mesh components. (should do before or after BSP?)
-    for(auto meshComponent : mMeshComponents)
+    std::vector<RenderPacket> allRenderPackets;
+    for(auto meshRenderer : mMeshRenderers)
     {
-        meshComponent->Render();
+        std::vector<RenderPacket> packets = meshRenderer->GetRenderPackets();
+        allRenderPackets.insert(allRenderPackets.end(), packets.begin(), packets.end());
+        //meshRenderer->Render();
+    }
+    
+    // Render the packets.
+    for(auto& packet : allRenderPackets)
+    {
+        packet.Render();
     }
     
     // Reset world matrix to identity for BSP rendering (or for next render cycle).
@@ -169,8 +185,8 @@ void SDLRenderer::Render()
     // From here, we need alpha blending.
     // Since we render opaque and alpha BSP in one go, it needs to be on for BSP.
     // And then we certainly need alpha blending for UI rendering.
-    glEnable(GL_BLEND);
-    glDepthMask(GL_FALSE);
+    glEnable(GL_BLEND); // do alpha blending (transparent rendering)
+    glDepthMask(GL_FALSE); // don't write to the depth buffer
     
     // Render the BSP.
     if(mBSP != nullptr)
@@ -184,30 +200,30 @@ void SDLRenderer::Render()
     //glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
     
     // Reset for next render loop.
-    glDisable(GL_BLEND);
-    glDepthMask(GL_TRUE);
+    glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
+    glDepthMask(GL_TRUE); // start writing to depth buffer
 }
 
-void SDLRenderer::Present()
+void Renderer::Present()
 {
     SDL_GL_SwapWindow(mWindow);
 }
 
-void SDLRenderer::SetWorldTransformMatrix(Matrix4& worldTransform)
+void Renderer::SetWorldTransformMatrix(Matrix4& worldTransform)
 {
-    mShader->SetUniformMatrix4("uWorldTransform", worldTransform);
+    mDefaultShader->SetUniformMatrix4("uWorldTransform", worldTransform);
 }
 
-void SDLRenderer::AddMeshComponent(MeshComponent *mc)
+void Renderer::AddMeshRenderer(MeshRenderer* mr)
 {
-    mMeshComponents.push_back(mc);
+    mMeshRenderers.push_back(mr);
 }
 
-void SDLRenderer::RemoveMeshComponent(MeshComponent *mc)
+void Renderer::RemoveMeshRenderer(MeshRenderer* mr)
 {
-    auto it = std::find(mMeshComponents.begin(), mMeshComponents.end(), mc);
-    if(it != mMeshComponents.end())
+    auto it = std::find(mMeshRenderers.begin(), mMeshRenderers.end(), mr);
+    if(it != mMeshRenderers.end())
     {
-        mMeshComponents.erase(it);
+        mMeshRenderers.erase(it);
     }
 }

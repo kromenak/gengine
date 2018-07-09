@@ -1,9 +1,9 @@
 //
-// GLShader.cpp
+// Shader.cpp
 //
 // Clark Kromenaker
 //
-#include "GLShader.h"
+#include "Shader.h"
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -11,7 +11,7 @@
 #include "Matrix4.h"
 #include "Vector3.h"
 
-GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
+Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
 {
     // Load vertex and fragment shaders, and compile them.
     GLuint vertexShader = LoadAndCompileShaderFromFile(vertShaderPath, GL_VERTEX_SHADER);
@@ -47,34 +47,34 @@ GLShader::GLShader(const char* vertShaderPath, const char* fragShaderPath)
     glDetachShader(mProgram, fragmentShader);
 }
 
-GLShader::~GLShader()
+Shader::~Shader()
 {
     glDeleteProgram(mProgram);
 }
 
-void GLShader::Activate()
+void Shader::Activate()
 {
     glUseProgram(mProgram);
 }
 
-GLuint GLShader::GetAttributeLocation(const char* name)
+GLuint Shader::GetAttributeLocation(const char* name)
 {
     return glGetAttribLocation(mProgram, name);
 }
 
-void GLShader::SetUniformVector3(const char* name, const Vector3& vector)
+void Shader::SetUniformVector3(const char* name, const Vector3& vector)
 {
     GLuint vecLoc = glGetUniformLocation(mProgram, name);
     glUniform3f(vecLoc, vector.GetX(), vector.GetY(), vector.GetZ());
 }
 
-void GLShader::SetUniformMatrix4(const char* name, const Matrix4& mat)
+void Shader::SetUniformMatrix4(const char* name, const Matrix4& mat)
 {
     GLuint loc = glGetUniformLocation(mProgram, name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, mat.GetFloatPtr());
 }
 
-GLuint GLShader::LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType)
+GLuint Shader::LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType)
 {
     // Open the file, but freak out if not valid.
     std::ifstream file(filePath);
@@ -99,7 +99,7 @@ GLuint GLShader::LoadAndCompileShaderFromFile(const char* filePath, GLuint shade
     return shader;
 }
 
-bool GLShader::IsShaderCompiled(GLuint shader)
+bool Shader::IsShaderCompiled(GLuint shader)
 {
     // Ask GL whether compile succeeded for this shader.
     GLint compileSucceeded = 0;
@@ -123,7 +123,7 @@ bool GLShader::IsShaderCompiled(GLuint shader)
     return true;
 }
 
-bool GLShader::IsProgramLinked(GLuint program)
+bool Shader::IsProgramLinked(GLuint program)
 {
     // Ask GL whether link succeeded for this program.
     GLint linkSucceeded = 0;

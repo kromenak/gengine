@@ -5,7 +5,6 @@
 //
 #include "CameraComponent.h"
 #include "Services.h"
-#include "SDLRenderer.h"
 
 CameraComponent::CameraComponent(Actor* owner) : Component(owner)
 {

@@ -6,37 +6,85 @@
 #include "Mesh.h"
 #include "GLVertexArray.h"
 
-Mesh::Mesh()
+Mesh::Mesh(uint vertexCount, uint vertexSize, MeshUsage usage)
 {
-    mVertexArray = new GLVertexArray();
+    mVertexArray = new GLVertexArray(vertexCount, vertexSize, usage);
 }
 
-Mesh::Mesh(GLfloat* positions, int positionCount)
+Mesh::~Mesh()
 {
-    mVertexArray = new GLVertexArray(positions, positionCount);
+    delete mVertexArray;
+    
+    // Delete vertex attribute data.
+    delete mPositions;
+    delete mColors;
+    delete mNormals;
+    delete mUV1;
+    
+    // Delete indexes.
+    delete mIndexes;
 }
 
 void Mesh::Render()
 {
-    mVertexArray->Draw();
+    switch(mRenderMode)
+    {
+        default:
+        case RenderMode::Triangles:
+            mVertexArray->DrawTriangles();
+            break;
+        case RenderMode::TriangleFan:
+            mVertexArray->DrawTriangleFans();
+            break;
+        case RenderMode::Lines:
+            mVertexArray->DrawLines();
+            break;
+    }
 }
 
-void Mesh::SetPositions(const GLfloat* vertPositions, int count)
+void Mesh::Render(uint offset, uint count)
 {
-    mVertexArray->SetPositions(vertPositions, count);
+    switch(mRenderMode)
+    {
+        default:
+        case RenderMode::Triangles:
+            mVertexArray->DrawTriangles(offset, count);
+            break;
+        case RenderMode::TriangleFan:
+            mVertexArray->DrawTriangleFans(offset, count);
+            break;
+        case RenderMode::Lines:
+            mVertexArray->DrawLines(offset, count);
+            break;
+    }
 }
 
-void Mesh::SetColors(const GLfloat* vertColors, int count)
+void Mesh::SetPositions(const float* positions)
 {
-    mVertexArray->SetColors(vertColors, count);
+    mPositions = positions;
+    mVertexArray->SetPositions(positions);
 }
 
-void Mesh::SetUV1(const GLfloat* vertUV1s, int count)
+void Mesh::SetColors(const float* colors)
 {
-    mVertexArray->SetUV1(vertUV1s, count);
+    mColors = colors;
+    mVertexArray->SetColors(colors);
 }
 
-void Mesh::SetIndexes(const GLushort* indexes, int count)
+void Mesh::SetNormals(const float* normals)
 {
+    mNormals = normals;
+    mVertexArray->SetNormals(normals);
+}
+
+void Mesh::SetUV1(const float* uvs)
+{
+    mUV1 = uvs;
+    mVertexArray->SetUV1(uvs);
+}
+
+void Mesh::SetIndexes(const ushort* indexes, int count)
+{
+    mIndexes = indexes;
     mVertexArray->SetIndexes(indexes, count);
 }
