@@ -20,8 +20,8 @@ struct IniKeyValue
     
     IniKeyValue* next;
     
-    float GetValueAsFloat() { return (float)atof(value.c_str()); }
-    int GetValueAsInt() { return atoi(value.c_str()); }
+    float GetValueAsFloat();
+    int GetValueAsInt();
     bool GetValueAsBool();
     Vector2 GetValueAsVector2();
     Vector3 GetValueAsVector3();

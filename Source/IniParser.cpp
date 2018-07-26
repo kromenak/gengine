@@ -9,27 +9,19 @@
 #include "imstream.h"
 #include "StringUtil.h"
 
+float IniKeyValue::GetValueAsFloat()
+{
+    return StringUtil::ToFloat(value);
+}
+
+int IniKeyValue::GetValueAsInt()
+{
+    return StringUtil::ToInt(value);
+}
+
 bool IniKeyValue::GetValueAsBool()
 {
-    if(StringUtil::EqualsIgnoreCase(value, "yes"))
-    {
-        return true;
-    }
-    else if(StringUtil::EqualsIgnoreCase(value, "no"))
-    {
-        return false;
-    }
-    else if(StringUtil::EqualsIgnoreCase(value, "true"))
-    {
-        return true;
-    }
-    else if(StringUtil::EqualsIgnoreCase(value, "false"))
-    {
-        return false;
-    }
-    
-    // Unknown - return false?
-    return false;
+    return StringUtil::ToBool(value);
 }
 
 Vector2 IniKeyValue::GetValueAsVector2()
@@ -169,20 +161,8 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
     
     // Just read the whole file one line at a time...
     std::string line;
-    while(std::getline(*mStream, line))
+    while(StringUtil::GetLineSanitized(*mStream, line))
     {
-        // "getline" reads up to the '\n' character in a file, and "eats" the '\n' too.
-        // But Windows line breaks might include the '\r' character too, like "\r\n".
-        // To deal with this semi-elegantly, we'll search for and remove the '\r' here.
-        if(!line.empty() && line[line.length() - 1] == '\r')
-        {
-            line.resize(line.length() - 1);
-        }
-        
-        // Trim the line of any whitespaces after getting rid of line breaks.
-        StringUtil::Trim(line);
-        StringUtil::Trim(line, '\t');
-        
         // Ignore empty lines. Need to do this after \r check because some lines might just be '\r'.
         if(line.empty())
         {
