@@ -6,6 +6,7 @@
 //
 #pragma once
 #include <string>
+#include <sstream>
 #include <algorithm>
 #include <cctype>
 
@@ -56,6 +57,18 @@ namespace StringUtil
         Trim(str, ' ');
     }
     
+    inline std::vector<std::string> Split(std::string& str, char delim)
+    {
+        std::stringstream ss(str);
+        std::vector<std::string> tokens;
+        std::string item;
+        while(getline(ss, item, delim))
+        {
+            tokens.push_back(item);
+        }
+        return tokens;
+    }
+    
     inline void RemoveQuotes(std::string& str)
     {
         // Remove any whitespace on left/right.
@@ -76,6 +89,26 @@ namespace StringUtil
         }
     }
     
+    inline bool GetLineSanitized(std::istream& is, std::string& str)
+    {
+        if(std::getline(is, str))
+        {
+            // "getline" reads up to the '\n' character in a file, and "eats" the '\n' too.
+            // But Windows line breaks might include the '\r' character too, like "\r\n".
+            // To deal with this semi-elegantly, we'll search for and remove the '\r' here.
+            if(!str.empty() && str[str.length() - 1] == '\r')
+            {
+                str.resize(str.length() - 1);
+            }
+            
+            // Trim the line of any whitespaces and tabs.
+            Trim(str);
+            Trim(str, '\t');
+            return true;
+        }
+        return false;
+    }
+    
     // Struct that encapsulates a case-insensitive character comparison.
     struct iequal
     {
@@ -89,5 +122,23 @@ namespace StringUtil
     {
         if(str1.size() != str2.size()) { return false; }
         return std::equal(str1.begin(), str1.end(), str2.begin(), iequal());
+    }
+    
+    inline bool ToBool(const std::string& str)
+    {
+        // If the string is "yes" or "true", we'll say it converts to "true".
+        // The values "no" or "false" would convert to false...but false will also be our default return value.
+        // So, anything other than "yes" or "true" returns false.
+        return EqualsIgnoreCase(str, "yes") || EqualsIgnoreCase(str, "true");
+    }
+    
+    inline int ToInt(const std::string& str)
+    {
+        return atoi(str.c_str());
+    }
+    
+    inline float ToFloat(const std::string& str)
+    {
+        return (float)atof(str.c_str());
     }
 }
