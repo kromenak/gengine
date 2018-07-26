@@ -21,6 +21,8 @@
 #include "ACT.h"
 #include "Sheep/SheepScript.h"
 #include "Shader.h"
+#include "GAS.h"
+#include "Animation.h"
 
 class AssetManager
 {
@@ -44,6 +46,8 @@ public:
     Model* LoadModel(std::string name);
     Texture* LoadTexture(std::string name);
     
+    GAS* LoadGAS(std::string name);
+    Animation* LoadAnimation(std::string name);
     ACT* LoadACT(std::string name);
     
     SIF* LoadSIF(std::string name);

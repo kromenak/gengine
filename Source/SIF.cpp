@@ -400,19 +400,19 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 else if(keyValue->key == "idle")
                 {
-                    //TODO: Gas file
+                    actor->idleGas = Services::GetAssets()->LoadGAS(keyValue->value);
                 }
                 else if(keyValue->key == "talk")
                 {
-                    
+                    actor->talkGas = Services::GetAssets()->LoadGAS(keyValue->value);
                 }
                 else if(keyValue->key == "listen")
                 {
-                    
+                    actor->listenGas = Services::GetAssets()->LoadGAS(keyValue->value);
                 }
                 else if(keyValue->key == "initAnim")
                 {
-                    
+                    actor->initAnim = Services::GetAssets()->LoadAnimation(keyValue->value);
                 }
                 else if(keyValue->key == "hidden")
                 {
@@ -498,7 +498,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 else if(keyValue->key == "gas")
                 {
-                    //TODO
+                    model->gas = Services::GetAssets()->LoadGAS(keyValue->value);
                 }
                 keyValue = keyValue->next;
             }

@@ -158,7 +158,7 @@ void ACT::ParseFromData(char *data, int dataLength)
                     
                     // Now that we have deciphered the vertex data formats,
                     // we can read in each vertex's data.
-                    ACTKeyframe& lastKeyframe = mKeyframes[mKeyframes.size() - 1];
+                    ACTKeyframe& lastKeyframe = mKeyframes[0];
                     ACTMeshData& lastMeshData = lastKeyframe.meshDatas[j];
                     for(int k = 0; k < vertexCount; k++)
                     {

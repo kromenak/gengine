@@ -163,6 +163,16 @@ Texture* AssetManager::LoadTexture(std::string name)
     return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), &mLoadedTextures);
 }
 
+GAS* AssetManager::LoadGAS(std::string name)
+{
+    return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), nullptr);
+}
+
+Animation* AssetManager::LoadAnimation(std::string name)
+{
+    return LoadAsset<Animation>(SanitizeAssetName(name, ".ANM"), nullptr);
+}
+
 ACT* AssetManager::LoadACT(std::string name)
 {
     return LoadAsset<ACT>(SanitizeAssetName(name, ".ACT"), nullptr);

@@ -71,7 +71,7 @@ bool GEngine::Initialize()
     mCursor->Activate();
     
     //mAssetManager.WriteBarnAssetToFile("CANDY.MOD");
-    //mAssetManager.WriteOutAssetsOfType("YAK");
+    //mAssetManager.WriteOutAssetsOfType("ANM");
     
     //mAssetManager.LoadACT("GAB_GABBREATH1.ACT");
     //mAssetManager.LoadACT("CAT_CATRUN.ACT");

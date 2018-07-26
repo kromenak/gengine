@@ -57,7 +57,10 @@
 		4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421120A905B600DE8C0D /* Cursor.cpp */; };
 		4B85421520A9276200DE8C0D /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B8E830A20F046750009A86B /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8E830920F046750009A86B /* Material.cpp */; };
+		4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
+		4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
+		4BACA50D20F72663008C7FE9 /* StringTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */; };
 		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
@@ -195,8 +198,14 @@
 		4B8E830820F046750009A86B /* Material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Material.h; path = ../Source/Material.h; sourceTree = "<group>"; };
 		4B8E830920F046750009A86B /* Material.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Material.cpp; path = ../Source/Material.cpp; sourceTree = "<group>"; };
 		4B8E830B20F148260009A86B /* RenderPacket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RenderPacket.h; path = ../Source/RenderPacket.h; sourceTree = "<group>"; };
+		4B92319A2103AF1B0004F4F3 /* Animation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Animation.h; path = ../Source/Animation.h; sourceTree = "<group>"; };
+		4B92319B2103AF1B0004F4F3 /* Animation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Animation.cpp; path = ../Source/Animation.cpp; sourceTree = "<group>"; };
 		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
+		4BACA50820F7132E008C7FE9 /* GAS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GAS.h; path = ../Source/GAS.h; sourceTree = "<group>"; };
+		4BACA50920F7132E008C7FE9 /* GAS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GAS.cpp; path = ../Source/GAS.cpp; sourceTree = "<group>"; };
+		4BACA50B20F72663008C7FE9 /* StringTokenizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringTokenizer.h; path = ../Source/StringTokenizer.h; sourceTree = "<group>"; };
+		4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StringTokenizer.cpp; path = ../Source/StringTokenizer.cpp; sourceTree = "<group>"; };
 		4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepScriptBuilder.h; path = ../Source/Sheep/SheepScriptBuilder.h; sourceTree = "<group>"; };
 		4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScriptBuilder.cpp; path = ../Source/Sheep/SheepScriptBuilder.cpp; sourceTree = "<group>"; };
 		4BB82829205665680054625A /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../Libraries/SDL/SDL2.framework; sourceTree = "<group>"; };
@@ -308,8 +317,7 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */,
-				4BDDCD5C20D6C4BC00701A89 /* ACT.h */,
+				4B9231992103AED90004F4F3 /* Animation */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
 				4B4621ED1FF7532A00536BA6 /* Asset.cpp */,
@@ -474,6 +482,19 @@
 			name = FlexBison;
 			sourceTree = "<group>";
 		};
+		4B9231992103AED90004F4F3 /* Animation */ = {
+			isa = PBXGroup;
+			children = (
+				4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */,
+				4BDDCD5C20D6C4BC00701A89 /* ACT.h */,
+				4B92319B2103AF1B0004F4F3 /* Animation.cpp */,
+				4B92319A2103AF1B0004F4F3 /* Animation.h */,
+				4BACA50920F7132E008C7FE9 /* GAS.cpp */,
+				4BACA50820F7132E008C7FE9 /* GAS.h */,
+			);
+			name = Animation;
+			sourceTree = "<group>";
+		};
 		4B98D70A1F53D26C009CC2F0 /* STD */ = {
 			isa = PBXGroup;
 			children = (
@@ -483,6 +504,8 @@
 				4B02A3B11F526529000540A7 /* membuf.h */,
 				4B5497F81FF80E0A00F1EF4F /* StringUtil.h */,
 				4B4B4ADE2091B5A000391827 /* Value.h */,
+				4BACA50B20F72663008C7FE9 /* StringTokenizer.h */,
+				4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */,
 			);
 			name = STD;
 			sourceTree = "<group>";
@@ -658,6 +681,7 @@
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B15A9561F242C55000A689F /* Renderer.cpp in Sources */,
 				4BFCD33820CDFFB4004FF9EA /* Plane.cpp in Sources */,
+				4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */,
 				4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
@@ -679,6 +703,7 @@
 				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
+				4BACA50D20F72663008C7FE9 /* StringTokenizer.cpp in Sources */,
 				4B2E7A65203A6072001A5B9C /* SceneData.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
@@ -691,6 +716,7 @@
 				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
 				4B02A3B21F526529000540A7 /* membuf.cpp in Sources */,
 				4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */,
+				4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */,
 				4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */,
 				4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,

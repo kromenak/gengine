@@ -23,6 +23,8 @@ class Model;
 class NVC;
 class Soundtrack;
 class Skybox;
+class GAS;
+class Animation;
 
 struct SceneCameraData
 {
@@ -92,9 +94,18 @@ struct SceneActorData
     // after scene init - maybe due to a Sheep script or something.
     ScenePositionData* position = nullptr;
     
-    // IDLE GAS FILE
-    // TALK GAS FILE
-    // LISTEN GAS FILE
+    // Idle gas script file.
+    GAS* idleGas = nullptr;
+    
+    // Talk gas script file.
+    GAS* talkGas = nullptr;
+    
+    // Listen gas script file.
+    GAS* listenGas = nullptr;
+    
+    // Init animation, for initial positioning of the actor.
+    // Overrides any other position value used.
+    Animation* initAnim = nullptr;
     
     // If true, this actor is hidden at initialization.
     bool hidden = false;
@@ -133,10 +144,10 @@ struct SceneModelData
     
     // First frame of this anim will be applies on initialization.
     // Only applies to Props. Others will ignore this.
-    //TODO: InitAnim
+    //TODO: InitAnim ANM asset reference
     
     // For GasProps, the gas file to use.
-    //TODO: GasFile
+    GAS* gas = nullptr;
     
     // If true, the model is hidden at initialization.
     bool hidden = false;
