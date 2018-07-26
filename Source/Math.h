@@ -115,6 +115,26 @@ namespace Math
         return std::min(max, std::max(value, min));
     }
     
+    inline float Min(float val1, float val2)
+    {
+        return std::min(val1, val2);
+    }
+    
+    inline int Min(int val1, int val2)
+    {
+        return std::min(val1, val2);
+    }
+    
+    inline float Max(float val1, float val2)
+    {
+        return std::max(val1, val2);
+    }
+    
+    inline int Max(int val1, int val2)
+    {
+        return std::max(val1, val2);
+    }
+    
     inline float Abs(float val)
     {
         return std::abs(val);
