@@ -27,9 +27,14 @@ public:
     
     std::vector<AnimationNode*>* GetFrame(int num);
     
+    float GetDuration() { return (float)mFrameCount / (float)mFramesPerSecond; }
+    
 private:
     // Number of frames in this animation.
     int mFrameCount = 0;
+    
+    // Frames per second for this animation.
+    int mFramesPerSecond = 30;
     
     // Mapping of frame number to frame data.
     // "Frame data" consists of one or more animation nodes, which do things like
