@@ -129,7 +129,7 @@ namespace StringUtil
         // If the string is "yes" or "true", we'll say it converts to "true".
         // The values "no" or "false" would convert to false...but false will also be our default return value.
         // So, anything other than "yes" or "true" returns false.
-        return EqualsIgnoreCase(str, "yes") || EqualsIgnoreCase(str, "true");
+        return EqualsIgnoreCase(str, "on") || EqualsIgnoreCase(str, "yes") || EqualsIgnoreCase(str, "true");
     }
     
     inline int ToInt(const std::string& str)
