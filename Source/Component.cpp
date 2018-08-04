@@ -5,7 +5,9 @@
 //
 #include "Component.h"
 
-Component::Component(Actor* owner) :mOwner(owner)
+TYPE_DEF_BASE(Component);
+
+Component::Component(Actor* owner) : mOwner(owner)
 {
     
 }

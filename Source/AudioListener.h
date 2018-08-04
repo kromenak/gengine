@@ -11,6 +11,7 @@
 
 class AudioListener : public Component
 {
+    TYPE_DECL_CHILD();
 public:
     AudioListener(Actor* owner);
     

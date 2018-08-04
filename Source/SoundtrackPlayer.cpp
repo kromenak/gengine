@@ -5,6 +5,8 @@
 //
 #include "SoundtrackPlayer.h"
 
+TYPE_DEF_CHILD(Component, SoundtrackPlayer);
+
 SoundtrackPlayer::SoundtrackPlayer(Actor* owner) : Component(owner)
 {
     

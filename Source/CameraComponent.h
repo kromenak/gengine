@@ -6,9 +6,12 @@
 #pragma once
 #include "Component.h"
 #include "Matrix4.h"
+#include "Vector3.h"
+#include "Vector2.h"
 
 class CameraComponent : public Component
 {
+    TYPE_DECL_CHILD();
 public:
     CameraComponent(Actor* owner);
     

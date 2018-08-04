@@ -7,10 +7,13 @@
 // that can be attached to an Actor.
 //
 #pragma once
-#include "Actor.h"
+#include "Type.h"
+
+class Actor;
 
 class Component
 {
+    TYPE_DECL_BASE();
 public:
     Component(Actor* owner);
     

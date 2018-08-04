@@ -8,6 +8,7 @@
 #include "Mesh.h"
 #include "Services.h"
 #include "Texture.h"
+#include "Actor.h"
 
 extern Mesh* axes;
 

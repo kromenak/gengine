@@ -20,6 +20,7 @@
 
 class SoundtrackPlayer : public Component
 {
+    TYPE_DECL_CHILD();
 public:
     SoundtrackPlayer(Actor* owner);
     

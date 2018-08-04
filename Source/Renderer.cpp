@@ -16,6 +16,8 @@
 #include "CameraComponent.h"
 #include "MeshRenderer.h"
 #include "Skybox.h"
+#include "BSP.h"
+#include "Actor.h"
 
 GLfloat axis_vertices[] = {
     0.0f, 0.0f, 0.0f,

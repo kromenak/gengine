@@ -58,6 +58,8 @@
 		4B85421520A9276200DE8C0D /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B8E830A20F046750009A86B /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8E830920F046750009A86B /* Material.cpp */; };
 		4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
+		4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319E210999810004F4F3 /* GasPlayer.cpp */; };
+		4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
 		4BACA50D20F72663008C7FE9 /* StringTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */; };
@@ -200,6 +202,11 @@
 		4B8E830B20F148260009A86B /* RenderPacket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RenderPacket.h; path = ../Source/RenderPacket.h; sourceTree = "<group>"; };
 		4B92319A2103AF1B0004F4F3 /* Animation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Animation.h; path = ../Source/Animation.h; sourceTree = "<group>"; };
 		4B92319B2103AF1B0004F4F3 /* Animation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Animation.cpp; path = ../Source/Animation.cpp; sourceTree = "<group>"; };
+		4B92319D210999810004F4F3 /* GasPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GasPlayer.h; path = ../Source/GasPlayer.h; sourceTree = "<group>"; };
+		4B92319E210999810004F4F3 /* GasPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GasPlayer.cpp; path = ../Source/GasPlayer.cpp; sourceTree = "<group>"; };
+		4B9231A0210D4E000004F4F3 /* AnimationPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AnimationPlayer.h; path = ../Source/AnimationPlayer.h; sourceTree = "<group>"; };
+		4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AnimationPlayer.cpp; path = ../Source/AnimationPlayer.cpp; sourceTree = "<group>"; };
+		4B9231A32112167F0004F4F3 /* Type.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Type.h; path = ../Source/Type.h; sourceTree = "<group>"; };
 		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
 		4BACA50820F7132E008C7FE9 /* GAS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GAS.h; path = ../Source/GAS.h; sourceTree = "<group>"; };
@@ -332,7 +339,8 @@
 				4BD673CF20B2555E00795582 /* BinaryWriter.h */,
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
 				4B1112AE1F821FFF00AFDDFC /* Component.h */,
-				4B4A0E52203C0FB300AFA382 /* Components */,
+				4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */,
+				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
 				4B85421120A905B600DE8C0D /* Cursor.cpp */,
 				4B85421020A905B600DE8C0D /* Cursor.h */,
 				4B17D706206098B100EBD298 /* GameCamera.cpp */,
@@ -359,6 +367,7 @@
 				4B4621EA1FF741D800536BA6 /* Texture.cpp */,
 				4B4621E91FF741D800536BA6 /* Texture.h */,
 				4BE15CBC1F46620000114779 /* Types.h */,
+				4B9231A32112167F0004F4F3 /* Type.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -430,19 +439,6 @@
 			name = Math;
 			sourceTree = "<group>";
 		};
-		4B4A0E52203C0FB300AFA382 /* Components */ = {
-			isa = PBXGroup;
-			children = (
-				4BD673D320B26F0C00795582 /* AudioListener.cpp */,
-				4BD673D220B26F0C00795582 /* AudioListener.h */,
-				4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */,
-				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
-				4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */,
-				4B17D6FF206072E400EBD298 /* SoundtrackPlayer.h */,
-			);
-			name = Components;
-			sourceTree = "<group>";
-		};
 		4B76B57D1F3599A1003F63E5 /* Barn */ = {
 			isa = PBXGroup;
 			children = (
@@ -458,10 +454,14 @@
 			children = (
 				4B7AB0431F539EB200CFBE8F /* Audio.cpp */,
 				4B7AB0441F539EB200CFBE8F /* Audio.h */,
+				4BD673D320B26F0C00795582 /* AudioListener.cpp */,
+				4BD673D220B26F0C00795582 /* AudioListener.h */,
 				4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */,
 				4B7C3A151F4EB07000BB0922 /* AudioManager.h */,
 				4BBB91B52058E53A007B9375 /* Soundtrack.cpp */,
 				4BBB91B42058E53A007B9375 /* Soundtrack.h */,
+				4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */,
+				4B17D6FF206072E400EBD298 /* SoundtrackPlayer.h */,
 				4B85421420A9276200DE8C0D /* Yak.cpp */,
 				4B85421320A9276200DE8C0D /* Yak.h */,
 			);
@@ -489,8 +489,12 @@
 				4BDDCD5C20D6C4BC00701A89 /* ACT.h */,
 				4B92319B2103AF1B0004F4F3 /* Animation.cpp */,
 				4B92319A2103AF1B0004F4F3 /* Animation.h */,
+				4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */,
+				4B9231A0210D4E000004F4F3 /* AnimationPlayer.h */,
 				4BACA50920F7132E008C7FE9 /* GAS.cpp */,
 				4BACA50820F7132E008C7FE9 /* GAS.h */,
+				4B92319E210999810004F4F3 /* GasPlayer.cpp */,
+				4B92319D210999810004F4F3 /* GasPlayer.h */,
 			);
 			name = Animation;
 			sourceTree = "<group>";
@@ -704,7 +708,9 @@
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
 				4BACA50D20F72663008C7FE9 /* StringTokenizer.cpp in Sources */,
+				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
 				4B2E7A65203A6072001A5B9C /* SceneData.cpp in Sources */,
+				4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B8E830A20F046750009A86B /* Material.cpp in Sources */,

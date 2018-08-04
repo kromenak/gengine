@@ -36,25 +36,6 @@ void Actor::Update(float deltaTime)
     }
 }
 
-template<class T> T* Actor::AddComponent()
-{
-    T* component = new T(this);
-    mComponents.push_back(component);
-    return component;
-}
-
-template<class T> T* Actor::GetComponent()
-{
-    for(auto& component : mComponents)
-    {
-        if(component->IsTypeOf(T::GetType()))
-        {
-            return *static_cast<T*>(component);
-        }
-    }
-    return nullptr;
-}
-
 void Actor::Translate(Vector3 offset)
 {
     SetPosition(mPosition + offset);

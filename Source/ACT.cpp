@@ -7,7 +7,6 @@
 #include "BinaryReader.h"
 #include <iostream>
 #include <vector>
-#include "Vector3.h"
 
 ACT::ACT(std::string name, char* data, int dataLength) : Asset(name)
 {

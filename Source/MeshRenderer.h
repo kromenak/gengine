@@ -12,6 +12,7 @@
 #include "RenderPacket.h"
 
 class Mesh;
+class Model;
 class Texture;
 
 class MeshRenderer : public Component

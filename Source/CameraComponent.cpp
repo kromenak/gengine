@@ -5,6 +5,9 @@
 //
 #include "CameraComponent.h"
 #include "Services.h"
+#include "Actor.h"
+
+TYPE_DEF_CHILD(Component, CameraComponent);
 
 CameraComponent::CameraComponent(Actor* owner) : Component(owner)
 {

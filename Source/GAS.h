@@ -15,15 +15,20 @@
 #include <vector>
 
 class Animation;
+class GasPlayer;
 
 struct GasNode
 {
+    virtual int Execute(GasPlayer* player) = 0;
+    
     // Chance that this node will execute. 0 = no chance, 100 = definitely
     int random = 100;
 };
 
 struct AnimGasNode : public GasNode
 {
+    int Execute(GasPlayer* player) override { return 0; }
+    
     // Animation to do.
     Animation* animation = nullptr;
     
@@ -33,17 +38,23 @@ struct AnimGasNode : public GasNode
 
 struct OneOfGasNode : public GasNode
 {
+    int Execute(GasPlayer* player) override { return 0; }
+    
     std::vector<AnimGasNode*> animNodes;
 };
 
 struct WaitGasNode : public GasNode
 {
+    int Execute(GasPlayer* player) override { return 0; }
+    
     int minWaitTimeSeconds = 0;
     int maxWaitTimeSeconds = 0;
 };
 
 struct LabelOrGotoGasNode : public GasNode
 {
+    int Execute(GasPlayer* player) override { return 0; }
+    
     std::string label;
     
     // Indicates if this is a go-to or not.
@@ -94,6 +105,11 @@ class GAS : public Asset
 {
 public:
     GAS(std::string name, char* data, int dataLength);
+    
+    GasNode* GetNode(int index) { return mNodes[index]; }
+    int GetNodeCount() { return (int)mNodes.size(); }
+    
+    
     
 private:
     std::vector<GasNode*> mNodes;

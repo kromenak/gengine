@@ -17,7 +17,7 @@ typedef int16_t int16;
 typedef uint32_t uint32;
 typedef int32_t int32;
 
-// Some helpful aliases, from my C# work.
+// Some helpful aliases I'm used to from C#.
 typedef uint8_t uchar;
 typedef uint16_t ushort;
 typedef uint32_t uint;

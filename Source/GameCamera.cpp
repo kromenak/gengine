@@ -8,7 +8,6 @@
 #include "GEngine.h"
 #include "Scene.h"
 #include "AudioListener.h"
-#include "SheepCompiler.h"
 
 const float kCameraSpeed = 100.0f;
 const float kRunCameraMultiplier = 2.0f;
@@ -83,18 +82,5 @@ void GameCamera::Update(float deltaTime)
             
             GEngine::inst->GetScene()->Interact(ray);
         }
-    }
-    
-    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_0))
-    {
-        std::cout << "My Pos: " << GetPosition() << std::endl;
-        
-        //std::cout << "Execute!" << std::endl;
-        //SheepScript* sheepScript = Services::GetAssets()->LoadSheep("B25.SHP");
-        //SheepVM vm;
-        //vm.Execute(sheepScript);
-        
-        //SheepCompiler compiler;
-        //compiler.Compile("/Users/Clark/Dropbox/GK3/Assets/B25.shp");
     }
 }
