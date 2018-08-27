@@ -18,7 +18,7 @@
 #include "Soundtrack.h"
 #include "Yak.h"
 #include "Cursor.h"
-#include "ACT.h"
+#include "VertexAnimation.h"
 #include "Sheep/SheepScript.h"
 #include "Shader.h"
 #include "GAS.h"
@@ -48,7 +48,7 @@ public:
     
     GAS* LoadGAS(std::string name);
     Animation* LoadAnimation(std::string name);
-    ACT* LoadACT(std::string name);
+    VertexAnimation* LoadVertexAnimation(std::string name);
     
     SIF* LoadSIF(std::string name);
     SceneData* LoadScene(std::string name);

@@ -9,6 +9,8 @@
 #include "Component.h"
 
 class Animation;
+class VertexAnimation;
+class MeshRenderer;
 
 class AnimationPlayer : public Component
 {
@@ -19,7 +21,22 @@ public:
     void Update(float deltaTime) override;
     
     void Play(Animation* animation);
+    void Play(VertexAnimation* vertexAnimation);
+    
+    void SetMeshRenderer(MeshRenderer* meshRenderer) { mMeshRenderer = meshRenderer; }
+    MeshRenderer* GetMeshRenderer() { return mMeshRenderer; }
     
 private:
+    // Needs a MeshRenderer to update the mesh data every frame.
+    MeshRenderer* mMeshRenderer = nullptr;
+    
+    // The animation currently being played.
     Animation* mAnimation = nullptr;
+    
+    // The frame we're currently on in the animation.
+    int mCurrentAnimationFrame = 0;
+    
+    // If defined, a currently running vertex animation.
+    VertexAnimation* mVertexAnimation = nullptr;
+    float mVertexAnimationTimer = 0.0f;
 };

@@ -13,11 +13,12 @@
 #include <unordered_map>
 #include <vector>
 
-class ACT;
+class VertexAnimation;
 
 struct AnimationNode
 {
-    ACT* action = nullptr;
+    int mFrameNumber = 0;
+    VertexAnimation* mVertexAnimation = nullptr;
 };
 
 class Animation : public Asset
@@ -27,6 +28,8 @@ public:
     
     std::vector<AnimationNode*>* GetFrame(int num);
     
+    int GetFrameCount() { return mFrameCount; }
+    int GetFramesPerSecond() { return mFramesPerSecond; }
     float GetDuration() { return (float)mFrameCount / (float)mFramesPerSecond; }
     
 private:

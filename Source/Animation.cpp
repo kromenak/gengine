@@ -46,13 +46,15 @@ void Animation::ParseFromData(char *data, int dataLength)
                 // <frame_num>, <act_name>, <x1>, <y1>, <z1>, <angle1>, <x2>, <y2>, <z2>, <angle2>
                 int frameNumber = entry->GetValueAsInt();
                 
-                // Read in the animation node.
+                // Load vertex animation with the name.
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
-                AnimationNode* node = new AnimationNode();
-                node->action = Services::GetAssets()->LoadACT(entry->value);
                 
+                AnimationNode* node = new AnimationNode();
+                node->mFrameNumber = frameNumber;
+                node->mVertexAnimation = Services::GetAssets()->LoadVertexAnimation(entry->value);
                 mFrames[frameNumber].push_back(node);
+                
                 //TODO: Come back to do additional parsing here.
             }
         }

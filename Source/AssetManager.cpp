@@ -173,9 +173,9 @@ Animation* AssetManager::LoadAnimation(std::string name)
     return LoadAsset<Animation>(SanitizeAssetName(name, ".ANM"), nullptr);
 }
 
-ACT* AssetManager::LoadACT(std::string name)
+VertexAnimation* AssetManager::LoadVertexAnimation(std::string name)
 {
-    return LoadAsset<ACT>(SanitizeAssetName(name, ".ACT"), nullptr);
+    return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), nullptr);
 }
 
 SIF* AssetManager::LoadSIF(std::string name)

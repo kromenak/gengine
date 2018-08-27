@@ -60,6 +60,7 @@
 		4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
 		4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319E210999810004F4F3 /* GasPlayer.cpp */; };
 		4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */; };
+		4B9231A62117CFBC0004F4F3 /* GKActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A52117CFBC0004F4F3 /* GKActor.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
 		4BACA50D20F72663008C7FE9 /* StringTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */; };
@@ -73,7 +74,7 @@
 		4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673CB20B1119E00795582 /* Skybox.cpp */; };
 		4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D020B2555E00795582 /* BinaryWriter.cpp */; };
 		4BD673D420B26F0C00795582 /* AudioListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D320B26F0C00795582 /* AudioListener.cpp */; };
-		4BDDCD5E20D6C4BC00701A89 /* ACT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */; };
+		4BDDCD5E20D6C4BC00701A89 /* VertexAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
 		4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6EE331F441DC600BB29D5 /* minilzo.c */; };
 		4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE75D32208D7E7B007031A3 /* SheepVM.cpp */; };
@@ -207,6 +208,8 @@
 		4B9231A0210D4E000004F4F3 /* AnimationPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AnimationPlayer.h; path = ../Source/AnimationPlayer.h; sourceTree = "<group>"; };
 		4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AnimationPlayer.cpp; path = ../Source/AnimationPlayer.cpp; sourceTree = "<group>"; };
 		4B9231A32112167F0004F4F3 /* Type.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Type.h; path = ../Source/Type.h; sourceTree = "<group>"; };
+		4B9231A42117CFBC0004F4F3 /* GKActor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GKActor.h; path = ../Source/GKActor.h; sourceTree = "<group>"; };
+		4B9231A52117CFBC0004F4F3 /* GKActor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKActor.cpp; path = ../Source/GKActor.cpp; sourceTree = "<group>"; };
 		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
 		4BACA50820F7132E008C7FE9 /* GAS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GAS.h; path = ../Source/GAS.h; sourceTree = "<group>"; };
@@ -234,8 +237,8 @@
 		4BD673D220B26F0C00795582 /* AudioListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioListener.h; path = ../Source/AudioListener.h; sourceTree = "<group>"; };
 		4BD673D320B26F0C00795582 /* AudioListener.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioListener.cpp; path = ../Source/AudioListener.cpp; sourceTree = "<group>"; };
 		4BD9C7DC1F95D1D80066DC89 /* Math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Math.h; path = ../Source/Math.h; sourceTree = "<group>"; };
-		4BDDCD5C20D6C4BC00701A89 /* ACT.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ACT.h; path = ../Source/ACT.h; sourceTree = "<group>"; };
-		4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ACT.cpp; path = ../Source/ACT.cpp; sourceTree = "<group>"; };
+		4BDDCD5C20D6C4BC00701A89 /* VertexAnimation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimation.h; path = ../Source/VertexAnimation.h; sourceTree = "<group>"; };
+		4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimation.cpp; path = ../Source/VertexAnimation.cpp; sourceTree = "<group>"; };
 		4BE15CB61F464FD800114779 /* AssetManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AssetManager.cpp; path = ../Source/AssetManager.cpp; sourceTree = "<group>"; };
 		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
 		4BE15CBC1F46620000114779 /* Types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Types.h; path = ../Source/Types.h; sourceTree = "<group>"; };
@@ -324,9 +327,9 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				4B9231992103AED90004F4F3 /* Animation */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
+				4B9231992103AED90004F4F3 /* Animation */,
 				4B4621ED1FF7532A00536BA6 /* Asset.cpp */,
 				4B4621EC1FF7532A00536BA6 /* Asset.h */,
 				4BE15CB61F464FD800114779 /* AssetManager.cpp */,
@@ -337,16 +340,18 @@
 				4B76B57F1F35B175003F63E5 /* BinaryReader.h */,
 				4BD673D020B2555E00795582 /* BinaryWriter.cpp */,
 				4BD673CF20B2555E00795582 /* BinaryWriter.h */,
-				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
-				4B1112AE1F821FFF00AFDDFC /* Component.h */,
 				4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */,
 				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
+				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
+				4B1112AE1F821FFF00AFDDFC /* Component.h */,
 				4B85421120A905B600DE8C0D /* Cursor.cpp */,
 				4B85421020A905B600DE8C0D /* Cursor.h */,
 				4B17D706206098B100EBD298 /* GameCamera.cpp */,
 				4B17D705206098B100EBD298 /* GameCamera.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
 				4B15A9511F2428C5000A689F /* GEngine.h */,
+				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
+				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
 				4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */,
 				4B2E7A5A2039FCF0001A5B9C /* IniParser.h */,
 				4B09182F1FEED86B002991D4 /* InputManager.cpp */,
@@ -366,8 +371,8 @@
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4B4621EA1FF741D800536BA6 /* Texture.cpp */,
 				4B4621E91FF741D800536BA6 /* Texture.h */,
-				4BE15CBC1F46620000114779 /* Types.h */,
 				4B9231A32112167F0004F4F3 /* Type.h */,
+				4BE15CBC1F46620000114779 /* Types.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -485,8 +490,8 @@
 		4B9231992103AED90004F4F3 /* Animation */ = {
 			isa = PBXGroup;
 			children = (
-				4BDDCD5D20D6C4BC00701A89 /* ACT.cpp */,
-				4BDDCD5C20D6C4BC00701A89 /* ACT.h */,
+				4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */,
+				4BDDCD5C20D6C4BC00701A89 /* VertexAnimation.h */,
 				4B92319B2103AF1B0004F4F3 /* Animation.cpp */,
 				4B92319A2103AF1B0004F4F3 /* Animation.h */,
 				4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */,
@@ -678,11 +683,12 @@
 				4B0B67831F78DCD40023815F /* Actor.cpp in Sources */,
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
-				4BDDCD5E20D6C4BC00701A89 /* ACT.cpp in Sources */,
+				4BDDCD5E20D6C4BC00701A89 /* VertexAnimation.cpp in Sources */,
 				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
 				4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */,
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
+				4B9231A62117CFBC0004F4F3 /* GKActor.cpp in Sources */,
 				4B15A9561F242C55000A689F /* Renderer.cpp in Sources */,
 				4BFCD33820CDFFB4004FF9EA /* Plane.cpp in Sources */,
 				4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */,

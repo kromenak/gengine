@@ -29,6 +29,8 @@ public:
     void SetMesh(Mesh* mesh);
     void AddMesh(Mesh* mesh);
     
+    std::vector<Mesh*> GetMeshes() { return mMeshes; }
+    
 private:
     // A mesh component can render one or more meshes.
     // If more than one is specified, they will be rendered in order.
