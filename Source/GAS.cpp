@@ -4,13 +4,56 @@
 // Clark Kromenaker
 //
 #include "GAS.h"
+#include <string>
+#include <vector>
+#include <iostream>
 #include "imstream.h"
 #include "StringUtil.h"
 #include "StringTokenizer.h"
 #include "Services.h"
-#include <string>
-#include <vector>
-#include <iostream>
+#include "GasPlayer.h"
+#include "AnimationPlayer.h"
+
+int AnimGasNode::Execute(GasPlayer* player)
+{
+    // Do random check. If it fails, we don't execute.
+    // But note execution count is still incremented!
+    int randomCheck = rand() % 100 + 1;
+    if(randomCheck > random) { return 0; }
+    
+    // Must have a valid animation, and GasPlayer, and AnimationPlayer.
+    if(animation == nullptr) { return 0; }
+    if(player == nullptr || player->GetAnimationPlayer() == nullptr) { return 0; }
+    
+    // Play the animation!
+    player->GetAnimationPlayer()->Play(animation);
+    
+    std::cout << "Playing animation " << animation->GetName() << " for " << animation->GetDuration() << " seconds." << std::endl;
+    return animation->GetDuration() * 1000;
+}
+
+int OneOfGasNode::Execute(GasPlayer* player)
+{
+    if(animNodes.size() == 0) { return 0; }
+    int randomIndex = rand() % animNodes.size();
+    return animNodes[randomIndex]->Execute(player);
+}
+
+int WaitGasNode::Execute(GasPlayer* player)
+{
+    // Do random check. If it fails, we don't execute.
+    // But note execution count is still incremented!
+    int randomCheck = rand() % 100 + 1;
+    if(randomCheck > random) { return 0; }
+    
+    // We will execute this node. Decide wait time based on min/max.
+    if(minWaitTimeSeconds == maxWaitTimeSeconds) { return minWaitTimeSeconds * 1000; }
+    if(maxWaitTimeSeconds == 0 && minWaitTimeSeconds > 0) { return minWaitTimeSeconds * 1000; }
+    if(maxWaitTimeSeconds != 0 && minWaitTimeSeconds > maxWaitTimeSeconds) { return minWaitTimeSeconds * 1000; }
+    std::cout << "Waiting..." << std::endl;
+    // Normal case - random between min and max. Mult by 1000 to return milliseconds.
+    return (rand() % maxWaitTimeSeconds + minWaitTimeSeconds) * 1000;
+}
 
 GAS::GAS(std::string name, char* data, int dataLength) : Asset(name)
 {

@@ -27,7 +27,7 @@ struct GasNode
 
 struct AnimGasNode : public GasNode
 {
-    int Execute(GasPlayer* player) override { return 0; }
+    int Execute(GasPlayer* player) override;
     
     // Animation to do.
     Animation* animation = nullptr;
@@ -38,14 +38,14 @@ struct AnimGasNode : public GasNode
 
 struct OneOfGasNode : public GasNode
 {
-    int Execute(GasPlayer* player) override { return 0; }
+    int Execute(GasPlayer* player) override;
     
     std::vector<AnimGasNode*> animNodes;
 };
 
 struct WaitGasNode : public GasNode
 {
-    int Execute(GasPlayer* player) override { return 0; }
+    int Execute(GasPlayer* player) override;
     
     int minWaitTimeSeconds = 0;
     int maxWaitTimeSeconds = 0;
@@ -108,8 +108,6 @@ public:
     
     GasNode* GetNode(int index) { return mNodes[index]; }
     int GetNodeCount() { return (int)mNodes.size(); }
-    
-    
     
 private:
     std::vector<GasNode*> mNodes;
