@@ -6,11 +6,11 @@
 #include "Scene.h"
 #include <iostream>
 #include "Services.h"
-#include "Actor.h"
 #include "MeshRenderer.h"
 #include "SoundtrackPlayer.h"
 #include "GameCamera.h"
 #include "Math.h"
+#include "GKActor.h"
 
 Scene::Scene(std::string name, std::string timeCode) :
     mGeneralName(name)
@@ -51,7 +51,12 @@ Scene::Scene(std::string name, std::string timeCode) :
     std::vector<SceneActorData*> sceneActorDatas = mGeneralSIF->GetSceneActorDatas();
     for(auto& actorDef : sceneActorDatas)
     {
-        Actor* actor = new Actor();
+        // Create actor.
+        GKActor* actor = new GKActor();
+        
+        //TODO: Associate noun with actor.
+        
+        // Set actor's initial position and rotation.
         if(actorDef->position != nullptr)
         {
             Vector3 position = actorDef->position->position;
@@ -59,8 +64,20 @@ Scene::Scene(std::string name, std::string timeCode) :
             actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading));
         }
         
-        MeshRenderer* renderer = actor->AddComponent<MeshRenderer>();
-        renderer->SetModel(actorDef->model);
+        // Set actor's graphical appearance.
+        actor->GetMeshRenderer()->SetModel(actorDef->model);
+        
+        // Save actor's GAS references.
+        actor->SetIdleGas(actorDef->idleGas);
+        actor->SetTalkGas(actorDef->talkGas);
+        actor->SetListenGas(actorDef->listenGas);
+        
+        // Always start in "idle" state.
+        actor->SetState(GKActor::State::Idle);
+        
+        //TODO: Apply init anim.
+        
+        //TODO: If hidden, hide.
         
         // If this is our ego, save a reference to it.
         if(actorDef->ego)
