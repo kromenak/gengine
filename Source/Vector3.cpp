@@ -144,6 +144,11 @@ Vector3 Vector3::Cross(Vector3 lhs, Vector3 rhs)
     return result;
 }
 
+Vector3 Vector3::Lerp(Vector3 from, Vector3 to, float t)
+{
+    return ((1.0f - t) * from) + (t * to);
+}
+
 std::ostream& operator<<(std::ostream& os, const Vector3& v)
 {
     os << std::setprecision(9) << "(" << v.GetX() << ", " << v.GetY() << ", " << v.GetZ() << ")";

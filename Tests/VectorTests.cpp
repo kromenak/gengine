@@ -141,7 +141,7 @@ TEST_CASE("Vector3 can be multiplied and divided by a scalar")
     REQUIRE(vec2 == Vector3(-3.9086f, 1.25f, -0.400008f));
 }
 
-TEST_CASE("Vector3 Dot and Cross products work correctly.")
+TEST_CASE("Vector3 Dot and Cross products work correctly")
 {
     Vector3 vec1(10.0f, 12.3f, -3.5f);
     Vector3 vec2(-19.543f, 6.25f, -2.0f);
@@ -175,4 +175,13 @@ TEST_CASE("Vector3 Dot and Cross products work correctly.")
     // Cross product of of X/Y unit vectors should be the Z unit vector.
     crossProduct = Vector3::Cross(Vector3::UnitX, Vector3::UnitY);
     REQUIRE(crossProduct == Vector3::UnitZ);
+}
+
+TEST_CASE("Vector3 LERP works correctly")
+{
+    Vector3 vec1(0.0f, 0.0f, 0.0f);
+    Vector3 vec2(10.0f, 10.0f, 10.0f);
+    
+    Vector3 middle = Vector3::Lerp(vec1, vec2, 0.5f);
+    REQUIRE(middle == Vector3(5.0f, 5.0f, 5.0f));
 }

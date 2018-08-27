@@ -420,6 +420,74 @@ Vector3 Quaternion::Rotate(const Vector3& vector) const
                    pMult * vector.GetZ() + vMult * z + crossMult * (x * vector.GetY() - y * vector.GetX()));
 }
 
+void Quaternion::Lerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)
+{
+    // Get cos of angle between quaternions.
+    float cosTheta = Quaternion::Dot(start, end);
+    
+    // Set result to end by default.
+    result = t * end;
+    
+    // If angle between quaternions is less than 90 degrees, use standard interpolation.
+    // Otherwise, take the other path.
+    if(cosTheta >= Math::kEpsilon)
+    {
+        result += (1.0f - t) * start;
+    }
+    else
+    {
+        result += (t - 1.0f) * start;
+    }
+}
+
+void Quaternion::Slerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)
+{
+    // Get cos of angle between quaternions.
+    float cosTheta = Quaternion::Dot(start, end);
+    float startInterp, endInterp;
+    
+    // If angle between quaternions is less than 90 degrees...
+    if(cosTheta >= Math::kEpsilon)
+    {
+        // If angle is greater than zero, use standard slerp.
+        if((1.0f - cosTheta) > Math::kEpsilon)
+        {
+            float theta = Math::Acos(cosTheta);
+            float recipSinTheta = 1.0f / Math::Sin(theta);
+            
+            startInterp = Math::Sin((1.0f - t) * theta) * recipSinTheta;
+            endInterp = Math::Sin(t * theta) * recipSinTheta;
+        }
+        // Angle is close to zero, so use linear interpolation.
+        else
+        {
+            startInterp = 1.0f - t;
+            endInterp = t;
+        }
+    }
+    // Otherwise, take the shorter route.
+    else
+    {
+        // If angle is less than 180 degrees...
+        if((1.0f + cosTheta) > Math::kEpsilon)
+        {
+            // ...use slerp w/ negation of start quaternion.
+            float theta = Math::Acos(-cosTheta);
+            float recipSinTheta = 1.0f / Math::Sin(theta);
+            
+            startInterp = Math::Sin((t - 1.0f) * theta) * recipSinTheta;
+            endInterp = Math::Sin(t * theta) * recipSinTheta;
+        }
+        // Or angle is close to 180 degrees, so use lerp w/ negated start quat.
+        else
+        {
+            startInterp = t - 1.0f;
+            endInterp = t;
+        }
+    }
+    result = startInterp * start + endInterp * end;
+}
+
 std::ostream& operator<<(std::ostream& os, const Quaternion& q)
 {
     Vector3 axis;

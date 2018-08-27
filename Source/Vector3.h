@@ -66,6 +66,9 @@ public:
     static float Dot(Vector3 lhs, Vector3 rhs);
     static Vector3 Cross(Vector3 lhs, Vector3 rhs);
     
+    // Interpolation
+    static Vector3 Lerp(Vector3 from, Vector3 to, float t);
+    
 private:
     // Vector elements - important that they are in this order. We assume some memory layout stuff.
     float x = 0.0f;
