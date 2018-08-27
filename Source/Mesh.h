@@ -54,12 +54,12 @@ public:
     Mesh(uint vertexCount, uint vertexSize, MeshUsage usage);
     ~Mesh();
     
-    void SetPositions(const float* positions);
-    void SetColors(const float* colors);
-    void SetNormals(const float* normals);
-    void SetUV1(const float* uvs);
+    void SetPositions(float* positions);
+    void SetColors(float* colors);
+    void SetNormals(float* normals);
+    void SetUV1(float* uvs);
     
-    void SetIndexes(const ushort* indexes, int count);
+    void SetIndexes(ushort* indexes, int count);
     
     void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
     
@@ -71,6 +71,8 @@ public:
     
     void SetTextureName(std::string textureName) { mTextureName = textureName; }
     std::string GetTextureName() { return mTextureName; }
+    
+    uint GetVertexCount() { return mVertexCount; }
     
 private:
     // Number of vertices in the mesh.
@@ -89,13 +91,13 @@ private:
     std::string mTextureName;
     
     // Vertex data. This object owns this data.
-    const float* mPositions = nullptr;
-    const float* mColors = nullptr;
-    const float* mNormals = nullptr;
-    const float* mUV1 = nullptr;
+    float* mPositions = nullptr;
+    float* mColors = nullptr;
+    float* mNormals = nullptr;
+    float* mUV1 = nullptr;
     
     // Index data. This object owns this data.
-    const ushort* mIndexes = nullptr;
+    ushort* mIndexes = nullptr;
     
     // Vertex array object that actually renders the thing.
     GLVertexArray* mVertexArray = nullptr;

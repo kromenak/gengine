@@ -28,27 +28,28 @@ GLVertexArray::~GLVertexArray()
     glDeleteBuffers(1, &mIBO);
 }
 
-void GLVertexArray::SetPositions(const float* positions)
+void GLVertexArray::SetPositions(float* positions)
 {
     mPositions = positions;
+    mVboUpdateMask |= 1;
 }
 
-void GLVertexArray::SetColors(const float* colors)
+void GLVertexArray::SetColors(float* colors)
 {
     mColors = colors;
 }
 
-void GLVertexArray::SetNormals(const float* normals)
+void GLVertexArray::SetNormals(float* normals)
 {
     mNormals = normals;
 }
 
-void GLVertexArray::SetUV1(const float* uvs)
+void GLVertexArray::SetUV1(float* uvs)
 {
     mUV1 = uvs;
 }
 
-void GLVertexArray::SetIndexes(const ushort* indexes, uint count)
+void GLVertexArray::SetIndexes(ushort* indexes, uint count)
 {
     mIndexes = indexes;
     mIndexCount = count;

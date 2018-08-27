@@ -16,12 +16,12 @@ public:
     GLVertexArray(uint vertexCount, uint vertexSize, MeshUsage usage);
     ~GLVertexArray();
     
-    void SetPositions(const float* positions);
-    void SetColors(const float* colors);
-    void SetNormals(const float* normals);
-    void SetUV1(const float* uvs);
+    void SetPositions(float* positions);
+    void SetColors(float* colors);
+    void SetNormals(float* normals);
+    void SetUV1(float* uvs);
     
-    void SetIndexes(const ushort* indexes, uint count);
+    void SetIndexes(ushort* indexes, uint count);
     
     void DrawTriangles();
     void DrawTriangles(uint offset, uint count);
@@ -55,13 +55,13 @@ private:
     uint mVboUpdateMask = 0;
     
     // Vertex data
-    const float* mPositions = nullptr;
-    const float* mColors = nullptr;
-    const float* mNormals = nullptr;
-    const float* mUV1 = nullptr;
+    float* mPositions = nullptr;
+    float* mColors = nullptr;
+    float* mNormals = nullptr;
+    float* mUV1 = nullptr;
     
     // Index data
-    const ushort* mIndexes = nullptr;
+    ushort* mIndexes = nullptr;
     uint mIndexCount = 0;
     
     void BuildVBO();

@@ -6,7 +6,7 @@
 #include "Mesh.h"
 #include "GLVertexArray.h"
 
-Mesh::Mesh(uint vertexCount, uint vertexSize, MeshUsage usage)
+Mesh::Mesh(uint vertexCount, uint vertexSize, MeshUsage usage) : mVertexCount(vertexCount)
 {
     mVertexArray = new GLVertexArray(vertexCount, vertexSize, usage);
 }
@@ -16,13 +16,13 @@ Mesh::~Mesh()
     delete mVertexArray;
     
     // Delete vertex attribute data.
-    delete mPositions;
-    delete mColors;
-    delete mNormals;
-    delete mUV1;
+    delete[] mPositions;
+    delete[] mColors;
+    delete[] mNormals;
+    delete[] mUV1;
     
     // Delete indexes.
-    delete mIndexes;
+    delete[] mIndexes;
 }
 
 void Mesh::Render()
@@ -59,31 +59,48 @@ void Mesh::Render(uint offset, uint count)
     }
 }
 
-void Mesh::SetPositions(const float* positions)
+void Mesh::SetPositions(float* positions)
 {
-    mPositions = positions;
-    mVertexArray->SetPositions(positions);
+    if(mPositions == nullptr)
+    {
+        mPositions = new float[mVertexCount * 3];
+    }
+    
+    /*
+    for(int i = 0; i < mVertexCount * 3; i++)
+    {
+        if(!Math::AreEqual(mPositions[i], positions[i]))
+        {
+            std::cout << mPositions[i] << " to " << positions[i] << std::endl;
+        }
+        //std::cout << mPositions[i] << ", " << mPositions[i + 1] << ", " << mPositions[i + 2] << std::endl;
+    }
+    */
+    
+    memcpy(mPositions, positions, mVertexCount * 3 * sizeof(float));
+    
+    mVertexArray->SetPositions(mPositions);
 }
 
-void Mesh::SetColors(const float* colors)
+void Mesh::SetColors(float* colors)
 {
     mColors = colors;
     mVertexArray->SetColors(colors);
 }
 
-void Mesh::SetNormals(const float* normals)
+void Mesh::SetNormals(float* normals)
 {
     mNormals = normals;
     mVertexArray->SetNormals(normals);
 }
 
-void Mesh::SetUV1(const float* uvs)
+void Mesh::SetUV1(float* uvs)
 {
     mUV1 = uvs;
     mVertexArray->SetUV1(uvs);
 }
 
-void Mesh::SetIndexes(const ushort* indexes, int count)
+void Mesh::SetIndexes(ushort* indexes, int count)
 {
     mIndexes = indexes;
     mVertexArray->SetIndexes(indexes, count);
