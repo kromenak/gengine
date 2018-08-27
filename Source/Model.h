@@ -13,7 +13,7 @@
 
 class Mesh;
 
-class Model : Asset
+class Model : public Asset
 {
 public:
     Model(std::string name, char* data, int dataLength);

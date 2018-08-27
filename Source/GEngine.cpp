@@ -73,10 +73,10 @@ bool GEngine::Initialize()
     //mAssetManager.WriteBarnAssetToFile("CANDY.MOD");
     //mAssetManager.WriteOutAssetsOfType("ANM");
     
-    //mAssetManager.LoadACT("GAB_GABBREATH1.ACT");
-    //mAssetManager.LoadACT("CAT_CATRUN.ACT");
+    //mAssetManager.LoadVertexAnimation("GAB_GABBREATH1.ACT");
+    //mAssetManager.LoadVertexAnimation("CAT_CATRUN.ACT");
     
-    LoadScene("R25");
+    LoadScene("B25");
     return true;
 }
 
