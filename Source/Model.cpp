@@ -181,7 +181,7 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // Next we have vertex positions.
             #ifdef DEBUG_OUTPUT
-            std::cout << "      Vertex positions: " << std::endl;
+            //std::cout << "      Vertex positions: " << std::endl;
             #endif
             for(int k = 0; k < vertexCount; k++)
             {
@@ -193,11 +193,11 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexPositions[k * 3 + 2] = z;
                 
                 #ifdef DEBUG_OUTPUT
-                std::cout << Vector3(x, y, z);
+                //std::cout << Vector3(x, y, z);
                 #endif
             }
             #ifdef DEBUG_OUTPUT
-            std::cout << std::endl;
+            //std::cout << std::endl;
             #endif
             mesh->SetPositions(vertexPositions);
             

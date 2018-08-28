@@ -11,7 +11,7 @@
 #include "Math.h"
 #include "Matrix3.h"
 
-//#define DEBUG_OUTPUT
+#define DEBUG_OUTPUT
 
 VertexAnimation::VertexAnimation(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -25,6 +25,7 @@ VertexAnimationMeshPose VertexAnimation::TakeSample(float time, int meshIndex)
     
     float prevPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
+    VertexAnimationMeshPose* firstPose = nullptr;
     VertexAnimationMeshPose* prevPose = nullptr;
     VertexAnimationMeshPose* nextPose = nullptr;
     for(int i = 0; i < mFrames.size(); i++)
@@ -33,7 +34,7 @@ VertexAnimationMeshPose VertexAnimation::TakeSample(float time, int meshIndex)
         VertexAnimationMeshPose* meshPose = nullptr;
         for(int j = 0; j < mFrames[i]->mMeshPoses.size(); j++)
         {
-            if(mFrames[i]->mMeshPoses[j]->mMeshIndex == meshIndex)
+            if(mFrames[i]->mMeshPoses[j]->mMeshIndex == meshIndex && mFrames[i]->mMeshPoses[j]->mVertexPositions.size() > 0)
             {
                 meshPose = mFrames[i]->mMeshPoses[j];
                 break;
@@ -42,6 +43,12 @@ VertexAnimationMeshPose VertexAnimation::TakeSample(float time, int meshIndex)
         
         // If this frame doesn't have a pose for the desired mesh index, skip it.
         if(meshPose == nullptr) { continue; }
+        
+        // Save first pose, if we have it.
+        if(firstPose == nullptr)
+        {
+            firstPose = meshPose;
+        }
         
         // Determine the time of this frame in the animation.
         float frameTime = secondsPerFrame * i;
@@ -76,8 +83,8 @@ VertexAnimationMeshPose VertexAnimation::TakeSample(float time, int meshIndex)
     // This shouldn't happen, but if it does, just use the same as prev pose.
     if(nextPose == nullptr)
     {
-        nextPose = prevPose;
-        nextPoseTime = prevPoseTime;
+        nextPose = firstPose;
+        nextPoseTime = GetDuration();
     }
     
     // Determine our "t" value between the prev and next pose.
@@ -86,19 +93,93 @@ VertexAnimationMeshPose VertexAnimation::TakeSample(float time, int meshIndex)
     {
         t = (localTime - prevPoseTime) / (nextPoseTime - prevPoseTime);
     }
+    assert(t >= 0.0f && t <= 1.0f);
     
     // Create our pose struct to return.
     VertexAnimationMeshPose pose;
+    pose.mMeshIndex = prevPose->mMeshIndex;
     
     // Now calculate interpolated positions between those poses for this time t.
     for(int i = 0; i < prevPose->mVertexPositions.size(); i++)
     {
         pose.mVertexPositions.push_back(Vector3::Lerp(prevPose->mVertexPositions[i], nextPose->mVertexPositions[i], t));
     }
+    pose.mSetPositions = pose.mVertexPositions.size() > 0;
     
-    // Also interpolate translation/rotation.
-    pose.mLocalPosition = Vector3::Lerp(prevPose->mLocalPosition, nextPose->mLocalPosition, t);
-    Quaternion::Slerp(pose.mLocalRotation, prevPose->mLocalRotation, nextPose->mLocalRotation, t);
+    // NOW ALSO THE LOCAL POSITION/ROTATION WHY NOT!
+    float prevPosRotPoseTime = 0.0f;
+    float nextPosRotPoseTime = 0.0f;
+    VertexAnimationMeshPose* firstPosRotPose = nullptr;
+    VertexAnimationMeshPose* prevPosRotPose = nullptr;
+    VertexAnimationMeshPose* nextPosRotPose = nullptr;
+    for(int i = 0; i < mFrames.size(); i++)
+    {
+        // See if this frame has a pose for the desired mesh index.
+        VertexAnimationMeshPose* meshPose = nullptr;
+        for(int j = 0; j < mFrames[i]->mMeshPoses.size(); j++)
+        {
+            if(mFrames[i]->mMeshPoses[j]->mMeshIndex == meshIndex && mFrames[i]->mMeshPoses[j]->mSetPosRot)
+            {
+                meshPose = mFrames[i]->mMeshPoses[j];
+                break;
+            }
+        }
+        
+        // If this frame doesn't have a pose for the desired mesh index, skip it.
+        if(meshPose == nullptr) { continue; }
+        
+        if(firstPosRotPose == nullptr)
+        {
+            firstPosRotPose = meshPose;
+        }
+        
+        // Determine the time of this frame in the animation.
+        float frameTime = secondsPerFrame * i;
+        
+        // Based on whether the sample time is after this frame, exactly at this frame,
+        // or before this frame, save our prev/next poses. Once equal or after, we can also break.
+        if(frameTime < localTime)
+        {
+            prevPosRotPose = meshPose;
+            prevPosRotPoseTime = frameTime;
+        }
+        else if(frameTime == localTime)
+        {
+            prevPosRotPose = nextPosRotPose = meshPose;
+            prevPosRotPoseTime = nextPosRotPoseTime = frameTime;
+            break;
+        }
+        else if(frameTime > localTime)
+        {
+            nextPosRotPose = meshPose;
+            nextPosRotPoseTime = frameTime;
+            break;
+        }
+    }
+    
+    // If prev pose is null, we are screwed!
+    if(prevPosRotPose == nullptr)
+    {
+        return pose;
+    }
+    
+    // This shouldn't happen, but if it does, just use the same as prev pose.
+    if(nextPosRotPose == nullptr)
+    {
+        nextPosRotPose = firstPosRotPose;
+        nextPosRotPoseTime = GetDuration();
+    }
+    
+    t = 1.0f;
+    if(nextPosRotPoseTime != prevPosRotPoseTime)
+    {
+        t = (localTime - prevPosRotPoseTime) / (nextPosRotPoseTime - prevPosRotPoseTime);
+    }
+    assert(t >= 0.0f && t <= 1.0f);
+    
+    pose.mLocalPosition = Vector3::Lerp(prevPosRotPose->mLocalPosition, nextPosRotPose->mLocalPosition, t);
+    Quaternion::Slerp(pose.mLocalRotation, prevPosRotPose->mLocalRotation, nextPosRotPose->mLocalRotation, t);
+    pose.mSetPosRot = true;
     return pose;
 }
 
@@ -148,7 +229,8 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     }
     
     // Read in data for each keyframe.
-    std::unordered_map<int, std::unordered_map<int, VertexAnimationMeshPose*>> lastPoseLookup;
+    //std::unordered_map<int, std::unordered_map<int, VertexAnimationMeshPose*>> lastPoseLookup;
+    std::unordered_multimap<int, std::pair<int, VertexAnimationMeshPose*>> poseLookup;
     for(int i = 0; i < keyframeCount; i++)
     {
         #ifdef DEBUG_OUTPUT
@@ -181,6 +263,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
             std::vector<VertexAnimationMeshPose*> createdPoses;
             Vector3 minPos;
             Vector3 maxPos;
+            bool setPosRot = false;
             Quaternion localRotation;
             Vector3 localPosition;
             
@@ -222,7 +305,17 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                     else
                     {
-                        meshPose->mMeshIndex = lastPoseLookup[index][submeshIndex]->mMeshIndex;
+                        auto range = poseLookup.equal_range(index);
+                        for(auto it = range.first; it != range.second; it++)
+                        {
+                            auto pair = it->second;
+                            if(pair.first == submeshIndex)
+                            {
+                                meshPose->mMeshIndex = pair.second->mMeshIndex;
+                                break;
+                            }
+                        }
+                        //meshPose->mMeshIndex = lastPoseLookup[index][submeshIndex]->mMeshIndex;
                     }
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Submesh Index: " << submeshIndex << std::endl;
@@ -231,7 +324,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // 2 bytes: Vertex count.
                     ushort vertexCount = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
-                    std::cout << "        Vertex Count: " << vertexCount << std::endl;
+                    //std::cout << "        Vertex Count: " << vertexCount << std::endl;
                     #endif
                     
                     // Next, three floats per vertex (X, Y, Z).
@@ -243,6 +336,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         meshPose->mVertexPositions.push_back(Vector3(x, y, z));
                     }
                     
+                    /*
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Vertex Positions: " << std::endl;
                     for(auto& pos : meshPose->mVertexPositions)
@@ -251,11 +345,13 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                     std::cout << std::endl;
                     #endif
+                    */
                     
                     // Save last pose lookup.
                     if(i == 0)
                     {
-                        lastPoseLookup[index][submeshIndex] = meshPose;
+                        poseLookup.insert(std::make_pair(index, std::make_pair(submeshIndex, meshPose)));
+                        //lastPoseLookup[index][submeshIndex] = meshPose;
                     }
                 }
                 // Identifier 1 also appears to be vertex data, but in a compressed format.
@@ -282,7 +378,17 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                     else
                     {
-                        meshPose->mMeshIndex = lastPoseLookup[index][submeshIndex]->mMeshIndex;
+                        auto range = poseLookup.equal_range(index);
+                        for(auto it = range.first; it != range.second; it++)
+                        {
+                            auto pair = it->second;
+                            if(pair.first == submeshIndex)
+                            {
+                                meshPose->mMeshIndex = pair.second->mMeshIndex;
+                                break;
+                            }
+                        }
+                        //meshPose->mMeshIndex = lastPoseLookup[index][submeshIndex]->mMeshIndex;
                     }
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Submesh Index: " << submeshIndex << std::endl;
@@ -291,7 +397,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // 2 bytes: Vertex count.
                     ushort vertexCount = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
-                    std::cout << "        Vertex Count: " << vertexCount << std::endl;
+                    //std::cout << "        Vertex Count: " << vertexCount << std::endl;
                     #endif
                     
                     // Next ((VertexCount/4) + 1) bytes: Compression info for vertex data.
@@ -318,8 +424,19 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                     
                     // Find position data from last recorded frame.
-                    std::vector<Vector3>& prevPositions = lastPoseLookup[index][submeshIndex]->mVertexPositions;
-                   
+                    //std::vector<Vector3>& prevPositions = lastPoseLookup[index][submeshIndex]->mVertexPositions;
+                    std::vector<Vector3> prevPositions;
+                    auto range = poseLookup.equal_range(index);
+                    for(auto it = range.first; it != range.second; it++)
+                    {
+                        auto pair = it->second;
+                        if(pair.first == submeshIndex)
+                        {
+                            prevPositions = pair.second->mVertexPositions;
+                            break;
+                        }
+                    }
+                    
                     // Now that we have deciphered how each vertex is compressed, we can read in each vertex.
                     for(int k = 0; k < vertexCount; k++)
                     {
@@ -332,7 +449,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         else if(vertexDataFormat[k] == 1)
                         {
                             float x = DecompressFloatFromByte(reader.ReadByte());
-                            float z = -DecompressFloatFromByte(reader.ReadByte());
+                            float z = DecompressFloatFromByte(reader.ReadByte());
                             float y = DecompressFloatFromByte(reader.ReadByte());
                             meshPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
@@ -340,7 +457,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         else if(vertexDataFormat[k] == 2)
                         {
                             float x = DecompressFloatFromByte(reader.ReadUShort());
-                            float z = -DecompressFloatFromByte(reader.ReadUShort());
+                            float z = DecompressFloatFromByte(reader.ReadUShort());
                             float y = DecompressFloatFromByte(reader.ReadUShort());
                             meshPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
@@ -348,7 +465,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         else if(vertexDataFormat[k] == 3)
                         {
                             float x = reader.ReadFloat();
-                            float z = -reader.ReadFloat();
+                            float z = reader.ReadFloat();
                             float y = reader.ReadFloat();
                             meshPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
@@ -358,6 +475,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     delete[] compressionInfo;
                     delete[] vertexDataFormat;
                     
+                    /*
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Vertex Positions: " << std::endl;
                     for(auto& pos : meshPose->mVertexPositions)
@@ -366,24 +484,27 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                     std::cout << std::endl;
                     #endif
+                    */
                     
                     // Save last pose lookup.
                     if(i == 0)
                     {
-                        lastPoseLookup[index][submeshIndex] = meshPose;
+                        poseLookup.insert(std::make_pair(index, std::make_pair(submeshIndex, meshPose)));
+                        //lastPoseLookup[index][submeshIndex] = meshPose;
                     }
                 }
                 // Identifier 2 is transform matrix data.
                 else if(identifier == 2)
                 {
-                    //std::cout << "      Matrix Data Block" << std::endl;
+                    #ifdef DEBUG_OUTPUT
+                    std::cout << "      Matrix Data Block" << std::endl;
+                    #endif
                     
                     // 4 bytes: Number of bytes in this block.
                     // Should always be 48 bytes, for 12 floats, which is a 4x3 matrix of data.
                     uint blockByteCount = reader.ReadUInt();
                     assert(blockByteCount == 48);
                     byteCount -= blockByteCount + 4;
-                    //std::cout << "        Byte Count: " << blockByteCount << std::endl;
                     
                     // These are in i,k,j order, rather than i,j,k, likely due to 3DS Max conventions.
                     // 12 bytes: mesh's x-axis basis vector (i)
@@ -405,21 +526,29 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // Each mesh within the model has it's local offset from the model origin.
                     // This if vital, for example, if a mesh contains a human's head, legs, arms...
                     // want to position them all correctly relative to one another!
-                    Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), -reader.ReadFloat());
+                    float x = reader.ReadFloat();
+                    float y = reader.ReadFloat();
+                    float z = -reader.ReadFloat();
+                    Vector3 meshPos(x, y, z);
                     localPosition = meshPos;
-                    //std::cout << "    Mesh Position: " << meshPos << std::endl;
+                    #ifdef DEBUG_OUTPUT
+                    std::cout << "        Mesh Position: " << meshPos << std::endl;
+                    #endif
+                    
+                    setPosRot = true;
                 }
                 // Identifier 3 is min/max data.
                 else if(identifier == 3)
                 {
-                    //std::cout << "      Min/Max Data Block" << std::endl;
+                    #ifdef DEBUG_OUTPUT
+                    std::cout << "      Min/Max Data Block" << std::endl;
+                    #endif
                     
                     // 4 bytes: Number of bytes in this block.
                     // Should always be 24 bytes, for 6 floats, which is two Vector3.
                     uint blockByteCount = reader.ReadUInt();
                     assert(blockByteCount == 24);
                     byteCount -= blockByteCount + 4;
-                    //std::cout << "        Byte Count: " << blockByteCount << std::endl;
                     
                     // Assign min/max data.
                     minPos = Vector3(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
@@ -432,29 +561,34 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
             } // while(byteCount > 0)
             
             // Make sure min/max values and transform matrices are assigned to all poses.
+            
+            
             for(auto& pose : createdPoses)
             {
+                pose->mSetPositions = true;
                 pose->mMin = minPos;
                 pose->mMax = maxPos;
+                pose->mSetPosRot = setPosRot;
                 pose->mLocalPosition = localPosition;
                 pose->mLocalRotation = localRotation;
             }
-            
-            // Check that we have data in the MeshData structure.
-            // If not, we want to just reuse data from a previous keyframe.
-            /*
-            if(meshData.positions.size() == 0)
+            if(createdPoses.size() == 0 && setPosRot)
             {
-                meshData.positions = mFrames[mFrames.size() - 1].meshDatas[j].positions;
-            }
-            if(mFrames.size() > 0 && meshData.positions.size() < mFrames[mFrames.size() - 1].meshDatas[j].positions.size())
-            {
-                for(int k = (int)meshData.positions.size(); k < (int)mFrames[mFrames.size() - 1].meshDatas[j].positions.size(); k++)
+                auto range = poseLookup.equal_range(index);
+                for(auto it = range.first; it != range.second; it++)
                 {
-                    meshData.positions.push_back(mFrames[mFrames.size() - 1].meshDatas[j].positions[k]);
+                    auto pair = it->second;
+                    std::cout << pair.second->mMeshIndex << std::endl;
+                    VertexAnimationMeshPose* meshPose = new VertexAnimationMeshPose();
+                    keyframe->mMeshPoses.push_back(meshPose);
+                    meshPose->mMeshIndex = pair.second->mMeshIndex;
+                    meshPose->mSetPositions = false;
+                    meshPose->mSetPositions = true;
+                    meshPose->mLocalPosition = localPosition;
+                    meshPose->mLocalRotation = localRotation;
                 }
             }
-            */
+            
         } // iterate mesh groups
     } // iterate keyframes
 }

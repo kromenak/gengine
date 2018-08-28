@@ -73,7 +73,7 @@ Scene::Scene(std::string name, std::string timeCode) :
         actor->SetListenGas(actorDef->listenGas);
         
         // Always start in "idle" state.
-        actor->SetState(GKActor::State::Idle);
+        actor->SetState(GKActor::State::Talk);
         
         //TODO: Apply init anim.
         

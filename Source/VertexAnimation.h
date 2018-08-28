@@ -20,8 +20,10 @@ struct VertexAnimationMeshPose
 {
     int mMeshIndex = 0;
     
+    bool mSetPositions = false;
     std::vector<Vector3> mVertexPositions;
     
+    bool mSetPosRot = false;
     Quaternion mLocalRotation;
     Vector3 mLocalPosition;
     
@@ -42,6 +44,19 @@ struct VertexAnimationFrame
     std::vector<VertexAnimationMeshPose*> mMeshPoses;
 };
 
+struct VertexAnimationVertexPose
+{
+    std::vector<Vector3> mVertexPositions;
+    VertexAnimationVertexPose* mNext = nullptr;
+}
+
+struct VertexAnimationTransformPose
+{
+    Quaternion mLocalRotation;
+    Vector3 mLocalPosition;
+    VertexAnimationTransformPose* mNext = nullptr;
+};
+
 class VertexAnimation : public Asset
 {
 public:
@@ -55,6 +70,9 @@ private:
     // The animation consists of one or more frames.
     // Each frame's length is dictated by the frame rate (often 30FPS or 60FPS).
     std::vector<VertexAnimationFrame*> mFrames;
+    
+    std::vector<VertexAnimationVertexPose*> mVertexPoses;
+    std::vector<VertexAnimationTransformPose*> mTransformPoses;
     
     // The number of frames per second.
     // The duration of each frame is then 1/framesPerSecond seconds.
