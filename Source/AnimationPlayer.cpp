@@ -49,23 +49,13 @@ void AnimationPlayer::Update(float deltaTime)
         mVertexAnimationTimer += deltaTime;
         
         std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
-        
-        //std::vector<Vector3> sample = mVertexAnimation->TakeSample(mVertexAnimationTimer, 4);
-        //float* fPtr = (float*)sample.data();
-        //meshes[4]->SetPositions(fPtr);
-        
         for(int i = 0; i < meshes.size(); i++)
         {
-            VertexAnimationMeshPose sample = mVertexAnimation->TakeSample(mVertexAnimationTimer, i);
-            if(sample.mSetPositions)
-            {
-                float* fPtr = (float*)sample.mVertexPositions.data();
-                meshes[i]->SetPositions(fPtr);
-            }
-            if(sample.mSetPosRot)
-            {
-                meshes[i]->SetLocalTransformMatrix(sample.GetLocalTransformMatrix());
-            }
+            VertexAnimationVertexPose sample = mVertexAnimation->SampleVertexPose(mVertexAnimationTimer, i);
+            meshes[i]->SetPositions((float*)sample.mVertexPositions.data());
+            
+            VertexAnimationTransformPose transformSample = mVertexAnimation->SampleTransformPose(mVertexAnimationTimer, i);
+            meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
         }
     }
 }

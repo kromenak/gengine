@@ -16,45 +16,28 @@
 #include <vector>
 #include "Matrix4.h"
 
-struct VertexAnimationMeshPose
-{
-    int mMeshIndex = 0;
-    
-    bool mSetPositions = false;
-    std::vector<Vector3> mVertexPositions;
-    
-    bool mSetPosRot = false;
-    Quaternion mLocalRotation;
-    Vector3 mLocalPosition;
-    
-    Vector3 mMin;
-    Vector3 mMax;
-    
-    Matrix4 GetLocalTransformMatrix()
-    {
-        // Use mesh position offset and rotation values to create a local transform matrix.
-        Matrix4 transMatrix = Matrix4::MakeTranslate(mLocalPosition);
-        Matrix4 rotMatrix = Matrix4::MakeRotate(mLocalRotation);
-        return transMatrix * rotMatrix;
-    }
-};
-
-struct VertexAnimationFrame
-{
-    std::vector<VertexAnimationMeshPose*> mMeshPoses;
-};
-
 struct VertexAnimationVertexPose
 {
+    int mFrameNumber = 0;
+    unsigned char mMeshIndex = 0;
+    
     std::vector<Vector3> mVertexPositions;
     VertexAnimationVertexPose* mNext = nullptr;
-}
+};
 
 struct VertexAnimationTransformPose
 {
+    int mFrameNumber = 0;
+    unsigned char mMeshIndex = 0;
+    
     Quaternion mLocalRotation;
     Vector3 mLocalPosition;
     VertexAnimationTransformPose* mNext = nullptr;
+    
+    Matrix4 GetLocalTransformMatrix()
+    {
+        return Matrix4::MakeTranslate(mLocalPosition) * Matrix4::MakeRotate(mLocalRotation);
+    }
 };
 
 class VertexAnimation : public Asset
@@ -62,21 +45,23 @@ class VertexAnimation : public Asset
 public:
     VertexAnimation(std::string name, char* data, int dataLength);
     
-    VertexAnimationMeshPose TakeSample(float time, int meshIndex);
+    VertexAnimationVertexPose SampleVertexPose(float time, int meshIndex);
+    VertexAnimationTransformPose SampleTransformPose(float time, int meshIndex);
     
-    float GetDuration() { return (1.0f / mFramesPerSecond) * mFrames.size(); }
+    float GetDuration() { return (1.0f / mFramesPerSecond) * mFrameCount; }
     
 private:
-    // The animation consists of one or more frames.
-    // Each frame's length is dictated by the frame rate (often 30FPS or 60FPS).
-    std::vector<VertexAnimationFrame*> mFrames;
+    // The number of frames in this animation.
+    int mFrameCount = 0;
     
+    // Arrays containing the FIRST vertex/transform poses for each mesh.
+    // Subsequent poses are stored in the "next" of these poses.
     std::vector<VertexAnimationVertexPose*> mVertexPoses;
     std::vector<VertexAnimationTransformPose*> mTransformPoses;
     
     // The number of frames per second.
     // The duration of each frame is then 1/framesPerSecond seconds.
-    int mFramesPerSecond = 24;
+    int mFramesPerSecond = 10;
     
     void ParseFromData(char* data, int dataLength);
     
