@@ -93,6 +93,7 @@ void Model::ParseFromData(char *data, int dataLength)
         Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
         rotQuat.SetZ(-rotQuat.GetZ());
         rotQuat.SetW(-rotQuat.GetW());
+        //std::cout << "    Mesh Rotation: " << rotQuat << std::endl;
         
         // 12 bytes: an (X, Y, Z) offset or position for placing this mesh.
         // Each mesh within the model has it's local offset from the model origin.
