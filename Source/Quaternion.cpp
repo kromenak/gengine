@@ -494,6 +494,6 @@ std::ostream& operator<<(std::ostream& os, const Quaternion& q)
     float angle;
     q.GetAxisAngle(axis, angle);
     
-    os << axis << ", " << Math::ToDegrees(angle) << std::endl;
+    os << axis << ", " << Math::ToDegrees(angle);
     return os;
 }
