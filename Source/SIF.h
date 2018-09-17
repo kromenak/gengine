@@ -12,9 +12,10 @@
 // In-memory representation of .SIF files.
 //
 #pragma once
+#include "Asset.h"
+
 #include <vector>
 
-#include "Asset.h"
 #include "Vector2.h"
 #include "Vector3.h"
 

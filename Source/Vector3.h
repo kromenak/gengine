@@ -7,8 +7,9 @@
 // Often represents a 3D position/velocity/etc.
 //
 #pragma once
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+
 #include "Math.h"
 
 class Vector3

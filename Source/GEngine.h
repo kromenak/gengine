@@ -1,16 +1,20 @@
 //
-//  GEngine.h
-//  GEngine
+// GEngine.h
 //
-//  Created by Clark Kromenaker on 7/22/17.
+// Clark Kromenaker
+//
+// The "main" engine class. This is created by main() and handles
+// init, running the game loop, shutdown, and some coordination between systems.
 //
 #pragma once
-#include "Renderer.h"
-#include "AudioManager.h"
-#include "AssetManager.h"
-#include "InputManager.h"
-#include "SheepManager.h"
 #include <vector>
+
+#include "AssetManager.h"
+#include "AudioManager.h"
+#include "InputManager.h"
+#include "Renderer.h"
+#include "SheepManager.h"
+
 
 class Actor;
 class Scene;

@@ -4,15 +4,18 @@
 // Clark Kromenaker
 //
 #include "GAS.h"
+
 #include <string>
 #include <vector>
 #include <iostream>
+
 #include "imstream.h"
-#include "StringUtil.h"
 #include "StringTokenizer.h"
-#include "Services.h"
-#include "GasPlayer.h"
+#include "StringUtil.h"
+
 #include "AnimationPlayer.h"
+#include "GasPlayer.h"
+#include "Services.h"
 
 int AnimGasNode::Execute(GasPlayer* player)
 {
@@ -28,7 +31,7 @@ int AnimGasNode::Execute(GasPlayer* player)
     // Play the animation!
     player->GetAnimationPlayer()->Play(animation);
     
-    std::cout << "Playing animation " << animation->GetName() << " for " << animation->GetDuration() << " seconds." << std::endl;
+    //std::cout << "Playing animation " << animation->GetName() << " for " << animation->GetDuration() << " seconds." << std::endl;
     return animation->GetDuration() * 1000;
 }
 

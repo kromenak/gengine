@@ -3,7 +3,6 @@
 //
 // Clark Kromenaker
 // 
-
 #include "Vector4.h"
 
 Vector4 Vector4::Zero(0.0f, 0.0f, 0.0f, 0.0f);

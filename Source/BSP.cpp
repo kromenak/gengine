@@ -4,11 +4,13 @@
 // Clark Kromenaker
 //
 #include "BSP.h"
+
+#include <iostream>
+
 #include "BinaryReader.h"
+#include "Services.h"
 #include "Vector2.h"
 #include "Vector3.h"
-#include <iostream>
-#include "Services.h"
 
 BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -299,7 +301,7 @@ void BSP::ParseFromData(char *data, int dataLength)
          (B25, toilet paper has 2)
          (B25/RC1 - many instances of 0/1 too)
         */
-        uint flags = reader.ReadUInt();
+        unsigned int flags = reader.ReadUInt();
         
         // Combination of flags 8+4 seems to indicate thing is not visible.
         if(flags == 12)
@@ -387,17 +389,17 @@ void BSP::ParseFromData(char *data, int dataLength)
         vertsPtr[i * 3 + 2] = mVertices[i].GetZ();
     }
     
-    ushort* vertIndexesPtr = new ushort[mVertexIndices.size()];
+    unsigned short* vertIndexesPtr = new ushort[mVertexIndices.size()];
     for(int i = 0; i < mVertexIndices.size(); i++)
     {
         vertIndexesPtr[i] = mVertexIndices[i];
     }
     
     // Create the vertex array from the verts and vert indexes.
-    mMesh = new Mesh((uint)mVertices.size(), 5 * sizeof(float), MeshUsage::Static);
+    mMesh = new Mesh((unsigned int)mVertices.size(), 5 * sizeof(float), MeshUsage::Static);
     mMesh->SetRenderMode(RenderMode::TriangleFan);
     mMesh->SetPositions(vertsPtr);
-    mMesh->SetIndexes(vertIndexesPtr, (uint)mVertexIndices.size());
+    mMesh->SetIndexes(vertIndexesPtr, (unsigned int)mVertexIndices.size());
     
     // Also pass along UV data.
     float* uvsPtr = (float*)&mUVs[0];

@@ -1,13 +1,14 @@
 //
-//  SheepDriver.h
-//  GEngine
+// SheepCompiler.h
 //
-//  Created by Clark Kromenaker on 7/24/17.
+// Clark Kromenaker
+//
+// Description goes here!
 //
 #pragma once
 #include <istream>
-#include <string>
 #include <map>
+#include <string>
 
 #include "SheepScanner.h"
 #include "sheep.tab.hh"

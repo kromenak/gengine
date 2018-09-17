@@ -4,8 +4,9 @@
 // Clark Kromenaker
 //
 #include "Quaternion.h"
-#include "Vector3.h"
+
 #include "Matrix3.h"
+#include "Vector3.h"
 
 Quaternion Quaternion::Zero(0.0f, 0.0f, 0.0f, 0.0f);
 Quaternion Quaternion::Identity(0.0f, 0.0f, 0.0f, 1.0f);
@@ -179,7 +180,7 @@ void Quaternion::Set(const Matrix3 &rotation)
     }
     else
     {
-        uint i = 0;
+        unsigned int i = 0;
         if(rotation(1, 1) > rotation(0, 0))
         {
             i = 1;
@@ -188,8 +189,8 @@ void Quaternion::Set(const Matrix3 &rotation)
         {
             i = 2;
         }
-        uint j = (i + 1) % 3;
-        uint k = (j + 1) % 3;
+        unsigned int j = (i + 1) % 3;
+        unsigned int k = (j + 1) % 3;
         float s = Math::Sqrt(rotation(i, i) - rotation(j, j) - rotation(k, k) + 1.0f);
         (*this)[i] = 0.5f * s;
         

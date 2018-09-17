@@ -4,17 +4,16 @@
 // Clark Kromenaker
 //
 #include "Mesh.h"
+
 #include "GLVertexArray.h"
 
-Mesh::Mesh(uint vertexCount, uint vertexSize, MeshUsage usage) : mVertexCount(vertexCount)
+Mesh::Mesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage) : mVertexCount(vertexCount)
 {
     mVertexArray = new GLVertexArray(vertexCount, vertexSize, usage);
 }
 
 Mesh::~Mesh()
 {
-    delete mVertexArray;
-    
     // Delete vertex attribute data.
     delete[] mPositions;
     delete[] mColors;
@@ -23,6 +22,8 @@ Mesh::~Mesh()
     
     // Delete indexes.
     delete[] mIndexes;
+    
+    delete mVertexArray;
 }
 
 void Mesh::Render()
@@ -42,7 +43,7 @@ void Mesh::Render()
     }
 }
 
-void Mesh::Render(uint offset, uint count)
+void Mesh::Render(unsigned int offset, unsigned int count)
 {
     switch(mRenderMode)
     {
@@ -65,18 +66,6 @@ void Mesh::SetPositions(float* positions)
     {
         mPositions = new float[mVertexCount * 3];
     }
-    
-    /*
-    for(int i = 0; i < mVertexCount * 3; i++)
-    {
-        if(!Math::AreEqual(mPositions[i], positions[i]))
-        {
-            std::cout << mPositions[i] << " to " << positions[i] << std::endl;
-        }
-        //std::cout << mPositions[i] << ", " << mPositions[i + 1] << ", " << mPositions[i + 2] << std::endl;
-    }
-    */
-    
     memcpy(mPositions, positions, mVertexCount * 3 * sizeof(float));
     
     mVertexArray->SetPositions(mPositions);
@@ -100,7 +89,7 @@ void Mesh::SetUV1(float* uvs)
     mVertexArray->SetUV1(uvs);
 }
 
-void Mesh::SetIndexes(ushort* indexes, int count)
+void Mesh::SetIndexes(unsigned short* indexes, int count)
 {
     mIndexes = indexes;
     mVertexArray->SetIndexes(indexes, count);

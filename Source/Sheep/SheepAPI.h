@@ -7,12 +7,13 @@
 // All functions that can be called from sheep are in this header.
 //
 #pragma once
+#include <initializer_list>
 #include <map>
 #include <string>
-#include "Value.h"
-#include "Types.h"
-#include <initializer_list>
+
+#include "AtomicTypes.h"
 #include "SheepScript.h"
+#include "Value.h"
 
 // Functions for calling functions of various argument lengths.
 Value CallSysFunc(const std::string& name, const Value& x1);

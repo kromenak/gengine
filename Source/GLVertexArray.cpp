@@ -9,7 +9,7 @@
 // This macro just makes the syntax clearer for the reader.
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-GLVertexArray::GLVertexArray(uint vertexCount, uint vertexSize, MeshUsage usage) :
+GLVertexArray::GLVertexArray(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage) :
     mVertexCount(vertexCount)
 {
     // Generate and bind VBO.
@@ -49,7 +49,7 @@ void GLVertexArray::SetUV1(float* uvs)
     mUV1 = uvs;
 }
 
-void GLVertexArray::SetIndexes(ushort* indexes, uint count)
+void GLVertexArray::SetIndexes(unsigned short* indexes, unsigned int count)
 {
     mIndexes = indexes;
     mIndexCount = count;
@@ -60,7 +60,7 @@ void GLVertexArray::DrawTriangles()
     DrawTriangles(0, mIndexes != nullptr ? mIndexCount : mVertexCount);
 }
 
-void GLVertexArray::DrawTriangles(uint offset, uint count)
+void GLVertexArray::DrawTriangles(unsigned int offset, unsigned int count)
 {
     Draw(GL_TRIANGLES, offset, count);
 }
@@ -70,7 +70,7 @@ void GLVertexArray::DrawTriangleFans()
     DrawTriangleFans(0, mIndexes != nullptr ? mIndexCount : mVertexCount);
 }
 
-void GLVertexArray::DrawTriangleFans(uint offset, uint count)
+void GLVertexArray::DrawTriangleFans(unsigned int offset, unsigned int count)
 {
     Draw(GL_TRIANGLE_FAN, offset, count);
 }
@@ -80,7 +80,7 @@ void GLVertexArray::DrawLines()
     DrawLines(0, mIndexes != nullptr ? mIndexCount : mVertexCount);
 }
 
-void GLVertexArray::DrawLines(uint offset, uint count)
+void GLVertexArray::DrawLines(unsigned int offset, unsigned int count)
 {
     Draw(GL_LINES, offset, count);
 }
@@ -90,7 +90,7 @@ void GLVertexArray::Draw(GLenum mode)
     Draw(mode, 0, mIndexes != nullptr ? mIndexCount : mVertexCount);
 }
 
-void GLVertexArray::Draw(GLenum mode, uint offset, uint count)
+void GLVertexArray::Draw(GLenum mode, unsigned int offset, unsigned int count)
 {
     // If not yet built, build!
     if(mVAO == GL_NONE)
@@ -180,6 +180,9 @@ void GLVertexArray::BuildVBO()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndexCount * sizeof(GLushort), mIndexes, GL_STATIC_DRAW);
     }
+	
+	// Clear update mask, if any, since we definitely just updated.
+	mVboUpdateMask = 0;
 }
 
 void GLVertexArray::UpdateVBO()

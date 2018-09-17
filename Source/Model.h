@@ -7,9 +7,10 @@
 // representation of .MOD assets.
 //
 #pragma once
+#include "Asset.h"
+
 #include <string>
 #include <vector>
-#include "Asset.h"
 
 class Mesh;
 

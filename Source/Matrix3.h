@@ -6,8 +6,10 @@
 // Represents a 3x3 matrix.
 //
 #pragma once
-#include "Vector3.h"
-#include "Quaternion.h"
+#include <iostream>
+
+class Quaternion;
+class Vector3;
 
 class Matrix3
 {

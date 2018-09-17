@@ -7,22 +7,23 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "BarnFile.h"
-#include "Audio.h"
-#include "Model.h"
-#include "Texture.h"
-#include "BSP.h"
-#include "SIF.h"
-#include "SceneData.h"
-#include "NVC.h"
-#include "Soundtrack.h"
-#include "Yak.h"
-#include "Cursor.h"
-#include "VertexAnimation.h"
-#include "Sheep/SheepScript.h"
-#include "Shader.h"
-#include "GAS.h"
+
 #include "Animation.h"
+#include "Audio.h"
+#include "BarnFile.h"
+#include "BSP.h"
+#include "Cursor.h"
+#include "GAS.h"
+#include "Model.h"
+#include "NVC.h"
+#include "SceneData.h"
+#include "Shader.h"
+#include "Sheep/SheepScript.h"
+#include "SIF.h"
+#include "Soundtrack.h"
+#include "Texture.h"
+#include "VertexAnimation.h"
+#include "Yak.h"
 
 class AssetManager
 {
@@ -58,7 +59,7 @@ public:
     SheepScript* LoadSheep(std::string name);
     
     Cursor* LoadCursor(std::string name);
-    
+	
     Shader* LoadShader(std::string name);
     
 private:
@@ -73,7 +74,6 @@ private:
     // A list of loaded assets, so we can just return existing assets if already loaded.
     std::unordered_map<std::string, Audio*> mLoadedAudios;
     std::unordered_map<std::string, Texture*> mLoadedTextures;
-    
     std::unordered_map<std::string, Shader*> mLoadedShaders;
     
     std::string SanitizeAssetName(std::string assetName, std::string expectedExtension);

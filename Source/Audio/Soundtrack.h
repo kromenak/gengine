@@ -9,12 +9,15 @@
 // In-memory representation of ".STK" files.
 //
 #pragma once
+#include "Asset.h"
+
 #include <string>
 #include <vector>
 #include <cstdlib>
 
-#include "Asset.h"
 #include "Vector3.h"
+
+
 
 class IniSection;
 

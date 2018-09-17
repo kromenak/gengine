@@ -13,9 +13,10 @@
 // so a custom component for the purpose seems reasonable.
 //
 #pragma once
+#include "Component.h"
+
 #include <vector>
 
-#include "Component.h"
 #include "Soundtrack.h"
 
 class SoundtrackPlayer : public Component

@@ -4,11 +4,13 @@
 // Clark Kromenaker
 //
 #include "SheepVM.h"
+
+#include <iostream>
+
 #include "BinaryReader.h"
 #include "Math.h"
-#include "SheepScript.h"
 #include "SheepAPI.h"
-#include <iostream>
+#include "SheepScript.h"
 
 void SheepVM::Execute(SheepScript* script)
 {

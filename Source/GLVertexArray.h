@@ -7,13 +7,14 @@
 //
 #pragma once
 #include <GL/glew.h>
-#include "Types.h"
+
+#include "AtomicTypes.h"
 #include "Mesh.h"
 
 class GLVertexArray
 {
 public:
-    GLVertexArray(uint vertexCount, uint vertexSize, MeshUsage usage);
+    GLVertexArray(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage);
     ~GLVertexArray();
     
     void SetPositions(float* positions);
@@ -21,23 +22,23 @@ public:
     void SetNormals(float* normals);
     void SetUV1(float* uvs);
     
-    void SetIndexes(ushort* indexes, uint count);
+    void SetIndexes(unsigned short* indexes, unsigned int count);
     
     void DrawTriangles();
-    void DrawTriangles(uint offset, uint count);
+    void DrawTriangles(unsigned int offset, unsigned int count);
     
     void DrawTriangleFans();
-    void DrawTriangleFans(uint offset, uint count);
+    void DrawTriangleFans(unsigned int offset, unsigned int count);
     
     void DrawLines();
-    void DrawLines(uint offset, uint count);
+    void DrawLines(unsigned int offset, unsigned int count);
     
     void Draw(GLenum mode);
-    void Draw(GLenum mode, uint offset, uint count);
+    void Draw(GLenum mode, unsigned int offset, unsigned int count);
     
 private:
     // Number of vertices in the mesh.
-    uint mVertexCount = 0;
+    unsigned int mVertexCount = 0;
     
     // The VBO (vertex buffer object) holds all per-vertex data (position, color, normals, etc).
     GLuint mVBO = GL_NONE;
@@ -52,7 +53,7 @@ private:
     GLuint mVAO = GL_NONE;
     
     // Indicates that we need to update some aspect of the VBO.
-    uint mVboUpdateMask = 0;
+    unsigned int mVboUpdateMask = 0;
     
     // Vertex data
     float* mPositions = nullptr;
@@ -61,8 +62,8 @@ private:
     float* mUV1 = nullptr;
     
     // Index data
-    ushort* mIndexes = nullptr;
-    uint mIndexCount = 0;
+    unsigned short* mIndexes = nullptr;
+    unsigned int mIndexCount = 0;
     
     void BuildVBO();
     void UpdateVBO();

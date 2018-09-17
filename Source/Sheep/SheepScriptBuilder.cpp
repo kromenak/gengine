@@ -4,9 +4,11 @@
 // Clark Kromenaker
 //
 #include "SheepScriptBuilder.h"
+
 #include <iostream>
-#include "StringUtil.h"
+
 #include "SheepAPI.h"
+#include "StringUtil.h"
 
 //#define DEBUG_BUILDER
 
@@ -724,134 +726,6 @@ SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2)
         return SheepValueType::Void;
     }
 }
-
-/*
-void SheepScriptBuilder::AddI()
-{
-    #ifdef DEBUG_BUILDER
-    std::cout << "AddI" << std::endl;
-    #endif
-    AddInstruction(SheepInstruction::AddI);
-}
-
-void SheepScriptBuilder::AddF()
-{
-    #ifdef DEBUG_BUILDER
-    std::cout << "AddF" << std::endl;
-    #endif
-    AddInstruction(SheepInstruction::AddF);
-}
-
-void SheepScriptBuilder::SubtractI()
-{
-    #ifdef DEBUG_BUILDER
-    std::cout << "SubtractI" << std::endl;
-    #endif
-    AddInstruction(SheepInstruction::SubtractI);
-}
-
-void SheepScriptBuilder::SubtractF()
-{
-    std::cout << "SubtractF" << std::endl;
-    AddInstruction(SheepInstruction::SubtractF);
-}
-
-void SheepScriptBuilder::MultiplyI()
-{
-    std::cout << "MultiplyI" << std::endl;
-    AddInstruction(SheepInstruction::MultiplyI);
-}
-
-void SheepScriptBuilder::MultiplyF()
-{
-    std::cout << "MultiplyF" << std::endl;
-    AddInstruction(SheepInstruction::MultiplyF);
-}
-
-void SheepScriptBuilder::DivideI()
-{
-    std::cout << "DivideI" << std::endl;
-    AddInstruction(SheepInstruction::DivideI);
-}
-
-void SheepScriptBuilder::DivideF()
-{
-    std::cout << "DivideF" << std::endl;
-    AddInstruction(SheepInstruction::DivideF);
-}
-
-void SheepScriptBuilder::NegateI()
-{
-    std::cout << "NegateI" << std::endl;
-    AddInstruction(SheepInstruction::NegateI);
-}
-
-void SheepScriptBuilder::NegateF()
-{
-    std::cout << "NegateF" << std::endl;
-    AddInstruction(SheepInstruction::NegateF);
-}
-
-void SheepScriptBuilder::IsEqualI()
-{
-    AddInstruction(SheepInstruction::IsEqualI);
-}
-
-void SheepScriptBuilder::IsEqualF()
-{
-    AddInstruction(SheepInstruction::IsEqualF);
-}
-
-void SheepScriptBuilder::IsNotEqualI()
-{
-    AddInstruction(SheepInstruction::IsNotEqualI);
-}
-
-void SheepScriptBuilder::IsNotEqualF()
-{
-    AddInstruction(SheepInstruction::IsNotEqualF);
-}
-
-void SheepScriptBuilder::IsGreaterI()
-{
-    AddInstruction(SheepInstruction::IsGreaterI);
-}
-
-void SheepScriptBuilder::IsGreaterF()
-{
-    AddInstruction(SheepInstruction::IsGreaterF);
-}
-
-void SheepScriptBuilder::IsLessI()
-{
-    AddInstruction(SheepInstruction::IsLessI);
-}
-
-void SheepScriptBuilder::IsLessF()
-{
-    AddInstruction(SheepInstruction::IsLessF);
-}
-
-void SheepScriptBuilder::IsGreaterEqualI()
-{
-    AddInstruction(SheepInstruction::IsGreaterEqualI);
-}
-
-void SheepScriptBuilder::IsGreaterEqualF()
-{
-    AddInstruction(SheepInstruction::IsGreaterEqualF);
-}
-
-void SheepScriptBuilder::IsLessEqualI()
-{
-    AddInstruction(SheepInstruction::IsLessEqualI);
-}
-
-void SheepScriptBuilder::IsLessEqualF()
-{
-    AddInstruction(SheepInstruction::IsLessEqualF);
-}
-*/
 
 void SheepScriptBuilder::IToF(int index)
 {

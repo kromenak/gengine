@@ -8,6 +8,7 @@
 #pragma once
 #include <string>
 #include <vector>
+
 #include "Value.h"
 
 enum class SheepValueType

@@ -4,11 +4,11 @@
 //
 //  Created by Clark Kromenaker on 8/4/17.
 //
-
 #pragma once
+#include <unordered_map>
+
 #include "BarnAsset.h"
 #include "BinaryReader.h"
-#include <unordered_map>
 
 class BarnFile
 {

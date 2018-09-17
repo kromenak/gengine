@@ -3,12 +3,12 @@
 //
 // Clark Kromenaker
 //
-// Given a string, provides a way to pieces of it one at a time.
+// Given a string, provides a way to get pieces of it one at a time.
 //
 #pragma once
+#include <initializer_list>
 #include <string>
 #include <vector>
-#include <initializer_list>
 
 class StringTokenizer
 {

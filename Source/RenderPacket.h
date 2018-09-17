@@ -7,7 +7,9 @@
 //
 #pragma once
 #include "Material.h"
-#include "Mesh.h"
+#include "Matrix4.h"
+
+class Mesh;
 
 struct RenderPacket
 {

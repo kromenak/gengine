@@ -4,10 +4,13 @@
 // Clark Kromenaker
 //
 #include "Texture.h"
+
+#include <iostream>
+
+#include <SDL2/SDL.h>
+
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
-#include <iostream>
-#include <SDL2/SDL.h>
 #include "Math.h"
 
 Texture::Texture(std::string name, char* data, int dataLength) :
@@ -47,7 +50,7 @@ SDL_Surface* Texture::GetSurface()
 
 SDL_Surface* Texture::GetSurface(int x, int y, int width, int height)
 {
-    Uint32 rmask, gmask, bmask, amask;
+    unsigned int rmask, gmask, bmask, amask;
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     int shift = 0;
     rmask = 0xff000000 >> shift;

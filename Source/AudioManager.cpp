@@ -4,11 +4,15 @@
 //
 //  Created by Clark Kromenaker on 8/23/17.
 //
-#include <iostream>
 #include "AudioManager.h"
-#include "Audio.h"
+
+#include <iostream>
+
 #include "fmod_errors.h"
+
 #include "Vector3.h"
+
+#include "Audio.h"
 
 bool AudioManager::Initialize()
 {
@@ -20,7 +24,7 @@ bool AudioManager::Initialize()
         return false;
     }
     
-    uint version;
+    unsigned int version;
     result = mSystem->getVersion(&version);
     if(result != FMOD_OK)
     {

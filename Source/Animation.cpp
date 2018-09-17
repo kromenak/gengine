@@ -4,9 +4,12 @@
 // Clark Kromenaker
 //
 #include "Animation.h"
-#include "IniParser.h"
+
 #include "StringUtil.h"
+
+#include "IniParser.h"
 #include "Services.h"
+
 
 Animation::Animation(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -174,7 +177,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 
                 // <frame_num>, <sound_name>, <volume>, <model_name>, <min_dist>, <max_dist>
                 // <frame_num>, <sound_name>, <volume>, <x1>, <y1>, <z1>, <min_dist>, <max_dist>
-                uint paramCount = 1;
+                unsigned int paramCount = 1;
                 IniKeyValue* countEntry = entry;
                 while(countEntry == nullptr)
                 {

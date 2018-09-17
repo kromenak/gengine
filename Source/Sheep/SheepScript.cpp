@@ -5,10 +5,11 @@
 //  Created by Clark Kromenaker on 7/23/17.
 //
 #include "SheepScript.h"
-#include "BinaryReader.h"
-#include "SheepScriptBuilder.h"
 
 #include <iostream>
+
+#include "BinaryReader.h"
+#include "SheepScriptBuilder.h"
 
 SheepScript::SheepScript(std::string name, char* data, int dataLength) : Asset(name)
 {

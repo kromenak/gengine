@@ -4,9 +4,10 @@
 // Clark Kromenaker
 //
 #include "Yak.h"
+
 #include "IniParser.h"
-#include "StringUtil.h"
 #include "Services.h"
+#include "StringUtil.h"
 
 Yak::Yak(std::string name, char* data, int dataLength) : Asset(name)
 {

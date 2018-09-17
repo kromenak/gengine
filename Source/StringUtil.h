@@ -5,10 +5,10 @@
 //  Created by Clark Kromenaker on 12/30/17.
 //
 #pragma once
-#include <string>
-#include <sstream>
 #include <algorithm>
 #include <cctype>
+#include <sstream>
+#include <string>
 
 namespace StringUtil
 {

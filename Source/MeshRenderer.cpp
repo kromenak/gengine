@@ -4,13 +4,16 @@
 // Clark Kromenaker
 //
 #include "MeshRenderer.h"
-#include "Model.h"
+
+#include "Actor.h"
 #include "Mesh.h"
+#include "Model.h"
 #include "Services.h"
 #include "Texture.h"
-#include "Actor.h"
 
 extern Mesh* axes;
+
+TYPE_DEF_CHILD(Component, MeshRenderer);
 
 MeshRenderer::MeshRenderer(Actor* owner) : Component(owner)
 {
@@ -22,6 +25,7 @@ MeshRenderer::~MeshRenderer()
     Services::GetRenderer()->RemoveMeshRenderer(this);
 }
 
+/*
 void MeshRenderer::Render()
 {
     Matrix4 worldTransform = mOwner->GetWorldTransformMatrix();
@@ -34,7 +38,7 @@ void MeshRenderer::Render()
     // Early out if nothing to render.
     if(mMeshes.size() == 0) { return; }
     
-    // Render the things!
+    // Render all the meshes!
     for(int i = 0; i < mMeshes.size(); i++)
     {
         // Can't render without any materials.
@@ -44,7 +48,7 @@ void MeshRenderer::Render()
         if(mMeshes[i] == nullptr) { continue; }
         
         // Usually there's a one-to-one mapping of mesh to material.
-        // But if not for some reason, use the max.
+        // But if not for some reason, use the last material available.
         int materialIndex = Math::Clamp(i, 0, (int)mMaterials.size() - 1);
         mMaterials[materialIndex].Activate();
         
@@ -52,15 +56,17 @@ void MeshRenderer::Render()
         // So, we'll combine that into the world transform matrix before rendering.
         Matrix4 finalMatrix = worldTransform * mMeshes[i]->GetLocalTransformMatrix();
         mMaterials[materialIndex].SetWorldTransformMatrix(finalMatrix);
-        
+		
+		// Finally, we render the mesh.
         mMeshes[i]->Render();
         
-        // This bit draws local axes for the model, for debugging.
+        // This bit draws local axes for each mesh, for debugging position/rotation.
         // TODO: Would be cool to turn this on/off as needed.
         glBindTexture(GL_TEXTURE_2D, 0);
         axes->Render();
     }
 }
+*/
 
 std::vector<RenderPacket> MeshRenderer::GetRenderPackets()
 {

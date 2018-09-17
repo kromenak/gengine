@@ -7,8 +7,8 @@
 // Handles complexities of async callbacks, waiting, multithreading, etc.
 //
 #pragma once
-#include "SheepVM.h"
 #include "SheepCompiler.h"
+#include "SheepVM.h"
 
 class SheepManager
 {

@@ -4,10 +4,12 @@
 // Clark Kromenaker
 //
 #include "Shader.h"
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <string>
+
 #include "Matrix4.h"
 #include "Vector3.h"
 

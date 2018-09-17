@@ -4,7 +4,6 @@
 //
 //  Created by Clark Kromenaker on 8/26/17.
 //
-
 #include "membuf.h"
 
 membuf::membuf(const char* data, unsigned int length) :

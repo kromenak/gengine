@@ -4,8 +4,12 @@
 // Clark Kromenaker
 //
 #include "Matrix3.h"
+
 #include <cstring>
 #include <cmath>
+
+#include "Quaternion.h"
+#include "Vector3.h"
 
 Matrix3::Matrix3(float vals[9])
 {

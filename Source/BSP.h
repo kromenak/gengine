@@ -7,16 +7,18 @@
 // representation of a .BSP file.
 //
 #pragma once
-#include "Types.h"
 #include "Asset.h"
+
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "AtomicTypes.h"
+#include "Mesh.h"
+#include "Plane.h"
+#include "Ray.h"
 #include "Vector2.h"
 #include "Vector3.h"
-#include "Plane.h"
-#include "Mesh.h"
-#include <vector>
-#include <unordered_map>
-#include <string>
-#include "Ray.h"
 
 class Texture;
 
@@ -25,21 +27,21 @@ struct BSPNode
 {
     // Indexes of front front and back child nodes.
     // One is a BSPNode that draws in front of me, the other draws behind me.
-    ushort frontChildIndex;
-    ushort backChildIndex;
+    unsigned short frontChildIndex;
+    unsigned short backChildIndex;
     
     // The plane associated with this node.
     // Used to make front/back distinction, I believe.
-    ushort planeIndex;
+    unsigned short planeIndex;
     
     // Offset and count into the polygon list.
     // These are the polygons that should be drawn as part of this node, I guess.
-    ushort polygonIndex;
-    ushort polygonCount;
+    unsigned short polygonIndex;
+    unsigned short polygonCount;
     
     // Nodes seem to optionally also define a second set of polygons.
-    ushort polygonIndex2;
-    ushort polygonCount2;
+    unsigned short polygonIndex2;
+    unsigned short polygonCount2;
 };
 
 // A polygon is a renderable thing, one or more are associated with each BSP node.
@@ -47,20 +49,20 @@ struct BSPNode
 struct BSPPolygon
 {
     // Index of a surface object, which conveys the polygon's texture, UV coords, etc.
-    ushort surfaceIndex;
+    unsigned short surfaceIndex;
     
     // An index into the mVertexIndices array (an index to an index), plus
     // the count of values from that index that are associated with this polygon.
     // These are ALSO offsets into the UV indices array - direct correlation.
-    ushort vertexIndex;
-    ushort vertexCount;
+    unsigned short vertexIndex;
+    unsigned short vertexCount;
 };
 
 struct BSPSurface
 {
     // An index to an object. An "object" is really just a string name value,
     // so this is sort of a way to group surfaces logically.
-    uint objectIndex;
+    unsigned int objectIndex;
     
     // This correlates exactly to a texture asset name, without the BMP extension.
     std::string textureName;
@@ -101,7 +103,7 @@ public:
 private:
     // Points to the root node in our node list.
     // Almost always 0, but maybe not in some cases?
-    uint mRootNodeIndex;
+    unsigned int mRootNodeIndex;
     
     // List of nodes. These all reference one another to form a tree structure.
     std::vector<BSPNode*> mNodes;
@@ -119,11 +121,11 @@ private:
     
     // Vertices are vertex positions (X, Y, Z), while indices are indexes into the vertex list.
     std::vector<Vector3> mVertices;
-    std::vector<uint> mVertexIndices;
+    std::vector<unsigned int> mVertexIndices;
     
     // UVs are UV coordinates (U, V), while indices are indexes into the UVs list.
     std::vector<Vector2> mUVs;
-    std::vector<uint> mUVIndices;
+    std::vector<unsigned int> mUVIndices;
     
     // Mesh for rendering BSP.
     Mesh* mMesh = nullptr;

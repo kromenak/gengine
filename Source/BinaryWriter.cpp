@@ -4,6 +4,7 @@
 // Clark Kromenaker
 //
 #include "BinaryWriter.h"
+
 #include <iostream>
 
 BinaryWriter::BinaryWriter(const char* filePath)

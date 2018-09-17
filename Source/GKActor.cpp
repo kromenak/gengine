@@ -4,9 +4,10 @@
 // Clark Kromenaker
 //
 #include "GKActor.h"
-#include "MeshRenderer.h"
+
 #include "AnimationPlayer.h"
 #include "GasPlayer.h"
+#include "MeshRenderer.h"
 
 GKActor::GKActor() : Actor()
 {

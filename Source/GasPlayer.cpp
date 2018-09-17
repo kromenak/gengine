@@ -4,6 +4,7 @@
 // Clark Kromenaker
 //
 #include "GasPlayer.h"
+
 #include "GAS.h"
 
 TYPE_DEF_CHILD(Component, GasPlayer);

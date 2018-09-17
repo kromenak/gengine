@@ -6,9 +6,10 @@
 // Description goes here!
 //
 #pragma once
-#include <vector>
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
+#include <vector>
+
 #include "SheepScript.h"
 
 class SheepScriptBuilder
@@ -52,31 +53,6 @@ public:
     SheepValueType IsLess(SheepValue val1, SheepValue val2);
     SheepValueType IsGreaterEqual(SheepValue val1, SheepValue val2);
     SheepValueType IsLessEqual(SheepValue val1, SheepValue val2);
-    
-    /*
-    void AddI();
-    void AddF();
-    void SubtractI();
-    void SubtractF();
-    void MultiplyI();
-    void MultiplyF();
-    void DivideI();
-    void DivideF();
-    void NegateI();
-    void NegateF();
-    void IsEqualI();
-    void IsEqualF();
-    void IsNotEqualI();
-    void IsNotEqualF();
-    void IsGreaterI();
-    void IsGreaterF();
-    void IsLessI();
-    void IsLessF();
-    void IsGreaterEqualI();
-    void IsGreaterEqualF();
-    void IsLessEqualI();
-    void IsLessEqualF();
-    */
     
     void IToF(int index);
     void FToI(int index);

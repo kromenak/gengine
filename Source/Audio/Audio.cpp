@@ -5,11 +5,13 @@
 //  Created by Clark Kromenaker on 8/24/17.
 //
 #include "Audio.h"
+
 #include <iostream>
 #include <fstream>
+
 #include "BinaryReader.h"
 
-//const ushort kMp3Format = 0x0055;
+//const unsigned short kMp3Format = 0x0055;
 
 Audio::Audio(std::string name, char* data, int dataLength) :
     Asset(name),
@@ -70,7 +72,7 @@ void Audio::ParseFromData(char* data, int dataLength)
     // The next bit of data (format) indicates PCM vs other.
     
     // 2 bytes: the format used by the data.
-    ushort format = reader.ReadUShort();
+    unsigned short format = reader.ReadUShort();
     //mIsMusic = (format == kMp3Format);
     
     // 2 bytes: the number of channels (1 = mono, 2 = stereo, etc).

@@ -13,10 +13,9 @@
 #include "Quaternion.h"
 #include "Matrix4.h"
 
-#include "Services.h"
-#include "InputManager.h"
-
 #include "Component.h"
+#include "InputManager.h"
+#include "Services.h"
 
 class Actor
 {

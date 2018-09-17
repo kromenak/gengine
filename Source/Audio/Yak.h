@@ -7,6 +7,7 @@
 //
 #pragma once
 #include "Asset.h"
+
 #include <vector>
 
 class Yak : public Asset

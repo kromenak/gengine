@@ -7,8 +7,10 @@
 // representation of .BMP assets.
 //
 #pragma once
-#include <string>
 #include "Asset.h"
+
+#include <string>
+
 #include <GL/glew.h>
 
 class SDL_Surface;

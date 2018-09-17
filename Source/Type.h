@@ -7,8 +7,8 @@
 // base class and subclasses.
 //
 #include <cstddef>
-#include <string>
 #include <functional>   // for std::hash support
+#include <string>
 
 // A class's type will just be a size_t alias right now.
 typedef std::size_t Type;

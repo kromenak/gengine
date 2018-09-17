@@ -8,9 +8,10 @@
 //
 #pragma once
 #include <GL/glew.h>
-#include "Vector3.h"
+
 #include "Matrix4.h"
 #include "Quaternion.h"
+#include "Vector3.h"
 
 class GLVertexArray;
 
@@ -51,7 +52,7 @@ struct VertexFormat
 class Mesh
 {
 public:
-    Mesh(uint vertexCount, uint vertexSize, MeshUsage usage);
+    Mesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage);
     ~Mesh();
     
     void SetPositions(float* positions);
@@ -59,12 +60,12 @@ public:
     void SetNormals(float* normals);
     void SetUV1(float* uvs);
     
-    void SetIndexes(ushort* indexes, int count);
+    void SetIndexes(unsigned short* indexes, int count);
     
     void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
     
     void Render();
-    void Render(uint offset, uint count);
+    void Render(unsigned int offset, unsigned int count);
     
     void SetLocalTransformMatrix(const Matrix4& mat) { mLocalTransformMatrix = mat; }
     Matrix4& GetLocalTransformMatrix() { return mLocalTransformMatrix; }
@@ -76,7 +77,7 @@ public:
     
 private:
     // Number of vertices in the mesh.
-    uint mVertexCount = 0;
+    unsigned int mVertexCount = 0;
     
     // Indicates how this mesh is rendered.
     RenderMode mRenderMode = RenderMode::Triangles;
@@ -97,7 +98,7 @@ private:
     float* mUV1 = nullptr;
     
     // Index data. This object owns this data.
-    ushort* mIndexes = nullptr;
+    unsigned short* mIndexes = nullptr;
     
     // Vertex array object that actually renders the thing.
     GLVertexArray* mVertexArray = nullptr;

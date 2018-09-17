@@ -7,8 +7,10 @@
 //
 #pragma once
 #include "Asset.h"
+
 #include <unordered_map>
 #include <vector>
+
 #include "SheepVM.h"
 
 class BinaryReader;

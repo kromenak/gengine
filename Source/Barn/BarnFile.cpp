@@ -5,11 +5,14 @@
 //  Created by Clark Kromenaker on 8/4/17.
 //
 #include "BarnFile.h"
-#include <iostream>
+
 #include <fstream>
+#include <iostream>
 #include <vector>
+
 #include "minilzo.h"
 #include "zlib.h"
+
 #include "Texture.h"
 
 using namespace std;

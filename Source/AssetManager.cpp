@@ -5,7 +5,9 @@
 //  Created by Clark Kromenaker on 8/17/17.
 //
 #include "AssetManager.h"
+
 #include <iostream>
+
 #include "StringUtil.h"
 
 AssetManager::AssetManager()

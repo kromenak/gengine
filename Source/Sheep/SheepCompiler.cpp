@@ -1,16 +1,17 @@
 //
-//  SheepDriver.cpp
+//  SheepCompiler.cpp
 //  GEngine
 //
 //  Created by Clark Kromenaker on 7/24/17.
 //
+#include "SheepCompiler.h"
+
+#include <cassert>
 #include <fstream>
 #include <sstream>
-#include <cassert>
 
-#include "SheepCompiler.h"
-#include "SheepScriptBuilder.h"
 #include "SheepAPI.h"
+#include "SheepScriptBuilder.h"
 
 SheepCompiler::~SheepCompiler()
 {

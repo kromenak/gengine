@@ -4,11 +4,13 @@
 // Clark Kromenaker
 //
 #include "SceneData.h"
-#include "IniParser.h"
+
 #include <iostream>
-#include "StringUtil.h"
-#include "Skybox.h"
+
+#include "IniParser.h"
 #include "Services.h"
+#include "Skybox.h"
+#include "StringUtil.h"
 
 SceneData::SceneData(std::string name, char* data, int dataLength) : Asset(name)
 {

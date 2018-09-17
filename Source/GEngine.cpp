@@ -1,21 +1,15 @@
 //
-//  GEngine.cpp
-//  GEngine
+// GEngine.cpp
 //
-//  Created by Clark Kromenaker on 7/22/17.
+// Clark Kromenaker
 //
 #include "GEngine.h"
+
 #include <SDL2/SDL.h>
 
-#include "Services.h"
 #include "Actor.h"
-
-#include "Sheep/SheepCompiler.h"
-#include "Barn/BarnFile.h"
-
-#include "CameraComponent.h"
-
 #include "Scene.h"
+#include "Services.h"
 
 GEngine* GEngine::inst = nullptr;
 std::vector<Actor*> GEngine::mActors;
@@ -70,7 +64,7 @@ bool GEngine::Initialize()
     mCursor = mAssetManager.LoadCursor("C_POINT.CUR");
     mCursor->Activate();
     
-    //mAssetManager.WriteBarnAssetToFile("CANDY.MOD");
+    //mAssetManager.WriteBarnAssetToFile("EYE_GREENX.BMP");
     //mAssetManager.WriteOutAssetsOfType("ANM");
     
     //mAssetManager.LoadVertexAnimation("GAB_GABBREATH1.ACT");
@@ -166,14 +160,14 @@ void GEngine::Update()
     static int nextTicks = 0;
     
     // Tracks the last ticks value each time we run this loop.
-    static Uint32 lastTicks = 0;
+    static uint32_t lastTicks = 0;
     
     // Limit the FPS to about 60. nextTicks is always +16 at start of frame.
     // If we get here again and not 16 frames have passed, we wait.
     while(!SDL_TICKS_PASSED(SDL_GetTicks(), nextTicks)) { }
     
     // Get current ticks and save next ticks as +16. Limits FPS to ~60.
-    Uint32 currentTicks = SDL_GetTicks();
+    uint32_t currentTicks = SDL_GetTicks();
     nextTicks = currentTicks + 16;
     
     // Calculate the time delta.

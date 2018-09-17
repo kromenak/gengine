@@ -3,13 +3,14 @@
 //
 // Clark Kromenaker
 //
+#include "Cursor.h"
+
 #include <SDL2/SDL.h>
 
-#include "Cursor.h"
 #include "IniParser.h"
-#include "Texture.h"
 #include "Services.h"
 #include "StringUtil.h"
+#include "Texture.h"
 
 Cursor::Cursor(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -108,7 +109,7 @@ void Cursor::ParseFromData(char *data, int dataLength)
     int frameWidth = texture->GetWidth() / mFrameCount;
     int frameHeight = texture->GetHeight();
     
-    Uint32 rmask, gmask, bmask, amask;
+    unsigned int rmask, gmask, bmask, amask;
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     int shift = 0;
     rmask = 0xff000000 >> shift;

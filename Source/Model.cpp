@@ -4,14 +4,16 @@
 // Clark Kromenaker
 // 
 #include "Model.h"
-#include "BinaryReader.h"
+
 #include <iostream>
+
+#include "BinaryReader.h"
+#include "Matrix3.h"
+#include "Mesh.h"
+#include "Quaternion.h"
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
-#include "Mesh.h"
-#include "Matrix3.h"
-#include "Quaternion.h"
 
 //#define DEBUG_OUTPUT
 
@@ -152,7 +154,7 @@ void Model::ParseFromData(char *data, int dataLength)
             #endif
             
             // Create mesh object and push onto array.
-            Mesh* mesh = new Mesh(vertexCount, 8 * sizeof(float), MeshUsage::Static);
+            Mesh* mesh = new Mesh(vertexCount, 8 * sizeof(float), MeshUsage::Dynamic);
             mMeshes.push_back(mesh);
             
             // Save local offset and rotation of mesh.
@@ -300,7 +302,7 @@ void Model::ParseFromData(char *data, int dataLength)
         }
         
         // 4 bytes: vertex count (why, what good is that?)
-        uint vertexCount = reader.ReadUInt();
+        unsigned int vertexCount = reader.ReadUInt();
         
         // The next n bytes represent a certain number of ushort values.
         // Not yet clear how to derive the size of this block, however.

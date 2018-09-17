@@ -4,8 +4,10 @@
 // Clark Kromenaker
 //
 #include "IniParser.h"
-#include <iostream>
+
 #include <cstdlib>
+#include <iostream>
+
 #include "imstream.h"
 #include "StringUtil.h"
 

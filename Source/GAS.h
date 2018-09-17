@@ -11,8 +11,12 @@
 //
 #pragma once
 #include "Asset.h"
-#include "Vector3.h"
+
 #include <vector>
+
+#include "Vector3.h"
+
+
 
 class Animation;
 class GasPlayer;

@@ -42,3 +42,8 @@ void InputManager::Update()
     mMousePosition.SetX(x);
     mMousePosition.SetY(y);
 }
+
+void InputManager::DispatchEvents()
+{
+    
+}

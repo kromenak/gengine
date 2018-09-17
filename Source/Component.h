@@ -7,7 +7,7 @@
 // that can be attached to an Actor.
 //
 #pragma once
-#include "Type.h"
+#include "Type.h" // For homebrew RTTI.
 
 class Actor;
 

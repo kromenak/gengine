@@ -6,10 +6,10 @@
 // An asset that represents a mouse cursor in the game.
 //
 #pragma once
+#include "Asset.h"
 
 #include <vector>
 
-#include "Asset.h"
 #include "Vector2.h"
 
 class SDL_Cursor;

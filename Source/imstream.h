@@ -1,12 +1,14 @@
 //
-//  imstream.h
-//  GEngine
+// imstream.h
 //
-//  Created by Clark Kromenaker on 8/26/17.
+// Clark Kromenaker
 //
-
+// A "memory stream" that can be used to feed an array of byte data
+// to a reader to be read as though it were a file stream.
+//
 #pragma once
 #include <istream>
+
 #include "membuf.h"
 
 class imstream : public std::istream

@@ -6,8 +6,10 @@
 // Component for rendering meshes.
 //
 #pragma once
-#include <vector>
 #include "Component.h"
+
+#include <vector>
+
 #include "Material.h"
 #include "RenderPacket.h"
 
@@ -17,11 +19,12 @@ class Texture;
 
 class MeshRenderer : public Component
 {
+    TYPE_DECL_CHILD();
 public:
     MeshRenderer(Actor* actor);
     ~MeshRenderer();
     
-    void Render();
+    //void Render();
     std::vector<RenderPacket> GetRenderPackets();
     
     void SetModel(Model* model);

@@ -4,10 +4,11 @@
 // Clark Kromenaker
 //
 #include "GameCamera.h"
+
+#include "AudioListener.h"
 #include "CameraComponent.h"
 #include "GEngine.h"
 #include "Scene.h"
-#include "AudioListener.h"
 
 const float kCameraSpeed = 100.0f;
 const float kRunCameraMultiplier = 2.0f;
@@ -74,6 +75,7 @@ void GameCamera::Update(float deltaTime)
     {
         if(mCamera != nullptr)
         {
+            // Calculate mouse click ray.
             Vector2 mousePos = Services::GetInput()->GetMousePosition();
             Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
             Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);

@@ -4,9 +4,10 @@
 // Clark Kromenaker
 //
 #include "Skybox.h"
+
 #include "Mesh.h"
-#include "Texture.h"
 #include "Services.h"
+#include "Texture.h"
 
 float points[] = {
     // Back

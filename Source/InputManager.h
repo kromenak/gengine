@@ -8,6 +8,7 @@
 //
 #pragma once
 #include <SDL2/SDL.h>
+
 #include "Vector2.h"
 
 class InputManager
@@ -23,6 +24,8 @@ public:
     InputManager();
     
     void Update();
+    
+    void DispatchEvents();
     
     bool IsKeyDown(SDL_Scancode scancode);
     bool IsKeyPressed(SDL_Scancode scancode) { return mKeyboardState[scancode] == 1; }
@@ -48,8 +51,8 @@ private:
     
     // MOUSE
     // Current and previous mouse state, to detect button up and down events.
-    Uint32 mMouseButtonState = 0;
-    Uint32 mPrevMouseButtonState = 0;
+    uint32_t mMouseButtonState = 0;
+    uint32_t mPrevMouseButtonState = 0;
     
     // The mouse's current position in window coords.
     Vector2 mMousePosition;

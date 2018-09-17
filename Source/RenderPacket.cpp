@@ -5,6 +5,8 @@
 //
 #include "RenderPacket.h"
 
+#include "Mesh.h"
+
 void RenderPacket::Render()
 {
     material.SetWorldTransformMatrix(worldTransform);
