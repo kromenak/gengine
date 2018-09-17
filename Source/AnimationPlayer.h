@@ -35,6 +35,7 @@ private:
     
     // The frame we're currently on in the animation.
     int mCurrentAnimationFrame = 0;
+    float mAnimationTimer = 0.0f;
     
     // If defined, a currently running vertex animation.
     VertexAnimation* mVertexAnimation = nullptr;
