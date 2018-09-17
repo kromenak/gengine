@@ -4,9 +4,11 @@
 // Clark Kromenaker
 // 
 #include "Matrix4.h"
-#include "Matrix3.h"
-#include <cstring>
+
 #include <cmath>
+#include <cstring>
+
+#include "Matrix3.h"
 
 Matrix4 Matrix4::Identity;
 
@@ -651,11 +653,55 @@ Matrix4 Matrix4::MakeScale(Vector3 scale)
     return m;
 }
 
+Matrix4 Matrix4::MakeScale(float xScale, float yScale, float zScale)
+{
+	Matrix4 m;
+	m[0] = xScale;
+	m[5] = yScale;
+	m[10] = zScale;
+	return m;
+}
+
+Matrix4 Matrix4::MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up)
+{
+	// Generate view space axes. First, the view direction.
+	Vector3 viewDir = lookAt - eye;
+	viewDir.Normalize();
+	
+	// We can use "Gram-Schmidt Orthogonalization" to ensure
+	// that the up axis passed is orthogonal with our view direction.
+	Vector3 viewUp = up - Vector3::Dot(up, viewDir) * viewDir;
+	viewUp.Normalize();
+	
+	// Once we know the view direction and up, we can use cross product
+	// to generate side axis. Order also has an effect on our view-space coordinate system.
+	Vector3 viewSide = Vector3::Cross(viewDir, viewUp);
+	
+	// Generate rotation matrix. This is where we make some concrete
+	// choices about our view-space coordinate system.
+	// +X is right, +Y is up, +Z is forward (left-handed).
+	Matrix3 rotate;
+	rotate.SetColumns(-viewSide, viewUp, -viewDir);
+	
+	// This operation calculates wheter this is a left or right-handed system.
+	//float result = Vector3::Dot(-viewSide, Vector3::Cross(viewUp, -viewDir));
+	//std::cout << result << std::endl;
+	
+	// Make a 4x4 matrix based on the 3x3 rotation matrix.
+	rotate.Transpose();
+	Matrix4 m = Matrix4::MakeRotate(rotate);
+	
+	// Calculate inverse of eye vector and assign it to 4x4 matrix.
+	Vector3 eyeInv = -(rotate * eye);
+	m(0, 3) = eyeInv.GetX();
+	m(1, 3) = eyeInv.GetY();
+	m(2, 3) = eyeInv.GetZ();
+	return m;
+}
+
 Matrix4 Matrix4::MakePerspective(float fovAngleRad, float aspectRatio, float near, float far)
 {
-    // This doesn't work for all view systems.
-    // Different values would be required for Direct3D.
-    // This should work in OpenGL though.
+    // This works for OpenGL, but needs to be different for DirectX.
     Matrix4 m;
     float d = 1 / Math::Tan(fovAngleRad / 2.0f);
     m[0] = d / aspectRatio;
@@ -665,6 +711,36 @@ Matrix4 Matrix4::MakePerspective(float fovAngleRad, float aspectRatio, float nea
     m[14] = (2.0f * near * far) / (near - far);
     m[15] = 0.0f;
     return m;
+}
+
+Matrix4 Matrix4::MakeOrthographic(float left, float right, float bottom, float top, float near, float far)
+{
+	// This works for OpenGL, but needs to be different for DirectX.
+	Matrix4 m;
+	m[0] = 2.0f / (right - left);
+	m[5] = 2.0f / (top - bottom);
+	m[10] = -2.0f / (far - near);
+	m[12] = -((right + left) / (right - left));
+	m[13] = -((top + bottom) / (top - bottom));
+	m[14] = -((far + near) / (far - near));
+	return m;
+}
+
+Matrix4 Matrix4::MakeSimpleScreenOrtho(float width, float height)
+{
+	// Zero values will cause divide-by-zeros.
+	if(width == 0.0f || height == 0.0f) { return Matrix4(); }
+	
+	// The difference from MakeOrthographic is assumptions we can make.
+	// Left/bottom are always zero, near is always -1, far is always 1, which simplifies the equations.
+	Matrix4 m;
+	m[0] = 2.0f / width; 		//2.0f / (right - left);
+	m[5] = 2.0f / height; 		//2.0f / (top - bottom);
+	m[10] = -1.0f; 				//-2.0f / (far - near);
+	m[12] = -1.0f; 				//-((right + left) / (right - left));
+	m[13] = -1.0f; 				//-((top + bottom) / (top - bottom));
+	m[14] = 0.0f; 				//-((far + near) / (far - near));
+	return m;
 }
 
 std::ostream& operator<<(std::ostream& os, const Matrix4& m)

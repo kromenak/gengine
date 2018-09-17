@@ -6,10 +6,12 @@
 // Represents a 4x4 matrix.
 //
 #pragma once
+#include <iostream>
+
 #include "Matrix3.h"
+#include "Quaternion.h"
 #include "Vector3.h"
 #include "Vector4.h"
-#include "Quaternion.h"
 
 class Matrix4
 {
@@ -84,13 +86,25 @@ public:
     
     // Factory methods for generating certain types of matrices.
     static Matrix4 MakeTranslate(Vector3 translation);
+	
     static Matrix4 MakeRotateX(float rotX);
     static Matrix4 MakeRotateY(float rotY);
     static Matrix4 MakeRotateZ(float rotZ);
+	
     static Matrix4 MakeRotate(const Quaternion& quat);
     static Matrix4 MakeRotate(const Matrix3& matrix3);
+	
     static Matrix4 MakeScale(Vector3 scale);
+	static Matrix4 MakeScale(float xScale, float yScale, float zScale);
+	
+	static Matrix4 MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up);
+	
     static Matrix4 MakePerspective(float fovAngleRad, float aspectRatio, float near, float far);
+	static Matrix4 MakeOrthographic(float left, float right, float bottom, float top, float near, float far);
+	static Matrix4 MakeSimpleScreenOrtho(float width, float height);
+	
+	static Matrix4 MakeSimpleViewProj(float width, float height);
+	
     
 private:
     // Elements are stored in a 1D array internally.

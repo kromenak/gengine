@@ -4,13 +4,16 @@
 // Clark Kromenaker
 //
 #include "Scene.h"
+
 #include <iostream>
-#include "Services.h"
-#include "MeshRenderer.h"
-#include "SoundtrackPlayer.h"
+
 #include "GameCamera.h"
-#include "Math.h"
 #include "GKActor.h"
+#include "Math.h"
+#include "MeshRenderer.h"
+#include "Services.h"
+#include "SoundtrackPlayer.h"
+#include "UIImage.h"
 
 Scene::Scene(std::string name, std::string timeCode) :
     mGeneralName(name)
@@ -113,6 +116,11 @@ Scene::Scene(std::string name, std::string timeCode) :
         SoundtrackPlayer* soundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
         soundtrackPlayer->Play(soundtracks[0]);
     }
+	
+	Texture* uiTex = Services::GetAssets()->LoadTexture("SYRUPTOP.BMP");
+    Actor* uiActor = new Actor();
+	uiActor->SetPosition(Vector3(512, 384, 0));
+	uiActor->AddComponent<UIImage>()->SetTexture(uiTex);
 }
 
 void Scene::InitEgoPosition(std::string positionName)
