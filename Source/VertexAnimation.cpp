@@ -4,12 +4,15 @@
 // Clark Kromenaker
 //
 #include "VertexAnimation.h"
-#include "BinaryReader.h"
+
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+
 #include "Math.h"
 #include "Matrix3.h"
+
+#include "BinaryReader.h"
 
 //#define DEBUG_OUTPUT
 
@@ -18,10 +21,10 @@ VertexAnimation::VertexAnimation(std::string name, char* data, int dataLength) :
     ParseFromData(data, dataLength);
 }
 
-VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int meshIndex)
+VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int framesPerSecond, int meshIndex)
 {
-    float secondsPerFrame = 1.0f / mFramesPerSecond;
-    float localTime = Math::Mod(time, GetDuration());
+    float secondsPerFrame = 1.0f / framesPerSecond;
+    float localTime = Math::Mod(time, GetDuration(framesPerSecond));
     
     float currentPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
@@ -42,7 +45,7 @@ VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int mesh
     if(nextVertexPose == nullptr)
     {
         nextVertexPose = firstVertexPose;
-        nextPoseTime = GetDuration();
+        nextPoseTime = GetDuration(framesPerSecond);
     }
     
     // Determine our "t" value between the prev and next pose.
@@ -64,10 +67,10 @@ VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int mesh
     return pose;
 }
 
-VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, int meshIndex)
+VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, int framesPerSecond, int meshIndex)
 {
-    float secondsPerFrame = 1.0f / mFramesPerSecond;
-    float localTime = Math::Mod(time, GetDuration());
+    float secondsPerFrame = 1.0f / framesPerSecond;
+    float localTime = Math::Mod(time, GetDuration(framesPerSecond));
     
     float currentPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
@@ -90,7 +93,7 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
     if(nextTransformPose == nullptr)
     {
         nextTransformPose = firstTransformPose;
-        nextPoseTime = GetDuration();
+        nextPoseTime = GetDuration(framesPerSecond);
     }
     
     // Determine our "t" value between the prev and next pose.
@@ -146,7 +149,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     
     // Next is a byte offset within the data for each keyframe.
     // We will just read the data in order below, but this is useful to assert that we are aligned for each keyframe.
-    std::vector<uint> offsets;
+    std::vector<unsigned int> offsets;
     for(int i = 0; i < mFrameCount; i++)
     {
         offsets.push_back(reader.ReadUInt());
@@ -178,16 +181,16 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
             
             // 2 bytes: Index of mesh in MOD file.
             // It should always be ordered (0, 1, 2, 3), so we check that here as well.
-            ushort index = reader.ReadUShort();
+            unsigned short index = reader.ReadUShort();
             assert(index == j);
             
             // 4 bytes: Number of bytes of data for this mesh in this keyframe.
             // All bytes from here contain vertex or transform data for this mesh in this keyframe.
-            uint byteCount = reader.ReadUInt();
+            unsigned int byteCount = reader.ReadUInt();
             while(byteCount > 0)
             {
                 // 1 byte: A flag indicating what type of data is coming next.
-                uint8_t identifier = reader.ReadUByte();
+                unsigned int identifier = reader.ReadUByte();
                 byteCount -= 1;
                 
                 // Identifier 0 is uncompressed vertex data.
@@ -198,11 +201,11 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     #endif
                     
                     // 4 bytes: Number of bytes in this block.
-                    uint blockByteCount = reader.ReadUInt();
+                    unsigned int blockByteCount = reader.ReadUInt();
                     byteCount -= blockByteCount + 4;
                     
                     // 2 bytes: Mesh group within mesh this block refers to.
-                    ushort submeshIndex = reader.ReadUShort();
+                    unsigned short submeshIndex = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Submesh Index: " << submeshIndex << std::endl;
                     #endif
@@ -224,7 +227,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                     
                     // 2 bytes: Vertex count.
-                    ushort vertexCount = reader.ReadUShort();
+                    unsigned short vertexCount = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
                     //std::cout << "        Vertex Count: " << vertexCount << std::endl;
                     #endif
@@ -264,7 +267,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     byteCount -= blockByteCount + 4;
                     
                     // 2 bytes: Mesh group within mesh this block refers to.
-                    ushort submeshIndex = reader.ReadUShort();
+                    unsigned short submeshIndex = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Submesh Index: " << submeshIndex << std::endl;
                     #endif
@@ -289,14 +292,14 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                     
                     // 2 bytes: Vertex count.
-                    ushort vertexCount = reader.ReadUShort();
+                    unsigned short vertexCount = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
                     //std::cout << "        Vertex Count: " << vertexCount << std::endl;
                     #endif
                     
                     // Next ((VertexCount/4) + 1) bytes: Compression info for vertex data.
                     // Every 2 bits indicates how the vertex at that index is compressed.
-                    ushort compressionInfoSize = (vertexCount / 4) + 1;
+                    unsigned short compressionInfoSize = (vertexCount / 4) + 1;
                     unsigned char* compressionInfo = new unsigned char[compressionInfoSize];
                     reader.Read(compressionInfo, compressionInfoSize);
                     
@@ -306,10 +309,10 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     for(int k = 0; k < vertexCount; k += 4)
                     {
                         unsigned char byte = compressionInfo[k / 4];
-                        uint val1 = (byte & 0x3);
-                        uint val2 = (byte & 0xC) >> 2;
-                        uint val3 = (byte & 0x30) >> 4;
-                        uint val4 = (byte & 0xC0) >> 6;
+                        unsigned int val1 = (byte & 0x3);
+                        unsigned int val2 = (byte & 0xC) >> 2;
+                        unsigned int val3 = (byte & 0x30) >> 4;
+                        unsigned int val4 = (byte & 0xC0) >> 6;
                         
                         vertexDataFormat[k] = val1;        // Masking 0000 0011
                         vertexDataFormat[k + 1] = val2;    // Masking 0000 1100
@@ -378,7 +381,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     
                     // 4 bytes: Number of bytes in this block.
                     // Should always be 48 bytes, for 12 floats, which is a 4x3 matrix of data.
-                    uint blockByteCount = reader.ReadUInt();
+                    unsigned int blockByteCount = reader.ReadUInt();
                     assert(blockByteCount == 48);
                     byteCount -= blockByteCount + 4;
                     
@@ -437,7 +440,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     
                     // 4 bytes: Number of bytes in this block.
                     // Should always be 24 bytes, for 6 floats, which is two Vector3.
-                    uint blockByteCount = reader.ReadUInt();
+                    unsigned int blockByteCount = reader.ReadUInt();
                     assert(blockByteCount == 24);
                     byteCount -= blockByteCount + 4;
                     
@@ -454,24 +457,24 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     } // iterate keyframes
 }
 
-float VertexAnimation::DecompressFloatFromByte(unsigned char byte)
+float VertexAnimation::DecompressFloatFromByte(unsigned char val)
 {
-    uint signFlag = (byte & 0x80);
+    unsigned int signFlag = (val & 0x80);
     float sign = (signFlag == 0) ? 1.0f : -1.0f;
     
-    float frac = (float)(byte & 0x1F) / 32.0f;
-    float whole = (byte & 0x7F) >> 5;
+    float frac = (float)(val & 0x1F) / 32.0f;
+    float whole = (val & 0x7F) >> 5;
     
     return sign * (whole + frac);
 }
 
-float VertexAnimation::DecompressFloatFromUShort(unsigned short ushort)
+float VertexAnimation::DecompressFloatFromUShort(unsigned short val)
 {
-    uint signFlag = (ushort & 0x8000);
+    unsigned int signFlag = (val & 0x8000);
     float sign = (signFlag == 0) ? 1.0f : -1.0f;
     
-    float frac = (float)(ushort & 0x1FF) / 256.0f;
-    float whole = (ushort & 0x7FFF) >> 8;
+    float frac = (float)(val & 0x1FF) / 256.0f;
+    float whole = (val & 0x7FFF) >> 8;
     
     return sign * (whole + frac);
 }

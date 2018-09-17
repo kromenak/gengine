@@ -12,14 +12,17 @@
 //
 #pragma once
 #include "Asset.h"
-#include "Vector3.h"
+
 #include <vector>
+
+#include "AtomicTypes.h"
 #include "Matrix4.h"
+#include "Vector3.h"
 
 struct VertexAnimationVertexPose
 {
-    int mFrameNumber = 0;
-    unsigned char mMeshIndex = 0;
+    int32 mFrameNumber = 0;
+    uint8 mMeshIndex = 0;
     
     std::vector<Vector3> mVertexPositions;
     VertexAnimationVertexPose* mNext = nullptr;
@@ -27,8 +30,8 @@ struct VertexAnimationVertexPose
 
 struct VertexAnimationTransformPose
 {
-    int mFrameNumber = 0;
-    unsigned char mMeshIndex = 0;
+    int32 mFrameNumber = 0;
+    uint8 mMeshIndex = 0;
     
     Quaternion mLocalRotation;
     Vector3 mLocalPosition;
@@ -45,10 +48,10 @@ class VertexAnimation : public Asset
 public:
     VertexAnimation(std::string name, char* data, int dataLength);
     
-    VertexAnimationVertexPose SampleVertexPose(float time, int meshIndex);
-    VertexAnimationTransformPose SampleTransformPose(float time, int meshIndex);
+    VertexAnimationVertexPose SampleVertexPose(float time, int framesPerSecond, int meshIndex);
+    VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);
     
-    float GetDuration() { return (1.0f / mFramesPerSecond) * mFrameCount; }
+    float GetDuration(int framesPerSecond) { return (1.0f / framesPerSecond) * mFrameCount; }
     
 private:
     // The number of frames in this animation.
@@ -59,12 +62,8 @@ private:
     std::vector<VertexAnimationVertexPose*> mVertexPoses;
     std::vector<VertexAnimationTransformPose*> mTransformPoses;
     
-    // The number of frames per second.
-    // The duration of each frame is then 1/framesPerSecond seconds.
-    int mFramesPerSecond = 10;
-    
     void ParseFromData(char* data, int dataLength);
     
-    float DecompressFloatFromByte(unsigned char byte);
-    float DecompressFloatFromUShort(unsigned short ushort);
+    float DecompressFloatFromByte(unsigned char val);
+    float DecompressFloatFromUShort(unsigned short val);
 };
