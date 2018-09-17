@@ -10,6 +10,7 @@
 //
 #pragma once
 #include "Asset.h"
+
 #include <unordered_map>
 #include <vector>
 
@@ -37,7 +38,8 @@ private:
     int mFrameCount = 0;
     
     // Frames per second for this animation.
-    int mFramesPerSecond = 30;
+    // Default value "15" is taken from the defaults written to registry file.
+    int mFramesPerSecond = 15;
     
     // Mapping of frame number to frame data.
     // "Frame data" consists of one or more animation nodes, which do things like
