@@ -12,6 +12,7 @@
 #include <GL/glew.h>
 
 #include "Matrix4.h"
+#include "Vector2.h"
 
 class Shader;
 class CameraComponent;
@@ -44,8 +45,10 @@ public:
     
     void SetSkybox(Skybox* skybox) { mSkybox = skybox; }
     
-    int GetWidth() { return mScreenWidth; }
-    int GetHeight() { return mScreenHeight; }
+    int GetWindowWidth() { return mScreenWidth; }
+	int GetWindowHeight() { return mScreenHeight; }
+	
+	Vector2 GetWindowSize() { return Vector2(mScreenWidth, mScreenHeight); }
     
 private:
     // Screen's width and height, in pixels.

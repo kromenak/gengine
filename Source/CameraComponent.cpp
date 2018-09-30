@@ -37,8 +37,8 @@ Matrix4 CameraComponent::GetProjectionMatrix()
 
 Vector3 CameraComponent::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 {
-    float screenWidth = Services::GetRenderer()->GetWidth();
-    float screenHeight = Services::GetRenderer()->GetHeight();
+    float screenWidth = Services::GetRenderer()->GetWindowWidth();
+    float screenHeight = Services::GetRenderer()->GetWindowHeight();
     
     Matrix4 viewMatrix = GetLookAtMatrix();
     Matrix4 projectionMatrix = GetProjectionMatrix();
