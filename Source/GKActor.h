@@ -29,6 +29,8 @@ public:
     };
     
     GKActor();
+	
+	void Update(float deltaTime) override;
     
     void SetIdleGas(GAS* gas) { mIdleGas = gas; }
     void SetTalkGas(GAS* gas) { mTalkGas = gas; }
