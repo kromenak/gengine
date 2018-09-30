@@ -16,7 +16,6 @@ class UIImage : public UIWidget
 public:
     UIImage(Actor* actor);
 	
-	void Update(float deltaTime) override;
     void Render() override;
 	
 	void SetTexture(Texture* texture);

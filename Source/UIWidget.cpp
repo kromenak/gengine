@@ -29,12 +29,12 @@ Matrix4 UIWidget::GetUIWorldTransformMatrix()
 	Vector3 scale = mOwner->GetScale();
 	Matrix4 scaleMat = Matrix4::MakeScale(mSize.GetX() * scale.GetX(), mSize.GetY() * scale.GetY(), 1.0f);
 	
-	// Determine what position is relative to - this will be based on the anchor.
-	//Vector2 origin;
-	//origin.SetX()
+	// Based on anchor, calculate our anchor position on-screen.
+	Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
+	Vector3 anchorPos(windowSize.GetX() * mAnchor.GetX(), windowSize.GetY() * mAnchor.GetY());
 	
-	Vector3 pos = mOwner->GetPosition();
+	// Our position will be treated as an offset from the anchor position.
+	Vector3 pos = anchorPos + mOwner->GetPosition();
 	Matrix4 transMat = Matrix4::MakeTranslate(pos);
-	
 	return transMat * scaleMat;
 }
