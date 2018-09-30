@@ -19,6 +19,7 @@ class Texture : Asset
 {
 public:
     Texture(std::string name, char* data, int dataLength);
+	~Texture();
     
     void Activate();
     static void Deactivate();
