@@ -69,6 +69,7 @@
 		4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
 		4BACA50D20F72663008C7FE9 /* StringTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */; };
 		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
+		4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB34B4214F72BB0069B2E9 /* Font.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4BCF4B25205672350045EDC8 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
@@ -232,6 +233,8 @@
 		4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScriptBuilder.cpp; path = ../Source/Sheep/SheepScriptBuilder.cpp; sourceTree = "<group>"; };
 		4BB82829205665680054625A /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../Libraries/SDL/SDL2.framework; sourceTree = "<group>"; };
 		4BB8282B205665750054625A /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_mixer.framework; path = ../Libraries/SDL/SDL2_mixer.framework; sourceTree = "<group>"; };
+		4BBB34B3214F72BB0069B2E9 /* Font.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Font.h; path = ../Source/Font.h; sourceTree = "<group>"; };
+		4BBB34B4214F72BB0069B2E9 /* Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Font.cpp; path = ../Source/Font.cpp; sourceTree = "<group>"; };
 		4BBB91B42058E53A007B9375 /* Soundtrack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Soundtrack.h; path = ../Source/Audio/Soundtrack.h; sourceTree = "<group>"; };
 		4BBB91B52058E53A007B9375 /* Soundtrack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Soundtrack.cpp; path = ../Source/Audio/Soundtrack.cpp; sourceTree = "<group>"; };
 		4BCBCF452043A90F001BE1E0 /* NVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NVC.h; path = ../Source/NVC.h; sourceTree = "<group>"; };
@@ -302,6 +305,8 @@
 				4B08C90F213745070028FEB3 /* UIWidget.cpp */,
 				4B08C911213747980028FEB3 /* UIImage.h */,
 				4B08C912213747980028FEB3 /* UIImage.cpp */,
+				4BBB34B3214F72BB0069B2E9 /* Font.h */,
+				4BBB34B4214F72BB0069B2E9 /* Font.cpp */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -752,6 +757,7 @@
 				4B8E830A20F046750009A86B /* Material.cpp in Sources */,
 				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
+				4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */,
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
 				4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */,
 				4B08C913213747980028FEB3 /* UIImage.cpp in Sources */,
