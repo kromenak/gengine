@@ -53,11 +53,11 @@ void SIF::ParseFromData(char *data, int dataLength)
             IniKeyValue* keyValue = entry;
             if(keyValue->key == "scene")
             {
-                mSceneAssetName = keyValue->value;
+                mSceneDataName = keyValue->value;
             }
             else if(keyValue->key == "floor")
             {
-                mFloorSceneModelName = keyValue->value;
+                mFloorBspModelName = keyValue->value;
             }
             else if(keyValue->key == "boundary")
             {

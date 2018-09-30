@@ -52,7 +52,7 @@ public:
     VertexAnimation* LoadVertexAnimation(std::string name);
     
     SIF* LoadSIF(std::string name);
-    SceneData* LoadScene(std::string name);
+    SceneData* LoadSceneData(std::string name);
     NVC* LoadNVC(std::string name);
     BSP* LoadBSP(std::string name);
     

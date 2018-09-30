@@ -185,7 +185,7 @@ SIF* AssetManager::LoadSIF(std::string name)
     return LoadAsset<SIF>(SanitizeAssetName(name, ".SIF"), nullptr);
 }
 
-SceneData* AssetManager::LoadScene(std::string name)
+SceneData* AssetManager::LoadSceneData(std::string name)
 {
     return LoadAsset<SceneData>(SanitizeAssetName(name, ".SCN"), nullptr);
 }

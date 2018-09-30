@@ -159,8 +159,10 @@ class SIF : public Asset
 public:
     SIF(std::string name, char* data, int dataLength);
     
-    std::string GetSCNName() { return mSceneAssetName; }
-    
+    std::string GetSceneDataName() { return mSceneDataName; }
+	
+	std::string GetFloorBspModelName() { return mFloorBspModelName; }
+	
     Skybox* GetSkybox() { return mSkybox; }
     
     std::vector<SceneActorData*> GetSceneActorDatas() { return mSceneActorDatas; }
@@ -175,12 +177,12 @@ public:
     std::vector<NVC*> GetNounVerbCases() { return mNVCs; }
     
 private:
-    // Name of the Scene asset that is used in conjunction with this SIF.
-    std::string mSceneAssetName;
+    // Name of the Scene Data asset name that's used in conjunction with this SIF.
+    std::string mSceneDataName;
     
     // FLOOR
-    // Name of the model in the BSP scene that is used for character walking.
-    std::string mFloorSceneModelName;
+    // Name of the model in the BSP that is used for character walking.
+    std::string mFloorBspModelName;
     
     // BOUNDARIES
     std::string mWalkBoundaryTextureName;

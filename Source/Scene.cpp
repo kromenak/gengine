@@ -26,7 +26,7 @@ Scene::Scene(std::string name, std::string timeCode) :
     mSpecificSIF = Services::GetAssets()->LoadSIF(mSpecificName);
     
     // Load scene data asset.
-    mSceneData = Services::GetAssets()->LoadScene(mGeneralSIF->GetSCNName());
+    mSceneData = Services::GetAssets()->LoadSceneData(mGeneralSIF->GetSceneDataName());
     
     // Load BSP and set it to be rendered.
     mSceneBSP = Services::GetAssets()->LoadBSP(mSceneData->GetBSPName());
@@ -119,7 +119,7 @@ Scene::Scene(std::string name, std::string timeCode) :
 	
 	Texture* uiTex = Services::GetAssets()->LoadTexture("SYRUPTOP.BMP");
     Actor* uiActor = new Actor();
-	uiActor->SetPosition(Vector3(512, 384, 0));
+	//uiActor->SetPosition(Vector3(512, 384, 0));
 	uiActor->AddComponent<UIImage>()->SetTexture(uiTex);
 }
 
@@ -149,16 +149,23 @@ void Scene::Interact(const Ray& ray)
 {
     // Cast ray against scene BSP to see if it intersects with anything.
     // If so, it means we clicked on that thing.
-    std::string* name = mSceneBSP->Intersects(ray);
-    if(name == nullptr) { return; }
-    
+	HitInfo hitInfo;
+	if(!mSceneBSP->RaycastNearest(ray, hitInfo)) { return; }
+	
+	// Clicked on the floor - move ego to position.
+	if(hitInfo.name == mGeneralSIF->GetFloorBspModelName())
+	{
+		mEgo->SetPosition(hitInfo.position);
+		return;
+	}
+	
     // Correlate the interacted model name to model data from the SIF.
     // This allows us to correlate a model in the BSP to a noun keyword.
     SceneModelData* sceneModelData = nullptr;
     std::vector<SceneModelData*> sceneModelDatas = mGeneralSIF->GetSceneModelDatas();
     for(auto& modelData : sceneModelDatas)
     {
-        if(modelData->name == *name)
+        if(modelData->name == hitInfo.name)
         {
             sceneModelData = modelData;
             break;
@@ -185,4 +192,26 @@ void Scene::Interact(const Ray& ray)
             }
         }
     }
+}
+
+float Scene::GetFloorY(const Vector3& position)
+{
+	// Calculate ray origin using passed position, but really high in the air!
+	Vector3 rayOrigin = position;
+	rayOrigin.SetY(10000);
+	
+	// Create ray with origin high in the sky and pointing straight down.
+	Ray downRay(rayOrigin, -Vector3::UnitY);
+	
+	// Raycast straight down and test against the floor BSP.
+	// If we hit something, just use the Y hit position as the floor's Y.
+	HitInfo hitInfo;
+	if(mSceneBSP->RaycastSingle(downRay, mGeneralSIF->GetFloorBspModelName(), hitInfo))
+	{
+		return hitInfo.position.GetY();
+	}
+	
+	// If didn't hit floor, just return 0.
+	// TODO: Maybe we should return a default based on the floor BSP's height?
+	return 0.0f;
 }

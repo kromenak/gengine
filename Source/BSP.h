@@ -80,6 +80,12 @@ struct BSPSurface
     bool visible = true;
 };
 
+struct HitInfo
+{
+	std::string name;
+	Vector3 position;
+};
+
 class BSP : Asset
 {
     // When identifying the position of a point relative to a plane in the
@@ -96,8 +102,10 @@ public:
     
     void Render(Vector3 cameraPosition);
     
-    std::string* Intersects(Ray ray);
-    
+    bool RaycastNearest(const Ray& ray, HitInfo& outHitInfo);
+	bool RaycastSingle(const Ray& ray, std::string name, HitInfo& outHitInfo);
+	std::vector<HitInfo> RaycastAll(const Ray& ray);
+	
     void Hide(std::string objectName);
     
 private:

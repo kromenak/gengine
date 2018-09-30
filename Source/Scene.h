@@ -16,6 +16,7 @@ class Actor;
 class GameCamera;
 class Ray;
 class Skybox;
+class Vector3;
 
 class Scene
 {
@@ -25,6 +26,8 @@ public:
     void InitEgoPosition(std::string positionName);
     
     void Interact(const Ray& ray);
+	
+	float GetFloorY(const Vector3& position);
     
 private:
     // The scene name, both general and specific.
