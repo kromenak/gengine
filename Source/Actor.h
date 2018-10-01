@@ -51,10 +51,15 @@ public:
     {
         return mRotation.Rotate(Vector3::UnitX);
     }
+	
+	void SetParent(Actor* parent);
     
 private:
     // A parent actor, if any.
     Actor* mParent = nullptr;
+	
+	// Children, if any.
+	std::vector<Actor*> mChildren;
     
     // Position, rotation, and scale of the actor in local space.
     Vector3 mPosition;
@@ -69,6 +74,9 @@ private:
     std::vector<Component*> mComponents;
     
     void UpdateWorldTransform();
+	
+	void AddChild(Actor* child);
+	void RemoveChild(Actor* child);
 };
 
 template<class T> T* Actor::AddComponent()
