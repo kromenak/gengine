@@ -13,6 +13,7 @@
 
 #include <GL/glew.h>
 
+class BinaryReader;
 class SDL_Surface;
 
 class Texture : Asset
@@ -45,4 +46,6 @@ private:
     GLuint mTextureId = GL_NONE;
     
     void ParseFromData(char* data, int dataLength);
+	void ParseFromCompressedFormat(BinaryReader& reader);
+	void ParseFromBmpFormat(BinaryReader& reader);
 };

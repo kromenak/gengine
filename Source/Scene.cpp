@@ -117,9 +117,8 @@ Scene::Scene(std::string name, std::string timeCode) :
         soundtrackPlayer->Play(soundtracks[0]);
     }
 	
-	Texture* uiTex = Services::GetAssets()->LoadTexture("SYRUPTOP.BMP");
+	Texture* uiTex = Services::GetAssets()->LoadTexture("B25WALKERBOUNDS.BMP");
     Actor* uiActor = new Actor();
-	//uiActor->SetPosition(Vector3(512, 384, 0));
 	uiActor->AddComponent<UIImage>()->SetTexture(uiTex);
 }
 

@@ -113,7 +113,7 @@ void Texture::WriteToFile(std::string filePath)
     writer.WriteUInt(0); // Number of palette colors, unused.
     writer.WriteUInt(0); // Number of important colors, unused.
     
-    // COLOR TABLE - Don't need it?
+    // COLOR TABLE - Only needed for 8BPP or less.
     
     // PIXELS
     //int rowSize = Math::FloorToInt((32.0f * mWidth + 31.0f) / 32.0f) * 4;
@@ -143,110 +143,185 @@ void Texture::ParseFromData(char *data, int dataLength)
 	// Texture can be in one of two formats:
 	// 1) A custom/compressed format.
 	// 2) A normal BMP format.
-	// The first 2 bytes can tell us.
+	// The first 2 byte value can tell us.
 	unsigned short fileIdentifier = reader.ReadUShort();
 	if(fileIdentifier == 0x3136) // 16
 	{
-		unsigned short fileIdentifier2 = reader.ReadUShort();
-		if(fileIdentifier2 != 0x4D6E) // Mn
-		{
-			std::cout << "BMP file does not have correct identifier!" << std::endl;
-			return;
-		}
-		
-		// Read width and height values.
-		mHeight = reader.ReadUShort();
-		mWidth = reader.ReadUShort();
-		
-		// Allocate pixels array.
-		mPixels = new unsigned char[mWidth * mHeight * 4];
-		for(int y = 0; y < mHeight; y++)
-		{
-			for(int x = 0; x < mWidth; x++)
-			{
-				int current = (y * mWidth + x) * 4;
-				uint16_t pixel = reader.ReadUShort();
-				
-				float red = (pixel & 0xF800) >> 11;
-				float green = (pixel & 0x07E0) >> 5;
-				float blue = (pixel & 0x001F);
-				
-				mPixels[current] = (unsigned char)(red * 255 / 31);
-				mPixels[current + 1] = (unsigned char)(green * 255 / 63);
-				mPixels[current + 2] = (unsigned char)(blue * 255 / 31);
-				
-				// Causes all instances of magenta (R = 255, B = 255) to appear transparent.
-				if(mPixels[current] > 200 && mPixels[current + 1] < 100 && mPixels[current + 2] > 200)
-				{
-					mPixels[current + 3] = 0;
-				}
-				else
-				{
-					mPixels[current + 3] = 255;
-				}
-			}
-			
-			// Might need to skip some padding here.
-			if((mWidth & 0x00000001) != 0)
-			{
-				reader.ReadUShort();
-			}
-		}
+		ParseFromCompressedFormat(reader);
 	}
 	else if(fileIdentifier == 0x4D42) // BM
 	{
-		// BMP HEADER
-		// 4 bytes: size of file in bytes
-		// 4 bytes: 2 shorts that are reserved/unused
-		reader.Skip(8);
-		
-		// 4 bytes: offset to image data
-		reader.Skip(4);
-		
-		// DIB HEADER
-		// 4 bytes: size of DIB header (always 40)
-		reader.Skip(4);
-		
-		// 8 bytes: width and height (12 x 37)
-		mWidth = reader.ReadUInt();
-		mHeight = reader.ReadUInt();
-		
-		// 2 bytes: number of color planes
-		unsigned short colorPlaneCount = reader.ReadUShort();
-		
-		// 2 bytes: number of bits per pixel
-		unsigned short bitsPerPixel = reader.ReadUShort();
-		
-		// 8 bytes: compression method (0 if not compressed).
-		// If not compressed, uncompressed size is usually zero.
-		unsigned int compressionMethod = reader.ReadUInt();
-		unsigned int uncompressedSize = reader.ReadUInt();
-		
-		// 16 bytes: 4 unused reserved ints
-		reader.Skip(16);
-		
-		// COLOR TABLE - Don't need it?
-		
-		// PIXELS
-		// Allocate pixels array.
-		mPixels = new unsigned char[mWidth * mHeight * 4];
-		
-		for(int y = mHeight - 1; y >= 0; y--)
+		ParseFromBmpFormat(reader);
+	}
+}
+
+void Texture::ParseFromCompressedFormat(BinaryReader& reader)
+{
+	// The compressed format has a second value here.
+	unsigned short fileIdentifier2 = reader.ReadUShort();
+	if(fileIdentifier2 != 0x4D6E) // Mn
+	{
+		std::cout << "BMP file does not have correct identifier!" << std::endl;
+		return;
+	}
+	
+	// Read width and height values.
+	mHeight = reader.ReadUShort();
+	mWidth = reader.ReadUShort();
+	
+	// Allocate pixels array.
+	mPixels = new unsigned char[mWidth * mHeight * 4];
+	for(int y = 0; y < mHeight; y++)
+	{
+		for(int x = 0; x < mWidth; x++)
 		{
-			for(int x = 0; x < mWidth; x++)
-			{
-				int index = (y * mWidth + x) * 4;
-				writer.WriteUByte(mPixels[index]);
-				writer.WriteUByte(mPixels[index + 1]);
-				writer.WriteUByte(mPixels[index + 2]);
-				writer.WriteUByte(0); // Alpha is ignored
-			}
+			int current = (y * mWidth + x) * 4;
+			uint16_t pixel = reader.ReadUShort();
 			
-			// Add padding if we need it.
-			if((mWidth & 0x00000001) != 0)
+			float red = (pixel & 0xF800) >> 11;
+			float green = (pixel & 0x07E0) >> 5;
+			float blue = (pixel & 0x001F);
+			
+			mPixels[current] = (unsigned char)(red * 255 / 31);
+			mPixels[current + 1] = (unsigned char)(green * 255 / 63);
+			mPixels[current + 2] = (unsigned char)(blue * 255 / 31);
+			
+			// Causes all instances of magenta (R = 255, B = 255) to appear transparent.
+			if(mPixels[current] > 200 && mPixels[current + 1] < 100 && mPixels[current + 2] > 200)
 			{
-				writer.WriteUShort(0);
+				mPixels[current + 3] = 0;
 			}
+			else
+			{
+				mPixels[current + 3] = 255;
+			}
+		}
+		
+		// Might need to skip some padding here.
+		if((mWidth & 0x00000001) != 0)
+		{
+			reader.ReadUShort();
+		}
+	}
+}
+
+void Texture::ParseFromBmpFormat(BinaryReader& reader)
+{
+	// BMP HEADER
+	// 4 bytes: size of file in bytes
+	// 4 bytes: 2 shorts that are reserved/unused
+	reader.Skip(8);
+	
+	// 4 bytes: offset to image data
+	reader.Skip(4);
+	
+	// DIB HEADER
+	// 4 bytes: size of DIB header (always 40)
+	unsigned int dibHeaderSize = reader.ReadUInt();
+	if(dibHeaderSize != 40)
+	{
+		std::cout << "Texture: unexpected dib header size of " << dibHeaderSize << std::endl;
+	}
+	
+	// 8 bytes: width and height
+	mWidth = reader.ReadUInt();
+	mHeight = reader.ReadUInt();
+	
+	// 2 bytes: number of color planes
+	unsigned short colorPlaneCount = reader.ReadUShort();
+	if(colorPlaneCount != 1)
+	{
+		std::cout << "Texture: unexpected color plane count of " << colorPlaneCount << std::endl;
+	}
+	
+	// 2 bytes: number of bits per pixel
+	unsigned short bitsPerPixel = reader.ReadUShort();
+	
+	// 4 bytes: compression method
+	// 0 = BI_RGB (not compressed)
+	// 1 = BI_RLE8 (RLE 8-bit/pixel)
+	// 2 = BI_RLE4 (RLE 4-bit/pixel)
+	// 3 = BI_BITFIELDS (???)
+	// 4 = BI_JPEG (a JPEG image)
+	// 5 = BI_PNG (a PNG image)
+	// 6-13 = BI_ALPHABITFIELDS, BI_CMYK, BI_CMYKRLE8, BI_CMYKRLE4
+	unsigned int compressionMethod = reader.ReadUInt();
+	if(compressionMethod != 0)
+	{
+		std::cout << "Texture: unexpected compression method " << compressionMethod << std::endl;
+	}
+	
+	// 4 bytes: uncompressed size; but if compression method is zero, this is usually also zero (unset).
+	reader.Skip(4); //unsigned int uncompressedSize = reader.ReadUInt();
+	
+	// 8 bytes: horizontal/vertical resolution (pixels per meter) - unused.
+	reader.Skip(8);
+	
+	// 4 bytes: num colors in palette. If zero, default to 2^(bpp)
+	unsigned int numColorsInColorPalette = reader.ReadUInt();
+	if(numColorsInColorPalette == 0)
+	{
+		numColorsInColorPalette = Math::PowBase2(bitsPerPixel);
+	}
+	
+	// 4 bytes: num important colors - unused.
+	reader.Skip(4);
+	
+	// COLOR TABLE - only present for 8-bpp or lower images
+	unsigned char* palette = nullptr;
+	if(bitsPerPixel <= 8)
+	{
+		// The number of bytes is numColors in palette, time 4 bytes each.
+		// The order of the colors by default is blue, green, red, alpha.
+		palette = new unsigned char[numColorsInColorPalette * 4];
+		reader.Read(palette, numColorsInColorPalette * 4);
+	}
+	
+	// PIXELS
+	// Allocate pixels array.
+	mPixels = new unsigned char[mWidth * mHeight * 4];
+	for(int y = mHeight - 1; y >= 0; y--)
+	{
+		for(int x = 0; x < mWidth; x++)
+		{
+			// Calculate index into pixels array.
+			int index = (y * mWidth + x) * 4;
+			
+			// How we interpret pixel data will depend on the bpp.
+			if(bitsPerPixel == 8)
+			{
+				// Read in the palette index. Multiply by 4 because each index has 4 bytes.
+				// So 0 = 0, 1 = 4, 2 = 8, etc.
+				int paletteIndex = reader.ReadUByte();
+				paletteIndex *= 4;
+				
+				if(palette != nullptr)
+				{
+					// Palette color order is BGRA. But our internal pixels are RGBA.
+					mPixels[index] = palette[paletteIndex + 2];
+					mPixels[index + 1] = palette[paletteIndex + 1];
+					mPixels[index + 2] = palette[paletteIndex];
+					mPixels[index + 3] = palette[paletteIndex + 3];
+				}
+			}
+			else if(bitsPerPixel == 32)
+			{
+				// We're assuming pixel data order is RGBA.
+				mPixels[index] = reader.ReadUByte();
+				mPixels[index + 1] = reader.ReadUByte();
+				mPixels[index + 2] = reader.ReadUByte();
+				mPixels[index + 3] = reader.ReadUByte();
+			}
+			else
+			{
+				std::cout << "Texture: Unaccounted for BPP of " << bitsPerPixel << std::endl;
+			}
+		}
+		
+		// Skip padding if needed.
+		if((mWidth & 0x00000001) != 0)
+		{
+			reader.ReadUShort();
 		}
 	}
 }

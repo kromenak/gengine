@@ -39,6 +39,16 @@ namespace Math
     {
         return IsZero(a - b);
     }
+	
+	inline float Pow(float base, float exp)
+	{
+		return std::pow(base, exp);
+	}
+	
+	inline int PowBase2(int exp)
+	{
+		return 1 << exp;
+	}
     
     inline float Mod(float num1, float num2)
     {
