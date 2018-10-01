@@ -15,6 +15,8 @@
 #include "SoundtrackPlayer.h"
 #include "UIImage.h"
 
+extern Mesh* quad;
+
 Scene::Scene(std::string name, std::string timeCode) :
     mGeneralName(name)
 {
@@ -117,9 +119,29 @@ Scene::Scene(std::string name, std::string timeCode) :
         soundtrackPlayer->Play(soundtracks[0]);
     }
 	
-	Texture* uiTex = Services::GetAssets()->LoadTexture("B25WALKERBOUNDS.BMP");
-    Actor* uiActor = new Actor();
-	uiActor->AddComponent<UIImage>()->SetTexture(uiTex);
+	//Texture* uiTex = Services::GetAssets()->LoadTexture("B25WALKERBOUNDS.BMP");
+    //Actor* uiActor = new Actor();
+	//uiActor->AddComponent<UIImage>()->SetTexture(uiTex);
+	
+	Actor* walkerBoundaryActor = new Actor();
+	
+	MeshRenderer* walkerBoundaryMeshRenderer = walkerBoundaryActor->AddComponent<MeshRenderer>();
+	walkerBoundaryMeshRenderer->SetMesh(quad);
+	
+	Material m;
+	m.SetDiffuseTexture(mGeneralSIF->GetWalkBoundaryTexture());
+	walkerBoundaryMeshRenderer->SetMaterial(0, m);
+	
+	
+	Vector3 size = mGeneralSIF->GetWalkBoundarySize();
+	Vector3 offset = mGeneralSIF->GetWalkBoundaryOffset();
+	offset.SetX(-offset.GetX() + size.GetX() * 0.5f);
+	offset.SetZ(-offset.GetY() + size.GetY() * 0.5f);
+	offset.SetY(0.0f);
+	
+	walkerBoundaryActor->SetPosition(offset);
+	walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
+	walkerBoundaryActor->SetScale(size);
 }
 
 void Scene::InitEgoPosition(std::string positionName)
@@ -154,6 +176,25 @@ void Scene::Interact(const Ray& ray)
 	// Clicked on the floor - move ego to position.
 	if(hitInfo.name == mGeneralSIF->GetFloorBspModelName())
 	{
+		Texture* tex = mGeneralSIF->GetWalkBoundaryTexture();
+		Vector3 size = mGeneralSIF->GetWalkBoundarySize();
+		Vector3 offset = mGeneralSIF->GetWalkBoundaryOffset();
+		
+		Vector3 pos = hitInfo.position;
+		std::cout << "World Pos: " << pos << std::endl;
+		
+		pos.SetX(pos.GetX() + offset.GetX());
+		pos.SetZ(pos.GetZ() + offset.GetY());
+		std::cout << "Offset Pos: " << pos << std::endl;
+		
+		pos.SetX(pos.GetX() / size.GetX());
+		pos.SetZ(pos.GetZ() / size.GetY());
+		std::cout << "Normalized Pos: " << pos << std::endl;
+		
+		pos.SetX(pos.GetX() * tex->GetWidth());
+		pos.SetZ(pos.GetZ() * tex->GetHeight());
+		std::cout << "Pixel Pos: " << pos << std::endl;
+		
 		mEgo->SetPosition(hitInfo.position);
 		return;
 	}
@@ -177,18 +218,25 @@ void Scene::Interact(const Ray& ray)
     //TODO: Here is where we'd stop and show the UI for the user to pick a verb!
     // Let's assume a verb for the moment (LOOK).
     
-    // The next question is whether any NVC defines an entry for the given noun/verb combo.
+    // Next, does any NVC defines an entry for the given noun/verb combo?
     std::vector<NVC*> nvcs = mGeneralSIF->GetNounVerbCases();
     for(auto& nvc : nvcs)
     {
         NVCItem* item = nvc->GetNVC(sceneModelData->noun, "LOOK");
         if(item != nullptr)
         {
-            if(item->script != nullptr)
-            {
-                SheepVM vm;
-                vm.Execute(item->script);
-            }
+			// If so, check if the case for the item is met (Gabe Only, Grace Only, Only After 5PM, etc).
+			if(nvc->IsCaseMet(item))
+			{
+				//TODO: Deal with approach and target.
+				
+				// Execute the sheep script for this NVC.
+				item->Execute();
+				
+				// Only execute one per interaction.
+				// If multiple NVC items match, only the first will be played.
+				break;
+			}
         }
     }
 }
