@@ -163,6 +163,10 @@ public:
 	
 	std::string GetFloorBspModelName() { return mFloorBspModelName; }
 	
+	Texture* GetWalkBoundaryTexture() { return mWalkBoundaryTexture; }
+	Vector2 GetWalkBoundarySize() { return mWalkBoundarySize; }
+	Vector2 GetWalkBoundaryOffset() { return mWalkBoundaryOffset; }
+	
     Skybox* GetSkybox() { return mSkybox; }
     
     std::vector<SceneActorData*> GetSceneActorDatas() { return mSceneActorDatas; }
@@ -185,7 +189,7 @@ private:
     std::string mFloorBspModelName;
     
     // BOUNDARIES
-    std::string mWalkBoundaryTextureName;
+	Texture* mWalkBoundaryTexture = nullptr;
     Vector2 mWalkBoundarySize;
     Vector2 mWalkBoundaryOffset;
     

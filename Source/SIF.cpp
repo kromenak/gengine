@@ -51,57 +51,62 @@ void SIF::ParseFromData(char *data, int dataLength)
         for(auto& entry : section.entries)
         {
             IniKeyValue* keyValue = entry;
-            if(keyValue->key == "scene")
+			
+			if(StringUtil::EqualsIgnoreCase(keyValue->key, "scene"))
             {
                 mSceneDataName = keyValue->value;
             }
-            else if(keyValue->key == "floor")
+            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "floor"))
             {
                 mFloorBspModelName = keyValue->value;
             }
-            else if(keyValue->key == "boundary")
+            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "boundary"))
             {
-                mWalkBoundaryTextureName = keyValue->value;
+				// First value is name of a texture defining walk bounds.
+				mWalkBoundaryTexture = Services::GetAssets()->LoadTexture(keyValue->value);
+				
+				// Remaining key/values are size/offset of the texture in 3D space.
+				// This is used as a 2D overlay on the X/Z plane to determine walkable area.
                 keyValue = keyValue->next;
                 while(keyValue != nullptr)
                 {
-                    if(keyValue->key == "size")
+                    if(StringUtil::EqualsIgnoreCase(keyValue->key, "size"))
                     {
                         mWalkBoundarySize = keyValue->GetValueAsVector2();
                     }
-                    else if(keyValue->key == "offset")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "offset"))
                     {
                         mWalkBoundaryOffset = keyValue->GetValueAsVector2();
                     }
                     keyValue = keyValue->next;
                 }
             }
-            else if(keyValue->key == "cameraBounds")
+            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "cameraBounds"))
             {
                 mCameraBoundsModelName = keyValue->value;
                 keyValue = keyValue->next;
-                if(keyValue != nullptr && keyValue->key == "type")
+                if(keyValue != nullptr && StringUtil::EqualsIgnoreCase(keyValue->key, "type"))
                 {
-                    mCameraBoundsDynamic = (keyValue->value == "dynamic");
+                    mCameraBoundsDynamic = (StringUtil::EqualsIgnoreCase(keyValue->value, "dynamic"));
                 }
             }
-            else if(keyValue->key == "globalLight")
+            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "globalLight"))
             {
                 keyValue = keyValue->next;
                 while(keyValue != nullptr)
                 {
-                    if(keyValue->key == "pos")
+                    if(StringUtil::EqualsIgnoreCase(keyValue->key, "pos"))
                     {
                         mGlobalLightPosition = keyValue->GetValueAsVector3();
                     }
-                    else if(keyValue->key == "ambient")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "ambient"))
                     {
                         mGlobalLightAmbient = keyValue->GetValueAsVector3();
                     }
                     keyValue = keyValue->next;
                 }
             }
-            else if(keyValue->key == "skybox")
+            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "skybox"))
             {
                 keyValue = keyValue->next;
                 
