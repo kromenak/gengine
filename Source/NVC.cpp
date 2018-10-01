@@ -8,6 +8,16 @@
 #include "IniParser.h"
 #include "SheepCompiler.h"
 #include "SheepScript.h"
+#include "StringUtil.h"
+
+void NVCItem::Execute()
+{
+	if(script != nullptr)
+	{
+		SheepVM vm;
+		vm.Execute(script);
+	}
+}
 
 NVC::NVC(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -32,6 +42,38 @@ NVCItem* NVC::GetNVC(std::string noun, std::string verb)
     
     // Found no matching verb entry.
     return nullptr;
+}
+
+bool NVC::IsCaseMet(NVCItem* item)
+{
+	// Empty condition is automatically met.
+	if(item->condition.empty()) { return true; }
+	
+	// Check global case conditions.
+	if(StringUtil::EqualsIgnoreCase(item->condition, "all"))
+	{
+		return true;
+	}
+	else if(StringUtil::EqualsIgnoreCase(item->condition, "gabe_all"))
+	{
+		return true;
+	}
+	else if(StringUtil::EqualsIgnoreCase(item->condition, "grace_all"))
+	{
+		return false;
+	}
+	//TODO: Add any more global conditions.
+	
+	// Next, see if we have a local condition that matches.
+	auto it = mCaseToSheep.find(item->condition);
+	if(it != mCaseToSheep.end())
+	{
+		SheepVM vm;
+		return vm.Evaluate(it->second);
+	}
+	
+	// Assume any not found case is false by default.
+	return false;
 }
 
 void NVC::ParseFromData(char *data, int dataLength)
