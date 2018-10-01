@@ -31,6 +31,8 @@ public:
     
     void SetMesh(Mesh* mesh);
     void AddMesh(Mesh* mesh);
+	
+	void SetMaterial(int index, Material material);
     
     std::vector<Mesh*> GetMeshes() { return mMeshes; }
     

@@ -78,6 +78,7 @@ std::vector<RenderPacket> MeshRenderer::GetRenderPackets()
         
         // Usually there's a one-to-one mapping of mesh to material.
         // But if not for some reason, use the max.
+		// TODO: If zero materials, use a default "error" material.
         int materialIndex = Math::Clamp(i, 0, (int)mMaterials.size() - 1);
         packet.material = mMaterials[materialIndex];
         
@@ -116,7 +117,7 @@ void MeshRenderer::SetMesh(Mesh* mesh)
 void MeshRenderer::AddMesh(Mesh* mesh)
 {
     mMeshes.push_back(mesh);
-    
+	
     // Generate materials for each mesh.
     Material m;
     
@@ -126,4 +127,12 @@ void MeshRenderer::AddMesh(Mesh* mesh)
     
     // Add to materials list.
     mMaterials.push_back(m);
+}
+
+void MeshRenderer::SetMaterial(int index, Material material)
+{
+	if(index >= 0 && index < mMaterials.size())
+	{
+		mMaterials[index] = material;
+	}
 }
