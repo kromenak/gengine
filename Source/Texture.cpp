@@ -122,9 +122,9 @@ void Texture::WriteToFile(std::string filePath)
         for(int x = 0; x < mWidth; x++)
         {
             int index = (y * mWidth + x) * 4;
-            writer.WriteUByte(mPixels[index]);
-            writer.WriteUByte(mPixels[index + 1]);
-            writer.WriteUByte(mPixels[index + 2]);
+			writer.WriteUByte(mPixels[index + 2]); // Blue
+            writer.WriteUByte(mPixels[index + 1]); // Green
+			writer.WriteUByte(mPixels[index]); 	   // Red
             writer.WriteUByte(0); // Alpha is ignored
         }
         
@@ -307,10 +307,10 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 			else if(bitsPerPixel == 32)
 			{
 				// We're assuming pixel data order is RGBA.
-				mPixels[index] = reader.ReadUByte();
-				mPixels[index + 1] = reader.ReadUByte();
-				mPixels[index + 2] = reader.ReadUByte();
-				mPixels[index + 3] = reader.ReadUByte();
+				mPixels[index + 2] = reader.ReadUByte(); // Blue
+				mPixels[index + 1] = reader.ReadUByte(); // Green
+				mPixels[index] = reader.ReadUByte(); 	 // Red
+				mPixels[index + 3] = reader.ReadUByte(); // Alpha
 			}
 			else
 			{
