@@ -12,6 +12,8 @@
 
 #include "Math.h"
 
+class Vector2;
+
 class Vector3
 {
 public:
@@ -24,11 +26,13 @@ public:
     Vector3();
     Vector3(float x, float y, float z);
 	Vector3(float x, float y);
-    
+	
     // Copy
     Vector3(const Vector3& other);
     Vector3& operator=(const Vector3& other);
-    
+	
+	Vector3(const Vector2& other);
+	
     // Equality
     bool operator==(const Vector3& other) const;
     bool operator!=(const Vector3& other) const;
