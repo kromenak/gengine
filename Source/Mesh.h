@@ -17,9 +17,10 @@ class GLVertexArray;
 
 enum class RenderMode
 {
-    Triangles,
-    TriangleFan,
-    Lines
+    Triangles,			// Every 3 vertices is one triangle.
+	TriangleStrip,		// A triangle is the current vertex and previous two vertices.
+    TriangleFan,		// A triangle is the first vertex and subsequent groups of two vertices.
+    Lines				// Every 2 vertices is one line.
 };
 
 enum class MeshUsage
@@ -28,6 +29,7 @@ enum class MeshUsage
     Dynamic
 };
 
+//TODO: Figure out how to best define this stuff (semantic/type/format).
 enum class VertexAttributeSemantic
 {
     Position,
