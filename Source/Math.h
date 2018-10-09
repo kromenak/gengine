@@ -5,6 +5,8 @@
 //  Created by Clark Kromenaker on 10/16/17.
 //
 #pragma once
+
+#include <algorithm>
 #include <cmath>
 
 namespace Math
@@ -117,7 +119,7 @@ namespace Math
     
     inline float Clamp(float value, float min, float max)
     {
-        return std::min(max, std::max(value, min));
+        return std::fmin(max, std::fmax(value, min));
     }
     
     inline int Clamp(int value, int min, int max)
@@ -127,7 +129,7 @@ namespace Math
     
     inline float Min(float val1, float val2)
     {
-        return std::min(val1, val2);
+        return std::fmin(val1, val2);
     }
     
     inline int Min(int val1, int val2)
@@ -137,7 +139,7 @@ namespace Math
     
     inline float Max(float val1, float val2)
     {
-        return std::max(val1, val2);
+        return std::fmax(val1, val2);
     }
     
     inline int Max(int val1, int val2)
