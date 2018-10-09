@@ -29,8 +29,6 @@ public:
     };
     
     GKActor();
-	
-	void Update(float deltaTime) override;
     
     void SetIdleGas(GAS* gas) { mIdleGas = gas; }
     void SetTalkGas(GAS* gas) { mTalkGas = gas; }
@@ -39,7 +37,10 @@ public:
     void SetState(State state);
     
     MeshRenderer* GetMeshRenderer() { return mMeshRenderer; }
-    
+	
+protected:
+	void UpdateInternal(float deltaTime) override;
+	
 private:
     // Actor's current state.
     State mState = State::Idle;

@@ -20,10 +20,8 @@ GameCamera::GameCamera()
     AddComponent<AudioListener>();
 }
 
-void GameCamera::Update(float deltaTime)
+void GameCamera::UpdateInternal(float deltaTime)
 {
-    Actor::Update(deltaTime);
-    
     // Determine camera speed.
     float camSpeed = kCameraSpeed;
     if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LSHIFT))

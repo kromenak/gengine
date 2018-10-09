@@ -26,14 +26,6 @@ GKActor::GKActor() : Actor()
     mGasPlayer->SetAnimationPlayer(animationPlayer);
 }
 
-void GKActor::Update(float deltaTime)
-{
-	// Stay attached to the floor, usually.
-	Vector3 position = GetPosition();
-	position.SetY(GEngine::inst->GetScene()->GetFloorY(position));
-	SetPosition(position);
-}
-
 void GKActor::SetState(GKActor::State state)
 {
     // Save state.
@@ -54,4 +46,12 @@ void GKActor::SetState(GKActor::State state)
             mGasPlayer->SetGas(mListenGas);
             break;
     }
+}
+
+void GKActor::UpdateInternal(float deltaTime)
+{
+	// Stay attached to the floor, usually.
+	Vector3 position = GetPosition();
+	position.SetY(GEngine::inst->GetScene()->GetFloorY(position));
+	SetPosition(position);
 }

@@ -23,7 +23,7 @@ public:
     Actor();
     ~Actor();
     
-    virtual void Update(float deltaTime);
+	void Update(float deltaTime);
     
     template<class T> T* AddComponent();
     template<class T> T* GetComponent();
@@ -53,6 +53,9 @@ public:
     }
 	
 	void SetParent(Actor* parent);
+	
+protected:
+	virtual void UpdateInternal(float deltaTime) { }
     
 private:
     // A parent actor, if any.
