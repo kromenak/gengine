@@ -62,14 +62,15 @@ bool GEngine::Initialize()
     
     //mCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
     mCursor = mAssetManager.LoadCursor("C_POINT.CUR");
-    mCursor->Activate();
-    
-    //mAssetManager.WriteBarnAssetToFile("EYE_GREENX.BMP");
-    //mAssetManager.WriteOutAssetsOfType("ANM");
-    
-    //mAssetManager.LoadVertexAnimation("GAB_GABBREATH1.ACT");
-    //mAssetManager.LoadVertexAnimation("CAT_CATRUN.ACT");
-    
+	if(mCursor != nullptr)
+	{
+    	mCursor->Activate();
+	}
+	
+    //mAssetManager.WriteBarnAssetToFile("F_ARIAL_T12.BMP");
+	//mAssetManager.WriteBarnAssetToFile("COURIER_R_12A.BMP");
+    //mAssetManager.WriteOutAssetsOfType("WLKBNDS");
+	
     LoadScene("B25");
     return true;
 }
