@@ -20,6 +20,7 @@
 #include "Model.h"
 #include "Shader.h"
 #include "Skybox.h"
+#include "Texture.h"
 #include "UIWidget.h"
 
 float axis_vertices[] = {
@@ -109,7 +110,10 @@ bool Renderer::Initialize()
     
     // For use with alpha blending during render loop.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+	
+	// Init default textures.
+	Texture::Init();
+	
     // Load default shader.
 	mDefaultShader = LoadShader("3D-Diffuse-Tex");
 	Material::sDefaultShader = mDefaultShader;
@@ -158,7 +162,7 @@ void Renderer::Render()
     
     // Draws a little axes indicator at world origin.
 	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
-    glBindTexture(GL_TEXTURE_2D, 0);
+	Texture::Deactivate();
     axes->Render();
     
     // We'll need the projection matrix a few times below.
@@ -197,7 +201,7 @@ void Renderer::Render()
     mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
     
     // Render an axis at the world origin for debugging.
-    glBindTexture(GL_TEXTURE_2D, 0);
+	Texture::Deactivate();
     axes->Render();
     
     // Render all mesh components. (should do before or after BSP?)
