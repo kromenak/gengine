@@ -7,13 +7,14 @@
 
 #include <iostream>
 
+#include "Color32.h"
 #include "GameCamera.h"
 #include "GKActor.h"
 #include "Math.h"
 #include "MeshRenderer.h"
 #include "Services.h"
 #include "SoundtrackPlayer.h"
-#include "UIImage.h"
+#include "UILabel.h"
 
 extern Mesh* quad;
 
@@ -119,29 +120,34 @@ Scene::Scene(std::string name, std::string timeCode) :
         soundtrackPlayer->Play(soundtracks[0]);
     }
 	
-	//Texture* uiTex = Services::GetAssets()->LoadTexture("B25WALKERBOUNDS.BMP");
-    //Actor* uiActor = new Actor();
-	//uiActor->AddComponent<UIImage>()->SetTexture(uiTex);
+    Actor* uiActor = new Actor();
+	uiActor->SetPosition(Vector3(-400, 0, 0));
+	UILabel* label = uiActor->AddComponent<UILabel>();
+	label->SetFont(Services::GetAssets()->LoadFont("F_GRAPHITE"));
+	label->SetText("ABYZwx)-=[]<>LNSstuv");
+	label->SetSize(6, 6);
 	
-	Actor* walkerBoundaryActor = new Actor();
-	
-	MeshRenderer* walkerBoundaryMeshRenderer = walkerBoundaryActor->AddComponent<MeshRenderer>();
-	walkerBoundaryMeshRenderer->SetMesh(quad);
-	
-	Material m;
-	m.SetDiffuseTexture(mGeneralSIF->GetWalkBoundaryTexture());
-	walkerBoundaryMeshRenderer->SetMaterial(0, m);
-	
-	
-	Vector3 size = mGeneralSIF->GetWalkBoundarySize();
-	Vector3 offset = mGeneralSIF->GetWalkBoundaryOffset();
-	offset.SetX(-offset.GetX() + size.GetX() * 0.5f);
-	offset.SetZ(-offset.GetY() + size.GetY() * 0.5f);
-	offset.SetY(0.0f);
-	
-	walkerBoundaryActor->SetPosition(offset);
-	walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
-	walkerBoundaryActor->SetScale(size);
+	// For debugging - render walker bounds overlay on game world.
+	{
+		Actor* walkerBoundaryActor = new Actor();
+		
+		MeshRenderer* walkerBoundaryMeshRenderer = walkerBoundaryActor->AddComponent<MeshRenderer>();
+		walkerBoundaryMeshRenderer->SetMesh(quad);
+		
+		Material m;
+		m.SetDiffuseTexture(mGeneralSIF->GetWalkBoundaryTexture());
+		walkerBoundaryMeshRenderer->SetMaterial(0, m);
+		
+		Vector3 size = mGeneralSIF->GetWalkBoundarySize();
+		Vector3 offset = mGeneralSIF->GetWalkBoundaryOffset();
+		offset.SetX(-offset.GetX() + size.GetX() * 0.5f);
+		offset.SetZ(-offset.GetY() + size.GetY() * 0.5f);
+		offset.SetY(0.1f); // Offset slightly up to avoid z-fighting with floor (in most scenes).
+		
+		walkerBoundaryActor->SetPosition(offset);
+		walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
+		walkerBoundaryActor->SetScale(size);
+	}
 }
 
 void Scene::InitEgoPosition(std::string positionName)
@@ -194,6 +200,28 @@ void Scene::Interact(const Ray& ray)
 		pos.SetX(pos.GetX() * tex->GetWidth());
 		pos.SetZ(pos.GetZ() * tex->GetHeight());
 		std::cout << "Pixel Pos: " << pos << std::endl;
+		
+		// The color of the pixel at pos seems to indicate whether that spot is walkable.
+		// White = totally OK to walk 				(255, 255, 255)
+		// Blue = OK to walk						(0, 0, 255)
+		// Green = sort of OK to walk 				(0, 255, 0)
+		// Red = getting less OK to walk 			(255, 0, 0)
+		// Yellow = sort of not OK to walk 			(255, 255, 0)
+		// Magenta = really pushing it here 		(255, 0, 255)
+		// Grey = pretty not OK to walk here 		(128, 128, 128)
+		// Cyan = this is your last warning, buddy 	(0, 255, 255)
+		// Black = totally not OK to walk 			(0, 0, 0)
+		
+		// Need to flip the Y because the calculated value is from lower-left. But X/Y are from upper-left.
+		Color32 color = tex->GetPixelColor32(pos.GetX(), tex->GetHeight() - pos.GetZ());
+		std::cout << color << std::endl;
+		
+		// Don't allow walking in black area.
+		if(color == Color32::Black)
+		{
+			std::cout << "Can't walk!" << std::endl;
+			return;
+		}
 		
 		mEgo->SetPosition(hitInfo.position);
 		return;

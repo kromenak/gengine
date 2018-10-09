@@ -11,7 +11,7 @@
 
 extern Mesh* quad;
 
-TYPE_DEF_CHILD(Component, UIImage);
+TYPE_DEF_CHILD(UIWidget, UIImage);
 
 UIImage::UIImage(Actor* owner) : UIWidget(owner)
 {

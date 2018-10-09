@@ -20,6 +20,9 @@ public:
     ~UIWidget();
     
 	virtual void Render() = 0;
+	
+	void SetSize(float x, float y) { mSize.SetX(x); mSize.SetY(y); }
+	void SetSize(Vector2 size) { mSize = size; }
     
 protected:
 	// The rectangular size of the widget.
