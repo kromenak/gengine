@@ -210,6 +210,11 @@ Cursor* AssetManager::LoadCursor(std::string name)
     return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), nullptr);
 }
 
+Font* AssetManager::LoadFont(std::string name)
+{
+	return LoadAsset<Font>(SanitizeAssetName(name, ".FON"), nullptr);
+}
+
 Shader* AssetManager::LoadShader(std::string name)
 {
     auto it = mLoadedShaders.find(name);

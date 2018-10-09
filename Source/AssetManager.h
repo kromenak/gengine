@@ -14,6 +14,7 @@
 #include "BSP.h"
 #include "Cursor.h"
 #include "GAS.h"
+#include "Font.h"
 #include "Model.h"
 #include "NVC.h"
 #include "SceneData.h"
@@ -59,6 +60,7 @@ public:
     SheepScript* LoadSheep(std::string name);
     
     Cursor* LoadCursor(std::string name);
+	Font* LoadFont(std::string name);
 	
     Shader* LoadShader(std::string name);
     
