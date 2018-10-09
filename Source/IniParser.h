@@ -11,6 +11,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Color32.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -26,6 +27,7 @@ struct IniKeyValue
     bool GetValueAsBool();
     Vector2 GetValueAsVector2();
     Vector3 GetValueAsVector3();
+	Color32 GetValueAsColor32();
 };
 
 struct IniSection

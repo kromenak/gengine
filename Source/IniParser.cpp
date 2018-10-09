@@ -28,7 +28,7 @@ bool IniKeyValue::GetValueAsBool()
 
 Vector2 IniKeyValue::GetValueAsVector2()
 {
-    // We assume the string form of {4.23, 5.23} as an example.
+    // We assume the string form of {4.23, 5.23}
     // First, let's get rid of the braces.
     std::string noBraces = value;
     if(noBraces[0] == '{' && noBraces[noBraces.size() - 1] == '}')
@@ -54,7 +54,7 @@ Vector2 IniKeyValue::GetValueAsVector2()
 
 Vector3 IniKeyValue::GetValueAsVector3()
 {
-    // We assume the string form of {4.23, 5.23, 10.04} as an example.
+    // We assume the string form of {4.23, 5.23, 10.04}
     // First, let's get rid of the braces.
     std::string noBraces = value;
     if(noBraces[0] == '{' && noBraces[noBraces.size() - 1] == '}')
@@ -81,6 +81,29 @@ Vector3 IniKeyValue::GetValueAsVector3()
     
     // Convert to numbers and return.
     return Vector3(atof(firstNum.c_str()), atof(secondNum.c_str()), atof(thirdNum.c_str()));
+}
+
+Color32 IniKeyValue::GetValueAsColor32()
+{
+	// Assume string form of R/G/B
+	std::size_t firstSlashIndex = value.find('/');
+	if(firstSlashIndex == std::string::npos)
+	{
+		return Color32::Black;
+	}
+	std::size_t secondSlashIndex = value.find('/', firstSlashIndex);
+	if(secondSlashIndex == std::string::npos)
+	{
+		return Color32::Black;
+	}
+	
+	// Split at slashes.
+	std::string firstNum = value.substr(0, firstSlashIndex);
+	std::string secondNum = value.substr(firstSlashIndex + 1, secondSlashIndex);
+	std::string thirdNum = value.substr(secondSlashIndex + 1, std::string::npos);
+	
+	// Convert to number and return.
+	return Color32(atoi(firstNum.c_str()), atoi(secondNum.c_str()), atoi(thirdNum.c_str()));
 }
 
 IniParser::IniParser(const char* filePath)
