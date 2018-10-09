@@ -13,24 +13,41 @@
 #include "BinaryWriter.h"
 #include "Math.h"
 
+Texture* Texture::White = nullptr;
+Texture* Texture::Black = nullptr;
+
+void Texture::Init()
+{
+	White = new Texture(2, 2, Color32::White);
+	Black = new Texture(2, 2, Color32::Black);
+}
+
+Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
+	Asset(""), mWidth(width), mHeight(height)
+{
+	// Create pixel array of desired size.
+	int pixelsSize = mWidth * mHeight * 4;
+	mPixels = new unsigned char[pixelsSize];
+	
+	// Flood-fill pixels with desired color.
+	for(int i = 0; i < pixelsSize; i += 4)
+	{
+		mPixels[i] = color.GetR();
+		mPixels[i + 1] = color.GetG();
+		mPixels[i + 2] = color.GetB();
+		mPixels[i + 3] = color.GetA();
+	}
+	
+	GenerateOpenGlTexture();
+}
+
 Texture::Texture(std::string name, char* data, int dataLength) :
     Asset(name)
 {
     // Retrieve the data.
     ParseFromData(data, dataLength);
     
-    // Generate and bind the texture object in OpenGL.
-    glGenTextures(1, &mTextureId);
-    glBindTexture(GL_TEXTURE_2D, mTextureId);
-    
-    // Load texture data into texture object.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                 mWidth, mHeight, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
-    
-    //TODO: Should put this in initialization or rendering or...?
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    GenerateOpenGlTexture();
 }
 
 Texture::~Texture()
@@ -53,7 +70,44 @@ void Texture::Activate()
 
 void Texture::Deactivate()
 {
-    glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	// When we "deactivate" all textures, we'll just actually
+	// activate our default "white" texture.
+	if(White != nullptr)
+	{
+		White->Activate();
+	}
+	else
+	{
+		glBindTexture(GL_TEXTURE_2D, GL_NONE);
+	}
+}
+
+void Texture::SetTransparentColor(Color32 color)
+{
+	if(mPixels == nullptr) { return; }
+	
+	// Find instances of the desired transparent color and
+	// make sure the alpha value is zero.
+	int pixelByteCount = mWidth * mHeight * 4;
+	for(int i = 0; i < pixelByteCount; i += 4)
+	{
+		if(mPixels[i] == color.GetR() &&
+		   mPixels[i + 1] == color.GetG() &&
+		   mPixels[i + 2] == color.GetB())
+		{
+			mPixels[i + 3] = 0;
+		}
+		else
+		{
+			mPixels[i + 3] = 255;
+		}
+	}
+	
+	// Update texture data on GPU.
+	glBindTexture(GL_TEXTURE_2D, mTextureId);
+	glTexSubImage2D(GL_TEXTURE_2D, 0,
+				 0, 0, mWidth, mHeight,
+				 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
 }
 
 SDL_Surface* Texture::GetSurface()
@@ -87,6 +141,30 @@ SDL_Surface* Texture::GetSurface(int x, int y, int width, int height)
         SDL_Log("Creating surface failed: %s", SDL_GetError());
     }
     return surface;
+}
+
+Color32 Texture::GetPixelColor32(int x, int y)
+{
+	// No pixels means...just return black.
+	if(mPixels == nullptr) { return Color32::Black; }
+	
+	// Calculate index into pixels array.
+	int index = (y * mWidth + x) * 4;
+	
+	// If index isn't valid...also return black.
+	if(index < 0 || index >= (mWidth * mHeight * 4)) { return Color32::Black; }
+	
+	//float r = mPixels[index] / 255.0f;
+	//float g = mPixels[index + 1] / 255.0f;
+	//float b = mPixels[index + 2] / 255.0f;
+	//float a = mPixels[index + 3] / 255.0f;
+	//return Vector4(r, g, b, a);
+	
+	unsigned char r = mPixels[index];
+	unsigned char g = mPixels[index + 1];
+	unsigned char b = mPixels[index + 2];
+	unsigned char a = mPixels[index + 3];
+	return Color32(r, g, b, a);
 }
 
 void Texture::WriteToFile(std::string filePath)
@@ -134,6 +212,22 @@ void Texture::WriteToFile(std::string filePath)
             writer.WriteUShort(0);
         }
     }
+}
+
+void Texture::GenerateOpenGlTexture()
+{
+	// Generate and bind the texture object in OpenGL.
+	glGenTextures(1, &mTextureId);
+	glBindTexture(GL_TEXTURE_2D, mTextureId);
+	
+	// Load texture data into texture object.
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+				 mWidth, mHeight, 0,
+				 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+	
+	// When texturing, use the nearest pixel to pick the color to use.
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 }
 
 void Texture::ParseFromData(char *data, int dataLength)
@@ -301,7 +395,11 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 					mPixels[index] = palette[paletteIndex + 2];
 					mPixels[index + 1] = palette[paletteIndex + 1];
 					mPixels[index + 2] = palette[paletteIndex];
-					mPixels[index + 3] = palette[paletteIndex + 3];
+					
+					// As long as the BMP format is BI_RGB, we can assume the image does not have any alpha data.
+					// In these cases, the alpha value is usually zero.
+					// But we actually want to interpret that as 255 (full alpha).
+					mPixels[index + 3] = 255; //palette[paletteIndex + 3];
 				}
 			}
 			else if(bitsPerPixel == 32)
@@ -310,7 +408,10 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 				mPixels[index + 2] = reader.ReadUByte(); // Blue
 				mPixels[index + 1] = reader.ReadUByte(); // Green
 				mPixels[index] = reader.ReadUByte(); 	 // Red
-				mPixels[index + 3] = reader.ReadUByte(); // Alpha
+				
+				// Same as for 8-bit. When BMP format is BI_RGB, there is no alpha.
+				// Placeholder is usually zero, but we want to interpret "no alpha" as "fully opaque" == 255.
+				mPixels[index + 3] = 255; //reader.ReadUByte(); // Alpha
 			}
 			else
 			{

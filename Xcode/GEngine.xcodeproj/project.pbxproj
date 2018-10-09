@@ -58,6 +58,8 @@
 		4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
 		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
 		4B7C3A161F4EB07000BB0922 /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */; };
+		4B84A13621684374003B4C3F /* Color32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13521684374003B4C3F /* Color32.cpp */; };
+		4B84A13921697223003B4C3F /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13821697223003B4C3F /* UILabel.cpp */; };
 		4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421120A905B600DE8C0D /* Cursor.cpp */; };
 		4B85421520A9276200DE8C0D /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B8E830A20F046750009A86B /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8E830920F046750009A86B /* Material.cpp */; };
@@ -207,6 +209,10 @@
 		4B7AB0441F539EB200CFBE8F /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio/Audio.h; sourceTree = "<group>"; };
 		4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioManager.cpp; path = ../Source/AudioManager.cpp; sourceTree = "<group>"; };
 		4B7C3A151F4EB07000BB0922 /* AudioManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AudioManager.h; path = ../Source/AudioManager.h; sourceTree = "<group>"; };
+		4B84A13421684374003B4C3F /* Color32.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Color32.h; path = ../Source/Color32.h; sourceTree = "<group>"; };
+		4B84A13521684374003B4C3F /* Color32.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Color32.cpp; path = ../Source/Color32.cpp; sourceTree = "<group>"; };
+		4B84A13721697223003B4C3F /* UILabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UILabel.h; path = ../Source/UILabel.h; sourceTree = "<group>"; };
+		4B84A13821697223003B4C3F /* UILabel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UILabel.cpp; path = ../Source/UILabel.cpp; sourceTree = "<group>"; };
 		4B85421020A905B600DE8C0D /* Cursor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Cursor.h; path = ../Source/Cursor.h; sourceTree = "<group>"; };
 		4B85421120A905B600DE8C0D /* Cursor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Cursor.cpp; path = ../Source/Cursor.cpp; sourceTree = "<group>"; };
 		4B85421320A9276200DE8C0D /* Yak.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Yak.h; path = ../Source/Audio/Yak.h; sourceTree = "<group>"; };
@@ -301,12 +307,14 @@
 			children = (
 				4B85421120A905B600DE8C0D /* Cursor.cpp */,
 				4B85421020A905B600DE8C0D /* Cursor.h */,
-				4B08C90E213745070028FEB3 /* UIWidget.h */,
-				4B08C90F213745070028FEB3 /* UIWidget.cpp */,
-				4B08C911213747980028FEB3 /* UIImage.h */,
-				4B08C912213747980028FEB3 /* UIImage.cpp */,
-				4BBB34B3214F72BB0069B2E9 /* Font.h */,
 				4BBB34B4214F72BB0069B2E9 /* Font.cpp */,
+				4BBB34B3214F72BB0069B2E9 /* Font.h */,
+				4B08C912213747980028FEB3 /* UIImage.cpp */,
+				4B08C911213747980028FEB3 /* UIImage.h */,
+				4B84A13821697223003B4C3F /* UILabel.cpp */,
+				4B84A13721697223003B4C3F /* UILabel.h */,
+				4B08C90F213745070028FEB3 /* UIWidget.cpp */,
+				4B08C90E213745070028FEB3 /* UIWidget.h */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -427,6 +435,8 @@
 		4B364C3520ECADBE00EFC50C /* Rendering */ = {
 			isa = PBXGroup;
 			children = (
+				4B84A13521684374003B4C3F /* Color32.cpp */,
+				4B84A13421684374003B4C3F /* Color32.h */,
 				4BF32B871F67BC34000639FB /* GLVertexArray.cpp */,
 				4BF32B881F67BC34000639FB /* GLVertexArray.h */,
 				4B8E830920F046750009A86B /* Material.cpp */,
@@ -723,12 +733,14 @@
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B9231A62117CFBC0004F4F3 /* GKActor.cpp in Sources */,
 				4B15A9561F242C55000A689F /* Renderer.cpp in Sources */,
+				4B84A13921697223003B4C3F /* UILabel.cpp in Sources */,
 				4BFCD33820CDFFB4004FF9EA /* Plane.cpp in Sources */,
 				4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */,
 				4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
 				4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */,
+				4B84A13621684374003B4C3F /* Color32.cpp in Sources */,
 				4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */,
 				4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */,
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
