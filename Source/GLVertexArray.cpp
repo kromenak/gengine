@@ -65,6 +65,16 @@ void GLVertexArray::DrawTriangles(unsigned int offset, unsigned int count)
     Draw(GL_TRIANGLES, offset, count);
 }
 
+void GLVertexArray::DrawTriangleStrips()
+{
+	DrawTriangleStrips(0, mIndexes != nullptr ? mIndexCount : mVertexCount);
+}
+
+void GLVertexArray::DrawTriangleStrips(unsigned int offset, unsigned int count)
+{
+	Draw(GL_TRIANGLE_STRIP, offset, count);
+}
+
 void GLVertexArray::DrawTriangleFans()
 {
     DrawTriangleFans(0, mIndexes != nullptr ? mIndexCount : mVertexCount);
@@ -103,6 +113,12 @@ void GLVertexArray::Draw(GLenum mode, unsigned int offset, unsigned int count)
     {
         UpdateVBO();
     }
+	
+	// If no per-vertex colors are defined, use a default of white.
+	if(mColors == nullptr)
+	{
+		glVertexAttrib4f(1, 1.0f, 1.0f, 1.0f, 1.0f);
+	}
     
     // Bind vertex array and buffer.
     // It's OK if the mIBO is NONE here - will have no effect.

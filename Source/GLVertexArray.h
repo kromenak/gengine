@@ -16,7 +16,7 @@ class GLVertexArray
 public:
     GLVertexArray(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage);
     ~GLVertexArray();
-    
+	
     void SetPositions(float* positions);
     void SetColors(float* colors);
     void SetNormals(float* normals);
@@ -26,6 +26,9 @@ public:
     
     void DrawTriangles();
     void DrawTriangles(unsigned int offset, unsigned int count);
+	
+	void DrawTriangleStrips();
+	void DrawTriangleStrips(unsigned int offset, unsigned int count);
     
     void DrawTriangleFans();
     void DrawTriangleFans(unsigned int offset, unsigned int count);
@@ -54,14 +57,20 @@ private:
     
     // Indicates that we need to update some aspect of the VBO.
     unsigned int mVboUpdateMask = 0;
-    
-    // Vertex data
+	
+	// Positions are 3 floats per vertex. Required - size must be (3 * vertexCount).
     float* mPositions = nullptr;
-    float* mColors = nullptr;
+	
+	// Colors are in RGBA order, 4 floats per vertex. Optional.
+	float* mColors = nullptr;
+	
+	// Normals are 3 floats per vertex. Optional.
     float* mNormals = nullptr;
+	
+	// UVs are 2 floats per vertex. Optional.
     float* mUV1 = nullptr;
     
-    // Index data
+    // If present, the mesh data is indexed.
     unsigned short* mIndexes = nullptr;
     unsigned int mIndexCount = 0;
     
