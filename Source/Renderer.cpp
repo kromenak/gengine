@@ -93,6 +93,15 @@ bool Renderer::Initialize()
     
     // Create OpenGL context.
     mContext = SDL_GL_CreateContext(mWindow);
+	
+	int displayCount = SDL_GetNumVideoDisplays();
+	for(int i = 0; i < displayCount; i++)
+	{
+		float hdpi = 0.0f;
+		float vdpi = 0.0f;
+		SDL_GetDisplayDPI(i, nullptr, &hdpi, &vdpi);
+		SDL_Log("%f, %f", hdpi, vdpi);
+	}
     
     // Initialize GLEW.
     glewExperimental = GL_TRUE;
