@@ -9,10 +9,6 @@
 /* Begin PBXBuildFile section */
 		4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */; };
 		4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
-		4B02A3B21F526529000540A7 /* membuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B01F526529000540A7 /* membuf.cpp */; };
-		4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B31F5269E9000540A7 /* imstream.cpp */; };
-		4B08C9092137284C0028FEB3 /* CallbackFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C9082137284C0028FEB3 /* CallbackFunction.cpp */; };
-		4B08C90C21372A710028FEB3 /* CallbackMethod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C90B21372A710028FEB3 /* CallbackMethod.cpp */; };
 		4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C90F213745070028FEB3 /* UIWidget.cpp */; };
 		4B08C913213747980028FEB3 /* UIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C912213747980028FEB3 /* UIImage.cpp */; };
 		4B09182E1FEED84D002991D4 /* Services.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182D1FEED84D002991D4 /* Services.cpp */; };
@@ -30,6 +26,86 @@
 		4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A95A1F243349000A689F /* SDLLog.cpp */; };
 		4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */; };
 		4B17D707206098B100EBD298 /* GameCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D706206098B100EBD298 /* GameCamera.cpp */; };
+		4B22F4E7217170A00065B152 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4B22F4E6217170A00065B152 /* Assets.xcassets */; };
+		4B22F4EA217170A00065B152 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4B22F4E8217170A00065B152 /* Main.storyboard */; };
+		4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421120A905B600DE8C0D /* Cursor.cpp */; };
+		4B22F4F32174073D0065B152 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB34B4214F72BB0069B2E9 /* Font.cpp */; };
+		4B22F4F42174073D0065B152 /* UIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C912213747980028FEB3 /* UIImage.cpp */; };
+		4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13821697223003B4C3F /* UILabel.cpp */; };
+		4B22F4F62174073D0065B152 /* UIWidget.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C90F213745070028FEB3 /* UIWidget.cpp */; };
+		4B22F4F7217407460065B152 /* imstream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B31F5269E9000540A7 /* imstream.cpp */; };
+		4B22F4F8217407460065B152 /* membuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B01F526529000540A7 /* membuf.cpp */; };
+		4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */; };
+		4B22F4FA217407460065B152 /* CallbackFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C9082137284C0028FEB3 /* CallbackFunction.cpp */; };
+		4B22F4FB217407460065B152 /* CallbackMethod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C90B21372A710028FEB3 /* CallbackMethod.cpp */; };
+		4B22F4FC217407470065B152 /* imstream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B31F5269E9000540A7 /* imstream.cpp */; };
+		4B22F4FD217407470065B152 /* membuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A3B01F526529000540A7 /* membuf.cpp */; };
+		4B22F4FE217407470065B152 /* StringTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */; };
+		4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C9082137284C0028FEB3 /* CallbackFunction.cpp */; };
+		4B22F500217407470065B152 /* CallbackMethod.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C90B21372A710028FEB3 /* CallbackMethod.cpp */; };
+		4B22F501217407530065B152 /* lex.yy.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */; };
+		4B22F502217407530065B152 /* sheep.tab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */; };
+		4B22F503217407530065B152 /* SheepAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4B4AE22091B80700391827 /* SheepAPI.cpp */; };
+		4B22F504217407530065B152 /* SheepCompiler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */; };
+		4B22F505217407530065B152 /* SheepManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B294CE020B9E8BC00039F48 /* SheepManager.cpp */; };
+		4B22F506217407530065B152 /* SheepScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */; };
+		4B22F507217407530065B152 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
+		4B22F508217407530065B152 /* SheepVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE75D32208D7E7B007031A3 /* SheepVM.cpp */; };
+		4B22F509217407530065B152 /* Skybox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673CB20B1119E00795582 /* Skybox.cpp */; };
+		4B22F50A2174075B0065B152 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
+		4B22F50B2174075B0065B152 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
+		4B22F50C2174075B0065B152 /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
+		4B22F50D2174075B0065B152 /* SceneData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneData.cpp */; };
+		4B22F50E2174075B0065B152 /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
+		4B22F50F2174075B0065B152 /* SDLLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A95A1F243349000A689F /* SDLLog.cpp */; };
+		4B22F5102174075B0065B152 /* Services.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182D1FEED84D002991D4 /* Services.cpp */; };
+		4B22F511217407640065B152 /* Color32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13521684374003B4C3F /* Color32.cpp */; };
+		4B22F512217407640065B152 /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
+		4B22F513217407640065B152 /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8E830920F046750009A86B /* Material.cpp */; };
+		4B22F514217407640065B152 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */; };
+		4B22F515217407640065B152 /* MeshRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshRenderer.cpp */; };
+		4B22F516217407640065B152 /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED861F5CA5F4000065EF /* Model.cpp */; };
+		4B22F517217407640065B152 /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9541F242C55000A689F /* Renderer.cpp */; };
+		4B22F518217407640065B152 /* RenderPacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B30B08D20F29594002D96D5 /* RenderPacket.cpp */; };
+		4B22F519217407640065B152 /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B8A1F67C434000639FB /* Shader.cpp */; };
+		4B22F51A217407640065B152 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621EA1FF741D800536BA6 /* Texture.cpp */; };
+		4B22F51B2174076D0065B152 /* Matrix3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0918351FEEEA51002991D4 /* Matrix3.cpp */; };
+		4B22F51C2174076D0065B152 /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
+		4B22F51D2174076D0065B152 /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BFCD33720CDFFB4004FF9EA /* Plane.cpp */; };
+		4B22F51E2174076D0065B152 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
+		4B22F51F2174076D0065B152 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B53B0C8207AFE7E00663381 /* Ray.cpp */; };
+		4B22F5202174076D0065B152 /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
+		4B22F5212174076D0065B152 /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
+		4B22F5222174076D0065B152 /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
+		4B22F524217407760065B152 /* minilzo.c in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6EE331F441DC600BB29D5 /* minilzo.c */; };
+		4B22F5252174078B0065B152 /* Actor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0B67811F78DCD40023815F /* Actor.cpp */; };
+		4B22F5262174078B0065B152 /* VertexAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */; };
+		4B22F5272174078B0065B152 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
+		4B22F5282174078B0065B152 /* AnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */; };
+		4B22F5292174078B0065B152 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
+		4B22F52A2174078B0065B152 /* GasPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319E210999810004F4F3 /* GasPlayer.cpp */; };
+		4B22F52B2174078B0065B152 /* Asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621ED1FF7532A00536BA6 /* Asset.cpp */; };
+		4B22F52C2174078B0065B152 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
+		4B22F52D2174078B0065B152 /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
+		4B22F52E2174078B0065B152 /* AudioListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D320B26F0C00795582 /* AudioListener.cpp */; };
+		4B22F52F2174078B0065B152 /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */; };
+		4B22F5302174078B0065B152 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
+		4B22F5312174078B0065B152 /* SoundtrackPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */; };
+		4B22F5322174078B0065B152 /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
+		4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
+		4B22F5342174078B0065B152 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
+		4B22F5352174078B0065B152 /* BinaryWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D020B2555E00795582 /* BinaryWriter.cpp */; };
+		4B22F5362174078B0065B152 /* CameraComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */; };
+		4B22F5372174078B0065B152 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
+		4B22F5382174078B0065B152 /* GameCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D706206098B100EBD298 /* GameCamera.cpp */; };
+		4B22F5392174078B0065B152 /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
+		4B22F53A2174078B0065B152 /* GKActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A52117CFBC0004F4F3 /* GKActor.cpp */; };
+		4B22F53B2174078B0065B152 /* IniParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */; };
+		4B22F53C2174078B0065B152 /* InputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182F1FEED86B002991D4 /* InputManager.cpp */; };
+		4B22F53D217409A10065B152 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
+		4B22F53E217409AE0065B152 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A9571F242ECF000A689F /* CoreFoundation.framework */; };
+		4B22F53F217409B30065B152 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
+		4B22F543217410830065B152 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
 		4B294CE120B9E8BC00039F48 /* SheepManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B294CE020B9E8BC00039F48 /* SheepManager.cpp */; };
 		4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */; };
 		4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */; };
@@ -69,7 +145,6 @@
 		4B9231A62117CFBC0004F4F3 /* GKActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A52117CFBC0004F4F3 /* GKActor.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
-		4BACA50D20F72663008C7FE9 /* StringTokenizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */; };
 		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
 		4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB34B4214F72BB0069B2E9 /* Font.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
@@ -159,6 +234,11 @@
 		4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoundtrackPlayer.cpp; path = ../Source/SoundtrackPlayer.cpp; sourceTree = "<group>"; };
 		4B17D705206098B100EBD298 /* GameCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameCamera.h; path = ../Source/GameCamera.h; sourceTree = "<group>"; };
 		4B17D706206098B100EBD298 /* GameCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GameCamera.cpp; path = ../Source/GameCamera.cpp; sourceTree = "<group>"; };
+		4B22F4D82171709F0065B152 /* gengine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gengine.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4B22F4E6217170A00065B152 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		4B22F4E9217170A00065B152 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		4B22F4EB217170A00065B152 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4B22F4EE217170A00065B152 /* gengine.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = gengine.entitlements; sourceTree = "<group>"; };
 		4B294CDF20B9E8BC00039F48 /* SheepManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepManager.h; path = ../Source/Sheep/SheepManager.h; sourceTree = "<group>"; };
 		4B294CE020B9E8BC00039F48 /* SheepManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepManager.cpp; path = ../Source/Sheep/SheepManager.cpp; sourceTree = "<group>"; };
 		4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScript.cpp; path = ../Source/Sheep/SheepScript.cpp; sourceTree = "<group>"; };
@@ -172,7 +252,6 @@
 		4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepScanner.h; path = ../Source/Sheep/SheepScanner.h; sourceTree = "<group>"; };
 		4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepCompiler.cpp; path = ../Source/Sheep/SheepCompiler.cpp; sourceTree = "<group>"; };
 		4B2ACE121F25D310003EC7FE /* SheepCompiler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SheepCompiler.h; path = ../Source/Sheep/SheepCompiler.h; sourceTree = "<group>"; };
-		4B2D75A71F53667000900417 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B2E7A5A2039FCF0001A5B9C /* IniParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IniParser.h; path = ../Source/IniParser.h; sourceTree = "<group>"; };
 		4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = IniParser.cpp; path = ../Source/IniParser.cpp; sourceTree = "<group>"; };
 		4B2E7A5D203A0425001A5B9C /* SIF.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SIF.h; path = ../Source/SIF.h; sourceTree = "<group>"; };
@@ -299,6 +378,16 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4B22F4D52171709F0065B152 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4B22F53F217409B30065B152 /* OpenGL.framework in Frameworks */,
+				4B22F53E217409AE0065B152 /* CoreFoundation.framework in Frameworks */,
+				4B22F53D217409A10065B152 /* SDL2.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -347,6 +436,7 @@
 			children = (
 				4B15A9441F241DC8000A689F /* GEngine-MacOS */,
 				4B11129B1F820A6D00AFDDFC /* GEngine-Tests */,
+				4B22F4D82171709F0065B152 /* gengine.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -430,6 +520,17 @@
 				4BE75D31208D7E7B007031A3 /* SheepVM.h */,
 			);
 			name = Sheep;
+			sourceTree = "<group>";
+		};
+		4B22F4D92171709F0065B152 /* MacOS */ = {
+			isa = PBXGroup;
+			children = (
+				4B22F4E6217170A00065B152 /* Assets.xcassets */,
+				4B22F4E8217170A00065B152 /* Main.storyboard */,
+				4B22F4EB217170A00065B152 /* Info.plist */,
+				4B22F4EE217170A00065B152 /* gengine.entitlements */,
+			);
+			path = MacOS;
 			sourceTree = "<group>";
 		};
 		4B364C3520ECADBE00EFC50C /* Rendering */ = {
@@ -599,8 +700,8 @@
 			isa = PBXGroup;
 			children = (
 				4B0E2A561F74F5570019D4AD /* Assets */,
+				4B22F4D92171709F0065B152 /* MacOS */,
 				4B15A94D1F241FEA000A689F /* Frameworks */,
-				4B2D75A71F53667000900417 /* Info.plist */,
 				4B15A9451F241DC8000A689F /* Products */,
 				4B15A9531F2428CD000A689F /* Source */,
 				4B1112A51F820AAB00AFDDFC /* Tests */,
@@ -645,6 +746,24 @@
 			productReference = 4B15A9441F241DC8000A689F /* GEngine-MacOS */;
 			productType = "com.apple.product-type.tool";
 		};
+		4B22F4D72171709F0065B152 /* gengine */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4B22F4F1217170A00065B152 /* Build configuration list for PBXNativeTarget "gengine" */;
+			buildPhases = (
+				4B22F4D42171709F0065B152 /* Sources */,
+				4B22F4D52171709F0065B152 /* Frameworks */,
+				4B22F4D62171709F0065B152 /* Resources */,
+				4B22F540217409C60065B152 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = gengine;
+			productName = gengine;
+			productReference = 4B22F4D82171709F0065B152 /* gengine.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -661,6 +780,10 @@
 						CreatedOnToolsVersion = 8.3.3;
 						ProvisioningStyle = Automatic;
 					};
+					4B22F4D72171709F0065B152 = {
+						CreatedOnToolsVersion = 10.0;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 4BF8A46D1F24185300F0FB91 /* Build configuration list for PBXProject "GEngine" */;
@@ -669,6 +792,7 @@
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 4BF8A4691F24185300F0FB91;
 			productRefGroup = 4B15A9451F241DC8000A689F /* Products */;
@@ -677,9 +801,22 @@
 			targets = (
 				4B15A9431F241DC8000A689F /* GEngine-MacOS */,
 				4B11129A1F820A6D00AFDDFC /* GEngine-Tests */,
+				4B22F4D72171709F0065B152 /* gengine */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4B22F4D62171709F0065B152 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4B22F4E7217170A00065B152 /* Assets.xcassets in Resources */,
+				4B22F4EA217170A00065B152 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
 		4B15A9591F242EFB000A689F /* ShellScript */ = {
@@ -693,7 +830,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = ./CopyLibraries.sh;
+			shellScript = "./CopyLibraries.sh\n";
+		};
+		4B22F540217409C60065B152 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./CopyLibraries.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -736,17 +890,17 @@
 				4B84A13921697223003B4C3F /* UILabel.cpp in Sources */,
 				4BFCD33820CDFFB4004FF9EA /* Plane.cpp in Sources */,
 				4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */,
+				4B22F4F8217407460065B152 /* membuf.cpp in Sources */,
 				4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
+				4B22F4FA217407460065B152 /* CallbackFunction.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
-				4B02A3B51F5269E9000540A7 /* imstream.cpp in Sources */,
 				4B84A13621684374003B4C3F /* Color32.cpp in Sources */,
 				4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */,
 				4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */,
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
-				4B08C9092137284C0028FEB3 /* CallbackFunction.cpp in Sources */,
 				4B30B08E20F29594002D96D5 /* RenderPacket.cpp in Sources */,
 				4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */,
 				4B294CE120B9E8BC00039F48 /* SheepManager.cpp in Sources */,
@@ -758,24 +912,25 @@
 				4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
+				4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
-				4BACA50D20F72663008C7FE9 /* StringTokenizer.cpp in Sources */,
 				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
 				4B2E7A65203A6072001A5B9C /* SceneData.cpp in Sources */,
 				4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B8E830A20F046750009A86B /* Material.cpp in Sources */,
+				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
 				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
 				4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */,
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
+				4B22F4FB217407460065B152 /* CallbackMethod.cpp in Sources */,
 				4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */,
 				4B08C913213747980028FEB3 /* UIImage.cpp in Sources */,
 				4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */,
 				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
-				4B02A3B21F526529000540A7 /* membuf.cpp in Sources */,
 				4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */,
 				4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */,
 				4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */,
@@ -787,12 +942,99 @@
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
 				4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */,
-				4B08C90C21372A710028FEB3 /* CallbackMethod.cpp in Sources */,
 				4BF32B8C1F67C434000639FB /* Shader.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4B22F4D42171709F0065B152 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4B22F511217407640065B152 /* Color32.cpp in Sources */,
+				4B22F516217407640065B152 /* Model.cpp in Sources */,
+				4B22F52B2174078B0065B152 /* Asset.cpp in Sources */,
+				4B22F51F2174076D0065B152 /* Ray.cpp in Sources */,
+				4B22F50A2174075B0065B152 /* BSP.cpp in Sources */,
+				4B22F50B2174075B0065B152 /* NVC.cpp in Sources */,
+				4B22F505217407530065B152 /* SheepManager.cpp in Sources */,
+				4B22F5322174078B0065B152 /* Yak.cpp in Sources */,
+				4B22F5372174078B0065B152 /* Component.cpp in Sources */,
+				4B22F5262174078B0065B152 /* VertexAnimation.cpp in Sources */,
+				4B22F53A2174078B0065B152 /* GKActor.cpp in Sources */,
+				4B22F51A217407640065B152 /* Texture.cpp in Sources */,
+				4B22F5352174078B0065B152 /* BinaryWriter.cpp in Sources */,
+				4B22F50E2174075B0065B152 /* SIF.cpp in Sources */,
+				4B22F508217407530065B152 /* SheepVM.cpp in Sources */,
+				4B22F52F2174078B0065B152 /* AudioManager.cpp in Sources */,
+				4B22F4FC217407470065B152 /* imstream.cpp in Sources */,
+				4B22F50C2174075B0065B152 /* Scene.cpp in Sources */,
+				4B22F4F62174073D0065B152 /* UIWidget.cpp in Sources */,
+				4B22F5342174078B0065B152 /* BinaryReader.cpp in Sources */,
+				4B22F5312174078B0065B152 /* SoundtrackPlayer.cpp in Sources */,
+				4B22F4FD217407470065B152 /* membuf.cpp in Sources */,
+				4B22F5302174078B0065B152 /* Soundtrack.cpp in Sources */,
+				4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */,
+				4B22F50D2174075B0065B152 /* SceneData.cpp in Sources */,
+				4B22F503217407530065B152 /* SheepAPI.cpp in Sources */,
+				4B22F501217407530065B152 /* lex.yy.cc in Sources */,
+				4B22F5362174078B0065B152 /* CameraComponent.cpp in Sources */,
+				4B22F515217407640065B152 /* MeshRenderer.cpp in Sources */,
+				4B22F509217407530065B152 /* Skybox.cpp in Sources */,
+				4B22F53B2174078B0065B152 /* IniParser.cpp in Sources */,
+				4B22F5392174078B0065B152 /* GEngine.cpp in Sources */,
+				4B22F518217407640065B152 /* RenderPacket.cpp in Sources */,
+				4B22F502217407530065B152 /* sheep.tab.cc in Sources */,
+				4B22F51B2174076D0065B152 /* Matrix3.cpp in Sources */,
+				4B22F506217407530065B152 /* SheepScript.cpp in Sources */,
+				4B22F51D2174076D0065B152 /* Plane.cpp in Sources */,
+				4B22F5202174076D0065B152 /* Vector2.cpp in Sources */,
+				4B22F500217407470065B152 /* CallbackMethod.cpp in Sources */,
+				4B22F507217407530065B152 /* SheepScriptBuilder.cpp in Sources */,
+				4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */,
+				4B22F51C2174076D0065B152 /* Matrix4.cpp in Sources */,
+				4B22F52C2174078B0065B152 /* AssetManager.cpp in Sources */,
+				4B22F52A2174078B0065B152 /* GasPlayer.cpp in Sources */,
+				4B22F52E2174078B0065B152 /* AudioListener.cpp in Sources */,
+				4B22F514217407640065B152 /* Mesh.cpp in Sources */,
+				4B22F5212174076D0065B152 /* Vector3.cpp in Sources */,
+				4B22F5102174075B0065B152 /* Services.cpp in Sources */,
+				4B22F5272174078B0065B152 /* Animation.cpp in Sources */,
+				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
+				4B22F50F2174075B0065B152 /* SDLLog.cpp in Sources */,
+				4B22F52D2174078B0065B152 /* Audio.cpp in Sources */,
+				4B22F5382174078B0065B152 /* GameCamera.cpp in Sources */,
+				4B22F5252174078B0065B152 /* Actor.cpp in Sources */,
+				4B22F53C2174078B0065B152 /* InputManager.cpp in Sources */,
+				4B22F512217407640065B152 /* GLVertexArray.cpp in Sources */,
+				4B22F5292174078B0065B152 /* GAS.cpp in Sources */,
+				4B22F4F42174073D0065B152 /* UIImage.cpp in Sources */,
+				4B22F5282174078B0065B152 /* AnimationPlayer.cpp in Sources */,
+				4B22F517217407640065B152 /* Renderer.cpp in Sources */,
+				4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */,
+				4B22F51E2174076D0065B152 /* Quaternion.cpp in Sources */,
+				4B22F5222174076D0065B152 /* Vector4.cpp in Sources */,
+				4B22F524217407760065B152 /* minilzo.c in Sources */,
+				4B22F543217410830065B152 /* Main.cpp in Sources */,
+				4B22F519217407640065B152 /* Shader.cpp in Sources */,
+				4B22F4F32174073D0065B152 /* Font.cpp in Sources */,
+				4B22F4FE217407470065B152 /* StringTokenizer.cpp in Sources */,
+				4B22F513217407640065B152 /* Material.cpp in Sources */,
+				4B22F504217407530065B152 /* SheepCompiler.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		4B22F4E8217170A00065B152 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				4B22F4E9217170A00065B152 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		4B11129F1F820A6D00AFDDFC /* Debug */ = {
@@ -1027,6 +1269,119 @@
 			};
 			name = Release;
 		};
+		4B22F4EF217170A00065B152 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = gengine/gengine.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/minilzo",
+					"$(SRCROOT)/../Libraries/zlib/include",
+					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/fmod/inc",
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/MacOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/zlib/lib/mac",
+					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
+					"$(SRCROOT)/../Libraries/fmod/lib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lGLEW.1.12.0",
+					"-lfmod",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		4B22F4F0217170A00065B152 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = gengine/gengine.entitlements;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/minilzo",
+					"$(SRCROOT)/../Libraries/zlib/include",
+					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/fmod/inc",
+				);
+				INFOPLIST_FILE = "$(SRCROOT)/MacOS/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/zlib/lib/mac",
+					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
+					"$(SRCROOT)/../Libraries/fmod/lib",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lGLEW.1.12.0",
+					"-lfmod",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		4BF8A46E1F24185300F0FB91 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1114,6 +1469,15 @@
 			buildConfigurations = (
 				4B15A94A1F241DC8000A689F /* Debug */,
 				4B15A94B1F241DC8000A689F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4B22F4F1217170A00065B152 /* Build configuration list for PBXNativeTarget "gengine" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4B22F4EF217170A00065B152 /* Debug */,
+				4B22F4F0217170A00065B152 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
