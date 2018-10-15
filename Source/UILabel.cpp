@@ -70,20 +70,31 @@ void UILabel::GenerateMesh()
 	// If the text size is zero, we don't need to continue.
 	if(mText.size() == 0) { return; }
 	
-	// 4 vertices per letter; each vertex has position and UVs.
+	// 4 vertices per character; each vertex has position and UVs.
 	int vertexCount = (int)mText.size() * 4;
-	int vertexSize = (3 * sizeof(float) + 2 * sizeof(float));
+	int vertexSize = (9 * sizeof(float));
 	
 	// Create mesh of desired size and usage.
 	mMesh = new Mesh(vertexCount, vertexSize, MeshUsage::Static);
 	
 	// Create arrays to hold vertex positions and UVs.
-	float* positions = new float[vertexCount * 3];
-	unsigned short* indexes = new unsigned short[vertexCount * 6];
-	float* uvs = new float[vertexCount * 2];
+	int positionSize = vertexCount * 3;
+	int uvSize = vertexCount * 2;
+	int colorSize = vertexCount * 4;
+	int indexSize = (int)mText.size() * 6;
+	
+	float* positions = new float[positionSize];
+	float* uvs = new float[uvSize];
+	float* colors = new float[colorSize];
+	unsigned short* indexes = new unsigned short[indexSize];
+	
+	// Calculate desired pixel height from points.
+	//float desiredHeight = (mFontSizePt / 72.0f) * 96.0f;
+	//float desiredWidth = (desiredPixelHeight / glyph.height) * glyph.width;
 	
 	// Iterate over each char of the text and generate the needed quad per letter.
 	// Each char maps to a glyph from the font, which contains size and UV data.
+	Color32 defaultFontColor = mFont->GetDefaultColor();
 	float xPos = 0.0f;
 	for(int i = 0; i < mText.size(); i++)
 	{
@@ -103,6 +114,11 @@ void UILabel::GenerateMesh()
 		uvs[i * 8] = glyph.topLeftUvCoord.GetX();
 		uvs[i * 8 + 1] = glyph.topLeftUvCoord.GetY();
 		
+		colors[i * 16] = (float)defaultFontColor.GetR() / 255.0f;
+		colors[i * 16 + 1] = (float)defaultFontColor.GetG() / 255.0f;
+		colors[i * 16 + 2] = (float)defaultFontColor.GetB() / 255.0f;
+		colors[i * 16 + 3] = (float)defaultFontColor.GetA() / 255.0f;
+		
 		// Top-Right
 		positions[i * 12 + 3] = rightX;
 		positions[i * 12 + 4] = topY;
@@ -110,6 +126,11 @@ void UILabel::GenerateMesh()
 		
 		uvs[i * 8 + 2] = glyph.topRightUvCoord.GetX();
 		uvs[i * 8 + 3] = glyph.topRightUvCoord.GetY();
+		
+		colors[i * 16 + 4] = (float)defaultFontColor.GetR() / 255.0f;
+		colors[i * 16 + 5] = (float)defaultFontColor.GetG() / 255.0f;
+		colors[i * 16 + 6] = (float)defaultFontColor.GetB() / 255.0f;
+		colors[i * 16 + 7] = (float)defaultFontColor.GetA() / 255.0f;
 		
 		// Bottom-Left
 		positions[i * 12 + 6] = leftX;
@@ -119,6 +140,11 @@ void UILabel::GenerateMesh()
 		uvs[i * 8 + 4] = glyph.bottomLeftUvCoord.GetX();
 		uvs[i * 8 + 5] = glyph.bottomRightUvCoord.GetY();
 		
+		colors[i * 16 + 8] = (float)defaultFontColor.GetR() / 255.0f;
+		colors[i * 16 + 9] = (float)defaultFontColor.GetG() / 255.0f;
+		colors[i * 16 + 10] = (float)defaultFontColor.GetB() / 255.0f;
+		colors[i * 16 + 11] = (float)defaultFontColor.GetA() / 255.0f;
+		
 		// Bottom-Right
 		positions[i * 12 + 9] = rightX;
 		positions[i * 12 + 10] = bottomY;
@@ -127,7 +153,12 @@ void UILabel::GenerateMesh()
 		uvs[i * 8 + 6] = glyph.bottomRightUvCoord.GetX();
 		uvs[i * 8 + 7] = glyph.bottomRightUvCoord.GetY();
 		
-		// Indexes for this quad will be 0, 1, 2 & 2, 3, 4
+		colors[i * 16 + 12] = (float)defaultFontColor.GetR() / 255.0f;
+		colors[i * 16 + 13] = (float)defaultFontColor.GetG() / 255.0f;
+		colors[i * 16 + 14] = (float)defaultFontColor.GetB() / 255.0f;
+		colors[i * 16 + 15] = (float)defaultFontColor.GetA() / 255.0f;
+		
+		// Indexes for this quad will be (0, 1, 2) & (2, 3, 4)
 		indexes[i * 6] = i * 4;
 		indexes[i * 6 + 1] = i * 4 + 1;
 		indexes[i * 6 + 2] = i * 4 + 2;
@@ -140,8 +171,9 @@ void UILabel::GenerateMesh()
 	
 	// Save positions and UVs to mesh.
 	mMesh->SetPositions(positions);
-	mMesh->SetIndexes(indexes, vertexCount * 6);
+	mMesh->SetColors(colors);
 	mMesh->SetUV1(uvs);
+	mMesh->SetIndexes(indexes, indexSize);
 	
 	// This mesh should render as a "triangle strip".
 	// Vtx 1,2,3 is one triangle. Vtx 2,3,4 is the next triangle.

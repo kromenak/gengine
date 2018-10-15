@@ -14,6 +14,7 @@
 #include "MeshRenderer.h"
 #include "Services.h"
 #include "SoundtrackPlayer.h"
+#include "UIImage.h"
 #include "UILabel.h"
 
 extern Mesh* quad;
@@ -121,11 +122,15 @@ Scene::Scene(std::string name, std::string timeCode) :
     }
 	
     Actor* uiActor = new Actor();
-	uiActor->SetPosition(Vector3(-400, 0, 0));
+	uiActor->SetPosition(Vector3(0, 0, 0));
+	
 	UILabel* label = uiActor->AddComponent<UILabel>();
-	label->SetFont(Services::GetAssets()->LoadFont("F_GRAPHITE"));
-	label->SetText("ABYZwx)-=[]<>LNSstuv");
-	label->SetSize(6, 6);
+	label->SetFont(Services::GetAssets()->LoadFont("F_RYE"));
+	label->SetText("Test");
+	label->SetSize(4, 4);
+	
+	UIImage* image = uiActor->AddComponent<UIImage>();
+	image->SetTexture(Services::GetAssets()->LoadTexture("msg_yes_u"));
 	
 	// For debugging - render walker bounds overlay on game world.
 	{
