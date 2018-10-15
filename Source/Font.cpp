@@ -157,22 +157,23 @@ void Font::ParseFromData(char* data, int dataLength)
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
 			{
-				//TODO
-				//Alpha Blend
-				//Color Replacement
+				//TODO: Alpha Blend, Color Replacement
+				//TODO: Maybe not needed? We can render everything with alpha blended.
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "color"))
 			{
-				//TODO: Defined when type is "Color Replacement".
+				// Defined when type is "Color Replacement".
+				mForegroundColor = keyValue.GetValueAsColor32();
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "foreground color"))
 			{
-				//TODO: Defined when type is "Alpha Blend".
+				// Defined when type is "Alpha Blend".
+				mForegroundColor = keyValue.GetValueAsColor32();
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "background color"))
 			{
 				// Defined when type is "Alpha Blend".
-				backgroundColor = keyValue.GetValueAsColor32();
+				mBackgroundColor = keyValue.GetValueAsColor32();
 			}
 			else
 			{

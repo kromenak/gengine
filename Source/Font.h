@@ -41,6 +41,8 @@ public:
 	Texture* GetTexture() const { return mFontTexture; }
 	Glyph& GetGlyph(char character);
 	
+	Color32 GetDefaultColor() const { return mForegroundColor; }
+	
 private:
 	// A string containing all characters that can be rendered by this font.
 	// Each character is in the same order it appears in the font texture.
@@ -55,14 +57,19 @@ private:
 	// A single blue dot in column 0 signifies the "base" of each glyph.
 	Texture* mFontTexture = nullptr;
 	
+	// The line count in the font texture.
+	// Used to determine how many lines of glyphs exist in the texture.
+	int mLineCount = 1;
+	
 	// When rendering, we can have extra space between characters or lines.
 	int mExtraCharacterSpacing = 0;
 	int mExtraLineSpacing = 0;
 	
-	int mLineCount = 1;
-	
-	// Background color (used for transparency).
-	Color32 backgroundColor = Color32::Magenta;
+	// Foreground and background colors.
+	// For "Alpha Blend" type fonts, background color indicates the color that should be transparent.
+	// For either "Alpha Blend" or "Color Replacement", foreground color indicates text color.
+	Color32 mBackgroundColor = Color32::Magenta;
+	Color32 mForegroundColor = Color32::White;
 	
 	// A mapping from character to glyph.
 	std::unordered_map<char, Glyph> mFontGlyphs;
