@@ -10,6 +10,7 @@
 #include "Component.h"
 
 #include "Matrix4.h"
+#include "Rect.h"
 #include "Vector2.h"
 
 class UIWidget : public Component
@@ -23,6 +24,8 @@ public:
 	
 	void SetSize(float x, float y) { mSize.SetX(x); mSize.SetY(y); }
 	void SetSize(Vector2 size) { mSize = size; }
+	
+	Rect GetScreenRect();
     
 protected:
 	// The rectangular size of the widget.

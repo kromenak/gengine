@@ -23,6 +23,16 @@ UIWidget::~UIWidget()
     Services::GetRenderer()->RemoveUIWidget(this);
 }
 
+Rect UIWidget::GetScreenRect()
+{
+	// Based on anchor, calculate our anchor position on-screen.
+	Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
+	Vector3 anchorPos(windowSize.GetX() * mAnchor.GetX(), windowSize.GetY() * mAnchor.GetY());
+	Vector3 pos = anchorPos + mOwner->GetPosition();
+	
+	return Rect(pos.GetX() - (mSize.GetX() / 2), pos.GetY() - (mSize.GetY() / 2), mSize.GetX(), mSize.GetY());
+}
+
 Matrix4 UIWidget::GetUIWorldTransformMatrix()
 {
 	// Scale by the actor's scale and the size of the UI widget.
