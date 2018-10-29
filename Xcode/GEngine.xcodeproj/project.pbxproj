@@ -15,6 +15,8 @@
 		4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182F1FEED86B002991D4 /* InputManager.cpp */; };
 		4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0918351FEEEA51002991D4 /* Matrix3.cpp */; };
 		4B0B67831F78DCD40023815F /* Actor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0B67811F78DCD40023815F /* Actor.cpp */; };
+		4B0E44F62186878A00BD1CE1 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0E44F52186878A00BD1CE1 /* Rect.cpp */; };
+		4B0E44F72186878A00BD1CE1 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0E44F52186878A00BD1CE1 /* Rect.cpp */; };
 		4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112A71F820B0400AFDDFC /* TestMain.cpp */; };
 		4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */; };
 		4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
@@ -129,6 +131,8 @@
 		4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */; };
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */; };
+		4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76DFBB21867D2800BAECC4 /* UIButton.cpp */; };
+		4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76DFBB21867D2800BAECC4 /* UIButton.cpp */; };
 		4B79F8071F9C09F2008C6FEE /* VectorTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */; };
 		4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
@@ -214,6 +218,8 @@
 		4B0B67821F78DCD40023815F /* Actor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Actor.h; path = ../Source/Actor.h; sourceTree = "<group>"; };
 		4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Diffuse-Tex.frag"; path = "../Assets/3D-Diffuse-Tex.frag"; sourceTree = "<group>"; };
 		4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Diffuse-Tex.vert"; path = "../Assets/3D-Diffuse-Tex.vert"; sourceTree = "<group>"; };
+		4B0E44F42186878A00BD1CE1 /* Rect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../Source/Rect.h; sourceTree = "<group>"; };
+		4B0E44F52186878A00BD1CE1 /* Rect.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Rect.cpp; path = ../Source/Rect.cpp; sourceTree = "<group>"; };
 		4B11129B1F820A6D00AFDDFC /* GEngine-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B1112A61F820AC100AFDDFC /* catch.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = catch.hh; path = ../Tests/catch.hh; sourceTree = "<group>"; };
 		4B1112A71F820B0400AFDDFC /* TestMain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TestMain.cpp; path = ../Tests/TestMain.cpp; sourceTree = "<group>"; };
@@ -283,6 +289,8 @@
 		4B76B57E1F35B175003F63E5 /* BinaryReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryReader.cpp; path = ../Source/Barn/BinaryReader.cpp; sourceTree = "<group>"; };
 		4B76B57F1F35B175003F63E5 /* BinaryReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BinaryReader.h; path = ../Source/Barn/BinaryReader.h; sourceTree = "<group>"; };
 		4B76B5821F3788FA003F63E5 /* BarnAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnAsset.h; path = ../Source/Barn/BarnAsset.h; sourceTree = "<group>"; };
+		4B76DFBA21867D2800BAECC4 /* UIButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UIButton.h; path = ../Source/UIButton.h; sourceTree = "<group>"; };
+		4B76DFBB21867D2800BAECC4 /* UIButton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UIButton.cpp; path = ../Source/UIButton.cpp; sourceTree = "<group>"; };
 		4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VectorTests.cpp; path = ../Tests/VectorTests.cpp; sourceTree = "<group>"; };
 		4B7AB0431F539EB200CFBE8F /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Audio.cpp; path = ../Source/Audio/Audio.cpp; sourceTree = "<group>"; };
 		4B7AB0441F539EB200CFBE8F /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio/Audio.h; sourceTree = "<group>"; };
@@ -398,6 +406,8 @@
 				4B85421020A905B600DE8C0D /* Cursor.h */,
 				4BBB34B4214F72BB0069B2E9 /* Font.cpp */,
 				4BBB34B3214F72BB0069B2E9 /* Font.h */,
+				4B76DFBB21867D2800BAECC4 /* UIButton.cpp */,
+				4B76DFBA21867D2800BAECC4 /* UIButton.h */,
 				4B08C912213747980028FEB3 /* UIImage.cpp */,
 				4B08C911213747980028FEB3 /* UIImage.h */,
 				4B84A13821697223003B4C3F /* UILabel.cpp */,
@@ -574,6 +584,8 @@
 				4B4300851FB7EE44009EDE58 /* Quaternion.h */,
 				4B53B0C8207AFE7E00663381 /* Ray.cpp */,
 				4B53B0C7207AFE7E00663381 /* Ray.h */,
+				4B0E44F52186878A00BD1CE1 /* Rect.cpp */,
+				4B0E44F42186878A00BD1CE1 /* Rect.h */,
 				4BF751101F773E1A00B79D2F /* Vector2.cpp */,
 				4BF751111F773E1A00B79D2F /* Vector2.h */,
 				4B4EED891F5CACEF000065EF /* Vector3.cpp */,
@@ -913,6 +925,7 @@
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
 				4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */,
+				4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
 				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
@@ -935,6 +948,7 @@
 				4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */,
 				4BE6EE341F441DC600BB29D5 /* minilzo.c in Sources */,
 				4B76B5801F35B175003F63E5 /* BinaryReader.cpp in Sources */,
+				4B0E44F62186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
 				4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */,
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
@@ -990,6 +1004,7 @@
 				4B22F5202174076D0065B152 /* Vector2.cpp in Sources */,
 				4B22F500217407470065B152 /* CallbackMethod.cpp in Sources */,
 				4B22F507217407530065B152 /* SheepScriptBuilder.cpp in Sources */,
+				4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */,
 				4B22F51C2174076D0065B152 /* Matrix4.cpp in Sources */,
 				4B22F52C2174078B0065B152 /* AssetManager.cpp in Sources */,
@@ -1012,6 +1027,7 @@
 				4B22F517217407640065B152 /* Renderer.cpp in Sources */,
 				4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */,
 				4B22F51E2174076D0065B152 /* Quaternion.cpp in Sources */,
+				4B0E44F72186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4B22F5222174076D0065B152 /* Vector4.cpp in Sources */,
 				4B22F524217407760065B152 /* minilzo.c in Sources */,
 				4B22F543217410830065B152 /* Main.cpp in Sources */,

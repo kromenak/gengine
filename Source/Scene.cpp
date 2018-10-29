@@ -14,6 +14,7 @@
 #include "MeshRenderer.h"
 #include "Services.h"
 #include "SoundtrackPlayer.h"
+#include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
 
@@ -131,6 +132,12 @@ Scene::Scene(std::string name, std::string timeCode) :
 	
 	UIImage* image = uiActor->AddComponent<UIImage>();
 	image->SetTexture(Services::GetAssets()->LoadTexture("msg_yes_u"));
+	
+	UIButton* button = uiActor->AddComponent<UIButton>();
+	button->SetUpTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_U"));
+	button->SetDownTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_D"));
+	button->SetHoverTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_H"));
+	button->SetDisabledTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_X"));
 	
 	// For debugging - render walker bounds overlay on game world.
 	{
