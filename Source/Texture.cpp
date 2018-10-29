@@ -173,7 +173,7 @@ void Texture::WriteToFile(std::string filePath)
     
     // BMP HEADER
     writer.WriteString("BM");
-    writer.WriteUInt(0);    // Size of file in bytes
+    writer.WriteUInt(0);    // Size of file in bytes. Optional to fill in.
     writer.WriteUShort(0);  // Reserved/empty
     writer.WriteUShort(0);  // Reserved/empty
     writer.WriteUInt(54);   // Offset to image data
@@ -194,9 +194,15 @@ void Texture::WriteToFile(std::string filePath)
     // COLOR TABLE - Only needed for 8BPP or less.
     
     // PIXELS
-    //int rowSize = Math::FloorToInt((32.0f * mWidth + 31.0f) / 32.0f) * 4;
+	// Calculate the number of bytes that should be present in each row.
+	// Each row needs a 4-byte alignment, so this rounds us up to nearest 4 bytes.
+	// Note that for a 32-bit (4bpp) image...this doesn't really matter. But for other bpp sizes, it would.
+	int rowSize = Math::FloorToInt((32.0f * mWidth + 31.0f) / 32.0f) * 4;
+	
+	// Write out one row at a time, bottom to top, left to right, per BMP format standard.
     for(int y = mHeight - 1; y >= 0; y--)
     {
+		int bytesWritten = 0;
         for(int x = 0; x < mWidth; x++)
         {
             int index = (y * mWidth + x) * 4;
@@ -204,13 +210,18 @@ void Texture::WriteToFile(std::string filePath)
             writer.WriteUByte(mPixels[index + 1]); // Green
 			writer.WriteUByte(mPixels[index]); 	   // Red
             writer.WriteUByte(0); // Alpha is ignored
+			bytesWritten += 4;
         }
-        
-        // Add padding if we need it.
-        if((mWidth & 0x00000001) != 0)
-        {
-            writer.WriteUShort(0);
-        }
+		
+		// Each row needs to be a certain size to be a multiple of 4 bytes.
+		// If we haven't written enough bytes, write until we do.
+		// Note that for 32-bit (4bpp) images, this shouldn't ever be a problem.
+		while(bytesWritten < rowSize)
+		{
+			writer.WriteUByte(0);
+			bytesWritten++;
+		}
+		
     }
 }
 
