@@ -9,13 +9,14 @@ layout(location = 3) in vec2 vUV1;
 out vec4 fColor;
 out vec2 fUV1;
 
-uniform mat4 uViewProj;
 uniform mat4 uWorldTransform;
+uniform mat4 uViewProj;
+uniform vec4 uColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 void main()
 {
     // Pass through color attribute.
-    fColor = vColor;
+	fColor = vColor * uColor;
     
     // Pass through the UV attribute.
     fUV1 = vUV1;
