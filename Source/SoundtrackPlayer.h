@@ -25,9 +25,10 @@ class SoundtrackPlayer : public Component
 public:
     SoundtrackPlayer(Actor* owner);
     
-    void Update(float deltaTime) override;
-    
     void Play(Soundtrack* soundtrack);
+	
+protected:
+	void UpdateInternal(float deltaTime) override;
     
 private:
     // The soundtrack currently being played.

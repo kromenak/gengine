@@ -18,14 +18,15 @@ class AnimationPlayer : public Component
 public:
     AnimationPlayer(Actor* owner);
     
-    void Update(float deltaTime) override;
-    
     void Play(Animation* animation);
     void Play(VertexAnimation* vertexAnimation);
     
     void SetMeshRenderer(MeshRenderer* meshRenderer) { mMeshRenderer = meshRenderer; }
     MeshRenderer* GetMeshRenderer() { return mMeshRenderer; }
-    
+	
+protected:
+	void UpdateInternal(float deltaTime) override;
+	
 private:
     // Needs a MeshRenderer to update the mesh data every frame.
     MeshRenderer* mMeshRenderer = nullptr;

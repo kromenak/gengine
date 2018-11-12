@@ -10,8 +10,6 @@
 #include "Actor.h"
 #include "Services.h"
 
-
-
 TYPE_DEF_CHILD(Component, AudioListener);
 
 AudioListener::AudioListener(Actor* owner) : Component(owner)
@@ -19,7 +17,8 @@ AudioListener::AudioListener(Actor* owner) : Component(owner)
     
 }
 
-void AudioListener::Update(float deltaTime)
+void AudioListener::UpdateInternal(float deltaTime)
 {
-    Services::GetAudio()->UpdateListener(mOwner->GetPosition(), Vector3::Zero, mOwner->GetForward(), Vector3::UnitY);
+	Transform* transform = mOwner->GetTransform();
+    Services::GetAudio()->UpdateListener(transform->GetPosition(), Vector3::Zero, transform->GetForward(), Vector3::UnitY);
 }

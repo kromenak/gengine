@@ -12,22 +12,6 @@ SoundtrackPlayer::SoundtrackPlayer(Actor* owner) : Component(owner)
     
 }
 
-void SoundtrackPlayer::Update(float deltaTime)
-{
-    if(mSoundtrack == nullptr) { return; }
-    if(mSoundtrackNodes.size() == 0) { return; }
-    
-    // Decrement timer. When it gets to zero, we move onto the next node.
-    if(mTimer >= 0.0f)
-    {
-        mTimer -= deltaTime;
-        if(mTimer <= 0.0f)
-        {
-            ProcessNextNode();
-        }
-    }
-}
-
 void SoundtrackPlayer::Play(Soundtrack *soundtrack)
 {
     //TODO: If an existing sound track exists, clean it up.
@@ -74,4 +58,20 @@ void SoundtrackPlayer::ProcessNextNode()
     SoundtrackNode* node = mSoundtrackNodes[mCurrentNodeIndex];
     int waitMilliseconds = node->Execute();
     mTimer = (float)waitMilliseconds / 1000.0f;
+}
+
+void SoundtrackPlayer::UpdateInternal(float deltaTime)
+{
+	if(mSoundtrack == nullptr) { return; }
+	if(mSoundtrackNodes.size() == 0) { return; }
+	
+	// Decrement timer. When it gets to zero, we move onto the next node.
+	if(mTimer >= 0.0f)
+	{
+		mTimer -= deltaTime;
+		if(mTimer <= 0.0f)
+		{
+			ProcessNextNode();
+		}
+	}
 }

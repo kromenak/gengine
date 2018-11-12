@@ -17,13 +17,14 @@ class GasPlayer : public Component
 public:
     GasPlayer(Actor* owner);
     
-    void Update(float deltaTime) override;
-    
     void SetGas(GAS* gas) { mGas = gas; mNodeIndex = 0; }
     
     void SetAnimationPlayer(AnimationPlayer* animationPlayer) { mAnimationPlayer = animationPlayer; }
     AnimationPlayer* GetAnimationPlayer() { return mAnimationPlayer; }
-    
+	
+protected:
+	void UpdateInternal(float deltaTime) override;
+	
 private:
     // Animation player.
     AnimationPlayer* mAnimationPlayer = nullptr;

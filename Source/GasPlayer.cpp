@@ -14,7 +14,7 @@ GasPlayer::GasPlayer(Actor* owner) : Component(owner)
     
 }
 
-void GasPlayer::Update(float deltaTime)
+void GasPlayer::UpdateInternal(float deltaTime)
 {
     if(mGas == nullptr) { return; }
     

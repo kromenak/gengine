@@ -17,10 +17,12 @@ class Component
 public:
     Component(Actor* owner);
     
-    virtual void Update(float deltaTime) { }
+	void Update(float deltaTime) { UpdateInternal(deltaTime); }
     
     Actor* GetOwner() { return mOwner; }
     
 protected:
     Actor* mOwner;
+	
+	virtual void UpdateInternal(float deltaTime) { }
 };

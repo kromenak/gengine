@@ -14,6 +14,7 @@ class AudioListener : public Component
     TYPE_DECL_CHILD();
 public:
     AudioListener(Actor* owner);
-    
-    void Update(float deltaTime) override;
+	
+protected:
+    void UpdateInternal(float deltaTime) override;
 };
