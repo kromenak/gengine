@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */; };
 		4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
+		4B046E90218E855600E56341 /* Mover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E8F218E855600E56341 /* Mover.cpp */; };
+		4B046E91218E855600E56341 /* Mover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E8F218E855600E56341 /* Mover.cpp */; };
+		4B046E94218FB10F00E56341 /* Debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E93218FB10F00E56341 /* Debug.cpp */; };
+		4B046E95218FB10F00E56341 /* Debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E93218FB10F00E56341 /* Debug.cpp */; };
 		4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C90F213745070028FEB3 /* UIWidget.cpp */; };
 		4B08C913213747980028FEB3 /* UIImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B08C912213747980028FEB3 /* UIImage.cpp */; };
 		4B09182E1FEED84D002991D4 /* Services.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182D1FEED84D002991D4 /* Services.cpp */; };
@@ -20,6 +24,12 @@
 		4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112A71F820B0400AFDDFC /* TestMain.cpp */; };
 		4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */; };
 		4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
+		4B1555592197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
+		4B15555A2197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
+		4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15555C2197C2E500072F0D /* RectTransform.cpp */; };
+		4B15555E2197C2E500072F0D /* RectTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15555C2197C2E500072F0D /* RectTransform.cpp */; };
+		4B1555632199489100072F0D /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
+		4B1555642199489100072F0D /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4B15A94C1F241E2D000A689F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
 		4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
 		4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
@@ -104,7 +114,6 @@
 		4B22F53A2174078B0065B152 /* GKActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A52117CFBC0004F4F3 /* GKActor.cpp */; };
 		4B22F53B2174078B0065B152 /* IniParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */; };
 		4B22F53C2174078B0065B152 /* InputManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182F1FEED86B002991D4 /* InputManager.cpp */; };
-		4B22F53D217409A10065B152 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
 		4B22F53E217409AE0065B152 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A9571F242ECF000A689F /* CoreFoundation.framework */; };
 		4B22F53F217409B30065B152 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
 		4B22F543217410830065B152 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
@@ -182,6 +191,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		4B1555652199489100072F0D /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4B1555642199489100072F0D /* SDL2.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4B15A9421F241DC8000A689F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -200,6 +220,10 @@
 		4B02A3B11F526529000540A7 /* membuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = membuf.h; path = ../Source/membuf.h; sourceTree = "<group>"; };
 		4B02A3B31F5269E9000540A7 /* imstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imstream.cpp; path = ../Source/imstream.cpp; sourceTree = "<group>"; };
 		4B02A3B41F5269E9000540A7 /* imstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imstream.h; path = ../Source/imstream.h; sourceTree = "<group>"; };
+		4B046E8E218E855600E56341 /* Mover.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Mover.h; path = ../Source/Mover.h; sourceTree = "<group>"; };
+		4B046E8F218E855600E56341 /* Mover.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Mover.cpp; path = ../Source/Mover.cpp; sourceTree = "<group>"; };
+		4B046E92218FB10F00E56341 /* Debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Debug.h; path = ../Source/Debug.h; sourceTree = "<group>"; };
+		4B046E93218FB10F00E56341 /* Debug.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Debug.cpp; path = ../Source/Debug.cpp; sourceTree = "<group>"; };
 		4B08C9072137284C0028FEB3 /* CallbackFunction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CallbackFunction.h; path = ../Source/CallbackFunction.h; sourceTree = "<group>"; };
 		4B08C9082137284C0028FEB3 /* CallbackFunction.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CallbackFunction.cpp; path = ../Source/CallbackFunction.cpp; sourceTree = "<group>"; };
 		4B08C90A21372A710028FEB3 /* CallbackMethod.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CallbackMethod.h; path = ../Source/CallbackMethod.h; sourceTree = "<group>"; };
@@ -226,6 +250,10 @@
 		4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix4Tests.cpp; path = ../Tests/Matrix4Tests.cpp; sourceTree = "<group>"; };
 		4B1112AD1F821FFF00AFDDFC /* Component.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Component.cpp; path = ../Source/Component.cpp; sourceTree = "<group>"; };
 		4B1112AE1F821FFF00AFDDFC /* Component.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Component.h; path = ../Source/Component.h; sourceTree = "<group>"; };
+		4B1555572197B59F00072F0D /* Transform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Transform.h; path = ../Source/Transform.h; sourceTree = "<group>"; };
+		4B1555582197B59F00072F0D /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Transform.cpp; path = ../Source/Transform.cpp; sourceTree = "<group>"; };
+		4B15555B2197C2E500072F0D /* RectTransform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RectTransform.h; path = ../Source/RectTransform.h; sourceTree = "<group>"; };
+		4B15555C2197C2E500072F0D /* RectTransform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RectTransform.cpp; path = ../Source/RectTransform.cpp; sourceTree = "<group>"; };
 		4B15A93F1F24188E000A689F /* Main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../Source/Main.cpp; sourceTree = "<group>"; };
 		4B15A9441F241DC8000A689F /* GEngine-MacOS */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-MacOS"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B15A94E1F241FEA000A689F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -390,9 +418,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B1555632199489100072F0D /* SDL2.framework in Frameworks */,
 				4B22F53F217409B30065B152 /* OpenGL.framework in Frameworks */,
 				4B22F53E217409AE0065B152 /* CoreFoundation.framework in Frameworks */,
-				4B22F53D217409A10065B152 /* SDL2.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -483,6 +511,8 @@
 				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
 				4B1112AE1F821FFF00AFDDFC /* Component.h */,
+				4B046E93218FB10F00E56341 /* Debug.cpp */,
+				4B046E92218FB10F00E56341 /* Debug.h */,
 				4B17D706206098B100EBD298 /* GameCamera.cpp */,
 				4B17D705206098B100EBD298 /* GameCamera.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
@@ -496,6 +526,10 @@
 				4BE6EE351F441DD100BB29D5 /* Libraries */,
 				4B15A93F1F24188E000A689F /* Main.cpp */,
 				4B4300841FB7EDFA009EDE58 /* Math */,
+				4B046E8F218E855600E56341 /* Mover.cpp */,
+				4B046E8E218E855600E56341 /* Mover.h */,
+				4B15555C2197C2E500072F0D /* RectTransform.cpp */,
+				4B15555B2197C2E500072F0D /* RectTransform.h */,
 				4B364C3520ECADBE00EFC50C /* Rendering */,
 				4BD673C920B10EB200795582 /* Scene */,
 				4B15A95A1F243349000A689F /* SDLLog.cpp */,
@@ -506,6 +540,8 @@
 				4BD673CB20B1119E00795582 /* Skybox.cpp */,
 				4BD673CA20B1119E00795582 /* Skybox.h */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
+				4B1555582197B59F00072F0D /* Transform.cpp */,
+				4B1555572197B59F00072F0D /* Transform.h */,
 				4B9231A32112167F0004F4F3 /* Type.h */,
 				4B08C90D2137443F0028FEB3 /* UI */,
 			);
@@ -765,6 +801,7 @@
 				4B22F4D42171709F0065B152 /* Sources */,
 				4B22F4D52171709F0065B152 /* Frameworks */,
 				4B22F4D62171709F0065B152 /* Resources */,
+				4B1555652199489100072F0D /* Embed Frameworks */,
 				4B22F540217409C60065B152 /* ShellScript */,
 			);
 			buildRules = (
@@ -794,6 +831,7 @@
 					};
 					4B22F4D72171709F0065B152 = {
 						CreatedOnToolsVersion = 10.0;
+						DevelopmentTeam = YEKB28PSVK;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -859,7 +897,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "./CopyLibraries.sh\n";
+			shellScript = "./CopyLibrariesToApp.sh\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -929,11 +967,14 @@
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
 				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
+				4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */,
 				4B2E7A65203A6072001A5B9C /* SceneData.cpp in Sources */,
+				4B1555592197B59F00072F0D /* Transform.cpp in Sources */,
 				4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B8E830A20F046750009A86B /* Material.cpp in Sources */,
+				4B046E94218FB10F00E56341 /* Debug.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
 				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
@@ -951,6 +992,7 @@
 				4B0E44F62186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
 				4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */,
+				4B046E90218E855600E56341 /* Mover.cpp in Sources */,
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
 				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
@@ -1008,11 +1050,14 @@
 				4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */,
 				4B22F51C2174076D0065B152 /* Matrix4.cpp in Sources */,
 				4B22F52C2174078B0065B152 /* AssetManager.cpp in Sources */,
+				4B15555E2197C2E500072F0D /* RectTransform.cpp in Sources */,
 				4B22F52A2174078B0065B152 /* GasPlayer.cpp in Sources */,
+				4B15555A2197B59F00072F0D /* Transform.cpp in Sources */,
 				4B22F52E2174078B0065B152 /* AudioListener.cpp in Sources */,
 				4B22F514217407640065B152 /* Mesh.cpp in Sources */,
 				4B22F5212174076D0065B152 /* Vector3.cpp in Sources */,
 				4B22F5102174075B0065B152 /* Services.cpp in Sources */,
+				4B046E95218FB10F00E56341 /* Debug.cpp in Sources */,
 				4B22F5272174078B0065B152 /* Animation.cpp in Sources */,
 				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
 				4B22F50F2174075B0065B152 /* SDLLog.cpp in Sources */,
@@ -1030,6 +1075,7 @@
 				4B0E44F72186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4B22F5222174076D0065B152 /* Vector4.cpp in Sources */,
 				4B22F524217407760065B152 /* minilzo.c in Sources */,
+				4B046E91218E855600E56341 /* Mover.cpp in Sources */,
 				4B22F543217410830065B152 /* Main.cpp in Sources */,
 				4B22F519217407640065B152 /* Shader.cpp in Sources */,
 				4B22F4F32174073D0065B152 /* Font.cpp in Sources */,
@@ -1301,12 +1347,13 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = gengine/gengine.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_ENTITLEMENTS = MacOS/gengine.entitlements;
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = YEKB28PSVK;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
@@ -1324,7 +1371,7 @@
 					"$(SRCROOT)/../Libraries/fmod/inc",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/MacOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../Libs";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
@@ -1340,6 +1387,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -1360,12 +1408,13 @@
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = gengine/gengine.entitlements;
-				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_ENTITLEMENTS = MacOS/gengine.entitlements;
+				CODE_SIGN_IDENTITY = "Mac Developer";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = YEKB28PSVK;
 				ENABLE_NS_ASSERTIONS = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1378,7 +1427,7 @@
 					"$(SRCROOT)/../Libraries/fmod/inc",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/MacOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../Libs";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
@@ -1394,6 +1443,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = macosx;
 			};
 			name = Release;
