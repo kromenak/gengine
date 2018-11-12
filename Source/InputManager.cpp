@@ -5,6 +5,8 @@
 //
 #include "InputManager.h"
 
+#include "Services.h"
+
 InputManager::InputManager()
 {
     // Returns chunk of memory owned by SDL, which contains the keyboard state.
@@ -28,19 +30,24 @@ void InputManager::Update()
     SDL_PumpEvents();
     
     // Query the mouse state.
-    int x = 0;
-    int y = 0;
-    mMouseButtonState = SDL_GetMouseState(&x, &y);
-    
+	// This gives us button press data AND mouse position.
+    int mouseX = 0;
+    int mouseY = 0;
+    mMouseButtonState = SDL_GetMouseState(&mouseX, &mouseY);
+	
+	// INVERT the mouse Y.
+	// SDL returns mouse coords from top-left, but we want it from bottom-left.
+	mouseY = Services::GetRenderer()->GetWindowHeight() - mouseY;
+	
     // Calculate mouse delta since last frame.
-    int deltaX = x - mMousePosition.GetX();
-    int deltaY = y - mMousePosition.GetY();
+    int deltaX = mouseX - mMousePosition.GetX();
+    int deltaY = mouseY - mMousePosition.GetY();
     mMousePositionDelta.SetX(deltaX);
     mMousePositionDelta.SetY(deltaY);
     
     // After delta calc, set mouse position.
-    mMousePosition.SetX(x);
-    mMousePosition.SetY(y);
+    mMousePosition.SetX(mouseX);
+    mMousePosition.SetY(mouseY);
 }
 
 void InputManager::DispatchEvents()
