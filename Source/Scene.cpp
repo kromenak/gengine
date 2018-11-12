@@ -12,6 +12,8 @@
 #include "GKActor.h"
 #include "Math.h"
 #include "MeshRenderer.h"
+#include "Mover.h"
+#include "RectTransform.h"
 #include "Services.h"
 #include "SoundtrackPlayer.h"
 #include "UIButton.h"
@@ -122,18 +124,21 @@ Scene::Scene(std::string name, std::string timeCode) :
         soundtrackPlayer->Play(soundtracks[0]);
     }
 	
-    Actor* uiActor = new Actor();
-	uiActor->SetPosition(Vector3(0, 0, 0));
+	Actor* uiActor = new Actor(Actor::TransformType::RectTransform);
+	uiActor->AddComponent<Mover>();
+	RectTransform* rectTransform = uiActor->GetComponent<RectTransform>();
+	rectTransform->SetSize(512, 384);
 	
 	UILabel* label = uiActor->AddComponent<UILabel>();
 	label->SetFont(Services::GetAssets()->LoadFont("F_RYE"));
-	label->SetText("Test");
-	label->SetSize(4, 4);
+	label->SetText("Test Label");
 	
-	UIImage* image = uiActor->AddComponent<UIImage>();
-	image->SetTexture(Services::GetAssets()->LoadTexture("msg_yes_u"));
+	Actor* childUIActor = new Actor(Actor::TransformType::RectTransform);
+	//childUIActor->AddComponent<Mover>();
+	childUIActor->GetTransform()->SetParent(uiActor->GetTransform());
+	//childUIActor->SetPosition(Vector3(0.0f, 400.0f, 0.0f));
 	
-	UIButton* button = uiActor->AddComponent<UIButton>();
+	UIButton* button = childUIActor->AddComponent<UIButton>();
 	button->SetUpTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_U"));
 	button->SetDownTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_D"));
 	button->SetHoverTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_H"));

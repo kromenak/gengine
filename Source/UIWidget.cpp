@@ -10,12 +10,16 @@
 
 TYPE_DEF_CHILD(Component, UIWidget);
 
-UIWidget::UIWidget(Actor* owner) : Component(owner),
-	mSize(1.0f, 1.0f),
-	mPivot(0.5f, 0.5f),
-	mAnchor(0.5f, 0.5f)
+UIWidget::UIWidget(Actor* owner) : Component(owner)
 {
     Services::GetRenderer()->AddUIWidget(this);
+	
+	// Get RectTransform attached to this owner.
+	mRectTransform = mOwner->GetComponent<RectTransform>();
+	if(mRectTransform == nullptr)
+	{
+		std::cout << "Attempting to attach UI widget to an Actor that doesn't have a RectTransform. This will cause problems!" << std::endl;
+	}
 }
 
 UIWidget::~UIWidget()
@@ -23,28 +27,7 @@ UIWidget::~UIWidget()
     Services::GetRenderer()->RemoveUIWidget(this);
 }
 
-Rect UIWidget::GetScreenRect()
+Matrix4 UIWidget::GetWorldTransformWithSizeForRendering()
 {
-	// Based on anchor, calculate our anchor position on-screen.
-	Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
-	Vector3 anchorPos(windowSize.GetX() * mAnchor.GetX(), windowSize.GetY() * mAnchor.GetY());
-	Vector3 pos = anchorPos + mOwner->GetPosition();
-	
-	return Rect(pos.GetX() - (mSize.GetX() / 2), pos.GetY() - (mSize.GetY() / 2), mSize.GetX(), mSize.GetY());
-}
-
-Matrix4 UIWidget::GetUIWorldTransformMatrix()
-{
-	// Scale by the actor's scale and the size of the UI widget.
-	Vector3 scale = mOwner->GetScale();
-	Matrix4 scaleMat = Matrix4::MakeScale(mSize.GetX() * scale.GetX(), mSize.GetY() * scale.GetY(), 1.0f);
-	
-	// Based on anchor, calculate our anchor position on-screen.
-	Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
-	Vector3 anchorPos(windowSize.GetX() * mAnchor.GetX(), windowSize.GetY() * mAnchor.GetY());
-	
-	// Our position will be treated as an offset from the anchor position.
-	Vector3 pos = anchorPos + mOwner->GetPosition();
-	Matrix4 transMat = Matrix4::MakeTranslate(pos);
-	return transMat * scaleMat;
+	return mRectTransform->GetLocalToWorldMatrix() * Matrix4::MakeScale(mRectTransform->GetSize());
 }

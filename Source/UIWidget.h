@@ -9,9 +9,7 @@
 #pragma once
 #include "Component.h"
 
-#include "Matrix4.h"
-#include "Rect.h"
-#include "Vector2.h"
+#include "RectTransform.h"
 
 class UIWidget : public Component
 {
@@ -22,22 +20,10 @@ public:
     
 	virtual void Render() = 0;
 	
-	void SetSize(float x, float y) { mSize.SetX(x); mSize.SetY(y); }
-	void SetSize(Vector2 size) { mSize = size; }
-	
-	Rect GetScreenRect();
-    
 protected:
-	// The rectangular size of the widget.
-    Vector2 mSize;
+	// UI widgets usually rely heavily on a RectTransform.
+	// So, we cache it here.
+	RectTransform* mRectTransform = nullptr;
 	
-	// The pivot point of the widget.
-	// (0, 0) is top-left, (1, 1) is bottom-right, (0.5, 0.5) is center.
-	Vector2 mPivot;
-	
-	// The anchor is a normalized point on a parent that this widget is positioned relative to.
-	// (0, 0) is top-left corner, (1, 1) is bottom-right, (0.5, 0.5) is the center.
-	Vector2 mAnchor;
-	
-	Matrix4 GetUIWorldTransformMatrix();
+	Matrix4 GetWorldTransformWithSizeForRendering();
 };

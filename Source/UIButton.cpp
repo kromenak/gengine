@@ -5,8 +5,12 @@
 //
 #include "UIButton.h"
 
+#include "Actor.h"
+#include "CameraComponent.h"
+#include "Debug.h"
 #include "Mesh.h"
 #include "Services.h"
+#include "RectTransform.h"
 #include "Texture.h"
 
 extern Mesh* quad;
@@ -29,7 +33,7 @@ void UIButton::Render()
 	if(mEnabled)
 	{
 		// Button is hovered if mouse position is within the screen rect for this widget.
-		bool isHovered = GetScreenRect().Contains(Services::GetInput()->GetMousePosition());
+		bool isHovered = mRectTransform->GetScreenRect().Contains(Services::GetInput()->GetMousePosition());
 		
 		// Button is pressed if being hovered, and also the mouse is pressed down.
 		bool isPressed = isHovered && Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left);
@@ -57,14 +61,20 @@ void UIButton::Render()
 	}
 	
 	// Make sure widget size matches texture size.
-	mSize.SetX(texture->GetWidth());
-	mSize.SetY(texture->GetHeight());
+	mRectTransform->SetSize(texture->GetWidth(), texture->GetHeight());
 	
 	// Set texture.
 	mMaterial.SetDiffuseTexture(texture);
 	
 	// Set to correct location on screen.
-	mMaterial.SetWorldTransformMatrix(GetUIWorldTransformMatrix());
+	mMaterial.SetWorldTransformMatrix(GetWorldTransformWithSizeForRendering());
+	
+	Rect screenRect = mRectTransform->GetScreenRect();
+	Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
+	Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
+	//Rect worldRect(min, max);
+	//Debug::DrawRect(worldRect, Color32::Red);
+	Debug::DrawLine(min, max, Color32::Blue);
 	
 	// Render.
 	mMaterial.Activate();
