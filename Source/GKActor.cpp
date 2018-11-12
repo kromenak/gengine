@@ -6,6 +6,7 @@
 #include "GKActor.h"
 
 #include "AnimationPlayer.h"
+#include "Debug.h"
 #include "GasPlayer.h"
 #include "GEngine.h"
 #include "MeshRenderer.h"
@@ -24,6 +25,8 @@ GKActor::GKActor() : Actor()
     // Actor also needs a way to play animations, and the GasPlayer needs to know about it.
     mGasPlayer = AddComponent<GasPlayer>();
     mGasPlayer->SetAnimationPlayer(animationPlayer);
+	
+	Debug::DrawLine(Vector3::UnitX * 50, Vector3::UnitX * 100, Color32::Magenta, 10.0f);
 }
 
 void GKActor::SetState(GKActor::State state)

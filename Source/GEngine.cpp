@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 
 #include "Actor.h"
+#include "Debug.h"
 #include "Scene.h"
 #include "Services.h"
 
@@ -192,6 +193,9 @@ void GEngine::Update()
     {
         mCursor->Update(deltaTime);
     }
+	
+	// Update debug visualizations.
+	Debug::Update(deltaTime);
 }
 
 void GEngine::GenerateOutput()

@@ -14,6 +14,7 @@
 
 #include "Actor.h"
 #include "BSP.h"
+#include "Debug.h"
 #include "CameraComponent.h"
 #include "Matrix4.h"
 #include "MeshRenderer.h"
@@ -22,6 +23,18 @@
 #include "Skybox.h"
 #include "Texture.h"
 #include "UIWidget.h"
+
+float line_vertices[] = {
+	0.0f, 0.0f, 0.0f,
+	1.0f, 1.0f, 1.0f
+};
+
+float line_colors[] = {
+	1.0f, 1.0f, 1.0f, 1.0f,
+	1.0f, 1.0f, 1.0f, 1.0f
+};
+
+Mesh* line = nullptr;
 
 float axis_vertices[] = {
     0.0f, 0.0f, 0.0f,
@@ -100,7 +113,7 @@ bool Renderer::Initialize()
 		float hdpi = 0.0f;
 		float vdpi = 0.0f;
 		SDL_GetDisplayDPI(i, nullptr, &hdpi, &vdpi);
-		SDL_Log("%f, %f", hdpi, vdpi);
+		//SDL_Log("%f, %f", hdpi, vdpi);
 	}
     
     // Initialize GLEW.
@@ -131,7 +144,13 @@ bool Renderer::Initialize()
     // Compile skybox shader.
     mSkyboxShader = LoadShader("3D-Skybox");
     if(mSkyboxShader == nullptr) { return false; }
-    
+	
+	// Create line mesh, which is helpful for debugging.
+	line = new Mesh(2, 7 * sizeof(float), MeshUsage::Static);
+	line->SetRenderMode(RenderMode::Lines);
+	line->SetPositions(line_vertices);
+	line->SetColors(line_colors);
+	
     // Create axes mesh, which is helpful for debugging.
     axes = new Mesh(6, 7 * sizeof(float), MeshUsage::Static);
     axes->SetRenderMode(RenderMode::Lines);
@@ -169,11 +188,6 @@ void Renderer::Render()
     // Don't render if there's no camera.
     if(mCameraComponent == nullptr) { return; }
     
-    // Draws a little axes indicator at world origin.
-	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
-	Texture::Deactivate();
-    axes->Render();
-    
     // We'll need the projection matrix a few times below.
     // We'll also calculate the view/proj combined matrix one or two times.
     Matrix4 projectionMatrix = mCameraComponent->GetProjectionMatrix();
@@ -209,10 +223,9 @@ void Renderer::Render()
     // Set the combined view/projection matrix based on the assigned camera.
     mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
     
-    // Render an axis at the world origin for debugging.
-	Texture::Deactivate();
-    axes->Render();
-    
+    // Render an axis at the world origin, for debugging.
+	Debug::DrawAxes(Vector3::Zero);
+	
     // Render all mesh components. (should do before or after BSP?)
     std::vector<RenderPacket> allRenderPackets;
     for(auto& meshRenderer : mMeshRenderers)
@@ -227,7 +240,7 @@ void Renderer::Render()
     {
         packet.Render();
     }
-    
+	
     // Reset world matrix to identity for BSP rendering (or for next render cycle).
 	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
     
@@ -242,7 +255,7 @@ void Renderer::Render()
     {
         mBSP->Render(mCameraComponent->GetOwner()->GetPosition());
     }
-    
+	
     // Enable alpha-blended rendering and render UI elements.
     glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
@@ -256,8 +269,12 @@ void Renderer::Render()
     }
 	
     // Reset for next render loop.
-	//mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
     glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
+	
+	// Render debug elements.
+	mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
+	Debug::Render();
+	
     glDepthMask(GL_TRUE); // start writing to depth buffer
 	glEnable(GL_DEPTH_TEST);
 }
