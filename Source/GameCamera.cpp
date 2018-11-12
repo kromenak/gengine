@@ -32,41 +32,41 @@ void GameCamera::UpdateInternal(float deltaTime)
     // Forward and backward movement.
     if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_W))
     {
-        Translate(GetForward() * (camSpeed * deltaTime));
+        GetTransform()->Translate(GetForward() * (camSpeed * deltaTime));
     }
     else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_S))
     {
-        Translate(GetForward() * (-camSpeed * deltaTime));
+        GetTransform()->Translate(GetForward() * (-camSpeed * deltaTime));
     }
     
     // Up and down movement.
     if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_E))
     {
-        Translate(Vector3(0.0f, camSpeed * deltaTime, 0.0f));
+        GetTransform()->Translate(Vector3(0.0f, camSpeed * deltaTime, 0.0f));
     }
     else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_Q))
     {
-        Translate(Vector3(0.0f, -camSpeed * deltaTime, 0.0f));
+        GetTransform()->Translate(Vector3(0.0f, -camSpeed * deltaTime, 0.0f));
     }
     
     // Rotate left and right movement.
     if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_A))
     {
-        Rotate(Vector3::UnitY, -kCameraRotationSpeed * deltaTime);
+        GetTransform()->Rotate(Vector3::UnitY, -kCameraRotationSpeed * deltaTime);
     }
     else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_D))
     {
-        Rotate(Vector3::UnitY, kCameraRotationSpeed * deltaTime);
+        GetTransform()->Rotate(Vector3::UnitY, kCameraRotationSpeed * deltaTime);
     }
     
     // Rotate up and down movement.
     if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_C))
     {
-        Rotate(GetRight(), -kCameraRotationSpeed * deltaTime);
+        GetTransform()->Rotate(GetRight(), -kCameraRotationSpeed * deltaTime);
     }
     else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_Z))
     {
-        Rotate(GetRight(), kCameraRotationSpeed * deltaTime);
+        GetTransform()->Rotate(GetRight(), kCameraRotationSpeed * deltaTime);
     }
     
     if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))
@@ -75,6 +75,7 @@ void GameCamera::UpdateInternal(float deltaTime)
         {
             // Calculate mouse click ray.
             Vector2 mousePos = Services::GetInput()->GetMousePosition();
+			
             Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
             Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
             Vector3 dir = (worldPos2 - worldPos).Normalize();

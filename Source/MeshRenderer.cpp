@@ -83,7 +83,7 @@ std::vector<RenderPacket> MeshRenderer::GetRenderPackets()
         packet.material = mMaterials[materialIndex];
         
         // Save world transform for this packet.
-        Matrix4 worldTransform = mOwner->GetWorldTransformMatrix();
+		Matrix4 worldTransform = mOwner->GetTransform()->GetLocalToWorldMatrix();
         Matrix4 finalMatrix = worldTransform * mMeshes[i]->GetLocalTransformMatrix();
         packet.worldTransform = finalMatrix;
         
