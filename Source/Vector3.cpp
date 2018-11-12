@@ -28,6 +28,11 @@ Vector3::Vector3(float x, float y) : x(x), y(y), z(0.0f)
 	
 }
 
+Vector3::Vector3(const Vector2& other) : x(other.GetX()), y(other.GetY()), z(0.0f)
+{
+	
+}
+
 Vector3::Vector3(const Vector3& other) : x(other.x), y(other.y), z(other.z)
 {
     
@@ -39,11 +44,6 @@ Vector3& Vector3::operator=(const Vector3& other)
     y = other.y;
     z = other.z;
     return *this;
-}
-
-Vector3::Vector3(const Vector2& other) : x(other.GetX()), y(other.GetY()), z(0.0f)
-{
-	
 }
 
 bool Vector3::operator==(const Vector3& other) const

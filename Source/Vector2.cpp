@@ -5,6 +5,8 @@
 //
 #include "Vector2.h"
 
+#include "Vector3.h"
+
 Vector2 Vector2::Zero(0.0f, 0.0f);
 Vector2 Vector2::One(1.0f, 1.0f);
 Vector2 Vector2::UnitX(1.0f, 0.0f);
@@ -23,6 +25,11 @@ Vector2::Vector2(float x, float y) : x(x), y(y)
 Vector2::Vector2(const Vector2& other) : x(other.x), y(other.y)
 {
     
+}
+
+Vector2::Vector2(const Vector3& other) : x(other.GetX()), y(other.GetY())
+{
+	
 }
 
 Vector2& Vector2::operator=(const Vector2& other)

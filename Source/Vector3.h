@@ -26,12 +26,11 @@ public:
     Vector3();
     Vector3(float x, float y, float z);
 	Vector3(float x, float y);
+	Vector3(const Vector2& other);
 	
     // Copy
     Vector3(const Vector3& other);
     Vector3& operator=(const Vector3& other);
-	
-	Vector3(const Vector2& other);
 	
     // Equality
     bool operator==(const Vector3& other) const;

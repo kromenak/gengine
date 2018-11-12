@@ -10,6 +10,8 @@
 
 #include "Math.h"
 
+class Vector3;
+
 class Vector2
 {
 public:
@@ -20,11 +22,12 @@ public:
     
     Vector2();
     Vector2(float x, float y);
+	Vector2(const Vector3& other);
     
     // Copy
     Vector2(const Vector2& other);
     Vector2& operator=(const Vector2& other);
-    
+	
     // Equality
     bool operator==(const Vector2& other) const;
     bool operator!=(const Vector2& other) const;
