@@ -16,7 +16,25 @@ Rect::Rect(float x, float y, float width, float height) : mX(x), mY(y),
 	
 }
 
-bool Rect::Contains(Vector2 vec)
+Rect::Rect(const Vector2& min, const Vector2& max) :
+	mX(min.GetX()), mY(min.GetY()),
+	mWidth(max.GetX() - min.GetX()),
+	mHeight(max.GetY() - min.GetY())
+{
+	
+}
+
+Vector2 Rect::GetMin() const
+{
+	return Vector2(mX, mY);
+}
+
+Vector2 Rect::GetMax() const
+{
+	return Vector2(mX + mWidth, mY + mHeight);
+}
+
+bool Rect::Contains(const Vector2& vec) const
 {
 	// If x/y of vector are less than rect's x/y, vector is not contained.
 	if(vec.GetX() < mX) { return false; }
