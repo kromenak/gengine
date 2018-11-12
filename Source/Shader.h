@@ -10,8 +10,10 @@
 
 #include <GL/glew.h>
 
-class Vector3;
+class Color32;
 class Matrix4;
+class Vector3;
+class Vector4;
 
 class Shader
 {
@@ -21,12 +23,14 @@ public:
     
     void Activate();
     
-    GLuint GetAttributeLocation(const char* name);
+    GLuint GetAttributeLocation(const char* name) const;
     
     void SetUniformVector3(const char* name, const Vector3& vector);
+	void SetUniformVector4(const char* name, const Vector4& vector);
+	void SetUniformVector4(const char* name, const Color32& color);
     void SetUniformMatrix4(const char* name, const Matrix4& mat);
     
-    bool IsGood() { return !mError; }
+    bool IsGood() const { return !mError; }
     
 private:
     // Handle to the compiled and linked GL shader program.

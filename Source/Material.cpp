@@ -23,15 +23,29 @@ bool Material::operator==(const Material& other) const
 
 void Material::Activate()
 {
+	// Activate the shader.
     mShader->Activate();
-    
+	
+	// Set the uniform color for the shader.
+	SetActiveColor(mColor);
+	
+	// Activate the diffuse texture, if any.
     if(mDiffuseTexture != nullptr)
     {
         mDiffuseTexture->Activate();
     }
+	else
+	{
+		Texture::Deactivate();
+	}
 }
 
-void Material::SetWorldTransformMatrix(const Matrix4& mat)
+void Material::SetWorldTransformMatrix(const Matrix4& matrix)
 {
-    mShader->SetUniformMatrix4("uWorldTransform", mat);
+    mShader->SetUniformMatrix4("uWorldTransform", matrix);
+}
+
+void Material::SetActiveColor(const Color32& color)
+{
+	mShader->SetUniformVector4("uColor", color);
 }

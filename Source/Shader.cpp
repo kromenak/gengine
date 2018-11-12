@@ -10,6 +10,7 @@
 #include <sstream>
 #include <string>
 
+#include "Color32.h"
 #include "Matrix4.h"
 #include "Vector3.h"
 
@@ -59,7 +60,7 @@ void Shader::Activate()
     glUseProgram(mProgram);
 }
 
-GLuint Shader::GetAttributeLocation(const char* name)
+GLuint Shader::GetAttributeLocation(const char* name) const
 {
     return glGetAttribLocation(mProgram, name);
 }
@@ -68,6 +69,18 @@ void Shader::SetUniformVector3(const char* name, const Vector3& vector)
 {
     GLuint vecLoc = glGetUniformLocation(mProgram, name);
     glUniform3f(vecLoc, vector.GetX(), vector.GetY(), vector.GetZ());
+}
+
+void Shader::SetUniformVector4(const char *name, const Vector4& vector)
+{
+	GLuint vecLoc = glGetUniformLocation(mProgram, name);
+	glUniform4f(vecLoc, vector.GetX(), vector.GetY(), vector.GetZ(), vector.GetW());
+}
+
+void Shader::SetUniformVector4(const char *name, const Color32& color)
+{
+	GLuint vecLoc = glGetUniformLocation(mProgram, name);
+	glUniform4f(vecLoc, color.GetR() / 255.0f, color.GetG() / 255.0f, color.GetB() / 255.0f, color.GetA() / 255.0f);
 }
 
 void Shader::SetUniformMatrix4(const char* name, const Matrix4& mat)
