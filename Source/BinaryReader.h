@@ -14,16 +14,16 @@ public:
     BinaryReader(const char* memory, unsigned int memoryLength);
     ~BinaryReader();
     
-    bool CanRead() const;
-    bool IsEof() const;
+	bool CanRead() const { return stream->good(); }
+	bool IsEof() const { return stream->eof(); }
     
     void Seek(int position);
     void Skip(int size);
     
     int GetPosition();
     
-    void Read(char* buffer, int size);
-    void Read(unsigned char* buffer, int size);
+    int Read(char* buffer, int size);
+    int Read(unsigned char* buffer, int size);
     
     std::string ReadString(int length);
     

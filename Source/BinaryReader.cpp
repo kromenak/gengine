@@ -28,18 +28,15 @@ BinaryReader::~BinaryReader()
     delete stream;
 }
 
-bool BinaryReader::CanRead() const
-{
-    return stream->good();
-}
-
-bool BinaryReader::IsEof() const
-{
-    return stream->eof();
-}
-
 void BinaryReader::Seek(int position)
 {
+	// It's possible we've hit EOF, especially if we're jumping around a lot.
+	// If we are trying to seek on an EOF stream, clear the error flags and do the seek.
+	if(!stream->good() && stream->eof())
+	{
+		stream->clear();
+	}
+	
     stream->seekg(position, std::ios::beg);
 }
 
@@ -53,14 +50,16 @@ int BinaryReader::GetPosition()
     return (int)stream->tellg();
 }
 
-void BinaryReader::Read(char* buffer, int size)
+int BinaryReader::Read(char* buffer, int size)
 {
     stream->read(buffer, size);
+	return (int)stream->gcount();
 }
 
-void BinaryReader::Read(unsigned char* buffer, int size)
+int BinaryReader::Read(unsigned char* buffer, int size)
 {
     stream->read((char*)buffer, size);
+	return (int)stream->gcount();
 }
 
 std::string BinaryReader::ReadString(int length)
