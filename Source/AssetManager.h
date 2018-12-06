@@ -31,16 +31,22 @@ class AssetManager
 public:
     AssetManager();
     ~AssetManager();
-    
+	
+	// Adds a filesystem path to search for assets and bundles at.
     void AddSearchPath(std::string searchPath);
-    
+	
+	// Load or unload a barn bundle.
     void LoadBarn(std::string barnName);
     void UnloadBarn(std::string barnName);
-    BarnFile* GetBarn(std::string barnName);
-    BarnFile* GetBarnContainingAsset(std::string assetName);
+	
+	// Write an asset from a bundle to a file.
     void WriteBarnAssetToFile(std::string assetName);
-    void WriteOutAssetsOfType(std::string extension);
-    
+	void WriteBarnAssetToFile(std::string assetName, std::string outputDir);
+	
+	// Write all assets from a bundle that match a search string.
+	void WriteAllBarnAssetsToFile(std::string search);
+	void WriteAllBarnAssetsToFile(std::string search, std::string outputDir);
+	
     Audio* LoadAudio(std::string name);
     Soundtrack* LoadSoundtrack(std::string name);
     Yak* LoadYak(std::string name);
@@ -63,6 +69,8 @@ public:
 	Font* LoadFont(std::string name);
 	
     Shader* LoadShader(std::string name);
+	
+	char* LoadRaw(std::string name, unsigned int& outBufferSize);
     
 private:
     // A list of paths to search for assets.
@@ -77,10 +85,15 @@ private:
     std::unordered_map<std::string, Audio*> mLoadedAudios;
     std::unordered_map<std::string, Texture*> mLoadedTextures;
     std::unordered_map<std::string, Shader*> mLoadedShaders;
+	
+	// Retrieve a barn bundle by name, or by contained asset.
+	BarnFile* GetBarn(std::string barnName);
+	BarnFile* GetBarnContainingAsset(std::string assetName);
     
     std::string SanitizeAssetName(std::string assetName, std::string expectedExtension);
     
     std::string GetAssetPath(std::string fileName);
     
     template<class T> T* LoadAsset(std::string assetName, std::unordered_map<std::string, T*>* cache);
+	char* LoadAssetBuffer(std::string assetName, unsigned int& outBufferSize);
 };

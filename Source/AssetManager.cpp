@@ -76,68 +76,32 @@ void AssetManager::UnloadBarn(std::string barnName)
     mLoadedBarns.erase(dictKey);
 }
 
-BarnFile* AssetManager::GetBarn(std::string barnName)
-{
-    // We want our dictionary key to be all uppercase.
-    std::string dictKey = barnName;
-    StringUtil::ToUpper(dictKey);
-    
-    // If we find it, return it.
-    auto iter = mLoadedBarns.find(dictKey);
-    if(iter != mLoadedBarns.end())
-    {
-        return iter->second;
-    }
-    
-    //TODO: Maybe load barn if not loaded?
-    return nullptr;
-}
-
-BarnFile* AssetManager::GetBarnContainingAsset(std::string fileName)
-{
-    // Iterate over all loaded barn files to find the asset.
-    for(const auto& entry : mLoadedBarns)
-    {
-        BarnAsset* asset = entry.second->GetAsset(fileName);
-        if(asset != nullptr)
-        {
-            // If the asset is a pointer, we need to redirect to the correct BarnFile.
-            if(asset->IsPointer())
-            {
-                auto it = mLoadedBarns.find(asset->barnFileName);
-                if(it != mLoadedBarns.end())
-                {
-                    return it->second;
-                }
-                else
-                {
-                    std::cout << "Asset " << fileName << " exists in Barn " << asset->barnFileName << ", but that Barn is not loaded!" << std::endl;
-                }
-            }
-            else
-            {
-                return entry.second;
-            }
-        }
-    }
-    return nullptr;
-}
-
 void AssetManager::WriteBarnAssetToFile(std::string assetName)
 {
-    BarnFile* barn = GetBarnContainingAsset(assetName);
-    if(barn != nullptr)
-    {
-        barn->WriteToFile(assetName);
-    }
+	WriteBarnAssetToFile(assetName, "");
 }
 
-void AssetManager::WriteOutAssetsOfType(std::string extension)
+void AssetManager::WriteBarnAssetToFile(std::string assetName, std::string outputDir)
 {
-    for(auto& entry : mLoadedBarns)
-    {
-        entry.second->WriteAllOfType(extension);
-    }
+	BarnFile* barn = GetBarnContainingAsset(assetName);
+	if(barn != nullptr)
+	{
+		barn->WriteToFile(assetName, outputDir);
+	}
+}
+
+void AssetManager::WriteAllBarnAssetsToFile(std::string search)
+{
+	WriteAllBarnAssetsToFile(search, "");
+}
+
+void AssetManager::WriteAllBarnAssetsToFile(std::string search, std::string outputDir)
+{
+	// Pass the buck to all loaded barn files.
+	for(auto& entry : mLoadedBarns)
+	{
+		entry.second->WriteAllToFile(search, outputDir);
+	}
 }
 
 Audio* AssetManager::LoadAudio(std::string name)
@@ -234,6 +198,61 @@ Shader* AssetManager::LoadShader(std::string name)
     return shader;
 }
 
+char* AssetManager::LoadRaw(std::string name, unsigned int& outBufferSize)
+{
+	return LoadAssetBuffer(name, outBufferSize);
+}
+
+BarnFile* AssetManager::GetBarn(std::string barnName)
+{
+	// We want our dictionary key to be all uppercase.
+	std::string dictKey = barnName;
+	StringUtil::ToUpper(dictKey);
+	
+	// If we find it, return it.
+	auto iter = mLoadedBarns.find(dictKey);
+	if(iter != mLoadedBarns.end())
+	{
+		return iter->second;
+	}
+	
+	//TODO: Maybe load barn if not loaded?
+	return nullptr;
+}
+
+BarnFile* AssetManager::GetBarnContainingAsset(std::string fileName)
+{
+	// Iterate over all loaded barn files to find the asset.
+	for(const auto& entry : mLoadedBarns)
+	{
+		BarnAsset* asset = entry.second->GetAsset(fileName);
+		if(asset != nullptr)
+		{
+			// If the asset is a pointer, we need to redirect to the correct BarnFile.
+			// If the correct Barn isn't available, spit out an error and fail.
+			if(asset->IsPointer())
+			{
+				auto it = mLoadedBarns.find(asset->barnFileName);
+				if(it != mLoadedBarns.end())
+				{
+					return it->second;
+				}
+				else
+				{
+					std::cout << "Asset " << fileName << " exists in Barn " << asset->barnFileName << ", but that Barn is not loaded!" << std::endl;
+				}
+			}
+			else
+			{
+				return entry.second;
+			}
+		}
+	}
+	
+	// Didn't find the Barn containing this asset.
+	return nullptr;
+}
+
 std::string AssetManager::SanitizeAssetName(std::string assetName, std::string expectedExtension)
 {
     // First, convert all names to uppercase.
@@ -280,39 +299,61 @@ T* AssetManager::LoadAsset(std::string assetName, std::unordered_map<std::string
             return it->second;
         }
     }
-    
-    // First, see if the asset exists at any asset search path.
-    // If so, we load the asset directly from file.
-    std::string assetPath = GetAssetPath(upperName);
-    if(!assetPath.empty())
-    {
-        //TODO: Load asset from file.
-        return nullptr;
-    }
-    
-    // If no file to load, we'll get the asset from a barn.
-    BarnFile* barn = GetBarnContainingAsset(upperName);
-    if(barn != nullptr)
-    {
-        // Extract bytes from the barn file contents.
-        BarnAsset* barnAsset = barn->GetAsset(upperName);
-        char* buffer = new char[barnAsset->uncompressedSize];
-        barn->Extract(upperName, buffer, barnAsset->uncompressedSize);
+	
+	// Retrieve the buffer, from which we'll create the asset.
+	unsigned int bufferSize = 0;
+	char* buffer = LoadAssetBuffer(upperName, bufferSize);
+	
+	// If no buffer could be found, we're in trouble!
+	if(buffer == nullptr)
+	{
+		std::cout << "Asset " << upperName << " could not be loaded!" << std::endl;
+		return nullptr;
+	}
+	
+	// Generate asset from the BARN bytes.
+	T* asset = new T(upperName, buffer, bufferSize);
+	
+	// Add entry in cache, if we have a cache.
+	if(cache != nullptr)
+	{
+		(*cache)[upperName] = asset;
+	}
         
-        // Generate asset from the BARN bytes.
-        T* asset = new T(upperName, buffer, barnAsset->uncompressedSize);
-        
-        // Add entry in cache, if we have a cache.
-        if(cache != nullptr)
-        {
-            (*cache)[upperName] = asset;
-        }
-        
-        //std::cout << "Loaded asset " << upperName << std::endl;
-        return asset;
-    }
-    
-    // Couldn't find the asset!
-    std::cout << "Asset " << upperName << " could not be loaded!" << std::endl;
-    return nullptr;
+	//std::cout << "Loaded asset " << upperName << std::endl;
+	return asset;
+}
+
+char* AssetManager::LoadAssetBuffer(std::string assetName, unsigned int& outBufferSize)
+{
+	// First, see if the asset exists at any asset search path.
+	// If so, we load the asset directly from file.
+	std::string assetPath = GetAssetPath(assetName);
+	if(!assetPath.empty())
+	{
+		//TODO: Load asset from file.
+		return nullptr;
+	}
+	
+	// If no file to load, we'll get the asset from a barn.
+	BarnFile* barn = GetBarnContainingAsset(assetName);
+	if(barn != nullptr)
+	{
+		// Extract bytes from the barn file contents.
+		BarnAsset* barnAsset = barn->GetAsset(assetName);
+		//TODO: Assert barnAsset != null.
+		
+		// Create a buffer of the correct size.
+		outBufferSize = barnAsset->uncompressedSize;
+		char* buffer = new char[outBufferSize];
+		
+		// Extract the asset to that buffer.
+		barn->Extract(assetName, buffer, outBufferSize);
+		
+		// Return the buffer.
+		return buffer;
+	}
+	
+	// Couldn't find this asset!
+	return nullptr;
 }
