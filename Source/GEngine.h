@@ -1,6 +1,3 @@
-//
-// GEngine.h
-//
 // Clark Kromenaker
 //
 // The "main" engine class. This is created by main() and handles
@@ -14,7 +11,6 @@
 #include "InputManager.h"
 #include "Renderer.h"
 #include "SheepManager.h"
-
 
 class Actor;
 class Scene;
@@ -66,5 +62,5 @@ private:
     
     void ProcessInput();
     void Update();
-    void GenerateOutput();
+    void GenerateOutputs();
 };

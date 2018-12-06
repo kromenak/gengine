@@ -46,11 +46,11 @@ public:
 	Matrix4 GetLocalToWorldMatrix();
 	Matrix4 GetWorldToLocalMatrix();
 	
-	// Transforms points/directions from local space of this transform to world space.
+	// Transforms points/directions from local space to world space.
 	Vector3 LocalToWorldPoint(const Vector3& localPoint);
 	Vector3 LocalToWorldDirection(const Vector3& localDirection);
 	
-	// Transforms points/directions from world space to local space of this transform.
+	// Transforms points/directions from world space to local space.
 	Vector3 WorldToLocalPoint(const Vector3& worldPoint);
 	Vector3 WorldToLocalDirection(const Vector3& worldDirection);
 	

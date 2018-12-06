@@ -8,6 +8,7 @@
 #include <SDL2/SDL.h>
 
 #include "Actor.h"
+#include "ButtonIconManager.h"
 #include "Debug.h"
 #include "Scene.h"
 #include "Services.h"
@@ -68,9 +69,13 @@ bool GEngine::Initialize()
     	mCursor->Activate();
 	}
 	
-    //mAssetManager.WriteBarnAssetToFile("F_ARIAL_T12.BMP");
-	//mAssetManager.WriteBarnAssetToFile("COURIER_R_12A.BMP");
-    //mAssetManager.WriteOutAssetsOfType("WLKBNDS");
+    //mAssetManager.WriteBarnAssetToFile("POEM9_OP.BMP");
+	//mAssetManager.WriteBarnAssetToFile("C_WAIT.CUR", "Cursors");
+    //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
+	
+	//Services::Set(new ButtonIconManager());
+	
+	//ButtonIconManager* bim = Services::Get<ButtonIconManager>();
 	
     LoadScene("B25");
     return true;
@@ -102,7 +107,7 @@ void GEngine::Run()
     {
         ProcessInput();
         Update();
-        GenerateOutput();
+        GenerateOutputs();
     }
 }
 
@@ -164,19 +169,23 @@ void GEngine::Update()
     // Tracks the last ticks value each time we run this loop.
     static uint32_t lastTicks = 0;
     
-    // Limit the FPS to about 60. nextTicks is always +16 at start of frame.
-    // If we get here again and not 16 frames have passed, we wait.
-    while(!SDL_TICKS_PASSED(SDL_GetTicks(), nextTicks)) { }
-    
+    // Limit to ~60FPS. "nextTicks" is always +16 at start of frame.
+    // If we get here again and 16ms have not passed, we wait.
+	while(SDL_GetTicks() < nextTicks) { }
+	
     // Get current ticks and save next ticks as +16. Limits FPS to ~60.
     uint32_t currentTicks = SDL_GetTicks();
     nextTicks = currentTicks + 16;
-    
+	
     // Calculate the time delta.
-    float deltaTime = ((float)(currentTicks - lastTicks)) * 0.001f;
+	uint32_t deltaTicks = currentTicks - lastTicks;
+    float deltaTime = deltaTicks * 0.001f;
+	
+	// Save last ticks for next frame.
     lastTicks = currentTicks;
     
-    // Limit the time delta to, at most, 0.05 seconds.
+    // Limit the time delta. At least 0s, and at most, 0.05s.
+	if(deltaTime < 0.0f) { deltaTime = 0.0f; }
     if(deltaTime > 0.05f) { deltaTime = 0.05f; }
     
     // Update all actors.
@@ -198,7 +207,7 @@ void GEngine::Update()
 	Debug::Update(deltaTime);
 }
 
-void GEngine::GenerateOutput()
+void GEngine::GenerateOutputs()
 {
     mRenderer.Clear();
     mRenderer.Render();

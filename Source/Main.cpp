@@ -8,13 +8,12 @@
 
 int main(int argc, const char * argv[])
 {
-    // Create and initialize the engine.
-    GEngine engine;
-    bool initSucceeded = engine.Initialize();
-    
-    // If initialization succeeded, we can "run" the engine.
-    // Running will loop indefinitely until the game is quit by user/os.
+    // Create the engine.
+	GEngine engine;
+	
+    // If init succeeds, we can "run" the engine.
     // If init fails, the program ends immediately.
+	bool initSucceeded = engine.Initialize();
     if(initSucceeded)
     {
         engine.Run();

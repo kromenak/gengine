@@ -59,16 +59,16 @@ Vector3 CameraComponent::ScreenToWorldPoint(const Vector2& screenPoint, float di
 	float ndcY = (2.0f * (screenPoint.GetY() / screenHeight)) - 1.0f; 		// 0 => -1, screenHeight => 1
     //float ndcY = -(2.0f * (screenPoint.GetY() / screenHeight)) + 1.0f; 	// 0 => 1, screenHeight => -1 (this would put (-1, -1) in top-left corner)
 	
+	// Our NDC point is X/Y values for starters.
+	// Distance indicates what distance from the camera we want to get for the world point.
+	// 1.0 is just standard for homogenous coordinates.
+	Vector4 point(ndcX, ndcY, distance, 1.0f);
+	
 	// We now need to convert our normalized device coordinate to world space.
 	// To do this, we must calculate the "world space to screen space" matrix, and then invert it.
 	Matrix4 viewMatrix = GetLookAtMatrix();
 	Matrix4 projectionMatrix = GetProjectionMatrix();
 	Matrix4 projectionToWorld = (projectionMatrix * viewMatrix).Inverse();
-	
-	// Our NDC point is X/Y values for starters.
-	// Distance indicates what distance from the camera we want to get for the world point.
-	// 1.0 is just standard for homogenous coordinates.
-    Vector4 point(ndcX, ndcY, distance, 1.0f);
 	
 	// Multiply the NDC point by the "screen space to world space" matrix to get to world space.
 	// We must divide the whole point by W to deal with reversing perspective depth stuff.

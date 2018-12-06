@@ -26,11 +26,6 @@ void UIImage::Render()
 	mMaterial.Activate();
 	
 	quad->Render();
-	
-	//Rect screenRect = mRectTransform->GetScreenRect();
-	//Vector3 from = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
-	//Vector3 to = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
-	//Debug::DrawLine(from, to, Color32::Red);
 }
 
 void UIImage::SetTexture(Texture* texture)
