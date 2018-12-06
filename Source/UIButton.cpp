@@ -81,6 +81,35 @@ void UIButton::Render()
 	quad->Render();
 }
 
+void UIButton::Press()
+{
+	if(mPressCallback)
+	{
+		mPressCallback();
+	}
+}
+
+void UIButton::UpdateInternal(float deltaTime)
+{
+	// If left mouse button is pressed, record whether input began over this button.
+	if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))
+	{
+		mPointerBeganOver = mRectTransform->GetScreenRect().Contains(Services::GetInput()->GetMousePosition());
+	}
+	
+	// If pointer began over this button, wait for left mouse button to be released.
+	// If it is released over this button, that counts as a press.
+	if(mPointerBeganOver
+	   && Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Left))
+	{
+		if(mRectTransform->GetScreenRect().Contains(Services::GetInput()->GetMousePosition()))
+		{
+			Press();
+		}
+		mPointerBeganOver = false;
+	}
+}
+
 Texture* UIButton::GetDefaultTexture()
 {
 	if(mUpTexture != nullptr) { return mUpTexture; }

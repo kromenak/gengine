@@ -8,6 +8,8 @@
 #pragma once
 #include "UIWidget.h"
 
+#include <functional>
+
 #include "CallbackFunction.h"
 #include "Material.h"
 
@@ -29,18 +31,23 @@ public:
 	void Enable() { mEnabled = true; }
 	void Disable() { mEnabled = false; }
 	
-	void OnPointerEnter();
-	void OnPointerExit();
+	void SetPressCallback(std::function<void()> callback) { mPressCallback = callback; }
 	
-	void OnPointerUp();
-	void OnPointerDown();
+	//void OnPointerEnter();
+	//void OnPointerExit();
+	
+	//void OnPointerUp();
+	//void OnPointerDown();
+	
+	void Press();
+	
+protected:
+	void UpdateInternal(float deltaTime) override;
 	
 private:
 	// If enabled, the button can be interacted with.
 	// If disabled, the button doesn't respond to inputs.
 	bool mEnabled = true;
-	
-	CallbackFunction<UIButton>* mClickCallback = nullptr;
 	
 	// Textures for different visual states.
 	// Up (normal), Down (pressed), Hover, and Disabled.
@@ -51,6 +58,10 @@ private:
 	
 	// Material used for rendering.
 	Material mMaterial;
+	
+	std::function<void()> mPressCallback;
+	
+	bool mPointerBeganOver = false;
 	
 	Texture* GetDefaultTexture();
 };

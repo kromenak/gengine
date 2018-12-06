@@ -125,7 +125,7 @@ Scene::Scene(std::string name, std::string timeCode) :
     }
 	
 	Actor* uiActor = new Actor(Actor::TransformType::RectTransform);
-	uiActor->AddComponent<Mover>();
+	//uiActor->AddComponent<Mover>();
 	RectTransform* rectTransform = uiActor->GetComponent<RectTransform>();
 	rectTransform->SetSize(512, 384);
 	
@@ -143,6 +143,8 @@ Scene::Scene(std::string name, std::string timeCode) :
 	button->SetDownTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_D"));
 	button->SetHoverTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_H"));
 	button->SetDisabledTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_X"));
+	
+	button->SetPressCallback([]() { std::cout << "ahhh" << std::endl; });
 	
 	// For debugging - render walker bounds overlay on game world.
 	{
