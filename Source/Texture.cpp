@@ -44,9 +44,7 @@ Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
 Texture::Texture(std::string name, char* data, int dataLength) :
     Asset(name)
 {
-    // Retrieve the data.
     ParseFromData(data, dataLength);
-    
     GenerateOpenGlTexture();
 }
 
@@ -194,12 +192,8 @@ void Texture::WriteToFile(std::string filePath)
     // COLOR TABLE - Only needed for 8BPP or less.
     
     // PIXELS
-	// Calculate the number of bytes that should be present in each row.
-	// Each row needs a 4-byte alignment, so this rounds us up to nearest 4 bytes.
-	// Note that for a 32-bit (4bpp) image...this doesn't really matter. But for other bpp sizes, it would.
-	int rowSize = Math::FloorToInt((32.0f * mWidth + 31.0f) / 32.0f) * 4;
-	
 	// Write out one row at a time, bottom to top, left to right, per BMP format standard.
+	int rowSize = CalculateBmpRowSize(32, mWidth);
     for(int y = mHeight - 1; y >= 0; y--)
     {
 		int bytesWritten = 0;
@@ -213,15 +207,12 @@ void Texture::WriteToFile(std::string filePath)
 			bytesWritten += 4;
         }
 		
-		// Each row needs to be a certain size to be a multiple of 4 bytes.
-		// If we haven't written enough bytes, write until we do.
-		// Note that for 32-bit (4bpp) images, this shouldn't ever be a problem.
+		// Add padding to write out total desired row size (padded to 4 bytes).
 		while(bytesWritten < rowSize)
 		{
 			writer.WriteUByte(0);
 			bytesWritten++;
 		}
-		
     }
 }
 
@@ -315,17 +306,16 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	// BMP HEADER
 	// 4 bytes: size of file in bytes
 	// 4 bytes: 2 shorts that are reserved/unused
-	reader.Skip(8);
-	
 	// 4 bytes: offset to image data
-	reader.Skip(4);
+	reader.Skip(12);
 	
 	// DIB HEADER
 	// 4 bytes: size of DIB header (always 40)
 	unsigned int dibHeaderSize = reader.ReadUInt();
 	if(dibHeaderSize != 40)
 	{
-		std::cout << "Texture: unexpected dib header size of " << dibHeaderSize << std::endl;
+		std::cout << "Texture: unsupported dib header size of " << dibHeaderSize << std::endl;
+		return;
 	}
 	
 	// 8 bytes: width and height
@@ -336,7 +326,8 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	unsigned short colorPlaneCount = reader.ReadUShort();
 	if(colorPlaneCount != 1)
 	{
-		std::cout << "Texture: unexpected color plane count of " << colorPlaneCount << std::endl;
+		std::cout << "Texture: unsupported color plane count of " << colorPlaneCount << std::endl;
+		return;
 	}
 	
 	// 2 bytes: number of bits per pixel
@@ -353,14 +344,13 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	unsigned int compressionMethod = reader.ReadUInt();
 	if(compressionMethod != 0)
 	{
-		std::cout << "Texture: unexpected compression method " << compressionMethod << std::endl;
+		std::cout << "Texture: unsupported compression method " << compressionMethod << std::endl;
+		return;
 	}
 	
 	// 4 bytes: uncompressed size; but if compression method is zero, this is usually also zero (unset).
-	reader.Skip(4); //unsigned int uncompressedSize = reader.ReadUInt();
-	
 	// 8 bytes: horizontal/vertical resolution (pixels per meter) - unused.
-	reader.Skip(8);
+	reader.Skip(12);
 	
 	// 4 bytes: num colors in palette. If zero, default to 2^(bpp)
 	unsigned int numColorsInColorPalette = reader.ReadUInt();
@@ -385,8 +375,12 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	// PIXELS
 	// Allocate pixels array.
 	mPixels = new unsigned char[mWidth * mHeight * 4];
+	
+	// Read in pixel data.
+	int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
 	for(int y = mHeight - 1; y >= 0; y--)
 	{
+		int bytesRead = 0;
 		for(int x = 0; x < mWidth; x++)
 		{
 			// Calculate index into pixels array.
@@ -399,6 +393,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 				// So 0 = 0, 1 = 4, 2 = 8, etc.
 				int paletteIndex = reader.ReadUByte();
 				paletteIndex *= 4;
+				bytesRead++;
 				
 				if(palette != nullptr)
 				{
@@ -419,10 +414,11 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 				mPixels[index + 2] = reader.ReadUByte(); // Blue
 				mPixels[index + 1] = reader.ReadUByte(); // Green
 				mPixels[index] = reader.ReadUByte(); 	 // Red
+				bytesRead += 3;
 				
-				// Same as for 8-bit. When BMP format is BI_RGB, there is no alpha.
-				// Placeholder is usually zero, but we want to interpret "no alpha" as "fully opaque" == 255.
-				mPixels[index + 3] = 255; //reader.ReadUByte(); // Alpha
+				// When BMP format is BI_RGB, there is no alpha.
+				// We'll use a placeholder of 255 (full alpha).
+				mPixels[index + 3] = 255; // Alpha
 			}
 			else
 			{
@@ -430,10 +426,18 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 			}
 		}
 		
-		// Skip padding if needed.
-		if((mWidth & 0x00000001) != 0)
+		// Skip padding that may be present, to ensure 4-byte alignment.
+		if(bytesRead < rowSize)
 		{
-			reader.ReadUShort();
+			reader.Skip(rowSize - bytesRead);
 		}
 	}
+}
+
+/*static*/ int Texture::CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width)
+{
+	// Calculate number of bytes that should be present in each row.
+	// Each row has 4-byte alignment, so this rounds us up to nearest 4 bytes.
+	// For a 32-bit (4bpp) image...this doesn't really matter. But for other bpp sizes, it would.
+	return Math::FloorToInt((bitsPerPixel * width + 31.0f) / 32.0f) * 4;
 }

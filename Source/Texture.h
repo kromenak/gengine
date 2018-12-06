@@ -64,4 +64,6 @@ private:
     void ParseFromData(char* data, int dataLength);
 	void ParseFromCompressedFormat(BinaryReader& reader);
 	void ParseFromBmpFormat(BinaryReader& reader);
+	
+	static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
 };
