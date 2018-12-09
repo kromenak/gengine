@@ -82,7 +82,50 @@ ButtonIconManager::ButtonIconManager()
 			buttonIcon.hoverTexture = hoverTexture;
 			buttonIcon.disableTexture = disableTexture;
 			
+			// Save one of these as the default.
+			if(keyword == "QUESTION")
+			{
+				mDefaultIcon = buttonIcon;
+			}
+			
+			// Insert mapping from keyword to the button icons.
 			map->insert({ keyword, buttonIcon });
 		}
+	}
+}
+
+ButtonIcon& ButtonIconManager::GetButtonIconForNoun(std::string noun)
+{
+	if(mNounsToIcons.find(noun) != mNounsToIcons.end())
+	{
+		return mNounsToIcons[noun];
+	}
+	else
+	{
+		return mDefaultIcon;
+	}
+}
+
+ButtonIcon& ButtonIconManager::GetButtonIconForVerb(std::string verb)
+{
+	if(mVerbsToIcons.find(verb) != mVerbsToIcons.end())
+	{
+		return mVerbsToIcons[verb];
+	}
+	else
+	{
+		return mDefaultIcon;
+	}
+}
+
+ButtonIcon& ButtonIconManager::GetButtonIconForTopic(std::string topic)
+{
+	if(mTopicsToIcons.find(topic) != mTopicsToIcons.end())
+	{
+		return mTopicsToIcons[topic];
+	}
+	else
+	{
+		return mDefaultIcon;
 	}
 }

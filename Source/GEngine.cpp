@@ -73,7 +73,8 @@ bool GEngine::Initialize()
 	//mAssetManager.WriteBarnAssetToFile("C_WAIT.CUR", "Cursors");
     //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
 	
-	//Services::Set(new ButtonIconManager());
+	// Load button icon manager.
+	Services::Set(new ButtonIconManager());
 	
 	//ButtonIconManager* bim = Services::Get<ButtonIconManager>();
 	

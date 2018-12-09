@@ -7,6 +7,7 @@
 
 #include <iostream>
 
+#include "ActionBar.h"
 #include "Color32.h"
 #include "GameCamera.h"
 #include "GKActor.h"
@@ -124,27 +125,8 @@ Scene::Scene(std::string name, std::string timeCode) :
         soundtrackPlayer->Play(soundtracks[0]);
     }
 	
-	Actor* uiActor = new Actor(Actor::TransformType::RectTransform);
-	//uiActor->AddComponent<Mover>();
-	RectTransform* rectTransform = uiActor->GetComponent<RectTransform>();
-	rectTransform->SetSize(512, 384);
-	
-	UILabel* label = uiActor->AddComponent<UILabel>();
-	label->SetFont(Services::GetAssets()->LoadFont("F_RYE"));
-	label->SetText("Test Label");
-	
-	Actor* childUIActor = new Actor(Actor::TransformType::RectTransform);
-	//childUIActor->AddComponent<Mover>();
-	childUIActor->GetTransform()->SetParent(uiActor->GetTransform());
-	//childUIActor->SetPosition(Vector3(0.0f, 400.0f, 0.0f));
-	
-	UIButton* button = childUIActor->AddComponent<UIButton>();
-	button->SetUpTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_U"));
-	button->SetDownTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_D"));
-	button->SetHoverTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_H"));
-	button->SetDisabledTexture(Services::GetAssets()->LoadTexture("TITLE_PLAY_X"));
-	
-	button->SetPressCallback([]() { std::cout << "ahhh" << std::endl; });
+	// Create action bar, which will be used to choose nouns/verbs by the player.
+	mActionBar = new ActionBar();
 	
 	// For debugging - render walker bounds overlay on game world.
 	{

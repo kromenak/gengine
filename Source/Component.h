@@ -19,10 +19,10 @@ public:
     
 	void Update(float deltaTime) { UpdateInternal(deltaTime); }
     
-    Actor* GetOwner() { return mOwner; }
+    Actor* GetOwner() const { return mOwner; }
     
 protected:
-    Actor* mOwner;
+	Actor* mOwner = nullptr;
 	
 	virtual void UpdateInternal(float deltaTime) { }
 };

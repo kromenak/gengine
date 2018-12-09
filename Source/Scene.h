@@ -9,12 +9,13 @@
 #pragma once
 #include <string>
 
-class SIF;
-class SceneData;
-class BSP;
+class ActionBar;
 class Actor;
+class BSP;
 class GameCamera;
 class Ray;
+class SceneData;
+class SIF;
 class Skybox;
 class Vector3;
 
@@ -54,6 +55,8 @@ private:
     
     // The actor who we are controlling in the scene.
     Actor* mEgo = nullptr;
+	
+	ActionBar* mActionBar = nullptr;
 };
 
 /*
