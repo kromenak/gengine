@@ -15,13 +15,13 @@ public:
     BinaryWriter(const char* filePath);
     ~BinaryWriter();
     
-    bool CanWrite() const;
-    bool IsEof() const;
+	bool CanWrite() const { return mStream->good(); }
+	bool IsEof() const { return mStream->eof(); }
     
     void Seek(int position);
     void Skip(int size);
     
-    int GetPosition();
+	int GetPosition() const { return (int)mStream->tellp(); }
     
     void Write(char* buffer, int size);
     void Write(unsigned char* buffer, int size);
@@ -41,5 +41,5 @@ public:
     void WriteDouble(double val);
     
 private:
-    std::ostream* stream = nullptr;
+    std::ostream* mStream = nullptr;
 };

@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */; };
+		4B00D3301F8F3AD500D536D5 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* Camera.cpp */; };
 		4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
 		4B046E90218E855600E56341 /* Mover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E8F218E855600E56341 /* Mover.cpp */; };
 		4B046E91218E855600E56341 /* Mover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E8F218E855600E56341 /* Mover.cpp */; };
@@ -107,7 +107,7 @@
 		4B22F5322174078B0065B152 /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B22F5352174078B0065B152 /* BinaryWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D020B2555E00795582 /* BinaryWriter.cpp */; };
-		4B22F5362174078B0065B152 /* CameraComponent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */; };
+		4B22F5362174078B0065B152 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* Camera.cpp */; };
 		4B22F5372174078B0065B152 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
 		4B22F5382174078B0065B152 /* GameCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D706206098B100EBD298 /* GameCamera.cpp */; };
 		4B22F5392174078B0065B152 /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
@@ -172,7 +172,6 @@
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4BCF4B25205672350045EDC8 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
-		4BCF4B26205672400045EDC8 /* SDL2_mixer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB8282B205665750054625A /* SDL2_mixer.framework */; };
 		4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshRenderer.cpp */; };
 		4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */; };
 		4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673CB20B1119E00795582 /* Skybox.cpp */; };
@@ -222,8 +221,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CameraComponent.cpp; path = ../Source/CameraComponent.cpp; sourceTree = "<group>"; };
-		4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CameraComponent.h; path = ../Source/CameraComponent.h; sourceTree = "<group>"; };
+		4B00D32E1F8F3AD500D536D5 /* Camera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cpp; path = ../Source/Camera.cpp; sourceTree = "<group>"; };
+		4B00D32F1F8F3AD500D536D5 /* Camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Camera.h; path = ../Source/Camera.h; sourceTree = "<group>"; };
 		4B02A3B01F526529000540A7 /* membuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = membuf.cpp; path = ../Source/membuf.cpp; sourceTree = "<group>"; };
 		4B02A3B11F526529000540A7 /* membuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = membuf.h; path = ../Source/membuf.h; sourceTree = "<group>"; };
 		4B02A3B31F5269E9000540A7 /* imstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imstream.cpp; path = ../Source/imstream.cpp; sourceTree = "<group>"; };
@@ -369,7 +368,6 @@
 		4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepScriptBuilder.h; path = ../Source/Sheep/SheepScriptBuilder.h; sourceTree = "<group>"; };
 		4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScriptBuilder.cpp; path = ../Source/Sheep/SheepScriptBuilder.cpp; sourceTree = "<group>"; };
 		4BB82829205665680054625A /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../Libraries/SDL/SDL2.framework; sourceTree = "<group>"; };
-		4BB8282B205665750054625A /* SDL2_mixer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2_mixer.framework; path = ../Libraries/SDL/SDL2_mixer.framework; sourceTree = "<group>"; };
 		4BBB34B3214F72BB0069B2E9 /* Font.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Font.h; path = ../Source/Font.h; sourceTree = "<group>"; };
 		4BBB34B4214F72BB0069B2E9 /* Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Font.cpp; path = ../Source/Font.cpp; sourceTree = "<group>"; };
 		4BBB91B42058E53A007B9375 /* Soundtrack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Soundtrack.h; path = ../Source/Audio/Soundtrack.h; sourceTree = "<group>"; };
@@ -423,7 +421,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4BCF4B26205672400045EDC8 /* SDL2_mixer.framework in Frameworks */,
 				4BCF4B25205672350045EDC8 /* SDL2.framework in Frameworks */,
 				4B15A9581F242ECF000A689F /* CoreFoundation.framework in Frameworks */,
 				4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */,
@@ -500,7 +497,6 @@
 		4B15A94D1F241FEA000A689F /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				4BB8282B205665750054625A /* SDL2_mixer.framework */,
 				4BB82829205665680054625A /* SDL2.framework */,
 				4B15A9571F242ECF000A689F /* CoreFoundation.framework */,
 				4B15A94E1F241FEA000A689F /* OpenGL.framework */,
@@ -511,19 +507,14 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				4B6B765E21A5216B00788C02 /* GK3 */,
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
 				4B9231992103AED90004F4F3 /* Animation */,
 				4B76B57D1F3599A1003F63E5 /* Assets */,
 				4BE15CBC1F46620000114779 /* AtomicTypes.h */,
 				4B7AB0421F539EA500CFBE8F /* Audio */,
-				4B2CA00E21B90FAF006D5E52 /* BinaryReader.cpp */,
-				4B2CA00D21B90FAF006D5E52 /* BinaryReader.h */,
-				4BD673D020B2555E00795582 /* BinaryWriter.cpp */,
-				4BD673CF20B2555E00795582 /* BinaryWriter.h */,
-				4B00D32E1F8F3AD500D536D5 /* CameraComponent.cpp */,
-				4B00D32F1F8F3AD500D536D5 /* CameraComponent.h */,
+				4B00D32E1F8F3AD500D536D5 /* Camera.cpp */,
+				4B00D32F1F8F3AD500D536D5 /* Camera.h */,
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
 				4B1112AE1F821FFF00AFDDFC /* Component.h */,
 				4B046E93218FB10F00E56341 /* Debug.cpp */,
@@ -532,12 +523,10 @@
 				4B17D705206098B100EBD298 /* GameCamera.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
 				4B15A9511F2428C5000A689F /* GEngine.h */,
-				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
-				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
-				4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */,
-				4B2E7A5A2039FCF0001A5B9C /* IniParser.h */,
+				4B6B765E21A5216B00788C02 /* GK3 */,
 				4B09182F1FEED86B002991D4 /* InputManager.cpp */,
 				4B0918301FEED86B002991D4 /* InputManager.h */,
+				4B9E412E21BD019D008B9B1E /* IO */,
 				4BE6EE351F441DD100BB29D5 /* Libraries */,
 				4B15A93F1F24188E000A689F /* Main.cpp */,
 				4B4300841FB7EDFA009EDE58 /* Math */,
@@ -552,8 +541,6 @@
 				4B09182D1FEED84D002991D4 /* Services.cpp */,
 				4B09182C1FEED84D002991D4 /* Services.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
-				4BD673CB20B1119E00795582 /* Skybox.cpp */,
-				4BD673CA20B1119E00795582 /* Skybox.h */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4B1555582197B59F00072F0D /* Transform.cpp */,
 				4B1555572197B59F00072F0D /* Transform.h */,
@@ -615,6 +602,8 @@
 				4B8E830B20F148260009A86B /* RenderPacket.h */,
 				4BF32B8A1F67C434000639FB /* Shader.cpp */,
 				4BF32B8B1F67C434000639FB /* Shader.h */,
+				4BD673CB20B1119E00795582 /* Skybox.cpp */,
+				4BD673CA20B1119E00795582 /* Skybox.h */,
 				4B4621EA1FF741D800536BA6 /* Texture.cpp */,
 				4B4621E91FF741D800536BA6 /* Texture.h */,
 			);
@@ -650,9 +639,9 @@
 		4B6B765E21A5216B00788C02 /* GK3 */ = {
 			isa = PBXGroup;
 			children = (
+				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
+				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
 				4B6B766321AB746D00788C02 /* UI */,
-				4B6B765F21A6165E00788C02 /* ButtonIconManager.h */,
-				4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */,
 			);
 			name = GK3;
 			sourceTree = "<group>";
@@ -662,6 +651,8 @@
 			children = (
 				4B6B766521AB75AA00788C02 /* ActionBar.cpp */,
 				4B6B766421AB75AA00788C02 /* ActionBar.h */,
+				4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */,
+				4B6B765F21A6165E00788C02 /* ButtonIconManager.h */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -749,6 +740,19 @@
 				4B6B766921AB99C500788C02 /* FileSystem.cpp */,
 			);
 			name = STD;
+			sourceTree = "<group>";
+		};
+		4B9E412E21BD019D008B9B1E /* IO */ = {
+			isa = PBXGroup;
+			children = (
+				4B2CA00E21B90FAF006D5E52 /* BinaryReader.cpp */,
+				4B2CA00D21B90FAF006D5E52 /* BinaryReader.h */,
+				4BD673D020B2555E00795582 /* BinaryWriter.cpp */,
+				4BD673CF20B2555E00795582 /* BinaryWriter.h */,
+				4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */,
+				4B2E7A5A2039FCF0001A5B9C /* IniParser.h */,
+			);
+			name = IO;
 			sourceTree = "<group>";
 		};
 		4BD673C920B10EB200795582 /* Scene */ = {
@@ -1004,7 +1008,7 @@
 				4B6B766A21AB99C500788C02 /* FileSystem.cpp in Sources */,
 				4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */,
 				4B7C3A161F4EB07000BB0922 /* AudioManager.cpp in Sources */,
-				4B00D3301F8F3AD500D536D5 /* CameraComponent.cpp in Sources */,
+				4B00D3301F8F3AD500D536D5 /* Camera.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
 				4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */,
@@ -1080,7 +1084,7 @@
 				4B22F503217407530065B152 /* SheepAPI.cpp in Sources */,
 				4B2CA00B21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4B22F501217407530065B152 /* lex.yy.cc in Sources */,
-				4B22F5362174078B0065B152 /* CameraComponent.cpp in Sources */,
+				4B22F5362174078B0065B152 /* Camera.cpp in Sources */,
 				4B22F515217407640065B152 /* MeshRenderer.cpp in Sources */,
 				4B22F509217407530065B152 /* Skybox.cpp in Sources */,
 				4B22F53B2174078B0065B152 /* IniParser.cpp in Sources */,

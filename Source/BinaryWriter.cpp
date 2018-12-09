@@ -9,8 +9,8 @@
 
 BinaryWriter::BinaryWriter(const char* filePath)
 {
-    stream = new std::ofstream(filePath, std::ios::out | std::ios::binary);
-    if(!stream->good())
+    mStream = new std::ofstream(filePath, std::ios::out | std::ios::binary);
+    if(!mStream->good())
     {
         std::cout << "BinaryWriter can't write to file " << filePath << "!" << std::endl;
     }
@@ -18,86 +18,70 @@ BinaryWriter::BinaryWriter(const char* filePath)
 
 BinaryWriter::~BinaryWriter()
 {
-    
-    delete stream;
-}
-
-bool BinaryWriter::CanWrite() const
-{
-    return stream->good();
-}
-
-bool BinaryWriter::IsEof() const
-{
-    return stream->eof();
+    delete mStream;
 }
 
 void BinaryWriter::Seek(int position)
 {
-    stream->seekp(position, std::ios::beg);
+    mStream->seekp(position, std::ios::beg);
 }
 
 void BinaryWriter::Skip(int size)
 {
-    stream->seekp(size, std::ios::cur);
-}
-
-int BinaryWriter::GetPosition()
-{
-    return (int)stream->tellp();
+    mStream->seekp(size, std::ios::cur);
 }
 
 void BinaryWriter::Write(char* buffer, int size)
 {
-    stream->write(buffer, size);
+    mStream->write(buffer, size);
 }
 
 void BinaryWriter::Write(unsigned char* buffer, int size)
 {
-    stream->write((char*)buffer, size);
+    mStream->write((char*)buffer, size);
 }
 
 void BinaryWriter::WriteString(std::string val)
 {
-    stream->write(val.c_str(), val.size());
+    mStream->write(val.c_str(), val.size());
 }
 
 void BinaryWriter::WriteUByte(uint8_t val)
 {
-    stream->write(reinterpret_cast<char*>(&val), 1);
+    mStream->write(reinterpret_cast<char*>(&val), 1);
 }
 
 void BinaryWriter::WriteSByte(int8_t val)
 {
-    stream->write(reinterpret_cast<char*>(&val), 1);
+    mStream->write(reinterpret_cast<char*>(&val), 1);
 }
 
 void BinaryWriter::WriteUShort(uint16_t val)
 {
-    stream->write(reinterpret_cast<char*>(&val), 2);
+    mStream->write(reinterpret_cast<char*>(&val), 2);
 }
 
 void BinaryWriter::WriteShort(int16_t val)
 {
-    stream->write(reinterpret_cast<char*>(&val), 2);
+    mStream->write(reinterpret_cast<char*>(&val), 2);
 }
 
 void BinaryWriter::WriteUInt(uint32_t val)
 {
-    stream->write(reinterpret_cast<char*>(&val), 4);
+    mStream->write(reinterpret_cast<char*>(&val), 4);
 }
 
 void BinaryWriter::WriteInt(int32_t val)
 {
-    stream->write(reinterpret_cast<char*>(&val), 4);
+    mStream->write(reinterpret_cast<char*>(&val), 4);
 }
 
 void BinaryWriter::WriteFloat(float val)
 {
-    stream->write(reinterpret_cast<char*>(&val), 4);
+    mStream->write(reinterpret_cast<char*>(&val), 4);
 }
 
 void BinaryWriter::WriteDouble(double val)
 {
-    stream->write(reinterpret_cast<char*>(&val), 8);
+    mStream->write(reinterpret_cast<char*>(&val), 8);
 }

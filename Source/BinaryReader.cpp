@@ -6,13 +6,14 @@
 //
 #include "BinaryReader.h"
 
+#include <fstream>
 #include <iostream>
 #include "imstream.h"
 
 BinaryReader::BinaryReader(const char* filePath)
 {
-    stream = new std::ifstream(filePath, std::ios::in | std::ios::binary);
-    if(!stream->good())
+    mStream = new std::ifstream(filePath, std::ios::in | std::ios::binary);
+    if(!mStream->good())
     {
         std::cout << "BinaryReader can't read from file " << filePath << "!" << std::endl;
     }
@@ -20,52 +21,46 @@ BinaryReader::BinaryReader(const char* filePath)
 
 BinaryReader::BinaryReader(const char* memory, unsigned int memoryLength)
 {
-    stream = new imstream(memory, memoryLength);
+    mStream = new imstream(memory, memoryLength);
 }
 
 BinaryReader::~BinaryReader()
 {
-    delete stream;
+    delete mStream;
 }
 
 void BinaryReader::Seek(int position)
 {
 	// It's possible we've hit EOF, especially if we're jumping around a lot.
 	// If we are trying to seek on an EOF stream, clear the error flags and do the seek.
-	if(!stream->good() && stream->eof())
+	if(!mStream->good() && mStream->eof())
 	{
-		stream->clear();
+		mStream->clear();
 	}
-	
-    stream->seekg(position, std::ios::beg);
+    mStream->seekg(position, std::ios::beg);
 }
 
 void BinaryReader::Skip(int size)
 {
-    stream->seekg(size, std::ios::cur);
-}
-
-int BinaryReader::GetPosition()
-{
-    return (int)stream->tellg();
+    mStream->seekg(size, std::ios::cur);
 }
 
 int BinaryReader::Read(char* buffer, int size)
 {
-    stream->read(buffer, size);
-	return (int)stream->gcount();
+    mStream->read(buffer, size);
+	return (int)mStream->gcount();
 }
 
 int BinaryReader::Read(unsigned char* buffer, int size)
 {
-    stream->read((char*)buffer, size);
-	return (int)stream->gcount();
+    mStream->read((char*)buffer, size);
+	return (int)mStream->gcount();
 }
 
 std::string BinaryReader::ReadString(int length)
 {
     char* buffer = new char[length];
-    stream->read(buffer, length);
+    mStream->read(buffer, length);
     
     // Find null terminator, if any.
     for(int i = 0; i < length; i++)
@@ -81,55 +76,55 @@ std::string BinaryReader::ReadString(int length)
 uint8_t BinaryReader::ReadUByte()
 {
     uint8_t val;
-    stream->read(reinterpret_cast<char*>(&val), 1);
+    mStream->read(reinterpret_cast<char*>(&val), 1);
     return val;
 }
 
 int8_t BinaryReader::ReadByte()
 {
     int8_t val;
-    stream->read(reinterpret_cast<char*>(&val), 1);
+    mStream->read(reinterpret_cast<char*>(&val), 1);
     return val;
 }
 
 uint16_t BinaryReader::ReadUShort()
 {
     uint16_t val;
-    stream->read(reinterpret_cast<char*>(&val), 2);
+    mStream->read(reinterpret_cast<char*>(&val), 2);
     return val;
 }
 
 int16_t BinaryReader::ReadShort()
 {
     int16_t val;
-    stream->read(reinterpret_cast<char*>(&val), 2);
+    mStream->read(reinterpret_cast<char*>(&val), 2);
     return val;
 }
 
 uint32_t BinaryReader::ReadUInt()
 {
     uint32_t val;
-    stream->read(reinterpret_cast<char*>(&val), 4);
+    mStream->read(reinterpret_cast<char*>(&val), 4);
     return val;
 }
 
 int32_t BinaryReader::ReadInt()
 {
     int32_t val;
-    stream->read(reinterpret_cast<char*>(&val), 4);
+    mStream->read(reinterpret_cast<char*>(&val), 4);
     return val;
 }
 
 float BinaryReader::ReadFloat()
 {
     float val;
-    stream->read(reinterpret_cast<char*>(&val), 4);
+    mStream->read(reinterpret_cast<char*>(&val), 4);
     return val;
 }
 
 double BinaryReader::ReadDouble()
 {
     double val;
-    stream->read(reinterpret_cast<char*>(&val), 8);
+    mStream->read(reinterpret_cast<char*>(&val), 8);
     return val;
 }

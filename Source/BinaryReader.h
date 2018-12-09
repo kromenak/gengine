@@ -5,7 +5,7 @@
 //  Created by Clark Kromenaker on 8/5/17.
 //
 #pragma once
-#include <fstream>
+#include <istream>
 
 class BinaryReader
 {
@@ -14,13 +14,13 @@ public:
     BinaryReader(const char* memory, unsigned int memoryLength);
     ~BinaryReader();
     
-	bool CanRead() const { return stream->good(); }
-	bool IsEof() const { return stream->eof(); }
+	bool CanRead() const { return mStream->good(); }
+	bool IsEof() const { return mStream->eof(); }
     
     void Seek(int position);
     void Skip(int size);
     
-    int GetPosition();
+	int GetPosition() const { return (int)mStream->tellg(); }
     
     int Read(char* buffer, int size);
     int Read(unsigned char* buffer, int size);
@@ -40,5 +40,7 @@ public:
     double ReadDouble();
     
 private:
-    std::istream* stream = nullptr;
+	// Stream we are reading from.
+	// Needs to be pointer because type of stream (memory, file, etc) changes sometimes.
+    std::istream* mStream = nullptr;
 };
