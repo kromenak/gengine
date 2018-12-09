@@ -6,7 +6,7 @@
 #include "UIButton.h"
 
 #include "Actor.h"
-#include "CameraComponent.h"
+#include "Camera.h"
 #include "Debug.h"
 #include "Mesh.h"
 #include "Services.h"

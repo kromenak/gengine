@@ -6,7 +6,7 @@
 #include "GameCamera.h"
 
 #include "AudioListener.h"
-#include "CameraComponent.h"
+#include "Camera.h"
 #include "GEngine.h"
 #include "Scene.h"
 
@@ -16,7 +16,7 @@ const float kCameraRotationSpeed = 2.5f;
 
 GameCamera::GameCamera()
 {
-    mCamera = AddComponent<CameraComponent>();
+    mCamera = AddComponent<Camera>();
     AddComponent<AudioListener>();
 }
 

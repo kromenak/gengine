@@ -17,5 +17,5 @@ protected:
     void UpdateInternal(float deltaTime) override;
     
 private:
-    CameraComponent* mCamera = nullptr;
+    Camera* mCamera = nullptr;
 };

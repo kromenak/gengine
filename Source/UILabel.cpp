@@ -7,7 +7,7 @@
 
 #include "Actor.h"
 #include "Debug.h"
-#include "CameraComponent.h"
+#include "Camera.h"
 #include "Font.h"
 #include "Mesh.h"
 
