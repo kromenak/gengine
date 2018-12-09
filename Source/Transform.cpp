@@ -86,7 +86,7 @@ Matrix4 Transform::GetLocalToWorldMatrix()
 	if(mLocalToWorldDirty)
 	{
 		// Get translate/rotate/scale matrices.
-		Matrix4 translateMatrix = Matrix4::MakeTranslate(mLocalPosition);
+		Matrix4 translateMatrix = Matrix4::MakeTranslate(GetLocalPosition());
 		Matrix4 rotateMatrix = Matrix4::MakeRotate(mLocalRotation);
 		Matrix4 scaleMatrix = Matrix4::MakeScale(mLocalScale);
 		
@@ -136,6 +136,11 @@ Vector3 Transform::WorldToLocalDirection(const Vector3& worldDirection)
 	//TODO: Unit test this?
 	Vector4 result = Vector4(worldDirection.GetX(), worldDirection.GetY(), worldDirection.GetZ(), 0.0f) * GetLocalToWorldMatrix();
 	return Vector3(result.GetX(), result.GetY(), result.GetZ());
+}
+
+Vector3 Transform::GetLocalPosition()
+{
+	return mLocalPosition;
 }
 
 void Transform::SetDirty()

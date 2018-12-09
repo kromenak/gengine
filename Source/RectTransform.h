@@ -25,7 +25,7 @@ public:
 	Rect GetScreenRect();
 	
 protected:
-	//void UpdateWorldTransform() override;
+	Vector3 GetLocalPosition() override;
 	
 private:
 	// The size of the rect area (width/height).

@@ -55,6 +55,8 @@ public:
 	Vector3 WorldToLocalDirection(const Vector3& worldDirection);
 	
 protected:
+	virtual Vector3 GetLocalPosition();
+	
 	// Local position, rotation, and scale.
 	Vector3 mLocalPosition;
 	Quaternion mLocalRotation;
