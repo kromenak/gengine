@@ -15,12 +15,11 @@
 #include "Vector2.h"
 
 class Shader;
-class CameraComponent;
+class Camera;
 class MeshRenderer;
 class Model;
 class BSP;
 class Skybox;
-class UIWidget;
 
 class Renderer
 {
@@ -32,14 +31,11 @@ public:
     void Render();
     void Present();
     
-    void SetCamera(CameraComponent* camera) { mCameraComponent = camera; }
-    CameraComponent* GetCamera() { return mCameraComponent; }
+    void SetCamera(Camera* camera) { mCamera = camera; }
+    Camera* GetCamera() { return mCamera; }
 	
     void AddMeshRenderer(MeshRenderer* mc);
     void RemoveMeshRenderer(MeshRenderer* mc);
-    
-    void AddUIWidget(UIWidget* widget);
-    void RemoveUIWidget(UIWidget* widget);
     
     void SetBSP(BSP* bsp) { mBSP = bsp; }
     
@@ -65,16 +61,13 @@ private:
     Shader* mDefaultShader = nullptr;
     
     // Our camera in the scene - we currently only support one.
-    CameraComponent* mCameraComponent = nullptr;
+    Camera* mCamera = nullptr;
 	
 	// All loaded shaders.
 	std::vector<Shader*> mShaders;
     
     // List of mesh components to render.
     std::vector<MeshRenderer*> mMeshRenderers;
-	
-	// Widgets to be rendered.
-	std::vector<UIWidget*> mWidgets;
 	
     // A BSP to render.
     BSP* mBSP = nullptr;

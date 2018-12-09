@@ -6,6 +6,7 @@
 //
 #include "AssetManager.h"
 
+#include <fstream>
 #include <iostream>
 
 #include "StringUtil.h"

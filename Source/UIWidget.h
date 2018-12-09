@@ -16,7 +16,7 @@ class UIWidget : public Component
     TYPE_DECL_CHILD();
 public:
     UIWidget(Actor* actor);
-    ~UIWidget();
+    virtual ~UIWidget();
     
 	virtual void Render() = 0;
 	

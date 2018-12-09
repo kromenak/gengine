@@ -15,14 +15,14 @@
 #include "Actor.h"
 #include "BSP.h"
 #include "Debug.h"
-#include "CameraComponent.h"
+#include "Camera.h"
 #include "Matrix4.h"
 #include "MeshRenderer.h"
 #include "Model.h"
 #include "Shader.h"
 #include "Skybox.h"
 #include "Texture.h"
-#include "UIWidget.h"
+#include "UICanvas.h"
 
 float line_vertices[] = {
 	0.0f, 0.0f, 0.0f,
@@ -186,11 +186,11 @@ void Renderer::Clear()
 void Renderer::Render()
 {
     // Don't render if there's no camera.
-    if(mCameraComponent == nullptr) { return; }
+    if(mCamera == nullptr) { return; }
     
     // We'll need the projection matrix a few times below.
     // We'll also calculate the view/proj combined matrix one or two times.
-    Matrix4 projectionMatrix = mCameraComponent->GetProjectionMatrix();
+    Matrix4 projectionMatrix = mCamera->GetProjectionMatrix();
     Matrix4 viewProjMatrix;
     
     // Draw the skybox first, if we have one.
@@ -201,7 +201,7 @@ void Renderer::Render()
     {
         // To get the "infinite distance" skybox effect, we need to use a look-at
         // matrix that doesn't take the camera's position into account.
-        viewProjMatrix = projectionMatrix * mCameraComponent->GetLookAtMatrixNoTranslate();
+        viewProjMatrix = projectionMatrix * mCamera->GetLookAtMatrixNoTranslate();
         
         mSkyboxShader->Activate();
         mSkyboxShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
@@ -211,7 +211,7 @@ void Renderer::Render()
     glDepthMask(GL_TRUE); // start writing to depth buffer
     
     // For the rest of rendering, the normal view/proj matrix is fine.
-    viewProjMatrix = projectionMatrix * mCameraComponent->GetLookAtMatrix();
+    viewProjMatrix = projectionMatrix * mCamera->GetLookAtMatrix();
     
     // Enable depth test and disable blend to draw opaque 3D geometry.
     glEnable(GL_DEPTH_TEST); // do depth comparisons and update the depth buffer
@@ -253,7 +253,7 @@ void Renderer::Render()
     // Render the BSP.
     if(mBSP != nullptr)
     {
-        mBSP->Render(mCameraComponent->GetOwner()->GetPosition());
+        mBSP->Render(mCamera->GetOwner()->GetPosition());
     }
 	
     // Enable alpha-blended rendering and render UI elements.
@@ -263,10 +263,11 @@ void Renderer::Render()
 	glDisable(GL_DEPTH_TEST);
 	
     // Render UI elements.
-    for(auto& widget : mWidgets)
-    {
-        widget->Render();
-    }
+	const std::vector<UICanvas*>& canvases = UICanvas::GetCanvases();
+	for(auto& canvas : canvases)
+	{
+		canvas->Render();
+	}
 	
     // Reset for next render loop.
     glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
@@ -295,20 +296,6 @@ void Renderer::RemoveMeshRenderer(MeshRenderer* mr)
     if(it != mMeshRenderers.end())
     {
         mMeshRenderers.erase(it);
-    }
-}
-
-void Renderer::AddUIWidget(UIWidget* widget)
-{
-    mWidgets.push_back(widget);
-}
-
-void Renderer::RemoveUIWidget(UIWidget* widget)
-{
-    auto it = std::find(mWidgets.begin(), mWidgets.end(), widget);
-    if(it != mWidgets.end())
-    {
-        mWidgets.erase(it);
     }
 }
 

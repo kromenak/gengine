@@ -16,7 +16,10 @@ class UICanvas : public UIWidget
 {
 	TYPE_DECL_CHILD();
 public:
+	static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
+	
 	UICanvas(Actor* owner);
+	~UICanvas();
 	
 	void Render() override;
 	
@@ -24,5 +27,7 @@ public:
 	void RemoveWidget(UIWidget* widget);
 	
 private:
+	static std::vector<UICanvas*> sCanvases;
+	
 	std::vector<UIWidget*> mWidgets;
 };

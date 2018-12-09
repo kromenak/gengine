@@ -12,8 +12,6 @@ TYPE_DEF_CHILD(Component, UIWidget);
 
 UIWidget::UIWidget(Actor* owner) : Component(owner)
 {
-    Services::GetRenderer()->AddUIWidget(this);
-	
 	// Get RectTransform attached to this owner.
 	mRectTransform = mOwner->GetComponent<RectTransform>();
 	if(mRectTransform == nullptr)
@@ -24,7 +22,7 @@ UIWidget::UIWidget(Actor* owner) : Component(owner)
 
 UIWidget::~UIWidget()
 {
-    Services::GetRenderer()->RemoveUIWidget(this);
+    
 }
 
 Matrix4 UIWidget::GetWorldTransformWithSizeForRendering()

@@ -5,13 +5,22 @@
 //
 #include "UICanvas.h"
 
-#include "Actor.h"
-
 TYPE_DEF_CHILD(UIWidget, UICanvas);
+
+std::vector<UICanvas*> UICanvas::sCanvases;
 
 UICanvas::UICanvas(Actor* owner) : UIWidget(owner)
 {
-	
+	sCanvases.push_back(this);
+}
+
+UICanvas::~UICanvas()
+{
+	auto it = std::find(sCanvases.begin(), sCanvases.end(), this);
+	if(it != sCanvases.end())
+	{
+		sCanvases.erase(it);
+	}
 }
 
 void UICanvas::Render()
