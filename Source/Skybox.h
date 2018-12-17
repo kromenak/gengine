@@ -15,15 +15,16 @@ class Skybox
 {
 public:
     Skybox();
-    
+	~Skybox();
+	
     void Render();
     
-    void SetRightTexture(Texture* texture) { mRightTexture = texture; }
-    void SetLeftTexture(Texture* texture) { mLeftTexture = texture; }
-    void SetFrontTexture(Texture* texture) { mFrontTexture = texture; }
-    void SetBackTexture(Texture* texture) { mBackTexture = texture; }
-    void SetUpTexture(Texture* texture) { mUpTexture = texture; }
-    void SetDownTexture(Texture* texture) { mDownTexture = texture; }
+	void SetRightTexture(Texture* texture) { mRightTexture = texture; SetDefaultTexture(texture); }
+    void SetLeftTexture(Texture* texture) { mLeftTexture = texture; SetDefaultTexture(texture); }
+	void SetFrontTexture(Texture* texture) { mFrontTexture = texture; SetDefaultTexture(texture); }
+    void SetBackTexture(Texture* texture) { mBackTexture = texture; SetDefaultTexture(texture); }
+    void SetUpTexture(Texture* texture) { mUpTexture = texture; SetDefaultTexture(texture); }
+    void SetDownTexture(Texture* texture) { mDownTexture = texture; SetDefaultTexture(texture); }
     
     void SetAzimuth(float azimuth) { mAzimuth = azimuth; }
     
@@ -44,4 +45,6 @@ private:
     
     // An ID for the texture object generated in OpenGL.
     GLuint mCubemapTextureId = GL_NONE;
+	
+	void SetDefaultTexture(Texture* texture);
 };

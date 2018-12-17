@@ -61,15 +61,12 @@ float points[] = {
 
 Skybox::Skybox()
 {
-    // For the skybox to work correctly, all sides must have valid textures.
-    // So, set all to a valid default to start, and they can be overwritten as needed.
-    Texture* defaultTexture = Services::GetAssets()->LoadTexture("DEFAULT.BMP");
-    mRightTexture = defaultTexture;
-    mLeftTexture = defaultTexture;
-    mFrontTexture = defaultTexture;
-    mBackTexture = defaultTexture;
-    mUpTexture = defaultTexture;
-    mDownTexture = defaultTexture;
+	
+}
+
+Skybox::~Skybox()
+{
+	
 }
 
 void Skybox::Render()
@@ -126,14 +123,6 @@ void Skybox::Render()
                          mDownTexture->GetWidth(), mDownTexture->GetHeight(), 0,
                          GL_RGBA, GL_UNSIGNED_BYTE, mDownTexture->GetPixelData());
         }
-        else
-        {
-            //TODO: the down texture is often null/empty. Just using up texture for expediency,
-            // but should probably use some default "black" or "white" texture instead.
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA,
-                         mUpTexture->GetWidth(), mUpTexture->GetHeight(), 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, mUpTexture->GetPixelData());
-        }
         
         // These settings help to avoid visible seams around the edges of the skybox.
         glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -147,4 +136,17 @@ void Skybox::Render()
     glBindTexture(GL_TEXTURE_CUBE_MAP, mCubemapTextureId);
     
     mSkyboxMesh->Render();
+}
+
+void Skybox::SetDefaultTexture(Texture* texture)
+{
+	// The purpose of this is to ensure that each side of the skybox has a valid texture to use.
+	// Skyboxes have some requirements (in OpenGL, at least) about all sides being same size, mipmap level, and format.
+	// When any one side is set, we just make sure that ALL sides are set, if still null.
+	if(mRightTexture == nullptr) { mRightTexture = texture; }
+	if(mLeftTexture == nullptr) { mLeftTexture = texture; }
+	if(mFrontTexture == nullptr) { mFrontTexture = texture; }
+	if(mBackTexture == nullptr) { mBackTexture = texture; }
+	if(mUpTexture == nullptr) { mUpTexture = texture; }
+	if(mDownTexture == nullptr) { mDownTexture = texture; }
 }
