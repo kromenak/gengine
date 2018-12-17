@@ -203,7 +203,13 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
         }
         
         // Detect headers and react to them, but don't stop parsing.
-        if(line.length() > 2 && line[0] == '[' && line[line.length() - 1] == ']')
+		std::size_t endHeaderIndex = std::string::npos;
+		if(line.length() > 2 && line[0] == '[')
+		{
+			endHeaderIndex = line.find(']', 1);
+		}
+		
+		if(endHeaderIndex != std::string::npos)
         {
             if(sectionOut.entries.size() > 0)
             {
@@ -212,7 +218,7 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             }
             
             // Subtract the brackets to get the section name.
-            sectionOut.name = line.substr(1, line.length() - 2);
+            sectionOut.name = line.substr(1, endHeaderIndex - 1);
             
             // If there's an equals sign, it means this section is conditional.
             std::size_t equalsIndex = sectionOut.name.find('=');
