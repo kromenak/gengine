@@ -55,29 +55,34 @@ void SceneData::ParseFromData(char *data, int dataLength)
     }
     for(auto& entry : skyboxSection.entries)
     {
-        Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
         if(StringUtil::EqualsIgnoreCase(entry->key, "left"))
         {
+			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
             mSkybox->SetLeftTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "right"))
         {
+			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
             mSkybox->SetRightTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "front"))
         {
+			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
             mSkybox->SetFrontTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "back"))
         {
+			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
             mSkybox->SetBackTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "up"))
         {
+			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
             mSkybox->SetUpTexture(texture);
         }
         else if(StringUtil::EqualsIgnoreCase(entry->key, "down"))
         {
+			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
             mSkybox->SetDownTexture(texture);
         }
     }
