@@ -92,7 +92,7 @@ struct SceneActorData
     
     // Initial position of the actor in the scene.
     // We'll place the actor here, but this might be overwritten
-    // after scene init - maybe due to a Sheep script or something.
+    // after scene init - maybe due to a SheepScript or something.
     ScenePositionData* position = nullptr;
     
     // Idle gas script file.
@@ -104,7 +104,7 @@ struct SceneActorData
     // Listen gas script file.
     GAS* listenGas = nullptr;
     
-    // Init animation, for initial positioning of the actor.
+    // An animation played on init. Only first frame will be applied.
     // Overrides any other position value used.
     Animation* initAnim = nullptr;
     
@@ -119,10 +119,10 @@ struct SceneModelData
 {
     enum class Type
     {
-        Scene,
-        Prop,
-        HitTest,
-        GasProp
+        Scene,		// Model is part of BSP geometry.
+        Prop,		// Model is standalone - use "model" for geometry.
+        HitTest,	// Model is part of BSP, but shouldn't be rendered. Only used for hit tests.
+        GasProp		// Like a prop, but can also be animated by GAS - use "gas" for that.
     };
     
     // Name of the model. For props, this is the name of a MOD file.
@@ -133,7 +133,8 @@ struct SceneModelData
     // Could be null for models in the BSP geometry, which are quite common.
     Model* model = nullptr;
     
-    // The type of this model. Dictates whether it is part of the BSP geometry or a separate asset.
+    // The type of this model.
+	// Dictates whether it is part of the BSP geometry or a separate asset.
     Type type = Type::Scene;
     
     // Noun associated with this object, for interactivity.
@@ -143,14 +144,14 @@ struct SceneModelData
     // specify a verb here if only a single verb response is possible.
     std::string verb;
     
-    // First frame of this anim will be applies on initialization.
+    // An animation played on init. Only first frame will be applied.
     // Only applies to Props. Others will ignore this.
-    //TODO: InitAnim ANM asset reference
+	Animation* initAnim = nullptr;
     
     // For GasProps, the gas file to use.
     GAS* gas = nullptr;
     
-    // If true, the model is hidden at initialization.
+    // If true, the model is hidden at creation.
     bool hidden = false;
 };
 

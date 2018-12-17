@@ -511,7 +511,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 else if(keyValue->key == "initAnim")
                 {
-                    //TODO
+                    model->initAnim = Services::GetAssets()->LoadAnimation(keyValue->value);
                 }
                 else if(keyValue->key == "hidden")
                 {
