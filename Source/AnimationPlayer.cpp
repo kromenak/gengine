@@ -36,6 +36,64 @@ void AnimationPlayer::Play(VertexAnimation* vertexAnimation)
     mVertexAnimationTimer = 0.0f;
 }
 
+void AnimationPlayer::Sample(Animation* animation, int frame)
+{
+	if(animation == nullptr) { return; }
+	
+	std::vector<AnimationNode*>* frameData = animation->GetFrame(frame);
+	if(frameData == nullptr) { return; }
+	
+	if(frameData->size() > 0)
+	{
+		AnimationNode* node = (*frameData)[0];
+		if(node->mVertexAnimation == nullptr) { return; }
+		
+		// Iterate through each mesh and sample it in the vertex animation.
+		// We need to sample both vertex poses and transform poses to get the right result.
+		std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
+		for(int i = 0; i < meshes.size(); i++)
+		{
+			VertexAnimationVertexPose sample = node->mVertexAnimation->SampleVertexPose(mVertexAnimationTimer, 15, i);
+			if(sample.mFrameNumber >= 0)
+			{
+				meshes[i]->SetPositions((float*)sample.mVertexPositions.data());
+			}
+			
+			VertexAnimationTransformPose transformSample = node->mVertexAnimation->SampleTransformPose(mVertexAnimationTimer, 15, i);
+			if(transformSample.mFrameNumber >= 0)
+			{
+				meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
+			}
+		}
+	}
+	
+	/*
+	for(auto& node : *frameData)
+	{
+		if(node->mVertexAnimation != nullptr)
+		{
+			// Iterate through each mesh and sample it in the vertex animation.
+			// We need to sample both vertex poses and transform poses to get the right result.
+			std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
+			for(int i = 0; i < meshes.size(); i++)
+			{
+				VertexAnimationVertexPose sample = node->mVertexAnimation->SampleVertexPose(mVertexAnimationTimer, 15, i);
+				if(sample.mFrameNumber >= 0)
+				{
+					meshes[i]->SetPositions((float*)sample.mVertexPositions.data());
+				}
+				
+				VertexAnimationTransformPose transformSample = node->mVertexAnimation->SampleTransformPose(mVertexAnimationTimer, 15, i);
+				if(transformSample.mFrameNumber >= 0)
+				{
+					meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
+				}
+			}
+		}
+	}
+	*/
+}
+
 void AnimationPlayer::UpdateInternal(float deltaTime)
 {
 	// We need an animation to update.
@@ -85,10 +143,16 @@ void AnimationPlayer::UpdateInternal(float deltaTime)
 		for(int i = 0; i < meshes.size(); i++)
 		{
 			VertexAnimationVertexPose sample = mVertexAnimation->SampleVertexPose(mVertexAnimationTimer, framesPerSecond, i);
-			meshes[i]->SetPositions((float*)sample.mVertexPositions.data());
+			if(sample.mFrameNumber >= 0)
+			{
+				meshes[i]->SetPositions((float*)sample.mVertexPositions.data());
+			}
 			
 			VertexAnimationTransformPose transformSample = mVertexAnimation->SampleTransformPose(mVertexAnimationTimer, framesPerSecond, i);
-			meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
+			if(transformSample.mFrameNumber >= 0)
+			{
+				meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
+			}
 		}
 	}
 }

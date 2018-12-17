@@ -35,6 +35,10 @@ public:
     Scene* GetScene() { return mScene; }
     
     std::string GetCurrentTimeCode();
+	
+	void UseDefaultCursor();
+	void UseHighlightCursor();
+	void UseWaitCursor();
     
 private:
     // A list of all actors that currently exist in the game.
@@ -50,9 +54,17 @@ private:
     InputManager mInputManager;
     SheepManager mSheepManager;
     
-    // The currently active scene. There can be only one at a time.
+    // The currently active scene. There can be only one at a time (sure about that?).
     Scene* mScene = nullptr;
-    
+	
+	// Cursors - maybe move these into a manager at some point?
+	Cursor* mActiveCursor = nullptr;
+	Cursor* mDefaultCursor = nullptr;
+	Cursor* mHighlightRedCursor = nullptr;
+	Cursor* mHighlightBlueCursor = nullptr;
+	Cursor* mWaitCursor = nullptr;
+	
+	// The currently active cursor.
     Cursor* mCursor = nullptr;
     
     // Day and time that the game is currently in.
@@ -63,4 +75,6 @@ private:
     void ProcessInput();
     void Update();
     void GenerateOutputs();
+	
+	void DeleteAllActors();
 };

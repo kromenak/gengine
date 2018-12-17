@@ -9,6 +9,7 @@
 
 #include "Actor.h"
 #include "ButtonIconManager.h"
+#include "CharacterManager.h"
 #include "Debug.h"
 #include "Scene.h"
 #include "Services.h"
@@ -61,35 +62,31 @@ bool GEngine::Initialize()
     
     //SDL_Log(SDL_GetBasePath());
     //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
-    
-    //mCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
-    mCursor = mAssetManager.LoadCursor("C_POINT.CUR");
-	if(mCursor != nullptr)
-	{
-    	mCursor->Activate();
-	}
 	
-    //mAssetManager.WriteBarnAssetToFile("POEM9_OP.BMP");
-	//mAssetManager.WriteBarnAssetToFile("C_WAIT.CUR", "Cursors");
-    //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
+	// Load cursors and use the default one to start.
+	mDefaultCursor = mAssetManager.LoadCursor("C_POINT.CUR");
+	mHighlightRedCursor = mAssetManager.LoadCursor("C_ZOOM.CUR");
+	mHighlightBlueCursor = mAssetManager.LoadCursor("C_ZOOM_2.CUR");
+	mWaitCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
+	UseDefaultCursor();
+	
+	//mAssetManager.LoadVertexAnimation("R25CHAIR_GABR25SIT.ACT");
+    //mAssetManager.WriteBarnAssetToFile("R25CHAIR_GABR25SIT.ACT");
+    //mAssetManager.WriteAllBarnAssetsToFile(".CUR", "Cursors");
 	
 	// Load button icon manager.
-	Services::Set(new ButtonIconManager());
+	Services::Set<ButtonIconManager>(new ButtonIconManager());
 	
-	//ButtonIconManager* bim = Services::Get<ButtonIconManager>();
+	// Load character configs.
+	Services::Set<CharacterManager>(new CharacterManager());
 	
-    LoadScene("B25");
+    LoadScene("R25");
     return true;
 }
 
 void GEngine::Shutdown()
 {
-    // Delete all actors. Since actor destructor
-    // removes from this list, can't iterate and delete.
-    while(!mActors.empty())
-    {
-        delete mActors.back();
-    }
+	DeleteAllActors();
     
     mRenderer.Shutdown();
     mAudioManager.Shutdown();
@@ -125,15 +122,46 @@ std::string GEngine::GetCurrentTimeCode()
     return std::to_string(mDay) + std::to_string(hour) + ampm;
 }
 
+void GEngine::UseDefaultCursor()
+{
+	if(mDefaultCursor != nullptr)
+	{
+		mActiveCursor = mDefaultCursor;
+		mActiveCursor->Activate();
+	}
+}
+
+void GEngine::UseHighlightCursor()
+{
+	if(mHighlightRedCursor != nullptr)
+	{
+		mActiveCursor = mHighlightRedCursor;
+		mActiveCursor->Activate();
+	}
+}
+
+void GEngine::UseWaitCursor()
+{
+	if(mWaitCursor != nullptr)
+	{
+		mActiveCursor = mWaitCursor;
+		mActiveCursor->Activate();
+	}
+}
+
 void GEngine::LoadScene(std::string name)
 {
+	// Delete the current scene, if any.
     if(mScene != nullptr)
     {
-        //TODO: Deinit the current stage.
         delete mScene;
         mScene = nullptr;
     }
-    
+	
+	// Get rid of all actors between scenes.
+	DeleteAllActors();
+	
+	// Stand up the new scene.
     mScene = new Scene(name, GetCurrentTimeCode());
 }
 
@@ -227,4 +255,14 @@ void GEngine::RemoveActor(Actor* actor)
     {
         mActors.erase(it);
     }
+}
+
+void GEngine::DeleteAllActors()
+{
+	// Delete all actors.
+	// Since actor destructor removes from this list, can't iterate and delete.
+	while(!mActors.empty())
+	{
+		delete mActors.back();
+	}
 }

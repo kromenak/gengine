@@ -20,7 +20,7 @@ public:
     void SetGas(GAS* gas) { mGas = gas; mNodeIndex = 0; }
     
     void SetAnimationPlayer(AnimationPlayer* animationPlayer) { mAnimationPlayer = animationPlayer; }
-    AnimationPlayer* GetAnimationPlayer() { return mAnimationPlayer; }
+    AnimationPlayer* GetAnimationPlayer() const { return mAnimationPlayer; }
 	
 protected:
 	void UpdateInternal(float deltaTime) override;

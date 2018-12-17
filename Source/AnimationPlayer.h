@@ -20,6 +20,8 @@ public:
     
     void Play(Animation* animation);
     void Play(VertexAnimation* vertexAnimation);
+	
+	void Sample(Animation* animation, int frame);
     
     void SetMeshRenderer(MeshRenderer* meshRenderer) { mMeshRenderer = meshRenderer; }
     MeshRenderer* GetMeshRenderer() { return mMeshRenderer; }
