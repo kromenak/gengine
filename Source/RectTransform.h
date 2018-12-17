@@ -20,7 +20,14 @@ public:
 	
 	void SetSize(float x, float y) { mSize.SetX(x); mSize.SetY(y); }
 	void SetSize(Vector2 size) { mSize = size; }
-	Vector2 GetSize() { return mSize; }
+	Vector2 GetSize() const { return mSize; }
+	
+	void SetPivot(float x, float y) { mPivot.SetX(x); mPivot.SetY(y); }
+	void SetPivot(Vector2 pivot) { mPivot = pivot; }
+	Vector2 GetPivot() const { return mPivot; }
+	
+	void SetAnchorMin(Vector2 anchorMin) { mAnchorMin = anchorMin; }
+	Vector2 GetAnchorMin() const { return mAnchorMin; }
 	
 	Rect GetScreenRect();
 	
