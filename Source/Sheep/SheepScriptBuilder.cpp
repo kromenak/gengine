@@ -163,9 +163,12 @@ SheepValueType SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
     #ifdef DEBUG_BUILDER
     std::cout << "SysFunc " << sysFuncName << std::endl;
     #endif
+	
+	// All possible system functions are pre-registered in a giant list.
+	// So, to compile a system call, we just iterate over and find the matching function.
     for(auto& sysFunc : sysFuncs)
     {
-        if(sysFunc.name == sysFuncName)
+		if(StringUtil::EqualsIgnoreCase(sysFunc.name, sysFuncName))
         {
             // Right before calling the function, we want to push the argument
             // count onto the top of the stack.
@@ -243,6 +246,7 @@ SheepValueType SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
     }
     
     // Default - couldn't find this function, so it's just a void I guess.
+	std::cout << "Sheep Builder: SysFunc " << sysFuncName << " is not defined! Ignoring." << std::endl;
     return SheepValueType::Void;
 }
 
