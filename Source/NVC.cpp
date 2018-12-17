@@ -10,7 +10,7 @@
 #include "SheepScript.h"
 #include "StringUtil.h"
 
-void NVCItem::Execute()
+void NVCItem::Execute() const
 {
 	if(script != nullptr)
 	{
@@ -44,7 +44,7 @@ NVCItem* NVC::GetNVC(std::string noun, std::string verb)
     return nullptr;
 }
 
-bool NVC::IsCaseMet(NVCItem* item)
+bool NVC::IsCaseMet(const NVCItem* item) const
 {
 	// Empty condition is automatically met.
 	if(item->condition.empty()) { return true; }
@@ -74,6 +74,16 @@ bool NVC::IsCaseMet(NVCItem* item)
 	
 	// Assume any not found case is false by default.
 	return false;
+}
+
+const std::vector<NVCItem>& NVC::GetActionsForNoun(std::string noun)
+{
+	auto it = mNounToItems.find(noun);
+	if(it != mNounToItems.end())
+	{
+		return mNounToItems[noun];
+	}
+	return mEmptyActions;
 }
 
 void NVC::ParseFromData(char *data, int dataLength)
@@ -135,6 +145,13 @@ void NVC::ParseFromData(char *data, int dataLength)
     {
         // Only add this case entry if it isn't a duplicate entry.
         std::string caseLabel = entry->key;
+		
+		// We need to trim the case label to get the right label value.
+		// These are often formatted as "CASE    = blah" (note the extra whitespaces after the case label).
+		StringUtil::Trim(caseLabel);
+		
+		// Add case to dictionary, if not already in there.
+		// Multiple cases are considered an error - only the first is kept.
         auto it = mCaseToSheep.find(caseLabel);
         if(it == mCaseToSheep.end())
         {

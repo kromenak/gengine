@@ -38,24 +38,28 @@ struct NVCItem
 	// A script to execute when using this NVC item.
     SheepScript* script = nullptr;
 	
-	void Execute();
+	void Execute() const;
 };
 
 class NVC : public Asset
 {
 public:
     NVC(std::string name, char* data, int dataLength);
-    
+	
     NVCItem* GetNVC(std::string noun, std::string verb);
 	
-	bool IsCaseMet(NVCItem* item);
-    
+	bool IsCaseMet(const NVCItem* item) const;
+	
+	const std::vector<NVCItem>& GetActionsForNoun(std::string noun);
+	
 private:
-    void ParseFromData(char* data, int dataLength);
-    
+	std::vector<NVCItem> mEmptyActions;
+	
     // Mapping of noun name to NVC items.
     std::unordered_map<std::string, std::vector<NVCItem>> mNounToItems;
     
     // Mapping of case name to sheep script to eval.
     std::unordered_map<std::string, SheepScript*> mCaseToSheep;
+	
+	void ParseFromData(char* data, int dataLength);
 };
