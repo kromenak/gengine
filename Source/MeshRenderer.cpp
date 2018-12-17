@@ -95,6 +95,7 @@ std::vector<RenderPacket> MeshRenderer::GetRenderPackets()
 void MeshRenderer::SetModel(Model* model)
 {
     if(model == nullptr) { return; }
+	mModel = model;
     
     // Clear any existing.
     mMeshes.clear();

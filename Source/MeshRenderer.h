@@ -33,10 +33,15 @@ public:
     void AddMesh(Mesh* mesh);
 	
 	void SetMaterial(int index, Material material);
-    
-    std::vector<Mesh*> GetMeshes() { return mMeshes; }
+	
+	Model* GetModel() const { return mModel; }
+    std::vector<Mesh*> GetMeshes() const { return mMeshes; }
     
 private:
+	// A model, if any was specified.
+	// NOT used for rendering (meshes are used directly). But can be helpful to keep around.
+	Model* mModel = nullptr;
+	
     // A mesh component can render one or more meshes.
     // If more than one is specified, they will be rendered in order.
     std::vector<Mesh*> mMeshes;
