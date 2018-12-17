@@ -166,6 +166,8 @@
 		4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */; };
 		4B9231A62117CFBC0004F4F3 /* GKActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A52117CFBC0004F4F3 /* GKActor.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
+		4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
+		4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
 		4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
 		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
 		4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB34B4214F72BB0069B2E9 /* Font.cpp */; };
@@ -282,6 +284,7 @@
 		4B22F4E9217170A00065B152 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4B22F4EB217170A00065B152 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B22F4EE217170A00065B152 /* gengine.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = gengine.entitlements; sourceTree = "<group>"; };
+		4B263BBD21C705C500353F50 /* MeshImportSettings.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MeshImportSettings.h; path = ../Source/MeshImportSettings.h; sourceTree = "<group>"; };
 		4B294CDF20B9E8BC00039F48 /* SheepManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepManager.h; path = ../Source/Sheep/SheepManager.h; sourceTree = "<group>"; };
 		4B294CE020B9E8BC00039F48 /* SheepManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepManager.cpp; path = ../Source/Sheep/SheepManager.cpp; sourceTree = "<group>"; };
 		4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScript.cpp; path = ../Source/Sheep/SheepScript.cpp; sourceTree = "<group>"; };
@@ -361,6 +364,8 @@
 		4B9231A52117CFBC0004F4F3 /* GKActor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKActor.cpp; path = ../Source/GKActor.cpp; sourceTree = "<group>"; };
 		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
+		4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CharacterManager.h; path = ../Source/CharacterManager.h; sourceTree = "<group>"; };
+		4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CharacterManager.cpp; path = ../Source/CharacterManager.cpp; sourceTree = "<group>"; };
 		4BACA50820F7132E008C7FE9 /* GAS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GAS.h; path = ../Source/GAS.h; sourceTree = "<group>"; };
 		4BACA50920F7132E008C7FE9 /* GAS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GAS.cpp; path = ../Source/GAS.cpp; sourceTree = "<group>"; };
 		4BACA50B20F72663008C7FE9 /* StringTokenizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringTokenizer.h; path = ../Source/StringTokenizer.h; sourceTree = "<group>"; };
@@ -592,6 +597,7 @@
 				4B8E830820F046750009A86B /* Material.h */,
 				4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */,
 				4BD4CCE51FF1F7E3009665C7 /* Mesh.h */,
+				4B263BBD21C705C500353F50 /* MeshImportSettings.h */,
 				4BD4CCE31FF1F5F5009665C7 /* MeshRenderer.cpp */,
 				4BD4CCE21FF1F5F5009665C7 /* MeshRenderer.h */,
 				4B4EED861F5CA5F4000065EF /* Model.cpp */,
@@ -639,6 +645,8 @@
 		4B6B765E21A5216B00788C02 /* GK3 */ = {
 			isa = PBXGroup;
 			children = (
+				4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */,
+				4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */,
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
 				4B6B766321AB746D00788C02 /* UI */,
@@ -1044,6 +1052,7 @@
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
 				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
+				4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
 				4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */,
 				4BF32B8C1F67C434000639FB /* Shader.cpp in Sources */,
@@ -1131,6 +1140,7 @@
 				4B22F543217410830065B152 /* Main.cpp in Sources */,
 				4B22F519217407640065B152 /* Shader.cpp in Sources */,
 				4B22F4F32174073D0065B152 /* Font.cpp in Sources */,
+				4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B22F4FE217407470065B152 /* StringTokenizer.cpp in Sources */,
 				4B22F513217407640065B152 /* Material.cpp in Sources */,
 				4B22F504217407530065B152 /* SheepCompiler.cpp in Sources */,
