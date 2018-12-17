@@ -16,6 +16,7 @@ class Component
     TYPE_DECL_BASE();
 public:
     Component(Actor* owner);
+	virtual ~Component() { }
     
 	void Update(float deltaTime) { UpdateInternal(deltaTime); }
     
