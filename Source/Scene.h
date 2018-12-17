@@ -8,11 +8,12 @@
 //
 #pragma once
 #include <string>
+#include <vector>
 
 class ActionBar;
-class Actor;
 class BSP;
 class GameCamera;
+class GKActor;
 class Ray;
 class SceneData;
 class SIF;
@@ -23,12 +24,16 @@ class Scene
 {
 public:
     Scene(std::string name, std::string timeCode);
+	~Scene();
     
     void InitEgoPosition(std::string positionName);
-    
+	
+	bool CheckInteract(const Ray& ray);
     void Interact(const Ray& ray);
 	
 	float GetFloorY(const Vector3& position);
+	
+	GKActor* GetEgo() const { return mEgo; }
     
 private:
     // The scene name, both general and specific.
@@ -52,10 +57,14 @@ private:
     
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
-    
-    // The actor who we are controlling in the scene.
-    Actor* mEgo = nullptr;
 	
+	// GKActors created for this scene.
+	std::vector<GKActor*> mActors;
+	
+    // The actor who we are controlling in the scene.
+    GKActor* mEgo = nullptr;
+	
+	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;
 };
 

@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "ActionBar.h"
+#include "CharacterManager.h"
 #include "Color32.h"
 #include "GameCamera.h"
 #include "GKActor.h"
@@ -17,6 +18,7 @@
 #include "RectTransform.h"
 #include "Services.h"
 #include "SoundtrackPlayer.h"
+#include "StringUtil.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
@@ -57,15 +59,22 @@ Scene::Scene(std::string name, std::string timeCode) :
     mCamera = new GameCamera();
     mCamera->SetPosition(defaultRoomCamera->position);
     mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
-    
+	
     // Create actors for the scene.
     std::vector<SceneActorData*> sceneActorDatas = mGeneralSIF->GetSceneActorDatas();
     for(auto& actorDef : sceneActorDatas)
     {
         // Create actor.
         GKActor* actor = new GKActor();
-        
-        //TODO: Associate noun with actor.
+		actor->SetNoun(actorDef->noun);
+		
+		// The actor's 3-letter identifier can be derived from the name of the model.
+		std::string identifier;
+		if(actorDef->model != nullptr)
+		{
+			identifier = actorDef->model->GetNameNoExtension();
+		}
+		actor->SetIdentifier(identifier);
         
         // Set actor's initial position and rotation.
         if(actorDef->position != nullptr)
@@ -82,10 +91,13 @@ Scene::Scene(std::string name, std::string timeCode) :
         actor->SetIdleGas(actorDef->idleGas);
         actor->SetTalkGas(actorDef->talkGas);
         actor->SetListenGas(actorDef->listenGas);
-        
+		
         // Always start in "idle" state.
         actor->SetState(GKActor::State::Idle);
-        
+		
+		//CharacterConfig& characterConfig = Services::Get<CharacterManager>()->GetCharacterConfig(actorDef->model->GetNameNoExtension());
+		//actor->PlayAnimation(characterConfig.walkStartTurnLeftAnim);
+		
         //TODO: Apply init anim.
         
         //TODO: If hidden, hide.
@@ -95,21 +107,66 @@ Scene::Scene(std::string name, std::string timeCode) :
         {
             mEgo = actor;
         }
+		
+		// Save in created actors list.
+		mActors.push_back(actor);
     }
-    
+	
     // Iterate over scene model data and prep the scene.
     // First, we want to hide and scene models that are set to "hidden".
     // Second, we want to spawn any non-scene models.
     std::vector<SceneModelData*> sceneModelDatas = mGeneralSIF->GetSceneModelDatas();
     for(auto& modelDef : sceneModelDatas)
     {
-        if(modelDef->type == SceneModelData::Type::Scene)
-        {
-            if(modelDef->hidden)
-            {
-                mSceneBSP->Hide(modelDef->name);
-            }
-        }
+		switch(modelDef->type)
+		{
+			// "Scene" type models are ones that are baked into the BSP geometry.
+			case SceneModelData::Type::Scene:
+			{
+				// If it should be hidden by default, tell the BSP to hide it.
+				if(modelDef->hidden)
+				{
+					mSceneBSP->Hide(modelDef->name);
+				}
+				break;
+			}
+				
+			// "HitTest" type models should be hidden, but still interactive.
+			//case SceneModelData::Type::HitTest:
+			//	mSceneBSP->Hide(modelDef->name);
+			//	break;
+				
+			// "Prop" and "GasProp" models both render their own model geometry.
+			// Only difference for a "GasProp" is that it uses a provided Gas file too.
+			case SceneModelData::Type::Prop:
+			case SceneModelData::Type::GasProp:
+			{
+				// Create actor.
+				GKActor* actor = new GKActor();
+				actor->SetNoun(modelDef->noun);
+				
+				// Set model.
+				actor->GetMeshRenderer()->SetModel(modelDef->model);
+				
+				// Run any init anims specified.
+				// These are usually needed to correctly position the model.
+				/*
+				if(modelDef->initAnim != nullptr)
+				{
+					actor->PlayInitAnimation(modelDef->initAnim);
+				}
+				*/
+				
+				// For some reason, prop positions are exactly mirrored across the Z-axis from actual desired position.
+				// This might be related to negation of z-components when importing the model.
+				//actor->SetScale(Vector3(1.0f, 1.0f, -1.0f));
+				break;
+			}
+				
+			default:
+				std::cout << "Unaccounted for model type: " << (int)modelDef->type << std::endl;
+				break;
+		}
     }
     
     // Create soundtrack player and get it playing!
@@ -129,6 +186,7 @@ Scene::Scene(std::string name, std::string timeCode) :
 	mActionBar = new ActionBar();
 	
 	// For debugging - render walker bounds overlay on game world.
+	/*
 	{
 		Actor* walkerBoundaryActor = new Actor();
 		
@@ -149,6 +207,15 @@ Scene::Scene(std::string name, std::string timeCode) :
 		walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
 		walkerBoundaryActor->SetScale(size);
 	}
+	*/
+	
+	// Check for and run "scene enter" actions.
+}
+
+Scene::~Scene()
+{
+	Services::GetRenderer()->SetBSP(nullptr);
+	Services::GetRenderer()->SetSkybox(nullptr);
 }
 
 void Scene::InitEgoPosition(std::string positionName)
@@ -173,13 +240,45 @@ void Scene::InitEgoPosition(std::string positionName)
     }
 }
 
+bool Scene::CheckInteract(const Ray& ray)
+{
+	HitInfo hitInfo;
+	if(!mSceneBSP->RaycastNearest(ray, hitInfo)) { return false; }
+	
+	// If hit the floor, this IS an interaction, but not an interesting one.
+	// Clicking will walk the player, but we don't count it as an interactive object.
+	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mGeneralSIF->GetFloorBspModelName()))
+	{
+		return false;
+	}
+	
+	// See if the hit item matches any scene model data.
+	SceneModelData* sceneModelData = nullptr;
+	std::vector<SceneModelData*> sceneModelDatas = mGeneralSIF->GetSceneModelDatas();
+	for(auto& modelData : sceneModelDatas)
+	{
+		if(modelData->name == hitInfo.name)
+		{
+			sceneModelData = modelData;
+			break;
+		}
+	}
+	
+	// If we found something, it counts as an interactive thing.
+	return sceneModelData != nullptr;
+}
+
 void Scene::Interact(const Ray& ray)
 {
+	// Ignore scene interaction while the action bar is showing.
+	if(mActionBar->IsShowing()) { return; }
+	
     // Cast ray against scene BSP to see if it intersects with anything.
     // If so, it means we clicked on that thing.
+	//TODO: Need to also raycast against models (like Gabe, etc).
 	HitInfo hitInfo;
 	if(!mSceneBSP->RaycastNearest(ray, hitInfo)) { return; }
-	
+	std::cout << "Hit " << hitInfo.name << std::endl;
 	// Clicked on the floor - move ego to position.
 	if(hitInfo.name == mGeneralSIF->GetFloorBspModelName())
 	{
@@ -243,31 +342,26 @@ void Scene::Interact(const Ray& ray)
     
     // If we couldn't find any scene model data for this model, we're done.
     if(sceneModelData == nullptr) { return; }
-    
-    //TODO: Here is where we'd stop and show the UI for the user to pick a verb!
-    // Let's assume a verb for the moment (LOOK).
-    
-    // Next, does any NVC defines an entry for the given noun/verb combo?
-    std::vector<NVC*> nvcs = mGeneralSIF->GetNounVerbCases();
-    for(auto& nvc : nvcs)
-    {
-        NVCItem* item = nvc->GetNVC(sceneModelData->noun, "LOOK");
-        if(item != nullptr)
-        {
-			// If so, check if the case for the item is met (Gabe Only, Grace Only, Only After 5PM, etc).
-			if(nvc->IsCaseMet(item))
+	
+	//TODO: If a specific verb is pre-defined for this object, just use that directly.
+	
+	// Find all verbs that can be used for this object.
+	std::vector<const NVCItem*> viableActions;
+	std::vector<NVC*> nvcs = mGeneralSIF->GetNounVerbCases();
+	for(auto& nvc : nvcs)
+	{
+		const std::vector<NVCItem>& allActions = nvc->GetActionsForNoun(sceneModelData->noun);
+		for(auto& action : allActions)
+		{
+			if(nvc->IsCaseMet(&action))
 			{
-				//TODO: Deal with approach and target.
-				
-				// Execute the sheep script for this NVC.
-				item->Execute();
-				
-				// Only execute one per interaction.
-				// If multiple NVC items match, only the first will be played.
-				break;
+				viableActions.push_back(&action);
 			}
-        }
-    }
+		}
+	}
+	
+	// Show the action bar. Internally, this takes care of executing the chosen action.
+	mActionBar->Show(viableActions);
 }
 
 float Scene::GetFloorY(const Vector3& position)
