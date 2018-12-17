@@ -18,15 +18,23 @@ GKActor::GKActor() : Actor()
     mMeshRenderer = AddComponent<MeshRenderer>();
     
     // Create animation player.
-    AnimationPlayer* animationPlayer = AddComponent<AnimationPlayer>();
-    animationPlayer->SetMeshRenderer(mMeshRenderer);
+    mAnimationPlayer = AddComponent<AnimationPlayer>();
+    mAnimationPlayer->SetMeshRenderer(mMeshRenderer);
     
     // GasPlayer is used to play gas script files.
     // Actor also needs a way to play animations, and the GasPlayer needs to know about it.
     mGasPlayer = AddComponent<GasPlayer>();
-    mGasPlayer->SetAnimationPlayer(animationPlayer);
-	
-	Debug::DrawLine(Vector3::UnitX * 50, Vector3::UnitX * 100, Color32::Magenta, 10.0f);
+    mGasPlayer->SetAnimationPlayer(mAnimationPlayer);
+}
+
+void GKActor::PlayAnimation(Animation* animation)
+{
+	mAnimationPlayer->Play(animation);
+}
+
+void GKActor::PlayInitAnimation(Animation* animation)
+{
+	mAnimationPlayer->Sample(animation, 0);
 }
 
 void GKActor::SetState(GKActor::State state)
@@ -37,17 +45,17 @@ void GKActor::SetState(GKActor::State state)
     // Set appropriate Gas to play.
     switch(mState)
     {
-        case State::Idle:
-            mGasPlayer->SetGas(mIdleGas);
-            break;
-            
-        case State::Talk:
-            mGasPlayer->SetGas(mTalkGas);
-            break;
-            
-        case State::Listen:
-            mGasPlayer->SetGas(mListenGas);
-            break;
+	case State::Idle:
+		mGasPlayer->SetGas(mIdleGas);
+		break;
+		
+	case State::Talk:
+		mGasPlayer->SetGas(mTalkGas);
+		break;
+		
+	case State::Listen:
+		mGasPlayer->SetGas(mListenGas);
+		break;
     }
 }
 

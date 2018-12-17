@@ -14,6 +14,10 @@
 #pragma once
 #include "Actor.h"
 
+#include <string>
+
+class Animation;
+class AnimationPlayer;
 class GAS;
 class GasPlayer;
 class MeshRenderer;
@@ -29,27 +33,44 @@ public:
     };
     
     GKActor();
-    
+	
+	void PlayAnimation(Animation* animation);
+	void PlayInitAnimation(Animation* animation);
+	
+	void SetIdentifier(std::string identifier) { mIdentifier = identifier; }
+	
+	void SetNoun(std::string noun) { mNoun = noun; }
+	std::string GetNoun() const { return mNoun; }
+	
+	void SetState(State state);
+	
     void SetIdleGas(GAS* gas) { mIdleGas = gas; }
     void SetTalkGas(GAS* gas) { mTalkGas = gas; }
     void SetListenGas(GAS* gas) { mListenGas = gas; }
     
-    void SetState(State state);
-    
-    MeshRenderer* GetMeshRenderer() { return mMeshRenderer; }
+    MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
 	
 protected:
 	void UpdateInternal(float deltaTime) override;
 	
 private:
+	// The character's 3-letter identifier (GAB, GRA, etc).
+	std::string mIdentifier;
+	
+	// This character's noun.
+	std::string mNoun;
+	
     // Actor's current state.
     State mState = State::Idle;
-    
-    // Player for GAS logic.
-    GasPlayer* mGasPlayer = nullptr;
-    
-    // Mesh renderer.
-    MeshRenderer* mMeshRenderer = nullptr;
+	
+	// The character's mesh renderer.
+	MeshRenderer* mMeshRenderer = nullptr;
+	
+	// The character's animation player.
+	AnimationPlayer* mAnimationPlayer = nullptr;
+	
+	// Player for GAS logic.
+	GasPlayer* mGasPlayer = nullptr;
     
     // GAS scripts to use when actor is idle, talking, or listening.
     GAS* mIdleGas = nullptr;
