@@ -34,32 +34,6 @@ void SoundtrackPlayer::Play(Soundtrack *soundtrack)
     ProcessNextNode();
 }
 
-void SoundtrackPlayer::ProcessNextNode()
-{
-    // If no nodes, can't do anything!
-    if(mSoundtrackNodes.size() == 0)
-    {
-        mTimer = 0.0f;
-        return;
-    }
-    
-    // First off, if current node is looping...just keep doing it! It never stops!
-    if(mCurrentNodeIndex >= 0 && mSoundtrackNodes[mCurrentNodeIndex]->IsLooping())
-    {
-        mTimer = mSoundtrackNodes[mCurrentNodeIndex]->Execute();
-        return;
-    }
-    
-    // First, update the node index and loop if necessary.
-    mCurrentNodeIndex++;
-    mCurrentNodeIndex %= mSoundtrackNodes.size();
-    
-    // Grab the node from the list.
-    SoundtrackNode* node = mSoundtrackNodes[mCurrentNodeIndex];
-    int waitMilliseconds = node->Execute();
-    mTimer = (float)waitMilliseconds / 1000.0f;
-}
-
 void SoundtrackPlayer::UpdateInternal(float deltaTime)
 {
 	if(mSoundtrack == nullptr) { return; }
@@ -74,4 +48,30 @@ void SoundtrackPlayer::UpdateInternal(float deltaTime)
 			ProcessNextNode();
 		}
 	}
+}
+
+void SoundtrackPlayer::ProcessNextNode()
+{
+	// If no nodes, can't do anything!
+	if(mSoundtrackNodes.size() == 0)
+	{
+		mTimer = 0.0f;
+		return;
+	}
+	
+	// First off, if current node is looping...just keep doing it! It never stops!
+	if(mCurrentNodeIndex >= 0 && mSoundtrackNodes[mCurrentNodeIndex]->IsLooping())
+	{
+		mTimer = mSoundtrackNodes[mCurrentNodeIndex]->Execute();
+		return;
+	}
+	
+	// First, update the node index and loop if necessary.
+	mCurrentNodeIndex++;
+	mCurrentNodeIndex %= mSoundtrackNodes.size();
+	
+	// Grab the node from the list.
+	SoundtrackNode* node = mSoundtrackNodes[mCurrentNodeIndex];
+	int waitMilliseconds = node->Execute();
+	mTimer = (float)waitMilliseconds / 1000.0f;
 }
