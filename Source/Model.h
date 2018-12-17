@@ -3,8 +3,7 @@
 //
 // Clark Kromenaker
 //
-// 3D model asset type. The in-memory
-// representation of .MOD assets.
+// 3D model asset type. The in-memory representation of .MOD assets.
 //
 #pragma once
 #include "Asset.h"
@@ -20,10 +19,10 @@ public:
     Model(std::string name, char* data, int dataLength);
     
     std::vector<Mesh*> GetMeshes() const { return mMeshes; }
-    
+	
 private:
     // A model consists of one or more meshes.
     std::vector<Mesh*> mMeshes;
-    
+	
     void ParseFromData(char* data, int dataLength);
 };

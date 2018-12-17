@@ -71,11 +71,11 @@ public:
     
     void SetLocalTransformMatrix(const Matrix4& mat) { mLocalTransformMatrix = mat; }
     Matrix4& GetLocalTransformMatrix() { return mLocalTransformMatrix; }
-    
+	
     void SetTextureName(std::string textureName) { mTextureName = textureName; }
     std::string GetTextureName() { return mTextureName; }
     
-    uint GetVertexCount() { return mVertexCount; }
+	uint GetVertexCount() { return mVertexCount; }
     
 private:
     // Number of vertices in the mesh.
@@ -86,7 +86,7 @@ private:
     
     // Matrix containing local translation/rotation.
     Matrix4 mLocalTransformMatrix;
-    
+	
     // Uniform color value applied to this mesh.
     // ???
     

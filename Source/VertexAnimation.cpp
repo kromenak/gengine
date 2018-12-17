@@ -9,10 +9,10 @@
 #include <vector>
 #include <unordered_map>
 
+#include "BinaryReader.h"
 #include "Math.h"
 #include "Matrix3.h"
-
-#include "BinaryReader.h"
+#include "MeshImportSettings.h"
 
 //#define DEBUG_OUTPUT
 
@@ -23,6 +23,16 @@ VertexAnimation::VertexAnimation(std::string name, char* data, int dataLength) :
 
 VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int framesPerSecond, int meshIndex)
 {
+	// It's possible that this animation has no vertex poses (only transform data). Or only has poses for particular mesh indexes.
+	// In this case, just return an object with frame number -1 and let them figure it out!
+	//TODO: Frame number to -1 is pretty esoteric - maybe something clearer?
+	if(meshIndex >= mVertexPoses.size())
+	{
+		VertexAnimationVertexPose pose;
+		pose.mFrameNumber = -1;
+		return pose;
+	}
+	
     float secondsPerFrame = 1.0f / framesPerSecond;
     float localTime = Math::Mod(time, GetDuration(framesPerSecond));
     
@@ -69,13 +79,28 @@ VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int fram
 
 VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, int framesPerSecond, int meshIndex)
 {
+	// It's possible that this animation has no transform poses (only vertex data). Or only has poses for particular mesh indexes.
+	// In this case, just return an object with frame number -1 and let them figure it out!
+	//TODO: Frame number to -1 is pretty esoteric - maybe something clearer?
+	if(meshIndex >= mTransformPoses.size())
+	{
+		VertexAnimationTransformPose pose;
+		pose.mFrameNumber = -1;
+		return pose;
+	}
+	
     float secondsPerFrame = 1.0f / framesPerSecond;
     float localTime = Math::Mod(time, GetDuration(framesPerSecond));
     
     float currentPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
-    
-    int realMeshIndex = mVertexPoses[meshIndex]->mMeshIndex;
+	
+	//TODO: Uh...why was this needed again?
+	int realMeshIndex = meshIndex;
+	if(mVertexPoses.size() > meshIndex)
+	{
+		realMeshIndex = mVertexPoses[meshIndex]->mMeshIndex;
+	}
     
     VertexAnimationTransformPose* firstTransformPose = mTransformPoses[realMeshIndex];
     VertexAnimationTransformPose* currentTransformPose = firstTransformPose;
@@ -236,7 +261,11 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     for(int i = 0; i < vertexCount; i++)
                     {
                         float x = reader.ReadFloat();
+						#ifdef GK3_MIRROR_Z
                         float z = -reader.ReadFloat();
+						#else
+						float z = reader.ReadFloat();
+						#endif
                         float y = reader.ReadFloat();
                         vertexPose->mVertexPositions.push_back(Vector3(x, y, z));
                     }
@@ -332,7 +361,11 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         else if(vertexDataFormat[k] == 1)
                         {
                             float x = DecompressFloatFromByte(reader.ReadByte());
-                            float z = -DecompressFloatFromByte(reader.ReadByte());
+							#ifdef GK3_MIRROR_Z
+							float z = -DecompressFloatFromByte(reader.ReadByte());
+							#else
+							float z = DecompressFloatFromByte(reader.ReadByte());
+							#endif
                             float y = DecompressFloatFromByte(reader.ReadByte());
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
@@ -340,7 +373,11 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         else if(vertexDataFormat[k] == 2)
                         {
                             float x = DecompressFloatFromUShort(reader.ReadUShort());
-                            float z = -DecompressFloatFromUShort(reader.ReadUShort());
+							#ifdef GK3_MIRROR_Z
+							float z = -DecompressFloatFromUShort(reader.ReadUShort());
+							#else
+							float z = DecompressFloatFromUShort(reader.ReadUShort());
+							#endif
                             float y = DecompressFloatFromUShort(reader.ReadUShort());
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                             //vertexPose->mVertexPositions.push_back(Vector3());
@@ -349,7 +386,11 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         else if(vertexDataFormat[k] == 3)
                         {
                             float x = reader.ReadFloat();
-                            float z = -reader.ReadFloat();
+							#ifdef GK3_MIRROR_Z
+							float z = -reader.ReadFloat();
+							#else
+							float z = reader.ReadFloat();
+							#endif
                             float y = reader.ReadFloat();
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
@@ -397,8 +438,10 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // a rotation from the standard basis to that basis. We also need to negate some elements
                     // to represent "reflection" from a right-handed rotation to a left-handed rotation.
                     Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
+					#ifdef GK3_MIRROR_Z
                     rotQuat.SetZ(-rotQuat.GetZ());
-                    rotQuat.SetW(-rotQuat.GetW());
+					rotQuat.SetW(-rotQuat.GetW());
+					#endif
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Mesh Rotation: " << rotQuat << std::endl;
                     #endif
@@ -409,7 +452,11 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // want to position them all correctly relative to one another!
                     float x = reader.ReadFloat();
                     float y = reader.ReadFloat();
-                    float z = -reader.ReadFloat();
+					#ifdef GK3_MIRROR_Z
+					float z = -reader.ReadFloat();
+					#else
+					float z = reader.ReadFloat();
+					#endif
                     Vector3 meshPos(x, y, z);
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Mesh Position: " << meshPos << std::endl;

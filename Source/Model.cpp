@@ -10,6 +10,7 @@
 #include "BinaryReader.h"
 #include "Matrix3.h"
 #include "Mesh.h"
+#include "MeshImportSettings.h"
 #include "Quaternion.h"
 #include "Vector2.h"
 #include "Vector3.h"
@@ -93,15 +94,24 @@ void Model::ParseFromData(char *data, int dataLength)
         // a rotation from the standard basis to that basis. We also need to negate some elements
         // to represent "reflection" from a right-handed rotation to a left-handed rotation.
         Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
-        rotQuat.SetZ(-rotQuat.GetZ());
-        rotQuat.SetW(-rotQuat.GetW());
+		#ifdef GK3_MIRROR_Z
+		rotQuat.SetZ(-rotQuat.GetZ());
+		rotQuat.SetW(-rotQuat.GetW());
+		#else
+		rotQuat.SetZ(rotQuat.GetZ());
+		rotQuat.SetW(rotQuat.GetW());
+		#endif
         //std::cout << "    Mesh Rotation: " << rotQuat << std::endl;
         
         // 12 bytes: an (X, Y, Z) offset or position for placing this mesh.
         // Each mesh within the model has it's local offset from the model origin.
         // This if vital, for example, if a mesh contains a human's head, legs, arms...
         // want to position them all correctly relative to one another!
+		#ifdef GK3_MIRROR_Z
         Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), -reader.ReadFloat());
+		#else
+		Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+		#endif
         //std::cout << "    Mesh Position: " << meshPos << std::endl;
         
         // Use mesh position offset and rotation values to create a local transform matrix.
@@ -115,8 +125,8 @@ void Model::ParseFromData(char *data, int dataLength)
         
         // 24 bytes: Two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max values for the mesh.
-        Vector3 minVal(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        Vector3 maxVal(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+		Vector3 min(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+		Vector3 max(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         
         // Now, we iterate over each mesh group in this mesh.
         for(int j = 0; j < numMeshGroups; j++)
@@ -189,7 +199,11 @@ void Model::ParseFromData(char *data, int dataLength)
             for(int k = 0; k < vertexCount; k++)
             {
                 float x = reader.ReadFloat();
-                float z = -reader.ReadFloat();
+				#ifdef GK3_MIRROR_Z
+				float z = -reader.ReadFloat();
+				#else
+				float z = reader.ReadFloat();
+				#endif
                 float y = reader.ReadFloat();
                 vertexPositions[k * 3] = x;
                 vertexPositions[k * 3 + 1] = y;
