@@ -25,6 +25,7 @@ public:
 	
 	void AddWidget(UIWidget* widget);
 	void RemoveWidget(UIWidget* widget);
+	void RemoveAllWidgets() { mWidgets.clear(); }
 	
 private:
 	static std::vector<UICanvas*> sCanvases;

@@ -10,6 +10,10 @@
 #pragma once
 #include "Actor.h"
 
+#include <vector>
+
+class ButtonIcon;
+class UIButton;
 class UICanvas;
 
 class ActionBar : public Actor
@@ -17,9 +21,23 @@ class ActionBar : public Actor
 public:
 	ActionBar();
 	
+	void Show(std::vector<const NVCItem*> actions);
+	void Hide();
+	
+	bool IsShowing() const { return mIsShowing; }
+	
 protected:
 	void UpdateInternal(float deltaTime) override;
 	
 private:
-	UICanvas* mCanvas;
+	// The action bar's canvas, which renders the UI.
+	UICanvas* mCanvas = nullptr;
+	
+	// The buttons created for the action bar. Recycled on each show.
+	std::vector<UIButton*> mButtons;
+	
+	// If true, action bar is visible and waiting for input.
+	bool mIsShowing = false;
+	
+	UIButton* AddButton(int index, float xPos, const ButtonIcon& buttonIcon);
 };
