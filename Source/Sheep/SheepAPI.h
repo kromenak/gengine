@@ -463,8 +463,8 @@ shpvoid SetTopicCount(std::string noun, std::string verb, int count); // DEV
 
 int IsCurrentLocation(std::string location);
 int IsCurrentTime(std::string timeCode);
-int WasLastLocation(std::string lastLocation);
-int WasLastTime(std::string lastTimeCode);
+int WasLastLocation(std::string location);
+int WasLastTime(std::string timeCode);
 
 shpvoid ResetGameData(); // DEV
 

@@ -38,8 +38,11 @@ SheepScript* SheepCompiler::Compile(std::string sheep)
 
 SheepScript* SheepCompiler::Compile(std::istream& stream)
 {
+	// Make sure we can read our stream.
     if(!stream.good() || stream.eof()) { return nullptr; }
-    
+	
+	// Delete any pre-existing scanner and create a new one.
+	// The scanner is used to split the sheep script text into individual tokens.
     delete mScanner;
     try
     {
@@ -51,7 +54,9 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
         std::cerr << "Failed to allocate scanner: (" << ba.what() << "), exiting!\n";
         return nullptr;
     }
-    
+	
+	// Delete any pre-existing parser and create a new one.
+	// The parser is used to convert tokens into bytecode logic that can be executed.
     delete mParser;
     try
     {

@@ -5,7 +5,9 @@
 //
 #include "SheepAPI.h"
 
+#include "CharacterManager.h"
 #include "GEngine.h"
+#include "GKActor.h"
 #include "Scene.h"
 #include "Services.h"
 #include "StringUtil.h"
@@ -181,6 +183,33 @@ shpvoid InitEgoPosition(std::string positionName)
 }
 RegFunc1(InitEgoPosition, void, string);
 
+int IsActorAtLocation(std::string actorName, std::string locationName)
+{
+	std::string location = Services::Get<CharacterManager>()->GetCharacterLocation(actorName);
+	return StringUtil::EqualsIgnoreCase(location, locationName) ? 1 : 0;
+}
+RegFunc2(IsActorAtLocation, int, string, string);
+
+int IsActorOffstage(std::string actorName)
+{
+	return Services::Get<CharacterManager>()->IsCharacterOffstage(actorName) ? 1 : 0;
+}
+RegFunc1(IsActorOffstage, int, string);
+
+int IsCurrentEgo(std::string actorName)
+{
+	GKActor* ego = GEngine::inst->GetScene()->GetEgo();
+	if(ego == nullptr) { return 0; }
+	return StringUtil::EqualsIgnoreCase(ego->GetNoun(), actorName) ? 1 : 0;
+}
+RegFunc1(IsCurrentEgo, int, string);
+
+int WasEgoEverInLocation(std::string locationName)
+{
+	return 0;
+}
+RegFunc1(WasEgoEverInLocation, int, string);
+
 // ANIMATION AND DIALOGUE
 shpvoid StartVoiceOver(std::string dialogueName, int numLines)
 {
@@ -199,6 +228,18 @@ shpvoid CallSheep(std::string fileName, std::string functionName)
 RegFunc2(CallSheep, void, string, string);
 
 // GAME LOGIC
+int GetNounVerbCount(std::string noun, std::string verb)
+{
+	return 0;
+}
+RegFunc2(GetNounVerbCount, int, string, string);
+
+int IsCurrentLocation(std::string location)
+{
+	return 0;
+}
+RegFunc1(IsCurrentLocation, int, string);
+
 int IsCurrentTime(std::string timeCode)
 {
     std::string currentTimeCode = GEngine::inst->GetCurrentTimeCode();
@@ -206,10 +247,41 @@ int IsCurrentTime(std::string timeCode)
 }
 RegFunc1(IsCurrentTime, int, string);
 
+int WasLastLocation(std::string location)
+{
+	return 0;
+}
+RegFunc1(WasLastLocation, int, string);
+
+int WasLastTime(std::string timeCode)
+{
+	return 0;
+}
+RegFunc1(WasLastTime, int, string);
+
 // INVENTORY
+int DoesEgoHaveInvItem(std::string itemName)
+{
+	return 0;
+}
+RegFunc1(DoesEgoHaveInvItem, int, string);
+
+int DoesGabeHaveInvItem(std::string itemName)
+{
+	return 0;
+}
+RegFunc1(DoesGabeHaveInvItem, int, string);
+
 int DoesGraceHaveInvItem(std::string itemName)
 {
     return 0;
 }
 RegFunc1(DoesGraceHaveInvItem, int, string);
 
+// SCENE
+shpvoid SetLocation(std::string location)
+{
+	GEngine::inst->LoadScene(location);
+	return 0;
+}
+RegFunc1(SetLocation, void, string);
