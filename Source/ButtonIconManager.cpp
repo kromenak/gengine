@@ -9,6 +9,17 @@
 #include "Services.h"
 #include "StringUtil.h"
 
+float ButtonIcon::GetWidth() const
+{
+	if(upTexture != nullptr) { return upTexture->GetWidth(); }
+	if(downTexture != nullptr) { return downTexture->GetWidth(); }
+	if(hoverTexture != nullptr) { return hoverTexture->GetWidth(); }
+	if(disableTexture != nullptr) { return disableTexture->GetWidth(); }
+	return 0.0f;
+}
+
+TYPE_DEF_BASE(ButtonIconManager);
+
 ButtonIconManager::ButtonIconManager()
 {
 	// Get VERBS text file as a raw buffer.

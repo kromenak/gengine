@@ -25,10 +25,13 @@ struct ButtonIcon
 	Texture* downTexture = nullptr;
 	Texture* hoverTexture = nullptr;
 	Texture* disableTexture = nullptr;
+	
+	float GetWidth() const;
 };
 
 class ButtonIconManager
 {
+	TYPE_DECL_BASE();
 public:
 	ButtonIconManager();
 	

@@ -59,7 +59,7 @@ template<class T> void Services::Set(T* instance)
 	// Make this "static" so we can AVOID doing the type generation every time this function
 	// is called with this class type T. This will only run the first time the function is called.
 	// Note: we *could* limit use of Set/Get to only classes that make use of TYPE_DECL and TYPE_DEF...but I'd rather not for now!
-	static Type type = GENERATE_TYPE(T);
+	Type type = T::GetType();
 	
 	// Just create a mapping from the type to the instance!
 	sTypeToInstancePointer[type] = instance;
@@ -68,7 +68,7 @@ template<class T> void Services::Set(T* instance)
 template<class T> T* Services::Get()
 {
 	// See note in "Set" about why this is static.
-	static Type type = GENERATE_TYPE(T);
+	Type type = T::GetType();
 	
 	// Attempt to retrieve and return the instance from the type.
 	auto it = sTypeToInstancePointer.find(type);
