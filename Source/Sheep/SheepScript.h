@@ -31,7 +31,7 @@ public:
     
     SysImport* GetSysImport(int index);
     
-    std::string GetStringConst(int offset);
+    std::string* GetStringConst(int offset);
     
     std::vector<SheepValue> GetVariables() { return mVariables; }
     

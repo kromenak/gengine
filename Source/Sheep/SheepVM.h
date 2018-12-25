@@ -50,7 +50,7 @@ enum class SheepInstruction
     BeginWait           = 0x09,
     EndWait             = 0x0A,
     ReturnV             = 0x0B,
-    //Unknown1          = 0x0C,
+	//Unknown1          = 0x0C, // May be "Export" instruction; mentioned in docs as deprecated.
     StoreI              = 0x0D,
     StoreF              = 0x0E,
     StoreS              = 0x0F,

@@ -5,6 +5,7 @@
 //
 #include "SheepAPI.h"
 
+#include "AnimationPlayer.h"
 #include "CharacterManager.h"
 #include "GEngine.h"
 #include "GKActor.h"
@@ -36,40 +37,103 @@ std::map<std::string, Value (*)(const Value&, const Value&, const Value&,
 
 Value CallSysFunc(const std::string& name)
 {
-    return map0.at(name)(0);
+	auto it = map0.find(name);
+	if(it != map0.end())
+	{
+		return it->second(0);
+	}
+	else
+	{
+		std::cout << "Couldn't find SysFunc0 " << name << std::endl;
+		return Value(0);
+	}
 }
 
 Value CallSysFunc(const std::string& name, const Value& x1)
 {
-    return map1.at(name)(x1);
+	auto it = map1.find(name);
+	if(it != map1.end())
+	{
+		return it->second(x1);
+	}
+	else
+	{
+		std::cout << "Couldn't find SysFunc1 " << name << std::endl;
+		return Value(0);
+	}
 }
 
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2)
 {
-    return map2.at(name)(x1, x2);
+	auto it = map2.find(name);
+	if(it != map2.end())
+	{
+		return it->second(x1, x2);
+	}
+	else
+	{
+		std::cout << "Couldn't find SysFunc2 " << name << std::endl;
+		return Value(0);
+	}
 }
 
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3)
 {
-    return map3.at(name)(x1, x2, x3);
+	auto it = map3.find(name);
+	if(it != map3.end())
+	{
+		return it->second(x1, x2, x3);
+	}
+	else
+	{
+		std::cout << "Couldn't find SysFunc3 " << name << std::endl;
+		return Value(0);
+	}
 }
 
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
                   const Value& x4)
 {
-    return map4.at(name)(x1, x2, x3, x4);
+	auto it = map4.find(name);
+	if(it != map4.end())
+	{
+		return it->second(x1, x2, x3, x4);
+	}
+	else
+	{
+		std::cout << "Couldn't find SysFunc4 " << name << std::endl;
+		return Value(0);
+	}
 }
 
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
                   const Value& x4, const Value& x5)
 {
-    return map5.at(name)(x1, x2, x3, x4, x5);
+	auto it = map5.find(name);
+	if(it != map5.end())
+	{
+		return it->second(x1, x2, x3, x4, x5);
+	}
+	else
+	{
+		std::cout << "Couldn't find SysFunc5 " << name << std::endl;
+		return Value(0);
+	}
 }
 
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
                   const Value& x4, const Value& x5, const Value& x6)
 {
-    return map6.at(name)(x1, x2, x3, x4, x5, x6);
+	auto it = map6.find(name);
+	if(it != map6.end())
+	{
+		return it->second(x1, x2, x3, x4, x5, x6);
+	}
+	else
+	{
+		std::cout << "Couldn't find SysFunc6 " << name << std::endl;
+		return Value(0);
+	}
 }
 
 std::vector<SysImport> sysFuncs;
@@ -149,7 +213,7 @@ RegFunc1(GetEgoLocationCount, int, string);
 
 std::string GetEgoName()
 {
-    return "";
+	return GEngine::inst->GetScene()->GetEgo()->GetNoun();
 }
 RegFunc0(GetEgoName, string);
 
@@ -211,7 +275,19 @@ int WasEgoEverInLocation(std::string locationName)
 RegFunc1(WasEgoEverInLocation, int, string);
 
 // ANIMATION AND DIALOGUE
-shpvoid StartVoiceOver(std::string dialogueName, int numLines)
+shpvoid StartAnimation(std::string animationName)
+{
+	std::cout << "Start animation " << animationName << std::endl;
+	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
+	if(animation != nullptr)
+	{
+		GEngine::inst->GetScene()->GetAnimationPlayer()->Play(animation);
+	}
+	return 0;
+}
+RegFunc1(StartAnimation, void, string);
+
+shpvoid StartVoiceOver(std::string dialogueName, int numLines) // WAIT
 {
     std::string yakName = "E" + dialogueName + ".YAK";
     Yak* yak = Services::GetAssets()->LoadYak(yakName);
@@ -221,8 +297,27 @@ shpvoid StartVoiceOver(std::string dialogueName, int numLines)
 RegFunc2(StartVoiceOver, void, string, int);
 
 // ENGINE
-shpvoid CallSheep(std::string fileName, std::string functionName)
+shpvoid Call(std::string functionName) // WAIT
 {
+	Services::GetSheep()->Execute(functionName);
+	return 0;
+}
+RegFunc1(Call, void, string);
+
+shpvoid CallDefaultSheep(std::string fileName) // WAIT
+{
+	SheepScript* script = Services::GetAssets()->LoadSheep(fileName);
+	if(script != nullptr)
+	{
+		Services::GetSheep()->Execute(script);
+	}
+	return 0;
+}
+RegFunc1(CallDefaultSheep, void, string);
+
+shpvoid CallSheep(std::string fileName, std::string functionName) // WAIT
+{
+	Services::GetSheep()->Execute(fileName, functionName);
     return 0;
 }
 RegFunc2(CallSheep, void, string, string);

@@ -37,14 +37,14 @@ SysImport* SheepScript::GetSysImport(int index)
     return &mSysImports[index];
 }
 
-std::string SheepScript::GetStringConst(int offset)
+std::string* SheepScript::GetStringConst(int offset)
 {
     auto it = mStringConsts.find(offset);
     if(it != mStringConsts.end())
     {
-        return it->second;
+        return &it->second;
     }
-    return std::string();
+	return nullptr;
 }
 
 int SheepScript::GetFunctionOffset(std::string functionName)

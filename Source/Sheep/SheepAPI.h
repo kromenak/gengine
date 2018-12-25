@@ -16,8 +16,16 @@
 #include "Value.h"
 
 // Functions for calling functions of various argument lengths.
+Value CallSysFunc(const std::string& name);
 Value CallSysFunc(const std::string& name, const Value& x1);
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2);
+Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3);
+Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
+				  const Value& x4);
+Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
+				  const Value& x4, const Value& x5);
+Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
+				  const Value& x4, const Value& x5, const Value& x6);
 
 extern std::vector<SysImport> sysFuncs;
 
