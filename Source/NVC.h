@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <vector>
 
+class GKActor;
 class SheepScript;
 
 struct NVCItem
@@ -48,9 +49,10 @@ public:
 	
     NVCItem* GetNVC(std::string noun, std::string verb);
 	
-	bool IsCaseMet(const NVCItem* item) const;
+	bool IsCaseMet(const NVCItem* item, GKActor* ego) const;
 	
 	const std::vector<NVCItem>& GetActionsForNoun(std::string noun);
+	const NVCItem* GetAction(std::string noun, std::string verb);
 	
 private:
 	std::vector<NVCItem> mEmptyActions;

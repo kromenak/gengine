@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "ActionBar.h"
+#include "AnimationPlayer.h"
 #include "CharacterManager.h"
 #include "Color32.h"
 #include "GameCamera.h"
@@ -26,46 +27,39 @@
 extern Mesh* quad;
 
 Scene::Scene(std::string name, std::string timeCode) :
-    mGeneralName(name)
+    mGeneralName(name),
+	mSpecificName(name + timeCode),
+	mSceneData(name, timeCode)
 {
-    // Generate name for specific SIF.
-    mSpecificName = name + timeCode;
-    
-    // Load general and specific SIF assets.
-    mGeneralSIF = Services::GetAssets()->LoadSIF(mGeneralName);
-    mSpecificSIF = Services::GetAssets()->LoadSIF(mSpecificName);
-    
-    // Load scene data asset.
-    mSceneData = Services::GetAssets()->LoadSceneData(mGeneralSIF->GetSceneDataName());
-    
-    // Load BSP and set it to be rendered.
-    mSceneBSP = Services::GetAssets()->LoadBSP(mSceneData->GetBSPName());
-    Services::GetRenderer()->SetBSP(mSceneBSP);
+	//std::cout << mSpecificName << std::endl;
+	
+    // Set BSP to be rendered.
+    Services::GetRenderer()->SetBSP(mSceneData.GetBSP());
     
     // Figure out if we have a skybox, and set it to be rendered.
-    mSkybox = mSceneData->GetSkybox();
-    if(mSkybox == nullptr)
-    {
-        mSkybox = mSpecificSIF->GetSkybox();
-    }
-    if(mSkybox == nullptr)
-    {
-        mSkybox = mGeneralSIF->GetSkybox();
-    }
-    Services::GetRenderer()->SetSkybox(mSkybox);
+    Services::GetRenderer()->SetSkybox(mSceneData.GetSkybox());
     
-    // Create camera and position it at the the default position and heading.
-    SceneCameraData* defaultRoomCamera = mGeneralSIF->GetDefaultRoomCamera();
-    mCamera = new GameCamera();
-    mCamera->SetPosition(defaultRoomCamera->position);
-    mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
+    // Create game camera.
+	mCamera = new GameCamera();
+	
+	// Create animation player.
+	Actor* animationActor = new Actor();
+	mAnimationPlayer = animationActor->AddComponent<AnimationPlayer>();
+	
+	// Position the camera at the the default position and heading.
+	SceneCameraData* defaultRoomCamera = mSceneData.GetDefaultRoomCamera();
+	if(defaultRoomCamera != nullptr)
+	{
+    	mCamera->SetPosition(defaultRoomCamera->position);
+    	mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
+	}
 	
     // Create actors for the scene.
-    std::vector<SceneActorData*> sceneActorDatas = mGeneralSIF->GetSceneActorDatas();
+    std::vector<SceneActorData*> sceneActorDatas = mSceneData.GetSceneActorDatas();
     for(auto& actorDef : sceneActorDatas)
     {
         // Create actor.
-        GKActor* actor = new GKActor();
+        GKActor* actor = new GKActor(true);
 		actor->SetNoun(actorDef->noun);
 		
 		// The actor's 3-letter identifier can be derived from the name of the model.
@@ -81,7 +75,7 @@ Scene::Scene(std::string name, std::string timeCode) :
         {
             Vector3 position = actorDef->position->position;
             actor->SetPosition(position);
-            actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading));
+			actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading));
         }
         
         // Set actor's graphical appearance.
@@ -105,6 +99,13 @@ Scene::Scene(std::string name, std::string timeCode) :
         // If this is our ego, save a reference to it.
         if(actorDef->ego)
         {
+			// If we already created an Ego, delete the old one. Latest one takes priority.
+			// This actually happens pretty often - general SIF says Gabe is ego, specific says Grace.
+			// Maybe there's a better way to handle this? But this is the easiest for now.
+			if(mEgo != nullptr)
+			{
+				mEgo->Actor::SetState(Actor::State::Dead);
+			}
             mEgo = actor;
         }
 		
@@ -115,7 +116,7 @@ Scene::Scene(std::string name, std::string timeCode) :
     // Iterate over scene model data and prep the scene.
     // First, we want to hide and scene models that are set to "hidden".
     // Second, we want to spawn any non-scene models.
-    std::vector<SceneModelData*> sceneModelDatas = mGeneralSIF->GetSceneModelDatas();
+    std::vector<SceneModelData*> sceneModelDatas = mSceneData.GetSceneModelDatas();
     for(auto& modelDef : sceneModelDatas)
     {
 		switch(modelDef->type)
@@ -126,15 +127,17 @@ Scene::Scene(std::string name, std::string timeCode) :
 				// If it should be hidden by default, tell the BSP to hide it.
 				if(modelDef->hidden)
 				{
-					mSceneBSP->Hide(modelDef->name);
+					mSceneData.GetBSP()->Hide(modelDef->name);
 				}
 				break;
 			}
 				
 			// "HitTest" type models should be hidden, but still interactive.
-			//case SceneModelData::Type::HitTest:
-			//	mSceneBSP->Hide(modelDef->name);
-			//	break;
+			case SceneModelData::Type::HitTest:
+			{
+				mSceneData.GetBSP()->Hide(modelDef->name);
+				break;
+			}
 				
 			// "Prop" and "GasProp" models both render their own model geometry.
 			// Only difference for a "GasProp" is that it uses a provided Gas file too.
@@ -142,7 +145,7 @@ Scene::Scene(std::string name, std::string timeCode) :
 			case SceneModelData::Type::GasProp:
 			{
 				// Create actor.
-				GKActor* actor = new GKActor();
+				GKActor* actor = new GKActor(false);
 				actor->SetNoun(modelDef->noun);
 				
 				// Set model.
@@ -157,9 +160,7 @@ Scene::Scene(std::string name, std::string timeCode) :
 				}
 				*/
 				
-				// For some reason, prop positions are exactly mirrored across the Z-axis from actual desired position.
-				// This might be related to negation of z-components when importing the model.
-				//actor->SetScale(Vector3(1.0f, 1.0f, -1.0f));
+				mActors.push_back(actor);
 				break;
 			}
 				
@@ -170,17 +171,13 @@ Scene::Scene(std::string name, std::string timeCode) :
     }
     
     // Create soundtrack player and get it playing!
-    std::vector<Soundtrack*> soundtracks = mGeneralSIF->GetSoundtracks();
-    if(soundtracks.size() == 0 && mSpecificSIF != nullptr)
-    {
-        soundtracks = mSpecificSIF->GetSoundtracks();
-    }
-    if(soundtracks.size() > 0)
-    {
-        Actor* actor = new Actor();
-        SoundtrackPlayer* soundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
-        soundtrackPlayer->Play(soundtracks[0]);
-    }
+	Soundtrack* soundtrack = mSceneData.GetSoundtrack();
+	if(soundtrack != nullptr)
+	{
+		Actor* actor = new Actor();
+		SoundtrackPlayer* soundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
+		soundtrackPlayer->Play(soundtrack);
+	}
 	
 	// Create action bar, which will be used to choose nouns/verbs by the player.
 	mActionBar = new ActionBar();
@@ -208,8 +205,6 @@ Scene::Scene(std::string name, std::string timeCode) :
 		walkerBoundaryActor->SetScale(size);
 	}
 	*/
-	
-	// Check for and run "scene enter" actions.
 }
 
 Scene::~Scene()
@@ -218,11 +213,26 @@ Scene::~Scene()
 	Services::GetRenderer()->SetSkybox(nullptr);
 }
 
+void Scene::OnSceneEnter()
+{
+	// Check for and run "scene enter" actions.
+	std::vector<NVC*> nvcs = mSceneData.GetNounVerbCaseSets();
+	for(auto& nvc : nvcs)
+	{
+		const NVCItem* nvcItem = nvc->GetAction("SCENE", "ENTER");
+		if(nvcItem != nullptr)
+		{
+			std::cout << "Executing scene enter action." << std::endl;
+			nvcItem->Execute();
+		}
+	}
+}
+
 void Scene::InitEgoPosition(std::string positionName)
 {
     if(mEgo == nullptr) { return; }
     
-    ScenePositionData* position = mGeneralSIF->GetPosition(positionName);
+    ScenePositionData* position = mSceneData.GetScenePosition(positionName);
     if(position == nullptr) { return; }
     
     // Set position and heading.
@@ -236,28 +246,28 @@ void Scene::InitEgoPosition(std::string positionName)
     }
     else
     {
-        //TODO: Output a warning.
+		std::cout << "Can't init ego camera!" << std::endl;
     }
 }
 
 bool Scene::CheckInteract(const Ray& ray)
 {
 	HitInfo hitInfo;
-	if(!mSceneBSP->RaycastNearest(ray, hitInfo)) { return false; }
+	if(!mSceneData.GetBSP()->RaycastNearest(ray, hitInfo)) { return false; }
 	
 	// If hit the floor, this IS an interaction, but not an interesting one.
 	// Clicking will walk the player, but we don't count it as an interactive object.
-	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mGeneralSIF->GetFloorBspModelName()))
+	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData.GetFloorModelName()))
 	{
 		return false;
 	}
 	
 	// See if the hit item matches any scene model data.
 	SceneModelData* sceneModelData = nullptr;
-	std::vector<SceneModelData*> sceneModelDatas = mGeneralSIF->GetSceneModelDatas();
+	std::vector<SceneModelData*> sceneModelDatas = mSceneData.GetSceneModelDatas();
 	for(auto& modelData : sceneModelDatas)
 	{
-		if(modelData->name == hitInfo.name)
+		if(StringUtil::EqualsIgnoreCase(modelData->name, hitInfo.name))
 		{
 			sceneModelData = modelData;
 			break;
@@ -277,52 +287,22 @@ void Scene::Interact(const Ray& ray)
     // If so, it means we clicked on that thing.
 	//TODO: Need to also raycast against models (like Gabe, etc).
 	HitInfo hitInfo;
-	if(!mSceneBSP->RaycastNearest(ray, hitInfo)) { return; }
-	std::cout << "Hit " << hitInfo.name << std::endl;
+	if(!mSceneData.GetBSP()->RaycastNearest(ray, hitInfo)) { return; }
+	//std::cout << "Hit " << hitInfo.name << std::endl;
+	
 	// Clicked on the floor - move ego to position.
-	if(hitInfo.name == mGeneralSIF->GetFloorBspModelName())
+	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData.GetFloorModelName()))
 	{
-		Texture* tex = mGeneralSIF->GetWalkBoundaryTexture();
-		Vector3 size = mGeneralSIF->GetWalkBoundarySize();
-		Vector3 offset = mGeneralSIF->GetWalkBoundaryOffset();
+		Color32 color = mSceneData.GetWalkBoundaryColor(hitInfo.position);
 		
-		Vector3 pos = hitInfo.position;
-		std::cout << "World Pos: " << pos << std::endl;
-		
-		pos.SetX(pos.GetX() + offset.GetX());
-		pos.SetZ(pos.GetZ() + offset.GetY());
-		std::cout << "Offset Pos: " << pos << std::endl;
-		
-		pos.SetX(pos.GetX() / size.GetX());
-		pos.SetZ(pos.GetZ() / size.GetY());
-		std::cout << "Normalized Pos: " << pos << std::endl;
-		
-		pos.SetX(pos.GetX() * tex->GetWidth());
-		pos.SetZ(pos.GetZ() * tex->GetHeight());
-		std::cout << "Pixel Pos: " << pos << std::endl;
-		
-		// The color of the pixel at pos seems to indicate whether that spot is walkable.
-		// White = totally OK to walk 				(255, 255, 255)
-		// Blue = OK to walk						(0, 0, 255)
-		// Green = sort of OK to walk 				(0, 255, 0)
-		// Red = getting less OK to walk 			(255, 0, 0)
-		// Yellow = sort of not OK to walk 			(255, 255, 0)
-		// Magenta = really pushing it here 		(255, 0, 255)
-		// Grey = pretty not OK to walk here 		(128, 128, 128)
-		// Cyan = this is your last warning, buddy 	(0, 255, 255)
-		// Black = totally not OK to walk 			(0, 0, 0)
-		
-		// Need to flip the Y because the calculated value is from lower-left. But X/Y are from upper-left.
-		Color32 color = tex->GetPixelColor32(pos.GetX(), tex->GetHeight() - pos.GetZ());
-		std::cout << color << std::endl;
-		
-		// Don't allow walking in black area.
+		// Don't allow walking in black areas.
 		if(color == Color32::Black)
 		{
 			std::cout << "Can't walk!" << std::endl;
 			return;
 		}
 		
+		// Move Ego to position.
 		mEgo->SetPosition(hitInfo.position);
 		return;
 	}
@@ -330,7 +310,7 @@ void Scene::Interact(const Ray& ray)
     // Correlate the interacted model name to model data from the SIF.
     // This allows us to correlate a model in the BSP to a noun keyword.
     SceneModelData* sceneModelData = nullptr;
-    std::vector<SceneModelData*> sceneModelDatas = mGeneralSIF->GetSceneModelDatas();
+    std::vector<SceneModelData*> sceneModelDatas = mSceneData.GetSceneModelDatas();
     for(auto& modelData : sceneModelDatas)
     {
         if(modelData->name == hitInfo.name)
@@ -347,13 +327,13 @@ void Scene::Interact(const Ray& ray)
 	
 	// Find all verbs that can be used for this object.
 	std::vector<const NVCItem*> viableActions;
-	std::vector<NVC*> nvcs = mGeneralSIF->GetNounVerbCases();
+	std::vector<NVC*> nvcs = mSceneData.GetNounVerbCaseSets();
 	for(auto& nvc : nvcs)
 	{
 		const std::vector<NVCItem>& allActions = nvc->GetActionsForNoun(sceneModelData->noun);
 		for(auto& action : allActions)
 		{
-			if(nvc->IsCaseMet(&action))
+			if(nvc->IsCaseMet(&action, mEgo))
 			{
 				viableActions.push_back(&action);
 			}
@@ -376,7 +356,7 @@ float Scene::GetFloorY(const Vector3& position)
 	// Raycast straight down and test against the floor BSP.
 	// If we hit something, just use the Y hit position as the floor's Y.
 	HitInfo hitInfo;
-	if(mSceneBSP->RaycastSingle(downRay, mGeneralSIF->GetFloorBspModelName(), hitInfo))
+	if(mSceneData.GetBSP()->RaycastSingle(downRay, mSceneData.GetFloorModelName(), hitInfo))
 	{
 		return hitInfo.position.GetY();
 	}
@@ -384,4 +364,29 @@ float Scene::GetFloorY(const Vector3& position)
 	// If didn't hit floor, just return 0.
 	// TODO: Maybe we should return a default based on the floor BSP's height?
 	return 0.0f;
+}
+
+GKActor* Scene::GetActorByModelName(std::string modelName)
+{
+	for(auto& actor : mActors)
+	{
+		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
+		if(meshRenderer != nullptr)
+		{
+			Model* model = meshRenderer->GetModel();
+			if(model != nullptr)
+			{
+				if(StringUtil::EqualsIgnoreCase(model->GetNameNoExtension(), modelName))
+				{
+					return actor;
+				}
+			}
+		}
+	}
+	return nullptr;
+}
+
+void Scene::ApplyTextureToSceneModel(std::string modelName, Texture* texture)
+{
+	mSceneData.GetBSP()->SetTexture(modelName, texture);
 }

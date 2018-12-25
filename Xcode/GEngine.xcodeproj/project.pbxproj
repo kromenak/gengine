@@ -69,7 +69,7 @@
 		4B22F50A2174075B0065B152 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4B22F50B2174075B0065B152 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4B22F50C2174075B0065B152 /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
-		4B22F50D2174075B0065B152 /* SceneData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneData.cpp */; };
+		4B22F50D2174075B0065B152 /* SceneModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneModel.cpp */; };
 		4B22F50E2174075B0065B152 /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
 		4B22F50F2174075B0065B152 /* SDLLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A95A1F243349000A689F /* SDLLog.cpp */; };
 		4B22F5102174075B0065B152 /* Services.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182D1FEED84D002991D4 /* Services.cpp */; };
@@ -129,7 +129,7 @@
 		4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */; };
 		4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
 		4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
-		4B2E7A65203A6072001A5B9C /* SceneData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneData.cpp */; };
+		4B2E7A65203A6072001A5B9C /* SceneModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneModel.cpp */; };
 		4B30B08E20F29594002D96D5 /* RenderPacket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B30B08D20F29594002D96D5 /* RenderPacket.cpp */; };
 		4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0918351FEEEA51002991D4 /* Matrix3.cpp */; };
 		4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
@@ -142,6 +142,8 @@
 		4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B53B0C8207AFE7E00663381 /* Ray.cpp */; };
 		4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */; };
+		4B5C301D21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */; };
+		4B5C301E21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */; };
 		4B6B766121A6165E00788C02 /* ButtonIconManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */; };
 		4B6B766221A6165E00788C02 /* ButtonIconManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */; };
 		4B6B766621AB75AA00788C02 /* ActionBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766521AB75AA00788C02 /* ActionBar.cpp */; };
@@ -187,6 +189,8 @@
 		4BF32B8C1F67C434000639FB /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B8A1F67C434000639FB /* Shader.cpp */; };
 		4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
 		4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
+		4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BFBB86521D0469000E07EFB /* SceneData.cpp */; };
+		4BFBB86721D0469000E07EFB /* SceneData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BFBB86521D0469000E07EFB /* SceneData.cpp */; };
 		4BFCD33820CDFFB4004FF9EA /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BFCD33720CDFFB4004FF9EA /* Plane.cpp */; };
 /* End PBXBuildFile section */
 
@@ -306,8 +310,8 @@
 		4B2E7A5E203A0425001A5B9C /* SIF.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SIF.cpp; path = ../Source/SIF.cpp; sourceTree = "<group>"; };
 		4B2E7A60203A5CB3001A5B9C /* Scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Scene.h; path = ../Source/Scene.h; sourceTree = "<group>"; };
 		4B2E7A61203A5CB3001A5B9C /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Scene.cpp; path = ../Source/Scene.cpp; sourceTree = "<group>"; };
-		4B2E7A63203A6072001A5B9C /* SceneData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SceneData.h; path = ../Source/SceneData.h; sourceTree = "<group>"; };
-		4B2E7A64203A6072001A5B9C /* SceneData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SceneData.cpp; path = ../Source/SceneData.cpp; sourceTree = "<group>"; };
+		4B2E7A63203A6072001A5B9C /* SceneModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SceneModel.h; path = ../Source/SceneModel.h; sourceTree = "<group>"; };
+		4B2E7A64203A6072001A5B9C /* SceneModel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SceneModel.cpp; path = ../Source/SceneModel.cpp; sourceTree = "<group>"; };
 		4B30B08D20F29594002D96D5 /* RenderPacket.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RenderPacket.cpp; path = ../Source/RenderPacket.cpp; sourceTree = "<group>"; };
 		4B4300851FB7EE44009EDE58 /* Quaternion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Quaternion.h; path = ../Source/Quaternion.h; sourceTree = "<group>"; };
 		4B4300861FB7EE44009EDE58 /* Quaternion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Quaternion.cpp; path = ../Source/Quaternion.cpp; sourceTree = "<group>"; };
@@ -326,6 +330,8 @@
 		4B53B0C8207AFE7E00663381 /* Ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = ../Source/Ray.cpp; sourceTree = "<group>"; };
 		4B5497F81FF80E0A00F1EF4F /* StringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringUtil.h; path = ../Source/StringUtil.h; sourceTree = "<group>"; };
 		4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QuaternionTests.cpp; path = ../Tests/QuaternionTests.cpp; sourceTree = "<group>"; };
+		4B5C301B21D1F60900211724 /* VertexAnimationPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimationPlayer.h; path = ../Source/VertexAnimationPlayer.h; sourceTree = "<group>"; };
+		4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimationPlayer.cpp; path = ../Source/VertexAnimationPlayer.cpp; sourceTree = "<group>"; };
 		4B6B765F21A6165E00788C02 /* ButtonIconManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ButtonIconManager.h; path = ../Source/ButtonIconManager.h; sourceTree = "<group>"; };
 		4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ButtonIconManager.cpp; path = ../Source/ButtonIconManager.cpp; sourceTree = "<group>"; };
 		4B6B766421AB75AA00788C02 /* ActionBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ActionBar.h; path = ../Source/ActionBar.h; sourceTree = "<group>"; };
@@ -410,6 +416,8 @@
 		4BF7510E1F7737DD00B79D2F /* Vector4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector4.h; path = ../Source/Vector4.h; sourceTree = "<group>"; };
 		4BF751101F773E1A00B79D2F /* Vector2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector2.cpp; path = ../Source/Vector2.cpp; sourceTree = "<group>"; };
 		4BF751111F773E1A00B79D2F /* Vector2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector2.h; path = ../Source/Vector2.h; sourceTree = "<group>"; };
+		4BFBB86421D0469000E07EFB /* SceneData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SceneData.h; path = ../Source/SceneData.h; sourceTree = "<group>"; };
+		4BFBB86521D0469000E07EFB /* SceneData.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SceneData.cpp; path = ../Source/SceneData.cpp; sourceTree = "<group>"; };
 		4BFCD33620CDFFB4004FF9EA /* Plane.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Plane.h; path = ../Source/Plane.h; sourceTree = "<group>"; };
 		4BFCD33720CDFFB4004FF9EA /* Plane.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Plane.cpp; path = ../Source/Plane.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -715,8 +723,6 @@
 		4B9231992103AED90004F4F3 /* Animation */ = {
 			isa = PBXGroup;
 			children = (
-				4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */,
-				4BDDCD5C20D6C4BC00701A89 /* VertexAnimation.h */,
 				4B92319B2103AF1B0004F4F3 /* Animation.cpp */,
 				4B92319A2103AF1B0004F4F3 /* Animation.h */,
 				4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */,
@@ -725,6 +731,10 @@
 				4BACA50820F7132E008C7FE9 /* GAS.h */,
 				4B92319E210999810004F4F3 /* GasPlayer.cpp */,
 				4B92319D210999810004F4F3 /* GasPlayer.h */,
+				4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */,
+				4BDDCD5C20D6C4BC00701A89 /* VertexAnimation.h */,
+				4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */,
+				4B5C301B21D1F60900211724 /* VertexAnimationPlayer.h */,
 			);
 			name = Animation;
 			sourceTree = "<group>";
@@ -772,8 +782,10 @@
 				4BCBCF452043A90F001BE1E0 /* NVC.h */,
 				4B2E7A61203A5CB3001A5B9C /* Scene.cpp */,
 				4B2E7A60203A5CB3001A5B9C /* Scene.h */,
-				4B2E7A64203A6072001A5B9C /* SceneData.cpp */,
-				4B2E7A63203A6072001A5B9C /* SceneData.h */,
+				4BFBB86521D0469000E07EFB /* SceneData.cpp */,
+				4BFBB86421D0469000E07EFB /* SceneData.h */,
+				4B2E7A64203A6072001A5B9C /* SceneModel.cpp */,
+				4B2E7A63203A6072001A5B9C /* SceneModel.h */,
 				4B2E7A5E203A0425001A5B9C /* SIF.cpp */,
 				4B2E7A5D203A0425001A5B9C /* SIF.h */,
 			);
@@ -1005,6 +1017,7 @@
 				4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */,
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
+				4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
 				4B30B08E20F29594002D96D5 /* RenderPacket.cpp in Sources */,
@@ -1025,7 +1038,7 @@
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
 				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
 				4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */,
-				4B2E7A65203A6072001A5B9C /* SceneData.cpp in Sources */,
+				4B2E7A65203A6072001A5B9C /* SceneModel.cpp in Sources */,
 				4B1555592197B59F00072F0D /* Transform.cpp in Sources */,
 				4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
@@ -1052,6 +1065,7 @@
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
 				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
+				4B5C301D21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */,
 				4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
 				4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */,
@@ -1089,10 +1103,11 @@
 				4B22F4FD217407470065B152 /* membuf.cpp in Sources */,
 				4B22F5302174078B0065B152 /* Soundtrack.cpp in Sources */,
 				4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */,
-				4B22F50D2174075B0065B152 /* SceneData.cpp in Sources */,
+				4B22F50D2174075B0065B152 /* SceneModel.cpp in Sources */,
 				4B22F503217407530065B152 /* SheepAPI.cpp in Sources */,
 				4B2CA00B21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4B22F501217407530065B152 /* lex.yy.cc in Sources */,
+				4BFBB86721D0469000E07EFB /* SceneData.cpp in Sources */,
 				4B22F5362174078B0065B152 /* Camera.cpp in Sources */,
 				4B22F515217407640065B152 /* MeshRenderer.cpp in Sources */,
 				4B22F509217407530065B152 /* Skybox.cpp in Sources */,
@@ -1140,6 +1155,7 @@
 				4B22F543217410830065B152 /* Main.cpp in Sources */,
 				4B22F519217407640065B152 /* Shader.cpp in Sources */,
 				4B22F4F32174073D0065B152 /* Font.cpp in Sources */,
+				4B5C301E21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */,
 				4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B22F4FE217407470065B152 /* StringTokenizer.cpp in Sources */,
 				4B22F513217407640065B152 /* Material.cpp in Sources */,

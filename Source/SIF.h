@@ -4,10 +4,9 @@
 // Clark Kromenaker
 //
 // A (S)cene (I)nitialization (F)ile, which is an asset used to load
-// and initialize a scene (or room) in the game.
-//
-// If you wanted to load a particular scene in the game, you'd need to
-// pass a SIF asset to kick the loading process off!
+// and initialize a scene (or room) in the game. There are "general" SIFs,
+// which are used for a location at any time, and "specific" SIFs, which are
+// only loaded when you go to a location during a specific timeblock.
 //
 // In-memory representation of .SIF files.
 //
@@ -16,6 +15,7 @@
 
 #include <vector>
 
+#include "Color32.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -62,7 +62,7 @@ struct ScenePositionData
     std::string label;
     
     // The target position. If not specified, character won't move, but will still change headings, if specified.
-    Vector3 position ;
+    Vector3 position;
     
     // The rotation, in degrees, for the character to face when they get to the position.
     // It not specified, the character keeps their current heading at the target position.
@@ -160,20 +160,21 @@ class SIF : public Asset
 public:
     SIF(std::string name, char* data, int dataLength);
     
-    std::string GetSceneDataName() { return mSceneDataName; }
+    std::string GetSceneModelName() const { return mSceneModelName; }
 	
-	std::string GetFloorBspModelName() { return mFloorBspModelName; }
+	std::string GetFloorBspModelName() const { return mFloorBspModelName; }
 	
-	Texture* GetWalkBoundaryTexture() { return mWalkBoundaryTexture; }
-	Vector2 GetWalkBoundarySize() { return mWalkBoundarySize; }
-	Vector2 GetWalkBoundaryOffset() { return mWalkBoundaryOffset; }
+	Texture* GetWalkBoundaryTexture() const { return mWalkBoundaryTexture; }
+	Vector2 GetWalkBoundarySize() const { return mWalkBoundarySize; }
+	Vector2 GetWalkBoundaryOffset() const { return mWalkBoundaryOffset; }
+	Color32 GetWalkBoundaryColor(Vector3 position) const;
 	
-    Skybox* GetSkybox() { return mSkybox; }
+    Skybox* GetSkybox() const { return mSkybox; }
     
     std::vector<SceneActorData*> GetSceneActorDatas() { return mSceneActorDatas; }
     std::vector<SceneModelData*> GetSceneModelDatas() { return mSceneModelDatas; }
     
-    SceneCameraData* GetDefaultRoomCamera() { return mRoomCameras[mDefaultRoomCameraIndex]; }
+	SceneCameraData* GetDefaultRoomCamera() const { return mRoomCameras.size() > 0 ? mRoomCameras[mDefaultRoomCameraIndex] : nullptr; }
     
     ScenePositionData* GetPosition(std::string positionName);
     
@@ -183,7 +184,7 @@ public:
     
 private:
     // Name of the Scene Data asset name that's used in conjunction with this SIF.
-    std::string mSceneDataName;
+    std::string mSceneModelName;
     
     // FLOOR
     // Name of the model in the BSP that is used for character walking.

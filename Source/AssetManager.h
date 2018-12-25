@@ -17,7 +17,7 @@
 #include "Font.h"
 #include "Model.h"
 #include "NVC.h"
-#include "SceneData.h"
+#include "SceneModel.h"
 #include "Shader.h"
 #include "Sheep/SheepScript.h"
 #include "SIF.h"
@@ -59,7 +59,7 @@ public:
     VertexAnimation* LoadVertexAnimation(std::string name);
     
     SIF* LoadSIF(std::string name);
-    SceneData* LoadSceneData(std::string name);
+    SceneModel* LoadSceneModel(std::string name);
     NVC* LoadNVC(std::string name);
     BSP* LoadBSP(std::string name);
     
@@ -83,7 +83,22 @@ private:
     
     // A list of loaded assets, so we can just return existing assets if already loaded.
     std::unordered_map<std::string, Audio*> mLoadedAudios;
+	std::unordered_map<std::string, Soundtrack*> mLoadedSoundtracks;
+	std::unordered_map<std::string, Yak*> mLoadedYaks;
+	
+	std::unordered_map<std::string, Model*> mLoadedModels;
     std::unordered_map<std::string, Texture*> mLoadedTextures;
+	
+	std::unordered_map<std::string, GAS*> mLoadedGases;
+	std::unordered_map<std::string, Animation*> mLoadedAnimations;
+	std::unordered_map<std::string, VertexAnimation*> mLoadedVertexAnimations;
+	
+	std::unordered_map<std::string, SIF*> mLoadedSIFs;
+	std::unordered_map<std::string, SceneModel*> mLoadedSceneModels;
+	std::unordered_map<std::string, NVC*> mLoadedActionSets;
+	std::unordered_map<std::string, BSP*> mLoadedBSPs;
+	std::unordered_map<std::string, SheepScript*> mLoadedSheeps;
+	
     std::unordered_map<std::string, Shader*> mLoadedShaders;
 	
 	// Retrieve a barn bundle by name, or by contained asset.

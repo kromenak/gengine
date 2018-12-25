@@ -17,6 +17,39 @@ SIF::SIF(std::string name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
+Color32 SIF::GetWalkBoundaryColor(Vector3 position) const
+{
+	// If no texture...can walk anywhere?
+	if(mWalkBoundaryTexture == nullptr) { return Color32::White; }
+	//std::cout << "World Pos: " << position << std::endl;
+	
+	position.SetX(position.GetX() + mWalkBoundaryOffset.GetX());
+	position.SetZ(position.GetZ() + mWalkBoundaryOffset.GetY());
+	//std::cout << "Offset Pos: " << position << std::endl;
+	
+	position.SetX(position.GetX() / mWalkBoundarySize.GetX());
+	position.SetZ(position.GetZ() / mWalkBoundarySize.GetY());
+	//std::cout << "Normalized Pos: " << position << std::endl;
+	
+	position.SetX(position.GetX() * mWalkBoundaryTexture->GetWidth());
+	position.SetZ(position.GetZ() * mWalkBoundaryTexture->GetHeight());
+	//std::cout << "Pixel Pos: " << position << std::endl;
+	
+	// The color of the pixel at pos seems to indicate whether that spot is walkable.
+	// White = totally OK to walk 				(255, 255, 255)
+	// Blue = OK to walk						(0, 0, 255)
+	// Green = sort of OK to walk 				(0, 255, 0)
+	// Red = getting less OK to walk 			(255, 0, 0)
+	// Yellow = sort of not OK to walk 			(255, 255, 0)
+	// Magenta = really pushing it here 		(255, 0, 255)
+	// Grey = pretty not OK to walk here 		(128, 128, 128)
+	// Cyan = this is your last warning, buddy 	(0, 255, 255)
+	// Black = totally not OK to walk 			(0, 0, 0)
+	
+	// Need to flip the Y because the calculated value is from lower-left. But X/Y are from upper-left.
+	return mWalkBoundaryTexture->GetPixelColor32(position.GetX(), mWalkBoundaryTexture->GetHeight() - position.GetZ());
+}
+
 ScenePositionData* SIF::GetPosition(std::string positionName)
 {
     for(int i = 0; i < mPositions.size(); i++)
@@ -54,7 +87,7 @@ void SIF::ParseFromData(char *data, int dataLength)
 			
 			if(StringUtil::EqualsIgnoreCase(keyValue->key, "scene"))
             {
-                mSceneDataName = keyValue->value;
+                mSceneModelName = keyValue->value;
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue->key, "floor"))
             {
@@ -478,46 +511,46 @@ void SIF::ParseFromData(char *data, int dataLength)
             IniKeyValue* keyValue = entry;
             while(keyValue != nullptr)
             {
-                if(keyValue->key == "model")
+				if(StringUtil::EqualsIgnoreCase(keyValue->key, "model"))
                 {
                     model->name = keyValue->value;
                 }
-                else if(keyValue->key == "noun")
+                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "noun"))
                 {
                     model->noun = keyValue->value;
                 }
-                else if(keyValue->key == "type")
+                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "type"))
                 {
-                    if(keyValue->value == "scene")
+                    if(StringUtil::EqualsIgnoreCase(keyValue->value, "scene"))
                     {
                         model->type = SceneModelData::Type::Scene;
                     }
-                    else if(keyValue->value == "prop")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->value, "prop"))
                     {
                         model->type = SceneModelData::Type::Prop;
                     }
-                    else if(keyValue->value == "hittest")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->value, "hittest"))
                     {
                         model->type = SceneModelData::Type::HitTest;
                     }
-                    else if(keyValue->value == "gasprop")
+                    else if(StringUtil::EqualsIgnoreCase(keyValue->value, "gasprop"))
                     {
                         model->type = SceneModelData::Type::GasProp;
                     }
                 }
-                else if(keyValue->key == "verb")
+                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "verb"))
                 {
                     model->verb = keyValue->value;
                 }
-                else if(keyValue->key == "initAnim")
+                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "initanim"))
                 {
                     model->initAnim = Services::GetAssets()->LoadAnimation(keyValue->value);
                 }
-                else if(keyValue->key == "hidden")
+                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "hidden"))
                 {
                     model->hidden = true;
                 }
-                else if(keyValue->key == "gas")
+                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "gas"))
                 {
                     model->gas = Services::GetAssets()->LoadGAS(keyValue->value);
                 }

@@ -3,6 +3,13 @@
 //
 // Clark Kromenaker
 //
+// Encapsulates all the loaded actors and components for a single conceptual
+// location or place in the game. A scene can represent a single level, a set
+// of menus, or a particular location in a game.
+//
+// For GK3, a "scene" is a particular location in the game world (Lobby, Dining Room,
+// Room 25, Train Station, etc). The game can only be "in" one scene at a time.
+//
 // From GK3 docs: "a stage is everything associated with a specific game location
 // during a specific timeblock (e.g. Dining Room, Day 1, 10am).
 //
@@ -10,12 +17,15 @@
 #include <string>
 #include <vector>
 
+#include "SceneData.h"
+
 class ActionBar;
+class AnimationPlayer;
 class BSP;
 class GameCamera;
 class GKActor;
 class Ray;
-class SceneData;
+class SceneModel;
 class SIF;
 class Skybox;
 class Vector3;
@@ -25,7 +35,9 @@ class Scene
 public:
     Scene(std::string name, std::string timeCode);
 	~Scene();
-    
+	
+	void OnSceneEnter();
+	
     void InitEgoPosition(std::string positionName);
 	
 	bool CheckInteract(const Ray& ray);
@@ -34,27 +46,25 @@ public:
 	float GetFloorY(const Vector3& position);
 	
 	GKActor* GetEgo() const { return mEgo; }
+	GKActor* GetActorByModelName(std::string modelName);
+	
+	void ApplyTextureToSceneModel(std::string modelName, Texture* texture);
+	
+	AnimationPlayer* GetAnimationPlayer() { return mAnimationPlayer; }
     
 private:
     // The scene name, both general and specific.
-    // General name is time-agnostice (Ex: DIN).
+    // General name is time-agnostic (Ex: DIN).
     // Specific name includes the day/time (Ex: DIN110A).
     std::string mGeneralName;
     std::string mSpecificName;
-    
-    // Scene initialization files for the scene (general) and specific timeblock (specific).
-    SIF* mGeneralSIF = nullptr;
-    SIF* mSpecificSIF = nullptr;
-    
-    // SceneData (SCN) derived from SIFs. Mostly tells us which BSP to use.
-    SceneData* mSceneData = nullptr;
-    
-    // The BSP we'll use to render this scene's geometry.
-    BSP* mSceneBSP = nullptr;
-    
-    // The skybox this scene uses. Taken from either the SIF or SCN files.
-    Skybox* mSkybox = nullptr;
-    
+	
+	// Contains scene data references for the current location/timeblock.
+	SceneData mSceneData;
+	
+	// The animation player for the scene.
+	AnimationPlayer* mAnimationPlayer = nullptr;
+	
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
 	

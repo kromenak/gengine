@@ -112,17 +112,17 @@ Audio* AssetManager::LoadAudio(std::string name)
 
 Soundtrack* AssetManager::LoadSoundtrack(std::string name)
 {
-    return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), nullptr);
+    return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), &mLoadedSoundtracks);
 }
 
 Yak* AssetManager::LoadYak(std::string name)
 {
-    return LoadAsset<Yak>(SanitizeAssetName(name, ".YAK"), nullptr);
+    return LoadAsset<Yak>(SanitizeAssetName(name, ".YAK"), &mLoadedYaks);
 }
 
 Model* AssetManager::LoadModel(std::string name)
 {
-    return LoadAsset<Model>(SanitizeAssetName(name, ".MOD"), nullptr);
+    return LoadAsset<Model>(SanitizeAssetName(name, ".MOD"), &mLoadedModels);
 }
 
 Texture* AssetManager::LoadTexture(std::string name)
@@ -132,42 +132,42 @@ Texture* AssetManager::LoadTexture(std::string name)
 
 GAS* AssetManager::LoadGAS(std::string name)
 {
-    return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), nullptr);
+    return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), &mLoadedGases);
 }
 
 Animation* AssetManager::LoadAnimation(std::string name)
 {
-    return LoadAsset<Animation>(SanitizeAssetName(name, ".ANM"), nullptr);
+    return LoadAsset<Animation>(SanitizeAssetName(name, ".ANM"), &mLoadedAnimations);
 }
 
 VertexAnimation* AssetManager::LoadVertexAnimation(std::string name)
 {
-    return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), nullptr);
+    return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), &mLoadedVertexAnimations);
 }
 
 SIF* AssetManager::LoadSIF(std::string name)
 {
-    return LoadAsset<SIF>(SanitizeAssetName(name, ".SIF"), nullptr);
+    return LoadAsset<SIF>(SanitizeAssetName(name, ".SIF"), &mLoadedSIFs);
 }
 
-SceneData* AssetManager::LoadSceneData(std::string name)
+SceneModel* AssetManager::LoadSceneModel(std::string name)
 {
-    return LoadAsset<SceneData>(SanitizeAssetName(name, ".SCN"), nullptr);
+    return LoadAsset<SceneModel>(SanitizeAssetName(name, ".SCN"), &mLoadedSceneModels);
 }
 
 NVC* AssetManager::LoadNVC(std::string name)
 {
-    return LoadAsset<NVC>(SanitizeAssetName(name, ".NVC"), nullptr);
+    return LoadAsset<NVC>(SanitizeAssetName(name, ".NVC"), &mLoadedActionSets);
 }
 
 BSP* AssetManager::LoadBSP(std::string name)
 {
-    return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), nullptr);
+    return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), &mLoadedBSPs);
 }
 
 SheepScript* AssetManager::LoadSheep(std::string name)
 {
-    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), nullptr);
+    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), &mLoadedSheeps);
 }
 
 Cursor* AssetManager::LoadCursor(std::string name)

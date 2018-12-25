@@ -5,85 +5,177 @@
 //
 #include "SceneData.h"
 
-#include <iostream>
-
-#include "IniParser.h"
 #include "Services.h"
-#include "Skybox.h"
 #include "StringUtil.h"
 
-SceneData::SceneData(std::string name, char* data, int dataLength) : Asset(name)
+SceneData::SceneData(std::string location, std::string timeblock)
 {
-    ParseFromData(data, dataLength);
+	std::string specificName = location + timeblock;
+	
+	// Load general and specific SIF assets.
+	mGeneralSIF = Services::GetAssets()->LoadSIF(location);
+	assert(mGeneralSIF != nullptr);
+	mSpecificSIF = Services::GetAssets()->LoadSIF(specificName);
+	
+	// Load scene model asset. Only *one* is needed, so one defined
+	// in the specific SIF will override one from the general SIF.
+	std::string sceneModelName;
+	if(mSpecificSIF != nullptr && !mSpecificSIF->GetSceneModelName().empty())
+	{
+		sceneModelName = mSpecificSIF->GetSceneModelName();
+	}
+	else
+	{
+		sceneModelName = mGeneralSIF->GetSceneModelName();
+	}
+	mSceneModel = Services::GetAssets()->LoadSceneModel(sceneModelName);
+	assert(mSceneModel != nullptr);
+	
+	// Load the BSP data, which is specified by the scene model.
+	// If this is null, the game will still work...but there's no BSP geometry!
+	mBSP = Services::GetAssets()->LoadBSP(mSceneModel->GetBSPName());
+
+	// Figure out if we have a skybox, and set it to be rendered.
+	// The skybox can be defined in several places. Go down priority list and find one!
+	mSkybox = mSceneModel->GetSkybox();
+	if(mSkybox == nullptr && mSpecificSIF != nullptr)
+	{
+		mSkybox = mSpecificSIF->GetSkybox();
+	}
+	if(mSkybox == nullptr)
+	{
+		mSkybox = mGeneralSIF->GetSkybox();
+	}
+	
+	// Collect actor definitions from general and specific SIFs.
+	mSceneActorDatas = mGeneralSIF->GetSceneActorDatas();
+	if(mSpecificSIF != nullptr)
+	{
+		std::vector<SceneActorData*> sceneActorDatas = mSpecificSIF->GetSceneActorDatas();
+		mSceneActorDatas.insert(mSceneActorDatas.end(), sceneActorDatas.begin(), sceneActorDatas.end());
+		
+		//TODO: If there is more than one "ego" actor in the list, ignore all but the latest one.
+	}
+	
+	// Collect model definitions from general and specific SIFs.
+	mSceneModelDatas = mGeneralSIF->GetSceneModelDatas();
+	if(mSpecificSIF != nullptr)
+	{
+		std::vector<SceneModelData*> sceneModelDatas = mSpecificSIF->GetSceneModelDatas();
+		mSceneModelDatas.insert(mSceneModelDatas.end(), sceneModelDatas.begin(), sceneModelDatas.end());
+	}
+	
+	// Collect noun/verb/case sets from general and specific SIFs.
+	// The logic for the general SIF is a bit more complicated!
+	std::vector<NVC*> nounVerbCases = mGeneralSIF->GetNounVerbCases();
+	for(auto& nvc : nounVerbCases)
+	{
+		// For the general SIF, a naming convention indicates whether we should or shouldn't use the NVC.
+		// For example, "loc_all" is always used. "loc_12all" is used for days 1 & 2.
+		std::string nvcName = nvc->GetNameNoExtension();
+		StringUtil::ToLower(nvcName);
+		
+		// The naming convention always has an underscore followed by "all".
+		std::size_t allPos = nvcName.find("all");
+		std::size_t underscorePos = nvcName.rfind("_", allPos);
+		
+		// If "all" or underscore don't exist, use the file by default.
+		// Also, if the underscore is just one spot before "all", use the file, since it should be loaded ALWAYS.
+		if(allPos == std::string::npos || underscorePos == std::string::npos || underscorePos == allPos - 1)
+		{
+			std::cout << "Using NVC " << nvcName << std::endl;
+			mNounVerbCaseSets.push_back(nvc);
+		}
+		else
+		{
+			// So, there's some space between the underscore and the "all".
+			// Those values should be digits indicating which days to load the NVC on.
+			// If the digit matches the first digit of our timeblock, use it!
+			std::size_t checkPos = underscorePos + 1;
+			while(checkPos < allPos)
+			{
+				char val = nvcName[checkPos];
+				if(val == timeblock[0])
+				{
+					std::cout << "Using NVC " << nvcName << std::endl;
+					mNounVerbCaseSets.push_back(nvc);
+					break;
+				}
+				checkPos++;
+			}
+		}
+	}
+	
+	// The specific SIF NVCs is much simpler: just use them all!
+	if(mSpecificSIF != nullptr)
+	{
+		nounVerbCases = mSpecificSIF->GetNounVerbCases();
+		mNounVerbCaseSets.insert(mNounVerbCaseSets.end(), nounVerbCases.begin(), nounVerbCases.end());
+	}
+	
+	// Determine which soundtrack to use. Give priority to specific SIF version, fall back on general one.
+	std::vector<Soundtrack*> soundtracks;
+	if(mSpecificSIF != nullptr)
+	{
+		soundtracks = mSpecificSIF->GetSoundtracks();
+	}
+	if(soundtracks.size() == 0)
+	{
+		soundtracks = mGeneralSIF->GetSoundtracks();
+	}
+	if(soundtracks.size() > 0)
+	{
+		mSoundtrack = soundtracks[0];
+	}
 }
 
-std::string SceneData::GetBSPName()
+std::string SceneData::GetFloorModelName() const
 {
-    // If an override is specified, use it!
-    if(!mBSPNameOverride.empty())
-    {
-        return mBSPNameOverride;
-    }
-    
-    // Otherwise, we default to our asset name, with no extension.
-    return mName.substr(0, mName.length() - 4);
+	std::string floorModelName;
+	if(mSpecificSIF != nullptr)
+	{
+		floorModelName = mSpecificSIF->GetFloorBspModelName();
+	}
+	if(floorModelName.empty())
+	{
+		floorModelName = mGeneralSIF->GetFloorBspModelName();
+	}
+	return floorModelName;
 }
 
-void SceneData::ParseFromData(char *data, int dataLength)
+SceneCameraData* SceneData::GetDefaultRoomCamera() const
 {
-    IniParser parser(data, dataLength);
-    parser.ParseAll();
-    
-    // Load any BSP override specified. Otherwise, the name of the SCN asset is used for the BSP too.
-    std::vector<IniSection> topSections = parser.GetSections("");
-    for(auto& section : topSections)
-    {
-        for(auto& entry : section.entries)
-        {
-            if(StringUtil::EqualsIgnoreCase(entry->key, "bsp"))
-            {
-                mBSPNameOverride = entry->value;
-            }
-        }
-    }
-    
-    // Load a skybox, if any.
-    IniSection skyboxSection = parser.GetSection("SKYBOX");
-    if(skyboxSection.entries.size() > 0)
-    {
-        mSkybox = new Skybox();
-    }
-    for(auto& entry : skyboxSection.entries)
-    {
-        if(StringUtil::EqualsIgnoreCase(entry->key, "left"))
-        {
-			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
-            mSkybox->SetLeftTexture(texture);
-        }
-        else if(StringUtil::EqualsIgnoreCase(entry->key, "right"))
-        {
-			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
-            mSkybox->SetRightTexture(texture);
-        }
-        else if(StringUtil::EqualsIgnoreCase(entry->key, "front"))
-        {
-			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
-            mSkybox->SetFrontTexture(texture);
-        }
-        else if(StringUtil::EqualsIgnoreCase(entry->key, "back"))
-        {
-			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
-            mSkybox->SetBackTexture(texture);
-        }
-        else if(StringUtil::EqualsIgnoreCase(entry->key, "up"))
-        {
-			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
-            mSkybox->SetUpTexture(texture);
-        }
-        else if(StringUtil::EqualsIgnoreCase(entry->key, "down"))
-        {
-			Texture* texture = Services::GetAssets()->LoadTexture(entry->value);
-            mSkybox->SetDownTexture(texture);
-        }
-    }
+	SceneCameraData* sceneCameraData = nullptr;
+	if(mSpecificSIF != nullptr)
+	{
+		sceneCameraData = mSpecificSIF->GetDefaultRoomCamera();
+	}
+	if(sceneCameraData == nullptr)
+	{
+		sceneCameraData = mGeneralSIF->GetDefaultRoomCamera();
+	}
+	return sceneCameraData;
+}
+
+ScenePositionData* SceneData::GetScenePosition(std::string positionName) const
+{
+	ScenePositionData* position = nullptr;
+	if(mSpecificSIF != nullptr)
+	{
+		position = mSpecificSIF->GetPosition(positionName);
+	}
+	if(position == nullptr)
+	{
+		position = mGeneralSIF->GetPosition(positionName);
+	}
+	return position;
+}
+
+Color32 SceneData::GetWalkBoundaryColor(Vector3 position) const
+{
+	if(mSpecificSIF != nullptr && mSpecificSIF->GetWalkBoundaryTexture() != nullptr)
+	{
+		return mSpecificSIF->GetWalkBoundaryColor(position);
+	}
+	return mGeneralSIF->GetWalkBoundaryColor(position);
 }

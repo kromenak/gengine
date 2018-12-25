@@ -5,6 +5,7 @@
 //
 #include "NVC.h"
 
+#include "GKActor.h"
 #include "IniParser.h"
 #include "SheepCompiler.h"
 #include "SheepScript.h"
@@ -44,7 +45,7 @@ NVCItem* NVC::GetNVC(std::string noun, std::string verb)
     return nullptr;
 }
 
-bool NVC::IsCaseMet(const NVCItem* item) const
+bool NVC::IsCaseMet(const NVCItem* item, GKActor* ego) const
 {
 	// Empty condition is automatically met.
 	if(item->condition.empty()) { return true; }
@@ -56,11 +57,11 @@ bool NVC::IsCaseMet(const NVCItem* item) const
 	}
 	else if(StringUtil::EqualsIgnoreCase(item->condition, "gabe_all"))
 	{
-		return true;
+		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "gabriel");
 	}
 	else if(StringUtil::EqualsIgnoreCase(item->condition, "grace_all"))
 	{
-		return false;
+		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "grace");
 	}
 	//TODO: Add any more global conditions.
 	
@@ -73,6 +74,7 @@ bool NVC::IsCaseMet(const NVCItem* item) const
 	}
 	
 	// Assume any not found case is false by default.
+	std::cout << "Unknown NVC case " << item->condition << std::endl;
 	return false;
 }
 
@@ -84,6 +86,19 @@ const std::vector<NVCItem>& NVC::GetActionsForNoun(std::string noun)
 		return mNounToItems[noun];
 	}
 	return mEmptyActions;
+}
+
+const NVCItem* NVC::GetAction(std::string noun, std::string verb)
+{
+	const std::vector<NVCItem>& actionsForNoun = GetActionsForNoun(noun);
+	for(auto& action : actionsForNoun)
+	{
+		if(StringUtil::EqualsIgnoreCase(action.verb, verb))
+		{
+			return &action;
+		}
+	}
+	return nullptr;
 }
 
 void NVC::ParseFromData(char *data, int dataLength)
@@ -104,7 +119,10 @@ void NVC::ParseFromData(char *data, int dataLength)
         item.verb = keyValue->key;
         
         keyValue = keyValue->next;
-        item.condition = keyValue->key;
+		std::string condition = keyValue->key;
+		StringUtil::Trim(condition);
+		StringUtil::Trim(condition, '\t');
+		item.condition = condition;
         
         // From here, we have some optional stuff.
         keyValue = keyValue->next;
