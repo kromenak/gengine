@@ -5,6 +5,7 @@
 //
 #include "Actor.h"
 
+#include "Debug.h"
 #include "Component.h"
 #include "GEngine.h"
 #include "RectTransform.h"
@@ -54,4 +55,6 @@ void Actor::Update(float deltaTime)
     {
         component->Update(deltaTime);
     }
+	
+	Debug::DrawLine(GetPosition(), GetPosition() + GetForward() * 5.0f, Color32::Red);
 }

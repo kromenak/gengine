@@ -21,6 +21,13 @@
 class Actor
 {
 public:
+	enum class State
+	{
+		Enabled,
+		Disabled,
+		Dead
+	};
+	
 	enum class TransformType
 	{
 		Transform,
@@ -29,7 +36,7 @@ public:
 	
     Actor();
 	Actor(TransformType transformType);
-    ~Actor();
+    virtual ~Actor();
     
 	void Update(float deltaTime);
     
@@ -51,10 +58,15 @@ public:
 	Vector3 GetRight() const { return mTransform->GetRight(); }
 	Vector3 GetUp() const { return mTransform->GetUp(); }
 	
+	State GetState() const { return mState; }
+	void SetState(State state) { mState = state; }
+	
 protected:
 	virtual void UpdateInternal(float deltaTime) { }
     
 private:
+	State mState = State::Enabled;
+	
 	Transform* mTransform = nullptr;
 	
     // The components that are attached to this actor.
