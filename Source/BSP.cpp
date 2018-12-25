@@ -34,6 +34,9 @@ bool BSP::RaycastNearest(const Ray& ray, HitInfo& outHitInfo)
 	// up of "triangle fans", so the first vertex in a polygon is shared by all triangles.
     for(auto& polygon : mPolygons)
     {
+		BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
+		if(surface == nullptr) { continue; }
+		
         Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
         for(int i = 1; i < polygon->vertexCount - 1; i++)
         {
@@ -158,6 +161,32 @@ void BSP::Hide(std::string objectName)
             surface->visible = false;
         }
     }
+}
+
+void BSP::SetTexture(std::string objectName, Texture* texture)
+{
+	// Find index of the object name.
+	int index = -1;
+	for(int i = 0; i < mObjectNames.size(); i++)
+	{
+		if(mObjectNames[i] == objectName)
+		{
+			index = i;
+			break;
+		}
+	}
+	
+	// Can't hide an object if the passed name isn't present.
+	if(index == -1) { return; }
+	
+	// All surfaces belonging to this object will be hidden.
+	for(auto& surface : mSurfaces)
+	{
+		if(surface->objectIndex == index)
+		{
+			surface->texture = texture;
+		}
+	}
 }
 
 void BSP::RenderTree(BSPNode* node, Vector3 position)
@@ -354,13 +383,16 @@ void BSP::ParseFromData(char *data, int dataLength)
          (B25, toilet paper has 2)
          (B25/RC1 - many instances of 0/1 too)
         */
-        unsigned int flags = reader.ReadUInt();
+		reader.ReadUInt();
+        //unsigned int flags = reader.ReadUInt();
         
         // Combination of flags 8+4 seems to indicate thing is not visible.
-        if(flags == 12)
+		/*
+		if(flags == 12)
         {
             surface->visible = false;
         }
+		*/
         //std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
         
         mSurfaces.push_back(surface);

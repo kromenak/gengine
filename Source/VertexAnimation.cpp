@@ -165,9 +165,9 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     
     // Name of .MOD file this animation data is for.
     // TODO: May want to hash and save this for verification before playback, to avoid mismatched model/anim playing.
-    std::string modelName = reader.ReadString(32);
+    mModelName = reader.ReadString(32);
     #ifdef DEBUG_OUTPUT
-    std::cout << "  Model Name: " << modelName << std::endl;
+    std::cout << "  Model Name: " << mModelName << std::endl;
     std::cout << "  Mesh Count: " << meshCount << std::endl;
     std::cout << "  Frame Count: " << mFrameCount << std::endl;
     #endif

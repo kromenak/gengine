@@ -52,10 +52,16 @@ public:
     VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);
     
     float GetDuration(int framesPerSecond) { return (1.0f / framesPerSecond) * mFrameCount; }
-    
+	
+	const std::string& GetModelName() const { return mModelName; }
+	
 private:
     // The number of frames in this animation.
     int mFrameCount = 0;
+	
+	// The name of the model that is meant to play this animation.
+	// If we ever play the animation on a mismatched model, the graphics will probably glitch out.
+	std::string mModelName;
     
     // Arrays containing the FIRST vertex/transform poses for each mesh.
     // Subsequent poses are stored in the "next" of these poses.

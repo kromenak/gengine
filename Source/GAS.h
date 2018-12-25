@@ -16,8 +16,6 @@
 
 #include "Vector3.h"
 
-
-
 class Animation;
 class GasPlayer;
 

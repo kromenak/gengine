@@ -18,16 +18,13 @@ public:
     GasPlayer(Actor* owner);
     
     void SetGas(GAS* gas) { mGas = gas; mNodeIndex = 0; }
-    
-    void SetAnimationPlayer(AnimationPlayer* animationPlayer) { mAnimationPlayer = animationPlayer; }
-    AnimationPlayer* GetAnimationPlayer() const { return mAnimationPlayer; }
 	
 protected:
 	void UpdateInternal(float deltaTime) override;
 	
 private:
     // Animation player.
-    AnimationPlayer* mAnimationPlayer = nullptr;
+    //AnimationPlayer* mAnimationPlayer = nullptr;
     
     // The GAS asset being played.
     GAS* mGas = nullptr;

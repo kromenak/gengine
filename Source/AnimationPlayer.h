@@ -8,9 +8,21 @@
 #pragma once
 #include "Component.h"
 
+#include <list>
+
 class Animation;
 class VertexAnimation;
 class MeshRenderer;
+
+struct AnimationState
+{
+	AnimationState(Animation* animation, int currentFrame, float timer) :
+		animation(animation), currentFrame(currentFrame), timer(timer) { }
+	
+	Animation* animation = nullptr;
+	int currentFrame = 0;
+	float timer = 0.0f;
+};
 
 class AnimationPlayer : public Component
 {
@@ -22,9 +34,6 @@ public:
     void Play(VertexAnimation* vertexAnimation);
 	
 	void Sample(Animation* animation, int frame);
-    
-    void SetMeshRenderer(MeshRenderer* meshRenderer) { mMeshRenderer = meshRenderer; }
-    MeshRenderer* GetMeshRenderer() { return mMeshRenderer; }
 	
 protected:
 	void UpdateInternal(float deltaTime) override;
@@ -35,12 +44,14 @@ private:
     
     // The animation currently being played.
     Animation* mAnimation = nullptr;
-    
+	
     // The frame we're currently on in the animation.
-    int mCurrentAnimationFrame = 0;
-    float mAnimationTimer = 0.0f;
+    //int mCurrentAnimationFrame = 0;
+    //float mAnimationTimer = 0.0f;
+	
+	std::list<AnimationState> mActiveAnimations;
     
     // If defined, a currently running vertex animation.
-    VertexAnimation* mVertexAnimation = nullptr;
-    float mVertexAnimationTimer = 0.0f;
+    //VertexAnimation* mVertexAnimation = nullptr;
+    //float mVertexAnimationTimer = 0.0f;
 };

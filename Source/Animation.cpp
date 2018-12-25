@@ -5,18 +5,46 @@
 //
 #include "Animation.h"
 
-#include "StringUtil.h"
-
+#include "GKActor.h"
 #include "IniParser.h"
 #include "Services.h"
+#include "Scene.h"
+#include "StringUtil.h"
 
+void VertexAnimNode::Play()
+{
+	if(vertexAnimation != nullptr)
+	{
+		GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(vertexAnimation->GetModelName());
+		if(actor != nullptr)
+		{
+			actor->PlayAnimation(vertexAnimation);
+		}
+	}
+}
+
+void SceneTextureAnimNode::Play()
+{
+	Texture* texture = Services::GetAssets()->LoadTexture(textureName);
+	if(texture != nullptr)
+	{
+		//std::cout << "STEXTURE " << sceneName << ", " << sceneModelName << ", " << textureName << std::endl;
+		//TODO: Ensure sceneName matches loaded scene name?
+		GEngine::inst->GetScene()->ApplyTextureToSceneModel(sceneModelName, texture);
+	}
+}
 
 Animation::Animation(std::string name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }
 
-std::vector<AnimationNode*>* Animation::GetFrame(int num)
+Animation::~Animation()
+{
+	
+}
+
+std::vector<AnimNode*>* Animation::GetFrame(int num)
 {
     if(mFrames.find(num) != mFrames.end())
     {
@@ -39,6 +67,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 mFrameCount = section.entries[0]->GetValueAsInt();
             }
         }
+		// Actions section contains vertex animations to start playing on certain frames.
         else if(StringUtil::EqualsIgnoreCase(section.name, "ACTIONS"))
         {
             for(int i = 1; i < section.entries.size(); i++)
@@ -53,14 +82,15 @@ void Animation::ParseFromData(char *data, int dataLength)
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
                 
-                AnimationNode* node = new AnimationNode();
-                node->mFrameNumber = frameNumber;
-                node->mVertexAnimation = Services::GetAssets()->LoadVertexAnimation(entry->value);
+                VertexAnimNode* node = new VertexAnimNode();
+                node->frameNumber = frameNumber;
+                node->vertexAnimation = Services::GetAssets()->LoadVertexAnimation(entry->value);
                 mFrames[frameNumber].push_back(node);
                 
                 //TODO: Come back to do additional parsing here.
             }
         }
+		// "STextures" changes textures on a scene (BSP) model.
         else if(StringUtil::EqualsIgnoreCase(section.name, "STEXTURES"))
         {
             for(int i = 1; i < section.entries.size(); i++)
@@ -84,10 +114,17 @@ void Animation::ParseFromData(char *data, int dataLength)
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
                 std::string textureName = entry->value;
-                
-                //mFrames[frameNumber].push_back(node);
+				
+				SceneTextureAnimNode* node = new SceneTextureAnimNode();
+				node->frameNumber = frameNumber;
+				node->sceneName = sceneName;
+				node->sceneModelName = sceneModelName;
+				node->textureName = textureName;
+				
+                mFrames[frameNumber].push_back(node);
             }
         }
+		// "SVisibility" changes the visibility of a scene (BSP) model.
         else if(StringUtil::EqualsIgnoreCase(section.name, "SVISIBILITY"))
         {
             for(int i = 1; i < section.entries.size(); i++)
@@ -115,6 +152,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 //mFrames[frameNumber].push_back(node);
             }
         }
+		// "MTextures" changes textures on a model or actor.
         else if(StringUtil::EqualsIgnoreCase(section.name, "MTEXTURES"))
         {
             for(int i = 1; i < section.entries.size(); i++)
@@ -147,6 +185,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 //mFrames[frameNumber].push_back(node);
             }
         }
+		// "MVisibility" changes visibility on a model or actor.
         else if(StringUtil::EqualsIgnoreCase(section.name, "MVISIBILITY"))
         {
             for(int i = 1; i < section.entries.size(); i++)
@@ -169,6 +208,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 //mFrames[frameNumber].push_back(node);
             }
         }
+		// Triggers sounds to play on certain frames at certain locations.
         else if(StringUtil::EqualsIgnoreCase(section.name, "SOUNDS"))
         {
             for(int i = 1; i < section.entries.size(); i++)
@@ -234,6 +274,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 //mFrames[frameNumber].push_back(node);
             }
         }
+		// Allows specifying of additional options that affect the entire animation.
         else if(StringUtil::EqualsIgnoreCase(section.name, "OPTIONS"))
         {
             for(int i = 1; i < section.entries.size(); i++)
@@ -253,12 +294,13 @@ void Animation::ParseFromData(char *data, int dataLength)
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    int simpleValue = entry->GetValueAsInt();
+                    //int simpleValue = entry->GetValueAsInt();
                 }
                 else if(StringUtil::EqualsIgnoreCase(option, "NOINTERPOLATE"))
                 {
                     
                 }
+				// Allows us to dictate the rate at which the animation proceeds.
                 else if(StringUtil::EqualsIgnoreCase(option, "FRAMERATE"))
                 {
                     if(entry->next == nullptr) { continue; }
@@ -271,6 +313,9 @@ void Animation::ParseFromData(char *data, int dataLength)
                 }
             }
         }
+		// Contains some options specifically for GK3. I imagine this engine
+		// was initially meant to be reused on future projects, so they tried
+		// to isolate extremely specific to GK3 stuff here?
         else if(StringUtil::EqualsIgnoreCase(section.name, "GK3"))
         {
             for(int i = 1; i < section.entries.size(); i++)

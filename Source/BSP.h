@@ -76,8 +76,11 @@ struct BSPSurface
     // Not yet sure what this scales - is it an overall scale on top of UV-specific scales???
     float scale = 1.0f;
     
-    // Attributes, derived from flags.
+    // If true, this surface is visible. If not, hidden.
     bool visible = true;
+	
+	// If true, interactive (can be hit by raycasts). If false, not interactive.
+	bool interactive = true;
 };
 
 struct HitInfo
@@ -107,6 +110,8 @@ public:
 	std::vector<HitInfo> RaycastAll(const Ray& ray);
 	
     void Hide(std::string objectName);
+	
+	void SetTexture(std::string objectName, Texture* texture);
     
 private:
     // Points to the root node in our node list.

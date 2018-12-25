@@ -9,13 +9,13 @@
 #include <vector>
 #include <iostream>
 
-#include "imstream.h"
-#include "StringTokenizer.h"
-#include "StringUtil.h"
-
 #include "AnimationPlayer.h"
 #include "GasPlayer.h"
+#include "imstream.h"
+#include "Scene.h"
 #include "Services.h"
+#include "StringTokenizer.h"
+#include "StringUtil.h"
 
 int AnimGasNode::Execute(GasPlayer* player)
 {
@@ -26,11 +26,12 @@ int AnimGasNode::Execute(GasPlayer* player)
     
     // Must have a valid animation, and GasPlayer, and AnimationPlayer.
     if(animation == nullptr) { return 0; }
-    if(player == nullptr || player->GetAnimationPlayer() == nullptr) { return 0; }
+    //if(player == nullptr || player->GetAnimationPlayer() == nullptr) { return 0; }
     
     // Play the animation!
-    player->GetAnimationPlayer()->Play(animation);
-    
+    //player->GetAnimationPlayer()->Play(animation);
+	GEngine::inst->GetScene()->GetAnimationPlayer()->Play(animation);
+	
     //std::cout << "Playing animation " << animation->GetName() << " for " << animation->GetDuration() << " seconds." << std::endl;
     return animation->GetDuration() * 1000;
 }
@@ -53,7 +54,7 @@ int WaitGasNode::Execute(GasPlayer* player)
     if(minWaitTimeSeconds == maxWaitTimeSeconds) { return minWaitTimeSeconds * 1000; }
     if(maxWaitTimeSeconds == 0 && minWaitTimeSeconds > 0) { return minWaitTimeSeconds * 1000; }
     if(maxWaitTimeSeconds != 0 && minWaitTimeSeconds > maxWaitTimeSeconds) { return minWaitTimeSeconds * 1000; }
-    std::cout << "Waiting..." << std::endl;
+	
     // Normal case - random between min and max. Mult by 1000 to return milliseconds.
     return (rand() % maxWaitTimeSeconds + minWaitTimeSeconds) * 1000;
 }

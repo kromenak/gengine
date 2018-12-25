@@ -17,10 +17,11 @@
 #include <string>
 
 class Animation;
-class AnimationPlayer;
 class GAS;
 class GasPlayer;
 class MeshRenderer;
+class VertexAnimation;
+class VertexAnimationPlayer;
 
 class GKActor : public Actor
 {
@@ -32,7 +33,9 @@ public:
         Listen
     };
     
-    GKActor();
+    GKActor(bool forCharacter);
+	
+	void PlayAnimation(VertexAnimation* animation);
 	
 	void PlayAnimation(Animation* animation);
 	void PlayInitAnimation(Animation* animation);
@@ -47,7 +50,7 @@ public:
     void SetIdleGas(GAS* gas) { mIdleGas = gas; }
     void SetTalkGas(GAS* gas) { mTalkGas = gas; }
     void SetListenGas(GAS* gas) { mListenGas = gas; }
-    
+	
     MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
 	
 protected:
@@ -67,7 +70,7 @@ private:
 	MeshRenderer* mMeshRenderer = nullptr;
 	
 	// The character's animation player.
-	AnimationPlayer* mAnimationPlayer = nullptr;
+	VertexAnimationPlayer* mAnimationPlayer = nullptr;
 	
 	// Player for GAS logic.
 	GasPlayer* mGasPlayer = nullptr;

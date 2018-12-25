@@ -16,18 +16,37 @@
 
 class VertexAnimation;
 
-struct AnimationNode
+struct AnimNode
 {
-    int mFrameNumber = 0;
-    VertexAnimation* mVertexAnimation = nullptr;
+	int frameNumber = 0;
+	
+	virtual ~AnimNode() { }
+	virtual void Play() = 0;
+};
+
+struct VertexAnimNode : public AnimNode
+{
+	VertexAnimation* vertexAnimation = nullptr;
+	
+	void Play() override;
+};
+
+struct SceneTextureAnimNode : public AnimNode
+{
+	std::string sceneName;
+	std::string sceneModelName;
+	std::string textureName;
+	
+	void Play() override;
 };
 
 class Animation : public Asset
 {
 public:
     Animation(std::string name, char* data, int dataLength);
+	~Animation();
     
-    std::vector<AnimationNode*>* GetFrame(int num);
+    std::vector<AnimNode*>* GetFrame(int num);
     
     int GetFrameCount() { return mFrameCount; }
     int GetFramesPerSecond() { return mFramesPerSecond; }
@@ -44,7 +63,7 @@ private:
     // Mapping of frame number to frame data.
     // "Frame data" consists of one or more animation nodes, which do things like
     // playing mesh animations, setting textures, playing sounds, etc.
-    std::unordered_map<int, std::vector<AnimationNode*>> mFrames;
+    std::unordered_map<int, std::vector<AnimNode*>> mFrames;
     
     void ParseFromData(char* data, int dataLength);
 };
