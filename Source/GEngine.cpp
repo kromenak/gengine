@@ -103,9 +103,13 @@ void GEngine::Run()
     // Loop until not running anymore.
     while(mRunning)
     {
+		// Our main loop: inputs, updates, outputs.
         ProcessInput();
         Update();
         GenerateOutputs();
+		
+		// After frame is done, check whether we need a scene change.
+		LoadSceneInternal();
     }
 }
 
@@ -117,9 +121,22 @@ void GEngine::Quit()
 std::string GEngine::GetCurrentTimeCode()
 {
     // Depending on day/hour, returns something like "110A".
+	// Add A/P (for am/pm) on end, depending on hour.
     std::string ampm = (mHour <= 11) ? "A" : "P";
+	
+	// The hour is 24-hour based internally.
+	// Subtract 12, if over 12, to get it 12-hour based.
     int hour = mHour > 12 ? mHour - 12 : mHour;
-    return std::to_string(mDay) + std::to_string(hour) + ampm;
+	
+	// If hour is single digit, prepend a zero.
+	std::string hourStr = std::to_string(hour);
+	if(hour < 10)
+	{
+		hourStr = "0" + hourStr;
+	}
+	
+	// Put it all together.
+	return std::to_string(mDay) + hourStr + ampm;
 }
 
 void GEngine::UseDefaultCursor()
@@ -147,22 +164,6 @@ void GEngine::UseWaitCursor()
 		mActiveCursor = mWaitCursor;
 		mActiveCursor->Activate();
 	}
-}
-
-void GEngine::LoadScene(std::string name)
-{
-	// Delete the current scene, if any.
-    if(mScene != nullptr)
-    {
-        delete mScene;
-        mScene = nullptr;
-    }
-	
-	// Get rid of all actors between scenes.
-	DeleteAllActors();
-	
-	// Stand up the new scene.
-    mScene = new Scene(name, GetCurrentTimeCode());
 }
 
 void GEngine::ProcessInput()
@@ -222,6 +223,22 @@ void GEngine::Update()
     {
         mActors[i]->Update(deltaTime);
     }
+	
+	// Delete any dead actors...carefully.
+	auto it = mActors.begin();
+	while(it != mActors.end())
+	{
+		if((*it)->GetState() == Actor::State::Dead)
+		{
+			Actor* actor = (*it);
+			it = mActors.erase(it);
+			delete actor;
+		}
+		else
+		{
+			++it;
+		}
+	}
     
     // Also update audio system (before or after actors?)
     mAudioManager.Update(deltaTime);
@@ -255,6 +272,30 @@ void GEngine::RemoveActor(Actor* actor)
     {
         mActors.erase(it);
     }
+}
+
+void GEngine::LoadSceneInternal()
+{
+	if(mSceneToLoad.empty()) { return; }
+	
+	// Delete the current scene, if any.
+	if(mScene != nullptr)
+	{
+		delete mScene;
+		mScene = nullptr;
+	}
+	
+	// Get rid of all actors between scenes.
+	DeleteAllActors();
+	
+	// Create the new scene.
+	mScene = new Scene(mSceneToLoad, GetCurrentTimeCode());
+	
+	// Trigger any on-enter actions.
+	mScene->OnSceneEnter();
+	
+	// Clear scene load request.
+	mSceneToLoad.clear();
 }
 
 void GEngine::DeleteAllActors()

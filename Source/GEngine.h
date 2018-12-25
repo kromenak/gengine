@@ -31,7 +31,7 @@ public:
     
     void Quit();
     
-    void LoadScene(std::string name);
+	void LoadScene(std::string name) { mSceneToLoad = name; }
     Scene* GetScene() { return mScene; }
     
     std::string GetCurrentTimeCode();
@@ -45,7 +45,8 @@ private:
     static std::vector<Actor*> mActors;
     
     // Is the game running? While true, we loop. When false, the game exits.
-    bool mRunning;
+	// False by default, but set to true after initialization.
+	bool mRunning = false;
     
     // Subsystems.
     Renderer mRenderer;
@@ -56,6 +57,10 @@ private:
     
     // The currently active scene. There can be only one at a time (sure about that?).
     Scene* mScene = nullptr;
+	
+	// A scene that's been requested to load. If empty, no pending scene change.
+	// Scene loads happen at the end of a frame, to avoid a scene change mid-frame.
+	std::string mSceneToLoad;
 	
 	// Cursors - maybe move these into a manager at some point?
 	Cursor* mActiveCursor = nullptr;
@@ -69,12 +74,14 @@ private:
     
     // Day and time that the game is currently in.
     // GK3 takes place over three days and multiple time blocks.
-    int mDay = 1;
-    int mHour = 10; // hour in a 24-hour clock
+	int mDay = 1; //3; //1;
+	int mHour = 10; //18; //10; // hour in a 24-hour clock
     
     void ProcessInput();
     void Update();
     void GenerateOutputs();
+	
+	void LoadSceneInternal();
 	
 	void DeleteAllActors();
 };
