@@ -34,7 +34,12 @@ public:
 	void SetScale(Vector3 scale);
 	
 	Vector3 GetWorldPosition() const;
+	//SetWorldPosition
+	
 	Quaternion GetWorldRotation() const;
+	//SetWorldRotation
+	
+	//GetLossyWorldScale
 	
 	Vector3 GetForward() const { return mLocalRotation.Rotate(Vector3::UnitZ); }
 	Vector3 GetRight() const { return mLocalRotation.Rotate(Vector3::UnitX); }

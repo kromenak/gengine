@@ -30,12 +30,12 @@ void Yak::ParseFromData(char *data, int dataLength)
         if(StringUtil::EqualsIgnoreCase(section.name, "HEADER"))
         {
             int length = section.entries[0]->GetValueAsInt();
-            std::cout << "YAK Length: " << length << std::endl;
+            //std::cout << "YAK Length: " << length << std::endl;
         }
         else if(StringUtil::EqualsIgnoreCase(section.name, "SOUNDS"))
         {
             int count = section.entries[0]->GetValueAsInt();
-            std::cout << "SOUNDS Count: " << count << std::endl;
+            //std::cout << "SOUNDS Count: " << count << std::endl;
             for(int i = 0; i < count; i++)
             {
                 IniKeyValue* keyValue = section.entries[i + 1];
@@ -51,7 +51,7 @@ void Yak::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "GK3"))
         {
             int count = section.entries[0]->GetValueAsInt();
-            std::cout << "GK3 Count: " << count << std::endl;
+            //std::cout << "GK3 Count: " << count << std::endl;
             for(int i = 0; i < count; i++)
             {
                 IniKeyValue* keyValue = section.entries[i + 1];

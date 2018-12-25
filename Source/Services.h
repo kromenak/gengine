@@ -16,6 +16,7 @@
 
 #include "AssetManager.h"
 #include "AudioManager.h"
+#include "GEngine.h"
 #include "InputManager.h"
 #include "Renderer.h"
 #include "SheepManager.h"
