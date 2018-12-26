@@ -147,22 +147,25 @@ bool Renderer::Initialize()
 	
 	// Create line mesh, which is helpful for debugging.
 	line = new Mesh(2, 7 * sizeof(float), MeshUsage::Static);
-	line->SetRenderMode(RenderMode::Lines);
-	line->SetPositions(line_vertices);
-	line->SetColors(line_colors);
+	Submesh* lineSubmesh = line->GetSubmesh(0);
+	lineSubmesh->SetRenderMode(RenderMode::Lines);
+	lineSubmesh->SetPositions(line_vertices);
+	lineSubmesh->SetColors(line_colors);
 	
     // Create axes mesh, which is helpful for debugging.
     axes = new Mesh(6, 7 * sizeof(float), MeshUsage::Static);
-    axes->SetRenderMode(RenderMode::Lines);
-    axes->SetPositions(axis_vertices);
-    axes->SetColors(axis_colors);
+	Submesh* axesSubmesh = axes->GetSubmesh(0);
+    axesSubmesh->SetRenderMode(RenderMode::Lines);
+    axesSubmesh->SetPositions(axis_vertices);
+    axesSubmesh->SetColors(axis_colors);
 	
 	// Create quad mesh, which is used for UI and 2D rendering.
 	quad = new Mesh(4, 5 * sizeof(float), MeshUsage::Static);
-	quad->SetRenderMode(RenderMode::Triangles);
-	quad->SetPositions(quad_vertices);
-	quad->SetUV1(quad_uvs);
-	quad->SetIndexes(quad_indices, 6);
+	Submesh* quadSubmesh = quad->GetSubmesh(0);
+	quadSubmesh->SetRenderMode(RenderMode::Triangles);
+	quadSubmesh->SetPositions(quad_vertices);
+	quadSubmesh->SetUV1(quad_uvs);
+	quadSubmesh->SetIndexes(quad_indices, 6);
     
     // Init succeeded!
     return true;

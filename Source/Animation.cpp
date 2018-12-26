@@ -11,24 +11,30 @@
 #include "Scene.h"
 #include "StringUtil.h"
 
-void VertexAnimNode::Play()
+void VertexAnimNode::Play(Animation* anim)
 {
 	if(vertexAnimation != nullptr)
 	{
 		GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(vertexAnimation->GetModelName());
 		if(actor != nullptr)
 		{
-			actor->PlayAnimation(vertexAnimation);
+			if(anim != nullptr)
+			{
+				actor->PlayAnimation(vertexAnimation, anim->GetFramesPerSecond());
+			}
+			else
+			{
+				actor->PlayAnimation(vertexAnimation);
+			}
 		}
 	}
 }
 
-void SceneTextureAnimNode::Play()
+void SceneTextureAnimNode::Play(Animation* anim)
 {
 	Texture* texture = Services::GetAssets()->LoadTexture(textureName);
 	if(texture != nullptr)
 	{
-		//std::cout << "STEXTURE " << sceneName << ", " << sceneModelName << ", " << textureName << std::endl;
 		//TODO: Ensure sceneName matches loaded scene name?
 		GEngine::inst->GetScene()->ApplyTextureToSceneModel(sceneModelName, texture);
 	}
@@ -148,7 +154,8 @@ void Animation::ParseFromData(char *data, int dataLength)
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
                 bool visible = entry->GetValueAsBool();
-                
+				
+				std::cout << "SVISIBILITY" << std::endl;
                 //mFrames[frameNumber].push_back(node);
             }
         }
@@ -181,7 +188,8 @@ void Animation::ParseFromData(char *data, int dataLength)
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
                 std::string textureName = entry->value;
-                
+				
+				std::cout << "MTEXTURE" << std::endl;
                 //mFrames[frameNumber].push_back(node);
             }
         }
@@ -204,7 +212,8 @@ void Animation::ParseFromData(char *data, int dataLength)
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
                 bool visible = entry->GetValueAsBool();
-                
+				
+				std::cout << "MVISIBILITY" << std::endl;
                 //mFrames[frameNumber].push_back(node);
             }
         }
@@ -270,7 +279,8 @@ void Animation::ParseFromData(char *data, int dataLength)
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
                 int maxDist = entry->GetValueAsInt();
-                
+				
+				std::cout << "SOUND" << std::endl;
                 //mFrames[frameNumber].push_back(node);
             }
         }

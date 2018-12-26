@@ -14,6 +14,7 @@
 #include "Asset.h"
 
 #include <vector>
+#include <unordered_map>
 
 #include "AtomicTypes.h"
 #include "Matrix4.h"
@@ -21,8 +22,7 @@
 
 struct VertexAnimationVertexPose
 {
-    int32 mFrameNumber = 0;
-    uint8 mMeshIndex = 0;
+    int mFrameNumber = 0;
     
     std::vector<Vector3> mVertexPositions;
     VertexAnimationVertexPose* mNext = nullptr;
@@ -30,8 +30,7 @@ struct VertexAnimationVertexPose
 
 struct VertexAnimationTransformPose
 {
-    int32 mFrameNumber = 0;
-    uint8 mMeshIndex = 0;
+    int mFrameNumber = 0;
     
     Quaternion mLocalRotation;
     Vector3 mLocalPosition;
@@ -48,10 +47,10 @@ class VertexAnimation : public Asset
 public:
     VertexAnimation(std::string name, char* data, int dataLength);
     
-    VertexAnimationVertexPose SampleVertexPose(float time, int framesPerSecond, int meshIndex);
-    VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);
+	VertexAnimationVertexPose SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex);
+	VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);
     
-    float GetDuration(int framesPerSecond) { return (1.0f / framesPerSecond) * mFrameCount; }
+    float GetDuration(int framesPerSecond) const { return (1.0f / framesPerSecond) * mFrameCount; }
 	
 	const std::string& GetModelName() const { return mModelName; }
 	
@@ -63,9 +62,13 @@ private:
 	// If we ever play the animation on a mismatched model, the graphics will probably glitch out.
 	std::string mModelName;
     
-    // Arrays containing the FIRST vertex/transform poses for each mesh.
-    // Subsequent poses are stored in the "next" of these poses.
-    std::vector<VertexAnimationVertexPose*> mVertexPoses;
+	// Each array element is the FIRST vertex pose for each mesh/submesh index.
+	// Subsequent poses for the mesh are stored in the "next" of the first pose.
+	std::unordered_map<int, std::unordered_map<int, VertexAnimationVertexPose*>> mVertexPoses;
+	//std::vector<std::vector<VertexAnimationVertexPose*>> mVertexPoses;
+	
+	// Each element of array is the FIRST transform poses for each mesh index.
+	// Subsequent poses for the mesh are stored in the "next" of the first pose.
     std::vector<VertexAnimationTransformPose*> mTransformPoses;
     
     void ParseFromData(char* data, int dataLength);

@@ -83,7 +83,9 @@ void UILabel::GenerateMesh()
 	int vertexSize = (9 * sizeof(float));
 	
 	// Create mesh of desired size and usage.
-	mMesh = new Mesh(vertexCount, vertexSize, MeshUsage::Static);
+	mMesh = new Mesh();
+	Submesh* submesh = new Submesh(vertexCount, vertexSize, MeshUsage::Static);
+	mMesh->AddSubmesh(submesh);
 	
 	// Create arrays to hold vertex positions and UVs.
 	int positionSize = vertexCount * 3;
@@ -178,14 +180,14 @@ void UILabel::GenerateMesh()
 	}
 	
 	// Save positions and UVs to mesh.
-	mMesh->SetPositions(positions);
-	mMesh->SetColors(colors);
-	mMesh->SetUV1(uvs);
-	mMesh->SetIndexes(indexes, indexSize);
+	submesh->SetPositions(positions);
+	submesh->SetColors(colors);
+	submesh->SetUV1(uvs);
+	submesh->SetIndexes(indexes, indexSize);
 	
 	// This mesh should render as a "triangle strip".
 	// Vtx 1,2,3 is one triangle. Vtx 2,3,4 is the next triangle.
-	mMesh->SetRenderMode(RenderMode::Triangles);
+	submesh->SetRenderMode(RenderMode::Triangles);
 	
 	// No longer need mesh regen.
 	mNeedMeshRegen = false;

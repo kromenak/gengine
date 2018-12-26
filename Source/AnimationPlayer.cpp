@@ -94,7 +94,7 @@ void AnimationPlayer::UpdateInternal(float deltaTime)
 			{
 				for(auto& node : *frameData)
 				{
-					node->Play();
+					node->Play(activeAnimation.animation);
 					//Play(node->mVertexAnimation);
 				}
 			}

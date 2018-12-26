@@ -12,6 +12,7 @@
 #include "Mesh.h"
 #include "MeshImportSettings.h"
 #include "Quaternion.h"
+#include "Submesh.h"
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
@@ -50,6 +51,7 @@ void Model::ParseFromData(char *data, int dataLength)
     
     // 4 bytes: Size of the model data in bytes.
     // Always 48 bytes LESS than the total size (b/c header data is 48 bytes).
+	// Not really needed to parse everything.
     reader.ReadUInt();
     
     // 4 bytes: unknown - usually zero, but not always (GAB.MOD had 0x0000C842).
@@ -59,11 +61,11 @@ void Model::ParseFromData(char *data, int dataLength)
     // 24 bytes: unknown - all files have had zeros here thus far.
     reader.Skip(24);
     
-    // 4 bytes: unknown - has thus far always been 8.
+    // 4 bytes: unknown - has thus far always been the number 8.
     reader.ReadUInt();
     
     // Now, we iterate over each mesh in the file.
-    int meshGroupCount = 0;
+    //int meshGroupCount = 0;
     for(int i = 0; i < numMeshes; i++)
     {
         #ifdef DEBUG_OUTPUT
@@ -91,8 +93,7 @@ void Model::ParseFromData(char *data, int dataLength)
         //cout << "   x: " << Vector3::Dot(iBasis, Vector3::Cross(jBasis, kBasis)) << endl;
         
         // From the basis vectors, calculate a quaternion representing
-        // a rotation from the standard basis to that basis. We also need to negate some elements
-        // to represent "reflection" from a right-handed rotation to a left-handed rotation.
+        // a rotation from the standard basis to that orientation.
         Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
 		#ifdef GK3_MIRROR_Z
 		rotQuat.SetZ(-rotQuat.GetZ());
@@ -103,10 +104,9 @@ void Model::ParseFromData(char *data, int dataLength)
 		#endif
         //std::cout << "    Mesh Rotation: " << rotQuat << std::endl;
         
-        // 12 bytes: an (X, Y, Z) offset or position for placing this mesh.
-        // Each mesh within the model has it's local offset from the model origin.
-        // This if vital, for example, if a mesh contains a human's head, legs, arms...
-        // want to position them all correctly relative to one another!
+        // 12 bytes: an (X, Y, Z) *local* position for placing this mesh.
+        // Each mesh within a model has a local position relative to the model origin.
+		// Ex: if a human model has arms, legs, etc - this positions them all correctly relative to one another.
 		#ifdef GK3_MIRROR_Z
         Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), -reader.ReadFloat());
 		#else
@@ -114,36 +114,41 @@ void Model::ParseFromData(char *data, int dataLength)
 		#endif
         //std::cout << "    Mesh Position: " << meshPos << std::endl;
         
-        // Use mesh position offset and rotation values to create a local transform matrix.
+        // Use mesh position and rotation values to create a local transform matrix.
         Matrix4 transMatrix = Matrix4::MakeTranslate(meshPos);
         Matrix4 rotMatrix = Matrix4::MakeRotate(rotQuat);
         Matrix4 localTransformMatrix = transMatrix * rotMatrix;
+		
+		Mesh* mesh = new Mesh();
+		mesh->SetLocalTransformMatrix(localTransformMatrix);
+		mMeshes.push_back(mesh);
         
-        // 4 bytes: Number of mesh groups in this mesh.
-        unsigned int numMeshGroups = reader.ReadUInt();
-        //std::cout << "    Number of mesh groups in mesh: " << numMeshGroups << std::endl;
+        // 4 bytes: Number of submeshes in this mesh.
+        unsigned int numSubMeshes = reader.ReadUInt();
+        //std::cout << "    Number of submeshes in mesh: " << numSubMeshes << std::endl;
         
         // 24 bytes: Two more sets of floating point values.
-        // Based on plot test, seems very likely these are min/max values for the mesh.
+        // Based on plot test, seems very likely these are min/max bound values for the mesh.
 		Vector3 min(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
 		Vector3 max(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         
-        // Now, we iterate over each mesh group in this mesh.
-        for(int j = 0; j < numMeshGroups; j++)
+        // Now, we iterate over each submesh in this mesh.
+        for(int j = 0; j < numSubMeshes; j++)
         {
             #ifdef DEBUG_OUTPUT
             std::cout << "    Submesh " << j << std::endl;
             #endif
             
-            // 4 bytes: mesh group block identifier "PRGM" (MGRP backwards).
+            // 4 bytes: submesh block identifier "PRGM" (MGRP backwards).
+			// I think GK3 called these "mesh groups", which is why the identifier is "MGRP".
             identifier = reader.ReadString(4);
             if(identifier != "PRGM")
             {
                 std::cout << "Expected MGRP identifier." << std::endl;
                 return;
             }
-            
-            // 32 bytes: the name of the texture for this mesh group
+			
+            // 32 bytes: the name of the texture for this submesh
             std::string textureName = reader.ReadString(32);
             #ifdef DEBUG_OUTPUT
             std::cout << "      Texture name: " << textureName << std::endl;
@@ -157,21 +162,18 @@ void Model::ParseFromData(char *data, int dataLength)
             // 4 bytes: unknown - seems to always be 1.
             reader.ReadUInt();
             
-            // 4 bytes: Vertex count for this mesh group.
+            // 4 bytes: Vertex count for this submesh.
             int vertexCount = reader.ReadUInt();
             #ifdef DEBUG_OUTPUT
             std::cout << "      Vertex count: " << vertexCount << std::endl;
             #endif
             
-            // Create mesh object and push onto array.
-            Mesh* mesh = new Mesh(vertexCount, 8 * sizeof(float), MeshUsage::Dynamic);
-            mMeshes.push_back(mesh);
-            
-            // Save local offset and rotation of mesh.
-            mesh->SetLocalTransformMatrix(localTransformMatrix);
-            
+			// Create submesh object and add it to the mesh.
+			Submesh* submesh = new Submesh(vertexCount, 8 * sizeof(float), MeshUsage::Dynamic);
+			mesh->AddSubmesh(submesh);
+			
             // Save texture name.
-            mesh->SetTextureName(textureName);
+            submesh->SetTextureName(textureName);
             
             // Based on vertex count, we can allocate some arrays for data.
             float* vertexPositions = new float[vertexCount * 3];
@@ -185,7 +187,8 @@ void Model::ParseFromData(char *data, int dataLength)
             std::cout << "      Index count: " << indexCount << std::endl;
             #endif
             
-            // 4 bytes: Number of LODK blocks in this mesh group. Not uncommon to be 0.
+            // 4 bytes: Number of LODK blocks in this submesh. Not uncommon to be 0.
+			// My guess: this is for level-of-detail variants for the submesh?
             unsigned int lodkCount = reader.ReadUInt();
             //std::cout << "      LODK count: " << lodkCount << std::endl;
             
@@ -216,7 +219,7 @@ void Model::ParseFromData(char *data, int dataLength)
             #ifdef DEBUG_OUTPUT
             //std::cout << std::endl;
             #endif
-            mesh->SetPositions(vertexPositions);
+            submesh->SetPositions(vertexPositions);
             
             // Then we have vertex normals.
             for(int k = 0; k < vertexCount; k++)
@@ -226,7 +229,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexNormals[k * 3 + 1] = normal.GetZ();
                 vertexNormals[k * 3 + 2] = normal.GetY();
             }
-            mesh->SetNormals(vertexNormals);
+            submesh->SetNormals(vertexNormals);
             
             // Vertex UV coordinates.
             for(int k = 0; k < vertexCount; k++)
@@ -235,7 +238,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexUVs[k * 2] = uv.GetX();
                 vertexUVs[k * 2 + 1] = uv.GetY();
             }
-            mesh->SetUV1(vertexUVs);
+            submesh->SetUV1(vertexUVs);
             
             // Next comes vertex indexes for drawing from an IBO.
             // Common sequence would be (2, 1, 0) or (5, 4, 3), referring to vertex indexes above.
@@ -250,7 +253,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
                 reader.ReadUShort(); // WHAT IS IT!?
             }
-            mesh->SetIndexes(vertexIndexes, indexCount * 3);
+            submesh->SetIndexes(vertexIndexes, indexCount * 3);
             
             // Next comes LODK blocks for this mesh group.
             // Not totally sure what these are for, but maybe LOD groups?
@@ -290,7 +293,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 }
             }
         }
-        meshGroupCount += numMeshGroups;
+        //meshGroupCount += numSubMeshes;
     }
     
     // After all meshes and mesh groups, there is some additional data.

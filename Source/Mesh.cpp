@@ -5,92 +5,42 @@
 //
 #include "Mesh.h"
 
-#include "GLVertexArray.h"
-
-Mesh::Mesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage) : mVertexCount(vertexCount)
+Mesh::Mesh()
 {
-    mVertexArray = new GLVertexArray(vertexCount, vertexSize, usage);
+	
+}
+
+Mesh::Mesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage)
+{
+	// Since a mesh should REALLY REALLY have at least one submesh, this constructor
+	// allows us to create a submesh immediately upon construction.
+	mSubmeshes.push_back(new Submesh(vertexCount, vertexSize, usage));
 }
 
 Mesh::~Mesh()
 {
-    // Delete vertex attribute data.
-    delete[] mPositions;
-    delete[] mColors;
-    delete[] mNormals;
-    delete[] mUV1;
-    
-    // Delete indexes.
-    delete[] mIndexes;
-    
-    delete mVertexArray;
+	for(auto& submesh : mSubmeshes)
+	{
+		delete submesh;
+	}
 }
 
 void Mesh::Render()
 {
-    switch(mRenderMode)
-    {
-        default:
-        case RenderMode::Triangles:
-            mVertexArray->DrawTriangles();
-            break;
-        case RenderMode::TriangleFan:
-            mVertexArray->DrawTriangleFans();
-            break;
-        case RenderMode::Lines:
-            mVertexArray->DrawLines();
-            break;
-    }
+	for(auto& submesh : mSubmeshes)
+	{
+		submesh->Render();
+	}
 }
 
-void Mesh::Render(unsigned int offset, unsigned int count)
+void Mesh::Render(unsigned int submeshIndex)
 {
-    switch(mRenderMode)
-    {
-        default:
-        case RenderMode::Triangles:
-            mVertexArray->DrawTriangles(offset, count);
-            break;
-        case RenderMode::TriangleFan:
-            mVertexArray->DrawTriangleFans(offset, count);
-            break;
-        case RenderMode::Lines:
-            mVertexArray->DrawLines(offset, count);
-            break;
-    }
+	assert(submeshIndex < mSubmeshes.size());
+	mSubmeshes[submeshIndex]->Render();
 }
 
-void Mesh::SetPositions(float* positions)
+void Mesh::Render(unsigned int submeshIndex, unsigned int offset, unsigned int count)
 {
-    if(mPositions == nullptr)
-    {
-        mPositions = new float[mVertexCount * 3];
-    }
-    memcpy(mPositions, positions, mVertexCount * 3 * sizeof(float));
-    
-    mVertexArray->SetPositions(mPositions);
-}
-
-void Mesh::SetColors(float* colors)
-{
-    mColors = colors;
-    mVertexArray->SetColors(colors);
-}
-
-void Mesh::SetNormals(float* normals)
-{
-    mNormals = normals;
-    mVertexArray->SetNormals(normals);
-}
-
-void Mesh::SetUV1(float* uvs)
-{
-    mUV1 = uvs;
-    mVertexArray->SetUV1(uvs);
-}
-
-void Mesh::SetIndexes(unsigned short* indexes, int count)
-{
-    mIndexes = indexes;
-    mVertexArray->SetIndexes(indexes, count);
+	assert(submeshIndex < mSubmeshes.size());
+	mSubmeshes[submeshIndex]->Render(offset, count);
 }

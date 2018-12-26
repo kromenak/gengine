@@ -36,6 +36,7 @@ public:
     GKActor(bool forCharacter);
 	
 	void PlayAnimation(VertexAnimation* animation);
+	void PlayAnimation(VertexAnimation* animation, int framesPerSecond);
 	
 	void PlayAnimation(Animation* animation);
 	void PlayInitAnimation(Animation* animation);

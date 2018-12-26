@@ -46,6 +46,11 @@ void GKActor::PlayAnimation(VertexAnimation* animation)
 	mAnimationPlayer->Play(animation);
 }
 
+void GKActor::PlayAnimation(VertexAnimation* animation, int framesPerSecond)
+{
+	mAnimationPlayer->Play(animation, framesPerSecond);
+}
+
 void GKActor::PlayAnimation(Animation* animation)
 {
 	//mAnimationPlayer->Play(animation);

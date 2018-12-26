@@ -21,36 +21,59 @@ VertexAnimation::VertexAnimation(std::string name, char* data, int dataLength) :
     ParseFromData(data, dataLength);
 }
 
-VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int framesPerSecond, int meshIndex)
+VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex)
 {
 	// It's possible that this animation has no vertex poses (only transform data). Or only has poses for particular mesh indexes.
 	// In this case, just return an object with frame number -1 and let them figure it out!
 	//TODO: Frame number to -1 is pretty esoteric - maybe something clearer?
+	/*
 	if(meshIndex >= mVertexPoses.size())
 	{
 		VertexAnimationVertexPose pose;
 		pose.mFrameNumber = -1;
 		return pose;
 	}
+	*/
 	
     float secondsPerFrame = 1.0f / framesPerSecond;
     float localTime = Math::Mod(time, GetDuration(framesPerSecond));
     
     float currentPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
-    
-    VertexAnimationVertexPose* firstVertexPose = mVertexPoses[meshIndex];
+	
+	// Find the first vertex pose defined for this mesh/submesh.
+	VertexAnimationVertexPose* firstVertexPose = nullptr;
+	auto it = mVertexPoses.find(meshIndex);
+	if(it != mVertexPoses.end())
+	{
+		auto it2 = it->second.find(submeshIndex);
+		if(it2 != it->second.end())
+		{
+			firstVertexPose = it2->second;
+		}
+	}
+	
+	// If no vertex pose was found, we'll have to return an error state.
+	if(firstVertexPose == nullptr)
+	{
+		VertexAnimationVertexPose pose;
+		pose.mFrameNumber = -1;
+		return pose;
+	}
+	
+	// Determine the poses right before the desired local time on the animation.
     VertexAnimationVertexPose* currentVertexPose = firstVertexPose;
     while(currentVertexPose->mNext != nullptr)
     {
         currentPoseTime = secondsPerFrame * currentVertexPose->mFrameNumber;
         nextPoseTime = secondsPerFrame * currentVertexPose->mNext->mFrameNumber;
         if(nextPoseTime > localTime) { break; }
-        
-        // Move on to next one.
+		
         currentVertexPose = currentVertexPose->mNext;
     }
-    
+	
+	// Get the next pose, after the desired local time.
+	// If it doesn't exist, loop back to the first pose.
     VertexAnimationVertexPose* nextVertexPose = currentVertexPose->mNext;
     if(nextVertexPose == nullptr)
     {
@@ -58,18 +81,16 @@ VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int fram
         nextPoseTime = GetDuration(framesPerSecond);
     }
     
-    // Determine our "t" value between the prev and next pose.
+    // Determine our "t" value between the current and next pose.
     float t = 1.0f;
     if(currentPoseTime != nextPoseTime)
     {
         t = (localTime - currentPoseTime) / (nextPoseTime - currentPoseTime);
     }
     assert(t >= 0.0f && t <= 1.0f);
-    
-    // Create our pose struct to return.
-    VertexAnimationVertexPose pose;
-    
-    // Now calculate interpolated positions between those poses for this time t.
+	
+    // Now calculate interpolated positions between current and next poses for this time t.
+	VertexAnimationVertexPose pose;
     for(int i = 0; i < currentVertexPose->mVertexPositions.size(); i++)
     {
         pose.mVertexPositions.push_back(Vector3::Lerp(currentVertexPose->mVertexPositions[i], nextVertexPose->mVertexPositions[i], t));
@@ -82,12 +103,14 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
 	// It's possible that this animation has no transform poses (only vertex data). Or only has poses for particular mesh indexes.
 	// In this case, just return an object with frame number -1 and let them figure it out!
 	//TODO: Frame number to -1 is pretty esoteric - maybe something clearer?
+	/*
 	if(meshIndex >= mTransformPoses.size())
 	{
 		VertexAnimationTransformPose pose;
 		pose.mFrameNumber = -1;
 		return pose;
 	}
+	*/
 	
     float secondsPerFrame = 1.0f / framesPerSecond;
     float localTime = Math::Mod(time, GetDuration(framesPerSecond));
@@ -95,14 +118,7 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
     float currentPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
 	
-	//TODO: Uh...why was this needed again?
-	int realMeshIndex = meshIndex;
-	if(mVertexPoses.size() > meshIndex)
-	{
-		realMeshIndex = mVertexPoses[meshIndex]->mMeshIndex;
-	}
-    
-    VertexAnimationTransformPose* firstTransformPose = mTransformPoses[realMeshIndex];
+    VertexAnimationTransformPose* firstTransformPose = mTransformPoses[meshIndex];
     VertexAnimationTransformPose* currentTransformPose = firstTransformPose;
     while(currentTransformPose->mNext != nullptr)
     {
@@ -157,7 +173,8 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     mFrameCount = reader.ReadUInt();
     
     // 4 bytes: The number of mesh entries that exist for each keyframe in this animation.
-    // This should 100% correlate to the mesh count for the model file itself. If not, the animation probably won't play correctly.
+    // This should 100% correlate to the mesh count for the model file itself.
+	// If not, the animation probably won't play correctly.
     uint meshCount = reader.ReadUInt();
     
     // File contents size after header info. Not important to us.
@@ -181,10 +198,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     }
     
     // Read in data for each keyframe.
-    std::unordered_map<int, VertexAnimationVertexPose*> firstVertexPoseLookup;
     std::unordered_map<int, VertexAnimationVertexPose*> lastVertexPoseLookup;
-    
-    std::unordered_map<int, VertexAnimationTransformPose*> firstTransformPoseLookup;
     std::unordered_map<int, VertexAnimationTransformPose*> lastTransformPoseLookup;
     for(int i = 0; i < mFrameCount; i++)
     {
@@ -206,8 +220,8 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
             
             // 2 bytes: Index of mesh in MOD file.
             // It should always be ordered (0, 1, 2, 3), so we check that here as well.
-            unsigned short index = reader.ReadUShort();
-            assert(index == j);
+            unsigned short meshIndex = reader.ReadUShort();
+            assert(meshIndex == j);
             
             // 4 bytes: Number of bytes of data for this mesh in this keyframe.
             // All bytes from here contain vertex or transform data for this mesh in this keyframe.
@@ -234,15 +248,13 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Submesh Index: " << submeshIndex << std::endl;
                     #endif
-                    int hash = index * 1000 + submeshIndex;
+                    int hash = meshIndex * 1000 + submeshIndex;
                    
                     VertexAnimationVertexPose* vertexPose = new VertexAnimationVertexPose();
-                    vertexPose->mMeshIndex = index;
                     vertexPose->mFrameNumber = i;
                     if(i == 0)
                     {
-                        mVertexPoses.push_back(vertexPose);
-                        firstVertexPoseLookup[hash] = vertexPose;
+                        mVertexPoses[meshIndex][submeshIndex] = vertexPose;
                         lastVertexPoseLookup[hash] = vertexPose;
                     }
                     else
@@ -302,16 +314,14 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     #endif
                     
                     // Find position data from last recorded frame.
-                    int hash = index * 1000 + submeshIndex;
+                    int hash = meshIndex * 1000 + submeshIndex;
                     std::vector<Vector3>& prevPositions = lastVertexPoseLookup[hash]->mVertexPositions;
                     
                     VertexAnimationVertexPose* vertexPose = new VertexAnimationVertexPose();
-                    vertexPose->mMeshIndex = index;
                     vertexPose->mFrameNumber = i;
                     if(i == 0)
                     {
-                        mVertexPoses.push_back(vertexPose);
-                        firstVertexPoseLookup[hash] = vertexPose;
+						mVertexPoses[meshIndex][submeshIndex] = vertexPose;
                         lastVertexPoseLookup[hash] = vertexPose;
                     }
                     else
@@ -323,7 +333,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // 2 bytes: Vertex count.
                     unsigned short vertexCount = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
-                    //std::cout << "        Vertex Count: " << vertexCount << std::endl;
+                    std::cout << "        Vertex Count: " << vertexCount << std::endl;
                     #endif
                     
                     // Next ((VertexCount/4) + 1) bytes: Compression info for vertex data.
@@ -352,7 +362,11 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // Now that we have deciphered how each vertex is compressed, we can read in each vertex.
                     for(int k = 0; k < vertexCount; k++)
                     {
-                        // 0 means no vertex data, so don't do anything!
+						#ifdef DEBUG_OUTPUT
+						std::cout << "		" << (int)vertexDataFormat[k] << std::endl;
+						#endif
+						
+						// 0 means no vertex data, so don't do anything!
                         if(vertexDataFormat[k] == 0)
                         {
                             vertexPose->mVertexPositions.push_back(prevPositions[k]);
@@ -380,7 +394,6 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
 							#endif
                             float y = DecompressFloatFromUShort(reader.ReadUShort());
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
-                            //vertexPose->mVertexPositions.push_back(Vector3());
                         }
                         // 3 means (X, Y, Z) are not compressed - just floats.
                         else if(vertexDataFormat[k] == 3)
@@ -469,13 +482,12 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     if(i == 0)
                     {
                         mTransformPoses.push_back(transformPose);
-                        firstTransformPoseLookup[index] = transformPose;
-                        lastTransformPoseLookup[index] = transformPose;
+                        lastTransformPoseLookup[meshIndex] = transformPose;
                     }
                     else
                     {
-                        lastTransformPoseLookup[index]->mNext = transformPose;
-                        lastTransformPoseLookup[index] = transformPose;
+                        lastTransformPoseLookup[meshIndex]->mNext = transformPose;
+                        lastTransformPoseLookup[meshIndex] = transformPose;
                     }
                 }
                 // Identifier 3 is min/max data.

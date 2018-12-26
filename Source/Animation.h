@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
+class Animation;
 class VertexAnimation;
 
 struct AnimNode
@@ -21,14 +22,14 @@ struct AnimNode
 	int frameNumber = 0;
 	
 	virtual ~AnimNode() { }
-	virtual void Play() = 0;
+	virtual void Play(Animation* anim) = 0;
 };
 
 struct VertexAnimNode : public AnimNode
 {
 	VertexAnimation* vertexAnimation = nullptr;
 	
-	void Play() override;
+	void Play(Animation* anim) override;
 };
 
 struct SceneTextureAnimNode : public AnimNode
@@ -37,7 +38,7 @@ struct SceneTextureAnimNode : public AnimNode
 	std::string sceneModelName;
 	std::string textureName;
 	
-	void Play() override;
+	void Play(Animation* anim) override;
 };
 
 class Animation : public Asset

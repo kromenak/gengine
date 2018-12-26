@@ -286,7 +286,7 @@ void BSP::RenderPolygon(BSPPolygon* polygon)
     }
     
     // Draw the polygon.
-    mMesh->Render(polygon->vertexIndex, polygon->vertexCount);
+    mMesh->Render(0, polygon->vertexIndex, polygon->vertexCount);
 }
 
 BSP::PointLocation BSP::GetPointLocation(Vector3 position, Plane* plane)
@@ -481,14 +481,17 @@ void BSP::ParseFromData(char *data, int dataLength)
     }
     
     // Create the vertex array from the verts and vert indexes.
-    mMesh = new Mesh((unsigned int)mVertices.size(), 5 * sizeof(float), MeshUsage::Static);
-    mMesh->SetRenderMode(RenderMode::TriangleFan);
-    mMesh->SetPositions(vertsPtr);
-    mMesh->SetIndexes(vertIndexesPtr, (unsigned int)mVertexIndices.size());
+	mMesh = new Mesh();
+	Submesh* submesh = new Submesh((unsigned int)mVertices.size(), 5 * sizeof(float), MeshUsage::Static);
+	mMesh->AddSubmesh(submesh);
+	
+    submesh->SetRenderMode(RenderMode::TriangleFan);
+    submesh->SetPositions(vertsPtr);
+    submesh->SetIndexes(vertIndexesPtr, (unsigned int)mVertexIndices.size());
     
     // Also pass along UV data.
     float* uvsPtr = (float*)&mUVs[0];
-    mMesh->SetUV1(uvsPtr);
+    submesh->SetUV1(uvsPtr);
     
     /*
     //CK: Don't currently need this bounding sphere stuff.

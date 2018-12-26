@@ -24,7 +24,6 @@ public:
     MeshRenderer(Actor* actor);
     ~MeshRenderer();
     
-    //void Render();
     std::vector<RenderPacket> GetRenderPackets();
     
     void SetModel(Model* model);
@@ -48,5 +47,6 @@ private:
     
     // A material describes how to render a mesh.
     // Each mesh *must have* a material!
+	// If a mesh has multiple submeshes, each submesh *must have* a material!
     std::vector<Material> mMaterials;
 };

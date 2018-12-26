@@ -6,18 +6,19 @@
 // Contains all the information we need to render an object.
 //
 #pragma once
-#include "Material.h"
 #include "Matrix4.h"
 
 class Mesh;
+class Material;
 
 struct RenderPacket
 {
     // The mesh provides vertex data for rendering.
-    Mesh* mesh;
+	Mesh* mesh = nullptr;
     
     // The material provides everything else for rendering.
-    Material material;
+	Material* materials = nullptr;
+	int materialsCount = 0;
     
     // Data required for mesh instancing.
     Matrix4 worldTransform;

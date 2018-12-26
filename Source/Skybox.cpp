@@ -74,8 +74,10 @@ void Skybox::Render()
     // Generate submesh on the fly, if not yet generated.
     if(mSkyboxMesh == nullptr)
     {
-        mSkyboxMesh = new Mesh(36, 3 * sizeof(float), MeshUsage::Static);
-        mSkyboxMesh->SetPositions(points);
+		mSkyboxMesh = new Mesh();
+		Submesh* skyboxSubmesh = new Submesh(36, 3 * sizeof(float), MeshUsage::Static);
+		mSkyboxMesh->AddSubmesh(skyboxSubmesh);
+        skyboxSubmesh->SetPositions(points);
     }
     
     if(mCubemapTextureId == GL_NONE)

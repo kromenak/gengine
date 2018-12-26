@@ -18,7 +18,6 @@ class Material
 public:
     static Shader* sDefaultShader;
 	
-	
     Material();
     
     bool operator==(const Material& other) const;

@@ -19,6 +19,19 @@ VertexAnimationPlayer::VertexAnimationPlayer(Actor* owner) : Component(owner)
 	mMeshRenderer = owner->GetComponent<MeshRenderer>();
 }
 
+void VertexAnimationPlayer::Play(VertexAnimation* animation)
+{
+	mVertexAnimation = animation;
+	mVertexAnimationTimer = 0.0f;
+}
+
+void VertexAnimationPlayer::Play(VertexAnimation* animation, int framesPerSecond)
+{
+	mFramesPerSecond = framesPerSecond;
+	mVertexAnimation = animation;
+	mVertexAnimationTimer = 0.0f;
+}
+
 void VertexAnimationPlayer::UpdateInternal(float deltaTime)
 {
 	// Need a vertex animation to update.
@@ -32,10 +45,14 @@ void VertexAnimationPlayer::UpdateInternal(float deltaTime)
 	std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
 	for(int i = 0; i < meshes.size(); i++)
 	{
-		VertexAnimationVertexPose sample = mVertexAnimation->SampleVertexPose(mVertexAnimationTimer, mFramesPerSecond, i);
-		if(sample.mFrameNumber >= 0)
+		const std::vector<Submesh*>& submeshes = meshes[i]->GetSubmeshes();
+		for(int j = 0; j < submeshes.size(); j++)
 		{
-			meshes[i]->SetPositions((float*)sample.mVertexPositions.data());
+			VertexAnimationVertexPose sample = mVertexAnimation->SampleVertexPose(mVertexAnimationTimer, mFramesPerSecond, i, j);
+			if(sample.mFrameNumber >= 0)
+			{
+				submeshes[j]->CopyPositions((float*)sample.mVertexPositions.data());
+			}
 		}
 		
 		VertexAnimationTransformPose transformSample = mVertexAnimation->SampleTransformPose(mVertexAnimationTimer, mFramesPerSecond, i);

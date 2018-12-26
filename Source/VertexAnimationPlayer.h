@@ -17,7 +17,8 @@ class VertexAnimationPlayer : public Component
 public:
 	VertexAnimationPlayer(Actor* owner);
 	
-	void Play(VertexAnimation* animation) { mVertexAnimation = animation; mVertexAnimationTimer = 0.0f; }
+	void Play(VertexAnimation* animation);
+	void Play(VertexAnimation* animation, int framesPerSecond);
 	
 protected:
 	void UpdateInternal(float deltaTime) override;

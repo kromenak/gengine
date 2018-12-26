@@ -171,6 +171,8 @@
 		4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
 		4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
 		4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
+		4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACE1C821D2B2B2000CBE7B /* Submesh.cpp */; };
+		4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACE1C821D2B2B2000CBE7B /* Submesh.cpp */; };
 		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
 		4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB34B4214F72BB0069B2E9 /* Font.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
@@ -376,6 +378,8 @@
 		4BACA50920F7132E008C7FE9 /* GAS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GAS.cpp; path = ../Source/GAS.cpp; sourceTree = "<group>"; };
 		4BACA50B20F72663008C7FE9 /* StringTokenizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringTokenizer.h; path = ../Source/StringTokenizer.h; sourceTree = "<group>"; };
 		4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StringTokenizer.cpp; path = ../Source/StringTokenizer.cpp; sourceTree = "<group>"; };
+		4BACE1C721D2B2B2000CBE7B /* Submesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Submesh.h; path = ../Source/Submesh.h; sourceTree = "<group>"; };
+		4BACE1C821D2B2B2000CBE7B /* Submesh.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Submesh.cpp; path = ../Source/Submesh.cpp; sourceTree = "<group>"; };
 		4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepScriptBuilder.h; path = ../Source/Sheep/SheepScriptBuilder.h; sourceTree = "<group>"; };
 		4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScriptBuilder.cpp; path = ../Source/Sheep/SheepScriptBuilder.cpp; sourceTree = "<group>"; };
 		4BB82829205665680054625A /* SDL2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SDL2.framework; path = ../Libraries/SDL/SDL2.framework; sourceTree = "<group>"; };
@@ -618,6 +622,8 @@
 				4BF32B8B1F67C434000639FB /* Shader.h */,
 				4BD673CB20B1119E00795582 /* Skybox.cpp */,
 				4BD673CA20B1119E00795582 /* Skybox.h */,
+				4BACE1C821D2B2B2000CBE7B /* Submesh.cpp */,
+				4BACE1C721D2B2B2000CBE7B /* Submesh.h */,
 				4B4621EA1FF741D800536BA6 /* Texture.cpp */,
 				4B4621E91FF741D800536BA6 /* Texture.h */,
 			);
@@ -1046,6 +1052,7 @@
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B8E830A20F046750009A86B /* Material.cpp in Sources */,
 				4B046E94218FB10F00E56341 /* Debug.cpp in Sources */,
+				4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
 				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
@@ -1136,6 +1143,7 @@
 				4B22F5102174075B0065B152 /* Services.cpp in Sources */,
 				4B046E95218FB10F00E56341 /* Debug.cpp in Sources */,
 				4B22F5272174078B0065B152 /* Animation.cpp in Sources */,
+				4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
 				4B22F50F2174075B0065B152 /* SDLLog.cpp in Sources */,
 				4B22F52D2174078B0065B152 /* Audio.cpp in Sources */,
