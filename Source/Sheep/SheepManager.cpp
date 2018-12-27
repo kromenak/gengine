@@ -35,10 +35,11 @@ void SheepManager::Execute(SheepScript* script)
 {
 	mSheepScriptStack.push(script);
 	
-    // VM currently fails when executing multiple scripts (not re-entrant?)
-    // Something to look into/fix in the future.
     SheepVM vm;
     vm.Execute(script);
+	
+	// VM currently fails when executing multiple scripts (not re-entrant?)
+	// Something to look into/fix in the future.
     //mVirtualMachine.Execute(script);
 	
 	mSheepScriptStack.pop();
@@ -47,8 +48,11 @@ void SheepManager::Execute(SheepScript* script)
 void SheepManager::Execute(SheepScript* script, std::string functionName)
 {
 	mSheepScriptStack.push(script);
+	
 	SheepVM vm;
 	vm.Execute(script, functionName);
+	//mVirtualMachine.Execute(script, functionName);
+	
 	mSheepScriptStack.pop();
 }
 
@@ -69,7 +73,7 @@ bool SheepManager::Evaluate(SheepScript* script)
 	
     SheepVM vm;
 	bool result = vm.Evaluate(script);
-	//return mVirtualMachine.Evaluate(script);
+	//bool result = mVirtualMachine.Evaluate(script);
 	
 	mSheepScriptStack.pop();
 	return result;

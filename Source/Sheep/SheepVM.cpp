@@ -14,6 +14,8 @@
 
 //#define SHEEP_DEBUG
 
+SheepVM* SheepVM::sCurrent = nullptr;
+
 void SheepVM::Execute(SheepScript* script)
 {
     // We need a valid script.
@@ -64,9 +66,20 @@ bool SheepVM::Evaluate(SheepScript* script)
     return false;
 }
 
-void SheepVM::Execute(SheepScript *script, int bytecodeOffset)
+std::function<void()> SheepVM::GetWaitCallback()
+{
+	if(mInWaitBlock)
+	{
+		mWaitCount++;
+		return std::bind(&SheepVM::OnWaitCallback, this);
+	}
+	return nullptr;
+}
+
+void SheepVM::Execute(SheepScript* script, int bytecodeOffset)
 {
     if(script == nullptr) { return; }
+	mSheepScript = script;
     
     // Create copy of variables for assignment during execution.
     mVariables = script->GetVariables();
@@ -227,7 +240,8 @@ void SheepVM::Execute(SheepScript *script, int bytecodeOffset)
 				#ifdef SHEEP_DEBUG
 				std::cout << "BeginWait" << std::endl;
 				#endif
-				//TODO
+				mInWaitBlock = true;
+				mWaitCount = 0;
                 break;
             }
             case SheepInstruction::EndWait:
@@ -235,7 +249,11 @@ void SheepVM::Execute(SheepScript *script, int bytecodeOffset)
 				#ifdef SHEEP_DEBUG
 				std::cout << "EndWait" << std::endl;
 				#endif
-				//TODO
+				if(mInWaitBlock && mWaitCount > 0)
+				{
+					mContinueAtOffset = reader.GetPosition();
+					return;
+				}
                 break;
             }
             case SheepInstruction::ReturnV:
@@ -868,4 +886,17 @@ Value SheepVM::CallSysFunc(SysImport* sysFunc)
             std::cout << "SheepVM: Unimplemented arg count: " << argCount << std::endl;
             return Value(0);
     }
+}
+
+void SheepVM::OnWaitCallback()
+{
+	assert(mInWaitBlock);
+	assert(mWaitCount > 0);
+	
+	mWaitCount--;
+	if(mWaitCount == 0)
+	{
+		std::cout << "Done waiting! Resuming Sheep execution at position " << mContinueAtOffset << std::endl;
+		Execute(mSheepScript, mContinueAtOffset);
+	}
 }

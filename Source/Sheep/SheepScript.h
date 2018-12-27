@@ -18,9 +18,21 @@ class SheepScriptBuilder;
 
 struct SysImport
 {
+	// Name of the function.
     std::string name;
+	
+	// Return type (0 = void, 1 = int, 2 = float, 3 = string).
     char returnType;
+	
+	// Argument count (size of vector) and types (same as return value).
     std::vector<char> argumentTypes;
+	
+	// If true, this function can be "waited" upon.
+	// If false, it executes and returns immediately.
+	bool waitable = false;
+	
+	// If true, this function can only work in dev builds.
+	bool devOnly = false;
 };
 
 class SheepScript : public Asset

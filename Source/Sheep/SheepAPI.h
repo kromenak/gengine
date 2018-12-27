@@ -15,6 +15,9 @@
 #include "SheepScript.h"
 #include "Value.h"
 
+extern std::vector<SysImport> sysFuncs;
+void AddSysFuncDecl(const std::string& name, char retType, std::initializer_list<char> argTypes, bool waitable, bool dev);
+
 // Functions for calling functions of various argument lengths.
 Value CallSysFunc(const std::string& name);
 Value CallSysFunc(const std::string& name, const Value& x1);
@@ -27,10 +30,6 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
 				  const Value& x4, const Value& x5, const Value& x6);
 
-extern std::vector<SysImport> sysFuncs;
-
-void AddSysImport(const std::string& name, char retType, std::initializer_list<char> argTypes);
-
 #define void_TYPE 0
 #define int_TYPE 1
 #define float_TYPE 2
@@ -42,37 +41,37 @@ void AddSysImport(const std::string& name, char retType, std::initializer_list<c
 
 // Also registers an entry in the function map with a pointer to the "generic function".
 // Flow is: Look Up in Map -> Calls Generic Function -> Calls Actual Function
-#define RegFunc0(name, ret)                         \
-    Value name(const Value& x1) {                   \
-        return name();                              \
-    }                                               \
-    struct name##_ {                                \
-        name##_() {                                 \
-            map0[#name]=&name;                      \
-            AddSysImport(#name, ret##_TYPE, { }); \
-        }                                           \
+#define RegFunc0(name, ret, waitable, dev)          					\
+    Value name(const Value& x1) {                   					\
+        return name();                              					\
+    }                                               					\
+    struct name##_ {                                					\
+        name##_() {                                 					\
+            map0[#name]=&name;                      					\
+            AddSysFuncDecl(#name, ret##_TYPE, { }, waitable, dev); 		\
+        }                                           					\
     } name##_instance
 
-#define RegFunc1(name, ret, t1)                     \
-    Value name(const Value& x1) {                   \
-        return name(x1.to<t1>());                   \
-    }                                               \
-    struct name##_ {                                \
-        name##_() {                                 \
-            map1[#name]=&name;                      \
-            AddSysImport(#name, ret##_TYPE, { t1##_TYPE }); \
-        }                                           \
+#define RegFunc1(name, ret, t1, waitable, dev)                     		\
+    Value name(const Value& x1) {                   					\
+        return name(x1.to<t1>());                   					\
+    }                                               					\
+    struct name##_ {                                					\
+        name##_() {                                 					\
+            map1[#name]=&name;                      					\
+            AddSysFuncDecl(#name, ret##_TYPE, { t1##_TYPE }, waitable, dev);			\
+        }                                           					\
     } name##_instance
 
-#define RegFunc2(name, ret, t1, t2)                              \
-    Value name(const Value& x1, const Value& x2) {          \
-        return name(x1.to<t1>(), x2.to<t2>());              \
-    }                                                       \
-    struct name##_ {                                        \
-        name##_() {                                         \
-            map2[#name]=&name;                              \
-            AddSysImport(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE }); \
-        }                                                   \
+#define RegFunc2(name, ret, t1, t2, waitable, dev)                      \
+    Value name(const Value& x1, const Value& x2) {          			\
+        return name(x1.to<t1>(), x2.to<t2>());              			\
+    }                                                       			\
+    struct name##_ {                                        			\
+        name##_() {                                         			\
+            map2[#name]=&name;                              			\
+            AddSysFuncDecl(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE }, waitable, dev); \
+        }                                                   			\
     } name##_instance
 
 #define shpvoid uint8_t
@@ -608,16 +607,3 @@ shpvoid PrintIntHexX(std::string category, int value);
 
 shpvoid PrintString(std::string message);
 shpvoid PrintStringX(std::string category, std::string message);
-
-
-
-
-
-
-
-
-
-
-
-
-

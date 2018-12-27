@@ -6,6 +6,7 @@
 // A virtual machine for executing Sheep bytecode.
 //
 #pragma once
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -99,24 +100,50 @@ class SysImport;
 class SheepVM
 {
 public:
+	static SheepVM* GetCurrent() { return sCurrent; }
+	
     SheepVM() { }
     
     void Execute(SheepScript* script);
     void Execute(SheepScript* script, std::string functionName);
     
     bool Evaluate(SheepScript* script);
-    
+	
+	std::function<void()> GetWaitCallback();
+	
 private:
+	static SheepVM* sCurrent;
+	
+	// Max stack size supported.
+	// May need to increase/decrease to an optimal value.
     static const int kMaxStackSize = 64;
-    
+	
+	// The currently executing sheep script.
+	// Stored to enable pause/resume of execution.
+	SheepScript* mSheepScript = nullptr;
+	
+	// Instanced variables from the sheep script.
+	std::vector<SheepValue> mVariables;
+	
+	// Current stack and stack size.
     int mStackSize = 0;
     SheepValue mStack[kMaxStackSize];
-    
-    std::vector<SheepValue> mVariables;
+	
+	// If true, we are within a "wait" statement or block.
+	// If a sheep method is "wait" compatible, the VM will pause until it receives a callback.
+	bool mInWaitBlock = false;
+	int mWaitCount = 0;
+	int mContinueAtOffset = 0;
     
     void Execute(SheepScript* script, int bytecodeOffset);
     
     Value CallSysFunc(SysImport* sysFunc);
-    
+	
+	void OnWaitCallback();
+	
+	SheepValue& PopStack();
+	SheepValue& PushStack(int val);
+	SheepValue& PushStack(float val);
+	SheepValue& PushStack(std::string val);
     SheepValue& GetStack(int index) { return mStack[mStackSize - 1 - index]; }
 };
