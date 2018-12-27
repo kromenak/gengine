@@ -61,4 +61,11 @@ void VertexAnimationPlayer::UpdateInternal(float deltaTime)
 			meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
 		}
 	}
+	
+	// If at the end of the animation, clear animation.
+	// GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
+	if(mVertexAnimationTimer >= mVertexAnimation->GetDuration(mFramesPerSecond))
+	{
+		mVertexAnimation = nullptr;
+	}
 }
