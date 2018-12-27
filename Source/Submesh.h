@@ -4,6 +4,7 @@
 // Clark Kromenaker
 //
 // Actual 3D mesh data in a particular format that is fit to be rendered.
+// Vertex data - positions, colors, UVs, etc.
 //
 #pragma once
 #include <string>

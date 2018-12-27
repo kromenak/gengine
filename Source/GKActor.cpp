@@ -38,27 +38,6 @@ GKActor::GKActor(bool forCharacter) : Actor()
     // GasPlayer is used to play gas script files.
     // Actor also needs a way to play animations, and the GasPlayer needs to know about it.
     mGasPlayer = AddComponent<GasPlayer>();
-    //mGasPlayer->SetAnimationPlayer(mAnimationPlayer);
-}
-
-void GKActor::PlayAnimation(VertexAnimation* animation)
-{
-	mAnimationPlayer->Play(animation);
-}
-
-void GKActor::PlayAnimation(VertexAnimation* animation, int framesPerSecond)
-{
-	mAnimationPlayer->Play(animation, framesPerSecond);
-}
-
-void GKActor::PlayAnimation(Animation* animation)
-{
-	//mAnimationPlayer->Play(animation);
-}
-
-void GKActor::PlayInitAnimation(Animation* animation)
-{
-	//mAnimationPlayer->Sample(animation, 0);
 }
 
 void GKActor::SetState(GKActor::State state)
@@ -81,6 +60,16 @@ void GKActor::SetState(GKActor::State state)
 		mGasPlayer->SetGas(mListenGas);
 		break;
     }
+}
+
+void GKActor::PlayAnimation(VertexAnimation* animation)
+{
+	mAnimationPlayer->Play(animation);
+}
+
+void GKActor::PlayAnimation(VertexAnimation* animation, int framesPerSecond)
+{
+	mAnimationPlayer->Play(animation, framesPerSecond);
 }
 
 void GKActor::UpdateInternal(float deltaTime)

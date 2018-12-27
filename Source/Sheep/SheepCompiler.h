@@ -3,7 +3,8 @@
 //
 // Clark Kromenaker
 //
-// Description goes here!
+// Capable of taking sheep in text format and compiling it to a SheepScript
+// asset, in binary form. Uses the Sheep scanner/parser generated via Flex/Bison respectively.
 //
 #pragma once
 #include <istream>

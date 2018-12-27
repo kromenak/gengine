@@ -189,7 +189,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 entry = entry->next;
                 std::string textureName = entry->value;
 				
-				std::cout << "MTEXTURE" << std::endl;
+				std::cout << "MTEXTURE " << modelName << ", " << meshIndex << ", " << groupIndex << ", " << textureName << std::endl;
                 //mFrames[frameNumber].push_back(node);
             }
         }
@@ -213,7 +213,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 entry = entry->next;
                 bool visible = entry->GetValueAsBool();
 				
-				std::cout << "MVISIBILITY" << std::endl;
+				std::cout << "MVISIBILITY " << modelName << ", " << visible << std::endl;
                 //mFrames[frameNumber].push_back(node);
             }
         }
@@ -280,7 +280,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 entry = entry->next;
                 int maxDist = entry->GetValueAsInt();
 				
-				std::cout << "SOUND" << std::endl;
+				std::cout << "SOUND " << soundName << std::endl;
                 //mFrames[frameNumber].push_back(node);
             }
         }

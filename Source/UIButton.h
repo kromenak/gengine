@@ -59,8 +59,11 @@ private:
 	// Material used for rendering.
 	Material mMaterial;
 	
+	// Callback to execute when the button is pressed.
 	std::function<void()> mPressCallback;
 	
+	// True if mouse pointer began over the button.
+	// This ensures you can only press the button if you started the press over the button.
 	bool mPointerBeganOver = false;
 	
 	Texture* GetDefaultTexture();

@@ -8,8 +8,6 @@
 //
 // Also contains some data shared by all Submeshes.
 //
-// Vertex data - positions, colors, UVs, etc.
-//
 #pragma once
 #include <GL/glew.h>
 #include <vector>

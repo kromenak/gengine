@@ -3,7 +3,8 @@
 //
 // Clark Kromenaker
 //
-// Description goes here!
+// When parsing Sheep tokens during compilation, this builder is used to
+// maintain state/scope and construct the final bytecode stream.
 //
 #pragma once
 #include <string>

@@ -35,11 +35,7 @@ public:
     
     GKActor(bool forCharacter);
 	
-	void PlayAnimation(VertexAnimation* animation);
-	void PlayAnimation(VertexAnimation* animation, int framesPerSecond);
 	
-	void PlayAnimation(Animation* animation);
-	void PlayInitAnimation(Animation* animation);
 	
 	void SetIdentifier(std::string identifier) { mIdentifier = identifier; }
 	
@@ -51,6 +47,9 @@ public:
     void SetIdleGas(GAS* gas) { mIdleGas = gas; }
     void SetTalkGas(GAS* gas) { mTalkGas = gas; }
     void SetListenGas(GAS* gas) { mListenGas = gas; }
+	
+	void PlayAnimation(VertexAnimation* animation);
+	void PlayAnimation(VertexAnimation* animation, int framesPerSecond);
 	
     MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
 	
