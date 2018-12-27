@@ -74,7 +74,14 @@ CharacterConfig& CharacterManager::GetCharacterConfig(std::string identifier)
 
 void CharacterManager::SetCharacterLocation(std::string name, std::string location)
 {
-	mCharacterLocations[name] = location;
+	if(location.empty())
+	{
+		SetCharacterOffstage(name);
+	}
+	else
+	{
+		mCharacterLocations[name] = location;
+	}
 }
 
 std::string CharacterManager::GetCharacterLocation(std::string name) const
@@ -84,7 +91,16 @@ std::string CharacterManager::GetCharacterLocation(std::string name) const
 	{
 		return it->second;
 	}
-	return std::string();
+	return "";
+}
+
+void CharacterManager::SetCharacterOffstage(std::string name)
+{
+	auto it = mCharacterLocations.find(name);
+	if(it != mCharacterLocations.end())
+	{
+		mCharacterLocations.erase(it);
+	}
 }
 
 bool CharacterManager::IsCharacterOffstage(std::string name) const

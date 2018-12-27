@@ -65,6 +65,8 @@ public:
 	
 	void SetCharacterLocation(std::string name, std::string location);
 	std::string GetCharacterLocation(std::string name) const;
+	
+	void SetCharacterOffstage(std::string name);
 	bool IsCharacterOffstage(std::string name) const;
 	
 private:
