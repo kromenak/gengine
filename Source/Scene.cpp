@@ -86,9 +86,6 @@ Scene::Scene(std::string name, std::string timeCode) :
         actor->SetTalkGas(actorDef->talkGas);
         actor->SetListenGas(actorDef->listenGas);
 		
-        // Always start in "idle" state.
-        actor->SetState(GKActor::State::Idle);
-		
 		//CharacterConfig& characterConfig = Services::Get<CharacterManager>()->GetCharacterConfig(actorDef->model->GetNameNoExtension());
 		//actor->PlayAnimation(characterConfig.walkStartTurnLeftAnim);
 		
@@ -222,7 +219,6 @@ void Scene::OnSceneEnter()
 		const NVCItem* nvcItem = nvc->GetAction("SCENE", "ENTER");
 		if(nvcItem != nullptr)
 		{
-			std::cout << "Executing scene enter action." << std::endl;
 			nvcItem->Execute();
 		}
 	}
@@ -381,6 +377,18 @@ GKActor* Scene::GetActorByModelName(std::string modelName)
 					return actor;
 				}
 			}
+		}
+	}
+	return nullptr;
+}
+
+GKActor* Scene::GetActorByNoun(std::string noun)
+{
+	for(auto& actor : mActors)
+	{
+		if(StringUtil::EqualsIgnoreCase(actor->GetNoun(), noun))
+		{
+			return actor;
 		}
 	}
 	return nullptr;

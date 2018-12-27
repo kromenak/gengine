@@ -47,6 +47,7 @@ public:
 	
 	GKActor* GetEgo() const { return mEgo; }
 	GKActor* GetActorByModelName(std::string modelName);
+	GKActor* GetActorByNoun(std::string noun);
 	
 	void ApplyTextureToSceneModel(std::string modelName, Texture* texture);
 	
