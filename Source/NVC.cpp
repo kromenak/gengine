@@ -13,11 +13,7 @@
 
 void NVCItem::Execute() const
 {
-	if(script != nullptr)
-	{
-		SheepVM vm;
-		vm.Execute(script);
-	}
+	Services::GetSheep()->Execute(script);
 }
 
 NVC::NVC(std::string name, char* data, int dataLength) : Asset(name)
