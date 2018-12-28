@@ -11,6 +11,7 @@
 #include "MeshRenderer.h"
 #include "Scene.h"
 #include "VertexAnimationPlayer.h"
+#include "Walker.h"
 
 GKActor::GKActor(bool forCharacter) : Actor()
 {
@@ -26,6 +27,8 @@ GKActor::GKActor(bool forCharacter) : Actor()
 		meshParentTransform->SetPosition(Vector3::Zero);
 		meshParentTransform->SetRotation(Quaternion(Vector3::UnitY, Math::kPi));
 		mMeshRenderer = meshParent->AddComponent<MeshRenderer>();
+		
+		AddComponent<Walker>();
 	}
 	else
 	{
@@ -74,8 +77,5 @@ void GKActor::PlayAnimation(VertexAnimation* animation, int framesPerSecond)
 
 void GKActor::UpdateInternal(float deltaTime)
 {
-	// Stay attached to the floor, usually.
-	Vector3 position = GetPosition();
-	position.SetY(GEngine::inst->GetScene()->GetFloorY(position));
-	SetPosition(position);
+	
 }

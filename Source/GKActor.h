@@ -35,9 +35,8 @@ public:
     
     GKActor(bool forCharacter);
 	
-	
-	
 	void SetIdentifier(std::string identifier) { mIdentifier = identifier; }
+	const std::string& GetIdentifier() const { return mIdentifier; }
 	
 	void SetNoun(std::string noun) { mNoun = noun; }
 	std::string GetNoun() const { return mNoun; }
