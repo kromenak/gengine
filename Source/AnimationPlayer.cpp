@@ -31,36 +31,17 @@ void AnimationPlayer::Play(Animation* animation, std::function<void ()> finishCa
 
 void AnimationPlayer::Sample(Animation* animation, int frame)
 {
-	/*
 	if(animation == nullptr) { return; }
 	
+	// Play any anim nodes for the desired frame.
 	std::vector<AnimNode*>* frameData = animation->GetFrame(frame);
-	if(frameData == nullptr) { return; }
-	
-	if(frameData->size() > 0)
+	if(frameData != nullptr)
 	{
-		AnimNode* node = (*frameData)[0];
-		if(node->mVertexAnimation == nullptr) { return; }
-		
-		// Iterate through each mesh and sample it in the vertex animation.
-		// We need to sample both vertex poses and transform poses to get the right result.
-		std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
-		for(int i = 0; i < meshes.size(); i++)
+		for(auto& node : *frameData)
 		{
-			VertexAnimationVertexPose sample = node->mVertexAnimation->SampleVertexPose(mVertexAnimationTimer, 15, i);
-			if(sample.mFrameNumber >= 0)
-			{
-				meshes[i]->SetPositions((float*)sample.mVertexPositions.data());
-			}
-			
-			VertexAnimationTransformPose transformSample = node->mVertexAnimation->SampleTransformPose(mVertexAnimationTimer, 15, i);
-			if(transformSample.mFrameNumber >= 0)
-			{
-				meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
-			}
+			node->Play(animation);
 		}
 	}
-	*/
 }
 
 void AnimationPlayer::UpdateInternal(float deltaTime)
@@ -105,7 +86,7 @@ void AnimationPlayer::UpdateInternal(float deltaTime)
 		// If the animation has ended, remove it from the active animation states.
 		if(animState.currentFrame >= animState.animation->GetFrameCount())
 		{
-			std::cout << "Animation " << animState.animation->GetName() << " has ended." << std::endl;
+			//std::cout << "Animation " << animState.animation->GetName() << " has ended." << std::endl;
 			it = mActiveAnimationStates.erase(it);
 			
 			// Do the finish callback!

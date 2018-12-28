@@ -443,6 +443,10 @@ void Animation::ParseFromData(char *data, int dataLength)
                     entry = entry->next;
                     int num3 = entry->GetValueAsInt();
                 }
+				else if(StringUtil::EqualsIgnoreCase(keyword, "MOOD"))
+				{
+					
+				}
                 else
                 {
                     std::cout << "Unexpected keyword: " << keyword << std::endl;
