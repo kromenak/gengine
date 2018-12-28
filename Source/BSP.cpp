@@ -9,6 +9,7 @@
 
 #include "BinaryReader.h"
 #include "Services.h"
+#include "StringUtil.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -143,7 +144,7 @@ void BSP::Hide(std::string objectName)
     int index = -1;
     for(int i = 0; i < mObjectNames.size(); i++)
     {
-        if(mObjectNames[i] == objectName)
+		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
         {
             index = i;
             break;
@@ -169,7 +170,7 @@ void BSP::SetTexture(std::string objectName, Texture* texture)
 	int index = -1;
 	for(int i = 0; i < mObjectNames.size(); i++)
 	{
-		if(mObjectNames[i] == objectName)
+		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
 		{
 			index = i;
 			break;
