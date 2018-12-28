@@ -59,10 +59,8 @@ void Model::ParseFromData(char *data, int dataLength)
     reader.ReadUInt();
     
     // 24 bytes: unknown - all files have had zeros here thus far.
-    reader.Skip(24);
-    
-    // 4 bytes: unknown - has thus far always been the number 8.
-    reader.ReadUInt();
+	// 4 bytes: unknown - has thus far always been the number 8.
+    reader.Skip(28);
     
     // Now, we iterate over each mesh in the file.
     //int meshGroupCount = 0;
@@ -87,10 +85,22 @@ void Model::ParseFromData(char *data, int dataLength)
         Vector3 iBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         Vector3 kBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
         Vector3 jBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        //cout << "   i: " << iBasis << endl;
-        //cout << "   j: " << jBasis << endl;
-        //cout << "   k: " << kBasis << endl;
-        //cout << "   x: " << Vector3::Dot(iBasis, Vector3::Cross(jBasis, kBasis)) << endl;
+		
+		// We can derive an import scale factor from the i/j/k basis by taking the length.
+		Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
+		std::cout << "    Scale: " << scale << std::endl;
+		
+		// If the imported model IS scaled, we need to normalize our bases before generating a rotation.
+		// Otherwise, the rotation will be off/incorrect.
+		iBasis.Normalize();
+		jBasis.Normalize();
+		kBasis.Normalize();
+		#ifdef DEBUG_OUTPUT
+		//std::cout << "   i: " << iBasis << std::endl;
+		//std::cout << "   j: " << jBasis << std::endl;
+		//std::cout << "   k: " << kBasis << std::endl;
+		//std::cout << "   x: " << Vector3::Dot(iBasis, Vector3::Cross(jBasis, kBasis)) << std::endl;
+		#endif
         
         // From the basis vectors, calculate a quaternion representing
         // a rotation from the standard basis to that orientation.
@@ -102,7 +112,9 @@ void Model::ParseFromData(char *data, int dataLength)
 		rotQuat.SetZ(rotQuat.GetZ());
 		rotQuat.SetW(rotQuat.GetW());
 		#endif
+		#ifdef DEBUG_OUTPUT
         //std::cout << "    Mesh Rotation: " << rotQuat << std::endl;
+		#endif
         
         // 12 bytes: an (X, Y, Z) *local* position for placing this mesh.
         // Each mesh within a model has a local position relative to the model origin.
@@ -117,8 +129,10 @@ void Model::ParseFromData(char *data, int dataLength)
         // Use mesh position and rotation values to create a local transform matrix.
         Matrix4 transMatrix = Matrix4::MakeTranslate(meshPos);
         Matrix4 rotMatrix = Matrix4::MakeRotate(rotQuat);
-        Matrix4 localTransformMatrix = transMatrix * rotMatrix;
+		Matrix4 scaleMatrix = Matrix4::MakeScale(scale);
+        Matrix4 localTransformMatrix = transMatrix * rotMatrix * scaleMatrix;
 		
+		// Create our mesh.
 		Mesh* mesh = new Mesh();
 		mesh->SetLocalTransformMatrix(localTransformMatrix);
 		mMeshes.push_back(mesh);
@@ -190,7 +204,9 @@ void Model::ParseFromData(char *data, int dataLength)
             // 4 bytes: Number of LODK blocks in this submesh. Not uncommon to be 0.
 			// My guess: this is for level-of-detail variants for the submesh?
             unsigned int lodkCount = reader.ReadUInt();
-            //std::cout << "      LODK count: " << lodkCount << std::endl;
+			#ifdef DEBUG_OUTPUT
+            std::cout << "      LODK count: " << lodkCount << std::endl;
+			#endif
             
             // 4 bytes: unknown - always zero thus far.
             reader.ReadUInt();

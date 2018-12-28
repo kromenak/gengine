@@ -34,11 +34,15 @@ struct VertexAnimationTransformPose
     
     Quaternion mLocalRotation;
     Vector3 mLocalPosition;
+	Vector3 mLocalScale;
+	
     VertexAnimationTransformPose* mNext = nullptr;
     
     Matrix4 GetLocalTransformMatrix()
     {
-        return Matrix4::MakeTranslate(mLocalPosition) * Matrix4::MakeRotate(mLocalRotation);
+        return Matrix4::MakeTranslate(mLocalPosition)
+		* Matrix4::MakeRotate(mLocalRotation)
+		* Matrix4::MakeScale(mLocalScale);
     }
 };
 

@@ -147,6 +147,7 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
     
     VertexAnimationTransformPose pose;
     pose.mLocalPosition = Vector3::Lerp(currentTransformPose->mLocalPosition, nextTransformPose->mLocalPosition, t);
+	pose.mLocalScale = Vector3::Lerp(currentTransformPose->mLocalScale, nextTransformPose->mLocalScale, t);
     Quaternion::Slerp(pose.mLocalRotation, currentTransformPose->mLocalRotation, nextTransformPose->mLocalRotation, t);
     return pose;
 }
@@ -446,6 +447,15 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     Vector3 iBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
                     Vector3 kBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
                     Vector3 jBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+					
+					// We can derive an import scale factor from the i/j/k basis by taking the length.
+					Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
+				
+					// If the imported model IS scaled, we need to normalize our bases before generating a rotation.
+					// Otherwise, the rotation will be off/incorrect.
+					iBasis.Normalize();
+					jBasis.Normalize();
+					kBasis.Normalize();
                     
                     // From the basis vectors, calculate a quaternion representing
                     // a rotation from the standard basis to that basis. We also need to negate some elements
@@ -479,6 +489,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     transformPose->mFrameNumber = i;
                     transformPose->mLocalPosition = meshPos;
                     transformPose->mLocalRotation = rotQuat;
+					transformPose->mLocalScale = scale;
                     if(i == 0)
                     {
                         mTransformPoses.push_back(transformPose);
