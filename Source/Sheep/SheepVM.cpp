@@ -70,6 +70,7 @@ std::function<void()> SheepVM::GetWaitCallback()
 {
 	if(mInWaitBlock)
 	{
+		std::cout << "Increment wait count!" << std::endl;
 		mWaitCount++;
 		return std::bind(&SheepVM::OnWaitCallback, this);
 	}
@@ -80,6 +81,7 @@ void SheepVM::Execute(SheepScript* script, int bytecodeOffset)
 {
     if(script == nullptr) { return; }
 	mSheepScript = script;
+	sCurrent = this;
     
     // Create copy of variables for assignment during execution.
     mVariables = script->GetVariables();
@@ -247,7 +249,7 @@ void SheepVM::Execute(SheepScript* script, int bytecodeOffset)
             case SheepInstruction::EndWait:
             {
 				#ifdef SHEEP_DEBUG
-				std::cout << "EndWait" << std::endl;
+				std::cout << "EndWait " << mInWaitBlock << ", " << mWaitCount << std::endl;
 				#endif
 				if(mInWaitBlock && mWaitCount > 0)
 				{

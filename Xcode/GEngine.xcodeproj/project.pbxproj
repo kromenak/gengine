@@ -186,6 +186,10 @@
 		4BDDCD5E20D6C4BC00701A89 /* VertexAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
 		4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE75D32208D7E7B007031A3 /* SheepVM.cpp */; };
+		4BEA726D21D53F2000998066 /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA726C21D53F2000998066 /* Walker.cpp */; };
+		4BEA726E21D53F2000998066 /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA726C21D53F2000998066 /* Walker.cpp */; };
+		4BEA727121D5834300998066 /* WalkerBoundary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727021D5834300998066 /* WalkerBoundary.cpp */; };
+		4BEA727221D5834300998066 /* WalkerBoundary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727021D5834300998066 /* WalkerBoundary.cpp */; };
 		4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
 		4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
 		4BF32B8C1F67C434000639FB /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B8A1F67C434000639FB /* Shader.cpp */; };
@@ -410,6 +414,10 @@
 		4BE6EE331F441DC600BB29D5 /* minilzo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = minilzo.c; path = ../Libraries/minilzo/minilzo.c; sourceTree = "<group>"; };
 		4BE75D31208D7E7B007031A3 /* SheepVM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepVM.h; path = ../Source/Sheep/SheepVM.h; sourceTree = "<group>"; };
 		4BE75D32208D7E7B007031A3 /* SheepVM.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepVM.cpp; path = ../Source/Sheep/SheepVM.cpp; sourceTree = "<group>"; };
+		4BEA726B21D53F2000998066 /* Walker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Walker.h; path = ../Source/Walker.h; sourceTree = "<group>"; };
+		4BEA726C21D53F2000998066 /* Walker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Walker.cpp; path = ../Source/Walker.cpp; sourceTree = "<group>"; };
+		4BEA726F21D5834300998066 /* WalkerBoundary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WalkerBoundary.h; path = ../Source/WalkerBoundary.h; sourceTree = "<group>"; };
+		4BEA727021D5834300998066 /* WalkerBoundary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WalkerBoundary.cpp; path = ../Source/WalkerBoundary.cpp; sourceTree = "<group>"; };
 		4BF32B841F64D4B9000639FB /* Matrix4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix4.cpp; path = ../Source/Matrix4.cpp; sourceTree = "<group>"; };
 		4BF32B851F64D4B9000639FB /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix4.h; path = ../Source/Matrix4.h; sourceTree = "<group>"; };
 		4BF32B871F67BC34000639FB /* GLVertexArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLVertexArray.cpp; path = ../Source/GLVertexArray.cpp; sourceTree = "<group>"; };
@@ -664,6 +672,10 @@
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
 				4B6B766321AB746D00788C02 /* UI */,
+				4BEA726C21D53F2000998066 /* Walker.cpp */,
+				4BEA726B21D53F2000998066 /* Walker.h */,
+				4BEA727021D5834300998066 /* WalkerBoundary.cpp */,
+				4BEA726F21D5834300998066 /* WalkerBoundary.h */,
 			);
 			name = GK3;
 			sourceTree = "<group>";
@@ -995,6 +1007,7 @@
 			files = (
 				4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */,
 				4B17D707206098B100EBD298 /* GameCamera.cpp in Sources */,
+				4BEA726D21D53F2000998066 /* Walker.cpp in Sources */,
 				4B6B766621AB75AA00788C02 /* ActionBar.cpp in Sources */,
 				4B6B766121A6165E00788C02 /* ButtonIconManager.cpp in Sources */,
 				4BD673D420B26F0C00795582 /* AudioListener.cpp in Sources */,
@@ -1025,6 +1038,7 @@
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
+				4BEA727121D5834300998066 /* WalkerBoundary.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
 				4B30B08E20F29594002D96D5 /* RenderPacket.cpp in Sources */,
 				4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */,
@@ -1086,6 +1100,7 @@
 			files = (
 				4B22F511217407640065B152 /* Color32.cpp in Sources */,
 				4B22F516217407640065B152 /* Model.cpp in Sources */,
+				4BEA726E21D53F2000998066 /* Walker.cpp in Sources */,
 				4B6B766721AB75AA00788C02 /* ActionBar.cpp in Sources */,
 				4B6B766221A6165E00788C02 /* ButtonIconManager.cpp in Sources */,
 				4B22F52B2174078B0065B152 /* Asset.cpp in Sources */,
@@ -1116,6 +1131,7 @@
 				4B22F501217407530065B152 /* lex.yy.cc in Sources */,
 				4BFBB86721D0469000E07EFB /* SceneData.cpp in Sources */,
 				4B22F5362174078B0065B152 /* Camera.cpp in Sources */,
+				4BEA727221D5834300998066 /* WalkerBoundary.cpp in Sources */,
 				4B22F515217407640065B152 /* MeshRenderer.cpp in Sources */,
 				4B22F509217407530065B152 /* Skybox.cpp in Sources */,
 				4B22F53B2174078B0065B152 /* IniParser.cpp in Sources */,

@@ -30,7 +30,6 @@ public:
     
 private:
     SheepCompiler mCompiler;
-    //SheepVM mVirtualMachine;
 	
 	// We sometimes need to know what the current sheep script is.
 	// This can be complicated by sheep scripts calling each other.

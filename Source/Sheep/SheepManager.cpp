@@ -35,6 +35,7 @@ void SheepManager::Execute(SheepScript* script)
 {
 	mSheepScriptStack.push(script);
 	
+	std::cout << "Executing sheep " << script->GetName() << std::endl;
     SheepVM vm;
     vm.Execute(script);
 	

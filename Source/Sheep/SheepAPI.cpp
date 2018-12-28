@@ -382,6 +382,7 @@ RegFunc1(CallDefaultSheep, void, string, WAITABLE, REL_FUNC);
 
 shpvoid CallSheep(string fileName, string functionName) // WAIT
 {
+	std::cout << "CallSheep " << fileName << ", " << functionName << std::endl;
 	Services::GetSheep()->Execute(fileName, functionName);
     return 0;
 }
