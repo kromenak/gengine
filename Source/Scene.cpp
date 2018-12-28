@@ -54,119 +54,6 @@ Scene::Scene(std::string name, std::string timeCode) :
     	mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
 	}
 	
-    // Create actors for the scene.
-    std::vector<SceneActorData*> sceneActorDatas = mSceneData.GetSceneActorDatas();
-    for(auto& actorDef : sceneActorDatas)
-    {
-        // Create actor.
-        GKActor* actor = new GKActor(true);
-		actor->SetNoun(actorDef->noun);
-		
-		// The actor's 3-letter identifier can be derived from the name of the model.
-		std::string identifier;
-		if(actorDef->model != nullptr)
-		{
-			identifier = actorDef->model->GetNameNoExtension();
-		}
-		actor->SetIdentifier(identifier);
-        
-        // Set actor's initial position and rotation.
-        if(actorDef->position != nullptr)
-        {
-            Vector3 position = actorDef->position->position;
-            actor->SetPosition(position);
-			actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading));
-        }
-        
-        // Set actor's graphical appearance.
-        actor->GetMeshRenderer()->SetModel(actorDef->model);
-        
-        // Save actor's GAS references.
-        actor->SetIdleGas(actorDef->idleGas);
-        actor->SetTalkGas(actorDef->talkGas);
-        actor->SetListenGas(actorDef->listenGas);
-		
-		//CharacterConfig& characterConfig = Services::Get<CharacterManager>()->GetCharacterConfig(actorDef->model->GetNameNoExtension());
-		//actor->PlayAnimation(characterConfig.walkStartTurnLeftAnim);
-		
-        //TODO: Apply init anim.
-        
-        //TODO: If hidden, hide.
-        
-        // If this is our ego, save a reference to it.
-        if(actorDef->ego)
-        {
-			// If we already created an Ego, delete the old one. Latest one takes priority.
-			// This actually happens pretty often - general SIF says Gabe is ego, specific says Grace.
-			// Maybe there's a better way to handle this? But this is the easiest for now.
-			if(mEgo != nullptr)
-			{
-				mEgo->Actor::SetState(Actor::State::Dead);
-			}
-            mEgo = actor;
-        }
-		
-		// Save in created actors list.
-		mActors.push_back(actor);
-    }
-	
-    // Iterate over scene model data and prep the scene.
-    // First, we want to hide and scene models that are set to "hidden".
-    // Second, we want to spawn any non-scene models.
-    std::vector<SceneModelData*> sceneModelDatas = mSceneData.GetSceneModelDatas();
-    for(auto& modelDef : sceneModelDatas)
-    {
-		switch(modelDef->type)
-		{
-			// "Scene" type models are ones that are baked into the BSP geometry.
-			case SceneModelData::Type::Scene:
-			{
-				// If it should be hidden by default, tell the BSP to hide it.
-				if(modelDef->hidden)
-				{
-					mSceneData.GetBSP()->Hide(modelDef->name);
-				}
-				break;
-			}
-				
-			// "HitTest" type models should be hidden, but still interactive.
-			case SceneModelData::Type::HitTest:
-			{
-				mSceneData.GetBSP()->Hide(modelDef->name);
-				break;
-			}
-				
-			// "Prop" and "GasProp" models both render their own model geometry.
-			// Only difference for a "GasProp" is that it uses a provided Gas file too.
-			case SceneModelData::Type::Prop:
-			case SceneModelData::Type::GasProp:
-			{
-				// Create actor.
-				GKActor* actor = new GKActor(false);
-				actor->SetNoun(modelDef->noun);
-				
-				// Set model.
-				actor->GetMeshRenderer()->SetModel(modelDef->model);
-				
-				// Run any init anims specified.
-				// These are usually needed to correctly position the model.
-				/*
-				if(modelDef->initAnim != nullptr)
-				{
-					actor->PlayInitAnimation(modelDef->initAnim);
-				}
-				*/
-				
-				mActors.push_back(actor);
-				break;
-			}
-				
-			default:
-				std::cout << "Unaccounted for model type: " << (int)modelDef->type << std::endl;
-				break;
-		}
-    }
-    
     // Create soundtrack player and get it playing!
 	Soundtrack* soundtrack = mSceneData.GetSoundtrack();
 	if(soundtrack != nullptr)
@@ -212,6 +99,123 @@ Scene::~Scene()
 
 void Scene::OnSceneEnter()
 {
+	// Create actors for the scene.
+	std::vector<SceneActorData*> sceneActorDatas = mSceneData.GetSceneActorDatas();
+	for(auto& actorDef : sceneActorDatas)
+	{
+		// Create actor.
+		GKActor* actor = new GKActor(true);
+		actor->SetNoun(actorDef->noun);
+		
+		// The actor's 3-letter identifier can be derived from the name of the model.
+		std::string identifier;
+		if(actorDef->model != nullptr)
+		{
+			identifier = actorDef->model->GetNameNoExtension();
+		}
+		actor->SetIdentifier(identifier);
+		
+		// Set actor's initial position and rotation.
+		if(actorDef->position != nullptr)
+		{
+			Vector3 position = actorDef->position->position;
+			actor->SetPosition(position);
+			actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading));
+		}
+		
+		// Set actor's graphical appearance.
+		actor->GetMeshRenderer()->SetModel(actorDef->model);
+		
+		// Save actor's GAS references.
+		actor->SetIdleGas(actorDef->idleGas);
+		actor->SetTalkGas(actorDef->talkGas);
+		actor->SetListenGas(actorDef->listenGas);
+		
+		//CharacterConfig& characterConfig = Services::Get<CharacterManager>()->GetCharacterConfig(actorDef->model->GetNameNoExtension());
+		//actor->PlayAnimation(characterConfig.walkStartTurnLeftAnim);
+		
+		//TODO: Apply init anim.
+		
+		//TODO: If hidden, hide.
+		
+		// If this is our ego, save a reference to it.
+		if(actorDef->ego)
+		{
+			// If we already created an Ego, delete the old one. Latest one takes priority.
+			// This actually happens pretty often - general SIF says Gabe is ego, specific says Grace.
+			// Maybe there's a better way to handle this? But this is the easiest for now.
+			if(mEgo != nullptr)
+			{
+				mEgo->Actor::SetState(Actor::State::Dead);
+			}
+			mEgo = actor;
+		}
+		
+		// Save in created actors list.
+		mActors.push_back(actor);
+	}
+	
+	// Iterate over scene model data and prep the scene.
+	// First, we want to hide and scene models that are set to "hidden".
+	// Second, we want to spawn any non-scene models.
+	std::vector<SceneModelData*> sceneModelDatas = mSceneData.GetSceneModelDatas();
+	for(auto& modelDef : sceneModelDatas)
+	{
+		switch(modelDef->type)
+		{
+			// "Scene" type models are ones that are baked into the BSP geometry.
+			case SceneModelData::Type::Scene:
+			{
+				// If it should be hidden by default, tell the BSP to hide it.
+				if(modelDef->hidden)
+				{
+					mSceneData.GetBSP()->Hide(modelDef->name);
+				}
+				break;
+			}
+				
+			// "HitTest" type models should be hidden, but still interactive.
+			case SceneModelData::Type::HitTest:
+			{
+				//std::cout << "Hide " << modelDef->name << std::endl;
+				mSceneData.GetBSP()->Hide(modelDef->name);
+				break;
+			}
+				
+			// "Prop" and "GasProp" models both render their own model geometry.
+			// Only difference for a "GasProp" is that it uses a provided Gas file too.
+			case SceneModelData::Type::Prop:
+			case SceneModelData::Type::GasProp:
+			{
+				// Create actor.
+				GKActor* actor = new GKActor(false);
+				actor->SetNoun(modelDef->noun);
+				
+				// Set model.
+				actor->GetMeshRenderer()->SetModel(modelDef->model);
+				mActors.push_back(actor);
+				break;
+			}
+				
+			default:
+				std::cout << "Unaccounted for model type: " << (int)modelDef->type << std::endl;
+				break;
+		}
+	}
+	
+	// After all models have been created, run through and execute init anims.
+	// Want to wait until after creating all actors, in case init anims need to touch created actors!
+	for(auto& modelDef : sceneModelDatas)
+	{
+		// Run any init anims specified.
+		// These are usually needed to correctly position the model.
+		if((modelDef->type == SceneModelData::Type::Prop || modelDef->type == SceneModelData::Type::GasProp)
+		   && modelDef->initAnim != nullptr)
+		{
+			mAnimationPlayer->Sample(modelDef->initAnim, 0);
+		}
+	}
+	
 	// Check for and run "scene enter" actions.
 	std::vector<NVC*> nvcs = mSceneData.GetNounVerbCaseSets();
 	for(auto& nvc : nvcs)
@@ -219,6 +223,7 @@ void Scene::OnSceneEnter()
 		const NVCItem* nvcItem = nvc->GetAction("SCENE", "ENTER");
 		if(nvcItem != nullptr)
 		{
+			std::cout << "Executing scene enter for " << nvc->GetName() << std::endl;
 			nvcItem->Execute();
 		}
 	}
