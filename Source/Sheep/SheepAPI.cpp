@@ -7,6 +7,7 @@
 
 #include "AnimationPlayer.h"
 #include "CharacterManager.h"
+#include "GameProgress.h"
 #include "GEngine.h"
 #include "GKActor.h"
 #include "Scene.h"
@@ -361,6 +362,27 @@ shpvoid StartVoiceOver(string dialogueName, int numLines) // WAIT
 }
 RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
 
+// APPLICATION
+
+// CAMERA
+shpvoid CutToCameraAngle(string cameraName)
+{
+	GEngine::inst->GetScene()->SetCameraPosition(cameraName);
+	return 0;
+}
+RegFunc1(CutToCameraAngle, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid CutToCameraAngleX(float horizAngle, float vertAngle, float x, float y, float z) // DEV
+{
+	//TODO
+	return 0;
+}
+RegFunc5(CutToCameraAngleX, void, float, float, float, float, float, IMMEDIATE, DEV_FUNC);
+
+// CONSTRUCTION MODE
+
+// DEBUGGING
+
 // ENGINE
 shpvoid Call(string functionName) // WAIT
 {
@@ -389,34 +411,170 @@ shpvoid CallSheep(string fileName, string functionName) // WAIT
 RegFunc2(CallSheep, void, string, string, WAITABLE, REL_FUNC);
 
 // GAME LOGIC
+shpvoid ClearFlag(string flagName)
+{
+	Services::Get<GameProgress>()->ClearFlag(flagName);
+	return 0;
+}
+RegFunc1(ClearFlag, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid DumpFlags() // DEV
+{
+	//TODO
+	return 0;
+}
+RegFunc0(DumpFlags, void, IMMEDIATE, DEV_FUNC);
+
+int GetFlag(string flagName)
+{
+	return Services::Get<GameProgress>()->GetFlag(flagName);
+}
+RegFunc1(GetFlag, int, string, IMMEDIATE, REL_FUNC);
+
+int GetFlagInt(int flagEnum)
+{
+	// This function gets a flag, not by name, but by internal integer value.
+	// I'm a bit unclear how any Sheep caller would know this value, and how
+	// this value would be persistant across runs of the game...
+	std::cout << "GetFlagInt was called!" << std::endl;
+	return 0;
+}
+RegFunc1(GetFlagInt, int, int, IMMEDIATE, REL_FUNC);
+
+shpvoid SetFlag(string flagName)
+{
+	Services::Get<GameProgress>()->SetFlag(flagName);
+	return 0;
+}
+RegFunc1(SetFlag, void, string, IMMEDIATE, REL_FUNC);
+
+int GetChatCount(string noun)
+{
+	return Services::Get<GameProgress>()->GetChatCount(noun);
+}
+RegFunc1(GetChatCount, int, string, IMMEDIATE, REL_FUNC);
+
+int GetChatCountInt(int nounEnum)
+{
+	//TODO: Should be able to call this from sheep using $n variable.
+	return 0;
+}
+RegFunc1(GetChatCountInt, int, int, IMMEDIATE, REL_FUNC);
+
+shpvoid SetChatCount(string noun, int count) // DEV
+{
+	Services::Get<GameProgress>()->SetChatCount(noun, count);
+	return 0;
+}
+RegFunc2(SetChatCount, void, string, int, IMMEDIATE, DEV_FUNC);
+
+int GetGameVariableInt(string varName)
+{
+	return Services::Get<GameProgress>()->GetGameVariable(varName);
+}
+RegFunc1(GetGameVariableInt, int, string, IMMEDIATE, REL_FUNC);
+
+shpvoid IncGameVariableInt(string varName)
+{
+	Services::Get<GameProgress>()->IncGameVariable(varName);
+	return 0;
+}
+RegFunc1(IncGameVariableInt, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid SetGameVariableInt(string varName, int value)
+{
+	Services::Get<GameProgress>()->SetGameVariable(varName, value);
+	return 0;
+}
+RegFunc2(SetGameVariableInt, void, string, int, IMMEDIATE, REL_FUNC);
+
 int GetNounVerbCount(string noun, string verb)
 {
-	return 0;
+	return Services::Get<GameProgress>()->GetNounVerbCount(noun, verb);
 }
 RegFunc2(GetNounVerbCount, int, string, string, IMMEDIATE, REL_FUNC);
 
+int GetNounVerbCountInt(int nounEnum, int verbEnum)
+{
+	//TODO: Should be able to call this from sheep using $n and $v variables.
+	return 0;
+}
+RegFunc2(GetNounVerbCountInt, int, int, int, IMMEDIATE, REL_FUNC);
+
+shpvoid IncNounVerbCount(string noun, string verb)
+{
+	Services::Get<GameProgress>()->IncNounVerbCount(noun, verb);
+	return 0;
+}
+RegFunc2(IncNounVerbCount, void, string, string, IMMEDIATE, REL_FUNC);
+
+shpvoid SetNounVerbCount(string noun, string verb, int count)
+{
+	Services::Get<GameProgress>()->SetNounVerbCount(noun, verb, count);
+	return 0;
+}
+RegFunc3(SetNounVerbCount, void, string, string, int, IMMEDIATE, REL_FUNC);
+
+shpvoid SetNounVerbCountBoth(string noun, string verb, int count)
+{
+	//TODO: This function is undocumented, so I'm not sure how it differs from SetNounVerbCount.
+	//TODO: It has same return type and arguments. Maybe we track noun/verb counts separately for Gabe/Grace?
+	return SetNounVerbCount(noun, verb, count);
+}
+RegFunc3(SetNounVerbCountBoth, void, string, string, int, IMMEDIATE, REL_FUNC);
+
+shpvoid TriggerNounVerb(string noun, string verb) // DEV
+{
+	//TODO
+	return 0;
+}
+RegFunc2(TriggerNounVerb, void, string, string, IMMEDIATE, DEV_FUNC);
+
+int GetScore()
+{
+	return Services::Get<GameProgress>()->GetScore();
+}
+RegFunc0(GetScore, int, IMMEDIATE, REL_FUNC);
+
+shpvoid IncreaseScore(int value)
+{
+	Services::Get<GameProgress>()->IncreaseScore(value);
+	return 0;
+}
+RegFunc1(IncreaseScore, void, int, IMMEDIATE, REL_FUNC);
+
+shpvoid SetScore(int score) // DEV
+{
+	Services::Get<GameProgress>()->SetScore(score);
+	return 0;
+}
+RegFunc1(SetScore, void, int, IMMEDIATE, DEV_FUNC);
+
 int IsCurrentLocation(string location)
 {
-	return 0;
+	string currentLocation = Services::Get<GameProgress>()->GetLocation();
+	return StringUtil::EqualsIgnoreCase(currentLocation, location);
 }
 RegFunc1(IsCurrentLocation, int, string, IMMEDIATE, REL_FUNC);
 
 int IsCurrentTime(string timeCode)
 {
-    string currentTimeCode = GEngine::inst->GetCurrentTimeCode();
+	string currentTimeCode = Services::Get<GameProgress>()->GetTimeCode();
     return StringUtil::EqualsIgnoreCase(currentTimeCode, timeCode);
 }
 RegFunc1(IsCurrentTime, int, string, IMMEDIATE, REL_FUNC);
 
 int WasLastLocation(string location)
 {
-	return 0;
+	string lastLocation = Services::Get<GameProgress>()->GetLastLocation();
+	return StringUtil::EqualsIgnoreCase(lastLocation, location);
 }
 RegFunc1(WasLastLocation, int, string, IMMEDIATE, REL_FUNC);
 
 int WasLastTime(string timeCode)
 {
-	return 0;
+	string lastTimeCode = Services::Get<GameProgress>()->GetLastTimeCode();
+	return StringUtil::EqualsIgnoreCase(lastTimeCode, timeCode);
 }
 RegFunc1(WasLastTime, int, string, IMMEDIATE, REL_FUNC);
 

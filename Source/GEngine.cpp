@@ -11,6 +11,7 @@
 #include "ButtonIconManager.h"
 #include "CharacterManager.h"
 #include "Debug.h"
+#include "GameProgress.h"
 #include "Scene.h"
 #include "Services.h"
 
@@ -80,6 +81,9 @@ bool GEngine::Initialize()
 	// Load character configs.
 	Services::Set<CharacterManager>(new CharacterManager());
 	
+	// Create game progress.
+	Services::Set<GameProgress>(new GameProgress());
+	
     LoadScene("R25");
     return true;
 }
@@ -116,27 +120,6 @@ void GEngine::Run()
 void GEngine::Quit()
 {
     mRunning = false;
-}
-
-std::string GEngine::GetCurrentTimeCode()
-{
-    // Depending on day/hour, returns something like "110A".
-	// Add A/P (for am/pm) on end, depending on hour.
-    std::string ampm = (mHour <= 11) ? "A" : "P";
-	
-	// The hour is 24-hour based internally.
-	// Subtract 12, if over 12, to get it 12-hour based.
-    int hour = mHour > 12 ? mHour - 12 : mHour;
-	
-	// If hour is single digit, prepend a zero.
-	std::string hourStr = std::to_string(hour);
-	if(hour < 10)
-	{
-		hourStr = "0" + hourStr;
-	}
-	
-	// Put it all together.
-	return std::to_string(mDay) + hourStr + ampm;
 }
 
 void GEngine::UseDefaultCursor()
@@ -288,8 +271,11 @@ void GEngine::LoadSceneInternal()
 	// Get rid of all actors between scenes.
 	DeleteAllActors();
 	
+	// Save this new location.
+	Services::Get<GameProgress>()->SetLocation(mSceneToLoad);
+	
 	// Create the new scene.
-	mScene = new Scene(mSceneToLoad, GetCurrentTimeCode());
+	mScene = new Scene(mSceneToLoad, Services::Get<GameProgress>()->GetTimeCode());
 	
 	// Trigger any on-enter actions.
 	mScene->OnSceneEnter();

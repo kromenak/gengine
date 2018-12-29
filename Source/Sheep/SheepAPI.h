@@ -74,6 +74,39 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
         }                                                   			\
     } name##_instance
 
+#define RegFunc3(name, ret, t1, t2, t3, waitable, dev)                      \
+	Value name(const Value& x1, const Value& x2, const Value& x3) {          			\
+		return name(x1.to<t1>(), x2.to<t2>(), x3.to<t3>());              			\
+	}                                                       			\
+	struct name##_ {                                        			\
+		name##_() {                                         			\
+			map3[#name]=&name;                              			\
+			AddSysFuncDecl(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE }, waitable, dev); \
+		}                                                   			\
+	} name##_instance
+
+#define RegFunc4(name, ret, t1, t2, t3, t4, waitable, dev)                      \
+	Value name(const Value& x1, const Value& x2, const Value& x3, const Value& x4) {          			\
+		return name(x1.to<t1>(), x2.to<t2>(), x3.to<t3>(), x4.to<t4>());              			\
+	}                                                       			\
+	struct name##_ {                                        			\
+		name##_() {                                         			\
+			map4[#name]=&name;                              			\
+			AddSysFuncDecl(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE, t4##_TYPE }, waitable, dev); \
+		}                                                   			\
+	} name##_instance
+
+#define RegFunc5(name, ret, t1, t2, t3, t4, t5, waitable, dev)                      \
+	Value name(const Value& x1, const Value& x2, const Value& x3, const Value& x4, const Value& x5) {          			\
+		return name(x1.to<t1>(), x2.to<t2>(), x3.to<t3>(), x4.to<t4>(), x5.to<t5>());              			\
+	}                                                       			\
+	struct name##_ {                                        			\
+		name##_() {                                         			\
+			map5[#name]=&name;                              			\
+			AddSysFuncDecl(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE, t4##_TYPE, t5##_TYPE }, waitable, dev); \
+		}                                                   			\
+	} name##_instance
+
 #define shpvoid uint8_t
 
 // ACTORS
@@ -456,9 +489,9 @@ int GetNounVerbCount(std::string noun, std::string verb);
 int GetNounVerbCountInt(int nounEnum, int verbEnum);
 shpvoid IncNounVerbCount(std::string noun, std::string verb);
 shpvoid SetNounVerbCount(std::string noun, std::string verb, int count);
-shpvoid TriggerNounVerb(std::string noun, std::string verb);
+shpvoid SetNounVerbCountBoth(std::string noun, std::string verb, int count);
+shpvoid TriggerNounVerb(std::string noun, std::string verb); // DEV
 
-// ChangeScore???
 int GetScore();
 shpvoid IncreaseScore(int value);
 shpvoid SetScore(int score); // DEV

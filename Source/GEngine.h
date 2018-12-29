@@ -33,8 +33,6 @@ public:
     
 	void LoadScene(std::string name) { mSceneToLoad = name; }
     Scene* GetScene() { return mScene; }
-    
-    std::string GetCurrentTimeCode();
 	
 	void UseDefaultCursor();
 	void UseHighlightCursor();
@@ -71,11 +69,6 @@ private:
 	
 	// The currently active cursor.
     Cursor* mCursor = nullptr;
-    
-    // Day and time that the game is currently in.
-    // GK3 takes place over three days and multiple time blocks.
-	int mDay = 1; //3; //1;
-	int mHour = 10; //18; //10; // hour in a 24-hour clock
     
     void ProcessInput();
     void Update();
