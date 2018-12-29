@@ -190,6 +190,8 @@
 		4BEA726E21D53F2000998066 /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA726C21D53F2000998066 /* Walker.cpp */; };
 		4BEA727121D5834300998066 /* WalkerBoundary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727021D5834300998066 /* WalkerBoundary.cpp */; };
 		4BEA727221D5834300998066 /* WalkerBoundary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727021D5834300998066 /* WalkerBoundary.cpp */; };
+		4BEA727521D7F71A00998066 /* GameProgress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727421D7F71A00998066 /* GameProgress.cpp */; };
+		4BEA727621D7F71A00998066 /* GameProgress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727421D7F71A00998066 /* GameProgress.cpp */; };
 		4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
 		4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
 		4BF32B8C1F67C434000639FB /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B8A1F67C434000639FB /* Shader.cpp */; };
@@ -418,6 +420,8 @@
 		4BEA726C21D53F2000998066 /* Walker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Walker.cpp; path = ../Source/Walker.cpp; sourceTree = "<group>"; };
 		4BEA726F21D5834300998066 /* WalkerBoundary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WalkerBoundary.h; path = ../Source/WalkerBoundary.h; sourceTree = "<group>"; };
 		4BEA727021D5834300998066 /* WalkerBoundary.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = WalkerBoundary.cpp; path = ../Source/WalkerBoundary.cpp; sourceTree = "<group>"; };
+		4BEA727321D7F71A00998066 /* GameProgress.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameProgress.h; path = ../Source/GameProgress.h; sourceTree = "<group>"; };
+		4BEA727421D7F71A00998066 /* GameProgress.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GameProgress.cpp; path = ../Source/GameProgress.cpp; sourceTree = "<group>"; };
 		4BF32B841F64D4B9000639FB /* Matrix4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix4.cpp; path = ../Source/Matrix4.cpp; sourceTree = "<group>"; };
 		4BF32B851F64D4B9000639FB /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix4.h; path = ../Source/Matrix4.h; sourceTree = "<group>"; };
 		4BF32B871F67BC34000639FB /* GLVertexArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLVertexArray.cpp; path = ../Source/GLVertexArray.cpp; sourceTree = "<group>"; };
@@ -669,6 +673,8 @@
 			children = (
 				4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */,
 				4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */,
+				4BEA727421D7F71A00998066 /* GameProgress.cpp */,
+				4BEA727321D7F71A00998066 /* GameProgress.h */,
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
 				4B6B766321AB746D00788C02 /* UI */,
@@ -1066,6 +1072,7 @@
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B8E830A20F046750009A86B /* Material.cpp in Sources */,
 				4B046E94218FB10F00E56341 /* Debug.cpp in Sources */,
+				4BEA727521D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
 				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
@@ -1159,6 +1166,7 @@
 				4B22F5102174075B0065B152 /* Services.cpp in Sources */,
 				4B046E95218FB10F00E56341 /* Debug.cpp in Sources */,
 				4B22F5272174078B0065B152 /* Animation.cpp in Sources */,
+				4BEA727621D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
 				4B22F50F2174075B0065B152 /* SDLLog.cpp in Sources */,
