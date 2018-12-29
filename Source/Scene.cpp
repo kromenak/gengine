@@ -245,10 +245,16 @@ void Scene::InitEgoPosition(std::string positionName)
         mCamera->SetPosition(position->camera->position);
         mCamera->SetRotation(Quaternion(Vector3::UnitY, position->camera->angle.GetX()));
     }
-    else
-    {
-		std::cout << "Can't init ego camera!" << std::endl;
-    }
+}
+
+void Scene::SetCameraPosition(std::string cameraName)
+{
+	SceneCameraData* camera = mSceneData.GetRoomCamera(cameraName);
+	if(camera != nullptr)
+	{
+		mCamera->SetPosition(camera->position);
+		mCamera->SetRotation(Quaternion(Vector3::UnitY, camera->angle.GetX()));
+	}
 }
 
 bool Scene::CheckInteract(const Ray& ray)

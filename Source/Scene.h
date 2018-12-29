@@ -39,6 +39,7 @@ public:
 	void OnSceneEnter();
 	
     void InitEgoPosition(std::string positionName);
+	void SetCameraPosition(std::string cameraName);
 	
 	bool CheckInteract(const Ray& ray);
     void Interact(const Ray& ray);

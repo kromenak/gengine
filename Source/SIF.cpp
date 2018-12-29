@@ -50,11 +50,23 @@ Color32 SIF::GetWalkBoundaryColor(Vector3 position) const
 	return mWalkBoundaryTexture->GetPixelColor32(position.GetX(), mWalkBoundaryTexture->GetHeight() - position.GetZ());
 }
 
+SceneCameraData* SIF::GetRoomCamera(std::string cameraName)
+{
+	for(int i = 0; i < mRoomCameras.size(); i++)
+	{
+		if(StringUtil::EqualsIgnoreCase(mRoomCameras[i]->label, cameraName))
+		{
+			return mRoomCameras[i];
+		}
+	}
+	return nullptr;
+}
+
 ScenePositionData* SIF::GetPosition(std::string positionName)
 {
     for(int i = 0; i < mPositions.size(); i++)
     {
-        if(mPositions[i]->label == positionName)
+		if(StringUtil::EqualsIgnoreCase(mPositions[i]->label, positionName))
         {
             return mPositions[i];
         }

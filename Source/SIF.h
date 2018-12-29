@@ -45,8 +45,8 @@ struct DialogueSceneCameraData : public SceneCameraData
     // Specifies name of dialogue for which this camera is used.
     std::string dialogueName;
     
-    // Specifies name of set this camera belongs to.
-    // Allows logic to specify a set name, which randomly picks a camera in that set.
+    // Specifies name of "set" this camera belongs to.
+    // Allows logic to specify a "set" name, which randomly picks a camera in that set.
     std::string setName;
     
     // If true, this camera appears in the toolbar when the conversation is active.
@@ -175,7 +175,8 @@ public:
     std::vector<SceneModelData*> GetSceneModelDatas() { return mSceneModelDatas; }
     
 	SceneCameraData* GetDefaultRoomCamera() const { return mRoomCameras.size() > 0 ? mRoomCameras[mDefaultRoomCameraIndex] : nullptr; }
-    
+	SceneCameraData* GetRoomCamera(std::string cameraName);
+	
     ScenePositionData* GetPosition(std::string positionName);
     
     std::vector<Soundtrack*> GetSoundtracks() { return mSoundtracks; }

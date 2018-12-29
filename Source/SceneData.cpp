@@ -157,6 +157,20 @@ SceneCameraData* SceneData::GetDefaultRoomCamera() const
 	return sceneCameraData;
 }
 
+SceneCameraData* SceneData::GetRoomCamera(std::string cameraName) const
+{
+	SceneCameraData* sceneCameraData = nullptr;
+	if(mSpecificSIF != nullptr)
+	{
+		sceneCameraData = mSpecificSIF->GetRoomCamera(cameraName);
+	}
+	if(sceneCameraData == nullptr)
+	{
+		sceneCameraData = mGeneralSIF->GetRoomCamera(cameraName);
+	}
+	return sceneCameraData;
+}
+
 ScenePositionData* SceneData::GetScenePosition(std::string positionName) const
 {
 	ScenePositionData* position = nullptr;

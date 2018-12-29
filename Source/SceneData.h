@@ -36,6 +36,7 @@ public:
 	Skybox* GetSkybox() const { return mSkybox; }
 	
 	SceneCameraData* GetDefaultRoomCamera() const;
+	SceneCameraData* GetRoomCamera(std::string cameraName) const;
 	
 	ScenePositionData* GetScenePosition(std::string positionName) const;
 	
