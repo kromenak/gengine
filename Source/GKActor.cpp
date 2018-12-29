@@ -75,6 +75,11 @@ void GKActor::PlayAnimation(VertexAnimation* animation, int framesPerSecond)
 	mAnimationPlayer->Play(animation, framesPerSecond);
 }
 
+void GKActor::SampleAnimation(VertexAnimation* animation, int frame)
+{
+	mAnimationPlayer->Sample(animation, frame);
+}
+
 void GKActor::UpdateInternal(float deltaTime)
 {
 	

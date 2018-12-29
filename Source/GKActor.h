@@ -49,6 +49,7 @@ public:
 	
 	void PlayAnimation(VertexAnimation* animation);
 	void PlayAnimation(VertexAnimation* animation, int framesPerSecond);
+	void SampleAnimation(VertexAnimation* animation, int frame);
 	
     MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
 	

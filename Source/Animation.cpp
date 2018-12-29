@@ -30,6 +30,18 @@ void VertexAnimNode::Play(Animation* anim)
 	}
 }
 
+void VertexAnimNode::Sample(Animation* anim, int frame)
+{
+	if(vertexAnimation != nullptr)
+	{
+		GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(vertexAnimation->GetModelName());
+		if(actor != nullptr)
+		{
+			actor->SampleAnimation(vertexAnimation, frame);
+		}
+	}
+}
+
 void SceneTextureAnimNode::Play(Animation* anim)
 {
 	Texture* texture = Services::GetAssets()->LoadTexture(textureName);
@@ -404,7 +416,10 @@ void Animation::ParseFromData(char *data, int dataLength)
                     entry = entry->next;
                     std::string textureName = entry->value;
                     
-                    // Not sure what this is? Always H, E, M.
+                    // A value indicating what part of the face is changed. Always H, E, M.
+					// M = mouth
+					// E = eye
+					// H = eyebrow/forehead (H = head?)
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
                     std::string someValue = entry->value;
@@ -445,7 +460,16 @@ void Animation::ParseFromData(char *data, int dataLength)
                 }
 				else if(StringUtil::EqualsIgnoreCase(keyword, "MOOD"))
 				{
-					
+					// Seems to be followed by two keywords:
+					// 1) Actor to affect
+					// 2) Mood to apply
+					/*
+					while(entry != nullptr)
+					{
+						std::cout << entry->value << std::endl;
+						entry = entry->next;
+					}
+					*/
 				}
                 else
                 {

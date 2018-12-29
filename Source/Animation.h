@@ -23,6 +23,7 @@ struct AnimNode
 	
 	virtual ~AnimNode() { }
 	virtual void Play(Animation* anim) = 0;
+	virtual void Sample(Animation* anim, int frame) { } // Sampling support is optional. Does nothing by default.
 };
 
 struct VertexAnimNode : public AnimNode
@@ -30,6 +31,7 @@ struct VertexAnimNode : public AnimNode
 	VertexAnimation* vertexAnimation = nullptr;
 	
 	void Play(Animation* anim) override;
+	void Sample(Animation* anim, int frame) override;
 };
 
 struct SceneTextureAnimNode : public AnimNode

@@ -20,6 +20,8 @@ public:
 	void Play(VertexAnimation* animation);
 	void Play(VertexAnimation* animation, int framesPerSecond);
 	
+	void Sample(VertexAnimation* animation, int frame);
+	
 protected:
 	void UpdateInternal(float deltaTime) override;
 	
@@ -35,4 +37,6 @@ private:
 	
 	// Timer for tracking progress on vertex animation.
 	float mVertexAnimationTimer = 0.0f;
+	
+	void TakeSample(VertexAnimation* animation, float time);
 };

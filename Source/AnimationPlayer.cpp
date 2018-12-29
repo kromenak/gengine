@@ -39,7 +39,7 @@ void AnimationPlayer::Sample(Animation* animation, int frame)
 	{
 		for(auto& node : *frameData)
 		{
-			node->Play(animation);
+			node->Sample(animation, frame);
 		}
 	}
 }

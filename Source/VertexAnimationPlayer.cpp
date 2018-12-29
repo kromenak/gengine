@@ -32,6 +32,13 @@ void VertexAnimationPlayer::Play(VertexAnimation* animation, int framesPerSecond
 	mVertexAnimationTimer = 0.0f;
 }
 
+void VertexAnimationPlayer::Sample(VertexAnimation* animation, int frame)
+{
+	//TODO: We kind of convert from frames to time, then back to frames. Why not just stay in frames then?
+	float time = (float)frame * mFramesPerSecond;
+	TakeSample(animation, time);
+}
+
 void VertexAnimationPlayer::UpdateInternal(float deltaTime)
 {
 	// Need a vertex animation to update.
@@ -39,6 +46,21 @@ void VertexAnimationPlayer::UpdateInternal(float deltaTime)
 	
 	// Increment animation timer.
 	mVertexAnimationTimer += deltaTime;
+	
+	// Sample animation at current timer value.
+	TakeSample(mVertexAnimation, mVertexAnimationTimer);
+	
+	// If at the end of the animation, clear animation.
+	// GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
+	if(mVertexAnimationTimer >= mVertexAnimation->GetDuration(mFramesPerSecond))
+	{
+		mVertexAnimation = nullptr;
+	}
+}
+
+void VertexAnimationPlayer::TakeSample(VertexAnimation* animation, float time)
+{
+	if(animation == nullptr) { return; }
 	
 	// Iterate through each mesh and sample it in the vertex animation.
 	// We need to sample both vertex poses and transform poses to get the right result.
@@ -48,24 +70,17 @@ void VertexAnimationPlayer::UpdateInternal(float deltaTime)
 		const std::vector<Submesh*>& submeshes = meshes[i]->GetSubmeshes();
 		for(int j = 0; j < submeshes.size(); j++)
 		{
-			VertexAnimationVertexPose sample = mVertexAnimation->SampleVertexPose(mVertexAnimationTimer, mFramesPerSecond, i, j);
+			VertexAnimationVertexPose sample = animation->SampleVertexPose(time, mFramesPerSecond, i, j);
 			if(sample.mFrameNumber >= 0)
 			{
 				submeshes[j]->CopyPositions((float*)sample.mVertexPositions.data());
 			}
 		}
 		
-		VertexAnimationTransformPose transformSample = mVertexAnimation->SampleTransformPose(mVertexAnimationTimer, mFramesPerSecond, i);
+		VertexAnimationTransformPose transformSample = animation->SampleTransformPose(time, mFramesPerSecond, i);
 		if(transformSample.mFrameNumber >= 0)
 		{
 			meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
 		}
-	}
-	
-	// If at the end of the animation, clear animation.
-	// GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
-	if(mVertexAnimationTimer >= mVertexAnimation->GetDuration(mFramesPerSecond))
-	{
-		mVertexAnimation = nullptr;
 	}
 }

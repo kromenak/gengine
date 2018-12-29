@@ -52,6 +52,7 @@ private:
 	
 	// General-purpose mapping from class Type to class instance.
 	// Use "Set" to add an entry and "Get" to retrieve an entry.
+	//TODO: Should "Services" be in charge of deleting these on exit?
 	static std::unordered_map<Type, void*> sTypeToInstancePointer;
 };
 
