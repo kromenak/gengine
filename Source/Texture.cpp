@@ -232,7 +232,7 @@ void Texture::GenerateOpenGlTexture()
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 }
 
-void Texture::ParseFromData(char *data, int dataLength)
+void Texture::ParseFromData(char* data, int dataLength)
 {
     BinaryReader reader(data, dataLength);
 	
@@ -298,6 +298,12 @@ void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 		{
 			reader.ReadUShort();
 		}
+	}
+	
+	// This seeeeems to work consistently - if the top-left pixel has alpha, flag as a transparent image.
+	if(mHeight > 0 && mWidth > 0 && mPixels[3] == 0)
+	{
+		mHasAlpha = true;
 	}
 }
 

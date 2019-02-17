@@ -20,6 +20,14 @@ class SDL_Surface;
 class Texture : Asset
 {
 public:
+	/*
+	enum class Format
+	{
+		RGB,
+		RGBA
+	};
+	*/
+	
 	static Texture* White;
 	static Texture* Black;
 	
@@ -44,6 +52,8 @@ public:
     unsigned int GetHeight() { return mHeight; }
     unsigned char* GetPixelData() const { return mPixels; }
 	
+	bool HasAlpha() { return mHasAlpha; }
+	
 	Color32 GetPixelColor32(int x, int y);
 	
     void WriteToFile(std::string filePath);
@@ -58,6 +68,9 @@ private:
     
     // An ID for the texture object generated in OpenGL.
     GLuint mTextureId = GL_NONE;
+	
+	// If true, the texture has alpha, so it should probably be rendered in the translucent pass.
+	bool mHasAlpha = false;
 	
 	void GenerateOpenGlTexture();
 	
