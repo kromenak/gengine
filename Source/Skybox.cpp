@@ -140,6 +140,48 @@ void Skybox::Render()
     mSkyboxMesh->Render();
 }
 
+void Skybox::SetRightTexture(Texture* texture)
+{
+	if(texture == nullptr) { return; }
+	mRightTexture = texture;
+	SetDefaultTexture(texture);
+}
+
+void Skybox::SetLeftTexture(Texture* texture)
+{
+	if(texture == nullptr) { return; }
+	mLeftTexture = texture;
+	SetDefaultTexture(texture);
+}
+
+void Skybox::SetFrontTexture(Texture* texture)
+{
+	if(texture == nullptr) { return; }
+	mFrontTexture = texture;
+	SetDefaultTexture(texture);
+}
+
+void Skybox::SetBackTexture(Texture* texture)
+{
+	if(texture == nullptr) { return; }
+	mBackTexture = texture;
+	SetDefaultTexture(texture);
+}
+
+void Skybox::SetUpTexture(Texture* texture)
+{
+	if(texture == nullptr) { return; }
+	mUpTexture = texture;
+	SetDefaultTexture(texture);
+}
+
+void Skybox::SetDownTexture(Texture* texture)
+{
+	if(texture == nullptr) { return; }
+	mDownTexture = texture;
+	SetDefaultTexture(texture);
+}
+
 void Skybox::SetDefaultTexture(Texture* texture)
 {
 	// The purpose of this is to ensure that each side of the skybox has a valid texture to use.

@@ -19,12 +19,12 @@ public:
 	
     void Render();
     
-	void SetRightTexture(Texture* texture) { mRightTexture = texture; SetDefaultTexture(texture); }
-    void SetLeftTexture(Texture* texture) { mLeftTexture = texture; SetDefaultTexture(texture); }
-	void SetFrontTexture(Texture* texture) { mFrontTexture = texture; SetDefaultTexture(texture); }
-    void SetBackTexture(Texture* texture) { mBackTexture = texture; SetDefaultTexture(texture); }
-    void SetUpTexture(Texture* texture) { mUpTexture = texture; SetDefaultTexture(texture); }
-    void SetDownTexture(Texture* texture) { mDownTexture = texture; SetDefaultTexture(texture); }
+	void SetRightTexture(Texture* texture);
+	void SetLeftTexture(Texture* texture);
+	void SetFrontTexture(Texture* texture);
+	void SetBackTexture(Texture* texture);
+	void SetUpTexture(Texture* texture);
+	void SetDownTexture(Texture* texture);
     
     void SetAzimuth(float azimuth) { mAzimuth = azimuth; }
     
