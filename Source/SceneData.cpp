@@ -193,3 +193,47 @@ Color32 SceneData::GetWalkBoundaryColor(Vector3 position) const
 	}
 	return mGeneralSIF->GetWalkBoundaryColor(position);
 }
+
+std::vector<const NVCItem*> SceneData::GetViableVerbsForNoun(std::string noun, GKActor* ego) const
+{
+	// As we iterate, we'll use this to keep track of what verbs are in use.
+	// We don't want verb repeats - a new item with the same verb will overwrite the old item.
+	std::unordered_map<std::string, const NVCItem*> verbsToActions;
+	for(auto& nvc : mNounVerbCaseSets)
+	{
+		const std::vector<NVCItem>& allActions = nvc->GetActionsForNoun(noun);
+		for(auto& action : allActions)
+		{
+			if(nvc->IsCaseMet(&action, ego))
+			{
+				verbsToActions[action.verb] = &action;
+			}
+		}
+	}
+	
+	// Finally, convert our map to a vector to return.
+	std::vector<const NVCItem*> viableActions;
+	for(auto entry : verbsToActions)
+	{
+		viableActions.push_back(entry.second);
+	}
+	return viableActions;
+}
+
+const NVCItem* SceneData::GetNounVerbAction(std::string noun, std::string verb, GKActor* ego) const
+{
+	// Cycle through NVCs, trying to find a valid action.
+	// Again, any later match will overwrite an earlier match.
+	const NVCItem* action = nullptr;
+	for(auto& nvc : mNounVerbCaseSets)
+	{
+		const NVCItem* possibleAction = nvc->GetAction(noun, verb);
+		if(possibleAction != nullptr && nvc->IsCaseMet(possibleAction, ego))
+		{
+			action = possibleAction;
+		}
+	}
+	return action;
+}
+
+

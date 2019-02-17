@@ -194,6 +194,12 @@ void Scene::OnSceneEnter()
 				// Set model.
 				actor->GetMeshRenderer()->SetModel(modelDef->model);
 				mActors.push_back(actor);
+				
+				// If it's a "gas prop", use provided gas as the fidget for the actor.
+				if(modelDef->type == SceneModelData::Type::GasProp)
+				{
+					actor->StartFidget(modelDef->gas);
+				}
 				break;
 			}
 				
@@ -243,7 +249,10 @@ void Scene::InitEgoPosition(std::string positionName)
     if(position->camera != nullptr)
     {
         mCamera->SetPosition(position->camera->position);
-        mCamera->SetRotation(Quaternion(Vector3::UnitY, position->camera->angle.GetX()));
+		
+		Quaternion rotation = Quaternion(Vector3::UnitY, position->camera->angle.GetX()) *
+		Quaternion(Vector3::UnitX, position->camera->angle.GetY());
+        mCamera->SetRotation(rotation);
     }
 }
 
@@ -253,7 +262,10 @@ void Scene::SetCameraPosition(std::string cameraName)
 	if(camera != nullptr)
 	{
 		mCamera->SetPosition(camera->position);
-		mCamera->SetRotation(Quaternion(Vector3::UnitY, camera->angle.GetX()));
+		
+		Quaternion rotation = Quaternion(Vector3::UnitY, camera->angle.GetX()) *
+		Quaternion(Vector3::UnitX, camera->angle.GetY());
+		mCamera->SetRotation(rotation);
 	}
 }
 
@@ -330,22 +342,20 @@ void Scene::Interact(const Ray& ray)
     // If we couldn't find any scene model data for this model, we're done.
     if(sceneModelData == nullptr) { return; }
 	
-	//TODO: If a specific verb is pre-defined for this object, just use that directly.
+	// If a specific verb is pre-defined for this object, just use that directly.
+	if(!sceneModelData->verb.empty())
+	{
+		std::cout << "Trying to play default verb " << sceneModelData->verb << std::endl;
+		const NVCItem* action = mSceneData.GetNounVerbAction(sceneModelData->noun, sceneModelData->verb, mEgo);
+		if(action != nullptr)
+		{
+			action->Execute();
+		}
+		return;
+	}
 	
 	// Find all verbs that can be used for this object.
-	std::vector<const NVCItem*> viableActions;
-	std::vector<NVC*> nvcs = mSceneData.GetNounVerbCaseSets();
-	for(auto& nvc : nvcs)
-	{
-		const std::vector<NVCItem>& allActions = nvc->GetActionsForNoun(sceneModelData->noun);
-		for(auto& action : allActions)
-		{
-			if(nvc->IsCaseMet(&action, mEgo))
-			{
-				viableActions.push_back(&action);
-			}
-		}
-	}
+	std::vector<const NVCItem*> viableActions = mSceneData.GetViableVerbsForNoun(sceneModelData->noun, mEgo);
 	
 	// Show the action bar. Internally, this takes care of executing the chosen action.
 	mActionBar->Show(viableActions);
