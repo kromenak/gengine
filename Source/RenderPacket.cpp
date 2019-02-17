@@ -9,6 +9,15 @@
 #include "Mesh.h"
 #include "Submesh.h"
 
+bool RenderPacket::IsTransparent()
+{
+	for(int i = 0; i < materialsCount; i++)
+	{
+		if(materials[i].IsTransparent()) { return true; }
+	}
+	return false;
+}
+
 void RenderPacket::Render()
 {
 	const std::vector<Submesh*>& submeshes = mesh->GetSubmeshes();
