@@ -235,29 +235,56 @@ void Renderer::Render()
     {
         std::vector<RenderPacket> packets = meshRenderer->GetRenderPackets();
         allRenderPackets.insert(allRenderPackets.end(), packets.begin(), packets.end());
-        //meshRenderer->Render();
     }
     
     // Render the packets.
     for(auto& packet : allRenderPackets)
     {
-        packet.Render();
+		if(!packet.IsTransparent())
+		{
+        	packet.Render();
+		}
     }
+	
+	// Render opaque BSP first.
+	if(mBSP != nullptr)
+	{
+		mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
+		mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition());
+	}
 	
     // Reset world matrix to identity for BSP rendering (or for next render cycle).
 	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
-    
-    // From here, we need alpha blending.
+	
+	// From here, we need alpha blending.
     // Since we render opaque and alpha BSP in one go, it needs to be on for BSP.
     // And then we certainly need alpha blending for UI rendering.
     glEnable(GL_BLEND); // do alpha blending (transparent rendering)
     glDepthMask(GL_FALSE); // don't write to the depth buffer
-    
+	
+	// Render translucent BSP.
+	if(mBSP != nullptr)
+	{
+		mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
+		mBSP->RenderTranslucent(mCamera->GetOwner()->GetPosition());
+	}
+	
+	/*
     // Render the BSP.
     if(mBSP != nullptr)
     {
         mBSP->Render(mCamera->GetOwner()->GetPosition());
     }
+	*/
+	
+	// Render the packets.
+	for(auto& packet : allRenderPackets)
+	{
+		if(packet.IsTransparent())
+		{
+			packet.Render();
+		}
+	}
 	
     // Enable alpha-blended rendering and render UI elements.
     glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
