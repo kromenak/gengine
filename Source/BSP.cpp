@@ -20,7 +20,17 @@ BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
 
 void BSP::Render(Vector3 cameraPosition)
 {
-    RenderTree(mNodes[mRootNodeIndex], cameraPosition);
+	RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Any);
+}
+
+void BSP::RenderOpaque(Vector3 cameraPosition)
+{
+	RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Opaque);
+}
+
+void BSP::RenderTranslucent(Vector3 cameraPosition)
+{
+	RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Translucent);
 }
 
 bool BSP::RaycastNearest(const Ray& ray, HitInfo& outHitInfo)
@@ -190,7 +200,7 @@ void BSP::SetTexture(std::string objectName, Texture* texture)
 	}
 }
 
-void BSP::RenderTree(BSPNode* node, Vector3 position)
+void BSP::RenderTree(BSPNode* node, Vector3 position, RenderType renderType)
 {
     // Figure out the location of the camera position relative to the plane.
     PointLocation location = GetPointLocation(position, mPlanes[node->planeIndex]);
@@ -198,37 +208,47 @@ void BSP::RenderTree(BSPNode* node, Vector3 position)
     // Using "Behind" here acts as a "front-to-back" BSP renderer.
     // Pros: If depth-buffer is enabled, renders opaque graphics most efficiently.
     // Cons: Can't support non-opaque graphics. Only works if depth-buffer is enabled.
-    
+	
     // Using "InFrontOf" here acts as a "back-to-front" BSP renderer.
     // Pros: Without depth-buffer, will render both opaque and non-opaque graphics correctly.
     // Cons: More overdraw due to pixel redraw without depth-buffer.
-    if(location == PointLocation::InFrontOf)
+	PointLocation comparison = PointLocation::InFrontOf;
+	if(renderType == RenderType::Opaque)
+	{
+		comparison = PointLocation::Behind;
+	}
+	else if(renderType == RenderType::Translucent)
+	{
+		comparison = PointLocation::InFrontOf;
+	}
+	
+    if(location == comparison)
     {
         int backNodeIndex = node->backChildIndex;
         if(backNodeIndex >= 0 && backNodeIndex < mNodes.size())
         {
-            RenderTree(mNodes[backNodeIndex], position);
+            RenderTree(mNodes[backNodeIndex], position, renderType);
         }
         
         // Render polygons at current node.
         int polygonIndex = node->polygonIndex;
         for(int i = polygonIndex; i < polygonIndex + node->polygonCount; i++)
         {
-            RenderPolygon(mPolygons[i]);
+            RenderPolygon(mPolygons[i], renderType);
         }
         if(node->polygonIndex2 != 65535 && node->polygonCount2 > 0)
         {
             polygonIndex = node->polygonIndex2;
             for(int i = polygonIndex; i < polygonIndex + node->polygonCount2; i++)
             {
-                RenderPolygon(mPolygons[i]);
+                RenderPolygon(mPolygons[i], renderType);
             }
         }
         
         int frontNodeIndex = node->frontChildIndex;
         if(frontNodeIndex >= 0 && frontNodeIndex < mNodes.size())
         {
-            RenderTree(mNodes[frontNodeIndex], position);
+            RenderTree(mNodes[frontNodeIndex], position, renderType);
         }
     }
     else
@@ -236,33 +256,33 @@ void BSP::RenderTree(BSPNode* node, Vector3 position)
         int frontNodeIndex = node->frontChildIndex;
         if(frontNodeIndex >= 0 && frontNodeIndex < mNodes.size())
         {
-            RenderTree(mNodes[frontNodeIndex], position);
+            RenderTree(mNodes[frontNodeIndex], position, renderType);
         }
         
         // Render polygons at current node.
         int polygonIndex = node->polygonIndex;
         for(int i = polygonIndex; i < polygonIndex + node->polygonCount; i++)
         {
-            RenderPolygon(mPolygons[i]);
+            RenderPolygon(mPolygons[i], renderType);
         }
         if(node->polygonIndex2 != 65535 && node->polygonCount2 > 0)
         {
             polygonIndex = node->polygonIndex2;
             for(int i = polygonIndex; i < polygonIndex + node->polygonCount2; i++)
             {
-                RenderPolygon(mPolygons[i]);
+                RenderPolygon(mPolygons[i], renderType);
             }
         }
         
         int backNodeIndex = node->backChildIndex;
         if(backNodeIndex >= 0 && backNodeIndex < mNodes.size())
         {
-            RenderTree(mNodes[backNodeIndex], position);
+            RenderTree(mNodes[backNodeIndex], position, renderType);
         }
     }
 }
 
-void BSP::RenderPolygon(BSPPolygon* polygon)
+void BSP::RenderPolygon(BSPPolygon* polygon, RenderType renderType)
 {
     // Can't render a null object DUH.
     if(polygon == nullptr) { return; }
@@ -273,11 +293,19 @@ void BSP::RenderPolygon(BSPPolygon* polygon)
     {
         // Not going to render non-visible surfaces.
         if(!surface->visible) { return; }
-        
+		
         // Retrieve texture and activate it, if possible.
         Texture* tex = surface->texture;
         if(tex != nullptr)
         {
+			// Determine whether this is a translucent polygon or not.
+			// If we aren't rendering that type right now, return.
+			if((tex->HasAlpha() && renderType == RenderType::Opaque) ||
+			   (!tex->HasAlpha() && renderType == RenderType::Translucent))
+			{
+				return;
+			}
+			
             tex->Activate();
         }
         else
@@ -384,9 +412,10 @@ void BSP::ParseFromData(char *data, int dataLength)
          (B25, toilet paper has 2)
          (B25/RC1 - many instances of 0/1 too)
         */
-		reader.ReadUInt();
-        //unsigned int flags = reader.ReadUInt();
-        
+		//reader.ReadUInt();
+        unsigned int flags = reader.ReadUInt();
+		std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
+		
         // Combination of flags 8+4 seems to indicate thing is not visible.
 		/*
 		if(flags == 12)

@@ -99,11 +99,13 @@ class BSP : Asset
         Behind,
         OnPlane
     };
-    
+	
 public:
     BSP(std::string name, char* data, int dataLength);
     
     void Render(Vector3 cameraPosition);
+	void RenderOpaque(Vector3 cameraPosition);
+	void RenderTranslucent(Vector3 cameraPosition);
     
     bool RaycastNearest(const Ray& ray, HitInfo& outHitInfo);
 	bool RaycastSingle(const Ray& ray, std::string name, HitInfo& outHitInfo);
@@ -114,6 +116,13 @@ public:
 	void SetTexture(std::string objectName, Texture* texture);
     
 private:
+	enum class RenderType
+	{
+		Any,
+		Opaque,
+		Translucent
+	};
+	
     // Points to the root node in our node list.
     // Almost always 0, but maybe not in some cases?
     unsigned int mRootNodeIndex;
@@ -145,8 +154,8 @@ private:
     
     //TODO: bounding spheres?
     
-    void RenderTree(BSPNode* node, Vector3 cameraPosition);
-    void RenderPolygon(BSPPolygon* polygon);
+    void RenderTree(BSPNode* node, Vector3 cameraPosition, RenderType renderType);
+    void RenderPolygon(BSPPolygon* polygon, RenderType renderType);
     
     PointLocation GetPointLocation(Vector3 position, Plane* plane);
     
