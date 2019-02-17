@@ -5,7 +5,6 @@
 //  Created by Clark Kromenaker on 10/16/17.
 //
 #pragma once
-
 #include <algorithm>
 #include <cmath>
 
@@ -34,7 +33,7 @@ namespace Math
     
     inline bool IsZero(float val)
     {
-        return (fabsf(val) < kEpsilon);
+		return (std::fabsf(val) < kEpsilon);
     }
     
     inline bool AreEqual(float a, float b)
@@ -54,7 +53,7 @@ namespace Math
     
     inline float Mod(float num1, float num2)
     {
-        return fmod(num1, num2);
+		return std::fmod(num1, num2);
     }
     
     inline float Sin(float radians)

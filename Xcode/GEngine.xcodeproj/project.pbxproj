@@ -40,6 +40,7 @@
 		4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A95A1F243349000A689F /* SDLLog.cpp */; };
 		4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */; };
 		4B17D707206098B100EBD298 /* GameCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D706206098B100EBD298 /* GameCamera.cpp */; };
+		4B1A2CB522053097000C34D8 /* MathTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1A2CB422053097000C34D8 /* MathTests.cpp */; };
 		4B22F4E7217170A00065B152 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4B22F4E6217170A00065B152 /* Assets.xcassets */; };
 		4B22F4EA217170A00065B152 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4B22F4E8217170A00065B152 /* Main.storyboard */; };
 		4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421120A905B600DE8C0D /* Cursor.cpp */; };
@@ -291,6 +292,7 @@
 		4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoundtrackPlayer.cpp; path = ../Source/SoundtrackPlayer.cpp; sourceTree = "<group>"; };
 		4B17D705206098B100EBD298 /* GameCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameCamera.h; path = ../Source/GameCamera.h; sourceTree = "<group>"; };
 		4B17D706206098B100EBD298 /* GameCamera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GameCamera.cpp; path = ../Source/GameCamera.cpp; sourceTree = "<group>"; };
+		4B1A2CB422053097000C34D8 /* MathTests.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MathTests.cpp; path = ../Tests/MathTests.cpp; sourceTree = "<group>"; };
 		4B22F4D82171709F0065B152 /* gengine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = gengine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B22F4E6217170A00065B152 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4B22F4E9217170A00065B152 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -505,6 +507,7 @@
 			isa = PBXGroup;
 			children = (
 				4B1112A61F820AC100AFDDFC /* catch.hh */,
+				4B1A2CB422053097000C34D8 /* MathTests.cpp */,
 				4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */,
 				4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */,
 				4B1112A71F820B0400AFDDFC /* TestMain.cpp */,
@@ -1002,6 +1005,7 @@
 				4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */,
 				4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */,
 				4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */,
+				4B1A2CB522053097000C34D8 /* MathTests.cpp in Sources */,
 				4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */,
 			);
