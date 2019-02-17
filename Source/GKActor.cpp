@@ -19,6 +19,7 @@ GKActor::GKActor(bool forCharacter) : Actor()
 	// For some reason, characters (Gabe, Grace, etc) face backwards by default.
 	// To remedy this, I'm sticking the mesh render in a child object, rotated 180 degrees.
 	// Props don't seem to have this problem. What gives!?
+	//TODO: Probably update actor hierarchy to add some other class for props vs. actors.
 	if(forCharacter)
 	{
 		Actor* meshParent = new Actor();
@@ -63,6 +64,11 @@ void GKActor::SetState(GKActor::State state)
 		mGasPlayer->SetGas(mListenGas);
 		break;
     }
+}
+
+void GKActor::StartFidget(GAS* gas)
+{
+	mGasPlayer->SetGas(gas);
 }
 
 void GKActor::PlayAnimation(VertexAnimation* animation)

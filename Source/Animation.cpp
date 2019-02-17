@@ -18,6 +18,13 @@ void VertexAnimNode::Play(Animation* anim)
 		GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(vertexAnimation->GetModelName());
 		if(actor != nullptr)
 		{
+			// If non-zero value is specified, position the model before starting the animation.
+			if(position != Vector3::Zero)
+			{
+				actor->SetPosition(position - offsetFromOrigin);
+				//TODO: Set heading.
+			}
+			
 			if(anim != nullptr)
 			{
 				actor->PlayAnimation(vertexAnimation, anim->GetFramesPerSecond());
@@ -99,13 +106,50 @@ void Animation::ParseFromData(char *data, int dataLength)
                 // Load vertex animation with the name.
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
-                
+				
+				// Create and push back the animation node now.
+				// The remaining fields are optional.
                 VertexAnimNode* node = new VertexAnimNode();
                 node->frameNumber = frameNumber;
                 node->vertexAnimation = Services::GetAssets()->LoadVertexAnimation(entry->value);
                 mFrames[frameNumber].push_back(node);
-                
-                //TODO: Come back to do additional parsing here.
+				
+				// Next up, are (x1, y1, z1) and (angle1).
+				// Not sure what these are meant for yet. Doesn't seem to be a position; that's the next set.
+				if(entry->next == nullptr) { continue; }
+				entry = entry->next;
+				node->offsetFromOrigin.SetX(entry->GetValueAsFloat());
+				
+				if(entry->next == nullptr) { continue; }
+				entry = entry->next;
+				node->offsetFromOrigin.SetZ(entry->GetValueAsFloat());
+				
+				if(entry->next == nullptr) { continue; }
+				entry = entry->next;
+				node->offsetFromOrigin.SetY(entry->GetValueAsFloat());
+				
+				if(entry->next == nullptr) { continue; }
+				entry = entry->next;
+				node->headingFromOrigin = entry->GetValueAsFloat();
+				
+				// Next are (x2, z2, y2) and (angle2). Note z/y are flipped, due to Maya->Game conversion.
+				// Based on examining anim files (like RC1 fountain) and expected positions,
+				// this appears to be a position to move the model to at the start of the animation?
+				if(entry->next == nullptr) { continue; }
+				entry = entry->next;
+				node->position.SetX(entry->GetValueAsFloat());
+				
+				if(entry->next == nullptr) { continue; }
+				entry = entry->next;
+				node->position.SetZ(entry->GetValueAsFloat());
+				
+				if(entry->next == nullptr) { continue; }
+				entry = entry->next;
+				node->position.SetY(entry->GetValueAsFloat());
+				
+				if(entry->next == nullptr) { continue; }
+				entry = entry->next;
+				node->heading = entry->GetValueAsFloat();
             }
         }
 		// "STextures" changes textures on a scene (BSP) model.

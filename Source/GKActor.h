@@ -47,6 +47,8 @@ public:
     void SetTalkGas(GAS* gas) { mTalkGas = gas; }
     void SetListenGas(GAS* gas) { mListenGas = gas; }
 	
+	void StartFidget(GAS* gas);
+	
 	void PlayAnimation(VertexAnimation* animation);
 	void PlayAnimation(VertexAnimation* animation, int framesPerSecond);
 	void SampleAnimation(VertexAnimation* animation, int frame);
