@@ -49,3 +49,12 @@ void Material::SetActiveColor(const Color32& color)
 {
 	mShader->SetUniformVector4("uColor", color);
 }
+
+bool Material::IsTransparent()
+{
+	if(mDiffuseTexture != nullptr)
+	{
+		return mDiffuseTexture->HasAlpha();
+	}
+	return false;
+}

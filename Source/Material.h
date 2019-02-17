@@ -4,7 +4,7 @@
 // Clark Kromenaker
 //
 // The material describes the visual output for rendering.
-// It indicates the shader to use and any input parameters for the shader.
+// It indicates the shader to use and any input parameters for the shader (texture, color, etc).
 //
 #pragma once
 #include "Color32.h"
@@ -22,15 +22,17 @@ public:
     
     bool operator==(const Material& other) const;
 	
+	void Activate();
+	
     void SetShader(Shader* shader) { mShader = shader; }
 	
 	void SetColor(const Color32& color) { mColor = color; }
     void SetDiffuseTexture(Texture* diffuseTexture) { mDiffuseTexture = diffuseTexture; }
 	
-	void Activate();
-	
 	void SetWorldTransformMatrix(const Matrix4& matrix);
 	void SetActiveColor(const Color32& color);
+	
+	bool IsTransparent();
 	
 private:
     // Shader to use.

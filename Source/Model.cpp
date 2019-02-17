@@ -88,7 +88,9 @@ void Model::ParseFromData(char *data, int dataLength)
 		
 		// We can derive an import scale factor from the i/j/k basis by taking the length.
 		Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
-		//std::cout << "    Scale: " << scale << std::endl;
+		#ifdef DEBUG_OUTPUT
+		std::cout << "    Scale: " << scale << std::endl;
+		#endif
 		
 		// If the imported model IS scaled, we need to normalize our bases before generating a rotation.
 		// Otherwise, the rotation will be off/incorrect.
