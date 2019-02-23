@@ -72,7 +72,7 @@ bool GEngine::Initialize()
 	UseDefaultCursor();
 	
 	//mAssetManager.LoadVertexAnimation("R25CHAIR_GABR25SIT.ACT");
-    //mAssetManager.WriteBarnAssetToFile("R25CHAIR_GABR25SIT.ACT");
+    //mAssetManager.WriteBarnAssetToFile("FOUNTAINRC1.ANM");
     //mAssetManager.WriteAllBarnAssetsToFile(".CUR", "Cursors");
 	
 	// Load button icon manager.
@@ -84,7 +84,7 @@ bool GEngine::Initialize()
 	// Create game progress.
 	Services::Set<GameProgress>(new GameProgress());
 	
-    LoadScene("R25");
+    LoadScene("RC1");
     return true;
 }
 

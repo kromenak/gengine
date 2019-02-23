@@ -4,6 +4,8 @@ G-Engine is a C++ game engine that is capable of reading and using the data file
 
 The goal of this project is to create a cross-platform game engine that can be used to play GK3. The original game only supported Windows, and it is also a bit buggy on modern hardware. Since GK3 is a heavily data-driven game, the idea is to build a newer, more modern engine that can use the original's data files. Completely new features can also be implemented.
 
+See [my blog post](http://clarkkromenaker.com/post/gengine-01-introduction/) introducing the project for more in-depth info!
+
 ## Getting Started
 
 Currently, the project only builds and runs in Xcode as a command line project. Simply download, open in Xcode, and build/run.
