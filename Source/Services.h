@@ -40,6 +40,9 @@ public:
     static SheepManager* GetSheep() { return sSheep; }
     static void SetSheep(SheepManager* shp) { sSheep = shp; }
 	
+	static ReportManager* GetReports() { return sReportManager; }
+	static void SetReports(ReportManager* reportManager) { sReportManager = reportManager; }
+	
 	template<class T> static void Set(T* instance);
 	template<class T> static T* Get();
     
@@ -49,6 +52,7 @@ private:
     static Renderer* sRenderer;
     static AudioManager* sAudio;
     static SheepManager* sSheep;
+	static ReportManager* sReportManager;
 	
 	// General-purpose mapping from class Type to class instance.
 	// Use "Set" to add an entry and "Get" to retrieve an entry.
@@ -58,9 +62,7 @@ private:
 
 template<class T> void Services::Set(T* instance)
 {
-	// Make this "static" so we can AVOID doing the type generation every time this function
-	// is called with this class type T. This will only run the first time the function is called.
-	// Note: we *could* limit use of Set/Get to only classes that make use of TYPE_DECL and TYPE_DEF...but I'd rather not for now!
+	// Get type of class. So, note that this only works if the class has RTTI.
 	Type type = T::GetType();
 	
 	// Just create a mapping from the type to the instance!
@@ -69,7 +71,6 @@ template<class T> void Services::Set(T* instance)
 
 template<class T> T* Services::Get()
 {
-	// See note in "Set" about why this is static.
 	Type type = T::GetType();
 	
 	// Attempt to retrieve and return the instance from the type.
