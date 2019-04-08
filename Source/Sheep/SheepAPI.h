@@ -15,21 +15,41 @@
 #include "SheepScript.h"
 #include "Value.h"
 
-extern std::vector<SysImport> sysFuncs;
+// A "full" system function declaration.
+// Contains extra data about a function that is helpful, but doesn't uniquely identify the function signature.
+// Inherits from SysImport because that DOES uniquely identify the signature!
+struct SysFuncDecl : public SysImport
+{
+	// If true, this function can be "waited" upon.
+	// If false, it executes and returns immediately.
+	bool waitable = false;
+	
+	// If true, this function can only work in dev builds.
+	bool devOnly = false;
+	
+	//TODO: For in-game help output, we may need to store argument names AND description text.
+	// For example, HelpCommand("AddStreamContent") outputs this:
+	/*
+	 ----- 'Dump' * 03/16/2019 * 11:39:21 -----
+	 ** [DEBUG] AddStreamContent(string streamName, string content) **
+	 Adds an additional content type to the stream. Possible values for the 'content' parameter are: 'begin' (report headers), 'content' (report content), 'end' (report footers), 'category' (the category of the report), 'date' (the date the report was made), 'time' (the time the report was made), 'debug' (file/line debug info), 'timeblock' (the current timeblock if there is one), and 'location' (the current game scene location if there is one).
+	*/
+};
+
 void AddSysFuncDecl(const std::string& name, char retType, std::initializer_list<char> argTypes, bool waitable, bool dev);
+SysFuncDecl* GetSysFuncDecl(const std::string& name);
+SysFuncDecl* GetSysFuncDecl(const SysImport* sysImport);
 
 // Functions for calling functions of various argument lengths.
 Value CallSysFunc(const std::string& name);
 Value CallSysFunc(const std::string& name, const Value& x1);
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2);
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3);
-Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
-				  const Value& x4);
-Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
-				  const Value& x4, const Value& x5);
-Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3,
-				  const Value& x4, const Value& x5, const Value& x6);
+Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3, const Value& x4);
+Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3, const Value& x4, const Value& x5);
+Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3, const Value& x4, const Value& x5, const Value& x6);
 
+// These are used in the below macros to convert keywords into integers using ## macro operator.
 #define void_TYPE 0
 #define int_TYPE 1
 #define float_TYPE 2
@@ -107,7 +127,7 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 		}                                                   			\
 	} name##_instance
 
-#define shpvoid uint8_t
+#define shpvoid int
 
 // ACTORS
 shpvoid Blink(std::string actorName);
@@ -211,9 +231,9 @@ shpvoid TurnHead(std::string actorName, int percentX, int percentY, int duration
 shpvoid TurnToModel(std::string actorName, std::string modelName); // WAIT
 
 shpvoid WalkerBoundaryBlockModel(std::string modelName);
-shpvoid WalkerBoundaryBlockRegion(int regionIndex);
+shpvoid WalkerBoundaryBlockRegion(int regionIndex, int regionBoundaryIndex);
 shpvoid WalkerBoundaryUnblockModel(std::string modelName);
-shpvoid WalkerBoundaryUnblockRegion(int regionIndex);
+shpvoid WalkerBoundaryUnblockRegion(int regionIndex, int regionBoundaryIndex);
 
 shpvoid WalkNear(std::string actorName, std::string positionName); // WAIT
 shpvoid WalkNearModel(std::string actorName, std::string modelName); // WAIT

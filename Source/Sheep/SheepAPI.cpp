@@ -5,6 +5,8 @@
 //
 #include "SheepAPI.h"
 
+#include <functional> // for std::hash
+
 #include "AnimationPlayer.h"
 #include "CharacterManager.h"
 #include "GameProgress.h"
@@ -24,11 +26,37 @@ using namespace std;
 #define DEV_FUNC true
 #define REL_FUNC false
 
-std::vector<SysImport> sysFuncs;
+// A big array of all our defined system functions.
+// This is populated at program start and then never changed.
+std::vector<SysFuncDecl> sysFuncs;
 
+// Maps from system function name (or hash) to index in the sysFuncs vector.
+// We can't map to SysFuncDecl& because vector might move memory around when populating the list.
+// It IS OK to get references after initial population, since the vector never changes!
+std::map<std::string, int> nameToSysFunc;
+std::unordered_map<size_t, int> hashToSysFunc;
+
+size_t CalcHashForSysFunc(const SysImport& sysImport)
+{
+	// This is a variation of Bernstein hash, also called djb2.
+	// Original uses values 5381/33 instead of 17/31.
+	// It's actually unknown why these values result in a good hash...hope it works out!
+	size_t res = 17;
+	std::string lowerName = StringUtil::ToLowerCopy(sysImport.name);
+	res = res * 31 + std::hash<string>()(lowerName);
+	res = res * 31 + std::hash<int>()((int)sysImport.argumentTypes.size());
+	for(auto& argType : sysImport.argumentTypes)
+	{
+		res = res * 31 + std::hash<char>()(argType);
+	}
+	return res;
+}
+
+// A list of every defined system function. Add to this by calling AddSysFuncDecl.
+// Functions are added by using RegFuncX macros, which in turn call AddSysFuncDecl and put function pointers into call maps.
 void AddSysFuncDecl(const std::string& name, char retType, std::initializer_list<char> argTypes, bool waitable, bool dev)
 {
-	SysImport sysFunc;
+	SysFuncDecl sysFunc;
 	sysFunc.name = name;
 	sysFunc.returnType = retType;
 	for(auto argType : argTypes)
@@ -37,7 +65,34 @@ void AddSysFuncDecl(const std::string& name, char retType, std::initializer_list
 	}
 	sysFunc.waitable = waitable;
 	sysFunc.devOnly = dev;
+	
 	sysFuncs.push_back(sysFunc);
+	
+	// Store a mapping from name and hash to index in the vector of system functions.
+	// We can't store references because std::vector can move items around on us during population of the vector.
+	nameToSysFunc[StringUtil::ToLowerCopy(name)] = (int)sysFuncs.size() - 1;
+	hashToSysFunc[CalcHashForSysFunc(sysFunc)] = (int)sysFuncs.size() - 1;
+}
+
+SysFuncDecl* GetSysFuncDecl(const std::string& name)
+{
+	auto it = nameToSysFunc.find(name);
+	if(it != nameToSysFunc.end())
+	{
+		return &sysFuncs[it->second];
+	}
+	return nullptr;
+}
+
+SysFuncDecl* GetSysFuncDecl(const SysImport* sysImport)
+{
+	size_t hash = CalcHashForSysFunc(*sysImport);
+	auto it = hashToSysFunc.find(hash);
+	if(it != hashToSysFunc.end())
+	{
+		return &sysFuncs[it->second];
+	}
+	return nullptr;
 }
 
 // Maps from function name to a function pointer.
@@ -315,7 +370,7 @@ shpvoid StartListenFidget(string actorName) // WAIT
 }
 RegFunc1(StartListenFidget, void, string, WAITABLE, REL_FUNC);
 
-shpvoid StartTalkFidget(string actorName) // WAIT
+shpvoid StartTalkFidget(std::string actorName) // WAIT
 {
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
@@ -325,6 +380,48 @@ shpvoid StartTalkFidget(string actorName) // WAIT
 	return 0;
 }
 RegFunc1(StartTalkFidget, void, string, WAITABLE, REL_FUNC);
+
+shpvoid StopFidget(std::string actorName)
+{
+	return 0;
+}
+RegFunc1(StopFidget, void, string, WAITABLE, REL_FUNC);
+
+shpvoid TurnHead(std::string actorName, int percentX, int percentY, int durationMs)
+{
+	return 0;
+}
+RegFunc4(TurnHead, void, string, int, int, int, WAITABLE, REL_FUNC);
+
+shpvoid TurnToModel(std::string actorName, std::string modelName)
+{
+	return 0;
+}
+RegFunc2(TurnToModel, void, string, string, WAITABLE, REL_FUNC);
+
+shpvoid WalkerBoundaryBlockModel(std::string modelName)
+{
+	return 0;
+}
+RegFunc1(WalkerBoundaryBlockModel, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid WalkerBoundaryBlockRegion(int regionIndex, int regionBoundaryIndex)
+{
+	return 0;
+}
+RegFunc2(WalkerBoundaryBlockRegion, void, int, int, IMMEDIATE, REL_FUNC);
+
+shpvoid WalkerBoundaryUnblockModel(std::string modelName)
+{
+	return 0;
+}
+RegFunc1(WalkerBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid WalkerBoundaryUnblockRegion(int regionIndex, int regionBoundaryIndex)
+{
+	return 0;
+}
+RegFunc2(WalkerBoundaryUnblockRegion, void, int, int, IMMEDIATE, REL_FUNC);
 
 int WasEgoEverInLocation(string locationName)
 {
@@ -339,15 +436,8 @@ shpvoid StartAnimation(string animationName) // WAIT
 	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
 	if(animation != nullptr)
 	{
-		SheepVM* currentVM = SheepVM::GetCurrent();
-		if(currentVM != nullptr)
-		{
-			GEngine::inst->GetScene()->GetAnimationPlayer()->Play(animation, currentVM->GetWaitCallback());
-		}
-		else
-		{
-			GEngine::inst->GetScene()->GetAnimationPlayer()->Play(animation);
-		}
+		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+		GEngine::inst->GetScene()->GetAnimationPlayer()->Play(animation, currentThread->AddWait());
 	}
 	return 0;
 }
@@ -363,6 +453,107 @@ shpvoid StartVoiceOver(string dialogueName, int numLines) // WAIT
 RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
 
 // APPLICATION
+shpvoid AddPath(std::string pathName)
+{
+	return 0;
+}
+RegFunc1(AddPath, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid FullScanPaths()
+{
+	return 0;
+}
+RegFunc0(FullScanPaths, void, IMMEDIATE, DEV_FUNC);
+
+shpvoid RescanPaths()
+{
+	return 0;
+}
+RegFunc0(RescanPaths, void, IMMEDIATE, DEV_FUNC);
+
+shpvoid DumpBuildInfo()
+{
+	return 0;
+}
+RegFunc0(DumpBuildInfo, void, IMMEDIATE, DEV_FUNC);
+
+shpvoid DumpLayerStack()
+{
+	return 0;
+}
+RegFunc0(DumpLayerStack, void, IMMEDIATE, DEV_FUNC);
+
+shpvoid Edit(std::string filename)
+{
+	return 0;
+}
+RegFunc1(Edit, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid Open(std::string filename)
+{
+	return 0;
+}
+RegFunc1(Open, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid ForceQuitGame()
+{
+	return 0;
+}
+RegFunc0(ForceQuitGame, void, IMMEDIATE, DEV_FUNC);
+
+shpvoid FullReset()
+{
+	return 0;
+}
+RegFunc0(FullReset, void, IMMEDIATE, DEV_FUNC);
+
+shpvoid QuitApp()
+{
+	return 0;
+}
+RegFunc0(QuitApp, void, IMMEDIATE, DEV_FUNC);
+
+shpvoid Screenshot()
+{
+	return 0;
+}
+RegFunc0(Screenshot, void, IMMEDIATE, REL_FUNC);
+
+shpvoid ScreenshotX(std::string filename)
+{
+	return 0;
+}
+RegFunc1(ScreenshotX, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid ShowBinocs()
+{
+	return 0;
+}
+RegFunc0(ShowBinocs, void, IMMEDIATE, REL_FUNC);
+
+shpvoid ShowDrivingInterface()
+{
+	return 0;
+}
+RegFunc0(ShowDrivingInterface, void, IMMEDIATE, REL_FUNC);
+
+shpvoid ShowFingerprintInterface(std::string nounName)
+{
+	return 0;
+}
+RegFunc1(ShowFingerprintInterface, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid ShowSidney()
+{
+	return 0;
+}
+RegFunc0(ShowSidney, void, IMMEDIATE, REL_FUNC);
+
+shpvoid StartGame()
+{
+	return 0;
+}
+RegFunc0(StartGame, void, IMMEDIATE, DEV_FUNC);
 
 // CAMERA
 shpvoid CutToCameraAngle(string cameraName)
@@ -386,7 +577,7 @@ RegFunc5(CutToCameraAngleX, void, float, float, float, float, float, IMMEDIATE, 
 // ENGINE
 shpvoid Call(string functionName) // WAIT
 {
-	Services::GetSheep()->Execute(functionName);
+	//Services::GetSheep()->Execute(functionName);
 	return 0;
 }
 RegFunc1(Call, void, string, WAITABLE, REL_FUNC);
@@ -405,7 +596,8 @@ RegFunc1(CallDefaultSheep, void, string, WAITABLE, REL_FUNC);
 shpvoid CallSheep(string fileName, string functionName) // WAIT
 {
 	std::cout << "CallSheep " << fileName << ", " << functionName << std::endl;
-	Services::GetSheep()->Execute(fileName, functionName);
+	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+	Services::GetSheep()->Execute(fileName, functionName, currentThread->AddWait());
     return 0;
 }
 RegFunc2(CallSheep, void, string, string, WAITABLE, REL_FUNC);
@@ -550,52 +742,203 @@ shpvoid SetScore(int score) // DEV
 }
 RegFunc1(SetScore, void, int, IMMEDIATE, DEV_FUNC);
 
-int IsCurrentLocation(string location)
+int GetTopicCount(std::string noun, std::string verb)
 {
-	string currentLocation = Services::Get<GameProgress>()->GetLocation();
+	return 0;
+}
+RegFunc2(GetTopicCount, int, string, string, IMMEDIATE, REL_FUNC);
+
+int GetTopicCountInt(int nounEnum, int verbEnum)
+{
+	return 0;
+}
+RegFunc2(GetTopicCountInt, int, int, int, IMMEDIATE, REL_FUNC);
+
+int HasTopicsLeft(std::string noun)
+{
+	return 0;
+}
+RegFunc1(HasTopicsLeft, int, string, IMMEDIATE, REL_FUNC);
+
+int IsCurrentLocation(std::string location)
+{
+	std::string currentLocation = Services::Get<GameProgress>()->GetLocation();
 	return StringUtil::EqualsIgnoreCase(currentLocation, location);
 }
 RegFunc1(IsCurrentLocation, int, string, IMMEDIATE, REL_FUNC);
 
-int IsCurrentTime(string timeCode)
+int IsCurrentTime(std::string timeCode)
 {
-	string currentTimeCode = Services::Get<GameProgress>()->GetTimeCode();
+	std::string currentTimeCode = Services::Get<GameProgress>()->GetTimeCode();
     return StringUtil::EqualsIgnoreCase(currentTimeCode, timeCode);
 }
 RegFunc1(IsCurrentTime, int, string, IMMEDIATE, REL_FUNC);
 
-int WasLastLocation(string location)
+int WasLastLocation(std::string location)
 {
-	string lastLocation = Services::Get<GameProgress>()->GetLastLocation();
+	std::string lastLocation = Services::Get<GameProgress>()->GetLastLocation();
 	return StringUtil::EqualsIgnoreCase(lastLocation, location);
 }
 RegFunc1(WasLastLocation, int, string, IMMEDIATE, REL_FUNC);
 
-int WasLastTime(string timeCode)
+int WasLastTime(std::string timeCode)
 {
-	string lastTimeCode = Services::Get<GameProgress>()->GetLastTimeCode();
+	std::string lastTimeCode = Services::Get<GameProgress>()->GetLastTimeCode();
 	return StringUtil::EqualsIgnoreCase(lastTimeCode, timeCode);
 }
 RegFunc1(WasLastTime, int, string, IMMEDIATE, REL_FUNC);
 
 // INVENTORY
-int DoesEgoHaveInvItem(string itemName)
+int DoesEgoHaveInvItem(std::string itemName)
 {
 	return 0;
 }
 RegFunc1(DoesEgoHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
 
-int DoesGabeHaveInvItem(string itemName)
+int DoesGabeHaveInvItem(std::string itemName)
 {
 	return 0;
 }
 RegFunc1(DoesGabeHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
 
-int DoesGraceHaveInvItem(string itemName)
+int DoesGraceHaveInvItem(std::string itemName)
 {
     return 0;
 }
 RegFunc1(DoesGraceHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
+
+// REPORTS
+shpvoid AddStreamContent(std::string streamName, std::string content)
+{
+	if(StringUtil::EqualsIgnoreCase(content, "begin"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "content"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "end"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "category"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "date"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "time"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "debug"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "timeblock"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "location"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "machine"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "user"))
+	{
+		
+	}
+	else if(StringUtil::EqualsIgnoreCase(content, "all"))
+	{
+		
+	}
+	else
+	{
+		//ERROR: Unknown content!
+	}
+	
+	//Services::GetReports()->AddStreamContent(streamName, content);
+	return 0;
+}
+RegFunc2(AddStreamContent, void, string, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid ClearStreamContent(std::string streamName)
+{
+	return 0;
+}
+RegFunc1(ClearStreamContent, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid RemoveStreamContent(std::string streamName, std::string content)
+{
+	return 0;
+}
+RegFunc2(RemoveStreamContent, void, string, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid AddStreamOutput(std::string streamName, std::string output)
+{
+	return 0;
+}
+RegFunc2(AddStreamOutput, void, string, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid ClearStreamOutput(std::string streamName)
+{
+	return 0;
+}
+RegFunc1(ClearStreamOutput, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid RemoveStreamOutput(std::string streamName, std::string output)
+{
+	return 0;
+}
+RegFunc2(RemoveStreamOutput, void, string, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid DisableStream(std::string streamName)
+{
+	return 0;
+}
+RegFunc1(DisableStream, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid EnableStream(std::string streamName)
+{
+	return 0;
+}
+RegFunc1(EnableStream, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid HideReportGraph(std::string graphType)
+{
+	return 0;
+}
+RegFunc1(HideReportGraph, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid ShowReportGraph(std::string graphType)
+{
+	return 0;
+}
+RegFunc1(ShowReportGraph, void, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid SetStreamAction(std::string streamName, std::string action)
+{
+	return 0;
+}
+RegFunc2(SetStreamAction, void, string, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid SetStreamFilename(std::string streamName, std::string filename)
+{
+	return 0;
+}
+RegFunc2(SetStreamFilename, void, string, string, IMMEDIATE, DEV_FUNC);
+
+shpvoid SetStreamFileTruncate(std::string streamName, int truncate)
+{
+	return 0;
+}
+RegFunc2(SetStreamFileTruncate, void, string, int, IMMEDIATE, DEV_FUNC);
 
 // SCENE
 shpvoid SetLocation(string location)
