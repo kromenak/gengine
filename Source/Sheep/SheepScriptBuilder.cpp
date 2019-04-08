@@ -166,85 +166,86 @@ SheepValueType SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
 	
 	// All possible system functions are pre-registered in a giant list.
 	// So, to compile a system call, we just iterate over and find the matching function.
-    for(auto& sysFunc : sysFuncs)
-    {
-		if(StringUtil::EqualsIgnoreCase(sysFunc.name, sysFuncName))
-        {
-            // Right before calling the function, we want to push the argument
-            // count onto the top of the stack.
-            PushI((int)sysFunc.argumentTypes.size());
-            
-            // Add appropriate instruction based on function return type.
-            SheepValueType valueType;
-            if(sysFunc.returnType == 0)
-            {
-                #ifdef DEBUG_BUILDER
-                std::cout << "CallSysFunctionV" << std::endl;
-                #endif
-                AddInstruction(SheepInstruction::CallSysFunctionV);
-                valueType = SheepValueType::Void;
-            }
-            else if(sysFunc.returnType == 1)
-            {
-                #ifdef DEBUG_BUILDER
-                std::cout << "CallSysFunctionI" << std::endl;
-                #endif
-                AddInstruction(SheepInstruction::CallSysFunctionI);
-                valueType = SheepValueType::Int;
-            }
-            else if(sysFunc.returnType == 2)
-            {
-                #ifdef DEBUG_BUILDER
-                std::cout << "CallSysFunctionF" << std::endl;
-                #endif
-                AddInstruction(SheepInstruction::CallSysFunctionF);
-                valueType = SheepValueType::Float;
-            }
-            else if(sysFunc.returnType == 3)
-            {
-                #ifdef DEBUG_BUILDER
-                std::cout << "CallSysFunctionS" << std::endl;
-                #endif
-                AddInstruction(SheepInstruction::CallSysFunctionS);
-                valueType = SheepValueType::String;
-            }
-            else
-            {
-                std::cout << "Invalid Return Type!" << std::endl;
-                return SheepValueType::Void;
-            }
-            
-            // The argument for CallSysFunctionX is the index of the system function
-            // that is to be called. So, find the index or use list size by default
-            int sysFuncIndex = (int)mSysImports.size();
-            for(int i = 0; i < mSysImports.size(); i++)
-            {
-                if(mSysImports[i].name == sysFuncName)
-                {
-                    sysFuncIndex = i;
-                    break;
-                }
-            }
-            AddIntArg(sysFuncIndex);
-            
-            // Add sys func to imports list, if not already present.
-            if(sysFuncIndex == mSysImports.size())
-            {
-                mSysImports.push_back(sysFunc);
-            }
-            
-            // We may also need to do a pop for SysFunctionV calls.
-            if(valueType == SheepValueType::Void)
-            {
-                #ifdef DEBUG_BUILDER
-                std::cout << "Pop" << std::endl;
-                #endif
-                AddInstruction(SheepInstruction::Pop);
-            }
-            return valueType;
-        }
-    }
-    
+	StringUtil::ToLower(sysFuncName);
+	SysFuncDecl* sysFunc = GetSysFuncDecl(sysFuncName);
+	
+	if(sysFunc != nullptr)
+	{
+		// Right before calling the function, we want to push the argument
+		// count onto the top of the stack.
+		PushI((int)sysFunc->argumentTypes.size());
+		
+		// Add appropriate instruction based on function return type.
+		SheepValueType valueType;
+		if(sysFunc->returnType == 0)
+		{
+			#ifdef DEBUG_BUILDER
+			std::cout << "CallSysFunctionV" << std::endl;
+			#endif
+			AddInstruction(SheepInstruction::CallSysFunctionV);
+			valueType = SheepValueType::Void;
+		}
+		else if(sysFunc->returnType == 1)
+		{
+			#ifdef DEBUG_BUILDER
+			std::cout << "CallSysFunctionI" << std::endl;
+			#endif
+			AddInstruction(SheepInstruction::CallSysFunctionI);
+			valueType = SheepValueType::Int;
+		}
+		else if(sysFunc->returnType == 2)
+		{
+			#ifdef DEBUG_BUILDER
+			std::cout << "CallSysFunctionF" << std::endl;
+			#endif
+			AddInstruction(SheepInstruction::CallSysFunctionF);
+			valueType = SheepValueType::Float;
+		}
+		else if(sysFunc->returnType == 3)
+		{
+			#ifdef DEBUG_BUILDER
+			std::cout << "CallSysFunctionS" << std::endl;
+			#endif
+			AddInstruction(SheepInstruction::CallSysFunctionS);
+			valueType = SheepValueType::String;
+		}
+		else
+		{
+			std::cout << "Invalid Return Type!" << std::endl;
+			return SheepValueType::Void;
+		}
+		
+		// The argument for CallSysFunctionX is the index of the system function
+		// that is to be called. So, find the index or use list size by default
+		int sysFuncIndex = (int)mSysImports.size();
+		for(int i = 0; i < mSysImports.size(); i++)
+		{
+			if(mSysImports[i].name == sysFuncName)
+			{
+				sysFuncIndex = i;
+				break;
+			}
+		}
+		AddIntArg(sysFuncIndex);
+		
+		// Add sys func to imports list, if not already present.
+		// Note that this "slices" the SysFuncDecl down to just a SysImport, but that's OK!
+		if(sysFuncIndex == mSysImports.size())
+		{
+			mSysImports.push_back(*sysFunc);
+		}
+		
+		// We may also need to do a pop for SysFunctionV calls.
+		if(valueType == SheepValueType::Void)
+		{
+			#ifdef DEBUG_BUILDER
+			std::cout << "Pop" << std::endl;
+			#endif
+			AddInstruction(SheepInstruction::Pop);
+		}
+		return valueType;
+	}
+	
     // Default - couldn't find this function, so it's just a void I guess.
 	std::cout << "Sheep Builder: SysFunc " << sysFuncName << " is not defined! Ignoring." << std::endl;
     return SheepValueType::Void;
