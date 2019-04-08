@@ -72,7 +72,6 @@
 		4B22F50C2174075B0065B152 /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
 		4B22F50D2174075B0065B152 /* SceneModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneModel.cpp */; };
 		4B22F50E2174075B0065B152 /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
-		4B22F50F2174075B0065B152 /* SDLLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A95A1F243349000A689F /* SDLLog.cpp */; };
 		4B22F5102174075B0065B152 /* Services.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182D1FEED84D002991D4 /* Services.cpp */; };
 		4B22F511217407640065B152 /* Color32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13521684374003B4C3F /* Color32.cpp */; };
 		4B22F512217407640065B152 /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
@@ -157,6 +156,8 @@
 		4B79F8071F9C09F2008C6FEE /* VectorTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */; };
 		4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
+		4B7A62FF223DC3820053C95F /* ReportManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7A62FE223DC3820053C95F /* ReportManager.cpp */; };
+		4B7A6302223DC3B70053C95F /* ReportStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7A6301223DC3B70053C95F /* ReportStream.cpp */; };
 		4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7AB0431F539EB200CFBE8F /* Audio.cpp */; };
 		4B7C3A161F4EB07000BB0922 /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */; };
 		4B84A13621684374003B4C3F /* Color32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13521684374003B4C3F /* Color32.cpp */; };
@@ -354,6 +355,11 @@
 		4B76DFBA21867D2800BAECC4 /* UIButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UIButton.h; path = ../Source/UIButton.h; sourceTree = "<group>"; };
 		4B76DFBB21867D2800BAECC4 /* UIButton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UIButton.cpp; path = ../Source/UIButton.cpp; sourceTree = "<group>"; };
 		4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VectorTests.cpp; path = ../Tests/VectorTests.cpp; sourceTree = "<group>"; };
+		4B7A62FD223DC3820053C95F /* ReportManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ReportManager.h; path = ../Source/ReportManager.h; sourceTree = "<group>"; };
+		4B7A62FE223DC3820053C95F /* ReportManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ReportManager.cpp; path = ../Source/ReportManager.cpp; sourceTree = "<group>"; };
+		4B7A6300223DC3B70053C95F /* ReportStream.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ReportStream.h; path = ../Source/ReportStream.h; sourceTree = "<group>"; };
+		4B7A6301223DC3B70053C95F /* ReportStream.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ReportStream.cpp; path = ../Source/ReportStream.cpp; sourceTree = "<group>"; };
+		4B7A6303223ED8940053C95F /* SystemUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SystemUtil.h; path = ../Source/SystemUtil.h; sourceTree = "<group>"; };
 		4B7AB0431F539EB200CFBE8F /* Audio.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Audio.cpp; path = ../Source/Audio/Audio.cpp; sourceTree = "<group>"; };
 		4B7AB0441F539EB200CFBE8F /* Audio.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Audio.h; path = ../Source/Audio/Audio.h; sourceTree = "<group>"; };
 		4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AudioManager.cpp; path = ../Source/AudioManager.cpp; sourceTree = "<group>"; };
@@ -567,9 +573,8 @@
 				4B15555C2197C2E500072F0D /* RectTransform.cpp */,
 				4B15555B2197C2E500072F0D /* RectTransform.h */,
 				4B364C3520ECADBE00EFC50C /* Rendering */,
+				4B7A6306223EDAF50053C95F /* Reports */,
 				4BD673C920B10EB200795582 /* Scene */,
-				4B15A95A1F243349000A689F /* SDLLog.cpp */,
-				4B15A95B1F243349000A689F /* SDLLog.h */,
 				4B09182D1FEED84D002991D4 /* Services.cpp */,
 				4B09182C1FEED84D002991D4 /* Services.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
@@ -585,17 +590,13 @@
 		4B15A95D1F245BDC000A689F /* Sheep */ = {
 			isa = PBXGroup;
 			children = (
-				4B85420F20A7C11C00DE8C0D /* FlexBison */,
+				4B524ECA22484C9F00E3A5E2 /* Compiler */,
 				4B4B4AE22091B80700391827 /* SheepAPI.cpp */,
 				4B4B4AE12091B80700391827 /* SheepAPI.h */,
-				4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */,
-				4B2ACE121F25D310003EC7FE /* SheepCompiler.h */,
 				4B294CE020B9E8BC00039F48 /* SheepManager.cpp */,
 				4B294CDF20B9E8BC00039F48 /* SheepManager.h */,
 				4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */,
 				4B2ACDF71F25873C003EC7FE /* SheepScript.h */,
-				4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */,
-				4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */,
 				4BE75D32208D7E7B007031A3 /* SheepVM.cpp */,
 				4BE75D31208D7E7B007031A3 /* SheepVM.h */,
 			);
@@ -671,6 +672,18 @@
 			name = Math;
 			sourceTree = "<group>";
 		};
+		4B524ECA22484C9F00E3A5E2 /* Compiler */ = {
+			isa = PBXGroup;
+			children = (
+				4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */,
+				4B2ACE121F25D310003EC7FE /* SheepCompiler.h */,
+				4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */,
+				4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */,
+				4B85420F20A7C11C00DE8C0D /* FlexBison */,
+			);
+			name = Compiler;
+			sourceTree = "<group>";
+		};
 		4B6B765E21A5216B00788C02 /* GK3 */ = {
 			isa = PBXGroup;
 			children = (
@@ -712,6 +725,19 @@
 				4B76B57B1F35999B003F63E5 /* BarnFile.h */,
 			);
 			name = Assets;
+			sourceTree = "<group>";
+		};
+		4B7A6306223EDAF50053C95F /* Reports */ = {
+			isa = PBXGroup;
+			children = (
+				4B15A95A1F243349000A689F /* SDLLog.cpp */,
+				4B15A95B1F243349000A689F /* SDLLog.h */,
+				4B7A62FE223DC3820053C95F /* ReportManager.cpp */,
+				4B7A62FD223DC3820053C95F /* ReportManager.h */,
+				4B7A6301223DC3B70053C95F /* ReportStream.cpp */,
+				4B7A6300223DC3B70053C95F /* ReportStream.h */,
+			);
+			name = Reports;
 			sourceTree = "<group>";
 		};
 		4B7AB0421F539EA500CFBE8F /* Audio */ = {
@@ -769,20 +795,21 @@
 		4B98D70A1F53D26C009CC2F0 /* STD */ = {
 			isa = PBXGroup;
 			children = (
+				4B08C9082137284C0028FEB3 /* CallbackFunction.cpp */,
+				4B08C9072137284C0028FEB3 /* CallbackFunction.h */,
+				4B08C90B21372A710028FEB3 /* CallbackMethod.cpp */,
+				4B08C90A21372A710028FEB3 /* CallbackMethod.h */,
+				4B6B766921AB99C500788C02 /* FileSystem.cpp */,
+				4B6B766821AB99C500788C02 /* FileSystem.h */,
 				4B02A3B31F5269E9000540A7 /* imstream.cpp */,
 				4B02A3B41F5269E9000540A7 /* imstream.h */,
 				4B02A3B01F526529000540A7 /* membuf.cpp */,
 				4B02A3B11F526529000540A7 /* membuf.h */,
-				4B5497F81FF80E0A00F1EF4F /* StringUtil.h */,
-				4B4B4ADE2091B5A000391827 /* Value.h */,
-				4BACA50B20F72663008C7FE9 /* StringTokenizer.h */,
 				4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */,
-				4B08C9072137284C0028FEB3 /* CallbackFunction.h */,
-				4B08C9082137284C0028FEB3 /* CallbackFunction.cpp */,
-				4B08C90A21372A710028FEB3 /* CallbackMethod.h */,
-				4B08C90B21372A710028FEB3 /* CallbackMethod.cpp */,
-				4B6B766821AB99C500788C02 /* FileSystem.h */,
-				4B6B766921AB99C500788C02 /* FileSystem.cpp */,
+				4BACA50B20F72663008C7FE9 /* StringTokenizer.h */,
+				4B5497F81FF80E0A00F1EF4F /* StringUtil.h */,
+				4B7A6303223ED8940053C95F /* SystemUtil.h */,
+				4B4B4ADE2091B5A000391827 /* Value.h */,
 			);
 			name = STD;
 			sourceTree = "<group>";
@@ -1039,7 +1066,9 @@
 				4B22F4F8217407460065B152 /* membuf.cpp in Sources */,
 				4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */,
 				4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */,
+				4B7A6302223DC3B70053C95F /* ReportStream.cpp in Sources */,
 				4B22F4FA217407460065B152 /* CallbackFunction.cpp in Sources */,
+				4B7A62FF223DC3820053C95F /* ReportManager.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
 				4B84A13621684374003B4C3F /* Color32.cpp in Sources */,
 				4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */,
@@ -1173,7 +1202,6 @@
 				4BEA727621D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
-				4B22F50F2174075B0065B152 /* SDLLog.cpp in Sources */,
 				4B22F52D2174078B0065B152 /* Audio.cpp in Sources */,
 				4B22F5382174078B0065B152 /* GameCamera.cpp in Sources */,
 				4B22F5252174078B0065B152 /* Actor.cpp in Sources */,

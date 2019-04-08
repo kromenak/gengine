@@ -86,7 +86,7 @@ private:
 	int mScore = 0;
 	
 	// Current and last location.
-	std::string mLocation = "R25";
+	std::string mLocation = "non";
 	std::string mLastLocation;
 	
 	// Current and last time blocks.

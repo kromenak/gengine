@@ -33,6 +33,14 @@ struct SysImport
 	
 	// If true, this function can only work in dev builds.
 	bool devOnly = false;
+	
+	//TODO: For in-game help output, we may need to store argument names AND description text.
+	// For example, HelpCommand("AddStreamContent") outputs this:
+	/*
+	----- 'Dump' * 03/16/2019 * 11:39:21 -----
+	** [DEBUG] AddStreamContent(string streamName, string content) **
+	Adds an additional content type to the stream. Possible values for the 'content' parameter are: 'begin' (report headers), 'content' (report content), 'end' (report footers), 'category' (the category of the report), 'date' (the date the report was made), 'time' (the time the report was made), 'debug' (file/line debug info), 'timeblock' (the current timeblock if there is one), and 'location' (the current game scene location if there is one).
+	*/
 };
 
 class SheepScript : public Asset

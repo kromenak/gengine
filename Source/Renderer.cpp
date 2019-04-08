@@ -269,14 +269,6 @@ void Renderer::Render()
 		mBSP->RenderTranslucent(mCamera->GetOwner()->GetPosition());
 	}
 	
-	/*
-    // Render the BSP.
-    if(mBSP != nullptr)
-    {
-        mBSP->Render(mCamera->GetOwner()->GetPosition());
-    }
-	*/
-	
 	// Render the packets.
 	for(auto& packet : allRenderPackets)
 	{

@@ -414,7 +414,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         */
 		//reader.ReadUInt();
         unsigned int flags = reader.ReadUInt();
-		std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
+		//std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
 		
         // Combination of flags 8+4 seems to indicate thing is not visible.
 		/*

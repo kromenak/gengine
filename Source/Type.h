@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 //
-// Defines a "Type" type and macros for adding runtime type info to a
+// Defines a "Type" type and macros for adding runtime type info (RTTI) to a
 // base class and subclasses.
 //
 #include <cstddef>

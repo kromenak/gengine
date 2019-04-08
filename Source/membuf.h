@@ -22,7 +22,6 @@ public:
     membuf(const char* data, unsigned int length);
     
 private:
-    
     // Buffer management and positioning
     streampos seekoff(streamoff off, ios_base::seekdir way,
                       ios_base::openmode which = ios_base::in | ios_base::out);
