@@ -23,7 +23,7 @@ void AnimationPlayer::Play(Animation* animation)
 	mActiveAnimationStates.emplace_back(animation);
 }
 
-void AnimationPlayer::Play(Animation* animation, std::function<void ()> finishCallback)
+void AnimationPlayer::Play(Animation* animation, std::function<void()> finishCallback)
 {
 	if(animation == nullptr) { return; }
 	mActiveAnimationStates.emplace_back(animation, finishCallback);

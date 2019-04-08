@@ -7,7 +7,7 @@
 
 #include "Services.h"
 
-SheepScript* SheepManager::Compile(const char *filename)
+SheepScript* SheepManager::Compile(const char* filename)
 {
     return mCompiler.Compile(filename);
 }
@@ -22,69 +22,35 @@ SheepScript* SheepManager::Compile(std::istream &stream)
     return mCompiler.Compile(stream);
 }
 
-void SheepManager::Execute(std::string assetName, std::string functionName)
+void SheepManager::Execute(std::string sheepName, std::string functionName)
 {
-	SheepScript* script = Services::GetAssets()->LoadSheep(assetName);
+	SheepScript* script = Services::GetAssets()->LoadSheep(sheepName);
 	if(script != nullptr)
 	{
-		Execute(script, functionName);
+		Execute(script, functionName, nullptr);
+	}
+}
+
+void SheepManager::Execute(std::string sheepName, std::string functionName, std::function<void()> finishCallback)
+{
+	SheepScript* script = Services::GetAssets()->LoadSheep(sheepName);
+	if(script != nullptr)
+	{
+		Execute(script, functionName, finishCallback);
 	}
 }
 
 void SheepManager::Execute(SheepScript* script)
 {
-	mSheepScriptStack.push(script);
-	
-	std::cout << "Executing sheep " << script->GetName() << std::endl;
-    SheepVM vm;
-    vm.Execute(script);
-	
-	// VM currently fails when executing multiple scripts (not re-entrant?)
-	// Something to look into/fix in the future.
-    //mVirtualMachine.Execute(script);
-	
-	mSheepScriptStack.pop();
+    mVirtualMachine.Execute(script);
 }
 
-void SheepManager::Execute(SheepScript* script, std::string functionName)
+void SheepManager::Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback)
 {
-	mSheepScriptStack.push(script);
-	
-	SheepVM vm;
-	vm.Execute(script, functionName);
-	//mVirtualMachine.Execute(script, functionName);
-	
-	mSheepScriptStack.pop();
-}
-
-void SheepManager::Execute(std::string functionName)
-{
-	// This version is assuming a sheep is already executing.
-	if(mSheepScriptStack.size() == 0)
-	{
-		std::cout << "Attempting to execute function " << functionName << ", but no sheep is loaded!" << std::endl;
-		return;
-	}
-	Execute(mSheepScriptStack.top(), functionName);
+	mVirtualMachine.Execute(script, functionName, finishCallback);
 }
 
 bool SheepManager::Evaluate(SheepScript* script)
 {
-	mSheepScriptStack.push(script);
-	
-    SheepVM vm;
-	bool result = vm.Evaluate(script);
-	//bool result = mVirtualMachine.Evaluate(script);
-	
-	mSheepScriptStack.pop();
-	return result;
-}
-
-SheepScript* SheepManager::GetCurrentSheepScript() const
-{
-	if(mSheepScriptStack.size() > 0)
-	{
-		return mSheepScriptStack.top();
-	}
-	return nullptr;
+	return mVirtualMachine.Evaluate(script);
 }

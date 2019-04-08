@@ -65,8 +65,9 @@ bool NVC::IsCaseMet(const NVCItem* item, GKActor* ego) const
 	auto it = mCaseToSheep.find(item->condition);
 	if(it != mCaseToSheep.end())
 	{
-		SheepVM vm;
-		return vm.Evaluate(it->second);
+		return Services::GetSheep()->Evaluate(it->second);
+		//SheepVM vm;
+		//return vm.Evaluate(it->second);
 	}
 	
 	// Assume any not found case is false by default.

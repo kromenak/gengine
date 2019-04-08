@@ -19,20 +19,20 @@ public:
     SheepScript* Compile(std::string sheep);
     SheepScript* Compile(std::istream& stream);
     
-    void Execute(std::string assetName, std::string functionName);
+    void Execute(std::string sheepName, std::string functionName);
+	void Execute(std::string sheepName, std::string functionName, std::function<void()> finishCallback);
+	
     void Execute(SheepScript* script);
-	void Execute(SheepScript* script, std::string functionName);
-	void Execute(std::string functionName);
+	void Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback);
 	
     bool Evaluate(SheepScript* script);
 	
-	SheepScript* GetCurrentSheepScript() const;
-    
+	SheepThread* GetCurrentThread() const { return mVirtualMachine.GetCurrentThread(); }
+	
 private:
+	// Compiles text-based sheep script into sheep bytecode, represented as a SheepScript asset.
     SheepCompiler mCompiler;
 	
-	// We sometimes need to know what the current sheep script is.
-	// This can be complicated by sheep scripts calling each other.
-	// This stack helps us keep that all in order.
-	std::stack<SheepScript*> mSheepScriptStack;
+	// Executes binary bytecode sheep scripts.
+	SheepVM mVirtualMachine;
 };
