@@ -25,6 +25,9 @@ GEngine::GEngine() : mRunning(false)
 
 bool GEngine::Initialize()
 {
+	// Initialize reports.
+	Services::SetReports(&mReportManager);
+	
     // Initialize asset manager.
     Services::SetAssets(&mAssetManager);
     
@@ -84,7 +87,10 @@ bool GEngine::Initialize()
 	// Create game progress.
 	Services::Set<GameProgress>(new GameProgress());
 	
+	//LoadScene("R25");
     LoadScene("RC1");
+	
+	//mReportManager.Log("Generic", "Rock & Roll");
     return true;
 }
 

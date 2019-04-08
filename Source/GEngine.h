@@ -11,6 +11,7 @@
 #include "InputManager.h"
 #include "Renderer.h"
 #include "SheepManager.h"
+#include "ReportManager.h"
 
 class Actor;
 class Scene;
@@ -52,6 +53,7 @@ private:
     AssetManager mAssetManager;
     InputManager mInputManager;
     SheepManager mSheepManager;
+	ReportManager mReportManager;
     
     // The currently active scene. There can be only one at a time (sure about that?).
     Scene* mScene = nullptr;
