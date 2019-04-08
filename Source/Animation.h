@@ -17,6 +17,7 @@
 #include "Vector3.h"
 
 class Animation;
+class Audio;
 class VertexAnimation;
 
 struct AnimNode
@@ -53,6 +54,14 @@ struct SceneTextureAnimNode : public AnimNode
 	std::string sceneName;
 	std::string sceneModelName;
 	std::string textureName;
+	
+	void Play(Animation* anim) override;
+};
+
+struct SoundAnimNode : public AnimNode
+{
+	Audio* audio = nullptr;
+	int volume = 100; // 0 = no sound, 100 = max volume
 	
 	void Play(Animation* anim) override;
 };

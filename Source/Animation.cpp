@@ -59,6 +59,14 @@ void SceneTextureAnimNode::Play(Animation* anim)
 	}
 }
 
+void SoundAnimNode::Play(Animation* anim)
+{
+	if(audio != nullptr)
+	{
+		Services::GetAudio()->Play(audio);
+	}
+}
+
 Animation::Animation(std::string name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
@@ -302,7 +310,14 @@ void Animation::ParseFromData(char *data, int dataLength)
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
                 int volume = entry->GetValueAsInt();
-                
+				
+				// Create node here - remaining entries are optional.
+				SoundAnimNode* node = new SoundAnimNode();
+				node->frameNumber = frameNumber;
+				node->audio = Services::GetAssets()->LoadAudio(soundName);
+				node->volume = volume;
+				mFrames[frameNumber].push_back(node);
+				
                 // If there are 6 parameters, next up is the name of the model that plays the sound.
                 // If there are 8 parameters, next up are a sound position (x,y,z).
                 if(paramCount == 6)
