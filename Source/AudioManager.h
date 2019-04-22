@@ -25,7 +25,7 @@ public:
     void Play(Audio* audio);
     void Play(Audio* audio, int fadeInMs);
     
-    void Play3D(Audio* audio, const Vector3& position);
+	void Play3D(Audio* audio, const Vector3& position, float minDist, float maxDist);
     
     void UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up);
     

@@ -53,7 +53,7 @@ int SoundNode::Execute()
     if(is3d)
     {
         std::cout << "Play 3D! " << position << std::endl;
-        Services::GetAudio()->Play3D(audio, position);
+        Services::GetAudio()->Play3D(audio, position, minDist, maxDist);
     }
     else
     {

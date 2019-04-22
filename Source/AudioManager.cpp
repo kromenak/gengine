@@ -99,28 +99,27 @@ void AudioManager::Play(Audio* audio, int fadeInMs)
     }
 }
 
-void AudioManager::Play3D(Audio *audio, const Vector3 &position)
+void AudioManager::Play3D(Audio* audio, const Vector3& position, float minDist, float maxDist)
 {
     if(audio == nullptr) { return; }
-    
+	
+	// Create extra info struct containing length of audio buffer.
     FMOD_CREATESOUNDEXINFO exinfo;
     memset(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
     exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
     exinfo.length = audio->GetDataBufferLength();
 	
+	// Create sound that is 3D.
+	// We will use the linear rolloff model (less realistic, but more intuitive for games).
 	FMOD::Sound* sound1 = nullptr;
-    FMOD_RESULT result = mSystem->createSound((const char*)audio->GetDataBuffer(), FMOD_OPENMEMORY | FMOD_LOOP_OFF | FMOD_3D, &exinfo, &sound1);
+    FMOD_RESULT result = mSystem->createSound((const char*)audio->GetDataBuffer(), FMOD_OPENMEMORY | FMOD_LOOP_OFF | FMOD_3D | FMOD_3D_LINEARSQUAREROLLOFF, &exinfo, &sound1);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
         return;
     }
-    
-    // Position at the correct location.
-    //channel->set3DAttributes((const FMOD_VECTOR*) &position, (const FMOD_VECTOR*) &Vector3::Zero);
-    //channel->set3DMinMaxDistance(0.0f, 100000.0f);
-    //channel->setLoopCount(100);
 	
+	// Play the sound on whatever channel is available.
 	FMOD::Channel* channel = nullptr;
     result = mSystem->playSound(sound1, 0, false, &channel);
     if(result != FMOD_OK)
@@ -128,6 +127,12 @@ void AudioManager::Play3D(Audio *audio, const Vector3 &position)
         std::cout << FMOD_ErrorString(result) << std::endl;
         return;
     }
+	
+	// Set min/max distance based on passed arguments.
+	channel->set3DMinMaxDistance(minDist, maxDist);
+	
+	// Position at the correct location with no velocity.
+	channel->set3DAttributes((const FMOD_VECTOR*)&position, (const FMOD_VECTOR*)&Vector3::Zero);
 }
 
 void AudioManager::UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up)
