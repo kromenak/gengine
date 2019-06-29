@@ -396,6 +396,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         surface->scale = reader.ReadFloat();
         
         /*
+		 FLAGS - bitmask flags that indicate some interesting aspect about this surface.
          1 => ???
          2 => ???
          4 => interactable?
@@ -404,7 +405,9 @@ void BSP::ParseFromData(char *data, int dataLength)
          32 => ???
          64 => ???
          128 => ???
-         
+		 
+		 // NO flag seems to be dedicated to opaque vs. translucent.
+		 
          (RC1, rc4_pjcar uses 76 (64+8+4))
          (RC1, windows often use 12 (8+4))
          (RC1, street lamps have 16 sometimes)
@@ -412,19 +415,16 @@ void BSP::ParseFromData(char *data, int dataLength)
          (B25, toilet paper has 2)
          (B25/RC1 - many instances of 0/1 too)
         */
-		//reader.ReadUInt();
-        unsigned int flags = reader.ReadUInt();
+		reader.ReadUInt();
+        //unsigned int flags = reader.ReadUInt();
+		/*
+		if(!surface->texture->HasAlpha())
+		{
+			std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
+		}
+		*/
 		//std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
 		
-        // Combination of flags 8+4 seems to indicate thing is not visible.
-		/*
-		if(flags == 12)
-        {
-            surface->visible = false;
-        }
-		*/
-        //std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
-        
         mSurfaces.push_back(surface);
     }
     

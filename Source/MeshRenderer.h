@@ -11,7 +11,6 @@
 #include <vector>
 
 #include "Material.h"
-#include "RenderPacket.h"
 
 class Mesh;
 class Model;
@@ -23,8 +22,9 @@ class MeshRenderer : public Component
 public:
     MeshRenderer(Actor* actor);
     ~MeshRenderer();
-    
-    std::vector<RenderPacket> GetRenderPackets();
+	
+	void RenderOpaque();
+	void RenderTranslucent();
     
     void SetModel(Model* model);
     

@@ -75,21 +75,27 @@ void Debug::Update(float deltaTime)
 
 void Debug::Render()
 {
+	// We can just use any old material for now (uses default shader under the hood).
 	Material material;
 	material.Activate();
 	
+	// Iterate over all draw commands and render them.
 	auto it = sDrawCommands.begin();
 	while(it != sDrawCommands.end())
 	{
 		DrawCommand& command = *it;
+		
+		// Set color and world transform.
 		material.SetActiveColor(command.color);
 		material.SetWorldTransformMatrix(command.worldTransformMatrix);
 		
+		// Draw the mesh.
 		if(command.mesh != nullptr)
 		{
 			command.mesh->Render();
 		}
 		
+		// Erase from list if time is up.
 		if(command.timer <= 0.0f)
 		{
 			it = sDrawCommands.erase(it);
@@ -99,4 +105,7 @@ void Debug::Render()
 			it++;
 		}
 	}
+	
+	// Reset active color afterwards, since we might leave the shader with some weird color set.
+	material.SetActiveColor(Color32::White);
 }

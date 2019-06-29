@@ -107,6 +107,8 @@ bool Renderer::Initialize()
     // Create OpenGL context.
     mContext = SDL_GL_CreateContext(mWindow);
 	
+	/*
+	// For debugging display count stuff...
 	int displayCount = SDL_GetNumVideoDisplays();
 	for(int i = 0; i < displayCount; i++)
 	{
@@ -115,6 +117,7 @@ bool Renderer::Initialize()
 		SDL_GetDisplayDPI(i, nullptr, &hdpi, &vdpi);
 		//SDL_Log("%f, %f", hdpi, vdpi);
 	}
+	*/
     
     // Initialize GLEW.
     glewExperimental = GL_TRUE;
@@ -181,130 +184,119 @@ void Renderer::Shutdown()
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
 
-void Renderer::Clear()
-{
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
 void Renderer::Render()
 {
-    // Don't render if there's no camera.
-    if(mCamera == nullptr) { return; }
-    
-    // We'll need the projection matrix a few times below.
-    // We'll also calculate the view/proj combined matrix one or two times.
-    Matrix4 projectionMatrix = mCamera->GetProjectionMatrix();
-    Matrix4 viewProjMatrix;
-    
-    // Draw the skybox first, if we have one.
-    // For skybox, we don't want to write into the depth mask, or else you can ONLY see skybox.
-    // This is because the skybox is actually just a small cube around the camera.
-    glDepthMask(GL_FALSE); // stops writing to depth buffer
-    if(mSkybox != nullptr)
-    {
-        // To get the "infinite distance" skybox effect, we need to use a look-at
-        // matrix that doesn't take the camera's position into account.
-        viewProjMatrix = projectionMatrix * mCamera->GetLookAtMatrixNoTranslate();
-        
-        mSkyboxShader->Activate();
-        mSkyboxShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
-        
-        mSkybox->Render();
-    }
-    glDepthMask(GL_TRUE); // start writing to depth buffer
-    
-    // For the rest of rendering, the normal view/proj matrix is fine.
-    viewProjMatrix = projectionMatrix * mCamera->GetLookAtMatrix();
-    
-    // Enable depth test and disable blend to draw opaque 3D geometry.
-    glEnable(GL_DEPTH_TEST); // do depth comparisons and update the depth buffer
-    glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
-    
-    // Activate, for now, our one and only shader.
-    mDefaultShader->Activate();
-    
-    // Set the combined view/projection matrix based on the assigned camera.
-    mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
-    
-    // Render an axis at the world origin, for debugging.
+	// Enable opaque rendering (no blend, write to depth mask, test depth mask).
+	// Do this BEFORE clear to avoid some glitchy graphics.
+	glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
+	glDepthMask(GL_TRUE); // start writing to depth buffer
+	glEnable(GL_DEPTH_TEST); // do depth comparisons and update the depth buffer
+	
+	// Clear color and depth buffers from last frame.
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
+	// Just render nothing if there's no camera!
+	if(mCamera == nullptr)
+	{
+		SDL_GL_SwapWindow(mWindow);
+		return;
+	}
+	
+	// We'll need the projection matrix for the camera a few times below.
+	Matrix4 projectionMatrix = mCamera->GetProjectionMatrix();
+	
+	// Draw the skybox first, which is just a little cube around the camera.
+	// Don't write to depth mask, or else you can ONLY see skybox (b/c again, little cube).
+	glDepthMask(GL_FALSE); // stops writing to depth buffer
+	if(mSkybox != nullptr)
+	{
+		// To get the "infinite distance" skybox effect, we need to use a look-at
+		// matrix that doesn't take the camera's position into account.
+		Matrix4 skyboxViewProjMatrix = projectionMatrix * mCamera->GetLookAtMatrixNoTranslate();
+		
+		mSkyboxShader->Activate();
+		mSkyboxShader->SetUniformMatrix4("uViewProj", skyboxViewProjMatrix);
+		
+		mSkybox->Render();
+	}
+	glDepthMask(GL_TRUE); // start writing to depth buffer
+	 
+	// Calculate normal view/proj matrix, which is used for all non-skybox world rendering.
+	Matrix4 viewProjMatrix = projectionMatrix * mCamera->GetLookAtMatrix();
+	
+	// Activate, for now, our one and only shader.
+	mDefaultShader->Activate();
+	
+	// Set the combined view/projection matrix based on the assigned camera.
+	mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
+	
+	// Default to world origin for now.
+	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
+	
+	// Render an axis at the world origin, for debugging.
 	Debug::DrawAxes(Vector3::Zero);
 	
-    // Render all mesh components. (should do before or after BSP?)
-    std::vector<RenderPacket> allRenderPackets;
-    for(auto& meshRenderer : mMeshRenderers)
-    {
-        std::vector<RenderPacket> packets = meshRenderer->GetRenderPackets();
-        allRenderPackets.insert(allRenderPackets.end(), packets.begin(), packets.end());
-    }
-    
-    // Render the packets.
-    for(auto& packet : allRenderPackets)
-    {
-		if(!packet.IsTransparent())
-		{
-        	packet.Render();
-		}
-    }
-	
-	// Render opaque BSP first.
+	// Render opaque BSP (front-to-back).
 	if(mBSP != nullptr)
 	{
-		mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
 		mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition());
 	}
 	
-    // Reset world matrix to identity for BSP rendering (or for next render cycle).
+	// Render opaque meshes (no particular order).
+	// Sorting is probably not worthwhile b/c BSP likely mostly filled the z-buffer at this point.
+	// And with the z-buffer, we can render opaque meshed correctly regardless of order.
+	for(auto& meshRenderer : mMeshRenderers)
+	{
+		meshRenderer->RenderOpaque();
+	}
+	
+	// Reset shader world transform uniform after mesh rendering.
 	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
 	
-	// From here, we need alpha blending.
-    // Since we render opaque and alpha BSP in one go, it needs to be on for BSP.
-    // And then we certainly need alpha blending for UI rendering.
-    glEnable(GL_BLEND); // do alpha blending (transparent rendering)
-    glDepthMask(GL_FALSE); // don't write to the depth buffer
+	// Next, translucent rendering.
+	glEnable(GL_BLEND); // do alpha blending
+	glDepthMask(GL_FALSE); // don't write to the depth buffer
 	
-	// Render translucent BSP.
+	// Render translucent BSP (front-to-back).
 	if(mBSP != nullptr)
 	{
-		mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
 		mBSP->RenderTranslucent(mCamera->GetOwner()->GetPosition());
 	}
 	
-	// Render the packets.
-	for(auto& packet : allRenderPackets)
+	// Render translucent meshes (no particular order).
+	// PROBLEM: these sometimes overlap themselves AND alpha geometry in BSP.
+	// To fix this, I can only see merging with BSP contents AND sorting as an option...
+	for(auto& meshRenderer : mMeshRenderers)
 	{
-		if(packet.IsTransparent())
-		{
-			packet.Render();
-		}
+		meshRenderer->RenderTranslucent();
 	}
 	
-    // Enable alpha-blended rendering and render UI elements.
-    glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-    glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
+	// UI is translucent rendering, BUT the view/proj matrix is different.
 	mDefaultShader->SetUniformMatrix4("uViewProj", Matrix4::MakeSimpleScreenOrtho(GetWindowWidth(), GetWindowHeight()));
+	
+	// Don't do depth test because UI draws above everything.
 	glDisable(GL_DEPTH_TEST);
 	
-    // Render UI elements.
+	// Render UI elements.
 	const std::vector<UICanvas*>& canvases = UICanvas::GetCanvases();
 	for(auto& canvas : canvases)
 	{
 		canvas->Render();
 	}
 	
-    // Reset for next render loop.
-    glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
+	// Switch back to opaque rendering for debug rendering.
+	// Debug rendering happens after all else, so any previous function can ask for debug draws successfully.
+	// Also, don't bother with depth write or depth test so debug lines aren't obfuscated!
+	glDisable(GL_BLEND); // do not perform alpha blending
+	
+	// Gotta reset view/proj again...
+	mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
 	
 	// Render debug elements.
-	mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
 	Debug::Render();
 	
-    glDepthMask(GL_TRUE); // start writing to depth buffer
-	glEnable(GL_DEPTH_TEST);
-}
-
-void Renderer::Present()
-{
-    SDL_GL_SwapWindow(mWindow);
+	// Present to screen.
+	SDL_GL_SwapWindow(mWindow);
 }
 
 void Renderer::AddMeshRenderer(MeshRenderer* mr)

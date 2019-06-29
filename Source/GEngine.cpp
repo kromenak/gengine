@@ -75,7 +75,7 @@ bool GEngine::Initialize()
 	UseDefaultCursor();
 	
 	//mAssetManager.LoadVertexAnimation("R25CHAIR_GABR25SIT.ACT");
-    //mAssetManager.WriteBarnAssetToFile("FOUNTAINRC1.ANM");
+    mAssetManager.WriteBarnAssetToFile("RC1SNDTRKFOUNTAIN.STK");
     //mAssetManager.WriteAllBarnAssetsToFile(".CUR", "Cursors");
 	
 	// Load button icon manager.
@@ -244,9 +244,7 @@ void GEngine::Update()
 
 void GEngine::GenerateOutputs()
 {
-    mRenderer.Clear();
     mRenderer.Render();
-    mRenderer.Present();
 }
 
 void GEngine::AddActor(Actor* actor)

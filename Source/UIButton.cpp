@@ -69,13 +69,14 @@ void UIButton::Render()
 	// Set to correct location on screen.
 	mMaterial.SetWorldTransformMatrix(GetWorldTransformWithSizeForRendering());
 	
+	// Debug draw blue line from min/max, just to visualize bounds and show debug draw works for UI.
+	/*
 	Rect screenRect = mRectTransform->GetScreenRect();
 	Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
 	Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
-	//Rect worldRect(min, max);
-	//Debug::DrawRect(worldRect, Color32::Red);
 	Debug::DrawLine(min, max, Color32::Blue);
-	
+	*/
+	 
 	// Render.
 	mMaterial.Activate();
 	quad->Render();

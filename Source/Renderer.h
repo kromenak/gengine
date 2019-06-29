@@ -27,9 +27,7 @@ public:
     bool Initialize();
     void Shutdown();
     
-    void Clear();
     void Render();
-    void Present();
     
     void SetCamera(Camera* camera) { mCamera = camera; }
     Camera* GetCamera() { return mCamera; }

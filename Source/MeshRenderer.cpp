@@ -23,38 +23,64 @@ MeshRenderer::~MeshRenderer()
     Services::GetRenderer()->RemoveMeshRenderer(this);
 }
 
-std::vector<RenderPacket> MeshRenderer::GetRenderPackets()
+void MeshRenderer::RenderOpaque()
 {
 	Matrix4 actorWorldTransform = mOwner->GetTransform()->GetLocalToWorldMatrix();
 	
 	int materialIndex = 0;
 	int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
 	
-	// For each mesh to be rendered, create a render packet.
-    std::vector<RenderPacket> packets;
-    for(int i = 0; i < mMeshes.size(); i++)
-    {
-        RenderPacket packet;
-        packet.mesh = mMeshes[i];
-        
-        // Each mesh has one or more submeshes. Each submesh can/should have a different material.
-		// Each packet is given the offset into materials for the first submesh, plus the number of materials to use.
-		// In cases where there aren't enough materials for number of submeshes, the last material is used by default.
-		// If NO materials are present, the render packet will handle the null case.
-		if(mMaterials.size() > 0)
+	for(int i = 0; i < mMeshes.size(); i++)
+	{
+		auto submeshes = mMeshes[i]->GetSubmeshes();
+		for(int j = 0; j < submeshes.size(); j++)
 		{
-			packet.materials = &mMaterials[materialIndex];
-			packet.materialsCount = Math::Min(mMeshes[i]->GetSubmeshCount(), (int)mMaterials.size() - materialIndex);
-			materialIndex = Math::Min(materialIndex + mMeshes[i]->GetSubmeshCount(), maxMaterialIndex);
+			Material& material = mMaterials[materialIndex];
+			
+			// Ignore translucent rendering.
+			if(material.IsTransparent()) { continue; }
+			
+			// Activate material.
+			material.SetWorldTransformMatrix(actorWorldTransform * mMeshes[i]->GetLocalTransformMatrix());
+			material.Activate();
+			
+			// Render the submesh!
+			submeshes[j]->Render();
+			
+			// Increase material index, but not above the max.
+			materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
 		}
-		
-        // Save world transform for this packet.
-        packet.worldTransform = actorWorldTransform * mMeshes[i]->GetLocalTransformMatrix();
-		
-		// Add packet to packets array.
-        packets.push_back(packet);
-    }
-    return packets;
+	}
+}
+
+void MeshRenderer::RenderTranslucent()
+{
+	Matrix4 actorWorldTransform = mOwner->GetTransform()->GetLocalToWorldMatrix();
+	
+	int materialIndex = 0;
+	int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
+	
+	for(int i = 0; i < mMeshes.size(); i++)
+	{
+		auto submeshes = mMeshes[i]->GetSubmeshes();
+		for(int j = 0; j < submeshes.size(); j++)
+		{
+			Material& material = mMaterials[materialIndex];
+			
+			// Ignore opaque rendering.
+			if(!material.IsTransparent()) { continue; }
+			
+			// Activate material.
+			material.SetWorldTransformMatrix(actorWorldTransform * mMeshes[i]->GetLocalTransformMatrix());
+			material.Activate();
+			
+			// Render the submesh!
+			submeshes[i]->Render();
+			
+			// Increase material index, but not above the max.
+			materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
+		}
+	}
 }
 
 void MeshRenderer::SetModel(Model* model)
