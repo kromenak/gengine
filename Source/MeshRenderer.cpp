@@ -40,14 +40,15 @@ void MeshRenderer::RenderOpaque()
 			Material& material = mMaterials[materialIndex];
 			
 			// Ignore translucent rendering.
-			if(material.IsTransparent()) { continue; }
-			
-			// Activate material.
-			material.SetWorldTransformMatrix(meshWorldTransformMatrix);
-			material.Activate();
-			
-			// Render the submesh!
-			submeshes[j]->Render();
+			if(!material.IsTransparent())
+			{
+				// Activate material.
+				material.SetWorldTransformMatrix(meshWorldTransformMatrix);
+				material.Activate();
+				
+				// Render the submesh!
+				submeshes[j]->Render();
+			}
 			
 			// Increase material index, but not above the max.
 			materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
@@ -72,14 +73,15 @@ void MeshRenderer::RenderTranslucent()
 			Material& material = mMaterials[materialIndex];
 			
 			// Ignore opaque rendering.
-			if(!material.IsTransparent()) { continue; }
-			
-			// Activate material.
-			material.SetWorldTransformMatrix(meshWorldTransformMatrix);
-			material.Activate();
-			
-			// Render the submesh!
-			submeshes[j]->Render();
+			if(material.IsTransparent())
+			{
+				// Activate material.
+				material.SetWorldTransformMatrix(meshWorldTransformMatrix);
+				material.Activate();
+				
+				// Render the submesh!
+				submeshes[j]->Render();
+			}
 			
 			// Increase material index, but not above the max.
 			materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
