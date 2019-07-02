@@ -25,12 +25,20 @@ void BSP::Render(Vector3 cameraPosition)
 
 void BSP::RenderOpaque(Vector3 cameraPosition)
 {
+	mAlphaPolygons = nullptr;
 	RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Opaque);
 }
 
 void BSP::RenderTranslucent(Vector3 cameraPosition)
 {
-	RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Translucent);
+	BSPPolygon* polygon = mAlphaPolygons;
+	while(polygon != nullptr)
+	{
+		RenderPolygon(polygon, RenderType::Translucent);
+		polygon = polygon->next;
+	}
+	
+	//RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Translucent);
 }
 
 bool BSP::RaycastNearest(const Ray& ray, HitInfo& outHitInfo)
@@ -298,11 +306,11 @@ void BSP::RenderPolygon(BSPPolygon* polygon, RenderType renderType)
         Texture* tex = surface->texture;
         if(tex != nullptr)
         {
-			// Determine whether this is a translucent polygon or not.
-			// If we aren't rendering that type right now, return.
-			if((tex->HasAlpha() && renderType == RenderType::Opaque) ||
-			   (!tex->HasAlpha() && renderType == RenderType::Translucent))
+			// If has alpha, don't render it now, but add it to our alpha.
+			if(tex->HasAlpha() && renderType != RenderType::Translucent)
 			{
+				polygon->next = mAlphaPolygons;
+				mAlphaPolygons = polygon;
 				return;
 			}
 			
@@ -455,9 +463,11 @@ void BSP::ParseFromData(char *data, int dataLength)
     {
         BSPPolygon* polygon = new BSPPolygon();
         polygon->vertexIndex = reader.ReadUShort();
-        reader.ReadUShort(); // Unknown value
+		reader.ReadUByte(); // unknown
+		reader.ReadUByte(); // unknown
         polygon->vertexCount = reader.ReadUShort();
         polygon->surfaceIndex = reader.ReadUShort();
+		
         mPolygons.push_back(polygon);
     }
     

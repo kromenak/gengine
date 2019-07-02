@@ -75,7 +75,8 @@ bool GEngine::Initialize()
 	UseDefaultCursor();
 	
 	//mAssetManager.LoadVertexAnimation("R25CHAIR_GABR25SIT.ACT");
-    mAssetManager.WriteBarnAssetToFile("RC1SNDTRKFOUNTAIN.STK");
+    //mAssetManager.WriteBarnAssetToFile("PINE2FLAT.BMP");
+	//mAssetManager.WriteBarnAssetToFile("PINE2.BMP");
     //mAssetManager.WriteAllBarnAssetsToFile(".CUR", "Cursors");
 	
 	// Load button icon manager.

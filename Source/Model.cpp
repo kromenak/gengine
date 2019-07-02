@@ -115,7 +115,7 @@ void Model::ParseFromData(char *data, int dataLength)
 		rotQuat.SetW(rotQuat.GetW());
 		#endif
 		#ifdef DEBUG_OUTPUT
-        //std::cout << "    Mesh Rotation: " << rotQuat << std::endl;
+        std::cout << "    Mesh Rotation: " << rotQuat << std::endl;
 		#endif
         
         // 12 bytes: an (X, Y, Z) *local* position for placing this mesh.
@@ -126,7 +126,9 @@ void Model::ParseFromData(char *data, int dataLength)
 		#else
 		Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
 		#endif
-        //std::cout << "    Mesh Position: " << meshPos << std::endl;
+		#ifdef DEBUG_OUTPUT
+        std::cout << "    Mesh Position: " << meshPos << std::endl;
+		#endif
         
         // Use mesh position and rotation values to create a local transform matrix.
         Matrix4 transMatrix = Matrix4::MakeTranslate(meshPos);
@@ -141,7 +143,6 @@ void Model::ParseFromData(char *data, int dataLength)
         
         // 4 bytes: Number of submeshes in this mesh.
         unsigned int numSubMeshes = reader.ReadUInt();
-        //std::cout << "    Number of submeshes in mesh: " << numSubMeshes << std::endl;
         
         // 24 bytes: Two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max bound values for the mesh.
@@ -215,7 +216,7 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // Next we have vertex positions.
             #ifdef DEBUG_OUTPUT
-            //std::cout << "      Vertex positions: " << std::endl;
+            std::cout << "      Vertex positions: " << std::endl;
             #endif
             for(int k = 0; k < vertexCount; k++)
             {
@@ -231,11 +232,11 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexPositions[k * 3 + 2] = z;
                 
                 #ifdef DEBUG_OUTPUT
-                //std::cout << Vector3(x, y, z);
+                std::cout << Vector3(x, y, z);
                 #endif
             }
             #ifdef DEBUG_OUTPUT
-            //std::cout << std::endl;
+            std::cout << std::endl;
             #endif
             submesh->SetPositions(vertexPositions);
             

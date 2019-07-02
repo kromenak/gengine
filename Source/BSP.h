@@ -56,6 +56,9 @@ struct BSPPolygon
     // These are ALSO offsets into the UV indices array - direct correlation.
     unsigned short vertexIndex;
     unsigned short vertexCount;
+	
+	// Used for creating a linked list of alpha surfaces.
+	BSPPolygon* next;
 };
 
 struct BSPSurface
@@ -151,9 +154,11 @@ private:
     
     // Mesh for rendering BSP.
     Mesh* mMesh = nullptr;
+	
+	BSPPolygon* mAlphaPolygons = nullptr;
     
     //TODO: bounding spheres?
-    
+	
     void RenderTree(BSPNode* node, Vector3 cameraPosition, RenderType renderType);
     void RenderPolygon(BSPPolygon* polygon, RenderType renderType);
     
