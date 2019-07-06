@@ -33,8 +33,12 @@ Walker::Walker(Actor* owner) : Component(owner)
 
 void Walker::UpdateInternal(float deltaTime)
 {
-	// Stay attached to the floor.
-	Vector3 position = mOwner->GetPosition();
-	position.SetY(GEngine::inst->GetScene()->GetFloorY(position));
-	mOwner->SetPosition(position);
+	Scene* scene = GEngine::inst->GetScene();
+	if(scene != nullptr)
+	{
+		// Stay attached to the floor.
+		Vector3 position = mOwner->GetPosition();
+		position.SetY(scene->GetFloorY(position));
+		mOwner->SetPosition(position);
+	}
 }

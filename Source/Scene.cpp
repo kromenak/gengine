@@ -271,8 +271,11 @@ void Scene::SetCameraPosition(std::string cameraName)
 
 bool Scene::CheckInteract(const Ray& ray)
 {
+	BSP* bsp = mSceneData.GetBSP();
+	if(bsp == nullptr) { return false; }
+	
 	HitInfo hitInfo;
-	if(!mSceneData.GetBSP()->RaycastNearest(ray, hitInfo)) { return false; }
+	if(!bsp->RaycastNearest(ray, hitInfo)) { return false; }
 	
 	// If hit the floor, this IS an interaction, but not an interesting one.
 	// Clicking will walk the player, but we don't count it as an interactive object.
@@ -302,11 +305,14 @@ void Scene::Interact(const Ray& ray)
 	// Ignore scene interaction while the action bar is showing.
 	if(mActionBar->IsShowing()) { return; }
 	
+	BSP* bsp = mSceneData.GetBSP();
+	if(bsp == nullptr) { return; }
+	
     // Cast ray against scene BSP to see if it intersects with anything.
     // If so, it means we clicked on that thing.
 	//TODO: Need to also raycast against models (like Gabe, etc).
 	HitInfo hitInfo;
-	if(!mSceneData.GetBSP()->RaycastNearest(ray, hitInfo)) { return; }
+	if(!bsp->RaycastNearest(ray, hitInfo)) { return; }
 	//std::cout << "Hit " << hitInfo.name << std::endl;
 	
 	// Clicked on the floor - move ego to position.
@@ -372,10 +378,14 @@ float Scene::GetFloorY(const Vector3& position)
 	
 	// Raycast straight down and test against the floor BSP.
 	// If we hit something, just use the Y hit position as the floor's Y.
-	HitInfo hitInfo;
-	if(mSceneData.GetBSP()->RaycastSingle(downRay, mSceneData.GetFloorModelName(), hitInfo))
+	BSP* bsp = mSceneData.GetBSP();
+	if(bsp != nullptr)
 	{
-		return hitInfo.position.GetY();
+		HitInfo hitInfo;
+		if(bsp->RaycastSingle(downRay, mSceneData.GetFloorModelName(), hitInfo))
+		{
+			return hitInfo.position.GetY();
+		}
 	}
 	
 	// If didn't hit floor, just return 0.

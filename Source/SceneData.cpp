@@ -14,7 +14,6 @@ SceneData::SceneData(std::string location, std::string timeblock)
 	
 	// Load general and specific SIF assets.
 	mGeneralSIF = Services::GetAssets()->LoadSIF(location);
-	assert(mGeneralSIF != nullptr);
 	mSpecificSIF = Services::GetAssets()->LoadSIF(specificName);
 	
 	// Load scene model asset. Only *one* is needed, so one defined
@@ -24,28 +23,36 @@ SceneData::SceneData(std::string location, std::string timeblock)
 	{
 		sceneModelName = mSpecificSIF->GetSceneModelName();
 	}
-	else
+	else if(mGeneralSIF != nullptr)
 	{
 		sceneModelName = mGeneralSIF->GetSceneModelName();
 	}
 	mSceneModel = Services::GetAssets()->LoadSceneModel(sceneModelName);
-	assert(mSceneModel != nullptr);
 	
 	// Load the BSP data, which is specified by the scene model.
 	// If this is null, the game will still work...but there's no BSP geometry!
-	mBSP = Services::GetAssets()->LoadBSP(mSceneModel->GetBSPName());
+	if(mSceneModel != nullptr)
+	{
+		mBSP = Services::GetAssets()->LoadBSP(mSceneModel->GetBSPName());
+	}
 
 	// Figure out if we have a skybox, and set it to be rendered.
 	// The skybox can be defined in several places. Go down priority list and find one!
-	mSkybox = mSceneModel->GetSkybox();
+	if(mSceneModel != nullptr)
+	{
+		mSkybox = mSceneModel->GetSkybox();
+	}
 	if(mSkybox == nullptr && mSpecificSIF != nullptr)
 	{
 		mSkybox = mSpecificSIF->GetSkybox();
 	}
-	if(mSkybox == nullptr)
+	if(mSkybox == nullptr && mGeneralSIF != nullptr)
 	{
 		mSkybox = mGeneralSIF->GetSkybox();
 	}
+	
+	// FROM HERE, the lack of SIF files proves fatal, so just ignore if we don't have.
+	if(mGeneralSIF == nullptr) { return; }
 	
 	// Collect actor definitions from general and specific SIFs.
 	mSceneActorDatas = mGeneralSIF->GetSceneActorDatas();
@@ -150,7 +157,7 @@ SceneCameraData* SceneData::GetDefaultRoomCamera() const
 	{
 		sceneCameraData = mSpecificSIF->GetDefaultRoomCamera();
 	}
-	if(sceneCameraData == nullptr)
+	if(sceneCameraData == nullptr && mGeneralSIF != nullptr)
 	{
 		sceneCameraData = mGeneralSIF->GetDefaultRoomCamera();
 	}
