@@ -222,12 +222,15 @@ void Renderer::Render()
 	glDepthMask(GL_TRUE); // start writing to depth buffer
 	 
 	// Calculate normal view/proj matrix, which is used for all non-skybox world rendering.
-	Matrix4 viewProjMatrix = projectionMatrix * mCamera->GetLookAtMatrix();
+	Matrix4 viewMatrix = mCamera->GetLookAtMatrix();
+	Matrix4 viewProjMatrix = projectionMatrix * viewMatrix;
 	
 	// Activate, for now, our one and only shader.
 	mDefaultShader->Activate();
 	
 	// Set the combined view/projection matrix based on the assigned camera.
+	//mDefaultShader->SetUniformMatrix4("uViewMatrix", viewMatrix);
+	//mDefaultShader->SetUniformMatrix4("uProjectionMatrix", projectionMatrix);
 	mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
 	
 	// Default to world origin for now.
@@ -263,6 +266,17 @@ void Renderer::Render()
 		mBSP->RenderTranslucent(mCamera->GetOwner()->GetPosition());
 	}
 	
+	/*
+	// TODO: Maybe need to do some sort of depth sorting for translucent rendering?
+	std::sort(mMeshRenderers.begin(), mMeshRenderers.end(), [this] (const MeshRenderer* a, const MeshRenderer* b) -> bool {
+		Vector3* posA = (Vector3*)a->GetMeshes()[0]->GetSubmesh(0)->GetPositions();
+		Vector3* posB = (Vector3*)b->GetMeshes()[0]->GetSubmesh(0)->GetPositions();
+		float distASq = (this->mCamera->GetOwner()->GetPosition() - a->GetOwner()->GetPosition()).GetLengthSq();
+		float distBSq = (this->mCamera->GetOwner()->GetPosition() - b->GetOwner()->GetPosition()).GetLengthSq();
+		return distASq > distBSq;
+	});
+	*/
+	 
 	// Render translucent meshes (no particular order).
 	// PROBLEM: these sometimes overlap themselves AND alpha geometry in BSP.
 	// To fix this, I can only see merging with BSP contents AND sorting as an option...
