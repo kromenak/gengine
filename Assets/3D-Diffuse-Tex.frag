@@ -6,8 +6,11 @@ in vec2 fUV1;
 out vec4 oColor;
 
 uniform sampler2D uDiffuse;
+uniform float uAlphaTest;
 
 void main()
 {
-	oColor = texture(uDiffuse, fUV1) * fColor;
+	vec4 texel = texture(uDiffuse, fUV1) * fColor;
+	if(texel.a < uAlphaTest) { discard; }
+	oColor = texel;
 }

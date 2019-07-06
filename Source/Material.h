@@ -32,7 +32,7 @@ public:
 	void SetWorldTransformMatrix(const Matrix4& matrix);
 	void SetActiveColor(const Color32& color);
 	
-	bool IsTransparent();
+	bool IsTranslucent();
 	
 private:
     // Shader to use.

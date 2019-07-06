@@ -300,10 +300,10 @@ void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 		}
 	}
 	
-	// This seeeeems to work consistently - if the top-left pixel has alpha, flag as a transparent image.
+	// This seeeeems to work consistently - if the top-left pixel has no alpha, flag as alpha test.
 	if(mHeight > 0 && mWidth > 0 && mPixels[3] == 0)
 	{
-		mHasAlpha = true;
+		mRenderType = RenderType::AlphaTest;
 	}
 }
 

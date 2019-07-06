@@ -236,6 +236,9 @@ void Renderer::Render()
 	// Default to world origin for now.
 	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
 	
+	// Enable alpha test.
+	mDefaultShader->SetUniformFloat("uAlphaTest", 0.1f);
+	
 	// Render an axis at the world origin, for debugging.
 	Debug::DrawAxes(Vector3::Zero);
 	
@@ -256,9 +259,16 @@ void Renderer::Render()
 	// Reset shader world transform uniform after mesh rendering.
 	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
 	
+	// Turn off alpha test.
+	mDefaultShader->SetUniformFloat("uAlphaTest", 0.0f);
+	
 	// Next, translucent rendering.
 	glEnable(GL_BLEND); // do alpha blending
 	glDepthMask(GL_FALSE); // don't write to the depth buffer
+	
+	/*
+	// CK: There is currently no "translucent" 3D world rendering in GK3. It is all opaque or alpha test!
+	// Translucent rendering is used for the UI though.
 	
 	// Render translucent BSP (front-to-back).
 	if(mBSP != nullptr)
@@ -266,7 +276,6 @@ void Renderer::Render()
 		mBSP->RenderTranslucent(mCamera->GetOwner()->GetPosition());
 	}
 	
-	/*
 	// TODO: Maybe need to do some sort of depth sorting for translucent rendering?
 	std::sort(mMeshRenderers.begin(), mMeshRenderers.end(), [this] (const MeshRenderer* a, const MeshRenderer* b) -> bool {
 		Vector3* posA = (Vector3*)a->GetMeshes()[0]->GetSubmesh(0)->GetPositions();
@@ -275,7 +284,6 @@ void Renderer::Render()
 		float distBSq = (this->mCamera->GetOwner()->GetPosition() - b->GetOwner()->GetPosition()).GetLengthSq();
 		return distASq > distBSq;
 	});
-	*/
 	 
 	// Render translucent meshes (no particular order).
 	// PROBLEM: these sometimes overlap themselves AND alpha geometry in BSP.
@@ -284,6 +292,7 @@ void Renderer::Render()
 	{
 		meshRenderer->RenderTranslucent();
 	}
+	*/
 	
 	// UI is translucent rendering, BUT the view/proj matrix is different.
 	mDefaultShader->SetUniformMatrix4("uViewProj", Matrix4::MakeSimpleScreenOrtho(GetWindowWidth(), GetWindowHeight()));

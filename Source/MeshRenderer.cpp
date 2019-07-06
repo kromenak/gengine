@@ -40,7 +40,7 @@ void MeshRenderer::RenderOpaque()
 			Material& material = mMaterials[materialIndex];
 			
 			// Ignore translucent rendering.
-			if(!material.IsTransparent())
+			if(!material.IsTranslucent())
 			{
 				// Activate material.
 				material.SetWorldTransformMatrix(meshWorldTransformMatrix);
@@ -73,7 +73,7 @@ void MeshRenderer::RenderTranslucent()
 			Material& material = mMaterials[materialIndex];
 			
 			// Ignore opaque rendering.
-			if(material.IsTransparent())
+			if(material.IsTranslucent())
 			{
 				// Activate material.
 				material.SetWorldTransformMatrix(meshWorldTransformMatrix);

@@ -26,6 +26,8 @@ public:
     GLuint GetAttributeLocation(const char* name) const;
 	
 	void SetUniformInt(const char* name, int value);
+	void SetUniformFloat(const char* name, float value);
+	
     void SetUniformVector3(const char* name, const Vector3& vector);
 	void SetUniformVector4(const char* name, const Vector4& vector);
 	void SetUniformVector4(const char* name, const Color32& color);

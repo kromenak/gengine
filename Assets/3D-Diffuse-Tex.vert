@@ -11,6 +11,7 @@ out vec2 fUV1;
 
 uniform mat4 uWorldTransform;
 uniform mat4 uViewProj;
+
 uniform vec4 uColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 void main()

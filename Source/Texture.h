@@ -28,6 +28,13 @@ public:
 	};
 	*/
 	
+	enum class RenderType
+	{
+		Opaque,
+		AlphaTest,
+		Translucent
+	};
+	
 	static Texture* White;
 	static Texture* Black;
 	
@@ -53,6 +60,7 @@ public:
     unsigned char* GetPixelData() const { return mPixels; }
 	
 	bool HasAlpha() { return mHasAlpha; }
+	RenderType GetRenderType() const { return mRenderType; }
 	
 	Color32 GetPixelColor32(int x, int y);
 	
@@ -69,8 +77,14 @@ private:
     // An ID for the texture object generated in OpenGL.
     GLuint mTextureId = GL_NONE;
 	
-	// If true, the texture has alpha, so it should probably be rendered in the translucent pass.
+	// Textures tend to have a "render type". If there's no alpha, it is an opaque texture.
+	// If it has alpha, but only 255 or 0, it's an alpha test texture.
+	// If it has semi-alpha pixels, it is a translucent texture.
+	RenderType mRenderType = RenderType::Opaque;
+	
+	// If true, the texture has alpha, so it may need to be rendered
 	bool mHasAlpha = false;
+	bool mIsTranslucent = false;
 	
 	void GenerateOpenGlTexture();
 	

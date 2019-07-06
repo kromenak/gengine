@@ -50,11 +50,11 @@ void Material::SetActiveColor(const Color32& color)
 	mShader->SetUniformVector4("uColor", color);
 }
 
-bool Material::IsTransparent()
+bool Material::IsTranslucent()
 {
 	if(mDiffuseTexture != nullptr)
 	{
-		return mDiffuseTexture->HasAlpha();
+		return mDiffuseTexture->GetRenderType() == Texture::RenderType::Translucent;
 	}
 	return false;
 }
