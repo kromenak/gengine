@@ -65,13 +65,6 @@ void Submesh::SetPositions(float* positions)
 	// For now, we'll assume the caller passes in vertex data for us to own.
 	// In the future, maybe it'll be necessary for the caller to specify this somehow.
 	mPositions = positions;
-	/*
-	if(mPositions == nullptr)
-	{
-		mPositions = new float[mVertexCount * 3];
-	}
-	memcpy(mPositions, positions, mVertexCount * 3 * sizeof(float));
-	*/
 	mVertexArray->SetPositions(mPositions);
 }
 

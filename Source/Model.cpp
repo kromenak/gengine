@@ -10,7 +10,6 @@
 #include "BinaryReader.h"
 #include "Matrix3.h"
 #include "Mesh.h"
-#include "MeshImportSettings.h"
 #include "Quaternion.h"
 #include "Submesh.h"
 #include "Vector2.h"
@@ -58,12 +57,28 @@ void Model::ParseFromData(char *data, int dataLength)
     // Could maybe be a floating-point value? 0x000C842 = 100.0f
     reader.ReadUInt();
     
-    // 24 bytes: unknown - all files have had zeros here thus far.
+    // 24 bytes: mostly unknown - most files have had zeros here thus far.
+	// These are likely flags of some sort - will document as I figure it out.
+	{
+		// Unknown
+		reader.Skip(4);
+		
+		// A value of "2" indicates that this model should render as a billboard.
+		unsigned int flags = reader.ReadUInt();
+		if((flags & 2) != 0)
+		{
+			std::cout << "  Billboard Model!" << std::endl;
+			mBillboard = true;
+		}
+		
+		// Unknown
+		reader.Skip(16);
+	}
+	
 	// 4 bytes: unknown - has thus far always been the number 8.
-    reader.Skip(28);
-    
+	reader.Skip(4);
+	
     // Now, we iterate over each mesh in the file.
-    //int meshGroupCount = 0;
     for(int i = 0; i < numMeshes; i++)
     {
         #ifdef DEBUG_OUTPUT
@@ -101,7 +116,6 @@ void Model::ParseFromData(char *data, int dataLength)
 		//std::cout << "   i: " << iBasis << std::endl;
 		//std::cout << "   j: " << jBasis << std::endl;
 		//std::cout << "   k: " << kBasis << std::endl;
-		//std::cout << "   x: " << Vector3::Dot(iBasis, Vector3::Cross(jBasis, kBasis)) << std::endl;
 		#endif
         
         // From the basis vectors, calculate a quaternion representing
@@ -148,6 +162,10 @@ void Model::ParseFromData(char *data, int dataLength)
         // Based on plot test, seems very likely these are min/max bound values for the mesh.
 		Vector3 min(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
 		Vector3 max(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+		#ifdef DEBUG_OUTPUT
+		std::cout << "    Min: " << min << std::endl;
+		std::cout << "    Max: " << max << std::endl;
+		#endif
         
         // Now, we iterate over each submesh in this mesh.
         for(int j = 0; j < numSubMeshes; j++)
@@ -216,7 +234,7 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // Next we have vertex positions.
             #ifdef DEBUG_OUTPUT
-            std::cout << "      Vertex positions: " << std::endl;
+            //std::cout << "      Vertex positions: " << std::endl;
             #endif
             for(int k = 0; k < vertexCount; k++)
             {
@@ -232,11 +250,11 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexPositions[k * 3 + 2] = z;
                 
                 #ifdef DEBUG_OUTPUT
-                std::cout << Vector3(x, y, z);
+                //std::cout << Vector3(x, y, z);
                 #endif
             }
             #ifdef DEBUG_OUTPUT
-            std::cout << std::endl;
+            //std::cout << std::endl;
             #endif
             submesh->SetPositions(vertexPositions);
             
@@ -270,7 +288,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 // Every 4th number seems out of place - not sure what they mean.
                 // Seen: 0xF100 (241), 0x0000 (0), 0x0701 (263), 0x7F3F (16255), 0x56B1 (45398),
                 // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
-                reader.ReadUShort(); // WHAT IS IT!?
+				reader.ReadUShort(); // WHAT IS IT!?
             }
             submesh->SetIndexes(vertexIndexes, indexCount * 3);
             
@@ -286,8 +304,7 @@ void Model::ParseFromData(char *data, int dataLength)
                     return;
                 }
                 
-                // First three values in LODK block are counts for
-                // how much data to read after.
+                // First three values in LODK block are counts for how much data to read after.
                 int unknownCount1 = reader.ReadUInt();
                 int unknownCount2 = reader.ReadUInt();
                 int unknownCount3 = reader.ReadUInt();
@@ -312,7 +329,6 @@ void Model::ParseFromData(char *data, int dataLength)
                 }
             }
         }
-        //meshGroupCount += numSubMeshes;
     }
     
     // After all meshes and mesh groups, there is some additional data.

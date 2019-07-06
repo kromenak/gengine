@@ -27,9 +27,14 @@ public:
     
     std::vector<Mesh*> GetMeshes() const { return mMeshes; }
 	
+	bool IsBillboard() const { return mBillboard; }
+	
 private:
     // A model consists of one or more meshes.
     std::vector<Mesh*> mMeshes;
+	
+	// If true, the model should be rendered as a billboard.
+	bool mBillboard = false;
 	
     void ParseFromData(char* data, int dataLength);
 };

@@ -12,7 +12,6 @@
 #include "BinaryReader.h"
 #include "Math.h"
 #include "Matrix3.h"
-#include "MeshImportSettings.h"
 
 //#define DEBUG_OUTPUT
 
