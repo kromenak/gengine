@@ -595,6 +595,13 @@ RegFunc1(CallDefaultSheep, void, string, WAITABLE, REL_FUNC);
 
 shpvoid CallSheep(string fileName, string functionName) // WAIT
 {
+	// Make sure function name has the '$' suffix.
+	// Some GK3 data files do this, some don't!
+	if(functionName[functionName.size() - 1] != '$')
+	{
+		functionName.append("$");
+	}
+	
 	std::cout << "CallSheep " << fileName << ", " << functionName << std::endl;
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
 	Services::GetSheep()->Execute(fileName, functionName, currentThread->AddWait());
