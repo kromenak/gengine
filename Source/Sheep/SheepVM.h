@@ -125,13 +125,18 @@ public:
 	~SheepVM();
     
     void Execute(SheepScript* script);
+	void Execute(SheepScript* script, std::function<void()> finishCallback);
+	
     void Execute(SheepScript* script, std::string functionName);
 	void Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback);
+	
 	void Execute(SheepScript* script, int bytecodeOffset, std::function<void()> finishCallback);
 	
     bool Evaluate(SheepScript* script);
 	
 	SheepThread* GetCurrentThread() const { return mCurrentThread; }
+	
+	bool IsAnyRunning() const;
 	
 private:
 	// Stack for the VM - holds values that are pushed/popped by instructions.

@@ -37,11 +37,24 @@ SheepVM::~SheepVM()
 
 void SheepVM::Execute(SheepScript* script)
 {
-    // We need a valid script.
-    if(script == nullptr) { return; }
+	// We need a valid script.
+	if(script == nullptr) { return; }
 	
-    // Just default to zero offset (aka the first function in the script).
-    Execute(script, 0, nullptr);
+	// Just default to zero offset (aka the first function in the script).
+	Execute(script, 0, nullptr);
+}
+
+void SheepVM::Execute(SheepScript* script, std::function<void()> finishCallback)
+{
+	// We need a valid script.
+	if(script == nullptr)
+	{
+		finishCallback();
+		return;
+	}
+	
+	// Just default to zero offset (aka the first function in the script).
+	Execute(script, 0, finishCallback);
 }
 
 void SheepVM::Execute(SheepScript* script, std::string functionName)
@@ -52,16 +65,31 @@ void SheepVM::Execute(SheepScript* script, std::string functionName)
 void SheepVM::Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback)
 {
 	// We need a valid script.
-	if(script == nullptr) { return; }
+	if(script == nullptr)
+	{
+		std::cout << "ERROR: Script is not valid." << std::endl;
+		finishCallback();
+		return;
+	}
 	
 	// Get bytecode offset for this function. If less than zero,
 	// it means the function doesn't exist, and we've got to fail out.
 	int functionOffset = script->GetFunctionOffset(functionName);
-	if(functionOffset < 0) { return; }
+	if(functionOffset < 0)
+	{
+		std::cout << "ERROR: Couldn't find function: " << functionName << std::endl;
+		finishCallback();
+		return;
+	}
 	
 	// Retrieve a sheep instance for this script, or fail.
 	SheepInstance* instance = GetInstance(script);
-	if(instance == nullptr) { return; }
+	if(instance == nullptr)
+	{
+		std::cout << "ERROR: Couldn't allocate SheepInstance." << std::endl;
+		finishCallback();
+		return;
+	}
 	
 	// Create a sheep thread to perform the execution.
 	SheepThread* thread = GetThread();
@@ -132,6 +160,15 @@ bool SheepVM::Evaluate(SheepScript* script)
 
     // Default to false.
     return false;
+}
+
+bool SheepVM::IsAnyRunning() const
+{
+	for(auto& thread : mSheepThreads)
+	{
+		if(thread->mRunning) { return true; }
+	}
+	return false;
 }
 
 SheepInstance* SheepVM::GetInstance(SheepScript* script)

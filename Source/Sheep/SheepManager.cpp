@@ -24,11 +24,7 @@ SheepScript* SheepManager::Compile(std::istream &stream)
 
 void SheepManager::Execute(std::string sheepName, std::string functionName)
 {
-	SheepScript* script = Services::GetAssets()->LoadSheep(sheepName);
-	if(script != nullptr)
-	{
-		Execute(script, functionName, nullptr);
-	}
+	Execute(sheepName, functionName, nullptr);
 }
 
 void SheepManager::Execute(std::string sheepName, std::string functionName, std::function<void()> finishCallback)
@@ -42,12 +38,24 @@ void SheepManager::Execute(std::string sheepName, std::string functionName, std:
 
 void SheepManager::Execute(SheepScript* script)
 {
-    mVirtualMachine.Execute(script);
+	mVirtualMachine.Execute(script);
+}
+
+void SheepManager::Execute(SheepScript* script, std::function<void()> finishCallback)
+{
+	mVirtualMachine.Execute(script);
+}
+
+void SheepManager::Execute(SheepScript* script, std::string functionName)
+{
+	Execute(script, functionName, nullptr);
 }
 
 void SheepManager::Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback)
 {
-	mVirtualMachine.Execute(script, functionName, finishCallback);
+	mVirtualMachine.Execute(script, functionName, [finishCallback] () -> void {
+		finishCallback();
+	});
 }
 
 bool SheepManager::Evaluate(SheepScript* script)

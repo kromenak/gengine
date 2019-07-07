@@ -23,11 +23,16 @@ public:
 	void Execute(std::string sheepName, std::string functionName, std::function<void()> finishCallback);
 	
     void Execute(SheepScript* script);
+	void Execute(SheepScript* script, std::function<void()> finishCallback);
+	
+	void Execute(SheepScript* script, std::string functionName);
 	void Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback);
 	
     bool Evaluate(SheepScript* script);
 	
 	SheepThread* GetCurrentThread() const { return mVirtualMachine.GetCurrentThread(); }
+	
+	bool IsAnyRunning() const { return mVirtualMachine.IsAnyRunning(); }
 	
 private:
 	// Compiles text-based sheep script into sheep bytecode, represented as a SheepScript asset.
