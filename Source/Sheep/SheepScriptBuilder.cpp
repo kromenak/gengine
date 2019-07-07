@@ -88,7 +88,10 @@ void SheepScriptBuilder::StartFunction(std::string functionName)
     #ifdef DEBUG_BUILDER
     std::cout << "Function " << functionName << " (" << mBytecode.size() << ")" <<  std::endl;
     #endif
-    mFunctions[functionName] = (int)mBytecode.size();
+	
+	// All sheep functions are case-insensitive.
+	// So, lower-case the function name in the hash table, so we can lookup consistently.
+    mFunctions[StringUtil::ToLowerCopy(functionName)] = (int)mBytecode.size();
 }
 
 void SheepScriptBuilder::EndFunction(std::string functionName)

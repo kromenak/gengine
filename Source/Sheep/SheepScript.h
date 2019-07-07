@@ -73,7 +73,7 @@ private:
     std::vector<SheepValue> mVariables;
     
     // Maps a function name to it's offset in the bytecode.
-    std::unordered_map<std::string, int> mFunctions;
+	std::unordered_map<std::string, int> mFunctions;
     
     // The bytecode, grabbed directly from the code section.
     // Just pass this to the VM and aaaaawayyyyy we go!
