@@ -88,8 +88,8 @@ bool GEngine::Initialize()
 	// Create game progress.
 	Services::Set<GameProgress>(new GameProgress());
 	
-	//LoadScene("R25");
-    LoadScene("RC1");
+	LoadScene("R25");
+    //LoadScene("RC1");
 	
 	//mReportManager.Log("Generic", "Rock & Roll");
     return true;
@@ -233,7 +233,21 @@ void GEngine::Update()
     // Also update audio system (before or after actors?)
     mAudioManager.Update(deltaTime);
     
-    // Update active cursor.
+	// If a sheep is running, show "wait" cursor.
+	// If not, go back to normal cursor.
+	if(mSheepManager.IsAnyRunning())
+	{
+		UseWaitCursor();
+	}
+	else
+	{
+		if(mActiveCursor == mWaitCursor)
+		{
+			UseDefaultCursor();
+		}
+	}
+	
+	// Update active cursor.
     if(mCursor != nullptr)
     {
         mCursor->Update(deltaTime);

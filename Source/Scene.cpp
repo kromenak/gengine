@@ -267,6 +267,10 @@ void Scene::SetCameraPosition(std::string cameraName)
 		Quaternion(Vector3::UnitX, camera->angle.GetY());
 		mCamera->SetRotation(rotation);
 	}
+	else
+	{
+		std::cout << "Could not find camera " << cameraName << std::endl;
+	}
 }
 
 bool Scene::CheckInteract(const Ray& ray)
