@@ -3,7 +3,10 @@
 //
 // Clark Kromenaker
 //
-// Plays animations!
+// Plays animations (ANM assets)!
+//
+// This is more of a "manager" style class than a per-actor instance class.
+// See VertexAnimationPlayer for actor instance vertex animation logic.
 //
 #pragma once
 #include "Component.h"

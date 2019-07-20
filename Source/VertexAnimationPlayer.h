@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 //
-// A component that can play a vertex animation on an actor.
+// A component that can play vertex animations on an actor.
 //
 #pragma once
 #include "Component.h"

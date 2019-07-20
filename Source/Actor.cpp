@@ -56,5 +56,5 @@ void Actor::Update(float deltaTime)
         component->Update(deltaTime);
     }
 	
-	Debug::DrawLine(GetPosition(), GetPosition() + GetForward() * 5.0f, Color32::Red);
+	//Debug::DrawLine(GetPosition(), GetPosition() + GetForward() * 5.0f, Color32::Red);
 }

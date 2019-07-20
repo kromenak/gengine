@@ -6,6 +6,7 @@
 #include "MeshRenderer.h"
 
 #include "Actor.h"
+#include "Debug.h"
 #include "Mesh.h"
 #include "Model.h"
 #include "Services.h"
@@ -48,6 +49,12 @@ void MeshRenderer::RenderOpaque()
 				
 				// Render the submesh!
 				submeshes[j]->Render();
+			}
+			
+			// Draw debug axes if desired.
+			if(Debug::RenderSubmeshLocalAxes())
+			{
+				Debug::DrawAxes(meshWorldTransformMatrix);
 			}
 			
 			// Increase material index, but not above the max.

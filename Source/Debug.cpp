@@ -9,12 +9,16 @@
 #include "Matrix4.h"
 #include "Mesh.h"
 #include "Rect.h"
+#include "Services.h"
 #include "Vector3.h"
 
 extern Mesh* line;
 extern Mesh* axes;
 
 std::list<DrawCommand> Debug::sDrawCommands;
+
+// Default debug settings.
+bool Debug::sRenderSubmeshLocalAxes = false;
 
 void Debug::DrawLine(const Vector3& from, const Vector3& to, const Color32& color)
 {
@@ -44,9 +48,19 @@ void Debug::DrawAxes(const Vector3& position)
 
 void Debug::DrawAxes(const Vector3& position, float duration)
 {
+	DrawAxes(Matrix4::MakeTranslate(position), duration);
+}
+
+void Debug::DrawAxes(const Matrix4& worldTransform)
+{
+	DrawAxes(worldTransform, 0.0f);
+}
+
+void Debug::DrawAxes(const Matrix4& worldTransform, float duration)
+{
 	DrawCommand command;
 	command.mesh = axes;
-	command.worldTransformMatrix = Matrix4::MakeTranslate(position);
+	command.worldTransformMatrix = worldTransform;
 	command.timer = duration;
 	sDrawCommands.push_back(command);
 }
@@ -70,6 +84,12 @@ void Debug::Update(float deltaTime)
 	for(auto& command : sDrawCommands)
 	{
 		command.timer -= deltaTime;
+	}
+	
+	// Check for debug setting inputs.
+	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F1))
+	{
+		sRenderSubmeshLocalAxes = !sRenderSubmeshLocalAxes;
 	}
 }
 

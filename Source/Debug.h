@@ -38,12 +38,20 @@ public:
 	static void DrawAxes(const Vector3& position);
 	static void DrawAxes(const Vector3& position, float duration);
 	
+	static void DrawAxes(const Matrix4& worldTransform);
+	static void DrawAxes(const Matrix4& worldTransform, float duration);
+	
 	static void DrawRect(const Rect& rect, const Color32& color);
 	
 	static void Update(float deltaTime);
 	
 	static void Render();
 	
+	static bool RenderSubmeshLocalAxes() { return sRenderSubmeshLocalAxes; }
+	
 private:
 	static std::list<DrawCommand> sDrawCommands;
+	
+	// Debug settings, possible to toggle in-game.
+	static bool sRenderSubmeshLocalAxes;
 };
