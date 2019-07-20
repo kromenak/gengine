@@ -46,6 +46,8 @@ public:
     void Play(Animation* animation);
 	void Play(Animation* animation, std::function<void()> finishCallback);
 	
+	void Stop(Animation* animation);
+	
 	void Sample(Animation* animation, int frame);
 	
 protected:

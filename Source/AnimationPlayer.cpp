@@ -29,6 +29,15 @@ void AnimationPlayer::Play(Animation* animation, std::function<void()> finishCal
 	mActiveAnimationStates.emplace_back(animation, finishCallback);
 }
 
+void AnimationPlayer::Stop(Animation* animation)
+{
+	if(animation == nullptr) { return; }
+	auto newEndIt = std::remove_if(mActiveAnimationStates.begin(), mActiveAnimationStates.end(), [animation](const AnimationState& as) -> bool {
+		return as.animation == animation;
+	});
+	mActiveAnimationStates.erase(newEndIt, mActiveAnimationStates.end());
+}
+
 void AnimationPlayer::Sample(Animation* animation, int frame)
 {
 	if(animation == nullptr) { return; }

@@ -27,6 +27,7 @@ class NVCItem;
 class SceneModel;
 class Skybox;
 class Soundtrack;
+class WalkerBoundary;
 
 class SceneData
 {
@@ -42,7 +43,7 @@ public:
 	
 	ScenePositionData* GetScenePosition(std::string positionName) const;
 	
-	Color32 GetWalkBoundaryColor(Vector3 position) const;
+	WalkerBoundary* GetWalkerBoundary() const;
 	
 	std::vector<SceneActorData*> GetSceneActorDatas() const { return mSceneActorDatas; }
 	std::vector<SceneModelData*> GetSceneModelDatas() const { return mSceneModelDatas; }
