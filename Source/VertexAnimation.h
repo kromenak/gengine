@@ -69,7 +69,6 @@ private:
 	// Each array element is the FIRST vertex pose for each mesh/submesh index.
 	// Subsequent poses for the mesh are stored in the "next" of the first pose.
 	std::unordered_map<int, std::unordered_map<int, VertexAnimationVertexPose*>> mVertexPoses;
-	//std::vector<std::vector<VertexAnimationVertexPose*>> mVertexPoses;
 	
 	// Each element of array is the FIRST transform poses for each mesh index.
 	// Subsequent poses for the mesh are stored in the "next" of the first pose.
