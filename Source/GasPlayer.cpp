@@ -17,6 +17,7 @@ GasPlayer::GasPlayer(Actor* owner) : Component(owner)
 void GasPlayer::UpdateInternal(float deltaTime)
 {
     if(mGas == nullptr) { return; }
+	if(mPaused) { return; }
     
     // Decrement timer. When it gets to zero, we move onto the next node.
     if(mTimer >= 0.0f)
