@@ -17,24 +17,31 @@ class Texture;
 
 class WalkerBoundary
 {
-public:
+public:	
 	bool CanWalkTo(Vector3 position) const;
-	std::vector<Vector3> FindPath(Vector3 from, Vector3 to) const;
+	bool FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& path) const;
 	
 	void SetTexture(Texture* texture) { mTexture = texture; }
+	Texture* GetTexture() const { return mTexture; }
+	
 	void SetSize(Vector2 size) { mSize = size; }
+	Vector2 GetSize() const { return mSize; }
+	
 	void SetOffset(Vector2 offset) { mOffset = offset; }
+	Vector2 GetOffset() const { return mOffset; }
 	
 private:
 	// The texture provides vital data about walkable areas.
-	// Each pixel correlates to a spot in the scene. The pixel color indicates
-	// whether a spot is walkable, and the specific color seems to indicate desirability/weight.
+	// Each pixel correlates to a spot in the scene.
+	// The pixel color indicates whether a spot is walkable and how walkable.
 	Texture* mTexture = nullptr;
 	
-	// The size and offset are used to map the walker boundary texture to the 3D scene.
-	// Both are on the X/Z plane (no height).
+	// Size specifies scale of the walker bounds relative to the 3D scene.
 	Vector2 mSize;
+	
+	// An offset for the bottom-left of the walker bounds from the origin.
 	Vector2 mOffset;
 	
 	Vector2 WorldPosToTexturePos(Vector3 worldPos) const;
+	Vector3 TexturePosToWorldPos(Vector2 texturePos) const;
 };
