@@ -56,6 +56,11 @@ namespace StringUtil
     {
         Trim(str, ' ');
     }
+	
+	inline void RemoveAll(std::string& str, char remove)
+	{
+		str.erase(std::remove(str.begin(), str.end(), remove), str.end());
+	}
     
     inline std::vector<std::string> Split(std::string& str, char delim)
     {
