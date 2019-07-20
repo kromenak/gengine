@@ -111,12 +111,17 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
 	}
 	*/
 	
-    float secondsPerFrame = 1.0f / framesPerSecond;
-    float localTime = Math::Mod(time, GetDuration(framesPerSecond));
-    
+	// Calculate how many seconds should be used for a single frame.
+	float secondsPerFrame = 1.0f / framesPerSecond;
+	
+	// Caller may pass in a global time that extends beyond the local time of this particular animation.
+	// Desire here is for the animation to "loop", so we calculate how many seconds in we are.
+	float localTime = Math::Mod(time, GetDuration(framesPerSecond));
+	
+	// Determine between which two transform poses the desired local time is located.
+	// E.g. if local time is 50% between pose 5 and 6, we  want to interpolate 50% between those two poses.
     float currentPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
-	
     VertexAnimationTransformPose* firstTransformPose = mTransformPoses[meshIndex];
     VertexAnimationTransformPose* currentTransformPose = firstTransformPose;
     while(currentTransformPose->mNext != nullptr)
@@ -128,22 +133,30 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
         // Move on to next one.
         currentTransformPose = currentTransformPose->mNext;
     }
-    
+	
+	// If there is no "next" pose, we can either loop to the first pose, or "clamp" on the last pose.
+	// Testing suggests GK3 expects the "clamp" approach, but more generally, a parameter for this might make sense.
     VertexAnimationTransformPose* nextTransformPose = currentTransformPose->mNext;
     if(nextTransformPose == nullptr)
     {
-        nextTransformPose = firstTransformPose;
-        nextPoseTime = GetDuration(framesPerSecond);
+		// Clamp approach.
+		nextTransformPose = currentTransformPose;
+		nextPoseTime = currentPoseTime;
+		
+		// Loop approach.
+        //nextTransformPose = firstTransformPose;
+        //nextPoseTime = GetDuration(framesPerSecond);
     }
-    
+	
     // Determine our "t" value between the prev and next pose.
     float t = 1.0f;
-    if(currentPoseTime != nextPoseTime)
+	if(!Math::IsZero(nextPoseTime - currentPoseTime))
     {
         t = (localTime - currentPoseTime) / (nextPoseTime - currentPoseTime);
     }
     assert(t >= 0.0f && t <= 1.0f);
-    
+	
+	// Finally, create a pose with lerp/slerp that is interpolated between the two poses.
     VertexAnimationTransformPose pose;
     pose.mLocalPosition = Vector3::Lerp(currentTransformPose->mLocalPosition, nextTransformPose->mLocalPosition, t);
 	pose.mLocalScale = Vector3::Lerp(currentTransformPose->mLocalScale, nextTransformPose->mLocalScale, t);
