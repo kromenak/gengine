@@ -72,3 +72,13 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const Vector2& v);
 
+struct Vector2Hash
+{
+	std::size_t operator()(const Vector2& v) const noexcept
+	{
+		std::size_t h1 = std::hash<float>{}(v.GetX());
+		std::size_t h2 = std::hash<float>{}(v.GetY());
+		return h1 ^ (h2 << 1);
+	}
+};
+
