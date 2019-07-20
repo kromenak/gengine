@@ -22,6 +22,7 @@ class GasPlayer;
 class MeshRenderer;
 class VertexAnimation;
 class VertexAnimationPlayer;
+class Walker;
 
 class GKActor : public Actor
 {
@@ -32,8 +33,9 @@ public:
         Talk,
         Listen
     };
-    
-    GKActor(bool forCharacter);
+	
+	GKActor();
+	GKActor(std::string identifier);
 	
 	void SetIdentifier(std::string identifier) { mIdentifier = identifier; }
 	const std::string& GetIdentifier() const { return mIdentifier; }
@@ -54,6 +56,7 @@ public:
 	void SampleAnimation(VertexAnimation* animation, int frame);
 	
     MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
+	Walker* GetWalker() const { return mWalker; }
 	
 protected:
 	void UpdateInternal(float deltaTime) override;
@@ -73,6 +76,9 @@ private:
 	
 	// The character's animation player.
 	VertexAnimationPlayer* mAnimationPlayer = nullptr;
+	
+	// The character's walking control.
+	Walker* mWalker = nullptr;
 	
 	// Player for GAS logic.
 	GasPlayer* mGasPlayer = nullptr;

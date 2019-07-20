@@ -78,6 +78,8 @@ private:
 	
 	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;
+	
+	void ExecuteNVC(const NVCItem* nvc);
 };
 
 /*

@@ -11,43 +11,11 @@
 #include "Services.h"
 #include "Skybox.h"
 #include "StringUtil.h"
+#include "WalkerBoundary.h"
 
 SIF::SIF(std::string name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
-}
-
-Color32 SIF::GetWalkBoundaryColor(Vector3 position) const
-{
-	// If no texture...can walk anywhere?
-	if(mWalkBoundaryTexture == nullptr) { return Color32::White; }
-	//std::cout << "World Pos: " << position << std::endl;
-	
-	position.SetX(position.GetX() + mWalkBoundaryOffset.GetX());
-	position.SetZ(position.GetZ() + mWalkBoundaryOffset.GetY());
-	//std::cout << "Offset Pos: " << position << std::endl;
-	
-	position.SetX(position.GetX() / mWalkBoundarySize.GetX());
-	position.SetZ(position.GetZ() / mWalkBoundarySize.GetY());
-	//std::cout << "Normalized Pos: " << position << std::endl;
-	
-	position.SetX(position.GetX() * mWalkBoundaryTexture->GetWidth());
-	position.SetZ(position.GetZ() * mWalkBoundaryTexture->GetHeight());
-	//std::cout << "Pixel Pos: " << position << std::endl;
-	
-	// The color of the pixel at pos seems to indicate whether that spot is walkable.
-	// White = totally OK to walk 				(255, 255, 255)
-	// Blue = OK to walk						(0, 0, 255)
-	// Green = sort of OK to walk 				(0, 255, 0)
-	// Red = getting less OK to walk 			(255, 0, 0)
-	// Yellow = sort of not OK to walk 			(255, 255, 0)
-	// Magenta = really pushing it here 		(255, 0, 255)
-	// Grey = pretty not OK to walk here 		(128, 128, 128)
-	// Cyan = this is your last warning, buddy 	(0, 255, 255)
-	// Black = totally not OK to walk 			(0, 0, 0)
-	
-	// Need to flip the Y because the calculated value is from lower-left. But X/Y are from upper-left.
-	return mWalkBoundaryTexture->GetPixelColor32(position.GetX(), mWalkBoundaryTexture->GetHeight() - position.GetZ());
 }
 
 SceneCameraData* SIF::GetRoomCamera(std::string cameraName)
@@ -96,7 +64,6 @@ void SIF::ParseFromData(char *data, int dataLength)
         for(auto& entry : section.entries)
         {
             IniKeyValue* keyValue = entry;
-			
 			if(StringUtil::EqualsIgnoreCase(keyValue->key, "scene"))
             {
                 mSceneModelName = keyValue->value;
@@ -107,8 +74,13 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue->key, "boundary"))
             {
+				if(mWalkerBoundary == nullptr)
+				{
+					mWalkerBoundary = new WalkerBoundary();
+				}
+				
 				// First value is name of a texture defining walk bounds.
-				mWalkBoundaryTexture = Services::GetAssets()->LoadTexture(keyValue->value);
+				mWalkerBoundary->SetTexture(Services::GetAssets()->LoadTexture(keyValue->value));
 				
 				// Remaining key/values are size/offset of the texture in 3D space.
 				// This is used as a 2D overlay on the X/Z plane to determine walkable area.
@@ -117,11 +89,11 @@ void SIF::ParseFromData(char *data, int dataLength)
                 {
                     if(StringUtil::EqualsIgnoreCase(keyValue->key, "size"))
                     {
-                        mWalkBoundarySize = keyValue->GetValueAsVector2();
+						mWalkerBoundary->SetSize(keyValue->GetValueAsVector2());
                     }
                     else if(StringUtil::EqualsIgnoreCase(keyValue->key, "offset"))
                     {
-                        mWalkBoundaryOffset = keyValue->GetValueAsVector2();
+						mWalkerBoundary->SetOffset(keyValue->GetValueAsVector2());
                     }
                     keyValue = keyValue->next;
                 }

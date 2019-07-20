@@ -19,13 +19,14 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
-class Texture;
+class Animation;
+class GAS;
 class Model;
 class NVC;
-class Soundtrack;
 class Skybox;
-class GAS;
-class Animation;
+class Soundtrack;
+class Texture;
+class WalkerBoundary;
 
 struct SceneCameraData
 {
@@ -164,10 +165,7 @@ public:
 	
 	std::string GetFloorBspModelName() const { return mFloorBspModelName; }
 	
-	Texture* GetWalkBoundaryTexture() const { return mWalkBoundaryTexture; }
-	Vector2 GetWalkBoundarySize() const { return mWalkBoundarySize; }
-	Vector2 GetWalkBoundaryOffset() const { return mWalkBoundaryOffset; }
-	Color32 GetWalkBoundaryColor(Vector3 position) const;
+	WalkerBoundary* GetWalkerBoundary() const { return mWalkerBoundary; }
 	
     Skybox* GetSkybox() const { return mSkybox; }
     
@@ -192,9 +190,7 @@ private:
     std::string mFloorBspModelName;
     
     // BOUNDARIES
-	Texture* mWalkBoundaryTexture = nullptr;
-    Vector2 mWalkBoundarySize;
-    Vector2 mWalkBoundaryOffset;
+	WalkerBoundary* mWalkerBoundary = nullptr;
     
     // CAMERA BOUNDS
     // Name of the MOD file that should be used for camera bounds.

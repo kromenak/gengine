@@ -11,6 +11,7 @@
 #include "AnimationPlayer.h"
 #include "CharacterManager.h"
 #include "Color32.h"
+#include "Debug.h"
 #include "GameCamera.h"
 #include "GKActor.h"
 #include "Math.h"
@@ -23,6 +24,8 @@
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "Walker.h"
+#include "WalkerBoundary.h"
 
 extern Mesh* quad;
 
@@ -67,28 +70,30 @@ Scene::Scene(std::string name, std::string timeCode) :
 	mActionBar = new ActionBar();
 	
 	// For debugging - render walker bounds overlay on game world.
-	/*
 	{
-		Actor* walkerBoundaryActor = new Actor();
-		
-		MeshRenderer* walkerBoundaryMeshRenderer = walkerBoundaryActor->AddComponent<MeshRenderer>();
-		walkerBoundaryMeshRenderer->SetMesh(quad);
-		
-		Material m;
-		m.SetDiffuseTexture(mGeneralSIF->GetWalkBoundaryTexture());
-		walkerBoundaryMeshRenderer->SetMaterial(0, m);
-		
-		Vector3 size = mGeneralSIF->GetWalkBoundarySize();
-		Vector3 offset = mGeneralSIF->GetWalkBoundaryOffset();
-		offset.SetX(-offset.GetX() + size.GetX() * 0.5f);
-		offset.SetZ(-offset.GetY() + size.GetY() * 0.5f);
-		offset.SetY(0.1f); // Offset slightly up to avoid z-fighting with floor (in most scenes).
-		
-		walkerBoundaryActor->SetPosition(offset);
-		walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
-		walkerBoundaryActor->SetScale(size);
+		WalkerBoundary* walkerBoundary = mSceneData.GetWalkerBoundary();
+		if(walkerBoundary != nullptr)
+		{
+			Actor* walkerBoundaryActor = new Actor();
+			
+			MeshRenderer* walkerBoundaryMeshRenderer = walkerBoundaryActor->AddComponent<MeshRenderer>();
+			walkerBoundaryMeshRenderer->SetMesh(quad);
+			
+			Material m;
+			m.SetDiffuseTexture(walkerBoundary->GetTexture());
+			walkerBoundaryMeshRenderer->SetMaterial(0, m);
+			
+			Vector3 size = walkerBoundary->GetSize();
+			Vector3 offset = walkerBoundary->GetOffset();
+			offset.SetX(-offset.GetX() + size.GetX() * 0.5f);
+			offset.SetZ(-offset.GetY() + size.GetY() * 0.5f);
+			offset.SetY(0.1f); // Offset slightly up to avoid z-fighting with floor (in most scenes).
+			
+			walkerBoundaryActor->SetPosition(offset);
+			walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
+			walkerBoundaryActor->SetScale(size);
+		}
 	}
-	*/
 }
 
 Scene::~Scene()
@@ -103,17 +108,16 @@ void Scene::OnSceneEnter()
 	std::vector<SceneActorData*> sceneActorDatas = mSceneData.GetSceneActorDatas();
 	for(auto& actorDef : sceneActorDatas)
 	{
-		// Create actor.
-		GKActor* actor = new GKActor(true);
-		actor->SetNoun(actorDef->noun);
-		
 		// The actor's 3-letter identifier can be derived from the name of the model.
 		std::string identifier;
 		if(actorDef->model != nullptr)
 		{
 			identifier = actorDef->model->GetNameNoExtension();
 		}
-		actor->SetIdentifier(identifier);
+		
+		// Create actor.
+		GKActor* actor = new GKActor(identifier);
+		actor->SetNoun(actorDef->noun);
 		
 		// Set actor's initial position and rotation.
 		if(actorDef->position != nullptr)
@@ -155,6 +159,13 @@ void Scene::OnSceneEnter()
 		mActors.push_back(actor);
 	}
 	
+	// Create actor.
+	GKActor* dor = new GKActor();
+	dor->SetPosition(mEgo->GetPosition());
+	dor->SetRotation(mEgo->GetRotation());
+	dor->GetMeshRenderer()->SetModel(Services::GetAssets()->LoadModel("DOR_GAB.MOD"));
+	mActors.push_back(dor);
+	
 	// Iterate over scene model data and prep the scene.
 	// First, we want to hide and scene models that are set to "hidden".
 	// Second, we want to spawn any non-scene models.
@@ -188,7 +199,7 @@ void Scene::OnSceneEnter()
 			case SceneModelData::Type::GasProp:
 			{
 				// Create actor.
-				GKActor* actor = new GKActor(false);
+				GKActor* actor = new GKActor();
 				actor->SetNoun(modelDef->noun);
 				
 				// Set model.
@@ -322,17 +333,35 @@ void Scene::Interact(const Ray& ray)
 	// Clicked on the floor - move ego to position.
 	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData.GetFloorModelName()))
 	{
-		Color32 color = mSceneData.GetWalkBoundaryColor(hitInfo.position);
-		
-		// Don't allow walking in black areas.
-		if(color == Color32::Black)
+		// Check walker boundary to see whether we can walk to this spot.
+		WalkerBoundary* walkerBoundary = mSceneData.GetWalkerBoundary();
+		if(walkerBoundary != nullptr)
 		{
-			std::cout << "Can't walk!" << std::endl;
-			return;
+			if(!walkerBoundary->CanWalkTo(hitInfo.position))
+			{
+				std::cout << "Can't walk!" << std::endl;
+				return;
+			}
+			
+			std::vector<Vector3> path;
+			if(walkerBoundary->FindPath(mEgo->GetPosition(), hitInfo.position, path))
+			{
+				Vector3 prev = path[0];
+				for(int i = 1; i < path.size(); i++)
+				{
+					Debug::DrawLine(prev, path[i], Color32::Red, 10.0f);
+					prev = path[i];
+				}
+				mEgo->GetWalker()->SetPath(path);
+			}
+			else
+			{
+				std::cout << "No path!" << std::endl;
+			}
 		}
 		
 		// Move Ego to position.
-		mEgo->SetPosition(hitInfo.position);
+		//mEgo->SetPosition(hitInfo.position);
 		return;
 	}
 	
@@ -368,7 +397,7 @@ void Scene::Interact(const Ray& ray)
 	std::vector<const NVCItem*> viableActions = mSceneData.GetViableVerbsForNoun(sceneModelData->noun, mEgo);
 	
 	// Show the action bar. Internally, this takes care of executing the chosen action.
-	mActionBar->Show(viableActions);
+	mActionBar->Show(viableActions, std::bind(&Scene::ExecuteNVC, this, std::placeholders::_1));
 }
 
 float Scene::GetFloorY(const Vector3& position)
@@ -432,4 +461,76 @@ GKActor* Scene::GetActorByNoun(std::string noun)
 void Scene::ApplyTextureToSceneModel(std::string modelName, Texture* texture)
 {
 	mSceneData.GetBSP()->SetTexture(modelName, texture);
+}
+
+void Scene::ExecuteNVC(const NVCItem* nvc)
+{
+	// Ignore nulls.
+	if(nvc == nullptr) { return; }
+	
+	// Before executing the NVC, we need to handle any approach.
+	std::cout << (int)nvc->approach << std::endl;
+	std::cout << nvc->target << std::endl;
+	switch(nvc->approach)
+	{
+		case NVCItem::Approach::WalkTo:
+		{
+			ScenePositionData* scenePos1 = mSceneData.GetScenePosition(nvc->target);
+			if(scenePos1 != nullptr)
+			{
+				mEgo->SetPosition(scenePos1->position);
+			}
+			break;
+		}
+		case NVCItem::Approach::Anim:
+		{
+			Animation* anim = Services::GetAssets()->LoadAnimation(nvc->target);
+			if(anim != nullptr)
+			{
+				//TODO: Get position corresponding to first frame of animation and move there.
+			}
+			break;
+		}
+		case NVCItem::Approach::Near:
+		{
+			ScenePositionData* scenePos2 = mSceneData.GetScenePosition(nvc->target);
+			if(scenePos2 != nullptr)
+			{
+				mEgo->SetPosition(scenePos2->position);
+			}
+			break;
+		}
+		case NVCItem::Approach::NearModel:
+		{
+			break;
+		}
+		case NVCItem::Approach::Region:
+		{
+			break;
+		}
+		case NVCItem::Approach::TurnTo:
+		{
+			break;
+		}
+		case NVCItem::Approach::TurnToModel:
+		{
+			break;
+		}
+		case NVCItem::Approach::WalkToSee:
+		{
+			break;
+		}
+		case NVCItem::Approach::None:
+		{
+			break;
+		}
+		default:
+		{
+			std::cout << "Unaccounted for approach!" << std::endl;
+			break;
+		}
+	}
+	
+	// Execute the thing!
+	nvc->Execute();
 }

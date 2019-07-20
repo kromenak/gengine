@@ -32,8 +32,23 @@ struct NVCItem
 	// Can also be a local condition, defined in the file.
     std::string condition;
 	
-	// A desired approach, and the target of the approach (a scene obj).
-    std::string approach;
+	// If desired, an approach can be specified. Ego will "approach" the target
+	// before executing the associated script.
+	enum class Approach
+	{
+		None,		// no approach; execute immediately
+		WalkTo,		// target will be name of a position (as defined in SIF)
+		Anim,		// target will be an animation name (.anm file)
+		Near,		// target will be name of a position (as defined in SIF)
+		NearModel,	// target will be name of a model
+		Region,		// target will be name of a region (as defined in SIF)
+		TurnTo,		// target will be name of a position (as defined in SIF)
+		TurnToModel,// target will be name of a model
+		WalkToSee	// target will be name of a model
+	};
+	Approach approach = Approach::None;
+	
+	// A target for the approach; interpreted differently depending on the approach specified.
     std::string target;
 	
 	// A script to execute when using this NVC item.

@@ -66,8 +66,6 @@ bool NVC::IsCaseMet(const NVCItem* item, GKActor* ego) const
 	if(it != mCaseToSheep.end())
 	{
 		return Services::GetSheep()->Evaluate(it->second);
-		//SheepVM vm;
-		//return vm.Evaluate(it->second);
 	}
 	
 	// Assume any not found case is false by default.
@@ -117,24 +115,61 @@ void NVC::ParseFromData(char *data, int dataLength)
         
         keyValue = keyValue->next;
 		std::string condition = keyValue->key;
+		StringUtil::RemoveAll(condition, '\t');
 		StringUtil::Trim(condition);
-		StringUtil::Trim(condition, '\t');
 		item.condition = condition;
         
         // From here, we have some optional stuff.
         keyValue = keyValue->next;
         while(keyValue != nullptr)
         {
-            if(keyValue->key == "approach")
+			StringUtil::RemoveAll(keyValue->key, '\t');
+			StringUtil::Trim(keyValue->key);
+			
+			if(StringUtil::EqualsIgnoreCase(keyValue->key, "Approach"))
             {
-                // Valid options are: WalkTo, Anim, Near, NearModel, Region, TurnTo, TurnToModel, WalkToSee
-                item.approach = keyValue->value;
+				if(StringUtil::EqualsIgnoreCase(keyValue->value, "WalkTo"))
+				{
+					item.approach = NVCItem::Approach::WalkTo;
+				}
+				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Anim"))
+				{
+					item.approach = NVCItem::Approach::Anim;
+				}
+				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Near"))
+				{
+					item.approach = NVCItem::Approach::Near;
+				}
+				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "NearModel"))
+				{
+					item.approach = NVCItem::Approach::NearModel;
+				}
+				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Region"))
+				{
+					item.approach = NVCItem::Approach::Region;
+				}
+				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "TurnTo"))
+				{
+					item.approach = NVCItem::Approach::TurnTo;
+				}
+				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "TurnToModel"))
+				{
+					item.approach = NVCItem::Approach::TurnToModel;
+				}
+				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "WalkToSee"))
+				{
+					item.approach = NVCItem::Approach::WalkToSee;
+				}
+				else
+				{
+					std::cout << "ERROR: invalid approach " << keyValue->value << std::endl;
+				}
             }
-            else if(keyValue->key == "target")
+            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "Target"))
             {
                 item.target = keyValue->value;
             }
-            else if(keyValue->key == "script")
+            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "Script"))
             {
                 // A sheep expression to be evaluated for this item.
                 SheepCompiler compiler;

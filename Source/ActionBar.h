@@ -10,7 +10,10 @@
 #pragma once
 #include "Actor.h"
 
+#include <functional>
 #include <vector>
+
+#include "NVC.h"
 
 class ButtonIcon;
 class UIButton;
@@ -21,7 +24,7 @@ class ActionBar : public Actor
 public:
 	ActionBar();
 	
-	void Show(std::vector<const NVCItem*> actions);
+	void Show(std::vector<const NVCItem*> actions, std::function<void(const NVCItem*)> executeCallback);
 	void Hide();
 	
 	bool IsShowing() const { return mIsShowing; }

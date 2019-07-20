@@ -192,13 +192,18 @@ ScenePositionData* SceneData::GetScenePosition(std::string positionName) const
 	return position;
 }
 
-Color32 SceneData::GetWalkBoundaryColor(Vector3 position) const
+WalkerBoundary* SceneData::GetWalkerBoundary() const
 {
-	if(mSpecificSIF != nullptr && mSpecificSIF->GetWalkBoundaryTexture() != nullptr)
+	WalkerBoundary* walkerBoundary = nullptr;
+	if(mSpecificSIF != nullptr)
 	{
-		return mSpecificSIF->GetWalkBoundaryColor(position);
+		walkerBoundary = mSpecificSIF->GetWalkerBoundary();
 	}
-	return mGeneralSIF->GetWalkBoundaryColor(position);
+	if(walkerBoundary == nullptr && mGeneralSIF != nullptr)
+	{
+		walkerBoundary = mGeneralSIF->GetWalkerBoundary();
+	}
+	return walkerBoundary;
 }
 
 std::vector<const NVCItem*> SceneData::GetViableVerbsForNoun(std::string noun, GKActor* ego) const
