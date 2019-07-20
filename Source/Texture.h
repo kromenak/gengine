@@ -70,7 +70,10 @@ private:
     // Texture width and height.
     unsigned int mWidth = 0;
     unsigned int mHeight = 0;
-    
+	
+	// Some textures have palettes.
+	unsigned char* mPalette = nullptr;
+	
     // Pixel data - this is the meat of the texture!
     unsigned char* mPixels = nullptr;
     

@@ -54,6 +54,11 @@ Texture::~Texture()
 	{
 		glDeleteTextures(1, &mTextureId);
 	}
+	if(mPalette != nullptr)
+	{
+		delete[] mPalette;
+		mPalette = nullptr;
+	}
 	if(mPixels != nullptr)
 	{
 		delete[] mPixels;
@@ -369,13 +374,12 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	reader.Skip(4);
 	
 	// COLOR TABLE - only present for 8-bpp or lower images
-	unsigned char* palette = nullptr;
 	if(bitsPerPixel <= 8)
 	{
 		// The number of bytes is numColors in palette, time 4 bytes each.
 		// The order of the colors by default is blue, green, red, alpha.
-		palette = new unsigned char[numColorsInColorPalette * 4];
-		reader.Read(palette, numColorsInColorPalette * 4);
+		mPalette = new unsigned char[numColorsInColorPalette * 4];
+		reader.Read(mPalette, numColorsInColorPalette * 4);
 	}
 	
 	// PIXELS
@@ -401,12 +405,12 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 				paletteIndex *= 4;
 				bytesRead++;
 				
-				if(palette != nullptr)
+				if(mPalette != nullptr)
 				{
 					// Palette color order is BGRA. But our internal pixels are RGBA.
-					mPixels[index] = palette[paletteIndex + 2];
-					mPixels[index + 1] = palette[paletteIndex + 1];
-					mPixels[index + 2] = palette[paletteIndex];
+					mPixels[index] = mPalette[paletteIndex + 2];
+					mPixels[index + 1] = mPalette[paletteIndex + 1];
+					mPixels[index + 2] = mPalette[paletteIndex];
 					
 					// As long as the BMP format is BI_RGB, we can assume the image does not have any alpha data.
 					// In these cases, the alpha value is usually zero.
