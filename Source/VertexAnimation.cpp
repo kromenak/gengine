@@ -76,13 +76,18 @@ VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int fram
     VertexAnimationVertexPose* nextVertexPose = currentVertexPose->mNext;
     if(nextVertexPose == nullptr)
     {
-        nextVertexPose = firstVertexPose;
-        nextPoseTime = GetDuration(framesPerSecond);
+		// Clamp approach.
+		nextVertexPose = currentVertexPose;
+		nextPoseTime = currentPoseTime;
+		
+		// Loop approach.
+        //nextVertexPose = firstVertexPose;
+        //nextPoseTime = GetDuration(framesPerSecond);
     }
     
     // Determine our "t" value between the current and next pose.
     float t = 1.0f;
-    if(currentPoseTime != nextPoseTime)
+    if(!Math::IsZero(nextPoseTime - currentPoseTime))
     {
         t = (localTime - currentPoseTime) / (nextPoseTime - currentPoseTime);
     }
@@ -262,7 +267,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     std::cout << "        Submesh Index: " << submeshIndex << std::endl;
                     #endif
                     int hash = meshIndex * 1000 + submeshIndex;
-                   
+					
                     VertexAnimationVertexPose* vertexPose = new VertexAnimationVertexPose();
                     vertexPose->mFrameNumber = i;
                     if(i == 0)
@@ -279,35 +284,17 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // 2 bytes: Vertex count.
                     unsigned short vertexCount = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
-                    //std::cout << "        Vertex Count: " << vertexCount << std::endl;
+                    std::cout << "        Vertex Count: " << vertexCount << std::endl;
                     #endif
                     
                     // Next, three floats per vertex (X, Y, Z).
                     for(int i = 0; i < vertexCount; i++)
                     {
                         float x = reader.ReadFloat();
-						#ifdef GK3_MIRROR_Z
-                        float z = -reader.ReadFloat();
-						#else
 						float z = reader.ReadFloat();
-						#endif
                         float y = reader.ReadFloat();
                         vertexPose->mVertexPositions.push_back(Vector3(x, y, z));
                     }
-                    
-                    /*
-                    #ifdef DEBUG_OUTPUT
-                    if(index == 5 && submeshIndex == 0)
-                    {
-                    std::cout << "        Vertex Positions: " << std::endl;
-                    for(auto& pos : vertexPose->mVertexPositions)
-                    {
-                        std::cout << pos << std::endl;
-                    }
-                    std::cout << std::endl;
-                    }
-                    #endif
-                    */
                 }
                 // Identifier 1 also appears to be vertex data, but in a compressed format.
                 else if(identifier == 1)
@@ -320,7 +307,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     uint blockByteCount = reader.ReadUInt();
                     byteCount -= blockByteCount + 4;
                     
-                    // 2 bytes: Mesh group within mesh this block refers to.
+                    // 2 bytes: Submesh within mesh this block refers to.
                     unsigned short submeshIndex = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Submesh Index: " << submeshIndex << std::endl;
@@ -329,7 +316,8 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // Find position data from last recorded frame.
                     int hash = meshIndex * 1000 + submeshIndex;
                     std::vector<Vector3>& prevPositions = lastVertexPoseLookup[hash]->mVertexPositions;
-                    
+					
+					// Create a vertex pose to hold this new data and insert it into the vertex pose chain.
                     VertexAnimationVertexPose* vertexPose = new VertexAnimationVertexPose();
                     vertexPose->mFrameNumber = i;
                     if(i == 0)
@@ -342,7 +330,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         lastVertexPoseLookup[hash]->mNext = vertexPose;
                         lastVertexPoseLookup[hash] = vertexPose;
                     }
-                    
+					
                     // 2 bytes: Vertex count.
                     unsigned short vertexCount = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
@@ -375,65 +363,40 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // Now that we have deciphered how each vertex is compressed, we can read in each vertex.
                     for(int k = 0; k < vertexCount; k++)
                     {
-						#ifdef DEBUG_OUTPUT
-						std::cout << "		" << (int)vertexDataFormat[k] << std::endl;
-						#endif
-						
-						// 0 means no vertex data, so don't do anything!
+						// 0 means no vertex data, so just use whatever we had for the previous frame.
+						// If the vertex data hasn't changed since last frame, it isn't stored in ACT file, to save space.
                         if(vertexDataFormat[k] == 0)
                         {
                             vertexPose->mVertexPositions.push_back(prevPositions[k]);
                         }
                         // 1 means (X, Y, Z) are compressed in next 3 bytes.
+						// This tends to be used for storing vertex position delta for internal vertices in a mesh.
                         else if(vertexDataFormat[k] == 1)
                         {
                             float x = DecompressFloatFromByte(reader.ReadByte());
-							#ifdef GK3_MIRROR_Z
-							float z = -DecompressFloatFromByte(reader.ReadByte());
-							#else
 							float z = DecompressFloatFromByte(reader.ReadByte());
-							#endif
                             float y = DecompressFloatFromByte(reader.ReadByte());
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
                         // 2 means (X, Y, Z) are compressed in next 3 ushorts.
+						// This tends to be used for storing vertex position deltas where meshes meet (like a knee or elbow).
                         else if(vertexDataFormat[k] == 2)
                         {
+							//TODO: Hmm, something about this is incorrect...you can see it in Gabe's walk loop for example... :(
                             float x = DecompressFloatFromUShort(reader.ReadUShort());
-							#ifdef GK3_MIRROR_Z
-							float z = -DecompressFloatFromUShort(reader.ReadUShort());
-							#else
 							float z = DecompressFloatFromUShort(reader.ReadUShort());
-							#endif
-                            float y = DecompressFloatFromUShort(reader.ReadUShort());
-                            vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
+							float y = DecompressFloatFromUShort(reader.ReadUShort());
+							vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
                         // 3 means (X, Y, Z) are not compressed - just floats.
                         else if(vertexDataFormat[k] == 3)
                         {
                             float x = reader.ReadFloat();
-							#ifdef GK3_MIRROR_Z
-							float z = -reader.ReadFloat();
-							#else
 							float z = reader.ReadFloat();
-							#endif
                             float y = reader.ReadFloat();
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
                     }
-                    /*
-                    #ifdef DEBUG_OUTPUT
-                    if(index == 5 && submeshIndex == 0)
-                    {
-                        std::cout << "        Vertex Positions: " << std::endl;
-                        for(int k = 0; k < vertexCount; k++)
-                        {
-                            std::cout << vertexPose->mVertexPositions[k] << " (" << (int)vertexDataFormat[k] << ")" << std::endl;
-                        }
-                        std::cout << std::endl;
-                    }
-                    #endif
-                    */
                     
                     // Don't need these anymore!
                     delete[] compressionInfo;
@@ -473,10 +436,6 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // a rotation from the standard basis to that basis. We also need to negate some elements
                     // to represent "reflection" from a right-handed rotation to a left-handed rotation.
                     Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
-					#ifdef GK3_MIRROR_Z
-                    rotQuat.SetZ(-rotQuat.GetZ());
-					rotQuat.SetW(-rotQuat.GetW());
-					#endif
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Mesh Rotation: " << rotQuat << std::endl;
                     #endif
@@ -487,11 +446,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // want to position them all correctly relative to one another!
                     float x = reader.ReadFloat();
                     float y = reader.ReadFloat();
-					#ifdef GK3_MIRROR_Z
-					float z = -reader.ReadFloat();
-					#else
 					float z = reader.ReadFloat();
-					#endif
                     Vector3 meshPos(x, y, z);
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Mesh Position: " << meshPos << std::endl;
@@ -527,8 +482,12 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     byteCount -= blockByteCount + 4;
                     
                     // Assign min/max data.
-                    Vector3(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-                    Vector3(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                    Vector3 min(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                    Vector3 max(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+					#ifdef DEBUG_OUTPUT
+					std::cout << "        Min: " << min << std::endl;
+					std::cout << "        Max: " << max << std::endl;
+					#endif
                 }
                 else
                 {
