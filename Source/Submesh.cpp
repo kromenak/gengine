@@ -106,3 +106,12 @@ void Submesh::SetIndexes(unsigned short* indexes, int count)
 	mVertexArray->SetIndexes(indexes, count);
 }
 
+Vector3 Submesh::GetVertexPosition(int index) const
+{
+	// Handle error cases.
+	if(mPositions == nullptr) { return Vector3::Zero; }
+	if(index < 0 || index >= mVertexCount) { return Vector3::Zero; }
+	
+	int startOffset = index * 3;
+	return Vector3(mPositions[startOffset], mPositions[startOffset + 1], mPositions[startOffset + 2]);
+}
