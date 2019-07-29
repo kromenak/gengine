@@ -7,7 +7,10 @@
 // Vertex data - positions, colors, UVs, etc.
 //
 #pragma once
+
 #include <string>
+
+#include "Vector3.h"
 
 class GLVertexArray;
 
@@ -71,6 +74,8 @@ public:
 	std::string GetTextureName() const { return mTextureName; }
 	
 	unsigned int GetVertexCount() const { return mVertexCount; }
+	
+	Vector3 GetVertexPosition(int index) const;
 	
 private:
 	// Number of vertices in the mesh.
