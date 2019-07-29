@@ -540,6 +540,11 @@ Matrix4 operator*(float scalar, const Matrix4& matrix)
     return matrix * scalar;
 }
 
+Vector3 Matrix4::GetTranslation() const
+{
+	return Vector3(mVals[12], mVals[13], mVals[14]);
+}
+
 Matrix4 Matrix4::MakeTranslate(Vector3 translation)
 {
     Matrix4 m;

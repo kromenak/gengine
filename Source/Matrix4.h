@@ -83,7 +83,11 @@ public:
     operator float*() { return mVals; }
     operator const float*() const { return mVals; }
     const float* GetFloatPtr() const { return mVals; }
-    
+	
+	// A Matrix4 is often used to represent a transformation matrix.
+	// In that case, we can extract certain meaningful data if needed.
+	Vector3 GetTranslation() const;
+	
     // Factory methods for generating certain types of matrices.
     static Matrix4 MakeTranslate(Vector3 translation);
 	
@@ -105,7 +109,6 @@ public:
 	
 	static Matrix4 MakeSimpleViewProj(float width, float height);
 	
-    
 private:
     // Elements are stored in a 1D array internally.
     // Our storage is column-major, meaning that [0] = m(0,0), [1] = m(1,0), [2] = m(2,0), and so on.
