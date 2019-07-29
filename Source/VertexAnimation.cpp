@@ -22,18 +22,6 @@ VertexAnimation::VertexAnimation(std::string name, char* data, int dataLength) :
 
 VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex)
 {
-	// It's possible that this animation has no vertex poses (only transform data). Or only has poses for particular mesh indexes.
-	// In this case, just return an object with frame number -1 and let them figure it out!
-	//TODO: Frame number to -1 is pretty esoteric - maybe something clearer?
-	/*
-	if(meshIndex >= mVertexPoses.size())
-	{
-		VertexAnimationVertexPose pose;
-		pose.mFrameNumber = -1;
-		return pose;
-	}
-	*/
-	
     float secondsPerFrame = 1.0f / framesPerSecond;
     float localTime = Math::Mod(time, GetDuration(framesPerSecond));
     
@@ -104,18 +92,6 @@ VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int fram
 
 VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, int framesPerSecond, int meshIndex)
 {
-	// It's possible that this animation has no transform poses (only vertex data). Or only has poses for particular mesh indexes.
-	// In this case, just return an object with frame number -1 and let them figure it out!
-	//TODO: Frame number to -1 is pretty esoteric - maybe something clearer?
-	/*
-	if(meshIndex >= mTransformPoses.size())
-	{
-		VertexAnimationTransformPose pose;
-		pose.mFrameNumber = -1;
-		return pose;
-	}
-	*/
-	
 	// Calculate how many seconds should be used for a single frame.
 	float secondsPerFrame = 1.0f / framesPerSecond;
 	
