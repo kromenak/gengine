@@ -117,6 +117,9 @@ void Scene::OnSceneEnter()
 		
 		// Create actor.
 		GKActor* actor = new GKActor(identifier);
+		mActors.push_back(actor);
+		
+		// Set noun.
 		actor->SetNoun(actorDef->noun);
 		
 		// Set actor's initial position and rotation.
@@ -131,12 +134,28 @@ void Scene::OnSceneEnter()
 		actor->GetMeshRenderer()->SetModel(actorDef->model);
 		
 		// Save actor's GAS references.
-		actor->SetIdleGas(actorDef->idleGas);
-		actor->SetTalkGas(actorDef->talkGas);
-		actor->SetListenGas(actorDef->listenGas);
+		//actor->SetIdleGas(actorDef->idleGas);
+		//actor->SetTalkGas(actorDef->talkGas);
+		//actor->SetListenGas(actorDef->listenGas);
 		
-		//CharacterConfig& characterConfig = Services::Get<CharacterManager>()->GetCharacterConfig(actorDef->model->GetNameNoExtension());
-		//actor->PlayAnimation(characterConfig.walkStartTurnLeftAnim);
+		// Set up the actor's walker support, if any.
+		Model* walkerAidModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
+		if(walkerAidModel != nullptr)
+		{
+			// For walking anims to work correctly, a walker aid actor must exist
+			// and be part of the scenes actor list (so an animation can be started on it).
+			GKActor* walkerAid = new GKActor();
+			mActors.push_back(walkerAid);
+			
+			// Make the walker aid a child of the actor itself.
+			Transform* walkerAidTransform = walkerAid->GetComponent<Transform>();
+			walkerAidTransform->SetParent(actor->GetComponent<Transform>());
+			walkerAid->GetMeshRenderer()->SetModel(walkerAidModel);
+			
+			// Give the walker needed references to walk correctly.
+			actor->GetWalker()->SetWalkAidMeshRenderer(walkerAid->GetMeshRenderer());
+			actor->GetWalker()->SetWalkMeshTransform(actor->GetMeshRenderer()->GetOwner()->GetComponent<Transform>());
+		}
 		
 		//TODO: Apply init anim.
 		
@@ -154,17 +173,7 @@ void Scene::OnSceneEnter()
 			}
 			mEgo = actor;
 		}
-		
-		// Save in created actors list.
-		mActors.push_back(actor);
 	}
-	
-	// Create actor.
-	GKActor* dor = new GKActor();
-	dor->SetPosition(mEgo->GetPosition());
-	dor->SetRotation(mEgo->GetRotation());
-	dor->GetMeshRenderer()->SetModel(Services::GetAssets()->LoadModel("DOR_GAB.MOD"));
-	mActors.push_back(dor);
 	
 	// Iterate over scene model data and prep the scene.
 	// First, we want to hide and scene models that are set to "hidden".
@@ -243,7 +252,7 @@ void Scene::OnSceneEnter()
 			std::cout << "Executing scene enter for " << nvc->GetName() << std::endl;
 			nvcItem->Execute();
 		}
-	}
+	 }
 }
 
 void Scene::InitEgoPosition(std::string positionName)
