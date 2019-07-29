@@ -35,6 +35,8 @@ public:
 	
 	Model* GetModel() const { return mModel; }
     std::vector<Mesh*> GetMeshes() const { return mMeshes; }
+	
+	Matrix4 GetMeshWorldTransform(int index) const;
     
 private:
 	// A model, if any was specified.

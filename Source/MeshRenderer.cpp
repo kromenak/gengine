@@ -61,6 +61,11 @@ void MeshRenderer::RenderOpaque()
 			materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
 		}
 	}
+	
+	if(Debug::RenderSubmeshLocalAxes())
+	{
+		Debug::DrawAxes(actorWorldTransform);
+	}
 }
 
 void MeshRenderer::RenderTranslucent()
@@ -72,7 +77,7 @@ void MeshRenderer::RenderTranslucent()
 	
 	for(int i = 0; i < mMeshes.size(); i++)
 	{
-		Matrix4 meshWorldTransformMatrix = actorWorldTransform * mMeshes[i]->GetLocalTransformMatrix();
+		Matrix4 meshWorldTransform = actorWorldTransform * mMeshes[i]->GetLocalTransformMatrix();
 		
 		auto submeshes = mMeshes[i]->GetSubmeshes();
 		for(int j = 0; j < submeshes.size(); j++)
@@ -83,7 +88,7 @@ void MeshRenderer::RenderTranslucent()
 			if(material.IsTranslucent())
 			{
 				// Activate material.
-				material.SetWorldTransformMatrix(meshWorldTransformMatrix);
+				material.SetWorldTransformMatrix(meshWorldTransform);
 				material.Activate();
 				
 				// Render the submesh!
@@ -146,4 +151,13 @@ void MeshRenderer::SetMaterial(int index, Material material)
 	{
 		mMaterials[index] = material;
 	}
+}
+
+Matrix4 MeshRenderer::GetMeshWorldTransform(int index) const
+{
+	if(index >= 0 && index < mMeshes.size())
+	{
+		return mOwner->GetTransform()->GetLocalToWorldMatrix() * mMeshes[index]->GetLocalTransformMatrix();
+	}
+	return Matrix4::Identity;
 }
