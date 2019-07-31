@@ -289,7 +289,13 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
                 lastOnLine->next = keyValue;
             }
             lastOnLine = keyValue;
-            
+			
+			// Trim off any comment on the line.
+			StringUtil::TrimComment(currentKeyValuePair);
+			
+			// Get rid of any rogue tab characters.
+			StringUtil::RemoveAll(currentKeyValuePair, '\t');
+			
             // Trim any whitespace.
             StringUtil::Trim(currentKeyValuePair);
             
@@ -300,6 +306,10 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             {
                 keyValue->key = currentKeyValuePair.substr(0, found);
                 keyValue->value = currentKeyValuePair.substr(found + 1, std::string::npos);
+				
+				// Ooof, we may also have to trim these now...
+				StringUtil::Trim(keyValue->key);
+				StringUtil::Trim(keyValue->value);
             }
             else
             {
