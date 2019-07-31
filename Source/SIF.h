@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "Color32.h"
+#include "Quaternion.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -71,6 +72,10 @@ struct ScenePositionData
     
     // If specified, this camera will be switched to when using this position.
     SceneCameraData* camera = nullptr;
+	
+	// Headings are always defined about the Y-axis.
+	Quaternion GetHeadingAsRotation() const { return Quaternion(Vector3::UnitY, heading); }
+	Vector3 GetHeadingAsVector() const { return Quaternion(Vector3::UnitY, heading).Rotate(Vector3::UnitZ); }
 };
 
 struct SceneRegionOrTriggerData
