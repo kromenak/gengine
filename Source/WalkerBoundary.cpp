@@ -69,11 +69,16 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& pa
 	while(current != start)
 	{
 		// See if we should add neighbors to open set.
-		Vector2 neighbors[4];
+		Vector2 neighbors[8];
 		neighbors[0] = current + Vector2::UnitY;
 		neighbors[1] = current - Vector2::UnitY;
 		neighbors[2] = current + Vector2::UnitX;
 		neighbors[3] = current - Vector2::UnitX;
+		
+		neighbors[4] = current + Vector2(1, 1);
+		neighbors[5] = current + Vector2(1, -1);
+		neighbors[6] = current + Vector2(-1, 1);
+		neighbors[7] = current + Vector2(-1, -1);
 		for(auto& neighbor : neighbors)
 		{
 			// Ignore any neighbor that has pixel color black (not walkable).
