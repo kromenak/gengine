@@ -11,9 +11,50 @@
 
 #include "AtomicTypes.h"
 #include "Type.h"
+#include "Vector2.h"
+#include "Vector3.h"
 #include "Vector4.h"
 
 class Animation;
+class Texture;
+
+struct FaceConfig
+{
+	Texture* leftEyeTexture = nullptr;
+	Texture* rightEyeTexture = nullptr;
+	
+	Vector2 leftEyeOffset;
+	Vector2 rightEyeOffset;
+	
+	Vector2 leftEyeBias;
+	Vector2 rightEyeBias;
+	
+	Vector2 maxEyeLookDistance;
+	
+	Vector2 eyeJitterFrequency;
+	Vector2 maxEyeJitterDistance;
+	
+	Vector2 eyeFieldOfView;
+	Vector2 eyeShortFieldOfView;
+	float eyeSeparation = 0.0f;
+	
+	float headRadius = 0.0f;
+	Vector3 headCenterOffset;
+	
+	Vector2 foreheadOffset;
+	
+	Vector2 eyelidsOffset;
+	Texture* eyelidsAlphaChannel = nullptr;
+	
+	Animation* blinkAnim1 = nullptr;
+	int blinkAnim1Probability = 0;
+	Animation* blinkAnim2 = nullptr;
+	int blinkAnim2Probability = 0;
+	Vector2 blinkFrequency;
+	
+	Vector2 mouthOffset;
+	Vector2 mouthSize;
+};
 
 struct CharacterConfig
 {
@@ -48,6 +89,8 @@ struct CharacterConfig
 	
 	Animation* walkLoopAnim = nullptr;
 	Animation* walkStopAnim = nullptr;
+	
+	FaceConfig faceConfig;
 	
 	//TODO: Clothes anims?
 	//TODO: Eye/mouth coordinates?
