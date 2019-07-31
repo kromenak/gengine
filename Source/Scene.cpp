@@ -134,9 +134,12 @@ void Scene::OnSceneEnter()
 		actor->GetMeshRenderer()->SetModel(actorDef->model);
 		
 		// Save actor's GAS references.
-		//actor->SetIdleGas(actorDef->idleGas);
-		//actor->SetTalkGas(actorDef->talkGas);
-		//actor->SetListenGas(actorDef->listenGas);
+		actor->SetIdleGas(actorDef->idleGas);
+		actor->SetTalkGas(actorDef->talkGas);
+		actor->SetListenGas(actorDef->listenGas);
+		
+		// Start in idle state.
+		actor->SetState(GKActor::State::Idle);
 		
 		// Set up the actor's walker support, if any.
 		Model* walkerAidModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
@@ -343,34 +346,7 @@ void Scene::Interact(const Ray& ray)
 	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData.GetFloorModelName()))
 	{
 		// Check walker boundary to see whether we can walk to this spot.
-		WalkerBoundary* walkerBoundary = mSceneData.GetWalkerBoundary();
-		if(walkerBoundary != nullptr)
-		{
-			if(!walkerBoundary->CanWalkTo(hitInfo.position))
-			{
-				std::cout << "Can't walk!" << std::endl;
-				return;
-			}
-			
-			std::vector<Vector3> path;
-			if(walkerBoundary->FindPath(mEgo->GetPosition(), hitInfo.position, path))
-			{
-				Vector3 prev = path[0];
-				for(int i = 1; i < path.size(); i++)
-				{
-					Debug::DrawLine(prev, path[i], Color32::Red, 10.0f);
-					prev = path[i];
-				}
-				mEgo->GetWalker()->SetPath(path);
-			}
-			else
-			{
-				std::cout << "No path!" << std::endl;
-			}
-		}
-		
-		// Move Ego to position.
-		//mEgo->SetPosition(hitInfo.position);
+		mEgo->GetWalker()->WalkTo(hitInfo.position, mSceneData.GetWalkerBoundary(), nullptr);
 		return;
 	}
 	
@@ -484,10 +460,12 @@ void Scene::ExecuteNVC(const NVCItem* nvc)
 	{
 		case NVCItem::Approach::WalkTo:
 		{
-			ScenePositionData* scenePos1 = mSceneData.GetScenePosition(nvc->target);
-			if(scenePos1 != nullptr)
+			ScenePositionData* scenePos = mSceneData.GetScenePosition(nvc->target);
+			if(scenePos != nullptr)
 			{
-				mEgo->SetPosition(scenePos1->position);
+				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData.GetWalkerBoundary(), [nvc]() -> void {
+					nvc->Execute();
+				});
 			}
 			break;
 		}
@@ -497,6 +475,7 @@ void Scene::ExecuteNVC(const NVCItem* nvc)
 			if(anim != nullptr)
 			{
 				//TODO: Get position corresponding to first frame of animation and move there.
+				nvc->Execute();
 			}
 			break;
 		}
@@ -506,31 +485,38 @@ void Scene::ExecuteNVC(const NVCItem* nvc)
 			if(scenePos2 != nullptr)
 			{
 				mEgo->SetPosition(scenePos2->position);
+				nvc->Execute();
 			}
 			break;
 		}
 		case NVCItem::Approach::NearModel:
 		{
+			nvc->Execute();
 			break;
 		}
 		case NVCItem::Approach::Region:
 		{
+			nvc->Execute();
 			break;
 		}
 		case NVCItem::Approach::TurnTo:
 		{
+			nvc->Execute();
 			break;
 		}
 		case NVCItem::Approach::TurnToModel:
 		{
+			nvc->Execute();
 			break;
 		}
 		case NVCItem::Approach::WalkToSee:
 		{
+			nvc->Execute();
 			break;
 		}
 		case NVCItem::Approach::None:
 		{
+			nvc->Execute();
 			break;
 		}
 		default:
@@ -539,7 +525,4 @@ void Scene::ExecuteNVC(const NVCItem* nvc)
 			break;
 		}
 	}
-	
-	// Execute the thing!
-	nvc->Execute();
 }
