@@ -57,6 +57,16 @@ namespace StringUtil
         Trim(str, ' ');
     }
 	
+	inline void TrimComment(std::string& str)
+	{
+		// Trims any comment from trailing part of string.
+		size_t found = str.find("//");
+		if(found != std::string::npos)
+		{
+			str.erase(found);
+		}
+	}
+	
 	inline void RemoveAll(std::string& str, char remove)
 	{
 		str.erase(std::remove(str.begin(), str.end(), remove), str.end());
