@@ -139,7 +139,7 @@ void Scene::OnSceneEnter()
 		actor->SetListenGas(actorDef->listenGas);
 		
 		// Start in idle state.
-		actor->SetState(GKActor::State::Idle);
+		//actor->SetState(GKActor::State::Idle);
 		
 		// Set up the actor's walker support, if any.
 		Model* walkerAidModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
@@ -469,7 +469,7 @@ void Scene::ExecuteNVC(const NVCItem* nvc)
 			}
 			break;
 		}
-		case NVCItem::Approach::Anim:
+		case NVCItem::Approach::Anim: // Example use: R25 Open/Close Window, R25 Open/Close Dresser
 		{
 			Animation* anim = Services::GetAssets()->LoadAnimation(nvc->target);
 			if(anim != nullptr)
@@ -479,43 +479,46 @@ void Scene::ExecuteNVC(const NVCItem* nvc)
 			}
 			break;
 		}
-		case NVCItem::Approach::Near:
+		case NVCItem::Approach::Near: // Never used in GK3.
 		{
-			ScenePositionData* scenePos2 = mSceneData.GetScenePosition(nvc->target);
-			if(scenePos2 != nullptr)
+			std::cout << "Executed NEAR approach type!" << std::endl;
+			ScenePositionData* scenePos = mSceneData.GetScenePosition(nvc->target);
+			if(scenePos != nullptr)
 			{
-				mEgo->SetPosition(scenePos2->position);
-				nvc->Execute();
+				mEgo->SetPosition(scenePos->position);
 			}
+			nvc->Execute();
 			break;
 		}
-		case NVCItem::Approach::NearModel:
+		case NVCItem::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
 		{
 			nvc->Execute();
 			break;
 		}
-		case NVCItem::Approach::Region:
+		case NVCItem::Approach::Region: // Only use: RC1 "No Vacancies" Sign
 		{
 			nvc->Execute();
 			break;
 		}
-		case NVCItem::Approach::TurnTo:
+		case NVCItem::Approach::TurnTo: // Never used in GK3.
+		{
+			std::cout << "Executed TURNTO approach type!" << std::endl;
+			nvc->Execute();
+			break;
+		}
+		case NVCItem::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
 		{
 			nvc->Execute();
 			break;
 		}
-		case NVCItem::Approach::TurnToModel:
-		{
-			nvc->Execute();
-			break;
-		}
-		case NVCItem::Approach::WalkToSee:
+		case NVCItem::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser, RC1 Look Bench/Bookstore Sign
 		{
 			nvc->Execute();
 			break;
 		}
 		case NVCItem::Approach::None:
 		{
+			// Just do it!
 			nvc->Execute();
 			break;
 		}

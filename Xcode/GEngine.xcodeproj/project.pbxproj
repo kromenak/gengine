@@ -176,6 +176,7 @@
 		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
 		4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB34B4214F72BB0069B2E9 /* Font.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
+		4BBC028A22F162B8005ED374 /* FaceController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBC028922F162B8005ED374 /* FaceController.cpp */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4BCF4B25205672350045EDC8 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
 		4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshRenderer.cpp */; };
@@ -398,6 +399,8 @@
 		4BBB34B4214F72BB0069B2E9 /* Font.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Font.cpp; path = ../Source/Font.cpp; sourceTree = "<group>"; };
 		4BBB91B42058E53A007B9375 /* Soundtrack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Soundtrack.h; path = ../Source/Audio/Soundtrack.h; sourceTree = "<group>"; };
 		4BBB91B52058E53A007B9375 /* Soundtrack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Soundtrack.cpp; path = ../Source/Audio/Soundtrack.cpp; sourceTree = "<group>"; };
+		4BBC028822F162B8005ED374 /* FaceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FaceController.h; path = ../Source/FaceController.h; sourceTree = "<group>"; };
+		4BBC028922F162B8005ED374 /* FaceController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FaceController.cpp; path = ../Source/FaceController.cpp; sourceTree = "<group>"; };
 		4BCBCF452043A90F001BE1E0 /* NVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NVC.h; path = ../Source/NVC.h; sourceTree = "<group>"; };
 		4BCBCF462043A90F001BE1E0 /* NVC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NVC.cpp; path = ../Source/NVC.cpp; sourceTree = "<group>"; };
 		4BD4CCE21FF1F5F5009665C7 /* MeshRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MeshRenderer.h; path = ../Source/MeshRenderer.h; sourceTree = "<group>"; };
@@ -696,6 +699,8 @@
 				4BEA726B21D53F2000998066 /* Walker.h */,
 				4BEA727021D5834300998066 /* WalkerBoundary.cpp */,
 				4BEA726F21D5834300998066 /* WalkerBoundary.h */,
+				4BBC028822F162B8005ED374 /* FaceController.h */,
+				4BBC028922F162B8005ED374 /* FaceController.cpp */,
 			);
 			name = GK3;
 			sourceTree = "<group>";
@@ -1099,6 +1104,7 @@
 				4B15771321A3FCC1008B92BD /* UICanvas.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B8E830A20F046750009A86B /* Material.cpp in Sources */,
+				4BBC028A22F162B8005ED374 /* FaceController.cpp in Sources */,
 				4B046E94218FB10F00E56341 /* Debug.cpp in Sources */,
 				4BEA727521D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */,
