@@ -16,6 +16,7 @@
 #include "Scene.h"
 #include "Services.h"
 #include "Vector3.h"
+#include "WalkerBoundary.h"
 
 TYPE_DEF_CHILD(Component, Walker);
 
@@ -37,6 +38,9 @@ void Walker::UpdateInternal(float deltaTime)
 	Vector3 position = mOwner->GetPosition();
 	Quaternion rotation = mOwner->GetRotation();
 	
+	// Which direction should we turn to face? None at first.
+	Vector3 turnToFaceDir;
+	
 	// If we have a path, follow it.
 	if(mPath.size() > 0)
 	{
@@ -48,6 +52,12 @@ void Walker::UpdateInternal(float deltaTime)
 			mPath.erase(mPath.begin());
 			if(mPath.size() <= 0)
 			{
+				// If no desired heading was specified, we can do the callback right now.
+				if(!mHasDesiredFacingDir && mFinishedPathCallback != nullptr)
+				{
+					mFinishedPathCallback();
+					mFinishedPathCallback = nullptr;
+				}
 				StopWalk();
 			}
 			else
@@ -56,34 +66,66 @@ void Walker::UpdateInternal(float deltaTime)
 			}
 		}
 		
-		// Convert to pure direction.
-		Vector3 dir = toNext;
-		dir.Normalize();
-		
-		// Update position in the direction of the goal at a certain speed.
-		position += dir * 25.0f * deltaTime;
-		
+		if(mPath.size() > 0)
+		{
+			// Convert to pure direction.
+			Vector3 dir = toNext;
+			dir.Normalize();
+			
+			// Update position in the direction of the goal at a certain speed.
+			position += dir * mMoveSpeed * deltaTime;
+			
+			// Want to turn towards direction to next path node.
+			turnToFaceDir = dir;
+		}
+	}
+	
+	// If pathing logic doesn't specify a facing direction, we use the one specified, if any.
+	if(turnToFaceDir == Vector3::Zero && mHasDesiredFacingDir)
+	{
+		turnToFaceDir = mDesiredFacingDir;
+	}
+	
+	// If not zero, it means we want to rotate towards some direction.
+	if(turnToFaceDir != Vector3::Zero)
+	{
 		// What angle do I need to rotate to face the direction to the target?
-		float angle = Math::Acos(Vector3::Dot(mOwner->GetForward(), dir));
+		float angle = Math::Acos(Vector3::Dot(mOwner->GetForward(), turnToFaceDir));
 		if(Math::ToDegrees(angle) > 1.0f)
 		{
-			// Which way do I rotate to get to direction I want?
-			Vector3 cross = Vector3::Cross(mOwner->GetForward(), dir);
-			float rotateDirection = cross.GetY();
-			if(!Math::IsZero(rotateDirection))
+			// Which way do I rotate to get to facing direction I want?
+			// Can use y-axis of cross product to determine this.
+			Vector3 cross = Vector3::Cross(mOwner->GetForward(), turnToFaceDir);
+			
+			// If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
+			// In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
+			float rotateDirection = 1.0f;
+			if(!Math::IsZero(cross.GetY()))
 			{
-				rotateDirection /= Math::Abs(rotateDirection);
+				rotateDirection = cross.GetY() / Math::Abs(cross.GetY());
 			}
 			
-			if(Math::IsZero(rotateDirection))
-			{
-				std::cout << "Whoops." << std::endl;
-			}
-			
-			float angleOfRotation = rotateDirection * 10.0f * deltaTime;
+			// Calculate an angle we are going to rotate by, moving us toward our desired facing.
+			float angleOfRotation = rotateDirection * mRotateSpeed * deltaTime;
 			angleOfRotation = Math::Min(angleOfRotation, angle);
 			
+			// Update our rotation by this angle amount.
 			rotation *= Quaternion(Vector3::UnitY, angleOfRotation);
+		}
+		else
+		{
+			// If within acceptable range of our desired facing direction, AND no more path, clear desired heading.
+			if(mPath.size() <= 0 && mHasDesiredFacingDir)
+			{
+				mHasDesiredFacingDir = false;
+				
+				// At this point, we've REALLY finished our path.
+				if(mFinishedPathCallback != nullptr)
+				{
+					mFinishedPathCallback();
+					mFinishedPathCallback = nullptr;
+				}
+			}
 		}
 	}
 	
@@ -125,10 +167,65 @@ void Walker::UpdateInternal(float deltaTime)
 		Debug::DrawLine(Vector3::Zero, worldHipPos, Color32::Blue);
 		*/
 	}
-	
+		
 	// Set updated position.
 	mOwner->SetPosition(position);
 	mOwner->SetRotation(rotation);
+}
+
+bool Walker::WalkTo(Vector3 position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+{
+	bool result = WalkTo(position, 0.0f, walkerBoundary, finishCallback);
+	mHasDesiredFacingDir = false;
+	return result;
+}
+
+bool Walker::WalkTo(Vector3 position, float heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+{
+	// Save finish callback.
+	mFinishedPathCallback = finishCallback;
+	
+	// Save desired facing direction.
+	mHasDesiredFacingDir = true;
+	mDesiredFacingDir = Quaternion(Vector3::UnitY, heading).Rotate(Vector3::UnitZ);
+	
+	// Can't path without a valid walker boundary to define the area.
+	if(walkerBoundary == nullptr)
+	{
+		if(mFinishedPathCallback != nullptr)
+		{
+			mFinishedPathCallback();
+			mFinishedPathCallback = nullptr;
+		}
+		return false;
+	}
+	
+	// Find a path from current position to target position, populating our path vector.
+	if(walkerBoundary->FindPath(mOwner->GetPosition(), position, mPath))
+	{
+		//TODO: Make debug output of paths optional.
+		{
+			Vector3 prev = mPath[0];
+			for(int i = 1; i < mPath.size(); i++)
+			{
+				Debug::DrawLine(prev, mPath[i], Color32::Red, 10.0f);
+				prev = mPath[i];
+			}
+		}
+		
+		StartWalk();
+		return true;
+	}
+	else
+	{
+		std::cout << "No path!" << std::endl;
+		if(mFinishedPathCallback != nullptr)
+		{
+			mFinishedPathCallback();
+			mFinishedPathCallback = nullptr;
+		}
+		return false;
+	}
 }
 
 void Walker::StartWalk()

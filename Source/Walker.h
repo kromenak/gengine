@@ -9,6 +9,7 @@
 #pragma once
 #include "Component.h"
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,7 @@
 
 class Animation;
 class CharacterConfig;
+class WalkerBoundary;
 
 class Walker : public Component
 {
@@ -33,12 +35,14 @@ public:
 	Walker(Actor* owner);
 	
 	void SetCharacterConfig(const CharacterConfig& characterConfig);
-	void SetPath(std::vector<Vector3> path) { mPath = path; StartWalk(); }
 	
 	void SetWalkMeshTransform(Transform* transform) { mWalkMeshTransform = transform; }
 	void SetWalkAidMeshRenderer(MeshRenderer* aid) { mWalkAidMeshRenderer = aid; }
 	
 	bool IsWalking() const { return mState != State::Idle; }
+	
+	bool WalkTo(Vector3 position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
+	bool WalkTo(Vector3 position, float heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	
 protected:
 	void UpdateInternal(float deltaTime) override;
@@ -70,6 +74,18 @@ private:
 	
 	// The path to follow to destination.
 	std::vector<Vector3> mPath;
+	
+	// If desired, a facing direction to move towards.
+	// This only occurs *after* any path has been completed.
+	bool mHasDesiredFacingDir = false;
+	Vector3 mDesiredFacingDir;
+	
+	// Move and rotate speeds.
+	float mMoveSpeed = 35.0f;
+	float mRotateSpeed = 4.0f;
+	
+	// A callback for when the end of a path is reached.
+	std::function<void()> mFinishedPathCallback = nullptr;
 	
 	void StartWalk();
 	void ContinueWalk();
