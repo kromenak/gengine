@@ -6,6 +6,7 @@
 #include "AnimationPlayer.h"
 
 #include "Animation.h"
+#include "AnimationNodes.h"
 #include "Mesh.h"
 #include "MeshRenderer.h"
 #include "VertexAnimation.h"

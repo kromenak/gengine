@@ -14,57 +14,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Vector3.h"
-
-class Animation;
-class Audio;
-class VertexAnimation;
-
-struct AnimNode
-{
-	int frameNumber = 0;
-	
-	virtual ~AnimNode() { }
-	virtual void Play(Animation* anim) = 0;
-	virtual void Sample(Animation* anim, int frame) { } // Sampling support is optional. Does nothing by default.
-};
-
-struct VertexAnimNode : public AnimNode
-{
-	// A vertex animation to play.
-	VertexAnimation* vertexAnimation = nullptr;
-	
-	// This is a bit confusing, and I'm not totally sure why it is structured this way.
-	// In ANM file, syntax for vertex anim is <frame_num>, <act_name>, <x1>, <y1>, <z1>, <angle1>, <x2>, <y2>, <z2>, <angle2>
-	// The first x/y/z/angle appear to be the offset from the model's authored center to the origin.
-	// The second x/y/z/angle appear to be the desired offset from the origin.
-	// In other words, to properly position an object for an animation, we do (position - offsetFromOrigin)
-	Vector3 offsetFromOrigin;
-	float headingFromOrigin = 0.0f;
-	
-	Vector3 position;
-	float heading = 0.0f;
-	
-	void Play(Animation* anim) override;
-	void Sample(Animation* anim, int frame) override;
-};
-
-struct SceneTextureAnimNode : public AnimNode
-{
-	std::string sceneName;
-	std::string sceneModelName;
-	std::string textureName;
-	
-	void Play(Animation* anim) override;
-};
-
-struct SoundAnimNode : public AnimNode
-{
-	Audio* audio = nullptr;
-	int volume = 100; // 0 = no sound, 100 = max volume
-	
-	void Play(Animation* anim) override;
-};
+class AnimNode;
 
 class Animation : public Asset
 {

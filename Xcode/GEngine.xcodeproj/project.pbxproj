@@ -116,6 +116,7 @@
 		4B22F53E217409AE0065B152 /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A9571F242ECF000A689F /* CoreFoundation.framework */; };
 		4B22F53F217409B30065B152 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A94E1F241FEA000A689F /* OpenGL.framework */; };
 		4B22F543217410830065B152 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
+		4B2606ED22F3D43B0030F2D9 /* AnimationNodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2606EC22F3D43B0030F2D9 /* AnimationNodes.cpp */; };
 		4B294CE120B9E8BC00039F48 /* SheepManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B294CE020B9E8BC00039F48 /* SheepManager.cpp */; };
 		4B2ACDF81F25873C003EC7FE /* SheepScript.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */; };
 		4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */ = {isa = PBXBuildFile; fileRef = 4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */; };
@@ -298,6 +299,9 @@
 		4B22F4E9217170A00065B152 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		4B22F4EB217170A00065B152 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4B22F4EE217170A00065B152 /* gengine.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = gengine.entitlements; sourceTree = "<group>"; };
+		4B2606EB22F3D43B0030F2D9 /* AnimationNodes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AnimationNodes.h; path = ../Source/AnimationNodes.h; sourceTree = "<group>"; };
+		4B2606EC22F3D43B0030F2D9 /* AnimationNodes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AnimationNodes.cpp; path = ../Source/AnimationNodes.cpp; sourceTree = "<group>"; };
+		4B2606EE22F5144C0030F2D9 /* Random.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Random.h; path = ../Source/Random.h; sourceTree = "<group>"; };
 		4B294CDF20B9E8BC00039F48 /* SheepManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepManager.h; path = ../Source/Sheep/SheepManager.h; sourceTree = "<group>"; };
 		4B294CE020B9E8BC00039F48 /* SheepManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepManager.cpp; path = ../Source/Sheep/SheepManager.cpp; sourceTree = "<group>"; };
 		4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SheepScript.cpp; path = ../Source/Sheep/SheepScript.cpp; sourceTree = "<group>"; };
@@ -659,6 +663,7 @@
 				4BFCD33620CDFFB4004FF9EA /* Plane.h */,
 				4B4300861FB7EE44009EDE58 /* Quaternion.cpp */,
 				4B4300851FB7EE44009EDE58 /* Quaternion.h */,
+				4B2606EE22F5144C0030F2D9 /* Random.h */,
 				4B53B0C8207AFE7E00663381 /* Ray.cpp */,
 				4B53B0C7207AFE7E00663381 /* Ray.h */,
 				4B0E44F52186878A00BD1CE1 /* Rect.cpp */,
@@ -781,6 +786,8 @@
 			children = (
 				4B92319B2103AF1B0004F4F3 /* Animation.cpp */,
 				4B92319A2103AF1B0004F4F3 /* Animation.h */,
+				4B2606EC22F3D43B0030F2D9 /* AnimationNodes.cpp */,
+				4B2606EB22F3D43B0030F2D9 /* AnimationNodes.h */,
 				4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */,
 				4B9231A0210D4E000004F4F3 /* AnimationPlayer.h */,
 				4BACA50920F7132E008C7FE9 /* GAS.cpp */,
@@ -1123,6 +1130,7 @@
 				4B0E44F62186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
 				4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */,
+				4B2606ED22F3D43B0030F2D9 /* AnimationNodes.cpp in Sources */,
 				4B046E90218E855600E56341 /* Mover.cpp in Sources */,
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
 				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,

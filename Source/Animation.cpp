@@ -5,67 +5,10 @@
 //
 #include "Animation.h"
 
-#include "GKActor.h"
+#include "AnimationNodes.h"
 #include "IniParser.h"
 #include "Services.h"
-#include "Scene.h"
 #include "StringUtil.h"
-
-void VertexAnimNode::Play(Animation* anim)
-{
-	if(vertexAnimation != nullptr)
-	{
-		GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(vertexAnimation->GetModelName());
-		if(actor != nullptr)
-		{
-			// If non-zero value is specified, position the model before starting the animation.
-			if(position != Vector3::Zero)
-			{
-				actor->SetPosition(position - offsetFromOrigin);
-				//TODO: Set heading.
-			}
-			
-			if(anim != nullptr)
-			{
-				actor->PlayAnimation(vertexAnimation, anim->GetFramesPerSecond());
-			}
-			else
-			{
-				actor->PlayAnimation(vertexAnimation);
-			}
-		}
-	}
-}
-
-void VertexAnimNode::Sample(Animation* anim, int frame)
-{
-	if(vertexAnimation != nullptr)
-	{
-		GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(vertexAnimation->GetModelName());
-		if(actor != nullptr)
-		{
-			actor->SampleAnimation(vertexAnimation, frame);
-		}
-	}
-}
-
-void SceneTextureAnimNode::Play(Animation* anim)
-{
-	Texture* texture = Services::GetAssets()->LoadTexture(textureName);
-	if(texture != nullptr)
-	{
-		//TODO: Ensure sceneName matches loaded scene name?
-		GEngine::inst->GetScene()->ApplyTextureToSceneModel(sceneModelName, texture);
-	}
-}
-
-void SoundAnimNode::Play(Animation* anim)
-{
-	if(audio != nullptr)
-	{
-		Services::GetAudio()->Play(audio);
-	}
-}
 
 Animation::Animation(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -185,12 +128,12 @@ void Animation::ParseFromData(char *data, int dataLength)
                 entry = entry->next;
                 std::string textureName = entry->value;
 				
+				// Create and add the anim node.
 				SceneTextureAnimNode* node = new SceneTextureAnimNode();
 				node->frameNumber = frameNumber;
 				node->sceneName = sceneName;
 				node->sceneModelName = sceneModelName;
 				node->textureName = textureName;
-				
                 mFrames[frameNumber].push_back(node);
             }
         }
@@ -219,8 +162,12 @@ void Animation::ParseFromData(char *data, int dataLength)
                 entry = entry->next;
                 bool visible = entry->GetValueAsBool();
 				
-				std::cout << "SVISIBILITY" << std::endl;
-                //mFrames[frameNumber].push_back(node);
+				// Create and add the anim node.
+				SceneModelVisibilityAnimNode* node = new SceneModelVisibilityAnimNode();
+				node->sceneName = sceneName;
+				node->sceneModelName = sceneModelName;
+				node->visible = visible;
+                mFrames[frameNumber].push_back(node);
             }
         }
 		// "MTextures" changes textures on a model or actor.
@@ -246,15 +193,20 @@ void Animation::ParseFromData(char *data, int dataLength)
                 // Read the model mesh group index.
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
-                int groupIndex = entry->GetValueAsInt();
+                int submeshIndex = entry->GetValueAsInt();
                 
                 // Read the texture name.
                 if(entry->next == nullptr) { continue; }
                 entry = entry->next;
                 std::string textureName = entry->value;
 				
-				std::cout << "MTEXTURE " << modelName << ", " << meshIndex << ", " << groupIndex << ", " << textureName << std::endl;
-                //mFrames[frameNumber].push_back(node);
+				// Create and add node.
+				ModelTextureAnimNode* node = new ModelTextureAnimNode();
+				node->modelName = modelName;
+				node->meshIndex = static_cast<unsigned char>(meshIndex);
+				node->submeshIndex = static_cast<unsigned char>(submeshIndex);
+				node->textureName = textureName;
+				mFrames[frameNumber].push_back(node);
             }
         }
 		// "MVisibility" changes visibility on a model or actor.
@@ -277,8 +229,11 @@ void Animation::ParseFromData(char *data, int dataLength)
                 entry = entry->next;
                 bool visible = entry->GetValueAsBool();
 				
-				std::cout << "MVISIBILITY " << modelName << ", " << visible << std::endl;
-                //mFrames[frameNumber].push_back(node);
+				// Create and add node.
+				ModelVisibilityAnimNode* node = new ModelVisibilityAnimNode();
+				node->modelName = modelName;
+				node->visible = visible;
+                mFrames[frameNumber].push_back(node);
             }
         }
 		// Triggers sounds to play on certain frames at certain locations.
@@ -325,6 +280,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
                     std::string modelName = entry->value;
+					node->modelName = modelName;
                 }
                 else
                 {
@@ -339,6 +295,8 @@ void Animation::ParseFromData(char *data, int dataLength)
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
                     int z = entry->GetValueAsInt();
+					
+					node->position = Vector3(x, y, z);
                 }
                 
                 // Read in min distance for sound.
@@ -351,8 +309,8 @@ void Animation::ParseFromData(char *data, int dataLength)
                 entry = entry->next;
                 int maxDist = entry->GetValueAsInt();
 				
-				std::cout << "SOUND " << soundName << std::endl;
-                //mFrames[frameNumber].push_back(node);
+				node->minDistance = minDist;
+				node->maxDistance = maxDist;
             }
         }
 		// Allows specifying of additional options that affect the entire animation.
@@ -386,7 +344,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    mFramesPerSecond = entry->GetValueAsInt();
+                    //mFramesPerSecond = entry->GetValueAsInt();
                 }
                 else
                 {
@@ -415,58 +373,95 @@ void Animation::ParseFromData(char *data, int dataLength)
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string actorName = entry->value;
+                    std::string actorNoun = entry->value;
+					
+					// Create and add node.
+					FootstepAnimNode* node = new FootstepAnimNode();
+					node->actorNoun = actorNoun;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "FOOTSCUFF"))
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string actorName = entry->value;
+                    std::string actorNoun = entry->value;
+					
+					// Create and add node.
+					FootscuffAnimNode* node = new FootscuffAnimNode();
+					node->actorNoun = actorNoun;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "STOPSOUNDTRACK"))
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
                     std::string soundtrackName = entry->value;
+					
+					// Create and add node.
+					StopSoundtrackAnimNode* node = new StopSoundtrackAnimNode();
+					node->soundtrackName = soundtrackName;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "PLAYSOUNDTRACK"))
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
                     std::string soundtrackName = entry->value;
+					
+					// Create and add node.
+					PlaySoundtrackAnimNode* node = new PlaySoundtrackAnimNode();
+					node->soundtrackName = soundtrackName;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "PLAYSOUNDTRACKTBS"))
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
                     std::string soundtrackName = entry->value;
+					
+					// Create and add node.
+					PlaySoundtrackAnimNode* node = new PlaySoundtrackAnimNode();
+					node->soundtrackName = soundtrackName;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "STOPALLSOUNDTRACKS"))
                 {
-                    
+					// Create and add node.
+					mFrames[frameNumber].push_back(new StopSoundtrackAnimNode());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "CAMERA"))
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string cameraName = entry->value;
+                    std::string cameraPositionName = entry->value;
+					
+					// Create and add node.
+					CameraAnimNode* node = new CameraAnimNode();
+					node->cameraPositionName = cameraPositionName;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "LIPSYNCH"))
                 {
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string actorName = entry->value;
+                    std::string actorNoun = entry->value;
                     
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
                     std::string mouthTexName = entry->value;
+					
+					// Create and add node.
+					LipSyncAnimNode* node = new LipSyncAnimNode();
+					node->actorNoun = actorNoun;
+					node->mouthTextureName = mouthTexName;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "FACETEX"))
                 {
                     // Read the actor name.
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string actorName = entry->value;
+                    std::string actorNoun = entry->value;
                     
                     // Read texture name.
                     // This sometimes has a forward slash in it, which
@@ -478,29 +473,71 @@ void Animation::ParseFromData(char *data, int dataLength)
                     // A value indicating what part of the face is changed. Always H, E, M.
 					// M = mouth
 					// E = eye
-					// H = eyebrow/forehead (H = head?)
+					// H = head/forehead
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string someValue = entry->value;
+					StringUtil::ToLower(entry->value);
+					FaceElement faceElement = FaceElement::Mouth;
+					switch(entry->value[0])
+					{
+						case 'm':
+							faceElement = FaceElement::Mouth;
+							break;
+						case 'e':
+							faceElement = FaceElement::Eyelids;
+							break;
+						case 'h':
+							faceElement = FaceElement::Forehead;
+							break;
+					}
+					
+					// Create and add node.
+					FaceTexAnimNode* node = new FaceTexAnimNode();
+					node->actorNoun = actorNoun;
+					node->textureName = textureName;
+					node->faceElement = faceElement;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "UNFACETEX"))
                 {
                     // Read the actor name.
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string actorName = entry->value;
-                    
-                    // Not sure what this is? Always H, E, M.
+                    std::string actorNoun = entry->value;
+					
+					// A value indicating what part of the face is changed. Always H, E, M.
+					// M = mouth
+					// E = eye
+					// H = head/forehead
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string someValue = entry->value;
+					StringUtil::ToLower(entry->value);
+					FaceElement faceElement = FaceElement::Mouth;
+					switch(entry->value[0])
+					{
+						case 'm':
+							faceElement = FaceElement::Mouth;
+							break;
+						case 'e':
+							faceElement = FaceElement::Eyelids;
+							break;
+						case 'h':
+							faceElement = FaceElement::Forehead;
+							break;
+					}
+					
+					// Create and add node.
+					UnFaceTexAnimNode* node = new UnFaceTexAnimNode();
+					node->actorNoun = actorNoun;
+					node->faceElement = faceElement;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "GLANCE"))
                 {
                     // Read the actor name.
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
-                    std::string actorName = entry->value;
+                    std::string actorNoun = entry->value;
                     
                     // Unknown value
                     if(entry->next == nullptr) { continue; }
@@ -516,23 +553,34 @@ void Animation::ParseFromData(char *data, int dataLength)
                     if(entry->next == nullptr) { continue; }
                     entry = entry->next;
                     int num3 = entry->GetValueAsInt();
+					
+					// Create and add node.
+					GlanceAnimNode* node = new GlanceAnimNode();
+					node->actorNoun = actorNoun;
+					node->position = Vector3(num1, num2, num3);
+					mFrames[frameNumber].push_back(node);
                 }
 				else if(StringUtil::EqualsIgnoreCase(keyword, "MOOD"))
 				{
-					// Seems to be followed by two keywords:
-					// 1) Actor to affect
-					// 2) Mood to apply
-					/*
-					while(entry != nullptr)
-					{
-						std::cout << entry->value << std::endl;
-						entry = entry->next;
-					}
-					*/
+					// Read the actor name.
+					if(entry->next == nullptr) { continue; }
+					entry = entry->next;
+					std::string actorNoun = entry->value;
+					
+					// Read the mood name.
+					if(entry->next == nullptr) { continue; }
+					entry = entry->next;
+					std::string moodName = entry->value;
+					
+					// Create and add node.
+					MoodAnimNode* node = new MoodAnimNode();
+					node->actorNoun = actorNoun;
+					node->moodName = moodName;
+					mFrames[frameNumber].push_back(node);
 				}
                 else
                 {
-                    std::cout << "Unexpected keyword: " << keyword << std::endl;
+                    std::cout << "Unexpected GK3 animation keyword: " << keyword << std::endl;
                 }
             }
         }
