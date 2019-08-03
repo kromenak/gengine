@@ -156,30 +156,30 @@ std::vector<HitInfo> BSP::RaycastAll(const Ray& ray)
 	return hits;
 }
 
-void BSP::Hide(std::string objectName)
+void BSP::SetVisible(std::string objectName, bool visible)
 {
-    // Find index of the object name.
-    int index = -1;
-    for(int i = 0; i < mObjectNames.size(); i++)
-    {
+	// Find index of the object name.
+	int index = -1;
+	for(int i = 0; i < mObjectNames.size(); i++)
+	{
 		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
-        {
-            index = i;
-            break;
-        }
-    }
-    
-    // Can't hide an object if the passed name isn't present.
-    if(index == -1) { return; }
-    
-    // All surfaces belonging to this object will be hidden.
-    for(auto& surface : mSurfaces)
-    {
-        if(surface->objectIndex == index)
-        {
-            surface->visible = false;
-        }
-    }
+		{
+			index = i;
+			break;
+		}
+	}
+	
+	// Can't hide an object if the passed name isn't present.
+	if(index == -1) { return; }
+	
+	// All surfaces belonging to this object will be hidden.
+	for(auto& surface : mSurfaces)
+	{
+		if(surface->objectIndex == index)
+		{
+			surface->visible = visible;
+		}
+	}
 }
 
 void BSP::SetTexture(std::string objectName, Texture* texture)

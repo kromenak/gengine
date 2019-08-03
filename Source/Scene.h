@@ -51,6 +51,7 @@ public:
 	GKActor* GetActorByNoun(std::string noun);
 	
 	void ApplyTextureToSceneModel(std::string modelName, Texture* texture);
+	void SetSceneModelVisibility(std::string modelName, bool visible);
 	
 	AnimationPlayer* GetAnimationPlayer() { return mAnimationPlayer; }
     

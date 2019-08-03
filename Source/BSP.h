@@ -114,8 +114,7 @@ public:
 	bool RaycastSingle(const Ray& ray, std::string name, HitInfo& outHitInfo);
 	std::vector<HitInfo> RaycastAll(const Ray& ray);
 	
-    void Hide(std::string objectName);
-	
+	void SetVisible(std::string objectName, bool visible);
 	void SetTexture(std::string objectName, Texture* texture);
     
 private:

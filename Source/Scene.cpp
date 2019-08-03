@@ -192,7 +192,7 @@ void Scene::OnSceneEnter()
 				// If it should be hidden by default, tell the BSP to hide it.
 				if(modelDef->hidden)
 				{
-					mSceneData.GetBSP()->Hide(modelDef->name);
+					mSceneData.GetBSP()->SetVisible(modelDef->name, false);
 				}
 				break;
 			}
@@ -201,7 +201,7 @@ void Scene::OnSceneEnter()
 			case SceneModelData::Type::HitTest:
 			{
 				//std::cout << "Hide " << modelDef->name << std::endl;
-				mSceneData.GetBSP()->Hide(modelDef->name);
+				mSceneData.GetBSP()->SetVisible(modelDef->name, false);
 				break;
 			}
 				
@@ -446,6 +446,11 @@ GKActor* Scene::GetActorByNoun(std::string noun)
 void Scene::ApplyTextureToSceneModel(std::string modelName, Texture* texture)
 {
 	mSceneData.GetBSP()->SetTexture(modelName, texture);
+}
+
+void Scene::SetSceneModelVisibility(std::string modelName, bool visible)
+{
+	mSceneData.GetBSP()->SetVisible(modelName, visible);
 }
 
 void Scene::ExecuteNVC(const NVCItem* nvc)
