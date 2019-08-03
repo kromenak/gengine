@@ -153,6 +153,41 @@ void MeshRenderer::SetMaterial(int index, Material material)
 	}
 }
 
+Material* MeshRenderer::GetMaterial(int index)
+{
+	if(index >= 0 && index < mMaterials.size())
+	{
+		return &mMaterials[index];
+	}
+	return nullptr;
+}
+
+Material* MeshRenderer::GetMaterial(int meshIndex, int submeshIndex)
+{
+	if(meshIndex >= 0 && meshIndex < mMeshes.size())
+	{
+		// Determine offset of materials for this mesh.
+		int actualIndex = 0;
+		for(int i = 0; i < meshIndex; i++)
+		{
+			actualIndex += mMeshes[i]->GetSubmeshCount();
+		}
+		actualIndex += submeshIndex;
+		
+		return GetMaterial(actualIndex);
+	}
+	return nullptr;
+}
+
+Mesh* MeshRenderer::GetMesh(int index) const
+{
+	if(index >= 0 && index < mMeshes.size())
+	{
+		return mMeshes[index];
+	}
+	return nullptr;
+}
+
 Matrix4 MeshRenderer::GetMeshWorldTransform(int index) const
 {
 	if(index >= 0 && index < mMeshes.size())

@@ -32,9 +32,13 @@ public:
     void AddMesh(Mesh* mesh);
 	
 	void SetMaterial(int index, Material material);
+	Material* GetMaterial(int index);
+	Material* GetMaterial(int meshIndex, int submeshIndex);
 	
 	Model* GetModel() const { return mModel; }
-    std::vector<Mesh*> GetMeshes() const { return mMeshes; }
+	
+	std::vector<Mesh*> GetMeshes() const { return mMeshes; }
+	Mesh* GetMesh(int index) const;
 	
 	Matrix4 GetMeshWorldTransform(int index) const;
     
