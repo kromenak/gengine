@@ -24,6 +24,7 @@
 		4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112A71F820B0400AFDDFC /* TestMain.cpp */; };
 		4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */; };
 		4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
+		4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */; };
 		4B1555592197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
 		4B15555A2197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
 		4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15555C2197C2E500072F0D /* RectTransform.cpp */; };
@@ -273,6 +274,8 @@
 		4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix4Tests.cpp; path = ../Tests/Matrix4Tests.cpp; sourceTree = "<group>"; };
 		4B1112AD1F821FFF00AFDDFC /* Component.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Component.cpp; path = ../Source/Component.cpp; sourceTree = "<group>"; };
 		4B1112AE1F821FFF00AFDDFC /* Component.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Component.h; path = ../Source/Component.h; sourceTree = "<group>"; };
+		4B12B9CE22F527C8009F54E4 /* FootstepManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FootstepManager.h; path = ../Source/FootstepManager.h; sourceTree = "<group>"; };
+		4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FootstepManager.cpp; path = ../Source/FootstepManager.cpp; sourceTree = "<group>"; };
 		4B1555572197B59F00072F0D /* Transform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Transform.h; path = ../Source/Transform.h; sourceTree = "<group>"; };
 		4B1555582197B59F00072F0D /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Transform.cpp; path = ../Source/Transform.cpp; sourceTree = "<group>"; };
 		4B15555B2197C2E500072F0D /* RectTransform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RectTransform.h; path = ../Source/RectTransform.h; sourceTree = "<group>"; };
@@ -706,6 +709,8 @@
 				4BEA726F21D5834300998066 /* WalkerBoundary.h */,
 				4BBC028822F162B8005ED374 /* FaceController.h */,
 				4BBC028922F162B8005ED374 /* FaceController.cpp */,
+				4B12B9CE22F527C8009F54E4 /* FootstepManager.h */,
+				4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */,
 			);
 			name = GK3;
 			sourceTree = "<group>";
@@ -1115,6 +1120,7 @@
 				4B046E94218FB10F00E56341 /* Debug.cpp in Sources */,
 				4BEA727521D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */,
+				4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
 				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
