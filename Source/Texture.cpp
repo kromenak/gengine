@@ -221,6 +221,21 @@ void Texture::WriteToFile(std::string filePath)
     }
 }
 
+void Texture::Blit(Texture* source, int destX, int destY)
+{
+	GLuint fboId = GL_NONE;
+	glGenFramebuffers(1, &fboId);
+	glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+	
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, source->mTextureId, 0);
+	
+	glBindTexture(GL_TEXTURE_2D, mTextureId);
+	glCopyTexSubImage2D(GL_TEXTURE_2D, 0, destX, destY, 0, 0, source->GetWidth(), source->GetHeight());
+	
+	glBindFramebuffer(GL_FRAMEBUFFER, GL_NONE);
+	glDeleteFramebuffers(1, &fboId);
+}
+
 void Texture::GenerateOpenGlTexture()
 {
 	// Generate and bind the texture object in OpenGL.

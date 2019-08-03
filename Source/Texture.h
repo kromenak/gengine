@@ -65,7 +65,9 @@ public:
 	Color32 GetPixelColor32(int x, int y);
 	
     void WriteToFile(std::string filePath);
-    
+	
+	void Blit(Texture* source, int destX, int destY);
+	
 private:
     // Texture width and height.
     unsigned int mWidth = 0;
