@@ -13,7 +13,7 @@ namespace Random
 {
 	// A default random generator.
 	// Seeded by the current time to ensure different results on different runs of the program.
-	std::default_random_engine generator { (unsigned int)std::chrono::system_clock::now().time_since_epoch().count() };
+	static std::default_random_engine generator { (unsigned int)std::chrono::system_clock::now().time_since_epoch().count() };
 	
 	inline float Range(float minInclusive, float maxInclusive)
 	{
