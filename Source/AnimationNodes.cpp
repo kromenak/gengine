@@ -7,6 +7,7 @@
 
 #include "Animation.h"
 #include "FaceController.h"
+#include "FootstepManager.h"
 #include "GKActor.h"
 #include "MeshRenderer.h"
 #include "Services.h"
@@ -116,12 +117,46 @@ void SoundAnimNode::Play(Animation* anim)
 
 void FootstepAnimNode::Play(Animation* anim)
 {
-	std::cout << actorNoun << " STEP" << std::endl;
+	// Get actor using the specified noun.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
+	if(actor != nullptr)
+	{
+		// Get the actor's shoe type.
+		std::string shoeType = "Male Leather";
+		
+		// Query the texture used on the floor where the actor is walking.
+		std::string floorTextureName = "carpet1";
+		
+		// Get the footstep sound.
+		Audio* footstepAudio = Services::Get<FootstepManager>()->GetFootstep(shoeType, floorTextureName);
+		if(footstepAudio != nullptr)
+		{
+			//TODO: Play at correct 3D position in the scene.
+			Services::GetAudio()->Play(footstepAudio);
+		}
+	}
 }
 
 void FootscuffAnimNode::Play(Animation* anim)
 {
-	std::cout << actorNoun << " SCUFF" << std::endl;
+	// Get actor using the specified noun.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
+	if(actor != nullptr)
+	{
+		// Get the actor's shoe type.
+		std::string shoeType = "Male Leather";
+		
+		// Query the texture used on the floor where the actor is walking.
+		std::string floorTextureName = "carpet1";
+		
+		// Get the scuff sound.
+		Audio* footscuffAudio = Services::Get<FootstepManager>()->GetFootscuff(shoeType, floorTextureName);
+		if(footscuffAudio != nullptr)
+		{
+			//TODO: Play at correct 3D position in the scene.
+			Services::GetAudio()->Play(footscuffAudio);
+		}
+	}
 }
 
 void PlaySoundtrackAnimNode::Play(Animation* anim)

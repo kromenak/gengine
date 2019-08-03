@@ -10,6 +10,7 @@
 #include "Actor.h"
 #include "ButtonIconManager.h"
 #include "CharacterManager.h"
+#include "FootstepManager.h"
 #include "Debug.h"
 #include "GameProgress.h"
 #include "Scene.h"
@@ -84,6 +85,9 @@ bool GEngine::Initialize()
 	
 	// Load character configs.
 	Services::Set<CharacterManager>(new CharacterManager());
+	
+	// Load floor configs.
+	Services::Set<FootstepManager>(new FootstepManager());
 	
 	// Create game progress.
 	Services::Set<GameProgress>(new GameProgress());
