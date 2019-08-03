@@ -7,6 +7,7 @@
 
 #include "CharacterManager.h"
 #include "Debug.h"
+#include "FaceController.h"
 #include "GasPlayer.h"
 #include "GEngine.h"
 #include "MeshRenderer.h"
@@ -53,6 +54,10 @@ GKActor::GKActor(std::string identifier) : Actor(), mIdentifier(identifier)
     // GasPlayer is used to play gas script files.
     // Actor also needs a way to play animations, and the GasPlayer needs to know about it.
     mGasPlayer = AddComponent<GasPlayer>();
+	
+	// Create and configure face controller.
+	mFaceController = AddComponent<FaceController>();
+	mFaceController->SetCharacterConfig(config);
 }
 
 void GKActor::SetState(GKActor::State state)

@@ -17,6 +17,7 @@
 #include <string>
 
 class Animation;
+class FaceController;
 class GAS;
 class GasPlayer;
 class MeshRenderer;
@@ -57,6 +58,7 @@ public:
 	
     MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
 	Walker* GetWalker() const { return mWalker; }
+	FaceController* GetFaceController() const { return mFaceController; }
 	
 protected:
 	void UpdateInternal(float deltaTime) override;
@@ -79,6 +81,9 @@ private:
 	
 	// The character's walking control.
 	Walker* mWalker = nullptr;
+	
+	// The character's face control.
+	FaceController* mFaceController;
 	
 	// Player for GAS logic.
 	GasPlayer* mGasPlayer = nullptr;
