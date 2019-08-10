@@ -38,14 +38,14 @@ Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
 		mPixels[i + 3] = color.GetA();
 	}
 	
-	GenerateOpenGlTexture();
+	UploadToGPU();
 }
 
 Texture::Texture(std::string name, char* data, int dataLength) :
     Asset(name)
 {
     ParseFromData(data, dataLength);
-    GenerateOpenGlTexture();
+	UploadToGPU();
 }
 
 Texture::~Texture()
@@ -107,10 +107,7 @@ void Texture::SetTransparentColor(Color32 color)
 	}
 	
 	// Update texture data on GPU.
-	glBindTexture(GL_TEXTURE_2D, mTextureId);
-	glTexSubImage2D(GL_TEXTURE_2D, 0,
-				 0, 0, mWidth, mHeight,
-				 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+	UploadToGPU();
 }
 
 SDL_Surface* Texture::GetSurface()
@@ -156,12 +153,6 @@ Color32 Texture::GetPixelColor32(int x, int y)
 	
 	// If index isn't valid...also return black.
 	if(index < 0 || index >= (mWidth * mHeight * 4)) { return Color32::Black; }
-	
-	//float r = mPixels[index] / 255.0f;
-	//float g = mPixels[index + 1] / 255.0f;
-	//float b = mPixels[index + 2] / 255.0f;
-	//float a = mPixels[index + 3] / 255.0f;
-	//return Vector4(r, g, b, a);
 	
 	unsigned char r = mPixels[index];
 	unsigned char g = mPixels[index + 1];
@@ -236,20 +227,106 @@ void Texture::Blit(Texture* source, int destX, int destY)
 	glDeleteFramebuffers(1, &fboId);
 }
 
-void Texture::GenerateOpenGlTexture()
+void Texture::BlendPixels(const Texture& source, Texture& dest, int destX, int destY)
 {
-	// Generate and bind the texture object in OpenGL.
-	glGenTextures(1, &mTextureId);
-	glBindTexture(GL_TEXTURE_2D, mTextureId);
+	BlendPixels(source, 0, 0, source.mWidth, source.mHeight, dest, destX, destY);
+}
+
+void Texture::BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
+					     Texture& dest, int destX, int destY)
+{
+	// We can't copy out-of-bounds pixels from the source.
+	if(sourceX < 0 || sourceX >= source.mWidth) { return; }
+	if(sourceY < 0 || sourceY >= source.mHeight) { return; }
 	
-	// Load texture data into texture object.
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-				 mWidth, mHeight, 0,
-				 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+	// We can't copy to out-of-bounds pixels in the destination.
+	if(destX < 0 || destX >= dest.mWidth) { return; }
+	if(destY < 0 || destY >= dest.mHeight) { return; }
 	
-	// When texturing, use the nearest pixel to pick the color to use.
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	// Brute force copy, pixel by pixel!
+	for(int y = sourceY; y < sourceY + sourceHeight && y < source.mHeight; ++y)
+	{
+		for(int x = sourceX; x < sourceX + sourceWidth && x < source.mWidth; ++x)
+		{
+			// Calculate source pixel index.
+			int sourcePixelIndex = (y * source.mWidth + x) * 4;
+			
+			// Calculate dest x/y for this pixel.
+			int copyToY = destY + (y - sourceY);
+			int copyToX = destX + (x - sourceX);
+			if(copyToY < 0 || copyToY >= dest.mHeight) { continue; }
+			if(copyToX < 0 || copyToY >= dest.mWidth) { continue; }
+			
+			// Calculate dest pixel index based on x/y.
+			int destPixelIndex = (copyToY * dest.mWidth + copyToX) * 4;
+			
+			// Interpolate between source/dest pixel colors based on source alpha value.
+			// If source alpha is zero, use 100% dest color - this value will be 0.
+			// If source alpha is 255, use 100% source color - this value will be 1.
+			// If source alpha is between, use X% dest/source color - this value is 0-1.
+			float alphaPercent = (float)source.mPixels[sourcePixelIndex + 3] / 255.0f;
+			
+			// Copy!
+			dest.mPixels[destPixelIndex] = Math::Lerp(dest.mPixels[destPixelIndex], source.mPixels[sourcePixelIndex], alphaPercent);
+			dest.mPixels[destPixelIndex + 1] = Math::Lerp(dest.mPixels[destPixelIndex + 1], source.mPixels[sourcePixelIndex + 1], alphaPercent);
+			dest.mPixels[destPixelIndex + 2] = Math::Lerp(dest.mPixels[destPixelIndex + 2], source.mPixels[sourcePixelIndex + 2], alphaPercent);
+			// Don't make any changes to dest's alpha channel.
+		}
+	}
+	
+	// Don't upload dest to GPU here, since we might be doing a bunch of copy operations in a row.
+	// We'll leave it up to the caller to do that manually (for now).
+}
+
+void Texture::UploadToGPU()
+{
+	if(mTextureId == GL_NONE)
+	{
+		// Generate and bind the texture object in OpenGL.
+		glGenTextures(1, &mTextureId);
+		glBindTexture(GL_TEXTURE_2D, mTextureId);
+		
+		// Load texture data into texture object.
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+					 mWidth, mHeight, 0,
+					 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+		
+		// When texturing, use the nearest pixel to pick the color to use.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	}
+	else
+	{
+		// Update texture data on GPU.
+		glBindTexture(GL_TEXTURE_2D, mTextureId);
+		glTexSubImage2D(GL_TEXTURE_2D, 0,
+						0, 0, mWidth, mHeight,
+						GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+	}
+}
+
+void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
+{
+	// For now, let's assume alpha texture has same width/height as target texture.
+	if(alphaTexture.mWidth != mWidth || alphaTexture.mHeight != mHeight)
+	{
+		std::cout << "Can't apply alpha texture! Width and height do not match." << std::endl;
+		return;
+	}
+	
+	// If the alpha texture has a palette, we want to treat the R/G/B values as the alpha value.
+	// Palettized textures as alpha channels usually have palette colors like (255, 255, 255, 0) or (128, 128, 128, 0).
+	// At least, that's the case in GK3!
+	bool useRgbForAlpha = alphaTexture.mPalette != nullptr;
+	
+	// For each pixel, copy over the alpha value.
+	int pixelCount = mWidth * mHeight;
+	for(int i = 0; i < pixelCount; ++i)
+	{
+		// If RGB is alpha value, just grab R val. Otherwise, +3 to get A val.
+		unsigned char alpha = useRgbForAlpha ? alphaTexture.mPixels[(i * 4)] : alphaTexture.mPixels[(i * 4) + 3];
+		mPixels[(i * 4) + 3] = alpha;
+	}
 }
 
 void Texture::ParseFromData(char* data, int dataLength)

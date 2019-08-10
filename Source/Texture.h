@@ -55,8 +55,9 @@ public:
     SDL_Surface* GetSurface();
     SDL_Surface* GetSurface(int x, int y, int width, int height);
     
-    unsigned int GetWidth() { return mWidth; }
-    unsigned int GetHeight() { return mHeight; }
+    unsigned int GetWidth() const { return mWidth; }
+    unsigned int GetHeight() const { return mHeight; }
+	
     unsigned char* GetPixelData() const { return mPixels; }
 	
 	bool HasAlpha() { return mHasAlpha; }
@@ -68,7 +69,18 @@ public:
 	
 	void Blit(Texture* source, int destX, int destY);
 	
+	// Blend's source pixels into dest based on source's alpha channel.
+	static void BlendPixels(const Texture& source, Texture& dest, int destX, int destY);
+	static void BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
+						   Texture& dest, int destX, int destY);
+	
+	void UploadToGPU();
+	
+	void ApplyAlphaChannel(const Texture& alphaTexture);
+	
 private:
+	friend class RenderTexture; // To access OpenGL stuff.
+	
     // Texture width and height.
     unsigned int mWidth = 0;
     unsigned int mHeight = 0;
@@ -90,8 +102,6 @@ private:
 	// If true, the texture has alpha, so it may need to be rendered
 	bool mHasAlpha = false;
 	bool mIsTranslucent = false;
-	
-	void GenerateOpenGlTexture();
 	
     void ParseFromData(char* data, int dataLength);
 	void ParseFromCompressedFormat(BinaryReader& reader);
