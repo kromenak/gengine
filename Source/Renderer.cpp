@@ -77,6 +77,22 @@ unsigned short quad_indices[] = {
 
 Mesh* quad = nullptr;
 
+float full_quad_vertices[] = {
+	-1.0f,  1.0f, 0.0f, // upper-left
+	1.0f,  1.0f, 0.0f, // upper-right
+	1.0f, -1.0f, 0.0f, // lower-right
+	-1.0f, -1.0f, 0.0f, // lower-left
+};
+
+float full_quad_uvs[] = {
+	0.0f, 1.0f,		// upper-left
+	1.0f, 1.0f,		// upper-right
+	1.0f, 0.0f,		// lower-right
+	0.0f, 0.0f		// lower-left
+};
+
+Mesh* fullQuad = nullptr;
+
 bool Renderer::Initialize()
 {
     // Init video subsystem.
@@ -169,6 +185,16 @@ bool Renderer::Initialize()
 	quadSubmesh->SetPositions(quad_vertices);
 	quadSubmesh->SetUV1(quad_uvs);
 	quadSubmesh->SetIndexes(quad_indices, 6);
+	
+	// Perhaps errantly, the normal "quad" doesn't have "full" vertex positons (using 1 instead of 0.5)
+	// Also, the UVs seemed to be upside down?
+	// Anyway, this full quad seems to work a lot better for render texture usage...perhaps I'll need to fix the quad at some point.
+	fullQuad = new Mesh(4, 5 * sizeof(float), MeshUsage::Static);
+	Submesh* fullQuadSubmesh = fullQuad->GetSubmesh(0);
+	fullQuadSubmesh->SetRenderMode(RenderMode::Triangles);
+	fullQuadSubmesh->SetPositions(full_quad_vertices);
+	fullQuadSubmesh->SetUV1(full_quad_uvs);
+	fullQuadSubmesh->SetIndexes(quad_indices, 6);
     
     // Init succeeded!
     return true;
@@ -191,6 +217,33 @@ void Renderer::Render()
 	glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
 	glDepthMask(GL_TRUE); // start writing to depth buffer
 	glEnable(GL_DEPTH_TEST); // do depth comparisons and update the depth buffer
+	
+	// RENDER TEXTURE TEST
+	/*
+	mFaceRenderTexture->Activate();
+	mFaceShader->Activate();
+	
+	mFaceShader->SetUniformInt("uFaceTexture", 0);
+	mFaceShader->SetUniformInt("uMouthTexture", 1);
+	
+	glActiveTexture(GL_TEXTURE0);
+	Texture* faceTexture = Services::GetAssets()->LoadTexture("GAB_FACE");
+	faceTexture->Activate();
+	
+	glActiveTexture(GL_TEXTURE1);
+	Texture* mouthTexture = Services::GetAssets()->LoadTexture("GAB_MOUTH02");
+	mouthTexture->Activate();
+	
+	fullQuad->Render();
+	
+	// Reset active texture to default.
+	glActiveTexture(GL_TEXTURE0);
+	
+	// Unbind framebuffer object - all future drawing goes to the screen.
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, mScreenWidth, mScreenHeight);
+	*/
+	// END RENDER TEXTURE TEST
 	
 	// Clear color and depth buffers from last frame.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

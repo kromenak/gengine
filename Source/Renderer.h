@@ -14,11 +14,11 @@
 #include "Matrix4.h"
 #include "Vector2.h"
 
-class Shader;
+class BSP;
 class Camera;
 class MeshRenderer;
 class Model;
-class BSP;
+class Shader;
 class Skybox;
 
 class Renderer
