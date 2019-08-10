@@ -25,6 +25,8 @@
 		4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */; };
 		4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
 		4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */; };
+		4B12B9D322F94ABC009F54E4 /* RenderTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9D222F94ABC009F54E4 /* RenderTexture.cpp */; };
+		4B12B9DB22FF3764009F54E4 /* stb_image_resize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9D922FF3764009F54E4 /* stb_image_resize.cpp */; };
 		4B1555592197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
 		4B15555A2197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
 		4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15555C2197C2E500072F0D /* RectTransform.cpp */; };
@@ -276,6 +278,10 @@
 		4B1112AE1F821FFF00AFDDFC /* Component.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Component.h; path = ../Source/Component.h; sourceTree = "<group>"; };
 		4B12B9CE22F527C8009F54E4 /* FootstepManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FootstepManager.h; path = ../Source/FootstepManager.h; sourceTree = "<group>"; };
 		4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FootstepManager.cpp; path = ../Source/FootstepManager.cpp; sourceTree = "<group>"; };
+		4B12B9D122F94ABC009F54E4 /* RenderTexture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RenderTexture.h; path = ../Source/RenderTexture.h; sourceTree = "<group>"; };
+		4B12B9D222F94ABC009F54E4 /* RenderTexture.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RenderTexture.cpp; path = ../Source/RenderTexture.cpp; sourceTree = "<group>"; };
+		4B12B9D922FF3764009F54E4 /* stb_image_resize.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stb_image_resize.cpp; path = ../Libraries/stb/stb_image_resize.cpp; sourceTree = "<group>"; };
+		4B12B9DA22FF3764009F54E4 /* stb_image_resize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stb_image_resize.h; path = ../Libraries/stb/stb_image_resize.h; sourceTree = "<group>"; };
 		4B1555572197B59F00072F0D /* Transform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Transform.h; path = ../Source/Transform.h; sourceTree = "<group>"; };
 		4B1555582197B59F00072F0D /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Transform.cpp; path = ../Source/Transform.cpp; sourceTree = "<group>"; };
 		4B15555B2197C2E500072F0D /* RectTransform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RectTransform.h; path = ../Source/RectTransform.h; sourceTree = "<group>"; };
@@ -531,6 +537,15 @@
 			name = Tests;
 			sourceTree = "<group>";
 		};
+		4B12B9DC22FF3768009F54E4 /* stb */ = {
+			isa = PBXGroup;
+			children = (
+				4B12B9D922FF3764009F54E4 /* stb_image_resize.cpp */,
+				4B12B9DA22FF3764009F54E4 /* stb_image_resize.h */,
+			);
+			name = stb;
+			sourceTree = "<group>";
+		};
 		4B15A9451F241DC8000A689F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -642,6 +657,8 @@
 				4B4EED871F5CA5F4000065EF /* Model.h */,
 				4B15A9541F242C55000A689F /* Renderer.cpp */,
 				4B15A9551F242C55000A689F /* Renderer.h */,
+				4B12B9D222F94ABC009F54E4 /* RenderTexture.cpp */,
+				4B12B9D122F94ABC009F54E4 /* RenderTexture.h */,
 				4BF32B8A1F67C434000639FB /* Shader.cpp */,
 				4BF32B8B1F67C434000639FB /* Shader.h */,
 				4BD673CB20B1119E00795582 /* Skybox.cpp */,
@@ -698,6 +715,10 @@
 			children = (
 				4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */,
 				4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */,
+				4BBC028922F162B8005ED374 /* FaceController.cpp */,
+				4BBC028822F162B8005ED374 /* FaceController.h */,
+				4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */,
+				4B12B9CE22F527C8009F54E4 /* FootstepManager.h */,
 				4BEA727421D7F71A00998066 /* GameProgress.cpp */,
 				4BEA727321D7F71A00998066 /* GameProgress.h */,
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
@@ -707,10 +728,6 @@
 				4BEA726B21D53F2000998066 /* Walker.h */,
 				4BEA727021D5834300998066 /* WalkerBoundary.cpp */,
 				4BEA726F21D5834300998066 /* WalkerBoundary.h */,
-				4BBC028822F162B8005ED374 /* FaceController.h */,
-				4BBC028922F162B8005ED374 /* FaceController.cpp */,
-				4B12B9CE22F527C8009F54E4 /* FootstepManager.h */,
-				4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */,
 			);
 			name = GK3;
 			sourceTree = "<group>";
@@ -862,17 +879,18 @@
 		4BE6EE351F441DD100BB29D5 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				4BE6EE361F441DDB00BB29D5 /* MiniLZO */,
+				4B12B9DC22FF3768009F54E4 /* stb */,
+				4BE6EE361F441DDB00BB29D5 /* minilzo */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
 		};
-		4BE6EE361F441DDB00BB29D5 /* MiniLZO */ = {
+		4BE6EE361F441DDB00BB29D5 /* minilzo */ = {
 			isa = PBXGroup;
 			children = (
 				4BE6EE331F441DC600BB29D5 /* minilzo.c */,
 			);
-			name = MiniLZO;
+			name = minilzo;
 			sourceTree = "<group>";
 		};
 		4BF8A4691F24185300F0FB91 = {
@@ -1086,6 +1104,8 @@
 				4B84A13621684374003B4C3F /* Color32.cpp in Sources */,
 				4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */,
 				4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */,
+				4B12B9D322F94ABC009F54E4 /* RenderTexture.cpp in Sources */,
+				4B12B9DB22FF3764009F54E4 /* stb_image_resize.cpp in Sources */,
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */,
@@ -1404,6 +1424,8 @@
 					"$(SRCROOT)/../Libraries/zlib/include",
 					"$(SRCROOT)/../Libraries/GLEW/include",
 					"$(SRCROOT)/../Libraries/fmod/inc",
+					"$(SRCROOT)/../Libraries/sbt",
+					"$(SRCROOT)/../Libraries",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
@@ -1467,6 +1489,8 @@
 					"$(SRCROOT)/../Libraries/zlib/include",
 					"$(SRCROOT)/../Libraries/GLEW/include",
 					"$(SRCROOT)/../Libraries/fmod/inc",
+					"$(SRCROOT)/../Libraries/sbt",
+					"$(SRCROOT)/../Libraries",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LIBRARY_SEARCH_PATHS = (
