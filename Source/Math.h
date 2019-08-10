@@ -160,4 +160,14 @@ namespace Math
     {
         return (degrees * (kPi / 180.0f));
     }
+	
+	inline float Lerp(float a, float b, float t)
+	{
+		return a + ((b - a) * t);
+	}
+	
+	inline unsigned char Lerp(unsigned char a, unsigned char b, float t)
+	{
+		return a + ((b - a) * t);
+	}
 }
