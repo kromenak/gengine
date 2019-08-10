@@ -232,6 +232,12 @@ CharacterManager::CharacterManager()
 					else if(StringUtil::EqualsIgnoreCase(entry->key, "Eyelids Alpha Channel"))
 					{
 						config.faceConfig.eyelidsAlphaChannel = Services::GetAssets()->LoadTexture(entry->value);
+						
+						// If we have eyelids and an alpha channel, just apply it right away, why not?
+						if(config.faceConfig.eyelidsTexture != nullptr && config.faceConfig.eyelidsAlphaChannel != nullptr)
+						{
+							config.faceConfig.eyelidsTexture->ApplyAlphaChannel(*config.faceConfig.eyelidsAlphaChannel);
+						}
 					}
 					else if(StringUtil::EqualsIgnoreCase(entry->key, "Blink Anims"))
 					{

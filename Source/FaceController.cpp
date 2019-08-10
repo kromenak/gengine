@@ -5,6 +5,8 @@
 //
 #include "FaceController.h"
 
+#include "stb_image_resize.h"
+
 #include "AnimationPlayer.h"
 #include "CharacterManager.h"
 #include "Texture.h"
@@ -16,7 +18,14 @@ TYPE_DEF_CHILD(Component, FaceController);
 
 FaceController::FaceController(Actor* owner) : Component(owner)
 {
-	
+	mDownSampledLeftEyeTexture = new Texture(25, 26, Color32::Black);
+	mDownSampledRightEyeTexture = new Texture(25, 26, Color32::Black);
+}
+
+FaceController::~FaceController()
+{
+	delete mDownSampledLeftEyeTexture;
+	delete mDownSampledRightEyeTexture;
 }
 
 void FaceController::SetCharacterConfig(const CharacterConfig& characterConfig)
@@ -24,11 +33,23 @@ void FaceController::SetCharacterConfig(const CharacterConfig& characterConfig)
 	// Save character config.
 	mCharacterConfig = &characterConfig;
 	
+	// Save reference to face texture.
+	mFaceTexture = mCharacterConfig->faceConfig.faceTexture;
+	
 	// Grab references to default mouth/eyelids/forehead textures.
 	mDefaultMouthTexture = Services::GetAssets()->LoadTexture(mCharacterConfig->identifier + "_MOUTH00");
 	mDefaultEyelidsTexture = mCharacterConfig->faceConfig.eyelidsTexture;
 	mDefaultForeheadTexture = mCharacterConfig->faceConfig.foreheadTexture;
-
+	mDefaultLeftEyeTexture = mCharacterConfig->faceConfig.leftEyeTexture;
+	mDefaultRightEyeTexture = mCharacterConfig->faceConfig.rightEyeTexture;
+	
+	// Currents are just the defaults...uhh, by default.
+	mCurrentMouthTexture = mDefaultMouthTexture;
+	mCurrentEyelidsTexture = mDefaultEyelidsTexture;
+	mCurrentForeheadTexture = mDefaultForeheadTexture;
+	mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
+	mCurrentRightEyeTexture = mDefaultRightEyeTexture;
+	
 	// Roll a random blink time in the near future.
 	RollBlinkTimer();
 }
@@ -67,38 +88,78 @@ void FaceController::Clear(FaceElement element)
 
 void FaceController::SetMouth(Texture* texture)
 {
-	const Vector2& mouthOffset = mCharacterConfig->faceConfig.mouthOffset;
-	mCharacterConfig->faceConfig.faceTexture->Blit(texture, mouthOffset.GetX(), mouthOffset.GetY());
+	mCurrentMouthTexture = texture;
+	UpdateFaceTexture();
 }
 
 void FaceController::ClearMouth()
 {
-	const Vector2& mouthOffset = mCharacterConfig->faceConfig.mouthOffset;
-	mCharacterConfig->faceConfig.faceTexture->Blit(mDefaultMouthTexture, mouthOffset.GetX(), mouthOffset.GetY());
+	mCurrentMouthTexture = mDefaultMouthTexture;
+	UpdateFaceTexture();
 }
 
 void FaceController::SetEyelids(Texture* texture)
 {
-	const Vector2& eyelidsOffset = mCharacterConfig->faceConfig.eyelidsOffset;
-	mCharacterConfig->faceConfig.faceTexture->Blit(texture, eyelidsOffset.GetX(), eyelidsOffset.GetY());
+	mCurrentEyelidsTexture = texture;
+	UpdateFaceTexture();
 }
 
 void FaceController::ClearEyelids()
 {
-	const Vector2& eyelidsOffset = mCharacterConfig->faceConfig.eyelidsOffset;
-	mCharacterConfig->faceConfig.faceTexture->Blit(mDefaultEyelidsTexture, eyelidsOffset.GetX(), eyelidsOffset.GetY());
+	mCurrentEyelidsTexture = mDefaultEyelidsTexture;
+	UpdateFaceTexture();
 }
 
 void FaceController::SetForehead(Texture* texture)
 {
-	const Vector2& foreheadOffset = mCharacterConfig->faceConfig.foreheadOffset;
-	mCharacterConfig->faceConfig.faceTexture->Blit(texture, foreheadOffset.GetX(), foreheadOffset.GetY());
+	mCurrentForeheadTexture = texture;
+	UpdateFaceTexture();
 }
 
 void FaceController::ClearForehead()
 {
-	const Vector2& foreheadOffset = mCharacterConfig->faceConfig.foreheadOffset;
-	mCharacterConfig->faceConfig.faceTexture->Blit(mDefaultForeheadTexture, foreheadOffset.GetX(), foreheadOffset.GetY());
+	mCurrentForeheadTexture = mDefaultForeheadTexture;
+	UpdateFaceTexture();
+}
+
+void FaceController::SetEyes(Texture* texture)
+{
+	mCurrentLeftEyeTexture = texture;
+	mCurrentRightEyeTexture = texture;
+	UpdateFaceTexture();
+}
+
+void FaceController::ClearEyes()
+{
+	mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
+	mCurrentRightEyeTexture = mDefaultRightEyeTexture;
+	UpdateFaceTexture();
+}
+
+void FaceController::SetEye(EyeType type, Texture* texture)
+{
+	if(type == EyeType::Left)
+	{
+		mCurrentLeftEyeTexture = texture;
+	}
+	else
+	{
+		mCurrentRightEyeTexture = texture;
+	}
+	UpdateFaceTexture();
+}
+
+void FaceController::ClearEye(EyeType type)
+{
+	if(type == EyeType::Left)
+	{
+		mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
+	}
+	else
+	{
+		mCurrentRightEyeTexture = mDefaultRightEyeTexture;
+	}
+	UpdateFaceTexture();
 }
 
 void FaceController::Blink()
@@ -148,4 +209,54 @@ void FaceController::RollBlinkTimer()
 	
 	// Convert to seconds and set timer.
 	mBlinkTimer = (float)waitMs / 1000.0f;
+}
+
+void FaceController::UpdateFaceTexture()
+{
+	// Can't do much if face texture is missing!
+	if(mFaceTexture == nullptr) { return; }
+	
+	// Copy mouth texture.
+	if(mCurrentMouthTexture != nullptr)
+	{
+		const Vector2& mouthOffset = mCharacterConfig->faceConfig.mouthOffset;
+		Texture::BlendPixels(*mCurrentMouthTexture, *mFaceTexture, mouthOffset.GetX(), mouthOffset.GetY());
+	}
+		
+	// Downsample & copy left eye.
+	if(mCurrentLeftEyeTexture != nullptr)
+	{
+		stbir_resize_uint8(mCurrentLeftEyeTexture->GetPixelData(), mCurrentLeftEyeTexture->GetWidth(), mCurrentLeftEyeTexture->GetHeight(), 0,
+						   mDownSampledLeftEyeTexture->GetPixelData(), mDownSampledLeftEyeTexture->GetWidth(), mDownSampledLeftEyeTexture->GetHeight(), 0, 4);
+		mDownSampledLeftEyeTexture->UploadToGPU();
+		const Vector2& leftEyeOffset = mCharacterConfig->faceConfig.leftEyeOffset;
+		Texture::BlendPixels(*mDownSampledLeftEyeTexture, *mFaceTexture, leftEyeOffset.GetX(), leftEyeOffset.GetY());
+	}
+	
+	// Downsample & copy right eye.
+	if(mCurrentRightEyeTexture != nullptr)
+	{
+		stbir_resize_uint8(mCurrentRightEyeTexture->GetPixelData(), mCurrentRightEyeTexture->GetWidth(), mCurrentRightEyeTexture->GetHeight(), 0,
+						   mDownSampledRightEyeTexture->GetPixelData(), mDownSampledRightEyeTexture->GetWidth(), mDownSampledRightEyeTexture->GetHeight(), 0, 4);
+		mDownSampledRightEyeTexture->UploadToGPU();
+		const Vector2& rightEyeOffset = mCharacterConfig->faceConfig.rightEyeOffset;
+		Texture::BlendPixels(*mDownSampledRightEyeTexture, *mFaceTexture, rightEyeOffset.GetX(), rightEyeOffset.GetY());
+	}
+	
+	// Copy eyelids texture.
+	if(mCurrentEyelidsTexture != nullptr)
+	{
+		const Vector2& eyelidsOffset = mCharacterConfig->faceConfig.eyelidsOffset;
+		Texture::BlendPixels(*mCurrentEyelidsTexture, *mFaceTexture, eyelidsOffset.GetX(), eyelidsOffset.GetY());
+	}
+	
+	// Copy forehead texture.
+	if(mCurrentForeheadTexture != nullptr)
+	{
+		const Vector2& foreheadOffset = mCharacterConfig->faceConfig.foreheadOffset;
+		Texture::BlendPixels(*mCurrentForeheadTexture, *mFaceTexture, foreheadOffset.GetX(), foreheadOffset.GetY());
+	}
+		
+	// Upload all changes to the GPU.
+	mFaceTexture->UploadToGPU();
 }
