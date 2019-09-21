@@ -25,8 +25,6 @@ public:
     
     void Update();
     
-    void DispatchEvents();
-    
     bool IsKeyDown(SDL_Scancode scancode);
     bool IsKeyPressed(SDL_Scancode scancode) { return mKeyboardState[scancode] == 1; }
     bool IsKeyUp(SDL_Scancode scancode);

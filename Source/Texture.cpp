@@ -286,6 +286,11 @@ void Texture::UploadToGPU()
 		glGenTextures(1, &mTextureId);
 		glBindTexture(GL_TEXTURE_2D, mTextureId);
 		
+		//TODO: mPixels currently holds data from top-left to bottom-right.
+		//glTexImage2D expects pixel data from bottom-left to top-right!
+		//Furthermore, GK3 seems to use UVs where top-left is (0,0) and bottom-right is (1,1).
+		//Basically...figure out a consistent solution and stick with it!
+		
 		// Load texture data into texture object.
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
 					 mWidth, mHeight, 0,
@@ -368,7 +373,8 @@ void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 	{
 		for(int x = 0; x < mWidth; x++)
 		{
-			int current = (y * mWidth + x) * 4;
+			//int current = ((mHeight - y - 1)  * mWidth + x) * 4;
+			int current = (y  * mWidth + x) * 4;
 			uint16_t pixel = reader.ReadUShort();
 			
 			float red = (pixel & 0xF800) >> 11;

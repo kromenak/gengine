@@ -5,6 +5,11 @@
 //
 #include "Rect.h"
 
+Rect::Rect()
+{
+	
+}
+
 Rect::Rect(float x, float y) : mX(x), mY(y)
 {
 	
@@ -13,7 +18,7 @@ Rect::Rect(float x, float y) : mX(x), mY(y)
 Rect::Rect(float x, float y, float width, float height) : mX(x), mY(y),
 	mWidth(width), mHeight(height)
 {
-	
+
 }
 
 Rect::Rect(const Vector2& min, const Vector2& max) :
@@ -22,16 +27,6 @@ Rect::Rect(const Vector2& min, const Vector2& max) :
 	mHeight(max.GetY() - min.GetY())
 {
 	
-}
-
-Vector2 Rect::GetMin() const
-{
-	return Vector2(mX, mY);
-}
-
-Vector2 Rect::GetMax() const
-{
-	return Vector2(mX + mWidth, mY + mHeight);
 }
 
 bool Rect::Contains(const Vector2& vec) const
@@ -46,4 +41,40 @@ bool Rect::Contains(const Vector2& vec) const
 	
 	// If x/y of vector are both greater than rect's x/y and less than w/h, it is contained!
 	return true;
+}
+
+bool Rect::Overlaps(const Rect& other) const
+{
+	// Calculate maxes - just use x/y values for mins.
+	Vector2 max = GetMax();
+	Vector2 otherMax = other.GetMax();
+
+	// Check for overlaps on each side.
+	// As with an AABB, if no overlap on any side, we're not colliding.
+	bool noMinX = mX > otherMax.GetX();
+	bool noMaxX = max.GetX() < other.GetX();
+	bool noMinY = mY > otherMax.GetY();
+	bool noMaxY = max.GetY() < other.GetY();
+	return !noMinX && !noMaxX && !noMinY && !noMaxY;
+}
+
+Vector2 Rect::GetPoint(Vector2 normalizedPoint) const
+{
+	return Vector2(mX + (mWidth * normalizedPoint.GetX()), mY + (mHeight * normalizedPoint.GetY()));
+}
+
+Vector2 Rect::GetNormalizedPoint(Vector2 point) const
+{
+	float normalizedX = 0.0f;
+	if(mWidth != 0.0f)
+	{
+		normalizedX = (point.GetX() - mX) / mWidth;
+	}
+	
+	float normalizedY = 0.0f;
+	if(mHeight != 0.0f)
+	{
+		normalizedY = (point.GetY() - mY) / mHeight;
+	}
+	return Vector2(normalizedX, normalizedY);
 }

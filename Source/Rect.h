@@ -11,6 +11,7 @@
 class Rect
 {
 public:
+	Rect();
 	Rect(float x, float y);
 	Rect(float x, float y, float width, float height);
 	Rect(const Vector2& min, const Vector2& max);
@@ -25,10 +26,16 @@ public:
 	void SetWidth(float width) { mWidth = width; }
 	void SetHeight(float height) { mHeight = height; }
 	
-	Vector2 GetMin() const;
-	Vector2 GetMax() const;
+	Vector2 GetMin() const { return Vector2(mX, mY); }
+	Vector2 GetMax() const { return Vector2(mX + mWidth, mY + mHeight); }
+	
+	Vector2 GetSize() const { return Vector2(mWidth, mHeight); }
 	
 	bool Contains(const Vector2& vec) const;
+	bool Overlaps(const Rect& other) const;
+	
+	Vector2 GetPoint(Vector2 normalizedPoint) const;
+	Vector2 GetNormalizedPoint(Vector2 point) const;
 	
 private:
 	float mX = 0.0f;
