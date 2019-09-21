@@ -21,9 +21,6 @@
 #include "Services.h"
 #include "SoundtrackPlayer.h"
 #include "StringUtil.h"
-#include "UIButton.h"
-#include "UIImage.h"
-#include "UILabel.h"
 #include "Walker.h"
 #include "WalkerBoundary.h"
 
@@ -62,8 +59,8 @@ Scene::Scene(std::string name, std::string timeCode) :
 	if(soundtrack != nullptr)
 	{
 		Actor* actor = new Actor();
-		SoundtrackPlayer* soundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
-		soundtrackPlayer->Play(soundtrack);
+		mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
+		mSoundtrackPlayer->Play(soundtrack);
 	}
 	
 	// Create action bar, which will be used to choose nouns/verbs by the player.
@@ -451,6 +448,16 @@ void Scene::ApplyTextureToSceneModel(std::string modelName, Texture* texture)
 void Scene::SetSceneModelVisibility(std::string modelName, bool visible)
 {
 	mSceneData.GetBSP()->SetVisible(modelName, visible);
+}
+
+bool Scene::IsSceneModelVisible(std::string modelName) const
+{
+	return mSceneData.GetBSP()->IsVisible(modelName);
+}
+
+bool Scene::DoesSceneModelExist(std::string modelName) const
+{
+	return mSceneData.GetBSP()->Exists(modelName);
 }
 
 void Scene::ExecuteNVC(const NVCItem* nvc)

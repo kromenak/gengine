@@ -28,6 +28,7 @@ class Ray;
 class SceneModel;
 class SIF;
 class Skybox;
+class SoundtrackPlayer;
 class Vector3;
 
 class Scene
@@ -50,10 +51,15 @@ public:
 	GKActor* GetActorByModelName(std::string modelName);
 	GKActor* GetActorByNoun(std::string noun);
 	
+	ScenePositionData* GetPosition(std::string positionName) { return mSceneData.GetScenePosition(positionName); }
+	
 	void ApplyTextureToSceneModel(std::string modelName, Texture* texture);
 	void SetSceneModelVisibility(std::string modelName, bool visible);
+	bool IsSceneModelVisible(std::string modelName) const;
+	bool DoesSceneModelExist(std::string modelName) const;
 	
 	AnimationPlayer* GetAnimationPlayer() { return mAnimationPlayer; }
+	SoundtrackPlayer* GetSoundtrackPlayer() { return mSoundtrackPlayer; }
     
 private:
     // The scene name, both general and specific.
@@ -67,6 +73,9 @@ private:
 	
 	// The animation player for the scene.
 	AnimationPlayer* mAnimationPlayer = nullptr;
+	
+	// The soundtrack player for the scene.
+	SoundtrackPlayer* mSoundtrackPlayer = nullptr;
 	
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
