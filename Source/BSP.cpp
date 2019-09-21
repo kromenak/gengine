@@ -208,6 +208,47 @@ void BSP::SetTexture(std::string objectName, Texture* texture)
 	}
 }
 
+bool BSP::Exists(std::string objectName) const
+{
+	for(int i = 0; i < mObjectNames.size(); i++)
+	{
+		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool BSP::IsVisible(std::string objectName) const
+{
+	// Find index of the object name.
+	int index = -1;
+	for(int i = 0; i < mObjectNames.size(); i++)
+	{
+		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
+		{
+			index = i;
+			break;
+		}
+	}
+	
+	// If can't find object name, it's certainly not visible...
+	if(index == -1) { return false; }
+	
+	// Find any surface belonging to this object and see if it is visible.
+	for(auto& surface : mSurfaces)
+	{
+		if(surface->objectIndex == index)
+		{
+			return surface->visible;
+		}
+	}
+	
+	// Worst case, no surfaces belong to this object. Must not be visible then!
+	return false;
+}
+
 void BSP::RenderTree(BSPNode* node, Vector3 position, RenderType renderType)
 {
     // Figure out the location of the camera position relative to the plane.

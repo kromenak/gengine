@@ -116,6 +116,9 @@ public:
 	
 	void SetVisible(std::string objectName, bool visible);
 	void SetTexture(std::string objectName, Texture* texture);
+	
+	bool Exists(std::string objectName) const;
+	bool IsVisible(std::string objectName) const;
     
 private:
 	enum class RenderType
