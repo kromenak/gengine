@@ -134,6 +134,11 @@ float Vector2::Dot(Vector2 lhs, Vector2 rhs)
     return (lhs.x * rhs.x + lhs.y * rhs.y);
 }
 
+Vector2 Vector2::Lerp(Vector2 from, Vector2 to, float t)
+{
+	return ((1.0f - t) * from) + (t * to);
+}
+
 std::ostream& operator<<(std::ostream& os, const Vector2& v)
 {
     os << "(" << v.GetX() << ", " << v.GetY() << ")";
