@@ -5,9 +5,39 @@
 //
 #include "GameProgress.h"
 
+#include "Math.h"
+#include "StringUtil.h"
+
 TYPE_DEF_BASE(GameProgress);
 
-bool GameProgress::GetFlag(std::string flagName) const
+Timeblock::Timeblock(const std::string& code)
+{
+	
+}
+
+void GameProgress::SetScore(int score)
+{
+	mScore = Math::Clamp(score, 0, kMaxScore);
+}
+
+void GameProgress::IncreaseScore(int points)
+{
+	SetScore(mScore + points);
+}
+
+void GameProgress::SetLocation(const std::string& location)
+{
+	mLastLocation = mLocation;
+	mLocation = location;
+}
+
+void GameProgress::SetTimeCode(const std::string& timeCode)
+{
+	mLastTimeCode = mTimeCode;
+	mTimeCode = timeCode;
+}
+
+bool GameProgress::GetFlag(const std::string& flagName) const
 {
 	// If the flag exists, it implies a "true" value.
 	// Absence of flag implies "false" value.
@@ -15,13 +45,13 @@ bool GameProgress::GetFlag(std::string flagName) const
 	return it != mGameFlags.end();
 }
 
-void GameProgress::SetFlag(std::string flagName)
+void GameProgress::SetFlag(const std::string& flagName)
 {
 	// Doesn't matter whether we are setting an already set flag.
 	mGameFlags.insert(flagName);
 }
 
-void GameProgress::ClearFlag(std::string flagName)
+void GameProgress::ClearFlag(const std::string& flagName)
 {
 	// Erase the flag from the container to "clear" it.
 	auto it = mGameFlags.find(flagName);
@@ -31,9 +61,65 @@ void GameProgress::ClearFlag(std::string flagName)
 	}
 }
 
-int GameProgress::GetChatCount(std::string noun) const
+int GameProgress::GetLifetimeLocationCount(const std::string& actorName, const std::string& location)
 {
-	auto it = mChatCounts.find(noun);
+	std::string key = actorName + location;
+	StringUtil::ToLower(key);
+	return mActorLocationCounts[key];
+}
+
+int GameProgress::GetLocationCount(const std::string& actorName) const
+{
+	return GetLocationCount(actorName, mLocation, mTimeCode);
+}
+
+int GameProgress::GetLocationCount(const std::string& actorName, const std::string& location) const
+{
+	return GetLocationCount(actorName, location, mTimeCode);
+}
+
+int GameProgress::GetLocationCount(const std::string& location, const std::string& timeblock, const std::string& actorName) const
+{
+	// Generate a key from the various bits.
+	// Make sure it's all lowercase, for consistency.
+	std::string key = actorName + location + timeblock;
+	StringUtil::ToLower(key);
+	
+	// Either return stored value, or 0 by default.
+	auto it = mActorLocationTimeblockCounts.find(key);
+	if(it != mActorLocationTimeblockCounts.end())
+	{
+		return it->second;
+	}
+	return 0;
+}
+
+void GameProgress::IncLocationCount(const std::string& actorName)
+{
+	IncLocationCount(actorName, mLocation, mTimeCode);
+}
+
+void GameProgress::IncLocationCount(const std::string &actorName, const std::string &location)
+{
+	IncLocationCount(actorName, mLocation, mTimeCode);
+}
+
+void GameProgress::IncLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock)
+{
+	// Generate a key from the various bits.
+	// Make sure it's all lowercase, for consistency.
+	std::string locationKey = actorName + location;
+	std::string locationTimeblockKey = locationKey + timeblock;
+	StringUtil::ToLower(locationKey);
+	StringUtil::ToLower(locationTimeblockKey);
+	
+	++mActorLocationCounts[locationKey];
+	++mActorLocationTimeblockCounts[locationTimeblockKey];
+}
+
+int GameProgress::GetChatCount(const std::string& noun) const
+{
+	auto it = mChatCounts.find(StringUtil::ToLowerCopy(noun));
 	if(it != mChatCounts.end())
 	{
 		return it->second;
@@ -41,43 +127,55 @@ int GameProgress::GetChatCount(std::string noun) const
 	return 0;
 }
 
-void GameProgress::SetChatCount(std::string noun, int count)
+void GameProgress::SetChatCount(const std::string& noun, int count)
 {
-	mChatCounts[noun] = count;
+	mChatCounts[StringUtil::ToLowerCopy(noun)] = count;
 }
 
-void GameProgress::IncChatCount(std::string noun)
+void GameProgress::IncChatCount(const std::string& noun)
 {
-	mChatCounts[noun]++;
+	++mChatCounts[StringUtil::ToLowerCopy(noun)];
 }
 
-int GameProgress::GetNounVerbCount(std::string noun, std::string verb) const
+int GameProgress::GetNounVerbCount(const std::string& noun, const std::string& verb) const
 {
-	auto it = mNounVerbCounts.find(noun);
+	// Key is noun+verb.
+	// Make sure it's all lowercase, for consistency.
+	std::string key = noun + verb;
+	StringUtil::ToLower(key);
+	
+	// Find and return, or return default.
+	auto it = mNounVerbCounts.find(key);
 	if(it != mNounVerbCounts.end())
 	{
-		auto it2 = it->second.find(verb);
-		if(it2 != it->second.end())
-		{
-			return it2->second;
-		}
+		return it->second;
 	}
 	return 0;
 }
 
-void GameProgress::SetNounVerbCount(std::string noun, std::string verb, int count)
+void GameProgress::SetNounVerbCount(const std::string& noun, const std::string& verb, int count)
 {
-	mNounVerbCounts[noun][verb] = count;
+	// Key is noun+verb.
+	// Make sure it's all lowercase, for consistency.
+	std::string key = noun + verb;
+	StringUtil::ToLower(key);
+	
+	mNounVerbCounts[key] = count;
 }
 
-void GameProgress::IncNounVerbCount(std::string noun, std::string verb)
+void GameProgress::IncNounVerbCount(const std::string& noun, const std::string& verb)
 {
-	mNounVerbCounts[noun][verb]++;
+	// Key is noun+verb.
+	// Make sure it's all lowercase, for consistency.
+	std::string key = noun + verb;
+	StringUtil::ToLower(key);
+	
+	++mNounVerbCounts[key];
 }
 
-int GameProgress::GetGameVariable(std::string varName) const
+int GameProgress::GetGameVariable(const std::string& varName) const
 {
-	auto it = mGameVariables.find(varName);
+	auto it = mGameVariables.find(StringUtil::ToLowerCopy(varName));
 	if(it != mGameVariables.end())
 	{
 		return it->second;
@@ -85,12 +183,12 @@ int GameProgress::GetGameVariable(std::string varName) const
 	return 0;
 }
 
-void GameProgress::SetGameVariable(std::string varName, int value)
+void GameProgress::SetGameVariable(const std::string& varName, int value)
 {
-	mGameVariables[varName] = value;
+	mGameVariables[StringUtil::ToLowerCopy(varName)] = value;
 }
 
-void GameProgress::IncGameVariable(std::string varName)
+void GameProgress::IncGameVariable(const std::string& varName)
 {
-	mGameVariables[varName]++;
+	++mGameVariables[StringUtil::ToLowerCopy(varName)];
 }

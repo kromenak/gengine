@@ -14,13 +14,16 @@
 
 #include "Type.h"
 
-struct TimeBlock
+struct Timeblock
 {
 	// The day; should be 1+.
 	int day = 1;
 	
 	// The hour; should be 0-23.
 	int hour = 10;
+	
+	Timeblock(int day, int hour) : day(day), hour(hour) { }
+	Timeblock(const std::string& code);
 	
 	// Depending on day/hour, returns something like "110A".
 	std::string GetCode()
@@ -51,34 +54,43 @@ class GameProgress
 public:
 	int GetMaxScore() const { return kMaxScore; }
 	int GetScore() const { return mScore; }
-	void SetScore(int score) { mScore = score; }
-	void IncreaseScore(int points) { mScore += points; }
+	void SetScore(int score);
+	void IncreaseScore(int points);
 	
 	std::string GetLocation() const { return mLocation; }
 	std::string GetLastLocation() const { return mLastLocation; }
-	void SetLocation(std::string location) { mLastLocation = mLocation; mLocation = location; }
+	void SetLocation(const std::string& location);
 	
 	std::string GetTimeCode() const { return mTimeCode; }
 	std::string GetLastTimeCode() const { return mLastTimeCode; }
-	void SetTimeCode(std::string timeCode) { mLastTimeCode = mTimeCode; mTimeCode = timeCode; }
+	void SetTimeCode(const std::string& timeCode);
 	
-	bool GetFlag(std::string flagName) const;
-	void SetFlag(std::string flagName);
-	void ClearFlag(std::string flagName);
+	bool GetFlag(const std::string& flagName) const;
+	void SetFlag(const std::string& flagName);
+	void ClearFlag(const std::string& flagName);
 	
-	int GetChatCount(std::string noun) const;
-	void SetChatCount(std::string, int count);
-	void IncChatCount(std::string noun);
+	int GetLifetimeLocationCount(const std::string& actorName, const std::string& location);
+	int GetLocationCount(const std::string& actorName) const;
+	int GetLocationCount(const std::string& actorName, const std::string& location) const;
+	int GetLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock) const;
+	void IncLocationCount(const std::string& actorName);
+	void IncLocationCount(const std::string& actorName, const std::string& location);
+	void IncLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock);
+	
+	//TODO: Chat counts should be reset when the timeblock changes!
+	int GetChatCount(const std::string& noun) const;
+	void SetChatCount(const std::string&, int count);
+	void IncChatCount(const std::string& noun);
 	
 	//TODO: Topic Counts
 	
-	int GetNounVerbCount(std::string noun, std::string verb) const;
-	void SetNounVerbCount(std::string noun, std::string verb, int count);
-	void IncNounVerbCount(std::string noun, std::string verb);
+	int GetNounVerbCount(const std::string& noun, const std::string& verb) const;
+	void SetNounVerbCount(const std::string& noun, const std::string& verb, int count);
+	void IncNounVerbCount(const std::string& noun, const std::string& verb);
 	
-	int GetGameVariable(std::string varName) const;
-	void SetGameVariable(std::string varName, int value);
-	void IncGameVariable(std::string varName);
+	int GetGameVariable(const std::string& varName) const;
+	void SetGameVariable(const std::string& varName, int value);
+	void IncGameVariable(const std::string& varName);
 	
 private:
 	// Score tracking.
@@ -103,10 +115,16 @@ private:
 	
 	// Maps noun/verb to a count value.
 	// Tracks the number of times we've triggered a verb on a noun.
-	std::unordered_map<std::string, std::unordered_map<std::string, int>> mNounVerbCounts;
+	std::unordered_map<std::string, int> mNounVerbCounts;
 
 	// Maps a variable name to an integer value.
 	// For general game logic variables.
 	std::unordered_map<std::string, int> mGameVariables;
+	
+	// Location counts for actors. We track lifetime times an actor visits a location AND per-timeblock counts.
+	// Key is actorName+location (e.g. gabrielr25) or actorName+locationId+timeblockCode (e.g. gabrielr25110a).
+	// Value is number of times the actor has been at that location during that timeblock.
+	std::unordered_map<std::string, int> mActorLocationCounts;
+	std::unordered_map<std::string, int> mActorLocationTimeblockCounts;
 };
 
