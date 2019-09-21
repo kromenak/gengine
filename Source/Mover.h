@@ -3,7 +3,8 @@
 //
 // Clark Kromenaker
 //
-// Description
+// Moves an actor to/from designated positions/rotations/scales.
+// Mainly used to test out transform hierarchy calculations at runtime.
 //
 #pragma once
 #include "Component.h"

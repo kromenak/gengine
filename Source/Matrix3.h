@@ -19,7 +19,7 @@ public:
     Matrix3() { ToIdentity(); }
     Matrix3(float vals[9]);
     explicit Matrix3(float vals[3][3]);
-    explicit Matrix3(float vals[3][3], bool convert);
+    explicit Matrix3(float vals[3][3], bool transpose);
     ~Matrix3() { }
     
     // Copy

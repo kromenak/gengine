@@ -21,12 +21,12 @@ Matrix3::Matrix3(float vals[3][3])
     memcpy(mVals, vals, 9 * sizeof(float));
 }
 
-Matrix3::Matrix3(float vals[3][3], bool convert)
+Matrix3::Matrix3(float vals[3][3], bool transpose)
 {
     memcpy(mVals, vals, 9 * sizeof(float));
     
     // Indicates that the matrix passed in needs to be transposed.
-    if(convert) { Transpose(); }
+    if(transpose) { Transpose(); }
 }
 
 Matrix3::Matrix3(const Matrix3& other)

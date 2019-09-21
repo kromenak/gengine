@@ -21,7 +21,7 @@ public:
     Matrix4() { ToIdentity(); }
     Matrix4(float vals[16]);
     explicit Matrix4(float vals[4][4]);
-    explicit Matrix4(float vals[4][4], bool convert);
+    explicit Matrix4(float vals[4][4], bool transpose);
     ~Matrix4() { }
     
     // Copy

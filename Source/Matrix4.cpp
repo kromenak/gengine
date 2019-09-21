@@ -22,12 +22,12 @@ Matrix4::Matrix4(float vals[4][4])
     memcpy(mVals, vals, 16 * sizeof(float));
 }
 
-Matrix4::Matrix4(float vals[4][4], bool convert)
+Matrix4::Matrix4(float vals[4][4], bool transpose)
 {
     memcpy(mVals, vals, 16 * sizeof(float));
     
     // Indicates that the matrix passed in needs to be transposed.
-    if(convert) { Transpose(); }
+    if(transpose) { Transpose(); }
 }
 
 Matrix4::Matrix4(const Matrix4& other)

@@ -9,6 +9,7 @@
 #include <cctype>
 #include <sstream>
 #include <string>
+#include <vector>
 
 namespace StringUtil
 {

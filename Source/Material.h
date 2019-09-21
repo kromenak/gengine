@@ -27,6 +27,8 @@ public:
     void SetShader(Shader* shader) { mShader = shader; }
 	
 	void SetColor(const Color32& color) { mColor = color; }
+	
+	Texture* GetDiffuseTexture() const { return mDiffuseTexture; }
     void SetDiffuseTexture(Texture* diffuseTexture) { mDiffuseTexture = diffuseTexture; }
 	
 	void SetWorldTransformMatrix(const Matrix4& matrix);
