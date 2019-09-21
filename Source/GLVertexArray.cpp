@@ -47,6 +47,7 @@ void GLVertexArray::SetNormals(float* normals)
 void GLVertexArray::SetUV1(float* uvs)
 {
     mUV1 = uvs;
+	mVboUpdateMask |= 8;
 }
 
 void GLVertexArray::SetIndexes(unsigned short* indexes, unsigned int count)
@@ -217,6 +218,40 @@ void GLVertexArray::UpdateVBO()
         glBufferSubData(GL_ARRAY_BUFFER, offset, positionSize, mPositions);
     }
     offset += positionSize;
-    
+	
+	// Check and update color data.
+	if(mColors != nullptr)
+	{
+		int colorSize = mVertexCount * 4 * sizeof(GLfloat);
+		if((mVboUpdateMask & 2) != 0)
+		{
+			glBufferSubData(GL_ARRAY_BUFFER, offset, colorSize, mColors);
+		}
+		offset += colorSize;
+	}
+	
+	// Check and update normal data.
+	if(mNormals != nullptr)
+	{
+		int normalsSize = mVertexCount * 3 * sizeof(GLfloat);
+		if((mVboUpdateMask & 4) != 0)
+		{
+			glBufferSubData(GL_ARRAY_BUFFER, offset, normalsSize, mNormals);
+		}
+		offset += normalsSize;
+	}
+	
+	// Check and update UV1 data.
+	if(mUV1 != nullptr)
+	{
+		int uvSize = mVertexCount * 2 * sizeof(GLfloat);
+		if((mVboUpdateMask & 8) != 0)
+		{
+			glBufferSubData(GL_ARRAY_BUFFER, offset, uvSize, mUV1);
+		}
+		offset += uvSize;
+	}
+	
+	// Reset update mask.
     mVboUpdateMask = 0;
 }
