@@ -18,7 +18,7 @@ std::string SheepInstance::GetName()
 {
 	if(mSheepScript != nullptr)
 	{
-		return mSheepScript->GetName();
+		return mSheepScript->GetNameNoExtension();
 	}
 	return "";
 }

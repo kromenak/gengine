@@ -207,7 +207,7 @@ shpvoid SetActorPosition(std::string actorName, std::string positionName);
 shpvoid SetEyeOffsets(std::string actorName, float leftX, float leftY,
                       float rightX, float rightY); // DEV
 
-shpvoid SetEgo(std::string actorName); // DEV
+shpvoid SetEgo(std::string actorName);
 shpvoid SetEgoLocationCount(std::string locationName, int count); // DEV
 
 shpvoid SetIdleGAS(std::string actorName, std::string gasName); // WAIT
@@ -265,20 +265,19 @@ shpvoid DumpAnimator(); // DEV
 shpvoid SetConversation(std::string conversationName); // WAIT
 shpvoid EndConversation(); // WAIT
 
-shpvoid StartAnimation(std::string animName); // WAIT
-shpvoid LoopAnimation(std::string animName);
-shpvoid StopAnimation(std::string animName);
+shpvoid StartAnimation(std::string animationName); // WAIT
+shpvoid StartMoveAnimation(std::string animName); // WAIT
+shpvoid StartMom(std::string momAnimationName); // WAIT
+shpvoid LoopAnimation(std::string animationName);
+shpvoid StopAnimation(std::string animationName);
 shpvoid StopAllAnimations(); // DEV
 
-shpvoid StartMorphAnimation(std::string animName, int animStartFrame, int morphFrames); // WAIT
-shpvoid StopMorphAnimation(std::string animName);
+shpvoid StartMorphAnimation(std::string animationName, int animStartFrame, int morphFrames); // WAIT
+shpvoid StopMorphAnimation(std::string animationName);
 shpvoid StopAllMorphAnimations(); // DEV
 
-shpvoid StartMom(std::string momAnimName); // WAIT
-shpvoid StartMoveAnimation(std::string animName); // WAIT
-
 shpvoid StartVoiceOver(std::string dialogueName, int numLines); // WAIT
-shpvoid StartYak(std::string yakAnimName); // DEV, WAIT
+shpvoid StartYak(std::string yakAnimName); // WAIT
 
 // APPLICATION
 shpvoid AddPath(std::string pathName); // DEV
@@ -292,10 +291,9 @@ shpvoid Edit(std::string filename); // DEV
 shpvoid Open(std::string filename); // DEV
 
 shpvoid ForceQuitGame(); // DEV
+shpvoid QuitApp(); // DEV
 
 shpvoid FullReset(); // DEV
-
-shpvoid QuitApp(); // DEV
 
 shpvoid RefreshScreen(); // DEV
 
@@ -316,21 +314,22 @@ shpvoid CameraBoundaryUnblockModel(std::string modelName);
 shpvoid CutToCameraAngle(std::string cameraName);
 shpvoid CutToCameraAngleX(float horizAngle, float vertAngle,
                           float x, float y, float z); // DEV
+shpvoid ForceCutToCameraAngle(std::string cameraName);
 
 shpvoid DefaultInspect(std::string noun); // WAIT
 
+shpvoid EnableCameraBoundaries(); // DEV
 shpvoid DisableCameraBoundaries(); // DEV
+
 shpvoid DumpCamera(); // DEV
 shpvoid DumpCameraAngles(); // DEV
-shpvoid EnableCameraBoundaries(); // DEV
-
-shpvoid ForceCutToCameraAngle(std::string cameraName);
 
 int GetCameraAngleCount(); // DEV
 std::string GetIndexedCameraAngle(int index); // DEV
 
 shpvoid SetCameraGlide(int glide);
 shpvoid GlideToCameraAngle(std::string cameraName); // WAIT
+
 shpvoid InspectObject(); // WAIT
 shpvoid Uninspect(); // WAIT
 
@@ -338,31 +337,33 @@ float GetCameraFOV();
 shpvoid SetCameraFOV(float fov);
 
 // CONSTRUCTION MODE
+shpvoid ShowConstruction(); // DEV
+shpvoid HideConstruction(); // DEV
+
 std::string CreateCameraAngleGizmo(); // DEV
 std::string CreateCameraAngleGizmoX(float horizAngle, float vertAngle,
                                     float x, float y, float z); // DEV
+shpvoid ShowCameraAngleGizmo(std::string cameraName); // DEV
+shpvoid HideCameraAngleGizmo(std::string cameraName); // DEV
 
 std::string CreatePositionGizmo(); // DEV
 std::string CreatePositionGizmoX(float heading, float x, float y, float z); // DEV
-
-shpvoid HideAmbientMapGizmo(); // DEV
-shpvoid HideCameraAngleGizmo(std::string cameraName); // DEV
-shpvoid HideConstruction(); // DEV
+shpvoid ShowPositionGizmo(std::string positionName); // DEV
 shpvoid HidePositionGizmo(std::string positionName); // DEV
+
+shpvoid ShowAmbientMapGizmo(); // DEV
+shpvoid HideAmbientMapGizmo(); // DEV
+
+shpvoid ShowWalkerBoundaryGizmo(); // DEV
 shpvoid HideWalkerBoundaryGizmo(); // DEV
 
 shpvoid SetSceneViewport(int xPercent, int yPercent, int widthPercent, int heightPercent); // DEV
 
-shpvoid ShowAmbientMapGizmo(); // DEV
-shpvoid ShowCameraAngleGizmo(std::string cameraName); // DEV
-shpvoid ShowConstruction(); // DEV
-shpvoid ShowPositionGizmo(); // DEV
-shpvoid ShowWalkerBoundaryGizmo(); // DEV
-
-shpvoid TextInpsectCameraGizmo(std::string cameraName); // DEV
+shpvoid TextInspectCameraGizmo(std::string cameraName); // DEV
 shpvoid TextInspectCameraGizmoX(std::string cameraName, int xPercent,
                                 int yPercent, int fontSize); // DEV
-shpvoid TextInpsectPositionGizmo(std::string positionName); // DEV
+
+shpvoid TextInspectPositionGizmo(std::string positionName); // DEV
 shpvoid TextInspectPositionGizmoX(std::string positionName, int xPercent,
                                 int yPercent, int fontSize); // DEV
 
@@ -372,12 +373,28 @@ shpvoid ViewportInspectCameraGizmoX(std::string cameraName, int xPercent,
 
 // DEBUGGING (ALL DEV)
 shpvoid AddTemplate(std::string templateText, std::string expandedText, int removeTemplate);
+shpvoid RemoveTemplate(std::string templateText);
+
 shpvoid Alias(std::string alias, std::string sheepCommand);
+shpvoid Unalias(std::string alias);
+
 shpvoid BindDebugKey(std::string keyName, std::string sheepCommand);
+shpvoid UnbindDebugKey(std::string keyName);
+
+shpvoid OpenConsole();
+shpvoid CloseConsole();
+shpvoid ToggleConsole();
+
+shpvoid SetConsole(std::string command);
+shpvoid InsertConsole(std::string command);
 shpvoid ClearConsole();
 shpvoid ClearConsoleBuffer();
+
+int GetDebugFlag(std::string flagName);
+shpvoid SetDebugFlag(std::string flagName);
 shpvoid ClearDebugFlag(std::string flagName);
-shpvoid CloseConsole();
+shpvoid ToggleDebugFlag(std::string flagName);
+
 shpvoid DumpDebugFlags();
 shpvoid DumpFile(std::string filename);
 shpvoid DumpLockedObjects();
@@ -385,35 +402,32 @@ shpvoid DumpMemoryUsage();
 shpvoid DumpPathFileMap();
 shpvoid DumpUsedPaths();
 shpvoid DumpUsedFiles();
-int GetDebugFlag(std::string flagName);
-float GetTimeMultiplier();
-shpvoid InsertConsole(std::string command);
-shpvoid OpenConsole();
-shpvoid RemoveTemplate(std::string templateText);
+
 shpvoid ReportMemoryUsage();
 shpvoid ReportSurfaceMemoryUsage();
-shpvoid SetConsole(std::string command);
-shpvoid SetDebugFlag(std::string flagName);
+
+float GetTimeMultiplier();
 shpvoid SetTimeMultiplier(float multiplier);
-shpvoid ToggleConsole();
-shpvoid ToggleDebugFlag(std::string flagName);
-shpvoid Unalias(std::string alias);
-shpvoid UnbindDebugKey(std::string keyName);
 
 // ENGINE
 shpvoid Call(std::string functionName); // WAIT
 shpvoid CallDefaultSheep(std::string sheepFileName); // WAIT
+shpvoid CallSheep(std::string sheepFileName, std::string functionName); // WAIT
+
 shpvoid CallGlobal(std::string functionName); // WAIT
 shpvoid CallGlobalSheep(std::string sheepFileName, std::string functionName); // WAIT
 
 shpvoid CallIndexedSheep(std::string sheepFileName, int sheepIndex, std::string functionName); // DEV, WAIT
 
-shpvoid CallSheep(std::string sheepFileName, std::string functionName); // WAIT
-
+shpvoid EnableCinematics(); // DEV
 shpvoid DisableCinematics(); // DEV
+
+shpvoid EnableIncrementalRendering(); // DEV
 shpvoid DisableIncrementalRendering(); // DEV
-shpvoid DisableCurrentSheepCaching(); // DEV
+
+shpvoid EnableSheepCaching(); // DEV
 shpvoid DisableSheepCaching(); // DEV
+shpvoid DisableCurrentSheepCaching(); // DEV
 
 shpvoid DumpActiveSheepObjects(); // DEV
 shpvoid DumpActiveSheepThreads(); // DEV
@@ -421,29 +435,25 @@ shpvoid DumpCommands(); // DEV
 shpvoid DumpRawSheep(std::string sheepName); // DEV
 shpvoid DumpSheepEngine(); // DEV
 
-shpvoid EnableCinematics(); // DEV
-shpvoid EnableIncrementalRendering(); // DEV
-shpvoid EnableSheepCaching(); // DEV
-
-shpvoid ExecCommand(std::string sheepCommand); // DEV
+shpvoid ExecCommand(std::string sheepCommand); // DEV, WAIT
 shpvoid FindCommand(std::string commandGuess); // DEV
+shpvoid HelpCommand(std::string commandName); // DEV
 
 std::string GetCurrentSheepFunction();
 std::string GetCurrentSheepName();
 
-float GetGamma(); // DEV
-shpvoid SetGamma(float gamma); // DEV
-
-shpvoid HelpCommand(std::string commandName); // DEV
+shpvoid SetGlobalSheep();
+shpvoid SetTopSheep();
 
 shpvoid NukeAllSheep(); // DEV
 shpvoid NukeSheep(std::string sheepName); // DEV
 
+float GetGamma(); // DEV
+shpvoid SetGamma(float gamma); // DEV
+
 shpvoid SaveSprite(std::string spriteName, std::string fileName); // DEV
 shpvoid SaveTexture(std::string textureName, std::string fileName); // DEV
 shpvoid SaveTextureX(std::string textureName, int surfaceIndex, std::string fileName); // DEV
-
-shpvoid SetGlobalSheep();
 
 shpvoid SetRenderFlat(); // DEV
 shpvoid SetRenderFull(); // DEV
@@ -460,8 +470,6 @@ shpvoid SetSurfaceNormal(); // DEV
 
 shpvoid SetTimerMs(int milliseconds); // WAIT
 shpvoid SetTimerSeconds(float seconds); // WAIT
-
-shpvoid SetTopSheep();
 
 shpvoid ThrowException(); // DEV
 
@@ -489,12 +497,12 @@ shpvoid CommitCaseLogic(); // DEV
 shpvoid DumpCaseCode(); // DEV
 shpvoid ResetCaseLogic(); // DEV
 
-shpvoid ClearFlag(std::string flagName);
-shpvoid DumpFlags(); // DEV
 int GetFlag(std::string flagName);
 int GetFlagInt(int flagEnum);
 shpvoid SetFlag(std::string flagName);
+shpvoid ClearFlag(std::string flagName);
 
+shpvoid DumpFlags(); // DEV
 shpvoid DumpNouns(); // DEV
 
 int GetChatCount(std::string noun);
@@ -534,7 +542,7 @@ shpvoid SetGameTimer(std::string noun, std::string verb, int milliseconds);
 shpvoid DrawFilledRect(int left, int top, int right, int bottom,
                        int red, int green, int blue); // DEV
 
-shpvoid FollowOnDrivingMap(int follwState); // WAIT
+shpvoid FollowOnDrivingMap(int followState); // WAIT
 
 float GetRandomFloat(float lower, float upper);
 int GetRandomInt(int lower, int upper);
@@ -546,10 +554,12 @@ shpvoid SetPamphletPage(int page);
 
 // INSETS
 shpvoid DumpInsetNames(); // DEV
-shpvoid HideInset();
-shpvoid HidePlate(std::string plateName);
+
 shpvoid ShowInset(std::string insetName);
+shpvoid HideInset();
+
 shpvoid ShowPlate(std::string plateName);
+shpvoid HidePlate(std::string plateName);
 
 // INVENTORY
 shpvoid CombineInvItems(std::string firstItemName, std::string secondItemName,
@@ -563,8 +573,8 @@ shpvoid EgoTakeInvItem(std::string itemName);
 shpvoid DumpEgoActiveInvItem(); // DEV
 shpvoid SetEgoActiveInvItem(std::string itemName);
 
-shpvoid HideInventory();
 shpvoid ShowInventory();
+shpvoid HideInventory();
 
 shpvoid InventoryInspect(std::string itemName);
 shpvoid InventoryUninspect();
@@ -572,11 +582,11 @@ shpvoid InventoryUninspect();
 shpvoid SetInvItemStatus(std::string itemName, std::string status);
 
 // MODELS
-shpvoid ClearModelShadowTexture(std::string modelName);
 shpvoid SetModelShadowTexture(std::string modelName, std::string textureName);
+shpvoid ClearModelShadowTexture(std::string modelName);
 
-shpvoid ClearGasProp(std::string modelName);
 shpvoid SetPropGas(std::string modelName, std::string gasName);
+shpvoid ClearPropGas(std::string modelName);
 
 int DoesModelExist(std::string modelName);
 int DoesSceneModelExist(std::string modelName);
@@ -585,16 +595,17 @@ shpvoid DumpModel(std::string modelName); // DEV
 shpvoid DumpModelNames(); // DEV
 shpvoid DumpSceneModelNames(); // DEV
 
+shpvoid ShowModel(std::string modelName);
 shpvoid HideModel(std::string modelName);
+
+shpvoid ShowModelGroup(std::string groupName);
 shpvoid HideModelGroup(std::string groupName);
+
+shpvoid ShowSceneModel(std::string modelName);
 shpvoid HideSceneModel(std::string modelName);
 
 int IsModelVisible(std::string modelName);
 int IsSceneModelVisible(std::string modelName);
-
-shpvoid ShowModel(std::string modelName);
-shpvoid ShowModelGroup(std::string groupName);
-shpvoid ShowSceneModel(std::string modelName);
 
 shpvoid StartPropFidget(std::string modelName);
 shpvoid StopPropFidget(std::string modelName);
@@ -630,24 +641,26 @@ shpvoid ReEnter(); // DEV, WAIT
 
 shpvoid SetLocation(std::string location); // WAIT
 shpvoid SetLocationTime(std::string location, std::string time); // WAIT
-shpvoid SetScene(std::string sceneName); // WAIT
 shpvoid SetTime(std::string time); // WAIT
+
+shpvoid SetScene(std::string sceneName); // WAIT
 
 shpvoid Warp(std::string locationAndTime); // WAIT
 
 // SOUND
-shpvoid DisableSound(std::string soundType); // DEV
 shpvoid EnableSound(std::string soundType); // DEV
+shpvoid DisableSound(std::string soundType); // DEV
+
 shpvoid GetVolume(std::string soundType); // DEV
 shpvoid SetVolume(std::string soundType); // DEV
 
 shpvoid PlaySound(std::string soundName); // WAIT
-shpvoid PlaySoundTrack(std::string soundtrackName); // WAIT
-
-shpvoid StopAllSounds();
-shpvoid StopAllSoundTracks();
 shpvoid StopSound(std::string soundName);
+shpvoid StopAllSounds();
+
+shpvoid PlaySoundTrack(std::string soundtrackName); // WAIT
 shpvoid StopSoundTrack(std::string soundtrackName); // WAIT
+shpvoid StopAllSoundTracks();
 
 // TRACING (ALL DEV)
 shpvoid PrintFloat(float value);
@@ -655,6 +668,7 @@ shpvoid PrintFloatX(std::string category, float value);
 
 shpvoid PrintInt(int value);
 shpvoid PrintIntX(std::string category, int value);
+
 shpvoid PrintIntHex(int value);
 shpvoid PrintIntHexX(std::string category, int value);
 
