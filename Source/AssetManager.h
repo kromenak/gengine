@@ -69,6 +69,7 @@ public:
 	Font* LoadFont(std::string name);
 	
     Shader* LoadShader(std::string name);
+	Shader* LoadShader(std::string vertName, std::string fragName);
 	
 	char* LoadRaw(std::string name, unsigned int& outBufferSize);
     

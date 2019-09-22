@@ -192,11 +192,41 @@ Shader* AssetManager::LoadShader(std::string name)
     std::string fragFilePath = GetAssetPath(name + ".frag");
     
     Shader* shader = new Shader(vertFilePath.c_str(), fragFilePath.c_str());
-    if(shader->IsGood())
-    {
-        mLoadedShaders[name] = shader;
-    }
+	
+	// If shader couldn't be found, or failed to load for some reason, return null.
+	if(shader == nullptr || !shader->IsGood())
+	{
+		return nullptr;
+	}
+	
+	// Cache and return.
+	mLoadedShaders[name] = shader;
     return shader;
+}
+
+Shader* AssetManager::LoadShader(std::string vertName, std::string fragName)
+{
+	std::string key = vertName + fragName;
+	auto it = mLoadedShaders.find(key);
+	if(it != mLoadedShaders.end())
+	{
+		return it->second;
+	}
+	
+	std::string vertFilePath = GetAssetPath(vertName + ".vert");
+	std::string fragFilePath = GetAssetPath(fragName + ".frag");
+	
+	Shader* shader = new Shader(vertFilePath.c_str(), fragFilePath.c_str());
+	
+	// If shader couldn't be found, or failed to load for some reason, return null.
+	if(shader == nullptr || !shader->IsGood())
+	{
+		return nullptr;
+	}
+	
+	// Cache and return.
+	mLoadedShaders[key] = shader;
+	return shader;
 }
 
 char* AssetManager::LoadRaw(std::string name, unsigned int& outBufferSize)
