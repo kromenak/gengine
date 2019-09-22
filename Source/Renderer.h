@@ -60,9 +60,6 @@ private:
     
     // Our camera in the scene - we currently only support one.
     Camera* mCamera = nullptr;
-	
-	// All loaded shaders.
-	std::vector<Shader*> mShaders;
     
     // List of mesh components to render.
     std::vector<MeshRenderer*> mMeshRenderers;
@@ -75,6 +72,4 @@ private:
     
     // Skybox shader.
     Shader* mSkyboxShader = nullptr;
-	
-	Shader* LoadShader(std::string name);
 };

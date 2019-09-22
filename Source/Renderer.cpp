@@ -93,6 +93,22 @@ float full_quad_uvs[] = {
 
 Mesh* fullQuad = nullptr;
 
+float ui_quad_vertices[] = {
+	0.0f,  1.0f, 0.0f, // upper-left
+	1.0f,  1.0f, 0.0f, // upper-right
+	1.0f,  0.0f, 0.0f, // lower-right
+	0.0f,  0.0f, 0.0f, // lower-left
+};
+
+float ui_quad_uvs[] = {
+	0.0f, 0.0f,		// upper-left
+	1.0f, 0.0f,		// upper-right
+	1.0f, 1.0f,		// lower-right
+	0.0f, 1.0f		// lower-left
+};
+
+Mesh* uiQuad = nullptr;
+
 bool Renderer::Initialize()
 {
     // Init video subsystem.
@@ -156,12 +172,12 @@ bool Renderer::Initialize()
 	Texture::Init();
 	
     // Load default shader.
-	mDefaultShader = LoadShader("3D-Diffuse-Tex");
+	mDefaultShader = Services::GetAssets()->LoadShader("3D-Diffuse-Tex");
 	Material::sDefaultShader = mDefaultShader;
 	if(mDefaultShader == nullptr) { return false; }
 	
     // Compile skybox shader.
-    mSkyboxShader = LoadShader("3D-Skybox");
+    mSkyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
     if(mSkyboxShader == nullptr) { return false; }
 	
 	// Create line mesh, which is helpful for debugging.
@@ -195,7 +211,14 @@ bool Renderer::Initialize()
 	fullQuadSubmesh->SetPositions(full_quad_vertices);
 	fullQuadSubmesh->SetUV1(full_quad_uvs);
 	fullQuadSubmesh->SetIndexes(quad_indices, 6);
-    
+	
+	uiQuad = new Mesh(4, 5 * sizeof(float), MeshUsage::Static);
+	Submesh* uiQuadSubmesh = uiQuad->GetSubmesh(0);
+	uiQuadSubmesh->SetRenderMode(RenderMode::Triangles);
+	uiQuadSubmesh->SetPositions(ui_quad_vertices);
+	uiQuadSubmesh->SetUV1(ui_quad_uvs);
+	uiQuadSubmesh->SetIndexes(quad_indices, 6);
+	
     // Init succeeded!
     return true;
 }
@@ -387,23 +410,4 @@ void Renderer::RemoveMeshRenderer(MeshRenderer* mr)
     {
         mMeshRenderers.erase(it);
     }
-}
-
-Shader* Renderer::LoadShader(std::string name)
-{
-	// Load shader asset from AssetManager.
-	// TODO: Support for loading from text directly?
-	Shader* shader = Services::GetAssets()->LoadShader(name);
-	
-	// If shader couldn't be found, or failed to load for some reason, return null.
-	if(shader == nullptr || !shader->IsGood())
-	{
-		return nullptr;
-	}
-	
-	// Add to shader vector.
-	mShaders.push_back(shader);
-	
-	// Success!
-	return shader;
 }
