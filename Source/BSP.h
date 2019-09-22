@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "AtomicTypes.h"
+#include "Material.h"
 #include "Mesh.h"
 #include "Plane.h"
 #include "Ray.h"
@@ -157,6 +158,14 @@ private:
     // Mesh for rendering BSP.
     Mesh* mMesh = nullptr;
 	
+	// Material for rendering BSP.
+	// We rely on a few assumptions right now - no shader is set, so we assume default shader (3D-Tex-Diffuse) is used.
+	// We also rely on textures being activated separately from the material.
+	Material mMaterial;
+	
+	// For translucent rendering, we can create a polygon chain when doing opaque rendering.
+	// We then iterate the chain afterwards to properly render translucent stuff.
+	// Saw this in id's Quake/Doom code and thought it was pretty cool!
 	BSPPolygon* mAlphaPolygons = nullptr;
     
     //TODO: bounding spheres?

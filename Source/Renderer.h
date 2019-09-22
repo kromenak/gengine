@@ -11,6 +11,7 @@
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
 
+#include "Material.h"
 #include "Matrix4.h"
 #include "Vector2.h"
 
@@ -37,7 +38,7 @@ public:
     
     void SetBSP(BSP* bsp) { mBSP = bsp; }
     
-    void SetSkybox(Skybox* skybox) { mSkybox = skybox; }
+	void SetSkybox(Skybox* skybox);
     
     int GetWindowWidth() { return mScreenWidth; }
 	int GetWindowHeight() { return mScreenHeight; }
@@ -55,9 +56,6 @@ private:
     // Context handle for rendering in OpenGL.
     SDL_GLContext mContext;
     
-    // Default shader.
-    Shader* mDefaultShader = nullptr;
-    
     // Our camera in the scene - we currently only support one.
     Camera* mCamera = nullptr;
     
@@ -68,8 +66,6 @@ private:
     BSP* mBSP = nullptr;
     
     // A skybox to render.
+	Material mSkyboxMaterial;
     Skybox* mSkybox = nullptr;
-    
-    // Skybox shader.
-    Shader* mSkyboxShader = nullptr;
 };

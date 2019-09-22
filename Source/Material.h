@@ -8,17 +8,21 @@
 //
 #pragma once
 #include "Color32.h"
+#include "Matrix4.h"
 
 class Shader;
 class Texture;
-class Matrix4;
 
 class Material
 {
 public:
     static Shader* sDefaultShader;
+	static void SetViewMatrix(const Matrix4& viewMatrix);
+	static void SetProjMatrix(const Matrix4& projMatrix);
+	static void UseAlphaTest(bool use);
 	
     Material();
+	Material(Shader* shader);
     
     bool operator==(const Material& other) const;
 	
@@ -37,6 +41,10 @@ public:
 	bool IsTranslucent();
 	
 private:
+	static Matrix4 sCurrentViewMatrix;
+	static Matrix4 sCurrentProjMatrix;
+	static float sAlphaTestValue;
+	
     // Shader to use.
     //TODO: Could have array of shaders to represent "subshaders" for different hardware.
     Shader* mShader = nullptr;

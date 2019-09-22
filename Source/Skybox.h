@@ -8,8 +8,9 @@
 #pragma once
 #include <GL/glew.h>
 
-class Texture;
+class Material;
 class Mesh;
+class Texture;
 
 class Skybox
 {
@@ -27,6 +28,8 @@ public:
 	void SetDownTexture(Texture* texture);
     
     void SetAzimuth(float azimuth) { mAzimuth = azimuth; }
+	
+	void SetMaterial(Material& material) { mMaterial = &material; }
     
 private:
     // Textures for various sides of the skybox.
@@ -45,6 +48,9 @@ private:
     
     // An ID for the texture object generated in OpenGL.
     GLuint mCubemapTextureId = GL_NONE;
+	
+	// Material used for rendering.
+	Material* mMaterial = nullptr;
 	
 	void SetDefaultTexture(Texture* texture);
 };

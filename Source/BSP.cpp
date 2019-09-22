@@ -25,6 +25,12 @@ void BSP::Render(Vector3 cameraPosition)
 
 void BSP::RenderOpaque(Vector3 cameraPosition)
 {
+	// Activate the material one time to ensure shader is activated and uniforms are set.
+	// But we do a bit of a hack by activating/deactivating the texture separately when rendering each triangle.
+	// I don't really want to make a separate material for each texture in the bsp...seems like it'd just slow things down.
+	mMaterial.Activate();
+	mMaterial.SetWorldTransformMatrix(Matrix4::Identity);
+	
 	mAlphaPolygons = nullptr;
 	RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Opaque);
 }
@@ -359,10 +365,10 @@ void BSP::RenderPolygon(BSPPolygon* polygon, RenderType renderType)
         }
         else
         {
-            Texture::Deactivate();
+			Texture::Deactivate();
         }
     }
-    
+	
     // Draw the polygon.
     mMesh->Render(0, polygon->vertexIndex, polygon->vertexCount);
 }

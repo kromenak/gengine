@@ -172,13 +172,14 @@ bool Renderer::Initialize()
 	Texture::Init();
 	
     // Load default shader.
-	mDefaultShader = Services::GetAssets()->LoadShader("3D-Diffuse-Tex");
-	Material::sDefaultShader = mDefaultShader;
-	if(mDefaultShader == nullptr) { return false; }
+	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Diffuse-Tex");
+	if(defaultShader == nullptr) { return false; }
+	Material::sDefaultShader = defaultShader;
 	
-    // Compile skybox shader.
-    mSkyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
-    if(mSkyboxShader == nullptr) { return false; }
+    // Load skybox shader and create material.
+    Shader* skyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
+    if(skyboxShader == nullptr) { return false; }
+	mSkyboxMaterial.SetShader(skyboxShader);
 	
 	// Create line mesh, which is helpful for debugging.
 	line = new Mesh(2, 7 * sizeof(float), MeshUsage::Static);
@@ -225,9 +226,6 @@ bool Renderer::Initialize()
 
 void Renderer::Shutdown()
 {
-    delete mDefaultShader;
-    delete mSkyboxShader;
-    
     SDL_GL_DeleteContext(mContext);
     SDL_DestroyWindow(mWindow);
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
@@ -235,38 +233,11 @@ void Renderer::Shutdown()
 
 void Renderer::Render()
 {
-	// Enable opaque rendering (no blend, write to depth mask, test depth mask).
+	// Enable opaque rendering (no blend, write to & test depth buffer).
 	// Do this BEFORE clear to avoid some glitchy graphics.
 	glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
 	glDepthMask(GL_TRUE); // start writing to depth buffer
 	glEnable(GL_DEPTH_TEST); // do depth comparisons and update the depth buffer
-	
-	// RENDER TEXTURE TEST
-	/*
-	mFaceRenderTexture->Activate();
-	mFaceShader->Activate();
-	
-	mFaceShader->SetUniformInt("uFaceTexture", 0);
-	mFaceShader->SetUniformInt("uMouthTexture", 1);
-	
-	glActiveTexture(GL_TEXTURE0);
-	Texture* faceTexture = Services::GetAssets()->LoadTexture("GAB_FACE");
-	faceTexture->Activate();
-	
-	glActiveTexture(GL_TEXTURE1);
-	Texture* mouthTexture = Services::GetAssets()->LoadTexture("GAB_MOUTH02");
-	mouthTexture->Activate();
-	
-	fullQuad->Render();
-	
-	// Reset active texture to default.
-	glActiveTexture(GL_TEXTURE0);
-	
-	// Unbind framebuffer object - all future drawing goes to the screen.
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, mScreenWidth, mScreenHeight);
-	*/
-	// END RENDER TEXTURE TEST
 	
 	// Clear color and depth buffers from last frame.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -278,9 +249,11 @@ void Renderer::Render()
 		return;
 	}
 	
-	// We'll need the projection matrix for the camera a few times below.
+	// We'll need the projection and view matrix for the camera a few times below.
 	Matrix4 projectionMatrix = mCamera->GetProjectionMatrix();
+	Matrix4 viewMatrix = mCamera->GetLookAtMatrix();
 	
+	// STEP 1: SKYBOX RENDERING
 	// Draw the skybox first, which is just a little cube around the camera.
 	// Don't write to depth mask, or else you can ONLY see skybox (b/c again, little cube).
 	glDepthMask(GL_FALSE); // stops writing to depth buffer
@@ -288,35 +261,21 @@ void Renderer::Render()
 	{
 		// To get the "infinite distance" skybox effect, we need to use a look-at
 		// matrix that doesn't take the camera's position into account.
-		Matrix4 skyboxViewProjMatrix = projectionMatrix * mCamera->GetLookAtMatrixNoTranslate();
-		
-		mSkyboxShader->Activate();
-		mSkyboxShader->SetUniformMatrix4("uViewProj", skyboxViewProjMatrix);
-		
+		Material::SetViewMatrix(mCamera->GetLookAtMatrixNoTranslate());
+		Material::SetProjMatrix(projectionMatrix);
 		mSkybox->Render();
 	}
 	glDepthMask(GL_TRUE); // start writing to depth buffer
-	 
-	// Calculate normal view/proj matrix, which is used for all non-skybox world rendering.
-	Matrix4 viewMatrix = mCamera->GetLookAtMatrix();
-	Matrix4 viewProjMatrix = projectionMatrix * viewMatrix;
 	
-	// Activate, for now, our one and only shader.
-	mDefaultShader->Activate();
+	// STEP 2: OPAQUE WORLD RENDERING
+	// STEP 2A: OPAQUE BSP RENDERING
+	// Set the view & projection matrices for normal 3D camera-oriented rendering.
+	Material::SetViewMatrix(viewMatrix);
+	Material::SetProjMatrix(projectionMatrix);
 	
-	// Set the combined view/projection matrix based on the assigned camera.
-	//mDefaultShader->SetUniformMatrix4("uViewMatrix", viewMatrix);
-	//mDefaultShader->SetUniformMatrix4("uProjectionMatrix", projectionMatrix);
-	mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
-	
-	// Default to world origin for now.
-	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
-	
-	// Enable alpha test.
-	mDefaultShader->SetUniformFloat("uAlphaTest", 0.1f);
-	
-	// Render an axis at the world origin, for debugging.
-	Debug::DrawAxes(Vector3::Zero);
+	// If BSP was using a material, we could just use Material function here.
+	// But we must also set on default shader for BSP...for now.
+	Material::UseAlphaTest(true);
 	
 	// Render opaque BSP (front-to-back).
 	if(mBSP != nullptr)
@@ -324,6 +283,7 @@ void Renderer::Render()
 		mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition());
 	}
 	
+	// STEP 2B: OPAQUE MESH RENDERING
 	// Render opaque meshes (no particular order).
 	// Sorting is probably not worthwhile b/c BSP likely mostly filled the z-buffer at this point.
 	// And with the z-buffer, we can render opaque meshed correctly regardless of order.
@@ -332,68 +292,53 @@ void Renderer::Render()
 		meshRenderer->RenderOpaque();
 	}
 	
-	// Reset shader world transform uniform after mesh rendering.
-	mDefaultShader->SetUniformMatrix4("uWorldTransform", Matrix4::Identity);
-	
 	// Turn off alpha test.
-	mDefaultShader->SetUniformFloat("uAlphaTest", 0.0f);
+	Material::UseAlphaTest(false);
 	
-	// Next, translucent rendering.
+	// STEP 3: TRANSLUCENT WORLD RENDERING
+	// So far, GK3 doesn't seem to have any translucent geometry AT ALL!
+	// Everything is either opaque or alpha test.
+	// If we DO need translucent rendering, it probably can only be meshes or BSP, but not both.
+	
+	// STEP 4: (TRANSLUCENT) UI RENDERING
 	glEnable(GL_BLEND); // do alpha blending
 	glDepthMask(GL_FALSE); // don't write to the depth buffer
 	
-	/*
-	// CK: There is currently no "translucent" 3D world rendering in GK3. It is all opaque or alpha test!
-	// Translucent rendering is used for the UI though.
-	
-	// Render translucent BSP (front-to-back).
-	if(mBSP != nullptr)
-	{
-		mBSP->RenderTranslucent(mCamera->GetOwner()->GetPosition());
-	}
-	
-	// TODO: Maybe need to do some sort of depth sorting for translucent rendering?
-	std::sort(mMeshRenderers.begin(), mMeshRenderers.end(), [this] (const MeshRenderer* a, const MeshRenderer* b) -> bool {
-		Vector3* posA = (Vector3*)a->GetMeshes()[0]->GetSubmesh(0)->GetPositions();
-		Vector3* posB = (Vector3*)b->GetMeshes()[0]->GetSubmesh(0)->GetPositions();
-		float distASq = (this->mCamera->GetOwner()->GetPosition() - a->GetOwner()->GetPosition()).GetLengthSq();
-		float distBSq = (this->mCamera->GetOwner()->GetPosition() - b->GetOwner()->GetPosition()).GetLengthSq();
-		return distASq > distBSq;
-	});
-	 
-	// Render translucent meshes (no particular order).
-	// PROBLEM: these sometimes overlap themselves AND alpha geometry in BSP.
-	// To fix this, I can only see merging with BSP contents AND sorting as an option...
-	for(auto& meshRenderer : mMeshRenderers)
-	{
-		meshRenderer->RenderTranslucent();
-	}
-	*/
-	
-	// UI is translucent rendering, BUT the view/proj matrix is different.
-	mDefaultShader->SetUniformMatrix4("uViewProj", Matrix4::MakeSimpleScreenOrtho(GetWindowWidth(), GetWindowHeight()));
+	// UI uses a view/proj setup for now - world space for UI maps to pixel size of screen.
+	// Bottom-left corner of screen is origin, +x is right, +y is up.
+	Material::SetViewMatrix(Matrix4::Identity);
+	Material::SetProjMatrix(Matrix4::MakeSimpleScreenOrtho(GetWindowWidth(), GetWindowHeight()));
 	
 	// Don't do depth test because UI draws above everything.
+	// This means UI is basically painter's algorithm though!
 	glDisable(GL_DEPTH_TEST);
 	
 	// Render UI elements.
+	// Any renderable UI element is contained within a Canvas.
 	const std::vector<UICanvas*>& canvases = UICanvas::GetCanvases();
 	for(auto& canvas : canvases)
 	{
 		canvas->Render();
 	}
 	
+	// STEP 5: OPAQUE DEBUG RENDERING
 	// Switch back to opaque rendering for debug rendering.
 	// Debug rendering happens after all else, so any previous function can ask for debug draws successfully.
 	// Also, don't bother with depth write or depth test so debug lines aren't obfuscated!
 	glDisable(GL_BLEND); // do not perform alpha blending
 	
 	// Gotta reset view/proj again...
-	mDefaultShader->SetUniformMatrix4("uViewProj", viewProjMatrix);
+	Material::SetViewMatrix(viewMatrix);
+	Material::SetProjMatrix(projectionMatrix);
+	
+	// Render an axis at the world origin, for debugging.
+	Debug::DrawAxes(Vector3::Zero);
 	
 	// Render debug elements.
+	// Any debug commands from earlier are queued internally, and only drawn when this is called!
 	Debug::Render();
 	
+	// STEP 6: ALL DONE! PUT THE ART ON DISPLAY!
 	// Present to screen.
 	SDL_GL_SwapWindow(mWindow);
 }
@@ -410,4 +355,13 @@ void Renderer::RemoveMeshRenderer(MeshRenderer* mr)
     {
         mMeshRenderers.erase(it);
     }
+}
+
+void Renderer::SetSkybox(Skybox* skybox)
+{
+	mSkybox = skybox;
+	if(mSkybox != nullptr)
+	{
+		mSkybox->SetMaterial(mSkyboxMaterial);
+	}
 }

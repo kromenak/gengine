@@ -31,8 +31,6 @@ Scene::Scene(std::string name, std::string timeCode) :
 	mSpecificName(name + timeCode),
 	mSceneData(name, timeCode)
 {
-	//std::cout << mSpecificName << std::endl;
-	
     // Set BSP to be rendered.
     Services::GetRenderer()->SetBSP(mSceneData.GetBSP());
     

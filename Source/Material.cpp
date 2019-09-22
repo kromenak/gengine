@@ -11,20 +11,53 @@
 // This is set to a default shader during Renderer init.
 Shader* Material::sDefaultShader = nullptr;
 
+Matrix4 Material::sCurrentViewMatrix;
+Matrix4 Material::sCurrentProjMatrix;
+
+float Material::sAlphaTestValue = 0.0f;
+
+void Material::SetViewMatrix(const Matrix4& viewMatrix)
+{
+	sCurrentViewMatrix = viewMatrix;
+}
+
+void Material::SetProjMatrix(const Matrix4& projMatrix)
+{
+	sCurrentProjMatrix = projMatrix;
+}
+
+void Material::UseAlphaTest(bool use)
+{
+	sAlphaTestValue = use ? 0.1f : 0.0f;
+}
+
 Material::Material() : mShader(sDefaultShader)
 {
     
 }
 
+Material::Material(Shader* shader) : mShader(shader)
+{
+	
+}
+
 bool Material::operator==(const Material& other) const
 {
-    return mShader == other.mShader && mDiffuseTexture == other.mDiffuseTexture;
+    return mShader == other.mShader
+	&& mDiffuseTexture == other.mDiffuseTexture
+	&& mColor == other.mColor;
 }
 
 void Material::Activate()
 {
 	// Activate the shader.
     mShader->Activate();
+	
+	// Set view/proj matrix.
+	mShader->SetUniformMatrix4("uViewProj", sCurrentProjMatrix * sCurrentViewMatrix);
+	
+	// Set alpha test value.
+	mShader->SetUniformFloat("uAlphaTest", sAlphaTestValue);
 	
 	// Set the uniform color for the shader.
 	SetActiveColor(mColor);
