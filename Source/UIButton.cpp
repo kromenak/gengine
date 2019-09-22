@@ -13,7 +13,7 @@
 #include "RectTransform.h"
 #include "Texture.h"
 
-extern Mesh* quad;
+extern Mesh* uiQuad;
 
 TYPE_DEF_CHILD(UIWidget, UIButton);
 
@@ -61,30 +61,22 @@ void UIButton::Render()
 	}
 	
 	// Make sure widget size matches texture size.
-	mRectTransform->SetSize(texture->GetWidth(), texture->GetHeight());
+	mRectTransform->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
 	
 	// Set texture.
 	mMaterial.SetDiffuseTexture(texture);
 	
 	// Set to correct location on screen.
 	mMaterial.SetWorldTransformMatrix(GetWorldTransformWithSizeForRendering());
-	
-	// Debug draw blue line from min/max, just to visualize bounds and show debug draw works for UI.
-	/*
-	Rect screenRect = mRectTransform->GetScreenRect();
-	Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
-	Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
-	Debug::DrawLine(min, max, Color32::Blue);
-	*/
 	 
 	// Render.
 	mMaterial.Activate();
-	quad->Render();
+	uiQuad->Render();
 }
 
 void UIButton::Press()
 {
-	if(mPressCallback)
+	if(mPressCallback && mEnabled)
 	{
 		mPressCallback();
 	}

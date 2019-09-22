@@ -33,15 +33,18 @@ void UILabel::Render()
 	
 	// Activate material.
 	mMaterial.SetWorldTransformMatrix(mRectTransform->GetLocalToWorldMatrix());
+	mMaterial.SetShader(mFont->GetShader());
 	mMaterial.Activate();
 	
 	// Render the mesh!
 	mMesh->Render();
 	
+	/*
 	Rect screenRect = mRectTransform->GetScreenRect();
 	Vector3 from = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
 	Vector3 to = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
 	Debug::DrawLine(from, to, Color32::Blue);
+	*/
 }
 
 void UILabel::SetText(std::string text)

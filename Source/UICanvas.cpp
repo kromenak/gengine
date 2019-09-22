@@ -25,9 +25,12 @@ UICanvas::~UICanvas()
 
 void UICanvas::Render()
 {
-	for(auto& widget : mWidgets)
+	if(mEnabled)
 	{
-		widget->Render();
+		for(auto& widget : mWidgets)
+		{
+			widget->Render();
+		}
 	}
 }
 

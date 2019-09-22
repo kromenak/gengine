@@ -27,5 +27,9 @@ UIWidget::~UIWidget()
 
 Matrix4 UIWidget::GetWorldTransformWithSizeForRendering()
 {
-	return mRectTransform->GetLocalToWorldMatrix() * Matrix4::MakeScale(mRectTransform->GetSize());
+	// In addition to normal local to world matrix, first offset by local rect offset to get rect in right spot.
+	// And afterwards, apply size to deal with rect that isn't perfect square.
+	Matrix4 localRectOffsetMatrix = mRectTransform->GetLocalRectOffset();
+	Matrix4 result = localRectOffsetMatrix * mRectTransform->GetLocalToWorldMatrix();
+	return result * Matrix4::MakeScale(mRectTransform->GetSize());
 }
