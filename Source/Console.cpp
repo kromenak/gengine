@@ -84,14 +84,14 @@ Console::Console(bool mini) : Actor(TransformType::RectTransform)
 		// Scrollback takes up big chunk of space above horizontal rule.
 		scrollbackRT->SetAnchorMin(Vector2(0.0f, 0.2f));
 		scrollbackRT->SetAnchorMax(Vector2(1.0f, 1.0f));
-		scrollbackRT->SetSizeDelta(-2.0f, -2.0f);
+		scrollbackRT->SetSizeDelta(-20.0f, 0.0f);
 		scrollbackRT->SetPivot(0.5f, 0.0f);
 		
 		UILabel* scrollbackText = scrollbackActor->AddComponent<UILabel>();
 		mCanvas->AddWidget(scrollbackText);
 		
 		scrollbackText->SetFont(Services::GetAssets()->LoadFont("F_CONSOLE_DISPLAY"));
-		scrollbackText->SetText("GEngine");
+		scrollbackText->SetText("Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\n");
 	}
 	
 	// Disable canvas so console is hidden by default.

@@ -10,8 +10,7 @@
 #include "Camera.h"
 #include "Font.h"
 #include "Mesh.h"
-
-extern Mesh* quad;
+#include "StringUtil.h"
 
 TYPE_DEF_CHILD(UIWidget, UILabel);
 
@@ -38,13 +37,6 @@ void UILabel::Render()
 	
 	// Render the mesh!
 	mMesh->Render();
-	
-	/*
-	Rect screenRect = mRectTransform->GetScreenRect();
-	Vector3 from = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
-	Vector3 to = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
-	Debug::DrawLine(from, to, Color32::Blue);
-	*/
 }
 
 void UILabel::SetText(std::string text)
@@ -64,6 +56,7 @@ void UILabel::SetFont(Font* font)
 	{
 		mMaterial.SetDiffuseTexture(font->GetTexture());
 	}
+	mNeedMeshRegen = true;
 }
 
 void UILabel::GenerateMesh()
@@ -78,11 +71,31 @@ void UILabel::GenerateMesh()
 		mMesh = nullptr;
 	}
 	
+	// Split text into lines based on newline char.
+	//TODO: May also need to split lines based on overflow settings! How would that work?
+	std::vector<std::string> lines = StringUtil::Split(mText, '\n');
+	
+	// For each line, determine it's width ahead of time for proper alignment calculations.
+	std::vector<int> lineWidths;
+	int glyphCount = 0;
+	for(std::string& line : lines)
+	{
+		int lineWidth = 0;
+		for(int i = 0; i < line.size(); ++i)
+		{
+			Glyph& glyph = mFont->GetGlyph(line[i]);
+			lineWidth += glyph.width;
+			++glyphCount;
+		}
+		lineWidths.push_back(lineWidth);
+	}
+	int lineHeight = mFont->GetGlyphHeight();
+	
 	// If the text size is zero, we don't need to continue.
-	if(mText.size() == 0) { return; }
+	if(glyphCount == 0) { return; }
 	
 	// 4 vertices per character; each vertex has position and UVs.
-	int vertexCount = (int)mText.size() * 4;
+	int vertexCount = (int)glyphCount * 4;
 	int vertexSize = (9 * sizeof(float));
 	
 	// Create mesh of desired size and usage.
@@ -94,7 +107,7 @@ void UILabel::GenerateMesh()
 	int positionSize = vertexCount * 3;
 	int uvSize = vertexCount * 2;
 	int colorSize = vertexCount * 4;
-	int indexSize = (int)mText.size() * 6;
+	int indexSize = (int)glyphCount * 6;
 	
 	float* positions = new float[positionSize];
 	float* uvs = new float[uvSize];
@@ -105,81 +118,120 @@ void UILabel::GenerateMesh()
 	//float desiredHeight = (mFontSizePt / 72.0f) * 96.0f;
 	//float desiredWidth = (desiredPixelHeight / glyph.height) * glyph.width;
 	
-	// Iterate over each char of the text and generate the needed quad per letter.
-	// Each char maps to a glyph from the font, which contains size and UV data.
-	Color32 defaultFontColor = mFont->GetDefaultColor();
-	float xPos = 0.0f;
-	for(int i = 0; i < mText.size(); i++)
+	// Need rect to determine x/y starting pos for each line.
+	Rect rect = mRectTransform->GetRect();
+	
+	// Need color to pass as vertex color for text mesh.
+	Color32 fontColor = mFont->GetDefaultColor();
+	
+	// Iterate each line and draw it.
+	unsigned int charIndex = 0;
+	for(int lIndex = 0; lIndex < lines.size(); ++lIndex)
 	{
-		Glyph& glyph = mFont->GetGlyph(mText[i]);
+		std::string& line = lines[lIndex];
 		
-		float leftX = xPos;
-		float rightX = xPos + glyph.width;
+		float xPos = 0.0f;
+		switch(mHorizontalAlignment)
+		{
+			case HorizontalAlignment::Left:
+				xPos = rect.GetMin().GetX();
+				break;
+			case HorizontalAlignment::Right:
+				xPos = rect.GetMax().GetX() - lineWidths[lIndex];
+				break;
+			//case HorizontalAlignment::Center:
+			//	break;
+		}
 		
-		float topY = glyph.height;
-		float bottomY = 0.0f;
+		float yPos = 0.0f;
+		switch(mVerticalAlignment)
+		{
+			case VerticalAlignment::Bottom:
+				yPos = rect.GetMin().GetY() + (lineHeight * (lines.size() - 1 - lIndex));
+				break;
+			case VerticalAlignment::Top:
+				yPos = rect.GetMax().GetY() - (lineHeight * (lIndex + 1));
+				break;
+			//case VerticalAlignment::Center:
+			//	break;
+		}
 		
-		// Top-Left
-		positions[i * 12] = leftX;
-		positions[i * 12 + 1] = topY;
-		positions[i * 12 + 2] = 0.0f;
-		
-		uvs[i * 8] = glyph.topLeftUvCoord.GetX();
-		uvs[i * 8 + 1] = glyph.topLeftUvCoord.GetY();
-		
-		colors[i * 16] = (float)defaultFontColor.GetR() / 255.0f;
-		colors[i * 16 + 1] = (float)defaultFontColor.GetG() / 255.0f;
-		colors[i * 16 + 2] = (float)defaultFontColor.GetB() / 255.0f;
-		colors[i * 16 + 3] = (float)defaultFontColor.GetA() / 255.0f;
-		
-		// Top-Right
-		positions[i * 12 + 3] = rightX;
-		positions[i * 12 + 4] = topY;
-		positions[i * 12 + 5] = 0.0f;
-		
-		uvs[i * 8 + 2] = glyph.topRightUvCoord.GetX();
-		uvs[i * 8 + 3] = glyph.topRightUvCoord.GetY();
-		
-		colors[i * 16 + 4] = (float)defaultFontColor.GetR() / 255.0f;
-		colors[i * 16 + 5] = (float)defaultFontColor.GetG() / 255.0f;
-		colors[i * 16 + 6] = (float)defaultFontColor.GetB() / 255.0f;
-		colors[i * 16 + 7] = (float)defaultFontColor.GetA() / 255.0f;
-		
-		// Bottom-Left
-		positions[i * 12 + 6] = leftX;
-		positions[i * 12 + 7] = bottomY;
-		positions[i * 12 + 8] = 0.0f;
-		
-		uvs[i * 8 + 4] = glyph.bottomLeftUvCoord.GetX();
-		uvs[i * 8 + 5] = glyph.bottomRightUvCoord.GetY();
-		
-		colors[i * 16 + 8] = (float)defaultFontColor.GetR() / 255.0f;
-		colors[i * 16 + 9] = (float)defaultFontColor.GetG() / 255.0f;
-		colors[i * 16 + 10] = (float)defaultFontColor.GetB() / 255.0f;
-		colors[i * 16 + 11] = (float)defaultFontColor.GetA() / 255.0f;
-		
-		// Bottom-Right
-		positions[i * 12 + 9] = rightX;
-		positions[i * 12 + 10] = bottomY;
-		positions[i * 12 + 11] = 0.0f;
-		
-		uvs[i * 8 + 6] = glyph.bottomRightUvCoord.GetX();
-		uvs[i * 8 + 7] = glyph.bottomRightUvCoord.GetY();
-		
-		colors[i * 16 + 12] = (float)defaultFontColor.GetR() / 255.0f;
-		colors[i * 16 + 13] = (float)defaultFontColor.GetG() / 255.0f;
-		colors[i * 16 + 14] = (float)defaultFontColor.GetB() / 255.0f;
-		colors[i * 16 + 15] = (float)defaultFontColor.GetA() / 255.0f;
-		
-		// Indexes for this quad will be (0, 1, 2) & (2, 3, 4)
-		indexes[i * 6] = i * 4;
-		indexes[i * 6 + 1] = i * 4 + 1;
-		indexes[i * 6 + 2] = i * 4 + 2;
-		indexes[i * 6 + 3] = i * 4 + 1;
-		indexes[i * 6 + 4] = i * 4 + 2;
-		indexes[i * 6 + 5] = i * 4 + 3;
-		
-		xPos += glyph.width;
+		for(int i = 0; i < line.size(); ++i)
+		{
+			Glyph& glyph = mFont->GetGlyph(line[i]);
+			
+			float leftX = xPos;
+			float rightX = xPos + glyph.width;
+			
+			float bottomY = yPos;
+			float topY = yPos + glyph.height;
+			
+			//std::cout << line[i] << ", " << leftX << ", " << bottomY << std::endl;
+			//std::cout << line[i] << ", " << rightX << ", " << topY << std::endl;
+			
+			// Top-Left
+			positions[charIndex * 12] = leftX;
+			positions[charIndex * 12 + 1] = topY;
+			positions[charIndex * 12 + 2] = 0.0f;
+			
+			uvs[charIndex * 8] = glyph.topLeftUvCoord.GetX();
+			uvs[charIndex * 8 + 1] = glyph.topLeftUvCoord.GetY();
+			
+			colors[charIndex * 16] = (float)fontColor.GetR() / 255.0f;
+			colors[charIndex * 16 + 1] = (float)fontColor.GetG() / 255.0f;
+			colors[charIndex * 16 + 2] = (float)fontColor.GetB() / 255.0f;
+			colors[charIndex * 16 + 3] = (float)fontColor.GetA() / 255.0f;
+			
+			// Top-Right
+			positions[charIndex * 12 + 3] = rightX;
+			positions[charIndex * 12 + 4] = topY;
+			positions[charIndex * 12 + 5] = 0.0f;
+			
+			uvs[charIndex * 8 + 2] = glyph.topRightUvCoord.GetX();
+			uvs[charIndex * 8 + 3] = glyph.topRightUvCoord.GetY();
+			
+			colors[charIndex * 16 + 4] = (float)fontColor.GetR() / 255.0f;
+			colors[charIndex * 16 + 5] = (float)fontColor.GetG() / 255.0f;
+			colors[charIndex * 16 + 6] = (float)fontColor.GetB() / 255.0f;
+			colors[charIndex * 16 + 7] = (float)fontColor.GetA() / 255.0f;
+			
+			// Bottom-Left
+			positions[charIndex * 12 + 6] = leftX;
+			positions[charIndex * 12 + 7] = bottomY;
+			positions[charIndex * 12 + 8] = 0.0f;
+			
+			uvs[charIndex * 8 + 4] = glyph.bottomLeftUvCoord.GetX();
+			uvs[charIndex * 8 + 5] = glyph.bottomRightUvCoord.GetY();
+			
+			colors[charIndex * 16 + 8] = (float)fontColor.GetR() / 255.0f;
+			colors[charIndex * 16 + 9] = (float)fontColor.GetG() / 255.0f;
+			colors[charIndex * 16 + 10] = (float)fontColor.GetB() / 255.0f;
+			colors[charIndex * 16 + 11] = (float)fontColor.GetA() / 255.0f;
+			
+			// Bottom-Right
+			positions[charIndex * 12 + 9] = rightX;
+			positions[charIndex * 12 + 10] = bottomY;
+			positions[charIndex * 12 + 11] = 0.0f;
+			
+			uvs[charIndex * 8 + 6] = glyph.bottomRightUvCoord.GetX();
+			uvs[charIndex * 8 + 7] = glyph.bottomRightUvCoord.GetY();
+			
+			colors[charIndex * 16 + 12] = (float)fontColor.GetR() / 255.0f;
+			colors[charIndex * 16 + 13] = (float)fontColor.GetG() / 255.0f;
+			colors[charIndex * 16 + 14] = (float)fontColor.GetB() / 255.0f;
+			colors[charIndex * 16 + 15] = (float)fontColor.GetA() / 255.0f;
+			
+			// Indexes for this quad will be (0, 1, 2) & (2, 3, 4)
+			indexes[charIndex * 6] = charIndex * 4;
+			indexes[charIndex * 6 + 1] = charIndex * 4 + 1;
+			indexes[charIndex * 6 + 2] = charIndex * 4 + 2;
+			indexes[charIndex * 6 + 3] = charIndex * 4 + 1;
+			indexes[charIndex * 6 + 4] = charIndex * 4 + 2;
+			indexes[charIndex * 6 + 5] = charIndex * 4 + 3;
+			
+			xPos += glyph.width;
+			++charIndex;
+		}
 	}
 	
 	// Save positions and UVs to mesh.

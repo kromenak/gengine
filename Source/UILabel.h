@@ -17,6 +17,32 @@ class UILabel : public UIWidget
 {
 	TYPE_DECL_CHILD();
 public:
+	enum class HorizontalAlignment
+	{
+		Left,
+		Right,
+		//Center
+	};
+	
+	enum class VerticalAlignment
+	{
+		Bottom,
+		Top,
+		//Center
+	};
+	
+	enum class HorizontalOverflow
+	{
+		Wrap,
+		Overflow
+	};
+	
+	enum class VerticalOverflow
+	{
+		Truncate,
+		Overflow
+	};
+	
 	UILabel(Actor* owner);
 	
 	void Render() override;
@@ -30,6 +56,10 @@ private:
 	
 	// The font used to display the label.
 	Font* mFont = nullptr;
+	
+	// Desired text alignment within the transform's rect.
+	HorizontalAlignment mHorizontalAlignment = HorizontalAlignment::Left;
+	VerticalAlignment mVerticalAlignment = VerticalAlignment::Bottom;
 	
 	// Material used for rendering.
 	Material mMaterial;
