@@ -54,7 +54,10 @@ void SheepManager::Execute(SheepScript* script, std::string functionName)
 void SheepManager::Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback)
 {
 	mVirtualMachine.Execute(script, functionName, [finishCallback] () -> void {
-		finishCallback();
+		if(finishCallback)
+		{
+			finishCallback();
+		}
 	});
 }
 

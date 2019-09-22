@@ -294,8 +294,18 @@ RegFunc0(GetEgoCurrentLocationCount, int, IMMEDIATE, REL_FUNC);
 
 int GetEgoLocationCount(std::string locationName)
 {
+	//FIXME: Sheep functions can be called while the scene is being created.
+	//SO...Scene is null in that case! And Ego is not yet created!
+	//Need to revisit scene creation and find some stepped process to resolve this.
+	Scene* scene = GEngine::inst->GetScene();
+	if(scene == nullptr)
+	{
+		std::cout << "scene is null!" << std::endl;
+		return 0;
+	}
+	
 	// Figure out who ego is.
-	GKActor* ego = GEngine::inst->GetScene()->GetEgo();
+	GKActor* ego = scene->GetEgo();
 	if(ego != nullptr)
 	{
 		return Services::Get<GameProgress>()->GetLocationCount(ego->GetNoun(), locationName);
