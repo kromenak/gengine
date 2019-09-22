@@ -18,12 +18,27 @@ AssetManager::AssetManager()
 
 AssetManager::~AssetManager()
 {
-    // Delete and clear all loaded barns.
-    for(auto& entry : mLoadedBarns)
-    {
-        delete entry.second;
-    }
-    mLoadedBarns.clear();
+	// All the loaded stuff has to be unloaded!
+	UnloadAssets(mLoadedShaders);
+	
+	UnloadAssets(mLoadedSheeps);
+	UnloadAssets(mLoadedBSPs);
+	UnloadAssets(mLoadedActionSets);
+	UnloadAssets(mLoadedSceneModels);
+	UnloadAssets(mLoadedSIFs);
+	
+	UnloadAssets(mLoadedVertexAnimations);
+	UnloadAssets(mLoadedAnimations);
+	UnloadAssets(mLoadedGases);
+	
+	UnloadAssets(mLoadedTextures);
+	UnloadAssets(mLoadedModels);
+	
+	UnloadAssets(mLoadedYaks);
+	UnloadAssets(mLoadedSoundtracks);
+	UnloadAssets(mLoadedAudios);
+	
+	UnloadAssets(mLoadedBarns);
 }
 
 void AssetManager::AddSearchPath(std::string searchPath)
@@ -387,4 +402,17 @@ char* AssetManager::LoadAssetBuffer(std::string assetName, unsigned int& outBuff
 	
 	// Couldn't find this asset!
 	return nullptr;
+}
+
+template<class T>
+void AssetManager::UnloadAssets(std::unordered_map<std::string, T*>& cache)
+{
+	// Delete all assets in the cache.
+	for(auto& entry : cache)
+	{
+		delete entry.second;
+	}
+	
+	// Clear the cache.
+	cache.clear();
 }

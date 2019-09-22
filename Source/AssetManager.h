@@ -112,4 +112,6 @@ private:
     
     template<class T> T* LoadAsset(std::string assetName, std::unordered_map<std::string, T*>* cache);
 	char* LoadAssetBuffer(std::string assetName, unsigned int& outBufferSize);
+	
+	template<class T> void UnloadAssets(std::unordered_map<std::string, T*>& cache);
 };
