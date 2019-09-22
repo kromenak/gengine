@@ -16,6 +16,9 @@ public:
 	Rect(float x, float y, float width, float height);
 	Rect(const Vector2& min, const Vector2& max);
 	
+	bool operator==(const Rect& other) const;
+	bool operator!=(const Rect& other) const;
+	
 	float GetX() const { return mX; }
 	float GetY() const { return mY; }
 	float GetWidth() const { return mWidth; }
@@ -44,3 +47,5 @@ private:
 	float mWidth = 0.0f;
 	float mHeight = 0.0f;
 };
+
+std::ostream& operator<<(std::ostream& os, const Rect& r);

@@ -29,6 +29,22 @@ Rect::Rect(const Vector2& min, const Vector2& max) :
 	
 }
 
+bool Rect::operator==(const Rect& other) const
+{
+	return Math::AreEqual(mX, other.mX)
+		&& Math::AreEqual(mY, other.mY)
+		&& Math::AreEqual(mWidth, other.mWidth)
+		&& Math::AreEqual(mHeight, other.mHeight);
+}
+
+bool Rect::operator!=(const Rect& other) const
+{
+	return !(Math::AreEqual(mX, other.mX)
+		  && Math::AreEqual(mY, other.mY)
+		  && Math::AreEqual(mWidth, other.mWidth)
+		  && Math::AreEqual(mHeight, other.mHeight));
+}
+
 bool Rect::Contains(const Vector2& vec) const
 {
 	// If x/y of vector are less than rect's x/y, vector is not contained.
@@ -77,4 +93,10 @@ Vector2 Rect::GetNormalizedPoint(Vector2 point) const
 		normalizedY = (point.GetY() - mY) / mHeight;
 	}
 	return Vector2(normalizedX, normalizedY);
+}
+
+std::ostream& operator<<(std::ostream& os, const Rect& r)
+{
+	os << "(x:" << r.GetX() << ", y:" << r.GetY() << ", width:" << r.GetWidth() << ", height:" << r.GetHeight() << ")";
+	return os;
 }
