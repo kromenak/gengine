@@ -141,4 +141,102 @@ TEST_CASE("Rect::GetNormalizedPoint works")
 	REQUIRE(zeroRect.GetNormalizedPoint(Vector2(99.0f, 34.34f)) == Vector2::Zero);
 }
 
+TEST_CASE("RectUtil::CalcAnchorRect works")
+{
+	Rect parentRect(10.0f, 10.0f, 100.0f, 100.0f);
+	
+	// Check that the anchor rect in base case matches the parent rect.
+	REQUIRE(RectUtil::CalcAnchorRect(parentRect, Vector2::Zero, Vector2::One) == parentRect);
+	
+	// Check that anchor rect when anchor min/max are equal is actually a point.
+	Rect pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2::Zero, Vector2::Zero);
+	REQUIRE(pointRect.GetX() == 10.0f);
+	REQUIRE(pointRect.GetY() == 10.0f);
+	REQUIRE(pointRect.GetWidth() == 0.0f);
+	REQUIRE(pointRect.GetHeight() == 0.0f);
+	
+	pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2::One, Vector2::One);
+	REQUIRE(pointRect.GetX() == 110.0f);
+	REQUIRE(pointRect.GetY() == 110.0f);
+	REQUIRE(pointRect.GetWidth() == 0.0f);
+	REQUIRE(pointRect.GetHeight() == 0.0f);
+	
+	pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.5f, 0.5f), Vector2(0.5f, 0.5f));
+	REQUIRE(pointRect.GetX() == 60.0f);
+	REQUIRE(pointRect.GetY() == 60.0f);
+	REQUIRE(pointRect.GetWidth() == 0.0f);
+	REQUIRE(pointRect.GetHeight() == 0.0f);
+	
+	// Check that anchors with a matching X/Y value make a rect with zero width/height.
+	Rect lineRect = RectUtil::CalcAnchorRect(parentRect, Vector2::Zero, Vector2(0.0f, 1.0f));
+	REQUIRE(lineRect.GetX() == 10.0f);
+	REQUIRE(lineRect.GetY() == 10.0f);
+	REQUIRE(lineRect.GetWidth() == 0.0f);
+	REQUIRE(lineRect.GetHeight() == 100.0f);
+	
+	lineRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.0f, 0.5f), Vector2(1.0f, 0.5f));
+	REQUIRE(lineRect.GetX() == 10.0f);
+	REQUIRE(lineRect.GetY() == 60.0f);
+	REQUIRE(lineRect.GetWidth() == 100.0f);
+	REQUIRE(lineRect.GetHeight() == 0.0f);
+	
+	// Check anchor rect for an actual rect.
+	Rect anchorRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.25f, 0.4f), Vector2(0.75f, 0.6f));
+	REQUIRE(anchorRect.GetX() == 35.0f);
+	REQUIRE(anchorRect.GetY() == 50.0f);
+	REQUIRE(anchorRect.GetWidth() == 50.0f);
+	REQUIRE(anchorRect.GetHeight() == 20.0f);
+}
 
+TEST_CASE("RectUtil::CalcChildRect works")
+{
+	Rect parentRect(-480.0f, -269.86f, 960.0f, 539.73f);
+	Vector2 anchorMin(0.2f, 0.3f);
+	Vector2 anchorMax(0.8f, 0.4f);
+	Vector2 sizeDelta(20.0f, -10.0f);
+	Vector2 pivot(0.5f, 0.2f);
+	
+	Rect rect = RectUtil::CalcLocalRect(parentRect, anchorMin, anchorMax, sizeDelta, pivot);
+	REQUIRE(rect == Rect(-298.0f, -8.79459857f, 596.0f, 43.9729919f));
+	
+	Rect parentRect2(-512.0f, -384.0f, 1024.0f, 768.0f);
+	Vector2 anchorMin2(0.5f, 0.5f);
+	Vector2 anchorMax2(1.0f, 0.5f);
+	Vector2 sizeDelta2(256.0f, 80.0f);
+	Vector2 pivot2(0.0f, 0.8f);
+	
+	rect = RectUtil::CalcLocalRect(parentRect2, anchorMin2, anchorMax2, sizeDelta2, pivot2);
+	REQUIRE(rect == Rect(0.0f, -64.0f, 768.0f, 80.0f));
+}
+
+TEST_CASE("RectUtil::CalcLocalPosition works")
+{
+	Rect parentRect(-512.0f, -384.0f, 1024.0f, 768.0f);
+	Vector2 parentPivot(0.5f, 0.5f);
+	Vector2 anchorMin(0.0f, 0.0f);
+	Vector2 anchorMax(1.0f, 1.0f);
+	Vector2 anchoredPosition(0.0f, 0.0f);
+	Vector2 pivot(0.5f, 0.5f);
+	
+	// A child rect with same pivot, full anchor min/max, and zero anchored position has no local pos offset.
+	Vector3 localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, anchorMin, anchorMax, anchoredPosition, pivot);
+	REQUIRE(localPos == Vector3::Zero);
+	
+	// If the parent pivot changes, the local pos should change.
+	Vector2 offcenterParentPivot(0.0f, 0.5f);
+	localPos = RectUtil::CalcLocalPosition(parentRect, offcenterParentPivot, anchorMin, anchorMax, anchoredPosition, pivot);
+	REQUIRE(localPos == Vector3(512.0f, 0.0f, 0.0f));
+	
+	// If the anchored position changes, it should change the local pos.
+	Vector2 adjustedAnchoredPosition(95.0f, -200.0f);
+	localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, anchorMin, anchorMax, adjustedAnchoredPosition, pivot);
+	REQUIRE(localPos == Vector3(95.0f, -200.0f, 0.0f));
+	
+	// Try a very unusual one!
+	Vector2 anchorMin2(0.3f, 0.1f);
+	Vector2 anchorMax2(0.4f, 0.2f);
+	Vector3 anchoredPosition2(-104.0f, 323.0f);
+	Vector3 pivot2(0.2f, 0.6f);
+	localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, anchorMin2, anchorMax2, anchoredPosition2, pivot2);
+	REQUIRE(localPos == Vector3(-288.320007f, 61.8800049f, 0.0f));
+}

@@ -27,6 +27,7 @@
 		4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */; };
 		4B12B9D322F94ABC009F54E4 /* RenderTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9D222F94ABC009F54E4 /* RenderTexture.cpp */; };
 		4B12B9DB22FF3764009F54E4 /* stb_image_resize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9D922FF3764009F54E4 /* stb_image_resize.cpp */; };
+		4B12B9E0230A7298009F54E4 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9DF230A7298009F54E4 /* Console.cpp */; };
 		4B1555592197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
 		4B15555A2197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
 		4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15555C2197C2E500072F0D /* RectTransform.cpp */; };
@@ -146,6 +147,10 @@
 		4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */; };
 		4B5C301D21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */; };
 		4B5C301E21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */; };
+		4B6A3F232335B16C00D25B2D /* RectUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F222335B16C00D25B2D /* RectUtil.cpp */; };
+		4B6A3F242335B16C00D25B2D /* RectUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F222335B16C00D25B2D /* RectUtil.cpp */; };
+		4B6A3F262335B20000D25B2D /* RectTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F252335B20000D25B2D /* RectTests.cpp */; };
+		4B6A3F272335B36500D25B2D /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0E44F52186878A00BD1CE1 /* Rect.cpp */; };
 		4B6B766121A6165E00788C02 /* ButtonIconManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */; };
 		4B6B766221A6165E00788C02 /* ButtonIconManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */; };
 		4B6B766621AB75AA00788C02 /* ActionBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766521AB75AA00788C02 /* ActionBar.cpp */; };
@@ -282,6 +287,8 @@
 		4B12B9D222F94ABC009F54E4 /* RenderTexture.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RenderTexture.cpp; path = ../Source/RenderTexture.cpp; sourceTree = "<group>"; };
 		4B12B9D922FF3764009F54E4 /* stb_image_resize.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stb_image_resize.cpp; path = ../Libraries/stb/stb_image_resize.cpp; sourceTree = "<group>"; };
 		4B12B9DA22FF3764009F54E4 /* stb_image_resize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = stb_image_resize.h; path = ../Libraries/stb/stb_image_resize.h; sourceTree = "<group>"; };
+		4B12B9DE230A7298009F54E4 /* Console.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Console.h; path = ../Source/Console.h; sourceTree = "<group>"; };
+		4B12B9DF230A7298009F54E4 /* Console.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Console.cpp; path = ../Source/Console.cpp; sourceTree = "<group>"; };
 		4B1555572197B59F00072F0D /* Transform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Transform.h; path = ../Source/Transform.h; sourceTree = "<group>"; };
 		4B1555582197B59F00072F0D /* Transform.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Transform.cpp; path = ../Source/Transform.cpp; sourceTree = "<group>"; };
 		4B15555B2197C2E500072F0D /* RectTransform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RectTransform.h; path = ../Source/RectTransform.h; sourceTree = "<group>"; };
@@ -355,6 +362,9 @@
 		4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QuaternionTests.cpp; path = ../Tests/QuaternionTests.cpp; sourceTree = "<group>"; };
 		4B5C301B21D1F60900211724 /* VertexAnimationPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimationPlayer.h; path = ../Source/VertexAnimationPlayer.h; sourceTree = "<group>"; };
 		4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimationPlayer.cpp; path = ../Source/VertexAnimationPlayer.cpp; sourceTree = "<group>"; };
+		4B6A3F212335B16C00D25B2D /* RectUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RectUtil.h; path = ../Source/RectUtil.h; sourceTree = "<group>"; };
+		4B6A3F222335B16C00D25B2D /* RectUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RectUtil.cpp; path = ../Source/RectUtil.cpp; sourceTree = "<group>"; };
+		4B6A3F252335B20000D25B2D /* RectTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RectTests.cpp; path = ../Tests/RectTests.cpp; sourceTree = "<group>"; };
 		4B6B765F21A6165E00788C02 /* ButtonIconManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ButtonIconManager.h; path = ../Source/ButtonIconManager.h; sourceTree = "<group>"; };
 		4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ButtonIconManager.cpp; path = ../Source/ButtonIconManager.cpp; sourceTree = "<group>"; };
 		4B6B766421AB75AA00788C02 /* ActionBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ActionBar.h; path = ../Source/ActionBar.h; sourceTree = "<group>"; };
@@ -366,6 +376,7 @@
 		4B76B5821F3788FA003F63E5 /* BarnAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnAsset.h; path = ../Source/Barn/BarnAsset.h; sourceTree = "<group>"; };
 		4B76DFBA21867D2800BAECC4 /* UIButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UIButton.h; path = ../Source/UIButton.h; sourceTree = "<group>"; };
 		4B76DFBB21867D2800BAECC4 /* UIButton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UIButton.cpp; path = ../Source/UIButton.cpp; sourceTree = "<group>"; };
+		4B775E5023373890007FF777 /* UI-Text-ColorReplace.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "UI-Text-ColorReplace.frag"; path = "../Assets/UI-Text-ColorReplace.frag"; sourceTree = "<group>"; };
 		4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VectorTests.cpp; path = ../Tests/VectorTests.cpp; sourceTree = "<group>"; };
 		4B7A62FD223DC3820053C95F /* ReportManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ReportManager.h; path = ../Source/ReportManager.h; sourceTree = "<group>"; };
 		4B7A62FE223DC3820053C95F /* ReportManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ReportManager.cpp; path = ../Source/ReportManager.cpp; sourceTree = "<group>"; };
@@ -514,6 +525,7 @@
 		4B0E2A561F74F5570019D4AD /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				4B775E5023373890007FF777 /* UI-Text-ColorReplace.frag */,
 				4B399E4022D00E2100221AE4 /* 3D-Billboard.frag */,
 				4B399E3F22D00E2100221AE4 /* 3D-Billboard.vert */,
 				4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */,
@@ -533,6 +545,7 @@
 				4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */,
 				4B1112A71F820B0400AFDDFC /* TestMain.cpp */,
 				4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */,
+				4B6A3F252335B20000D25B2D /* RectTests.cpp */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -544,6 +557,17 @@
 				4B12B9DA22FF3764009F54E4 /* stb_image_resize.h */,
 			);
 			name = stb;
+			sourceTree = "<group>";
+		};
+		4B12B9DD230A720D009F54E4 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				4B046E93218FB10F00E56341 /* Debug.cpp */,
+				4B046E92218FB10F00E56341 /* Debug.h */,
+				4B12B9DE230A7298009F54E4 /* Console.h */,
+				4B12B9DF230A7298009F54E4 /* Console.cpp */,
+			);
+			name = Debug;
 			sourceTree = "<group>";
 		};
 		4B15A9451F241DC8000A689F /* Products */ = {
@@ -579,8 +603,7 @@
 				4B00D32F1F8F3AD500D536D5 /* Camera.h */,
 				4B1112AD1F821FFF00AFDDFC /* Component.cpp */,
 				4B1112AE1F821FFF00AFDDFC /* Component.h */,
-				4B046E93218FB10F00E56341 /* Debug.cpp */,
-				4B046E92218FB10F00E56341 /* Debug.h */,
+				4B12B9DD230A720D009F54E4 /* Debug */,
 				4B17D706206098B100EBD298 /* GameCamera.cpp */,
 				4B17D705206098B100EBD298 /* GameCamera.h */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
@@ -688,6 +711,8 @@
 				4B53B0C7207AFE7E00663381 /* Ray.h */,
 				4B0E44F52186878A00BD1CE1 /* Rect.cpp */,
 				4B0E44F42186878A00BD1CE1 /* Rect.h */,
+				4B6A3F222335B16C00D25B2D /* RectUtil.cpp */,
+				4B6A3F212335B16C00D25B2D /* RectUtil.h */,
 				4BF751101F773E1A00B79D2F /* Vector2.cpp */,
 				4BF751111F773E1A00B79D2F /* Vector2.h */,
 				4B4EED891F5CACEF000065EF /* Vector3.cpp */,
@@ -1060,10 +1085,13 @@
 				4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */,
 				4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */,
 				4B79F8071F9C09F2008C6FEE /* VectorTests.cpp in Sources */,
+				4B6A3F272335B36500D25B2D /* Rect.cpp in Sources */,
+				4B6A3F242335B16C00D25B2D /* RectUtil.cpp in Sources */,
 				4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */,
 				4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */,
 				4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */,
 				4B1A2CB522053097000C34D8 /* MathTests.cpp in Sources */,
+				4B6A3F262335B20000D25B2D /* RectTests.cpp in Sources */,
 				4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */,
 			);
@@ -1088,6 +1116,7 @@
 				4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */,
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
+				4B6A3F232335B16C00D25B2D /* RectUtil.cpp in Sources */,
 				4B9231A62117CFBC0004F4F3 /* GKActor.cpp in Sources */,
 				4B2CA00F21B90FAF006D5E52 /* BinaryReader.cpp in Sources */,
 				4B15A9561F242C55000A689F /* Renderer.cpp in Sources */,
@@ -1164,6 +1193,7 @@
 				4B5C301D21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */,
 				4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
+				4B12B9E0230A7298009F54E4 /* Console.cpp in Sources */,
 				4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */,
 				4BF32B8C1F67C434000639FB /* Shader.cpp in Sources */,
 			);
@@ -1393,12 +1423,15 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_FLOAT_CONVERSION = NO;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = NO;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = NO;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -1415,6 +1448,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = MUSIC_MP3_MPG123;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
@@ -1460,12 +1494,15 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_FLOAT_CONVERSION = NO;
+				CLANG_WARN_IMPLICIT_SIGN_CONVERSION = NO;
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_IMPLICIT_CONVERSION = NO;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -1480,6 +1517,7 @@
 				GCC_PREPROCESSOR_DEFINITIONS = MUSIC_MP3_MPG123;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_SHADOW = YES;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
