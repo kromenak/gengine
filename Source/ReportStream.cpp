@@ -33,7 +33,7 @@ void ReportStream::Log(std::string content)
 	//TODO: Handle console output type
 	
 	// Handle debugger output type.
-	if((mOutput & ReportOutput::Debugger) != 0)
+	if((mOutput & ReportOutput::Debugger) != ReportOutput::None)
 	{
 		std::cout << output;
 	}

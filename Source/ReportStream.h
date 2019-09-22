@@ -21,8 +21,9 @@ enum class ReportAction
 	ResTrack,
 };
 
-enum ReportOutput : int
+enum class ReportOutput : int
 {
+	None            = 0,
 	Console 		= 1,	// Outputs contents to the console window.
 	Debugger 		= 2,	// Outputs to any active and supported debugger.
 	File 			= 4,	// Outputs to a file.
@@ -30,6 +31,36 @@ enum ReportOutput : int
 	OSDialog 		= 16	// Original game called this "Win32Dialog"
 };
 
+inline ReportOutput operator|(ReportOutput lhs, ReportOutput rhs)
+{
+	using T = std::underlying_type<ReportOutput>::type;
+	return static_cast<ReportOutput>(static_cast<T>(lhs) | static_cast<T>(rhs));
+}
+
+inline ReportOutput& operator|=(ReportOutput& lhs, ReportOutput rhs)
+{
+	lhs = lhs | rhs;
+	return lhs;
+}
+	
+inline ReportOutput operator&(ReportOutput lhs, ReportOutput rhs)
+{
+	using T = std::underlying_type<ReportOutput>::type;
+	return static_cast<ReportOutput>(static_cast<T>(lhs) & static_cast<T>(rhs));
+}
+
+inline ReportOutput& operator&=(ReportOutput& lhs, ReportOutput rhs)
+{
+	lhs = lhs & rhs;
+	return lhs;
+}
+	
+inline ReportOutput operator~(ReportOutput rhs)
+{
+	using T = std::underlying_type<ReportOutput>::type;
+	return static_cast<ReportOutput>(~static_cast<T>(rhs));
+}
+	
 enum ReportContent : int
 {
 	Begin			= 1,	// Displays a header before the meat of the report.
