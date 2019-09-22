@@ -32,9 +32,9 @@ void UILabel::Render()
 	if(mMesh == nullptr) { return; }
 	
 	// Activate material.
-	mMaterial.SetWorldTransformMatrix(mRectTransform->GetLocalToWorldMatrix());
 	mMaterial.SetShader(mFont->GetShader());
 	mMaterial.Activate();
+	mMaterial.SetWorldTransformMatrix(mRectTransform->GetLocalToWorldMatrix());
 	
 	// Render the mesh!
 	mMesh->Render();

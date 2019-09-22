@@ -10,7 +10,11 @@ uniform float uAlphaTest;
 
 void main()
 {
-	vec4 texel = texture(uDiffuse, fUV1) * fColor;
-	if(texel.a < uAlphaTest) { discard; }
+	// Grab texel.
+	vec4 texel = texture(uDiffuse, fUV1);
+	
+	// Completely replace color values with passed in color.
+	// Basically only using texel for its alpha.
+	texel.rgb = fColor.rgb;
 	oColor = texel;
 }
