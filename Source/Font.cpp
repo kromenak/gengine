@@ -25,7 +25,7 @@ Font::Font(std::string name, char* data, int dataLength) :
 	// The line height is the font texture height divided by number of lines.
 	// The glyphs height is then that number, minus one (for the indicator pixel).
 	int lineHeight = mFontTexture->GetHeight() / mLineCount;
-	int height = lineHeight - 1; //TODO: Take baseline value into account?
+	mGlyphHeight = lineHeight - 1; //TODO: Take baseline value into account?
 	
 	// We'll start processing glyphs at (1, 0).
 	int currentX = 1;
@@ -57,7 +57,7 @@ Font::Font(std::string name, char* data, int dataLength) :
 		
 		// Save height/width.
 		glyph.width = width;
-		glyph.height = height;
+		glyph.height = mGlyphHeight;
 		
 		// Calculate top/bottom y UV values.
 		// TODO: Why is UV (0, 0) in top-left corner? Kind of unexpected...

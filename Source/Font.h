@@ -46,6 +46,8 @@ public:
 	
 	Shader* GetShader() const;
 	
+	int GetGlyphHeight() const { return mGlyphHeight; }
+	
 private:
 	// A string containing all characters that can be rendered by this font.
 	// Each character is in the same order it appears in the font texture.
@@ -76,6 +78,10 @@ private:
 	
 	// Is this a color replacement font? If not, it is alpha-blended.
 	bool mColorReplacement = false;
+	
+	// The max height of a glyph in the font.
+	// We can use this to make some assumptions about line height.
+	int mGlyphHeight = 0;
 	
 	// A mapping from character to glyph.
 	std::unordered_map<char, Glyph> mFontGlyphs;
