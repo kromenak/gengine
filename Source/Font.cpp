@@ -7,6 +7,7 @@
 
 #include "Color32.h"
 #include "IniParser.h"
+#include "Material.h"
 #include "Services.h"
 #include "StringUtil.h"
 
@@ -114,6 +115,15 @@ Glyph& Font::GetGlyph(char character)
 	}
 }
 
+Shader* Font::GetShader() const
+{
+	if(mColorReplacement)
+	{
+		return Services::GetAssets()->LoadShader("3D-Diffuse-Tex", "UI-Text-ColorReplace");
+	}
+	return Material::sDefaultShader;
+}
+
 void Font::ParseFromData(char* data, int dataLength)
 {
 	// Font is in INI format, but only one key per line.
@@ -157,8 +167,10 @@ void Font::ParseFromData(char* data, int dataLength)
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
 			{
-				//TODO: Alpha Blend, Color Replacement
-				//TODO: Maybe not needed? We can render everything with alpha blended.
+				if(StringUtil::EqualsIgnoreCase(keyValue.value, "color replacement"))
+				{
+					mColorReplacement = true;
+				}
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "color"))
 			{

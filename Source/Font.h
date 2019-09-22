@@ -14,6 +14,7 @@
 #include "Vector2.h"
 
 class Texture;
+class Shader;
 
 struct Glyph
 {
@@ -43,6 +44,8 @@ public:
 	
 	Color32 GetDefaultColor() const { return mForegroundColor; }
 	
+	Shader* GetShader() const;
+	
 private:
 	// A string containing all characters that can be rendered by this font.
 	// Each character is in the same order it appears in the font texture.
@@ -70,6 +73,9 @@ private:
 	// For either "Alpha Blend" or "Color Replacement", foreground color indicates text color.
 	Color32 mBackgroundColor = Color32::Magenta;
 	Color32 mForegroundColor = Color32::White;
+	
+	// Is this a color replacement font? If not, it is alpha-blended.
+	bool mColorReplacement = false;
 	
 	// A mapping from character to glyph.
 	std::unordered_map<char, Glyph> mFontGlyphs;
