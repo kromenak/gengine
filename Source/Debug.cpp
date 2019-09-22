@@ -19,6 +19,7 @@ std::list<DrawCommand> Debug::sDrawCommands;
 
 // Default debug settings.
 bool Debug::sRenderSubmeshLocalAxes = false;
+bool Debug::sRenderRectTransformRects = false;
 
 void Debug::DrawLine(const Vector3& from, const Vector3& to, const Color32& color)
 {
@@ -90,6 +91,10 @@ void Debug::Update(float deltaTime)
 	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F1))
 	{
 		sRenderSubmeshLocalAxes = !sRenderSubmeshLocalAxes;
+	}
+	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F2))
+	{
+		sRenderRectTransformRects = !sRenderRectTransformRects;
 	}
 }
 

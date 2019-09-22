@@ -48,10 +48,12 @@ public:
 	static void Render();
 	
 	static bool RenderSubmeshLocalAxes() { return sRenderSubmeshLocalAxes; }
+	static bool RenderRectTransformRects() { return sRenderRectTransformRects; }
 	
 private:
 	static std::list<DrawCommand> sDrawCommands;
 	
 	// Debug settings, possible to toggle in-game.
 	static bool sRenderSubmeshLocalAxes;
+	static bool sRenderRectTransformRects;
 };

@@ -140,8 +140,11 @@ Vector3 RectTransform::GetLocalPosition()
 void RectTransform::UpdateInternal(float deltaTime)
 {
 	// For debugging: visualize min/max of the rect calculated for this RectTransform.
-	Rect screenRect = GetScreenRect();
-	Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
-	Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
-	Debug::DrawLine(min, max, Color32::Cyan);
+	if(Debug::RenderRectTransformRects())
+	{
+		Rect screenRect = GetScreenRect();
+		Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
+		Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
+		Debug::DrawLine(min, max, Color32::Cyan);
+	}
 }
