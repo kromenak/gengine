@@ -16,6 +16,7 @@
 #include "NVC.h"
 
 class ButtonIcon;
+class RectTransform;
 class UIButton;
 class UICanvas;
 
@@ -35,6 +36,9 @@ protected:
 private:
 	// The action bar's canvas, which renders the UI.
 	UICanvas* mCanvas = nullptr;
+	
+	// A transform that is parent for all buttons.
+	RectTransform* mButtonHolder = nullptr;
 	
 	// The buttons created for the action bar. Recycled on each show.
 	std::vector<UIButton*> mButtons;

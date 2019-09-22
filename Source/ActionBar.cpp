@@ -18,7 +18,21 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	// Since we will set the action bar's position based on mouse position,
 	// set the anchor to the lower-left corner.
 	RectTransform* rectTransform = GetComponent<RectTransform>();
+	rectTransform->SetSizeDelta(0.0f, 0.0f);
 	rectTransform->SetAnchorMin(Vector2::Zero);
+	rectTransform->SetAnchorMax(Vector2::One);
+	
+	Actor* buttonHolderActor = new Actor(Actor::TransformType::RectTransform);
+	mButtonHolder = buttonHolderActor->GetComponent<RectTransform>();
+	mButtonHolder->SetParent(rectTransform);
+	mButtonHolder->SetAnchorMin(Vector2::Zero);
+	mButtonHolder->SetAnchorMax(Vector2::Zero);
+	mButtonHolder->SetPivot(0.5f, 0.5f);
+	
+	// To have button holder appear in correct spot, we need the holder to be the right height.
+	// So, just use one of the buttons to get a valid height.
+	ButtonIcon& cancelButtonIcon = Services::Get<ButtonIconManager>()->GetButtonIconForVerb("CANCEL");
+	mButtonHolder->SetSizeDelta(cancelButtonIcon.GetWidth(), cancelButtonIcon.GetWidth());
 	
 	/*
 	Actor* labelActor = new Actor(Actor::TransformType::RectTransform);
@@ -95,7 +109,8 @@ void ActionBar::Show(std::vector<const NVCItem*> actions, std::function<void(con
 	cancelButton->SetPressCallback(std::bind(&ActionBar::Hide, this));
 	
 	// Position action bar at mouse position.
-	SetPosition(Services::GetInput()->GetMousePosition() - Vector2(xPos / 2.0f, 0.0f));
+	mButtonHolder->SetAnchoredPosition(Services::GetInput()->GetMousePosition() - Vector2(xPos / 2.0f, 0.0f));
+	//SetPosition(Services::GetInput()->GetMousePosition() - Vector2(xPos / 2.0f, 0.0f));
 	
 	//TODO: Make sure the bar doesn't go off screen.
 	
@@ -107,6 +122,12 @@ void ActionBar::Hide()
 {
 	// Remove all widgets.
 	mCanvas->RemoveAllWidgets();
+	
+	// Make buttons no longer interactable.
+	for(auto& button : mButtons)
+	{
+		button->Disable();
+	}
 	
 	// Not showing anymore.
 	mIsShowing = false;
@@ -131,7 +152,7 @@ UIButton* ActionBar::AddButton(int index, float xPos, const ButtonIcon& buttonIc
 	else
 	{
 		Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
-		buttonActor->GetTransform()->SetParent(GetTransform());
+		buttonActor->GetTransform()->SetParent(mButtonHolder);
 		
 		button = buttonActor->AddComponent<UIButton>();
 		mButtons.push_back(button);
@@ -140,15 +161,24 @@ UIButton* ActionBar::AddButton(int index, float xPos, const ButtonIcon& buttonIc
 	// Add button as a widget (so it'll render).
 	mCanvas->AddWidget(button);
 	
+	// Make sure button can be pressed.
+	button->Enable();
+	
 	// Position correctly, relative to previous buttons.
 	Transform* buttonTransform = button->GetOwner()->GetTransform();
-	buttonTransform->SetPosition(Vector3(xPos, 0.0f, 0.0f));
+	RectTransform* buttonRectTransform = static_cast<RectTransform*>(buttonTransform);
+	buttonRectTransform->SetAnchor(Vector2::Zero);
+	buttonRectTransform->SetPivot(0.0f, 0.0f);
+	buttonRectTransform->SetAnchoredPosition(Vector2(xPos, 0.0f));
 	
 	// Show correct icon on button.
 	button->SetUpTexture(buttonIcon.upTexture);
 	button->SetDownTexture(buttonIcon.downTexture);
 	button->SetHoverTexture(buttonIcon.hoverTexture);
 	button->SetDisabledTexture(buttonIcon.disableTexture);
+	
+	// Make sure any old callbacks are no longer set (since we recycle the buttons).
+	button->SetPressCallback(nullptr);
 	
 	// Return button to caller, so they can do any additional stuff (like specify a callback).
 	return button;

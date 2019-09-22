@@ -10,6 +10,7 @@
 #include "Actor.h"
 #include "ButtonIconManager.h"
 #include "CharacterManager.h"
+#include "Console.h"
 #include "FootstepManager.h"
 #include "Debug.h"
 #include "GameProgress.h"
@@ -75,10 +76,8 @@ bool GEngine::Initialize()
 	mWaitCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
 	UseDefaultCursor();
 	
-	//mAssetManager.LoadVertexAnimation("R25CHAIR_GABR25SIT.ACT");
     //mAssetManager.WriteBarnAssetToFile("PINE2FLAT.BMP");
-	//mAssetManager.WriteBarnAssetToFile("PINE2.BMP");
-    //mAssetManager.WriteAllBarnAssetsToFile(".CUR", "Cursors");
+    //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
 	
 	// Load button icon manager.
 	Services::Set<ButtonIconManager>(new ButtonIconManager());
@@ -293,6 +292,10 @@ void GEngine::LoadSceneInternal()
 	
 	// Get rid of all actors between scenes.
 	DeleteAllActors();
+	
+	//TEMP: Create a console when entering a scene.
+	//TODO: Console should persist across all scenes! Need some "Do Not Destroy On Load" style functionality...
+	new Console(false);
 	
 	// Save this new location.
 	Services::Get<GameProgress>()->SetLocation(mSceneToLoad);
