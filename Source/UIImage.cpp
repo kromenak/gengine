@@ -31,12 +31,17 @@ UIImage::UIImage(Actor* owner) : UIWidget(owner)
 void UIImage::Render()
 {
 	// We need a texture to render (and calculate repeats for tiled rendering).
+	// If none is specified, use plain ol' white.
 	Texture* texture = mMaterial.GetDiffuseTexture();
-	if(texture == nullptr) { return; }
+	if(texture == nullptr)
+	{
+		texture = Texture::White;
+	}
 	
-	// Prep the material.
-	mMaterial.SetWorldTransformMatrix(GetWorldTransformWithSizeForRendering());
+	// Activate material and set world transform.
+	//TODO: I noticed that I must "Activate" first, or some images don't render correctly. But why?
 	mMaterial.Activate();
+	mMaterial.SetWorldTransformMatrix(GetWorldTransformWithSizeForRendering());
 	
 	// Render based on desired render mode.
 	switch(mRenderMode)
@@ -75,7 +80,6 @@ void UIImage::Render()
 void UIImage::SetTexture(Texture* texture)
 {
 	mMaterial.SetDiffuseTexture(texture);
-	
 }
 
 void UIImage::SetSizeToTextureSize()
