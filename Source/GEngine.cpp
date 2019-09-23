@@ -171,6 +171,18 @@ void GEngine::ProcessInput()
     {
         switch(event.type)
         {
+			case SDL_KEYDOWN:
+				if(event.key.keysym.sym == SDLK_BACKSPACE)
+				{
+					mInputManager.Backspace();
+				}
+				break;
+				
+			case SDL_TEXTINPUT:
+				//TODO: Make sure not copy or pasting.
+				mInputManager.AppendText(event.text.text);
+				break;
+				
             case SDL_QUIT:
                 Quit();
                 break;

@@ -8,6 +8,7 @@
 //
 #pragma once
 #include <SDL2/SDL.h>
+#include <string>
 
 #include "Vector2.h"
 
@@ -35,16 +36,22 @@ public:
     
     Vector2 GetMousePosition() { return mMousePosition; }
     Vector2 GetMouseDelta() { return mMousePositionDelta; }
-    
+	
+	void StartListenForKeyboardInput(std::string initialText);
+	void StopListenForKeyboardInput();
+	bool IsTextInput() const { return mIsTextInput; }
+	void AppendText(std::string text);
+	void Backspace();
+	std::string& GetTextInput();
+	
 private:
     // KEYBOARD
     // Number of keys on the keyboard.
     int mNumKeys = 0;
     
     // A byte array where each byte indicates if a key is up or down.
+	// Current and previous states, so we can check for up or down moments.
     const uint8_t* mKeyboardState = nullptr;
-    
-    // The keyboard state from last frame, so we can check for up or down moments.
     uint8_t* mPrevKeyboardState = nullptr;
     
     // MOUSE
@@ -57,6 +64,10 @@ private:
     
     // The mouse's position delta for this frame.
     Vector2 mMousePositionDelta;
+	
+	// TEXT INPUT
+	bool mIsTextInput = false;
+	std::string mTextInput;
 };
 
 inline bool InputManager::IsKeyDown(SDL_Scancode scancode)
