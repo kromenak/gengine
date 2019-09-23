@@ -160,6 +160,7 @@
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76DFBB21867D2800BAECC4 /* UIButton.cpp */; };
 		4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76DFBB21867D2800BAECC4 /* UIButton.cpp */; };
+		4B775E5323382EE7007FF777 /* UITextInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B775E5223382EE7007FF777 /* UITextInput.cpp */; };
 		4B79F8071F9C09F2008C6FEE /* VectorTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */; };
 		4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
@@ -377,6 +378,8 @@
 		4B76DFBA21867D2800BAECC4 /* UIButton.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UIButton.h; path = ../Source/UIButton.h; sourceTree = "<group>"; };
 		4B76DFBB21867D2800BAECC4 /* UIButton.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UIButton.cpp; path = ../Source/UIButton.cpp; sourceTree = "<group>"; };
 		4B775E5023373890007FF777 /* UI-Text-ColorReplace.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "UI-Text-ColorReplace.frag"; path = "../Assets/UI-Text-ColorReplace.frag"; sourceTree = "<group>"; };
+		4B775E5123382EE7007FF777 /* UITextInput.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UITextInput.h; path = ../Source/UITextInput.h; sourceTree = "<group>"; };
+		4B775E5223382EE7007FF777 /* UITextInput.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UITextInput.cpp; path = ../Source/UITextInput.cpp; sourceTree = "<group>"; };
 		4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VectorTests.cpp; path = ../Tests/VectorTests.cpp; sourceTree = "<group>"; };
 		4B7A62FD223DC3820053C95F /* ReportManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ReportManager.h; path = ../Source/ReportManager.h; sourceTree = "<group>"; };
 		4B7A62FE223DC3820053C95F /* ReportManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ReportManager.cpp; path = ../Source/ReportManager.cpp; sourceTree = "<group>"; };
@@ -518,6 +521,8 @@
 				4B84A13721697223003B4C3F /* UILabel.h */,
 				4B08C90F213745070028FEB3 /* UIWidget.cpp */,
 				4B08C90E213745070028FEB3 /* UIWidget.h */,
+				4B775E5123382EE7007FF777 /* UITextInput.h */,
+				4B775E5223382EE7007FF777 /* UITextInput.cpp */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -1152,6 +1157,7 @@
 				4B00D3301F8F3AD500D536D5 /* Camera.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
+				4B775E5323382EE7007FF777 /* UITextInput.cpp in Sources */,
 				4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */,
 				4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
