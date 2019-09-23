@@ -9,6 +9,7 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UITextInput.h"
 
 Console::Console(bool mini) : Actor(TransformType::RectTransform)
 {
@@ -59,39 +60,82 @@ Console::Console(bool mini) : Actor(TransformType::RectTransform)
 		mBackgroundTransform->SetSizeDelta(0.0f, 200.0f);
 		
 		// Add horizontal rule for full console.
-		Actor* hrActor = new Actor(TransformType::RectTransform);
-		RectTransform* hrTransform = hrActor->GetComponent<RectTransform>();
-		hrTransform->SetParent(mBackgroundTransform);
+		{
+			Actor* hrActor = new Actor(TransformType::RectTransform);
+			RectTransform* hrTransform = hrActor->GetComponent<RectTransform>();
+			hrTransform->SetParent(mBackgroundTransform);
+			
+			// Horizontal rule uses a tiling line image.
+			UIImage* hrImage = hrActor->AddComponent<UIImage>();
+			mCanvas->AddWidget(hrImage);
+			
+			// Anchor along bottom edge of the console, with enough space for the input line below.
+			hrTransform->SetAnchorMin(Vector2(0.0f, 0.0f));
+			hrTransform->SetAnchorMax(Vector2(1.0f, 0.0f));
+			hrTransform->SetSizeDelta(-8.0f, 1.0f);
+			hrTransform->SetAnchoredPosition(0.0f, 25.0f);
+		}
 		
-		// Horizontal rule uses a tiling line image.
-		UIImage* hrImage = hrActor->AddComponent<UIImage>();
-		hrImage->SetRenderMode(UIImage::RenderMode::Tiled);
-		hrImage->SetTexture(Services::GetAssets()->LoadTexture("HORIZONTALRULE"));
-		hrImage->SetSizeToTextureSize();
-		mCanvas->AddWidget(hrImage);
+		// Create scrollback text area.
+		Font* font = Services::GetAssets()->LoadFont("F_CONSOLE_DISPLAY");
+		{
+			Actor* scrollbackActor = new Actor(TransformType::RectTransform);
+			RectTransform* scrollbackRT = scrollbackActor->GetComponent<RectTransform>();
+			scrollbackRT->SetParent(mBackgroundTransform);
+			
+			// Scrollback takes up big chunk of space above horizontal rule.
+			scrollbackRT->SetAnchorMin(Vector2(0.0f, 0.2f));
+			scrollbackRT->SetAnchorMax(Vector2(1.0f, 1.0f));
+			scrollbackRT->SetSizeDelta(-20.0f, 0.0f);
+			scrollbackRT->SetPivot(0.5f, 0.0f);
+			
+			UILabel* scrollbackText = scrollbackActor->AddComponent<UILabel>();
+			mCanvas->AddWidget(scrollbackText);
+			
+			scrollbackText->SetFont(font);
+			scrollbackText->SetText("Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\n");
+		}
 		
-		// Anchor along bottom edge of the console, with enough space for the input line below.
-		hrTransform->SetAnchorMin(Vector2(0.0f, 0.0f));
-		hrTransform->SetAnchorMax(Vector2(1.0f, 0.0f));
-		hrTransform->SetSizeDelta(0.0f, hrTransform->GetSize().GetY());
-		hrTransform->SetAnchoredPosition(0.0f, 25.0f);
-		
-		// Create scrollback actor.
-		Actor* scrollbackActor = new Actor(TransformType::RectTransform);
-		RectTransform* scrollbackRT = scrollbackActor->GetComponent<RectTransform>();
-		scrollbackRT->SetParent(mBackgroundTransform);
-		
-		// Scrollback takes up big chunk of space above horizontal rule.
-		scrollbackRT->SetAnchorMin(Vector2(0.0f, 0.2f));
-		scrollbackRT->SetAnchorMax(Vector2(1.0f, 1.0f));
-		scrollbackRT->SetSizeDelta(-20.0f, 0.0f);
-		scrollbackRT->SetPivot(0.5f, 0.0f);
-		
-		UILabel* scrollbackText = scrollbackActor->AddComponent<UILabel>();
-		mCanvas->AddWidget(scrollbackText);
-		
-		scrollbackText->SetFont(Services::GetAssets()->LoadFont("F_CONSOLE_DISPLAY"));
-		scrollbackText->SetText("Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\n");
+		// Create text input field.
+		{
+			Actor* textInputActor = new Actor(TransformType::RectTransform);
+			RectTransform* textInputRT = textInputActor->GetComponent<RectTransform>();
+			textInputRT->SetParent(mBackgroundTransform);
+			
+			// Input field takes up a single line below horizontal rule.
+			textInputRT->SetAnchorMin(Vector2(0.0f, 0.0f));
+			textInputRT->SetAnchorMax(Vector2(1.0f, 0.0f));
+			textInputRT->SetPivot(0.0f, 0.0f);
+			textInputRT->SetSizeDelta(0.0f, font->GetGlyphHeight());
+			textInputRT->SetAnchoredPosition(4.0f, 4.0f);
+			
+			UITextInput* textInput = textInputActor->AddComponent<UITextInput>();
+			mCanvas->AddWidget(textInput);
+			
+			textInput->SetFont(font);
+			textInput->SetText("");
+			
+			// Create text input field caret.
+			Actor* caretActor = new Actor(TransformType::RectTransform);
+			RectTransform* caretRT = caretActor->GetComponent<RectTransform>();
+			caretRT->SetParent(textInputRT);
+			
+			// Horizontal rule uses a tiling line image.
+			UIImage* caretImage = caretActor->AddComponent<UIImage>();
+			mCanvas->AddWidget(caretImage);
+			
+			// Anchor along bottom edge of the console, with enough space for the input line below.
+			//caretRT->SetAnchorMin(Vector2(0.0f, 0.0f));
+			//caretRT->SetAnchorMax(Vector2(1.0f, 0.0f));
+			//caretRT->SetSizeDelta(-8.0f, 1.0f);
+			//caretRT->SetAnchoredPosition(0.0f, 0.0f);
+			
+			caretRT->SetAnchorMin(Vector2(0.0f, 0.0f));
+			caretRT->SetAnchorMax(Vector2(0.0f, 1.0f));
+			caretRT->SetPivot(0.0f, 0.0f);
+			caretRT->SetSizeDelta(1.0f, 4.0f);
+			caretRT->SetAnchoredPosition(0.0f, 0.0f);
+		}
 	}
 	
 	// Disable canvas so console is hidden by default.
