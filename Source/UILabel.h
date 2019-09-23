@@ -47,8 +47,10 @@ public:
 	
 	void Render() override;
 	
-	void SetText(std::string text);
 	void SetFont(Font* font);
+	
+	void SetText(std::string text);
+	std::string GetText() const { return mText; }
 	
 private:
 	// The text to be displayed by the label.

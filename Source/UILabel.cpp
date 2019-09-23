@@ -41,8 +41,11 @@ void UILabel::Render()
 
 void UILabel::SetText(std::string text)
 {
-	mText = text;
-	mNeedMeshRegen = true;
+	if(text != mText)
+	{
+		mText = text;
+		mNeedMeshRegen = true;
+	}
 }
 
 void UILabel::SetFont(Font* font)
