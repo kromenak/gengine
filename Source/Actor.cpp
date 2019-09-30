@@ -48,7 +48,7 @@ Actor::~Actor()
 void Actor::Update(float deltaTime)
 {
 	// Do my own update (subclasses can override).
-	UpdateInternal(deltaTime);
+	OnUpdate(deltaTime);
 	
     // Update all components.
     for(auto& component : mComponents)

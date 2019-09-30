@@ -23,7 +23,7 @@ public:
 	void Sample(VertexAnimation* animation, int frame);
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
 	// The mesh renderer from which we will animate.

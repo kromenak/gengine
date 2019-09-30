@@ -50,33 +50,14 @@ void InputManager::Update()
     mMousePosition.SetY(mouseY);
 }
 
-void InputManager::StartListenForKeyboardInput(std::string initialText)
+void InputManager::StartTextInput(TextInput* textInput)
 {
 	SDL_StartTextInput();
-	mTextInput = initialText;
-	mIsTextInput = true;
+	mTextInput = textInput;
 }
 
-void InputManager::StopListenForKeyboardInput()
+void InputManager::StopTextInput()
 {
 	SDL_StopTextInput();
-	mIsTextInput = false;
-}
-
-void InputManager::AppendText(std::string text)
-{
-	mTextInput += text;
-}
-
-void InputManager::Backspace()
-{
-	if(mTextInput.size() > 0)
-	{
-		mTextInput.pop_back();
-	}
-}
-
-std::string& InputManager::GetTextInput()
-{
-	return mTextInput;
+	mTextInput = nullptr;
 }

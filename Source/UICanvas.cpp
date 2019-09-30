@@ -25,11 +25,14 @@ UICanvas::~UICanvas()
 
 void UICanvas::Render()
 {
-	if(mEnabled)
+	if(IsActiveAndEnabled())
 	{
 		for(auto& widget : mWidgets)
 		{
-			widget->Render();
+			if(widget->IsActiveAndEnabled())
+			{
+				widget->Render();
+			}
 		}
 	}
 }

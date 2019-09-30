@@ -102,7 +102,7 @@ void GKActor::SampleAnimation(VertexAnimation* animation, int frame)
 	mAnimationPlayer->Sample(animation, frame);
 }
 
-void GKActor::UpdateInternal(float deltaTime)
+void GKActor::OnUpdate(float deltaTime)
 {
 	// Pause any fidgets while walker is going.
 	if(mGasPlayer != nullptr && mWalker != nullptr)

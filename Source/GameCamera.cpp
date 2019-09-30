@@ -20,7 +20,7 @@ GameCamera::GameCamera()
     AddComponent<AudioListener>();
 }
 
-void GameCamera::UpdateInternal(float deltaTime)
+void GameCamera::OnUpdate(float deltaTime)
 {
 	// If someone is capturing text input, key inputs should not affect the game.
 	if(!Services::GetInput()->IsTextInput())

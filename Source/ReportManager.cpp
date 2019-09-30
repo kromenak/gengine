@@ -7,21 +7,92 @@
 
 ReportManager::ReportManager()
 {
-	// Create a general purpose "generic" stream.
-	ReportStream& generic = GetOrCreateStream("Generic");
-	generic.SetAction(ReportAction::Log);
-	generic.AddOutput(ReportOutput::Debugger);
-	generic.AddOutput(ReportOutput::SharedMemory);
-	generic.AddOutput(ReportOutput::Console);
-	generic.AddContent(ReportContent::Content);
+	// SheepScript stream.
+	ReportStream& sheepScript = GetOrCreateStream("SheepScript");
+	sheepScript.SetAction(ReportAction::Log);
+	sheepScript.AddOutput(ReportOutput::Debugger);
+	sheepScript.AddOutput(ReportOutput::SharedMemory);
+	sheepScript.AddOutput(ReportOutput::Console);
+	sheepScript.AddContent(ReportContent::All);
+	sheepScript.RemoveContent(ReportContent::Date);
+	sheepScript.RemoveContent(ReportContent::Machine);
+	sheepScript.RemoveContent(ReportContent::User);
 	
-	// Create stream for GEngine.
-	ReportStream& gengine = GetOrCreateStream("GEngine");
-	gengine.SetAction(ReportAction::Log);
-	gengine.AddOutput(ReportOutput::Debugger);
-	gengine.AddOutput(ReportOutput::SharedMemory);
-	gengine.AddOutput(ReportOutput::Console);
-	gengine.AddContent(ReportContent::Content);
+	// Sheep engine stream.
+	ReportStream& sheepEngine = GetOrCreateStream("SheepEngine");
+	sheepEngine.SetAction(ReportAction::Log);
+	sheepEngine.AddOutput(ReportOutput::Debugger);
+	sheepEngine.AddOutput(ReportOutput::SharedMemory);
+	sheepEngine.AddOutput(ReportOutput::Console);
+	sheepEngine.AddContent(ReportContent::All);
+	sheepEngine.RemoveContent(ReportContent::Date);
+	sheepEngine.RemoveContent(ReportContent::Machine);
+	sheepEngine.RemoveContent(ReportContent::User);
+	
+	// Sheep machine stream.
+	ReportStream& sheepMachine = GetOrCreateStream("SheepMachine");
+	sheepMachine.SetAction(ReportAction::Log);
+	sheepMachine.AddOutput(ReportOutput::Debugger);
+	sheepMachine.AddOutput(ReportOutput::SharedMemory);
+	sheepMachine.AddOutput(ReportOutput::Console);
+	sheepMachine.AddContent(ReportContent::All);
+	sheepMachine.RemoveContent(ReportContent::Date);
+	sheepMachine.RemoveContent(ReportContent::Machine);
+	sheepMachine.RemoveContent(ReportContent::User);
+	
+	// Sheep compiler fatal stream.
+	ReportStream& sheepCompilerFatal = GetOrCreateStream("SheepCompilerFatal");
+	sheepCompilerFatal.SetAction(ReportAction::Error);
+	sheepCompilerFatal.AddOutput(ReportOutput::Debugger);
+	sheepCompilerFatal.AddOutput(ReportOutput::SharedMemory);
+	sheepCompilerFatal.AddOutput(ReportOutput::Console);
+	sheepCompilerFatal.AddContent(ReportContent::All);
+	sheepCompilerFatal.RemoveContent(ReportContent::Date);
+	sheepCompilerFatal.RemoveContent(ReportContent::Machine);
+	sheepCompilerFatal.RemoveContent(ReportContent::User);
+	
+	// Sheep compiler error stream.
+	ReportStream& sheepCompilerError = GetOrCreateStream("SheepCompilerError");
+	sheepCompilerError.SetAction(ReportAction::Error);
+	sheepCompilerError.AddOutput(ReportOutput::Debugger);
+	sheepCompilerError.AddOutput(ReportOutput::SharedMemory);
+	sheepCompilerError.AddOutput(ReportOutput::Console);
+	sheepCompilerError.AddContent(ReportContent::All);
+	sheepCompilerError.RemoveContent(ReportContent::Date);
+	sheepCompilerError.RemoveContent(ReportContent::Machine);
+	sheepCompilerError.RemoveContent(ReportContent::User);
+	
+	// Sheep compiler warning stream.
+	ReportStream& sheepCompilerWarning = GetOrCreateStream("SheepCompilerWarning");
+	sheepCompilerWarning.SetAction(ReportAction::Warning);
+	sheepCompilerWarning.AddOutput(ReportOutput::Debugger);
+	sheepCompilerWarning.AddOutput(ReportOutput::SharedMemory);
+	sheepCompilerWarning.AddOutput(ReportOutput::Console);
+	sheepCompilerWarning.AddContent(ReportContent::All);
+	sheepCompilerWarning.RemoveContent(ReportContent::Date);
+	sheepCompilerWarning.RemoveContent(ReportContent::Machine);
+	sheepCompilerWarning.RemoveContent(ReportContent::User);
+	
+	// Sheep compiler info stream.
+	ReportStream& sheepCompilerInfo = GetOrCreateStream("SheepCompilerInfo");
+	sheepCompilerInfo.SetAction(ReportAction::Log);
+	sheepCompilerInfo.AddOutput(ReportOutput::Debugger);
+	sheepCompilerInfo.AddOutput(ReportOutput::SharedMemory);
+	sheepCompilerInfo.AddOutput(ReportOutput::Console);
+	sheepCompilerInfo.AddContent(ReportContent::All);
+	sheepCompilerInfo.RemoveContent(ReportContent::Date);
+	sheepCompilerInfo.RemoveContent(ReportContent::Machine);
+	sheepCompilerInfo.RemoveContent(ReportContent::User);
+	
+	//PathFileMgr
+	
+	//GameLogic
+	
+	//Console
+	
+	//BarnFileMgr
+	
+	//Actions
 	
 	// Create stream that outputs to OS dialog box.
 	ReportStream& messageBox = GetOrCreateStream("MessageBox");
@@ -30,7 +101,7 @@ ReportManager::ReportManager()
 	messageBox.AddOutput(ReportOutput::OSDialog);
 	messageBox.AddOutput(ReportOutput::Debugger);
 	messageBox.AddContent(ReportContent::All);
-	messageBox.SetFilename("errors.log");
+	messageBox.SetFilename("Errors.log");
 	
 	// Create stream that outputs to debugger console.
 	ReportStream& debugger = GetOrCreateStream("Debugger");
@@ -60,16 +131,6 @@ ReportManager::ReportManager()
 	dump.AddContent(ReportContent::Timeblock);
 	dump.AddContent(ReportContent::Location);
 	
-	// Create stream for warnings.
-	ReportStream& warning = GetOrCreateStream("Warning");
-	warning.SetAction(ReportAction::Warning);
-	warning.AddOutput(ReportOutput::File);
-	warning.AddOutput(ReportOutput::Debugger);
-	warning.AddOutput(ReportOutput::SharedMemory);
-	warning.AddOutput(ReportOutput::Console);
-	warning.AddContent(ReportContent::All);
-	warning.SetFilename("errors.log");
-	
 	// Create stream for errors.
 	ReportStream& error = GetOrCreateStream("Error");
 	error.SetAction(ReportAction::Error);
@@ -78,7 +139,46 @@ ReportManager::ReportManager()
 	error.AddOutput(ReportOutput::SharedMemory);
 	error.AddOutput(ReportOutput::Console);
 	error.AddContent(ReportContent::All);
-	error.SetFilename("errors.log");
+	error.SetFilename("Errors.log");
+	
+	// Create stream for warnings.
+	ReportStream& warning = GetOrCreateStream("Warning");
+	warning.SetAction(ReportAction::Warning);
+	warning.AddOutput(ReportOutput::File);
+	warning.AddOutput(ReportOutput::Debugger);
+	warning.AddOutput(ReportOutput::SharedMemory);
+	warning.AddOutput(ReportOutput::Console);
+	warning.AddContent(ReportContent::All);
+	warning.SetFilename("Errors.log");
+	
+	// Create stream for GEngine.
+	ReportStream& gengine = GetOrCreateStream("GEngine");
+	gengine.SetAction(ReportAction::Log);
+	gengine.AddOutput(ReportOutput::Debugger);
+	gengine.AddOutput(ReportOutput::SharedMemory);
+	gengine.AddOutput(ReportOutput::Console);
+	gengine.AddContent(ReportContent::Content);
+	
+	// Create a general purpose "generic" stream.
+	ReportStream& generic = GetOrCreateStream("Generic");
+	generic.SetAction(ReportAction::Log);
+	generic.AddOutput(ReportOutput::Debugger);
+	generic.AddOutput(ReportOutput::SharedMemory);
+	generic.AddOutput(ReportOutput::Console);
+	generic.AddContent(ReportContent::Content);
+	
+	//SheepSysCalls
+	
+	// Create resource tracker (restrack) stream.
+	ReportStream& resTrack = GetOrCreateStream("ResTrack");
+	resTrack.SetAction(ReportAction::ResTrack);
+	resTrack.AddOutput(ReportOutput::File);
+	resTrack.AddContent(ReportContent::All);
+	resTrack.RemoveContent(ReportContent::Date);
+	resTrack.RemoveContent(ReportContent::Machine);
+	resTrack.RemoveContent(ReportContent::User);
+	resTrack.SetFilename("ResTrack.log");
+	resTrack.SetFileTruncate(true);
 	
 	// Create stream for serious errors.
 	ReportStream& seriousError = GetOrCreateStream("SeriousError");
@@ -88,7 +188,7 @@ ReportManager::ReportManager()
 	seriousError.AddOutput(ReportOutput::SharedMemory);
 	seriousError.AddOutput(ReportOutput::Console);
 	seriousError.AddContent(ReportContent::All);
-	seriousError.SetFilename("errors.log");
+	seriousError.SetFilename("Errors.log");
 	
 	// Create stream for fatal errors.
 	ReportStream& fatal = GetOrCreateStream("Fatal");
@@ -96,7 +196,7 @@ ReportManager::ReportManager()
 	fatal.AddOutput(ReportOutput::File);
 	fatal.AddOutput(ReportOutput::Debugger);
 	fatal.AddContent(ReportContent::All);
-	fatal.SetFilename("errors.log");
+	fatal.SetFilename("Errors.log");
 }
 
 void ReportManager::EnableStream(const std::string& streamName)

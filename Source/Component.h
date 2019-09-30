@@ -18,12 +18,31 @@ public:
     Component(Actor* owner);
 	virtual ~Component() { }
     
-	void Update(float deltaTime) { UpdateInternal(deltaTime); }
+	void Update(float deltaTime);
     
     Actor* GetOwner() const { return mOwner; }
+	
+	void SetEnabled(bool enabled) { mEnabled = enabled; }
+	bool IsEnabled() const { return mEnabled; }
+	
+	bool IsActiveAndEnabled() const;
     
 protected:
+	virtual void OnUpdate(float deltaTime) { }
+	
+private:
+	// The component's owner.
 	Actor* mOwner = nullptr;
 	
-	virtual void UpdateInternal(float deltaTime) { }
+	// Is the component enabled? If not, OnUpdate won't be called.
+	// Components can otherwise use this as needed - for example, a disabled UIWidget may not render.
+	bool mEnabled = true;
 };
+
+inline void Component::Update(float deltaTime)
+{
+	if(mEnabled)
+	{
+		OnUpdate(deltaTime);
+	}
+}

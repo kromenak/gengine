@@ -54,7 +54,7 @@ public:
 	void Sample(Animation* animation, int frame);
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
 	std::list<AnimationState> mActiveAnimationStates;

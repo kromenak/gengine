@@ -10,12 +10,13 @@
 #include "Actor.h"
 #include "ButtonIconManager.h"
 #include "CharacterManager.h"
-#include "Console.h"
+#include "ConsoleUI.h"
 #include "FootstepManager.h"
 #include "Debug.h"
 #include "GameProgress.h"
 #include "Scene.h"
 #include "Services.h"
+#include "TextInput.h"
 
 GEngine* GEngine::inst = nullptr;
 std::vector<Actor*> GEngine::mActors;
@@ -172,16 +173,68 @@ void GEngine::ProcessInput()
         switch(event.type)
         {
 			case SDL_KEYDOWN:
+			{
 				if(event.key.keysym.sym == SDLK_BACKSPACE)
 				{
-					mInputManager.Backspace();
+					TextInput* textInput = mInputManager.GetTextInput();
+					if(textInput != nullptr)
+					{
+						textInput->DeletePrev();
+					}
+				}
+				else if(event.key.keysym.sym == SDLK_DELETE)
+				{
+					TextInput* textInput = mInputManager.GetTextInput();
+					if(textInput != nullptr)
+					{
+						textInput->DeleteNext();
+					}
+				}
+				else if(event.key.keysym.sym == SDLK_LEFT)
+				{
+					TextInput* textInput = mInputManager.GetTextInput();
+					if(textInput != nullptr)
+					{
+						textInput->MoveCursorBack();
+					}
+				}
+				else if(event.key.keysym.sym == SDLK_RIGHT)
+				{
+					TextInput* textInput = mInputManager.GetTextInput();
+					if(textInput != nullptr)
+					{
+						textInput->MoveCursorForward();
+					}
+				}
+				else if(event.key.keysym.sym == SDLK_HOME)
+				{
+					TextInput* textInput = mInputManager.GetTextInput();
+					if(textInput != nullptr)
+					{
+						textInput->MoveCursorToStart();
+					}
+				}
+				else if(event.key.keysym.sym == SDLK_END)
+				{
+					TextInput* textInput = mInputManager.GetTextInput();
+					if(textInput != nullptr)
+					{
+						textInput->MoveCursorToEnd();
+					}
 				}
 				break;
-				
+			}
+			
 			case SDL_TEXTINPUT:
+			{
 				//TODO: Make sure not copy or pasting.
-				mInputManager.AppendText(event.text.text);
+				TextInput* textInput = mInputManager.GetTextInput();
+				if(textInput != nullptr)
+				{
+					textInput->Insert(event.text.text);
+				}
 				break;
+			}
 				
             case SDL_QUIT:
                 Quit();
@@ -307,7 +360,7 @@ void GEngine::LoadSceneInternal()
 	
 	//TEMP: Create a console when entering a scene.
 	//TODO: Console should persist across all scenes! Need some "Do Not Destroy On Load" style functionality...
-	new Console(false);
+	new ConsoleUI(false);
 	
 	// Save this new location.
 	Services::Get<GameProgress>()->SetLocation(mSceneToLoad);

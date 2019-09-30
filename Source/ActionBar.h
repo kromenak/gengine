@@ -31,7 +31,7 @@ public:
 	bool IsShowing() const { return mIsShowing; }
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
 	// The action bar's canvas, which renders the UI.

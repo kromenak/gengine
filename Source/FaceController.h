@@ -55,7 +55,7 @@ public:
 	void Blink();
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
 	// The character config assigned by owner.

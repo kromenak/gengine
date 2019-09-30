@@ -16,7 +16,7 @@ public:
 	Mover(Actor* owner);
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
 	float mDirection = 1.0f;

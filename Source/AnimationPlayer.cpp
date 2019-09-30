@@ -54,7 +54,7 @@ void AnimationPlayer::Sample(Animation* animation, int frame)
 	}
 }
 
-void AnimationPlayer::UpdateInternal(float deltaTime)
+void AnimationPlayer::OnUpdate(float deltaTime)
 {
 	// Iterate over each active animation state and update it.
 	auto it = mActiveAnimationStates.begin();

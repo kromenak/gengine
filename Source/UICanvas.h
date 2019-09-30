@@ -27,16 +27,10 @@ public:
 	void RemoveWidget(UIWidget* widget);
 	void RemoveAllWidgets() { mWidgets.clear(); }
 	
-	void SetEnabled(bool enabled) { mEnabled = enabled; }
-	bool GetEnabled() { return mEnabled; }
-	
 private:
 	// An array of all canvases that currently exist.
 	static std::vector<UICanvas*> sCanvases;
 	
 	// All widgets on this canvas.
 	std::vector<UIWidget*> mWidgets;
-	
-	// Is this canvas enabled? If not, it will not be rendered.
-	bool mEnabled = true;
 };

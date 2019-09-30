@@ -28,7 +28,7 @@ public:
     void Play(Soundtrack* soundtrack);
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
     
 private:
     // The soundtrack currently being played.

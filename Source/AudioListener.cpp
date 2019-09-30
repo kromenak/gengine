@@ -17,8 +17,8 @@ AudioListener::AudioListener(Actor* owner) : Component(owner)
     
 }
 
-void AudioListener::UpdateInternal(float deltaTime)
+void AudioListener::OnUpdate(float deltaTime)
 {
-	Transform* transform = mOwner->GetTransform();
+	Transform* transform = GetOwner()->GetTransform();
     Services::GetAudio()->UpdateListener(transform->GetPosition(), Vector3::Zero, transform->GetForward(), transform->GetUp());
 }

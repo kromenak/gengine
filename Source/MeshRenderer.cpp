@@ -26,7 +26,7 @@ MeshRenderer::~MeshRenderer()
 
 void MeshRenderer::RenderOpaque()
 {
-	Matrix4 actorWorldTransform = mOwner->GetTransform()->GetLocalToWorldMatrix();
+	Matrix4 actorWorldTransform = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
 	
 	int materialIndex = 0;
 	int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
@@ -70,7 +70,7 @@ void MeshRenderer::RenderOpaque()
 
 void MeshRenderer::RenderTranslucent()
 {
-	Matrix4 actorWorldTransform = mOwner->GetTransform()->GetLocalToWorldMatrix();
+	Matrix4 actorWorldTransform = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
 	
 	int materialIndex = 0;
 	int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
@@ -192,7 +192,7 @@ Matrix4 MeshRenderer::GetMeshWorldTransform(int index) const
 {
 	if(index >= 0 && index < mMeshes.size())
 	{
-		return mOwner->GetTransform()->GetLocalToWorldMatrix() * mMeshes[index]->GetLocalTransformMatrix();
+		return GetOwner()->GetTransform()->GetLocalToWorldMatrix() * mMeshes[index]->GetLocalTransformMatrix();
 	}
 	return Matrix4::Identity;
 }

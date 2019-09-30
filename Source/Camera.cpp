@@ -17,15 +17,18 @@ Camera::Camera(Actor* owner) : Component(owner)
 
 Matrix4 Camera::GetLookAtMatrix()
 {
-    Vector3 eye = mOwner->GetPosition();
-    Vector3 lookAt = mOwner->GetPosition() + mOwner->GetForward() * 5.0f;
+	Actor* owner = GetOwner();
+	Vector3 position = GetOwner()->GetPosition();
+	
+    Vector3 eye = position;
+    Vector3 lookAt = position + owner->GetForward() * 5.0f;
     Vector3 up = Vector3::UnitY;
     return Matrix4::MakeLookAt(eye, lookAt, up);
 }
 
 Matrix4 Camera::GetLookAtMatrixNoTranslate()
 {
-    Vector3 lookAt = mOwner->GetForward() * 5.0f;
+    Vector3 lookAt = GetOwner()->GetForward() * 5.0f;
     Vector3 up = Vector3::UnitY;
 	return Matrix4::MakeLookAt(Vector3::Zero, lookAt, up);
 }

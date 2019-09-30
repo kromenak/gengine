@@ -62,6 +62,15 @@ void UILabel::SetFont(Font* font)
 	mNeedMeshRegen = true;
 }
 
+Vector2 UILabel::GetGlyphPos(int index) const
+{
+	if(index >= 0 && index < mGlyphPositions.size())
+	{
+		return mGlyphPositions[index];
+	}
+	return Vector2::Zero;
+}
+
 void UILabel::GenerateMesh()
 {
 	// Need font to generate mesh.
@@ -73,6 +82,10 @@ void UILabel::GenerateMesh()
 		delete mMesh;
 		mMesh = nullptr;
 	}
+	
+	// Reset next glyph pos (in case we have zero glyphs).
+	mGlyphPositions.clear();
+	mNextGlyphPos = Vector2::Zero;
 	
 	// Split text into lines based on newline char.
 	//TODO: May also need to split lines based on overflow settings! How would that work?
@@ -232,9 +245,14 @@ void UILabel::GenerateMesh()
 			indexes[charIndex * 6 + 4] = charIndex * 4 + 2;
 			indexes[charIndex * 6 + 5] = charIndex * 4 + 3;
 			
+			mGlyphPositions.emplace_back(xPos, yPos);
 			xPos += glyph.width;
 			++charIndex;
 		}
+		
+		// Save whatever the next glyph pos would be.
+		mGlyphPositions.emplace_back(xPos, yPos);
+		mNextGlyphPos = Vector2(xPos, yPos);
 	}
 	
 	// Save positions and UVs to mesh.

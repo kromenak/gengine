@@ -187,7 +187,7 @@ void FaceController::Blink()
 	GEngine::inst->GetScene()->GetAnimationPlayer()->Play(blinkAnim);
 }
 
-void FaceController::UpdateInternal(float deltaTime)
+void FaceController::OnUpdate(float deltaTime)
 {
 	mBlinkTimer -= deltaTime;
 	if(mBlinkTimer <= 0.0f)

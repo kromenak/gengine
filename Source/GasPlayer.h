@@ -21,7 +21,7 @@ public:
 	void SetPaused(bool paused) { mPaused = paused; }
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
     // The GAS asset being played.

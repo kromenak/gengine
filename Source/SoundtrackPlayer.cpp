@@ -34,7 +34,7 @@ void SoundtrackPlayer::Play(Soundtrack *soundtrack)
     ProcessNextNode();
 }
 
-void SoundtrackPlayer::UpdateInternal(float deltaTime)
+void SoundtrackPlayer::OnUpdate(float deltaTime)
 {
 	if(mSoundtrack == nullptr) { return; }
 	if(mSoundtrackNodes.size() == 0) { return; }

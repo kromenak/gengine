@@ -32,11 +32,13 @@ void Walker::SetCharacterConfig(const CharacterConfig& characterConfig)
 	mWalkStopAnim = characterConfig.walkStopAnim;
 }
 
-void Walker::UpdateInternal(float deltaTime)
+void Walker::OnUpdate(float deltaTime)
 {
+	Actor* owner = GetOwner();
+	
 	// Get position and rotation to modify.
-	Vector3 position = mOwner->GetPosition();
-	Quaternion rotation = mOwner->GetRotation();
+	Vector3 position = owner->GetPosition();
+	Quaternion rotation = owner->GetRotation();
 	
 	// Which direction should we turn to face? None at first.
 	Vector3 turnToFaceDir;
@@ -90,12 +92,12 @@ void Walker::UpdateInternal(float deltaTime)
 	if(turnToFaceDir != Vector3::Zero)
 	{
 		// What angle do I need to rotate to face the direction to the target?
-		float angle = Math::Acos(Vector3::Dot(mOwner->GetForward(), turnToFaceDir));
+		float angle = Math::Acos(Vector3::Dot(owner->GetForward(), turnToFaceDir));
 		if(Math::ToDegrees(angle) > 1.0f)
 		{
 			// Which way do I rotate to get to facing direction I want?
 			// Can use y-axis of cross product to determine this.
-			Vector3 cross = Vector3::Cross(mOwner->GetForward(), turnToFaceDir);
+			Vector3 cross = Vector3::Cross(owner->GetForward(), turnToFaceDir);
 			
 			// If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
 			// In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
@@ -169,8 +171,8 @@ void Walker::UpdateInternal(float deltaTime)
 	}
 		
 	// Set updated position.
-	mOwner->SetPosition(position);
-	mOwner->SetRotation(rotation);
+	owner->SetPosition(position);
+	owner->SetRotation(rotation);
 }
 
 bool Walker::WalkTo(Vector3 position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
@@ -201,7 +203,7 @@ bool Walker::WalkTo(Vector3 position, float heading, WalkerBoundary* walkerBound
 	}
 	
 	// Find a path from current position to target position, populating our path vector.
-	if(walkerBoundary->FindPath(mOwner->GetPosition(), position, mPath))
+	if(walkerBoundary->FindPath(GetOwner()->GetPosition(), position, mPath))
 	{
 		//TODO: Make debug output of paths optional.
 		{

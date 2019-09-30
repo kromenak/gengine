@@ -137,7 +137,7 @@ Vector3 RectTransform::GetLocalPosition()
 	return mLocalPosition;
 }
 
-void RectTransform::UpdateInternal(float deltaTime)
+void RectTransform::OnUpdate(float deltaTime)
 {
 	// For debugging: visualize min/max of the rect calculated for this RectTransform.
 	if(Debug::RenderRectTransformRects())

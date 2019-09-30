@@ -52,7 +52,7 @@ public:
 	
 protected:
 	Vector3 GetLocalPosition() override;
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
 	// Identifies an anchor rect that is used to position & size this RectTransform relative to its parent's Rect.

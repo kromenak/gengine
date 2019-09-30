@@ -12,6 +12,8 @@
 
 #include "Vector2.h"
 
+class TextInput;
+
 class InputManager
 {
 public:
@@ -37,12 +39,10 @@ public:
     Vector2 GetMousePosition() { return mMousePosition; }
     Vector2 GetMouseDelta() { return mMousePositionDelta; }
 	
-	void StartListenForKeyboardInput(std::string initialText);
-	void StopListenForKeyboardInput();
-	bool IsTextInput() const { return mIsTextInput; }
-	void AppendText(std::string text);
-	void Backspace();
-	std::string& GetTextInput();
+	void StartTextInput(TextInput* textInput);
+	void StopTextInput();
+	bool IsTextInput() const { return mTextInput != nullptr; }
+	TextInput* GetTextInput() { return mTextInput; }
 	
 private:
     // KEYBOARD
@@ -66,8 +66,7 @@ private:
     Vector2 mMousePositionDelta;
 	
 	// TEXT INPUT
-	bool mIsTextInput = false;
-	std::string mTextInput;
+	TextInput* mTextInput = nullptr;
 };
 
 inline bool InputManager::IsKeyDown(SDL_Scancode scancode)

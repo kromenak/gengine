@@ -16,5 +16,5 @@ public:
     AudioListener(Actor* owner);
 	
 protected:
-    void UpdateInternal(float deltaTime) override;
+    void OnUpdate(float deltaTime) override;
 };

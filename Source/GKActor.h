@@ -61,7 +61,7 @@ public:
 	FaceController* GetFaceController() const { return mFaceController; }
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
 	// The character's 3-letter identifier (GAB, GRA, etc).

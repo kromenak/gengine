@@ -133,7 +133,7 @@ void ActionBar::Hide()
 	mIsShowing = false;
 }
 
-void ActionBar::UpdateInternal(float deltaTime)
+void ActionBar::OnUpdate(float deltaTime)
 {
 	if(mIsShowing && Services::GetInput()->IsKeyDown(SDL_SCANCODE_BACKSPACE))
 	{

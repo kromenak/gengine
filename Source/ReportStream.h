@@ -141,6 +141,7 @@ private:
 	//int mBlockLevel = 0;
 	//bool mReporting = false;
 	
+	// If a file is used as output, the output file stream.
 	std::ofstream mFileOut;
 	
 	std::string BuildOutputString(const std::string& content);

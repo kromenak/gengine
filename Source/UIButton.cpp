@@ -82,7 +82,7 @@ void UIButton::Press()
 	}
 }
 
-void UIButton::UpdateInternal(float deltaTime)
+void UIButton::OnUpdate(float deltaTime)
 {
 	// If left mouse button is pressed, record whether input began over this button.
 	if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))

@@ -39,7 +39,7 @@ void VertexAnimationPlayer::Sample(VertexAnimation* animation, int frame)
 	TakeSample(animation, time);
 }
 
-void VertexAnimationPlayer::UpdateInternal(float deltaTime)
+void VertexAnimationPlayer::OnUpdate(float deltaTime)
 {
 	// Need a vertex animation to update.
 	if(mVertexAnimation == nullptr) { return; }

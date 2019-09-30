@@ -14,7 +14,7 @@ public:
     GameCamera();
 	
 protected:
-    void UpdateInternal(float deltaTime) override;
+    void OnUpdate(float deltaTime) override;
     
 private:
     Camera* mCamera = nullptr;

@@ -3,26 +3,32 @@
 //
 // Clark Kromenaker
 //
-// In-game console where some log data is output
-// and sheep commands can be entered.
+// The console system in GK3.
+// This is only the system - UI is a separate class.
 //
 #pragma once
-#include "Actor.h"
+#include <string>
+#include <vector>
 
-class RectTransform;
-class UICanvas;
-
-class Console : public Actor
+class Console
 {
 public:
-	Console(bool mini);
+	void AddOutput(std::string str);
+	std::string GetOutput(int lineCount);
+	std::string GetOutput(int index, int lineCount);
 	
-protected:
-	void UpdateInternal(float deltaTime) override;
+	void ExecuteCommand(std::string command);
+	
+	int GetCommandHistoryLength() const { return (int)mCommandHistory.size(); }
+	std::string GetCommandFromHistory(int index);
 	
 private:
-	// The console's canvas, which renders the UI.
-	UICanvas* mCanvas = nullptr;
+	// Max scrollback lines we will store.
+	int mMaxScrollbackLength = 1000;
 	
-	RectTransform* mBackgroundTransform = nullptr;
+	// Max number of commands we will store in history.
+	int mMaxCommandHistoryLength = 40;
+	
+	// History of executed commands.
+	std::vector<std::string> mCommandHistory;
 };

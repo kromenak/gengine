@@ -61,8 +61,10 @@ public:
 	State GetState() const { return mState; }
 	void SetState(State state) { mState = state; }
 	
+	bool IsActive() const { return mState == State::Enabled; }
+	
 protected:
-	virtual void UpdateInternal(float deltaTime) { }
+	virtual void OnUpdate(float deltaTime) { }
     
 private:
 	State mState = State::Enabled;

@@ -42,7 +42,7 @@ public:
 	void Press();
 	
 protected:
-	void UpdateInternal(float deltaTime) override;
+	void OnUpdate(float deltaTime) override;
 	
 private:
 	// If enabled, the button can be interacted with.

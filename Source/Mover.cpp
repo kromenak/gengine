@@ -14,7 +14,7 @@ Mover::Mover(Actor* owner) : Component(owner)
 	
 }
 
-void Mover::UpdateInternal(float deltaTime)
+void Mover::OnUpdate(float deltaTime)
 {
 	mTimer += deltaTime * mDirection;
 	if(mTimer > 5.0f)
@@ -41,7 +41,8 @@ void Mover::UpdateInternal(float deltaTime)
 	Quaternion rotation;
 	Quaternion::Slerp(rotation, fromRotation, toRotation, t);
 	
-	mOwner->SetPosition(pos);
-	mOwner->SetScale(scale);
-	mOwner->SetRotation(rotation);
+	Actor* owner = GetOwner();
+	owner->SetPosition(pos);
+	owner->SetScale(scale);
+	owner->SetRotation(rotation);
 }
