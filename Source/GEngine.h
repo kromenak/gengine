@@ -8,6 +8,7 @@
 
 #include "AssetManager.h"
 #include "AudioManager.h"
+#include "Console.h"
 #include "InputManager.h"
 #include "Renderer.h"
 #include "SheepManager.h"
@@ -54,6 +55,7 @@ private:
     InputManager mInputManager;
     SheepManager mSheepManager;
 	ReportManager mReportManager;
+	Console mConsole;
     
     // The currently active scene. There can be only one at a time (sure about that?).
     Scene* mScene = nullptr;

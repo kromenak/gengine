@@ -13,9 +13,8 @@
 class Console
 {
 public:
-	void AddOutput(std::string str);
-	std::string GetOutput(int lineCount);
-	std::string GetOutput(int index, int lineCount);
+	void AddToScrollback(std::string str);
+	std::string GetScrollback(int index, int lineCount);
 	
 	void ExecuteCommand(std::string command);
 	
@@ -25,6 +24,9 @@ public:
 private:
 	// Max scrollback lines we will store.
 	int mMaxScrollbackLength = 1000;
+	
+	// The scrollback buffer. Split into individual lines.
+	std::vector<std::string> mScrollback;
 	
 	// Max number of commands we will store in history.
 	int mMaxCommandHistoryLength = 40;

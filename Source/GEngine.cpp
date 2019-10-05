@@ -28,6 +28,9 @@ GEngine::GEngine() : mRunning(false)
 
 bool GEngine::Initialize()
 {
+	// Initialize console.
+	Services::SetConsole(&mConsole);
+	
 	// Initialize reports.
 	Services::SetReports(&mReportManager);
 	

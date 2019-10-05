@@ -16,6 +16,7 @@
 
 #include "AssetManager.h"
 #include "AudioManager.h"
+#include "Console.h"
 #include "GEngine.h"
 #include "InputManager.h"
 #include "Renderer.h"
@@ -43,6 +44,9 @@ public:
 	static ReportManager* GetReports() { return sReportManager; }
 	static void SetReports(ReportManager* reportManager) { sReportManager = reportManager; }
 	
+	static Console* GetConsole() { return sConsole; }
+	static void SetConsole(Console* console) { sConsole = console; }
+	
 	template<class T> static void Set(T* instance);
 	template<class T> static T* Get();
     
@@ -53,6 +57,7 @@ private:
     static AudioManager* sAudio;
     static SheepManager* sSheep;
 	static ReportManager* sReportManager;
+	static Console* sConsole;
 	
 	// General-purpose mapping from class Type to class instance.
 	// Use "Set" to add an entry and "Get" to retrieve an entry.

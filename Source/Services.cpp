@@ -12,5 +12,6 @@ Renderer* Services::sRenderer = nullptr;
 AudioManager* Services::sAudio = nullptr;
 SheepManager* Services::sSheep = nullptr;
 ReportManager* Services::sReportManager = nullptr;
+Console* Services::sConsole = nullptr;
 
 std::unordered_map<Type, void*> Services::sTypeToInstancePointer;
