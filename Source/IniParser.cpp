@@ -91,7 +91,7 @@ Color32 IniKeyValue::GetValueAsColor32()
 	{
 		return Color32::Black;
 	}
-	std::size_t secondSlashIndex = value.find('/', firstSlashIndex);
+	std::size_t secondSlashIndex = value.find('/', firstSlashIndex + 1);
 	if(secondSlashIndex == std::string::npos)
 	{
 		return Color32::Black;
@@ -99,7 +99,7 @@ Color32 IniKeyValue::GetValueAsColor32()
 	
 	// Split at slashes.
 	std::string firstNum = value.substr(0, firstSlashIndex);
-	std::string secondNum = value.substr(firstSlashIndex + 1, secondSlashIndex);
+	std::string secondNum = value.substr(firstSlashIndex + 1, secondSlashIndex - firstSlashIndex - 1);
 	std::string thirdNum = value.substr(secondSlashIndex + 1, std::string::npos);
 	
 	// Convert to number and return.
