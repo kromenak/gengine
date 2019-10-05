@@ -55,6 +55,13 @@ void UITextInput::Unfocus()
 	mFocused = false;
 }
 
+void UITextInput::Clear()
+{
+	mTextInput.SetText("");
+	SetText("");
+	//TODO: Reset caret position
+}
+
 void UITextInput::OnUpdate(float deltaTime)
 {
 	// If mouse is down in the rect, let's assume that means we are focused.

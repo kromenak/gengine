@@ -19,6 +19,8 @@ public:
 	void Focus();
 	void Unfocus();
 	
+	void Clear();
+	
 	void SetCaret(UIWidget* caret) { mCaret = caret; }
 	void SetCaretBlinkInterval(float interval) { mCaretBlinkInterval = interval; }
 	
