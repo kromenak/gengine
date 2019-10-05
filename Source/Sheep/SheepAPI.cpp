@@ -2039,5 +2039,11 @@ RegFunc0(StopAllSoundTracks, void, IMMEDIATE, REL_FUNC);
 //PrintIntHex
 //PrintIntHexX
 
-//PrintString
+shpvoid PrintString(std::string string)
+{
+	std::cout << string << std::endl;
+	return 0;
+}
+RegFunc1(PrintString, void, string, IMMEDIATE, DEV_FUNC);
+
 //PrintStringX
