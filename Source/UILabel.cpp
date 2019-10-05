@@ -39,14 +39,7 @@ void UILabel::Render()
 	mMesh->Render();
 }
 
-void UILabel::SetText(std::string text)
-{
-	if(text != mText)
-	{
-		mText = text;
-		mNeedMeshRegen = true;
-	}
-}
+
 
 void UILabel::SetFont(Font* font)
 {
@@ -59,6 +52,21 @@ void UILabel::SetFont(Font* font)
 	{
 		mMaterial.SetDiffuseTexture(font->GetTexture());
 	}
+	mNeedMeshRegen = true;
+}
+
+void UILabel::SetText(std::string text)
+{
+	if(text != mText)
+	{
+		mText = text;
+		mNeedMeshRegen = true;
+	}
+}
+
+void UILabel::SetLineSpacing(int spacing)
+{
+	mLineSpacing = spacing;
 	mNeedMeshRegen = true;
 }
 
@@ -163,10 +171,10 @@ void UILabel::GenerateMesh()
 		switch(mVerticalAlignment)
 		{
 			case VerticalAlignment::Bottom:
-				yPos = rect.GetMin().GetY() + (lineHeight * (lines.size() - 1 - lIndex));
+				yPos = rect.GetMin().GetY() + ((lineHeight + mLineSpacing) * (lines.size() - 1 - lIndex));
 				break;
 			case VerticalAlignment::Top:
-				yPos = rect.GetMax().GetY() - (lineHeight * (lIndex + 1));
+				yPos = rect.GetMax().GetY() - ((lineHeight + mLineSpacing) * (lIndex + 1));
 				break;
 			//case VerticalAlignment::Center:
 			//	break;
