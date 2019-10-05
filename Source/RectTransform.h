@@ -20,7 +20,10 @@ public:
 	
 	void SetSizeDelta(float x, float y);
 	void SetSizeDelta(Vector2 size);
-	Vector2 GetSize() const;
+	Vector2 GetSize() const { return GetRect().GetSize(); }
+	
+	void SetSizeDeltaX(float x);
+	void SetSizeDeltaY(float y);
 	
 	void SetPivot(float x, float y);
 	void SetPivot(Vector2 pivot);
@@ -35,10 +38,6 @@ public:
 	void SetAnchoredPosition(float x, float y);
 	void SetAnchoredPosition(const Vector2& anchoredPosition);
 	Vector2 GetAnchoredPosition() const { return mAnchoredPosition; }
-	
-	void SetAnchorOffsetsX(float x) { }
-	void SetAnchorOffsetsY(float y) { }
-	void SetAnchorOffsets(float x, float y) { }
 	
 	//SetLeft
 	//SetRight

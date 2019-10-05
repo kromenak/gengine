@@ -28,9 +28,16 @@ void RectTransform::SetSizeDelta(Vector2 size)
 	SetDirty();
 }
 
-Vector2 RectTransform::GetSize() const
+void RectTransform::SetSizeDeltaX(float x)
 {
-	return GetRect().GetSize();
+	mSizeDelta.SetX(x);
+	SetDirty();
+}
+
+void RectTransform::SetSizeDeltaY(float y)
+{
+	mSizeDelta.SetY(y);
+	SetDirty();
 }
 
 void RectTransform::SetPivot(float x, float y)
