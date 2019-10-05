@@ -61,7 +61,10 @@ public:
 	State GetState() const { return mState; }
 	void SetState(State state) { mState = state; }
 	
+	void SetActive(bool active) { mState = active ? State::Enabled : State::Disabled; }
 	bool IsActive() const { return mState == State::Enabled; }
+	
+	void Destroy() { mState = State::Dead; }
 	
 protected:
 	virtual void OnUpdate(float deltaTime) { }
