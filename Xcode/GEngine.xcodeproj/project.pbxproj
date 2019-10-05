@@ -615,10 +615,10 @@
 				4B12B9DD230A720D009F54E4 /* Debug */,
 				4B17D706206098B100EBD298 /* GameCamera.cpp */,
 				4B17D705206098B100EBD298 /* GameCamera.h */,
-				4BDFBA072341679000C4DD49 /* GameObjectModel */,
 				4B15A9501F2428C5000A689F /* GEngine.cpp */,
 				4B15A9511F2428C5000A689F /* GEngine.h */,
 				4B6B765E21A5216B00788C02 /* GK3 */,
+				4BDFBA072341679000C4DD49 /* GOM */,
 				4B09182F1FEED86B002991D4 /* InputManager.cpp */,
 				4B0918301FEED86B002991D4 /* InputManager.h */,
 				4B9E412E21BD019D008B9B1E /* IO */,
@@ -634,10 +634,10 @@
 				4B09182C1FEED84D002991D4 /* Services.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
+				4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */,
+				4BDFBA0B2341B75C00C4DD49 /* TextInput.h */,
 				4B9231A32112167F0004F4F3 /* Type.h */,
 				4B08C90D2137443F0028FEB3 /* UI */,
-				4BDFBA0B2341B75C00C4DD49 /* TextInput.h */,
-				4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -909,7 +909,7 @@
 			name = Scene;
 			sourceTree = "<group>";
 		};
-		4BDFBA072341679000C4DD49 /* GameObjectModel */ = {
+		4BDFBA072341679000C4DD49 /* GOM */ = {
 			isa = PBXGroup;
 			children = (
 				4B1555582197B59F00072F0D /* Transform.cpp */,
@@ -921,7 +921,7 @@
 				4B0B67811F78DCD40023815F /* Actor.cpp */,
 				4B0B67821F78DCD40023815F /* Actor.h */,
 			);
-			name = GameObjectModel;
+			name = GOM;
 			sourceTree = "<group>";
 		};
 		4BE6EE351F441DD100BB29D5 /* Libraries */ = {
@@ -1038,6 +1038,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);

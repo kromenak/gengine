@@ -11,7 +11,8 @@
 #include "UILabel.h"
 #include "UITextInput.h"
 
-ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform)
+ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
+	mMini(mini)
 {
 	// Add canvas for UI rendering.
 	mCanvas = AddComponent<UICanvas>();
@@ -57,44 +58,44 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform)
 		mBackgroundTransform->SetAnchorMin(Vector2(0.0f, 1.0f));
 		mBackgroundTransform->SetAnchorMax(Vector2(1.0f, 1.0f));
 		mBackgroundTransform->SetPivot(0.5f, 1.0f);
-		mBackgroundTransform->SetSizeDelta(0.0f, 200.0f);
+		mBackgroundTransform->SetSizeDelta(0.0f, 0.0f);
 		
 		// Add horizontal rule for full console.
 		{
-			Actor* hrActor = new Actor(TransformType::RectTransform);
-			RectTransform* hrTransform = hrActor->GetComponent<RectTransform>();
+			mHorizontalRuleActor = new Actor(TransformType::RectTransform);
+			RectTransform* hrTransform = mHorizontalRuleActor->GetComponent<RectTransform>();
 			hrTransform->SetParent(mBackgroundTransform);
 			
 			// Horizontal rule uses a tiling line image.
-			UIImage* hrImage = hrActor->AddComponent<UIImage>();
+			UIImage* hrImage = mHorizontalRuleActor->AddComponent<UIImage>();
 			mCanvas->AddWidget(hrImage);
 			
 			// Anchor along bottom edge of the console, with enough space for the input line below.
 			hrTransform->SetAnchorMin(Vector2(0.0f, 0.0f));
 			hrTransform->SetAnchorMax(Vector2(1.0f, 0.0f));
 			hrTransform->SetSizeDelta(-8.0f, 1.0f);
-			hrTransform->SetAnchoredPosition(0.0f, 25.0f);
+			hrTransform->SetAnchoredPosition(0.0f, kHorizontalRuleOffsetFromBottom);
 		}
 		
 		// Create scrollback text area.
-		
 		{
 			Actor* scrollbackActor = new Actor(TransformType::RectTransform);
 			RectTransform* scrollbackRT = scrollbackActor->GetComponent<RectTransform>();
 			scrollbackRT->SetParent(mBackgroundTransform);
+			mScrollbackTransform = scrollbackRT;
 			
 			// Scrollback takes up big chunk of space above horizontal rule.
-			scrollbackRT->SetAnchorMin(Vector2(0.0f, 0.2f));
+			scrollbackRT->SetAnchorMin(Vector2(0.0f, 1.0f));
 			scrollbackRT->SetAnchorMax(Vector2(1.0f, 1.0f));
 			scrollbackRT->SetSizeDelta(-20.0f, 0.0f);
-			scrollbackRT->SetPivot(0.5f, 0.0f);
+			scrollbackRT->SetPivot(0.5f, 1.0f);
 			
-			UILabel* scrollbackText = scrollbackActor->AddComponent<UILabel>();
-			mCanvas->AddWidget(scrollbackText);
+			mScrollbackBuffer = scrollbackActor->AddComponent<UILabel>();
+			mCanvas->AddWidget(mScrollbackBuffer);
 			
 			Font* font = Services::GetAssets()->LoadFont("F_CONSOLE_DISPLAY");
-			scrollbackText->SetFont(font);
-			scrollbackText->SetText("Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\n");
+			mScrollbackBuffer->SetFont(font);
+			mScrollbackBuffer->SetText("Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8\nLine9");
 		}
 		
 		// Create text input field.
@@ -112,11 +113,11 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform)
 			textInputRT->SetSizeDelta(0.0f, font->GetGlyphHeight());
 			textInputRT->SetAnchoredPosition(4.0f, 4.0f);
 			
-			UITextInput* textInput = textInputActor->AddComponent<UITextInput>();
-			mCanvas->AddWidget(textInput);
+			mTextInput = textInputActor->AddComponent<UITextInput>();
+			mCanvas->AddWidget(mTextInput);
 			
-			textInput->SetFont(font);
-			textInput->SetText("");
+			mTextInput->SetFont(font);
+			mTextInput->SetText("");
 			
 			// Create text input field caret.
 			Actor* caretActor = new Actor(TransformType::RectTransform);
@@ -127,21 +128,21 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform)
 			UIImage* caretImage = caretActor->AddComponent<UIImage>();
 			mCanvas->AddWidget(caretImage);
 			
-			// Anchor along bottom edge of the console, with enough space for the input line below.
-			//caretRT->SetAnchorMin(Vector2(0.0f, 0.0f));
-			//caretRT->SetAnchorMax(Vector2(1.0f, 0.0f));
-			//caretRT->SetSizeDelta(-8.0f, 1.0f);
-			//caretRT->SetAnchoredPosition(0.0f, 0.0f);
-			
 			caretRT->SetAnchorMin(Vector2(0.0f, 0.0f));
 			caretRT->SetAnchorMax(Vector2(0.0f, 1.0f));
 			caretRT->SetPivot(0.0f, 0.0f);
 			caretRT->SetSizeDelta(1.0f, 4.0f);
 			caretRT->SetAnchoredPosition(0.0f, 0.0f);
 			
-			textInput->SetCaret(caretImage);
-			textInput->SetCaretBlinkInterval(0.5f);
+			mTextInput->SetCaret(caretImage);
+			mTextInput->SetCaretBlinkInterval(0.5f);
 		}
+		
+		// Calculate max number of lines in the console.
+		//TODO: Need to recalculate this if the screen resolution changes.
+		float availableHeight = Services::GetRenderer()->GetWindowHeight();
+		availableHeight -= CalcInputFieldHeight();
+		mMaxScrollbackLineCount = availableHeight / mScrollbackBuffer->GetFont()->GetGlyphHeight();
 	}
 	
 	// Disable canvas so console is hidden by default.
@@ -150,44 +151,155 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform)
 
 void ConsoleUI::OnUpdate(float deltaTime)
 {
-	// Show an indicator when the console key is pressed down, but not yet released.
-	if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE))
+	if(mMini)
 	{
-		//TODO: Show "Cain" image.
+		//TODO: Mini console stuff!
+	}
+	else
+	{
+		// Show an indicator when the console key is pressed down, but not yet released.
+		if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE))
+		{
+			//TODO: Show "Cain" image.
+		}
+		
+		// On release, toggle the display of the console.
+		if(Services::GetInput()->IsKeyUp(SDL_SCANCODE_GRAVE))
+		{
+			mCanvas->SetEnabled(!mCanvas->IsEnabled());
+			if(mCanvas->IsEnabled())
+			{
+				Refresh();
+				mTextInput->Clear();
+				mTextInput->Focus();
+			}
+			else
+			{
+				mTextInput->Unfocus();
+			}
+		}
+		
+		// Don't bother with other console updates unless it's opened.
+		if(!mCanvas->IsActiveAndEnabled()) { return; }
+		
+		// If enter is pressed, execute sheep!
+		if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_RETURN))
+		{
+			Services::GetConsole()->ExecuteCommand(mTextInput->GetText());
+			mTextInput->Clear();
+		}
+		
+		// Alt plus other keys affect the size of the full console.
+		if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LALT))
+		{
+			// Alt+Down increases console size by one line.
+			if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_DOWN))
+			{
+				if(mScrollbackLineCount < mMaxScrollbackLineCount)
+				{
+					++mScrollbackLineCount;
+					Refresh();
+				}
+			}
+			// Alt+Up decreases console size by one line.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_UP))
+			{
+				if(mScrollbackLineCount > 0)
+				{
+					--mScrollbackLineCount;
+					Refresh();
+				}
+			}
+			// Alt+PgDown adds 10 lines.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_PAGEDOWN))
+			{
+				mScrollbackLineCount += 10;
+				if(mScrollbackLineCount > mMaxScrollbackLineCount)
+				{
+					mScrollbackLineCount = mMaxScrollbackLineCount;
+				}
+				Refresh();
+			}
+			// Alt+PgUp removes 10 lines.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_PAGEUP))
+			{
+				mScrollbackLineCount -= 10;
+				if(mScrollbackLineCount < 0)
+				{
+					mScrollbackLineCount = 0;
+				}
+				Refresh();
+			}
+			// Alt+Home hides all lines.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_HOME))
+			{
+				mScrollbackLineCount = 0;
+				Refresh();
+			}
+			// Alt+ENd shows max number of lines.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_END))
+			{
+				mScrollbackLineCount = mMaxScrollbackLineCount;
+				Refresh();
+			}
+		}
+		
+		//TODO: Similarly, some key combo swaps mini console between the four corners of the screen
+		
+		//TODO: Some key combo allows scrolling through the console buffer.
+	}
+}
+
+void ConsoleUI::Refresh()
+{
+	// HR is only enabled when line count is more than zero.
+	//TODO: HR is only enabled when buffer pos is at bottom.
+	mHorizontalRuleActor->SetActive(mScrollbackLineCount > 0);
+	
+	// Calculate how many scrollback lines we actually show.
+	// HR counts as a line, so it takes some space.
+	int lineCount = mScrollbackLineCount;
+	if(mHorizontalRuleActor->IsActive())
+	{
+		--lineCount;
 	}
 	
-	// On release, toggle the display of the console.
-	if(Services::GetInput()->IsKeyUp(SDL_SCANCODE_GRAVE))
+	// Calculate size of one line of scrollback buffer.
+	float scrollbackLineHeight = mScrollbackBuffer->GetFont()->GetGlyphHeight();
+	
+	// HR is positioned at 25 units. So, everything below HR is 25 - half line height (since HR is considered a line).
+	float height = CalcInputFieldHeight();
+	
+	// If HR is active, it takes up some space.
+	if(mHorizontalRuleActor->IsActive())
 	{
-		mCanvas->SetEnabled(!mCanvas->IsEnabled());
+		height += scrollbackLineHeight;
 	}
 	
-	//TODO: Alt+Up or Alt+Down should increase/decrease the size of the full console.
+	// Each line of the scrollback takes up some space.
+	float scrollbackHeight = lineCount * scrollbackLineHeight;
+	height += scrollbackHeight;
 	
-	//TODO: Some key combo also swaps full console from top to bottom.
+	// Set height for both the entire background and the scrollback buffer.
+	mScrollbackTransform->SetSizeDeltaY(scrollbackHeight);
+	mBackgroundTransform->SetSizeDeltaY(height);
 	
-	//TODO: Similarly, some key combo swaps mini console between the four corners of the screen
-	
-	//TODO: Some key combo allows scrolling through the console buffer.
-	
-	/*
-	Vector2 pivot = mBackgroundTransform->GetPivot();
-	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_LEFT))
+	// FOR TESTING
+	std::string bufferText;
+	for(int i = 0; i < lineCount; ++i)
 	{
-		pivot.SetX(pivot.GetX() - 0.1f);
+		bufferText += "Line" + std::to_string(i) + "\n";
 	}
-	else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_RIGHT))
+	mScrollbackBuffer->SetText(bufferText);
+}
+
+float ConsoleUI::CalcInputFieldHeight() const
+{
+	// HR offset constant specifies center of last scrollback line as offset from bottom of console rect.
+	// HR is meant to take up space of one scrollback line, so subtract half scrollback line height to get height just for input field.
+	if(mScrollbackBuffer != nullptr)
 	{
-		pivot.SetX(pivot.GetX() + 0.1f);
+		return kHorizontalRuleOffsetFromBottom - (mScrollbackBuffer->GetFont()->GetGlyphHeight() / 2.0f);
 	}
-	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_DOWN))
-	{
-		pivot.SetY(pivot.GetY() - 0.1f);
-	}
-	else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_UP))
-	{
-		pivot.SetY(pivot.GetY() + 0.1f);
-	}
-	mBackgroundTransform->SetPivot(pivot);
-	*/
+	return kHorizontalRuleOffsetFromBottom;
 }
