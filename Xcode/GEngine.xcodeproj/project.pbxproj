@@ -172,6 +172,8 @@
 		4B84A13921697223003B4C3F /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13821697223003B4C3F /* UILabel.cpp */; };
 		4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421120A905B600DE8C0D /* Cursor.cpp */; };
 		4B85421520A9276200DE8C0D /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
+		4B85E87923497A4A004AA3E5 /* UITextBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */; };
+		4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */; };
 		4B8E830A20F046750009A86B /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8E830920F046750009A86B /* Material.cpp */; };
 		4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
 		4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319E210999810004F4F3 /* GasPlayer.cpp */; };
@@ -400,6 +402,10 @@
 		4B85421120A905B600DE8C0D /* Cursor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Cursor.cpp; path = ../Source/Cursor.cpp; sourceTree = "<group>"; };
 		4B85421320A9276200DE8C0D /* Yak.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Yak.h; path = ../Source/Audio/Yak.h; sourceTree = "<group>"; };
 		4B85421420A9276200DE8C0D /* Yak.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Yak.cpp; path = ../Source/Audio/Yak.cpp; sourceTree = "<group>"; };
+		4B85E87723497A4A004AA3E5 /* UITextBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UITextBuffer.h; path = ../Source/UITextBuffer.h; sourceTree = "<group>"; };
+		4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UITextBuffer.cpp; path = ../Source/UITextBuffer.cpp; sourceTree = "<group>"; };
+		4B85E87A23497EBF004AA3E5 /* TextLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TextLayout.h; path = ../Source/TextLayout.h; sourceTree = "<group>"; };
+		4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TextLayout.cpp; path = ../Source/TextLayout.cpp; sourceTree = "<group>"; };
 		4B8E830820F046750009A86B /* Material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Material.h; path = ../Source/Material.h; sourceTree = "<group>"; };
 		4B8E830920F046750009A86B /* Material.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Material.cpp; path = ../Source/Material.cpp; sourceTree = "<group>"; };
 		4B92319A2103AF1B0004F4F3 /* Animation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Animation.h; path = ../Source/Animation.h; sourceTree = "<group>"; };
@@ -529,6 +535,8 @@
 				4B08C90E213745070028FEB3 /* UIWidget.h */,
 				4B775E5123382EE7007FF777 /* UITextInput.h */,
 				4B775E5223382EE7007FF777 /* UITextInput.cpp */,
+				4B85E87723497A4A004AA3E5 /* UITextBuffer.h */,
+				4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -636,6 +644,8 @@
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */,
 				4BDFBA0B2341B75C00C4DD49 /* TextInput.h */,
+				4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */,
+				4B85E87A23497EBF004AA3E5 /* TextLayout.h */,
 				4B9231A32112167F0004F4F3 /* Type.h */,
 				4B08C90D2137443F0028FEB3 /* UI */,
 			);
@@ -1183,6 +1193,7 @@
 				4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
+				4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */,
 				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
 				4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */,
 				4B2E7A65203A6072001A5B9C /* SceneModel.cpp in Sources */,
@@ -1195,6 +1206,7 @@
 				4BBC028A22F162B8005ED374 /* FaceController.cpp in Sources */,
 				4B046E94218FB10F00E56341 /* Debug.cpp in Sources */,
 				4BEA727521D7F71A00998066 /* GameProgress.cpp in Sources */,
+				4B85E87923497A4A004AA3E5 /* UITextBuffer.cpp in Sources */,
 				4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,

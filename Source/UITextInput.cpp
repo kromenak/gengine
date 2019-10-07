@@ -116,11 +116,11 @@ void UITextInput::OnUpdate(float deltaTime)
 		RectTransform* caretRT = mCaret->GetOwner()->GetComponent<RectTransform>();
 		if(mTextInput.GetCursorPos() == -1)
 		{
-			caretRT->SetAnchoredPosition(GetNextGlyphPos());
+			caretRT->SetAnchoredPosition(GetNextCharPos());
 		}
 		else
 		{
-			caretRT->SetAnchoredPosition(GetGlyphPos(mTextInput.GetCursorPos()));
+			caretRT->SetAnchoredPosition(GetCharPos(mTextInput.GetCursorPos()));
 		}
 	}
 }
