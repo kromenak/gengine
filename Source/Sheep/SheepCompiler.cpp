@@ -31,7 +31,6 @@ SheepScript* SheepCompiler::Compile(const char *filename)
 
 SheepScript* SheepCompiler::Compile(std::string sheep)
 {
-    //std::cout << sheep << std::endl;
     std::stringstream stringStream(sheep);
     return Compile(stringStream);
 }
@@ -49,7 +48,7 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
         mScanner = new SheepScanner(&stream);
         //DebugOutputTokens(mScanner);
     }
-    catch(std::bad_alloc &ba)
+    catch(std::bad_alloc& ba)
     {
         std::cerr << "Failed to allocate scanner: (" << ba.what() << "), exiting!\n";
         return nullptr;
@@ -75,7 +74,7 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
             return nullptr;
         }
     }
-    catch(std::bad_alloc &ba)
+    catch(std::bad_alloc& ba)
     {
         std::cerr << "Failed to allocate parser: (" << ba.what() << "), exiting!\n";
         return nullptr;

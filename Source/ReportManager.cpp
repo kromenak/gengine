@@ -88,7 +88,15 @@ ReportManager::ReportManager()
 	
 	//GameLogic
 	
-	//Console
+	ReportStream& console = GetOrCreateStream("Console");
+	console.SetAction(ReportAction::Log);
+	console.AddOutput(ReportOutput::Debugger);
+	console.AddOutput(ReportOutput::SharedMemory);
+	console.AddOutput(ReportOutput::Console);
+	console.AddContent(ReportContent::All);
+	console.RemoveContent(ReportContent::Date);
+	console.RemoveContent(ReportContent::Machine);
+	console.RemoveContent(ReportContent::User);
 	
 	//BarnFileMgr
 	

@@ -10,16 +10,20 @@
 #include <string>
 #include <vector>
 
+class ReportStream;
+
 class Console
 {
 public:
 	void AddToScrollback(std::string str);
-	std::string GetScrollback(int index, int lineCount);
+	const std::vector<std::string>& GetScrollback() const { return mScrollback; }
 	
 	void ExecuteCommand(std::string command);
 	
 	int GetCommandHistoryLength() const { return (int)mCommandHistory.size(); }
 	std::string GetCommandFromHistory(int index);
+	
+	void SetReportStream(ReportStream* reportStream) { mConsoleReportStream = reportStream; }
 	
 private:
 	// Max scrollback lines we will store.
@@ -33,4 +37,7 @@ private:
 	
 	// History of executed commands.
 	std::vector<std::string> mCommandHistory;
+	
+	// Report stream for console output.
+	ReportStream* mConsoleReportStream = nullptr;
 };

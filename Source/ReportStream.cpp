@@ -30,7 +30,11 @@ void ReportStream::Log(std::string content)
 	// Build output string based on desired contents.
 	std::string output = BuildOutputString(content);
 	
-	//TODO: Handle console output type
+	// Handle console output type
+	if((mOutput & ReportOutput::Console) != ReportOutput::None)
+	{
+		Services::GetConsole()->AddToScrollback(output);
+	}
 	
 	// Handle debugger output type.
 	if((mOutput & ReportOutput::Debugger) != ReportOutput::None)

@@ -21,18 +21,20 @@
 GEngine* GEngine::inst = nullptr;
 std::vector<Actor*> GEngine::mActors;
 
-GEngine::GEngine() : mRunning(false)
+GEngine::GEngine() :
+	mRunning(false)
 {
     inst = this;
 }
 
 bool GEngine::Initialize()
 {
-	// Initialize console.
-	Services::SetConsole(&mConsole);
-	
 	// Initialize reports.
 	Services::SetReports(&mReportManager);
+	
+	// Initialize console.
+	Services::SetConsole(&mConsole);
+	mConsole.SetReportStream(&mReportManager.GetReportStream("Console"));
 	
     // Initialize asset manager.
     Services::SetAssets(&mAssetManager);
@@ -98,7 +100,7 @@ bool GEngine::Initialize()
 	LoadScene("R25");
     //LoadScene("RC1");
 	
-	//mReportManager.Log("Generic", "Rock & Roll");
+	mReportManager.Log("Generic", "Rock & Roll");
     return true;
 }
 

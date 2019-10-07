@@ -12,6 +12,7 @@
 class RectTransform;
 class UICanvas;
 class UILabel;
+class UITextBuffer;
 class UITextInput;
 
 class ConsoleUI : public Actor
@@ -37,6 +38,9 @@ private:
 	// Max number of scrollback lines we can show.
 	int mMaxScrollbackLineCount = 20;
 	
+	// Current scrollback offset.
+	int mScrollbackOffset = 0;
+	
 	// The console's canvas, which renders the UI.
 	UICanvas* mCanvas = nullptr;
 	
@@ -48,7 +52,7 @@ private:
 	Actor* mHorizontalRuleActor = nullptr;
 	
 	// Scrollback buffer, contains console output text.
-	UILabel* mScrollbackBuffer = nullptr;
+	UITextBuffer* mScrollbackBuffer = nullptr;
 	
 	// Input field, contains command text.
 	UITextInput* mTextInput = nullptr;

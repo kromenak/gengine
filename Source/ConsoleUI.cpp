@@ -9,6 +9,7 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UITextBuffer.h"
 #include "UITextInput.h"
 
 ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
@@ -90,12 +91,11 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			scrollbackRT->SetSizeDelta(-20.0f, 0.0f);
 			scrollbackRT->SetPivot(0.5f, 1.0f);
 			
-			mScrollbackBuffer = scrollbackActor->AddComponent<UILabel>();
+			mScrollbackBuffer = scrollbackActor->AddComponent<UITextBuffer>();
 			mCanvas->AddWidget(mScrollbackBuffer);
 			
 			Font* font = Services::GetAssets()->LoadFont("F_CONSOLE_DISPLAY");
 			mScrollbackBuffer->SetFont(font);
-			mScrollbackBuffer->SetText("Line1\nLine2\nLine3\nLine4\nLine5\nLine6\nLine7\nLine8\nLine9");
 		}
 		
 		// Create text input field.
@@ -236,10 +236,53 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				mScrollbackLineCount = 0;
 				Refresh();
 			}
-			// Alt+ENd shows max number of lines.
+			// Alt+End shows max number of lines.
 			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_END))
 			{
 				mScrollbackLineCount = mMaxScrollbackLineCount;
+				Refresh();
+			}
+		}
+		
+		// Ctrl plus other keys affect the position within the scrollback buffer.
+		if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LCTRL))
+		{
+			// Ctrl+Down moves scrollback down one line.
+			if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_DOWN))
+			{
+				if(mScrollbackOffset > 0)
+				{
+					--mScrollbackOffset;
+					Refresh();
+				}
+			}
+			// Ctrl+Up moves scrollback up one line.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_UP))
+			{
+				//TODO
+			}
+			// Ctrl+PgDown moves scrollback down 10 lines.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_PAGEDOWN))
+			{
+				//TODO
+				Refresh();
+			}
+			// Ctrl+PgUp moves scrollback up 10 lines.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_PAGEUP))
+			{
+				//TODO
+				Refresh();
+			}
+			// Ctrl+Home moves scrollback to earliest line.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_HOME))
+			{
+				//TODO
+				Refresh();
+			}
+			// Ctrl+End moves scrollback to the latest line.
+			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_END))
+			{
+				mScrollbackOffset = 0;
 				Refresh();
 			}
 		}
@@ -252,6 +295,9 @@ void ConsoleUI::OnUpdate(float deltaTime)
 
 void ConsoleUI::Refresh()
 {
+	mScrollbackBuffer->SetLineOffset(mScrollbackOffset);
+	mScrollbackBuffer->SetLineCount(mScrollbackLineCount);
+	
 	// HR is only enabled when line count is more than zero.
 	//TODO: HR is only enabled when buffer pos is at bottom.
 	mHorizontalRuleActor->SetActive(mScrollbackLineCount > 0);
@@ -288,7 +334,14 @@ void ConsoleUI::Refresh()
 	std::string bufferText;
 	for(int i = 0; i < lineCount; ++i)
 	{
-		bufferText += "Line" + std::to_string(i) + "\n";
+		if(i == 2)
+		{
+			bufferText += "This is a really really really long line of text. It goes on and on and on. This is some really verbose console output text. Perhaps someone should consider editing this copy to make it shorter.\n";
+		}
+		else
+		{
+			bufferText += "Line" + std::to_string(i) + "\n";
+		}
 	}
 	mScrollbackBuffer->SetText(bufferText);
 }

@@ -23,13 +23,16 @@ void Console::AddToScrollback(std::string str)
 	}
 }
 
-std::string Console::GetScrollback(int index, int lineCount)
-{
-	return "";
-}
-
 void Console::ExecuteCommand(std::string command)
 {
+	// Passing an empty command outputs 40 dashes.
+	// An acknowledgement that you did something meaningless.
+	if(command.empty())
+	{
+		AddToScrollback("----------------------------------------");
+		return;
+	}
+	
 	// Modify command to have required syntax.
 	//TODO: Update compiler to accept without braces?
 	std::string modCommand = command;
