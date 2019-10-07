@@ -322,7 +322,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 IniKeyValue* entry = section.entries[i];
                 
                 // Read frame number.
-                int frameNumber = entry->GetValueAsInt();
+                //int frameNumber = entry->GetValueAsInt();
                 
                 // Read in the option.
                 if(entry->next == nullptr) { continue; }

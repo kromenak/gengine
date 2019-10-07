@@ -273,8 +273,8 @@ void SheepScriptBuilder::BranchGoto(std::string labelName)
         
         // Keep track of the fact that we need to revisit this argument once we
         // know where the "goto" label is located.
-        auto it = mGotoLabelsToBeHookedUp.find(labelName);
-        if(it == mGotoLabelsToBeHookedUp.end())
+        auto it2 = mGotoLabelsToBeHookedUp.find(labelName);
+        if(it2 == mGotoLabelsToBeHookedUp.end())
         {
             mGotoLabelsToBeHookedUp[labelName] = std::vector<int>();
         }

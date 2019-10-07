@@ -1026,7 +1026,7 @@
 		4BF8A46A1F24185300F0FB91 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0930;
+				LastUpgradeCheck = 1100;
 				TargetAttributes = {
 					4B11129A1F820A6D00AFDDFC = {
 						CreatedOnToolsVersion = 9.0;
@@ -1045,10 +1045,9 @@
 			};
 			buildConfigurationList = 4BF8A46D1F24185300F0FB91 /* Build configuration list for PBXProject "GEngine" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
 				en,
 				Base,
 			);
@@ -1611,6 +1610,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = YEKB28PSVK;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
 				GCC_CHAR_IS_UNSIGNED_CHAR = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -1673,6 +1673,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = YEKB28PSVK;
+				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
 				GCC_CHAR_IS_UNSIGNED_CHAR = NO;
@@ -1710,6 +1711,7 @@
 		4BF8A46E1F24185300F0FB91 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -1746,6 +1748,7 @@
 		4BF8A46F1F24185300F0FB91 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;

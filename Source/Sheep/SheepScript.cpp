@@ -104,30 +104,30 @@ void SheepScript::ParseFromData(char *data, int dataLength)
         int offset = dataOffsets[i] + headerSize;
         reader.Seek(offset);
         
-        std::string identifier = reader.ReadString(12);
-        if(identifier == "SysImports")
+        std::string section = reader.ReadString(12);
+        if(section == "SysImports")
         {
             ParseSysImportsSection(reader);
         }
-        else if(identifier == "StringConsts")
+        else if(section == "StringConsts")
         {
             ParseStringConstsSection(reader);
         }
-        else if(identifier == "Variables")
+        else if(section == "Variables")
         {
             ParseVariablesSection(reader);
         }
-        else if(identifier == "Functions")
+        else if(section == "Functions")
         {
             ParseFunctionsSection(reader);
         }
-        else if(identifier == "Code")
+        else if(section == "Code")
         {
             ParseCodeSection(reader);
         }
         else
         {
-            std::cout << "Unknown component: " << identifier << std::endl;
+            std::cout << "Unknown component: " << section << std::endl;
         }
     }
 }
@@ -156,7 +156,7 @@ void SheepScript::ParseSysImportsSection(BinaryReader& reader)
         import.returnType = reader.ReadByte();
         
         char argumentCount = reader.ReadByte();
-        for(int i = 0; i < argumentCount; i++)
+        for(int j = 0; j < argumentCount; j++)
         {
             import.argumentTypes.push_back(reader.ReadByte());
         }

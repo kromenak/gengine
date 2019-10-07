@@ -77,7 +77,6 @@ bool BSP::RaycastNearest(const Ray& ray, HitInfo& outHitInfo)
                     closestDistSq = distSq;
                     
                     // Find surface for this polygon, and then name for the surface.
-                    BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
                     closest = &mObjectNames[surface->objectIndex];
 					
 					// Save closest hit position.

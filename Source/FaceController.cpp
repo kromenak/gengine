@@ -136,9 +136,9 @@ void FaceController::ClearEyes()
 	UpdateFaceTexture();
 }
 
-void FaceController::SetEye(EyeType type, Texture* texture)
+void FaceController::SetEye(EyeType eyeType, Texture* texture)
 {
-	if(type == EyeType::Left)
+	if(eyeType == EyeType::Left)
 	{
 		mCurrentLeftEyeTexture = texture;
 	}
@@ -149,9 +149,9 @@ void FaceController::SetEye(EyeType type, Texture* texture)
 	UpdateFaceTexture();
 }
 
-void FaceController::ClearEye(EyeType type)
+void FaceController::ClearEye(EyeType eyeType)
 {
-	if(type == EyeType::Left)
+	if(eyeType == EyeType::Left)
 	{
 		mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
 	}

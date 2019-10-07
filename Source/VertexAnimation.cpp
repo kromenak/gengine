@@ -223,11 +223,11 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
             while(byteCount > 0)
             {
                 // 1 byte: A flag indicating what type of data is coming next.
-                unsigned int identifier = reader.ReadUByte();
+                unsigned int dataId = reader.ReadUByte();
                 byteCount -= 1;
                 
                 // Identifier 0 is uncompressed vertex data.
-                if(identifier == 0)
+                if(dataId == 0)
                 {
                     #ifdef DEBUG_OUTPUT
                     std::cout << "      Vertex Data Block" << std::endl;
@@ -264,7 +264,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     #endif
                     
                     // Next, three floats per vertex (X, Y, Z).
-                    for(int i = 0; i < vertexCount; i++)
+                    for(int k = 0; k < vertexCount; k++)
                     {
                         float x = reader.ReadFloat();
 						float z = reader.ReadFloat();
@@ -273,7 +273,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                 }
                 // Identifier 1 also appears to be vertex data, but in a compressed format.
-                else if(identifier == 1)
+                else if(dataId == 1)
                 {
                     #ifdef DEBUG_OUTPUT
                     std::cout << "      Compressed Vertex Data Block" << std::endl;
@@ -379,7 +379,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     delete[] vertexDataFormat;
                 }
                 // Identifier 2 is transform matrix data.
-                else if(identifier == 2)
+                else if(dataId == 2)
                 {
                     #ifdef DEBUG_OUTPUT
                     std::cout << "      Matrix Data Block" << std::endl;
@@ -445,7 +445,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     }
                 }
                 // Identifier 3 is min/max data.
-                else if(identifier == 3)
+                else if(dataId == 3)
                 {
                     #ifdef DEBUG_OUTPUT
                     std::cout << "      Min/Max Data Block" << std::endl;
@@ -467,7 +467,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                 }
                 else
                 {
-                    std::cout << "Unexpected identifier " << (int)identifier << std::endl;
+                    std::cout << "Unexpected identifier " << (int)dataId << std::endl;
                 }
             } // while(byteCount > 0)
         } // iterate mesh groups
