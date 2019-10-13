@@ -41,6 +41,9 @@ bool GEngine::Initialize()
     
     // Add "Assets" directory as a possible location for any file.
     mAssetManager.AddSearchPath("Assets/");
+	
+	// Add "Assets/GK3" directory, which should contain the actual assets from GK3 data folder.
+	mAssetManager.AddSearchPath("Assets/GK3/");
     
     // Initialize input.
     Services::SetInput(&mInputManager);
