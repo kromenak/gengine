@@ -9,6 +9,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <CoreFoundation/CoreFoundation.h>
+
 #include "StringUtil.h"
 
 AssetManager::AssetManager()
@@ -319,13 +321,36 @@ std::string AssetManager::SanitizeAssetName(std::string assetName, std::string e
 
 std::string AssetManager::GetAssetPath(std::string fileName)
 {
-    for(const std::string& searchPath : mSearchPaths)
-    {
-        std::string path = searchPath + fileName;
-        
-        std::ifstream f(path.c_str());
-        if(f.good()) { return path; }
-    }
+	CFBundleRef bundleRef = CFBundleGetMainBundle();
+	if(bundleRef != nullptr)
+	{
+		for(const std::string& searchPath : mSearchPaths)
+		{
+			CFStringRef searchPathCFStr = CFStringCreateWithCString(CFAllocatorGetDefault(), searchPath.c_str(), kCFStringEncodingUTF8);
+			CFStringRef fileNameCFStr = CFStringCreateWithCString(CFAllocatorGetDefault(), fileName.c_str(), kCFStringEncodingUTF8);
+			CFURLRef assetUrl = CFBundleCopyResourceURL(bundleRef, fileNameCFStr, NULL, searchPathCFStr);
+			
+			if(assetUrl != nullptr)
+			{
+				CFStringRef assetStr = CFURLGetString(assetUrl);
+				std::string path = CFStringGetCStringPtr(assetStr, kCFStringEncodingUTF8);
+				path.erase(0, 7);
+			
+				std::ifstream f(path.c_str());
+				if(f.good()) { return path; }
+			}
+		}
+	}
+	else
+	{
+		for(const std::string& searchPath : mSearchPaths)
+		{
+			std::string path = searchPath + fileName;
+			
+			std::ifstream f(path.c_str());
+			if(f.good()) { return path; }
+		}
+	}
     return "";
 }
 
