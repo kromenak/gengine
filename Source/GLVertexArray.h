@@ -7,6 +7,7 @@
 //
 #pragma once
 #include <GL/glew.h>
+//#include <OpenGL/gl.h>
 
 #include "AtomicTypes.h"
 #include "Mesh.h"

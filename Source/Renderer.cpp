@@ -150,7 +150,7 @@ bool Renderer::Initialize()
 		//SDL_Log("%f, %f", hdpi, vdpi);
 	}
 	*/
-    
+	
     // Initialize GLEW.
     glewExperimental = GL_TRUE;
     if(glewInit() != GLEW_OK)
