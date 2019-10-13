@@ -41,7 +41,6 @@
 		4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9501F2428C5000A689F /* GEngine.cpp */; };
 		4B15A9561F242C55000A689F /* Renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A9541F242C55000A689F /* Renderer.cpp */; };
 		4B15A9581F242ECF000A689F /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4B15A9571F242ECF000A689F /* CoreFoundation.framework */; };
-		4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A95A1F243349000A689F /* SDLLog.cpp */; };
 		4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */; };
 		4B17D707206098B100EBD298 /* GameCamera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D706206098B100EBD298 /* GameCamera.cpp */; };
 		4B1A2CB522053097000C34D8 /* MathTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1A2CB422053097000C34D8 /* MathTests.cpp */; };
@@ -186,6 +185,20 @@
 		4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACE1C821D2B2B2000CBE7B /* Submesh.cpp */; };
 		4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACE1C821D2B2B2000CBE7B /* Submesh.cpp */; };
 		4BAF4BD1209A15F1006472E0 /* SheepScriptBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */; };
+		4BB67C41235254F900FDFB30 /* AnimationNodes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2606EC22F3D43B0030F2D9 /* AnimationNodes.cpp */; };
+		4BB67C422352552000FDFB30 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFBA0923418E8F00C4DD49 /* Console.cpp */; };
+		4BB67C432352552200FDFB30 /* ConsoleUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9DF230A7298009F54E4 /* ConsoleUI.cpp */; };
+		4BB67C442352552A00FDFB30 /* FaceController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBC028922F162B8005ED374 /* FaceController.cpp */; };
+		4BB67C452352552C00FDFB30 /* FootstepManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */; };
+		4BB67C462352554500FDFB30 /* stb_image_resize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9D922FF3764009F54E4 /* stb_image_resize.cpp */; };
+		4BB67C472352555800FDFB30 /* RectUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F222335B16C00D25B2D /* RectUtil.cpp */; };
+		4BB67C482352556C00FDFB30 /* RenderTexture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B12B9D222F94ABC009F54E4 /* RenderTexture.cpp */; };
+		4BB67C492352558300FDFB30 /* ReportManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7A62FE223DC3820053C95F /* ReportManager.cpp */; };
+		4BB67C4A2352558400FDFB30 /* ReportStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7A6301223DC3B70053C95F /* ReportStream.cpp */; };
+		4BB67C4B235255C800FDFB30 /* TextInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */; };
+		4BB67C4C235255CA00FDFB30 /* TextLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */; };
+		4BB67C4D235255DE00FDFB30 /* UITextInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B775E5223382EE7007FF777 /* UITextInput.cpp */; };
+		4BB67C4E235255E000FDFB30 /* UITextBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */; };
 		4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB34B4214F72BB0069B2E9 /* Font.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
 		4BBC028A22F162B8005ED374 /* FaceController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBC028922F162B8005ED374 /* FaceController.cpp */; };
@@ -308,8 +321,6 @@
 		4B15A9541F242C55000A689F /* Renderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Renderer.cpp; path = ../Source/Renderer.cpp; sourceTree = "<group>"; };
 		4B15A9551F242C55000A689F /* Renderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Renderer.h; path = ../Source/Renderer.h; sourceTree = "<group>"; };
 		4B15A9571F242ECF000A689F /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
-		4B15A95A1F243349000A689F /* SDLLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SDLLog.cpp; path = ../Source/SDLLog.cpp; sourceTree = "<group>"; };
-		4B15A95B1F243349000A689F /* SDLLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SDLLog.h; path = ../Source/SDLLog.h; sourceTree = "<group>"; };
 		4B17D6FF206072E400EBD298 /* SoundtrackPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SoundtrackPlayer.h; path = ../Source/SoundtrackPlayer.h; sourceTree = "<group>"; };
 		4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SoundtrackPlayer.cpp; path = ../Source/SoundtrackPlayer.cpp; sourceTree = "<group>"; };
 		4B17D705206098B100EBD298 /* GameCamera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GameCamera.h; path = ../Source/GameCamera.h; sourceTree = "<group>"; };
@@ -531,12 +542,12 @@
 				4B08C911213747980028FEB3 /* UIImage.h */,
 				4B84A13821697223003B4C3F /* UILabel.cpp */,
 				4B84A13721697223003B4C3F /* UILabel.h */,
+				4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */,
+				4B85E87723497A4A004AA3E5 /* UITextBuffer.h */,
+				4B775E5223382EE7007FF777 /* UITextInput.cpp */,
+				4B775E5123382EE7007FF777 /* UITextInput.h */,
 				4B08C90F213745070028FEB3 /* UIWidget.cpp */,
 				4B08C90E213745070028FEB3 /* UIWidget.h */,
-				4B775E5123382EE7007FF777 /* UITextInput.h */,
-				4B775E5223382EE7007FF777 /* UITextInput.cpp */,
-				4B85E87723497A4A004AA3E5 /* UITextBuffer.h */,
-				4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -581,12 +592,12 @@
 		4B12B9DD230A720D009F54E4 /* Debug */ = {
 			isa = PBXGroup;
 			children = (
+				4BDFBA0923418E8F00C4DD49 /* Console.cpp */,
+				4BDFBA0823418E8F00C4DD49 /* Console.h */,
+				4B12B9DF230A7298009F54E4 /* ConsoleUI.cpp */,
+				4B12B9DE230A7298009F54E4 /* ConsoleUI.h */,
 				4B046E93218FB10F00E56341 /* Debug.cpp */,
 				4B046E92218FB10F00E56341 /* Debug.h */,
-				4B12B9DE230A7298009F54E4 /* ConsoleUI.h */,
-				4B12B9DF230A7298009F54E4 /* ConsoleUI.cpp */,
-				4BDFBA0823418E8F00C4DD49 /* Console.h */,
-				4BDFBA0923418E8F00C4DD49 /* Console.cpp */,
 			);
 			name = Debug;
 			sourceTree = "<group>";
@@ -803,8 +814,6 @@
 		4B7A6306223EDAF50053C95F /* Reports */ = {
 			isa = PBXGroup;
 			children = (
-				4B15A95A1F243349000A689F /* SDLLog.cpp */,
-				4B15A95B1F243349000A689F /* SDLLog.h */,
 				4B7A62FE223DC3820053C95F /* ReportManager.cpp */,
 				4B7A62FD223DC3820053C95F /* ReportManager.h */,
 				4B7A6301223DC3B70053C95F /* ReportStream.cpp */,
@@ -1145,7 +1154,6 @@
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4BDDCD5E20D6C4BC00701A89 /* VertexAnimation.cpp in Sources */,
-				4B15A95C1F243349000A689F /* SDLLog.cpp in Sources */,
 				4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */,
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
@@ -1252,6 +1260,7 @@
 				4B22F50B2174075B0065B152 /* NVC.cpp in Sources */,
 				4B22F505217407530065B152 /* SheepManager.cpp in Sources */,
 				4B22F5322174078B0065B152 /* Yak.cpp in Sources */,
+				4BB67C462352554500FDFB30 /* stb_image_resize.cpp in Sources */,
 				4B22F5372174078B0065B152 /* Component.cpp in Sources */,
 				4B22F5262174078B0065B152 /* VertexAnimation.cpp in Sources */,
 				4B22F53A2174078B0065B152 /* GKActor.cpp in Sources */,
@@ -1259,16 +1268,22 @@
 				4B22F5352174078B0065B152 /* BinaryWriter.cpp in Sources */,
 				4B2CA01021B90FAF006D5E52 /* BinaryReader.cpp in Sources */,
 				4B22F50E2174075B0065B152 /* SIF.cpp in Sources */,
+				4BB67C4B235255C800FDFB30 /* TextInput.cpp in Sources */,
+				4BB67C41235254F900FDFB30 /* AnimationNodes.cpp in Sources */,
 				4B22F508217407530065B152 /* SheepVM.cpp in Sources */,
 				4B22F52F2174078B0065B152 /* AudioManager.cpp in Sources */,
 				4B22F4FC217407470065B152 /* imstream.cpp in Sources */,
 				4B22F50C2174075B0065B152 /* Scene.cpp in Sources */,
 				4B22F4F62174073D0065B152 /* UIWidget.cpp in Sources */,
+				4BB67C4A2352558400FDFB30 /* ReportStream.cpp in Sources */,
+				4BB67C472352555800FDFB30 /* RectUtil.cpp in Sources */,
 				4B22F5312174078B0065B152 /* SoundtrackPlayer.cpp in Sources */,
 				4B22F4FD217407470065B152 /* membuf.cpp in Sources */,
 				4B22F5302174078B0065B152 /* Soundtrack.cpp in Sources */,
 				4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */,
 				4B22F50D2174075B0065B152 /* SceneModel.cpp in Sources */,
+				4BB67C4C235255CA00FDFB30 /* TextLayout.cpp in Sources */,
+				4BB67C452352552C00FDFB30 /* FootstepManager.cpp in Sources */,
 				4B22F503217407530065B152 /* SheepAPI.cpp in Sources */,
 				4B2CA00B21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4B22F501217407530065B152 /* lex.yy.cc in Sources */,
@@ -1279,12 +1294,14 @@
 				4B22F509217407530065B152 /* Skybox.cpp in Sources */,
 				4B22F53B2174078B0065B152 /* IniParser.cpp in Sources */,
 				4B22F5392174078B0065B152 /* GEngine.cpp in Sources */,
+				4BB67C422352552000FDFB30 /* Console.cpp in Sources */,
 				4B22F502217407530065B152 /* sheep.tab.cc in Sources */,
 				4B6B766B21AB99C500788C02 /* FileSystem.cpp in Sources */,
 				4B22F51B2174076D0065B152 /* Matrix3.cpp in Sources */,
 				4B22F506217407530065B152 /* SheepScript.cpp in Sources */,
 				4B22F51D2174076D0065B152 /* Plane.cpp in Sources */,
 				4B22F5202174076D0065B152 /* Vector2.cpp in Sources */,
+				4BB67C492352558300FDFB30 /* ReportManager.cpp in Sources */,
 				4B22F500217407470065B152 /* CallbackMethod.cpp in Sources */,
 				4B22F507217407530065B152 /* SheepScriptBuilder.cpp in Sources */,
 				4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */,
@@ -1300,7 +1317,9 @@
 				4B22F5212174076D0065B152 /* Vector3.cpp in Sources */,
 				4B22F5102174075B0065B152 /* Services.cpp in Sources */,
 				4B046E95218FB10F00E56341 /* Debug.cpp in Sources */,
+				4BB67C442352552A00FDFB30 /* FaceController.cpp in Sources */,
 				4B22F5272174078B0065B152 /* Animation.cpp in Sources */,
+				4BB67C4E235255E000FDFB30 /* UITextBuffer.cpp in Sources */,
 				4BEA727621D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
@@ -1310,14 +1329,17 @@
 				4B22F53C2174078B0065B152 /* InputManager.cpp in Sources */,
 				4B22F512217407640065B152 /* GLVertexArray.cpp in Sources */,
 				4B22F5292174078B0065B152 /* GAS.cpp in Sources */,
+				4BB67C432352552200FDFB30 /* ConsoleUI.cpp in Sources */,
 				4B22F4F42174073D0065B152 /* UIImage.cpp in Sources */,
 				4B22F5282174078B0065B152 /* AnimationPlayer.cpp in Sources */,
 				4B22F517217407640065B152 /* Renderer.cpp in Sources */,
 				4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */,
 				4B22F51E2174076D0065B152 /* Quaternion.cpp in Sources */,
+				4BB67C4D235255DE00FDFB30 /* UITextInput.cpp in Sources */,
 				4B0E44F72186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4B22F5222174076D0065B152 /* Vector4.cpp in Sources */,
 				4B046E91218E855600E56341 /* Mover.cpp in Sources */,
+				4BB67C482352556C00FDFB30 /* RenderTexture.cpp in Sources */,
 				4B22F543217410830065B152 /* Main.cpp in Sources */,
 				4B22F519217407640065B152 /* Shader.cpp in Sources */,
 				4B22F4F32174073D0065B152 /* Font.cpp in Sources */,
@@ -1510,7 +1532,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lGLEW.1.12.0",
+					"-lGLEW.2.1.0",
 					"-lfmod",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
@@ -1578,7 +1600,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lGLEW.1.12.0",
+					"-lGLEW.2.1.0",
 					"-lfmod",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
@@ -1640,7 +1662,7 @@
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lGLEW.1.12.0",
+					"-lGLEW.2.1.0",
 					"-lfmod",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
@@ -1698,7 +1720,7 @@
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lGLEW.1.12.0",
+					"-lGLEW.2.1.0",
 					"-lfmod",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
