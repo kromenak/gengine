@@ -20,6 +20,15 @@ namespace Path
 	const char kSeparator = '/';
 	
 	std::string Combine(std::initializer_list<std::string> paths);
+		
+	/**
+	 * Given a filename and a relative search path, determine if a file exists (return value) and determines
+	 * a full path (via out variable) that can be used to read the file.
+	 *
+	 * If a file is in a sub-directory next to the executable, this is fairly trivial (though determining if the file exists is still a bit iffy).
+	 * But on some platforms (like OSX), getting a resource that exists in the app bundle is not entirely straightforward.
+	 */
+	bool FindFullPath(const std::string& fileName, const std::string& relativeSearchPath, std::string& outPath);
 }
 
 namespace Directory
