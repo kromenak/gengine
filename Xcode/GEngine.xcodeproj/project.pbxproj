@@ -359,6 +359,7 @@
 		4B2E7A64203A6072001A5B9C /* SceneModel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SceneModel.cpp; path = ../Source/SceneModel.cpp; sourceTree = "<group>"; };
 		4B399E3F22D00E2100221AE4 /* 3D-Billboard.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Billboard.vert"; path = "../Assets/3D-Billboard.vert"; sourceTree = "<group>"; };
 		4B399E4022D00E2100221AE4 /* 3D-Billboard.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Billboard.frag"; path = "../Assets/3D-Billboard.frag"; sourceTree = "<group>"; };
+		4B3D478B23540D2500EB510E /* Platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../Source/Platform.h; sourceTree = "<group>"; };
 		4B4300851FB7EE44009EDE58 /* Quaternion.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Quaternion.h; path = ../Source/Quaternion.h; sourceTree = "<group>"; };
 		4B4300861FB7EE44009EDE58 /* Quaternion.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Quaternion.cpp; path = ../Source/Quaternion.cpp; sourceTree = "<group>"; };
 		4B4621E91FF741D800536BA6 /* Texture.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Texture.h; path = ../Source/Texture.h; sourceTree = "<group>"; };
@@ -646,6 +647,7 @@
 				4B4300841FB7EDFA009EDE58 /* Math */,
 				4B046E8F218E855600E56341 /* Mover.cpp */,
 				4B046E8E218E855600E56341 /* Mover.h */,
+				4B3D478B23540D2500EB510E /* Platform.h */,
 				4B364C3520ECADBE00EFC50C /* Rendering */,
 				4B7A6306223EDAF50053C95F /* Reports */,
 				4BD673C920B10EB200795582 /* Scene */,
