@@ -33,45 +33,45 @@ public:
     ~AssetManager();
 	
 	// Adds a filesystem path to search for assets and bundles at.
-    void AddSearchPath(std::string searchPath);
+    void AddSearchPath(const std::string& searchPath);
 	
 	// Load or unload a barn bundle.
-    void LoadBarn(std::string barnName);
-    void UnloadBarn(std::string barnName);
+    bool LoadBarn(const std::string& barnName);
+    void UnloadBarn(const std::string& barnName);
 	
 	// Write an asset from a bundle to a file.
-    void WriteBarnAssetToFile(std::string assetName);
-	void WriteBarnAssetToFile(std::string assetName, std::string outputDir);
+    void WriteBarnAssetToFile(const std::string& assetName);
+	void WriteBarnAssetToFile(const std::string& assetName, const std::string& outputDir);
 	
 	// Write all assets from a bundle that match a search string.
-	void WriteAllBarnAssetsToFile(std::string search);
-	void WriteAllBarnAssetsToFile(std::string search, std::string outputDir);
+	void WriteAllBarnAssetsToFile(const std::string& search);
+	void WriteAllBarnAssetsToFile(const std::string& search, const std::string& outputDir);
 	
-    Audio* LoadAudio(std::string name);
-    Soundtrack* LoadSoundtrack(std::string name);
-    Yak* LoadYak(std::string name);
+    Audio* LoadAudio(const std::string& name);
+    Soundtrack* LoadSoundtrack(const std::string& name);
+    Yak* LoadYak(const std::string& name);
     
-    Model* LoadModel(std::string name);
-    Texture* LoadTexture(std::string name);
+    Model* LoadModel(const std::string& name);
+    Texture* LoadTexture(const std::string& name);
     
-    GAS* LoadGAS(std::string name);
-    Animation* LoadAnimation(std::string name);
-    VertexAnimation* LoadVertexAnimation(std::string name);
+    GAS* LoadGAS(const std::string& name);
+    Animation* LoadAnimation(const std::string& name);
+    VertexAnimation* LoadVertexAnimation(const std::string& name);
     
-    SIF* LoadSIF(std::string name);
-    SceneModel* LoadSceneModel(std::string name);
-    NVC* LoadNVC(std::string name);
-    BSP* LoadBSP(std::string name);
+    SIF* LoadSIF(const std::string& name);
+    SceneModel* LoadSceneModel(const std::string& name);
+    NVC* LoadNVC(const std::string& name);
+    BSP* LoadBSP(const std::string& name);
     
-    SheepScript* LoadSheep(std::string name);
+    SheepScript* LoadSheep(const std::string& name);
     
-    Cursor* LoadCursor(std::string name);
-	Font* LoadFont(std::string name);
+    Cursor* LoadCursor(const std::string& name);
+	Font* LoadFont(const std::string& name);
 	
-    Shader* LoadShader(std::string name);
-	Shader* LoadShader(std::string vertName, std::string fragName);
+    Shader* LoadShader(const std::string& name);
+	Shader* LoadShader(const std::string& vertName, const std::string& fragName);
 	
-	char* LoadRaw(std::string name, unsigned int& outBufferSize);
+	char* LoadRaw(const std::string& name, unsigned int& outBufferSize);
     
 private:
     // A list of paths to search for assets.
@@ -103,15 +103,15 @@ private:
     std::unordered_map<std::string, Shader*> mLoadedShaders;
 	
 	// Retrieve a barn bundle by name, or by contained asset.
-	BarnFile* GetBarn(std::string barnName);
-	BarnFile* GetBarnContainingAsset(std::string assetName);
+	BarnFile* GetBarn(const std::string& barnName);
+	BarnFile* GetBarnContainingAsset(const std::string& assetName);
     
-    std::string SanitizeAssetName(std::string assetName, std::string expectedExtension);
+    std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
     
-    std::string GetAssetPath(std::string fileName);
+    std::string GetAssetPath(const std::string& fileName);
     
-    template<class T> T* LoadAsset(std::string assetName, std::unordered_map<std::string, T*>* cache);
-	char* LoadAssetBuffer(std::string assetName, unsigned int& outBufferSize);
+    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache);
+	char* LoadAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
 	
 	template<class T> void UnloadAssets(std::unordered_map<std::string, T*>& cache);
 };

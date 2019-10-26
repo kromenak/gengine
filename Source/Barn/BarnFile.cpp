@@ -16,7 +16,7 @@
 #include "FileSystem.h"
 #include "Texture.h"
 
-BarnFile::BarnFile(const char* filePath) :
+BarnFile::BarnFile(const std::string& filePath) :
     mName(filePath),
     mReader(filePath)
 {
@@ -238,7 +238,7 @@ bool BarnFile::CanRead() const
     return mReader.CanRead();
 }
 
-BarnAsset* BarnFile::GetAsset(const std::string assetName)
+BarnAsset* BarnFile::GetAsset(const std::string& assetName)
 {
 	auto it = mAssetMap.find(assetName);
     if(it != mAssetMap.end())
@@ -248,7 +248,7 @@ BarnAsset* BarnFile::GetAsset(const std::string assetName)
     return nullptr;
 }
 
-bool BarnFile::Extract(const std::string assetName, char *buffer, int bufferSize)
+bool BarnFile::Extract(const std::string& assetName, char *buffer, int bufferSize)
 {
     // Get the asset handle associated with this asset name.
     // We fail if we can't find the asset with that name.
@@ -392,12 +392,12 @@ bool BarnFile::Extract(const std::string assetName, char *buffer, int bufferSize
     return true;
 }
 
-bool BarnFile::WriteToFile(const std::string assetName)
+bool BarnFile::WriteToFile(const std::string& assetName)
 {
 	return WriteToFile(assetName, "");
 }
 
-bool BarnFile::WriteToFile(const std::string assetName, const std::string outputDir)
+bool BarnFile::WriteToFile(const std::string& assetName, const std::string outputDir)
 {
 	// Retrieve the asset handle, first of all.
 	BarnAsset* asset = GetAsset(assetName);
@@ -478,12 +478,12 @@ bool BarnFile::WriteToFile(const std::string assetName, const std::string output
 	return result;
 }
 
-void BarnFile::WriteAllToFile(const std::string search)
+void BarnFile::WriteAllToFile(const std::string& search)
 {
 	return WriteAllToFile(search, "");
 }
 
-void BarnFile::WriteAllToFile(const std::string search, const std::string outputDir)
+void BarnFile::WriteAllToFile(const std::string& search, const std::string outputDir)
 {
 	// Search through all assets for the search term.
 	// If it's found, write the asset to file.

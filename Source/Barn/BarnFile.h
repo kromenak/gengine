@@ -5,6 +5,7 @@
 //  Created by Clark Kromenaker on 8/4/17.
 //
 #pragma once
+#include <string>
 #include <unordered_map>
 
 #include "BarnAsset.h"
@@ -13,24 +14,24 @@
 class BarnFile
 {
 public:
-    BarnFile(const char* filePath);
+    BarnFile(const std::string& filePath);
 	
 	// Ensure we can actually read assets from this barn.
     bool CanRead() const;
 	
 	// Retrieves an asset handle, if it exists in this bundle.
-    BarnAsset* GetAsset(const std::string assetName);
+    BarnAsset* GetAsset(const std::string& assetName);
 	
 	// Extracts an asset into the provided buffer.
-    bool Extract(const std::string assetName, char* buffer, int bufferSize);
+    bool Extract(const std::string& assetName, char* buffer, int bufferSize);
 	
 	// For debugging, write assets to file.
-    bool WriteToFile(const std::string assetName);
-	bool WriteToFile(const std::string assetName, const std::string outputDir);
+    bool WriteToFile(const std::string& assetName);
+	bool WriteToFile(const std::string& assetName, const std::string outputDir);
 	
 	// For debugging, write assets to file whose names match a search string.
-	void WriteAllToFile(const std::string search);
-	void WriteAllToFile(const std::string search, const std::string outputDir);
+	void WriteAllToFile(const std::string& search);
+	void WriteAllToFile(const std::string& search, const std::string outputDir);
 	
 	// For debugging, output asset list to cout.
 	void OutputAssetList() const;

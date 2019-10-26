@@ -10,6 +10,12 @@
 #include <iostream>
 #include "imstream.h"
 
+BinaryReader::BinaryReader(const std::string& filePath) :
+	BinaryReader(filePath.c_str())
+{
+	
+}
+
 BinaryReader::BinaryReader(const char* filePath)
 {
     mStream = new std::ifstream(filePath, std::ios::in | std::ios::binary);

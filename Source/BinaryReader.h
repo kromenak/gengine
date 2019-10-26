@@ -10,6 +10,7 @@
 class BinaryReader
 {
 public:
+	BinaryReader(const std::string& filePath);
     BinaryReader(const char* filePath);
     BinaryReader(const char* memory, unsigned int memoryLength);
     ~BinaryReader();
