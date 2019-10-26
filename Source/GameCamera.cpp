@@ -80,6 +80,8 @@ void GameCamera::OnUpdate(float deltaTime)
 	}
 	
 	// Handle hovering and clicking on scene objects.
+	//TODO: Original game seems to ONLY check this when the mouse cursor moves or is clicked (in other words, on input).
+	//TODO: Maybe we should do that too?
 	if(mCamera != nullptr)
 	{
 		// Calculate mouse click ray.

@@ -293,6 +293,16 @@ void Scene::SetCameraPosition(std::string cameraName)
 
 bool Scene::CheckInteract(const Ray& ray)
 {
+	// Check against any dynamic actors before falling back on BSP check.
+	for(auto& actor : mActors)
+	{
+		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
+		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
+		{
+			return true;
+		}
+	}
+	
 	BSP* bsp = mSceneData.GetBSP();
 	if(bsp == nullptr) { return false; }
 	
@@ -327,12 +337,28 @@ void Scene::Interact(const Ray& ray)
 	// Ignore scene interaction while the action bar is showing.
 	if(mActionBar->IsShowing()) { return; }
 	
+	// Check against any dynamic actors before falling back on BSP check.
+	//TODO: Need to handle case where mouse is over multiple actors! We want to pick the closest one in that case.
+	for(auto& actor : mActors)
+	{
+		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
+		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
+		{
+			// Find all verbs that can be used for this object.
+			std::vector<const NVCItem*> viableActions = mSceneData.GetViableVerbsForNoun(actor->GetNoun(), mEgo);
+			
+			// Show the action bar. Internally, this takes care of executing the chosen action.
+			mActionBar->Show(viableActions, std::bind(&Scene::ExecuteNVC, this, std::placeholders::_1));
+			return;
+		}
+	}
+	
+	// Make sure we have valid BSP.
 	BSP* bsp = mSceneData.GetBSP();
 	if(bsp == nullptr) { return; }
 	
     // Cast ray against scene BSP to see if it intersects with anything.
     // If so, it means we clicked on that thing.
-	//TODO: Need to also raycast against models (like Gabe, etc).
 	HitInfo hitInfo;
 	if(!bsp->RaycastNearest(ray, hitInfo)) { return; }
 	//std::cout << "Hit " << hitInfo.name << std::endl;
