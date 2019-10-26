@@ -486,18 +486,36 @@ Matrix4& Matrix4::operator*=(const Matrix4& rhs)
     return *this;
 }
 
+/*
 Vector3 Matrix4::operator*(const Vector3& rhs) const
 {
-    return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8] * rhs[2] + mVals[12],
-                   mVals[1] * rhs[0] + mVals[5] * rhs[1] + mVals[9] * rhs[2] + mVals[13],
+    return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2] + mVals[12],
+                   mVals[1] * rhs[0] + mVals[5] * rhs[1] + mVals[9]  * rhs[2] + mVals[13],
                    mVals[2] * rhs[0] + mVals[6] * rhs[1] + mVals[10] * rhs[2] + mVals[14]);
 }
 
 Vector3 operator*(const Vector3& lhs, const Matrix4& rhs)
 {
-    return Vector3(lhs[0] * rhs[0]  + lhs[1] * rhs[1]  + lhs[2] * rhs[2]  + rhs[3],
-                   lhs[0] * rhs[4]  + lhs[1] * rhs[5]  + lhs[2] * rhs[6]  + rhs[7],
-                   lhs[0] * rhs[8]  + lhs[1] * rhs[9]  + lhs[2] * rhs[10] + rhs[11]);
+    return Vector3(lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2]  + rhs[3],
+                   lhs[0] * rhs[4] + lhs[1] * rhs[5] + lhs[2] * rhs[6]  + rhs[7],
+                   lhs[0] * rhs[8] + lhs[1] * rhs[9] + lhs[2] * rhs[10] + rhs[11]);
+}
+*/
+
+Vector3 Matrix4::Transform(const Vector3& rhs)
+{
+	// Assume Vector3 is not a point, so implicit w value for multiplication is "0".
+	return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2],
+				   mVals[1] * rhs[0] + mVals[5] * rhs[1] + mVals[9]  * rhs[2],
+				   mVals[2] * rhs[0] + mVals[6] * rhs[1] + mVals[10] * rhs[2]);
+}
+
+Vector3 Matrix4::TransformPoint(const Vector3& rhs)
+{
+	// Assume Vector3 is a point, so implicit w value for multiplication is "1".
+	return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2] + mVals[12],
+				   mVals[1] * rhs[0] + mVals[5] * rhs[1] + mVals[9]  * rhs[2] + mVals[13],
+				   mVals[2] * rhs[0] + mVals[6] * rhs[1] + mVals[10] * rhs[2] + mVals[14]);
 }
 
 Vector4 Matrix4::operator*(const Vector4& rhs) const

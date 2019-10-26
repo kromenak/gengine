@@ -67,13 +67,16 @@ public:
     Matrix4& operator*=(const Matrix4& rhs);
     
     // Vector3 multiplication - column-major (rhs) and row-major (lhs)
-    Vector3 operator*(const Vector3& rhs) const;
-    friend Vector3 operator*(const Vector3& lhs, const Matrix4& rhs);
-    
-    // Vector4 multiplication - column-major (rhs) and row-major (lhs)
+    //Vector3 operator*(const Vector3& rhs) const;
+    //friend Vector3 operator*(const Vector3& lhs, const Matrix4& rhs);
+	// Vector3 multiplication -
+	Vector3 TransformPoint(const Vector3& rhs);
+	Vector3 Transform(const Vector3& rhs);
+	
+    // Vector4 multiplication - column-vector (rhs) and row-vector (lhs)
     Vector4 operator*(const Vector4& rhs) const;
     friend Vector4 operator*(const Vector4& lhs, const Matrix4& rhs);
-    
+	
     // Scalar multiplication
     Matrix4 operator*(float scalar) const;
     Matrix4& operator*=(float scalar);

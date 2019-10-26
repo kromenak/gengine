@@ -45,7 +45,7 @@ Vector3 Transform::GetWorldPosition() const
 {
 	if(mParent != nullptr)
 	{
-		return mParent->GetLocalToWorldMatrix() * GetPosition();
+		return mParent->GetLocalToWorldMatrix().TransformPoint(GetPosition());
 	}
 	return GetPosition();
 }
@@ -116,7 +116,7 @@ Matrix4 Transform::GetWorldToLocalMatrix()
 
 Vector3 Transform::LocalToWorldPoint(const Vector3& localPoint)
 {
-	return GetLocalToWorldMatrix() * localPoint;
+	return GetLocalToWorldMatrix().TransformPoint(localPoint);
 }
 
 Vector3 Transform::LocalToWorldDirection(const Vector3& localDirection)
@@ -128,7 +128,7 @@ Vector3 Transform::LocalToWorldDirection(const Vector3& localDirection)
 
 Vector3 Transform::WorldToLocalPoint(const Vector3& worldPoint)
 {
-	return GetWorldToLocalMatrix() * worldPoint;
+	return GetWorldToLocalMatrix().TransformPoint(worldPoint);
 }
 
 Vector3 Transform::WorldToLocalDirection(const Vector3& worldDirection)
