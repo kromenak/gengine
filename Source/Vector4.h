@@ -43,6 +43,7 @@ public:
     float GetY() const { return y; }
     float GetZ() const { return z; }
     float GetW() const { return w; }
+	
     float& operator[](unsigned int i)       { return (&x)[i]; }
     float  operator[](unsigned int i) const { return (&x)[i]; }
     
@@ -56,7 +57,6 @@ public:
     Vector4& operator+=(const Vector4& other);
     Vector4 operator-(const Vector4& other) const;
     Vector4& operator-=(const Vector4& other);
-    
     Vector4 operator-() const;
     
     // Scalar multiplication
@@ -66,6 +66,7 @@ public:
     Vector4 operator/(float scalar) const;
     Vector4& operator/=(float scalar);
     
+	// Scalar and vector products
     static float Dot(Vector4 lhs, Vector4 rhs);
     static Vector4 Cross(Vector4 lhs, Vector4 rhs);
     

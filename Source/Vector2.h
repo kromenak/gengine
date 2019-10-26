@@ -38,6 +38,7 @@ public:
     
     float GetX() const { return x; }
     float GetY() const { return y; }
+	
     float& operator[](unsigned int i)       { return (&x)[i]; }
     float  operator[](unsigned int i) const { return (&x)[i]; }
     
@@ -51,7 +52,6 @@ public:
     Vector2& operator+=(const Vector2& other);
     Vector2 operator-(const Vector2& other) const;
     Vector2& operator-=(const Vector2& other);
-    
     Vector2 operator-() const;
     
     // Scalar multiplication
