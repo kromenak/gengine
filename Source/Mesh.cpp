@@ -44,3 +44,16 @@ void Mesh::Render(unsigned int submeshIndex, unsigned int offset, unsigned int c
 	assert(submeshIndex < mSubmeshes.size());
 	mSubmeshes[submeshIndex]->Render(offset, count);
 }
+
+bool Mesh::Raycast(const Ray& ray)
+{
+	//TODO: Could do a bounds check first, before checking against all triangles!
+	for(auto& submesh : mSubmeshes)
+	{
+		if(submesh->Raycast(ray))
+		{
+			return true;
+		}
+	}
+	return false;
+}

@@ -18,6 +18,8 @@
 #include "Submesh.h"
 #include "Vector3.h"
 
+class Ray;
+
 class Mesh
 {
 public:
@@ -33,9 +35,13 @@ public:
     Matrix4& GetLocalTransformMatrix() { return mLocalTransformMatrix; }
 	
 	void AddSubmesh(Submesh* submesh) { mSubmeshes.push_back(submesh); }
-	const std::vector<Submesh*>& GetSubmeshes() const { return mSubmeshes; }
+	
 	Submesh* GetSubmesh(int index) const { return index >= 0 && index < mSubmeshes.size() ? mSubmeshes[index] : nullptr; }
 	int GetSubmeshCount() const { return static_cast<int>(mSubmeshes.size()); }
+	
+	const std::vector<Submesh*>& GetSubmeshes() const { return mSubmeshes; }
+	
+	bool Raycast(const Ray& ray);
 	
 private:
 	std::vector<Submesh*> mSubmeshes;

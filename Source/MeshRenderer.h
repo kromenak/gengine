@@ -14,6 +14,7 @@
 
 class Mesh;
 class Model;
+class Ray;
 class Texture;
 
 class MeshRenderer : public Component
@@ -41,6 +42,8 @@ public:
 	Mesh* GetMesh(int index) const;
 	
 	Matrix4 GetMeshWorldTransform(int index) const;
+	
+	bool Raycast(const Ray& ray);
     
 private:
 	// A model, if any was specified.

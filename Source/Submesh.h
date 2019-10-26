@@ -13,6 +13,7 @@
 #include "Vector3.h"
 
 class GLVertexArray;
+class Ray;
 
 enum class RenderMode
 {
@@ -74,8 +75,9 @@ public:
 	std::string GetTextureName() const { return mTextureName; }
 	
 	unsigned int GetVertexCount() const { return mVertexCount; }
-	
 	Vector3 GetVertexPosition(int index) const;
+	
+	bool Raycast(const Ray& ray);
 	
 private:
 	// Number of vertices in the mesh.
@@ -90,6 +92,7 @@ private:
 	
 	// Index data. If present, the submesh draws using indexed methods.
 	// This object owns this data.
+	unsigned int mIndexCount = 0;
 	unsigned short* mIndexes = nullptr;
 	
 	// Name of the default texture to use for this submesh.

@@ -196,3 +196,29 @@ Matrix4 MeshRenderer::GetMeshWorldTransform(int index) const
 	}
 	return Matrix4::Identity;
 }
+
+bool MeshRenderer::Raycast(const Ray& ray)
+{
+	Matrix4 localToWorldMatrix = GetOwner()->GetComponent<Transform>()->GetLocalToWorldMatrix();
+	//Matrix4 worldToLocalMatrix = mTransform->GetWorldToLocalMatrix();
+	
+	// Raycast against triangles in the mesh.
+	for(auto& mesh : mMeshes)
+	{
+		Matrix4 meshWorldTransform = localToWorldMatrix * mesh->GetLocalTransformMatrix();
+		Matrix4 worldToModelMatrix = meshWorldTransform.Inverse();
+		
+		Vector3 rayLocalPos = worldToModelMatrix.TransformPoint(ray.GetOrigin());
+		Vector3 rayLocalDir = worldToModelMatrix.Transform(ray.GetDirection());
+		rayLocalDir.Normalize();
+		Ray localRay(rayLocalPos, rayLocalDir);
+		
+		if(mesh->Raycast(localRay))
+		{
+			return true;
+		}
+	}
+	
+	// Ray did not intersect with any part of the mesh renderer.
+	return false;
+}

@@ -6,6 +6,7 @@
 #include "Submesh.h"
 
 #include "GLVertexArray.h"
+#include "Ray.h"
 
 Submesh::Submesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage) : mVertexCount(vertexCount)
 {
@@ -103,6 +104,7 @@ void Submesh::SetUV1(float* uvs)
 void Submesh::SetIndexes(unsigned short* indexes, int count)
 {
 	mIndexes = indexes;
+	mIndexCount = count;
 	mVertexArray->SetIndexes(indexes, count);
 }
 
@@ -114,4 +116,29 @@ Vector3 Submesh::GetVertexPosition(int index) const
 	
 	int startOffset = index * 3;
 	return Vector3(mPositions[startOffset], mPositions[startOffset + 1], mPositions[startOffset + 2]);
+}
+
+bool Submesh::Raycast(const Ray& ray)
+{
+	if(mRenderMode != RenderMode::Triangles || mIndexes == nullptr)
+	{
+		std::cout << "Submesh::Raycast only supports Triangle meshes with indexes for now - aborting." << std::endl;
+		return false;
+	}
+	
+	Vector3 hitPos;
+	for(int i = 0; i < mIndexCount; i += 3)
+	{
+		Vector3 vert1 = GetVertexPosition(mIndexes[i]);
+		Vector3 vert2 = GetVertexPosition(mIndexes[i + 1]);
+		Vector3 vert3 = GetVertexPosition(mIndexes[i + 2]);
+		
+		if(ray.IntersectsTriangle(vert1, vert2, vert3, hitPos))
+		{
+			return true;
+		}
+	}
+	
+	// Ray did not hit any triangles.
+	return false;
 }
