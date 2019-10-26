@@ -95,14 +95,7 @@ void ModelVisibilityAnimNode::Play(Animation* anim)
 	{
 		//TODO: Not sure if models need to be invisible but still updating in this scenario.
 		//For now, I'll just disable or enable the actor entirely.
-		if(visible)
-		{
-			actor->Actor::SetState(Actor::State::Enabled);
-		}
-		else
-		{
-			actor->Actor::SetState(Actor::State::Disabled);
-		}
+		actor->SetActive(visible);
 	}
 }
 

@@ -3,8 +3,7 @@
 //
 // Clark Kromenaker
 //
-// Any object that exists in the game world and
-// has position/rotation/scale.
+// Any object that exists in the game world and has position/rotation/scale.
 //
 #pragma once
 #include <vector>
@@ -43,6 +42,14 @@ public:
     template<class T> T* AddComponent();
     template<class T> T* GetComponent();
 	
+	// STATE
+	void SetActive(bool active) { mState = active ? State::Enabled : State::Disabled; }
+	bool IsActive() const { return mState == State::Enabled; }
+	
+	void Destroy() { mState = State::Dead; }
+	bool IsDestroyed() const { return mState == State::Dead; }
+	
+	// TRANSFORM CONVENIENCE ACCESSORS
 	Transform* GetTransform() const { return mTransform; }
 	
 	Vector3 GetPosition() const { return mTransform->GetPosition(); }
@@ -57,14 +64,6 @@ public:
 	Vector3 GetForward() const { return mTransform->GetForward(); }
 	Vector3 GetRight() const { return mTransform->GetRight(); }
 	Vector3 GetUp() const { return mTransform->GetUp(); }
-	
-	State GetState() const { return mState; }
-	void SetState(State state) { mState = state; }
-	
-	void SetActive(bool active) { mState = active ? State::Enabled : State::Disabled; }
-	bool IsActive() const { return mState == State::Enabled; }
-	
-	void Destroy() { mState = State::Dead; }
 	
 protected:
 	virtual void OnUpdate(float deltaTime) { }

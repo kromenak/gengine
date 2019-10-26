@@ -1689,7 +1689,7 @@ shpvoid ShowModel(std::string modelName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
 	if(actor != nullptr)
 	{
-		actor->Actor::SetState(Actor::State::Enabled);
+		actor->SetActive(true);
 	}
 	return 0;
 }
@@ -1700,7 +1700,7 @@ shpvoid HideModel(std::string modelName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
 	if(actor != nullptr)
 	{
-		actor->Actor::SetState(Actor::State::Disabled);
+		actor->SetActive(false);
 	}
 	return 0;
 }
@@ -1741,7 +1741,7 @@ int IsModelVisible(std::string modelName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
 	if(actor != nullptr)
 	{
-		return actor->GetState() == Actor::State::Enabled ? 1 : 0;
+		return actor->IsActive() ? 1 : 0;
 	}
 	return 0;
 }

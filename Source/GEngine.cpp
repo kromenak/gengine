@@ -308,7 +308,7 @@ void GEngine::Update()
 	auto it = mActors.begin();
 	while(it != mActors.end())
 	{
-		if((*it)->GetState() == Actor::State::Dead)
+		if((*it)->IsDestroyed())
 		{
 			Actor* actor = (*it);
 			it = mActors.erase(it);

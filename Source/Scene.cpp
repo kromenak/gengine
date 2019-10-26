@@ -167,7 +167,7 @@ void Scene::OnSceneEnter()
 			// Maybe there's a better way to handle this? But this is the easiest for now.
 			if(mEgo != nullptr)
 			{
-				mEgo->Actor::SetState(Actor::State::Dead);
+				mEgo->Destroy();
 			}
 			mEgo = actor;
 		}

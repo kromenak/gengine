@@ -659,7 +659,6 @@
 				4BDFBA0B2341B75C00C4DD49 /* TextInput.h */,
 				4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */,
 				4B85E87A23497EBF004AA3E5 /* TextLayout.h */,
-				4B9231A32112167F0004F4F3 /* Type.h */,
 				4B08C90D2137443F0028FEB3 /* UI */,
 			);
 			name = Source;
@@ -895,6 +894,7 @@
 				4BACA50B20F72663008C7FE9 /* StringTokenizer.h */,
 				4B5497F81FF80E0A00F1EF4F /* StringUtil.h */,
 				4B7A6303223ED8940053C95F /* SystemUtil.h */,
+				4B9231A32112167F0004F4F3 /* Type.h */,
 				4B4B4ADE2091B5A000391827 /* Value.h */,
 			);
 			name = STD;
