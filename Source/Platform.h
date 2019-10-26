@@ -9,7 +9,7 @@
 #pragma once
 
 #if defined(__APPLE__)
-	#include "TargetConditionals.h"
+	#include <TargetConditionals.h>
 	#if defined(TARGET_OS_OSX)
 		#define PLATFORM_MAC
 	#else
