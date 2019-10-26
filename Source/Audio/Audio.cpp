@@ -11,8 +11,6 @@
 
 #include "BinaryReader.h"
 
-//const unsigned short kMp3Format = 0x0055;
-
 Audio::Audio(std::string name, char* data, int dataLength) :
     Asset(name),
     mDataBuffer(data),
@@ -65,7 +63,7 @@ void Audio::ParseFromData(char* data, int dataLength)
     }
     
     // 4 bytes: length of the subchunk data.
-    reader.ReadUInt();
+    unsigned int chunkSize = reader.ReadUInt();
     
     // From here: "fact" chunk is formatChunkSize bytes ahead.
     // Or, for PCM, "data" chunk is formatChunkSize bytes ahead.
@@ -88,13 +86,18 @@ void Audio::ParseFromData(char* data, int dataLength)
     // 2 bytes: bits per sample
     reader.Skip(4);
     
-    // 2 bytes: size of extension, which is appended to end of format chunk.
-    //TODO: Read extension data.
-    unsigned short extensionSize = reader.ReadUShort();
-    reader.Skip(extensionSize);
+	// The minimum fmt chunk size is 16. If there's 18, it means an extension size is present.
+	// If the chunk size is 40, it means an extensions size AND extension data are present!
+	if(chunkSize > 16)
+	{
+		// 2 bytes: size of extension, which is appended to end of format chunk.
+		//TODO: Read extension data.
+		unsigned short extensionSize = reader.ReadUShort();
+		reader.Skip(extensionSize);
+	}
     
     // If format is NOT PCM (0x0001), there is a "fact" chunk.
-    if(format != 0x0001)
+    if(format != kFormatPCM)
     {
         identifier = reader.ReadString(4);
         if(identifier != "fact")

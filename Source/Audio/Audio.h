@@ -25,6 +25,9 @@ public:
     float GetDuration() const { return mDuration; }
     
 private:
+	const unsigned short kFormatPCM = 0x0001;
+	//const unsigned short kMp3Format = 0x0055;
+	
     // Audio data buffer - the contents of WAV file in memory.
     char* mDataBuffer = nullptr;
     int mDataBufferLength = 0;
