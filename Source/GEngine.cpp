@@ -63,14 +63,28 @@ bool GEngine::Initialize()
     Services::SetAudio(&mAudioManager);
     
     // For simplicity right now, let's just load all barns at once.
-    mAssetManager.LoadBarn("ambient.brn");
-    mAssetManager.LoadBarn("common.brn");
-    mAssetManager.LoadBarn("core.brn");
-    mAssetManager.LoadBarn("day1.brn");
-    mAssetManager.LoadBarn("day2.brn");
-    mAssetManager.LoadBarn("day3.brn");
-    mAssetManager.LoadBarn("day23.brn");
-    mAssetManager.LoadBarn("day123.brn");
+	std::vector<std::string> barns = {
+		"ambient.brn",
+		"common.brn",
+		"core.brn",
+		"day1.brn",
+		"day2.brn",
+		"day3.brn",
+		"day23.brn",
+		"day123.brn"
+	};
+	for(auto& barn : barns)
+	{
+		if(!mAssetManager.LoadBarn(barn))
+		{
+			std::string error = "Could not load barn: " + barn;
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+									 "GEngine",
+									 error.c_str(),
+									 nullptr);
+			return false;
+		}
+	}
     
     // Initialize sheep manager.
     Services::SetSheep(&mSheepManager);
