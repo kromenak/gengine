@@ -120,6 +120,15 @@ SceneData::SceneData(std::string location, std::string timeblock)
 		mNounVerbCaseSets.insert(mNounVerbCaseSets.end(), nounVerbCases.begin(), nounVerbCases.end());
 	}
 	
+	// ALSO, always include the global NVC!
+	//TODO: Maybe we should load and store this elsewhere? NVCManager anyone?
+	//TODO: Though, the AssetManager makes sure we only have one in memory anyway, so maybe this is fine...
+	mNounVerbCaseSets.push_back(Services::GetAssets()->LoadNVC("GLB_ALL.NVC"));
+	
+	//TODO: Handle also loading "GLB" (global) NVCs for specific days and timeblocks.
+	//TODO: e.g. GLB_23ALL should be loaded if the day is 2 or 3
+	//TODO: e.g. GLB_210A should be loaded on day 2 during 10AM timeblock
+	
 	// Determine which soundtrack to use. Give priority to specific SIF version, fall back on general one.
 	std::vector<Soundtrack*> soundtracks;
 	if(mSpecificSIF != nullptr)
