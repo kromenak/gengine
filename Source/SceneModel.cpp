@@ -17,16 +17,9 @@ SceneModel::SceneModel(std::string name, char* data, int dataLength) : Asset(nam
     ParseFromData(data, dataLength);
 }
 
-std::string SceneModel::GetBSPName()
+SceneModel::~SceneModel()
 {
-    // If an override is specified, use it!
-    if(!mBSPNameOverride.empty())
-    {
-        return mBSPNameOverride;
-    }
-    
-    // Otherwise, we default to our asset name, with no extension.
-	return GetNameNoExtension();
+	delete mSkybox;
 }
 
 void SceneModel::ParseFromData(char *data, int dataLength)
@@ -42,10 +35,16 @@ void SceneModel::ParseFromData(char *data, int dataLength)
         {
             if(StringUtil::EqualsIgnoreCase(entry->key, "bsp"))
             {
-                mBSPNameOverride = entry->value;
+                mBspName = entry->value;
             }
         }
     }
+	
+	// If no BSP name was specified in the SCN file, default to the asset name with no extension.
+	if(mBspName.empty())
+	{
+		mBspName = GetNameNoExtension();
+	}
     
     // Load a skybox, if any.
     IniSection skyboxSection = parser.GetSection("SKYBOX");

@@ -464,7 +464,7 @@ shpvoid SetActorPosition(std::string actorName, std::string positionName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
-		ScenePositionData* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+		const ScenePositionData* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
 		if(scenePosition != nullptr)
 		{
 			// Based on docs, I don't think this sets heading...but maybe it does? Unclear.

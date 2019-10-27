@@ -21,26 +21,6 @@ NVC::NVC(std::string name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
-Action* NVC::GetNVC(std::string noun, std::string verb)
-{
-    // See if we have an entry for this noun. If not, we're done.
-    auto it = mNounToItems.find(noun);
-    if(it == mNounToItems.end()) { return nullptr; }
-    
-    // See if we have an item with the given verb.
-    std::vector<Action> items = mNounToItems[noun];
-    for(auto& item : items)
-    {
-        if(item.verb == verb)
-        {
-            return &item;
-        }
-    }
-    
-    // Found no matching verb entry.
-    return nullptr;
-}
-
 bool NVC::IsCaseMet(const Action* item, GKActor* ego) const
 {
 	// Empty condition is automatically met.
@@ -73,7 +53,7 @@ bool NVC::IsCaseMet(const Action* item, GKActor* ego) const
 	return false;
 }
 
-const std::vector<Action>& NVC::GetActionsForNoun(std::string noun)
+const std::vector<Action>& NVC::GetActions(const std::string& noun)
 {
 	auto it = mNounToItems.find(noun);
 	if(it != mNounToItems.end())
@@ -83,9 +63,9 @@ const std::vector<Action>& NVC::GetActionsForNoun(std::string noun)
 	return mEmptyActions;
 }
 
-const Action* NVC::GetAction(std::string noun, std::string verb)
+const Action* NVC::GetAction(const std::string& noun, const std::string& verb)
 {
-	const std::vector<Action>& actionsForNoun = GetActionsForNoun(noun);
+	const std::vector<Action>& actionsForNoun = GetActions(noun);
 	for(auto& action : actionsForNoun)
 	{
 		if(StringUtil::EqualsIgnoreCase(action.verb, verb))

@@ -8,13 +8,11 @@
 #include "Services.h"
 #include "StringUtil.h"
 
-SceneData::SceneData(std::string location, std::string timeblock)
+SceneData::SceneData(const std::string& location, const std::string& timeblock)
 {
-	std::string specificName = location + timeblock;
-	
 	// Load general and specific SIF assets.
 	mGeneralSIF = Services::GetAssets()->LoadSIF(location);
-	mSpecificSIF = Services::GetAssets()->LoadSIF(specificName);
+	mSpecificSIF = Services::GetAssets()->LoadSIF(location + timeblock);
 	
 	// Load scene model asset. Only *one* is needed, so one defined
 	// in the specific SIF will override one from the general SIF.
@@ -74,7 +72,7 @@ SceneData::SceneData(std::string location, std::string timeblock)
 	
 	// Collect noun/verb/case sets from general and specific SIFs.
 	// The logic for the general SIF is a bit more complicated!
-	std::vector<NVC*> nounVerbCases = mGeneralSIF->GetNounVerbCases();
+	std::vector<NVC*> nounVerbCases = mGeneralSIF->GetActionSets();
 	for(auto& nvc : nounVerbCases)
 	{
 		// For the general SIF, a naming convention indicates whether we should or shouldn't use the NVC.
@@ -91,7 +89,7 @@ SceneData::SceneData(std::string location, std::string timeblock)
 		if(allPos == std::string::npos || underscorePos == std::string::npos || underscorePos == allPos - 1)
 		{
 			//std::cout << "Using NVC " << nvcName << std::endl;
-			mNounVerbCaseSets.push_back(nvc);
+			mActionSets.push_back(nvc);
 		}
 		else
 		{
@@ -105,7 +103,7 @@ SceneData::SceneData(std::string location, std::string timeblock)
 				if(val == timeblock[0])
 				{
 					//std::cout << "Using NVC " << nvcName << std::endl;
-					mNounVerbCaseSets.push_back(nvc);
+					mActionSets.push_back(nvc);
 					break;
 				}
 				checkPos++;
@@ -116,14 +114,14 @@ SceneData::SceneData(std::string location, std::string timeblock)
 	// The specific SIF NVCs is much simpler: just use them all!
 	if(mSpecificSIF != nullptr)
 	{
-		nounVerbCases = mSpecificSIF->GetNounVerbCases();
-		mNounVerbCaseSets.insert(mNounVerbCaseSets.end(), nounVerbCases.begin(), nounVerbCases.end());
+		nounVerbCases = mSpecificSIF->GetActionSets();
+		mActionSets.insert(mActionSets.end(), nounVerbCases.begin(), nounVerbCases.end());
 	}
 	
 	// ALSO, always include the global NVC!
 	//TODO: Maybe we should load and store this elsewhere? NVCManager anyone?
 	//TODO: Though, the AssetManager makes sure we only have one in memory anyway, so maybe this is fine...
-	mNounVerbCaseSets.push_back(Services::GetAssets()->LoadNVC("GLB_ALL.NVC"));
+	mActionSets.push_back(Services::GetAssets()->LoadNVC("GLB_ALL.NVC"));
 	
 	//TODO: Handle also loading "GLB" (global) NVCs for specific days and timeblocks.
 	//TODO: e.g. GLB_23ALL should be loaded if the day is 2 or 3
@@ -145,23 +143,9 @@ SceneData::SceneData(std::string location, std::string timeblock)
 	}
 }
 
-std::string SceneData::GetFloorModelName() const
+const SceneCameraData* SceneData::GetDefaultRoomCamera() const
 {
-	std::string floorModelName;
-	if(mSpecificSIF != nullptr)
-	{
-		floorModelName = mSpecificSIF->GetFloorBspModelName();
-	}
-	if(floorModelName.empty())
-	{
-		floorModelName = mGeneralSIF->GetFloorBspModelName();
-	}
-	return floorModelName;
-}
-
-SceneCameraData* SceneData::GetDefaultRoomCamera() const
-{
-	SceneCameraData* sceneCameraData = nullptr;
+	const SceneCameraData* sceneCameraData = nullptr;
 	if(mSpecificSIF != nullptr)
 	{
 		sceneCameraData = mSpecificSIF->GetDefaultRoomCamera();
@@ -173,9 +157,9 @@ SceneCameraData* SceneData::GetDefaultRoomCamera() const
 	return sceneCameraData;
 }
 
-SceneCameraData* SceneData::GetRoomCamera(std::string cameraName) const
+const SceneCameraData* SceneData::GetRoomCamera(const std::string& cameraName) const
 {
-	SceneCameraData* sceneCameraData = nullptr;
+	const SceneCameraData* sceneCameraData = nullptr;
 	if(mSpecificSIF != nullptr)
 	{
 		sceneCameraData = mSpecificSIF->GetRoomCamera(cameraName);
@@ -187,9 +171,9 @@ SceneCameraData* SceneData::GetRoomCamera(std::string cameraName) const
 	return sceneCameraData;
 }
 
-ScenePositionData* SceneData::GetScenePosition(std::string positionName) const
+const ScenePositionData* SceneData::GetScenePosition(const std::string& positionName) const
 {
-	ScenePositionData* position = nullptr;
+	const ScenePositionData* position = nullptr;
 	if(mSpecificSIF != nullptr)
 	{
 		position = mSpecificSIF->GetPosition(positionName);
@@ -199,6 +183,16 @@ ScenePositionData* SceneData::GetScenePosition(std::string positionName) const
 		position = mGeneralSIF->GetPosition(positionName);
 	}
 	return position;
+}
+
+const std::string& SceneData::GetFloorModelName() const
+{
+	if(mSpecificSIF != nullptr &&
+	   !mSpecificSIF->GetFloorModelName().empty())
+	{
+		return mSpecificSIF->GetFloorModelName();
+	}
+	return mGeneralSIF->GetFloorModelName();
 }
 
 WalkerBoundary* SceneData::GetWalkerBoundary() const
@@ -215,14 +209,14 @@ WalkerBoundary* SceneData::GetWalkerBoundary() const
 	return walkerBoundary;
 }
 
-std::vector<const Action*> SceneData::GetViableVerbsForNoun(std::string noun, GKActor* ego) const
+std::vector<const Action*> SceneData::GetActions(const std::string& noun, GKActor* ego) const
 {
 	// As we iterate, we'll use this to keep track of what verbs are in use.
 	// We don't want verb repeats - a new item with the same verb will overwrite the old item.
 	std::unordered_map<std::string, const Action*> verbsToActions;
-	for(auto& nvc : mNounVerbCaseSets)
+	for(auto& nvc : mActionSets)
 	{
-		const std::vector<Action>& allActions = nvc->GetActionsForNoun(noun);
+		const std::vector<Action>& allActions = nvc->GetActions(noun);
 		for(auto& action : allActions)
 		{
 			if(nvc->IsCaseMet(&action, ego))
@@ -241,12 +235,12 @@ std::vector<const Action*> SceneData::GetViableVerbsForNoun(std::string noun, GK
 	return viableActions;
 }
 
-const Action* SceneData::GetNounVerbAction(std::string noun, std::string verb, GKActor* ego) const
+const Action* SceneData::GetAction(const std::string& noun, const std::string& verb, GKActor* ego) const
 {
 	// Cycle through NVCs, trying to find a valid action.
 	// Again, any later match will overwrite an earlier match.
 	const Action* action = nullptr;
-	for(auto& nvc : mNounVerbCaseSets)
+	for(auto& nvc : mActionSets)
 	{
 		const Action* possibleAction = nvc->GetAction(noun, verb);
 		if(possibleAction != nullptr && nvc->IsCaseMet(possibleAction, ego))

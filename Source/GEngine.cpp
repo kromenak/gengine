@@ -117,7 +117,7 @@ bool GEngine::Initialize()
 	//LoadScene("R25");
     LoadScene("RC1");
 	
-	mReportManager.Log("Generic", "Rock & Roll");
+	//mReportManager.Log("Generic", "Rock & Roll");
     return true;
 }
 
@@ -373,6 +373,7 @@ void GEngine::LoadSceneInternal()
 	// Delete the current scene, if any.
 	if(mScene != nullptr)
 	{
+		mScene->Unload();
 		delete mScene;
 		mScene = nullptr;
 	}
@@ -390,8 +391,8 @@ void GEngine::LoadSceneInternal()
 	// Create the new scene.
 	mScene = new Scene(mSceneToLoad, Services::Get<GameProgress>()->GetTimeCode());
 	
-	// Trigger any on-enter actions.
-	mScene->OnSceneEnter();
+	// Load the scene - this is separate from constructor b/c load operations may need to reference the scene!
+	mScene->Load();
 	
 	// Clear scene load request.
 	mSceneToLoad.clear();

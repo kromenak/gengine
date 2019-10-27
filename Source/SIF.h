@@ -165,26 +165,26 @@ class SIF : public Asset
 {
 public:
     SIF(std::string name, char* data, int dataLength);
+	~SIF();
     
-    std::string GetSceneModelName() const { return mSceneModelName; }
+    const std::string& GetSceneModelName() const { return mSceneModelName; }
 	
-	std::string GetFloorBspModelName() const { return mFloorBspModelName; }
+	const std::string& GetFloorModelName() const { return mFloorModelName; }
 	
 	WalkerBoundary* GetWalkerBoundary() const { return mWalkerBoundary; }
-	
     Skybox* GetSkybox() const { return mSkybox; }
     
-    std::vector<SceneActorData*> GetSceneActorDatas() { return mSceneActorDatas; }
-    std::vector<SceneModelData*> GetSceneModelDatas() { return mSceneModelDatas; }
+    const std::vector<SceneActorData*>& GetSceneActorDatas() { return mSceneActorDatas; }
+    const std::vector<SceneModelData*>& GetSceneModelDatas() { return mSceneModelDatas; }
     
-	SceneCameraData* GetDefaultRoomCamera() const { return mRoomCameras.size() > 0 ? mRoomCameras[mDefaultRoomCameraIndex] : nullptr; }
-	SceneCameraData* GetRoomCamera(std::string cameraName);
+	const SceneCameraData* GetDefaultRoomCamera() const { return mRoomCameras.size() > 0 ? mRoomCameras[mDefaultRoomCameraIndex] : nullptr; }
+	const SceneCameraData* GetRoomCamera(const std::string& cameraName) const;
 	
-    ScenePositionData* GetPosition(std::string positionName);
+	const ScenePositionData* GetPosition(const std::string& positionName) const;
     
-    std::vector<Soundtrack*> GetSoundtracks() { return mSoundtracks; }
+    const std::vector<Soundtrack*>& GetSoundtracks() { return mSoundtracks; }
     
-    std::vector<NVC*> GetNounVerbCases() { return mNVCs; }
+    const std::vector<NVC*>& GetActionSets() { return mNVCs; }
     
 private:
     // Name of the Scene Data asset name that's used in conjunction with this SIF.
@@ -192,7 +192,7 @@ private:
     
     // FLOOR
     // Name of the model in the BSP that is used for character walking.
-    std::string mFloorBspModelName;
+    std::string mFloorModelName;
     
     // BOUNDARIES
 	WalkerBoundary* mWalkerBoundary = nullptr;

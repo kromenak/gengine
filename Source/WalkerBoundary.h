@@ -19,15 +19,15 @@ class WalkerBoundary
 {
 public:	
 	bool CanWalkTo(Vector3 position) const;
-	bool FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& path) const;
+	bool FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& outPath) const;
 	
 	void SetTexture(Texture* texture) { mTexture = texture; }
 	Texture* GetTexture() const { return mTexture; }
 	
-	void SetSize(Vector2 size) { mSize = size; }
+	void SetSize(const Vector2& size) { mSize = size; }
 	Vector2 GetSize() const { return mSize; }
 	
-	void SetOffset(Vector2 offset) { mOffset = offset; }
+	void SetOffset(const Vector2& offset) { mOffset = offset; }
 	Vector2 GetOffset() const { return mOffset; }
 	
 private:

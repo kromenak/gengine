@@ -26,17 +26,10 @@
 
 extern Mesh* quad;
 
-Scene::Scene(std::string name, std::string timeCode) :
-    mGeneralName(name),
-	mSpecificName(name + timeCode),
-	mSceneData(name, timeCode)
+Scene::Scene(std::string name, std::string timeblock) :
+	mLocation(name),
+	mTimeblock(timeblock)
 {
-    // Set BSP to be rendered.
-    Services::GetRenderer()->SetBSP(mSceneData.GetBSP());
-    
-    // Figure out if we have a skybox, and set it to be rendered.
-    Services::GetRenderer()->SetSkybox(mSceneData.GetSkybox());
-    
     // Create game camera.
 	mCamera = new GameCamera();
 	
@@ -44,16 +37,45 @@ Scene::Scene(std::string name, std::string timeCode) :
 	Actor* animationActor = new Actor();
 	mAnimationPlayer = animationActor->AddComponent<AnimationPlayer>();
 	
+	// Create action bar, which will be used to choose nouns/verbs by the player.
+	mActionBar = new ActionBar();
+}
+
+Scene::~Scene()
+{
+	if(mSceneData != nullptr)
+	{
+		Unload();
+	}
+}
+
+void Scene::Load()
+{
+	// If this is true, we are calling load when scene is already loaded!
+	if(mSceneData != nullptr)
+	{
+		//TODO: Ignore for now, but maybe we should Unload and then re-Load?
+		return;
+	}
+	
+	mSceneData = new SceneData(mLocation, mTimeblock);
+	
+	// Set BSP to be rendered.
+    Services::GetRenderer()->SetBSP(mSceneData->GetBSP());
+    
+    // Figure out if we have a skybox, and set it to be rendered.
+    Services::GetRenderer()->SetSkybox(mSceneData->GetSkybox());
+	
 	// Position the camera at the the default position and heading.
-	SceneCameraData* defaultRoomCamera = mSceneData.GetDefaultRoomCamera();
+	const SceneCameraData* defaultRoomCamera = mSceneData->GetDefaultRoomCamera();
 	if(defaultRoomCamera != nullptr)
 	{
     	mCamera->SetPosition(defaultRoomCamera->position);
     	mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
 	}
 	
-    // Create soundtrack player and get it playing!
-	Soundtrack* soundtrack = mSceneData.GetSoundtrack();
+	// Create soundtrack player and get it playing!
+	Soundtrack* soundtrack = mSceneData->GetSoundtrack();
 	if(soundtrack != nullptr)
 	{
 		Actor* actor = new Actor();
@@ -61,12 +83,9 @@ Scene::Scene(std::string name, std::string timeCode) :
 		mSoundtrackPlayer->Play(soundtrack);
 	}
 	
-	// Create action bar, which will be used to choose nouns/verbs by the player.
-	mActionBar = new ActionBar();
-	
 	// For debugging - render walker bounds overlay on game world.
 	{
-		WalkerBoundary* walkerBoundary = mSceneData.GetWalkerBoundary();
+		WalkerBoundary* walkerBoundary = mSceneData->GetWalkerBoundary();
 		if(walkerBoundary != nullptr)
 		{
 			Actor* walkerBoundaryActor = new Actor();
@@ -89,18 +108,9 @@ Scene::Scene(std::string name, std::string timeCode) :
 			walkerBoundaryActor->SetScale(size);
 		}
 	}
-}
-
-Scene::~Scene()
-{
-	Services::GetRenderer()->SetBSP(nullptr);
-	Services::GetRenderer()->SetSkybox(nullptr);
-}
-
-void Scene::OnSceneEnter()
-{
+	
 	// Create actors for the scene.
-	std::vector<SceneActorData*> sceneActorDatas = mSceneData.GetSceneActorDatas();
+	std::vector<SceneActorData*> sceneActorDatas = mSceneData->GetSceneActorDatas();
 	for(auto& actorDef : sceneActorDatas)
 	{
 		// The actor's 3-letter identifier can be derived from the name of the model.
@@ -176,7 +186,7 @@ void Scene::OnSceneEnter()
 	// Iterate over scene model data and prep the scene.
 	// First, we want to hide and scene models that are set to "hidden".
 	// Second, we want to spawn any non-scene models.
-	std::vector<SceneModelData*> sceneModelDatas = mSceneData.GetSceneModelDatas();
+	std::vector<SceneModelData*> sceneModelDatas = mSceneData->GetSceneModelDatas();
 	for(auto& modelDef : sceneModelDatas)
 	{
 		switch(modelDef->type)
@@ -187,7 +197,7 @@ void Scene::OnSceneEnter()
 				// If it should be hidden by default, tell the BSP to hide it.
 				if(modelDef->hidden)
 				{
-					mSceneData.GetBSP()->SetVisible(modelDef->name, false);
+					mSceneData->GetBSP()->SetVisible(modelDef->name, false);
 				}
 				break;
 			}
@@ -196,7 +206,7 @@ void Scene::OnSceneEnter()
 			case SceneModelData::Type::HitTest:
 			{
 				//std::cout << "Hide " << modelDef->name << std::endl;
-				mSceneData.GetBSP()->SetVisible(modelDef->name, false);
+				mSceneData->GetBSP()->SetVisible(modelDef->name, false);
 				break;
 			}
 				
@@ -241,7 +251,7 @@ void Scene::OnSceneEnter()
 	}
 	
 	// Check for and run "scene enter" actions.
-	std::vector<NVC*> nvcs = mSceneData.GetNounVerbCaseSets();
+	std::vector<NVC*> nvcs = mSceneData->GetActionSets();
 	for(auto& nvc : nvcs)
 	{
 		const Action* action = nvc->GetAction("SCENE", "ENTER");
@@ -253,11 +263,20 @@ void Scene::OnSceneEnter()
 	 }
 }
 
-void Scene::InitEgoPosition(std::string positionName)
+void Scene::Unload()
+{
+	Services::GetRenderer()->SetBSP(nullptr);
+	Services::GetRenderer()->SetSkybox(nullptr);
+	
+	delete mSceneData;
+	mSceneData = nullptr;
+}
+
+void Scene::InitEgoPosition(const std::string& positionName)
 {
     if(mEgo == nullptr) { return; }
     
-    ScenePositionData* position = mSceneData.GetScenePosition(positionName);
+    const ScenePositionData* position = mSceneData->GetScenePosition(positionName);
     if(position == nullptr) { return; }
     
     // Set position and heading.
@@ -274,9 +293,9 @@ void Scene::InitEgoPosition(std::string positionName)
     }
 }
 
-void Scene::SetCameraPosition(std::string cameraName)
+void Scene::SetCameraPosition(const std::string& cameraName)
 {
-	SceneCameraData* camera = mSceneData.GetRoomCamera(cameraName);
+	const SceneCameraData* camera = mSceneData->GetRoomCamera(cameraName);
 	if(camera != nullptr)
 	{
 		mCamera->SetPosition(camera->position);
@@ -291,7 +310,7 @@ void Scene::SetCameraPosition(std::string cameraName)
 	}
 }
 
-bool Scene::CheckInteract(const Ray& ray)
+bool Scene::CheckInteract(const Ray& ray) const
 {
 	// Check against any dynamic actors before falling back on BSP check.
 	for(auto& actor : mActors)
@@ -303,7 +322,7 @@ bool Scene::CheckInteract(const Ray& ray)
 		}
 	}
 	
-	BSP* bsp = mSceneData.GetBSP();
+	BSP* bsp = mSceneData->GetBSP();
 	if(bsp == nullptr) { return false; }
 	
 	HitInfo hitInfo;
@@ -311,14 +330,14 @@ bool Scene::CheckInteract(const Ray& ray)
 	
 	// If hit the floor, this IS an interaction, but not an interesting one.
 	// Clicking will walk the player, but we don't count it as an interactive object.
-	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData.GetFloorModelName()))
+	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
 	{
 		return false;
 	}
 	
 	// See if the hit item matches any scene model data.
 	SceneModelData* sceneModelData = nullptr;
-	std::vector<SceneModelData*> sceneModelDatas = mSceneData.GetSceneModelDatas();
+	std::vector<SceneModelData*> sceneModelDatas = mSceneData->GetSceneModelDatas();
 	for(auto& modelData : sceneModelDatas)
 	{
 		if(StringUtil::EqualsIgnoreCase(modelData->name, hitInfo.name))
@@ -345,16 +364,16 @@ void Scene::Interact(const Ray& ray)
 		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
 		{
 			// Find all verbs that can be used for this object.
-			std::vector<const Action*> viableActions = mSceneData.GetViableVerbsForNoun(actor->GetNoun(), mEgo);
+			std::vector<const Action*> viableActions = mSceneData->GetActions(actor->GetNoun(), mEgo);
 			
 			// Show the action bar. Internally, this takes care of executing the chosen action.
-			mActionBar->Show(viableActions, std::bind(&Scene::ExecuteNVC, this, std::placeholders::_1));
+			mActionBar->Show(viableActions, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 			return;
 		}
 	}
 	
 	// Make sure we have valid BSP.
-	BSP* bsp = mSceneData.GetBSP();
+	BSP* bsp = mSceneData->GetBSP();
 	if(bsp == nullptr) { return; }
 	
     // Cast ray against scene BSP to see if it intersects with anything.
@@ -364,17 +383,17 @@ void Scene::Interact(const Ray& ray)
 	//std::cout << "Hit " << hitInfo.name << std::endl;
 	
 	// Clicked on the floor - move ego to position.
-	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData.GetFloorModelName()))
+	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
 	{
 		// Check walker boundary to see whether we can walk to this spot.
-		mEgo->GetWalker()->WalkTo(hitInfo.position, mSceneData.GetWalkerBoundary(), nullptr);
+		mEgo->GetWalker()->WalkTo(hitInfo.position, mSceneData->GetWalkerBoundary(), nullptr);
 		return;
 	}
 	
     // Correlate the interacted model name to model data from the SIF.
     // This allows us to correlate a model in the BSP to a noun keyword.
     SceneModelData* sceneModelData = nullptr;
-    std::vector<SceneModelData*> sceneModelDatas = mSceneData.GetSceneModelDatas();
+    std::vector<SceneModelData*> sceneModelDatas = mSceneData->GetSceneModelDatas();
     for(auto& modelData : sceneModelDatas)
     {
         if(modelData->name == hitInfo.name)
@@ -391,7 +410,7 @@ void Scene::Interact(const Ray& ray)
 	if(!sceneModelData->verb.empty())
 	{
 		std::cout << "Trying to play default verb " << sceneModelData->verb << std::endl;
-		const Action* action = mSceneData.GetNounVerbAction(sceneModelData->noun, sceneModelData->verb, mEgo);
+		const Action* action = mSceneData->GetAction(sceneModelData->noun, sceneModelData->verb, mEgo);
 		if(action != nullptr)
 		{
 			action->Execute();
@@ -400,13 +419,13 @@ void Scene::Interact(const Ray& ray)
 	}
 	
 	// Find all verbs that can be used for this object.
-	std::vector<const Action*> viableActions = mSceneData.GetViableVerbsForNoun(sceneModelData->noun, mEgo);
+	std::vector<const Action*> viableActions = mSceneData->GetActions(sceneModelData->noun, mEgo);
 	
 	// Show the action bar. Internally, this takes care of executing the chosen action.
-	mActionBar->Show(viableActions, std::bind(&Scene::ExecuteNVC, this, std::placeholders::_1));
+	mActionBar->Show(viableActions, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 }
 
-float Scene::GetFloorY(const Vector3& position)
+float Scene::GetFloorY(const Vector3& position) const
 {
 	// Calculate ray origin using passed position, but really high in the air!
 	Vector3 rayOrigin = position;
@@ -417,11 +436,11 @@ float Scene::GetFloorY(const Vector3& position)
 	
 	// Raycast straight down and test against the floor BSP.
 	// If we hit something, just use the Y hit position as the floor's Y.
-	BSP* bsp = mSceneData.GetBSP();
+	BSP* bsp = mSceneData->GetBSP();
 	if(bsp != nullptr)
 	{
 		HitInfo hitInfo;
-		if(bsp->RaycastSingle(downRay, mSceneData.GetFloorModelName(), hitInfo))
+		if(bsp->RaycastSingle(downRay, mSceneData->GetFloorModelName(), hitInfo))
 		{
 			return hitInfo.position.GetY();
 		}
@@ -432,7 +451,7 @@ float Scene::GetFloorY(const Vector3& position)
 	return 0.0f;
 }
 
-GKActor* Scene::GetActorByModelName(std::string modelName)
+GKActor* Scene::GetActorByModelName(const std::string& modelName) const
 {
 	for(auto& actor : mActors)
 	{
@@ -452,7 +471,7 @@ GKActor* Scene::GetActorByModelName(std::string modelName)
 	return nullptr;
 }
 
-GKActor* Scene::GetActorByNoun(std::string noun)
+GKActor* Scene::GetActorByNoun(const std::string& noun) const
 {
 	for(auto& actor : mActors)
 	{
@@ -464,27 +483,36 @@ GKActor* Scene::GetActorByNoun(std::string noun)
 	return nullptr;
 }
 
-void Scene::ApplyTextureToSceneModel(std::string modelName, Texture* texture)
+const ScenePositionData* Scene::GetPosition(const std::string& positionName) const
 {
-	mSceneData.GetBSP()->SetTexture(modelName, texture);
+	if(mSceneData != nullptr)
+	{
+		return mSceneData->GetScenePosition(positionName);
+	}
+	return nullptr;
 }
 
-void Scene::SetSceneModelVisibility(std::string modelName, bool visible)
+void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* texture)
 {
-	mSceneData.GetBSP()->SetVisible(modelName, visible);
+	mSceneData->GetBSP()->SetTexture(modelName, texture);
 }
 
-bool Scene::IsSceneModelVisible(std::string modelName) const
+void Scene::SetSceneModelVisibility(const std::string& modelName, bool visible)
 {
-	return mSceneData.GetBSP()->IsVisible(modelName);
+	mSceneData->GetBSP()->SetVisible(modelName, visible);
 }
 
-bool Scene::DoesSceneModelExist(std::string modelName) const
+bool Scene::IsSceneModelVisible(const std::string& modelName) const
 {
-	return mSceneData.GetBSP()->Exists(modelName);
+	return mSceneData->GetBSP()->IsVisible(modelName);
 }
 
-void Scene::ExecuteNVC(const Action* action)
+bool Scene::DoesSceneModelExist(const std::string& modelName) const
+{
+	return mSceneData->GetBSP()->Exists(modelName);
+}
+
+void Scene::ExecuteAction(const Action* action)
 {
 	// Ignore nulls.
 	if(action == nullptr) { return; }
@@ -496,10 +524,10 @@ void Scene::ExecuteNVC(const Action* action)
 	{
 		case Action::Approach::WalkTo:
 		{
-			ScenePositionData* scenePos = mSceneData.GetScenePosition(action->target);
+			const ScenePositionData* scenePos = mSceneData->GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
-				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData.GetWalkerBoundary(), [action]() -> void {
+				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData->GetWalkerBoundary(), [action]() -> void {
 					action->Execute();
 				});
 			}
@@ -518,7 +546,7 @@ void Scene::ExecuteNVC(const Action* action)
 		case Action::Approach::Near: // Never used in GK3.
 		{
 			std::cout << "Executed NEAR approach type!" << std::endl;
-			ScenePositionData* scenePos = mSceneData.GetScenePosition(action->target);
+			const ScenePositionData* scenePos = mSceneData->GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
 				mEgo->SetPosition(scenePos->position);

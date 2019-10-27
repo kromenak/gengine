@@ -62,14 +62,14 @@ class NVC : public Asset
 public:
     NVC(std::string name, char* data, int dataLength);
 	
-    Action* GetNVC(std::string noun, std::string verb);
-	
 	bool IsCaseMet(const Action* item, GKActor* ego) const;
 	
-	const std::vector<Action>& GetActionsForNoun(std::string noun);
-	const Action* GetAction(std::string noun, std::string verb);
+	const std::vector<Action>& GetActions(const std::string& noun);
+	const Action* GetAction(const std::string& noun, const std::string& verb);
 	
 private:
+	// If attempting to get actions for a noun that doesn't exist,
+	// We just return a reference to this empty vector.
 	std::vector<Action> mEmptyActions;
 	
     // Mapping of noun name to NVC items.

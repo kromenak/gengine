@@ -32,27 +32,27 @@ class WalkerBoundary;
 class SceneData
 {
 public:
-	SceneData(std::string location, std::string timeblock);
+	SceneData(const std::string& location, const std::string& timeblock);
 	
 	BSP* GetBSP() const { return mBSP; }
-	std::string GetFloorModelName() const;
 	Skybox* GetSkybox() const { return mSkybox; }
 	
-	SceneCameraData* GetDefaultRoomCamera() const;
-	SceneCameraData* GetRoomCamera(std::string cameraName) const;
+	const SceneCameraData* GetDefaultRoomCamera() const;
+	const SceneCameraData* GetRoomCamera(const std::string& cameraName) const;
 	
-	ScenePositionData* GetScenePosition(std::string positionName) const;
+	const ScenePositionData* GetScenePosition(const std::string& positionName) const;
 	
+	const std::string& GetFloorModelName() const;
 	WalkerBoundary* GetWalkerBoundary() const;
 	
-	std::vector<SceneActorData*> GetSceneActorDatas() const { return mSceneActorDatas; }
-	std::vector<SceneModelData*> GetSceneModelDatas() const { return mSceneModelDatas; }
+	const std::vector<SceneActorData*>& GetSceneActorDatas() const { return mSceneActorDatas; }
+	const std::vector<SceneModelData*>& GetSceneModelDatas() const { return mSceneModelDatas; }
 	
 	Soundtrack* GetSoundtrack() const { return mSoundtrack; }
 	
-	std::vector<NVC*> GetNounVerbCaseSets() const { return mNounVerbCaseSets; }
-	std::vector<const Action*> GetViableVerbsForNoun(std::string noun, GKActor* ego) const;
-	const Action* GetNounVerbAction(std::string noun, std::string verb, GKActor* ego) const;
+	const std::vector<NVC*>& GetActionSets() const { return mActionSets; }
+	std::vector<const Action*> GetActions(const std::string& noun, GKActor* ego) const;
+	const Action* GetAction(const std::string& noun, const std::string& verb, GKActor* ego) const;
 	
 private:
 	// Every location *must* have a general SIF.
@@ -82,7 +82,7 @@ private:
 	std::vector<SceneModelData*> mSceneModelDatas;
 	
 	// Combined generic and specific NVC sets.
-	std::vector<NVC*> mNounVerbCaseSets;
+	std::vector<NVC*> mActionSets;
 	
 	// The soundtrack to use.
 	Soundtrack* mSoundtrack = nullptr;

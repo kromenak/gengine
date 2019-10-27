@@ -34,42 +34,43 @@ class Vector3;
 class Scene
 {
 public:
-    Scene(std::string name, std::string timeCode);
+    Scene(std::string name, std::string timeblock);
 	~Scene();
 	
-	void OnSceneEnter();
+	void Load();
+	void Unload();
 	
-    void InitEgoPosition(std::string positionName);
-	void SetCameraPosition(std::string cameraName);
+    void InitEgoPosition(const std::string& positionName);
+	void SetCameraPosition(const std::string& cameraName);
 	
-	bool CheckInteract(const Ray& ray);
+	bool CheckInteract(const Ray& ray) const;
     void Interact(const Ray& ray);
 	
-	float GetFloorY(const Vector3& position);
+	float GetFloorY(const Vector3& position) const;
 	
 	GKActor* GetEgo() const { return mEgo; }
-	GKActor* GetActorByModelName(std::string modelName);
-	GKActor* GetActorByNoun(std::string noun);
+	GKActor* GetActorByModelName(const std::string& modelName) const;
+	GKActor* GetActorByNoun(const std::string& noun) const;
 	
-	ScenePositionData* GetPosition(std::string positionName) { return mSceneData.GetScenePosition(positionName); }
+	const ScenePositionData* GetPosition(const std::string& positionName) const;
 	
-	void ApplyTextureToSceneModel(std::string modelName, Texture* texture);
-	void SetSceneModelVisibility(std::string modelName, bool visible);
-	bool IsSceneModelVisible(std::string modelName) const;
-	bool DoesSceneModelExist(std::string modelName) const;
+	void ApplyTextureToSceneModel(const std::string& modelName, Texture* texture);
+	void SetSceneModelVisibility(const std::string& modelName, bool visible);
+	bool IsSceneModelVisible(const std::string& modelName) const;
+	bool DoesSceneModelExist(const std::string& modelName) const;
 	
-	AnimationPlayer* GetAnimationPlayer() { return mAnimationPlayer; }
-	SoundtrackPlayer* GetSoundtrackPlayer() { return mSoundtrackPlayer; }
+	AnimationPlayer* GetAnimationPlayer() const { return mAnimationPlayer; }
+	SoundtrackPlayer* GetSoundtrackPlayer() const { return mSoundtrackPlayer; }
     
 private:
-    // The scene name, both general and specific.
-    // General name is time-agnostic (Ex: DIN).
-    // Specific name includes the day/time (Ex: DIN110A).
-    std::string mGeneralName;
-    std::string mSpecificName;
+	// Location is 3-letter code (e.g. DIN).
+	// Timeblock is day/time code (e.g. 110A).
+	std::string mLocation;
+	std::string mTimeblock;
 	
 	// Contains scene data references for the current location/timeblock.
-	SceneData mSceneData;
+	// If not null, means we're loaded!
+	SceneData* mSceneData = nullptr;
 	
 	// The animation player for the scene.
 	AnimationPlayer* mAnimationPlayer = nullptr;
@@ -89,7 +90,7 @@ private:
 	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;
 	
-	void ExecuteNVC(const Action* action);
+	void ExecuteAction(const Action* action);
 };
 
 /*

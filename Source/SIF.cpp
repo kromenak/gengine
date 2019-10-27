@@ -18,7 +18,12 @@ SIF::SIF(std::string name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
-SceneCameraData* SIF::GetRoomCamera(std::string cameraName)
+SIF::~SIF()
+{
+	delete mSkybox;
+}
+
+const SceneCameraData* SIF::GetRoomCamera(const std::string& cameraName) const
 {
 	for(int i = 0; i < mRoomCameras.size(); i++)
 	{
@@ -30,7 +35,7 @@ SceneCameraData* SIF::GetRoomCamera(std::string cameraName)
 	return nullptr;
 }
 
-ScenePositionData* SIF::GetPosition(std::string positionName)
+const ScenePositionData* SIF::GetPosition(const std::string& positionName) const
 {
     for(int i = 0; i < mPositions.size(); i++)
     {
@@ -70,7 +75,7 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue->key, "floor"))
             {
-                mFloorBspModelName = keyValue->value;
+                mFloorModelName = keyValue->value;
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue->key, "boundary"))
             {
@@ -667,5 +672,4 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
     }
-    
 }

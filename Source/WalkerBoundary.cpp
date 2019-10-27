@@ -44,10 +44,10 @@ struct NodeInfo
 	float GetF() { return h + g; }
 };
 
-bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& path) const
+bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& outPath) const
 {
 	// Make sure path vector is empty.
-	path.clear();
+	outPath.clear();
 	
 	// If start or goal are not walkable, say we can't find a path.
 	if(!CanWalkTo(from) || !CanWalkTo(to)) { return false; }
@@ -144,7 +144,7 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& pa
 	// Found a path! Convert it and fill the path.
 	while(current != goal)
 	{
-		path.push_back(TexturePosToWorldPos(current));
+		outPath.push_back(TexturePosToWorldPos(current));
 		current = infos[current].parent;
 	}
 	return true;
