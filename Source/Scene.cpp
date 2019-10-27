@@ -490,8 +490,8 @@ void Scene::ExecuteNVC(const NVCItem* nvc)
 	if(nvc == nullptr) { return; }
 	
 	// Before executing the NVC, we need to handle any approach.
-	std::cout << (int)nvc->approach << std::endl;
-	std::cout << nvc->target << std::endl;
+	//std::cout << (int)nvc->approach << std::endl;
+	//std::cout << nvc->target << std::endl;
 	switch(nvc->approach)
 	{
 		case NVCItem::Approach::WalkTo:

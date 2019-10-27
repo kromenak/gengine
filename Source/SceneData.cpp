@@ -90,7 +90,7 @@ SceneData::SceneData(std::string location, std::string timeblock)
 		// Also, if the underscore is just one spot before "all", use the file, since it should be loaded ALWAYS.
 		if(allPos == std::string::npos || underscorePos == std::string::npos || underscorePos == allPos - 1)
 		{
-			std::cout << "Using NVC " << nvcName << std::endl;
+			//std::cout << "Using NVC " << nvcName << std::endl;
 			mNounVerbCaseSets.push_back(nvc);
 		}
 		else
@@ -104,7 +104,7 @@ SceneData::SceneData(std::string location, std::string timeblock)
 				char val = nvcName[checkPos];
 				if(val == timeblock[0])
 				{
-					std::cout << "Using NVC " << nvcName << std::endl;
+					//std::cout << "Using NVC " << nvcName << std::endl;
 					mNounVerbCaseSets.push_back(nvc);
 					break;
 				}

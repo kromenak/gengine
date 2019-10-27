@@ -67,7 +67,7 @@ void Model::ParseFromData(char *data, int dataLength)
 		unsigned int flags = reader.ReadUInt();
 		if((flags & 2) != 0)
 		{
-			std::cout << "  Billboard Model!" << std::endl;
+			//std::cout << "  Billboard Model!" << std::endl;
 			mBillboard = true;
 		}
 		
