@@ -279,7 +279,7 @@ int GetEgoCurrentLocationCount()
 	return 0;
 	/*
 	// Figure out who ego is.
-	GKActor* ego = GEngine::inst->GetScene()->GetEgo();
+	GKActor* ego = GEngine::inst->Gettime()->GetEgo();
 	if(ego != nullptr)
 	{
 		return Services::Get<GameProgress>()->GetLocationCount(ego->GetNoun());
@@ -528,7 +528,7 @@ shpvoid StartIdleFidget(std::string actorName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
-		actor->SetState(GKActor::State::Idle);
+		actor->StartFidget(GKActor::FidgetType::Idle);
 	}
 	return 0;
 }
@@ -539,7 +539,7 @@ shpvoid StartListenFidget(std::string actorName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
-		actor->SetState(GKActor::State::Listen);
+		actor->StartFidget(GKActor::FidgetType::Listen);
 	}
 	return 0;
 }
@@ -550,7 +550,7 @@ shpvoid StartTalkFidget(std::string actorName) // WAIT
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
-		actor->SetState(GKActor::State::Talk);
+		actor->StartFidget(GKActor::FidgetType::Talk);
 	}
 	return 0;
 }

@@ -60,23 +60,28 @@ GKActor::GKActor(std::string identifier) : Actor(), mIdentifier(identifier)
 	mFaceController->SetCharacterConfig(config);
 }
 
-void GKActor::SetState(GKActor::State state)
+void GKActor::StartFidget(FidgetType type)
 {
-    // Save state.
-    mState = state;
+    // Save type.
+    mActiveFidget = type;
     
     // Set appropriate gas to play.
-    switch(mState)
+    switch(mActiveFidget)
     {
-	case State::Idle:
+	case FidgetType::None:
+	case FidgetType::Custom: // Can only be started via custom GAS version of this function (for now).
+		mGasPlayer->SetGas(nullptr);
+		break;
+		
+	case FidgetType::Idle:
 		mGasPlayer->SetGas(mIdleGas);
 		break;
 		
-	case State::Talk:
+	case FidgetType::Talk:
 		mGasPlayer->SetGas(mTalkGas);
 		break;
 		
-	case State::Listen:
+	case FidgetType::Listen:
 		mGasPlayer->SetGas(mListenGas);
 		break;
     }
@@ -84,6 +89,7 @@ void GKActor::SetState(GKActor::State state)
 
 void GKActor::StartFidget(GAS* gas)
 {
+	mActiveFidget = FidgetType::Custom;
 	mGasPlayer->SetGas(gas);
 }
 

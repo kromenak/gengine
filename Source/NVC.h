@@ -18,7 +18,7 @@
 class GKActor;
 class SheepScript;
 
-struct NVCItem
+struct Action
 {
 	// The noun is the thing we are interacting with.
     std::string noun;
@@ -62,18 +62,18 @@ class NVC : public Asset
 public:
     NVC(std::string name, char* data, int dataLength);
 	
-    NVCItem* GetNVC(std::string noun, std::string verb);
+    Action* GetNVC(std::string noun, std::string verb);
 	
-	bool IsCaseMet(const NVCItem* item, GKActor* ego) const;
+	bool IsCaseMet(const Action* item, GKActor* ego) const;
 	
-	const std::vector<NVCItem>& GetActionsForNoun(std::string noun);
-	const NVCItem* GetAction(std::string noun, std::string verb);
+	const std::vector<Action>& GetActionsForNoun(std::string noun);
+	const Action* GetAction(std::string noun, std::string verb);
 	
 private:
-	std::vector<NVCItem> mEmptyActions;
+	std::vector<Action> mEmptyActions;
 	
     // Mapping of noun name to NVC items.
-    std::unordered_map<std::string, std::vector<NVCItem>> mNounToItems;
+    std::unordered_map<std::string, std::vector<Action>> mNounToItems;
     
     // Mapping of case name to sheep script to eval.
     std::unordered_map<std::string, SheepScript*> mCaseToSheep;

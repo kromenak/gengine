@@ -23,7 +23,7 @@
 class BSP;
 class GKActor;
 class NVC;
-class NVCItem;
+class Action;
 class SceneModel;
 class Skybox;
 class Soundtrack;
@@ -51,8 +51,8 @@ public:
 	Soundtrack* GetSoundtrack() const { return mSoundtrack; }
 	
 	std::vector<NVC*> GetNounVerbCaseSets() const { return mNounVerbCaseSets; }
-	std::vector<const NVCItem*> GetViableVerbsForNoun(std::string noun, GKActor* ego) const;
-	const NVCItem* GetNounVerbAction(std::string noun, std::string verb, GKActor* ego) const;
+	std::vector<const Action*> GetViableVerbsForNoun(std::string noun, GKActor* ego) const;
+	const Action* GetNounVerbAction(std::string noun, std::string verb, GKActor* ego) const;
 	
 private:
 	// Every location *must* have a general SIF.

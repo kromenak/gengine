@@ -11,7 +11,7 @@
 #include "SheepScript.h"
 #include "StringUtil.h"
 
-void NVCItem::Execute() const
+void Action::Execute() const
 {
 	Services::GetSheep()->Execute(script);
 }
@@ -21,14 +21,14 @@ NVC::NVC(std::string name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
-NVCItem* NVC::GetNVC(std::string noun, std::string verb)
+Action* NVC::GetNVC(std::string noun, std::string verb)
 {
     // See if we have an entry for this noun. If not, we're done.
     auto it = mNounToItems.find(noun);
     if(it == mNounToItems.end()) { return nullptr; }
     
     // See if we have an item with the given verb.
-    std::vector<NVCItem> items = mNounToItems[noun];
+    std::vector<Action> items = mNounToItems[noun];
     for(auto& item : items)
     {
         if(item.verb == verb)
@@ -41,7 +41,7 @@ NVCItem* NVC::GetNVC(std::string noun, std::string verb)
     return nullptr;
 }
 
-bool NVC::IsCaseMet(const NVCItem* item, GKActor* ego) const
+bool NVC::IsCaseMet(const Action* item, GKActor* ego) const
 {
 	// Empty condition is automatically met.
 	if(item->condition.empty()) { return true; }
@@ -73,7 +73,7 @@ bool NVC::IsCaseMet(const NVCItem* item, GKActor* ego) const
 	return false;
 }
 
-const std::vector<NVCItem>& NVC::GetActionsForNoun(std::string noun)
+const std::vector<Action>& NVC::GetActionsForNoun(std::string noun)
 {
 	auto it = mNounToItems.find(noun);
 	if(it != mNounToItems.end())
@@ -83,9 +83,9 @@ const std::vector<NVCItem>& NVC::GetActionsForNoun(std::string noun)
 	return mEmptyActions;
 }
 
-const NVCItem* NVC::GetAction(std::string noun, std::string verb)
+const Action* NVC::GetAction(std::string noun, std::string verb)
 {
-	const std::vector<NVCItem>& actionsForNoun = GetActionsForNoun(noun);
+	const std::vector<Action>& actionsForNoun = GetActionsForNoun(noun);
 	for(auto& action : actionsForNoun)
 	{
 		if(StringUtil::EqualsIgnoreCase(action.verb, verb))
@@ -105,7 +105,7 @@ void NVC::ParseFromData(char *data, int dataLength)
     IniSection mainSection = parser.GetSection("");
     for(auto& entry : mainSection.entries)
     {
-        NVCItem item;
+        Action item;
         
         // The first three items must be the noun, verb, and case.
         item.noun = entry->key;
@@ -130,35 +130,35 @@ void NVC::ParseFromData(char *data, int dataLength)
             {
 				if(StringUtil::EqualsIgnoreCase(keyValue->value, "WalkTo"))
 				{
-					item.approach = NVCItem::Approach::WalkTo;
+					item.approach = Action::Approach::WalkTo;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Anim"))
 				{
-					item.approach = NVCItem::Approach::Anim;
+					item.approach = Action::Approach::Anim;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Near"))
 				{
-					item.approach = NVCItem::Approach::Near;
+					item.approach = Action::Approach::Near;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "NearModel"))
 				{
-					item.approach = NVCItem::Approach::NearModel;
+					item.approach = Action::Approach::NearModel;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Region"))
 				{
-					item.approach = NVCItem::Approach::Region;
+					item.approach = Action::Approach::Region;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "TurnTo"))
 				{
-					item.approach = NVCItem::Approach::TurnTo;
+					item.approach = Action::Approach::TurnTo;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "TurnToModel"))
 				{
-					item.approach = NVCItem::Approach::TurnToModel;
+					item.approach = Action::Approach::TurnToModel;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "WalkToSee"))
 				{
-					item.approach = NVCItem::Approach::WalkToSee;
+					item.approach = Action::Approach::WalkToSee;
 				}
 				else
 				{
@@ -182,7 +182,7 @@ void NVC::ParseFromData(char *data, int dataLength)
         auto it = mNounToItems.find(item.noun);
         if(it == mNounToItems.end())
         {
-            mNounToItems[item.noun] = std::vector<NVCItem>();
+            mNounToItems[item.noun] = std::vector<Action>();
         }
         mNounToItems[item.noun].push_back(item);
     }

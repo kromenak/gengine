@@ -63,7 +63,7 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	*/
 }
 
-void ActionBar::Show(std::vector<const NVCItem*> actions, std::function<void(const NVCItem*)> executeCallback)
+void ActionBar::Show(std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback)
 {
 	Hide();
 	
@@ -79,7 +79,7 @@ void ActionBar::Show(std::vector<const NVCItem*> actions, std::function<void(con
 		ButtonIcon& buttonIcon = buttonIconManager->GetButtonIconForVerb(actions[i]->verb);
 		UIButton* actionButton = AddButton(buttonIndex, xPos, buttonIcon);
 		
-		const NVCItem* action = actions[i];
+		const Action* action = actions[i];
 		actionButton->SetPressCallback([this, action, executeCallback]() {
 			// Hide action bar on button press. Make sure to do this BEFORE executing action.
 			// The execute might lead to a scene change, which deletes this object!

@@ -134,7 +134,7 @@ void Scene::OnSceneEnter()
 		actor->SetListenGas(actorDef->listenGas);
 		
 		// Start in idle state.
-		//actor->SetState(GKActor::State::Idle);
+		actor->StartFidget(GKActor::FidgetType::Idle);
 		
 		// Set up the actor's walker support, if any.
 		Model* walkerAidModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
@@ -244,11 +244,11 @@ void Scene::OnSceneEnter()
 	std::vector<NVC*> nvcs = mSceneData.GetNounVerbCaseSets();
 	for(auto& nvc : nvcs)
 	{
-		const NVCItem* nvcItem = nvc->GetAction("SCENE", "ENTER");
-		if(nvcItem != nullptr)
+		const Action* action = nvc->GetAction("SCENE", "ENTER");
+		if(action != nullptr)
 		{
 			std::cout << "Executing scene enter for " << nvc->GetName() << std::endl;
-			nvcItem->Execute();
+			action->Execute();
 		}
 	 }
 }
@@ -345,7 +345,7 @@ void Scene::Interact(const Ray& ray)
 		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
 		{
 			// Find all verbs that can be used for this object.
-			std::vector<const NVCItem*> viableActions = mSceneData.GetViableVerbsForNoun(actor->GetNoun(), mEgo);
+			std::vector<const Action*> viableActions = mSceneData.GetViableVerbsForNoun(actor->GetNoun(), mEgo);
 			
 			// Show the action bar. Internally, this takes care of executing the chosen action.
 			mActionBar->Show(viableActions, std::bind(&Scene::ExecuteNVC, this, std::placeholders::_1));
@@ -391,7 +391,7 @@ void Scene::Interact(const Ray& ray)
 	if(!sceneModelData->verb.empty())
 	{
 		std::cout << "Trying to play default verb " << sceneModelData->verb << std::endl;
-		const NVCItem* action = mSceneData.GetNounVerbAction(sceneModelData->noun, sceneModelData->verb, mEgo);
+		const Action* action = mSceneData.GetNounVerbAction(sceneModelData->noun, sceneModelData->verb, mEgo);
 		if(action != nullptr)
 		{
 			action->Execute();
@@ -400,7 +400,7 @@ void Scene::Interact(const Ray& ray)
 	}
 	
 	// Find all verbs that can be used for this object.
-	std::vector<const NVCItem*> viableActions = mSceneData.GetViableVerbsForNoun(sceneModelData->noun, mEgo);
+	std::vector<const Action*> viableActions = mSceneData.GetViableVerbsForNoun(sceneModelData->noun, mEgo);
 	
 	// Show the action bar. Internally, this takes care of executing the chosen action.
 	mActionBar->Show(viableActions, std::bind(&Scene::ExecuteNVC, this, std::placeholders::_1));
@@ -484,78 +484,78 @@ bool Scene::DoesSceneModelExist(std::string modelName) const
 	return mSceneData.GetBSP()->Exists(modelName);
 }
 
-void Scene::ExecuteNVC(const NVCItem* nvc)
+void Scene::ExecuteNVC(const Action* action)
 {
 	// Ignore nulls.
-	if(nvc == nullptr) { return; }
+	if(action == nullptr) { return; }
 	
 	// Before executing the NVC, we need to handle any approach.
 	//std::cout << (int)nvc->approach << std::endl;
 	//std::cout << nvc->target << std::endl;
-	switch(nvc->approach)
+	switch(action->approach)
 	{
-		case NVCItem::Approach::WalkTo:
+		case Action::Approach::WalkTo:
 		{
-			ScenePositionData* scenePos = mSceneData.GetScenePosition(nvc->target);
+			ScenePositionData* scenePos = mSceneData.GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
-				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData.GetWalkerBoundary(), [nvc]() -> void {
-					nvc->Execute();
+				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData.GetWalkerBoundary(), [action]() -> void {
+					action->Execute();
 				});
 			}
 			break;
 		}
-		case NVCItem::Approach::Anim: // Example use: R25 Open/Close Window, R25 Open/Close Dresser
+		case Action::Approach::Anim: // Example use: R25 Open/Close Window, R25 Open/Close Dresser
 		{
-			Animation* anim = Services::GetAssets()->LoadAnimation(nvc->target);
+			Animation* anim = Services::GetAssets()->LoadAnimation(action->target);
 			if(anim != nullptr)
 			{
 				//TODO: Get position corresponding to first frame of animation and move there.
-				nvc->Execute();
+				action->Execute();
 			}
 			break;
 		}
-		case NVCItem::Approach::Near: // Never used in GK3.
+		case Action::Approach::Near: // Never used in GK3.
 		{
 			std::cout << "Executed NEAR approach type!" << std::endl;
-			ScenePositionData* scenePos = mSceneData.GetScenePosition(nvc->target);
+			ScenePositionData* scenePos = mSceneData.GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
 				mEgo->SetPosition(scenePos->position);
 			}
-			nvc->Execute();
+			action->Execute();
 			break;
 		}
-		case NVCItem::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
+		case Action::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
 		{
-			nvc->Execute();
+			action->Execute();
 			break;
 		}
-		case NVCItem::Approach::Region: // Only use: RC1 "No Vacancies" Sign
+		case Action::Approach::Region: // Only use: RC1 "No Vacancies" Sign
 		{
-			nvc->Execute();
+			action->Execute();
 			break;
 		}
-		case NVCItem::Approach::TurnTo: // Never used in GK3.
+		case Action::Approach::TurnTo: // Never used in GK3.
 		{
 			std::cout << "Executed TURNTO approach type!" << std::endl;
-			nvc->Execute();
+			action->Execute();
 			break;
 		}
-		case NVCItem::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
+		case Action::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
 		{
-			nvc->Execute();
+			action->Execute();
 			break;
 		}
-		case NVCItem::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser, RC1 Look Bench/Bookstore Sign
+		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser, RC1 Look Bench/Bookstore Sign
 		{
-			nvc->Execute();
+			action->Execute();
 			break;
 		}
-		case NVCItem::Approach::None:
+		case Action::Approach::None:
 		{
 			// Just do it!
-			nvc->Execute();
+			action->Execute();
 			break;
 		}
 		default:

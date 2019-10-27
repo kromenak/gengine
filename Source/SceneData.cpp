@@ -215,14 +215,14 @@ WalkerBoundary* SceneData::GetWalkerBoundary() const
 	return walkerBoundary;
 }
 
-std::vector<const NVCItem*> SceneData::GetViableVerbsForNoun(std::string noun, GKActor* ego) const
+std::vector<const Action*> SceneData::GetViableVerbsForNoun(std::string noun, GKActor* ego) const
 {
 	// As we iterate, we'll use this to keep track of what verbs are in use.
 	// We don't want verb repeats - a new item with the same verb will overwrite the old item.
-	std::unordered_map<std::string, const NVCItem*> verbsToActions;
+	std::unordered_map<std::string, const Action*> verbsToActions;
 	for(auto& nvc : mNounVerbCaseSets)
 	{
-		const std::vector<NVCItem>& allActions = nvc->GetActionsForNoun(noun);
+		const std::vector<Action>& allActions = nvc->GetActionsForNoun(noun);
 		for(auto& action : allActions)
 		{
 			if(nvc->IsCaseMet(&action, ego))
@@ -233,7 +233,7 @@ std::vector<const NVCItem*> SceneData::GetViableVerbsForNoun(std::string noun, G
 	}
 	
 	// Finally, convert our map to a vector to return.
-	std::vector<const NVCItem*> viableActions;
+	std::vector<const Action*> viableActions;
 	for(auto entry : verbsToActions)
 	{
 		viableActions.push_back(entry.second);
@@ -241,14 +241,14 @@ std::vector<const NVCItem*> SceneData::GetViableVerbsForNoun(std::string noun, G
 	return viableActions;
 }
 
-const NVCItem* SceneData::GetNounVerbAction(std::string noun, std::string verb, GKActor* ego) const
+const Action* SceneData::GetNounVerbAction(std::string noun, std::string verb, GKActor* ego) const
 {
 	// Cycle through NVCs, trying to find a valid action.
 	// Again, any later match will overwrite an earlier match.
-	const NVCItem* action = nullptr;
+	const Action* action = nullptr;
 	for(auto& nvc : mNounVerbCaseSets)
 	{
-		const NVCItem* possibleAction = nvc->GetAction(noun, verb);
+		const Action* possibleAction = nvc->GetAction(noun, verb);
 		if(possibleAction != nullptr && nvc->IsCaseMet(possibleAction, ego))
 		{
 			action = possibleAction;

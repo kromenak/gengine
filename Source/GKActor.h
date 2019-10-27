@@ -28,11 +28,13 @@ class Walker;
 class GKActor : public Actor
 {
 public:
-    enum class State
+    enum class FidgetType
     {
+		None,
         Idle,
         Talk,
-        Listen
+        Listen,
+		Custom
     };
 	
 	GKActor();
@@ -44,12 +46,11 @@ public:
 	void SetNoun(std::string noun) { mNoun = noun; }
 	std::string GetNoun() const { return mNoun; }
 	
-	void SetState(State state);
-	
     void SetIdleGas(GAS* gas) { mIdleGas = gas; }
     void SetTalkGas(GAS* gas) { mTalkGas = gas; }
     void SetListenGas(GAS* gas) { mListenGas = gas; }
 	
+	void StartFidget(FidgetType type);
 	void StartFidget(GAS* gas);
 	
 	void PlayAnimation(VertexAnimation* animation);
@@ -70,8 +71,8 @@ private:
 	// This character's noun.
 	std::string mNoun;
 	
-    // Actor's current state.
-    State mState = State::Idle;
+    // Actor's current fidget.
+    FidgetType mActiveFidget = FidgetType::Idle;
 	
 	// The character's mesh renderer.
 	MeshRenderer* mMeshRenderer = nullptr;

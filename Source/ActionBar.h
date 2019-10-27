@@ -25,7 +25,7 @@ class ActionBar : public Actor
 public:
 	ActionBar();
 	
-	void Show(std::vector<const NVCItem*> actions, std::function<void(const NVCItem*)> executeCallback);
+	void Show(std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback);
 	void Hide();
 	
 	bool IsShowing() const { return mIsShowing; }

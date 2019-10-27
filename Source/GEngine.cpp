@@ -114,8 +114,8 @@ bool GEngine::Initialize()
 	// Create game progress.
 	Services::Set<GameProgress>(new GameProgress());
 	
-	LoadScene("R25");
-    //LoadScene("RC1");
+	//LoadScene("R25");
+    LoadScene("RC1");
 	
 	mReportManager.Log("Generic", "Rock & Roll");
     return true;
