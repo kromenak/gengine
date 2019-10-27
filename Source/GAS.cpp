@@ -73,6 +73,9 @@ void GAS::ParseFromData(char *data, int dataLength)
     std::string line;
     while(StringUtil::GetLineSanitized(stream, line))
     {
+		// Ignore commented out lines (// format)
+		if(line[0] == '/' && line[1] == '/') { continue; }
+		
         // Split line into tokens based on spaces, commas, and parenthesis.
         StringTokenizer tokenizer(line, { ' ', ',', '(', ')' });
         

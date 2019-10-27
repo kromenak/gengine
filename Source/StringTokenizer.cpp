@@ -14,7 +14,7 @@ StringTokenizer::StringTokenizer(std::string str, std::initializer_list<char> sp
         {
             if(str[i] == splitChar)
             {
-                if(i - startIndex > 1)
+                if(i - startIndex >= 1)
                 {
                     mTokens.push_back(str.substr(startIndex, i - startIndex));
                 }
@@ -23,7 +23,7 @@ StringTokenizer::StringTokenizer(std::string str, std::initializer_list<char> sp
         }
     }
     
-    if(str.size() - startIndex > 1)
+    if(str.size() - startIndex >= 1)
     {
         mTokens.push_back(str.substr(startIndex, str.size() - startIndex));
     }
