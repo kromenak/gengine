@@ -71,8 +71,8 @@ public:
 	
 	void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
 	
-	void SetTextureName(std::string textureName) { mTextureName = textureName; }
-	std::string GetTextureName() const { return mTextureName; }
+	void SetTextureName(const std::string& textureName) { mTextureName = textureName; }
+	const std::string& GetTextureName() const { return mTextureName; }
 	
 	unsigned int GetVertexCount() const { return mVertexCount; }
 	Vector3 GetVertexPosition(int index) const;

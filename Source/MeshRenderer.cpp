@@ -137,8 +137,11 @@ void MeshRenderer::AddMesh(Mesh* mesh)
 		Material m;
 		
 		// Load and set texture reference.
-		Texture* tex = Services::GetAssets()->LoadTexture(submesh->GetTextureName());
-		m.SetDiffuseTexture(tex);
+		if(!submesh->GetTextureName().empty())
+		{
+			Texture* tex = Services::GetAssets()->LoadTexture(submesh->GetTextureName());
+			m.SetDiffuseTexture(tex);
+		}
 		
 		// Add to materials list.
 		mMaterials.push_back(m);
