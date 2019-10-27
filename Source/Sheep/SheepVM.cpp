@@ -11,6 +11,7 @@
 #include "Math.h"
 #include "SheepAPI.h"
 #include "SheepScript.h"
+#include "Services.h"
 
 //#define SHEEP_DEBUG
 
@@ -362,13 +363,14 @@ void SheepVM::Execute(SheepThread* thread)
 	if(!thread->mRunning)
 	{
 		thread->mRunning = true;
-		std::cout << "Sheep " << thread->GetName() << " created and starting" << std::endl;
+		
+		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " created and starting");
 	}
 	else if(thread->mInWaitBlock)
 	{
 		thread->mBlocked = false;
 		thread->mInWaitBlock = false;
-		std::cout << "Sheep " << thread->GetName() << " released at line -1" << std::endl;
+		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " released at line -1");
 	}
 	
 	// Get instance/script we'll be using.
@@ -1132,7 +1134,7 @@ void SheepVM::Execute(SheepThread* thread)
 	// If we get here and the thread IS running, it means the thread was blocked due to a wait!
 	if(!thread->mRunning)
 	{
-		std::cout << "Sheep " << thread->GetName() << " is exiting" << std::endl;
+		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is exiting");
 		if(thread->mWaitCallback)
 		{
 			thread->mWaitCallback();
@@ -1140,11 +1142,11 @@ void SheepVM::Execute(SheepThread* thread)
 	}
 	else if(thread->mInWaitBlock)
 	{
-		std::cout << "Sheep " << thread->GetName() << " is blocked at line -1" << std::endl;
+		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is blocked at line -1");
 	}
 	else
 	{
-		std::cout << "Sheep " << thread->GetName() << " is in some weird unexpected state!" << std::endl;
+		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is in some weird unexpected state!");
 	}
 	
 	// Restore previously executing thread.

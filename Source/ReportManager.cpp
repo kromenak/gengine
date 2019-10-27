@@ -32,9 +32,9 @@ ReportManager::ReportManager()
 	// Sheep machine stream.
 	ReportStream& sheepMachine = GetOrCreateStream("SheepMachine");
 	sheepMachine.SetAction(ReportAction::Log);
-	sheepMachine.AddOutput(ReportOutput::Debugger);
+	//sheepMachine.AddOutput(ReportOutput::Debugger);
 	sheepMachine.AddOutput(ReportOutput::SharedMemory);
-	sheepMachine.AddOutput(ReportOutput::Console);
+	//sheepMachine.AddOutput(ReportOutput::Console);
 	sheepMachine.AddContent(ReportContent::All);
 	sheepMachine.RemoveContent(ReportContent::Date);
 	sheepMachine.RemoveContent(ReportContent::Machine);
