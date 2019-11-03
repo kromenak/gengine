@@ -223,12 +223,10 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 shpvoid Blink(std::string actorName)
 {
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	if(actor == nullptr)
+	if(actor != nullptr)
 	{
-		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
-		return 0;
+		actor->GetFaceController()->Blink();
 	}
-	actor->GetFaceController()->Blink();
     return 0;
 }
 RegFunc1(Blink, void, string, IMMEDIATE, REL_FUNC);
@@ -236,12 +234,10 @@ RegFunc1(Blink, void, string, IMMEDIATE, REL_FUNC);
 shpvoid BlinkX(std::string actorName, std::string blinkAnim)
 {
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	if(actor == nullptr)
+	if(actor != nullptr)
 	{
-		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
-		return 0;
+		actor->GetFaceController()->Blink(blinkAnim);
 	}
-	actor->GetFaceController()->Blink(blinkAnim);
     return 0;
 }
 RegFunc2(BlinkX, void, string, string, IMMEDIATE, REL_FUNC);
@@ -256,12 +252,10 @@ RegFunc1(ClearMood, void, string, IMMEDIATE, REL_FUNC);
 shpvoid EnableEyeJitter(std::string actorName)
 {
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	if(actor == nullptr)
+	if(actor != nullptr)
 	{
-		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
-		return 0;
+		actor->GetFaceController()->SetEyeJitterEnabled(true);
 	}
-	actor->GetFaceController()->SetEyeJitterEnabled(true);
     return 0;
 }
 RegFunc1(EnableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
@@ -269,12 +263,10 @@ RegFunc1(EnableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
 shpvoid DisableEyeJitter(std::string actorName)
 {
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	if(actor == nullptr)
+	if(actor != nullptr)
 	{
-		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
-		return 0;
+		actor->GetFaceController()->SetEyeJitterEnabled(false);
 	}
-	actor->GetFaceController()->SetEyeJitterEnabled(false);
     return 0;
 }
 RegFunc1(DisableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
@@ -282,19 +274,25 @@ RegFunc1(DisableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
 shpvoid EyeJitter(std::string actorName)
 {
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	if(actor == nullptr)
+	if(actor != nullptr)
 	{
-		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
-		return 0;
+		actor->GetFaceController()->EyeJitter();
 	}
-	actor->GetFaceController()->EyeJitter();
     return 0;
 }
 RegFunc1(EyeJitter, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DumpActorPosition(std::string actorName)
 {
-	std::cout << "Dump actor position " << actorName << std::endl;
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor != nullptr)
+	{
+		std::stringstream ss;
+		ss << "actor '" << actorName << "' ";
+		ss << "h=" << actor->GetHeading().ToDegrees() << ", ";
+		ss << "pos=" << actor->GetPosition();
+		Services::GetReports()->Log("Dump", ss.str());
+	}
     return 0;
 }
 RegFunc1(DumpActorPosition, void, string, IMMEDIATE, DEV_FUNC);

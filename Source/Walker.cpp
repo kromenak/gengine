@@ -11,6 +11,7 @@
 #include "Debug.h"
 #include "GEngine.h"
 #include "GKActor.h"
+#include "Heading.h"
 #include "Matrix4.h"
 #include "MeshRenderer.h"
 #include "Scene.h"
@@ -175,21 +176,26 @@ void Walker::OnUpdate(float deltaTime)
 	owner->SetRotation(rotation);
 }
 
-bool Walker::WalkTo(Vector3 position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+bool Walker::WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
 {
-	bool result = WalkTo(position, 0.0f, walkerBoundary, finishCallback);
-	mHasDesiredFacingDir = false;
-	return result;
+	return WalkTo(position, Heading::None, walkerBoundary, finishCallback);
 }
 
-bool Walker::WalkTo(Vector3 position, float heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+bool Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
 {
 	// Save finish callback.
 	mFinishedPathCallback = finishCallback;
 	
 	// Save desired facing direction.
-	mHasDesiredFacingDir = true;
-	mDesiredFacingDir = Quaternion(Vector3::UnitY, heading).Rotate(Vector3::UnitZ);
+	if(heading.IsValid())
+	{
+		mHasDesiredFacingDir = true;
+		mDesiredFacingDir = heading.ToVector();
+	}
+	else
+	{
+		mHasDesiredFacingDir = false;
+	}
 	
 	// Can't path without a valid walker boundary to define the area.
 	if(walkerBoundary == nullptr)

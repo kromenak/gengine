@@ -191,9 +191,10 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
         offsets.push_back(reader.ReadUInt());
     }
     
-    // Read in data for each keyframe.
     std::unordered_map<int, VertexAnimationVertexPose*> lastVertexPoseLookup;
     std::unordered_map<int, VertexAnimationTransformPose*> lastTransformPoseLookup;
+	
+	// Read in data for each keyframe.
     for(int i = 0; i < mFrameCount; i++)
     {
         #ifdef DEBUG_OUTPUT
@@ -237,13 +238,17 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     unsigned int blockByteCount = reader.ReadUInt();
                     byteCount -= blockByteCount + 4;
                     
-                    // 2 bytes: Mesh group within mesh this block refers to.
+                    // 2 bytes: Submesh within mesh this block refers to.
                     unsigned short submeshIndex = reader.ReadUShort();
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Submesh Index: " << submeshIndex << std::endl;
                     #endif
+					
+					// This is a pretty sorry hash...but assuming we'll never
+					// have more than 1000 submeshes (pretty likely for GK3), this'll do OK.
                     int hash = meshIndex * 1000 + submeshIndex;
 					
+					// Create a vertex pose for this frame and stick it in our dictionary and linked list.
                     VertexAnimationVertexPose* vertexPose = new VertexAnimationVertexPose();
                     vertexPose->mFrameNumber = i;
                     if(i == 0)
@@ -272,7 +277,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         vertexPose->mVertexPositions.push_back(Vector3(x, y, z));
                     }
                 }
-                // Identifier 1 also appears to be vertex data, but in a compressed format.
+                // Identifier 1 also is vertex data, but in a compressed format.
                 else if(dataId == 1)
                 {
                     #ifdef DEBUG_OUTPUT
@@ -340,7 +345,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     for(int k = 0; k < vertexCount; k++)
                     {
 						// 0 means no vertex data, so just use whatever we had for the previous frame.
-						// If the vertex data hasn't changed since last frame, it isn't stored in ACT file, to save space.
+						// If the vertex data hasn't changed since last frame, it isn't stored, to save space.
                         if(vertexDataFormat[k] == 0)
                         {
                             vertexPose->mVertexPositions.push_back(prevPositions[k]);

@@ -18,6 +18,7 @@
 
 class Animation;
 class CharacterConfig;
+class Heading;
 class WalkerBoundary;
 
 class Walker : public Component
@@ -41,8 +42,8 @@ public:
 	
 	bool IsWalking() const { return mState != State::Idle; }
 	
-	bool WalkTo(Vector3 position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
-	bool WalkTo(Vector3 position, float heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
+	bool WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
+	bool WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	
 protected:
 	void OnUpdate(float deltaTime) override;

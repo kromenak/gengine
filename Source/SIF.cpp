@@ -369,7 +369,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                 }
                 else if(keyValue->key == "heading")
                 {
-                    position->heading = Math::ToRadians(keyValue->GetValueAsFloat());
+					position->heading = Heading::FromDegrees(keyValue->GetValueAsFloat());
                 }
                 else if(keyValue->key == "camera")
                 {

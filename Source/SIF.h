@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "Color32.h"
+#include "Heading.h"
 #include "Quaternion.h"
 #include "Vector2.h"
 #include "Vector3.h"
@@ -66,16 +67,12 @@ struct ScenePositionData
     // The target position. If not specified, character won't move, but will still change headings, if specified.
     Vector3 position;
     
-    // The rotation, in degrees, for the character to face when they get to the position.
+    // The heading to use at the target position.
     // It not specified, the character keeps their current heading at the target position.
-    float heading = -1.0f;
+	Heading heading = Heading::None;
     
     // If specified, this camera will be switched to when using this position.
     SceneCameraData* camera = nullptr;
-	
-	// Headings are always defined about the Y-axis.
-	Quaternion GetHeadingAsRotation() const { return Quaternion(Vector3::UnitY, heading); }
-	Vector3 GetHeadingAsVector() const { return Quaternion(Vector3::UnitY, heading).Rotate(Vector3::UnitZ); }
 };
 
 struct SceneRegionOrTriggerData

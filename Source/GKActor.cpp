@@ -108,6 +108,11 @@ void GKActor::SampleAnimation(VertexAnimation* animation, int frame)
 	mAnimationPlayer->Sample(animation, frame);
 }
 
+Heading GKActor::GetHeading() const
+{
+	return Heading::FromQuaternion(GetRotation());
+}
+
 void GKActor::OnUpdate(float deltaTime)
 {
 	// Pause any fidgets while walker is going.

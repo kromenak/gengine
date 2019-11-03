@@ -16,6 +16,8 @@
 
 #include <string>
 
+#include "Heading.h"
+
 class Animation;
 class FaceController;
 class GAS;
@@ -60,6 +62,8 @@ public:
     MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
 	Walker* GetWalker() const { return mWalker; }
 	FaceController* GetFaceController() const { return mFaceController; }
+	
+	Heading GetHeading() const;
 	
 protected:
 	void OnUpdate(float deltaTime) override;

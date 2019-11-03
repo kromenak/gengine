@@ -132,7 +132,7 @@ void Scene::Load()
 		{
 			Vector3 position = actorDef->position->position;
 			actor->SetPosition(position);
-			actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading));
+			actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading.ToRadians()));
 		}
 		
 		// Set actor's graphical appearance.
@@ -281,7 +281,7 @@ void Scene::InitEgoPosition(const std::string& positionName)
     
     // Set position and heading.
     mEgo->SetPosition(position->position);
-    mEgo->SetRotation(Quaternion(Vector3::UnitY, position->heading));
+    mEgo->SetRotation(Quaternion(Vector3::UnitY, position->heading.ToRadians()));
     
     if(position->camera != nullptr)
     {
@@ -477,9 +477,11 @@ GKActor* Scene::GetActorByNoun(const std::string& noun) const
 	{
 		if(StringUtil::EqualsIgnoreCase(actor->GetNoun(), noun))
 		{
+			
 			return actor;
 		}
 	}
+	Services::GetReports()->Log("Error", "Error: Who the hell is '" + noun + "'?");
 	return nullptr;
 }
 
