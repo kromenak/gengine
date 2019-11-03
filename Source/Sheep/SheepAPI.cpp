@@ -6,9 +6,11 @@
 #include "SheepAPI.h"
 
 #include <functional> // for std::hash
+#include <sstream> // for int->hex
 
 #include "AnimationPlayer.h"
 #include "CharacterManager.h"
+#include "FaceController.h"
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "GKActor.h"
@@ -220,7 +222,13 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 // ACTORS
 shpvoid Blink(std::string actorName)
 {
-	std::cout << "Blink " << actorName << std::endl;
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		std::cout << "Who the hell is " << actorName << "?" << std::endl;
+		return 0;
+	}
+	actor->GetFaceController()->Blink();
     return 0;
 }
 RegFunc1(Blink, void, string, IMMEDIATE, REL_FUNC);
@@ -2030,20 +2038,62 @@ RegFunc0(StopAllSoundTracks, void, IMMEDIATE, REL_FUNC);
 */
  
 // TRACING
-//PrintFloat
-//PrintFloatX
+shpvoid PrintFloat(float value)
+{
+	Services::GetReports()->Log("SheepScript", std::to_string(value));
+	return 0;
+}
+RegFunc1(PrintFloat, void, float, IMMEDIATE, DEV_FUNC);
 
-//PrintInt
-//PrintIntX
+shpvoid PrintFloatX(std::string category, float value)
+{
+	Services::GetReports()->Log(category, std::to_string(value));
+	return 0;
+}
+RegFunc2(PrintFloatX, void, string, float, IMMEDIATE, DEV_FUNC);
 
-//PrintIntHex
-//PrintIntHexX
+shpvoid PrintInt(int value)
+{
+	Services::GetReports()->Log("SheepScript", std::to_string(value));
+	return 0;
+}
+RegFunc1(PrintInt, void, int, IMMEDIATE, DEV_FUNC);
+
+shpvoid PrintIntX(std::string category, int value)
+{
+	Services::GetReports()->Log(category, std::to_string(value));
+	return 0;
+}
+RegFunc2(PrintIntX, void, string, int, IMMEDIATE, DEV_FUNC);
+
+shpvoid PrintIntHex(int value)
+{
+	std::stringstream ss;
+	ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << value;
+	Services::GetReports()->Log("SheepScript", ss.str());
+	return 0;
+}
+RegFunc1(PrintIntHex, void, int, IMMEDIATE, DEV_FUNC);
+
+shpvoid PrintIntHexX(std::string category, int value)
+{
+	std::stringstream ss;
+	ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << value;
+	Services::GetReports()->Log(category, ss.str());
+	return 0;
+}
+RegFunc2(PrintIntHexX, void, string, int, IMMEDIATE, DEV_FUNC);
 
 shpvoid PrintString(std::string string)
 {
-	std::cout << string << std::endl;
+	Services::GetReports()->Log("SheepScript", string);
 	return 0;
 }
 RegFunc1(PrintString, void, string, IMMEDIATE, DEV_FUNC);
 
-//PrintStringX
+shpvoid PrintStringX(std::string category, std::string string)
+{
+	Services::GetReports()->Log(category, string);
+	return 0;
+}
+RegFunc2(PrintStringX, void, string, string, IMMEDIATE, DEV_FUNC);
