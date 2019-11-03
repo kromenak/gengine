@@ -39,6 +39,11 @@ struct SheepValue
     SheepValue(float f) { type = SheepValueType::Float; floatValue = f; }
     SheepValue(const char* s) { type = SheepValueType::String; stringValue = s; }
 	~SheepValue() { }
+	
+	// Helpers for implicit conversions between Int/Float when needed.
+	int GetInt();
+	float GetFloat();
+	std::string GetString();
 };
 
 // GK3 calls these "Object Code" instances.

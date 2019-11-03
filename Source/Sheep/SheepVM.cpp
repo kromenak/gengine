@@ -24,6 +24,48 @@ std::string SheepInstance::GetName()
 	return "";
 }
 
+float SheepValue::GetFloat()
+{
+	switch(type)
+	{
+	default:
+	case SheepValueType::Float:
+		return floatValue;
+	case SheepValueType::Int:
+		return (float)intValue;
+	case SheepValueType::String:
+		return std::stof(stringValue);
+	}
+}
+
+int SheepValue::GetInt()
+{
+	switch(type)
+	{
+	default:
+	case SheepValueType::Int:
+		return intValue;
+	case SheepValueType::Float:
+		return (int)floatValue;
+	case SheepValueType::String:
+		return std::stoi(stringValue);
+	}
+}
+
+std::string SheepValue::GetString()
+{
+	switch(type)
+	{
+	default:
+	case SheepValueType::String:
+		return std::string(stringValue);
+	case SheepValueType::Float:
+		return std::to_string(floatValue);
+	case SheepValueType::Int:
+		return std::to_string(intValue);
+	}
+}
+
 SheepVM::~SheepVM()
 {
 	for(auto& instance : mSheepInstances)
@@ -245,18 +287,18 @@ Value SheepVM::CallSysFunc(SysImport* sysImport)
 		int argType = sysFunc->argumentTypes[i];
 		switch(argType)
 		{
-			case 1:
-				args.push_back(sheepValue.intValue);
-				break;
-			case 2:
-				args.push_back(sheepValue.floatValue);
-				break;
-			case 3:
-				args.push_back(std::string(sheepValue.stringValue));
-				break;
-			default:
-				std::cout << "Invalid arg type: " << argType << std::endl;
-				break;
+		case 1:
+			args.push_back(sheepValue.GetInt());
+			break;
+		case 2:
+			args.push_back(sheepValue.GetFloat());
+			break;
+		case 3:
+			args.push_back(sheepValue.GetString());
+			break;
+		default:
+			std::cout << "Invalid arg type: " << argType << std::endl;
+			break;
 		}
 	}
 	PopStack(argCount);
@@ -300,7 +342,7 @@ void SheepVM::PushStackFloat(float val)
 	mStackSize++;
 	assert(mStackSize < kMaxStackSize);
 	mStack[mStackSize - 1].type = SheepValueType::Float;
-	mStack[mStackSize - 1].intValue = val;
+	mStack[mStackSize - 1].floatValue = val;
 	#ifdef SHEEP_DEBUG
 	std::cout << "SHEEP STACK: Push 1 (Stack Size = " << mStackSize << ")" << std::endl;
 	#endif

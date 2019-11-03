@@ -17,6 +17,7 @@ class SheepScriptBuilder
 {
 public:
     SheepScriptBuilder();
+	~SheepScriptBuilder();
     
     bool AddStringConst(std::string str);
     bool AddIntVariable(std::string name, int defaultValue);

@@ -14,8 +14,19 @@
 
 SheepScriptBuilder::SheepScriptBuilder()
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "SheepBuilder BEGIN" << std::endl;
+	#endif
+	
     // Always add the empty string as a constant.
     AddStringConst("");
+}
+
+SheepScriptBuilder::~SheepScriptBuilder()
+{
+	#ifdef DEBUG_BUILDER
+	std::cout << "SheepBuilder END" << std::endl;
+	#endif
 }
 
 bool SheepScriptBuilder::AddStringConst(std::string str)
@@ -171,7 +182,6 @@ SheepValueType SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
 	// So, to compile a system call, we just iterate over and find the matching function.
 	StringUtil::ToLower(sysFuncName);
 	SysFuncDecl* sysFunc = GetSysFuncDecl(sysFuncName);
-	
 	if(sysFunc != nullptr)
 	{
 		// Right before calling the function, we want to push the argument
@@ -856,8 +866,8 @@ void SheepScriptBuilder::AddIntArg(int arg)
 
 void SheepScriptBuilder::AddFloatArg(float arg)
 {
-    char* array;
-    array = reinterpret_cast<char*>(&arg);
+    unsigned char* array;
+    array = reinterpret_cast<unsigned char*>(&arg);
     mBytecode.push_back(array[0]);
     mBytecode.push_back(array[1]);
     mBytecode.push_back(array[2]);
