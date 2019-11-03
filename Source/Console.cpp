@@ -32,6 +32,7 @@ void Console::ExecuteCommand(std::string command)
 		AddToScrollback("----------------------------------------");
 		return;
 	}
+	AddToScrollback("console command: '" + command + "'");
 	
 	// Modify command to have required syntax.
 	//TODO: Update compiler to accept without braces?
@@ -59,4 +60,13 @@ void Console::ExecuteCommand(std::string command)
 	
 	// Add to history.
 	mCommandHistory.push_back(command);
+}
+
+std::string Console::GetCommandFromHistory(int index) const
+{
+	if(index < 0 || index >= mCommandHistory.size())
+	{
+		return "";
+	}
+	return mCommandHistory[index];
 }

@@ -154,6 +154,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 	if(mMini)
 	{
 		//TODO: Mini console stuff!
+		//TODO: Some key combo swaps mini console between the four corners of the screen
 	}
 	else
 	{
@@ -172,6 +173,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				Refresh();
 				mTextInput->Clear();
 				mTextInput->Focus();
+				mCommandHistoryIndex = -1;
 			}
 			else
 			{
@@ -187,6 +189,9 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		{
 			Services::GetConsole()->ExecuteCommand(mTextInput->GetText());
 			mTextInput->Clear();
+			
+			// Executing a command resets command history.
+			mCommandHistoryIndex = -1;
 		}
 		
 		// Alt plus other keys affect the size of the full console.
@@ -287,9 +292,46 @@ void ConsoleUI::OnUpdate(float deltaTime)
 			}
 		}
 		
-		//TODO: Similarly, some key combo swaps mini console between the four corners of the screen
-		
-		//TODO: Some key combo allows scrolling through the console buffer.
+		if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_UP))
+		{
+			// Increment command history index if it is in-bounds.
+			// First time this happens will go from -1 to 0, which is OK!
+			int historyLength = Services::GetConsole()->GetCommandHistoryLength();
+			if(mCommandHistoryIndex < historyLength - 1)
+			{
+				++mCommandHistoryIndex;
+			}
+			
+			// Commands in history are earliest to most recent.
+			// So, when we push "up", we want to go to the next most recent item.
+			// Have to invert our index to get that.
+			int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
+			std::string command = Services::GetConsole()->GetCommandFromHistory(commandIndex);
+			
+			// This changes the text... TODO: Better API for this?
+			mTextInput->Unfocus();
+			mTextInput->SetText(command);
+			mTextInput->Focus();
+		}
+		else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_DOWN))
+		{
+			// If current history index is above zero, decrement.
+			// Note that we can't decrement back to -1, per GK3 behavior.
+			if(mCommandHistoryIndex > 0)
+			{
+				--mCommandHistoryIndex;
+			}
+			
+			// As above, need to invert the index.
+			int historyLength = Services::GetConsole()->GetCommandHistoryLength();
+			int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
+			std::string command = Services::GetConsole()->GetCommandFromHistory(commandIndex);
+			
+			// This changes the text... TODO: Better API for this?
+			mTextInput->Unfocus();
+			mTextInput->SetText(command);
+			mTextInput->Focus();
+		}
 	}
 }
 

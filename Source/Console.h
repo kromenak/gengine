@@ -21,7 +21,7 @@ public:
 	void ExecuteCommand(std::string command);
 	
 	int GetCommandHistoryLength() const { return (int)mCommandHistory.size(); }
-	std::string GetCommandFromHistory(int index);
+	std::string GetCommandFromHistory(int index) const;
 	
 	void SetReportStream(ReportStream* reportStream) { mConsoleReportStream = reportStream; }
 	

@@ -41,6 +41,9 @@ private:
 	// Current scrollback offset.
 	int mScrollbackOffset = 0;
 	
+	// Current history index. -1 means 'not at any index'.
+	int mCommandHistoryIndex = -1;
+	
 	// The console's canvas, which renders the UI.
 	UICanvas* mCanvas = nullptr;
 	
