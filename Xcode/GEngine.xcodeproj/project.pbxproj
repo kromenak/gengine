@@ -173,6 +173,9 @@
 		4B85421520A9276200DE8C0D /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B85E87923497A4A004AA3E5 /* UITextBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */; };
 		4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */; };
+		4B8D2CD1236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
+		4B8D2CD2236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
+		4B8D2CD3236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
 		4B8E830A20F046750009A86B /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8E830920F046750009A86B /* Material.cpp */; };
 		4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
 		4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319E210999810004F4F3 /* GasPlayer.cpp */; };
@@ -418,6 +421,8 @@
 		4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UITextBuffer.cpp; path = ../Source/UITextBuffer.cpp; sourceTree = "<group>"; };
 		4B85E87A23497EBF004AA3E5 /* TextLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TextLayout.h; path = ../Source/TextLayout.h; sourceTree = "<group>"; };
 		4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TextLayout.cpp; path = ../Source/TextLayout.cpp; sourceTree = "<group>"; };
+		4B8D2CCF236F98B300B8E68D /* Heading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Heading.h; path = ../Source/Heading.h; sourceTree = "<group>"; };
+		4B8D2CD0236F98B300B8E68D /* Heading.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Heading.cpp; path = ../Source/Heading.cpp; sourceTree = "<group>"; };
 		4B8E830820F046750009A86B /* Material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Material.h; path = ../Source/Material.h; sourceTree = "<group>"; };
 		4B8E830920F046750009A86B /* Material.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Material.cpp; path = ../Source/Material.cpp; sourceTree = "<group>"; };
 		4B92319A2103AF1B0004F4F3 /* Animation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Animation.h; path = ../Source/Animation.h; sourceTree = "<group>"; };
@@ -727,6 +732,8 @@
 		4B4300841FB7EDFA009EDE58 /* Math */ = {
 			isa = PBXGroup;
 			children = (
+				4B8D2CD0236F98B300B8E68D /* Heading.cpp */,
+				4B8D2CCF236F98B300B8E68D /* Heading.h */,
 				4BD9C7DC1F95D1D80066DC89 /* Math.h */,
 				4B0918351FEEEA51002991D4 /* Matrix3.cpp */,
 				4B0918341FEEEA51002991D4 /* Matrix3.h */,
@@ -1138,6 +1145,7 @@
 				4B6A3F262335B20000D25B2D /* RectTests.cpp in Sources */,
 				4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */,
+				4B8D2CD2236F98B300B8E68D /* Heading.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1229,6 +1237,7 @@
 				4B17D701206072E400EBD298 /* SoundtrackPlayer.cpp in Sources */,
 				4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */,
 				4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */,
+				4B8D2CD1236F98B300B8E68D /* Heading.cpp in Sources */,
 				4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */,
 				4B0E44F62186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
@@ -1335,6 +1344,7 @@
 				4B22F4F42174073D0065B152 /* UIImage.cpp in Sources */,
 				4B22F5282174078B0065B152 /* AnimationPlayer.cpp in Sources */,
 				4B22F517217407640065B152 /* Renderer.cpp in Sources */,
+				4B8D2CD3236F98B300B8E68D /* Heading.cpp in Sources */,
 				4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */,
 				4B22F51E2174076D0065B152 /* Quaternion.cpp in Sources */,
 				4BB67C4D235255DE00FDFB30 /* UITextInput.cpp in Sources */,
