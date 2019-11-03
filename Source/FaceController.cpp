@@ -13,6 +13,7 @@
 #include "Random.h"
 #include "Services.h"
 #include "Scene.h"
+#include "StringUtil.h"
 
 TYPE_DEF_CHILD(Component, FaceController);
 
@@ -187,13 +188,64 @@ void FaceController::Blink()
 	GEngine::inst->GetScene()->GetAnimationPlayer()->Play(blinkAnim);
 }
 
+void FaceController::Blink(const std::string& animName)
+{
+	Animation* blinkAnim = mCharacterConfig->faceConfig.blinkAnim1;
+	if(!StringUtil::EqualsIgnoreCase(blinkAnim->GetNameNoExtension(), animName))
+	{
+		blinkAnim = mCharacterConfig->faceConfig.blinkAnim2;
+		if(!StringUtil::EqualsIgnoreCase(blinkAnim->GetNameNoExtension(), animName))
+		{
+			//TODO: This seems to be an AssetManager-level warning?
+			//TODO: So, maybe OG game finds and applies blink anim indescriminantly (which seems not good, tbh).
+			Services::GetReports()->Log("Error", "gk3 animation '" + animName + ".anm' not found.");
+			//TODO: This also causes a warning OS dialog to appear (in debug, I guess)
+			//TODO: If a non-blink anim is specified, you get a cryptic error about "attempt to apply multiple actions"
+			return;
+		}
+	}
+	GEngine::inst->GetScene()->GetAnimationPlayer()->Play(blinkAnim);
+}
+
+void FaceController::SetEyeJitterEnabled(bool enabled)
+{
+	mEyeJitterEnabled = enabled;
+	if(mEyeJitterEnabled)
+	{
+		RollEyeJitterTimer();
+	}
+}
+
+void FaceController::EyeJitter()
+{
+	float maxX = mCharacterConfig->faceConfig.maxEyeJitterDistance.GetX();
+	mEyeJitterX = Random::Range(-maxX, maxX);
+	
+	float maxY = mCharacterConfig->faceConfig.maxEyeJitterDistance.GetY();
+	mEyeJitterY = Random::Range(-maxY, maxY);
+	
+	UpdateFaceTexture();
+}
+
 void FaceController::OnUpdate(float deltaTime)
 {
+	// Count down and blink after some time.
 	mBlinkTimer -= deltaTime;
 	if(mBlinkTimer <= 0.0f)
 	{
 		Blink();
 		RollBlinkTimer();
+	}
+	
+	// Update eye jitter.
+	if(mEyeJitterEnabled)
+	{
+		mEyeJitterTimer -= deltaTime;
+		if(mEyeJitterTimer <= 0.0f)
+		{
+			EyeJitter();
+			RollEyeJitterTimer();
+		}
 	}
 }
 
@@ -211,6 +263,20 @@ void FaceController::RollBlinkTimer()
 	mBlinkTimer = (float)waitMs / 1000.0f;
 }
 
+void FaceController::RollEyeJitterTimer()
+{
+	// Calculate wait milliseconds for next jitter.
+	int waitMs = 0;
+	if(mCharacterConfig != nullptr)
+	{
+		const Vector2& jitterFrequency = mCharacterConfig->faceConfig.eyeJitterFrequency;
+		waitMs = Random::Range((int)jitterFrequency.GetX(), (int)jitterFrequency.GetY());
+	}
+	
+	// Convert to seconds and set timer.
+	mEyeJitterTimer = (float)waitMs / 1000.0f;
+}
+
 void FaceController::UpdateFaceTexture()
 {
 	// Can't do much if face texture is missing!
@@ -226,9 +292,18 @@ void FaceController::UpdateFaceTexture()
 	// Downsample & copy left eye.
 	if(mCurrentLeftEyeTexture != nullptr)
 	{
-		stbir_resize_uint8(mCurrentLeftEyeTexture->GetPixelData(), mCurrentLeftEyeTexture->GetWidth(), mCurrentLeftEyeTexture->GetHeight(), 0,
-						   mDownSampledLeftEyeTexture->GetPixelData(), mDownSampledLeftEyeTexture->GetWidth(), mDownSampledLeftEyeTexture->GetHeight(), 0, 4);
+		//stbir_resize_uint8(mCurrentLeftEyeTexture->GetPixelData(), mCurrentLeftEyeTexture->GetWidth(), mCurrentLeftEyeTexture->GetHeight(), 0,
+		//				   mDownSampledLeftEyeTexture->GetPixelData(), mDownSampledLeftEyeTexture->GetWidth(), mDownSampledLeftEyeTexture->GetHeight(), 0, 4);
+		 
+		stbir_resize_subpixel(mCurrentLeftEyeTexture->GetPixelData(), mCurrentLeftEyeTexture->GetWidth(), mCurrentLeftEyeTexture->GetHeight(), 0,
+							  mDownSampledLeftEyeTexture->GetPixelData(), mDownSampledLeftEyeTexture->GetWidth(), mDownSampledLeftEyeTexture->GetHeight(), 0,
+							  STBIR_TYPE_UINT8, 4, -1, 0,
+							  STBIR_EDGE_WRAP, STBIR_EDGE_WRAP, STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,
+							  STBIR_COLORSPACE_LINEAR, NULL,
+							  0.25f, 0.25f, mEyeJitterX, mEyeJitterY);
+		
 		mDownSampledLeftEyeTexture->UploadToGPU();
+		
 		const Vector2& leftEyeOffset = mCharacterConfig->faceConfig.leftEyeOffset;
 		Texture::BlendPixels(*mDownSampledLeftEyeTexture, *mFaceTexture, leftEyeOffset.GetX(), leftEyeOffset.GetY());
 	}
@@ -236,9 +311,18 @@ void FaceController::UpdateFaceTexture()
 	// Downsample & copy right eye.
 	if(mCurrentRightEyeTexture != nullptr)
 	{
-		stbir_resize_uint8(mCurrentRightEyeTexture->GetPixelData(), mCurrentRightEyeTexture->GetWidth(), mCurrentRightEyeTexture->GetHeight(), 0,
-						   mDownSampledRightEyeTexture->GetPixelData(), mDownSampledRightEyeTexture->GetWidth(), mDownSampledRightEyeTexture->GetHeight(), 0, 4);
+		//stbir_resize_uint8(mCurrentRightEyeTexture->GetPixelData(), mCurrentRightEyeTexture->GetWidth(), mCurrentRightEyeTexture->GetHeight(), 0,
+		//				   mDownSampledRightEyeTexture->GetPixelData(), mDownSampledRightEyeTexture->GetWidth(), mDownSampledRightEyeTexture->GetHeight(), 0, 4);
+		
+		stbir_resize_subpixel(mCurrentRightEyeTexture->GetPixelData(), mCurrentRightEyeTexture->GetWidth(), mCurrentRightEyeTexture->GetHeight(), 0,
+							  mDownSampledRightEyeTexture->GetPixelData(), mDownSampledRightEyeTexture->GetWidth(), mDownSampledRightEyeTexture->GetHeight(), 0,
+							  STBIR_TYPE_UINT8, 4, -1, 0,
+							  STBIR_EDGE_WRAP, STBIR_EDGE_WRAP, STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,
+							  STBIR_COLORSPACE_LINEAR, NULL,
+							  0.25f, 0.25f, mEyeJitterX, mEyeJitterY);
+		
 		mDownSampledRightEyeTexture->UploadToGPU();
+		
 		const Vector2& rightEyeOffset = mCharacterConfig->faceConfig.rightEyeOffset;
 		Texture::BlendPixels(*mDownSampledRightEyeTexture, *mFaceTexture, rightEyeOffset.GetX(), rightEyeOffset.GetY());
 	}

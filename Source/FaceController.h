@@ -53,6 +53,10 @@ public:
 	void ClearForehead();
 	
 	void Blink();
+	void Blink(const std::string& animName);
+	
+	void SetEyeJitterEnabled(bool enabled);
+	void EyeJitter();
 	
 protected:
 	void OnUpdate(float deltaTime) override;
@@ -90,7 +94,16 @@ private:
 	// Set randomly based on interval specified in face config.
 	float mBlinkTimer = 0.0f;
 	
+	// If eye jitter is enabled, apply some jitter within a range (based on character config)
+	// before downsampling eyes to construct the face.
+	bool mEyeJitterEnabled = true;
+	float mEyeJitterTimer = 0.0f;
+	float mEyeJitterX = 0.0f;
+	float mEyeJitterY = 0.0f;
+	
 	void RollBlinkTimer();
+	
+	void RollEyeJitterTimer();
 	
 	void UpdateFaceTexture();
 };

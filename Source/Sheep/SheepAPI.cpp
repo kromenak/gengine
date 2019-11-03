@@ -225,7 +225,7 @@ shpvoid Blink(std::string actorName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
 	if(actor == nullptr)
 	{
-		std::cout << "Who the hell is " << actorName << "?" << std::endl;
+		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
 		return 0;
 	}
 	actor->GetFaceController()->Blink();
@@ -235,7 +235,13 @@ RegFunc1(Blink, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid BlinkX(std::string actorName, std::string blinkAnim)
 {
-	std::cout << "Blink " << actorName << " " << blinkAnim << std::endl;
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
+		return 0;
+	}
+	actor->GetFaceController()->Blink(blinkAnim);
     return 0;
 }
 RegFunc2(BlinkX, void, string, string, IMMEDIATE, REL_FUNC);
@@ -249,21 +255,39 @@ RegFunc1(ClearMood, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EnableEyeJitter(std::string actorName)
 {
-	std::cout << "Enable eye jitter " << actorName << std::endl;
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
+		return 0;
+	}
+	actor->GetFaceController()->SetEyeJitterEnabled(true);
     return 0;
 }
 RegFunc1(EnableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DisableEyeJitter(std::string actorName)
 {
-	std::cout << "Disable eye jitter " << actorName << std::endl;
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
+		return 0;
+	}
+	actor->GetFaceController()->SetEyeJitterEnabled(false);
     return 0;
 }
 RegFunc1(DisableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EyeJitter(std::string actorName)
 {
-	std::cout << "Eye jitter " << actorName << std::endl;
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		Services::GetReports()->Log("Error", "Who the hell is '" + actorName + "'?");
+		return 0;
+	}
+	actor->GetFaceController()->EyeJitter();
     return 0;
 }
 RegFunc1(EyeJitter, void, string, IMMEDIATE, REL_FUNC);
