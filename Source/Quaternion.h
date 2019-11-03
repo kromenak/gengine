@@ -68,6 +68,8 @@ public:
     void Set(Vector3 forward, Vector3 up, Vector3 right);
     
     void GetAxisAngle(Vector3& axis, float& angle) const;
+	
+	Vector3 GetEulerAngles() const;
     
     // Modifiers
     void MakeZero() { x = y = z = w = 0.0f; }

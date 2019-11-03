@@ -280,6 +280,35 @@ void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const
     }
 }
 
+Vector3 Quaternion::GetEulerAngles() const
+{
+	// Taken from Wikipedia (https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles)
+	Vector3 result;
+	
+	// X-axis
+	float sinr_cosp = 2 * (w * x + y * z);
+	float cosr_cosp = 1 - (2 * (x * x + y * y));
+	result.SetX(Math::Atan2(sinr_cosp, cosr_cosp));
+	
+	// Y-axis
+	float sinp = 2 * (w * y - z * x);
+	if(Math::Abs(sinp) >= 1)
+	{
+		result.SetY(Math::MagnitudeSign(Math::kPi / 2, sinp));
+	}
+	else
+	{
+		result.SetY(Math::Asin(sinp));
+	}
+	
+	// Z-axis
+	float siny_cosp = 2 * (w * z + x * y);
+	float cosy_cosp = 1 - (2 * (y * y + z * z));
+	result.SetZ(Math::Atan2(siny_cosp, cosy_cosp));
+	
+	return result;
+}
+
 float Quaternion::GetLength() const
 {
     return Math::Sqrt(x*x + y*y + z*z + w*w);

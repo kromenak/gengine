@@ -53,6 +53,7 @@ namespace Math
     
     inline float Mod(float num1, float num2)
     {
+		// floating-point equivalent of "return num1 % num2;"
 		return std::fmod(num1, num2);
     }
     
@@ -85,6 +86,11 @@ namespace Math
     {
         return std::atanf(ratio);
     }
+
+	inline float Atan2(float y, float x)
+	{
+		return std::atan2(y, x);
+	}
     
     inline float Floor(float val)
     {
@@ -150,6 +156,15 @@ namespace Math
     {
         return std::abs(val);
     }
+
+	inline float MagnitudeSign(float mag, float sign)
+	{
+		// Given a magnitude and sign, returns a number that has the given magnitude and sign.
+		// So, take the magnitude of the first number, discard the sign.
+		// Take the sign of the second number, discard the magnitude.
+		// Mash them together!
+		return std::copysign(mag, sign);
+	}
     
     inline float ToDegrees(float radians)
     {
