@@ -24,7 +24,7 @@ AssetManager::~AssetManager()
 	UnloadAssets(mLoadedSheeps);
 	UnloadAssets(mLoadedBSPs);
 	UnloadAssets(mLoadedActionSets);
-	UnloadAssets(mLoadedSceneModels);
+	UnloadAssets(mLoadedSceneAssets);
 	UnloadAssets(mLoadedSIFs);
 	
 	UnloadAssets(mLoadedVertexAnimations);
@@ -166,9 +166,9 @@ SIF* AssetManager::LoadSIF(const std::string& name)
     return LoadAsset<SIF>(SanitizeAssetName(name, ".SIF"), &mLoadedSIFs);
 }
 
-SceneModel* AssetManager::LoadSceneModel(const std::string& name)
+SceneAsset* AssetManager::LoadSceneAsset(const std::string& name)
 {
-    return LoadAsset<SceneModel>(SanitizeAssetName(name, ".SCN"), &mLoadedSceneModels);
+    return LoadAsset<SceneAsset>(SanitizeAssetName(name, ".SCN"), &mLoadedSceneAssets);
 }
 
 NVC* AssetManager::LoadNVC(const std::string& name)

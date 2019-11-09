@@ -52,7 +52,7 @@ public:
 	GKActor* GetActorByModelName(const std::string& modelName) const;
 	GKActor* GetActorByNoun(const std::string& noun) const;
 	
-	const ScenePositionData* GetPosition(const std::string& positionName) const;
+	const ScenePosition* GetPosition(const std::string& positionName) const;
 	
 	void ApplyTextureToSceneModel(const std::string& modelName, Texture* texture);
 	void SetSceneModelVisibility(const std::string& modelName, bool visible);

@@ -16,29 +16,29 @@ SceneData::SceneData(const std::string& location, const std::string& timeblock)
 	
 	// Load scene model asset. Only *one* is needed, so one defined
 	// in the specific SIF will override one from the general SIF.
-	std::string sceneModelName;
-	if(mSpecificSIF != nullptr && !mSpecificSIF->GetSceneModelName().empty())
+	std::string sceneAssetName;
+	if(mSpecificSIF != nullptr && !mSpecificSIF->GetSceneAssetName().empty())
 	{
-		sceneModelName = mSpecificSIF->GetSceneModelName();
+		sceneAssetName = mSpecificSIF->GetSceneAssetName();
 	}
 	else if(mGeneralSIF != nullptr)
 	{
-		sceneModelName = mGeneralSIF->GetSceneModelName();
+		sceneAssetName = mGeneralSIF->GetSceneAssetName();
 	}
-	mSceneModel = Services::GetAssets()->LoadSceneModel(sceneModelName);
+	mSceneAsset = Services::GetAssets()->LoadSceneAsset(sceneAssetName);
 	
 	// Load the BSP data, which is specified by the scene model.
 	// If this is null, the game will still work...but there's no BSP geometry!
-	if(mSceneModel != nullptr)
+	if(mSceneAsset != nullptr)
 	{
-		mBSP = Services::GetAssets()->LoadBSP(mSceneModel->GetBSPName());
+		mBSP = Services::GetAssets()->LoadBSP(mSceneAsset->GetBSPName());
 	}
 
 	// Figure out if we have a skybox, and set it to be rendered.
 	// The skybox can be defined in several places. Go down priority list and find one!
-	if(mSceneModel != nullptr)
+	if(mSceneAsset != nullptr)
 	{
-		mSkybox = mSceneModel->GetSkybox();
+		mSkybox = mSceneAsset->GetSkybox();
 	}
 	if(mSkybox == nullptr && mSpecificSIF != nullptr)
 	{
@@ -53,21 +53,21 @@ SceneData::SceneData(const std::string& location, const std::string& timeblock)
 	if(mGeneralSIF == nullptr) { return; }
 	
 	// Collect actor definitions from general and specific SIFs.
-	mSceneActorDatas = mGeneralSIF->GetSceneActorDatas();
+	mSceneActors = mGeneralSIF->GetSceneActors();
 	if(mSpecificSIF != nullptr)
 	{
-		std::vector<SceneActorData*> sceneActorDatas = mSpecificSIF->GetSceneActorDatas();
-		mSceneActorDatas.insert(mSceneActorDatas.end(), sceneActorDatas.begin(), sceneActorDatas.end());
+		std::vector<SceneActor*> sceneActorDatas = mSpecificSIF->GetSceneActors();
+		mSceneActors.insert(mSceneActors.end(), sceneActorDatas.begin(), sceneActorDatas.end());
 		
 		//TODO: If there is more than one "ego" actor in the list, ignore all but the latest one.
 	}
 	
 	// Collect model definitions from general and specific SIFs.
-	mSceneModelDatas = mGeneralSIF->GetSceneModelDatas();
+	mSceneModels = mGeneralSIF->GetSceneModels();
 	if(mSpecificSIF != nullptr)
 	{
-		std::vector<SceneModelData*> sceneModelDatas = mSpecificSIF->GetSceneModelDatas();
-		mSceneModelDatas.insert(mSceneModelDatas.end(), sceneModelDatas.begin(), sceneModelDatas.end());
+		std::vector<SceneModel*> sceneModelDatas = mSpecificSIF->GetSceneModels();
+		mSceneModels.insert(mSceneModels.end(), sceneModelDatas.begin(), sceneModelDatas.end());
 	}
 	
 	// Collect noun/verb/case sets from general and specific SIFs.
@@ -143,9 +143,9 @@ SceneData::SceneData(const std::string& location, const std::string& timeblock)
 	}
 }
 
-const SceneCameraData* SceneData::GetDefaultRoomCamera() const
+const SceneCamera* SceneData::GetDefaultRoomCamera() const
 {
-	const SceneCameraData* sceneCameraData = nullptr;
+	const SceneCamera* sceneCameraData = nullptr;
 	if(mSpecificSIF != nullptr)
 	{
 		sceneCameraData = mSpecificSIF->GetDefaultRoomCamera();
@@ -157,9 +157,9 @@ const SceneCameraData* SceneData::GetDefaultRoomCamera() const
 	return sceneCameraData;
 }
 
-const SceneCameraData* SceneData::GetRoomCamera(const std::string& cameraName) const
+const SceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) const
 {
-	const SceneCameraData* sceneCameraData = nullptr;
+	const SceneCamera* sceneCameraData = nullptr;
 	if(mSpecificSIF != nullptr)
 	{
 		sceneCameraData = mSpecificSIF->GetRoomCamera(cameraName);
@@ -171,9 +171,9 @@ const SceneCameraData* SceneData::GetRoomCamera(const std::string& cameraName) c
 	return sceneCameraData;
 }
 
-const ScenePositionData* SceneData::GetScenePosition(const std::string& positionName) const
+const ScenePosition* SceneData::GetScenePosition(const std::string& positionName) const
 {
-	const ScenePositionData* position = nullptr;
+	const ScenePosition* position = nullptr;
 	if(mSpecificSIF != nullptr)
 	{
 		position = mSpecificSIF->GetPosition(positionName);

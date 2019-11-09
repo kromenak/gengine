@@ -13,6 +13,7 @@
 #include "Color32.h"
 #include "Debug.h"
 #include "GameCamera.h"
+#include "GameProgress.h"
 #include "GKActor.h"
 #include "Math.h"
 #include "MeshRenderer.h"
@@ -58,6 +59,11 @@ void Scene::Load()
 		return;
 	}
 	
+	// Increment location counter IMMEDIATELY.
+	// We know this b/c various scripts that need to run on "1st time enter" or similar check if count==1.
+	// For those to evaluate correctly, we need to do this BEFORE we even parse scene data or anything.
+	//Services::Get<GameProgress>()->IncLocationCount(const std::string &actorName, const std::string &location, const std::string &timeblock)
+	
 	mSceneData = new SceneData(mLocation, mTimeblock);
 	
 	// Set BSP to be rendered.
@@ -67,7 +73,7 @@ void Scene::Load()
     Services::GetRenderer()->SetSkybox(mSceneData->GetSkybox());
 	
 	// Position the camera at the the default position and heading.
-	const SceneCameraData* defaultRoomCamera = mSceneData->GetDefaultRoomCamera();
+	const SceneCamera* defaultRoomCamera = mSceneData->GetDefaultRoomCamera();
 	if(defaultRoomCamera != nullptr)
 	{
     	mCamera->SetPosition(defaultRoomCamera->position);
@@ -110,7 +116,7 @@ void Scene::Load()
 	}
 	
 	// Create actors for the scene.
-	std::vector<SceneActorData*> sceneActorDatas = mSceneData->GetSceneActorDatas();
+	std::vector<SceneActor*> sceneActorDatas = mSceneData->GetSceneActors();
 	for(auto& actorDef : sceneActorDatas)
 	{
 		// The actor's 3-letter identifier can be derived from the name of the model.
@@ -186,13 +192,13 @@ void Scene::Load()
 	// Iterate over scene model data and prep the scene.
 	// First, we want to hide and scene models that are set to "hidden".
 	// Second, we want to spawn any non-scene models.
-	std::vector<SceneModelData*> sceneModelDatas = mSceneData->GetSceneModelDatas();
+	std::vector<SceneModel*> sceneModelDatas = mSceneData->GetSceneModels();
 	for(auto& modelDef : sceneModelDatas)
 	{
 		switch(modelDef->type)
 		{
 			// "Scene" type models are ones that are baked into the BSP geometry.
-			case SceneModelData::Type::Scene:
+			case SceneModel::Type::Scene:
 			{
 				// If it should be hidden by default, tell the BSP to hide it.
 				if(modelDef->hidden)
@@ -203,7 +209,7 @@ void Scene::Load()
 			}
 				
 			// "HitTest" type models should be hidden, but still interactive.
-			case SceneModelData::Type::HitTest:
+			case SceneModel::Type::HitTest:
 			{
 				//std::cout << "Hide " << modelDef->name << std::endl;
 				mSceneData->GetBSP()->SetVisible(modelDef->name, false);
@@ -212,8 +218,8 @@ void Scene::Load()
 				
 			// "Prop" and "GasProp" models both render their own model geometry.
 			// Only difference for a "GasProp" is that it uses a provided Gas file too.
-			case SceneModelData::Type::Prop:
-			case SceneModelData::Type::GasProp:
+			case SceneModel::Type::Prop:
+			case SceneModel::Type::GasProp:
 			{
 				// Create actor.
 				GKActor* actor = new GKActor();
@@ -224,7 +230,7 @@ void Scene::Load()
 				mActors.push_back(actor);
 				
 				// If it's a "gas prop", use provided gas as the fidget for the actor.
-				if(modelDef->type == SceneModelData::Type::GasProp)
+				if(modelDef->type == SceneModel::Type::GasProp)
 				{
 					actor->StartFidget(modelDef->gas);
 				}
@@ -243,7 +249,7 @@ void Scene::Load()
 	{
 		// Run any init anims specified.
 		// These are usually needed to correctly position the model.
-		if((modelDef->type == SceneModelData::Type::Prop || modelDef->type == SceneModelData::Type::GasProp)
+		if((modelDef->type == SceneModel::Type::Prop || modelDef->type == SceneModel::Type::GasProp)
 		   && modelDef->initAnim != nullptr)
 		{
 			mAnimationPlayer->Sample(modelDef->initAnim, 0);
@@ -260,7 +266,7 @@ void Scene::Load()
 			std::cout << "Executing scene enter for " << nvc->GetName() << std::endl;
 			action->Execute();
 		}
-	 }
+	}
 }
 
 void Scene::Unload()
@@ -276,7 +282,7 @@ void Scene::InitEgoPosition(const std::string& positionName)
 {
     if(mEgo == nullptr) { return; }
     
-    const ScenePositionData* position = mSceneData->GetScenePosition(positionName);
+    const ScenePosition* position = mSceneData->GetScenePosition(positionName);
     if(position == nullptr) { return; }
     
     // Set position and heading.
@@ -295,7 +301,7 @@ void Scene::InitEgoPosition(const std::string& positionName)
 
 void Scene::SetCameraPosition(const std::string& cameraName)
 {
-	const SceneCameraData* camera = mSceneData->GetRoomCamera(cameraName);
+	const SceneCamera* camera = mSceneData->GetRoomCamera(cameraName);
 	if(camera != nullptr)
 	{
 		mCamera->SetPosition(camera->position);
@@ -336,8 +342,8 @@ bool Scene::CheckInteract(const Ray& ray) const
 	}
 	
 	// See if the hit item matches any scene model data.
-	SceneModelData* sceneModelData = nullptr;
-	std::vector<SceneModelData*> sceneModelDatas = mSceneData->GetSceneModelDatas();
+	SceneModel* sceneModelData = nullptr;
+	std::vector<SceneModel*> sceneModelDatas = mSceneData->GetSceneModels();
 	for(auto& modelData : sceneModelDatas)
 	{
 		if(StringUtil::EqualsIgnoreCase(modelData->name, hitInfo.name))
@@ -392,8 +398,8 @@ void Scene::Interact(const Ray& ray)
 	
     // Correlate the interacted model name to model data from the SIF.
     // This allows us to correlate a model in the BSP to a noun keyword.
-    SceneModelData* sceneModelData = nullptr;
-    std::vector<SceneModelData*> sceneModelDatas = mSceneData->GetSceneModelDatas();
+    SceneModel* sceneModelData = nullptr;
+    std::vector<SceneModel*> sceneModelDatas = mSceneData->GetSceneModels();
     for(auto& modelData : sceneModelDatas)
     {
         if(modelData->name == hitInfo.name)
@@ -485,7 +491,7 @@ GKActor* Scene::GetActorByNoun(const std::string& noun) const
 	return nullptr;
 }
 
-const ScenePositionData* Scene::GetPosition(const std::string& positionName) const
+const ScenePosition* Scene::GetPosition(const std::string& positionName) const
 {
 	if(mSceneData != nullptr)
 	{
@@ -526,7 +532,7 @@ void Scene::ExecuteAction(const Action* action)
 	{
 		case Action::Approach::WalkTo:
 		{
-			const ScenePositionData* scenePos = mSceneData->GetScenePosition(action->target);
+			const ScenePosition* scenePos = mSceneData->GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
 				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData->GetWalkerBoundary(), [action]() -> void {
@@ -548,7 +554,7 @@ void Scene::ExecuteAction(const Action* action)
 		case Action::Approach::Near: // Never used in GK3.
 		{
 			std::cout << "Executed NEAR approach type!" << std::endl;
-			const ScenePositionData* scenePos = mSceneData->GetScenePosition(action->target);
+			const ScenePosition* scenePos = mSceneData->GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
 				mEgo->SetPosition(scenePos->position);

@@ -24,7 +24,7 @@ class BSP;
 class GKActor;
 class NVC;
 class Action;
-class SceneModel;
+class SceneAsset;
 class Skybox;
 class Soundtrack;
 class WalkerBoundary;
@@ -37,16 +37,16 @@ public:
 	BSP* GetBSP() const { return mBSP; }
 	Skybox* GetSkybox() const { return mSkybox; }
 	
-	const SceneCameraData* GetDefaultRoomCamera() const;
-	const SceneCameraData* GetRoomCamera(const std::string& cameraName) const;
+	const SceneCamera* GetDefaultRoomCamera() const;
+	const SceneCamera* GetRoomCamera(const std::string& cameraName) const;
 	
-	const ScenePositionData* GetScenePosition(const std::string& positionName) const;
+	const ScenePosition* GetScenePosition(const std::string& positionName) const;
 	
 	const std::string& GetFloorModelName() const;
 	WalkerBoundary* GetWalkerBoundary() const;
 	
-	const std::vector<SceneActorData*>& GetSceneActorDatas() const { return mSceneActorDatas; }
-	const std::vector<SceneModelData*>& GetSceneModelDatas() const { return mSceneModelDatas; }
+	const std::vector<SceneActor*>& GetSceneActors() const { return mSceneActors; }
+	const std::vector<SceneModel*>& GetSceneModels() const { return mSceneModels; }
 	
 	Soundtrack* GetSoundtrack() const { return mSoundtrack; }
 	
@@ -60,9 +60,8 @@ private:
 	SIF* mGeneralSIF = nullptr;
 	SIF* mSpecificSIF = nullptr;
 	
-	// The scene model. One *must* be defined, but really
-	// just so we can get the BSP data.
-	SceneModel* mSceneModel = nullptr;
+	// The scene asset. One *must* be defined, but really just so we can get the BSP data.
+	SceneAsset* mSceneAsset = nullptr;
 	
 	// BSP model, retrieved from the Scene Model.
 	BSP* mBSP = nullptr;
@@ -76,10 +75,10 @@ private:
 	Skybox* mSkybox = nullptr;
 	
 	// Combined generic and specific scene actor datas.
-	std::vector<SceneActorData*> mSceneActorDatas;
+	std::vector<SceneActor*> mSceneActors;
 	
 	// Combined generic and specific scene model datas.
-	std::vector<SceneModelData*> mSceneModelDatas;
+	std::vector<SceneModel*> mSceneModels;
 	
 	// Combined generic and specific NVC sets.
 	std::vector<NVC*> mActionSets;

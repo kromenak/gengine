@@ -73,7 +73,7 @@
 		4B22F50A2174075B0065B152 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4B22F50B2174075B0065B152 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4B22F50C2174075B0065B152 /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
-		4B22F50D2174075B0065B152 /* SceneModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneModel.cpp */; };
+		4B22F50D2174075B0065B152 /* SceneAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */; };
 		4B22F50E2174075B0065B152 /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
 		4B22F5102174075B0065B152 /* Services.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182D1FEED84D002991D4 /* Services.cpp */; };
 		4B22F511217407640065B152 /* Color32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13521684374003B4C3F /* Color32.cpp */; };
@@ -132,7 +132,7 @@
 		4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */; };
 		4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
 		4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
-		4B2E7A65203A6072001A5B9C /* SceneModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneModel.cpp */; };
+		4B2E7A65203A6072001A5B9C /* SceneAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */; };
 		4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0918351FEEEA51002991D4 /* Matrix3.cpp */; };
 		4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
 		4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
@@ -358,8 +358,8 @@
 		4B2E7A5E203A0425001A5B9C /* SIF.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SIF.cpp; path = ../Source/SIF.cpp; sourceTree = "<group>"; };
 		4B2E7A60203A5CB3001A5B9C /* Scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Scene.h; path = ../Source/Scene.h; sourceTree = "<group>"; };
 		4B2E7A61203A5CB3001A5B9C /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Scene.cpp; path = ../Source/Scene.cpp; sourceTree = "<group>"; };
-		4B2E7A63203A6072001A5B9C /* SceneModel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SceneModel.h; path = ../Source/SceneModel.h; sourceTree = "<group>"; };
-		4B2E7A64203A6072001A5B9C /* SceneModel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SceneModel.cpp; path = ../Source/SceneModel.cpp; sourceTree = "<group>"; };
+		4B2E7A63203A6072001A5B9C /* SceneAsset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SceneAsset.h; path = ../Source/SceneAsset.h; sourceTree = "<group>"; };
+		4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SceneAsset.cpp; path = ../Source/SceneAsset.cpp; sourceTree = "<group>"; };
 		4B399E3F22D00E2100221AE4 /* 3D-Billboard.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Billboard.vert"; path = "../Assets/3D-Billboard.vert"; sourceTree = "<group>"; };
 		4B399E4022D00E2100221AE4 /* 3D-Billboard.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Billboard.frag"; path = "../Assets/3D-Billboard.frag"; sourceTree = "<group>"; };
 		4B3D478B23540D2500EB510E /* Platform.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Platform.h; path = ../Source/Platform.h; sourceTree = "<group>"; };
@@ -929,8 +929,8 @@
 				4B2E7A60203A5CB3001A5B9C /* Scene.h */,
 				4BFBB86521D0469000E07EFB /* SceneData.cpp */,
 				4BFBB86421D0469000E07EFB /* SceneData.h */,
-				4B2E7A64203A6072001A5B9C /* SceneModel.cpp */,
-				4B2E7A63203A6072001A5B9C /* SceneModel.h */,
+				4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */,
+				4B2E7A63203A6072001A5B9C /* SceneAsset.h */,
 				4B2E7A5E203A0425001A5B9C /* SIF.cpp */,
 				4B2E7A5D203A0425001A5B9C /* SIF.h */,
 			);
@@ -1213,7 +1213,7 @@
 				4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */,
 				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
 				4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */,
-				4B2E7A65203A6072001A5B9C /* SceneModel.cpp in Sources */,
+				4B2E7A65203A6072001A5B9C /* SceneAsset.cpp in Sources */,
 				4B1555592197B59F00072F0D /* Transform.cpp in Sources */,
 				4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
@@ -1292,7 +1292,7 @@
 				4B22F4FD217407470065B152 /* membuf.cpp in Sources */,
 				4B22F5302174078B0065B152 /* Soundtrack.cpp in Sources */,
 				4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */,
-				4B22F50D2174075B0065B152 /* SceneModel.cpp in Sources */,
+				4B22F50D2174075B0065B152 /* SceneAsset.cpp in Sources */,
 				4BB67C4C235255CA00FDFB30 /* TextLayout.cpp in Sources */,
 				4BB67C452352552C00FDFB30 /* FootstepManager.cpp in Sources */,
 				4B22F503217407530065B152 /* SheepAPI.cpp in Sources */,

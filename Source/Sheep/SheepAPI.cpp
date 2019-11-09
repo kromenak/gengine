@@ -306,42 +306,20 @@ RegFunc2(Expression, void, string, string, IMMEDIATE, REL_FUNC);
 
 int GetEgoCurrentLocationCount()
 {
-	return 0;
-	/*
-	// Figure out who ego is.
-	GKActor* ego = GEngine::inst->Gettime()->GetEgo();
-	if(ego != nullptr)
-	{
-		return Services::Get<GameProgress>()->GetLocationCount(ego->GetNoun());
-	}
-	
-	// If we can't find anything...it must be at least one!?
-	// Like, ego is there right now...
-    return 1;
-	*/
+	return GetEgoLocationCount(Services::Get<GameProgress>()->GetLocation());
 }
 RegFunc0(GetEgoCurrentLocationCount, int, IMMEDIATE, REL_FUNC);
 
 int GetEgoLocationCount(std::string locationName)
 {
-	//FIXME: Sheep functions can be called while the scene is being created.
-	//SO...Scene is null in that case! And Ego is not yet created!
-	//Need to revisit scene creation and find some stepped process to resolve this.
-	Scene* scene = GEngine::inst->GetScene();
-	if(scene == nullptr)
-	{
-		std::cout << "scene is null!" << std::endl;
-		return 0;
-	}
-	
 	// Figure out who ego is.
-	GKActor* ego = scene->GetEgo();
+	GKActor* ego = GEngine::inst->GetScene()->GetEgo();
 	if(ego != nullptr)
 	{
 		return Services::Get<GameProgress>()->GetLocationCount(ego->GetNoun(), locationName);
 	}
 	
-	// Can't assume 1 in this case.
+	// If we don't know who ego is, I guess we just use zero!
     return 0;
 }
 RegFunc1(GetEgoLocationCount, int, string, IMMEDIATE, REL_FUNC);
@@ -494,7 +472,7 @@ shpvoid SetActorPosition(std::string actorName, std::string positionName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
-		const ScenePositionData* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+		const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
 		if(scenePosition != nullptr)
 		{
 			// Based on docs, I don't think this sets heading...but maybe it does? Unclear.

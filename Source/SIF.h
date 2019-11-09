@@ -25,12 +25,29 @@ class Animation;
 class GAS;
 class Model;
 class NVC;
+class SheepScript;
 class Skybox;
 class Soundtrack;
 class Texture;
 class WalkerBoundary;
 
-struct SceneCameraData
+struct GeneralBlock
+{
+	std::string sceneAssetName;
+	
+	std::string floorModelName;
+	WalkerBoundary* walkerBoundary = nullptr;
+	
+	std::string cameraBoundsModelName;
+	bool cameraBoundsDynamic = false;
+	
+	Vector3 globalLightPosition;
+	Vector3 globalLightAmbient;
+	
+	Skybox* skybox = nullptr;
+};
+
+struct SceneCamera
 {
     // The label for this camera.
     // This can be an identifier, or (for an inspect camera) the noun/model associated.
@@ -43,7 +60,7 @@ struct SceneCameraData
     Vector3 position;
 };
 
-struct DialogueSceneCameraData : public SceneCameraData
+struct DialogueSceneCamera : public SceneCamera
 {
     // Specifies name of dialogue for which this camera is used.
     std::string dialogueName;
@@ -59,7 +76,7 @@ struct DialogueSceneCameraData : public SceneCameraData
     bool isFinal = false;
 };
 
-struct ScenePositionData
+struct ScenePosition
 {
     // Identifier for this position.
     std::string label;
@@ -72,10 +89,10 @@ struct ScenePositionData
 	Heading heading = Heading::None;
     
     // If specified, this camera will be switched to when using this position.
-    SceneCameraData* camera = nullptr;
+    SceneCamera* camera = nullptr;
 };
 
-struct SceneRegionOrTriggerData
+struct SceneRegionOrTrigger
 {
     // A region and trigger only vary in that the label for a
     // trigger is a "noun".
@@ -85,7 +102,7 @@ struct SceneRegionOrTriggerData
     float x1, z1, x2, z2;
 };
 
-struct SceneActorData
+struct SceneActor
 {
     // The model that will represent this actor in the scene.
     Model* model = nullptr;
@@ -96,7 +113,7 @@ struct SceneActorData
     // Initial position of the actor in the scene.
     // We'll place the actor here, but this might be overwritten
     // after scene init - maybe due to a SheepScript or something.
-    ScenePositionData* position = nullptr;
+    ScenePosition* position = nullptr;
     
     // Idle gas script file.
     GAS* idleGas = nullptr;
@@ -118,7 +135,7 @@ struct SceneActorData
     bool ego = false;
 };
 
-struct SceneModelData
+struct SceneModel
 {
     enum class Type
     {
@@ -158,26 +175,40 @@ struct SceneModelData
     bool hidden = false;
 };
 
+template<typename T>
+struct ConditionalElements
+{
+	SheepScript* condition = nullptr;
+	std::vector<T> elements;
+};
+
+template<typename T>
+struct ConditionalElement
+{
+	SheepScript* condition = nullptr;
+	T element;
+};
+
 class SIF : public Asset
 {
 public:
     SIF(std::string name, char* data, int dataLength);
 	~SIF();
     
-    const std::string& GetSceneModelName() const { return mSceneModelName; }
+    const std::string& GetSceneAssetName() const { return mSceneModelName; }
 	
 	const std::string& GetFloorModelName() const { return mFloorModelName; }
 	
 	WalkerBoundary* GetWalkerBoundary() const { return mWalkerBoundary; }
     Skybox* GetSkybox() const { return mSkybox; }
     
-    const std::vector<SceneActorData*>& GetSceneActorDatas() { return mSceneActorDatas; }
-    const std::vector<SceneModelData*>& GetSceneModelDatas() { return mSceneModelDatas; }
+    const std::vector<SceneActor*>& GetSceneActors() { return mSceneActors; }
+    const std::vector<SceneModel*>& GetSceneModels() { return mSceneModels; }
     
-	const SceneCameraData* GetDefaultRoomCamera() const { return mRoomCameras.size() > 0 ? mRoomCameras[mDefaultRoomCameraIndex] : nullptr; }
-	const SceneCameraData* GetRoomCamera(const std::string& cameraName) const;
+	const SceneCamera* GetDefaultRoomCamera() const { return mRoomCameras.size() > 0 ? mRoomCameras[mDefaultRoomCameraIndex] : nullptr; }
+	const SceneCamera* GetRoomCamera(const std::string& cameraName) const;
 	
-	const ScenePositionData* GetPosition(const std::string& positionName) const;
+	const ScenePosition* GetPosition(const std::string& positionName) const;
     
     const std::vector<Soundtrack*>& GetSoundtracks() { return mSoundtracks; }
     
@@ -210,26 +241,26 @@ private:
     Skybox* mSkybox = nullptr;
     
     // ACTORS
-    std::vector<SceneActorData*> mSceneActorDatas;
+    std::vector<SceneActor*> mSceneActors;
     
     // MODELS
-    std::vector<SceneModelData*> mSceneModelDatas;
+    std::vector<SceneModel*> mSceneModels;
     
     // CAMERAS
-    std::vector<SceneCameraData*> mInspectCameras;
+    std::vector<SceneCamera*> mInspectCameras;
     
-    std::vector<SceneCameraData*> mRoomCameras;
+    std::vector<SceneCamera*> mRoomCameras;
     int mDefaultRoomCameraIndex = 0;
     
-    std::vector<SceneCameraData*> mCinematicCameras;
-    std::vector<DialogueSceneCameraData*> mDialogueSceneCameraDatas;
+    std::vector<SceneCamera*> mCinematicCameras;
+    std::vector<DialogueSceneCamera*> mDialogueSceneCameras;
     
     // POSITIONS
-    std::vector<ScenePositionData*> mPositions;
+    std::vector<ScenePosition*> mPositions;
     
     // REGIONS & TRIGGERS
-    std::vector<SceneRegionOrTriggerData*> mRegions;
-    std::vector<SceneRegionOrTriggerData*> mTriggers;
+    std::vector<SceneRegionOrTrigger*> mRegions;
+    std::vector<SceneRegionOrTrigger*> mTriggers;
     
     // AMBIENT
     std::vector<Soundtrack*> mSoundtracks;
