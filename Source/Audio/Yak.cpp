@@ -34,40 +34,42 @@ void Yak::ParseFromData(char *data, int dataLength)
         }
         else if(StringUtil::EqualsIgnoreCase(section.name, "SOUNDS"))
         {
-            int count = section.entries[0]->GetValueAsInt();
+            int count = section.lines[0].entries[0].GetValueAsInt();
             //std::cout << "SOUNDS Count: " << count << std::endl;
+			
             for(int i = 0; i < count; i++)
             {
-                IniKeyValue* keyValue = section.entries[i + 1];
+                IniKeyValue keyValue = section.lines[i + 1].entries[0];
                 //int frame = keyValue->GetValueAsInt();
                 
-                keyValue = keyValue->next;
-                mSounds.push_back(keyValue->value);
+                keyValue = section.lines[i + 1].entries[1];
+                mSounds.push_back(keyValue.key);
                 
-                keyValue = keyValue->next;
+                keyValue = section.lines[i + 1].entries[2];
                 //int someVal = keyValue->GetValueAsInt();
             }
         }
         else if(StringUtil::EqualsIgnoreCase(section.name, "GK3"))
         {
-            int count = section.entries[0]->GetValueAsInt();
+            int count = section.lines[0].entries[0].GetValueAsInt();
             //std::cout << "GK3 Count: " << count << std::endl;
+			
             for(int i = 0; i < count; i++)
             {
-                IniKeyValue* keyValue = section.entries[i + 1];
+				IniKeyValue keyValue = section.lines[i + 1].entries[0];
                 //int frame = keyValue->GetValueAsInt();
                 
-                keyValue = keyValue->next;
-                std::string type = keyValue->value;
+                keyValue = section.lines[i + 1].entries[1];
+                std::string type = keyValue.key;
                 if(StringUtil::EqualsIgnoreCase(type, "SPEAKER"))
                 {
-                    keyValue = keyValue->next;
-                    std::string speakerName = keyValue->value;
+                    keyValue = section.lines[i + 1].entries[2];
+                    std::string speakerName = keyValue.key;
                 }
                 else if(StringUtil::EqualsIgnoreCase(type, "CAPTION"))
                 {
-                    keyValue = keyValue->next;
-                    std::string caption = keyValue->value;
+                    keyValue = section.lines[i + 1].entries[2];
+                    std::string caption = keyValue.key;
                 }
                 else if(StringUtil::EqualsIgnoreCase(type, "DIALOGUECUE"))
                 {
@@ -75,11 +77,11 @@ void Yak::ParseFromData(char *data, int dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(type, "SPEAKERCAPTION"))
                 {
-                    
+                    //TODO
                 }
                 else if(StringUtil::EqualsIgnoreCase(type, "LIPSYNCH"))
                 {
-                    
+                    //TODO
                 }
                 else
                 {

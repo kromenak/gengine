@@ -91,27 +91,28 @@ void Soundtrack::ParseFromData(char *data, int dataLength)
         {
             // Parse wait node keys and add to nodes list.
             WaitNode* node = new WaitNode();
-            for(auto& pair : section.entries)
+            for(auto& line : section.lines)
             {
-                if(StringUtil::EqualsIgnoreCase(pair->key, "MinWaitMs"))
+				IniKeyValue& entry = line.entries[0];
+                if(StringUtil::EqualsIgnoreCase(entry.key, "MinWaitMs"))
                 {
-                    node->minWaitTimeMs = pair->GetValueAsInt();
+                    node->minWaitTimeMs = entry.GetValueAsInt();
                 }
-                else if(StringUtil::EqualsIgnoreCase(pair->key, "MaxWaitMs"))
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "MaxWaitMs"))
                 {
-                    node->maxWaitTimeMs = pair->GetValueAsInt();
+                    node->maxWaitTimeMs = entry.GetValueAsInt();
                 }
-                else if(StringUtil::EqualsIgnoreCase(pair->key, "Repeat"))
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "Repeat"))
                 {
-                    node->repeat = pair->GetValueAsInt();
+                    node->repeat = entry.GetValueAsInt();
                 }
-                else if(StringUtil::EqualsIgnoreCase(pair->key, "Random"))
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "Random"))
                 {
-                    node->random = pair->GetValueAsInt();
+                    node->random = entry.GetValueAsInt();
                 }
                 else
                 {
-                    std::cout << "Unexpected key: " << pair->key << std::endl;
+                    std::cout << "Unexpected key: " << entry.key << std::endl;
                 }
             }
             mNodes.push_back(node);
@@ -136,15 +137,17 @@ void Soundtrack::ParseFromData(char *data, int dataLength)
         }
         else if(StringUtil::EqualsIgnoreCase(section.name, "SOUNDTRACK"))
         {
-            for(auto& pair : section.entries)
+            for(auto& line : section.lines)
             {
-                if(StringUtil::EqualsIgnoreCase(pair->key, "SoundType"))
+				IniKeyValue& entry = line.entries[0];
+                if(StringUtil::EqualsIgnoreCase(entry.key, "SoundType"))
                 {
                     // Set soundtype.
+					//TODO
                 }
                 else
                 {
-                    std::cout << "Unexpected key: " << pair->key << std::endl;
+                    std::cout << "Unexpected key: " << entry.key << std::endl;
                 }
             }
         }
@@ -158,71 +161,72 @@ void Soundtrack::ParseFromData(char *data, int dataLength)
 SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
 {
     SoundNode* node = new SoundNode();
-    for(auto& pair : section.entries)
+    for(auto& line : section.lines)
     {
-        if(StringUtil::EqualsIgnoreCase(pair->key, "Name"))
+		IniKeyValue& entry = line.entries[0];
+        if(StringUtil::EqualsIgnoreCase(entry.key, "Name"))
         {
-            node->soundName = pair->value;
+            node->soundName = entry.value;
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "Volume"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "Volume"))
         {
-            node->volume = pair->GetValueAsInt();
+            node->volume = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "Repeat"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "Repeat"))
         {
-            node->repeat = pair->GetValueAsInt();
+            node->repeat = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "Random"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "Random"))
         {
-            node->random = pair->GetValueAsInt();
+            node->random = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "Loop"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "Loop"))
         {
-            node->loop = pair->GetValueAsInt();
+            node->loop = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "FadeInMs"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "FadeInMs"))
         {
-            node->fadeInTimeMs = pair->GetValueAsInt();
+            node->fadeInTimeMs = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "StopMethod"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "StopMethod"))
         {
-            node->stopMethod = pair->GetValueAsInt();
+            node->stopMethod = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "FadeOutMs"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "FadeOutMs"))
         {
-            node->fadeOutTimeMs = pair->GetValueAsInt();
+            node->fadeOutTimeMs = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "3D"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "3D"))
         {
-            node->is3d = pair->GetValueAsInt();
+            node->is3d = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "MinDist"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "MinDist"))
         {
-            node->minDist = pair->GetValueAsInt();
+            node->minDist = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "MaxDist"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "MaxDist"))
         {
-            node->maxDist = pair->GetValueAsInt();
+            node->maxDist = entry.GetValueAsInt();
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "X"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "X"))
         {
-            node->position.SetX(pair->GetValueAsFloat());
+            node->position.SetX(entry.GetValueAsFloat());
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "Y"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "Y"))
         {
-            node->position.SetY(pair->GetValueAsFloat());
+            node->position.SetY(entry.GetValueAsFloat());
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "Z"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "Z"))
         {
-            node->position.SetZ(pair->GetValueAsFloat());
+            node->position.SetZ(entry.GetValueAsFloat());
         }
-        else if(StringUtil::EqualsIgnoreCase(pair->key, "Follow"))
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "Follow"))
         {
-            node->followModelName = pair->value;
+            node->followModelName = entry.value;
         }
         else
         {
-            std::cout << "Unexpected key: " << pair->key << std::endl;
+            std::cout << "Unexpected key: " << entry.key << std::endl;
         }
     }
     return node;

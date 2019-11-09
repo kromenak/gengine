@@ -30,31 +30,32 @@ CharacterManager::CharacterManager()
 		config.identifier = section.name;
 		
 		// Each entry in a section is some property about the character.
-		for(auto& entry : section.entries)
+		for(auto& line : section.lines)
 		{
-			if(StringUtil::EqualsIgnoreCase(entry->key, "WalkerHeight"))
+			IniKeyValue& entry = line.entries.front();
+			if(StringUtil::EqualsIgnoreCase(entry.key, "WalkerHeight"))
 			{
-				config.walkerHeight = entry->GetValueAsFloat();
+				config.walkerHeight = entry.GetValueAsFloat();
 			}
-			else if(StringUtil::EqualsIgnoreCase(entry->key, "StartAnim"))
+			else if(StringUtil::EqualsIgnoreCase(entry.key, "StartAnim"))
 			{
-				config.walkStartAnim = Services::GetAssets()->LoadAnimation(entry->value);
+				config.walkStartAnim = Services::GetAssets()->LoadAnimation(entry.value);
 			}
-			else if(StringUtil::EqualsIgnoreCase(entry->key, "ContAnim"))
+			else if(StringUtil::EqualsIgnoreCase(entry.key, "ContAnim"))
 			{
-				config.walkLoopAnim = Services::GetAssets()->LoadAnimation(entry->value);
+				config.walkLoopAnim = Services::GetAssets()->LoadAnimation(entry.value);
 			}
-			else if(StringUtil::EqualsIgnoreCase(entry->key, "StopAnim"))
+			else if(StringUtil::EqualsIgnoreCase(entry.key, "StopAnim"))
 			{
-				config.walkStopAnim = Services::GetAssets()->LoadAnimation(entry->value);
+				config.walkStopAnim = Services::GetAssets()->LoadAnimation(entry.value);
 			}
-			else if(StringUtil::EqualsIgnoreCase(entry->key, "StartTurnRightAnim"))
+			else if(StringUtil::EqualsIgnoreCase(entry.key, "StartTurnRightAnim"))
 			{
-				config.walkStartTurnRightAnim = Services::GetAssets()->LoadAnimation(entry->value);
+				config.walkStartTurnRightAnim = Services::GetAssets()->LoadAnimation(entry.value);
 			}
-			else if(StringUtil::EqualsIgnoreCase(entry->key, "StartTurnLeftAnim"))
+			else if(StringUtil::EqualsIgnoreCase(entry.key, "StartTurnLeftAnim"))
 			{
-				config.walkStartTurnLeftAnim = Services::GetAssets()->LoadAnimation(entry->value);
+				config.walkStartTurnLeftAnim = Services::GetAssets()->LoadAnimation(entry.value);
 			}
 		}
 		
@@ -88,43 +89,44 @@ CharacterManager::CharacterManager()
 			Vector2 blinkFrequencyDefault;
 			
 			// Read in default values.
-			for(auto& entry : section.entries)
+			for(auto& line : section.lines)
 			{
-				if(StringUtil::EqualsIgnoreCase(entry->key, "Max Look Distance"))
+				IniKeyValue& entry = line.entries.front();
+				if(StringUtil::EqualsIgnoreCase(entry.key, "Max Look Distance"))
 				{
-					maxEyeLookDistanceDefault = entry->GetValueAsVector2();
+					maxEyeLookDistanceDefault = entry.GetValueAsVector2();
 				}
-				else if(StringUtil::EqualsIgnoreCase(entry->key, "Jitter Frequency"))
+				else if(StringUtil::EqualsIgnoreCase(entry.key, "Jitter Frequency"))
 				{
-					eyeJitterFrequencyDefault = entry->GetValueAsVector2();
+					eyeJitterFrequencyDefault = entry.GetValueAsVector2();
 				}
-				else if(StringUtil::EqualsIgnoreCase(entry->key, "Max Jitter Distance"))
+				else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Jitter Distance"))
 				{
-					maxEyeJitterDistanceDefault = entry->GetValueAsVector2();
+					maxEyeJitterDistanceDefault = entry.GetValueAsVector2();
 				}
-				else if(StringUtil::EqualsIgnoreCase(entry->key, "Eye Field of View"))
+				else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Field of View"))
 				{
-					eyeFieldOfViewDefault = entry->GetValueAsVector2();
+					eyeFieldOfViewDefault = entry.GetValueAsVector2();
 				}
-				else if(StringUtil::EqualsIgnoreCase(entry->key, "Eye Short Field of View"))
+				else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Short Field of View"))
 				{
-					eyeShortFieldOfViewDefault = entry->GetValueAsVector2();
+					eyeShortFieldOfViewDefault = entry.GetValueAsVector2();
 				}
-				else if(StringUtil::EqualsIgnoreCase(entry->key, "Eye Separation"))
+				else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Separation"))
 				{
-					eyeSeparationDefault = entry->GetValueAsFloat();
+					eyeSeparationDefault = entry.GetValueAsFloat();
 				}
-				else if(StringUtil::EqualsIgnoreCase(entry->key, "Head Radius"))
+				else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Radius"))
 				{
-					headRadiusDefault = entry->GetValueAsFloat();
+					headRadiusDefault = entry.GetValueAsFloat();
 				}
-				else if(StringUtil::EqualsIgnoreCase(entry->key, "Head Center Offset"))
+				else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Center Offset"))
 				{
-					headCenterOffsetDefault = entry->GetValueAsVector3();
+					headCenterOffsetDefault = entry.GetValueAsVector3();
 				}
-				else if(StringUtil::EqualsIgnoreCase(entry->key, "Blink Frequency"))
+				else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Frequency"))
 				{
-					blinkFrequencyDefault = entry->GetValueAsVector2();
+					blinkFrequencyDefault = entry.GetValueAsVector2();
 				}
 			}
 			
@@ -163,75 +165,76 @@ CharacterManager::CharacterManager()
 				config.faceConfig.foreheadTexture = Services::GetAssets()->LoadTexture(section.name + "_forehead");
 				
 				// Each entry is a face property for the character.
-				for(auto& entry : section.entries)
+				for(auto& line : section.lines)
 				{
-					if(StringUtil::EqualsIgnoreCase(entry->key, "Left Eye Name"))
+					IniKeyValue& entry = line.entries.front();
+					if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Name"))
 					{
-						config.faceConfig.leftEyeTexture = Services::GetAssets()->LoadTexture(entry->value);
+						config.faceConfig.leftEyeTexture = Services::GetAssets()->LoadTexture(entry.value);
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Right Eye Name"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Name"))
 					{
-						config.faceConfig.rightEyeTexture = Services::GetAssets()->LoadTexture(entry->value);
+						config.faceConfig.rightEyeTexture = Services::GetAssets()->LoadTexture(entry.value);
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Left Eye Offset"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Offset"))
 					{
-						config.faceConfig.leftEyeOffset = entry->GetValueAsVector2();
+						config.faceConfig.leftEyeOffset = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Right Eye Offset"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Offset"))
 					{
-						config.faceConfig.rightEyeOffset = entry->GetValueAsVector2();
+						config.faceConfig.rightEyeOffset = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Left Eye Bias"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Bias"))
 					{
-						config.faceConfig.leftEyeBias = entry->GetValueAsVector2();
+						config.faceConfig.leftEyeBias = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Right Eye Bias"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Bias"))
 					{
-						config.faceConfig.rightEyeBias = entry->GetValueAsVector2();
+						config.faceConfig.rightEyeBias = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Max Look Distance"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Look Distance"))
 					{
-						config.faceConfig.maxEyeLookDistance = entry->GetValueAsVector2();
+						config.faceConfig.maxEyeLookDistance = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Jitter Frequency"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Jitter Frequency"))
 					{
-						config.faceConfig.eyeJitterFrequency = entry->GetValueAsVector2();
+						config.faceConfig.eyeJitterFrequency = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Max Jitter Distance"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Jitter Distance"))
 					{
-						config.faceConfig.maxEyeLookDistance = entry->GetValueAsVector2();
+						config.faceConfig.maxEyeLookDistance = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Eye Field of View"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Field of View"))
 					{
-						config.faceConfig.eyeFieldOfView = entry->GetValueAsVector2();
+						config.faceConfig.eyeFieldOfView = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Eye Short Field of View"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Short Field of View"))
 					{
-						config.faceConfig.eyeShortFieldOfView = entry->GetValueAsVector2();
+						config.faceConfig.eyeShortFieldOfView = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Eye Separation"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Separation"))
 					{
-						config.faceConfig.eyeSeparation = entry->GetValueAsFloat();
+						config.faceConfig.eyeSeparation = entry.GetValueAsFloat();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Head Radius"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Radius"))
 					{
-						config.faceConfig.headRadius = entry->GetValueAsFloat();
+						config.faceConfig.headRadius = entry.GetValueAsFloat();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Head Center Offset"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Center Offset"))
 					{
-						config.faceConfig.headCenterOffset = entry->GetValueAsVector3();
+						config.faceConfig.headCenterOffset = entry.GetValueAsVector3();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Forehead Offset"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Forehead Offset"))
 					{
-						config.faceConfig.foreheadOffset = entry->GetValueAsVector2();
+						config.faceConfig.foreheadOffset = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Eyelids Offset"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Eyelids Offset"))
 					{
-						config.faceConfig.eyelidsOffset = entry->GetValueAsVector2();
+						config.faceConfig.eyelidsOffset = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Eyelids Alpha Channel"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Eyelids Alpha Channel"))
 					{
-						config.faceConfig.eyelidsAlphaChannel = Services::GetAssets()->LoadTexture(entry->value);
+						config.faceConfig.eyelidsAlphaChannel = Services::GetAssets()->LoadTexture(entry.value);
 						
 						// If we have eyelids and an alpha channel, just apply it right away, why not?
 						if(config.faceConfig.eyelidsTexture != nullptr && config.faceConfig.eyelidsAlphaChannel != nullptr)
@@ -239,10 +242,10 @@ CharacterManager::CharacterManager()
 							config.faceConfig.eyelidsTexture->ApplyAlphaChannel(*config.faceConfig.eyelidsAlphaChannel);
 						}
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Blink Anims"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Anims"))
 					{
 						// Value will be a comma-separated list of elements. Gotta split them up.
-						std::vector<std::string> tokens = StringUtil::Split(entry->value, ',');
+						std::vector<std::string> tokens = StringUtil::Split(entry.value, ',');
 						
 						// First element is an animation name, second is a probability, and so on.
 						// Technically, I think the system was meant to support a variable-sized list of anims and probabilities.
@@ -261,17 +264,17 @@ CharacterManager::CharacterManager()
 							}
 						}
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Blink Frequency"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Frequency"))
 					{
-						config.faceConfig.blinkFrequency = entry->GetValueAsVector2();
+						config.faceConfig.blinkFrequency = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Mouth Offset"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Mouth Offset"))
 					{
-						config.faceConfig.mouthOffset = entry->GetValueAsVector2();
+						config.faceConfig.mouthOffset = entry.GetValueAsVector2();
 					}
-					else if(StringUtil::EqualsIgnoreCase(entry->key, "Mouth Size"))
+					else if(StringUtil::EqualsIgnoreCase(entry.key, "Mouth Size"))
 					{
-						config.faceConfig.mouthSize = entry->GetValueAsVector2();
+						config.faceConfig.mouthSize = entry.GetValueAsVector2();
 					}
 				}
 			}

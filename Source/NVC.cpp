@@ -83,80 +83,85 @@ void NVC::ParseFromData(char *data, int dataLength)
     
     // Main section contains all the Noun/Verb/Cases on individual lines.
     IniSection mainSection = parser.GetSection("");
-    for(auto& entry : mainSection.entries)
+    for(auto& line : mainSection.lines)
     {
         Action item;
         
-        // The first three items must be the noun, verb, and case.
-        item.noun = entry->key;
+        // The first item is always the noun.
+		IniKeyValue& first = line.entries.front();
+        item.noun = first.key;
         
-        IniKeyValue* keyValue = entry->next;
-        item.verb = keyValue->key;
+		// Second item is always the verb.
+		IniKeyValue& second = line.entries[1];
+        item.verb = second.key;
         
-        keyValue = keyValue->next;
-		std::string condition = keyValue->key;
-		StringUtil::RemoveAll(condition, '\t');
+		// Third item is always the case (requires a bit of trimming/conditioning sometimes).
+		IniKeyValue& third = line.entries[2];
+		std::string condition = third.key;
+		StringUtil::RemoveAll(condition, '\t'); //TODO: Still needed? We also do this in IniParser layer now.
 		StringUtil::Trim(condition);
 		item.condition = condition;
         
         // From here, we have some optional stuff.
-        keyValue = keyValue->next;
-        while(keyValue != nullptr)
-        {
-			StringUtil::RemoveAll(keyValue->key, '\t');
-			StringUtil::Trim(keyValue->key);
+		for(int i = 3; i < line.entries.size(); ++i)
+		{
+			IniKeyValue& keyValue = line.entries[i];
 			
-			if(StringUtil::EqualsIgnoreCase(keyValue->key, "Approach"))
+			//TODO: Still needed? We also do this in IniParser layer now.
+			StringUtil::RemoveAll(keyValue.key, '\t');
+			StringUtil::Trim(keyValue.key);
+			
+			if(StringUtil::EqualsIgnoreCase(keyValue.key, "Approach"))
             {
-				if(StringUtil::EqualsIgnoreCase(keyValue->value, "WalkTo"))
+				if(StringUtil::EqualsIgnoreCase(keyValue.value, "WalkTo"))
 				{
 					item.approach = Action::Approach::WalkTo;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Anim"))
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "Anim"))
 				{
 					item.approach = Action::Approach::Anim;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Near"))
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "Near"))
 				{
 					item.approach = Action::Approach::Near;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "NearModel"))
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "NearModel"))
 				{
 					item.approach = Action::Approach::NearModel;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "Region"))
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "Region"))
 				{
 					item.approach = Action::Approach::Region;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "TurnTo"))
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "TurnTo"))
 				{
 					item.approach = Action::Approach::TurnTo;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "TurnToModel"))
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "TurnToModel"))
 				{
 					item.approach = Action::Approach::TurnToModel;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValue->value, "WalkToSee"))
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "WalkToSee"))
 				{
 					item.approach = Action::Approach::WalkToSee;
 				}
 				else
 				{
-					std::cout << "ERROR: invalid approach " << keyValue->value << std::endl;
+					std::cout << "ERROR: invalid approach " << keyValue.value << std::endl;
 				}
             }
-            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "Target"))
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "Target"))
             {
-                item.target = keyValue->value;
+                item.target = keyValue.value;
             }
-            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "Script"))
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "Script"))
             {
                 // A sheep expression to be evaluated for this item.
-                SheepCompiler compiler;
-                item.script = compiler.Compile(keyValue->value);
+				//TODO: Should we compile this immediately, or save it as a string and compile/execute on-demand?
+				//TODO: Based on debug output from GK3, the string value is stored SOMEWHERE in memory for debug and dump purposes.
+                item.script = Services::GetSheep()->Compile(keyValue.value);
             }
-            keyValue = keyValue->next;
-        }
+		}
         
         // Add item to map.
         auto it = mNounToItems.find(item.noun);
@@ -171,22 +176,23 @@ void NVC::ParseFromData(char *data, int dataLength)
     // But an NVC item can also specify a custom case value. In that case,
     // this section maps the case value to a sheep expression to evaluate, to see whether the case is met.
     IniSection logicSection = parser.GetSection("LOGIC");
-    for(auto& entry : logicSection.entries)
+    for(auto& line : logicSection.lines)
     {
         // Only add this case entry if it isn't a duplicate entry.
-        std::string caseLabel = entry->key;
+		IniKeyValue& first = line.entries.front();
+        std::string caseLabel = first.key;
 		
 		// We need to trim the case label to get the right label value.
 		// These are often formatted as "CASE    = blah" (note the extra whitespaces after the case label).
-		StringUtil::Trim(caseLabel);
+		StringUtil::Trim(caseLabel); //TODO: Still needed?
 		
 		// Add case to dictionary, if not already in there.
 		// Multiple cases are considered an error - only the first is kept.
         auto it = mCaseToSheep.find(caseLabel);
         if(it == mCaseToSheep.end())
         {
-            SheepCompiler compiler;
-            mCaseToSheep[caseLabel] = compiler.Compile(entry->value);
+			//TODO: Again, should save string value somewhere???
+            mCaseToSheep[caseLabel] = Services::GetSheep()->Compile(first.value);
         }
         else
         {

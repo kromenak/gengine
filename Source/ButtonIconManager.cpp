@@ -34,53 +34,58 @@ ButtonIconManager::ButtonIconManager()
 	// There's only one section in the whole file.
 	IniSection section = parser.GetSection("VERBS");
 	
-	// Each entry is a single button icon declaration.
+	// Each line is a single button icon declaration.
 	// Format is: KEYWORD, up=, down=, hover=, disable=, type
-	for(auto& entry : section.entries)
+	for(auto& line : section.lines)
 	{
+		IniKeyValue& entry = line.entries.front();
+		
 		// This is a required value.
-		std::string keyword = entry->key;
+		std::string keyword = entry.key;
 		
 		// These values will be filled in with remaining entry keys.
 		Texture* upTexture = nullptr;
 		Texture* downTexture = nullptr;
 		Texture* hoverTexture = nullptr;
 		Texture* disableTexture = nullptr;
+		
+		// By default, the type of each button is a verb.
+		// However, if the keyword "inventory" or "topic" are used, the button is put in those maps instead.
+		// This is why I bother using a pointer to a map here!
 		std::unordered_map<std::string, ButtonIcon>* map = &mVerbsToIcons;
 		
 		// The remaining values are all optional.
 		// If a value isn't present, the above defaults are used.
-		IniKeyValue* keyValuePair = entry->next;
-		while(keyValuePair != nullptr)
+		for(int i = 1; i < line.entries.size(); ++i)
 		{
-			if(StringUtil::EqualsIgnoreCase(keyValuePair->key, "up"))
+			IniKeyValue& keyValuePair = line.entries[i];
+			if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "up"))
 			{
-				upTexture = Services::GetAssets()->LoadTexture(keyValuePair->value);
+				upTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
 			}
-			else if(StringUtil::EqualsIgnoreCase(keyValuePair->key, "down"))
+			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "down"))
 			{
-				downTexture = Services::GetAssets()->LoadTexture(keyValuePair->value);
+				downTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
 			}
-			else if(StringUtil::EqualsIgnoreCase(keyValuePair->key, "hover"))
+			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "hover"))
 			{
-				hoverTexture = Services::GetAssets()->LoadTexture(keyValuePair->value);
+				hoverTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
 			}
-			else if(StringUtil::EqualsIgnoreCase(keyValuePair->key, "disable"))
+			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "disable"))
 			{
-				disableTexture = Services::GetAssets()->LoadTexture(keyValuePair->value);
+				disableTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
 			}
-			else if(StringUtil::EqualsIgnoreCase(keyValuePair->key, "type"))
+			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "type"))
 			{
-				if(StringUtil::EqualsIgnoreCase(keyValuePair->value, "inventory"))
+				if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "inventory"))
 				{
 					map = &mNounsToIcons;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValuePair->value, "topic"))
+				else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic"))
 				{
 					map = &mTopicsToIcons;
 				}
 			}
-			keyValuePair = keyValuePair->next;
 		}
 		
 		// As long as any texture was set, we'll save this one.
@@ -93,8 +98,9 @@ ButtonIconManager::ButtonIconManager()
 			buttonIcon.hoverTexture = hoverTexture;
 			buttonIcon.disableTexture = disableTexture;
 			
-			// Save one of these as the default.
-			if(keyword == "QUESTION")
+			// Save one of these as the default icon.
+			// "Question mark" seems like as good as any!
+			if(StringUtil::EqualsIgnoreCase(keyword, "QUESTION"))
 			{
 				mDefaultIcon = buttonIcon;
 			}

@@ -13,6 +13,7 @@ TYPE_DEF_BASE(FootstepManager);
 
 FootstepManager::FootstepManager()
 {
+	// STEP 1: FLOORMAP maps texture names to a floor type.
 	// Get FLOORMAP text file as a raw buffer.
 	unsigned int bufferSize = 0;
 	char* buffer = Services::GetAssets()->LoadRaw("FLOORMAP.TXT", bufferSize);
@@ -24,23 +25,23 @@ FootstepManager::FootstepManager()
 	IniSection section;
 	while(parser.ReadNextSection(section))
 	{
-		for(auto& entry : section.entries)
+		for(auto& line : section.lines)
 		{
 			// Key of first entry is the floor type.
-			std::string floorType = entry->key;
+			std::string floorType = line.entries[0].key;
 			
 			// All values are texture names (with no extension).
+			// Note the value of the first entry is also used (it is a valid texture name too).
 			// Map them to the floor type.
-			IniKeyValue* current = entry;
-			do
+			for(int i = 0; i < line.entries.size(); ++i)
 			{
-				mTextureNameToFloorType[current->value] = floorType;
-				current = current->next;
+				IniKeyValue& current = line.entries[i];
+				mTextureNameToFloorType[current.value] = floorType;
 			}
-			while(current != nullptr);
 		}
 	}
 	
+	// STEP 2: FOOTSTEPS maps floor types to audio files for footsteps.
 	// Next up: read in all the footstep data.
 	buffer = Services::GetAssets()->LoadRaw("FOOTSTEPS.TXT", bufferSize);
 	
@@ -57,31 +58,29 @@ FootstepManager::FootstepManager()
 		ShoeSounds& shoeSounds = mShoeTypeToShoeSounds[shoeType];
 		
 		// Each entry maps a floor type to an audio file name.
-		for(auto& entry : section.entries)
+		for(auto& line : section.lines)
 		{
 			// Key of first entry is the floor type.
-			std::string floorType = entry->key;
+			std::string floorType = line.entries[0].key;
 			
 			// Grab the audio vector for this floor type.
-			// Again, gets an existing list or creates a new empty one.
+			// Gets an existing list or creates a new empty one.
 			auto& footsteps = shoeSounds.floorTypeToFootsteps[floorType];
 			
 			// All values are audio files that go along with this shoeType/floorType pair.
-			IniKeyValue* current = entry;
-			do
+			for(int i = 0; i < line.entries.size(); ++i)
 			{
-				// Get the audio file and add to list.
-				Audio* audio = Services::GetAssets()->LoadAudio(current->value);
+				IniKeyValue& current = line.entries[i];
+				Audio* audio = Services::GetAssets()->LoadAudio(current.value);
 				if(audio != nullptr)
 				{
 					footsteps.push_back(audio);
 				}
-				current = current->next;
 			}
-			while(current != nullptr);
 		}
 	}
 	
+	// STEP 2: FOOTSCUFFS maps floor types to audio files for footscuffs.
 	// Finally, very similar thing with the footscuff data.
 	buffer = Services::GetAssets()->LoadRaw("FOOTSCUFFS.TXT", bufferSize);
 	
@@ -98,28 +97,25 @@ FootstepManager::FootstepManager()
 		ShoeSounds& shoeSounds = mShoeTypeToShoeSounds[shoeType];
 		
 		// Each entry maps a floor type to an audio file name.
-		for(auto& entry : section.entries)
+		for(auto& line : section.lines)
 		{
 			// Key of first entry is the floor type.
-			std::string floorType = entry->key;
+			std::string floorType = line.entries[0].key;
 			
 			// Grab the audio vector for this floor type.
 			// Again, gets an existing list or creates a new empty one.
 			auto& footscuffs = shoeSounds.floorTypeToFootscuffs[floorType];
 			
 			// All values are audio files that go along with this shoeType/floorType pair.
-			IniKeyValue* current = entry;
-			do
+			for(int i = 0; i < line.entries.size(); ++i)
 			{
-				// Get the audio file and add to list.
-				Audio* audio = Services::GetAssets()->LoadAudio(current->value);
+				IniKeyValue& current = line.entries[i];
+				Audio* audio = Services::GetAssets()->LoadAudio(current.value);
 				if(audio != nullptr)
 				{
 					footscuffs.push_back(audio);
 				}
-				current = current->next;
 			}
-			while(current != nullptr);
 		}
 	}
 }

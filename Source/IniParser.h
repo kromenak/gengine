@@ -20,8 +20,6 @@ struct IniKeyValue
     std::string key;
     std::string value;
     
-    IniKeyValue* next;
-    
     float GetValueAsFloat();
     int GetValueAsInt();
     bool GetValueAsBool();
@@ -30,11 +28,16 @@ struct IniKeyValue
 	Color32 GetValueAsColor32();
 };
 
+struct IniLine
+{
+	std::vector<IniKeyValue> entries;
+};
+
 struct IniSection
 {
     std::string name;
     std::string condition;
-    std::vector<IniKeyValue*> entries;
+	std::vector<IniLine> lines;
 };
 
 class IniParser

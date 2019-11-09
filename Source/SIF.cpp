@@ -66,18 +66,18 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
-            IniKeyValue* keyValue = entry;
-			if(StringUtil::EqualsIgnoreCase(keyValue->key, "scene"))
+			IniKeyValue& first = line.entries.front();
+			if(StringUtil::EqualsIgnoreCase(first.key, "scene"))
             {
-                mSceneModelName = keyValue->value;
+                mSceneModelName = first.value;
             }
-            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "floor"))
+            else if(StringUtil::EqualsIgnoreCase(first.key, "floor"))
             {
-                mFloorModelName = keyValue->value;
+                mFloorModelName = first.value;
             }
-            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "boundary"))
+            else if(StringUtil::EqualsIgnoreCase(first.key, "boundary"))
             {
 				if(mWalkerBoundary == nullptr)
 				{
@@ -85,83 +85,87 @@ void SIF::ParseFromData(char *data, int dataLength)
 				}
 				
 				// First value is name of a texture defining walk bounds.
-				mWalkerBoundary->SetTexture(Services::GetAssets()->LoadTexture(keyValue->value));
+				mWalkerBoundary->SetTexture(Services::GetAssets()->LoadTexture(first.value));
 				
 				// Remaining key/values are size/offset of the texture in 3D space.
 				// This is used as a 2D overlay on the X/Z plane to determine walkable area.
-                keyValue = keyValue->next;
-                while(keyValue != nullptr)
-                {
-                    if(StringUtil::EqualsIgnoreCase(keyValue->key, "size"))
+				for(int i = 1; i < line.entries.size(); ++i)
+				{
+					IniKeyValue& keyValue = line.entries[i];
+					if(StringUtil::EqualsIgnoreCase(keyValue.key, "size"))
                     {
-						mWalkerBoundary->SetSize(keyValue->GetValueAsVector2());
+						mWalkerBoundary->SetSize(keyValue.GetValueAsVector2());
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "offset"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.key, "offset"))
                     {
-						mWalkerBoundary->SetOffset(keyValue->GetValueAsVector2());
+						mWalkerBoundary->SetOffset(keyValue.GetValueAsVector2());
                     }
-                    keyValue = keyValue->next;
-                }
+				}
             }
-            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "cameraBounds"))
+            else if(StringUtil::EqualsIgnoreCase(first.key, "cameraBounds"))
             {
-                mCameraBoundsModelName = keyValue->value;
-                keyValue = keyValue->next;
-                if(keyValue != nullptr && StringUtil::EqualsIgnoreCase(keyValue->key, "type"))
-                {
-                    mCameraBoundsDynamic = (StringUtil::EqualsIgnoreCase(keyValue->value, "dynamic"));
-                }
+                mCameraBoundsModelName = first.value;
+				
+				// One possible option: a type.
+				if(line.entries.size() > 1)
+				{
+					IniKeyValue& keyValue = line.entries[1];
+					if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
+					{
+						mCameraBoundsDynamic = (StringUtil::EqualsIgnoreCase(keyValue.value, "dynamic"));
+					}
+				}
             }
-            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "globalLight"))
+            else if(StringUtil::EqualsIgnoreCase(first.key, "globalLight"))
             {
-                keyValue = keyValue->next;
-                while(keyValue != nullptr)
-                {
-                    if(StringUtil::EqualsIgnoreCase(keyValue->key, "pos"))
+				for(int i = 1; i < section.lines.size(); ++i)
+				{
+					IniKeyValue& keyValue = line.entries[i];
+					if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
                     {
-                        mGlobalLightPosition = keyValue->GetValueAsVector3();
+                        mGlobalLightPosition = keyValue.GetValueAsVector3();
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "ambient"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.key, "ambient"))
                     {
-                        mGlobalLightAmbient = keyValue->GetValueAsVector3();
+                        mGlobalLightAmbient = keyValue.GetValueAsVector3();
                     }
-                    keyValue = keyValue->next;
-                }
+				}
             }
-            else if(StringUtil::EqualsIgnoreCase(keyValue->key, "skybox"))
+            else if(StringUtil::EqualsIgnoreCase(first.key, "skybox"))
             {
-                keyValue = keyValue->next;
-                
-                mSkybox = new Skybox();
-                while(keyValue != nullptr)
-                {
-                    Texture* texture = Services::GetAssets()->LoadTexture(keyValue->value);
-                    if(StringUtil::EqualsIgnoreCase(keyValue->key, "left"))
+				mSkybox = new Skybox();
+				
+				for(int i = 1; i < section.lines.size(); ++i)
+				{
+					IniKeyValue& keyValue = line.entries[i];
+					
+					Texture* texture = Services::GetAssets()->LoadTexture(keyValue.value);
+                    if(StringUtil::EqualsIgnoreCase(keyValue.key, "left"))
                     {
                         mSkybox->SetLeftTexture(texture);
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "right"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.key, "right"))
                     {
                         mSkybox->SetRightTexture(texture);
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "front"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.key, "front"))
                     {
                         mSkybox->SetFrontTexture(texture);
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "back"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.key, "back"))
                     {
                         mSkybox->SetBackTexture(texture);
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "up"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.key, "up"))
                     {
                         mSkybox->SetUpTexture(texture);
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->key, "down"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.key, "down"))
                     {
                         mSkybox->SetDownTexture(texture);
                     }
-                    keyValue = keyValue->next;
-                }
+					
+				}
             }
         }
     }
@@ -180,30 +184,30 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             SceneCamera* camera = new SceneCamera();
-            IniKeyValue* keyValue = entry;
-            while(keyValue != nullptr)
-            {
-                if(keyValue->key == "noun" || keyValue->key == "model")
+			for(auto& keyValue : line.entries)
+			{
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun") || StringUtil::EqualsIgnoreCase(keyValue.key, "model"))
                 {
-                    camera->label = keyValue->value;
+                    camera->label = keyValue.value;
                 }
-                else if(keyValue->key == "pos")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
                 {
-                    camera->position = keyValue->GetValueAsVector3();
+                    camera->position = keyValue.GetValueAsVector3();
                 }
-                else if(keyValue->key == "angle")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "angle"))
                 {
                     // Angle will be in degrees, but we want it in radians for internal use.
-                    camera->angle = keyValue->GetValueAsVector2();
-                    camera->angle.SetX(Math::ToRadians(camera->angle.GetX()));
-                    camera->angle.SetY(Math::ToRadians(camera->angle.GetY()));
+					Vector2 angleDeg = keyValue.GetValueAsVector2();
+                    camera->angle.SetX(Math::ToRadians(angleDeg.GetX()));
+                    camera->angle.SetY(Math::ToRadians(angleDeg.GetY()));
                 }
-                keyValue = keyValue->next;
-            }
-            mInspectCameras.push_back(camera);
+			}
+			
+			// Add to inspect cameras.
+			mInspectCameras.push_back(camera);
         }
     }
     
@@ -220,32 +224,38 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             SceneCamera* camera = new SceneCamera();
-            camera->label = entry->key;
-            
-            IniKeyValue* keyValue = entry->next;
-            while(keyValue != nullptr)
-            {
-                if(keyValue->key == "pos")
+			
+			// First keyword for room cameras is always the camera name.
+			IniKeyValue& first = line.entries.front();
+			camera->label = first.key;
+			
+			// Followed by one or more optional attributes.
+			for(int i = 1; i < line.entries.size(); ++i)
+			{
+				IniKeyValue& keyValue = line.entries[i];
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
                 {
-                    camera->position = keyValue->GetValueAsVector3();
+                    camera->position = keyValue.GetValueAsVector3();
                 }
-                else if(keyValue->key == "angle")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "angle"))
                 {
-                    camera->angle = keyValue->GetValueAsVector2();
-                    camera->angle.SetX(Math::ToRadians(camera->angle.GetX()));
-                    camera->angle.SetY(Math::ToRadians(camera->angle.GetY()));
+					// Angle is in degrees, but we use radians internally.
+					Vector2 angleDeg = keyValue.GetValueAsVector2();
+                    camera->angle.SetX(Math::ToRadians(angleDeg.GetX()));
+                    camera->angle.SetY(Math::ToRadians(angleDeg.GetY()));
                 }
-                else if(keyValue->key == "default")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "default"))
                 {
                     // Save index for default room camera. Equals size, since about to add to list.
                     mDefaultRoomCameraIndex = (int)mRoomCameras.size();
                 }
-                keyValue = keyValue->next;
-            }
-            mRoomCameras.push_back(camera);
+			}
+			
+			// Add to room cameras.
+			mRoomCameras.push_back(camera);
         }
     }
     
@@ -262,26 +272,32 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             SceneCamera* camera = new SceneCamera();
-            camera->label = entry->key;
+			
+			// First keyword for cinematic cameras is always the camera name.
+			IniKeyValue& first = line.entries.front();
+			camera->label = first.key;
             
-            IniKeyValue* keyValue = entry->next;
-            while(keyValue != nullptr)
-            {
-                if(keyValue->key == "pos")
+			// Followed by one or more optional attributes.
+			for(int i = 1; i < line.entries.size(); ++i)
+			{
+				IniKeyValue& keyValue = line.entries[i];
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
                 {
-                    camera->position = keyValue->GetValueAsVector3();
+                    camera->position = keyValue.GetValueAsVector3();
                 }
-                else if(keyValue->key == "angle")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "angle"))
                 {
-                    camera->angle = keyValue->GetValueAsVector2();
-                    camera->angle.SetX(Math::ToRadians(camera->angle.GetX()));
-                    camera->angle.SetY(Math::ToRadians(camera->angle.GetY()));
+					// Angle is in degrees, but we use radians internally.
+					Vector2 angleDeg = keyValue.GetValueAsVector2();
+                    camera->angle.SetX(Math::ToRadians(angleDeg.GetX()));
+                    camera->angle.SetY(Math::ToRadians(angleDeg.GetY()));
                 }
-                keyValue = keyValue->next;
-            }
+			}
+			
+			// Add to cinematic cameras.
             mCinematicCameras.push_back(camera);
         }
     }
@@ -299,43 +315,49 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             DialogueSceneCamera* camera = new DialogueSceneCamera();
-            camera->label = entry->key;
+			
+			// First keyword for dialogue cameras is always the camera name.
+			IniKeyValue& first = line.entries.front();
+			camera->label = first.key;
             
-            IniKeyValue* keyValue = entry->next;
-            while(keyValue != nullptr)
-            {
-                if(keyValue->key == "dialogue")
+			// Followed by one or more optional attributes.
+			for(int i = 1; i < line.entries.size(); ++i)
+			{
+				IniKeyValue& keyValue = line.entries[i];
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
                 {
-                    camera->dialogueName = keyValue->value;
+                    camera->position = keyValue.GetValueAsVector3();
                 }
-                else if(keyValue->key == "set")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "angle"))
                 {
-                    camera->setName = keyValue->value;
+					// Angle is in degrees, but we use radians internally.
+					Vector2 angleDeg = keyValue.GetValueAsVector2();
+                    camera->angle.SetX(Math::ToRadians(angleDeg.GetX()));
+                    camera->angle.SetY(Math::ToRadians(angleDeg.GetY()));
                 }
-                else if(keyValue->key == "pos")
+				else if(StringUtil::EqualsIgnoreCase(keyValue.key, "dialogue"))
                 {
-                    camera->position = keyValue->GetValueAsVector3();
+                    camera->dialogueName = keyValue.value;
                 }
-                else if(keyValue->key == "angle")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "set"))
                 {
-                    camera->angle = keyValue->GetValueAsVector2();
-                    camera->angle.SetX(Math::ToRadians(camera->angle.GetX()));
-                    camera->angle.SetY(Math::ToRadians(camera->angle.GetY()));
+                    camera->setName = keyValue.value;
                 }
-                else if(keyValue->key == "show")
+				else if(StringUtil::EqualsIgnoreCase(keyValue.key, "show"))
                 {
                     camera->showInToolbar = true;
                 }
-                else if(keyValue->key == "final")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "final"))
                 {
                     camera->isFinal = true;
                 }
-                keyValue = keyValue->next;
-            }
-            mDialogueSceneCameras.push_back(camera);
+			}
+			
+			// Add to dialogue cameras.
+			mDialogueSceneCameras.push_back(camera);
         }
     }
     
@@ -353,37 +375,40 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
-            // First pair is always the identifier.
             ScenePosition* position = new ScenePosition();
-            position->label = entry->key;
+			
+			// First pair is always the identifier.
+			IniKeyValue& first = line.entries.front();
+			position->label = first.key;
             
-            // Remaining pairs are optional and in any order.
-            IniKeyValue* keyValue = entry->next;
-            while(keyValue != nullptr)
-            {
-                if(keyValue->key == "pos")
+			// Followed by one or more optional attributes.
+			for(int i = 1; i < line.entries.size(); ++i)
+			{
+				IniKeyValue& keyValue = line.entries[i];
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
                 {
-                    position->position = keyValue->GetValueAsVector3();
+                    position->position = keyValue.GetValueAsVector3();
                 }
-                else if(keyValue->key == "heading")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "heading"))
                 {
-					position->heading = Heading::FromDegrees(keyValue->GetValueAsFloat());
+					position->heading = Heading::FromDegrees(keyValue.GetValueAsFloat());
                 }
-                else if(keyValue->key == "camera")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "camera"))
                 {
                     for(auto& cam : mRoomCameras)
                     {
-                        if(cam->label == keyValue->value)
+                        if(StringUtil::EqualsIgnoreCase(cam->label, keyValue.value))
                         {
                             position->camera = cam;
                             break;
                         }
                     }
                 }
-                keyValue = keyValue->next;
-            }
+			}
+			
+			// Add to positions.
             mPositions.push_back(position);
         }
     }
@@ -402,57 +427,56 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             SceneActor* actor = new SceneActor();
-            IniKeyValue* keyValue = entry;
-            while(keyValue != nullptr)
-            {
-                if(keyValue->key == "model")
+			
+			for(auto& keyValue : line.entries)
+			{
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "model"))
                 {
-                    actor->model = Services::GetAssets()->LoadModel(keyValue->value);
+                    actor->model = Services::GetAssets()->LoadModel(keyValue.value);
                 }
-                else if(keyValue->key == "noun")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun"))
                 {
-                    actor->noun = keyValue->value;
+                    actor->noun = keyValue.value;
                 }
-                else if(keyValue->key == "pos")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
                 {
                     for(auto& position : mPositions)
                     {
-                        if(position->label == keyValue->value)
+                        if(StringUtil::EqualsIgnoreCase(position->label, keyValue.value))
                         {
                             actor->position = position;
                             break;
                         }
                     }
                 }
-                else if(keyValue->key == "idle")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "idle"))
                 {
-                    actor->idleGas = Services::GetAssets()->LoadGAS(keyValue->value);
+                    actor->idleGas = Services::GetAssets()->LoadGAS(keyValue.value);
                 }
-                else if(keyValue->key == "talk")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "talk"))
                 {
-                    actor->talkGas = Services::GetAssets()->LoadGAS(keyValue->value);
+                    actor->talkGas = Services::GetAssets()->LoadGAS(keyValue.value);
                 }
-                else if(keyValue->key == "listen")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "listen"))
                 {
-                    actor->listenGas = Services::GetAssets()->LoadGAS(keyValue->value);
+                    actor->listenGas = Services::GetAssets()->LoadGAS(keyValue.value);
                 }
-                else if(keyValue->key == "initAnim")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initAnim"))
                 {
-                    actor->initAnim = Services::GetAssets()->LoadAnimation(keyValue->value);
+                    actor->initAnim = Services::GetAssets()->LoadAnimation(keyValue.value);
                 }
-                else if(keyValue->key == "hidden")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "hidden"))
                 {
                     actor->hidden = true;
                 }
-                else if(keyValue->key == "ego")
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "ego"))
                 {
                     actor->ego = true;
                 }
-                keyValue = keyValue->next;
-            }
+			}
             
             // If no position was set, try a default for now.
             if(actor->position == nullptr && mPositions.size() > 0)
@@ -473,6 +497,8 @@ void SIF::ParseFromData(char *data, int dataLength)
             {
                 actor->listenGas = actor->talkGas;
             }
+			
+			// Add to actors.
             mSceneActors.push_back(actor);
         }
     }
@@ -493,58 +519,57 @@ void SIF::ParseFromData(char *data, int dataLength)
             //std::cout << "Condition was true: " << section.condition << std::endl;
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             SceneModel* model = new SceneModel();
             
-            IniKeyValue* keyValue = entry;
-            while(keyValue != nullptr)
-            {
-				if(StringUtil::EqualsIgnoreCase(keyValue->key, "model"))
+			for(auto& keyValue : line.entries)
+			{
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "model"))
                 {
-                    model->name = keyValue->value;
+                    model->name = keyValue.value;
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "noun"))
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun"))
                 {
-                    model->noun = keyValue->value;
+                    model->noun = keyValue.value;
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "type"))
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
                 {
-                    if(StringUtil::EqualsIgnoreCase(keyValue->value, "scene"))
+                    if(StringUtil::EqualsIgnoreCase(keyValue.value, "scene"))
                     {
                         model->type = SceneModel::Type::Scene;
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->value, "prop"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.value, "prop"))
                     {
                         model->type = SceneModel::Type::Prop;
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->value, "hittest"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.value, "hittest"))
                     {
                         model->type = SceneModel::Type::HitTest;
                     }
-                    else if(StringUtil::EqualsIgnoreCase(keyValue->value, "gasprop"))
+                    else if(StringUtil::EqualsIgnoreCase(keyValue.value, "gasprop"))
                     {
                         model->type = SceneModel::Type::GasProp;
                     }
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "verb"))
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "verb"))
                 {
-                    model->verb = keyValue->value;
+                    model->verb = keyValue.value;
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "initanim"))
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initanim"))
                 {
-                    model->initAnim = Services::GetAssets()->LoadAnimation(keyValue->value);
+                    model->initAnim = Services::GetAssets()->LoadAnimation(keyValue.value);
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "hidden"))
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "hidden"))
                 {
                     model->hidden = true;
                 }
-                else if(StringUtil::EqualsIgnoreCase(keyValue->key, "gas"))
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "gas"))
                 {
-                    model->gas = Services::GetAssets()->LoadGAS(keyValue->value);
+                    model->gas = Services::GetAssets()->LoadGAS(keyValue.value);
                 }
-                keyValue = keyValue->next;
-            }
+				
+			}
             
             // After parsing all the data, if this is a prop, load the model.
             // For non-props, we don't load a model - the model is baked into the BSP.
@@ -552,7 +577,7 @@ void SIF::ParseFromData(char *data, int dataLength)
                (model->type == SceneModel::Type::Prop ||
                 model->type == SceneModel::Type::GasProp))
             {
-                model->model = Services::GetAssets()->LoadModel(model->name + ".MOD");
+                model->model = Services::GetAssets()->LoadModel(model->name);
             }
             mSceneModels.push_back(model);
         }
@@ -572,20 +597,25 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             SceneRegionOrTrigger* region = new SceneRegionOrTrigger();
-            region->label = entry->key;
+			
+			// First pair is always the identifier.
+			IniKeyValue& first = line.entries.front();
+			region->label = first.key;
             
-            IniKeyValue* keyValue = entry->next;
-            while(keyValue != nullptr)
-            {
-                if(keyValue->key == "rect")
+			// Followed by one or more optional attributes.
+			for(int i = 1; i < line.entries.size(); ++i)
+			{
+				IniKeyValue& keyValue = line.entries[i];
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "rect"))
                 {
                     //TODO: read in rect.
                 }
-                keyValue = keyValue->next;
-            }
+			}
+				
+			// Add to regions.
             mRegions.push_back(region);
         }
     }
@@ -603,23 +633,23 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             SceneRegionOrTrigger* region = new SceneRegionOrTrigger();
             
-            IniKeyValue* keyValue = entry;
-            while(keyValue != nullptr)
-            {
-                if(keyValue->key == "noun")
+			for(auto& keyValue : line.entries)
+			{
+				if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun"))
                 {
-                    region->label = keyValue->value;
+                    region->label = keyValue.value;
                 }
-                if(keyValue->key == "rect")
+                if(StringUtil::EqualsIgnoreCase(keyValue.key, "rect"))
                 {
                     //TODO: read in rect.
                 }
-                keyValue = keyValue->next;
-            }
+			}
+			
+			// Add to triggers.
             mTriggers.push_back(region);
         }
     }
@@ -637,9 +667,9 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
-            Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(entry->key);
+            Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(line.entries[0].key);
             if(soundtrack != nullptr)
             {
                 mSoundtracks.push_back(soundtrack);
@@ -660,12 +690,12 @@ void SIF::ParseFromData(char *data, int dataLength)
             }
         }
         
-        for(auto& entry : section.entries)
+        for(auto& line : section.lines)
         {
             //TODO: Should only read in NVC files that correspond to the current day.
             //Will have a number like "1" for day 1.
             
-            NVC* nvc = Services::GetAssets()->LoadNVC(entry->key);
+            NVC* nvc = Services::GetAssets()->LoadNVC(line.entries[0].key);
             if(nvc != nullptr)
             {
                 mNVCs.push_back(nvc);

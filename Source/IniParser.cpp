@@ -178,17 +178,17 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
     // Make sure passed in section is empty.
     sectionOut.name.clear();
     sectionOut.condition.clear();
-    sectionOut.entries.clear();
+    sectionOut.lines.clear();
     
-    // Always remember the current position *before* reading the next line,
-    // so we can set it back if needs be.
+    // Always remember the current position *before* reading the next line, so we can set it back if needs be.
     imstream::pos_type currentPos = mStream->tellg();
     
     // Just read the whole file one line at a time...
+	// GetLineSanitized ensures: no line break or tab characters, no whitespace before/after, etc.
     std::string line;
     while(StringUtil::GetLineSanitized(*mStream, line))
     {
-        // Ignore empty lines. Need to do this after \r check because some lines might just be '\r'.
+        // Ignore empty lines.
         if(line.empty())
         {
             currentPos = mStream->tellg();
@@ -202,18 +202,23 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             continue;
         }
         
-        // Detect headers and react to them, but don't stop parsing.
+        // The line is a header if it starts with [ followed by a later ] (e.g. [General], [Hacks]).
+		// If this is the header for the current section, we should note it and keep reading.
+		// If this is the header for the NEXT section, we should STOP reading (since this function only reads one section and returns).
 		std::size_t endHeaderIndex = std::string::npos;
 		if(line.length() > 2 && line[0] == '[')
 		{
 			endHeaderIndex = line.find(']', 1);
 		}
-		
 		if(endHeaderIndex != std::string::npos)
         {
-            if(sectionOut.entries.size() > 0)
+			// If the section has entries, we can use that to determine that this header belongs to the next section.
+			// We set the stream back to before this header was read in, so next call to ReadNextSection starts at the right spot.
+            if(sectionOut.lines.size() > 0)
             {
                 mStream->seekg(currentPos);
+				
+				// Return true to indicate that we read a section and there was data!
                 return true;
             }
             
@@ -221,6 +226,8 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             sectionOut.name = line.substr(1, endHeaderIndex - 1);
             
             // If there's an equals sign, it means this section is conditional.
+			// A conditional section may be ignored by game code if the condition is not met.
+			// The condition is usually Sheepscript code.
             std::size_t equalsIndex = sectionOut.name.find('=');
             if(equalsIndex != std::string::npos)
             {
@@ -231,22 +238,28 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             currentPos = mStream->tellg();
             continue;
         }
-        
-        // From here: just a normal line with key/value pair(s) on it.
-        // So, we need to split it into individual key/value pairs.
-        IniKeyValue* lastOnLine = nullptr;
+		
+        // From here: this is a normal line with key/value pair(s) on it.
+		// Create a line entry for the section and grab a reference to it.
+		sectionOut.lines.emplace_back();
+		IniLine& iniLine = sectionOut.lines.back();
+		
+        // We need to split the line into individual key/value pairs.
         while(!line.empty())
         {
             // First, determine the token we want to work with on the current line.
-            // We want the first item, if there are multiple comma-separated values.
+            // We want the first item, if there are multiple comma-separated values on a single line.
             // Otherwise, we just want the whole remaining line.
             std::string currentKeyValuePair;
             
-            std::size_t found = std::string::npos;
+			// If a line can have multiple key/value pairs, we'll need to determine
+			// what portion of the current line constitutes the next key/value pair.
             if(mMultipleKeyValuePairsPerLine)
             {
+				// Need to find index of a comma, which is the delimiter between key/value pairs on a single line.
                 // We can't just use string::find because we want to ignore commas that are inside braces.
                 // Ex: pos={10, 20, 30} should NOT be considered multiple key/value pairs.
+				std::size_t delimiterIndex = std::string::npos;
                 int braceDepth = 0;
                 for(int i = 0; i < line.length(); i++)
                 {
@@ -255,17 +268,17 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
                     
                     if(line[i] == ',' && braceDepth == 0)
                     {
-                        found = i;
+                        delimiterIndex = i;
                         break;
                     }
                 }
                 
-                // If we found a valid comma separator, then we only want to deal with the parts in front of the comma.
-                // If no comma, then the rest of the line is our focus.
-                if(found != std::string::npos)
+                // If we found a valid delimiter, we only want to deal with the parts in front of the delimiter.
+                // If no delimiter, then the rest of the line is our focus.
+                if(delimiterIndex != std::string::npos)
                 {
-                    currentKeyValuePair = line.substr(0, found);
-                    line = line.substr(found + 1, std::string::npos);
+                    currentKeyValuePair = line.substr(0, delimiterIndex);
+                    line = line.substr(delimiterIndex + 1, std::string::npos);
                 }
                 else
                 {
@@ -275,20 +288,10 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             }
             else
             {
+				// If no multiple key/value pairs per line, this is easy: the whole line is one key/value pair!
                 currentKeyValuePair = line;
                 line.clear();
             }
-            
-            IniKeyValue* keyValue = new IniKeyValue();
-            if(lastOnLine == nullptr)
-            {
-                sectionOut.entries.push_back(keyValue);
-            }
-            else
-            {
-                lastOnLine->next = keyValue;
-            }
-            lastOnLine = keyValue;
 			
 			// Trim off any comment on the line.
 			StringUtil::TrimComment(currentKeyValuePair);
@@ -299,29 +302,37 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             // Trim any whitespace.
             StringUtil::Trim(currentKeyValuePair);
             
-            // OK, so now we have a string representing a key/value pair, "model=blahblah" or similar.
-            // But it might also just be a keyword (no value) like "hidden".
-            found = currentKeyValuePair.find('=');
-            if(found != std::string::npos)
+			// Build the key/value object, to be filled with data next.
+			iniLine.entries.emplace_back();
+			IniKeyValue& keyValue = iniLine.entries.back();
+			
+			// The delimiter between keys and values is the '=' symbol (e.g. "model=gab")
+			// If there is no delimiter (fairly common), it still works, but it's just a key with no value (e.g. "hidden").
+            std::size_t equalsIndex = currentKeyValuePair.find('=');
+            if(equalsIndex != std::string::npos)
             {
-                keyValue->key = currentKeyValuePair.substr(0, found);
-                keyValue->value = currentKeyValuePair.substr(found + 1, std::string::npos);
+                keyValue.key = currentKeyValuePair.substr(0, equalsIndex);
+                keyValue.value = currentKeyValuePair.substr(equalsIndex + 1, std::string::npos);
 				
 				// Ooof, we may also have to trim these now...
-				StringUtil::Trim(keyValue->key);
-				StringUtil::Trim(keyValue->value);
+				StringUtil::Trim(keyValue.key);
+				StringUtil::Trim(keyValue.value);
             }
             else
             {
-                keyValue->key = currentKeyValuePair;
-                keyValue->value = currentKeyValuePair;
+                keyValue.key = currentKeyValuePair;
+				
+				// In this case, set "value" to same thing so that we can still use "value" and value getters.
+				//TODO: Seems kind of wasteful - perhaps we can say "use key field only" in this case; may want to augment/change GetValueAsX functions to work with this.
+                keyValue.value = currentKeyValuePair;
             }
         }
         currentPos = mStream->tellg();
     }
     
     // If we run out of things to read, return true if there's any data.
-    return (!sectionOut.name.empty() || !sectionOut.condition.empty() || !sectionOut.entries.empty());
+	// Remember, this function returns true if "sectionOut" has been filled with new data!
+    return (!sectionOut.name.empty() || !sectionOut.condition.empty() || !sectionOut.lines.empty());
 }
 
 bool IniParser::ReadLine()
@@ -329,17 +340,9 @@ bool IniParser::ReadLine()
     if(mStream->eof()) { return false; }
     
     std::string line;
-    while(std::getline(*mStream, line))
+    while(StringUtil::GetLineSanitized(*mStream, line))
     {
-        // "getline" reads up to the '\n' character in a file, and "eats" the '\n' too.
-        // But Windows line breaks might include the '\r' character too, like "\r\n".
-        // To deal with this semi-elegantly, we'll search for and remove the '\r' here.
-        if(!line.empty() && line[line.length() - 1] == '\r')
-        {
-            line.resize(line.length() - 1);
-        }
-        
-        // Ignore empty lines. Need to do this after \r check because some lines might just be '\r'.
+        // Ignore empty lines.
         if(line.empty()) { continue; }
         
         // Ignore comment lines.
@@ -409,8 +412,14 @@ bool IniParser::ReadKeyValuePair()
         mCurrentLineWorking.clear();
     }
     
-    // Trim any whitespace.
-    StringUtil::Trim(currentKeyValuePair);
+    // Trim off any comment on the line.
+	StringUtil::TrimComment(currentKeyValuePair);
+	
+	// Get rid of any rogue tab characters.
+	StringUtil::RemoveAll(currentKeyValuePair, '\t');
+	
+	// Trim any whitespace.
+	StringUtil::Trim(currentKeyValuePair);
     
     // OK, so now we have a string representing a key/value pair, "model=blahblah" or similar.
     // But it might also just be a keyword (no value) like "hidden".
@@ -419,6 +428,10 @@ bool IniParser::ReadKeyValuePair()
     {
         mCurrentKeyValue.key = currentKeyValuePair.substr(0, found);
         mCurrentKeyValue.value = currentKeyValuePair.substr(found + 1, std::string::npos);
+		
+		// Ooof, we may also have to trim these now...
+		StringUtil::Trim(mCurrentKeyValue.key);
+		StringUtil::Trim(mCurrentKeyValue.value);
     }
     else
     {
