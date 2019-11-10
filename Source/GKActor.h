@@ -63,6 +63,7 @@ public:
 	Walker* GetWalker() const { return mWalker; }
 	FaceController* GetFaceController() const { return mFaceController; }
 	
+	void SetHeading(const Heading& heading);
 	Heading GetHeading() const;
 	
 protected:

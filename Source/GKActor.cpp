@@ -108,6 +108,11 @@ void GKActor::SampleAnimation(VertexAnimation* animation, int frame)
 	mAnimationPlayer->Sample(animation, frame);
 }
 
+void GKActor::SetHeading(const Heading& heading)
+{
+	SetRotation(Quaternion(Vector3::UnitY, heading.ToRadians()));
+}
+
 Heading GKActor::GetHeading() const
 {
 	return Heading::FromQuaternion(GetRotation());
