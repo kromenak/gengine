@@ -11,6 +11,8 @@
 #include <fstream>
 #include <string>
 
+#include "EnumClassFlags.h"
+
 enum class ReportAction
 {
 	Log,
@@ -30,39 +32,11 @@ enum class ReportOutput : int
 	SharedMemory	= 8,	// Outputs to shared memory region for external app debugging.
 	OSDialog 		= 16	// Original game called this "Win32Dialog"
 };
-
-inline ReportOutput operator|(ReportOutput lhs, ReportOutput rhs)
-{
-	using T = std::underlying_type<ReportOutput>::type;
-	return static_cast<ReportOutput>(static_cast<T>(lhs) | static_cast<T>(rhs));
-}
-
-inline ReportOutput& operator|=(ReportOutput& lhs, ReportOutput rhs)
-{
-	lhs = lhs | rhs;
-	return lhs;
-}
+ENUM_CLASS_FLAGS(ReportOutput);
 	
-inline ReportOutput operator&(ReportOutput lhs, ReportOutput rhs)
+enum class ReportContent : int
 {
-	using T = std::underlying_type<ReportOutput>::type;
-	return static_cast<ReportOutput>(static_cast<T>(lhs) & static_cast<T>(rhs));
-}
-
-inline ReportOutput& operator&=(ReportOutput& lhs, ReportOutput rhs)
-{
-	lhs = lhs & rhs;
-	return lhs;
-}
-	
-inline ReportOutput operator~(ReportOutput rhs)
-{
-	using T = std::underlying_type<ReportOutput>::type;
-	return static_cast<ReportOutput>(~static_cast<T>(rhs));
-}
-	
-enum ReportContent : int
-{
+	None			= 0,
 	Begin			= 1,	// Displays a header before the meat of the report.
 							// By default, just a bunch of dashes. Enable Category/Date/Time/etc to add to it.
 	Content 		= 2,	// The meat of the report. You probably want this enabled!
@@ -81,6 +55,7 @@ enum ReportContent : int
 	// BELOW HERE: Combinations of above flags.
 	All 			= (Begin | Content | End | Category | Date | Time | User | Machine | Timeblock | Location)
 };
+ENUM_CLASS_FLAGS(ReportContent);
 
 class ReportStream
 {

@@ -54,7 +54,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 	std::ostringstream outputStr;
 	
 	// If we want "Begin" content, we'll add some data before the real content.
-	if((mContent & ReportContent::Begin) != 0)
+	if((mContent & ReportContent::Begin) != ReportContent::None)
 	{
 		// The begin string always starts with 5 dashes.
 		outputStr << "-----";
@@ -62,11 +62,11 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 		// Go through each of the possible begin header bits that we could add to the begin content.
 		// These are added in order with a * char between them. For example, we might get:
 		// ----- 'Dump' * TB: '110a' * Loc: 'r25' * 03/16/2019 * 11:41:25 -----
-		if((mContent & ReportContent::Category) != 0)
+		if((mContent & ReportContent::Category) != ReportContent::None)
 		{
 			outputStr << " '" << mName << "' ";
 		}
-		if((mContent & ReportContent::Machine) != 0)
+		if((mContent & ReportContent::Machine) != ReportContent::None)
 		{
 			if(outputStr.tellp() > 5)
 			{
@@ -74,7 +74,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			}
 			outputStr << " " << SystemUtil::GetComputerName() << " ";
 		}
-		if((mContent & ReportContent::User) != 0)
+		if((mContent & ReportContent::User) != ReportContent::None)
 		{
 			if(outputStr.tellp() > 5)
 			{
@@ -82,7 +82,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			}
 			outputStr << " " << SystemUtil::GetUserName() << " ";
 		}
-		if((mContent & ReportContent::Timeblock) != 0)
+		if((mContent & ReportContent::Timeblock) != ReportContent::None)
 		{
 			if(outputStr.tellp() > 5)
 			{
@@ -90,7 +90,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			}
 			outputStr << " TB: '" << Services::Get<GameProgress>()->GetTimeCode() << "' ";
 		}
-		if((mContent & ReportContent::Location) != 0)
+		if((mContent & ReportContent::Location) != ReportContent::None)
 		{
 			if(outputStr.tellp()> 5)
 			{
@@ -98,7 +98,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			}
 			outputStr << " Loc: '" << Services::Get<GameProgress>()->GetLocation() << "' ";
 		}
-		if((mContent & ReportContent::Date) != 0)
+		if((mContent & ReportContent::Date) != ReportContent::None)
 		{
 			if(outputStr.tellp()> 5)
 			{
@@ -113,7 +113,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			outputStr << std::setw(2) << std::setfill('0') << (time->tm_mday) << "/";
 			outputStr << (time->tm_year + 1900) << " ";
 		}
-		if((mContent & ReportContent::Time) != 0)
+		if((mContent & ReportContent::Time) != ReportContent::None)
 		{
 			if(outputStr.tellp()> 5)
 			{
@@ -144,13 +144,13 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 	
 	// If we want "Content" content, that means we want to output what was passed in!
 	// It seems pretty rare to NOT do this...but you can!
-	if((mContent & ReportContent::Content) != 0)
+	if((mContent & ReportContent::Content) != ReportContent::None)
 	{
 		outputStr << content << std::endl;
 	}
 	
 	// If we want "End" content, we'll add an empty line for spacing.
-	if((mContent & ReportContent::End) != 0)
+	if((mContent & ReportContent::End) != ReportContent::None)
 	{
 		outputStr << "\n";
 	}
