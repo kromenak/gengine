@@ -306,7 +306,8 @@ void FaceController::UpdateFaceTexture()
 							  STBIR_TYPE_UINT8, 4, -1, 0,
 							  STBIR_EDGE_WRAP, STBIR_EDGE_WRAP, STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,
 							  STBIR_COLORSPACE_LINEAR, NULL,
-							  0.25f, 0.25f, mEyeJitterX + leftEyeBias.GetX(), mEyeJitterY + leftEyeBias.GetY());
+							  //0.25f, 0.25f, mEyeJitterX + leftEyeBias.GetX(), mEyeJitterY + leftEyeBias.GetY());
+							  0.25f, 0.25f, 0.0f, 0.0f);
 		
 		mDownSampledLeftEyeTexture->UploadToGPU();
 		
@@ -328,8 +329,9 @@ void FaceController::UpdateFaceTexture()
 							  STBIR_TYPE_UINT8, 4, -1, 0,
 							  STBIR_EDGE_WRAP, STBIR_EDGE_WRAP, STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,
 							  STBIR_COLORSPACE_LINEAR, NULL,
-							  0.25f, 0.25f, mEyeJitterX + rightEyeBias.GetX(), mEyeJitterY + rightEyeBias.GetY());
-		
+							  //0.25f, 0.25f, mEyeJitterX + rightEyeBias.GetX(), mEyeJitterY + rightEyeBias.GetY());
+							  0.25f, 0.25f, 0.0f, 0.0f);
+							  
 		mDownSampledRightEyeTexture->UploadToGPU();
 		
 		const Vector2& rightEyeOffset = mCharacterConfig->faceConfig.rightEyeOffset;
