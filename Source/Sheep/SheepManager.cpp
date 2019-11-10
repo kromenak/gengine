@@ -63,5 +63,9 @@ void SheepManager::Execute(SheepScript* script, std::string functionName, std::f
 
 bool SheepManager::Evaluate(SheepScript* script)
 {
+	// No script automatically equates to "true".
+	if(script == nullptr) { return true; }
+	
+	// Otherwise, do it "for real."
 	return mVirtualMachine.Evaluate(script);
 }
