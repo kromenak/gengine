@@ -177,6 +177,12 @@
 		4B8D2CD2236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
 		4B8D2CD3236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
 		4B8E830A20F046750009A86B /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8E830920F046750009A86B /* Material.cpp */; };
+		4B90E07723769D6300E0E3FA /* SceneInitFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E07623769D6300E0E3FA /* SceneInitFile.cpp */; };
+		4B90E07823769D6300E0E3FA /* SceneInitFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E07623769D6300E0E3FA /* SceneInitFile.cpp */; };
+		4B90E07B2377AD4E00E0E3FA /* Timeblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E07A2377AD4E00E0E3FA /* Timeblock.cpp */; };
+		4B90E07C2377AD4E00E0E3FA /* Timeblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E07A2377AD4E00E0E3FA /* Timeblock.cpp */; };
+		4B90E07E2377B50D00E0E3FA /* TimeblockTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E07D2377B50D00E0E3FA /* TimeblockTests.cpp */; };
+		4B90E07F2377B52E00E0E3FA /* Timeblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E07A2377AD4E00E0E3FA /* Timeblock.cpp */; };
 		4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
 		4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319E210999810004F4F3 /* GasPlayer.cpp */; };
 		4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */; };
@@ -425,6 +431,12 @@
 		4B8D2CD0236F98B300B8E68D /* Heading.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Heading.cpp; path = ../Source/Heading.cpp; sourceTree = "<group>"; };
 		4B8E830820F046750009A86B /* Material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Material.h; path = ../Source/Material.h; sourceTree = "<group>"; };
 		4B8E830920F046750009A86B /* Material.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Material.cpp; path = ../Source/Material.cpp; sourceTree = "<group>"; };
+		4B90E07523769D6300E0E3FA /* SceneInitFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SceneInitFile.h; path = ../Source/SceneInitFile.h; sourceTree = "<group>"; };
+		4B90E07623769D6300E0E3FA /* SceneInitFile.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SceneInitFile.cpp; path = ../Source/SceneInitFile.cpp; sourceTree = "<group>"; };
+		4B90E0792377AD4E00E0E3FA /* Timeblock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Timeblock.h; path = ../Source/Timeblock.h; sourceTree = "<group>"; };
+		4B90E07A2377AD4E00E0E3FA /* Timeblock.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Timeblock.cpp; path = ../Source/Timeblock.cpp; sourceTree = "<group>"; };
+		4B90E07D2377B50D00E0E3FA /* TimeblockTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TimeblockTests.cpp; path = ../Tests/TimeblockTests.cpp; sourceTree = "<group>"; };
+		4B90E0802377C05400E0E3FA /* EnumClassFlags.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = EnumClassFlags.h; path = ../Source/EnumClassFlags.h; sourceTree = "<group>"; };
 		4B92319A2103AF1B0004F4F3 /* Animation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Animation.h; path = ../Source/Animation.h; sourceTree = "<group>"; };
 		4B92319B2103AF1B0004F4F3 /* Animation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Animation.cpp; path = ../Source/Animation.cpp; sourceTree = "<group>"; };
 		4B92319D210999810004F4F3 /* GasPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GasPlayer.h; path = ../Source/GasPlayer.h; sourceTree = "<group>"; };
@@ -582,6 +594,7 @@
 				4B1112A71F820B0400AFDDFC /* TestMain.cpp */,
 				4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */,
 				4B6A3F252335B20000D25B2D /* RectTests.cpp */,
+				4B90E07D2377B50D00E0E3FA /* TimeblockTests.cpp */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -785,6 +798,8 @@
 				4BEA727321D7F71A00998066 /* GameProgress.h */,
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
+				4B90E07A2377AD4E00E0E3FA /* Timeblock.cpp */,
+				4B90E0792377AD4E00E0E3FA /* Timeblock.h */,
 				4B6B766321AB746D00788C02 /* UI */,
 				4BEA726C21D53F2000998066 /* Walker.cpp */,
 				4BEA726B21D53F2000998066 /* Walker.h */,
@@ -891,6 +906,7 @@
 				4B08C9072137284C0028FEB3 /* CallbackFunction.h */,
 				4B08C90B21372A710028FEB3 /* CallbackMethod.cpp */,
 				4B08C90A21372A710028FEB3 /* CallbackMethod.h */,
+				4B90E0802377C05400E0E3FA /* EnumClassFlags.h */,
 				4B6B766921AB99C500788C02 /* FileSystem.cpp */,
 				4B6B766821AB99C500788C02 /* FileSystem.h */,
 				4B02A3B31F5269E9000540A7 /* imstream.cpp */,
@@ -927,10 +943,12 @@
 				4BCBCF452043A90F001BE1E0 /* NVC.h */,
 				4B2E7A61203A5CB3001A5B9C /* Scene.cpp */,
 				4B2E7A60203A5CB3001A5B9C /* Scene.h */,
-				4BFBB86521D0469000E07EFB /* SceneData.cpp */,
-				4BFBB86421D0469000E07EFB /* SceneData.h */,
 				4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */,
 				4B2E7A63203A6072001A5B9C /* SceneAsset.h */,
+				4BFBB86521D0469000E07EFB /* SceneData.cpp */,
+				4BFBB86421D0469000E07EFB /* SceneData.h */,
+				4B90E07623769D6300E0E3FA /* SceneInitFile.cpp */,
+				4B90E07523769D6300E0E3FA /* SceneInitFile.h */,
 				4B2E7A5E203A0425001A5B9C /* SIF.cpp */,
 				4B2E7A5D203A0425001A5B9C /* SIF.h */,
 			);
@@ -1131,6 +1149,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B90E07E2377B50D00E0E3FA /* TimeblockTests.cpp in Sources */,
 				4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */,
 				4B79F8091F9D7A88008C6FEE /* Vector4.cpp in Sources */,
 				4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */,
@@ -1139,6 +1158,7 @@
 				4B6A3F272335B36500D25B2D /* Rect.cpp in Sources */,
 				4B6A3F242335B16C00D25B2D /* RectUtil.cpp in Sources */,
 				4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */,
+				4B90E07F2377B52E00E0E3FA /* Timeblock.cpp in Sources */,
 				4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */,
 				4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */,
 				4B1A2CB522053097000C34D8 /* MathTests.cpp in Sources */,
@@ -1203,6 +1223,7 @@
 				4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */,
 				4B7C3A161F4EB07000BB0922 /* AudioManager.cpp in Sources */,
 				4B00D3301F8F3AD500D536D5 /* Camera.cpp in Sources */,
+				4B90E07723769D6300E0E3FA /* SceneInitFile.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
 				4B775E5323382EE7007FF777 /* UITextInput.cpp in Sources */,
@@ -1212,6 +1233,7 @@
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
 				4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */,
 				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
+				4B90E07B2377AD4E00E0E3FA /* Timeblock.cpp in Sources */,
 				4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */,
 				4B2E7A65203A6072001A5B9C /* SceneAsset.cpp in Sources */,
 				4B1555592197B59F00072F0D /* Transform.cpp in Sources */,
@@ -1310,6 +1332,7 @@
 				4B6B766B21AB99C500788C02 /* FileSystem.cpp in Sources */,
 				4B22F51B2174076D0065B152 /* Matrix3.cpp in Sources */,
 				4B22F506217407530065B152 /* SheepScript.cpp in Sources */,
+				4B90E07823769D6300E0E3FA /* SceneInitFile.cpp in Sources */,
 				4B22F51D2174076D0065B152 /* Plane.cpp in Sources */,
 				4B22F5202174076D0065B152 /* Vector2.cpp in Sources */,
 				4BB67C492352558300FDFB30 /* ReportManager.cpp in Sources */,
@@ -1319,6 +1342,7 @@
 				4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */,
 				4B22F51C2174076D0065B152 /* Matrix4.cpp in Sources */,
 				4B22F52C2174078B0065B152 /* AssetManager.cpp in Sources */,
+				4B90E07C2377AD4E00E0E3FA /* Timeblock.cpp in Sources */,
 				4B15555E2197C2E500072F0D /* RectTransform.cpp in Sources */,
 				4B22F52A2174078B0065B152 /* GasPlayer.cpp in Sources */,
 				4B15555A2197B59F00072F0D /* Transform.cpp in Sources */,

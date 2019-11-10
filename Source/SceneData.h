@@ -18,7 +18,8 @@
 #include <string>
 #include <vector>
 
-#include "SIF.h"
+#include "SceneInitFile.h"
+#include "Timeblock.h"
 
 class BSP;
 class GKActor;
@@ -34,32 +35,46 @@ class SceneData
 public:
 	SceneData(const std::string& location, const std::string& timeblock);
 	
+	// SCENE RESOLUTION
+	const SceneActor* DetermineWhoEgoWillBe() const;
+	void ResolveSceneData();
+	
+	// SCENE SETTINGS
 	BSP* GetBSP() const { return mBSP; }
 	Skybox* GetSkybox() const { return mSkybox; }
+	const std::string& GetFloorModelName() const { return mGeneralSettings.floorModelName; }
+	WalkerBoundary* GetWalkerBoundary() const { return mWalkerBoundary; }
 	
-	const SceneCamera* GetDefaultRoomCamera() const;
-	const SceneCamera* GetRoomCamera(const std::string& cameraName) const;
+	// ACTORS/MODELS
+	const std::vector<const SceneActor*>& GetActors() const { return mActors; }
+	const std::vector<const SceneModel*>& GetModels() const { return mModels; }
 	
+	// POSITIONS
 	const ScenePosition* GetScenePosition(const std::string& positionName) const;
 	
-	const std::string& GetFloorModelName() const;
-	WalkerBoundary* GetWalkerBoundary() const;
+	// CAMERAS
+	const SceneCamera* GetDefaultRoomCamera() const { return mDefaultRoomCamera; }
+	const SceneCamera* GetRoomCamera(const std::string& cameraName) const;
 	
-	const std::vector<SceneActor*>& GetSceneActors() const { return mSceneActors; }
-	const std::vector<SceneModel*>& GetSceneModels() const { return mSceneModels; }
+	// SOUNDTRACK
+	Soundtrack* GetSoundtrack() const { return mSoundtracks.size() > 0 ? mSoundtracks.back() : nullptr; }
 	
-	Soundtrack* GetSoundtrack() const { return mSoundtrack; }
-	
+	// ACTIONS
 	const std::vector<NVC*>& GetActionSets() const { return mActionSets; }
 	std::vector<const Action*> GetActions(const std::string& noun, GKActor* ego) const;
 	const Action* GetAction(const std::string& noun, const std::string& verb, GKActor* ego) const;
 	
 private:
+	Timeblock mTimeblock;
+	
 	// Every location *must* have a general SIF.
 	// Specific SIFs, however, are optional.
-	SIF* mGeneralSIF = nullptr;
-	SIF* mSpecificSIF = nullptr;
+	SceneInitFile* mGeneralSIF = nullptr;
+	SceneInitFile* mSpecificSIF = nullptr;
 	
+	// The general block to be used by the scene.
+	GeneralBlock mGeneralSettings;
+		
 	// The scene asset. One *must* be defined, but really just so we can get the BSP data.
 	SceneAsset* mSceneAsset = nullptr;
 	
@@ -74,15 +89,42 @@ private:
 	// 4) Skybox from General SIF.
 	Skybox* mSkybox = nullptr;
 	
-	// Combined generic and specific scene actor datas.
-	std::vector<SceneActor*> mSceneActors;
+	// Walker boundary for the scene, if any.
+	WalkerBoundary* mWalkerBoundary = nullptr;
 	
-	// Combined generic and specific scene model datas.
-	std::vector<SceneModel*> mSceneModels;
+	// Combined generic and specific actors to spawn.
+	std::vector<const SceneActor*> mActors;
 	
-	// Combined generic and specific NVC sets.
+	// Combined generic and specific models to spawn.
+	std::vector<const SceneModel*> mModels;
+	
+	// Combined generic and specific positions to use.
+	std::vector<const ScenePosition*> mPositions;
+	
+	// Combined generic and specific cameras to use.
+	std::vector<const SceneCamera*> mInspectCameras;
+	std::vector<const RoomSceneCamera*> mRoomCameras;
+	const SceneCamera* mDefaultRoomCamera = nullptr;
+	std::vector<const SceneCamera*> mCinematicCameras;
+	std::vector<const DialogueSceneCamera*> mDialogueCameras;
+	
+	// Combined generic and specific soundtracks to use.
+	// Or is there ever only one???
+	std::vector<Soundtrack*> mSoundtracks;
+	
+	// Combined generic and specific action sets.
+	// Each set contains multiple actions.
 	std::vector<NVC*> mActionSets;
 	
-	// The soundtrack to use.
-	Soundtrack* mSoundtrack = nullptr;
+	void AddActorBlocks(const std::vector<ConditionalBlock<SceneActor>>& actorBlocks);
+	void AddModelBlocks(const std::vector<ConditionalBlock<SceneModel>>& modelBlocks);
+	void AddPositionBlocks(const std::vector<ConditionalBlock<ScenePosition>>& positionBlocks);
+	
+	void AddInspectCameraBlocks(const std::vector<ConditionalBlock<SceneCamera>>& cameraBlocks);
+	void AddRoomCameraBlocks(const std::vector<ConditionalBlock<RoomSceneCamera>>& cameraBlocks);
+	void AddCinematicCameraBlocks(const std::vector<ConditionalBlock<SceneCamera>>& cameraBlocks);
+	void AddDialogueCameraBlocks(const std::vector<ConditionalBlock<DialogueSceneCamera>>& cameraBlocks);
+	
+	void AddSoundtrackBlocks(const std::vector<ConditionalBlock<Soundtrack*>>& soundtrackBlocks);
+	void AddActionBlocks(const std::vector<ConditionalBlock<NVC*>>& actionSetBlocks, bool performNameCheck);
 };

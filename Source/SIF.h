@@ -18,6 +18,7 @@
 #include "Color32.h"
 #include "Heading.h"
 #include "Quaternion.h"
+#include "Rect.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -31,22 +32,6 @@ class Soundtrack;
 class Texture;
 class WalkerBoundary;
 
-struct GeneralBlock
-{
-	std::string sceneAssetName;
-	
-	std::string floorModelName;
-	WalkerBoundary* walkerBoundary = nullptr;
-	
-	std::string cameraBoundsModelName;
-	bool cameraBoundsDynamic = false;
-	
-	Vector3 globalLightPosition;
-	Vector3 globalLightAmbient;
-	
-	Skybox* skybox = nullptr;
-};
-
 struct SceneCamera
 {
     // The label for this camera.
@@ -58,6 +43,13 @@ struct SceneCamera
     
     // Camera's position.
     Vector3 position;
+};
+
+struct RoomSceneCamera : public SceneCamera
+{
+	// If true, this is the 'default" room camera.
+	// Default room camera is used if one is needed, but none is specified.
+	bool isDefault = false;
 };
 
 struct DialogueSceneCamera : public SceneCamera
@@ -89,6 +81,7 @@ struct ScenePosition
 	Heading heading = Heading::None;
     
     // If specified, this camera will be switched to when using this position.
+	std::string cameraName;
     SceneCamera* camera = nullptr;
 };
 
@@ -98,14 +91,14 @@ struct SceneRegionOrTrigger
     // trigger is a "noun".
     std::string label;
     
-    //TODO: Need a Rect structure.
-    float x1, z1, x2, z2;
+    // The rectangular area. Note that this is on X/Z plane, despite Rect var names.
+	Rect rect;
 };
 
 struct SceneActor
 {
     // The model that will represent this actor in the scene.
-    Model* model = nullptr;
+    Model* model = nullptr; //TODO: Should we just store the name until Scene load?
     
     // The noun associated with this actor, for interactions.
     std::string noun;
@@ -113,7 +106,8 @@ struct SceneActor
     // Initial position of the actor in the scene.
     // We'll place the actor here, but this might be overwritten
     // after scene init - maybe due to a SheepScript or something.
-    ScenePosition* position = nullptr;
+	std::string positionName;
+	ScenePosition* position = nullptr;
     
     // Idle gas script file.
     GAS* idleGas = nullptr;
@@ -173,20 +167,6 @@ struct SceneModel
     
     // If true, the model is hidden at creation.
     bool hidden = false;
-};
-
-template<typename T>
-struct ConditionalElements
-{
-	SheepScript* condition = nullptr;
-	std::vector<T> elements;
-};
-
-template<typename T>
-struct ConditionalElement
-{
-	SheepScript* condition = nullptr;
-	T element;
 };
 
 class SIF : public Asset

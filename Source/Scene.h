@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "SceneData.h"
+#include "Timeblock.h"
 
 class ActionBar;
 class AnimationPlayer;
@@ -48,7 +49,9 @@ public:
 	
 	float GetFloorY(const Vector3& position) const;
 	
+	const std::string& GetEgoName() const { return mEgoName; }
 	GKActor* GetEgo() const { return mEgo; }
+	
 	GKActor* GetActorByModelName(const std::string& modelName) const;
 	GKActor* GetActorByNoun(const std::string& noun) const;
 	
@@ -66,7 +69,7 @@ private:
 	// Location is 3-letter code (e.g. DIN).
 	// Timeblock is day/time code (e.g. 110A).
 	std::string mLocation;
-	std::string mTimeblock;
+	Timeblock mTimeblock;
 	
 	// Contains scene data references for the current location/timeblock.
 	// If not null, means we're loaded!
@@ -84,7 +87,9 @@ private:
 	// GKActors created for this scene.
 	std::vector<GKActor*> mActors;
 	
-    // The actor who we are controlling in the scene.
+    // The name of actor and actor who we are controlling in the scene.
+	// We sometimes need just the name - that's safer during scene loading.
+	std::string mEgoName;
     GKActor* mEgo = nullptr;
 	
 	// Action bar, which the player uses to perform actions on scene objects.

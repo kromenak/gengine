@@ -59,12 +59,30 @@ void Scene::Load()
 		return;
 	}
 	
+	// Creating scene data loads SIFs, but does nothing else yet!
+	mSceneData = new SceneData(mLocation, mTimeblock.ToString());
+	
+	// It's generally important that we know how our "ego" will be as soon as possible.
+	// This is because the scene loading *itself* may check who ego is to do certain things!
+	const SceneActor* egoSceneActor = mSceneData->DetermineWhoEgoWillBe();
+	//TODO: If no ego, I guess we fail loading!?
+	if(egoSceneActor == nullptr)
+	{
+		std::cout << "No ego actor could be predicted for scene!" << std::endl;
+	}
+	else
+	{
+		mEgoName = egoSceneActor->noun;
+	}
+	
 	// Increment location counter IMMEDIATELY.
 	// We know this b/c various scripts that need to run on "1st time enter" or similar check if count==1.
 	// For those to evaluate correctly, we need to do this BEFORE we even parse scene data or anything.
-	//Services::Get<GameProgress>()->IncLocationCount(const std::string &actorName, const std::string &location, const std::string &timeblock)
+	Services::Get<GameProgress>()->IncLocationCount(mEgoName, mLocation, mTimeblock.ToString());
 	
-	mSceneData = new SceneData(mLocation, mTimeblock);
+	// Based on location, timeblock, and game progress, resolve what data we will load into the current scene.
+	// After calling this, SceneData will have interpreted all data from SIFs and determined exactly what we should and should not load/use for the scene right now.
+	mSceneData->ResolveSceneData();
 	
 	// Set BSP to be rendered.
     Services::GetRenderer()->SetBSP(mSceneData->GetBSP());
@@ -90,6 +108,7 @@ void Scene::Load()
 	}
 	
 	// For debugging - render walker bounds overlay on game world.
+	//TODO: Move to construction system!
 	{
 		WalkerBoundary* walkerBoundary = mSceneData->GetWalkerBoundary();
 		if(walkerBoundary != nullptr)
@@ -116,9 +135,12 @@ void Scene::Load()
 	}
 	
 	// Create actors for the scene.
-	std::vector<SceneActor*> sceneActorDatas = mSceneData->GetSceneActors();
+	const std::vector<const SceneActor*>& sceneActorDatas = mSceneData->GetActors();
 	for(auto& actorDef : sceneActorDatas)
 	{
+		// NEVER spawn an ego who is not our current ego!
+		if(actorDef->ego && actorDef != egoSceneActor) { continue; }
+		
 		// The actor's 3-letter identifier can be derived from the name of the model.
 		std::string identifier;
 		if(actorDef->model != nullptr)
@@ -134,11 +156,18 @@ void Scene::Load()
 		actor->SetNoun(actorDef->noun);
 		
 		// Set actor's initial position and rotation.
-		if(actorDef->position != nullptr)
+		if(!actorDef->positionName.empty())
 		{
-			Vector3 position = actorDef->position->position;
-			actor->SetPosition(position);
-			actor->SetRotation(Quaternion(Vector3::UnitY, actorDef->position->heading.ToRadians()));
+			const ScenePosition* scenePos = mSceneData->GetScenePosition(actorDef->positionName);
+			if(scenePos != nullptr)
+			{
+				actor->SetPosition(scenePos->position);
+				actor->SetHeading(scenePos->heading);
+			}
+			else
+			{
+				std::cout << "Invalid position for actor: " << actorDef->positionName << std::endl;
+			}
 		}
 		
 		// Set actor's graphical appearance.
@@ -176,15 +205,8 @@ void Scene::Load()
 		//TODO: If hidden, hide.
 		
 		// If this is our ego, save a reference to it.
-		if(actorDef->ego)
+		if(actorDef->ego && actorDef == egoSceneActor)
 		{
-			// If we already created an Ego, delete the old one. Latest one takes priority.
-			// This actually happens pretty often - general SIF says Gabe is ego, specific says Grace.
-			// Maybe there's a better way to handle this? But this is the easiest for now.
-			if(mEgo != nullptr)
-			{
-				mEgo->Destroy();
-			}
 			mEgo = actor;
 		}
 	}
@@ -192,7 +214,7 @@ void Scene::Load()
 	// Iterate over scene model data and prep the scene.
 	// First, we want to hide and scene models that are set to "hidden".
 	// Second, we want to spawn any non-scene models.
-	std::vector<SceneModel*> sceneModelDatas = mSceneData->GetSceneModels();
+	const std::vector<const SceneModel*> sceneModelDatas = mSceneData->GetModels();
 	for(auto& modelDef : sceneModelDatas)
 	{
 		switch(modelDef->type)
@@ -342,8 +364,8 @@ bool Scene::CheckInteract(const Ray& ray) const
 	}
 	
 	// See if the hit item matches any scene model data.
-	SceneModel* sceneModelData = nullptr;
-	std::vector<SceneModel*> sceneModelDatas = mSceneData->GetSceneModels();
+	const SceneModel* sceneModelData = nullptr;
+	const std::vector<const SceneModel*>& sceneModelDatas = mSceneData->GetModels();
 	for(auto& modelData : sceneModelDatas)
 	{
 		if(StringUtil::EqualsIgnoreCase(modelData->name, hitInfo.name))
@@ -398,8 +420,8 @@ void Scene::Interact(const Ray& ray)
 	
     // Correlate the interacted model name to model data from the SIF.
     // This allows us to correlate a model in the BSP to a noun keyword.
-    SceneModel* sceneModelData = nullptr;
-    std::vector<SceneModel*> sceneModelDatas = mSceneData->GetSceneModels();
+    const SceneModel* sceneModelData = nullptr;
+    const std::vector<const SceneModel*>& sceneModelDatas = mSceneData->GetModels();
     for(auto& modelData : sceneModelDatas)
     {
         if(modelData->name == hitInfo.name)

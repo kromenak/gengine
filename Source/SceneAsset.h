@@ -23,7 +23,7 @@ public:
     Skybox* GetSkybox() const { return mSkybox; }
     
 private:
-    // Often, the BSP name is equal to the SCN name. But if not, it's here.
+    // Often, the BSP name is equal to the SCN name.
     std::string mBspName;
     
     // A skybox to use for the scene. This might also be specified in the SIF.

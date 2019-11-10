@@ -312,21 +312,14 @@ RegFunc0(GetEgoCurrentLocationCount, int, IMMEDIATE, REL_FUNC);
 
 int GetEgoLocationCount(std::string locationName)
 {
-	// Figure out who ego is.
-	GKActor* ego = GEngine::inst->GetScene()->GetEgo();
-	if(ego != nullptr)
-	{
-		return Services::Get<GameProgress>()->GetLocationCount(ego->GetNoun(), locationName);
-	}
-	
-	// If we don't know who ego is, I guess we just use zero!
-    return 0;
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	return Services::Get<GameProgress>()->GetLocationCount(egoName, locationName);
 }
 RegFunc1(GetEgoLocationCount, int, string, IMMEDIATE, REL_FUNC);
 
 std::string GetEgoName()
 {
-	return GEngine::inst->GetScene()->GetEgo()->GetNoun();
+	return GEngine::inst->GetScene()->GetEgoName();
 }
 RegFunc0(GetEgoName, string, IMMEDIATE, REL_FUNC);
 

@@ -18,9 +18,9 @@
 #include "Model.h"
 #include "NVC.h"
 #include "SceneAsset.h"
+#include "SceneInitFile.h"
 #include "Shader.h"
 #include "Sheep/SheepScript.h"
-#include "SIF.h"
 #include "Soundtrack.h"
 #include "Texture.h"
 #include "VertexAnimation.h"
@@ -58,7 +58,7 @@ public:
     Animation* LoadAnimation(const std::string& name);
     VertexAnimation* LoadVertexAnimation(const std::string& name);
     
-    SIF* LoadSIF(const std::string& name);
+    SceneInitFile* LoadSIF(const std::string& name);
     SceneAsset* LoadSceneAsset(const std::string& name);
     NVC* LoadNVC(const std::string& name);
     BSP* LoadBSP(const std::string& name);
@@ -94,7 +94,7 @@ private:
 	std::unordered_map<std::string, Animation*> mLoadedAnimations;
 	std::unordered_map<std::string, VertexAnimation*> mLoadedVertexAnimations;
 	
-	std::unordered_map<std::string, SIF*> mLoadedSIFs;
+	std::unordered_map<std::string, SceneInitFile*> mLoadedSIFs;
 	std::unordered_map<std::string, SceneAsset*> mLoadedSceneAssets;
 	std::unordered_map<std::string, NVC*> mLoadedActionSets;
 	std::unordered_map<std::string, BSP*> mLoadedBSPs;

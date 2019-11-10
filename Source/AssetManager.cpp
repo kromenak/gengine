@@ -161,9 +161,9 @@ VertexAnimation* AssetManager::LoadVertexAnimation(const std::string& name)
     return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), &mLoadedVertexAnimations);
 }
 
-SIF* AssetManager::LoadSIF(const std::string& name)
+SceneInitFile* AssetManager::LoadSIF(const std::string& name)
 {
-    return LoadAsset<SIF>(SanitizeAssetName(name, ".SIF"), &mLoadedSIFs);
+    return LoadAsset<SceneInitFile>(SanitizeAssetName(name, ".SIF"), &mLoadedSIFs);
 }
 
 SceneAsset* AssetManager::LoadSceneAsset(const std::string& name)

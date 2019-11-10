@@ -115,7 +115,8 @@ bool GEngine::Initialize()
 	Services::Set<GameProgress>(new GameProgress());
 	
 	//LoadScene("R25");
-    LoadScene("RC1");
+	Services::Get<GameProgress>()->SetTimeCode("205P");
+    LoadScene("R25");
 	
 	//mReportManager.Log("Generic", "Rock & Roll");
     return true;
