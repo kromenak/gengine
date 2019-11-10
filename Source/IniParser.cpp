@@ -11,22 +11,22 @@
 #include "imstream.h"
 #include "StringUtil.h"
 
-float IniKeyValue::GetValueAsFloat()
+float IniKeyValue::GetValueAsFloat() const
 {
     return StringUtil::ToFloat(value);
 }
 
-int IniKeyValue::GetValueAsInt()
+int IniKeyValue::GetValueAsInt() const
 {
     return StringUtil::ToInt(value);
 }
 
-bool IniKeyValue::GetValueAsBool()
+bool IniKeyValue::GetValueAsBool() const
 {
     return StringUtil::ToBool(value);
 }
 
-Vector2 IniKeyValue::GetValueAsVector2()
+Vector2 IniKeyValue::GetValueAsVector2() const
 {
     // We assume the string form of {4.23, 5.23}
     // First, let's get rid of the braces.
@@ -49,10 +49,10 @@ Vector2 IniKeyValue::GetValueAsVector2()
     std::string secondNum = noBraces.substr(commaIndex + 1, std::string::npos);
     
     // Convert to numbers and return.
-    return Vector2(atof(firstNum.c_str()), atof(secondNum.c_str()));
+    return Vector2(std::stof(firstNum), std::stof(secondNum));
 }
 
-Vector3 IniKeyValue::GetValueAsVector3()
+Vector3 IniKeyValue::GetValueAsVector3() const
 {
     // We assume the string form of {4.23, 5.23, 10.04}
     // First, let's get rid of the braces.
@@ -80,10 +80,10 @@ Vector3 IniKeyValue::GetValueAsVector3()
     std::string thirdNum = noBraces.substr(secondCommaIndex + 1, std::string::npos);
     
     // Convert to numbers and return.
-    return Vector3(atof(firstNum.c_str()), atof(secondNum.c_str()), atof(thirdNum.c_str()));
+    return Vector3(std::stof(firstNum), std::stof(secondNum), std::stof(thirdNum));
 }
 
-Color32 IniKeyValue::GetValueAsColor32()
+Color32 IniKeyValue::GetValueAsColor32() const
 {
 	// Assume string form of R/G/B
 	std::size_t firstSlashIndex = value.find('/');
@@ -103,7 +103,47 @@ Color32 IniKeyValue::GetValueAsColor32()
 	std::string thirdNum = value.substr(secondSlashIndex + 1, std::string::npos);
 	
 	// Convert to number and return.
-	return Color32(atoi(firstNum.c_str()), atoi(secondNum.c_str()), atoi(thirdNum.c_str()));
+	return Color32(std::stoi(firstNum), std::stoi(secondNum), std::stoi(thirdNum));
+}
+
+Rect IniKeyValue::GetValueAsRect() const
+{
+	// We assume the string form of {4.23, 5.23, 10.04, 5.23}
+	// Values are in order of x1, z1, x2, z2 for two points.
+	// First, let's get rid of the braces.
+    std::string noBraces = value;
+    if(noBraces[0] == '{' && noBraces[noBraces.size() - 1] == '}')
+    {
+        noBraces = value.substr(1, value.length() - 2);
+    }
+    
+    // Find the three commas.
+    std::size_t firstCommaIndex = noBraces.find(',');
+    if(firstCommaIndex == std::string::npos)
+    {
+		return Rect();
+    }
+    std::size_t secondCommaIndex = noBraces.find(',', firstCommaIndex + 1);
+    if(secondCommaIndex == std::string::npos)
+    {
+		return Rect();
+    }
+	std::size_t thirdCommaIndex = noBraces.find(',', secondCommaIndex + 1);
+	if(thirdCommaIndex == std::string::npos)
+	{
+		return Rect();
+	}
+    
+    // Split at commas.
+    std::string firstNum = noBraces.substr(0, firstCommaIndex);
+    std::string secondNum = noBraces.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex);
+    std::string thirdNum = noBraces.substr(secondCommaIndex + 1, thirdCommaIndex - secondCommaIndex);
+    std::string fourthNum = noBraces.substr(thirdCommaIndex + 1, std::string::npos);
+	
+    // Convert to numbers and return.
+	Vector2 p1(std::stof(firstNum), std::stof(secondNum));
+	Vector2 p2(std::stof(thirdNum), std::stof(fourthNum));
+	return Rect::FromTwoPoints(p1, p2);
 }
 
 IniParser::IniParser(const char* filePath)
@@ -145,7 +185,7 @@ void IniParser::ParseAll()
     }
 }
 
-std::vector<IniSection> IniParser::GetSections(std::string name)
+std::vector<IniSection> IniParser::GetSections(const std::string& name)
 {
     std::vector<IniSection> toReturn;
     for(auto& section : mSections)
@@ -158,7 +198,7 @@ std::vector<IniSection> IniParser::GetSections(std::string name)
     return toReturn;
 }
 
-IniSection IniParser::GetSection(std::string name)
+IniSection IniParser::GetSection(const std::string& name)
 {
     std::vector<IniSection> sections = GetSections(name);
     if(sections.size() > 0)

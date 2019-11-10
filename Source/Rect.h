@@ -11,6 +11,8 @@
 class Rect
 {
 public:
+	static Rect FromTwoPoints(Vector2 p1, Vector2 p2);
+	
 	Rect();
 	Rect(float x, float y);
 	Rect(float x, float y, float width, float height);

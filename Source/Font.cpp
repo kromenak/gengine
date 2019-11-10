@@ -135,7 +135,7 @@ void Font::ParseFromData(char* data, int dataLength)
 	{
 		while(parser.ReadKeyValuePair())
 		{
-			IniKeyValue keyValue = parser.GetKeyValue();
+			const IniKeyValue& keyValue = parser.GetKeyValue();
 			if(StringUtil::EqualsIgnoreCase(keyValue.key, "font"))
 			{
 				//TODO: If font contains non-ASCII chars (pretty likely), this won't work for those chars.

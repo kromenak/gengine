@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "Color32.h"
+#include "Rect.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -20,12 +21,13 @@ struct IniKeyValue
     std::string key;
     std::string value;
     
-    float GetValueAsFloat();
-    int GetValueAsInt();
-    bool GetValueAsBool();
-    Vector2 GetValueAsVector2();
-    Vector3 GetValueAsVector3();
-	Color32 GetValueAsColor32();
+    float GetValueAsFloat() const;
+    int GetValueAsInt() const;
+    bool GetValueAsBool() const;
+    Vector2 GetValueAsVector2() const;
+    Vector3 GetValueAsVector3() const;
+	Color32 GetValueAsColor32() const;
+	Rect GetValueAsRect() const;
 };
 
 struct IniLine
@@ -49,8 +51,8 @@ public:
     
     // MODE A: Read it all in at once and use it.
     void ParseAll();
-    std::vector<IniSection> GetSections(std::string name);
-    IniSection GetSection(std::string name);
+    std::vector<IniSection> GetSections(const std::string& name);
+    IniSection GetSection(const std::string& name);
     
     // MODE B: Read one section at a time.
     void ResetToTop();
@@ -59,7 +61,7 @@ public:
     // MODE C: Read line by line by line.
     bool ReadLine();
     bool ReadKeyValuePair();
-    IniKeyValue GetKeyValue() { return mCurrentKeyValue; }
+    const IniKeyValue& GetKeyValue() { return mCurrentKeyValue; }
     
     void SetMultipleKeyValuePairsPerLine(bool areThere) { mMultipleKeyValuePairsPerLine = areThere; }
     

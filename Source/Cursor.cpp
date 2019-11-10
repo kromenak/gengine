@@ -72,7 +72,7 @@ void Cursor::ParseFromData(char *data, int dataLength)
     {
         while(parser.ReadKeyValuePair())
         {
-            IniKeyValue keyValue = parser.GetKeyValue();
+            const IniKeyValue& keyValue = parser.GetKeyValue();
             if(StringUtil::EqualsIgnoreCase(keyValue.key, "hotspot"))
             {
                 if(StringUtil::EqualsIgnoreCase(keyValue.value, "center"))

@@ -5,6 +5,29 @@
 //
 #include "Rect.h"
 
+/*static*/ Rect Rect::FromTwoPoints(Vector2 p1, Vector2 p2)
+{
+	// Difference from min/max constructor: give any two points and a valid rect will be made!
+	// Don't need to worry about whether min is actually min or max is actually max.
+	
+	// Make sure p1 has min values and p2 has max.
+	if(p1.GetX() > p2.GetX())
+	{
+		float temp = p1.GetX();
+		p1.SetX(p2.GetX());
+		p2.SetX(temp);
+	}
+	if(p1.GetY() > p2.GetY())
+	{
+		float temp = p1.GetY();
+		p1.SetY(p2.GetY());
+		p2.SetY(temp);
+	}
+	
+	// Use min/max constructor per usual.
+	return Rect(p1, p2);
+}
+
 Rect::Rect()
 {
 	
