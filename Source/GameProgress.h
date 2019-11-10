@@ -14,40 +14,6 @@
 
 #include "Type.h"
 
-struct Timeblock
-{
-	// The day; should be 1+.
-	int day = 1;
-	
-	// The hour; should be 0-23.
-	int hour = 10;
-	
-	Timeblock(int day, int hour) : day(day), hour(hour) { }
-	Timeblock(const std::string& code);
-	
-	// Depending on day/hour, returns something like "110A".
-	std::string GetCode()
-	{
-		// Add A/P (for am/pm) on end, depending on the hour.
-		// 0-11 is AM, 12-23 is PM.
-		std::string ampm = (hour <= 11) ? "A" : "P";
-		
-		// The hour is 24-hour based. But in the code, it's am/pm.
-		// If over 12, subtract 12.
-		int ampmHour = hour > 12 ? hour - 12 : hour;
-		
-		// If hour is single digit, prepend a zero.
-		std::string hourStr = std::to_string(ampmHour);
-		if(ampmHour < 10)
-		{
-			hourStr = "0" + hourStr;
-		}
-		
-		// Put it all together.
-		return std::to_string(day) + hourStr + ampm;
-	}
-};
-
 class GameProgress
 {
 	TYPE_DECL_BASE();

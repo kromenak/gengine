@@ -10,11 +10,6 @@
 
 TYPE_DEF_BASE(GameProgress);
 
-Timeblock::Timeblock(const std::string& code)
-{
-	
-}
-
 void GameProgress::SetScore(int score)
 {
 	mScore = Math::Clamp(score, 0, kMaxScore);
