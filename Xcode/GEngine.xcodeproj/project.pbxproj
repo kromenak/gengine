@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		4B00D3301F8F3AD500D536D5 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* Camera.cpp */; };
 		4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
+		4B02A8BF2381E56200CCDFAA /* InventoryManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */; };
+		4B02A8C02381E56200CCDFAA /* InventoryManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */; };
 		4B046E90218E855600E56341 /* Mover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E8F218E855600E56341 /* Mover.cpp */; };
 		4B046E91218E855600E56341 /* Mover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E8F218E855600E56341 /* Mover.cpp */; };
 		4B046E94218FB10F00E56341 /* Debug.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E93218FB10F00E56341 /* Debug.cpp */; };
@@ -74,7 +76,6 @@
 		4B22F50B2174075B0065B152 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4B22F50C2174075B0065B152 /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
 		4B22F50D2174075B0065B152 /* SceneAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */; };
-		4B22F50E2174075B0065B152 /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
 		4B22F5102174075B0065B152 /* Services.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182D1FEED84D002991D4 /* Services.cpp */; };
 		4B22F511217407640065B152 /* Color32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13521684374003B4C3F /* Color32.cpp */; };
 		4B22F512217407640065B152 /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
@@ -130,7 +131,6 @@
 		4B2CA00F21B90FAF006D5E52 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2CA00E21B90FAF006D5E52 /* BinaryReader.cpp */; };
 		4B2CA01021B90FAF006D5E52 /* BinaryReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2CA00E21B90FAF006D5E52 /* BinaryReader.cpp */; };
 		4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */; };
-		4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A5E203A0425001A5B9C /* SIF.cpp */; };
 		4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A61203A5CB3001A5B9C /* Scene.cpp */; };
 		4B2E7A65203A6072001A5B9C /* SceneAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */; };
 		4B39E8872082DFC800DB3F52 /* Matrix3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0918351FEEEA51002991D4 /* Matrix3.cpp */; };
@@ -278,6 +278,8 @@
 		4B02A3B11F526529000540A7 /* membuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = membuf.h; path = ../Source/membuf.h; sourceTree = "<group>"; };
 		4B02A3B31F5269E9000540A7 /* imstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imstream.cpp; path = ../Source/imstream.cpp; sourceTree = "<group>"; };
 		4B02A3B41F5269E9000540A7 /* imstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = imstream.h; path = ../Source/imstream.h; sourceTree = "<group>"; };
+		4B02A8BD2381E56200CCDFAA /* InventoryManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InventoryManager.h; path = ../Source/InventoryManager.h; sourceTree = "<group>"; };
+		4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = InventoryManager.cpp; path = ../Source/InventoryManager.cpp; sourceTree = "<group>"; };
 		4B046E8E218E855600E56341 /* Mover.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Mover.h; path = ../Source/Mover.h; sourceTree = "<group>"; };
 		4B046E8F218E855600E56341 /* Mover.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Mover.cpp; path = ../Source/Mover.cpp; sourceTree = "<group>"; };
 		4B046E92218FB10F00E56341 /* Debug.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Debug.h; path = ../Source/Debug.h; sourceTree = "<group>"; };
@@ -360,8 +362,6 @@
 		4B2CA00E21B90FAF006D5E52 /* BinaryReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryReader.cpp; path = ../Source/BinaryReader.cpp; sourceTree = "<group>"; };
 		4B2E7A5A2039FCF0001A5B9C /* IniParser.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = IniParser.h; path = ../Source/IniParser.h; sourceTree = "<group>"; };
 		4B2E7A5B2039FCF0001A5B9C /* IniParser.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = IniParser.cpp; path = ../Source/IniParser.cpp; sourceTree = "<group>"; };
-		4B2E7A5D203A0425001A5B9C /* SIF.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SIF.h; path = ../Source/SIF.h; sourceTree = "<group>"; };
-		4B2E7A5E203A0425001A5B9C /* SIF.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SIF.cpp; path = ../Source/SIF.cpp; sourceTree = "<group>"; };
 		4B2E7A60203A5CB3001A5B9C /* Scene.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Scene.h; path = ../Source/Scene.h; sourceTree = "<group>"; };
 		4B2E7A61203A5CB3001A5B9C /* Scene.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Scene.cpp; path = ../Source/Scene.cpp; sourceTree = "<group>"; };
 		4B2E7A63203A6072001A5B9C /* SceneAsset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SceneAsset.h; path = ../Source/SceneAsset.h; sourceTree = "<group>"; };
@@ -798,6 +798,8 @@
 				4BEA727321D7F71A00998066 /* GameProgress.h */,
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
+				4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */,
+				4B02A8BD2381E56200CCDFAA /* InventoryManager.h */,
 				4B90E07A2377AD4E00E0E3FA /* Timeblock.cpp */,
 				4B90E0792377AD4E00E0E3FA /* Timeblock.h */,
 				4B6B766321AB746D00788C02 /* UI */,
@@ -949,8 +951,6 @@
 				4BFBB86421D0469000E07EFB /* SceneData.h */,
 				4B90E07623769D6300E0E3FA /* SceneInitFile.cpp */,
 				4B90E07523769D6300E0E3FA /* SceneInitFile.h */,
-				4B2E7A5E203A0425001A5B9C /* SIF.cpp */,
-				4B2E7A5D203A0425001A5B9C /* SIF.h */,
 			);
 			name = Scene;
 			sourceTree = "<group>";
@@ -1225,13 +1225,13 @@
 				4B00D3301F8F3AD500D536D5 /* Camera.cpp in Sources */,
 				4B90E07723769D6300E0E3FA /* SceneInitFile.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
-				4B2E7A5F203A0425001A5B9C /* SIF.cpp in Sources */,
 				4B775E5323382EE7007FF777 /* UITextInput.cpp in Sources */,
 				4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */,
 				4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
 				4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */,
+				4B02A8BF2381E56200CCDFAA /* InventoryManager.cpp in Sources */,
 				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
 				4B90E07B2377AD4E00E0E3FA /* Timeblock.cpp in Sources */,
 				4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */,
@@ -1300,7 +1300,6 @@
 				4B22F51A217407640065B152 /* Texture.cpp in Sources */,
 				4B22F5352174078B0065B152 /* BinaryWriter.cpp in Sources */,
 				4B2CA01021B90FAF006D5E52 /* BinaryReader.cpp in Sources */,
-				4B22F50E2174075B0065B152 /* SIF.cpp in Sources */,
 				4BB67C4B235255C800FDFB30 /* TextInput.cpp in Sources */,
 				4BB67C41235254F900FDFB30 /* AnimationNodes.cpp in Sources */,
 				4B22F508217407530065B152 /* SheepVM.cpp in Sources */,
@@ -1341,6 +1340,7 @@
 				4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */,
 				4B22F51C2174076D0065B152 /* Matrix4.cpp in Sources */,
+				4B02A8C02381E56200CCDFAA /* InventoryManager.cpp in Sources */,
 				4B22F52C2174078B0065B152 /* AssetManager.cpp in Sources */,
 				4B90E07C2377AD4E00E0E3FA /* Timeblock.cpp in Sources */,
 				4B15555E2197C2E500072F0D /* RectTransform.cpp in Sources */,
