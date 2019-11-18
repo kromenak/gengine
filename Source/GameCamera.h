@@ -13,6 +13,9 @@ class GameCamera : public Actor
 public:
     GameCamera();
 	
+	void SetAngle(const Vector2& angle);
+	void SetAngle(float yaw, float pitch);
+	
 protected:
     void OnUpdate(float deltaTime) override;
     

@@ -20,6 +20,16 @@ GameCamera::GameCamera()
     AddComponent<AudioListener>();
 }
 
+void GameCamera::SetAngle(const Vector2& angle)
+{
+	SetAngle(angle.GetX(), angle.GetY());
+}
+
+void GameCamera::SetAngle(float yaw, float pitch)
+{
+	SetRotation(Quaternion(Vector3::UnitY, yaw) * Quaternion(Vector3::UnitX, pitch));
+}
+
 void GameCamera::OnUpdate(float deltaTime)
 {
 	// If someone is capturing text input, key inputs should not affect the game.
