@@ -14,6 +14,7 @@
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "GKActor.h"
+#include "InventoryManager.h"
 #include "Random.h"
 #include "Scene.h"
 #include "Services.h"
@@ -313,7 +314,7 @@ RegFunc0(GetEgoCurrentLocationCount, int, IMMEDIATE, REL_FUNC);
 int GetEgoLocationCount(std::string locationName)
 {
 	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
-	return Services::Get<GameProgress>()->GetLocationCount(egoName, locationName);
+	return Services::Get<GameProgress>()->GetLocationCountForCurrentTimeblock(egoName, locationName);
 }
 RegFunc1(GetEgoLocationCount, int, string, IMMEDIATE, REL_FUNC);
 
@@ -462,16 +463,21 @@ RegFunc1(SetActorOffstage, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid SetActorPosition(std::string actorName, std::string positionName)
 {
+	// Get needed data.
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	if(actor != nullptr)
+	const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+	
+	// If either is null, log an error.
+	if(actor == nullptr || scenePosition == nullptr)
 	{
-		const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
-		if(scenePosition != nullptr)
-		{
-			// Based on docs, I don't think this sets heading...but maybe it does? Unclear.
-			actor->SetPosition(scenePosition->position);
-		}
+		std::string sheepContextName = GetCurrentSheepName() + ":" + GetCurrentSheepFunction();
+		Services::GetReports()->Log("Error", "An error occurred while executing " + sheepContextName);
+		return 0;
 	}
+	
+	// Docs are unclear about this, but in GK3, this definitely also sets heading.
+	actor->SetPosition(scenePosition->position);
+	actor->SetHeading(scenePosition->heading);
 	return 0;
 }
 RegFunc2(SetActorPosition, void, string, string, IMMEDIATE, REL_FUNC);
@@ -647,15 +653,10 @@ RegFunc2(WalkToSeeModel, void, string, string, WAITABLE, REL_FUNC);
  
 int WasEgoEverInLocation(string locationName)
 {
-	// Figure out who ego is.
-	GKActor* ego = GEngine::inst->GetScene()->GetEgo();
-	if(ego != nullptr)
-	{
-		return Services::Get<GameProgress>()->GetLifetimeLocationCount(ego->GetNoun(), locationName);
-	}
-	
-	// No ego means we assume he/she wasn't ever in the location...
-	return 0;
+	// Returns if Ego was EVER in a location during ANY timeblock!
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	int locationCount = Services::Get<GameProgress>()->GetLocationCountAcrossAllTimeblocks(egoName, locationName);
+	return locationCount > 0 ? 1 : 0;
 }
 RegFunc1(WasEgoEverInLocation, int, string, IMMEDIATE, REL_FUNC);
 
@@ -1090,7 +1091,7 @@ shpvoid Call(std::string functionName)
 		SheepScript* sheep = currentThread->mAttachedSheep->mSheepScript;
 		if(sheep != nullptr)
 		{
-			Services::GetSheep()->Execute(sheep, functionName, currentThread->AddWait());
+			Services::GetSheep()->Execute(sheep, functionName, currentThread != nullptr ? currentThread->AddWait() : nullptr);
 		}
 	}
 	return 0;
@@ -1165,11 +1166,7 @@ RegFunc2(CallGlobalSheep, void, string, string, WAITABLE, REL_FUNC);
 std::string GetCurrentSheepFunction()
 {
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-	if(currentThread != nullptr)
-	{
-		return currentThread->mFunctionName;
-	}
-	return "";
+	return currentThread != nullptr ? currentThread->mFunctionName : "";
 }
 RegFunc0(GetCurrentSheepFunction, string, IMMEDIATE, REL_FUNC);
 
@@ -1451,10 +1448,10 @@ int IsCurrentLocation(std::string location)
 }
 RegFunc1(IsCurrentLocation, int, string, IMMEDIATE, REL_FUNC);
 
-int IsCurrentTime(std::string timeCode)
+int IsCurrentTime(std::string timeblock)
 {
-	std::string currentTimeCode = Services::Get<GameProgress>()->GetTimeCode();
-    return StringUtil::EqualsIgnoreCase(currentTimeCode, timeCode);
+	std::string currentTimeblock = Services::Get<GameProgress>()->GetTimeblock().ToString();
+    return StringUtil::EqualsIgnoreCase(currentTimeblock, timeblock);
 }
 RegFunc1(IsCurrentTime, int, string, IMMEDIATE, REL_FUNC);
 
@@ -1465,10 +1462,10 @@ int WasLastLocation(std::string location)
 }
 RegFunc1(WasLastLocation, int, string, IMMEDIATE, REL_FUNC);
 
-int WasLastTime(std::string timeCode)
+int WasLastTime(std::string timeblock)
 {
-	std::string lastTimeCode = Services::Get<GameProgress>()->GetLastTimeCode();
-	return StringUtil::EqualsIgnoreCase(lastTimeCode, timeCode);
+	std::string lastTimeblock = Services::Get<GameProgress>()->GetLastTimeblock().ToString();
+	return StringUtil::EqualsIgnoreCase(lastTimeblock, timeblock);
 }
 RegFunc1(WasLastTime, int, string, IMMEDIATE, REL_FUNC);
 
@@ -1531,7 +1528,7 @@ RegFunc1(SetPamphletPage, void, int, WAITABLE, REL_FUNC);
  
 // INSETS
 //DumpInsetNames
-
+/*
 shpvoid ShowInset(std::string insetName)
 {
 	std::cout << "ShowInset" << std::endl;
@@ -1559,50 +1556,119 @@ shpvoid HidePlate(std::string plateName)
 	return 0;
 }
 RegFunc1(HidePlate, void, string, IMMEDIATE, REL_FUNC);
-
+*/
+ 
 // INVENTORY
-/*
 shpvoid CombineInvItems(std::string firstItemName, std::string secondItemName,
 						std::string combinedItemName)
 {
-	std::cout << "CombineInvItems" << std::endl;
+	// All three items must be valid.
+	// Output error messages for ALL invalid items before early out.
+	bool firstItemValid = Services::Get<InventoryManager>()->IsValidInventoryItem(firstItemName);
+	bool secondItemValid = Services::Get<InventoryManager>()->IsValidInventoryItem(secondItemName);
+	bool combinedItemValid = Services::Get<InventoryManager>()->IsValidInventoryItem(combinedItemName);
+	if(!firstItemValid)
+	{
+		Services::GetReports()->Log("Error", "'" + firstItemName + "' is not a valid inventory item name.");
+	}
+	if(!secondItemValid)
+	{
+		Services::GetReports()->Log("Error", "'" + secondItemName + "' is not a valid inventory item name.");
+	}
+	if(!combinedItemValid)
+	{
+		Services::GetReports()->Log("Error", "'" + combinedItemName + "' is not a valid inventory item name.");
+	}
+	if(!firstItemValid || !secondItemValid || !combinedItemValid)
+	{
+		return 0;
+	}
+	
+	// This function doesn't actually check whether you HAVE any of the items involved in the combining or output.
+	// It simply removes the first two (whether they exist or not) and adds the combined (whether you already have it or not).
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, firstItemName);
+	Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, secondItemName);
+	Services::Get<InventoryManager>()->AddInventoryItem(egoName, combinedItemName);
 	return 0;
 }
 RegFunc3(CombineInvItems, void, string, string, string, IMMEDIATE, REL_FUNC);
 
 int DoesEgoHaveInvItem(std::string itemName)
 {
-	std::cout << "DoesEgoHaveInvItem" << std::endl;
-	return 0;
+	// This function does work with invalid inventory item names.
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName);
+	return hasItem ? 1 : 0;
 }
 RegFunc1(DoesEgoHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
 
 int DoesGabeHaveInvItem(std::string itemName)
 {
-	std::cout << "DoesGabeHaveInvItem" << std::endl;
-	return 0;
+	// This function does work with invalid inventory item names.
+	bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem("Gabriel", itemName);
+	return hasItem ? 1 : 0;
 }
 RegFunc1(DoesGabeHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
 
 int DoesGraceHaveInvItem(std::string itemName)
 {
-	std::cout << "DoesGraceHaveInvItem" << std::endl;
-    return 0;
+	// This function does work with invalid inventory item names.
+	bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem("Grace", itemName);
+	return hasItem ? 1 : 0;
 }
 RegFunc1(DoesGraceHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EgoTakeInvItem(std::string itemName)
 {
-	std::cout << "EgoTakeInvItem" << std::endl;
+	// It must be a valid inventory item.
+	if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
+	{
+		Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
+		return 0;
+	}
+	
+	// Add to inventory of Ego.
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	Services::Get<InventoryManager>()->AddInventoryItem(egoName, itemName);
 	return 0;
 }
 RegFunc1(EgoTakeInvItem, void, string, IMMEDIATE, REL_FUNC);
 
-//DumpEgoActiveInvItem
+shpvoid DumpEgoActiveInvItem()
+{
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	std::string activeItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
+	if(activeItem.empty())
+	{
+		Services::GetReports()->Log("Dump", "Ego active inventory item is 'NONE'.");
+	}
+	else
+	{
+		Services::GetReports()->Log("Dump", "Ego active inventory item is '" + activeItem + "'.");
+	}
+	return 0;
+}
+RegFunc0(DumpEgoActiveInvItem, void, IMMEDIATE, DEV_FUNC);
 
 shpvoid SetEgoActiveInvItem(std::string itemName)
 {
-	std::cout << "SetEgoActiveInvItem" << std::endl;
+	// It must be a valid inventory item.
+	if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
+	{
+		Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
+		return 0;
+	}
+	
+	// If the item we are setting active is not in our inventory, output a warning (but let it go anyway).
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	if(!Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName))
+	{
+		Services::GetReports()->Log("Warning", egoName + " does not have " + itemName + ".");
+	}
+	
+	// Set the inventory item!
+	Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, itemName);
 	return 0;
 }
 RegFunc1(SetEgoActiveInvItem, void, string, IMMEDIATE, REL_FUNC);
@@ -1637,11 +1703,74 @@ RegFunc0(InventoryUninspect, void, IMMEDIATE, REL_FUNC);
 
 shpvoid SetInvItemStatus(std::string itemName, std::string status)
 {
-	std::cout << "SetInvItemStatus" << std::endl;
+	std::cout << "SetInvItemStatus: " << itemName << ", " << status << std::endl;
+	
+	// The item name must be valid.
+	bool argumentError = false;
+	if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
+	{
+		Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
+		argumentError = true;
+	}
+	
+	// Make sure we're using a valid status.
+	// NOTE: The reason I check inputs before doing the action is to emulate how error output works in the original game.
+	bool validStatus = false;
+	if(StringUtil::EqualsIgnoreCase(status, "NotPlaced")
+	   || StringUtil::EqualsIgnoreCase(status, "Used")
+	   || StringUtil::EqualsIgnoreCase(status, "Placed")
+	   || StringUtil::EqualsIgnoreCase(status, "GraceHas")
+	   || StringUtil::EqualsIgnoreCase(status, "GabeHas")
+	   || StringUtil::EqualsIgnoreCase(status, "BothHave")
+	   || StringUtil::EqualsIgnoreCase(status, "Used"))
+	{
+		validStatus = true;
+	}
+	if(!validStatus)
+	{
+		Services::GetReports()->Log("Error", "Error: '" + status + "' is not a valid inventory status.");
+		argumentError = true;
+	}
+	
+	// Early out if any argument is invalid.
+	if(argumentError)
+	{
+		return 0;
+	}
+	
+	// Status can be any of: NotPlaced, Placed, GraceHas, GabeHas, BothHave, Used.
+	// It's unclear what the relevance of these different statuses are - there's no way to 'get' the status of an inventory item!
+	// For now, I'll just boil these statuses down to the important states: have or don't have.
+	if(StringUtil::EqualsIgnoreCase(status, "NotPlaced")
+	   || StringUtil::EqualsIgnoreCase(status, "Placed")
+	   || StringUtil::EqualsIgnoreCase(status, "Used"))
+	{
+		// NotPlaced = not in the game = make sure neither ego has it.
+		// Placed = placed in the game, but not in anyone's inventory = make sure neither ego has it.
+		// Used = item is used and no longer available = make sure neither ego has it.
+		Services::Get<InventoryManager>()->RemoveInventoryItem("Gabriel", itemName);
+		Services::Get<InventoryManager>()->RemoveInventoryItem("Grace", itemName);
+	}
+	else if(StringUtil::EqualsIgnoreCase(status, "GraceHas"))
+	{
+		// Grace has, but also implies that Gabriel DOES NOT have!
+		Services::Get<InventoryManager>()->AddInventoryItem("Grace", itemName);
+		Services::Get<InventoryManager>()->RemoveInventoryItem("Gabriel", itemName);
+	}
+	else if(StringUtil::EqualsIgnoreCase(status, "GabeHas"))
+	{
+		// Gabe has, but also implies that Grace DOES NOT have!
+		Services::Get<InventoryManager>()->AddInventoryItem("Gabriel", itemName);
+		Services::Get<InventoryManager>()->RemoveInventoryItem("Grace", itemName);
+	}
+	else if(StringUtil::EqualsIgnoreCase(status, "BothHave"))
+	{
+		Services::Get<InventoryManager>()->AddInventoryItem("Gabriel", itemName);
+		Services::Get<InventoryManager>()->AddInventoryItem("Grace", itemName);
+	}
 	return 0;
 }
 RegFunc2(SetInvItemStatus, void, string, string, IMMEDIATE, REL_FUNC);
-*/
  
 // MODELS
 /*
@@ -1933,18 +2062,18 @@ shpvoid SetLocation(std::string location)
 }
 RegFunc1(SetLocation, void, string, WAITABLE, REL_FUNC);
 
-shpvoid SetLocationTime(std::string location, std::string time)
+shpvoid SetLocationTime(std::string location, std::string timeblock)
 {
-	Services::Get<GameProgress>()->SetTimeCode(time);
+	Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
 	GEngine::inst->LoadScene(location);
 	return 0;
 }
 RegFunc2(SetLocationTime, void, string, string, WAITABLE, REL_FUNC);
 
-shpvoid SetTime(std::string time)
+shpvoid SetTime(std::string timeblock)
 {
 	// Change time, but load in to the same scene we are currently in.
-	Services::Get<GameProgress>()->SetTimeCode(time);
+	Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
 	GEngine::inst->LoadScene(Services::Get<GameProgress>()->GetLocation());
 	return 0;
 }

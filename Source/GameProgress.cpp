@@ -26,10 +26,10 @@ void GameProgress::SetLocation(const std::string& location)
 	mLocation = location;
 }
 
-void GameProgress::SetTimeCode(const std::string& timeCode)
+void GameProgress::SetTimeblock(const Timeblock& timeblock)
 {
-	mLastTimeCode = mTimeCode;
-	mTimeCode = timeCode;
+	mLastTimeblock = mTimeblock;
+	mTimeblock = timeblock;
 }
 
 bool GameProgress::GetFlag(const std::string& flagName) const
@@ -56,24 +56,49 @@ void GameProgress::ClearFlag(const std::string& flagName)
 	}
 }
 
-int GameProgress::GetLifetimeLocationCount(const std::string& actorName, const std::string& location)
+int GameProgress::GetGameVariable(const std::string& varName) const
+{
+	auto it = mGameVariables.find(StringUtil::ToLowerCopy(varName));
+	if(it != mGameVariables.end())
+	{
+		return it->second;
+	}
+	return 0;
+}
+
+void GameProgress::SetGameVariable(const std::string& varName, int value)
+{
+	mGameVariables[StringUtil::ToLowerCopy(varName)] = value;
+}
+
+void GameProgress::IncGameVariable(const std::string& varName)
+{
+	++mGameVariables[StringUtil::ToLowerCopy(varName)];
+}
+
+int GameProgress::GetLocationCountAcrossAllTimeblocks(const std::string& actorName, const std::string& location)
 {
 	std::string key = actorName + location;
 	StringUtil::ToLower(key);
 	return mActorLocationCounts[key];
 }
 
-int GameProgress::GetLocationCount(const std::string& actorName) const
+int GameProgress::GetCurrentLocationCountForCurrentTimeblock(const std::string& actorName) const
 {
-	return GetLocationCount(actorName, mLocation, mTimeCode);
+	return GetLocationCount(actorName, mLocation, mTimeblock);
 }
 
-int GameProgress::GetLocationCount(const std::string& actorName, const std::string& location) const
+int GameProgress::GetLocationCountForCurrentTimeblock(const std::string& actorName, const std::string& location) const
 {
-	return GetLocationCount(actorName, location, mTimeCode);
+	return GetLocationCount(actorName, location, mTimeblock);
 }
 
-int GameProgress::GetLocationCount(const std::string& location, const std::string& timeblock, const std::string& actorName) const
+int GameProgress::GetLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock) const
+{
+	return GetLocationCount(actorName, location, timeblock.ToString());
+}
+
+int GameProgress::GetLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock) const
 {
 	// Generate a key from the various bits.
 	// Make sure it's all lowercase, for consistency.
@@ -89,14 +114,19 @@ int GameProgress::GetLocationCount(const std::string& location, const std::strin
 	return 0;
 }
 
-void GameProgress::IncLocationCount(const std::string& actorName)
+void GameProgress::IncCurrentLocationCountForCurrentTimeblock(const std::string& actorName)
 {
-	IncLocationCount(actorName, mLocation, mTimeCode);
+	IncLocationCount(actorName, mLocation, mTimeblock);
 }
 
-void GameProgress::IncLocationCount(const std::string &actorName, const std::string &location)
+void GameProgress::IncLocationCountForCurrentTimeblock(const std::string &actorName, const std::string &location)
 {
-	IncLocationCount(actorName, mLocation, mTimeCode);
+	IncLocationCount(actorName, mLocation, mTimeblock);
+}
+
+void GameProgress::IncLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock)
+{
+	IncLocationCount(actorName, location, timeblock.ToString());
 }
 
 void GameProgress::IncLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock)
@@ -166,24 +196,4 @@ void GameProgress::IncNounVerbCount(const std::string& noun, const std::string& 
 	StringUtil::ToLower(key);
 	
 	++mNounVerbCounts[key];
-}
-
-int GameProgress::GetGameVariable(const std::string& varName) const
-{
-	auto it = mGameVariables.find(StringUtil::ToLowerCopy(varName));
-	if(it != mGameVariables.end())
-	{
-		return it->second;
-	}
-	return 0;
-}
-
-void GameProgress::SetGameVariable(const std::string& varName, int value)
-{
-	mGameVariables[StringUtil::ToLowerCopy(varName)] = value;
-}
-
-void GameProgress::IncGameVariable(const std::string& varName)
-{
-	++mGameVariables[StringUtil::ToLowerCopy(varName)];
 }

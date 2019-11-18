@@ -530,9 +530,9 @@ int HasTopicsLeft(std::string noun);
 shpvoid SetTopicCount(std::string noun, std::string verb, int count); // DEV
 
 int IsCurrentLocation(std::string location);
-int IsCurrentTime(std::string timeCode);
+int IsCurrentTime(std::string timeblock);
 int WasLastLocation(std::string location);
-int WasLastTime(std::string timeCode);
+int WasLastTime(std::string timeblock);
 
 shpvoid ResetGameData(); // DEV
 
@@ -640,8 +640,8 @@ shpvoid DumpTimes(); // DEV
 shpvoid ReEnter(); // DEV, WAIT
 
 shpvoid SetLocation(std::string location); // WAIT
-shpvoid SetLocationTime(std::string location, std::string time); // WAIT
-shpvoid SetTime(std::string time); // WAIT
+shpvoid SetLocationTime(std::string location, std::string timeblock); // WAIT
+shpvoid SetTime(std::string timeblock); // WAIT
 
 shpvoid SetScene(std::string sceneName); // WAIT
 

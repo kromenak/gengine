@@ -11,9 +11,10 @@
 #include "ButtonIconManager.h"
 #include "CharacterManager.h"
 #include "ConsoleUI.h"
-#include "FootstepManager.h"
 #include "Debug.h"
+#include "FootstepManager.h"
 #include "GameProgress.h"
+#include "InventoryManager.h"
 #include "Scene.h"
 #include "Services.h"
 #include "TextInput.h"
@@ -99,7 +100,7 @@ bool GEngine::Initialize()
 	mWaitCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
 	UseDefaultCursor();
 	
-    //mAssetManager.WriteBarnAssetToFile("PINE2FLAT.BMP");
+    //mAssetManager.WriteBarnAssetToFile("BLKMUSTACHE_3.BMP");
     //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
 	
 	// Load button icon manager.
@@ -114,8 +115,11 @@ bool GEngine::Initialize()
 	// Create game progress.
 	Services::Set<GameProgress>(new GameProgress());
 	
+	// Create inventory manager.
+	Services::Set<InventoryManager>(new InventoryManager());
+	
 	//LoadScene("R25");
-	Services::Get<GameProgress>()->SetTimeCode("205P");
+	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
     LoadScene("R25");
 	
 	//mReportManager.Log("Generic", "Rock & Roll");
@@ -390,7 +394,9 @@ void GEngine::LoadSceneInternal()
 	Services::Get<GameProgress>()->SetLocation(mSceneToLoad);
 	
 	// Create the new scene.
-	mScene = new Scene(mSceneToLoad, Services::Get<GameProgress>()->GetTimeCode());
+	//TODO: Scene constructor should probably ONLY take a scene name.
+	//TODO: Internally, we can call to GameProgress or whatnot as needed, but that's very GK3-specific stuff.
+	mScene = new Scene(mSceneToLoad, Services::Get<GameProgress>()->GetTimeblock());
 	
 	// Load the scene - this is separate from constructor b/c load operations may need to reference the scene!
 	mScene->Load();

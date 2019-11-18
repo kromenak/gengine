@@ -12,6 +12,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Timeblock.h"
 #include "Type.h"
 
 class GameProgress
@@ -27,20 +28,27 @@ public:
 	std::string GetLastLocation() const { return mLastLocation; }
 	void SetLocation(const std::string& location);
 	
-	std::string GetTimeCode() const { return mTimeCode; }
-	std::string GetLastTimeCode() const { return mLastTimeCode; }
-	void SetTimeCode(const std::string& timeCode);
+	const Timeblock& GetTimeblock() const { return mTimeblock; }
+	const Timeblock& GetLastTimeblock() const { return mLastTimeblock; }
+	void SetTimeblock(const Timeblock& timeblock);
 	
 	bool GetFlag(const std::string& flagName) const;
 	void SetFlag(const std::string& flagName);
 	void ClearFlag(const std::string& flagName);
 	
-	int GetLifetimeLocationCount(const std::string& actorName, const std::string& location);
-	int GetLocationCount(const std::string& actorName) const;
-	int GetLocationCount(const std::string& actorName, const std::string& location) const;
+	int GetGameVariable(const std::string& varName) const;
+	void SetGameVariable(const std::string& varName, int value);
+	void IncGameVariable(const std::string& varName);
+	
+	int GetLocationCountAcrossAllTimeblocks(const std::string& actorName, const std::string& location);
+	int GetCurrentLocationCountForCurrentTimeblock(const std::string& actorName) const;
+	int GetLocationCountForCurrentTimeblock(const std::string& actorName, const std::string& location) const;
+	int GetLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock) const;
 	int GetLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock) const;
-	void IncLocationCount(const std::string& actorName);
-	void IncLocationCount(const std::string& actorName, const std::string& location);
+	
+	void IncCurrentLocationCountForCurrentTimeblock(const std::string& actorName);
+	void IncLocationCountForCurrentTimeblock(const std::string& actorName, const std::string& location);
+	void IncLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock);
 	void IncLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock);
 	
 	//TODO: Chat counts should be reset when the timeblock changes!
@@ -54,10 +62,6 @@ public:
 	void SetNounVerbCount(const std::string& noun, const std::string& verb, int count);
 	void IncNounVerbCount(const std::string& noun, const std::string& verb);
 	
-	int GetGameVariable(const std::string& varName) const;
-	void SetGameVariable(const std::string& varName, int value);
-	void IncGameVariable(const std::string& varName);
-	
 private:
 	// Score tracking.
 	const int kMaxScore = 999;
@@ -68,8 +72,8 @@ private:
 	std::string mLastLocation;
 	
 	// Current and last time blocks.
-	std::string mTimeCode = "110a";
-	std::string mLastTimeCode;
+	Timeblock mTimeblock;
+	Timeblock mLastTimeblock;
 	
 	// General-use true/false flags for game logic.
 	// Absence of a flag implies false; otherwise, true.

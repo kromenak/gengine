@@ -88,7 +88,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			{
 				outputStr << "*";
 			}
-			outputStr << " TB: '" << Services::Get<GameProgress>()->GetTimeCode() << "' ";
+			outputStr << " TB: '" << Services::Get<GameProgress>()->GetTimeblock() << "' ";
 		}
 		if((mContent & ReportContent::Location) != ReportContent::None)
 		{
