@@ -27,11 +27,16 @@
 
 extern Mesh* quad;
 
-Scene::Scene(std::string name, std::string timeblock) :
+Scene::Scene(const std::string& name, const std::string& timeblock) : Scene(name, Timeblock(timeblock))
+{
+    
+}
+
+Scene::Scene(const std::string& name, const Timeblock& timeblock) :
 	mLocation(name),
 	mTimeblock(timeblock)
 {
-    // Create game camera.
+	// Create game camera.
 	mCamera = new GameCamera();
 	
 	// Create animation player.
@@ -304,38 +309,39 @@ void Scene::InitEgoPosition(const std::string& positionName)
 {
     if(mEgo == nullptr) { return; }
     
-    const ScenePosition* position = mSceneData->GetScenePosition(positionName);
+	// Get position.
+    const ScenePosition* position = GetPosition(positionName);
     if(position == nullptr) { return; }
     
     // Set position and heading.
     mEgo->SetPosition(position->position);
-    mEgo->SetRotation(Quaternion(Vector3::UnitY, position->heading.ToRadians()));
+    mEgo->SetHeading(position->heading);
     
-    if(position->camera != nullptr)
-    {
-        mCamera->SetPosition(position->camera->position);
-		
-		Quaternion rotation = Quaternion(Vector3::UnitY, position->camera->angle.GetX()) *
-		Quaternion(Vector3::UnitX, position->camera->angle.GetY());
-        mCamera->SetRotation(rotation);
-    }
+	// Should also set camera position/angle.
+	// Output a warning if specified position has no camera though.
+	if(position->cameraName.empty())
+	{
+		Services::GetReports()->Log("Warning", "No camera information is supplied in position '" + positionName + "'.");
+		return;
+	}
+	
+	// Move the camera to desired position/angle.
+	SetCameraPosition(position->cameraName);
 }
 
 void Scene::SetCameraPosition(const std::string& cameraName)
 {
+	// Find camera or fail.
 	const SceneCamera* camera = mSceneData->GetRoomCamera(cameraName);
-	if(camera != nullptr)
+	if(camera == nullptr)
 	{
-		mCamera->SetPosition(camera->position);
-		
-		Quaternion rotation = Quaternion(Vector3::UnitY, camera->angle.GetX()) *
-		Quaternion(Vector3::UnitX, camera->angle.GetY());
-		mCamera->SetRotation(rotation);
+		Services::GetReports()->Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
+		return;
 	}
-	else
-	{
-		std::cout << "Could not find camera " << cameraName << std::endl;
-	}
+	
+	// Set position/angle.
+	mCamera->SetPosition(camera->position);
+	mCamera->SetAngle(camera->angle);
 }
 
 bool Scene::CheckInteract(const Ray& ray) const
@@ -505,7 +511,6 @@ GKActor* Scene::GetActorByNoun(const std::string& noun) const
 	{
 		if(StringUtil::EqualsIgnoreCase(actor->GetNoun(), noun))
 		{
-			
 			return actor;
 		}
 	}
@@ -515,11 +520,16 @@ GKActor* Scene::GetActorByNoun(const std::string& noun) const
 
 const ScenePosition* Scene::GetPosition(const std::string& positionName) const
 {
+	const ScenePosition* position = nullptr;
 	if(mSceneData != nullptr)
 	{
-		return mSceneData->GetScenePosition(positionName);
+		position = mSceneData->GetScenePosition(positionName);
 	}
-	return nullptr;
+	if(position == nullptr)
+	{
+		Services::GetReports()->Log("Error", "Error: '" + positionName + "' is not a valid position. Call DumpPositions() to see valid positions.");
+	}
+	return position;
 }
 
 void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* texture)

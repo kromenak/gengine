@@ -35,7 +35,8 @@ class Vector3;
 class Scene
 {
 public:
-    Scene(std::string name, std::string timeblock);
+    Scene(const std::string& name, const std::string& timeblock);
+	Scene(const std::string& name, const Timeblock& timeblock);
 	~Scene();
 	
 	void Load();
