@@ -142,7 +142,7 @@ void SceneData::ResolveSceneData()
 	//TODO: e.g. GLB_210A should be loaded on day 2 during 10AM timeblock
 }
 
-const SceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) const
+const RoomSceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) const
 {
 	for(int i = 0; i < mRoomCameras.size(); i++)
 	{

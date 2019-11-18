@@ -53,8 +53,8 @@ public:
 	const ScenePosition* GetScenePosition(const std::string& positionName) const;
 	
 	// CAMERAS
-	const SceneCamera* GetDefaultRoomCamera() const { return mDefaultRoomCamera; }
-	const SceneCamera* GetRoomCamera(const std::string& cameraName) const;
+	const RoomSceneCamera* GetDefaultRoomCamera() const { return mDefaultRoomCamera; }
+	const RoomSceneCamera* GetRoomCamera(const std::string& cameraName) const;
 	
 	// SOUNDTRACK
 	Soundtrack* GetSoundtrack() const { return mSoundtracks.size() > 0 ? mSoundtracks.back() : nullptr; }
@@ -104,7 +104,7 @@ private:
 	// Combined generic and specific cameras to use.
 	std::vector<const SceneCamera*> mInspectCameras;
 	std::vector<const RoomSceneCamera*> mRoomCameras;
-	const SceneCamera* mDefaultRoomCamera = nullptr;
+	const RoomSceneCamera* mDefaultRoomCamera = nullptr;
 	std::vector<const SceneCamera*> mCinematicCameras;
 	std::vector<const DialogueSceneCamera*> mDialogueCameras;
 	
