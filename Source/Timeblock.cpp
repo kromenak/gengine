@@ -95,6 +95,21 @@ std::string Timeblock::ToString() const
 	return std::to_string(mDay) + hourStr + ampm;
 }
 
+std::ostream& operator<<(std::ostream& o, const Timeblock& timeblock)
+{
+	return o << timeblock.ToString();
+}
+
+bool Timeblock::operator==(const Timeblock& other) const
+{
+	return mDay == other.mDay && mHour == other.mHour;
+}
+
+bool Timeblock::operator!=(const Timeblock& other) const
+{
+	return !(*this == other);
+}
+
 int Timeblock::GetHour12() const
 {
 	if(mHour == 0) { return 12; }

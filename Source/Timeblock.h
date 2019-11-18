@@ -20,11 +20,16 @@ public:
 	static const AMPM AM = 0;
 	static const AMPM PM = 1;
 	
+	Timeblock() { } // Just use default values.
 	Timeblock(int day, int hour);
 	Timeblock(int day, int hour, AMPM amOrPM);
 	Timeblock(const std::string& str);
 	
 	std::string ToString() const;
+	friend std::ostream& operator<< (std::ostream& o, const Timeblock& timeblock);
+	
+	bool operator==(const Timeblock& other) const;
+    bool operator!=(const Timeblock& other) const;
 	
 	int GetDay() const { return mDay; }
 	
