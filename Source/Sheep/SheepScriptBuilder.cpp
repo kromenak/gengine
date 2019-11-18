@@ -178,6 +178,11 @@ SheepValueType SheepScriptBuilder::CallSysFunction(std::string sysFuncName)
     std::cout << "SysFunc " << sysFuncName << std::endl;
     #endif
 	
+	//TODO: Should output compiler error if calling a sysfunction with too few arguments!
+	//TODO: Output to SheepCompilerError stream
+	//TODO: GK3 compiler error at `<SHEEPNAME>` (line X, col X) <Code>
+	//TODO: too few parameters in call to function 'sysFuncName` (function takes X parameters)
+	
 	// All possible system functions are pre-registered in a giant list.
 	// So, to compile a system call, we just iterate over and find the matching function.
 	StringUtil::ToLower(sysFuncName);
