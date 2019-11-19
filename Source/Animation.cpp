@@ -216,7 +216,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 				// Two possible versions of these lines:
                 // <frame_num>, <sound_name>, <volume>, <model_name>, <min_dist>, <max_dist>
                 // <frame_num>, <sound_name>, <volume>, <x1>, <y1>, <z1>, <min_dist>, <max_dist>
-                unsigned int paramCount = line.entries.size();
+				unsigned int paramCount = static_cast<int>(line.entries.size());
 				if(paramCount != 6 && paramCount != 8)
 				{
 					std::cout << "Invalid param count of " << paramCount << " for animation asset " << GetName() << std::endl;

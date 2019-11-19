@@ -300,7 +300,7 @@ void FaceController::UpdateFaceTexture()
 		 
 		//TODO: Am I using the "bias" correctly?
 		//TODO: Is CATMULLROM the best filter? Some filters trigger an assertion if the x/y offset become too big...
-		const Vector2& leftEyeBias = mCharacterConfig->faceConfig.leftEyeBias;
+		//const Vector2& leftEyeBias = mCharacterConfig->faceConfig.leftEyeBias;
 		stbir_resize_subpixel(mCurrentLeftEyeTexture->GetPixelData(), mCurrentLeftEyeTexture->GetWidth(), mCurrentLeftEyeTexture->GetHeight(), 0,
 							  mDownSampledLeftEyeTexture->GetPixelData(), mDownSampledLeftEyeTexture->GetWidth(), mDownSampledLeftEyeTexture->GetHeight(), 0,
 							  STBIR_TYPE_UINT8, 4, -1, 0,
@@ -323,7 +323,7 @@ void FaceController::UpdateFaceTexture()
 		
 		//TODO: Am I using the "bias" correctly?
 		//TODO: Is CATMULLROM the best filter? Some filters trigger an assertion if the x/y offset become too big...
-		const Vector2& rightEyeBias = mCharacterConfig->faceConfig.rightEyeBias;
+		//const Vector2& rightEyeBias = mCharacterConfig->faceConfig.rightEyeBias;
 		stbir_resize_subpixel(mCurrentRightEyeTexture->GetPixelData(), mCurrentRightEyeTexture->GetWidth(), mCurrentRightEyeTexture->GetHeight(), 0,
 							  mDownSampledRightEyeTexture->GetPixelData(), mDownSampledRightEyeTexture->GetWidth(), mDownSampledRightEyeTexture->GetHeight(), 0,
 							  STBIR_TYPE_UINT8, 4, -1, 0,
