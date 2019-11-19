@@ -180,7 +180,7 @@ extern yy_size_t yyleng;
      *       existing scanners that call yyless() from OUTSIDE yylex. 
      *       One obvious solution it to make yy_act a global. I tried that, and saw
      *       a 5% performance hit in a non-yylineno scanner, because yy_act is
-     *       normally declared as a register variable-- so it is not worth it.
+     *       normally declared as a  variable-- so it is not worth it.
      */
     #define  YY_LESS_LINENO(n) \
             do { \
@@ -511,8 +511,8 @@ static yyconst flex_int32_t yy_rule_can_match_eol[48] =
 #define yymore() yymore_used_but_not_detected
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
-#line 1 "Sheep.l"
-#line 2 "Sheep.l"
+#line 1 "sheep.l"
+#line 2 "sheep.l"
 #include <string>
 #include <cstdlib>
 #include "SheepScanner.h"
@@ -522,7 +522,7 @@ static yyconst flex_int32_t yy_rule_can_match_eol[48] =
 using token = Sheep::Parser::token;
 using parser = Sheep::Parser;
 
-#define YY_USER_ACTION loc.step(); loc.columns(yyleng);
+#define YY_USER_ACTION loc.step(); loc.columns(static_cast<int>(yyleng));
 
 #define yyterminate() return parser::make_END(loc)
 
@@ -623,11 +623,11 @@ static int yy_flex_strlen (yyconst char * );
  */
 YY_DECL
 {
-	register yy_state_type yy_current_state;
-	register char *yy_cp, *yy_bp;
-	register int yy_act;
+	 yy_state_type yy_current_state;
+	 char *yy_cp, *yy_bp;
+	 int yy_act;
     
-#line 25 "Sheep.l"
+#line 25 "sheep.l"
 
 
 #line 634 "lex.yy.cc"
@@ -674,7 +674,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			 YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -722,239 +722,239 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 27 "Sheep.l"
+#line 27 "sheep.l"
 { }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 28 "Sheep.l"
+#line 28 "sheep.l"
 { }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 30 "Sheep.l"
+#line 30 "sheep.l"
 return parser::make_CODE(loc);
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 31 "Sheep.l"
+#line 31 "sheep.l"
 return parser::make_SYMBOLS(loc);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 33 "Sheep.l"
+#line 33 "sheep.l"
 return parser::make_INTVAR(loc);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 34 "Sheep.l"
+#line 34 "sheep.l"
 return parser::make_FLOATVAR(loc);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 35 "Sheep.l"
+#line 35 "sheep.l"
 return parser::make_STRINGVAR(loc);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 37 "Sheep.l"
+#line 37 "sheep.l"
 return parser::make_RETURN(loc);
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 38 "Sheep.l"
+#line 38 "sheep.l"
 return parser::make_WAIT(loc);
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 39 "Sheep.l"
+#line 39 "sheep.l"
 return parser::make_IF(loc);
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 40 "Sheep.l"
+#line 40 "sheep.l"
 return parser::make_ELSE(loc);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 41 "Sheep.l"
+#line 41 "sheep.l"
 return parser::make_GOTO(loc);
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "Sheep.l"
+#line 43 "sheep.l"
 return parser::make_COLON(loc);
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 44 "Sheep.l"
+#line 44 "sheep.l"
 return parser::make_SEMICOLON(loc);
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 45 "Sheep.l"
+#line 45 "sheep.l"
 return parser::make_COMMA(loc);
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 46 "Sheep.l"
+#line 46 "sheep.l"
 return parser::make_DOLLAR(loc);
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 47 "Sheep.l"
+#line 47 "sheep.l"
 return parser::make_OPENPAREN(loc);
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 48 "Sheep.l"
+#line 48 "sheep.l"
 return parser::make_CLOSEPAREN(loc);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 49 "Sheep.l"
+#line 49 "sheep.l"
 return parser::make_OPENBRACKET(loc);
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 50 "Sheep.l"
+#line 50 "sheep.l"
 return parser::make_CLOSEBRACKET(loc);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 52 "Sheep.l"
+#line 52 "sheep.l"
 return parser::make_QUOTE(loc);
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 54 "Sheep.l"
+#line 54 "sheep.l"
 return parser::make_EQUAL(loc);
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 55 "Sheep.l"
+#line 55 "sheep.l"
 return parser::make_NOTEQUAL(loc);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 56 "Sheep.l"
+#line 56 "sheep.l"
 return parser::make_ASSIGN(loc);
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 58 "Sheep.l"
+#line 58 "sheep.l"
 return parser::make_PLUS(loc);
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 59 "Sheep.l"
+#line 59 "sheep.l"
 return parser::make_MINUS(loc);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 60 "Sheep.l"
+#line 60 "sheep.l"
 return parser::make_MULTIPLY(loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 61 "Sheep.l"
+#line 61 "sheep.l"
 return parser::make_DIVIDE(loc);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 63 "Sheep.l"
+#line 63 "sheep.l"
 return parser::make_GTE(loc);
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 64 "Sheep.l"
+#line 64 "sheep.l"
 return parser::make_LTE(loc);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 65 "Sheep.l"
+#line 65 "sheep.l"
 return parser::make_GT(loc);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 66 "Sheep.l"
+#line 66 "sheep.l"
 return parser::make_LT(loc);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 68 "Sheep.l"
+#line 68 "sheep.l"
 return parser::make_NOT(loc);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 69 "Sheep.l"
+#line 69 "sheep.l"
 return parser::make_AND(loc);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 70 "Sheep.l"
+#line 70 "sheep.l"
 return parser::make_OR(loc);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 73 "Sheep.l"
+#line 73 "sheep.l"
 { return parser::make_FLOAT(strtof(yytext, nullptr), loc); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 74 "Sheep.l"
-{ return parser::make_INT(strtol(yytext, nullptr, 10), loc); }
+#line 74 "sheep.l"
+{ return parser::make_INT(static_cast<int>(strtol(yytext, nullptr, 10)), loc); }
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 75 "Sheep.l"
+#line 75 "sheep.l"
 { return parser::make_STRING(yytext, loc); }
 	YY_BREAK
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 76 "Sheep.l"
+#line 76 "sheep.l"
 { return parser::make_STRING(yytext, loc); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 78 "Sheep.l"
+#line 78 "sheep.l"
 { return parser::make_USERID(yytext, loc); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 79 "Sheep.l"
+#line 79 "sheep.l"
 { return parser::make_SYSID(yytext, loc); }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 81 "Sheep.l"
+#line 81 "sheep.l"
 BEGIN(COMMENT);
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 83 "Sheep.l"
+#line 83 "sheep.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 84 "Sheep.l"
+#line 84 "sheep.l"
 { } // eat comment in chunks
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 85 "Sheep.l"
+#line 85 "sheep.l"
 { } // eat the lone star
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 87 "Sheep.l"
+#line 87 "sheep.l"
 printf("bad input character '%s' at line %d\n", yytext, yylineno); yyterminate();
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 88 "Sheep.l"
+#line 88 "sheep.l"
 ECHO;
 	YY_BREAK
 #line 961 "lex.yy.cc"
@@ -1190,9 +1190,9 @@ void yyFlexLexer::LexerOutput( const char* buf, size_t size )
  */
 int yyFlexLexer::yy_get_next_buffer()
 {
-    	register char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
-	register char *source = (yytext_ptr);
-	register int number_to_move, i;
+    	 char *dest = YY_CURRENT_BUFFER_LVALUE->yy_ch_buf;
+	 char *source = (yytext_ptr);
+	 int number_to_move, i;
 	int ret_val;
 
 	if ( (yy_c_buf_p) > &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[(yy_n_chars) + 1] )
@@ -1324,14 +1324,14 @@ int yyFlexLexer::yy_get_next_buffer()
 
     yy_state_type yyFlexLexer::yy_get_previous_state()
 {
-	register yy_state_type yy_current_state;
-	register char *yy_cp;
+	 yy_state_type yy_current_state;
+	 char *yy_cp;
     
 	yy_current_state = (yy_start);
 
 	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
 		{
-		register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
+		 YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
 		if ( yy_accept[yy_current_state] )
 			{
 			(yy_last_accepting_state) = yy_current_state;
@@ -1356,10 +1356,10 @@ int yyFlexLexer::yy_get_next_buffer()
  */
     yy_state_type yyFlexLexer::yy_try_NUL_trans( yy_state_type yy_current_state )
 {
-	register int yy_is_jam;
-    	register char *yy_cp = (yy_c_buf_p);
+	 int yy_is_jam;
+    	 char *yy_cp = (yy_c_buf_p);
 
-	register YY_CHAR yy_c = 1;
+	 YY_CHAR yy_c = 1;
 	if ( yy_accept[yy_current_state] )
 		{
 		(yy_last_accepting_state) = yy_current_state;
@@ -1377,9 +1377,9 @@ int yyFlexLexer::yy_get_next_buffer()
 	return yy_is_jam ? 0 : yy_current_state;
 }
 
-    void yyFlexLexer::yyunput( int c, register char* yy_bp)
+    void yyFlexLexer::yyunput( int c,  char* yy_bp)
 {
-	register char *yy_cp;
+	 char *yy_cp;
     
     yy_cp = (yy_c_buf_p);
 
@@ -1389,10 +1389,10 @@ int yyFlexLexer::yy_get_next_buffer()
 	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
 		{ /* need to shift things up to make room */
 		/* +2 for EOB chars. */
-		register yy_size_t number_to_move = (yy_n_chars) + 2;
-		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
+		 yy_size_t number_to_move = (yy_n_chars) + 2;
+		 char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
 					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
-		register char *source =
+		 char *source =
 				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
 
 		while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
@@ -1825,7 +1825,7 @@ void yyFlexLexer::LexerError( yyconst char msg[] )
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 {
-	register int i;
+	 int i;
 	for ( i = 0; i < n; ++i )
 		s1[i] = s2[i];
 }
@@ -1834,7 +1834,7 @@ static void yy_flex_strncpy (char* s1, yyconst char * s2, int n )
 #ifdef YY_NEED_STRLEN
 static int yy_flex_strlen (yyconst char * s )
 {
-	register int n;
+	 int n;
 	for ( n = 0; s[n]; ++n )
 		;
 
@@ -1866,4 +1866,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 88 "Sheep.l"
+#line 88 "sheep.l"

@@ -31,7 +31,7 @@
 // version 2.2 of Bison.
 
 /**
- ** \file Sheep.tab.hh
+ ** \file sheep.tab.hh
  ** Define the Sheep::parser class.
  */
 
@@ -40,14 +40,14 @@
 #ifndef YY_YY_SHEEP_TAB_HH_INCLUDED
 # define YY_YY_SHEEP_TAB_HH_INCLUDED
 // //                    "%code requires" blocks.
-#line 31 "Sheep.yy" // lalr1.cc:392
+#line 32 "sheep.yy" // lalr1.cc:392
 
 	class SheepScanner;
 	class SheepCompiler;
 	#include "SheepScriptBuilder.h"
 	#include "SheepVM.h"
 
-#line 51 "Sheep.tab.hh" // lalr1.cc:392
+#line 51 "sheep.tab.hh" // lalr1.cc:392
 
 # include <cassert>
 # include <cstdlib> // std::abort
@@ -122,9 +122,9 @@
 # define YYDEBUG 0
 #endif
 
-#line 17 "Sheep.yy" // lalr1.cc:392
+#line 18 "sheep.yy" // lalr1.cc:392
 namespace Sheep {
-#line 128 "Sheep.tab.hh" // lalr1.cc:392
+#line 128 "sheep.tab.hh" // lalr1.cc:392
 
 
 
@@ -1475,9 +1475,9 @@ namespace Sheep {
   }
 
 
-#line 17 "Sheep.yy" // lalr1.cc:392
+#line 18 "sheep.yy" // lalr1.cc:392
 } // Sheep
-#line 1481 "Sheep.tab.hh" // lalr1.cc:392
+#line 1481 "sheep.tab.hh" // lalr1.cc:392
 
 
 

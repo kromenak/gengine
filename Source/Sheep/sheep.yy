@@ -5,6 +5,7 @@
 }
 
 /* Tell bison to generate C++ output */
+%language "C++"
 %skeleton "lalr1.cc"
 
 /* We use features that require Bison 3.0+ */

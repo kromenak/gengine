@@ -71,7 +71,7 @@ using parser = Sheep::Parser;
 
 
 -?([0-9])+\.([0-9])+	{ return parser::make_FLOAT(strtof(yytext, nullptr), loc); }
--?([0-9])+				{ return parser::make_INT(strtol(yytext, nullptr, 10), loc); }
+-?([0-9])+				{ return parser::make_INT(static_cast<int>(strtol(yytext, nullptr, 10)), loc); }
 \"([^\\\"]|\\.)*\"		{ return parser::make_STRING(yytext, loc); }
 \|\<[^\>\|]*\>\|		{ return parser::make_STRING(yytext, loc); }
 
