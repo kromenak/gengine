@@ -361,8 +361,8 @@ static yyconst flex_int16_t yy_accept[101] =
        30,   22,   29,   40,   41,   41,   41,   41,   41,   10,
        41,   41,   41,   41,   41,    0,   35,   44,   43,    2,
        36,   41,   41,   41,   41,    5,   41,   41,   41,   41,
-        0,    0,    3,   11,   41,   12,   41,   41,   41,    9,
-       39,    6,   41,   41,   41,    8,    7,   41,    4,    0
+        0,    0,    4,   11,   41,   12,   41,   41,   41,    9,
+       39,    6,   41,   41,   41,    8,    7,   41,    3,    0
 
     } ;
 
@@ -374,14 +374,14 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    2,    4,    5,    1,    6,    1,    7,    1,    8,
         9,   10,   11,   12,   13,   14,   15,   16,   16,   16,
        16,   16,   16,   16,   16,   16,   16,   17,   18,   19,
-       20,   21,    1,    1,   22,   22,   22,   22,   22,   22,
-       22,   22,   22,   22,   22,   22,   22,   22,   22,   22,
-       22,   22,   22,   22,   22,   22,   22,   22,   22,   22,
-        1,   23,    1,    1,   24,    1,   25,   26,   27,   28,
+       20,   21,    1,    1,   22,   23,   24,   25,   26,   27,
+       28,   29,   30,   29,   29,   31,   32,   33,   34,   29,
+       29,   35,   36,   37,   38,   29,   39,   29,   40,   29,
+        1,   41,    1,    1,   42,    1,   43,   44,   45,   46,
 
-       29,   30,   31,   22,   32,   22,   22,   33,   34,   35,
-       36,   22,   22,   37,   38,   39,   40,   22,   41,   22,
-       42,   22,   43,   44,   45,    1,    1,    1,    1,    1,
+       47,   48,   49,   29,   50,   29,   29,   51,   52,   53,
+       54,   29,   29,   55,   56,   57,   58,   29,   59,   29,
+       60,   29,   61,   62,   63,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
@@ -398,29 +398,31 @@ static yyconst flex_int32_t yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static yyconst flex_int32_t yy_meta[46] =
+static yyconst flex_int32_t yy_meta[64] =
     {   0,
         1,    1,    2,    1,    1,    3,    1,    1,    1,    4,
         1,    1,    1,    1,    1,    3,    1,    1,    1,    1,
-        1,    3,    1,    3,    3,    3,    3,    3,    3,    3,
+        1,    3,    3,    3,    3,    3,    3,    3,    3,    3,
         3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
-        3,    3,    1,    5,    1
+        1,    3,    3,    3,    3,    3,    3,    3,    3,    3,
+        3,    3,    3,    3,    3,    3,    3,    3,    3,    3,
+        1,    5,    1
     } ;
 
 static yyconst flex_int16_t yy_base[107] =
     {   0,
-        0,    0,   43,   44,  183,  184,   46,   48,  162,   47,
-      184,  174,  184,  184,  184,  184,  184,  164,   45,   42,
-      184,  184,  152,  149,  147,  148,   51,   53,   55,   56,
-       59,   61,   57,   58,  184,   47,  184,    0,  184,  138,
-       66,  184,   70,  184,  149,  184,   57,  184,    0,  132,
-      184,  184,  184,  184,  141,   70,   66,   71,   72,  138,
-       73,   74,   68,   75,   76,  121,  184,    0,  184,    0,
-      124,   89,   91,   78,   79,  132,   94,   95,   96,  100,
-      116,   92,  129,  127,  104,  126,  108,  111,  113,  125,
-      184,  124,  115,  110,  118,  123,  122,  117,  120,  184,
+        0,    0,   61,   62,  226,  239,   64,   66,  193,   65,
+      239,  205,  239,  239,  239,  239,  239,  195,   63,   60,
+      239,  239,  189,  188,  185,  198,   69,   71,   73,   74,
+       78,   83,   75,   76,  239,   67,  239,    0,  239,  185,
+       85,  239,   80,  239,  196,  239,   76,  239,    0,  181,
+      239,  239,  239,  239,  190,   88,   89,   93,  101,  186,
+      104,  111,   85,  110,  127,  167,  239,    0,  239,    0,
+      169,  133,  137,  130,  112,  173,  131,  144,  147,  138,
+      155,  110,  161,  158,  145,  108,  143,  148,  149,   95,
+      239,   94,  154,  165,  159,   91,   90,  150,   87,  239,
 
-      155,  160,  122,  165,  170,  175
+      214,  219,   80,  224,  229,  234
     } ;
 
 static yyconst flex_int16_t yy_def[107] =
@@ -439,62 +441,80 @@ static yyconst flex_int16_t yy_def[107] =
       100,  100,  100,  100,  100,  100
     } ;
 
-static yyconst flex_int16_t yy_nxt[230] =
+static yyconst flex_int16_t yy_nxt[303] =
     {   0,
         6,    7,    8,    9,   10,   11,   12,   13,   14,   15,
        16,   17,   18,    6,   19,   20,   21,   22,   23,   24,
-       25,   26,    6,    6,   26,   26,   27,   26,   28,   29,
-       30,   31,   26,   26,   26,   26,   32,   33,   26,   26,
-       34,   26,   35,   36,   37,   39,   39,   41,   41,   41,
-       41,   44,   40,   40,   48,   50,   54,   47,   54,   49,
-       54,   54,   54,   54,   54,   66,   54,   41,   41,   45,
-       50,   54,   47,   54,   44,   54,   54,   54,   54,   54,
-       54,   54,   65,   54,   54,   57,   56,   58,   60,   62,
-       67,   59,   45,   61,   54,   63,   54,   72,   64,   54,
+       25,   26,   26,   27,   26,   28,   29,   30,   26,   31,
+       26,   26,   26,   26,   32,   33,   26,   26,   34,   26,
+        6,    6,   26,   26,   27,   26,   28,   29,   30,   31,
+       26,   26,   26,   26,   32,   33,   26,   26,   34,   26,
+       35,   36,   37,   39,   39,   41,   41,   41,   41,   44,
+       40,   40,   48,   50,   54,   47,   54,   49,   54,   54,
+       54,   54,   55,   54,   44,   66,   41,   41,   54,   50,
+       54,   47,   54,   54,   54,   54,   54,   65,   54,   54,
 
-       54,   54,   85,   73,   78,   54,   74,   80,   79,   54,
-       75,   76,   77,   54,   86,   54,   54,   83,   54,   84,
-       54,   89,   54,   54,   55,   54,   88,   54,   54,   54,
-       54,   54,   54,   87,   54,   91,   82,   54,   90,   71,
-       97,   82,   92,   54,   93,   94,   54,   71,   95,   96,
-       98,  100,   69,   54,   99,   38,   38,   38,   38,   38,
-       43,   43,   43,   43,   43,   68,   53,   68,   52,   68,
-       70,   51,   70,   70,   70,   81,   81,   81,   81,   47,
-       46,   42,  100,    5,  100,  100,  100,  100,  100,  100,
+       54,   57,   56,   58,   60,   45,   54,   59,   62,   54,
+       61,   63,   72,   54,   64,   54,   54,   54,   65,   78,
+       45,   57,   56,   58,   73,   60,   74,   59,   67,   62,
+       61,   63,   54,   72,   64,   54,   54,   75,   54,   78,
+       76,   79,   54,   54,   73,   86,   74,   77,   54,   54,
+       54,   85,   54,   54,   54,   54,   80,   75,   83,   54,
+       76,   79,   84,   54,   54,   86,   54,   77,   87,   89,
+       54,   91,   85,   88,   90,   82,   80,   93,   54,   83,
+       94,   92,   95,   84,   71,   99,   96,   82,   87,   98,
+       89,   54,   97,   88,   90,   54,   71,   93,  100,   69,
+
+       94,   92,   95,   54,   53,   99,   96,   52,   51,   98,
+       47,   46,   42,   97,   38,   38,   38,   38,   38,   43,
+       43,   43,   43,   43,   68,  100,   68,  100,   68,   70,
+      100,   70,   70,   70,   81,   81,   81,   81,    5,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
       100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
 
-      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
-      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
-      100,  100,  100,  100,  100,  100,  100,  100,  100
+      100,  100
     } ;
 
-static yyconst flex_int16_t yy_chk[230] =
+static yyconst flex_int16_t yy_chk[303] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    3,    4,    7,    7,    8,
-        8,   10,    3,    4,   19,   20,   27,   20,   28,   19,
-       29,   30,   33,   34,   31,   36,   32,   41,   41,   10,
-       47,   57,   47,   63,   43,   56,   58,   59,   61,   62,
-       64,   65,   34,   74,   75,   28,   27,   29,   31,   32,
-       36,   30,   43,   31,   72,   33,   73,   56,   33,   77,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
+        1,    1,    1,    3,    4,    7,    7,    8,    8,   10,
+        3,    4,   19,   20,   27,   20,   28,   19,   29,   30,
+       33,   34,  103,   31,   43,   36,   41,   41,   32,   47,
+       63,   47,   99,   56,   57,   97,   96,   34,   58,   92,
 
-       78,   79,   74,   57,   63,   80,   58,   65,   64,   85,
-       59,   61,   62,   87,   75,   94,   88,   72,   89,   73,
-       93,   79,   98,   95,  103,   99,   78,   97,   96,   92,
-       90,   86,   84,   77,   83,   82,   81,   76,   80,   71,
-       94,   66,   85,   60,   87,   88,   55,   50,   89,   93,
-       95,   45,   40,   26,   98,  101,  101,  101,  101,  101,
-      102,  102,  102,  102,  102,  104,   25,  104,   24,  104,
-      105,   23,  105,  105,  105,  106,  106,  106,  106,   18,
-       12,    9,    5,  100,  100,  100,  100,  100,  100,  100,
+       90,   28,   27,   29,   31,   10,   59,   30,   32,   61,
+       31,   33,   56,   86,   33,   64,   62,   75,   34,   63,
+       43,   28,   27,   29,   57,   31,   58,   30,   36,   32,
+       31,   33,   65,   56,   33,   74,   77,   59,   72,   63,
+       61,   64,   73,   80,   57,   75,   58,   62,   87,   78,
+       85,   74,   79,   88,   89,   98,   65,   59,   72,   93,
+       61,   64,   73,   84,   95,   75,   83,   62,   77,   79,
+       94,   82,   74,   78,   80,   81,   65,   87,   76,   72,
+       88,   85,   89,   73,   71,   98,   93,   66,   77,   95,
+       79,   60,   94,   78,   80,   55,   50,   87,   45,   40,
+
+       88,   85,   89,   26,   25,   98,   93,   24,   23,   95,
+       18,   12,    9,   94,  101,  101,  101,  101,  101,  102,
+      102,  102,  102,  102,  104,    5,  104,    0,  104,  105,
+        0,  105,  105,  105,  106,  106,  106,  106,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
+      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
       100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
 
-      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
-      100,  100,  100,  100,  100,  100,  100,  100,  100,  100,
-      100,  100,  100,  100,  100,  100,  100,  100,  100
+      100,  100
     } ;
 
 /* Table of booleans, true if rule could match eol. */
@@ -513,20 +533,36 @@ static yyconst flex_int32_t yy_rule_can_match_eol[48] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "sheep.l"
 #line 2 "sheep.l"
-#include <string>
-#include <cstdlib>
+// Generated code will use SheepScanner symbols (b/c of YY_DECL and using keywords).
 #include "SheepScanner.h"
+
+// SheepScanner is a class that inherits yyFlexLexer. See SheepScanner.h for this function declaration.
+// This allows our compiler/manager classes to treat SheepScanner as a "facade" for the entire compiler process.
+// It also allows us to pass in a bunch of extra stuff used during compilation (scanner, compiler, builder). 
 #undef YY_DECL
 #define YY_DECL Sheep::Parser::symbol_type SheepScanner::yylex(SheepScanner& scanner, SheepCompiler& compiler, SheepScriptBuilder& builder)
 
+// Since we're using namespaces, alias to just token and parser for later code.
 using token = Sheep::Parser::token;
 using parser = Sheep::Parser;
 
+// Row/column tracking for error reporting.
+// This code is run every time yylex is called.
 #define YY_USER_ACTION loc.step(); loc.columns(static_cast<int>(yyleng));
 
+// If scanner terminates (end of code or end of file), always put an END statement in the bytecode.
 #define yyterminate() return parser::make_END(loc)
+/* We're making a C++ scanner (aka it is contained within a class) */
+/* Since we're using C++ with a custom subclass, tell code generator to put classes in SheepScanner:: instead of yyFlexLexer:: */
+/* yywrap function returns 1 if there's no more input upon reaching EOF, 0 if there is more input at EOF. */
+/* Since we always want to say "no more input" at EOF, we can just use this option to specify that. */
+/* If specified, current line number of input is tracked in variable yylineno. */
+/* Specify that we want to use start condition stacks. Allows us to use different scopes for "normal code" and "comments" for example. */
+/* We don't need an interactive scanner/parser. We are using it from our own code. */
+/* We don't care about case (code == CODE == CoDe) */
+/* Define all "start conditions" used in the scanner here. Besides the implicit INITIAL condition, we only use COMMENT right now.*/
 
-#line 530 "lex.yy.cc"
+#line 566 "lex.yy.cc"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -627,10 +663,10 @@ YY_DECL
 	 char *yy_cp, *yy_bp;
 	 int yy_act;
     
-#line 25 "sheep.l"
+#line 48 "sheep.l"
 
 
-#line 634 "lex.yy.cc"
+#line 670 "lex.yy.cc"
 
 	if ( !(yy_init) )
 		{
@@ -722,242 +758,242 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 27 "sheep.l"
-{ }
+#line 50 "sheep.l"
+{ } 	/* Ignore 1 or more spaces, tabs, or newlines. */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 28 "sheep.l"
-{ }
+#line 51 "sheep.l"
+{ } 			/* Ignore any single-line comments. */
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 30 "sheep.l"
-return parser::make_CODE(loc);
+#line 53 "sheep.l"
+return parser::make_SYMBOLS(loc); /* Symbols section contains variable declarations. */
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 31 "sheep.l"
-return parser::make_SYMBOLS(loc);
+#line 54 "sheep.l"
+return parser::make_CODE(loc);    /* Code section contains functions and operations on variables. */
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 33 "sheep.l"
-return parser::make_INTVAR(loc);
+#line 56 "sheep.l"
+return parser::make_INTVAR(loc);	/* Sheep only allows three types of variables: int, float, and string. */
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 34 "sheep.l"
+#line 57 "sheep.l"
 return parser::make_FLOATVAR(loc);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 35 "sheep.l"
+#line 58 "sheep.l"
 return parser::make_STRINGVAR(loc);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 37 "sheep.l"
-return parser::make_RETURN(loc);
+#line 60 "sheep.l"
+return parser::make_RETURN(loc); /* Returns from a function before the end is reached. */
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 38 "sheep.l"
-return parser::make_WAIT(loc);
+#line 61 "sheep.l"
+return parser::make_WAIT(loc);   /* Sheep's async operation support - some commands can be "waited on" before continuing script execution many frames later. */
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 39 "sheep.l"
-return parser::make_IF(loc);
+#line 62 "sheep.l"
+return parser::make_IF(loc);	 /* if/else are your standard logic control statements. Combine to "else if" as well. */
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 40 "sheep.l"
+#line 63 "sheep.l"
 return parser::make_ELSE(loc);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 41 "sheep.l"
-return parser::make_GOTO(loc);
+#line 64 "sheep.l"
+return parser::make_GOTO(loc);   /* Sheep supports labels and gotos...for those who like to live dangerously. */
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 43 "sheep.l"
-return parser::make_COLON(loc);
+#line 66 "sheep.l"
+return parser::make_COLON(loc);		 /* Used for goto labels (e.g. MyLabel:) */
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 44 "sheep.l"
-return parser::make_SEMICOLON(loc);
+#line 67 "sheep.l"
+return parser::make_SEMICOLON(loc);	 /* Each statement in Sheep is ended by a semicolon - similar to C-style languages. */
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 45 "sheep.l"
-return parser::make_COMMA(loc);
+#line 68 "sheep.l"
+return parser::make_COMMA(loc);      /* Separates parameters in function parameter lists. */
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 46 "sheep.l"
-return parser::make_DOLLAR(loc);
+#line 70 "sheep.l"
+return parser::make_DOLLAR(loc);	 /* Dollar symbol is used to identify user-specified symbols. All user-defined symbols must end with $. */
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 47 "sheep.l"
-return parser::make_OPENPAREN(loc);
+#line 72 "sheep.l"
+return parser::make_OPENPAREN(loc);  /* Open/close parentheses are used for function calls and math operation precedence. */
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 48 "sheep.l"
+#line 73 "sheep.l"
 return parser::make_CLOSEPAREN(loc);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 49 "sheep.l"
-return parser::make_OPENBRACKET(loc);
+#line 75 "sheep.l"
+return parser::make_OPENBRACKET(loc); /* Open/close braces are used for section/function/logic scopes. */
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 50 "sheep.l"
+#line 76 "sheep.l"
 return parser::make_CLOSEBRACKET(loc);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 52 "sheep.l"
-return parser::make_QUOTE(loc);
+#line 78 "sheep.l"
+return parser::make_QUOTE(loc); 	/* Signifies start/end of a string literal. */
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 54 "sheep.l"
-return parser::make_EQUAL(loc);
+#line 80 "sheep.l"
+return parser::make_EQUAL(loc);		/* Equality and inequality comparisons. */
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 55 "sheep.l"
+#line 81 "sheep.l"
 return parser::make_NOTEQUAL(loc);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 56 "sheep.l"
-return parser::make_ASSIGN(loc);
+#line 83 "sheep.l"
+return parser::make_ASSIGN(loc); 	/* Assignment to a variable. */
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 58 "sheep.l"
-return parser::make_PLUS(loc);
+#line 85 "sheep.l"
+return parser::make_PLUS(loc);		/* Basic math operators. Sheep doesn't support +=, -=, etc. */
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 59 "sheep.l"
+#line 86 "sheep.l"
 return parser::make_MINUS(loc);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 60 "sheep.l"
+#line 87 "sheep.l"
 return parser::make_MULTIPLY(loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 61 "sheep.l"
+#line 88 "sheep.l"
 return parser::make_DIVIDE(loc);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 63 "sheep.l"
-return parser::make_GTE(loc);
+#line 90 "sheep.l"
+return parser::make_GTE(loc); 		/* Logical comparisons. */
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 64 "sheep.l"
+#line 91 "sheep.l"
 return parser::make_LTE(loc);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 65 "sheep.l"
+#line 92 "sheep.l"
 return parser::make_GT(loc);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 66 "sheep.l"
+#line 93 "sheep.l"
 return parser::make_LT(loc);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 68 "sheep.l"
-return parser::make_NOT(loc);
+#line 95 "sheep.l"
+return parser::make_NOT(loc);		/* Logical operators. */
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 69 "sheep.l"
+#line 96 "sheep.l"
 return parser::make_AND(loc);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 70 "sheep.l"
+#line 97 "sheep.l"
 return parser::make_OR(loc);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 73 "sheep.l"
-{ return parser::make_FLOAT(strtof(yytext, nullptr), loc); }
+#line 100 "sheep.l"
+{ return parser::make_FLOAT(strtof(yytext, nullptr), loc); }	/* Float literals are identified by use of a decimal point (e.g. 4.5). Sheep DOES NOT use "f" suffix. */
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 74 "sheep.l"
-{ return parser::make_INT(static_cast<int>(strtol(yytext, nullptr, 10)), loc); }
+#line 101 "sheep.l"
+{ return parser::make_INT(static_cast<int>(strtol(yytext, nullptr, 10)), loc); }	/* Int literals are just whole numbers. */
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 75 "sheep.l"
-{ return parser::make_STRING(yytext, loc); }
+#line 102 "sheep.l"
+{ return parser::make_STRING(yytext, loc); }	/* String literals have quotes around them. */
 	YY_BREAK
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 76 "sheep.l"
-{ return parser::make_STRING(yytext, loc); }
+#line 103 "sheep.l"
+{ return parser::make_STRING(yytext, loc); }	/* String literals with from |<This is a string>| - don't know if we need this? */
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 78 "sheep.l"
-{ return parser::make_USERID(yytext, loc); }
+#line 105 "sheep.l"
+{ return parser::make_USERID(yytext, loc); } 	/* A user id is any non-keyword or non-literal string with a $ on the end. Used for user-defined functions and variables. */
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 79 "sheep.l"
-{ return parser::make_SYSID(yytext, loc); }
+#line 106 "sheep.l"
+{ return parser::make_SYSID(yytext, loc); }		/* A system id is any non-keyworld or non-literal with no $ on the end. Used mostly for systen functions. */
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 81 "sheep.l"
-BEGIN(COMMENT);
+#line 108 "sheep.l"
+BEGIN(COMMENT); 	/*  Uses "start conditions" to capture block comments. */
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 83 "sheep.l"
+#line 109 "sheep.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 84 "sheep.l"
+#line 110 "sheep.l"
 { } // eat comment in chunks
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 85 "sheep.l"
+#line 111 "sheep.l"
 { } // eat the lone star
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 87 "sheep.l"
-printf("bad input character '%s' at line %d\n", yytext, yylineno); yyterminate();
+#line 113 "sheep.l"
+printf("bad input character '%s' at line %d\n", yytext, yylineno); yyterminate(); /* If we get to this point, we have some unexpected input. */
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 88 "sheep.l"
+#line 114 "sheep.l"
 ECHO;
 	YY_BREAK
-#line 961 "lex.yy.cc"
+#line 997 "lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -1866,4 +1902,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 88 "sheep.l"
+#line 114 "sheep.l"
