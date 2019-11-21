@@ -1,5 +1,6 @@
 /* This code is added to the top of sheep.tab.cc */
-%code top {
+%code top 
+{
 	#include <cstdlib>
 	#include <string>
 }
@@ -9,6 +10,7 @@
 %skeleton "lalr1.cc"
 
 /* We use features that require Bison 3.0+ */
+/* As of writing, latest is v3.4, but macOS only has 3.0.2 available by default. */
 %require "3.0"
 
 /* Tell bison to write tokens to .hh file */
@@ -27,15 +29,19 @@
 /* Helps catch invalid uses. */
 %define parse.assert
 
+/* Output more verbose error messages. */
+%define parse.error verbose
+
 /* This code is added to the top of sheep.tab.hh. */
 %code requires 
 {
 	class SheepScanner;
 	class SheepCompiler;
-	#include "SheepScriptBuilder.h"
-	#include "SheepVM.h"
+	class SheepScriptBuilder;
+	#include "SheepVM.h" // Declarations for SheepValue and SheepValueType
 }
 
+/* Specifies (in order) parameters that are passed in for us to use in our code. Note that this matches the YY_DECL from the Flex file. */
 %param { SheepScanner& scanner }
 %param { SheepCompiler& compiler }
 %param { SheepScriptBuilder& builder }
@@ -44,6 +50,7 @@
 %code
 {
 	#include "SheepCompiler.h"
+	#include "SheepScriptBuilder.h"
 
 	// When requesting yylex, redirect to scanner.yylex.
 	#undef yylex
@@ -54,16 +61,24 @@
 	#undef yytext
 	#define yytext scanner.GetYYText()
 
+    // In case of error, just pass that back to our SheepCompiler class to handle.
+    // This is probably the main reason we need to pass in the compiler reference!
 	void Sheep::Parser::error(const location_type& loc, const std::string& msg)
 	{
-		compiler.error(loc, msg);
+		compiler.Error(loc, msg);
 	}
+
+	#define BUILDER_ERROR_CHECK if(builder.CheckError(yyla.location, *this)) { YYERROR; }
 }
 
 /* Causes location to be tracked, and yylloc value is populated for use. */
 %locations
 /* TODO: Add %initial-action block to set filename for location variable */
 
+/* 
+	TOKENS
+   	Declare all the unique tokens that are used to generate/identify more complex types in the code.
+*/
 %token END 0 "end of file"
 
 /* section keywords */
@@ -73,11 +88,19 @@
 %token IF ELSE GOTO RETURN
 
 /* various other symbols for a c-like language */
-%token DOLLAR COMMA COLON SEMICOLON QUOTE
-%token OPENPAREN CLOSEPAREN OPENBRACKET CLOSEBRACKET
+%token COMMA ","
+%token COLON ":"
+%token SEMICOLON ";"
+%token OPENPAREN "("
+%token CLOSEPAREN ")"
+%token OPENBRACKET "{"
+%token CLOSEBRACKET "}"
+
+/* TODO: These tokens are not used below, so do we really need them at all? */
+%token DOLLAR QUOTE 
 
 /* pretty critical keyword for scripting synchronization */
-%token WAIT
+%token WAIT "wait"
 
 /* Some other keywords outlined in the language doc, but not sure if they are used */
 %token YIELD EXPORT BREAKPOINT SITNSPIN
@@ -85,27 +108,38 @@
 /* variable types */
 %token INTVAR FLOATVAR STRINGVAR
 
-/* constant types */
+/* literals - we're also indicating the type for these guys */
 %token <int> INT
 %token <float> FLOAT
 %token <std::string> STRING
 
-/* symbol dictating a user-defined name (variable or function) */
+/* symbol dictating a user-defined name (variable or function) or a system name (function) */
 %token <std::string> USERID
 %token <std::string> SYSID
 
+/*
+	TYPES
+	Here we declare what the "type" is of certain complex/non-terminal symbols are.
+
+	For example, an "expr" (e.g. 4 + 4) has a type as it's output.
+	Similarly, a system function always returns a value (even void "under the hood" for simplicity).
+
+	We use "SheepValue" as the type. This is defined in C++ as a union with int/float/string values.
+	We are essentially saying that the type of these symbols is one of those, and we'll figure it out in code which is which.
+*/
 %type <SheepValue> expr
 %type <SheepValue> sysfunc_call
 
-/* %left dictates left associativity, which means multiple operators at once will group
+/* 
+   OPERATOR ASSOCIATIVITY
+   %left dictates left associativity, which means multiple operators at once will group
    to the left first. Ex: x OP y OP z with '%left OP' means ((x OP y) OP z).
 
    Also, the order here defines precendence of associativity. The ones declared later
    will group FIRST. Ex: NOT is the lowest on the list so that it will group before
    anything else.
 
-   For pretty much ALL operators, we want left associativity 
-
+   For _most_ operators, we want left associativity.
    Since Sheep is C-like, we base the precendences off of C (http://en.cppreference.com/w/c/language/operator_precedence)
    */
 %right ASSIGN
@@ -235,13 +269,13 @@ expr: sysfunc_call 						{ $$ = $1; } 												/* PrintString("Ahhh") */
 
 /* a sysfunc call is like GetEgoName(); or PrintString("Ahh");
    it can have zero or more arguments */
-sysfunc_call: SYSID OPENPAREN sysfunc_call_args CLOSEPAREN { auto type = builder.CallSysFunction($1); $$ = SheepValue(type); }
+sysfunc_call: SYSID OPENPAREN sysfunc_call_args CLOSEPAREN { auto type = builder.CallSysFunc($1); $$ = SheepValue(type); BUILDER_ERROR_CHECK; }
 	;
 
 /* sysfunc call args are either empty, or a list or args */
 sysfunc_call_args: %empty				{ } /* No arg */
-	| expr 								{ } /* 5 + 2 */
-	| sysfunc_call_args COMMA expr 		{ } /* 5 + 2, "Gab", GetCameraFov() */
+	| expr 								{ builder.AddToSysFuncArgCount(); } /* 5 + 2 */
+	| sysfunc_call_args COMMA expr 		{ builder.AddToSysFuncArgCount(); } /* 5 + 2, "Gab", GetCameraFov() */
 	;
 
 if_else_block: if_statement

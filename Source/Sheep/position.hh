@@ -50,7 +50,7 @@
 #  endif
 # endif
 
-#line 18 "sheep.yy" // location.cc:337
+#line 20 "sheep.yy" // location.cc:337
 namespace Sheep {
 #line 56 "position.hh" // location.cc:337
   /// Abstract a position.
@@ -174,7 +174,7 @@ namespace Sheep {
     return ostr << pos.line << '.' << pos.column;
   }
 
-#line 18 "sheep.yy" // location.cc:337
+#line 20 "sheep.yy" // location.cc:337
 } // Sheep
 #line 180 "position.hh" // location.cc:337
 #endif // !YY_YY_POSITION_HH_INCLUDED

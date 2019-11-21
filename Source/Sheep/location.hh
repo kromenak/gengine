@@ -40,7 +40,7 @@
 
 # include "position.hh"
 
-#line 18 "sheep.yy" // location.cc:337
+#line 20 "sheep.yy" // location.cc:337
 namespace Sheep {
 #line 46 "location.hh" // location.cc:337
   /// Abstract a location.
@@ -186,7 +186,7 @@ namespace Sheep {
     return ostr;
   }
 
-#line 18 "sheep.yy" // location.cc:337
+#line 20 "sheep.yy" // location.cc:337
 } // Sheep
 #line 192 "location.hh" // location.cc:337
 #endif // !YY_YY_LOCATION_HH_INCLUDED

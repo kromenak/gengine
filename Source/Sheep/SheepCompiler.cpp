@@ -10,8 +10,10 @@
 #include <fstream>
 #include <sstream>
 
+#include "Services.h"
 #include "SheepAPI.h"
 #include "SheepScriptBuilder.h"
+#include "StringUtil.h"
 
 SheepCompiler::~SheepCompiler()
 {
@@ -64,7 +66,6 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
         int result = mParser->parse();
         if(result == 0)
         {
-            //std::cout << "Parsed sheep successfully." << std::endl;
             SheepScript* sheepScript = new SheepScript("", builder);
             return sheepScript;
         }
@@ -81,14 +82,16 @@ SheepScript* SheepCompiler::Compile(std::istream& stream)
     }
 }
 
-void SheepCompiler::error(const Sheep::location& location, const std::string& message)
+void SheepCompiler::Error(const Sheep::location& location, const std::string& message)
 {
-    std::cerr << "Sheep Compiler Error: " << location << ": " << message << std::endl;
-}
-
-void SheepCompiler::error(const std::string& message)
-{
-    std::cerr << "Sheep Compiler Error: " << message << std::endl;
+	int line = location.begin.line;
+	int col = location.begin.column;
+	std::string section = "Code"; //TODO: I think <Code> is dynamic and changes based on whether section with error is Symbols or Code section.
+	std::string sheepContext = "'Console:2'"; //TODO: This should be generated from sheep name.
+	
+	std::string reportMsg = StringUtil::Format("GK3 compiler error at '%s' (line %d, col %d) <%s>\n%s",
+											   sheepContext.c_str(), line, col, section.c_str(), message.c_str());
+	Services::GetReports()->Log("SheepCompilerError", reportMsg);
 }
 
 void SheepCompiler::DebugOutputTokens(SheepScanner *scanner)

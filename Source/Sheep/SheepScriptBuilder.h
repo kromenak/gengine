@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "SheepScript.h"
+#include "sheep.tab.hh"
 
 class SheepScriptBuilder
 {
@@ -31,7 +32,10 @@ public:
     
     void SitnSpin();
     void Yield();
-    SheepValueType CallSysFunction(std::string sysFuncName);
+	
+	void AddToSysFuncArgCount() { ++mSysFuncArgCount; }
+    SheepValueType CallSysFunc(std::string sysFuncName);
+	
     //Branch
     void BranchGoto(std::string labelName);
     //BranchIfZero
@@ -66,7 +70,10 @@ public:
     void Not();
     
     void Breakpoint();
+	
+	bool CheckError(const Sheep::Parser::location_type& loc, Sheep::Parser& parser) const;
     
+	// After "building" the script's bytecode and tables, these functions are used to access that data.
     std::vector<SysImport> GetSysImports() { return mSysImports; }
     std::unordered_map<int, std::string> GetStringConsts() { return mStringConstsByOffset; }
     std::vector<SheepValue> GetVariables() { return mVariables; }
@@ -76,6 +83,10 @@ public:
 private:
     // Definition for any system functions used.
     std::vector<SysImport> mSysImports;
+	
+	// When building system function calls, its useful to keep track of the arg count given by the user.
+	// If the arg count doesn't match the expected number of arguments, we can generate a compiler error.
+	int mSysFuncArgCount = 0;
     
     // String constants, keyed by data offset, since that's how bytecode identifies them.
     std::vector<std::string> mStringConsts;
@@ -83,7 +94,7 @@ private:
     std::unordered_map<int, std::string> mStringConstsByOffset;
     
     // Represents variable ordering, types, and default values.
-    // Bytecode only cares about the index of the variable.
+    // Bytecode only cares about the index of the variable. But we maintain a map by name to detect duplicates.
     std::vector<SheepValue> mVariables;
     std::unordered_map<std::string, int> mVariableIndexByName;
     
@@ -96,6 +107,9 @@ private:
     
     // A vector for building the bytecode section.
     std::vector<char> mBytecode;
+	
+	// In case of error, this flag will be set.
+	std::string mErrorMessage;
     
     void AddInstruction(SheepInstruction instr);
     
@@ -103,4 +117,6 @@ private:
     void AddFloatArg(float arg);
     
     int GetStringConstOffset(std::string stringConst);
+	
+	void SetError(const std::string& message);
 };

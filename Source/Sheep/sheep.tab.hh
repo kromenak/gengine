@@ -40,12 +40,12 @@
 #ifndef YY_YY_SHEEP_TAB_HH_INCLUDED
 # define YY_YY_SHEEP_TAB_HH_INCLUDED
 // //                    "%code requires" blocks.
-#line 32 "sheep.yy" // lalr1.cc:392
+#line 37 "sheep.yy" // lalr1.cc:392
 
 	class SheepScanner;
 	class SheepCompiler;
-	#include "SheepScriptBuilder.h"
-	#include "SheepVM.h"
+	class SheepScriptBuilder;
+	#include "SheepVM.h" // Declarations for SheepValue and SheepValueType
 
 #line 51 "sheep.tab.hh" // lalr1.cc:392
 
@@ -122,7 +122,7 @@
 # define YYDEBUG 0
 #endif
 
-#line 18 "sheep.yy" // lalr1.cc:392
+#line 20 "sheep.yy" // lalr1.cc:392
 namespace Sheep {
 #line 128 "sheep.tab.hh" // lalr1.cc:392
 
@@ -334,15 +334,15 @@ namespace Sheep {
         ELSE = 261,
         GOTO = 262,
         RETURN = 263,
-        DOLLAR = 264,
-        COMMA = 265,
-        COLON = 266,
-        SEMICOLON = 267,
-        QUOTE = 268,
-        OPENPAREN = 269,
-        CLOSEPAREN = 270,
-        OPENBRACKET = 271,
-        CLOSEBRACKET = 272,
+        COMMA = 264,
+        COLON = 265,
+        SEMICOLON = 266,
+        OPENPAREN = 267,
+        CLOSEPAREN = 268,
+        OPENBRACKET = 269,
+        CLOSEBRACKET = 270,
+        DOLLAR = 271,
+        QUOTE = 272,
         WAIT = 273,
         YIELD = 274,
         EXPORT = 275,
@@ -514,10 +514,6 @@ namespace Sheep {
 
     static inline
     symbol_type
-    make_DOLLAR (const location_type& l);
-
-    static inline
-    symbol_type
     make_COMMA (const location_type& l);
 
     static inline
@@ -527,10 +523,6 @@ namespace Sheep {
     static inline
     symbol_type
     make_SEMICOLON (const location_type& l);
-
-    static inline
-    symbol_type
-    make_QUOTE (const location_type& l);
 
     static inline
     symbol_type
@@ -547,6 +539,14 @@ namespace Sheep {
     static inline
     symbol_type
     make_CLOSEBRACKET (const location_type& l);
+
+    static inline
+    symbol_type
+    make_DOLLAR (const location_type& l);
+
+    static inline
+    symbol_type
+    make_QUOTE (const location_type& l);
 
     static inline
     symbol_type
@@ -762,12 +762,15 @@ namespace Sheep {
   static const unsigned char yyr2_[];
 
 
-#if YYDEBUG
+    /// Convert the symbol name \a n to a form suitable for a diagnostic.
+    static std::string yytnamerr_ (const char *n);
+
+
     /// For a symbol, its name in clear.
     static const char* const yytname_[];
-
+#if YYDEBUG
   // YYRLINE[YYN] -- Source line where rule number YYN was defined.
-  static const unsigned char yyrline_[];
+  static const unsigned short int yyrline_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
     virtual void yy_reduce_print_ (int r);
     /// Print the state stack on the debug stream.
@@ -866,7 +869,7 @@ namespace Sheep {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 263,     ///< Last index in yytable_.
+      yylast_ = 265,     ///< Last index in yytable_.
       yynnts_ = 23,  ///< Number of nonterminal symbols.
       yyfinal_ = 10, ///< Termination state number.
       yyterror_ = 1,
@@ -1247,12 +1250,6 @@ namespace Sheep {
   }
 
   Parser::symbol_type
-  Parser::make_DOLLAR (const location_type& l)
-  {
-    return symbol_type (token::DOLLAR, l);
-  }
-
-  Parser::symbol_type
   Parser::make_COMMA (const location_type& l)
   {
     return symbol_type (token::COMMA, l);
@@ -1268,12 +1265,6 @@ namespace Sheep {
   Parser::make_SEMICOLON (const location_type& l)
   {
     return symbol_type (token::SEMICOLON, l);
-  }
-
-  Parser::symbol_type
-  Parser::make_QUOTE (const location_type& l)
-  {
-    return symbol_type (token::QUOTE, l);
   }
 
   Parser::symbol_type
@@ -1298,6 +1289,18 @@ namespace Sheep {
   Parser::make_CLOSEBRACKET (const location_type& l)
   {
     return symbol_type (token::CLOSEBRACKET, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_DOLLAR (const location_type& l)
+  {
+    return symbol_type (token::DOLLAR, l);
+  }
+
+  Parser::symbol_type
+  Parser::make_QUOTE (const location_type& l)
+  {
+    return symbol_type (token::QUOTE, l);
   }
 
   Parser::symbol_type
@@ -1475,9 +1478,9 @@ namespace Sheep {
   }
 
 
-#line 18 "sheep.yy" // lalr1.cc:392
+#line 20 "sheep.yy" // lalr1.cc:392
 } // Sheep
-#line 1481 "sheep.tab.hh" // lalr1.cc:392
+#line 1484 "sheep.tab.hh" // lalr1.cc:392
 
 
 
