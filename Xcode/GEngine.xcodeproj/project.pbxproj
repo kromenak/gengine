@@ -545,6 +545,18 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4B00436E2386140F00BEFC46 /* BisonParser */ = {
+			isa = PBXGroup;
+			children = (
+				4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */,
+				4B2ACE0A1F25C20B003EC7FE /* sheep.tab.hh */,
+				4B2ACE071F25C20B003EC7FE /* location.hh */,
+				4B2ACE081F25C20B003EC7FE /* position.hh */,
+				4B2ACE061F25C1FB003EC7FE /* stack.hh */,
+			);
+			name = BisonParser;
+			sourceTree = "<group>";
+		};
 		4B08C90D2137443F0028FEB3 /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -776,11 +788,12 @@
 		4B524ECA22484C9F00E3A5E2 /* Compiler */ = {
 			isa = PBXGroup;
 			children = (
+				4B00436E2386140F00BEFC46 /* BisonParser */,
+				4B85420F20A7C11C00DE8C0D /* FlexScanner */,
 				4B2ACE111F25D310003EC7FE /* SheepCompiler.cpp */,
 				4B2ACE121F25D310003EC7FE /* SheepCompiler.h */,
 				4BAF4BD0209A15F1006472E0 /* SheepScriptBuilder.cpp */,
 				4BAF4BCF209A15F1006472E0 /* SheepScriptBuilder.h */,
-				4B85420F20A7C11C00DE8C0D /* FlexBison */,
 			);
 			name = Compiler;
 			sourceTree = "<group>";
@@ -866,18 +879,13 @@
 			name = Audio;
 			sourceTree = "<group>";
 		};
-		4B85420F20A7C11C00DE8C0D /* FlexBison */ = {
+		4B85420F20A7C11C00DE8C0D /* FlexScanner */ = {
 			isa = PBXGroup;
 			children = (
 				4B2ACE0C1F25C45F003EC7FE /* lex.yy.cc */,
-				4B2ACE071F25C20B003EC7FE /* location.hh */,
-				4B2ACE081F25C20B003EC7FE /* position.hh */,
-				4B2ACE091F25C20B003EC7FE /* sheep.tab.cc */,
-				4B2ACE0A1F25C20B003EC7FE /* sheep.tab.hh */,
 				4B2ACE0F1F25CF08003EC7FE /* SheepScanner.h */,
-				4B2ACE061F25C1FB003EC7FE /* stack.hh */,
 			);
-			name = FlexBison;
+			name = FlexScanner;
 			sourceTree = "<group>";
 		};
 		4B9231992103AED90004F4F3 /* Animation */ = {
