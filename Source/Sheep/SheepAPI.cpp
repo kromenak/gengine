@@ -1441,6 +1441,7 @@ RegFunc2(GetNounVerbCountInt, int, int, int, IMMEDIATE, REL_FUNC);
  
 shpvoid IncNounVerbCount(string noun, string verb)
 {
+	//TODO: Throw an error if the given noun corresponds to a "Topic".
 	Services::Get<GameProgress>()->IncNounVerbCount(noun, verb);
 	return 0;
 }
@@ -1448,20 +1449,21 @@ RegFunc2(IncNounVerbCount, void, string, string, IMMEDIATE, REL_FUNC);
 
 shpvoid SetNounVerbCount(string noun, string verb, int count)
 {
+	//TODO: Throw an error if the given noun corresponds to a "Topic".
 	Services::Get<GameProgress>()->SetNounVerbCount(noun, verb, count);
 	return 0;
 }
 RegFunc3(SetNounVerbCount, void, string, string, int, IMMEDIATE, REL_FUNC);
 
-/*
 shpvoid SetNounVerbCountBoth(string noun, string verb, int count)
 {
-	//TODO: This function is undocumented, so I'm not sure how it differs from SetNounVerbCount.
-	//TODO: It has same return type and arguments. Maybe we track noun/verb counts separately for Gabe/Grace?
+	//TODO: HelpCommand says this sets the noun/verb count for both Gabe and Grace.
+	//TODO: Does that imply SetNounVerbCount tracks per-Ego?
 	return SetNounVerbCount(noun, verb, count);
 }
 RegFunc3(SetNounVerbCountBoth, void, string, string, int, IMMEDIATE, REL_FUNC);
 
+/*
 shpvoid TriggerNounVerb(string noun, string verb)
 {
 	return 0;
