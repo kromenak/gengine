@@ -34,9 +34,10 @@ InventoryManager::InventoryManager()
 			
 			//TODO: Use entry.value to populate InventoryItemTextures.
 			mInventoryItems[StringUtil::ToLowerCopy(entry.key)] = InventoryItemTextures();
-			std::cout << "Added " << entry.key << std::endl;
+			//std::cout << "Added " << entry.key << std::endl;
 	    }
 	}
+	delete[] buffer;
 }
 
 bool InventoryManager::IsValidInventoryItem(const std::string& itemName) const

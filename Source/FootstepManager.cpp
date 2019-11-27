@@ -40,6 +40,7 @@ FootstepManager::FootstepManager()
 			}
 		}
 	}
+	delete[] buffer;
 	
 	// STEP 2: FOOTSTEPS maps floor types to audio files for footsteps.
 	// Next up: read in all the footstep data.
@@ -79,6 +80,7 @@ FootstepManager::FootstepManager()
 			}
 		}
 	}
+	delete[] buffer;
 	
 	// STEP 2: FOOTSCUFFS maps floor types to audio files for footscuffs.
 	// Finally, very similar thing with the footscuff data.
@@ -118,6 +120,7 @@ FootstepManager::FootstepManager()
 			}
 		}
 	}
+	delete[] buffer;
 }
 
 Audio* FootstepManager::GetFootstep(std::string shoeType, std::string floorTextureName)

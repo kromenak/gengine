@@ -62,6 +62,7 @@ CharacterManager::CharacterManager()
 		// Key each config by its identifier.
 		mCharacterConfigs[config.identifier] = config;
 	}
+	delete[] buffer;
 	
 	// Get FACES text file as a raw buffer.
 	unsigned int facesBufferSize = 0;
@@ -280,6 +281,7 @@ CharacterManager::CharacterManager()
 			}
 		}
 	}
+	delete[] facesBuffer;
 }
 
 CharacterConfig& CharacterManager::GetCharacterConfig(std::string identifier)

@@ -109,6 +109,7 @@ ButtonIconManager::ButtonIconManager()
 			map->insert({ keyword, buttonIcon });
 		}
 	}
+	delete[] buffer;
 }
 
 ButtonIcon& ButtonIconManager::GetButtonIconForNoun(std::string noun)
