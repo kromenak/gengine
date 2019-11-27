@@ -52,9 +52,11 @@ struct Action
     std::string target;
 	
 	// A script to execute when using this NVC item.
+	std::string scriptText;
     SheepScript* script = nullptr;
 	
 	void Execute() const;
+	std::string ToString() const { return "'" + noun + ":" + verb + ":" + condition + "': " + scriptText; }
 };
 
 class NVC : public Asset

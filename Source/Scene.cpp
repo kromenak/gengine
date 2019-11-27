@@ -568,6 +568,9 @@ void Scene::ExecuteAction(const Action* action)
 	// Ignore nulls.
 	if(action == nullptr) { return; }
 	
+	// Log to "Actions" stream.
+	Services::GetReports()->Log("Actions", "Playing NVC " + action->ToString());
+	
 	// Before executing the NVC, we need to handle any approach.
 	//std::cout << (int)nvc->approach << std::endl;
 	//std::cout << nvc->target << std::endl;

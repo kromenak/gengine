@@ -101,6 +101,15 @@ ReportManager::ReportManager()
 	//BarnFileMgr
 	
 	//Actions
+	ReportStream& actions = GetOrCreateStream("Actions");
+	actions.SetAction(ReportAction::Log);
+	actions.AddOutput(ReportOutput::Debugger);
+	actions.AddOutput(ReportOutput::SharedMemory);
+	actions.AddOutput(ReportOutput::Console);
+	actions.AddContent(ReportContent::All);
+	actions.RemoveContent(ReportContent::Date);
+	actions.RemoveContent(ReportContent::Machine);
+	actions.RemoveContent(ReportContent::User);
 	
 	// Create stream that outputs to OS dialog box.
 	ReportStream& messageBox = GetOrCreateStream("MessageBox");
