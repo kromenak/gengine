@@ -30,7 +30,7 @@ void UIButton::Render()
 	if(texture == nullptr) { return; }
 	
 	// Split into enabled and disabled textures.
-	if(mEnabled)
+	if(IsEnabled())
 	{
 		// Button is hovered if mouse position is within the screen rect for this widget.
 		bool isHovered = mRectTransform->GetScreenRect().Contains(Services::GetInput()->GetMousePosition());
@@ -76,7 +76,7 @@ void UIButton::Render()
 
 void UIButton::Press()
 {
-	if(mPressCallback && mEnabled)
+	if(mPressCallback && IsEnabled())
 	{
 		mPressCallback();
 	}

@@ -126,7 +126,7 @@ void ActionBar::Hide()
 	// Make buttons no longer interactable.
 	for(auto& button : mButtons)
 	{
-		button->Disable();
+		button->SetEnabled(false);
 	}
 	
 	// Not showing anymore.
@@ -162,7 +162,7 @@ UIButton* ActionBar::AddButton(int index, float xPos, const ButtonIcon& buttonIc
 	mCanvas->AddWidget(button);
 	
 	// Make sure button can be pressed.
-	button->Enable();
+	button->SetEnabled(true);
 	
 	// Position correctly, relative to previous buttons.
 	Transform* buttonTransform = button->GetOwner()->GetTransform();

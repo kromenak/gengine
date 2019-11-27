@@ -28,9 +28,6 @@ public:
 	void SetHoverTexture(Texture* texture) { mHoverTexture = texture; }
 	void SetDisabledTexture(Texture* texture) { mDisabledTexture = texture; }
 	
-	void Enable() { mEnabled = true; }
-	void Disable() { mEnabled = false; }
-	
 	void SetPressCallback(std::function<void()> callback) { mPressCallback = callback; }
 	
 	//void OnPointerEnter();
@@ -45,10 +42,6 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
-	// If enabled, the button can be interacted with.
-	// If disabled, the button doesn't respond to inputs.
-	bool mEnabled = true;
-	
 	// Textures for different visual states.
 	// Up (normal), Down (pressed), Hover, and Disabled.
 	Texture* mUpTexture = nullptr;
