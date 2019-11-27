@@ -39,7 +39,7 @@ private:
 	// May want to exclude certain characters.
 	// This approach is extremely simplistic, but it may have some speed advantages over like a set.
 	// And we'll probably only ever need to exclude a couple chars in special situations.
-	char mExcludeChars[4];
+	char mExcludeChars[4] { 0, 0, 0, 0 };
 	
 	// If set, the cursor is positioned before the given index.
 	// E.g. 0 = cursor is before first character.
