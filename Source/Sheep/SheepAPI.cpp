@@ -9,8 +9,10 @@
 #include <sstream> // for int->hex
 
 #include "AnimationPlayer.h"
+#include "Camera.h"
 #include "CharacterManager.h"
 #include "FaceController.h"
+#include "GameCamera.h"
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "GKActor.h"
@@ -1040,20 +1042,47 @@ shpvoid Uninspect()
 	return 0;
 }
 RegFunc0(Uninspect, void, WAITABLE, REL_FUNC);
-
+*/
+ 
 float GetCameraFOV()
 {
+	// Dig down to grab the value.
+	GameCamera* gameCamera = GEngine::inst->GetScene()->GetCamera();
+	if(gameCamera != nullptr)
+	{
+		Camera* camera = gameCamera->GetCamera();
+		if(camera != nullptr)
+		{
+			return camera->GetCameraFovDegrees();
+		}
+	}
 	return 0.0f;
 }
 RegFunc0(GetCameraFOV, float, IMMEDIATE, REL_FUNC);
 
-shpvoid SetCameraFOV()
+shpvoid SetCameraFOV(float fov)
 {
+	// Clamp argument in valid range.
+	if(fov < 1.0f || fov > 180.0f)
+	{
+		Services::GetReports()->Log("Warning", "Warning: camera FOV must be between 1 and 180. Clamping to fit...");
+		fov = Math::Clamp(fov, 1.0f, 180.0f);
+	}
+	
+	// Dig down to actually set it.
+	GameCamera* gameCamera = GEngine::inst->GetScene()->GetCamera();
+	if(gameCamera != nullptr)
+	{
+		Camera* camera = gameCamera->GetCamera();
+		if(camera != nullptr)
+		{
+			camera->SetCameraFovDegrees(fov);
+		}
+	}
 	return 0;
 }
-RegFunc0(SetCameraFOV, void, IMMEDIATE, REL_FUNC);
-*/
- 
+RegFunc1(SetCameraFOV, void, float, IMMEDIATE, REL_FUNC);
+
 // CONSTRUCTION MODE
 //ShowConstruction
 //HideConstruction

@@ -81,3 +81,13 @@ Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 	// Finally, return the world point.
     return Vector3(point.GetX(), point.GetY(), point.GetZ());
 }
+
+void Camera::SetCameraFovRadians(float fovRad)
+{
+	mFovAngleRad = Math::Clamp(fovRad, 0.0f, Math::kPi);
+}
+
+void Camera::SetCameraFovDegrees(float fovDeg)
+{
+	mFovAngleRad = Math::ToRadians(Math::Clamp(fovDeg, 0.0f, 180.0f));
+}

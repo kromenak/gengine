@@ -16,6 +16,8 @@ public:
 	void SetAngle(const Vector2& angle);
 	void SetAngle(float yaw, float pitch);
 	
+	Camera* GetCamera() { return mCamera; }
+	
 protected:
     void OnUpdate(float deltaTime) override;
     

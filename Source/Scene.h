@@ -65,6 +65,8 @@ public:
 	
 	AnimationPlayer* GetAnimationPlayer() const { return mAnimationPlayer; }
 	SoundtrackPlayer* GetSoundtrackPlayer() const { return mSoundtrackPlayer; }
+	
+	GameCamera* GetCamera() const { return mCamera; }
     
 private:
 	// Location is 3-letter code (e.g. DIN).
