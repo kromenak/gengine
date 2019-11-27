@@ -9,11 +9,12 @@
 
 #include <string>
 
-class Audio : Asset
+class Audio : public Asset
 {
 public:
     Audio(std::string name, char* data, int dataLength);
-    
+	~Audio();
+	
     void WriteToFile();
     
     char* GetDataBuffer() const { return mDataBuffer; }

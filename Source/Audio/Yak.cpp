@@ -16,7 +16,8 @@ Yak::Yak(std::string name, char* data, int dataLength) : Asset(name)
 
 void Yak::Play(int numLines)
 {
-    Audio* vo = Services::GetAssets()->LoadAudio(mSounds[0]);
+	//TODO: Use numLines somewhere?
+	Audio* vo = Services::GetAssets()->LoadAudio(mSounds[0]);
     Services::GetAudio()->Play(vo);
 }
 

@@ -16,7 +16,18 @@ Audio::Audio(std::string name, char* data, int dataLength) :
     mDataBuffer(data),
     mDataBufferLength(dataLength)
 {
+	// An asset doesn't own the passed-in data buffer - we're meant to use it and not save it.
+	// But for audio, we DO need the whole buffer! So here, we create a copy of it.
+	// There's probably a smarter/more efficient way to do this, perhaps with smart pointers...
+	mDataBuffer = new char[dataLength];
+	std::memcpy(mDataBuffer, data, dataLength);
+	
     ParseFromData(data, dataLength);
+}
+
+Audio::~Audio()
+{
+	delete[] mDataBuffer;
 }
 
 void Audio::WriteToFile()
