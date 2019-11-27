@@ -154,6 +154,18 @@ const RoomSceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) c
 	return nullptr;
 }
 
+const SceneCamera* SceneData::GetCinematicCamera(const std::string& cameraName) const
+{
+	for(int i = 0; i < mCinematicCameras.size(); i++)
+	{
+		if(StringUtil::EqualsIgnoreCase(mCinematicCameras[i]->label, cameraName))
+		{
+			return mRoomCameras[i];
+		}
+	}
+	return nullptr;
+}
+
 const ScenePosition* SceneData::GetScenePosition(const std::string& positionName) const
 {
 	for(int i = 0; i < mPositions.size(); i++)

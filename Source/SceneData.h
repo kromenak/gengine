@@ -55,6 +55,7 @@ public:
 	// CAMERAS
 	const RoomSceneCamera* GetDefaultRoomCamera() const { return mDefaultRoomCamera; }
 	const RoomSceneCamera* GetRoomCamera(const std::string& cameraName) const;
+	const SceneCamera* GetCinematicCamera(const std::string& cameraName) const;
 	
 	// SOUNDTRACK
 	Soundtrack* GetSoundtrack() const { return mSoundtracks.size() > 0 ? mSoundtracks.back() : nullptr; }

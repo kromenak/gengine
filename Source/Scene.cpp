@@ -336,7 +336,14 @@ void Scene::InitEgoPosition(const std::string& positionName)
 void Scene::SetCameraPosition(const std::string& cameraName)
 {
 	// Find camera or fail.
+	// Any *named* camera type is valid.
 	const SceneCamera* camera = mSceneData->GetRoomCamera(cameraName);
+	if(camera == nullptr)
+	{
+		camera = mSceneData->GetCinematicCamera(cameraName);
+	}
+	
+	// If couldn't find a camera with this name, error out!
 	if(camera == nullptr)
 	{
 		Services::GetReports()->Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
