@@ -67,7 +67,7 @@ std::string BinaryReader::ReadString(int length)
 {
     char* buffer = new char[length];
     mStream->read(buffer, length);
-    
+	
     // Find null terminator, if any.
     for(int i = 0; i < length; i++)
     {

@@ -347,7 +347,6 @@ bool BarnFile::Extract(const std::string& assetName, char *buffer, int bufferSiz
 			delete[] compressedBuffer;
 			return false;
 		}
-		//std::cout << mReader.IsEof() << ", " <<  mReader.CanRead() << ", " << mReader.IsBad() << ", " << mReader.IsFail() << std::endl;
 		
         // Make sure LZO library is initialized.
 		static bool initLzo = false;

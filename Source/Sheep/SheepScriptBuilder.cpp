@@ -860,6 +860,9 @@ void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2)
 
 void SheepScriptBuilder::Not()
 {
+	#ifdef DEBUG_BUILDER
+    std::cout << "Not" << std::endl;
+    #endif
     AddInstruction(SheepInstruction::Not);
 }
 

@@ -14,9 +14,13 @@ class BinaryWriter
 public:
     BinaryWriter(const char* filePath);
     ~BinaryWriter();
-    
-	bool CanWrite() const { return mStream->good(); }
-	bool IsEof() const { return mStream->eof(); }
+	
+	// Should only write if OK is true.
+	bool OK() const
+	{
+		// Remember, "good" returns true as long as long as fail/bad/eof bits are all false.
+		return mStream->good();
+	}
     
     void Seek(int position);
     void Skip(int size);

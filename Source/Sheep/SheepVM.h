@@ -77,7 +77,7 @@ enum class SheepInstruction
     BranchGoto          = 0x07,
     BranchIfZero        = 0x08,
     BeginWait           = 0x09,
-    EndWait             = 0x0A,
+    EndWait             = 0x0A,	// 10
     ReturnV             = 0x0B,
 	//Unknown1          = 0x0C, // May be "Export" instruction; mentioned in docs as deprecated.
     StoreI              = 0x0D,
@@ -87,7 +87,7 @@ enum class SheepInstruction
     LoadF               = 0x11,
     LoadS               = 0x12,
     PushI               = 0x13,
-    PushF               = 0x14,
+    PushF               = 0x14, // 20
     PushS               = 0x15,
     Pop                 = 0x16,
     AddI                = 0x17,
@@ -97,7 +97,7 @@ enum class SheepInstruction
     MultiplyI           = 0x1B,
     MultiplyF           = 0x1C,
     DivideI             = 0x1D,
-    DivideF             = 0x1E,
+    DivideF             = 0x1E, // 30
     NegateI             = 0x1F,
     NegateF             = 0x20,
     IsEqualI            = 0x21,
@@ -107,7 +107,7 @@ enum class SheepInstruction
     IsGreaterI          = 0x25,
     IsGreaterF          = 0x26,
     IsLessI             = 0x27,
-    IsLessF             = 0x28,
+    IsLessF             = 0x28, // 40
     IsGreaterEqualI     = 0x29,
     IsGreaterEqualF     = 0x2A,
     IsLessEqualI        = 0x2B,
@@ -117,7 +117,7 @@ enum class SheepInstruction
     Modulo              = 0x2F,
     And                 = 0x30,
     Or                  = 0x31,
-    Not                 = 0x32,
+    Not                 = 0x32, // 50
     GetString           = 0x33,
     DebugBreakpoint     = 0x34
 };

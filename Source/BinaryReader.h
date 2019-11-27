@@ -14,9 +14,13 @@ public:
     BinaryReader(const char* filePath);
     BinaryReader(const char* memory, unsigned int memoryLength);
     ~BinaryReader();
-    
-	bool CanRead() const { return mStream->good(); }
-	bool IsEof() const { return mStream->eof(); }
+	
+	// Should only read if OK is true, and should only use read value if OK is still true after reading!
+	bool OK() const
+	{
+		// Remember, "good" returns true as long as long as fail/bad/eof bits are all false.
+		return mStream->good();
+	}
     
     void Seek(int position);
     void Skip(int size);
