@@ -18,7 +18,7 @@
 class BinaryReader;
 class SDL_Surface;
 
-class Texture : Asset
+class Texture : public Asset
 {
 public:
 	/*

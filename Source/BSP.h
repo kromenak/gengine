@@ -93,7 +93,7 @@ struct HitInfo
 	Vector3 position;
 };
 
-class BSP : Asset
+class BSP : public Asset
 {
     // When identifying the position of a point relative to a plane in the
     // BSP tree, the result can be Front, Back, or on the plane itself.
