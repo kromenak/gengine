@@ -6,7 +6,11 @@
 //
 #include "AssetManager.h"
 
+#include <cstring>
+#include <fstream>
 #include <iostream>
+#include <sstream>
+#include <string>
 
 #include "FileSystem.h"
 #include "StringUtil.h"
@@ -247,7 +251,9 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
 
 char* AssetManager::LoadRaw(const std::string& name, unsigned int& outBufferSize)
 {
-	return LoadAssetBuffer(name, outBufferSize);
+	// NOTE: caller is responsible for deleting buffer!
+	//TODO: Perhaps this is a good candidate to use a unique_ptr.
+	return CreateAssetBuffer(name, outBufferSize);
 }
 
 BarnFile* AssetManager::GetBarn(const std::string& barnName)
@@ -350,7 +356,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	
 	// Retrieve the buffer, from which we'll create the asset.
 	unsigned int bufferSize = 0;
-	char* buffer = LoadAssetBuffer(upperName, bufferSize);
+	char* buffer = CreateAssetBuffer(upperName, bufferSize);
 	
 	// If no buffer could be found, we're in trouble!
 	if(buffer == nullptr)
@@ -362,6 +368,9 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	// Generate asset from the BARN bytes.
 	T* asset = new T(upperName, buffer, bufferSize);
 	
+	// Delete the buffer after use (or it'll leak).
+	delete[] buffer;
+	
 	// Add entry in cache, if we have a cache.
 	if(cache != nullptr)
 	{
@@ -372,15 +381,34 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	return asset;
 }
 
-char* AssetManager::LoadAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)
+char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)
 {
 	// First, see if the asset exists at any asset search path.
 	// If so, we load the asset directly from file.
+	// Loose files take precedence over packaged barn assets.
 	std::string assetPath = GetAssetPath(assetName);
 	if(!assetPath.empty())
 	{
-		//TODO: Load asset from file.
-		return nullptr;
+		// Open the file, or error if failed.
+		std::ifstream file(assetPath);
+		if(!file.good())
+		{
+			std::cout << "Found asset path, but could not open file for " << assetName << std::endl;
+			return nullptr;
+		}
+		
+		// Read the file contents into a char buffer.
+		// Important to read to intermediate std::string first!
+		// Doesn't read correctly without that bit.
+		std::stringstream bufferStream;
+		bufferStream << file.rdbuf();
+		std::string fileContentsStr = bufferStream.str();
+		
+		// Copy file contents to a char array.
+		outBufferSize = static_cast<int>(fileContentsStr.length()) + 1;
+		char* buffer = new char[fileContentsStr.length() + 1];
+		std::strcpy(buffer, fileContentsStr.c_str());
+		return buffer;
 	}
 	
 	// If no file to load, we'll get the asset from a barn.
@@ -389,7 +417,11 @@ char* AssetManager::LoadAssetBuffer(const std::string& assetName, unsigned int& 
 	{
 		// Extract bytes from the barn file contents.
 		BarnAsset* barnAsset = barn->GetAsset(assetName);
-		//TODO: Assert barnAsset != null.
+		if(barnAsset == nullptr)
+		{
+			std::cout << "Asset " << assetName << " appears to be in barn " << barn->GetName() << " (based on asset manifest), but could not retrieve the asset!" << std::endl;
+			return nullptr;
+		}
 		
 		// Create a buffer of the correct size.
 		outBufferSize = barnAsset->uncompressedSize;

@@ -111,7 +111,7 @@ private:
     std::string GetAssetPath(const std::string& fileName);
     
     template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache);
-	char* LoadAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
+	char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
 	
 	template<class T> void UnloadAssets(std::unordered_map<std::string, T*>& cache);
 };
