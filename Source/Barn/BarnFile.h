@@ -36,6 +36,9 @@ public:
 	// For debugging, output asset list to cout.
 	void OutputAssetList() const;
     
+	// For debugging, name of barn.
+	const std::string& GetName() const { return mName; }
+	
 private:
 	// Identifiers required to verify file type.
     const int kGameIdentifier = 0x21334B47; // GK3!
