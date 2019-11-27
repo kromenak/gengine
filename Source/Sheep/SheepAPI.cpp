@@ -15,6 +15,7 @@
 #include "GEngine.h"
 #include "GKActor.h"
 #include "InventoryManager.h"
+#include "LocationManager.h"
 #include "Random.h"
 #include "Scene.h"
 #include "Services.h"
@@ -307,14 +308,22 @@ RegFunc2(Expression, void, string, string, IMMEDIATE, REL_FUNC);
 
 int GetEgoCurrentLocationCount()
 {
-	return GetEgoLocationCount(Services::Get<GameProgress>()->GetLocation());
+	return GetEgoLocationCount(Services::Get<LocationManager>()->GetLocation());
 }
 RegFunc0(GetEgoCurrentLocationCount, int, IMMEDIATE, REL_FUNC);
 
 int GetEgoLocationCount(std::string locationName)
 {
+	// Make sure it's a valid location.
+	if(!Services::Get<LocationManager>()->IsValidLocation(locationName))
+	{
+		Services::GetReports()->Log("Error", "Error: '" + locationName + "' is not a valid location name. Call DumpLocations() to see valid locations.");
+		return 0;
+	}
+	
+	// Get it!
 	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
-	return Services::Get<GameProgress>()->GetLocationCountForCurrentTimeblock(egoName, locationName);
+	return Services::Get<LocationManager>()->GetLocationCountForCurrentTimeblock(egoName, locationName);
 }
 RegFunc1(GetEgoLocationCount, int, string, IMMEDIATE, REL_FUNC);
 
@@ -360,7 +369,18 @@ RegFunc1(InitEgoPosition, void, string, IMMEDIATE, REL_FUNC);
 
 int IsActorAtLocation(std::string actorName, std::string locationName)
 {
-	std::string location = Services::Get<CharacterManager>()->GetCharacterLocation(actorName);
+	// Validate parameters.
+	//TODO: Verify that actor name is valid.
+	bool locationValid = Services::Get<LocationManager>()->IsValidLocation(locationName);
+	if(!locationValid)
+	{
+		std::string sheepContextName = GetCurrentSheepName() + ":" + GetCurrentSheepFunction();
+		Services::GetReports()->Log("Error", "An error occurred while executing " + sheepContextName);
+		return 0;
+	}
+	
+	// See if actor location matches specified location.
+	std::string location = Services::Get<LocationManager>()->GetActorLocation(actorName);
 	return StringUtil::EqualsIgnoreCase(location, locationName) ? 1 : 0;
 }
 RegFunc2(IsActorAtLocation, int, string, string, IMMEDIATE, REL_FUNC);
@@ -381,15 +401,15 @@ RegFunc3(IsWalkingActorNear, int, string, string, float, IMMEDIATE, REL_FUNC);
  
 int IsActorOffstage(std::string actorName)
 {
-	return Services::Get<CharacterManager>()->IsCharacterOffstage(actorName) ? 1 : 0;
+	//TODO: Verify that actor name is valid.
+	return Services::Get<LocationManager>()->IsActorOffstage(actorName) ? 1 : 0;
 }
 RegFunc1(IsActorOffstage, int, string, IMMEDIATE, REL_FUNC);
 
 int IsCurrentEgo(string actorName)
 {
-	GKActor* ego = GEngine::inst->GetScene()->GetEgo();
-	if(ego == nullptr) { return 0; }
-	return StringUtil::EqualsIgnoreCase(ego->GetNoun(), actorName) ? 1 : 0;
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	return StringUtil::EqualsIgnoreCase(egoName, actorName) ? 1 : 0;
 }
 RegFunc1(IsCurrentEgo, int, string, IMMEDIATE, REL_FUNC);
 
@@ -449,14 +469,25 @@ shpvoid LookitModelX(std::string actorName, std::string modelName, int mesh,
 
 shpvoid SetActorLocation(string actorName, string locationName)
 {
-	Services::Get<CharacterManager>()->SetCharacterLocation(actorName, locationName);
+	// Validate parameters.
+	//TODO: Verify that actor name is valid.
+	bool locationValid = Services::Get<LocationManager>()->IsValidLocation(locationName);
+	if(!locationValid)
+	{
+		std::string sheepContextName = GetCurrentSheepName() + ":" + GetCurrentSheepFunction();
+		Services::GetReports()->Log("Error", "An error occurred while executing " + sheepContextName);
+		return 0;
+	}
+	
+	Services::Get<LocationManager>()->SetActorLocation(actorName, locationName);
 	return 0;
 }
 RegFunc2(SetActorLocation, void, string, string, IMMEDIATE, REL_FUNC);
 
 shpvoid SetActorOffstage(string actorName)
 {
-	Services::Get<CharacterManager>()->SetCharacterOffstage(actorName);
+	//TODO: Verify that actor name is valid.
+	Services::Get<LocationManager>()->SetActorOffstage(actorName);
 	return 0;
 }
 RegFunc1(SetActorOffstage, void, string, IMMEDIATE, REL_FUNC);
@@ -653,9 +684,19 @@ RegFunc2(WalkToSeeModel, void, string, string, WAITABLE, REL_FUNC);
  
 int WasEgoEverInLocation(string locationName)
 {
+	// Make sure it's a valid location.
+	if(!Services::Get<LocationManager>()->IsValidLocation(locationName))
+	{
+		Services::GetReports()->Log("Error", "Error: '" + locationName + "' is not a valid location name. Call DumpLocations() to see valid locations.");
+		
+		std::string sheepContextName = GetCurrentSheepName() + ":" + GetCurrentSheepFunction();
+		Services::GetReports()->Log("Error", "An error occurred while executing " + sheepContextName);
+		return 0;
+	}
+	
 	// Returns if Ego was EVER in a location during ANY timeblock!
 	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
-	int locationCount = Services::Get<GameProgress>()->GetLocationCountAcrossAllTimeblocks(egoName, locationName);
+	int locationCount = Services::Get<LocationManager>()->GetLocationCountAcrossAllTimeblocks(egoName, locationName);
 	return locationCount > 0 ? 1 : 0;
 }
 RegFunc1(WasEgoEverInLocation, int, string, IMMEDIATE, REL_FUNC);
@@ -1443,29 +1484,29 @@ RegFunc1(HasTopicsLeft, int, string, IMMEDIATE, REL_FUNC);
  
 int IsCurrentLocation(std::string location)
 {
-	std::string currentLocation = Services::Get<GameProgress>()->GetLocation();
-	return StringUtil::EqualsIgnoreCase(currentLocation, location);
+	std::string currentLocation = Services::Get<LocationManager>()->GetLocation();
+	return StringUtil::EqualsIgnoreCase(currentLocation, location) ? 1 : 0;
 }
 RegFunc1(IsCurrentLocation, int, string, IMMEDIATE, REL_FUNC);
 
 int IsCurrentTime(std::string timeblock)
 {
 	std::string currentTimeblock = Services::Get<GameProgress>()->GetTimeblock().ToString();
-    return StringUtil::EqualsIgnoreCase(currentTimeblock, timeblock);
+	return StringUtil::EqualsIgnoreCase(currentTimeblock, timeblock) ? 1 : 0;
 }
 RegFunc1(IsCurrentTime, int, string, IMMEDIATE, REL_FUNC);
 
 int WasLastLocation(std::string location)
 {
-	std::string lastLocation = Services::Get<GameProgress>()->GetLastLocation();
-	return StringUtil::EqualsIgnoreCase(lastLocation, location);
+	std::string lastLocation = Services::Get<LocationManager>()->GetLastLocation();
+	return StringUtil::EqualsIgnoreCase(lastLocation, location) ? 1 : 0;
 }
 RegFunc1(WasLastLocation, int, string, IMMEDIATE, REL_FUNC);
 
 int WasLastTime(std::string timeblock)
 {
 	std::string lastTimeblock = Services::Get<GameProgress>()->GetLastTimeblock().ToString();
-	return StringUtil::EqualsIgnoreCase(lastTimeblock, timeblock);
+	return StringUtil::EqualsIgnoreCase(lastTimeblock, timeblock) ? 1 : 0;
 }
 RegFunc1(WasLastTime, int, string, IMMEDIATE, REL_FUNC);
 
@@ -2074,7 +2115,7 @@ shpvoid SetTime(std::string timeblock)
 {
 	// Change time, but load in to the same scene we are currently in.
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
-	GEngine::inst->LoadScene(Services::Get<GameProgress>()->GetLocation());
+	GEngine::inst->LoadScene(Services::Get<LocationManager>()->GetLocation());
 	return 0;
 }
 RegFunc1(SetTime, void, string, WAITABLE, REL_FUNC);

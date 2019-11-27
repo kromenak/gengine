@@ -133,19 +133,10 @@ public:
 	
 	CharacterConfig& GetCharacterConfig(std::string identifier);
 	
-	void SetCharacterLocation(std::string name, std::string location);
-	std::string GetCharacterLocation(std::string name) const;
-	
-	void SetCharacterOffstage(std::string name);
-	bool IsCharacterOffstage(std::string name) const;
-	
 private:
 	// Character configs, keyed by the 3-letter character identifier.
 	std::unordered_map<std::string, CharacterConfig> mCharacterConfigs;
 	
 	// A default character config, in case you request one that doesn't exist.
 	CharacterConfig mDefaultCharacterConfig;
-	
-	// A mapping of character to location. If not present, the actor is "offstage".
-	std::unordered_map<std::string, std::string> mCharacterLocations;
 };

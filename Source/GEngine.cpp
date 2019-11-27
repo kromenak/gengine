@@ -15,6 +15,7 @@
 #include "FootstepManager.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
+#include "LocationManager.h"
 #include "Scene.h"
 #include "Services.h"
 #include "TextInput.h"
@@ -117,6 +118,9 @@ bool GEngine::Initialize()
 	
 	// Create inventory manager.
 	Services::Set<InventoryManager>(new InventoryManager());
+	
+	// Create locations manager.
+	Services::Set<LocationManager>(new LocationManager());
 	
 	//LoadScene("R25");
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
@@ -389,9 +393,6 @@ void GEngine::LoadSceneInternal()
 	//TEMP: Create a console when entering a scene.
 	//TODO: Console should persist across all scenes! Need some "Do Not Destroy On Load" style functionality...
 	new ConsoleUI(false);
-	
-	// Save this new location.
-	Services::Get<GameProgress>()->SetLocation(mSceneToLoad);
 	
 	// Create the new scene.
 	//TODO: Scene constructor should probably ONLY take a scene name.

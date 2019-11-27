@@ -20,12 +20,6 @@ void GameProgress::IncreaseScore(int points)
 	SetScore(mScore + points);
 }
 
-void GameProgress::SetLocation(const std::string& location)
-{
-	mLastLocation = mLocation;
-	mLocation = location;
-}
-
 void GameProgress::SetTimeblock(const Timeblock& timeblock)
 {
 	mLastTimeblock = mTimeblock;
@@ -74,72 +68,6 @@ void GameProgress::SetGameVariable(const std::string& varName, int value)
 void GameProgress::IncGameVariable(const std::string& varName)
 {
 	++mGameVariables[StringUtil::ToLowerCopy(varName)];
-}
-
-int GameProgress::GetLocationCountAcrossAllTimeblocks(const std::string& actorName, const std::string& location)
-{
-	std::string key = actorName + location;
-	StringUtil::ToLower(key);
-	return mActorLocationCounts[key];
-}
-
-int GameProgress::GetCurrentLocationCountForCurrentTimeblock(const std::string& actorName) const
-{
-	return GetLocationCount(actorName, mLocation, mTimeblock);
-}
-
-int GameProgress::GetLocationCountForCurrentTimeblock(const std::string& actorName, const std::string& location) const
-{
-	return GetLocationCount(actorName, location, mTimeblock);
-}
-
-int GameProgress::GetLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock) const
-{
-	return GetLocationCount(actorName, location, timeblock.ToString());
-}
-
-int GameProgress::GetLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock) const
-{
-	// Generate a key from the various bits.
-	// Make sure it's all lowercase, for consistency.
-	std::string key = actorName + location + timeblock;
-	StringUtil::ToLower(key);
-	
-	// Either return stored value, or 0 by default.
-	auto it = mActorLocationTimeblockCounts.find(key);
-	if(it != mActorLocationTimeblockCounts.end())
-	{
-		return it->second;
-	}
-	return 0;
-}
-
-void GameProgress::IncCurrentLocationCountForCurrentTimeblock(const std::string& actorName)
-{
-	IncLocationCount(actorName, mLocation, mTimeblock);
-}
-
-void GameProgress::IncLocationCountForCurrentTimeblock(const std::string &actorName, const std::string &location)
-{
-	IncLocationCount(actorName, mLocation, mTimeblock);
-}
-
-void GameProgress::IncLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock)
-{
-	IncLocationCount(actorName, location, timeblock.ToString());
-}
-
-void GameProgress::IncLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock)
-{
-	// Generate a key from the various bits.
-	// Make sure it's all lowercase, for consistency.
-	std::string locationKey = actorName + location;
-	std::string locationTimeblockKey = locationKey + timeblock;
-	StringUtil::ToLower(locationKey);
-	StringUtil::ToLower(locationTimeblockKey);
-	
-	++mActorLocationCounts[locationKey];
-	++mActorLocationTimeblockCounts[locationTimeblockKey];
 }
 
 int GameProgress::GetChatCount(const std::string& noun) const

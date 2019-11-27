@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "GameProgress.h"
+#include "LocationManager.h"
 #include "Services.h"
 #include "SystemUtil.h"
 
@@ -96,7 +97,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			{
 				outputStr << "*";
 			}
-			outputStr << " Loc: '" << Services::Get<GameProgress>()->GetLocation() << "' ";
+			outputStr << " Loc: '" << Services::Get<LocationManager>()->GetLocation() << "' ";
 		}
 		if((mContent & ReportContent::Date) != ReportContent::None)
 		{

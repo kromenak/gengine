@@ -15,6 +15,7 @@
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GKActor.h"
+#include "LocationManager.h"
 #include "Math.h"
 #include "MeshRenderer.h"
 #include "Mover.h"
@@ -80,10 +81,13 @@ void Scene::Load()
 		mEgoName = egoSceneActor->noun;
 	}
 	
+	// Set location.
+	Services::Get<LocationManager>()->SetLocation(mLocation);
+	
 	// Increment location counter IMMEDIATELY.
 	// We know this b/c various scripts that need to run on "1st time enter" or similar check if count==1.
 	// For those to evaluate correctly, we need to do this BEFORE we even parse scene data or anything.
-	Services::Get<GameProgress>()->IncLocationCount(mEgoName, mLocation, mTimeblock.ToString());
+	Services::Get<LocationManager>()->IncLocationCount(mEgoName, mLocation, mTimeblock);
 	
 	// Based on location, timeblock, and game progress, resolve what data we will load into the current scene.
 	// After calling this, SceneData will have interpreted all data from SIFs and determined exactly what we should and should not load/use for the scene right now.

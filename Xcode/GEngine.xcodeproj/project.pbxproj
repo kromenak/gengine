@@ -173,6 +173,9 @@
 		4B85421520A9276200DE8C0D /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B85E87923497A4A004AA3E5 /* UITextBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */; };
 		4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */; };
+		4B8A976D238B6EE1006D284D /* LocationManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8A976C238B6EE1006D284D /* LocationManager.cpp */; };
+		4B8A976E238B6EE1006D284D /* LocationManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8A976C238B6EE1006D284D /* LocationManager.cpp */; };
+		4B8A9770238B7A0E006D284D /* Locations.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4B8A976F238B7A0E006D284D /* Locations.txt */; };
 		4B8D2CD1236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
 		4B8D2CD2236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
 		4B8D2CD3236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
@@ -427,6 +430,9 @@
 		4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UITextBuffer.cpp; path = ../Source/UITextBuffer.cpp; sourceTree = "<group>"; };
 		4B85E87A23497EBF004AA3E5 /* TextLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TextLayout.h; path = ../Source/TextLayout.h; sourceTree = "<group>"; };
 		4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TextLayout.cpp; path = ../Source/TextLayout.cpp; sourceTree = "<group>"; };
+		4B8A976B238B6EE1006D284D /* LocationManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = LocationManager.h; path = ../Source/LocationManager.h; sourceTree = "<group>"; };
+		4B8A976C238B6EE1006D284D /* LocationManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = LocationManager.cpp; path = ../Source/LocationManager.cpp; sourceTree = "<group>"; };
+		4B8A976F238B7A0E006D284D /* Locations.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Locations.txt; path = ../Assets/Locations.txt; sourceTree = "<group>"; };
 		4B8D2CCF236F98B300B8E68D /* Heading.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Heading.h; path = ../Source/Heading.h; sourceTree = "<group>"; };
 		4B8D2CD0236F98B300B8E68D /* Heading.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Heading.cpp; path = ../Source/Heading.cpp; sourceTree = "<group>"; };
 		4B8E830820F046750009A86B /* Material.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Material.h; path = ../Source/Material.h; sourceTree = "<group>"; };
@@ -585,6 +591,7 @@
 		4B0E2A561F74F5570019D4AD /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				4B8A976F238B7A0E006D284D /* Locations.txt */,
 				4B775E5023373890007FF777 /* UI-Text-ColorReplace.frag */,
 				4B399E4022D00E2100221AE4 /* 3D-Billboard.frag */,
 				4B399E3F22D00E2100221AE4 /* 3D-Billboard.vert */,
@@ -813,6 +820,8 @@
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
 				4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */,
 				4B02A8BD2381E56200CCDFAA /* InventoryManager.h */,
+				4B8A976C238B6EE1006D284D /* LocationManager.cpp */,
+				4B8A976B238B6EE1006D284D /* LocationManager.h */,
 				4B90E07A2377AD4E00E0E3FA /* Timeblock.cpp */,
 				4B90E0792377AD4E00E0E3FA /* Timeblock.h */,
 				4B6B766321AB746D00788C02 /* UI */,
@@ -1113,6 +1122,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B22F4E7217170A00065B152 /* Assets.xcassets in Resources */,
+				4B8A9770238B7A0E006D284D /* Locations.txt in Resources */,
 				4B22F4EA217170A00065B152 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1258,6 +1268,7 @@
 				4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
 				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
+				4B8A976D238B6EE1006D284D /* LocationManager.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
 				4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */,
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
@@ -1367,6 +1378,7 @@
 				4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
 				4B22F52D2174078B0065B152 /* Audio.cpp in Sources */,
+				4B8A976E238B6EE1006D284D /* LocationManager.cpp in Sources */,
 				4B22F5382174078B0065B152 /* GameCamera.cpp in Sources */,
 				4B22F5252174078B0065B152 /* Actor.cpp in Sources */,
 				4B22F53C2174078B0065B152 /* InputManager.cpp in Sources */,
