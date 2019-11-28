@@ -233,7 +233,7 @@ statement: USERID ASSIGN expr SEMICOLON 				{ builder.Store($1); } /* myInt$ = 2
 	| WAIT { builder.BeginWait(); } OPENBRACKET statements CLOSEBRACKET { builder.EndWait(); } /* wait { // stuff } */
 	| statements_block 									/* { // stuff } */
 	| SEMICOLON 										{ } /* ; */
-	| if_else_block										/* if(blah) { } else if(foo) { } else { } */
+	| { builder.BeginIfElseBlock(); } if_else_block 	{ builder.EndIfElseBlock(); } /* if(blah) { } else if(foo) { } else { } */
 	;
 
 /* just an indented section with MORE statements */
@@ -282,11 +282,11 @@ if_else_block: if_statement
 	| if_statement else_statement
 	;
 
-if_statement: IF OPENPAREN expr CLOSEPAREN statements_block 	/* if(1) { // stuff } */
+if_statement: IF OPENPAREN expr CLOSEPAREN { builder.BeginIfBlock(); } statements_block { builder.EndIfBlock(); } /* if(1) { // stuff } */
 	;
 
-else_statement: ELSE statements_block 	/* else { // stuff } */
-	| ELSE if_else_block { } 			/* else if(1) { // stuff } */
+else_statement: ELSE { builder.BeginElseBlock(); } statements_block { builder.EndElseBlock(); } /* else { // stuff } */
+	| ELSE if_else_block 				{  } /* else if(1) { // stuff } */
 	;
 
 %%

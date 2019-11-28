@@ -122,9 +122,11 @@ bool GEngine::Initialize()
 	// Create locations manager.
 	Services::Set<LocationManager>(new LocationManager());
 	
-	//LoadScene("R25");
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
     LoadScene("R25");
+	
+	//SheepScript* ss = Services::GetSheep()->Compile("/Users/Clark/Projects/gengine/Assets/Conditions.shp");
+	//Services::GetSheep()->Execute(ss);
 	
 	//mReportManager.Log("Generic", "Rock & Roll");
     return true;

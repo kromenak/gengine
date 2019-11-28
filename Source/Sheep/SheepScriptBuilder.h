@@ -20,15 +20,16 @@ public:
     SheepScriptBuilder();
 	~SheepScriptBuilder();
     
-    bool AddStringConst(std::string str);
-    bool AddIntVariable(std::string name, int defaultValue);
-    bool AddFloatVariable(std::string name, float defaultValue);
-    bool AddStringVariable(std::string name, std::string defaultValue);
+    void AddStringConst(std::string str);
+    void AddIntVariable(std::string name, int defaultValue);
+    void AddFloatVariable(std::string name, float defaultValue);
+    void AddStringVariable(std::string name, std::string defaultValue);
     
     void StartFunction(std::string functionName);
     void EndFunction(std::string functionName);
     
     void AddGoto(std::string labelName);
+	void BranchGoto(std::string labelName);
     
     void SitnSpin();
     void Yield();
@@ -36,14 +37,23 @@ public:
 	void AddToSysFuncArgCount() { ++mSysFuncArgCount; }
     SheepValueType CallSysFunc(std::string sysFuncName);
 	
-    //Branch
-    void BranchGoto(std::string labelName);
-    //BranchIfZero
+	void BeginIfElseBlock();
+	void EndIfElseBlock();
+	
+	void BeginIfBlock();
+	void EndIfBlock();
+	
+	void BeginElseBlock();
+	void EndElseBlock();
+	
     void BeginWait();
     void EndWait();
+	
     void ReturnV();
+	
     void Store(std::string varName);
     SheepValueType Load(std::string varName);
+	
     void PushI(int arg);
     void PushF(float arg);
     void PushS(std::string arg);
@@ -53,6 +63,7 @@ public:
     SheepValueType Multiply(SheepValue val1, SheepValue val2);
     SheepValueType Divide(SheepValue val1, SheepValue val2);
     void Negate(SheepValue val);
+	
     SheepValueType IsEqual(SheepValue val1, SheepValue val2);
     SheepValueType IsNotEqual(SheepValue val1, SheepValue val2);
     SheepValueType IsGreater(SheepValue val1, SheepValue val2);
@@ -71,6 +82,8 @@ public:
     
     void Breakpoint();
 	
+	// Parser code can call this function after calling an above function to see if an internal compiler error occurred.
+	// Usually, the compiler will want to abort if this returns true.
 	bool CheckError(const Sheep::Parser::location_type& loc, Sheep::Parser& parser) const;
     
 	// After "building" the script's bytecode and tables, these functions are used to access that data.
@@ -104,6 +117,21 @@ private:
     // For gotos, a map of label to bytecode offset.
     std::unordered_map<std::string, int> mGotoLabelsToOffsets;
     std::unordered_map<std::string, std::vector<int>> mGotoLabelsToBeHookedUp;
+	
+	// For if/else blocks, we need to track what block we're in and how many nested blocks exist as we parse/compile.
+	struct OpenIfBlock
+	{
+		// Each if statement needs to know where to branch to if the if condition evaluates to false.
+		// We store the offset where we need to fill in that address here.
+		int branchIfZeroAddressOffset = -1;
+		
+		// At the end of each if block, we need to put a branch to the point past the end of the if/else block.
+		// E.g. after first "if" block, we don't want to execute 2nd/3rd/etc "else if" blocks - must branch!
+		// Here, we store all the offsets where we need to fill in the end of the if/else block address.
+		// We can then circle back and fill in the missing values once we know where the if/else block ends.
+		std::vector<int> branchAddressOffsets;
+	};
+	std::vector<OpenIfBlock> mOpenIfBlocks;
     
     // A vector for building the bytecode section.
     std::vector<char> mBytecode;

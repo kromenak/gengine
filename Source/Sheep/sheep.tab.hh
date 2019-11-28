@@ -742,14 +742,14 @@ namespace Sheep {
   static const short int yypgoto_[];
 
   // YYDEFGOTO[NTERM-NUM].
-  static const signed char yydefgoto_[];
+  static const short int yydefgoto_[];
 
   // YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
   // positive, shift that token.  If negative, reduce the rule whose
   // number is the opposite.  If YYTABLE_NINF, syntax error.
   static const short int yytable_[];
 
-  static const short int yycheck_[];
+  static const unsigned char yycheck_[];
 
   // YYSTOS[STATE-NUM] -- The (internal number of the) accessing
   // symbol of state STATE-NUM.
@@ -869,8 +869,8 @@ namespace Sheep {
     enum
     {
       yyeof_ = 0,
-      yylast_ = 265,     ///< Last index in yytable_.
-      yynnts_ = 23,  ///< Number of nonterminal symbols.
+      yylast_ = 252,     ///< Last index in yytable_.
+      yynnts_ = 26,  ///< Number of nonterminal symbols.
       yyfinal_ = 10, ///< Termination state number.
       yyterror_ = 1,
       yyerrcode_ = 256,
@@ -958,8 +958,8 @@ namespace Sheep {
   {
       switch (other.type_get ())
     {
-      case 64: // expr
-      case 65: // sysfunc_call
+      case 65: // expr
+      case 66: // sysfunc_call
         value.copy< SheepValue > (other.value);
         break;
 
@@ -994,8 +994,8 @@ namespace Sheep {
     (void) v;
       switch (this->type_get ())
     {
-      case 64: // expr
-      case 65: // sysfunc_call
+      case 65: // expr
+      case 66: // sysfunc_call
         value.copy< SheepValue > (v);
         break;
 
@@ -1082,8 +1082,8 @@ namespace Sheep {
     // Type destructor.
     switch (yytype)
     {
-      case 64: // expr
-      case 65: // sysfunc_call
+      case 65: // expr
+      case 66: // sysfunc_call
         value.template destroy< SheepValue > ();
         break;
 
@@ -1124,8 +1124,8 @@ namespace Sheep {
     super_type::move(s);
       switch (this->type_get ())
     {
-      case 64: // expr
-      case 65: // sysfunc_call
+      case 65: // expr
+      case 66: // sysfunc_call
         value.move< SheepValue > (s.value);
         break;
 

@@ -30,7 +30,7 @@ SheepScriptBuilder::~SheepScriptBuilder()
 	#endif
 }
 
-bool SheepScriptBuilder::AddStringConst(std::string str)
+void SheepScriptBuilder::AddStringConst(std::string str)
 {
     StringUtil::RemoveQuotes(str);
     auto it = std::find(mStringConsts.begin(), mStringConsts.end(), str);
@@ -43,12 +43,10 @@ bool SheepScriptBuilder::AddStringConst(std::string str)
         #ifdef DEBUG_BUILDER
         std::cout << "String Const \"" << str << "\"" << std::endl;
         #endif
-        return true;
     }
-    return false;
 }
 
-bool SheepScriptBuilder::AddIntVariable(std::string name, int defaultValue)
+void SheepScriptBuilder::AddIntVariable(std::string name, int defaultValue)
 {
     SheepValue sheepValue;
     sheepValue.type = SheepValueType::Int;
@@ -60,10 +58,9 @@ bool SheepScriptBuilder::AddIntVariable(std::string name, int defaultValue)
     #ifdef DEBUG_BUILDER
     std::cout << "Int Var " << name << " = " << defaultValue << std::endl;
     #endif
-    return true;
 }
 
-bool SheepScriptBuilder::AddFloatVariable(std::string name, float defaultValue)
+void SheepScriptBuilder::AddFloatVariable(std::string name, float defaultValue)
 {
     SheepValue sheepValue;
     sheepValue.type = SheepValueType::Float;
@@ -75,10 +72,9 @@ bool SheepScriptBuilder::AddFloatVariable(std::string name, float defaultValue)
     #ifdef DEBUG_BUILDER
     std::cout << "Float Var " << name << " = " << defaultValue << std::endl;
     #endif
-    return true;
 }
 
-bool SheepScriptBuilder::AddStringVariable(std::string name, std::string defaultValue)
+void SheepScriptBuilder::AddStringVariable(std::string name, std::string defaultValue)
 {
     AddStringConst(defaultValue);
     
@@ -92,7 +88,6 @@ bool SheepScriptBuilder::AddStringVariable(std::string name, std::string default
     #ifdef DEBUG_BUILDER
     std::cout << "String Var " << name << " = \"" << defaultValue << "\"" << std::endl;
     #endif
-    return true;
 }
 
 void SheepScriptBuilder::StartFunction(std::string functionName)
@@ -132,7 +127,7 @@ void SheepScriptBuilder::AddGoto(std::string labelName)
     auto it = mGotoLabelsToOffsets.find(labelName);
     if(it == mGotoLabelsToOffsets.end())
     {
-        int gotoOffset = (int)mBytecode.size();
+		int gotoOffset = static_cast<int>(mBytecode.size());
         mGotoLabelsToOffsets[labelName] = gotoOffset;
         
         // Check whether we have any "goto" instructions that used this label before
@@ -150,10 +145,46 @@ void SheepScriptBuilder::AddGoto(std::string labelName)
             }
             mGotoLabelsToBeHookedUp.erase(labelName);
         }
+		
+		#ifdef DEBUG_BUILDER
+		std::cout << "Goto Label " << labelName << std::endl;
+		#endif
     }
     else
     {
         //TODO: Error: duplicate goto label
+    }
+}
+
+void SheepScriptBuilder::BranchGoto(std::string labelName)
+{
+	#ifdef DEBUG_BUILDER
+	std::cout << "Branch to Goto " << labelName << std::endl;
+	#endif
+	
+    AddInstruction(SheepInstruction::BranchGoto);
+    
+    // Argument is the offset in the bytecode to the "goto" label.
+    // However...we might already know that offset, or we might not!
+    auto it = mGotoLabelsToOffsets.find(labelName);
+    if(it != mGotoLabelsToOffsets.end())
+    {
+        // If we already know the offset, just add the argument and be done with it.
+        AddIntArg(it->second);
+    }
+    else
+    {
+        // We DO NOT yet know the offset, so just push -1 as a placeholder.
+        AddIntArg(-1);
+        
+        // Keep track of the fact that we need to revisit this argument once we
+        // know where the "goto" label is located.
+        auto it2 = mGotoLabelsToBeHookedUp.find(labelName);
+        if(it2 == mGotoLabelsToBeHookedUp.end())
+        {
+            mGotoLabelsToBeHookedUp[labelName] = std::vector<int>();
+        }
+        mGotoLabelsToBeHookedUp[labelName].push_back(static_cast<int>(mBytecode.size()) - 4);
     }
 }
 
@@ -281,32 +312,99 @@ SheepValueType SheepScriptBuilder::CallSysFunc(std::string sysFuncName)
 	return valueType;
 }
 
-void SheepScriptBuilder::BranchGoto(std::string labelName)
+void SheepScriptBuilder::BeginIfElseBlock()
 {
-    AddInstruction(SheepInstruction::BranchGoto);
-    
-    // Argument is the offset in the bytecode to the "goto" label.
-    // However...we might already know that offset, or we might not!
-    auto it = mGotoLabelsToOffsets.find(labelName);
-    if(it != mGotoLabelsToOffsets.end())
-    {
-        // If we already know the offset, just add the argument and be done with it.
-        AddIntArg(it->second);
-    }
-    else
-    {
-        // We DO NOT yet know the offset, so just push -1 as a placeholder.
-        AddIntArg(-1);
-        
-        // Keep track of the fact that we need to revisit this argument once we
-        // know where the "goto" label is located.
-        auto it2 = mGotoLabelsToBeHookedUp.find(labelName);
-        if(it2 == mGotoLabelsToBeHookedUp.end())
-        {
-            mGotoLabelsToBeHookedUp[labelName] = std::vector<int>();
-        }
-        mGotoLabelsToBeHookedUp[labelName].push_back((int)(mBytecode.size() - 4));
-    }
+	#ifdef DEBUG_BUILDER
+	std::cout << "BeginIfElseBlock" << std::endl;
+	#endif
+	mOpenIfBlocks.emplace_back();
+}
+
+void SheepScriptBuilder::EndIfElseBlock()
+{
+	#ifdef DEBUG_BUILDER
+	std::cout << "EndIfElseBlock" << std::endl;
+	#endif
+	
+	// At the end of each "if" and "else if" block, we have been putting "branch" statements with placeholder addresses.
+	// The address there should be the address of the end of the if/else block...which is right here!
+	// So, go back and hook those addresses up.
+	int branchOffset = static_cast<int>(mBytecode.size());
+	for(auto& offset : mOpenIfBlocks.back().branchAddressOffsets)
+	{
+		mBytecode[offset] = (branchOffset & 0xFF);
+		mBytecode[offset + 1] = (branchOffset >> 8) & 0xFF;
+		mBytecode[offset + 2] = (branchOffset >> 16) & 0xFF;
+		mBytecode[offset + 3] = (branchOffset >> 24) & 0xFF;
+	}
+	
+	// Pop the open if block - it's not open any longer.
+	mOpenIfBlocks.pop_back();
+}
+
+void SheepScriptBuilder::BeginIfBlock()
+{
+	// This is beginning of an if block within a larger if/else block.
+	// Ex: if(blah$ == 10)
+	// Add branch if zero instruction. This branches PAST the if statement if the conditions is false.
+	#ifdef DEBUG_BUILDER
+	std::cout << "BranchIfZero, XXX" << std::endl;
+	#endif
+	AddInstruction(SheepInstruction::BranchIfZero);
+	
+	// Argument is address to branch to. BUT we don't know this address yet!
+	// We just reserve the space and note that we need to circle back to this!
+	AddIntArg(-1);
+	
+	// Record that we need to circle back and fill in the correct branch address.
+	mOpenIfBlocks.back().branchIfZeroAddressOffset = static_cast<int>(mBytecode.size()) - 4;
+}
+
+void SheepScriptBuilder::EndIfBlock()
+{
+	// This is end of an if block. We will need to branch past any other "else if" or "else blocks!
+	// Add branch instruction.
+	#ifdef DEBUG_BUILDER
+	std::cout << "Branch, XXX" << std::endl;
+	#endif
+	AddInstruction(SheepInstruction::Branch);
+	
+	// Argument is address to branch to. BUT we don't know this address yet!
+	// We just reserve the space and note that we need to circle back to this!
+	AddIntArg(-1);
+	
+	// Record that we need to circle back and fill in the correct branch address.
+	mOpenIfBlocks.back().branchAddressOffsets.push_back(static_cast<int>(mBytecode.size()) - 4);
+	
+	// If there was a previous "branch if zero" address to be hooked up (from start of if block), it should point HERE!
+	// This effectively has the code execute the NEXT "else if" or "else" statement.
+	if(mOpenIfBlocks.back().branchIfZeroAddressOffset > 0)
+	{
+		int offset = mOpenIfBlocks.back().branchIfZeroAddressOffset;
+		int branchOffset = static_cast<int>(mBytecode.size());
+		mBytecode[offset] = (branchOffset & 0xFF);
+		mBytecode[offset + 1] = (branchOffset >> 8) & 0xFF;
+		mBytecode[offset + 2] = (branchOffset >> 16) & 0xFF;
+		mBytecode[offset + 3] = (branchOffset >> 24) & 0xFF;
+		
+		mOpenIfBlocks.back().branchIfZeroAddressOffset = -1;
+	}
+}
+
+void SheepScriptBuilder::BeginElseBlock()
+{
+	#ifdef DEBUG_BUILDER
+	std::cout << "BeginElseBlock" << std::endl;
+	#endif
+	// Maybe nothing?
+}
+
+void SheepScriptBuilder::EndElseBlock()
+{
+	#ifdef DEBUG_BUILDER
+	std::cout << "EndElseBlock" << std::endl;
+	#endif
+	// Maybe nothing?
 }
 
 void SheepScriptBuilder::BeginWait()
@@ -344,14 +442,23 @@ void SheepScriptBuilder::Store(std::string varName)
             SheepValue& value = mVariables[varIndex];
             if(value.type == SheepValueType::Int)
             {
+				#ifdef DEBUG_BUILDER
+				std::cout << "StoreI, " << varIndex << std::endl;
+				#endif
                 AddInstruction(SheepInstruction::StoreI);
             }
             else if(value.type == SheepValueType::Float)
             {
+				#ifdef DEBUG_BUILDER
+				std::cout << "StoreF, " << varIndex << std::endl;
+				#endif
                 AddInstruction(SheepInstruction::StoreF);
             }
             else if(value.type == SheepValueType::String)
             {
+				#ifdef DEBUG_BUILDER
+				std::cout << "StoreS, " << varIndex << std::endl;
+				#endif
                 AddInstruction(SheepInstruction::StoreS);
             }
             AddIntArg(varIndex);
@@ -370,14 +477,23 @@ SheepValueType SheepScriptBuilder::Load(std::string varName)
             SheepValue& value = mVariables[varIndex];
             if(value.type == SheepValueType::Int)
             {
+				#ifdef DEBUG_BUILDER
+				std::cout << "LoadI, " << varIndex << std::endl;
+				#endif
                 AddInstruction(SheepInstruction::LoadI);
             }
             else if(value.type == SheepValueType::Float)
             {
+				#ifdef DEBUG_BUILDER
+				std::cout << "LoadF, " << varIndex << std::endl;
+				#endif
                 AddInstruction(SheepInstruction::LoadF);
             }
             else if(value.type == SheepValueType::String)
             {
+				#ifdef DEBUG_BUILDER
+				std::cout << "LoadS, " << varIndex << std::endl;
+				#endif
                 AddInstruction(SheepInstruction::LoadS);
             }
             AddIntArg(varIndex);
@@ -438,6 +554,9 @@ void SheepScriptBuilder::PushS(std::string arg)
 
 SheepValueType SheepScriptBuilder::Add(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "Add" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -469,6 +588,9 @@ SheepValueType SheepScriptBuilder::Add(SheepValue val1, SheepValue val2)
 
 SheepValueType SheepScriptBuilder::Subtract(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "Subtract" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -500,6 +622,9 @@ SheepValueType SheepScriptBuilder::Subtract(SheepValue val1, SheepValue val2)
 
 SheepValueType SheepScriptBuilder::Multiply(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "Multiply" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -531,6 +656,9 @@ SheepValueType SheepScriptBuilder::Multiply(SheepValue val1, SheepValue val2)
 
 SheepValueType SheepScriptBuilder::Divide(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "Divide" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -564,10 +692,16 @@ void SheepScriptBuilder::Negate(SheepValue val)
 {
     if(val.type == SheepValueType::Int)
     {
+		#ifdef DEBUG_BUILDER
+		std::cout << "NegateI" << std::endl;
+		#endif
         AddInstruction(SheepInstruction::NegateI);
     }
     else if(val.type == SheepValueType::Float)
     {
+		#ifdef DEBUG_BUILDER
+		std::cout << "NegateF" << std::endl;
+		#endif
         AddInstruction(SheepInstruction::NegateF);
     }
     else
@@ -578,6 +712,9 @@ void SheepScriptBuilder::Negate(SheepValue val)
 
 SheepValueType SheepScriptBuilder::IsEqual(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "IsEqual" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -609,6 +746,9 @@ SheepValueType SheepScriptBuilder::IsEqual(SheepValue val1, SheepValue val2)
 
 SheepValueType SheepScriptBuilder::IsNotEqual(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "IsNotEqual" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -640,6 +780,9 @@ SheepValueType SheepScriptBuilder::IsNotEqual(SheepValue val1, SheepValue val2)
 
 SheepValueType SheepScriptBuilder::IsGreater(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "IsGreater" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -671,6 +814,9 @@ SheepValueType SheepScriptBuilder::IsGreater(SheepValue val1, SheepValue val2)
 
 SheepValueType SheepScriptBuilder::IsLess(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "IsLess" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -702,6 +848,9 @@ SheepValueType SheepScriptBuilder::IsLess(SheepValue val1, SheepValue val2)
 
 SheepValueType SheepScriptBuilder::IsGreaterEqual(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "IsGreaterEqual" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -733,6 +882,9 @@ SheepValueType SheepScriptBuilder::IsGreaterEqual(SheepValue val1, SheepValue va
 
 SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "IsLessEqual" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -764,12 +916,18 @@ SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2)
 
 void SheepScriptBuilder::IToF(int index)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "IToF, " << index << std::endl;
+	#endif
     AddInstruction(SheepInstruction::IToF);
     AddIntArg(index);
 }
 
 void SheepScriptBuilder::FToI(int index)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "FToI, " << index << std::endl;
+	#endif
     AddInstruction(SheepInstruction::FToI);
     AddIntArg(index);
 }
@@ -800,6 +958,10 @@ void SheepScriptBuilder::Modulo(SheepValue val1, SheepValue val2)
     {
         // Unsupported
     }
+	
+	#ifdef DEBUG_BUILDER
+	std::cout << "Modulo" << std::endl;
+	#endif
 }
 
 void SheepScriptBuilder::And(SheepValue val1, SheepValue val2)
@@ -828,6 +990,10 @@ void SheepScriptBuilder::And(SheepValue val1, SheepValue val2)
     {
         // Unsupported
     }
+	
+	#ifdef DEBUG_BUILDER
+	std::cout << "And" << std::endl;
+	#endif
 }
 
 void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2)
@@ -856,6 +1022,10 @@ void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2)
     {
         // Unsupported
     }
+	
+	#ifdef DEBUG_BUILDER
+	std::cout << "Or" << std::endl;
+	#endif
 }
 
 void SheepScriptBuilder::Not()
@@ -868,6 +1038,9 @@ void SheepScriptBuilder::Not()
 
 void SheepScriptBuilder::Breakpoint()
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "DebugBreakpoint" << std::endl;
+	#endif
     AddInstruction(SheepInstruction::DebugBreakpoint);
 }
 
