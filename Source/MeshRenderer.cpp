@@ -61,11 +61,6 @@ void MeshRenderer::RenderOpaque()
 			materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
 		}
 	}
-	
-	if(Debug::RenderSubmeshLocalAxes())
-	{
-		Debug::DrawAxes(actorWorldTransform);
-	}
 }
 
 void MeshRenderer::RenderTranslucent()

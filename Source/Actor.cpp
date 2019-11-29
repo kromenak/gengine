@@ -56,5 +56,9 @@ void Actor::Update(float deltaTime)
         component->Update(deltaTime);
     }
 	
+	if(Debug::RenderSubmeshLocalAxes())
+	{
+		Debug::DrawAxes(mTransform->GetLocalToWorldMatrix());
+	}
 	//Debug::DrawLine(GetPosition(), GetPosition() + GetForward() * 5.0f, Color32::Red);
 }
