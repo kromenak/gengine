@@ -22,9 +22,13 @@ VertexAnimation::VertexAnimation(std::string name, char* data, int dataLength) :
 
 VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex)
 {
-    float secondsPerFrame = 1.0f / framesPerSecond;
-    float localTime = Math::Mod(time, GetDuration(framesPerSecond));
-    
+	float duration = GetDuration(framesPerSecond);
+	float localTime = time;
+	if(localTime > duration)
+	{
+		localTime = Math::Mod(time, duration);
+	}
+	
     float currentPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
 	
@@ -47,6 +51,9 @@ VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int fram
 		pose.mFrameNumber = -1;
 		return pose;
 	}
+	
+	// Calculate how many seconds should be used for a single frame - used later.
+    float secondsPerFrame = 1.0f / framesPerSecond;
 	
 	// Determine the poses right before the desired local time on the animation.
     VertexAnimationVertexPose* currentVertexPose = firstVertexPose;
@@ -97,7 +104,12 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
 	
 	// Caller may pass in a global time that extends beyond the local time of this particular animation.
 	// Desire here is for the animation to "loop", so we calculate how many seconds in we are.
-	float localTime = Math::Mod(time, GetDuration(framesPerSecond));
+	float duration = GetDuration(framesPerSecond);
+	float localTime = time;
+	if(localTime > duration)
+	{
+		localTime = Math::Mod(time, duration);
+	}
 	
 	// Determine between which two transform poses the desired local time is located.
 	// E.g. if local time is 50% between pose 5 and 6, we  want to interpolate 50% between those two poses.

@@ -3,12 +3,10 @@
 //
 // Clark Kromenaker
 //
-// A vertex animation for a particular model/mesh.
+// A vertex animation for a particular model/mesh. For GK3, this is the in-memory representation of "ACT" file.
 //
-// For an animation to work, its data must align with that of a particular model/mesh.
-// This includes mesh count, vertex count within meshes, etc.
-//
-// For GK3, this is the in-memory representation of "ACT" file.
+// For an animation to work, its vertex data must align with that of a particular model/mesh.
+// This includes mesh count, submesh count, vertex count within submeshes, etc.
 //
 #pragma once
 #include "Asset.h"

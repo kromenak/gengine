@@ -15,6 +15,8 @@ class VertexAnimationPlayer : public Component
 {
 	TYPE_DECL_CHILD();
 public:
+	static const int kDefaultFramesPerSecond = 15;
+	
 	VertexAnimationPlayer(Actor* owner);
 	
 	void Play(VertexAnimation* animation);
@@ -26,13 +28,13 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
-	// The mesh renderer from which we will animate.
+	// The mesh renderer that will be animated.
 	MeshRenderer* mMeshRenderer = nullptr;
 	
 	// How many frames per second to run at. Default is 15 (from GK3 docs).
-	int mFramesPerSecond = 15;
+	int mFramesPerSecond = kDefaultFramesPerSecond;
 	
-	// If defined, a currently running vertex animation.
+	// A currently running vertex animation, if any.
 	VertexAnimation* mVertexAnimation = nullptr;
 	
 	// Timer for tracking progress on vertex animation.

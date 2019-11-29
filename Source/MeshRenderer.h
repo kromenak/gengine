@@ -38,7 +38,7 @@ public:
 	
 	Model* GetModel() const { return mModel; }
 	
-	std::vector<Mesh*> GetMeshes() const { return mMeshes; }
+	const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
 	Mesh* GetMesh(int index) const;
 	
 	Matrix4 GetMeshWorldTransform(int index) const;
