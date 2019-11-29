@@ -21,7 +21,7 @@ BarnFile::BarnFile(const std::string& filePath) :
     mReader(filePath)
 {
     // Make sure we can actually read this file.
-    if(!mReader.CanRead())
+    if(!mReader.OK())
     {
 		std::cout << "Can't read barn file at " << filePath << std::endl;
         return;
@@ -235,7 +235,7 @@ BarnFile::BarnFile(const std::string& filePath) :
 
 bool BarnFile::CanRead() const
 {
-    return mReader.CanRead();
+    return mReader.OK();
 }
 
 BarnAsset* BarnFile::GetAsset(const std::string& assetName)
