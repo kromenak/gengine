@@ -156,6 +156,10 @@
 		4B6B766721AB75AA00788C02 /* ActionBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766521AB75AA00788C02 /* ActionBar.cpp */; };
 		4B6B766A21AB99C500788C02 /* FileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766921AB99C500788C02 /* FileSystem.cpp */; };
 		4B6B766B21AB99C500788C02 /* FileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766921AB99C500788C02 /* FileSystem.cpp */; };
+		4B6EDC0A2391A1F900412737 /* GKObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EDC092391A1F900412737 /* GKObject.cpp */; };
+		4B6EDC0B2391A1F900412737 /* GKObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EDC092391A1F900412737 /* GKObject.cpp */; };
+		4B6EDC0E2391A36F00412737 /* GKProp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EDC0D2391A36F00412737 /* GKProp.cpp */; };
+		4B6EDC0F2391A36F00412737 /* GKProp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EDC0D2391A36F00412737 /* GKProp.cpp */; };
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76DFBB21867D2800BAECC4 /* UIButton.cpp */; };
 		4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76DFBB21867D2800BAECC4 /* UIButton.cpp */; };
@@ -400,6 +404,10 @@
 		4B6B766521AB75AA00788C02 /* ActionBar.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ActionBar.cpp; path = ../Source/ActionBar.cpp; sourceTree = "<group>"; };
 		4B6B766821AB99C500788C02 /* FileSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FileSystem.h; path = ../Source/FileSystem.h; sourceTree = "<group>"; };
 		4B6B766921AB99C500788C02 /* FileSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileSystem.cpp; path = ../Source/FileSystem.cpp; sourceTree = "<group>"; };
+		4B6EDC082391A1F900412737 /* GKObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GKObject.h; path = ../Source/GKObject.h; sourceTree = "<group>"; };
+		4B6EDC092391A1F900412737 /* GKObject.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKObject.cpp; path = ../Source/GKObject.cpp; sourceTree = "<group>"; };
+		4B6EDC0C2391A36F00412737 /* GKProp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GKProp.h; path = ../Source/GKProp.h; sourceTree = "<group>"; };
+		4B6EDC0D2391A36F00412737 /* GKProp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKProp.cpp; path = ../Source/GKProp.cpp; sourceTree = "<group>"; };
 		4B76B57A1F35999B003F63E5 /* BarnFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnFile.cpp; path = ../Source/Barn/BarnFile.cpp; sourceTree = "<group>"; };
 		4B76B57B1F35999B003F63E5 /* BarnFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnFile.h; path = ../Source/Barn/BarnFile.h; sourceTree = "<group>"; };
 		4B76B5821F3788FA003F63E5 /* BarnAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnAsset.h; path = ../Source/Barn/BarnAsset.h; sourceTree = "<group>"; };
@@ -818,6 +826,10 @@
 				4BEA727321D7F71A00998066 /* GameProgress.h */,
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
+				4B6EDC092391A1F900412737 /* GKObject.cpp */,
+				4B6EDC082391A1F900412737 /* GKObject.h */,
+				4B6EDC0D2391A36F00412737 /* GKProp.cpp */,
+				4B6EDC0C2391A36F00412737 /* GKProp.h */,
 				4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */,
 				4B02A8BD2381E56200CCDFAA /* InventoryManager.h */,
 				4B8A976C238B6EE1006D284D /* LocationManager.cpp */,
@@ -1224,6 +1236,7 @@
 				4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */,
 				4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */,
 				4B12B9D322F94ABC009F54E4 /* RenderTexture.cpp in Sources */,
+				4B6EDC0E2391A36F00412737 /* GKProp.cpp in Sources */,
 				4B12B9DB22FF3764009F54E4 /* stb_image_resize.cpp in Sources */,
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
@@ -1245,6 +1258,7 @@
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B775E5323382EE7007FF777 /* UITextInput.cpp in Sources */,
 				4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */,
+				4B6EDC0A2391A1F900412737 /* GKObject.cpp in Sources */,
 				4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
@@ -1334,6 +1348,7 @@
 				4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */,
 				4B22F50D2174075B0065B152 /* SceneAsset.cpp in Sources */,
 				4BB67C4C235255CA00FDFB30 /* TextLayout.cpp in Sources */,
+				4B6EDC0F2391A36F00412737 /* GKProp.cpp in Sources */,
 				4BB67C452352552C00FDFB30 /* FootstepManager.cpp in Sources */,
 				4B22F503217407530065B152 /* SheepAPI.cpp in Sources */,
 				4B2CA00B21B8FC6D006D5E52 /* minilzo.c in Sources */,
@@ -1355,6 +1370,7 @@
 				4B22F5202174076D0065B152 /* Vector2.cpp in Sources */,
 				4BB67C492352558300FDFB30 /* ReportManager.cpp in Sources */,
 				4B22F500217407470065B152 /* CallbackMethod.cpp in Sources */,
+				4B6EDC0B2391A1F900412737 /* GKObject.cpp in Sources */,
 				4B22F507217407530065B152 /* SheepScriptBuilder.cpp in Sources */,
 				4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */,

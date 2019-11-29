@@ -12,22 +12,16 @@
 // are the "cat" and "chicken". So, maybe we need a subclass for humanoids at some point.
 //
 #pragma once
-#include "Actor.h"
+#include "GKObject.h"
 
 #include <string>
 
-#include "Heading.h"
-
-class Animation;
 class FaceController;
 class GAS;
-class GasPlayer;
-class MeshRenderer;
 class VertexAnimation;
-class VertexAnimationPlayer;
 class Walker;
 
-class GKActor : public Actor
+class GKActor : public GKObject
 {
 public:
     enum class FidgetType
@@ -39,60 +33,38 @@ public:
 		Custom
     };
 	
-	GKActor();
-	GKActor(std::string identifier);
-	
-	void SetIdentifier(std::string identifier) { mIdentifier = identifier; }
-	const std::string& GetIdentifier() const { return mIdentifier; }
-	
-	void SetNoun(std::string noun) { mNoun = noun; }
-	std::string GetNoun() const { return mNoun; }
+	GKActor(const std::string& identifier);
 	
     void SetIdleGas(GAS* gas) { mIdleGas = gas; }
     void SetTalkGas(GAS* gas) { mTalkGas = gas; }
     void SetListenGas(GAS* gas) { mListenGas = gas; }
 	
 	void StartFidget(FidgetType type);
-	void StartFidget(GAS* gas);
+	void StartCustomFidget(GAS* gas);
 	
-	void PlayAnimation(VertexAnimation* animation);
-	void PlayAnimation(VertexAnimation* animation, int framesPerSecond);
-	void SampleAnimation(VertexAnimation* animation, int frame);
+	void PlayAnimation(VertexAnimation* animation, int framesPerSecond) override;
 	
-    MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
+	const std::string& GetIdentifier() const { return mIdentifier; }
+	
 	Walker* GetWalker() const { return mWalker; }
 	FaceController* GetFaceController() const { return mFaceController; }
-	
-	void SetHeading(const Heading& heading);
-	Heading GetHeading() const;
 	
 protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
-	// The character's 3-letter identifier (GAB, GRA, etc).
+	// The actor's 3-letter identifier (GAB, GRA, etc).
+	// Every GK Actor has one. Note this is NOT THE SAME as the noun!
 	std::string mIdentifier;
-	
-	// This character's noun.
-	std::string mNoun;
 	
     // Actor's current fidget.
     FidgetType mActiveFidget = FidgetType::Idle;
 	
-	// The character's mesh renderer.
-	MeshRenderer* mMeshRenderer = nullptr;
-	
-	// The character's animation player.
-	VertexAnimationPlayer* mAnimationPlayer = nullptr;
-	
-	// The character's walking control.
+	// The actor's walking control.
 	Walker* mWalker = nullptr;
 	
-	// The character's face control.
-	FaceController* mFaceController;
-	
-	// Player for GAS logic.
-	GasPlayer* mGasPlayer = nullptr;
+	// The actor's face control.
+	FaceController* mFaceController = nullptr;
     
     // GAS scripts to use when actor is idle, talking, or listening.
     GAS* mIdleGas = nullptr;

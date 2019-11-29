@@ -6,6 +6,7 @@
 #include "Scene.h"
 
 #include <iostream>
+#include <limits>
 
 #include "ActionBar.h"
 #include "AnimationPlayer.h"
@@ -15,6 +16,8 @@
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GKActor.h"
+#include "GKObject.h"
+#include "GKProp.h"
 #include "LocationManager.h"
 #include "Math.h"
 #include "MeshRenderer.h"
@@ -116,6 +119,7 @@ void Scene::Load()
 		mSoundtrackPlayer->Play(soundtrack);
 	}
 	
+	/*
 	// For debugging - render walker bounds overlay on game world.
 	//TODO: Move to construction system!
 	{
@@ -142,6 +146,7 @@ void Scene::Load()
 			walkerBoundaryActor->SetScale(size);
 		}
 	}
+	*/
 	
 	// Create actors for the scene.
 	const std::vector<const SceneActor*>& sceneActorDatas = mSceneData->GetActors();
@@ -150,7 +155,7 @@ void Scene::Load()
 		// NEVER spawn an ego who is not our current ego!
 		if(actorDef->ego && actorDef != egoSceneActor) { continue; }
 		
-		// The actor's 3-letter identifier can be derived from the name of the model.
+		// The actor's 3-letter identifier (GAB, GRA, etc) can be derived from the name of the model.
 		std::string identifier;
 		if(actorDef->model != nullptr)
 		{
@@ -160,8 +165,9 @@ void Scene::Load()
 		// Create actor.
 		GKActor* actor = new GKActor(identifier);
 		mActors.push_back(actor);
+		mObjects.push_back(actor);
 		
-		// Set noun.
+		// Set noun (GABRIEL, GRACE, etc).
 		actor->SetNoun(actorDef->noun);
 		
 		// Set actor's initial position and rotation.
@@ -172,6 +178,7 @@ void Scene::Load()
 			{
 				actor->SetPosition(scenePos->position);
 				actor->SetHeading(scenePos->heading);
+				actor->GetWalker()->SnapToWalkActor();
 			}
 			else
 			{
@@ -188,16 +195,17 @@ void Scene::Load()
 		actor->SetListenGas(actorDef->listenGas);
 		
 		// Start in idle state.
-		actor->StartFidget(GKActor::FidgetType::Idle);
+		//actor->StartFidget(GKActor::FidgetType::Idle);
 		
+		/*
 		// Set up the actor's walker support, if any.
 		Model* walkerAidModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
 		if(walkerAidModel != nullptr)
 		{
 			// For walking anims to work correctly, a walker aid actor must exist
 			// and be part of the scenes actor list (so an animation can be started on it).
-			GKActor* walkerAid = new GKActor();
-			mActors.push_back(walkerAid);
+			GKObject* walkerAid = new GKObject();
+			mObjects.push_back(walkerAid);
 			
 			// Make the walker aid a child of the actor itself.
 			Transform* walkerAidTransform = walkerAid->GetComponent<Transform>();
@@ -208,6 +216,7 @@ void Scene::Load()
 			actor->GetWalker()->SetWalkAidMeshRenderer(walkerAid->GetMeshRenderer());
 			actor->GetWalker()->SetWalkMeshTransform(actor->GetMeshRenderer()->GetOwner()->GetComponent<Transform>());
 		}
+		*/
 		
 		//TODO: Apply init anim.
 		
@@ -253,17 +262,18 @@ void Scene::Load()
 			case SceneModel::Type::GasProp:
 			{
 				// Create actor.
-				GKActor* actor = new GKActor();
-				actor->SetNoun(modelDef->noun);
+				GKProp* prop = new GKProp();
+				prop->SetNoun(modelDef->noun);
 				
 				// Set model.
-				actor->GetMeshRenderer()->SetModel(modelDef->model);
-				mActors.push_back(actor);
+				prop->GetMeshRenderer()->SetModel(modelDef->model);
+				mProps.push_back(prop);
+				mObjects.push_back(prop);
 				
 				// If it's a "gas prop", use provided gas as the fidget for the actor.
 				if(modelDef->type == SceneModel::Type::GasProp)
 				{
-					actor->StartFidget(modelDef->gas);
+					prop->SetGas(modelDef->gas);
 				}
 				break;
 			}
@@ -320,7 +330,8 @@ void Scene::InitEgoPosition(const std::string& positionName)
     // Set position and heading.
     mEgo->SetPosition(position->position);
     mEgo->SetHeading(position->heading);
-    
+	mEgo->GetWalker()->SnapToWalkActor();
+	
 	// Should also set camera position/angle.
 	// Output a warning if specified position has no camera though.
 	if(position->cameraName.empty())
@@ -358,9 +369,9 @@ void Scene::SetCameraPosition(const std::string& cameraName)
 bool Scene::CheckInteract(const Ray& ray) const
 {
 	// Check against any dynamic actors before falling back on BSP check.
-	for(auto& actor : mActors)
+	for(auto& object : mObjects)
 	{
-		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
+		MeshRenderer* meshRenderer = object->GetMeshRenderer();
 		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
 		{
 			return true;
@@ -403,18 +414,36 @@ void Scene::Interact(const Ray& ray)
 	
 	// Check against any dynamic actors before falling back on BSP check.
 	//TODO: Need to handle case where mouse is over multiple actors! We want to pick the closest one in that case.
-	for(auto& actor : mActors)
+	//float nearestObjectDistSq = FLT_MAX;
+	std::vector<const Action*> actions;
+	for(auto& object : mObjects)
 	{
-		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
+		MeshRenderer* meshRenderer = object->GetMeshRenderer();
 		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
 		{
-			// Find all verbs that can be used for this object.
-			std::vector<const Action*> viableActions = mSceneData->GetActions(actor->GetNoun(), mEgo);
-			
-			// Show the action bar. Internally, this takes care of executing the chosen action.
-			mActionBar->Show(viableActions, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
-			return;
+			// Find all verbs that can be used for this object. Only use this object if it has at least one action.
+			std::vector<const Action*> viableActions = mSceneData->GetActions(object->GetNoun(), mEgo);
+			if(viableActions.size() > 0)
+			{
+				// If we already found actions for some other object, see which object is closer to the ray origin.
+				// The closer object will be the one we want to prioritize.
+				if(actions.size() > 0)
+				{
+					
+				}
+				else
+				{
+					actions = viableActions;
+				}
+			}
 		}
+	}
+	
+	// Show the action bar. Internally, this takes care of executing the chosen action.
+	if(actions.size() > 0)
+	{
+		mActionBar->Show(actions, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
+		return;
 	}
 	
 	// Make sure we have valid BSP.
@@ -496,11 +525,11 @@ float Scene::GetFloorY(const Vector3& position) const
 	return 0.0f;
 }
 
-GKActor* Scene::GetActorByModelName(const std::string& modelName) const
+GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 {
-	for(auto& actor : mActors)
+	for(auto& object : mObjects)
 	{
-		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
+		MeshRenderer* meshRenderer = object->GetMeshRenderer();
 		if(meshRenderer != nullptr)
 		{
 			Model* model = meshRenderer->GetModel();
@@ -508,7 +537,7 @@ GKActor* Scene::GetActorByModelName(const std::string& modelName) const
 			{
 				if(StringUtil::EqualsIgnoreCase(model->GetNameNoExtension(), modelName))
 				{
-					return actor;
+					return object;
 				}
 			}
 		}
@@ -572,8 +601,6 @@ void Scene::ExecuteAction(const Action* action)
 	Services::GetReports()->Log("Actions", "Playing NVC " + action->ToString());
 	
 	// Before executing the NVC, we need to handle any approach.
-	//std::cout << (int)nvc->approach << std::endl;
-	//std::cout << nvc->target << std::endl;
 	switch(action->approach)
 	{
 		case Action::Approach::WalkTo:
@@ -642,7 +669,8 @@ void Scene::ExecuteAction(const Action* action)
 		}
 		default:
 		{
-			std::cout << "Unaccounted for approach!" << std::endl;
+			Services::GetReports()->Log("Error", "Invalid approach " + std::to_string(static_cast<int>(action->approach)));
+			action->Execute();
 			break;
 		}
 	}

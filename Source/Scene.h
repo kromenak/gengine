@@ -25,6 +25,8 @@ class AnimationPlayer;
 class BSP;
 class GameCamera;
 class GKActor;
+class GKObject;
+class GKProp;
 class Ray;
 class SceneModel;
 class SIF;
@@ -53,7 +55,7 @@ public:
 	const std::string& GetEgoName() const { return mEgoName; }
 	GKActor* GetEgo() const { return mEgo; }
 	
-	GKActor* GetActorByModelName(const std::string& modelName) const;
+	GKObject* GetSceneObjectByModelName(const std::string& modelName) const;
 	GKActor* GetActorByNoun(const std::string& noun) const;
 	
 	const ScenePosition* GetPosition(const std::string& positionName) const;
@@ -87,8 +89,14 @@ private:
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
 	
+	// GKObjects created for this scene (includes all Actors & Props).
+	std::vector<GKObject*> mObjects;
+	
 	// GKActors created for this scene.
 	std::vector<GKActor*> mActors;
+	
+	// GKProps created for this scene.
+	std::vector<GKProp*> mProps;
 	
     // The name of actor and actor who we are controlling in the scene.
 	// We sometimes need just the name - that's safer during scene loading.
