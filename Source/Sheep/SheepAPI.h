@@ -429,6 +429,8 @@ shpvoid EnableSheepCaching(); // DEV
 shpvoid DisableSheepCaching(); // DEV
 shpvoid DisableCurrentSheepCaching(); // DEV
 
+shpvoid Extract(std::string fileSpec, std::string outputPath);
+
 shpvoid DumpActiveSheepObjects(); // DEV
 shpvoid DumpActiveSheepThreads(); // DEV
 shpvoid DumpCommands(); // DEV
@@ -523,6 +525,7 @@ shpvoid TriggerNounVerb(std::string noun, std::string verb); // DEV
 int GetScore();
 shpvoid IncreaseScore(int value);
 shpvoid SetScore(int score); // DEV
+shpvoid ChangeScore(std::string scoreValue);
 
 int GetTopicCount(std::string noun, std::string verb);
 int GetTopicCountInt(int nounEnum, int verbEnum);

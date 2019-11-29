@@ -617,7 +617,8 @@ shpvoid TurnToModel(std::string actorName, std::string modelName)
 	return 0;
 }
 RegFunc2(TurnToModel, void, string, string, WAITABLE, REL_FUNC);
-
+*/
+ 
 shpvoid WalkerBoundaryBlockModel(std::string modelName)
 {
 	std::cout << "WalkerBoundaryBlockModel" << std::endl;
@@ -625,13 +626,15 @@ shpvoid WalkerBoundaryBlockModel(std::string modelName)
 }
 RegFunc1(WalkerBoundaryBlockModel, void, string, IMMEDIATE, REL_FUNC);
 
+/*
 shpvoid WalkerBoundaryBlockRegion(int regionIndex, int regionBoundaryIndex)
 {
 	std::cout << "WalkerBoundaryBlockRegion" << std::endl;
 	return 0;
 }
 RegFunc2(WalkerBoundaryBlockRegion, void, int, int, IMMEDIATE, REL_FUNC);
-
+*/
+ 
 shpvoid WalkerBoundaryUnblockModel(std::string modelName)
 {
 	std::cout << "WalkerBoundaryUnblockModel" << std::endl;
@@ -639,6 +642,7 @@ shpvoid WalkerBoundaryUnblockModel(std::string modelName)
 }
 RegFunc1(WalkerBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
 
+/*
 shpvoid WalkerBoundaryUnblockRegion(int regionIndex, int regionBoundaryIndex)
 {
 	std::cout << "WalkerBoundaryUnblockRegion" << std::endl;
@@ -1223,6 +1227,25 @@ RegFunc2(CallGlobalSheep, void, string, string, WAITABLE, REL_FUNC);
 //DisableSheepCaching
 //DisableCurrentSheepCaching
 
+shpvoid Extract(std::string fileSpec, std::string outputPath)
+{
+	//TODO: fileSpec should support regex if surrounded by { }.
+	//TODO: fileSpec prefixed with @ indicates a "listing file" - what's a listing file? Perhaps a file that lists assets to extract?
+	
+	// An empty output path defaults to EXE directory.
+	// If a path is provided, absolute or relative paths will work.
+	if(outputPath.empty())
+	{
+		Services::GetAssets()->WriteBarnAssetToFile(fileSpec);
+	}
+	else
+	{
+		Services::GetAssets()->WriteBarnAssetToFile(fileSpec, outputPath);
+	}
+	return 0;
+}
+RegFunc2(Extract, void, string, string, IMMEDIATE, REL_FUNC);
+
 //DumpActiveSheepObjects
 //DumpActiveSheepThreads
 //DumpCommands
@@ -1490,6 +1513,13 @@ shpvoid SetScore(int score)
 	return 0;
 }
 RegFunc1(SetScore, void, int, IMMEDIATE, DEV_FUNC);
+
+shpvoid ChangeScore(std::string scoreValue)
+{
+	std::cout << "ChangeScore " << scoreValue << std::endl;
+	return 0;
+}
+RegFunc1(ChangeScore, void, string, IMMEDIATE, REL_FUNC);
 
 /*
 int GetTopicCount(std::string noun, std::string verb)
@@ -1873,8 +1903,8 @@ shpvoid ClearPropGas(std::string modelName)
 
 int DoesModelExist(std::string modelName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
-	return actor != nullptr ? 1 : 0;
+	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	return object != nullptr ? 1 : 0;
 }
 
 int DoesSceneModelExist(std::string modelName)
@@ -1888,10 +1918,10 @@ int DoesSceneModelExist(std::string modelName)
 
 shpvoid ShowModel(std::string modelName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
-	if(actor != nullptr)
+	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	if(object != nullptr)
 	{
-		actor->SetActive(true);
+		object->SetActive(true);
 	}
 	return 0;
 }
@@ -1899,10 +1929,10 @@ RegFunc1(ShowModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideModel(std::string modelName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
-	if(actor != nullptr)
+	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	if(object != nullptr)
 	{
-		actor->SetActive(false);
+		object->SetActive(false);
 	}
 	return 0;
 }
@@ -1940,10 +1970,10 @@ RegFunc1(HideSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 int IsModelVisible(std::string modelName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
-	if(actor != nullptr)
+	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	if(object != nullptr)
 	{
-		return actor->IsActive() ? 1 : 0;
+		return object->IsActive() ? 1 : 0;
 	}
 	return 0;
 }
