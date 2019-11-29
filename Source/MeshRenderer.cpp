@@ -198,21 +198,24 @@ Matrix4 MeshRenderer::GetMeshWorldTransform(int index) const
 bool MeshRenderer::Raycast(const Ray& ray)
 {
 	Matrix4 localToWorldMatrix = GetOwner()->GetComponent<Transform>()->GetLocalToWorldMatrix();
-	//Matrix4 worldToLocalMatrix = mTransform->GetWorldToLocalMatrix();
 	
 	// Raycast against triangles in the mesh.
 	for(auto& mesh : mMeshes)
 	{
+		// Calculate world->local space transform by creating object->local and inverting.
 		Matrix4 meshWorldTransform = localToWorldMatrix * mesh->GetLocalTransformMatrix();
-		Matrix4 worldToModelMatrix = meshWorldTransform.Inverse();
+		Matrix4 worldToLocalMatrix = meshWorldTransform.Inverse();
 		
-		Vector3 rayLocalPos = worldToModelMatrix.TransformPoint(ray.GetOrigin());
-		Vector3 rayLocalDir = worldToModelMatrix.Transform(ray.GetDirection());
+		// Transform the ray to object space.
+		Vector3 rayLocalPos = worldToLocalMatrix.TransformPoint(ray.GetOrigin());
+		Vector3 rayLocalDir = worldToLocalMatrix.Transform(ray.GetDirection());
 		rayLocalDir.Normalize();
 		Ray localRay(rayLocalPos, rayLocalDir);
 		
+		// See if the local ray intersects the local space triangles of the mesh.
 		if(mesh->Raycast(localRay))
 		{
+			//TODO: Convert hit info back to world space.
 			return true;
 		}
 	}

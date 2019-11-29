@@ -9,7 +9,6 @@
 
 void TextInput::Insert(std::string text)
 {
-	std::cout << "Insert " << text << "\n";
 	Insert(text.c_str(), (int)text.size());
 }
 

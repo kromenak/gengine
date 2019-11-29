@@ -57,5 +57,5 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
-	std::list<AnimationState> mActiveAnimationStates;
+	std::list<AnimationState> mActiveAnimations;
 };

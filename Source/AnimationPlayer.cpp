@@ -21,22 +21,23 @@ AnimationPlayer::AnimationPlayer(Actor* owner) : Component(owner)
 void AnimationPlayer::Play(Animation* animation)
 {
 	if(animation == nullptr) { return; }
-	mActiveAnimationStates.emplace_back(animation);
+	mActiveAnimations.emplace_back(animation);
 }
 
 void AnimationPlayer::Play(Animation* animation, std::function<void()> finishCallback)
 {
 	if(animation == nullptr) { return; }
-	mActiveAnimationStates.emplace_back(animation, finishCallback);
+	std::cout << "Play animation " << animation->GetName() << std::endl;
+	mActiveAnimations.emplace_back(animation, finishCallback);
 }
 
 void AnimationPlayer::Stop(Animation* animation)
 {
 	if(animation == nullptr) { return; }
-	auto newEndIt = std::remove_if(mActiveAnimationStates.begin(), mActiveAnimationStates.end(), [animation](const AnimationState& as) -> bool {
+	auto newEndIt = std::remove_if(mActiveAnimations.begin(), mActiveAnimations.end(), [animation](const AnimationState& as) -> bool {
 		return as.animation == animation;
 	});
-	mActiveAnimationStates.erase(newEndIt, mActiveAnimationStates.end());
+	mActiveAnimations.erase(newEndIt, mActiveAnimations.end());
 }
 
 void AnimationPlayer::Sample(Animation* animation, int frame)
@@ -57,8 +58,8 @@ void AnimationPlayer::Sample(Animation* animation, int frame)
 void AnimationPlayer::OnUpdate(float deltaTime)
 {
 	// Iterate over each active animation state and update it.
-	auto it = mActiveAnimationStates.begin();
-	while(it != mActiveAnimationStates.end())
+	auto it = mActiveAnimations.begin();
+	while(it != mActiveAnimations.end())
 	{
 		AnimationState& animState = *it;
 		
@@ -96,8 +97,7 @@ void AnimationPlayer::OnUpdate(float deltaTime)
 		// If the animation has ended, remove it from the active animation states.
 		if(animState.currentFrame >= animState.animation->GetFrameCount())
 		{
-			//std::cout << "Animation " << animState.animation->GetName() << " has ended." << std::endl;
-			it = mActiveAnimationStates.erase(it);
+			it = mActiveAnimations.erase(it);
 			
 			// Do the finish callback!
 			if(animState.finishCallback)
