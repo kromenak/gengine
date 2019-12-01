@@ -3,8 +3,11 @@
 //
 // Clark Kromenaker
 //
-// The walker (Texas Ranger) takes care of the intricacies of
-// moving an actor's legs and walking from point to point in the game world.
+// The walker (Texas Ranger) takes care of the intricacies of moving an actor's legs
+// and walking from point to point in the game world.
+//
+// A walker is always associated with a GKActor, but it is also a completely separate Actor in the world.
+// The walker moves along a path using A*. It then also updates the actor it's associated with.
 //
 #pragma once
 #include "Component.h"
@@ -37,8 +40,10 @@ public:
 	
 	void SetCharacterConfig(const CharacterConfig& characterConfig);
 	
-	void SetWalkMeshTransform(Transform* transform) { mWalkMeshTransform = transform; }
-	void SetWalkAidMeshRenderer(MeshRenderer* aid) { mWalkAidMeshRenderer = aid; }
+	void SetWalkActor(Actor* walkActor) { mWalkActor = walkActor; }
+	
+	void SnapToWalkActor();
+	void SnapWalkActorToWalker();
 	
 	bool IsWalking() const { return mState != State::Idle; }
 	
@@ -52,26 +57,14 @@ private:
 	// Current state of the walker.
 	State mState = State::Idle;
 	
-	// Animations to play while wsalking.
-	Animation* mWalkStartAnim = nullptr;
-	Animation* mWalkLoopAnim = nullptr;
-	Animation* mWalkStopAnim = nullptr;
+	bool mUpdatePosRot = true;
 	
-	/*
-	 GK3 walk anims have translation baked in, rather than being centered/locked
-	 at the origin. This makes it difficult to align the anim with the position
-	 of the actor in the world.
-	 
-	 I'm not 100% sure how the original game resolved this - the GK3 postmortem
-	 mentions this system is quite buggy!
-	 
-	 From what I can gather, an "aid" mesh animation is used to solve this problem.
-	 The aid animation matches the walk anim, but in the opposite direction of
-	 the actual walk animation. You can then offset the walking model by the offset
-	 of the aid from the local origin to keep the walk animation in the right spot.
-	*/
-	MeshRenderer* mWalkAidMeshRenderer = nullptr;
-	Transform* mWalkMeshTransform = nullptr;
+	// Config is vital for walker to function - contains things like
+	// walk anims and hip position data.
+	const CharacterConfig* mCharConfig = nullptr;
+	
+	// Actor who is driven by the walker.
+	Actor* mWalkActor = nullptr;
 	
 	// The path to follow to destination.
 	std::vector<Vector3> mPath;

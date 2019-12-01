@@ -57,6 +57,18 @@ CharacterManager::CharacterManager()
 			{
 				config.walkStartTurnLeftAnim = Services::GetAssets()->LoadAnimation(entry.value);
 			}
+			else if(StringUtil::EqualsIgnoreCase(entry.key, "HipAxesMeshIndex"))
+			{
+				config.hipAxesMeshIndex = entry.GetValueAsInt();
+			}
+			else if(StringUtil::EqualsIgnoreCase(entry.key, "HipAxesGroupIndex"))
+			{
+				config.hipAxesGroupIndex = entry.GetValueAsInt();
+			}
+			else if(StringUtil::EqualsIgnoreCase(entry.key, "HipAxesPointIndex"))
+			{
+				config.hipAxesPointIndex = entry.GetValueAsInt();
+			}
 		}
 		
 		// Key each config by its identifier.

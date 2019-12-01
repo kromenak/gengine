@@ -17,7 +17,7 @@ class GasPlayer : public Component
 public:
     GasPlayer(Actor* owner);
     
-    void SetGas(GAS* gas) { mGas = gas; mNodeIndex = 0; }
+	void SetGas(GAS* gas) { mGas = gas; mNodeIndex = 0; mTimer = 0.0f; }
 	void SetPaused(bool paused) { mPaused = paused; }
 	
 protected:
