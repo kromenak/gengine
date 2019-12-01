@@ -9,6 +9,8 @@
 #include "FaceController.h"
 #include "FootstepManager.h"
 #include "GKActor.h"
+#include "GKObject.h"
+#include "Heading.h"
 #include "MeshRenderer.h"
 #include "Services.h"
 #include "Scene.h"
@@ -17,23 +19,23 @@ void VertexAnimNode::Play(Animation* anim)
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(vertexAnimation->GetModelName());
-		if(actor != nullptr)
+		GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(object != nullptr)
 		{
-			// If non-zero value is specified, position the model before starting the animation.
-			if(position != Vector3::Zero)
+			// Absolute anims must set the object's position and heading before playing.
+			if(absolute)
 			{
-				actor->SetPosition(position - offsetFromOrigin);
-				//TODO: Set heading.
+				object->SetPosition(position - offsetFromOrigin);
+				object->SetHeading(Heading::FromDegrees(heading - headingFromOrigin));
 			}
 			
 			if(anim != nullptr)
 			{
-				actor->PlayAnimation(vertexAnimation, anim->GetFramesPerSecond());
+				object->PlayAnimation(vertexAnimation, anim->GetFramesPerSecond());
 			}
 			else
 			{
-				actor->PlayAnimation(vertexAnimation);
+				object->PlayAnimation(vertexAnimation);
 			}
 		}
 	}
@@ -43,10 +45,10 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(vertexAnimation->GetModelName());
-		if(actor != nullptr)
+		GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(object != nullptr)
 		{
-			actor->SampleAnimation(vertexAnimation, frame);
+			object->SampleAnimation(vertexAnimation, frame);
 		}
 	}
 }
@@ -70,11 +72,11 @@ void SceneModelVisibilityAnimNode::Play(Animation* anim)
 void ModelTextureAnimNode::Play(Animation* anim)
 {
 	// Get actor by model name.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
-	if(actor != nullptr)
+	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	if(object != nullptr)
 	{
 		// Grab the material used to render this meshIndex/submeshIndex pair.
-		Material* material = actor->GetMeshRenderer()->GetMaterial(meshIndex, submeshIndex);
+		Material* material = object->GetMeshRenderer()->GetMaterial(meshIndex, submeshIndex);
 		if(material != nullptr)
 		{
 			// Apply the texture to that material.
@@ -90,12 +92,12 @@ void ModelTextureAnimNode::Play(Animation* anim)
 void ModelVisibilityAnimNode::Play(Animation* anim)
 {
 	// Get actor by model name.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByModelName(modelName);
-	if(actor != nullptr)
+	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	if(object != nullptr)
 	{
 		//TODO: Not sure if models need to be invisible but still updating in this scenario.
 		//For now, I'll just disable or enable the actor entirely.
-		actor->SetActive(visible);
+		object->SetActive(visible);
 	}
 }
 

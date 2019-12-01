@@ -29,6 +29,10 @@ struct VertexAnimNode : public AnimNode
 	// A vertex animation to play.
 	VertexAnimation* vertexAnimation = nullptr;
 	
+	// Absolute anims need to have position and heading for the target actor set exactly for the anim to play correctly.
+	// Relative anims (aka not absolute anims) can play on the actor regardless of the actor's position.
+	bool absolute = false;
+	
 	// This is a bit confusing, and I'm not totally sure why it is structured this way.
 	// In ANM file, syntax for vertex anim is <frame_num>, <act_name>, <x1>, <y1>, <z1>, <angle1>, <x2>, <y2>, <z2>, <angle2>
 	// The first x/y/z/angle appear to be the offset from the model's authored center to the origin.

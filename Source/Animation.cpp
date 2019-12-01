@@ -69,8 +69,12 @@ void Animation::ParseFromData(char *data, int dataLength)
                 mFrames[frameNumber].push_back(node);
 				
 				// See if there are enough args for the (x1, y1, z1) and (angle1) values.
-				// Note z/y are flipped due to Maya->Game conversion.
 				if(line.entries.size() < 6) { continue; }
+				
+				// If an animation defines more entries, it means it is an absolute animation.
+				node->absolute = true;
+				
+				// Note z/y are flipped due to Maya->Game conversion.
 				node->offsetFromOrigin.SetX(line.entries[2].GetValueAsFloat());
 				node->offsetFromOrigin.SetZ(line.entries[3].GetValueAsFloat());
 				node->offsetFromOrigin.SetY(line.entries[4].GetValueAsFloat());

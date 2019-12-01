@@ -27,7 +27,6 @@ void AnimationPlayer::Play(Animation* animation)
 void AnimationPlayer::Play(Animation* animation, std::function<void()> finishCallback)
 {
 	if(animation == nullptr) { return; }
-	std::cout << "Play animation " << animation->GetName() << std::endl;
 	mActiveAnimations.emplace_back(animation, finishCallback);
 }
 

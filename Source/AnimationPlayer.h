@@ -21,7 +21,6 @@ struct AnimationState
 {
 	// Needed for "emplace" usage.
 	AnimationState(Animation* animation) : animation(animation) { }
-	
 	AnimationState(Animation* animation, std::function<void()> finishCallback) :
 		animation(animation), finishCallback(finishCallback) { }
 	
@@ -34,6 +33,8 @@ struct AnimationState
 	// A timer to track when we need to execute one or more additional frames.
 	// This doesn't track total animation time, just time until the next frame!
 	float timer = 0.0f;
+	
+	//loop
 	
 	// Callback that is executed when the animation finishes.
 	//TODO: What about premature stops?
