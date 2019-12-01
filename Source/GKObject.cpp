@@ -53,4 +53,3 @@ void GKObject::SampleAnimation(VertexAnimation* animation, int frame)
 {
 	mVertexAnimationPlayer->Sample(animation, frame);
 }
-

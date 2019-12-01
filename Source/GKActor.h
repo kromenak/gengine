@@ -42,8 +42,6 @@ public:
 	void StartFidget(FidgetType type);
 	void StartCustomFidget(GAS* gas);
 	
-	void PlayAnimation(VertexAnimation* animation, int framesPerSecond) override;
-	
 	const std::string& GetIdentifier() const { return mIdentifier; }
 	
 	Walker* GetWalker() const { return mWalker; }

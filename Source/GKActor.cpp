@@ -51,7 +51,6 @@ GKActor::GKActor(const std::string& identifier) : GKObject(true),
 
 void GKActor::StartFidget(FidgetType type)
 {
-	/*
     // Save type.
     mActiveFidget = type;
     
@@ -75,7 +74,6 @@ void GKActor::StartFidget(FidgetType type)
 		mGasPlayer->SetGas(mListenGas);
 		break;
     }
-	*/
 }
 
 void GKActor::StartCustomFidget(GAS* gas)
@@ -84,22 +82,11 @@ void GKActor::StartCustomFidget(GAS* gas)
 	mGasPlayer->SetGas(gas);
 }
 
-void GKActor::PlayAnimation(VertexAnimation* animation, int framesPerSecond)
-{
-	mMeshRenderer->GetOwner()->GetTransform()->SetParent(nullptr);
-	//mMeshRenderer->GetOwner()->SetPosition(Vector3::Zero);
-	//mMeshRenderer->GetOwner()->SetRotation(Quaternion::Identity);
-	
-	GKObject::PlayAnimation(animation, framesPerSecond);
-}
-
 void GKActor::OnUpdate(float deltaTime)
 {
 	// Pause any fidgets while walker is going.
-	/*
 	if(mGasPlayer != nullptr && mWalker != nullptr)
 	{
 		mGasPlayer->SetPaused(mWalker->IsWalking());
 	}
-	*/
 }

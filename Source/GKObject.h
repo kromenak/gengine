@@ -32,7 +32,7 @@ public:
 	Heading GetHeading() const;
 	
 	void PlayAnimation(VertexAnimation* animation);
-	virtual void PlayAnimation(VertexAnimation* animation, int framesPerSecond);
+	void PlayAnimation(VertexAnimation* animation, int framesPerSecond);
 	void SampleAnimation(VertexAnimation* animation, int frame);
 	
 	MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
