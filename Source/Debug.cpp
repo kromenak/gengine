@@ -18,6 +18,7 @@ extern Mesh* axes;
 std::list<DrawCommand> Debug::sDrawCommands;
 
 // Default debug settings.
+bool Debug::sRenderActorTransformAxes = false;
 bool Debug::sRenderSubmeshLocalAxes = false;
 bool Debug::sRenderRectTransformRects = false;
 
@@ -90,9 +91,13 @@ void Debug::Update(float deltaTime)
 	// Check for debug setting inputs.
 	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F1))
 	{
-		sRenderSubmeshLocalAxes = !sRenderSubmeshLocalAxes;
+		sRenderActorTransformAxes = !sRenderActorTransformAxes;
 	}
 	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F2))
+	{
+		sRenderSubmeshLocalAxes = !sRenderSubmeshLocalAxes;
+	}
+	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F3))
 	{
 		sRenderRectTransformRects = !sRenderRectTransformRects;
 	}

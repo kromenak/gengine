@@ -56,7 +56,7 @@ void Actor::Update(float deltaTime)
         component->Update(deltaTime);
     }
 	
-	if(Debug::RenderSubmeshLocalAxes())
+	if(Debug::RenderActorTransformAxes())
 	{
 		Debug::DrawAxes(mTransform->GetLocalToWorldMatrix());
 	}
