@@ -67,6 +67,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 node->frameNumber = frameNumber;
 				node->vertexAnimation = vertexAnim;
                 mFrames[frameNumber].push_back(node);
+				mVertexAnimNodes.push_back(node);
 				
 				// See if there are enough args for the (x1, y1, z1) and (angle1) values.
 				if(line.entries.size() < 6) { continue; }

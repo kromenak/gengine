@@ -15,6 +15,7 @@
 #include <vector>
 
 class AnimNode;
+class VertexAnimNode;
 
 class Animation : public Asset
 {
@@ -23,10 +24,12 @@ public:
 	~Animation();
     
     std::vector<AnimNode*>* GetFrame(int num);
+	
+	const std::vector<VertexAnimNode*>& GetVertexAnimNodes() const { return mVertexAnimNodes; }
     
-    int GetFrameCount() { return mFrameCount; }
-    int GetFramesPerSecond() { return mFramesPerSecond; }
-    float GetDuration() { return (float)mFrameCount / (float)mFramesPerSecond; }
+    int GetFrameCount() const { return mFrameCount; }
+    int GetFramesPerSecond() const { return mFramesPerSecond; }
+    float GetDuration() const { return (float)mFrameCount / (float)mFramesPerSecond; }
     
 private:
     // Number of frames in this animation.
@@ -40,6 +43,8 @@ private:
     // "Frame data" consists of one or more animation nodes, which do things like
     // playing mesh animations, setting textures, playing sounds, etc.
     std::unordered_map<int, std::vector<AnimNode*>> mFrames;
+	
+	std::vector<VertexAnimNode*> mVertexAnimNodes;
     
     void ParseFromData(char* data, int dataLength);
 };
