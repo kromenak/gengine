@@ -9,7 +9,7 @@
 #include <vector>
 #include <iostream>
 
-#include "AnimationPlayer.h"
+#include "Animator.h"
 #include "GasPlayer.h"
 #include "imstream.h"
 #include "Scene.h"
@@ -24,11 +24,11 @@ int AnimGasNode::Execute(GasPlayer* player)
     int randomCheck = rand() % 100 + 1;
     if(randomCheck > random) { return 0; }
     
-    // Must have a valid animation, and GasPlayer, and AnimationPlayer.
+    // Must have a valid animation, and GasPlayer, and Animator.
     if(animation == nullptr) { return 0; }
     
     // Play the animation!
-	GEngine::inst->GetScene()->GetAnimationPlayer()->Play(animation);
+	GEngine::inst->GetScene()->GetAnimator()->Start(animation, false, nullptr);
 	
     //std::cout << "Playing animation " << animation->GetName() << " for " << animation->GetDuration() << " seconds." << std::endl;
     return animation->GetDuration() * 1000;

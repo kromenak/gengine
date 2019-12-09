@@ -6,37 +6,49 @@
 #include "AnimationNodes.h"
 
 #include "Animation.h"
+#include "Animator.h"
 #include "FaceController.h"
 #include "FootstepManager.h"
 #include "GKActor.h"
-#include "GKObject.h"
+#include "GKActor.h"
 #include "Heading.h"
 #include "MeshRenderer.h"
 #include "Services.h"
 #include "Scene.h"
 
-void VertexAnimNode::Play(Animation* anim)
+void VertexAnimNode::Play(AnimationState* animState)
 {
+	// Make sure anim state and anim are valid - we need those.
+	if(animState == nullptr || animState->animation == nullptr) { return; }
+	
+	// Make sure we have a vertex anim to play...
 	if(vertexAnimation != nullptr)
 	{
-		GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		// Also we need the object to play the vertex anim on!
+		GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(object != nullptr)
 		{
-			// Absolute anims must set the object's position and heading before playing.
+			// Start absolute or relative anim.
 			if(absolute)
 			{
-				object->SetPosition(position - offsetFromOrigin);
-				object->SetHeading(Heading::FromDegrees(heading - headingFromOrigin));
-			}
-			
-			if(anim != nullptr)
-			{
-				object->PlayAnimation(vertexAnimation, anim->GetFramesPerSecond());
+				object->StartAnimation(vertexAnimation, animState->animation->GetFramesPerSecond(), position - offsetFromOrigin, Heading::FromDegrees(heading - headingFromOrigin));
 			}
 			else
 			{
-				object->PlayAnimation(vertexAnimation);
+				object->StartAnimation(vertexAnimation, animState->animation->GetFramesPerSecond(), animState->allowMove);
 			}
+		}
+	}
+}
+
+void VertexAnimNode::Stop()
+{
+	if(vertexAnimation != nullptr)
+	{
+		GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(object != nullptr)
+		{
+			object->StopAnimation(vertexAnimation);
 		}
 	}
 }
@@ -45,7 +57,7 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(object != nullptr)
 		{
 			object->SampleAnimation(vertexAnimation, frame);
@@ -53,7 +65,7 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
 	}
 }
 
-void SceneTextureAnimNode::Play(Animation* anim)
+void SceneTextureAnimNode::Play(AnimationState* animState)
 {
 	Texture* texture = Services::GetAssets()->LoadTexture(textureName);
 	if(texture != nullptr)
@@ -63,16 +75,16 @@ void SceneTextureAnimNode::Play(Animation* anim)
 	}
 }
 
-void SceneModelVisibilityAnimNode::Play(Animation* anim)
+void SceneModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	//TODO: Ensure sceneName matches loaded scene name?
 	GEngine::inst->GetScene()->SetSceneModelVisibility(sceneModelName, visible);
 }
 
-void ModelTextureAnimNode::Play(Animation* anim)
+void ModelTextureAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		// Grab the material used to render this meshIndex/submeshIndex pair.
@@ -89,10 +101,10 @@ void ModelTextureAnimNode::Play(Animation* anim)
 	}
 }
 
-void ModelVisibilityAnimNode::Play(Animation* anim)
+void ModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		//TODO: Not sure if models need to be invisible but still updating in this scenario.
@@ -101,7 +113,7 @@ void ModelVisibilityAnimNode::Play(Animation* anim)
 	}
 }
 
-void SoundAnimNode::Play(Animation* anim)
+void SoundAnimNode::Play(AnimationState* animState)
 {
 	//TODO: Flesh this out
 	if(audio != nullptr)
@@ -110,7 +122,7 @@ void SoundAnimNode::Play(Animation* anim)
 	}
 }
 
-void FootstepAnimNode::Play(Animation* anim)
+void FootstepAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
@@ -132,7 +144,7 @@ void FootstepAnimNode::Play(Animation* anim)
 	}
 }
 
-void FootscuffAnimNode::Play(Animation* anim)
+void FootscuffAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
@@ -154,12 +166,12 @@ void FootscuffAnimNode::Play(Animation* anim)
 	}
 }
 
-void PlaySoundtrackAnimNode::Play(Animation* anim)
+void PlaySoundtrackAnimNode::Play(AnimationState* animState)
 {
 	std::cout << "PLAY " << soundtrackName << std::endl;
 }
 
-void StopSoundtrackAnimNode::Play(Animation* anim)
+void StopSoundtrackAnimNode::Play(AnimationState* animState)
 {
 	if(soundtrackName.empty())
 	{
@@ -171,12 +183,12 @@ void StopSoundtrackAnimNode::Play(Animation* anim)
 	}
 }
 
-void CameraAnimNode::Play(Animation* anim)
+void CameraAnimNode::Play(AnimationState* animState)
 {
 	std::cout << "MOVE CAMERA TO " << cameraPositionName << std::endl;
 }
 
-void FaceTexAnimNode::Play(Animation* anim)
+void FaceTexAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
@@ -191,7 +203,7 @@ void FaceTexAnimNode::Play(Animation* anim)
 	}
 }
 
-void UnFaceTexAnimNode::Play(Animation* anim)
+void UnFaceTexAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
@@ -201,7 +213,7 @@ void UnFaceTexAnimNode::Play(Animation* anim)
 	}
 }
 
-void LipSyncAnimNode::Play(Animation* anim)
+void LipSyncAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
@@ -216,12 +228,12 @@ void LipSyncAnimNode::Play(Animation* anim)
 	}
 }
 
-void GlanceAnimNode::Play(Animation* anim)
+void GlanceAnimNode::Play(AnimationState* animState)
 {
 	std::cout << actorNoun << " GLANCE AT " << position << std::endl;
 }
 
-void MoodAnimNode::Play(Animation* anim)
+void MoodAnimNode::Play(AnimationState* animState)
 {
 	std::cout << actorNoun << " IN MOOD " << moodName << std::endl;
 }

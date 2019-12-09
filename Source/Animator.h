@@ -1,16 +1,17 @@
 //
-// AnimationPlayer.cpp
+// Animator.cpp
 //
 // Clark Kromenaker
 //
 // Plays animations (ANM assets)!
 //
 // This is more of a "manager" style class than a per-actor instance class.
-// See VertexAnimationPlayer for actor instance vertex animation logic.
+// See VertexAnimator for actor instance vertex animation logic.
 //
 #pragma once
 #include "Component.h"
 
+#include <functional>
 #include <list>
 
 class Animation;
@@ -34,22 +35,25 @@ struct AnimationState
 	// This doesn't track total animation time, just time until the next frame!
 	float timer = 0.0f;
 	
-	//loop
+	// If true, the animation loops!
+	bool loop = false;
+	
+	// If true, the animation is allowed to move actors as part of vertex animations.
+	bool allowMove = false;
 	
 	// Callback that is executed when the animation finishes.
 	//TODO: What about premature stops?
 	std::function<void()> finishCallback = nullptr;
 };
 
-class AnimationPlayer : public Component
+class Animator : public Component
 {
     TYPE_DECL_CHILD();
 public:
-    AnimationPlayer(Actor* owner);
-    
-    void Play(Animation* animation);
-	void Play(Animation* animation, std::function<void()> finishCallback);
+    Animator(Actor* owner);
 	
+	void Start(Animation* animation, bool allowMove, std::function<void()> finishCallback);
+	void Loop(Animation* animation);
 	void Stop(Animation* animation);
 	
 	void Sample(Animation* animation, int frame);
@@ -58,5 +62,7 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
+	// I chose to use a linked list here b/c we may need to remove animations that are
+	// in the middle of the list at arbitrary times...not sure if the list is big enough or we do it often enough to get benefits?
 	std::list<AnimationState> mActiveAnimations;
 };

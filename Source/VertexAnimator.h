@@ -1,5 +1,5 @@
 //
-// VertexAnimationPlayer.h
+// VertexAnimator.h
 //
 // Clark Kromenaker
 //
@@ -8,21 +8,25 @@
 #pragma once
 #include "Component.h"
 
+#include <functional>
+
 class MeshRenderer;
 class VertexAnimation;
 
-class VertexAnimationPlayer : public Component
+class VertexAnimator : public Component
 {
 	TYPE_DECL_CHILD();
 public:
 	static const int kDefaultFramesPerSecond = 15;
 	
-	VertexAnimationPlayer(Actor* owner);
+	VertexAnimator(Actor* owner);
 	
-	void Play(VertexAnimation* animation);
-	void Play(VertexAnimation* animation, int framesPerSecond);
+	void Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback);
+	void Stop(VertexAnimation* anim);
 	
 	void Sample(VertexAnimation* animation, int frame);
+	
+	bool IsPlaying() const { return mVertexAnimation != nullptr; }
 	
 protected:
 	void OnUpdate(float deltaTime) override;
@@ -36,6 +40,10 @@ private:
 	
 	// A currently running vertex animation, if any.
 	VertexAnimation* mVertexAnimation = nullptr;
+	
+	// Callback that is fired when the animation stops.
+	// "Stops" means manually stopped OR reached end of playback!
+	std::function<void()> mStopCallback = nullptr;
 	
 	// Timer for tracking progress on vertex animation.
 	float mVertexAnimationTimer = 0.0f;

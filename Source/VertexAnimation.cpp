@@ -20,6 +20,71 @@ VertexAnimation::VertexAnimation(std::string name, char* data, int dataLength) :
     ParseFromData(data, dataLength);
 }
 
+Vector3 VertexAnimation::SampleVertexPosition(float time, int framesPerSecond, int meshIndex, int submeshIndex, int vertexIndex)
+{
+	float duration = GetDuration(framesPerSecond);
+	float localTime = time;
+	if(localTime > duration)
+	{
+		localTime = Math::Mod(time, duration);
+	}
+	
+	float currentPoseTime = 0.0f;
+    float nextPoseTime = 0.0f;
+	
+	// Find the first vertex pose defined for this mesh/submesh.
+	VertexAnimationVertexPose* firstVertexPose = nullptr;
+	auto it = mVertexPoses.find(meshIndex);
+	if(it != mVertexPoses.end())
+	{
+		auto it2 = it->second.find(submeshIndex);
+		if(it2 != it->second.end())
+		{
+			firstVertexPose = it2->second;
+		}
+	}
+	
+	// If no vertex pose was found, we'll have to return an error state.
+	if(firstVertexPose == nullptr)
+	{
+		return Vector3::Zero;
+	}
+	
+	// Calculate how many seconds should be used for a single frame - used later.
+    float secondsPerFrame = 1.0f / framesPerSecond;
+	
+	// Determine the poses right before the desired local time on the animation.
+    VertexAnimationVertexPose* currentVertexPose = firstVertexPose;
+    while(currentVertexPose->mNext != nullptr)
+    {
+        currentPoseTime = secondsPerFrame * currentVertexPose->mFrameNumber;
+        nextPoseTime = secondsPerFrame * currentVertexPose->mNext->mFrameNumber;
+        if(nextPoseTime > localTime) { break; }
+		
+        currentVertexPose = currentVertexPose->mNext;
+    }
+	
+	// Get the next pose, after the desired local time.
+	// If it doesn't exist, loop back to the first pose.
+    VertexAnimationVertexPose* nextVertexPose = currentVertexPose->mNext;
+    if(nextVertexPose == nullptr)
+    {
+		nextVertexPose = currentVertexPose;
+		nextPoseTime = currentPoseTime;
+    }
+    
+    // Determine our "t" value between the current and next pose.
+    float t = 1.0f;
+    if(!Math::IsZero(nextPoseTime - currentPoseTime))
+    {
+        t = (localTime - currentPoseTime) / (nextPoseTime - currentPoseTime);
+    }
+    assert(t >= 0.0f && t <= 1.0f);
+	
+    // Now calculate interpolated positions between current and next poses for this time t.
+	return Vector3::Lerp(currentVertexPose->mVertexPositions[vertexIndex], nextVertexPose->mVertexPositions[vertexIndex], t);
+}
+
 VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex)
 {
 	float duration = GetDuration(framesPerSecond);

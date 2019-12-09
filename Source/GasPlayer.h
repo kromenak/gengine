@@ -9,7 +9,7 @@
 #include "Component.h"
 
 class GAS;
-class AnimationPlayer;
+class Animator;
 
 class GasPlayer : public Component
 {

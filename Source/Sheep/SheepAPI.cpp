@@ -8,7 +8,7 @@
 #include <functional> // for std::hash
 #include <sstream> // for int->hex
 
-#include "AnimationPlayer.h"
+#include "Animator.h"
 #include "Camera.h"
 #include "CharacterManager.h"
 #include "FaceController.h"
@@ -777,43 +777,58 @@ shpvoid StartAnimation(std::string animationName)
 	if(animation != nullptr)
 	{
 		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-		GEngine::inst->GetScene()->GetAnimationPlayer()->Play(animation, currentThread->AddWait());
+		GEngine::inst->GetScene()->GetAnimator()->Start(animation, false, currentThread->AddWait());
 	}
 	return 0;
 }
 RegFunc1(StartAnimation, void, string, WAITABLE, REL_FUNC);
 
-/*
 shpvoid StartMoveAnimation(std::string animationName)
 {
-	std::cout << "StartMoveAnimation" << std::endl;
+	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
+	if(animation != nullptr)
+	{
+		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+		GEngine::inst->GetScene()->GetAnimator()->Start(animation, true, currentThread->AddWait());
+	}
 	return 0;
 }
 RegFunc1(StartMoveAnimation, void, string, WAITABLE, REL_FUNC);
 
+/*
 shpvoid StartMom(std::string momAnimationName)
 {
 	std::cout << "StartMom" << std::endl;
 	return 0;
 }
 RegFunc1(StartMom, void, string, WAITABLE, REL_FUNC);
-
+*/
+ 
 shpvoid LoopAnimation(std::string animationName)
 {
-	std::cout << "LoopAnimation" << std::endl;
+	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
+	if(animation != nullptr)
+	{
+		GEngine::inst->GetScene()->GetAnimator()->Loop(animation);
+	}
 	return 0;
 }
 RegFunc1(LoopAnimation, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid StopAnimation(std::string animationName)
 {
-	std::cout << "StopAnimation" << std::endl;
+	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
+	if(animation != nullptr)
+	{
+		GEngine::inst->GetScene()->GetAnimator()->Stop(animation);
+	}
 	return 0;
 }
 RegFunc1(StopAnimation, void, string, IMMEDIATE, REL_FUNC);
 
 //StopAllAnimations
 
+/*
 shpvoid StartMorphAnimation(std::string animationName, int animStartFrame, int morphFrames)
 {
 	std::cout << "StartMorphAnimation" << std::endl;
@@ -1903,7 +1918,7 @@ shpvoid ClearPropGas(std::string modelName)
 
 int DoesModelExist(std::string modelName)
 {
-	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
 	return object != nullptr ? 1 : 0;
 }
 
@@ -1918,7 +1933,7 @@ int DoesSceneModelExist(std::string modelName)
 
 shpvoid ShowModel(std::string modelName)
 {
-	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		object->SetActive(true);
@@ -1929,7 +1944,7 @@ RegFunc1(ShowModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideModel(std::string modelName)
 {
-	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		object->SetActive(false);
@@ -1970,7 +1985,7 @@ RegFunc1(HideSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 int IsModelVisible(std::string modelName)
 {
-	GKObject* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		return object->IsActive() ? 1 : 0;

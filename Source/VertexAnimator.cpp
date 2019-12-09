@@ -1,9 +1,9 @@
 //
-// VertexAnimationPlayer.cpp
+// VertexAnimator.cpp
 //
 // Clark Kromenaker
 //
-#include "VertexAnimationPlayer.h"
+#include "VertexAnimator.h"
 
 #include <vector>
 
@@ -12,38 +12,53 @@
 #include "MeshRenderer.h"
 #include "VertexAnimation.h"
 
-TYPE_DEF_CHILD(Component, VertexAnimationPlayer);
+TYPE_DEF_CHILD(Component, VertexAnimator);
 
-VertexAnimationPlayer::VertexAnimationPlayer(Actor* owner) : Component(owner)
+VertexAnimator::VertexAnimator(Actor* owner) : Component(owner)
 {
 	mMeshRenderer = owner->GetComponent<MeshRenderer>();
 }
 
-void VertexAnimationPlayer::Play(VertexAnimation* animation)
+void VertexAnimator::Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback)
 {
-	mFramesPerSecond = kDefaultFramesPerSecond;
-	mVertexAnimation = animation;
-	mVertexAnimationTimer = 0.0f;
-}
-
-void VertexAnimationPlayer::Play(VertexAnimation* animation, int framesPerSecond)
-{
+	// If we're interrupting some other anim, fire the stop callback for that other anim.
+	Stop(nullptr);
+	
+	// Save passed parameters.
+	mVertexAnimation = anim;
 	mFramesPerSecond = framesPerSecond;
-	mVertexAnimation = animation;
+	mStopCallback = stopCallback;
+	
+	// Reset animation timer.
 	mVertexAnimationTimer = 0.0f;
 }
 
-void VertexAnimationPlayer::Sample(VertexAnimation* animation, int frame)
+void VertexAnimator::Stop(VertexAnimation* anim)
 {
-	if(animation != nullptr)
+	// Stop if animation matches playing one OR null was passed in.
+	if(mVertexAnimation != nullptr && (mVertexAnimation == anim || anim == nullptr))
 	{
-		//TODO: We kind of convert from frames to time, then back to frames. Why not just stay in frames then?
-		float time = (float)frame * kDefaultFramesPerSecond;
-		TakeSample(animation, time);
+		// Fire stop callback if an animation was in progress.
+		if(mStopCallback != nullptr)
+		{
+			mStopCallback();
+		}
+		
+		// Reset state data.
+		mVertexAnimation = nullptr;
+		mStopCallback = nullptr;
 	}
 }
 
-void VertexAnimationPlayer::OnUpdate(float deltaTime)
+void VertexAnimator::Sample(VertexAnimation* animation, int frame)
+{
+	if(animation != nullptr)
+	{
+		TakeSample(animation, (float)frame * kDefaultFramesPerSecond);
+	}
+}
+
+void VertexAnimator::OnUpdate(float deltaTime)
 {
 	// Need a vertex animation to update.
 	if(mVertexAnimation != nullptr)
@@ -67,12 +82,13 @@ void VertexAnimationPlayer::OnUpdate(float deltaTime)
 		// GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
 		if(mVertexAnimationTimer >= animDuration)
 		{
-			mVertexAnimation = nullptr;
+			Stop(nullptr);
+			//mVertexAnimation = nullptr;
 		}
 	}
 }
 
-void VertexAnimationPlayer::TakeSample(VertexAnimation* animation, float time)
+void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
 {
 	// Iterate through each mesh and sample it in the vertex animation.
 	// We need to sample both vertex poses and transform poses to get the right result.

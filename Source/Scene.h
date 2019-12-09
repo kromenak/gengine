@@ -21,11 +21,11 @@
 #include "Timeblock.h"
 
 class ActionBar;
-class AnimationPlayer;
+class Animator;
 class BSP;
 class GameCamera;
 class GKActor;
-class GKObject;
+class GKActor;
 class GKProp;
 class Ray;
 class SceneModel;
@@ -55,7 +55,7 @@ public:
 	const std::string& GetEgoName() const { return mEgoName; }
 	GKActor* GetEgo() const { return mEgo; }
 	
-	GKObject* GetSceneObjectByModelName(const std::string& modelName) const;
+	GKActor* GetSceneObjectByModelName(const std::string& modelName) const;
 	GKActor* GetActorByNoun(const std::string& noun) const;
 	
 	const ScenePosition* GetPosition(const std::string& positionName) const;
@@ -65,7 +65,7 @@ public:
 	bool IsSceneModelVisible(const std::string& modelName) const;
 	bool DoesSceneModelExist(const std::string& modelName) const;
 	
-	AnimationPlayer* GetAnimationPlayer() const { return mAnimationPlayer; }
+	Animator* GetAnimator() const { return mAnimator; }
 	SoundtrackPlayer* GetSoundtrackPlayer() const { return mSoundtrackPlayer; }
 	
 	GameCamera* GetCamera() const { return mCamera; }
@@ -81,7 +81,7 @@ private:
 	SceneData* mSceneData = nullptr;
 	
 	// The animation player for the scene.
-	AnimationPlayer* mAnimationPlayer = nullptr;
+	Animator* mAnimator = nullptr;
 	
 	// The soundtrack player for the scene.
 	SoundtrackPlayer* mSoundtrackPlayer = nullptr;
@@ -89,14 +89,14 @@ private:
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
 	
-	// GKObjects created for this scene (includes all Actors & Props).
-	std::vector<GKObject*> mObjects;
+	// All GKActors in the scene (Actors and Props).
+	std::vector<GKActor*> mObjects;
 	
-	// GKActors created for this scene.
+	// Just "actors".
 	std::vector<GKActor*> mActors;
 	
-	// GKProps created for this scene.
-	std::vector<GKProp*> mProps;
+	// Just "props".
+	std::vector<GKActor*> mProps;
 	
     // The name of actor and actor who we are controlling in the scene.
 	// We sometimes need just the name - that's safer during scene loading.

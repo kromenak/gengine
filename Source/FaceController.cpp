@@ -7,7 +7,7 @@
 
 #include "stb_image_resize.h"
 
-#include "AnimationPlayer.h"
+#include "Animator.h"
 #include "CharacterManager.h"
 #include "Texture.h"
 #include "Random.h"
@@ -185,7 +185,7 @@ void FaceController::Blink()
 	}
 	
 	// Play it if you got it!
-	GEngine::inst->GetScene()->GetAnimationPlayer()->Play(blinkAnim);
+	GEngine::inst->GetScene()->GetAnimator()->Start(blinkAnim, false, nullptr);
 }
 
 void FaceController::Blink(const std::string& animName)
@@ -204,7 +204,7 @@ void FaceController::Blink(const std::string& animName)
 			return;
 		}
 	}
-	GEngine::inst->GetScene()->GetAnimationPlayer()->Play(blinkAnim);
+	GEngine::inst->GetScene()->GetAnimator()->Start(blinkAnim, false, nullptr);
 }
 
 void FaceController::SetEyeJitterEnabled(bool enabled)

@@ -40,8 +40,9 @@ public:
 	
 	void SetCharacterConfig(const CharacterConfig& characterConfig);
 	
-	void SetWalkActor(Actor* walkActor) { mWalkActor = walkActor; }
+	void SetWalkActor(GKActor* walkActor) { mWalkActor = walkActor; }
 	
+	void SnapWalkActorToFloor();
 	void SnapToWalkActor();
 	void SnapWalkActorToWalker();
 	
@@ -57,14 +58,12 @@ private:
 	// Current state of the walker.
 	State mState = State::Idle;
 	
-	bool mUpdatePosRot = true;
-	
 	// Config is vital for walker to function - contains things like
 	// walk anims and hip position data.
 	const CharacterConfig* mCharConfig = nullptr;
 	
 	// Actor who is driven by the walker.
-	Actor* mWalkActor = nullptr;
+	GKActor* mWalkActor = nullptr;
 	
 	// The path to follow to destination.
 	std::vector<Vector3> mPath;

@@ -97,7 +97,7 @@
 		4B22F5252174078B0065B152 /* Actor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0B67811F78DCD40023815F /* Actor.cpp */; };
 		4B22F5262174078B0065B152 /* VertexAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */; };
 		4B22F5272174078B0065B152 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
-		4B22F5282174078B0065B152 /* AnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */; };
+		4B22F5282174078B0065B152 /* Animator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* Animator.cpp */; };
 		4B22F5292174078B0065B152 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
 		4B22F52A2174078B0065B152 /* GasPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319E210999810004F4F3 /* GasPlayer.cpp */; };
 		4B22F52B2174078B0065B152 /* Asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621ED1FF7532A00536BA6 /* Asset.cpp */; };
@@ -144,8 +144,8 @@
 		4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B53B0C8207AFE7E00663381 /* Ray.cpp */; };
 		4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */; };
-		4B5C301D21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */; };
-		4B5C301E21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */; };
+		4B5C301D21D1F60900211724 /* VertexAnimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimator.cpp */; };
+		4B5C301E21D1F60900211724 /* VertexAnimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimator.cpp */; };
 		4B6A3F232335B16C00D25B2D /* RectUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F222335B16C00D25B2D /* RectUtil.cpp */; };
 		4B6A3F242335B16C00D25B2D /* RectUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F222335B16C00D25B2D /* RectUtil.cpp */; };
 		4B6A3F262335B20000D25B2D /* RectTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F252335B20000D25B2D /* RectTests.cpp */; };
@@ -156,10 +156,6 @@
 		4B6B766721AB75AA00788C02 /* ActionBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766521AB75AA00788C02 /* ActionBar.cpp */; };
 		4B6B766A21AB99C500788C02 /* FileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766921AB99C500788C02 /* FileSystem.cpp */; };
 		4B6B766B21AB99C500788C02 /* FileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766921AB99C500788C02 /* FileSystem.cpp */; };
-		4B6EDC0A2391A1F900412737 /* GKObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EDC092391A1F900412737 /* GKObject.cpp */; };
-		4B6EDC0B2391A1F900412737 /* GKObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EDC092391A1F900412737 /* GKObject.cpp */; };
-		4B6EDC0E2391A36F00412737 /* GKProp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EDC0D2391A36F00412737 /* GKProp.cpp */; };
-		4B6EDC0F2391A36F00412737 /* GKProp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6EDC0D2391A36F00412737 /* GKProp.cpp */; };
 		4B76B57C1F35999B003F63E5 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76DFBB21867D2800BAECC4 /* UIButton.cpp */; };
 		4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76DFBB21867D2800BAECC4 /* UIButton.cpp */; };
@@ -192,7 +188,7 @@
 		4B90E07F2377B52E00E0E3FA /* Timeblock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B90E07A2377AD4E00E0E3FA /* Timeblock.cpp */; };
 		4B92319C2103AF1B0004F4F3 /* Animation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319B2103AF1B0004F4F3 /* Animation.cpp */; };
 		4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B92319E210999810004F4F3 /* GasPlayer.cpp */; };
-		4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */; };
+		4B9231A2210D4E000004F4F3 /* Animator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* Animator.cpp */; };
 		4B9231A62117CFBC0004F4F3 /* GKActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A52117CFBC0004F4F3 /* GKActor.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
@@ -393,8 +389,8 @@
 		4B53B0C8207AFE7E00663381 /* Ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = ../Source/Ray.cpp; sourceTree = "<group>"; };
 		4B5497F81FF80E0A00F1EF4F /* StringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringUtil.h; path = ../Source/StringUtil.h; sourceTree = "<group>"; };
 		4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QuaternionTests.cpp; path = ../Tests/QuaternionTests.cpp; sourceTree = "<group>"; };
-		4B5C301B21D1F60900211724 /* VertexAnimationPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimationPlayer.h; path = ../Source/VertexAnimationPlayer.h; sourceTree = "<group>"; };
-		4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimationPlayer.cpp; path = ../Source/VertexAnimationPlayer.cpp; sourceTree = "<group>"; };
+		4B5C301B21D1F60900211724 /* VertexAnimator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimator.h; path = ../Source/VertexAnimator.h; sourceTree = "<group>"; };
+		4B5C301C21D1F60900211724 /* VertexAnimator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimator.cpp; path = ../Source/VertexAnimator.cpp; sourceTree = "<group>"; };
 		4B6A3F212335B16C00D25B2D /* RectUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RectUtil.h; path = ../Source/RectUtil.h; sourceTree = "<group>"; };
 		4B6A3F222335B16C00D25B2D /* RectUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RectUtil.cpp; path = ../Source/RectUtil.cpp; sourceTree = "<group>"; };
 		4B6A3F252335B20000D25B2D /* RectTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RectTests.cpp; path = ../Tests/RectTests.cpp; sourceTree = "<group>"; };
@@ -404,10 +400,6 @@
 		4B6B766521AB75AA00788C02 /* ActionBar.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ActionBar.cpp; path = ../Source/ActionBar.cpp; sourceTree = "<group>"; };
 		4B6B766821AB99C500788C02 /* FileSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FileSystem.h; path = ../Source/FileSystem.h; sourceTree = "<group>"; };
 		4B6B766921AB99C500788C02 /* FileSystem.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FileSystem.cpp; path = ../Source/FileSystem.cpp; sourceTree = "<group>"; };
-		4B6EDC082391A1F900412737 /* GKObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GKObject.h; path = ../Source/GKObject.h; sourceTree = "<group>"; };
-		4B6EDC092391A1F900412737 /* GKObject.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKObject.cpp; path = ../Source/GKObject.cpp; sourceTree = "<group>"; };
-		4B6EDC0C2391A36F00412737 /* GKProp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GKProp.h; path = ../Source/GKProp.h; sourceTree = "<group>"; };
-		4B6EDC0D2391A36F00412737 /* GKProp.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKProp.cpp; path = ../Source/GKProp.cpp; sourceTree = "<group>"; };
 		4B76B57A1F35999B003F63E5 /* BarnFile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BarnFile.cpp; path = ../Source/Barn/BarnFile.cpp; sourceTree = "<group>"; };
 		4B76B57B1F35999B003F63E5 /* BarnFile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnFile.h; path = ../Source/Barn/BarnFile.h; sourceTree = "<group>"; };
 		4B76B5821F3788FA003F63E5 /* BarnAsset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BarnAsset.h; path = ../Source/Barn/BarnAsset.h; sourceTree = "<group>"; };
@@ -455,8 +447,8 @@
 		4B92319B2103AF1B0004F4F3 /* Animation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Animation.cpp; path = ../Source/Animation.cpp; sourceTree = "<group>"; };
 		4B92319D210999810004F4F3 /* GasPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GasPlayer.h; path = ../Source/GasPlayer.h; sourceTree = "<group>"; };
 		4B92319E210999810004F4F3 /* GasPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GasPlayer.cpp; path = ../Source/GasPlayer.cpp; sourceTree = "<group>"; };
-		4B9231A0210D4E000004F4F3 /* AnimationPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AnimationPlayer.h; path = ../Source/AnimationPlayer.h; sourceTree = "<group>"; };
-		4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AnimationPlayer.cpp; path = ../Source/AnimationPlayer.cpp; sourceTree = "<group>"; };
+		4B9231A0210D4E000004F4F3 /* Animator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Animator.h; path = ../Source/Animator.h; sourceTree = "<group>"; };
+		4B9231A1210D4E000004F4F3 /* Animator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Animator.cpp; path = ../Source/Animator.cpp; sourceTree = "<group>"; };
 		4B9231A32112167F0004F4F3 /* Type.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Type.h; path = ../Source/Type.h; sourceTree = "<group>"; };
 		4B9231A42117CFBC0004F4F3 /* GKActor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GKActor.h; path = ../Source/GKActor.h; sourceTree = "<group>"; };
 		4B9231A52117CFBC0004F4F3 /* GKActor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKActor.cpp; path = ../Source/GKActor.cpp; sourceTree = "<group>"; };
@@ -826,10 +818,6 @@
 				4BEA727321D7F71A00998066 /* GameProgress.h */,
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
-				4B6EDC092391A1F900412737 /* GKObject.cpp */,
-				4B6EDC082391A1F900412737 /* GKObject.h */,
-				4B6EDC0D2391A36F00412737 /* GKProp.cpp */,
-				4B6EDC0C2391A36F00412737 /* GKProp.h */,
 				4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */,
 				4B02A8BD2381E56200CCDFAA /* InventoryManager.h */,
 				4B8A976C238B6EE1006D284D /* LocationManager.cpp */,
@@ -916,16 +904,16 @@
 				4B92319A2103AF1B0004F4F3 /* Animation.h */,
 				4B2606EC22F3D43B0030F2D9 /* AnimationNodes.cpp */,
 				4B2606EB22F3D43B0030F2D9 /* AnimationNodes.h */,
-				4B9231A1210D4E000004F4F3 /* AnimationPlayer.cpp */,
-				4B9231A0210D4E000004F4F3 /* AnimationPlayer.h */,
+				4B9231A1210D4E000004F4F3 /* Animator.cpp */,
+				4B9231A0210D4E000004F4F3 /* Animator.h */,
 				4BACA50920F7132E008C7FE9 /* GAS.cpp */,
 				4BACA50820F7132E008C7FE9 /* GAS.h */,
 				4B92319E210999810004F4F3 /* GasPlayer.cpp */,
 				4B92319D210999810004F4F3 /* GasPlayer.h */,
 				4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */,
 				4BDDCD5C20D6C4BC00701A89 /* VertexAnimation.h */,
-				4B5C301C21D1F60900211724 /* VertexAnimationPlayer.cpp */,
-				4B5C301B21D1F60900211724 /* VertexAnimationPlayer.h */,
+				4B5C301C21D1F60900211724 /* VertexAnimator.cpp */,
+				4B5C301B21D1F60900211724 /* VertexAnimator.h */,
 			);
 			name = Animation;
 			sourceTree = "<group>";
@@ -1236,7 +1224,6 @@
 				4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */,
 				4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */,
 				4B12B9D322F94ABC009F54E4 /* RenderTexture.cpp in Sources */,
-				4B6EDC0E2391A36F00412737 /* GKProp.cpp in Sources */,
 				4B12B9DB22FF3764009F54E4 /* stb_image_resize.cpp in Sources */,
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
@@ -1258,13 +1245,12 @@
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
 				4B775E5323382EE7007FF777 /* UITextInput.cpp in Sources */,
 				4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */,
-				4B6EDC0A2391A1F900412737 /* GKObject.cpp in Sources */,
 				4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
 				4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */,
 				4B02A8BF2381E56200CCDFAA /* InventoryManager.cpp in Sources */,
-				4B9231A2210D4E000004F4F3 /* AnimationPlayer.cpp in Sources */,
+				4B9231A2210D4E000004F4F3 /* Animator.cpp in Sources */,
 				4B90E07B2377AD4E00E0E3FA /* Timeblock.cpp in Sources */,
 				4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */,
 				4B2E7A65203A6072001A5B9C /* SceneAsset.cpp in Sources */,
@@ -1302,7 +1288,7 @@
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
 				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
-				4B5C301D21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */,
+				4B5C301D21D1F60900211724 /* VertexAnimator.cpp in Sources */,
 				4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
 				4B12B9E0230A7298009F54E4 /* ConsoleUI.cpp in Sources */,
@@ -1348,7 +1334,6 @@
 				4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */,
 				4B22F50D2174075B0065B152 /* SceneAsset.cpp in Sources */,
 				4BB67C4C235255CA00FDFB30 /* TextLayout.cpp in Sources */,
-				4B6EDC0F2391A36F00412737 /* GKProp.cpp in Sources */,
 				4BB67C452352552C00FDFB30 /* FootstepManager.cpp in Sources */,
 				4B22F503217407530065B152 /* SheepAPI.cpp in Sources */,
 				4B2CA00B21B8FC6D006D5E52 /* minilzo.c in Sources */,
@@ -1370,7 +1355,6 @@
 				4B22F5202174076D0065B152 /* Vector2.cpp in Sources */,
 				4BB67C492352558300FDFB30 /* ReportManager.cpp in Sources */,
 				4B22F500217407470065B152 /* CallbackMethod.cpp in Sources */,
-				4B6EDC0B2391A1F900412737 /* GKObject.cpp in Sources */,
 				4B22F507217407530065B152 /* SheepScriptBuilder.cpp in Sources */,
 				4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */,
@@ -1402,7 +1386,7 @@
 				4B22F5292174078B0065B152 /* GAS.cpp in Sources */,
 				4BB67C432352552200FDFB30 /* ConsoleUI.cpp in Sources */,
 				4B22F4F42174073D0065B152 /* UIImage.cpp in Sources */,
-				4B22F5282174078B0065B152 /* AnimationPlayer.cpp in Sources */,
+				4B22F5282174078B0065B152 /* Animator.cpp in Sources */,
 				4B22F517217407640065B152 /* Renderer.cpp in Sources */,
 				4B8D2CD3236F98B300B8E68D /* Heading.cpp in Sources */,
 				4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */,
@@ -1415,7 +1399,7 @@
 				4B22F543217410830065B152 /* Main.cpp in Sources */,
 				4B22F519217407640065B152 /* Shader.cpp in Sources */,
 				4B22F4F32174073D0065B152 /* Font.cpp in Sources */,
-				4B5C301E21D1F60900211724 /* VertexAnimationPlayer.cpp in Sources */,
+				4B5C301E21D1F60900211724 /* VertexAnimator.cpp in Sources */,
 				4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B22F4FE217407470065B152 /* StringTokenizer.cpp in Sources */,
 				4B22F513217407640065B152 /* Material.cpp in Sources */,

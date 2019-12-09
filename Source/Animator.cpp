@@ -1,9 +1,9 @@
 //
-// AnimationPlayer.cpp
+// Animator.cpp
 //
 // Clark Kromenaker
 //
-#include "AnimationPlayer.h"
+#include "Animator.h"
 
 #include "Animation.h"
 #include "AnimationNodes.h"
@@ -11,35 +11,50 @@
 #include "MeshRenderer.h"
 #include "VertexAnimation.h"
 
-TYPE_DEF_CHILD(Component, AnimationPlayer);
+TYPE_DEF_CHILD(Component, Animator);
 
-AnimationPlayer::AnimationPlayer(Actor* owner) : Component(owner)
+Animator::Animator(Actor* owner) : Component(owner)
 {
     
 }
 
-void AnimationPlayer::Play(Animation* animation)
-{
-	if(animation == nullptr) { return; }
-	mActiveAnimations.emplace_back(animation);
-}
-
-void AnimationPlayer::Play(Animation* animation, std::function<void()> finishCallback)
+void Animator::Start(Animation* animation, bool allowMove, std::function<void()> finishCallback)
 {
 	if(animation == nullptr) { return; }
 	mActiveAnimations.emplace_back(animation, finishCallback);
+	mActiveAnimations.back().allowMove = allowMove;
 }
 
-void AnimationPlayer::Stop(Animation* animation)
+void Animator::Loop(Animation* animation)
+{
+	if(animation == nullptr) { return; }
+	mActiveAnimations.emplace_back(animation);
+	mActiveAnimations.back().loop = true;
+}
+
+void Animator::Stop(Animation* animation)
 {
 	if(animation == nullptr) { return; }
 	auto newEndIt = std::remove_if(mActiveAnimations.begin(), mActiveAnimations.end(), [animation](const AnimationState& as) -> bool {
-		return as.animation == animation;
+		if(as.animation == animation)
+		{
+			// If stopping an animation, be sure to also stop any running vertex animations.
+			auto& vertexAnims = animation->GetVertexAnimNodes();
+			for(auto& vertexAnim : vertexAnims)
+			{
+				if(vertexAnim->frameNumber <= as.currentFrame)
+				{
+					vertexAnim->Stop();
+				}
+			}
+			return true;
+		}
+		return false;
 	});
 	mActiveAnimations.erase(newEndIt, mActiveAnimations.end());
 }
 
-void AnimationPlayer::Sample(Animation* animation, int frame)
+void Animator::Sample(Animation* animation, int frame)
 {
 	if(animation == nullptr) { return; }
 	
@@ -54,7 +69,7 @@ void AnimationPlayer::Sample(Animation* animation, int frame)
 	}
 }
 
-void AnimationPlayer::OnUpdate(float deltaTime)
+void Animator::OnUpdate(float deltaTime)
 {
 	// Iterate over each active animation state and update it.
 	auto it = mActiveAnimations.begin();
@@ -79,15 +94,18 @@ void AnimationPlayer::OnUpdate(float deltaTime)
 			{
 				for(auto& node : *frameData)
 				{
-					node->Play(animState.animation);
+					node->Play(&animState);
 				}
 			}
 			
 			// Move on to the next frame.
 			animState.currentFrame++;
 			
-			// This causes the animation to loop, but we don't really want that in GK3.
-			//activeAnimation.currentFrame %= activeAnimation.animation->GetFrameCount();
+			// If looping, wrap around the current frame when we reach the end!
+			if(animState.loop)
+			{
+				animState.currentFrame %= animState.animation->GetFrameCount();
+			}
 			
 			// Decrement timer, since we just simulated a single frame.
 			animState.timer -= timePerFrame;

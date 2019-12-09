@@ -49,6 +49,7 @@ class VertexAnimation : public Asset
 public:
     VertexAnimation(std::string name, char* data, int dataLength);
     
+	Vector3 SampleVertexPosition(float time, int framesPerSecond, int meshIndex, int submeshIndex, int vertexIndex);
 	VertexAnimationVertexPose SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex);
 	VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);
     

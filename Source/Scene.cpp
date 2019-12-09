@@ -9,15 +9,14 @@
 #include <limits>
 
 #include "ActionBar.h"
-#include "AnimationPlayer.h"
+#include "Animator.h"
 #include "CharacterManager.h"
 #include "Color32.h"
 #include "Debug.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GKActor.h"
-#include "GKObject.h"
-#include "GKProp.h"
+#include "GKActor.h"
 #include "LocationManager.h"
 #include "Math.h"
 #include "MeshRenderer.h"
@@ -45,7 +44,7 @@ Scene::Scene(const std::string& name, const Timeblock& timeblock) :
 	
 	// Create animation player.
 	Actor* animationActor = new Actor();
-	mAnimationPlayer = animationActor->AddComponent<AnimationPlayer>();
+	mAnimator = animationActor->AddComponent<Animator>();
 	
 	// Create action bar, which will be used to choose nouns/verbs by the player.
 	mActionBar = new ActionBar();
@@ -204,7 +203,7 @@ void Scene::Load()
 		{
 			// For walking anims to work correctly, a walker aid actor must exist
 			// and be part of the scenes actor list (so an animation can be started on it).
-			GKObject* walkerAid = new GKObject();
+			GKActor* walkerAid = new GKActor();
 			mObjects.push_back(walkerAid);
 			
 			// Make the walker aid a child of the actor itself.
@@ -262,7 +261,7 @@ void Scene::Load()
 			case SceneModel::Type::GasProp:
 			{
 				// Create actor.
-				GKProp* prop = new GKProp();
+				GKActor* prop = new GKActor();
 				prop->SetNoun(modelDef->noun);
 				
 				// Set model.
@@ -273,7 +272,7 @@ void Scene::Load()
 				// If it's a "gas prop", use provided gas as the fidget for the actor.
 				if(modelDef->type == SceneModel::Type::GasProp)
 				{
-					prop->SetGas(modelDef->gas);
+					prop->SetIdleGas(modelDef->gas);
 				}
 				break;
 			}
@@ -293,7 +292,7 @@ void Scene::Load()
 		if((modelDef->type == SceneModel::Type::Prop || modelDef->type == SceneModel::Type::GasProp)
 		   && modelDef->initAnim != nullptr)
 		{
-			mAnimationPlayer->Sample(modelDef->initAnim, 0);
+			mAnimator->Sample(modelDef->initAnim, 0);
 		}
 	}
 	
@@ -525,7 +524,7 @@ float Scene::GetFloorY(const Vector3& position) const
 	return 0.0f;
 }
 
-GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
+GKActor* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 {
 	for(auto& object : mObjects)
 	{

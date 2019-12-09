@@ -12,50 +12,128 @@
 #include "GEngine.h"
 #include "MeshRenderer.h"
 #include "Services.h"
-#include "VertexAnimationPlayer.h"
+#include "VertexAnimator.h"
 #include "Walker.h"
 
-GKActor::GKActor(const std::string& identifier) : GKObject(true),
-	mIdentifier(identifier)
+GKActor::GKActor() : Actor(),
+	mActorType(ActorType::Prop)
 {
-	// For some reason, characters (Gabe, Grace, etc) face backwards by default.
-	// To remedy this, I'm sticking the mesh render in a child object, rotated 180 degrees.
-	// Props don't seem to have this problem. What gives!?
-	//Actor* meshActor = new Actor();
-	//Transform* meshActorTransform = meshActor->GetComponent<Transform>();
-	//meshActorTransform->SetParent(GetComponent<Transform>());
-	//meshActorTransform->SetPosition(Vector3::Zero);
-	//meshActorTransform->SetRotation(Quaternion(Vector3::UnitY, Math::kPi));
-	//mMeshRenderer = meshActor->AddComponent<MeshRenderer>();
+	// Add mesh renderer.
+	mMeshActor = new Actor();
+	mMeshRenderer = mMeshActor->AddComponent<MeshRenderer>();
+	
+	// Add vertex animation player.
+	mVertexAnimator = mMeshActor->AddComponent<VertexAnimator>();
+	
+	// Add GAS player.
+	mGasPlayer = AddComponent<GasPlayer>();
+}
+
+GKActor::GKActor(const std::string& identifier) : Actor(),
+	mIdentifier(identifier),
+	mActorType(ActorType::Actor)
+{
+	// Create mesh actor with
+	mMeshActor = new Actor();
+	mMeshRenderer = mMeshActor->AddComponent<MeshRenderer>();
+	
+	// Create animation player on the same object as the mesh renderer.
+    mVertexAnimator = mMeshActor->AddComponent<VertexAnimator>();
+	
+	// GasPlayer will go on the actor itself.
+    mGasPlayer = AddComponent<GasPlayer>();
 	
 	// Get config for this character.
 	CharacterConfig& config = Services::Get<CharacterManager>()->GetCharacterConfig(mIdentifier);
+	mCharConfig = &config;
+	
+	// Create and configure face controller.
+	mFaceController = AddComponent<FaceController>();
+	mFaceController->SetCharacterConfig(config);
 	
 	// Add walker and configure it.
 	Actor* walkerActor = new Actor();
 	mWalker = walkerActor->AddComponent<Walker>();
 	mWalker->SetCharacterConfig(config);
 	mWalker->SetWalkActor(this);
+}
+
+void GKActor::SetHeading(const Heading& heading)
+{
+	SetRotation(Quaternion(Vector3::UnitY, heading.ToRadians()));
+}
+
+Heading GKActor::GetHeading() const
+{
+	return Heading::FromQuaternion(GetRotation());
+}
+
+void GKActor::StartAnimation(VertexAnimation* anim, int framesPerSecond, bool allowMove)
+{
+	// Stop any playing animation before starting a new one.
+	if(mVertexAnimator->IsPlaying())
+	{
+		mVertexAnimator->Stop(nullptr);
+	}
 	
-    // Create animation player on the same objwdect as the mesh renderer.
-    //mVertexAnimationPlayer = mMeshRenderer->GetOwner()->AddComponent<VertexAnimationPlayer>();
-    
-    // GasPlayer is used to play gas script files.
-    // Actor also needs a way to play animations, and the GasPlayer needs to know about it.
-    //mGasPlayer = AddComponent<GasPlayer>();
+	// Save whether this anim is allowed to move the actor.
+	mVertexAnimAllowMove = allowMove;
 	
-	// Create and configure face controller.
-	mFaceController = AddComponent<FaceController>();
-	mFaceController->SetCharacterConfig(config);
+	// If not allowed to move, save the start pos/rot so we can revert when the anim stops.
+	// In GK3, non-move anims STILL move the actor during the animation, but reverts the position at the end.
+	if(!allowMove)
+	{
+		mStartVertexAnimPosition = GetPosition();
+		mStartVertexAnimRotation = GetRotation();
+	}
+	
+	// Move mesh to actor's rotation.
+	if(mActorType == ActorType::Actor)
+	{
+		mMeshActor->SetRotation(GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
+	}
+	else
+	{
+		mMeshActor->SetRotation(GetRotation());
+	}
+	
+	// Move model to actor position.
+	SetMeshToActorPositionUsingAnim(anim, framesPerSecond);
+	
+	// Start the animation.
+	mVertexAnimator->Start(anim, framesPerSecond, std::bind(&GKActor::OnVertexAnimationStopped, this));
+}
+
+void GKActor::StartAnimation(VertexAnimation* anim, int framesPerSecond, Vector3 pos, Heading heading)
+{
+	// Absolute anims are always move anims?
+	mVertexAnimAllowMove = true;
+	
+	// Set the 3D model's position and heading.
+	mMeshRenderer->GetOwner()->SetPosition(pos);
+	mMeshRenderer->GetOwner()->SetRotation(heading.ToQuaternion());
+	
+	// Start the animation.
+	mVertexAnimator->Start(anim, framesPerSecond, std::bind(&GKActor::OnVertexAnimationStopped, this));
+}
+
+void GKActor::StopAnimation(VertexAnimation* anim)
+{
+	// Vertex animator will only stop if specified anim is one currently playing.
+	// But keep in mind passing null will stop any anim!
+	mVertexAnimator->Stop(anim);
+}
+
+void GKActor::SampleAnimation(VertexAnimation* anim, int frame)
+{
+	mVertexAnimator->Sample(anim, frame);
 }
 
 void GKActor::StartFidget(FidgetType type)
 {
-    // Save type.
-    mActiveFidget = type;
-    
+	/*
     // Set appropriate gas to play.
-    switch(mActiveFidget)
+    switch(type)
     {
 	case FidgetType::None:
 	case FidgetType::Custom: // Can only be started via custom GAS version of this function (for now).
@@ -74,19 +152,132 @@ void GKActor::StartFidget(FidgetType type)
 		mGasPlayer->SetGas(mListenGas);
 		break;
     }
+	*/
 }
 
 void GKActor::StartCustomFidget(GAS* gas)
 {
-	mActiveFidget = FidgetType::Custom;
-	mGasPlayer->SetGas(gas);
+	//mGasPlayer->SetGas(gas);
 }
 
 void GKActor::OnUpdate(float deltaTime)
 {
+	// Stay on the ground.
+	if(mWalker != nullptr)
+	{
+		mWalker->SnapWalkActorToFloor();
+	}
+	
+	// Move to follow actor mesh during animation.
+	if(mVertexAnimator->IsPlaying())
+	{
+		SetActorToMeshPosition(true);
+	}
+	
+	/*
 	// Pause any fidgets while walker is going.
 	if(mGasPlayer != nullptr && mWalker != nullptr)
 	{
 		mGasPlayer->SetPaused(mWalker->IsWalking());
+	}
+	*/
+}
+
+void GKActor::OnVertexAnimationStopped()
+{
+	// On anim stop, if vertex anim is not allowed to move actor position,
+	// we must revert actor back to position when anim started.
+	if(!mVertexAnimAllowMove)
+	{
+		// Move actor to original position/rotation.
+		SetPosition(mStartVertexAnimPosition);
+		SetRotation(mStartVertexAnimRotation);
+		
+		// Move mesh to position as well.
+		mMeshActor->SetPosition(mStartVertexAnimPosition);
+		mMeshActor->SetRotation(GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
+		
+		// Offset mesh to be positioned at actor position.
+		SetMeshToActorPosition(true);
+	}
+}
+
+void GKActor::SetMeshToActorPosition(bool useMeshPosOffset)
+{
+	// Move mesh to actor's position.
+	mMeshActor->SetPosition(GetPosition());
+	
+	// The 3D mesh's graphical position does not always align to the mesh actor's position.
+	// If desired, we can correct for this to ensure that the mesh's graphical position matches the actor.
+	if(useMeshPosOffset && mCharConfig != nullptr)
+	{
+		// Get hip vertex pos based on values provided by character config. This is in the mesh's local space.
+		Vector3 hipPos = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
+		
+		// Convert hip vertex pos to world space.
+		// To do this, we multiply the mesh->local with local->world to get a mesh->world matrix for transforming.
+		Vector3 worldHipPos = (mMeshActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetLocalTransformMatrix()).TransformPoint(hipPos);
+		
+		// The hip pos is usually higher up on the mesh (about hip height).
+		// We want to NOT take into account the vertical height.
+		worldHipPos.SetY(GetPosition().GetY());
+		
+		// Calculate offset from hip position to actor's position.
+		// This is how much we want to "correct" or move the mesh actor's position so the mesh itself is positioned at the actor's position.
+		Vector3 hipPosToActor = GetPosition() - worldHipPos;
+		
+		// Apply the offset to the mesh actor.
+		mMeshActor->SetPosition(mMeshActor->GetPosition() + hipPosToActor);
+	}
+}
+
+void GKActor::SetMeshToActorPositionUsingAnim(VertexAnimation* anim, int framesPerSecond)
+{
+	if(mCharConfig != nullptr)
+	{
+		// Sample the anim start for local vertex position AND the mesh's local transform for that frame.
+		Vector3 startHipPos = anim->SampleVertexPosition(0.0f, framesPerSecond, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
+		VertexAnimationTransformPose startHipTransform = anim->SampleTransformPose(0.0f, framesPerSecond, mCharConfig->hipAxesMeshIndex);
+		
+		// Calculate world hip pos using those
+		Vector3 worldHipPos = (GetTransform()->GetLocalToWorldMatrix() * startHipTransform.GetLocalTransformMatrix()).TransformPoint(startHipPos);
+		
+		// Calculate world position of the actor's origin.
+		Vector3 worldModelOrigin = GetTransform()->GetLocalToWorldMatrix().TransformPoint(Vector3::Zero);
+		
+		// Make sure hip and origin Y-components are equal (no height in this calculation).
+		worldHipPos.SetY(worldModelOrigin.GetY());
+		
+		// Calculate offset from hip position to actor's position.
+		// This is how much we want to "correct" or move the mesh actor's position so the mesh itself is positioned at the actor's position.
+		//Debug::DrawLine(worldModelOrigin, worldHipPos, Color32::Blue);
+		Vector3 hipPosToActor = worldHipPos - worldModelOrigin;
+		
+		// Update walking actor's position to match the walker's position, minus that offset to counteract the animation (whew).
+		mMeshActor->SetPosition(GetPosition() + hipPosToActor);
+	}
+}
+
+void GKActor::SetActorToMeshPosition(bool useMeshPosOffset)
+{
+	if(useMeshPosOffset && mCharConfig != nullptr)
+	{
+		// Get hip vertex pos based on values provided by character config. This is in the mesh's local space.
+		Vector3 hipPos = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
+		
+		// Convert hip vertex pos to world space.
+		// To do this, we multiply the mesh->local with local->world to get a mesh->world matrix for transforming.
+		Vector3 worldHipPos = (mMeshActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetLocalTransformMatrix()).TransformPoint(hipPos);
+		
+		// The hip pos is usually higher up on the mesh (about hip height).
+		// We want to NOT take into account the vertical height.
+		worldHipPos.SetY(GetPosition().GetY());
+		
+		// Just put the actor at that world hip pos!
+		SetPosition(worldHipPos);
+	}
+	else
+	{
+		SetPosition(mMeshActor->GetPosition());
 	}
 }
