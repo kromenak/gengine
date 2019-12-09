@@ -1,0 +1,54 @@
+symbols
+{
+	int a$ = 4;
+	int b$ = 10;
+}
+
+code
+{
+	If$()
+	{
+		// 1
+		if(a$ == 3) // BranchIfZero 2
+		{
+			PrintString("A is 3");
+			// Branch 4
+		}	
+		// 2
+		else if(a$ == 4) // BranchIfZero 3
+		{
+			PrintString("A is 4");
+
+			// 5
+			if(b$ == 5) // BranchIfZero 6
+			{
+				PrintString("B is 5");
+				// Branch 8
+			}
+			// 6
+			else if(b$ == 10) // BranchIfZero 7
+			{
+				PrintString("B is 10");
+				// Branch 8
+			}
+			// 7
+			else
+			{
+				PrintString("B is neither 5 nor 10");
+				// Branch 8
+			}
+			// 8
+
+			// Branch 4
+		}
+		// 3
+		else
+		{
+			PrintString("A is neither 3 nor 4");
+			// Branch 4
+		}
+
+		// 4
+		PrintString("That's all!")
+	}
+}
