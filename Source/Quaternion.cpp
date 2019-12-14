@@ -80,11 +80,6 @@ bool Quaternion::IsZero() const
     return Math::IsZero(x*x + y*y + z*z + w*w);
 }
 
-bool Quaternion::IsUnit() const
-{
-    return Math::IsZero(1.0f - (x*x + y*y + z*z + w*w));
-}
-
 bool Quaternion::IsIdentity() const
 {
     return (Math::IsZero(x) &&
@@ -309,6 +304,11 @@ Vector3 Quaternion::GetEulerAngles() const
 	return result;
 }
 
+bool Quaternion::IsUnit() const
+{
+    return Math::IsZero(1.0f - (x*x + y*y + z*z + w*w));
+}
+
 float Quaternion::GetLength() const
 {
     return Math::Sqrt(x*x + y*y + z*z + w*w);
@@ -333,33 +333,26 @@ void Quaternion::Normalize()
 
 Quaternion Quaternion::Inverse(const Quaternion& quat)
 {
-    // Calculate length squared, so we know if the quaternion is zero or not.
-    float lengthSq = (quat.x * quat.x) + (quat.y * quat.y) + (quat.z * quat.z) + (quat.w * quat.w);
-    
-    // If length is zero, we just return the identity matrix.
-    // This is technically an invalid operation, btw.
-    if(Math::IsZero(lengthSq))
-    {
-        return Identity;
-    }
-    
-    // We basically just want to negate our axis. The angle (w) doesn't negate.
-    // As mentioned in EMFG, a fully negated quat rotates to same angle but other way around axis.
-    // The inverse just rotates the same angle around opposite axis.
-    // Also, the equation can be simpler if quat is unit vector...
-    float recip = 1.0f / lengthSq;
-    return Quaternion(-recip * quat.x, -recip * quat.y, -recip * quat.z, recip * quat.w);
+	Quaternion toInvert = quat;
+	return toInvert.Invert();
 }
 
 const Quaternion& Quaternion::Invert()
 {
-    // Very similar to above, but affects an instance of a quat, instead of returning a new one.
+	// Calculate length squared, so we know if the quaternion is zero or not.
     float lengthSq = (x * x) + (y * y) + (z * z) + (w * w);
-    if(Math::IsZero(lengthSq))
+    
+	// If length is zero, we just return the matrix, unaffected.
+    // This is technically an invalid operation, btw.
+	if(Math::IsZero(lengthSq))
     {
         return *this;
     }
     
+	// We basically just want to negate our axis. The angle (w) doesn't negate.
+    // As mentioned in EMFG, a fully negated quat rotates to same angle but other way around axis.
+    // The inverse just rotates the same angle around opposite axis.
+    // Also, the equation can be simpler if quat is unit vector...
     float recip = 1.0f / lengthSq;
     w *= recip;
     x *= -recip;
@@ -439,8 +432,7 @@ float Quaternion::Dot(const Quaternion& quat1, const Quaternion& quat2)
 
 Vector3 Quaternion::Rotate(const Vector3& vector) const
 {
-    //ASSERT( IsUnit() );
-    
+    //ASSERT(IsUnit());
     float vMult = 2.0f * (x * vector.GetX() + y * vector.GetY() + z * vector.GetZ());
     float crossMult = 2.0f * w;
     float pMult = crossMult * w - 1.0f;

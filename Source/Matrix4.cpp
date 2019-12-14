@@ -139,7 +139,7 @@ Matrix4 Matrix4::Transpose(const Matrix4& matrix)
     return result;
 }
 
-Matrix4 Matrix4::AffineInverse()
+Matrix4 Matrix4::AffineInverse() const
 {
     Matrix4 m;
     
@@ -174,7 +174,7 @@ Matrix4 Matrix4::AffineInverse()
     return m;
 }
 
-Matrix4 Matrix4::Inverse()
+Matrix4 Matrix4::Inverse() const
 {
     Matrix4 m;
     double inv[16], det;
@@ -502,7 +502,7 @@ Vector3 operator*(const Vector3& lhs, const Matrix4& rhs)
 }
 */
 
-Vector3 Matrix4::Transform(const Vector3& rhs)
+Vector3 Matrix4::Transform(const Vector3& rhs) const
 {
 	// Assume Vector3 is not a point, so implicit w value for multiplication is "0".
 	return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2],
@@ -510,7 +510,7 @@ Vector3 Matrix4::Transform(const Vector3& rhs)
 				   mVals[2] * rhs[0] + mVals[6] * rhs[1] + mVals[10] * rhs[2]);
 }
 
-Vector3 Matrix4::TransformPoint(const Vector3& rhs)
+Vector3 Matrix4::TransformPoint(const Vector3& rhs) const
 {
 	// Assume Vector3 is a point, so implicit w value for multiplication is "1".
 	return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2] + mVals[12],

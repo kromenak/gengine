@@ -20,10 +20,15 @@ public:
     
     Quaternion();
     Quaternion(float x, float y, float z, float w);
+	
+	// Quaternion from axis/angle representation
     Quaternion(const Vector3& axis, float angle);
+	
+	// Conversion from Vector3 (component-wise copy)
     explicit Quaternion(const Vector3& vector);
+	
+	// Conversion from Matrix - rotation that matches the matrix axes!
     explicit Quaternion(const Matrix3& matrix);
-    ~Quaternion() { }
     
     // Copy
     Quaternion(const Quaternion& other);
@@ -37,8 +42,8 @@ public:
     bool operator==(const Quaternion& other) const;
     bool operator!=(const Quaternion& other) const;
     
+	// Property checks
     bool IsZero() const;
-    bool IsUnit() const;
     bool IsIdentity() const;
     
     // Accessors
@@ -60,24 +65,28 @@ public:
         z = newZ;
         w = newW;
     }
-    void Set(const Vector3& axis, float angle);
-    void Set(const Vector3& from, const Vector3& to);
-    void Set(const Matrix3& rotation);
-    void Set(float xRadians, float yRadians, float zRadians);
-    
-    void Set(Vector3 forward, Vector3 up, Vector3 right);
-    
-    void GetAxisAngle(Vector3& axis, float& angle) const;
 	
-	Vector3 GetEulerAngles() const;
+	// Conversions To
+    void Set(const Vector3& axis, float angle); // From axis/angle
+    void Set(const Vector3& from, const Vector3& to); // From from/to facing
+    void Set(const Matrix3& rotation); // From matrix representation
+	void Set(Vector3 forward, Vector3 up, Vector3 right); // From coordinate system axes
+    void Set(float xRadians, float yRadians, float zRadians); // From euler angles
+    
+	// Conversions From
+    void GetAxisAngle(Vector3& axis, float& angle) const; // To axis/angle
+	Vector3 GetEulerAngles() const; // To euler angles
     
     // Modifiers
     void MakeZero() { x = y = z = w = 0.0f; }
     void MakeIdentity() { x = y = z = 0.0f; w = 1.0f; }
    
+	// Length
+	bool IsUnit() const;
     float GetLength() const;
     void Normalize();
     
+	// Inversion
     static Quaternion Inverse(const Quaternion& quat);
     const Quaternion& Invert();
     
@@ -86,7 +95,6 @@ public:
     Quaternion& operator+=(const Quaternion& other);
     Quaternion operator-(const Quaternion& other) const;
     Quaternion& operator-=(const Quaternion& other);
-    
     Quaternion operator-() const;
     
     // Scalar Multiplication
@@ -97,12 +105,11 @@ public:
     Quaternion operator*(const Quaternion& other) const;
     Quaternion& operator*=(const Quaternion& other);
     
-    //TODO: Multiply by a Vector.
-    
     // Dot Product
     static float Dot(const Quaternion& quat1, const Quaternion& quat2);
     
-    // Rotate Vector by this Quaternion
+    // Rotate Vector
+	//TODO: operator* overload?
     Vector3 Rotate(const Vector3& vector) const;
     
     // Interpolate

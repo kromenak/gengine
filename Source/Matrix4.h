@@ -52,8 +52,8 @@ public:
     
     // Inverse and affine inverse.
     // Affine inverse is maybe faster, but only works with affine matrices!
-    Matrix4 AffineInverse();
-    Matrix4 Inverse();
+    Matrix4 AffineInverse() const;
+    Matrix4 Inverse() const;
     
     // Addition and subtraction
     Matrix4 operator+(const Matrix4& rhs) const;
@@ -66,12 +66,9 @@ public:
     Matrix4 operator*(const Matrix4& rhs) const;
     Matrix4& operator*=(const Matrix4& rhs);
     
-    // Vector3 multiplication - column-major (rhs) and row-major (lhs)
-    //Vector3 operator*(const Vector3& rhs) const;
-    //friend Vector3 operator*(const Vector3& lhs, const Matrix4& rhs);
-	// Vector3 multiplication -
-	Vector3 TransformPoint(const Vector3& rhs);
-	Vector3 Transform(const Vector3& rhs);
+	// Vector3 multiplication
+	Vector3 TransformPoint(const Vector3& rhs) const;
+	Vector3 Transform(const Vector3& rhs) const;
 	
     // Vector4 multiplication - column-vector (rhs) and row-vector (lhs)
     Vector4 operator*(const Vector4& rhs) const;
