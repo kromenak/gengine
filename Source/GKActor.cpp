@@ -56,6 +56,7 @@ GKActor::GKActor(const std::string& identifier) : Actor(),
 	mWalker = walkerActor->AddComponent<Walker>();
 	mWalker->SetCharacterConfig(config);
 	mWalker->SetWalkActor(this);
+	mWalker->SetWalkMeshActor(mMeshActor);
 }
 
 void GKActor::SetHeading(const Heading& heading)
@@ -168,7 +169,7 @@ void GKActor::OnUpdate(float deltaTime)
 		mWalker->SnapWalkActorToFloor();
 	}
 	
-	// Move to follow actor mesh during animation.
+	// Actor follows mesh during animation.
 	if(mVertexAnimator->IsPlaying())
 	{
 		SetActorToMeshPosition(true);

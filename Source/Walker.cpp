@@ -50,12 +50,6 @@ void Walker::SnapToWalkActor()
 
 void Walker::OnUpdate(float deltaTime)
 {
-	Actor* walkerActor = GetOwner();
-	
-	// Get position and rotation to modify.
-	Vector3 position = walkerActor->GetPosition();
-	Quaternion rotation = walkerActor->GetRotation();
-	
 	// Which direction should we turn to face? None at first.
 	Vector3 turnToFaceDir;
 	
@@ -64,7 +58,7 @@ void Walker::OnUpdate(float deltaTime)
 	{
 		// Figure out where to move next.
 		// If we're near that spot, move on to the next spot.
-		Vector3 toNext = mPath[0] - position;
+		Vector3 toNext = mPath[0] - mWalkActor->GetPosition();
 		if(toNext.GetLengthSq() < 1.0f)
 		{
 			mPath.erase(mPath.begin());
@@ -80,16 +74,13 @@ void Walker::OnUpdate(float deltaTime)
 			}
 			else
 			{
-				toNext = mPath[0] - position;
+				toNext = mPath[0] - mWalkActor->GetPosition();
 			}
 		}
 		
 		// Convert to pure direction.
 		Vector3 dir = toNext;
 		dir.Normalize();
-		
-		// Update position in the direction of the goal at a certain speed.
-		position += dir * mMoveSpeed * deltaTime;
 		
 		// Want to turn towards direction to next path node.
 		turnToFaceDir = dir;
@@ -105,12 +96,12 @@ void Walker::OnUpdate(float deltaTime)
 	if(turnToFaceDir != Vector3::Zero)
 	{
 		// What angle do I need to rotate to face the direction to the target?
-		float angle = Math::Acos(Vector3::Dot(walkerActor->GetForward(), turnToFaceDir));
+		float angle = Math::Acos(Vector3::Dot(mWalkActor->GetForward(), turnToFaceDir));
 		if(Math::ToDegrees(angle) > 1.0f)
 		{
 			// Which way do I rotate to get to facing direction I want?
 			// Can use y-axis of cross product to determine this.
-			Vector3 cross = Vector3::Cross(walkerActor->GetForward(), turnToFaceDir);
+			Vector3 cross = Vector3::Cross(mWalkActor->GetForward(), turnToFaceDir);
 			
 			// If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
 			// In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
@@ -125,7 +116,9 @@ void Walker::OnUpdate(float deltaTime)
 			angleOfRotation = Math::Min(angleOfRotation, angle);
 			
 			// Update our rotation by this angle amount.
+			Quaternion rotation = mWalkMeshActor->GetRotation();
 			rotation *= Quaternion(Vector3::UnitY, angleOfRotation);
+			mWalkMeshActor->SetRotation(rotation * Quaternion(Vector3::UnitY, Math::kPi));
 		}
 		else
 		{
@@ -143,55 +136,6 @@ void Walker::OnUpdate(float deltaTime)
 			}
 		}
 	}
-	
-	// Stay attached to the floor.
-	Scene* scene = GEngine::inst->GetScene();
-	if(scene != nullptr)
-	{
-		position.SetY(scene->GetFloorY(position));
-	}
-	
-	// Move the walker itself to desired position/rotation.
-	walkerActor->SetPosition(position);
-	walkerActor->SetRotation(rotation);
-	
-	/*
-	// GK3 walk anims have baked-in translation. That IS NOT really want you want with a walk anim!
-	// Ideally, a walk anim is positioned at the origin (no translation), just rotation of limbs and such.
-	// Anyway...that's not how GK3 handles it. It was an early 3D game, so no doubt they were figuring it out as they went along.
-	
-	// For the anim to not look janky, we need to counter-act this baked-in translation somehow.
-	// After much experimentation, the below logic seems to work.
-	// The actor's "hip bone position" (defined in a character's config) moves some distance away from the origin during the animation.
-	// We can use that change in position during the walk anim to "counteract" the movement in the opposite direction using an offset we calculate.
-	
-	// Calculate world position of the hips.
-	MeshRenderer* r = mWalkActor->GetMeshRenderer();
-	Vector3 hipPos = r->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
-	Vector3 worldHipPos = (mWalkActor->GetTransform()->GetLocalToWorldMatrix() * r->GetMesh(mCharConfig->hipAxesMeshIndex)->GetLocalTransformMatrix()).TransformPoint(hipPos);
-	
-	// Calculate world position of the actor's origin.
-	Vector3 worldModelOrigin = mWalkActor->GetTransform()->GetLocalToWorldMatrix().TransformPoint(Vector3::Zero);
-	
-	// Make sure hip and origin Y-components are equal (no height in this calculation).
-	worldHipPos.SetY(worldModelOrigin.GetY());
-	
-	// Calculate offset from origin to hip pos.
-	// This is how much we need to "correct for" in the positioning of the walking actor.
-	Debug::DrawLine(worldModelOrigin, worldHipPos, Color32::Blue);
-	Vector3 offset = worldHipPos - worldModelOrigin;
-	
-	// Get only the portion of the offset in the forward direction (vector projection ftw).
-	Vector3 fwd = mWalkActor->GetForward();
-	Vector3 projOffsetFwd = Vector3::Dot(offset, fwd) * fwd;
-	
-	// Update walking actor's position to match the walker's position, minus that offset to counteract the animation (whew).
-	mWalkActor->SetPosition(position - projOffsetFwd);
-		
-	// Rotate the walking actor to match our rotation.
-	// We also flip the actor by 180 degrees about the y-axis (GK3 actors are flipped like this for some reason?).
-	mWalkActor->SetRotation(rotation * Quaternion(Vector3::UnitY, Math::kPi));
-	*/
 }
 
 bool Walker::WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
@@ -277,14 +221,14 @@ void Walker::StartWalk()
 			}
 		}
 		mState = State::Start;
-		GEngine::inst->GetScene()->GetAnimator()->Start(anim, false, std::bind(&Walker::ContinueWalk, this));
+		GEngine::inst->GetScene()->GetAnimator()->Start(anim, true, std::bind(&Walker::ContinueWalk, this));
 	}
 }
 
 void Walker::ContinueWalk()
 {
 	mState = State::Loop;
-	GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkLoopAnim, false, std::bind(&Walker::ContinueWalk, this));
+	GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkLoopAnim, true, std::bind(&Walker::ContinueWalk, this));
 }
 
 void Walker::StopWalk()
@@ -295,8 +239,8 @@ void Walker::StopWalk()
 		GEngine::inst->GetScene()->GetAnimator()->Stop(mCharConfig->walkLoopAnim);
 		
 		mState = State::End;
-		GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkStopAnim, false, [this]() -> void {
-			this->mState = State::Idle;
+		GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkStopAnim, true, [this]() -> void {
+			mState = State::Idle;
 			mWalkActor->StartFidget(GKActor::FidgetType::Idle);
 		});
 	}

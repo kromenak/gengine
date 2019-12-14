@@ -41,6 +41,7 @@ public:
 	void SetCharacterConfig(const CharacterConfig& characterConfig);
 	
 	void SetWalkActor(GKActor* walkActor) { mWalkActor = walkActor; }
+	void SetWalkMeshActor(Actor* walkMeshActor) { mWalkMeshActor = walkMeshActor; }
 	
 	void SnapWalkActorToFloor();
 	void SnapToWalkActor();
@@ -63,6 +64,7 @@ private:
 	const CharacterConfig* mCharConfig = nullptr;
 	
 	// Actor who is driven by the walker.
+	Actor* mWalkMeshActor = nullptr;
 	GKActor* mWalkActor = nullptr;
 	
 	// The path to follow to destination.
