@@ -33,7 +33,7 @@ void UIButton::Render()
 	if(IsEnabled())
 	{
 		// Button is hovered if mouse position is within the screen rect for this widget.
-		bool isHovered = mRectTransform->GetScreenRect().Contains(Services::GetInput()->GetMousePosition());
+		bool isHovered = mRectTransform->GetWorldRect().Contains(Services::GetInput()->GetMousePosition());
 		
 		// Button is pressed if being hovered, and also the mouse is pressed down.
 		bool isPressed = isHovered && Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left);
@@ -87,7 +87,7 @@ void UIButton::OnUpdate(float deltaTime)
 	// If left mouse button is pressed, record whether input began over this button.
 	if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))
 	{
-		mPointerBeganOver = mRectTransform->GetScreenRect().Contains(Services::GetInput()->GetMousePosition());
+		mPointerBeganOver = mRectTransform->GetWorldRect().Contains(Services::GetInput()->GetMousePosition());
 	}
 	
 	// If pointer began over this button, wait for left mouse button to be released.
@@ -95,7 +95,7 @@ void UIButton::OnUpdate(float deltaTime)
 	if(mPointerBeganOver
 	   && Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Left))
 	{
-		if(mRectTransform->GetScreenRect().Contains(Services::GetInput()->GetMousePosition()))
+		if(mRectTransform->GetWorldRect().Contains(Services::GetInput()->GetMousePosition()))
 		{
 			Press();
 		}

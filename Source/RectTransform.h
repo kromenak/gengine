@@ -19,14 +19,12 @@ public:
 	RectTransform(Actor* owner);
 	
 	void SetSizeDelta(float x, float y);
-	void SetSizeDelta(Vector2 size);
-	Vector2 GetSize() const { return GetRect().GetSize(); }
-	
+	void SetSizeDelta(const Vector2& size);
 	void SetSizeDeltaX(float x);
 	void SetSizeDeltaY(float y);
 	
 	void SetPivot(float x, float y);
-	void SetPivot(Vector2 pivot);
+	void SetPivot(const Vector2& pivot);
 	Vector2 GetPivot() const { return mPivot; }
 	
 	void SetAnchor(const Vector2& anchor);
@@ -39,18 +37,21 @@ public:
 	void SetAnchoredPosition(const Vector2& anchoredPosition);
 	Vector2 GetAnchoredPosition() const { return mAnchoredPosition; }
 	
-	//SetLeft
-	//SetRight
-	//SetTop
-	//SetBottom
+	// Rect width/height
+	Vector2 GetSize() const { return GetRect().GetSize(); }
 	
+	// Rects!
 	Rect GetRect() const;
-	Rect GetScreenRect();
+	Rect GetWorldRect();
 	
+	// A transform has a singular "point" that is it's position.
+	// But a RectTransform's Rect may be positioned in relation to that point based on size/pivot settings.
+	// This function provides a "rectToLocal" transform for positioning the rect relative to the local origin.
 	Matrix4 GetLocalRectOffset() { return Matrix4::MakeTranslate(GetRect().GetMin()); }
 	
 protected:
-	Vector3 GetLocalPosition() override;
+	void CalcLocalPosition() override;
+	
 	void OnUpdate(float deltaTime) override;
 	
 private:
@@ -70,6 +71,6 @@ private:
 	Vector2 mAnchoredPosition = Vector2::Zero;
 	
 	// The size of the rect area (width/height).
-	// This can usually be set as desired, but it may be overridden due to anchor settings.
+	// This can usually be set as desired, but it may be overridden by anchor logic in some cases.
 	Vector2 mSizeDelta = Vector2(100.0f, 100.0f);
 };

@@ -8,34 +8,26 @@
 TYPE_DEF_CHILD(Component, Transform);
 
 Transform::Transform(Actor* owner) : Component(owner),
-	mLocalPosition(0, 0, 0), mLocalRotation(0, 0, 0, 1), mLocalScale(1, 1, 1)
+	mLocalPosition(0.0f, 0.0f, 0.0f),
+	mLocalRotation(0.0f, 0.0f, 0.0f, 1.0f),
+	mLocalScale(1.0f, 1.0f, 1.0f)
 {
 	
 }
 
-void Transform::Translate(Vector3 offset)
-{
-	SetPosition(mLocalPosition + offset);
-}
-
-void Transform::Rotate(Vector3 axis, float angle)
-{
-	SetRotation(Quaternion(axis, angle) * GetRotation());
-}
-
-void Transform::SetPosition(Vector3 position)
+void Transform::SetPosition(const Vector3& position)
 {
 	mLocalPosition = position;
 	SetDirty();
 }
 
-void Transform::SetRotation(Quaternion rotation)
+void Transform::SetRotation(const Quaternion& rotation)
 {
 	mLocalRotation = rotation;
 	SetDirty();
 }
 
-void Transform::SetScale(Vector3 scale)
+void Transform::SetScale(const Vector3& scale)
 {
 	mLocalScale = scale;
 	SetDirty();
@@ -50,6 +42,19 @@ Vector3 Transform::GetWorldPosition() const
 	return GetPosition();
 }
 
+void Transform::SetWorldPosition(const Vector3& position)
+{
+	if(mParent != nullptr)
+	{
+		mLocalPosition = mParent->GetWorldToLocalMatrix().TransformPoint(position);
+	}
+	else
+	{
+		mLocalPosition = position;
+	}
+	SetDirty();
+}
+
 Quaternion Transform::GetWorldRotation() const
 {
 	if(mParent != nullptr)
@@ -57,6 +62,27 @@ Quaternion Transform::GetWorldRotation() const
 		return mParent->GetWorldRotation() * GetRotation();
 	}
 	return GetRotation();
+}
+
+void Transform::SetWorldRotation(const Quaternion& rotation)
+{
+	if(mParent != nullptr)
+	{
+		mLocalRotation = Quaternion::Inverse(mParent->GetWorldRotation()) * rotation;
+	}
+	else
+	{
+		mLocalRotation = rotation;
+	}
+}
+
+Vector3 Transform::GetWorldScale() const
+{
+	if(mParent != nullptr)
+	{
+		return mParent->GetWorldScale() * mLocalScale;
+	}
+	return mLocalScale;
 }
 
 void Transform::SetParent(Transform* parent)
@@ -68,7 +94,8 @@ void Transform::SetParent(Transform* parent)
 		mParent = nullptr;
 	}
 	
-	//TODO: Ensure not setting as parent one of my children.
+	//TODO: Ensure not setting as parent one of my children?
+	//TODO: For now, let's count on not doing that...
 	
 	// Attach to new parent. It could be null for "no parent".
 	mParent = parent;
@@ -81,12 +108,16 @@ void Transform::SetParent(Transform* parent)
 	SetDirty();
 }
 
-Matrix4 Transform::GetLocalToWorldMatrix()
+const Matrix4& Transform::GetLocalToWorldMatrix()
 {
 	if(mLocalToWorldDirty)
 	{
+		// Make sure local position is up-to-date.
+		// This is primarily for RectTransform pivot/size changing local position.
+		CalcLocalPosition();
+		
 		// Get translate/rotate/scale matrices.
-		Matrix4 translateMatrix = Matrix4::MakeTranslate(GetLocalPosition());
+		Matrix4 translateMatrix = Matrix4::MakeTranslate(mLocalPosition);
 		Matrix4 rotateMatrix = Matrix4::MakeRotate(mLocalRotation);
 		Matrix4 scaleMatrix = Matrix4::MakeScale(mLocalScale);
 		
@@ -104,7 +135,7 @@ Matrix4 Transform::GetLocalToWorldMatrix()
 	return mLocalToWorldMatrix;
 }
 
-Matrix4 Transform::GetWorldToLocalMatrix()
+const Matrix4& Transform::GetWorldToLocalMatrix()
 {
 	if(mWorldToLocalDirty)
 	{
@@ -138,22 +169,53 @@ Vector3 Transform::WorldToLocalDirection(const Vector3& worldDirection)
 	return Vector3(result.GetX(), result.GetY(), result.GetZ());
 }
 
-Vector3 Transform::GetLocalPosition()
+void Transform::Translate(const Vector3& offset)
 {
-	return mLocalPosition;
+	SetPosition(mLocalPosition + offset);
+}
+
+void Transform::Rotate(const Vector3& axis, float angle)
+{
+	Rotate(Quaternion(axis, angle));
+}
+
+void Transform::Rotate(const Quaternion& rotation)
+{
+	SetRotation(GetRotation() * rotation);
+}
+
+void Transform::RotateAround(const Vector3& worldPoint, const Vector3& axis, float angle)
+{
+	// HOW THIS WORKS: rotating a transform normally does not change the transform's position - we just rotate about the transform's origin.
+	// To rotate about some other point, the transform's position must change during the rotation to keep positions the same relative to that point.
+	// 1) Calc offset from rotation point.
+	// 2) Rotate that offset by desired rotation.
+	// 3) Move transform to point + offset.
+	// 4) Rotate as you would normally.
+	
+	// Calculate world-space offset from point rotating around to current position.
+	Vector3 worldPos = GetWorldPosition();
+	Vector3 pointToPos = worldPos - worldPoint;
+	
+	// Create rotation about desired axis/angle.
+	Quaternion rotation(axis, angle);
+	
+	// Rotate offset from rotation point to old world pos to get a new offset.
+	// Adding that new offset to the rotation point gives us the object's new world space position.
+	SetWorldPosition(worldPoint + rotation.Rotate(pointToPos));
+	
+	// Actually rotate the transform.
+	Rotate(rotation);
 }
 
 void Transform::SetDirty()
 {
-	if(!mLocalToWorldDirty)
+	mLocalToWorldDirty = true;
+	mWorldToLocalDirty = true;
+	
+	for(auto& child : mChildren)
 	{
-		mLocalToWorldDirty = true;
-		mWorldToLocalDirty = true;
-		
-		for(auto& child : mChildren)
-		{
-			child->SetDirty();
-		}
+		child->SetDirty();
 	}
 }
 
@@ -170,3 +232,4 @@ void Transform::RemoveChild(Transform* child)
 		mChildren.erase(it);
 	}
 }
+

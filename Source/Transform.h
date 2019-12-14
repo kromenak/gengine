@@ -21,35 +21,35 @@ class Transform : public Component
 public:
 	Transform(Actor* owner);
 	
-	void Translate(Vector3 offset);
-	void Rotate(Vector3 axis, float angle);
-	
+	// Local position/rotation/scale/axes accessors.
 	Vector3 GetPosition() const { return mLocalPosition; }
-	void SetPosition(Vector3 position);
+	void SetPosition(const Vector3& position);
 	
 	Quaternion GetRotation() const { return mLocalRotation; }
-	void SetRotation(Quaternion rotation);
+	void SetRotation(const Quaternion& rotation);
 	
 	Vector3 GetScale() const { return mLocalScale; }
-	void SetScale(Vector3 scale);
-	
-	Vector3 GetWorldPosition() const;
-	//SetWorldPosition
-	
-	Quaternion GetWorldRotation() const;
-	//SetWorldRotation
-	
-	//GetLossyWorldScale
+	void SetScale(const Vector3& scale);
 	
 	Vector3 GetForward() const { return mLocalRotation.Rotate(Vector3::UnitZ); }
 	Vector3 GetRight() const { return mLocalRotation.Rotate(Vector3::UnitX); }
 	Vector3 GetUp() const { return mLocalRotation.Rotate(Vector3::UnitY); }
 	
+	// World position/rotation/scale/axes accessors.
+	Vector3 GetWorldPosition() const;
+	void SetWorldPosition(const Vector3& position);
+	
+	Quaternion GetWorldRotation() const;
+	void SetWorldRotation(const Quaternion& rotation);
+	
+	Vector3 GetWorldScale() const;
+	
+	// Parenting.
 	void SetParent(Transform* parent);
 	Transform* GetParent() const { return mParent; }
 	
-	Matrix4 GetLocalToWorldMatrix();
-	Matrix4 GetWorldToLocalMatrix();
+	const Matrix4& GetLocalToWorldMatrix();
+	const Matrix4& GetWorldToLocalMatrix();
 	
 	// Transforms points/directions from local space to world space.
 	Vector3 LocalToWorldPoint(const Vector3& localPoint);
@@ -59,10 +59,22 @@ public:
 	Vector3 WorldToLocalPoint(const Vector3& worldPoint);
 	Vector3 WorldToLocalDirection(const Vector3& worldDirection);
 	
-protected:
-	virtual Vector3 GetLocalPosition();
+	// Changes position by some offset
+	void Translate(const Vector3& offset);
 	
-	// Local position, rotation, and scale.
+	// Rotates through origin about an axis/angle
+	void Rotate(const Vector3& axis, float angle);
+	void Rotate(const Quaternion& rotation);
+	
+	// Rotates through a point in local space about an axis/angle
+	void RotateAround(const Vector3& worldPoint, const Vector3& axis, float angle);
+	void RotateAround(const Vector3& worldPoint, const Quaternion& rotation);
+	
+protected:
+	virtual void CalcLocalPosition() { }
+	
+	// Local position, rotation, and scale. Relative to parent's position/rotation/scale.
+	// Only equal to world position/rotation/scale if I have no parent.
 	Vector3 mLocalPosition;
 	Quaternion mLocalRotation;
 	Vector3 mLocalScale;
@@ -76,10 +88,9 @@ protected:
 	bool mLocalToWorldDirty = true;
 	bool mWorldToLocalDirty = true;
 	
-	// A parent, if any.
+	// If we are a child of any other transform, parent is set.
+	// If we have any children, they are in the children vector.
 	Transform* mParent = nullptr;
-	
-	// Children, if any.
 	std::vector<Transform*> mChildren;
 	
 	void SetDirty();

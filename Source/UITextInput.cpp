@@ -67,7 +67,7 @@ void UITextInput::OnUpdate(float deltaTime)
 	// If mouse is down in the rect, let's assume that means we are focused.
 	if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))
 	{
-		bool focus = mRectTransform->GetScreenRect().Contains(Services::GetInput()->GetMousePosition());
+		bool focus = mRectTransform->GetWorldRect().Contains(Services::GetInput()->GetMousePosition());
 		if(!mFocused && focus)
 		{
 			Focus();

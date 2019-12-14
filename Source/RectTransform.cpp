@@ -22,7 +22,7 @@ void RectTransform::SetSizeDelta(float x, float y)
 	SetSizeDelta(Vector2(x, y));
 }
 
-void RectTransform::SetSizeDelta(Vector2 size)
+void RectTransform::SetSizeDelta(const Vector2& size)
 {
 	mSizeDelta = size;
 	SetDirty();
@@ -45,7 +45,7 @@ void RectTransform::SetPivot(float x, float y)
 	SetPivot(Vector2(x, y));
 }
 
-void RectTransform::SetPivot(Vector2 pivot)
+void RectTransform::SetPivot(const Vector2& pivot)
 {
 	mPivot = pivot;
 	SetDirty();
@@ -94,11 +94,10 @@ Rect RectTransform::GetRect() const
 		RectTransform* parent = static_cast<RectTransform*>(mParent);
 		parentRect = parent->GetRect();
 	}
-	
 	return RectUtil::CalcLocalRect(parentRect, mAnchorMin, mAnchorMax, mSizeDelta, mPivot);
 }
 
-Rect RectTransform::GetScreenRect()
+Rect RectTransform::GetWorldRect()
 {
 	Rect localRect = GetRect();
 	
@@ -118,7 +117,7 @@ Rect RectTransform::GetScreenRect()
 	return Rect(min, max);
 }
 
-Vector3 RectTransform::GetLocalPosition()
+void RectTransform::CalcLocalPosition()
 {
 	Rect parentRect;
 	Vector2 parentPivot;
@@ -141,7 +140,6 @@ Vector3 RectTransform::GetLocalPosition()
 	// Don't overwrite the z-component, which can be set freely.
 	mLocalPosition.SetX(localPos.GetX());
 	mLocalPosition.SetY(localPos.GetY());
-	return mLocalPosition;
 }
 
 void RectTransform::OnUpdate(float deltaTime)
@@ -149,7 +147,7 @@ void RectTransform::OnUpdate(float deltaTime)
 	// For debugging: visualize min/max of the rect calculated for this RectTransform.
 	if(Debug::RenderRectTransformRects())
 	{
-		Rect screenRect = GetScreenRect();
+		Rect screenRect = GetWorldRect();
 		Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
 		Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
 		Debug::DrawLine(min, max, Color32::Cyan);
