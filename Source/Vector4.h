@@ -23,6 +23,8 @@ public:
     
     Vector4();
     Vector4(float x, float y, float z, float w);
+	
+	// Special constructor to set w component to 0 or 1 depending
     Vector4(bool isPos);
     
     // Copy
@@ -65,6 +67,9 @@ public:
     Vector4& operator*=(float scalar);
     Vector4 operator/(float scalar) const;
     Vector4& operator/=(float scalar);
+	
+	// Component-wise multiplication
+	Vector4 operator*(const Vector4& other) const;
     
 	// Scalar and vector products
     static float Dot(Vector4 lhs, Vector4 rhs);

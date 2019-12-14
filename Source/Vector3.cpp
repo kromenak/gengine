@@ -143,6 +143,11 @@ Vector3& Vector3::operator/=(float scalar)
     return *this;
 }
 
+Vector3 Vector3::operator*(const Vector3& other) const
+{
+	return Vector3(x * other.x, y * other.y, z * other.z);
+}
+
 float Vector3::Dot(Vector3 lhs, Vector3 rhs)
 {
     return (lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z);

@@ -129,6 +129,11 @@ Vector2& Vector2::operator/=(float scalar)
     return *this;
 }
 
+Vector2 Vector2::operator*(const Vector2& other) const
+{
+	return Vector2(x * other.x, y * other.y);
+}
+
 float Vector2::Dot(Vector2 lhs, Vector2 rhs)
 {
     return (lhs.x * rhs.x + lhs.y * rhs.y);

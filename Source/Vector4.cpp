@@ -145,6 +145,11 @@ Vector4& Vector4::operator/=(float scalar)
     return *this;
 }
 
+Vector4 Vector4::operator*(const Vector4& other) const
+{
+	return Vector4(x * other.x, y * other.y, z * other.z, w * other.w);
+}
+
 float Vector4::Dot(Vector4 lhs, Vector4 rhs)
 {
     return (lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w);

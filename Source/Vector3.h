@@ -25,6 +25,8 @@ public:
     
     Vector3();
     Vector3(float x, float y, float z);
+	
+	// Conversion from Vector2
 	Vector3(float x, float y);
 	Vector3(const Vector2& other);
 	
@@ -66,6 +68,9 @@ public:
     Vector3& operator*=(float scalar);
     Vector3 operator/(float scalar) const;
     Vector3& operator/=(float scalar);
+	
+	// Component-wise multiplication
+	Vector3 operator*(const Vector3& other) const;
     
     // Scalar and vector products
     static float Dot(Vector3 lhs, Vector3 rhs);

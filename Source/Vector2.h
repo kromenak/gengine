@@ -22,6 +22,8 @@ public:
     
     Vector2();
     Vector2(float x, float y);
+	
+	// Conversion from Vector3.
 	Vector2(const Vector3& other);
     
     // Copy
@@ -35,7 +37,7 @@ public:
     // Accessors
     void SetX(float newX) { x = newX; }
     void SetY(float newY) { y = newY; }
-    
+	
     float GetX() const { return x; }
     float GetY() const { return y; }
 	
@@ -60,6 +62,9 @@ public:
     Vector2& operator*=(float scalar);
     Vector2 operator/(float scalar) const;
     Vector2& operator/=(float scalar);
+	
+	// Component-wise multiplication
+	Vector2 operator*(const Vector2& other) const;
     
     // Scalar product
     static float Dot(Vector2 lhs, Vector2 rhs);
