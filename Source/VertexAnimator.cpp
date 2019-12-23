@@ -54,7 +54,7 @@ void VertexAnimator::Sample(VertexAnimation* animation, int frame)
 {
 	if(animation != nullptr)
 	{
-		TakeSample(animation, (float)frame * kDefaultFramesPerSecond);
+		TakeSample(animation, frame * (1.0f / kDefaultFramesPerSecond));
 	}
 }
 
