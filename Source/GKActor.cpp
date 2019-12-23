@@ -52,10 +52,8 @@ GKActor::GKActor(const std::string& identifier) : Actor(),
 	mFaceController->SetCharacterConfig(config);
 	
 	// Add walker and configure it.
-	Actor* walkerActor = new Actor();
-	mWalker = walkerActor->AddComponent<Walker>();
+	mWalker = AddComponent<Walker>();
 	mWalker->SetCharacterConfig(config);
-	mWalker->SetWalkActor(this);
 	mWalker->SetWalkMeshActor(mMeshActor);
 }
 
@@ -173,6 +171,7 @@ void GKActor::OnUpdate(float deltaTime)
 	if(mVertexAnimator->IsPlaying())
 	{
 		SetActorToMeshPosition(true);
+		SetActorToMeshRotation(true);
 	}
 	
 	/*
@@ -281,4 +280,32 @@ void GKActor::SetActorToMeshPosition(bool useMeshPosOffset)
 	{
 		SetPosition(mMeshActor->GetPosition());
 	}
+}
+
+void GKActor::SetActorToMeshRotation(bool useMeshPosOffset)
+{
+	SetRotation(mMeshActor->GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
+	
+	/*
+	if(useMeshPosOffset && mCharConfig != nullptr)
+	{
+		// Get hip vertex pos based on values provided by character config. This is in the mesh's local space.
+		Vector3 hipPos = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
+		
+		// Convert hip vertex pos to world space.
+		// To do this, we multiply the mesh->local with local->world to get a mesh->world matrix for transforming.
+		Vector3 worldHipPos = (mMeshActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetLocalTransformMatrix()).TransformPoint(hipPos);
+		
+		// The hip pos is usually higher up on the mesh (about hip height).
+		// We want to NOT take into account the vertical height.
+		worldHipPos.SetY(GetPosition().GetY());
+		
+		// Just put the actor at that world hip pos!
+		SetPosition(worldHipPos);
+	}
+	else
+	{
+		
+	}
+	*/
 }

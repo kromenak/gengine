@@ -120,9 +120,6 @@ struct CharacterConfig
 	FaceConfig faceConfig;
 	
 	//TODO: Clothes anims?
-	//TODO: Eye/mouth coordinates?
-	//TODO: Blink?
-	//TODO: Model/mouth name?
 };
 
 class CharacterManager

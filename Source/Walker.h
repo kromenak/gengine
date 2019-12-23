@@ -39,13 +39,9 @@ public:
 	Walker(Actor* owner);
 	
 	void SetCharacterConfig(const CharacterConfig& characterConfig);
-	
-	void SetWalkActor(GKActor* walkActor) { mWalkActor = walkActor; }
 	void SetWalkMeshActor(Actor* walkMeshActor) { mWalkMeshActor = walkMeshActor; }
 	
 	void SnapWalkActorToFloor();
-	void SnapToWalkActor();
-	void SnapWalkActorToWalker();
 	
 	bool IsWalking() const { return mState != State::Idle; }
 	
@@ -65,7 +61,6 @@ private:
 	
 	// Actor who is driven by the walker.
 	Actor* mWalkMeshActor = nullptr;
-	GKActor* mWalkActor = nullptr;
 	
 	// The path to follow to destination.
 	std::vector<Vector3> mPath;
@@ -76,8 +71,9 @@ private:
 	Vector3 mDesiredFacingDir;
 	
 	// Move and rotate speeds.
-	float mMoveSpeed = 35.0f;
-	float mRotateSpeed = 4.0f;
+	// Why these values? Trial and error...
+	const float mMoveSpeed = 35.0f;
+	const float mRotateSpeed = Math::kPi;
 	
 	// A callback for when the end of a path is reached.
 	std::function<void()> mFinishedPathCallback = nullptr;

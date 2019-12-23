@@ -147,12 +147,8 @@ private:
 	
 	void SetMeshToActorPosition(bool useMeshPosOffset);
 	void SetMeshToActorPositionUsingAnim(VertexAnimation* anim, int framesPerSecond);
-	
 	void SetActorToMeshPosition(bool useMeshPosOffset);
 	
 	void SetMeshToActorRotation(bool useMeshPosOffset);
-	
 	void SetActorToMeshRotation(bool useMeshPosOffset);
-	
-	
 };

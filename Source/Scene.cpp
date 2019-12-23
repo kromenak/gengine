@@ -118,7 +118,6 @@ void Scene::Load()
 		mSoundtrackPlayer->Play(soundtrack);
 	}
 	
-	/*
 	// For debugging - render walker bounds overlay on game world.
 	//TODO: Move to construction system!
 	{
@@ -145,7 +144,6 @@ void Scene::Load()
 			walkerBoundaryActor->SetScale(size);
 		}
 	}
-	*/
 	
 	// Create actors for the scene.
 	const std::vector<const SceneActor*>& sceneActorDatas = mSceneData->GetActors();
@@ -177,7 +175,6 @@ void Scene::Load()
 			{
 				actor->SetPosition(scenePos->position);
 				actor->SetHeading(scenePos->heading);
-				actor->GetWalker()->SnapToWalkActor();
 			}
 			else
 			{
@@ -329,7 +326,6 @@ void Scene::InitEgoPosition(const std::string& positionName)
     // Set position and heading.
     mEgo->SetPosition(position->position);
     mEgo->SetHeading(position->heading);
-	mEgo->GetWalker()->SnapToWalkActor();
 	
 	// Should also set camera position/angle.
 	// Output a warning if specified position has no camera though.

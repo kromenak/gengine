@@ -62,13 +62,13 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 	std::unordered_map<Vector2, NodeInfo, Vector2Hash> infos;
 	
 	// Start with goal and put it in closed set.
-	Vector2 current = goal;
+	Vector2 current = start;
 	closedSet.insert(current);
 	
 	// Iterate until we find the start node.
-	while(current != start)
+	while(current != goal)
 	{
-		// See if we should add neighbors to open set.
+		// Create neighbors array - including diagonals!
 		Vector2 neighbors[8];
 		neighbors[0] = current + Vector2::UnitY;
 		neighbors[1] = current - Vector2::UnitY;
@@ -79,14 +79,22 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 		neighbors[5] = current + Vector2(1, -1);
 		neighbors[6] = current + Vector2(-1, 1);
 		neighbors[7] = current + Vector2(-1, -1);
+		
+		// See if we should add neighbors to open set.
 		for(auto& neighbor : neighbors)
 		{
 			// Ignore any neighbor that has pixel color black (not walkable).
 			Color32 color = mTexture->GetPixelColor32(neighbor.GetX(), neighbor.GetY());
-			if(color == Color32::Black)
-			{
-				continue;
-			}
+			if(color == Color32::Black) { continue; }
+			
+			// Calculate a weight for the edge from current to neighbor, which we use for "g(x)" calculation.
+			// The weight is the palette index in the texture: a lower value index means "more walkable."
+			// We want encourage going from less walkable to more walkable terrain...to a degree.
+			//TODO: Probably want to revisit this...it's not perfect by any means.
+			//int currentWeight = mTexture->GetPaletteIndex(current.GetX(), current.GetY());
+			//int neighborWeight = mTexture->GetPaletteIndex(neighbor.GetX(), neighbor.GetY());
+			//int weightChange = neighborWeight - currentWeight;
+			int weight = 1; //32 + weightChange;
 			
 			// Ignore anything already in the closed set.
 			if(closedSet.find(neighbor) != closedSet.end())
@@ -97,7 +105,7 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 			{
 				// If in the open set, check for adoption.
 				// If lower g value, reparent to current.
-				float newG = infos[current].g + 1;
+				float newG = infos[current].g + weight;
 				if(newG < infos[neighbor].g)
 				{
 					infos[neighbor].parent = current;
@@ -109,8 +117,9 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 				// Found a new node - create an info for it and add to open set.
 				NodeInfo nodeInfo;
 				nodeInfo.parent = current;
-				nodeInfo.h = (current - goal).GetLength();
-				nodeInfo.g = infos[current].g + 1;
+				
+				nodeInfo.h = (current - goal).GetLength(); // No heuristic? (Dijkstra)
+				nodeInfo.g = infos[current].g + weight;
 				infos[neighbor] = nodeInfo;
 				openSet.push_back(neighbor);
 			}
@@ -142,7 +151,7 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 	}
 	
 	// Found a path! Convert it and fill the path.
-	while(current != goal)
+	while(current != start)
 	{
 		outPath.push_back(TexturePosToWorldPos(current));
 		current = infos[current].parent;
