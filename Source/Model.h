@@ -29,6 +29,8 @@ public:
 	
 	bool IsBillboard() const { return mBillboard; }
 	
+	void WriteToObjFile(std::string filePath);
+	
 private:
     // A model consists of one or more meshes.
     std::vector<Mesh*> mMeshes;

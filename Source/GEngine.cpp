@@ -125,6 +125,23 @@ bool GEngine::Initialize()
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
     LoadScene("R25");
 	
+	/*
+	TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
+	TODO: Maybe move this to some exporter class or something?
+	Model* gabMod = mAssetManager.LoadModel("GAB.MOD");
+	gabMod->WriteToObjFile("GAB.OBJ");
+	
+	GKActor* actor = new GKActor("GAB");
+	actor->GetMeshRenderer()->SetModel(gabMod);
+	
+	VertexAnimation* anim = mAssetManager.LoadVertexAnimation("GAB_GABWALK.ACT");
+	for(int i = 0; i < anim->GetFrameCount(); ++i)
+	{
+		actor->SampleAnimation(anim, i);
+		actor->GetMeshRenderer()->GetModel()->WriteToObjFile("GAB_" + std::to_string(i) + ".OBJ");
+	}
+	*/
+	
 	//SheepScript* ss = Services::GetSheep()->Compile("/Users/Clark/Projects/gengine/Assets/Conditions.shp");
 	//Services::GetSheep()->Execute(ss);
 	

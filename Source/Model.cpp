@@ -5,6 +5,7 @@
 // 
 #include "Model.h"
 
+#include <fstream>
 #include <iostream>
 
 #include "BinaryReader.h"
@@ -22,6 +23,113 @@ Model::Model(std::string name, char* data, int dataLength) :
     Asset(name)
 {
     ParseFromData(data, dataLength);
+}
+
+void Model::WriteToObjFile(std::string filePath)
+{
+	std::ofstream out(filePath, std::ios::out);
+    if(!out.good())
+    {
+        std::cout << "Can't write to file " << filePath << "!" << std::endl;
+		return;
+    }
+	
+	// Don't write out scientific notation.
+	out << std::fixed;
+	
+	int count = 0;
+	
+	// Write out vertices.
+	out << "# Vertices\n";
+	for(auto& mesh : mMeshes)
+	{
+		Matrix4 localTransformMatrix = mesh->GetLocalTransformMatrix();
+		for(auto& submesh : mesh->GetSubmeshes())
+		{
+			float* positions = submesh->GetPositions();
+			if(positions != nullptr)
+			{
+				int vertexCount = submesh->GetVertexCount();
+				for(int i = 0; i < vertexCount; ++i)
+				{
+					Vector3 vertex(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
+					vertex = localTransformMatrix.TransformPoint(vertex);
+					
+					out << "v " << vertex.GetX();
+					out << " "  << vertex.GetY();
+					out << " "  << vertex.GetZ() << "\n";
+					++count;
+				}
+			}
+		}
+	}
+			
+	// Write out texture coordinates.
+	out << "# Texture Coordinates\n";
+	for(auto& mesh : mMeshes)
+	{
+		for(auto& submesh : mesh->GetSubmeshes())
+		{
+			float* uvs = submesh->GetUV1s();
+			if(uvs != nullptr)
+			{
+				int vertexCount = submesh->GetVertexCount();
+				for(int i = 0; i < vertexCount; ++i)
+				{
+					out << "vt " << uvs[i * 2] << " " << uvs[i * 2 + 1] << "\n";
+				}
+			}
+		}
+	}
+				
+	// Write out normals.
+	out << "# Normals\n";
+	for(auto& mesh : mMeshes)
+	{
+		for(auto& submesh : mesh->GetSubmeshes())
+		{
+			float* normals = submesh->GetNormals();
+			if(normals != nullptr)
+			{
+				int vertexCount = submesh->GetVertexCount();
+				for(int i = 0; i < vertexCount; ++i)
+				{
+					out << "vn " << normals[i * 3] << " " << normals[i * 3 + 1] << " " << normals[i * 3 + 2] << "\n";
+				}
+			}
+		}
+	}
+	
+	// Write out faces.
+	out << "# Faces\n";
+	int submeshOffset = 1;
+	for(auto& mesh : mMeshes)
+	{
+		for(auto& submesh : mesh->GetSubmeshes())
+		{
+			unsigned short* indexes = submesh->GetIndexes();
+			if(indexes != nullptr)
+			{
+				int indexCount = submesh->GetIndexCount();
+				for(int i = 0; i < indexCount; i += 3)
+				{
+					int f1 = submeshOffset + indexes[i];
+					int f2 = submeshOffset + indexes[i + 1];
+					int f3 = submeshOffset + indexes[i + 2];
+					
+					if(f1 < 1 || f1 > count || f2 < 1 || f2 > count || f3 < 1 || f3 > count)
+					{
+						std::cout << "Using face index " << f1 << " which is greater than max of " << count << std::endl;
+					}
+					
+					out << "f " << f1;
+					out << " " << f2;
+					out << " " << f3 << "\n";
+				}
+				submeshOffset += submesh->GetVertexCount();
+			}
+		}
+	}
 }
 
 void Model::ParseFromData(char *data, int dataLength)
@@ -215,11 +323,11 @@ void Model::ParseFromData(char *data, int dataLength)
             float* vertexNormals = new float[vertexCount * 3];
             float* vertexUVs = new float[vertexCount * 2];
             
-            // 4 bytes: Index count, for drawing indexed mesh.
-            int indexCount = reader.ReadUInt();
-            unsigned short* vertexIndexes = new unsigned short[indexCount * 3];
+            // 4 bytes: Face count, for drawing indexed mesh. Each face has 3 vertices (triangles).
+            int faceCount = reader.ReadUInt();
+            unsigned short* vertexIndexes = new unsigned short[faceCount * 3];
             #ifdef DEBUG_OUTPUT
-            std::cout << "      Index count: " << indexCount << std::endl;
+            std::cout << "      Face count: " << faceCount << std::endl;
             #endif
             
             // 4 bytes: Number of LODK blocks in this submesh. Not uncommon to be 0.
@@ -279,7 +387,7 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // Next comes vertex indexes for drawing from an IBO.
             // Common sequence would be (2, 1, 0) or (5, 4, 3), referring to vertex indexes above.
-            for(int k = 0; k < indexCount; k++)
+            for(int k = 0; k < faceCount; k++)
             {
                 vertexIndexes[k * 3] = reader.ReadUShort();
                 vertexIndexes[k * 3 + 1] = reader.ReadUShort();
@@ -290,7 +398,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
 				reader.ReadUShort(); // WHAT IS IT!?
             }
-            submesh->SetIndexes(vertexIndexes, indexCount * 3);
+            submesh->SetIndexes(vertexIndexes, faceCount * 3);
             
             // Next comes LODK blocks for this mesh group.
             // Not totally sure what these are for, but maybe LOD groups?

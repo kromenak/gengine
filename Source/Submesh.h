@@ -77,6 +77,14 @@ public:
 	unsigned int GetVertexCount() const { return mVertexCount; }
 	Vector3 GetVertexPosition(int index) const;
 	
+	float* GetPositions() { return mPositions; }
+	float* GetColors() { return mColors; }
+	float* GetNormals() { return mNormals; }
+	float* GetUV1s() { return mUV1; }
+	
+	int GetIndexCount() const { return mIndexCount; }
+	unsigned short* GetIndexes() { return mIndexes; }
+	
 	bool Raycast(const Ray& ray);
 	
 private:
