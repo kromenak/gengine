@@ -55,6 +55,7 @@ public:
     
     float GetDuration(int framesPerSecond) const { return (1.0f / framesPerSecond) * mFrameCount; }
 	
+	int GetFrameCount() const { return mFrameCount; }
 	const std::string& GetModelName() const { return mModelName; }
 	
 private:

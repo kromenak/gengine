@@ -440,7 +440,6 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
 						// This tends to be used for storing vertex position deltas where meshes meet (like a knee or elbow).
                         else if(vertexDataFormat[k] == 2)
                         {
-							//TODO: Hmm, something about this is incorrect...you can see it in Gabe's walk loop for example... :(
                             float x = DecompressFloatFromUShort(reader.ReadUShort());
 							float z = DecompressFloatFromUShort(reader.ReadUShort());
 							float y = DecompressFloatFromUShort(reader.ReadUShort());
@@ -558,22 +557,28 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
 
 float VertexAnimation::DecompressFloatFromByte(unsigned char val)
 {
+	// Sign flag is 1 bit - masked by 1000 0000.
     unsigned int signFlag = (val & 0x80);
     float sign = (signFlag == 0) ? 1.0f : -1.0f;
     
+	// Whole portion is 2 bits - masked by 0111 1111, then shift 5.
+	float whole = (val & 0x7F) >> 5;
+	
+	// Fractional portion is 5 bits - masked by 0001 1111.
     float frac = (float)(val & 0x1F) / 32.0f;
-    float whole = (val & 0x7F) >> 5;
-    
     return sign * (whole + frac);
 }
 
 float VertexAnimation::DecompressFloatFromUShort(unsigned short val)
 {
+	// Sign flag is 1 bit - masked by 1000 0000 0000 0000.
     unsigned int signFlag = (val & 0x8000);
     float sign = (signFlag == 0) ? 1.0f : -1.0f;
     
-    float frac = (float)(val & 0x1FF) / 256.0f;
-    float whole = (val & 0x7FFF) >> 8;
-    
+	// Whole portion is 7 bits - masked by 0111 1111 1111 1111, then shift 8.
+	float whole = (val & 0x7FFF) >> 8;
+	
+	// Fractional portion is 8 bits - masked by 0000 0000 1111 1111.
+    float frac = (float)(val & 0x00FF) / 256.0f;
     return sign * (whole + frac);
 }
