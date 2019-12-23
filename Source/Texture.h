@@ -21,19 +21,11 @@ class SDL_Surface;
 class Texture : public Asset
 {
 public:
-	/*
-	enum class Format
-	{
-		RGB,
-		RGBA
-	};
-	*/
-	
 	enum class RenderType
 	{
-		Opaque,
-		AlphaTest,
-		Translucent
+		Opaque,		// Texture is fully opaque
+		AlphaTest,	// Texture has only opaque and transparent pixels
+		Translucent	// Texture has pixels that are partially transparent
 	};
 	
 	static Texture* White;
@@ -49,8 +41,6 @@ public:
     void Activate();
     static void Deactivate();
 	
-	void SetTransparentColor(Color32 color);
-	
 	// For SDL cursor stuff, convert texture to a surface.
 	//TODO: Probably move this elsewhere?
     SDL_Surface* GetSurface();
@@ -58,26 +48,28 @@ public:
     
     unsigned int GetWidth() const { return mWidth; }
     unsigned int GetHeight() const { return mHeight; }
-	
     unsigned char* GetPixelData() const { return mPixels; }
 	
-	bool HasAlpha() { return mHasAlpha; }
 	RenderType GetRenderType() const { return mRenderType; }
 	
 	Color32 GetPixelColor32(int x, int y);
+	unsigned char GetPaletteIndex(int x, int y);
 	
-    void WriteToFile(std::string filePath);
-	
-	void Blit(Texture* source, int destX, int destY);
+	//void Blit(Texture* source, int destX, int destY);
 	
 	// Blend's source pixels into dest based on source's alpha channel.
 	static void BlendPixels(const Texture& source, Texture& dest, int destX, int destY);
 	static void BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
 						   Texture& dest, int destX, int destY);
 	
+	// Alpha and transparency
+	void SetTransparentColor(Color32 color);
+	void ApplyAlphaChannel(const Texture& alphaTexture);
+	bool HasAlpha() { return mHasAlpha; }
+	
 	void UploadToGPU();
 	
-	void ApplyAlphaChannel(const Texture& alphaTexture);
+	void WriteToFile(std::string filePath);
 	
 private:
 	friend class RenderTexture; // To access OpenGL stuff.
@@ -88,6 +80,9 @@ private:
 	
 	// Some textures have palettes.
 	unsigned char* mPalette = nullptr;
+	
+	// If a texture has a palette, the indexes into the palette are stored here.
+	unsigned char* mPaletteIndexes = nullptr;
 	
     // Pixel data - this is the meat of the texture!
     unsigned char* mPixels = nullptr;
@@ -104,9 +99,8 @@ private:
 	bool mHasAlpha = false;
 	bool mIsTranslucent = false;
 	
-    void ParseFromData(char* data, int dataLength);
+	static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
+	
 	void ParseFromCompressedFormat(BinaryReader& reader);
 	void ParseFromBmpFormat(BinaryReader& reader);
-	
-	static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
 };
