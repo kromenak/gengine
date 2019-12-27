@@ -54,10 +54,12 @@ public:
 	// Transforms points/directions from local space to world space.
 	Vector3 LocalToWorldPoint(const Vector3& localPoint);
 	Vector3 LocalToWorldDirection(const Vector3& localDirection);
+	Quaternion LocalToWorldRotation(const Quaternion& localRotation);
 	
 	// Transforms points/directions from world space to local space.
 	Vector3 WorldToLocalPoint(const Vector3& worldPoint);
 	Vector3 WorldToLocalDirection(const Vector3& worldDirection);
+	//WorldToLocalRotation(...);
 	
 	// Changes position by some offset
 	void Translate(const Vector3& offset);

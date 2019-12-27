@@ -157,6 +157,11 @@ Vector3 Transform::LocalToWorldDirection(const Vector3& localDirection)
 	return Vector3(result.GetX(), result.GetY(), result.GetZ());
 }
 
+Quaternion Transform::LocalToWorldRotation(const Quaternion& localRotation)
+{
+	return GetWorldRotation() * localRotation;
+}
+
 Vector3 Transform::WorldToLocalPoint(const Vector3& worldPoint)
 {
 	return GetWorldToLocalMatrix().TransformPoint(worldPoint);
