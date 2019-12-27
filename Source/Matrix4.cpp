@@ -563,6 +563,20 @@ Vector3 Matrix4::GetTranslation() const
 	return Vector3(mVals[12], mVals[13], mVals[14]);
 }
 
+Quaternion Matrix4::GetRotation() const
+{
+	Quaternion q;
+	q.SetW(Math::Sqrt(Math::Max(0.0f, 1.0f + mVals[0] + mVals[5] + mVals[10])) / 2.0f);
+	q.SetX(Math::Sqrt(Math::Max(0.0f, 1.0f + mVals[0] - mVals[5] - mVals[10])) / 2.0f);
+	q.SetY(Math::Sqrt(Math::Max(0.0f, 1.0f - mVals[0] + mVals[5] - mVals[10])) / 2.0f);
+	q.SetZ(Math::Sqrt(Math::Max(0.0f, 1.0f - mVals[0] - mVals[5] + mVals[10])) / 2.0f);
+	
+	q.SetX(Math::MagnitudeSign(q.GetX(), mVals[6] - mVals[9]));
+	q.SetY(Math::MagnitudeSign(q.GetY(), mVals[8] - mVals[2]));
+	q.SetZ(Math::MagnitudeSign(q.GetZ(), mVals[1] - mVals[4]));
+	return q;
+}
+
 Matrix4 Matrix4::MakeTranslate(Vector3 translation)
 {
     Matrix4 m;

@@ -137,3 +137,19 @@ TEST_CASE("Test calculate the inverse of Matrix4")
     Matrix4 result = matrix * inverse;
     REQUIRE(result == Matrix4::Identity);
 }
+
+TEST_CASE("Extract Translation/Rotation from Matrix4")
+{
+	Vector3 translation = Vector3(5.0f, 20.0f, -4.0f);
+	Quaternion rotation = Quaternion(Vector3::UnitY, Math::kPiOver2);
+	
+	Matrix4 translationMatrix = Matrix4::MakeTranslate(translation);
+	Matrix4 rotationMatrix = Matrix4::MakeRotate(rotation);
+	Matrix4 combinedMatrix = translationMatrix * rotationMatrix;
+	
+	Vector3 extractedTranslation = combinedMatrix.GetTranslation();
+	Quaternion extractedRotation = combinedMatrix.GetRotation();
+	
+	REQUIRE(extractedTranslation == translation);
+	REQUIRE(extractedRotation == rotation);
+}

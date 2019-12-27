@@ -87,6 +87,7 @@ public:
 	// A Matrix4 is often used to represent a transformation matrix.
 	// In that case, we can extract certain meaningful data if needed.
 	Vector3 GetTranslation() const;
+	Quaternion GetRotation() const;
 	
     // Factory methods for generating certain types of matrices.
     static Matrix4 MakeTranslate(Vector3 translation);
