@@ -32,10 +32,15 @@ public:
 	
 	bool IsValid() const { return mDegrees >= 0.0f && mDegrees <= 360.0f; }
 	
+	std::string ToString() const { return std::to_string(mDegrees); }
+	
 private:
 	Heading() { }
 	
+	// A heading is represented internally as degrees 0-360.
 	float mDegrees = -1.0f;
 	
 	void SetDegrees(float degrees);
 };
+
+std::ostream& operator<<(std::ostream& os, const Heading& h);

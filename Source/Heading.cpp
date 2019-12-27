@@ -38,3 +38,9 @@ void Heading::SetDegrees(float degrees)
 		mDegrees += 360.0f;
 	}
 }
+
+std::ostream& operator<<(std::ostream& os, const Heading& h)
+{
+	os << h.ToString();
+	return os;
+}
