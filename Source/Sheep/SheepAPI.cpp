@@ -293,7 +293,7 @@ shpvoid DumpActorPosition(std::string actorName)
 	{
 		std::stringstream ss;
 		ss << "actor '" << actorName << "' ";
-		ss << "h=" << actor->GetHeading().ToDegrees() << ", ";
+		ss << "h=" << actor->GetHeading() << ", ";
 		ss << "pos=" << actor->GetPosition();
 		Services::GetReports()->Log("Dump", ss.str());
 	}
@@ -519,7 +519,21 @@ RegFunc2(SetActorPosition, void, string, string, IMMEDIATE, REL_FUNC);
 
 // SetEgo
 
-// SetEgoLocationCount
+shpvoid SetEgoLocationCount(std::string locationName, int count)
+{
+	// Make sure it's a valid location.
+	if(!Services::Get<LocationManager>()->IsValidLocation(locationName))
+	{
+		Services::GetReports()->Log("Error", "Error: '" + locationName + "' is not a valid location name. Call DumpLocations() to see valid locations.");
+		return 0;
+	}
+	
+	// Set it!
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	Services::Get<LocationManager>()->SetLocationCountForCurrentTimeblock(egoName, locationName, count);
+	return 0;
+}
+RegFunc2(SetEgoLocationCount, void, string, int, IMMEDIATE, DEV_FUNC);
 
 /*
 shpvoid SetIdleGAS(std::string actorName, std::string gasName)

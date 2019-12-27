@@ -39,6 +39,8 @@ public:
 	void IncLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock);
 	void IncLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock);
 	
+	void SetLocationCountForCurrentTimeblock(const std::string& actorName, const std::string& location, int count);
+	
 	void SetActorLocation(const std::string& actorName, const std::string& location);
 	std::string GetActorLocation(const std::string& actorName) const;
 	

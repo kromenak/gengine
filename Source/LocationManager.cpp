@@ -107,15 +107,26 @@ void LocationManager::IncLocationCount(const std::string& actorName, const std::
 
 void LocationManager::IncLocationCount(const std::string& actorName, const std::string& location, const std::string& timeblock)
 {
-	// Generate a key from the various bits.
-	// Make sure it's all lowercase, for consistency.
+	// Increment global location count. Lowercase for consistency.
 	std::string locationKey = actorName + location;
-	std::string locationTimeblockKey = locationKey + timeblock;
 	StringUtil::ToLower(locationKey);
-	StringUtil::ToLower(locationTimeblockKey);
-	
 	++mActorLocationCounts[locationKey];
+	
+	// Increment timeblock-specific location count. Lowercase for consistency.
+	std::string locationTimeblockKey = locationKey + timeblock;
+	StringUtil::ToLower(locationTimeblockKey);
 	++mActorLocationTimeblockCounts[locationTimeblockKey];
+}
+
+void LocationManager::SetLocationCountForCurrentTimeblock(const std::string& actorName, const std::string& location, int count)
+{
+	// Get current timeblock as string.
+	std::string timeblock = Services::Get<GameProgress>()->GetTimeblock().ToString();
+
+	// Increment timeblock-specific location count. This version should NOT change the global one!
+	std::string key = actorName + location + timeblock;
+	StringUtil::ToLower(key);
+	mActorLocationTimeblockCounts[key] = count;
 }
 
 void LocationManager::SetActorLocation(const std::string& actorName, const std::string& location)
