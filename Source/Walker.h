@@ -43,7 +43,7 @@ public:
 	
 	void SnapWalkActorToFloor();
 	
-	bool IsWalking() const { return mState != State::Idle; }
+	bool IsWalking() const { return mState != State::Idle || mHasDesiredFacingDir; }
 	
 	bool WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	bool WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
@@ -52,6 +52,9 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
+	const float kAtNodeDistSq = 100.0f;
+	const float kAtHeadingRadians = Math::ToRadians(5.0f);
+	
 	// Current state of the walker.
 	State mState = State::Idle;
 	

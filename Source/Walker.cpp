@@ -42,8 +42,6 @@ void Walker::SnapWalkActorToFloor()
 	}
 }
 
-
-
 bool Walker::WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
 {
 	return WalkTo(position, Heading::None, walkerBoundary, finishCallback);
@@ -74,6 +72,24 @@ bool Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBound
 			mFinishedPathCallback = nullptr;
 		}
 		return false;
+	}
+	
+	// If already at position...don't move! "At position" is...less than 10 units? Maybe?
+	float distToPositionSq = (GetOwner()->GetPosition() - position).GetLengthSq();
+	if(distToPositionSq < kAtNodeDistSq)
+	{
+		// If there's a desired facing direction, then technically the walker still has work to do - it has to turn the actor.
+		// So, return true if desired facing, false otherwise.
+		if(!mHasDesiredFacingDir)
+		{
+			if(mFinishedPathCallback != nullptr)
+			{
+				mFinishedPathCallback();
+				mFinishedPathCallback = nullptr;
+			}
+			return false;
+		}
+		return true;
 	}
 	
 	// Find a path from current position to target position, populating our path vector.
@@ -120,7 +136,7 @@ void Walker::OnUpdate(float deltaTime)
 		// Figure out where to move next.
 		// If we're near that spot, move on to the next spot.
 		Vector3 toNext = mPath.back() - walkActor->GetPosition();
-		if(toNext.GetLengthSq() < 100.0f)
+		if(toNext.GetLengthSq() < kAtNodeDistSq)
 		{
 			mPath.pop_back();
 			if(mPath.size() <= 0)
@@ -158,7 +174,7 @@ void Walker::OnUpdate(float deltaTime)
 	{
 		// What angle do I need to rotate to face the direction to the target?
 		float angle = Math::Acos(Vector3::Dot(walkActor->GetForward(), turnToFaceDir));
-		if(Math::ToDegrees(angle) > 5.0f)
+		if(angle > kAtHeadingRadians)
 		{
 			// Which way do I rotate to get to facing direction I want?
 			// Can use y-axis of cross product to determine this.
@@ -174,7 +190,6 @@ void Walker::OnUpdate(float deltaTime)
 			
 			// Calculate an angle we are going to rotate by, moving us toward our desired facing.
 			float angleOfRotation = rotateDirection * mRotateSpeed * deltaTime;
-			angleOfRotation = Math::Min(angleOfRotation, angle);
 			
 			// Update our rotation by this angle amount.
 			Transform* meshTransform = mWalkMeshActor->GetTransform();
