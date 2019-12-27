@@ -614,8 +614,10 @@ void Scene::ExecuteAction(const Action* action)
 			Animation* anim = Services::GetAssets()->LoadAnimation(action->target);
 			if(anim != nullptr)
 			{
-				//TODO: Get position corresponding to first frame of animation and move there.
-				action->Execute();
+				std::cout << "WalkToAnim" << std::endl;
+				mEgo->WalkToAnimationStart(anim, mSceneData->GetWalkerBoundary(), [action]() -> void {
+					action->Execute();
+				});
 			}
 			break;
 		}

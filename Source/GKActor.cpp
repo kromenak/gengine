@@ -67,6 +67,16 @@ Heading GKActor::GetHeading() const
 	return Heading::FromQuaternion(GetRotation());
 }
 
+std::string GKActor::GetModelName() const
+{
+	if(mMeshRenderer == nullptr) { return std::string(); }
+	
+	Model* model = mMeshRenderer->GetModel();
+	if(model == nullptr) { return std::string(); }
+	
+	return model->GetNameNoExtension();
+}
+
 void GKActor::StartAnimation(VertexAnimation* anim, int framesPerSecond, bool allowMove)
 {
 	// Stop any playing animation before starting a new one.
@@ -159,6 +169,33 @@ void GKActor::StartCustomFidget(GAS* gas)
 	//mGasPlayer->SetGas(gas);
 }
 
+void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+{
+	// Need a walker and walker boundary for any of this to work.
+	if(mWalker == nullptr || walkerBoundary == nullptr) { return; }
+	
+	// Retrieve vertex animation that this actor's model will play on first frame of the given animation.
+	// It's possible for this to be null if the actor's model is not involved in the animation! This is probably a developer error.
+	if(anim != nullptr)
+	{
+		VertexAnimation* vertexAnim = anim->GetVertexAnimationOnFrameForModel(0, GetModelName());
+		if(vertexAnim != nullptr)
+		{
+			VertexAnimationTransformPose transformPose = vertexAnim->SampleTransformPose(0.0f, 15, mCharConfig->hipAxesMeshIndex);
+			
+			// Grab position/heading from first frame of the animation.
+			Vector3 walkPos = vertexAnim->SampleVertexPosition(0.0f, 15, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
+			walkPos = transformPose.GetLocalTransformMatrix().TransformPoint(walkPos);
+			walkPos.SetY(GetPosition().GetY());
+			
+			Heading heading = Heading::FromQuaternion(transformPose.mLocalRotation * Quaternion(Vector3::UnitY, Math::kPi));
+			
+			// Walk to that position/heading.
+			mWalker->WalkTo(walkPos, heading, walkerBoundary, finishCallback);
+		}
+	}
+}
+
 void GKActor::OnUpdate(float deltaTime)
 {
 	// Stay on the ground.
@@ -168,7 +205,7 @@ void GKActor::OnUpdate(float deltaTime)
 	}
 	
 	// Actor follows mesh during animation.
-	if(mVertexAnimator->IsPlaying())
+	if(mVertexAnimator->IsPlaying() || (mWalker != nullptr && mWalker->IsWalking()))
 	{
 		SetActorToMeshPosition(true);
 		SetActorToMeshRotation(true);
@@ -284,7 +321,15 @@ void GKActor::SetActorToMeshPosition(bool useMeshPosOffset)
 
 void GKActor::SetActorToMeshRotation(bool useMeshPosOffset)
 {
-	SetRotation(mMeshActor->GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
+	if(mCharConfig != nullptr)
+	{
+		// Get hip rotation and transform to world space.
+		Quaternion rotation = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetLocalTransformMatrix().GetRotation();
+		rotation = mMeshActor->GetTransform()->LocalToWorldRotation(rotation);
+		
+		// Per usual, ALSO flip 180 degrees for humanoid actors.
+		SetRotation(rotation * Quaternion(Vector3::UnitY, Math::kPi));
+	}
 	
 	/*
 	if(useMeshPosOffset && mCharConfig != nullptr)

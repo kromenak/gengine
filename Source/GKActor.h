@@ -54,6 +54,8 @@ public:
 	void SetNoun(std::string noun) { mNoun = noun; }
 	std::string GetNoun() const { return mNoun; }
 	
+	std::string GetModelName() const;
+	
 	MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
 	VertexAnimator* GetVertexAnimator() const { return mVertexAnimator; }
 	GasPlayer* GetGasPlayer() const { return mGasPlayer; }
@@ -75,6 +77,8 @@ public:
 	
 	void StartFidget(FidgetType type);
 	void StartCustomFidget(GAS* gas);
+	
+	void WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	
 	Walker* GetWalker() const { return mWalker; }
 	FaceController* GetFaceController() const { return mFaceController; }
