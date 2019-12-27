@@ -17,8 +17,7 @@ class Texture;
 
 class WalkerBoundary
 {
-public:	
-	bool CanWalkTo(Vector3 position) const;
+public:
 	bool FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& outPath) const;
 	
 	void SetTexture(Texture* texture) { mTexture = texture; }
@@ -42,6 +41,11 @@ private:
 	// An offset for the bottom-left of the walker bounds from the origin.
 	Vector2 mOffset;
 	
+	bool IsWorldPosWalkable(Vector3 worldPos) const;
+	bool IsTexturePosWalkable(Vector2 texturePos) const;
+	
 	Vector2 WorldPosToTexturePos(Vector3 worldPos) const;
 	Vector3 TexturePosToWorldPos(Vector2 texturePos) const;
+	
+	Vector2 FindNearestWalkableTexturePosToWorldPos(const Vector3& worldPos) const;
 };
