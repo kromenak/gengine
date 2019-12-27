@@ -15,18 +15,27 @@ Animation::Animation(std::string name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
-Animation::~Animation()
+std::vector<AnimNode*>* Animation::GetFrame(int frameNumber)
 {
-	
-}
-
-std::vector<AnimNode*>* Animation::GetFrame(int num)
-{
-    if(mFrames.find(num) != mFrames.end())
+    if(mFrames.find(frameNumber) != mFrames.end())
     {
-        return &mFrames[num];
+        return &mFrames[frameNumber];
     }
     return nullptr;
+}
+
+VertexAnimation* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, const std::string& modelName)
+{
+	for(auto& node : mVertexAnimNodes)
+	{
+		if(node->frameNumber == frameNumber &&
+		   node->vertexAnimation != nullptr &&
+		   StringUtil::EqualsIgnoreCase(node->vertexAnimation->GetModelName(), modelName))
+		{
+			return node->vertexAnimation;
+		}
+	}
+	return nullptr;
 }
 
 void Animation::ParseFromData(char *data, int dataLength)
@@ -47,7 +56,6 @@ void Animation::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "ACTIONS"))
         {
 			// First line is number of action entries...but we can just determine that from the number of lines!
-			
 			// Read in 2+ lines as actions.
             for(int i = 1; i < section.lines.size(); ++i)
             {
@@ -126,7 +134,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "SVISIBILITY"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			
+			// Read in 2+ lines as actions.
             for(int i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
@@ -155,7 +163,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "MTEXTURES"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			
+			// Read in 2+ lines as actions.
             for(int i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
@@ -188,7 +196,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "MVISIBILITY"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			
+			// Read in 2+ lines as actions.
             for(int i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
@@ -213,7 +221,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "SOUNDS"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			
+			// Read in 2+ lines as actions.
             for(int i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
@@ -269,7 +277,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "OPTIONS"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			
+			// Read in 2+ lines as actions.
             for(int i = 1; i < section.lines.size(); i++)
             {
 				IniLine& line = section.lines[i];

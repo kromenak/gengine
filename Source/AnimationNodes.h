@@ -21,6 +21,7 @@ struct AnimNode
 	int frameNumber = 0;
 	
 	virtual ~AnimNode() { }
+	
 	virtual void Play(AnimationState* animState) = 0;
 	virtual void Stop() { } // Stop support is optional. Does nothing by default.
 	virtual void Sample(Animation* anim, int frame) { } // Sampling support is optional. Does nothing by default.

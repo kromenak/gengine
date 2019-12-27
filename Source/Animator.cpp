@@ -58,7 +58,7 @@ void Animator::Sample(Animation* animation, int frame)
 {
 	if(animation == nullptr) { return; }
 	
-	// Play any anim nodes for the desired frame.
+	// Sample any anim nodes for the desired frame.
 	std::vector<AnimNode*>* frameData = animation->GetFrame(frame);
 	if(frameData != nullptr)
 	{

@@ -49,13 +49,19 @@ class VertexAnimation : public Asset
 public:
     VertexAnimation(std::string name, char* data, int dataLength);
     
+	// Queries the position of a single vertex at a particular time of the animation.
 	Vector3 SampleVertexPosition(float time, int framesPerSecond, int meshIndex, int submeshIndex, int vertexIndex);
+	
+	// Queries positions of ALL vertices for a submesh at a particular time of the animation.
 	VertexAnimationVertexPose SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex);
+	
+	// Queries a mesh's transform properties (position, rotation, scale) at a particular time of the animation.
 	VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);
     
-    float GetDuration(int framesPerSecond) const { return (1.0f / framesPerSecond) * mFrameCount; }
-	
+	// Length and duration.
 	int GetFrameCount() const { return mFrameCount; }
+    float GetDuration(int framesPerSecond) const { return (float)mFrameCount / (float)framesPerSecond; }
+	
 	const std::string& GetModelName() const { return mModelName; }
 	
 private:

@@ -52,10 +52,12 @@ class Animator : public Component
 public:
     Animator(Actor* owner);
 	
+	// Playback
 	void Start(Animation* animation, bool allowMove, std::function<void()> finishCallback);
 	void Loop(Animation* animation);
 	void Stop(Animation* animation);
 	
+	// Sampling
 	void Sample(Animation* animation, int frame);
 	
 protected:
