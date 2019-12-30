@@ -91,3 +91,8 @@ void UIImage::SetSizeToTextureSize()
 	// Set size from texture.
 	mRectTransform->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
 }
+
+void UIImage::SetColor(const Color32& color)
+{
+	mMaterial.SetColor(color);
+}

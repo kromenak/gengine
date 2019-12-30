@@ -10,6 +10,8 @@
 
 #include "Material.h"
 
+class Color32;
+
 class UIImage : public UIWidget
 {
 	TYPE_DECL_CHILD();
@@ -27,6 +29,8 @@ public:
 	
 	void SetTexture(Texture* texture);
 	void SetSizeToTextureSize();
+	
+	void SetColor(const Color32& color);
 	
 	void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
 	
