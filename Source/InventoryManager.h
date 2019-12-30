@@ -12,16 +12,22 @@
 // However, using invalid or unsupported inventory items is probably a bad idea because
 // the necessary art assets won't be available.
 #pragma once
+#include <set>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "Type.h"
 
+class InventoryScreen;
+class Texture;
+
 struct InventoryItemTextures
 {
+	Texture* listTexture = nullptr;
+	Texture* closeupTexture = nullptr;
+	
 	/*
-	 TODO: INVENTORY_SPRITES.TXT defines a map from item name to texture prefix.
+	 TODO: INVENTORYSPRITES.TXT defines a map from item name to texture prefix.
 	 TODO: There are then 4 textures with that prefix in the asset catalog:
 	 VITPRNTWILKESNAME3.BMP
 	 VITPRNTWILKESNAME6_ALPHA.BMP
@@ -45,11 +51,13 @@ public:
 	std::string GetActiveInventoryItem(const std::string& actorName) const;
 	void SetActiveInventoryItem(const std::string& actorName, const std::string& itemName);
 	
-	void ShowInventory() const;
+	void ShowInventory(const std::string& actorName);
 	void HideInventory() const;
 	
 	void InventoryInspect(const std::string& itemName) const;
 	void InventoryUninspect() const;
+	
+	Texture* GetInventoryItemListTexture(const std::string& itemName);
 	
 private:
 	// A map from name to textures used for that inventory item.
@@ -58,9 +66,13 @@ private:
 	
 	// Inventories for actors.
 	// Key is actor name, value is a set. If a value is present in the set, the actor "has" that inventory item.
-	std::unordered_map<std::string, std::unordered_set<std::string>> mInventories;
+	// Set is used (rather than unordered_set) b/c we want items to display in UI in alphabetical order.
+	std::unordered_map<std::string, std::set<std::string>> mInventories;
 	
 	// Each actor can have one active inventory item.
 	// It's also possible for an actor to have NO active item!
 	std::unordered_map<std::string, std::string> mActiveInventoryItems;
+	
+	// UI for inventory.
+	InventoryScreen* inventoryScreen = nullptr;
 };

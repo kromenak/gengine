@@ -6,6 +6,7 @@
 #include "InventoryManager.h"
 
 #include "IniParser.h"
+#include "InventoryScreen.h"
 #include "Services.h"
 #include "StringUtil.h"
 
@@ -32,12 +33,59 @@ InventoryManager::InventoryManager()
 			// Rather than muck up the parser code, I'll just catch and ignore those lines here.
 			if(entry.key[0] == ';') { continue; }
 			
-			//TODO: Use entry.value to populate InventoryItemTextures.
-			mInventoryItems[StringUtil::ToLowerCopy(entry.key)] = InventoryItemTextures();
-			//std::cout << "Added " << entry.key << std::endl;
+			// Populate a textures entry for this inventory item.
+			InventoryItemTextures textures;
+			
+			// Closeup texture has suffix "6_ALPHA" after entry value.
+			// Why "6_ALPHA"? Who knows! Sometimes it's even "_6_ALPHA"!
+			textures.closeupTexture = Services::GetAssets()->LoadTexture(entry.value + "6_ALPHA.BMP");
+			if(textures.closeupTexture == nullptr)
+			{
+				textures.closeupTexture = Services::GetAssets()->LoadTexture(entry.value + "_6_ALPHA.BMP");
+			}
+			
+			// List texture has suffix "9" - again, why? Who knows!
+			// List texture also has an alpha texture.
+			// In both cases, the leading underscore is inconsistently used, so we must check for both.
+			textures.listTexture = Services::GetAssets()->LoadTexture(entry.value + "9.BMP");
+			if(textures.listTexture == nullptr)
+			{
+				textures.listTexture = Services::GetAssets()->LoadTexture(entry.value + "_9.BMP");
+			}
+			Texture* listTextureAlpha = Services::GetAssets()->LoadTexture(entry.value + "9_OP.BMP");
+			if(listTextureAlpha == nullptr)
+			{
+				listTextureAlpha = Services::GetAssets()->LoadTexture(entry.value + "_9_OP.BMP");
+			}
+			
+			// Apply alpha channel to list texture, if we have it.
+			if(textures.listTexture != nullptr && listTextureAlpha != nullptr)
+			{
+				textures.listTexture->ApplyAlphaChannel(*listTextureAlpha);
+				textures.listTexture->UploadToGPU();
+			}
+			
+			// Save to map.
+			mInventoryItems[StringUtil::ToLowerCopy(entry.key)] = textures;
 	    }
 	}
 	delete[] buffer;
+	
+	// Give Gabe starting inventory items.
+	//TODO: Obviously, this should be data-driven, but not sure where this is defined?
+	AddInventoryItem("GABRIEL", "DAGGER");
+	AddInventoryItem("GABRIEL", "GABES_PASSPORT");
+	AddInventoryItem("GABRIEL", "NOTEPAD");
+	AddInventoryItem("GABRIEL", "PRINCE_JAMES_CARD");
+	AddInventoryItem("GABRIEL", "R25_ROOM_KEY");
+	AddInventoryItem("GABRIEL", "TALISMAN");
+	AddInventoryItem("GABRIEL", "TAPE_RECORDER");
+	AddInventoryItem("GABRIEL", "WALLET");
+}
+
+Texture* InventoryManager::GetInventoryItemListTexture(const std::string &itemName)
+{
+	return mInventoryItems[StringUtil::ToLowerCopy(itemName)].listTexture;
 }
 
 bool InventoryManager::IsValidInventoryItem(const std::string& itemName) const
@@ -50,7 +98,7 @@ void InventoryManager::AddInventoryItem(const std::string& actorName, const std:
 {
 	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
 	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
-	std::unordered_set<std::string>& items = mInventories[actorNameLower];
+	std::set<std::string>& items = mInventories[actorNameLower];
 	items.insert(itemNameLower);
 }
 
@@ -58,7 +106,7 @@ void InventoryManager::RemoveInventoryItem(const std::string& actorName, const s
 {
 	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
 	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
-	std::unordered_set<std::string>& items = mInventories[actorNameLower];
+	std::set<std::string>& items = mInventories[actorNameLower];
 	items.erase(itemNameLower);
 }
 
@@ -89,3 +137,21 @@ void InventoryManager::SetActiveInventoryItem(const std::string& actorName, cons
 	mActiveInventoryItems[actorNameLower] = itemNameLower;
 }
 
+void InventoryManager::ShowInventory(const std::string& actorName)
+{
+	if(inventoryScreen == nullptr)
+	{
+		inventoryScreen = new InventoryScreen();
+	}
+	
+	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
+	inventoryScreen->Show(mInventories[actorNameLower]);
+}
+
+void InventoryManager::HideInventory() const
+{
+	if(inventoryScreen != nullptr)
+	{
+		inventoryScreen->Hide();
+	}
+}

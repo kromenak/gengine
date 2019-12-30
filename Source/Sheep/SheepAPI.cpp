@@ -1806,14 +1806,15 @@ RegFunc1(SetEgoActiveInvItem, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowInventory()
 {
-	std::cout << "ShowInventory" << std::endl;
+	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	Services::Get<InventoryManager>()->ShowInventory(egoName);
 	return 0;
 }
 RegFunc0(ShowInventory, void, IMMEDIATE, REL_FUNC);
 
 shpvoid HideInventory()
 {
-	std::cout << "HideInventory" << std::endl;
+	Services::Get<InventoryManager>()->HideInventory();
 	return 0;
 }
 RegFunc0(HideInventory, void, IMMEDIATE, REL_FUNC);

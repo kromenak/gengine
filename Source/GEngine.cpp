@@ -413,6 +413,8 @@ void GEngine::LoadSceneInternal()
 	//TODO: Console should persist across all scenes! Need some "Do Not Destroy On Load" style functionality...
 	new ConsoleUI(false);
 	
+	//Services::Get<InventoryManager>()->ShowInventory("GABRIEL");
+	
 	// Create the new scene.
 	//TODO: Scene constructor should probably ONLY take a scene name.
 	//TODO: Internally, we can call to GameProgress or whatnot as needed, but that's very GK3-specific stuff.
