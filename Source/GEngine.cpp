@@ -126,6 +126,8 @@ bool GEngine::Initialize()
 	ConsoleUI* consoleUI = new ConsoleUI(false);
 	consoleUI->SetIsDestroyOnLoad(false);
 	
+	//TEMP: Load scene as though starting a new game.
+	//TODO: Should really show logos, show title screen, allow restore or new game choice.
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
     LoadScene("R25");
 	
@@ -341,21 +343,8 @@ void GEngine::Update()
         mActors[i]->Update(deltaTime);
     }
 	
-	// Delete any dead actors...carefully.
-	auto it = mActors.begin();
-	while(it != mActors.end())
-	{
-		if((*it)->IsDestroyed())
-		{
-			Actor* actor = (*it);
-			it = mActors.erase(it);
-			delete actor;
-		}
-		else
-		{
-			++it;
-		}
-	}
+	// Delete any destroyed actors.
+	DeleteDestroyedActors();
     
     // Also update audio system (before or after actors?)
     mAudioManager.Update(deltaTime);
@@ -417,21 +406,17 @@ void GEngine::LoadSceneInternal()
 		mScene = nullptr;
 	}
 	
-	// Delete actors who are destroy on load.
-	auto it = mActors.begin();
-	while(it != mActors.end())
+	// Destroy any actors that are destroy on load.
+	for(auto& actor : mActors)
 	{
-		if((*it)->IsDestroyOnLoad())
+		if(actor->IsDestroyOnLoad())
 		{
-			Actor* actor = (*it);
-			it = mActors.erase(it);
-			delete actor;
-		}
-		else
-		{
-			++it;
+			actor->Destroy();
 		}
 	}
+	
+	// After destroy pass, delete destroyed actors.
+	DeleteDestroyedActors();
 	
 	// Create the new scene.
 	//TODO: Scene constructor should probably ONLY take a scene name.
@@ -444,4 +429,23 @@ void GEngine::LoadSceneInternal()
 	
 	// Clear scene load request.
 	mSceneToLoad.clear();
+}
+
+void GEngine::DeleteDestroyedActors()
+{
+	// Use iterator so we can carefully erase and delete actors without too many headaches.
+	auto it = mActors.begin();
+	while(it != mActors.end())
+	{
+		if((*it)->IsDestroyed())
+		{
+			Actor* actor = (*it);
+			it = mActors.erase(it);
+			delete actor;
+		}
+		else
+		{
+			++it;
+		}
+	}
 }

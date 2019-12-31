@@ -79,4 +79,6 @@ private:
     void GenerateOutputs();
 	
 	void LoadSceneInternal();
+	
+	void DeleteDestroyedActors();
 };
