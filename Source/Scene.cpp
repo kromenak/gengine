@@ -16,7 +16,7 @@
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GKActor.h"
-#include "GKActor.h"
+#include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Math.h"
 #include "MeshRenderer.h"
@@ -406,6 +406,9 @@ void Scene::Interact(const Ray& ray)
 {
 	// Ignore scene interaction while the action bar is showing.
 	if(mActionBar->IsShowing()) { return; }
+	
+	// Also ignore scene interaction when inventory is up.
+	if(Services::Get<InventoryManager>()->IsInventoryShowing()) { return; }
 	
 	// Check against any dynamic actors before falling back on BSP check.
 	//TODO: Need to handle case where mouse is over multiple actors! We want to pick the closest one in that case.

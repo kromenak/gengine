@@ -24,6 +24,7 @@ public:
 	
 	void Show(const std::set<std::string>& inventory);
 	void Hide();
+	bool IsShowing() { return IsActive(); }
 	
 protected:
 	
@@ -33,4 +34,6 @@ private:
 	
 	// Created item buttons - can reuse on repeat visits.
 	std::vector<UIButton*> mItemButtons;
+	
+	void OnItemClicked(std::string itemName);
 };

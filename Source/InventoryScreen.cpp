@@ -105,6 +105,11 @@ void InventoryScreen::Show(const std::set<std::string>& inventory)
 		// Set texture for button.
 		button->SetUpTexture(itemTexture);
 		
+		// Set button callback.
+		button->SetPressCallback([this, item]() {
+			this->OnItemClicked(item);
+		});
+		
 		// Next button located to the right, with spacing.
 		x += itemTexture->GetWidth() + kSpacingX;
 	}
@@ -116,4 +121,9 @@ void InventoryScreen::Show(const std::set<std::string>& inventory)
 void InventoryScreen::Hide()
 {
 	SetActive(false);
+}
+
+void InventoryScreen::OnItemClicked(std::string itemName)
+{
+	std::cout << "Clicked " << itemName << std::endl;
 }

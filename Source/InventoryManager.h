@@ -53,6 +53,7 @@ public:
 	
 	void ShowInventory(const std::string& actorName);
 	void HideInventory() const;
+	bool IsInventoryShowing() const;
 	
 	void InventoryInspect(const std::string& itemName) const;
 	void InventoryUninspect() const;
@@ -74,5 +75,5 @@ private:
 	std::unordered_map<std::string, std::string> mActiveInventoryItems;
 	
 	// UI for inventory.
-	InventoryScreen* inventoryScreen = nullptr;
+	InventoryScreen* mInventoryScreen = nullptr;
 };

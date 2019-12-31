@@ -71,6 +71,10 @@ InventoryManager::InventoryManager()
 	}
 	delete[] buffer;
 	
+	// Create inventory screen UI.
+	mInventoryScreen = new InventoryScreen();
+	mInventoryScreen->SetIsDestroyOnLoad(false);
+	
 	// Give Gabe starting inventory items.
 	//TODO: Obviously, this should be data-driven, but not sure where this is defined?
 	AddInventoryItem("GABRIEL", "DAGGER");
@@ -139,19 +143,16 @@ void InventoryManager::SetActiveInventoryItem(const std::string& actorName, cons
 
 void InventoryManager::ShowInventory(const std::string& actorName)
 {
-	if(inventoryScreen == nullptr)
-	{
-		inventoryScreen = new InventoryScreen();
-	}
-	
 	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
-	inventoryScreen->Show(mInventories[actorNameLower]);
+	mInventoryScreen->Show(mInventories[actorNameLower]);
 }
 
 void InventoryManager::HideInventory() const
 {
-	if(inventoryScreen != nullptr)
-	{
-		inventoryScreen->Hide();
-	}
+	mInventoryScreen->Hide();
+}
+
+bool InventoryManager::IsInventoryShowing() const
+{
+	return mInventoryScreen->IsShowing();
 }
