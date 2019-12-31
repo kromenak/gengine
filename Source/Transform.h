@@ -20,6 +20,7 @@ class Transform : public Component
 	TYPE_DECL_CHILD();
 public:
 	Transform(Actor* owner);
+	virtual ~Transform();
 	
 	// Local position/rotation/scale/axes accessors.
 	Vector3 GetPosition() const { return mLocalPosition; }
@@ -47,7 +48,9 @@ public:
 	// Parenting.
 	void SetParent(Transform* parent);
 	Transform* GetParent() const { return mParent; }
+	const std::vector<Transform*>& GetChildren() const { return mChildren; }
 	
+	// Transform matrices.
 	const Matrix4& GetLocalToWorldMatrix();
 	const Matrix4& GetWorldToLocalMatrix();
 	

@@ -15,6 +15,12 @@ Transform::Transform(Actor* owner) : Component(owner),
 	
 }
 
+Transform::~Transform()
+{
+	// Ensure that deleted actor doesn't stay a child of some actor.
+	SetParent(nullptr);
+}
+
 void Transform::SetPosition(const Vector3& position)
 {
 	mLocalPosition = position;
