@@ -35,6 +35,7 @@ public:
 	
     Actor();
 	Actor(TransformType transformType);
+	
     virtual ~Actor();
     
 	void Update(float deltaTime);
@@ -43,10 +44,10 @@ public:
     template<class T> T* GetComponent();
 	
 	// STATE
-	void SetActive(bool active) { mState = active ? State::Enabled : State::Disabled; }
+	void SetActive(bool active) { if(mState != State::Dead) { mState = active ? State::Enabled : State::Disabled; } }
 	bool IsActive() const { return mState == State::Enabled; }
 	
-	void Destroy() { mState = State::Dead; }
+	void Destroy();
 	bool IsDestroyed() const { return mState == State::Dead; }
 	
 	void SetIsDestroyOnLoad(bool destroyOnLoad) { mIsDestroyOnLoad = destroyOnLoad; }
@@ -74,10 +75,11 @@ protected:
 private:
 	State mState = State::Enabled;
 	
-	Transform* mTransform = nullptr;
-	
 	// By default, actors are destroyed when a new scene loads.
 	bool mIsDestroyOnLoad = true;
+	
+	// Transform is accessed pretty often, so seems good to cache it.
+	Transform* mTransform = nullptr;
 	
     // The components that are attached to this actor.
     std::vector<Component*> mComponents;
