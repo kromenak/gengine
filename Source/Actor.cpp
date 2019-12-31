@@ -35,7 +35,7 @@ Actor::Actor(TransformType transformType)
 
 Actor::~Actor()
 {
-    GEngine::RemoveActor(this);
+    //GEngine::RemoveActor(this);
     
     // Delete all components and clear list.
     for(auto& component : mComponents)
@@ -61,4 +61,14 @@ void Actor::Update(float deltaTime)
 		Debug::DrawAxes(mTransform->GetLocalToWorldMatrix());
 	}
 	//Debug::DrawLine(GetPosition(), GetPosition() + GetForward() * 5.0f, Color32::Red);
+}
+
+bool Actor::IsDestroyOnLoad() const
+{
+	// For children, the parent decides "destroy on load" functionality.
+	if(mTransform->GetParent() != nullptr)
+	{
+		return mTransform->GetParent()->GetOwner()->IsDestroyOnLoad();
+	}
+	return mIsDestroyOnLoad;
 }

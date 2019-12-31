@@ -22,7 +22,7 @@ class GEngine
 {
 public:
     static void AddActor(Actor* actor);
-    static void RemoveActor(Actor* actor);
+    //static void RemoveActor(Actor* actor);
     static GEngine* inst;
     
     GEngine();
@@ -79,6 +79,4 @@ private:
     void GenerateOutputs();
 	
 	void LoadSceneInternal();
-	
-	void DeleteAllActors();
 };

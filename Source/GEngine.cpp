@@ -122,6 +122,10 @@ bool GEngine::Initialize()
 	// Create locations manager.
 	Services::Set<LocationManager>(new LocationManager());
 	
+	// Create console UI - this persists for the entire game.
+	ConsoleUI* consoleUI = new ConsoleUI(false);
+	consoleUI->SetIsDestroyOnLoad(false);
+	
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
     LoadScene("R25");
 	
@@ -151,8 +155,13 @@ bool GEngine::Initialize()
 
 void GEngine::Shutdown()
 {
-	DeleteAllActors();
-    
+	// Delete all actors.
+	for(auto& actor : mActors)
+	{
+		delete actor;
+	}
+	mActors.clear();
+	
     mRenderer.Shutdown();
     mAudioManager.Shutdown();
     
@@ -385,6 +394,7 @@ void GEngine::AddActor(Actor* actor)
     mActors.push_back(actor);
 }
 
+/*
 void GEngine::RemoveActor(Actor* actor)
 {
     auto it = std::find(mActors.begin(), mActors.end(), actor);
@@ -393,6 +403,7 @@ void GEngine::RemoveActor(Actor* actor)
         mActors.erase(it);
     }
 }
+*/
 
 void GEngine::LoadSceneInternal()
 {
@@ -406,33 +417,31 @@ void GEngine::LoadSceneInternal()
 		mScene = nullptr;
 	}
 	
-	// Get rid of all actors between scenes.
-	DeleteAllActors();
-	
-	//TEMP: Create a console when entering a scene.
-	//TODO: Console should persist across all scenes! Need some "Do Not Destroy On Load" style functionality...
-	new ConsoleUI(false);
-	
-	//Services::Get<InventoryManager>()->ShowInventory("GABRIEL");
+	// Delete actors who are destroy on load.
+	auto it = mActors.begin();
+	while(it != mActors.end())
+	{
+		if((*it)->IsDestroyOnLoad())
+		{
+			Actor* actor = (*it);
+			it = mActors.erase(it);
+			delete actor;
+		}
+		else
+		{
+			++it;
+		}
+	}
 	
 	// Create the new scene.
 	//TODO: Scene constructor should probably ONLY take a scene name.
 	//TODO: Internally, we can call to GameProgress or whatnot as needed, but that's very GK3-specific stuff.
 	mScene = new Scene(mSceneToLoad, Services::Get<GameProgress>()->GetTimeblock());
 	
-	// Load the scene - this is separate from constructor b/c load operations may need to reference the scene!
+	// Load the scene - this is separate from constructor
+	// b/c load operations may need to reference the scene itself!
 	mScene->Load();
 	
 	// Clear scene load request.
 	mSceneToLoad.clear();
-}
-
-void GEngine::DeleteAllActors()
-{
-	// Delete all actors.
-	// Since actor destructor removes from this list, can't iterate and delete.
-	while(!mActors.empty())
-	{
-		delete mActors.back();
-	}
 }

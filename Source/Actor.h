@@ -49,6 +49,9 @@ public:
 	void Destroy() { mState = State::Dead; }
 	bool IsDestroyed() const { return mState == State::Dead; }
 	
+	void SetIsDestroyOnLoad(bool destroyOnLoad) { mIsDestroyOnLoad = destroyOnLoad; }
+	bool IsDestroyOnLoad() const;
+	
 	// TRANSFORM CONVENIENCE ACCESSORS
 	Transform* GetTransform() const { return mTransform; }
 	
@@ -72,6 +75,9 @@ private:
 	State mState = State::Enabled;
 	
 	Transform* mTransform = nullptr;
+	
+	// By default, actors are destroyed when a new scene loads.
+	bool mIsDestroyOnLoad = true;
 	
     // The components that are attached to this actor.
     std::vector<Component*> mComponents;
