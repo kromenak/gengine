@@ -17,6 +17,8 @@ class UICanvas : public UIWidget
 	TYPE_DECL_CHILD();
 public:
 	static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
+	static void UpdateInput();
+	static bool DidWidgetEatInput() { return sMouseOverWidget != nullptr; }
 	
 	UICanvas(Actor* owner);
 	~UICanvas();
@@ -30,6 +32,10 @@ public:
 private:
 	// An array of all canvases that currently exist.
 	static std::vector<UICanvas*> sCanvases;
+	
+	// At any time, the mouse can be over exactly one widget.
+	// (at least, unless we add multi-pointer support...shudders)
+	static UIWidget* sMouseOverWidget;
 	
 	// All widgets on this canvas.
 	std::vector<UIWidget*> mWidgets;

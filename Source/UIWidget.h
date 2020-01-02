@@ -20,6 +20,14 @@ public:
     
 	virtual void Render() = 0;
 	
+	virtual void OnPointerEnter() { }
+	virtual void OnPointerExit() { }
+	
+	virtual void OnPointerDown() { }
+	virtual void OnPointerUp() { }
+	
+	RectTransform* GetRectTransform() const { return mRectTransform; }
+	
 protected:
 	// UI widgets usually rely heavily on a RectTransform.
 	// So, we cache it here.

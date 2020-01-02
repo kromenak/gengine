@@ -30,16 +30,15 @@ public:
 	
 	void SetPressCallback(std::function<void()> callback) { mPressCallback = callback; }
 	
-	//void OnPointerEnter();
-	//void OnPointerExit();
+	void OnPointerEnter() override;
+	void OnPointerExit() override;
 	
-	//void OnPointerUp();
-	//void OnPointerDown();
+	void OnPointerDown() override;
+	void OnPointerUp() override;
 	
 	void Press();
 	
 protected:
-	void OnUpdate(float deltaTime) override;
 	
 private:
 	// Textures for different visual states.
@@ -55,9 +54,9 @@ private:
 	// Callback to execute when the button is pressed.
 	std::function<void()> mPressCallback;
 	
-	// True if mouse pointer began over the button.
-	// This ensures you can only press the button if you started the press over the button.
-	bool mPointerBeganOver = false;
+	// Tracks pointer enter/exit and up/down for visual state and press checks.
+	bool mPointerOver = false;
+	bool mPointerDown = false;
 	
 	Texture* GetDefaultTexture();
 };

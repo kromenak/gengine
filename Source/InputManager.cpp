@@ -6,6 +6,7 @@
 #include "InputManager.h"
 
 #include "Services.h"
+#include "UICanvas.h"
 
 InputManager::InputManager()
 {
@@ -48,6 +49,9 @@ void InputManager::Update()
     // After delta calc, set mouse position.
     mMousePosition.SetX(mouseX);
     mMousePosition.SetY(mouseY);
+	
+	// Handle UI input.
+	UICanvas::UpdateInput();
 }
 
 void InputManager::StartTextInput(TextInput* textInput)

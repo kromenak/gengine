@@ -30,20 +30,15 @@ void UIButton::Render()
 	if(texture == nullptr) { return; }
 	
 	// Split into enabled and disabled textures.
+	//TODO: Don't use "IsEnabled" for this - need a separate bool for button interactivity.
 	if(IsEnabled())
 	{
-		// Button is hovered if mouse position is within the screen rect for this widget.
-		bool isHovered = mRectTransform->GetWorldRect().Contains(Services::GetInput()->GetMousePosition());
-		
-		// Button is pressed if being hovered, and also the mouse is pressed down.
-		bool isPressed = isHovered && Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left);
-		
 		// This logic favors showing pressed, then hovered, then up states.
-		if(isPressed && mDownTexture != nullptr)
+		if(mPointerDown && mDownTexture != nullptr)
 		{
 			texture = mDownTexture;
 		}
-		else if(isHovered && mHoverTexture != nullptr)
+		else if(mPointerOver && mHoverTexture != nullptr)
 		{
 			texture = mHoverTexture;
 		}
@@ -74,32 +69,38 @@ void UIButton::Render()
 	uiQuad->Render();
 }
 
+void UIButton::OnPointerEnter()
+{
+	GEngine::inst->UseHighlightCursor();
+	mPointerOver = true;
+}
+
+void UIButton::OnPointerExit()
+{
+	GEngine::inst->UseDefaultCursor();
+	mPointerOver = false;
+}
+
+void UIButton::OnPointerDown()
+{
+	mPointerDown = true;
+}
+
+void UIButton::OnPointerUp()
+{
+	// Pointer up after also receiving the pointer down event means...you pressed it!
+	if(mPointerDown)
+	{
+		Press();
+	}
+	mPointerDown = false;
+}
+
 void UIButton::Press()
 {
 	if(mPressCallback && IsEnabled())
 	{
 		mPressCallback();
-	}
-}
-
-void UIButton::OnUpdate(float deltaTime)
-{
-	// If left mouse button is pressed, record whether input began over this button.
-	if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))
-	{
-		mPointerBeganOver = mRectTransform->GetWorldRect().Contains(Services::GetInput()->GetMousePosition());
-	}
-	
-	// If pointer began over this button, wait for left mouse button to be released.
-	// If it is released over this button, that counts as a press.
-	if(mPointerBeganOver
-	   && Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Left))
-	{
-		if(mRectTransform->GetWorldRect().Contains(Services::GetInput()->GetMousePosition()))
-		{
-			Press();
-		}
-		mPointerBeganOver = false;
 	}
 }
 
