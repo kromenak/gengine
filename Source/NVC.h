@@ -66,8 +66,8 @@ public:
 	
 	bool IsCaseMet(const Action* item, GKActor* ego) const;
 	
-	const std::vector<Action>& GetActions(const std::string& noun);
-	const Action* GetAction(const std::string& noun, const std::string& verb);
+	const std::vector<Action>& GetActions(const std::string& noun) const;
+	const Action* GetAction(const std::string& noun, const std::string& verb) const;
 	
 private:
 	// If attempting to get actions for a noun that doesn't exist,

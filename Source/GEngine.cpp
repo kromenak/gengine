@@ -7,6 +7,7 @@
 
 #include <SDL2/SDL.h>
 
+#include "ActionManager.h"
 #include "Actor.h"
 #include "ButtonIconManager.h"
 #include "CharacterManager.h"
@@ -121,6 +122,9 @@ bool GEngine::Initialize()
 	
 	// Create locations manager.
 	Services::Set<LocationManager>(new LocationManager());
+	
+	// Create action manager.
+	Services::Set<ActionManager>(new ActionManager());
 	
 	// Create console UI - this persists for the entire game.
 	ConsoleUI* consoleUI = new ConsoleUI(false);

@@ -5,6 +5,7 @@
 //
 #include "InventoryScreen.h"
 
+#include "ActionManager.h"
 #include "InventoryManager.h"
 #include "RectTransform.h"
 #include "UIButton.h"
@@ -125,5 +126,8 @@ void InventoryScreen::Hide()
 
 void InventoryScreen::OnItemClicked(std::string itemName)
 {
-	std::cout << "Clicked " << itemName << std::endl;
+	// Show the action bar for this noun.
+	Services::Get<ActionManager>()->ShowActionBar(itemName, [](const Action* action) {
+		action->Execute();
+	});
 }

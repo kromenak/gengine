@@ -60,11 +60,6 @@ public:
 	// SOUNDTRACK
 	Soundtrack* GetSoundtrack() const { return mSoundtracks.size() > 0 ? mSoundtracks.back() : nullptr; }
 	
-	// ACTIONS
-	const std::vector<NVC*>& GetActionSets() const { return mActionSets; }
-	std::vector<const Action*> GetActions(const std::string& noun, GKActor* ego) const;
-	const Action* GetAction(const std::string& noun, const std::string& verb, GKActor* ego) const;
-	
 private:
 	Timeblock mTimeblock;
 	

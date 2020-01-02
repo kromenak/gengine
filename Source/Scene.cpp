@@ -8,7 +8,7 @@
 #include <iostream>
 #include <limits>
 
-#include "ActionBar.h"
+#include "ActionManager.h"
 #include "Animator.h"
 #include "CharacterManager.h"
 #include "Color32.h"
@@ -45,9 +45,6 @@ Scene::Scene(const std::string& name, const Timeblock& timeblock) :
 	// Create animation player.
 	Actor* animationActor = new Actor();
 	mAnimator = animationActor->AddComponent<Animator>();
-	
-	// Create action bar, which will be used to choose nouns/verbs by the player.
-	mActionBar = new ActionBar();
 }
 
 Scene::~Scene()
@@ -294,7 +291,7 @@ void Scene::Load()
 	}
 	
 	// Check for and run "scene enter" actions.
-	std::vector<NVC*> nvcs = mSceneData->GetActionSets();
+	const std::vector<NVC*>& nvcs = Services::Get<ActionManager>()->GetActionSets();
 	for(auto& nvc : nvcs)
 	{
 		const Action* action = nvc->GetAction("SCENE", "ENTER");
@@ -405,7 +402,7 @@ bool Scene::CheckInteract(const Ray& ray) const
 void Scene::Interact(const Ray& ray)
 {
 	// Ignore scene interaction while the action bar is showing.
-	if(mActionBar->IsShowing()) { return; }
+	if(Services::Get<ActionManager>()->IsActionBarShowing()) { return; }
 	
 	// Also ignore scene interaction when inventory is up.
 	if(Services::Get<InventoryManager>()->IsInventoryShowing()) { return; }
@@ -420,7 +417,7 @@ void Scene::Interact(const Ray& ray)
 		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
 		{
 			// Find all verbs that can be used for this object. Only use this object if it has at least one action.
-			std::vector<const Action*> viableActions = mSceneData->GetActions(object->GetNoun(), mEgo);
+			std::vector<const Action*> viableActions = Services::Get<ActionManager>()->GetActions(object->GetNoun(), mEgo);
 			if(viableActions.size() > 0)
 			{
 				// If we already found actions for some other object, see which object is closer to the ray origin.
@@ -440,7 +437,7 @@ void Scene::Interact(const Ray& ray)
 	// Show the action bar. Internally, this takes care of executing the chosen action.
 	if(actions.size() > 0)
 	{
-		mActionBar->Show(actions, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
+		Services::Get<ActionManager>()->ShowActionBar(actions, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 		return;
 	}
 	
@@ -482,7 +479,7 @@ void Scene::Interact(const Ray& ray)
 	if(!sceneModelData->verb.empty())
 	{
 		std::cout << "Trying to play default verb " << sceneModelData->verb << std::endl;
-		const Action* action = mSceneData->GetAction(sceneModelData->noun, sceneModelData->verb, mEgo);
+		const Action* action = Services::Get<ActionManager>()->GetAction(sceneModelData->noun, sceneModelData->verb, mEgo);
 		if(action != nullptr)
 		{
 			action->Execute();
@@ -490,11 +487,8 @@ void Scene::Interact(const Ray& ray)
 		return;
 	}
 	
-	// Find all verbs that can be used for this object.
-	std::vector<const Action*> viableActions = mSceneData->GetActions(sceneModelData->noun, mEgo);
-	
-	// Show the action bar. Internally, this takes care of executing the chosen action.
-	mActionBar->Show(viableActions, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
+	// Show the action bar for this noun.
+	Services::Get<ActionManager>()->ShowActionBar(sceneModelData->noun, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 }
 
 float Scene::GetFloorY(const Vector3& position) const

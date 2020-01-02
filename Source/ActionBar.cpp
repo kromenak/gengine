@@ -33,34 +33,6 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	// So, just use one of the buttons to get a valid height.
 	ButtonIcon& cancelButtonIcon = Services::Get<ButtonIconManager>()->GetButtonIconForVerb("CANCEL");
 	mButtonHolder->SetSizeDelta(cancelButtonIcon.GetWidth(), cancelButtonIcon.GetWidth());
-	
-	/*
-	Actor* labelActor = new Actor(Actor::TransformType::RectTransform);
-	labelActor->GetTransform()->SetParent(GetTransform());
-	RectTransform* rectTransform = labelActor->GetComponent<RectTransform>();
-	rectTransform->SetSize(512, 384);
-	
-	UILabel* label = labelActor->AddComponent<UILabel>();
-	label->SetFont(Services::GetAssets()->LoadFont("F_RYE"));
-	label->SetText("Test Label");
-	mCanvas->AddWidget(label);
-	
-	Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
-	buttonActor->GetTransform()->SetParent(GetTransform());
-	
-	UIButton* button = buttonActor->AddComponent<UIButton>();
-	button->SetPressCallback([]() { std::cout << "ahhh" << std::endl; });
-	mCanvas->AddWidget(button);
-	
-	ButtonIconManager* buttonIconManager = Services::Get<ButtonIconManager>();
-	ButtonIcon& buttonIcon = buttonIconManager->GetButtonIconForVerb("GLARB");
-	button->SetUpTexture(buttonIcon.upTexture);
-	button->SetDownTexture(buttonIcon.downTexture);
-	button->SetHoverTexture(buttonIcon.hoverTexture);
-	button->SetDisabledTexture(buttonIcon.disableTexture);
-	
-	std::cout << GetTransform()->GetPosition() << std::endl;
-	*/
 }
 
 void ActionBar::Show(std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback)
@@ -110,7 +82,6 @@ void ActionBar::Show(std::vector<const Action*> actions, std::function<void(cons
 	
 	// Position action bar at mouse position.
 	mButtonHolder->SetAnchoredPosition(Services::GetInput()->GetMousePosition() - Vector2(xPos / 2.0f, 0.0f));
-	//SetPosition(Services::GetInput()->GetMousePosition() - Vector2(xPos / 2.0f, 0.0f));
 	
 	//TODO: Make sure the bar doesn't go off screen.
 	

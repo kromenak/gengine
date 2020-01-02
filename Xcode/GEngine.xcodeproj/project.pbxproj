@@ -141,6 +141,8 @@
 		4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621ED1FF7532A00536BA6 /* Asset.cpp */; };
 		4B4AFEE723B9C24100554D04 /* InventoryScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */; };
 		4B4AFEE823B9C24100554D04 /* InventoryScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */; };
+		4B4AFEEB23BBC6B100554D04 /* ActionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4AFEEA23BBC6B100554D04 /* ActionManager.cpp */; };
+		4B4AFEEC23BBC6B100554D04 /* ActionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4AFEEA23BBC6B100554D04 /* ActionManager.cpp */; };
 		4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4B4AE22091B80700391827 /* SheepAPI.cpp */; };
 		4B4EED881F5CA5F4000065EF /* Model.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED861F5CA5F4000065EF /* Model.cpp */; };
 		4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
@@ -382,6 +384,8 @@
 		4B4621ED1FF7532A00536BA6 /* Asset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Asset.cpp; path = ../Source/Asset.cpp; sourceTree = "<group>"; };
 		4B4AFEE523B9C24100554D04 /* InventoryScreen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InventoryScreen.h; path = ../Source/InventoryScreen.h; sourceTree = "<group>"; };
 		4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = InventoryScreen.cpp; path = ../Source/InventoryScreen.cpp; sourceTree = "<group>"; };
+		4B4AFEE923BBC6B100554D04 /* ActionManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ActionManager.h; path = ../Source/ActionManager.h; sourceTree = "<group>"; };
+		4B4AFEEA23BBC6B100554D04 /* ActionManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ActionManager.cpp; path = ../Source/ActionManager.cpp; sourceTree = "<group>"; };
 		4B4B4ADE2091B5A000391827 /* Value.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Value.h; path = ../Source/Value.h; sourceTree = "<group>"; };
 		4B4B4AE12091B80700391827 /* SheepAPI.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepAPI.h; path = ../Source/Sheep/SheepAPI.h; sourceTree = "<group>"; };
 		4B4B4AE22091B80700391827 /* SheepAPI.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepAPI.cpp; path = ../Source/Sheep/SheepAPI.cpp; sourceTree = "<group>"; };
@@ -812,6 +816,8 @@
 		4B6B765E21A5216B00788C02 /* GK3 */ = {
 			isa = PBXGroup;
 			children = (
+				4B4AFEEA23BBC6B100554D04 /* ActionManager.cpp */,
+				4B4AFEE923BBC6B100554D04 /* ActionManager.h */,
 				4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */,
 				4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */,
 				4BBC028922F162B8005ED374 /* FaceController.cpp */,
@@ -1290,6 +1296,7 @@
 				4B0E44F62186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
 				4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */,
+				4B4AFEEB23BBC6B100554D04 /* ActionManager.cpp in Sources */,
 				4B2606ED22F3D43B0030F2D9 /* AnimationNodes.cpp in Sources */,
 				4B046E90218E855600E56341 /* Mover.cpp in Sources */,
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
@@ -1401,6 +1408,7 @@
 				4B22F51E2174076D0065B152 /* Quaternion.cpp in Sources */,
 				4BB67C4D235255DE00FDFB30 /* UITextInput.cpp in Sources */,
 				4B0E44F72186878A00BD1CE1 /* Rect.cpp in Sources */,
+				4B4AFEEC23BBC6B100554D04 /* ActionManager.cpp in Sources */,
 				4B22F5222174076D0065B152 /* Vector4.cpp in Sources */,
 				4B046E91218E855600E56341 /* Mover.cpp in Sources */,
 				4BB67C482352556C00FDFB30 /* RenderTexture.cpp in Sources */,

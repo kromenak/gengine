@@ -5,6 +5,7 @@
 //
 #include "SceneData.h"
 
+#include "ActionManager.h"
 #include "Services.h"
 #include "StringUtil.h"
 #include "WalkerBoundary.h"
@@ -126,20 +127,20 @@ void SceneData::ResolveSceneData()
 		AddSoundtrackBlocks(mSpecificSIF->GetSoundtrackBlocks());
 	}
 	
+	// Clear actions from previous scene - we're about to populate here!
+	Services::Get<ActionManager>()->ClearActionSets();
+	
+	// Always load action sets that are global or for inventory.
+	Services::Get<ActionManager>()->AddGlobalAndInventoryActionSets(mTimeblock);
+	
+	// Populate actions for current scene.
+	// General SIF contains action sets that should only be conditionally loaded based on current timeblock.
+	// We should always load action sets for specific SIF.
 	AddActionBlocks(mGeneralSIF->GetActionBlocks(), true);
 	if(mSpecificSIF != nullptr)
 	{
 		AddActionBlocks(mSpecificSIF->GetActionBlocks(), false);
 	}
-	
-	// ALSO, always include global action sets...
-	//TODO: Maybe we should load and store this elsewhere? NVCManager anyone?
-	//TODO: Though, the AssetManager makes sure we only have one in memory anyway, so maybe this is fine...
-	mActionSets.push_back(Services::GetAssets()->LoadNVC("GLB_ALL.NVC"));
-	
-	//TODO: Handle also loading "GLB" (global) NVCs for specific days and timeblocks.
-	//TODO: e.g. GLB_23ALL should be loaded if the day is 2 or 3
-	//TODO: e.g. GLB_210A should be loaded on day 2 during 10AM timeblock
 }
 
 const RoomSceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) const
@@ -176,48 +177,6 @@ const ScenePosition* SceneData::GetScenePosition(const std::string& positionName
         }
     }
     return nullptr;
-}
-
-std::vector<const Action*> SceneData::GetActions(const std::string& noun, GKActor* ego) const
-{
-	// As we iterate, we'll use this to keep track of what verbs are in use.
-	// We don't want verb repeats - a new item with the same verb will overwrite the old item.
-	std::unordered_map<std::string, const Action*> verbsToActions;
-	for(auto& nvc : mActionSets)
-	{
-		const std::vector<Action>& allActions = nvc->GetActions(noun);
-		for(auto& action : allActions)
-		{
-			if(nvc->IsCaseMet(&action, ego))
-			{
-				verbsToActions[action.verb] = &action;
-			}
-		}
-	}
-	
-	// Finally, convert our map to a vector to return.
-	std::vector<const Action*> viableActions;
-	for(auto entry : verbsToActions)
-	{
-		viableActions.push_back(entry.second);
-	}
-	return viableActions;
-}
-
-const Action* SceneData::GetAction(const std::string& noun, const std::string& verb, GKActor* ego) const
-{
-	// Cycle through NVCs, trying to find a valid action.
-	// Again, any later match will overwrite an earlier match.
-	const Action* action = nullptr;
-	for(auto& nvc : mActionSets)
-	{
-		const Action* possibleAction = nvc->GetAction(noun, verb);
-		if(possibleAction != nullptr && nvc->IsCaseMet(possibleAction, ego))
-		{
-			action = possibleAction;
-		}
-	}
-	return action;
 }
 
 void SceneData::AddActorBlocks(const std::vector<ConditionalBlock<SceneActor>>& actorBlocks)
@@ -341,75 +300,16 @@ void SceneData::AddActionBlocks(const std::vector<ConditionalBlock<NVC*>>& actio
 	{
 		if(Services::GetSheep()->Evaluate(block.condition))
 		{
-			// If performing a name check (occurs in general SIF), we ONLY want to load action sets if the name of the asset
-			// implies that it should be used for the current day or timeblock.
-			if(performNameCheck)
+			for(auto& nvc : block.items)
 			{
-				for(auto& nvc : block.items)
+				if(performNameCheck)
 				{
-					// For the general SIF, a naming convention indicates whether we should or shouldn't use the NVC.
-					// For example, "loc_all" is always used. "loc_12all" is used for days 1 & 2.
-					std::string nvcName = nvc->GetNameNoExtension();
-					StringUtil::ToLower(nvcName);
-					
-					// First three letters are always the location code.
-					// Arguably, we could care that the location code matches the current location, but that's kind of a given.
-					// So, we'll just ignore it.
-					std::size_t curIndex = 3;
-					
-					// Next, there mayyy be an underscore, but maybe not.
-					// Skip the underscore, in any case.
-					if(nvcName[curIndex] == '_')
-					{
-						++curIndex;
-					}
-					
-					// See if "all" is in the name.
-					// If so, it indicates that the actions are used for all timeblocks on one or more days.
-					std::size_t allPos = nvcName.find("all", curIndex);
-					if(allPos != std::string::npos)
-					{
-						// If "all" is at the current index, it means there's no day constraint - just ALWAYS load this one!
-						if(allPos == curIndex)
-						{
-							mActionSets.push_back(nvc);
-						}
-						else
-						{
-							// "all" is later in the string, meaning intermediate characters indicate which
-							// days are OK to use this NVC. So, see if the current day is included!
-							for(std::size_t i = curIndex; i < allPos; ++i)
-							{
-								if(std::isdigit(nvcName[i]))
-								{
-									int day = std::stoi(std::string(1, nvcName[i]));
-									if(day == mTimeblock.GetDay())
-									{
-										mActionSets.push_back(nvc);
-										break;
-									}
-								}
-							}
-						}
-					}
-					else
-					{
-						// If "all" did not appear, we assume this is an action set for a specific timeblock ONLY!
-						// See if it's the current timeblock!
-						std::string currentTimeblock = mTimeblock.ToString();
-						StringUtil::ToLower(currentTimeblock);
-						
-						if(nvcName.find(currentTimeblock) != std::string::npos)
-						{
-							mActionSets.push_back(nvc);
-						}
-					}
+					Services::Get<ActionManager>()->AddActionSetIfForTimeblock(nvc->GetName(), mTimeblock);
 				}
-			}
-			else
-			{
-				// No name check = just insert them all!
-				mActionSets.insert(mActionSets.end(), block.items.begin(), block.items.end());
+				else
+				{
+					Services::Get<ActionManager>()->AddActionSet(nvc->GetName());
+				}
 			}
 		}
 	}

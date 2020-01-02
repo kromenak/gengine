@@ -53,17 +53,17 @@ bool NVC::IsCaseMet(const Action* item, GKActor* ego) const
 	return false;
 }
 
-const std::vector<Action>& NVC::GetActions(const std::string& noun)
+const std::vector<Action>& NVC::GetActions(const std::string& noun) const
 {
-	auto it = mNounToItems.find(noun);
+	auto it = mNounToItems.find(StringUtil::ToLowerCopy(noun));
 	if(it != mNounToItems.end())
 	{
-		return mNounToItems[noun];
+		return it->second;
 	}
 	return mEmptyActions;
 }
 
-const Action* NVC::GetAction(const std::string& noun, const std::string& verb)
+const Action* NVC::GetAction(const std::string& noun, const std::string& verb) const
 {
 	const std::vector<Action>& actionsForNoun = GetActions(noun);
 	for(auto& action : actionsForNoun)
@@ -90,7 +90,8 @@ void NVC::ParseFromData(char *data, int dataLength)
         // The first item is always the noun.
 		IniKeyValue& first = line.entries.front();
         item.noun = first.key;
-        
+		StringUtil::ToLower(item.noun);
+		
 		// Second item is always the verb.
 		IniKeyValue& second = line.entries[1];
         item.verb = second.key;
@@ -113,7 +114,11 @@ void NVC::ParseFromData(char *data, int dataLength)
 			
 			if(StringUtil::EqualsIgnoreCase(keyValue.key, "Approach"))
             {
-				if(StringUtil::EqualsIgnoreCase(keyValue.value, "WalkTo"))
+				if(StringUtil::EqualsIgnoreCase(keyValue.value, "None"))
+				{
+					// Do nothing.
+				}
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "WalkTo"))
 				{
 					item.approach = Action::Approach::WalkTo;
 				}

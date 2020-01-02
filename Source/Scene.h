@@ -103,9 +103,6 @@ private:
 	std::string mEgoName;
     GKActor* mEgo = nullptr;
 	
-	// Action bar, which the player uses to perform actions on scene objects.
-	ActionBar* mActionBar = nullptr;
-	
 	void ExecuteAction(const Action* action);
 };
 
