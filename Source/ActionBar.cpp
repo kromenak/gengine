@@ -5,6 +5,7 @@
 //
 #include "ActionBar.h"
 
+#include "ActionManager.h"
 #include "ButtonIconManager.h"
 #include "InventoryManager.h"
 #include "Scene.h"
@@ -42,7 +43,7 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 
 void ActionBar::Show(std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback)
 {
-	// Hide if not already hidden.
+	// Hide if not already hidden (make sure buttons are freed).
 	Hide();
 	
 	// If we don't have any actions, don't need to do anything!
@@ -76,13 +77,15 @@ void ActionBar::Show(std::vector<const Action*> actions, std::function<void(cons
 		ButtonIcon& invButtonIcon = buttonIconManager->GetButtonIconForNoun(activeItemName);
 		UIButton* invButton = AddButton(buttonIndex, invButtonIcon);
 		
-		//TODO: Callback for INV button!
-		invButton->SetPressCallback([]() {
-			std::cout << "Pressed the inventory button." << std::endl;
+		// Create callback for inventory button press.
+		const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName, GEngine::inst->GetScene()->GetEgo());
+		invButton->SetPressCallback([invAction, executeCallback]() {
+			executeCallback(invAction);
 		});
 		
 		++buttonIndex;
 	}
+	mHasInventoryItemButton = !activeItemName.empty();
 	
 	// Always put cancel button on the end.
 	ButtonIcon& cancelButtonIcon = buttonIconManager->GetButtonIconForVerb("CANCEL");
@@ -123,6 +126,7 @@ bool ActionBar::IsShowing() const
 
 void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> callback)
 {
+	// Add button at index 0.
 	ButtonIcon& icon = Services::Get<ButtonIconManager>()->GetButtonIconForVerb(verb);
 	UIButton* button = AddButton(0, icon);
 	button->SetPressCallback([this, callback]() {
@@ -130,6 +134,7 @@ void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> ca
 		callback();
 	});
 	
+	// Refresh button positions and move bar to pointer.
 	RefreshButtonLayout();
 	CenterOnPointer();
 }
@@ -138,20 +143,29 @@ void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> cal
 {
 	ButtonIcon& icon = Services::Get<ButtonIconManager>()->GetButtonIconForVerb(verb);
 	
-	// Use "-1" to keep Cancel button at the back, no matter what.
-	UIButton* button = AddButton(static_cast<int>(mButtons.size() - 1), icon);
+	// Action bar order is always [VERBS][INV_ITEM][CANCEL]
+	// So, skip 1 for cancel button, and maybe skip another one if inventory item is shown.
+	int skipCount = 1;
+	if(mHasInventoryItemButton)
+	{
+		skipCount = 2;
+	}
+	
+	// Add button with callback at index.
+	UIButton* button = AddButton(static_cast<int>(mButtons.size() - skipCount), icon);
 	button->SetPressCallback([this, callback]() {
 		this->Hide();
 		callback();
 	});
 	
+	// Refresh button positions and move bar to pointer.
 	RefreshButtonLayout();
 	CenterOnPointer();
 }
 
 void ActionBar::OnUpdate(float deltaTime)
 {
-	if(mIsShowing && Services::GetInput()->IsKeyDown(SDL_SCANCODE_BACKSPACE))
+	if(IsShowing() && Services::GetInput()->IsKeyDown(SDL_SCANCODE_BACKSPACE))
 	{
 		Hide();
 	}

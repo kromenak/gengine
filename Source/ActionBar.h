@@ -35,8 +35,6 @@ public:
 	void AddVerbToFront(const std::string& verb, std::function<void()> callback);
 	void AddVerbToBack(const std::string& verb, std::function<void()> callback);
 	
-	
-	
 protected:
 	void OnUpdate(float deltaTime) override;
 	
@@ -53,8 +51,8 @@ private:
 	// The buttons currently showing on the action bar, in order left-to-right.
 	std::vector<UIButton*> mButtons;
 	
-	// If true, action bar is visible and waiting for input.
-	bool mIsShowing = false;
+	// Currently showing inventory button?
+	bool mHasInventoryItemButton = false;
 	
 	UIButton* AddButton(int index, const ButtonIcon& buttonIcon);
 	void RefreshButtonLayout();
