@@ -1821,14 +1821,14 @@ RegFunc0(HideInventory, void, IMMEDIATE, REL_FUNC);
 
 shpvoid InventoryInspect(std::string itemName)
 {
-	std::cout << "InventoryInspect" << std::endl;
+	Services::Get<InventoryManager>()->InventoryInspect(itemName);
 	return 0;
 }
 RegFunc1(InventoryInspect, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid InventoryUninspect()
 {
-	std::cout << "InventoryUninspect" << std::endl;
+	Services::Get<InventoryManager>()->InventoryUninspect();
 	return 0;
 }
 RegFunc0(InventoryUninspect, void, IMMEDIATE, REL_FUNC);

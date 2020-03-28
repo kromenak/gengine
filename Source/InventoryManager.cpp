@@ -125,8 +125,8 @@ bool InventoryManager::HasInventoryItem(const std::string& actorName, const std:
 
 std::string InventoryManager::GetActiveInventoryItem(const std::string& actorName) const
 {
-	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
-	auto it = mActiveInventoryItems.find(actorNameLower);
+	std::string activeInvKey = StringUtil::ToLowerCopy(actorName);
+	auto it = mActiveInventoryItems.find(activeInvKey);
 	if(it == mActiveInventoryItems.end())
 	{
 		return "";
@@ -143,8 +143,8 @@ void InventoryManager::SetActiveInventoryItem(const std::string& actorName, cons
 
 void InventoryManager::ShowInventory(const std::string& actorName)
 {
-	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
-	mInventoryScreen->Show(mInventories[actorNameLower]);
+	std::string invKey = StringUtil::ToLowerCopy(actorName);
+	mInventoryScreen->Show(actorName, mInventories[invKey]);
 }
 
 void InventoryManager::HideInventory() const
@@ -155,4 +155,14 @@ void InventoryManager::HideInventory() const
 bool InventoryManager::IsInventoryShowing() const
 {
 	return mInventoryScreen->IsShowing();
+}
+
+void InventoryManager::InventoryInspect(const std::string& itemName) const
+{
+	std::cout << "Inventory Inspect " << itemName << std::endl;
+}
+
+void InventoryManager::InventoryUninspect() const
+{
+	std::cout << "Inventory Uninspect" << std::endl;
 }

@@ -39,6 +39,7 @@ public:
 	void ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback);
 	void ShowActionBar(const std::vector<const Action*>& actions, std::function<void(const Action*)> selectCallback);
 	bool IsActionBarShowing() const;
+	ActionBar* GetActionBar() const { return mActionBar; }
 	
 private:
 	const std::string kGlobalActionSets[11] {

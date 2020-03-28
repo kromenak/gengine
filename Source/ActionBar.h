@@ -11,6 +11,8 @@
 #include "Actor.h"
 
 #include <functional>
+#include <stack>
+#include <string>
 #include <vector>
 
 #include "NVC.h"
@@ -28,7 +30,12 @@ public:
 	void Show(std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback);
 	void Hide();
 	
-	bool IsShowing() const { return mIsShowing; }
+	bool IsShowing() const;
+	
+	void AddVerbToFront(const std::string& verb, std::function<void()> callback);
+	void AddVerbToBack(const std::string& verb, std::function<void()> callback);
+	
+	
 	
 protected:
 	void OnUpdate(float deltaTime) override;
@@ -40,11 +47,16 @@ private:
 	// A transform that is parent for all buttons.
 	RectTransform* mButtonHolder = nullptr;
 	
-	// The buttons created for the action bar. Recycled on each show.
+	// Buttons that are created, but not shown. These can be reused when needed.
+	std::stack<UIButton*> mFreeButtons;
+	
+	// The buttons currently showing on the action bar, in order left-to-right.
 	std::vector<UIButton*> mButtons;
 	
 	// If true, action bar is visible and waiting for input.
 	bool mIsShowing = false;
 	
-	UIButton* AddButton(int index, float xPos, const ButtonIcon& buttonIcon);
+	UIButton* AddButton(int index, const ButtonIcon& buttonIcon);
+	void RefreshButtonLayout();
+	void CenterOnPointer();
 };
