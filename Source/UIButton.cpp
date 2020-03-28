@@ -24,14 +24,15 @@ UIButton::UIButton(Actor* owner) : UIWidget(owner)
 
 void UIButton::Render()
 {
+	if(!IsActiveAndEnabled()) { return; }
+	
 	// Figure out which texture we want to use.
 	// Start by getting a default texture. If none exists, we can't render.
 	Texture* texture = GetDefaultTexture();
 	if(texture == nullptr) { return; }
 	
 	// Split into enabled and disabled textures.
-	//TODO: Don't use "IsEnabled" for this - need a separate bool for button interactivity.
-	if(IsEnabled())
+	if(mCanInteract)
 	{
 		// This logic favors showing pressed, then hovered, then up states.
 		if(mPointerDown && mDownTexture != nullptr)

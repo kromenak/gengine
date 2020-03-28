@@ -22,6 +22,8 @@ UILabel::UILabel(Actor* owner) : UIWidget(owner)
 
 void UILabel::Render()
 {
+	if(!IsActiveAndEnabled()) { return; }
+	
 	// Generate the mesh, if needed.
 	if(mMesh == nullptr || mNeedMeshRegen)
 	{

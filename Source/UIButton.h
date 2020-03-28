@@ -38,6 +38,9 @@ public:
 	
 	void Press();
 	
+	bool CanInteract() const { return mCanInteract; }
+	void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
+	
 protected:
 	
 private:
@@ -47,6 +50,10 @@ private:
 	Texture* mDownTexture = nullptr;
 	Texture* mHoverTexture = nullptr;
 	Texture* mDisabledTexture = nullptr;
+	
+	// Is the button interactive?
+	// If not, it appears as a "disabled" button (e.g. grayed out) if a disabled texture is provided.
+	bool mCanInteract = true;
 	
 	// Material used for rendering.
 	Material mMaterial;

@@ -30,6 +30,8 @@ UIImage::UIImage(Actor* owner) : UIWidget(owner)
 
 void UIImage::Render()
 {
+	if(!IsActiveAndEnabled()) { return; }
+	
 	// We need a texture to render (and calculate repeats for tiled rendering).
 	// If none is specified, use plain ol' white.
 	Texture* texture = mMaterial.GetDiffuseTexture();
