@@ -9,6 +9,7 @@
 #include "ActionManager.h"
 #include "InventoryManager.h"
 #include "RectTransform.h"
+#include "StringUtil.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -46,6 +47,18 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform)
 	exitButtonRectTransform->SetAnchoredPosition(10.0f, 10.0f);
 	exitButtonRectTransform->SetPivot(0.0f, 0.0f);
 	
+	// Create active inventory item highlight, but hide by default.
+	Actor* activeHighlightActor = new Actor(TransformType::RectTransform);
+	mActiveHighlightImage = activeHighlightActor->AddComponent<UIImage>();
+	mActiveHighlightImage->SetTextureAndSize(Services::GetAssets()->LoadTexture("INV_HIGHLIGHT.BMP"));
+	mActiveHighlightImage->SetEnabled(false);
+	mCanvas->AddWidget(mActiveHighlightImage);
+	
+	RectTransform* activeHighlightRectTransform = mActiveHighlightImage->GetRectTransform();
+	activeHighlightRectTransform->SetParent(inventoryRectTransform);
+	activeHighlightRectTransform->SetAnchor(0.0f, 1.0f);
+	activeHighlightRectTransform->SetPivot(0.0f, 1.0f);
+	
 	// Hide inventory UI by default.
 	Hide();
 }
@@ -54,6 +67,12 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 {
 	// Save current actor name.
 	mCurrentActorName = actorName;
+	
+	// Get active inventory item for actor.
+	std::string activeInventoryItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(mCurrentActorName);
+	
+	// Hide active inventory highlight by default.
+	mActiveHighlightImage->SetEnabled(false);
 	
 	// Populate the inventory screen.
 	const float kStartX = 60.0f;
@@ -112,9 +131,18 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 		button->SetUpTexture(itemTexture);
 		
 		// Set button callback.
-		button->SetPressCallback([this, item]() {
-			this->OnItemClicked(item);
+		button->SetPressCallback([this, button, item]() {
+			this->OnItemClicked(button, item);
 		});
+		
+		// See if this is the active inventory item.
+		// If so, position the highlight over it.
+		if(StringUtil::EqualsIgnoreCase(item, activeInventoryItem))
+		{
+			RectTransform* activeHighlightRT = mActiveHighlightImage->GetRectTransform();
+			activeHighlightRT->SetAnchoredPosition(x, y);
+			mActiveHighlightImage->SetEnabled(true);
+		}
 		
 		// Next button located to the right, with spacing.
 		x += itemTexture->GetWidth() + kSpacingX;
@@ -129,7 +157,7 @@ void InventoryScreen::Hide()
 	SetActive(false);
 }
 
-void InventoryScreen::OnItemClicked(std::string itemName)
+void InventoryScreen::OnItemClicked(UIButton* button, std::string itemName)
 {
 	// Show the action bar for this noun.
 	Services::Get<ActionManager>()->ShowActionBar(itemName, [](const Action* action) {
@@ -138,9 +166,15 @@ void InventoryScreen::OnItemClicked(std::string itemName)
 	
 	// We want to add a "pickup" verb, which means to make the item the active inventory item.
 	ActionBar* actionBar = Services::Get<ActionManager>()->GetActionBar();
-	actionBar->AddVerbToBack("PICKUP", [this, itemName]() {
+	actionBar->AddVerbToBack("PICKUP", [this, button, itemName]() {
 		Services::Get<InventoryManager>()->SetActiveInventoryItem(this->mCurrentActorName, itemName);
-		std::cout << "Set active inventory item to " << itemName << std::endl;
+		
+		// Move active highlight to this object.
+		Vector2 buttonPos = button->GetRectTransform()->GetAnchoredPosition();
+		mActiveHighlightImage->GetRectTransform()->SetAnchoredPosition(buttonPos);
+		
+		// Make sure highlight is visible.
+		mActiveHighlightImage->SetEnabled(true);
 	});
 	
 	// We want to add an "inspect" verb, which means to show the close-up of the item.

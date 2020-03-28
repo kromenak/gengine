@@ -136,6 +136,7 @@ std::string InventoryManager::GetActiveInventoryItem(const std::string& actorNam
 
 void InventoryManager::SetActiveInventoryItem(const std::string& actorName, const std::string& itemName)
 {
+	std::cout << "Set active inventory item to " << itemName << std::endl;
 	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
 	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
 	mActiveInventoryItems[actorNameLower] = itemNameLower;

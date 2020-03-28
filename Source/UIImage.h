@@ -28,6 +28,8 @@ public:
     void Render() override;
 	
 	void SetTexture(Texture* texture);
+	void SetTextureAndSize(Texture* texture);
+	
 	void SetSizeToTextureSize();
 	
 	void SetColor(const Color32& color);

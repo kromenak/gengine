@@ -27,7 +27,9 @@ public:
 	void SetPivot(const Vector2& pivot);
 	Vector2 GetPivot() const { return mPivot; }
 	
+	void SetAnchor(float x, float y) { SetAnchor(Vector2(x, y)); }
 	void SetAnchor(const Vector2& anchor);
+	
 	void SetAnchorMin(const Vector2& anchorMin);
 	void SetAnchorMax(const Vector2& anchorMax);
 	Vector2 GetAnchorMin() const { return mAnchorMin; }

@@ -16,6 +16,7 @@
 
 class UIButton;
 class UICanvas;
+class UIImage;
 
 class InventoryScreen : public Actor
 {
@@ -35,8 +36,11 @@ private:
 	// Created item buttons - can reuse on repeat visits.
 	std::vector<UIButton*> mItemButtons;
 	
+	// A highlight that appears over the active inventory item.
+	UIImage* mActiveHighlightImage = nullptr;
+	
 	// Name of the actor whose inventory we are currently viewing.
 	std::string mCurrentActorName;
 	
-	void OnItemClicked(std::string itemName);
+	void OnItemClicked(UIButton* button, std::string itemName);
 };
