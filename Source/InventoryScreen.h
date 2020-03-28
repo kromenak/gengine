@@ -25,7 +25,7 @@ public:
 	
 	void Show(const std::string& actorName, const std::set<std::string>& inventory);
 	void Hide();
-	bool IsShowing() { return IsActive(); }
+	bool IsShowing() const { return IsActive(); }
 	
 private:
 	const int kActiveHighlightXOffset = -4;

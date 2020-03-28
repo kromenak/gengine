@@ -18,6 +18,7 @@ public:
 	
 	void Show(const std::string& itemName);
 	void Hide();
+	bool IsShowing() const { return IsActive(); }
 	
 private:
 	// Canvas to render UI.
