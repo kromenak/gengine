@@ -67,9 +67,25 @@ void Actor::Update(float deltaTime)
 	//Debug::DrawLine(GetPosition(), GetPosition() + GetForward() * 5.0f, Color32::Red);
 }
 
+bool Actor::IsActive() const
+{
+	// Easy enough...
+	if(mState != State::Active) { return false; }
+	
+	// If we're active, our parent might not be active, which means we aren't active.
+	Transform* parent = mTransform->GetParent();
+	if(parent != nullptr)
+	{
+		return parent->GetOwner()->IsActive();
+	}
+	
+	// We're active!
+	return true;
+}
+
 void Actor::Destroy()
 {
-	mState = State::Dead;
+	mState = State::Destroyed;
 	
 	// Destroying an actor also destroys its children.
 	for(auto& child : mTransform->GetChildren())

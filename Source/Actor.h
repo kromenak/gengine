@@ -22,9 +22,9 @@ class Actor
 public:
 	enum class State
 	{
-		Enabled,
-		Disabled,
-		Dead
+		Active,
+		Inactive,
+		Destroyed
 	};
 	
 	enum class TransformType
@@ -44,11 +44,11 @@ public:
     template<class T> T* GetComponent();
 	
 	// STATE
-	void SetActive(bool active) { if(mState != State::Dead) { mState = active ? State::Enabled : State::Disabled; } }
-	bool IsActive() const { return mState == State::Enabled; }
+	void SetActive(bool active) { if(mState != State::Destroyed) { mState = active ? State::Active : State::Inactive; } }
+	bool IsActive() const;
 	
 	void Destroy();
-	bool IsDestroyed() const { return mState == State::Dead; }
+	bool IsDestroyed() const { return mState == State::Destroyed; }
 	
 	void SetIsDestroyOnLoad(bool destroyOnLoad) { mIsDestroyOnLoad = destroyOnLoad; }
 	bool IsDestroyOnLoad() const;
@@ -73,7 +73,7 @@ protected:
 	virtual void OnUpdate(float deltaTime) { }
     
 private:
-	State mState = State::Enabled;
+	State mState = State::Active;
 	
 	// By default, actors are destroyed when a new scene loads.
 	bool mIsDestroyOnLoad = true;
