@@ -41,7 +41,7 @@ ButtonIconManager::ButtonIconManager()
 		IniKeyValue& entry = line.entries.front();
 		
 		// This is a required value.
-		std::string keyword = entry.key;
+		std::string keyword = StringUtil::ToLowerCopy(entry.key);
 		
 		// These values will be filled in with remaining entry keys.
 		Texture* upTexture = nullptr;
@@ -112,11 +112,12 @@ ButtonIconManager::ButtonIconManager()
 	delete[] buffer;
 }
 
-ButtonIcon& ButtonIconManager::GetButtonIconForNoun(std::string noun)
+ButtonIcon& ButtonIconManager::GetButtonIconForNoun(const std::string& noun)
 {
-	if(mNounsToIcons.find(noun) != mNounsToIcons.end())
+	auto it = mNounsToIcons.find(StringUtil::ToLowerCopy(noun));
+	if(it != mNounsToIcons.end())
 	{
-		return mNounsToIcons[noun];
+		return it->second;
 	}
 	else
 	{
@@ -124,11 +125,12 @@ ButtonIcon& ButtonIconManager::GetButtonIconForNoun(std::string noun)
 	}
 }
 
-ButtonIcon& ButtonIconManager::GetButtonIconForVerb(std::string verb)
+ButtonIcon& ButtonIconManager::GetButtonIconForVerb(const std::string& verb)
 {
-	if(mVerbsToIcons.find(verb) != mVerbsToIcons.end())
+	auto it = mVerbsToIcons.find(StringUtil::ToLowerCopy(verb));
+	if(it != mVerbsToIcons.end())
 	{
-		return mVerbsToIcons[verb];
+		return it->second;
 	}
 	else
 	{
@@ -136,11 +138,12 @@ ButtonIcon& ButtonIconManager::GetButtonIconForVerb(std::string verb)
 	}
 }
 
-ButtonIcon& ButtonIconManager::GetButtonIconForTopic(std::string topic)
+ButtonIcon& ButtonIconManager::GetButtonIconForTopic(const std::string& topic)
 {
-	if(mTopicsToIcons.find(topic) != mTopicsToIcons.end())
+	auto it = mTopicsToIcons.find(StringUtil::ToLowerCopy(topic));
+	if(it != mTopicsToIcons.end())
 	{
-		return mTopicsToIcons[topic];
+		return it->second;
 	}
 	else
 	{

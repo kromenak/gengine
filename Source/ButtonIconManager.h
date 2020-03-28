@@ -35,9 +35,9 @@ class ButtonIconManager
 public:
 	ButtonIconManager();
 	
-	ButtonIcon& GetButtonIconForNoun(std::string noun);
-	ButtonIcon& GetButtonIconForVerb(std::string verb);
-	ButtonIcon& GetButtonIconForTopic(std::string topic);
+	ButtonIcon& GetButtonIconForNoun(const std::string& noun);
+	ButtonIcon& GetButtonIconForVerb(const std::string& verb);
+	ButtonIcon& GetButtonIconForTopic(const std::string& topic);
 	
 private:
 	ButtonIcon mDefaultIcon;
