@@ -677,3 +677,6 @@ shpvoid PrintIntHexX(std::string category, int value);
 
 shpvoid PrintString(std::string message);
 shpvoid PrintStringX(std::string category, std::string message);
+
+// UNDOCUMENTED
+int IsTopLayerInventory();

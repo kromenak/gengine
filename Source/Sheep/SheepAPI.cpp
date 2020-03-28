@@ -2351,3 +2351,11 @@ shpvoid PrintStringX(std::string category, std::string string)
 	return 0;
 }
 RegFunc2(PrintStringX, void, string, string, IMMEDIATE, DEV_FUNC);
+
+// UNDOCUMENTED
+int IsTopLayerInventory()
+{
+	//TODO: Should really use layer system for this, but this'll work for now.
+	return Services::Get<InventoryManager>()->IsInventoryShowing() ? 1 : 0;
+}
+RegFunc0(IsTopLayerInventory, int, IMMEDIATE, REL_FUNC);
