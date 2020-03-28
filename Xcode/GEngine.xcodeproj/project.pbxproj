@@ -139,6 +139,8 @@
 		4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4300861FB7EE44009EDE58 /* Quaternion.cpp */; };
 		4B4621EB1FF741D800536BA6 /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621EA1FF741D800536BA6 /* Texture.cpp */; };
 		4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4621ED1FF7532A00536BA6 /* Asset.cpp */; };
+		4B4861D1243001D000C4EA31 /* InventoryInspectScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4861D0243001D000C4EA31 /* InventoryInspectScreen.cpp */; };
+		4B4861D2243001D000C4EA31 /* InventoryInspectScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4861D0243001D000C4EA31 /* InventoryInspectScreen.cpp */; };
 		4B4AFEE723B9C24100554D04 /* InventoryScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */; };
 		4B4AFEE823B9C24100554D04 /* InventoryScreen.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */; };
 		4B4AFEEB23BBC6B100554D04 /* ActionManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4AFEEA23BBC6B100554D04 /* ActionManager.cpp */; };
@@ -382,6 +384,8 @@
 		4B4621EA1FF741D800536BA6 /* Texture.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Texture.cpp; path = ../Source/Texture.cpp; sourceTree = "<group>"; };
 		4B4621EC1FF7532A00536BA6 /* Asset.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Asset.h; path = ../Source/Asset.h; sourceTree = "<group>"; };
 		4B4621ED1FF7532A00536BA6 /* Asset.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Asset.cpp; path = ../Source/Asset.cpp; sourceTree = "<group>"; };
+		4B4861CF243001D000C4EA31 /* InventoryInspectScreen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InventoryInspectScreen.h; path = ../Source/InventoryInspectScreen.h; sourceTree = "<group>"; };
+		4B4861D0243001D000C4EA31 /* InventoryInspectScreen.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = InventoryInspectScreen.cpp; path = ../Source/InventoryInspectScreen.cpp; sourceTree = "<group>"; };
 		4B4AFEE523B9C24100554D04 /* InventoryScreen.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = InventoryScreen.h; path = ../Source/InventoryScreen.h; sourceTree = "<group>"; };
 		4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = InventoryScreen.cpp; path = ../Source/InventoryScreen.cpp; sourceTree = "<group>"; };
 		4B4AFEE923BBC6B100554D04 /* ActionManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ActionManager.h; path = ../Source/ActionManager.h; sourceTree = "<group>"; };
@@ -850,6 +854,8 @@
 				4B6B766421AB75AA00788C02 /* ActionBar.h */,
 				4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */,
 				4B6B765F21A6165E00788C02 /* ButtonIconManager.h */,
+				4B4861D0243001D000C4EA31 /* InventoryInspectScreen.cpp */,
+				4B4861CF243001D000C4EA31 /* InventoryInspectScreen.h */,
 				4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */,
 				4B4AFEE523B9C24100554D04 /* InventoryScreen.h */,
 			);
@@ -1270,6 +1276,7 @@
 				4B1555592197B59F00072F0D /* Transform.cpp in Sources */,
 				4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
+				4B4861D1243001D000C4EA31 /* InventoryInspectScreen.cpp in Sources */,
 				4B15771321A3FCC1008B92BD /* UICanvas.cpp in Sources */,
 				4B0918311FEED86B002991D4 /* InputManager.cpp in Sources */,
 				4B8E830A20F046750009A86B /* Material.cpp in Sources */,
@@ -1382,6 +1389,7 @@
 				4B15555A2197B59F00072F0D /* Transform.cpp in Sources */,
 				4B22F52E2174078B0065B152 /* AudioListener.cpp in Sources */,
 				4B22F514217407640065B152 /* Mesh.cpp in Sources */,
+				4B4861D2243001D000C4EA31 /* InventoryInspectScreen.cpp in Sources */,
 				4B15771421A3FCC1008B92BD /* UICanvas.cpp in Sources */,
 				4B22F5212174076D0065B152 /* Vector3.cpp in Sources */,
 				4B22F5102174075B0065B152 /* Services.cpp in Sources */,

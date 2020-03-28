@@ -27,9 +27,9 @@ public:
 	void Hide();
 	bool IsShowing() { return IsActive(); }
 	
-protected:
-	
 private:
+	const int kActiveHighlightXOffset = -4;
+	
 	// Canvas to render inventory UI.
 	UICanvas* mCanvas = nullptr;
 	

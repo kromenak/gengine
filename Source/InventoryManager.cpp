@@ -7,6 +7,7 @@
 
 #include "IniParser.h"
 #include "InventoryScreen.h"
+#include "InventoryInspectScreen.h"
 #include "Services.h"
 #include "StringUtil.h"
 
@@ -75,6 +76,10 @@ InventoryManager::InventoryManager()
 	mInventoryScreen = new InventoryScreen();
 	mInventoryScreen->SetIsDestroyOnLoad(false);
 	
+	// Create inventory inspect UI.
+	mInventoryInspectScreen = new InventoryInspectScreen();
+	mInventoryInspectScreen->SetIsDestroyOnLoad(false);
+	
 	// Give Gabe starting inventory items.
 	//TODO: Obviously, this should be data-driven, but not sure where this is defined?
 	AddInventoryItem("GABRIEL", "DAGGER");
@@ -85,11 +90,8 @@ InventoryManager::InventoryManager()
 	AddInventoryItem("GABRIEL", "TALISMAN");
 	AddInventoryItem("GABRIEL", "TAPE_RECORDER");
 	AddInventoryItem("GABRIEL", "WALLET");
-}
-
-Texture* InventoryManager::GetInventoryItemListTexture(const std::string &itemName)
-{
-	return mInventoryItems[StringUtil::ToLowerCopy(itemName)].listTexture;
+	
+	//TODO: Give Grace starting inventory items.
 }
 
 bool InventoryManager::IsValidInventoryItem(const std::string& itemName) const
@@ -160,10 +162,20 @@ bool InventoryManager::IsInventoryShowing() const
 
 void InventoryManager::InventoryInspect(const std::string& itemName) const
 {
-	std::cout << "Inventory Inspect " << itemName << std::endl;
+	mInventoryInspectScreen->Show(itemName);
 }
 
 void InventoryManager::InventoryUninspect() const
 {
-	std::cout << "Inventory Uninspect" << std::endl;
+	mInventoryInspectScreen->Hide();
+}
+
+Texture* InventoryManager::GetInventoryItemListTexture(const std::string &itemName)
+{
+	return mInventoryItems[StringUtil::ToLowerCopy(itemName)].listTexture;
+}
+
+Texture* InventoryManager::GetInventoryItemCloseupTexture(const std::string &itemName)
+{
+	return mInventoryItems[StringUtil::ToLowerCopy(itemName)].closeupTexture;
 }

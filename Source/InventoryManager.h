@@ -19,6 +19,7 @@
 #include "Type.h"
 
 class InventoryScreen;
+class InventoryInspectScreen;
 class Texture;
 
 struct InventoryItemTextures
@@ -59,6 +60,7 @@ public:
 	void InventoryUninspect() const;
 	
 	Texture* GetInventoryItemListTexture(const std::string& itemName);
+	Texture* GetInventoryItemCloseupTexture(const std::string& itemName);
 	
 private:
 	// A map from name to textures used for that inventory item.
@@ -76,4 +78,5 @@ private:
 	
 	// UI for inventory.
 	InventoryScreen* mInventoryScreen = nullptr;
+	InventoryInspectScreen* mInventoryInspectScreen = nullptr;
 };

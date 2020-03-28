@@ -140,7 +140,7 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 		if(StringUtil::EqualsIgnoreCase(item, activeInventoryItem))
 		{
 			RectTransform* activeHighlightRT = mActiveHighlightImage->GetRectTransform();
-			activeHighlightRT->SetAnchoredPosition(x, y);
+			activeHighlightRT->SetAnchoredPosition(x + kActiveHighlightXOffset, y);
 			mActiveHighlightImage->SetEnabled(true);
 		}
 		
@@ -171,7 +171,7 @@ void InventoryScreen::OnItemClicked(UIButton* button, std::string itemName)
 		
 		// Move active highlight to this object.
 		Vector2 buttonPos = button->GetRectTransform()->GetAnchoredPosition();
-		mActiveHighlightImage->GetRectTransform()->SetAnchoredPosition(buttonPos);
+		mActiveHighlightImage->GetRectTransform()->SetAnchoredPosition(buttonPos.GetX() + kActiveHighlightXOffset, buttonPos.GetY());
 		
 		// Make sure highlight is visible.
 		mActiveHighlightImage->SetEnabled(true);
