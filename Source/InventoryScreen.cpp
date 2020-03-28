@@ -5,6 +5,7 @@
 //
 #include "InventoryScreen.h"
 
+#include "ActionBar.h"
 #include "ActionManager.h"
 #include "InventoryManager.h"
 #include "RectTransform.h"
@@ -49,8 +50,12 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform)
 	Hide();
 }
 
-void InventoryScreen::Show(const std::set<std::string>& inventory)
+void InventoryScreen::Show(const std::string& actorName, const std::set<std::string>& inventory)
 {
+	// Save current actor name.
+	mCurrentActorName = actorName;
+	
+	// Populate the inventory screen.
 	const float kStartX = 60.0f;
 	const float kStartY = -90.0f;
 	const float kSpacingX = 10.0f;
@@ -129,5 +134,17 @@ void InventoryScreen::OnItemClicked(std::string itemName)
 	// Show the action bar for this noun.
 	Services::Get<ActionManager>()->ShowActionBar(itemName, [](const Action* action) {
 		action->Execute();
+	});
+	
+	// We want to add a "pickup" verb, which means to make the item the active inventory item.
+	ActionBar* actionBar = Services::Get<ActionManager>()->GetActionBar();
+	actionBar->AddVerbToBack("PICKUP", [this, itemName]() {
+		Services::Get<InventoryManager>()->SetActiveInventoryItem(this->mCurrentActorName, itemName);
+		std::cout << "Set active inventory item to " << itemName << std::endl;
+	});
+	
+	// We want to add an "inspect" verb, which means to show the close-up of the item.
+	actionBar->AddVerbToFront("INSPECT", [itemName]() {
+		Services::Get<InventoryManager>()->InventoryInspect(itemName);
 	});
 }
