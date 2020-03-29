@@ -161,7 +161,7 @@ const SceneCamera* SceneData::GetCinematicCamera(const std::string& cameraName) 
 	{
 		if(StringUtil::EqualsIgnoreCase(mCinematicCameras[i]->label, cameraName))
 		{
-			return mRoomCameras[i];
+			return mCinematicCameras[i];
 		}
 	}
 	return nullptr;
