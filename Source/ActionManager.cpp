@@ -111,7 +111,8 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 	const Action* candidate = nullptr;
 	
 	// If the verb is an inventory item, handle ANY_OBJECT/ANY_INV_ITEM wildcards for noun/verb.
-	if(Services::Get<ButtonIconManager>()->IsInventoryItem(verb))
+	bool verbIsInventoryItem = Services::Get<ButtonIconManager>()->IsInventoryItem(verb);
+	if(verbIsInventoryItem)
 	{
 		for(auto& nvc : mActionSets)
 		{
@@ -137,6 +138,24 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 			{
 				std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/" << verb << std::endl;
 				candidate = action;
+			}
+		}
+	}
+	
+	// If the verb is an inventoty item, handle noun/ANY_INV_ITEM combo.
+	// Find any matches for "ANY_OBJECT" and this verb next.
+	if(verbIsInventoryItem)
+	{
+		for(auto& nvc : mActionSets)
+		{
+			std::vector<const Action*> actionsForAnyObject = nvc->GetActions(noun, "ANY_INV_ITEM");
+			for(auto& action : actionsForAnyObject)
+			{
+				if(nvc->IsCaseMet(action, ego))
+				{
+					std::cout << "Candidate action for " << noun << "/" << verb << " matches " << noun << "/ANY_INV_ITEM" << std::endl;
+					candidate = action;
+				}
 			}
 		}
 	}
