@@ -408,39 +408,33 @@ void Scene::Interact(const Ray& ray)
 	if(Services::Get<InventoryManager>()->IsInventoryShowing()) { return; }
 	
 	// Check against any dynamic actors before falling back on BSP check.
-	//TODO: Need to handle case where mouse is over multiple actors! We want to pick the closest one in that case.
-	//float nearestObjectDistSq = FLT_MAX;
-	std::vector<const Action*> actions;
-	for(auto& object : mObjects)
+	float nearestActorDistSq = FLT_MAX;
+	GKActor* interactedActor = nullptr;
+	for(auto& actor : mObjects)
 	{
-		MeshRenderer* meshRenderer = object->GetMeshRenderer();
+		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
 		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
 		{
-			// Find all verbs that can be used for this object. Only use this object if it has at least one action.
-			std::vector<const Action*> viableActions = Services::Get<ActionManager>()->GetActions(object->GetNoun(), mEgo);
-			if(viableActions.size() > 0)
+			// Interacted actor is one closest to me.
+			// Might not be 100% accurate, but probably good enough.
+			// TODO: (Would also be great if Raycast call returned distance stat for this).
+			float actorDistSq = (mCamera->GetPosition() - actor->GetPosition()).GetLengthSq();
+			if(actorDistSq < nearestActorDistSq)
 			{
-				// If we already found actions for some other object, see which object is closer to the ray origin.
-				// The closer object will be the one we want to prioritize.
-				if(actions.size() > 0)
-				{
-					
-				}
-				else
-				{
-					actions = viableActions;
-				}
+				nearestActorDistSq = actorDistSq;
+				interactedActor = actor;
 			}
 		}
 	}
 	
 	// Show the action bar. Internally, this takes care of executing the chosen action.
-	if(actions.size() > 0)
+	if(interactedActor != nullptr)
 	{
-		Services::Get<ActionManager>()->ShowActionBar(actions, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
+		Services::Get<ActionManager>()->ShowActionBar(interactedActor->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 		return;
 	}
 	
+	// FROM HERE: we are interacting with static scene objects (BSP).
 	// Make sure we have valid BSP.
 	BSP* bsp = mSceneData->GetBSP();
 	if(bsp == nullptr) { return; }

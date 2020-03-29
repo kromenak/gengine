@@ -9,6 +9,7 @@
 #include "ButtonIconManager.h"
 #include "InventoryManager.h"
 #include "Scene.h"
+#include "StringUtil.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UILabel.h"
@@ -41,7 +42,7 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	Hide();
 }
 
-void ActionBar::Show(std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback)
+void ActionBar::Show(const std::string& noun, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback)
 {
 	// Hide if not already hidden (make sure buttons are freed).
 	Hide();
@@ -72,7 +73,11 @@ void ActionBar::Show(std::vector<const Action*> actions, std::function<void(cons
 	// Get active inventory item for current ego.
 	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
 	std::string activeItemName = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
-	if(!activeItemName.empty())
+	
+	// Show inventory button if there's an active inventory item AND it is not the object we're interacting with.
+	// In other words, don't allow using an object on itself!
+	mHasInventoryItemButton = !activeItemName.empty() && !StringUtil::EqualsIgnoreCase(activeItemName, noun);
+	if(mHasInventoryItemButton)
 	{
 		ButtonIcon& invButtonIcon = buttonIconManager->GetButtonIconForNoun(activeItemName);
 		UIButton* invButton = AddButton(buttonIndex, invButtonIcon);
@@ -89,7 +94,6 @@ void ActionBar::Show(std::vector<const Action*> actions, std::function<void(cons
 		
 		++buttonIndex;
 	}
-	mHasInventoryItemButton = !activeItemName.empty();
 	
 	// Always put cancel button on the end.
 	ButtonIcon& cancelButtonIcon = buttonIconManager->GetButtonIconForVerb("CANCEL");

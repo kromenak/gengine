@@ -27,7 +27,7 @@ class ActionBar : public Actor
 public:
 	ActionBar();
 	
-	void Show(std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback);
+	void Show(const std::string& noun, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback);
 	void Hide();
 	
 	bool IsShowing() const;

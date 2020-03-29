@@ -81,7 +81,12 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, GK
 		const std::vector<Action>& nounActions = nvc->GetActions(noun);
 		for(auto& action : nounActions)
 		{
-			if(nvc->IsCaseMet(&action, ego))
+			// Ignore any action verbs that refer to inventory items.
+			// Inventory items ONLY match if a specific item is provided (see GetActions(noun, verb)).
+			bool verbIsInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM") ||
+				Services::Get<ButtonIconManager>()->IsInventoryItem(action.verb);
+			
+			if(!verbIsInvItem && nvc->IsCaseMet(&action, ego))
 			{
 				verbsToActions[action.verb] = &action;
 			}
@@ -92,6 +97,7 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, GK
 	std::vector<const Action*> viableActions;
 	for(auto entry : verbsToActions)
 	{
+		std::cout << "Found action " << entry.second->ToString() << std::endl;
 		viableActions.push_back(entry.second);
 	}
 	return viableActions;
@@ -114,7 +120,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 			{
 				if(nvc->IsCaseMet(action, ego))
 				{
-					//std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/ANY_INV_ITEM" << std::endl;
+					std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/ANY_INV_ITEM" << std::endl;
 					candidate = action;
 				}
 			}
@@ -129,7 +135,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 		{
 			if(nvc->IsCaseMet(action, ego))
 			{
-				//std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/" << verb << std::endl;
+				std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/" << verb << std::endl;
 				candidate = action;
 			}
 		}
@@ -143,7 +149,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 		{
 			if(nvc->IsCaseMet(action, ego))
 			{
-				//std::cout << "Candidate action for " << noun << "/" << verb << " matches " << noun << "/" << verb << std::endl;
+				std::cout << "Candidate action for " << noun << "/" << verb << " matches " << noun << "/" << verb << std::endl;
 				candidate = action;
 			}
 		}
@@ -153,12 +159,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 
 void ActionManager::ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
 {
-	ShowActionBar(GetActions(noun, GEngine::inst->GetScene()->GetEgo()), selectCallback);
-}
-
-void ActionManager::ShowActionBar(const std::vector<const Action*>& actions, std::function<void(const Action*)> selectCallback)
-{
-	mActionBar->Show(actions, selectCallback);
+	mActionBar->Show(noun, GetActions(noun, GEngine::inst->GetScene()->GetEgo()), selectCallback);
 }
 
 bool ActionManager::IsActionBarShowing() const
