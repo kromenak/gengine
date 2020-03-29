@@ -150,3 +150,8 @@ ButtonIcon& ButtonIconManager::GetButtonIconForTopic(const std::string& topic)
 		return mDefaultIcon;
 	}
 }
+
+bool ButtonIconManager::IsInventoryItem(const std::string& word)
+{
+	return mNounsToIcons.find(StringUtil::ToLowerCopy(word)) != mNounsToIcons.end();
+}
