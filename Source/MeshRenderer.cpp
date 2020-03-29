@@ -26,11 +26,14 @@ MeshRenderer::~MeshRenderer()
 
 void MeshRenderer::RenderOpaque()
 {
+	// Don't render if actor is inactive or component is disabled.
+	if(!IsActiveAndEnabled()) { return; }
+	
 	Matrix4 actorWorldTransform = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
 	
 	int materialIndex = 0;
 	int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
-	
+
 	for(int i = 0; i < mMeshes.size(); i++)
 	{
 		Matrix4 meshWorldTransformMatrix = actorWorldTransform * mMeshes[i]->GetLocalTransformMatrix();
