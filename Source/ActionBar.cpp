@@ -51,13 +51,24 @@ void ActionBar::Show(const std::string& noun, std::vector<const Action*> actions
 	if(actions.size() <= 0) { return; }
 	
 	// Iterate over all desired actions and show a button for it.
+	bool inventoryShowing = Services::Get<InventoryManager>()->IsInventoryShowing();
 	ButtonIconManager* buttonIconManager = Services::Get<ButtonIconManager>();
 	int buttonIndex = 0;
 	for(int i = 0; i < actions.size(); ++i)
 	{
+		// Kind of a HACK, but it does the trick...if inventory is showing, hide all PICKUP verbs.
+		// You can't PICKUP something you already have. And the PICKUP icon is used in inventory to represent "make active".
+		if(inventoryShowing && StringUtil::EqualsIgnoreCase(actions[i]->verb, "PICKUP"))
+		{
+			continue;
+		}
+		
+		// Add button with appropriate icon.
 		ButtonIcon& buttonIcon = buttonIconManager->GetButtonIconForVerb(actions[i]->verb);
 		UIButton* actionButton = AddButton(buttonIndex, buttonIcon);
+		++buttonIndex;
 		
+		// Set up button callback to execute the action.
 		const Action* action = actions[i];
 		actionButton->SetPressCallback([this, action, executeCallback]() {
 			// Hide action bar on button press.
@@ -66,8 +77,6 @@ void ActionBar::Show(const std::string& noun, std::vector<const Action*> actions
 			// Execute the action, which will likely run some SheepScript.
 			executeCallback(action);
 		});
-		
-		++buttonIndex;
 	}
 	
 	// Get active inventory item for current ego.
@@ -81,6 +90,7 @@ void ActionBar::Show(const std::string& noun, std::vector<const Action*> actions
 	{
 		ButtonIcon& invButtonIcon = buttonIconManager->GetButtonIconForNoun(activeItemName);
 		UIButton* invButton = AddButton(buttonIndex, invButtonIcon);
+		++buttonIndex;
 		
 		// Create callback for inventory button press.
 		const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName, GEngine::inst->GetScene()->GetEgo());
@@ -91,8 +101,6 @@ void ActionBar::Show(const std::string& noun, std::vector<const Action*> actions
 			// Execute the action, which will likely run some SheepScript.
 			executeCallback(invAction);
 		});
-		
-		++buttonIndex;
 	}
 	
 	// Always put cancel button on the end.
