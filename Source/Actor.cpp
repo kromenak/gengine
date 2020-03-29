@@ -67,6 +67,29 @@ void Actor::Update(float deltaTime)
 	//Debug::DrawLine(GetPosition(), GetPosition() + GetForward() * 5.0f, Color32::Red);
 }
 
+void Actor::SetActive(bool active)
+{
+	// Don't allow setting active/inactive if destroyed.
+	if(mState != State::Destroyed)
+	{
+		// Save old state.
+		Actor::State oldState = mState;
+		
+		// Update state.
+		mState = active ? State::Active : State::Inactive;
+		
+		// Handle transitions from active to inactive and vice-versa.
+		if(oldState == State::Active && mState == State::Inactive)
+		{
+			OnInactive();
+		}
+		else if(oldState == State::Inactive && mState == State::Active)
+		{
+			OnActive();
+		}
+	}
+}
+
 bool Actor::IsActive() const
 {
 	// Easy enough...

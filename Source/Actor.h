@@ -44,7 +44,7 @@ public:
     template<class T> T* GetComponent();
 	
 	// STATE
-	void SetActive(bool active) { if(mState != State::Destroyed) { mState = active ? State::Active : State::Inactive; } }
+	void SetActive(bool active);
 	bool IsActive() const;
 	
 	void Destroy();
@@ -69,7 +69,18 @@ public:
 	Vector3 GetRight() const { return mTransform->GetRight(); }
 	Vector3 GetUp() const { return mTransform->GetUp(); }
 	
+	Vector3 GetWorldPosition() const { return mTransform->GetWorldPosition(); }
+	void SetWorldPosition(const Vector3& position) { mTransform->SetWorldPosition(position); }
+	
+	Quaternion GetWorldRotation() const { return mTransform->GetWorldRotation(); }
+	void SetWorldRotation(const Quaternion& rotation) { mTransform->SetWorldRotation(rotation); }
+	
+	Vector3 GetWorldScale() const { return mTransform->GetWorldScale(); }
+	
 protected:
+	virtual void OnActive() { }
+	virtual void OnInactive() { }
+	
 	virtual void OnUpdate(float deltaTime) { }
     
 private:
