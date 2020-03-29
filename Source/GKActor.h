@@ -84,6 +84,8 @@ public:
 	FaceController* GetFaceController() const { return mFaceController; }
 	
 protected:
+	void OnActive() override;
+	void OnInactive() override;
 	void OnUpdate(float deltaTime) override;
 	
 private:
@@ -110,6 +112,8 @@ private:
 	// to refer to the object in SIF/NVC/Sheep logic.
 	std::string mNoun;
 	
+	// Mesh is attached to a separate actor so that the mesh can move separately from the rest of the actor.
+	// This is sometimes necessary for how GK3 does walking and vertex animations.
 	Actor* mMeshActor = nullptr;
 	
 	// Allows the object to render a 3D mesh.
@@ -122,6 +126,8 @@ private:
 	// Used by both actors and props.
 	GasPlayer* mGasPlayer = nullptr;
 	
+	// Vertex anims often change the position of the mesh, but that doesn't mean the actor's position should change.
+	// Sometimes we allow a vertex anim to affect the actor's position.
 	bool mVertexAnimAllowMove = false;
 	Vector3 mStartVertexAnimPosition;
 	Quaternion mStartVertexAnimRotation;

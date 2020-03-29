@@ -196,6 +196,18 @@ void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBounda
 	}
 }
 
+void GKActor::OnActive()
+{
+	// My mesh becomes active when I become active.
+	mMeshActor->SetActive(true);
+}
+
+void GKActor::OnInactive()
+{
+	// My mesh becomes inactive when I become inactive.
+	mMeshActor->SetActive(false);
+}
+
 void GKActor::OnUpdate(float deltaTime)
 {
 	// Stay on the ground.
