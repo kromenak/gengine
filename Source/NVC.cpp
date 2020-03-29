@@ -63,16 +63,36 @@ const std::vector<Action>& NVC::GetActions(const std::string& noun) const
 	return mEmptyActions;
 }
 
-const Action* NVC::GetAction(const std::string& noun, const std::string& verb) const
+std::vector<const Action*> NVC::GetActions(const std::string& noun, const std::string& verb) const
 {
+	std::vector<const Action*> actions;
+	
+	// Find any exact matches for this noun/verb combo.
 	const std::vector<Action>& actionsForNoun = GetActions(noun);
 	for(auto& action : actionsForNoun)
 	{
 		if(StringUtil::EqualsIgnoreCase(action.verb, verb))
 		{
+			actions.push_back(&action);
+		}
+	}
+	
+	return actions;
+}
+
+const Action* NVC::GetAction(const std::string& noun, const std::string& verb) const
+{
+	const std::vector<Action>& actionsForNoun = GetActions(noun);
+	for(auto& action : actionsForNoun)
+	{
+		// This action matches if the action's verb exactly matches the passed in verb.
+		if(StringUtil::EqualsIgnoreCase(action.verb, verb))
+		{
 			return &action;
 		}
 	}
+	
+	// Couldn't find any action for this noun/verb pair.
 	return nullptr;
 }
 
