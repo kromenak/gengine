@@ -79,7 +79,11 @@ void ActionBar::Show(std::vector<const Action*> actions, std::function<void(cons
 		
 		// Create callback for inventory button press.
 		const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName, GEngine::inst->GetScene()->GetEgo());
-		invButton->SetPressCallback([invAction, executeCallback]() {
+		invButton->SetPressCallback([this, invAction, executeCallback]() {
+			// Hide action bar on button press.
+			this->Hide();
+			
+			// Execute the action, which will likely run some SheepScript.
 			executeCallback(invAction);
 		});
 		

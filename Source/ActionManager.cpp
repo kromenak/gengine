@@ -6,6 +6,7 @@
 #include "ActionManager.h"
 
 #include "ActionBar.h"
+#include "ButtonIconManager.h"
 #include "Scene.h"
 #include "Services.h"
 #include "StringUtil.h"
@@ -55,10 +56,30 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, GK
 	// As we iterate, we'll use this to keep track of what verbs are in use.
 	// We don't want verb repeats - a new item with the same verb will overwrite the old item.
 	std::unordered_map<std::string, const Action*> verbsToActions;
+	
+	// Check "ANY_OBJECT" wildcard nouns first. They are lowest priority, but match all nouns.
 	for(auto& nvc : mActionSets)
 	{
-		const std::vector<Action>& allActions = nvc->GetActions(noun);
-		for(auto& action : allActions)
+		const std::vector<Action>& anyObjectActions = nvc->GetActions("ANY_OBJECT");
+		for(auto& action : anyObjectActions)
+		{
+			// Ignore any action verbs that refer to inventory items.
+			// Inventory items ONLY match if a specific item is provided (see GetActions(noun, verb)).
+			bool verbIsInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM") ||
+				Services::Get<ButtonIconManager>()->IsInventoryItem(action.verb);
+			
+			if(!verbIsInvItem && nvc->IsCaseMet(&action, ego))
+			{
+				verbsToActions[action.verb] = &action;
+			}
+		}
+	}
+	
+	// Check actions that map directly to this noun.
+	for(auto& nvc : mActionSets)
+	{
+		const std::vector<Action>& nounActions = nvc->GetActions(noun);
+		for(auto& action : nounActions)
 		{
 			if(nvc->IsCaseMet(&action, ego))
 			{
@@ -78,18 +99,56 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, GK
 
 const Action* ActionManager::GetAction(const std::string& noun, const std::string& verb, GKActor* ego) const
 {
-	// Cycle through NVCs, trying to find a valid action.
-	// Again, any later match will overwrite an earlier match.
-	const Action* action = nullptr;
-	for(auto& nvc : mActionSets)
+	// For any noun/verb pair, there is only ONE possible action that can be performed at any given time in the game.
+	// Keep track of the candidate as we iterate from most general/broad to most specific.
+	// The most specific valid action will be our candidate.
+	const Action* candidate = nullptr;
+	
+	// If the verb is an inventory item, handle ANY_OBJECT/ANY_INV_ITEM wildcards for noun/verb.
+	if(Services::Get<ButtonIconManager>()->IsInventoryItem(verb))
 	{
-		const Action* possibleAction = nvc->GetAction(noun, verb);
-		if(possibleAction != nullptr && nvc->IsCaseMet(possibleAction, ego))
+		for(auto& nvc : mActionSets)
 		{
-			action = possibleAction;
+			std::vector<const Action*> actionsForAnyObject = nvc->GetActions("ANY_OBJECT", "ANY_INV_ITEM");
+			for(auto& action : actionsForAnyObject)
+			{
+				if(nvc->IsCaseMet(action, ego))
+				{
+					//std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/ANY_INV_ITEM" << std::endl;
+					candidate = action;
+				}
+			}
 		}
 	}
-	return action;
+	
+	// Find any matches for "ANY_OBJECT" and this verb next.
+	for(auto& nvc : mActionSets)
+	{
+		std::vector<const Action*> actionsForAnyObject = nvc->GetActions("ANY_OBJECT", verb);
+		for(auto& action : actionsForAnyObject)
+		{
+			if(nvc->IsCaseMet(action, ego))
+			{
+				//std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/" << verb << std::endl;
+				candidate = action;
+			}
+		}
+	}
+	
+	// Finally, check for any exact noun/verb matches.
+	for(auto& nvc : mActionSets)
+	{
+		std::vector<const Action*> actionsForAnyObject = nvc->GetActions(noun, verb);
+		for(auto& action : actionsForAnyObject)
+		{
+			if(nvc->IsCaseMet(action, ego))
+			{
+				//std::cout << "Candidate action for " << noun << "/" << verb << " matches " << noun << "/" << verb << std::endl;
+				candidate = action;
+			}
+		}
+	}
+	return candidate;
 }
 
 void ActionManager::ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
