@@ -16,7 +16,7 @@ membuf::membuf(const char* data, unsigned int length) :
 
 streampos membuf::seekoff(streamoff off, ios_base::seekdir way, ios_base::openmode which)
 {
-    if(way == ios_base::seekdir::beg)
+    if(way == ios_base::beg)
     {
         mCurrent = mBegin + off;
         if(mCurrent > mEnd)
@@ -24,7 +24,7 @@ streampos membuf::seekoff(streamoff off, ios_base::seekdir way, ios_base::openmo
             mCurrent = mEnd;
         }
     }
-    else if(way == ios_base::seekdir::cur)
+    else if(way == ios_base::cur)
     {
         mCurrent += off;
         if(mCurrent > mEnd)
@@ -32,7 +32,7 @@ streampos membuf::seekoff(streamoff off, ios_base::seekdir way, ios_base::openmo
             mCurrent = mEnd;
         }
     }
-    else if(way == ios_base::seekdir::end)
+    else if(way == ios_base::end)
     {
         mCurrent = mEnd - off;
         if(mCurrent < mBegin)
@@ -45,7 +45,7 @@ streampos membuf::seekoff(streamoff off, ios_base::seekdir way, ios_base::openmo
 
 streampos membuf::seekpos(streampos pos, ios_base::openmode which)
 {
-    mCurrent = mBegin + pos;
+    mCurrent = mBegin + static_cast<int>(pos);
     if(mCurrent > mEnd)
     {
         mCurrent = mEnd;
