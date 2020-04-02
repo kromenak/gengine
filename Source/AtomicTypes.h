@@ -25,7 +25,3 @@ typedef int32_t int32;
 
 typedef uint64_t uint64;
 typedef int64_t int64;
-
-// Floating point types with specific sizes.
-typedef float float32;
-typedef double float64;

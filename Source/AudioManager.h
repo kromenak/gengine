@@ -6,7 +6,7 @@
 //
 #pragma once
 #include <SDL2/SDL.h>
-#include "fmod.hpp"
+#include <fmod.hpp>
 
 class Audio;
 class Soundtrack;
