@@ -9,16 +9,22 @@
 #include <iostream>
 #include <string>
 
-#include <dirent.h>
-#include <sys/stat.h>
-
+#include "Platform.h"
 #include "StringTokenizer.h"
 
 namespace Path
 {
 	// Separator used for platform.
+#if defined(PLATFORM_WINDOWS)
+	const char kSeparator = '\\';
+#else
 	const char kSeparator = '/';
+#endif
 	
+	/**
+	 * Combines pieces of path together using the appropriate path separator.
+	 * Ex: "/Applications/GK3.app" and "Contents/Blah.png" becomes "/Applications/GK3.app/Contents/Blah.png".
+	 */
 	std::string Combine(std::initializer_list<std::string> paths);
 		
 	/**
@@ -36,18 +42,7 @@ namespace Directory
 	/**
 	 * Returns true if the directory at path exists, false if it doesn't.
 	 */
-	inline bool Exists(std::string path)
-	{
-		DIR* directoryStream = opendir(path.c_str());
-		if(directoryStream == nullptr)
-		{
-			//TODO: Detect whether the directory doesn't exist, or an error occurred.
-			//TODO: If an error occurred, we don't know for sure whether the directory exists or not.
-			return false;
-		}
-		closedir(directoryStream);
-		return true;
-	}
+	bool Exists(const std::string& path);
 	
 	/**
 	 * Creates the directory at path. Fails if the directory already exists.
@@ -58,23 +53,7 @@ namespace Directory
 	 * Returns true on successful creation (or if directory already exists).
 	 * Returns false if an error occurred.
 	 */
-	inline bool Create(std::string path)
-	{
-		// Makes the directory with Read/Write/Execute permissions for User and Group, Read/Execute for Other.
-		const int result = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		
-		// A non-zero result indicates an error.
-		if(result != 0)
-		{
-			// If error is that directory already exists...great, wonderful, ok!
-			if(errno == EEXIST) { return true; }
-			
-			// Some error occurred.
-			std::cout << "Failed to make directory at " << path << std::endl;
-			return false;
-		}
-		return true;
-	}
+	bool Create(const std::string& path);
 	
 	/**
 	 * Makes one or more directories in a given path.

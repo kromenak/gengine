@@ -5,13 +5,16 @@
 //
 #include "FileSystem.h"
 
-#include "Platform.h"
+#include <fstream>
 
+#include "Platform.h"
 #if defined(PLATFORM_MAC)
 #include <CoreFoundation/CoreFoundation.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#elif defined(PLATFORM_WINDOWS)
+#include <Windows.h>
 #endif
-
-#include <fstream>
 
 std::string Path::Combine(std::initializer_list<std::string> paths)
 {
@@ -84,4 +87,65 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
 	
 	// Failure!
 	return false;
+}
+
+bool Directory::Exists(const std::string& path)
+{
+#if defined(PLATFORM_MAC)
+	DIR* directoryStream = opendir(path.c_str());
+	if (directoryStream == nullptr)
+	{
+		//TODO: Detect whether the directory doesn't exist, or an error occurred.
+		//TODO: If an error occurred, we don't know for sure whether the directory exists or not.
+		return false;
+	}
+	closedir(directoryStream);
+	return true;
+#elif defined(PLATFORM_WINDOWS)
+	DWORD fileAttributes = GetFileAttributesA(path.c_str());
+
+	// In this case, the provided path might be malformed.
+	if (fileAttributes == INVALID_FILE_ATTRIBUTES) { return false; }
+
+	// If attribute has directory flag, it is a directory and it does exist!
+	if (fileAttributes & FILE_ATTRIBUTE_DIRECTORY != 0) { return true; }
+
+	// This is not a directory.
+	return false;
+#endif
+}
+
+bool Directory::Create(const std::string& path)
+{
+#if defined(PLATFORM_MAC)
+	// Makes the directory with Read/Write/Execute permissions for User and Group, Read/Execute for Other.
+	const int result = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+	// A non-zero result indicates an error.
+	if (result != 0)
+	{
+		// If error is that directory already exists...great, wonderful, ok!
+		if (errno == EEXIST) { return true; }
+
+		// Some error occurred.
+		std::cout << "Failed to make directory at " << path << std::endl;
+		return false;
+	}
+	return true;
+#elif defined (PLATFORM_WINDOWS)
+	// Make the directory.
+	bool result = CreateDirectory(path.c_str(), NULL);
+
+	// A false result indicates an error.
+	if (!result)
+	{
+		// If error is that directory already exists...great, wonderful, ok!
+		if (GetLastError() == ERROR_ALREADY_EXISTS) { return true; }
+
+		// Some error occurred.
+		std::cout << "Failed to make directory at " << path << std::endl;
+		return false;
+	}
+	return true;
+#endif
 }

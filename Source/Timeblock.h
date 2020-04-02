@@ -11,6 +11,7 @@
 //
 #pragma once
 #include <string>
+#include <iostream>
 
 typedef char AMPM;
 

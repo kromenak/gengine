@@ -73,7 +73,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			{
 				outputStr << "*";
 			}
-			outputStr << " " << SystemUtil::GetComputerName() << " ";
+			outputStr << " " << SystemUtil::GetMachineName() << " ";
 		}
 		if((mContent & ReportContent::User) != ReportContent::None)
 		{
@@ -81,7 +81,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			{
 				outputStr << "*";
 			}
-			outputStr << " " << SystemUtil::GetUserName() << " ";
+			outputStr << " " << SystemUtil::GetCurrentUserName() << " ";
 		}
 		if((mContent & ReportContent::Timeblock) != ReportContent::None)
 		{
