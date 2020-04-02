@@ -19,6 +19,14 @@ Transform::~Transform()
 {
 	// Ensure that deleted actor doesn't stay a child of some actor.
 	SetParent(nullptr);
+
+	// If this actor is gone...what about all its children?
+	// For now, let's just unparent the child entirely! (Maybe should set to my parent instead?)
+	for(auto& child : mChildren)
+	{
+		child->mParent = nullptr;
+		child->SetDirty();
+	}
 }
 
 void Transform::SetPosition(const Vector3& position)
