@@ -400,6 +400,7 @@
 		4B53B0C7207AFE7E00663381 /* Ray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Ray.h; path = ../Source/Ray.h; sourceTree = "<group>"; };
 		4B53B0C8207AFE7E00663381 /* Ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Ray.cpp; path = ../Source/Ray.cpp; sourceTree = "<group>"; };
 		4B5497F81FF80E0A00F1EF4F /* StringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringUtil.h; path = ../Source/StringUtil.h; sourceTree = "<group>"; };
+		4B54DDE52435B1C2009C92DA /* GMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMath.h; path = ../Source/GMath.h; sourceTree = "<group>"; };
 		4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QuaternionTests.cpp; path = ../Tests/QuaternionTests.cpp; sourceTree = "<group>"; };
 		4B5C301B21D1F60900211724 /* VertexAnimator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimator.h; path = ../Source/VertexAnimator.h; sourceTree = "<group>"; };
 		4B5C301C21D1F60900211724 /* VertexAnimator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimator.cpp; path = ../Source/VertexAnimator.cpp; sourceTree = "<group>"; };
@@ -497,7 +498,6 @@
 		4BD673D020B2555E00795582 /* BinaryWriter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryWriter.cpp; path = ../Source/BinaryWriter.cpp; sourceTree = "<group>"; };
 		4BD673D220B26F0C00795582 /* AudioListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioListener.h; path = ../Source/AudioListener.h; sourceTree = "<group>"; };
 		4BD673D320B26F0C00795582 /* AudioListener.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioListener.cpp; path = ../Source/AudioListener.cpp; sourceTree = "<group>"; };
-		4BD9C7DC1F95D1D80066DC89 /* Math.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Math.h; path = ../Source/Math.h; sourceTree = "<group>"; };
 		4BDDCD5C20D6C4BC00701A89 /* VertexAnimation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimation.h; path = ../Source/VertexAnimation.h; sourceTree = "<group>"; };
 		4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimation.cpp; path = ../Source/VertexAnimation.cpp; sourceTree = "<group>"; };
 		4BDFBA0823418E8F00C4DD49 /* Console.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Console.h; path = ../Source/Console.h; sourceTree = "<group>"; };
@@ -776,9 +776,9 @@
 		4B4300841FB7EDFA009EDE58 /* Math */ = {
 			isa = PBXGroup;
 			children = (
+				4B54DDE52435B1C2009C92DA /* GMath.h */,
 				4B8D2CD0236F98B300B8E68D /* Heading.cpp */,
 				4B8D2CCF236F98B300B8E68D /* Heading.h */,
-				4BD9C7DC1F95D1D80066DC89 /* Math.h */,
 				4B0918351FEEEA51002991D4 /* Matrix3.cpp */,
 				4B0918341FEEEA51002991D4 /* Matrix3.h */,
 				4BF32B841F64D4B9000639FB /* Matrix4.cpp */,

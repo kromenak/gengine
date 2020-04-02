@@ -18,6 +18,9 @@ using parser = Sheep::Parser;
 
 // If scanner terminates (end of code or end of file), always put an END statement in the bytecode.
 #define yyterminate() return parser::make_END(loc)
+
+// Since this is cross-platform (including Windows), we can't use unistd.h
+#define YY_NO_UNISTD_H
 %}
 
 /* We're making a C++ scanner (aka it is contained within a class) */
