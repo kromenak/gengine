@@ -114,13 +114,14 @@ void Animator::OnUpdate(float deltaTime)
 		// If the animation has ended, remove it from the active animation states.
 		if(animState.currentFrame >= animState.animation->GetFrameCount())
 		{
-			it = mActiveAnimations.erase(it);
-			
 			// Do the finish callback!
 			if(animState.finishCallback)
 			{
 				animState.finishCallback();
 			}
+
+			// Erase the anim state.
+			it = mActiveAnimations.erase(it);
 		}
 		else
 		{
