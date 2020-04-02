@@ -93,7 +93,7 @@ void SheepScript::ParseFromData(char *data, int dataLength)
     reader.Skip(8);
     
     int dataCount = reader.ReadInt();
-    int dataOffsets[dataCount];
+    std::vector<int> dataOffsets(dataCount);
     for(int i = 0; i < dataCount; i++)
     {
         dataOffsets[i] = reader.ReadInt();
@@ -173,7 +173,7 @@ void SheepScript::ParseStringConstsSection(BinaryReader& reader)
     
     int contentSize = reader.ReadInt();
     int stringCount = reader.ReadInt();
-    int stringOffsets[stringCount];
+    std::vector<int> stringOffsets(stringCount);
     for(int i = 0; i < stringCount; i++)
     {
         stringOffsets[i] = reader.ReadInt();
