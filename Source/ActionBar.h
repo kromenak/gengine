@@ -17,7 +17,7 @@
 
 #include "NVC.h"
 
-class ButtonIcon;
+struct ButtonIcon;
 class RectTransform;
 class UIButton;
 class UICanvas;

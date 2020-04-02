@@ -24,7 +24,7 @@
 class BSP;
 class GKActor;
 class NVC;
-class Action;
+struct Action;
 class SceneAsset;
 class Skybox;
 class Soundtrack;

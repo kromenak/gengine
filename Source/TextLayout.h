@@ -20,7 +20,7 @@
 #include "Vector2.h"
 
 class Font;
-class Glyph;
+struct Glyph;
 
 enum class HorizontalAlignment
 {

@@ -13,7 +13,7 @@
 #include "Value.h"
 
 class SheepScript;
-class SysImport;
+struct SysImport;
 
 enum class SheepValueType
 {
@@ -124,7 +124,7 @@ enum class SheepInstruction
 
 class SheepVM
 {
-	friend class SheepThread;
+	friend struct SheepThread;
 public:
     SheepVM() { }
 	~SheepVM();

@@ -12,7 +12,7 @@
 #include "Vector3.h"
 
 class Animation;
-class AnimationState;
+struct AnimationState;
 class Audio;
 class VertexAnimation;
 

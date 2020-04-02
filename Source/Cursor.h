@@ -12,7 +12,7 @@
 
 #include "Vector2.h"
 
-class SDL_Cursor;
+struct SDL_Cursor;
 
 class Cursor : public Asset
 {

@@ -9,7 +9,7 @@
 #pragma once
 #include "Component.h"
 
-class CharacterConfig;
+struct CharacterConfig;
 class Texture;
 
 enum class FaceElement

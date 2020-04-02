@@ -20,7 +20,7 @@
 #include "Vector3.h"
 
 class Animation;
-class CharacterConfig;
+struct CharacterConfig;
 class Heading;
 class WalkerBoundary;
 

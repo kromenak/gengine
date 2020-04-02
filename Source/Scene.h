@@ -28,7 +28,7 @@ class GKActor;
 class GKActor;
 class GKProp;
 class Ray;
-class SceneModel;
+struct SceneModel;
 class SIF;
 class Skybox;
 class SoundtrackPlayer;

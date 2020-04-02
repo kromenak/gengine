@@ -18,7 +18,7 @@
 
 #include "Heading.h"
 
-class CharacterConfig;
+struct CharacterConfig;
 class FaceController;
 class GAS;
 class VertexAnimation;

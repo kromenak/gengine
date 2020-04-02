@@ -12,7 +12,7 @@
 
 #include "Type.h"
 
-class Action;
+struct Action;
 class ActionBar;
 class GKActor;
 class NVC;

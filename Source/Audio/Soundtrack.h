@@ -17,7 +17,7 @@
 
 #include "Vector3.h"
 
-class IniSection;
+struct IniSection;
 
 struct SoundtrackNode
 {

@@ -14,9 +14,9 @@
 #include <unordered_map>
 #include <vector>
 
-class AnimNode;
+struct AnimNode;
 class VertexAnimation;
-class VertexAnimNode;
+struct VertexAnimNode;
 
 class Animation : public Asset
 {
