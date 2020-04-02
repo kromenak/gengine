@@ -8,14 +8,17 @@ See [my blog post](http://clarkkromenaker.com/post/gengine-01-introduction/) int
 
 ## Getting Started
 
-Currently, the project only builds and runs in Xcode as a command line project. Simply download, open in Xcode, and build/run.
+The project builds and runs in Xcode and Visual Studio 2019.
 
-Supporting new platforms or build tools should be as easy as creating the necessary build tool files and making sure all required libraries are implemented on those platforms (see below).
+- Xcode: build/run the GEngine-MacOS target
+- Visual Studio: build/run the x86 configuration
+
+Supporting new platforms or build tools should be as easy as creating the necessary build tool files, making sure all required libraries are implemented on those platforms (see below), and probably implementing a few platform-specific File & System functions.
 
 ### GK3 Data Files
 This repository **does not** contain the data files from the game, since those are copyrighted material. You will need to obtain a copy of GK3 (available on Steam or GOG) to get the data files.
 
-The following data files are needed at the moment; copy them into the "Assets" folder before building/running:
+The following data files are needed at the moment; copy them into the "Assets/GK3" folder before building/running:
 
 - ambient.brn
 - common.brn
@@ -34,6 +37,7 @@ The engine currently uses the following libraries:
 - GLEW
 - minilzo
 - SDL
+- stb
 - zlib
 
 All library files are included in the repo, so no software need be installed before running the game.
@@ -43,6 +47,7 @@ All library files are included in the repo, so no software need be installed bef
 This project uses [Catch](https://github.com/catchorg/Catch2) for unit tests.
 
 The Xcode project contains a build target called **GEngine-Tests**. Simply build and run this target to run all defined unit tests.
+Tests are not yet implemented in Visual Studio.
 
 ## Built With
 
@@ -50,6 +55,7 @@ The Xcode project contains a build target called **GEngine-Tests**. Simply build
 * [fmod](https://www.fmod.com/) - Made SFX and music way easier than I thought possible
 * [zlib](https://www.zlib.net/) - For GK3 asset decompression
 * [minilzo](http://www.oberhumer.com/opensource/lzo/) - Also for GK3 asset decompression
+* [stb](https://github.com/nothings/stb) - Handy public domain utilities; I'm currently using the image resize algorithms
 
 ## Contributing
 
@@ -67,5 +73,6 @@ This project is licensed under the GNU GPLv3 License - see the [LICENSE.md](LICE
 
 ## Acknowledgments
 
-* Sierra On-Line, who inspired me as a kid, and still do today
+* Sierra On-Line, who inspired me as a kid and still do today
+* Jane Jensen, for creating and designing the GK series
 * [GK3 Tools](https://sourceforge.net/projects/gk3tools/), which provided some guidance on BRN, BSP, and ACT file formats
