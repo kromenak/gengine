@@ -41,8 +41,8 @@ void InputManager::Update()
 	mouseY = Services::GetRenderer()->GetWindowHeight() - mouseY;
 	
     // Calculate mouse delta since last frame.
-    int deltaX = mouseX - mMousePosition.GetX();
-    int deltaY = mouseY - mMousePosition.GetY();
+    int deltaX = static_cast<int>(mouseX - mMousePosition.GetX());
+    int deltaY = static_cast<int>(mouseY - mMousePosition.GetY());
     mMousePositionDelta.SetX(deltaX);
     mMousePositionDelta.SetY(deltaY);
     

@@ -317,7 +317,7 @@ void GEngine::ProcessInput()
 void GEngine::Update()
 {
     // Tracks the next "GetTicks" value that is acceptable to perform an update.
-    static int nextTicks = 0;
+    static unsigned int nextTicks = 0;
     
     // Tracks the last ticks value each time we run this loop.
     static uint32_t lastTicks = 0;
@@ -342,7 +342,7 @@ void GEngine::Update()
     if(deltaTime > 0.05f) { deltaTime = 0.05f; }
     
     // Update all actors.
-    for(int i = 0; i < mActors.size(); i++)
+    for(size_t i = 0; i < mActors.size(); i++)
     {
         mActors[i]->Update(deltaTime);
     }

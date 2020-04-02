@@ -28,13 +28,13 @@ Font::Font(std::string name, char* data, int dataLength) :
 	mGlyphHeight = lineHeight - 1; //TODO: Take baseline value into account?
 	
 	// We'll start processing glyphs at (1, 0).
-	int currentX = 1;
-	int currentY = 0;
+	unsigned int currentX = 1;
+	unsigned int currentY = 0;
 	int currentLine = 1;
 	
 	// We'll now interate the font characters and determine the UV rects
 	// within the font texture used to render each glyph.
-	for(int i = 0; i < mFontCharacters.size(); i++)
+	for(size_t i = 0; i < mFontCharacters.size(); i++)
 	{
 		Glyph glyph;
 		glyph.character = mFontCharacters[i];

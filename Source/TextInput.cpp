@@ -29,7 +29,7 @@ void TextInput::Insert(char c)
 	}
 	
 	// Add the char to our text.
-	if(mCursorPos < 0 || mCursorPos >= mText.size())
+	if(mCursorPos < 0 || mCursorPos >= static_cast<int>(mText.size()))
 	{
 		mText.push_back(c);
 	}
@@ -55,7 +55,7 @@ void TextInput::DeletePrev()
 		// Out-of-range cursor pos means just delete from end.
 		// Otherwise, delete one before the cursor pos.
 		// If cursor pos is 0, this does nothing!
-		if(mCursorPos < 0 || mCursorPos >= mText.size())
+		if(mCursorPos < 0 || mCursorPos >= static_cast<int>(mText.size()))
 		{
 			mText.pop_back();
 		}
@@ -79,7 +79,7 @@ void TextInput::DeleteNext()
 		// For a cursor at the end of the text, this would do nothing.
 		// Otherwise, it deletes the current character.
 		// Cursor pos does not change!
-		if(mCursorPos >= 0 && mCursorPos < mText.size())
+		if(mCursorPos >= 0 && mCursorPos < static_cast<int>(mText.size()))
 		{
 			mText.erase(mCursorPos, 1);
 		}
@@ -88,7 +88,7 @@ void TextInput::DeleteNext()
 
 void TextInput::SetCursorPos(int pos)
 {
-	if(pos < 0 || pos >= mText.size())
+	if(pos < 0 || pos >= static_cast<int>(mText.size()))
 	{
 		mCursorPos = -1;
 	}
@@ -101,13 +101,13 @@ void TextInput::SetCursorPos(int pos)
 void TextInput::MoveCursorForward()
 {
 	// Move cursor forward if in range.
-	if(mCursorPos >= 0 && mCursorPos < mText.size())
+	if(mCursorPos >= 0 && mCursorPos < static_cast<int>(mText.size()))
 	{
 		++mCursorPos;
 	}
 	
 	// If cursor went out-of-bounds, just reset to -1 (means 'end of text').
-	if(mCursorPos >= mText.size())
+	if(mCursorPos >= static_cast<int>(mText.size()))
 	{
 		mCursorPos = -1;
 	}
@@ -116,7 +116,7 @@ void TextInput::MoveCursorForward()
 void TextInput::MoveCursorBack()
 {
 	// If cursor is out-of-bounds (meaning 'end of text'), just move back one.
-	if(mCursorPos < 0 || mCursorPos >= mText.size())
+	if(mCursorPos < 0 || mCursorPos >= static_cast<int>(mText.size()))
 	{
 		mCursorPos = (int)mText.size() - 1;
 	}
@@ -147,7 +147,7 @@ void TextInput::SetText(const std::string& text)
 	mText = text;
 	
 	// Reset cursor pos if it's now too large.
-	if(mCursorPos >= mText.size())
+	if(mCursorPos >= static_cast<int>(mText.size()))
 	{
 		mCursorPos = -1;
 	}

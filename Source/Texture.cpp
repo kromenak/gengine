@@ -146,7 +146,7 @@ Color32 Texture::GetPixelColor32(int x, int y)
 	if(mPixels == nullptr) { return Color32::Black; }
 	
 	// Calculate index into pixels array.
-	int index = (y * mWidth + x) * 4;
+	unsigned int index = static_cast<unsigned int>((y * mWidth + x) * 4);
 	
 	// If index isn't valid...also return black.
 	if(index < 0 || index >= (mWidth * mHeight * 4)) { return Color32::Black; }
@@ -164,7 +164,7 @@ unsigned char Texture::GetPaletteIndex(int x, int y)
 	if(mPaletteIndexes == nullptr) { return 0; }
 	
 	// Calculate index into pixels array.
-	int index = (y * mWidth + x);
+	unsigned int index = static_cast<unsigned int>(y * mWidth + x);
 	
 	// If index isn't valid...also return zero.
 	if(index < 0 || index >= (mWidth * mHeight)) { return 0; }
@@ -200,17 +200,17 @@ void Texture::BlendPixels(const Texture& source, int sourceX, int sourceY, int s
 					     Texture& dest, int destX, int destY)
 {
 	// We can't copy out-of-bounds pixels from the source.
-	if(sourceX < 0 || sourceX >= source.mWidth) { return; }
-	if(sourceY < 0 || sourceY >= source.mHeight) { return; }
+	if(sourceX < 0 || sourceX >= static_cast<int>(source.mWidth)) { return; }
+	if(sourceY < 0 || sourceY >= static_cast<int>(source.mHeight)) { return; }
 	
 	// We can't copy to out-of-bounds pixels in the destination.
-	if(destX < 0 || destX >= dest.mWidth) { return; }
-	if(destY < 0 || destY >= dest.mHeight) { return; }
+	if(destX < 0 || destX >= static_cast<int>(dest.mWidth)) { return; }
+	if(destY < 0 || destY >= static_cast<int>(dest.mHeight)) { return; }
 	
 	// Brute force copy, pixel by pixel!
-	for(int y = sourceY; y < sourceY + sourceHeight && y < source.mHeight; ++y)
+	for(int y = sourceY; y < sourceY + sourceHeight && y < static_cast<int>(source.mHeight); ++y)
 	{
-		for(int x = sourceX; x < sourceX + sourceWidth && x < source.mWidth; ++x)
+		for(int x = sourceX; x < sourceX + sourceWidth && x < static_cast<int>(source.mWidth); ++x)
 		{
 			// Calculate source pixel index.
 			int sourcePixelIndex = (y * source.mWidth + x) * 4;
@@ -406,9 +406,9 @@ void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 			int current = (y  * mWidth + x) * 4;
 			uint16_t pixel = reader.ReadUShort();
 			
-			float red = (pixel & 0xF800) >> 11;
-			float green = (pixel & 0x07E0) >> 5;
-			float blue = (pixel & 0x001F);
+			float red = static_cast<float>((pixel & 0xF800) >> 11);
+			float green = static_cast<float>((pixel & 0x07E0) >> 5);
+			float blue = static_cast<float>((pixel & 0x001F));
 			
 			mPixels[current] = (unsigned char)(red * 255 / 31);
 			mPixels[current + 1] = (unsigned char)(green * 255 / 63);
@@ -533,7 +533,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	for(int y = mHeight - 1; y >= 0; y--)
 	{
 		int bytesRead = 0;
-		for(int x = 0; x < mWidth; x++)
+		for(unsigned int x = 0; x < mWidth; x++)
 		{
 			// Calculate index into pixels array.
 			int index = (y * mWidth + x) * 4;

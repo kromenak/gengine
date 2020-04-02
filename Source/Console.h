@@ -27,13 +27,13 @@ public:
 	
 private:
 	// Max scrollback lines we will store.
-	int mMaxScrollbackLength = 1000;
+	const unsigned int kMaxScrollbackLength = 1000;
 	
 	// The scrollback buffer. Split into individual lines.
 	std::vector<std::string> mScrollback;
 	
 	// Max number of commands we will store in history.
-	int mMaxCommandHistoryLength = 40;
+	const unsigned int kMaxCommandHistoryLength = 40;
 	
 	// History of executed commands.
 	std::vector<std::string> mCommandHistory;

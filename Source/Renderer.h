@@ -44,7 +44,7 @@ public:
     int GetWindowWidth() { return mScreenWidth; }
 	int GetWindowHeight() { return mScreenHeight; }
 	
-	Vector2 GetWindowSize() { return Vector2(mScreenWidth, mScreenHeight); }
+	Vector2 GetWindowSize() { return Vector2(static_cast<float>(mScreenWidth), static_cast<float>(mScreenHeight)); }
     
 private:
     // Screen's width and height, in pixels.

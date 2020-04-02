@@ -55,7 +55,7 @@ private:
 	
 	// A character to use when the font can't render the desired character.
 	// The default is usually "0x9D", which is graphically displayed as an "empty rectangle".
-	char mDefaultChar = 0x9D;
+	unsigned char mDefaultChar = 0x9D;
 	
 	// The texture containing the font glyphs.
 	// Blue dots in row 0 signifies the top-left corner of each glyph in the texture.

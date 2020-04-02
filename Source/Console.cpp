@@ -16,9 +16,9 @@ void Console::AddToScrollback(std::string str)
 		mScrollback.push_back(line);
 	}
 	
-	if(mScrollback.size() > mMaxScrollbackLength)
+	if(mScrollback.size() > kMaxScrollbackLength)
 	{
-		int extraCount = mMaxScrollbackLength - (int)mScrollback.size();
+		int extraCount = kMaxScrollbackLength - (int)mScrollback.size();
 		mScrollback.erase(mScrollback.begin(), mScrollback.begin() + extraCount);
 	}
 }
@@ -64,7 +64,7 @@ void Console::ExecuteCommand(std::string command)
 
 std::string Console::GetCommandFromHistory(int index) const
 {
-	if(index < 0 || index >= mCommandHistory.size())
+	if(index < 0 || index >= static_cast<int>(mCommandHistory.size()))
 	{
 		return "";
 	}

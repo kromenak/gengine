@@ -48,7 +48,7 @@ void TextLayout::AddLine(const std::string& line)
 	
 	int lineHeight = mFont->GetGlyphHeight();
 	int lineWidth = 0;
-	for(int i = 0; i < line.size(); ++i)
+	for(size_t i = 0; i < line.size(); ++i)
 	{
 		Glyph& glyph = mFont->GetGlyph(line[i]);
 		lineWidth += glyph.width;
@@ -87,7 +87,7 @@ void TextLayout::AddLine(const std::string& line)
 	// We are adding at least one line...
 	++mLineCount;
 	
-	for(int i = 0; i < line.size(); ++i)
+	for(size_t i = 0; i < line.size(); ++i)
 	{
 		Glyph& glyph = mFont->GetGlyph(line[i]);
 		
@@ -151,7 +151,7 @@ void TextLayout::AddLine(const std::string& line)
 
 const TextLayout::CharInfo* TextLayout::GetChar(int index) const
 {
-	if(index >= 0 && index < mCharInfos.size())
+	if(index >= 0 && index < static_cast<int>(mCharInfos.size()))
 	{
 		return &mCharInfos[index];
 	}

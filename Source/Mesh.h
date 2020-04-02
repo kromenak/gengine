@@ -36,7 +36,7 @@ public:
 	
 	void AddSubmesh(Submesh* submesh) { mSubmeshes.push_back(submesh); }
 	
-	Submesh* GetSubmesh(int index) const { return index >= 0 && index < mSubmeshes.size() ? mSubmeshes[index] : nullptr; }
+	Submesh* GetSubmesh(int index) const { return index >= 0 && index < static_cast<int>(mSubmeshes.size()) ? mSubmeshes[index] : nullptr; }
 	int GetSubmeshCount() const { return static_cast<int>(mSubmeshes.size()); }
 	
 	const std::vector<Submesh*>& GetSubmeshes() const { return mSubmeshes; }
