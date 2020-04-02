@@ -205,9 +205,9 @@ void Model::ParseFromData(char *data, int dataLength)
         // 12 bytes: mesh's x-axis basis vector (i)
         // 12 bytes: mesh's z-axis basis vector (k)
         // 12 bytes: mesh's y-axis basis vector (j)
-        Vector3 iBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        Vector3 kBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        Vector3 jBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        Vector3 iBasis = reader.ReadVector3();
+        Vector3 kBasis = reader.ReadVector3();
+        Vector3 jBasis = reader.ReadVector3();
 		
 		// We can derive an import scale factor from the i/j/k basis by taking the length.
 		Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
@@ -244,9 +244,9 @@ void Model::ParseFromData(char *data, int dataLength)
         // Each mesh within a model has a local position relative to the model origin.
 		// Ex: if a human model has arms, legs, etc - this positions them all correctly relative to one another.
 		#ifdef GK3_MIRROR_Z
-        Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), -reader.ReadFloat());
+        Vector3 meshPos = reader.ReadVector3();
 		#else
-		Vector3 meshPos(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        Vector3 meshPos = reader.ReadVector3();
 		#endif
 		#ifdef DEBUG_OUTPUT
         std::cout << "    Mesh Position: " << meshPos << std::endl;
@@ -268,8 +268,8 @@ void Model::ParseFromData(char *data, int dataLength)
         
         // 24 bytes: Two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max bound values for the mesh.
-		Vector3 min(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-		Vector3 max(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+        Vector3 min = reader.ReadVector3();
+        Vector3 max = reader.ReadVector3(); 
 		#ifdef DEBUG_OUTPUT
 		std::cout << "    Min: " << min << std::endl;
 		std::cout << "    Max: " << max << std::endl;
@@ -369,7 +369,7 @@ void Model::ParseFromData(char *data, int dataLength)
             // Then we have vertex normals.
             for(int k = 0; k < vertexCount; k++)
             {
-                Vector3 normal(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                Vector3 normal = reader.ReadVector3();
                 vertexNormals[k * 3] = normal.GetX();
                 vertexNormals[k * 3 + 1] = normal.GetZ();
                 vertexNormals[k * 3 + 2] = normal.GetY();
@@ -379,7 +379,7 @@ void Model::ParseFromData(char *data, int dataLength)
             // Vertex UV coordinates.
             for(int k = 0; k < vertexCount; k++)
             {
-                Vector2 uv(reader.ReadFloat(), reader.ReadFloat());
+                Vector2 uv = reader.ReadVector2();
                 vertexUVs[k * 2] = uv.GetX();
                 vertexUVs[k * 2 + 1] = uv.GetY();
             }

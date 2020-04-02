@@ -7,6 +7,9 @@
 #pragma once
 #include <istream>
 
+#include "Vector2.h"
+#include "Vector3.h"
+
 class BinaryReader
 {
 public:
@@ -43,7 +46,11 @@ public:
     
     float ReadFloat();
     double ReadDouble();
-    
+
+    // For convenience - reading in some more commonly encountered complex types.
+    Vector2 ReadVector2();
+    Vector3 ReadVector3();
+
 private:
 	// Stream we are reading from.
 	// Needs to be pointer because type of stream (memory, file, etc) changes sometimes.

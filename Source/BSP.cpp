@@ -444,8 +444,8 @@ void BSP::ParseFromData(char *data, int dataLength)
         surface->textureName = reader.ReadString(32);
         surface->texture = Services::GetAssets()->LoadTexture(surface->textureName);
         
-        surface->uvOffset = Vector2(reader.ReadFloat(), reader.ReadFloat());
-        surface->uvScale = Vector2(reader.ReadFloat(), reader.ReadFloat());
+        surface->uvOffset = reader.ReadVector2();
+        surface->uvScale = reader.ReadVector2();
         
         surface->scale = reader.ReadFloat();
         
@@ -520,22 +520,24 @@ void BSP::ParseFromData(char *data, int dataLength)
     // Iterate and read planes.
     for(int i = 0; i < planeCount; i++)
     {
-        Plane* plane = new Plane(reader.ReadFloat(), reader.ReadFloat(),
-                                 reader.ReadFloat(), reader.ReadFloat());
+        float normalX = reader.ReadFloat();
+        float normalY = reader.ReadFloat();
+        float normalZ = reader.ReadFloat();
+        float distance = reader.ReadFloat();
+        Plane* plane = new Plane(normalX, normalY, normalZ, distance);
         mPlanes.push_back(plane);
     }
     
     // Iterate and read vertices
     for(int i = 0; i < vertexCount; i++)
     {
-        Vector3 v(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        mVertices.push_back(v);
+        mVertices.push_back(reader.ReadVector3());
     }
     
     // Iterate and read UVs
     for(int i = 0; i < uvCount; i++)
     {
-        mUVs.push_back(Vector2(reader.ReadFloat(), reader.ReadFloat()));
+        mUVs.push_back(reader.ReadVector2());
     }
     
     // Iterate and read vertex indexes.
@@ -560,7 +562,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         vertsPtr[i * 3 + 2] = mVertices[i].GetZ();
     }
     
-    unsigned short* vertIndexesPtr = new ushort[mVertexIndices.size()];
+    unsigned short* vertIndexesPtr = new unsigned short[mVertexIndices.size()];
     for(int i = 0; i < mVertexIndices.size(); i++)
     {
         vertIndexesPtr[i] = mVertexIndices[i];

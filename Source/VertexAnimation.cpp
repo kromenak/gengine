@@ -247,7 +247,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     // 4 bytes: The number of mesh entries that exist for each keyframe in this animation.
     // This should 100% correlate to the mesh count for the model file itself.
 	// If not, the animation probably won't play correctly.
-    uint meshCount = reader.ReadUInt();
+    uint32_t meshCount = reader.ReadUInt();
     
     // File contents size after header info. Not important to us.
     reader.ReadUInt();
@@ -363,7 +363,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     #endif
                     
                     // 4 bytes: Number of bytes in this block.
-                    uint blockByteCount = reader.ReadUInt();
+                    uint32_t blockByteCount = reader.ReadUInt();
                     byteCount -= blockByteCount + 4;
                     
                     // 2 bytes: Submesh within mesh this block refers to.
@@ -412,11 +412,20 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         unsigned int val2 = (byte & 0xC) >> 2;
                         unsigned int val3 = (byte & 0x30) >> 4;
                         unsigned int val4 = (byte & 0xC0) >> 6;
-                        
+
                         vertexDataFormat[k] = val1;        // Masking 0000 0011
-                        vertexDataFormat[k + 1] = val2;    // Masking 0000 1100
-                        vertexDataFormat[k + 2] = val3;    // Masking 0011 0000
-                        vertexDataFormat[k + 3] = val4;    // Masking 1100 0000
+                        if(k + 1 < vertexCount)
+                        {
+                            vertexDataFormat[k + 1] = val2;    // Masking 0000 1100
+                        }
+                        if(k + 2 < vertexCount)
+                        {
+                            vertexDataFormat[k + 2] = val3;    // Masking 0011 0000
+                        }
+                        if(k + 3 < vertexCount)
+                        {
+                            vertexDataFormat[k + 3] = val4;    // Masking 1100 0000
+                        }
                     }
                     
                     // Now that we have deciphered how each vertex is compressed, we can read in each vertex.
@@ -477,9 +486,9 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // 12 bytes: mesh's x-axis basis vector (i)
                     // 12 bytes: mesh's z-axis basis vector (k)
                     // 12 bytes: mesh's y-axis basis vector (j)
-                    Vector3 iBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-                    Vector3 kBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-                    Vector3 jBasis(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                    Vector3 iBasis = reader.ReadVector3();
+                    Vector3 kBasis = reader.ReadVector3();
+                    Vector3 jBasis = reader.ReadVector3();
 					
 					// We can derive an import scale factor from the i/j/k basis by taking the length.
 					Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
@@ -540,8 +549,8 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     byteCount -= blockByteCount + 4;
                     
                     // Assign min/max data.
-                    Vector3 min(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-                    Vector3 max(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
+                    Vector3 min = reader.ReadVector3();
+                    Vector3 max = reader.ReadVector3();
 					#ifdef DEBUG_OUTPUT
 					std::cout << "        Min: " << min << std::endl;
 					std::cout << "        Max: " << max << std::endl;

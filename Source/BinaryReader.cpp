@@ -134,3 +134,18 @@ double BinaryReader::ReadDouble()
     mStream->read(reinterpret_cast<char*>(&val), 8);
     return val;
 }
+
+Vector2 BinaryReader::ReadVector2()
+{
+    float x = ReadFloat();
+    float y = ReadFloat();
+    return Vector2(x, y);
+}
+
+Vector3 BinaryReader::ReadVector3()
+{
+    float x = ReadFloat();
+    float y = ReadFloat();
+    float z = ReadFloat();
+    return Vector3(x, y, z);
+}
