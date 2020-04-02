@@ -4,9 +4,10 @@
 //
 //  Created by Clark Kromenaker on 7/22/17.
 //
+#define SDL_MAIN_HANDLED // For Windows: we provide our own main, so use that!
 #include "GEngine.h"
 
-int main(int argc, const char * argv[])
+int main(int argc, const char* argv[])
 {
     // Create the engine.
 	GEngine engine;
