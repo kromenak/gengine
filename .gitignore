@@ -27,3 +27,14 @@ xcuserdata/
 *.moved-aside
 *.xccheckout
 *.xcscmblueprint
+
+####
+# Visual Studio
+####
+.vs
+*.vcproj.user
+
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
