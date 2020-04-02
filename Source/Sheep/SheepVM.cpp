@@ -8,7 +8,7 @@
 #include <iostream>
 
 #include "BinaryReader.h"
-#include "Math.h"
+#include "GMath.h"
 #include "SheepAPI.h"
 #include "SheepScript.h"
 #include "Services.h"

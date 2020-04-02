@@ -18,7 +18,7 @@
 #include "GKActor.h"
 #include "InventoryManager.h"
 #include "LocationManager.h"
-#include "Math.h"
+#include "GMath.h"
 #include "MeshRenderer.h"
 #include "Mover.h"
 #include "RectTransform.h"

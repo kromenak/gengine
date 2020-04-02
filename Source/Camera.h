@@ -6,7 +6,7 @@
 #pragma once
 #include "Component.h"
 
-#include "Math.h"
+#include "GMath.h"
 #include "Matrix4.h"
 #include "Vector2.h"
 #include "Vector3.h"

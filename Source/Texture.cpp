@@ -11,7 +11,7 @@
 
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
-#include "Math.h"
+#include "GMath.h"
 
 Texture* Texture::White = nullptr;
 Texture* Texture::Black = nullptr;

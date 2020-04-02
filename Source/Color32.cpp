@@ -5,7 +5,7 @@
 //
 #include "Color32.h"
 
-#include "Math.h"
+#include "GMath.h"
 
 Color32 Color32::Black(0, 0, 0, 255);
 Color32 Color32::White(255, 255, 255, 255);

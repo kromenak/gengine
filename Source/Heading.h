@@ -10,7 +10,9 @@
 //
 #pragma once
 
-#include "Math.h"
+#include <string>
+
+#include "GMath.h"
 #include "Quaternion.h"
 #include "Vector3.h"
 

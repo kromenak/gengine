@@ -5,12 +5,13 @@
 //
 #include "VertexAnimation.h"
 
+#include <cassert>
 #include <iostream>
 #include <vector>
 #include <unordered_map>
 
 #include "BinaryReader.h"
-#include "Math.h"
+#include "GMath.h"
 #include "Matrix3.h"
 
 //#define DEBUG_OUTPUT

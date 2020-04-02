@@ -5,7 +5,7 @@
 //
 #include "GameProgress.h"
 
-#include "Math.h"
+#include "GMath.h"
 #include "StringUtil.h"
 
 TYPE_DEF_BASE(GameProgress);

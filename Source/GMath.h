@@ -183,6 +183,6 @@ namespace Math
 	
 	inline unsigned char Lerp(unsigned char a, unsigned char b, float t)
 	{
-		return a + ((b - a) * t);
+		return static_cast<unsigned char>(a + ((b - a) * t));
 	}
 }

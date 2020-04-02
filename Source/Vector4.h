@@ -8,7 +8,7 @@
 #pragma once
 #include <iostream>
 
-#include "Math.h"
+#include "GMath.h"
 #include "Vector3.h"
 
 class Vector4
