@@ -562,6 +562,8 @@ using parser = Sheep::Parser;
 /* We don't care about case (code == CODE == CoDe) */
 /* Define all "start conditions" used in the scanner here. Besides the implicit INITIAL condition, we only use COMMENT right now.*/
 
+#define YY_NO_UNISTD_H
+
 #line 566 "lex.yy.cc"
 
 #define INITIAL 0
