@@ -268,11 +268,14 @@ void Model::ParseFromData(char *data, int dataLength)
         
         // 24 bytes: Two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max bound values for the mesh.
-        Vector3 min = reader.ReadVector3();
-        Vector3 max = reader.ReadVector3(); 
 		#ifdef DEBUG_OUTPUT
+		Vector3 min = reader.ReadVector3();
+        Vector3 max = reader.ReadVector3();
 		std::cout << "    Min: " << min << std::endl;
 		std::cout << "    Max: " << max << std::endl;
+		#else
+		reader.ReadVector3();
+		reader.ReadVector3();
 		#endif
         
         // Now, we iterate over each submesh in this mesh.

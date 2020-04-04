@@ -549,11 +549,14 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     byteCount -= blockByteCount + 4;
                     
                     // Assign min/max data.
-                    Vector3 min = reader.ReadVector3();
-                    Vector3 max = reader.ReadVector3();
 					#ifdef DEBUG_OUTPUT
+					Vector3 min = reader.ReadVector3();
+                    Vector3 max = reader.ReadVector3();
 					std::cout << "        Min: " << min << std::endl;
 					std::cout << "        Max: " << max << std::endl;
+					#else
+					reader.ReadVector3();
+					reader.ReadVector3();
 					#endif
                 }
                 else
