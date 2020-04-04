@@ -75,8 +75,7 @@ public:
     static float Dot(Vector4 lhs, Vector4 rhs);
     static Vector4 Cross(Vector4 lhs, Vector4 rhs);
     
-private:
-    // Vector elements - important that they are in this order. We assume some memory layout stuff.
+	// Vector elements - important that they are in this order. We assume some memory layout stuff.
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;

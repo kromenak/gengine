@@ -79,8 +79,7 @@ public:
     // Interpolation
     static Vector3 Lerp(Vector3 from, Vector3 to, float t);
     
-private:
-    // Vector elements - important that they are in this order. We assume some memory layout stuff.
+	// Vector elements - important that they are in this order. We assume some memory layout stuff.
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
