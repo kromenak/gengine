@@ -6,7 +6,7 @@
 // Tests for general math functions.
 //
 #include "catch.hh"
-#include "Math.h"
+#include "GMath.h"
 
 TEST_CASE("Floating-point comparison works")
 {
