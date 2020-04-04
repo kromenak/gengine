@@ -375,7 +375,7 @@ void BSP::RenderPolygon(BSPPolygon* polygon, RenderType renderType)
 BSP::PointLocation BSP::GetPointLocation(Vector3 position, Plane* plane)
 {
     // We can calculate a point on the plane with the normal and distance values.
-    Vector3 pointOnPlane = plane->FindClosestPointOnPlane(Vector3::Zero);
+    Vector3 pointOnPlane = plane->GetClosestPoint(Vector3::Zero);
     //std::cout << (Vector3::Dot(pointOnPlane, plane->GetNormal()) + plane->GetDistanceFromOrigin()) << std::endl;
     
     // We then get a vector from our position to the plane.

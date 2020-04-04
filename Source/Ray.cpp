@@ -9,7 +9,40 @@ Ray::Ray(const Vector3& origin, const Vector3& direction) :
     mOrigin(origin),
     mDirection(direction)
 {
-    
+    //TODO: Make sure direction is normalized?
+}
+
+bool Ray::ContainsPoint(const Vector3& point) const
+{
+	// Edge case: if origin is point...yep, ray contains this point!
+	if(mOrigin == point) { return true; }
+	
+	// Calculate normalized vector from origin to point.
+	Vector3 pointDir = (point - mOrigin).Normalize();
+	
+	// If dot product gives us 1, then these direction vectors point in the same direction!
+	// So, that means the point is on the line!
+	float dot = Vector3::Dot(mDirection, pointDir);
+	return Math::AreEqual(dot, 1.0f);
+}
+
+Vector3 Ray::GetClosestPoint(const Vector3& point) const
+{
+	// Get a vector from start to point.
+	Vector3 startToPoint = point - mOrigin;
+	
+	// Project onto the line.
+	Vector3 projection = Vector3::Dot(startToPoint, mDirection) * mDirection;
+	
+	// Determine "t" for projected position on the line segment.
+	Vector3 end = mOrigin + mDirection;
+	float t = (projection - mOrigin).GetLengthSq() / (end - mOrigin).GetLengthSq();
+	
+	// This is where we differ from line segment algorithm: don't clamp, just greater than zero!
+	t = Math::Max(0.0f, t);
+	
+	// Get the point that correlates to "t".
+	return GetPoint(t);
 }
 
 bool Ray::IntersectsTriangle(const Vector3& p0, const Vector3& p1, const Vector3& p2, Vector3& outHitPos) const
@@ -38,6 +71,6 @@ bool Ray::IntersectsTriangle(const Vector3& p0, const Vector3& p1, const Vector3
 	if(t < 0) { return false; }
 	
 	// We DID intersect the triangle. Return the point of intersection.
-	outHitPos = GetPosition(t);
+	outHitPos = GetPoint(t);
 	return true;
 }
