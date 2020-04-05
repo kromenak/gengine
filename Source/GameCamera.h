@@ -22,5 +22,25 @@ protected:
     void OnUpdate(float deltaTime) override;
     
 private:
+	// Camera movement speed in units/second.
+	// A modifier key (alt) causes the camera to move even faster.
+	// These values were derived from trial and error!
+	const float kSpeed = 500.0f;
+	const float kFastSpeedMultiplier = 2.0f;
+	
+	// Camera rotation speed in radians/second. Again, trial and error!
+	const float kRotationSpeed = Math::kPi / 2.0f;
+	
+	// Mouse range in pixels to move as fast as keyboard keys.
+	// Smaller values mean mouse movement is more sensitive/speedier.
+	const float kMouseRangePixels = 50.0f;
+	
+	// Reference to underlying camera component.
     Camera* mCamera = nullptr;
+	
+	// Height of camera above ground. Always try to maintain some height above ground.
+	// So, if moving down a hill, the camera follows the slope, for example.
+	// Default value is derived from trial and error!
+	const float kDefaultHeight = 60.0f;
+	float mHeight = kDefaultHeight;
 };
