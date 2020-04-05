@@ -40,6 +40,11 @@ public:
     Vector2 GetMousePosition() { return mMousePosition; }
     Vector2 GetMouseDelta() { return mMousePositionDelta; }
 	
+	void LockMouse();
+	void UnlockMouse();
+	bool MouseLocked() const { return mMouseLocked; }
+	
+	// Text input support
 	void StartTextInput(TextInput* textInput);
 	void StopTextInput();
 	bool IsTextInput() const { return mTextInput != nullptr; }
@@ -65,6 +70,10 @@ private:
     
     // The mouse's position delta for this frame.
     Vector2 mMousePositionDelta;
+		
+	// Is the mouse locked?
+	bool mMouseLocked = false;
+	Vector2 mLockedMousePosition;
 	
 	// TEXT INPUT
 	TextInput* mTextInput = nullptr;
