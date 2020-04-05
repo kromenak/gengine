@@ -19,6 +19,12 @@ class Transform : public Component
 {
 	TYPE_DECL_CHILD();
 public:
+	enum class Space
+	{
+		Local,	// This transform's local space
+		World	// World space
+	};
+	
 	Transform(Actor* owner);
 	virtual ~Transform();
 	
@@ -68,10 +74,10 @@ public:
 	void Translate(const Vector3& offset);
 	
 	// Rotates through origin about an axis/angle
-	void Rotate(const Vector3& axis, float angle);
-	void Rotate(const Quaternion& rotation);
+	void Rotate(const Vector3& axis, float angle, Space space = Space::Local);
+	void Rotate(const Quaternion& rotation, Space space = Space::Local);
 	
-	// Rotates through a point in local space about an axis/angle
+	// Rotates in local space, about an axis at a world point, by an angle.
 	void RotateAround(const Vector3& worldPoint, const Vector3& axis, float angle);
 	void RotateAround(const Vector3& worldPoint, const Quaternion& rotation);
 	

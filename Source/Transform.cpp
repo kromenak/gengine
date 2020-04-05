@@ -193,14 +193,27 @@ void Transform::Translate(const Vector3& offset)
 	SetPosition(mLocalPosition + offset);
 }
 
-void Transform::Rotate(const Vector3& axis, float angle)
+void Transform::Rotate(const Vector3& axis, float angle, Space space)
 {
-	Rotate(Quaternion(axis, angle));
+	Rotate(Quaternion(axis, angle), space);
 }
 
-void Transform::Rotate(const Quaternion& rotation)
+void Transform::Rotate(const Quaternion& rotation, Space space)
 {
-	SetRotation(GetRotation() * rotation);
+	if(space == Space::Local)
+	{
+		SetRotation(GetRotation() * rotation);
+	}
+	else
+	{
+		// What's going on here!? From left to right:
+		// 1) WR * IWR cancels each other out - gets us to zero rotation
+		// 2) Apply desired rotation
+		// 3) Reapply previous WR on top of rotation
+		Quaternion worldRotation = GetWorldRotation();
+		Quaternion invertedWorldRotation = GetWorldRotation().Invert();
+		SetWorldRotation(worldRotation * invertedWorldRotation * rotation * worldRotation);
+	}
 }
 
 void Transform::RotateAround(const Vector3& worldPoint, const Vector3& axis, float angle)
