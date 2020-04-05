@@ -61,6 +61,12 @@ Vector3 IniKeyValue::GetValueAsVector3() const
     {
         noBraces = value.substr(1, value.length() - 2);
     }
+	else if(noBraces[0] == '{')
+	{
+		// Error resiliance: some typos exist, like missing closing bracket.
+		// Don't want it to crash the game :P
+		noBraces = value.substr(1, value.length() - 1);
+	}
     
     // Find the two commas.
     std::size_t firstCommaIndex = noBraces.find(',');
