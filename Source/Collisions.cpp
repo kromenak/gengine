@@ -43,14 +43,21 @@
 	return distSq < s.GetRadius() * s.GetRadius();
 }
 
-/*static*/ bool Collisions::TestSphereTriangle(const Sphere& s, const Triangle& t)
+/*static*/ bool Collisions::TestSphereTriangle(const Sphere& s, const Triangle& t, Vector3& intersection)
 {
 	// Get closest point on triangle to sphere center.
 	Vector3 pointOnTriangle = t.GetClosestPoint(s.GetCenter());
 	
 	// Get distance from center to point on triangle.
 	float distSq = (pointOnTriangle - s.GetCenter()).GetLengthSq();
-	return distSq < s.GetRadius() * s.GetRadius();
+	bool intersects = distSq < s.GetRadius() * s.GetRadius();
+	if(intersects)
+	{
+		intersection = s.GetCenter() - pointOnTriangle;
+		intersection.Normalize();
+		intersection *= s.GetRadius() - Math::Sqrt(distSq);
+	}
+	return intersects;
 }
 
 /*static*/ bool Collisions::TestAABBAABB(const AABB& aabb1, const AABB& aabb2)

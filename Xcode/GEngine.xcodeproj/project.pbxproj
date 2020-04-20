@@ -23,6 +23,7 @@
 		4B0B67831F78DCD40023815F /* Actor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0B67811F78DCD40023815F /* Actor.cpp */; };
 		4B0E44F62186878A00BD1CE1 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0E44F52186878A00BD1CE1 /* Rect.cpp */; };
 		4B0E44F72186878A00BD1CE1 /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0E44F52186878A00BD1CE1 /* Rect.cpp */; };
+		4B0FDB22244D191B007AA85F /* CollisionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0FDB21244D191B007AA85F /* CollisionTests.cpp */; };
 		4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112A71F820B0400AFDDFC /* TestMain.cpp */; };
 		4B1112AB1F820BD000AFDDFC /* Matrix4Tests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */; };
 		4B1112AC1F820C1F00AFDDFC /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
@@ -333,6 +334,7 @@
 		4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Diffuse-Tex.vert"; path = "../Assets/3D-Diffuse-Tex.vert"; sourceTree = "<group>"; };
 		4B0E44F42186878A00BD1CE1 /* Rect.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Rect.h; path = ../Source/Rect.h; sourceTree = "<group>"; };
 		4B0E44F52186878A00BD1CE1 /* Rect.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Rect.cpp; path = ../Source/Rect.cpp; sourceTree = "<group>"; };
+		4B0FDB21244D191B007AA85F /* CollisionTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CollisionTests.cpp; path = ../Tests/CollisionTests.cpp; sourceTree = "<group>"; };
 		4B11129B1F820A6D00AFDDFC /* GEngine-Tests */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "GEngine-Tests"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4B1112A61F820AC100AFDDFC /* catch.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = catch.hh; path = ../Tests/catch.hh; sourceTree = "<group>"; };
 		4B1112A71F820B0400AFDDFC /* TestMain.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TestMain.cpp; path = ../Tests/TestMain.cpp; sourceTree = "<group>"; };
@@ -662,6 +664,7 @@
 				4B90E07D2377B50D00E0E3FA /* TimeblockTests.cpp */,
 				4B38BA7E24393F0C001F9240 /* SphereTests.cpp */,
 				4B38BA80243944C8001F9240 /* AABBTests.cpp */,
+				4B0FDB21244D191B007AA85F /* CollisionTests.cpp */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -727,25 +730,25 @@
 				4B9E412E21BD019D008B9B1E /* IO */,
 				4BE6EE351F441DD100BB29D5 /* Libraries */,
 				4B15A93F1F24188E000A689F /* Main.cpp */,
-				4B38BA6E2438F4F3001F9240 /* Primitives */,
 				4B4300841FB7EDFA009EDE58 /* Math */,
 				4B046E8F218E855600E56341 /* Mover.cpp */,
 				4B046E8E218E855600E56341 /* Mover.h */,
 				4B3D478B23540D2500EB510E /* Platform.h */,
+				4B38BA6E2438F4F3001F9240 /* Primitives */,
 				4B364C3520ECADBE00EFC50C /* Rendering */,
 				4B7A6306223EDAF50053C95F /* Reports */,
 				4BD673C920B10EB200795582 /* Scene */,
 				4B09182D1FEED84D002991D4 /* Services.cpp */,
 				4B09182C1FEED84D002991D4 /* Services.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
+				4B5A334A243A57A70064FC06 /* SphereCollider.cpp */,
+				4B5A3349243A57A70064FC06 /* SphereCollider.h */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */,
 				4BDFBA0B2341B75C00C4DD49 /* TextInput.h */,
 				4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */,
 				4B85E87A23497EBF004AA3E5 /* TextLayout.h */,
 				4B08C90D2137443F0028FEB3 /* UI */,
-				4B5A3349243A57A70064FC06 /* SphereCollider.h */,
-				4B5A334A243A57A70064FC06 /* SphereCollider.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -1261,6 +1264,7 @@
 				4B39E8882082DFCF00DB3F52 /* Vector2.cpp in Sources */,
 				4B1A2CB522053097000C34D8 /* MathTests.cpp in Sources */,
 				4B38BA7C24390D7F001F9240 /* LineSegment.cpp in Sources */,
+				4B0FDB22244D191B007AA85F /* CollisionTests.cpp in Sources */,
 				4B38BA8A24395D05001F9240 /* Triangle.cpp in Sources */,
 				4B6A3F262335B20000D25B2D /* RectTests.cpp in Sources */,
 				4B4300881FB7EE44009EDE58 /* Quaternion.cpp in Sources */,

@@ -42,8 +42,9 @@ public:
 	// SCENE SETTINGS
 	BSP* GetBSP() const { return mBSP; }
 	Skybox* GetSkybox() const { return mSkybox; }
-	const std::string& GetFloorModelName() const { return mGeneralSettings.floorModelName; }
 	WalkerBoundary* GetWalkerBoundary() const { return mWalkerBoundary; }
+	const std::string& GetFloorModelName() const { return mGeneralSettings.floorModelName; }
+	const std::string& GetCameraBoundsModelName() const { return mGeneralSettings.cameraBoundsModelName; }
 	
 	// ACTORS/MODELS
 	const std::vector<const SceneActor*>& GetActors() const { return mActors; }

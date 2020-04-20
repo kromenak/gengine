@@ -77,29 +77,31 @@ public:
 	unsigned int GetVertexCount() const { return mVertexCount; }
 	Vector3 GetVertexPosition(int index) const;
 	
+	int GetIndexCount() const { return mIndexCount; }
+	unsigned short* GetIndexes() { return mIndexes; }
+	
+	int GetTriangleCount() const;
+	bool GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) const;
+	
+	bool Raycast(const Ray& ray);
+	
 	float* GetPositions() { return mPositions; }
 	float* GetColors() { return mColors; }
 	float* GetNormals() { return mNormals; }
 	float* GetUV1s() { return mUV1; }
 	
-	int GetIndexCount() const { return mIndexCount; }
-	unsigned short* GetIndexes() { return mIndexes; }
-	
-	bool Raycast(const Ray& ray);
-	
 private:
 	// Number of vertices in the mesh.
 	unsigned int mVertexCount = 0;
 	
-	// Vertex data.
-	// This object owns this data.
+	// Vertex data. The submesh owns this data.
 	float* mPositions = nullptr;
 	float* mColors = nullptr;
 	float* mNormals = nullptr;
 	float* mUV1 = nullptr;
 	
 	// Index data. If present, the submesh draws using indexed methods.
-	// This object owns this data.
+	// The submesh owns this data.
 	unsigned int mIndexCount = 0;
 	unsigned short* mIndexes = nullptr;
 	

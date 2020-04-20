@@ -13,14 +13,17 @@ class Plane;
 class Ray;
 class Sphere;
 class Triangle;
+class Vector3;
 
 class Collisions
 {
+public:
 	// Sphere
 	static bool TestSphereSphere(const Sphere& s1, const Sphere& s2);
 	static bool TestSphereAABB(const Sphere& s, const AABB& aabb);
 	static bool TestSpherePlane(const Sphere& s, const Plane& p);
-	static bool TestSphereTriangle(const Sphere& s, const Triangle& t);
+	
+	static bool TestSphereTriangle(const Sphere& s, const Triangle& t, Vector3& intersection);
 	
 	// AABB
 	static bool TestAABBAABB(const AABB& aabb1, const AABB& aabb2);

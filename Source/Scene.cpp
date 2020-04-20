@@ -106,6 +106,18 @@ void Scene::Load()
     	mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
 	}
 	
+	// If a camera bounds model exists for this scene, pass it along to the camera.
+	Model* cameraBoundsModel = Services::GetAssets()->LoadModel(mSceneData->GetCameraBoundsModelName());
+	if(cameraBoundsModel != nullptr)
+	{
+		mCamera->SetCameraBounds(cameraBoundsModel);
+		
+		// For debugging - we can visualize the camera bounds mesh, if desired.
+		//Actor* cameraBoundsActor = new Actor();
+		//MeshRenderer* cameraBoundsMeshRenderer = cameraBoundsActor->AddComponent<MeshRenderer>();
+		//cameraBoundsMeshRenderer->SetModel(cameraBoundsModel);
+	}
+	
 	// Create soundtrack player and get it playing!
 	Soundtrack* soundtrack = mSceneData->GetSoundtrack();
 	if(soundtrack != nullptr)
@@ -189,27 +201,6 @@ void Scene::Load()
 		
 		// Start in idle state.
 		//actor->StartFidget(GKActor::FidgetType::Idle);
-		
-		/*
-		// Set up the actor's walker support, if any.
-		Model* walkerAidModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
-		if(walkerAidModel != nullptr)
-		{
-			// For walking anims to work correctly, a walker aid actor must exist
-			// and be part of the scenes actor list (so an animation can be started on it).
-			GKActor* walkerAid = new GKActor();
-			mObjects.push_back(walkerAid);
-			
-			// Make the walker aid a child of the actor itself.
-			Transform* walkerAidTransform = walkerAid->GetComponent<Transform>();
-			walkerAidTransform->SetParent(actor->GetComponent<Transform>());
-			walkerAid->GetMeshRenderer()->SetModel(walkerAidModel);
-			
-			// Give the walker needed references to walk correctly.
-			actor->GetWalker()->SetWalkAidMeshRenderer(walkerAid->GetMeshRenderer());
-			actor->GetWalker()->SetWalkMeshTransform(actor->GetMeshRenderer()->GetOwner()->GetComponent<Transform>());
-		}
-		*/
 		
 		//TODO: Apply init anim.
 		

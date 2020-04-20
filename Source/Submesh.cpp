@@ -118,6 +118,37 @@ Vector3 Submesh::GetVertexPosition(int index) const
 	return Vector3(mPositions[startOffset], mPositions[startOffset + 1], mPositions[startOffset + 2]);
 }
 
+int Submesh::GetTriangleCount() const
+{
+	if(mRenderMode == RenderMode::Triangles)
+	{
+		return mIndexes != nullptr ? (mIndexCount / 3) : (mVertexCount / 3);
+	}
+	//TODO: Add support for TriangleFan/TriangleStrip modes.
+	
+	// Can't compute triangle count!
+	return 0;
+}
+
+bool Submesh::GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) const
+{
+	if(mRenderMode == RenderMode::Triangles)
+	{
+		if(mIndexes != nullptr)
+		{
+			int offset = index * 3;
+			p0 = GetVertexPosition(mIndexes[offset]);
+			p1 = GetVertexPosition(mIndexes[offset + 1]);
+			p2 = GetVertexPosition(mIndexes[offset + 2]);
+			return true;
+		}
+		//TODO: Add support if no indexes present
+	}
+	//TODO: Add support for triangle fans/strips.
+	
+	return false;
+}
+
 bool Submesh::Raycast(const Ray& ray)
 {
 	if(mRenderMode != RenderMode::Triangles || mIndexes == nullptr)

@@ -8,10 +8,14 @@
 #pragma once
 #include "Actor.h"
 
+class Model;
+
 class GameCamera : public Actor
 {
 public:
     GameCamera();
+	
+	void SetCameraBounds(Model* boundsModel) { mBoundsModel = boundsModel; }
 	
 	void SetAngle(const Vector2& angle);
 	void SetAngle(float yaw, float pitch);
@@ -43,4 +47,9 @@ private:
 	// Default value is derived from trial and error!
 	const float kDefaultHeight = 60.0f;
 	float mHeight = kDefaultHeight;
+	
+	// A model whose triangles are used as collision for the camera.
+	Model* mBoundsModel = nullptr;
+	
+	void ResolveCollisions(Vector3& position);
 };

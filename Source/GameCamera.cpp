@@ -7,16 +7,17 @@
 
 #include "AudioListener.h"
 #include "Camera.h"
+#include "Collisions.h"
 #include "GEngine.h"
 #include "Scene.h"
-#include "SphereCollider.h"
+#include "Sphere.h"
+#include "Triangle.h"
 #include "UICanvas.h"
 
 GameCamera::GameCamera()
 {
     mCamera = AddComponent<Camera>();
     AddComponent<AudioListener>();
-	AddComponent<SphereCollider>();
 }
 
 void GameCamera::SetAngle(const Vector2& angle)
@@ -174,24 +175,39 @@ void GameCamera::OnUpdate(float deltaTime)
 		verticalSpeed *= kFastSpeedMultiplier;
 	}
 	
-	// Apply forward movement.
-	// Forward movement should be only on X/Z plane.
+	// For forward movement, we want to disregard any y-facing; just move on X/Z plane.
 	Vector3 forward = GetForward();
 	forward.y = 0.0f;
 	forward.Normalize();
-	GetTransform()->Translate(forward * forwardSpeed * deltaTime);
 	
-	// Apply strafe movement.
-	GetTransform()->Translate(GetRight() * strafeSpeed * deltaTime);
+	// Calculate desired position based on all speeds.
+	// We may not actually move to this exact position, due to collision.
+	Vector3 position = GetPosition();
+	position += forward * forwardSpeed * deltaTime;
+	position += GetRight() * strafeSpeed * deltaTime;
+	
+	// Calculate new desired height and apply that to position y.
+	float height = mHeight + verticalSpeed * deltaTime;
+	float floorY = GEngine::inst->GetScene()->GetFloorY(position);
+	position.SetY(floorY + height);
+	
+	// Perform collision checks and resolutions.
+	ResolveCollisions(position);
+	
+	// Set position after resolving collisions.
+	GetTransform()->SetPosition(position);
+	
+	// Height may also be affected by collision. After resolving,
+	// we can see if our height changed and save it.
+	float newFloorY = GEngine::inst->GetScene()->GetFloorY(position);
+	float heightForReal = position.GetY() - newFloorY;
+	mHeight = heightForReal;
 	
 	// Apply turn movement.
 	GetTransform()->Rotate(Vector3::UnitY, turnSpeed * deltaTime, Transform::Space::World);
 	
 	// Apply pitch movement.
 	GetTransform()->Rotate(GetRight(), -pitchSpeed * deltaTime, Transform::Space::World);
-	
-	// Apply height.
-	mHeight += verticalSpeed * deltaTime;
 	
 	// Raycast to the ground and always maintain a desired height.
 	//TODO: This does not apply when camera boundaries are disabled!
@@ -200,7 +216,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	if(scene != nullptr)
 	{
 		Vector3 pos = GetPosition();
-		float floorY = scene->GetFloorY(pos);
+		floorY = scene->GetFloorY(pos);
 		pos.SetY(floorY + mHeight);
 		SetPosition(pos);
 	}
@@ -251,5 +267,54 @@ void GameCamera::OnUpdate(float deltaTime)
 	if(!leftMousePressed)
 	{
 		Services::GetInput()->UnlockMouse();
+	}
+}
+
+void GameCamera::ResolveCollisions(Vector3& position)
+{
+	// No bounds model = no collision.
+	if(mBoundsModel == nullptr) { return; }
+	
+	// We'll represent the camera with a sphere and the bounds are a model (triangles).
+	// Iterate and do a collision check against the triangles of the bounds model.
+	auto meshes = mBoundsModel->GetMeshes();
+	for(auto& mesh : meshes)
+	{
+		// Bounds model is positioned at (0,0,0) in world space (so no need to multiply local to world...it's identity).
+		// BUT each mesh in the model has its own local coordinate system!
+		// We need to convert camera position to local space of the mesh before doing collision check.
+		//TODO: Inverse operation here is expensive - can probably be more efficient somehow...
+		Matrix4 meshToLocal = mesh->GetLocalTransformMatrix();
+		Matrix4 localToMesh = meshToLocal.Inverse();
+		Vector3 meshPosition = localToMesh.TransformPoint(position);
+		
+		// Create sphere at position.
+		const float kCameraColliderRadius = 25.0f;
+		Sphere s(meshPosition, kCameraColliderRadius);
+		
+		// Iterate submeshes/submesh triangles.
+		auto submeshes = mesh->GetSubmeshes();
+		for(auto& submesh : submeshes)
+		{
+			Vector3 p0, p1, p2;
+			int triangleCount = submesh->GetTriangleCount();
+			for(int i = 0; i < triangleCount; i++)
+			{
+				if(submesh->GetTriangle(i, p0, p1, p2))
+				{
+					// If an intersection exists, resolve it by "pushing" mesh position out.
+					Vector3 intersection;
+					if(Collisions::TestSphereTriangle(s, Triangle(p0, p1, p2), intersection))
+					{
+						meshPosition += intersection;
+						s = Sphere(meshPosition, kCameraColliderRadius);
+					}
+				}
+			}
+		}
+		
+		// We modified the local position while iterating submeshes.
+		// We now need to go back to "world" space.
+		position = meshToLocal.TransformPoint(meshPosition);
 	}
 }
