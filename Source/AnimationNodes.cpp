@@ -25,17 +25,17 @@ void VertexAnimNode::Play(AnimationState* animState)
 	if(vertexAnimation != nullptr)
 	{
 		// Also we need the object to play the vertex anim on!
-		GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
-		if(object != nullptr)
+		GKActor* actor = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(actor != nullptr)
 		{
 			// Start absolute or relative anim.
 			if(absolute)
 			{
-				object->StartAnimation(vertexAnimation, animState->animation->GetFramesPerSecond(), position - offsetFromOrigin, Heading::FromDegrees(heading - headingFromOrigin));
+				actor->StartAbsoluteAnimation(vertexAnimation, animState->animation->GetFramesPerSecond(), position - offsetFromOrigin, Heading::FromDegrees(heading - headingFromOrigin), animState->timer, animState->fromGas);
 			}
 			else
 			{
-				object->StartAnimation(vertexAnimation, animState->animation->GetFramesPerSecond(), animState->allowMove);
+				actor->StartAnimation(vertexAnimation, animState->animation->GetFramesPerSecond(), animState->allowMove, animState->timer, animState->fromGas);
 			}
 		}
 	}
@@ -45,10 +45,10 @@ void VertexAnimNode::Stop()
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
-		if(object != nullptr)
+		GKActor* actor = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(actor != nullptr)
 		{
-			object->StopAnimation(vertexAnimation);
+			actor->StopAnimation(vertexAnimation);
 		}
 	}
 }
@@ -57,10 +57,10 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
-		if(object != nullptr)
+		GKActor* actor = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(actor != nullptr)
 		{
-			object->SampleAnimation(vertexAnimation, frame);
+			actor->SampleAnimation(vertexAnimation, frame);
 		}
 	}
 }

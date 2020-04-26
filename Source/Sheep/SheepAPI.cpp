@@ -791,7 +791,7 @@ shpvoid StartAnimation(std::string animationName)
 	if(animation != nullptr)
 	{
 		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-		GEngine::inst->GetScene()->GetAnimator()->Start(animation, false, currentThread->AddWait());
+		GEngine::inst->GetScene()->GetAnimator()->Start(animation, false, false, currentThread->AddWait());
 	}
 	return 0;
 }
@@ -803,7 +803,7 @@ shpvoid StartMoveAnimation(std::string animationName)
 	if(animation != nullptr)
 	{
 		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-		GEngine::inst->GetScene()->GetAnimator()->Start(animation, true, currentThread->AddWait());
+		GEngine::inst->GetScene()->GetAnimator()->Start(animation, true, false, currentThread->AddWait());
 	}
 	return 0;
 }

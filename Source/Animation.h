@@ -39,6 +39,7 @@ public:
 	// Length and duration.
     int GetFrameCount() const { return mFrameCount; }
     int GetFramesPerSecond() const { return mFramesPerSecond; }
+	float GetFrameDuration() const { return 1.0f / mFramesPerSecond; }
     float GetDuration() const { return (float)mFrameCount / (float)mFramesPerSecond; }
     
 private:

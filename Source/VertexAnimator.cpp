@@ -33,6 +33,15 @@ void VertexAnimator::Start(VertexAnimation* anim, int framesPerSecond, std::func
 	mVertexAnimationTimer = 0.0f;
 }
 
+void VertexAnimator::Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback, float time)
+{
+	Start(anim, framesPerSecond, stopCallback);
+	mVertexAnimationTimer = time;
+
+	// Sample animation at current timer value.
+	TakeSample(mVertexAnimation, mVertexAnimationTimer);
+}
+
 void VertexAnimator::Stop(VertexAnimation* anim)
 {
 	// Stop if animation matches playing one OR null was passed in.
@@ -54,7 +63,8 @@ void VertexAnimator::Sample(VertexAnimation* animation, int frame)
 {
 	if(animation != nullptr)
 	{
-		TakeSample(animation, frame * (1.0f / kDefaultFramesPerSecond));
+		//TODO: Should not assume 15.0f here, probably?
+		TakeSample(animation, frame * (1.0f / 15.0f));
 	}
 }
 
@@ -66,24 +76,15 @@ void VertexAnimator::OnUpdate(float deltaTime)
 		// Increment animation timer.
 		mVertexAnimationTimer += deltaTime;
 		
-		//TODO: If anim is looping, maybe it's OK to let anim timer exceed anim duration.
-		//TODO: But if not looping, we should clamp the time.
-		// Assuming clamped animation (no looping) for now...
+		// Sample animation at current timer value, clamping to anim duration.
 		float animDuration = mVertexAnimation->GetDuration(mFramesPerSecond);
-		if(mVertexAnimationTimer > animDuration)
-		{
-			mVertexAnimationTimer = animDuration;
-		}
-		
-		// Sample animation at current timer value.
-		TakeSample(mVertexAnimation, mVertexAnimationTimer);
+		TakeSample(mVertexAnimation, Math::Clamp(mVertexAnimationTimer, 0.0f, animDuration));
 		
 		// If at the end of the animation, clear animation.
 		// GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
 		if(mVertexAnimationTimer >= animDuration)
 		{
 			Stop(nullptr);
-			//mVertexAnimation = nullptr;
 		}
 	}
 }

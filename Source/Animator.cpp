@@ -18,23 +18,34 @@ Animator::Animator(Actor* owner) : Component(owner)
     
 }
 
-void Animator::Start(Animation* animation, bool allowMove, std::function<void()> finishCallback)
+void Animator::Start(Animation* animation, bool allowMove, bool fromGas, std::function<void()> finishCallback)
 {
 	if(animation == nullptr) { return; }
+	
+	// Create anim state for animation with appropriate "allow move" value.
 	mActiveAnimations.emplace_back(animation, finishCallback);
 	mActiveAnimations.back().allowMove = allowMove;
+	mActiveAnimations.back().fromGas = fromGas;
+	
+	// Immediately execute frame 0 of the animation.
+	// Frames execute at the BEGINNING of the time slice for that frame, so frame 0 executes at t=0.
+	ExecuteFrame(mActiveAnimations.back(), 0);
 }
 
 void Animator::Loop(Animation* animation)
 {
 	if(animation == nullptr) { return; }
-	mActiveAnimations.emplace_back(animation);
+	
+	// Can start anim per usual, but just set loop flag after creation.
+	Start(animation, false, false, nullptr);
 	mActiveAnimations.back().loop = true;
 }
 
 void Animator::Stop(Animation* animation)
 {
 	if(animation == nullptr) { return; }
+	
+	// Remove all anim states that are using the passed-in animation.
 	auto newEndIt = std::remove_if(mActiveAnimations.begin(), mActiveAnimations.end(), [animation](const AnimationState& as) -> bool {
 		if(as.animation == animation)
 		{
@@ -51,6 +62,9 @@ void Animator::Stop(Animation* animation)
 		}
 		return false;
 	});
+	
+	// "remove_if" returns iterator to new ending (all elements to be erased are after it.
+	// So...do the erase!
 	mActiveAnimations.erase(newEndIt, mActiveAnimations.end());
 }
 
@@ -75,44 +89,53 @@ void Animator::OnUpdate(float deltaTime)
 	auto it = mActiveAnimations.begin();
 	while(it != mActiveAnimations.end())
 	{
-		AnimationState& animState = *it;
-		
 		// Increment animation timer.
+		AnimationState& animState = *it;
 		animState.timer += deltaTime;
 		
-		// Based on the animation's frames per second, determine what
-		// fraction of a second should be spend on each frame.
-		float timePerFrame = 1.0f / animState.animation->GetFramesPerSecond();
+		/*
+		 Say we have a 6-frame animation:
+		 0----1----2----3----4----5-----
+		 
+		 Frame 0 executes immediately when the animation starts.
+		 After that, each frame executes after X seconds have passed.
+		 
+		 One issue that arises with "looped" animations particularly is that
+		 the first and last frames are the same pose (0/5 in above example). And in that
+		 case, you don't want that extra "time" after frame 5 to occur, or the
+		 looped animation stutters when it loops.
+		 That's why we use "-1" to decide when to loop/finish the anim.
+		 TODO: Does that cause problems with non-looping anims? Need to see!
+		 */
 		
 		// Based on how much time has passed, we may need to increment multiple frames of animation in one update loop.
 		// For example, if timer is 0.3, and timePerFrame is 0.1, we need to update 3 times.
-		while(animState.timer > timePerFrame)
+		float timePerFrame = animState.animation->GetFrameDuration();
+		while(animState.timer >= timePerFrame)
 		{
-			// Play any anim nodes for the current frame.
-			std::vector<AnimNode*>* frameData = animState.animation->GetFrame(animState.currentFrame);
-			if(frameData != nullptr)
-			{
-				for(auto& node : *frameData)
-				{
-					node->Play(&animState);
-				}
-			}
+			// WE ARE EXECUTING A FRAME!
 			
-			// Move on to the next frame.
+			// Decrement timer by amount for one frame.
+			// "timer" now contains how much time we are ahead of the current frame.
+			animState.timer -= timePerFrame;
+			
+			// Increment the frame.
+			// Frame 0 happens immediately on anim start. Each executed frame is then one more.
 			animState.currentFrame++;
 			
 			// If looping, wrap around the current frame when we reach the end!
+			// Note the "-1" because first and last frames are the same for a looping anim!
 			if(animState.loop)
 			{
-				animState.currentFrame %= animState.animation->GetFrameCount();
+				animState.currentFrame %= animState.animation->GetFrameCount() - 1;
 			}
 			
-			// Decrement timer, since we just simulated a single frame.
-			animState.timer -= timePerFrame;
+			// Execute any actions/anim nodes on the current frame.
+			ExecuteFrame(animState, animState.currentFrame);
 		}
 		
 		// If the animation has ended, remove it from the active animation states.
-		if(animState.currentFrame >= animState.animation->GetFrameCount())
+		if(animState.currentFrame >= animState.animation->GetFrameCount() - 1)
 		{
 			// Do the finish callback!
 			if(animState.finishCallback)
@@ -126,6 +149,18 @@ void Animator::OnUpdate(float deltaTime)
 		else
 		{
 			++it;
+		}
+	}
+}
+
+void Animator::ExecuteFrame(AnimationState& animState, int frameNumber)
+{
+	std::vector<AnimNode*>* animNodes = animState.animation->GetFrame(frameNumber);
+	if(animNodes != nullptr)
+	{
+		for(auto& node : *animNodes)
+		{
+			node->Play(&animState);
 		}
 	}
 }

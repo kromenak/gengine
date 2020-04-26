@@ -17,8 +17,11 @@ class GasPlayer : public Component
 public:
     GasPlayer(Actor* owner);
     
-	void SetGas(GAS* gas) { mGas = gas; mNodeIndex = 0; mTimer = 0.0f; }
-	void SetPaused(bool paused) { mPaused = paused; }
+	void SetGas(GAS* gas) { mGas = gas; }
+	
+	void Play() { mNodeIndex = 0; mTimer = 0.0f; mPaused = false; }
+	void Pause() { mPaused = true; }
+	void Resume() { mPaused = false; }
 	
 protected:
 	void OnUpdate(float deltaTime) override;
@@ -34,7 +37,7 @@ private:
     float mTimer = 0.0f;
 	
 	// If true, gas player is paused.
-	bool mPaused = false;
+	bool mPaused = true;
     
     void ProcessNextNode();
 };

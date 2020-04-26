@@ -200,7 +200,7 @@ void Scene::Load()
 		actor->SetListenGas(actorDef->listenGas);
 		
 		// Start in idle state.
-		//actor->StartFidget(GKActor::FidgetType::Idle);
+		actor->StartFidget(GKActor::FidgetType::Idle);
 		
 		//TODO: Apply init anim.
 		

@@ -41,6 +41,10 @@ struct AnimationState
 	// If true, the animation is allowed to move actors as part of vertex animations.
 	bool allowMove = false;
 	
+	// If true, this is an animation triggered by a GAS (GK3 auto-script).
+	// This mainly indicates that the animation is lower-priority than other anims.
+	bool fromGas = false;
+	
 	// Callback that is executed when the animation finishes.
 	//TODO: What about premature stops?
 	std::function<void()> finishCallback = nullptr;
@@ -53,7 +57,7 @@ public:
     Animator(Actor* owner);
 	
 	// Playback
-	void Start(Animation* animation, bool allowMove, std::function<void()> finishCallback);
+	void Start(Animation* animation, bool allowMove, bool fromGas, std::function<void()> finishCallback);
 	void Loop(Animation* animation);
 	void Stop(Animation* animation);
 	
@@ -67,4 +71,6 @@ private:
 	// I chose to use a linked list here b/c we may need to remove animations that are
 	// in the middle of the list at arbitrary times...not sure if the list is big enough or we do it often enough to get benefits?
 	std::list<AnimationState> mActiveAnimations;
+	
+	void ExecuteFrame(AnimationState& animState, int frameNumber);
 };

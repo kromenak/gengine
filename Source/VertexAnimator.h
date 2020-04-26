@@ -13,15 +13,31 @@
 class MeshRenderer;
 class VertexAnimation;
 
+/*
+struct VertexAnimParams
+{
+	// The anim to play.
+	VertexAnimation* anim = nullptr;
+	
+	// Rate to play the animation at.
+	int framesPerSecond = 15;
+	
+	// Time to start the animation at.
+	float startTime = 0.0f;
+	
+	// A callback to fire on animation stop.
+	std::function<void()> stopCallback = nullptr;
+};
+*/
+
 class VertexAnimator : public Component
 {
 	TYPE_DECL_CHILD();
 public:
-	static const int kDefaultFramesPerSecond = 15;
-	
 	VertexAnimator(Actor* owner);
 	
 	void Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback);
+	void Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback, float time);
 	void Stop(VertexAnimation* anim);
 	
 	void Sample(VertexAnimation* animation, int frame);
@@ -36,7 +52,7 @@ private:
 	MeshRenderer* mMeshRenderer = nullptr;
 	
 	// How many frames per second to run at. Default is 15 (from GK3 docs).
-	int mFramesPerSecond = kDefaultFramesPerSecond;
+	int mFramesPerSecond = 15;
 	
 	// A currently running vertex animation, if any.
 	VertexAnimation* mVertexAnimation = nullptr;

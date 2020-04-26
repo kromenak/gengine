@@ -268,6 +268,7 @@ void Model::ParseFromData(char *data, int dataLength)
         
         // 24 bytes: Two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max bound values for the mesh.
+		//TODO: May want to use this to generate bounding boxes for models, which we can then use for collision instead of triangles in most cases.
 		#ifdef DEBUG_OUTPUT
 		Vector3 min = reader.ReadVector3();
         Vector3 max = reader.ReadVector3();

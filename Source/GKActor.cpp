@@ -77,8 +77,11 @@ std::string GKActor::GetModelName() const
 	return model->GetNameNoExtension();
 }
 
-void GKActor::StartAnimation(VertexAnimation* anim, int framesPerSecond, bool allowMove)
+void GKActor::StartAnimation(VertexAnimation* anim, int framesPerSecond, bool allowMove, float time, bool fromGas)
 {
+	// Don't let a GAS anim override a non-GAS anim.
+	if(fromGas && mVertexAnimator->IsPlaying()) { return; }
+	
 	// Stop any playing animation before starting a new one.
 	if(mVertexAnimator->IsPlaying())
 	{
@@ -109,21 +112,36 @@ void GKActor::StartAnimation(VertexAnimation* anim, int framesPerSecond, bool al
 	// Move model to actor position.
 	SetMeshToActorPositionUsingAnim(anim, framesPerSecond);
 	
+	// If this is not a GAS anim, pause any running GAS.
+	if(!fromGas)
+	{
+		mGasPlayer->Pause();
+	}
+	
 	// Start the animation.
-	mVertexAnimator->Start(anim, framesPerSecond, std::bind(&GKActor::OnVertexAnimationStopped, this));
+	mVertexAnimator->Start(anim, framesPerSecond, std::bind(&GKActor::OnVertexAnimationStopped, this), time);
 }
 
-void GKActor::StartAnimation(VertexAnimation* anim, int framesPerSecond, Vector3 pos, Heading heading)
+void GKActor::StartAbsoluteAnimation(VertexAnimation* anim, int framesPerSecond, Vector3 pos, Heading heading, float time, bool fromGas)
 {
+	// Don't let a GAS anim override a non-GAS anim.
+	if(fromGas && mVertexAnimator->IsPlaying()) { return; }
+	
 	// Absolute anims are always move anims?
 	mVertexAnimAllowMove = true;
 	
 	// Set the 3D model's position and heading.
-	mMeshRenderer->GetOwner()->SetPosition(pos);
-	mMeshRenderer->GetOwner()->SetRotation(heading.ToQuaternion());
+	mMeshActor->SetPosition(pos);
+	mMeshActor->SetRotation(heading.ToQuaternion());
+	
+	// If this is not a GAS anim, pause any running GAS.
+	if(!fromGas)
+	{
+		mGasPlayer->Pause();
+	}
 	
 	// Start the animation.
-	mVertexAnimator->Start(anim, framesPerSecond, std::bind(&GKActor::OnVertexAnimationStopped, this));
+	mVertexAnimator->Start(anim, framesPerSecond, std::bind(&GKActor::OnVertexAnimationStopped, this), time);
 }
 
 void GKActor::StopAnimation(VertexAnimation* anim)
@@ -140,7 +158,6 @@ void GKActor::SampleAnimation(VertexAnimation* anim, int frame)
 
 void GKActor::StartFidget(FidgetType type)
 {
-	/*
     // Set appropriate gas to play.
     switch(type)
     {
@@ -161,12 +178,16 @@ void GKActor::StartFidget(FidgetType type)
 		mGasPlayer->SetGas(mListenGas);
 		break;
     }
-	*/
+	
+	// Play it!
+	mGasPlayer->Play();
 }
 
 void GKActor::StartCustomFidget(GAS* gas)
 {
-	//mGasPlayer->SetGas(gas);
+	// Set and play.
+	mGasPlayer->SetGas(gas);
+	mGasPlayer->Play();
 }
 
 void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
@@ -222,12 +243,20 @@ void GKActor::OnUpdate(float deltaTime)
 		SetActorToMeshPosition(true);
 		SetActorToMeshRotation(true);
 	}
-	
 	/*
-	// Pause any fidgets while walker is going.
-	if(mGasPlayer != nullptr && mWalker != nullptr)
+	else
 	{
-		mGasPlayer->SetPaused(mWalker->IsWalking());
+		mMeshActor->SetPosition(GetPosition());
+		
+		// Move mesh to actor's rotation.
+		if(mActorType == ActorType::Actor)
+		{
+			mMeshActor->SetRotation(GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
+		}
+		else
+		{
+			mMeshActor->SetRotation(GetRotation());
+		}
 	}
 	*/
 }
@@ -249,6 +278,9 @@ void GKActor::OnVertexAnimationStopped()
 		// Offset mesh to be positioned at actor position.
 		SetMeshToActorPosition(true);
 	}
+	
+	// Resume GAS (well, play from beginning - gives better results).
+	mGasPlayer->Play();
 }
 
 void GKActor::SetMeshToActorPosition(bool useMeshPosOffset)

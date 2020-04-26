@@ -61,8 +61,8 @@ public:
 	GasPlayer* GetGasPlayer() const { return mGasPlayer; }
 	
 	// Vertex animation functions.
-	void StartAnimation(VertexAnimation* anim, int framesPerSecond, bool allowMove);
-	void StartAnimation(VertexAnimation* anim, int framesPerSecond, Vector3 pos, Heading heading);
+	void StartAnimation(VertexAnimation* anim, int framesPerSecond, bool allowMove, float time, bool fromGas);
+	void StartAbsoluteAnimation(VertexAnimation* anim, int framesPerSecond, Vector3 pos, Heading heading, float time, bool fromGas);
 	void StopAnimation(VertexAnimation* anim);
 	void SampleAnimation(VertexAnimation* anim, int frame);
 	

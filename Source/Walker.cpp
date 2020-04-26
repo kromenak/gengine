@@ -238,14 +238,14 @@ void Walker::StartWalk()
 		*/
 		 
 		mState = State::Start;
-		GEngine::inst->GetScene()->GetAnimator()->Start(anim, true, std::bind(&Walker::ContinueWalk, this));
+		GEngine::inst->GetScene()->GetAnimator()->Start(anim, true, false, std::bind(&Walker::ContinueWalk, this));
 	}
 }
 
 void Walker::ContinueWalk()
 {
 	mState = State::Loop;
-	GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkLoopAnim, true, std::bind(&Walker::ContinueWalk, this));
+	GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkLoopAnim, true, false, std::bind(&Walker::ContinueWalk, this));
 }
 
 void Walker::StopWalk()
@@ -256,7 +256,7 @@ void Walker::StopWalk()
 		GEngine::inst->GetScene()->GetAnimator()->Stop(mCharConfig->walkLoopAnim);
 		
 		mState = State::End;
-		GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkStopAnim, true, [this]() -> void {
+		GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkStopAnim, true, false, [this]() -> void {
 			mState = State::Idle;
 			//mWalkActor->StartFidget(GKActor::FidgetType::Idle);
 		});

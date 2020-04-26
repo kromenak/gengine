@@ -28,7 +28,7 @@ int AnimGasNode::Execute(GasPlayer* player)
     if(animation == nullptr) { return 0; }
     
     // Play the animation!
-	GEngine::inst->GetScene()->GetAnimator()->Start(animation, false, nullptr);
+	GEngine::inst->GetScene()->GetAnimator()->Start(animation, false, true, nullptr);
 	
     //std::cout << "Playing animation " << animation->GetName() << " for " << animation->GetDuration() << " seconds." << std::endl;
     return animation->GetDuration() * 1000;
