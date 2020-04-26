@@ -518,6 +518,7 @@ shpvoid SetGameVariableInt(std::string varName, int value);
 int GetNounVerbCount(std::string noun, std::string verb);
 int GetNounVerbCountInt(int nounEnum, int verbEnum);
 shpvoid IncNounVerbCount(std::string noun, std::string verb);
+shpvoid IncNounVerbCountBoth(std::string noun, std::string verb);
 shpvoid SetNounVerbCount(std::string noun, std::string verb, int count);
 shpvoid SetNounVerbCountBoth(std::string noun, std::string verb, int count);
 shpvoid TriggerNounVerb(std::string noun, std::string verb); // DEV

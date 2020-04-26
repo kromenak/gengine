@@ -270,10 +270,15 @@ void GameCamera::OnUpdate(float deltaTime)
 	}
 }
 
+//TODO: In OG game, if you disable collision, go outside bounds, and re-enable, you can get back into the bounds area.
+//TODO: In other words, it seems the OG game takes triangle facing direction or containment within bounds when checking collision.
 void GameCamera::ResolveCollisions(Vector3& position)
 {
 	// No bounds model = no collision.
 	if(mBoundsModel == nullptr) { return; }
+	
+	// Bounds may be purposely disabled for debugging purposes.
+	if(!mBoundsEnabled) { return; }
 	
 	// We'll represent the camera with a sphere and the bounds are a model (triangles).
 	// Iterate and do a collision check against the triangles of the bounds model.
@@ -283,7 +288,8 @@ void GameCamera::ResolveCollisions(Vector3& position)
 		// Bounds model is positioned at (0,0,0) in world space (so no need to multiply local to world...it's identity).
 		// BUT each mesh in the model has its own local coordinate system!
 		// We need to convert camera position to local space of the mesh before doing collision check.
-		//TODO: Inverse operation here is expensive - can probably be more efficient somehow...
+		//TODO: Inverse operation here is expensive - can probably be more efficient.
+		//TODO: The local transform is just rotation/scale/translation, so we can invert using a different method likely.
 		Matrix4 meshToLocal = mesh->GetLocalTransformMatrix();
 		Matrix4 localToMesh = meshToLocal.Inverse();
 		Vector3 meshPosition = localToMesh.TransformPoint(position);

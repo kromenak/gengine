@@ -1039,8 +1039,24 @@ shpvoid DefaultInspect(std::string noun)
 	return 0;
 }
 RegFunc1(DefaultInspect, void, string, WAITABLE, REL_FUNC);
+*/
+ 
+shpvoid EnableCameraBoundaries()
+{
+	GEngine::inst->GetScene()->GetCamera()->SetBoundsEnabled(true);
+	return 0;
+}
+RegFunc0(EnableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
+ 
+shpvoid DisableCameraBoundaries()
+{
+	// Note that this only disables camera boundaries until the next scene load.
+	// This reflects the behavior in the OG game.
+	GEngine::inst->GetScene()->GetCamera()->SetBoundsEnabled(false);
+	return 0;
+}
+RegFunc0(DisableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
 
-//EnableCameraBoundaries
 //DisableCameraBoundaries
 
 //DumpCamera
@@ -1049,6 +1065,7 @@ RegFunc1(DefaultInspect, void, string, WAITABLE, REL_FUNC);
 //GetCameraAngleCount
 //GetIndexedCameraAngle
 
+/*
 shpvoid SetCameraGlide(int glide)
 {
 	// glide is 0 or 1
@@ -1498,6 +1515,15 @@ shpvoid IncNounVerbCount(string noun, string verb)
 	return 0;
 }
 RegFunc2(IncNounVerbCount, void, string, string, IMMEDIATE, REL_FUNC);
+
+shpvoid IncNounVerbCountBoth(string noun, string verb)
+{
+	//TODO: HelpCommand says this sets the noun/verb count for both Gabe and Grace.
+	//TODO: Does that imply SetNounVerbCount tracks per-Ego?
+	Services::Get<GameProgress>()->IncNounVerbCount(noun, verb);
+	return 0;
+}
+RegFunc2(IncNounVerbCountBoth, void, string, string, IMMEDIATE, REL_FUNC);
 
 shpvoid SetNounVerbCount(string noun, string verb, int count)
 {

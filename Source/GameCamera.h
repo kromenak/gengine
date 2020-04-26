@@ -15,7 +15,8 @@ class GameCamera : public Actor
 public:
     GameCamera();
 	
-	void SetCameraBounds(Model* boundsModel) { mBoundsModel = boundsModel; }
+	void SetBounds(Model* boundsModel) { mBoundsModel = boundsModel; }
+	void SetBoundsEnabled(bool enabled) { mBoundsEnabled = enabled; }
 	
 	void SetAngle(const Vector2& angle);
 	void SetAngle(float yaw, float pitch);
@@ -50,6 +51,9 @@ private:
 	
 	// A model whose triangles are used as collision for the camera.
 	Model* mBoundsModel = nullptr;
+		
+	// If true, camera bounds are turned on. If false, they are disabled.
+	bool mBoundsEnabled = true;
 	
 	void ResolveCollisions(Vector3& position);
 };

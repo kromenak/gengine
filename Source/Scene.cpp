@@ -110,7 +110,7 @@ void Scene::Load()
 	Model* cameraBoundsModel = Services::GetAssets()->LoadModel(mSceneData->GetCameraBoundsModelName());
 	if(cameraBoundsModel != nullptr)
 	{
-		mCamera->SetCameraBounds(cameraBoundsModel);
+		mCamera->SetBounds(cameraBoundsModel);
 		
 		// For debugging - we can visualize the camera bounds mesh, if desired.
 		//Actor* cameraBoundsActor = new Actor();
