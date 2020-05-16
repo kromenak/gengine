@@ -5,6 +5,8 @@
 //
 #include "Animation.h"
 
+#include <cctype>
+
 #include "AnimationNodes.h"
 #include "IniParser.h"
 #include "Services.h"
@@ -221,21 +223,17 @@ void Animation::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "SOUNDS"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			// Read in 2+ lines as actions.
+			// Read in lines 2+ as sounds.
             for(int i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
                 
-				// Two possible versions of these lines:
-                // <frame_num>, <sound_name>, <volume>, <model_name>, <min_dist>, <max_dist>
-                // <frame_num>, <sound_name>, <volume>, <x1>, <y1>, <z1>, <min_dist>, <max_dist>
-				unsigned int paramCount = static_cast<int>(line.entries.size());
-				if(paramCount != 6 && paramCount != 8)
-				{
-					std::cout << "Invalid param count of " << paramCount << " for animation asset " << GetName() << std::endl;
-					continue;
-				}
-                
+				// Possible versions of these lines:
+				// <frame_num>, <sound_name>, <volume> (2D sound)
+				// <frame_num>, <sound_name>, <volume>, <model_name> (3D sound attached to model)
+                // <frame_num>, <sound_name>, <volume>, <model_name>, <min_dist>, <max_dist> (3D sound attached to model w/ min/max distances)
+                // <frame_num>, <sound_name>, <volume>, <x>, <y>, <z> (3D sound at position)
+				// <frame_num>, <sound_name>, <volume>, <x>, <y>, <z>, <min_dist>, <max_dist> (3D sound at position w/ min/max distances)
                 // Read frame number.
                 int frameNumber = line.entries[0].GetValueAsInt();
                 
@@ -252,24 +250,34 @@ void Animation::ParseFromData(char *data, int dataLength)
 				node->volume = volume;
 				mFrames[frameNumber].push_back(node);
 				
-                // If there are 6 parameters, next up is the name of the model that plays the sound.
-                // If there are 8 parameters, next up are a sound position (x,y,z).
-                if(paramCount == 6)
-                {
+				// Below here, arguments are optional.
+				if(line.entries.size() < 4) { continue; }
+				
+				// HACK: the next argument might be a model name OR a sound position (x, y, z).
+				// To determine, let's just see if the first char is a digit.
+				// Probably a better way to do this is add IniParser logic to check entry type (int, float, string, etc).
+				// Also, a position requires at least 6 arguments total.
+				bool usesPosition = std::isdigit(line.entries[3].value[0]) && line.entries.size() >= 6;
+				int distIndex = 0;
+				if(!usesPosition)
+				{
 					node->modelName = line.entries[3].key;
-                }
-                else
-                {
-					//TODO: Do the z/y values need to be flipped here as well???
-                    int x = line.entries[3].GetValueAsInt();
-                    int y = line.entries[4].GetValueAsInt();
-                    int z = line.entries[5].GetValueAsInt();
-					node->position = Vector3(x, y, z);
-                }
-                
-                // Read in min/max distance for sound.
-				int distIndex = paramCount == 6 ? 4 : 6;
+					distIndex = 4;
+				}
+				else
+				{
+					int x = line.entries[3].GetValueAsInt();
+				    int y = line.entries[4].GetValueAsInt();
+				    int z = line.entries[5].GetValueAsInt();
+				    node->position = Vector3(x, y, z);
+					distIndex = 6;
+				}
+				
+				// Read in min/max distance for sound, if entries are present.
+				if(line.entries.size() <= distIndex) { continue; }
                 node->minDistance = line.entries[distIndex].GetValueAsInt();
+				
+				if(line.entries.size() <= (distIndex + 1)) { continue; }
                 node->maxDistance = line.entries[distIndex + 1].GetValueAsInt();
             }
         }
