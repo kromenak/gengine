@@ -168,14 +168,17 @@ void GKActor::StartFidget(FidgetType type)
 		
 	case FidgetType::Idle:
 		mGasPlayer->SetGas(mIdleGas);
+		std::cout << mNoun << " using Idle fidget." << std::endl;
 		break;
 		
 	case FidgetType::Talk:
 		mGasPlayer->SetGas(mTalkGas);
+		std::cout << mNoun << " using Talk fidget." << std::endl;
 		break;
 		
 	case FidgetType::Listen:
 		mGasPlayer->SetGas(mListenGas);
+		std::cout << mNoun << " using Listen fidget." << std::endl;
 		break;
     }
 	

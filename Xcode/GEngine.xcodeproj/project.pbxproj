@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		4B00D3301F8F3AD500D536D5 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* Camera.cpp */; };
 		4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1112AD1F821FFF00AFDDFC /* Component.cpp */; };
+		4B0183A624574837004B5C58 /* DialogueManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0183A524574837004B5C58 /* DialogueManager.cpp */; };
+		4B0183A724574837004B5C58 /* DialogueManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0183A524574837004B5C58 /* DialogueManager.cpp */; };
 		4B02A8BF2381E56200CCDFAA /* InventoryManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */; };
 		4B02A8C02381E56200CCDFAA /* InventoryManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */; };
 		4B046E90218E855600E56341 /* Mover.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B046E8F218E855600E56341 /* Mover.cpp */; };
@@ -108,7 +110,6 @@
 		4B22F52F2174078B0065B152 /* AudioManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B7C3A141F4EB07000BB0922 /* AudioManager.cpp */; };
 		4B22F5302174078B0065B152 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
 		4B22F5312174078B0065B152 /* SoundtrackPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */; };
-		4B22F5322174078B0065B152 /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B76B57A1F35999B003F63E5 /* BarnFile.cpp */; };
 		4B22F5352174078B0065B152 /* BinaryWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D020B2555E00795582 /* BinaryWriter.cpp */; };
 		4B22F5362174078B0065B152 /* Camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B00D32E1F8F3AD500D536D5 /* Camera.cpp */; };
@@ -197,7 +198,6 @@
 		4B84A13621684374003B4C3F /* Color32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13521684374003B4C3F /* Color32.cpp */; };
 		4B84A13921697223003B4C3F /* UILabel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13821697223003B4C3F /* UILabel.cpp */; };
 		4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421120A905B600DE8C0D /* Cursor.cpp */; };
-		4B85421520A9276200DE8C0D /* Yak.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85421420A9276200DE8C0D /* Yak.cpp */; };
 		4B85E87923497A4A004AA3E5 /* UITextBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */; };
 		4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */; };
 		4B8A976D238B6EE1006D284D /* LocationManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8A976C238B6EE1006D284D /* LocationManager.cpp */; };
@@ -304,6 +304,8 @@
 /* Begin PBXFileReference section */
 		4B00D32E1F8F3AD500D536D5 /* Camera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Camera.cpp; path = ../Source/Camera.cpp; sourceTree = "<group>"; };
 		4B00D32F1F8F3AD500D536D5 /* Camera.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Camera.h; path = ../Source/Camera.h; sourceTree = "<group>"; };
+		4B0183A424574837004B5C58 /* DialogueManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = DialogueManager.h; path = ../Source/DialogueManager.h; sourceTree = "<group>"; };
+		4B0183A524574837004B5C58 /* DialogueManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DialogueManager.cpp; path = ../Source/DialogueManager.cpp; sourceTree = "<group>"; };
 		4B02A3B01F526529000540A7 /* membuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = membuf.cpp; path = ../Source/membuf.cpp; sourceTree = "<group>"; };
 		4B02A3B11F526529000540A7 /* membuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = membuf.h; path = ../Source/membuf.h; sourceTree = "<group>"; };
 		4B02A3B31F5269E9000540A7 /* imstream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = imstream.cpp; path = ../Source/imstream.cpp; sourceTree = "<group>"; };
@@ -473,8 +475,6 @@
 		4B84A13821697223003B4C3F /* UILabel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UILabel.cpp; path = ../Source/UILabel.cpp; sourceTree = "<group>"; };
 		4B85421020A905B600DE8C0D /* Cursor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Cursor.h; path = ../Source/Cursor.h; sourceTree = "<group>"; };
 		4B85421120A905B600DE8C0D /* Cursor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Cursor.cpp; path = ../Source/Cursor.cpp; sourceTree = "<group>"; };
-		4B85421320A9276200DE8C0D /* Yak.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Yak.h; path = ../Source/Audio/Yak.h; sourceTree = "<group>"; };
-		4B85421420A9276200DE8C0D /* Yak.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Yak.cpp; path = ../Source/Audio/Yak.cpp; sourceTree = "<group>"; };
 		4B85E87723497A4A004AA3E5 /* UITextBuffer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = UITextBuffer.h; path = ../Source/UITextBuffer.h; sourceTree = "<group>"; };
 		4B85E87823497A4A004AA3E5 /* UITextBuffer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = UITextBuffer.cpp; path = ../Source/UITextBuffer.cpp; sourceTree = "<group>"; };
 		4B85E87A23497EBF004AA3E5 /* TextLayout.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = TextLayout.h; path = ../Source/TextLayout.h; sourceTree = "<group>"; };
@@ -883,6 +883,8 @@
 				4B4AFEE923BBC6B100554D04 /* ActionManager.h */,
 				4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */,
 				4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */,
+				4B0183A524574837004B5C58 /* DialogueManager.cpp */,
+				4B0183A424574837004B5C58 /* DialogueManager.h */,
 				4BBC028922F162B8005ED374 /* FaceController.cpp */,
 				4BBC028822F162B8005ED374 /* FaceController.h */,
 				4B12B9CF22F527C8009F54E4 /* FootstepManager.cpp */,
@@ -959,8 +961,6 @@
 				4BBB91B42058E53A007B9375 /* Soundtrack.h */,
 				4B17D700206072E400EBD298 /* SoundtrackPlayer.cpp */,
 				4B17D6FF206072E400EBD298 /* SoundtrackPlayer.h */,
-				4B85421420A9276200DE8C0D /* Yak.cpp */,
-				4B85421320A9276200DE8C0D /* Yak.h */,
 			);
 			name = Audio;
 			sourceTree = "<group>";
@@ -1318,6 +1318,7 @@
 				4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
 				4B5A334B243A57A70064FC06 /* SphereCollider.cpp in Sources */,
+				4B0183A624574837004B5C58 /* DialogueManager.cpp in Sources */,
 				4BEA727121D5834300998066 /* WalkerBoundary.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
 				4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */,
@@ -1360,7 +1361,6 @@
 				4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
-				4B85421520A9276200DE8C0D /* Yak.cpp in Sources */,
 				4B8A976D238B6EE1006D284D /* LocationManager.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
 				4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */,
@@ -1406,7 +1406,6 @@
 				4B22F50A2174075B0065B152 /* BSP.cpp in Sources */,
 				4B22F50B2174075B0065B152 /* NVC.cpp in Sources */,
 				4B22F505217407530065B152 /* SheepManager.cpp in Sources */,
-				4B22F5322174078B0065B152 /* Yak.cpp in Sources */,
 				4BB67C462352554500FDFB30 /* stb_image_resize.cpp in Sources */,
 				4B22F5372174078B0065B152 /* Component.cpp in Sources */,
 				4B22F5262174078B0065B152 /* VertexAnimation.cpp in Sources */,
@@ -1438,6 +1437,7 @@
 				4BFBB86721D0469000E07EFB /* SceneData.cpp in Sources */,
 				4B5A334C243A57A70064FC06 /* SphereCollider.cpp in Sources */,
 				4B22F5362174078B0065B152 /* Camera.cpp in Sources */,
+				4B0183A724574837004B5C58 /* DialogueManager.cpp in Sources */,
 				4BEA727221D5834300998066 /* WalkerBoundary.cpp in Sources */,
 				4B22F515217407640065B152 /* MeshRenderer.cpp in Sources */,
 				4B22F509217407530065B152 /* Skybox.cpp in Sources */,

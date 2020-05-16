@@ -13,6 +13,7 @@
 #include "CharacterManager.h"
 #include "ConsoleUI.h"
 #include "Debug.h"
+#include "DialogueManager.h"
 #include "FootstepManager.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
@@ -125,6 +126,9 @@ bool GEngine::Initialize()
 	
 	// Create action manager.
 	Services::Set<ActionManager>(new ActionManager());
+	
+	// Create dialogue manager.
+	Services::Set<DialogueManager>(new DialogueManager());
 	
 	// Create console UI - this persists for the entire game.
 	ConsoleUI* consoleUI = new ConsoleUI(false);

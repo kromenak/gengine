@@ -11,6 +11,7 @@
 #include "Animator.h"
 #include "Camera.h"
 #include "CharacterManager.h"
+#include "DialogueManager.h"
 #include "FaceController.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
@@ -733,35 +734,37 @@ RegFunc1(WasEgoEverInLocation, int, string, IMMEDIATE, REL_FUNC);
 
 //AnimEvent
 
-/*
-shpvoid StartDialogue(std::string dialogueName, int numLines)
+shpvoid StartDialogue(std::string licensePlate, int numLines)
 {
-	std::cout << "StartDialogue" << std::endl;
-	return 0;
+	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+	Services::Get<DialogueManager>()->StartDialogue(licensePlate, numLines, true, currentThread->AddWait());
+    return 0;
 }
 RegFunc2(StartDialogue, void, string, int, WAITABLE, REL_FUNC);
 
-shpvoid StartDialogueNoFidgets(std::string dialogueName, int numLines)
+shpvoid StartDialogueNoFidgets(std::string licensePlate, int numLines)
 {
-	std::cout << "StartDialogueNoFidgets" << std::endl;
-	return 0;
+	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+	Services::Get<DialogueManager>()->StartDialogue(licensePlate, numLines, false, currentThread->AddWait());
+    return 0;
 }
 RegFunc2(StartDialogueNoFidgets, void, string, int, WAITABLE, REL_FUNC);
 
 shpvoid ContinueDialogue(int numLines)
 {
-	std::cout << "ContinueDialogue" << std::endl;
+	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+	Services::Get<DialogueManager>()->ContinueDialogue(numLines, true, currentThread->AddWait());
 	return 0;
 }
 RegFunc1(ContinueDialogue, void, int, WAITABLE, REL_FUNC);
 
 shpvoid ContinueDialogueNoFidgets(int numLines)
 {
-	std::cout << "ContinueDialogueNoFidgets" << std::endl;
+	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+	Services::Get<DialogueManager>()->ContinueDialogue(numLines, false, currentThread->AddWait());
 	return 0;
 }
 RegFunc1(ContinueDialogueNoFidgets, void, int, WAITABLE, REL_FUNC);
-*/
  
 //EnableInterpolation
 
@@ -769,14 +772,14 @@ RegFunc1(ContinueDialogueNoFidgets, void, int, WAITABLE, REL_FUNC);
 
 //DumpAnimator
 
-/*
 shpvoid SetConversation(std::string conversationName)
 {
-	std::cout << "SetConversation" << std::endl;
+	std::cout << "SetConversation " << conversationName << std::endl;
 	return 0;
 }
 RegFunc1(SetConversation, void, string, WAITABLE, REL_FUNC);
 
+/*
 shpvoid EndConversation()
 {
 	std::cout << "EndConversation" << std::endl;
