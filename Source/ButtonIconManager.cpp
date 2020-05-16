@@ -81,7 +81,8 @@ ButtonIconManager::ButtonIconManager()
 				{
 					map = &mNounsToIcons;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic"))
+				else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic") ||
+						StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
 				{
 					map = &mTopicsToIcons;
 				}
@@ -151,7 +152,17 @@ ButtonIcon& ButtonIconManager::GetButtonIconForTopic(const std::string& topic)
 	}
 }
 
+bool ButtonIconManager::IsVerb(const std::string& word)
+{
+	return mVerbsToIcons.find(StringUtil::ToLowerCopy(word)) != mVerbsToIcons.end();
+}
+
 bool ButtonIconManager::IsInventoryItem(const std::string& word)
 {
 	return mNounsToIcons.find(StringUtil::ToLowerCopy(word)) != mNounsToIcons.end();
+}
+
+bool ButtonIconManager::IsTopic(const std::string& word)
+{
+	return mTopicsToIcons.find(StringUtil::ToLowerCopy(word)) != mTopicsToIcons.end();
 }

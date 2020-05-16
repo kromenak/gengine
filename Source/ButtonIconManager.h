@@ -39,7 +39,9 @@ public:
 	ButtonIcon& GetButtonIconForVerb(const std::string& verb);
 	ButtonIcon& GetButtonIconForTopic(const std::string& topic);
 	
+	bool IsVerb(const std::string& word);
 	bool IsInventoryItem(const std::string& word);
+	bool IsTopic(const std::string& word);
 	
 private:
 	ButtonIcon mDefaultIcon;

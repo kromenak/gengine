@@ -63,12 +63,15 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, GK
 		const std::vector<Action>& anyObjectActions = nvc->GetActions("ANY_OBJECT");
 		for(auto& action : anyObjectActions)
 		{
-			// Ignore any action verbs that refer to inventory items.
-			// Inventory items ONLY match if a specific item is provided (see GetActions(noun, verb)).
-			bool verbIsInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM") ||
-				Services::Get<ButtonIconManager>()->IsInventoryItem(action.verb);
+			// Wildcard verb can't match here. It only matches when a specific verb is provided.
+			bool verbIsWildcard = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
+			if(verbIsWildcard) { continue; }
 			
-			if(!verbIsInvItem && nvc->IsCaseMet(&action, ego))
+			// Action's verb must ACTUALLY be a verb - no inventory item, no topic.
+			// Inventory items only match when a specific verb is provided (see GetActions(noun, verb)).
+			// Topics only match for conversations.
+			bool isVerb = Services::Get<ButtonIconManager>()->IsVerb(action.verb);
+			if(isVerb && nvc->IsCaseMet(&action, ego))
 			{
 				verbsToActions[action.verb] = &action;
 			}
@@ -81,12 +84,13 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, GK
 		const std::vector<Action>& nounActions = nvc->GetActions(noun);
 		for(auto& action : nounActions)
 		{
-			// Ignore any action verbs that refer to inventory items.
-			// Inventory items ONLY match if a specific item is provided (see GetActions(noun, verb)).
-			bool verbIsInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM") ||
-				Services::Get<ButtonIconManager>()->IsInventoryItem(action.verb);
+			// Wildcard verb can't match here. It only matches when a specific verb is provided.
+			bool verbIsWildcard = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
+			if(verbIsWildcard) { continue; }
 			
-			if(!verbIsInvItem && nvc->IsCaseMet(&action, ego))
+			// Again, must be a verb in this scenario.
+			bool isVerb = Services::Get<ButtonIconManager>()->IsVerb(action.verb);
+			if(isVerb && nvc->IsCaseMet(&action, ego))
 			{
 				verbsToActions[action.verb] = &action;
 			}
@@ -142,7 +146,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 		}
 	}
 	
-	// If the verb is an inventoty item, handle noun/ANY_INV_ITEM combo.
+	// If the verb is an inventory item, handle noun/ANY_INV_ITEM combo.
 	// Find any matches for "ANY_OBJECT" and this verb next.
 	if(verbIsInventoryItem)
 	{
