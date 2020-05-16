@@ -167,6 +167,18 @@ const SceneCamera* SceneData::GetCinematicCamera(const std::string& cameraName) 
 	return nullptr;
 }
 
+const DialogueSceneCamera* SceneData::GetDialogueCamera(const std::string& cameraName) const
+{
+	for(int i = 0; i < mDialogueCameras.size(); i++)
+	{
+		if(StringUtil::EqualsIgnoreCase(mDialogueCameras[i]->label, cameraName))
+		{
+			return mDialogueCameras[i];
+		}
+	}
+	return nullptr;
+}
+
 const ScenePosition* SceneData::GetScenePosition(const std::string& positionName) const
 {
 	for(int i = 0; i < mPositions.size(); i++)

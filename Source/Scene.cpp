@@ -329,12 +329,15 @@ void Scene::InitEgoPosition(const std::string& positionName)
 
 void Scene::SetCameraPosition(const std::string& cameraName)
 {
-	// Find camera or fail.
-	// Any *named* camera type is valid.
+	// Find camera or fail. Any *named* camera type is valid.
 	const SceneCamera* camera = mSceneData->GetRoomCamera(cameraName);
 	if(camera == nullptr)
 	{
 		camera = mSceneData->GetCinematicCamera(cameraName);
+		if(camera == nullptr)
+		{
+			camera = mSceneData->GetDialogueCamera(cameraName);
+		}
 	}
 	
 	// If couldn't find a camera with this name, error out!
