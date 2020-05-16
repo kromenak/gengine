@@ -24,7 +24,6 @@
 #include "Soundtrack.h"
 #include "Texture.h"
 #include "VertexAnimation.h"
-#include "Yak.h"
 
 class AssetManager
 {
@@ -49,7 +48,7 @@ public:
 	
     Audio* LoadAudio(const std::string& name);
     Soundtrack* LoadSoundtrack(const std::string& name);
-    Yak* LoadYak(const std::string& name);
+	Animation* LoadYak(const std::string& name);
     
     Model* LoadModel(const std::string& name);
     Texture* LoadTexture(const std::string& name);
@@ -85,7 +84,7 @@ private:
     // A list of loaded assets, so we can just return existing assets if already loaded.
     std::unordered_map<std::string, Audio*> mLoadedAudios;
 	std::unordered_map<std::string, Soundtrack*> mLoadedSoundtracks;
-	std::unordered_map<std::string, Yak*> mLoadedYaks;
+	std::unordered_map<std::string, Animation*> mLoadedYaks;
 	
 	std::unordered_map<std::string, Model*> mLoadedModels;
     std::unordered_map<std::string, Texture*> mLoadedTextures;

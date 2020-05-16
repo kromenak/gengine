@@ -3,7 +3,12 @@
 //
 // Clark Kromenaker
 //
-// Description
+// Various nodes that are used in constructing animations.
+//
+// Animations proceed over time, executing each "frame" as enough time passes.
+// Each frame can have one or more "animation nodes" associated with it.
+// When a frame is executed, all associated animation nodes are executed.
+// Each node can do something such as: play a vertex animation, trigger SFX, change face textures, lip sync, etc.
 //
 #pragma once
 #include <string>
@@ -16,6 +21,7 @@ struct AnimationState;
 class Audio;
 class VertexAnimation;
 
+// Base struct for all anim nodes.
 struct AnimNode
 {
 	int frameNumber = 0;
@@ -27,6 +33,7 @@ struct AnimNode
 	virtual void Sample(Animation* anim, int frame) { } // Sampling support is optional. Does nothing by default.
 };
 
+// A node that plays a vertex animation.
 struct VertexAnimNode : public AnimNode
 {
 	// A vertex animation to play.
@@ -52,6 +59,7 @@ struct VertexAnimNode : public AnimNode
 	void Sample(Animation* anim, int frame) override;
 };
 
+// Applies a texture to a *scene* model (aka a model within the BSP geometry).
 struct SceneTextureAnimNode : public AnimNode
 {
 	std::string sceneName;
@@ -61,6 +69,7 @@ struct SceneTextureAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// Changes visibility of a *scene* model (aka a model within the BSP geometry).
 struct SceneModelVisibilityAnimNode : public AnimNode
 {
 	std::string sceneName;
@@ -70,6 +79,7 @@ struct SceneModelVisibilityAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// Changes a models texture (a model loaded from a .MOD file).
 struct ModelTextureAnimNode : public AnimNode
 {
 	std::string modelName;
@@ -80,6 +90,7 @@ struct ModelTextureAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// Changes visibility of a model (a model loaded from a .MOD file).
 struct ModelVisibilityAnimNode : public AnimNode
 {
 	std::string modelName;
@@ -88,6 +99,7 @@ struct ModelVisibilityAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that plays a sound effect.
 struct SoundAnimNode : public AnimNode
 {
 	Audio* audio = nullptr;
@@ -107,6 +119,7 @@ struct SoundAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that plays a footstep sound.
 struct FootstepAnimNode : public AnimNode
 {
 	std::string actorNoun;
@@ -114,6 +127,7 @@ struct FootstepAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that plays a "footscuff' sound.
 struct FootscuffAnimNode : public AnimNode
 {
 	std::string actorNoun;
@@ -121,6 +135,7 @@ struct FootscuffAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that plays a soundtrack.
 struct PlaySoundtrackAnimNode : public AnimNode
 {
 	std::string soundtrackName;
@@ -129,6 +144,7 @@ struct PlaySoundtrackAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that stops a soundtrack.
 struct StopSoundtrackAnimNode : public AnimNode
 {
 	// If empty, means "stop all soundtracks."
@@ -137,6 +153,7 @@ struct StopSoundtrackAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that changes the game camera's position/angle.
 struct CameraAnimNode : public AnimNode
 {
 	std::string cameraPositionName;
@@ -144,6 +161,7 @@ struct CameraAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that changes a part of an actor's face.
 struct FaceTexAnimNode : public AnimNode
 {
 	std::string actorNoun;
@@ -153,6 +171,7 @@ struct FaceTexAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that reverts part of an actor's face to the default.
 struct UnFaceTexAnimNode : public AnimNode
 {
 	std::string actorNoun;
@@ -161,6 +180,7 @@ struct UnFaceTexAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that changes an actor's mouth texture, for lip-sync during VO.
 struct LipSyncAnimNode : public AnimNode
 {
 	std::string actorNoun;
@@ -169,6 +189,7 @@ struct LipSyncAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that causes an actor to look towards a position briefly.
 struct GlanceAnimNode : public AnimNode
 {
 	// This node is used a grand total of ONCE in the entire game - EMLCONCENTRATE.ANM
@@ -178,6 +199,7 @@ struct GlanceAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that applies a certain "mood" (face combination) to an actor.
 struct MoodAnimNode : public AnimNode
 {
 	std::string actorNoun;
@@ -185,3 +207,50 @@ struct MoodAnimNode : public AnimNode
 	
 	void Play(AnimationState* animState) override;
 };
+
+// Specifies who the speaker is.
+// This is used to determine caption colors (different characters get different colors).
+// This is ALSO used (I think) to apply talk or listen animations to conversation participants.
+struct SpeakerAnimNode : public AnimNode
+{
+	// The actor who will be speaking.
+	std::string actorNoun;
+	
+	void Play(AnimationState* animState) override;
+};
+
+// Contains a caption to show on-screen.
+// When do we stop showing it? Maybe on a timer, when next caption appears, when "DIALOGUECUE" occurs...?
+struct CaptionAnimNode : public AnimNode
+{
+	// The caption to show.
+	std::string caption;
+	
+	void Play(AnimationState* animState) override;
+};
+
+// Speaker and caption data rolled into one.
+// Specifies who is speaking, what they're saying, and frame to end on.
+// Seems to be used primarily for movie captions (vs. in-game captions).
+struct SpeakerCaptionAnimNode : public AnimNode
+{
+	// The frame to stop showing the caption on.
+	int endFrame = 0;
+	
+	// The actor who will be speaking.
+	std::string actorNoun;
+	
+	// The caption to show.
+	std::string caption;
+	
+	void Play(AnimationState* animState) override;
+};
+
+// An empty trigger node, seems to be used to signal the end of a piece of dialogue.
+// There tends to be exactly one of these at the end of in-game VO animation (YAK) files.
+// What does it do? Maybe clears captions, maybe signals to SheepScript that the VO is over. Not sure yet...
+struct DialogueCueAnimNode : public AnimNode
+{
+	void Play(AnimationState* animState) override;
+};
+

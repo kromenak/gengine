@@ -862,14 +862,27 @@ RegFunc1(StopMorphAnimation, void, string, IMMEDIATE, REL_FUNC);
  
 shpvoid StartVoiceOver(string dialogueName, int numLines)
 {
-    string yakName = "E" + dialogueName + ".YAK";
-    Yak* yak = Services::GetAssets()->LoadYak(yakName);
-    yak->Play(numLines);
+	if(numLines > 1)
+	{
+		std::cout << "StartVoiceOver lines were greater than 1." << std::endl;
+	}
+    std::string yakName = "E" + dialogueName;
+	Animation* yak = Services::GetAssets()->LoadYak(yakName);
+	
+	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    GEngine::inst->GetScene()->GetAnimator()->Start(yak, false, false, currentThread->AddWait());
     return 0;
 }
 RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
 
-//StartYak
+shpvoid StartYak(string yakAnimationName)
+{
+	Animation* yak = Services::GetAssets()->LoadYak(yakAnimationName);
+	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    GEngine::inst->GetScene()->GetAnimator()->Start(yak, false, false, currentThread->AddWait());
+    return 0;
+}
+RegFunc1(StartYak, void, string, WAITABLE, DEV_FUNC);
 
 // APPLICATION
 shpvoid AddPath(std::string pathName)

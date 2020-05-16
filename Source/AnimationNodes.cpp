@@ -7,6 +7,7 @@
 
 #include "Animation.h"
 #include "Animator.h"
+#include "DialogueManager.h"
 #include "FaceController.h"
 #include "FootstepManager.h"
 #include "GKActor.h"
@@ -236,4 +237,26 @@ void GlanceAnimNode::Play(AnimationState* animState)
 void MoodAnimNode::Play(AnimationState* animState)
 {
 	std::cout << actorNoun << " IN MOOD " << moodName << std::endl;
+}
+
+void SpeakerAnimNode::Play(AnimationState* animState)
+{
+	std::cout << "SPEAKER IS NOW " << actorNoun << std::endl;
+	Services::Get<DialogueManager>()->SetSpeaker(actorNoun);
+}
+
+void CaptionAnimNode::Play(AnimationState* animState)
+{
+	std::cout << "CAPTION: " << caption << std::endl;
+}
+
+void SpeakerCaptionAnimNode::Play(AnimationState* animState)
+{
+	std::cout << "SPEAKER " << actorNoun << " w/ CAPTION: " << caption << std::endl;
+}
+
+void DialogueCueAnimNode::Play(AnimationState* animState)
+{
+	std::cout << "DIALOGUE CUE" << std::endl;
+	Services::Get<DialogueManager>()->TriggerDialogueCue();
 }

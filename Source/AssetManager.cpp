@@ -135,9 +135,9 @@ Soundtrack* AssetManager::LoadSoundtrack(const std::string& name)
     return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), &mLoadedSoundtracks);
 }
 
-Yak* AssetManager::LoadYak(const std::string& name)
+Animation* AssetManager::LoadYak(const std::string& name)
 {
-    return LoadAsset<Yak>(SanitizeAssetName(name, ".YAK"), &mLoadedYaks);
+    return LoadAsset<Animation>(SanitizeAssetName(name, ".YAK"), &mLoadedYaks);
 }
 
 Model* AssetManager::LoadModel(const std::string& name)

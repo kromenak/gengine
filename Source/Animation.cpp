@@ -490,6 +490,51 @@ void Animation::ParseFromData(char *data, int dataLength)
 					node->moodName = moodName;
 					mFrames[frameNumber].push_back(node);
 				}
+				else if(StringUtil::EqualsIgnoreCase(keyword, "SPEAKER"))
+                {
+					// Read actor name.
+					std::string actorNoun = line.entries[2].key;
+					
+					// Create and add node.
+					SpeakerAnimNode* node = new SpeakerAnimNode();
+					node->actorNoun = actorNoun;
+					mFrames[frameNumber].push_back(node);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyword, "CAPTION"))
+                {
+					// Read caption.
+					std::string caption = line.entries[2].key;
+					
+					// Create and add node.
+					CaptionAnimNode* node = new CaptionAnimNode();
+					node->caption = caption;
+					mFrames[frameNumber].push_back(node);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyword, "SPEAKERCAPTION"))
+                {
+					// Read end frame.
+					int endFrame = line.entries[2].GetValueAsInt();
+					
+					// Read actor who is doing the caption.
+					std::string actorNoun = line.entries[3].key;
+					
+					// Read caption.
+					std::string caption = line.entries[3].key;
+					
+					SpeakerCaptionAnimNode* node = new SpeakerCaptionAnimNode();
+					node->endFrame = endFrame;
+					node->actorNoun = actorNoun;
+					node->caption = caption;
+					mFrames[frameNumber].push_back(node);
+                }
+				else if(StringUtil::EqualsIgnoreCase(keyword, "DIALOGUECUE"))
+                {
+					// No options for this one.
+					
+                    // Create and add node.
+					DialogueCueAnimNode* node = new DialogueCueAnimNode();
+					mFrames[frameNumber].push_back(node);
+                }
                 else
                 {
                     std::cout << "Unexpected GK3 animation keyword: " << keyword << std::endl;

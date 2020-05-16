@@ -277,7 +277,7 @@ shpvoid StopMorphAnimation(std::string animationName);
 shpvoid StopAllMorphAnimations(); // DEV
 
 shpvoid StartVoiceOver(std::string dialogueName, int numLines); // WAIT
-shpvoid StartYak(std::string yakAnimName); // WAIT
+shpvoid StartYak(std::string yakAnimName); // WAIT, DEV
 
 // APPLICATION
 shpvoid AddPath(std::string pathName); // DEV
