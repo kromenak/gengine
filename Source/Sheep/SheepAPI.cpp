@@ -24,6 +24,7 @@
 #include "Services.h"
 #include "SoundtrackPlayer.h"
 #include "StringUtil.h"
+#include "VerbManager.h"
 
 // Required for macros to work correctly with "string" instead of "std::string".
 using namespace std;
@@ -1113,14 +1114,16 @@ shpvoid GlideToCameraAngle(std::string cameraName)
 	return 0;
 }
 RegFunc1(GlideToCameraAngle, void, string, WAITABLE, REL_FUNC);
-
+*/
+ 
 shpvoid InspectObject()
 {
-	// Glide to inspect camera position/heading.
+	//TODO: What is "current object"? This just seems to output an error when run in OG game.
 	return 0;
 }
 RegFunc0(InspectObject, void, WAITABLE, REL_FUNC);
 
+/*
 shpvoid Uninspect()
 {
 	// Glide back to camera position/heading before inspecting object.
@@ -1713,6 +1716,7 @@ int GetRandomInt(int lower, int upper)
 	// So, add one to upper since our range function is upper-exclusive.
 	return Random::Range(lower, upper + 1);
 }
+RegFunc2(GetRandomInt, int, int, int, IMMEDIATE, REL_FUNC);
 
 /*
 shpvoid PlayFullScreenMovie(std::string movieName)
