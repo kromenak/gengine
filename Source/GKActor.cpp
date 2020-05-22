@@ -193,6 +193,11 @@ void GKActor::StartCustomFidget(GAS* gas)
 	mGasPlayer->Play();
 }
 
+void GKActor::StopFidget()
+{
+	mGasPlayer->Pause();
+}
+
 void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
 {
 	// Need a walker and walker boundary for any of this to work.
@@ -218,6 +223,12 @@ void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBounda
 			mWalker->WalkTo(walkPos, heading, walkerBoundary, finishCallback);
 		}
 	}
+}
+
+Vector3 GKActor::GetWalkDestination() const
+{
+	if(mWalker == nullptr || !mWalker->IsWalking()) { return GetPosition(); }
+	return mWalker->GetDestination();
 }
 
 void GKActor::OnActive()

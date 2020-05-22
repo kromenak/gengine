@@ -77,10 +77,12 @@ public:
 	
 	void StartFidget(FidgetType type);
 	void StartCustomFidget(GAS* gas);
+	void StopFidget();
 	
 	void WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
-	
+	Vector3 GetWalkDestination() const;
 	Walker* GetWalker() const { return mWalker; }
+	
 	FaceController* GetFaceController() const { return mFaceController; }
 	
 protected:

@@ -49,6 +49,9 @@ bool Walker::WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std
 
 bool Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
 {
+	// Save destination.
+	mDestination = position;
+	
 	// Save finish callback.
 	mFinishedPathCallback = finishCallback;
 	

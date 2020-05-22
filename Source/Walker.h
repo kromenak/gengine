@@ -43,10 +43,13 @@ public:
 	
 	void SnapWalkActorToFloor();
 	
-	bool IsWalking() const { return mState != State::Idle || mHasDesiredFacingDir; }
+	
 	
 	bool WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	bool WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
+	
+	bool IsWalking() const { return mState != State::Idle || mHasDesiredFacingDir; }
+	Vector3 GetDestination() const { return mDestination; }
 	
 protected:
 	void OnUpdate(float deltaTime) override;
@@ -67,6 +70,9 @@ private:
 	
 	// The path to follow to destination.
 	std::vector<Vector3> mPath;
+	
+	// The current destination - only valid if walking.
+	Vector3 mDestination;
 	
 	// If desired, a facing direction to move towards.
 	// This only occurs *after* any path has been completed.
