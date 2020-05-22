@@ -36,12 +36,13 @@ public:
 	void SetGameVariable(const std::string& varName, int value);
 	void IncGameVariable(const std::string& varName);
 	
-	//TODO: Chat counts should be reset when the timeblock changes!
 	int GetChatCount(const std::string& noun) const;
 	void SetChatCount(const std::string&, int count);
 	void IncChatCount(const std::string& noun);
 	
-	//TODO: Topic Counts
+	int GetTopicCount(const std::string& noun, const std::string& topic) const;
+	void SetTopicCount(const std::string& noun, const std::string& topic, int count);
+	void IncTopicCount(const std::string& noun, const std::string& topic);
 	
 	int GetNounVerbCount(const std::string& noun, const std::string& verb) const;
 	void SetNounVerbCount(const std::string& noun, const std::string& verb, int count);
@@ -61,8 +62,11 @@ private:
 	std::unordered_set<std::string> mGameFlags;
 	
 	// Tracks the number of times the player has chatted with a noun.
-	// TODO: Could this just be stored in noun/verbs?
 	std::unordered_map<std::string, int> mChatCounts;
+	
+	// Maps noun/topic combos to a count value.
+	// Tracks the number of times we've talked to a noun about a topic.
+	std::unordered_map<std::string, int> mTopicCounts;
 	
 	// Maps noun/verb to a count value.
 	// Tracks the number of times we've triggered a verb on a noun.
