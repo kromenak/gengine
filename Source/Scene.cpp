@@ -282,16 +282,7 @@ void Scene::Load()
 	}
 	
 	// Check for and run "scene enter" actions.
-	const std::vector<NVC*>& nvcs = Services::Get<ActionManager>()->GetActionSets();
-	for(auto& nvc : nvcs)
-	{
-		const Action* action = nvc->GetAction("SCENE", "ENTER");
-		if(action != nullptr)
-		{
-			std::cout << "Executing scene enter for " << nvc->GetName() << std::endl;
-			action->Execute();
-		}
-	}
+	Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");
 }
 
 void Scene::Unload()
@@ -467,12 +458,10 @@ void Scene::Interact(const Ray& ray)
 	if(!sceneModelData->verb.empty())
 	{
 		std::cout << "Trying to play default verb " << sceneModelData->verb << std::endl;
-		const Action* action = Services::Get<ActionManager>()->GetAction(sceneModelData->noun, sceneModelData->verb, mEgo);
-		if(action != nullptr)
+		if(Services::Get<ActionManager>()->ExecuteAction(sceneModelData->noun, sceneModelData->verb))
 		{
-			action->Execute();
+			return;
 		}
-		return;
 	}
 	
 	// Show the action bar for this noun.
@@ -588,8 +577,9 @@ void Scene::ExecuteAction(const Action* action)
 			const ScenePosition* scenePos = mSceneData->GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
-				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData->GetWalkerBoundary(), [action]() -> void {
-					action->Execute();
+				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData->GetWalkerBoundary(), [this, scenePos, action]() -> void {
+					mEgo->SetHeading(scenePos->heading);
+					Services::Get<ActionManager>()->ExecuteAction(action);
 				});
 			}
 			break;
@@ -601,7 +591,7 @@ void Scene::ExecuteAction(const Action* action)
 			{
 				std::cout << "WalkToAnim" << std::endl;
 				mEgo->WalkToAnimationStart(anim, mSceneData->GetWalkerBoundary(), [action]() -> void {
-					action->Execute();
+					Services::Get<ActionManager>()->ExecuteAction(action);
 				});
 			}
 			break;
@@ -614,45 +604,45 @@ void Scene::ExecuteAction(const Action* action)
 			{
 				mEgo->SetPosition(scenePos->position);
 			}
-			action->Execute();
+			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
 		case Action::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
 		{
-			action->Execute();
+			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
 		case Action::Approach::Region: // Only use: RC1 "No Vacancies" Sign
 		{
-			action->Execute();
+			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
 		case Action::Approach::TurnTo: // Never used in GK3.
 		{
 			std::cout << "Executed TURNTO approach type!" << std::endl;
-			action->Execute();
+			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
 		case Action::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
 		{
-			action->Execute();
+			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
 		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser, RC1 Look Bench/Bookstore Sign
 		{
-			action->Execute();
+			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
 		case Action::Approach::None:
 		{
 			// Just do it!
-			action->Execute();
+			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
 		default:
 		{
 			Services::GetReports()->Log("Error", "Invalid approach " + std::to_string(static_cast<int>(action->approach)));
-			action->Execute();
+			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
 	}

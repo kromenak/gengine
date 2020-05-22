@@ -81,10 +81,12 @@ struct DialogueSceneCamera : public SceneCamera
     
     // Specifies name of "set" this camera belongs to.
     // Allows logic to specify a "set" name, which randomly picks a camera in that set.
-    std::string setName;
+    std::string setName; //TODO: this seems to never be used...maybe abandoned
     
     // If true, this camera appears in the toolbar when the conversation is active.
-    bool showInToolbar = false;
+    bool showInToolbar = false; //TODO: also seems to never be used!
+	
+	//TODO: Add isInitial?
     
     // If true, camera is used when the conversation ends.
     bool isFinal = false;

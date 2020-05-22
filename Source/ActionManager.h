@@ -8,35 +8,53 @@
 #pragma once
 #include <functional>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
+#include "NVC.h"
 #include "Type.h"
 
-struct Action;
 class ActionBar;
 class GKActor;
-class NVC;
+class SheepScript;
 class Timeblock;
+
+enum class VerbType
+{
+	Normal,
+	Inventory,
+	Topic
+};
 
 class ActionManager
 {
 	TYPE_DECL_BASE();
 public:
-	ActionManager();
+	void Init();
 	
-	// Action set population.
-	void ClearActionSets() { mActionSets.clear(); }
+	// Action Set Population
 	void AddActionSet(const std::string& assetName);
 	void AddActionSetIfForTimeblock(const std::string& assetName, const Timeblock& timeblock);
 	void AddGlobalAndInventoryActionSets(const Timeblock& timeblock);
+	void ClearActionSets() { mActionSets.clear(); mCaseLogic.clear(); }
 	
-	// Action queries.
-	const std::vector<NVC*> GetActionSets() const { return mActionSets; }
-	std::vector<const Action*> GetActions(const std::string& noun, GKActor* ego) const;
-	const Action* GetAction(const std::string& noun, const std::string& verb, GKActor* ego) const;
+	// Action Execution
+	bool ExecuteAction(const std::string& noun, const std::string& verb);
+	void ExecuteAction(const Action* action);
+	void ExecuteSheepAction(SheepScript* script);
+	bool IsActionPlaying() const { return mCurrentAction != nullptr; }
 	
-	// Action bar UI.
+	// Action Query
+	const Action* GetAction(const std::string& noun, const std::string& verb) const;
+	std::vector<const Action*> GetActions(const std::string& noun, VerbType verbType) const;
+	bool HasTopicsLeft(const std::string& noun) const;
+	
+	// Action Bar
 	void ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback);
+	
+	void ShowTopicBar(const std::string& noun);
+	void ShowTopicBar();
+	
 	bool IsActionBarShowing() const;
 	ActionBar* GetActionBar() const { return mActionBar; }
 	
@@ -78,6 +96,25 @@ private:
 	// When asked to show action bar, the game uses these to determine what valid actions are for a noun.
 	std::vector<NVC*> mActionSets;
 	
+	// An action may specify a "case" under which it is valid.
+	// A case label corresponds to a bit of sheepscript that evaluates to either true or false.
+	// Cases must be stored here (rather than in Action Sets) because cases can be shared (especially global/inventory ones).
+    std::unordered_map<std::string, SheepScript*> mCaseLogic;
+	
+	// An action that's used for "Sheep Commands."
+	// When an arbitrary SheepScript needs to execute through the action system, we use this Action object.
+	Action mSheepCommandAction;
+	
+	// When an action is playing, we save it here. Only one action can play at a time.
+	// Also save the last action, in case we need it.
+	const Action* mCurrentAction = nullptr;
+	const Action* mLastAction = nullptr;
+	
+	// An identifier for an executing action.
+	// We just increment this value each time an action executes to uniquly identify each action.
+	// This mirrors what's output in GK3 when dumping actions.
+	int mActionId = 0;
+	
 	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;
 	
@@ -85,4 +122,14 @@ private:
 	// The asset name indicates this (e.g. GLB_12ALL.NVC or GLB_110A.NVC).
 	// Checks asset name against current timeblock to see if the asset should be used.
 	bool IsActionSetForTimeblock(const std::string& assetName, const Timeblock& timeblock);
+	
+	// Returns true if the case for an action is met.
+	// A case can be a global condition, or some user-defined script to evaluate.
+	bool IsCaseMet(const Action* item) const;
+	
+	// Called when action bar is canceled (press cancel button).
+	void OnActionBarCanceled();
+	
+	// Called when an action finishes executing.
+	void OnActionExecuteFinished();
 };

@@ -26,11 +26,10 @@ struct Action
 	// The verb is what action we perform on the noun.
     std::string verb;
 	
-	// The condition can be global or local.
-	// Some global conditions: ALL, GABE_ALL, GRACE_ALL,
-	// 1ST_TIME_BLOCK, TIME_BLOCK_OVERRIDE, OTR_TIME, DIALOGUE_TOPICS_LEFT
-	// Can also be a local condition, defined in the file.
-    std::string condition;
+	// The "case" for this action. A label that refers to a case under which this action is valid.
+	// The label can refer to arbitrary SheepScript that evaluates to true/false in the NVC file.
+	// Or, it can refer to a hard-coded global condition (e.g. ALL, GABE_ALL, GRACE_ALL).
+    std::string caseLabel;
 	
 	// If desired, an approach can be specified. Ego will "approach" the target
 	// before executing the associated script.
@@ -51,12 +50,14 @@ struct Action
 	// A target for the approach; interpreted differently depending on the approach specified.
     std::string target;
 	
-	// A script to execute when using this NVC item.
+	//TODO: An undocumented parameter: after the action executes, immediately begin a conversation with this person.
+	//std::string talkTo;
+	
+	// A script to run when this action is executed.
 	std::string scriptText;
     SheepScript* script = nullptr;
 	
-	void Execute() const;
-	std::string ToString() const { return "'" + noun + ":" + verb + ":" + condition + "': " + scriptText; }
+	std::string ToString() const { return "'" + noun + ":" + verb + ":" + caseLabel + "': " + scriptText; }
 };
 
 class NVC : public Asset
@@ -64,22 +65,22 @@ class NVC : public Asset
 public:
     NVC(std::string name, char* data, int dataLength);
 	
-	bool IsCaseMet(const Action* item, GKActor* ego) const;
-	
 	const std::vector<Action>& GetActions(const std::string& noun) const;
 	std::vector<const Action*> GetActions(const std::string& noun, const std::string& verb) const;
 	const Action* GetAction(const std::string& noun, const std::string& verb) const;
 	
+	const std::unordered_map<std::string, SheepScript*>& GetCases() const { return mCaseLogic; }
+	
 private:
 	// If attempting to get actions for a noun that doesn't exist,
 	// We just return a reference to this empty vector.
-	std::vector<Action> mEmptyActions;
+	static std::vector<Action> mEmptyActions;
 	
-    // Mapping of noun name to NVC items.
-    std::unordered_map<std::string, std::vector<Action>> mNounToItems;
+    // Mapping of noun to actions.
+    std::unordered_map<std::string, std::vector<Action>> mNounToActions;
     
     // Mapping of case name to sheep script to eval.
-    std::unordered_map<std::string, SheepScript*> mCaseToSheep;
+    std::unordered_map<std::string, SheepScript*> mCaseLogic;
 	
 	void ParseFromData(char* data, int dataLength);
 };

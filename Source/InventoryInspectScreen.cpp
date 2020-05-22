@@ -86,7 +86,7 @@ void InventoryInspectScreen::OnClicked()
 {
 	// Show the action bar for this noun.
 	Services::Get<ActionManager>()->ShowActionBar(mInspectItemName, [](const Action* action) {
-		action->Execute();
+		Services::Get<ActionManager>()->ExecuteAction(action);
 	});
 	
 	// We want to add an "inspect" verb, which means to show the close-up of the item.

@@ -5,14 +5,13 @@
 //
 #include "ActionBar.h"
 
-#include "ActionManager.h"
-#include "ButtonIconManager.h"
 #include "InventoryManager.h"
 #include "Scene.h"
 #include "StringUtil.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UILabel.h"
+#include "VerbManager.h"
 
 ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 {
@@ -35,24 +34,28 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	
 	// To have button holder appear in correct spot, we need the holder to be the right height.
 	// So, just use one of the buttons to get a valid height.
-	ButtonIcon& cancelButtonIcon = Services::Get<ButtonIconManager>()->GetButtonIconForVerb("CANCEL");
-	mButtonHolder->SetSizeDelta(cancelButtonIcon.GetWidth(), cancelButtonIcon.GetWidth());
+	VerbIcon& cancelVerbIcon = Services::Get<VerbManager>()->GetVerbIcon("CANCEL");
+	mButtonHolder->SetSizeDelta(cancelVerbIcon.GetWidth(), cancelVerbIcon.GetWidth());
 	
 	// Hide by default.
 	Hide();
 }
 
-void ActionBar::Show(const std::string& noun, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback)
+void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback)
 {
 	// Hide if not already hidden (make sure buttons are freed).
+	mHideCallback = nullptr;
 	Hide();
 	
 	// If we don't have any actions, don't need to do anything!
 	if(actions.size() <= 0) { return; }
 	
+	// Save hide callback.
+	mHideCallback = cancelCallback;
+	
 	// Iterate over all desired actions and show a button for it.
 	bool inventoryShowing = Services::Get<InventoryManager>()->IsInventoryShowing();
-	ButtonIconManager* buttonIconManager = Services::Get<ButtonIconManager>();
+	VerbManager* verbManager = Services::Get<VerbManager>();
 	int buttonIndex = 0;
 	for(int i = 0; i < actions.size(); ++i)
 	{
@@ -64,8 +67,18 @@ void ActionBar::Show(const std::string& noun, std::vector<const Action*> actions
 		}
 		
 		// Add button with appropriate icon.
-		ButtonIcon& buttonIcon = buttonIconManager->GetButtonIconForVerb(actions[i]->verb);
-		UIButton* actionButton = AddButton(buttonIndex, buttonIcon);
+		UIButton* actionButton = nullptr;
+		if(verbType == VerbType::Normal)
+		{
+			VerbIcon& buttonIcon = verbManager->GetVerbIcon(actions[i]->verb);
+			actionButton = AddButton(buttonIndex, buttonIcon);
+		}
+		else if(verbType == VerbType::Topic)
+		{
+			VerbIcon& buttonIcon = verbManager->GetTopicIcon(actions[i]->verb);
+			actionButton = AddButton(buttonIndex, buttonIcon);
+		}
+		if(actionButton == nullptr) { continue; }
 		++buttonIndex;
 		
 		// Set up button callback to execute the action.
@@ -74,38 +87,50 @@ void ActionBar::Show(const std::string& noun, std::vector<const Action*> actions
 			// Hide action bar on button press.
 			this->Hide();
 			
-			// Execute the action, which will likely run some SheepScript.
-			executeCallback(action);
+			// If callback was provided for press, pass handling the press off to that.
+			// If no callback was provided, simply play the action!
+			if(executeCallback != nullptr)
+			{
+				executeCallback(action);
+			}
+			else
+			{
+				Services::Get<ActionManager>()->ExecuteAction(action);
+			}
 		});
 	}
 	
-	// Get active inventory item for current ego.
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
-	std::string activeItemName = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
-	
-	// Show inventory button if there's an active inventory item AND it is not the object we're interacting with.
-	// In other words, don't allow using an object on itself!
-	mHasInventoryItemButton = !activeItemName.empty() && !StringUtil::EqualsIgnoreCase(activeItemName, noun);
-	if(mHasInventoryItemButton)
+	// Show inventory item button IF this is a normal action bar (not topic chooser).
+	if(verbType == VerbType::Normal)
 	{
-		ButtonIcon& invButtonIcon = buttonIconManager->GetButtonIconForNoun(activeItemName);
-		UIButton* invButton = AddButton(buttonIndex, invButtonIcon);
-		++buttonIndex;
+		// Get active inventory item for current ego.
+		const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+		std::string activeItemName = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
 		
-		// Create callback for inventory button press.
-		const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName, GEngine::inst->GetScene()->GetEgo());
-		invButton->SetPressCallback([this, invAction, executeCallback]() {
-			// Hide action bar on button press.
-			this->Hide();
+		// Show inventory button if there's an active inventory item AND it is not the object we're interacting with.
+		// In other words, don't allow using an object on itself!
+		mHasInventoryItemButton = !activeItemName.empty() && !StringUtil::EqualsIgnoreCase(activeItemName, noun);
+		if(mHasInventoryItemButton)
+		{
+			VerbIcon& invVerbIcon = verbManager->GetInventoryIcon(activeItemName);
+			UIButton* invButton = AddButton(buttonIndex, invVerbIcon);
+			++buttonIndex;
 			
-			// Execute the action, which will likely run some SheepScript.
-			executeCallback(invAction);
-		});
+			// Create callback for inventory button press.
+			const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName);
+			invButton->SetPressCallback([this, invAction, executeCallback]() {
+				// Hide action bar on button press.
+				this->Hide();
+				
+				// Execute the action, which will likely run some SheepScript.
+				executeCallback(invAction);
+			});
+		}
 	}
 	
 	// Always put cancel button on the end.
-	ButtonIcon& cancelButtonIcon = buttonIconManager->GetButtonIconForVerb("CANCEL");
-	UIButton* cancelButton = AddButton(buttonIndex, cancelButtonIcon);
+	VerbIcon& cancelVerbIcon = verbManager->GetVerbIcon("CANCEL");
+	UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon);
 	
 	// Just hide the bar when cancel is pressed.
 	cancelButton->SetPressCallback(std::bind(&ActionBar::Hide, this));
@@ -133,6 +158,13 @@ void ActionBar::Hide()
 	
 	// Button holder inactive = no children show.
 	mButtonHolder->GetOwner()->SetActive(false);
+	
+	// Call hide callback.
+	if(mHideCallback != nullptr)
+	{
+		mHideCallback();
+		mHideCallback = nullptr;
+	}
 }
 
 bool ActionBar::IsShowing() const
@@ -143,7 +175,7 @@ bool ActionBar::IsShowing() const
 void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> callback)
 {
 	// Add button at index 0.
-	ButtonIcon& icon = Services::Get<ButtonIconManager>()->GetButtonIconForVerb(verb);
+	VerbIcon& icon = Services::Get<VerbManager>()->GetVerbIcon(verb);
 	UIButton* button = AddButton(0, icon);
 	button->SetPressCallback([this, callback]() {
 		this->Hide();
@@ -157,7 +189,7 @@ void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> ca
 
 void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> callback)
 {
-	ButtonIcon& icon = Services::Get<ButtonIconManager>()->GetButtonIconForVerb(verb);
+	VerbIcon& icon = Services::Get<VerbManager>()->GetVerbIcon(verb);
 	
 	// Action bar order is always [VERBS][INV_ITEM][CANCEL]
 	// So, skip 1 for cancel button, and maybe skip another one if inventory item is shown.
@@ -187,7 +219,7 @@ void ActionBar::OnUpdate(float deltaTime)
 	}
 }
 
-UIButton* ActionBar::AddButton(int index, const ButtonIcon& buttonIcon)
+UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon)
 {
 	// Reuse a free button or create a new one.
 	UIButton* button = nullptr;

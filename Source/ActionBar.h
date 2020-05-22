@@ -15,9 +15,10 @@
 #include <string>
 #include <vector>
 
+#include "ActionManager.h"
 #include "NVC.h"
 
-struct ButtonIcon;
+struct VerbIcon;
 class RectTransform;
 class UIButton;
 class UICanvas;
@@ -27,7 +28,7 @@ class ActionBar : public Actor
 public:
 	ActionBar();
 	
-	void Show(const std::string& noun, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback);
+	void Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback);
 	void Hide();
 	
 	bool IsShowing() const;
@@ -54,7 +55,10 @@ private:
 	// Currently showing inventory button?
 	bool mHasInventoryItemButton = false;
 	
-	UIButton* AddButton(int index, const ButtonIcon& buttonIcon);
+	// Hide callback.
+	std::function<void()> mHideCallback = nullptr;
+	
+	UIButton* AddButton(int index, const VerbIcon& buttonIcon);
 	void RefreshButtonLayout();
 	void CenterOnPointer();
 };

@@ -9,7 +9,7 @@
 
 #include "ActionManager.h"
 #include "Actor.h"
-#include "ButtonIconManager.h"
+#include "VerbManager.h"
 #include "CharacterManager.h"
 #include "ConsoleUI.h"
 #include "Debug.h"
@@ -107,7 +107,7 @@ bool GEngine::Initialize()
     //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
 	
 	// Load button icon manager.
-	Services::Set<ButtonIconManager>(new ButtonIconManager());
+	Services::Set<VerbManager>(new VerbManager());
 	
 	// Load character configs.
 	Services::Set<CharacterManager>(new CharacterManager());
@@ -125,7 +125,8 @@ bool GEngine::Initialize()
 	Services::Set<LocationManager>(new LocationManager());
 	
 	// Create action manager.
-	Services::Set<ActionManager>(new ActionManager());
+	Services::Set<ActionManager>(&mActionManager);
+	mActionManager.Init();
 	
 	// Create dialogue manager.
 	Services::Set<DialogueManager>(new DialogueManager());
@@ -137,7 +138,7 @@ bool GEngine::Initialize()
 	//TEMP: Load scene as though starting a new game.
 	//TODO: Should really show logos, show title screen, allow restore or new game choice.
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-    LoadScene("R25");
+    LoadScene("LBY");
 	
 	/*
 	TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
@@ -359,7 +360,7 @@ void GEngine::Update()
     
 	// If a sheep is running, show "wait" cursor.
 	// If not, go back to normal cursor.
-	if(mSheepManager.IsAnyRunning())
+	if(mActionManager.IsActionPlaying())
 	{
 		UseWaitCursor();
 	}
@@ -390,17 +391,6 @@ void GEngine::AddActor(Actor* actor)
 {
     mActors.push_back(actor);
 }
-
-/*
-void GEngine::RemoveActor(Actor* actor)
-{
-    auto it = std::find(mActors.begin(), mActors.end(), actor);
-    if(it != mActors.end())
-    {
-        mActors.erase(it);
-    }
-}
-*/
 
 void GEngine::LoadSceneInternal()
 {
@@ -441,6 +431,8 @@ void GEngine::LoadSceneInternal()
 
 void GEngine::DeleteDestroyedActors()
 {
+	//TODO: Maybe switch to a "swap to end then delete" strategy.
+	
 	// Use iterator so we can carefully erase and delete actors without too many headaches.
 	auto it = mActors.begin();
 	while(it != mActors.end())

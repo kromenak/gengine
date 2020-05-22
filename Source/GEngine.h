@@ -6,6 +6,7 @@
 #pragma once
 #include <vector>
 
+#include "ActionManager.h"
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "Console.h"
@@ -22,7 +23,6 @@ class GEngine
 {
 public:
     static void AddActor(Actor* actor);
-    //static void RemoveActor(Actor* actor);
     static GEngine* inst;
     
     GEngine();
@@ -55,6 +55,7 @@ private:
     InputManager mInputManager;
     SheepManager mSheepManager;
 	ReportManager mReportManager;
+	ActionManager mActionManager;
 	Console mConsole;
     
     // The currently active scene. There can be only one at a time (sure about that?).

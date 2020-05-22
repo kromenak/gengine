@@ -1,15 +1,15 @@
 //
-// ButtonIconManager.cpp
+// VerbManager.cpp
 //
 // Clark Kromenaker
 //
-#include "ButtonIconManager.h"
+#include "VerbManager.h"
 
 #include "IniParser.h"
 #include "Services.h"
 #include "StringUtil.h"
 
-float ButtonIcon::GetWidth() const
+float VerbIcon::GetWidth() const
 {
 	if(upTexture != nullptr) { return upTexture->GetWidth(); }
 	if(downTexture != nullptr) { return downTexture->GetWidth(); }
@@ -18,9 +18,9 @@ float ButtonIcon::GetWidth() const
 	return 0.0f;
 }
 
-TYPE_DEF_BASE(ButtonIconManager);
+TYPE_DEF_BASE(VerbManager);
 
-ButtonIconManager::ButtonIconManager()
+VerbManager::VerbManager()
 {
 	// Get VERBS text file as a raw buffer.
 	unsigned int bufferSize = 0;
@@ -52,7 +52,7 @@ ButtonIconManager::ButtonIconManager()
 		// By default, the type of each button is a verb.
 		// However, if the keyword "inventory" or "topic" are used, the button is put in those maps instead.
 		// This is why I bother using a pointer to a map here!
-		std::unordered_map<std::string, ButtonIcon>* map = &mVerbsToIcons;
+		std::unordered_map<std::string, VerbIcon>* map = &mVerbs;
 		
 		// The remaining values are all optional.
 		// If a value isn't present, the above defaults are used.
@@ -79,12 +79,12 @@ ButtonIconManager::ButtonIconManager()
 			{
 				if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "inventory"))
 				{
-					map = &mNounsToIcons;
+					map = &mInventoryItems;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic") ||
 						StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
 				{
-					map = &mTopicsToIcons;
+					map = &mTopics;
 				}
 			}
 		}
@@ -93,7 +93,7 @@ ButtonIconManager::ButtonIconManager()
 		if(upTexture != nullptr || downTexture != nullptr ||
 		   hoverTexture != nullptr || disableTexture != nullptr)
 		{
-			ButtonIcon buttonIcon;
+			VerbIcon buttonIcon;
 			buttonIcon.upTexture = upTexture;
 			buttonIcon.downTexture = downTexture;
 			buttonIcon.hoverTexture = hoverTexture;
@@ -113,10 +113,10 @@ ButtonIconManager::ButtonIconManager()
 	delete[] buffer;
 }
 
-ButtonIcon& ButtonIconManager::GetButtonIconForNoun(const std::string& noun)
+VerbIcon& VerbManager::GetInventoryIcon(const std::string& noun)
 {
-	auto it = mNounsToIcons.find(StringUtil::ToLowerCopy(noun));
-	if(it != mNounsToIcons.end())
+	auto it = mInventoryItems.find(StringUtil::ToLowerCopy(noun));
+	if(it != mInventoryItems.end())
 	{
 		return it->second;
 	}
@@ -126,10 +126,10 @@ ButtonIcon& ButtonIconManager::GetButtonIconForNoun(const std::string& noun)
 	}
 }
 
-ButtonIcon& ButtonIconManager::GetButtonIconForVerb(const std::string& verb)
+VerbIcon& VerbManager::GetVerbIcon(const std::string& verb)
 {
-	auto it = mVerbsToIcons.find(StringUtil::ToLowerCopy(verb));
-	if(it != mVerbsToIcons.end())
+	auto it = mVerbs.find(StringUtil::ToLowerCopy(verb));
+	if(it != mVerbs.end())
 	{
 		return it->second;
 	}
@@ -139,10 +139,10 @@ ButtonIcon& ButtonIconManager::GetButtonIconForVerb(const std::string& verb)
 	}
 }
 
-ButtonIcon& ButtonIconManager::GetButtonIconForTopic(const std::string& topic)
+VerbIcon& VerbManager::GetTopicIcon(const std::string& topic)
 {
-	auto it = mTopicsToIcons.find(StringUtil::ToLowerCopy(topic));
-	if(it != mTopicsToIcons.end())
+	auto it = mTopics.find(StringUtil::ToLowerCopy(topic));
+	if(it != mTopics.end())
 	{
 		return it->second;
 	}
@@ -152,17 +152,17 @@ ButtonIcon& ButtonIconManager::GetButtonIconForTopic(const std::string& topic)
 	}
 }
 
-bool ButtonIconManager::IsVerb(const std::string& word)
+bool VerbManager::IsVerb(const std::string& word)
 {
-	return mVerbsToIcons.find(StringUtil::ToLowerCopy(word)) != mVerbsToIcons.end();
+	return mVerbs.find(StringUtil::ToLowerCopy(word)) != mVerbs.end();
 }
 
-bool ButtonIconManager::IsInventoryItem(const std::string& word)
+bool VerbManager::IsInventoryItem(const std::string& word)
 {
-	return mNounsToIcons.find(StringUtil::ToLowerCopy(word)) != mNounsToIcons.end();
+	return mInventoryItems.find(StringUtil::ToLowerCopy(word)) != mInventoryItems.end();
 }
 
-bool ButtonIconManager::IsTopic(const std::string& word)
+bool VerbManager::IsTopic(const std::string& word)
 {
-	return mTopicsToIcons.find(StringUtil::ToLowerCopy(word)) != mTopicsToIcons.end();
+	return mTopics.find(StringUtil::ToLowerCopy(word)) != mTopics.end();
 }

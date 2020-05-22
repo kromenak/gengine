@@ -1,5 +1,5 @@
 //
-// ButtonIconManager.h
+// VerbManager.h
 //
 // Clark Kromenaker
 //
@@ -19,7 +19,7 @@
 
 class Texture;
 
-struct ButtonIcon
+struct VerbIcon
 {
 	Texture* upTexture = nullptr;
 	Texture* downTexture = nullptr;
@@ -29,25 +29,25 @@ struct ButtonIcon
 	float GetWidth() const;
 };
 
-class ButtonIconManager
+class VerbManager
 {
 	TYPE_DECL_BASE();
 public:
-	ButtonIconManager();
+	VerbManager();
 	
-	ButtonIcon& GetButtonIconForNoun(const std::string& noun);
-	ButtonIcon& GetButtonIconForVerb(const std::string& verb);
-	ButtonIcon& GetButtonIconForTopic(const std::string& topic);
+	VerbIcon& GetInventoryIcon(const std::string& noun);
+	VerbIcon& GetVerbIcon(const std::string& verb);
+	VerbIcon& GetTopicIcon(const std::string& topic);
 	
 	bool IsVerb(const std::string& word);
 	bool IsInventoryItem(const std::string& word);
 	bool IsTopic(const std::string& word);
 	
 private:
-	ButtonIcon mDefaultIcon;
+	VerbIcon mDefaultIcon;
 	
 	// Mappings from noun/verb/topic to icons.
-	std::unordered_map<std::string, ButtonIcon> mNounsToIcons;
-	std::unordered_map<std::string, ButtonIcon> mVerbsToIcons;
-	std::unordered_map<std::string, ButtonIcon> mTopicsToIcons;
+	std::unordered_map<std::string, VerbIcon> mInventoryItems;
+	std::unordered_map<std::string, VerbIcon> mVerbs;
+	std::unordered_map<std::string, VerbIcon> mTopics;
 };

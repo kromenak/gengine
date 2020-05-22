@@ -5,8 +5,13 @@
 //
 #include "ActionManager.h"
 
+#include <cassert>
+
 #include "ActionBar.h"
-#include "ButtonIconManager.h"
+#include "VerbManager.h"
+#include "GameProgress.h"
+#include "GKActor.h"
+#include "IniParser.h"
 #include "Scene.h"
 #include "Services.h"
 #include "StringUtil.h"
@@ -14,8 +19,13 @@
 
 TYPE_DEF_BASE(ActionManager);
 
-ActionManager::ActionManager()
+void ActionManager::Init()
 {
+	// Pre-populate the Sheep Command action.
+	mSheepCommandAction.noun = "SHEEP_COMMAND";
+	mSheepCommandAction.verb = "NONE";
+	mSheepCommandAction.caseLabel = "NONE";
+	
 	// Create action bar, which will be used to choose nouns/verbs by the player.
 	mActionBar = new ActionBar();
 	mActionBar->SetIsDestroyOnLoad(false);
@@ -28,6 +38,10 @@ void ActionManager::AddActionSet(const std::string& assetName)
 	{
 		std::cout << "Using NVC " << assetName << std::endl;
 		mActionSets.push_back(actionSet);
+		
+		// Also build case logic map.
+		auto caseLogic = actionSet->GetCases();
+		mCaseLogic.insert(caseLogic.begin(), caseLogic.end());
 	}
 }
 
@@ -51,71 +65,68 @@ void ActionManager::AddGlobalAndInventoryActionSets(const Timeblock& timeblock)
 	}
 }
 
-std::vector<const Action*> ActionManager::GetActions(const std::string& noun, GKActor* ego) const
+bool ActionManager::ExecuteAction(const std::string& noun, const std::string& verb)
 {
-	// As we iterate, we'll use this to keep track of what verbs are in use.
-	// We don't want verb repeats - a new item with the same verb will overwrite the old item.
-	std::unordered_map<std::string, const Action*> verbsToActions;
-	
-	// Check "ANY_OBJECT" wildcard nouns first. They are lowest priority, but match all nouns.
-	for(auto& nvc : mActionSets)
+	for(auto& actionSet : mActionSets)
 	{
-		const std::vector<Action>& anyObjectActions = nvc->GetActions("ANY_OBJECT");
-		for(auto& action : anyObjectActions)
+		const Action* action = actionSet->GetAction(noun, verb);
+		if(action != nullptr && IsCaseMet(action))
 		{
-			// Wildcard verb can't match here. It only matches when a specific verb is provided.
-			bool verbIsWildcard = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
-			if(verbIsWildcard) { continue; }
-			
-			// Action's verb must ACTUALLY be a verb - no inventory item, no topic.
-			// Inventory items only match when a specific verb is provided (see GetActions(noun, verb)).
-			// Topics only match for conversations.
-			bool isVerb = Services::Get<ButtonIconManager>()->IsVerb(action.verb);
-			if(isVerb && nvc->IsCaseMet(&action, ego))
-			{
-				verbsToActions[action.verb] = &action;
-			}
+			ExecuteAction(action);
+			return true;
 		}
 	}
-	
-	// Check actions that map directly to this noun.
-	for(auto& nvc : mActionSets)
-	{
-		const std::vector<Action>& nounActions = nvc->GetActions(noun);
-		for(auto& action : nounActions)
-		{
-			// Wildcard verb can't match here. It only matches when a specific verb is provided.
-			bool verbIsWildcard = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
-			if(verbIsWildcard) { continue; }
-			
-			// Again, must be a verb in this scenario.
-			bool isVerb = Services::Get<ButtonIconManager>()->IsVerb(action.verb);
-			if(isVerb && nvc->IsCaseMet(&action, ego))
-			{
-				verbsToActions[action.verb] = &action;
-			}
-		}
-	}
-	
-	// Finally, convert our map to a vector to return.
-	std::vector<const Action*> viableActions;
-	for(auto entry : verbsToActions)
-	{
-		std::cout << "Found action " << entry.second->ToString() << std::endl;
-		viableActions.push_back(entry.second);
-	}
-	return viableActions;
+	return false;
 }
 
-const Action* ActionManager::GetAction(const std::string& noun, const std::string& verb, GKActor* ego) const
+void ActionManager::ExecuteAction(const Action* action)
 {
-	// For any noun/verb pair, there is only ONE possible action that can be performed at any given time in the game.
+	if(action == nullptr)
+	{
+		//TODO: Log
+		return;
+	}
+	
+	// We should only execute one action at a time.
+	if(mCurrentAction != nullptr)
+	{
+		//TODO: Log?
+		return;
+	}
+	mCurrentAction = action;
+	
+	// Increment action ID.
+	mActionId++;
+	
+	// If this is a topic, automatically increment topic counts.
+	if(Services::Get<VerbManager>()->IsTopic(action->verb))
+	{
+		Services::Get<GameProgress>()->IncTopicCount(action->noun, action->verb);
+	}
+	
+	// If no script is associated with the action, that might be an error...
+	// But for now, we'll just treat it as action is immediately over.
+	if(action->script != nullptr)
+	{
+		// Execute action in Sheep system, call finished function when done.
+		Services::GetSheep()->Execute(action->script, std::bind(&ActionManager::OnActionExecuteFinished, this));
+	}
+	else
+	{
+		//TODO: Log?
+		OnActionExecuteFinished();
+	}
+}
+
+const Action* ActionManager::GetAction(const std::string& noun, const std::string& verb) const
+{
+	// For any noun/verb pair, there is only ONE possible action that can be performed at any given time.
 	// Keep track of the candidate as we iterate from most general/broad to most specific.
 	// The most specific valid action will be our candidate.
 	const Action* candidate = nullptr;
 	
 	// If the verb is an inventory item, handle ANY_OBJECT/ANY_INV_ITEM wildcards for noun/verb.
-	bool verbIsInventoryItem = Services::Get<ButtonIconManager>()->IsInventoryItem(verb);
+	bool verbIsInventoryItem = Services::Get<VerbManager>()->IsInventoryItem(verb);
 	if(verbIsInventoryItem)
 	{
 		for(auto& nvc : mActionSets)
@@ -123,7 +134,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 			std::vector<const Action*> actionsForAnyObject = nvc->GetActions("ANY_OBJECT", "ANY_INV_ITEM");
 			for(auto& action : actionsForAnyObject)
 			{
-				if(nvc->IsCaseMet(action, ego))
+				if(IsCaseMet(action))
 				{
 					std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/ANY_INV_ITEM" << std::endl;
 					candidate = action;
@@ -138,7 +149,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 		std::vector<const Action*> actionsForAnyObject = nvc->GetActions("ANY_OBJECT", verb);
 		for(auto& action : actionsForAnyObject)
 		{
-			if(nvc->IsCaseMet(action, ego))
+			if(IsCaseMet(action))
 			{
 				std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/" << verb << std::endl;
 				candidate = action;
@@ -155,7 +166,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 			std::vector<const Action*> actionsForAnyObject = nvc->GetActions(noun, "ANY_INV_ITEM");
 			for(auto& action : actionsForAnyObject)
 			{
-				if(nvc->IsCaseMet(action, ego))
+				if(IsCaseMet(action))
 				{
 					std::cout << "Candidate action for " << noun << "/" << verb << " matches " << noun << "/ANY_INV_ITEM" << std::endl;
 					candidate = action;
@@ -170,7 +181,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 		std::vector<const Action*> actionsForAnyObject = nvc->GetActions(noun, verb);
 		for(auto& action : actionsForAnyObject)
 		{
-			if(nvc->IsCaseMet(action, ego))
+			if(IsCaseMet(action))
 			{
 				std::cout << "Candidate action for " << noun << "/" << verb << " matches " << noun << "/" << verb << std::endl;
 				candidate = action;
@@ -180,14 +191,147 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 	return candidate;
 }
 
+std::vector<const Action*> ActionManager::GetActions(const std::string& noun, VerbType verbType) const
+{
+	// As we find actions for this noun, we don't want repeated "verbs".
+	// For example, if two actions exist for the verb "LOOK", we don't want two look actions on the action bar!
+	// So, keep track of the verb-to-action mappings; a repeat verb will overwrite the previously mapped action.
+	std::unordered_map<std::string, const Action*> verbToAction;
+	
+	// "ANY_OBJECT" is a wildcard. Any action with a noun of "ANY_OBJECT" can be valid for any noun passed in.
+	// These are lowest-priority, so we do them first (they might be overwritten later).
+	for(auto& actionSet : mActionSets)
+	{
+		const std::vector<Action>& anyObjectActions = actionSet->GetActions("ANY_OBJECT");
+		for(auto& action : anyObjectActions)
+		{
+			// The "ANY_INV_ITEM" wildcard only matches if a specific verb was provided.
+			// This function doesn't let you specify a verb, so this never matches.
+			bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
+			if(isWildcardInvItem) { continue; }
+			
+			// The action's verb must be of the correct type for us to use it.
+			bool validType = false;
+			switch(verbType)
+			{
+			case VerbType::Normal:
+				validType = Services::Get<VerbManager>()->IsVerb(action.verb);
+				break;
+			case VerbType::Inventory:
+				validType = Services::Get<VerbManager>()->IsInventoryItem(action.verb);
+				break;
+			case VerbType::Topic:
+				validType = Services::Get<VerbManager>()->IsTopic(action.verb);
+				break;
+			}
+			
+			// If type is valid and the action meets any case specified, we can use this action!
+			if(validType && IsCaseMet(&action))
+			{
+				verbToAction[action.verb] = &action;
+			}
+		}
+	}
+	
+	// Check actions that map directly to this noun.
+	for(auto& actionSet : mActionSets)
+	{
+		const std::vector<Action>& nounActions = actionSet->GetActions(noun);
+		for(auto& action : nounActions)
+		{
+			// The "ANY_INV_ITEM" wildcard only matches if a specific verb was provided.
+			// This function doesn't let you specify a verb, so this never matches.
+			bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
+			if(isWildcardInvItem) { continue; }
+			
+			// The action's verb must be of the correct type for us to use it.
+			bool validType = false;
+			switch(verbType)
+			{
+			case VerbType::Normal:
+				validType = Services::Get<VerbManager>()->IsVerb(action.verb);
+				break;
+			case VerbType::Inventory:
+				validType = Services::Get<VerbManager>()->IsInventoryItem(action.verb);
+				break;
+			case VerbType::Topic:
+				validType = Services::Get<VerbManager>()->IsTopic(action.verb);
+				break;
+			}
+			
+			// If type is valid and the action meets any case specified, we can use this action!
+			if(validType && IsCaseMet(&action))
+			{
+				verbToAction[action.verb] = &action;
+			}
+		}
+	}
+	
+	// Finally, convert our map to a vector to return.
+	std::vector<const Action*> viableActions;
+	for(auto entry : verbToAction)
+	{
+		viableActions.push_back(entry.second);
+	}
+	return viableActions;
+}
+
+bool ActionManager::HasTopicsLeft(const std::string &noun) const
+{
+	return GetActions(noun, VerbType::Topic).size() > 0;
+}
+
+// Temp, for debugging.
+void OutputActions(const std::vector<const Action*>& actions)
+{
+	for(auto& action : actions)
+	{
+		std::cout << "Action " << action->ToString() << std::endl;
+	}
+}
+
 void ActionManager::ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
 {
-	mActionBar->Show(noun, GetActions(noun, GEngine::inst->GetScene()->GetEgo()), selectCallback);
+	auto actions = GetActions(noun, VerbType::Normal);
+	OutputActions(actions);
+	mActionBar->Show(noun, VerbType::Normal, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
 }
 
 bool ActionManager::IsActionBarShowing() const
 {
 	return mActionBar->IsShowing();
+}
+
+void ActionManager::ShowTopicBar(const std::string& noun)
+{
+	// See if we have any more topics to discuss with this noun (person).
+	// If not, we will pre-emptively cancel the bar and return.
+	auto actions = GetActions(noun, VerbType::Topic);
+	if(actions.size() == 0) { return; }
+	
+	// Show topics.
+	OutputActions(actions);
+	mActionBar->Show(noun, VerbType::Topic, actions, nullptr, std::bind(&ActionManager::OnActionBarCanceled, this));
+}
+
+void ActionManager::ShowTopicBar()
+{
+	// Attempt to derive noun from current or last action.
+	std::string noun;
+	if(mCurrentAction != nullptr)
+	{
+		noun = mCurrentAction->noun;
+	}
+	else if(mLastAction != nullptr)
+	{
+		noun = mLastAction->noun;
+	}
+	
+	// Couldn't derive noun to use...so fail.
+	if(noun.empty()) { return; }
+	
+	// Show topic bar with same noun again.
+	ShowTopicBar(noun);
 }
 
 bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const Timeblock& timeblock)
@@ -239,7 +383,6 @@ bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const 
 		// See if it's the current timeblock!
 		std::string currentTimeblock = timeblock.ToString();
 		StringUtil::ToLower(currentTimeblock);
-		
 		if(lowerName.find(currentTimeblock) != std::string::npos)
 		{
 			return true;
@@ -248,4 +391,119 @@ bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const 
 	
 	// Seemingly, this asset should not be used for the current timeblock.
 	return false;
+}
+
+bool ActionManager::IsCaseMet(const Action* action) const
+{
+	// Empty condition is automatically met.
+	if(action->caseLabel.empty()) { return true; }
+	
+	// See if any "local" case logic matches this action and execute that case if so.
+	// Do this before "global" cases b/c an action set *could* declare an override of a global...
+	// I'd consider that "not great practice" but it does occur in the game's files a few times.
+	auto it = mCaseLogic.find(action->caseLabel);
+	if(it != mCaseLogic.end())
+	{
+		return Services::GetSheep()->Evaluate(it->second);
+	}
+	
+	// Check global case conditions.
+	if(StringUtil::EqualsIgnoreCase(action->caseLabel, "all"))
+	{
+		// all: same as "no condition" - condition is always met!
+		return true;
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "gabe_all"))
+	{
+		// gabe_all: condition is met if Ego is Gabriel.
+		Scene* scene = GEngine::inst->GetScene();
+		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
+		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "gabriel");
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "grace_all"))
+	{
+		// grace_all: condition is met if Ego is Grace.
+		Scene* scene = GEngine::inst->GetScene();
+		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
+		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "grace");
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "1st_time"))
+	{
+		// 1st_time: condition is met if this is the first time we've executed this action (noun/verb combo).
+		return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 0;
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "2cd_time"))
+	{
+		// 2cd_time: a surprising way to abbreviate "2nd time"...condition is met if this is the 2nd time we did the action.
+		return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 1;
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "3rd_time"))
+	{
+		// 3rd_time: and again for good measure.
+		return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 2;
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "otr_time"))
+	{
+		// otr_time: condition is met if this IS NOT the first time we've executed this action (noun/verb combo).
+		return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) > 0;
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "dialogue_topics_left"))
+	{
+		// dialogue_topics_left: condition is met if there are any "topic" type actions available for this noun.
+		return HasTopicsLeft(action->noun);
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "not_dialogue_topics_left"))
+	{
+		// not_dialogue_topics_left: condition is met if there are no more "topic" type actions available for this noun.
+		return !HasTopicsLeft(action->noun);
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "time_block_override"))
+	{
+		// time_block_override: not 100% sure...only appears in timeblock-specific NVC files.
+		// Possibilities:
+		//   1) Evaluates true if this is the first scene of the timeblock.
+		//	 2) Evaluates true if NVC's timeblock equals the current timeblock.
+		//   3) Evaluates true always...just acts as a "ALL" for a timeblock.
+		
+		// Example use of this:
+		// RC1_ALL.NVC has (TELE_SIGN, LOOK, GABE_ALL), which executes some VO.
+		// RC1110A.NVC has (TELE_SIGN, LOOK, TIME_BLOCK_OVERRIDE), which executes different VO.
+		// So...seems the idea would be to play the timeblock-specific VO during that timeblock, but fall back on general one otherwise?
+		std::cout << "Using TIME_BLOCK_OVERRIDE global condition!" << std::endl;
+		return true;
+	}
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "time_block"))
+	{
+		//TODO
+	}
+	//TODO: Add any more global conditions.
+	
+	// Assume any not found case is false by default.
+	std::cout << "Unknown NVC case " << action->caseLabel << std::endl;
+	return false;
+}
+
+void ActionManager::OnActionBarCanceled()
+{
+	std::cout << "Action bar canceled." << std::endl;
+}
+
+void ActionManager::OnActionExecuteFinished()
+{
+	// This function should only be called if an action is playing.
+	assert(mCurrentAction != nullptr);
+	
+	// When a "talk" action ends, try to show the topic bar.
+	if(StringUtil::EqualsIgnoreCase(mCurrentAction->verb, "talk"))
+	{
+		ShowTopicBar(mCurrentAction->noun);
+	}
+	else if(Services::Get<VerbManager>()->IsTopic(mCurrentAction->verb))
+	{
+		ShowTopicBar(mCurrentAction->noun);
+	}
+	
+	// Clear current action.
+	mLastAction = mCurrentAction;
+	mCurrentAction = nullptr;
 }

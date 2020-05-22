@@ -161,7 +161,7 @@ void InventoryScreen::OnItemClicked(UIButton* button, std::string itemName)
 {
 	// Show the action bar for this noun.
 	Services::Get<ActionManager>()->ShowActionBar(itemName, [](const Action* action) {
-		action->Execute();
+		Services::Get<ActionManager>()->ExecuteAction(action);
 	});
 	
 	// We want to add a "pickup" verb, which means to make the item the active inventory item.

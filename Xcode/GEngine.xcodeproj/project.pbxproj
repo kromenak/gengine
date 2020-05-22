@@ -178,8 +178,8 @@
 		4B6A3F242335B16C00D25B2D /* RectUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F222335B16C00D25B2D /* RectUtil.cpp */; };
 		4B6A3F262335B20000D25B2D /* RectTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F252335B20000D25B2D /* RectTests.cpp */; };
 		4B6A3F272335B36500D25B2D /* Rect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B0E44F52186878A00BD1CE1 /* Rect.cpp */; };
-		4B6B766121A6165E00788C02 /* ButtonIconManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */; };
-		4B6B766221A6165E00788C02 /* ButtonIconManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */; };
+		4B6B766121A6165E00788C02 /* VerbManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766021A6165E00788C02 /* VerbManager.cpp */; };
+		4B6B766221A6165E00788C02 /* VerbManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766021A6165E00788C02 /* VerbManager.cpp */; };
 		4B6B766621AB75AA00788C02 /* ActionBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766521AB75AA00788C02 /* ActionBar.cpp */; };
 		4B6B766721AB75AA00788C02 /* ActionBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766521AB75AA00788C02 /* ActionBar.cpp */; };
 		4B6B766A21AB99C500788C02 /* FileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6B766921AB99C500788C02 /* FileSystem.cpp */; };
@@ -445,8 +445,8 @@
 		4B6A3F212335B16C00D25B2D /* RectUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RectUtil.h; path = ../Source/RectUtil.h; sourceTree = "<group>"; };
 		4B6A3F222335B16C00D25B2D /* RectUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RectUtil.cpp; path = ../Source/RectUtil.cpp; sourceTree = "<group>"; };
 		4B6A3F252335B20000D25B2D /* RectTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RectTests.cpp; path = ../Tests/RectTests.cpp; sourceTree = "<group>"; };
-		4B6B765F21A6165E00788C02 /* ButtonIconManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ButtonIconManager.h; path = ../Source/ButtonIconManager.h; sourceTree = "<group>"; };
-		4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ButtonIconManager.cpp; path = ../Source/ButtonIconManager.cpp; sourceTree = "<group>"; };
+		4B6B765F21A6165E00788C02 /* VerbManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VerbManager.h; path = ../Source/VerbManager.h; sourceTree = "<group>"; };
+		4B6B766021A6165E00788C02 /* VerbManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VerbManager.cpp; path = ../Source/VerbManager.cpp; sourceTree = "<group>"; };
 		4B6B766421AB75AA00788C02 /* ActionBar.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = ActionBar.h; path = ../Source/ActionBar.h; sourceTree = "<group>"; };
 		4B6B766521AB75AA00788C02 /* ActionBar.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ActionBar.cpp; path = ../Source/ActionBar.cpp; sourceTree = "<group>"; };
 		4B6B766821AB99C500788C02 /* FileSystem.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FileSystem.h; path = ../Source/FileSystem.h; sourceTree = "<group>"; };
@@ -769,6 +769,21 @@
 			name = Sheep;
 			sourceTree = "<group>";
 		};
+		4B1E2F4C2475046300347687 /* Actions */ = {
+			isa = PBXGroup;
+			children = (
+				4BCBCF462043A90F001BE1E0 /* NVC.cpp */,
+				4BCBCF452043A90F001BE1E0 /* NVC.h */,
+				4B4AFEEA23BBC6B100554D04 /* ActionManager.cpp */,
+				4B4AFEE923BBC6B100554D04 /* ActionManager.h */,
+				4B6B766521AB75AA00788C02 /* ActionBar.cpp */,
+				4B6B766421AB75AA00788C02 /* ActionBar.h */,
+				4B6B766021A6165E00788C02 /* VerbManager.cpp */,
+				4B6B765F21A6165E00788C02 /* VerbManager.h */,
+			);
+			name = Actions;
+			sourceTree = "<group>";
+		};
 		4B22F4D92171709F0065B152 /* MacOS */ = {
 			isa = PBXGroup;
 			children = (
@@ -879,8 +894,7 @@
 		4B6B765E21A5216B00788C02 /* GK3 */ = {
 			isa = PBXGroup;
 			children = (
-				4B4AFEEA23BBC6B100554D04 /* ActionManager.cpp */,
-				4B4AFEE923BBC6B100554D04 /* ActionManager.h */,
+				4B1E2F4C2475046300347687 /* Actions */,
 				4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */,
 				4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */,
 				4B0183A524574837004B5C58 /* DialogueManager.cpp */,
@@ -911,10 +925,6 @@
 		4B6B766321AB746D00788C02 /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				4B6B766521AB75AA00788C02 /* ActionBar.cpp */,
-				4B6B766421AB75AA00788C02 /* ActionBar.h */,
-				4B6B766021A6165E00788C02 /* ButtonIconManager.cpp */,
-				4B6B765F21A6165E00788C02 /* ButtonIconManager.h */,
 				4B4861D0243001D000C4EA31 /* InventoryInspectScreen.cpp */,
 				4B4861CF243001D000C4EA31 /* InventoryInspectScreen.h */,
 				4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */,
@@ -1035,8 +1045,6 @@
 		4BD673C920B10EB200795582 /* Scene */ = {
 			isa = PBXGroup;
 			children = (
-				4BCBCF462043A90F001BE1E0 /* NVC.cpp */,
-				4BCBCF452043A90F001BE1E0 /* NVC.h */,
 				4B2E7A61203A5CB3001A5B9C /* Scene.cpp */,
 				4B2E7A60203A5CB3001A5B9C /* Scene.h */,
 				4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */,
@@ -1281,7 +1289,7 @@
 				4B17D707206098B100EBD298 /* GameCamera.cpp in Sources */,
 				4BEA726D21D53F2000998066 /* Walker.cpp in Sources */,
 				4B6B766621AB75AA00788C02 /* ActionBar.cpp in Sources */,
-				4B6B766121A6165E00788C02 /* ButtonIconManager.cpp in Sources */,
+				4B6B766121A6165E00788C02 /* VerbManager.cpp in Sources */,
 				4BD673D420B26F0C00795582 /* AudioListener.cpp in Sources */,
 				4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */,
 				4B0B67831F78DCD40023815F /* Actor.cpp in Sources */,
@@ -1400,7 +1408,7 @@
 				4B22F516217407640065B152 /* Model.cpp in Sources */,
 				4BEA726E21D53F2000998066 /* Walker.cpp in Sources */,
 				4B6B766721AB75AA00788C02 /* ActionBar.cpp in Sources */,
-				4B6B766221A6165E00788C02 /* ButtonIconManager.cpp in Sources */,
+				4B6B766221A6165E00788C02 /* VerbManager.cpp in Sources */,
 				4B22F52B2174078B0065B152 /* Asset.cpp in Sources */,
 				4B22F51F2174076D0065B152 /* Ray.cpp in Sources */,
 				4B22F50A2174075B0065B152 /* BSP.cpp in Sources */,
