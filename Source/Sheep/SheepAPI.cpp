@@ -388,19 +388,23 @@ int IsActorAtLocation(std::string actorName, std::string locationName)
 }
 RegFunc2(IsActorAtLocation, int, string, string, IMMEDIATE, REL_FUNC);
 
-/*
 int IsActorNear(std::string actorName, std::string positionName, float distance)
 {
-	return 0;
+	//TODO: Verify that actor name is valid.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+	return (actor->GetPosition() - scenePosition->position).GetLengthSq() < distance * distance;
 }
 RegFunc3(IsActorNear, int, string, string, float, IMMEDIATE, REL_FUNC);
 
 int IsWalkingActorNear(std::string actorName, std::string positionName, float distance)
 {
-	return 0;
+	//TODO: Verify that actor name is valid.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+	return (actor->GetWalkDestination() - scenePosition->position).GetLengthSq() < distance * distance;
 }
 RegFunc3(IsWalkingActorNear, int, string, string, float, IMMEDIATE, REL_FUNC);
-*/
  
 int IsActorOffstage(std::string actorName)
 {
@@ -611,14 +615,23 @@ shpvoid StartTalkFidget(std::string actorName) // WAIT
 }
 RegFunc1(StartTalkFidget, void, string, WAITABLE, REL_FUNC);
 
-/*
 shpvoid StopFidget(std::string actorName)
 {
-	std::cout << "StopFidget" << std::endl;
+	//TODO: Should be waitable for complex fidgets.
+	Scene* scene = GEngine::inst->GetScene();
+	if(scene != nullptr)
+	{
+		GKActor* actor = scene->GetActorByNoun(actorName);
+		if(actor != nullptr)
+		{
+			actor->StopFidget();
+		}
+	}
 	return 0;
 }
 RegFunc1(StopFidget, void, string, WAITABLE, REL_FUNC);
  
+/*
 shpvoid TurnHead(std::string actorName, int percentX, int percentY, int durationMs)
 {
 	std::cout << "TurnHead" << std::endl;
