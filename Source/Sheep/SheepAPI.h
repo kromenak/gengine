@@ -265,6 +265,8 @@ shpvoid DumpAnimator(); // DEV
 shpvoid SetConversation(std::string conversationName); // WAIT
 shpvoid EndConversation(); // WAIT
 
+shpvoid SetDefaultDialogueCamera(std::string cameraName);
+
 shpvoid StartAnimation(std::string animationName); // WAIT
 shpvoid StartMoveAnimation(std::string animName); // WAIT
 shpvoid StartMom(std::string momAnimationName); // WAIT

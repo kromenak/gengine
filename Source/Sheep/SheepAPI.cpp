@@ -787,19 +787,25 @@ RegFunc1(ContinueDialogueNoFidgets, void, int, WAITABLE, REL_FUNC);
 
 shpvoid SetConversation(std::string conversationName)
 {
-	std::cout << "SetConversation " << conversationName << std::endl;
+	//TODO: Why is this waitable?
+	Services::Get<DialogueManager>()->SetConversation(conversationName);
 	return 0;
 }
 RegFunc1(SetConversation, void, string, WAITABLE, REL_FUNC);
 
-/*
 shpvoid EndConversation()
 {
-	std::cout << "EndConversation" << std::endl;
+	//TODO: Why is this waitable?
+	Services::Get<DialogueManager>()->EndConversation();
 	return 0;
 }
 RegFunc0(EndConversation, void, WAITABLE, REL_FUNC);
-*/
+
+shpvoid SetDefaultDialogueCamera(std::string cameraName)
+{
+	return 0;
+}
+RegFunc1(SetDefaultDialogueCamera, void, string, IMMEDIATE, REL_FUNC);
  
 shpvoid StartAnimation(std::string animationName)
 {
@@ -1570,13 +1576,18 @@ shpvoid SetNounVerbCountBoth(string noun, string verb, int count)
 }
 RegFunc3(SetNounVerbCountBoth, void, string, string, int, IMMEDIATE, REL_FUNC);
 
-/*
-shpvoid TriggerNounVerb(string noun, string verb)
+shpvoid TriggerNounVerb(std::string noun, std::string verb)
 {
+	//TODO: Validate noun or throw error.
+	//TODO: Validate verb or throw error.
+	bool success = Services::Get<ActionManager>()->ExecuteAction(noun, verb);
+	if(!success)
+	{
+		Services::GetReports()->Log("Error", "Error: unable to trigger noun-verb combination " + noun + ":" + verb);
+	}
 	return 0;
 }
 RegFunc2(TriggerNounVerb, void, string, string, IMMEDIATE, DEV_FUNC);
-*/
  
 int GetScore()
 {
@@ -1605,27 +1616,41 @@ shpvoid ChangeScore(std::string scoreValue)
 }
 RegFunc1(ChangeScore, void, string, IMMEDIATE, REL_FUNC);
 
-/*
 int GetTopicCount(std::string noun, std::string verb)
 {
-	return 0;
+	//TODO: Validate noun. Must be a valid noun. Seems to include any scene nouns, inventory nouns, actor nouns.
+	if(!Services::Get<VerbManager>()->IsTopic(verb))
+	{
+		Services::GetReports()->Log("Error", "Error: '" + verb + " is not a valid verb name.");
+		return 0;
+	}
+	return Services::Get<GameProgress>()->GetTopicCount(noun, verb);
 }
 RegFunc2(GetTopicCount, int, string, string, IMMEDIATE, REL_FUNC);
 
 int GetTopicCountInt(int nounEnum, int verbEnum)
 {
+	std::cout << "GetTopicCountInt(" << nounEnum << ", " << verbEnum << ")" << std::endl;
 	return 0;
 }
 RegFunc2(GetTopicCountInt, int, int, int, IMMEDIATE, REL_FUNC);
-
+ 
 int HasTopicsLeft(std::string noun)
 {
-	return 0;
+	//TODO: Validate noun.
+	bool hasTopics = Services::Get<ActionManager>()->HasTopicsLeft(noun);
+	return hasTopics ? 1 : 0;
 }
 RegFunc1(HasTopicsLeft, int, string, IMMEDIATE, REL_FUNC);
 
-//SetTopicCount
-*/
+shpvoid SetTopicCount(std::string noun, std::string verb, int count)
+{
+	//TODO: Validate noun or report error.
+	//TODO: Validate verb or report error.
+	Services::Get<GameProgress>()->SetTopicCount(noun, verb, count);
+	return 0;
+}
+RegFunc3(SetTopicCount, void, string, string, int, IMMEDIATE, DEV_FUNC);
  
 int IsCurrentLocation(std::string location)
 {
