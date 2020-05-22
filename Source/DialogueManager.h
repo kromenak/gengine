@@ -23,7 +23,7 @@ public:
 	
 	void SetSpeaker(const std::string& noun);
 	
-	void SetConversation(const std::string& conversationName);
+	void SetConversation(const std::string& conversation);
 	void EndConversation();
 	
 	void StartYak(const std::string& yakAnimName, std::function<void()> finishCallback);
@@ -54,6 +54,10 @@ private:
 	// The current speaker. Whoever is speaking will play a "talk" animation.
 	// When someone else becomes the speaker, they'll play their "listen" animation.
 	std::string mSpeaker;
+	
+	// The current conversation. While a conversation is active, certain
+	// cameras may be used and the topic chooser appears after dialogue.
+	std::string mConversation;
 	
 	void PlayNextDialogueLine();
 };

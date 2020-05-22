@@ -7,6 +7,7 @@
 
 #include <cctype>
 
+#include "ActionManager.h"
 #include "Animation.h"
 #include "Animator.h"
 #include "GEngine.h"
@@ -59,9 +60,10 @@ void DialogueManager::ContinueDialogue(int numLines, bool playFidgets, std::func
 
 void DialogueManager::TriggerDialogueCue()
 {
-	// If we've done all the lines of dialogue we're interested in, call finish callback.
+	// If we've done all the lines of dialogue we're interested in...
 	if(mRemainingDialogueLines <= 0)
 	{
+		// Call finish callback.
 		if(mDialogueFinishCallback != nullptr)
 		{
 			mDialogueFinishCallback();
@@ -97,6 +99,21 @@ void DialogueManager::SetSpeaker(const std::string& noun)
 			actor->StartFidget(GKActor::FidgetType::Talk);
 		}
 	}
+}
+
+void DialogueManager::SetConversation(const std::string& conversation)
+{
+	mConversation = conversation;
+	//TODO: Set camera - should get dialogue camera(s) with matching dialogueName, set to "initial" one
+	//TODO: Gather LISTENERS from SIF and play appropriate anims, set fidgets, etc.
+	std::cout << "SetConversation " << conversation << std::endl;
+}
+
+void DialogueManager::EndConversation()
+{
+	//TODO: Set camera - get dialogue camera(s) with matching dialogueName, set to "final" one
+	//TODO: Based on listeners involved, play any exit anims, clear fidgets, etc.
+	mConversation.clear();
 }
 
 void DialogueManager::PlayNextDialogueLine()
