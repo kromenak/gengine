@@ -23,7 +23,7 @@ public:
     virtual ~SheepCompiler();
     
     SheepScript* Compile(const char* filename);
-    SheepScript* Compile(std::string sheep);
+    SheepScript* Compile(const std::string& sheep);
     SheepScript* Compile(std::istream& stream);
 	
     void Error(const Sheep::location& location, const std::string& message);

@@ -31,10 +31,10 @@ SheepScript* SheepCompiler::Compile(const char *filename)
     return Compile(inFile);
 }
 
-SheepScript* SheepCompiler::Compile(std::string sheep)
+SheepScript* SheepCompiler::Compile(const std::string& sheep)
 {
-    std::stringstream stringStream(sheep);
-    return Compile(stringStream);
+    std::stringstream stream(sheep);
+    return Compile(stream);
 }
 
 SheepScript* SheepCompiler::Compile(std::istream& stream)
@@ -89,8 +89,10 @@ void SheepCompiler::Error(const Sheep::location& location, const std::string& me
 	std::string section = "Code"; //TODO: I think <Code> is dynamic and changes based on whether section with error is Symbols or Code section.
 	std::string sheepContext = "'Console:2'"; //TODO: This should be generated from sheep name.
 	
+	// Format and log message.
 	std::string reportMsg = StringUtil::Format("GK3 compiler error at '%s' (line %d, col %d) <%s>\n%s",
-											   sheepContext.c_str(), line, col, section.c_str(), message.c_str());
+											   sheepContext.c_str(), line, col, section.c_str(),
+											   message.c_str());
 	Services::GetReports()->Log("SheepCompilerError", reportMsg);
 }
 
