@@ -81,8 +81,8 @@ VerbManager::VerbManager()
 				{
 					map = &mInventoryItems;
 				}
-				else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic") ||
-						StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
+				else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic"))
+						//StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
 				{
 					map = &mTopics;
 				}
