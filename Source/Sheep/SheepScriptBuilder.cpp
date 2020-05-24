@@ -152,7 +152,8 @@ void SheepScriptBuilder::AddGoto(std::string labelName)
     }
     else
     {
-        //TODO: Error: duplicate goto label
+		SetError(StringUtil::Format("label '%s' already exists at (line %d, col %d)",
+									labelName.c_str(), 0, 0));
     }
 }
 
@@ -440,6 +441,8 @@ void SheepScriptBuilder::Store(std::string varName)
         if(varIndex >= 0 && varIndex < mVariables.size())
         {
             SheepValue& value = mVariables[varIndex];
+			//TODO: If trying to assign invalid type, throw error. (need to pass in expr SheepValue to do this)
+			//TODO: cannot assign <type> expression to <type> variable '<varName>'
             if(value.type == SheepValueType::Int)
             {
 				#ifdef DEBUG_BUILDER
@@ -464,6 +467,10 @@ void SheepScriptBuilder::Store(std::string varName)
             AddIntArg(varIndex);
         }
     }
+	else
+	{
+		SetError(StringUtil::Format("user identifier '%s' not found in symbol definitions", varName.c_str()));
+	}
 }
 
 SheepValueType SheepScriptBuilder::Load(std::string varName)
@@ -500,6 +507,10 @@ SheepValueType SheepScriptBuilder::Load(std::string varName)
             return value.type;
         }
     }
+	else
+	{
+		SetError(StringUtil::Format("user identifier '%s' not found in symbol definitions", varName.c_str()));
+	}
     
     // Default return type is void; this is an error!
     return SheepValueType::Void;
@@ -557,6 +568,8 @@ SheepValueType SheepScriptBuilder::Add(SheepValue val1, SheepValue val2)
 	#ifdef DEBUG_BUILDER
 	std::cout << "Add" << std::endl;
 	#endif
+	
+	// Different results depending on whether both vals are ints, floats, or both.
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         IToF(1);
@@ -579,11 +592,15 @@ SheepValueType SheepScriptBuilder::Add(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::AddI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed with operator '+'");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '+'");
     }
+	return SheepValueType::Void;
 }
 
 SheepValueType SheepScriptBuilder::Subtract(SheepValue val1, SheepValue val2)
@@ -613,11 +630,15 @@ SheepValueType SheepScriptBuilder::Subtract(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::SubtractI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed with operator '-'");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '-'");
     }
+	return SheepValueType::Void;
 }
 
 SheepValueType SheepScriptBuilder::Multiply(SheepValue val1, SheepValue val2)
@@ -647,11 +668,15 @@ SheepValueType SheepScriptBuilder::Multiply(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::MultiplyI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed with operator '*'");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '*'");
     }
+	return SheepValueType::Void;
 }
 
 SheepValueType SheepScriptBuilder::Divide(SheepValue val1, SheepValue val2)
@@ -681,11 +706,15 @@ SheepValueType SheepScriptBuilder::Divide(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::DivideI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed with operator '/'");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '/'");
     }
+	return SheepValueType::Void;
 }
 
 void SheepScriptBuilder::Negate(SheepValue val)
@@ -706,7 +735,7 @@ void SheepScriptBuilder::Negate(SheepValue val)
     }
     else
     {
-        // Unsupported
+        SetError(StringUtil::Format("'-' operator not allowed on %s expressions", val.GetTypeString().c_str()));
     }
 }
 
@@ -737,11 +766,15 @@ SheepValueType SheepScriptBuilder::IsEqual(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::IsEqualI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed for operator '=='");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '=='");
     }
+	return SheepValueType::Void;
 }
 
 SheepValueType SheepScriptBuilder::IsNotEqual(SheepValue val1, SheepValue val2)
@@ -771,11 +804,15 @@ SheepValueType SheepScriptBuilder::IsNotEqual(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::IsNotEqualI);
         return SheepValueType::Int;
     }
-    else
+	else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed for operator '!='");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '!='");
     }
+	return SheepValueType::Void;
 }
 
 SheepValueType SheepScriptBuilder::IsGreater(SheepValue val1, SheepValue val2)
@@ -805,11 +842,15 @@ SheepValueType SheepScriptBuilder::IsGreater(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::IsGreaterI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed for operator '>'");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '>'");
     }
+	return SheepValueType::Void;
 }
 
 SheepValueType SheepScriptBuilder::IsLess(SheepValue val1, SheepValue val2)
@@ -839,11 +880,15 @@ SheepValueType SheepScriptBuilder::IsLess(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::IsLessI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed for operator '<'");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '<'");
     }
+	return SheepValueType::Void;
 }
 
 SheepValueType SheepScriptBuilder::IsGreaterEqual(SheepValue val1, SheepValue val2)
@@ -873,11 +918,15 @@ SheepValueType SheepScriptBuilder::IsGreaterEqual(SheepValue val1, SheepValue va
         AddInstruction(SheepInstruction::IsGreaterEqualI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed for operator '>='");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '>='");
     }
+	return SheepValueType::Void;
 }
 
 SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2)
@@ -907,11 +956,15 @@ SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2)
         AddInstruction(SheepInstruction::IsLessEqualI);
         return SheepValueType::Int;
     }
-    else
+    else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
+	{
+		SetError("string types not allowed for operator '<='");
+	}
+	else
     {
-        // Unsupported
-        return SheepValueType::Void;
+        SetError("cannot use void return with operator '<='");
     }
+	return SheepValueType::Void;
 }
 
 void SheepScriptBuilder::IToF(int index)
@@ -934,6 +987,9 @@ void SheepScriptBuilder::FToI(int index)
 
 void SheepScriptBuilder::Modulo(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "Modulo" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         FToI(0);
@@ -956,16 +1012,15 @@ void SheepScriptBuilder::Modulo(SheepValue val1, SheepValue val2)
     }
     else
     {
-        // Unsupported
+		SetError("operator '%' requires both left and right expressions be of integer type");
     }
-	
-	#ifdef DEBUG_BUILDER
-	std::cout << "Modulo" << std::endl;
-	#endif
 }
 
 void SheepScriptBuilder::And(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "And" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         FToI(0);
@@ -988,16 +1043,15 @@ void SheepScriptBuilder::And(SheepValue val1, SheepValue val2)
     }
     else
     {
-        // Unsupported
+        SetError("operator '&&' requires both left and right expressions be of integer type");
     }
-	
-	#ifdef DEBUG_BUILDER
-	std::cout << "And" << std::endl;
-	#endif
 }
 
 void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2)
 {
+	#ifdef DEBUG_BUILDER
+	std::cout << "Or" << std::endl;
+	#endif
     if(val1.type == SheepValueType::Float && val2.type == SheepValueType::Int)
     {
         FToI(0);
@@ -1020,12 +1074,8 @@ void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2)
     }
     else
     {
-        // Unsupported
+        SetError("operator '||' requires both left and right expressions be of integer type");
     }
-	
-	#ifdef DEBUG_BUILDER
-	std::cout << "Or" << std::endl;
-	#endif
 }
 
 void SheepScriptBuilder::Not()
