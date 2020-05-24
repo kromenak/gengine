@@ -130,17 +130,20 @@ void SceneData::ResolveSceneData()
 	// Clear actions from previous scene - we're about to populate here!
 	Services::Get<ActionManager>()->ClearActionSets();
 	
-	// Always load action sets that are global or for inventory.
-	Services::Get<ActionManager>()->AddGlobalAndInventoryActionSets(mTimeblock);
+	// Add inventory action sets first (global-to-specific).
+	Services::Get<ActionManager>()->AddInventoryActionSets(mTimeblock);
 	
-	// Populate actions for current scene.
-	// General SIF contains action sets that should only be conditionally loaded based on current timeblock.
-	// We should always load action sets for specific SIF.
+	// Add current scene general SIF action sets conditionally (in order defined in SIF file).
 	AddActionBlocks(mGeneralSIF->GetActionBlocks(), true);
+	
+	// Add current scene specific SIFs action sets unconditionally (in order defined in SIF file).
 	if(mSpecificSIF != nullptr)
 	{
 		AddActionBlocks(mSpecificSIF->GetActionBlocks(), false);
 	}
+	
+	// Add global action sets (global-to-specific).
+	Services::Get<ActionManager>()->AddGlobalActionSets(mTimeblock);
 }
 
 const RoomSceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) const
@@ -323,6 +326,10 @@ void SceneData::AddActionBlocks(const std::vector<ConditionalBlock<NVC*>>& actio
 					Services::Get<ActionManager>()->AddActionSet(nvc->GetName());
 				}
 			}
+		}
+		else
+		{
+			Services::GetReports()->Log("Generic", "Skipping header `%s`.");
 		}
 	}
 }
