@@ -16,22 +16,18 @@ class SheepManager
 {
 public:
     SheepScript* Compile(const char* filename);
-    SheepScript* Compile(std::string sheep);
+    SheepScript* Compile(const std::string& sheep);
     SheepScript* Compile(std::istream& stream);
+	SheepScript* CompileEval(const std::string& sheep);
     
-    void Execute(std::string sheepName, std::string functionName);
-	void Execute(std::string sheepName, std::string functionName, std::function<void()> finishCallback);
-	
-    void Execute(SheepScript* script);
+	void Execute(const std::string& sheepName, const std::string& functionName, std::function<void()> finishCallback);
 	void Execute(SheepScript* script, std::function<void()> finishCallback);
-	
-	void Execute(SheepScript* script, std::string functionName);
-	void Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback);
+	void Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback);
 	
     bool Evaluate(SheepScript* script);
+	bool Evaluate(SheepScript* script, int n, int v);
 	
 	SheepThread* GetCurrentThread() const { return mVirtualMachine.GetCurrentThread(); }
-	
 	bool IsAnyRunning() const { return mVirtualMachine.IsAnyRunning(); }
 	
 private:
@@ -40,4 +36,6 @@ private:
 	
 	// Executes binary bytecode sheep scripts.
 	SheepVM mVirtualMachine;
+	
+	std::string mEvalHusk = "symbols { int n$ = 0; int v$ = 0; } code { X$() %s }";
 };

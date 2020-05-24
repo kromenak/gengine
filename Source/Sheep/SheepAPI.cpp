@@ -1244,9 +1244,9 @@ RegFunc1(SetCameraFOV, void, float, IMMEDIATE, REL_FUNC);
 shpvoid Call(std::string functionName)
 {
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-	if(currentThread != nullptr && currentThread->mAttachedSheep != nullptr)
+	if(currentThread != nullptr && currentThread->mContext != nullptr)
 	{
-		SheepScript* sheep = currentThread->mAttachedSheep->mSheepScript;
+		SheepScript* sheep = currentThread->mContext->mSheepScript;
 		if(sheep != nullptr)
 		{
 			Services::GetSheep()->Execute(sheep, functionName, currentThread != nullptr ? currentThread->AddWait() : nullptr);
@@ -1350,10 +1350,10 @@ RegFunc0(GetCurrentSheepFunction, string, IMMEDIATE, REL_FUNC);
 std::string GetCurrentSheepName()
 {
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-	if(currentThread != nullptr && currentThread->mAttachedSheep != nullptr)
+	if(currentThread != nullptr && currentThread->mContext != nullptr)
 	{
 		// Specifically, return name with no extension.
-		return currentThread->mAttachedSheep->mSheepScript->GetNameNoExtension();
+		return currentThread->mContext->mSheepScript->GetNameNoExtension();
 	}
 	return "";
 }
@@ -1633,8 +1633,9 @@ RegFunc2(GetTopicCount, int, string, string, IMMEDIATE, REL_FUNC);
 
 int GetTopicCountInt(int nounEnum, int verbEnum)
 {
-	std::cout << "GetTopicCountInt(" << nounEnum << ", " << verbEnum << ")" << std::endl;
-	return 0;
+	std::string noun = Services::Get<ActionManager>()->GetNoun(nounEnum);
+	std::string verb = Services::Get<ActionManager>()->GetVerb(verbEnum);
+	return GetTopicCount(noun, verb);
 }
 RegFunc2(GetTopicCountInt, int, int, int, IMMEDIATE, REL_FUNC);
  
