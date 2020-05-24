@@ -24,48 +24,6 @@ std::string SheepInstance::GetName()
 	return "";
 }
 
-float SheepValue::GetFloat()
-{
-	switch(type)
-	{
-	default:
-	case SheepValueType::Float:
-		return floatValue;
-	case SheepValueType::Int:
-		return (float)intValue;
-	case SheepValueType::String:
-		return std::stof(stringValue);
-	}
-}
-
-int SheepValue::GetInt()
-{
-	switch(type)
-	{
-	default:
-	case SheepValueType::Int:
-		return intValue;
-	case SheepValueType::Float:
-		return (int)floatValue;
-	case SheepValueType::String:
-		return std::stoi(stringValue);
-	}
-}
-
-std::string SheepValue::GetString()
-{
-	switch(type)
-	{
-	default:
-	case SheepValueType::String:
-		return std::string(stringValue);
-	case SheepValueType::Float:
-		return std::to_string(floatValue);
-	case SheepValueType::Int:
-		return std::to_string(intValue);
-	}
-}
-
 SheepVM::~SheepVM()
 {
 	for(auto& instance : mSheepInstances)
@@ -78,115 +36,72 @@ SheepVM::~SheepVM()
 	}
 }
 
-void SheepVM::Execute(SheepScript* script)
-{
-	// We need a valid script.
-	if(script == nullptr) { return; }
-	
-	// Just default to zero offset (aka the first function in the script).
-	Execute(script, 0, nullptr);
-}
-
 void SheepVM::Execute(SheepScript* script, std::function<void()> finishCallback)
 {
-	// We need a valid script.
-	if(script == nullptr)
-	{
-		finishCallback();
-		return;
-	}
-	
 	// Just default to zero offset (aka the first function in the script).
 	Execute(script, 0, finishCallback);
 }
 
-void SheepVM::Execute(SheepScript* script, std::string functionName)
-{
-	Execute(script, functionName, nullptr);
-}
-
-void SheepVM::Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback)
+void SheepVM::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback)
 {
 	// We need a valid script.
 	if(script == nullptr)
 	{
-		std::cout << "ERROR: Script is not valid." << std::endl;
-		finishCallback();
+		if(finishCallback != nullptr)
+		{
+			finishCallback();
+		}
 		return;
 	}
 	
 	// Get bytecode offset for this function. If less than zero,
 	// it means the function doesn't exist, and we've got to fail out.
-	int functionOffset = script->GetFunctionOffset(functionName);
-	if(functionOffset < 0)
+	int bytecodeOffset = script->GetFunctionOffset(functionName);
+	if(bytecodeOffset < 0)
 	{
 		std::cout << "ERROR: Couldn't find function: " << functionName << std::endl;
-		finishCallback();
+		if(finishCallback != nullptr)
+		{
+			finishCallback();
+		}
 		return;
 	}
 	
-	// Retrieve a sheep instance for this script, or fail.
-	SheepInstance* instance = GetInstance(script);
-	if(instance == nullptr)
-	{
-		std::cout << "ERROR: Couldn't allocate SheepInstance." << std::endl;
-		finishCallback();
-		return;
-	}
-	
-	// Create a sheep thread to perform the execution.
-	SheepThread* thread = GetThread();
-	thread->mAttachedSheep = instance;
-	thread->mWaitCallback = finishCallback;
-	thread->mCodeOffset = functionOffset;
-	
-	// Save function name and start offset, mainly for debug output.
-	thread->mFunctionName = functionName;
-	thread->mFunctionStartOffset = functionOffset;
-	
-	// Start the thread of execution.
-	//std::cout << "SHEEP EXECUTE START - Stack size is " << mStackSize << std::endl;
-	Execute(thread);
-	//std::cout << "SHEEP EXECUTE END - Stack size is " << mStackSize << std::endl;
+	// Execute at bytecode offset.
+	ExecuteInternal(script, bytecodeOffset, functionName, finishCallback);
 }
 
 void SheepVM::Execute(SheepScript* script, int bytecodeOffset, std::function<void()> finishCallback)
 {
-	if(script == nullptr) { return; }
-	
-	// Retrieve a sheep instance for this script, or fail.
-	SheepInstance* instance = GetInstance(script);
-	if(instance == nullptr) { return; }
-	
-	// Create a sheep thread to perform the execution.
-	SheepThread* thread = GetThread();
-	thread->mAttachedSheep = instance;
-	thread->mWaitCallback = finishCallback;
-	thread->mCodeOffset = bytecodeOffset;
-	
-	// In this case, we don't know the specific function name, so we just use X$.
-	// (Technically, it may be possible to dig through the SheepScript* to figure this out, but do we need to?)
-	thread->mFunctionName = "X$";
-	thread->mFunctionStartOffset = bytecodeOffset;
-	
-	// Start the thread of execution.
-	//std::cout << "SHEEP EXECUTE START - Stack size is " << mStackSize << std::endl;
-	Execute(thread);
-	//std::cout << "SHEEP EXECUTE END - Stack size is " << mStackSize << std::endl;
+	ExecuteInternal(script, bytecodeOffset, "X$", finishCallback);
 }
 
-bool SheepVM::Evaluate(SheepScript* script)
+bool SheepVM::Evaluate(SheepScript* script, int n, int v)
 {
+	// Get an execution context.
+	SheepInstance* instance = GetInstance(script);
+	
+	// For NVC evaluation logic, scripts can use built-in variables $n and $v.
+	// These variables refer to whatever the current noun and current verb are, using an int identifier.
+	// Pass these values in, but only if the context can support them.
+	if(instance->mVariables.size() > 0 && instance->mVariables[0].type == SheepValueType::Int)
+	{
+		instance->mVariables[0].intValue = n;
+	}
+	if(instance->mVariables.size() > 1 && instance->mVariables[1].type == SheepValueType::Int)
+	{
+		instance->mVariables[1].intValue = v;
+	}
+	
 	//std::cout << "SHEEP EVALUATE START - Stack size is " << mStackSize << std::endl;
     // Execute the script, per usual.
-    Execute(script);
+    SheepThread* thread = ExecuteInternal(instance, 0, "X$", nullptr);
     
     // If stack is empty, return false.
-    if(mStackSize == 0) { return false; }
-    
+	if(thread->mStack.Size() == 0) { return false; }
+	
     // Check the top item on the stack and return true or false based on that.
-	SheepValue& result = PopStack();
-	//std::cout << "SHEEP EVALUATE END - Stack size is " << mStackSize << std::endl;
+	SheepValue& result = thread->mStack.Pop();
     if(result.type == SheepValueType::Int)
     {
         return result.intValue != 0;
@@ -216,7 +131,12 @@ bool SheepVM::IsAnyRunning() const
 
 SheepInstance* SheepVM::GetInstance(SheepScript* script)
 {
+	// Don't create without a valid script.
+	if(script == nullptr) { return nullptr; }
+	
 	// If an instance already exists for this sheep, just reuse that one.
+	// This *might* be important b/c we want variables in the same script to be shared.
+	// Ex: call IncCounter$ in same sheep, the counter variable should still be incremented after returning.
 	for(auto& instance : mSheepInstances)
 	{
 		if(instance->mSheepScript == script)
@@ -225,19 +145,28 @@ SheepInstance* SheepVM::GetInstance(SheepScript* script)
 		}
 	}
 	
-	//TODO: Try to reuse an existing, but unused, instance.
+	// Try to reuse an execution context that is no longer being used.
+	SheepInstance* context = nullptr;
+	for(auto& instance : mSheepInstances)
+	{
+		if(instance->mReferenceCount == 0)
+		{
+			context = instance;
+			break;
+		}
+	}
 	
 	// Create a new instance if we have to.
-	SheepInstance* instance = new SheepInstance();
-	instance->mSheepScript = script;
+	if(context == nullptr)
+	{
+		context = new SheepInstance();
+		mSheepInstances.push_back(context);
+	}
+	context->mSheepScript = script;
 	
 	// Create copy of variables for assignment during execution.
-	instance->mVariables = script->GetVariables();
-	
-	// Add to sheep instances.
-	mSheepInstances.push_back(instance);
-	//std::cout << mSheepInstances.size() << std::endl;
-	return instance;
+	context->mVariables = script->GetVariables();
+	return context;
 }
 
 SheepThread* SheepVM::GetThread()
@@ -263,7 +192,7 @@ SheepThread* SheepVM::GetThread()
 	return useThread;
 }
 
-Value SheepVM::CallSysFunc(SysImport* sysImport)
+Value SheepVM::CallSysFunc(SheepThread* thread, SysImport* sysImport)
 {
 	// Retrieve system function declaration for the system function import.
 	// We need the full declaration to know whether this is a waitable function!
@@ -276,14 +205,15 @@ Value SheepVM::CallSysFunc(SysImport* sysImport)
 	
 	// Number on top of stack is argument count.
 	// Make sure it matches the argument count from the system function declaration.
-	int argCount = PopStack().intValue;
+	int argCount = thread->mStack.Pop().intValue;
 	assert(argCount == sysFunc->argumentTypes.size());
 	
 	// Retrieve the arguments, of the expected types, from the stack.
 	std::vector<Value> args;
 	for(int i = 0; i < argCount; i++)
 	{
-		SheepValue sheepValue = mStack[mStackSize - (argCount - i)];
+		SheepValue& sheepValue = thread->mStack.Peek(argCount - 1 - i);
+		//SheepValue sheepValue = mStack[mStackSize - (argCount - i)];
 		int argType = sysFunc->argumentTypes[i];
 		switch(argType)
 		{
@@ -301,7 +231,35 @@ Value SheepVM::CallSysFunc(SysImport* sysImport)
 			break;
 		}
 	}
-	PopStack(argCount);
+	thread->mStack.Pop(argCount);
+	
+	/*
+	{
+		// Pretty useful for seeing the function that was called output to the console.
+		std::cout << "SysFunc " << sysFunc->name << "(";
+		for(int i = 0; i < argCount; i++)
+		{
+			switch(sysFunc->argumentTypes[i])
+			{
+			case 1:
+				std::cout << args[i].to<int>();
+				break;
+			case 2:
+				std::cout << args[i].to<float>();
+				break;
+			case 3:
+				std::cout << args[i].to<std::string>();
+				break;
+			}
+
+			if(i < argCount - 1)
+			{
+				std::cout << ", ";
+			}
+		}
+		std::cout << ")" << std::endl;
+	}
+	*/
 	
 	// Based on argument count, call the appropriate function variant.
 	switch(argCount)
@@ -326,76 +284,44 @@ Value SheepVM::CallSysFunc(SysImport* sysImport)
 	}
 }
 
-void SheepVM::PushStackInt(int val)
+SheepThread* SheepVM::ExecuteInternal(SheepScript *script, int bytecodeOffset,
+        const std::string &functionName, std::function<void ()> finishCallback)
 {
-	mStackSize++;
-	assert(mStackSize < kMaxStackSize);
-	mStack[mStackSize - 1].type = SheepValueType::Int;
-	mStack[mStackSize - 1].intValue = val;
-	#ifdef SHEEP_DEBUG
-	std::cout << "SHEEP STACK: Push 1 (Stack Size = " << mStackSize << ")" << std::endl;
-	#endif
+	return ExecuteInternal(GetInstance(script), bytecodeOffset, functionName, finishCallback);
 }
 
-void SheepVM::PushStackFloat(float val)
+SheepThread* SheepVM::ExecuteInternal(SheepInstance* instance, int bytecodeOffset,
+									  const std::string& functionName, std::function<void()> finishCallback)
 {
-	mStackSize++;
-	assert(mStackSize < kMaxStackSize);
-	mStack[mStackSize - 1].type = SheepValueType::Float;
-	mStack[mStackSize - 1].floatValue = val;
-	#ifdef SHEEP_DEBUG
-	std::cout << "SHEEP STACK: Push 1 (Stack Size = " << mStackSize << ")" << std::endl;
-	#endif
+	// A valid execution context is required.
+	if(instance == nullptr)
+	{
+		if(finishCallback != nullptr)
+		{
+			finishCallback();
+		}
+		return nullptr;
+	}
+	
+	// Create a sheep thread to perform the execution.
+	SheepThread* thread = GetThread();
+	thread->mContext = instance;
+	thread->mWaitCallback = finishCallback;
+	thread->mCodeOffset = bytecodeOffset;
+	
+	// Save name and start offset (for debugging/info).
+	thread->mFunctionName = functionName;
+	thread->mFunctionStartOffset = bytecodeOffset;
+	
+	// The thread is using this execution context.
+	instance->mReferenceCount++;
+	
+	// Start the thread of execution.
+	ExecuteInternal(thread);
+	return thread;
 }
 
-void SheepVM::PushStackStrOffset(int val)
-{
-	mStackSize++;
-	assert(mStackSize < kMaxStackSize);
-	mStack[mStackSize - 1].type = SheepValueType::String;
-	mStack[mStackSize - 1].intValue = val;
-	#ifdef SHEEP_DEBUG
-	std::cout << "SHEEP STACK: Push 1 (Stack Size = " << mStackSize << ")" << std::endl;
-	#endif
-}
-
-void SheepVM::PushStackStr(const char* str)
-{
-	mStackSize++;
-	assert(mStackSize < kMaxStackSize);
-	mStack[mStackSize - 1].type = SheepValueType::String;
-	mStack[mStackSize - 1].stringValue = str;
-	#ifdef SHEEP_DEBUG
-	std::cout << "SHEEP STACK: Push 1 (Stack Size = " << mStackSize << ")" << std::endl;
-	#endif
-}
-
-SheepValue& SheepVM::PopStack()
-{
-	SheepValue& top = mStack[mStackSize - 1];
-	mStackSize--;
-	#ifdef SHEEP_DEBUG
-	std::cout << "SHEEP STACK: Pop 1 (Stack Size = " << mStackSize << ")" << std::endl;
-	#endif
-	assert(mStackSize >= 0); // Or clamp?
-	return top;
-}
-
-void SheepVM::PopStack(int count)
-{
-	mStackSize -= count;
-	#ifdef SHEEP_DEBUG
-	std::cout << "SHEEP STACK: Pop " << count << " (Stack Size = " << mStackSize << ")" << std::endl;
-	#endif
-	assert(mStackSize >= 0); // Or clamp?
-}
-
-SheepValue& SheepVM::PeekStack()
-{
-	return mStack[mStackSize - 1];
-}
-
-void SheepVM::Execute(SheepThread* thread)
+void SheepVM::ExecuteInternal(SheepThread* thread)
 {
 	// Store previous thread and set passed in thead as the currently executing thread.
 	SheepThread* prevThread = mCurrentThread;
@@ -405,7 +331,6 @@ void SheepVM::Execute(SheepThread* thread)
 	if(!thread->mRunning)
 	{
 		thread->mRunning = true;
-		
 		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " created and starting");
 	}
 	else if(thread->mInWaitBlock)
@@ -416,7 +341,7 @@ void SheepVM::Execute(SheepThread* thread)
 	}
 	
 	// Get instance/script we'll be using.
-	SheepInstance* instance = thread->mAttachedSheep;
+	SheepInstance* instance = thread->mContext;
 	SheepScript* script = instance->mSheepScript;
 	
     // Get bytecode and generate a binary reader for easier parsing.
@@ -437,7 +362,7 @@ void SheepVM::Execute(SheepThread* thread)
 		// Read instruction.
         char instruction = reader.ReadUByte();
 		
-		// Break when read instruction fails (perhaps due to reading past end of file/mem stream.
+		// Break when read instruction fails (perhaps due to reading past end of file/mem stream).
 		if(!reader.OK()) { break; }
 		
 		// Perform the action associated with each instruction.
@@ -476,12 +401,12 @@ void SheepVM::Execute(SheepThread* thread)
 				#endif
 				
 				// Execute the system function.
-                Value value = CallSysFunc(sysFunc);
+                Value value = CallSysFunc(thread, sysFunc);
 				
 				// Though this is void return, we still push type of "shpvoid" onto stack.
 				// The compiler generates an extra "Pop" instruction after a CallSysFunctionV.
 				// This matches how the original game's compiler generated instructions!
-				PushStackInt(value.to<shpvoid>());
+				thread->mStack.PushInt(value.to<shpvoid>());
                 break;
             }
             case SheepInstruction::CallSysFunctionI:
@@ -499,10 +424,10 @@ void SheepVM::Execute(SheepThread* thread)
 				#endif
 				
 				// Execute the system function.
-                Value value = CallSysFunc(sysFunc);
+                Value value = CallSysFunc(thread, sysFunc);
 				
 				// Push the int result onto the stack.
-				PushStackInt(value.to<int>());
+				thread->mStack.PushInt(value.to<int>());
                 break;
             }
             case SheepInstruction::CallSysFunctionF:
@@ -520,10 +445,10 @@ void SheepVM::Execute(SheepThread* thread)
 				#endif
 				
 				// Execute the system function.
-                Value value = CallSysFunc(sysFunc);
+                Value value = CallSysFunc(thread, sysFunc);
 				
 				// Push the float result onto the stack.
-				PushStackFloat(value.to<float>());
+				thread->mStack.PushFloat(value.to<float>());
                 break;
             }
             case SheepInstruction::CallSysFunctionS:
@@ -541,10 +466,10 @@ void SheepVM::Execute(SheepThread* thread)
 				#endif
 				
 				// Execute the system function.
-                Value value = CallSysFunc(sysFunc);
+                Value value = CallSysFunc(thread, sysFunc);
 				
 				// Push the string result onto the stack.
-				PushStackStr(value.to<std::string>().c_str()); //TODO: Seems like this could cause problems? Where is value's string coming from? What if it is deallocated???
+				thread->mStack.PushString(value.to<std::string>().c_str()); //TODO: Seems like this could cause problems? Where is value's string coming from? What if it is deallocated???
                 break;
             }
             case SheepInstruction::Branch:
@@ -577,7 +502,8 @@ void SheepVM::Execute(SheepThread* thread)
 				
 				// If top item on stack is zero, we will branch.
 				// This operation also pops off the stack.
-				if(PopStack().intValue == 0)
+				SheepValue& result = thread->mStack.Pop();
+				if(result.intValue == 0)
 				{
 					reader.Seek(branchAddress);
 				}
@@ -626,11 +552,11 @@ void SheepVM::Execute(SheepThread* thread)
                 if(varIndex >= 0 && varIndex < instance->mVariables.size())
                 {
 					#ifdef SHEEP_DEBUG
-					std::cout << "StoreI " << mStack[mStackSize - 1].intValue << std::endl;
+					std::cout << "StoreI " << thread->mStack.Peek(0).intValue << std::endl;
 					#endif
 					
                     assert(instance->mVariables[varIndex].type == SheepValueType::Int);
-					SheepValue& value = PopStack();
+					SheepValue& value = thread->mStack.Pop();
 					instance->mVariables[varIndex].intValue = value.intValue;
                 }
                 break;
@@ -641,11 +567,11 @@ void SheepVM::Execute(SheepThread* thread)
                 if(varIndex >= 0 && varIndex < instance->mVariables.size())
                 {
 					#ifdef SHEEP_DEBUG
-					std::cout << "StoreF " << mStack[mStackSize - 1].floatValue << std::endl;
+					std::cout << "StoreF " << thread->mStack.Peek(0).floatValue << std::endl;
 					#endif
 					
                     assert(instance->mVariables[varIndex].type == SheepValueType::Float);
-					SheepValue& value = PopStack();
+					SheepValue& value = thread->mStack.Pop();
                     instance->mVariables[varIndex].floatValue = value.floatValue;
                 }
                 break;
@@ -656,11 +582,11 @@ void SheepVM::Execute(SheepThread* thread)
                 if(varIndex >= 0 && varIndex < instance->mVariables.size())
                 {
 					#ifdef SHEEP_DEBUG
-					std::cout << "StoreS " << mStack[mStackSize - 1].stringValue << std::endl;
+					std::cout << "StoreS " << thread->mStack.Peek(0).stringValue << std::endl;
 					#endif
 					
                     assert(instance->mVariables[varIndex].type == SheepValueType::String);
-					SheepValue& value = PopStack();
+					SheepValue& value = thread->mStack.Pop();
                     instance->mVariables[varIndex].stringValue = value.stringValue;
                 }
                 break;
@@ -675,7 +601,7 @@ void SheepVM::Execute(SheepThread* thread)
 					#endif
 					
                     assert(instance->mVariables[varIndex].type == SheepValueType::Int);
-					PushStackInt(instance->mVariables[varIndex].intValue);
+					thread->mStack.PushInt(instance->mVariables[varIndex].intValue);
                 }
                 break;
             }
@@ -689,7 +615,7 @@ void SheepVM::Execute(SheepThread* thread)
 					#endif
 					
                     assert(instance->mVariables[varIndex].type == SheepValueType::Float);
-					PushStackFloat(instance->mVariables[varIndex].floatValue);
+					thread->mStack.PushFloat(instance->mVariables[varIndex].floatValue);
                 }
                 break;
             }
@@ -703,7 +629,7 @@ void SheepVM::Execute(SheepThread* thread)
 					#endif
 					
                     assert(instance->mVariables[varIndex].type == SheepValueType::String);
-					PushStackStr(instance->mVariables[varIndex].stringValue);
+					thread->mStack.PushString(instance->mVariables[varIndex].stringValue);
                 }
                 break;
             }
@@ -713,7 +639,7 @@ void SheepVM::Execute(SheepThread* thread)
 				#ifdef SHEEP_DEBUG
 				std::cout << "PushI " << int1 << std::endl;
 				#endif
-				PushStackInt(int1);
+				thread->mStack.PushInt(int1);
                 break;
             }
             case SheepInstruction::PushF:
@@ -722,7 +648,7 @@ void SheepVM::Execute(SheepThread* thread)
 				#ifdef SHEEP_DEBUG
 				std::cout << "PushF " << float1 << std::endl;
 				#endif
-				PushStackFloat(float1);
+				thread->mStack.PushFloat(float1);
                 break;
             }
             case SheepInstruction::PushS:
@@ -731,19 +657,19 @@ void SheepVM::Execute(SheepThread* thread)
 				#ifdef SHEEP_DEBUG
 				std::cout << "PushS " << stringConstOffset << std::endl;
 				#endif
-				PushStackStrOffset(stringConstOffset);
+				thread->mStack.PushStringOffset(stringConstOffset);
                 break;
             }
 			case SheepInstruction::GetString:
 			{
-				SheepValue& offsetValue = PopStack();
+				SheepValue& offsetValue = thread->mStack.Pop();
 				std::string* stringPtr = script->GetStringConst(offsetValue.intValue);
 				if(stringPtr != nullptr)
 				{
-					PushStackStr(stringPtr->c_str());
+					thread->mStack.PushString(stringPtr->c_str());
 				}
 				#ifdef SHEEP_DEBUG
-				std::cout << "GetString " << mStack[mStackSize - 1].stringValue << std::endl;
+				std::cout << "GetString " << thread->mStack.Peek().stringValue << std::endl;
 				#endif
 				break;
 			}
@@ -752,405 +678,379 @@ void SheepVM::Execute(SheepThread* thread)
 				#ifdef SHEEP_DEBUG
 				std::cout << "Pop" << std::endl;
 				#endif
-				PopStack(1);
+				thread->mStack.Pop(1);
                 break;
             }
             case SheepInstruction::AddI:
             {
-                if(mStackSize < 2) { break; }
+                assert(thread->mStack.Size() >= 2);
+				int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
 				
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
 				#ifdef SHEEP_DEBUG
 				std::cout << "AddI " << int1 << " + " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 + int2);
+				thread->mStack.PushInt(int1 + int2);
                 break;
             }
             case SheepInstruction::AddF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+				assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "AddF " << float1 << " + " << float2 << std::endl;
 				#endif
-				
-				PushStackFloat(float1 + float2);
+				thread->mStack.PushFloat(float1 + float2);
                 break;
             }
             case SheepInstruction::SubtractI:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "SubtractI " << int1 << " - " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 - int2);
+				thread->mStack.PushInt(int1 - int2);
                 break;
             }
             case SheepInstruction::SubtractF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "SubtractF " << float1 << " - " << float2 << std::endl;
 				#endif
-				
-				PushStackFloat(float1 - float2);
+				thread->mStack.PushFloat(float1 - float2);
                 break;
             }
             case SheepInstruction::MultiplyI:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "MultiplyI " << int1 << " * " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 * int2);
+				thread->mStack.PushInt(int1 * int2);
                 break;
             }
             case SheepInstruction::MultiplyF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "MultiplyF " << float1 << " * " << float2 << std::endl;
 				#endif
-				
-				PushStackFloat(float1 * float2);
+				thread->mStack.PushFloat(float1 * float2);
                 break;
             }
             case SheepInstruction::DivideI:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "DivideI " << int1 << " / " << int2 << std::endl;
 				#endif
-				
 				// If dividing by zero, we'll spit out an error and just put a zero on the stack.
 				if(int2 != 0)
 				{
-					PushStackInt(int1 / int2);
+					thread->mStack.PushInt(int1 / int2);
 				}
 				else
 				{
 					std::cout << "Divide by zero!" << std::endl;
-					PushStackInt(0);
+					thread->mStack.PushInt(0);
 				}
                 break;
             }
             case SheepInstruction::DivideF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "DivideF " << float1 << " / " << float2 << std::endl;
 				#endif
-				
 				// If dividing by zero, we'll spit out an error and just put a zero on the stack.
 				if(!Math::AreEqual(float2, 0.0f))
 				{
-					PushStackFloat(float1 / float2);
+					thread->mStack.PushFloat(float1 / float2);
 				}
 				else
 				{
 					std::cout << "Divide by zero!" << std::endl;
-					PushStackFloat(0);
+					thread->mStack.PushFloat(0.0f);
 				}
                 break;
             }
             case SheepInstruction::NegateI:
             {
-                if(mStackSize < 1) { break; }
+                assert(thread->mStack.Size() >= 1);
 				
 				#ifdef SHEEP_DEBUG
-				std::cout << "NegateI " << mStack[mStackSize - 1].intValue << std::endl;
+				std::cout << "NegateI " << thread->mStack.Peek(0).intValue << std::endl;
 				#endif
-                mStack[mStackSize - 1].intValue *= -1;
+                thread->mStack.Peek(0).intValue *= -1;
                 break;
             }
             case SheepInstruction::NegateF:
             {
-                if(mStackSize < 1) { break; }
+                assert(thread->mStack.Size() >= 1);
 				
 				#ifdef SHEEP_DEBUG
-				std::cout << "NegateF " << mStack[mStackSize - 1].floatValue << std::endl;
+				std::cout << "NegateF " << thread->mStack.Peek(0).floatValue << std::endl;
 				#endif
-                mStack[mStackSize - 1].floatValue *= -1.0f;
+                thread->mStack.Peek(0).floatValue *= -1.0f;
                 break;
             }
             case SheepInstruction::IsEqualI:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsEqualI " << int1 << " == " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 == int2 ? 1 : 0);
+				thread->mStack.PushInt(int1 == int2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::IsEqualF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsEqualF " << float1 << " == " << float2 << std::endl;
 				#endif
-				
-				PushStackInt(Math::AreEqual(float1, float2) ? 1 : 0);
+				thread->mStack.PushInt(Math::AreEqual(float1, float2) ? 1 : 0);
                 break;
             }
             case SheepInstruction::IsNotEqualI:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsNotEqualI " << int1 << " != " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 != int2 ? 1 : 0);
+				thread->mStack.PushInt(int1 != int2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::IsNotEqualF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsNotEqualF " << float1 << " != " << float2 << std::endl;
 				#endif
-				
-				PushStackInt(!Math::AreEqual(float1, float2) ? 1 : 0);
+				thread->mStack.PushInt(!Math::AreEqual(float1, float2) ? 1 : 0);
                 break;
             }
             case SheepInstruction::IsGreaterI:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsGreaterI " << int1 << " > " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 > int2 ? 1 : 0);
+				thread->mStack.PushInt(int1 > int2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::IsGreaterF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsGreaterF " << float1 << " > " << float2 << std::endl;
 				#endif
-				
-				PushStackInt(float1 > float2 ? 1 : 0);
+				thread->mStack.PushInt(float1 > float2 ? 1 : 0);
                 break;
             }
 			case SheepInstruction::IsLessI:
 			{
-				if(mStackSize < 2) { break; }
+				assert(thread->mStack.Size() >= 2);
+				int int1 = thread->mStack.Peek(1).intValue;
+				int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
 				
-				int int1 = mStack[mStackSize - 2].intValue;
-				int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsLessI " << int1 << " < " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 < int2 ? 1 : 0);
+				thread->mStack.PushInt(int1 < int2 ? 1 : 0);
 				break;
 			}
 			case SheepInstruction::IsLessF:
 			{
-				if(mStackSize < 2) { break; }
+				assert(thread->mStack.Size() >= 2);
+				float float1 = thread->mStack.Peek(1).floatValue;
+				float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
 				
-				float float1 = mStack[mStackSize - 2].floatValue;
-				float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsLessF " << float1 << " < " << float2 << std::endl;
 				#endif
-				
-				PushStackInt(float1 < float2 ? 1 : 0);
+				thread->mStack.PushInt(float1 < float2 ? 1 : 0);
 				break;
 			}
             case SheepInstruction::IsGreaterEqualI:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsGreaterEqualI " << int1 << " >= " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 >= int2 ? 1 : 0);
+				thread->mStack.PushInt(int1 >= int2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::IsGreaterEqualF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsGreaterEqualF " << float1 << " >= " << float2 << std::endl;
 				#endif
-				
-				PushStackInt(float1 >= float2 ? 1 : 0);
+				thread->mStack.PushInt(float1 >= float2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::IsLessEqualI:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsLessEqualI " << int1 << " <= " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 <= int2 ? 1 : 0);
+				thread->mStack.PushInt(int1 <= int2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::IsLessEqualF:
             {
-                if(mStackSize < 2) { break; }
-                
-                float float1 = mStack[mStackSize - 2].floatValue;
-                float float2 = mStack[mStackSize - 1].floatValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                float float1 = thread->mStack.Peek(1).floatValue;
+                float float2 = thread->mStack.Peek(0).floatValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "IsLessEqualF " << float1 << " <= " << float2 << std::endl;
 				#endif
-				
-				PushStackInt(float1 <= float2 ? 1 : 0);
+				thread->mStack.PushInt(float1 <= float2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::IToF:
             {
-                int indexFromTop = reader.ReadInt();
-                int stackIndex = mStackSize - 1 - indexFromTop;
-                if(stackIndex < 0 || stackIndex >= mStackSize) { break; }
+                int index = reader.ReadInt();
+				SheepValue& value = thread->mStack.Peek(index);
 				
 				#ifdef SHEEP_DEBUG
-				std::cout << "IToF " << mStack[stackIndex].intValue << std::endl;
+				std::cout << "IToF " << value.intValue << std::endl;
 				#endif
-                mStack[stackIndex].floatValue = mStack[stackIndex].intValue;
-                mStack[stackIndex].type = SheepValueType::Float;
+                value.floatValue = value.intValue;
+                value.type = SheepValueType::Float;
                 break;
             }
             case SheepInstruction::FToI:
             {
-                int indexFromTop = reader.ReadInt();
-                int stackIndex = mStackSize - 1 - indexFromTop;
-                if(stackIndex < 0 || stackIndex >= mStackSize) { break; }
+                int index = reader.ReadInt();
+				SheepValue& value = thread->mStack.Peek(index);
 				
 				#ifdef SHEEP_DEBUG
-				std::cout << "FToI " << mStack[stackIndex].floatValue << std::endl;
+				std::cout << "FToI " << value.floatValue << std::endl;
 				#endif
-                mStack[stackIndex].intValue = mStack[stackIndex].floatValue;
-                mStack[stackIndex].type = SheepValueType::Int;
+                value.intValue = value.floatValue;
+                value.type = SheepValueType::Int;
                 break;
             }
             case SheepInstruction::Modulo:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "Modulo " << int1 << " % " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 % int2);
+				thread->mStack.PushInt(int1 % int2);
                 break;
             }
             case SheepInstruction::And:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "And " << int1 << " && " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 && int2 ? 1 : 0);
+				thread->mStack.PushInt(int1 && int2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::Or:
             {
-                if(mStackSize < 2) { break; }
-                
-                int int1 = mStack[mStackSize - 2].intValue;
-                int int2 = mStack[mStackSize - 1].intValue;
-				PopStack(2);
+                assert(thread->mStack.Size() >= 2);
+                int int1 = thread->mStack.Peek(1).intValue;
+                int int2 = thread->mStack.Peek(0).intValue;
+				thread->mStack.Pop(2);
+				
 				#ifdef SHEEP_DEBUG
 				std::cout << "Or " << int1 << " || " << int2 << std::endl;
 				#endif
-				
-				PushStackInt(int1 || int2 ? 1 : 0);
+				thread->mStack.PushInt(int1 || int2 ? 1 : 0);
                 break;
             }
             case SheepInstruction::Not:
             {
-                if(mStackSize < 1) { break; }
+                assert(thread->mStack.Size() >= 1);
+				int int1 = thread->mStack.Peek(0).intValue;
 				
-				int int1 = mStack[mStackSize - 1].intValue;
 				#ifdef SHEEP_DEBUG
 				std::cout << "Not " << int1 << std::endl;
 				#endif
-				
-                mStack[mStackSize - 1].intValue = (int1 == 0 ? 1 : 0);
+                thread->mStack.Peek(0).intValue = (int1 == 0 ? 1 : 0);
                 break;
             }
             case SheepInstruction::DebugBreakpoint:
@@ -1183,6 +1083,11 @@ void SheepVM::Execute(SheepThread* thread)
 	if(!thread->mRunning)
 	{
 		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is exiting");
+		
+		// Thread is no longer using execution context.
+		thread->mContext->mReferenceCount--;
+		
+		// Call my wait callback - someone might have been waiting for this thread to finish.
 		if(thread->mWaitCallback)
 		{
 			thread->mWaitCallback();

@@ -10,58 +10,33 @@
 #include <string>
 #include <vector>
 
+#include "SheepThread.h"
+#include "SheepValue.h"
 #include "Value.h"
 
 class SheepScript;
 struct SysImport;
 
-enum class SheepValueType
-{
-    Void,
-    Int,
-    Float,
-    String
-};
-
-struct SheepValue
-{
-    SheepValueType type = SheepValueType::Int;
-    union
-    {
-        int intValue;
-        float floatValue;
-        const char* stringValue;
-    };
-    
-    SheepValue() { }
-    SheepValue(SheepValueType t) { type = t; }
-    SheepValue(int i) { type = SheepValueType::Int; intValue = i; }
-    SheepValue(float f) { type = SheepValueType::Float; floatValue = f; }
-    SheepValue(const char* s) { type = SheepValueType::String; stringValue = s; }
-	~SheepValue() { }
-	
-	// Helpers for implicit conversions between Int/Float when needed.
-	int GetInt();
-	float GetFloat();
-	std::string GetString();
-};
-
 // GK3 calls these "Object Code" instances.
 // Basically, a loaded instance of a sheep script with variables and such.
 struct SheepInstance
 {
+	// The script being executed in this context.
 	SheepScript* mSheepScript = nullptr;
-	uint32_t mLastUsedTimeMs = 0;
-	int mReferenceCount = 0;
 	
 	// Instanced variables from the sheep script.
 	// These'll likely be modified during execution.
 	std::vector<SheepValue> mVariables;
 	
+	// For debugging, the last time this object was in use during a sheep thread execution.
+	uint32_t mLastUsedTimeMs = 0;
+	
+	// Number of references. Multiple sheep threads can be using the same executing context.
+	// For example, if one function calls another in the same SheepScript.
+	int mReferenceCount = 0;
+	
 	std::string GetName();
 };
-
-struct SheepThread;
 
 // Notify Links?
 
@@ -126,31 +101,19 @@ class SheepVM
 {
 	friend struct SheepThread;
 public:
-    SheepVM() { }
+	SheepVM() = default;
 	~SheepVM();
     
-    void Execute(SheepScript* script);
 	void Execute(SheepScript* script, std::function<void()> finishCallback);
-	
-    void Execute(SheepScript* script, std::string functionName);
-	void Execute(SheepScript* script, std::string functionName, std::function<void()> finishCallback);
-	
+	void Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback);
 	void Execute(SheepScript* script, int bytecodeOffset, std::function<void()> finishCallback);
 	
-    bool Evaluate(SheepScript* script);
+    bool Evaluate(SheepScript* script, int n, int v);
 	
 	SheepThread* GetCurrentThread() const { return mCurrentThread; }
-	
 	bool IsAnyRunning() const;
 	
 private:
-	// Stack for the VM - holds values that are pushed/popped by instructions.
-	// Just like the stack C++ functions use (uhh, kind of).
-	// Top of the stack is (mStackSize - 1).
-	static const int kMaxStackSize = 1024;
-	int mStackSize = 0;
-	SheepValue mStack[kMaxStackSize];
-	
 	std::vector<SheepInstance*> mSheepInstances;
 	std::vector<SheepThread*> mSheepThreads;
 	
@@ -159,86 +122,9 @@ private:
 	SheepInstance* GetInstance(SheepScript* script);
 	SheepThread* GetThread();
 	
-    Value CallSysFunc(SysImport* sysImport);
+    Value CallSysFunc(SheepThread* thread, SysImport* sysImport);
 	
-	void PushStackInt(int val);
-	void PushStackFloat(float val);
-	void PushStackStrOffset(int val);
-	void PushStackStr(const char* str);
-	
-	SheepValue& GetStack(int index) { return mStack[mStackSize - 1 - index]; }
-	void PopStack(int count);
-	SheepValue& PopStack();
-	SheepValue& PeekStack();
-	
-	void Execute(SheepThread* thread);
-};
-
-//TODO: Move to separate file
-struct SheepThread
-{
-	// Reference to this thread's virtual machine.
-	SheepVM* mVirtualMachine = nullptr;
-	
-	// The sheep attached to this thread.
-	SheepInstance* mAttachedSheep = nullptr;
-	
-	// Current code offset for attached sheep (aka the instruction pointer).
-	int mCodeOffset = 0;
-	
-	// Info about the function being executed (mainly for debugging).
-	std::string mFunctionName;
-	int mFunctionStartOffset = 0;
-	
-	// If true, this thread is executing the attached sheep.
-	// This is still "true" while "waiting" on something else.
-	//TODO: Convert to enum
-	bool mRunning = false;
-	bool mBlocked = false;
-	
-	// If set, some other thread is waiting for this thread to complete before continuing.
-	// Could happen if some sheep "waits" on a CallSheep system function.
-	std::function<void()> mWaitCallback = nullptr;
-	
-	// The number of "things" this thread is waiting on.
-	// When exiting a wait block, thread execution will be blocked until this counter reaches zero.
-	int mWaitCounter = 0;
-	
-	// If true, the thread is executing code inside a wait block.
-	// Before exiting the wait block, all waited upon functions must complete.
-	bool mInWaitBlock = false;
-	
-	std::string GetName()
-	{
-		if(mAttachedSheep != nullptr)
-		{
-			return mAttachedSheep->GetName() + ":" + mFunctionName;
-		}
-		return ":" + mFunctionName;
-	}
-	
-	std::function<void()> AddWait()
-	{
-		if(!mInWaitBlock) { return nullptr; }
-		mWaitCounter++;
-		return std::bind(&SheepThread::OnWaitCompleted, this);
-	}
-	
-	void OnWaitCompleted()
-	{
-		assert(mInWaitBlock);
-		assert(mWaitCounter > 0);
-		mWaitCounter--;
-		if(mBlocked && mWaitCounter == 0)
-		{
-			mVirtualMachine->Execute(this);
-		}
-	}
-	
-	//TODO
-	// owning layer?
-	// int mFunctionOffset = 0;
-	// debug info?
-	// is preloading only?
-	// bool mIsCurrentlyBlocking = false;
+	SheepThread* ExecuteInternal(SheepScript* script, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback);
+	SheepThread* ExecuteInternal(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback);
+	void ExecuteInternal(SheepThread* thread);
 };

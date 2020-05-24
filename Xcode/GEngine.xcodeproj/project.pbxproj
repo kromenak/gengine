@@ -220,6 +220,10 @@
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
 		4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
 		4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
+		4BA228AC2477A9F2002F0EE3 /* SheepThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BA228AB2477A9F2002F0EE3 /* SheepThread.cpp */; };
+		4BA228AD2477A9F2002F0EE3 /* SheepThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BA228AB2477A9F2002F0EE3 /* SheepThread.cpp */; };
+		4BA228B42477AC1E002F0EE3 /* SheepStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BA228B32477AC1E002F0EE3 /* SheepStack.cpp */; };
+		4BA228B52477AC1E002F0EE3 /* SheepStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BA228B32477AC1E002F0EE3 /* SheepStack.cpp */; };
 		4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACA50920F7132E008C7FE9 /* GAS.cpp */; };
 		4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACE1C821D2B2B2000CBE7B /* Submesh.cpp */; };
 		4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BACE1C821D2B2B2000CBE7B /* Submesh.cpp */; };
@@ -505,6 +509,11 @@
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
 		4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CharacterManager.h; path = ../Source/CharacterManager.h; sourceTree = "<group>"; };
 		4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CharacterManager.cpp; path = ../Source/CharacterManager.cpp; sourceTree = "<group>"; };
+		4BA228A72477A7F7002F0EE3 /* SheepThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepThread.h; path = ../Source/Sheep/SheepThread.h; sourceTree = "<group>"; };
+		4BA228AB2477A9F2002F0EE3 /* SheepThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepThread.cpp; path = ../Source/Sheep/SheepThread.cpp; sourceTree = "<group>"; };
+		4BA228AE2477AB4E002F0EE3 /* SheepValue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepValue.h; path = ../Source/Sheep/SheepValue.h; sourceTree = "<group>"; };
+		4BA228B22477AC1E002F0EE3 /* SheepStack.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepStack.h; path = ../Source/Sheep/SheepStack.h; sourceTree = "<group>"; };
+		4BA228B32477AC1E002F0EE3 /* SheepStack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepStack.cpp; path = ../Source/Sheep/SheepStack.cpp; sourceTree = "<group>"; };
 		4BACA50820F7132E008C7FE9 /* GAS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GAS.h; path = ../Source/GAS.h; sourceTree = "<group>"; };
 		4BACA50920F7132E008C7FE9 /* GAS.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GAS.cpp; path = ../Source/GAS.cpp; sourceTree = "<group>"; };
 		4BACA50B20F72663008C7FE9 /* StringTokenizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringTokenizer.h; path = ../Source/StringTokenizer.h; sourceTree = "<group>"; };
@@ -757,14 +766,13 @@
 			isa = PBXGroup;
 			children = (
 				4B524ECA22484C9F00E3A5E2 /* Compiler */,
+				4BA228A62477A7CB002F0EE3 /* Machine */,
 				4B4B4AE22091B80700391827 /* SheepAPI.cpp */,
 				4B4B4AE12091B80700391827 /* SheepAPI.h */,
 				4B294CE020B9E8BC00039F48 /* SheepManager.cpp */,
 				4B294CDF20B9E8BC00039F48 /* SheepManager.h */,
 				4B2ACDF61F25873C003EC7FE /* SheepScript.cpp */,
 				4B2ACDF71F25873C003EC7FE /* SheepScript.h */,
-				4BE75D32208D7E7B007031A3 /* SheepVM.cpp */,
-				4BE75D31208D7E7B007031A3 /* SheepVM.h */,
 			);
 			name = Sheep;
 			sourceTree = "<group>";
@@ -1042,6 +1050,20 @@
 			name = IO;
 			sourceTree = "<group>";
 		};
+		4BA228A62477A7CB002F0EE3 /* Machine */ = {
+			isa = PBXGroup;
+			children = (
+				4BA228B32477AC1E002F0EE3 /* SheepStack.cpp */,
+				4BA228B22477AC1E002F0EE3 /* SheepStack.h */,
+				4BA228AB2477A9F2002F0EE3 /* SheepThread.cpp */,
+				4BA228A72477A7F7002F0EE3 /* SheepThread.h */,
+				4BA228AE2477AB4E002F0EE3 /* SheepValue.h */,
+				4BE75D32208D7E7B007031A3 /* SheepVM.cpp */,
+				4BE75D31208D7E7B007031A3 /* SheepVM.h */,
+			);
+			name = Machine;
+			sourceTree = "<group>";
+		};
 		4BD673C920B10EB200795582 /* Scene */ = {
 			isa = PBXGroup;
 			children = (
@@ -1291,6 +1313,7 @@
 				4B6B766621AB75AA00788C02 /* ActionBar.cpp in Sources */,
 				4B6B766121A6165E00788C02 /* VerbManager.cpp in Sources */,
 				4BD673D420B26F0C00795582 /* AudioListener.cpp in Sources */,
+				4BA228B42477AC1E002F0EE3 /* SheepStack.cpp in Sources */,
 				4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */,
 				4B0B67831F78DCD40023815F /* Actor.cpp in Sources */,
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
@@ -1348,6 +1371,7 @@
 				4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
 				4B00D3311F8F3DB900D536D5 /* Component.cpp in Sources */,
+				4BA228AC2477A9F2002F0EE3 /* SheepThread.cpp in Sources */,
 				4B38BA7B24390D7F001F9240 /* LineSegment.cpp in Sources */,
 				4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */,
 				4B02A8BF2381E56200CCDFAA /* InventoryManager.cpp in Sources */,
@@ -1410,6 +1434,7 @@
 				4B6B766721AB75AA00788C02 /* ActionBar.cpp in Sources */,
 				4B6B766221A6165E00788C02 /* VerbManager.cpp in Sources */,
 				4B22F52B2174078B0065B152 /* Asset.cpp in Sources */,
+				4BA228B52477AC1E002F0EE3 /* SheepStack.cpp in Sources */,
 				4B22F51F2174076D0065B152 /* Ray.cpp in Sources */,
 				4B22F50A2174075B0065B152 /* BSP.cpp in Sources */,
 				4B22F50B2174075B0065B152 /* NVC.cpp in Sources */,
@@ -1467,6 +1492,7 @@
 				4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4B22F4FF217407470065B152 /* CallbackFunction.cpp in Sources */,
 				4B38BA7D24390D7F001F9240 /* LineSegment.cpp in Sources */,
+				4BA228AD2477A9F2002F0EE3 /* SheepThread.cpp in Sources */,
 				4B22F51C2174076D0065B152 /* Matrix4.cpp in Sources */,
 				4B02A8C02381E56200CCDFAA /* InventoryManager.cpp in Sources */,
 				4B22F52C2174078B0065B152 /* AssetManager.cpp in Sources */,
