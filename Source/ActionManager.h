@@ -35,8 +35,9 @@ public:
 	// Action Set Population
 	void AddActionSet(const std::string& assetName);
 	void AddActionSetIfForTimeblock(const std::string& assetName, const Timeblock& timeblock);
-	void AddGlobalAndInventoryActionSets(const Timeblock& timeblock);
-	void ClearActionSets() { mActionSets.clear(); mCaseLogic.clear(); }
+	void AddInventoryActionSets(const Timeblock& timeblock);
+	void AddGlobalActionSets(const Timeblock& timeblock);
+	void ClearActionSets();
 	
 	// Action Execution
 	bool ExecuteAction(const std::string& noun, const std::string& verb);
@@ -49,12 +50,14 @@ public:
 	std::vector<const Action*> GetActions(const std::string& noun, VerbType verbType) const;
 	bool HasTopicsLeft(const std::string& noun) const;
 	
+	// Int-Identifier to Noun/Verb
+	std::string& GetNoun(int nounEnum);
+	std::string& GetVerb(int verbEnum);
+	
 	// Action Bar
 	void ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback);
-	
 	void ShowTopicBar(const std::string& noun);
 	void ShowTopicBar();
-	
 	bool IsActionBarShowing() const;
 	ActionBar* GetActionBar() const { return mActionBar; }
 	
@@ -92,7 +95,7 @@ private:
 		"INV303P.NVC"
 	};
 	
-	// Action sets that are currently active. Note that these change pretty frequenrly (i.e. on scene change).
+	// Action sets that are currently active. Note that these change pretty frequently (i.e. on scene change).
 	// When asked to show action bar, the game uses these to determine what valid actions are for a noun.
 	std::vector<NVC*> mActionSets;
 	
@@ -100,6 +103,14 @@ private:
 	// A case label corresponds to a bit of sheepscript that evaluates to either true or false.
 	// Cases must be stored here (rather than in Action Sets) because cases can be shared (especially global/inventory ones).
     std::unordered_map<std::string, SheepScript*> mCaseLogic;
+	
+	// Nouns and verbs that are currently active. Pulled out of action sets as they are loaded.
+	// We do this to support the Sheep-eval feature of specifying n$ and v$ variables as wildcards for current noun/verb.
+	// To use these, we must map each active noun/verb to an integer and back again.
+	std::vector<std::string> mNouns;
+	std::unordered_map<std::string, int> mNounToEnum;
+	std::vector<std::string> mVerbs;
+	std::unordered_map<std::string, int> mVerbToEnum;
 	
 	// An action that's used for "Sheep Commands."
 	// When an arbitrary SheepScript needs to execute through the action system, we use this Action object.
@@ -125,7 +136,7 @@ private:
 	
 	// Returns true if the case for an action is met.
 	// A case can be a global condition, or some user-defined script to evaluate.
-	bool IsCaseMet(const Action* item) const;
+	bool IsCaseMet(const Action* item, VerbType verbType = VerbType::Normal) const;
 	
 	// Called when action bar is canceled (press cancel button).
 	void OnActionBarCanceled();

@@ -65,6 +65,7 @@ class NVC : public Asset
 public:
     NVC(std::string name, char* data, int dataLength);
 	
+	const std::vector<Action*> GetActions() const { return mActions; }
 	const std::vector<Action>& GetActions(const std::string& noun) const;
 	std::vector<const Action*> GetActions(const std::string& noun, const std::string& verb) const;
 	const Action* GetAction(const std::string& noun, const std::string& verb) const;
@@ -75,6 +76,8 @@ private:
 	// If attempting to get actions for a noun that doesn't exist,
 	// We just return a reference to this empty vector.
 	static std::vector<Action> mEmptyActions;
+	
+	std::vector<Action*> mActions;
 	
     // Mapping of noun to actions.
     std::unordered_map<std::string, std::vector<Action>> mNounToActions;

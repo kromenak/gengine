@@ -36,12 +36,33 @@ void ActionManager::AddActionSet(const std::string& assetName)
 	NVC* actionSet = Services::GetAssets()->LoadNVC(assetName);
 	if(actionSet != nullptr)
 	{
-		std::cout << "Using NVC " << assetName << std::endl;
+		Services::GetReports()->Log("Generic", StringUtil::Format("Reading NVC file: %s", assetName.c_str()));
 		mActionSets.push_back(actionSet);
 		
 		// Also build case logic map.
 		auto caseLogic = actionSet->GetCases();
 		mCaseLogic.insert(caseLogic.begin(), caseLogic.end());
+		
+		// Iterate actions and add nouns/verbs to lists and maps.
+		// This allows us to convert a noun/verb to a unique integer-based ID, and back again.
+		// Doing this primarily to support n$ and v$ requirement in Sheep eval logic...
+		const std::vector<Action*> actions = actionSet->GetActions();
+		for(auto& action : actions)
+		{
+			auto nounIt = mNounToEnum.find(action->noun);
+			if(nounIt == mNounToEnum.end())
+			{
+				mNounToEnum[action->noun] = (int)mNouns.size();
+				mNouns.push_back(action->noun);
+			}
+			
+			auto verbIt = mVerbToEnum.find(action->verb);
+			if(verbIt == mVerbToEnum.end())
+			{
+				mVerbToEnum[action->verb] = (int)mVerbs.size();
+				mVerbs.push_back(action->verb);
+			}
+		}
 	}
 }
 
@@ -53,16 +74,30 @@ void ActionManager::AddActionSetIfForTimeblock(const std::string& assetName, con
 	}
 }
 
-void ActionManager::AddGlobalAndInventoryActionSets(const Timeblock& timeblock)
+void ActionManager::AddGlobalActionSets(const Timeblock& timeblock)
 {
 	for(auto& actionSet : kGlobalActionSets)
 	{
 		AddActionSetIfForTimeblock(actionSet, timeblock);
 	}
+}
+
+void ActionManager::AddInventoryActionSets(const Timeblock& timeblock)
+{
 	for(auto& actionSet : kInventoryActionSets)
 	{
 		AddActionSetIfForTimeblock(actionSet, timeblock);
 	}
+}
+
+void ActionManager::ClearActionSets()
+{
+	mActionSets.clear();
+	mCaseLogic.clear();
+	mNounToEnum.clear();
+	mNouns.clear();
+	mVerbToEnum.clear();
+	mVerbs.clear();
 }
 
 bool ActionManager::ExecuteAction(const std::string& noun, const std::string& verb)
@@ -94,6 +129,9 @@ void ActionManager::ExecuteAction(const Action* action)
 		return;
 	}
 	mCurrentAction = action;
+	
+	// Log it!
+	Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", action->ToString().c_str()));
 	
 	// Increment action ID.
 	mActionId++;
@@ -195,13 +233,18 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 {
 	// As we find actions for this noun, we don't want repeated "verbs".
 	// For example, if two actions exist for the verb "LOOK", we don't want two look actions on the action bar!
-	// So, keep track of the verb-to-action mappings; a repeat verb will overwrite the previously mapped action.
+	// So, keep track of the verb-to-action mappings; only the first verb with a true case will be used.
 	std::unordered_map<std::string, const Action*> verbToAction;
 	
-	// "ANY_OBJECT" is a wildcard. Any action with a noun of "ANY_OBJECT" can be valid for any noun passed in.
-	// These are lowest-priority, so we do them first (they might be overwritten later).
+	// Iterate all loaded action sets to find valid actions for this noun.
 	for(auto& actionSet : mActionSets)
 	{
+		// Within a single action set, we only want to use the first matching verb.
+		// Ex: if NOUN, VERB, CASE1 matches and is then followed by NOUN, VERB, CASE2 (which also matches), ignore the second one.
+		std::unordered_set<std::string> usedVerbs;
+		
+		// "ANY_OBJECT" is a wildcard. Any action with a noun of "ANY_OBJECT" can be valid for any noun passed in.
+		// These are lowest-priority, so we do them first (they might be overwritten later).
 		const std::vector<Action>& anyObjectActions = actionSet->GetActions("ANY_OBJECT");
 		for(auto& action : anyObjectActions)
 		{
@@ -210,6 +253,9 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 			bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
 			if(isWildcardInvItem) { continue; }
 			
+			// Ignore this action if the verb has already been used in this action set.
+			if(usedVerbs.find(action.verb) != usedVerbs.end()) { continue; }
+			
 			// The action's verb must be of the correct type for us to use it.
 			bool validType = false;
 			switch(verbType)
@@ -226,16 +272,18 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 			}
 			
 			// If type is valid and the action meets any case specified, we can use this action!
-			if(validType && IsCaseMet(&action))
+			if(validType && IsCaseMet(&action, verbType))
 			{
 				verbToAction[action.verb] = &action;
+				usedVerbs.insert(action.verb);
 			}
 		}
-	}
-	
-	// Check actions that map directly to this noun.
-	for(auto& actionSet : mActionSets)
-	{
+		
+		// Clear used verbs here - we allow an exact match to overwrite a wildcard match.
+		// Ex: ANY_OBJECT, LOOK, CASE1 matches, but then CANDY, LOOK, CASE2 matches exactly - use the second one.
+		usedVerbs.clear();
+		
+		// Check actions that map directly to this noun.
 		const std::vector<Action>& nounActions = actionSet->GetActions(noun);
 		for(auto& action : nounActions)
 		{
@@ -244,6 +292,9 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 			bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
 			if(isWildcardInvItem) { continue; }
 			
+			// Ignore this action if the verb has already been used in this action set.
+			if(usedVerbs.find(action.verb) != usedVerbs.end()) { continue; }
+						
 			// The action's verb must be of the correct type for us to use it.
 			bool validType = false;
 			switch(verbType)
@@ -260,9 +311,10 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 			}
 			
 			// If type is valid and the action meets any case specified, we can use this action!
-			if(validType && IsCaseMet(&action))
+			if(validType && IsCaseMet(&action, verbType))
 			{
 				verbToAction[action.verb] = &action;
+				usedVerbs.insert(action.verb);
 			}
 		}
 	}
@@ -279,6 +331,16 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 bool ActionManager::HasTopicsLeft(const std::string &noun) const
 {
 	return GetActions(noun, VerbType::Topic).size() > 0;
+}
+
+std::string& ActionManager::GetNoun(int nounEnum)
+{
+	return mNouns[Math::Clamp(nounEnum, 0, (int)mNouns.size() - 1)];
+}
+
+std::string& ActionManager::GetVerb(int verbEnum)
+{
+	return mVerbs[Math::Clamp(verbEnum, 0, (int)mVerbs.size() - 1)];
 }
 
 // Temp, for debugging.
@@ -393,7 +455,7 @@ bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const 
 	return false;
 }
 
-bool ActionManager::IsCaseMet(const Action* action) const
+bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 {
 	// Empty condition is automatically met.
 	if(action->caseLabel.empty()) { return true; }
@@ -404,7 +466,14 @@ bool ActionManager::IsCaseMet(const Action* action) const
 	auto it = mCaseLogic.find(action->caseLabel);
 	if(it != mCaseLogic.end())
 	{
-		return Services::GetSheep()->Evaluate(it->second);
+		// Case evaluation logic may have magic variables n$ and v$.
+		// These variables should hold int-based identifiers for the noun/verb of the action we're evaluating.
+		// So, look those up and save the indexes!
+		int n = mNounToEnum.at(action->noun);
+		int v = mVerbToEnum.at(action->verb);
+		
+		// Evaluate our condition logic with our n$ and v$ values.
+		return Services::GetSheep()->Evaluate(it->second, n, v);
 	}
 	
 	// Check global case conditions.
@@ -430,22 +499,50 @@ bool ActionManager::IsCaseMet(const Action* action) const
 	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "1st_time"))
 	{
 		// 1st_time: condition is met if this is the first time we've executed this action (noun/verb combo).
-		return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 0;
+		if(verbType == VerbType::Topic)
+		{
+			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 0;
+		}
+		else
+		{
+			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 0;
+		}
 	}
 	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "2cd_time"))
 	{
 		// 2cd_time: a surprising way to abbreviate "2nd time"...condition is met if this is the 2nd time we did the action.
-		return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 1;
+		if(verbType == VerbType::Topic)
+		{
+			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 1;
+		}
+		else
+		{
+			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 1;
+		}
 	}
 	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "3rd_time"))
 	{
 		// 3rd_time: and again for good measure.
-		return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 2;
+		if(verbType == VerbType::Topic)
+		{
+			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 2;
+		}
+		else
+		{
+			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 2;
+		}
 	}
 	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "otr_time"))
 	{
 		// otr_time: condition is met if this IS NOT the first time we've executed this action (noun/verb combo).
-		return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) > 0;
+		if(verbType == VerbType::Topic)
+		{
+			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) > 0;
+		}
+		else
+		{
+			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) > 0;
+		}
 	}
 	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "dialogue_topics_left"))
 	{

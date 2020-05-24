@@ -11,13 +11,6 @@
 #include "SheepScript.h"
 #include "StringUtil.h"
 
-/*
-void Action::Execute() const
-{
-	Services::GetSheep()->Execute(script);
-}
-*/
-
 /*static*/ std::vector<Action> NVC::mEmptyActions;
 
 NVC::NVC(std::string name, char* data, int dataLength) : Asset(name)
@@ -77,23 +70,24 @@ void NVC::ParseFromData(char *data, int dataLength)
     IniSection mainSection = parser.GetSection("");
     for(auto& line : mainSection.lines)
     {
-        Action item;
+        Action action;
         
-        // The first item is always the noun.
+        // The first entry is the noun.
 		IniKeyValue& first = line.entries.front();
-        item.noun = first.key;
-		StringUtil::ToLower(item.noun);
+        action.noun = first.key;
+		StringUtil::ToLower(action.noun);
 		
-		// Second item is always the verb.
+		// Second entry is the verb.
 		IniKeyValue& second = line.entries[1];
-        item.verb = second.key;
+        action.verb = second.key;
+		StringUtil::ToLower(action.verb);
         
-		// Third item is always the case (requires a bit of trimming/conditioning sometimes).
+		// Third entry is always the case (requires a bit of trimming/conditioning sometimes).
 		IniKeyValue& third = line.entries[2];
 		std::string caseLabel = third.key;
 		StringUtil::RemoveAll(caseLabel, '\t'); //TODO: Still needed? We also do this in IniParser layer now.
 		StringUtil::Trim(caseLabel);
-		item.caseLabel = caseLabel;
+		action.caseLabel = caseLabel;
         
         // From here, we have some optional stuff.
 		for(int i = 3; i < line.entries.size(); ++i)
@@ -112,35 +106,35 @@ void NVC::ParseFromData(char *data, int dataLength)
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "WalkTo"))
 				{
-					item.approach = Action::Approach::WalkTo;
+					action.approach = Action::Approach::WalkTo;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "Anim"))
 				{
-					item.approach = Action::Approach::Anim;
+					action.approach = Action::Approach::Anim;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "Near"))
 				{
-					item.approach = Action::Approach::Near;
+					action.approach = Action::Approach::Near;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "NearModel"))
 				{
-					item.approach = Action::Approach::NearModel;
+					action.approach = Action::Approach::NearModel;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "Region"))
 				{
-					item.approach = Action::Approach::Region;
+					action.approach = Action::Approach::Region;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "TurnTo"))
 				{
-					item.approach = Action::Approach::TurnTo;
+					action.approach = Action::Approach::TurnTo;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "TurnToModel"))
 				{
-					item.approach = Action::Approach::TurnToModel;
+					action.approach = Action::Approach::TurnToModel;
 				}
 				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "WalkToSee"))
 				{
-					item.approach = Action::Approach::WalkToSee;
+					action.approach = Action::Approach::WalkToSee;
 				}
 				else
 				{
@@ -149,27 +143,39 @@ void NVC::ParseFromData(char *data, int dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "Target"))
             {
-                item.target = keyValue.value;
+                action.target = keyValue.value;
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "Script"))
             {
                 // A sheep expression to be evaluated for this item.
 				//TODO: Should we compile this immediately, or save it as a string and compile/execute on-demand?
 				//TODO: Based on debug output from GK3, the string value is stored SOMEWHERE in memory for debug and dump purposes.
-				item.scriptText = keyValue.value;
-				item.script = Services::GetSheep()->Compile(keyValue.value);
+				action.scriptText = keyValue.value;
+				action.script = Services::GetSheep()->Compile(keyValue.value);
             }
 		}
         
         // Add item to map.
-        auto it = mNounToActions.find(item.noun);
+        auto it = mNounToActions.find(action.noun);
         if(it == mNounToActions.end())
         {
-            mNounToActions[item.noun] = std::vector<Action>();
+            mNounToActions[action.noun] = std::vector<Action>();
         }
-        mNounToActions[item.noun].push_back(item);
+        mNounToActions[action.noun].push_back(action);
     }
-    
+	
+	// After all actions have been read in, iterate and save pointers to each in a vector.
+	// When action set will be used, we must iterate all actions to map nouns and verbs.
+	// Perhaps I can make this more efficient at some point...
+	for(auto it = mNounToActions.begin(); it != mNounToActions.end(); it++)
+	{
+		std::vector<Action>& actions = it->second;
+		for(auto& action : actions)
+		{
+			mActions.push_back(&action);
+		}
+	}
+	
     // Some "CASE" values are special, and handled by the system (like ALL, GABE_ALL, GRACE_ALL)
     // But an NVC item can also specify a custom case value. In that case,
     // this section maps the case value to a sheep expression to evaluate, to see whether the case is met.
@@ -190,7 +196,7 @@ void NVC::ParseFromData(char *data, int dataLength)
         if(it == mCaseLogic.end())
         {
 			//TODO: Again, should save string value somewhere???
-            mCaseLogic[caseLabel] = Services::GetSheep()->Compile(first.value);
+            mCaseLogic[caseLabel] = Services::GetSheep()->CompileEval(first.value);
         }
         else
         {
