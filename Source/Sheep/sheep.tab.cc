@@ -1,8 +1,8 @@
-// A Bison parser, made by GNU Bison 3.0.4.
+// A Bison parser, made by GNU Bison 3.5.3.
 
 // Skeleton implementation for Bison LALR(1) parsers in C++
 
-// Copyright (C) 2002-2015 Free Software Foundation, Inc.
+// Copyright (C) 2002-2015, 2018-2020 Free Software Foundation, Inc.
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -29,34 +29,26 @@
 
 // This special exception was added by the Free Software Foundation in
 // version 2.2 of Bison.
-// //                    "%code top" blocks.
-#line 3 "sheep.yy" // lalr1.cc:397
+
+// Undocumented macros, especially those whose name start with YY_,
+// are private implementation details.  Do not rely on them.
+
+// "%code top" blocks.
+#line 3 "sheep.yy"
 
 	#include <cstdlib>
 	#include <string>
 
-#line 39 "sheep.tab.cc" // lalr1.cc:397
+#line 43 "sheep.tab.cc"
 
 
-// First part of user declarations.
 
-#line 44 "sheep.tab.cc" // lalr1.cc:404
-
-# ifndef YY_NULLPTR
-#  if defined __cplusplus && 201103L <= __cplusplus
-#   define YY_NULLPTR nullptr
-#  else
-#   define YY_NULLPTR 0
-#  endif
-# endif
 
 #include "sheep.tab.hh"
 
-// User implementation prologue.
 
-#line 58 "sheep.tab.cc" // lalr1.cc:412
 // Unqualified %code blocks.
-#line 51 "sheep.yy" // lalr1.cc:413
+#line 51 "sheep.yy"
 
 	#include "SheepCompiler.h"
 	#include "SheepScriptBuilder.h"
@@ -74,12 +66,12 @@
     // This is probably the main reason we need to pass in the compiler reference!
 	void Sheep::Parser::error(const location_type& loc, const std::string& msg)
 	{
-		compiler.Error(loc, msg);
+		compiler.Error(&builder, loc, msg);
 	}
 
-	#define BUILDER_ERROR_CHECK if(builder.CheckError(yyla.location, *this)) { YYERROR; }
+	//#define BUILDER_ERROR_CHECK if(builder.CheckError(yyla.location, *this)) { YYERROR; }
 
-#line 83 "sheep.tab.cc" // lalr1.cc:413
+#line 75 "sheep.tab.cc"
 
 
 #ifndef YY_
@@ -91,6 +83,15 @@
 # endif
 # ifndef YY_
 #  define YY_(msgid) msgid
+# endif
+#endif
+
+// Whether we are compiled with exception support.
+#ifndef YY_EXCEPTIONS
+# if defined __GNUC__ && !defined __EXCEPTIONS
+#  define YY_EXCEPTIONS 0
+# else
+#  define YY_EXCEPTIONS 1
 # endif
 #endif
 
@@ -111,12 +112,9 @@
         {                                                               \
           (Current).begin = (Current).end = YYRHSLOC (Rhs, 0).end;      \
         }                                                               \
-    while (/*CONSTCOND*/ false)
+    while (false)
 # endif
 
-
-// Suppress unused-variable warnings by "using" E.
-#define YYUSE(E) ((void) (E))
 
 // Enable debugging if requested.
 #if YYDEBUG
@@ -130,7 +128,7 @@
     {                                           \
       *yycdebug_ << Title << ' ';               \
       yy_print_ (*yycdebug_, Symbol);           \
-      *yycdebug_ << std::endl;                  \
+      *yycdebug_ << '\n';                       \
     }                                           \
   } while (false)
 
@@ -149,9 +147,9 @@
 #else // !YYDEBUG
 
 # define YYCDEBUG if (false) std::cerr
-# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE(Symbol)
-# define YY_REDUCE_PRINT(Rule)           static_cast<void>(0)
-# define YY_STACK_PRINT()                static_cast<void>(0)
+# define YY_SYMBOL_PRINT(Title, Symbol)  YYUSE (Symbol)
+# define YY_REDUCE_PRINT(Rule)           static_cast<void> (0)
+# define YY_STACK_PRINT()                static_cast<void> (0)
 
 #endif // !YYDEBUG
 
@@ -163,9 +161,10 @@
 #define YYERROR         goto yyerrorlab
 #define YYRECOVERING()  (!!yyerrstatus_)
 
-#line 20 "sheep.yy" // lalr1.cc:479
+#line 20 "sheep.yy"
 namespace Sheep {
-#line 169 "sheep.tab.cc" // lalr1.cc:479
+#line 167 "sheep.tab.cc"
+
 
   /* Return YYSTR after stripping away unnecessary quotes and
      backslashes, so that it's suitable for yyerror.  The heuristic is
@@ -177,7 +176,7 @@ namespace Sheep {
   {
     if (*yystr == '"')
       {
-        std::string yyr = "";
+        std::string yyr;
         char const *yyp = yystr;
 
         for (;;)
@@ -190,7 +189,10 @@ namespace Sheep {
             case '\\':
               if (*++yyp != '\\')
                 goto do_not_strip_quotes;
-              // Fall through.
+              else
+                goto append;
+
+            append:
             default:
               yyr += *yyp;
               break;
@@ -207,10 +209,11 @@ namespace Sheep {
 
   /// Build a parser object.
   Parser::Parser (SheepScanner& scanner_yyarg, SheepCompiler& compiler_yyarg, SheepScriptBuilder& builder_yyarg)
-    :
 #if YYDEBUG
-      yydebug_ (false),
+    : yydebug_ (false),
       yycdebug_ (&std::cerr),
+#else
+    :
 #endif
       scanner (scanner_yyarg),
       compiler (compiler_yyarg),
@@ -220,6 +223,8 @@ namespace Sheep {
   Parser::~Parser ()
   {}
 
+  Parser::syntax_error::~syntax_error () YY_NOEXCEPT YY_NOTHROW
+  {}
 
   /*---------------.
   | Symbol types.  |
@@ -228,24 +233,20 @@ namespace Sheep {
 
 
   // by_state.
-  inline
-  Parser::by_state::by_state ()
+  Parser::by_state::by_state () YY_NOEXCEPT
     : state (empty_state)
   {}
 
-  inline
-  Parser::by_state::by_state (const by_state& other)
-    : state (other.state)
+  Parser::by_state::by_state (const by_state& that) YY_NOEXCEPT
+    : state (that.state)
   {}
 
-  inline
   void
-  Parser::by_state::clear ()
+  Parser::by_state::clear () YY_NOEXCEPT
   {
     state = empty_state;
   }
 
-  inline
   void
   Parser::by_state::move (by_state& that)
   {
@@ -253,49 +254,78 @@ namespace Sheep {
     that.clear ();
   }
 
-  inline
-  Parser::by_state::by_state (state_type s)
+  Parser::by_state::by_state (state_type s) YY_NOEXCEPT
     : state (s)
   {}
 
-  inline
   Parser::symbol_number_type
-  Parser::by_state::type_get () const
+  Parser::by_state::type_get () const YY_NOEXCEPT
   {
     if (state == empty_state)
       return empty_symbol;
     else
-      return yystos_[state];
+      return yystos_[+state];
   }
 
-  inline
   Parser::stack_symbol_type::stack_symbol_type ()
   {}
 
-
-  inline
-  Parser::stack_symbol_type::stack_symbol_type (state_type s, symbol_type& that)
-    : super_type (s, that.location)
+  Parser::stack_symbol_type::stack_symbol_type (YY_RVREF (stack_symbol_type) that)
+    : super_type (YY_MOVE (that.state), YY_MOVE (that.location))
   {
-      switch (that.type_get ())
+    switch (that.type_get ())
     {
-      case 65: // expr
-      case 66: // sysfunc_call
-        value.move< SheepValue > (that.value);
+      case 67: // expr
+      case 68: // sysfunc_call
+        value.YY_MOVE_OR_COPY< SheepValue > (YY_MOVE (that.value));
         break;
 
       case 27: // FLOAT
-        value.move< float > (that.value);
+        value.YY_MOVE_OR_COPY< float > (YY_MOVE (that.value));
         break;
 
       case 26: // INT
-        value.move< int > (that.value);
+        value.YY_MOVE_OR_COPY< int > (YY_MOVE (that.value));
         break;
 
       case 28: // STRING
       case 29: // USERID
       case 30: // SYSID
-        value.move< std::string > (that.value);
+        value.YY_MOVE_OR_COPY< std::string > (YY_MOVE (that.value));
+        break;
+
+      default:
+        break;
+    }
+
+#if 201103L <= YY_CPLUSPLUS
+    // that is emptied.
+    that.state = empty_state;
+#endif
+  }
+
+  Parser::stack_symbol_type::stack_symbol_type (state_type s, YY_MOVE_REF (symbol_type) that)
+    : super_type (s, YY_MOVE (that.location))
+  {
+    switch (that.type_get ())
+    {
+      case 67: // expr
+      case 68: // sysfunc_call
+        value.move< SheepValue > (YY_MOVE (that.value));
+        break;
+
+      case 27: // FLOAT
+        value.move< float > (YY_MOVE (that.value));
+        break;
+
+      case 26: // INT
+        value.move< int > (YY_MOVE (that.value));
+        break;
+
+      case 28: // STRING
+      case 29: // USERID
+      case 30: // SYSID
+        value.move< std::string > (YY_MOVE (that.value));
         break;
 
       default:
@@ -306,15 +336,15 @@ namespace Sheep {
     that.type = empty_symbol;
   }
 
-  inline
+#if YY_CPLUSPLUS < 201103L
   Parser::stack_symbol_type&
   Parser::stack_symbol_type::operator= (const stack_symbol_type& that)
   {
     state = that.state;
-      switch (that.type_get ())
+    switch (that.type_get ())
     {
-      case 65: // expr
-      case 66: // sysfunc_call
+      case 67: // expr
+      case 68: // sysfunc_call
         value.copy< SheepValue > (that.value);
         break;
 
@@ -340,9 +370,43 @@ namespace Sheep {
     return *this;
   }
 
+  Parser::stack_symbol_type&
+  Parser::stack_symbol_type::operator= (stack_symbol_type& that)
+  {
+    state = that.state;
+    switch (that.type_get ())
+    {
+      case 67: // expr
+      case 68: // sysfunc_call
+        value.move< SheepValue > (that.value);
+        break;
+
+      case 27: // FLOAT
+        value.move< float > (that.value);
+        break;
+
+      case 26: // INT
+        value.move< int > (that.value);
+        break;
+
+      case 28: // STRING
+      case 29: // USERID
+      case 30: // SYSID
+        value.move< std::string > (that.value);
+        break;
+
+      default:
+        break;
+    }
+
+    location = that.location;
+    // that is emptied.
+    that.state = empty_state;
+    return *this;
+  }
+#endif
 
   template <typename Base>
-  inline
   void
   Parser::yy_destroy_ (const char* yymsg, basic_symbol<Base>& yysym) const
   {
@@ -359,10 +423,12 @@ namespace Sheep {
     std::ostream& yyoutput = yyo;
     YYUSE (yyoutput);
     symbol_number_type yytype = yysym.type_get ();
+#if defined __GNUC__ && ! defined __clang__ && ! defined __ICC && __GNUC__ * 100 + __GNUC_MINOR__ <= 408
     // Avoid a (spurious) G++ 4.8 warning about "array subscript is
     // below array bounds".
     if (yysym.empty ())
       std::abort ();
+#endif
     yyo << (yytype < yyntokens_ ? "token" : "nterm")
         << ' ' << yytname_[yytype] << " ("
         << yysym.location << ": ";
@@ -371,26 +437,27 @@ namespace Sheep {
   }
 #endif
 
-  inline
   void
-  Parser::yypush_ (const char* m, state_type s, symbol_type& sym)
-  {
-    stack_symbol_type t (s, sym);
-    yypush_ (m, t);
-  }
-
-  inline
-  void
-  Parser::yypush_ (const char* m, stack_symbol_type& s)
+  Parser::yypush_ (const char* m, YY_MOVE_REF (stack_symbol_type) sym)
   {
     if (m)
-      YY_SYMBOL_PRINT (m, s);
-    yystack_.push (s);
+      YY_SYMBOL_PRINT (m, sym);
+    yystack_.push (YY_MOVE (sym));
   }
 
-  inline
   void
-  Parser::yypop_ (unsigned int n)
+  Parser::yypush_ (const char* m, state_type s, YY_MOVE_REF (symbol_type) sym)
+  {
+#if 201103L <= YY_CPLUSPLUS
+    yypush_ (m, stack_symbol_type (s, std::move (sym)));
+#else
+    stack_symbol_type ss (s, sym);
+    yypush_ (m, ss);
+#endif
+  }
+
+  void
+  Parser::yypop_ (int n)
   {
     yystack_.pop (n);
   }
@@ -422,7 +489,7 @@ namespace Sheep {
   }
 #endif // YYDEBUG
 
-  inline Parser::state_type
+  Parser::state_type
   Parser::yy_lr_goto_state_ (state_type yystate, int yysym)
   {
     int yyr = yypgoto_[yysym - yyntokens_] + yystate;
@@ -432,22 +499,27 @@ namespace Sheep {
       return yydefgoto_[yysym - yyntokens_];
   }
 
-  inline bool
+  bool
   Parser::yy_pact_value_is_default_ (int yyvalue)
   {
     return yyvalue == yypact_ninf_;
   }
 
-  inline bool
+  bool
   Parser::yy_table_value_is_error_ (int yyvalue)
   {
     return yyvalue == yytable_ninf_;
   }
 
   int
+  Parser::operator() ()
+  {
+    return parse ();
+  }
+
+  int
   Parser::parse ()
   {
-    // State.
     int yyn;
     /// Length of the RHS of the rule being reduced.
     int yylen = 0;
@@ -465,11 +537,11 @@ namespace Sheep {
     /// The return value of parse ().
     int yyresult;
 
-    // FIXME: This shoud be completely indented.  It is not yet to
-    // avoid gratuitous conflicts when merging into the master branch.
+#if YY_EXCEPTIONS
     try
+#endif // YY_EXCEPTIONS
       {
-    YYCDEBUG << "Starting parse" << std::endl;
+    YYCDEBUG << "Starting parse\n";
 
 
     /* Initialize the stack.  The initial state will be set in
@@ -477,23 +549,27 @@ namespace Sheep {
        location values to have been already stored, initialize these
        stacks with a primary value.  */
     yystack_.clear ();
-    yypush_ (YY_NULLPTR, 0, yyla);
+    yypush_ (YY_NULLPTR, 0, YY_MOVE (yyla));
 
-    // A new symbol was pushed on the stack.
+  /*-----------------------------------------------.
+  | yynewstate -- push a new symbol on the stack.  |
+  `-----------------------------------------------*/
   yynewstate:
-    YYCDEBUG << "Entering state " << yystack_[0].state << std::endl;
+    YYCDEBUG << "Entering state " << int (yystack_[0].state) << '\n';
 
     // Accept?
     if (yystack_[0].state == yyfinal_)
-      goto yyacceptlab;
+      YYACCEPT;
 
     goto yybackup;
 
-    // Backup.
-  yybackup:
 
+  /*-----------.
+  | yybackup.  |
+  `-----------*/
+  yybackup:
     // Try to take a decision without lookahead.
-    yyn = yypact_[yystack_[0].state];
+    yyn = yypact_[+yystack_[0].state];
     if (yy_pact_value_is_default_ (yyn))
       goto yydefault;
 
@@ -501,16 +577,21 @@ namespace Sheep {
     if (yyla.empty ())
       {
         YYCDEBUG << "Reading a token: ";
+#if YY_EXCEPTIONS
         try
+#endif // YY_EXCEPTIONS
           {
             symbol_type yylookahead (yylex (scanner, compiler, builder));
             yyla.move (yylookahead);
           }
+#if YY_EXCEPTIONS
         catch (const syntax_error& yyexc)
           {
+            YYCDEBUG << "Caught exception: " << yyexc.what() << '\n';
             error (yyexc);
             goto yyerrlab1;
           }
+#endif // YY_EXCEPTIONS
       }
     YY_SYMBOL_PRINT ("Next token is", yyla);
 
@@ -518,7 +599,9 @@ namespace Sheep {
        to detect an error, take that action.  */
     yyn += yyla.type_get ();
     if (yyn < 0 || yylast_ < yyn || yycheck_[yyn] != yyla.type_get ())
-      goto yydefault;
+      {
+        goto yydefault;
+      }
 
     // Reduce or error.
     yyn = yytable_[yyn];
@@ -535,48 +618,50 @@ namespace Sheep {
       --yyerrstatus_;
 
     // Shift the lookahead token.
-    yypush_ ("Shifting", yyn, yyla);
+    yypush_ ("Shifting", state_type (yyn), YY_MOVE (yyla));
     goto yynewstate;
+
 
   /*-----------------------------------------------------------.
   | yydefault -- do the default action for the current state.  |
   `-----------------------------------------------------------*/
   yydefault:
-    yyn = yydefact_[yystack_[0].state];
+    yyn = yydefact_[+yystack_[0].state];
     if (yyn == 0)
       goto yyerrlab;
     goto yyreduce;
 
+
   /*-----------------------------.
-  | yyreduce -- Do a reduction.  |
+  | yyreduce -- do a reduction.  |
   `-----------------------------*/
   yyreduce:
     yylen = yyr2_[yyn];
     {
       stack_symbol_type yylhs;
-      yylhs.state = yy_lr_goto_state_(yystack_[yylen].state, yyr1_[yyn]);
+      yylhs.state = yy_lr_goto_state_ (yystack_[yylen].state, yyr1_[yyn]);
       /* Variants are always initialized to an empty instance of the
          correct type. The default '$$ = $1' action is NOT applied
          when using variants.  */
-        switch (yyr1_[yyn])
+      switch (yyr1_[yyn])
     {
-      case 65: // expr
-      case 66: // sysfunc_call
-        yylhs.value.build< SheepValue > ();
+      case 67: // expr
+      case 68: // sysfunc_call
+        yylhs.value.emplace< SheepValue > ();
         break;
 
       case 27: // FLOAT
-        yylhs.value.build< float > ();
+        yylhs.value.emplace< float > ();
         break;
 
       case 26: // INT
-        yylhs.value.build< int > ();
+        yylhs.value.emplace< int > ();
         break;
 
       case 28: // STRING
       case 29: // USERID
       case 30: // SYSID
-        yylhs.value.build< std::string > ();
+        yylhs.value.emplace< std::string > ();
         break;
 
       default:
@@ -584,476 +669,496 @@ namespace Sheep {
     }
 
 
-      // Compute the default @$.
+      // Default location.
       {
-        slice<stack_symbol_type, stack_type> slice (yystack_, yylen);
-        YYLLOC_DEFAULT (yylhs.location, slice, yylen);
+        stack_type::slice range (yystack_, yylen);
+        YYLLOC_DEFAULT (yylhs.location, range, yylen);
+        yyerror_range[1].location = yylhs.location;
       }
 
       // Perform the reduction.
       YY_REDUCE_PRINT (yyn);
+#if YY_EXCEPTIONS
       try
+#endif // YY_EXCEPTIONS
         {
           switch (yyn)
             {
   case 2:
-#line 160 "sheep.yy" // lalr1.cc:859
-    { }
-#line 603 "sheep.tab.cc" // lalr1.cc:859
+#line 160 "sheep.yy"
+                                                                        { }
+#line 691 "sheep.tab.cc"
     break;
 
   case 3:
-#line 161 "sheep.yy" // lalr1.cc:859
-    { }
-#line 609 "sheep.tab.cc" // lalr1.cc:859
+#line 161 "sheep.yy"
+                                                                        { }
+#line 697 "sheep.tab.cc"
     break;
 
   case 4:
-#line 162 "sheep.yy" // lalr1.cc:859
-    { }
-#line 615 "sheep.tab.cc" // lalr1.cc:859
+#line 162 "sheep.yy"
+                                                                        { }
+#line 703 "sheep.tab.cc"
     break;
 
   case 5:
-#line 163 "sheep.yy" // lalr1.cc:859
-    { }
-#line 621 "sheep.tab.cc" // lalr1.cc:859
+#line 163 "sheep.yy"
+                                                        { }
+#line 709 "sheep.tab.cc"
     break;
 
   case 6:
-#line 164 "sheep.yy" // lalr1.cc:859
-    { }
-#line 627 "sheep.tab.cc" // lalr1.cc:859
+#line 164 "sheep.yy"
+                                                { }
+#line 715 "sheep.tab.cc"
     break;
 
   case 7:
-#line 169 "sheep.yy" // lalr1.cc:859
-    { }
-#line 633 "sheep.tab.cc" // lalr1.cc:859
+#line 169 "sheep.yy"
+                                     { builder.BeginSymbols(); }
+#line 721 "sheep.tab.cc"
     break;
 
   case 8:
-#line 172 "sheep.yy" // lalr1.cc:859
-    {  }
-#line 639 "sheep.tab.cc" // lalr1.cc:859
+#line 169 "sheep.yy"
+                                                                                           { }
+#line 727 "sheep.tab.cc"
     break;
 
   case 9:
-#line 173 "sheep.yy" // lalr1.cc:859
-    {  }
-#line 645 "sheep.tab.cc" // lalr1.cc:859
+#line 172 "sheep.yy"
+                                                {  }
+#line 733 "sheep.tab.cc"
     break;
 
   case 10:
-#line 179 "sheep.yy" // lalr1.cc:859
-    { }
-#line 651 "sheep.tab.cc" // lalr1.cc:859
+#line 173 "sheep.yy"
+                                        {  }
+#line 739 "sheep.tab.cc"
     break;
 
   case 11:
-#line 180 "sheep.yy" // lalr1.cc:859
-    { }
-#line 657 "sheep.tab.cc" // lalr1.cc:859
+#line 179 "sheep.yy"
+                                                        { }
+#line 745 "sheep.tab.cc"
     break;
 
   case 12:
-#line 181 "sheep.yy" // lalr1.cc:859
-    { }
-#line 663 "sheep.tab.cc" // lalr1.cc:859
+#line 180 "sheep.yy"
+                                                                { }
+#line 751 "sheep.tab.cc"
     break;
 
   case 13:
-#line 184 "sheep.yy" // lalr1.cc:859
-    { builder.AddIntVariable(yystack_[0].value.as< std::string > (), 0); }
-#line 669 "sheep.tab.cc" // lalr1.cc:859
+#line 181 "sheep.yy"
+                                                                { }
+#line 757 "sheep.tab.cc"
     break;
 
   case 14:
-#line 185 "sheep.yy" // lalr1.cc:859
-    { builder.AddIntVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< int > ()); }
-#line 675 "sheep.tab.cc" // lalr1.cc:859
+#line 184 "sheep.yy"
+                                                                                { builder.AddIntVariable(yystack_[0].value.as < std::string > (), 0); }
+#line 763 "sheep.tab.cc"
     break;
 
   case 15:
-#line 186 "sheep.yy" // lalr1.cc:859
-    { builder.AddIntVariable(yystack_[0].value.as< std::string > (), 0); }
-#line 681 "sheep.tab.cc" // lalr1.cc:859
+#line 185 "sheep.yy"
+                                                                                { builder.AddIntVariable(yystack_[2].value.as < std::string > (), yystack_[0].value.as < int > ()); }
+#line 769 "sheep.tab.cc"
     break;
 
   case 16:
-#line 187 "sheep.yy" // lalr1.cc:859
-    { builder.AddIntVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< int > ()); }
-#line 687 "sheep.tab.cc" // lalr1.cc:859
+#line 186 "sheep.yy"
+                                                                        { builder.AddIntVariable(yystack_[0].value.as < std::string > (), 0); }
+#line 775 "sheep.tab.cc"
     break;
 
   case 17:
-#line 190 "sheep.yy" // lalr1.cc:859
-    { builder.AddFloatVariable(yystack_[0].value.as< std::string > (), 0.0f); }
-#line 693 "sheep.tab.cc" // lalr1.cc:859
+#line 187 "sheep.yy"
+                                                                { builder.AddIntVariable(yystack_[2].value.as < std::string > (), yystack_[0].value.as < int > ()); }
+#line 781 "sheep.tab.cc"
     break;
 
   case 18:
-#line 191 "sheep.yy" // lalr1.cc:859
-    { builder.AddFloatVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< float > ()); }
-#line 699 "sheep.tab.cc" // lalr1.cc:859
+#line 190 "sheep.yy"
+                                                                                { builder.AddFloatVariable(yystack_[0].value.as < std::string > (), 0.0f); }
+#line 787 "sheep.tab.cc"
     break;
 
   case 19:
-#line 192 "sheep.yy" // lalr1.cc:859
-    { builder.AddFloatVariable(yystack_[0].value.as< std::string > (), 0.0f); }
-#line 705 "sheep.tab.cc" // lalr1.cc:859
+#line 191 "sheep.yy"
+                                                                                { builder.AddFloatVariable(yystack_[2].value.as < std::string > (), yystack_[0].value.as < float > ()); }
+#line 793 "sheep.tab.cc"
     break;
 
   case 20:
-#line 193 "sheep.yy" // lalr1.cc:859
-    { builder.AddFloatVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< float > ()); }
-#line 711 "sheep.tab.cc" // lalr1.cc:859
+#line 192 "sheep.yy"
+                                                                { builder.AddFloatVariable(yystack_[0].value.as < std::string > (), 0.0f); }
+#line 799 "sheep.tab.cc"
     break;
 
   case 21:
-#line 196 "sheep.yy" // lalr1.cc:859
-    { builder.AddStringVariable(yystack_[0].value.as< std::string > (), ""); }
-#line 717 "sheep.tab.cc" // lalr1.cc:859
+#line 193 "sheep.yy"
+                                                        { builder.AddFloatVariable(yystack_[2].value.as < std::string > (), yystack_[0].value.as < float > ()); }
+#line 805 "sheep.tab.cc"
     break;
 
   case 22:
-#line 197 "sheep.yy" // lalr1.cc:859
-    { builder.AddStringVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< std::string > ()); }
-#line 723 "sheep.tab.cc" // lalr1.cc:859
+#line 196 "sheep.yy"
+                                                                                { builder.AddStringVariable(yystack_[0].value.as < std::string > (), ""); }
+#line 811 "sheep.tab.cc"
     break;
 
   case 23:
-#line 198 "sheep.yy" // lalr1.cc:859
-    { builder.AddStringVariable(yystack_[0].value.as< std::string > (), ""); }
-#line 729 "sheep.tab.cc" // lalr1.cc:859
+#line 197 "sheep.yy"
+                                                                                { builder.AddStringVariable(yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 817 "sheep.tab.cc"
     break;
 
   case 24:
-#line 199 "sheep.yy" // lalr1.cc:859
-    { builder.AddStringVariable(yystack_[2].value.as< std::string > (), yystack_[0].value.as< std::string > ()); }
-#line 735 "sheep.tab.cc" // lalr1.cc:859
+#line 198 "sheep.yy"
+                                                                        { builder.AddStringVariable(yystack_[0].value.as < std::string > (), ""); }
+#line 823 "sheep.tab.cc"
     break;
 
   case 25:
-#line 205 "sheep.yy" // lalr1.cc:859
-    { }
-#line 741 "sheep.tab.cc" // lalr1.cc:859
+#line 199 "sheep.yy"
+                                                        { builder.AddStringVariable(yystack_[2].value.as < std::string > (), yystack_[0].value.as < std::string > ()); }
+#line 829 "sheep.tab.cc"
     break;
 
   case 26:
-#line 209 "sheep.yy" // lalr1.cc:859
-    { }
-#line 747 "sheep.tab.cc" // lalr1.cc:859
+#line 205 "sheep.yy"
+                               { builder.BeginCode(); }
+#line 835 "sheep.tab.cc"
     break;
 
   case 27:
-#line 210 "sheep.yy" // lalr1.cc:859
-    { }
-#line 753 "sheep.tab.cc" // lalr1.cc:859
+#line 205 "sheep.yy"
+                                                                               { }
+#line 841 "sheep.tab.cc"
     break;
 
   case 28:
-#line 215 "sheep.yy" // lalr1.cc:859
-    { builder.StartFunction(yystack_[2].value.as< std::string > ()); }
-#line 759 "sheep.tab.cc" // lalr1.cc:859
+#line 209 "sheep.yy"
+                                        { }
+#line 847 "sheep.tab.cc"
     break;
 
   case 29:
-#line 215 "sheep.yy" // lalr1.cc:859
-    { builder.EndFunction(yystack_[6].value.as< std::string > ()); }
-#line 765 "sheep.tab.cc" // lalr1.cc:859
+#line 210 "sheep.yy"
+                                { }
+#line 853 "sheep.tab.cc"
     break;
 
-  case 32:
-#line 224 "sheep.yy" // lalr1.cc:859
-    { builder.Store(yystack_[3].value.as< std::string > ()); }
-#line 771 "sheep.tab.cc" // lalr1.cc:859
+  case 30:
+#line 215 "sheep.yy"
+                                      { builder.StartFunction(yystack_[2].value.as < std::string > ()); }
+#line 859 "sheep.tab.cc"
     break;
 
-  case 33:
-#line 225 "sheep.yy" // lalr1.cc:859
-    { }
-#line 777 "sheep.tab.cc" // lalr1.cc:859
+  case 31:
+#line 215 "sheep.yy"
+                                                                                                         { builder.EndFunction(yystack_[6].value.as < std::string > ()); }
+#line 865 "sheep.tab.cc"
     break;
 
   case 34:
-#line 226 "sheep.yy" // lalr1.cc:859
-    { builder.ReturnV(); }
-#line 783 "sheep.tab.cc" // lalr1.cc:859
+#line 224 "sheep.yy"
+                                                                        { builder.Store(yystack_[3].value.as < std::string > (), yylhs.location); }
+#line 871 "sheep.tab.cc"
     break;
 
   case 35:
-#line 227 "sheep.yy" // lalr1.cc:859
-    { builder.Breakpoint(); }
-#line 789 "sheep.tab.cc" // lalr1.cc:859
+#line 225 "sheep.yy"
+                                                                                                        { }
+#line 877 "sheep.tab.cc"
     break;
 
   case 36:
-#line 228 "sheep.yy" // lalr1.cc:859
-    { builder.SitnSpin(); }
-#line 795 "sheep.tab.cc" // lalr1.cc:859
+#line 226 "sheep.yy"
+                                                                                                { builder.ReturnV(); }
+#line 883 "sheep.tab.cc"
     break;
 
   case 37:
-#line 229 "sheep.yy" // lalr1.cc:859
-    { builder.BranchGoto(yystack_[1].value.as< std::string > ()); }
-#line 801 "sheep.tab.cc" // lalr1.cc:859
+#line 227 "sheep.yy"
+                                                                                        { builder.Breakpoint(); }
+#line 889 "sheep.tab.cc"
     break;
 
   case 38:
-#line 230 "sheep.yy" // lalr1.cc:859
-    { builder.AddGoto(yystack_[1].value.as< std::string > ()); }
-#line 807 "sheep.tab.cc" // lalr1.cc:859
+#line 228 "sheep.yy"
+                                                                                        { builder.SitnSpin(); }
+#line 895 "sheep.tab.cc"
     break;
 
   case 39:
-#line 231 "sheep.yy" // lalr1.cc:859
-    { builder.BeginWait(); builder.EndWait(); }
-#line 813 "sheep.tab.cc" // lalr1.cc:859
+#line 229 "sheep.yy"
+                                                                                        { builder.BranchGoto(yystack_[1].value.as < std::string > ()); }
+#line 901 "sheep.tab.cc"
     break;
 
   case 40:
-#line 232 "sheep.yy" // lalr1.cc:859
-    { builder.BeginWait(); }
-#line 819 "sheep.tab.cc" // lalr1.cc:859
+#line 230 "sheep.yy"
+                                                                                                { builder.AddGoto(yystack_[1].value.as < std::string > (), yylhs.location); }
+#line 907 "sheep.tab.cc"
     break;
 
   case 41:
-#line 232 "sheep.yy" // lalr1.cc:859
-    { builder.EndWait(); }
-#line 825 "sheep.tab.cc" // lalr1.cc:859
+#line 231 "sheep.yy"
+                                                                                                { builder.BeginWait(); builder.EndWait(); }
+#line 913 "sheep.tab.cc"
     break;
 
   case 42:
-#line 233 "sheep.yy" // lalr1.cc:859
-    { builder.BeginWait(); }
-#line 831 "sheep.tab.cc" // lalr1.cc:859
+#line 232 "sheep.yy"
+               { builder.BeginWait(); }
+#line 919 "sheep.tab.cc"
     break;
 
   case 43:
-#line 233 "sheep.yy" // lalr1.cc:859
-    { builder.EndWait(); }
-#line 837 "sheep.tab.cc" // lalr1.cc:859
+#line 232 "sheep.yy"
+                                                                { builder.EndWait(); }
+#line 925 "sheep.tab.cc"
+    break;
+
+  case 44:
+#line 233 "sheep.yy"
+               { builder.BeginWait(); }
+#line 931 "sheep.tab.cc"
     break;
 
   case 45:
-#line 235 "sheep.yy" // lalr1.cc:859
-    { }
-#line 843 "sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 46:
-#line 236 "sheep.yy" // lalr1.cc:859
-    { builder.BeginIfElseBlock(); }
-#line 849 "sheep.tab.cc" // lalr1.cc:859
+#line 233 "sheep.yy"
+                                                                            { builder.EndWait(); }
+#line 937 "sheep.tab.cc"
     break;
 
   case 47:
-#line 236 "sheep.yy" // lalr1.cc:859
-    { builder.EndIfElseBlock(); }
-#line 855 "sheep.tab.cc" // lalr1.cc:859
+#line 235 "sheep.yy"
+                                                                                                { }
+#line 943 "sheep.tab.cc"
+    break;
+
+  case 48:
+#line 236 "sheep.yy"
+          { builder.BeginIfElseBlock(); }
+#line 949 "sheep.tab.cc"
     break;
 
   case 49:
-#line 244 "sheep.yy" // lalr1.cc:859
-    { yylhs.value.as< SheepValue > () = yystack_[0].value.as< SheepValue > (); }
-#line 861 "sheep.tab.cc" // lalr1.cc:859
-    break;
-
-  case 50:
-#line 245 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.Load(yystack_[0].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 867 "sheep.tab.cc" // lalr1.cc:859
+#line 236 "sheep.yy"
+                                                                { builder.EndIfElseBlock(); }
+#line 955 "sheep.tab.cc"
     break;
 
   case 51:
-#line 246 "sheep.yy" // lalr1.cc:859
-    { builder.PushI(yystack_[0].value.as< int > ()); yylhs.value.as< SheepValue > () = SheepValue(yystack_[0].value.as< int > ()); }
-#line 873 "sheep.tab.cc" // lalr1.cc:859
+#line 244 "sheep.yy"
+                                                                { yylhs.value.as < SheepValue > () = yystack_[0].value.as < SheepValue > (); }
+#line 961 "sheep.tab.cc"
     break;
 
   case 52:
-#line 247 "sheep.yy" // lalr1.cc:859
-    { builder.PushF(yystack_[0].value.as< float > ()); yylhs.value.as< SheepValue > () = SheepValue(yystack_[0].value.as< float > ()); }
-#line 879 "sheep.tab.cc" // lalr1.cc:859
+#line 245 "sheep.yy"
+                                                                        { auto type = builder.Load(yystack_[0].value.as < std::string > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 967 "sheep.tab.cc"
     break;
 
   case 53:
-#line 248 "sheep.yy" // lalr1.cc:859
-    { builder.AddStringConst(yystack_[0].value.as< std::string > ()); builder.PushS(yystack_[0].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(""); }
-#line 885 "sheep.tab.cc" // lalr1.cc:859
+#line 246 "sheep.yy"
+                                                                        { builder.PushI(yystack_[0].value.as < int > ()); yylhs.value.as < SheepValue > () = SheepValue(yystack_[0].value.as < int > ()); }
+#line 973 "sheep.tab.cc"
     break;
 
   case 54:
-#line 250 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.Add(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 891 "sheep.tab.cc" // lalr1.cc:859
+#line 247 "sheep.yy"
+                                                                        { builder.PushF(yystack_[0].value.as < float > ()); yylhs.value.as < SheepValue > () = SheepValue(yystack_[0].value.as < float > ()); }
+#line 979 "sheep.tab.cc"
     break;
 
   case 55:
-#line 251 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.Subtract(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 897 "sheep.tab.cc" // lalr1.cc:859
+#line 248 "sheep.yy"
+                                                                        { builder.AddStringConst(yystack_[0].value.as < std::string > ()); builder.PushS(yystack_[0].value.as < std::string > ()); yylhs.value.as < SheepValue > () = SheepValue(""); }
+#line 985 "sheep.tab.cc"
     break;
 
   case 56:
-#line 252 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.Multiply(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 903 "sheep.tab.cc" // lalr1.cc:859
+#line 250 "sheep.yy"
+                                                                { auto type = builder.Add(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 991 "sheep.tab.cc"
     break;
 
   case 57:
-#line 253 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.Divide(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 909 "sheep.tab.cc" // lalr1.cc:859
+#line 251 "sheep.yy"
+                                                                { auto type = builder.Subtract(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 997 "sheep.tab.cc"
     break;
 
   case 58:
-#line 254 "sheep.yy" // lalr1.cc:859
-    { builder.Modulo(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(SheepValueType::Int); }
-#line 915 "sheep.tab.cc" // lalr1.cc:859
+#line 252 "sheep.yy"
+                                                        { auto type = builder.Multiply(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1003 "sheep.tab.cc"
     break;
 
   case 59:
-#line 255 "sheep.yy" // lalr1.cc:859
-    { builder.Negate(yystack_[0].value.as< SheepValue > ()); }
-#line 921 "sheep.tab.cc" // lalr1.cc:859
+#line 253 "sheep.yy"
+                                                                { auto type = builder.Divide(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1009 "sheep.tab.cc"
     break;
 
   case 60:
-#line 257 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.IsLess(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 927 "sheep.tab.cc" // lalr1.cc:859
+#line 254 "sheep.yy"
+                                                                { builder.Modulo(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(SheepValueType::Int); }
+#line 1015 "sheep.tab.cc"
     break;
 
   case 61:
-#line 258 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.IsGreater(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 933 "sheep.tab.cc" // lalr1.cc:859
+#line 255 "sheep.yy"
+                                                                { builder.Negate(yystack_[0].value.as < SheepValue > (), yylhs.location); }
+#line 1021 "sheep.tab.cc"
     break;
 
   case 62:
-#line 259 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.IsLessEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 939 "sheep.tab.cc" // lalr1.cc:859
+#line 257 "sheep.yy"
+                                                                { auto type = builder.IsLess(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1027 "sheep.tab.cc"
     break;
 
   case 63:
-#line 260 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.IsGreaterEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 945 "sheep.tab.cc" // lalr1.cc:859
+#line 258 "sheep.yy"
+                                                                { auto type = builder.IsGreater(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1033 "sheep.tab.cc"
     break;
 
   case 64:
-#line 261 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.IsEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 951 "sheep.tab.cc" // lalr1.cc:859
+#line 259 "sheep.yy"
+                                                                { auto type = builder.IsLessEqual(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1039 "sheep.tab.cc"
     break;
 
   case 65:
-#line 262 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.IsNotEqual(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(type); }
-#line 957 "sheep.tab.cc" // lalr1.cc:859
+#line 260 "sheep.yy"
+                                                                { auto type = builder.IsGreaterEqual(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1045 "sheep.tab.cc"
     break;
 
   case 66:
-#line 263 "sheep.yy" // lalr1.cc:859
-    { builder.Or(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(SheepValueType::Int); }
-#line 963 "sheep.tab.cc" // lalr1.cc:859
+#line 261 "sheep.yy"
+                                                                { auto type = builder.IsEqual(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1051 "sheep.tab.cc"
     break;
 
   case 67:
-#line 264 "sheep.yy" // lalr1.cc:859
-    { builder.And(yystack_[2].value.as< SheepValue > (), yystack_[0].value.as< SheepValue > ()); yylhs.value.as< SheepValue > () = SheepValue(SheepValueType::Int); }
-#line 969 "sheep.tab.cc" // lalr1.cc:859
+#line 262 "sheep.yy"
+                                                        { auto type = builder.IsNotEqual(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1057 "sheep.tab.cc"
     break;
 
   case 68:
-#line 265 "sheep.yy" // lalr1.cc:859
-    { builder.Not(); yylhs.value.as< SheepValue > () = yystack_[0].value.as< SheepValue > (); }
-#line 975 "sheep.tab.cc" // lalr1.cc:859
+#line 263 "sheep.yy"
+                                                                { builder.Or(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(SheepValueType::Int); }
+#line 1063 "sheep.tab.cc"
     break;
 
   case 69:
-#line 267 "sheep.yy" // lalr1.cc:859
-    { yylhs.value.as< SheepValue > () = yystack_[1].value.as< SheepValue > (); }
-#line 981 "sheep.tab.cc" // lalr1.cc:859
+#line 264 "sheep.yy"
+                                                                { builder.And(yystack_[2].value.as < SheepValue > (), yystack_[0].value.as < SheepValue > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(SheepValueType::Int); }
+#line 1069 "sheep.tab.cc"
     break;
 
   case 70:
-#line 272 "sheep.yy" // lalr1.cc:859
-    { auto type = builder.CallSysFunc(yystack_[3].value.as< std::string > ()); yylhs.value.as< SheepValue > () = SheepValue(type); BUILDER_ERROR_CHECK; }
-#line 987 "sheep.tab.cc" // lalr1.cc:859
+#line 265 "sheep.yy"
+                                                                        { builder.Not(); yylhs.value.as < SheepValue > () = yystack_[0].value.as < SheepValue > (); }
+#line 1075 "sheep.tab.cc"
     break;
 
   case 71:
-#line 276 "sheep.yy" // lalr1.cc:859
-    { }
-#line 993 "sheep.tab.cc" // lalr1.cc:859
+#line 267 "sheep.yy"
+                                                { yylhs.value.as < SheepValue > () = yystack_[1].value.as < SheepValue > (); }
+#line 1081 "sheep.tab.cc"
     break;
 
   case 72:
-#line 277 "sheep.yy" // lalr1.cc:859
-    { builder.AddToSysFuncArgCount(); }
-#line 999 "sheep.tab.cc" // lalr1.cc:859
+#line 272 "sheep.yy"
+                                                           { auto type = builder.CallSysFunc(yystack_[3].value.as < std::string > (), yylhs.location); yylhs.value.as < SheepValue > () = SheepValue(type); }
+#line 1087 "sheep.tab.cc"
     break;
 
   case 73:
-#line 278 "sheep.yy" // lalr1.cc:859
-    { builder.AddToSysFuncArgCount(); }
-#line 1005 "sheep.tab.cc" // lalr1.cc:859
+#line 276 "sheep.yy"
+                                                        { }
+#line 1093 "sheep.tab.cc"
     break;
 
-  case 76:
-#line 285 "sheep.yy" // lalr1.cc:859
-    { builder.BeginIfBlock(); }
-#line 1011 "sheep.tab.cc" // lalr1.cc:859
+  case 74:
+#line 277 "sheep.yy"
+                                                                        { builder.AddSysFuncArg(yystack_[0].value.as < SheepValue > (), yylhs.location); }
+#line 1099 "sheep.tab.cc"
     break;
 
-  case 77:
-#line 285 "sheep.yy" // lalr1.cc:859
-    { builder.EndIfBlock(); }
-#line 1017 "sheep.tab.cc" // lalr1.cc:859
+  case 75:
+#line 278 "sheep.yy"
+                                                { builder.AddSysFuncArg(yystack_[0].value.as < SheepValue > (), yylhs.location); }
+#line 1105 "sheep.tab.cc"
     break;
 
   case 78:
-#line 288 "sheep.yy" // lalr1.cc:859
-    { builder.BeginElseBlock(); }
-#line 1023 "sheep.tab.cc" // lalr1.cc:859
+#line 285 "sheep.yy"
+                                           { builder.BeginIfBlock(); }
+#line 1111 "sheep.tab.cc"
     break;
 
   case 79:
-#line 288 "sheep.yy" // lalr1.cc:859
-    { builder.EndElseBlock(); }
-#line 1029 "sheep.tab.cc" // lalr1.cc:859
+#line 285 "sheep.yy"
+                                                                                        { builder.EndIfBlock(); }
+#line 1117 "sheep.tab.cc"
     break;
 
   case 80:
-#line 289 "sheep.yy" // lalr1.cc:859
-    {  }
-#line 1035 "sheep.tab.cc" // lalr1.cc:859
+#line 288 "sheep.yy"
+                     { builder.BeginElseBlock(); }
+#line 1123 "sheep.tab.cc"
+    break;
+
+  case 81:
+#line 288 "sheep.yy"
+                                                                    { builder.EndElseBlock(); }
+#line 1129 "sheep.tab.cc"
+    break;
+
+  case 82:
+#line 289 "sheep.yy"
+                                                        {  }
+#line 1135 "sheep.tab.cc"
     break;
 
 
-#line 1039 "sheep.tab.cc" // lalr1.cc:859
+#line 1139 "sheep.tab.cc"
+
             default:
               break;
             }
         }
+#if YY_EXCEPTIONS
       catch (const syntax_error& yyexc)
         {
+          YYCDEBUG << "Caught exception: " << yyexc.what() << '\n';
           error (yyexc);
           YYERROR;
         }
+#endif // YY_EXCEPTIONS
       YY_SYMBOL_PRINT ("-> $$ =", yylhs);
       yypop_ (yylen);
       yylen = 0;
       YY_STACK_PRINT ();
 
       // Shift the result of the reduction.
-      yypush_ (YY_NULLPTR, yylhs);
+      yypush_ (YY_NULLPTR, YY_MOVE (yylhs));
     }
     goto yynewstate;
+
 
   /*--------------------------------------.
   | yyerrlab -- here on detecting error.  |
@@ -1091,18 +1196,17 @@ namespace Sheep {
   | yyerrorlab -- error raised explicitly by YYERROR.  |
   `---------------------------------------------------*/
   yyerrorlab:
-
-    /* Pacify compilers like GCC when the user code never invokes
-       YYERROR and the label yyerrorlab therefore never appears in user
-       code.  */
+    /* Pacify compilers when the user code never invokes YYERROR and
+       the label yyerrorlab therefore never appears in user code.  */
     if ((false))
-      goto yyerrorlab;
-    yyerror_range[1].location = yystack_[yylen - 1].location;
+      YYERROR;
+
     /* Do not reclaim the symbols of the rule whose action triggered
        this YYERROR.  */
     yypop_ (yylen);
     yylen = 0;
     goto yyerrlab1;
+
 
   /*-------------------------------------------------------------.
   | yyerrlab1 -- common code for both syntax error and YYERROR.  |
@@ -1113,11 +1217,11 @@ namespace Sheep {
       stack_symbol_type error_token;
       for (;;)
         {
-          yyn = yypact_[yystack_[0].state];
+          yyn = yypact_[+yystack_[0].state];
           if (!yy_pact_value_is_default_ (yyn))
             {
-              yyn += yyterror_;
-              if (0 <= yyn && yyn <= yylast_ && yycheck_[yyn] == yyterror_)
+              yyn += yy_error_token_;
+              if (0 <= yyn && yyn <= yylast_ && yycheck_[yyn] == yy_error_token_)
                 {
                   yyn = yytable_[yyn];
                   if (0 < yyn)
@@ -1139,21 +1243,31 @@ namespace Sheep {
       YYLLOC_DEFAULT (error_token.location, yyerror_range, 2);
 
       // Shift the error token.
-      error_token.state = yyn;
-      yypush_ ("Shifting", error_token);
+      error_token.state = state_type (yyn);
+      yypush_ ("Shifting", YY_MOVE (error_token));
     }
     goto yynewstate;
 
-    // Accept.
+
+  /*-------------------------------------.
+  | yyacceptlab -- YYACCEPT comes here.  |
+  `-------------------------------------*/
   yyacceptlab:
     yyresult = 0;
     goto yyreturn;
 
-    // Abort.
+
+  /*-----------------------------------.
+  | yyabortlab -- YYABORT comes here.  |
+  `-----------------------------------*/
   yyabortlab:
     yyresult = 1;
     goto yyreturn;
 
+
+  /*-----------------------------------------------------.
+  | yyreturn -- parsing is finished, return the result.  |
+  `-----------------------------------------------------*/
   yyreturn:
     if (!yyla.empty ())
       yy_destroy_ ("Cleanup: discarding lookahead", yyla);
@@ -1169,12 +1283,12 @@ namespace Sheep {
 
     return yyresult;
   }
+#if YY_EXCEPTIONS
     catch (...)
       {
-        YYCDEBUG << "Exception caught: cleaning lookahead and stack"
-                 << std::endl;
+        YYCDEBUG << "Exception caught: cleaning lookahead and stack\n";
         // Do not try to display the values of the reclaimed symbols,
-        // as their printer might throw an exception.
+        // as their printers might throw an exception.
         if (!yyla.empty ())
           yy_destroy_ (YY_NULLPTR, yyla);
 
@@ -1185,12 +1299,13 @@ namespace Sheep {
           }
         throw;
       }
+#endif // YY_EXCEPTIONS
   }
 
   void
   Parser::error (const syntax_error& yyexc)
   {
-    error (yyexc.location, yyexc.what());
+    error (yyexc.location, yyexc.what ());
   }
 
   // Generate an error message.
@@ -1199,7 +1314,7 @@ namespace Sheep {
   {
     // Number of reported tokens (one for the "unexpected", one per
     // "expected").
-    size_t yycount = 0;
+    std::ptrdiff_t yycount = 0;
     // Its maximum.
     enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
     // Arguments of yyformat.
@@ -1223,18 +1338,18 @@ namespace Sheep {
        - Of course, the expected token list depends on states to have
          correct lookahead information, and it depends on the parser not
          to perform extra reductions after fetching a lookahead from the
-         scanner and before detecting a syntax error.  Thus, state
-         merging (from LALR or IELR) and default reductions corrupt the
-         expected token list.  However, the list is correct for
-         canonical LR with one exception: it will still contain any
-         token that will not be accepted due to an error action in a
-         later state.
+         scanner and before detecting a syntax error.  Thus, state merging
+         (from LALR or IELR) and default reductions corrupt the expected
+         token list.  However, the list is correct for canonical LR with
+         one exception: it will still contain any token that will not be
+         accepted due to an error action in a later state.
     */
     if (!yyla.empty ())
       {
-        int yytoken = yyla.type_get ();
+        symbol_number_type yytoken = yyla.type_get ();
         yyarg[yycount++] = yytname_[yytoken];
-        int yyn = yypact_[yystate];
+
+        int yyn = yypact_[+yystate];
         if (!yy_pact_value_is_default_ (yyn))
           {
             /* Start YYX at -YYN if negative to avoid negative indexes in
@@ -1245,7 +1360,7 @@ namespace Sheep {
             int yychecklim = yylast_ - yyn + 1;
             int yyxend = yychecklim < yyntokens_ ? yychecklim : yyntokens_;
             for (int yyx = yyxbegin; yyx < yyxend; ++yyx)
-              if (yycheck_[yyx + yyn] == yyx && yyx != yyterror_
+              if (yycheck_[yyx + yyn] == yyx && yyx != yy_error_token_
                   && !yy_table_value_is_error_ (yytable_[yyx + yyn]))
                 {
                   if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
@@ -1266,18 +1381,19 @@ namespace Sheep {
         case N:                               \
           yyformat = S;                       \
         break
-        YYCASE_(0, YY_("syntax error"));
-        YYCASE_(1, YY_("syntax error, unexpected %s"));
-        YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-        YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-        YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-        YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+      default: // Avoid compiler warnings.
+        YYCASE_ (0, YY_("syntax error"));
+        YYCASE_ (1, YY_("syntax error, unexpected %s"));
+        YYCASE_ (2, YY_("syntax error, unexpected %s, expecting %s"));
+        YYCASE_ (3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+        YYCASE_ (4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+        YYCASE_ (5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
 #undef YYCASE_
       }
 
     std::string yyres;
     // Argument number.
-    size_t yyi = 0;
+    std::ptrdiff_t yyi = 0;
     for (char const* yyp = yyformat; *yyp; ++yyp)
       if (yyp[0] == '%' && yyp[1] == 's' && yyi < yycount)
         {
@@ -1290,174 +1406,174 @@ namespace Sheep {
   }
 
 
-  const signed char Parser::yypact_ninf_ = -117;
+  const signed char Parser::yypact_ninf_ = -112;
 
-  const signed char Parser::yytable_ninf_ = -43;
+  const signed char Parser::yytable_ninf_ = -45;
 
-  const short int
+  const short
   Parser::yypact_[] =
   {
-      29,    -8,     1,  -117,    20,    33,  -117,  -117,  -117,    -4,
-    -117,  -117,   -13,     4,    11,    52,  -117,    59,  -117,  -117,
-      23,    53,    63,  -117,  -117,  -117,    -1,    32,    59,    59,
-    -117,    65,  -117,   178,  -117,  -117,    66,  -117,  -117,    79,
-      82,    83,  -117,   103,  -117,  -117,   152,    54,  -117,    88,
-     105,  -117,  -117,  -117,    59,    59,  -117,  -117,   108,  -117,
-     124,    59,    59,    59,    59,    59,    59,    59,    59,    59,
-      59,    59,    59,    59,   113,    96,    68,   106,    86,   107,
-      87,  -117,  -117,  -117,  -117,  -117,   120,   178,    22,    59,
-      65,  -117,   190,   201,   132,   132,    50,    50,    50,    50,
-      16,    16,  -117,  -117,  -117,  -117,   118,   116,  -117,   119,
-     148,  -117,   151,   153,  -117,    95,  -117,    59,  -117,   165,
-    -117,   166,   167,  -117,   215,  -117,   216,  -117,   217,  -117,
-     178,  -117,  -117,  -117,   157,   222,   223,   166,   121,  -117,
-    -117,  -117,  -117,  -117
+       4,    -8,     7,  -112,    10,    24,  -112,  -112,  -112,     8,
+    -112,  -112,  -112,  -112,    -1,    20,  -112,    57,  -112,  -112,
+       0,    41,    44,  -112,  -112,  -112,    -6,    46,    57,    57,
+    -112,    54,  -112,   176,  -112,   -12,    65,    55,  -112,  -112,
+     150,    49,  -112,    35,    67,  -112,  -112,  -112,    57,    57,
+    -112,  -112,    70,  -112,    85,    57,    57,    57,    57,    57,
+      57,    57,    57,    57,    57,    57,    57,    57,  -112,    80,
+    -112,  -112,    77,    84,    95,  -112,  -112,  -112,  -112,  -112,
+    -112,   118,   176,    -4,    57,    54,  -112,   188,   199,   130,
+     130,   137,   137,   137,   137,    30,    30,  -112,  -112,  -112,
+      96,    86,    87,    94,    88,    97,   101,    93,  -112,    57,
+    -112,   163,  -112,   102,  -112,   106,   107,  -112,   108,   113,
+    -112,   115,   146,  -112,  -112,   176,  -112,  -112,   230,  -112,
+     214,  -112,   215,  -112,   216,   102,  -112,   222,   117,   221,
+    -112,   119,  -112,  -112,  -112,  -112
   };
 
-  const unsigned char
+  const signed char
   Parser::yydefact_[] =
   {
-       2,     0,     0,    30,     0,     3,     4,    26,     8,    46,
-       1,     5,     0,     0,     0,     0,    45,     0,    30,     6,
-      40,     0,     0,    51,    52,    53,    50,     0,     0,     0,
-      31,     0,    44,    33,    49,    25,     0,    27,     7,     0,
-       0,     0,     9,     0,    34,    50,     0,    46,    39,     0,
-       0,    35,    36,    38,     0,    71,    68,    59,     0,    47,
-      74,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,    13,     0,    17,     0,    21,
-       0,    37,    69,    48,    41,    30,     0,    72,     0,     0,
-      78,    75,    66,    67,    64,    65,    60,    62,    61,    63,
-      54,    55,    56,    57,    58,    28,     0,     0,    10,     0,
-       0,    11,     0,     0,    12,    46,    32,     0,    70,     0,
-      80,     0,     0,    14,    15,    18,    19,    22,    23,    43,
-      73,    76,    79,    30,     0,     0,     0,     0,    46,    16,
-      20,    24,    77,    29
+       2,     0,     0,    32,     0,     3,     4,    26,     7,    48,
+       1,     5,    28,     9,     0,     0,    47,     0,    32,     6,
+      42,     0,     0,    53,    54,    55,    52,     0,     0,     0,
+      33,     0,    46,    35,    51,     0,     0,     0,    36,    52,
+       0,    48,    41,     0,     0,    37,    38,    40,     0,    73,
+      70,    61,     0,    49,    76,     0,     0,     0,     0,     0,
+       0,     0,     0,     0,     0,     0,     0,     0,    27,     0,
+      29,     8,     0,     0,     0,    10,    39,    71,    50,    43,
+      32,     0,    74,     0,     0,    80,    77,    68,    69,    66,
+      67,    62,    64,    63,    65,    56,    57,    58,    59,    60,
+       0,    14,     0,    18,     0,    22,     0,    48,    34,     0,
+      72,     0,    82,     0,    30,     0,     0,    11,     0,     0,
+      12,     0,     0,    13,    45,    75,    78,    81,     0,    15,
+      16,    19,    20,    23,    24,     0,    32,     0,     0,     0,
+      79,    48,    17,    21,    25,    31
   };
 
-  const short int
+  const short
   Parser::yypgoto_[] =
   {
-    -117,  -117,  -117,  -117,  -117,  -117,  -117,  -117,   129,  -117,
-    -117,  -117,   -18,  -117,  -117,  -117,  -117,  -116,   -16,   203,
-    -117,   160,  -117,  -117,  -117,  -117
+    -112,  -112,  -112,  -112,  -112,  -112,  -112,  -112,  -112,   245,
+    -112,  -112,  -112,  -112,   -18,  -112,  -112,  -112,  -112,  -111,
+     -16,   208,  -112,   167,  -112,  -112,  -112,  -112
   };
 
-  const short int
+  const short
   Parser::yydefgoto_[] =
   {
-      -1,     4,     5,    13,    42,    76,    78,    80,     6,    12,
-      37,   122,     9,    30,    49,    50,    31,    32,    33,    34,
-      88,    59,    60,   137,    91,   121
+      -1,     4,     5,    13,    36,    75,   102,   104,   106,     6,
+      12,    35,    70,   128,     9,    30,    43,    44,    31,    32,
+      33,    34,    83,    53,    54,   135,    86,   113
   };
 
-  const short int
+  const short
   Parser::yytable_[] =
   {
-      47,    46,    35,    14,    15,   132,     7,    16,    17,    53,
-      18,    19,    56,    57,    20,     8,    36,    21,    22,    38,
-      10,   142,    23,    24,    25,    26,    27,    39,    40,    41,
-      54,   117,     1,     2,    48,   118,     1,   -42,    86,    87,
-      43,    28,    29,     3,    55,    92,    93,    94,    95,    96,
-      97,    98,    99,   100,   101,   102,   103,   104,    71,    72,
-      73,    14,    15,    44,    51,    16,    17,   115,    18,    83,
-      58,    17,    20,   119,    52,    21,    22,   107,    74,   108,
-      23,    24,    25,    26,    27,    23,    24,    25,    45,    27,
-      69,    70,    71,    72,    73,   110,   113,   111,   114,    28,
-      29,   130,    14,    15,    28,    29,    16,    17,    75,    18,
-     129,    77,    79,    20,    81,   138,    21,    22,    27,    85,
-      89,    23,    24,    25,    26,    27,   105,   106,    14,    15,
-      90,   116,    16,    17,    11,    18,   143,   109,   112,    20,
-      28,    29,    21,    22,   123,   124,   125,    23,    24,    25,
-      26,    27,    61,    62,    63,    64,    65,    66,    67,    68,
-      69,    70,    71,    72,    73,    82,    28,    29,    65,    66,
-      67,    68,    69,    70,    71,    72,    73,   126,   131,   127,
-      18,   133,   128,   139,    61,    62,    63,    64,    65,    66,
-      67,    68,    69,    70,    71,    72,    73,    61,    62,    63,
-      64,    65,    66,    67,    68,    69,    70,    71,    72,    73,
-      61,    62,    63,    64,    65,    66,    67,    68,    69,    70,
-      71,    72,    73,    62,    63,    64,    65,    66,    67,    68,
-      69,    70,    71,    72,    73,    63,    64,    65,    66,    67,
-      68,    69,    70,    71,    72,    73,   134,   135,   136,   140,
-     120,   141,    84
+      41,    40,   127,    68,    47,   109,     7,     1,     2,   110,
+      10,    42,    50,    51,   -44,    14,    15,    69,     3,    16,
+      17,     8,    18,    19,   140,    48,    20,     1,    37,    21,
+      22,    38,    81,    82,    23,    24,    25,    26,    27,    87,
+      88,    89,    90,    91,    92,    93,    94,    95,    96,    97,
+      98,    99,    45,    28,    29,    46,    14,    15,    49,    52,
+      16,    17,   107,    18,    78,    27,    76,    20,   111,    17,
+      21,    22,    65,    66,    67,    23,    24,    25,    26,    27,
+      71,    80,    84,    23,    24,    25,    39,    27,    72,    73,
+      74,    85,   100,   125,    28,    29,   116,   119,   117,   120,
+      14,    15,    28,    29,    16,    17,   101,    18,   124,   114,
+     122,    20,   123,   103,    21,    22,    18,   115,   141,    23,
+      24,    25,    26,    27,   105,   118,    14,    15,   121,   108,
+      16,    17,   129,    18,   145,   131,   130,    20,    28,    29,
+      21,    22,   132,   133,   143,    23,    24,    25,    26,    27,
+      55,    56,    57,    58,    59,    60,    61,    62,    63,    64,
+      65,    66,    67,    77,    28,    29,    59,    60,    61,    62,
+      63,    64,    65,    66,    67,   134,   126,    63,    64,    65,
+      66,    67,    55,    56,    57,    58,    59,    60,    61,    62,
+      63,    64,    65,    66,    67,    55,    56,    57,    58,    59,
+      60,    61,    62,    63,    64,    65,    66,    67,    55,    56,
+      57,    58,    59,    60,    61,    62,    63,    64,    65,    66,
+      67,    56,    57,    58,    59,    60,    61,    62,    63,    64,
+      65,    66,    67,    57,    58,    59,    60,    61,    62,    63,
+      64,    65,    66,    67,   136,   137,   138,   139,   142,   144,
+      11,    79,   112
   };
 
   const unsigned char
   Parser::yycheck_[] =
   {
-      18,    17,    15,     7,     8,   121,    14,    11,    12,    10,
-      14,    15,    28,    29,    18,    14,    29,    21,    22,    15,
-       0,   137,    26,    27,    28,    29,    30,    23,    24,    25,
-      31,     9,     3,     4,    11,    13,     3,    14,    54,    55,
-      29,    45,    46,    14,    12,    61,    62,    63,    64,    65,
-      66,    67,    68,    69,    70,    71,    72,    73,    42,    43,
-      44,     7,     8,    11,    11,    11,    12,    85,    14,    15,
-       5,    12,    18,    89,    11,    21,    22,     9,    12,    11,
-      26,    27,    28,    29,    30,    26,    27,    28,    29,    30,
-      40,    41,    42,    43,    44,     9,     9,    11,    11,    45,
-      46,   117,     7,     8,    45,    46,    11,    12,    29,    14,
-      15,    29,    29,    18,    11,   133,    21,    22,    30,    14,
-      12,    26,    27,    28,    29,    30,    13,    31,     7,     8,
-       6,    11,    11,    12,     5,    14,    15,    31,    31,    18,
-      45,    46,    21,    22,    26,    29,    27,    26,    27,    28,
-      29,    30,    32,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    13,    45,    46,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    29,    13,    28,
-      14,    14,    29,    26,    32,    33,    34,    35,    36,    37,
-      38,    39,    40,    41,    42,    43,    44,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    42,    43,    44,
+      18,    17,   113,    15,    10,     9,    14,     3,     4,    13,
+       0,    11,    28,    29,    14,     7,     8,    29,    14,    11,
+      12,    14,    14,    15,   135,    31,    18,     3,    29,    21,
+      22,    11,    48,    49,    26,    27,    28,    29,    30,    55,
+      56,    57,    58,    59,    60,    61,    62,    63,    64,    65,
+      66,    67,    11,    45,    46,    11,     7,     8,    12,     5,
+      11,    12,    80,    14,    15,    30,    11,    18,    84,    12,
+      21,    22,    42,    43,    44,    26,    27,    28,    29,    30,
+      15,    14,    12,    26,    27,    28,    29,    30,    23,    24,
+      25,     6,    12,   109,    45,    46,     9,     9,    11,    11,
+       7,     8,    45,    46,    11,    12,    29,    14,    15,    13,
+       9,    18,    11,    29,    21,    22,    14,    31,   136,    26,
+      27,    28,    29,    30,    29,    31,     7,     8,    31,    11,
+      11,    12,    26,    14,    15,    27,    29,    18,    45,    46,
+      21,    22,    29,    28,    27,    26,    27,    28,    29,    30,
       32,    33,    34,    35,    36,    37,    38,    39,    40,    41,
-      42,    43,    44,    33,    34,    35,    36,    37,    38,    39,
-      40,    41,    42,    43,    44,    34,    35,    36,    37,    38,
-      39,    40,    41,    42,    43,    44,    31,    31,    31,    27,
-      90,    28,    49
+      42,    43,    44,    13,    45,    46,    36,    37,    38,    39,
+      40,    41,    42,    43,    44,    29,    13,    40,    41,    42,
+      43,    44,    32,    33,    34,    35,    36,    37,    38,    39,
+      40,    41,    42,    43,    44,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    32,    33,
+      34,    35,    36,    37,    38,    39,    40,    41,    42,    43,
+      44,    33,    34,    35,    36,    37,    38,    39,    40,    41,
+      42,    43,    44,    34,    35,    36,    37,    38,    39,    40,
+      41,    42,    43,    44,    14,    31,    31,    31,    26,    28,
+       5,    43,    85
   };
 
-  const unsigned char
+  const signed char
   Parser::yystos_[] =
   {
-       0,     3,     4,    14,    48,    49,    55,    14,    14,    59,
-       0,    55,    56,    50,     7,     8,    11,    12,    14,    15,
+       0,     3,     4,    14,    48,    49,    56,    14,    14,    61,
+       0,    56,    57,    50,     7,     8,    11,    12,    14,    15,
       18,    21,    22,    26,    27,    28,    29,    30,    45,    46,
-      60,    63,    64,    65,    66,    15,    29,    57,    15,    23,
-      24,    25,    51,    29,    11,    29,    65,    59,    11,    61,
-      62,    11,    11,    10,    31,    12,    65,    65,     5,    68,
-      69,    32,    33,    34,    35,    36,    37,    38,    39,    40,
-      41,    42,    43,    44,    12,    29,    52,    29,    53,    29,
-      54,    11,    13,    15,    66,    14,    65,    65,    67,    12,
-       6,    71,    65,    65,    65,    65,    65,    65,    65,    65,
-      65,    65,    65,    65,    65,    13,    31,     9,    11,    31,
-       9,    11,    31,     9,    11,    59,    11,     9,    13,    65,
-      68,    72,    58,    26,    29,    27,    29,    28,    29,    15,
-      65,    13,    64,    14,    31,    31,    31,    70,    59,    26,
-      27,    28,    64,    15
+      62,    65,    66,    67,    68,    58,    51,    29,    11,    29,
+      67,    61,    11,    63,    64,    11,    11,    10,    31,    12,
+      67,    67,     5,    70,    71,    32,    33,    34,    35,    36,
+      37,    38,    39,    40,    41,    42,    43,    44,    15,    29,
+      59,    15,    23,    24,    25,    52,    11,    13,    15,    68,
+      14,    67,    67,    69,    12,     6,    73,    67,    67,    67,
+      67,    67,    67,    67,    67,    67,    67,    67,    67,    67,
+      12,    29,    53,    29,    54,    29,    55,    61,    11,     9,
+      13,    67,    70,    74,    13,    31,     9,    11,    31,     9,
+      11,    31,     9,    11,    15,    67,    13,    66,    60,    26,
+      29,    27,    29,    28,    29,    72,    14,    31,    31,    31,
+      66,    61,    26,    27,    28,    15
   };
 
-  const unsigned char
+  const signed char
   Parser::yyr1_[] =
   {
-       0,    47,    48,    48,    48,    48,    48,    49,    50,    50,
-      51,    51,    51,    52,    52,    52,    52,    53,    53,    53,
-      53,    54,    54,    54,    54,    55,    56,    56,    58,    57,
-      59,    59,    60,    60,    60,    60,    60,    60,    60,    60,
-      61,    60,    62,    60,    60,    60,    63,    60,    64,    65,
-      65,    65,    65,    65,    65,    65,    65,    65,    65,    65,
-      65,    65,    65,    65,    65,    65,    65,    65,    65,    65,
-      66,    67,    67,    67,    68,    68,    70,    69,    72,    71,
-      71
+       0,    47,    48,    48,    48,    48,    48,    50,    49,    51,
+      51,    52,    52,    52,    53,    53,    53,    53,    54,    54,
+      54,    54,    55,    55,    55,    55,    57,    56,    58,    58,
+      60,    59,    61,    61,    62,    62,    62,    62,    62,    62,
+      62,    62,    63,    62,    64,    62,    62,    62,    65,    62,
+      66,    67,    67,    67,    67,    67,    67,    67,    67,    67,
+      67,    67,    67,    67,    67,    67,    67,    67,    67,    67,
+      67,    67,    68,    69,    69,    69,    70,    70,    72,    71,
+      74,    73,    73
   };
 
-  const unsigned char
+  const signed char
   Parser::yyr2_[] =
   {
-       0,     2,     0,     1,     1,     2,     3,     4,     0,     2,
-       3,     3,     3,     1,     3,     3,     5,     1,     3,     3,
-       5,     1,     3,     3,     5,     4,     0,     2,     0,     7,
-       0,     2,     4,     1,     2,     2,     2,     3,     2,     2,
-       0,     3,     0,     5,     1,     1,     0,     2,     3,     1,
-       1,     1,     1,     1,     3,     3,     3,     3,     3,     2,
-       3,     3,     3,     3,     3,     3,     3,     3,     2,     3,
-       4,     0,     1,     3,     1,     2,     0,     6,     0,     3,
-       2
+       0,     2,     0,     1,     1,     2,     3,     0,     5,     0,
+       2,     3,     3,     3,     1,     3,     3,     5,     1,     3,
+       3,     5,     1,     3,     3,     5,     0,     5,     0,     2,
+       0,     7,     0,     2,     4,     1,     2,     2,     2,     3,
+       2,     2,     0,     3,     0,     5,     1,     1,     0,     2,
+       3,     1,     1,     1,     1,     1,     3,     3,     3,     3,
+       3,     2,     3,     3,     3,     3,     3,     3,     3,     3,
+       2,     3,     4,     0,     1,     3,     1,     2,     0,     6,
+       0,     3,     2
   };
 
 
@@ -1474,26 +1590,26 @@ namespace Sheep {
   "FLOAT", "STRING", "USERID", "SYSID", "ASSIGN", "OR", "AND", "EQUAL",
   "NOTEQUAL", "LT", "LTE", "GT", "GTE", "PLUS", "MINUS", "MULTIPLY",
   "DIVIDE", "MOD", "NOT", "NEGATE", "$accept", "script", "symbols_section",
-  "symbol_decls", "symbol_decl", "symbol_decl_int", "symbol_decl_float",
-  "symbol_decl_string", "code_section", "functions", "function", "$@1",
-  "statements", "statement", "$@2", "$@3", "$@4", "statements_block",
-  "expr", "sysfunc_call", "sysfunc_call_args", "if_else_block",
-  "if_statement", "$@5", "else_statement", "$@6", YY_NULLPTR
+  "$@1", "symbol_decls", "symbol_decl", "symbol_decl_int",
+  "symbol_decl_float", "symbol_decl_string", "code_section", "$@2",
+  "functions", "function", "$@3", "statements", "statement", "$@4", "$@5",
+  "$@6", "statements_block", "expr", "sysfunc_call", "sysfunc_call_args",
+  "if_else_block", "if_statement", "$@7", "else_statement", "$@8", YY_NULLPTR
   };
 
 #if YYDEBUG
-  const unsigned short int
+  const short
   Parser::yyrline_[] =
   {
-       0,   160,   160,   161,   162,   163,   164,   169,   172,   173,
-     179,   180,   181,   184,   185,   186,   187,   190,   191,   192,
-     193,   196,   197,   198,   199,   205,   209,   210,   215,   215,
-     219,   220,   224,   225,   226,   227,   228,   229,   230,   231,
-     232,   232,   233,   233,   234,   235,   236,   236,   240,   244,
-     245,   246,   247,   248,   250,   251,   252,   253,   254,   255,
-     257,   258,   259,   260,   261,   262,   263,   264,   265,   267,
-     272,   276,   277,   278,   281,   282,   285,   285,   288,   288,
-     289
+       0,   160,   160,   161,   162,   163,   164,   169,   169,   172,
+     173,   179,   180,   181,   184,   185,   186,   187,   190,   191,
+     192,   193,   196,   197,   198,   199,   205,   205,   209,   210,
+     215,   215,   219,   220,   224,   225,   226,   227,   228,   229,
+     230,   231,   232,   232,   233,   233,   234,   235,   236,   236,
+     240,   244,   245,   246,   247,   248,   250,   251,   252,   253,
+     254,   255,   257,   258,   259,   260,   261,   262,   263,   264,
+     265,   267,   272,   276,   277,   278,   281,   282,   285,   285,
+     288,   288,   289
   };
 
   // Print the state stack on the debug stream.
@@ -1505,19 +1621,19 @@ namespace Sheep {
            i = yystack_.begin (),
            i_end = yystack_.end ();
          i != i_end; ++i)
-      *yycdebug_ << ' ' << i->state;
-    *yycdebug_ << std::endl;
+      *yycdebug_ << ' ' << int (i->state);
+    *yycdebug_ << '\n';
   }
 
   // Report on the debug stream that the rule \a yyrule is going to be reduced.
   void
   Parser::yy_reduce_print_ (int yyrule)
   {
-    unsigned int yylno = yyrline_[yyrule];
+    int yylno = yyrline_[yyrule];
     int yynrhs = yyr2_[yyrule];
     // Print the symbols being reduced, and their result.
     *yycdebug_ << "Reducing stack by rule " << yyrule - 1
-               << " (line " << yylno << "):" << std::endl;
+               << " (line " << yylno << "):\n";
     // The symbols being reduced.
     for (int yyi = 0; yyi < yynrhs; yyi++)
       YY_SYMBOL_PRINT ("   $" << yyi + 1 << " =",
@@ -1526,10 +1642,11 @@ namespace Sheep {
 #endif // YYDEBUG
 
 
-#line 20 "sheep.yy" // lalr1.cc:1167
+#line 20 "sheep.yy"
 } // Sheep
-#line 1532 "sheep.tab.cc" // lalr1.cc:1167
-#line 292 "sheep.yy" // lalr1.cc:1168
+#line 1648 "sheep.tab.cc"
+
+#line 292 "sheep.yy"
 
 
 /* No epilogue is needed. */

@@ -8,25 +8,25 @@
 #include "Services.h"
 #include "StringUtil.h"
 
-SheepScript* SheepManager::Compile(const char* filename)
+SheepScript* SheepManager::Compile(const char* filePath)
 {
-    return mCompiler.Compile(filename);
+    return mCompiler.Compile(filePath);
 }
 
-SheepScript* SheepManager::Compile(const std::string& sheep)
+SheepScript* SheepManager::Compile(const std::string& name, const std::string& sheep)
 {
-    return mCompiler.Compile(sheep);
+    return mCompiler.Compile(name, sheep);
 }
 
-SheepScript* SheepManager::Compile(std::istream& stream)
+SheepScript* SheepManager::Compile(const std::string& name, std::istream& stream)
 {
-    return mCompiler.Compile(stream);
+    return mCompiler.Compile(name, stream);
 }
 
 SheepScript* SheepManager::CompileEval(const std::string& sheep)
 {
 	std::string fullSheep = StringUtil::Format(mEvalHusk, sheep.c_str());
-	return mCompiler.Compile(fullSheep);
+	return mCompiler.Compile("Case Evaluation", fullSheep);
 }
 
 void SheepManager::Execute(const std::string& sheepName, const std::string& functionName, std::function<void()> finishCallback)

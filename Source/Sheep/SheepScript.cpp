@@ -17,7 +17,7 @@ SheepScript::SheepScript(std::string name, char* data, int dataLength) : Asset(n
     ParseFromData(data, dataLength);
 }
 
-SheepScript::SheepScript(std::string name, SheepScriptBuilder& builder) : Asset(name)
+SheepScript::SheepScript(const std::string& name, SheepScriptBuilder& builder) : Asset(name)
 {
     // Just copy these directly.
     mSysImports = builder.GetSysImports();

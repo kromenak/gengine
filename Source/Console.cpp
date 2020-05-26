@@ -32,7 +32,7 @@ void Console::ExecuteCommand(std::string command)
 		AddToScrollback("----------------------------------------");
 		return;
 	}
-	AddToScrollback("console command: '" + command + "'");
+	Services::GetReports()->Log("Console", StringUtil::Format("console command: '%s'", command.c_str()));
 	
 	// Modify command to have required syntax.
 	//TODO: Update compiler to accept without braces?
@@ -47,8 +47,8 @@ void Console::ExecuteCommand(std::string command)
 	}
 	
 	// Compile the sheep from text.
-	std::cout << "Execute command: " << command << std::endl;
-	SheepScript* sheepScript = Services::GetSheep()->Compile(modCommand);
+	std::string scriptName = StringUtil::Format("`Console`:%i", mCommandCounter);
+	SheepScript* sheepScript = Services::GetSheep()->Compile(scriptName, modCommand);
 	
 	// If compiled successfully, execute it!
 	if(sheepScript != nullptr)
@@ -60,6 +60,9 @@ void Console::ExecuteCommand(std::string command)
 	
 	// Add to history.
 	mCommandHistory.push_back(command);
+	
+	// Increment command counter.
+	mCommandCounter++;
 }
 
 std::string Console::GetCommandFromHistory(int index) const

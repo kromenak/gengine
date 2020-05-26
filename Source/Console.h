@@ -38,6 +38,10 @@ private:
 	// History of executed commands.
 	std::vector<std::string> mCommandHistory;
 	
+	// Counts commands executed via console.
+	// Used primarily as an identifier when compiling console commands.
+	int mCommandCounter = 0;
+	
 	// Report stream for console output.
 	ReportStream* mConsoleReportStream = nullptr;
 };

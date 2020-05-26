@@ -151,7 +151,7 @@ void NVC::ParseFromData(char *data, int dataLength)
 				//TODO: Should we compile this immediately, or save it as a string and compile/execute on-demand?
 				//TODO: Based on debug output from GK3, the string value is stored SOMEWHERE in memory for debug and dump purposes.
 				action.scriptText = keyValue.value;
-				action.script = Services::GetSheep()->Compile(keyValue.value);
+				action.script = Services::GetSheep()->Compile("Case Evaluation", keyValue.value);
             }
 		}
         

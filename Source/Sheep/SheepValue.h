@@ -44,6 +44,7 @@ struct SheepValue
 		case SheepValueType::Float:
 			return (int)floatValue;
 		case SheepValueType::String:
+			//TODO: This will throw an exception if the string doesn't represent a number!
 			return std::stoi(stringValue);
 		}
 	}
@@ -58,6 +59,7 @@ struct SheepValue
 		case SheepValueType::Int:
 			return (float)intValue;
 		case SheepValueType::String:
+			//TODO: This will throw an exception if the string doesn't represent a number!
 			return std::stof(stringValue);
 		}
 	}

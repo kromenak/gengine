@@ -15,9 +15,9 @@
 class SheepManager
 {
 public:
-    SheepScript* Compile(const char* filename);
-    SheepScript* Compile(const std::string& sheep);
-    SheepScript* Compile(std::istream& stream);
+    SheepScript* Compile(const char* filePath);
+    SheepScript* Compile(const std::string& name, const std::string& sheep);
+    SheepScript* Compile(const std::string& name, std::istream& stream);
 	SheepScript* CompileEval(const std::string& sheep);
     
 	void Execute(const std::string& sheepName, const std::string& functionName, std::function<void()> finishCallback);

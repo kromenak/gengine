@@ -13,7 +13,9 @@
 
 //#define DEBUG_BUILDER
 
-SheepScriptBuilder::SheepScriptBuilder()
+SheepScriptBuilder::SheepScriptBuilder(SheepCompiler* compiler, const std::string& name) :
+	mCompiler(compiler),
+	mScriptName(name)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "SheepBuilder BEGIN" << std::endl;
@@ -121,7 +123,7 @@ void SheepScriptBuilder::EndFunction(std::string functionName)
     #endif
 }
 
-void SheepScriptBuilder::AddGoto(std::string labelName)
+void SheepScriptBuilder::AddGoto(std::string labelName, const Location& loc)
 {
     // Add the label and record the offset, but don't allow duplicates.
     auto it = mGotoLabelsToOffsets.find(labelName);
@@ -152,8 +154,8 @@ void SheepScriptBuilder::AddGoto(std::string labelName)
     }
     else
     {
-		SetError(StringUtil::Format("label '%s' already exists at (line %d, col %d)",
-									labelName.c_str(), 0, 0));
+		LogError(loc, StringUtil::Format("label '%s' already exists at (line %d, col %d)",
+										 labelName.c_str(), 0, 0));
     }
 }
 
@@ -205,7 +207,15 @@ void SheepScriptBuilder::Yield()
     AddInstruction(SheepInstruction::Yield);
 }
 
-SheepValueType SheepScriptBuilder::CallSysFunc(std::string sysFuncName)
+void SheepScriptBuilder::AddSysFuncArg(SheepValue arg, const Location& loc)
+{
+	#ifdef DEBUG_BUILDER
+    std::cout << "SysFunc Arg " << arg.GetTypeString() << std::endl;
+    #endif
+	mSysFuncArgs.push_back(arg);
+}
+
+SheepValueType SheepScriptBuilder::CallSysFunc(std::string sysFuncName, const Location& loc)
 {
     #ifdef DEBUG_BUILDER
     std::cout << "SysFunc " << sysFuncName << std::endl;
@@ -216,25 +226,91 @@ SheepValueType SheepScriptBuilder::CallSysFunc(std::string sysFuncName)
 	SysFuncDecl* sysFunc = GetSysFuncDecl(StringUtil::ToLowerCopy(sysFuncName));
 	if(sysFunc == nullptr)
 	{
-		SetError("system function '" + sysFuncName + "' not found in export table.");
+		LogError(loc, "system function '" + sysFuncName + "' not found in export table.");
+		mSysFuncArgs.clear();
 		return SheepValueType::Void;
 	}
 	
 	// Get expected and actual arg counts for this function.
 	// Be sure to reset the arg counter for the next time we try to call a system function!
 	int expectedArgCount = static_cast<int>(sysFunc->argumentTypes.size());
-	int actualArgCount = mSysFuncArgCount;
-	mSysFuncArgCount = 0;
+	int actualArgCount = static_cast<int>(mSysFuncArgs.size());
 	
 	// Only let compilation succeed if the number of args passed to the function match the expected number of arguments.
 	if(actualArgCount < expectedArgCount)
 	{
-		SetError("too few parameters in call to function '" + sysFunc->name + "' (function takes " + std::to_string(expectedArgCount) + " parameters)");
+		LogError(loc, "too few parameters in call to function '" + sysFunc->name + "' (function takes " + std::to_string(expectedArgCount) + " parameters)");
+		mSysFuncArgs.clear();
 		return SheepValueType::Void;
 	}
 	else if(actualArgCount > expectedArgCount)
 	{
-		SetError("too many parameters in call to function '" + sysFunc->name + "' (function takes " + std::to_string(expectedArgCount) + " parameters)");
+		LogError(loc, "too many parameters in call to function '" + sysFunc->name + "' (function takes " + std::to_string(expectedArgCount) + " parameters)");
+		mSysFuncArgs.clear();
+		return SheepValueType::Void;
+	}
+	
+	// Check that arg types are compatible.
+	bool argTypesCompatible = true;
+	for(int i = 0; i < sysFunc->argumentTypes.size(); i++)
+	{
+		SheepValue& value = mSysFuncArgs[i];
+		int argType = sysFunc->argumentTypes[i];
+		switch(argType)
+		{
+		case 1: // Int
+			if(value.type == SheepValueType::Float)
+			{
+				LogWarning(loc, StringUtil::Format("float expression loses precision when passed for int parameter %i of function `%s",
+												   i+1, sysFuncName.c_str()));
+				argTypesCompatible = false;
+			}
+			else if(value.type == SheepValueType::String)
+			{
+				LogError(loc, StringUtil::Format("cannot pass string expression for int parameter %i of function `%s`",
+												 i+1, sysFuncName.c_str()));
+				argTypesCompatible = false;
+			}
+			break;
+			
+		case 2: // Float
+			if(value.type == SheepValueType::String)
+			{
+				LogError(loc, StringUtil::Format("cannot pass string expression for float parameter %i of function `%s`",
+												 i+1, sysFuncName.c_str()));
+				argTypesCompatible = false;
+			}
+			break;
+			
+		case 3: // String
+			if(value.type == SheepValueType::Int)
+			{
+				LogError(loc, StringUtil::Format("cannot pass int expression for string parameter %i of function `%s`",
+												 i+1, sysFuncName.c_str()));
+				argTypesCompatible = false;
+			}
+			else if(value.type == SheepValueType::Float)
+			{
+				LogError(loc, StringUtil::Format("cannot pass float expression for string parameter %i of function `%s`",
+												 i+1, sysFuncName.c_str()));
+				argTypesCompatible = false;
+			}
+			break;
+			
+		default:
+		case 0:	// Void
+			// Void (or anything that's not an int/float/string) are never compatible arg types.
+			argTypesCompatible = false;
+			break;
+		}
+	}
+	
+	// Clear sys func args - don't need them anymore and we want this cleared for next sys func call parse.
+	mSysFuncArgs.clear();
+	
+	// If incompatible argument types, don't go any further.
+	if(!argTypesCompatible)
+	{
 		return SheepValueType::Void;
 	}
 	
@@ -432,7 +508,7 @@ void SheepScriptBuilder::ReturnV()
     AddInstruction(SheepInstruction::ReturnV);
 }
 
-void SheepScriptBuilder::Store(std::string varName)
+void SheepScriptBuilder::Store(std::string varName, const Location& loc)
 {
     auto it = mVariableIndexByName.find(varName);
     if(it != mVariableIndexByName.end())
@@ -469,11 +545,11 @@ void SheepScriptBuilder::Store(std::string varName)
     }
 	else
 	{
-		SetError(StringUtil::Format("user identifier '%s' not found in symbol definitions", varName.c_str()));
+		LogError(loc, StringUtil::Format("user identifier '%s' not found in symbol definitions", varName.c_str()));
 	}
 }
 
-SheepValueType SheepScriptBuilder::Load(std::string varName)
+SheepValueType SheepScriptBuilder::Load(std::string varName, const Location& loc)
 {
     auto it = mVariableIndexByName.find(varName);
     if(it != mVariableIndexByName.end())
@@ -509,7 +585,7 @@ SheepValueType SheepScriptBuilder::Load(std::string varName)
     }
 	else
 	{
-		SetError(StringUtil::Format("user identifier '%s' not found in symbol definitions", varName.c_str()));
+		LogError(loc, StringUtil::Format("user identifier '%s' not found in symbol definitions", varName.c_str()));
 	}
     
     // Default return type is void; this is an error!
@@ -563,7 +639,7 @@ void SheepScriptBuilder::PushS(std::string arg)
 // float divide int = float
 // int divide float = float
 
-SheepValueType SheepScriptBuilder::Add(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::Add(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "Add" << std::endl;
@@ -594,16 +670,16 @@ SheepValueType SheepScriptBuilder::Add(SheepValue val1, SheepValue val2)
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed with operator '+'");
+		LogError(loc, "string types not allowed with operator '+'");
 	}
 	else
     {
-        SetError("cannot use void return with operator '+'");
+        LogError(loc, "cannot use void return with operator '+'");
     }
 	return SheepValueType::Void;
 }
 
-SheepValueType SheepScriptBuilder::Subtract(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::Subtract(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "Subtract" << std::endl;
@@ -632,16 +708,16 @@ SheepValueType SheepScriptBuilder::Subtract(SheepValue val1, SheepValue val2)
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed with operator '-'");
+		LogError(loc, "string types not allowed with operator '-'");
 	}
 	else
     {
-        SetError("cannot use void return with operator '-'");
+        LogError(loc, "cannot use void return with operator '-'");
     }
 	return SheepValueType::Void;
 }
 
-SheepValueType SheepScriptBuilder::Multiply(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::Multiply(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "Multiply" << std::endl;
@@ -670,16 +746,16 @@ SheepValueType SheepScriptBuilder::Multiply(SheepValue val1, SheepValue val2)
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed with operator '*'");
+		LogError(loc, "string types not allowed with operator '*'");
 	}
 	else
     {
-        SetError("cannot use void return with operator '*'");
+        LogError(loc, "cannot use void return with operator '*'");
     }
 	return SheepValueType::Void;
 }
 
-SheepValueType SheepScriptBuilder::Divide(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::Divide(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "Divide" << std::endl;
@@ -708,16 +784,16 @@ SheepValueType SheepScriptBuilder::Divide(SheepValue val1, SheepValue val2)
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed with operator '/'");
+		LogError(loc, "string types not allowed with operator '/'");
 	}
 	else
     {
-        SetError("cannot use void return with operator '/'");
+        LogError(loc, "cannot use void return with operator '/'");
     }
 	return SheepValueType::Void;
 }
 
-void SheepScriptBuilder::Negate(SheepValue val)
+void SheepScriptBuilder::Negate(SheepValue val, const Location& loc)
 {
     if(val.type == SheepValueType::Int)
     {
@@ -735,11 +811,11 @@ void SheepScriptBuilder::Negate(SheepValue val)
     }
     else
     {
-        SetError(StringUtil::Format("'-' operator not allowed on %s expressions", val.GetTypeString().c_str()));
+        LogError(loc, StringUtil::Format("'-' operator not allowed on %s expressions", val.GetTypeString().c_str()));
     }
 }
 
-SheepValueType SheepScriptBuilder::IsEqual(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::IsEqual(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "IsEqual" << std::endl;
@@ -768,16 +844,16 @@ SheepValueType SheepScriptBuilder::IsEqual(SheepValue val1, SheepValue val2)
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed for operator '=='");
+		LogError(loc, "string types not allowed for operator '=='");
 	}
 	else
     {
-        SetError("cannot use void return with operator '=='");
+        LogError(loc, "cannot use void return with operator '=='");
     }
 	return SheepValueType::Void;
 }
 
-SheepValueType SheepScriptBuilder::IsNotEqual(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::IsNotEqual(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "IsNotEqual" << std::endl;
@@ -806,16 +882,16 @@ SheepValueType SheepScriptBuilder::IsNotEqual(SheepValue val1, SheepValue val2)
     }
 	else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed for operator '!='");
+		LogError(loc, "string types not allowed for operator '!='");
 	}
 	else
     {
-        SetError("cannot use void return with operator '!='");
+        LogError(loc, "cannot use void return with operator '!='");
     }
 	return SheepValueType::Void;
 }
 
-SheepValueType SheepScriptBuilder::IsGreater(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::IsGreater(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "IsGreater" << std::endl;
@@ -844,16 +920,16 @@ SheepValueType SheepScriptBuilder::IsGreater(SheepValue val1, SheepValue val2)
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed for operator '>'");
+		LogError(loc, "string types not allowed for operator '>'");
 	}
 	else
     {
-        SetError("cannot use void return with operator '>'");
+        LogError(loc, "cannot use void return with operator '>'");
     }
 	return SheepValueType::Void;
 }
 
-SheepValueType SheepScriptBuilder::IsLess(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::IsLess(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "IsLess" << std::endl;
@@ -882,16 +958,16 @@ SheepValueType SheepScriptBuilder::IsLess(SheepValue val1, SheepValue val2)
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed for operator '<'");
+		LogError(loc, "string types not allowed for operator '<'");
 	}
 	else
     {
-        SetError("cannot use void return with operator '<'");
+        LogError(loc, "cannot use void return with operator '<'");
     }
 	return SheepValueType::Void;
 }
 
-SheepValueType SheepScriptBuilder::IsGreaterEqual(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::IsGreaterEqual(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "IsGreaterEqual" << std::endl;
@@ -920,16 +996,16 @@ SheepValueType SheepScriptBuilder::IsGreaterEqual(SheepValue val1, SheepValue va
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed for operator '>='");
+		LogError(loc, "string types not allowed for operator '>='");
 	}
 	else
     {
-        SetError("cannot use void return with operator '>='");
+        LogError(loc, "cannot use void return with operator '>='");
     }
 	return SheepValueType::Void;
 }
 
-SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2)
+SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "IsLessEqual" << std::endl;
@@ -958,11 +1034,11 @@ SheepValueType SheepScriptBuilder::IsLessEqual(SheepValue val1, SheepValue val2)
     }
     else if(val1.type == SheepValueType::String || val2.type == SheepValueType::String)
 	{
-		SetError("string types not allowed for operator '<='");
+		LogError(loc, "string types not allowed for operator '<='");
 	}
 	else
     {
-        SetError("cannot use void return with operator '<='");
+        LogError(loc, "cannot use void return with operator '<='");
     }
 	return SheepValueType::Void;
 }
@@ -985,7 +1061,7 @@ void SheepScriptBuilder::FToI(int index)
     AddIntArg(index);
 }
 
-void SheepScriptBuilder::Modulo(SheepValue val1, SheepValue val2)
+void SheepScriptBuilder::Modulo(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "Modulo" << std::endl;
@@ -1012,11 +1088,11 @@ void SheepScriptBuilder::Modulo(SheepValue val1, SheepValue val2)
     }
     else
     {
-		SetError("operator '%' requires both left and right expressions be of integer type");
+		LogError(loc, "operator '%' requires both left and right expressions be of integer type");
     }
 }
 
-void SheepScriptBuilder::And(SheepValue val1, SheepValue val2)
+void SheepScriptBuilder::And(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "And" << std::endl;
@@ -1043,11 +1119,11 @@ void SheepScriptBuilder::And(SheepValue val1, SheepValue val2)
     }
     else
     {
-        SetError("operator '&&' requires both left and right expressions be of integer type");
+        LogError(loc, "operator '&&' requires both left and right expressions be of integer type");
     }
 }
 
-void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2)
+void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2, const Location& loc)
 {
 	#ifdef DEBUG_BUILDER
 	std::cout << "Or" << std::endl;
@@ -1074,7 +1150,7 @@ void SheepScriptBuilder::Or(SheepValue val1, SheepValue val2)
     }
     else
     {
-        SetError("operator '||' requires both left and right expressions be of integer type");
+        LogError(loc, "operator '||' requires both left and right expressions be of integer type");
     }
 }
 
@@ -1092,16 +1168,6 @@ void SheepScriptBuilder::Breakpoint()
 	std::cout << "DebugBreakpoint" << std::endl;
 	#endif
     AddInstruction(SheepInstruction::DebugBreakpoint);
-}
-
-bool SheepScriptBuilder::CheckError(const Sheep::Parser::location_type& loc, Sheep::Parser& parser) const
-{
-	if(!mErrorMessage.empty())
-	{
-		parser.error(loc, mErrorMessage);
-		return true;
-	}
-	return false;
 }
 
 void SheepScriptBuilder::AddInstruction(SheepInstruction instr)
@@ -1146,7 +1212,12 @@ int SheepScriptBuilder::GetStringConstOffset(std::string stringConst)
     return -1;
 }
 
-void SheepScriptBuilder::SetError(const std::string& message)
+void SheepScriptBuilder::LogWarning(const Location& loc, const std::string& message)
 {
-	mErrorMessage = message;
+	mCompiler->Warning(this, loc, message);
+}
+
+void SheepScriptBuilder::LogError(const Location& loc, const std::string& message)
+{
+	mCompiler->Error(this, loc, message);
 }

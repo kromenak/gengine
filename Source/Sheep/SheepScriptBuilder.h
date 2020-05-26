@@ -14,28 +14,37 @@
 #include "SheepScript.h"
 #include "sheep.tab.hh"
 
+class SheepCompiler;
+
+// A "location" in a Sheep script (i.e. line/column numbers).
+using Location = Sheep::Parser::location_type;
+
 class SheepScriptBuilder
 {
 public:
-    SheepScriptBuilder();
+    SheepScriptBuilder(SheepCompiler* compiler, const std::string& name);
 	~SheepScriptBuilder();
     
+	void BeginSymbols() { mSection = "Symbols"; }
+	
     void AddStringConst(std::string str);
     void AddIntVariable(std::string name, int defaultValue);
     void AddFloatVariable(std::string name, float defaultValue);
     void AddStringVariable(std::string name, std::string defaultValue);
     
+	void BeginCode() { mSection = "Code"; }
+	
     void StartFunction(std::string functionName);
     void EndFunction(std::string functionName);
     
-    void AddGoto(std::string labelName);
+    void AddGoto(std::string labelName, const Location& loc);
 	void BranchGoto(std::string labelName);
     
     void SitnSpin();
     void Yield();
 	
-	void AddToSysFuncArgCount() { ++mSysFuncArgCount; }
-    SheepValueType CallSysFunc(std::string sysFuncName);
+	void AddSysFuncArg(SheepValue arg, const Location& loc);
+    SheepValueType CallSysFunc(std::string sysFuncName, const Location& loc);
 	
 	void BeginIfElseBlock();
 	void EndIfElseBlock();
@@ -51,41 +60,40 @@ public:
 	
     void ReturnV();
 	
-    void Store(std::string varName);
-    SheepValueType Load(std::string varName);
+    void Store(std::string varName, const Location& loc);
+    SheepValueType Load(std::string varName, const Location& loc);
 	
     void PushI(int arg);
     void PushF(float arg);
     void PushS(std::string arg);
     
-    SheepValueType Add(SheepValue val1, SheepValue val2);
-    SheepValueType Subtract(SheepValue val1, SheepValue val2);
-    SheepValueType Multiply(SheepValue val1, SheepValue val2);
-    SheepValueType Divide(SheepValue val1, SheepValue val2);
-    void Negate(SheepValue val);
+    SheepValueType Add(SheepValue val1, SheepValue val2, const Location& loc);
+    SheepValueType Subtract(SheepValue val1, SheepValue val2, const Location& loc);
+    SheepValueType Multiply(SheepValue val1, SheepValue val2, const Location& loc);
+    SheepValueType Divide(SheepValue val1, SheepValue val2, const Location& loc);
+    void Negate(SheepValue val, const Location& loc);
 	
-    SheepValueType IsEqual(SheepValue val1, SheepValue val2);
-    SheepValueType IsNotEqual(SheepValue val1, SheepValue val2);
-    SheepValueType IsGreater(SheepValue val1, SheepValue val2);
-    SheepValueType IsLess(SheepValue val1, SheepValue val2);
-    SheepValueType IsGreaterEqual(SheepValue val1, SheepValue val2);
-    SheepValueType IsLessEqual(SheepValue val1, SheepValue val2);
+    SheepValueType IsEqual(SheepValue val1, SheepValue val2, const Location& loc);
+    SheepValueType IsNotEqual(SheepValue val1, SheepValue val2, const Location& loc);
+    SheepValueType IsGreater(SheepValue val1, SheepValue val2, const Location& loc);
+    SheepValueType IsLess(SheepValue val1, SheepValue val2, const Location& loc);
+    SheepValueType IsGreaterEqual(SheepValue val1, SheepValue val2, const Location& loc);
+    SheepValueType IsLessEqual(SheepValue val1, SheepValue val2, const Location& loc);
     
     void IToF(int index);
     void FToI(int index);
     
-    void Modulo(SheepValue val1, SheepValue val2);
+    void Modulo(SheepValue val1, SheepValue val2, const Location& loc);
     
-    void And(SheepValue val1, SheepValue val2);
-    void Or(SheepValue val1, SheepValue val2);
+    void And(SheepValue val1, SheepValue val2, const Location& loc);
+    void Or(SheepValue val1, SheepValue val2, const Location& loc);
     void Not();
     
     void Breakpoint();
 	
-	// Parser code can call this function after calling an above function to see if an internal compiler error occurred.
-	// Usually, the compiler will want to abort if this returns true.
-	bool CheckError(const Sheep::Parser::location_type& loc, Sheep::Parser& parser) const;
-    
+	const std::string& GetName() const { return mScriptName; }
+	const std::string& GetSection() const { return mSection; }
+	
 	// After "building" the script's bytecode and tables, these functions are used to access that data.
     std::vector<SysImport> GetSysImports() { return mSysImports; }
     std::unordered_map<int, std::string> GetStringConsts() { return mStringConstsByOffset; }
@@ -94,12 +102,19 @@ public:
     std::vector<char> GetBytecode() { return mBytecode; }
     
 private:
+	// Reference back to the compiler.
+	SheepCompiler* mCompiler = nullptr;
+	
+	// Name of the script being compiled.
+	std::string mScriptName;
+	
     // Definition for any system functions used.
     std::vector<SysImport> mSysImports;
 	
-	// When building system function calls, its useful to keep track of the arg count given by the user.
+	// When building system function calls, its useful to keep track of the args given by the user.
 	// If the arg count doesn't match the expected number of arguments, we can generate a compiler error.
-	int mSysFuncArgCount = 0;
+	// Also, if arg types don't match (and aren't compatible/convertable), that's also a compiler error or warning.
+	std::vector<SheepValue> mSysFuncArgs;
     
     // String constants, keyed by data offset, since that's how bytecode identifies them.
     std::vector<std::string> mStringConsts;
@@ -136,9 +151,9 @@ private:
     // A vector for building the bytecode section.
     std::vector<char> mBytecode;
 	
-	// In case of error, this flag will be set.
-	std::string mErrorMessage;
-    
+	// Section currently being compiled.
+	std::string mSection = "Code";
+	
     void AddInstruction(SheepInstruction instr);
     
     void AddIntArg(int arg);
@@ -146,5 +161,6 @@ private:
     
     int GetStringConstOffset(std::string stringConst);
 	
-	void SetError(const std::string& message);
+	void LogWarning(const Location& loc, const std::string& message);
+	void LogError(const Location& loc, const std::string& message);
 };

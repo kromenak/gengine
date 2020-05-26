@@ -47,7 +47,7 @@ class SheepScript : public Asset
 {
 public:
     SheepScript(std::string name, char* data, int dataLength);
-    SheepScript(std::string name, SheepScriptBuilder& builder);
+    SheepScript(const std::string& name, SheepScriptBuilder& builder);
     
     SysImport* GetSysImport(int index);
     

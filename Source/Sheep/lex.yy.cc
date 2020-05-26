@@ -552,6 +552,9 @@ using parser = Sheep::Parser;
 
 // If scanner terminates (end of code or end of file), always put an END statement in the bytecode.
 #define yyterminate() return parser::make_END(loc)
+
+// Since this is cross-platform (including Windows), we can't use unistd.h
+#define YY_NO_UNISTD_H
 /* We're making a C++ scanner (aka it is contained within a class) */
 /* Since we're using C++ with a custom subclass, tell code generator to put classes in SheepScanner:: instead of yyFlexLexer:: */
 /* yywrap function returns 1 if there's no more input upon reaching EOF, 0 if there is more input at EOF. */
@@ -562,9 +565,7 @@ using parser = Sheep::Parser;
 /* We don't care about case (code == CODE == CoDe) */
 /* Define all "start conditions" used in the scanner here. Besides the implicit INITIAL condition, we only use COMMENT right now.*/
 
-#define YY_NO_UNISTD_H
-
-#line 566 "lex.yy.cc"
+#line 569 "lex.yy.cc"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -665,10 +666,10 @@ YY_DECL
 	 char *yy_cp, *yy_bp;
 	 int yy_act;
     
-#line 48 "sheep.l"
+#line 51 "sheep.l"
 
 
-#line 670 "lex.yy.cc"
+#line 673 "lex.yy.cc"
 
 	if ( !(yy_init) )
 		{
@@ -760,242 +761,242 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 50 "sheep.l"
+#line 53 "sheep.l"
 { } 	/* Ignore 1 or more spaces, tabs, or newlines. */
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 51 "sheep.l"
+#line 54 "sheep.l"
 { } 			/* Ignore any single-line comments. */
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 53 "sheep.l"
+#line 56 "sheep.l"
 return parser::make_SYMBOLS(loc); /* Symbols section contains variable declarations. */
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 54 "sheep.l"
+#line 57 "sheep.l"
 return parser::make_CODE(loc);    /* Code section contains functions and operations on variables. */
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 56 "sheep.l"
+#line 59 "sheep.l"
 return parser::make_INTVAR(loc);	/* Sheep only allows three types of variables: int, float, and string. */
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 57 "sheep.l"
+#line 60 "sheep.l"
 return parser::make_FLOATVAR(loc);
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 58 "sheep.l"
+#line 61 "sheep.l"
 return parser::make_STRINGVAR(loc);
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 60 "sheep.l"
+#line 63 "sheep.l"
 return parser::make_RETURN(loc); /* Returns from a function before the end is reached. */
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 61 "sheep.l"
+#line 64 "sheep.l"
 return parser::make_WAIT(loc);   /* Sheep's async operation support - some commands can be "waited on" before continuing script execution many frames later. */
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 62 "sheep.l"
+#line 65 "sheep.l"
 return parser::make_IF(loc);	 /* if/else are your standard logic control statements. Combine to "else if" as well. */
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 63 "sheep.l"
+#line 66 "sheep.l"
 return parser::make_ELSE(loc);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 64 "sheep.l"
+#line 67 "sheep.l"
 return parser::make_GOTO(loc);   /* Sheep supports labels and gotos...for those who like to live dangerously. */
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 66 "sheep.l"
+#line 69 "sheep.l"
 return parser::make_COLON(loc);		 /* Used for goto labels (e.g. MyLabel:) */
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 67 "sheep.l"
+#line 70 "sheep.l"
 return parser::make_SEMICOLON(loc);	 /* Each statement in Sheep is ended by a semicolon - similar to C-style languages. */
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 68 "sheep.l"
+#line 71 "sheep.l"
 return parser::make_COMMA(loc);      /* Separates parameters in function parameter lists. */
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 70 "sheep.l"
+#line 73 "sheep.l"
 return parser::make_DOLLAR(loc);	 /* Dollar symbol is used to identify user-specified symbols. All user-defined symbols must end with $. */
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 72 "sheep.l"
+#line 75 "sheep.l"
 return parser::make_OPENPAREN(loc);  /* Open/close parentheses are used for function calls and math operation precedence. */
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 73 "sheep.l"
+#line 76 "sheep.l"
 return parser::make_CLOSEPAREN(loc);
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 75 "sheep.l"
+#line 78 "sheep.l"
 return parser::make_OPENBRACKET(loc); /* Open/close braces are used for section/function/logic scopes. */
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 76 "sheep.l"
+#line 79 "sheep.l"
 return parser::make_CLOSEBRACKET(loc);
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 78 "sheep.l"
+#line 81 "sheep.l"
 return parser::make_QUOTE(loc); 	/* Signifies start/end of a string literal. */
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 80 "sheep.l"
+#line 83 "sheep.l"
 return parser::make_EQUAL(loc);		/* Equality and inequality comparisons. */
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 81 "sheep.l"
+#line 84 "sheep.l"
 return parser::make_NOTEQUAL(loc);
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 83 "sheep.l"
+#line 86 "sheep.l"
 return parser::make_ASSIGN(loc); 	/* Assignment to a variable. */
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 85 "sheep.l"
+#line 88 "sheep.l"
 return parser::make_PLUS(loc);		/* Basic math operators. Sheep doesn't support +=, -=, etc. */
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 86 "sheep.l"
+#line 89 "sheep.l"
 return parser::make_MINUS(loc);
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 87 "sheep.l"
+#line 90 "sheep.l"
 return parser::make_MULTIPLY(loc);
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 88 "sheep.l"
+#line 91 "sheep.l"
 return parser::make_DIVIDE(loc);
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 90 "sheep.l"
+#line 93 "sheep.l"
 return parser::make_GTE(loc); 		/* Logical comparisons. */
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 91 "sheep.l"
+#line 94 "sheep.l"
 return parser::make_LTE(loc);
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 92 "sheep.l"
+#line 95 "sheep.l"
 return parser::make_GT(loc);
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 93 "sheep.l"
+#line 96 "sheep.l"
 return parser::make_LT(loc);
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 95 "sheep.l"
+#line 98 "sheep.l"
 return parser::make_NOT(loc);		/* Logical operators. */
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 96 "sheep.l"
+#line 99 "sheep.l"
 return parser::make_AND(loc);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 97 "sheep.l"
+#line 100 "sheep.l"
 return parser::make_OR(loc);
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 100 "sheep.l"
+#line 103 "sheep.l"
 { return parser::make_FLOAT(strtof(yytext, nullptr), loc); }	/* Float literals are identified by use of a decimal point (e.g. 4.5). Sheep DOES NOT use "f" suffix. */
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 101 "sheep.l"
+#line 104 "sheep.l"
 { return parser::make_INT(static_cast<int>(strtol(yytext, nullptr, 10)), loc); }	/* Int literals are just whole numbers. */
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 102 "sheep.l"
+#line 105 "sheep.l"
 { return parser::make_STRING(yytext, loc); }	/* String literals have quotes around them. */
 	YY_BREAK
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 103 "sheep.l"
+#line 106 "sheep.l"
 { return parser::make_STRING(yytext, loc); }	/* String literals with from |<This is a string>| - don't know if we need this? */
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 105 "sheep.l"
+#line 108 "sheep.l"
 { return parser::make_USERID(yytext, loc); } 	/* A user id is any non-keyword or non-literal string with a $ on the end. Used for user-defined functions and variables. */
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 106 "sheep.l"
+#line 109 "sheep.l"
 { return parser::make_SYSID(yytext, loc); }		/* A system id is any non-keyworld or non-literal with no $ on the end. Used mostly for systen functions. */
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 108 "sheep.l"
+#line 111 "sheep.l"
 BEGIN(COMMENT); 	/*  Uses "start conditions" to capture block comments. */
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 109 "sheep.l"
+#line 112 "sheep.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 110 "sheep.l"
+#line 113 "sheep.l"
 { } // eat comment in chunks
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 111 "sheep.l"
+#line 114 "sheep.l"
 { } // eat the lone star
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 113 "sheep.l"
+#line 116 "sheep.l"
 printf("bad input character '%s' at line %d\n", yytext, yylineno); yyterminate(); /* If we get to this point, we have some unexpected input. */
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 114 "sheep.l"
+#line 117 "sheep.l"
 ECHO;
 	YY_BREAK
-#line 997 "lex.yy.cc"
+#line 1000 "lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
 	yyterminate();
@@ -1904,4 +1905,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 114 "sheep.l"
+#line 117 "sheep.l"

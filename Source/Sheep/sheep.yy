@@ -18,7 +18,7 @@
 
 /* Tell bison to output parser named Sheep::Parser, instead of yy::parser */
 %define api.namespace {Sheep}
-%define parser_class_name {Parser}
+%define api.parser.class {Parser}
 
 /* When enabled w/ variants option, creates an actual "symbol" internal class. */
 %define api.token.constructor
@@ -65,10 +65,10 @@
     // This is probably the main reason we need to pass in the compiler reference!
 	void Sheep::Parser::error(const location_type& loc, const std::string& msg)
 	{
-		compiler.Error(loc, msg);
+		compiler.Error(&builder, loc, msg);
 	}
 
-	#define BUILDER_ERROR_CHECK if(builder.CheckError(yyla.location, *this)) { YYERROR; }
+	//#define BUILDER_ERROR_CHECK if(builder.CheckError(yyla.location, *this)) { YYERROR; }
 }
 
 /* Causes location to be tracked, and yylloc value is populated for use. */
@@ -166,7 +166,7 @@ script: %empty 								{ }	/* just an empty file :( */
 
 /* symbols starts with "symbols {" and ends with "}"
    between brackets is zero or more symbols */
-symbols_section: SYMBOLS OPENBRACKET symbol_decls CLOSEBRACKET { }
+symbols_section: SYMBOLS OPENBRACKET { builder.BeginSymbols(); } symbol_decls CLOSEBRACKET { }
 
 /* zero or more symbols */
 symbol_decls: %empty 				{  }
@@ -202,7 +202,7 @@ symbol_decl_string: USERID 							{ builder.AddStringVariable($1, ""); }
 
 /* code section starts with "code {" and ends with "}"
    between brackets is zero or more functions */
-code_section: CODE OPENBRACKET functions CLOSEBRACKET { }
+code_section: CODE OPENBRACKET { builder.BeginCode(); } functions CLOSEBRACKET { }
 	;
 
 /* functions in code section is either zero or more function */
@@ -221,13 +221,13 @@ statements: %empty
 	;
 
 /* a statement is any individual line inside of a function */
-statement: USERID ASSIGN expr SEMICOLON 				{ builder.Store($1); } /* myInt$ = 2 + 8; */
+statement: USERID ASSIGN expr SEMICOLON 				{ builder.Store($1, @$); } /* myInt$ = 2 + 8; */
 	| expr 												{ } /* sys func call or pointless expression like (2+4); */
 	| RETURN SEMICOLON 									{ builder.ReturnV(); } /* return; */
 	| BREAKPOINT SEMICOLON 								{ builder.Breakpoint(); } /* breakpoint; */
 	| SITNSPIN SEMICOLON 								{ builder.SitnSpin(); } /* sitnspin; */
 	| GOTO USERID SEMICOLON 							{ builder.BranchGoto($2); } /* goto blah$; */
-	| USERID COLON										{ builder.AddGoto($1); } /* blah$: */
+	| USERID COLON										{ builder.AddGoto($1, @$); } /* blah$: */
 	| WAIT SEMICOLON 									{ builder.BeginWait(); builder.EndWait(); } /* wait; */
 	| WAIT { builder.BeginWait(); } sysfunc_call 		{ builder.EndWait(); } /* wait WalkTo("Gab", "FR_25"); */
 	| WAIT { builder.BeginWait(); } OPENBRACKET statements CLOSEBRACKET { builder.EndWait(); } /* wait { // stuff } */
@@ -242,26 +242,26 @@ statements_block: OPENBRACKET statements CLOSEBRACKET
 
 /* an expression is any constant value, math operation, system function call */ 
 expr: sysfunc_call 						{ $$ = $1; } 												/* PrintString("Ahhh") */
-	| USERID 							{ auto type = builder.Load($1); $$ = SheepValue(type); } 	/* foo$ */
+	| USERID 							{ auto type = builder.Load($1, @$); $$ = SheepValue(type); } 	/* foo$ */
 	| INT								{ builder.PushI($1); $$ = SheepValue($1); }
 	| FLOAT 							{ builder.PushF($1); $$ = SheepValue($1); }
 	| STRING 							{ builder.AddStringConst($1); builder.PushS($1); $$ = SheepValue(""); }
 
-	| expr PLUS expr					{ auto type = builder.Add($1, $3); $$ = SheepValue(type); }
-	| expr MINUS expr					{ auto type = builder.Subtract($1, $3); $$ = SheepValue(type); }
-	| expr MULTIPLY expr				{ auto type = builder.Multiply($1, $3); $$ = SheepValue(type); }
-	| expr DIVIDE expr					{ auto type = builder.Divide($1, $3); $$ = SheepValue(type); }
-	| expr MOD expr						{ builder.Modulo($1, $3); $$ = SheepValue(SheepValueType::Int); } 
-	| NEGATE expr 						{ builder.Negate($2); }
+	| expr PLUS expr					{ auto type = builder.Add($1, $3, @$); $$ = SheepValue(type); }
+	| expr MINUS expr					{ auto type = builder.Subtract($1, $3, @$); $$ = SheepValue(type); }
+	| expr MULTIPLY expr				{ auto type = builder.Multiply($1, $3, @$); $$ = SheepValue(type); }
+	| expr DIVIDE expr					{ auto type = builder.Divide($1, $3, @$); $$ = SheepValue(type); }
+	| expr MOD expr						{ builder.Modulo($1, $3, @$); $$ = SheepValue(SheepValueType::Int); } 
+	| NEGATE expr 						{ builder.Negate($2, @$); }
 
-	| expr LT expr 						{ auto type = builder.IsLess($1, $3); $$ = SheepValue(type); }
-	| expr GT expr						{ auto type = builder.IsGreater($1, $3); $$ = SheepValue(type); }
-	| expr LTE expr 					{ auto type = builder.IsLessEqual($1, $3); $$ = SheepValue(type); }
-	| expr GTE expr 					{ auto type = builder.IsGreaterEqual($1, $3); $$ = SheepValue(type); }
-	| expr EQUAL expr 					{ auto type = builder.IsEqual($1, $3); $$ = SheepValue(type); }
-	| expr NOTEQUAL expr 				{ auto type = builder.IsNotEqual($1, $3); $$ = SheepValue(type); }
-	| expr OR expr 						{ builder.Or($1, $3); $$ = SheepValue(SheepValueType::Int); }
-	| expr AND expr 					{ builder.And($1, $3); $$ = SheepValue(SheepValueType::Int); }
+	| expr LT expr 						{ auto type = builder.IsLess($1, $3, @$); $$ = SheepValue(type); }
+	| expr GT expr						{ auto type = builder.IsGreater($1, $3, @$); $$ = SheepValue(type); }
+	| expr LTE expr 					{ auto type = builder.IsLessEqual($1, $3, @$); $$ = SheepValue(type); }
+	| expr GTE expr 					{ auto type = builder.IsGreaterEqual($1, $3, @$); $$ = SheepValue(type); }
+	| expr EQUAL expr 					{ auto type = builder.IsEqual($1, $3, @$); $$ = SheepValue(type); }
+	| expr NOTEQUAL expr 				{ auto type = builder.IsNotEqual($1, $3, @$); $$ = SheepValue(type); }
+	| expr OR expr 						{ builder.Or($1, $3, @$); $$ = SheepValue(SheepValueType::Int); }
+	| expr AND expr 					{ builder.And($1, $3, @$); $$ = SheepValue(SheepValueType::Int); }
 	| NOT expr 							{ builder.Not(); $$ = $2; }
 
 	| OPENPAREN expr CLOSEPAREN 		{ $$ = $2; } /* (10 + 12) */
@@ -269,13 +269,13 @@ expr: sysfunc_call 						{ $$ = $1; } 												/* PrintString("Ahhh") */
 
 /* a sysfunc call is like GetEgoName(); or PrintString("Ahh");
    it can have zero or more arguments */
-sysfunc_call: SYSID OPENPAREN sysfunc_call_args CLOSEPAREN { auto type = builder.CallSysFunc($1); $$ = SheepValue(type); BUILDER_ERROR_CHECK; }
+sysfunc_call: SYSID OPENPAREN sysfunc_call_args CLOSEPAREN { auto type = builder.CallSysFunc($1, @$); $$ = SheepValue(type); }
 	;
 
 /* sysfunc call args are either empty, or a list or args */
 sysfunc_call_args: %empty				{ } /* No arg */
-	| expr 								{ builder.AddToSysFuncArgCount(); } /* 5 + 2 */
-	| sysfunc_call_args COMMA expr 		{ builder.AddToSysFuncArgCount(); } /* 5 + 2, "Gab", GetCameraFov() */
+	| expr 								{ builder.AddSysFuncArg($1, @$); } /* 5 + 2 */
+	| sysfunc_call_args COMMA expr 		{ builder.AddSysFuncArg($3, @$); } /* 5 + 2, "Gab", GetCameraFov() */
 	;
 
 if_else_block: if_statement
