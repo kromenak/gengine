@@ -89,6 +89,50 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
 	return false;
 }
 
+std::string Path::GetFileName(const std::string& path)
+{
+	// Make sure there's any content in the path argument.
+	if(path.empty()) { return path; }
+	
+	// Find the last index of the separator character.
+	size_t pos = path.find_last_of(kSeparator);
+	
+	// If no separator exists, just return the path as-is...
+	// it's either invalid or a single element like "MyFile".
+	if(pos == std::string::npos)
+	{
+		return path;
+	}
+	
+	// If pos is at end of string, return empty string.
+	// Something like "/Users/Bob/" should return "".
+	if(pos + 1 >= path.size())
+	{
+		return "";
+	}
+	
+	// Get everything after the separator and return it
+	return path.substr(pos + 1, std::string::npos);
+}
+
+std::string Path::GetFileNameNoExtension(const std::string& path)
+{
+	// Get filename with extension first.
+	std::string filename = GetFileName(path);
+	
+	// Find extension separator, if any.
+	size_t pos = filename.find_last_of('.');
+	
+	// If no extension, we can just return the filename as-is.
+	if(pos == std::string::npos)
+	{
+		return filename;
+	}
+	
+	// Return everything before the extension separator.
+	return filename.substr(0, pos);
+}
+
 bool Directory::Exists(const std::string& path)
 {
 #if defined(PLATFORM_MAC)

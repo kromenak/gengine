@@ -35,6 +35,19 @@ namespace Path
 	 * But on some platforms (like OSX), getting a resource that exists in the app bundle is not entirely straightforward.
 	 */
 	bool FindFullPath(const std::string& fileName, const std::string& relativeSearchPath, std::string& outPath);
+
+	/**
+	 * Given a path, returns the name of the file only.
+	 * Ex: "/Projects/Project/Assets/MyAsset.shp" becomes "MyAsset.shp".
+	 * Ex: "/Projects/Project/" becomes "".
+	 */
+	std::string GetFileName(const std::string& path);
+
+	/**
+	 * Similar to GetFileName, but returns file name with no extension (everything after and including '.' is removed).
+	 * Ex: "/Projects/Project/Assets/MyAsset.shp" becomes "MyAsset".
+	 */
+	std::string GetFileNameNoExtension(const std::string& path);
 }
 
 namespace Directory
