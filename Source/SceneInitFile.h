@@ -28,6 +28,7 @@ class WalkerBoundary;
 
 struct GeneralBlock
 {
+	std::string conditionText;
 	SheepScript* condition = nullptr;
 	
 	std::string sceneAssetName;
@@ -194,6 +195,7 @@ struct SceneModel
 template<typename T>
 struct ConditionalBlock
 {
+	std::string conditionText;
 	SheepScript* condition = nullptr;
 	std::vector<T> items;
 };

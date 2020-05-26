@@ -329,7 +329,7 @@ void SceneData::AddActionBlocks(const std::vector<ConditionalBlock<NVC*>>& actio
 		}
 		else
 		{
-			Services::GetReports()->Log("Generic", "Skipping header `%s`.");
+			Services::GetReports()->Log("Generic", StringUtil::Format("Skipping header `%s`.", block.conditionText.c_str()));
 		}
 	}
 }

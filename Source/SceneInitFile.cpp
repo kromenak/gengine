@@ -172,7 +172,9 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-			general.condition = Services::GetSheep()->Compile(section.condition);
+			// Why is this called "Int Evaluation"? Not sure - but testing in GK3 seems to suggest it is...
+			general.conditionText = section.condition;
+			general.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Handle all key/value pairs in this block.
@@ -286,7 +288,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-			cameraBlock.condition = Services::GetSheep()->Compile(section.condition);
+			cameraBlock.conditionText = section.condition;
+			cameraBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Handle creation of each camera in this block.
@@ -325,7 +328,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-			cameraBlock.condition = Services::GetSheep()->Compile(section.condition);
+			cameraBlock.conditionText = section.condition;
+			cameraBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Handle creation of each camera in this block.
@@ -372,7 +376,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-			cameraBlock.condition = Services::GetSheep()->Compile(section.condition);
+			cameraBlock.conditionText = section.condition;
+			cameraBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Handle creation of each camera in this block.
@@ -413,7 +418,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-			cameraBlock.condition = Services::GetSheep()->Compile(section.condition);
+			cameraBlock.conditionText = section.condition;
+			cameraBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Create each camera in this block.
@@ -471,7 +477,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-			positionBlock.condition = Services::GetSheep()->Compile(section.condition);
+			positionBlock.conditionText = section.condition;
+			positionBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Create each scene position.
@@ -514,7 +521,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-			actorBlock.condition = Services::GetSheep()->Compile(section.condition);
+			actorBlock.conditionText = section.condition;
+			actorBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Create each actor defined in the block.
@@ -589,7 +597,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-            modelBlock.condition = Services::GetSheep()->Compile(section.condition);
+			modelBlock.conditionText = section.condition;
+            modelBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Create each model defined in block.
@@ -667,7 +676,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-            regionBlock.condition = Services::GetSheep()->Compile(section.condition);
+			regionBlock.conditionText = section.condition;
+            regionBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Create each region.
@@ -701,7 +711,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-            triggerBlock.condition = Services::GetSheep()->Compile(section.condition);
+			triggerBlock.conditionText = section.condition;
+            triggerBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Create each trigger defined.
@@ -733,7 +744,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-            soundtrackBlock.condition = Services::GetSheep()->Compile(section.condition);
+			soundtrackBlock.conditionText = section.condition;
+            soundtrackBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
 		// Add soundtracks.
@@ -756,7 +768,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         // Compile and save condition.
         if(!section.condition.empty())
         {
-            actionBlock.condition = Services::GetSheep()->Compile(section.condition);
+			actionBlock.conditionText = section.condition;
+            actionBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
         }
         
         for(auto& line : section.lines)
