@@ -16,6 +16,7 @@
 #include "Vector2.h"
 #include "Vector3.h"
 #include "Vector4.h"
+#include "Debug.h"
 
 //#define DEBUG_OUTPUT
 
@@ -229,13 +230,8 @@ void Model::ParseFromData(char *data, int dataLength)
         // From the basis vectors, calculate a quaternion representing
         // a rotation from the standard basis to that orientation.
         Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
-		#ifdef GK3_MIRROR_Z
-		rotQuat.SetZ(-rotQuat.GetZ());
-		rotQuat.SetW(-rotQuat.GetW());
-		#else
 		rotQuat.SetZ(rotQuat.GetZ());
 		rotQuat.SetW(rotQuat.GetW());
-		#endif
 		#ifdef DEBUG_OUTPUT
         std::cout << "    Mesh Rotation: " << rotQuat << std::endl;
 		#endif
@@ -243,11 +239,7 @@ void Model::ParseFromData(char *data, int dataLength)
         // 12 bytes: an (X, Y, Z) *local* position for placing this mesh.
         // Each mesh within a model has a local position relative to the model origin.
 		// Ex: if a human model has arms, legs, etc - this positions them all correctly relative to one another.
-		#ifdef GK3_MIRROR_Z
-        Vector3 meshPos = reader.ReadVector3();
-		#else
-        Vector3 meshPos = reader.ReadVector3();
-		#endif
+		Vector3 meshPos = reader.ReadVector3();
 		#ifdef DEBUG_OUTPUT
         std::cout << "    Mesh Position: " << meshPos << std::endl;
 		#endif
@@ -351,11 +343,7 @@ void Model::ParseFromData(char *data, int dataLength)
             for(int k = 0; k < vertexCount; k++)
             {
                 float x = reader.ReadFloat();
-				#ifdef GK3_MIRROR_Z
-				float z = -reader.ReadFloat();
-				#else
 				float z = reader.ReadFloat();
-				#endif
                 float y = reader.ReadFloat();
                 vertexPositions[k * 3] = x;
                 vertexPositions[k * 3 + 1] = y;
