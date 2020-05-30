@@ -5,6 +5,8 @@
 //
 #include "GKActor.h"
 
+#include <sstream>
+
 #include "CharacterManager.h"
 #include "Debug.h"
 #include "FaceController.h"
@@ -167,20 +169,23 @@ void GKActor::StartFidget(FidgetType type)
 		break;
 		
 	case FidgetType::Idle:
-		mGasPlayer->SetGas(mIdleGas);
+		mGasPlayer->SetGas(mIdleFidget);
 		std::cout << mNoun << " using Idle fidget." << std::endl;
 		break;
 		
 	case FidgetType::Talk:
-		mGasPlayer->SetGas(mTalkGas);
+		mGasPlayer->SetGas(mTalkFidget);
 		std::cout << mNoun << " using Talk fidget." << std::endl;
 		break;
 		
 	case FidgetType::Listen:
-		mGasPlayer->SetGas(mListenGas);
+		mGasPlayer->SetGas(mListenFidget);
 		std::cout << mNoun << " using Listen fidget." << std::endl;
 		break;
     }
+	
+	// Save type we're playing.
+	mCurrentFidget = type;
 	
 	// Play it!
 	mGasPlayer->Play();
@@ -196,6 +201,15 @@ void GKActor::StartCustomFidget(GAS* gas)
 void GKActor::StopFidget()
 {
 	mGasPlayer->Pause();
+}
+
+void GKActor::DumpPosition()
+{
+	std::stringstream ss;
+	ss << "actor '" << mNoun << "' ";
+	ss << "h=" << GetHeading() << ", ";
+	ss << "pos=" << GetPosition();
+	Services::GetReports()->Log("Dump", ss.str());
 }
 
 void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
@@ -294,7 +308,7 @@ void GKActor::OnVertexAnimationStopped()
 	}
 	
 	// Resume GAS (well, play from beginning - gives better results).
-	mGasPlayer->Play();
+	StartFidget(mCurrentFidget);
 }
 
 void GKActor::SetMeshToActorPosition(bool useMeshPosOffset)

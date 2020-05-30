@@ -195,9 +195,9 @@ void Scene::Load()
 		actor->GetMeshRenderer()->SetModel(actorDef->model);
 		
 		// Save actor's GAS references.
-		actor->SetIdleGas(actorDef->idleGas);
-		actor->SetTalkGas(actorDef->talkGas);
-		actor->SetListenGas(actorDef->listenGas);
+		actor->SetIdleFidget(actorDef->idleGas);
+		actor->SetTalkFidget(actorDef->talkGas);
+		actor->SetListenFidget(actorDef->listenGas);
 		
 		// Start in idle state.
 		actor->StartFidget(GKActor::FidgetType::Idle);
@@ -257,7 +257,7 @@ void Scene::Load()
 				// If it's a "gas prop", use provided gas as the fidget for the actor.
 				if(modelDef->type == SceneModel::Type::GasProp)
 				{
-					prop->SetIdleGas(modelDef->gas);
+					prop->SetIdleFidget(modelDef->gas);
 				}
 				break;
 			}
@@ -294,13 +294,13 @@ void Scene::Unload()
 	mSceneData = nullptr;
 }
 
-void Scene::InitEgoPosition(const std::string& positionName)
+bool Scene::InitEgoPosition(const std::string& positionName)
 {
-    if(mEgo == nullptr) { return; }
+	if(mEgo == nullptr) { return false; }
     
 	// Get position.
     const ScenePosition* position = GetPosition(positionName);
-    if(position == nullptr) { return; }
+	if(position == nullptr) { return false; }
     
     // Set position and heading.
     mEgo->SetPosition(position->position);
@@ -311,11 +311,12 @@ void Scene::InitEgoPosition(const std::string& positionName)
 	if(position->cameraName.empty())
 	{
 		Services::GetReports()->Log("Warning", "No camera information is supplied in position '" + positionName + "'.");
-		return;
+		return true;
 	}
 	
 	// Move the camera to desired position/angle.
 	SetCameraPosition(position->cameraName);
+	return true;
 }
 
 void Scene::SetCameraPosition(const std::string& cameraName)

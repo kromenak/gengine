@@ -225,6 +225,12 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 	}
 }
 
+// Helper for reporting back to Sheep VM that an error occurred.
+void ExecError()
+{
+	Services::GetSheep()->FlagExecutionError();
+}
+
 // ACTORS
 shpvoid Blink(std::string actorName)
 {
@@ -232,6 +238,10 @@ shpvoid Blink(std::string actorName)
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->Blink();
+	}
+	else
+	{
+		ExecError();
 	}
     return 0;
 }
@@ -244,14 +254,27 @@ shpvoid BlinkX(std::string actorName, std::string blinkAnim)
 	{
 		actor->GetFaceController()->Blink(blinkAnim);
 	}
+	else
+	{
+		ExecError();
+	}
     return 0;
 }
 RegFunc2(BlinkX, void, string, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ClearMood(std::string actorName)
 {
-	std::cout << "Clear mood " << actorName << std::endl;
-    return 0;
+	// Get actor and make sure it's valid.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		ExecError();
+		return 0;
+	}
+	
+	// Clear mood.
+	actor->GetFaceController()->ClearMood();
+	return 0;
 }
 RegFunc1(ClearMood, void, string, IMMEDIATE, REL_FUNC);
 
@@ -261,6 +284,10 @@ shpvoid EnableEyeJitter(std::string actorName)
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->SetEyeJitterEnabled(true);
+	}
+	else
+	{
+		ExecError();
 	}
     return 0;
 }
@@ -273,6 +300,10 @@ shpvoid DisableEyeJitter(std::string actorName)
 	{
 		actor->GetFaceController()->SetEyeJitterEnabled(false);
 	}
+	else
+	{
+		ExecError();
+	}
     return 0;
 }
 RegFunc1(DisableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
@@ -284,6 +315,10 @@ shpvoid EyeJitter(std::string actorName)
 	{
 		actor->GetFaceController()->EyeJitter();
 	}
+	else
+	{
+		ExecError();
+	}
     return 0;
 }
 RegFunc1(EyeJitter, void, string, IMMEDIATE, REL_FUNC);
@@ -293,11 +328,11 @@ shpvoid DumpActorPosition(std::string actorName)
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
-		std::stringstream ss;
-		ss << "actor '" << actorName << "' ";
-		ss << "h=" << actor->GetHeading() << ", ";
-		ss << "pos=" << actor->GetPosition();
-		Services::GetReports()->Log("Dump", ss.str());
+		actor->DumpPosition();
+	}
+	else
+	{
+		ExecError();
 	}
     return 0;
 }
@@ -305,7 +340,15 @@ RegFunc1(DumpActorPosition, void, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid Expression(std::string actorName, std::string expression)
 {
-	std::cout << "Expression " << actorName << " " << expression << std::endl;
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor != nullptr)
+	{
+		actor->GetFaceController()->DoExpression(expression);
+	}
+	else
+	{
+		ExecError();
+	}
     return 0;
 }
 RegFunc2(Expression, void, string, string, IMMEDIATE, REL_FUNC);
@@ -321,7 +364,7 @@ int GetEgoLocationCount(std::string locationName)
 	// Make sure it's a valid location.
 	if(!Services::Get<LocationManager>()->IsValidLocation(locationName))
 	{
-		Services::GetReports()->Log("Error", "Error: '" + locationName + "' is not a valid location name. Call DumpLocations() to see valid locations.");
+		ExecError();
 		return 0;
 	}
 	
@@ -366,20 +409,28 @@ shpvoid GlanceX(std::string actorName, int leftPercentX, int leftPercentY,
 
 shpvoid InitEgoPosition(std::string positionName)
 {
-    GEngine::inst->GetScene()->InitEgoPosition(positionName);
+    if(!GEngine::inst->GetScene()->InitEgoPosition(positionName))
+	{
+		ExecError();
+	}
     return 0;
 }
 RegFunc1(InitEgoPosition, void, string, IMMEDIATE, REL_FUNC);
 
 int IsActorAtLocation(std::string actorName, std::string locationName)
 {
-	// Validate parameters.
-	//TODO: Verify that actor name is valid.
+	// Validate actor name.
+	if(!Services::Get<CharacterManager>()->IsValidName(actorName))
+	{
+		ExecError();
+		return 0;
+	}
+	
+	// Validate location.
 	bool locationValid = Services::Get<LocationManager>()->IsValidLocation(locationName);
 	if(!locationValid)
 	{
-		std::string sheepContextName = GetCurrentSheepName() + ":" + GetCurrentSheepFunction();
-		Services::GetReports()->Log("Error", "An error occurred while executing " + sheepContextName);
+		ExecError();
 		return 0;
 	}
 	
@@ -391,25 +442,68 @@ RegFunc2(IsActorAtLocation, int, string, string, IMMEDIATE, REL_FUNC);
 
 int IsActorNear(std::string actorName, std::string positionName, float distance)
 {
-	//TODO: Verify that actor name is valid.
+	// Make sure distance is valid.
+	if(distance < 0.0f)
+	{
+		Services::GetReports()->Log("Warning", StringUtil::Format("Warning: distance of %f is not valid - must be >= 0.", distance));
+		ExecError();
+		return 0;
+	}
+	
+	// Get actor and position, or fail.
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
-	return (actor->GetPosition() - scenePosition->position).GetLengthSq() < distance * distance;
+	if(actor != nullptr)
+	{
+		const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+		if(scenePosition != nullptr)
+		{
+			// Distance check.
+			return (actor->GetPosition() - scenePosition->position).GetLengthSq() < distance * distance;
+		}
+	}
+	
+	// Something was null...
+	ExecError();
+	return 0;
 }
 RegFunc3(IsActorNear, int, string, string, float, IMMEDIATE, REL_FUNC);
 
 int IsWalkingActorNear(std::string actorName, std::string positionName, float distance)
 {
-	//TODO: Verify that actor name is valid.
+	// Make sure distance is valid.
+	if(distance < 0.0f)
+	{
+		Services::GetReports()->Log("Warning", StringUtil::Format("Warning: distance of %f is not valid - must be >= 0.", distance));
+		ExecError();
+		return 0;
+	}
+	
+	// Get actor and position, or fail.
 	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
-	return (actor->GetWalkDestination() - scenePosition->position).GetLengthSq() < distance * distance;
+	if(actor != nullptr)
+	{
+		const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+		if(scenePosition != nullptr)
+		{
+			return (actor->GetWalkDestination() - scenePosition->position).GetLengthSq() < distance * distance;
+		}
+	}
+	
+	// Something was null...
+	ExecError();
+	return 0;
 }
 RegFunc3(IsWalkingActorNear, int, string, string, float, IMMEDIATE, REL_FUNC);
  
 int IsActorOffstage(std::string actorName)
 {
-	//TODO: Verify that actor name is valid.
+	// Validate actor name.
+	if(!Services::Get<CharacterManager>()->IsValidName(actorName))
+	{
+		ExecError();
+		return 0;
+	}
+	
 	return Services::Get<LocationManager>()->IsActorOffstage(actorName) ? 1 : 0;
 }
 RegFunc1(IsActorOffstage, int, string, IMMEDIATE, REL_FUNC);
@@ -477,13 +571,18 @@ shpvoid LookitModelX(std::string actorName, std::string modelName, int mesh,
 
 shpvoid SetActorLocation(string actorName, string locationName)
 {
-	// Validate parameters.
-	//TODO: Verify that actor name is valid.
+	// Validate actor name.
+	if(!Services::Get<CharacterManager>()->IsValidName(actorName))
+	{
+		ExecError();
+		return 0;
+	}
+	
+	// Validate location.
 	bool locationValid = Services::Get<LocationManager>()->IsValidLocation(locationName);
 	if(!locationValid)
 	{
-		std::string sheepContextName = GetCurrentSheepName() + ":" + GetCurrentSheepFunction();
-		Services::GetReports()->Log("Error", "An error occurred while executing " + sheepContextName);
+		ExecError();
 		return 0;
 	}
 	
@@ -494,7 +593,13 @@ RegFunc2(SetActorLocation, void, string, string, IMMEDIATE, REL_FUNC);
 
 shpvoid SetActorOffstage(string actorName)
 {
-	//TODO: Verify that actor name is valid.
+	// Validate actor name.
+	if(!Services::Get<CharacterManager>()->IsValidName(actorName))
+	{
+		ExecError();
+		return 0;
+	}
+	
 	Services::Get<LocationManager>()->SetActorOffstage(actorName);
 	return 0;
 }
@@ -509,8 +614,7 @@ shpvoid SetActorPosition(std::string actorName, std::string positionName)
 	// If either is null, log an error.
 	if(actor == nullptr || scenePosition == nullptr)
 	{
-		std::string sheepContextName = GetCurrentSheepName() + ":" + GetCurrentSheepFunction();
-		Services::GetReports()->Log("Error", "An error occurred while executing " + sheepContextName);
+		ExecError();
 		return 0;
 	}
 	
@@ -530,7 +634,7 @@ shpvoid SetEgoLocationCount(std::string locationName, int count)
 	// Make sure it's a valid location.
 	if(!Services::Get<LocationManager>()->IsValidLocation(locationName))
 	{
-		Services::GetReports()->Log("Error", "Error: '" + locationName + "' is not a valid location name. Call DumpLocations() to see valid locations.");
+		ExecError();
 		return 0;
 	}
 	
@@ -541,35 +645,111 @@ shpvoid SetEgoLocationCount(std::string locationName, int count)
 }
 RegFunc2(SetEgoLocationCount, void, string, int, IMMEDIATE, DEV_FUNC);
 
-/*
 shpvoid SetIdleGAS(std::string actorName, std::string gasName)
 {
-	std::cout << "SetIdleGAS" << std::endl;
+	// Get actor and make sure it's valid.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		ExecError();
+		return 0;
+	}
+	
+	// If gas is empty, that means clear out fidget.
+	if(gasName.empty())
+	{
+		actor->SetIdleFidget(nullptr);
+		return 0;
+	}
+	
+	// Load fidget or fail.
+	GAS* fidget = Services::GetAssets()->LoadGAS(gasName);
+	if(fidget == nullptr)
+	{
+		ExecError();
+		return 0;
+	}
+	actor->SetIdleFidget(fidget);
 	return 0;
 }
 RegFunc2(SetIdleGAS, void, string, string, WAITABLE, REL_FUNC);
 
 shpvoid SetListenGAS(std::string actorName, std::string gasName)
 {
-	std::cout << "SetListenGAS" << std::endl;
+	// Get actor and make sure it's valid.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		ExecError();
+		return 0;
+	}
+	
+	// If gas is empty, that means clear out fidget.
+	if(gasName.empty())
+	{
+		actor->SetListenFidget(nullptr);
+		return 0;
+	}
+	
+	// Load fidget or fail.
+	GAS* fidget = Services::GetAssets()->LoadGAS(gasName);
+	if(fidget == nullptr)
+	{
+		ExecError();
+		return 0;
+	}
+	actor->SetListenFidget(fidget);
 	return 0;
 }
 RegFunc2(SetListenGAS, void, string, string, WAITABLE, REL_FUNC);
 
 shpvoid SetTalkGAS(std::string actorName, std::string gasName)
 {
-	std::cout << "SetTalkGAS" << std::endl;
+	// Get actor and make sure it's valid.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		ExecError();
+		return 0;
+	}
+	
+	// If gas is empty, that means clear out fidget.
+	if(gasName.empty())
+	{
+		actor->SetTalkFidget(nullptr);
+		return 0;
+	}
+	
+	// Load fidget or fail.
+	GAS* fidget = Services::GetAssets()->LoadGAS(gasName);
+	if(fidget == nullptr)
+	{
+		ExecError();
+		return 0;
+	}
+	actor->SetTalkFidget(fidget);
 	return 0;
 }
 RegFunc2(SetTalkGAS, void, string, string, WAITABLE, REL_FUNC);
 
 shpvoid SetMood(std::string actorName, std::string moodName)
 {
-	std::cout << "SetMood" << std::endl;
+	// Get actor and make sure it's valid.
+	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	if(actor == nullptr)
+	{
+		ExecError();
+		return 0;
+	}
+	
+	// Apply mood.
+	//TODO: What if mood is invalid?
+	actor->GetFaceController()->SetMood(moodName);
 	return 0;
 }
 RegFunc2(SetMood, void, string, string, IMMEDIATE, REL_FUNC);
 
+/*
 //SetNextEgo
 
 //SetPrevEgo

@@ -44,7 +44,7 @@ public:
 	void Load();
 	void Unload();
 	
-    void InitEgoPosition(const std::string& positionName);
+    bool InitEgoPosition(const std::string& positionName);
 	void SetCameraPosition(const std::string& cameraName);
 	
 	bool CheckInteract(const Ray& ray) const;

@@ -71,9 +71,9 @@ public:
 	///
 	const std::string& GetIdentifier() const { return mIdentifier; }
 	
-    void SetIdleGas(GAS* gas) { mIdleGas = gas; }
-    void SetTalkGas(GAS* gas) { mTalkGas = gas; }
-    void SetListenGas(GAS* gas) { mListenGas = gas; }
+    void SetIdleFidget(GAS* fidget) { mIdleFidget = fidget; }
+    void SetTalkFidget(GAS* fidget) { mTalkFidget = fidget; }
+    void SetListenFidget(GAS* fidget) { mListenFidget = fidget; }
 	
 	void StartFidget(FidgetType type);
 	void StartCustomFidget(GAS* gas);
@@ -84,6 +84,8 @@ public:
 	Walker* GetWalker() const { return mWalker; }
 	
 	FaceController* GetFaceController() const { return mFaceController; }
+	
+	void DumpPosition();
 	
 protected:
 	void OnActive() override;
@@ -151,9 +153,10 @@ private:
 	FaceController* mFaceController = nullptr;
     
     // GAS scripts to use when actor is idle, talking, or listening.
-    GAS* mIdleGas = nullptr;
-    GAS* mTalkGas = nullptr;
-    GAS* mListenGas = nullptr;
+	FidgetType mCurrentFidget = FidgetType::None;
+    GAS* mIdleFidget = nullptr;
+    GAS* mTalkFidget = nullptr;
+    GAS* mListenFidget = nullptr;
 	
 	void OnVertexAnimationStopped();
 	
