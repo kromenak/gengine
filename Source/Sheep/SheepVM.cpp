@@ -12,6 +12,7 @@
 #include "SheepAPI.h"
 #include "SheepScript.h"
 #include "Services.h"
+#include "StringUtil.h"
 
 //#define SHEEP_DEBUG
 
@@ -262,26 +263,44 @@ Value SheepVM::CallSysFunc(SheepThread* thread, SysImport* sysImport)
 	*/
 	
 	// Based on argument count, call the appropriate function variant.
+	Value v = Value(0);
 	switch(argCount)
 	{
-		case 0:
-			return ::CallSysFunc(sysFunc->name);
-		case 1:
-			return ::CallSysFunc(sysFunc->name, args[0]);
-		case 2:
-			return ::CallSysFunc(sysFunc->name, args[0], args[1]);
-		case 3:
-			return ::CallSysFunc(sysFunc->name, args[0], args[1], args[2]);
-		case 4:
-			return ::CallSysFunc(sysFunc->name, args[0], args[1], args[2], args[3]);
-		case 5:
-			return ::CallSysFunc(sysFunc->name, args[0], args[1], args[2], args[3], args[4]);
-		case 6:
-			return ::CallSysFunc(sysFunc->name, args[0], args[1], args[2], args[3], args[4], args[5]);
-		default:
-			std::cout << "SheepVM: Unimplemented arg count: " << argCount << std::endl;
-			return Value(0);
+	case 0:
+		v = ::CallSysFunc(sysFunc->name);
+		break;
+	case 1:
+		v = ::CallSysFunc(sysFunc->name, args[0]);
+		break;
+	case 2:
+		v = ::CallSysFunc(sysFunc->name, args[0], args[1]);
+		break;
+	case 3:
+		v = ::CallSysFunc(sysFunc->name, args[0], args[1], args[2]);
+		break;
+	case 4:
+		v = ::CallSysFunc(sysFunc->name, args[0], args[1], args[2], args[3]);
+		break;
+	case 5:
+		v = ::CallSysFunc(sysFunc->name, args[0], args[1], args[2], args[3], args[4]);
+		break;
+	case 6:
+		v = ::CallSysFunc(sysFunc->name, args[0], args[1], args[2], args[3], args[4], args[5]);
+		break;
+	default:
+		std::cout << "SheepVM: Unimplemented arg count: " << argCount << std::endl;
+		break;
 	}
+	
+	// Output a general execution exception if we encountered a problem in the sys func call.
+	if(mExecutionError)
+	{
+		Services::GetReports()->Log("Error", StringUtil::Format("An error occurred while executing %s", thread->GetName().c_str()));
+		mExecutionError = false;
+	}
+	
+	// Return result of sys func call.
+	return v;
 }
 
 SheepThread* SheepVM::ExecuteInternal(SheepScript *script, int bytecodeOffset,

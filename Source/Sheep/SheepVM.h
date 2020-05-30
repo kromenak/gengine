@@ -113,12 +113,16 @@ public:
 	SheepThread* GetCurrentThread() const { return mCurrentThread; }
 	bool IsAnyRunning() const;
 	
+	void FlagExecutionError() { mExecutionError = true; }
+	
 private:
 	std::vector<SheepInstance*> mSheepInstances;
 	std::vector<SheepThread*> mSheepThreads;
 	
 	SheepThread* mCurrentThread = nullptr;
 	
+	bool mExecutionError = false;
+		
 	SheepInstance* GetInstance(SheepScript* script);
 	SheepThread* GetThread();
 	
