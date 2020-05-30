@@ -32,6 +32,11 @@ void GameCamera::SetAngle(float yaw, float pitch)
 
 void GameCamera::OnUpdate(float deltaTime)
 {
+	// It's possible our height was changed due to a script moving the camera.
+	// Make sure height is correct before we do our updates.
+	float startFloorY = GEngine::inst->GetScene()->GetFloorY(GetPosition());
+	mHeight = GetPosition().GetY() - startFloorY;
+	
 	// We don't move/turn unless some input causes it.
 	float forwardSpeed = 0.0f;
 	float strafeSpeed = 0.0f;
