@@ -67,6 +67,7 @@ void DialogueManager::TriggerDialogueCue()
 		if(mDialogueFinishCallback != nullptr)
 		{
 			mDialogueFinishCallback();
+			mDialogueFinishCallback = nullptr;
 		}
 		return;
 	}
