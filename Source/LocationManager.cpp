@@ -28,7 +28,7 @@ LocationManager::LocationManager()
 		IniKeyValue& entry = line.entries.front();
 		mLocCodeShortToLocCodeLong[entry.key] = entry.value;
 	}
-	
+
 	delete[] buffer;
 }
 
@@ -38,7 +38,12 @@ bool LocationManager::IsValidLocation(const std::string& locationCode) const
 	if(locationCode.length() != 3) { return false; }
 	
 	std::string key = StringUtil::ToLowerCopy(locationCode);
-	return mLocCodeShortToLocCodeLong.find(key) != mLocCodeShortToLocCodeLong.end();
+	bool isValid = mLocCodeShortToLocCodeLong.find(key) != mLocCodeShortToLocCodeLong.end();
+	if(!isValid)
+	{
+		Services::GetReports()->Log("Error", "Error: '" + locationCode + "' is not a valid location name. Call DumpLocations() to see valid locations.");
+	}
+	return isValid;
 }
 
 void LocationManager::DumpLocations() const
