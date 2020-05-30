@@ -102,14 +102,24 @@ void ActionManager::ClearActionSets()
 
 bool ActionManager::ExecuteAction(const std::string& noun, const std::string& verb)
 {
+	// Iterate action sets and find a valid candidate for this noun/verb combo.
+	// Action sets are loaded such that the LAST valid candidate we find is the one we should use.
+	const Action* candidate = nullptr;
 	for(auto& actionSet : mActionSets)
 	{
 		const Action* action = actionSet->GetAction(noun, verb);
 		if(action != nullptr && IsCaseMet(action))
 		{
-			ExecuteAction(action);
-			return true;
+			candidate = action;
+			continue;
 		}
+	}
+	
+	// Execute action if we found a valid one.
+	if(candidate != nullptr)
+	{
+		ExecuteAction(candidate);
+		return true;
 	}
 	return false;
 }
