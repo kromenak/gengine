@@ -1,0 +1,36 @@
+// GK3 somehow internally knows what is or isn't a valid actor in the game.
+// Thus far, I have't been able to find any data file that specifies this data. Possibly, it is hard-coded in the game's source code.
+
+// To get around this, I have created this mapping manually that'll be loaded at game launch and used to verify actor validity.
+[ACTORS]
+ABBE
+ASMODEUS
+BARTENDER
+BUCHELLI
+BUTHANE
+CAT
+CHICKEN
+DOG
+EMILIO
+ESTELLE
+GABRIEL
+GABRIEL_DISGUISED
+GIRARD
+GOAT
+JEAN
+LADY_HOWARD
+LARRY
+MAID
+MACDOUGALL
+MALLORY
+MARCIE
+MESMI
+MONSIEUR_BIGOUT
+MONTREAUX
+MOSELY
+OLD_LADY
+PRINCE_JAMES
+SIMONE
+WILKES
+VAMPIRE_1
+VAMPIRE_2

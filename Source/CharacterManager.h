@@ -6,6 +6,7 @@
 // Provides configuration data about the various characters in the game.
 //
 #pragma once
+#include <set>
 #include <string>
 #include <unordered_map>
 
@@ -128,9 +129,15 @@ class CharacterManager
 public:
 	CharacterManager();
 	
-	CharacterConfig& GetCharacterConfig(std::string identifier);
+	CharacterConfig& GetCharacterConfig(const std::string& identifier);
+	
+	bool IsValidName(const std::string& name);
 	
 private:
+	// Set of valid nouns referring to characters.
+	// Used to verify sheep commands are valid.
+	std::set<std::string> mCharacterNouns;
+	
 	// Character configs, keyed by the 3-letter character identifier.
 	std::unordered_map<std::string, CharacterConfig> mCharacterConfigs;
 	
