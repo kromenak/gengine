@@ -57,7 +57,7 @@ public:
     Animator(Actor* owner);
 	
 	// Playback
-	void Start(Animation* animation, bool allowMove, bool fromGas, std::function<void()> finishCallback);
+	void Start(Animation* animation, bool allowMove = false, bool fromGas = false, std::function<void()> finishCallback = nullptr);
 	void Loop(Animation* animation);
 	void Stop(Animation* animation);
 	
