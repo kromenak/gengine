@@ -230,6 +230,61 @@ void FaceController::EyeJitter()
 	UpdateFaceTexture();
 }
 
+void FaceController::DoExpression(const std::string& expression)
+{
+	// Expressions are named as combination of identifier and expression string.
+	// E.g. Gabriel Frown becomes GABFROWN.ANM.
+	std::string animName = mCharacterConfig->identifier + expression;
+	Animation* animation = Services::GetAssets()->LoadAnimation(animName);
+	if(animation != nullptr)
+	{
+		GEngine::inst->GetScene()->GetAnimator()->Start(animation);
+	}
+	else
+	{
+		//TODO: This seems to be an AssetManager-level warning?
+		//TODO: So, maybe OG game finds and applies expression anim indescriminantly (which seems not good, tbh).
+		Services::GetReports()->Log("Error", "gk3 animation '" + animName + ".anm' not found.");
+	}
+}
+
+void FaceController::SetMood(const std::string& mood)
+{
+	std::string moodOnName = mCharacterConfig->identifier + mood + "on";
+	std::string moodOffName = mCharacterConfig->identifier + mood + "off";
+	
+	// Make sure mood animations exist.
+	Animation* enterAnimation = Services::GetAssets()->LoadAnimation(moodOnName);
+	Animation* exitAnimation = Services::GetAssets()->LoadAnimation(moodOffName);
+	if(enterAnimation == nullptr || exitAnimation == nullptr)
+	{
+		//TODO: Log error?
+		return;
+	}
+	
+	// Save mood.
+	mMood = mood;
+	mEnterMoodAnimation = enterAnimation;
+	mExitMoodAnimation = exitAnimation;
+	
+	// Play mood on animation.
+	GEngine::inst->GetScene()->GetAnimator()->Start(mEnterMoodAnimation);
+}
+
+void FaceController::ClearMood()
+{
+	// Mood is already clear!
+	if(mMood.empty()) { return; }
+	
+	// Play mood off animation.
+	GEngine::inst->GetScene()->GetAnimator()->Start(mExitMoodAnimation);
+	
+	// Clear mood state.
+	mMood.clear();
+	mEnterMoodAnimation = nullptr;
+	mExitMoodAnimation = nullptr;
+}
+
 void FaceController::OnUpdate(float deltaTime)
 {
 	// Count down and blink after some time.

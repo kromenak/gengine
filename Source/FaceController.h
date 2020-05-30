@@ -9,6 +9,7 @@
 #pragma once
 #include "Component.h"
 
+class Animation;
 struct CharacterConfig;
 class Texture;
 
@@ -58,6 +59,11 @@ public:
 	void SetEyeJitterEnabled(bool enabled);
 	void EyeJitter();
 	
+	void DoExpression(const std::string& expression);
+	
+	void SetMood(const std::string& mood);
+	void ClearMood();
+	
 protected:
 	void OnUpdate(float deltaTime) override;
 	
@@ -101,9 +107,14 @@ private:
 	float mEyeJitterX = 0.0f;
 	float mEyeJitterY = 0.0f;
 	
+	// A mood for the actor, if any. Default is "no mood" (aka "normal").
+	// Actors can enter and exit moods. This requires "on" and "off" anims to exist.
+	std::string mMood;
+	Animation* mEnterMoodAnimation = nullptr;
+	Animation* mExitMoodAnimation = nullptr;
+	
 	void RollBlinkTimer();
-	
 	void RollEyeJitterTimer();
-	
+
 	void UpdateFaceTexture();
 };
