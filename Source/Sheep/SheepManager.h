@@ -29,6 +29,7 @@ public:
 	
 	SheepThread* GetCurrentThread() const { return mVirtualMachine.GetCurrentThread(); }
 	bool IsAnyRunning() const { return mVirtualMachine.IsAnyRunning(); }
+	void FlagExecutionError() { mVirtualMachine.FlagExecutionError(); }
 	
 private:
 	// Compiles text-based sheep script into sheep bytecode, represented as a SheepScript asset.
