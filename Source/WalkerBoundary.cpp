@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "GMath.h"
 #include "Texture.h"
 
 struct NodeInfo
@@ -34,11 +35,11 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 	{
 		// If "to" is not walkable, we need to find nearest walkable position as our goal.
 		goal = FindNearestWalkableTexturePosToWorldPos(to);
-		
-		// Also, push "to" onto our path first. Upon reaching goal (nearest walkable position),
-		// the walker will move off the walker boundary to the final "to" position.
-		outPath.push_back(to);
 	}
+	
+	// Converting to/from texture/world space can introduce a bit of error into the final goal position.
+	// To avoid this, we'll always use our "to" as the end of the path.
+	outPath.push_back(to);
 	
 	// Pick start position. If "from" is walkable, we can use it directly.
 	Vector2 start;
@@ -84,14 +85,11 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 			Color32 color = mTexture->GetPixelColor32(neighbor.GetX(), neighbor.GetY());
 			if(color == Color32::Black) { continue; }
 			
-			// Calculate a weight for the edge from current to neighbor, which we use for "g(x)" calculation.
-			// The weight is the palette index in the texture: a lower value index means "more walkable."
-			// We want encourage going from less walkable to more walkable terrain...to a degree.
-			//TODO: Probably want to revisit this...it's not perfect by any means.
-			//int currentWeight = mTexture->GetPaletteIndex(current.GetX(), current.GetY());
-			//int neighborWeight = mTexture->GetPaletteIndex(neighbor.GetX(), neighbor.GetY());
-			//int weightChange = neighborWeight - currentWeight;
-			int weight = 1; //32 + weightChange;
+			// So, setting edge cost to be exactly the palette index actually gives pretty decent results.
+			//int currentIndex = mTexture->GetPaletteIndex(current.GetX(), current.GetY());
+			int neighborIndex = mTexture->GetPaletteIndex(neighbor.GetX(), neighbor.GetY());
+			//float edgeCost = (neighbor - current).GetLength() + neighborIndex;
+			float edgeCost = neighborIndex;
 			
 			// Ignore anything already in the closed set.
 			if(closedSet.find(neighbor) != closedSet.end())
@@ -102,7 +100,7 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 			{
 				// If in the open set, check for adoption.
 				// If lower g value, reparent to current.
-				float newG = infos[current].g + weight;
+				float newG = infos[current].g + edgeCost;
 				if(newG < infos[neighbor].g)
 				{
 					infos[neighbor].parent = current;
@@ -115,8 +113,9 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 				NodeInfo nodeInfo;
 				nodeInfo.parent = current;
 				
-				nodeInfo.h = 0; // No heuristic? (Dijkstra)
-				nodeInfo.g = infos[current].g + weight;
+				//nodeInfo.h = (goal - neighbor).GetLength();
+				nodeInfo.h = 0.0f; // No heuristic? (Dijkstra)
+				nodeInfo.g = infos[current].g + edgeCost;
 				infos[neighbor] = nodeInfo;
 				openSet.push_back(neighbor);
 			}
@@ -147,7 +146,10 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 		closedSet.insert(current);
 	}
 	
-	// Found a path! Convert it and fill the path.
+	// Skip goal node (we already added "to" at beginning of algorithm).
+	current = infos[current].parent;
+	
+	// Iterate back to start, pushing world position of each node onto our path.
 	while(current != start)
 	{
 		outPath.push_back(TexturePosToWorldPos(current));
@@ -238,7 +240,7 @@ Vector3 WalkerBoundary::TexturePosToWorldPos(Vector2 texturePos) const
 	worldPos.SetX(worldPos.GetX() * mSize.GetX());
 	worldPos.SetZ(worldPos.GetZ() * mSize.GetY());
 	
-	// Subtract offset to go from "texture space" to "world space.
+	// Subtract offset to go from "texture space" to "world space".
 	worldPos.SetX(worldPos.GetX() - mOffset.GetX());
 	worldPos.SetZ(worldPos.GetZ() - mOffset.GetY());
 	return worldPos;
