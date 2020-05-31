@@ -79,9 +79,15 @@ public:
 	void StartCustomFidget(GAS* gas);
 	void StopFidget();
 	
+	void TurnTo(const Heading& heading, std::function<void()> finishCallback);
+	
+	void WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
+	void WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	void WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
+	void WalkToSee(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	Vector3 GetWalkDestination() const;
-	Walker* GetWalker() const { return mWalker; }
+	
+	void SnapToFloor();
 	
 	FaceController* GetFaceController() const { return mFaceController; }
 	
@@ -160,10 +166,10 @@ private:
 	
 	void OnVertexAnimationStopped();
 	
-	void SetMeshToActorPosition(bool useMeshPosOffset);
+	void SetMeshToActorPosition();
 	void SetMeshToActorPositionUsingAnim(VertexAnimation* anim, int framesPerSecond);
-	void SetActorToMeshPosition(bool useMeshPosOffset);
+	void SetMeshToActorRotation();
 	
-	void SetMeshToActorRotation(bool useMeshPosOffset);
-	void SetActorToMeshRotation(bool useMeshPosOffset);
+	void SetActorToMeshPosition();
+	void SetActorToMeshRotation();
 };
