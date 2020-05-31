@@ -9,21 +9,21 @@
 #include "Plane.h"
 
 Triangle::Triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2) :
-	mP0(p0),
-	mP1(p1),
-	mP2(p2)
+	p0(p0),
+	p1(p1),
+	p2(p2)
 {
 	//TODO: What if the points don't form a triangle???
 }
 
 bool Triangle::ContainsPoint(const Vector3& point) const
 {
-	return ContainsPoint(mP0, mP1, mP2, point);
+	return ContainsPoint(p0, p1, p2, point);
 }
 
 Vector3 Triangle::GetClosestPoint(const Vector3& point) const
 {
-	return GetClosestPoint(mP0, mP1, mP2, point);
+	return GetClosestPoint(p0, p1, p2, point);
 }
 
 /*static*/ bool Triangle::ContainsPoint(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& point)

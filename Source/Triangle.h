@@ -22,9 +22,8 @@ public:
 	static bool ContainsPoint(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& point);
 	static Vector3 GetClosestPoint(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& point);
 	
-private:
 	// A triangle consists of three points!
-	Vector3 mP0;
-	Vector3 mP1;
-	Vector3 mP2;
+	Vector3 p0;
+	Vector3 p1;
+	Vector3 p2;
 };
