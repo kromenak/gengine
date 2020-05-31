@@ -3,10 +3,7 @@
 //
 // Clark Kromenaker
 //
-// A heading in GK3 is a yaw-only rotation (about the y-axis) that is usually
-// defined in degrees from 0 to 360.
-//
-// A heading is often, along with a position, to define a placement for an actor.
+// A heading in GK3 is a yaw-only rotation (about the y-axis) that is defined in degrees from 0 to 360.
 //
 #pragma once
 
@@ -26,6 +23,7 @@ public:
 	static Heading FromDegrees(float degrees);
 	static Heading FromRadians(float radians);
 	static Heading FromQuaternion(const Quaternion& quaternion);
+	static Heading FromDirection(const Vector3& direction);
 	
 	float ToDegrees() const { return mDegrees; }
 	float ToRadians() const { return Math::ToRadians(mDegrees); }

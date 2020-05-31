@@ -24,6 +24,21 @@ Heading Heading::FromQuaternion(const Quaternion& quaternion)
 	return FromRadians(quaternion.GetEulerAngles().GetY());
 }
 
+Heading Heading::FromDirection(const Vector3& direction)
+{
+	// Zero out Y-component and renormalize.
+	Vector3 dir = direction;
+	dir.SetY(0.0f);
+	dir.Normalize();
+	
+	// Calculate axis and angle of rotation.
+	Vector3 axis = Vector3::Cross(Vector3::UnitZ, dir).Normalize();
+	float angle = Math::Acos(Vector3::Dot(Vector3::UnitZ, dir));
+	
+	// Create heading from quaternion.
+	return Heading::FromQuaternion(Quaternion(axis, angle));
+}
+
 void Heading::SetDegrees(float degrees)
 {
 	mDegrees = degrees;
