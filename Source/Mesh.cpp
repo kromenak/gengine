@@ -7,6 +7,8 @@
 
 #include <cassert>
 
+#include "Collisions.h"
+
 Mesh::Mesh()
 {
 	
@@ -47,16 +49,23 @@ void Mesh::Render(unsigned int submeshIndex, unsigned int offset, unsigned int c
 	mSubmeshes[submeshIndex]->Render(offset, count);
 }
 
-bool Mesh::Raycast(const Ray& ray)
+bool Mesh::Raycast(const Ray& ray, RaycastHit& hitInfo)
 {
-	//TODO: Could do a bounds check first, before checking against all triangles!
-	// Pass through to each submesh...
-	for(auto& submesh : mSubmeshes)
+	// Check against Mesh's AABB to see if we hit it.
+	if(Collisions::TestRayAABB(ray, mAABB, hitInfo))
 	{
-		if(submesh->Raycast(ray))
+		// If hit the AABB, do a per-triangle check as well for more precise detection.
+		// For example, Gabe's AABBs are pretty rough, so you can select him when clicking nowhere near him (a foot left of his arm).
+		// This isn't how the original game works, so I think they must do a per-triangle check as well.
+		for(auto& submesh : mSubmeshes)
 		{
-			return true;
+			if(submesh->Raycast(ray))
+			{
+				return true;
+			}
 		}
 	}
+	
+	// Either didn't hit AABB or did hit AABB, but failed triangle test.
 	return false;
 }

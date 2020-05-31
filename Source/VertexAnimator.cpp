@@ -109,7 +109,7 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
 		VertexAnimationTransformPose transformSample = animation->SampleTransformPose(time, mFramesPerSecond, i);
 		if(transformSample.mFrameNumber >= 0)
 		{
-			meshes[i]->SetLocalTransformMatrix(transformSample.GetLocalTransformMatrix());
+			meshes[i]->SetMeshToLocalMatrix(transformSample.GetMeshToLocalMatrix());
 		}
 	}
 }

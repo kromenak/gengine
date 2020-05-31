@@ -36,7 +36,7 @@ struct VertexAnimationTransformPose
 	
     VertexAnimationTransformPose* mNext = nullptr;
     
-    Matrix4 GetLocalTransformMatrix()
+    Matrix4 GetMeshToLocalMatrix()
     {
         return Matrix4::MakeTranslate(mLocalPosition)
 		* Matrix4::MakeRotate(mLocalRotation)

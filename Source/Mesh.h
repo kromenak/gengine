@@ -9,16 +9,16 @@
 // Also contains some data shared by all Submeshes.
 //
 #pragma once
-#include <GL/glew.h>
-//#include <OpenGL/gl.h>
 #include <vector>
 
+#include "AABB.h"
 #include "Matrix4.h"
 #include "Quaternion.h"
 #include "Submesh.h"
 #include "Vector3.h"
 
 class Ray;
+struct RaycastHit;
 
 class Mesh
 {
@@ -31,21 +31,29 @@ public:
 	void Render(unsigned int submeshIndex);
 	void Render(unsigned int submeshIndex, unsigned int offset, unsigned int count);
     
-    void SetLocalTransformMatrix(const Matrix4& mat) { mLocalTransformMatrix = mat; }
-    Matrix4& GetLocalTransformMatrix() { return mLocalTransformMatrix; }
+    void SetMeshToLocalMatrix(const Matrix4& mat) { mMeshToLocalMatrix = mat; }
+    Matrix4& GetMeshToLocalMatrix() { return mMeshToLocalMatrix; }
+	
+	void SetAABB(const AABB& aabb) { mAABB = aabb; }
+	const AABB& GetAABB() const { return mAABB; }
 	
 	void AddSubmesh(Submesh* submesh) { mSubmeshes.push_back(submesh); }
-	
 	Submesh* GetSubmesh(int index) const { return index >= 0 && index < static_cast<int>(mSubmeshes.size()) ? mSubmeshes[index] : nullptr; }
 	int GetSubmeshCount() const { return static_cast<int>(mSubmeshes.size()); }
 	
 	const std::vector<Submesh*>& GetSubmeshes() const { return mSubmeshes; }
 	
-	bool Raycast(const Ray& ray);
+	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
 	
 private:
 	std::vector<Submesh*> mSubmeshes;
 	
-    // Matrix containing local translation/rotation.
-    Matrix4 mLocalTransformMatrix;
+    // Transforms from "mesh space" to "local space".
+	// Each Mesh in GK3 has its own position/rotation/scale,
+	// and Submesh vertices are relative to the Mesh coordinate system.
+	// This matrix represents the Mesh's coordinate system and can be used to transform from mesh space to parent space.
+    Matrix4 mMeshToLocalMatrix;
+	
+	// An AABB for the mesh, in its own local space.
+	AABB mAABB;
 };
