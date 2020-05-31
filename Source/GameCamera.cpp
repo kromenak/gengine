@@ -197,7 +197,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	position.SetY(floorY + height);
 	
 	// Perform collision checks and resolutions.
-	ResolveCollisions(position);
+	//ResolveCollisions(position);
 	
 	// Set position after resolving collisions.
 	GetTransform()->SetPosition(position);
@@ -295,7 +295,7 @@ void GameCamera::ResolveCollisions(Vector3& position)
 		// We need to convert camera position to local space of the mesh before doing collision check.
 		//TODO: Inverse operation here is expensive - can probably be more efficient.
 		//TODO: The local transform is just rotation/scale/translation, so we can invert using a different method likely.
-		Matrix4 meshToLocal = mesh->GetLocalTransformMatrix();
+		Matrix4 meshToLocal = mesh->GetMeshToLocalMatrix();
 		Matrix4 localToMesh = meshToLocal.Inverse();
 		Vector3 meshPosition = localToMesh.TransformPoint(position);
 		
