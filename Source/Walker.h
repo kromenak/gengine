@@ -41,9 +41,7 @@ public:
 	void SetCharacterConfig(const CharacterConfig& characterConfig);
 	void SetWalkMeshActor(Actor* walkMeshActor) { mWalkMeshActor = walkMeshActor; }
 	
-	void SnapWalkActorToFloor();
-	
-	
+	void SnapToFloor();
 	
 	bool WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	bool WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
@@ -56,7 +54,7 @@ protected:
 	
 private:
 	const float kAtNodeDistSq = 100.0f;
-	const float kAtHeadingRadians = Math::ToRadians(5.0f);
+	const float kAtHeadingRadians = Math::ToRadians(4.0f);
 	
 	// Current state of the walker.
 	State mState = State::Idle;
@@ -79,10 +77,9 @@ private:
 	bool mHasDesiredFacingDir = false;
 	Vector3 mDesiredFacingDir;
 	
-	// Move and rotate speeds.
-	// Why these values? Trial and error...
-	const float mMoveSpeed = 35.0f;
-	const float mRotateSpeed = Math::kPi;
+	// Turn speeds. A faster speed is used for turning in place when not walking.
+	const float kWalkTurnSpeed = Math::kPi;
+	const float kTurnSpeed = Math::k2Pi * 2;
 	
 	// A callback for when the end of a path is reached.
 	std::function<void()> mFinishedPathCallback = nullptr;
