@@ -15,6 +15,7 @@
 class Mesh;
 class Model;
 class Ray;
+struct RaycastHit;
 class Texture;
 
 class MeshRenderer : public Component
@@ -43,7 +44,9 @@ public:
 	
 	Matrix4 GetMeshWorldTransform(int index) const;
 	
-	bool Raycast(const Ray& ray);
+	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
+	
+	void DebugDrawAABBs();
     
 private:
 	// A model, if any was specified.

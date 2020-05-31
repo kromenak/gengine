@@ -18,6 +18,7 @@
 #include "Mesh.h"
 #include "Plane.h"
 #include "Ray.h"
+#include "Collisions.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -111,9 +112,9 @@ public:
 	void RenderOpaque(Vector3 cameraPosition);
 	void RenderTranslucent(Vector3 cameraPosition);
     
-    bool RaycastNearest(const Ray& ray, HitInfo& outHitInfo);
-	bool RaycastSingle(const Ray& ray, std::string name, HitInfo& outHitInfo);
-	std::vector<HitInfo> RaycastAll(const Ray& ray);
+    bool RaycastNearest(const Ray& ray, RaycastHit& outHitInfo);
+	bool RaycastSingle(const Ray& ray, std::string name, RaycastHit& outHitInfo);
+	std::vector<RaycastHit> RaycastAll(const Ray& ray);
 	
 	void SetVisible(std::string objectName, bool visible);
 	void SetTexture(std::string objectName, Texture* texture);
@@ -121,6 +122,8 @@ public:
 	bool Exists(std::string objectName) const;
 	bool IsVisible(std::string objectName) const;
     
+	Vector3 GetPosition(const std::string& objectName) const;
+	
 private:
 	enum class RenderType
 	{

@@ -47,12 +47,11 @@ void BSP::RenderTranslucent(Vector3 cameraPosition)
 	//RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Translucent);
 }
 
-bool BSP::RaycastNearest(const Ray& ray, HitInfo& outHitInfo)
+bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
 {
 	// Values for tracking closest found hit.
-    float closestDistSq = 9999999;
+    float closestT = FLT_MAX;
     std::string* closest = nullptr;
-	Vector3 closestHitPosition;
 	
 	// Iterate through all polygons in the BSP and see if the ray intersects
 	// with any triangles inside the polygon. Triangles within the BSP are made
@@ -67,20 +66,15 @@ bool BSP::RaycastNearest(const Ray& ray, HitInfo& outHitInfo)
         {
             Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
             Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
-            Vector3 hitPos;
-            if(ray.IntersectsTriangle(p0, p1, p2, hitPos))
+            if(Collisions::TestRayTriangle(ray, p0, p1, p2, outHitInfo))
             {
-                float distSq = (hitPos - ray.GetOrigin()).GetLengthSq();
-                if(distSq < closestDistSq)
+                if(outHitInfo.t < closestT)
                 {
 					// Save closest distance.
-                    closestDistSq = distSq;
+                    closestT = outHitInfo.t;
                     
                     // Find surface for this polygon, and then name for the surface.
                     closest = &mObjectNames[surface->objectIndex];
-					
-					// Save closest hit position.
-					closestHitPosition = hitPos;
                 }
             }
         }
@@ -91,11 +85,10 @@ bool BSP::RaycastNearest(const Ray& ray, HitInfo& outHitInfo)
 	
 	// Otherwise, fill in out hit info and return.
 	outHitInfo.name = *closest;
-	outHitInfo.position = closestHitPosition;
 	return true;
 }
 
-bool BSP::RaycastSingle(const Ray& ray, std::string name, HitInfo& outHitInfo)
+bool BSP::RaycastSingle(const Ray& ray, std::string name, RaycastHit& outHitInfo)
 {
 	for(auto& polygon : mPolygons)
 	{
@@ -109,12 +102,10 @@ bool BSP::RaycastSingle(const Ray& ray, std::string name, HitInfo& outHitInfo)
 		{
 			Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
 			Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
-			Vector3 hitPos;
-			if(ray.IntersectsTriangle(p0, p1, p2, hitPos))
+			if(Collisions::TestRayTriangle(ray, p0, p1, p2, outHitInfo))
 			{
-				// Save name and hit position and return.
+				// Save name of hit object.
 				outHitInfo.name = name;
-				outHitInfo.position = hitPos;
 				return true;
 			}
 		}
@@ -124,9 +115,9 @@ bool BSP::RaycastSingle(const Ray& ray, std::string name, HitInfo& outHitInfo)
 	return false;
 }
 
-std::vector<HitInfo> BSP::RaycastAll(const Ray& ray)
+std::vector<RaycastHit> BSP::RaycastAll(const Ray& ray)
 {
-	std::vector<HitInfo> hits;
+	std::vector<RaycastHit> hits;
 	
 	// Iterate through all polygons in the BSP and see if the ray intersects
 	// with any triangles inside the polygon. Triangles within the BSP are made
@@ -138,18 +129,13 @@ std::vector<HitInfo> BSP::RaycastAll(const Ray& ray)
 		{
 			Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
 			Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
-			Vector3 hitPos;
-			if(ray.IntersectsTriangle(p0, p1, p2, hitPos))
+			RaycastHit hitInfo;
+			if(Collisions::TestRayTriangle(ray, p0, p1, p2, hitInfo))
 			{
-				HitInfo hitInfo;
-				
 				// Save hit object name.
 				// Find surface for this polygon, and then name for the surface.
 				BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
 				hitInfo.name = mObjectNames[surface->objectIndex];
-				
-				// Save hit position.
-				hitInfo.position = hitPos;
 				
 				// Add to hit info vector.
 				hits.push_back(hitInfo);
@@ -252,6 +238,51 @@ bool BSP::IsVisible(std::string objectName) const
 	
 	// Worst case, no surfaces belong to this object. Must not be visible then!
 	return false;
+}
+
+Vector3 BSP::GetPosition(const std::string& objectName) const
+{
+	// Find index of the object name.
+	int objectIndex = -1;
+	for(int i = 0; i < mObjectNames.size(); i++)
+	{
+		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
+		{
+			objectIndex = i;
+			break;
+		}
+	}
+	
+	// Couldn't find object!
+	//TODO: Maybe we should return true/false with an out parameter?
+	if(objectIndex == -1) { return Vector3::Zero; }
+	
+	// Find index of a surface.
+	Vector3 pos = Vector3::Zero;
+	int vertexCount = 0;
+	for(int i = 0; i < mSurfaces.size(); i++)
+	{
+		if(mSurfaces[i]->objectIndex == objectIndex)
+		{
+			for(int j = 0; j < mPolygons.size(); j++)
+			{
+				if(mPolygons[j]->surfaceIndex == i)
+				{
+					int start = mPolygons[j]->vertexIndex;
+					int end = start + mPolygons[j]->vertexCount;
+					
+					for(int k = start; k < end; k++)
+					{
+						pos += mVertices[mVertexIndices[k]];
+						vertexCount++;
+					}
+				}
+			}
+		}
+	}
+	
+	// Get average position.
+	return pos / vertexCount;
 }
 
 void BSP::RenderTree(BSPNode* node, Vector3 position, RenderType renderType)

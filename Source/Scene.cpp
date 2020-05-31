@@ -11,6 +11,7 @@
 #include "ActionManager.h"
 #include "Animator.h"
 #include "CharacterManager.h"
+#include "Collisions.h"
 #include "Color32.h"
 #include "Debug.h"
 #include "GameCamera.h"
@@ -191,6 +192,9 @@ void Scene::Load()
 			}
 		}
 		
+		// Put to floor right away.
+		actor->SnapToFloor();
+		
 		// Set actor's graphical appearance.
 		actor->GetMeshRenderer()->SetModel(actorDef->model);
 		
@@ -306,6 +310,9 @@ bool Scene::InitEgoPosition(const std::string& positionName)
     mEgo->SetPosition(position->position);
     mEgo->SetHeading(position->heading);
 	
+	// Make sure Ego stays grounded.
+	mEgo->SnapToFloor();
+	
 	// Should also set camera position/angle.
 	// Output a warning if specified position has no camera though.
 	if(position->cameraName.empty())
@@ -350,7 +357,8 @@ bool Scene::CheckInteract(const Ray& ray) const
 	for(auto& object : mObjects)
 	{
 		MeshRenderer* meshRenderer = object->GetMeshRenderer();
-		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
+		RaycastHit hitInfo;
+		if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
 		{
 			return true;
 		}
@@ -359,7 +367,7 @@ bool Scene::CheckInteract(const Ray& ray) const
 	BSP* bsp = mSceneData->GetBSP();
 	if(bsp == nullptr) { return false; }
 	
-	HitInfo hitInfo;
+	RaycastHit hitInfo;
 	if(!bsp->RaycastNearest(ray, hitInfo)) { return false; }
 	
 	// If hit the floor, this IS an interaction, but not an interesting one.
@@ -394,20 +402,19 @@ void Scene::Interact(const Ray& ray)
 	if(Services::Get<InventoryManager>()->IsInventoryShowing()) { return; }
 	
 	// Check against any dynamic actors before falling back on BSP check.
-	float nearestActorDistSq = FLT_MAX;
+	float nearestT = FLT_MAX;
 	GKActor* interactedActor = nullptr;
 	for(auto& actor : mObjects)
 	{
 		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
-		if(meshRenderer != nullptr && meshRenderer->Raycast(ray))
+		RaycastHit hitInfo;
+		if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
 		{
-			// Interacted actor is one closest to me.
-			// Might not be 100% accurate, but probably good enough.
-			// TODO: (Would also be great if Raycast call returned distance stat for this).
-			float actorDistSq = (mCamera->GetPosition() - actor->GetPosition()).GetLengthSq();
-			if(actorDistSq < nearestActorDistSq)
+			// If ray hits multiple actors, choose the one closest to the ray origin.
+			if(hitInfo.t < nearestT)
 			{
-				nearestActorDistSq = actorDistSq;
+				std::cout << meshRenderer->GetModel()->GetName() << " is closer." << std::endl;
+				nearestT = hitInfo.t;
 				interactedActor = actor;
 			}
 		}
@@ -427,7 +434,7 @@ void Scene::Interact(const Ray& ray)
 	
     // Cast ray against scene BSP to see if it intersects with anything.
     // If so, it means we clicked on that thing.
-	HitInfo hitInfo;
+	RaycastHit hitInfo;
 	if(!bsp->RaycastNearest(ray, hitInfo)) { return; }
 	//std::cout << "Hit " << hitInfo.name << std::endl;
 	
@@ -435,7 +442,7 @@ void Scene::Interact(const Ray& ray)
 	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
 	{
 		// Check walker boundary to see whether we can walk to this spot.
-		mEgo->GetWalker()->WalkTo(hitInfo.position, mSceneData->GetWalkerBoundary(), nullptr);
+		mEgo->WalkTo(ray.GetPoint(hitInfo.t), mSceneData->GetWalkerBoundary(), nullptr);
 		return;
 	}
 	
@@ -483,10 +490,10 @@ float Scene::GetFloorY(const Vector3& position) const
 	BSP* bsp = mSceneData->GetBSP();
 	if(bsp != nullptr)
 	{
-		HitInfo hitInfo;
+		RaycastHit hitInfo;
 		if(bsp->RaycastSingle(downRay, mSceneData->GetFloorModelName(), hitInfo))
 		{
-			return hitInfo.position.GetY();
+			return downRay.GetPoint(hitInfo.t).GetY();
 		}
 	}
 	
@@ -578,10 +585,14 @@ void Scene::ExecuteAction(const Action* action)
 			const ScenePosition* scenePos = mSceneData->GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
-				mEgo->GetWalker()->WalkTo(scenePos->position, scenePos->heading, mSceneData->GetWalkerBoundary(), [this, scenePos, action]() -> void {
-					mEgo->SetHeading(scenePos->heading);
+				Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
+				mEgo->WalkTo(scenePos->position, scenePos->heading, mSceneData->GetWalkerBoundary(), [this, action]() -> void {
 					Services::Get<ActionManager>()->ExecuteAction(action);
 				});
+			}
+			else
+			{
+				Services::Get<ActionManager>()->ExecuteAction(action);
 			}
 			break;
 		}
@@ -590,10 +601,13 @@ void Scene::ExecuteAction(const Action* action)
 			Animation* anim = Services::GetAssets()->LoadAnimation(action->target);
 			if(anim != nullptr)
 			{
-				std::cout << "WalkToAnim" << std::endl;
 				mEgo->WalkToAnimationStart(anim, mSceneData->GetWalkerBoundary(), [action]() -> void {
 					Services::Get<ActionManager>()->ExecuteAction(action);
 				});
+			}
+			else
+			{
+				Services::Get<ActionManager>()->ExecuteAction(action);
 			}
 			break;
 		}
@@ -626,11 +640,45 @@ void Scene::ExecuteAction(const Action* action)
 		}
 		case Action::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
 		{
-			Services::Get<ActionManager>()->ExecuteAction(action);
+			// Find position of the model.
+			Vector3 modelPosition;
+			GKActor* actor = GetSceneObjectByModelName(action->target);
+			if(actor != nullptr)
+			{
+				modelPosition = actor->GetPosition();
+			}
+			else
+			{
+				modelPosition = mSceneData->GetBSP()->GetPosition(action->target);
+			}
+			
+			// Get vector from Ego to model.
+			Debug::DrawLine(mEgo->GetPosition(), modelPosition, Color32::Green, 60.0f);
+			Vector3 egoToModel = modelPosition - mEgo->GetPosition();
+			
+			// Do a "turn to" heading.
+			Heading turnToHeading = Heading::FromDirection(egoToModel);
+			mEgo->TurnTo(turnToHeading, [this, action]() -> void {
+				Services::Get<ActionManager>()->ExecuteAction(action);
+			});
 			break;
 		}
 		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser, RC1 Look Bench/Bookstore Sign
 		{
+			// Find position of the model we want to "walk to see".
+			Vector3 modelPosition;
+			GKActor* actor = GetSceneObjectByModelName(action->target);
+			if(actor != nullptr)
+			{
+				modelPosition = actor->GetPosition();
+			}
+			else
+			{
+				modelPosition = mSceneData->GetBSP()->GetPosition(action->target);
+			}
+			
+			//TODO
+			
 			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}

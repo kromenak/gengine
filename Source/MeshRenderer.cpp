@@ -36,7 +36,7 @@ void MeshRenderer::RenderOpaque()
 
 	for(int i = 0; i < mMeshes.size(); i++)
 	{
-		Matrix4 meshWorldTransformMatrix = actorWorldTransform * mMeshes[i]->GetLocalTransformMatrix();
+		Matrix4 meshWorldTransformMatrix = actorWorldTransform * mMeshes[i]->GetMeshToLocalMatrix();
 		
 		auto submeshes = mMeshes[i]->GetSubmeshes();
 		for(int j = 0; j < submeshes.size(); j++)
@@ -75,7 +75,7 @@ void MeshRenderer::RenderTranslucent()
 	
 	for(int i = 0; i < mMeshes.size(); i++)
 	{
-		Matrix4 meshWorldTransform = actorWorldTransform * mMeshes[i]->GetLocalTransformMatrix();
+		Matrix4 meshWorldTransform = actorWorldTransform * mMeshes[i]->GetMeshToLocalMatrix();
 		
 		auto submeshes = mMeshes[i]->GetSubmeshes();
 		for(int j = 0; j < submeshes.size(); j++)
@@ -193,30 +193,30 @@ Matrix4 MeshRenderer::GetMeshWorldTransform(int index) const
 {
 	if(index >= 0 && index < mMeshes.size())
 	{
-		return GetOwner()->GetTransform()->GetLocalToWorldMatrix() * mMeshes[index]->GetLocalTransformMatrix();
+		return GetOwner()->GetTransform()->GetLocalToWorldMatrix() * mMeshes[index]->GetMeshToLocalMatrix();
 	}
 	return Matrix4::Identity;
 }
 
-bool MeshRenderer::Raycast(const Ray& ray)
+bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 {
-	Matrix4 localToWorldMatrix = GetOwner()->GetComponent<Transform>()->GetLocalToWorldMatrix();
+	Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
 	
 	// Raycast against triangles in the mesh.
 	for(auto& mesh : mMeshes)
 	{
 		// Calculate world->local space transform by creating object->local and inverting.
-		Matrix4 meshWorldTransform = localToWorldMatrix * mesh->GetLocalTransformMatrix();
-		Matrix4 worldToLocalMatrix = meshWorldTransform.Inverse();
+		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
+		Matrix4 worldToMeshMatrix = meshToWorldMatrix.Inverse();
 		
 		// Transform the ray to object space.
-		Vector3 rayLocalPos = worldToLocalMatrix.TransformPoint(ray.GetOrigin());
-		Vector3 rayLocalDir = worldToLocalMatrix.Transform(ray.GetDirection());
+		Vector3 rayLocalPos = worldToMeshMatrix.TransformPoint(ray.GetOrigin());
+		Vector3 rayLocalDir = worldToMeshMatrix.Transform(ray.GetDirection());
 		rayLocalDir.Normalize();
 		Ray localRay(rayLocalPos, rayLocalDir);
 		
 		// See if the local ray intersects the local space triangles of the mesh.
-		if(mesh->Raycast(localRay))
+		if(mesh->Raycast(localRay, hitInfo))
 		{
 			//TODO: Convert hit info back to world space.
 			return true;
@@ -225,4 +225,57 @@ bool MeshRenderer::Raycast(const Ray& ray)
 	
 	// Ray did not intersect with any part of the mesh renderer.
 	return false;
+}
+
+void MeshRenderer::DebugDrawAABBs()
+{
+	Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
+	
+	// Raycast against triangles in the mesh.
+	for(auto& mesh : mMeshes)
+	{
+		// Calculate mesh->world matrix.
+		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
+	
+		// Convert AABB min/max to world space.
+		const AABB& aabb = mesh->GetAABB();
+		Vector3 min = aabb.GetMin();
+		Vector3 max = aabb.GetMax();
+		
+		// Left side of box.
+		Vector3 p0(min.x, min.y, min.z);
+		Vector3 p1(min.x, min.y, max.z);
+		Vector3 p3(min.x, max.y, min.z);
+		Vector3 p2(min.x, max.y, max.z);
+		
+		// Right side of box.
+		Vector3 p4(max.x, min.y, min.z);
+		Vector3 p5(max.x, min.y, max.z);
+		Vector3 p7(max.x, max.y, min.z);
+		Vector3 p6(max.x, max.y, max.z);
+		
+		p0 = meshToWorldMatrix.TransformPoint(p0);
+		p1 = meshToWorldMatrix.TransformPoint(p1);
+		p2 = meshToWorldMatrix.TransformPoint(p2);
+		p3 = meshToWorldMatrix.TransformPoint(p3);
+		p4 = meshToWorldMatrix.TransformPoint(p4);
+		p5 = meshToWorldMatrix.TransformPoint(p5);
+		p6 = meshToWorldMatrix.TransformPoint(p6);
+		p7 = meshToWorldMatrix.TransformPoint(p7);
+		
+		Debug::DrawLine(p0, p1, Color32::Magenta);
+		Debug::DrawLine(p1, p2, Color32::Magenta);
+		Debug::DrawLine(p2, p3, Color32::Magenta);
+		Debug::DrawLine(p3, p0, Color32::Magenta);
+		
+		Debug::DrawLine(p4, p5, Color32::Magenta);
+		Debug::DrawLine(p5, p6, Color32::Magenta);
+		Debug::DrawLine(p6, p7, Color32::Magenta);
+		Debug::DrawLine(p7, p4, Color32::Magenta);
+		
+		Debug::DrawLine(p0, p4, Color32::Magenta);
+		Debug::DrawLine(p1, p5, Color32::Magenta);
+		Debug::DrawLine(p2, p6, Color32::Magenta);
+		Debug::DrawLine(p3, p7, Color32::Magenta);
+	}
 }
