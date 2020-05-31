@@ -44,7 +44,7 @@ void Model::WriteToObjFile(std::string filePath)
 	out << "# Vertices\n";
 	for(auto& mesh : mMeshes)
 	{
-		Matrix4 localTransformMatrix = mesh->GetLocalTransformMatrix();
+		Matrix4 localTransformMatrix = mesh->GetMeshToLocalMatrix();
 		for(auto& submesh : mesh->GetSubmeshes())
 		{
 			float* positions = submesh->GetPositions();
@@ -248,11 +248,11 @@ void Model::ParseFromData(char *data, int dataLength)
         Matrix4 transMatrix = Matrix4::MakeTranslate(meshPos);
         Matrix4 rotMatrix = Matrix4::MakeRotate(rotQuat);
 		Matrix4 scaleMatrix = Matrix4::MakeScale(scale);
-        Matrix4 localTransformMatrix = transMatrix * rotMatrix * scaleMatrix;
+        Matrix4 meshToLocalMatrix = transMatrix * rotMatrix * scaleMatrix;
 		
 		// Create our mesh.
 		Mesh* mesh = new Mesh();
-		mesh->SetLocalTransformMatrix(localTransformMatrix);
+		mesh->SetMeshToLocalMatrix(meshToLocalMatrix);
 		mMeshes.push_back(mesh);
         
         // 4 bytes: Number of submeshes in this mesh.
@@ -260,15 +260,23 @@ void Model::ParseFromData(char *data, int dataLength)
         
         // 24 bytes: Two more sets of floating point values.
         // Based on plot test, seems very likely these are min/max bound values for the mesh.
-		//TODO: May want to use this to generate bounding boxes for models, which we can then use for collision instead of triangles in most cases.
+		Vector3 min;
+		Vector3 max;
+		
+		min.x = reader.ReadFloat();
+		min.z = reader.ReadFloat();
+		min.y = reader.ReadFloat();
+		
+		max.x = reader.ReadFloat();
+		max.z = reader.ReadFloat();
+		max.y = reader.ReadFloat();
+		
+		//Vector3 min = reader.ReadVector3();
+        //Vector3 max = reader.ReadVector3();
+		mesh->SetAABB(AABB(min, max));
 		#ifdef DEBUG_OUTPUT
-		Vector3 min = reader.ReadVector3();
-        Vector3 max = reader.ReadVector3();
 		std::cout << "    Min: " << min << std::endl;
 		std::cout << "    Max: " << max << std::endl;
-		#else
-		reader.ReadVector3();
-		reader.ReadVector3();
 		#endif
         
         // Now, we iterate over each submesh in this mesh.
