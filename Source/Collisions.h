@@ -7,6 +7,8 @@
 //
 #pragma once
 
+#include <string>
+
 class AABB;
 class LineSegment;
 class Plane;
@@ -14,6 +16,15 @@ class Ray;
 class Sphere;
 class Triangle;
 class Vector3;
+
+struct RaycastHit
+{
+	// The "t" value at which the hit occurred.
+	float t = 0.0f;
+	
+	// A name/identifier for the thing hit.
+	std::string name;
+};
 
 class Collisions
 {
@@ -34,8 +45,10 @@ public:
 	
 	// Ray
 	static bool TestRaySphere(const Ray& r, const Sphere& s);
-	static bool TestRayAABB(const Ray& r, const AABB& aabb);
+	static bool TestRayAABB(const Ray& r, const AABB& aabb, RaycastHit& outHitInfo);
 	static bool TestRayPlane(const Ray& r, const Plane& p);
+	static bool TestRayTriangle(const Ray& r, const Triangle& t, RaycastHit& hitInfo);
+	static bool TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& p1, const Vector3& p2, RaycastHit& outHitInfo);
 	
 	// Line Segment
 	static bool TestLineSegmentSphere(const LineSegment& ls, const Sphere& s);
