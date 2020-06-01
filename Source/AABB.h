@@ -9,6 +9,9 @@
 #pragma once
 #include "Vector3.h"
 
+class Color32;
+class Matrix4;
+
 class AABB
 {
 public:
@@ -22,10 +25,14 @@ public:
 	Vector3 GetCenter() const { return mMin + ((mMax - mMin) * 0.5f); }
 	Vector3 GetExtents() const { return ((mMax - mMin) * 0.5f); }
 	
+	void GrowToContain(const Vector3& point);
+	
 	bool IsValid() const { return mMin.x <= mMax.x && mMin.y <= mMax.y && mMin.z <= mMax.z; }
 	
 	bool ContainsPoint(const Vector3& point) const;
 	Vector3 GetClosestPoint(const Vector3& point) const;
+	
+	void DebugDraw(const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr) const;
 	
 private:
 	Vector3 mMin;
