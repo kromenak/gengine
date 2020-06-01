@@ -7,8 +7,10 @@
 //
 #pragma once
 
+#include <cfloat>
 #include <string>
 
+class Actor;
 class AABB;
 class LineSegment;
 class Plane;
@@ -20,10 +22,13 @@ class Vector3;
 struct RaycastHit
 {
 	// The "t" value at which the hit occurred.
-	float t = 0.0f;
+	float t = FLT_MAX;
 	
 	// A name/identifier for the thing hit.
 	std::string name;
+	
+	// An actor hit.
+	Actor* actor = nullptr;
 };
 
 class Collisions
