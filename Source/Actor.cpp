@@ -51,20 +51,22 @@ Actor::~Actor()
 
 void Actor::Update(float deltaTime)
 {
-	// Do my own update (subclasses can override).
-	OnUpdate(deltaTime);
-	
-    // Update all components.
-    for(auto& component : mComponents)
-    {
-        component->Update(deltaTime);
-    }
-	
-	if(Debug::RenderActorTransformAxes())
+	if(mState == State::Active)
 	{
-		Debug::DrawAxes(mTransform->GetLocalToWorldMatrix());
+		// Do my own update (subclasses can override).
+		OnUpdate(deltaTime);
+		
+		// Update all components.
+		for(auto& component : mComponents)
+		{
+			component->Update(deltaTime);
+		}
+		
+		if(Debug::RenderActorTransformAxes())
+		{
+			Debug::DrawAxes(mTransform->GetLocalToWorldMatrix());
+		}
 	}
-	//Debug::DrawLine(GetPosition(), GetPosition() + GetForward() * 5.0f, Color32::Red);
 }
 
 void Actor::SetActive(bool active)
