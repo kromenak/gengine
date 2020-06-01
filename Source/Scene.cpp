@@ -10,6 +10,7 @@
 
 #include "ActionManager.h"
 #include "Animator.h"
+#include "BSPActor.h"
 #include "CharacterManager.h"
 #include "Collisions.h"
 #include "Color32.h"
@@ -114,9 +115,11 @@ void Scene::Load()
 		mCamera->SetBounds(cameraBoundsModel);
 		
 		// For debugging - we can visualize the camera bounds mesh, if desired.
-		//Actor* cameraBoundsActor = new Actor();
-		//MeshRenderer* cameraBoundsMeshRenderer = cameraBoundsActor->AddComponent<MeshRenderer>();
-		//cameraBoundsMeshRenderer->SetModel(cameraBoundsModel);
+		GKActor* cameraBoundsActor = new GKActor();
+		MeshRenderer* cameraBoundsMeshRenderer = cameraBoundsActor->GetMeshRenderer();
+		cameraBoundsMeshRenderer->SetModel(cameraBoundsModel);
+		cameraBoundsMeshRenderer->SetEnabled(false);
+		cameraBoundsMeshRenderer->DebugDrawAABBs();
 	}
 	
 	// Create soundtrack player and get it playing!
@@ -228,10 +231,17 @@ void Scene::Load()
 			// "Scene" type models are ones that are baked into the BSP geometry.
 			case SceneModel::Type::Scene:
 			{
+				BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
+				mBSPActors.push_back(actor);
+				
+				actor->SetNoun(modelDef->noun);
+				actor->SetVerb(modelDef->verb);
+				
 				// If it should be hidden by default, tell the BSP to hide it.
 				if(modelDef->hidden)
 				{
-					mSceneData->GetBSP()->SetVisible(modelDef->name, false);
+					actor->SetActive(false);
+					//mSceneData->GetBSP()->SetVisible(modelDef->name, false);
 				}
 				break;
 			}
@@ -239,8 +249,25 @@ void Scene::Load()
 			// "HitTest" type models should be hidden, but still interactive.
 			case SceneModel::Type::HitTest:
 			{
+				BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
+				mBSPActors.push_back(actor);
+				
+				actor->SetNoun(modelDef->noun);
+				actor->SetVerb(modelDef->verb);
+				
+				// Hit tests, if hidden, are completely deactivated.
+				// However, if not hidden, they are still not visible, but they DO receive ray casts.
+				if(modelDef->hidden)
+				{
+					actor->SetActive(false);
+				}
+				else
+				{
+					actor->SetVisible(false);
+				}
+				
 				//std::cout << "Hide " << modelDef->name << std::endl;
-				mSceneData->GetBSP()->SetVisible(modelDef->name, false);
+				//mSceneData->GetBSP()->SetVisible(modelDef->name, false);
 				break;
 			}
 				
@@ -351,49 +378,73 @@ void Scene::SetCameraPosition(const std::string& cameraName)
 	mCamera->SetAngle(camera->angle);
 }
 
-bool Scene::CheckInteract(const Ray& ray) const
+GKObject* Scene::GetInteract(const Ray& ray) const
 {
-	// Check against any dynamic actors before falling back on BSP check.
+	GKObject* interactedObject = nullptr;
+	RaycastHit bestHit;
+	
+	// Check props/actors before BSP.
+	// Later, we'll check BSP and see if we hit something obscuring a prop/actor.
 	for(auto& object : mObjects)
 	{
+		if(!object->CanInteract()) { continue; }
+		
 		MeshRenderer* meshRenderer = object->GetMeshRenderer();
 		RaycastHit hitInfo;
 		if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
 		{
-			return true;
+			if(hitInfo.t < bestHit.t)
+			{
+				bestHit = hitInfo;
+				interactedObject = object;
+			}
 		}
 	}
 	
+	// Check BSP for any hit interactable object.
 	BSP* bsp = mSceneData->GetBSP();
-	if(bsp == nullptr) { return false; }
-	
-	RaycastHit hitInfo;
-	if(!bsp->RaycastNearest(ray, hitInfo)) { return false; }
-	
-	// If hit the floor, this IS an interaction, but not an interesting one.
-	// Clicking will walk the player, but we don't count it as an interactive object.
-	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
+	if(bsp != nullptr)
 	{
-		return false;
-	}
-	
-	// See if the hit item matches any scene model data.
-	const SceneModel* sceneModelData = nullptr;
-	const std::vector<const SceneModel*>& sceneModelDatas = mSceneData->GetModels();
-	for(auto& modelData : sceneModelDatas)
-	{
-		if(StringUtil::EqualsIgnoreCase(modelData->name, hitInfo.name))
+		RaycastHit hitInfo;
+		if(bsp->RaycastNearest(ray, hitInfo))
 		{
-			sceneModelData = modelData;
-			break;
+			// If "t" is smaller, then the BSP object obscured any previous hit.
+			if(hitInfo.t < bestHit.t)
+			{
+				// If hit the floor, this IS an interaction, but not an interesting one.
+				// Clicking will walk the player, but we don't count it as an interactive object.
+				if(StringUtil::EqualsIgnoreCase(bestHit.name, mSceneData->GetFloorModelName()))
+				{
+					return nullptr;
+				}
+				
+				// See if hit any actor representing BSP object.
+				for(auto& bspActor : mBSPActors)
+				{
+					if(!bspActor->CanInteract()) { continue; }
+					
+					if(StringUtil::EqualsIgnoreCase(bspActor->GetName(), hitInfo.name))
+					{
+						interactedObject = bspActor;
+						break;
+					}
+				}
+			}
 		}
 	}
+
+	/*
+	if(interactedObject != nullptr)
+	{
+		std::cout << interactedObject->GetNoun() << std::endl;
+	}
+	*/
 	
-	// If we found something, it counts as an interactive thing.
-	return sceneModelData != nullptr;
+	// Return what we found.
+	return interactedObject;
 }
 
-void Scene::Interact(const Ray& ray)
+void Scene::Interact(const Ray& ray, GKObject* interactHint)
 {
 	// Ignore scene interaction while the action bar is showing.
 	if(Services::Get<ActionManager>()->IsActionBarShowing()) { return; }
@@ -401,79 +452,48 @@ void Scene::Interact(const Ray& ray)
 	// Also ignore scene interaction when inventory is up.
 	if(Services::Get<InventoryManager>()->IsInventoryShowing()) { return; }
 	
-	// Check against any dynamic actors before falling back on BSP check.
-	float nearestT = FLT_MAX;
-	GKActor* interactedActor = nullptr;
-	for(auto& actor : mObjects)
+	// Get interacted object.
+	GKObject* interacted = interactHint;
+	if(interacted == nullptr)
 	{
-		MeshRenderer* meshRenderer = actor->GetMeshRenderer();
-		RaycastHit hitInfo;
-		if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
+		interacted = GetInteract(ray);
+	}
+	
+	// If interacted object is null, see if we hit the floor, in which case we want to walk.
+	if(interacted == nullptr)
+	{
+		BSP* bsp = mSceneData->GetBSP();
+		if(bsp != nullptr)
 		{
-			// If ray hits multiple actors, choose the one closest to the ray origin.
-			if(hitInfo.t < nearestT)
+			// Cast ray against scene BSP to see if it intersects with anything.
+			// If so, it means we clicked on that thing.
+			RaycastHit hitInfo;
+			if(bsp->RaycastNearest(ray, hitInfo))
 			{
-				std::cout << meshRenderer->GetModel()->GetName() << " is closer." << std::endl;
-				nearestT = hitInfo.t;
-				interactedActor = actor;
+				// Clicked on the floor - move ego to position.
+				if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
+				{
+					// Check walker boundary to see whether we can walk to this spot.
+					mEgo->WalkTo(ray.GetPoint(hitInfo.t), mSceneData->GetWalkerBoundary(), nullptr);
+				}
 			}
 		}
-	}
-	
-	// Show the action bar. Internally, this takes care of executing the chosen action.
-	if(interactedActor != nullptr)
-	{
-		Services::Get<ActionManager>()->ShowActionBar(interactedActor->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 		return;
 	}
 	
-	// FROM HERE: we are interacting with static scene objects (BSP).
-	// Make sure we have valid BSP.
-	BSP* bsp = mSceneData->GetBSP();
-	if(bsp == nullptr) { return; }
-	
-    // Cast ray against scene BSP to see if it intersects with anything.
-    // If so, it means we clicked on that thing.
-	RaycastHit hitInfo;
-	if(!bsp->RaycastNearest(ray, hitInfo)) { return; }
-	//std::cout << "Hit " << hitInfo.name << std::endl;
-	
-	// Clicked on the floor - move ego to position.
-	if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
+	// We've got an object to interact with!
+	// See if it has a pre-defined verb. If so, we will immediately execute that noun/verb combo.
+	if(!interacted->GetVerb().empty())
 	{
-		// Check walker boundary to see whether we can walk to this spot.
-		mEgo->WalkTo(ray.GetPoint(hitInfo.t), mSceneData->GetWalkerBoundary(), nullptr);
-		return;
-	}
-	
-    // Correlate the interacted model name to model data from the SIF.
-    // This allows us to correlate a model in the BSP to a noun keyword.
-    const SceneModel* sceneModelData = nullptr;
-    const std::vector<const SceneModel*>& sceneModelDatas = mSceneData->GetModels();
-    for(auto& modelData : sceneModelDatas)
-    {
-        if(modelData->name == hitInfo.name)
-        {
-            sceneModelData = modelData;
-            break;
-        }
-    }
-    
-    // If we couldn't find any scene model data for this model, we're done.
-    if(sceneModelData == nullptr) { return; }
-	
-	// If a specific verb is pre-defined for this object, just use that directly.
-	if(!sceneModelData->verb.empty())
-	{
-		std::cout << "Trying to play default verb " << sceneModelData->verb << std::endl;
-		if(Services::Get<ActionManager>()->ExecuteAction(sceneModelData->noun, sceneModelData->verb))
+		std::cout << "Trying to play default verb " << interacted->GetVerb() << std::endl;
+		if(Services::Get<ActionManager>()->ExecuteAction(interacted->GetNoun(), interacted->GetVerb()))
 		{
 			return;
 		}
 	}
 	
-	// Show the action bar for this noun.
-	Services::Get<ActionManager>()->ShowActionBar(sceneModelData->noun, std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
+	// No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
+	Services::Get<ActionManager>()->ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 }
 
 float Scene::GetFloorY(const Vector3& position) const

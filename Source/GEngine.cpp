@@ -214,9 +214,15 @@ void GEngine::UseDefaultCursor()
 
 void GEngine::UseHighlightCursor()
 {
-	if(mHighlightRedCursor != nullptr)
+	Cursor* useCursor = mHighlightRedCursor;
+	if(mHighlightRedCursor == nullptr || mActiveCursor == mHighlightRedCursor)
 	{
-		mActiveCursor = mHighlightRedCursor;
+		useCursor = mHighlightBlueCursor;
+	}
+	
+	if(useCursor != nullptr)
+	{
+		mActiveCursor = useCursor;
 		mActiveCursor->Activate();
 	}
 }

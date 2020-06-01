@@ -8,6 +8,7 @@
 #pragma once
 #include "Actor.h"
 
+class GKObject;
 class Model;
 
 class GameCamera : public Actor
@@ -54,6 +55,9 @@ private:
 		
 	// If true, camera bounds are turned on. If false, they are disabled.
 	bool mBoundsEnabled = true;
+	
+	// The last object hovered over. Used for toggling cursor highlight color.
+	std::string mLastHoveredNoun;
 	
 	void ResolveCollisions(Vector3& position);
 };

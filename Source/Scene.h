@@ -23,10 +23,10 @@
 class ActionBar;
 class Animator;
 class BSP;
+class BSPActor;
 class GameCamera;
 class GKActor;
-class GKActor;
-class GKProp;
+class GKObject;
 class Ray;
 struct SceneModel;
 class SIF;
@@ -47,8 +47,8 @@ public:
     bool InitEgoPosition(const std::string& positionName);
 	void SetCameraPosition(const std::string& cameraName);
 	
-	bool CheckInteract(const Ray& ray) const;
-    void Interact(const Ray& ray);
+	GKObject* GetInteract(const Ray& ray) const;
+    void Interact(const Ray& ray, GKObject* interactHint = nullptr);
 	
 	float GetFloorY(const Vector3& position) const;
 	
@@ -97,6 +97,9 @@ private:
 	
 	// Just "props".
 	std::vector<GKActor*> mProps;
+	
+	// Actors in the BSP.
+	std::vector<BSPActor*> mBSPActors;
 	
     // The name of actor and actor who we are controlling in the scene.
 	// We sometimes need just the name - that's safer during scene loading.

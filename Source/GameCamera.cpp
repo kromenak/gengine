@@ -9,8 +9,10 @@
 #include "Camera.h"
 #include "Collisions.h"
 #include "GEngine.h"
+#include "GKObject.h"
 #include "Scene.h"
 #include "Sphere.h"
+#include "StringUtil.h"
 #include "Triangle.h"
 #include "UICanvas.h"
 
@@ -235,7 +237,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	// Handle hovering and clicking on scene objects.
 	//TODO: Original game seems to ONLY check this when the mouse cursor moves or is clicked (in other words, on input).
 	//TODO: Maybe we should do that too?
-	if(mCamera != nullptr && !Services::GetInput()->MouseLocked())
+	if(!Services::GetInput()->MouseLocked())
 	{
 		// Only allow scene interaction if pointer isn't over a UI widget.
 		if(!UICanvas::DidWidgetEatInput())
@@ -248,22 +250,33 @@ void GameCamera::OnUpdate(float deltaTime)
 			Ray ray(worldPos, dir);
 		
 			// If we can interact with whatever we are pointing at, highlight the cursor.
-			bool canInteract = GEngine::inst->GetScene()->CheckInteract(ray);
-			if(canInteract)
+			// Note we call "UseHighlightCursor" when start hovering OR we switch hover to new object.
+			// This toggles red/blue highlight.
+			GKObject* hovering = GEngine::inst->GetScene()->GetInteract(ray);
+			if(hovering != nullptr)
 			{
-				GEngine::inst->UseHighlightCursor();
+				if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
+				{
+					GEngine::inst->UseHighlightCursor();
+					mLastHoveredNoun = hovering->GetNoun();
+				}
 			}
 			else
 			{
 				GEngine::inst->UseDefaultCursor();
+				mLastHoveredNoun.clear();
 			}
 			
 			// If left mouse button is released, try to interact with whatever it is over.
 			// Need to do this, even if canInteract==false, because floor can be clicked to move around.
 			if(Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Left))
 			{
-				GEngine::inst->GetScene()->Interact(ray);
+				GEngine::inst->GetScene()->Interact(ray, hovering);
 			}
+		}
+		else
+		{
+			mLastHoveredNoun.clear();
 		}
 	}
 	
