@@ -540,6 +540,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun"))
                 {
                     actor.noun = keyValue.value;
+					StringUtil::ToUpper(actor.noun);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
                 {
@@ -616,6 +617,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun"))
                 {
                     model.noun = keyValue.value;
+					StringUtil::ToUpper(model.noun);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
                 {
@@ -652,7 +654,6 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 {
                     model.gas = Services::GetAssets()->LoadGAS(keyValue.value);
                 }
-				
 			}
             
             // After parsing all the data, if this is a prop, load the model.
