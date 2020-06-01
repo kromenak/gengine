@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "BinaryReader.h"
+#include "BSPActor.h"
 #include "Services.h"
 #include "StringUtil.h"
 #include "Vector2.h"
@@ -50,7 +51,7 @@ void BSP::RenderTranslucent(Vector3 cameraPosition)
 bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
 {
 	// Values for tracking closest found hit.
-    float closestT = FLT_MAX;
+    outHitInfo.t = FLT_MAX;
     std::string* closest = nullptr;
 	
 	// Iterate through all polygons in the BSP and see if the ray intersects
@@ -60,18 +61,20 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
     {
 		BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
 		if(surface == nullptr) { continue; }
+		if(!surface->interactive) { continue; }
 		
         Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
         for(int i = 1; i < polygon->vertexCount - 1; i++)
         {
             Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
             Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
-            if(Collisions::TestRayTriangle(ray, p0, p1, p2, outHitInfo))
+			RaycastHit hitInfo;
+			if(Collisions::TestRayTriangle(ray, p0, p1, p2, hitInfo))
             {
-                if(outHitInfo.t < closestT)
+                if(hitInfo.t < outHitInfo.t)
                 {
 					// Save closest distance.
-                    closestT = outHitInfo.t;
+                    outHitInfo.t = hitInfo.t;
                     
                     // Find surface for this polygon, and then name for the surface.
                     closest = &mObjectNames[surface->objectIndex];
@@ -96,6 +99,7 @@ bool BSP::RaycastSingle(const Ray& ray, std::string name, RaycastHit& outHitInfo
 		// So, if this isn't the object, we can continue!
 		BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
 		if(mObjectNames[surface->objectIndex] != name) { continue; }
+		if(!surface->interactive) { continue; }
 		
 		Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
 		for(int i = 1; i < polygon->vertexCount - 1; i++)
@@ -124,6 +128,9 @@ std::vector<RaycastHit> BSP::RaycastAll(const Ray& ray)
 	// up of "triangle fans", so the first vertex in a polygon is shared by all triangles.
 	for(auto& polygon : mPolygons)
 	{
+		BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
+		if(!surface->interactive) { continue; }
+		
 		Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
 		for(int i = 1; i < polygon->vertexCount - 1; i++)
 		{
@@ -133,8 +140,6 @@ std::vector<RaycastHit> BSP::RaycastAll(const Ray& ray)
 			if(Collisions::TestRayTriangle(ray, p0, p1, p2, hitInfo))
 			{
 				// Save hit object name.
-				// Find surface for this polygon, and then name for the surface.
-				BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
 				hitInfo.name = mObjectNames[surface->objectIndex];
 				
 				// Add to hit info vector.
@@ -145,6 +150,78 @@ std::vector<RaycastHit> BSP::RaycastAll(const Ray& ray)
 
 	// Return vector of hits.
 	return hits;
+}
+
+bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo)
+{
+	Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
+	for(int i = 1; i < polygon->vertexCount - 1; i++)
+	{
+		Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
+		Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
+		if(Collisions::TestRayTriangle(ray, p0, p1, p2, outHitInfo))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+BSPActor* BSP::CreateBSPActor(const std::string& objectName)
+{
+	// Find index for object name or fail.
+	int objectIndex = -1;
+	for(int i = 0; i < mObjectNames.size(); i++)
+	{
+		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
+		{
+			objectIndex = i;
+			break;
+		}
+	}
+	if(objectIndex == -1) { return nullptr; }
+	
+	// OK, we found it! Create the actor.
+	BSPActor* actor = new BSPActor(this, objectName);
+	
+	// Generate AABB from this BSP object's position data.
+	bool firstPoint = true;
+	AABB aabb;
+	for(int surfaceIndex = 0; surfaceIndex < mSurfaces.size(); surfaceIndex++)
+	{
+		if(mSurfaces[surfaceIndex]->objectIndex == objectIndex)
+		{
+			actor->AddSurface(mSurfaces[surfaceIndex]);
+			
+			for(int polygonIndex = 0; polygonIndex < mPolygons.size(); polygonIndex++)
+			{
+				if(mPolygons[polygonIndex]->surfaceIndex == surfaceIndex)
+				{
+					actor->AddPolygon(mPolygons[polygonIndex]);
+					
+					int start = mPolygons[polygonIndex]->vertexIndex;
+					int end = start + mPolygons[polygonIndex]->vertexCount;
+					for(int k = start; k < end; k++)
+					{
+						if(firstPoint)
+						{
+							aabb = AABB(mVertices[mVertexIndices[k]], mVertices[mVertexIndices[k]]);
+							firstPoint = false;
+						}
+						else
+						{
+							aabb.GrowToContain(mVertices[mVertexIndices[k]]);
+						}
+					}
+				}
+			}
+		}
+	}
+	actor->SetAABB(aabb);
+	
+	// Position actor at center of BSP object position.
+	actor->SetPosition(GetPosition(objectName));
+	return actor;
 }
 
 void BSP::SetVisible(std::string objectName, bool visible)

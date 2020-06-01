@@ -22,6 +22,7 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
+class BSPActor;
 class Texture;
 
 // A node in the BSP tree.
@@ -88,12 +89,6 @@ struct BSPSurface
 	bool interactive = true;
 };
 
-struct HitInfo
-{
-	std::string name;
-	Vector3 position;
-};
-
 class BSP : public Asset
 {
     // When identifying the position of a point relative to a plane in the
@@ -112,9 +107,12 @@ public:
 	void RenderOpaque(Vector3 cameraPosition);
 	void RenderTranslucent(Vector3 cameraPosition);
     
+	BSPActor* CreateBSPActor(const std::string& objectName);
+	
     bool RaycastNearest(const Ray& ray, RaycastHit& outHitInfo);
 	bool RaycastSingle(const Ray& ray, std::string name, RaycastHit& outHitInfo);
 	std::vector<RaycastHit> RaycastAll(const Ray& ray);
+	bool RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo);
 	
 	void SetVisible(std::string objectName, bool visible);
 	void SetTexture(std::string objectName, Texture* texture);
