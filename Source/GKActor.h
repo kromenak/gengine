@@ -12,7 +12,7 @@
 // are the "cat" and "chicken". So, maybe we need a subclass for humanoids at some point.
 //
 #pragma once
-#include "Actor.h"
+#include "GKObject.h"
 
 #include <string>
 
@@ -25,7 +25,7 @@ class VertexAnimation;
 class VertexAnimator;
 class Walker;
 
-class GKActor : public Actor
+class GKActor : public GKObject
 {
 public:
     enum class FidgetType
@@ -45,15 +45,11 @@ public:
 	/// BASE GK3 OBJECT FUNCTIONS
 	///
 	// GK3 rotations are often defined in terms of a heading (360 degrees about Y-axis).
-	void SetHeading(const Heading& heading);
-	Heading GetHeading() const;
+	void SetHeading(const Heading& heading) override;
 	
 	///
 	/// ACTOR AND PROP FUNCTIONS
 	///
-	void SetNoun(std::string noun) { mNoun = noun; }
-	std::string GetNoun() const { return mNoun; }
-	
 	std::string GetModelName() const;
 	
 	MeshRenderer* GetMeshRenderer() const { return mMeshRenderer; }
@@ -118,10 +114,6 @@ private:
 	///
 	/// ACTOR AND PROP VARIABLES
 	///
-	// The object's noun. Almost all props and actors have a noun that is used
-	// to refer to the object in SIF/NVC/Sheep logic.
-	std::string mNoun;
-	
 	// Mesh is attached to a separate actor so that the mesh can move separately from the rest of the actor.
 	// This is sometimes necessary for how GK3 does walking and vertex animations.
 	Actor* mMeshActor = nullptr;

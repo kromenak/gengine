@@ -17,7 +17,7 @@
 #include "VertexAnimator.h"
 #include "Walker.h"
 
-GKActor::GKActor() : Actor(),
+GKActor::GKActor() : GKObject(),
 	mActorType(ActorType::Prop)
 {
 	// Create mesh actor with mesh renderer on it.
@@ -31,7 +31,7 @@ GKActor::GKActor() : Actor(),
 	mGasPlayer = AddComponent<GasPlayer>();
 }
 
-GKActor::GKActor(const std::string& identifier) : Actor(),
+GKActor::GKActor(const std::string& identifier) : GKObject(),
 	mIdentifier(identifier),
 	mActorType(ActorType::Actor)
 {
@@ -61,13 +61,8 @@ GKActor::GKActor(const std::string& identifier) : Actor(),
 
 void GKActor::SetHeading(const Heading& heading)
 {
-	SetRotation(Quaternion(Vector3::UnitY, heading.ToRadians()));
+	GKObject::SetHeading(heading);
 	SetMeshToActorRotation();
-}
-
-Heading GKActor::GetHeading() const
-{
-	return Heading::FromQuaternion(GetRotation());
 }
 
 std::string GKActor::GetModelName() const
@@ -205,7 +200,7 @@ void GKActor::StopFidget()
 void GKActor::DumpPosition()
 {
 	std::stringstream ss;
-	ss << "actor '" << mNoun << "' ";
+	ss << "actor '" << GetNoun() << "' ";
 	ss << "h=" << GetHeading() << ", ";
 	ss << "pos=" << GetPosition();
 	Services::GetReports()->Log("Dump", ss.str());
@@ -296,7 +291,7 @@ void GKActor::OnUpdate(float deltaTime)
 	
 	if(mMeshRenderer != nullptr)
 	{
-		mMeshRenderer->DebugDrawAABBs();
+		//mMeshRenderer->DebugDrawAABBs();
 	}
 }
 

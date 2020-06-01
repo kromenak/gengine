@@ -218,6 +218,10 @@
 		4B9231A2210D4E000004F4F3 /* Animator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A1210D4E000004F4F3 /* Animator.cpp */; };
 		4B9231A62117CFBC0004F4F3 /* GKActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9231A52117CFBC0004F4F3 /* GKActor.cpp */; };
 		4B99229D2031735500184755 /* BSP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B99229C2031735500184755 /* BSP.cpp */; };
+		4B9AB96124844A07007090B7 /* BSPActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9AB96024844A07007090B7 /* BSPActor.cpp */; };
+		4B9AB96224844A07007090B7 /* BSPActor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9AB96024844A07007090B7 /* BSPActor.cpp */; };
+		4B9AB9652484732C007090B7 /* GKObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9AB9642484732C007090B7 /* GKObject.cpp */; };
+		4B9AB9662484732C007090B7 /* GKObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9AB9642484732C007090B7 /* GKObject.cpp */; };
 		4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
 		4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */; };
 		4BA228AC2477A9F2002F0EE3 /* SheepThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BA228AB2477A9F2002F0EE3 /* SheepThread.cpp */; };
@@ -507,6 +511,10 @@
 		4B9231A52117CFBC0004F4F3 /* GKActor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKActor.cpp; path = ../Source/GKActor.cpp; sourceTree = "<group>"; };
 		4B99229B2031735500184755 /* BSP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSP.h; path = ../Source/BSP.h; sourceTree = "<group>"; };
 		4B99229C2031735500184755 /* BSP.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSP.cpp; path = ../Source/BSP.cpp; sourceTree = "<group>"; };
+		4B9AB95F24844A07007090B7 /* BSPActor.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSPActor.h; path = ../Source/BSPActor.h; sourceTree = "<group>"; };
+		4B9AB96024844A07007090B7 /* BSPActor.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSPActor.cpp; path = ../Source/BSPActor.cpp; sourceTree = "<group>"; };
+		4B9AB9632484732C007090B7 /* GKObject.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = GKObject.h; path = ../Source/GKObject.h; sourceTree = "<group>"; };
+		4B9AB9642484732C007090B7 /* GKObject.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GKObject.cpp; path = ../Source/GKObject.cpp; sourceTree = "<group>"; };
 		4B9E412F21BDEAB2008B9B1E /* CharacterManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = CharacterManager.h; path = ../Source/CharacterManager.h; sourceTree = "<group>"; };
 		4B9E413021BDEAB2008B9B1E /* CharacterManager.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = CharacterManager.cpp; path = ../Source/CharacterManager.cpp; sourceTree = "<group>"; };
 		4BA228A72477A7F7002F0EE3 /* SheepThread.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepThread.h; path = ../Source/Sheep/SheepThread.h; sourceTree = "<group>"; };
@@ -808,6 +816,8 @@
 			children = (
 				4B99229C2031735500184755 /* BSP.cpp */,
 				4B99229B2031735500184755 /* BSP.h */,
+				4B9AB96024844A07007090B7 /* BSPActor.cpp */,
+				4B9AB95F24844A07007090B7 /* BSPActor.h */,
 				4B00D32E1F8F3AD500D536D5 /* Camera.cpp */,
 				4B00D32F1F8F3AD500D536D5 /* Camera.h */,
 				4B84A13521684374003B4C3F /* Color32.cpp */,
@@ -915,6 +925,8 @@
 				4BEA727321D7F71A00998066 /* GameProgress.h */,
 				4B9231A52117CFBC0004F4F3 /* GKActor.cpp */,
 				4B9231A42117CFBC0004F4F3 /* GKActor.h */,
+				4B9AB9642484732C007090B7 /* GKObject.cpp */,
+				4B9AB9632484732C007090B7 /* GKObject.h */,
 				4B02A8BE2381E56200CCDFAA /* InventoryManager.cpp */,
 				4B02A8BD2381E56200CCDFAA /* InventoryManager.h */,
 				4B8A976C238B6EE1006D284D /* LocationManager.cpp */,
@@ -1414,12 +1426,14 @@
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
 				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
+				4B9AB96124844A07007090B7 /* BSPActor.cpp in Sources */,
 				4B5C301D21D1F60900211724 /* VertexAnimator.cpp in Sources */,
 				4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
 				4B12B9E0230A7298009F54E4 /* ConsoleUI.cpp in Sources */,
 				4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */,
 				4B38BA712438F547001F9240 /* Sphere.cpp in Sources */,
+				4B9AB9652484732C007090B7 /* GKObject.cpp in Sources */,
 				4BF32B8C1F67C434000639FB /* Shader.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1535,12 +1549,14 @@
 				4BB67C482352556C00FDFB30 /* RenderTexture.cpp in Sources */,
 				4B22F543217410830065B152 /* Main.cpp in Sources */,
 				4B22F519217407640065B152 /* Shader.cpp in Sources */,
+				4B9AB96224844A07007090B7 /* BSPActor.cpp in Sources */,
 				4B22F4F32174073D0065B152 /* Font.cpp in Sources */,
 				4B5C301E21D1F60900211724 /* VertexAnimator.cpp in Sources */,
 				4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B22F4FE217407470065B152 /* StringTokenizer.cpp in Sources */,
 				4B22F513217407640065B152 /* Material.cpp in Sources */,
 				4B38BA732438F547001F9240 /* Sphere.cpp in Sources */,
+				4B9AB9662484732C007090B7 /* GKObject.cpp in Sources */,
 				4B22F504217407530065B152 /* SheepCompiler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
