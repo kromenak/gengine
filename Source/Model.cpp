@@ -262,7 +262,6 @@ void Model::ParseFromData(char *data, int dataLength)
         // Based on plot test, seems very likely these are min/max bound values for the mesh.
 		Vector3 min;
 		Vector3 max;
-		
 		min.x = reader.ReadFloat();
 		min.z = reader.ReadFloat();
 		min.y = reader.ReadFloat();
@@ -271,8 +270,6 @@ void Model::ParseFromData(char *data, int dataLength)
 		max.z = reader.ReadFloat();
 		max.y = reader.ReadFloat();
 		
-		//Vector3 min = reader.ReadVector3();
-        //Vector3 max = reader.ReadVector3();
 		mesh->SetAABB(AABB(min, max));
 		#ifdef DEBUG_OUTPUT
 		std::cout << "    Min: " << min << std::endl;

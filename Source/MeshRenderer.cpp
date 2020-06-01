@@ -189,15 +189,6 @@ Mesh* MeshRenderer::GetMesh(int index) const
 	return nullptr;
 }
 
-Matrix4 MeshRenderer::GetMeshWorldTransform(int index) const
-{
-	if(index >= 0 && index < mMeshes.size())
-	{
-		return GetOwner()->GetTransform()->GetLocalToWorldMatrix() * mMeshes[index]->GetMeshToLocalMatrix();
-	}
-	return Matrix4::Identity;
-}
-
 bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 {
 	Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
@@ -237,45 +228,7 @@ void MeshRenderer::DebugDrawAABBs()
 		// Calculate mesh->world matrix.
 		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
 	
-		// Convert AABB min/max to world space.
-		const AABB& aabb = mesh->GetAABB();
-		Vector3 min = aabb.GetMin();
-		Vector3 max = aabb.GetMax();
-		
-		// Left side of box.
-		Vector3 p0(min.x, min.y, min.z);
-		Vector3 p1(min.x, min.y, max.z);
-		Vector3 p3(min.x, max.y, min.z);
-		Vector3 p2(min.x, max.y, max.z);
-		
-		// Right side of box.
-		Vector3 p4(max.x, min.y, min.z);
-		Vector3 p5(max.x, min.y, max.z);
-		Vector3 p7(max.x, max.y, min.z);
-		Vector3 p6(max.x, max.y, max.z);
-		
-		p0 = meshToWorldMatrix.TransformPoint(p0);
-		p1 = meshToWorldMatrix.TransformPoint(p1);
-		p2 = meshToWorldMatrix.TransformPoint(p2);
-		p3 = meshToWorldMatrix.TransformPoint(p3);
-		p4 = meshToWorldMatrix.TransformPoint(p4);
-		p5 = meshToWorldMatrix.TransformPoint(p5);
-		p6 = meshToWorldMatrix.TransformPoint(p6);
-		p7 = meshToWorldMatrix.TransformPoint(p7);
-		
-		Debug::DrawLine(p0, p1, Color32::Magenta);
-		Debug::DrawLine(p1, p2, Color32::Magenta);
-		Debug::DrawLine(p2, p3, Color32::Magenta);
-		Debug::DrawLine(p3, p0, Color32::Magenta);
-		
-		Debug::DrawLine(p4, p5, Color32::Magenta);
-		Debug::DrawLine(p5, p6, Color32::Magenta);
-		Debug::DrawLine(p6, p7, Color32::Magenta);
-		Debug::DrawLine(p7, p4, Color32::Magenta);
-		
-		Debug::DrawLine(p0, p4, Color32::Magenta);
-		Debug::DrawLine(p1, p5, Color32::Magenta);
-		Debug::DrawLine(p2, p6, Color32::Magenta);
-		Debug::DrawLine(p3, p7, Color32::Magenta);
+		// Debug draw the AABB.
+		mesh->GetAABB().DebugDraw(Color32::Magenta, 60.0f, &meshToWorldMatrix);
 	}
 }
