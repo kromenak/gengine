@@ -165,13 +165,13 @@ void Model::ParseFromData(char *data, int dataLength)
     // 4 bytes: unknown - usually zero, but not always (GAB.MOD had 0x0000C842).
     // Could maybe be a floating-point value? 0x000C842 = 100.0f
     reader.ReadUInt();
+	
+	// Unknown
+	reader.Skip(4);
     
     // 24 bytes: mostly unknown - most files have had zeros here thus far.
 	// These are likely flags of some sort - will document as I figure it out.
 	{
-		// Unknown
-		reader.Skip(4);
-		
 		// A value of "2" indicates that this model should render as a billboard.
 		unsigned int flags = reader.ReadUInt();
 		if((flags & 2) != 0)
@@ -182,10 +182,10 @@ void Model::ParseFromData(char *data, int dataLength)
 		
 		// Unknown
 		reader.Skip(16);
+		
+		// 4 bytes: unknown - has thus far always been the number 8.
+		reader.Skip(4);
 	}
-	
-	// 4 bytes: unknown - has thus far always been the number 8.
-	reader.Skip(4);
 	
     // Now, we iterate over each mesh in the file.
     for(int i = 0; i < numMeshes; i++)
@@ -202,41 +202,13 @@ void Model::ParseFromData(char *data, int dataLength)
             return;
         }
 
-        // These are in i,k,j order, rather than i,j,k, likely due to 3DS Max conventions.
-        // 12 bytes: mesh's x-axis basis vector (i)
-        // 12 bytes: mesh's z-axis basis vector (k)
-        // 12 bytes: mesh's y-axis basis vector (j)
+		// 36 bytes: i/j/k bases (aka x/y/z axes of mesh coordinate system).
+		// j/k are flipped b/c this data is in "Z-up" format, but our engine in "Y-up".
         Vector3 iBasis = reader.ReadVector3();
         Vector3 kBasis = reader.ReadVector3();
         Vector3 jBasis = reader.ReadVector3();
-		
-		// We can derive an import scale factor from the i/j/k basis by taking the length.
-		Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
-		#ifdef DEBUG_OUTPUT
-		std::cout << "    Scale: " << scale << std::endl;
-		#endif
-		
-		// If the imported model IS scaled, we need to normalize our bases before generating a rotation.
-		// Otherwise, the rotation will be off/incorrect.
-		iBasis.Normalize();
-		jBasis.Normalize();
-		kBasis.Normalize();
-		#ifdef DEBUG_OUTPUT
-		//std::cout << "   i: " << iBasis << std::endl;
-		//std::cout << "   j: " << jBasis << std::endl;
-		//std::cout << "   k: " << kBasis << std::endl;
-		#endif
         
-        // From the basis vectors, calculate a quaternion representing
-        // a rotation from the standard basis to that orientation.
-        Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
-		rotQuat.SetZ(rotQuat.GetZ());
-		rotQuat.SetW(rotQuat.GetW());
-		#ifdef DEBUG_OUTPUT
-        std::cout << "    Mesh Rotation: " << rotQuat << std::endl;
-		#endif
-        
-        // 12 bytes: an (X, Y, Z) *local* position for placing this mesh.
+        // 12 bytes: an (X, Y, Z) position in "mesh space."
         // Each mesh within a model has a local position relative to the model origin.
 		// Ex: if a human model has arms, legs, etc - this positions them all correctly relative to one another.
 		Vector3 meshPos = reader.ReadVector3();
@@ -244,11 +216,12 @@ void Model::ParseFromData(char *data, int dataLength)
         std::cout << "    Mesh Position: " << meshPos << std::endl;
 		#endif
         
-        // Use mesh position and rotation values to create a local transform matrix.
-        Matrix4 transMatrix = Matrix4::MakeTranslate(meshPos);
-        Matrix4 rotMatrix = Matrix4::MakeRotate(rotQuat);
-		Matrix4 scaleMatrix = Matrix4::MakeScale(scale);
-        Matrix4 meshToLocalMatrix = transMatrix * rotMatrix * scaleMatrix;
+		// Generate transform matrix from i/j/k bases and mesh position.
+		// This mesh allows us to go from "mesh space" to "local space" (i.e. local space of an Actor).
+		// Assuming the actor is at world origin (or there is no actor), this is actually "world space."
+		Matrix4 meshToLocalMatrix;
+		meshToLocalMatrix.SetColumns(Vector4(iBasis), Vector4(jBasis), Vector4(kBasis), Vector4(meshPos));
+		meshToLocalMatrix(3, 3) = 1.0f;
 		
 		// Create our mesh.
 		Mesh* mesh = new Mesh();
@@ -301,9 +274,10 @@ void Model::ParseFromData(char *data, int dataLength)
             // 4 bytes: unknown - often is (0x00FFFFFF), but not always.
             // Have also seen: 0x03773BB3, 0xFF000000, 0x50261200
             // Maybe a color value?
+			
             reader.ReadUInt();
 
-            // 4 bytes: unknown - seems to always be 1.
+            // 4 bytes: unknown - seems to usually be 1, sometimes 0.
             reader.ReadUInt();
             
             // 4 bytes: Vertex count for this submesh.
