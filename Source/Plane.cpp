@@ -17,9 +17,20 @@ Plane::Plane(float normalX, float normalY, float normalZ, float distance)
 
 Plane::Plane(const Vector3& p0, const Vector3& p1, const Vector3& p2)
 {
+	// Calculate normal using cross product.
 	mNormal = Vector3::Cross(p1 - p0, p2 - p0);
 	mNormal.Normalize();
-	mDistance = -Vector3::Dot(mNormal, p0);
+	
+	// Distance from origin can be calculated using scalar projection. Any of p0/p1/p2 could be used here.
+	mDistance = Vector3::Dot(mNormal, p0);
+	
+	// Negative distance implies that the normal is facing the wrong direction.
+	// So, negate normal to flip it, and make distance positive.
+	if(mDistance < 0.0f)
+	{
+		mNormal = -mNormal;
+		mDistance = -mDistance;
+	}
 }
 
 bool Plane::ContainsPoint(const Vector3& point) const
@@ -29,14 +40,19 @@ bool Plane::ContainsPoint(const Vector3& point) const
 
 Vector3 Plane::GetClosestPoint(const Vector3& point) const
 {
-	// Point's distance from plane * normal gives us vector with length of distance from plane.
-	// Subtracting from point gives us the point on the plane.
-    return point - (GetDistanceFromPlane(point) * mNormal);
+	// (distToPlane * normal) gives us a vector from the plane surface to the point.
+	// Negating that gives us a vector from the point to the plane's surface.
+	Vector3 pointToPlane = -(GetDistanceFromPlane(point) * mNormal);
+	
+	// Adding pointToPlane moves us from point to the surface of the plane.
+	return point + pointToPlane;
 }
 
 float Plane::GetDistanceFromPlane(const Vector3& point) const
 {
-	return Vector3::Dot(mNormal, point) + mDistance;
+	// We can use scalar projection (dot product) to get "distance from origin" along normal's direction.
+	// But then, we must subtract plane's distance from origin to get "distance from plane", rather than distance from origin.
+	return Vector3::Dot(mNormal, point) - mDistance;
 }
 
 /*static*/ bool Plane::GetIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& outPoint)

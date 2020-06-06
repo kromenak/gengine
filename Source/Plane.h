@@ -14,7 +14,7 @@
 class Plane
 {
 public:
-	Plane() { }
+	Plane() = default;
 	Plane(const Vector3& normal, float distance);
     Plane(float normalX, float normalY, float normalZ, float distance);
     Plane(const Vector3& p0, const Vector3& p1, const Vector3& p2);
