@@ -82,6 +82,7 @@ public:
 	
 	int GetTriangleCount() const;
 	bool GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) const;
+	bool GetNormal(int index, Vector3& n) const;
 	
 	bool Raycast(const Ray& ray);
 	

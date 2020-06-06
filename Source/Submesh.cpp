@@ -149,6 +149,19 @@ bool Submesh::GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) cons
 	return false;
 }
 
+bool Submesh::GetNormal(int index, Vector3& n) const
+{
+	if(mRenderMode == RenderMode::Triangles)
+	{
+		int offset = index * 3;
+		n.x = mNormals[offset];
+		n.y = mNormals[offset + 1];
+		n.z = mNormals[offset + 2];
+		return true;
+	}
+	return false;
+}
+
 bool Submesh::Raycast(const Ray& ray)
 {
 	if(mRenderMode != RenderMode::Triangles || mIndexes == nullptr)
