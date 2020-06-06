@@ -8,6 +8,7 @@
 #include "AudioListener.h"
 #include "Camera.h"
 #include "Collisions.h"
+#include "Debug.h"
 #include "GEngine.h"
 #include "GKObject.h"
 #include "Scene.h"
@@ -34,6 +35,25 @@ void GameCamera::SetAngle(float yaw, float pitch)
 
 void GameCamera::OnUpdate(float deltaTime)
 {
+	//Vector3 planeOffset = -Vector3::UnitZ * 50.0f;
+	//Debug::DrawLine(Vector3::Zero, planeOffset, Color32::Magenta);
+	
+	//Plane plane2(Vector3::UnitZ, 50.0f);
+	//Plane plane2(planeOffset,
+	//			 planeOffset + (Vector3::UnitX * 250.0f),
+	//			 planeOffset + (Vector3::UnitY * 100.0f));
+	//Vector3 testPoint = plane2.GetClosestPoint(GetPosition());
+	//Debug::DrawLine(Vector3::Zero, testPoint, Color32::Green);
+	
+	//Vector3 triOffset = Vector3::UnitZ * 200.0f;
+	//Triangle tri(triOffset,
+	//			 (Vector3::UnitX * 250.0f) + triOffset,
+	//			 (Vector3::UnitY * 100.0f) + triOffset);
+	//tri.DebugDraw(Color32::Yellow);
+	
+	//Vector3 testPoint2 = tri.GetClosestPoint(GetPosition());
+	//Debug::DrawLine(Vector3::Zero, testPoint2, Color32::Red);
+	
 	// It's possible our height was changed due to a script moving the camera.
 	// Make sure height is correct before we do our updates.
 	float startFloorY = GEngine::inst->GetScene()->GetFloorY(GetPosition());
@@ -199,7 +219,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	position.SetY(floorY + height);
 	
 	// Perform collision checks and resolutions.
-	//ResolveCollisions(position);
+	ResolveCollisions(position);
 	
 	// Set position after resolving collisions.
 	GetTransform()->SetPosition(position);
@@ -293,10 +313,8 @@ void GameCamera::OnUpdate(float deltaTime)
 void GameCamera::ResolveCollisions(Vector3& position)
 {
 	// No bounds model = no collision.
-	if(mBoundsModel == nullptr) { return; }
-	
-	// Bounds may be purposely disabled for debugging purposes.
-	if(!mBoundsEnabled) { return; }
+	// Bounds may also be purposely disabled for debugging purposes.
+	if(mBoundsModel == nullptr || !mBoundsEnabled) { return; }
 	
 	// We'll represent the camera with a sphere and the bounds are a model (triangles).
 	// Iterate and do a collision check against the triangles of the bounds model.
@@ -313,7 +331,7 @@ void GameCamera::ResolveCollisions(Vector3& position)
 		Vector3 meshPosition = localToMesh.TransformPoint(position);
 		
 		// Create sphere at position.
-		const float kCameraColliderRadius = 25.0f;
+		const float kCameraColliderRadius = 20.0f;
 		Sphere s(meshPosition, kCameraColliderRadius);
 		
 		// Iterate submeshes/submesh triangles.
@@ -326,6 +344,15 @@ void GameCamera::ResolveCollisions(Vector3& position)
 			{
 				if(submesh->GetTriangle(i, p0, p1, p2))
 				{
+					/*
+					if(meshNumber >= 19 && meshNumber <= 22)
+					{
+						Triangle triangle(p0, p1, p2);
+						Vector3 pointOnTriangle = triangle.GetClosestPoint(s.GetCenter());
+						Debug::DrawLine(Vector3::Zero, meshToLocal.TransformPoint(pointOnTriangle), Color32::Green);
+					}
+					*/
+					
 					// If an intersection exists, resolve it by "pushing" mesh position out.
 					Vector3 intersection;
 					if(Collisions::TestSphereTriangle(s, Triangle(p0, p1, p2), intersection))
@@ -334,6 +361,15 @@ void GameCamera::ResolveCollisions(Vector3& position)
 						s = Sphere(meshPosition, kCameraColliderRadius);
 					}
 				}
+				
+				/*
+				Vector3 normal;
+				if(submesh->GetNormal(i, normal))
+				{
+					Vector3 triCenter = meshToLocal.TransformPoint((p0 + p1 + p2) / 3);
+					Debug::DrawLine(triCenter, triCenter + (normal * 10.0f), Color32::Blue);
+				}
+				*/
 			}
 		}
 		
