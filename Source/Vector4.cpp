@@ -5,6 +5,8 @@
 // 
 #include "Vector4.h"
 
+#include "Vector3.h"
+
 Vector4 Vector4::Zero(0.0f, 0.0f, 0.0f, 0.0f);
 Vector4 Vector4::One(1.0f, 1.0f, 1.0f, 1.0f);
 Vector4 Vector4::UnitX(1.0f, 0.0f, 0.0f, 0.0f);
@@ -25,6 +27,11 @@ Vector4::Vector4(float x, float y, float z, float w) : x(x), y(y), z(z), w(w)
 Vector4::Vector4(bool isPos) : Vector4(0.0f, 0.0f, 0.0f, 0.0f)
 {
     w = isPos ? 1.0f : 0.0f;
+}
+
+Vector4::Vector4(const Vector3& other) : Vector4(other.x, other.y, other.z, 0.0f)
+{
+	
 }
 
 Vector4::Vector4(const Vector4& other) : x(other.x), y(other.y), z(other.z), w(other.w)

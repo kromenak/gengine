@@ -9,7 +9,8 @@
 #include <iostream>
 
 #include "GMath.h"
-#include "Vector3.h"
+
+class Vector3;
 
 class Vector4
 {
@@ -26,6 +27,9 @@ public:
 	
 	// Special constructor to set w component to 0 or 1 depending
     Vector4(bool isPos);
+	
+	// Conversion from Vector3.
+	Vector4(const Vector3& other);
     
     // Copy
     Vector4(const Vector4& other);
