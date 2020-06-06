@@ -18,7 +18,7 @@ public:
 	LineSegment() { }
 	LineSegment(const Vector3& start, const Vector3& end);
 	
-	Vector3 GetPoint(float t) const { return mStart + (mEnd - mStart) * t; }
+	Vector3 GetPoint(float t) const { return mStart + ((mEnd - mStart) * t); }
 	
 	bool ContainsPoint(const Vector3& point) const;
 	Vector3 GetClosestPoint(const Vector3& point) const;

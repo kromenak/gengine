@@ -36,23 +36,24 @@ bool LineSegment::ContainsPoint(const Vector3& point) const
 
 Vector3 LineSegment::GetClosestPoint(const Vector3& point) const
 {
-	// Get a unit vector in the line direction.
-	Vector3 dir = mEnd - mStart;
-	dir.Normalize();
-	
-	// Get a vector from start to point.
+	// Get vectors start-to-end and start-to-point.
+	Vector3 startToEnd = mEnd - mStart;
 	Vector3 startToPoint = point - mStart;
 	
-	// Project onto the line.
+	/*
+	// This also works, and is maybe more straightforward logic, but is a bit more expensive.
+	Vector3 dir = startToEnd.Normalize();
 	Vector3 projection = Vector3::Dot(startToPoint, dir) * dir;
+	return mStart + projection;
+	*/
 	
-	// Determine "t" for projected position on the line segment.
-	float t = (projection - mStart).GetLengthSq() / (mEnd - mStart).GetLengthSq();
-	
-	// If "t" was outside 0-1, then the closest point will be start/end.
-	// So, we can just clamp t to valid bounds.
+	// Project "start to point" onto "start to end." That'll give us the closest point on the line.
+	// Why does this work?
+	// ((a dot b) / ||b||) is scalar projection (which projects length of startToPoint onto line)
+	// (1 / ||b||) divides by length of b (with gives us fraction of line length - t value)
+	// Combined, we get ((a dot b) / (||b|| * ||b||)). And ||b|| * ||b|| is equal to b dot b.
+	// All together, we've got ((a dot b) / (b dot b)).
+	float t = Vector3::Dot(startToPoint, startToEnd) / Vector3::Dot(startToEnd, startToEnd);
 	t = Math::Clamp(t, 0.0f, 1.0f);
-	
-	// Get the point that correlates to "t".
 	return GetPoint(t);
 }
