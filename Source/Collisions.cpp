@@ -14,10 +14,10 @@
 /*static*/ bool Collisions::TestSphereSphere(const Sphere& s1, const Sphere& s2)
 {
 	// Get squared distance between centers of spheres.
-	float centersDistSq = (s1.GetCenter() - s2.GetCenter()).GetLengthSq();
+	float centersDistSq = (s1.center - s2.center).GetLengthSq();
 	
 	// Get squared length of radii summed.
-	float radiiDistSq = s1.GetRadius() + s2.GetRadius();
+	float radiiDistSq = s1.radius + s2.radius;
 	radiiDistSq *= radiiDistSq;
 	
 	// Spheres must be colliding if distance between centers is less than sum of radii.
@@ -27,36 +27,36 @@
 /*static*/ bool Collisions::TestSphereAABB(const Sphere& s, const AABB& aabb)
 {
 	// Get closest point on AABB to center of sphere.
-	Vector3 closestAABBPoint = aabb.GetClosestPoint(s.GetCenter());
+	Vector3 closestAABBPoint = aabb.GetClosestPoint(s.center);
 	
 	// If squared distance from sphere center to closest point is less than squared radius, we have an intersection!
-	float distSq = (s.GetCenter() - closestAABBPoint).GetLengthSq();
-	return distSq < s.GetRadius() * s.GetRadius();
+	float distSq = (s.center - closestAABBPoint).GetLengthSq();
+	return distSq < s.radius * s.radius;
 }
 
 /*static*/ bool Collisions::TestSpherePlane(const Sphere& s, const Plane& p)
 {
 	// Get closest point on plane to the sphere.
-	Vector3 closestPlanePoint = p.GetClosestPoint(s.GetCenter());
+	Vector3 closestPlanePoint = p.GetClosestPoint(s.center);
 	
 	// If squared distance from center to closest point is less than squared radius, we have an intersection!
-	float distSq = (s.GetCenter() - closestPlanePoint).GetLengthSq();
-	return distSq < s.GetRadius() * s.GetRadius();
+	float distSq = (s.center - closestPlanePoint).GetLengthSq();
+	return distSq < s.radius * s.radius;
 }
 
 /*static*/ bool Collisions::TestSphereTriangle(const Sphere& s, const Triangle& t, Vector3& intersection)
 {
 	// Get closest point on triangle to sphere center.
-	Vector3 pointOnTriangle = t.GetClosestPoint(s.GetCenter());
+	Vector3 pointOnTriangle = t.GetClosestPoint(s.center);
 	
 	// Get distance from center to point on triangle.
-	float distSq = (pointOnTriangle - s.GetCenter()).GetLengthSq();
-	bool intersects = distSq < s.GetRadius() * s.GetRadius();
+	float distSq = (pointOnTriangle - s.center).GetLengthSq();
+	bool intersects = distSq < s.radius * s.radius;
 	if(intersects)
 	{
-		intersection = s.GetCenter() - pointOnTriangle;
+		intersection = s.center - pointOnTriangle;
 		intersection.Normalize();
-		intersection *= s.GetRadius() - Math::Sqrt(distSq);
+		intersection *= s.radius - Math::Sqrt(distSq);
 	}
 	return intersects;
 }

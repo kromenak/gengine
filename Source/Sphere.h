@@ -8,6 +8,9 @@
 #pragma once
 #include "Vector3.h"
 
+class Color32;
+class Matrix4;
+
 class Sphere
 {
 public:
@@ -17,11 +20,7 @@ public:
 	bool ContainsPoint(const Vector3& point) const;
 	Vector3 GetClosestSurfacePoint(const Vector3& point) const;
 	
-	Vector3 GetCenter() const { return mCenter; }
-	float GetRadius() const { return mRadius; }
-	
-private:
 	// Sphere is defined as just a center point and radius.
-	Vector3 mCenter;
-	float mRadius = 1.0f;
+	Vector3 center;
+	float radius = 1.0f;
 };

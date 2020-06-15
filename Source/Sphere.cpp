@@ -5,20 +5,23 @@
 //
 #include "Sphere.h"
 
+#include "Debug.h"
+
 Sphere::Sphere(const Vector3& center, float radius) :
-	mCenter(center),
-	mRadius(radius)
+	center(center),
+	radius(radius)
 {
-	mRadius = Math::Max(0.0f, mRadius);
+	// Radius must not be negative.
+	this->radius = Math::Max(0.0f, radius);
 }
 
 bool Sphere::ContainsPoint(const Vector3& point) const
 {
 	// I *think* a point ON the surface of the sphere should be considered contained in the sphere...
-	return (point - mCenter).GetLengthSq() <= mRadius * mRadius;
+	return (point - center).GetLengthSq() <= radius * radius;
 }
 
 Vector3 Sphere::GetClosestSurfacePoint(const Vector3& point) const
 {
-	return mCenter + ((point - mCenter).Normalize() * mRadius);
+	return center + ((point - center).Normalize() * radius);
 }

@@ -7,9 +7,9 @@
 
 Ray::Ray(const Vector3& origin, const Vector3& direction) :
     mOrigin(origin),
-    mDirection(direction)
+    mDirection(direction) // assumed that caller has normalized direction
 {
-    //TODO: Make sure direction is normalized?
+    
 }
 
 bool Ray::ContainsPoint(const Vector3& point) const
