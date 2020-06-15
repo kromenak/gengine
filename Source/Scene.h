@@ -17,6 +17,7 @@
 #include <string>
 #include <vector>
 
+#include "Collisions.h"
 #include "SceneData.h"
 #include "Timeblock.h"
 
@@ -34,6 +35,12 @@ class Skybox;
 class SoundtrackPlayer;
 class Vector3;
 
+struct SceneCastResult
+{
+	RaycastHit hitInfo;
+	GKObject* hitObject = nullptr;
+};
+
 class Scene
 {
 public:
@@ -47,7 +54,8 @@ public:
     bool InitEgoPosition(const std::string& positionName);
 	void SetCameraPosition(const std::string& cameraName);
 	
-	GKObject* GetInteract(const Ray& ray) const;
+	SceneCastResult Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore = nullptr) const;
+	
     void Interact(const Ray& ray, GKObject* interactHint = nullptr);
 	
 	float GetFloorY(const Vector3& position) const;

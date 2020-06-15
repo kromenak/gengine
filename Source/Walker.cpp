@@ -16,12 +16,14 @@
 #include "MeshRenderer.h"
 #include "Scene.h"
 #include "Services.h"
+#include "StringUtil.h"
 #include "Vector3.h"
 #include "WalkerBoundary.h"
 
 TYPE_DEF_CHILD(Component, Walker);
 
-Walker::Walker(Actor* owner) : Component(owner)
+Walker::Walker(Actor* owner) : Component(owner),
+	mGKOwner(static_cast<GKActor*>(owner))
 {
 	
 }
@@ -71,11 +73,7 @@ bool Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBound
 	{
 		if(!mHasDesiredFacingDir)
 		{
-			if(mFinishedPathCallback != nullptr)
-			{
-				mFinishedPathCallback();
-				mFinishedPathCallback = nullptr;
-			}
+			OnWalkToFinished();
 			return false;
 		}
 		return true;
@@ -89,11 +87,7 @@ bool Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBound
 		// So, return true if desired facing, false otherwise.
 		if(!mHasDesiredFacingDir)
 		{
-			if(mFinishedPathCallback != nullptr)
-			{
-				mFinishedPathCallback();
-				mFinishedPathCallback = nullptr;
-			}
+			OnWalkToFinished();
 			return false;
 		}
 		return true;
@@ -128,9 +122,47 @@ bool Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBound
 	}
 }
 
+bool Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+{
+	mWalkToSeeTarget = targetName;
+	mWalkToSeeTargetPosition = targetPosition;
+	std::cout << "Target is " << targetName << std::endl;
+	
+	// Check whether thing is already in view.
+	// If so, we don't even need to walk (but may need to turn-to-face).
+	Vector3 facingDir;
+	if(IsWalkToSeeTargetInView(facingDir))
+	{
+		// Be sure to save finish callback in this case - it usually happens in walk to.
+		mFinishedPathCallback = finishCallback;
+		
+		// No need to walk, but do turn to face the thing.
+		mHasDesiredFacingDir = true;
+		mDesiredFacingDir = facingDir;
+		return true;
+	}
+	else
+	{
+		return WalkTo(targetPosition, walkerBoundary, finishCallback);
+	}
+}
+
 void Walker::OnUpdate(float deltaTime)
 {
-	Actor* walkActor = GetOwner();
+	// If we have a "walk to see" target, check whether it has come into view.
+	bool stopWalkPrematurely = false;
+	if(!mWalkToSeeTarget.empty())
+	{
+		Vector3 facingDir;
+		if(IsWalkToSeeTargetInView(facingDir))
+		{
+			stopWalkPrematurely = true;
+			
+			// When doing a "walk to see," we want the actor to turn to face.
+			mHasDesiredFacingDir = true;
+			mDesiredFacingDir = facingDir;
+		}
+	}
 	
 	// Which direction should we turn to face? None at first.
 	Vector3 turnToFaceDir;
@@ -138,35 +170,36 @@ void Walker::OnUpdate(float deltaTime)
 	// If we have a path, follow it.
 	if(mPath.size() > 0)
 	{
-		Debug::DrawLine(walkActor->GetPosition(), mPath.back(), Color32::White);
+		Debug::DrawLine(mGKOwner->GetPosition(), mPath.back(), Color32::White);
 		
 		// Figure out where to move next.
 		// If we're near that spot, move on to the next spot.
-		Vector3 toNext = mPath.back() - walkActor->GetPosition();
-		if(toNext.GetLengthSq() < kAtNodeDistSq)
+		Vector3 toNext = mPath.back() - mGKOwner->GetPosition();
+		if(toNext.GetLengthSq() < kAtNodeDistSq || stopWalkPrematurely)
 		{
 			/*
 			// We are approaching the final node in the path - set our position exactly.
 			if(mPath.size() == 1)
 			{
-				walkActor->SetPosition(mPath.back());
+				mGKOwner->SetPosition(mPath.back());
 			}
 			*/
 			
 			mPath.pop_back();
 			if(mPath.size() <= 0)
 			{
-				// If no desired heading was specified, we can do the callback right now.
-				if(!mHasDesiredFacingDir && mFinishedPathCallback != nullptr)
-				{
-					mFinishedPathCallback();
-					mFinishedPathCallback = nullptr;
-				}
+				// Stop walk anim.
 				StopWalk();
+				
+				// If no desired heading was specified, we can do the callback right now.
+				if(!mHasDesiredFacingDir)
+				{
+					OnWalkToFinished();
+				}
 			}
 			else
 			{
-				toNext = mPath.back() - walkActor->GetPosition();
+				toNext = mPath.back() - mGKOwner->GetPosition();
 			}
 		}
 		
@@ -188,12 +221,12 @@ void Walker::OnUpdate(float deltaTime)
 	if(turnToFaceDir != Vector3::Zero)
 	{
 		// What angle do I need to rotate to face the direction to the target?
-		float angle = Math::Acos(Vector3::Dot(walkActor->GetForward(), turnToFaceDir));
+		float angle = Math::Acos(Vector3::Dot(mGKOwner->GetForward(), turnToFaceDir));
 		if(angle > kAtHeadingRadians)
 		{
 			// Which way do I rotate to get to facing direction I want?
 			// Can use y-axis of cross product to determine this.
-			Vector3 cross = Vector3::Cross(walkActor->GetForward(), turnToFaceDir);
+			Vector3 cross = Vector3::Cross(mGKOwner->GetForward(), turnToFaceDir);
 			
 			// If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
 			// In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
@@ -216,9 +249,9 @@ void Walker::OnUpdate(float deltaTime)
 			angleOfRotation *= rotateDirection;
 			
 			// Update our rotation by this angle amount.
-			Transform* meshTransform = mWalkMeshActor->GetTransform();
-			meshTransform->RotateAround(walkActor->GetPosition(), Vector3::UnitY, angleOfRotation);
-			walkActor->GetTransform()->Rotate(Vector3::UnitY, angleOfRotation);
+			Transform* meshTransform = mGKOwner->GetMeshRenderer()->GetOwner()->GetTransform();
+			meshTransform->RotateAround(mGKOwner->GetPosition(), Vector3::UnitY, angleOfRotation);
+			mGKOwner->GetTransform()->Rotate(Vector3::UnitY, angleOfRotation);
 		}
 		else
 		{
@@ -228,11 +261,7 @@ void Walker::OnUpdate(float deltaTime)
 				mHasDesiredFacingDir = false;
 				
 				// At this point, we've REALLY finished our path.
-				if(mFinishedPathCallback != nullptr)
-				{
-					mFinishedPathCallback();
-					mFinishedPathCallback = nullptr;
-				}
+				OnWalkToFinished();
 			}
 		}
 	}
@@ -283,7 +312,43 @@ void Walker::StopWalk()
 		mState = State::End;
 		GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkStopAnim, true, false, [this]() -> void {
 			mState = State::Idle;
-			//mWalkActor->StartFidget(GKActor::FidgetType::Idle);
+			//mowner->StartFidget(GKActor::FidgetType::Idle);
 		});
 	}
+}
+
+void Walker::OnWalkToFinished()
+{
+	// Make sure state variables are cleared.
+	mPath.clear();
+	mHasDesiredFacingDir = false;
+	mWalkToSeeTarget.clear();
+	
+	// Call finished callback.
+	if(mFinishedPathCallback != nullptr)
+	{
+		mFinishedPathCallback();
+		mFinishedPathCallback = nullptr;
+	}
+}
+
+bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
+{
+	Vector3 headPos = mGKOwner->GetHeadPosition();
+	Debug::DrawLine(headPos, mWalkToSeeTargetPosition, Color32::Magenta);
+	
+	// Create ray from head in direction of target position.
+	Vector3 dir = (mWalkToSeeTargetPosition - headPos).Normalize();
+	Ray ray(headPos, dir);
+	
+	// If hit the target with the ray, it must be in view.
+	SceneCastResult result = GEngine::inst->GetScene()->Raycast(ray, false, mGKOwner);
+	if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget))
+	{
+		// Convert ray direction to a "facing" direction,
+		dir.SetY(0.0f);
+		outTurnToFaceDir = dir.Normalize();
+		return true;
+	}
+	return false;
 }

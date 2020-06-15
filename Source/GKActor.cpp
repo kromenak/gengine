@@ -56,7 +56,6 @@ GKActor::GKActor(const std::string& identifier) : GKObject(),
 	// Add walker and configure it.
 	mWalker = AddComponent<Walker>();
 	mWalker->SetCharacterConfig(config);
-	mWalker->SetWalkMeshActor(mMeshActor);
 }
 
 void GKActor::SetHeading(const Heading& heading)
@@ -246,9 +245,9 @@ void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBounda
 	mWalker->WalkTo(walkPos, heading, walkerBoundary, finishCallback);
 }
 
-void GKActor::WalkToSee(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+void GKActor::WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
 {
-	
+	mWalker->WalkToSee(targetName, targetPosition, walkerBoundary, finishCallback);
 }
 
 Vector3 GKActor::GetWalkDestination() const
@@ -263,6 +262,27 @@ void GKActor::SnapToFloor()
 	{
 		mWalker->SnapToFloor();
 	}
+}
+
+Vector3 GKActor::GetHeadPosition() const
+{
+	/*
+	if(mMeshRenderer != nullptr)
+	{
+		Mesh* headMesh = mMeshRenderer->GetMesh(mCharConfig->headMeshIndex);
+		if(headMesh != nullptr)
+		{
+			Vector3 headCenter = headMesh->GetAABB().GetCenter();
+			Matrix4 meshToWorld = mMeshActor->GetTransform()->GetLocalToWorldMatrix() * headMesh->GetMeshToLocalMatrix();
+			return meshToWorld.TransformPoint(headCenter);
+		}
+	}
+	*/
+	
+	// Can't determine exact head position! Just return position.
+	Vector3 position = GetPosition();
+	position.y += mCharConfig->walkerHeight;
+	return position;
 }
 
 void GKActor::OnActive()

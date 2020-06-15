@@ -41,10 +41,6 @@ public:
 	GKActor();
 	GKActor(const std::string& identifier);
 	
-	///
-	/// BASE GK3 OBJECT FUNCTIONS
-	///
-	// GK3 rotations are often defined in terms of a heading (360 degrees about Y-axis).
 	void SetHeading(const Heading& heading) override;
 	
 	///
@@ -80,12 +76,14 @@ public:
 	void WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	void WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
-	void WalkToSee(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
+	void WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	Vector3 GetWalkDestination() const;
 	
 	void SnapToFloor();
 	
 	FaceController* GetFaceController() const { return mFaceController; }
+	
+	Vector3 GetHeadPosition() const;
 	
 	void DumpPosition();
 	

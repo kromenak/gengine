@@ -30,16 +30,20 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 	if(IsWorldPosWalkable(to))
 	{
 		goal = WorldPosToTexturePos(to);
+		
+		// Since "to" is walkable, push it as the final node in the path directly.
+		// Path creation logic below assumes that we've done this up here.
+		outPath.push_back(to);
 	}
 	else
 	{
 		// If "to" is not walkable, we need to find nearest walkable position as our goal.
 		goal = FindNearestWalkableTexturePosToWorldPos(to);
+		
+		// Since "to" is NOT walkable, we don't want to push it onto the path directly.
+		// However, we can push our "nearest walkable" world pos.
+		outPath.push_back(TexturePosToWorldPos(goal));
 	}
-	
-	// Converting to/from texture/world space can introduce a bit of error into the final goal position.
-	// To avoid this, we'll always use our "to" as the end of the path.
-	outPath.push_back(to);
 	
 	// Pick start position. If "from" is walkable, we can use it directly.
 	Vector2 start;
@@ -156,6 +160,16 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 		current = infos[current].parent;
 	}
 	return true;
+}
+
+Vector3 WalkerBoundary::FindNearestWalkablePosition(const Vector3& position) const
+{
+	// Easy case: the position provided is already walkable.
+	if(IsWorldPosWalkable(position)) { return position; }
+	
+	// Find nearest walkable position on texture, convert to world space.
+	Vector2 walkableTexturePos = FindNearestWalkableTexturePosToWorldPos(position);
+	return TexturePosToWorldPos(walkableTexturePos);
 }
 
 bool WalkerBoundary::IsWorldPosWalkable(Vector3 worldPos) const

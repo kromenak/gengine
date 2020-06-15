@@ -119,7 +119,7 @@ void Scene::Load()
 		MeshRenderer* cameraBoundsMeshRenderer = cameraBoundsActor->GetMeshRenderer();
 		cameraBoundsMeshRenderer->SetModel(cameraBoundsModel);
 		cameraBoundsMeshRenderer->SetEnabled(false);
-		cameraBoundsMeshRenderer->DebugDrawAABBs();
+		//cameraBoundsMeshRenderer->DebugDrawAABBs();
 	}
 	
 	// Create soundtrack player and get it playing!
@@ -133,6 +133,7 @@ void Scene::Load()
 	
 	// For debugging - render walker bounds overlay on game world.
 	//TODO: Move to construction system!
+	/*
 	{
 		WalkerBoundary* walkerBoundary = mSceneData->GetWalkerBoundary();
 		if(walkerBoundary != nullptr)
@@ -157,6 +158,7 @@ void Scene::Load()
 			walkerBoundaryActor->SetScale(size);
 		}
 	}
+	*/
 	
 	// Create actors for the scene.
 	const std::vector<const SceneActor*>& sceneActorDatas = mSceneData->GetActors();
@@ -378,27 +380,36 @@ void Scene::SetCameraPosition(const std::string& cameraName)
 	mCamera->SetAngle(camera->angle);
 }
 
-GKObject* Scene::GetInteract(const Ray& ray) const
+SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore) const
 {
-	GKObject* interactedObject = nullptr;
-	RaycastHit bestHit;
+	SceneCastResult result;
 	
 	// Check props/actors before BSP.
 	// Later, we'll check BSP and see if we hit something obscuring a prop/actor.
 	for(auto& object : mObjects)
 	{
-		if(!object->CanInteract()) { continue; }
+		// If only interested in interactive objects, skip non-interactive objects.
+		if(interactiveOnly && !object->CanInteract()) { continue; }
 		
+		// Raycast to see if this is the closest thing we've hit.
+		// If so, we save it as our current result.
 		MeshRenderer* meshRenderer = object->GetMeshRenderer();
 		RaycastHit hitInfo;
 		if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
 		{
-			if(hitInfo.t < bestHit.t)
+			if(hitInfo.t < result.hitInfo.t)
 			{
-				bestHit = hitInfo;
-				interactedObject = object;
+				result.hitInfo = hitInfo;
+				result.hitObject = object;
 			}
 		}
+	}
+	
+	// Assign name in hit info, if anything was hit.
+	// This is because GKObjects don't currently do this during raycast.
+	if(result.hitObject != nullptr)
+	{
+		result.hitInfo.name = result.hitObject->GetNoun();
 	}
 	
 	// Check BSP for any hit interactable object.
@@ -409,39 +420,27 @@ GKObject* Scene::GetInteract(const Ray& ray) const
 		if(bsp->RaycastNearest(ray, hitInfo))
 		{
 			// If "t" is smaller, then the BSP object obscured any previous hit.
-			if(hitInfo.t < bestHit.t)
+			if(hitInfo.t < result.hitInfo.t)
 			{
-				// If hit the floor, this IS an interaction, but not an interesting one.
-				// Clicking will walk the player, but we don't count it as an interactive object.
-				if(StringUtil::EqualsIgnoreCase(bestHit.name, mSceneData->GetFloorModelName()))
-				{
-					return nullptr;
-				}
+				result.hitInfo = hitInfo;
 				
 				// See if hit any actor representing BSP object.
 				for(auto& bspActor : mBSPActors)
 				{
-					if(!bspActor->CanInteract()) { continue; }
+					// If only interested in interactive objects, skip non-interactive objects.
+					if(interactiveOnly && !bspActor->CanInteract()) { continue; }
 					
+					// Check whether this is the BSP actor we hit.
 					if(StringUtil::EqualsIgnoreCase(bspActor->GetName(), hitInfo.name))
 					{
-						interactedObject = bspActor;
+						result.hitObject = bspActor;
 						break;
 					}
 				}
 			}
 		}
 	}
-
-	/*
-	if(interactedObject != nullptr)
-	{
-		std::cout << interactedObject->GetNoun() << std::endl;
-	}
-	*/
-	
-	// Return what we found.
-	return interactedObject;
+	return result;
 }
 
 void Scene::Interact(const Ray& ray, GKObject* interactHint)
@@ -456,7 +455,8 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 	GKObject* interacted = interactHint;
 	if(interacted == nullptr)
 	{
-		interacted = GetInteract(ray);
+		SceneCastResult result = Raycast(ray, true);
+		interacted = result.hitObject;
 	}
 	
 	// If interacted object is null, see if we hit the floor, in which case we want to walk.
@@ -634,11 +634,6 @@ void Scene::ExecuteAction(const Action* action)
 		case Action::Approach::Near: // Never used in GK3.
 		{
 			std::cout << "Executed NEAR approach type!" << std::endl;
-			const ScenePosition* scenePos = mSceneData->GetScenePosition(action->target);
-			if(scenePos != nullptr)
-			{
-				mEgo->SetPosition(scenePos->position);
-			}
 			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
 		}
@@ -686,20 +681,21 @@ void Scene::ExecuteAction(const Action* action)
 		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser, RC1 Look Bench/Bookstore Sign
 		{
 			// Find position of the model we want to "walk to see".
-			Vector3 modelPosition;
+			Vector3 targetPosition;
 			GKActor* actor = GetSceneObjectByModelName(action->target);
 			if(actor != nullptr)
 			{
-				modelPosition = actor->GetPosition();
+				targetPosition = actor->GetPosition();
 			}
 			else
 			{
-				modelPosition = mSceneData->GetBSP()->GetPosition(action->target);
+				targetPosition = mSceneData->GetBSP()->GetPosition(action->target);
 			}
 			
-			//TODO
-			
-			Services::Get<ActionManager>()->ExecuteAction(action);
+			// Walk over and execute action once target is visible.
+			mEgo->WalkToSee(action->target, targetPosition, mSceneData->GetWalkerBoundary(), [this, action]() -> void {
+				Services::Get<ActionManager>()->ExecuteAction(action);
+			});
 			break;
 		}
 		case Action::Approach::None:

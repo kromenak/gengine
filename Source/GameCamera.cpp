@@ -59,6 +59,12 @@ void GameCamera::OnUpdate(float deltaTime)
 	float startFloorY = GEngine::inst->GetScene()->GetFloorY(GetPosition());
 	mHeight = GetPosition().GetY() - startFloorY;
 	
+	// Disallow moving camera when an action is playing.
+	if(Services::Get<ActionManager>()->IsActionPlaying())
+	{
+		return;
+	}
+	
 	// We don't move/turn unless some input causes it.
 	float forwardSpeed = 0.0f;
 	float strafeSpeed = 0.0f;
@@ -268,11 +274,14 @@ void GameCamera::OnUpdate(float deltaTime)
 			Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
 			Vector3 dir = (worldPos2 - worldPos).Normalize();
 			Ray ray(worldPos, dir);
+			
+			// Cast into the scene to see if we're over an interactive object.
+			SceneCastResult result = GEngine::inst->GetScene()->Raycast(ray, true);
 		
 			// If we can interact with whatever we are pointing at, highlight the cursor.
 			// Note we call "UseHighlightCursor" when start hovering OR we switch hover to new object.
 			// This toggles red/blue highlight.
-			GKObject* hovering = GEngine::inst->GetScene()->GetInteract(ray);
+			GKObject* hovering = result.hitObject;
 			if(hovering != nullptr)
 			{
 				if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
@@ -348,7 +357,7 @@ void GameCamera::ResolveCollisions(Vector3& position)
 					if(meshNumber >= 19 && meshNumber <= 22)
 					{
 						Triangle triangle(p0, p1, p2);
-						Vector3 pointOnTriangle = triangle.GetClosestPoint(s.GetCenter());
+						Vector3 pointOnTriangle = triangle.GetClosestPoint(s.center);
 						Debug::DrawLine(Vector3::Zero, meshToLocal.TransformPoint(pointOnTriangle), Color32::Green);
 					}
 					*/

@@ -19,6 +19,7 @@ class WalkerBoundary
 {
 public:
 	bool FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& outPath) const;
+	Vector3 FindNearestWalkablePosition(const Vector3& position) const;
 	
 	void SetTexture(Texture* texture) { mTexture = texture; }
 	Texture* GetTexture() const { return mTexture; }
