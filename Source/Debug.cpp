@@ -71,8 +71,8 @@ void Debug::DrawRect(const Rect& rect, const Color32& color)
 {
 	Vector2 bottomLeft = rect.GetMin();
 	Vector2 topRight = rect.GetMax();
-	Vector2 topLeft = Vector2(bottomLeft.GetX(), topRight.GetY());
-	Vector2 bottomRight = Vector2(topRight.GetX(), bottomLeft.GetY());
+	Vector2 topLeft = Vector2(bottomLeft.x, topRight.y);
+	Vector2 bottomRight = Vector2(topRight.x, bottomLeft.y);
 	
 	DrawLine(bottomLeft, topLeft, color);
 	DrawLine(topLeft, topRight, color);

@@ -25,7 +25,7 @@ GameCamera::GameCamera()
 
 void GameCamera::SetAngle(const Vector2& angle)
 {
-	SetAngle(angle.GetX(), angle.GetY());
+	SetAngle(angle.x, angle.y);
 }
 
 void GameCamera::SetAngle(float yaw, float pitch)
@@ -57,7 +57,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	// It's possible our height was changed due to a script moving the camera.
 	// Make sure height is correct before we do our updates.
 	float startFloorY = GEngine::inst->GetScene()->GetFloorY(GetPosition());
-	mHeight = GetPosition().GetY() - startFloorY;
+	mHeight = GetPosition().y - startFloorY;
 	
 	// Disallow moving camera when an action is playing.
 	if(Services::Get<ActionManager>()->IsActionPlaying())
@@ -222,7 +222,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	// Calculate new desired height and apply that to position y.
 	float height = mHeight + verticalSpeed * deltaTime;
 	float floorY = GEngine::inst->GetScene()->GetFloorY(position);
-	position.SetY(floorY + height);
+	position.y = floorY + height;
 	
 	// Perform collision checks and resolutions.
 	ResolveCollisions(position);
@@ -233,7 +233,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	// Height may also be affected by collision. After resolving,
 	// we can see if our height changed and save it.
 	float newFloorY = GEngine::inst->GetScene()->GetFloorY(position);
-	float heightForReal = position.GetY() - newFloorY;
+	float heightForReal = position.y - newFloorY;
 	mHeight = heightForReal;
 	
 	// Apply turn movement.
@@ -250,7 +250,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	{
 		Vector3 pos = GetPosition();
 		floorY = scene->GetFloorY(pos);
-		pos.SetY(floorY + mHeight);
+		pos.y = floorY + mHeight;
 		SetPosition(pos);
 	}
 	

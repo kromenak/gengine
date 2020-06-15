@@ -238,7 +238,7 @@ void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBounda
 	Vector3 walkPos = vertexAnim->SampleVertexPosition(0.0f, 15, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
 	VertexAnimationTransformPose transformPose = vertexAnim->SampleTransformPose(0.0f, 15, mCharConfig->hipAxesMeshIndex);
 	walkPos = transformPose.GetMeshToLocalMatrix().TransformPoint(walkPos);
-	walkPos.SetY(GetPosition().GetY());
+	walkPos.y = GetPosition().y;
 	Heading heading = Heading::FromQuaternion(transformPose.mLocalRotation * Quaternion(Vector3::UnitY, Math::kPi));
 	
 	// Walk to that position/heading.
@@ -352,7 +352,7 @@ void GKActor::SetMeshToActorPosition()
 		
 		// The hip pos is usually higher up on the mesh (about hip height).
 		// We want to NOT take into account the vertical height.
-		worldHipPos.SetY(GetPosition().GetY());
+		worldHipPos.y = GetPosition().y;
 		
 		// Calculate offset from hip position to actor's position.
 		// This is how much we want to "correct" or move the mesh actor's position so the mesh itself is positioned at the actor's position.
@@ -378,7 +378,7 @@ void GKActor::SetMeshToActorPositionUsingAnim(VertexAnimation* anim, int framesP
 		Vector3 worldModelOrigin = GetTransform()->GetLocalToWorldMatrix().TransformPoint(Vector3::Zero);
 		
 		// Make sure hip and origin Y-components are equal (no height in this calculation).
-		worldHipPos.SetY(worldModelOrigin.GetY());
+		worldHipPos.y = worldModelOrigin.y;
 		
 		// Calculate offset from hip position to actor's position.
 		// This is how much we want to "correct" or move the mesh actor's position so the mesh itself is positioned at the actor's position.
@@ -416,7 +416,7 @@ void GKActor::SetActorToMeshPosition()
 		
 		// The hip pos is usually higher up on the mesh (about hip height).
 		// We want to NOT take into account the vertical height.
-		worldHipPos.SetY(GetPosition().GetY());
+		worldHipPos.y = GetPosition().y;
 		
 		// Just put the actor at that world hip pos!
 		SetPosition(worldHipPos);

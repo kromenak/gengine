@@ -39,14 +39,6 @@ public:
     bool operator!=(const Vector3& other) const;
     
     // Accessors
-    void SetX(float newX) { x = newX; }
-    void SetY(float newY) { y = newY; }
-    void SetZ(float newZ) { z = newZ; }
-    
-    float GetX() const { return x; }
-    float GetY() const { return y; }
-    float GetZ() const { return z; }
-	
     float& operator[](unsigned int i)       { return (&x)[i]; }
     float  operator[](unsigned int i) const { return (&x)[i]; }
     

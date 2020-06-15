@@ -271,7 +271,7 @@ void ActionBar::RefreshButtonLayout()
 		buttonRT->SetPivot(0.0f, 0.0f);
 		buttonRT->SetAnchoredPosition(Vector2(xPos, 0.0f));
 		
-		xPos += buttonRT->GetSize().GetX();
+		xPos += buttonRT->GetSize().x;
 	}
 	
 	// Update the button holder to match the size of all buttons.
@@ -295,21 +295,21 @@ void ActionBar::CenterOnPointer()
 	Vector2 max = buttonHolderRect.GetMax();
 	
 	Vector2 anchoredPos = mButtonHolder->GetAnchoredPosition();
-	if(min.GetX() < 0)
+	if(min.x < 0)
 	{
-		anchoredPos.SetX(anchoredPos.GetX() - min.GetX());
+		anchoredPos.x = anchoredPos.x - min.x;
 	}
-	if(max.GetX() > screenRectMax.GetX())
+	if(max.x > screenRectMax.x)
 	{
-		anchoredPos.SetX(anchoredPos.GetX() - (max.GetX() - screenRectMax.GetX()));
+		anchoredPos.x = anchoredPos.x - (max.x - screenRectMax.x);
 	}
-	if(min.GetY() < 0)
+	if(min.y < 0)
 	{
-		anchoredPos.SetY(anchoredPos.GetY() - min.GetY());
+		anchoredPos.y = anchoredPos.y - min.y;
 	}
-	if(max.GetY() > screenRectMax.GetY())
+	if(max.y > screenRectMax.y)
 	{
-		anchoredPos.SetY(anchoredPos.GetY() - (max.GetY() - screenRectMax.GetY()));
+		anchoredPos.y = anchoredPos.y - (max.y - screenRectMax.y);
 	}
 	mButtonHolder->SetAnchoredPosition(anchoredPos);
 }

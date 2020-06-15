@@ -58,27 +58,27 @@ void TextLayout::AddLine(const std::string& line)
 	switch(mHorizontalAlignment)
 	{
 	case HorizontalAlignment::Left:
-		xPos = mRect.GetMin().GetX();
+		xPos = mRect.GetMin().x;
 		break;
 	case HorizontalAlignment::Right:
-		xPos = mRect.GetMax().GetX() - lineWidth;
+		xPos = mRect.GetMax().x - lineWidth;
 		break;
 	//case HorizontalAlignment::Center:
 	//	break;
 	}
 	
-	float yPos = mNextCharPos.GetY() + lineHeight;
+	float yPos = mNextCharPos.y + lineHeight;
 	switch(mVerticalAlignment)
 	{
 	case VerticalAlignment::Bottom:
-		yPos = mRect.GetMin().GetY();
+		yPos = mRect.GetMin().y;
 		for(auto& charInfo : mCharInfos)
 		{
-			charInfo.pos.SetY(charInfo.pos.GetY() + lineHeight);
+			charInfo.pos.y = charInfo.pos.y + lineHeight;
 		}
 		break;
 	case VerticalAlignment::Top:
-		//yPos = mRect.GetMax().GetY() - ((lineHeight + mLineSpacing) * (lIndex + 1));
+		//yPos = mRect.GetMax().y - ((lineHeight + mLineSpacing) * (lIndex + 1));
 		break;
 	//case VerticalAlignment::Center:
 	//	break;
@@ -96,15 +96,15 @@ void TextLayout::AddLine(const std::string& line)
 		
 		// If this glyph will extend outside the horizontal bounds of the rect, and we want to wrap, move to a new line!
 		if(mHorizontalOverflow == HorizontalOverflow::Wrap &&
-		   (leftX < mRect.GetMin().GetX() || rightX > mRect.GetMax().GetX()))
+		   (leftX < mRect.GetMin().x || rightX > mRect.GetMax().x))
 		{
 			switch(mHorizontalAlignment)
 			{
 			case HorizontalAlignment::Left:
-				xPos = mRect.GetMin().GetX();
+				xPos = mRect.GetMin().x;
 				break;
 			case HorizontalAlignment::Right:
-				xPos = mRect.GetMax().GetX() - lineWidth;
+				xPos = mRect.GetMax().x - lineWidth;
 				break;
 			//case HorizontalAlignment::Center:
 			//	break;
@@ -113,10 +113,10 @@ void TextLayout::AddLine(const std::string& line)
 			switch(mVerticalAlignment)
 			{
 			case VerticalAlignment::Bottom:
-				yPos = mRect.GetMin().GetY();
+				yPos = mRect.GetMin().y;
 				for(auto& charInfo : mCharInfos)
 				{
-					charInfo.pos.SetY(charInfo.pos.GetY() + lineHeight);
+					charInfo.pos.y = charInfo.pos.y + lineHeight;
 				}
 				break;
 			case VerticalAlignment::Top:
@@ -136,7 +136,7 @@ void TextLayout::AddLine(const std::string& line)
 		
 		// If this char will extend outside the vertical bounds of the rect, and we don't want overflow, stop!
 		if(mVerticalOverflow == VerticalOverflow::Truncate &&
-		   (bottomY < mRect.GetMin().GetY() || topY > mRect.GetMax().GetY()))
+		   (bottomY < mRect.GetMin().y || topY > mRect.GetMax().y))
 		{
 			break;
 		}
@@ -166,10 +166,10 @@ float xPos = 0.0f;
 switch(mHorizontalAlignment)
 {
 	case HorizontalAlignment::Left:
-		xPos = rect.GetMin().GetX();
+		xPos = rect.GetMin().x;
 		break;
 	case HorizontalAlignment::Right:
-		xPos = rect.GetMax().GetX() - lineWidths[lIndex];
+		xPos = rect.GetMax().x - lineWidths[lIndex];
 		break;
 	//case HorizontalAlignment::Center:
 	//	break;
@@ -179,10 +179,10 @@ float yPos = 0.0f;
 switch(mVerticalAlignment)
 {
 	case VerticalAlignment::Bottom:
-		yPos = rect.GetMin().GetY() + ((lineHeight + mLineSpacing) * (lines.size() - 1 - lIndex));
+		yPos = rect.GetMin().y + ((lineHeight + mLineSpacing) * (lines.size() - 1 - lIndex));
 		break;
 	case VerticalAlignment::Top:
-		yPos = rect.GetMax().GetY() - ((lineHeight + mLineSpacing) * (lIndex + 1));
+		yPos = rect.GetMax().y - ((lineHeight + mLineSpacing) * (lIndex + 1));
 		break;
 	//case VerticalAlignment::Center:
 	//	break;

@@ -221,10 +221,10 @@ void FaceController::EyeJitter()
 	//TODO: This eye jitter behavior doesn't seem quite right...
 	//TODO: Maybe I have to limit x/y between max, but ALSO only allow at most 2px movement each time?
 	//TODO: Or something else...anyway, it can definitely be better.
-	float maxX = mCharacterConfig->faceConfig.maxEyeJitterDistance.GetX();
+	float maxX = mCharacterConfig->faceConfig.maxEyeJitterDistance.x;
 	mEyeJitterX = Random::Range(-maxX, maxX);
 	
-	float maxY = mCharacterConfig->faceConfig.maxEyeJitterDistance.GetY();
+	float maxY = mCharacterConfig->faceConfig.maxEyeJitterDistance.y;
 	mEyeJitterY = Random::Range(-maxY, maxY);
 	
 	UpdateFaceTexture();
@@ -314,7 +314,7 @@ void FaceController::RollBlinkTimer()
 	if(mCharacterConfig != nullptr)
 	{
 		const Vector2& blinkFrequency = mCharacterConfig->faceConfig.blinkFrequency;
-		waitMs = Random::Range((int)blinkFrequency.GetX(), (int)blinkFrequency.GetY());
+		waitMs = Random::Range((int)blinkFrequency.x, (int)blinkFrequency.y);
 	}
 	
 	// Convert to seconds and set timer.
@@ -328,7 +328,7 @@ void FaceController::RollEyeJitterTimer()
 	if(mCharacterConfig != nullptr)
 	{
 		const Vector2& jitterFrequency = mCharacterConfig->faceConfig.eyeJitterFrequency;
-		waitMs = Random::Range((int)jitterFrequency.GetX(), (int)jitterFrequency.GetY());
+		waitMs = Random::Range((int)jitterFrequency.x, (int)jitterFrequency.y);
 	}
 	
 	// Convert to seconds and set timer.
@@ -344,7 +344,7 @@ void FaceController::UpdateFaceTexture()
 	if(mCurrentMouthTexture != nullptr)
 	{
 		const Vector2& mouthOffset = mCharacterConfig->faceConfig.mouthOffset;
-		Texture::BlendPixels(*mCurrentMouthTexture, *mFaceTexture, mouthOffset.GetX(), mouthOffset.GetY());
+		Texture::BlendPixels(*mCurrentMouthTexture, *mFaceTexture, mouthOffset.x, mouthOffset.y);
 	}
 		
 	// Downsample & copy left eye.
@@ -361,13 +361,13 @@ void FaceController::UpdateFaceTexture()
 							  STBIR_TYPE_UINT8, 4, -1, 0,
 							  STBIR_EDGE_WRAP, STBIR_EDGE_WRAP, STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,
 							  STBIR_COLORSPACE_LINEAR, NULL,
-							  //0.25f, 0.25f, mEyeJitterX + leftEyeBias.GetX(), mEyeJitterY + leftEyeBias.GetY());
+							  //0.25f, 0.25f, mEyeJitterX + leftEyeBias.x, mEyeJitterY + leftEyeBias.y);
 							  0.25f, 0.25f, 0.0f, 0.0f);
 		
 		mDownSampledLeftEyeTexture->UploadToGPU();
 		
 		const Vector2& leftEyeOffset = mCharacterConfig->faceConfig.leftEyeOffset;
-		Texture::BlendPixels(*mDownSampledLeftEyeTexture, *mFaceTexture, leftEyeOffset.GetX(), leftEyeOffset.GetY());
+		Texture::BlendPixels(*mDownSampledLeftEyeTexture, *mFaceTexture, leftEyeOffset.x, leftEyeOffset.y);
 	}
 	
 	// Downsample & copy right eye.
@@ -384,27 +384,27 @@ void FaceController::UpdateFaceTexture()
 							  STBIR_TYPE_UINT8, 4, -1, 0,
 							  STBIR_EDGE_WRAP, STBIR_EDGE_WRAP, STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,
 							  STBIR_COLORSPACE_LINEAR, NULL,
-							  //0.25f, 0.25f, mEyeJitterX + rightEyeBias.GetX(), mEyeJitterY + rightEyeBias.GetY());
+							  //0.25f, 0.25f, mEyeJitterX + rightEyeBias.x, mEyeJitterY + rightEyeBias.y);
 							  0.25f, 0.25f, 0.0f, 0.0f);
 							  
 		mDownSampledRightEyeTexture->UploadToGPU();
 		
 		const Vector2& rightEyeOffset = mCharacterConfig->faceConfig.rightEyeOffset;
-		Texture::BlendPixels(*mDownSampledRightEyeTexture, *mFaceTexture, rightEyeOffset.GetX(), rightEyeOffset.GetY());
+		Texture::BlendPixels(*mDownSampledRightEyeTexture, *mFaceTexture, rightEyeOffset.x, rightEyeOffset.y);
 	}
 	
 	// Copy eyelids texture.
 	if(mCurrentEyelidsTexture != nullptr)
 	{
 		const Vector2& eyelidsOffset = mCharacterConfig->faceConfig.eyelidsOffset;
-		Texture::BlendPixels(*mCurrentEyelidsTexture, *mFaceTexture, eyelidsOffset.GetX(), eyelidsOffset.GetY());
+		Texture::BlendPixels(*mCurrentEyelidsTexture, *mFaceTexture, eyelidsOffset.x, eyelidsOffset.y);
 	}
 	
 	// Copy forehead texture.
 	if(mCurrentForeheadTexture != nullptr)
 	{
 		const Vector2& foreheadOffset = mCharacterConfig->faceConfig.foreheadOffset;
-		Texture::BlendPixels(*mCurrentForeheadTexture, *mFaceTexture, foreheadOffset.GetX(), foreheadOffset.GetY());
+		Texture::BlendPixels(*mCurrentForeheadTexture, *mFaceTexture, foreheadOffset.x, foreheadOffset.y);
 	}
 		
 	// Upload all changes to the GPU.

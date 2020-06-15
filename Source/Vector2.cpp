@@ -27,7 +27,7 @@ Vector2::Vector2(const Vector2& other) : x(other.x), y(other.y)
     
 }
 
-Vector2::Vector2(const Vector3& other) : x(other.GetX()), y(other.GetY())
+Vector2::Vector2(const Vector3& other) : x(other.x), y(other.y)
 {
 	
 }
@@ -146,6 +146,6 @@ Vector2 Vector2::Lerp(Vector2 from, Vector2 to, float t)
 
 std::ostream& operator<<(std::ostream& os, const Vector2& v)
 {
-    os << "(" << v.GetX() << ", " << v.GetY() << ")";
+    os << "(" << v.x << ", " << v.y << ")";
     return os;
 }

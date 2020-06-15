@@ -35,12 +35,6 @@ public:
     bool operator!=(const Vector2& other) const;
     
     // Accessors
-    void SetX(float newX) { x = newX; }
-    void SetY(float newY) { y = newY; }
-	
-    float GetX() const { return x; }
-    float GetY() const { return y; }
-	
     float& operator[](unsigned int i)       { return (&x)[i]; }
     float  operator[](unsigned int i) const { return (&x)[i]; }
     
@@ -83,8 +77,8 @@ struct Vector2Hash
 {
 	std::size_t operator()(const Vector2& v) const noexcept
 	{
-		std::size_t h1 = std::hash<float>{}(v.GetX());
-		std::size_t h2 = std::hash<float>{}(v.GetY());
+		std::size_t h1 = std::hash<float>{}(v.x);
+		std::size_t h2 = std::hash<float>{}(v.y);
 		return h1 ^ (h2 << 1);
 	}
 };

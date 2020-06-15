@@ -86,9 +86,9 @@ void Animation::ParseFromData(char *data, int dataLength)
 				node->absolute = true;
 				
 				// Note z/y are flipped due to Maya->Game conversion.
-				node->offsetFromOrigin.SetX(line.entries[2].GetValueAsFloat());
-				node->offsetFromOrigin.SetZ(line.entries[3].GetValueAsFloat());
-				node->offsetFromOrigin.SetY(line.entries[4].GetValueAsFloat());
+				node->offsetFromOrigin.x = line.entries[2].GetValueAsFloat();
+				node->offsetFromOrigin.z = line.entries[3].GetValueAsFloat();
+				node->offsetFromOrigin.y = line.entries[4].GetValueAsFloat();
 				node->headingFromOrigin = line.entries[5].GetValueAsFloat();
 				
 				// Next are (x2, z2, y2) and (angle2), if we have enough args.
@@ -96,9 +96,9 @@ void Animation::ParseFromData(char *data, int dataLength)
 				// Based on examining anim files (like RC1 fountain) and expected positions,
 				// this appears to be a position to move the model to at the start of the animation?
 				if(line.entries.size() < 10) { continue; }
-				node->position.SetX(line.entries[6].GetValueAsFloat());
-				node->position.SetZ(line.entries[7].GetValueAsFloat());
-				node->position.SetY(line.entries[8].GetValueAsFloat());
+				node->position.x = line.entries[6].GetValueAsFloat();
+				node->position.z = line.entries[7].GetValueAsFloat();
+				node->position.y = line.entries[8].GetValueAsFloat();
 				node->heading = line.entries[9].GetValueAsFloat();
             }
         }

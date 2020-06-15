@@ -139,10 +139,10 @@ void UILabel::GenerateMesh()
 	{
 		Glyph& glyph = charInfo.glyph;
 		
-		float leftX = charInfo.pos.GetX();
+		float leftX = charInfo.pos.x;
 		float rightX = leftX + glyph.width;
 		
-		float bottomY = charInfo.pos.GetY();
+		float bottomY = charInfo.pos.y;
 		float topY = bottomY + glyph.height;
 		
 		// Top-Left
@@ -150,8 +150,8 @@ void UILabel::GenerateMesh()
 		positions[charIndex * 12 + 1] = topY;
 		positions[charIndex * 12 + 2] = 0.0f;
 		
-		uvs[charIndex * 8] = glyph.topLeftUvCoord.GetX();
-		uvs[charIndex * 8 + 1] = glyph.topLeftUvCoord.GetY();
+		uvs[charIndex * 8] = glyph.topLeftUvCoord.x;
+		uvs[charIndex * 8 + 1] = glyph.topLeftUvCoord.y;
 		
 		colors[charIndex * 16] = colorR;
 		colors[charIndex * 16 + 1] = colorG;
@@ -163,8 +163,8 @@ void UILabel::GenerateMesh()
 		positions[charIndex * 12 + 4] = topY;
 		positions[charIndex * 12 + 5] = 0.0f;
 		
-		uvs[charIndex * 8 + 2] = glyph.topRightUvCoord.GetX();
-		uvs[charIndex * 8 + 3] = glyph.topRightUvCoord.GetY();
+		uvs[charIndex * 8 + 2] = glyph.topRightUvCoord.x;
+		uvs[charIndex * 8 + 3] = glyph.topRightUvCoord.y;
 		
 		colors[charIndex * 16 + 4] = colorR;
 		colors[charIndex * 16 + 5] = colorG;
@@ -176,8 +176,8 @@ void UILabel::GenerateMesh()
 		positions[charIndex * 12 + 7] = bottomY;
 		positions[charIndex * 12 + 8] = 0.0f;
 		
-		uvs[charIndex * 8 + 4] = glyph.bottomLeftUvCoord.GetX();
-		uvs[charIndex * 8 + 5] = glyph.bottomRightUvCoord.GetY();
+		uvs[charIndex * 8 + 4] = glyph.bottomLeftUvCoord.x;
+		uvs[charIndex * 8 + 5] = glyph.bottomRightUvCoord.y;
 		
 		colors[charIndex * 16 + 8] = colorR;
 		colors[charIndex * 16 + 9] = colorG;
@@ -189,8 +189,8 @@ void UILabel::GenerateMesh()
 		positions[charIndex * 12 + 10] = bottomY;
 		positions[charIndex * 12 + 11] = 0.0f;
 		
-		uvs[charIndex * 8 + 6] = glyph.bottomRightUvCoord.GetX();
-		uvs[charIndex * 8 + 7] = glyph.bottomRightUvCoord.GetY();
+		uvs[charIndex * 8 + 6] = glyph.bottomRightUvCoord.x;
+		uvs[charIndex * 8 + 7] = glyph.bottomRightUvCoord.y;
 		
 		colors[charIndex * 16 + 12] = colorR;
 		colors[charIndex * 16 + 13] = colorG;

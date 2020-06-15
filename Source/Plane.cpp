@@ -100,9 +100,9 @@ void Plane::Set(float x, float y, float z, float d)
     else
     {
         float recip = Math::InvSqrt(lengthSq);
-        mNormal.SetX(x * recip);
-        mNormal.SetY(y * recip);
-        mNormal.SetZ(z * recip);
+        mNormal.x = x * recip;
+        mNormal.y = y * recip;
+        mNormal.z = z * recip;
         mDistance = d * recip;
     }
 }

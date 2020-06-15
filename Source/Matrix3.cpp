@@ -363,9 +363,9 @@ Matrix3 Matrix3::MakeRotate(const Quaternion& quat)
 Matrix3 Matrix3::MakeScale(Vector3 scale)
 {
     Matrix3 m;
-    m[0] = scale.GetX();
-    m[4] = scale.GetY();
-    m[8] = scale.GetZ();
+    m[0] = scale.x;
+    m[4] = scale.y;
+    m[8] = scale.z;
     return m;
 }
 

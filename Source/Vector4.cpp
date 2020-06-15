@@ -175,6 +175,6 @@ Vector4 Vector4::Cross(Vector4 lhs, Vector4 rhs)
 
 std::ostream& operator<<(std::ostream& os, const Vector4& v)
 {
-    os << "(" << v.GetX() << ", " << v.GetY() << ", " << v.GetZ() << ", " << v.GetW() << ")";
+    os << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
     return os;
 }

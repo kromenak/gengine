@@ -86,12 +86,12 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 		for(auto& neighbor : neighbors)
 		{
 			// Ignore any neighbor that has pixel color black (not walkable).
-			Color32 color = mTexture->GetPixelColor32(neighbor.GetX(), neighbor.GetY());
+			Color32 color = mTexture->GetPixelColor32(neighbor.x, neighbor.y);
 			if(color == Color32::Black) { continue; }
 			
 			// So, setting edge cost to be exactly the palette index actually gives pretty decent results.
-			//int currentIndex = mTexture->GetPaletteIndex(current.GetX(), current.GetY());
-			int neighborIndex = mTexture->GetPaletteIndex(neighbor.GetX(), neighbor.GetY());
+			//int currentIndex = mTexture->GetPaletteIndex(current.x, current.y);
+			int neighborIndex = mTexture->GetPaletteIndex(neighbor.x, neighbor.y);
 			//float edgeCost = (neighbor - current).GetLength() + neighborIndex;
 			float edgeCost = neighborIndex;
 			
@@ -193,7 +193,7 @@ bool WalkerBoundary::IsTexturePosWalkable(Vector2 texturePos) const
 	// Grey = pretty not OK to walk here 		(128, 128, 128)
 	// Cyan = this is your last warning, buddy 	(0, 255, 255)
 	// Black = totally not OK to walk 			(0, 0, 0)
-	Color32 color = mTexture->GetPixelColor32(texturePos.GetX(), texturePos.GetY());
+	Color32 color = mTexture->GetPixelColor32(texturePos.x, texturePos.y);
 	
 	// Basically, if the texture color is not black, you can walk there.
 	return color != Color32::Black;
@@ -207,28 +207,28 @@ Vector2 WalkerBoundary::WorldPosToTexturePos(Vector3 worldPos) const
 	// Add walker boundary's world position offset.
 	// This causes the position to be relative to the texture's origin (lower left) instead of the world origin.
 	Vector2 texturePos;
-	texturePos.SetX(worldPos.GetX() + mOffset.GetX());
-	texturePos.SetY(worldPos.GetZ() + mOffset.GetY());
+	texturePos.x = worldPos.x + mOffset.x;
+	texturePos.y = worldPos.z + mOffset.y;
 	//std::cout << "Offset Pos: " << position << std::endl;
 	
 	// Divide position by walkable area size to get a normalized position within that area.
 	// Hopefully 0-1, but could be outside those bounds. If so, not walkable.
-	texturePos.SetX(texturePos.GetX() / mSize.GetX());
-	texturePos.SetY(texturePos.GetY() / mSize.GetY());
+	texturePos.x = texturePos.x / mSize.x;
+	texturePos.y = texturePos.y / mSize.y;
 	//std::cout << "Normalized Pos: " << position << std::endl;
 	
 	// Multiply by texture width/height to determine the pixel within the texture.
-	texturePos.SetX(texturePos.GetX() * mTexture->GetWidth());
-	texturePos.SetY(texturePos.GetY() * mTexture->GetHeight());
+	texturePos.x = texturePos.x * mTexture->GetWidth();
+	texturePos.y = texturePos.y * mTexture->GetHeight();
 	//std::cout << "Pixel Pos: " << position << std::endl;
 	
 	// Need to flip Y because the calculated value is from lower-left of the walkable area.
 	// But texture sample X/Y are from upper-left.
-	texturePos.SetY(mTexture->GetHeight() - texturePos.GetY());
+	texturePos.y = mTexture->GetHeight() - texturePos.y;
 	
 	// Texture positions are integers.
-	texturePos.SetX((int)texturePos.GetX());
-	texturePos.SetY((int)texturePos.GetY());
+	texturePos.x = (int)texturePos.x;
+	texturePos.y = (int)texturePos.y;
 	return texturePos;
 }
 
@@ -238,25 +238,25 @@ Vector3 WalkerBoundary::TexturePosToWorldPos(Vector2 texturePos) const
 	if(mTexture == nullptr) { return Vector3::Zero; }
 	
 	// Flip y because texture pos is from top-left, but we need lower-left for world pos conversion.
-	texturePos.SetY(mTexture->GetHeight() - texturePos.GetY());
+	texturePos.y = mTexture->GetHeight() - texturePos.y;
 	
 	// A texture pos actually correlates to the bottom-left corner of the pixel.
 	// But we want center of pixel...so let's offset before the conversion!
-	texturePos.SetX(texturePos.GetX() + 0.5f);
-	texturePos.SetY(texturePos.GetY() + 0.5f);
+	texturePos.x = texturePos.x + 0.5f;
+	texturePos.y = texturePos.y + 0.5f;
 	
 	// Divide by texture width/height to get normalized position within the texture (0-1).
 	Vector3 worldPos;
-	worldPos.SetX(texturePos.GetX() / mTexture->GetWidth());
-	worldPos.SetZ(texturePos.GetY() / mTexture->GetHeight());
+	worldPos.x = texturePos.x / mTexture->GetWidth();
+	worldPos.z = texturePos.y / mTexture->GetHeight();
 	
 	// Multiply by size to get unit in world space.
-	worldPos.SetX(worldPos.GetX() * mSize.GetX());
-	worldPos.SetZ(worldPos.GetZ() * mSize.GetY());
+	worldPos.x = worldPos.x * mSize.x;
+	worldPos.z = worldPos.z * mSize.y;
 	
 	// Subtract offset to go from "texture space" to "world space".
-	worldPos.SetX(worldPos.GetX() - mOffset.GetX());
-	worldPos.SetZ(worldPos.GetZ() - mOffset.GetY());
+	worldPos.x = worldPos.x - mOffset.x;
+	worldPos.z = worldPos.z - mOffset.y;
 	return worldPos;
 }
 

@@ -57,8 +57,8 @@ void UIImage::Render()
 		{
 			// Determine how many repeats are needed.
 			Vector2 size = mRectTransform->GetSize();
-			float repeatX = size.GetX() / texture->GetWidth();
-			float repeatY = size.GetY() / texture->GetHeight();
+			float repeatX = size.x / texture->GetWidth();
+			float repeatY = size.y / texture->GetHeight();
 			
 			// Adjust UVs for repeating textures.
 			float repeat_uvs[] = {

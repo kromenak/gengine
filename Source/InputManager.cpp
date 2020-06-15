@@ -56,14 +56,14 @@ void InputManager::Update()
 		mouseY = Services::GetRenderer()->GetWindowHeight() - mouseY;
 		
 		// Calculate delta from last mouse position.
-		int deltaX = static_cast<int>(mouseX - mMousePosition.GetX());
-		int deltaY = static_cast<int>(mouseY - mMousePosition.GetY());
+		int deltaX = static_cast<int>(mouseX - mMousePosition.x);
+		int deltaY = static_cast<int>(mouseY - mMousePosition.y);
 		mMousePositionDelta.x = deltaX;
 		mMousePositionDelta.y = deltaY;
 		
 		// After delta calc, set mouse position.
-		mMousePosition.SetX(mouseX);
-		mMousePosition.SetY(mouseY);
+		mMousePosition.x = mouseX;
+		mMousePosition.y = mouseY;
 		
 		// Handle UI input.
 		UICanvas::UpdateInput();

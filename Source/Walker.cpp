@@ -39,7 +39,7 @@ void Walker::SnapToFloor()
 	if(scene != nullptr)
 	{
 		Vector3 pos = GetOwner()->GetPosition();
-		pos.SetY(scene->GetFloorY(pos));
+		pos.y = scene->GetFloorY(pos);
 		GetOwner()->SetPosition(pos);
 	}
 }
@@ -231,9 +231,9 @@ void Walker::OnUpdate(float deltaTime)
 			// If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
 			// In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
 			float rotateDirection = 1.0f;
-			if(!Math::IsZero(cross.GetY()))
+			if(!Math::IsZero(cross.y))
 			{
-				rotateDirection = cross.GetY() / Math::Abs(cross.GetY());
+				rotateDirection = cross.y / Math::Abs(cross.y);
 			}
 			
 			// Determine how much we'll rotate this frame.
@@ -280,7 +280,7 @@ void Walker::StartWalk()
 		if(Vector3::Dot(GetOwner()->GetForward(), toNext) < 0.6f)
 		{
 			Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toNext);
-			if(cross.GetY() > 0)
+			if(cross.y > 0)
 			{
 				anim = mCharConfig->walkStartTurnRightAnim;
 			}
@@ -346,7 +346,7 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
 	if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget))
 	{
 		// Convert ray direction to a "facing" direction,
-		dir.SetY(0.0f);
+		dir.y = 0.0f;
 		outTurnToFaceDir = dir.Normalize();
 		return true;
 	}

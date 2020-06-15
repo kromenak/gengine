@@ -28,7 +28,7 @@ Vector3::Vector3(float x, float y) : x(x), y(y), z(0.0f)
 	
 }
 
-Vector3::Vector3(const Vector2& other) : x(other.GetX()), y(other.GetY()), z(0.0f)
+Vector3::Vector3(const Vector2& other) : x(other.x), y(other.y), z(0.0f)
 {
 	
 }
@@ -168,6 +168,6 @@ Vector3 Vector3::Lerp(Vector3 from, Vector3 to, float t)
 
 std::ostream& operator<<(std::ostream& os, const Vector3& v)
 {
-    os << std::setprecision(9) << "(" << v.GetX() << ", " << v.GetY() << ", " << v.GetZ() << ")";
+    os << std::setprecision(9) << "(" << v.x << ", " << v.y << ", " << v.z << ")";
     return os;
 }

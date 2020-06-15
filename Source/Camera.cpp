@@ -55,9 +55,9 @@ Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 	// Note that the mapping of NDCs to top-left/lower-left/etc is dictated by these equations.
 	float screenWidth = Services::GetRenderer()->GetWindowWidth();
 	float screenHeight = Services::GetRenderer()->GetWindowHeight();
-    float ndcX = (2.0f * (screenPoint.GetX() / screenWidth)) - 1.0f; 		// 0 => -1, screenWidth => 1
-	float ndcY = (2.0f * (screenPoint.GetY() / screenHeight)) - 1.0f; 		// 0 => -1, screenHeight => 1
-    //float ndcY = -(2.0f * (screenPoint.GetY() / screenHeight)) + 1.0f; 	// 0 => 1, screenHeight => -1 (this would put (-1, -1) in top-left corner)
+    float ndcX = (2.0f * (screenPoint.x / screenWidth)) - 1.0f; 		// 0 => -1, screenWidth => 1
+	float ndcY = (2.0f * (screenPoint.y / screenHeight)) - 1.0f; 		// 0 => -1, screenHeight => 1
+    //float ndcY = -(2.0f * (screenPoint.y / screenHeight)) + 1.0f; 	// 0 => 1, screenHeight => -1 (this would put (-1, -1) in top-left corner)
 	
 	// Our NDC point is X/Y values for starters.
 	// Distance indicates what distance from the camera we want to get for the world point.
@@ -73,10 +73,10 @@ Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 	// Multiply the NDC point by the "screen space to world space" matrix to get to world space.
 	// We must divide the whole point by W to deal with reversing perspective depth stuff.
     point = projectionToWorld * point;
-    point /= point.GetW();
+    point /= point.w;
 	
 	// Finally, return the world point.
-    return Vector3(point.GetX(), point.GetY(), point.GetZ());
+    return Vector3(point.x, point.y, point.z);
 }
 
 void Camera::SetCameraFovRadians(float fovRad)

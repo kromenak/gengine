@@ -167,8 +167,8 @@ Vector3 Transform::LocalToWorldPoint(const Vector3& localPoint)
 Vector3 Transform::LocalToWorldDirection(const Vector3& localDirection)
 {
 	//TODO: Unit test this?
-	Vector4 result = Vector4(localDirection.GetX(), localDirection.GetY(), localDirection.GetZ(), 0.0f) * GetWorldToLocalMatrix();
-	return Vector3(result.GetX(), result.GetY(), result.GetZ());
+	Vector4 result = Vector4(localDirection.x, localDirection.y, localDirection.z, 0.0f) * GetWorldToLocalMatrix();
+	return Vector3(result.x, result.y, result.z);
 }
 
 Quaternion Transform::LocalToWorldRotation(const Quaternion& localRotation)
@@ -184,8 +184,8 @@ Vector3 Transform::WorldToLocalPoint(const Vector3& worldPoint)
 Vector3 Transform::WorldToLocalDirection(const Vector3& worldDirection)
 {
 	//TODO: Unit test this?
-	Vector4 result = Vector4(worldDirection.GetX(), worldDirection.GetY(), worldDirection.GetZ(), 0.0f) * GetLocalToWorldMatrix();
-	return Vector3(result.GetX(), result.GetY(), result.GetZ());
+	Vector4 result = Vector4(worldDirection.x, worldDirection.y, worldDirection.z, 0.0f) * GetLocalToWorldMatrix();
+	return Vector3(result.x, result.y, result.z);
 }
 
 void Transform::Translate(const Vector3& offset)

@@ -29,9 +29,9 @@ Quaternion::Quaternion(const Vector3& axis, float angle)
 }
 
 Quaternion::Quaternion(const Vector3& vector) :
-    x(vector.GetX()),
-    y(vector.GetY()),
-    z(vector.GetZ()),
+    x(vector.x),
+    y(vector.y),
+    z(vector.z),
     w(0.0f)
 {
     
@@ -108,9 +108,9 @@ void Quaternion::Set(const Vector3& axis, float angle)
     // So, this combines the "sin(angle) / ||v|| part into one value.
     // We can then just multiply by the axis components.
     float sinAndNormalize = Math::Sin(angle) / Math::Sqrt(lengthSq);
-    x = axis.GetX() * sinAndNormalize;
-    y = axis.GetY() * sinAndNormalize;
-    z = axis.GetZ() * sinAndNormalize;
+    x = axis.x * sinAndNormalize;
+    y = axis.y * sinAndNormalize;
+    z = axis.z * sinAndNormalize;
 }
 
 // Creates a quaternion representing a rotation from one vector to another.
@@ -122,7 +122,7 @@ void Quaternion::Set(const Vector3& from, const Vector3& to)
     Vector3 axis = Vector3::Cross(from, to);
     
     // Set axis values and set w to dot product of two vectors.
-    Set(axis.GetX(), axis.GetY(), axis.GetZ(), Vector3::Dot(from, to));
+    Set(axis.x, axis.y, axis.z, Vector3::Dot(from, to));
    
     // Quaternion is now ||from||*||to||*(cos(theta), r * sin(theta)).
     // Normalize to remove the ||from||*||to|| part.
@@ -138,13 +138,13 @@ void Quaternion::Set(const Vector3& from, const Vector3& to)
     if(w <= Math::kEpsilon)
     {
         // Rotate pi radians around the orthogonal vector.
-        if(from.GetZ() * from.GetZ() > from.GetX() * from.GetX())
+        if(from.z * from.z > from.x * from.x)
         {
-            Set(0.0f, from.GetZ(), -from.GetY(), 0.0f);
+            Set(0.0f, from.z, -from.y, 0.0f);
         }
         else
         {
-            Set(from.GetY(), -from.GetX(), 0.0f, 0.0f);
+            Set(from.y, -from.x, 0.0f, 0.0f);
         }
     }
     
@@ -243,14 +243,14 @@ void Quaternion::Set(Vector3 forward, Vector3 up, Vector3 right)
     */
     
     /*
-    float m00 = right.GetX();
-    float m01 = right.GetY();
+    float m00 = right.x;
+    float m01 = right.y;
     float m02 = right.GetZ();
-    float m10 = up.GetX();
-    float m11 = up.GetY();
+    float m10 = up.x;
+    float m11 = up.y;
     float m12 = up.GetZ();
-    float m20 = forward.GetX();
-    float m21 = forward.GetY();
+    float m20 = forward.x;
+    float m21 = forward.y;
     float m22 = forward.GetZ();
     */
 }
@@ -262,16 +262,14 @@ void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const
     float length = Math::Sqrt(1.0f - (w * w));
     if(Math::IsZero(length))
     {
-        axis.SetX(0);
-        axis.SetY(0);
-        axis.SetZ(0);
+		axis = Vector3::Zero;
     }
     else
     {
         length = 1.0f / length;
-        axis.SetX(x * length);
-        axis.SetY(y * length);
-        axis.SetZ(z * length);
+        axis.x = x * length;
+        axis.y = y * length;
+        axis.z = z * length;
     }
 }
 
@@ -283,23 +281,23 @@ Vector3 Quaternion::GetEulerAngles() const
 	// X-axis
 	float sinr_cosp = 2 * (w * x + y * z);
 	float cosr_cosp = 1 - (2 * (x * x + y * y));
-	result.SetX(Math::Atan2(sinr_cosp, cosr_cosp));
+	result.x = Math::Atan2(sinr_cosp, cosr_cosp);
 	
 	// Y-axis
 	float sinp = 2 * (w * y - z * x);
 	if(Math::Abs(sinp) >= 1)
 	{
-		result.SetY(Math::MagnitudeSign(Math::kPi / 2, sinp));
+		result.y = Math::MagnitudeSign(Math::kPi / 2, sinp);
 	}
 	else
 	{
-		result.SetY(Math::Asin(sinp));
+		result.y = Math::Asin(sinp);
 	}
 	
 	// Z-axis
 	float siny_cosp = 2 * (w * z + x * y);
 	float cosy_cosp = 1 - (2 * (y * y + z * z));
-	result.SetZ(Math::Atan2(siny_cosp, cosy_cosp));
+	result.z = Math::Atan2(siny_cosp, cosy_cosp);
 	
 	return result;
 }
@@ -433,13 +431,13 @@ float Quaternion::Dot(const Quaternion& quat1, const Quaternion& quat2)
 Vector3 Quaternion::Rotate(const Vector3& vector) const
 {
     //ASSERT(IsUnit());
-    float vMult = 2.0f * (x * vector.GetX() + y * vector.GetY() + z * vector.GetZ());
+    float vMult = 2.0f * (x * vector.x + y * vector.y + z * vector.z);
     float crossMult = 2.0f * w;
     float pMult = crossMult * w - 1.0f;
     
-    return Vector3(pMult * vector.GetX() + vMult * x + crossMult * (y * vector.GetZ() - z * vector.GetY()),
-                   pMult * vector.GetY() + vMult * y + crossMult * (z * vector.GetX() - x * vector.GetZ()),
-                   pMult * vector.GetZ() + vMult * z + crossMult * (x * vector.GetY() - y * vector.GetX()));
+    return Vector3(pMult * vector.x + vMult * x + crossMult * (y * vector.z - z * vector.y),
+                   pMult * vector.y + vMult * y + crossMult * (z * vector.x - x * vector.z),
+                   pMult * vector.z + vMult * z + crossMult * (x * vector.y - y * vector.x));
 }
 
 void Quaternion::Lerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)

@@ -77,8 +77,8 @@ void Cursor::ParseFromData(char *data, int dataLength)
             {
                 if(StringUtil::EqualsIgnoreCase(keyValue.value, "center"))
                 {
-                    hotspotVal.SetX(0.5f);
-                    hotspotVal.SetY(0.5f);
+					hotspotVal.x = 0.5f;
+					hotspotVal.y = 0.5f;
                     hotspotIsPercent = true;
                 }
                 else
@@ -138,11 +138,11 @@ void Cursor::ParseFromData(char *data, int dataLength)
         Vector2 hotspot = hotspotVal;
         if(hotspotIsPercent)
         {
-            hotspot.SetX((texture->GetWidth() / mFrameCount) * hotspotVal.GetX());
-            hotspot.SetY(texture->GetHeight() * hotspotVal.GetY());
+            hotspot.x = (texture->GetWidth() / mFrameCount) * hotspotVal.x;
+            hotspot.y = texture->GetHeight() * hotspotVal.y;
         }
         
-        SDL_Cursor* cursor = SDL_CreateColorCursor(dstSurface, (int)hotspot.GetX(), (int)hotspot.GetY());
+        SDL_Cursor* cursor = SDL_CreateColorCursor(dstSurface, (int)hotspot.x, (int)hotspot.y);
         if(cursor == nullptr)
         {
             std::cout << "Create cursor failed: " << SDL_GetError() << std::endl;

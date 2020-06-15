@@ -171,7 +171,7 @@ void InventoryScreen::OnItemClicked(UIButton* button, std::string itemName)
 		
 		// Move active highlight to this object.
 		Vector2 buttonPos = button->GetRectTransform()->GetAnchoredPosition();
-		mActiveHighlightImage->GetRectTransform()->SetAnchoredPosition(buttonPos.GetX() + kActiveHighlightXOffset, buttonPos.GetY());
+		mActiveHighlightImage->GetRectTransform()->SetAnchoredPosition(buttonPos.x + kActiveHighlightXOffset, buttonPos.y);
 		
 		// Make sure highlight is visible.
 		mActiveHighlightImage->SetEnabled(true);

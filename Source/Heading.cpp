@@ -21,14 +21,14 @@ Heading Heading::FromRadians(float radians)
 
 Heading Heading::FromQuaternion(const Quaternion& quaternion)
 {
-	return FromRadians(quaternion.GetEulerAngles().GetY());
+	return FromRadians(quaternion.GetEulerAngles().y);
 }
 
 Heading Heading::FromDirection(const Vector3& direction)
 {
 	// Zero out Y-component and renormalize.
 	Vector3 dir = direction;
-	dir.SetY(0.0f);
+	dir.y = 0.0f;
 	dir.Normalize();
 	
 	// Calculate axis and angle of rotation.

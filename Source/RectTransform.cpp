@@ -30,13 +30,13 @@ void RectTransform::SetSizeDelta(const Vector2& size)
 
 void RectTransform::SetSizeDeltaX(float x)
 {
-	mSizeDelta.SetX(x);
+	mSizeDelta.x = x;
 	SetDirty();
 }
 
 void RectTransform::SetSizeDeltaY(float y)
 {
-	mSizeDelta.SetY(y);
+	mSizeDelta.y = y;
 	SetDirty();
 }
 
@@ -87,7 +87,7 @@ Rect RectTransform::GetRect() const
 	if(mParent == nullptr || !mParent->IsTypeOf(RectTransform::GetType()))
 	{
 		Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
-		parentRect = Rect(0.0f, 0.0f, windowSize.GetX(), windowSize.GetY());
+		parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
 	}
 	else
 	{
@@ -124,7 +124,7 @@ void RectTransform::CalcLocalPosition()
 	if(mParent == nullptr || !mParent->IsTypeOf(RectTransform::GetType()))
 	{
 		Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
-		parentRect = Rect(0.0f, 0.0f, windowSize.GetX(), windowSize.GetY());
+		parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
 		parentPivot = Vector2(0.0f, 0.0f);
 	}
 	else
@@ -138,8 +138,8 @@ void RectTransform::CalcLocalPosition()
 	
 	// Update local pos x/y components.
 	// Don't overwrite the z-component, which can be set freely.
-	mLocalPosition.SetX(localPos.GetX());
-	mLocalPosition.SetY(localPos.GetY());
+	mLocalPosition.x = localPos.x;
+	mLocalPosition.y = localPos.y;
 }
 
 void RectTransform::OnUpdate(float deltaTime)

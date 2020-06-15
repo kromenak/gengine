@@ -12,20 +12,20 @@
 TEST_CASE("Test quaternion constructors")
 {
     Quaternion defaultQuat;
-    REQUIRE(defaultQuat.GetX() == 0.0f);
-    REQUIRE(defaultQuat.GetY() == 0.0f);
+    REQUIRE(defaultQuat.x == 0.0f);
+    REQUIRE(defaultQuat.y == 0.0f);
     REQUIRE(defaultQuat.GetZ() == 0.0f);
     REQUIRE(defaultQuat.GetW() == 1.0f);
     
     Quaternion specificQuat(2.0f, 3.2f, 1.1f, 0.0f);
-    REQUIRE(specificQuat.GetX() == 2.0f);
-    REQUIRE(specificQuat.GetY() == 3.2f);
+    REQUIRE(specificQuat.x == 2.0f);
+    REQUIRE(specificQuat.y == 3.2f);
     REQUIRE(specificQuat.GetZ() == 1.1f);
     REQUIRE(specificQuat.GetW() == 0.0f);
     
     Quaternion axisAngleQuat(Vector3(0.8804509f, 0.1760902f, 0.4402255f), 1.57f);
-    REQUIRE(Math::AreEqual(axisAngleQuat.GetX(), 0.6223249f));
-    REQUIRE(Math::AreEqual(axisAngleQuat.GetY(), 0.124465f));
+    REQUIRE(Math::AreEqual(axisAngleQuat.x, 0.6223249f));
+    REQUIRE(Math::AreEqual(axisAngleQuat.y, 0.124465f));
     REQUIRE(Math::AreEqual(axisAngleQuat.GetZ(), 0.3111624f));
     REQUIRE(Math::AreEqual(axisAngleQuat.GetW(), 0.7073883f));
 }
@@ -34,14 +34,14 @@ TEST_CASE("Test quaternion copy and assign")
 {
     Quaternion specificQuat(2.0f, 3.2f, 1.1f, 0.0f);
     Quaternion copyQuat(specificQuat);
-    REQUIRE(copyQuat.GetX() == specificQuat.GetX());
-    REQUIRE(copyQuat.GetY() == specificQuat.GetY());
+    REQUIRE(copyQuat.x == specificQuat.x);
+    REQUIRE(copyQuat.y == specificQuat.y);
     REQUIRE(copyQuat.GetZ() == specificQuat.GetZ());
     REQUIRE(copyQuat.GetW() == specificQuat.GetW());
     
     Quaternion assignQuat = specificQuat;
-    REQUIRE(assignQuat.GetX() == specificQuat.GetX());
-    REQUIRE(assignQuat.GetY() == specificQuat.GetY());
+    REQUIRE(assignQuat.x == specificQuat.x);
+    REQUIRE(assignQuat.y == specificQuat.y);
     REQUIRE(assignQuat.GetZ() == specificQuat.GetZ());
     REQUIRE(assignQuat.GetW() == specificQuat.GetW());
 }

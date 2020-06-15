@@ -56,9 +56,9 @@ void Model::WriteToObjFile(std::string filePath)
 					Vector3 vertex(positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2]);
 					vertex = localTransformMatrix.TransformPoint(vertex);
 					
-					out << "v " << vertex.GetX();
-					out << " "  << vertex.GetY();
-					out << " "  << vertex.GetZ() << "\n";
+					out << "v " << vertex.x;
+					out << " "  << vertex.y;
+					out << " "  << vertex.z << "\n";
 					++count;
 				}
 			}
@@ -341,9 +341,9 @@ void Model::ParseFromData(char *data, int dataLength)
             for(int k = 0; k < vertexCount; k++)
             {
                 Vector3 normal = reader.ReadVector3();
-                vertexNormals[k * 3] = normal.GetX();
-                vertexNormals[k * 3 + 1] = normal.GetZ();
-                vertexNormals[k * 3 + 2] = normal.GetY();
+                vertexNormals[k * 3] = normal.x;
+                vertexNormals[k * 3 + 1] = normal.z;
+                vertexNormals[k * 3 + 2] = normal.y;
             }
             submesh->SetNormals(vertexNormals);
             
@@ -351,8 +351,8 @@ void Model::ParseFromData(char *data, int dataLength)
             for(int k = 0; k < vertexCount; k++)
             {
                 Vector2 uv = reader.ReadVector2();
-                vertexUVs[k * 2] = uv.GetX();
-                vertexUVs[k * 2 + 1] = uv.GetY();
+                vertexUVs[k * 2] = uv.x;
+                vertexUVs[k * 2 + 1] = uv.y;
             }
             submesh->SetUV1(vertexUVs);
             

@@ -210,15 +210,15 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "X"))
         {
-            node->position.SetX(entry.GetValueAsFloat());
+			node->position.x = entry.GetValueAsFloat();
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "Y"))
         {
-            node->position.SetY(entry.GetValueAsFloat());
+            node->position.y = entry.GetValueAsFloat();
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "Z"))
         {
-            node->position.SetZ(entry.GetValueAsFloat());
+            node->position.z = entry.GetValueAsFloat();
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "Follow"))
         {

@@ -80,13 +80,13 @@ void Shader::SetUniformFloat(const char* name, float value)
 void Shader::SetUniformVector3(const char* name, const Vector3& vector)
 {
     GLuint vecLoc = glGetUniformLocation(mProgram, name);
-    glUniform3f(vecLoc, vector.GetX(), vector.GetY(), vector.GetZ());
+    glUniform3f(vecLoc, vector.x, vector.y, vector.z);
 }
 
 void Shader::SetUniformVector4(const char *name, const Vector4& vector)
 {
 	GLuint vecLoc = glGetUniformLocation(mProgram, name);
-	glUniform4f(vecLoc, vector.GetX(), vector.GetY(), vector.GetZ(), vector.GetW());
+	glUniform4f(vecLoc, vector.x, vector.y, vector.z, vector.w);
 }
 
 void Shader::SetUniformVector4(const char* name, const Color32& color)

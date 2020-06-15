@@ -665,9 +665,9 @@ void BSP::ParseFromData(char *data, int dataLength)
     float* vertsPtr = new float[mVertices.size() * 3];
     for(int i = 0; i < mVertices.size(); i++)
     {
-        vertsPtr[i * 3] = mVertices[i].GetX();
-        vertsPtr[i * 3 + 1] = mVertices[i].GetY();
-        vertsPtr[i * 3 + 2] = mVertices[i].GetZ();
+        vertsPtr[i * 3] = mVertices[i].x;
+        vertsPtr[i * 3 + 1] = mVertices[i].y;
+        vertsPtr[i * 3 + 2] = mVertices[i].z;
     }
     
     unsigned short* vertIndexesPtr = new unsigned short[mVertexIndices.size()];

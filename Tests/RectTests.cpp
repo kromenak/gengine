@@ -13,8 +13,8 @@ TEST_CASE("Rect constructors are correct")
 {
 	// Check default constructor gives correct results.
 	Rect defaultRect;
-	REQUIRE(defaultRect.GetX() == 0.0f);
-	REQUIRE(defaultRect.GetY() == 0.0f);
+	REQUIRE(defaultRect.x == 0.0f);
+	REQUIRE(defaultRect.y == 0.0f);
 	REQUIRE(defaultRect.GetWidth() == 0.0f);
 	REQUIRE(defaultRect.GetHeight() == 0.0f);
 	REQUIRE(defaultRect.GetSize() == Vector2::Zero);
@@ -23,8 +23,8 @@ TEST_CASE("Rect constructors are correct")
 	
 	// Check x/y constructor gives correct results.
 	Rect positionedRect(10.0f, -12.4f);
-	REQUIRE(positionedRect.GetX() == 10.0f);
-	REQUIRE(positionedRect.GetY() == -12.4f);
+	REQUIRE(positionedRect.x == 10.0f);
+	REQUIRE(positionedRect.y == -12.4f);
 	REQUIRE(positionedRect.GetWidth() == 0.0f);
 	REQUIRE(positionedRect.GetHeight() == 0.0f);
 	REQUIRE(positionedRect.GetSize() == Vector2::Zero);
@@ -33,8 +33,8 @@ TEST_CASE("Rect constructors are correct")
 	
 	// Check x/y/width/height constructor gives correct results.
 	Rect sizedRect(100.0f, -50.0f, 100.0f, 300.0f);
-	REQUIRE(sizedRect.GetX() == 100.0f);
-	REQUIRE(sizedRect.GetY() == -50.0f);
+	REQUIRE(sizedRect.x == 100.0f);
+	REQUIRE(sizedRect.y == -50.0f);
 	REQUIRE(sizedRect.GetWidth() == 100.0f);
 	REQUIRE(sizedRect.GetHeight() == 300.0f);
 	REQUIRE(sizedRect.GetSize() == Vector2(100.0f, 300.0f));
@@ -43,8 +43,8 @@ TEST_CASE("Rect constructors are correct")
 	
 	// Check min/max constructor gives expected results.
 	Rect minMaxRect(Vector2(-25.0f, -25.0f), Vector2(40.0f, 0.0f));
-	REQUIRE(minMaxRect.GetX() == -25.0f);
-	REQUIRE(minMaxRect.GetY() == -25.0f);
+	REQUIRE(minMaxRect.x == -25.0f);
+	REQUIRE(minMaxRect.y == -25.0f);
 	REQUIRE(minMaxRect.GetWidth() == 65.0f);
 	REQUIRE(minMaxRect.GetHeight() == 25.0f);
 	REQUIRE(minMaxRect.GetSize() == Vector2(65.0f, 25.0f));
@@ -150,40 +150,40 @@ TEST_CASE("RectUtil::CalcAnchorRect works")
 	
 	// Check that anchor rect when anchor min/max are equal is actually a point.
 	Rect pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2::Zero, Vector2::Zero);
-	REQUIRE(pointRect.GetX() == 10.0f);
-	REQUIRE(pointRect.GetY() == 10.0f);
+	REQUIRE(pointRect.x == 10.0f);
+	REQUIRE(pointRect.y == 10.0f);
 	REQUIRE(pointRect.GetWidth() == 0.0f);
 	REQUIRE(pointRect.GetHeight() == 0.0f);
 	
 	pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2::One, Vector2::One);
-	REQUIRE(pointRect.GetX() == 110.0f);
-	REQUIRE(pointRect.GetY() == 110.0f);
+	REQUIRE(pointRect.x == 110.0f);
+	REQUIRE(pointRect.y == 110.0f);
 	REQUIRE(pointRect.GetWidth() == 0.0f);
 	REQUIRE(pointRect.GetHeight() == 0.0f);
 	
 	pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.5f, 0.5f), Vector2(0.5f, 0.5f));
-	REQUIRE(pointRect.GetX() == 60.0f);
-	REQUIRE(pointRect.GetY() == 60.0f);
+	REQUIRE(pointRect.x == 60.0f);
+	REQUIRE(pointRect.y == 60.0f);
 	REQUIRE(pointRect.GetWidth() == 0.0f);
 	REQUIRE(pointRect.GetHeight() == 0.0f);
 	
 	// Check that anchors with a matching X/Y value make a rect with zero width/height.
 	Rect lineRect = RectUtil::CalcAnchorRect(parentRect, Vector2::Zero, Vector2(0.0f, 1.0f));
-	REQUIRE(lineRect.GetX() == 10.0f);
-	REQUIRE(lineRect.GetY() == 10.0f);
+	REQUIRE(lineRect.x == 10.0f);
+	REQUIRE(lineRect.y == 10.0f);
 	REQUIRE(lineRect.GetWidth() == 0.0f);
 	REQUIRE(lineRect.GetHeight() == 100.0f);
 	
 	lineRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.0f, 0.5f), Vector2(1.0f, 0.5f));
-	REQUIRE(lineRect.GetX() == 10.0f);
-	REQUIRE(lineRect.GetY() == 60.0f);
+	REQUIRE(lineRect.x == 10.0f);
+	REQUIRE(lineRect.y == 60.0f);
 	REQUIRE(lineRect.GetWidth() == 100.0f);
 	REQUIRE(lineRect.GetHeight() == 0.0f);
 	
 	// Check anchor rect for an actual rect.
 	Rect anchorRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.25f, 0.4f), Vector2(0.75f, 0.6f));
-	REQUIRE(anchorRect.GetX() == 35.0f);
-	REQUIRE(anchorRect.GetY() == 50.0f);
+	REQUIRE(anchorRect.x == 35.0f);
+	REQUIRE(anchorRect.y == 50.0f);
 	REQUIRE(anchorRect.GetWidth() == 50.0f);
 	REQUIRE(anchorRect.GetHeight() == 20.0f);
 }

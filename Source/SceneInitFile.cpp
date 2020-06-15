@@ -312,8 +312,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 {
                     // Angle will be in degrees, but we want it in radians for internal use.
 					Vector2 angleDeg = keyValue.GetValueAsVector2();
-                    camera.angle.SetX(Math::ToRadians(angleDeg.GetX()));
-                    camera.angle.SetY(Math::ToRadians(angleDeg.GetY()));
+                    camera.angle.x = Math::ToRadians(angleDeg.x);
+					camera.angle.y = Math::ToRadians(angleDeg.y);
                 }
 			}
         }
@@ -354,8 +354,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 {
 					// Angle is in degrees, but we use radians internally.
 					Vector2 angleDeg = keyValue.GetValueAsVector2();
-                    camera.angle.SetX(Math::ToRadians(angleDeg.GetX()));
-                    camera.angle.SetY(Math::ToRadians(angleDeg.GetY()));
+                    camera.angle.x = Math::ToRadians(angleDeg.x);
+                    camera.angle.y = Math::ToRadians(angleDeg.y);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "default"))
                 {
@@ -402,8 +402,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 {
 					// Angle is in degrees, but we use radians internally.
 					Vector2 angleDeg = keyValue.GetValueAsVector2();
-                    camera.angle.SetX(Math::ToRadians(angleDeg.GetX()));
-                    camera.angle.SetY(Math::ToRadians(angleDeg.GetY()));
+                    camera.angle.x = Math::ToRadians(angleDeg.x);
+                    camera.angle.y = Math::ToRadians(angleDeg.y);
                 }
 			}
         }
@@ -444,8 +444,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 {
 					// Angle is in degrees, but we use radians internally.
 					Vector2 angleDeg = keyValue.GetValueAsVector2();
-                    camera.angle.SetX(Math::ToRadians(angleDeg.GetX()));
-                    camera.angle.SetY(Math::ToRadians(angleDeg.GetY()));
+                    camera.angle.x = Math::ToRadians(angleDeg.x);
+                    camera.angle.y = Math::ToRadians(angleDeg.y);
                 }
 				else if(StringUtil::EqualsIgnoreCase(keyValue.key, "dialogue"))
                 {

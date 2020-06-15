@@ -105,7 +105,7 @@ void Scene::Load()
 	if(defaultRoomCamera != nullptr)
 	{
     	mCamera->SetPosition(defaultRoomCamera->position);
-    	mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.GetX()));
+    	mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.x));
 	}
 	
 	// If a camera bounds model exists for this scene, pass it along to the camera.
@@ -149,9 +149,9 @@ void Scene::Load()
 			
 			Vector3 size = walkerBoundary->GetSize();
 			Vector3 offset = walkerBoundary->GetOffset();
-			offset.SetX(-offset.GetX() + size.GetX() * 0.5f);
-			offset.SetZ(-offset.GetY() + size.GetY() * 0.5f);
-			offset.SetY(0.1f); // Offset slightly up to avoid z-fighting with floor (in most scenes).
+			offset.x = -offset.x + size.x * 0.5f;
+			offset.z = -offset.y + size.y * 0.5f;
+			offset.y = 0.1f; // Offset slightly up to avoid z-fighting with floor (in most scenes).
 			
 			walkerBoundaryActor->SetPosition(offset);
 			walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
@@ -500,7 +500,7 @@ float Scene::GetFloorY(const Vector3& position) const
 {
 	// Calculate ray origin using passed position, but really high in the air!
 	Vector3 rayOrigin = position;
-	rayOrigin.SetY(10000);
+	rayOrigin.y = 10000.0f;
 	
 	// Create ray with origin high in the sky and pointing straight down.
 	Ray downRay(rayOrigin, -Vector3::UnitY);
@@ -513,7 +513,7 @@ float Scene::GetFloorY(const Vector3& position) const
 		RaycastHit hitInfo;
 		if(bsp->RaycastSingle(downRay, mSceneData->GetFloorModelName(), hitInfo))
 		{
-			return downRay.GetPoint(hitInfo.t).GetY();
+			return downRay.GetPoint(hitInfo.t).y;
 		}
 	}
 	

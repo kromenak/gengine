@@ -575,9 +575,9 @@ Quaternion Matrix4::GetRotation() const
 Matrix4 Matrix4::MakeTranslate(Vector3 translation)
 {
     Matrix4 m;
-    m.mVals[12] = translation.GetX();
-    m.mVals[13] = translation.GetY();
-    m.mVals[14] = translation.GetZ();
+    m.mVals[12] = translation.x;
+    m.mVals[13] = translation.y;
+    m.mVals[14] = translation.z;
     return m;
 }
 
@@ -679,9 +679,9 @@ Matrix4 Matrix4::MakeRotate(const Matrix3& other)
 Matrix4 Matrix4::MakeScale(Vector3 scale)
 {
     Matrix4 m;
-    m[0] = scale.GetX();
-    m[5] = scale.GetY();
-    m[10] = scale.GetZ();
+    m[0] = scale.x;
+    m[5] = scale.y;
+    m[10] = scale.z;
     return m;
 }
 
@@ -725,9 +725,9 @@ Matrix4 Matrix4::MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vec
 	
 	// Calculate inverse of eye vector and assign it to 4x4 matrix.
 	Vector3 eyeInv = -(rotate * eye);
-	m(0, 3) = eyeInv.GetX();
-	m(1, 3) = eyeInv.GetY();
-	m(2, 3) = eyeInv.GetZ();
+	m(0, 3) = eyeInv.x;
+	m(1, 3) = eyeInv.y;
+	m(2, 3) = eyeInv.z;
 	return m;
 }
 
