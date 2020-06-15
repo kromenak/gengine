@@ -20,7 +20,6 @@ public:
     Matrix3(float vals[9]);
     explicit Matrix3(float vals[3][3]);
     explicit Matrix3(float vals[3][3], bool transpose);
-    ~Matrix3() { }
     
     // Copy
     Matrix3(const Matrix3& other);
@@ -61,7 +60,7 @@ public:
     Matrix3 operator*(const Matrix3& rhs) const;
     Matrix3& operator*=(const Matrix3& rhs);
     
-    // Vector4 multiplication - column-major (rhs) and row-major (lhs)
+    // Vector3 multiplication - column-vector (rhs) and row-vector (lhs)
     Vector3 operator*(const Vector3& rhs) const;
     friend Vector3 operator*(const Vector3& lhs, const Matrix3& rhs);
     
@@ -70,10 +69,9 @@ public:
     Matrix3& operator*=(float scalar);
     friend Matrix3 operator*(float scalar, const Matrix3& matrix);
     
-    // Data accessors for graphics APIs.
+    // Implicit float conversion - allows Matrix3 to be passed as a float* argument.
     operator float*() { return mVals; }
     operator const float*() const { return mVals; }
-    const float* GetFloatPtr() const { return mVals; }
     
     // Factory methods for generating certain types of matrices.
     static Matrix3 MakeRotateX(float rotX);

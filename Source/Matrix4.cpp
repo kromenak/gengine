@@ -558,11 +558,6 @@ Matrix4 operator*(float scalar, const Matrix4& matrix)
     return matrix * scalar;
 }
 
-Vector3 Matrix4::GetTranslation() const
-{
-	return Vector3(mVals[12], mVals[13], mVals[14]);
-}
-
 Quaternion Matrix4::GetRotation() const
 {
 	Quaternion q;

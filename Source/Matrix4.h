@@ -22,7 +22,6 @@ public:
     Matrix4(float vals[16]);
     explicit Matrix4(float vals[4][4]);
     explicit Matrix4(float vals[4][4], bool transpose);
-    ~Matrix4() { }
     
     // Copy
     Matrix4(const Matrix4& other);
@@ -66,7 +65,7 @@ public:
     Matrix4 operator*(const Matrix4& rhs) const;
     Matrix4& operator*=(const Matrix4& rhs);
     
-	// Vector3 multiplication
+	// Vector3 multiplication - column-vector only!
 	Vector3 TransformPoint(const Vector3& rhs) const;
 	Vector3 Transform(const Vector3& rhs) const;
 	
@@ -79,14 +78,16 @@ public:
     Matrix4& operator*=(float scalar);
     friend Matrix4 operator*(float scalar, const Matrix4& matrix);
     
-    // Data accessors for graphics APIs.
+    // Implicit float conversion - allows Matrix3 to be passed as a float* argument.
     operator float*() { return mVals; }
     operator const float*() const { return mVals; }
-    const float* GetFloatPtr() const { return mVals; }
 	
 	// A Matrix4 is often used to represent a transformation matrix.
 	// In that case, we can extract certain meaningful data if needed.
-	Vector3 GetTranslation() const;
+	const Vector3& GetXAxis() const { return reinterpret_cast<const Vector3&>(mVals[0]); }
+	const Vector3& GetYAxis() const { return reinterpret_cast<const Vector3&>(mVals[4]); }
+	const Vector3& GetZAxis() const { return reinterpret_cast<const Vector3&>(mVals[8]); }
+	const Vector3& GetTranslation() const { return reinterpret_cast<const Vector3&>(mVals[12]); }
 	Quaternion GetRotation() const;
 	
     // Factory methods for generating certain types of matrices.

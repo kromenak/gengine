@@ -98,7 +98,7 @@ void Shader::SetUniformVector4(const char* name, const Color32& color)
 void Shader::SetUniformMatrix4(const char* name, const Matrix4& mat)
 {
     GLuint loc = glGetUniformLocation(mProgram, name);
-    glUniformMatrix4fv(loc, 1, GL_FALSE, mat.GetFloatPtr());
+    glUniformMatrix4fv(loc, 1, GL_FALSE, mat);
 }
 
 GLuint Shader::LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType)
