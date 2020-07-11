@@ -3,8 +3,8 @@
 //
 // Clark Kromenaker
 //
-// A "memory stream" that can be used to feed an array of byte data
-// to a reader to be read as though it were a file stream.
+// An "input memory stream", for reading memory via a stream.
+// Like an "ifstream," but reads in data from byte array rather than a file.
 //
 #pragma once
 #include <istream>

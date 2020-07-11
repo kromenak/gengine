@@ -27,6 +27,9 @@ public:
 	std::string GetLocation() const { return mLocation; }
 	std::string GetLastLocation() const { return mLastLocation; }
 	void SetLocation(const std::string& location);
+    
+    std::string GetLocationDisplayName() const;
+    std::string GetLocationDisplayName(const std::string& location) const;
 	
 	int GetLocationCountAcrossAllTimeblocks(const std::string& actorName, const std::string& location);
 	int GetCurrentLocationCountForCurrentTimeblock(const std::string& actorName) const;

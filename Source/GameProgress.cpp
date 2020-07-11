@@ -6,6 +6,8 @@
 #include "GameProgress.h"
 
 #include "GMath.h"
+#include "Localizer.h"
+#include "Services.h"
 #include "StringUtil.h"
 
 TYPE_DEF_BASE(GameProgress);
@@ -27,6 +29,12 @@ void GameProgress::SetTimeblock(const Timeblock& timeblock)
 	
 	// Chat counts are reset on time block change.
 	mChatCounts.clear();
+}
+
+std::string GameProgress::GetTimeblockDisplayName() const
+{
+    // Keys for timeblocks are in form "Day110A".
+    return Services::Get<Localizer>()->GetText("Day" + mTimeblock.ToString());
 }
 
 bool GameProgress::GetFlag(const std::string& flagName) const

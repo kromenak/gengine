@@ -250,7 +250,12 @@
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
 		4BBC028A22F162B8005ED374 /* FaceController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBC028922F162B8005ED374 /* FaceController.cpp */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
+		4BCC2EA524B41CC700DAE6BD /* Localizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */; };
+		4BCC2EA624B41CC700DAE6BD /* Localizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */; };
+		4BCC2EAD24B50DE900DAE6BD /* Actors.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4BCC2EAB24B50DE900DAE6BD /* Actors.txt */; };
 		4BCF4B25205672350045EDC8 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
+		4BCFC69C24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCFC69B24A6AB4D0039A2CF /* StatusOverlay.cpp */; };
+		4BCFC69D24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCFC69B24A6AB4D0039A2CF /* StatusOverlay.cpp */; };
 		4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshRenderer.cpp */; };
 		4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */; };
 		4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673CB20B1119E00795582 /* Skybox.cpp */; };
@@ -539,6 +544,11 @@
 		4BBC028922F162B8005ED374 /* FaceController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FaceController.cpp; path = ../Source/FaceController.cpp; sourceTree = "<group>"; };
 		4BCBCF452043A90F001BE1E0 /* NVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NVC.h; path = ../Source/NVC.h; sourceTree = "<group>"; };
 		4BCBCF462043A90F001BE1E0 /* NVC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NVC.cpp; path = ../Source/NVC.cpp; sourceTree = "<group>"; };
+		4BCC2EA324B41CC700DAE6BD /* Localizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Localizer.h; path = ../Source/Localizer.h; sourceTree = "<group>"; };
+		4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Localizer.cpp; path = ../Source/Localizer.cpp; sourceTree = "<group>"; };
+		4BCC2EAB24B50DE900DAE6BD /* Actors.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Actors.txt; path = ../Assets/Actors.txt; sourceTree = "<group>"; };
+		4BCFC69A24A6AB4D0039A2CF /* StatusOverlay.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StatusOverlay.h; path = ../Source/StatusOverlay.h; sourceTree = "<group>"; };
+		4BCFC69B24A6AB4D0039A2CF /* StatusOverlay.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = StatusOverlay.cpp; path = ../Source/StatusOverlay.cpp; sourceTree = "<group>"; };
 		4BD4CCE21FF1F5F5009665C7 /* MeshRenderer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = MeshRenderer.h; path = ../Source/MeshRenderer.h; sourceTree = "<group>"; };
 		4BD4CCE31FF1F5F5009665C7 /* MeshRenderer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = MeshRenderer.cpp; path = ../Source/MeshRenderer.cpp; sourceTree = "<group>"; };
 		4BD4CCE51FF1F7E3009665C7 /* Mesh.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Mesh.h; path = ../Source/Mesh.h; sourceTree = "<group>"; };
@@ -559,7 +569,7 @@
 		4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TextInput.cpp; path = ../Source/TextInput.cpp; sourceTree = "<group>"; };
 		4BE15CB61F464FD800114779 /* AssetManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AssetManager.cpp; path = ../Source/AssetManager.cpp; sourceTree = "<group>"; };
 		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
-		4BE15CBC1F46620000114779 /* AtomicTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AtomicTypes.h; path = ../Source/AtomicTypes.h; sourceTree = "<group>"; };
+		4BE15CBC1F46620000114779 /* Atomics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Atomics.h; path = ../Source/Atomics.h; sourceTree = "<group>"; };
 		4BE6EE331F441DC600BB29D5 /* minilzo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = minilzo.c; path = ../Libraries/minilzo/minilzo.c; sourceTree = "<group>"; };
 		4BE75D31208D7E7B007031A3 /* SheepVM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepVM.h; path = ../Source/Sheep/SheepVM.h; sourceTree = "<group>"; };
 		4BE75D32208D7E7B007031A3 /* SheepVM.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepVM.cpp; path = ../Source/Sheep/SheepVM.cpp; sourceTree = "<group>"; };
@@ -631,6 +641,8 @@
 		4B08C90D2137443F0028FEB3 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */,
+				4B85E87A23497EBF004AA3E5 /* TextLayout.h */,
 				4B85421120A905B600DE8C0D /* Cursor.cpp */,
 				4B85421020A905B600DE8C0D /* Cursor.h */,
 				4BBB34B4214F72BB0069B2E9 /* Font.cpp */,
@@ -656,14 +668,15 @@
 		4B0E2A561F74F5570019D4AD /* Assets */ = {
 			isa = PBXGroup;
 			children = (
-				4B8A976F238B7A0E006D284D /* Locations.txt */,
-				4B775E5023373890007FF777 /* UI-Text-ColorReplace.frag */,
 				4B399E4022D00E2100221AE4 /* 3D-Billboard.frag */,
 				4B399E3F22D00E2100221AE4 /* 3D-Billboard.vert */,
 				4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */,
 				4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */,
 				4BD673CE20B23B8800795582 /* 3D-Skybox.frag */,
 				4BD673CD20B239CD00795582 /* 3D-Skybox.vert */,
+				4BCC2EAB24B50DE900DAE6BD /* Actors.txt */,
+				4B8A976F238B7A0E006D284D /* Locations.txt */,
+				4B775E5023373890007FF777 /* UI-Text-ColorReplace.frag */,
 			);
 			name = Assets;
 			sourceTree = "<group>";
@@ -731,9 +744,9 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				4BCC2EA224B4178400DAE6BD /* Input */,
 				4B9231992103AED90004F4F3 /* Animation */,
 				4B76B57D1F3599A1003F63E5 /* Assets */,
-				4BE15CBC1F46620000114779 /* AtomicTypes.h */,
 				4B7AB0421F539EA500CFBE8F /* Audio */,
 				4B12B9DD230A720D009F54E4 /* Debug */,
 				4B17D706206098B100EBD298 /* GameCamera.cpp */,
@@ -742,15 +755,13 @@
 				4B15A9511F2428C5000A689F /* GEngine.h */,
 				4B6B765E21A5216B00788C02 /* GK3 */,
 				4BDFBA072341679000C4DD49 /* GOM */,
-				4B09182F1FEED86B002991D4 /* InputManager.cpp */,
-				4B0918301FEED86B002991D4 /* InputManager.h */,
 				4B9E412E21BD019D008B9B1E /* IO */,
 				4BE6EE351F441DD100BB29D5 /* Libraries */,
 				4B15A93F1F24188E000A689F /* Main.cpp */,
 				4B4300841FB7EDFA009EDE58 /* Math */,
 				4B046E8F218E855600E56341 /* Mover.cpp */,
 				4B046E8E218E855600E56341 /* Mover.h */,
-				4B3D478B23540D2500EB510E /* Platform.h */,
+				4BCFC69924A69C990039A2CF /* Platform */,
 				4B38BA6E2438F4F3001F9240 /* Primitives */,
 				4B364C3520ECADBE00EFC50C /* Rendering */,
 				4B7A6306223EDAF50053C95F /* Reports */,
@@ -761,11 +772,9 @@
 				4B5A334A243A57A70064FC06 /* SphereCollider.cpp */,
 				4B5A3349243A57A70064FC06 /* SphereCollider.h */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
-				4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */,
-				4BDFBA0B2341B75C00C4DD49 /* TextInput.h */,
-				4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */,
-				4B85E87A23497EBF004AA3E5 /* TextLayout.h */,
 				4B08C90D2137443F0028FEB3 /* UI */,
+				4BCC2EA324B41CC700DAE6BD /* Localizer.h */,
+				4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -949,6 +958,8 @@
 				4B4861CF243001D000C4EA31 /* InventoryInspectScreen.h */,
 				4B4AFEE623B9C24100554D04 /* InventoryScreen.cpp */,
 				4B4AFEE523B9C24100554D04 /* InventoryScreen.h */,
+				4BCFC69B24A6AB4D0039A2CF /* StatusOverlay.cpp */,
+				4BCFC69A24A6AB4D0039A2CF /* StatusOverlay.h */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -1033,8 +1044,6 @@
 				4B08C90B21372A710028FEB3 /* CallbackMethod.cpp */,
 				4B08C90A21372A710028FEB3 /* CallbackMethod.h */,
 				4B90E0802377C05400E0E3FA /* EnumClassFlags.h */,
-				4B6B766921AB99C500788C02 /* FileSystem.cpp */,
-				4B6B766821AB99C500788C02 /* FileSystem.h */,
 				4B02A3B31F5269E9000540A7 /* imstream.cpp */,
 				4B02A3B41F5269E9000540A7 /* imstream.h */,
 				4B02A3B01F526529000540A7 /* membuf.cpp */,
@@ -1042,7 +1051,6 @@
 				4BACA50C20F72663008C7FE9 /* StringTokenizer.cpp */,
 				4BACA50B20F72663008C7FE9 /* StringTokenizer.h */,
 				4B5497F81FF80E0A00F1EF4F /* StringUtil.h */,
-				4B7A6303223ED8940053C95F /* SystemUtil.h */,
 				4B9231A32112167F0004F4F3 /* Type.h */,
 				4B4B4ADE2091B5A000391827 /* Value.h */,
 			);
@@ -1074,6 +1082,29 @@
 				4BE75D31208D7E7B007031A3 /* SheepVM.h */,
 			);
 			name = Machine;
+			sourceTree = "<group>";
+		};
+		4BCC2EA224B4178400DAE6BD /* Input */ = {
+			isa = PBXGroup;
+			children = (
+				4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */,
+				4BDFBA0B2341B75C00C4DD49 /* TextInput.h */,
+				4B09182F1FEED86B002991D4 /* InputManager.cpp */,
+				4B0918301FEED86B002991D4 /* InputManager.h */,
+			);
+			name = Input;
+			sourceTree = "<group>";
+		};
+		4BCFC69924A69C990039A2CF /* Platform */ = {
+			isa = PBXGroup;
+			children = (
+				4BE15CBC1F46620000114779 /* Atomics.h */,
+				4B3D478B23540D2500EB510E /* Platform.h */,
+				4B6B766921AB99C500788C02 /* FileSystem.cpp */,
+				4B6B766821AB99C500788C02 /* FileSystem.h */,
+				4B7A6303223ED8940053C95F /* SystemUtil.h */,
+			);
+			name = Platform;
 			sourceTree = "<group>";
 		};
 		4BD673C920B10EB200795582 /* Scene */ = {
@@ -1240,6 +1271,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4BCC2EAD24B50DE900DAE6BD /* Actors.txt in Resources */,
 				4B22F4E7217170A00065B152 /* Assets.xcassets in Resources */,
 				4B8A9770238B7A0E006D284D /* Locations.txt in Resources */,
 				4B22F4EA217170A00065B152 /* Main.storyboard in Resources */,
@@ -1357,6 +1389,7 @@
 				4B12B9DB22FF3764009F54E4 /* stb_image_resize.cpp in Sources */,
 				4B4AFEE723B9C24100554D04 /* InventoryScreen.cpp in Sources */,
 				4B0918361FEEEA51002991D4 /* Matrix3.cpp in Sources */,
+				4BCFC69C24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */,
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
@@ -1403,6 +1436,7 @@
 				4BEA727521D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4B85E87923497A4A004AA3E5 /* UITextBuffer.cpp in Sources */,
 				4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */,
+				4BCC2EA524B41CC700DAE6BD /* Localizer.cpp in Sources */,
 				4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
 				4B8A976D238B6EE1006D284D /* LocationManager.cpp in Sources */,
@@ -1480,6 +1514,7 @@
 				4B4AFEE823B9C24100554D04 /* InventoryScreen.cpp in Sources */,
 				4B22F503217407530065B152 /* SheepAPI.cpp in Sources */,
 				4B2CA00B21B8FC6D006D5E52 /* minilzo.c in Sources */,
+				4BCFC69D24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */,
 				4B22F501217407530065B152 /* lex.yy.cc in Sources */,
 				4BFBB86721D0469000E07EFB /* SceneData.cpp in Sources */,
 				4B5A334C243A57A70064FC06 /* SphereCollider.cpp in Sources */,
@@ -1526,6 +1561,7 @@
 				4BB67C4E235255E000FDFB30 /* UITextBuffer.cpp in Sources */,
 				4BEA727621D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */,
+				4BCC2EA624B41CC700DAE6BD /* Localizer.cpp in Sources */,
 				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
 				4B22F52D2174078B0065B152 /* Audio.cpp in Sources */,
 				4B8A976E238B6EE1006D284D /* LocationManager.cpp in Sources */,

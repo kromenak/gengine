@@ -17,6 +17,7 @@
 #include "FootstepManager.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
+#include "Localizer.h"
 #include "LocationManager.h"
 #include "Scene.h"
 #include "Services.h"
@@ -106,7 +107,10 @@ bool GEngine::Initialize()
     //mAssetManager.WriteBarnAssetToFile("BLKMUSTACHE_3.BMP");
     //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
 	
-	// Load button icon manager.
+    // Create localizer.
+    Services::Set<Localizer>(new Localizer());
+    
+	// Load verb manager.
 	Services::Set<VerbManager>(new VerbManager());
 	
 	// Load character configs.

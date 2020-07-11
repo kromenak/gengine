@@ -7,6 +7,7 @@
 
 #include "GameProgress.h"
 #include "IniParser.h"
+#include "Localizer.h"
 #include "Services.h"
 #include "StringUtil.h"
 #include "Timeblock.h"
@@ -55,6 +56,17 @@ void LocationManager::SetLocation(const std::string& location)
 {
 	mLastLocation = mLocation;
 	mLocation = location;
+}
+
+std::string LocationManager::GetLocationDisplayName() const
+{
+    return GetLocationDisplayName(mLocation);
+}
+
+std::string LocationManager::GetLocationDisplayName(const std::string& location) const
+{
+    // Keys for timeblocks are in form "loc_r25".
+    return Services::Get<Localizer>()->GetText("loc_" + location);
 }
 
 int LocationManager::GetLocationCountAcrossAllTimeblocks(const std::string& actorName, const std::string& location)
