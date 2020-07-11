@@ -15,11 +15,6 @@ TextLayout::CharInfo& TextLayout::CharInfo::operator=(const TextLayout::CharInfo
 	return *this;
 }
 
-TextLayout::TextLayout()
-{
-	
-}
-
 TextLayout::TextLayout(const Rect& rect, Font* font,
 	HorizontalAlignment ha, VerticalAlignment va,
 	HorizontalOverflow ho, VerticalOverflow vo) :
@@ -45,48 +40,67 @@ void TextLayout::AddLine(const std::string& line)
 		}
 		return;
 	}
+    
+    // OK, we have a line of text that has no line breaks in it.
+    // However, we may need to add a line break if line is too long and horizontal overflow mode is "wrap"!
+    
+    // Add one line.
+    ++mLineCount;
+    
+    // Determine length of this line.
+    //TODO: This logic DOES NOT currently account for horizontal wrapping correctly!
+    int lineWidth = 0;
+    for(size_t i = 0; i < line.size(); ++i)
+    {
+        Glyph& glyph = mFont->GetGlyph(line[i]);
+        lineWidth += glyph.width;
+    }
 	
+    // Height of the line is easier - always glyph height from the font.
 	int lineHeight = mFont->GetGlyphHeight();
-	int lineWidth = 0;
-	for(size_t i = 0; i < line.size(); ++i)
-	{
-		Glyph& glyph = mFont->GetGlyph(line[i]);
-		lineWidth += glyph.width;
-	}
 	
+    // Determine initial left x-pos of this line, depending on alignment.
 	float xPos = 0.0f;
 	switch(mHorizontalAlignment)
 	{
 	case HorizontalAlignment::Left:
+        // Left: just use min.x
 		xPos = mRect.GetMin().x;
 		break;
 	case HorizontalAlignment::Right:
+        // Right: start at max.x and subtract total line width to get start pos
 		xPos = mRect.GetMax().x - lineWidth;
 		break;
 	//case HorizontalAlignment::Center:
 	//	break;
 	}
 	
-	float yPos = mNextCharPos.y + lineHeight;
+    // Determine bottom y-pos of this line, depending on alignment.
+    float yPos = 0.0f;
 	switch(mVerticalAlignment)
 	{
 	case VerticalAlignment::Bottom:
+        // Bottom: just use min.y
 		yPos = mRect.GetMin().y;
+        
+        // If we add a new line with bottom alignment,
+        // all previous characters must be moved up by one line!
 		for(auto& charInfo : mCharInfos)
 		{
 			charInfo.pos.y = charInfo.pos.y + lineHeight;
 		}
 		break;
 	case VerticalAlignment::Top:
-		//yPos = mRect.GetMax().y - ((lineHeight + mLineSpacing) * (lIndex + 1));
+        // Top: max.y is top-y, but we need bottom-y.
+        // So, we must subtract line height, and also deal with how many previous lines already exist.
+        yPos = mRect.GetMax().y - (lineHeight * mLineCount);
 		break;
 	//case VerticalAlignment::Center:
 	//	break;
 	}
 	
-	// We are adding at least one line...
-	++mLineCount;
-	
+    // OK, we know x/y to start the line at.
+    // Determine CharInfo for each text character: the glyph and position of the glyph for rendering.
 	for(size_t i = 0; i < line.size(); ++i)
 	{
 		Glyph& glyph = mFont->GetGlyph(line[i]);
@@ -94,40 +108,49 @@ void TextLayout::AddLine(const std::string& line)
 		float leftX = xPos;
 		float rightX = xPos + glyph.width;
 		
+        //TODO: This KIND OF works, but I think horizontal wrap detection should really occur earlier in this function
+        //TODO: to avoid duplicate code AND get correct results!
 		// If this glyph will extend outside the horizontal bounds of the rect, and we want to wrap, move to a new line!
-		if(mHorizontalOverflow == HorizontalOverflow::Wrap &&
+        if(mHorizontalOverflow == HorizontalOverflow::Wrap &&
 		   (leftX < mRect.GetMin().x || rightX > mRect.GetMax().x))
 		{
+            // Adding another line!
+            ++mLineCount;
+            
+            // Determine new x-pos for this next line.
 			switch(mHorizontalAlignment)
 			{
 			case HorizontalAlignment::Left:
 				xPos = mRect.GetMin().x;
 				break;
 			case HorizontalAlignment::Right:
+                //TODO: This doesn't seem correct - shouldn't it be "remainingLineWidth" or something?
 				xPos = mRect.GetMax().x - lineWidth;
 				break;
 			//case HorizontalAlignment::Center:
 			//	break;
 			}
 			
+            // Determine new y-pos for this next line.
 			switch(mVerticalAlignment)
 			{
 			case VerticalAlignment::Bottom:
 				yPos = mRect.GetMin().y;
+                
+                // If we add a new line with bottom alignment,
+                // all previous characters must be moved up by one line!
 				for(auto& charInfo : mCharInfos)
 				{
-					charInfo.pos.y = charInfo.pos.y + lineHeight;
+					charInfo.pos.y += lineHeight;
 				}
 				break;
 			case VerticalAlignment::Top:
+                // Top: just move down "one line's worth".
 				yPos += lineHeight;
 				break;
 			//case VerticalAlignment::Center:
 			//	break;
 			}
-			
-			// Adding another line!
-			++mLineCount;
 		}
 		
 		// Calc bottom and top.
@@ -141,7 +164,10 @@ void TextLayout::AddLine(const std::string& line)
 			break;
 		}
 		
+        // OK, we will render this character - put it on.
 		mCharInfos.emplace_back(glyph, Vector2(xPos, yPos));
+        
+        // Move forward x-pos by the glyph's width.
 		xPos += glyph.width;
 	}
 		

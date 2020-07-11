@@ -56,11 +56,14 @@ public:
 		CharInfo(Glyph& glyph, Vector2 pos) : glyph(glyph), pos(pos) { }
 		CharInfo& operator=(const CharInfo& other);
 		
+        // Glyph to use when rendering this text character.
 		Glyph& glyph;
+        
+        // Position of the text character (bottom-left corner).
 		Vector2 pos;
 	};
 	
-	TextLayout();
+    TextLayout() = default;
 	TextLayout(const Rect& rect, Font* font,
 			   HorizontalAlignment ha, VerticalAlignment va,
 			   HorizontalOverflow ho, VerticalOverflow vo);
