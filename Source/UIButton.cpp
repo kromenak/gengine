@@ -73,13 +73,13 @@ void UIButton::Render()
 
 void UIButton::OnPointerEnter()
 {
-	GEngine::inst->UseHighlightCursor();
+	GEngine::Instance()->UseHighlightCursor();
 	mPointerOver = true;
 }
 
 void UIButton::OnPointerExit()
 {
-	GEngine::inst->UseDefaultCursor();
+	GEngine::Instance()->UseDefaultCursor();
 	mPointerOver = false;
 }
 

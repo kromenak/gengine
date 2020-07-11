@@ -81,7 +81,7 @@ void DialogueManager::SetSpeaker(const std::string& noun)
 	// If someone is no longer the speaker, have them transition to listening.
 	if(!mSpeaker.empty() && mDialogueUsesFidgets)
 	{
-		GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(mSpeaker);
+		GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(mSpeaker);
 		if(actor != nullptr)
 		{
 			actor->StartFidget(GKActor::FidgetType::Listen);
@@ -94,7 +94,7 @@ void DialogueManager::SetSpeaker(const std::string& noun)
 	// Have the new speaker play talk animation.
 	if(mDialogueUsesFidgets)
 	{
-		GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(mSpeaker);
+		GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(mSpeaker);
 		if(actor != nullptr)
 		{
 			actor->StartFidget(GKActor::FidgetType::Talk);
@@ -146,5 +146,5 @@ void DialogueManager::PlayNextDialogueLine()
 		return;
 	}
 	std::cout << "Playing YAK " << yak->GetName() << std::endl;
-	GEngine::inst->GetScene()->GetAnimator()->Start(yak, false, false, nullptr);
+	GEngine::Instance()->GetScene()->GetAnimator()->Start(yak, false, false, nullptr);
 }

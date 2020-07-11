@@ -104,7 +104,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	if(verbType == VerbType::Normal)
 	{
 		// Get active inventory item for current ego.
-		const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+		const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 		std::string activeItemName = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
 		
 		// Show inventory button if there's an active inventory item AND it is not the object we're interacting with.

@@ -35,7 +35,7 @@ void Walker::SetCharacterConfig(const CharacterConfig& characterConfig)
 
 void Walker::SnapToFloor()
 {
-	Scene* scene = GEngine::inst->GetScene();
+	Scene* scene = GEngine::Instance()->GetScene();
 	if(scene != nullptr)
 	{
 		Vector3 pos = GetOwner()->GetPosition();
@@ -292,25 +292,25 @@ void Walker::StartWalk()
 		*/
 		 
 		mState = State::Start;
-		GEngine::inst->GetScene()->GetAnimator()->Start(anim, true, false, std::bind(&Walker::ContinueWalk, this));
+		GEngine::Instance()->GetScene()->GetAnimator()->Start(anim, true, false, std::bind(&Walker::ContinueWalk, this));
 	}
 }
 
 void Walker::ContinueWalk()
 {
 	mState = State::Loop;
-	GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkLoopAnim, true, false, std::bind(&Walker::ContinueWalk, this));
+	GEngine::Instance()->GetScene()->GetAnimator()->Start(mCharConfig->walkLoopAnim, true, false, std::bind(&Walker::ContinueWalk, this));
 }
 
 void Walker::StopWalk()
 {
 	if(mState != State::End)
 	{
-		GEngine::inst->GetScene()->GetAnimator()->Stop(mCharConfig->walkStartAnim);
-		GEngine::inst->GetScene()->GetAnimator()->Stop(mCharConfig->walkLoopAnim);
+		GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkStartAnim);
+		GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkLoopAnim);
 		
 		mState = State::End;
-		GEngine::inst->GetScene()->GetAnimator()->Start(mCharConfig->walkStopAnim, true, false, [this]() -> void {
+		GEngine::Instance()->GetScene()->GetAnimator()->Start(mCharConfig->walkStopAnim, true, false, [this]() -> void {
 			mState = State::Idle;
 			//mowner->StartFidget(GKActor::FidgetType::Idle);
 		});
@@ -342,7 +342,7 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
 	Ray ray(headPos, dir);
 	
 	// If hit the target with the ray, it must be in view.
-	SceneCastResult result = GEngine::inst->GetScene()->Raycast(ray, false, mGKOwner);
+	SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, false, mGKOwner);
 	if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget))
 	{
 		// Convert ray direction to a "facing" direction,

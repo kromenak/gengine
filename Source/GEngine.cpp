@@ -23,13 +23,12 @@
 #include "Services.h"
 #include "TextInput.h"
 
-GEngine* GEngine::inst = nullptr;
-std::vector<Actor*> GEngine::mActors;
+GEngine* GEngine::sInstance = nullptr;
 
-GEngine::GEngine() :
-	mRunning(false)
+GEngine::GEngine()
 {
-    inst = this;
+    assert(sInstance == nullptr);
+    sInstance = this;
 }
 
 bool GEngine::Initialize()

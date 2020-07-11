@@ -26,7 +26,7 @@ void VertexAnimNode::Play(AnimationState* animState)
 	if(vertexAnimation != nullptr)
 	{
 		// Also we need the object to play the vertex anim on!
-		GKActor* actor = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		GKActor* actor = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(actor != nullptr)
 		{
 			// Start absolute or relative anim.
@@ -46,7 +46,7 @@ void VertexAnimNode::Stop()
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKActor* actor = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		GKActor* actor = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(actor != nullptr)
 		{
 			actor->StopAnimation(vertexAnimation);
@@ -58,7 +58,7 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKActor* actor = GEngine::inst->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		GKActor* actor = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(actor != nullptr)
 		{
 			actor->SampleAnimation(vertexAnimation, frame);
@@ -72,20 +72,20 @@ void SceneTextureAnimNode::Play(AnimationState* animState)
 	if(texture != nullptr)
 	{
 		//TODO: Ensure sceneName matches loaded scene name?
-		GEngine::inst->GetScene()->ApplyTextureToSceneModel(sceneModelName, texture);
+		GEngine::Instance()->GetScene()->ApplyTextureToSceneModel(sceneModelName, texture);
 	}
 }
 
 void SceneModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	//TODO: Ensure sceneName matches loaded scene name?
-	GEngine::inst->GetScene()->SetSceneModelVisibility(sceneModelName, visible);
+	GEngine::Instance()->GetScene()->SetSceneModelVisibility(sceneModelName, visible);
 }
 
 void ModelTextureAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		// Grab the material used to render this meshIndex/submeshIndex pair.
@@ -105,7 +105,7 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
 void ModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		//TODO: Not sure if models need to be invisible but still updating in this scenario.
@@ -126,7 +126,7 @@ void SoundAnimNode::Play(AnimationState* animState)
 void FootstepAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
 		// Get the actor's shoe type.
@@ -148,7 +148,7 @@ void FootstepAnimNode::Play(AnimationState* animState)
 void FootscuffAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
 		// Get the actor's shoe type.
@@ -192,7 +192,7 @@ void CameraAnimNode::Play(AnimationState* animState)
 void FaceTexAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
 		// In this case, the texture name is what it is.
@@ -207,7 +207,7 @@ void FaceTexAnimNode::Play(AnimationState* animState)
 void UnFaceTexAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->Clear(faceElement);
@@ -217,7 +217,7 @@ void UnFaceTexAnimNode::Play(AnimationState* animState)
 void LipSyncAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
 		// The mouth texture names need to have a prefix added, based on 3-letter identifier.

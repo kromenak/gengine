@@ -12,7 +12,7 @@
 
 Actor::Actor()
 {
-	GEngine::AddActor(this);
+    GEngine::Instance()->AddActor(this);
 	
 	// Add transform component.
 	mTransform = AddComponent<Transform>();
@@ -20,7 +20,7 @@ Actor::Actor()
 
 Actor::Actor(TransformType transformType)
 {
-	GEngine::AddActor(this);
+	GEngine::Instance()->AddActor(this);
 	
 	// Add transform component.
 	if(transformType == TransformType::Transform)

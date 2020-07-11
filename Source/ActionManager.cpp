@@ -495,14 +495,14 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "gabe_all"))
 	{
 		// gabe_all: condition is met if Ego is Gabriel.
-		Scene* scene = GEngine::inst->GetScene();
+		Scene* scene = GEngine::Instance()->GetScene();
 		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
 		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "gabriel");
 	}
 	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "grace_all"))
 	{
 		// grace_all: condition is met if Ego is Grace.
-		Scene* scene = GEngine::inst->GetScene();
+		Scene* scene = GEngine::Instance()->GetScene();
 		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
 		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "grace");
 	}

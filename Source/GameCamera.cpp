@@ -56,7 +56,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	
 	// It's possible our height was changed due to a script moving the camera.
 	// Make sure height is correct before we do our updates.
-	float startFloorY = GEngine::inst->GetScene()->GetFloorY(GetPosition());
+	float startFloorY = GEngine::Instance()->GetScene()->GetFloorY(GetPosition());
 	mHeight = GetPosition().y - startFloorY;
 	
 	// Disallow moving camera when an action is playing.
@@ -221,7 +221,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	
 	// Calculate new desired height and apply that to position y.
 	float height = mHeight + verticalSpeed * deltaTime;
-	float floorY = GEngine::inst->GetScene()->GetFloorY(position);
+	float floorY = GEngine::Instance()->GetScene()->GetFloorY(position);
 	position.y = floorY + height;
 	
 	// Perform collision checks and resolutions.
@@ -232,7 +232,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	
 	// Height may also be affected by collision. After resolving,
 	// we can see if our height changed and save it.
-	float newFloorY = GEngine::inst->GetScene()->GetFloorY(position);
+	float newFloorY = GEngine::Instance()->GetScene()->GetFloorY(position);
 	float heightForReal = position.y - newFloorY;
 	mHeight = heightForReal;
 	
@@ -245,7 +245,7 @@ void GameCamera::OnUpdate(float deltaTime)
 	// Raycast to the ground and always maintain a desired height.
 	//TODO: This does not apply when camera boundaries are disabled!
 	//TODO: Doesn't apply when middle mouse button is held???
-	Scene* scene = GEngine::inst->GetScene();
+	Scene* scene = GEngine::Instance()->GetScene();
 	if(scene != nullptr)
 	{
 		Vector3 pos = GetPosition();
@@ -276,7 +276,7 @@ void GameCamera::OnUpdate(float deltaTime)
 			Ray ray(worldPos, dir);
 			
 			// Cast into the scene to see if we're over an interactive object.
-			SceneCastResult result = GEngine::inst->GetScene()->Raycast(ray, true);
+			SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, true);
 		
 			// If we can interact with whatever we are pointing at, highlight the cursor.
 			// Note we call "UseHighlightCursor" when start hovering OR we switch hover to new object.
@@ -286,13 +286,13 @@ void GameCamera::OnUpdate(float deltaTime)
 			{
 				if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
 				{
-					GEngine::inst->UseHighlightCursor();
+					GEngine::Instance()->UseHighlightCursor();
 					mLastHoveredNoun = hovering->GetNoun();
 				}
 			}
 			else
 			{
-				GEngine::inst->UseDefaultCursor();
+				GEngine::Instance()->UseDefaultCursor();
 				mLastHoveredNoun.clear();
 			}
 			
@@ -300,7 +300,7 @@ void GameCamera::OnUpdate(float deltaTime)
 			// Need to do this, even if canInteract==false, because floor can be clicked to move around.
 			if(Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Left))
 			{
-				GEngine::inst->GetScene()->Interact(ray, hovering);
+				GEngine::Instance()->GetScene()->Interact(ray, hovering);
 			}
 		}
 		else

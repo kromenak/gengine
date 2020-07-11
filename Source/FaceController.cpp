@@ -185,7 +185,7 @@ void FaceController::Blink()
 	}
 	
 	// Play it if you got it!
-	GEngine::inst->GetScene()->GetAnimator()->Start(blinkAnim, false, false, nullptr);
+	GEngine::Instance()->GetScene()->GetAnimator()->Start(blinkAnim, false, false, nullptr);
 }
 
 void FaceController::Blink(const std::string& animName)
@@ -204,7 +204,7 @@ void FaceController::Blink(const std::string& animName)
 			return;
 		}
 	}
-	GEngine::inst->GetScene()->GetAnimator()->Start(blinkAnim, false, false, nullptr);
+	GEngine::Instance()->GetScene()->GetAnimator()->Start(blinkAnim, false, false, nullptr);
 }
 
 void FaceController::SetEyeJitterEnabled(bool enabled)
@@ -238,7 +238,7 @@ void FaceController::DoExpression(const std::string& expression)
 	Animation* animation = Services::GetAssets()->LoadAnimation(animName);
 	if(animation != nullptr)
 	{
-		GEngine::inst->GetScene()->GetAnimator()->Start(animation);
+		GEngine::Instance()->GetScene()->GetAnimator()->Start(animation);
 	}
 	else
 	{
@@ -268,7 +268,7 @@ void FaceController::SetMood(const std::string& mood)
 	mExitMoodAnimation = exitAnimation;
 	
 	// Play mood on animation.
-	GEngine::inst->GetScene()->GetAnimator()->Start(mEnterMoodAnimation);
+	GEngine::Instance()->GetScene()->GetAnimator()->Start(mEnterMoodAnimation);
 }
 
 void FaceController::ClearMood()
@@ -277,7 +277,7 @@ void FaceController::ClearMood()
 	if(mMood.empty()) { return; }
 	
 	// Play mood off animation.
-	GEngine::inst->GetScene()->GetAnimator()->Start(mExitMoodAnimation);
+	GEngine::Instance()->GetScene()->GetAnimator()->Start(mExitMoodAnimation);
 	
 	// Clear mood state.
 	mMood.clear();

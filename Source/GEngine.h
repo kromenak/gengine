@@ -1,3 +1,6 @@
+//
+// GEngine.h
+//
 // Clark Kromenaker
 //
 // The "main" engine class. This is created by main() and handles
@@ -22,8 +25,7 @@ class Cursor;
 class GEngine
 {
 public:
-    static void AddActor(Actor* actor);
-    static GEngine* inst;
+    static GEngine* Instance() { return sInstance; }
     
     GEngine();
     
@@ -33,6 +35,8 @@ public:
     
     void Quit();
     
+    void AddActor(Actor* actor);
+    
 	void LoadScene(std::string name) { mSceneToLoad = name; }
     Scene* GetScene() { return mScene; }
 	
@@ -41,8 +45,8 @@ public:
 	void UseWaitCursor();
     
 private:
-    // A list of all actors that currently exist in the game.
-    static std::vector<Actor*> mActors;
+    // Only one instance of GEngine can exist.
+    static GEngine* sInstance;
     
     // Is the game running? While true, we loop. When false, the game exits.
 	// False by default, but set to true after initialization.
@@ -57,6 +61,9 @@ private:
 	ReportManager mReportManager;
 	ActionManager mActionManager;
 	Console mConsole;
+    
+    // A list of all actors that currently exist in the game.
+    std::vector<Actor*> mActors;
     
     // The currently active scene. There can be only one at a time (sure about that?).
     Scene* mScene = nullptr;

@@ -234,7 +234,7 @@ void ExecError()
 // ACTORS
 shpvoid Blink(std::string actorName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->Blink();
@@ -249,7 +249,7 @@ RegFunc1(Blink, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid BlinkX(std::string actorName, std::string blinkAnim)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->Blink(blinkAnim);
@@ -265,7 +265,7 @@ RegFunc2(BlinkX, void, string, string, IMMEDIATE, REL_FUNC);
 shpvoid ClearMood(std::string actorName)
 {
 	// Get actor and make sure it's valid.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor == nullptr)
 	{
 		ExecError();
@@ -280,7 +280,7 @@ RegFunc1(ClearMood, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EnableEyeJitter(std::string actorName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->SetEyeJitterEnabled(true);
@@ -295,7 +295,7 @@ RegFunc1(EnableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DisableEyeJitter(std::string actorName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->SetEyeJitterEnabled(false);
@@ -310,7 +310,7 @@ RegFunc1(DisableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EyeJitter(std::string actorName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->EyeJitter();
@@ -325,7 +325,7 @@ RegFunc1(EyeJitter, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DumpActorPosition(std::string actorName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->DumpPosition();
@@ -340,7 +340,7 @@ RegFunc1(DumpActorPosition, void, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid Expression(std::string actorName, std::string expression)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->DoExpression(expression);
@@ -369,14 +369,14 @@ int GetEgoLocationCount(std::string locationName)
 	}
 	
 	// Get it!
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	return Services::Get<LocationManager>()->GetLocationCountForCurrentTimeblock(egoName, locationName);
 }
 RegFunc1(GetEgoLocationCount, int, string, IMMEDIATE, REL_FUNC);
 
 std::string GetEgoName()
 {
-	return GEngine::inst->GetScene()->GetEgoName();
+	return GEngine::Instance()->GetScene()->GetEgoName();
 }
 RegFunc0(GetEgoName, string, IMMEDIATE, REL_FUNC);
 
@@ -409,7 +409,7 @@ shpvoid GlanceX(std::string actorName, int leftPercentX, int leftPercentY,
 
 shpvoid InitEgoPosition(std::string positionName)
 {
-    if(!GEngine::inst->GetScene()->InitEgoPosition(positionName))
+    if(!GEngine::Instance()->GetScene()->InitEgoPosition(positionName))
 	{
 		ExecError();
 	}
@@ -451,10 +451,10 @@ int IsActorNear(std::string actorName, std::string positionName, float distance)
 	}
 	
 	// Get actor and position, or fail.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
-		const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+		const ScenePosition* scenePosition = GEngine::Instance()->GetScene()->GetPosition(positionName);
 		if(scenePosition != nullptr)
 		{
 			// Distance check.
@@ -479,10 +479,10 @@ int IsWalkingActorNear(std::string actorName, std::string positionName, float di
 	}
 	
 	// Get actor and position, or fail.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
-		const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+		const ScenePosition* scenePosition = GEngine::Instance()->GetScene()->GetPosition(positionName);
 		if(scenePosition != nullptr)
 		{
 			return (actor->GetWalkDestination() - scenePosition->position).GetLengthSq() < distance * distance;
@@ -510,7 +510,7 @@ RegFunc1(IsActorOffstage, int, string, IMMEDIATE, REL_FUNC);
 
 int IsCurrentEgo(string actorName)
 {
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	return StringUtil::EqualsIgnoreCase(egoName, actorName) ? 1 : 0;
 }
 RegFunc1(IsCurrentEgo, int, string, IMMEDIATE, REL_FUNC);
@@ -608,8 +608,8 @@ RegFunc1(SetActorOffstage, void, string, IMMEDIATE, REL_FUNC);
 shpvoid SetActorPosition(std::string actorName, std::string positionName)
 {
 	// Get needed data.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
-	const ScenePosition* scenePosition = GEngine::inst->GetScene()->GetPosition(positionName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+	const ScenePosition* scenePosition = GEngine::Instance()->GetScene()->GetPosition(positionName);
 	
 	// If either is null, log an error.
 	if(actor == nullptr || scenePosition == nullptr)
@@ -639,7 +639,7 @@ shpvoid SetEgoLocationCount(std::string locationName, int count)
 	}
 	
 	// Set it!
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	Services::Get<LocationManager>()->SetLocationCountForCurrentTimeblock(egoName, locationName, count);
 	return 0;
 }
@@ -648,7 +648,7 @@ RegFunc2(SetEgoLocationCount, void, string, int, IMMEDIATE, DEV_FUNC);
 shpvoid SetIdleGAS(std::string actorName, std::string gasName)
 {
 	// Get actor and make sure it's valid.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor == nullptr)
 	{
 		ExecError();
@@ -677,7 +677,7 @@ RegFunc2(SetIdleGAS, void, string, string, WAITABLE, REL_FUNC);
 shpvoid SetListenGAS(std::string actorName, std::string gasName)
 {
 	// Get actor and make sure it's valid.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor == nullptr)
 	{
 		ExecError();
@@ -706,7 +706,7 @@ RegFunc2(SetListenGAS, void, string, string, WAITABLE, REL_FUNC);
 shpvoid SetTalkGAS(std::string actorName, std::string gasName)
 {
 	// Get actor and make sure it's valid.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor == nullptr)
 	{
 		ExecError();
@@ -735,7 +735,7 @@ RegFunc2(SetTalkGAS, void, string, string, WAITABLE, REL_FUNC);
 shpvoid SetMood(std::string actorName, std::string moodName)
 {
 	// Get actor and make sure it's valid.
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor == nullptr)
 	{
 		ExecError();
@@ -765,7 +765,7 @@ RegFunc5(SetWalkAnim, void, string, string, string, string, string, IMMEDIATE, R
  
 shpvoid StartIdleFidget(std::string actorName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->StartFidget(GKActor::FidgetType::Idle);
@@ -776,7 +776,7 @@ RegFunc1(StartIdleFidget, void, string, WAITABLE, REL_FUNC);
 
 shpvoid StartListenFidget(std::string actorName)
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->StartFidget(GKActor::FidgetType::Listen);
@@ -787,7 +787,7 @@ RegFunc1(StartListenFidget, void, string, WAITABLE, REL_FUNC);
 
 shpvoid StartTalkFidget(std::string actorName) // WAIT
 {
-	GKActor* actor = GEngine::inst->GetScene()->GetActorByNoun(actorName);
+	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
 	if(actor != nullptr)
 	{
 		actor->StartFidget(GKActor::FidgetType::Talk);
@@ -799,7 +799,7 @@ RegFunc1(StartTalkFidget, void, string, WAITABLE, REL_FUNC);
 shpvoid StopFidget(std::string actorName)
 {
 	//TODO: Should be waitable for complex fidgets.
-	Scene* scene = GEngine::inst->GetScene();
+	Scene* scene = GEngine::Instance()->GetScene();
 	if(scene != nullptr)
 	{
 		GKActor* actor = scene->GetActorByNoun(actorName);
@@ -910,7 +910,7 @@ int WasEgoEverInLocation(string locationName)
 	}
 	
 	// Returns if Ego was EVER in a location during ANY timeblock!
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	int locationCount = Services::Get<LocationManager>()->GetLocationCountAcrossAllTimeblocks(egoName, locationName);
 	return locationCount > 0 ? 1 : 0;
 }
@@ -994,7 +994,7 @@ shpvoid StartAnimation(std::string animationName)
 	if(animation != nullptr)
 	{
 		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-		GEngine::inst->GetScene()->GetAnimator()->Start(animation, false, false, currentThread->AddWait());
+		GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, false, false, currentThread->AddWait());
 	}
 	return 0;
 }
@@ -1006,7 +1006,7 @@ shpvoid StartMoveAnimation(std::string animationName)
 	if(animation != nullptr)
 	{
 		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-		GEngine::inst->GetScene()->GetAnimator()->Start(animation, true, false, currentThread->AddWait());
+		GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, true, false, currentThread->AddWait());
 	}
 	return 0;
 }
@@ -1026,7 +1026,7 @@ shpvoid LoopAnimation(std::string animationName)
 	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
 	if(animation != nullptr)
 	{
-		GEngine::inst->GetScene()->GetAnimator()->Loop(animation);
+		GEngine::Instance()->GetScene()->GetAnimator()->Loop(animation);
 	}
 	return 0;
 }
@@ -1037,7 +1037,7 @@ shpvoid StopAnimation(std::string animationName)
 	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
 	if(animation != nullptr)
 	{
-		GEngine::inst->GetScene()->GetAnimator()->Stop(animation);
+		GEngine::Instance()->GetScene()->GetAnimator()->Stop(animation);
 	}
 	return 0;
 }
@@ -1073,7 +1073,7 @@ shpvoid StartVoiceOver(string dialogueName, int numLines)
 	Animation* yak = Services::GetAssets()->LoadYak(yakName);
 	
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    GEngine::inst->GetScene()->GetAnimator()->Start(yak, false, false, currentThread->AddWait());
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(yak, false, false, currentThread->AddWait());
     return 0;
 }
 RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
@@ -1082,7 +1082,7 @@ shpvoid StartYak(string yakAnimationName)
 {
 	Animation* yak = Services::GetAssets()->LoadYak(yakAnimationName);
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    GEngine::inst->GetScene()->GetAnimator()->Start(yak, false, false, currentThread->AddWait());
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(yak, false, false, currentThread->AddWait());
     return 0;
 }
 RegFunc1(StartYak, void, string, WAITABLE, DEV_FUNC);
@@ -1140,7 +1140,7 @@ RegFunc1(Open, void, string, IMMEDIATE, DEV_FUNC);
  
 shpvoid ForceQuitGame()
 {
-	GEngine::inst->Quit();
+	GEngine::Instance()->Quit();
 	return 0;
 }
 RegFunc0(ForceQuitGame, void, IMMEDIATE, DEV_FUNC);
@@ -1148,7 +1148,7 @@ RegFunc0(ForceQuitGame, void, IMMEDIATE, DEV_FUNC);
 shpvoid QuitApp()
 {
 	//TODO: Should quit nicely by asking "are you sure" and making sure you saved.
-	GEngine::inst->Quit();
+	GEngine::Instance()->Quit();
 	return 0;
 }
 RegFunc0(QuitApp, void, IMMEDIATE, DEV_FUNC);
@@ -1228,7 +1228,7 @@ RegFunc1(CameraBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
  
 shpvoid CutToCameraAngle(std::string cameraName)
 {
-	GEngine::inst->GetScene()->SetCameraPosition(cameraName);
+	GEngine::Instance()->GetScene()->SetCameraPosition(cameraName);
 	return 0;
 }
 RegFunc1(CutToCameraAngle, void, string, IMMEDIATE, REL_FUNC);
@@ -1243,7 +1243,7 @@ RegFunc5(CutToCameraAngleX, void, float, float, float, float, float, IMMEDIATE, 
  
 shpvoid ForceCutToCameraAngle(std::string cameraName)
 {
-	GEngine::inst->GetScene()->SetCameraPosition(cameraName);
+	GEngine::Instance()->GetScene()->SetCameraPosition(cameraName);
 	return 0;
 }
 RegFunc1(ForceCutToCameraAngle, void, string, IMMEDIATE, REL_FUNC);
@@ -1259,7 +1259,7 @@ RegFunc1(DefaultInspect, void, string, WAITABLE, REL_FUNC);
  
 shpvoid EnableCameraBoundaries()
 {
-	GEngine::inst->GetScene()->GetCamera()->SetBoundsEnabled(true);
+	GEngine::Instance()->GetScene()->GetCamera()->SetBoundsEnabled(true);
 	return 0;
 }
 RegFunc0(EnableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
@@ -1268,7 +1268,7 @@ shpvoid DisableCameraBoundaries()
 {
 	// Note that this only disables camera boundaries until the next scene load.
 	// This reflects the behavior in the OG game.
-	GEngine::inst->GetScene()->GetCamera()->SetBoundsEnabled(false);
+	GEngine::Instance()->GetScene()->GetCamera()->SetBoundsEnabled(false);
 	return 0;
 }
 RegFunc0(DisableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
@@ -1315,7 +1315,7 @@ RegFunc0(Uninspect, void, WAITABLE, REL_FUNC);
 float GetCameraFOV()
 {
 	// Dig down to grab the value.
-	GameCamera* gameCamera = GEngine::inst->GetScene()->GetCamera();
+	GameCamera* gameCamera = GEngine::Instance()->GetScene()->GetCamera();
 	if(gameCamera != nullptr)
 	{
 		Camera* camera = gameCamera->GetCamera();
@@ -1338,7 +1338,7 @@ shpvoid SetCameraFOV(float fov)
 	}
 	
 	// Dig down to actually set it.
-	GameCamera* gameCamera = GEngine::inst->GetScene()->GetCamera();
+	GameCamera* gameCamera = GEngine::Instance()->GetScene()->GetCamera();
 	if(gameCamera != nullptr)
 	{
 		Camera* camera = gameCamera->GetCamera();
@@ -1982,7 +1982,7 @@ shpvoid CombineInvItems(std::string firstItemName, std::string secondItemName,
 	
 	// This function doesn't actually check whether you HAVE any of the items involved in the combining or output.
 	// It simply removes the first two (whether they exist or not) and adds the combined (whether you already have it or not).
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, firstItemName);
 	Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, secondItemName);
 	Services::Get<InventoryManager>()->AddInventoryItem(egoName, combinedItemName);
@@ -1993,7 +1993,7 @@ RegFunc3(CombineInvItems, void, string, string, string, IMMEDIATE, REL_FUNC);
 int DoesEgoHaveInvItem(std::string itemName)
 {
 	// This function does work with invalid inventory item names.
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName);
 	return hasItem ? 1 : 0;
 }
@@ -2025,7 +2025,7 @@ shpvoid EgoTakeInvItem(std::string itemName)
 	}
 	
 	// Add to inventory of Ego.
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	Services::Get<InventoryManager>()->AddInventoryItem(egoName, itemName);
 	return 0;
 }
@@ -2033,7 +2033,7 @@ RegFunc1(EgoTakeInvItem, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DumpEgoActiveInvItem()
 {
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	std::string activeItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
 	if(activeItem.empty())
 	{
@@ -2057,7 +2057,7 @@ shpvoid SetEgoActiveInvItem(std::string itemName)
 	}
 	
 	// If the item we are setting active is not in our inventory, output a warning (but let it go anyway).
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	if(!Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName))
 	{
 		Services::GetReports()->Log("Warning", egoName + " does not have " + itemName + ".");
@@ -2071,7 +2071,7 @@ RegFunc1(SetEgoActiveInvItem, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowInventory()
 {
-	const std::string& egoName = GEngine::inst->GetScene()->GetEgoName();
+	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
 	Services::Get<InventoryManager>()->ShowInventory(egoName);
 	return 0;
 }
@@ -2198,13 +2198,13 @@ shpvoid ClearPropGas(std::string modelName)
 
 int DoesModelExist(std::string modelName)
 {
-	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	return object != nullptr ? 1 : 0;
 }
 
 int DoesSceneModelExist(std::string modelName)
 {
-	return GEngine::inst->GetScene()->DoesSceneModelExist(modelName) ? 1 : 0;
+	return GEngine::Instance()->GetScene()->DoesSceneModelExist(modelName) ? 1 : 0;
 }
 
 //DumpModel
@@ -2213,7 +2213,7 @@ int DoesSceneModelExist(std::string modelName)
 
 shpvoid ShowModel(std::string modelName)
 {
-	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		object->SetActive(true);
@@ -2224,7 +2224,7 @@ RegFunc1(ShowModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideModel(std::string modelName)
 {
-	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		object->SetActive(false);
@@ -2251,21 +2251,21 @@ RegFunc1(HideModelGroup, void, string, IMMEDIATE, REL_FUNC);
  
 shpvoid ShowSceneModel(std::string modelName)
 {
-	GEngine::inst->GetScene()->SetSceneModelVisibility(modelName, true);
+	GEngine::Instance()->GetScene()->SetSceneModelVisibility(modelName, true);
 	return 0;
 }
 RegFunc1(ShowSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideSceneModel(std::string modelName)
 {
-	GEngine::inst->GetScene()->SetSceneModelVisibility(modelName, false);
+	GEngine::Instance()->GetScene()->SetSceneModelVisibility(modelName, false);
 	return 0;
 }
 RegFunc1(HideSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 int IsModelVisible(std::string modelName)
 {
-	GKActor* object = GEngine::inst->GetScene()->GetSceneObjectByModelName(modelName);
+	GKActor* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		return object->IsActive() ? 1 : 0;
@@ -2276,7 +2276,7 @@ RegFunc1(IsModelVisible, int, string, IMMEDIATE, REL_FUNC);
 
 int IsSceneModelVisible(std::string modelName)
 {
-	return GEngine::inst->GetScene()->IsSceneModelVisible(modelName) ? 1 : 0;
+	return GEngine::Instance()->GetScene()->IsSceneModelVisible(modelName) ? 1 : 0;
 }
 RegFunc1(IsSceneModelVisible, int, string, IMMEDIATE, REL_FUNC);
 
@@ -2454,7 +2454,7 @@ RegFunc1(CallSceneFunction, void, string, WAITABLE, REL_FUNC);
 
 shpvoid SetLocation(std::string location)
 {
-	GEngine::inst->LoadScene(location);
+	GEngine::Instance()->LoadScene(location);
 	return 0;
 }
 RegFunc1(SetLocation, void, string, WAITABLE, REL_FUNC);
@@ -2462,7 +2462,7 @@ RegFunc1(SetLocation, void, string, WAITABLE, REL_FUNC);
 shpvoid SetLocationTime(std::string location, std::string timeblock)
 {
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
-	GEngine::inst->LoadScene(location);
+	GEngine::Instance()->LoadScene(location);
 	return 0;
 }
 RegFunc2(SetLocationTime, void, string, string, WAITABLE, REL_FUNC);
@@ -2471,7 +2471,7 @@ shpvoid SetTime(std::string timeblock)
 {
 	// Change time, but load in to the same scene we are currently in.
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
-	GEngine::inst->LoadScene(Services::Get<LocationManager>()->GetLocation());
+	GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
 	return 0;
 }
 RegFunc1(SetTime, void, string, WAITABLE, REL_FUNC);
@@ -2534,7 +2534,7 @@ shpvoid PlaySoundTrack(std::string soundtrackName)
 	Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName);
 	if(soundtrack != nullptr)
 	{
-		GEngine::inst->GetScene()->GetSoundtrackPlayer()->Play(soundtrack);
+		GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Play(soundtrack);
 	}
 	return 0;
 }

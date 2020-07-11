@@ -112,7 +112,7 @@ Glyph& Font::GetGlyph(char character)
 
 Shader* Font::GetShader() const
 {
-	if(mColorReplacement)
+	if(mColorMode == ColorMode::ColorReplace)
 	{
 		return Services::GetAssets()->LoadShader("3D-Diffuse-Tex", "UI-Text-ColorReplace");
 	}
