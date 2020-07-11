@@ -80,7 +80,7 @@ void Material::SetWorldTransformMatrix(const Matrix4& matrix)
 
 void Material::SetActiveColor(const Color32& color)
 {
-	mShader->SetUniformVector4("uColor", color);
+	mShader->SetUniformColor("uColor", color);
 }
 
 bool Material::IsTranslucent()

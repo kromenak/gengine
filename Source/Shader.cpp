@@ -25,7 +25,6 @@ Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
     {
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
-        mError = true;
         return;
     }
     
@@ -39,9 +38,10 @@ Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
     if(!IsProgramLinked(mProgram))
     {
         glDeleteProgram(mProgram);
+        mProgram = GL_NONE;
+        
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
-        mError = true;
         return;
     }
     
@@ -57,49 +57,66 @@ Shader::~Shader()
 
 void Shader::Activate()
 {
-    glUseProgram(mProgram);
-}
-
-GLuint Shader::GetAttributeLocation(const char* name) const
-{
-    return glGetAttribLocation(mProgram, name);
+    if(mProgram != GL_NONE)
+    {
+        glUseProgram(mProgram);
+    }
 }
 
 void Shader::SetUniformInt(const char* name, int value)
 {
-	GLuint loc = glGetUniformLocation(mProgram, name);
-	glUniform1i(loc, value);
+    if(mProgram != GL_NONE)
+    {
+        GLuint loc = glGetUniformLocation(mProgram, name);
+        glUniform1i(loc, value);
+    }
 }
 
 void Shader::SetUniformFloat(const char* name, float value)
 {
-	GLuint loc = glGetUniformLocation(mProgram, name);
-	glUniform1f(loc, value);
+    if(mProgram != GL_NONE)
+    {
+        GLuint loc = glGetUniformLocation(mProgram, name);
+        glUniform1f(loc, value);
+    }
 }
 
 void Shader::SetUniformVector3(const char* name, const Vector3& vector)
 {
-    GLuint vecLoc = glGetUniformLocation(mProgram, name);
-    glUniform3f(vecLoc, vector.x, vector.y, vector.z);
+    if(mProgram != GL_NONE)
+    {
+        GLuint vecLoc = glGetUniformLocation(mProgram, name);
+        glUniform3f(vecLoc, vector.x, vector.y, vector.z);
+    }
 }
 
 void Shader::SetUniformVector4(const char *name, const Vector4& vector)
 {
-	GLuint vecLoc = glGetUniformLocation(mProgram, name);
-	glUniform4f(vecLoc, vector.x, vector.y, vector.z, vector.w);
-}
-
-void Shader::SetUniformVector4(const char* name, const Color32& color)
-{
-	GLuint vecLoc = glGetUniformLocation(mProgram, name);
-	glUniform4f(vecLoc, color.GetR() / 255.0f, color.GetG() / 255.0f, color.GetB() / 255.0f, color.GetA() / 255.0f);
+    if(mProgram != GL_NONE)
+    {
+        GLuint vecLoc = glGetUniformLocation(mProgram, name);
+        glUniform4f(vecLoc, vector.x, vector.y, vector.z, vector.w);
+    }
 }
 
 void Shader::SetUniformMatrix4(const char* name, const Matrix4& mat)
 {
-    GLuint loc = glGetUniformLocation(mProgram, name);
-    glUniformMatrix4fv(loc, 1, GL_FALSE, mat);
+    if(mProgram != GL_NONE)
+    {
+        GLuint loc = glGetUniformLocation(mProgram, name);
+        glUniformMatrix4fv(loc, 1, GL_FALSE, mat);
+    }
 }
+
+void Shader::SetUniformColor(const char* name, const Color32& color)
+{
+    if(mProgram != GL_NONE)
+    {
+        GLuint vecLoc = glGetUniformLocation(mProgram, name);
+        glUniform4f(vecLoc, color.GetR() / 255.0f, color.GetG() / 255.0f, color.GetB() / 255.0f, color.GetA() / 255.0f);
+    }
+}
+
 
 GLuint Shader::LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType)
 {

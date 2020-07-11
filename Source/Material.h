@@ -29,7 +29,7 @@ public:
 	void Activate();
 	
     void SetShader(Shader* shader) { mShader = shader; }
-	
+    
 	void SetColor(const Color32& color) { mColor = color; }
 	
 	Texture* GetDiffuseTexture() const { return mDiffuseTexture; }
@@ -46,7 +46,6 @@ private:
 	static float sAlphaTestValue;
 	
     // Shader to use.
-    //TODO: Could have array of shaders to represent "subshaders" for different hardware.
     Shader* mShader = nullptr;
 	
 	// A uniform color to pass to the shader.
