@@ -56,7 +56,7 @@ void UIImage::Render()
 		case RenderMode::Tiled:
 		{
 			// Determine how many repeats are needed.
-			Vector2 size = mRectTransform->GetSize();
+			Vector2 size = GetRectTransform()->GetSize();
 			float repeatX = size.x / texture->GetWidth();
 			float repeatY = size.y / texture->GetHeight();
 			
@@ -97,7 +97,7 @@ void UIImage::SetSizeToTextureSize()
 	if(texture == nullptr) { return; }
 	
 	// Set size from texture.
-	mRectTransform->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
+	GetRectTransform()->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
 }
 
 void UIImage::SetColor(const Color32& color)

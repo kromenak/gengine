@@ -37,7 +37,7 @@ void UILabel::Render()
 	// Activate material.
 	mMaterial.SetShader(mFont->GetShader());
 	mMaterial.Activate();
-	mMaterial.SetWorldTransformMatrix(mRectTransform->GetLocalToWorldMatrix());
+	mMaterial.SetWorldTransformMatrix(GetRectTransform()->GetLocalToWorldMatrix());
 	
 	// Render the mesh!
 	mMesh->Render();
@@ -55,6 +55,11 @@ void UILabel::SetFont(Font* font)
 		mMaterial.SetDiffuseTexture(font->GetTexture());
 	}
 	SetDirty();
+}
+
+void UILabel::SetColor(const Color32& color)
+{
+    mMaterial.SetColor(color);
 }
 
 void UILabel::SetText(std::string text)
@@ -95,7 +100,7 @@ void UILabel::GenerateMesh()
 	}
 	
 	// Create new text layout object with desired settings.
-	mTextLayout = TextLayout(mRectTransform->GetRect(), mFont,
+	mTextLayout = TextLayout(GetRectTransform()->GetRect(), mFont,
 						     mHorizontalAlignment, mVerticalAlignment,
 						     mHorizontalOverflow, mVerticalOverflow);
 	

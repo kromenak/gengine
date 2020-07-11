@@ -30,6 +30,9 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
 			UIWidget* widget = canvas->mWidgets[j];
 			if(!widget->IsActiveAndEnabled()) { continue; }
 			
+            // Widgets that are not recieving inputs should be ignored.
+            if(!widget->ReceivesInput()) { continue; }
+            
 			// See whether the pointer is over this widget.
 			RectTransform* widgetRT = widget->GetRectTransform();
 			if(widgetRT->GetWorldRect().Contains(Services::GetInput()->GetMousePosition()))

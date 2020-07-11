@@ -19,7 +19,8 @@ TYPE_DEF_CHILD(UIWidget, UIButton);
 
 UIButton::UIButton(Actor* owner) : UIWidget(owner)
 {
-	
+	// By default, a button ought to receive input.
+    SetReceivesInput(true);
 }
 
 void UIButton::Render()
@@ -57,7 +58,7 @@ void UIButton::Render()
 	}
 	
 	// Make sure widget size matches texture size.
-	mRectTransform->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
+	GetRectTransform()->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
 	
 	// Set texture.
 	mMaterial.SetDiffuseTexture(texture);

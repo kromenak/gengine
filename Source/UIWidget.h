@@ -27,11 +27,19 @@ public:
 	virtual void OnPointerUp() { }
 	
 	RectTransform* GetRectTransform() const { return mRectTransform; }
+    
+    void SetReceivesInput(bool receivesInput) { mReceivesInput = receivesInput; }
+    bool ReceivesInput() const { return mReceivesInput; }
 	
 protected:
-	// UI widgets usually rely heavily on a RectTransform.
-	// So, we cache it here.
-	RectTransform* mRectTransform = nullptr;
-	
 	Matrix4 GetWorldTransformWithSizeForRendering();
+    
+private:
+    // UI widgets usually rely heavily on a RectTransform.
+    // So, we cache it here.
+    RectTransform* mRectTransform = nullptr;
+    
+    // If a widget receives input, its "OnPointer" functions are called
+    // AND it can block interaction with the scene (since it can "eat" inputs).
+    bool mReceivesInput = false;
 };

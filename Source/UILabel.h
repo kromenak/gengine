@@ -27,6 +27,8 @@ public:
 	
 	void SetFont(Font* font);
 	Font* GetFont() const { return mFont; }
+    
+    void SetColor(const Color32& color);
 	
 	void SetHorizonalAlignment(HorizontalAlignment ha) { mHorizontalAlignment = ha; }
 	void SetVerticalAlignment(VerticalAlignment va) { mVerticalAlignment = va; }
@@ -36,7 +38,7 @@ public:
 	
 	void SetText(std::string text);
 	std::string GetText() const { return mText; }
-	
+    
 protected:
 	Vector2 GetCharPos(int index) const;
 	Vector2 GetNextCharPos() const { return mTextLayout.GetNextCharPos(); }
