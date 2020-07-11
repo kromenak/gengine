@@ -97,11 +97,6 @@ Font::Font(std::string name, char* data, int dataLength) :
 	*/
 }
 
-Font::~Font()
-{
-	delete mFontTexture;
-}
-
 Glyph& Font::GetGlyph(char character)
 {
 	auto it = mFontGlyphs.find(character);
@@ -167,10 +162,19 @@ void Font::ParseFromData(char* data, int dataLength)
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
 			{
+                // Default is "alpha blend," but it can still be specified explicitly.
+                if(StringUtil::EqualsIgnoreCase(keyValue.value, "alpha blend"))
+                {
+                    mColorMode = ColorMode::AlphaBlend;
+                }
 				if(StringUtil::EqualsIgnoreCase(keyValue.value, "color replacement"))
 				{
-					mColorReplacement = true;
+                    mColorMode = ColorMode::ColorReplace;
 				}
+                else
+                {
+                    std::cout << "Unknown font type: " << keyValue.value << std::endl;
+                }
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "color"))
 			{
@@ -189,7 +193,7 @@ void Font::ParseFromData(char* data, int dataLength)
 			}
 			else
 			{
-				std::cout << "Unknown key in font: " << keyValue.key << std::endl;
+				std::cout << "Unknown font property: " << keyValue.key << std::endl;
 			}
 		}
 	}

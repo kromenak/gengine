@@ -27,6 +27,8 @@ public:
 	const Timeblock& GetTimeblock() const { return mTimeblock; }
 	const Timeblock& GetLastTimeblock() const { return mLastTimeblock; }
 	void SetTimeblock(const Timeblock& timeblock);
+    
+    std::string GetTimeblockDisplayName() const;
 	
 	bool GetFlag(const std::string& flagName) const;
 	void SetFlag(const std::string& flagName);
@@ -50,7 +52,7 @@ public:
 	
 private:
 	// Score tracking.
-	const int kMaxScore = 999;
+    const int kMaxScore = 965; //TODO: Should be loaded from GAME.CFG
 	int mScore = 0;
 	
 	// Current and last time blocks.

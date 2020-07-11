@@ -37,7 +37,6 @@ class Font : public Asset
 {
 public:
 	Font(std::string name, char* data, int dataLength);
-	~Font();
 	
 	Texture* GetTexture() const { return mFontTexture; }
 	Glyph& GetGlyph(char character);
@@ -76,9 +75,15 @@ private:
 	Color32 mBackgroundColor = Color32::Magenta;
 	Color32 mForegroundColor = Color32::White;
 	
-	// Is this a color replacement font? If not, it is alpha-blended.
-	bool mColorReplacement = false;
-	
+    // Color mode used by this font.
+    // Dictates shader used to mix color with font texture.
+    enum class ColorMode : char
+    {
+        AlphaBlend,     // Multiply texel and color
+        ColorReplace,   // Replace texel with color, using only alpha from texel
+    };
+    ColorMode mColorMode = ColorMode::AlphaBlend;
+    
 	// The max height of a glyph in the font.
 	// We can use this to make some assumptions about line height.
 	int mGlyphHeight = 0;
