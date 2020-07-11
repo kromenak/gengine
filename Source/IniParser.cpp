@@ -160,14 +160,12 @@ IniParser::IniParser(const char* filePath)
     {
         std::cout << "IniParser can't read from file " << filePath << "!" << std::endl;
     }
-    mCurrentSection = "";
 }
 
 IniParser::IniParser(const char* memory, unsigned int memoryLength)
 {
     // Create stream to read from memory.
     mStream = new imstream(memory, memoryLength);
-    mCurrentSection = "";
 }
 
 IniParser::~IniParser()
@@ -206,10 +204,12 @@ std::vector<IniSection> IniParser::GetSections(const std::string& name)
 
 IniSection IniParser::GetSection(const std::string& name)
 {
-    std::vector<IniSection> sections = GetSections(name);
-    if(sections.size() > 0)
+    for(auto& section : mSections)
     {
-        return GetSections(name)[0];
+        if(StringUtil::EqualsIgnoreCase(section.name, name))
+        {
+            return section;
+        }
     }
     return IniSection();
 }

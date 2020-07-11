@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 //
-// Represents a 3x3 matrix.
+// A 3x3 matrix.
 //
 #pragma once
 #include <iostream>
@@ -47,6 +47,7 @@ public:
     Matrix3& Transpose();
     static Matrix3 Transpose(const Matrix3& matrix);
     
+    // Calculate trace (sum of diagonal elements).
     float GetTrace() const;
     
     // Addition and subtraction

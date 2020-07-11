@@ -3,8 +3,7 @@
 //
 // Clark Kromenaker
 //
-// A component is a reusable bit of functionality
-// that can be attached to an Actor.
+// A component is a reusable bit of functionality that can be attached to an Actor.
 //
 #pragma once
 #include "Type.h" // For homebrew RTTI.

@@ -1,8 +1,7 @@
 //
 //  membuf.cpp
-//  GEngine
 //
-//  Created by Clark Kromenaker on 8/26/17.
+//  Clark Kromenaker
 //
 #include "membuf.h"
 
@@ -84,5 +83,3 @@ membuf::int_type membuf::pbackfail(int_type ch)
     }
     return traits_type::to_int_type(*--mCurrent);
 }
-
-

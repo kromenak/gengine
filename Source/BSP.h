@@ -13,7 +13,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "AtomicTypes.h"
 #include "Material.h"
 #include "Mesh.h"
 #include "Plane.h"

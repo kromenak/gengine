@@ -1,8 +1,10 @@
 //
 //  StringUtil.h
-//  GEngine
 //
-//  Created by Clark Kromenaker on 12/30/17.
+//  Clark Kromenaker
+//
+// "Add ons" to std::string.
+// A bunch of handy utility functions that you wish were just built-in!
 //
 #pragma once
 #include <algorithm>

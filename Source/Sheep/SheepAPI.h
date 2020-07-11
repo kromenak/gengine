@@ -11,7 +11,6 @@
 #include <map>
 #include <string>
 
-#include "AtomicTypes.h"
 #include "SheepScript.h"
 #include "Value.h"
 

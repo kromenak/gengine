@@ -31,33 +31,33 @@ void Submesh::Render() const
 {
 	switch(mRenderMode)
 	{
-		default:
-		case RenderMode::Triangles:
-			mVertexArray->DrawTriangles();
-			break;
-		case RenderMode::TriangleFan:
-			mVertexArray->DrawTriangleFans();
-			break;
-		case RenderMode::Lines:
-			mVertexArray->DrawLines();
-			break;
-	}
+    default:
+    case RenderMode::Triangles:
+        mVertexArray->DrawTriangles();
+        break;
+    case RenderMode::TriangleFan:
+        mVertexArray->DrawTriangleFans();
+        break;
+    case RenderMode::Lines:
+        mVertexArray->DrawLines();
+        break;
+    }
 }
 
 void Submesh::Render(unsigned int offset, unsigned int count) const
 {
 	switch(mRenderMode)
 	{
-		default:
-		case RenderMode::Triangles:
-			mVertexArray->DrawTriangles(offset, count);
-			break;
-		case RenderMode::TriangleFan:
-			mVertexArray->DrawTriangleFans(offset, count);
-			break;
-		case RenderMode::Lines:
-			mVertexArray->DrawLines(offset, count);
-			break;
+    default:
+    case RenderMode::Triangles:
+        mVertexArray->DrawTriangles(offset, count);
+        break;
+    case RenderMode::TriangleFan:
+        mVertexArray->DrawTriangleFans(offset, count);
+        break;
+    case RenderMode::Lines:
+        mVertexArray->DrawLines(offset, count);
+        break;
 	}
 }
 

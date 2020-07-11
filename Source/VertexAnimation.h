@@ -14,7 +14,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include "AtomicTypes.h"
 #include "Matrix4.h"
 #include "Vector3.h"
 

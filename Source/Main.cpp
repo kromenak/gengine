@@ -1,8 +1,9 @@
 //
-//  Main.cpp
-//  GEngine
+// Main.cpp
 //
-//  Created by Clark Kromenaker on 7/22/17.
+// Clark Kromenaker
+//
+// Program point of entry for all platforms.
 //
 #define SDL_MAIN_HANDLED // For Windows: we provide our own main, so use that!
 #include "GEngine.h"

@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 //
-// Represents a 4x4 matrix.
+// A 4x4 matrix.
 //
 #pragma once
 #include <iostream>

@@ -3,8 +3,8 @@
 //
 // Clark Kromenaker
 //
-// A text parser that makes it easier to read INI-style
-// text assets used in GK3.
+// Parses key/value data from INI-format files.
+// Does contain some special-sauce unique to GK3.
 //
 #pragma once
 #include <fstream>

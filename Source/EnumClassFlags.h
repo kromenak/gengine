@@ -1,8 +1,10 @@
 //
-//  EnumClassFlags.h
-//  GEngine
+// EnumClassFlags.h
 //
-//  Created by Clark Kromenaker on 11/9/19.
+// Clark Kromenaker
+//
+// Enum classes are nice, but they don't support use as flags without writing
+// a bunch of boilerplate. This macro takes care of that boilerplate!
 //
 #pragma once
 

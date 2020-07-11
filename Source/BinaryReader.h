@@ -21,7 +21,7 @@ public:
 	// Should only read if OK is true, and should only use read value if OK is still true after reading!
 	bool OK() const
 	{
-		// Remember, "good" returns true as long as long as fail/bad/eof bits are all false.
+		// Remember, "good" returns true as long as fail/bad/eof bits are all false.
 		return mStream->good();
 	}
     

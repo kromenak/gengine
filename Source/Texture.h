@@ -97,7 +97,6 @@ private:
 	
 	// If true, the texture has alpha, so it may need to be rendered
 	bool mHasAlpha = false;
-	bool mIsTranslucent = false;
 	
 	static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
 	

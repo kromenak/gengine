@@ -10,7 +10,7 @@
 #include <string>
 #include <unordered_map>
 
-#include "AtomicTypes.h"
+#include "Atomics.h"
 #include "Type.h"
 #include "Vector2.h"
 #include "Vector3.h"
@@ -88,21 +88,21 @@ struct CharacterConfig
 {
 	std::string identifier;
 	
-	uint8 headMeshIndex = 0;
+	U8 headMeshIndex = 0;
 	Vector4 headFov; 			// left, top, right, bottom
 	Vector4 headComfortableFov;
 	
-	uint8 hipAxesMeshIndex = 0;
-	uint8 hipAxesGroupIndex = 0;
-	uint16 hipAxesPointIndex = 0;
+	U8 hipAxesMeshIndex = 0;
+	U8 hipAxesGroupIndex = 0;
+	U16 hipAxesPointIndex = 0;
 	
-	uint8 leftShoeAxesMeshIndex = 0;
-	uint8 leftShoeAxesGroupIndex = 0;
-	uint16 leftShoeAxesPointIndex = 0;
+	U8 leftShoeAxesMeshIndex = 0;
+	U8 leftShoeAxesGroupIndex = 0;
+	U16 leftShoeAxesPointIndex = 0;
 	
-	uint8 rightShoeAxesMeshIndex = 0;
-	uint8 rightShoeAxesGroupIndex = 0;
-	uint16 rightShoeAxesPointIndex = 0;
+	U8 rightShoeAxesMeshIndex = 0;
+	U8 rightShoeAxesGroupIndex = 0;
+	U16 rightShoeAxesPointIndex = 0;
 	
 	float walkerHeight = 72.0f;
 	float shoeThickness = 0.75f;
@@ -112,8 +112,8 @@ struct CharacterConfig
 	Animation* walkStartTurnRightAnim = nullptr;
 	Animation* walkStartTurnLeftAnim = nullptr;
 	
-	uint16 walkStartTurnRightFrame = 0;
-	uint16 walkStartTurnLeftFrame = 0;
+	U16 walkStartTurnRightFrame = 0;
+	U16 walkStartTurnLeftFrame = 0;
 	
 	Animation* walkLoopAnim = nullptr;
 	Animation* walkStopAnim = nullptr;
