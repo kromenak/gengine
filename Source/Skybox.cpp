@@ -136,7 +136,7 @@ void Skybox::Render()
 	
 	// Activate the material (or fail).
 	if(mMaterial == nullptr) { return; }
-	mMaterial->Activate();
+	mMaterial->Activate(Matrix4::Identity);
 	
 	// Activate and bind the cubemap texture.
     glActiveTexture(GL_TEXTURE0);

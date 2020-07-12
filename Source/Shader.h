@@ -7,6 +7,7 @@
 //
 #pragma once
 #include <string>
+#include <vector>
 
 #include <GL/glew.h>
 //#include <OpenGL/gl.h>
@@ -16,6 +17,37 @@ class Matrix4;
 class Vector3;
 class Vector4;
 
+enum class UniformType
+{
+    Unknown,
+    
+    Float,
+    Int,
+    Uint,
+    Bool,
+    
+    Vector2,
+    Vector3,
+    Vector4,
+    
+    Matrix2,
+    Matrix3,
+    Matrix4,
+    
+    Texture2D,
+    TextureCube
+    //TODO: Add more as needed
+};
+
+struct Uniform
+{
+    // Type of the uniform.
+    UniformType type = UniformType::Unknown;
+    
+    // Uniform name.
+    std::string name;
+};
+
 class Shader
 {
 public:
@@ -23,7 +55,7 @@ public:
     ~Shader();
     
     void Activate();
-	
+    
 	void SetUniformInt(const char* name, int value);
 	void SetUniformFloat(const char* name, float value);
 	
@@ -39,6 +71,9 @@ public:
 private:
     // Handle to the compiled and linked GL shader program.
     GLuint mProgram = GL_NONE;
+    
+    // Uniforms for this shader, excluding "built-in" ones.
+    //std::vector<Uniform> mUniforms;
     
     GLuint LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType);
     

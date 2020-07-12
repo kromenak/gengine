@@ -7,6 +7,9 @@
 // It indicates the shader to use and any input parameters for the shader (texture, color, etc).
 //
 #pragma once
+#include <unordered_map>
+#include <vector>
+
 #include "Color32.h"
 #include "Matrix4.h"
 
@@ -24,20 +27,22 @@ public:
     Material();
 	Material(Shader* shader);
     
-    bool operator==(const Material& other) const;
-	
-	void Activate();
+	void Activate(const Matrix4& objectToWorldMatrix);
 	
     void SetShader(Shader* shader) { mShader = shader; }
     
-	void SetColor(const Color32& color) { mColor = color; }
-	
-	Texture* GetDiffuseTexture() const { return mDiffuseTexture; }
-    void SetDiffuseTexture(Texture* diffuseTexture) { mDiffuseTexture = diffuseTexture; }
-	
-	void SetWorldTransformMatrix(const Matrix4& matrix);
-	void SetActiveColor(const Color32& color);
-	
+    void SetColor(const std::string& name, const Color32& color);
+    //GetColor
+    
+    void SetTexture(const std::string& name, Texture* texture);
+    Texture* GetTexture(const std::string& name) const;
+    
+    // Helpers for setting/getting frequently accessed shader uniforms.
+    void SetColor(const Color32& color) { SetColor("uColor", color); }
+    
+    void SetDiffuseTexture(Texture* texture) { SetTexture("uDiffuse", texture); }
+    Texture* GetDiffuseTexture() const { return GetTexture("uDiffuse"); }
+    
 	bool IsTranslucent();
 	
 private:
@@ -47,12 +52,9 @@ private:
 	
     // Shader to use.
     Shader* mShader = nullptr;
-	
-	// A uniform color to pass to the shader.
-	Color32 mColor = Color32::White;
-	
-    // Diffuse texture.
-    Texture* mDiffuseTexture = nullptr;
+    
+    std::unordered_map<std::string, Color32> mColors;
+    std::unordered_map<std::string, Texture*> mTextures;
     
     //TODO: Opaque vs. transparent? Render queue value?
 };

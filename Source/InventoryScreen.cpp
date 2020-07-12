@@ -21,7 +21,7 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform)
 	// Add translucent background image that tints the scene.
 	UIImage* background = AddComponent<UIImage>();
 	mCanvas->AddWidget(background);
-	background->SetTexture(Texture::Black);
+	background->SetTexture(&Texture::Black);
 	background->SetColor(Color32(0, 0, 0, 128));
 	
 	RectTransform* inventoryRectTransform = GetComponent<RectTransform>();

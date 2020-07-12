@@ -28,8 +28,8 @@ public:
 		Translucent	// Texture has pixels that are partially transparent
 	};
 	
-	static Texture* White;
-	static Texture* Black;
+	static Texture White;
+	static Texture Black;
 	
 	static void Init();
 	
@@ -38,7 +38,7 @@ public:
 	~Texture();
 	
 	// Activates the texture in the graphics library.
-    void Activate();
+    void Activate(int textureUnit);
     static void Deactivate();
 	
 	// For SDL cursor stuff, convert texture to a surface.
@@ -52,6 +52,7 @@ public:
 	
 	RenderType GetRenderType() const { return mRenderType; }
 	
+    // Coordinates are from top-left corner of texture.
 	Color32 GetPixelColor32(int x, int y);
 	unsigned char GetPaletteIndex(int x, int y);
 	
@@ -65,7 +66,6 @@ public:
 	// Alpha and transparency
 	void SetTransparentColor(Color32 color);
 	void ApplyAlphaChannel(const Texture& alphaTexture);
-	bool HasAlpha() { return mHasAlpha; }
 	
 	void UploadToGPU();
 	
@@ -90,13 +90,13 @@ private:
     // An ID for the texture object generated in OpenGL.
     GLuint mTextureId = GL_NONE;
 	
-	// Textures tend to have a "render type". If there's no alpha, it is an opaque texture.
-	// If it has alpha, but only 255 or 0, it's an alpha test texture.
+	// If there's no alpha, it is an opaque texture.
+	// If it has alpha, but only 255 or 0 (on or off), it's an alpha test texture.
 	// If it has semi-alpha pixels, it is a translucent texture.
 	RenderType mRenderType = RenderType::Opaque;
-	
-	// If true, the texture has alpha, so it may need to be rendered
-	bool mHasAlpha = false;
+    
+    // If true, texture data in RAM is dirty, so we need to upload to GPU.
+    bool mDirty = true;
 	
 	static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
 	

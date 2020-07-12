@@ -5,6 +5,7 @@ in vec2 fUV1;
 
 out vec4 oColor;
 
+// User-defined uniforms
 uniform sampler2D uDiffuse;
 
 void main()

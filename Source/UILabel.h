@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "Color32.h"
 #include "Material.h"
 #include "TextLayout.h"
 
@@ -29,7 +30,8 @@ public:
 	Font* GetFont() const { return mFont; }
     
     void SetColor(const Color32& color);
-	
+    Color32 GetColor() const { return mColor; }
+    
 	void SetHorizonalAlignment(HorizontalAlignment ha) { mHorizontalAlignment = ha; }
 	void SetVerticalAlignment(VerticalAlignment va) { mVerticalAlignment = va; }
 	
@@ -64,6 +66,9 @@ private:
 	
 	// Helper for laying out text within the available space with desired alignment/overflow.
 	TextLayout mTextLayout;
+    
+    // Text color.
+    Color32 mColor = Color32::White;
 	
 	// Material used for rendering.
 	Material mMaterial;

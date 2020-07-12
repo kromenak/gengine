@@ -9,9 +9,13 @@ layout(location = 3) in vec2 vUV1;
 out vec4 fColor;
 out vec2 fUV1;
 
-uniform mat4 uWorldTransform;
-uniform mat4 uViewProj;
+// Built-in uniforms
+uniform mat4 gViewMatrix;
+uniform mat4 gProjMatrix;
+uniform mat4 gWorldToProjMatrix;
+uniform mat4 gObjectToWorldMatrix;
 
+// User-defined uniforms
 uniform vec4 uColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 
 void main()
@@ -23,5 +27,5 @@ void main()
     fUV1 = vUV1;
     
     // Transform position obj->world->view->proj
-    gl_Position = uViewProj * uWorldTransform * vec4(vPos, 1.0f);
+    gl_Position = gWorldToProjMatrix * gObjectToWorldMatrix * vec4(vPos, 1.0f);
 }

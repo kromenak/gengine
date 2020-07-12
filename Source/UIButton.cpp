@@ -63,11 +63,8 @@ void UIButton::Render()
 	// Set texture.
 	mMaterial.SetDiffuseTexture(texture);
 	
-	// Set to correct location on screen.
-	mMaterial.SetWorldTransformMatrix(GetWorldTransformWithSizeForRendering());
-	 
 	// Render.
-	mMaterial.Activate();
+	mMaterial.Activate(GetWorldTransformWithSizeForRendering());
 	uiQuad->Render();
 }
 

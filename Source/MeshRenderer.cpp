@@ -47,8 +47,7 @@ void MeshRenderer::RenderOpaque()
 			if(!material.IsTranslucent())
 			{
 				// Activate material.
-				material.SetWorldTransformMatrix(meshWorldTransformMatrix);
-				material.Activate();
+				material.Activate(meshWorldTransformMatrix);
 				
 				// Render the submesh!
 				submeshes[j]->Render();
@@ -86,8 +85,7 @@ void MeshRenderer::RenderTranslucent()
 			if(material.IsTranslucent())
 			{
 				// Activate material.
-				material.SetWorldTransformMatrix(meshWorldTransform);
-				material.Activate();
+				material.Activate(meshWorldTransform);
 				
 				// Render the submesh!
 				submeshes[j]->Render();

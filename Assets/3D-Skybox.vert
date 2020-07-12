@@ -5,10 +5,11 @@ layout(location = 0) in vec3 vPos;
 
 out vec3 fTexCoords;
 
-uniform mat4 uViewProj;
+// Built-in uniforms
+uniform mat4 gWorldToProjMatrix;
 
 void main()
 {
     fTexCoords = vPos;
-    gl_Position = uViewProj * vec4(vPos, 1.0f);
+    gl_Position = gWorldToProjMatrix * vec4(vPos, 1.0f);
 }

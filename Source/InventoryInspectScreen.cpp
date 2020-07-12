@@ -19,7 +19,7 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTran
 	// Add black background image that blocks out the scene entirely.
 	UIImage* background = AddComponent<UIImage>();
 	mCanvas->AddWidget(background);
-	background->SetTexture(Texture::Black);
+	background->SetTexture(&Texture::Black);
 	
 	RectTransform* inventoryRectTransform = GetComponent<RectTransform>();
 	inventoryRectTransform->SetSizeDelta(0.0f, 0.0f);

@@ -13,13 +13,12 @@
 #include "BinaryWriter.h"
 #include "GMath.h"
 
-Texture* Texture::White = nullptr;
-Texture* Texture::Black = nullptr;
+Texture Texture::White(2, 2, Color32::White);
+Texture Texture::Black(2, 2, Color32::Black);
 
 /*static*/ void Texture::Init()
 {
-	White = new Texture(2, 2, Color32::White);
-	Black = new Texture(2, 2, Color32::Black);
+	
 }
 
 Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
@@ -39,8 +38,6 @@ Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
 		mPixels[i + 2] = color.GetB();
 		mPixels[i + 3] = color.GetA();
 	}
-	
-	UploadToGPU();
 }
 
 Texture::Texture(std::string name, char* data, int dataLength) :
@@ -61,8 +58,6 @@ Texture::Texture(std::string name, char* data, int dataLength) :
 	{
 		ParseFromBmpFormat(reader);
 	}
-	
-	UploadToGPU();
 }
 
 Texture::~Texture()
@@ -88,23 +83,22 @@ Texture::~Texture()
 	}
 }
 
-void Texture::Activate()
+void Texture::Activate(int textureUnit)
 {
+    glActiveTexture(GL_TEXTURE0 + textureUnit);
+    
+    if(mDirty)
+    {
+        UploadToGPU();
+        mDirty = false;
+    }
+    
     glBindTexture(GL_TEXTURE_2D, mTextureId);
 }
 
 void Texture::Deactivate()
 {
-	// When we "deactivate" all textures, we'll just actually
-	// activate our default "white" texture.
-	if(White != nullptr)
-	{
-		White->Activate();
-	}
-	else
-	{
-		glBindTexture(GL_TEXTURE_2D, GL_NONE);
-	}
+    White.Activate(0);
 }
 
 SDL_Surface* Texture::GetSurface()
@@ -263,8 +257,8 @@ void Texture::SetTransparentColor(Color32 color)
 		}
 	}
 	
-	// Update texture data on GPU.
-	UploadToGPU();
+    // Mark dirty so it uploads to GPU on next use.
+    mDirty = true;
 }
 
 void Texture::ApplyAlphaChannel(const Texture& alphaTexture)

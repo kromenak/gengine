@@ -8,7 +8,6 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-#include <string>
 
 #include "Color32.h"
 #include "Matrix4.h"
@@ -48,6 +47,13 @@ Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
     // Detach shaders after a successful link.
     glDetachShader(mProgram, vertexShader);
     glDetachShader(mProgram, fragmentShader);
+    
+    // After shader program is compiled and linked, it's possible to query the program
+    // to determine the uniforms that exist in the program.
+    
+    // This *may* be useful in the future so that a material knows what uniforms exist.
+    // But for now, we are assuming that the material has explicitly defined values for all uniforms.
+    //RefreshUniforms();
 }
 
 Shader::~Shader()
@@ -116,7 +122,6 @@ void Shader::SetUniformColor(const char* name, const Color32& color)
         glUniform4f(vecLoc, color.GetR() / 255.0f, color.GetG() / 255.0f, color.GetB() / 255.0f, color.GetA() / 255.0f);
     }
 }
-
 
 GLuint Shader::LoadAndCompileShaderFromFile(const char* filePath, GLuint shaderType)
 {
@@ -190,3 +195,90 @@ bool Shader::IsProgramLinked(GLuint program)
     // GL reports the linking was successful!
     return true;
 }
+
+/*
+void Shader::RefreshUniforms()
+{
+    // Save listing of uniforms used by this shader.
+    const GLsizei kMaxUniformNameLength = 32;
+    GLchar uniformNameBuffer[kMaxUniformNameLength];
+    GLsizei uniformNameLength = 0;
+    GLsizei uniformSize = 0;
+    GLenum uniformType = GL_NONE;
+    
+    GLint uniformCount = 0;
+    glGetProgramiv(mProgram, GL_ACTIVE_UNIFORMS, &uniformCount);
+    for(GLuint i = 0; i < uniformCount; ++i)
+    {
+        glGetActiveUniform(mProgram, i, kMaxUniformNameLength, &uniformNameLength, &uniformSize, &uniformType, uniformNameBuffer);
+        
+        // If returned name length is 0, that means the uniform is not valid (compile/link failed?).
+        if(uniformNameLength <= 0) { continue; }
+        
+        // We only want to track user-defined uniforms.
+        // We want to ignore built-in OpenGL uniforms, which have "gl_" prefix.
+        // We want to ignore built-in G-Engine uniforms, which have a "g" prefix.
+        // So really, we can just ignore any uniform with a "g" prefix to cover both scenarios!
+        if(uniformNameLength > 0 && uniformNameBuffer[0] == 'g') { continue; }
+        printf("Uniform %d, Type %u, Name %s\n", i, uniformType, uniformNameBuffer);
+           
+        // Convert GLenum type to an actual enum type.
+        UniformType type = UniformType::Unknown;
+        switch(uniformType)
+        {
+        case GL_FLOAT:
+            type = UniformType::Float;
+            break;
+        case GL_INT:
+            type = UniformType::Int;
+            break;
+        case GL_UNSIGNED_INT:
+            type = UniformType::Uint;
+            break;
+        case GL_BOOL:
+            type = UniformType::Bool;
+            break;
+            
+        case GL_FLOAT_VEC2:
+            type = UniformType::Vector2;
+            break;
+        case GL_FLOAT_VEC3:
+            type = UniformType::Vector3;
+            break;
+        case GL_FLOAT_VEC4:
+            type = UniformType::Vector4;
+            break;
+            
+        case GL_FLOAT_MAT2:
+            type = UniformType::Matrix2;
+            break;
+        case GL_FLOAT_MAT3:
+            type = UniformType::Matrix3;
+            break;
+        case GL_FLOAT_MAT4:
+            type = UniformType::Matrix4;
+            break;
+            
+        case GL_SAMPLER_2D:
+            type = UniformType::Texture2D;
+            break;
+        case GL_SAMPLER_CUBE:
+            type = UniformType::TextureCube;
+            break;
+            
+        default:
+            std::cout << "Unknown uniform type in shader: " << uniformType << std::endl;
+            break;
+        }
+        
+        // Create and save uniform info.
+        if(type != UniformType::Unknown)
+        {
+            Uniform uniform;
+            uniform.type = type;
+            uniform.name = std::string(uniformNameBuffer);
+            mUniforms.push_back(uniform);
+        }
+    }
+}
+*/

@@ -35,9 +35,7 @@ void UILabel::Render()
 	if(mMesh == nullptr) { return; }
 	
 	// Activate material.
-	mMaterial.SetShader(mFont->GetShader());
-	mMaterial.Activate();
-	mMaterial.SetWorldTransformMatrix(GetRectTransform()->GetLocalToWorldMatrix());
+	mMaterial.Activate(GetRectTransform()->GetLocalToWorldMatrix());
 	
 	// Render the mesh!
 	mMesh->Render();
@@ -46,19 +44,36 @@ void UILabel::Render()
 void UILabel::SetFont(Font* font)
 {
 	mFont = font;
-	if(mFont == nullptr)
+	if(mFont != nullptr)
 	{
-		mMaterial.SetDiffuseTexture(nullptr);
+        // Assign shader from font.
+        mMaterial.SetShader(mFont->GetShader());
+        
+        // Use font texture.
+        mMaterial.SetDiffuseTexture(font->GetTexture());
+        
+        mMaterial.SetColor(font->GetColor());
+        
+        // If doing color replace, we want to set the replace color.
+        mMaterial.SetColor("uReplaceColor", font->GetReplaceColor());
 	}
-	else
-	{
-		mMaterial.SetDiffuseTexture(font->GetTexture());
-	}
+    else
+    {
+        // Null out references if no font is provided.
+        mMaterial.SetShader(nullptr);
+        mMaterial.SetDiffuseTexture(nullptr);
+    }
+    
+    // Assign shader from font.
+    mMaterial.SetShader(mFont->GetShader());
+    
+    // Mark label dirty. Changing font may mean our mesh needs to be updated.
 	SetDirty();
 }
 
 void UILabel::SetColor(const Color32& color)
 {
+    mColor = color;
     mMaterial.SetColor(color);
 }
 
