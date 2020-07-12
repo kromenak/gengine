@@ -145,11 +145,24 @@ void RectTransform::CalcLocalPosition()
 void RectTransform::OnUpdate(float deltaTime)
 {
 	// For debugging: visualize min/max of the rect calculated for this RectTransform.
-	if(Debug::RenderRectTransformRects())
+	if(Debug::RenderRectTransformRects() || debugVisualizeRect)
 	{
+        // For UI, "world space" is really "screen space". Confusing, I know.
+        // So, get screen rect, convert to world space.
 		Rect screenRect = GetWorldRect();
-		Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
-		Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
-		Debug::DrawLine(min, max, Color32::Cyan);
+        Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
+        Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
+        
+        // Generate corners of the rectangular area in 3D space.
+        Vector3 p0 = min;
+        Vector3 p1(min.x, max.y, min.z);
+        Vector3 p2 = max;
+        Vector3 p3(max.x, min.y, max.z);
+        
+        // Draw lines to create rectangle.
+        Debug::DrawLine(p0, p1, Color32::Cyan);
+        Debug::DrawLine(p1, p2, Color32::Cyan);
+        Debug::DrawLine(p2, p3, Color32::Cyan);
+        Debug::DrawLine(p3, p0, Color32::Cyan);
 	}
 }

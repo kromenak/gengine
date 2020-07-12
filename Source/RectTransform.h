@@ -16,6 +16,10 @@ class RectTransform : public Transform
 {
 	TYPE_DECL_CHILD();
 public:
+    // HACK: setting anchors/pivots/sizes can be a bit hard to visualize and error-prone.
+    // By setting this to true, this RT will show its debug visualization.
+    bool debugVisualizeRect = false;
+    
 	RectTransform(Actor* owner);
 	
 	void SetSizeDelta(float x, float y);
@@ -50,7 +54,7 @@ public:
 	// But a RectTransform's Rect may be positioned in relation to that point based on size/pivot settings.
 	// This function provides a "rectToLocal" transform for positioning the rect relative to the local origin.
 	Matrix4 GetLocalRectOffset() { return Matrix4::MakeTranslate(GetRect().GetMin()); }
-	
+    
 protected:
 	void CalcLocalPosition() override;
 	
