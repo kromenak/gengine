@@ -8,6 +8,7 @@
 #include "GameProgress.h"
 #include "Localizer.h"
 #include "LocationManager.h"
+#include "Services.h"
 #include "StringUtil.h"
 #include "UICanvas.h"
 #include "UILabel.h"
@@ -25,18 +26,24 @@ StatusOverlay::StatusOverlay() : Actor(TransformType::RectTransform)
     
     // Create status text actor at top of screen.
     Actor* statusTextActor = new Actor(TransformType::RectTransform);
-    
     mStatusLabel = statusTextActor->AddComponent<UILabel>();
     mStatusLabel->SetFont(Services::GetAssets()->LoadFont("F_STATUS_FADE"));
     mStatusLabel->SetVerticalAlignment(VerticalAlignment::Top);
     canvas->AddWidget(mStatusLabel);
     
+    // Status text is anchored to top of screen with pivot at top-center.
+    // The size of this RT is the "hover area" for showing the status text.
     RectTransform* statusTextRT = mStatusLabel->GetRectTransform();
     statusTextRT->SetParent(rectTransform);
-    statusTextRT->SetPivot(0.0f, 1.0f);
-    statusTextRT->SetAnchor(0.0f, 1.0f);
-    statusTextRT->SetAnchoredPosition(5.0f, -5.0f);
+    statusTextRT->SetPivot(0.5f, 1.0f);
     
+    statusTextRT->SetAnchorMin(Vector2(0.0f, 1.0f));
+    statusTextRT->SetAnchorMax(Vector2(1.0f, 1.0f));
+    
+    statusTextRT->SetSizeDeltaX(-5.0f);
+    statusTextRT->SetSizeDeltaY(20.0f);
+    
+    // Refresh text with latest location, timeblock, score, etc.
     Refresh();
 }
 
@@ -55,9 +62,25 @@ void StatusOverlay::Refresh()
                                                 timeblockName.c_str(),
                                                 scoreText.c_str());
     mStatusLabel->SetText(statusText);
+    
+    // Refreshing the text should force the overlay to show.
+    mShowTimer = kShowTime;
 }
 
 void StatusOverlay::OnUpdate(float deltaTime)
 {
-	
+    if(mStatusLabel->GetRectTransform()->GetWorldRect().Contains(Services::GetInput()->GetMousePosition()))
+    {
+        mShowTimer = kShowTime;
+    }
+    
+    if(mShowTimer > 0.0f)
+    {
+        mShowTimer -= deltaTime;
+    }
+    
+    Color32 color = mStatusLabel->GetColor();
+    float t = Math::Clamp(mShowTimer / kStartFadeTime, 0.0f, 1.0f);
+    color.SetA(Math::Lerp((unsigned char)0, (unsigned char)255, t));
+    mStatusLabel->SetColor(color);
 }
