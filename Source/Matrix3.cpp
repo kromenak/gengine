@@ -11,6 +11,8 @@
 #include "Quaternion.h"
 #include "Vector3.h"
 
+Matrix3 Matrix3::Identity;
+
 Matrix3::Matrix3(float vals[9])
 {
     memcpy(mVals, vals, 9 * sizeof(float));
