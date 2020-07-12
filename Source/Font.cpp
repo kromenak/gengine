@@ -82,7 +82,14 @@ Font::Font(std::string name, char* data, int dataLength) :
 			currentY += lineHeight;
 		}
 	}
-	
+    
+    // If font uses color replace logic, the pixel at (0, 1)
+    // indicates what color should be replaced with the foreground color.
+    if(mColorMode == ColorMode::ColorReplace)
+    {
+        mReplaceColor = mFontTexture->GetPixelColor32(0, 1);
+    }
+    
 	// Update font texture with background color transparency.
 	//mFontTexture->SetTransparentColor(backgroundColor);
 	
@@ -179,12 +186,12 @@ void Font::ParseFromData(char* data, int dataLength)
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "color"))
 			{
 				// Defined when type is "Color Replacement".
-				mForegroundColor = keyValue.GetValueAsColor32();
+				mColor = keyValue.GetValueAsColor32();
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "foreground color"))
 			{
 				// Defined when type is "Alpha Blend".
-				mForegroundColor = keyValue.GetValueAsColor32();
+				mColor = keyValue.GetValueAsColor32();
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "background color"))
 			{

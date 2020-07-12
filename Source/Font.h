@@ -41,7 +41,8 @@ public:
 	Texture* GetTexture() const { return mFontTexture; }
 	Glyph& GetGlyph(char character);
 	
-	Color32 GetDefaultColor() const { return mForegroundColor; }
+	Color32 GetColor() const { return mColor; }
+    Color32 GetReplaceColor() const { return mReplaceColor; }
 	
 	Shader* GetShader() const;
 	
@@ -68,13 +69,18 @@ private:
 	// When rendering, we can have extra space between characters or lines.
 	int mExtraCharacterSpacing = 0;
 	int mExtraLineSpacing = 0;
-	
-	// Foreground and background colors.
-	// For "Alpha Blend" type fonts, background color indicates the color that should be transparent.
-	// For either "Alpha Blend" or "Color Replacement", foreground color indicates text color.
-	Color32 mBackgroundColor = Color32::Magenta;
-	Color32 mForegroundColor = Color32::White;
-	
+    
+    // The color this font uses for the text.
+    // For alpha-blended, the text is simply tinted by this color.
+    // For color replacement, a single color in the font texture is replaced with this color (in shader).
+	Color32 mColor = Color32::White;
+
+    // If color mode is "ColorReplace," this specifies what color should be replaced.
+    Color32 mReplaceColor = Color32::White;
+    
+    // For "Alpha Blend" type fonts, background color indicates the color that should be transparent.
+    Color32 mBackgroundColor = Color32::Magenta;
+    
     // Color mode used by this font.
     // Dictates shader used to mix color with font texture.
     enum class ColorMode : char

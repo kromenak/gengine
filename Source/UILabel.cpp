@@ -132,7 +132,7 @@ void UILabel::GenerateMesh()
 	unsigned short* indexes = new unsigned short[indexSize];
 	
 	// Need color to pass as vertex color for text mesh.
-	Color32 fontColor = mFont->GetDefaultColor();
+    Color32 fontColor = Color32::White;
 	float colorR = (float)fontColor.GetR() / 255.0f;
 	float colorG = (float)fontColor.GetG() / 255.0f;
 	float colorB = (float)fontColor.GetB() / 255.0f;
