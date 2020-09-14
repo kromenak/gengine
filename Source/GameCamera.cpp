@@ -333,10 +333,8 @@ void GameCamera::ResolveCollisions(Vector3& position)
 		// Bounds model is positioned at (0,0,0) in world space (so no need to multiply local to world...it's identity).
 		// BUT each mesh in the model has its own local coordinate system!
 		// We need to convert camera position to local space of the mesh before doing collision check.
-		//TODO: Inverse operation here is expensive - can probably be more efficient.
-		//TODO: The local transform is just rotation/scale/translation, so we can invert using a different method likely.
 		Matrix4 meshToLocal = mesh->GetMeshToLocalMatrix();
-		Matrix4 localToMesh = meshToLocal.Inverse();
+        Matrix4 localToMesh = Matrix4::InverseTransform(meshToLocal);
 		Vector3 meshPosition = localToMesh.TransformPoint(position);
 		
 		// Create sphere at position.

@@ -10,24 +10,25 @@
 
 namespace Math
 {
-    // Dictates that floating-point numbers within 0.000001 units are equal to one another.
+    // Floating-point numbers within 0.000001 units are considered equal to one another.
     static const float kEpsilon = 1.0e-6f;
     
-    // Pi-related constants.
+    // Pi constants.
     static const float kPi = 3.1415926535897932384626433832795f;
     static const float k2Pi = 2.0f * kPi;
     static const float kPiOver2 = kPi / 2.0f;
     static const float kPiOver4 = kPi / 4.0f;
     
-    // Calculates the square root of a value.
     inline float Sqrt(float val)
     {
         return std::sqrtf(val);
     }
     
-    // Calculates the inverse square root of a value.
     inline float InvSqrt(float val)
     {
+        //TODO: this could be replaced by a faster (but approximate) calculation
+        //TODO: the famous "fast inverse square root!"
+        //TODO: https://www.slideshare.net/maksym_zavershynskyi/fast-inverse-square-root
         return (1.0f / std::sqrtf(val));
     }
     
@@ -109,17 +110,17 @@ namespace Math
     
     inline int FloorToInt(float val)
     {
-        return (int)Floor(val);
+        return static_cast<int>(Floor(val));
     }
     
     inline int CeilToInt(float val)
     {
-        return (int)Ceil(val);
+        return static_cast<int>(Ceil(val));
     }
     
     inline int RoundToInt(float val)
     {
-        return (int)Round(val);
+        return static_cast<int>(Round(val));
     }
     
     inline float Clamp(float value, float min, float max)

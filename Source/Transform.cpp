@@ -153,7 +153,7 @@ const Matrix4& Transform::GetWorldToLocalMatrix()
 {
 	if(mWorldToLocalDirty)
 	{
-		mWorldToLocalMatrix = GetLocalToWorldMatrix().Inverse();
+        mWorldToLocalMatrix = Matrix4::InverseTransform(GetLocalToWorldMatrix());
 		mWorldToLocalDirty = false;
 	}
 	return mWorldToLocalMatrix;
@@ -211,7 +211,7 @@ void Transform::Rotate(const Quaternion& rotation, Space space)
 		// 2) Apply desired rotation
 		// 3) Reapply previous WR on top of rotation
 		Quaternion worldRotation = GetWorldRotation();
-		Quaternion invertedWorldRotation = GetWorldRotation().Invert();
+        Quaternion invertedWorldRotation = Quaternion::Inverse(worldRotation);
 		SetWorldRotation(worldRotation * invertedWorldRotation * rotation * worldRotation);
 	}
 }

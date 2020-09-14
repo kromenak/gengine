@@ -11,12 +11,6 @@
 Quaternion Quaternion::Zero(0.0f, 0.0f, 0.0f, 0.0f);
 Quaternion Quaternion::Identity(0.0f, 0.0f, 0.0f, 1.0f);
 
-Quaternion::Quaternion() :
-    x(0.0f), y(0.0f), z(0.0f), w(1.0f)
-{
-    
-}
-
 Quaternion::Quaternion(float x, float y, float z, float w) :
     x(x), y(y), z(z), w(w)
 {
@@ -73,290 +67,6 @@ bool Quaternion::operator!=(const Quaternion& other) const
              Math::AreEqual(y, other.y) &&
              Math::AreEqual(z, other.z) &&
              Math::AreEqual(w, other.w));
-}
-
-bool Quaternion::IsZero() const
-{
-    return Math::IsZero(x*x + y*y + z*z + w*w);
-}
-
-bool Quaternion::IsIdentity() const
-{
-    return (Math::IsZero(x) &&
-            Math::IsZero(y) &&
-            Math::IsZero(z) &&
-            Math::IsZero(1.0f - w));
-}
-
-void Quaternion::Set(const Vector3& axis, float angle)
-{
-    // Special case: axis is the zero vector. Just set to identity.
-    float lengthSq = axis.GetLengthSq();
-    if(Math::IsZero(lengthSq))
-    {
-        MakeIdentity();
-        return;
-    }
-    
-    // We need the half angle for our calculations.
-    angle *= 0.5f;
-    
-    // The w component is easy - just cosine of the half angle.
-    w = Math::Cos(angle);
-    
-    // For the axis, the equation is v = sin(angle) * (v/||v||).
-    // So, this combines the "sin(angle) / ||v|| part into one value.
-    // We can then just multiply by the axis components.
-    float sinAndNormalize = Math::Sin(angle) / Math::Sqrt(lengthSq);
-    x = axis.x * sinAndNormalize;
-    y = axis.y * sinAndNormalize;
-    z = axis.z * sinAndNormalize;
-}
-
-// Creates a quaternion representing a rotation from one vector to another.
-// Method is based on an article by minorlogic from GameDev.net, and
-// referenced in Essential Mathematics for Games.
-void Quaternion::Set(const Vector3& from, const Vector3& to)
-{
-    // Take cross product between two vectors to get axis of rotation.
-    Vector3 axis = Vector3::Cross(from, to);
-    
-    // Set axis values and set w to dot product of two vectors.
-    Set(axis.x, axis.y, axis.z, Vector3::Dot(from, to));
-   
-    // Quaternion is now ||from||*||to||*(cos(theta), r * sin(theta)).
-    // Normalize to remove the ||from||*||to|| part.
-    Normalize();
-    
-    // Quaternion is now (cos(theta), r * sin(theta)).
-    // We want it to be (cos(theta/2), r * sin(theta/2)).
-    w += 1.0f;
-    
-    // Before normalizing, handle case where from/to vectors are opposing.
-    // If result of dot product was -1 (and then we added 1), then the vectors
-    // were facing opposite directions.
-    if(w <= Math::kEpsilon)
-    {
-        // Rotate pi radians around the orthogonal vector.
-        if(from.z * from.z > from.x * from.x)
-        {
-            Set(0.0f, from.z, -from.y, 0.0f);
-        }
-        else
-        {
-            Set(from.y, -from.x, 0.0f, 0.0f);
-        }
-    }
-    
-    // now when we normalize, we'll be dividing by sqrt(2*(1+cos(theta))), which is
-    // what we want for r*sin(theta) to give us r*sin(theta/2)  (see pages 487-488)
-    //
-    // w will become
-    //                 1+cos(theta)
-    //            ----------------------
-    //            sqrt(2*(1+cos(theta)))
-    // which simplifies to
-    //                cos(theta/2)
-    Normalize();
-}
-
-void Quaternion::Set(const Matrix3 &rotation)
-{
-    float trace = rotation.GetTrace();
-    if(trace > 0.0f)
-    {
-        float s = Math::Sqrt(trace + 1.0f);
-        w = s * 0.5f;
-        
-        float recip = 0.5f / s;
-        x = (rotation(2, 1) - rotation(1, 2)) * recip;
-        y = (rotation(0, 2) - rotation(2, 0)) * recip;
-        z = (rotation(1, 0) - rotation(0, 1)) * recip;
-    }
-    else
-    {
-        unsigned int i = 0;
-        if(rotation(1, 1) > rotation(0, 0))
-        {
-            i = 1;
-        }
-        if(rotation(2, 2) > rotation(i, i))
-        {
-            i = 2;
-        }
-        unsigned int j = (i + 1) % 3;
-        unsigned int k = (j + 1) % 3;
-        float s = Math::Sqrt(rotation(i, i) - rotation(j, j) - rotation(k, k) + 1.0f);
-        (*this)[i] = 0.5f * s;
-        
-        float recip = 0.5f / s;
-        w = (rotation(k, j) - rotation(j, k)) * recip;
-        (*this)[j] = (rotation(j, i) + rotation(i, j)) * recip;
-        (*this)[k] = (rotation(k, i) + rotation(i, k)) * recip;
-    }
-}
-
-void Quaternion::Set(float xRadians, float yRadians, float zRadians)
-{
-    // Since the internal representation of an angle in a quaternion is
-    // half the angle, we cut each passed in angle in half.
-    xRadians *= 0.5f;
-    yRadians *= 0.5f;
-    zRadians *= 0.5f;
-    
-    // To convert fixed angles to a quaternion, we basically need to
-    // create three quaternions to represent rotation around each axis
-    // and concatenate them to get a final quaternion.
-    
-    // This method does that, but without creating the quaternions,
-    // and just doing the math. (EMFG, 193)
-    float sinX = Math::Sin(xRadians);
-    float cosX = Math::Cos(xRadians);
-    
-    float sinY = Math::Sin(yRadians);
-    float cosY = Math::Cos(yRadians);
-    
-    float sinZ = Math::Sin(zRadians);
-    float cosZ = Math::Cos(zRadians);
-    
-    w = cosX * cosY * cosZ - sinX * sinY * sinZ;
-    x = sinX * cosY * cosZ + cosX * sinY * sinZ;
-    y = cosX * sinY * cosZ - sinX * cosY * sinZ;
-    z = cosX * cosY * sinZ + sinZ * sinY * cosX;
-}
-
-void Quaternion::Set(Vector3 forward, Vector3 up, Vector3 right)
-{
-    /*
-     Vector3 forward = Vector3.Normalize(forward);
-     Vector3 right = Vector3.Normalize(Vector3.Cross(up, forward));
-     Vector3 up = Vector3.Cross(forward, right);
-     var m00 = right.x;
-     var m01 = right.y;
-     var m02 = right.z;
-     var m10 = up.x;
-     var m11 = up.y;
-     var m12 = up.z;
-     var m20 = forward.x;
-     var m21 = forward.y;
-     var m22 = forward.z;
-    */
-    
-    /*
-    float m00 = right.x;
-    float m01 = right.y;
-    float m02 = right.GetZ();
-    float m10 = up.x;
-    float m11 = up.y;
-    float m12 = up.GetZ();
-    float m20 = forward.x;
-    float m21 = forward.y;
-    float m22 = forward.GetZ();
-    */
-}
-
-void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const
-{
-    angle = 2.0f * acosf(w);
-    
-    float length = Math::Sqrt(1.0f - (w * w));
-    if(Math::IsZero(length))
-    {
-		axis = Vector3::Zero;
-    }
-    else
-    {
-        length = 1.0f / length;
-        axis.x = x * length;
-        axis.y = y * length;
-        axis.z = z * length;
-    }
-}
-
-Vector3 Quaternion::GetEulerAngles() const
-{
-	// Taken from Wikipedia (https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles)
-	Vector3 result;
-	
-	// X-axis
-	float sinr_cosp = 2 * (w * x + y * z);
-	float cosr_cosp = 1 - (2 * (x * x + y * y));
-	result.x = Math::Atan2(sinr_cosp, cosr_cosp);
-	
-	// Y-axis
-	float sinp = 2 * (w * y - z * x);
-	if(Math::Abs(sinp) >= 1)
-	{
-		result.y = Math::MagnitudeSign(Math::kPi / 2, sinp);
-	}
-	else
-	{
-		result.y = Math::Asin(sinp);
-	}
-	
-	// Z-axis
-	float siny_cosp = 2 * (w * z + x * y);
-	float cosy_cosp = 1 - (2 * (y * y + z * z));
-	result.z = Math::Atan2(siny_cosp, cosy_cosp);
-	
-	return result;
-}
-
-bool Quaternion::IsUnit() const
-{
-    return Math::IsZero(1.0f - (x*x + y*y + z*z + w*w));
-}
-
-float Quaternion::GetLength() const
-{
-    return Math::Sqrt(x*x + y*y + z*z + w*w);
-}
-
-void Quaternion::Normalize()
-{
-    float lengthSq = (x * x) + (y * y) + (z * z) + (w * w);
-    if(Math::IsZero(lengthSq))
-    {
-        MakeZero();
-    }
-    else
-    {
-        float factor = Math::InvSqrt(lengthSq);
-        x *= factor;
-        y *= factor;
-        z *= factor;
-        w *= factor;
-    }
-}
-
-Quaternion Quaternion::Inverse(const Quaternion& quat)
-{
-	Quaternion toInvert = quat;
-	return toInvert.Invert();
-}
-
-const Quaternion& Quaternion::Invert()
-{
-	// Calculate length squared, so we know if the quaternion is zero or not.
-    float lengthSq = (x * x) + (y * y) + (z * z) + (w * w);
-    
-	// If length is zero, we just return the matrix, unaffected.
-    // This is technically an invalid operation, btw.
-	if(Math::IsZero(lengthSq))
-    {
-        return *this;
-    }
-    
-	// We basically just want to negate our axis. The angle (w) doesn't negate.
-    // As mentioned in EMFG, a fully negated quat rotates to same angle but other way around axis.
-    // The inverse just rotates the same angle around opposite axis.
-    // Also, the equation can be simpler if quat is unit vector...
-    float recip = 1.0f / lengthSq;
-    w *= recip;
-    x *= -recip;
-    y *= -recip;
-    z *= -recip;
-    return *this;
 }
 
 Quaternion Quaternion::operator+(const Quaternion& other) const
@@ -416,16 +126,321 @@ Quaternion Quaternion::operator*(const Quaternion& other) const
 
 Quaternion& Quaternion::operator*=(const Quaternion &other)
 {
-    Set(w * other.x + x * other.w + y * other.z - z * other.y,
-        w * other.y + y * other.w + z * other.x - x * other.z,
-        w * other.z + z * other.w + x * other.y - y * other.x,
-        w * other.w - x * other.x - y * other.y - z * other.z);
+    x = w * other.x + x * other.w + y * other.z - z * other.y;
+    y = w * other.y + y * other.w + z * other.x - x * other.z;
+    z = w * other.z + z * other.w + x * other.y - y * other.x;
+    w = w * other.w - x * other.x - y * other.y - z * other.z;
     return *this;
 }
 
-float Quaternion::Dot(const Quaternion& quat1, const Quaternion& quat2)
+bool Quaternion::IsZero() const
+{
+    return Math::IsZero(x*x + y*y + z*z + w*w);
+}
+
+bool Quaternion::IsIdentity() const
+{
+    return (Math::IsZero(x) &&
+            Math::IsZero(y) &&
+            Math::IsZero(z) &&
+            Math::IsZero(1.0f - w));
+}
+
+void Quaternion::Set(const Vector3& axis, float angle)
+{
+    // Special case: axis is the zero vector. Just set to identity.
+    float lengthSq = axis.GetLengthSq();
+    if(Math::IsZero(lengthSq))
+    {
+        x = y = z = 0.0f;
+        w = 1.0f;
+        return;
+    }
+    
+    // We need the half angle for our calculations.
+    angle *= 0.5f;
+    
+    // The w component is easy - just cosine of the half angle.
+    w = Math::Cos(angle);
+    
+    // For the axis, the equation is v = sin(angle) * (v/||v||).
+    // So, this combines the "sin(angle) / ||v|| part into one value.
+    // We can then just multiply by the axis components.
+    float sinAndNormalize = Math::Sin(angle) / Math::Sqrt(lengthSq);
+    x = axis.x * sinAndNormalize;
+    y = axis.y * sinAndNormalize;
+    z = axis.z * sinAndNormalize;
+}
+
+void Quaternion::Set(const Vector3& from, const Vector3& to)
+{
+    // Creates quaternion that is a rotation between two direction vectors.r.
+    // Method based on an article by minorlogic from GameDev.net, referenced in Essential Mathematics book.
+    
+    // Take cross product between two vectors to get axis of rotation.
+    Vector3 axis = Vector3::Cross(from, to);
+    
+    // Set axis values and set w to dot product of two vectors.
+    x = axis.x;
+    y = axis.y;
+    z = axis.z;
+    w = Vector3::Dot(from, to);
+   
+    // Quaternion is now ||from|| * ||to|| * (cos(theta), r * sin(theta)).
+    // Normalize to remove the ||from||*||to|| part.
+    Normalize();
+    
+    // Quaternion is now (cos(theta), r * sin(theta)).
+    // We want it to be (cos(theta/2), r * sin(theta/2)).
+    w += 1.0f;
+    
+    // Before normalizing, handle case where from/to vectors are opposing.
+    // If result of dot product was -1 (and then we added 1), then the vectors
+    // were facing opposite directions.
+    if(w <= Math::kEpsilon)
+    {
+        // Rotate pi radians around the orthogonal vector.
+        if(from.z * from.z > from.x * from.x)
+        {
+            x = 0.0f;
+            y = from.z;
+            z = -from.y;
+        }
+        else
+        {
+            x = from.y;
+            y = -from.x;
+            z = 0.0f;
+        }
+        w = 0.0f;
+    }
+    
+    // now when we normalize, we'll be dividing by sqrt(2*(1+cos(theta))), which is
+    // what we want for r*sin(theta) to give us r*sin(theta/2) (see pages 487-488)
+    //
+    // w will become
+    //                 1+cos(theta)
+    //            ----------------------
+    //            sqrt(2*(1+cos(theta)))
+    // which simplifies to
+    //                cos(theta/2)
+    Normalize();
+}
+
+void Quaternion::Set(const Matrix3& rotation)
+{
+    // The method used to convert to a quaternion depends on whether the trace is positive or not.
+    float trace = rotation.GetTrace();
+    if(trace >= 0.0f)
+    {
+        // Given an axis and angle, q = (sin(θ/2) * axis, cos(θ/2)).
+        
+        // From a rotation matrix, we can *almost* get this data!
+        // Vector part: from the matrix, calculate (R21 - R12, R02 - R20, R10 - R01). This equals (2 * sin(θ) * axis).
+        // Scalar part: trace of matrix equals (2 * cos(θ) + 1).
+        // So, from a rotation matrix, we can get q2 = (2 * sin(θ) * axis, 2 * cos(θ) + 1).
+        
+        // To convert q2 to q1 format, we can simply add one to the scalar part and normalize!
+        // See (EMFG, 191)
+        
+        // Calculate vector part (2 * sin(θ) * axis).
+        x = rotation(2, 1) - rotation(1, 2);
+        y = rotation(0, 2) - rotation(2, 0);
+        z = rotation(1, 0) - rotation(0, 1);
+        
+        // Calculate scalar part (2 * cos(θ) + 1).
+        // Add one to get "+ 2" instead, which is required for normalization to give correct result.
+        w = trace + 1.0f;
+        
+        // Normalize to force quaternion into correct format.
+        Normalize();
+    }
+    else
+    {
+        // When the trace is less than zero, the above method doesn't work (the vector part calculation returns zero).
+        // This alternative method works in that case. (EMFG, 191)
+        
+        // Determine which diagonal value is largest.
+        unsigned int i = 0;
+        if(rotation(1, 1) > rotation(0, 0))
+        {
+            i = 1;
+        }
+        if(rotation(2, 2) > rotation(i, i))
+        {
+            i = 2;
+        }
+        
+        // Depending on what i ended up being, determine j & k with wraparound.
+        // If i = 0, j = 1 & k = 2.
+        // If i = 1, j = 2 & k = 0 (and so on).
+        unsigned int j = (i + 1) % 3;
+        unsigned int k = (j + 1) % 3;
+        
+        // The first term can be calculated by subtracting the three diagonal values in the right order and adding 1.
+        // The *0.5f bit is a sneaky way to normalize the result.
+        float s = Math::Sqrt(rotation(i, i) - rotation(j, j) - rotation(k, k) + 1.0f);
+        (*this)[i] = 0.5f * s;
+        
+        // Calculate remaining terms, with similar sneaky normalization techniques.
+        float recip = 0.5f / s;
+        w = (rotation(k, j) - rotation(j, k)) * recip;
+        (*this)[j] = (rotation(j, i) + rotation(i, j)) * recip;
+        (*this)[k] = (rotation(k, i) + rotation(i, k)) * recip;
+    }
+}
+
+void Quaternion::Set(float xRadians, float yRadians, float zRadians)
+{
+    // To convert fixed angles to a quaternion, we basically need to
+    // create three quaternions to represent rotation around each axis
+    // and concatenate them to get a final quaternion.
+    
+    // Since the internal representation of an angle in a quaternion is
+    // half the angle, we cut each passed in angle in half.
+    xRadians *= 0.5f;
+    yRadians *= 0.5f;
+    zRadians *= 0.5f;
+    
+    // This method does that, but without creating the quaternions,
+    // and just doing the math. (EMFG, 193)
+    float sinX = Math::Sin(xRadians);
+    float cosX = Math::Cos(xRadians);
+    
+    float sinY = Math::Sin(yRadians);
+    float cosY = Math::Cos(yRadians);
+    
+    float sinZ = Math::Sin(zRadians);
+    float cosZ = Math::Cos(zRadians);
+    
+    w = cosX * cosY * cosZ - sinX * sinY * sinZ;
+    x = sinX * cosY * cosZ + cosX * sinY * sinZ;
+    y = cosX * sinY * cosZ - sinX * cosY * sinZ;
+    z = cosX * cosY * sinZ + sinZ * sinY * cosX;
+}
+
+void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const
+{
+    // scalar part = cos(θ/2)
+    // So, we can extract the angle directly.
+    angle = 2.0f * Math::Acos(w);
+    
+    // vector part = axis * sin(θ/2)
+    // In other words, the vector part is the axis, but with length of sin(θ/2).
+    // We assume quaternion is unit length, so subtracting w^2 gives us length of just vector part (aka sin(θ/2)).
+    float length = Math::Sqrt(1.0f - (w * w));
+    
+    // Normalize vector part to get the axis!
+    if(Math::IsZero(length))
+    {
+		axis = Vector3::Zero;
+    }
+    else
+    {
+        length = 1.0f / length;
+        axis.x = x * length;
+        axis.y = y * length;
+        axis.z = z * length;
+    }
+}
+
+Vector3 Quaternion::GetEulerAngles() const
+{
+	// Taken from Wikipedia (https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles)
+	Vector3 result;
+	
+	// X-axis
+	float sinr_cosp = 2 * (w * x + y * z);
+	float cosr_cosp = 1 - (2 * (x * x + y * y));
+	result.x = Math::Atan2(sinr_cosp, cosr_cosp);
+	
+	// Y-axis
+	float sinp = 2 * (w * y - z * x);
+	if(Math::Abs(sinp) >= 1)
+	{
+		result.y = Math::MagnitudeSign(Math::kPi / 2, sinp);
+	}
+	else
+	{
+		result.y = Math::Asin(sinp);
+	}
+	
+	// Z-axis
+	float siny_cosp = 2 * (w * z + x * y);
+	float cosy_cosp = 1 - (2 * (y * y + z * z));
+	result.z = Math::Atan2(siny_cosp, cosy_cosp);
+	
+	return result;
+}
+
+bool Quaternion::IsUnit() const
+{
+    return Math::IsZero(1.0f - (x * x + y * y + z * z + w * w));
+}
+
+float Quaternion::GetLength() const
+{
+    return Math::Sqrt(x * x + y * y + z * z + w * w);
+}
+
+void Quaternion::Normalize()
+{
+    float lengthSq = (x * x) + (y * y) + (z * z) + (w * w);
+    if(Math::IsZero(lengthSq))
+    {
+        x = y = z = w = 0.0f;
+    }
+    else
+    {
+        float factor = Math::InvSqrt(lengthSq);
+        x *= factor;
+        y *= factor;
+        z *= factor;
+        w *= factor;
+    }
+}
+
+/*static*/ float Quaternion::Dot(const Quaternion& quat1, const Quaternion& quat2)
 {
     return (quat1.x * quat2.x + quat1.y * quat2.y + quat1.z * quat2.z + quat1.w * quat2.w);
+}
+
+void Quaternion::Invert()
+{
+	// Calculate length squared, so we know if the quaternion is zero or not.
+    float lengthSq = (x * x) + (y * y) + (z * z) + (w * w);
+    
+	// If length is zero, we just return the quaternion, unaffected.
+    // This is technically an invalid operation, btw.
+	if(Math::IsZero(lengthSq))
+    {
+        return;
+    }
+    
+    // For unit length quaternions, the inverse is equal to the conjugate (just negate vector part).
+    if(IsUnit())
+    {
+        x *= -1.0f;
+        y *= -1.0f;
+        z *= -1.0f;
+    }
+    else
+    {
+        // For non-unit quaternions, inverse is calculated by dividing by quaternion (q) times conjugate (q*).
+        // After doing the math/simplifying, this means we can just divide by length squared and negate the vector part.
+        float recip = 1.0f / lengthSq;
+        x *= -recip;
+        y *= -recip;
+        z *= -recip;
+        w *= recip;
+    }
+}
+
+/*static*/ Quaternion Quaternion::Inverse(const Quaternion& quat)
+{
+    Quaternion toInvert = quat;
+    toInvert.Invert();
+    return toInvert;
 }
 
 Vector3 Quaternion::Rotate(const Vector3& vector) const
@@ -440,7 +455,7 @@ Vector3 Quaternion::Rotate(const Vector3& vector) const
                    pMult * vector.z + vMult * z + crossMult * (x * vector.y - y * vector.x));
 }
 
-void Quaternion::Lerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)
+/*static*/ void Quaternion::Lerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)
 {
     // Get cos of angle between quaternions.
     float cosTheta = Quaternion::Dot(start, end);
@@ -460,7 +475,7 @@ void Quaternion::Lerp(Quaternion &result, const Quaternion &start, const Quatern
     }
 }
 
-void Quaternion::Slerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)
+/*static*/ void Quaternion::Slerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)
 {
     // Get cos of angle between quaternions.
     float cosTheta = Quaternion::Dot(start, end);

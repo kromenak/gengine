@@ -16,12 +16,15 @@
 class Matrix4
 {
 public:
+    static Matrix4 Zero;
     static Matrix4 Identity;
     
-    Matrix4() { ToIdentity(); }
+    Matrix4() = default;
     Matrix4(float vals[16]);
-    explicit Matrix4(float vals[4][4]);
-    explicit Matrix4(float vals[4][4], bool transpose);
+    Matrix4(float v00, float v01, float v02, float v03,
+            float v10, float v11, float v12, float v13,
+            float v20, float v21, float v22, float v23,
+            float v30, float v31, float v32, float v33);
     
     // Copy
     Matrix4(const Matrix4& other);
@@ -31,28 +34,23 @@ public:
     bool operator==(const Matrix4& other) const;
     bool operator!=(const Matrix4& other) const;
     
-    // Retrieve or set an element using (row, col) notation.
+    // Accessors - get entry using (row, col) notation.
     float& operator()(int row, int col) { return mVals[row + 4 * col]; }
     float operator()(int row, int col) const { return mVals[row + 4 * col]; }
     
-    // Row and column getters/accessors.
+    // Accessors - get column using [index] notation.
+    Vector4& operator[](int col) { return (*reinterpret_cast<Vector4*>(&mVals[col * 4])); }
+    const Vector4& operator[](int col) const { return (*reinterpret_cast<const Vector4*>(&mVals[col * 4])); }
+    
+    // More explicit Row/Column getters/setters.
     void SetRows(const Vector4& row1, const Vector4& row2, const Vector4& row3, const Vector4& row4);
     void GetRows(Vector4& row1, Vector4& row2, Vector4& row3, Vector4& row4);
-    
     void SetColumns(const Vector4& col1, const Vector4& col2, const Vector4& col3, const Vector4& col4);
     void GetColumns(Vector4& col1, Vector4& col2, Vector4& col3, Vector4& col4);
     
-    // Clear matrix to identity.
-    void ToIdentity();
-    
-    // Transpose the matrix.
-    Matrix4& Transpose();
-    static Matrix4 Transpose(const Matrix4& matrix);
-    
-    // Inverse and affine inverse.
-    // Affine inverse is maybe faster, but only works with affine matrices!
-    Matrix4 AffineInverse() const;
-    Matrix4 Inverse() const;
+    // Implicit float conversion - allows Matrix4 to be passed as a float* argument.
+    operator float*() { return mVals; }
+    operator const float*() const { return mVals; }
     
     // Addition and subtraction
     Matrix4 operator+(const Matrix4& rhs) const;
@@ -65,10 +63,6 @@ public:
     Matrix4 operator*(const Matrix4& rhs) const;
     Matrix4& operator*=(const Matrix4& rhs);
     
-	// Vector3 multiplication - column-vector only!
-	Vector3 TransformPoint(const Vector3& rhs) const;
-	Vector3 Transform(const Vector3& rhs) const;
-	
     // Vector4 multiplication - column-vector (rhs) and row-vector (lhs)
     Vector4 operator*(const Vector4& rhs) const;
     friend Vector4 operator*(const Vector4& lhs, const Matrix4& rhs);
@@ -78,38 +72,62 @@ public:
     Matrix4& operator*=(float scalar);
     friend Matrix4 operator*(float scalar, const Matrix4& matrix);
     
-    // Implicit float conversion - allows Matrix3 to be passed as a float* argument.
-    operator float*() { return mVals; }
-    operator const float*() const { return mVals; }
+    // Transpose
+    void Transpose();
+    static Matrix4 Transpose(const Matrix4& matrix);
+    
+    // Inverse
+    void Invert();
+    static Matrix4 Inverse(const Matrix4& matrix);
+    
+    void InvertOrthogonal();
+    static Matrix4 InverseOrthogonal(const Matrix4& matrix);
+    
+    //IsOrthoganal
+    
+    //*********************
+    // Transform Functions
+    //*********************
+    //IsTransform
+    
+    // Extraction of transform data
+    const Vector3& GetXAxis() const { return reinterpret_cast<const Vector3&>(mVals[0]); }
+    const Vector3& GetYAxis() const { return reinterpret_cast<const Vector3&>(mVals[4]); }
+    const Vector3& GetZAxis() const { return reinterpret_cast<const Vector3&>(mVals[8]); }
+    const Vector3& GetTranslation() const { return reinterpret_cast<const Vector3&>(mVals[12]); }
+    Quaternion GetRotation() const;
+    
+    // Vector3 multiplication (assume w=1 for point, w=0 for vector)
+    // These assume the Vector is a column vector (and thus matrix columns are axis/translation).
+    Vector3 TransformVector(const Vector3& vector) const;
+    Vector3 TransformPoint(const Vector3& point) const;
+    
+    // Inverse
+    void InvertTransform();
+    static Matrix4 InverseTransform(const Matrix4& matrix);
+    
+    //TODO: Inverse of matrices representing just scale or translation can be calculated very efficiently.
+    //TODO: See Essential Mathematics for Games, pg 120.
 	
-	// A Matrix4 is often used to represent a transformation matrix.
-	// In that case, we can extract certain meaningful data if needed.
-	const Vector3& GetXAxis() const { return reinterpret_cast<const Vector3&>(mVals[0]); }
-	const Vector3& GetYAxis() const { return reinterpret_cast<const Vector3&>(mVals[4]); }
-	const Vector3& GetZAxis() const { return reinterpret_cast<const Vector3&>(mVals[8]); }
-	const Vector3& GetTranslation() const { return reinterpret_cast<const Vector3&>(mVals[12]); }
-	Quaternion GetRotation() const;
-	
-    // Factory methods for generating certain types of matrices.
-    static Matrix4 MakeTranslate(Vector3 translation);
+    //*********************
+    // Factory Methods
+    //*********************
+    static Matrix4 MakeTranslate(const Vector3& translation);
 	
     static Matrix4 MakeRotateX(float rotX);
     static Matrix4 MakeRotateY(float rotY);
     static Matrix4 MakeRotateZ(float rotZ);
-	
     static Matrix4 MakeRotate(const Quaternion& quat);
     static Matrix4 MakeRotate(const Matrix3& matrix3);
 	
-    static Matrix4 MakeScale(Vector3 scale);
-	static Matrix4 MakeScale(float xScale, float yScale, float zScale);
+    static Matrix4 MakeScale(float scale);
+    static Matrix4 MakeScale(const Vector3& scale);
 	
 	static Matrix4 MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up);
 	
     static Matrix4 MakePerspective(float fovAngleRad, float aspectRatio, float near, float far);
 	static Matrix4 MakeOrthographic(float left, float right, float bottom, float top, float near, float far);
-	static Matrix4 MakeSimpleScreenOrtho(float width, float height);
-	
-	static Matrix4 MakeSimpleViewProj(float width, float height);
+	static Matrix4 MakeOrthographic(float width, float height);
 	
 private:
     // Elements are stored in a 1D array internally.

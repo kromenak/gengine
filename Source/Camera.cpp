@@ -68,7 +68,7 @@ Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 	// To do this, we must calculate the "world space to screen space" matrix, and then invert it.
 	Matrix4 viewMatrix = GetLookAtMatrix();
 	Matrix4 projectionMatrix = GetProjectionMatrix();
-	Matrix4 projectionToWorld = (projectionMatrix * viewMatrix).Inverse();
+    Matrix4 projectionToWorld = Matrix4::Inverse(projectionMatrix * viewMatrix);
 	
 	// Multiply the NDC point by the "screen space to world space" matrix to get to world space.
 	// We must divide the whole point by W to deal with reversing perspective depth stuff.

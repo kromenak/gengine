@@ -3,7 +3,8 @@
 //
 // Clark Kromenaker
 //
-// A heading in GK3 is a yaw-only rotation (about the y-axis) that is defined in degrees from 0 to 360.
+// A heading in GK3 is a yaw-only rotation (about the y-axis)
+// that is defined in degrees from 0 to 360.
 //
 #pragma once
 

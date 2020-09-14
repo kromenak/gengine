@@ -196,11 +196,11 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 	{
 		// Calculate world->local space transform by creating object->local and inverting.
 		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
-		Matrix4 worldToMeshMatrix = meshToWorldMatrix.Inverse();
+        Matrix4 worldToMeshMatrix = Matrix4::InverseTransform(meshToWorldMatrix);
 		
 		// Transform the ray to object space.
 		Vector3 rayLocalPos = worldToMeshMatrix.TransformPoint(ray.GetOrigin());
-		Vector3 rayLocalDir = worldToMeshMatrix.Transform(ray.GetDirection());
+		Vector3 rayLocalDir = worldToMeshMatrix.TransformVector(ray.GetDirection());
 		rayLocalDir.Normalize();
 		Ray localRay(rayLocalPos, rayLocalDir);
 		

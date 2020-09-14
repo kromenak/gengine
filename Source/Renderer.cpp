@@ -307,7 +307,7 @@ void Renderer::Render()
 	// UI uses a view/proj setup for now - world space for UI maps to pixel size of screen.
 	// Bottom-left corner of screen is origin, +x is right, +y is up.
 	Material::SetViewMatrix(Matrix4::Identity);
-	Material::SetProjMatrix(Matrix4::MakeSimpleScreenOrtho(static_cast<float>(GetWindowWidth()), static_cast<float>(GetWindowHeight())));
+	Material::SetProjMatrix(Matrix4::MakeOrthographic(static_cast<float>(GetWindowWidth()), static_cast<float>(GetWindowHeight())));
 	
 	// Don't do depth test because UI draws above everything.
 	// This means UI is basically painter's algorithm though!

@@ -12,21 +12,15 @@ SCENARIO("Multiply Two Matrix4")
 {
     GIVEN("Two Matrix4")
     {
-        float vals1[4][4] = {
-            { 6, 10, 8, 12 },
-            { -5, 60, 80, 12 },
-            { 12, 15, -20, -1 },
-            { 25, 33, 42, 16 }
-        };
-        Matrix4 mat1(vals1, true);
+        Matrix4 mat1(6, 10, 8, 12,
+                     -5, 60, 80, 12,
+                     12, 15, -20, -1,
+                     25, 33, 42, 16);
         
-        float vals2[4][4] = {
-            { 0.5f, -1.3f, 5, 100 },
-            { -256, 34.5f, 2, 32 },
-            { -17, 14, -20, -4 },
-            { 0.6f, 33.0f, 7, -43 }
-        };
-        Matrix4 mat2(vals2, true);
+        Matrix4 mat2(0.5f, -1.3f, 5.0f, 100.0f,
+                     -256.0f, 34.5f, 2.0f, 32.0f,
+                     -17.0f, 14.0f, -20.0f, -4.0f,
+                     0.6f, 33.0f, 7.0f, -43.0f);
         
         WHEN("the matrices are multiplied")
         {
@@ -103,14 +97,11 @@ TEST_CASE("Test multiply Vector4 by scale Matrix4")
 
 TEST_CASE("Test calculate the inverse of Matrix4")
 {
-    float vals1[4][4] = {
-        { 1, 1, 1, 23 },
-        { 0, 3, 1, 10 },
-        { 2, 3, 1, 14 },
-        { 0, 0, 0, 1 }
-    };
-    Matrix4 matrix(vals1, true);
-    Matrix4 inverse = matrix.Inverse();
+    Matrix4 matrix(1, 1, 1, 23,
+                   0, 3, 1, 10,
+                   2, 3, 1, 14,
+                   0, 0, 0, 1);
+    Matrix4 inverse = Matrix4::Inverse(matrix);
     
     // Make sure values are correct in the inverse matrix.
     REQUIRE(Math::AreEqual(inverse(0,0), 0.0f));

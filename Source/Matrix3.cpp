@@ -11,24 +11,50 @@
 #include "Quaternion.h"
 #include "Vector3.h"
 
-Matrix3 Matrix3::Identity;
+Matrix3 Matrix3::Zero(0.0f, 0.0f, 0.0f,
+                      0.0f, 0.0f, 0.0f,
+                      0.0f, 0.0f, 0.0f);
+
+Matrix3 Matrix3::Identity(1.0f, 0.0f, 0.0f,
+                          0.0f, 1.0f, 0.0f,
+                          0.0f, 0.0f, 1.0f);
 
 Matrix3::Matrix3(float vals[9])
 {
+    // Assumed to already be in column-major order.
     memcpy(mVals, vals, 9 * sizeof(float));
 }
 
-Matrix3::Matrix3(float vals[3][3])
+Matrix3::Matrix3(float v00, float v01, float v02,
+                 float v10, float v11, float v12,
+                 float v20, float v21, float v22)
 {
-    memcpy(mVals, vals, 9 * sizeof(float));
-}
-
-Matrix3::Matrix3(float vals[3][3], bool transpose)
-{
-    memcpy(mVals, vals, 9 * sizeof(float));
+    mVals[0] = v00;
+    mVals[1] = v10;
+    mVals[2] = v20;
     
-    // Indicates that the matrix passed in needs to be transposed.
-    if(transpose) { Transpose(); }
+    mVals[3] = v01;
+    mVals[4] = v11;
+    mVals[5] = v21;
+    
+    mVals[6] = v02;
+    mVals[7] = v12;
+    mVals[8] = v22;
+}
+
+Matrix3::Matrix3(const Vector3& col1, const Vector3& col2, const Vector3& col3)
+{
+    mVals[0] = col1.x;
+    mVals[1] = col1.y;
+    mVals[2] = col1.z;
+    
+    mVals[3] = col2.x;
+    mVals[4] = col2.y;
+    mVals[5] = col2.z;
+    
+    mVals[6] = col3.x;
+    mVals[7] = col3.y;
+    mVals[8] = col3.z;
 }
 
 Matrix3::Matrix3(const Matrix3& other)
@@ -64,57 +90,6 @@ bool Matrix3::operator!=(const Matrix3 &other) const
         }
     }
     return false;
-}
-
-void Matrix3::ToIdentity()
-{
-    mVals[0] = 1.0f;
-    mVals[1] = 0.0f;
-    mVals[2] = 0.0f;
-    
-    mVals[3] = 0.0f;
-    mVals[4] = 1.0f;
-    mVals[5] = 0.0f;
-    
-    mVals[6] = 0.0f;
-    mVals[7] = 0.0f;
-    mVals[8] = 1.0f;
-}
-
-Matrix3& Matrix3::Transpose()
-{
-    float temp = mVals[1];
-    mVals[1] = mVals[3];
-    mVals[3] = temp;
-    
-    temp = mVals[2];
-    mVals[2] = mVals[6];
-    mVals[6] = temp;
-    
-    temp = mVals[5];
-    mVals[5] = mVals[7];
-    mVals[7] = temp;
-    return *this;
-}
-
-Matrix3 Matrix3::Transpose(const Matrix3& matrix)
-{
-    Matrix3 result;
-    result.mVals[0] = matrix.mVals[0];
-    result.mVals[1] = matrix.mVals[3];
-    result.mVals[2] = matrix.mVals[6];
-    result.mVals[3] = matrix.mVals[1];
-    result.mVals[4] = matrix.mVals[4];
-    result.mVals[5] = matrix.mVals[7];
-    result.mVals[6] = matrix.mVals[2];
-    result.mVals[7] = matrix.mVals[5];
-    result.mVals[8] = matrix.mVals[8];
-    return result;
-}
-
-float Matrix3::GetTrace() const
-{
-    return mVals[0] + mVals[4] + mVals[8];
 }
 
 void Matrix3::SetRows(const Vector3& row1, const Vector3& row2, const Vector3& row3)
@@ -257,6 +232,7 @@ Matrix3& Matrix3::operator*=(const Matrix3& rhs)
 
 Vector3 Matrix3::operator*(const Vector3& rhs) const
 {
+    // Treating Vector3 as a column vector here (Mv).
     return Vector3(mVals[0] * rhs[0] + mVals[3] * rhs[1] + mVals[6] * rhs[2],
                    mVals[1] * rhs[0] + mVals[4] * rhs[1] + mVals[7] * rhs[2],
                    mVals[2] * rhs[0] + mVals[5] * rhs[1] + mVals[8] * rhs[2]);
@@ -264,9 +240,10 @@ Vector3 Matrix3::operator*(const Vector3& rhs) const
 
 Vector3 operator*(const Vector3& lhs, const Matrix3& rhs)
 {
-    return Vector3(lhs[0] * rhs[0] + lhs[1] * rhs[1]  + lhs[2] * rhs[2],
-                   lhs[0] * rhs[3] + lhs[1] * rhs[4]  + lhs[2] * rhs[5],
-                   lhs[0] * rhs[6] + lhs[1] * rhs[7]  + lhs[2] * rhs[8]);
+    // Treating Vector3 as a row vector here (vM).
+    return Vector3(lhs[0] * rhs.mVals[0] + lhs[1] * rhs.mVals[1]  + lhs[2] * rhs.mVals[2],
+                   lhs[0] * rhs.mVals[3] + lhs[1] * rhs.mVals[4]  + lhs[2] * rhs.mVals[5],
+                   lhs[0] * rhs.mVals[6] + lhs[1] * rhs.mVals[7]  + lhs[2] * rhs.mVals[8]);
 }
 
 Matrix3 Matrix3::operator*(float scalar) const
@@ -293,59 +270,167 @@ Matrix3 operator*(float scalar, const Matrix3& matrix)
     return matrix * scalar;
 }
 
-Matrix3 Matrix3::MakeRotateX(float rotX)
+void Matrix3::Transpose()
 {
-    Matrix3 m;
+    float temp = mVals[1];
+    mVals[1] = mVals[3];
+    mVals[3] = temp;
+    
+    temp = mVals[2];
+    mVals[2] = mVals[6];
+    mVals[6] = temp;
+    
+    temp = mVals[5];
+    mVals[5] = mVals[7];
+    mVals[7] = temp;
+}
+
+Matrix3 Matrix3::Transpose(const Matrix3& matrix)
+{
+    Matrix3 result;
+    result.mVals[0] = matrix.mVals[0];
+    result.mVals[1] = matrix.mVals[3];
+    result.mVals[2] = matrix.mVals[6];
+    result.mVals[3] = matrix.mVals[1];
+    result.mVals[4] = matrix.mVals[4];
+    result.mVals[5] = matrix.mVals[7];
+    result.mVals[6] = matrix.mVals[2];
+    result.mVals[7] = matrix.mVals[5];
+    result.mVals[8] = matrix.mVals[8];
+    return result;
+}
+
+float Matrix3::GetTrace() const
+{
+    return mVals[0] + mVals[4] + mVals[8];
+}
+
+void Matrix3::Invert()
+{
+    // Math from Foundations of Game Engine Development.
+    // Uses "inverse = adjugate divided by determinant" method.
+    
+    // For a 3x3 matrix:
+    // The adjugate matrix can be calculated using a series of cross products.
+    // The determinant is equal to scalar triple produce ((a x b) dot c).
+    
+    // Extract column vectors from matrix - we can calculate entire inverse with these.
+    const Vector3& col0 = (*this)[0];
+    const Vector3& col1 = (*this)[1];
+    const Vector3& col2 = (*this)[2];
+    
+    // Cross products of the column vectors give us the rows of the adjugate matrix.
+    Vector3 row0 = Vector3::Cross(col1, col2);
+    Vector3 row1 = Vector3::Cross(col2, col0);
+    Vector3 row2 = Vector3::Cross(col0, col1);
+    
+    // Determinant is calculated using scalar triple product.
+    // row2 = (col0 x col1) and we dot product with col2.
+    float determinant = Vector3::Dot(row2, col2);
+    
+    // Determinant of zero indicates that an inverse doesn't exist.
+    // Further reinforced by the "divide by determinant" below.
+    if(Math::IsZero(determinant))
+    {
+        return;
+    }
+    
+    // Multiply adjugate matrix by (1/det) to get the inverse.
+    float invDet = 1.0f / determinant;
+    mVals[0] = row0.x * invDet;
+    mVals[1] = row1.x * invDet;
+    mVals[2] = row2.x * invDet;
+    
+    mVals[3] = row0.y * invDet;
+    mVals[4] = row1.y * invDet;
+    mVals[5] = row2.y * invDet;
+    
+    mVals[6] = row0.z * invDet;
+    mVals[7] = row1.z * invDet;
+    mVals[8] = row2.z * invDet;
+}
+
+/*static*/ Matrix3 Matrix3::Inverse(const Matrix3& matrix)
+{
+    Matrix3 toInvert = matrix;
+    toInvert.Invert();
+    return toInvert;
+}
+
+//*********************
+// Factory Methods
+//*********************
+/*static*/ Matrix3 Matrix3::MakeRotateX(float rotX)
+{
     float cos = Math::Cos(rotX);
     float sin = Math::Sin(rotX);
-    m[5] = cos;
-    m[6] = sin;
-    m[9] = -sin;
-    m[10] = cos;
-    return m;
+    return Matrix3(1.0f, 0.0f, 0.0f,
+                   0.0f, cos,  -sin,
+                   0.0f, sin,  cos);
 }
 
-Matrix3 Matrix3::MakeRotateY(float rotY)
+/*static*/ Matrix3 Matrix3::MakeRotateY(float rotY)
 {
-    Matrix3 m;
     float cos = Math::Cos(rotY);
     float sin = Math::Sin(rotY);
-    m[0] = cos;
-    m[2] = -sin;
-    m[8] = sin;
-    m[10] = cos;
-    return m;
+    return Matrix3(cos, 0.0f, sin,
+                   0.0f, 1.0f, 0.0f,
+                   -sin, 0.0f, cos);
 }
 
-Matrix3 Matrix3::MakeRotateZ(float rotZ)
+/*static*/ Matrix3 Matrix3::MakeRotateZ(float rotZ)
 {
-    Matrix3 m;
     float cos = Math::Cos(rotZ);
     float sin = Math::Sin(rotZ);
-    m[0] = cos;
-    m[1] = sin;
-    m[4] = -sin;
-    m[5] = cos;
-    return m;
+    return Matrix3(cos, -sin, 0.0f,
+                   sin,  cos, 0.0f,
+                   0.0f, 0.0f, 1.0f);
 }
 
-Matrix3 Matrix3::MakeRotate(const Quaternion& quat)
+/*static*/ Matrix3 Matrix3::MakeRotate(const Vector3 &axis, float angle)
 {
-    float s, xs, ys, zs, wx, wy, wz, xx, xy, xz, yy, yz, zz;
-    s = 2.0f / Quaternion::Dot(quat, quat);
+    // Math from Foundations of Game Engine Development.
+    // Multiply by a vector (v) to rotate the vector by angle about axis.
     
-    xs = s * quat.GetX();
-    ys = s * quat.GetY();
-    zs = s * quat.GetZ();
-    wx = quat.GetW() * xs;
-    wy = quat.GetW() * ys;
-    wz = quat.GetW() * zs;
-    xx = quat.GetX() * xs;
-    xy = quat.GetX() * ys;
-    xz = quat.GetX() * zs;
-    yy = quat.GetY() * ys;
-    yz = quat.GetY() * zs;
-    zz = quat.GetZ() * zs;
+    // How it works: create a set of coordinate axes as [axis, projection of v onto axis, a x v].
+    // Result = v.proj(a) + v.reject(a) * cos(theta) + (a x v) * sin(theta)
+    // Representing this project/reject/cross as 3x3 matrices (and factoring out v),
+    // we can generate a final 3x3 matrix to multiply by v to get the result.
+    
+    // Pre-calculate terms that are used many times in the math.
+    float cos = Math::Cos(angle);
+    float cosComplement = 1.0f - cos;
+    float sin = Math::Sin(angle);
+    
+    float x = axis.x * cosComplement; // (1 - c) * x
+    float y = axis.y * cosComplement; // (1 - c) * y
+    float z = axis.z * cosComplement; // (1 - c) * z
+    float axay = x * axis.y;
+    float axaz = x * axis.z;
+    float ayaz = y * axis.z;
+    
+    // Generate final matrix.
+    return Matrix3(cos + x * axis.x, axay - sin * axis.z, axaz + sin * axis.y,
+                   axay + sin * axis.z, cos + y * axis.y, ayaz - sin * axis.x,
+                   axaz - sin * axis.y, ayaz + sin * axis.x, cos + z * axis.z);
+}
+
+/*static*/ Matrix3 Matrix3::MakeRotate(const Quaternion& quat)
+{
+    float s = 2.0f / Quaternion::Dot(quat, quat);
+    
+    float xs = s * quat.x;
+    float ys = s * quat.y;
+    float zs = s * quat.z;
+    float wx = quat.w * xs;
+    float wy = quat.w * ys;
+    float wz = quat.w * zs;
+    float xx = quat.x * xs;
+    float xy = quat.x * ys;
+    float xz = quat.x * zs;
+    float yy = quat.y * ys;
+    float yz = quat.y * zs;
+    float zz = quat.z * zs;
     
     Matrix3 m;
     m.mVals[0] = 1.0f - (yy + zz);
@@ -362,16 +447,21 @@ Matrix3 Matrix3::MakeRotate(const Quaternion& quat)
     return m;
 }
 
-Matrix3 Matrix3::MakeScale(Vector3 scale)
+/*static*/ Matrix3 Matrix3::MakeScale(float scale)
 {
-    Matrix3 m;
-    m[0] = scale.x;
-    m[4] = scale.y;
-    m[8] = scale.z;
-    return m;
+    return Matrix3(scale, 0.0f, 0.0f,
+                   0.0f, scale, 0.0f,
+                   0.0f, 0.0f, scale);
 }
 
-Matrix3 Matrix3::MakeBasis(Vector3 forward, Vector3 up, Vector3 right)
+/*static*/ Matrix3 Matrix3::MakeScale(const Vector3& scale)
+{
+    return Matrix3(scale.x, 0.0f, 0.0f,
+                   0.0f, scale.y, 0.0f,
+                   0.0f, 0.0f, scale.z);
+}
+
+/*static*/ Matrix3 Matrix3::MakeBasis(const Vector3& forward, const Vector3& up, const Vector3& right)
 {
     Matrix3 m;
     m.SetColumns(forward, up, right);

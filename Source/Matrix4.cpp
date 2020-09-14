@@ -10,24 +10,45 @@
 
 #include "Matrix3.h"
 
-Matrix4 Matrix4::Identity;
+Matrix4 Matrix4::Zero(0.0f, 0.0f, 0.0f, 0.0f,
+                      0.0f, 0.0f, 0.0f, 0.0f,
+                      0.0f, 0.0f, 0.0f, 0.0f,
+                      0.0f, 0.0f, 0.0f, 0.0f);
+
+Matrix4 Matrix4::Identity(1.0f, 0.0f, 0.0f, 0.0f,
+                          0.0f, 1.0f, 0.0f, 0.0f,
+                          0.0f, 0.0f, 1.0f, 0.0f,
+                          0.0f, 0.0f, 0.0f, 1.0f);
 
 Matrix4::Matrix4(float vals[16])
 {
     memcpy(mVals, vals, 16 * sizeof(float));
 }
 
-Matrix4::Matrix4(float vals[4][4])
+Matrix4::Matrix4(float v00, float v01, float v02, float v03,
+                 float v10, float v11, float v12, float v13,
+                 float v20, float v21, float v22, float v23,
+                 float v30, float v31, float v32, float v33)
 {
-    memcpy(mVals, vals, 16 * sizeof(float));
-}
-
-Matrix4::Matrix4(float vals[4][4], bool transpose)
-{
-    memcpy(mVals, vals, 16 * sizeof(float));
+    mVals[0] = v00;
+    mVals[1] = v10;
+    mVals[2] = v20;
+    mVals[3] = v30;
     
-    // Indicates that the matrix passed in needs to be transposed.
-    if(transpose) { Transpose(); }
+    mVals[4] = v01;
+    mVals[5] = v11;
+    mVals[6] = v21;
+    mVals[7] = v31;
+    
+    mVals[8] = v02;
+    mVals[9] = v12;
+    mVals[10] = v22;
+    mVals[11] = v32;
+    
+    mVals[12] = v03;
+    mVals[13] = v13;
+    mVals[14] = v23;
+    mVals[15] = v33;
 }
 
 Matrix4::Matrix4(const Matrix4& other)
@@ -63,248 +84,6 @@ bool Matrix4::operator!=(const Matrix4 &other) const
         }
     }
     return false;
-}
-
-void Matrix4::ToIdentity()
-{
-    mVals[0] = 1.0f;
-    mVals[1] = 0.0f;
-    mVals[2] = 0.0f;
-    mVals[3] = 0.0f;
-    
-    mVals[4] = 0.0f;
-    mVals[5] = 1.0f;
-    mVals[6] = 0.0f;
-    mVals[7] = 0.0f;
-    
-    mVals[8] = 0.0f;
-    mVals[9] = 0.0f;
-    mVals[10] = 1.0f;
-    mVals[11] = 0.0f;
-    
-    mVals[12] = 0.0f;
-    mVals[13] = 0.0f;
-    mVals[14] = 0.0f;
-    mVals[15] = 1.0f;
-}
-
-Matrix4& Matrix4::Transpose()
-{
-    float temp = mVals[1];
-    mVals[1] = mVals[4];
-    mVals[4] = temp;
-    
-    temp = mVals[2];
-    mVals[2] = mVals[8];
-    mVals[8] = temp;
-    
-    temp = mVals[3];
-    mVals[3] = mVals[12];
-    mVals[12] = temp;
-    
-    temp = mVals[6];
-    mVals[6] = mVals[9];
-    mVals[9] = temp;
-    
-    temp = mVals[7];
-    mVals[7] = mVals[13];
-    mVals[13] = temp;
-    
-    temp = mVals[11];
-    mVals[11] = mVals[14];
-    mVals[14] = temp;
-    
-    return *this;
-}
-
-Matrix4 Matrix4::Transpose(const Matrix4& matrix)
-{
-    Matrix4 result;
-    result.mVals[0] = matrix.mVals[0];
-    result.mVals[1] = matrix.mVals[4];
-    result.mVals[2] = matrix.mVals[8];
-    result.mVals[3] = matrix.mVals[12];
-    result.mVals[4] = matrix.mVals[1];
-    result.mVals[5] = matrix.mVals[5];
-    result.mVals[6] = matrix.mVals[9];
-    result.mVals[7] = matrix.mVals[13];
-    result.mVals[8] = matrix.mVals[2];
-    result.mVals[9] = matrix.mVals[6];
-    result.mVals[10] = matrix.mVals[10];
-    result.mVals[11] = matrix.mVals[14];
-    result.mVals[12] = matrix.mVals[3];
-    result.mVals[13] = matrix.mVals[7];
-    result.mVals[14] = matrix.mVals[11];
-    result.mVals[15] = matrix.mVals[15];
-    return result;
-}
-
-Matrix4 Matrix4::AffineInverse() const
-{
-    Matrix4 m;
-    
-    // Compute determinant of the upper-left 3x3 matrix.
-    float val1 = mVals[5] * mVals[10] - mVals[9] * mVals[6];
-    float val2 = mVals[2] * mVals[9] - mVals[1] * mVals[10];
-    float val3 = mVals[1] * mVals[6]  - mVals[5] * mVals[2];
-    float det = mVals[0] * val1 + mVals[4] * val2 + mVals[8] * val3;
-    
-    // If determinant is zero, it means it's not possible to find an inverse, so we must return.
-    if(Math::IsZero(det)) { return m; }
-    
-    // Create adjunct matrix, divided by inverse determinant, to get upper 3x3.
-    float invDet = 1.0f / det;
-    m.mVals[0] = invDet * val1;
-    m.mVals[1] = invDet * val2;
-    m.mVals[2] = invDet * val3;
-    
-    m.mVals[4] = invDet * (mVals[6] * mVals[8] - mVals[4] * mVals[10]);
-    m.mVals[5] = invDet * (mVals[0] * mVals[10] - mVals[2] * mVals[8]);
-    m.mVals[6] = invDet * (mVals[2] * mVals[4] - mVals[0] * mVals[6]);
-    
-    m.mVals[8] = invDet * (mVals[4] * mVals[9] - mVals[5] * mVals[8]);
-    m.mVals[9] = invDet * (mVals[1] * mVals[8] - mVals[0] * mVals[9]);
-    m.mVals[10] = invDet * (mVals[0] * mVals[5] - mVals[1] * mVals[4]);
-    
-    // Multiply negative translation by inverted 3x3 to get these values.
-    m.mVals[12] = -m.mVals[0] * mVals[12] - m.mVals[4] * mVals[13] - m.mVals[8] * mVals[14];
-    m.mVals[13] = -m.mVals[1] * mVals[12] - m.mVals[5] * mVals[13] - m.mVals[9] * mVals[14];
-    m.mVals[14] = -m.mVals[2] * mVals[12] - m.mVals[6] * mVals[13] - m.mVals[10] * mVals[14];
-    
-    return m;
-}
-
-Matrix4 Matrix4::Inverse() const
-{
-    Matrix4 m;
-    double inv[16], det;
-    int i;
-    
-    inv[0] = mVals[5]  * mVals[10] * mVals[15] -
-    mVals[5]  * mVals[11] * mVals[14] -
-    mVals[9]  * mVals[6]  * mVals[15] +
-    mVals[9]  * mVals[7]  * mVals[14] +
-    mVals[13] * mVals[6]  * mVals[11] -
-    mVals[13] * mVals[7]  * mVals[10];
-    
-    inv[4] = -mVals[4]  * mVals[10] * mVals[15] +
-    mVals[4]  * mVals[11] * mVals[14] +
-    mVals[8]  * mVals[6]  * mVals[15] -
-    mVals[8]  * mVals[7]  * mVals[14] -
-    mVals[12] * mVals[6]  * mVals[11] +
-    mVals[12] * mVals[7]  * mVals[10];
-    
-    inv[8] = mVals[4] * mVals[9] * mVals[15] -
-    mVals[4]  * mVals[11] * mVals[13] -
-    mVals[8]  * mVals[5] * mVals[15] +
-    mVals[8]  * mVals[7] * mVals[13] +
-    mVals[12] * mVals[5] * mVals[11] -
-    mVals[12] * mVals[7] * mVals[9];
-    
-    inv[12] = -mVals[4]  * mVals[9] * mVals[14] +
-    mVals[4]  * mVals[10] * mVals[13] +
-    mVals[8]  * mVals[5] * mVals[14] -
-    mVals[8]  * mVals[6] * mVals[13] -
-    mVals[12] * mVals[5] * mVals[10] +
-    mVals[12] * mVals[6] * mVals[9];
-    
-    inv[1] = -mVals[1]  * mVals[10] * mVals[15] +
-    mVals[1]  * mVals[11] * mVals[14] +
-    mVals[9]  * mVals[2] * mVals[15] -
-    mVals[9]  * mVals[3] * mVals[14] -
-    mVals[13] * mVals[2] * mVals[11] +
-    mVals[13] * mVals[3] * mVals[10];
-    
-    inv[5] = mVals[0]  * mVals[10] * mVals[15] -
-    mVals[0]  * mVals[11] * mVals[14] -
-    mVals[8]  * mVals[2] * mVals[15] +
-    mVals[8]  * mVals[3] * mVals[14] +
-    mVals[12] * mVals[2] * mVals[11] -
-    mVals[12] * mVals[3] * mVals[10];
-    
-    inv[9] = -mVals[0]  * mVals[9] * mVals[15] +
-    mVals[0]  * mVals[11] * mVals[13] +
-    mVals[8]  * mVals[1] * mVals[15] -
-    mVals[8]  * mVals[3] * mVals[13] -
-    mVals[12] * mVals[1] * mVals[11] +
-    mVals[12] * mVals[3] * mVals[9];
-    
-    inv[13] = mVals[0]  * mVals[9] * mVals[14] -
-    mVals[0]  * mVals[10] * mVals[13] -
-    mVals[8]  * mVals[1] * mVals[14] +
-    mVals[8]  * mVals[2] * mVals[13] +
-    mVals[12] * mVals[1] * mVals[10] -
-    mVals[12] * mVals[2] * mVals[9];
-    
-    inv[2] = mVals[1]  * mVals[6] * mVals[15] -
-    mVals[1]  * mVals[7] * mVals[14] -
-    mVals[5]  * mVals[2] * mVals[15] +
-    mVals[5]  * mVals[3] * mVals[14] +
-    mVals[13] * mVals[2] * mVals[7] -
-    mVals[13] * mVals[3] * mVals[6];
-    
-    inv[6] = -mVals[0]  * mVals[6] * mVals[15] +
-    mVals[0]  * mVals[7] * mVals[14] +
-    mVals[4]  * mVals[2] * mVals[15] -
-    mVals[4]  * mVals[3] * mVals[14] -
-    mVals[12] * mVals[2] * mVals[7] +
-    mVals[12] * mVals[3] * mVals[6];
-    
-    inv[10] = mVals[0]  * mVals[5] * mVals[15] -
-    mVals[0]  * mVals[7] * mVals[13] -
-    mVals[4]  * mVals[1] * mVals[15] +
-    mVals[4]  * mVals[3] * mVals[13] +
-    mVals[12] * mVals[1] * mVals[7] -
-    mVals[12] * mVals[3] * mVals[5];
-    
-    inv[14] = -mVals[0]  * mVals[5] * mVals[14] +
-    mVals[0]  * mVals[6] * mVals[13] +
-    mVals[4]  * mVals[1] * mVals[14] -
-    mVals[4]  * mVals[2] * mVals[13] -
-    mVals[12] * mVals[1] * mVals[6] +
-    mVals[12] * mVals[2] * mVals[5];
-    
-    inv[3] = -mVals[1] * mVals[6] * mVals[11] +
-    mVals[1] * mVals[7] * mVals[10] +
-    mVals[5] * mVals[2] * mVals[11] -
-    mVals[5] * mVals[3] * mVals[10] -
-    mVals[9] * mVals[2] * mVals[7] +
-    mVals[9] * mVals[3] * mVals[6];
-    
-    inv[7] = mVals[0] * mVals[6] * mVals[11] -
-    mVals[0] * mVals[7] * mVals[10] -
-    mVals[4] * mVals[2] * mVals[11] +
-    mVals[4] * mVals[3] * mVals[10] +
-    mVals[8] * mVals[2] * mVals[7] -
-    mVals[8] * mVals[3] * mVals[6];
-    
-    inv[11] = -mVals[0] * mVals[5] * mVals[11] +
-    mVals[0] * mVals[7] * mVals[9] +
-    mVals[4] * mVals[1] * mVals[11] -
-    mVals[4] * mVals[3] * mVals[9] -
-    mVals[8] * mVals[1] * mVals[7] +
-    mVals[8] * mVals[3] * mVals[5];
-    
-    inv[15] = mVals[0] * mVals[5] * mVals[10] -
-    mVals[0] * mVals[6] * mVals[9] -
-    mVals[4] * mVals[1] * mVals[10] +
-    mVals[4] * mVals[2] * mVals[9] +
-    mVals[8] * mVals[1] * mVals[6] -
-    mVals[8] * mVals[2] * mVals[5];
-    
-    det = mVals[0] * inv[0] + mVals[1] * inv[4] + mVals[2] * inv[8] + mVals[3] * inv[12];
-    
-    if(Math::IsZero(det))
-    {
-        return m;
-    }
-    det = 1.0 / det;
-    
-    for(i = 0; i < 16; i++)
-    {
-        m.mVals[i] = inv[i] * det;
-    }
-    return m;
 }
 
 void Matrix4::SetRows(const Vector4& row1, const Vector4& row2, const Vector4& row3, const Vector4& row4)
@@ -486,38 +265,6 @@ Matrix4& Matrix4::operator*=(const Matrix4& rhs)
     return *this;
 }
 
-/*
-Vector3 Matrix4::operator*(const Vector3& rhs) const
-{
-    return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2] + mVals[12],
-                   mVals[1] * rhs[0] + mVals[5] * rhs[1] + mVals[9]  * rhs[2] + mVals[13],
-                   mVals[2] * rhs[0] + mVals[6] * rhs[1] + mVals[10] * rhs[2] + mVals[14]);
-}
-
-Vector3 operator*(const Vector3& lhs, const Matrix4& rhs)
-{
-    return Vector3(lhs[0] * rhs[0] + lhs[1] * rhs[1] + lhs[2] * rhs[2]  + rhs[3],
-                   lhs[0] * rhs[4] + lhs[1] * rhs[5] + lhs[2] * rhs[6]  + rhs[7],
-                   lhs[0] * rhs[8] + lhs[1] * rhs[9] + lhs[2] * rhs[10] + rhs[11]);
-}
-*/
-
-Vector3 Matrix4::Transform(const Vector3& rhs) const
-{
-	// Assume Vector3 is not a point, so implicit w value for multiplication is "0".
-	return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2],
-				   mVals[1] * rhs[0] + mVals[5] * rhs[1] + mVals[9]  * rhs[2],
-				   mVals[2] * rhs[0] + mVals[6] * rhs[1] + mVals[10] * rhs[2]);
-}
-
-Vector3 Matrix4::TransformPoint(const Vector3& rhs) const
-{
-	// Assume Vector3 is a point, so implicit w value for multiplication is "1".
-	return Vector3(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2] + mVals[12],
-				   mVals[1] * rhs[0] + mVals[5] * rhs[1] + mVals[9]  * rhs[2] + mVals[13],
-				   mVals[2] * rhs[0] + mVals[6] * rhs[1] + mVals[10] * rhs[2] + mVals[14]);
-}
-
 Vector4 Matrix4::operator*(const Vector4& rhs) const
 {
     return Vector4(mVals[0] * rhs[0] + mVals[4] * rhs[1] + mVals[8]  * rhs[2] + mVals[12] * rhs[3],
@@ -528,10 +275,10 @@ Vector4 Matrix4::operator*(const Vector4& rhs) const
 
 Vector4 operator*(const Vector4& lhs, const Matrix4& rhs)
 {
-    return Vector4(lhs[0] * rhs[0]  + lhs[1] * rhs[1]  + lhs[2] * rhs[2]  + lhs[3] * rhs[3],
-                   lhs[0] * rhs[4]  + lhs[1] * rhs[5]  + lhs[2] * rhs[6]  + lhs[3] * rhs[7],
-                   lhs[0] * rhs[8]  + lhs[1] * rhs[9]  + lhs[2] * rhs[10] + lhs[3] * rhs[11],
-                   lhs[0] * rhs[12] + lhs[1] * rhs[13] + lhs[2] * rhs[14] + lhs[3] * rhs[15]);
+    return Vector4(lhs[0] * rhs.mVals[0]  + lhs[1] * rhs.mVals[1]  + lhs[2] * rhs.mVals[2]  + lhs[3] * rhs.mVals[3],
+                   lhs[0] * rhs.mVals[4]  + lhs[1] * rhs.mVals[5]  + lhs[2] * rhs.mVals[6]  + lhs[3] * rhs.mVals[7],
+                   lhs[0] * rhs.mVals[8]  + lhs[1] * rhs.mVals[9]  + lhs[2] * rhs.mVals[10] + lhs[3] * rhs.mVals[11],
+                   lhs[0] * rhs.mVals[12] + lhs[1] * rhs.mVals[13] + lhs[2] * rhs.mVals[14] + lhs[3] * rhs.mVals[15]);
 }
 
 Matrix4 Matrix4::operator*(float scalar) const
@@ -558,155 +305,377 @@ Matrix4 operator*(float scalar, const Matrix4& matrix)
     return matrix * scalar;
 }
 
+void Matrix4::Transpose()
+{
+    float temp = mVals[1];
+    mVals[1] = mVals[4];
+    mVals[4] = temp;
+    
+    temp = mVals[2];
+    mVals[2] = mVals[8];
+    mVals[8] = temp;
+    
+    temp = mVals[3];
+    mVals[3] = mVals[12];
+    mVals[12] = temp;
+    
+    temp = mVals[6];
+    mVals[6] = mVals[9];
+    mVals[9] = temp;
+    
+    temp = mVals[7];
+    mVals[7] = mVals[13];
+    mVals[13] = temp;
+    
+    temp = mVals[11];
+    mVals[11] = mVals[14];
+    mVals[14] = temp;
+}
+
+Matrix4 Matrix4::Transpose(const Matrix4& matrix)
+{
+    Matrix4 result;
+    result.mVals[0] = matrix.mVals[0];
+    result.mVals[1] = matrix.mVals[4];
+    result.mVals[2] = matrix.mVals[8];
+    result.mVals[3] = matrix.mVals[12];
+    result.mVals[4] = matrix.mVals[1];
+    result.mVals[5] = matrix.mVals[5];
+    result.mVals[6] = matrix.mVals[9];
+    result.mVals[7] = matrix.mVals[13];
+    result.mVals[8] = matrix.mVals[2];
+    result.mVals[9] = matrix.mVals[6];
+    result.mVals[10] = matrix.mVals[10];
+    result.mVals[11] = matrix.mVals[14];
+    result.mVals[12] = matrix.mVals[3];
+    result.mVals[13] = matrix.mVals[7];
+    result.mVals[14] = matrix.mVals[11];
+    result.mVals[15] = matrix.mVals[15];
+    return result;
+}
+
+void Matrix4::Invert()
+{
+    // Math from Foundations of Game Engine Development.
+    // We can split our 4x4 matrix into 4 3D column vectors and 1 4D row vector.
+    // From there, those vectors can be used to calculate determinant and cofactor matrix fairly efficiently.
+    // Then, we can use "inverse = adjugate matrix divided by determinant" method.
+
+    // Grab 4 3D column vectors from the matrix.
+    // matrix[x] returns reference to 4D column vector, but we only need first 3 values, so reinterpret to get that.
+    const Vector3& col0 = reinterpret_cast<const Vector3&>((*this)[0]);
+    const Vector3& col1 = reinterpret_cast<const Vector3&>((*this)[1]);
+    const Vector3& col2 = reinterpret_cast<const Vector3&>((*this)[2]);
+    const Vector3& col3 = reinterpret_cast<const Vector3&>((*this)[3]);
+    
+    // Grab 4D row vector values from last row of matrix.
+    const float& x = mVals[3];
+    const float& y = mVals[7];
+    const float& z = mVals[11];
+    const float& w = mVals[15];
+    
+    // Calculate intermediate vectors.
+    Vector3 s = Vector3::Cross(col0, col1);
+    Vector3 t = Vector3::Cross(col2, col3);
+    Vector3 u = col0 * y - col1 * x;
+    Vector3 v = col2 * w - col3 * z;
+    
+    // Calculate determinant from intermediate values.
+    // If determinant is zero, no inverse exists!
+    float determinant = Vector3::Dot(s, v) + Vector3::Dot(t, u);
+    if(Math::IsZero(determinant))
+    {
+        return;
+    }
+    
+    // Now we just need to calculate adjugate matrix and multiply by inverse determinant to get the inverse matrix!
+    float invDet = 1.0f / determinant;
+    
+    // Pre-multiply each intermediate vector by inverse determinant.
+    // By doing this now, we can avoid multiplying final result my inverse determinant.
+    s *= invDet;
+    t *= invDet;
+    u *= invDet;
+    v *= invDet;
+    
+    // Calculate left 4x3 rows of the inverse matrix.
+    // Because we multiplied by invDet earlier, these are FINAL values.
+    Vector3 row0 = Vector3::Cross(col1, v) + t * y;
+    Vector3 row1 = Vector3::Cross(v, col0) - t * x;
+    Vector3 row2 = Vector3::Cross(col3, u) + s * w;
+    Vector3 row3 = Vector3::Cross(u, col2) - s * z;
+    
+    // Calculate right 4x1 column.
+    float colX = -Vector3::Dot(col1, t);
+    float colY =  Vector3::Dot(col0, t);
+    float colZ = -Vector3::Dot(col3, s);
+    float colW =  Vector3::Dot(col2, s);
+    
+    // Construct final 4x4 matrix.
+    mVals[0] = row0.x;
+    mVals[1] = row1.x;
+    mVals[2] = row2.x;
+    mVals[3] = row3.x;
+    
+    mVals[4] = row0.y;
+    mVals[5] = row1.y;
+    mVals[6] = row2.y;
+    mVals[7] = row3.y;
+    
+    mVals[8] = row0.z;
+    mVals[9] = row1.z;
+    mVals[10] = row2.z;
+    mVals[11] = row3.z;
+    
+    mVals[12] = colX;
+    mVals[13] = colY;
+    mVals[14] = colZ;
+    mVals[15] = colW;
+}
+
+/*static*/ Matrix4 Matrix4::Inverse(const Matrix4& matrix)
+{
+    Matrix4 toInvert = matrix;
+    toInvert.Invert();
+    return toInvert;
+}
+
+void Matrix4::InvertOrthogonal()
+{
+    // If matrix is orthogonal, the inverse is equal to the transpose!
+    Transpose();
+}
+
+/*static*/ Matrix4 Matrix4::InverseOrthogonal(const Matrix4& matrix)
+{
+    // If matrix is orthogonal, the inverse is equal to the transpose!
+    return Transpose(matrix);
+}
+
+//*********************
+// Transform Functions
+//*********************
 Quaternion Matrix4::GetRotation() const
 {
-	Quaternion q;
-	q.SetW(Math::Sqrt(Math::Max(0.0f, 1.0f + mVals[0] + mVals[5] + mVals[10])) / 2.0f);
-	q.SetX(Math::Sqrt(Math::Max(0.0f, 1.0f + mVals[0] - mVals[5] - mVals[10])) / 2.0f);
-	q.SetY(Math::Sqrt(Math::Max(0.0f, 1.0f - mVals[0] + mVals[5] - mVals[10])) / 2.0f);
-	q.SetZ(Math::Sqrt(Math::Max(0.0f, 1.0f - mVals[0] - mVals[5] + mVals[10])) / 2.0f);
-	
-	q.SetX(Math::MagnitudeSign(q.GetX(), mVals[6] - mVals[9]));
-	q.SetY(Math::MagnitudeSign(q.GetY(), mVals[8] - mVals[2]));
-	q.SetZ(Math::MagnitudeSign(q.GetZ(), mVals[1] - mVals[4]));
-	return q;
+    Quaternion q;
+    q.w = (Math::Sqrt(Math::Max(0.0f, 1.0f + mVals[0] + mVals[5] + mVals[10])) / 2.0f);
+    q.x = (Math::Sqrt(Math::Max(0.0f, 1.0f + mVals[0] - mVals[5] - mVals[10])) / 2.0f);
+    q.y = (Math::Sqrt(Math::Max(0.0f, 1.0f - mVals[0] + mVals[5] - mVals[10])) / 2.0f);
+    q.z = (Math::Sqrt(Math::Max(0.0f, 1.0f - mVals[0] - mVals[5] + mVals[10])) / 2.0f);
+    
+    q.x = (Math::MagnitudeSign(q.x, mVals[6] - mVals[9]));
+    q.y = (Math::MagnitudeSign(q.y, mVals[8] - mVals[2]));
+    q.z = (Math::MagnitudeSign(q.z, mVals[1] - mVals[4]));
+    return q;
 }
 
-Matrix4 Matrix4::MakeTranslate(Vector3 translation)
+Vector3 Matrix4::TransformVector(const Vector3& vector) const
 {
-    Matrix4 m;
-    m.mVals[12] = translation.x;
-    m.mVals[13] = translation.y;
-    m.mVals[14] = translation.z;
-    return m;
+    // Assume Vector3 is not a point, so w = 0.
+    return Vector3(mVals[0] * vector[0] + mVals[4] * vector[1] + mVals[8]  * vector[2],
+                   mVals[1] * vector[0] + mVals[5] * vector[1] + mVals[9]  * vector[2],
+                   mVals[2] * vector[0] + mVals[6] * vector[1] + mVals[10] * vector[2]);
 }
 
-Matrix4 Matrix4::MakeRotateX(float rotX)
+Vector3 Matrix4::TransformPoint(const Vector3& point) const
 {
-    Matrix4 m;
+    // Assume Vector3 is a point, so w = 1.
+    return Vector3(mVals[0] * point[0] + mVals[4] * point[1] + mVals[8]  * point[2] + mVals[12],
+                   mVals[1] * point[0] + mVals[5] * point[1] + mVals[9]  * point[2] + mVals[13],
+                   mVals[2] * point[0] + mVals[6] * point[1] + mVals[10] * point[2] + mVals[14]);
+}
+
+void Matrix4::InvertTransform()
+{
+    // Math from Foundations of Game Engine Development.
+    // When a matrix is a transform, the inverse math can be optimized.
+    // A transform matrix's fourth row is always (0, 0, 0, 1).
+    // See normal Inverse function for more in-depth explanation.
+    
+    // Grab 4 3D column vectors from the matrix.
+    const Vector3& col0 = reinterpret_cast<const Vector3&>((*this)[0]);
+    const Vector3& col1 = reinterpret_cast<const Vector3&>((*this)[1]);
+    const Vector3& col2 = reinterpret_cast<const Vector3&>((*this)[2]);
+    const Vector3& col3 = reinterpret_cast<const Vector3&>((*this)[3]);
+    
+    // Calculate intermediate vectors.
+    // Because this is a transform, u cancels out entirely and v just equals col2!
+    Vector3 s = Vector3::Cross(col0, col1);
+    Vector3 t = Vector3::Cross(col2, col3);
+    Vector3 v = col2;
+    
+    // Because this is a transform, determinant calc is simpler.
+    // We will also assume that determinant is non-zero for transforms.
+    float invDet = 1.0f / Vector3::Dot(s, col2);
+    s *= invDet;
+    t *= invDet;
+    v *= invDet;
+    
+    // Calculate final result and return. row2 is not needed in this version
+    Vector3 row0 = Vector3::Cross(col1, v);
+    Vector3 row1 = Vector3::Cross(v, col0);
+    
+    // Calculate right 3x1 column.
+    float colX = -Vector3::Dot(col1, t);
+    float colY =  Vector3::Dot(col0, t);
+    float colZ = -Vector3::Dot(col3, s);
+    
+    // Construct final 4x4 matrix.
+    mVals[0] = row0.x;
+    mVals[1] = row1.x;
+    mVals[2] = s.x;
+    mVals[3] = 0.0f;
+    
+    mVals[4] = row0.y;
+    mVals[5] = row1.y;
+    mVals[6] = s.y;
+    mVals[7] = 0.0f;
+    
+    mVals[8] = row0.z;
+    mVals[9] = row1.z;
+    mVals[10] = s.z;
+    mVals[11] = 0.0f;
+    
+    mVals[12] = colX;
+    mVals[13] = colY;
+    mVals[14] = colZ;
+    mVals[15] = 1.0f;
+}
+
+/*static*/ Matrix4 Matrix4::InverseTransform(const Matrix4& matrix)
+{
+    Matrix4 toInvert = matrix;
+    toInvert.InvertTransform();
+    return toInvert;
+}
+
+//*********************
+// Factory Methods
+//*********************
+/*static*/ Matrix4 Matrix4::MakeTranslate(const Vector3& translation)
+{
+    return Matrix4(1.0f, 0.0f, 0.0f, translation.x,
+                   0.0f, 1.0f, 0.0f, translation.y,
+                   0.0f, 0.0f, 1.0f, translation.z,
+                   0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+/*static*/ Matrix4 Matrix4::MakeRotateX(float rotX)
+{
     float cos = Math::Cos(rotX);
     float sin = Math::Sin(rotX);
-    m[5] = cos;
-    m[6] = sin;
-    m[9] = -sin;
-    m[10] = cos;
-    return m;
+    return Matrix4(1.0f, 0.0f, 0.0f, 0.0f,
+                   0.0f,  cos, -sin, 0.0f,
+                   0.0f,  sin,  cos, 0.0f,
+                   0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::MakeRotateY(float rotY)
+/*static*/ Matrix4 Matrix4::MakeRotateY(float rotY)
 {
-    Matrix4 m;
     float cos = Math::Cos(rotY);
     float sin = Math::Sin(rotY);
-    m[0] = cos;
-    m[2] = -sin;
-    m[8] = sin;
-    m[10] = cos;
-    return m;
+    return Matrix4( cos, 0.0f,  sin, 0.0f,
+                   0.0f, 1.0f, 0.0f, 0.0f,
+                   -sin, 0.0f,  cos, 0.0f,
+                   0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::MakeRotateZ(float rotZ)
+/*static*/ Matrix4 Matrix4::MakeRotateZ(float rotZ)
 {
-    Matrix4 m;
     float cos = Math::Cos(rotZ);
     float sin = Math::Sin(rotZ);
-    m[0] = cos;
-    m[1] = sin;
-    m[4] = -sin;
-    m[5] = cos;
-    return m;
+    return Matrix4( cos, -sin, 0.0f, 0.0f,
+                    sin,  cos, 0.0f, 0.0f,
+                   0.0f, 0.0f, 1.0f, 0.0f,
+                   0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::MakeRotate(const Quaternion& quat)
+/*static*/ Matrix4 Matrix4::MakeRotate(const Quaternion& quat)
 {
-    float s, xs, ys, zs, wx, wy, wz, xx, xy, xz, yy, yz, zz;
-    s = 2.0f / Quaternion::Dot(quat, quat);
+    float s = 2.0f / Quaternion::Dot(quat, quat);
     
-    xs = s * quat.GetX();
-    ys = s * quat.GetY();
-    zs = s * quat.GetZ();
-    wx = quat.GetW() * xs;
-    wy = quat.GetW() * ys;
-    wz = quat.GetW() * zs;
-    xx = quat.GetX() * xs;
-    xy = quat.GetX() * ys;
-    xz = quat.GetX() * zs;
-    yy = quat.GetY() * ys;
-    yz = quat.GetY() * zs;
-    zz = quat.GetZ() * zs;
+    float xs = s * quat.x;
+    float ys = s * quat.y;
+    float zs = s * quat.z;
+    float wx = quat.w * xs;
+    float wy = quat.w * ys;
+    float wz = quat.w * zs;
+    float xx = quat.x * xs;
+    float xy = quat.x * ys;
+    float xz = quat.x * zs;
+    float yy = quat.y * ys;
+    float yz = quat.y * zs;
+    float zz = quat.z * zs;
     
     Matrix4 m;
     m.mVals[0] = 1.0f - (yy + zz);
     m.mVals[1] = xy + wz;
     m.mVals[2] = xz - wy;
-    //m[3] = 0.0f;
+    m.mVals[3] = 0.0f;
     
     m.mVals[4] = xy - wz;
     m.mVals[5] = 1.0f - (xx + zz);
     m.mVals[6] = yz + wx;
-    //m[7] = 0.0f;
+    m.mVals[7] = 0.0f;
     
     m.mVals[8] = xz + wy;
     m.mVals[9] = yz - wx;
     m.mVals[10] = 1.0f - (xx + yy);
-    //m[11] = 0.0f;
+    m.mVals[11] = 0.0f;
     
-    //m[12] = 0.0f;
-    //m[13] = 0.0f;
-    //m[14] = 0.0f;
-    //m[15] = 1.0f;
+    m.mVals[12] = 0.0f;
+    m.mVals[13] = 0.0f;
+    m.mVals[14] = 0.0f;
+    m.mVals[15] = 1.0f;
     return m;
 }
 
-Matrix4 Matrix4::MakeRotate(const Matrix3& other)
+/*static*/ Matrix4 Matrix4::MakeRotate(const Matrix3& other)
 {
-    Matrix4 m;
-    m[0] = other[0];
-    m[1] = other[1];
-    m[2] = other[2];
-    //m[3] = 0;
-    m[4] = other[3];
-    m[5] = other[4];
-    m[6] = other[5];
-    //m[7] = 0;
-    m[8] = other[6];
-    m[9] = other[7];
-    m[10] = other[8];
+    Matrix4 m = Identity;
+    m.mVals[0] = other(0, 0);
+    m.mVals[1] = other(1, 0);
+    m.mVals[2] = other(2, 0);
+    //m.mVals[3] = 0;
+    m.mVals[4] = other(0, 1);
+    m.mVals[5] = other(1, 1);
+    m.mVals[6] = other(2, 1);
+    //m.mVals[7] = 0;
+    m.mVals[8] = other(0, 2);
+    m.mVals[9] = other(1, 2);
+    m.mVals[10] = other(2, 2);
     //...
     return m;
 }
 
-Matrix4 Matrix4::MakeScale(Vector3 scale)
+/*static*/ Matrix4 Matrix4::MakeScale(float scale)
 {
-    Matrix4 m;
-    m[0] = scale.x;
-    m[5] = scale.y;
-    m[10] = scale.z;
-    return m;
+    return Matrix4(scale, 0.0f, 0.0f, 0.0f,
+                   0.0f, scale, 0.0f, 0.0f,
+                   0.0f, 0.0f, scale, 0.0f,
+                   0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::MakeScale(float xScale, float yScale, float zScale)
+/*static*/ Matrix4 Matrix4::MakeScale(const Vector3& scale)
 {
-	Matrix4 m;
-	m[0] = xScale;
-	m[5] = yScale;
-	m[10] = zScale;
-	return m;
+    return Matrix4(scale.x, 0.0f, 0.0f, 0.0f,
+                   0.0f, scale.y, 0.0f, 0.0f,
+                   0.0f, 0.0f, scale.z, 0.0f,
+                   0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-Matrix4 Matrix4::MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up)
+/*static*/ Matrix4 Matrix4::MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up)
 {
 	// Generate view space axes. First, the view direction.
 	Vector3 viewDir = lookAt - eye;
 	viewDir.Normalize();
 	
-	// We can use "Gram-Schmidt Orthogonalization" to ensure
-	// that the up axis passed is orthogonal with our view direction.
+	// Use "Gram-Schmidt process" to ensure up axis is orthogonal to view direction.
 	Vector3 viewUp = up - Vector3::Dot(up, viewDir) * viewDir;
 	viewUp.Normalize();
 	
-	// Once we know the view direction and up, we can use cross product
-	// to generate side axis. Order also has an effect on our view-space coordinate system.
+	// Once we know view and up directions, use cross product to get side axis.
+	// Order also has an effect on our view-space coordinate system!
 	Vector3 viewSide = Vector3::Cross(viewDir, viewUp);
 	
 	// Generate rotation matrix. This is where we make some concrete
@@ -733,45 +702,46 @@ Matrix4 Matrix4::MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vec
 
 Matrix4 Matrix4::MakePerspective(float fovAngleRad, float aspectRatio, float near, float far)
 {
+    float yScale = 1.0f / Math::Tan(fovAngleRad / 2.0f);
+    float xScale = yScale / aspectRatio;
+    
     // This works for OpenGL, but needs to be different for DirectX.
-    Matrix4 m;
-    float d = 1 / Math::Tan(fovAngleRad / 2.0f);
-    m[0] = d / aspectRatio;
-    m[5] = d;
-    m[10] = (near + far) / (near - far);
-    m[11] = -1.0f;
-    m[14] = (2.0f * near * far) / (near - far);
-    m[15] = 0.0f;
+    Matrix4 m = Zero;
+    m.mVals[0] = xScale;
+    m.mVals[5] = yScale;
+    m.mVals[10] = (near + far) / (near - far);
+    m.mVals[11] = -1.0f;
+    m.mVals[14] = (2.0f * near * far) / (near - far);
     return m;
 }
 
 Matrix4 Matrix4::MakeOrthographic(float left, float right, float bottom, float top, float near, float far)
 {
 	// This works for OpenGL, but needs to be different for DirectX.
-	Matrix4 m;
-	m[0] = 2.0f / (right - left);
-	m[5] = 2.0f / (top - bottom);
-	m[10] = -2.0f / (far - near);
-	m[12] = -((right + left) / (right - left));
-	m[13] = -((top + bottom) / (top - bottom));
-	m[14] = -((far + near) / (far - near));
+    Matrix4 m = Identity;
+	m.mVals[0] = 2.0f / (right - left);
+	m.mVals[5] = 2.0f / (top - bottom);
+	m.mVals[10] = -2.0f / (far - near);
+	m.mVals[12] = -((right + left) / (right - left));
+	m.mVals[13] = -((top + bottom) / (top - bottom));
+	m.mVals[14] = -((far + near) / (far - near));
 	return m;
 }
 
-Matrix4 Matrix4::MakeSimpleScreenOrtho(float width, float height)
+Matrix4 Matrix4::MakeOrthographic(float width, float height)
 {
 	// Zero values will cause divide-by-zeros.
-	if(width == 0.0f || height == 0.0f) { return Matrix4(); }
+    if(width == 0.0f || height == 0.0f) { return Identity; }
 	
 	// The difference from MakeOrthographic is assumptions we can make.
 	// Left/bottom are always zero, near is always -1, far is always 1, which simplifies the equations.
-	Matrix4 m;
-	m[0] = 2.0f / width; 		//2.0f / (right - left);
-	m[5] = 2.0f / height; 		//2.0f / (top - bottom);
-	m[10] = -1.0f; 				//-2.0f / (far - near);
-	m[12] = -1.0f; 				//-((right + left) / (right - left));
-	m[13] = -1.0f; 				//-((top + bottom) / (top - bottom));
-	m[14] = 0.0f; 				//-((far + near) / (far - near));
+    Matrix4 m = Identity;
+	m.mVals[0] = 2.0f / width; 		    //2.0f / (right - left);
+	m.mVals[5] = 2.0f / height; 		//2.0f / (top - bottom);
+	m.mVals[10] = -1.0f; 				//-2.0f / (far - near);
+	m.mVals[12] = -1.0f; 				//-((right + left) / (right - left));
+	m.mVals[13] = -1.0f; 				//-((top + bottom) / (top - bottom));
+	//m.mVals[14] = 0.0f; 				//-((far + near) / (far - near));
 	return m;
 }
 

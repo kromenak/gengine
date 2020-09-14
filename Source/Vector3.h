@@ -3,8 +3,7 @@
 //
 // Clark Kromenaker
 //
-// A vector of 3 floating point values.
-// Often represents a 3D position/velocity/etc.
+// A 3D vector.
 //
 #pragma once
 #include <iomanip>
@@ -23,7 +22,7 @@ public:
     static Vector3 UnitY;
     static Vector3 UnitZ;
     
-    Vector3();
+    Vector3() = default;
     Vector3(float x, float y, float z);
 	
 	// Conversion from Vector2
@@ -39,13 +38,8 @@ public:
     bool operator!=(const Vector3& other) const;
     
     // Accessors
-    float& operator[](unsigned int i)       { return (&x)[i]; }
-    float  operator[](unsigned int i) const { return (&x)[i]; }
-    
-    // Length
-    float GetLength() const { return Math::Sqrt(x * x + y * y + z * z); }
-    float GetLengthSq() const { return (x * x + y * y + z * z); }
-    Vector3& Normalize();
+    float& operator[](int i)       { return (&x)[i]; }
+    float  operator[](int i) const { return (&x)[i]; }
     
     // Addition and subtraction
     Vector3 operator+(const Vector3& other) const;
@@ -64,14 +58,23 @@ public:
 	// Component-wise multiplication
 	Vector3 operator*(const Vector3& other) const;
     
-    // Scalar and vector products
-    static float Dot(Vector3 lhs, Vector3 rhs);
-    static Vector3 Cross(Vector3 lhs, Vector3 rhs);
+    // Length
+    float GetLength() const { return Math::Sqrt(x * x + y * y + z * z); }
+    float GetLengthSq() const { return (x * x + y * y + z * z); }
+    Vector3& Normalize();
+    
+    // Scalar/dot and vector/cross products
+    static float Dot(const Vector3& lhs, const Vector3& rhs);
+    static Vector3 Cross(const Vector3& lhs, const Vector3& rhs);
     
     // Interpolation
-    static Vector3 Lerp(Vector3 from, Vector3 to, float t);
+    static Vector3 Lerp(const Vector3& from, const Vector3& to, float t);
     
-	// Vector elements - important that they are in this order. We assume some memory layout stuff.
+    // Projection and rejection
+    static Vector3 Project(const Vector3& a, const Vector3& b);
+    static Vector3 Reject(const Vector3& a, const Vector3& b);
+    
+	// Vector elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;

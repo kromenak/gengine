@@ -5,13 +5,9 @@
 //
 #include "Material.h"
 
-#include "Matrix3.h"
 #include "Matrix4.h"
 #include "Shader.h"
 #include "Texture.h"
-#include "Vector2.h"
-#include "Vector3.h"
-#include "Vector4.h"
 
 // This is set to a default shader during Renderer init.
 Shader* Material::sDefaultShader = nullptr;

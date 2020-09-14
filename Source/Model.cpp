@@ -9,7 +9,6 @@
 #include <iostream>
 
 #include "BinaryReader.h"
-#include "Matrix3.h"
 #include "Mesh.h"
 #include "Quaternion.h"
 #include "Submesh.h"

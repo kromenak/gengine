@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 // 
-// A vector of 4 floating point values.
+// A 4D vector.
 //
 #pragma once
 #include <iostream>
@@ -22,14 +22,12 @@ public:
     static Vector4 UnitZ;
     static Vector4 UnitW;
     
-    Vector4();
+    Vector4() = default;
     Vector4(float x, float y, float z, float w);
-	
-	// Special constructor to set w component to 0 or 1 depending
-    Vector4(bool isPos);
+    Vector4(float w);
 	
 	// Conversion from Vector3.
-	Vector4(const Vector3& other);
+    Vector4(const Vector3& other, float w = 0.0f);
     
     // Copy
     Vector4(const Vector4& other);
@@ -40,13 +38,8 @@ public:
     bool operator!=(const Vector4& other) const;
     
     // Accessors
-    float& operator[](unsigned int i)       { return (&x)[i]; }
-    float  operator[](unsigned int i) const { return (&x)[i]; }
-    
-    // Length
-    float GetLength() const { return Math::Sqrt(x * x + y * y + z * z + w * w); }
-    float GetLengthSq() const { return (x * x + y * y + z * z + w * w); }
-    Vector4& Normalize();
+    float& operator[](int i)       { return (&x)[i]; }
+    float  operator[](int i) const { return (&x)[i]; }
     
     // Addition and subtraction
     Vector4 operator+(const Vector4& other) const;
@@ -65,11 +58,16 @@ public:
 	// Component-wise multiplication
 	Vector4 operator*(const Vector4& other) const;
     
-	// Scalar and vector products
-    static float Dot(Vector4 lhs, Vector4 rhs);
-    static Vector4 Cross(Vector4 lhs, Vector4 rhs);
+    // Length
+    float GetLength() const { return Math::Sqrt(x * x + y * y + z * z + w * w); }
+    float GetLengthSq() const { return (x * x + y * y + z * z + w * w); }
+    Vector4& Normalize();
     
-	// Vector elements - important that they are in this order. We assume some memory layout stuff.
+	// Scalar and vector products
+    static float Dot(const Vector4& lhs, const Vector4& rhs);
+    static Vector4 Cross(const Vector4& lhs, const Vector4& rhs);
+    
+	// Vector elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;

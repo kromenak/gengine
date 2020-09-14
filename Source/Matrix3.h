@@ -14,12 +14,15 @@ class Vector3;
 class Matrix3
 {
 public:
+    static Matrix3 Zero;
     static Matrix3 Identity;
     
-    Matrix3() { ToIdentity(); }
+    Matrix3() = default;
     Matrix3(float vals[9]);
-    explicit Matrix3(float vals[3][3]);
-    explicit Matrix3(float vals[3][3], bool transpose);
+    Matrix3(float v00, float v01, float v02,
+            float v10, float v11, float v12,
+            float v20, float v21, float v22);
+    Matrix3(const Vector3& col1, const Vector3& col2, const Vector3& col3);
     
     // Copy
     Matrix3(const Matrix3& other);
@@ -29,26 +32,23 @@ public:
     bool operator==(const Matrix3& other) const;
     bool operator!=(const Matrix3& other) const;
     
-    // Retrieve an element using (row, col) notation.
+    // Accessors - get entry using (row, col) notation.
     float& operator()(int row, int col) { return mVals[row + 3 * col]; }
     float operator()(int row, int col) const { return mVals[row + 3 * col]; }
     
-    // Row and column getters/accessors.
+    // Accessors - get column using [index] notation.
+    Vector3& operator[](int col) { return (*reinterpret_cast<Vector3*>(&mVals[col * 3])); }
+    const Vector3& operator[](int col) const { return (*reinterpret_cast<const Vector3*>(&mVals[col * 3])); }
+    
+    // Implicit float conversion - allows Matrix3 to be passed as a float* argument.
+    operator float*() { return mVals; }
+    operator const float*() const { return mVals; }
+    
+    // More explicit Row/Column getters/setters.
     void SetRows(const Vector3& row1, const Vector3& row2, const Vector3& row3);
     void GetRows(Vector3& row1, Vector3& row2, Vector3& row3);
-    
     void SetColumns(const Vector3& col1, const Vector3& col2, const Vector3& col3);
     void GetColumns(Vector3& col1, Vector3& col2, Vector3& col3);
-    
-    // Clear matrix to identity.
-    void ToIdentity();
-    
-    // Transpose the matrix.
-    Matrix3& Transpose();
-    static Matrix3 Transpose(const Matrix3& matrix);
-    
-    // Calculate trace (sum of diagonal elements).
-    float GetTrace() const;
     
     // Addition and subtraction
     Matrix3 operator+(const Matrix3& rhs) const;
@@ -70,17 +70,34 @@ public:
     Matrix3& operator*=(float scalar);
     friend Matrix3 operator*(float scalar, const Matrix3& matrix);
     
-    // Implicit float conversion - allows Matrix3 to be passed as a float* argument.
-    operator float*() { return mVals; }
-    operator const float*() const { return mVals; }
+    // Transpose
+    void Transpose();
+    static Matrix3 Transpose(const Matrix3& matrix);
     
-    // Factory methods for generating certain types of matrices.
+    // Trace (sum of diagonal entries)
+    float GetTrace() const;
+    
+    // Inverse
+    void Invert();
+    static Matrix3 Inverse(const Matrix3& matrix);
+    
+    //*********************
+    // Factory Methods
+    //*********************
     static Matrix3 MakeRotateX(float rotX);
     static Matrix3 MakeRotateY(float rotY);
     static Matrix3 MakeRotateZ(float rotZ);
+    static Matrix3 MakeRotate(const Vector3& axis, float angle);
     static Matrix3 MakeRotate(const Quaternion& quat);
-    static Matrix3 MakeScale(Vector3 scale);
-    static Matrix3 MakeBasis(Vector3 forward, Vector3 up, Vector3 right);
+    
+    static Matrix3 MakeScale(float scale);
+    static Matrix3 MakeScale(const Vector3& scale);
+    
+    static Matrix3 MakeBasis(const Vector3& forward, const Vector3& up, const Vector3& right);
+    
+    //TODO: Others...
+    // Reflection
+    // Skew
     
 private:
     // Elements are stored in a 1D array internally.

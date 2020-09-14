@@ -79,9 +79,9 @@ TEST_CASE("Test quaternion zero, identity, and unit")
     REQUIRE(!randQuat.IsUnit());
     REQUIRE(!randQuat.IsIdentity());
     
-    randQuat.MakeZero();
+    randQuat = Quaternion::Zero;
     REQUIRE(randQuat.IsZero());
-    randQuat.MakeIdentity();
+    randQuat = Quaternion::Identity;
     REQUIRE(randQuat.IsIdentity());
 }
 

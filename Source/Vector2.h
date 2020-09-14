@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 // 
-// A vector of 2 floating point values.
+// A 2D vector.
 //
 #pragma once
 #include <iostream>
@@ -20,7 +20,7 @@ public:
     static Vector2 UnitX;
     static Vector2 UnitY;
     
-    Vector2();
+    Vector2() = default;
     Vector2(float x, float y);
 	
 	// Conversion from Vector3.
@@ -35,13 +35,8 @@ public:
     bool operator!=(const Vector2& other) const;
     
     // Accessors
-    float& operator[](unsigned int i)       { return (&x)[i]; }
-    float  operator[](unsigned int i) const { return (&x)[i]; }
-    
-    // Length
-    float GetLength() const { return Math::Sqrt(x * x + y * y); }
-    float GetLengthSq() const { return (x * x + y * y); }
-    Vector2& Normalize();
+    float& operator[](int i)       { return (&x)[i]; }
+    float  operator[](int i) const { return (&x)[i]; }
     
     // Addition and subtraction
     Vector2 operator+(const Vector2& other) const;
@@ -60,13 +55,22 @@ public:
 	// Component-wise multiplication
 	Vector2 operator*(const Vector2& other) const;
     
-    // Scalar product
-    static float Dot(Vector2 lhs, Vector2 rhs);
+    // Length
+    float GetLength() const { return Math::Sqrt(x * x + y * y); }
+    float GetLengthSq() const { return (x * x + y * y); }
+    Vector2& Normalize();
+    
+    // Scalar/dot product
+    static float Dot(const Vector2& lhs, const Vector2& rhs);
 	
 	// Interpolation
-	static Vector2 Lerp(Vector2 from, Vector2 to, float t);
+	static Vector2 Lerp(const Vector2& from, const Vector2& to, float t);
+    
+    // Projection and rejection
+    static Vector2 Project(const Vector2& a, const Vector2& b);
+    static Vector2 Reject(const Vector2& a, const Vector2& b);
 	
-	// Vector elements - important that they are in this order. We assume some memory layout stuff.
+	// Vector elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;
     float y = 0.0f;
 };
