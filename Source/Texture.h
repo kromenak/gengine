@@ -31,8 +31,6 @@ public:
 	static Texture White;
 	static Texture Black;
 	
-	static void Init();
-	
 	Texture(unsigned int width, unsigned int height, Color32 color);
     Texture(std::string name, char* data, int dataLength);
     Texture(BinaryReader& reader);

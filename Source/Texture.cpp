@@ -16,11 +16,6 @@
 Texture Texture::White(2, 2, Color32::White);
 Texture Texture::Black(2, 2, Color32::Black);
 
-/*static*/ void Texture::Init()
-{
-	
-}
-
 Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
 	Asset(""),
 	mWidth(width),
