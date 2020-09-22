@@ -30,6 +30,7 @@ public:
 	void Activate(const Matrix4& objectToWorldMatrix);
 	
     void SetShader(Shader* shader) { mShader = shader; }
+    Shader* GetShader() const { return mShader; }
     
     void SetColor(const std::string& name, const Color32& color);
     //GetColor

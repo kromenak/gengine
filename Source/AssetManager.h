@@ -12,6 +12,7 @@
 #include "Audio.h"
 #include "BarnFile.h"
 #include "BSP.h"
+#include "BSPLightmap.h"
 #include "Cursor.h"
 #include "GAS.h"
 #include "Font.h"
@@ -60,7 +61,9 @@ public:
     SceneInitFile* LoadSIF(const std::string& name);
     SceneAsset* LoadSceneAsset(const std::string& name);
     NVC* LoadNVC(const std::string& name);
+    
     BSP* LoadBSP(const std::string& name);
+    BSPLightmap* LoadBSPLightmap(const std::string& name);
     
     SheepScript* LoadSheep(const std::string& name);
     
@@ -96,7 +99,10 @@ private:
 	std::unordered_map<std::string, SceneInitFile*> mLoadedSIFs;
 	std::unordered_map<std::string, SceneAsset*> mLoadedSceneAssets;
 	std::unordered_map<std::string, NVC*> mLoadedActionSets;
+    
 	std::unordered_map<std::string, BSP*> mLoadedBSPs;
+    std::unordered_map<std::string, BSPLightmap*> mLoadedBSPLightmaps;
+    
 	std::unordered_map<std::string, SheepScript*> mLoadedSheeps;
 	
     std::unordered_map<std::string, Shader*> mLoadedShaders;

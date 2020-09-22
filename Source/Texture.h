@@ -35,6 +35,7 @@ public:
 	
 	Texture(unsigned int width, unsigned int height, Color32 color);
     Texture(std::string name, char* data, int dataLength);
+    Texture(BinaryReader& reader);
 	~Texture();
 	
 	// Activates the texture in the graphics library.
@@ -100,6 +101,7 @@ private:
 	
 	static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
 	
+    void ParseFromData(BinaryReader& reader);
 	void ParseFromCompressedFormat(BinaryReader& reader);
 	void ParseFromBmpFormat(BinaryReader& reader);
 };

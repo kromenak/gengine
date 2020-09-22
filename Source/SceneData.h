@@ -21,10 +21,11 @@
 #include "SceneInitFile.h"
 #include "Timeblock.h"
 
+struct Action;
 class BSP;
+class BSPLightmap;
 class GKActor;
 class NVC;
-struct Action;
 class SceneAsset;
 class Skybox;
 class Soundtrack;
@@ -76,9 +77,13 @@ private:
 	// The scene asset. One *must* be defined, but really just so we can get the BSP data.
 	SceneAsset* mSceneAsset = nullptr;
 	
-	// BSP model, retrieved from the Scene Model.
+	// BSP model, retrieved from the Scene asset.
 	BSP* mBSP = nullptr;
-	
+    
+    // BSP lightmap, determined from the scene asset.
+    // The rule seems to be that the lightmap to use always has the same name as the scene asset.
+    BSPLightmap* mBSPLightmap = nullptr;
+    
 	// The skybox the scene should use.
 	// This can be defined in serveral spots. The priority is:
 	// 1) Skybox from Specific SIF's Scene Model.

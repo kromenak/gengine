@@ -3,8 +3,7 @@
 //
 // Clark Kromenaker
 //
-// Geometry data for a scene. In-memory
-// representation of a .BSP file.
+// Geometry data for a scene. In-memory representation of a .BSP file.
 //
 #pragma once
 #include "Asset.h"
@@ -22,6 +21,7 @@
 #include "Vector3.h"
 
 class BSPActor;
+class BSPLightmap;
 class Texture;
 
 // A node in the BSP tree.
@@ -73,6 +73,9 @@ struct BSPSurface
     std::string textureName;
     Texture* texture = nullptr;
     
+    // An optional lightmap texture - applied from a lightmap texture.
+    Texture* lightmapTexture = nullptr;
+    
     // Each vertex has a UV coordinate, but a surface can also specify
     // an offset or scale for the texture, so it looks good graphically.
     Vector2 uvOffset;
@@ -101,6 +104,8 @@ class BSP : public Asset
 	
 public:
     BSP(std::string name, char* data, int dataLength);
+    
+    void ApplyLightmap(const BSPLightmap& lightmap);
     
     void Render(Vector3 cameraPosition);
 	void RenderOpaque(Vector3 cameraPosition);

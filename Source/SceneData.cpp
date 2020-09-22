@@ -54,6 +54,15 @@ void SceneData::ResolveSceneData()
 	{
 		mBSP = Services::GetAssets()->LoadBSP(mSceneAsset->GetBSPName());
 	}
+    
+    // Load BSP lightmap data.
+    mBSPLightmap = Services::GetAssets()->LoadBSPLightmap(mGeneralSettings.sceneAssetName);
+    
+    // Apply lightmap to BSP.
+    if(mBSPLightmap != nullptr)
+    {
+        mBSP->ApplyLightmap(*mBSPLightmap);
+    }
 	
 	// Figure out if we have a skybox, and set it to be rendered.
 	// The skybox can be defined in any SIF or in the SceneAsset.

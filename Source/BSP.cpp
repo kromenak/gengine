@@ -17,6 +17,26 @@
 BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
+    
+    // Load shader and map lightmap texture unit (remember, must activate before setting texture unit).
+    Shader* lightmapShader = Services::GetAssets()->LoadShader("3D-Lightmap");
+    lightmapShader->Activate();
+    lightmapShader->SetUniformInt("uLightmap", 1);
+    
+    // Use lightmap shader for material.
+    mMaterial.SetShader(lightmapShader);
+}
+
+void BSP::ApplyLightmap(const BSPLightmap& lightmap)
+{
+    const std::vector<Texture*>& lightmapTextures = lightmap.GetLightmapTextures();
+    for(int i = 0; i < lightmapTextures.size(); i++)
+    {
+        if(i < mSurfaces.size())
+        {
+            mSurfaces[i]->lightmapTexture = lightmapTextures[i];
+        }
+    }
 }
 
 void BSP::Render(Vector3 cameraPosition)
@@ -43,7 +63,6 @@ void BSP::RenderTranslucent(Vector3 cameraPosition)
 		RenderPolygon(polygon, RenderType::Translucent);
 		polygon = polygon->next;
 	}
-	
 	//RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Translucent);
 }
 
@@ -473,6 +492,20 @@ void BSP::RenderPolygon(BSPPolygon* polygon, RenderType renderType)
         {
 			Texture::Deactivate();
         }
+        
+        
+        Vector4 uvScaleOffset;
+        uvScaleOffset.x = surface->uvScale.x;
+        uvScaleOffset.y = surface->uvScale.y;
+        uvScaleOffset.x = surface->uvOffset.x;
+        uvScaleOffset.y = surface->uvOffset.y;
+        mMaterial.GetShader()->SetUniformVector4("uDiffuseScaleOffset", uvScaleOffset);
+        
+        Texture* lightmapTex = surface->lightmapTexture;
+        if(lightmapTex != nullptr)
+        {
+            lightmapTex->Activate(1);
+        }
     }
 	
     // Draw the polygon.
@@ -644,7 +677,10 @@ void BSP::ParseFromData(char *data, int dataLength)
     // Iterate and read UVs
     for(int i = 0; i < uvCount; i++)
     {
-        mUVs.push_back(reader.ReadVector2());
+        Vector2 uv = reader.ReadVector2();
+        uv.y = 1.0f - uv.y;
+        
+        mUVs.push_back(uv);
     }
     
     // Iterate and read vertex indexes.

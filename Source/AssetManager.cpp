@@ -27,6 +27,7 @@ AssetManager::~AssetManager()
 	
 	UnloadAssets(mLoadedSheeps);
 	UnloadAssets(mLoadedBSPs);
+    UnloadAssets(mLoadedBSPLightmaps);
 	UnloadAssets(mLoadedActionSets);
 	UnloadAssets(mLoadedSceneAssets);
 	UnloadAssets(mLoadedSIFs);
@@ -183,6 +184,11 @@ NVC* AssetManager::LoadNVC(const std::string& name)
 BSP* AssetManager::LoadBSP(const std::string& name)
 {
     return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), &mLoadedBSPs);
+}
+
+BSPLightmap* AssetManager::LoadBSPLightmap(const std::string& name)
+{
+    return LoadAsset<BSPLightmap>(SanitizeAssetName(name, ".MUL"), &mLoadedBSPLightmaps);
 }
 
 SheepScript* AssetManager::LoadSheep(const std::string& name)

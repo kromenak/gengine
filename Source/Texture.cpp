@@ -44,20 +44,13 @@ Texture::Texture(std::string name, char* data, int dataLength) :
     Asset(name)
 {
 	BinaryReader reader(data, dataLength);
-	
-	// Texture can be in one of two formats:
-	// 1) A custom/compressed format.
-	// 2) A normal BMP format.
-	// The first 2 byte value can tell us.
-	unsigned short fileIdentifier = reader.ReadUShort();
-	if(fileIdentifier == 0x3136) // 16
-	{
-		ParseFromCompressedFormat(reader);
-	}
-	else if(fileIdentifier == 0x4D42) // BM
-	{
-		ParseFromBmpFormat(reader);
-	}
+    ParseFromData(reader);
+}
+
+Texture::Texture(BinaryReader& reader) :
+    Asset("")
+{
+    ParseFromData(reader);
 }
 
 Texture::~Texture()
@@ -299,6 +292,7 @@ void Texture::UploadToGPU()
 		//Basically...figure out a consistent solution and stick with it!
 		
 		// Load texture data into texture object.
+        // Note that OpenGL assumes pixels are bottom-left to top-right.
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
 					 mWidth, mHeight, 0,
 					 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
@@ -326,27 +320,27 @@ void Texture::WriteToFile(std::string filePath)
     writer.WriteUInt(0);    // Size of file in bytes. Optional to fill in.
     writer.WriteUShort(0);  // Reserved/empty
     writer.WriteUShort(0);  // Reserved/empty
-    writer.WriteUInt(54);   // Offset to image data
+    writer.WriteUInt(54);   // Offset to image data (from beginning of this file)
     
     // DIB HEADER
-    writer.WriteUInt(40); // Size of this header, always 40 bytes.
-    writer.WriteInt(mWidth);
-    writer.WriteInt(mHeight);
-    writer.WriteUShort(1); // Number of color planes, always 1.
-    writer.WriteUShort(32); // Number of bits-per-pixel. Assume 32 for now.
-    writer.WriteUInt(0); // Compression method - assumed none (0).
-    writer.WriteUInt(0); // Uncompressed size of image. Since we aren't compressing, can just use 0 as placeholder.
-    writer.WriteInt(0); // Preferred width for printing, unused.
-    writer.WriteInt(0); // Preferred height for printing, unused.
-    writer.WriteUInt(0); // Number of palette colors, unused.
-    writer.WriteUInt(0); // Number of important colors, unused.
+    writer.WriteUInt(40);       // Size of this header, always 40 bytes.
+    writer.WriteInt(mWidth);    // Width of image; signed for some reason.
+    writer.WriteInt(mHeight);   // Height of image; signed for some reason.
+    writer.WriteUShort(1);      // Number of color planes, always 1.
+    writer.WriteUShort(32);     // Number of bits-per-pixel. Assume 32 for now.
+    writer.WriteUInt(0);        // Compression method - assumed none (0).
+    writer.WriteUInt(0);        // Uncompressed size of image. Since we aren't compressing, can just use 0 as placeholder.
+    writer.WriteInt(0);         // Preferred width for printing, unused.
+    writer.WriteInt(0);         // Preferred height for printing, unused.
+    writer.WriteUInt(0);        // Number of palette colors, unused.
+    writer.WriteUInt(0);        // Number of important colors, unused.
     
     // COLOR TABLE - Only needed for 8BPP or less.
     
     // PIXELS
 	// Write out one row at a time, bottom to top, left to right, per BMP format standard.
 	int rowSize = CalculateBmpRowSize(32, mWidth);
-    for(int y = mHeight - 1; y >= 0; y--)
+    for(int y = 0; y < mHeight; y++)
     {
 		int bytesWritten = 0;
         for(int x = 0; x < mWidth; x++)
@@ -376,9 +370,27 @@ void Texture::WriteToFile(std::string filePath)
 	return Math::FloorToInt((bitsPerPixel * width + 31.0f) / 32.0f) * 4;
 }
 
+void Texture::ParseFromData(BinaryReader &reader)
+{
+    // Texture can be in one of two formats:
+    // 1) A custom/compressed format.
+    // 2) A normal BMP format.
+    // The first 2 byte value can tell us.
+    unsigned short fileIdentifier = reader.ReadUShort();
+    if(fileIdentifier == 0x3136) // 16
+    {
+        ParseFromCompressedFormat(reader);
+    }
+    else if(fileIdentifier == 0x4D42) // BM
+    {
+        ParseFromBmpFormat(reader);
+    }
+}
+
 void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 {
-	// The compressed format has a second value here.
+    // 2 bytes: compressed file identifier (assumed this has already been read in from constructor).
+	// 2 bytes: The compressed format has a second value here.
 	unsigned short fileIdentifier2 = reader.ReadUShort();
 	if(fileIdentifier2 != 0x4D6E) // Mn
 	{
@@ -392,18 +404,20 @@ void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 	
 	// Allocate pixels array.
 	mPixels = new unsigned char[mWidth * mHeight * 4];
-	for(int y = 0; y < mHeight; y++)
+    
+    // Read in pixel data.
+    // This pixel data is top-left to bottom-right, so it needs to be flipped!
+	for(int y = mHeight - 1; y >= 0; y--)
 	{
 		for(int x = 0; x < mWidth; x++)
 		{
-			//int current = ((mHeight - y - 1)  * mWidth + x) * 4;
 			int current = (y  * mWidth + x) * 4;
 			uint16_t pixel = reader.ReadUShort();
 			
 			float red = static_cast<float>((pixel & 0xF800) >> 11);
 			float green = static_cast<float>((pixel & 0x07E0) >> 5);
 			float blue = static_cast<float>((pixel & 0x001F));
-			
+            
 			mPixels[current] = (unsigned char)(red * 255 / 31);
 			mPixels[current + 1] = (unsigned char)(green * 255 / 63);
 			mPixels[current + 2] = (unsigned char)(blue * 255 / 31);
@@ -436,6 +450,7 @@ void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 void Texture::ParseFromBmpFormat(BinaryReader& reader)
 {
 	// BMP HEADER
+    // 2 bytes: BMP file identifier (assumed this has already been read in from constructor).
 	// 4 bytes: size of file in bytes
 	// 4 bytes: 2 shorts that are reserved/unused
 	// 4 bytes: offset to image data
@@ -523,14 +538,15 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	}
 	
 	// Read in pixel data.
+    // BMP pixel data is stored bottom-left to top-right.
 	int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
-	for(int y = mHeight - 1; y >= 0; y--)
+	for(int y = 0; y < mHeight; y++)
 	{
 		int bytesRead = 0;
 		for(unsigned int x = 0; x < mWidth; x++)
 		{
 			// Calculate index into pixels array.
-			int index = (y * mWidth + x) * 4;
+            int index = (y * mWidth + x) * 4;
 			
 			// How we interpret pixel data will depend on the bpp.
 			if(bitsPerPixel == 8)
@@ -557,15 +573,19 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 					mPixels[index + 3] = 255; //palette[paletteByteIndex + 3];
 				}
 			}
-			else if(bitsPerPixel == 32)
+			else if(bitsPerPixel == 24 || bitsPerPixel == 32)
 			{
-				// We're assuming pixel data order is RGBA.
+                // Assuming BI_RGB format, alpha is not stored.
+                // So regardless of bits per pixel of 24 or 32, the data layout and size is the same.
+                
+				// Pixel data in the BMP file is BGR.
+                // Internal pixel data is RGBA, so reorganize on read in.
 				mPixels[index + 2] = reader.ReadUByte(); // Blue
 				mPixels[index + 1] = reader.ReadUByte(); // Green
 				mPixels[index] = reader.ReadUByte(); 	 // Red
 				bytesRead += 3;
 				
-				// When BMP format is BI_RGB, there is no alpha.
+				// BI_RGB format doesn't save any alpha, even if 32 bits per pixel.
 				// We'll use a placeholder of 255 (full alpha).
 				mPixels[index + 3] = 255; // Alpha
 			}

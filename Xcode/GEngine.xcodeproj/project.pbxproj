@@ -169,9 +169,11 @@
 		4B4EED8B1F5CACEF000065EF /* Vector3.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B4EED891F5CACEF000065EF /* Vector3.cpp */; };
 		4B53B0C9207AFE7E00663381 /* Ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B53B0C8207AFE7E00663381 /* Ray.cpp */; };
 		4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */; };
+		4B598C4725113853007AC569 /* BSPLightmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B598C4625113853007AC569 /* BSPLightmap.cpp */; };
+		4B598C4825113853007AC569 /* BSPLightmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B598C4625113853007AC569 /* BSPLightmap.cpp */; };
+		4B598C4B251148C2007AC569 /* 3D-Lightmap.vert in Resources */ = {isa = PBXBuildFile; fileRef = 4B598C49251148C2007AC569 /* 3D-Lightmap.vert */; };
+		4B598C4C251148C2007AC569 /* 3D-Lightmap.frag in Resources */ = {isa = PBXBuildFile; fileRef = 4B598C4A251148C2007AC569 /* 3D-Lightmap.frag */; };
 		4B5A3348243A54EC0064FC06 /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BFCD33720CDFFB4004FF9EA /* Plane.cpp */; };
-		4B5A334B243A57A70064FC06 /* SphereCollider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5A334A243A57A70064FC06 /* SphereCollider.cpp */; };
-		4B5A334C243A57A70064FC06 /* SphereCollider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5A334A243A57A70064FC06 /* SphereCollider.cpp */; };
 		4B5C301D21D1F60900211724 /* VertexAnimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimator.cpp */; };
 		4B5C301E21D1F60900211724 /* VertexAnimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimator.cpp */; };
 		4B6A3F232335B16C00D25B2D /* RectUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B6A3F222335B16C00D25B2D /* RectUtil.cpp */; };
@@ -451,8 +453,10 @@
 		4B5497F81FF80E0A00F1EF4F /* StringUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = StringUtil.h; path = ../Source/StringUtil.h; sourceTree = "<group>"; };
 		4B54DDE52435B1C2009C92DA /* GMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GMath.h; path = ../Source/GMath.h; sourceTree = "<group>"; };
 		4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = QuaternionTests.cpp; path = ../Tests/QuaternionTests.cpp; sourceTree = "<group>"; };
-		4B5A3349243A57A70064FC06 /* SphereCollider.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SphereCollider.h; path = ../Source/SphereCollider.h; sourceTree = "<group>"; };
-		4B5A334A243A57A70064FC06 /* SphereCollider.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SphereCollider.cpp; path = ../Source/SphereCollider.cpp; sourceTree = "<group>"; };
+		4B598C4525113853007AC569 /* BSPLightmap.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = BSPLightmap.h; path = ../Source/BSPLightmap.h; sourceTree = "<group>"; };
+		4B598C4625113853007AC569 /* BSPLightmap.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BSPLightmap.cpp; path = ../Source/BSPLightmap.cpp; sourceTree = "<group>"; };
+		4B598C49251148C2007AC569 /* 3D-Lightmap.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Lightmap.vert"; path = "../Assets/3D-Lightmap.vert"; sourceTree = "<group>"; };
+		4B598C4A251148C2007AC569 /* 3D-Lightmap.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Lightmap.frag"; path = "../Assets/3D-Lightmap.frag"; sourceTree = "<group>"; };
 		4B5C301B21D1F60900211724 /* VertexAnimator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimator.h; path = ../Source/VertexAnimator.h; sourceTree = "<group>"; };
 		4B5C301C21D1F60900211724 /* VertexAnimator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimator.cpp; path = ../Source/VertexAnimator.cpp; sourceTree = "<group>"; };
 		4B6A3F212335B16C00D25B2D /* RectUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RectUtil.h; path = ../Source/RectUtil.h; sourceTree = "<group>"; };
@@ -672,6 +676,8 @@
 				4B399E3F22D00E2100221AE4 /* 3D-Billboard.vert */,
 				4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */,
 				4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */,
+				4B598C4A251148C2007AC569 /* 3D-Lightmap.frag */,
+				4B598C49251148C2007AC569 /* 3D-Lightmap.vert */,
 				4BD673CE20B23B8800795582 /* 3D-Skybox.frag */,
 				4BD673CD20B239CD00795582 /* 3D-Skybox.vert */,
 				4BCC2EAB24B50DE900DAE6BD /* Actors.txt */,
@@ -744,7 +750,6 @@
 		4B15A9531F2428CD000A689F /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				4BCC2EA224B4178400DAE6BD /* Input */,
 				4B9231992103AED90004F4F3 /* Animation */,
 				4B76B57D1F3599A1003F63E5 /* Assets */,
 				4B7AB0421F539EA500CFBE8F /* Audio */,
@@ -755,8 +760,11 @@
 				4B15A9511F2428C5000A689F /* GEngine.h */,
 				4B6B765E21A5216B00788C02 /* GK3 */,
 				4BDFBA072341679000C4DD49 /* GOM */,
+				4BCC2EA224B4178400DAE6BD /* Input */,
 				4B9E412E21BD019D008B9B1E /* IO */,
 				4BE6EE351F441DD100BB29D5 /* Libraries */,
+				4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */,
+				4BCC2EA324B41CC700DAE6BD /* Localizer.h */,
 				4B15A93F1F24188E000A689F /* Main.cpp */,
 				4B4300841FB7EDFA009EDE58 /* Math */,
 				4B046E8F218E855600E56341 /* Mover.cpp */,
@@ -769,12 +777,8 @@
 				4B09182D1FEED84D002991D4 /* Services.cpp */,
 				4B09182C1FEED84D002991D4 /* Services.h */,
 				4B15A95D1F245BDC000A689F /* Sheep */,
-				4B5A334A243A57A70064FC06 /* SphereCollider.cpp */,
-				4B5A3349243A57A70064FC06 /* SphereCollider.h */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4B08C90D2137443F0028FEB3 /* UI */,
-				4BCC2EA324B41CC700DAE6BD /* Localizer.h */,
-				4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -827,6 +831,8 @@
 				4B99229B2031735500184755 /* BSP.h */,
 				4B9AB96024844A07007090B7 /* BSPActor.cpp */,
 				4B9AB95F24844A07007090B7 /* BSPActor.h */,
+				4B598C4625113853007AC569 /* BSPLightmap.cpp */,
+				4B598C4525113853007AC569 /* BSPLightmap.h */,
 				4B00D32E1F8F3AD500D536D5 /* Camera.cpp */,
 				4B00D32F1F8F3AD500D536D5 /* Camera.h */,
 				4B84A13521684374003B4C3F /* Color32.cpp */,
@@ -860,6 +866,10 @@
 		4B38BA6E2438F4F3001F9240 /* Primitives */ = {
 			isa = PBXGroup;
 			children = (
+				4B0E44F52186878A00BD1CE1 /* Rect.cpp */,
+				4B0E44F42186878A00BD1CE1 /* Rect.h */,
+				4B6A3F222335B16C00D25B2D /* RectUtil.cpp */,
+				4B6A3F212335B16C00D25B2D /* RectUtil.h */,
 				4B38BA752438F823001F9240 /* AABB.cpp */,
 				4B38BA742438F823001F9240 /* AABB.h */,
 				4B38BA8324394F75001F9240 /* Collisions.cpp */,
@@ -891,10 +901,6 @@
 				4B4300861FB7EE44009EDE58 /* Quaternion.cpp */,
 				4B4300851FB7EE44009EDE58 /* Quaternion.h */,
 				4B2606EE22F5144C0030F2D9 /* Random.h */,
-				4B0E44F52186878A00BD1CE1 /* Rect.cpp */,
-				4B0E44F42186878A00BD1CE1 /* Rect.h */,
-				4B6A3F222335B16C00D25B2D /* RectUtil.cpp */,
-				4B6A3F212335B16C00D25B2D /* RectUtil.h */,
 				4BF751101F773E1A00B79D2F /* Vector2.cpp */,
 				4BF751111F773E1A00B79D2F /* Vector2.h */,
 				4B4EED891F5CACEF000065EF /* Vector3.cpp */,
@@ -1271,8 +1277,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4B598C4C251148C2007AC569 /* 3D-Lightmap.frag in Resources */,
 				4BCC2EAD24B50DE900DAE6BD /* Actors.txt in Resources */,
 				4B22F4E7217170A00065B152 /* Assets.xcassets in Resources */,
+				4B598C4B251148C2007AC569 /* 3D-Lightmap.vert in Resources */,
 				4B8A9770238B7A0E006D284D /* Locations.txt in Resources */,
 				4B22F4EA217170A00065B152 /* Main.storyboard in Resources */,
 			);
@@ -1393,7 +1401,6 @@
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */,
 				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
-				4B5A334B243A57A70064FC06 /* SphereCollider.cpp in Sources */,
 				4B0183A624574837004B5C58 /* DialogueManager.cpp in Sources */,
 				4BEA727121D5834300998066 /* WalkerBoundary.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
@@ -1453,6 +1460,7 @@
 				4BACA50A20F7132E008C7FE9 /* GAS.cpp in Sources */,
 				4B0E44F62186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
+				4B598C4725113853007AC569 /* BSPLightmap.cpp in Sources */,
 				4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */,
 				4B4AFEEB23BBC6B100554D04 /* ActionManager.cpp in Sources */,
 				4B2606ED22F3D43B0030F2D9 /* AnimationNodes.cpp in Sources */,
@@ -1517,7 +1525,6 @@
 				4BCFC69D24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */,
 				4B22F501217407530065B152 /* lex.yy.cc in Sources */,
 				4BFBB86721D0469000E07EFB /* SceneData.cpp in Sources */,
-				4B5A334C243A57A70064FC06 /* SphereCollider.cpp in Sources */,
 				4B22F5362174078B0065B152 /* Camera.cpp in Sources */,
 				4B0183A724574837004B5C58 /* DialogueManager.cpp in Sources */,
 				4BEA727221D5834300998066 /* WalkerBoundary.cpp in Sources */,
@@ -1578,6 +1585,7 @@
 				4B22F5332174078B0065B152 /* BarnFile.cpp in Sources */,
 				4B22F51E2174076D0065B152 /* Quaternion.cpp in Sources */,
 				4BB67C4D235255DE00FDFB30 /* UITextInput.cpp in Sources */,
+				4B598C4825113853007AC569 /* BSPLightmap.cpp in Sources */,
 				4B0E44F72186878A00BD1CE1 /* Rect.cpp in Sources */,
 				4B4AFEEC23BBC6B100554D04 /* ActionManager.cpp in Sources */,
 				4B22F5222174076D0065B152 /* Vector4.cpp in Sources */,
