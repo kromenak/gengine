@@ -83,7 +83,9 @@ private:
 	// If a texture has a palette, the indexes into the palette are stored here.
 	unsigned char* mPaletteIndexes = nullptr;
 	
-    // Pixel data - this is the meat of the texture!
+    // Pixel data, from the top-left corner of the image.
+    // SDL and DirectX (I think) expect pixel data from top-left corner.
+    // OpenGL expects from bottom-left, but we compensate for that by using flipped UVs!
     unsigned char* mPixels = nullptr;
     
     // An ID for the texture object generated in OpenGL.

@@ -497,8 +497,8 @@ void BSP::RenderPolygon(BSPPolygon* polygon, RenderType renderType)
         Vector4 uvScaleOffset;
         uvScaleOffset.x = surface->uvScale.x;
         uvScaleOffset.y = surface->uvScale.y;
-        uvScaleOffset.x = surface->uvOffset.x;
-        uvScaleOffset.y = surface->uvOffset.y;
+        uvScaleOffset.z = surface->uvOffset.x;
+        uvScaleOffset.w = surface->uvOffset.y;
         mMaterial.GetShader()->SetUniformVector4("uDiffuseScaleOffset", uvScaleOffset);
         
         Texture* lightmapTex = surface->lightmapTexture;
@@ -588,6 +588,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         surface->uvScale = reader.ReadVector2();
         
         surface->scale = reader.ReadFloat();
+        //std::cout << i << ", " << mObjectNames[surface->objectIndex] << ": uv-off " << surface->uvOffset << ", uv-scale " << surface->uvScale << ", scale " << surface->scale << std::endl;
         
         /*
 		 FLAGS - bitmask flags that indicate some interesting aspect about this surface.
@@ -678,8 +679,6 @@ void BSP::ParseFromData(char *data, int dataLength)
     for(int i = 0; i < uvCount; i++)
     {
         Vector2 uv = reader.ReadVector2();
-        uv.y = 1.0f - uv.y;
-        
         mUVs.push_back(uv);
     }
     

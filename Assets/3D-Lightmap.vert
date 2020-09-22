@@ -17,6 +17,7 @@ uniform mat4 gObjectToWorldMatrix;
 
 // User-defined uniforms
 uniform vec4 uColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+uniform vec4 uDiffuseScaleOffset = vec4(1.0f, 1.0f, 0.0f, 0.0f);
 
 void main()
 {
@@ -24,6 +25,7 @@ void main()
 	fColor = vColor * uColor;
     
     // Pass through the UV attribute.
+    //fUV1 = vUV1.xy * uDiffuseScaleOffset.xy + uDiffuseScaleOffset.zw;
     fUV1 = vUV1;
     
     // Transform position obj->world->view->proj

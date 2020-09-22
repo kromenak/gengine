@@ -168,9 +168,6 @@ bool Renderer::Initialize()
     // For use with alpha blending during render loop.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	// Init default textures.
-	Texture::Init();
-	
     // Load default shader.
 	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Diffuse-Tex");
 	if(defaultShader == nullptr) { return false; }
