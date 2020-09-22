@@ -36,7 +36,7 @@ public:
 	std::string ToString() const { return std::to_string(mDegrees); }
 	
 private:
-	Heading() { }
+    Heading() = default;
 	
 	// A heading is represented internally as degrees 0-360.
 	float mDegrees = -1.0f;

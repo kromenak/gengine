@@ -199,8 +199,8 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
         Matrix4 worldToMeshMatrix = Matrix4::InverseTransform(meshToWorldMatrix);
 		
 		// Transform the ray to object space.
-		Vector3 rayLocalPos = worldToMeshMatrix.TransformPoint(ray.GetOrigin());
-		Vector3 rayLocalDir = worldToMeshMatrix.TransformVector(ray.GetDirection());
+        Vector3 rayLocalPos = worldToMeshMatrix.TransformPoint(ray.origin);
+        Vector3 rayLocalDir = worldToMeshMatrix.TransformVector(ray.direction);
 		rayLocalDir.Normalize();
 		Ray localRay(rayLocalPos, rayLocalDir);
 		
@@ -227,6 +227,6 @@ void MeshRenderer::DebugDrawAABBs()
 		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
 	
 		// Debug draw the AABB.
-		mesh->GetAABB().DebugDraw(Color32::Magenta, 60.0f, &meshToWorldMatrix);
+        Debug::DrawAABB(mesh->GetAABB(), Color32::Magenta, 60.0f, &meshToWorldMatrix);
 	}
 }

@@ -55,9 +55,8 @@ public:
     Quaternion operator*(const Quaternion& other) const;
     Quaternion& operator*=(const Quaternion& other);
     
-    // Zero/Identity
-    bool IsZero() const;
-    bool IsIdentity() const;
+    // Rotate Vector
+    Vector3 Rotate(const Vector3& vector) const;
 	
 	// Conversions To
     void Set(const Vector3& axis, float angle); // From axis/angle
@@ -81,8 +80,7 @@ public:
     void Invert();
     static Quaternion Inverse(const Quaternion& quat);
     
-    // Rotate Vector
-    Vector3 Rotate(const Vector3& vector) const;
+
     
     // Interpolate
     static void Lerp(Quaternion& result, const Quaternion& start, const Quaternion& end, float t);

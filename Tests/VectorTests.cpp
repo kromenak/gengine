@@ -14,13 +14,13 @@ TEST_CASE("Vector3 constructors are correct")
     Vector3 defVec3;
     REQUIRE(defVec3.x == 0.0f);
     REQUIRE(defVec3.y == 0.0f);
-    REQUIRE(defVec3.GetZ() == 0.0f);
+    REQUIRE(defVec3.z == 0.0f);
     
     // Check that vector using custom constructor has correct values.
     Vector3 customVec3(10.0f, 12.5f, -2.3456f);
     REQUIRE(customVec3.x == 10.0f);
     REQUIRE(customVec3.y == 12.5f);
-    REQUIRE(customVec3.GetZ() == -2.3456f);
+    REQUIRE(customVec3.z == -2.3456f);
 }
 
 TEST_CASE("Vector3 copy operations and equality checks work correctly")
@@ -67,7 +67,7 @@ TEST_CASE("Vector3 getters/setters work correctly")
     // Check that values are approximately correct.
     REQUIRE(Math::AreEqual(vec3.x, 1000.0f));
     REQUIRE(Math::AreEqual(vec3.y, 2.3f));
-    REQUIRE(Math::AreEqual(vec3.GetZ(), -345.0f));
+    REQUIRE(Math::AreEqual(vec3.z, -345.0f));
 }
 
 TEST_CASE("Vector3 length and normalization operations work correctly")

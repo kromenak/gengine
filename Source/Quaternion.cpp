@@ -133,19 +133,6 @@ Quaternion& Quaternion::operator*=(const Quaternion &other)
     return *this;
 }
 
-bool Quaternion::IsZero() const
-{
-    return Math::IsZero(x*x + y*y + z*z + w*w);
-}
-
-bool Quaternion::IsIdentity() const
-{
-    return (Math::IsZero(x) &&
-            Math::IsZero(y) &&
-            Math::IsZero(z) &&
-            Math::IsZero(1.0f - w));
-}
-
 void Quaternion::Set(const Vector3& axis, float angle)
 {
     // Special case: axis is the zero vector. Just set to identity.

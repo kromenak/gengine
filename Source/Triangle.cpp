@@ -100,23 +100,3 @@ Vector3 Triangle::GetClosestPoint(const Vector3& point) const
 	}
 	return closestPointP2ToP0;
 }
-
-void Triangle::DebugDraw(const Color32& color, float duration, const Matrix4* transformMatrix) const
-{
-	if(transformMatrix != nullptr)
-	{
-		Vector3 t0 = transformMatrix->TransformPoint(p0);
-		Vector3 t1 = transformMatrix->TransformPoint(p1);
-		Vector3 t2 = transformMatrix->TransformPoint(p2);
-		
-		Debug::DrawLine(t0, t1, color, duration);
-		Debug::DrawLine(t1, t2, color, duration);
-		Debug::DrawLine(t2, t0, color, duration);
-	}
-	else
-	{
-		Debug::DrawLine(p0, p1, color, duration);
-		Debug::DrawLine(p1, p2, color, duration);
-		Debug::DrawLine(p2, p0, color, duration);
-	}
-}

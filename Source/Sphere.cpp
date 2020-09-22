@@ -5,8 +5,6 @@
 //
 #include "Sphere.h"
 
-#include "Debug.h"
-
 Sphere::Sphere(const Vector3& center, float radius) :
 	center(center),
 	radius(radius)

@@ -9,15 +9,11 @@
 #pragma once
 #include "Vector3.h"
 
-class Color32;
-class Matrix4;
-
 class AABB
 {
 public:
-	AABB() { }
-	AABB(Vector3 min, Vector3 max);
-	//AABB(Vector3 center, float extentX, float extentY, float extentZ);
+    AABB() = default;
+	AABB(const Vector3& min, const Vector3& max);
 	
 	Vector3 GetMin() const { return mMin; }
 	Vector3 GetMax() const { return mMax; }
@@ -32,9 +28,9 @@ public:
 	bool ContainsPoint(const Vector3& point) const;
 	Vector3 GetClosestPoint(const Vector3& point) const;
 	
-	void DebugDraw(const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr) const;
-	
 private:
+    // Min and max points of the AABB.
+    // Keep private b/c AABB can be represented as min/max points or center/size...may want or need to switch this at some point.
 	Vector3 mMin;
 	Vector3 mMax;
 };

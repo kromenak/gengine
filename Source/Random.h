@@ -1,8 +1,9 @@
 //
-//  Random.h
-//  GEngine
+// Random.h
 //
-//  Created by Clark Kromenaker on 8/2/19.
+// Clark Kromenaker
+//
+// Wrapper for random number utilities.
 //
 #pragma once
 #include <chrono>

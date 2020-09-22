@@ -90,8 +90,8 @@
 {
 	Vector3 min = aabb.GetMin();
 	Vector3 max = aabb.GetMax();
-	Vector3 rayOrigin = r.GetOrigin();
-	Vector3 rayDir = r.GetDirection();
+	Vector3 rayOrigin = r.origin;
+	Vector3 rayDir = r.direction;
 	
 	float t1 = (min.x - rayOrigin.x) / rayDir.x;
     float t2 = (max.x - rayOrigin.x) / rayDir.x;
@@ -133,7 +133,7 @@
 	Vector3 e1 = p1 - p0;
 	Vector3 e2 = p2 - p0;
 	
-	Vector3 p = Vector3::Cross(r.GetDirection(), e2);
+	Vector3 p = Vector3::Cross(r.direction, e2);
 	float a = Vector3::Dot(e1, p);
 	
 	// If zero, means ray is parallel to triangle plane, which is not an intersection.
@@ -141,12 +141,12 @@
 	
 	float f = 1.0f / a;
 	
-	Vector3 s = r.GetOrigin() - p0;
+	Vector3 s = r.origin - p0;
 	float u = f * Vector3::Dot(s, p);
 	if(u < 0.0f || u > 1.0f) { return false; }
 	
 	Vector3 q = Vector3::Cross(s, e1);
-	float v = f * Vector3::Dot(r.GetDirection(), q);
+	float v = f * Vector3::Dot(r.direction, q);
 	if(v < 0.0f || u + v > 1.0f) { return false; }
 	
 	float t = f * Vector3::Dot(e2, q);

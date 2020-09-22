@@ -56,7 +56,7 @@ TEST_CASE("Test multiply Vector4 by translation Matrix4")
     Vector4 result = translationMatrix * position;
     REQUIRE(Math::AreEqual(result.x, 5.0f));
     REQUIRE(Math::AreEqual(result.y, 10.0f));
-    REQUIRE(Math::AreEqual(result.GetZ(), 20.0f));
+    REQUIRE(Math::AreEqual(result.z, 20.0f));
 }
 
 TEST_CASE("Test multiply Vector4 by rotation Matrix4")
@@ -67,13 +67,13 @@ TEST_CASE("Test multiply Vector4 by rotation Matrix4")
     Vector4 result = rotate90YMatrix * xAxis;
     REQUIRE(Math::AreEqual(result.x, 0.0f));
     REQUIRE(Math::AreEqual(result.y, 0.0f));
-    REQUIRE(Math::AreEqual(result.GetZ(), -1.0f));
+    REQUIRE(Math::AreEqual(result.z, -1.0f));
     
     Matrix4 rotate90ZMatrix = Matrix4::MakeRotateZ(Math::kPiOver2);
     result = rotate90ZMatrix * xAxis;
     REQUIRE(Math::AreEqual(result.x, 0.0f));
     REQUIRE(Math::AreEqual(result.y, 1.0f));
-    REQUIRE(Math::AreEqual(result.GetZ(), 0.0f));
+    REQUIRE(Math::AreEqual(result.z, 0.0f));
 }
 
 TEST_CASE("Test multiply Vector4 by scale Matrix4")
@@ -84,15 +84,15 @@ TEST_CASE("Test multiply Vector4 by scale Matrix4")
     Vector4 result = scaleUpMatrix * pos;
     REQUIRE(Math::AreEqual(result.x, 2.0f));
     REQUIRE(Math::AreEqual(result.y, 2.0f));
-    REQUIRE(Math::AreEqual(result.GetZ(), 2.0f));
-    REQUIRE(Math::AreEqual(result.GetW(), 1.0f));
+    REQUIRE(Math::AreEqual(result.z, 2.0f));
+    REQUIRE(Math::AreEqual(result.w, 1.0f));
     
     Matrix4 scaleDownMatrix = Matrix4::MakeScale(Vector3(0.5f, 0.5f, 0.5f));
     result = scaleDownMatrix * pos;
     REQUIRE(Math::AreEqual(result.x, 0.5f));
     REQUIRE(Math::AreEqual(result.y, 0.5f));
-    REQUIRE(Math::AreEqual(result.GetZ(), 0.5f));
-    REQUIRE(Math::AreEqual(result.GetW(), 1.0f));
+    REQUIRE(Math::AreEqual(result.z, 0.5f));
+    REQUIRE(Math::AreEqual(result.w, 1.0f));
 }
 
 TEST_CASE("Test calculate the inverse of Matrix4")

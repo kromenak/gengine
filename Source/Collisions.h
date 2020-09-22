@@ -38,7 +38,6 @@ public:
 	static bool TestSphereSphere(const Sphere& s1, const Sphere& s2);
 	static bool TestSphereAABB(const Sphere& s, const AABB& aabb);
 	static bool TestSpherePlane(const Sphere& s, const Plane& p);
-	
 	static bool TestSphereTriangle(const Sphere& s, const Triangle& t, Vector3& intersection);
 	
 	// AABB

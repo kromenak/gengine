@@ -12,7 +12,9 @@
 #include "Color32.h"
 #include "Matrix4.h"
 
+class AABB;
 class Mesh;
+class Triangle;
 class Rect;
 class Vector3;
 
@@ -32,16 +34,15 @@ struct DrawCommand
 class Debug
 {
 public:
-	static void DrawLine(const Vector3& from, const Vector3& to, const Color32& color);
-	static void DrawLine(const Vector3& from, const Vector3& to, const Color32& color, float duration);
+    static void DrawLine(const Vector3& from, const Vector3& to, const Color32& color, float duration = 0.0f);
 	
-	static void DrawAxes(const Vector3& position);
-	static void DrawAxes(const Vector3& position, float duration);
+    static void DrawAxes(const Vector3& position, float duration = 0.0f);
+    static void DrawAxes(const Matrix4& worldTransform, float duration = 0.0f);
 	
-	static void DrawAxes(const Matrix4& worldTransform);
-	static void DrawAxes(const Matrix4& worldTransform, float duration);
-	
-	static void DrawRect(const Rect& rect, const Color32& color);
+    static void DrawRect(const Rect& rect, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
+    static void DrawAABB(const AABB& aabb, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
+    
+    static void DrawTriangle(const Triangle& triangle, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
 	
 	static void Update(float deltaTime);
 	

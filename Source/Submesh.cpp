@@ -5,6 +5,7 @@
 //
 #include "Submesh.h"
 
+#include "Collisions.h"
 #include "GLVertexArray.h"
 #include "Ray.h"
 
@@ -170,14 +171,14 @@ bool Submesh::Raycast(const Ray& ray)
 		return false;
 	}
 	
-	Vector3 hitPos;
+    RaycastHit hitInfo;
 	for(int i = 0; i < mIndexCount; i += 3)
 	{
 		Vector3 vert1 = GetVertexPosition(mIndexes[i]);
 		Vector3 vert2 = GetVertexPosition(mIndexes[i + 1]);
 		Vector3 vert3 = GetVertexPosition(mIndexes[i + 2]);
 		
-		if(ray.IntersectsTriangle(vert1, vert2, vert3, hitPos))
+		if(Collisions::TestRayTriangle(ray, vert1, vert2, vert3, hitInfo))
 		{
 			return true;
 		}

@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 //
-// Utilities for dealing with Rects (and RectTransforms).
+// Utilities for dealing with Rects, primarily in relation to RectTransforms.
 //
 #pragma once
 #include "Rect.h"

@@ -15,7 +15,7 @@
 class LineSegment
 {
 public:
-	LineSegment() { }
+    LineSegment() = default;
 	LineSegment(const Vector3& start, const Vector3& end);
 	
 	Vector3 GetPoint(float t) const { return start + ((end - start) * t); }

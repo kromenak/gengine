@@ -15,8 +15,8 @@ TEST_CASE("Rect constructors are correct")
 	Rect defaultRect;
 	REQUIRE(defaultRect.x == 0.0f);
 	REQUIRE(defaultRect.y == 0.0f);
-	REQUIRE(defaultRect.GetWidth() == 0.0f);
-	REQUIRE(defaultRect.GetHeight() == 0.0f);
+	REQUIRE(defaultRect.width == 0.0f);
+	REQUIRE(defaultRect.height == 0.0f);
 	REQUIRE(defaultRect.GetSize() == Vector2::Zero);
 	REQUIRE(defaultRect.GetMin() == Vector2::Zero);
 	REQUIRE(defaultRect.GetMax() == Vector2::Zero);
@@ -25,8 +25,8 @@ TEST_CASE("Rect constructors are correct")
 	Rect positionedRect(10.0f, -12.4f);
 	REQUIRE(positionedRect.x == 10.0f);
 	REQUIRE(positionedRect.y == -12.4f);
-	REQUIRE(positionedRect.GetWidth() == 0.0f);
-	REQUIRE(positionedRect.GetHeight() == 0.0f);
+	REQUIRE(positionedRect.width == 0.0f);
+	REQUIRE(positionedRect.height == 0.0f);
 	REQUIRE(positionedRect.GetSize() == Vector2::Zero);
 	REQUIRE(positionedRect.GetMin() == Vector2(10.0f, -12.4f));
 	REQUIRE(positionedRect.GetMax() == Vector2(10.0f, -12.4f));
@@ -35,8 +35,8 @@ TEST_CASE("Rect constructors are correct")
 	Rect sizedRect(100.0f, -50.0f, 100.0f, 300.0f);
 	REQUIRE(sizedRect.x == 100.0f);
 	REQUIRE(sizedRect.y == -50.0f);
-	REQUIRE(sizedRect.GetWidth() == 100.0f);
-	REQUIRE(sizedRect.GetHeight() == 300.0f);
+	REQUIRE(sizedRect.width == 100.0f);
+	REQUIRE(sizedRect.height == 300.0f);
 	REQUIRE(sizedRect.GetSize() == Vector2(100.0f, 300.0f));
 	REQUIRE(sizedRect.GetMin() == Vector2(100.0f, -50.0f));
 	REQUIRE(sizedRect.GetMax() == Vector2(200.0f, 250.0f));
@@ -45,8 +45,8 @@ TEST_CASE("Rect constructors are correct")
 	Rect minMaxRect(Vector2(-25.0f, -25.0f), Vector2(40.0f, 0.0f));
 	REQUIRE(minMaxRect.x == -25.0f);
 	REQUIRE(minMaxRect.y == -25.0f);
-	REQUIRE(minMaxRect.GetWidth() == 65.0f);
-	REQUIRE(minMaxRect.GetHeight() == 25.0f);
+	REQUIRE(minMaxRect.width == 65.0f);
+	REQUIRE(minMaxRect.height == 25.0f);
 	REQUIRE(minMaxRect.GetSize() == Vector2(65.0f, 25.0f));
 	REQUIRE(minMaxRect.GetMin() == Vector2(-25.0f, -25.0f));
 	REQUIRE(minMaxRect.GetMax() == Vector2(40.0f, 0.0f));
@@ -152,40 +152,40 @@ TEST_CASE("RectUtil::CalcAnchorRect works")
 	Rect pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2::Zero, Vector2::Zero);
 	REQUIRE(pointRect.x == 10.0f);
 	REQUIRE(pointRect.y == 10.0f);
-	REQUIRE(pointRect.GetWidth() == 0.0f);
-	REQUIRE(pointRect.GetHeight() == 0.0f);
+	REQUIRE(pointRect.width == 0.0f);
+	REQUIRE(pointRect.height == 0.0f);
 	
 	pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2::One, Vector2::One);
 	REQUIRE(pointRect.x == 110.0f);
 	REQUIRE(pointRect.y == 110.0f);
-	REQUIRE(pointRect.GetWidth() == 0.0f);
-	REQUIRE(pointRect.GetHeight() == 0.0f);
+	REQUIRE(pointRect.width == 0.0f);
+	REQUIRE(pointRect.height == 0.0f);
 	
 	pointRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.5f, 0.5f), Vector2(0.5f, 0.5f));
 	REQUIRE(pointRect.x == 60.0f);
 	REQUIRE(pointRect.y == 60.0f);
-	REQUIRE(pointRect.GetWidth() == 0.0f);
-	REQUIRE(pointRect.GetHeight() == 0.0f);
+	REQUIRE(pointRect.width == 0.0f);
+	REQUIRE(pointRect.height == 0.0f);
 	
 	// Check that anchors with a matching X/Y value make a rect with zero width/height.
 	Rect lineRect = RectUtil::CalcAnchorRect(parentRect, Vector2::Zero, Vector2(0.0f, 1.0f));
 	REQUIRE(lineRect.x == 10.0f);
 	REQUIRE(lineRect.y == 10.0f);
-	REQUIRE(lineRect.GetWidth() == 0.0f);
-	REQUIRE(lineRect.GetHeight() == 100.0f);
+	REQUIRE(lineRect.width == 0.0f);
+	REQUIRE(lineRect.height == 100.0f);
 	
 	lineRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.0f, 0.5f), Vector2(1.0f, 0.5f));
 	REQUIRE(lineRect.x == 10.0f);
 	REQUIRE(lineRect.y == 60.0f);
-	REQUIRE(lineRect.GetWidth() == 100.0f);
-	REQUIRE(lineRect.GetHeight() == 0.0f);
+	REQUIRE(lineRect.width == 100.0f);
+	REQUIRE(lineRect.height == 0.0f);
 	
 	// Check anchor rect for an actual rect.
 	Rect anchorRect = RectUtil::CalcAnchorRect(parentRect, Vector2(0.25f, 0.4f), Vector2(0.75f, 0.6f));
 	REQUIRE(anchorRect.x == 35.0f);
 	REQUIRE(anchorRect.y == 50.0f);
-	REQUIRE(anchorRect.GetWidth() == 50.0f);
-	REQUIRE(anchorRect.GetHeight() == 20.0f);
+	REQUIRE(anchorRect.width == 50.0f);
+	REQUIRE(anchorRect.height == 20.0f);
 }
 
 TEST_CASE("RectUtil::CalcChildRect works")

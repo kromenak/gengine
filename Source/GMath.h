@@ -1,8 +1,10 @@
 //
-//  Math.h
-//  GEngine
+// GMath.h
 //
-//  Created by Clark Kromenaker on 10/16/17.
+// Clark Kromenaker
+//
+// General purpose math functions.
+// Called "GMath" to avoid potential name conflict on Windows.
 //
 #pragma once
 #include <algorithm>
@@ -160,10 +162,8 @@ namespace Math
 
 	inline float MagnitudeSign(float mag, float sign)
 	{
-		// Given a magnitude and sign, returns a number that has the given magnitude and sign.
-		// So, take the magnitude of the first number, discard the sign.
-		// Take the sign of the second number, discard the magnitude.
-		// Mash them together!
+        // Take magnitude of first number and sign of second number.
+        // Return product of those two things. (e.g. 35, -18 => -35)
 		return std::copysign(mag, sign);
 	}
     

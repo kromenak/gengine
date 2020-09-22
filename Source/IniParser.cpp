@@ -149,7 +149,7 @@ Rect IniKeyValue::GetValueAsRect() const
     // Convert to numbers and return.
 	Vector2 p1(std::stof(firstNum), std::stof(secondNum));
 	Vector2 p2(std::stof(thirdNum), std::stof(fourthNum));
-	return Rect::FromTwoPoints(p1, p2);
+    return Rect(p1, p2);
 }
 
 IniParser::IniParser(const char* filePath)

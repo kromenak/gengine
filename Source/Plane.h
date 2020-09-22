@@ -19,15 +19,15 @@ public:
     Plane(float normalX, float normalY, float normalZ, float distance);
     Plane(const Vector3& p0, const Vector3& p1, const Vector3& p2);
     
+    Vector3 GetNormal() const { return mNormal; }
+    float GetDistanceFromOrigin() const { return mDistance; }
+    
 	//TODO: Transform plane to another space.
     
 	bool ContainsPoint(const Vector3& point) const;
 	Vector3 GetClosestPoint(const Vector3& point) const;
 	
 	float GetDistanceFromPlane(const Vector3& point) const;
-	
-	Vector3 GetNormal() const { return mNormal; }
-    float GetDistanceFromOrigin() const { return mDistance; }
 	
 	// Given three planes, calculate point of intersection.
 	static bool GetIntersectionPoint(const Plane& p1, const Plane& p2, const Plane& p3, Vector3& outPoint);
