@@ -11,7 +11,6 @@
 BSPLightmap::BSPLightmap(std::string name, char* data, int dataLength) :
     Asset(name)
 {
-    std::cout << "Loading BSP lightmap " << name << std::endl;
     BinaryReader reader(data, dataLength);
     
     // 4 bytes: file identifier "TULM" (MULT backwards).
@@ -29,11 +28,11 @@ BSPLightmap::BSPLightmap(std::string name, char* data, int dataLength) :
     // Iterate and read in each bitmap in turn.
     for(unsigned int i = 0; i < bitmapCount; i++)
     {
-        std::cout << "Loading lightmap texture " << i << std::endl;
-        
         // The texture will be read in using the same reader object.
         // This should leave the reader ready to read in the NEXT texture (assuming no texture parsing bugs).
         Texture* texture = new Texture(reader);
+        texture->SetFilterMode(Texture::FilterMode::Bilinear);
+        texture->SetWrapMode(Texture::WrapMode::Clamp);
         mLightmapTextures.push_back(texture);
     }
     
@@ -41,7 +40,7 @@ BSPLightmap::BSPLightmap(std::string name, char* data, int dataLength) :
     // Write out for debugging...
     for(int i = 0; i < mLightmapTextures.size(); i++)
     {
-        mLightmapTextures[i]->WriteToFile(name + "_lm_" + std::to_string(i) + ".bmp");
+        mLightmapTextures[i]->WriteToFile(GetNameNoExtension() + "_lm_" + std::to_string(i) + ".bmp");
     }
     */
 }
