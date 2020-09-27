@@ -12,6 +12,13 @@ AABB::AABB(const Vector3& min, const Vector3& max) :
     
 }
 
+AABB::AABB(const Vector3& center, float extentsX, float extentsY, float extentsZ)
+{
+    Vector3 halfExtents(extentsX * 0.5f, extentsY * 0.5f, extentsZ * 0.5f);
+    mMin = center - halfExtents;
+    mMax = center + halfExtents;
+}
+
 void AABB::GrowToContain(const Vector3& point)
 {
 	// Grow min.

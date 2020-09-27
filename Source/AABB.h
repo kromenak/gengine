@@ -14,6 +14,7 @@ class AABB
 public:
     AABB() = default;
 	AABB(const Vector3& min, const Vector3& max);
+    AABB(const Vector3& center, float extentsX, float extentsY, float extentsZ);
 	
 	Vector3 GetMin() const { return mMin; }
 	Vector3 GetMax() const { return mMax; }
