@@ -126,14 +126,11 @@ void UILabel::GenerateMesh()
 	int charCount = mTextLayout.GetCharCount();
 	if(charCount == 0) { return; }
 	
-	// 4 vertices per character; each vertex has position and UVs.
-	int vertexCount = (int)charCount * 4;
-	int vertexSize = (9 * sizeof(float));
-	
 	// Create mesh of desired size and usage.
 	mMesh = new Mesh();
-	Submesh* submesh = new Submesh(vertexCount, vertexSize, MeshUsage::Static);
-	mMesh->AddSubmesh(submesh);
+    
+    // 4 vertices per character; each vertex has position and UVs.
+    int vertexCount = (int)charCount * 4;
 	
 	// Create arrays to hold vertex positions and UVs.
 	int positionSize = vertexCount * 3;
@@ -228,11 +225,21 @@ void UILabel::GenerateMesh()
 		++charIndex;
 	}
 	
-	// Save positions and UVs to mesh.
-	submesh->SetPositions(positions);
-	submesh->SetColors(colors);
-	submesh->SetUV1(uvs);
-	submesh->SetIndexes(indexes, indexSize);
+    MeshDefinition meshDefinition;
+    meshDefinition.meshUsage = MeshUsage::Static;
+    
+    meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Color);
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
+    
+    meshDefinition.vertexCount = vertexCount;
+    meshDefinition.vertexData = &(std::vector<float*> { positions, colors, uvs })[0];
+    
+    meshDefinition.indexCount = indexSize;
+    meshDefinition.indexData = indexes;
+    
+    Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
 	
 	// This mesh should render as a "triangle strip".
 	// Vtx 1,2,3 is one triangle. Vtx 2,3,4 is the next triangle.

@@ -3,16 +3,15 @@
 //
 // Clark Kromenaker
 //
-// Actual 3D mesh data in a particular format that is fit to be rendered.
-// Vertex data - positions, colors, UVs, etc.
+// Whereas a vertex array ONLY knows how to upload to the GPU and render,
+// a Submesh owns vertex data and provides some other functionality (e.g getting triangles, raycasting).
 //
 #pragma once
-
 #include <string>
 
 #include "Vector3.h"
+#include "VertexArray.h"
 
-class GLVertexArray;
 class Ray;
 
 enum class RenderMode
@@ -23,99 +22,66 @@ enum class RenderMode
 	Lines				// Every 2 vertices is one line.
 };
 
-enum class MeshUsage
-{
-	Static,
-	Dynamic
-};
-
-//TODO: Figure out how to best define this stuff (semantic/type/format).
-enum class VertexAttributeSemantic
-{
-	Position,
-	Color,
-	Normal,
-	UV
-};
-
-enum class VertexAttributeType
-{
-	Float,
-	Float2,
-	Float3,
-	Float4
-};
-
-struct VertexFormat
-{
-	bool interleaved = false;
-};
-
 class Submesh
 {
 public:
-	Submesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage);
+    Submesh(const MeshDefinition& meshDefinition);
 	~Submesh();
 	
+    void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
+    
 	void Render() const;
 	void Render(unsigned int offset, unsigned int count) const;
 	
-	void SetPositions(float* positions);
-	void CopyPositions(float* positions);
-	
-	void SetColors(float* colors);
-	void SetNormals(float* normals);
-	void SetUV1(float* uvs);
-	
-	void SetIndexes(unsigned short* indexes, int count);
-	
-	void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
-	
-	void SetTextureName(const std::string& textureName) { mTextureName = textureName; }
-	const std::string& GetTextureName() const { return mTextureName; }
-	
 	unsigned int GetVertexCount() const { return mVertexCount; }
 	Vector3 GetVertexPosition(int index) const;
-	
-	int GetIndexCount() const { return mIndexCount; }
-	unsigned short* GetIndexes() { return mIndexes; }
+    bool GetVertexNormal(int index, Vector3& n) const;
 	
 	int GetTriangleCount() const;
 	bool GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) const;
-	bool GetNormal(int index, Vector3& n) const;
 	
 	bool Raycast(const Ray& ray);
-	
-	float* GetPositions() { return mPositions; }
-	float* GetColors() { return mColors; }
-	float* GetNormals() { return mNormals; }
-	float* GetUV1s() { return mUV1; }
+    
+    void SetPositions(float* positions, bool createCopy = false);
+    float* GetPositions() { return mPositions; }
+    
+    void SetNormals(float* normals, bool createCopy = false);
+    float* GetNormals() { return mNormals; }
+    
+    void SetColors(float* colors, bool createCopy = false);
+    float* GetColors() { return mColors; }
+    
+    void SetUV1s(float* uvs, bool createCopy = false);
+    float* GetUV1s() { return mUV1; }
+    
+    void SetIndexes(unsigned short* indexes, bool createCopy = false);
+    int GetIndexCount() const { return mIndexCount; }
+    unsigned short* GetIndexes() { return mIndexes; }
+    
+    // Kind of a weird thing where GK3 submeshes hold the texture name.
+    // Might make sense to move this to like a subclass or something?
+    void SetTextureName(const std::string& textureName) { mTextureName = textureName; }
+    const std::string& GetTextureName() const { return mTextureName; }
 	
 private:
-	// Number of vertices in the mesh.
+    // Indicates how this mesh is rendered.
+    // Dictates what rendering command we use in the underlying rendering system.
+    RenderMode mRenderMode = RenderMode::Triangles;
+    
+	// Number of vertices and indexes in the mesh.
 	unsigned int mVertexCount = 0;
+    unsigned int mIndexCount = 0;
 	
 	// Vertex data. The submesh owns this data.
 	float* mPositions = nullptr;
 	float* mColors = nullptr;
 	float* mNormals = nullptr;
 	float* mUV1 = nullptr;
+    unsigned short* mIndexes = nullptr;
 	
-	// Index data. If present, the submesh draws using indexed methods.
-	// The submesh owns this data.
-	unsigned int mIndexCount = 0;
-	unsigned short* mIndexes = nullptr;
-	
+    // Vertex array that actually renders using the underlying rendering system.
+    VertexArray mVertexArray;
+    
 	// Name of the default texture to use for this submesh.
 	std::string mTextureName;
-	
-	// Uniform color value applied to this mesh.
-	// ???
-	
-	// Indicates how this mesh is rendered.
-	// Dictates what rendering command we use in the underlying rendering system.
-	RenderMode mRenderMode = RenderMode::Triangles;
-	
-	// Vertex array object that actually renders using the underlying rendering system.
-	GLVertexArray* mVertexArray = nullptr;
 };

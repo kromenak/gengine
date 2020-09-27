@@ -80,7 +80,7 @@
 	
 	// If planes do intersect, the line of intersection is along this vector.
 	// If parallel, normals are facing same direction or opposite - in both cases, cross result would be zero.
-	Vector3 lineDir = Vector3::Cross(p1.GetNormal(), p2.GetNormal());
+	Vector3 lineDir = Vector3::Cross(p1.normal, p2.normal);
 	
 	// If not zero, there is an intersection.
 	return !Math::IsZero(lineDir.GetLengthSq());

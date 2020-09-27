@@ -273,7 +273,6 @@ void Model::ParseFromData(char *data, int dataLength)
             // 4 bytes: unknown - often is (0x00FFFFFF), but not always.
             // Have also seen: 0x03773BB3, 0xFF000000, 0x50261200
             // Maybe a color value?
-			
             reader.ReadUInt();
 
             // 4 bytes: unknown - seems to usually be 1, sometimes 0.
@@ -284,13 +283,6 @@ void Model::ParseFromData(char *data, int dataLength)
             #ifdef DEBUG_OUTPUT
             std::cout << "      Vertex count: " << vertexCount << std::endl;
             #endif
-            
-			// Create submesh object and add it to the mesh.
-			Submesh* submesh = new Submesh(vertexCount, 8 * sizeof(float), MeshUsage::Dynamic);
-			mesh->AddSubmesh(submesh);
-			
-            // Save texture name.
-            submesh->SetTextureName(textureName);
             
             // Based on vertex count, we can allocate some arrays for data.
             float* vertexPositions = new float[vertexCount * 3];
@@ -334,7 +326,6 @@ void Model::ParseFromData(char *data, int dataLength)
             #ifdef DEBUG_OUTPUT
             //std::cout << std::endl;
             #endif
-            submesh->SetPositions(vertexPositions);
             
             // Then we have vertex normals.
             for(int k = 0; k < vertexCount; k++)
@@ -343,8 +334,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexNormals[k * 3] = normal.x;
                 vertexNormals[k * 3 + 1] = normal.z;
                 vertexNormals[k * 3 + 2] = normal.y;
-            }
-            submesh->SetNormals(vertexNormals);
+            };
             
             // Vertex UV coordinates.
             for(int k = 0; k < vertexCount; k++)
@@ -353,7 +343,6 @@ void Model::ParseFromData(char *data, int dataLength)
                 vertexUVs[k * 2] = uv.x;
                 vertexUVs[k * 2 + 1] = uv.y;
             }
-            submesh->SetUV1(vertexUVs);
             
             // Next comes vertex indexes for drawing from an IBO.
             // Common sequence would be (2, 1, 0) or (5, 4, 3), referring to vertex indexes above.
@@ -368,7 +357,35 @@ void Model::ParseFromData(char *data, int dataLength)
                 // 0x9B3E (16027), 0x583F (16216), 0xCC0D (3532), 0xCD0D (3533)
 				reader.ReadUShort(); // WHAT IS IT!?
             }
-            submesh->SetIndexes(vertexIndexes, faceCount * 3);
+            
+            // Generate mesh from data.
+            MeshDefinition meshDefinition;
+            meshDefinition.meshUsage = MeshUsage::Dynamic;
+            
+            meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
+            meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
+            meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Normal);
+            meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
+            
+            meshDefinition.vertexCount = vertexCount;
+            std::vector<float*> vertexData;
+            vertexData.push_back(vertexPositions);
+            vertexData.push_back(vertexNormals);
+            vertexData.push_back(vertexUVs);
+            meshDefinition.vertexData = &vertexData[0];
+        
+            meshDefinition.indexCount = faceCount * 3;
+            meshDefinition.indexData = vertexIndexes;
+            
+            // Create submesh.
+            Submesh* submesh = mesh->AddSubmesh(meshDefinition);
+            submesh->SetPositions(vertexPositions);
+            submesh->SetNormals(vertexNormals);
+            submesh->SetUV1s(vertexUVs);
+            submesh->SetIndexes(vertexIndexes);
+            
+            // Save texture name.
+            submesh->SetTextureName(textureName);
             
             // Next comes LODK blocks for this mesh group.
             // Not totally sure what these are for, but maybe LOD groups?

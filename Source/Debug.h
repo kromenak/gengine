@@ -6,7 +6,6 @@
 // Provides some functions for debugging and visualizing constructs in 3D space.
 //
 #pragma once
-
 #include <list>
 
 #include "Color32.h"
@@ -14,8 +13,10 @@
 
 class AABB;
 class Mesh;
-class Triangle;
+class Plane;
 class Rect;
+class Shader;
+class Triangle;
 class Vector3;
 
 struct DrawCommand
@@ -42,6 +43,8 @@ public:
     static void DrawRect(const Rect& rect, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
     static void DrawAABB(const AABB& aabb, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
     
+    static void DrawPlane(const Plane& plane, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
+    
     static void DrawTriangle(const Triangle& triangle, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
 	
 	static void Update(float deltaTime);
@@ -54,6 +57,7 @@ public:
 	
 private:
 	static std::list<DrawCommand> sDrawCommands;
+    static Shader* sDrawShader;
 	
 	// Debug settings, possible to toggle in-game.
 	static bool sRenderActorTransformAxes;

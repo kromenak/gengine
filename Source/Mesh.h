@@ -23,8 +23,7 @@ struct RaycastHit;
 class Mesh
 {
 public:
-	Mesh();
-	Mesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage);
+    Mesh() = default;
     ~Mesh();
 	
     void Render();
@@ -37,7 +36,8 @@ public:
 	void SetAABB(const AABB& aabb) { mAABB = aabb; }
 	const AABB& GetAABB() const { return mAABB; }
 	
-	void AddSubmesh(Submesh* submesh) { mSubmeshes.push_back(submesh); }
+    Submesh* AddSubmesh(const MeshDefinition& meshDefinition);
+    
 	Submesh* GetSubmesh(int index) const { return index >= 0 && index < static_cast<int>(mSubmeshes.size()) ? mSubmeshes[index] : nullptr; }
 	int GetSubmeshCount() const { return static_cast<int>(mSubmeshes.size()); }
 	

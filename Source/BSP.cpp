@@ -9,6 +9,7 @@
 
 #include "BinaryReader.h"
 #include "BSPActor.h"
+#include "Debug.h"
 #include "Services.h"
 #include "StringUtil.h"
 #include "Vector2.h"
@@ -27,45 +28,6 @@ BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
     mMaterial.SetShader(lightmapShader);
 }
 
-void BSP::ApplyLightmap(const BSPLightmap& lightmap)
-{
-    const std::vector<Texture*>& lightmapTextures = lightmap.GetLightmapTextures();
-    for(int i = 0; i < lightmapTextures.size(); i++)
-    {
-        if(i < mSurfaces.size())
-        {
-            mSurfaces[i]->lightmapTexture = lightmapTextures[i];
-        }
-    }
-}
-
-void BSP::Render(Vector3 cameraPosition)
-{
-	RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Any);
-}
-
-void BSP::RenderOpaque(Vector3 cameraPosition)
-{
-	// Activate the material one time to ensure shader is activated and uniforms are set.
-	// But we do a bit of a hack by activating/deactivating the texture separately when rendering each triangle.
-	// I don't really want to make a separate material for each texture in the bsp...seems like it'd just slow things down.
-    mMaterial.Activate(Matrix4::Identity);
-	
-	mAlphaPolygons = nullptr;
-	RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Opaque);
-}
-
-void BSP::RenderTranslucent(Vector3 cameraPosition)
-{
-	BSPPolygon* polygon = mAlphaPolygons;
-	while(polygon != nullptr)
-	{
-		RenderPolygon(polygon, RenderType::Translucent);
-		polygon = polygon->next;
-	}
-	//RenderTree(mNodes[mRootNodeIndex], cameraPosition, RenderType::Translucent);
-}
-
 bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
 {
 	// Values for tracking closest found hit.
@@ -77,15 +39,14 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
 	// up of "triangle fans", so the first vertex in a polygon is shared by all triangles.
     for(auto& polygon : mPolygons)
     {
-		BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
-		if(surface == nullptr) { continue; }
-		if(!surface->interactive) { continue; }
+        BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
+        if(!surface.interactive) { continue; }
 		
-        Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
-        for(int i = 1; i < polygon->vertexCount - 1; i++)
+        Vector3 p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
+        for(int i = 1; i < polygon.vertexIndexCount - 1; i++)
         {
-            Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
-            Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
+            Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
+            Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
 			RaycastHit hitInfo;
 			if(Collisions::TestRayTriangle(ray, p0, p1, p2, hitInfo))
             {
@@ -95,7 +56,7 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
                     outHitInfo.t = hitInfo.t;
                     
                     // Find surface for this polygon, and then name for the surface.
-                    closest = &mObjectNames[surface->objectIndex];
+                    closest = &mObjectNames[surface.objectIndex];
                 }
             }
         }
@@ -115,15 +76,15 @@ bool BSP::RaycastSingle(const Ray& ray, std::string name, RaycastHit& outHitInfo
 	{
 		// We're only interested in intersections with a certain object.
 		// So, if this isn't the object, we can continue!
-		BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
-		if(mObjectNames[surface->objectIndex] != name) { continue; }
-		if(!surface->interactive) { continue; }
+        BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
+        if(mObjectNames[surface.objectIndex] != name) { continue; }
+        if(!surface.interactive) { continue; }
 		
-		Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
-		for(int i = 1; i < polygon->vertexCount - 1; i++)
+        Vector3 p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
+        for(int i = 1; i < polygon.vertexIndexCount - 1; i++)
 		{
-			Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
-			Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
+            Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
+            Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
 			if(Collisions::TestRayTriangle(ray, p0, p1, p2, outHitInfo))
 			{
 				// Save name of hit object.
@@ -146,19 +107,19 @@ std::vector<RaycastHit> BSP::RaycastAll(const Ray& ray)
 	// up of "triangle fans", so the first vertex in a polygon is shared by all triangles.
 	for(auto& polygon : mPolygons)
 	{
-		BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
-		if(!surface->interactive) { continue; }
+        BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
+        if(!surface.interactive) { continue; }
 		
-		Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
-		for(int i = 1; i < polygon->vertexCount - 1; i++)
+        Vector3 p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
+        for(int i = 1; i < polygon.vertexIndexCount - 1; i++)
 		{
-			Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
-			Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
+            Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
+            Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
 			RaycastHit hitInfo;
 			if(Collisions::TestRayTriangle(ray, p0, p1, p2, hitInfo))
 			{
 				// Save hit object name.
-				hitInfo.name = mObjectNames[surface->objectIndex];
+                hitInfo.name = mObjectNames[surface.objectIndex];
 				
 				// Add to hit info vector.
 				hits.push_back(hitInfo);
@@ -172,11 +133,11 @@ std::vector<RaycastHit> BSP::RaycastAll(const Ray& ray)
 
 bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo)
 {
-	Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndex]];
-	for(int i = 1; i < polygon->vertexCount - 1; i++)
+	Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndexOffset]];
+	for(int i = 1; i < polygon->vertexIndexCount - 1; i++)
 	{
-		Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndex + i]];
-		Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndex + i + 1]];
+		Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i]];
+		Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i + 1]];
 		if(Collisions::TestRayTriangle(ray, p0, p1, p2, outHitInfo))
 		{
 			return true;
@@ -207,18 +168,18 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
 	AABB aabb;
 	for(int surfaceIndex = 0; surfaceIndex < mSurfaces.size(); surfaceIndex++)
 	{
-		if(mSurfaces[surfaceIndex]->objectIndex == objectIndex)
+        if(mSurfaces[surfaceIndex].objectIndex == objectIndex)
 		{
-			actor->AddSurface(mSurfaces[surfaceIndex]);
+			actor->AddSurface(&mSurfaces[surfaceIndex]);
 			
 			for(int polygonIndex = 0; polygonIndex < mPolygons.size(); polygonIndex++)
 			{
-				if(mPolygons[polygonIndex]->surfaceIndex == surfaceIndex)
+                if(mPolygons[polygonIndex].surfaceIndex == surfaceIndex)
 				{
-					actor->AddPolygon(mPolygons[polygonIndex]);
+					actor->AddPolygon(&mPolygons[polygonIndex]);
 					
-					int start = mPolygons[polygonIndex]->vertexIndex;
-					int end = start + mPolygons[polygonIndex]->vertexCount;
+                    int start = mPolygons[polygonIndex].vertexIndexOffset;
+                    int end = start + mPolygons[polygonIndex].vertexIndexCount;
 					for(int k = start; k < end; k++)
 					{
 						if(firstPoint)
@@ -261,9 +222,9 @@ void BSP::SetVisible(std::string objectName, bool visible)
 	// All surfaces belonging to this object will be hidden.
 	for(auto& surface : mSurfaces)
 	{
-		if(surface->objectIndex == index)
+        if(surface.objectIndex == index)
 		{
-			surface->visible = visible;
+            surface.visible = visible;
 		}
 	}
 }
@@ -287,9 +248,9 @@ void BSP::SetTexture(std::string objectName, Texture* texture)
 	// All surfaces belonging to this object will be hidden.
 	for(auto& surface : mSurfaces)
 	{
-		if(surface->objectIndex == index)
+        if(surface.objectIndex == index)
 		{
-			surface->texture = texture;
+            surface.texture = texture;
 		}
 	}
 }
@@ -325,9 +286,9 @@ bool BSP::IsVisible(std::string objectName) const
 	// Find any surface belonging to this object and see if it is visible.
 	for(auto& surface : mSurfaces)
 	{
-		if(surface->objectIndex == index)
+        if(surface.objectIndex == index)
 		{
-			return surface->visible;
+            return surface.visible;
 		}
 	}
 	
@@ -357,14 +318,14 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
 	int vertexCount = 0;
 	for(int i = 0; i < mSurfaces.size(); i++)
 	{
-		if(mSurfaces[i]->objectIndex == objectIndex)
+        if(mSurfaces[i].objectIndex == objectIndex)
 		{
 			for(int j = 0; j < mPolygons.size(); j++)
 			{
-				if(mPolygons[j]->surfaceIndex == i)
+                if(mPolygons[j].surfaceIndex == i)
 				{
-					int start = mPolygons[j]->vertexIndex;
-					int end = start + mPolygons[j]->vertexCount;
+                    int start = mPolygons[j].vertexIndexOffset;
+                    int end = start + mPolygons[j].vertexIndexCount;
 					
 					for(int k = start; k < end; k++)
 					{
@@ -380,163 +341,183 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
 	return pos / vertexCount;
 }
 
-void BSP::RenderTree(BSPNode* node, Vector3 position, RenderType renderType)
+void BSP::ApplyLightmap(const BSPLightmap& lightmap)
 {
-    // Figure out the location of the camera position relative to the plane.
-    PointLocation location = GetPointLocation(position, mPlanes[node->planeIndex]);
-    
-    // Using "Behind" here acts as a "front-to-back" BSP renderer.
-    // Pros: If depth-buffer is enabled, renders opaque graphics most efficiently.
-    // Cons: Can't support non-opaque graphics. Only works if depth-buffer is enabled.
-	
-    // Using "InFrontOf" here acts as a "back-to-front" BSP renderer.
-    // Pros: Without depth-buffer, will render both opaque and non-opaque graphics correctly.
-    // Cons: More overdraw due to pixel redraw without depth-buffer.
-	PointLocation comparison = PointLocation::InFrontOf;
-	if(renderType == RenderType::Opaque)
-	{
-		comparison = PointLocation::Behind;
-	}
-	else if(renderType == RenderType::Translucent)
-	{
-		comparison = PointLocation::InFrontOf;
-	}
-	
-    if(location == comparison)
+    const std::vector<Texture*>& lightmapTextures = lightmap.GetLightmapTextures();
+    for(int i = 0; i < mSurfaces.size(); ++i)
     {
-        int backNodeIndex = node->backChildIndex;
-        if(backNodeIndex >= 0 && backNodeIndex < mNodes.size())
-        {
-            RenderTree(mNodes[backNodeIndex], position, renderType);
-        }
+        mSurfaces[i].lightmapTexture = lightmapTextures[i];
+    }
+}
+
+// For debugging BSP issues, helpful to track polygons rendered and tree depth.
+int renderedPolygonCount = 0;
+int treeDepth = 0;
+
+void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirection)
+{
+    // Activate material for rendering.
+    mMaterial.Activate(Matrix4::Identity);
+    
+    // Reset render stat values.
+    renderedPolygonCount = 0;
+    treeDepth = 0;
+    
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    RenderTree(mNodes[mRootNodeIndex], cameraPosition, cameraDirection);
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
+    //std::cout << "Rendered " << renderedPolygonCount << " polygons." << std::endl;
+}
+
+void BSP::RenderTranslucent()
+{
+    BSPPolygon* polygon = mAlphaPolygons;
+    while(polygon != nullptr)
+    {
+        RenderPolygon(*polygon, true);
+        polygon = polygon->next;
+    }
+    mAlphaPolygons = nullptr;
+}
+
+void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const Vector3& cameraDirection)
+{
+    // Check signed distance of point to plane to determine if point is in front of, behind, or on the plane.
+    float signedDistance = mPlanes[node.planeIndex].GetSignedDistance(cameraPosition);
+    
+    // Based on camera position/facing direction, we can sometimes avoid rendering entire parts of the BSP tree.
+    //TODO: Maybe base this on the camera's FOV rather than hardcoding?
+    const float kCameraFacingDot = 0.9f;
+    
+    // Determine render order for this node.
+    // This makes a "front-to-back" renderer, resulting in no overdraw for opaque rendering.
+    bool renderCurrent = true;
+    int firstNodeIndex = -1;
+    int secondNodeIndex = -1;
+    if(Math::IsZero(signedDistance))
+    {
+        // Point is on plane - render front and back trees. Don't render current node.
+        renderCurrent = false;
+        firstNodeIndex = node.frontChildIndex;
+        secondNodeIndex = node.backChildIndex;
+    }
+    else if(signedDistance > 0.0f)
+    {
+        // Point is in front of plane - render front, then back trees.
+        firstNodeIndex = node.frontChildIndex;
+        secondNodeIndex = node.backChildIndex;
         
-        // Render polygons at current node.
-        int polygonIndex = node->polygonIndex;
-        for(int i = polygonIndex; i < polygonIndex + node->polygonCount; i++)
+        // If in front of plane AND facing away from plane, there's no need to render the back at all.
+        float dot = Vector3::Dot(mPlanes[node.planeIndex].normal, cameraDirection);
+        if(dot > kCameraFacingDot)
         {
-            RenderPolygon(mPolygons[i], renderType);
-        }
-        if(node->polygonIndex2 != 65535 && node->polygonCount2 > 0)
-        {
-            polygonIndex = node->polygonIndex2;
-            for(int i = polygonIndex; i < polygonIndex + node->polygonCount2; i++)
-            {
-                RenderPolygon(mPolygons[i], renderType);
-            }
-        }
-        
-        int frontNodeIndex = node->frontChildIndex;
-        if(frontNodeIndex >= 0 && frontNodeIndex < mNodes.size())
-        {
-            RenderTree(mNodes[frontNodeIndex], position, renderType);
+            secondNodeIndex = -1;
         }
     }
     else
     {
-        int frontNodeIndex = node->frontChildIndex;
-        if(frontNodeIndex >= 0 && frontNodeIndex < mNodes.size())
+        // Point is behind plane - render back, then front trees.
+        firstNodeIndex = node.backChildIndex;
+        secondNodeIndex = node.frontChildIndex;
+        
+        // If behind plane AND facing away from plane, there's no need to render the front at all.
+        float dot = Vector3::Dot(mPlanes[node.planeIndex].normal, cameraDirection);
+        if(dot < -kCameraFacingDot)
         {
-            RenderTree(mNodes[frontNodeIndex], position, renderType);
+            secondNodeIndex = -1;
+        }
+    }
+    
+    // Render first tree.
+    if(firstNodeIndex >= 0 && firstNodeIndex < mNodes.size())
+    {
+        ++treeDepth;
+        RenderTree(mNodes[firstNodeIndex], cameraPosition, cameraDirection);
+        --treeDepth;
+    }
+    
+    // Render current, maybe (probably).
+    if(renderCurrent)
+    {
+        // Determine whether polygon sets 1 & 2 are present.
+        bool hasPolygon1 = node.polygonIndex != 65535 && node.polygonCount > 0;
+        bool hasPolygon2 = node.polygonIndex2 != 65535 && node.polygonCount2 > 0;
+        
+        // Some debug keys to visualize what polygons are in each set.
+        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_Y))
+        {
+            hasPolygon1 = false;
+        }
+        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_U))
+        {
+            hasPolygon2 = false;
         }
         
-        // Render polygons at current node.
-        int polygonIndex = node->polygonIndex;
-        for(int i = polygonIndex; i < polygonIndex + node->polygonCount; i++)
+        // Render first set of polygons.
+        if(hasPolygon1)
         {
-            RenderPolygon(mPolygons[i], renderType);
-        }
-        if(node->polygonIndex2 != 65535 && node->polygonCount2 > 0)
-        {
-            polygonIndex = node->polygonIndex2;
-            for(int i = polygonIndex; i < polygonIndex + node->polygonCount2; i++)
+            for(int i = node.polygonIndex; i < node.polygonIndex + node.polygonCount; i++)
             {
-                RenderPolygon(mPolygons[i], renderType);
+                RenderPolygon(mPolygons[i], false);
+                ++renderedPolygonCount;
             }
         }
         
-        int backNodeIndex = node->backChildIndex;
-        if(backNodeIndex >= 0 && backNodeIndex < mNodes.size())
+        // Render second set of polygons.
+        if(hasPolygon2)
         {
-            RenderTree(mNodes[backNodeIndex], position, renderType);
+            for(int i = node.polygonIndex2; i < node.polygonIndex2 + node.polygonCount2; i++)
+            {
+                RenderPolygon(mPolygons[i], false);
+                ++renderedPolygonCount;
+            }
         }
+    }
+    
+    // Render second tree.
+    if(secondNodeIndex >= 0 && secondNodeIndex < mNodes.size())
+    {
+        ++treeDepth;
+        RenderTree(mNodes[secondNodeIndex], cameraPosition, cameraDirection);
+        --treeDepth;
     }
 }
 
-void BSP::RenderPolygon(BSPPolygon* polygon, RenderType renderType)
+void BSP::RenderPolygon(BSPPolygon& polygon, bool translucent)
 {
-    // Can't render a null object DUH.
-    if(polygon == nullptr) { return; }
-    
     // If we have a valid surface reference, use it to get rendering configured.
-    BSPSurface* surface = mSurfaces[polygon->surfaceIndex];
-    if(surface != nullptr)
-    {
-        // Not going to render non-visible surfaces.
-        if(!surface->visible) { return; }
+    BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
+    
+    // Not going to render non-visible surfaces.
+    if(!surface.visible) { return; }
 		
-        // Retrieve texture and activate it, if possible.
-        Texture* tex = surface->texture;
-        if(tex != nullptr)
+    // Retrieve texture and activate it, if possible.
+    Texture* tex = surface.texture;
+    if(tex != nullptr)
+    {
+        // If has alpha, don't render it now, but add it to the alpha chain.
+        if(tex->GetRenderType() == Texture::RenderType::Translucent && translucent)
         {
-			// If has alpha, don't render it now, but add it to our alpha.
-			if(tex->GetRenderType() == Texture::RenderType::Translucent && renderType != RenderType::Translucent)
-			{
-				polygon->next = mAlphaPolygons;
-				mAlphaPolygons = polygon;
-				return;
-			}
-			
-            tex->Activate(0);
+            polygon.next = mAlphaPolygons;
+            mAlphaPolygons = &polygon;
+            return;
         }
-        else
-        {
-			Texture::Deactivate();
-        }
-        
-        
-        Vector4 uvScaleOffset;
-        uvScaleOffset.x = surface->uvScale.x;
-        uvScaleOffset.y = surface->uvScale.y;
-        uvScaleOffset.z = surface->uvOffset.x;
-        uvScaleOffset.w = surface->uvOffset.y;
-        mMaterial.GetShader()->SetUniformVector4("uDiffuseScaleOffset", uvScaleOffset);
-        
-        Texture* lightmapTex = surface->lightmapTexture;
-        if(lightmapTex != nullptr)
-        {
-            lightmapTex->Activate(1);
-        }
+        tex->Activate(0);
+    }
+    else
+    {
+        Texture::Deactivate();
+    }
+     
+    Texture* lightmapTex = surface.lightmapTexture;
+    if(lightmapTex != nullptr)
+    {
+        lightmapTex->Activate(1);
     }
 	
     // Draw the polygon.
-    mMesh->Render(0, polygon->vertexIndex, polygon->vertexCount);
-}
-
-BSP::PointLocation BSP::GetPointLocation(Vector3 position, Plane* plane)
-{
-    // We can calculate a point on the plane with the normal and distance values.
-    Vector3 pointOnPlane = plane->GetClosestPoint(Vector3::Zero);
-    //std::cout << (Vector3::Dot(pointOnPlane, plane->GetNormal()) + plane->GetDistanceFromOrigin()) << std::endl;
-    
-    // We then get a vector from our position to the plane.
-    Vector3 posToPlane = pointOnPlane - position;
-    
-    // If dot product is zero, the point is on the plane.
-    // If greater than zero, the vector and normal are generally facing the same way: the point is behind the plane.
-    // If less than zero, the vector and normal are facing away from each other: the point is in front of the plane.
-    float dotProduct = Vector3::Dot(posToPlane, plane->GetNormal());
-    if(Math::IsZero(dotProduct))
-    {
-        return BSP::PointLocation::OnPlane;
-    }
-    else if(dotProduct > 0.0f)
-    {
-        return BSP::PointLocation::Behind;
-    }
-    else
-    {
-        return BSP::PointLocation::InFrontOf;
-    }
+    mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
 }
 
 void BSP::ParseFromData(char *data, int dataLength)
@@ -578,16 +559,15 @@ void BSP::ParseFromData(char *data, int dataLength)
     // Iterate and read surfaces.
     for(int i = 0; i < surfaceCount; i++)
     {
-        BSPSurface* surface = new BSPSurface();
-        surface->objectIndex = reader.ReadUInt();
+        BSPSurface surface;
+        surface.objectIndex = reader.ReadUInt();
         
-        surface->textureName = reader.ReadString(32);
-        surface->texture = Services::GetAssets()->LoadTexture(surface->textureName);
+        surface.texture = Services::GetAssets()->LoadTexture(reader.ReadString(32));
         
-        surface->uvOffset = reader.ReadVector2();
-        surface->uvScale = reader.ReadVector2();
+        surface.uvOffset = reader.ReadVector2();
+        surface.uvScale = reader.ReadVector2();
         
-        surface->scale = reader.ReadFloat();
+        surface.scale = reader.ReadFloat();
         //std::cout << i << ", " << mObjectNames[surface->objectIndex] << ": uv-off " << surface->uvOffset << ", uv-scale " << surface->uvScale << ", scale " << surface->scale << std::endl;
         
         /*
@@ -626,16 +606,16 @@ void BSP::ParseFromData(char *data, int dataLength)
     // Iterate and read nodes.
     for(int i = 0; i < nodeCount; i++)
     {
-        BSPNode* node = new BSPNode();
-        node->frontChildIndex = reader.ReadUShort(); // These appear to be 65535 if invalid/null.
-        node->backChildIndex = reader.ReadUShort();
+        BSPNode node;
+        node.frontChildIndex = reader.ReadUShort(); 
+        node.backChildIndex = reader.ReadUShort();
         
-        node->planeIndex = reader.ReadUShort();
+        node.planeIndex = reader.ReadUShort();
         
-        node->polygonIndex = reader.ReadUShort();
-        node->polygonIndex2 = reader.ReadUShort();
-        node->polygonCount = reader.ReadUShort();
-        node->polygonCount2 = reader.ReadUShort();
+        node.polygonIndex = reader.ReadUShort();
+        node.polygonIndex2 = reader.ReadUShort();
+        node.polygonCount = reader.ReadUShort();
+        node.polygonCount2 = reader.ReadUShort();
         
         reader.ReadUShort(); // Unknown value
         
@@ -648,13 +628,13 @@ void BSP::ParseFromData(char *data, int dataLength)
     // Iterate and read polygons.
     for(int i = 0; i < polygonCount; i++)
     {
-        BSPPolygon* polygon = new BSPPolygon();
-        polygon->vertexIndex = reader.ReadUShort();
+        BSPPolygon polygon;
+        polygon.vertexIndexOffset = reader.ReadUShort();
 		reader.ReadUByte(); // unknown
 		reader.ReadUByte(); // unknown
-        polygon->vertexCount = reader.ReadUShort();
-        polygon->surfaceIndex = reader.ReadUShort();
-		
+        polygon.vertexIndexCount = reader.ReadUShort();
+        polygon.surfaceIndex = reader.ReadUShort();
+        
         mPolygons.push_back(polygon);
     }
     
@@ -665,8 +645,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         float normalY = reader.ReadFloat();
         float normalZ = reader.ReadFloat();
         float distance = reader.ReadFloat();
-        Plane* plane = new Plane(normalX, normalY, normalZ, distance);
-        mPlanes.push_back(plane);
+        mPlanes.emplace_back(normalX, normalY, normalZ, distance);
     }
     
     // Iterate and read vertices
@@ -689,73 +668,126 @@ void BSP::ParseFromData(char *data, int dataLength)
     }
     
     // Iterate and read UV indexes.
-    for(int i = 0; i < uvIndexCount; i++)
-    {
-        mUVIndices.push_back(reader.ReadUShort());
-    }
+    // Skipped for now - not sure if we'll ever need these.
+    reader.Skip(uvIndexCount * 2); // 2 bytes per UV index.
     
-    // We need to build the vertex array by passing our buffer of vertex values
-    // and our buffer of vertex index values, so we can draw indexed primitives.
-    float* vertsPtr = new float[mVertices.size() * 3];
-    for(int i = 0; i < mVertices.size(); i++)
-    {
-        vertsPtr[i * 3] = mVertices[i].x;
-        vertsPtr[i * 3 + 1] = mVertices[i].y;
-        vertsPtr[i * 3 + 2] = mVertices[i].z;
-    }
+    // Next up are spheres centers with radiis for each node. Not sure what these are for.
+    reader.Skip(nodeCount * 16); // 4 floats per node, each float is 4 bytes
     
-    unsigned short* vertIndexesPtr = new unsigned short[mVertexIndices.size()];
-    for(int i = 0; i < mVertexIndices.size(); i++)
-    {
-        vertIndexesPtr[i] = mVertexIndices[i];
-    }
+    std::cout << "BSP has " << mVertices.size() << " vertices. " << std::endl;
+    std::cout << "BSP has " << mUVs.size() << " UVs. " << std::endl;
+    std::cout << "BSP has " << mVertexIndices.size() << " indexes. " << std::endl;
     
-    // Create the vertex array from the verts and vert indexes.
-	mMesh = new Mesh();
-	Submesh* submesh = new Submesh((unsigned int)mVertices.size(), 5 * sizeof(float), MeshUsage::Static);
-	mMesh->AddSubmesh(submesh);
-	
-    submesh->SetRenderMode(RenderMode::TriangleFan);
-    submesh->SetPositions(vertsPtr);
-    submesh->SetIndexes(vertIndexesPtr, (unsigned int)mVertexIndices.size());
+    mColors.resize(mVertices.size(), Vector4(0.0f, 0.0f, 0.0f, 1.0f));
     
-    // Also pass along UV data.
-    float* uvsPtr = (float*)&mUVs[0];
-    submesh->SetUV1(uvsPtr);
-    
-    /*
-    //CK: Don't currently need this bounding sphere stuff.
-    // Read in bounding spheres.
-    for(int i = 0; i < nodeCount; i++)
-    {
-        Vector3 center(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        float radius = reader.ReadFloat();
-    }
-    
-    // Read in more bounding sphere stuff.
+    // Calculate lightmap UVs.
+    mLightmapUVs.resize(mUVs.size());
+    int totalIndexes = 0;
     for(int i = 0; i < surfaceCount; i++)
     {
-        Vector3 center(reader.ReadFloat(), reader.ReadFloat(), reader.ReadFloat());
-        float radius = reader.ReadFloat();
+        // Some stuff that isn't super clear/we don't currently need.
+        reader.Skip(28);
         
-        float chrome = reader.ReadFloat();
-        float grazing = reader.ReadFloat();
-        float chromeColor = reader.ReadFloat();
-        
+        // Number of indices and triangles for this surface.
         int indexCount = reader.ReadUInt();
         int triangleCount = reader.ReadUInt();
+        totalIndexes += indexCount;
         
+        std::cout << "Surface " <<  i << " (" << mObjectNames[mSurfaces[i].objectIndex] << ")" << std::endl;
+        std::cout << "  Index Count: " << indexCount << std::endl;
+        
+        // Next, a certain number of index values.
+        std::vector<unsigned short> indexes;
         for(int j = 0; j < indexCount; j++)
         {
-            unsigned short index = reader.ReadUShort();
+            unsigned short vertexIndex = reader.ReadUShort();
+            indexes.push_back(vertexIndex);
+            std::cout << "    Index " << j << ": " << vertexIndex << std::endl;
+            
+            Vector2 uv = (mUVs[vertexIndex] + mSurfaces[i].uvOffset) * mSurfaces[i].uvScale;
+            mLightmapUVs[vertexIndex] = uv;
+            
+            if(i >= 5 && i <= 24)
+            {
+                //Debug::DrawLine(Vector3::Zero, mVertices[vertexIndex], Color32::Magenta, 120.0f);
+                mColors[vertexIndex] = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+            }
+            else
+            {
+                mColors[vertexIndex] = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+            }
         }
         
+        std::cout << "  Triangle Count: " << triangleCount << std::endl;
         for(int j = 0; j < triangleCount; j++)
         {
-            reader.ReadUShort();
-            reader.ReadUShort();
-            reader.ReadUShort();
+            unsigned short p0Index = reader.ReadUShort();
+            unsigned short p1Index = reader.ReadUShort();
+            unsigned short p2Index = reader.ReadUShort();
+            std::cout << "    Triangle " << j << ": " << p0Index << ", " << p1Index << ", " << p2Index << std::endl;
         }
     }
-    */
+    std::cout << "We have " << surfaceCount << " surfaces with a total of " << totalIndexes << " vertices" << std::endl;
+    
+    int totalCountFromPolygons = 0;
+    for(auto& polygon : mPolygons)
+    {
+        totalCountFromPolygons += polygon.vertexIndexCount;
+        
+        int start = polygon.vertexIndexOffset;
+        int end = start + polygon.vertexIndexCount;
+        for(int index = start; index < end; ++index)
+        {
+            unsigned short vertexIndex = mVertexIndices[index];
+            Vector2 uv = (mUVs[vertexIndex] + mSurfaces[polygon.surfaceIndex].uvOffset) * mSurfaces[polygon.surfaceIndex].uvScale;
+            mLightmapUVs[vertexIndex] = uv;
+            
+            mColors[vertexIndex] = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+        }
+    }
+    std::cout << "But if we count all polygon surfaces, we have " << totalCountFromPolygons << " vertices..." << std::endl;
+    
+    for(auto& polygon : mPolygons)
+    {
+        int start = polygon.vertexIndexOffset;
+        int end = start + polygon.vertexIndexCount;
+        for(int index = start; index < end; ++index)
+        {
+            unsigned short vertexIndex = mVertexIndices[index];
+            if(polygon.surfaceIndex == 127)
+            {
+                Vector2 uv = (mUVs[vertexIndex] + mSurfaces[polygon.surfaceIndex].uvOffset) * mSurfaces[polygon.surfaceIndex].uvScale;
+                mLightmapUVs[vertexIndex] = uv;
+                
+                Debug::DrawLine(Vector3::Zero, mVertices[vertexIndex], Color32::Magenta, 120.0f);
+                mColors[vertexIndex] = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
+            }
+        }
+    }
+    
+    
+    // Generate mesh definition.
+    MeshDefinition meshDefinition;
+    meshDefinition.meshUsage = MeshUsage::Static;
+    
+    meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Color);
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV2);
+    
+    meshDefinition.vertexCount = static_cast<int>(mVertices.size());
+    
+    std::vector<float*> vertexData;
+    vertexData.push_back(reinterpret_cast<float*>(&mVertices[0]));
+    vertexData.push_back(reinterpret_cast<float*>(&mColors[0]));
+    vertexData.push_back(reinterpret_cast<float*>(&mUVs[0]));
+    vertexData.push_back(reinterpret_cast<float*>(&mLightmapUVs[0]));
+    meshDefinition.vertexData = &vertexData[0];
+    
+    meshDefinition.indexCount = static_cast<int>(mVertexIndices.size());
+    meshDefinition.indexData = static_cast<unsigned short*>(&mVertexIndices[0]);
+    
+    // Create vertex array.
+    mVertexArray = VertexArray(meshDefinition);
 }

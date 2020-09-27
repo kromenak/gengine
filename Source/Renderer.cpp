@@ -50,8 +50,8 @@ float axis_colors[] = {
     1.0f, 0.0f, 0.0f, 1.0f,
     0.0f, 1.0f, 0.0f, 1.0f,
     0.0f, 1.0f, 0.0f, 1.0f,
-    0.0f, 1.0f, 1.0f, 1.0f,
-    0.0f, 1.0f, 1.0f, 1.0f
+    0.0f, 0.0f, 1.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, 1.0f
 };
 
 Mesh* axes = nullptr;
@@ -177,45 +177,66 @@ bool Renderer::Initialize()
     Shader* skyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
     if(skyboxShader == nullptr) { return false; }
 	mSkyboxMaterial.SetShader(skyboxShader);
-	
+    
+    MeshDefinition meshDefinition;
+    meshDefinition.meshUsage = MeshUsage::Static;
+    
+    meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
+    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Color);
+    std::vector<float*> vertexData;
+    
 	// Create line mesh, which is helpful for debugging.
-	line = new Mesh(2, 7 * sizeof(float), MeshUsage::Static);
-	Submesh* lineSubmesh = line->GetSubmesh(0);
+    vertexData.push_back(line_vertices);
+    vertexData.push_back(line_colors);
+    
+    meshDefinition.vertexCount = 2;
+    meshDefinition.vertexData = &vertexData[0];
+    
+	line = new Mesh();
+    Submesh* lineSubmesh = line->AddSubmesh(meshDefinition);
 	lineSubmesh->SetRenderMode(RenderMode::Lines);
-	lineSubmesh->SetPositions(line_vertices);
-	lineSubmesh->SetColors(line_colors);
 	
     // Create axes mesh, which is helpful for debugging.
-    axes = new Mesh(6, 7 * sizeof(float), MeshUsage::Static);
-	Submesh* axesSubmesh = axes->GetSubmesh(0);
+    meshDefinition.vertexCount = 6;
+    vertexData[0] = axis_vertices;
+    vertexData[1] = axis_colors;
+    
+    axes = new Mesh();
+    Submesh* axesSubmesh = axes->AddSubmesh(meshDefinition);
     axesSubmesh->SetRenderMode(RenderMode::Lines);
-    axesSubmesh->SetPositions(axis_vertices);
-    axesSubmesh->SetColors(axis_colors);
 	
 	// Create quad mesh, which is used for UI and 2D rendering.
-	quad = new Mesh(4, 5 * sizeof(float), MeshUsage::Static);
-	Submesh* quadSubmesh = quad->GetSubmesh(0);
+    meshDefinition.vertexDefinition.attributes[1] = VertexAttribute::UV1;
+    meshDefinition.vertexCount = 4;
+    vertexData[0] = quad_vertices;
+    vertexData[1] = quad_uvs;
+    meshDefinition.indexCount = 6;
+    meshDefinition.indexData = quad_indices;
+    
+	quad = new Mesh();
+    Submesh* quadSubmesh = quad->AddSubmesh(meshDefinition);
 	quadSubmesh->SetRenderMode(RenderMode::Triangles);
-	quadSubmesh->SetPositions(quad_vertices);
-	quadSubmesh->SetUV1(quad_uvs);
-	quadSubmesh->SetIndexes(quad_indices, 6);
 	
 	// Perhaps errantly, the normal "quad" doesn't have "full" vertex positons (using 1 instead of 0.5)
 	// Also, the UVs seemed to be upside down?
 	// Anyway, this full quad seems to work a lot better for render texture usage...perhaps I'll need to fix the quad at some point.
-	fullQuad = new Mesh(4, 5 * sizeof(float), MeshUsage::Static);
-	Submesh* fullQuadSubmesh = fullQuad->GetSubmesh(0);
+    meshDefinition.vertexCount = 4;
+    vertexData[0] = full_quad_vertices;
+    vertexData[1] = full_quad_uvs;
+    
+	fullQuad = new Mesh();
+    Submesh* fullQuadSubmesh = fullQuad->AddSubmesh(meshDefinition);
 	fullQuadSubmesh->SetRenderMode(RenderMode::Triangles);
-	fullQuadSubmesh->SetPositions(full_quad_vertices);
-	fullQuadSubmesh->SetUV1(full_quad_uvs);
-	fullQuadSubmesh->SetIndexes(quad_indices, 6);
 	
-	uiQuad = new Mesh(4, 5 * sizeof(float), MeshUsage::Static);
-	Submesh* uiQuadSubmesh = uiQuad->GetSubmesh(0);
+    // And a quad for UI usage...
+    meshDefinition.vertexCount = 4;
+    vertexData[0] = ui_quad_vertices;
+    vertexData[1] = ui_quad_uvs;
+    
+	uiQuad = new Mesh();
+    Submesh* uiQuadSubmesh = uiQuad->AddSubmesh(meshDefinition);
 	uiQuadSubmesh->SetRenderMode(RenderMode::Triangles);
-	uiQuadSubmesh->SetPositions(ui_quad_vertices);
-	uiQuadSubmesh->SetUV1(ui_quad_uvs);
-	uiQuadSubmesh->SetIndexes(quad_indices, 6);
 	
     // Init succeeded!
     return true;
@@ -277,7 +298,14 @@ void Renderer::Render()
 	// Render opaque BSP (front-to-back).
 	if(mBSP != nullptr)
 	{
-		mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition());
+        static Vector3 camPos;
+        if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_R))
+        {
+            std::cout << "Saving cam pos" << std::endl;
+            camPos = mCamera->GetOwner()->GetPosition();
+        }
+        camPos = mCamera->GetOwner()->GetPosition();
+		mBSP->RenderOpaque(camPos, mCamera->GetOwner()->GetForward());
 	}
 	
 	// STEP 2B: OPAQUE MESH RENDERING

@@ -12,6 +12,7 @@
 #include "Color32.h"
 #include "Matrix4.h"
 #include "Vector3.h"
+#include "VertexDefinition.h"
 
 Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
 {
@@ -31,6 +32,13 @@ Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
     mProgram = glCreateProgram();
     glAttachShader(mProgram, vertexShader);
     glAttachShader(mProgram, fragmentShader);
+    
+    // Bind shader attribute names to attribute indexes.
+    int semanticCount = static_cast<int>(VertexAttribute::Semantic::SemanticCount);
+    for(int i = 0; i < semanticCount; ++i)
+    {
+        glBindAttribLocation(mProgram, i, gAttributeNames[i]);
+    }
     
     // Link the shader program.
     glLinkProgram(mProgram);

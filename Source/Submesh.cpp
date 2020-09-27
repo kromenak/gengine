@@ -6,17 +6,19 @@
 #include "Submesh.h"
 
 #include "Collisions.h"
-#include "GLVertexArray.h"
 #include "Ray.h"
 
-Submesh::Submesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage) : mVertexCount(vertexCount)
+Submesh::Submesh(const MeshDefinition& meshDefinition) :
+    mVertexCount(meshDefinition.vertexCount),
+    mIndexCount(meshDefinition.indexCount),
+    mVertexArray(meshDefinition)
 {
-	mVertexArray = new GLVertexArray(vertexCount, vertexSize, usage);
+    
 }
 
 Submesh::~Submesh()
 {
-	// Delete vertex attribute data.
+	// Delete vertex data.
 	delete[] mPositions;
 	delete[] mColors;
 	delete[] mNormals;
@@ -24,8 +26,6 @@ Submesh::~Submesh()
 	
 	// Delete indexes.
 	delete[] mIndexes;
-	
-	delete mVertexArray;
 }
 
 void Submesh::Render() const
@@ -34,13 +34,13 @@ void Submesh::Render() const
 	{
     default:
     case RenderMode::Triangles:
-        mVertexArray->DrawTriangles();
+        mVertexArray.DrawTriangles();
         break;
     case RenderMode::TriangleFan:
-        mVertexArray->DrawTriangleFans();
+        mVertexArray.DrawTriangleFans();
         break;
     case RenderMode::Lines:
-        mVertexArray->DrawLines();
+        mVertexArray.DrawLines();
         break;
     }
 }
@@ -51,62 +51,15 @@ void Submesh::Render(unsigned int offset, unsigned int count) const
 	{
     default:
     case RenderMode::Triangles:
-        mVertexArray->DrawTriangles(offset, count);
+        mVertexArray.DrawTriangles(offset, count);
         break;
     case RenderMode::TriangleFan:
-        mVertexArray->DrawTriangleFans(offset, count);
+        mVertexArray.DrawTriangleFans(offset, count);
         break;
     case RenderMode::Lines:
-        mVertexArray->DrawLines(offset, count);
+        mVertexArray.DrawLines(offset, count);
         break;
 	}
-}
-
-void Submesh::SetPositions(float* positions)
-{
-	// For now, we'll assume the caller passes in vertex data for us to own.
-	// In the future, maybe it'll be necessary for the caller to specify this somehow.
-	mPositions = positions;
-	mVertexArray->SetPositions(mPositions);
-}
-
-void Submesh::CopyPositions(float* positions)
-{
-	// We're assuming the positions passed in are the right size.
-	// Hopefully the caller can guarantee that!
-	if(mPositions == nullptr)
-	{
-		mPositions = new float[mVertexCount * 3];
-	}
-	memcpy(mPositions, positions, mVertexCount * 3 * sizeof(float));
-	
-	// Need to "re-set" the positions, to flag a change on the GPU.
-	mVertexArray->SetPositions(mPositions);
-}
-
-void Submesh::SetColors(float* colors)
-{
-	mColors = colors;
-	mVertexArray->SetColors(colors);
-}
-
-void Submesh::SetNormals(float* normals)
-{
-	mNormals = normals;
-	mVertexArray->SetNormals(normals);
-}
-
-void Submesh::SetUV1(float* uvs)
-{
-	mUV1 = uvs;
-	mVertexArray->SetUV1(uvs);
-}
-
-void Submesh::SetIndexes(unsigned short* indexes, int count)
-{
-	mIndexes = indexes;
-	mIndexCount = count;
-	mVertexArray->SetIndexes(indexes, count);
 }
 
 Vector3 Submesh::GetVertexPosition(int index) const
@@ -117,6 +70,15 @@ Vector3 Submesh::GetVertexPosition(int index) const
 	
 	int startOffset = index * 3;
 	return Vector3(mPositions[startOffset], mPositions[startOffset + 1], mPositions[startOffset + 2]);
+}
+
+bool Submesh::GetVertexNormal(int index, Vector3& n) const
+{
+    int offset = index * 3;
+    n.x = mNormals[offset];
+    n.y = mNormals[offset + 1];
+    n.z = mNormals[offset + 2];
+    return true;
 }
 
 int Submesh::GetTriangleCount() const
@@ -150,19 +112,6 @@ bool Submesh::GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) cons
 	return false;
 }
 
-bool Submesh::GetNormal(int index, Vector3& n) const
-{
-	if(mRenderMode == RenderMode::Triangles)
-	{
-		int offset = index * 3;
-		n.x = mNormals[offset];
-		n.y = mNormals[offset + 1];
-		n.z = mNormals[offset + 2];
-		return true;
-	}
-	return false;
-}
-
 bool Submesh::Raycast(const Ray& ray)
 {
 	if(mRenderMode != RenderMode::Triangles || mIndexes == nullptr)
@@ -186,4 +135,94 @@ bool Submesh::Raycast(const Ray& ray)
 	
 	// Ray did not hit any triangles.
 	return false;
+}
+
+void Submesh::SetPositions(float* positions, bool createCopy)
+{
+    // Size of array is assumed to be correct based on vertex count.
+    if(createCopy)
+    {
+        if(mPositions == nullptr)
+        {
+            mPositions = new float[mVertexCount * 3];
+        }
+        memcpy(mPositions, positions, mVertexCount * 3 * sizeof(float));
+    }
+    else
+    {
+        mPositions = positions;
+    }
+    mVertexArray.ChangeVertexData(VertexAttribute::Semantic::Position, mPositions);
+}
+
+void Submesh::SetColors(float* colors, bool createCopy)
+{
+    // Size of array is assumed to be correct based on vertex count.
+    if(createCopy)
+    {
+        if(mColors == nullptr)
+        {
+            mColors = new float[mVertexCount * 4];
+        }
+        memcpy(mColors, colors, mVertexCount * 4 * sizeof(float));
+    }
+    else
+    {
+        mColors = colors;
+    }
+    mVertexArray.ChangeVertexData(VertexAttribute::Semantic::Color, mColors);
+}
+
+void Submesh::SetNormals(float* normals, bool createCopy)
+{
+    // Size of array is assumed to be correct based on vertex count.
+    if(createCopy)
+    {
+        if(mNormals == nullptr)
+        {
+            mNormals = new float[mVertexCount * 3];
+        }
+        memcpy(mNormals, normals, mVertexCount * 3 * sizeof(float));
+    }
+    else
+    {
+        mNormals = normals;
+    }
+    mVertexArray.ChangeVertexData(VertexAttribute::Semantic::Normal, mNormals);
+}
+
+void Submesh::SetUV1s(float* uvs, bool createCopy)
+{
+    // Size of array is assumed to be correct based on vertex count.
+    if(createCopy)
+    {
+        if(mUV1 == nullptr)
+        {
+            mUV1 = new float[mVertexCount * 2];
+        }
+        memcpy(mUV1, uvs, mVertexCount * 3 * sizeof(float));
+    }
+    else
+    {
+        mUV1 = uvs;
+    }
+    mVertexArray.ChangeVertexData(VertexAttribute::Semantic::UV1, mUV1);
+}
+
+void Submesh::SetIndexes(unsigned short* indexes, bool createCopy)
+{
+    // Size of array is assumed to be correct based on vertex count.
+    if(createCopy)
+    {
+        if(mIndexes == nullptr)
+        {
+            mIndexes = new unsigned short[mIndexCount * 2];
+        }
+        memcpy(mIndexes, indexes, mIndexCount * 2 * sizeof(unsigned short));
+    }
+    else
+    {
+        mIndexes = indexes;
+    }
+    mVertexArray.ChangeIndexData(mIndexes, mIndexCount);
 }

@@ -81,7 +81,6 @@
 		4B22F50D2174075B0065B152 /* SceneAsset.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B2E7A64203A6072001A5B9C /* SceneAsset.cpp */; };
 		4B22F5102174075B0065B152 /* Services.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B09182D1FEED84D002991D4 /* Services.cpp */; };
 		4B22F511217407640065B152 /* Color32.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B84A13521684374003B4C3F /* Color32.cpp */; };
-		4B22F512217407640065B152 /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
 		4B22F513217407640065B152 /* Material.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8E830920F046750009A86B /* Material.cpp */; };
 		4B22F514217407640065B152 /* Mesh.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */; };
 		4B22F515217407640065B152 /* MeshRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshRenderer.cpp */; };
@@ -251,6 +250,12 @@
 		4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB34B4214F72BB0069B2E9 /* Font.cpp */; };
 		4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBB91B52058E53A007B9375 /* Soundtrack.cpp */; };
 		4BBC028A22F162B8005ED374 /* FaceController.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BBC028922F162B8005ED374 /* FaceController.cpp */; };
+		4BC36B96251BBD2200692817 /* VertexDefinition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BC36B95251BBD2200692817 /* VertexDefinition.cpp */; };
+		4BC36B97251BBD2200692817 /* VertexDefinition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BC36B95251BBD2200692817 /* VertexDefinition.cpp */; };
+		4BC36B9A251BD70E00692817 /* VertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BC36B99251BD70E00692817 /* VertexArray.cpp */; };
+		4BC36B9B251BD70E00692817 /* VertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BC36B99251BD70E00692817 /* VertexArray.cpp */; };
+		4BC36B9E251D0F8A00692817 /* 3D-Color.frag in Resources */ = {isa = PBXBuildFile; fileRef = 4BC36B9C251D0F8A00692817 /* 3D-Color.frag */; };
+		4BC36B9F251D0F8A00692817 /* 3D-Color.vert in Resources */ = {isa = PBXBuildFile; fileRef = 4BC36B9D251D0F8A00692817 /* 3D-Color.vert */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4BCC2EA524B41CC700DAE6BD /* Localizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */; };
 		4BCC2EA624B41CC700DAE6BD /* Localizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */; };
@@ -275,8 +280,8 @@
 		4BEA727521D7F71A00998066 /* GameProgress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727421D7F71A00998066 /* GameProgress.cpp */; };
 		4BEA727621D7F71A00998066 /* GameProgress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727421D7F71A00998066 /* GameProgress.cpp */; };
 		4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B841F64D4B9000639FB /* Matrix4.cpp */; };
-		4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B871F67BC34000639FB /* GLVertexArray.cpp */; };
 		4BF32B8C1F67C434000639FB /* Shader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF32B8A1F67C434000639FB /* Shader.cpp */; };
+		4BF71501251ECE870017F0AA /* PlaneTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF71500251ECE870017F0AA /* PlaneTests.cpp */; };
 		4BF7510F1F7737DD00B79D2F /* Vector4.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF7510D1F7737DD00B79D2F /* Vector4.cpp */; };
 		4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BF751101F773E1A00B79D2F /* Vector2.cpp */; };
 		4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BFBB86521D0469000E07EFB /* SceneData.cpp */; };
@@ -546,6 +551,12 @@
 		4BBB91B52058E53A007B9375 /* Soundtrack.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Soundtrack.cpp; path = ../Source/Audio/Soundtrack.cpp; sourceTree = "<group>"; };
 		4BBC028822F162B8005ED374 /* FaceController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FaceController.h; path = ../Source/FaceController.h; sourceTree = "<group>"; };
 		4BBC028922F162B8005ED374 /* FaceController.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FaceController.cpp; path = ../Source/FaceController.cpp; sourceTree = "<group>"; };
+		4BC36B94251BBD2200692817 /* VertexDefinition.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexDefinition.h; path = ../Source/VertexDefinition.h; sourceTree = "<group>"; };
+		4BC36B95251BBD2200692817 /* VertexDefinition.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexDefinition.cpp; path = ../Source/VertexDefinition.cpp; sourceTree = "<group>"; };
+		4BC36B98251BD70E00692817 /* VertexArray.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexArray.h; path = ../Source/VertexArray.h; sourceTree = "<group>"; };
+		4BC36B99251BD70E00692817 /* VertexArray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexArray.cpp; path = ../Source/VertexArray.cpp; sourceTree = "<group>"; };
+		4BC36B9C251D0F8A00692817 /* 3D-Color.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Color.frag"; path = "../Assets/3D-Color.frag"; sourceTree = "<group>"; };
+		4BC36B9D251D0F8A00692817 /* 3D-Color.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; name = "3D-Color.vert"; path = "../Assets/3D-Color.vert"; sourceTree = "<group>"; };
 		4BCBCF452043A90F001BE1E0 /* NVC.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = NVC.h; path = ../Source/NVC.h; sourceTree = "<group>"; };
 		4BCBCF462043A90F001BE1E0 /* NVC.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = NVC.cpp; path = ../Source/NVC.cpp; sourceTree = "<group>"; };
 		4BCC2EA324B41CC700DAE6BD /* Localizer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Localizer.h; path = ../Source/Localizer.h; sourceTree = "<group>"; };
@@ -585,10 +596,9 @@
 		4BEA727421D7F71A00998066 /* GameProgress.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = GameProgress.cpp; path = ../Source/GameProgress.cpp; sourceTree = "<group>"; };
 		4BF32B841F64D4B9000639FB /* Matrix4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Matrix4.cpp; path = ../Source/Matrix4.cpp; sourceTree = "<group>"; };
 		4BF32B851F64D4B9000639FB /* Matrix4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Matrix4.h; path = ../Source/Matrix4.h; sourceTree = "<group>"; };
-		4BF32B871F67BC34000639FB /* GLVertexArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GLVertexArray.cpp; path = ../Source/GLVertexArray.cpp; sourceTree = "<group>"; };
-		4BF32B881F67BC34000639FB /* GLVertexArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GLVertexArray.h; path = ../Source/GLVertexArray.h; sourceTree = "<group>"; };
 		4BF32B8A1F67C434000639FB /* Shader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Shader.cpp; path = ../Source/Shader.cpp; sourceTree = "<group>"; };
 		4BF32B8B1F67C434000639FB /* Shader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Shader.h; path = ../Source/Shader.h; sourceTree = "<group>"; };
+		4BF71500251ECE870017F0AA /* PlaneTests.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PlaneTests.cpp; path = ../Tests/PlaneTests.cpp; sourceTree = "<group>"; };
 		4BF7510D1F7737DD00B79D2F /* Vector4.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector4.cpp; path = ../Source/Vector4.cpp; sourceTree = "<group>"; };
 		4BF7510E1F7737DD00B79D2F /* Vector4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vector4.h; path = ../Source/Vector4.h; sourceTree = "<group>"; };
 		4BF751101F773E1A00B79D2F /* Vector2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vector2.cpp; path = ../Source/Vector2.cpp; sourceTree = "<group>"; };
@@ -674,6 +684,8 @@
 			children = (
 				4B399E4022D00E2100221AE4 /* 3D-Billboard.frag */,
 				4B399E3F22D00E2100221AE4 /* 3D-Billboard.vert */,
+				4BC36B9C251D0F8A00692817 /* 3D-Color.frag */,
+				4BC36B9D251D0F8A00692817 /* 3D-Color.vert */,
 				4B0E2A571F74F5650019D4AD /* 3D-Diffuse-Tex.frag */,
 				4B0E2A581F74F5650019D4AD /* 3D-Diffuse-Tex.vert */,
 				4B598C4A251148C2007AC569 /* 3D-Lightmap.frag */,
@@ -691,16 +703,17 @@
 			isa = PBXGroup;
 			children = (
 				4B1112A61F820AC100AFDDFC /* catch.hh */,
-				4B1A2CB422053097000C34D8 /* MathTests.cpp */,
-				4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */,
-				4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */,
-				4B1112A71F820B0400AFDDFC /* TestMain.cpp */,
-				4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */,
-				4B6A3F252335B20000D25B2D /* RectTests.cpp */,
-				4B90E07D2377B50D00E0E3FA /* TimeblockTests.cpp */,
-				4B38BA7E24393F0C001F9240 /* SphereTests.cpp */,
 				4B38BA80243944C8001F9240 /* AABBTests.cpp */,
 				4B0FDB21244D191B007AA85F /* CollisionTests.cpp */,
+				4B1A2CB422053097000C34D8 /* MathTests.cpp */,
+				4B1112AA1F820BD000AFDDFC /* Matrix4Tests.cpp */,
+				4BF71500251ECE870017F0AA /* PlaneTests.cpp */,
+				4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */,
+				4B6A3F252335B20000D25B2D /* RectTests.cpp */,
+				4B38BA7E24393F0C001F9240 /* SphereTests.cpp */,
+				4B1112A71F820B0400AFDDFC /* TestMain.cpp */,
+				4B90E07D2377B50D00E0E3FA /* TimeblockTests.cpp */,
+				4B79F8061F9C09F2008C6FEE /* VectorTests.cpp */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -837,8 +850,6 @@
 				4B00D32F1F8F3AD500D536D5 /* Camera.h */,
 				4B84A13521684374003B4C3F /* Color32.cpp */,
 				4B84A13421684374003B4C3F /* Color32.h */,
-				4BF32B871F67BC34000639FB /* GLVertexArray.cpp */,
-				4BF32B881F67BC34000639FB /* GLVertexArray.h */,
 				4B8E830920F046750009A86B /* Material.cpp */,
 				4B8E830820F046750009A86B /* Material.h */,
 				4BD4CCE61FF1F7E3009665C7 /* Mesh.cpp */,
@@ -859,6 +870,10 @@
 				4BACE1C721D2B2B2000CBE7B /* Submesh.h */,
 				4B4621EA1FF741D800536BA6 /* Texture.cpp */,
 				4B4621E91FF741D800536BA6 /* Texture.h */,
+				4BC36B99251BD70E00692817 /* VertexArray.cpp */,
+				4BC36B98251BD70E00692817 /* VertexArray.h */,
+				4BC36B95251BBD2200692817 /* VertexDefinition.cpp */,
+				4BC36B94251BBD2200692817 /* VertexDefinition.h */,
 			);
 			name = Rendering;
 			sourceTree = "<group>";
@@ -1283,6 +1298,8 @@
 				4B598C4B251148C2007AC569 /* 3D-Lightmap.vert in Resources */,
 				4B8A9770238B7A0E006D284D /* Locations.txt in Resources */,
 				4B22F4EA217170A00065B152 /* Main.storyboard in Resources */,
+				4BC36B9E251D0F8A00692817 /* 3D-Color.frag in Resources */,
+				4BC36B9F251D0F8A00692817 /* 3D-Color.vert in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1334,6 +1351,7 @@
 				4B38BA81243944C8001F9240 /* AABBTests.cpp in Sources */,
 				4B38BA7F24393F0C001F9240 /* SphereTests.cpp in Sources */,
 				4B79F8081F9C0D54008C6FEE /* Vector3.cpp in Sources */,
+				4BF71501251ECE870017F0AA /* PlaneTests.cpp in Sources */,
 				4B1112A91F820B7500AFDDFC /* TestMain.cpp in Sources */,
 				4B79F8071F9C09F2008C6FEE /* VectorTests.cpp in Sources */,
 				4B6A3F272335B36500D25B2D /* Rect.cpp in Sources */,
@@ -1372,6 +1390,7 @@
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4BDDCD5E20D6C4BC00701A89 /* VertexAnimation.cpp in Sources */,
 				4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */,
+				4BC36B9A251BD70E00692817 /* VertexArray.cpp in Sources */,
 				4B99229D2031735500184755 /* BSP.cpp in Sources */,
 				4B4300871FB7EE44009EDE58 /* Quaternion.cpp in Sources */,
 				4B6A3F232335B16C00D25B2D /* RectUtil.cpp in Sources */,
@@ -1400,7 +1419,6 @@
 				4BCFC69C24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */,
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */,
-				4BF32B891F67BC34000639FB /* GLVertexArray.cpp in Sources */,
 				4B0183A624574837004B5C58 /* DialogueManager.cpp in Sources */,
 				4BEA727121D5834300998066 /* WalkerBoundary.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
@@ -1462,6 +1480,7 @@
 				4BF32B861F64D4B9000639FB /* Matrix4.cpp in Sources */,
 				4B598C4725113853007AC569 /* BSPLightmap.cpp in Sources */,
 				4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */,
+				4BC36B96251BBD2200692817 /* VertexDefinition.cpp in Sources */,
 				4B4AFEEB23BBC6B100554D04 /* ActionManager.cpp in Sources */,
 				4B2606ED22F3D43B0030F2D9 /* AnimationNodes.cpp in Sources */,
 				4B046E90218E855600E56341 /* Mover.cpp in Sources */,
@@ -1497,6 +1516,7 @@
 				4B22F505217407530065B152 /* SheepManager.cpp in Sources */,
 				4BB67C462352554500FDFB30 /* stb_image_resize.cpp in Sources */,
 				4B22F5372174078B0065B152 /* Component.cpp in Sources */,
+				4BC36B9B251BD70E00692817 /* VertexArray.cpp in Sources */,
 				4B22F5262174078B0065B152 /* VertexAnimation.cpp in Sources */,
 				4B22F53A2174078B0065B152 /* GKActor.cpp in Sources */,
 				4B22F51A217407640065B152 /* Texture.cpp in Sources */,
@@ -1575,7 +1595,6 @@
 				4B22F5382174078B0065B152 /* GameCamera.cpp in Sources */,
 				4B22F5252174078B0065B152 /* Actor.cpp in Sources */,
 				4B22F53C2174078B0065B152 /* InputManager.cpp in Sources */,
-				4B22F512217407640065B152 /* GLVertexArray.cpp in Sources */,
 				4B22F5292174078B0065B152 /* GAS.cpp in Sources */,
 				4BB67C432352552200FDFB30 /* ConsoleUI.cpp in Sources */,
 				4B22F4F42174073D0065B152 /* UIImage.cpp in Sources */,
@@ -1587,6 +1606,7 @@
 				4BB67C4D235255DE00FDFB30 /* UITextInput.cpp in Sources */,
 				4B598C4825113853007AC569 /* BSPLightmap.cpp in Sources */,
 				4B0E44F72186878A00BD1CE1 /* Rect.cpp in Sources */,
+				4BC36B97251BBD2200692817 /* VertexDefinition.cpp in Sources */,
 				4B4AFEEC23BBC6B100554D04 /* ActionManager.cpp in Sources */,
 				4B22F5222174076D0065B152 /* Vector4.cpp in Sources */,
 				4B046E91218E855600E56341 /* Mover.cpp in Sources */,

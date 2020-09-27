@@ -9,18 +9,6 @@
 
 #include "Collisions.h"
 
-Mesh::Mesh()
-{
-	
-}
-
-Mesh::Mesh(unsigned int vertexCount, unsigned int vertexSize, MeshUsage usage)
-{
-	// Since a mesh should REALLY REALLY have at least one submesh, this constructor
-	// allows us to create a submesh immediately upon construction.
-	mSubmeshes.push_back(new Submesh(vertexCount, vertexSize, usage));
-}
-
 Mesh::~Mesh()
 {
 	for(auto& submesh : mSubmeshes)
@@ -47,6 +35,13 @@ void Mesh::Render(unsigned int submeshIndex, unsigned int offset, unsigned int c
 {
 	assert(submeshIndex < mSubmeshes.size());
 	mSubmeshes[submeshIndex]->Render(offset, count);
+}
+
+Submesh* Mesh::AddSubmesh(const MeshDefinition& meshDefinition)
+{
+    Submesh* submesh = new Submesh(meshDefinition);
+    mSubmeshes.push_back(submesh);
+    return submesh;
 }
 
 bool Mesh::Raycast(const Ray& ray, RaycastHit& hitInfo)

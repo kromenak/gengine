@@ -66,13 +66,13 @@ void UIImage::Render()
 				repeatX, repeatY,	// lower-right
 				0.0f,    repeatY	// lower-left
 			};
-			uiQuad->GetSubmesh(0)->SetUV1(repeat_uvs);
+			uiQuad->GetSubmesh(0)->SetUV1s(repeat_uvs);
 			
 			// Render.
 			uiQuad->Render();
 			
 			// Revert to "normal" UVs.
-			uiQuad->GetSubmesh(0)->SetUV1(quad_uvs);
+			uiQuad->GetSubmesh(0)->SetUV1s(quad_uvs);
 		}
 		//TODO: Nine-slice?
 	}

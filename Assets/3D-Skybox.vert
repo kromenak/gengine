@@ -1,7 +1,6 @@
 #version 150
-#extension GL_ARB_explicit_attrib_location : require
 
-layout(location = 0) in vec3 vPos;
+in vec3 vPos;
 
 out vec3 fTexCoords;
 
