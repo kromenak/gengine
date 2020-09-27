@@ -22,7 +22,7 @@ public:
 	static Color32 Magenta; // (255, 0, 255, 255)
 	static Color32 Yellow;  // (255, 255, 0, 255)
 	
-	Color32();
+    Color32() = default;
 	Color32(unsigned char r, unsigned char g, unsigned char b);
 	Color32(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 	

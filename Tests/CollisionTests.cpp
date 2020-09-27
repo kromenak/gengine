@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 //
-// Description
+// Tests for collision/intersection logic between geometric primitives.
 //
 #include "catch.hh"
 #include "Collisions.h"

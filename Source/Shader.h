@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <GL/glew.h>
-//#include <OpenGL/gl.h>
 
 class Color32;
 class Matrix4;
