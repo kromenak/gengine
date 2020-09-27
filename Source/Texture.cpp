@@ -289,9 +289,15 @@ void Texture::UploadToGPU()
 					 mWidth, mHeight, 0,
 					 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
 		
-		// When texturing, use the nearest pixel to pick the color to use.
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		// Set filter mode for the texture.
+        GLfloat filterParam = mFilterMode == FilterMode::Point ? GL_NEAREST : GL_LINEAR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
+        
+        // Set wrap mode for the texture.
+        GLfloat wrapParam = mWrapMode == WrapMode::Repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapParam);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapParam);
 	}
 	else
 	{
@@ -332,10 +338,10 @@ void Texture::WriteToFile(std::string filePath)
     // PIXELS
 	// Write out one row at a time, bottom to top, left to right, per BMP format standard.
 	int rowSize = CalculateBmpRowSize(32, mWidth);
-    for(int y = 0; y < mHeight; y++)
+    for(int y = mHeight - 1; y >= 0; --y)
     {
 		int bytesWritten = 0;
-        for(int x = 0; x < mWidth; x++)
+        for(int x = 0; x < mWidth; ++x)
         {
             int index = (y * mWidth + x) * 4;
 			writer.WriteUByte(mPixels[index + 2]); // Blue
