@@ -6,6 +6,7 @@
 #include "BSP.h"
 
 #include <iostream>
+#include <unordered_map>
 
 #include "BinaryReader.h"
 #include "BSPActor.h"
@@ -510,12 +511,20 @@ void BSP::RenderPolygon(BSPPolygon& polygon, bool translucent)
         Texture::Deactivate();
     }
      
+    // Activate lightmap texture, if any.
     Texture* lightmapTex = surface.lightmapTexture;
     if(lightmapTex != nullptr)
     {
         lightmapTex->Activate(1);
     }
-	
+    
+    // Lightmap scale/offsets are used in shaders to calculate proper lightmap UVs.
+    Vector4 lightmapUvScaleOffset(surface.lightmapUvScale.x,
+                          surface.lightmapUvScale.y,
+                          surface.lightmapUvOffset.x,
+                          surface.lightmapUvOffset.y);
+    mMaterial.GetShader()->SetUniformVector4("uLightmapScaleOffset", lightmapUvScaleOffset);
+
     // Draw the polygon.
     mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
 }
@@ -524,7 +533,7 @@ void BSP::ParseFromData(char *data, int dataLength)
 {
     BinaryReader reader(data, dataLength);
     
-    // First 4 bytes: file identifier "NECS" (SCEN backwards).
+    // 4 bytes: file identifier "NECS" (SCEN backwards).
     std::string identifier = reader.ReadString(4);
     if(identifier != "NECS")
     {
@@ -539,12 +548,12 @@ void BSP::ParseFromData(char *data, int dataLength)
     // 4 bytes: index of root node for BSP tree.
     mRootNodeIndex = reader.ReadUInt();
     
-    // Read in all the header count values.
+    // 36 bytes: Read in all the header count values.
     int nameCount = reader.ReadUInt();
     int vertexCount = reader.ReadUInt();
     int uvCount = reader.ReadUInt();
     int vertexIndexCount = reader.ReadUInt();
-    int uvIndexCount = reader.ReadUInt();
+    int otherIndexCount = reader.ReadUInt();
     int surfaceCount = reader.ReadUInt();
     int planeCount = reader.ReadUInt();
     int nodeCount = reader.ReadUInt();
@@ -564,11 +573,10 @@ void BSP::ParseFromData(char *data, int dataLength)
         
         surface.texture = Services::GetAssets()->LoadTexture(reader.ReadString(32));
         
-        surface.uvOffset = reader.ReadVector2();
-        surface.uvScale = reader.ReadVector2();
+        surface.lightmapUvOffset = reader.ReadVector2();
+        surface.lightmapUvScale = reader.ReadVector2();
         
-        surface.scale = reader.ReadFloat();
-        //std::cout << i << ", " << mObjectNames[surface->objectIndex] << ": uv-off " << surface->uvOffset << ", uv-scale " << surface->uvScale << ", scale " << surface->scale << std::endl;
+        reader.ReadFloat(); // Unknown - I had assumed this was a scale earlier, but I'm not sure.
         
         /*
 		 FLAGS - bitmask flags that indicate some interesting aspect about this surface.
@@ -580,9 +588,7 @@ void BSP::ParseFromData(char *data, int dataLength)
          32 => ???
          64 => ???
          128 => ???
-		 
-		 // NO flag seems to be dedicated to opaque vs. translucent.
-		 
+         
          (RC1, rc4_pjcar uses 76 (64+8+4))
          (RC1, windows often use 12 (8+4))
          (RC1, street lamps have 16 sometimes)
@@ -592,13 +598,6 @@ void BSP::ParseFromData(char *data, int dataLength)
         */
 		reader.ReadUInt();
         //unsigned int flags = reader.ReadUInt();
-		/*
-		if(!surface->texture->HasAlpha())
-		{
-			std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
-		}
-		*/
-		//std::cout << mObjectNames[surface->objectIndex] << ", " << flags << std::endl;
 		
         mSurfaces.push_back(surface);
     }
@@ -614,14 +613,13 @@ void BSP::ParseFromData(char *data, int dataLength)
         
         node.polygonIndex = reader.ReadUShort();
         node.polygonIndex2 = reader.ReadUShort();
+        
         node.polygonCount = reader.ReadUShort();
         node.polygonCount2 = reader.ReadUShort();
         
-        reader.ReadUShort(); // Unknown value
-        
-        //std::cout << "Node " << mNodes.size() << ":" << std::endl;
-        //std::cout << "  Polygon Idx: " << node->polygonIndex << ", Polygon Count: " << node->polygonCount << std::endl;
-        //std::cout << "  Unknown Val 1: " << val1 << std::endl;
+        // Unknown value - only known values: 0 for root node, 348, 1007, 1009, 1010, 1012, 1074, 30723 for other nodes.
+        // Values seem to be the same for all nodes in a single BSP file?
+        reader.ReadUShort();
         mNodes.push_back(node);
     }
     
@@ -630,11 +628,13 @@ void BSP::ParseFromData(char *data, int dataLength)
     {
         BSPPolygon polygon;
         polygon.vertexIndexOffset = reader.ReadUShort();
-		reader.ReadUByte(); // unknown
-		reader.ReadUByte(); // unknown
+        
+        // Unknown value - sometimes zero, but almost always 1073.
+        // Mysteriously stuck right in the middle of each polygon hmm...
+        reader.ReadUShort();
+        
         polygon.vertexIndexCount = reader.ReadUShort();
         polygon.surfaceIndex = reader.ReadUShort();
-        
         mPolygons.push_back(polygon);
     }
     
@@ -648,17 +648,16 @@ void BSP::ParseFromData(char *data, int dataLength)
         mPlanes.emplace_back(normalX, normalY, normalZ, distance);
     }
     
-    // Iterate and read vertices
+    // Iterate and read vertices.
     for(int i = 0; i < vertexCount; i++)
     {
         mVertices.push_back(reader.ReadVector3());
     }
     
-    // Iterate and read UVs
+    // Iterate and read UVs.
     for(int i = 0; i < uvCount; i++)
     {
-        Vector2 uv = reader.ReadVector2();
-        mUVs.push_back(uv);
+        mUVs.push_back(reader.ReadVector2());
     }
     
     // Iterate and read vertex indexes.
@@ -667,22 +666,18 @@ void BSP::ParseFromData(char *data, int dataLength)
         mVertexIndices.push_back(reader.ReadUShort());
     }
     
-    // Iterate and read UV indexes.
+    // Iterate and read other indexes.
+    // After reviewing all BSP files, these always exactly match the vertex indexes? Why bother?
     // Skipped for now - not sure if we'll ever need these.
-    reader.Skip(uvIndexCount * 2); // 2 bytes per UV index.
+    reader.Skip(otherIndexCount * 2); // 2 bytes per index.
     
     // Next up are spheres centers with radiis for each node. Not sure what these are for.
     reader.Skip(nodeCount * 16); // 4 floats per node, each float is 4 bytes
     
-    std::cout << "BSP has " << mVertices.size() << " vertices. " << std::endl;
-    std::cout << "BSP has " << mUVs.size() << " UVs. " << std::endl;
-    std::cout << "BSP has " << mVertexIndices.size() << " indexes. " << std::endl;
-    
-    mColors.resize(mVertices.size(), Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-    
-    // Calculate lightmap UVs.
-    mLightmapUVs.resize(mUVs.size());
-    int totalIndexes = 0;
+    // Next are per-surface vertex indices and triangle datas.
+    // I'm not 100% sure why this data exists - but it doesn't seem necessary to render the BSP.
+    // Since this is the last thing in the file, we can just ignore it - don't even need to skip.
+    /*
     for(int i = 0; i < surfaceCount; i++)
     {
         // Some stuff that isn't super clear/we don't currently need.
@@ -691,80 +686,21 @@ void BSP::ParseFromData(char *data, int dataLength)
         // Number of indices and triangles for this surface.
         int indexCount = reader.ReadUInt();
         int triangleCount = reader.ReadUInt();
-        totalIndexes += indexCount;
-        
-        std::cout << "Surface " <<  i << " (" << mObjectNames[mSurfaces[i].objectIndex] << ")" << std::endl;
-        std::cout << "  Index Count: " << indexCount << std::endl;
         
         // Next, a certain number of index values.
-        std::vector<unsigned short> indexes;
         for(int j = 0; j < indexCount; j++)
         {
             unsigned short vertexIndex = reader.ReadUShort();
-            indexes.push_back(vertexIndex);
-            std::cout << "    Index " << j << ": " << vertexIndex << std::endl;
-            
-            Vector2 uv = (mUVs[vertexIndex] + mSurfaces[i].uvOffset) * mSurfaces[i].uvScale;
-            mLightmapUVs[vertexIndex] = uv;
-            
-            if(i >= 5 && i <= 24)
-            {
-                //Debug::DrawLine(Vector3::Zero, mVertices[vertexIndex], Color32::Magenta, 120.0f);
-                mColors[vertexIndex] = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-            }
-            else
-            {
-                mColors[vertexIndex] = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-            }
         }
         
-        std::cout << "  Triangle Count: " << triangleCount << std::endl;
         for(int j = 0; j < triangleCount; j++)
         {
             unsigned short p0Index = reader.ReadUShort();
             unsigned short p1Index = reader.ReadUShort();
             unsigned short p2Index = reader.ReadUShort();
-            std::cout << "    Triangle " << j << ": " << p0Index << ", " << p1Index << ", " << p2Index << std::endl;
         }
     }
-    std::cout << "We have " << surfaceCount << " surfaces with a total of " << totalIndexes << " vertices" << std::endl;
-    
-    int totalCountFromPolygons = 0;
-    for(auto& polygon : mPolygons)
-    {
-        totalCountFromPolygons += polygon.vertexIndexCount;
-        
-        int start = polygon.vertexIndexOffset;
-        int end = start + polygon.vertexIndexCount;
-        for(int index = start; index < end; ++index)
-        {
-            unsigned short vertexIndex = mVertexIndices[index];
-            Vector2 uv = (mUVs[vertexIndex] + mSurfaces[polygon.surfaceIndex].uvOffset) * mSurfaces[polygon.surfaceIndex].uvScale;
-            mLightmapUVs[vertexIndex] = uv;
-            
-            mColors[vertexIndex] = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
-        }
-    }
-    std::cout << "But if we count all polygon surfaces, we have " << totalCountFromPolygons << " vertices..." << std::endl;
-    
-    for(auto& polygon : mPolygons)
-    {
-        int start = polygon.vertexIndexOffset;
-        int end = start + polygon.vertexIndexCount;
-        for(int index = start; index < end; ++index)
-        {
-            unsigned short vertexIndex = mVertexIndices[index];
-            if(polygon.surfaceIndex == 127)
-            {
-                Vector2 uv = (mUVs[vertexIndex] + mSurfaces[polygon.surfaceIndex].uvOffset) * mSurfaces[polygon.surfaceIndex].uvScale;
-                mLightmapUVs[vertexIndex] = uv;
-                
-                Debug::DrawLine(Vector3::Zero, mVertices[vertexIndex], Color32::Magenta, 120.0f);
-                mColors[vertexIndex] = Vector4(0.0f, 1.0f, 0.0f, 1.0f);
-            }
-        }
-    }
-    
+    */
     
     // Generate mesh definition.
     MeshDefinition meshDefinition;
@@ -772,17 +708,13 @@ void BSP::ParseFromData(char *data, int dataLength)
     
     meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
     meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Color);
     meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV2);
     
     meshDefinition.vertexCount = static_cast<int>(mVertices.size());
     
     std::vector<float*> vertexData;
     vertexData.push_back(reinterpret_cast<float*>(&mVertices[0]));
-    vertexData.push_back(reinterpret_cast<float*>(&mColors[0]));
     vertexData.push_back(reinterpret_cast<float*>(&mUVs[0]));
-    vertexData.push_back(reinterpret_cast<float*>(&mLightmapUVs[0]));
     meshDefinition.vertexData = &vertexData[0];
     
     meshDefinition.indexCount = static_cast<int>(mVertexIndices.size());

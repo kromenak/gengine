@@ -286,26 +286,18 @@ void Renderer::Render()
 	glDepthMask(GL_TRUE); // start writing to depth buffer
 	
 	// STEP 2: OPAQUE WORLD RENDERING
+    // All opaque world rendering uses alpha test.
+    Material::UseAlphaTest(true);
+    
+    // Set the view & projection matrices for normal 3D camera-oriented rendering.
+    Material::SetViewMatrix(viewMatrix);
+    Material::SetProjMatrix(projectionMatrix);
+    
 	// STEP 2A: OPAQUE BSP RENDERING
-	// Set the view & projection matrices for normal 3D camera-oriented rendering.
-	Material::SetViewMatrix(viewMatrix);
-	Material::SetProjMatrix(projectionMatrix);
-	
-	// If BSP was using a material, we could just use Material function here.
-	// But we must also set on default shader for BSP...for now.
-	Material::UseAlphaTest(true);
-	
-	// Render opaque BSP (front-to-back).
+	// Render opaque BSP. This should occur front-to-back, which has no overdraw.
 	if(mBSP != nullptr)
 	{
-        static Vector3 camPos;
-        if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_R))
-        {
-            std::cout << "Saving cam pos" << std::endl;
-            camPos = mCamera->GetOwner()->GetPosition();
-        }
-        camPos = mCamera->GetOwner()->GetPosition();
-		mBSP->RenderOpaque(camPos, mCamera->GetOwner()->GetForward());
+		mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition(), mCamera->GetOwner()->GetForward());
 	}
 	
 	// STEP 2B: OPAQUE MESH RENDERING
@@ -328,15 +320,12 @@ void Renderer::Render()
 	// STEP 4: (TRANSLUCENT) UI RENDERING
 	glEnable(GL_BLEND); // do alpha blending
 	glDepthMask(GL_FALSE); // don't write to the depth buffer
-	
+	glDisable(GL_DEPTH_TEST); // no depth test b/c UI draws over everything
+    
 	// UI uses a view/proj setup for now - world space for UI maps to pixel size of screen.
 	// Bottom-left corner of screen is origin, +x is right, +y is up.
 	Material::SetViewMatrix(Matrix4::Identity);
 	Material::SetProjMatrix(Matrix4::MakeOrthographic(static_cast<float>(GetWindowWidth()), static_cast<float>(GetWindowHeight())));
-	
-	// Don't do depth test because UI draws above everything.
-	// This means UI is basically painter's algorithm though!
-	glDisable(GL_DEPTH_TEST);
 	
 	// Render UI elements.
 	// Any renderable UI element is contained within a Canvas.
@@ -356,15 +345,14 @@ void Renderer::Render()
 	Material::SetViewMatrix(viewMatrix);
 	Material::SetProjMatrix(projectionMatrix);
 	
-	// Render an axis at the world origin, for debugging.
+	// Render an axis at the world origin.
 	Debug::DrawAxes(Vector3::Zero);
 	
 	// Render debug elements.
 	// Any debug commands from earlier are queued internally, and only drawn when this is called!
 	Debug::Render();
 	
-	// STEP 6: ALL DONE! PUT THE ART ON DISPLAY!
-	// Present to screen.
+	// STEP 6: ALL DONE!
 	SDL_GL_SwapWindow(mWindow);
 }
 

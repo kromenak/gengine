@@ -27,68 +27,67 @@ class Texture;
 // A node in the BSP tree.
 struct BSPNode
 {
-    // Indexes of front front and back child nodes.
-    // One is a BSPNode that draws in front of me, the other draws behind me.
-    // These appear to be 65535 if invalid/null.
+    // Indexes of front and back nodes.
+    // Front is in front of the plane for this node; back is behind the plane.
+    // These appear to be 65535 (ushort max value) if invalid/null.
     unsigned short frontChildIndex;
     unsigned short backChildIndex;
     
-    // The plane associated with this node.
-    // Used to make front/back distinction, I believe.
+    // Each node has a plane that divides child geometry into "front" and "back".
+    // By testing what side of the plane the camera is on, correct order to draw geometry can be determined.
     unsigned short planeIndex;
     
-    // Offset and count into the polygon list.
-    // These are the polygons that should be drawn as part of this node, I guess.
+    // Polygons associated with this node (offset + count into polygon list).
+    // This makes up the majority of the BSP geometry.
     unsigned short polygonIndex;
     unsigned short polygonCount;
     
-    // Nodes seem to optionally also define a second set of polygons.
+    // Less commonly used, but a second set of polygons for this node.
+    // These appear to be used for rendering 2-sided polygons (though I haven't totally figured that out yet).
     unsigned short polygonIndex2;
     unsigned short polygonCount2;
 };
 
-// A polygon is a renderable thing, one or more are associated with each BSP node.
-// The polygon itself just references other pieces of data.
+// A polygon is made up of at least three vertices and can be rendered.
 struct BSPPolygon
 {
     // Index of surface this polygon belongs to.
+    // The surface defines appearance (texture, lightmap) and other properties.
     unsigned short surfaceIndex;
     
-    // BSP is rendered using indexed geometry. A list of vertices and a list of indices are sent to the graphics system.
+    // BSP is rendered using indexed geometry.
     // These are an offset + count into the index array, defining what vertices make up this polygon.
     unsigned short vertexIndexOffset;
     unsigned short vertexIndexCount;
 	
 	// Used for creating a linked list of alpha surfaces.
-	BSPPolygon* next;
+    BSPPolygon* next = nullptr;
 };
 
-// A surface is made up of one or more polygons.
+// A surface consists of one or more polygons.
 // It defined appearance (visibility, texture, lightmap info) and behavior (raycasting).
 struct BSPSurface
 {
-    // An index to an object. An "object" is really just a string name value,
-    // so this is sort of a way to group surfaces logically.
+    // An "object" is really just a name - a way to group surfaces logically.
+    // For example, several surfaces could make up a "door" object.
     unsigned int objectIndex;
     
     // The texture used for this surface.
     Texture* texture = nullptr;
     
-    // An optional lightmap texture - applied from a lightmap texture.
+    // An optional lightmap texture - applied from a lightmap asset.
+    //TODO: this works OK, but it'd be more efficient to use a lightmap atlas instead of many individual textures.
     Texture* lightmapTexture = nullptr;
     
-    // Each vertex has a UV coordinate, but a surface can also specify
-    // an offset or scale for the texture, so it looks good graphically.
-    Vector2 uvOffset;
-    Vector2 uvScale;
+    // UVs used for the lightmap are often different from the UVs used for diffuse textures.
+    // The surface defines offset/scale to apply to each UV to properly render a lightmap on that surface.
+    Vector2 lightmapUvOffset;
+    Vector2 lightmapUvScale;
     
-    // Not yet sure what this scales - is it an overall scale on top of UV-specific scales???
-    float scale = 1.0f;
-    
-    // If true, this surface is visible. If not, hidden.
+    // If true, this surface is rendered.
     bool visible = true;
 	
-	// If true, interactive (can be hit by raycasts). If false, not interactive.
+	// If true, interactive (can be hit by raycasts).
 	bool interactive = true;
 };
 
@@ -118,37 +117,34 @@ public:
     void RenderTranslucent();
 	
 private:
-    // Points to the root node in our node list.
-    // Almost always 0, but maybe not in some cases?
+    // Identifies the root node in the node list.
+    // Rendering always starts from this node.
     unsigned int mRootNodeIndex = 0;
     
     // List of nodes. These all reference one another to form a tree structure.
     std::vector<BSPNode> mNodes;
     
-    // Each BSP node uses a plane to calculate whether we are rendering in front of or behind the node.
-    // This dictates the path taken through the node tree when rendering.
+    // Planes used by nodes to determine camera location during tree traversal.
     std::vector<Plane> mPlanes;
     
-    // A polygon describes a unit of renderable geometry. It references vertex indices to do this.
-    // When rendering BSP, we determine which polygons are visible and render them.
+    // All the polygons that make up the scene - nodes traversed during rendering,
+    // reference polygons to be rendered at that node.
     std::vector<BSPPolygon> mPolygons;
     
-    // For translucent rendering, we can create a polygon chain when doing opaque rendering.
-    // We then iterate the chain afterwards to properly render translucent stuff.
+    // Opaque rendering occurs front-to-back, and a linked list of translucent polygons are generated.
+    // The linked list can be iterated afterwards to render translucent geometry in the correct order.
     // Saw this in id's Quake/Doom code and thought it was pretty cool!
     BSPPolygon* mAlphaPolygons = nullptr;
     
     // Surfaces are referenced by polygons, define surface properties like texture and lighting.
     std::vector<BSPSurface> mSurfaces;
     
-    // Each BSP map is logically divided into objects. An object is made up of multiple surfaces.
+    // Each BSP map is logically divided into objects.
     std::vector<std::string> mObjectNames;
     
     // Vertex attributes for BSP mesh.
     std::vector<Vector3> mVertices;
-    std::vector<Vector4> mColors;
     std::vector<Vector2> mUVs;
-    std::vector<Vector2> mLightmapUVs;
     
     // Vertex indices for BSP mesh.
     std::vector<unsigned short> mVertexIndices;

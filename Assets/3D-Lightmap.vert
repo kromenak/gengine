@@ -1,11 +1,8 @@
 #version 150
 
 in vec3 vPos;
-in vec4 vColor;
 in vec2 vUV1;
-in vec2 vUV2;
 
-out vec4 fColor;
 out vec2 fUV1;
 out vec2 fUV2;
 
@@ -16,15 +13,15 @@ uniform mat4 gWorldToProjMatrix;
 uniform mat4 gObjectToWorldMatrix;
 
 // User-defined uniforms
-uniform vec4 uColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+uniform vec4 uLightmapScaleOffset;
 
 void main()
 {
     // Pass through the UV attribute.
     fUV1 = vUV1;
-    fUV2 = vUV2;
     
-    fColor = vColor;
+    // Calculate light map UV by applying offset/scale to texture UV.
+    fUV2 = (vUV1 + uLightmapScaleOffset.zw) * uLightmapScaleOffset.xy;
     
     // Transform position obj->world->view->proj
     gl_Position = gWorldToProjMatrix * gObjectToWorldMatrix * vec4(vPos, 1.0f);
