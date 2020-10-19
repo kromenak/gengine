@@ -38,6 +38,7 @@ public:
 	Vector3 GetScale() const { return mLocalScale; }
 	void SetScale(const Vector3& scale);
 	
+    // NOTE: this is where we decide which axes correlate to forward/right/up in world space.
 	Vector3 GetForward() const { return mLocalRotation.Rotate(Vector3::UnitZ); }
 	Vector3 GetRight() const { return mLocalRotation.Rotate(Vector3::UnitX); }
 	Vector3 GetUp() const { return mLocalRotation.Rotate(Vector3::UnitY); }

@@ -123,12 +123,6 @@ public:
     static Matrix4 MakeScale(float scale);
     static Matrix4 MakeScale(const Vector3& scale);
 	
-	static Matrix4 MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up);
-	
-    static Matrix4 MakePerspective(float fovAngleRad, float aspectRatio, float near, float far);
-	static Matrix4 MakeOrthographic(float left, float right, float bottom, float top, float near, float far);
-	static Matrix4 MakeOrthographic(float width, float height);
-	
 private:
     // Elements are stored in a 1D array internally.
     // Our storage is column-major, meaning that [0] = m(0,0), [1] = m(1,0), [2] = m(2,0), and so on.

@@ -6,6 +6,7 @@
 #include "Camera.h"
 
 #include "Actor.h"
+#include "RenderTransforms.h"
 #include "Services.h"
 
 TYPE_DEF_CHILD(Component, Camera);
@@ -18,63 +19,47 @@ Camera::Camera(Actor* owner) : Component(owner)
 Matrix4 Camera::GetLookAtMatrix()
 {
     Vector3 eye = GetOwner()->GetPosition();
+    
+    // World space axes directions are all a matter of perspective.
+    // Here, we say that view forward equals Actor forward (mapped to Z axis).
+    // And view up equals Actor up (mapped to Y axis).
     Vector3 lookAt = eye + GetOwner()->GetForward();
-    Vector3 up = Vector3::UnitY;
-    return Matrix4::MakeLookAt(eye, lookAt, up);
+    Vector3 up = GetOwner()->GetUp();
+    return RenderTransforms::MakeLookAt(eye, lookAt, up);
 }
 
 Matrix4 Camera::GetLookAtMatrixNoTranslate()
 {
     Vector3 lookAt = GetOwner()->GetForward();
-    Vector3 up = Vector3::UnitY;
-	return Matrix4::MakeLookAt(Vector3::Zero, lookAt, up);
+    Vector3 up = GetOwner()->GetUp();
+	return RenderTransforms::MakeLookAt(Vector3::Zero, lookAt, up);
 }
 
 Matrix4 Camera::GetProjectionMatrix()
 {
-    return Matrix4::MakePerspective(mFovAngleRad, 1.333f, mNearClipPlane, mFarClipPlane);
+    return RenderTransforms::MakePerspective(mFovAngleRad, 1.333f, mNearClipPlane, mFarClipPlane);
 }
 
 Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 {
-	// GOAL: convert screen point back to world space.
-	
-	// The screen point is in screen coordinates. These are (0, 0) in lower-left and (screenWidth, screenHeight) in top-right.
-	// This is decided by how we map (x, y) values from the OS to the screen (in InputManager).
-	//
-	// We need the point to be in normalized device coordinates.
-	// Normalized device coordinates vary from (-1, -1) in lower-left and (1, 1) in upper right.
-	// This is decided by the ndcX and ndcY equations below.
-	//
-	//  				|-----------| (screenWidth, screenHeight) (1, 1)
-	//  				|           |
-	//  				|           |
-	//  (0, 0) (-1, -1)	|-----------|
-	//
-	// Convert screen point to normalized device coordinate point.
-	// Note that the mapping of NDCs to top-left/lower-left/etc is dictated by these equations.
+    // First, convert point to NDC space.
 	float screenWidth = Services::GetRenderer()->GetWindowWidth();
 	float screenHeight = Services::GetRenderer()->GetWindowHeight();
-    float ndcX = (2.0f * (screenPoint.x / screenWidth)) - 1.0f; 		// 0 => -1, screenWidth => 1
-	float ndcY = (2.0f * (screenPoint.y / screenHeight)) - 1.0f; 		// 0 => -1, screenHeight => 1
-    //float ndcY = -(2.0f * (screenPoint.y / screenHeight)) + 1.0f; 	// 0 => 1, screenHeight => -1 (this would put (-1, -1) in top-left corner)
-	
-	// Our NDC point is X/Y values for starters.
-	// Distance indicates what distance from the camera we want to get for the world point.
-	// 1.0 is just standard for homogenous coordinates.
-	Vector4 point(ndcX, ndcY, distance, 1.0f);
-	
-	// We now need to convert our normalized device coordinate to world space.
-	// To do this, we must calculate the "world space to screen space" matrix, and then invert it.
-	Matrix4 viewMatrix = GetLookAtMatrix();
-	Matrix4 projectionMatrix = GetProjectionMatrix();
+    Vector4 point = RenderTransforms::ScreenPointToNDCPoint(screenPoint, distance, screenWidth, screenHeight);
+    
+    // Usually, a point is converted from world to NDC using a "worldToProjection" matrix.
+    // To do the reverse, we create that matrix and then invert it.
+    Matrix4 viewMatrix = GetLookAtMatrix();
+    Matrix4 projectionMatrix = GetProjectionMatrix();
     Matrix4 projectionToWorld = Matrix4::Inverse(projectionMatrix * viewMatrix);
 	
-	// Multiply the NDC point by the "screen space to world space" matrix to get to world space.
-	// We must divide the whole point by W to deal with reversing perspective depth stuff.
+    // Convert point to world space.
     point = projectionToWorld * point;
+    
+    // W value is likely affected by the transformation.
+    // So, must divide to get back to a valid point (w == 1).
     point /= point.w;
-	
+    
 	// Finally, return the world point.
     return Vector3(point.x, point.y, point.z);
 }
@@ -88,3 +73,4 @@ void Camera::SetCameraFovDegrees(float fovDeg)
 {
 	mFovAngleRad = Math::ToRadians(Math::Clamp(fovDeg, 0.0f, 180.0f));
 }
+

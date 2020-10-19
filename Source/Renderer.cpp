@@ -19,6 +19,7 @@
 #include "Matrix4.h"
 #include "MeshRenderer.h"
 #include "Model.h"
+#include "RenderTransforms.h"
 #include "Shader.h"
 #include "Skybox.h"
 #include "Texture.h"
@@ -167,6 +168,14 @@ bool Renderer::Initialize()
     
     // For use with alpha blending during render loop.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+#if VIEW_HAND == VIEW_LH
+    // We can use left-hand or right-hand view space, but GL's depth buffer defaults assume right-hand.
+    // If using left-hand, we essentially "flip" the depth buffer.
+    // Clear to 0 (instead of 1) and use GL_GREATER for depth tests (rather than GL_LESS).
+    glClearDepth(0);
+    glDepthFunc(GL_GREATER);
+#endif
 	
     // Load default shader.
 	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Diffuse-Tex");
@@ -237,7 +246,7 @@ bool Renderer::Initialize()
 	uiQuad = new Mesh();
     Submesh* uiQuadSubmesh = uiQuad->AddSubmesh(meshDefinition);
 	uiQuadSubmesh->SetRenderMode(RenderMode::Triangles);
-	
+    
     // Init succeeded!
     return true;
 }
@@ -324,8 +333,8 @@ void Renderer::Render()
     
 	// UI uses a view/proj setup for now - world space for UI maps to pixel size of screen.
 	// Bottom-left corner of screen is origin, +x is right, +y is up.
-	Material::SetViewMatrix(Matrix4::Identity);
-	Material::SetProjMatrix(Matrix4::MakeOrthographic(static_cast<float>(GetWindowWidth()), static_cast<float>(GetWindowHeight())));
+    Material::SetViewMatrix(Matrix4::Identity);
+    Material::SetProjMatrix(RenderTransforms::MakeOrthoBottomLeft(static_cast<float>(GetWindowWidth()), static_cast<float>(GetWindowHeight())));
 	
 	// Render UI elements.
 	// Any renderable UI element is contained within a Canvas.

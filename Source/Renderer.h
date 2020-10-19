@@ -10,7 +10,6 @@
 
 #include <SDL2/SDL.h>
 #include <GL/glew.h>
-//#include <OpenGL/gl.h>
 
 #include "Material.h"
 #include "Matrix4.h"

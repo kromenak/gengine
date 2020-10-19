@@ -272,6 +272,8 @@
 		4BDFBA0A23418E8F00C4DD49 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFBA0923418E8F00C4DD49 /* Console.cpp */; };
 		4BDFBA0D2341B75C00C4DD49 /* TextInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */; };
 		4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE15CB61F464FD800114779 /* AssetManager.cpp */; };
+		4BE6F4B8252FE33600F03121 /* RenderTransforms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6F4B7252FE33600F03121 /* RenderTransforms.cpp */; };
+		4BE6F4B9252FE33600F03121 /* RenderTransforms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6F4B7252FE33600F03121 /* RenderTransforms.cpp */; };
 		4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE75D32208D7E7B007031A3 /* SheepVM.cpp */; };
 		4BEA726D21D53F2000998066 /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA726C21D53F2000998066 /* Walker.cpp */; };
 		4BEA726E21D53F2000998066 /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA726C21D53F2000998066 /* Walker.cpp */; };
@@ -586,6 +588,8 @@
 		4BE15CB71F464FD800114779 /* AssetManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AssetManager.h; path = ../Source/AssetManager.h; sourceTree = "<group>"; };
 		4BE15CBC1F46620000114779 /* Atomics.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Atomics.h; path = ../Source/Atomics.h; sourceTree = "<group>"; };
 		4BE6EE331F441DC600BB29D5 /* minilzo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = minilzo.c; path = ../Libraries/minilzo/minilzo.c; sourceTree = "<group>"; };
+		4BE6F4B6252FE33600F03121 /* RenderTransforms.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RenderTransforms.h; path = ../Source/RenderTransforms.h; sourceTree = "<group>"; };
+		4BE6F4B7252FE33600F03121 /* RenderTransforms.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RenderTransforms.cpp; path = ../Source/RenderTransforms.cpp; sourceTree = "<group>"; };
 		4BE75D31208D7E7B007031A3 /* SheepVM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepVM.h; path = ../Source/Sheep/SheepVM.h; sourceTree = "<group>"; };
 		4BE75D32208D7E7B007031A3 /* SheepVM.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepVM.cpp; path = ../Source/Sheep/SheepVM.cpp; sourceTree = "<group>"; };
 		4BEA726B21D53F2000998066 /* Walker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Walker.h; path = ../Source/Walker.h; sourceTree = "<group>"; };
@@ -862,6 +866,8 @@
 				4B15A9551F242C55000A689F /* Renderer.h */,
 				4B12B9D222F94ABC009F54E4 /* RenderTexture.cpp */,
 				4B12B9D122F94ABC009F54E4 /* RenderTexture.h */,
+				4BE6F4B7252FE33600F03121 /* RenderTransforms.cpp */,
+				4BE6F4B6252FE33600F03121 /* RenderTransforms.h */,
 				4BF32B8A1F67C434000639FB /* Shader.cpp */,
 				4BF32B8B1F67C434000639FB /* Shader.h */,
 				4BD673CB20B1119E00795582 /* Skybox.cpp */,
@@ -1485,6 +1491,7 @@
 				4B2606ED22F3D43B0030F2D9 /* AnimationNodes.cpp in Sources */,
 				4B046E90218E855600E56341 /* Mover.cpp in Sources */,
 				4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */,
+				4BE6F4B8252FE33600F03121 /* RenderTransforms.cpp in Sources */,
 				4B4B4AE32091B80700391827 /* SheepAPI.cpp in Sources */,
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
 				4B9AB96124844A07007090B7 /* BSPActor.cpp in Sources */,
@@ -1611,6 +1618,7 @@
 				4B22F5222174076D0065B152 /* Vector4.cpp in Sources */,
 				4B046E91218E855600E56341 /* Mover.cpp in Sources */,
 				4BB67C482352556C00FDFB30 /* RenderTexture.cpp in Sources */,
+				4BE6F4B9252FE33600F03121 /* RenderTransforms.cpp in Sources */,
 				4B22F543217410830065B152 /* Main.cpp in Sources */,
 				4B22F519217407640065B152 /* Shader.cpp in Sources */,
 				4B9AB96224844A07007090B7 /* BSPActor.cpp in Sources */,
