@@ -5,8 +5,8 @@
 //
 #include "BSP.h"
 
+#include <bitset>
 #include <iostream>
-#include <unordered_map>
 
 #include "BinaryReader.h"
 #include "BSPActor.h"
@@ -524,6 +524,13 @@ void BSP::RenderPolygon(BSPPolygon& polygon, bool translucent)
                           surface.lightmapUvOffset.x,
                           surface.lightmapUvOffset.y);
     mMaterial.GetShader()->SetUniformVector4("uLightmapScaleOffset", lightmapUvScaleOffset);
+    
+    /*
+    if((surface.flags & BSPSurface::kUnknownFlag7) != 0)
+    {
+        Debug::DrawLine(Vector3::Zero, mVertices[mVertexIndices[polygon.vertexIndexOffset]], Color32::Magenta);
+    }
+    */
 
     // Draw the polygon.
     mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
@@ -596,9 +603,15 @@ void BSP::ParseFromData(char *data, int dataLength)
          (B25, toilet paper has 2)
          (B25/RC1 - many instances of 0/1 too)
         */
-		reader.ReadUInt();
-        //unsigned int flags = reader.ReadUInt();
-		
+        surface.flags = reader.ReadUInt();
+        /*
+        if(surface.flags != 0)
+        {
+            std::bitset<32> bs(surface.flags);
+            std::cout << mObjectNames[surface.objectIndex] << ": " << bs << std::endl;
+        }
+        */
+        
         mSurfaces.push_back(surface);
     }
     

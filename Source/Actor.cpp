@@ -37,10 +37,6 @@ Actor::~Actor()
 {
 	//NOTE: GEngine class handles calling "delete". Others should call Destroy if needed.
 	
-	// Rather than have actors remove themselves, GEngine now does this during deletion.
-	// It seems much safer for GEngine to coordinate all this, rather than any actor being able to remove itself anytime.
-    //GEngine::RemoveActor(this);
-	
     // Delete all components and clear list.
     for(auto& component : mComponents)
     {

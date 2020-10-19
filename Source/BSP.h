@@ -70,7 +70,7 @@ struct BSPSurface
 {
     // An "object" is really just a name - a way to group surfaces logically.
     // For example, several surfaces could make up a "door" object.
-    unsigned int objectIndex;
+    unsigned int objectIndex = 0;
     
     // The texture used for this surface.
     Texture* texture = nullptr;
@@ -83,6 +83,17 @@ struct BSPSurface
     // The surface defines offset/scale to apply to each UV to properly render a lightmap on that surface.
     Vector2 lightmapUvOffset;
     Vector2 lightmapUvScale;
+    
+    // Flags defining surface properties.
+    unsigned int flags = 0;
+    
+    static const unsigned int kUnknownFlag1 = 1;
+    static const unsigned int kUnknownFlag2 = 2; // seems to correlate to surfaces that are hard to see or not very noticeable
+    static const unsigned int kUnknownFlag3 = 4; // surfaces that emit light, hit tests
+    static const unsigned int kUnknownFlag4 = 8; // surfaces that emit light, shadow casters, "hide these models", hit tests
+    static const unsigned int kUnknownFlag5 = 16; // lamp shades, light fixtures, lanterns, stained glass, chandilier, sconces, etc.
+    static const unsigned int kUnknownFlag6 = 32; // possibly never used - couldn't find in any BSP
+    static const unsigned int kUnknownFlag7 = 64; // some RC1, ARM, CDB, LHE, PLO, TE5 (shadow bridge) objects have this
     
     // If true, this surface is rendered.
     bool visible = true;

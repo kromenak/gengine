@@ -309,10 +309,12 @@ void GKActor::OnUpdate(float deltaTime)
 		SetActorToMeshRotation();
 	}
 	
+    /*
 	if(mMeshRenderer != nullptr)
 	{
-		//mMeshRenderer->DebugDrawAABBs();
+		mMeshRenderer->DebugDrawAABBs();
 	}
+    */
 }
 
 void GKActor::OnVertexAnimationStopped()
