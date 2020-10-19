@@ -153,6 +153,13 @@ Vector4& Vector4::Normalize()
     return *this;
 }
 
+/*static*/ Vector4 Vector4::Normalize(const Vector4& v)
+{
+    Vector4 v2 = v;
+    v2.Normalize();
+    return v2;
+}
+
 float Vector4::Dot(const Vector4& lhs, const Vector4& rhs)
 {
     return (lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z + lhs.w * rhs.w);

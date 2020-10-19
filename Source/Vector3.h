@@ -62,6 +62,7 @@ public:
     float GetLength() const { return Math::Sqrt(x * x + y * y + z * z); }
     float GetLengthSq() const { return (x * x + y * y + z * z); }
     Vector3& Normalize();
+    Vector3 Normalize(const Vector3& v);
     
     // Scalar/dot and vector/cross products
     static float Dot(const Vector3& lhs, const Vector3& rhs);
