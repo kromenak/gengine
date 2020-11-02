@@ -54,7 +54,7 @@ private:
 	Model* mBoundsModel = nullptr;
 		
 	// If true, camera bounds are turned on. If false, they are disabled.
-	bool mBoundsEnabled = true;
+    bool mBoundsEnabled = false;
 	
 	// The last object hovered over. Used for toggling cursor highlight color.
 	std::string mLastHoveredNoun;

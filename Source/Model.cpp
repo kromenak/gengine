@@ -217,7 +217,6 @@ void Model::ParseFromData(char *data, int dataLength)
         
 		// Generate transform matrix from i/j/k bases and mesh position.
 		// This mesh allows us to go from "mesh space" to "local space" (i.e. local space of an Actor).
-		// Assuming the actor is at world origin (or there is no actor), this is actually "world space."
 		Matrix4 meshToLocalMatrix;
 		meshToLocalMatrix.SetColumns(Vector4(iBasis), Vector4(jBasis), Vector4(kBasis), Vector4(meshPos));
 		meshToLocalMatrix(3, 3) = 1.0f;

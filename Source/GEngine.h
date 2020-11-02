@@ -17,6 +17,7 @@
 #include "Renderer.h"
 #include "SheepManager.h"
 #include "ReportManager.h"
+#include "VideoPlayer.h"
 
 class Actor;
 class Scene;
@@ -61,6 +62,7 @@ private:
 	ReportManager mReportManager;
 	ActionManager mActionManager;
 	Console mConsole;
+    VideoPlayer mVideoPlayer;
     
     // A list of all actors that currently exist in the game.
     std::vector<Actor*> mActors;

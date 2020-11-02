@@ -16,6 +16,16 @@
 Texture Texture::White(2, 2, Color32::White);
 Texture Texture::Black(2, 2, Color32::Black);
 
+Texture::Texture(unsigned int width, unsigned int height) :
+    Asset(""),
+    mWidth(width),
+    mHeight(height)
+{
+    // Create pixel array of desired size.
+    int pixelsSize = mWidth * mHeight * 4;
+    mPixels = new unsigned char[pixelsSize];
+}
+
 Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
 	Asset(""),
 	mWidth(width),

@@ -268,6 +268,28 @@
 		4BD673CC20B1119E00795582 /* Skybox.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673CB20B1119E00795582 /* Skybox.cpp */; };
 		4BD673D120B2555E00795582 /* BinaryWriter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D020B2555E00795582 /* BinaryWriter.cpp */; };
 		4BD673D420B26F0C00795582 /* AudioListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD673D320B26F0C00795582 /* AudioListener.cpp */; };
+		4BD89A22253D704C0040253A /* FrameQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A21253D704C0040253A /* FrameQueue.cpp */; };
+		4BD89A23253D704C0040253A /* FrameQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A21253D704C0040253A /* FrameQueue.cpp */; };
+		4BD89A26253D70700040253A /* PacketQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A25253D70700040253A /* PacketQueue.cpp */; };
+		4BD89A27253D70700040253A /* PacketQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A25253D70700040253A /* PacketQueue.cpp */; };
+		4BD89A2A253E1B060040253A /* PtsClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A29253E1B060040253A /* PtsClock.cpp */; };
+		4BD89A2B253E1B060040253A /* PtsClock.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A29253E1B060040253A /* PtsClock.cpp */; };
+		4BD89A2E253E1C290040253A /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A2D253E1C290040253A /* Decoder.cpp */; };
+		4BD89A2F253E1C290040253A /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A2D253E1C290040253A /* Decoder.cpp */; };
+		4BD89A32253E41900040253A /* VideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A31253E41900040253A /* VideoPlayer.cpp */; };
+		4BD89A33253E41900040253A /* VideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A31253E41900040253A /* VideoPlayer.cpp */; };
+		4BD89A35253E43B50040253A /* ReadThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A34253E43B50040253A /* ReadThread.cpp */; };
+		4BD89A36253E43B50040253A /* ReadThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A34253E43B50040253A /* ReadThread.cpp */; };
+		4BD89A39253E43F00040253A /* VideoState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A38253E43F00040253A /* VideoState.cpp */; };
+		4BD89A3A253E43F00040253A /* VideoState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A38253E43F00040253A /* VideoState.cpp */; };
+		4BD89A3D253E46E20040253A /* DecodeAudioThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A3C253E46E20040253A /* DecodeAudioThread.cpp */; };
+		4BD89A3E253E46E20040253A /* DecodeAudioThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A3C253E46E20040253A /* DecodeAudioThread.cpp */; };
+		4BD89A40253E471D0040253A /* DecodeVideoThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A3F253E471D0040253A /* DecodeVideoThread.cpp */; };
+		4BD89A41253E471D0040253A /* DecodeVideoThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A3F253E471D0040253A /* DecodeVideoThread.cpp */; };
+		4BD89A43253E47920040253A /* DecodeSubtitlesThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A42253E47920040253A /* DecodeSubtitlesThread.cpp */; };
+		4BD89A44253E47920040253A /* DecodeSubtitlesThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A42253E47920040253A /* DecodeSubtitlesThread.cpp */; };
+		4BD89A56253E7AC40040253A /* VideoPlaybackGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */; };
+		4BD89A57253E7AC40040253A /* VideoPlaybackGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */; };
 		4BDDCD5E20D6C4BC00701A89 /* VertexAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */; };
 		4BDFBA0A23418E8F00C4DD49 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFBA0923418E8F00C4DD49 /* Console.cpp */; };
 		4BDFBA0D2341B75C00C4DD49 /* TextInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */; };
@@ -275,6 +297,8 @@
 		4BE6F4B8252FE33600F03121 /* RenderTransforms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6F4B7252FE33600F03121 /* RenderTransforms.cpp */; };
 		4BE6F4B9252FE33600F03121 /* RenderTransforms.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE6F4B7252FE33600F03121 /* RenderTransforms.cpp */; };
 		4BE75D33208D7E7B007031A3 /* SheepVM.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE75D32208D7E7B007031A3 /* SheepVM.cpp */; };
+		4BE894A82547563C0083F4AA /* AudioPlaybackSDL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE894A72547563C0083F4AA /* AudioPlaybackSDL.cpp */; };
+		4BE894A92547563C0083F4AA /* AudioPlaybackSDL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BE894A72547563C0083F4AA /* AudioPlaybackSDL.cpp */; };
 		4BEA726D21D53F2000998066 /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA726C21D53F2000998066 /* Walker.cpp */; };
 		4BEA726E21D53F2000998066 /* Walker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA726C21D53F2000998066 /* Walker.cpp */; };
 		4BEA727121D5834300998066 /* WalkerBoundary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BEA727021D5834300998066 /* WalkerBoundary.cpp */; };
@@ -315,7 +339,7 @@
 		4B15A9421F241DC8000A689F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
-			dstPath = /usr/share/man/man1/;
+			dstPath = /usr/share/man/man1;
 			dstSubfolderSpec = 0;
 			files = (
 			);
@@ -578,6 +602,24 @@
 		4BD673D020B2555E00795582 /* BinaryWriter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = BinaryWriter.cpp; path = ../Source/BinaryWriter.cpp; sourceTree = "<group>"; };
 		4BD673D220B26F0C00795582 /* AudioListener.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioListener.h; path = ../Source/AudioListener.h; sourceTree = "<group>"; };
 		4BD673D320B26F0C00795582 /* AudioListener.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioListener.cpp; path = ../Source/AudioListener.cpp; sourceTree = "<group>"; };
+		4BD89A20253D704C0040253A /* FrameQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = FrameQueue.h; path = ../Source/Video/FrameQueue.h; sourceTree = "<group>"; };
+		4BD89A21253D704C0040253A /* FrameQueue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FrameQueue.cpp; path = ../Source/Video/FrameQueue.cpp; sourceTree = "<group>"; };
+		4BD89A24253D70700040253A /* PacketQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PacketQueue.h; path = ../Source/Video/PacketQueue.h; sourceTree = "<group>"; };
+		4BD89A25253D70700040253A /* PacketQueue.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PacketQueue.cpp; path = ../Source/Video/PacketQueue.cpp; sourceTree = "<group>"; };
+		4BD89A28253E1B060040253A /* PtsClock.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = PtsClock.h; path = ../Source/Video/PtsClock.h; sourceTree = "<group>"; };
+		4BD89A29253E1B060040253A /* PtsClock.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = PtsClock.cpp; path = ../Source/Video/PtsClock.cpp; sourceTree = "<group>"; };
+		4BD89A2C253E1C290040253A /* Decoder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Decoder.h; path = ../Source/Video/Decoder.h; sourceTree = "<group>"; };
+		4BD89A2D253E1C290040253A /* Decoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Decoder.cpp; path = ../Source/Video/Decoder.cpp; sourceTree = "<group>"; };
+		4BD89A30253E41900040253A /* VideoPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VideoPlayer.h; path = ../Source/Video/VideoPlayer.h; sourceTree = "<group>"; };
+		4BD89A31253E41900040253A /* VideoPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoPlayer.cpp; path = ../Source/Video/VideoPlayer.cpp; sourceTree = "<group>"; };
+		4BD89A34253E43B50040253A /* ReadThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ReadThread.cpp; path = ../Source/Video/ReadThread.cpp; sourceTree = "<group>"; };
+		4BD89A37253E43F00040253A /* VideoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VideoState.h; path = ../Source/Video/VideoState.h; sourceTree = "<group>"; };
+		4BD89A38253E43F00040253A /* VideoState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoState.cpp; path = ../Source/Video/VideoState.cpp; sourceTree = "<group>"; };
+		4BD89A3C253E46E20040253A /* DecodeAudioThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeAudioThread.cpp; path = ../Source/Video/DecodeAudioThread.cpp; sourceTree = "<group>"; };
+		4BD89A3F253E471D0040253A /* DecodeVideoThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeVideoThread.cpp; path = ../Source/Video/DecodeVideoThread.cpp; sourceTree = "<group>"; };
+		4BD89A42253E47920040253A /* DecodeSubtitlesThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeSubtitlesThread.cpp; path = ../Source/Video/DecodeSubtitlesThread.cpp; sourceTree = "<group>"; };
+		4BD89A54253E7AC40040253A /* VideoPlaybackGL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VideoPlaybackGL.h; path = ../Source/Video/VideoPlaybackGL.h; sourceTree = "<group>"; };
+		4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoPlaybackGL.cpp; path = ../Source/Video/VideoPlaybackGL.cpp; sourceTree = "<group>"; };
 		4BDDCD5C20D6C4BC00701A89 /* VertexAnimation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimation.h; path = ../Source/VertexAnimation.h; sourceTree = "<group>"; };
 		4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimation.cpp; path = ../Source/VertexAnimation.cpp; sourceTree = "<group>"; };
 		4BDFBA0823418E8F00C4DD49 /* Console.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Console.h; path = ../Source/Console.h; sourceTree = "<group>"; };
@@ -592,6 +634,8 @@
 		4BE6F4B7252FE33600F03121 /* RenderTransforms.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = RenderTransforms.cpp; path = ../Source/RenderTransforms.cpp; sourceTree = "<group>"; };
 		4BE75D31208D7E7B007031A3 /* SheepVM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = SheepVM.h; path = ../Source/Sheep/SheepVM.h; sourceTree = "<group>"; };
 		4BE75D32208D7E7B007031A3 /* SheepVM.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SheepVM.cpp; path = ../Source/Sheep/SheepVM.cpp; sourceTree = "<group>"; };
+		4BE894A62547563C0083F4AA /* AudioPlaybackSDL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = AudioPlaybackSDL.h; path = ../Source/Video/AudioPlaybackSDL.h; sourceTree = "<group>"; };
+		4BE894A72547563C0083F4AA /* AudioPlaybackSDL.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AudioPlaybackSDL.cpp; path = ../Source/Video/AudioPlaybackSDL.cpp; sourceTree = "<group>"; };
 		4BEA726B21D53F2000998066 /* Walker.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Walker.h; path = ../Source/Walker.h; sourceTree = "<group>"; };
 		4BEA726C21D53F2000998066 /* Walker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Walker.cpp; path = ../Source/Walker.cpp; sourceTree = "<group>"; };
 		4BEA726F21D5834300998066 /* WalkerBoundary.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = WalkerBoundary.h; path = ../Source/WalkerBoundary.h; sourceTree = "<group>"; };
@@ -796,6 +840,7 @@
 				4B15A95D1F245BDC000A689F /* Sheep */,
 				4B98D70A1F53D26C009CC2F0 /* STD */,
 				4B08C90D2137443F0028FEB3 /* UI */,
+				4BD89A1F253D6F0E0040253A /* Video */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -1149,6 +1194,34 @@
 			name = Scene;
 			sourceTree = "<group>";
 		};
+		4BD89A1F253D6F0E0040253A /* Video */ = {
+			isa = PBXGroup;
+			children = (
+				4BE130822546951200DAA9FE /* Playback */,
+				4BE13081254694F500DAA9FE /* Decode */,
+				4BD89A4B253E64D20040253A /* Util */,
+				4BD89A31253E41900040253A /* VideoPlayer.cpp */,
+				4BD89A30253E41900040253A /* VideoPlayer.h */,
+				4BD89A34253E43B50040253A /* ReadThread.cpp */,
+				4BD89A38253E43F00040253A /* VideoState.cpp */,
+				4BD89A37253E43F00040253A /* VideoState.h */,
+			);
+			name = Video;
+			sourceTree = "<group>";
+		};
+		4BD89A4B253E64D20040253A /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				4BD89A29253E1B060040253A /* PtsClock.cpp */,
+				4BD89A28253E1B060040253A /* PtsClock.h */,
+				4BD89A21253D704C0040253A /* FrameQueue.cpp */,
+				4BD89A20253D704C0040253A /* FrameQueue.h */,
+				4BD89A25253D70700040253A /* PacketQueue.cpp */,
+				4BD89A24253D70700040253A /* PacketQueue.h */,
+			);
+			name = Util;
+			sourceTree = "<group>";
+		};
 		4BDFBA072341679000C4DD49 /* GOM */ = {
 			isa = PBXGroup;
 			children = (
@@ -1162,6 +1235,29 @@
 				4B0B67821F78DCD40023815F /* Actor.h */,
 			);
 			name = GOM;
+			sourceTree = "<group>";
+		};
+		4BE13081254694F500DAA9FE /* Decode */ = {
+			isa = PBXGroup;
+			children = (
+				4BD89A3C253E46E20040253A /* DecodeAudioThread.cpp */,
+				4BD89A3F253E471D0040253A /* DecodeVideoThread.cpp */,
+				4BD89A42253E47920040253A /* DecodeSubtitlesThread.cpp */,
+				4BD89A2D253E1C290040253A /* Decoder.cpp */,
+				4BD89A2C253E1C290040253A /* Decoder.h */,
+			);
+			name = Decode;
+			sourceTree = "<group>";
+		};
+		4BE130822546951200DAA9FE /* Playback */ = {
+			isa = PBXGroup;
+			children = (
+				4BE894A72547563C0083F4AA /* AudioPlaybackSDL.cpp */,
+				4BE894A62547563C0083F4AA /* AudioPlaybackSDL.h */,
+				4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */,
+				4BD89A54253E7AC40040253A /* VideoPlaybackGL.h */,
+			);
+			name = Playback;
 			sourceTree = "<group>";
 		};
 		4BE6EE351F441DD100BB29D5 /* Libraries */ = {
@@ -1390,9 +1486,12 @@
 				4B6B766121A6165E00788C02 /* VerbManager.cpp in Sources */,
 				4BD673D420B26F0C00795582 /* AudioListener.cpp in Sources */,
 				4BA228B42477AC1E002F0EE3 /* SheepStack.cpp in Sources */,
+				4BD89A40253E471D0040253A /* DecodeVideoThread.cpp in Sources */,
+				4BD89A35253E43B50040253A /* ReadThread.cpp in Sources */,
 				4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */,
 				4B0B67831F78DCD40023815F /* Actor.cpp in Sources */,
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
+				4BD89A43253E47920040253A /* DecodeSubtitlesThread.cpp in Sources */,
 				4B2ACE0D1F25C45F003EC7FE /* lex.yy.cc in Sources */,
 				4BDDCD5E20D6C4BC00701A89 /* VertexAnimation.cpp in Sources */,
 				4B2E7A62203A5CB3001A5B9C /* Scene.cpp in Sources */,
@@ -1415,6 +1514,7 @@
 				4B38BA762438F823001F9240 /* AABB.cpp in Sources */,
 				4BDFBA0A23418E8F00C4DD49 /* Console.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
+				4BD89A56253E7AC40040253A /* VideoPlaybackGL.cpp in Sources */,
 				4B84A13621684374003B4C3F /* Color32.cpp in Sources */,
 				4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */,
 				4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */,
@@ -1425,6 +1525,7 @@
 				4BCFC69C24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */,
 				4B2CA00C21B8FC6D006D5E52 /* minilzo.c in Sources */,
 				4BFBB86621D0469000E07EFB /* SceneData.cpp in Sources */,
+				4BD89A3D253E46E20040253A /* DecodeAudioThread.cpp in Sources */,
 				4B0183A624574837004B5C58 /* DialogueManager.cpp in Sources */,
 				4BEA727121D5834300998066 /* WalkerBoundary.cpp in Sources */,
 				4B15A94C1F241E2D000A689F /* Main.cpp in Sources */,
@@ -1442,7 +1543,9 @@
 				4B00D3301F8F3AD500D536D5 /* Camera.cpp in Sources */,
 				4B90E07723769D6300E0E3FA /* SceneInitFile.cpp in Sources */,
 				4B2ACE0B1F25C20B003EC7FE /* sheep.tab.cc in Sources */,
+				4BE894A82547563C0083F4AA /* AudioPlaybackSDL.cpp in Sources */,
 				4B775E5323382EE7007FF777 /* UITextInput.cpp in Sources */,
+				4BD89A32253E41900040253A /* VideoPlayer.cpp in Sources */,
 				4B22F4F9217407460065B152 /* StringTokenizer.cpp in Sources */,
 				4B76DFBC21867D2800BAECC4 /* UIButton.cpp in Sources */,
 				4BE15CB81F464FD800114779 /* AssetManager.cpp in Sources */,
@@ -1457,6 +1560,7 @@
 				4B2E7A65203A6072001A5B9C /* SceneAsset.cpp in Sources */,
 				4B1555592197B59F00072F0D /* Transform.cpp in Sources */,
 				4B92319F210999810004F4F3 /* GasPlayer.cpp in Sources */,
+				4BD89A2E253E1C290040253A /* Decoder.cpp in Sources */,
 				4BD4CCE71FF1F7E3009665C7 /* Mesh.cpp in Sources */,
 				4B4861D1243001D000C4EA31 /* InventoryInspectScreen.cpp in Sources */,
 				4B15771321A3FCC1008B92BD /* UICanvas.cpp in Sources */,
@@ -1467,10 +1571,12 @@
 				4BEA727521D7F71A00998066 /* GameProgress.cpp in Sources */,
 				4B85E87923497A4A004AA3E5 /* UITextBuffer.cpp in Sources */,
 				4BACE1C921D2B2B2000CBE7B /* Submesh.cpp in Sources */,
+				4BD89A22253D704C0040253A /* FrameQueue.cpp in Sources */,
 				4BCC2EA524B41CC700DAE6BD /* Localizer.cpp in Sources */,
 				4B12B9D022F527C8009F54E4 /* FootstepManager.cpp in Sources */,
 				4B22F4F7217407460065B152 /* imstream.cpp in Sources */,
 				4B8A976D238B6EE1006D284D /* LocationManager.cpp in Sources */,
+				4BD89A2A253E1B060040253A /* PtsClock.cpp in Sources */,
 				4B2ACE131F25D310003EC7FE /* SheepCompiler.cpp in Sources */,
 				4BBB34B5214F72BB0069B2E9 /* Font.cpp in Sources */,
 				4B7AB0451F539EB200CFBE8F /* Audio.cpp in Sources */,
@@ -1496,7 +1602,9 @@
 				4B4621EE1FF7532A00536BA6 /* Asset.cpp in Sources */,
 				4B9AB96124844A07007090B7 /* BSPActor.cpp in Sources */,
 				4B5C301D21D1F60900211724 /* VertexAnimator.cpp in Sources */,
+				4BD89A39253E43F00040253A /* VideoState.cpp in Sources */,
 				4B9E413121BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
+				4BD89A26253D70700040253A /* PacketQueue.cpp in Sources */,
 				4B15A9521F2428C5000A689F /* GEngine.cpp in Sources */,
 				4B12B9E0230A7298009F54E4 /* ConsoleUI.cpp in Sources */,
 				4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */,
@@ -1517,9 +1625,12 @@
 				4B6B766221A6165E00788C02 /* VerbManager.cpp in Sources */,
 				4B22F52B2174078B0065B152 /* Asset.cpp in Sources */,
 				4BA228B52477AC1E002F0EE3 /* SheepStack.cpp in Sources */,
+				4BD89A41253E471D0040253A /* DecodeVideoThread.cpp in Sources */,
+				4BD89A36253E43B50040253A /* ReadThread.cpp in Sources */,
 				4B22F51F2174076D0065B152 /* Ray.cpp in Sources */,
 				4B22F50A2174075B0065B152 /* BSP.cpp in Sources */,
 				4B22F50B2174075B0065B152 /* NVC.cpp in Sources */,
+				4BD89A44253E47920040253A /* DecodeSubtitlesThread.cpp in Sources */,
 				4B22F505217407530065B152 /* SheepManager.cpp in Sources */,
 				4BB67C462352554500FDFB30 /* stb_image_resize.cpp in Sources */,
 				4B22F5372174078B0065B152 /* Component.cpp in Sources */,
@@ -1542,6 +1653,7 @@
 				4B22F5312174078B0065B152 /* SoundtrackPlayer.cpp in Sources */,
 				4B22F4FD217407470065B152 /* membuf.cpp in Sources */,
 				4B22F5302174078B0065B152 /* Soundtrack.cpp in Sources */,
+				4BD89A57253E7AC40040253A /* VideoPlaybackGL.cpp in Sources */,
 				4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */,
 				4B22F50D2174075B0065B152 /* SceneAsset.cpp in Sources */,
 				4BB67C4C235255CA00FDFB30 /* TextLayout.cpp in Sources */,
@@ -1552,6 +1664,7 @@
 				4BCFC69D24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */,
 				4B22F501217407530065B152 /* lex.yy.cc in Sources */,
 				4BFBB86721D0469000E07EFB /* SceneData.cpp in Sources */,
+				4BD89A3E253E46E20040253A /* DecodeAudioThread.cpp in Sources */,
 				4B22F5362174078B0065B152 /* Camera.cpp in Sources */,
 				4B0183A724574837004B5C58 /* DialogueManager.cpp in Sources */,
 				4BEA727221D5834300998066 /* WalkerBoundary.cpp in Sources */,
@@ -1569,7 +1682,9 @@
 				4B90E07823769D6300E0E3FA /* SceneInitFile.cpp in Sources */,
 				4B22F51D2174076D0065B152 /* Plane.cpp in Sources */,
 				4B22F5202174076D0065B152 /* Vector2.cpp in Sources */,
+				4BE894A92547563C0083F4AA /* AudioPlaybackSDL.cpp in Sources */,
 				4BB67C492352558300FDFB30 /* ReportManager.cpp in Sources */,
+				4BD89A33253E41900040253A /* VideoPlayer.cpp in Sources */,
 				4B22F500217407470065B152 /* CallbackMethod.cpp in Sources */,
 				4B22F507217407530065B152 /* SheepScriptBuilder.cpp in Sources */,
 				4B76DFBD21867D2800BAECC4 /* UIButton.cpp in Sources */,
@@ -1584,6 +1699,7 @@
 				4B22F52A2174078B0065B152 /* GasPlayer.cpp in Sources */,
 				4B15555A2197B59F00072F0D /* Transform.cpp in Sources */,
 				4B22F52E2174078B0065B152 /* AudioListener.cpp in Sources */,
+				4BD89A2F253E1C290040253A /* Decoder.cpp in Sources */,
 				4B22F514217407640065B152 /* Mesh.cpp in Sources */,
 				4B4861D2243001D000C4EA31 /* InventoryInspectScreen.cpp in Sources */,
 				4B15771421A3FCC1008B92BD /* UICanvas.cpp in Sources */,
@@ -1594,10 +1710,12 @@
 				4B22F5272174078B0065B152 /* Animation.cpp in Sources */,
 				4BB67C4E235255E000FDFB30 /* UITextBuffer.cpp in Sources */,
 				4BEA727621D7F71A00998066 /* GameProgress.cpp in Sources */,
+				4BD89A23253D704C0040253A /* FrameQueue.cpp in Sources */,
 				4BACE1CA21D2B2B2000CBE7B /* Submesh.cpp in Sources */,
 				4BCC2EA624B41CC700DAE6BD /* Localizer.cpp in Sources */,
 				4B22F4F52174073D0065B152 /* UILabel.cpp in Sources */,
 				4B22F52D2174078B0065B152 /* Audio.cpp in Sources */,
+				4BD89A2B253E1B060040253A /* PtsClock.cpp in Sources */,
 				4B8A976E238B6EE1006D284D /* LocationManager.cpp in Sources */,
 				4B22F5382174078B0065B152 /* GameCamera.cpp in Sources */,
 				4B22F5252174078B0065B152 /* Actor.cpp in Sources */,
@@ -1623,7 +1741,9 @@
 				4B22F519217407640065B152 /* Shader.cpp in Sources */,
 				4B9AB96224844A07007090B7 /* BSPActor.cpp in Sources */,
 				4B22F4F32174073D0065B152 /* Font.cpp in Sources */,
+				4BD89A3A253E43F00040253A /* VideoState.cpp in Sources */,
 				4B5C301E21D1F60900211724 /* VertexAnimator.cpp in Sources */,
+				4BD89A27253D70700040253A /* PacketQueue.cpp in Sources */,
 				4B9E413221BDEAB2008B9B1E /* CharacterManager.cpp in Sources */,
 				4B22F4FE217407470065B152 /* StringTokenizer.cpp in Sources */,
 				4B22F513217407640065B152 /* Material.cpp in Sources */,
@@ -1796,6 +1916,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/ffmpeg/include",
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/zlib/include",
 					"$(SRCROOT)/../Libraries/GLEW/include",
@@ -1804,18 +1925,25 @@
 					"$(SRCROOT)/../Libraries",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
 					"$(SRCROOT)/../Libraries/fmod/lib",
+					"$(SRCROOT)/../Libraries/ffmpeg/lib/mac",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lGLEW.2.1.0",
+					"-lGLEW",
 					"-lfmod",
+					"-lavutil",
+					"-lavformat",
+					"-lavcodec",
+					"-lswresample",
+					"-lswscale",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1865,6 +1993,7 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)/../Libraries/ffmpeg/include",
 					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/zlib/include",
 					"$(SRCROOT)/../Libraries/GLEW/include",
@@ -1873,17 +2002,24 @@
 					"$(SRCROOT)/../Libraries",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
 					"$(SRCROOT)/../Libraries/fmod/lib",
+					"$(SRCROOT)/../Libraries/ffmpeg/lib/mac",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lGLEW.2.1.0",
+					"-lGLEW",
 					"-lfmod",
+					"-lavutil",
+					"-lavformat",
+					"-lavcodec",
+					"-lswresample",
+					"-lswscale",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";

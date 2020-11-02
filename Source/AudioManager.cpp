@@ -10,9 +10,8 @@
 
 #include "fmod_errors.h"
 
-#include "Vector3.h"
-
 #include "Audio.h"
+#include "Vector3.h"
 
 bool AudioManager::Initialize()
 {

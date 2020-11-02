@@ -32,7 +32,7 @@ GEngine::GEngine()
 }
 
 bool GEngine::Initialize()
-{
+{    
 	// Initialize reports.
 	Services::SetReports(&mReportManager);
 	
@@ -102,7 +102,10 @@ bool GEngine::Initialize()
 	mHighlightBlueCursor = mAssetManager.LoadCursor("C_ZOOM_2.CUR");
 	mWaitCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
 	UseDefaultCursor();
-	
+    
+    //Texture* tex = mAssetManager.LoadTexture("21PAINTING1.BMP");
+    //tex->WriteToFile("PAINTING.BMP");
+    
     //mAssetManager.WriteBarnAssetToFile("BLKMUSTACHE_3.BMP");
     //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
 	
@@ -134,6 +137,10 @@ bool GEngine::Initialize()
 	// Create dialogue manager.
 	Services::Set<DialogueManager>(new DialogueManager());
 	
+    // Create video player.
+    Services::Set<VideoPlayer>(&mVideoPlayer);
+    mVideoPlayer.Initialize();
+    
 	// Create console UI - this persists for the entire game.
 	ConsoleUI* consoleUI = new ConsoleUI(false);
 	consoleUI->SetIsDestroyOnLoad(false);
@@ -141,7 +148,7 @@ bool GEngine::Initialize()
 	//TEMP: Load scene as though starting a new game.
 	//TODO: Should really show logos, show title screen, allow restore or new game choice.
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-    LoadScene("LBY");
+    LoadScene("R25");
 	
 	/*
 	TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
@@ -164,6 +171,10 @@ bool GEngine::Initialize()
 	//Services::GetSheep()->Execute(ss);
 	
 	//mReportManager.Log("Generic", "Rock & Roll");
+    
+    //mVideoPlayer.Play("Assets/GK3/intro.bik");
+    //mVideoPlayer.Play("Assets/GK3/EstLSRScan.avi");
+    //mVideoPlayer.Play("Assets/GK3/Parch1Geo.avi");
     return true;
 }
 
@@ -367,6 +378,10 @@ void GEngine::Update()
     // Also update audio system (before or after actors?)
     mAudioManager.Update(deltaTime);
     
+    // Update video playback.
+    mVideoPlayer.Update();
+    
+    // TODO: Move to CursorManager or something.
 	// If a sheep is running, show "wait" cursor.
 	// If not, go back to normal cursor.
 	if(mActionManager.IsActionPlaying())
