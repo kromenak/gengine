@@ -234,7 +234,9 @@ void UILabel::GenerateMesh()
     meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
     
     meshDefinition.vertexCount = vertexCount;
-    meshDefinition.vertexData = &(std::vector<float*> { positions, colors, uvs })[0];
+    
+    std::vector<float*> data { positions, colors, uvs };
+    meshDefinition.vertexData = &data[0];
     
     meshDefinition.indexCount = indexSize;
     meshDefinition.indexData = indexes;
