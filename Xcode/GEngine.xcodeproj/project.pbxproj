@@ -37,8 +37,6 @@
 		4B15555A2197B59F00072F0D /* Transform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B1555582197B59F00072F0D /* Transform.cpp */; };
 		4B15555D2197C2E500072F0D /* RectTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15555C2197C2E500072F0D /* RectTransform.cpp */; };
 		4B15555E2197C2E500072F0D /* RectTransform.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15555C2197C2E500072F0D /* RectTransform.cpp */; };
-		4B1555632199489100072F0D /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
-		4B1555642199489100072F0D /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		4B15771321A3FCC1008B92BD /* UICanvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15771221A3FCC1008B92BD /* UICanvas.cpp */; };
 		4B15771421A3FCC1008B92BD /* UICanvas.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15771221A3FCC1008B92BD /* UICanvas.cpp */; };
 		4B15A94C1F241E2D000A689F /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B15A93F1F24188E000A689F /* Main.cpp */; };
@@ -170,8 +168,6 @@
 		4B563A2F1FDA55010049D30D /* QuaternionTests.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B563A2D1FDA3D5B0049D30D /* QuaternionTests.cpp */; };
 		4B598C4725113853007AC569 /* BSPLightmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B598C4625113853007AC569 /* BSPLightmap.cpp */; };
 		4B598C4825113853007AC569 /* BSPLightmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B598C4625113853007AC569 /* BSPLightmap.cpp */; };
-		4B598C4B251148C2007AC569 /* 3D-Lightmap.vert in Resources */ = {isa = PBXBuildFile; fileRef = 4B598C49251148C2007AC569 /* 3D-Lightmap.vert */; };
-		4B598C4C251148C2007AC569 /* 3D-Lightmap.frag in Resources */ = {isa = PBXBuildFile; fileRef = 4B598C4A251148C2007AC569 /* 3D-Lightmap.frag */; };
 		4B5A3348243A54EC0064FC06 /* Plane.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BFCD33720CDFFB4004FF9EA /* Plane.cpp */; };
 		4B5C301D21D1F60900211724 /* VertexAnimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimator.cpp */; };
 		4B5C301E21D1F60900211724 /* VertexAnimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B5C301C21D1F60900211724 /* VertexAnimator.cpp */; };
@@ -203,7 +199,6 @@
 		4B85E87C23497EBF004AA3E5 /* TextLayout.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B85E87B23497EBF004AA3E5 /* TextLayout.cpp */; };
 		4B8A976D238B6EE1006D284D /* LocationManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8A976C238B6EE1006D284D /* LocationManager.cpp */; };
 		4B8A976E238B6EE1006D284D /* LocationManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8A976C238B6EE1006D284D /* LocationManager.cpp */; };
-		4B8A9770238B7A0E006D284D /* Locations.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4B8A976F238B7A0E006D284D /* Locations.txt */; };
 		4B8D2CD1236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
 		4B8D2CD2236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
 		4B8D2CD3236F98B300B8E68D /* Heading.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4B8D2CD0236F98B300B8E68D /* Heading.cpp */; };
@@ -254,13 +249,13 @@
 		4BC36B97251BBD2200692817 /* VertexDefinition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BC36B95251BBD2200692817 /* VertexDefinition.cpp */; };
 		4BC36B9A251BD70E00692817 /* VertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BC36B99251BD70E00692817 /* VertexArray.cpp */; };
 		4BC36B9B251BD70E00692817 /* VertexArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BC36B99251BD70E00692817 /* VertexArray.cpp */; };
-		4BC36B9E251D0F8A00692817 /* 3D-Color.frag in Resources */ = {isa = PBXBuildFile; fileRef = 4BC36B9C251D0F8A00692817 /* 3D-Color.frag */; };
-		4BC36B9F251D0F8A00692817 /* 3D-Color.vert in Resources */ = {isa = PBXBuildFile; fileRef = 4BC36B9D251D0F8A00692817 /* 3D-Color.vert */; };
 		4BCBCF472043A90F001BE1E0 /* NVC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCBCF462043A90F001BE1E0 /* NVC.cpp */; };
 		4BCC2EA524B41CC700DAE6BD /* Localizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */; };
 		4BCC2EA624B41CC700DAE6BD /* Localizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */; };
-		4BCC2EAD24B50DE900DAE6BD /* Actors.txt in Resources */ = {isa = PBXBuildFile; fileRef = 4BCC2EAB24B50DE900DAE6BD /* Actors.txt */; };
-		4BCF4B25205672350045EDC8 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
+		4BCF0B702556248800E4FB68 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
+		4BCF0B712556248800E4FB68 /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4BCF0B8F25563D6A00E4FB68 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
+		4BCF0B9025563D6A00E4FB68 /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4BCFC69C24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCFC69B24A6AB4D0039A2CF /* StatusOverlay.cpp */; };
 		4BCFC69D24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCFC69B24A6AB4D0039A2CF /* StatusOverlay.cpp */; };
 		4BD4CCE41FF1F5F5009665C7 /* MeshRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD4CCE31FF1F5F5009665C7 /* MeshRenderer.cpp */; };
@@ -325,17 +320,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
-		4B1555652199489100072F0D /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				4B1555642199489100072F0D /* SDL2.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		4B15A9421F241DC8000A689F /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -344,6 +328,28 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
+		};
+		4BCF0B722556248900E4FB68 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4BCF0B712556248800E4FB68 /* SDL2.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4BCF0B9125563D6A00E4FB68 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				4BCF0B9025563D6A00E4FB68 /* SDL2.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -669,7 +675,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4BCF4B25205672350045EDC8 /* SDL2.framework in Frameworks */,
+				4BCF0B702556248800E4FB68 /* SDL2.framework in Frameworks */,
 				4B15A9581F242ECF000A689F /* CoreFoundation.framework in Frameworks */,
 				4B15A94F1F241FEA000A689F /* OpenGL.framework in Frameworks */,
 			);
@@ -679,7 +685,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B1555632199489100072F0D /* SDL2.framework in Frameworks */,
+				4BCF0B8F25563D6A00E4FB68 /* SDL2.framework in Frameworks */,
 				4B22F53F217409B30065B152 /* OpenGL.framework in Frameworks */,
 				4B22F53E217409AE0065B152 /* CoreFoundation.framework in Frameworks */,
 			);
@@ -1317,6 +1323,7 @@
 				4B15A9411F241DC8000A689F /* Frameworks */,
 				4B15A9421F241DC8000A689F /* CopyFiles */,
 				4B15A9591F242EFB000A689F /* ShellScript */,
+				4BCF0B722556248900E4FB68 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1334,8 +1341,8 @@
 				4B22F4D42171709F0065B152 /* Sources */,
 				4B22F4D52171709F0065B152 /* Frameworks */,
 				4B22F4D62171709F0065B152 /* Resources */,
-				4B1555652199489100072F0D /* Embed Frameworks */,
 				4B22F540217409C60065B152 /* ShellScript */,
+				4BCF0B9125563D6A00E4FB68 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1394,14 +1401,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4B598C4C251148C2007AC569 /* 3D-Lightmap.frag in Resources */,
-				4BCC2EAD24B50DE900DAE6BD /* Actors.txt in Resources */,
 				4B22F4E7217170A00065B152 /* Assets.xcassets in Resources */,
-				4B598C4B251148C2007AC569 /* 3D-Lightmap.vert in Resources */,
-				4B8A9770238B7A0E006D284D /* Locations.txt in Resources */,
 				4B22F4EA217170A00065B152 /* Main.storyboard in Resources */,
-				4BC36B9E251D0F8A00692817 /* 3D-Color.frag in Resources */,
-				4BC36B9F251D0F8A00692817 /* 3D-Color.vert in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1436,7 +1437,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "./CopyLibrariesToApp.sh\n";
+			shellScript = "./CopyLibraries.sh app\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -1897,9 +1898,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
@@ -1917,22 +1920,21 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/ffmpeg/include",
-					"$(SRCROOT)/../Libraries/minilzo",
-					"$(SRCROOT)/../Libraries/zlib/include",
-					"$(SRCROOT)/../Libraries/GLEW/include",
 					"$(SRCROOT)/../Libraries/fmod/inc",
+					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/sbt",
-					"$(SRCROOT)/../Libraries",
+					"$(SRCROOT)/../Libraries/zlib/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/zlib/lib/mac",
-					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
-					"$(SRCROOT)/../Libraries/fmod/lib",
 					"$(SRCROOT)/../Libraries/ffmpeg/lib/mac",
+					"$(SRCROOT)/../Libraries/fmod/lib/mac",
+					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
+					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = (
@@ -1976,9 +1978,11 @@
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "-";
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Libraries/SDL";
@@ -1994,22 +1998,21 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(SRCROOT)/../Libraries/ffmpeg/include",
-					"$(SRCROOT)/../Libraries/minilzo",
-					"$(SRCROOT)/../Libraries/zlib/include",
-					"$(SRCROOT)/../Libraries/GLEW/include",
 					"$(SRCROOT)/../Libraries/fmod/inc",
+					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/minilzo",
 					"$(SRCROOT)/../Libraries/sbt",
-					"$(SRCROOT)/../Libraries",
+					"$(SRCROOT)/../Libraries/zlib/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/zlib/lib/mac",
-					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
-					"$(SRCROOT)/../Libraries/fmod/lib",
 					"$(SRCROOT)/../Libraries/ffmpeg/lib/mac",
+					"$(SRCROOT)/../Libraries/fmod/lib/mac",
+					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
+					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -2040,7 +2043,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = MacOS/gengine.entitlements;
@@ -2063,25 +2066,33 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/minilzo",
-					"$(SRCROOT)/../Libraries/zlib/include",
-					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/ffmpeg/include",
 					"$(SRCROOT)/../Libraries/fmod/inc",
+					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/minilzo",
+					"$(SRCROOT)/../Libraries/sbt",
+					"$(SRCROOT)/../Libraries/zlib/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/MacOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../Libs";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../Libraries";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/zlib/lib/mac",
+					"$(SRCROOT)/../Libraries/ffmpeg/lib/mac",
+					"$(SRCROOT)/../Libraries/fmod/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
-					"$(SRCROOT)/../Libraries/fmod/lib",
+					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lGLEW.2.1.0",
+					"-lGLEW",
 					"-lfmod",
+					"-lavutil",
+					"-lavformat",
+					"-lavcodec",
+					"-lswresample",
+					"-lswscale",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -2103,7 +2114,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
-				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = NO;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CODE_SIGN_ENTITLEMENTS = MacOS/gengine.entitlements;
@@ -2121,25 +2132,33 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				HEADER_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/minilzo",
-					"$(SRCROOT)/../Libraries/zlib/include",
-					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/ffmpeg/include",
 					"$(SRCROOT)/../Libraries/fmod/inc",
+					"$(SRCROOT)/../Libraries/GLEW/include",
+					"$(SRCROOT)/../Libraries/minilzo",
+					"$(SRCROOT)/../Libraries/sbt",
+					"$(SRCROOT)/../Libraries/zlib/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/MacOS/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../Libs";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @executable_path/../Libraries";
 				LIBRARY_SEARCH_PATHS = (
-					"$(SRCROOT)/../Libraries/zlib/lib/mac",
+					"$(SRCROOT)/../Libraries/ffmpeg/lib/mac",
+					"$(SRCROOT)/../Libraries/fmod/lib/mac",
 					"$(SRCROOT)/../Libraries/GLEW/lib/mac",
-					"$(SRCROOT)/../Libraries/fmod/lib",
+					"$(SRCROOT)/../Libraries/zlib/lib/mac",
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				OTHER_LDFLAGS = (
 					"-lz",
-					"-lGLEW.2.1.0",
+					"-lGLEW",
 					"-lfmod",
+					"-lavutil",
+					"-lavformat",
+					"-lavcodec",
+					"-lswresample",
+					"-lswscale",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.kromenak.gengine;
 				PRODUCT_NAME = "$(TARGET_NAME)";
