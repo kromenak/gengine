@@ -253,7 +253,6 @@
 		4BCC2EA524B41CC700DAE6BD /* Localizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */; };
 		4BCC2EA624B41CC700DAE6BD /* Localizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCC2EA424B41CC700DAE6BD /* Localizer.cpp */; };
 		4BCF0B702556248800E4FB68 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
-		4BCF0B712556248800E4FB68 /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4BCF0B8F25563D6A00E4FB68 /* SDL2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; };
 		4BCF0B9025563D6A00E4FB68 /* SDL2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4BB82829205665680054625A /* SDL2.framework */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4BCFC69C24A6AB4D0039A2CF /* StatusOverlay.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BCFC69B24A6AB4D0039A2CF /* StatusOverlay.cpp */; };
@@ -273,8 +272,6 @@
 		4BD89A2F253E1C290040253A /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A2D253E1C290040253A /* Decoder.cpp */; };
 		4BD89A32253E41900040253A /* VideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A31253E41900040253A /* VideoPlayer.cpp */; };
 		4BD89A33253E41900040253A /* VideoPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A31253E41900040253A /* VideoPlayer.cpp */; };
-		4BD89A35253E43B50040253A /* ReadThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A34253E43B50040253A /* ReadThread.cpp */; };
-		4BD89A36253E43B50040253A /* ReadThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A34253E43B50040253A /* ReadThread.cpp */; };
 		4BD89A39253E43F00040253A /* VideoState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A38253E43F00040253A /* VideoState.cpp */; };
 		4BD89A3A253E43F00040253A /* VideoState.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A38253E43F00040253A /* VideoState.cpp */; };
 		4BD89A3D253E46E20040253A /* DecodeAudioThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A3C253E46E20040253A /* DecodeAudioThread.cpp */; };
@@ -328,17 +325,6 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
-		};
-		4BCF0B722556248900E4FB68 /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				4BCF0B712556248800E4FB68 /* SDL2.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4BCF0B9125563D6A00E4FB68 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -618,7 +604,6 @@
 		4BD89A2D253E1C290040253A /* Decoder.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Decoder.cpp; path = ../Source/Video/Decoder.cpp; sourceTree = "<group>"; };
 		4BD89A30253E41900040253A /* VideoPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VideoPlayer.h; path = ../Source/Video/VideoPlayer.h; sourceTree = "<group>"; };
 		4BD89A31253E41900040253A /* VideoPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoPlayer.cpp; path = ../Source/Video/VideoPlayer.cpp; sourceTree = "<group>"; };
-		4BD89A34253E43B50040253A /* ReadThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ReadThread.cpp; path = ../Source/Video/ReadThread.cpp; sourceTree = "<group>"; };
 		4BD89A37253E43F00040253A /* VideoState.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VideoState.h; path = ../Source/Video/VideoState.h; sourceTree = "<group>"; };
 		4BD89A38253E43F00040253A /* VideoState.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoState.cpp; path = ../Source/Video/VideoState.cpp; sourceTree = "<group>"; };
 		4BD89A3C253E46E20040253A /* DecodeAudioThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeAudioThread.cpp; path = ../Source/Video/DecodeAudioThread.cpp; sourceTree = "<group>"; };
@@ -1208,9 +1193,6 @@
 				4BD89A4B253E64D20040253A /* Util */,
 				4BD89A31253E41900040253A /* VideoPlayer.cpp */,
 				4BD89A30253E41900040253A /* VideoPlayer.h */,
-				4BD89A34253E43B50040253A /* ReadThread.cpp */,
-				4BD89A38253E43F00040253A /* VideoState.cpp */,
-				4BD89A37253E43F00040253A /* VideoState.h */,
 			);
 			name = Video;
 			sourceTree = "<group>";
@@ -1258,6 +1240,8 @@
 		4BE130822546951200DAA9FE /* Playback */ = {
 			isa = PBXGroup;
 			children = (
+				4BD89A38253E43F00040253A /* VideoState.cpp */,
+				4BD89A37253E43F00040253A /* VideoState.h */,
 				4BE894A72547563C0083F4AA /* AudioPlaybackSDL.cpp */,
 				4BE894A62547563C0083F4AA /* AudioPlaybackSDL.h */,
 				4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */,
@@ -1323,7 +1307,6 @@
 				4B15A9411F241DC8000A689F /* Frameworks */,
 				4B15A9421F241DC8000A689F /* CopyFiles */,
 				4B15A9591F242EFB000A689F /* ShellScript */,
-				4BCF0B722556248900E4FB68 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1488,7 +1471,6 @@
 				4BD673D420B26F0C00795582 /* AudioListener.cpp in Sources */,
 				4BA228B42477AC1E002F0EE3 /* SheepStack.cpp in Sources */,
 				4BD89A40253E471D0040253A /* DecodeVideoThread.cpp in Sources */,
-				4BD89A35253E43B50040253A /* ReadThread.cpp in Sources */,
 				4B85421220A905B600DE8C0D /* Cursor.cpp in Sources */,
 				4B0B67831F78DCD40023815F /* Actor.cpp in Sources */,
 				4BF751121F773E1A00B79D2F /* Vector2.cpp in Sources */,
@@ -1627,7 +1609,6 @@
 				4B22F52B2174078B0065B152 /* Asset.cpp in Sources */,
 				4BA228B52477AC1E002F0EE3 /* SheepStack.cpp in Sources */,
 				4BD89A41253E471D0040253A /* DecodeVideoThread.cpp in Sources */,
-				4BD89A36253E43B50040253A /* ReadThread.cpp in Sources */,
 				4B22F51F2174076D0065B152 /* Ray.cpp in Sources */,
 				4B22F50A2174075B0065B152 /* BSP.cpp in Sources */,
 				4B22F50B2174075B0065B152 /* NVC.cpp in Sources */,
