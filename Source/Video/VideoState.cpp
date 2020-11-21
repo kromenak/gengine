@@ -13,7 +13,7 @@ extern "C"
 }
 
 #include "AudioPlaybackSDL.h"
-#include "VideoPlaybackGL.h"
+#include "VideoPlayback.h"
 
 #define MAX_QUEUE_SIZE (15 * 1024 * 1024)
 #define MIN_FRAMES 25
@@ -331,7 +331,7 @@ int VideoState::OpenStream(int streamIndex)
         break;
         
     case AVMEDIA_TYPE_VIDEO:
-        videoPlayback = new VideoPlaybackGL();
+        videoPlayback = new VideoPlayback();
         
         // Save stream info.
         mVideoStreamIndex = streamIndex;
@@ -383,6 +383,7 @@ void VideoState::CloseStream(int streamIndex)
     case AVMEDIA_TYPE_VIDEO:
         videoDecoder.Abort(&videoFrames);
         videoDecoder.Destroy();
+        delete videoPlayback;
         break;
     case AVMEDIA_TYPE_SUBTITLE:
         subtitleDecoder.Abort(&subtitleFrames);

@@ -20,7 +20,7 @@ extern "C"
 #include "PtsClock.h"
 
 class AudioPlaybackSDL;
-class VideoPlaybackGL;
+class VideoPlayback;
 class Texture;
 
 enum SyncType
@@ -75,7 +75,7 @@ struct VideoState
     AudioPlaybackSDL* audioPlayback = nullptr;
     
     // VIDEO PLAYBACK
-    VideoPlaybackGL* videoPlayback = nullptr;
+    VideoPlayback* videoPlayback = nullptr;
     double frameTimer = 0.0;
 
     VideoState(const char* filename);

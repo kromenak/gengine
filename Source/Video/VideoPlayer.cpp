@@ -134,21 +134,8 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     // Log movie play.
     Services::GetReports()->Log("Generic", "PlayMovie: trying to play " + name);
     
-    // The name passed is just a filename (e.g. "intro.bik"). Need to convert that into a full path.
-    std::string videoPath = Services::GetAssets()->GetAssetPath(name);
-    
-    // If couldn't find video, don't play video!
-    if(videoPath.empty())
-    {
-        if(stopCallback != nullptr)
-        {
-            stopCallback();
-        }
-        return;
-    }
-    
-    // Create new video.
-    mVideo = new VideoState(videoPath.c_str());
+    // Save callback.
+    mStopCallback = stopCallback;
     
     // If fullscreen, use window size as video size.
     // If not fullscreen, use size from video file.
@@ -157,8 +144,23 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     // Save autoclose flag.
     mAutoclose = autoclose;
     
-    // Save callback.
-    mStopCallback = stopCallback;
+    // The name passed is just a filename (e.g. "intro.bik"). Need to convert that into a full path.
+    // Names can also be passed with or without extension, so we have to try to resolve any ambiguous name.
+    std::string videoPath = Services::GetAssets()->GetAssetPath(name, { "bik", "avi" });
+    
+    // Create new video.
+    mVideo = new VideoState(videoPath.c_str());
+    
+    // On create, video begins playing immediately, assuming no error occurs.
+    // If stopped, something happened, and video will not play.
+    if(mVideo->IsStopped())
+    {
+        Services::GetReports()->Log("Error", "No movie specified for the movie layer.");
+        Stop();
+    }
+    
+    //TODO: Some video files have subtitles associated with them, but the subtitles are not part of the movie file.
+    //TODO: Need to check for a YAK file of the same name and use that to display subtitles during movie playback.
 }
 
 void VideoPlayer::Stop()

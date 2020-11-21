@@ -280,8 +280,8 @@
 		4BD89A41253E471D0040253A /* DecodeVideoThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A3F253E471D0040253A /* DecodeVideoThread.cpp */; };
 		4BD89A43253E47920040253A /* DecodeSubtitlesThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A42253E47920040253A /* DecodeSubtitlesThread.cpp */; };
 		4BD89A44253E47920040253A /* DecodeSubtitlesThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A42253E47920040253A /* DecodeSubtitlesThread.cpp */; };
-		4BD89A56253E7AC40040253A /* VideoPlaybackGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */; };
-		4BD89A57253E7AC40040253A /* VideoPlaybackGL.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */; };
+		4BD89A56253E7AC40040253A /* VideoPlayback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A55253E7AC40040253A /* VideoPlayback.cpp */; };
+		4BD89A57253E7AC40040253A /* VideoPlayback.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BD89A55253E7AC40040253A /* VideoPlayback.cpp */; };
 		4BDDCD5E20D6C4BC00701A89 /* VertexAnimation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */; };
 		4BDFBA0A23418E8F00C4DD49 /* Console.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFBA0923418E8F00C4DD49 /* Console.cpp */; };
 		4BDFBA0D2341B75C00C4DD49 /* TextInput.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4BDFBA0C2341B75C00C4DD49 /* TextInput.cpp */; };
@@ -609,8 +609,8 @@
 		4BD89A3C253E46E20040253A /* DecodeAudioThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeAudioThread.cpp; path = ../Source/Video/DecodeAudioThread.cpp; sourceTree = "<group>"; };
 		4BD89A3F253E471D0040253A /* DecodeVideoThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeVideoThread.cpp; path = ../Source/Video/DecodeVideoThread.cpp; sourceTree = "<group>"; };
 		4BD89A42253E47920040253A /* DecodeSubtitlesThread.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DecodeSubtitlesThread.cpp; path = ../Source/Video/DecodeSubtitlesThread.cpp; sourceTree = "<group>"; };
-		4BD89A54253E7AC40040253A /* VideoPlaybackGL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VideoPlaybackGL.h; path = ../Source/Video/VideoPlaybackGL.h; sourceTree = "<group>"; };
-		4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoPlaybackGL.cpp; path = ../Source/Video/VideoPlaybackGL.cpp; sourceTree = "<group>"; };
+		4BD89A54253E7AC40040253A /* VideoPlayback.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VideoPlayback.h; path = ../Source/Video/VideoPlayback.h; sourceTree = "<group>"; };
+		4BD89A55253E7AC40040253A /* VideoPlayback.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VideoPlayback.cpp; path = ../Source/Video/VideoPlayback.cpp; sourceTree = "<group>"; };
 		4BDDCD5C20D6C4BC00701A89 /* VertexAnimation.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = VertexAnimation.h; path = ../Source/VertexAnimation.h; sourceTree = "<group>"; };
 		4BDDCD5D20D6C4BC00701A89 /* VertexAnimation.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = VertexAnimation.cpp; path = ../Source/VertexAnimation.cpp; sourceTree = "<group>"; };
 		4BDFBA0823418E8F00C4DD49 /* Console.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = Console.h; path = ../Source/Console.h; sourceTree = "<group>"; };
@@ -1244,8 +1244,8 @@
 				4BD89A37253E43F00040253A /* VideoState.h */,
 				4BE894A72547563C0083F4AA /* AudioPlaybackSDL.cpp */,
 				4BE894A62547563C0083F4AA /* AudioPlaybackSDL.h */,
-				4BD89A55253E7AC40040253A /* VideoPlaybackGL.cpp */,
-				4BD89A54253E7AC40040253A /* VideoPlaybackGL.h */,
+				4BD89A55253E7AC40040253A /* VideoPlayback.cpp */,
+				4BD89A54253E7AC40040253A /* VideoPlayback.h */,
 			);
 			name = Playback;
 			sourceTree = "<group>";
@@ -1497,7 +1497,7 @@
 				4B38BA762438F823001F9240 /* AABB.cpp in Sources */,
 				4BDFBA0A23418E8F00C4DD49 /* Console.cpp in Sources */,
 				4B2E7A5C2039FCF0001A5B9C /* IniParser.cpp in Sources */,
-				4BD89A56253E7AC40040253A /* VideoPlaybackGL.cpp in Sources */,
+				4BD89A56253E7AC40040253A /* VideoPlayback.cpp in Sources */,
 				4B84A13621684374003B4C3F /* Color32.cpp in Sources */,
 				4BBB91B62058E53A007B9375 /* Soundtrack.cpp in Sources */,
 				4B08C910213745070028FEB3 /* UIWidget.cpp in Sources */,
@@ -1635,7 +1635,7 @@
 				4B22F5312174078B0065B152 /* SoundtrackPlayer.cpp in Sources */,
 				4B22F4FD217407470065B152 /* membuf.cpp in Sources */,
 				4B22F5302174078B0065B152 /* Soundtrack.cpp in Sources */,
-				4BD89A57253E7AC40040253A /* VideoPlaybackGL.cpp in Sources */,
+				4BD89A57253E7AC40040253A /* VideoPlayback.cpp in Sources */,
 				4B22F4F22174073D0065B152 /* Cursor.cpp in Sources */,
 				4B22F50D2174075B0065B152 /* SceneAsset.cpp in Sources */,
 				4BB67C4C235255CA00FDFB30 /* TextLayout.cpp in Sources */,
