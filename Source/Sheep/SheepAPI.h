@@ -553,6 +553,7 @@ float GetRandomFloat(float lower, float upper);
 int GetRandomInt(int lower, int upper);
 
 shpvoid PlayFullScreenMovie(std::string movieName); // WAIT
+shpvoid PlayFullScreenMovieX(std::string movieName, int autoclose); // WAIT
 shpvoid PlayMovie(std::string movieName); // WAIT
 
 shpvoid SetPamphletPage(int page);

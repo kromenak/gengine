@@ -25,6 +25,7 @@
 #include "SoundtrackPlayer.h"
 #include "StringUtil.h"
 #include "VerbManager.h"
+#include "VideoPlayer.h"
 
 // Required for macros to work correctly with "string" instead of "std::string".
 using namespace std;
@@ -1899,21 +1900,31 @@ int GetRandomInt(int lower, int upper)
 }
 RegFunc2(GetRandomInt, int, int, int, IMMEDIATE, REL_FUNC);
 
-/*
 shpvoid PlayFullScreenMovie(std::string movieName)
 {
-	std::cout << "PlayFullScreenMovie" << std::endl;
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    Services::Get<VideoPlayer>()->Play(movieName, true, true, currentThread->AddWait());
 	return 0;
 }
 RegFunc1(PlayFullScreenMovie, void, string, WAITABLE, REL_FUNC);
 
+shpvoid PlayFullScreenMovieX(std::string movieName, int autoclose)
+{
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    Services::Get<VideoPlayer>()->Play(movieName, true, autoclose != 0 ? true : false, currentThread->AddWait());
+    return 0;
+}
+RegFunc2(PlayFullScreenMovieX, void, string, int, WAITABLE, REL_FUNC);
+
 shpvoid PlayMovie(std::string movieName)
 {
-	std::cout << "PlayMovie" << std::endl;
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    Services::Get<VideoPlayer>()->Play(movieName, false, true, currentThread->AddWait());
 	return 0;
 }
 RegFunc1(PlayMovie, void, string, WAITABLE, REL_FUNC);
 
+/*
 shpvoid SetPamphletPage(int page)
 {
 	std::cout << "SetPamphletPage" << std::endl;
