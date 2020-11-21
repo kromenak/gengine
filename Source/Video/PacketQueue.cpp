@@ -7,13 +7,6 @@
 
 int PacketQueue::Init()
 {
-    // Init flush packet.
-    if(gFlushPacket.data != (uint8_t*)&gFlushPacket)
-    {
-        av_init_packet(&gFlushPacket);
-        gFlushPacket.data = (uint8_t*)&gFlushPacket;
-    }
-    
     // Clear all fields.
     memset(this, 0, sizeof(PacketQueue));
     
@@ -44,12 +37,8 @@ void PacketQueue::Destroy()
 
 void PacketQueue::Start()
 {
-    SDL_LockMutex(mMutex);
-    
     mAborted = false;
-    PutInternal(&gFlushPacket);
-    
-    SDL_UnlockMutex(mMutex);
+    EnqueueFlush();
 }
 
 void PacketQueue::Abort()
@@ -60,7 +49,6 @@ void PacketQueue::Abort()
     SDL_UnlockMutex(mMutex);
 }
 
-
 int PacketQueue::Enqueue(AVPacket* avPacket)
 {
     SDL_LockMutex(mMutex);
@@ -69,20 +57,30 @@ int PacketQueue::Enqueue(AVPacket* avPacket)
 
     // Failed to put this packet in the queue.
     // Unref it right away because we are discarding it.
-    if(avPacket != &gFlushPacket && ret < 0)
+    if(ret < 0)
     {
         av_packet_unref(avPacket);
     }
     return ret;
 }
 
-int PacketQueue::EnqueueNull(int streamIndex)
+int PacketQueue::EnqueueEof(int streamIndex)
 {
     AVPacket avPacket;
     av_init_packet(&avPacket);
     avPacket.data = nullptr;
     avPacket.size = 0;
     avPacket.stream_index = streamIndex;
+    return Enqueue(&avPacket);
+}
+
+int PacketQueue::EnqueueFlush()
+{
+    AVPacket avPacket;
+    av_init_packet(&avPacket);
+    avPacket.data = nullptr;
+    avPacket.size = 0;
+    avPacket.stream_index = -1;
     return Enqueue(&avPacket);
 }
 
@@ -170,7 +168,6 @@ void PacketQueue::Clear()
     SDL_UnlockMutex(mMutex);
 }
 
-
 int PacketQueue::PutInternal(AVPacket* avPacket)
 {
     // Don't put anything if aborting.
@@ -186,7 +183,7 @@ int PacketQueue::PutInternal(AVPacket* avPacket)
     // If it is the flush packet, increment serial.
     // The flush packet indicates that a skip/discontinuity has occurred in playback.
     // So, following packets are from a different segment than previous packets.
-    if(avPacket == &gFlushPacket)
+    if(avPacket->data == nullptr && avPacket->stream_index < 0)
     {
         serial++;
     }

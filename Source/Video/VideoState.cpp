@@ -15,6 +15,9 @@ extern "C"
 #include "AudioPlaybackSDL.h"
 #include "VideoPlaybackGL.h"
 
+#define MAX_QUEUE_SIZE (15 * 1024 * 1024)
+#define MIN_FRAMES 25
+
 VideoState::VideoState(const char* filename) :
     mFilename(av_strdup(filename))
 {
@@ -116,11 +119,15 @@ VideoState::VideoState(const char* filename) :
         return;
     }
     
+    // Video is now playing...
+    mState = State::Playing;
+    
     // Create read thread or fail.
     mReadThread = SDL_CreateThread(ReadThread, "read_thread", this);
     if(mReadThread == nullptr)
     {
         av_log(NULL, AV_LOG_FATAL, "SDL_CreateThread(): %s\n", SDL_GetError());
+        mState = State::Stopped;
     }
 }
 
@@ -171,7 +178,11 @@ void VideoState::Update()
 
 void VideoState::TogglePause()
 {
-    if(mPaused)
+    // Can only pause/unpause if video is playing.
+    if(mState == State::Stopped) { return; }
+    
+    // Reset clocks.
+    if(mState == State::Paused)
     {
         frameTimer += videoClock.GetSecondsSinceLastUpdate();
         videoClock.SetPaused(false);
@@ -180,12 +191,12 @@ void VideoState::TogglePause()
     externalClock.SetPtsToCurrentTime();
     
     // Toggle pause.
-    mPaused = !mPaused;
+    mState = (mState == State::Paused ? mState = State::Playing : mState = State::Paused);
     
     // Propogate to all clocks.
-    audioClock.SetPaused(mPaused);
-    videoClock.SetPaused(mPaused);
-    externalClock.SetPaused(mPaused);
+    audioClock.SetPaused(mState == State::Paused);
+    videoClock.SetPaused(mState == State::Paused);
+    externalClock.SetPaused(mState == State::Paused);
     
     videoPlayback->SetStep(false);
 }
@@ -193,7 +204,7 @@ void VideoState::TogglePause()
 void VideoState::StepToNextFrame()
 {
     /* if the stream is paused unpause it, then step */
-    if(mPaused)
+    if(mState == State::Paused)
     {
         TogglePause();
     }
@@ -237,7 +248,7 @@ double VideoState::GetMasterClock()
 
 Texture* VideoState::GetVideoTexture()
 {
-    return videoPlayback->GetVideoTexture();
+    return videoPlayback != nullptr ? videoPlayback->GetVideoTexture() : nullptr;
 }
 
 int VideoState::OpenStream(int streamIndex)
@@ -401,4 +412,204 @@ void VideoState::CloseStream(int streamIndex)
         av_log(NULL, AV_LOG_ERROR, "Unexpected codec type!");
         break;
     }
+}
+
+static int stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* queue)
+{
+    return stream_id < 0 ||
+           queue->Aborted() ||
+           queue->GetPacketCount() > (MIN_FRAMES && (!queue->GetDuration() || av_q2d(st->time_base) * queue->GetDuration() > 1.0));
+}
+
+// Reads data from video file and puts into appropriate packet queue for further processing.
+// In other words, performs "demuxing" of video data.
+/*static*/ int VideoState::ReadThread(void* arg)
+{
+    VideoState* is = static_cast<VideoState*>(arg);
+    
+    // Create wait mutex or fail.
+    SDL_mutex* wait_mutex = SDL_CreateMutex();
+    if(wait_mutex == nullptr)
+    {
+        av_log(NULL, AV_LOG_FATAL, "SDL_CreateMutex(): %s\n", SDL_GetError());
+        is->ReadThreadEnd(AVERROR(ENOMEM));
+        return 0;
+    }
+    
+    // If true, read all the content of the file. Note this DOES NOT mean playback is finished!
+    // After reaching read EOF, we must wait until decoder and frame queues are empty.
+    bool readEOF = false;
+    
+    // Loop indefinitely, reading in data from input streams to packet queues.
+    AVPacket avPacket;
+    int result = 0;
+    while(true)
+    {
+        // Abort was requested, so break out.
+        if(is->mAborted) { break; }
+        
+        // Seek requested.
+        if(is->seek_req)
+        {
+            int64_t seek_target = is->seek_pos;
+            int64_t seek_min    = is->seek_rel > 0 ? seek_target - is->seek_rel + 2: INT64_MIN;
+            int64_t seek_max    = is->seek_rel < 0 ? seek_target - is->seek_rel - 2: INT64_MAX;
+            // FIXME the +-2 is due to rounding being not done in the correct direction in generation of the seek_pos/seek_rel variables
+
+            int ret = avformat_seek_file(is->format, -1, seek_min, seek_target, seek_max, is->seek_flags);
+            if(ret < 0)
+            {
+                av_log(NULL, AV_LOG_ERROR, "%s: error while seeking\n", is->format->url);
+            }
+            else
+            {
+                if(is->mAudioStreamIndex >= 0)
+                {
+                    is->audioPackets.Clear();
+                    is->audioPackets.EnqueueFlush();
+                }
+                if(is->mSubtitleStreamIndex >= 0)
+                {
+                    is->subtitlePackets.Clear();
+                    is->subtitlePackets.EnqueueFlush();
+                }
+                if(is->mVideoStreamIndex >= 0)
+                {
+                    is->videoPackets.Clear();
+                    is->videoPackets.EnqueueFlush();
+                }
+                if(is->seek_flags & AVSEEK_FLAG_BYTE)
+                {
+                    is->externalClock.SetPts(NAN, 0);
+                }
+                else
+                {
+                    is->externalClock.SetPts(seek_target / (double)AV_TIME_BASE, 0);
+                }
+            }
+            is->seek_req = 0;
+            readEOF = false;
+            if(is->mState == State::Paused)
+            {
+                is->StepToNextFrame();
+            }
+        }
+
+        // If the queue are full, no need to read more.
+        bool tooMuchData = is->audioPackets.GetByteSize() +
+                           is->videoPackets.GetByteSize() +
+                           is->subtitlePackets.GetByteSize() > MAX_QUEUE_SIZE;
+        bool allStreamsHappy = stream_has_enough_packets(is->audioStream, is->mAudioStreamIndex, &is->audioPackets) &&
+                               stream_has_enough_packets(is->videoStream, is->mVideoStreamIndex, &is->videoPackets) &&
+                               stream_has_enough_packets(is->subtitleStream, is->mSubtitleStreamIndex, &is->subtitlePackets);
+        if(tooMuchData || allStreamsHappy)
+        {
+            // Wait 10 ms, or until continue read condition is signaled
+            SDL_LockMutex(wait_mutex);
+            SDL_CondWaitTimeout(is->mContinueReadCondition, wait_mutex, 10);
+            SDL_UnlockMutex(wait_mutex);
+            
+            // Everything below this point is about reading/decoding packets, but we have too many packets!
+            // So, loop back to top.
+            continue;
+        }
+        
+        // When this read thread reached EOF, it'll enqueue EOF packets in each packet queue.
+        // Then, we just need to wait for the decoders to signal EOF and for the frame queues to indicate that all data has been displayed.
+        // Then, we have "truly" reached EOF and can end playback.
+        if(is->mState == State::Playing && readEOF &&
+          (is->audioStream == nullptr || (is->audioDecoder.ReachedEOF() && is->audioFrames.GetUndisplayedCount() == 0)) &&
+          (is->videoStream == nullptr || (is->videoDecoder.ReachedEOF() && is->videoFrames.GetUndisplayedCount() == 0))) {
+            result = AVERROR_EOF;
+            break;
+        }
+        
+        // Attempt to read the next packet.
+        int ret = av_read_frame(is->format, &avPacket);
+        if(ret < 0)
+        {
+            // If reached end of file, enqueue EOF packets in each packet queue.
+            // The EOF packet signals to decoders that their job is done.
+            if((ret == AVERROR_EOF || avio_feof(is->format->pb)) && !readEOF)
+            {
+                if(is->mVideoStreamIndex >= 0)
+                {
+                    is->videoPackets.EnqueueEof(is->mVideoStreamIndex);
+                }
+                if(is->mAudioStreamIndex >= 0)
+                {
+                    is->audioPackets.EnqueueEof(is->mAudioStreamIndex);
+                }
+                if(is->mSubtitleStreamIndex >= 0)
+                {
+                    is->subtitlePackets.EnqueueEof(is->mSubtitleStreamIndex);
+                }
+                readEOF = true;
+            }
+            
+            // Some sort of playback error? Fail out with an unknown error.
+            if(is->format->pb && is->format->pb->error)
+            {
+                result = AVERROR_UNKNOWN;
+                break;
+            }
+            
+            // Wait 10ms, or until continue read condition is signaled.
+            SDL_LockMutex(wait_mutex);
+            SDL_CondWaitTimeout(is->mContinueReadCondition, wait_mutex, 10);
+            SDL_UnlockMutex(wait_mutex);
+            continue;
+        }
+        else
+        {
+            // Read frame successfully, so guess it's not eof yet.
+            readEOF = false;
+        }
+        
+        // Queue packets for audio, video, and subtitles.
+        // If a packet is not from one of those streams...clean it up and don't use it.
+        if(avPacket.stream_index == is->mAudioStreamIndex)
+        {
+            is->audioPackets.Enqueue(&avPacket);
+        }
+        else if(avPacket.stream_index == is->mVideoStreamIndex)
+        {
+            is->videoPackets.Enqueue(&avPacket);
+        }
+        else if(avPacket.stream_index == is->mSubtitleStreamIndex)
+        {
+            is->subtitlePackets.Enqueue(&avPacket);
+        }
+        else
+        {
+            // Packet is not for any stream we're interested in, so it won't be used.
+            // Unref it right away.
+            av_packet_unref(&avPacket);
+        }
+    } // while(true)
+    
+    // Clean up wait mutex.
+    SDL_DestroyMutex(wait_mutex);
+    
+    // Broke out of loop, so either playback is finished or an error occurred.
+    is->ReadThreadEnd(result);
+    return 0;
+}
+
+void VideoState::ReadThreadEnd(int result)
+{
+    /*
+    // Handle different end scenarios.
+    if(result == 0 || result == AVERROR_EOF)
+    {
+        // Playback ended in a way that was expected (user abort, played all video, etc).
+    }
+    else
+    {
+        // Pretty much anything else is bad news.
+    }
+    */
+    
+    // Regardless, video is now stopped.
+    mState = State::Stopped;
 }

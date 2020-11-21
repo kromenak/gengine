@@ -136,7 +136,8 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                     }
                 }
                 
-                // Reached end of file - done.
+                // If EOF is returned, set EOF serial, flush, and return.
+                // NOTE: In practice, I have not ever seen this occur. See "IsEofPacket" below for fallback.
                 if(ret == AVERROR_EOF)
                 {
                     mEofSerial = mSerial;
@@ -150,7 +151,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                     return 1;
                 }
             } while(ret != AVERROR(EAGAIN)); // Loop until avcodec_receive_frame returns EAGAIN.
-                                             // This signifies we must send dat ato be decoded (done next).
+                                             // This signifies we must send data to be decoded (done next).
         }
         
         // Get a packet to send to the decoder.
@@ -189,17 +190,27 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
             av_packet_unref(&avPacket);
         }
 
-        // Send data to be decoded!
-        if(avPacket.data == gFlushPacket.data)
+        // Determine what to do with the packet.
+        if(PacketQueue::IsFlushPacket(&avPacket))
         {
+            // If it's a flush packet, clear buffers and reset some data.
+            // This only occurs during a seek operation.
             avcodec_flush_buffers(mCodecContext);
             mEofSerial = 0;
             mNextPts = mFlushPts;
             mNextPtsTimeBase = mFlushPtsTimeBase;
         }
+        else if(PacketQueue::IsEofPacket(&avPacket))
+        {
+            // Received EOF packet, so we're done!
+            mEofSerial = mSerial;
+            avcodec_flush_buffers(mCodecContext);
+            return 0;
+        }
         else
         {
-            // Let's actually attempt to decode a packet!
+            // This is a real packet, so send it to be decoded!
+            
             // Decoding works a bit differently if it's a subtitle.
             if(mCodecContext->codec_type == AVMEDIA_TYPE_SUBTITLE)
             {

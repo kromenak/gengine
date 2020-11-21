@@ -16,10 +16,6 @@ extern "C"
 }
 #include <SDL2/SDL.h>
 
-// A special packet that is only enqueued when the queue is "flushed".
-// Flushing only occurs on start or seek, and signals that incoming data has a new serial.
-static AVPacket gFlushPacket;
-
 struct PacketQueue
 {
     // Incremented each time a flush packet is encountered (currently only Start and Seek).
@@ -35,7 +31,8 @@ struct PacketQueue
     
     // Return 0 on success, -1 on failure.
     int Enqueue(AVPacket* avPacket);
-    int EnqueueNull(int streamIndex);
+    int EnqueueEof(int streamIndex);
+    int EnqueueFlush();
     
     // Return < 0 if aborted, 0 if no packet and > 0 if packet.
     int Dequeue(bool block, AVPacket* avPacket, int* serial);
@@ -44,6 +41,9 @@ struct PacketQueue
     int GetPacketCount() const { return mPacketCount; }
     int GetByteSize() const { return mSizeBytes; }
     int64_t GetDuration() const { return mDuration; }
+    
+    static bool IsEofPacket(AVPacket* avPacket) { return avPacket->data == nullptr && avPacket->stream_index >= 0; }
+    static bool IsFlushPacket(AVPacket* avPacket) { return avPacket->data == nullptr && avPacket->stream_index < 0; }
     
 private:
     // Helper to form a linked list of packets.

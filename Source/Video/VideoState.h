@@ -32,6 +32,13 @@ enum SyncType
 
 struct VideoState
 {
+    enum class State
+    {
+        Stopped,    // Video is not playing and will not continue playing.
+        Playing,    // Video is currently playing.
+        Paused      // Video playback is suspended, but can be resumed anytime.
+    };
+    
     // Video format data (streams that exist, codecs to use, etc).
     AVFormatContext* format = nullptr;
     
@@ -77,9 +84,10 @@ struct VideoState
     void Update();
     
     void TogglePause();
-    bool IsPaused() const { return mPaused; }
-    
     void StepToNextFrame();
+    
+    bool IsPaused() const { return mState == State::Paused; }
+    bool IsStopped() const { return mState == State::Stopped; }
     
     int GetMasterSyncType();
     double GetMasterClock();
@@ -97,16 +105,11 @@ private:
     // Whether to sync to audio, video, or an external clock.
     int mSyncType = AV_SYNC_AUDIO_MASTER;
     
-    // If true, playback has reached end of file.
-    // Not used for anything super important - mainly just to enqueue one and only one null packet when eof is encountered.
-    bool mEOF = false;
-    
-    // If true, playback is aborted/paused.
+    // If true, playback is aborted.
     bool mAborted = false;
     
-    // If true, the video is paused.
-    // Processing of stream data and playback are suspended.
-    bool mPaused = false;
+    // Current playback state.
+    State mState = State::Stopped;
     
     // Stream indexes for video, audio, and subtitles - determined by reading format data.
     int mVideoStreamIndex = -1;
@@ -127,4 +130,5 @@ private:
     void CloseStream(int streamIndex);
     
     static int ReadThread(void* arg);
+    void ReadThreadEnd(int result);
 };
