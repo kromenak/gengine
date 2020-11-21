@@ -69,6 +69,27 @@ std::string AssetManager::GetAssetPath(const std::string& fileName)
     return std::string();
 }
 
+std::string AssetManager::GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions)
+{
+    // If already has an extension, just use the normal path find function.
+    if(File::HasExtension(fileName))
+    {
+        return GetAssetPath(fileName);
+    }
+    
+    // Otherwise, we have a filename, but multiple valid extensions.
+    // A good example is a movie file. The file might be called "intro", but the extension could be "avi" or "bik".
+    for(const std::string& extension : extensions)
+    {
+        std::string assetPath = GetAssetPath(fileName + "." + extension);
+        if(!assetPath.empty())
+        {
+            return assetPath;
+        }
+    }
+    return std::string();
+}
+
 bool AssetManager::LoadBarn(const std::string& barnName)
 {
     // We want our dictionary key to be all uppercase.
@@ -331,14 +352,10 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
     std::string sanitizedName = assetName;
     StringUtil::ToUpper(sanitizedName);
     
-    // We want to add the expected extension if it isn't present, and no other extension is present.
-    // There's probably a better way to do this...
-    if(!expectedExtension.empty() && sanitizedName.find(expectedExtension) == std::string::npos)
+    // We want to add the expected extension if no extension already exists on the name.
+    if(!File::HasExtension(sanitizedName))
     {
-        if(sanitizedName.size() < 4 || sanitizedName[sanitizedName.size() - 4] != '.')
-        {
-            sanitizedName += expectedExtension;
-        }
+        sanitizedName += expectedExtension;
     }
     return sanitizedName;
 }

@@ -5,6 +5,7 @@
 //  Created by Clark Kromenaker on 8/17/17.
 //
 #pragma once
+#include <initializer_list>
 #include <string>
 #include <vector>
 
@@ -38,6 +39,7 @@ public:
     // Given a filename, finds the path to the file if it exists on one of the search paths.
     // Returns empty string if file is not found.
     std::string GetAssetPath(const std::string& fileName);
+    std::string GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions);
 	
 	// Load or unload a barn bundle.
     bool LoadBarn(const std::string& barnName);
