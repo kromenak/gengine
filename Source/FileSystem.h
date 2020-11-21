@@ -12,6 +12,21 @@
 #include "Platform.h"
 #include "StringTokenizer.h"
 
+namespace File
+{
+    /**
+     * Removes the extension from the file name.
+     * Just returns a copy of the current file name if no extension is present.
+     */
+    inline std::string RemoveExtension(const std::string& fileName) { return fileName.substr(0, fileName.find_last_of('.')); }
+
+    /**
+     * Checks whether a file name has an extension.
+     * Use this if you know the string doesn't have path separators - otherwise, use Path::HasExtension.
+     */
+    inline bool HasExtension(const std::string& fileName) { return fileName.find_last_of('.') != std::string::npos; }
+}
+
 namespace Path
 {
 	// Separator used for platform.
@@ -48,6 +63,13 @@ namespace Path
 	 * Ex: "/Projects/Project/Assets/MyAsset.shp" becomes "MyAsset".
 	 */
 	std::string GetFileNameNoExtension(const std::string& path);
+
+    /**
+     * Given a file name or path, returns true if an extension is present.
+     * Any path with a "." in the last token is considered to have an extension.
+     * Ex: "Assets/Data/Blah" has no extension, "Assets/Data/Blah.x" does have an extension.
+     */
+    bool HasExtension(const std::string& path);
 }
 
 namespace Directory
