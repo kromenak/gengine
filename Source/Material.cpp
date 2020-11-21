@@ -67,9 +67,12 @@ void Material::Activate(const Matrix4& objectToWorldMatrix)
     int textureUnit = 0;
     for(auto& entry : mTextures)
     {
-        mShader->SetUniformInt(entry.first.c_str(), textureUnit);
-        entry.second->Activate(textureUnit);
-        ++textureUnit;
+        if(entry.second != nullptr)
+        {
+            mShader->SetUniformInt(entry.first.c_str(), textureUnit);
+            entry.second->Activate(textureUnit);
+            ++textureUnit;
+        }
     }
     
 	//TODO: May need to "deactivate" texture units if no texture is defined in material, but a texture sampler exists in the shader.
