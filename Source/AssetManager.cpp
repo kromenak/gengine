@@ -56,6 +56,19 @@ void AssetManager::AddSearchPath(const std::string& searchPath)
     mSearchPaths.push_back(searchPath);
 }
 
+std::string AssetManager::GetAssetPath(const std::string& fileName)
+{
+    std::string assetPath;
+    for(const std::string& searchPath : mSearchPaths)
+    {
+        if(Path::FindFullPath(fileName, searchPath, assetPath))
+        {
+            return assetPath;
+        }
+    }
+    return std::string();
+}
+
 bool AssetManager::LoadBarn(const std::string& barnName)
 {
     // We want our dictionary key to be all uppercase.
@@ -328,19 +341,6 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
         }
     }
     return sanitizedName;
-}
-
-std::string AssetManager::GetAssetPath(const std::string& fileName)
-{
-	std::string assetPath;
-	for(const std::string& searchPath : mSearchPaths)
-	{
-		if(Path::FindFullPath(fileName, searchPath, assetPath))
-		{
-			return assetPath;
-		}
-	}
-	return std::string();
 }
 
 template<class T>

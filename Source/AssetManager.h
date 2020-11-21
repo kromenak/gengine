@@ -34,6 +34,10 @@ public:
 	
 	// Adds a filesystem path to search for assets and bundles at.
     void AddSearchPath(const std::string& searchPath);
+    
+    // Given a filename, finds the path to the file if it exists on one of the search paths.
+    // Returns empty string if file is not found.
+    std::string GetAssetPath(const std::string& fileName);
 	
 	// Load or unload a barn bundle.
     bool LoadBarn(const std::string& barnName);
@@ -112,8 +116,6 @@ private:
 	BarnFile* GetBarnContainingAsset(const std::string& assetName);
     
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
-    
-    std::string GetAssetPath(const std::string& fileName);
     
     template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache);
 	char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);

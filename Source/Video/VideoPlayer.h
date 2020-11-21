@@ -6,6 +6,7 @@
 // Manager class for video playback.
 //
 #pragma once
+#include <functional>
 #include <string>
 
 #include "Type.h"
@@ -25,6 +26,7 @@ public:
     void Update();
     
     void Play(const std::string& name);
+    void Play(const std::string& name, bool fullscreen, bool autoclose, std::function<void()> stopCallback);
     void Stop();
     
 private:
@@ -37,11 +39,25 @@ private:
     UIImage* mVideoImage = nullptr;
     
     // Position to show the video on-screen. Zero is center of screen.
-    // Size of video on-screen. Fullscreen by default.
     Vector2 mVideoPosition;
-    Vector2 mVideoSize;
+    
+    // Size of video on-screen. Fullscreen by default.
+    enum class SizeMode
+    {
+        Native,
+        Fullscreen,
+        Custom
+    };
+    SizeMode mVideoSizeMode = SizeMode::Native;
+    Vector2 mCustomVideoSize;
     
     // If true, video is letterboxed if aspect ratio of video doesn't match
     // aspect ratio of the on-screen area where the video is being displayed.
-    bool mLetterbox = false;
+    bool mLetterbox = true;
+    
+    // If true, video will automatically close (i.e. hide itself) when end of playback is reached.
+    bool mAutoclose = true;
+    
+    // Callback that is fired when video playback stops (either due to EOF or skip).
+    std::function<void()> mStopCallback = nullptr;
 };
