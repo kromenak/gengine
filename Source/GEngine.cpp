@@ -190,7 +190,6 @@ void GEngine::Shutdown()
     mRenderer.Shutdown();
     mAudioManager.Shutdown();
     
-    //TODO: Ideally, I don't want the engine to know about SDL.
     SDL_Quit();
 }
 
@@ -332,8 +331,8 @@ void GEngine::ProcessInput()
         }
     }
     
-    // Quit game on escape press for now.
-    if(mInputManager.IsKeyPressed(SDL_SCANCODE_ESCAPE))
+    // Quick quit for dev purposes.
+    if(mInputManager.IsKeyPressed(SDL_SCANCODE_F4))
     {
         Quit();
     }

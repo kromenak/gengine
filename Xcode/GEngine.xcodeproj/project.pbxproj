@@ -2051,7 +2051,7 @@
 					"$(SRCROOT)/../Libraries/fmod/inc",
 					"$(SRCROOT)/../Libraries/GLEW/include",
 					"$(SRCROOT)/../Libraries/minilzo",
-					"$(SRCROOT)/../Libraries/sbt",
+					"$(SRCROOT)/../Libraries/stb",
 					"$(SRCROOT)/../Libraries/zlib/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/MacOS/Info.plist";
@@ -2117,7 +2117,7 @@
 					"$(SRCROOT)/../Libraries/fmod/inc",
 					"$(SRCROOT)/../Libraries/GLEW/include",
 					"$(SRCROOT)/../Libraries/minilzo",
-					"$(SRCROOT)/../Libraries/sbt",
+					"$(SRCROOT)/../Libraries/stb",
 					"$(SRCROOT)/../Libraries/zlib/include",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/MacOS/Info.plist";
