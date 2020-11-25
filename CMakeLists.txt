@@ -4,6 +4,12 @@ project(gengine VERSION 0.1
 				DESCRIPTION "Gabriel Knight 3 game engine"
 				LANGUAGES C CXX)
 
+# Build for C++14, standard required, no extensions.
+# Using global "set" rather thant target-specific commands b/c I want all my targets to use the same rules for these.
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # Get all cpp/h files in the Source directory using GLOB.
 # TODO: Using file(GLOB) is not recommended for generating source file list - you are supposed to explicitly list!
 # TODO: Some people use Python scripts or just manually do this...gotta decide on a solution. 
@@ -15,30 +21,21 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${source_files})
 # Add main executable - the game.
 add_executable(gk3 ${source_files})
 
-# Require C++14, no extensions, standard required.
-target_compile_features(gk3 PUBLIC cxx_std_14)
-set_target_properties(gk3 
-	PROPERTIES 
-		CXX_EXTENSIONS OFF
-		CXX_STANDARD_REQUIRED ON
-)
-
 # Header locations.
-target_include_directories(gk3 
-	PRIVATE
-		Source
-		Source/Audio
-		Source/Barn
-		Source/Sheep
-		Source/Video
-		Libraries/ffmpeg/include
-		Libraries/Flex/include
-		Libraries/fmod/inc
-		Libraries/GLEW/include
-		Libraries/minilzo
-		Libraries/SDL/include
-		Libraries/stb
-		Libraries/zlib/include
+target_include_directories(gk3 PRIVATE
+	Source
+	Source/Audio
+	Source/Barn
+	Source/Sheep
+	Source/Video
+	Libraries/ffmpeg/include
+	Libraries/Flex/include
+	Libraries/fmod/inc
+	Libraries/GLEW/include
+	Libraries/minilzo
+	Libraries/SDL/include
+	Libraries/stb
+	Libraries/zlib/include
 )
 
 # Library locations.
@@ -125,6 +122,5 @@ set(STB_SOURCES
 target_sources(gk3 PRIVATE ${STB_SOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${STB_SOURCES})
 
-#TODO: Tests via CMake
-#file(GLOB test_files CONFIGURE_DEPENDS "Tests/*.hh" "Tests/*.cpp")
-#add_executable(tests ${test_files})
+# Add tests subdirectory (creates the "tests" target).
+add_subdirectory(Tests)
