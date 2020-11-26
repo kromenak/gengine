@@ -74,6 +74,17 @@ G-Engine is kind of a pet project of mine, and I'm using it primarily as a learn
 
 If you are interested in contributing, you can submit a pull request. However, I request that you do not make pull requests that massively refactor or change how things are implemented. Shoot me an email or open an issue so we can discuss/debate such changes beforehand.
 
+## Progress
+You may be wondering: what's the status of this project? Is the game playable? Do the graphics work? Here's a screenshot of what the game currently looks like:
+
+![Screenshot](Media/Screenshot-0.png?raw=true "Screenshot")
+
+(See the "Media" folder for a few more screenshots).
+
+Graphically, the game looks pretty close to the original. You can't tell from the screenshots, but 3D model and face animations are working. A few things that are still missing: lighting on non-BSP models, correct texture filtering, billboard effect on 3D trees, graphical artifacts here and there, etc.
+
+Logically, the game runs, but is definitely not completable. You can walk around, interact with objects, move between rooms, and even talk to NPCs. However, a lot of important internal functions the game relies on to function are not yet implemented, which will likely result in softlocks or crashes in many cases.
+
 ## Authors
 
 * **Clark Kromenaker** - [website](http://clarkkromenaker.com/) - kromenak@gmail.com
