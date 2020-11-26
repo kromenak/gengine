@@ -1,38 +1,43 @@
 # G-Engine
 
-G-Engine is a C++ game engine that is capable of reading and using the data files from the 3D adventure game *Gabriel Knight 3: Blood of the Sacred, Blood of the Damned* (GK3), developed and published by Sierra Studios in 1998.
+G-Engine is a C++ game engine that can parse and use the data files from the classic 3D adventure game *Gabriel Knight 3: Blood of the Sacred, Blood of the Damned* (GK3), developed and published by Sierra Studios in 1999.
 
-The goal of this project is to create a cross-platform game engine that can be used to play GK3. The original game only supported Windows, and it is also a bit buggy on modern hardware. Since GK3 is a heavily data-driven game, the idea is to build a newer, more modern engine that can use the original's data files. Completely new features can also be implemented.
+The goal of this project is to create a cross-platform game engine capable of playing GK3. The original game only supported Windows, and it's also a bit buggy on modern hardware. Since GK3 is heavily data-driven, the idea is to build a newer, more modern engine that can use the original's data files. Completely new features can also be implemented!
 
 See [my blog post](http://clarkkromenaker.com/post/gengine-01-introduction/) introducing the project for more in-depth info!
 
 ## Getting Started
-
-The project builds and runs in Xcode and Visual Studio 2019.
-
-- Xcode: build/run the GEngine-MacOS target
-- Visual Studio: build/run the x86 configuration
-
-Supporting new platforms or build tools should be as easy as creating the necessary build tool files, making sure all required libraries are implemented on those platforms (see below), and probably implementing a few platform-specific File & System functions.
+Currently, the project builds and runs on Mac or Windows. Here are some instructions to get up and running.
 
 ### GK3 Data Files
 This repository **does not** contain the data files from the game, since those are copyrighted material. You will need to obtain a copy of GK3 (available on Steam or GOG) to get the data files.
 
-The following data files are needed at the moment; copy them into the "Assets/GK3" folder before building/running:
+Copy the entire contents of the game's `Data` folder into the `Assets/GK3` folder before building/running. This includes all Barn (.brn) asset bundles and all video files (.bik and .avi).
 
-- ambient.brn
-- common.brn
-- core.brn
-- day1.brn
-- day2.brn
-- day3.brn
-- day23.brn
-- day123.brn
+If you compile the project _before_ adding these data files, you can also copy them to the app bundle or exe directory after a build to get the game running.
+
+### Build File Generation
+The project uses CMake, which means the definitions of what targets to create, which source files to include, and which libraries to link against are defined in `CMakeLists.txt` in the project root. Using CMake, you can generate the project files for your preferred IDE. 
+
+I've only tested Xcode and Visual Studio 2019 at this point, but it'll likely work with other build systems with a bit of effort.
+
+#### Xcode
+Install CMake (if not already installed). One easy way to do this is through Homebrew.
+
+With CMake installed, go to the project directory. Run `mkdir build && cd build && cmake -G Xcode ..`. If the command runs successfully, you'll now have a `build` directory containing an Xcode project. Build and run the `gk3` target. 
+
+#### Visual Studio 2019
+Ensure that VS was installed with CMake support. If not, you can run the "VS 2019 Installer" to ensure the required components are installed. CMake is included in the "Desktop Development with C++" module.
+
+With VS installed with CMake support, simply right-click on the project directory and select "Open with Visual Studio". VS will generate the project files from CMake and open it for you. Build and run the `gk3` target.
+
+## Platform Support
+The engine currently supports Mac and Windows. Most of the engine code is platform-agnostic, but there are some key things that must be taken care of to support a new platform.
 
 ### Libraries
+The engine currently uses the following third-party libraries:
 
-The engine currently uses the following libraries:
-
+- ffmpeg
 - fmod
 - GLEW
 - minilzo
@@ -40,35 +45,40 @@ The engine currently uses the following libraries:
 - stb
 - zlib
 
-All library files are included in the repo, so no software need be installed before running the game.
+All library files are included in the repo, so no software need be installed before building and running. To support a new platform, the library files for that platform must be built and added to the appropriate `Libraries` subdirectory.
+
+### CMake
+Most of the CMake files probably don't need to change to support a new platform, but there are some platform-specific bits in there. To support a new platform, the CMake file likely needs to be modified.
+
+### Platform-Specific Code
+A lot of platform-specific code is taken care of by SDL. That being said, because the engine relies on SDL, you can only build and run on a platform that is supported by SDL!
+
+There are also some platform-specific File and System functions that may need to be implemented for a new platform. This includes functionality for loading files from the disk, retrieving the computer name, etc. 
 
 ## Running Tests
+This project uses [Catch2](https://github.com/catchorg/Catch2) for unit tests.
 
-This project uses [Catch](https://github.com/catchorg/Catch2) for unit tests.
-
-The Xcode project contains a build target called **GEngine-Tests**. Simply build and run this target to run all defined unit tests.
-Tests are not yet implemented in Visual Studio.
+After generating build files with CMake, simply run the `tests` target to run tests.
 
 ## Built With
 
 * [SDL](https://www.libsdl.org/) - My training wheels for cross-platform OS polling, rendering, and input
+* [ffmpeg](https://ffmpeg.org/) - Provides AVI and Bink video support. Without this library, I have no idea how I'd ever get video playback working
 * [fmod](https://www.fmod.com/) - Made SFX and music way easier than I thought possible
 * [zlib](https://www.zlib.net/) - For GK3 asset decompression
 * [minilzo](http://www.oberhumer.com/opensource/lzo/) - Also for GK3 asset decompression
 * [stb](https://github.com/nothings/stb) - Handy public domain utilities; I'm currently using the image resize algorithms
 
 ## Contributing
-
 G-Engine is kind of a pet project of mine, and I'm using it primarily as a learning tool. As such, I am not actively looking for contributions.
 
-That being said, if you are interested in contributing, shoot me an email and we can discuss!
+If you are interested in contributing, you can submit a pull request. However, I request that you do not make pull requests that massively refactor or change how things are implemented. Shoot me an email or open an issue so we can discuss/debate such changes beforehand.
 
 ## Authors
 
 * **Clark Kromenaker** - [website](http://clarkkromenaker.com/) - kromenak@gmail.com
 
 ## License
-
 This project is licensed under the GNU GPLv3 License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Acknowledgments
