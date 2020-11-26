@@ -40,11 +40,32 @@ target_include_directories(gk3 PRIVATE
 
 # Library locations.
 if(WIN32)
-	target_link_libraries(gk3 
-		#TODO: ffmpeg
+	# Specify library search directories.
+	target_link_directories(gk3 PRIVATE
+		Libraries/ffmpeg/lib/win
 		Libraries/fmod/lib/win
 		Libraries/GLEW/lib/win/x86
-		#TODO: SDL
+		Libraries/SDL/lib/win/x86
+		Libraries/zlib/lib/win/x86
+	)
+
+	# Link various libraries.
+	target_link_libraries(gk3
+		avcodec avformat avutil swresample swscale	# ffmpeg
+		fmod										# fmod
+		glew32										# GLEW
+		zlib 										# zlib
+		SDL2										# SD
+		opengl32									# OpenGL
+	)
+
+	# Copies libraries to exe directory.
+	file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} WIN_SOURCE_DIR)
+	file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} WIN_BINARY_DIR)
+	add_custom_command(TARGET gk3
+		POST_BUILD
+		COMMAND cmd /c ${WIN_SOURCE_DIR}\\Libraries\\CopyLibraries.bat ${WIN_BINARY_DIR} ${WIN_SOURCE_DIR}
+		VERBATIM
 	)
 elseif(APPLE)
 	# Build a MacOS app (rather than command line tool).
@@ -101,6 +122,7 @@ elseif(APPLE)
 		POST_BUILD
 		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Xcode/CopyLibraries.sh app
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Xcode
+		VERBATIM
 	)
 endif()
 
