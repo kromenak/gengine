@@ -117,7 +117,7 @@ int Decoder::DecodeFrame(AVFrame* frame, AVSubtitle* sub)
                     else if(mCodecContext->codec_type == AVMEDIA_TYPE_AUDIO)
                     {
                         // Set audio pts either by rescaling the frame's pts OR cached "next pts" (if frame has no pts set).
-                        AVRational timeBase = (AVRational){ 1, frame->sample_rate };
+                        AVRational timeBase { 1, frame->sample_rate };
                         if(frame->pts != AV_NOPTS_VALUE)
                         {
                             frame->pts = av_rescale_q(frame->pts, mCodecContext->pkt_timebase, timeBase);

@@ -7,6 +7,8 @@
 //
 #pragma once
 
+#include <cassert>
+
 #include "SheepValue.h"
 
 struct SheepStack

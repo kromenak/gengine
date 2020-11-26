@@ -46,10 +46,12 @@ int DecodeAudioThread(void* arg)
             af->serial = is->audioDecoder.GetSerial();
             
             // Store PTS/pos/duration.
-            AVRational timeBase = (AVRational){ 1, avFrame->sample_rate };
+            AVRational timeBase { 1, avFrame->sample_rate };
             af->pts = (avFrame->pts == AV_NOPTS_VALUE) ? NAN : avFrame->pts * av_q2d(timeBase);
             af->pos = avFrame->pkt_pos;
-            af->duration = av_q2d((AVRational){ avFrame->nb_samples, avFrame->sample_rate });
+
+            AVRational frameRational { avFrame->nb_samples, avFrame->sample_rate };
+            af->duration = av_q2d(frameRational);
 
             // Store AVFrame.
             av_frame_move_ref(af->frame, avFrame);

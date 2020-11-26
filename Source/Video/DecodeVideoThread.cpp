@@ -59,7 +59,11 @@ int DecodeVideoThread(void* arg)
     
     // Guess frame rate and cache it.
     AVRational frame_rate = av_guess_frame_rate(is->format, is->videoStream, nullptr);
-    double duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){ frame_rate.den, frame_rate.num }) : 0);
+    
+    AVRational avRational;
+    avRational.den = frame_rate.den;
+    avRational.num = frame_rate.num;
+    double duration = (frame_rate.num && frame_rate.den ? av_q2d(avRational) : 0);
     
     // Loop, decoding frames and putting them in the frame queue.
     while(true)

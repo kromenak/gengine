@@ -283,9 +283,9 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
     {
         // On Windows, I guess we need to sleep if we don't have any data (but why?).
         #if defined(_WIN32)
-        while(is->sampq.NumberRemaining() == 0)
+        while(is->audioFrames.GetUndisplayedCount() == 0)
         {
-            if((av_gettime_relative() - mAudioCallbackTime) > (1000000LL * audio_hw_buf_size / audio_tgt.bytes_per_sec / 2))
+            if((av_gettime_relative() - mAudioCallbackTime) > (1000000LL * mAudioDeviceBufferSize / mAudioOutParams.bytes_per_sec / 2))
             {
                 return -1;
             }
