@@ -10,6 +10,13 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Set compiler warning settings (TODO: a lot of stuff to clean up after adding this!)
+#if(MSVC)
+#  add_compile_options(/W3 /wd4065)
+#else()
+#  add_compile_options(-Wall -Wextra -pedantic)
+#endif()
+
 # Get all cpp/h files in the Source directory using GLOB.
 # TODO: Using file(GLOB) is not recommended for generating source file list - you are supposed to explicitly list!
 # TODO: Some people use Python scripts or just manually do this...gotta decide on a solution. 
@@ -59,7 +66,8 @@ if(WIN32)
 		opengl32									# OpenGL
 	)
 
-	# Copies libraries to exe directory.
+	# Copies libraries to exe directory. 
+	# Gotta use "TO_NATIVE_PATH" because CMake variables use the wrong path separator for Windows.
 	file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} WIN_SOURCE_DIR)
 	file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} WIN_BINARY_DIR)
 	add_custom_command(TARGET gk3
@@ -67,6 +75,17 @@ if(WIN32)
 		COMMAND cmd /c ${WIN_SOURCE_DIR}\\Libraries\\CopyLibraries.bat ${WIN_BINARY_DIR} ${WIN_SOURCE_DIR}
 		VERBATIM
 	)
+
+	# Create a custom "deploy" target that runs the install script.
+	# This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
+	# In VS, this target does not appear in the top bar - go to "Solution Explorer -> CMake Targets View" to build this target.
+	add_custom_target(deploy)
+	add_custom_command(TARGET deploy
+		POST_BUILD
+		COMMAND cmd /c ${WIN_SOURCE_DIR}\\Scripts\\Install.bat ${WIN_BINARY_DIR} ${WIN_SOURCE_DIR}\\Bin\\$<CONFIG>
+		VERBATIM
+	)
+	add_dependencies(deploy gk3)
 elseif(APPLE)
 	# Build a MacOS app (rather than command line tool).
 	set_target_properties(gk3 PROPERTIES

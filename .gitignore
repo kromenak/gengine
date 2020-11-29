@@ -5,6 +5,9 @@
 Assets/GK3/*
 !Assets/GK3/README.md
 
+## Ignore Bin directory (where final release files go)
+Bin
+
 ####
 # Xcode
 ####
