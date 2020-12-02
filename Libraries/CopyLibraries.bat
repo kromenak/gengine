@@ -19,7 +19,7 @@ rem Copy SDL libraries.
 xcopy /y %ROOTDIR%\Libraries\SDL\lib\win\x86\SDL2.dll %OUTDIR%
 
 rem Copy Zlib libraries.
-xcopy /y %ROOTDIR%\Libraries\zlib\lib\win\x86\zlib.dll %OUTDIR%
+xcopy /y %ROOTDIR%\Libraries\zlib\lib\win\x86\zlib1.dll %OUTDIR%
 
 rem Copy assets folder.
 xcopy /y /s /e /d %ROOTDIR%\Assets %OUTDIR%\Assets\
