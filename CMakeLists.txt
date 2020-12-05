@@ -98,7 +98,7 @@ if(WIN32)
 	add_custom_target(deploy)
 	add_custom_command(TARGET deploy
 		POST_BUILD
-		COMMAND cmd /c ${WIN_SOURCE_DIR}\\Scripts\\Install.bat ${WIN_BINARY_DIR} ${WIN_SOURCE_DIR}\\Bin\\$<CONFIG>
+		COMMAND cmd /c ${WIN_SOURCE_DIR}\\Scripts\\Install.bat ${WIN_BINARY_DIR} ${WIN_SOURCE_DIR}\\Bin\\$<CONFIG> ${PROJECT_VERSION}
 		VERBATIM
 	)
 	add_dependencies(deploy gk3)
@@ -166,11 +166,10 @@ elseif(APPLE)
 
 	# Create a custom "deploy" target that runs the install script.
 	# This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
-	# In VS, this target does not appear in the top bar - go to "Solution Explorer -> CMake Targets View" to build this target.
 	add_custom_target(deploy)
 	add_custom_command(TARGET deploy
 		POST_BUILD
-		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/Install.sh ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG>
+		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/Install.sh ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION}
 		VERBATIM
 	)
 	add_dependencies(deploy gk3)

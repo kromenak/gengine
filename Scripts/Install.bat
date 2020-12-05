@@ -1,6 +1,7 @@
 setlocal
 set BUILD_DIR=%1
 set INSTALL_DIR=%2
+set VERSION_NUM=%3
 
 rem Copy exe. Note the "echo d" tells xcopy that INSTALL_DIR is a directory and not a file.
 echo d | xcopy /y %BUILD_DIR%\gk3.exe %INSTALL_DIR%
@@ -17,5 +18,5 @@ del %INSTALL_DIR%\Assets\GK3\*.bik
 del %INSTALL_DIR%\Assets\GK3\*.avi
 
 rem Create zip file.
-powershell Compress-Archive -Path '%INSTALL_DIR%' -DestinationPath '%INSTALL_DIR%\GK3.zip' -Force
+powershell Compress-Archive -Path '%INSTALL_DIR%' -DestinationPath '%INSTALL_DIR%\GK3-%VERSION_NUM%.zip' -Force
 endlocal
