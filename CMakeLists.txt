@@ -48,9 +48,14 @@ target_include_directories(gk3 PRIVATE
 	Source/Rendering
 	Source/Reports
 	Source/Sheep
+	Source/Sheep/Compiler
+	Source/Sheep/Machine
 	Source/UI
 	Source/Util
 	Source/Video
+	Source/Video/Decode
+	Source/Video/Playback
+	Source/Video/Util
 	Libraries/ffmpeg/include
 	Libraries/Flex/include
 	Libraries/fmod/inc
