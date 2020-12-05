@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 
-project(gengine VERSION 0.1
+project(gengine VERSION 0.0.1
 				DESCRIPTION "Gabriel Knight 3 game engine"
 				LANGUAGES C CXX)
 
@@ -91,9 +91,13 @@ elseif(APPLE)
 	set_target_properties(gk3 PROPERTIES
 		MACOSX_BUNDLE TRUE
 		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Xcode/MacOS/Info.plist
+		MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
+
 		XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
 		XCODE_ATTRIBUTE_PRODUCT_NAME "Gabriel Knight 3"
 		XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.kromenak.gengine"
+		XCODE_ATTRIBUTE_MARKETING_VERSION ${PROJECT_VERSION}
+		XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION 1
 	)
 
 	# Add xcassets file under "Resources" in project (required for AppIcon to work correctly).
