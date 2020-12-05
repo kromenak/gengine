@@ -34,19 +34,21 @@ target_include_directories(tests PRIVATE
 
 # Game source files being tested.
 target_sources(tests PRIVATE
-	../Source/AABB.cpp
-	../Source/Collisions.cpp
-	../Source/LineSegment.cpp
-	../Source/Matrix3.cpp
-	../Source/Matrix4.cpp
-	../Source/Plane.cpp
-	../Source/Quaternion.cpp
-	../Source/Rect.cpp
-	../Source/RectUtil.cpp
-	../Source/Sphere.cpp
-	../Source/Timeblock.cpp
-	../Source/Triangle.cpp
-	../Source/Vector2.cpp
-	../Source/Vector3.cpp
-	../Source/Vector4.cpp
+	../Source/GK3/Timeblock.cpp
+
+	../Source/Math/Matrix3.cpp
+	../Source/Math/Matrix4.cpp
+	../Source/Math/Quaternion.cpp
+	../Source/Math/Vector2.cpp
+	../Source/Math/Vector3.cpp
+	../Source/Math/Vector4.cpp
+
+	../Source/Primitives/AABB.cpp
+	../Source/Primitives/Collisions.cpp
+	../Source/Primitives/LineSegment.cpp
+	../Source/Primitives/Plane.cpp
+	../Source/Primitives/Rect.cpp
+	../Source/Primitives/RectUtil.cpp
+	../Source/Primitives/Sphere.cpp
+	../Source/Primitives/Triangle.cpp
 )

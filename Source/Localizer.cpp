@@ -21,7 +21,7 @@ Localizer::Localizer()
     parser.SetMultipleKeyValuePairsPerLine(false);
     
     // Read one section at a time.
-    // L10N files can havd multiple sections, but we don't really care - just read it all.
+    // L10N files can have multiple sections, but we don't really care - just read it all.
     IniSection section;
     while(parser.ReadNextSection(section))
     {

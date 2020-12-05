@@ -31,9 +31,25 @@ add_executable(gk3 ${source_files})
 # Header locations.
 target_include_directories(gk3 PRIVATE
 	Source
+	Source/Assets
 	Source/Audio
-	Source/Barn
+	Source/Debug
+	Source/GK3
+	Source/GK3/Actions
+	Source/GK3/Actors
+	Source/GK3/Animation
+	Source/GK3/UI
+	Source/Input
+	Source/IO
+	Source/Math
+	Source/ObjectModel
+	Source/Platform
+	Source/Primitives
+	Source/Rendering
+	Source/Reports
 	Source/Sheep
+	Source/UI
+	Source/Util
 	Source/Video
 	Libraries/ffmpeg/include
 	Libraries/Flex/include
