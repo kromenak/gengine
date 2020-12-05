@@ -139,10 +139,21 @@ elseif(APPLE)
 	# Copies libraries to app bundle post-build.
 	add_custom_command(TARGET gk3
 		POST_BUILD
-		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Xcode/CopyLibraries.sh app
-		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Xcode
+		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/CopyLibraries.sh app
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries
 		VERBATIM
 	)
+
+	# Create a custom "deploy" target that runs the install script.
+	# This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
+	# In VS, this target does not appear in the top bar - go to "Solution Explorer -> CMake Targets View" to build this target.
+	add_custom_target(deploy)
+	add_custom_command(TARGET deploy
+		POST_BUILD
+		COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/Install.sh ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG>
+		VERBATIM
+	)
+	add_dependencies(deploy gk3)
 endif()
 
 # Add minilzo library (source only).
