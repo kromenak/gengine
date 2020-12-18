@@ -5,7 +5,6 @@
 //
 #include "Triangle.h"
 
-#include "Debug.h"
 #include "LineSegment.h"
 #include "Plane.h"
 

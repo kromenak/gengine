@@ -28,6 +28,9 @@ target_include_directories(tests PRIVATE
 	../Source
 	../Source/Audio
 	../Source/Barn
+	../Source/GK3
+	../Source/Math
+	../Source/Primitives
 	../Source/Sheep
 	../Source/Video
 )
