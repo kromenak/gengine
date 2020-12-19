@@ -6,7 +6,7 @@ Assets/GK3/*
 !Assets/GK3/README.md
 
 ## Ignore Bin directory (where final release files go)
-Bin
+/Bin
 
 ####
 # Xcode
@@ -37,5 +37,5 @@ xcuserdata/
 .vs
 *.vcproj.user
 
-[Dd]ebug/
-[Rr]elease/
+/[Dd]ebug/
+/[Rr]elease/
