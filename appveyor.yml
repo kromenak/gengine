@@ -3,7 +3,7 @@
 ####
 
 # For now, appveyor build version is not equal to app version - it's just a sequentially increasing number.
-version: {build}
+version: 1.0.{build}
 
 # The goal is to build and deploy occasional release milestones to GitHub.
 # Rather than building every commit to master, we'll only build when merging into release branch.
