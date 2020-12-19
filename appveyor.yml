@@ -1,0 +1,158 @@
+####
+# General Config
+####
+
+# For now, appveyor build version is not equal to app version - it's just a sequentially increasing number.
+version: {build}
+
+# The goal is to build and deploy occasional release milestones to GitHub.
+# Rather than building every commit to master, we'll only build when merging into release branch.
+#branches:
+#  only:
+#    - release
+
+# Do not build tags.
+skip_tags: true
+
+# I think this is a limitation of the free plan anyway!
+max_jobs: 1
+
+####
+# Environment Config
+####
+
+# Build for Windows and Mac.
+image: 
+  #- Visual Studio 2019
+  - macos
+
+# Init script runs before cloning the repo.
+init:
+  - echo Init
+
+# Install scripts run after cloning completes.
+install:
+  - echo Install
+
+####
+# Build Config
+####
+
+# Scripts to run before build.
+before_build:
+  - echo Before Build
+
+  # For Mac: generate Xcode project.
+  - sh: cmake -B build -G Xcode .
+  - sh: cd build
+
+# Scripts to run for actual build.
+build_script:
+  - echo Build
+
+  # For Mac: build project using "deploy" target.
+  # TODO: App Signing?
+  - sh: xcodebuild -target deploy -configuration "Release"
+
+# Appveyor's "automatic build" step.
+# Can be used to do a build using built-in options, rather than build_script.
+build: off
+
+# Scripts to run after build.
+after_build:
+  - echo After Build
+
+####
+# Tests Config
+####
+
+# Scripts to run before tests.
+before_test:
+  - echo Before Tests
+
+  # For Mac: build test target.
+  - sh: xcodebuild -target tests -configuration "Release"
+
+# Scripts to run for tests.
+test_script:
+  - echo Tests
+
+  # For Mac: run tests.
+  - sh: ./Tests/Release/tests
+
+# Appveyor's "automatic test" step.
+# Can be used to run tests using built-in options, rather than test_script.
+test: off
+
+# Scripts to run after tests.
+after_test:
+  - echo After Tests
+
+####
+# Artifact Config
+####
+
+# Build scripts will leave ready-to-deploy app in "Bin" folder 
+artifacts:
+ - path: Bin/Release/*.zip
+
+####
+# Deployment Config
+####
+
+# Scripts to run before deployment.
+before_deploy:
+  - echo Before Deploy
+
+# Scripts to be run for deployment.
+deploy_script:
+  - echo Deploy
+
+# Appveyor's "automatic deploy" step. 
+# Allows deploying to many destinations without writing custom scripts.
+#deploy:
+#  - provider: GitHub
+#    artifact: /*\.zip/
+#    draft: false
+#    prerelease: false
+#    on:
+#      branch: release
+
+# Scripts to run after deployment.
+after_deploy:
+  - echo After Deploy
+
+####
+# Handlers
+####
+
+# Scripts to run on successful build completion.
+on_success:
+  - echo Success
+
+# Scripts to run on build failure.
+on_failure:
+  - echo Failure
+
+# Scripts to run on build finish (success or failure).
+on_finish:
+  - echo Finish
+
+####
+# Notifications
+####
+
+# A way to send a notif (email, Slack, etc) when a build finishes.
+# Just to test it out, I'll send myself an email on build status change.
+notifications:
+  - provider: Email
+    to:
+      - kromenak@gmail.com
+    subject: 'Build {{status}}'
+    message: "{{message}}, {{commitId}}"
+    on_build_failure: true
+    on_build_status_changed: true
+
+
+
+
