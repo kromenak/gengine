@@ -56,7 +56,7 @@ build_script:
 
 # Appveyor's "automatic build" step.
 # Can be used to do a build using built-in options, rather than build_script.
-build: off
+#build: off
 
 # Scripts to run after build.
 after_build:
@@ -82,7 +82,7 @@ test_script:
 
 # Appveyor's "automatic test" step.
 # Can be used to run tests using built-in options, rather than test_script.
-test: off
+#test: off
 
 # Scripts to run after tests.
 after_test:
