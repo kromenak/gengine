@@ -62,6 +62,9 @@ build_script:
 # Scripts to run after build.
 after_build:
   - echo After Build
+  - sh: cd ../
+  - sh: ls
+  - sh: ls ${CONFIGURATION}
 
 ####
 # Tests Config
@@ -69,8 +72,6 @@ after_build:
 
 # Scripts to run before tests.
 before_test:
-  - echo Before Tests
-
   # For Mac: build test target.
   - sh: xcodebuild -target tests -configuration "${CONFIGURATION}"
 
@@ -79,8 +80,6 @@ before_test:
 
 # Scripts to run for tests.
 test_script:
-  - echo Tests
-
   # For Mac: run tests.
   - sh: ./Tests/${CONFIGURATION}/tests
 
