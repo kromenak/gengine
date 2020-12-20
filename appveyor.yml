@@ -23,40 +23,41 @@ max_jobs: 1
 
 # Build for Windows and Mac.
 image: 
-  #- Visual Studio 2019
+  - Visual Studio 2019
   - macos
 
 # Init script runs before cloning the repo.
-init:
-  - echo Init
+#init:
+#  - echo Init
 
 # Install scripts run after cloning completes.
-install:
-  - echo Install
+#install:
+#  - echo Install
 
 ####
 # Build Config
 ####
+configuration: RelWithDebInfo
 
 # Scripts to run before build.
 before_build:
-  - echo Before Build
-
   # For Mac: generate Xcode project.
   - sh: cmake -B build -G Xcode .
-  - sh: cd build
+  
+  # For Windows: when you open VS, it generates a CMake "build" directory based on the contents of CMakeSettings.json.
+  # Unfortunately, there's no way to execute what VS does (or use CMakeSettings.json) from the command line.
+  # As a workaround, execute the cmake command that VS exectutes (pulled from VS CMake output log).
+  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
+  - cmd: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="%CONFIGURATION%" -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_MAKE_PROGRAM="ninja.exe" .
+  #- cmd: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx86/x86/cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx86/x86/cl.exe" -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" .
 
-# Scripts to run for actual build.
 build_script:
-  - echo Build
+  # For Mac: build project using xcodebuild "deploy" target. (TODO: can "cmake --build" be used here as well?)
+  - sh: cd build
+  - sh: xcodebuild -target deploy -configuration "${CONFIGURATION}"
 
-  # For Mac: build project using "deploy" target.
-  # TODO: App Signing?
-  - sh: xcodebuild -target deploy -configuration "Release"
-
-# Appveyor's "automatic build" step.
-# Can be used to do a build using built-in options, rather than build_script.
-#build: off
+  # For Windows: use the built-in CMake "build" command to compile using Ninja. 
+  - cmd: cmake --build build --target deploy
 
 # Scripts to run after build.
 after_build:
@@ -71,18 +72,20 @@ before_test:
   - echo Before Tests
 
   # For Mac: build test target.
-  - sh: xcodebuild -target tests -configuration "Release"
+  - sh: xcodebuild -target tests -configuration "${CONFIGURATION}"
+
+  # For Windows: build test target.
+  - cmd: cmake --build build --target tests
 
 # Scripts to run for tests.
 test_script:
   - echo Tests
 
   # For Mac: run tests.
-  - sh: ./Tests/Release/tests
+  - sh: ./Tests/${CONFIGURATION}/tests
 
-# Appveyor's "automatic test" step.
-# Can be used to run tests using built-in options, rather than test_script.
-#test: off
+  # For Windows: run tests.
+  - cmd: build\Tests\tests.exe
 
 # Scripts to run after tests.
 after_test:
@@ -94,7 +97,7 @@ after_test:
 
 # Build scripts will leave ready-to-deploy app in "Bin" folder 
 artifacts:
- - path: Bin/Release/*.zip
+  - path: Bin/$(configuration)/*.zip
 
 ####
 # Deployment Config
@@ -152,7 +155,3 @@ notifications:
     message: "{{message}}, {{commitId}}"
     on_build_failure: true
     on_build_status_changed: true
-
-
-
-
