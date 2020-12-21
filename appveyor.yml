@@ -23,8 +23,8 @@ max_jobs: 1
 
 # Build for Windows and Mac.
 image: 
-  - Visual Studio 2019
   - macos
+  - Visual Studio 2019
 
 # Init script runs before cloning the repo.
 #init:
@@ -53,8 +53,10 @@ before_build:
 
 build_script:
   # For Mac: build project using xcodebuild "deploy" target. (TODO: can "cmake --build" be used here as well?)
+  # xcodebuild only works IN THE DIRECTORY with the Xcode project, which is why we must "cd" in and out.
   - sh: cd build
   - sh: xcodebuild -target deploy -configuration "${CONFIGURATION}"
+  - sh: cd ../
 
   # For Windows: use the built-in CMake "build" command to compile using Ninja. 
   - cmd: cmake --build build --target deploy
@@ -62,9 +64,6 @@ build_script:
 # Scripts to run after build.
 after_build:
   - echo After Build
-  - sh: cd ../
-  - sh: ls
-  - sh: ls Bin/${CONFIGURATION}
 
 ####
 # Tests Config
@@ -73,7 +72,9 @@ after_build:
 # Scripts to run before tests.
 before_test:
   # For Mac: build test target.
+  - sh: cd build
   - sh: xcodebuild -target tests -configuration "${CONFIGURATION}"
+  - sh: cd ../
 
   # For Windows: build test target.
   - cmd: cmake --build build --target tests
@@ -81,7 +82,7 @@ before_test:
 # Scripts to run for tests.
 test_script:
   # For Mac: run tests.
-  - sh: ./Tests/${CONFIGURATION}/tests
+  - sh: ./build/Tests/${CONFIGURATION}/tests
 
   # For Windows: run tests.
   - cmd: build\Tests\tests.exe
