@@ -97,7 +97,7 @@ after_test:
 
 # Build scripts will leave ready-to-deploy app in "Bin" folder 
 artifacts:
-  - path: Bin/$(configuration)/*.zip
+  - path: Bin/$(CONFIGURATION)/*.zip
 
 ####
 # Deployment Config
