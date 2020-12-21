@@ -64,7 +64,7 @@ after_build:
   - echo After Build
   - sh: cd ../
   - sh: ls
-  - sh: ls ${CONFIGURATION}
+  - sh: ls Bin/${CONFIGURATION}
 
 ####
 # Tests Config
