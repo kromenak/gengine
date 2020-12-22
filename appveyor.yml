@@ -2,14 +2,15 @@
 # General Config
 ####
 
-# For now, appveyor build version is not equal to app version - it's just a sequentially increasing number.
-version: 1.0.{build}
+# Appveyor build version equals app's version number, but with an added (patch) value.
+# Ex: if app version is "0.0.1", Appveyor's version might be "0.0.1.9".
+version: 0.0.1.{build}
 
 # The goal is to build and deploy occasional release milestones to GitHub.
 # Rather than building every commit to master, we'll only build when merging into release branch.
-#branches:
-#  only:
-#    - release
+branches:
+  only:
+    - release
 
 # Do not build tags.
 skip_tags: true
@@ -37,6 +38,8 @@ image:
 ####
 # Build Config
 ####
+
+# Can be one of (Debug, Release, RelWithDebInfo, MinSizeRel) - from CMake.
 configuration: RelWithDebInfo
 
 # Scripts to run before build.
@@ -49,7 +52,6 @@ before_build:
   # As a workaround, execute the cmake command that VS exectutes (pulled from VS CMake output log).
   - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
   - cmd: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="%CONFIGURATION%" -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_MAKE_PROGRAM="ninja.exe" .
-  #- cmd: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="RelWithDebInfo" -DCMAKE_C_COMPILER:FILEPATH="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx86/x86/cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.28.29333/bin/Hostx86/x86/cl.exe" -DCMAKE_MAKE_PROGRAM="C:\PROGRAM FILES (X86)\MICROSOFT VISUAL STUDIO\2019\COMMUNITY\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" .
 
 build_script:
   # For Mac: build project using xcodebuild "deploy" target. (TODO: can "cmake --build" be used here as well?)
@@ -62,8 +64,8 @@ build_script:
   - cmd: cmake --build build --target deploy
 
 # Scripts to run after build.
-after_build:
-  - echo After Build
+#after_build:
+#  - echo After Build
 
 ####
 # Tests Config
@@ -88,8 +90,8 @@ test_script:
   - cmd: build\Tests\tests.exe
 
 # Scripts to run after tests.
-after_test:
-  - echo After Tests
+#after_test:
+#  - echo After Tests
 
 ####
 # Artifact Config
@@ -98,6 +100,7 @@ after_test:
 # Build scripts will leave ready-to-deploy app in "Bin" folder 
 artifacts:
   - path: Bin/$(CONFIGURATION)/*.zip
+    name: Game
 
 ####
 # Deployment Config
@@ -107,19 +110,15 @@ artifacts:
 before_deploy:
   - echo Before Deploy
 
-# Scripts to be run for deployment.
-deploy_script:
-  - echo Deploy
-
-# Appveyor's "automatic deploy" step. 
-# Allows deploying to many destinations without writing custom scripts.
-#deploy:
-#  - provider: GitHub
-#    artifact: /*\.zip/
-#    draft: false
-#    prerelease: false
-#    on:
-#      branch: release
+# Deploy to GitHub Releases
+deploy:
+  - provider: GitHub
+    artifact: Game
+    release: '$(APPVEYOR_BUILD_VERSION)'
+    description: '$(APPVEYOR_REPO_COMMIT_MESSAGE) - $(APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED)'
+    force_update: true
+    auth_token:
+      secure: RziIBOU8Bm+xT4f7Yo1P0IXI2SZUitYy4qFrPthqi/Lb8/1rOYvYp1PvdDxYc/DO
 
 # Scripts to run after deployment.
 after_deploy:
@@ -151,7 +150,8 @@ notifications:
   - provider: Email
     to:
       - kromenak@gmail.com
-    subject: 'Build {{status}}'
-    message: "{{message}}, {{commitId}}"
+    # Exclude custom subject/message to use the default ones.
+    #subject: 'Build {{status}}: {{projectName}} {{buildVersion}}'
+    #message: "{{message}}, {{commitId}}"
     on_build_failure: true
     on_build_status_changed: true
