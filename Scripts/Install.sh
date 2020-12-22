@@ -7,7 +7,7 @@ VERSION_NUM=$3
 mkdir -p "${INSTALL_DIR}"
 
 # Make sure any old artifacts are cleared out.
-rm -r "${INSTALL_DIR}"/*
+rm -rf "${INSTALL_DIR}"/*
 
 # Copy the app bundle to the install directory.
 cp -r "${BUILD_DIR}/Gabriel Knight 3.app" "${INSTALL_DIR}"
@@ -20,4 +20,4 @@ rm "${INSTALL_DIR}/Gabriel Knight 3.app/Contents/Resources/Assets/GK3"/*.avi
 
 # Create zip archive containing app.
 cd "${INSTALL_DIR}"
-zip -r GK3-${VERSION_NUM}.zip "Gabriel Knight 3.app"
+zip -r GK3-Mac-${VERSION_NUM}.zip "Gabriel Knight 3.app"

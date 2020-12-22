@@ -18,5 +18,5 @@ del %INSTALL_DIR%\Assets\GK3\*.bik
 del %INSTALL_DIR%\Assets\GK3\*.avi
 
 rem Create zip file.
-powershell Compress-Archive -Path '%INSTALL_DIR%' -DestinationPath '%INSTALL_DIR%\GK3-%VERSION_NUM%.zip' -Force
+powershell Compress-Archive -Path '%INSTALL_DIR%' -DestinationPath '%INSTALL_DIR%\GK3-Win-%VERSION_NUM%.zip' -Force
 endlocal
