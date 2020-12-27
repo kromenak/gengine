@@ -1,5 +1,4 @@
 # G-Engine
-
 G-Engine is a C++ game engine that can parse and use the data files from the classic 3D adventure game *Gabriel Knight 3: Blood of the Sacred, Blood of the Damned* (GK3), developed and published by Sierra Studios in 1999.
 
 The goal of this project is to create a cross-platform game engine capable of playing GK3. The original game only supported Windows, and it's also a bit buggy on modern hardware. Since GK3 is heavily data-driven, the idea is to build a newer, more modern engine that can use the original's data files. Completely new features can also be implemented!
@@ -85,6 +84,17 @@ Graphically, the game looks pretty close to the original. You can't tell from th
 
 Logically, the game runs, but is definitely not completable. You can walk around, interact with objects, move between rooms, and even talk to NPCs. However, a lot of important internal functions the game relies on to function are not yet implemented, which will likely result in softlocks or crashes in many cases.
 
+## Running the Game
+From time to time, as new and interesting features are added to the game, I'll package and upload releases here on GitHub. These executables are not "signed" or "notarized", so your OS may complain about files being from an unknown developer. You'll have to use the OS mechanism to bypass such warnings if you want to run the game.
+
+Remember to copy the contents of GK3's "Data" folder to the "Assets/GK3" folder. If running on Mac, this folder is inside of the .app package - you'll need to right-click on "Gabriel Knight 3.app", select "Show Package Contents", and navigate to the "Resources" folder. If you don't do this, the game will provide an error message about missing "brn" files and fail to run.
+
+As mentioned above, some functionality is implemented, but expect bugs, crashes, poor performance, and missing/incorrect behavior. Do not expect to play the entire game, or even complete a single timeblock!
+
+You can open the developer console using the `~` key, which allows you to enter commands in the Sheep language. For example, try `SetLocation("LBY")` or `PrintString("Hello World")`.
+
+F1, F2, and F3 enable debug visualizations. F4 quits the game.
+
 ## Authors
 
 * **Clark Kromenaker** - [website](http://clarkkromenaker.com/) - kromenak@gmail.com
@@ -93,7 +103,6 @@ Logically, the game runs, but is definitely not completable. You can walk around
 This project is licensed under the GNU GPLv3 License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Acknowledgments
-
 * Sierra On-Line, who inspired me as a kid and still do today
 * Jane Jensen, for creating and designing the GK series
-* [GK3 Tools](https://sourceforge.net/projects/gk3tools/), which provided some guidance on BRN, BSP, and ACT file formats
+* [GK3 Tools](https://sourceforge.net/projects/gk3tools/), which provided guidance on BRN, BSP, and ACT file formats
