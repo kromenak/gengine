@@ -146,5 +146,5 @@ void DialogueManager::PlayNextDialogueLine()
 		return;
 	}
 	std::cout << "Playing YAK " << yak->GetName() << std::endl;
-	GEngine::Instance()->GetScene()->GetAnimator()->Start(yak, false, false, nullptr);
+	GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yak, nullptr);
 }

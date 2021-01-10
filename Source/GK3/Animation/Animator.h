@@ -44,6 +44,9 @@ struct AnimationState
 	// If true, this is an animation triggered by a GAS (GK3 auto-script).
 	// This mainly indicates that the animation is lower-priority than other anims.
 	bool fromGas = false;
+    
+    // If true, this is a "yak" animation - which mainly indicates that audio should play as VO.
+    bool isYak = false;
 	
 	// Callback that is executed when the animation finishes.
 	//TODO: What about premature stops?
@@ -58,9 +61,10 @@ public:
 	
 	// Playback
 	void Start(Animation* animation, bool allowMove = false, bool fromGas = false, std::function<void()> finishCallback = nullptr);
-	void Loop(Animation* animation);
+    void StartYak(Animation* yakAnimation, std::function<void()> finishCallback = nullptr);
+    void Loop(Animation* animation);
 	void Stop(Animation* animation);
-	
+    
 	// Sampling
 	void Sample(Animation* animation, int frame);
 	

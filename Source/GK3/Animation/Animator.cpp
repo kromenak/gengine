@@ -32,6 +32,21 @@ void Animator::Start(Animation* animation, bool allowMove, bool fromGas, std::fu
 	ExecuteFrame(mActiveAnimations.back(), 0);
 }
 
+void Animator::StartYak(Animation* yakAnimation, std::function<void()> finishCallback)
+{
+    if(yakAnimation == nullptr) { return; }
+    
+    // Create anim state for animation.
+    // A "yak" anim is a type of animation used primarily for dialogue and voiceover.
+    // A YAK anim doesn't do any move/GAS logic, plus audio is played as VO rather than SFX.
+    mActiveAnimations.emplace_back(yakAnimation, finishCallback);
+    mActiveAnimations.back().isYak = true;
+    
+    // Immediately execute frame 0 of the animation.
+    // Frames execute at the BEGINNING of the time slice for that frame, so frame 0 executes at t=0.
+    ExecuteFrame(mActiveAnimations.back(), 0);
+}
+
 void Animator::Loop(Animation* animation)
 {
 	if(animation == nullptr) { return; }
@@ -63,7 +78,7 @@ void Animator::Stop(Animation* animation)
 		return false;
 	});
 	
-	// "remove_if" returns iterator to new ending (all elements to be erased are after it.
+	// "remove_if" returns iterator to new ending (all elements to be erased are after it).
 	// So...do the erase!
 	mActiveAnimations.erase(newEndIt, mActiveAnimations.end());
 }

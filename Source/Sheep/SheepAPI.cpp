@@ -1074,7 +1074,7 @@ shpvoid StartVoiceOver(string dialogueName, int numLines)
 	Animation* yak = Services::GetAssets()->LoadYak(yakName);
 	
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(yak, false, false, currentThread->AddWait());
+    GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yak, currentThread->AddWait());
     return 0;
 }
 RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
@@ -1083,7 +1083,7 @@ shpvoid StartYak(string yakAnimationName)
 {
 	Animation* yak = Services::GetAssets()->LoadYak(yakAnimationName);
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(yak, false, false, currentThread->AddWait());
+    GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yak, currentThread->AddWait());
     return 0;
 }
 RegFunc1(StartYak, void, string, WAITABLE, DEV_FUNC);
@@ -2518,7 +2518,7 @@ shpvoid PlaySound(std::string soundName)
 	Audio* audio = Services::GetAssets()->LoadAudio(soundName);
 	if(audio != nullptr)
 	{
-		Services::GetAudio()->Play(audio);
+		Services::GetAudio()->PlaySFX(audio);
 	}
 	return 0;
 }

@@ -116,11 +116,43 @@ void ModelVisibilityAnimNode::Play(AnimationState* animState)
 
 void SoundAnimNode::Play(AnimationState* animState)
 {
-	//TODO: Flesh this out
-	if(audio != nullptr)
-	{
-		Services::GetAudio()->Play(audio);
-	}
+    if(is3D)
+    {
+        // Use specified position by default.
+        Vector3 playPosition = position;
+        
+        // If position is based on model name, find the model and set position.
+        if(!modelName.empty())
+        {
+            GKActor* actor = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+            if(actor != nullptr)
+            {
+                playPosition = actor->GetWorldPosition();
+            }
+        }
+        
+        //TODO: Pass/set volume
+        if(animState->isYak)
+        {
+            Services::GetAudio()->PlayVO3D(audio, playPosition, minDistance, maxDistance);
+        }
+        else
+        {
+            Services::GetAudio()->PlaySFX3D(audio, playPosition, minDistance, maxDistance);
+        }
+    }
+    else
+    {
+        //TODO: Pass/set volume
+        if(animState->isYak)
+        {
+            Services::GetAudio()->PlayVO(audio);
+        }
+        else
+        {
+            Services::GetAudio()->PlaySFX(audio);
+        }
+    }
 }
 
 void FootstepAnimNode::Play(AnimationState* animState)
@@ -139,14 +171,15 @@ void FootstepAnimNode::Play(AnimationState* animState)
 		Audio* footstepAudio = Services::Get<FootstepManager>()->GetFootstep(shoeType, floorTextureName);
 		if(footstepAudio != nullptr)
 		{
-			//TODO: Play at correct 3D position in the scene.
-			Services::GetAudio()->Play(footstepAudio);
+            //TODO: May want to play the sound at the actor's foot position by querying model.
+            Services::GetAudio()->PlaySFX3D(footstepAudio, actor->GetWorldPosition());
 		}
 	}
 }
 
 void FootscuffAnimNode::Play(AnimationState* animState)
 {
+    //TODO: Almost identical to Footstep node, so maybe they can be combined somehow.
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
@@ -161,9 +194,9 @@ void FootscuffAnimNode::Play(AnimationState* animState)
 		Audio* footscuffAudio = Services::Get<FootstepManager>()->GetFootscuff(shoeType, floorTextureName);
 		if(footscuffAudio != nullptr)
 		{
-			//TODO: Play at correct 3D position in the scene.
-			Services::GetAudio()->Play(footscuffAudio);
-		}
+            //TODO: May want to play the sound at the actor's foot position by querying model.
+            Services::GetAudio()->PlaySFX3D(footscuffAudio, actor->GetWorldPosition());
+        }
 	}
 }
 

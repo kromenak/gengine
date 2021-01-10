@@ -11,7 +11,7 @@
 #include "IniParser.h"
 #include "Services.h"
 
-int WaitNode::Execute()
+int WaitNode::Execute(SoundtrackSoundType soundType)
 {
     // Don't execute if we've hit the repeat limit.
     // Otherwise, increment the execution count (execution IS happening!)
@@ -32,7 +32,7 @@ int WaitNode::Execute()
     return (rand() % maxWaitTimeMs + minWaitTimeMs);
 }
 
-int SoundNode::Execute()
+int SoundNode::Execute(SoundtrackSoundType soundType)
 {
     // Don't execute if we've hit the repeat limit.
     // Otherwise, increment the execution count (execution IS happening!)
@@ -47,17 +47,31 @@ int SoundNode::Execute()
     // Definitely want to play the sound, if it exists.
     Audio* audio = Services::GetAssets()->LoadAudio(soundName);
     if(audio == nullptr) { return 0; }
-    audio->SetIsMusic(true);
     
-    // Play the audio correctly.
-    if(is3d)
+    // Play method differs based on sound type and whether its 3D or not.
+    switch(soundType)
     {
-        std::cout << "Play 3D! " << position << std::endl;
-        Services::GetAudio()->Play3D(audio, position, minDist, maxDist);
-    }
-    else
-    {
-        Services::GetAudio()->Play(audio, fadeInTimeMs);
+    case SoundtrackSoundType::Ambient:
+        if(is3d)
+        {
+            Services::GetAudio()->PlayAmbient3D(audio, position, minDist, maxDist);
+        }
+        else
+        {
+            Services::GetAudio()->PlayAmbient(audio, fadeInTimeMs);
+        }
+        break;
+        
+    case SoundtrackSoundType::SFX:
+        if(is3d)
+        {
+            Services::GetAudio()->PlaySFX3D(audio, position, minDist, maxDist);
+        }
+        else
+        {
+            Services::GetAudio()->PlaySFX(audio);
+        }
+        break;
     }
     
     // Return audio length. Gotta convert seconds to milliseconds.
@@ -142,8 +156,12 @@ void Soundtrack::ParseFromData(char *data, int dataLength)
 				IniKeyValue& entry = line.entries[0];
                 if(StringUtil::EqualsIgnoreCase(entry.key, "SoundType"))
                 {
-                    // Set soundtype.
-					//TODO
+                    // There are only two options: Ambient or SFX.
+                    // The default is Ambient, so we really only care if the value is SFX.
+                    if(StringUtil::EqualsIgnoreCase(entry.value, "SFX"))
+                    {
+                        mSoundType = SoundtrackSoundType::SFX;
+                    }
                 }
                 else
                 {
