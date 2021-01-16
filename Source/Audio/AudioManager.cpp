@@ -18,6 +18,22 @@ PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel) :
     
 }
 
+void PlayingSoundHandle::Pause()
+{
+    if(channel != nullptr)
+    {
+        channel->setPaused(true);
+    }
+}
+
+void PlayingSoundHandle::Resume()
+{
+    if(channel != nullptr)
+    {
+        channel->setPaused(false);
+    }
+}
+
 void PlayingSoundHandle::SetVolume(float volume)
 {
     // This may fail if the channel handle is no longer valid.
@@ -292,40 +308,37 @@ float AudioManager::GetVolume(AudioType audioType) const
     return volume;
 }
 
-AudioState AudioManager::SaveAudioState()
+AudioSaveState AudioManager::SaveAudioState()
 {
     // Create state object.
-    AudioState state;
-    /*
-    state.channels = mPlayingChannels;
+    AudioSaveState state;
+    state.playingSounds = mPlayingSounds;
     
     // Pause all playing sounds.
-    for(auto& channel : mPlayingChannels)
+    for(auto& sound : mPlayingSounds)
     {
-        channel->setPaused(true);
+        sound.Pause();
     }
     
     // Clear playing channels.
     // All saved channels are no longer playing until later restored.
-    mPlayingChannels.clear();
-    */
+    mPlayingSounds.clear();
+    
     // Return audio state - up to the caller to store the state and restore it when it makes sense.
     return state;
 }
 
-void AudioManager::RestoreAudioState(const AudioState& audioState)
+void AudioManager::RestoreAudioState(AudioSaveState& audioSaveState)
 {
-    /*
     // Resume playback of state channels.
-    for(auto& channel : mPlayingChannels)
+    for(auto& sound : audioSaveState.playingSounds)
     {
-        channel->setPaused(false);
+        sound.Resume();
     }
     
     // Add channels from state back to playing channels.
     // We'll say that restoring audio state *does not* clear other playing audio, so just append to existing playing channels.
-    mPlayingChannels.insert(mPlayingChannels.end(), audioState.channels.begin(), audioState.channels.end());
-    */
+    mPlayingSounds.insert(mPlayingSounds.end(), audioSaveState.playingSounds.begin(), audioSaveState.playingSounds.end());
 }
 
 FMOD::ChannelGroup* AudioManager::GetChannelGroupForAudioType(AudioType audioType) const

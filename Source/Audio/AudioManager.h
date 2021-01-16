@@ -14,11 +14,6 @@
 class Audio;
 class Vector3;
 
-struct AudioState
-{
-    std::vector<FMOD::Channel*> channels;
-};
-
 // A "handle" for a single playing sound. Basically a wrapper around a FMOD channel.
 // Returned by audio manager functions that start sound playback to allow the caller to query and modify the playing sound.
 // After the sound stops (either plays all the way or is stopped prematurely), the handle is no longer valid.
@@ -28,6 +23,9 @@ class PlayingSoundHandle
 public:
     PlayingSoundHandle() = default;
     PlayingSoundHandle(FMOD::Channel* channel);
+    
+    void Pause();
+    void Resume();
     
     void SetVolume(float volume);
     bool IsPlaying() const;
@@ -40,6 +38,11 @@ private:
     // Once returned, this pointer is always valid, even if the sound stops playing or the channel is reused.
     // In one of those scenarios, calls to channel functions start to return FMOD_ERR_INVALID_HANDLE or similar result codes.
     FMOD::Channel* channel = nullptr;
+};
+
+struct AudioSaveState
+{
+    std::vector<PlayingSoundHandle> playingSounds;
 };
 
 enum class AudioType
@@ -78,8 +81,8 @@ public:
     void SetVolume(AudioType audioType, float volume);
     float GetVolume(AudioType audioType) const;
     
-    AudioState SaveAudioState();
-    void RestoreAudioState(const AudioState& audioState);
+    AudioSaveState SaveAudioState();
+    void RestoreAudioState(AudioSaveState& audioState);
     
 private:
     // Underlying FMOD system - portal to audio greatness.
