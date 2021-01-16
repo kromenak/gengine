@@ -32,14 +32,16 @@
 
 extern Mesh* quad;
 
-Scene::Scene(const std::string& name, const std::string& timeblock) : Scene(name, Timeblock(timeblock))
+Scene::Scene(const std::string& name, const std::string& timeblock) :
+    Scene(name, Timeblock(timeblock))
 {
     
 }
 
 Scene::Scene(const std::string& name, const Timeblock& timeblock) :
 	mLocation(name),
-	mTimeblock(timeblock)
+	mTimeblock(timeblock),
+    mLayer(this)
 {
 	// Create game camera.
 	mCamera = new GameCamera();
@@ -66,6 +68,9 @@ void Scene::Load()
 		return;
 	}
 	
+    // Scene layer is now active!
+    Services::Get<LayerManager>()->PushLayer(&mLayer);
+    
 	// Creating scene data loads SIFs, but does nothing else yet!
 	mSceneData = new SceneData(mLocation, mTimeblock.ToString());
 	
@@ -316,7 +321,7 @@ void Scene::Load()
 			mAnimator->Sample(modelDef->initAnim, 0);
 		}
 	}
-	
+    
 	// Check for and run "scene enter" actions.
 	Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");
 }
@@ -328,6 +333,8 @@ void Scene::Unload()
 	
 	delete mSceneData;
 	mSceneData = nullptr;
+    
+    Services::Get<LayerManager>()->RemoveLayer(&mLayer);
 }
 
 bool Scene::InitEgoPosition(const std::string& positionName)
@@ -590,6 +597,42 @@ bool Scene::IsSceneModelVisible(const std::string& modelName) const
 bool Scene::DoesSceneModelExist(const std::string& modelName) const
 {
 	return mSceneData->GetBSP()->Exists(modelName);
+}
+
+void Scene::SetPaused(bool paused)
+{
+    // Pause/unpause sound track player.
+    if(mSoundtrackPlayer != nullptr)
+    {
+        mSoundtrackPlayer->SetEnabled(!paused);
+    }
+    
+    // Pause/unpause animator.
+    if(mAnimator != nullptr)
+    {
+        mAnimator->SetEnabled(!paused);
+    }
+    
+    // Pause/unpause gameplay camera.
+    // Don't want to "disable" camera b/c that kind of implies we stop rendering!
+    if(mCamera != nullptr)
+    {
+        mCamera->SetUpdateEnabled(!paused);
+    }
+    
+    // Pause/unpause all objects in the scene by adjusting time scales.
+    for(auto& object : mObjects)
+    {
+        object->SetUpdateEnabled(!paused);
+    }
+    
+    // For GKActors, they "internally" contain a separate actor for the 3D mesh.
+    // So, we've also got to set the time scale on that.
+    //TODO: Probably could hide this by adding GKObject/GKActor functions for pause/unpause.
+    for(auto& actor : mActors)
+    {
+        actor->GetMeshRenderer()->GetOwner()->SetUpdateEnabled(!paused);
+    }
 }
 
 void Scene::ExecuteAction(const Action* action)

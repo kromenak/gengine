@@ -19,6 +19,7 @@
 
 #include "Collisions.h"
 #include "SceneData.h"
+#include "SceneLayer.h"
 #include "Timeblock.h"
 
 class ActionBar;
@@ -75,14 +76,18 @@ public:
 	
 	Animator* GetAnimator() const { return mAnimator; }
 	SoundtrackPlayer* GetSoundtrackPlayer() const { return mSoundtrackPlayer; }
-	
 	GameCamera* GetCamera() const { return mCamera; }
+    
+    void SetPaused(bool paused);
     
 private:
 	// Location is 3-letter code (e.g. DIN).
 	// Timeblock is day/time code (e.g. 110A).
 	std::string mLocation;
 	Timeblock mTimeblock;
+    
+    // Layer for the scene.
+    SceneLayer mLayer;
 	
 	// Contains scene data references for the current location/timeblock.
 	// If not null, means we're loaded!
