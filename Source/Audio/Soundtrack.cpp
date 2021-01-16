@@ -49,30 +49,35 @@ int SoundNode::Execute(SoundtrackSoundType soundType)
     if(audio == nullptr) { return 0; }
     
     // Play method differs based on sound type and whether its 3D or not.
+    PlayingSoundHandle soundInstance;
     switch(soundType)
     {
     case SoundtrackSoundType::Ambient:
         if(is3d)
         {
-            Services::GetAudio()->PlayAmbient3D(audio, position, minDist, maxDist);
+            soundInstance = Services::GetAudio()->PlayAmbient3D(audio, position, minDist, maxDist);
         }
         else
         {
-            Services::GetAudio()->PlayAmbient(audio, fadeInTimeMs);
+            soundInstance = Services::GetAudio()->PlayAmbient(audio, fadeInTimeMs);
         }
         break;
         
     case SoundtrackSoundType::SFX:
         if(is3d)
         {
-            Services::GetAudio()->PlaySFX3D(audio, position, minDist, maxDist);
+            soundInstance = Services::GetAudio()->PlaySFX3D(audio, position, minDist, maxDist);
         }
         else
         {
-            Services::GetAudio()->PlaySFX(audio);
+            soundInstance = Services::GetAudio()->PlaySFX(audio);
         }
         break;
     }
+    
+    // Set sound's volume.
+    // Volume is 0-100, but audio system expects 0.0-1.0.
+    soundInstance.SetVolume(volume * 0.01f);
     
     // Return audio length. Gotta convert seconds to milliseconds.
     return (int)(audio->GetDuration() * 1000.0f);
@@ -208,7 +213,24 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "StopMethod"))
         {
-            node->stopMethod = entry.GetValueAsInt();
+            // Three stop methods are supported.
+            // Default to first one if unknown value is passed.
+            int stopMethod = entry.GetValueAsInt();
+            switch(stopMethod)
+            {
+            default:
+            case 0:
+                node->stopMethod = SoundNode::StopMethod::PlayToEnd;
+                break;
+                
+            case 1:
+                node->stopMethod = SoundNode::StopMethod::FadeOut;
+                break;
+                
+            case 2:
+                node->stopMethod = SoundNode::StopMethod::Immediate;
+                break;
+            }
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "FadeOutMs"))
         {
