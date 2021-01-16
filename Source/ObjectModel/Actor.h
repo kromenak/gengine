@@ -52,6 +52,9 @@ public:
 	
 	void SetIsDestroyOnLoad(bool destroyOnLoad) { mIsDestroyOnLoad = destroyOnLoad; }
 	bool IsDestroyOnLoad() const;
+    
+    void SetTimeScale(float timeScale) { mTimeScale = timeScale; }
+    void SetUpdateEnabled(bool updateEnabled) { mUpdateEnabled = updateEnabled; }
 	
 	// TRANSFORM CONVENIENCE ACCESSORS
 	Transform* GetTransform() const { return mTransform; }
@@ -89,6 +92,14 @@ private:
 	// By default, actors are destroyed when a new scene loads.
 	bool mIsDestroyOnLoad = true;
 	
+    // This actor's time scale.
+    // Can use to make actor update faster, slower.
+    float mTimeScale = 1.0f;
+    
+    // Is update enabled for this actor?
+    // Differs from time scale because timescale of 0.0 still calls update! This disables it entirely.
+    bool mUpdateEnabled = true;
+    
 	// Transform is accessed pretty often, so seems good to cache it.
 	Transform* mTransform = nullptr;
 	
