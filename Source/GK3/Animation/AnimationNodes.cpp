@@ -116,6 +116,10 @@ void ModelVisibilityAnimNode::Play(AnimationState* animState)
 
 void SoundAnimNode::Play(AnimationState* animState)
 {
+    // This will hold playing sound instance.
+    PlayingSoundHandle soundInstance;
+    
+    // If 3D, do a bit more work to determine position.
     if(is3D)
     {
         // Use specified position by default.
@@ -131,28 +135,30 @@ void SoundAnimNode::Play(AnimationState* animState)
             }
         }
         
-        //TODO: Pass/set volume
         if(animState->isYak)
         {
-            Services::GetAudio()->PlayVO3D(audio, playPosition, minDistance, maxDistance);
+            soundInstance = Services::GetAudio()->PlayVO3D(audio, playPosition, minDistance, maxDistance);
         }
         else
         {
-            Services::GetAudio()->PlaySFX3D(audio, playPosition, minDistance, maxDistance);
+            soundInstance = Services::GetAudio()->PlaySFX3D(audio, playPosition, minDistance, maxDistance);
         }
     }
     else
     {
-        //TODO: Pass/set volume
         if(animState->isYak)
         {
-            Services::GetAudio()->PlayVO(audio);
+            soundInstance = Services::GetAudio()->PlayVO(audio);
         }
         else
         {
-            Services::GetAudio()->PlaySFX(audio);
+            soundInstance = Services::GetAudio()->PlaySFX(audio);
         }
     }
+    
+    // Set volume after sound is created.
+    // Volume is 0-100, but audio system expects 0.0-1.0.
+    soundInstance.SetVolume(volume * 0.01f);
 }
 
 void FootstepAnimNode::Play(AnimationState* animState)
