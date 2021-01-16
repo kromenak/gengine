@@ -9,6 +9,7 @@
 #include <functional>
 #include <string>
 
+#include "LayerManager.h"
 #include "Type.h"
 #include "Vector2.h"
 
@@ -30,6 +31,8 @@ public:
     void Stop();
     
 private:
+    Layer mLayer;
+    
     // The video being played; null if none.
     VideoState* mVideo = nullptr;
     

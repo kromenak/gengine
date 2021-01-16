@@ -13,7 +13,8 @@
 
 TYPE_DEF_BASE(VideoPlayer);
 
-VideoPlayer::VideoPlayer()
+VideoPlayer::VideoPlayer() :
+    mLayer("MovieLayer")
 {
     
 }
@@ -46,10 +47,6 @@ void VideoPlayer::Initialize()
 
 void VideoPlayer::Update()
 {
-    // Only show video image when a video is playing.
-    mVideoImage->SetEnabled(mVideo != nullptr);
-    mVideoBackground->SetEnabled(mVideo != nullptr);
-    
     // Update video playback and video texture.
     if(mVideo != nullptr)
     {
@@ -118,7 +115,18 @@ void VideoPlayer::Update()
         {
             Stop();
         }
+        
+        // Pressing escape skips the video.
+        if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_ESCAPE))
+        {
+            Stop();
+        }
     }
+    
+    // Only show video image when a video is playing.
+    // Update UI after updating video playback in case video stops or ends prematurely.
+    mVideoImage->SetEnabled(mVideo != nullptr);
+    mVideoBackground->SetEnabled(mVideo != nullptr);
 }
 
 void VideoPlayer::Play(const std::string& name)
@@ -130,6 +138,9 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
 {
     // Stop any video that is already playing first.
     Stop();
+    
+    // Push video layer.
+    Services::Get<LayerManager>()->PushLayer(&mLayer);
     
     // Log movie play.
     Services::GetReports()->Log("Generic", "PlayMovie: trying to play " + name);
@@ -157,7 +168,12 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     {
         Services::GetReports()->Log("Error", "No movie specified for the movie layer.");
         Stop();
+        return;
     }
+    
+    // If we got here, movie seems to be playing ok!
+    // Lock the mouse so it isn't visible and doesn't change position.
+    Services::GetInput()->LockMouse();
     
     //TODO: Some video files have subtitles associated with them, but the subtitles are not part of the movie file.
     //TODO: Need to check for a YAK file of the same name and use that to display subtitles during movie playback.
@@ -165,9 +181,18 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
 
 void VideoPlayer::Stop()
 {
+    // Pop video layer.
+    if(mVideo != nullptr)
+    {
+        Services::Get<LayerManager>()->PopLayer();
+    }
+    
     // Delete video to cleanup resources.
     delete mVideo;
     mVideo = nullptr;
+    
+    // Unlock mouse on movie end.
+    Services::GetInput()->UnlockMouse();
     
     // Fire stop callback.
     if(mStopCallback != nullptr)
