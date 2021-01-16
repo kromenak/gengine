@@ -59,7 +59,7 @@ int SoundNode::Execute(SoundtrackSoundType soundType)
         }
         else
         {
-            soundInstance = Services::GetAudio()->PlayAmbient(audio, fadeInTimeMs);
+            soundInstance = Services::GetAudio()->PlayAmbient(audio, fadeInTimeMs * 0.001f);
         }
         break;
         

@@ -108,6 +108,22 @@ bool AudioManager::Initialize()
         return false;
     }
     
+    // Create ambient fade in/out channel group.
+    result = mSystem->createChannelGroup("Ambient Fade", &mAmbientFadeChannelGroup);
+    if(result != FMOD_OK)
+    {
+        std::cout << FMOD_ErrorString(result) << std::endl;
+        return false;
+    }
+    
+    // Ambient fade in/out group must be a child of the ambient group.
+    result = mAmbientFadeChannelGroup->addGroup(mAmbientChannelGroup);
+    if(result != FMOD_OK)
+    {
+        std::cout << FMOD_ErrorString(result) << std::endl;
+        return false;
+    }
+    
     // Get master channel group.
     result = mSystem->getMasterChannelGroup(&mMasterChannelGroup);
     if(result != FMOD_OK)
@@ -148,6 +164,29 @@ void AudioManager::Update(float deltaTime)
             mPlayingSounds.pop_back();
         }
     }
+    
+    /*
+    // For testing fade in/out behavior.
+    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_M))
+    {
+        AmbientFade(1.0f, 1.0f);
+    }
+    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_N))
+    {
+        AmbientFade(1.0f, 0.0f);
+    }
+    */
+    
+    // Update ambient fade in and fade out.
+    if(mAmbientFadeTimer < mAmbientFadeDuration)
+    {
+        mAmbientFadeTimer += deltaTime;
+        
+        // Set volume based on lerp.
+        // Note that SetVolume can fail, but if so, we don't really care.
+        float desiredAmbientVolume = Math::Lerp(mAmbientFadeFrom, mAmbientFadeTo, mAmbientFadeTimer / mAmbientFadeDuration);
+        mAmbientFadeChannelGroup->setVolume(desiredAmbientVolume);
+    }
 }
 
 void AudioManager::UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up)
@@ -184,9 +223,16 @@ PlayingSoundHandle AudioManager::PlayVO3D(Audio* audio, const Vector3 &position,
     return CreateAndPlaySound3D(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::VO, position, minDist, maxDist);
 }
 
-PlayingSoundHandle AudioManager::PlayAmbient(Audio* audio, int fadeInMs)
+PlayingSoundHandle AudioManager::PlayAmbient(Audio* audio, float fadeInTime)
 {
     if(audio == nullptr) { return; }
+    
+    // If specified, start fade in.
+    if(fadeInTime > 0.0f)
+    {
+        AmbientFade(fadeInTime, 1.0f, 0.0f);
+    }
+    
     return CreateAndPlaySound(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::Ambient);
 }
 
@@ -363,5 +409,26 @@ PlayingSoundHandle AudioManager::CreateAndPlaySound3D(const char* buffer, int bu
         
         // Put at desired position. No velocity right now.
         soundInstance.channel->set3DAttributes((const FMOD_VECTOR*)&position, (const FMOD_VECTOR*)&Vector3::Zero);
+    }
+}
+
+void AudioManager::AmbientFade(float fadeTime, float targetVolume, float startVolume)
+{
+    // Set duration and reset timer.
+    mAmbientFadeDuration = fadeTime;
+    mAmbientFadeTimer = 0.0f;
+    
+    // Save target volume.
+    mAmbientFadeTo = Math::Clamp(targetVolume, 0.0f, 1.0f);
+    
+    // If start volume is specified, use that value for "fade from".
+    // If not specified, the current ambient volume is used.
+    if(startVolume >= 0.0f)
+    {
+        mAmbientFadeFrom = Math::Clamp(startVolume, 0.0f, 1.0f);
+    }
+    else
+    {
+        mAmbientFadeChannelGroup->getVolume(&mAmbientFadeFrom);
     }
 }

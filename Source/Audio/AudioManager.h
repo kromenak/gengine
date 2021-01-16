@@ -69,7 +69,7 @@ public:
     PlayingSoundHandle PlayVO(Audio* audio);
     PlayingSoundHandle PlayVO3D(Audio* audio, const Vector3& position, float minDist = kDefault3DMinDist, float maxDist = kDefault3DMaxDist);
     
-    PlayingSoundHandle PlayAmbient(Audio* audio, int fadeInMs);
+    PlayingSoundHandle PlayAmbient(Audio* audio, float fadeInTime = 0.0f);
     PlayingSoundHandle PlayAmbient3D(Audio* audio, const Vector3& position, float minDist = kDefault3DMinDist, float maxDist = kDefault3DMaxDist);
     
     void SetMasterVolume(float volume);
@@ -85,7 +85,7 @@ private:
     // Underlying FMOD system - portal to audio greatness.
     FMOD::System* mSystem = nullptr;
         
-    // Channel groups for different types of audio.
+    // Channel groups for different types of audio. Children of "master" group.
     // Allows changing volume based on audio type.
     FMOD::ChannelGroup* mSFXChannelGroup = nullptr;
     FMOD::ChannelGroup* mVOChannelGroup = nullptr;
@@ -94,6 +94,16 @@ private:
     // Master channel group allows modifying master volume.
     // All other channel groups are children of this group.
     FMOD::ChannelGroup* mMasterChannelGroup = nullptr;
+    
+    // Channel group just for fading in/out ambient audio. Child of "ambient" channel group.
+    // Don't want to modify sound or ambient group directly (they can be modified by others). This is JUST for fade in/out.
+    FMOD::ChannelGroup* mAmbientFadeChannelGroup = nullptr;
+    
+    //
+    float mAmbientFadeDuration = 0.0f;
+    float mAmbientFadeTimer = 0.0f;
+    float mAmbientFadeTo = 0.0f;
+    float mAmbientFadeFrom = 0.0f;
     
     // Volume multipliers for each audio type. This changes the range of possible volumes for a particular type of audio.
     // For example, if 0.8 is used, it means that "max volume" for that audio type is actually 80% of the "true max".
@@ -109,4 +119,9 @@ private:
     
     PlayingSoundHandle CreateAndPlaySound(const char* buffer, int bufferLength, AudioType audioType, bool is3D = false);
     PlayingSoundHandle CreateAndPlaySound3D(const char* buffer, int bufferLength, AudioType audioType, const Vector3& position, float minDist, float maxDist);
+    
+    void AmbientFade(float fadeTime, float targetVolume, float startVolume = -1.0f);
+    
+    void AmbientFadeIn(float fadeInTime);
+    void AmbientFadeOut(float fadeOutTime);
 };
