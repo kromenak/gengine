@@ -14,6 +14,7 @@
 #include "AudioManager.h"
 #include "Console.h"
 #include "InputManager.h"
+#include "LayerManager.h"
 #include "Renderer.h"
 #include "SheepManager.h"
 #include "ReportManager.h"
@@ -63,6 +64,7 @@ private:
 	ActionManager mActionManager;
 	Console mConsole;
     VideoPlayer mVideoPlayer;
+    LayerManager mLayerManager;
     
     // A list of all actors that currently exist in the game.
     std::vector<Actor*> mActors;

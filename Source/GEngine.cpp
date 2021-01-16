@@ -107,7 +107,7 @@ bool GEngine::Initialize()
     //tex->WriteToFile("PAINTING.BMP");
     
     //mAssetManager.WriteBarnAssetToFile("BLKMUSTACHE_3.BMP");
-    //mAssetManager.WriteAllBarnAssetsToFile(".BMP", "Bitmaps");
+    //mAssetManager.WriteAllBarnAssetsToFile(".STK", "Soundtracks");
 	
     // Create localizer.
     Services::Set<Localizer>(new Localizer());
@@ -140,6 +140,9 @@ bool GEngine::Initialize()
     // Create video player.
     Services::Set<VideoPlayer>(&mVideoPlayer);
     mVideoPlayer.Initialize();
+    
+    // Create layer manager.
+    Services::Set<LayerManager>(&mLayerManager);
     
 	// Create console UI - this persists for the entire game.
 	ConsoleUI* consoleUI = new ConsoleUI(false);

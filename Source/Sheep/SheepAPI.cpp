@@ -1117,13 +1117,15 @@ shpvoid DumpBuildInfo()
 	return 0;
 }
 RegFunc0(DumpBuildInfo, void, IMMEDIATE, DEV_FUNC);
+*/
 
 shpvoid DumpLayerStack()
 {
-	return 0;
+    Services::Get<LayerManager>()->DumpLayerStack();
 }
 RegFunc0(DumpLayerStack, void, IMMEDIATE, DEV_FUNC);
 
+/*
 shpvoid Edit(std::string filename)
 {
 	// Should open text editor defined in INI or default with file.
