@@ -13,6 +13,7 @@
 #include "Type.h"
 #include "Vector2.h"
 
+class Actor;
 class UIImage;
 struct VideoState;
 
@@ -36,9 +37,18 @@ private:
     // The video being played; null if none.
     VideoState* mVideo = nullptr;
     
-    // UI components used to show video.
-    // Background is used for letterboxing effect, when desired.
-    UIImage* mVideoBackground = nullptr;
+    // Root canvas for all video UI components.
+    Actor* mVideoCanvasActor = nullptr;
+    
+    // A background image that takes up the full screen behind a video.
+    // When playing a "fullscreen" video, this is totally black.
+    // For non-fullscreen videos, it is slightly alpha'd so you can see below it.
+    UIImage* mVideoBackgroundImage = nullptr;
+    
+    // If desired video playback size doesn't match the actual video, a solid black letterbox is applied.
+    UIImage* mVideoLetterbox = nullptr;
+    
+    // Image that displays the actual video texture.
     UIImage* mVideoImage = nullptr;
     
     // Position to show the video on-screen. Zero is center of screen.
@@ -47,9 +57,9 @@ private:
     // Size of video on-screen. Fullscreen by default.
     enum class SizeMode
     {
-        Native,
-        Fullscreen,
-        Custom
+        Native,         // Video plays at its native size.
+        Fullscreen,     // Video plays in fullscreen (but with a maximum of 2x upscale).
+        Custom          // Video plays at a completely custom size.
     };
     SizeMode mVideoSizeMode = SizeMode::Native;
     Vector2 mCustomVideoSize;

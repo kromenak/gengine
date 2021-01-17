@@ -26,23 +26,36 @@ VideoPlayer::~VideoPlayer()
 
 void VideoPlayer::Initialize()
 {
-    // Create canvas actor.
-    Actor* actor = new Actor(Actor::TransformType::RectTransform);
-    actor->SetIsDestroyOnLoad(false);
-    UICanvas* canvas = actor->AddComponent<UICanvas>();
+    // Create canvas actor that sticks around forever.
+    mVideoCanvasActor = new Actor(Actor::TransformType::RectTransform);
+    mVideoCanvasActor->SetIsDestroyOnLoad(false);
+    UICanvas* canvas = mVideoCanvasActor->AddComponent<UICanvas>();
+    
+    // Size canvas rect so it always fills the entire screen.
+    RectTransform* canvasRectTransform = mVideoCanvasActor->GetComponent<RectTransform>();
+    canvasRectTransform->SetAnchorMin(Vector2::Zero);
+    canvasRectTransform->SetAnchorMax(Vector2::One);
+    canvasRectTransform->SetSizeDelta(Vector2::Zero);
+    
+    // When a video plays, a background image either tints or completely blocks whatever's behind the video.
+    mVideoBackgroundImage = mVideoCanvasActor->AddComponent<UIImage>();
+    canvas->AddWidget(mVideoBackgroundImage);
     
     // Create black background image, used for letterbox effect.
     Actor* videoBackgroundActor = new Actor(Actor::TransformType::RectTransform);
-    videoBackgroundActor->GetTransform()->SetParent(actor->GetTransform());
-    mVideoBackground = videoBackgroundActor->AddComponent<UIImage>();
-    mVideoBackground->SetColor(Color32::Black);
-    canvas->AddWidget(mVideoBackground);
+    videoBackgroundActor->GetTransform()->SetParent(mVideoCanvasActor->GetTransform());
+    mVideoLetterbox = videoBackgroundActor->AddComponent<UIImage>();
+    mVideoLetterbox->SetColor(Color32::Black);
+    canvas->AddWidget(mVideoLetterbox);
     
     // Create video image, which shows actual video playback.
     Actor* videoActor = new Actor(Actor::TransformType::RectTransform);
-    videoActor->GetTransform()->SetParent(actor->GetTransform());
+    videoActor->GetTransform()->SetParent(mVideoCanvasActor->GetTransform());
     mVideoImage = videoActor->AddComponent<UIImage>();
     canvas->AddWidget(mVideoImage);
+    
+    // Disable video UI until a movie is played.
+    mVideoCanvasActor->SetActive(false);
 }
 
 void VideoPlayer::Update()
@@ -58,7 +71,7 @@ void VideoPlayer::Update()
         mVideoImage->SetTexture(videoTexture);
         
         // Set position of video image and background.
-        mVideoBackground->GetRectTransform()->SetAnchoredPosition(mVideoPosition);
+        mVideoLetterbox->GetRectTransform()->SetAnchoredPosition(mVideoPosition);
         mVideoImage->GetRectTransform()->SetAnchoredPosition(mVideoPosition);
         
         // Determine video size.
@@ -80,10 +93,31 @@ void VideoPlayer::Update()
             videoSize = mCustomVideoSize;
             break;
         }
-        mVideoBackground->GetRectTransform()->SetSizeDelta(videoSize);
         
-        // If letterboxing, resize video image so as to not stretch the video.
-        // The background will act as a "letterbox" if needed.
+        // For fullscreen videos, don't allow upscaling more than 2x original size.
+        // This is a restriction used by the original engine.
+        // I think it's meant to stop low-res videos from looking too pixelated on larger displays.
+        if(mVideoSizeMode == SizeMode::Fullscreen && videoTexture != nullptr)
+        {
+            unsigned int maxVideoWidth = videoTexture->GetWidth() * 2;
+            unsigned int maxVideoHeight = videoTexture->GetHeight() * 2;
+            
+            if(videoSize.x > maxVideoWidth)
+            {
+                videoSize.x = maxVideoWidth;
+            }
+            if(videoSize.y > maxVideoHeight)
+            {
+                videoSize.y = maxVideoHeight;
+            }
+        }
+        
+        // Always set the letterbox to the "expected" size for video rendering.
+        // If letterboxing occurs, the video itself will be a different size than the letterbox image behind it.
+        mVideoLetterbox->GetRectTransform()->SetSizeDelta(videoSize);
+        
+        // If letterboxing is enabled, recalculate video size so to not stretch the video.
+        // If not letterboxing, and video size doesn't match the video's aspect ratio, stretching or warping may occur.
         if(mLetterbox && videoTexture != nullptr)
         {
             float videoWidth = videoTexture->GetWidth();
@@ -101,14 +135,14 @@ void VideoPlayer::Update()
                 newWidth *= heightRatio;
                 newHeight *= heightRatio;
             }
-            mVideoImage->GetRectTransform()->SetSizeDelta(Vector2(newWidth, newHeight));
+            
+            // Save updated video size.
+            videoSize.x = newWidth;
+            videoSize.y = newHeight;
         }
-        else
-        {
-            // Video image just uses specified size, even if it doesn't match video's aspect ratio.
-            // This means the video might be stretched and not correct aspect ratio.
-            mVideoImage->GetRectTransform()->SetSizeDelta(videoSize);
-        }
+        
+        // At long last, set video image size.
+        mVideoImage->GetRectTransform()->SetSizeDelta(videoSize);
         
         // Check for video end - call Stop if so to clean up video and call callback.
         if(mVideo->IsStopped())
@@ -125,8 +159,7 @@ void VideoPlayer::Update()
     
     // Only show video image when a video is playing.
     // Update UI after updating video playback in case video stops or ends prematurely.
-    mVideoImage->SetEnabled(mVideo != nullptr);
-    mVideoBackground->SetEnabled(mVideo != nullptr);
+    mVideoCanvasActor->SetActive(mVideo != nullptr);
 }
 
 void VideoPlayer::Play(const std::string& name)
@@ -151,6 +184,20 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     // If fullscreen, use window size as video size.
     // If not fullscreen, use size from video file.
     mVideoSizeMode = fullscreen ? SizeMode::Fullscreen : SizeMode::Native;
+    
+    // If fullscreen, background is 100% opaque.
+    // If not fullscreen, background is alpha'd a bit.
+    if(fullscreen)
+    {
+        mVideoBackgroundImage->SetColor(Color32::Black);
+    }
+    else
+    {
+        const unsigned char kNonFullscreenAlpha = 160;
+        Color32 tintColor = Color32::Black;
+        tintColor.SetA(kNonFullscreenAlpha);
+        mVideoBackgroundImage->SetColor(tintColor);
+    }
     
     // Save autoclose flag.
     mAutoclose = autoclose;
@@ -191,7 +238,7 @@ void VideoPlayer::Stop()
     delete mVideo;
     mVideo = nullptr;
     
-    // Unlock mouse on movie end.
+    // Unlock mouse on movie end. TODO: Maybe do this in the video layer?
     Services::GetInput()->UnlockMouse();
     
     // Fire stop callback.

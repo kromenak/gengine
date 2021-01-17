@@ -445,16 +445,6 @@ void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const V
         bool hasPolygon1 = node.polygonIndex != 65535 && node.polygonCount > 0;
         bool hasPolygon2 = node.polygonIndex2 != 65535 && node.polygonCount2 > 0;
         
-        // Some debug keys to visualize what polygons are in each set.
-        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_Y))
-        {
-            hasPolygon1 = false;
-        }
-        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_U))
-        {
-            hasPolygon2 = false;
-        }
-        
         // Render first set of polygons.
         if(hasPolygon1)
         {
