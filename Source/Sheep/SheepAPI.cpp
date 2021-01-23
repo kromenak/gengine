@@ -2084,8 +2084,7 @@ RegFunc1(SetEgoActiveInvItem, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowInventory()
 {
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
-	Services::Get<InventoryManager>()->ShowInventory(egoName);
+	Services::Get<InventoryManager>()->ShowInventory();
 	return 0;
 }
 RegFunc0(ShowInventory, void, IMMEDIATE, REL_FUNC);
@@ -2633,7 +2632,9 @@ RegFunc2(PrintStringX, void, string, string, IMMEDIATE, DEV_FUNC);
 // UNDOCUMENTED
 int IsTopLayerInventory()
 {
-	//TODO: Should really use layer system for this, but this'll work for now.
-	return Services::Get<InventoryManager>()->IsInventoryShowing() ? 1 : 0;
+    // This returns true if top layer is inventory OR inventory inspect screens.
+    bool anyShowing = Services::Get<InventoryManager>()->IsInventoryShowing() ||
+                      Services::Get<InventoryManager>()->IsInventoryInspectShowing();
+    return anyShowing ? 1 : 0;
 }
 RegFunc0(IsTopLayerInventory, int, IMMEDIATE, REL_FUNC);
