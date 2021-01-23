@@ -18,9 +18,12 @@ public:
 	
 	void Show(const std::string& itemName);
 	void Hide();
-	bool IsShowing() const { return IsActive(); }
+    bool IsShowing() const;
 	
 private:
+    // This screen's layer.
+    Layer mLayer;
+    
 	// Canvas to render UI.
 	UICanvas* mCanvas = nullptr;
 	

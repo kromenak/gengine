@@ -12,7 +12,8 @@
 #include "UIButton.h"
 #include "UIImage.h"
 
-InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTransform)
+InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTransform),
+    mLayer("CloseUpLayer")
 {
 	mCanvas = AddComponent<UICanvas>();
 	
@@ -57,6 +58,8 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTran
 
 void InventoryInspectScreen::Show(const std::string& itemName)
 {
+    Services::Get<LayerManager>()->PushLayer(&mLayer);
+    
 	// Get closeup texture or die trying.
 	//TODO: Placeholder here?
 	Texture* closeupTexture = Services::Get<InventoryManager>()->GetInventoryItemCloseupTexture(itemName);
@@ -80,6 +83,12 @@ void InventoryInspectScreen::Show(const std::string& itemName)
 void InventoryInspectScreen::Hide()
 {
 	SetActive(false);
+    Services::Get<LayerManager>()->PopLayer(&mLayer);
+}
+
+bool InventoryInspectScreen::IsShowing() const
+{
+    return Services::Get<LayerManager>()->IsTopLayer(&mLayer);
 }
 
 void InventoryInspectScreen::OnClicked()

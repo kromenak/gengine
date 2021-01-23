@@ -14,7 +14,8 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 
-InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform)
+InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
+    mLayer("InventoryLayer")
 {
 	mCanvas = AddComponent<UICanvas>();
 	
@@ -65,6 +66,8 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform)
 
 void InventoryScreen::Show(const std::string& actorName, const std::set<std::string>& inventory)
 {
+    Services::Get<LayerManager>()->PushLayer(&mLayer);
+    
 	// Save current actor name.
 	mCurrentActorName = actorName;
 	
@@ -155,6 +158,12 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 void InventoryScreen::Hide()
 {
 	SetActive(false);
+    Services::Get<LayerManager>()->PopLayer(&mLayer);
+}
+
+bool InventoryScreen::IsShowing() const
+{
+    return Services::Get<LayerManager>()->IsTopLayer(&mLayer);
 }
 
 void InventoryScreen::OnItemClicked(UIButton* button, std::string itemName)

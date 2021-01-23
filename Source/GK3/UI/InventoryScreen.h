@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "InventoryManager.h"
+#include "LayerManager.h"
 
 class UIButton;
 class UICanvas;
@@ -25,10 +26,13 @@ public:
 	
 	void Show(const std::string& actorName, const std::set<std::string>& inventory);
 	void Hide();
-	bool IsShowing() const { return IsActive(); }
+    bool IsShowing() const;
 	
 private:
 	const int kActiveHighlightXOffset = -4;
+    
+    // This screen's layer.
+    Layer mLayer;
 	
 	// Canvas to render inventory UI.
 	UICanvas* mCanvas = nullptr;
