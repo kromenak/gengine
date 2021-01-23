@@ -58,14 +58,24 @@ void LayerManager::PushLayer(Layer* layer)
     mLayerStack.back()->Enter();
 }
 
-void LayerManager::PopLayer()
+void LayerManager::PopLayer(Layer* expectedLayer)
 {
-    // Exit layer at top of stack and pop off stack.
-    if(mLayerStack.size() > 0)
+    if(mLayerStack.size() <= 0)
     {
-        mLayerStack.back()->Exit(true);
-        mLayerStack.pop_back();
+        std::cout << "Attempting to pop layer, but stack is empty!" << std::endl;
+        return;
     }
+    
+    // If an expected layer is provided, make sure we're popping that one!
+    if(expectedLayer != nullptr && !IsTopLayer(expectedLayer))
+    {
+        std::cout << "Expected to pop " << expectedLayer->GetName() << ", but top layer is actually " << mLayerStack.back()->GetName() << std::endl;
+        return;
+    }
+    
+    // Exit layer at top of stack and pop off stack.
+    mLayerStack.back()->Exit(true);
+    mLayerStack.pop_back();
     
     // New top of stack is now entered.
     if(mLayerStack.size() > 0)
@@ -82,6 +92,16 @@ void LayerManager::RemoveLayer(Layer* layer)
         (*it)->Exit(true);
         mLayerStack.erase(it);
     }
+}
+
+bool LayerManager::IsTopLayer(const Layer* layer) const
+{
+    return mLayerStack.size() > 0 && mLayerStack.back() == layer;
+}
+
+bool LayerManager::IsTopLayer(const std::string& name) const
+{
+    return mLayerStack.size() > 0 && StringUtil::EqualsIgnoreCase(name, mLayerStack.back()->GetName());
 }
 
 void LayerManager::DumpLayerStack()

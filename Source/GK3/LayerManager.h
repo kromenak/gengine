@@ -49,11 +49,18 @@ class LayerManager
 public:
     LayerManager();
     
+    // Push/pop from top of stack.
     void PushLayer(Layer* layer);
-    void PopLayer();
+    void PopLayer(Layer* expectedLayer = nullptr);
     
+    // Removes layer, even if not on top of stack.
     void RemoveLayer(Layer* layer);
     
+    // Query layer state.
+    bool IsTopLayer(const Layer* layer) const;
+    bool IsTopLayer(const std::string& name) const;
+    
+    // Debug output.
     void DumpLayerStack();
     
 private:
