@@ -608,19 +608,25 @@ void Scene::SetPaused(bool paused)
     }
     
     // Pause/unpause animator.
+    //TODO: You might expect that pausing the animator is necessary to effectively pause the scene.
+    //TODO: However, doing so can break actions in inventory, since voice over actions rely on the Animator.
+    //TODO: Not pausing animator seems to work fine for now, but if it's a problem later on, maybe we need to have a separate animator for non-scene stuff or something.
+    /*
     if(mAnimator != nullptr)
     {
         mAnimator->SetEnabled(!paused);
     }
+    */
     
-    // Pause/unpause gameplay camera.
-    // Don't want to "disable" camera b/c that kind of implies we stop rendering!
+    // Tell camera if the scene is active or not.
+    // We don't want to set camera inactive, because we still want it to render.
+    // And we don't want to disable updates b/c camera object handles player inputs, even if scene is paused.
     if(mCamera != nullptr)
     {
-        mCamera->SetUpdateEnabled(!paused);
+        mCamera->SetSceneActive(!paused);
     }
     
-    // Pause/unpause all objects in the scene by adjusting time scales.
+    // Pause/unpause all objects in the scene by disabling updates.
     for(auto& object : mObjects)
     {
         object->SetUpdateEnabled(!paused);

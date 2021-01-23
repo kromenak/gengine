@@ -23,6 +23,8 @@ public:
 	void SetAngle(float yaw, float pitch);
 	
 	Camera* GetCamera() { return mCamera; }
+    
+    void SetSceneActive(bool active) { mSceneActive = active; }
 	
 protected:
     void OnUpdate(float deltaTime) override;
@@ -58,6 +60,12 @@ private:
 	
 	// The last object hovered over. Used for toggling cursor highlight color.
 	std::string mLastHoveredNoun;
+    
+    // If true, scene is "active", so perform scene updates (e.g. camera movement).
+    // When scene is not active, game camera still handles some user input stuff.
+    bool mSceneActive = true;
 	
+    void SceneUpdate(float deltaTime);
+    
 	void ResolveCollisions(Vector3& position);
 };
