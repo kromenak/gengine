@@ -9,6 +9,7 @@
 #include "InventoryScreen.h"
 #include "InventoryInspectScreen.h"
 #include "Services.h"
+#include "Scene.h"
 #include "StringUtil.h"
 
 TYPE_DEF_BASE(InventoryManager);
@@ -143,13 +144,22 @@ void InventoryManager::SetActiveInventoryItem(const std::string& actorName, cons
 	mActiveInventoryItems[actorNameLower] = itemNameLower;
 }
 
+void InventoryManager::ShowInventory()
+{
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr)
+    {
+        ShowInventory(scene->GetEgoName());
+    }
+}
+
 void InventoryManager::ShowInventory(const std::string& actorName)
 {
 	std::string invKey = StringUtil::ToLowerCopy(actorName);
 	mInventoryScreen->Show(actorName, mInventories[invKey]);
 }
 
-void InventoryManager::HideInventory() const
+void InventoryManager::HideInventory()
 {
 	mInventoryScreen->Hide();
 }
@@ -159,14 +169,19 @@ bool InventoryManager::IsInventoryShowing() const
 	return mInventoryScreen->IsShowing();
 }
 
-void InventoryManager::InventoryInspect(const std::string& itemName) const
+void InventoryManager::InventoryInspect(const std::string& itemName)
 {
 	mInventoryInspectScreen->Show(itemName);
 }
 
-void InventoryManager::InventoryUninspect() const
+void InventoryManager::InventoryUninspect()
 {
 	mInventoryInspectScreen->Hide();
+}
+
+bool InventoryManager::IsInventoryInspectShowing() const
+{
+    return mInventoryInspectScreen->IsShowing();
 }
 
 Texture* InventoryManager::GetInventoryItemListTexture(const std::string &itemName)

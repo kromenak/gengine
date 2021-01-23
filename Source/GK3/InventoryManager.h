@@ -11,6 +11,7 @@
 // As a result, tracking who has what items or the statuses of items is very simple.
 // However, using invalid or unsupported inventory items is probably a bad idea because
 // the necessary art assets won't be available.
+//
 #pragma once
 #include <set>
 #include <string>
@@ -52,12 +53,14 @@ public:
 	std::string GetActiveInventoryItem(const std::string& actorName) const;
 	void SetActiveInventoryItem(const std::string& actorName, const std::string& itemName);
 	
+    void ShowInventory();
 	void ShowInventory(const std::string& actorName);
-	void HideInventory() const;
+	void HideInventory();
 	bool IsInventoryShowing() const;
 	
-	void InventoryInspect(const std::string& itemName) const;
-	void InventoryUninspect() const;
+	void InventoryInspect(const std::string& itemName);
+	void InventoryUninspect();
+    bool IsInventoryInspectShowing() const;
 	
 	Texture* GetInventoryItemListTexture(const std::string& itemName);
 	Texture* GetInventoryItemCloseupTexture(const std::string& itemName);
@@ -75,7 +78,7 @@ private:
 	// Each actor can have one active inventory item.
 	// It's also possible for an actor to have NO active item!
 	std::unordered_map<std::string, std::string> mActiveInventoryItems;
-	
+    
 	// UI for inventory.
 	InventoryScreen* mInventoryScreen = nullptr;
 	InventoryInspectScreen* mInventoryInspectScreen = nullptr;
