@@ -289,6 +289,11 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
 	return shader;
 }
 
+TextAsset* AssetManager::LoadText(const std::string& name)
+{
+    return LoadAsset<TextAsset>(SanitizeAssetName(name, ""), nullptr);
+}
+
 char* AssetManager::LoadRaw(const std::string& name, unsigned int& outBufferSize)
 {
 	// NOTE: caller is responsible for deleting buffer!

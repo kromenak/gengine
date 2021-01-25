@@ -24,6 +24,7 @@
 #include "Shader.h"
 #include "Sheep/SheepScript.h"
 #include "Soundtrack.h"
+#include "TextAsset.h"
 #include "Texture.h"
 #include "VertexAnimation.h"
 
@@ -78,7 +79,9 @@ public:
 	
     Shader* LoadShader(const std::string& name);
 	Shader* LoadShader(const std::string& vertName, const std::string& fragName);
-	
+    
+    TextAsset* LoadText(const std::string& name);
+    
 	char* LoadRaw(const std::string& name, unsigned int& outBufferSize);
     
 private:
