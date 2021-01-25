@@ -152,6 +152,19 @@ Rect IniKeyValue::GetValueAsRect() const
     return Rect(p1, p2);
 }
 
+std::unordered_map<std::string, IniKeyValue> IniSection::GetAsMap() const
+{
+    std::unordered_map<std::string, IniKeyValue> map;
+    for(auto& line : lines)
+    {
+        for(auto& entry : line.entries)
+        {
+            map[entry.key] = entry;
+        }
+    }
+    return map;
+}
+
 IniParser::IniParser(const char* filePath)
 {
     // Create stream to read from file.
@@ -187,6 +200,21 @@ void IniParser::ParseAll()
     {
         mSections.push_back(section);
     }
+}
+
+std::unordered_map<std::string, IniKeyValue> IniParser::ParseAllAsMap()
+{
+    // Parse all per usual.
+    ParseAll();
+    
+    // Now generate map and return it.
+    std::unordered_map<std::string, IniKeyValue> map;
+    for(auto& section : mSections)
+    {
+        std::unordered_map<std::string, IniKeyValue> sectionMap = section.GetAsMap();
+        map.insert(sectionMap.begin(), sectionMap.end());
+    }
+    return map;
 }
 
 std::vector<IniSection> IniParser::GetSections(const std::string& name)

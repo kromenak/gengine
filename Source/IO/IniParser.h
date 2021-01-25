@@ -40,6 +40,8 @@ struct IniSection
     std::string name;
     std::string condition;
 	std::vector<IniLine> lines;
+    
+    std::unordered_map<std::string, IniKeyValue> GetAsMap() const;
 };
 
 class IniParser
@@ -51,6 +53,7 @@ public:
     
     // MODE A: Read it all in at once and use it.
     void ParseAll();
+    std::unordered_map<std::string, IniKeyValue> ParseAllAsMap();
     std::vector<IniSection> GetSections(const std::string& name);
     IniSection GetSection(const std::string& name);
     
