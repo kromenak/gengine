@@ -10,6 +10,7 @@
 
 class GKObject;
 class Model;
+class OptionBar;
 
 class GameCamera : public Actor
 {
@@ -45,6 +46,9 @@ private:
 	
 	// Reference to underlying camera component.
     Camera* mCamera = nullptr;
+    
+    // Option bar - used to change settings, quit game, etc.
+    OptionBar* mOptionBar = nullptr;
 	
 	// Height of camera above ground. Always try to maintain some height above ground.
 	// So, if moving down a hill, the camera follows the slope, for example.

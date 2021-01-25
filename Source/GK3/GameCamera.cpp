@@ -12,6 +12,7 @@
 #include "GEngine.h"
 #include "GKObject.h"
 #include "InventoryManager.h"
+#include "OptionBar.h"
 #include "Scene.h"
 #include "Sphere.h"
 #include "StringUtil.h"
@@ -22,6 +23,9 @@ GameCamera::GameCamera()
 {
     mCamera = AddComponent<Camera>();
     AddComponent<AudioListener>();
+    
+    // Create option bar.
+    mOptionBar = new OptionBar();
 }
 
 void GameCamera::SetAngle(const Vector2& angle)
@@ -340,6 +344,11 @@ void GameCamera::SceneUpdate(float deltaTime)
     if(!leftMousePressed)
     {
         Services::GetInput()->UnlockMouse();
+    }
+    
+    if(Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Right))
+    {
+        mOptionBar->Show();
     }
 }
 
