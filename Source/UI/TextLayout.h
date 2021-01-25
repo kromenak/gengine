@@ -26,7 +26,7 @@ enum class HorizontalAlignment
 {
 	Left,
 	Right,
-	//Center
+	Center
 };
 
 enum class VerticalAlignment

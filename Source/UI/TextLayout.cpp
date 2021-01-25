@@ -64,15 +64,17 @@ void TextLayout::AddLine(const std::string& line)
 	switch(mHorizontalAlignment)
 	{
 	case HorizontalAlignment::Left:
-        // Left: just use min.x
+        // Left: just use min.x.
 		xPos = mRect.GetMin().x;
 		break;
 	case HorizontalAlignment::Right:
-        // Right: start at max.x and subtract total line width to get start pos
+        // Right: start at max.x and subtract total line width.
 		xPos = mRect.GetMax().x - lineWidth;
 		break;
-	//case HorizontalAlignment::Center:
-	//	break;
+	case HorizontalAlignment::Center:
+        // Center: start at rect center and subtract half line width.
+        xPos = mRect.GetMin().x + (mRect.GetSize().x / 2) - (lineWidth / 2);
+		break;
 	}
 	
     // Determine bottom y-pos of this line, depending on alignment.
@@ -127,8 +129,9 @@ void TextLayout::AddLine(const std::string& line)
                 //TODO: This doesn't seem correct - shouldn't it be "remainingLineWidth" or something?
 				xPos = mRect.GetMax().x - lineWidth;
 				break;
-			//case HorizontalAlignment::Center:
-			//	break;
+			case HorizontalAlignment::Center:
+                std::cout << "CENTER HORIZONTAL ALIGNMENT NOT ACCOUNTED FOR!" << std::endl;
+				break;
 			}
 			
             // Determine new y-pos for this next line.
