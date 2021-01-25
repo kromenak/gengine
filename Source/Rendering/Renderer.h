@@ -13,6 +13,7 @@
 
 #include "Material.h"
 #include "Matrix4.h"
+#include "Rect.h"
 #include "Vector2.h"
 
 class BSP;
@@ -44,6 +45,7 @@ public:
 	int GetWindowHeight() { return mScreenHeight; }
 	
 	Vector2 GetWindowSize() { return Vector2(static_cast<float>(mScreenWidth), static_cast<float>(mScreenHeight)); }
+    Rect GetScreenRect() { return Rect(0, 0, mScreenWidth, mScreenHeight); }
     
 private:
     // Screen's width and height, in pixels.

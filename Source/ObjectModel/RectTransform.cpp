@@ -105,9 +105,8 @@ Rect RectTransform::GetWorldRect()
 	// Ex: A quad centered on origin should use min of -(mSize / 2) and max of (mSize / 2).
 	// Ex: A quad with bottom-left corner at origin should use (0, 0, 0) and mSize respectively.
 	// Our UI quad has a min of (0, 0) and a max of (1, 1).
-	// TODO: Does this need to be dynamic in some way, or will we always render with bottom-left origin quad?
-	Vector2 min = localRect.GetMin(); //Vector3::Zero;
-	Vector2 max = localRect.GetMax(); //mSizeDelta;
+	Vector2 min = localRect.GetMin();
+	Vector2 max = localRect.GetMax();
 	
 	// Transform those points based on this transform's parents and scale/rotation/translation.
 	min = LocalToWorldPoint(min);
@@ -115,6 +114,35 @@ Rect RectTransform::GetWorldRect()
 	
 	// Construct and return the rect.
 	return Rect(min, max);
+}
+
+void RectTransform::MoveInsideRect(const Rect &other)
+{
+    Vector2 otherMin = other.GetMin();
+    Vector2 otherMax = other.GetMax();
+    
+    Rect ourRect = GetWorldRect();
+    Vector2 min = ourRect.GetMin();
+    Vector2 max = ourRect.GetMax();
+    
+    Vector2 anchoredPos = GetAnchoredPosition();
+    if(min.x < otherMin.x)
+    {
+        anchoredPos.x = anchoredPos.x - min.x;
+    }
+    if(max.x > otherMax.x)
+    {
+        anchoredPos.x = anchoredPos.x - (max.x - otherMax.x);
+    }
+    if(min.y < otherMin.y)
+    {
+        anchoredPos.y = anchoredPos.y - min.y;
+    }
+    if(max.y > otherMax.y)
+    {
+        anchoredPos.y = anchoredPos.y - (max.y - otherMax.y);
+    }
+    SetAnchoredPosition(anchoredPos);
 }
 
 void RectTransform::CalcLocalPosition()
@@ -164,5 +192,8 @@ void RectTransform::OnUpdate(float deltaTime)
         Debug::DrawLine(p1, p2, Color32::Cyan);
         Debug::DrawLine(p2, p3, Color32::Cyan);
         Debug::DrawLine(p3, p0, Color32::Cyan);
+        
+        Vector2 pivotPos(screenRect.GetMin().x + screenRect.GetSize().x * mPivot.x, screenRect.GetMin().y + screenRect.GetSize().y * mPivot.y);
+        Debug::DrawAxes(pivotPos);
 	}
 }

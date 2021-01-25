@@ -55,6 +55,10 @@ public:
 	// This function provides a "rectToLocal" transform for positioning the rect relative to the local origin.
 	Matrix4 GetLocalRectOffset() { return Matrix4::MakeTranslate(GetRect().GetMin()); }
     
+    // Sometimes, you want to make sure a RectTransform is inside of some Rect area.
+    // Good example: a UI widget (action bar, option bar) that you want to keep within the screen rect.
+    void MoveInsideRect(const Rect& other);
+    
 protected:
 	void CalcLocalPosition() override;
 	

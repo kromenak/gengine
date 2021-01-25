@@ -18,13 +18,13 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	// Create canvas, to contain the UI components.
 	mCanvas = AddComponent<UICanvas>();
 	
-	// Since we will set the action bar's position based on mouse position, set the anchor to the lower-left corner.
 	RectTransform* rectTransform = GetComponent<RectTransform>();
 	rectTransform->SetSizeDelta(0.0f, 0.0f);
 	rectTransform->SetAnchorMin(Vector2::Zero);
 	rectTransform->SetAnchorMax(Vector2::One);
 	
 	// Create button holder - it holds the buttons and we move it around the screen.
+    // Since we will set the action bar's position based on mouse position, set the anchor to the lower-left corner.
 	Actor* buttonHolderActor = new Actor(Actor::TransformType::RectTransform);
 	mButtonHolder = buttonHolderActor->GetComponent<RectTransform>();
 	mButtonHolder->SetParent(rectTransform);
@@ -284,32 +284,5 @@ void ActionBar::CenterOnPointer()
 	mButtonHolder->SetAnchoredPosition(Services::GetInput()->GetMousePosition());
 	
 	// Keep inside the screen.
-	//TODO: Seems like this might be generally useful...perhaps a RectTransform "KeepInRect(Rect)" function?
-	// Get min/max for rect of the holder.
-	Rect screenRect = mCanvas->GetRectTransform()->GetWorldRect();
-	//Vector2 screenRectMin = screenRect.GetMin();
-	Vector2 screenRectMax = screenRect.GetMax();
-	
-	Rect buttonHolderRect = mButtonHolder->GetWorldRect();
-	Vector2 min = buttonHolderRect.GetMin();
-	Vector2 max = buttonHolderRect.GetMax();
-	
-	Vector2 anchoredPos = mButtonHolder->GetAnchoredPosition();
-	if(min.x < 0)
-	{
-		anchoredPos.x = anchoredPos.x - min.x;
-	}
-	if(max.x > screenRectMax.x)
-	{
-		anchoredPos.x = anchoredPos.x - (max.x - screenRectMax.x);
-	}
-	if(min.y < 0)
-	{
-		anchoredPos.y = anchoredPos.y - min.y;
-	}
-	if(max.y > screenRectMax.y)
-	{
-		anchoredPos.y = anchoredPos.y - (max.y - screenRectMax.y);
-	}
-	mButtonHolder->SetAnchoredPosition(anchoredPos);
+    mButtonHolder->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
 }
