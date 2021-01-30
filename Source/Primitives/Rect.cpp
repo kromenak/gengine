@@ -60,6 +60,23 @@ bool Rect::operator!=(const Rect& other) const
 		  && Math::AreEqual(height, other.height));
 }
 
+void Rect::Contain(const Rect& other)
+{
+    // Figure out new max based on two max points.
+    Vector2 max = GetMax();
+    Vector2 otherMax = other.GetMax();
+    float biggestMaxX = Math::Max(max.x, otherMax.x);
+    float biggestMaxY = Math::Max(max.y, otherMax.y);
+    
+    // Expand mins.
+    x = Math::Min(other.x, x);
+    y = Math::Min(other.y, y);
+    
+    // Calculate new width/height.
+    width = biggestMaxX - x;
+    height = biggestMaxY - y;
+}
+
 bool Rect::Contains(const Vector2& vec) const
 {
 	// If x/y of vector are less than rect's x/y, vector is not contained.

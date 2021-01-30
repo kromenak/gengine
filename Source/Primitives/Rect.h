@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 //
-// A rectangular area in 2D space.
+// A 2D rectangular area.
 //
 #pragma once
 #include "Vector2.h"
@@ -24,6 +24,7 @@ public:
 	
 	Vector2 GetSize() const { return Vector2(width, height); }
 	
+    void Contain(const Rect& other);
 	bool Contains(const Vector2& vec) const;
 	bool Overlaps(const Rect& other) const;
 	
