@@ -48,7 +48,7 @@ public:
 	
 	// Rects!
 	Rect GetRect() const;
-	Rect GetWorldRect();
+	Rect GetWorldRect(bool includeChildren = false);
 	
 	// A transform has a singular "point" that is it's position.
 	// But a RectTransform's Rect may be positioned in relation to that point based on size/pivot settings.

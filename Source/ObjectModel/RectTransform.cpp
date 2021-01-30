@@ -97,7 +97,7 @@ Rect RectTransform::GetRect() const
 	return RectUtil::CalcLocalRect(parentRect, mAnchorMin, mAnchorMax, mSizeDelta, mPivot);
 }
 
-Rect RectTransform::GetWorldRect()
+Rect RectTransform::GetWorldRect(bool includeChildren)
 {
 	Rect localRect = GetRect();
 	
@@ -111,20 +111,37 @@ Rect RectTransform::GetWorldRect()
 	// Transform those points based on this transform's parents and scale/rotation/translation.
 	min = LocalToWorldPoint(min);
 	max = LocalToWorldPoint(max);
+    Rect worldRect(min, max);
+    
+    // Let's say you want to get the world rect for a RectTransform, but it has a bunch of children that make up its contents.
+    // This allows you to get a rect that contains all the children as well.
+    if(includeChildren)
+    {
+        for(auto& child : mChildren)
+        {
+            if(child->IsTypeOf(RectTransform::GetType()) && child->IsActiveAndEnabled())
+            {
+                RectTransform* childRT = static_cast<RectTransform*>(child);
+                worldRect.Contain(childRT->GetWorldRect(true));
+            }
+        }
+    }
 	
-	// Construct and return the rect.
-	return Rect(min, max);
+	// Return the rect.
+    return worldRect;
 }
 
 void RectTransform::MoveInsideRect(const Rect &other)
 {
-    Vector2 otherMin = other.GetMin();
-    Vector2 otherMax = other.GetMax();
-    
-    Rect ourRect = GetWorldRect();
+    // Calculate our rect, taking into account children.
+    Rect ourRect = GetWorldRect(true);
     Vector2 min = ourRect.GetMin();
     Vector2 max = ourRect.GetMax();
     
+    Vector2 otherMin = other.GetMin();
+    Vector2 otherMax = other.GetMax();
+    
+    // Apply changes to anchored position to move our rect inside other rect.
     Vector2 anchoredPos = GetAnchoredPosition();
     if(min.x < otherMin.x)
     {
