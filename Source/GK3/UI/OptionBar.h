@@ -13,6 +13,7 @@
 
 #include "IniParser.h"
 
+class RectTransform;
 class UICanvas;
 class UILabel;
 
@@ -28,12 +29,17 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
+    RectTransform* mRootRectTransform = nullptr;
+    
     // Main section's text fields.
     UILabel* mScoreLabel = nullptr;
     UILabel* mDayLabel = nullptr;
     UILabel* mTimeLabel = nullptr;
     
-    // Option's section root.
+    // Camera section root.
+    Actor* mCamerasSection = nullptr;
+    
+    // Roots for all options sections.
     Actor* mOptionsSection = nullptr;
     Actor* mAdvancedOptionsSection = nullptr;
     Actor* mSoundOptionsSection = nullptr;
@@ -41,7 +47,10 @@ private:
     Actor* mAdvancedGraphicOptionsSection = nullptr;
     Actor* mGameOptionsSection = nullptr;
     
+    void KeepOnScreen();
+    
     void CreateMainSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateCamerasSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     void CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     void CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     void CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);

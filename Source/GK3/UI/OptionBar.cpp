@@ -29,6 +29,7 @@ OptionBar::OptionBar() : Actor(Actor::TransformType::RectTransform)
     
     // Create sections.
     CreateMainSection(canvas, optionBarConfig);
+    CreateCamerasSection(canvas, optionBarConfig);
     CreateOptionsSection(canvas, optionBarConfig);
     
     // Hide by default.
@@ -40,21 +41,21 @@ void OptionBar::Show()
     SetActive(true);
     
     // Position option bar over mouse.
-    // Note the "minus half size" because option bar's pivot is lower-left corner, but we want mouse at center.
-    // Also, we must rount the "half size" to ensure the UI renders "pixel perfect" - on exact pixel spots rather than between them.
-    RectTransform* rectTransform = static_cast<RectTransform*>(GetTransform());
-    Vector2 halfSize = rectTransform->GetSize() * 0.5f;
+    // "Minus half size" because option bar's pivot is lower-left corner, but want mouse at center.
+    // Also, round the "half size" to ensure the UI renders "pixel perfect" - on exact pixel spots rather than between them.
+    Vector2 halfSize = mRootRectTransform->GetSize() * 0.5f;
     halfSize.x = Math::Round(halfSize.x);
     halfSize.y = Math::Round(halfSize.y);
-    rectTransform->SetAnchoredPosition(Services::GetInput()->GetMousePosition() - halfSize);
+    mRootRectTransform->SetAnchoredPosition(Services::GetInput()->GetMousePosition() - halfSize);
     
-    // Make sure the options bar stays on-screen.
-    rectTransform->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
+    // Force to be fully on screen.
+    KeepOnScreen();
 }
 
 void OptionBar::Hide()
 {
     // Reset sections to hidden.
+    mCamerasSection->SetActive(false);
     mOptionsSection->SetActive(false);
     mAdvancedOptionsSection->SetActive(false);
     mSoundOptionsSection->SetActive(false);
@@ -84,6 +85,12 @@ void OptionBar::OnUpdate(float deltaTime)
         ap.y -= 10;
         rt->SetAnchoredPosition(ap);
     }
+}
+
+void OptionBar::KeepOnScreen()
+{
+    // Make sure the options bar stays on-screen.
+    mRootRectTransform->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
 }
 
 UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, bool setSprites = true)
@@ -139,6 +146,9 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     
     backgroundImage->SetReceivesInput(true);
+    
+    // Cache root rect transform for use later on.
+    mRootRectTransform = backgroundImage->GetRectTransform();
     
     // Load font.
     Font* font = Services::GetAssets()->LoadFont(config["statusFont"].value);
@@ -223,8 +233,10 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     cameraButton->GetRectTransform()->SetParent(GetTransform());
     canvas->AddWidget(cameraButton);
     
-    cameraButton->SetPressCallback([]() {
-        std::cout << "Show cameras!" << std::endl;
+    cameraButton->SetPressCallback([this]() {
+        this->mCamerasSection->SetActive(!this->mCamerasSection->IsActive());
+        this->mOptionsSection->SetActive(false);
+        this->KeepOnScreen();
     });
     
     // Add cinematics button.
@@ -241,7 +253,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     canvas->AddWidget(cinematicsOffButton);
     
     cinematicsOffButton->SetPressCallback([]() {
-        std::cout << "Turn cinematics on!" << std::endl;
+        std::cout << "Turn cinematics off!" << std::endl;
     });
     
     // Add help button.
@@ -259,7 +271,9 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     canvas->AddWidget(optionsButton);
     
     optionsButton->SetPressCallback([this]() {
+        this->mCamerasSection->SetActive(false);
         this->mOptionsSection->SetActive(!this->mOptionsSection->IsActive());
+        this->KeepOnScreen();
     });
     
     // Add close button.
@@ -270,6 +284,24 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     closeButton->SetPressCallback([this]() {
         this->Hide();
     });
+}
+
+void OptionBar::CreateCamerasSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config)
+{
+    // Make this a child of the "main section" root.
+    mCamerasSection = new Actor(Actor::TransformType::RectTransform);
+    mCamerasSection->GetTransform()->SetParent(canvas->GetRectTransform());
+    
+    // Add background image.
+    UIImage* backgroundImage = mCamerasSection->AddComponent<UIImage>();
+    canvas->AddWidget(backgroundImage);
+    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["camBackSprite"].value));
+    
+    // Position directly below main section.
+    backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
+    backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
+    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+    backgroundImage->SetReceivesInput(true);
 }
 
 void OptionBar::CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config)
@@ -316,6 +348,7 @@ void OptionBar::CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::s
     
     advOptButton->SetPressCallback([this]() {
         this->mAdvancedOptionsSection->SetActive(!this->mAdvancedOptionsSection->IsActive());
+        this->KeepOnScreen();
     });
     
     // Create "quit game" button.
@@ -323,7 +356,8 @@ void OptionBar::CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::s
     quitButton->GetRectTransform()->SetParent(mOptionsSection->GetTransform());
     canvas->AddWidget(quitButton);
     
-    quitButton->SetPressCallback([]() {
+    quitButton->SetPressCallback([this]() {
+        this->Hide();
         //TODO: Show "are you sure you want to quit?" dialog.
         GEngine::Instance()->Quit();
     });
@@ -358,6 +392,7 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
         this->mSoundOptionsSection->SetActive(!this->mSoundOptionsSection->IsActive());
         this->mGraphicOptionsSection->SetActive(false);
         this->mGameOptionsSection->SetActive(false);
+        this->KeepOnScreen();
     });
     
     // Create graphics options button.
@@ -369,6 +404,7 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
         this->mSoundOptionsSection->SetActive(false);
         this->mGraphicOptionsSection->SetActive(!this->mGraphicOptionsSection->IsActive());
         this->mGameOptionsSection->SetActive(false);
+        this->KeepOnScreen();
     });
     
     // Create game options button.
@@ -380,6 +416,7 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
         this->mSoundOptionsSection->SetActive(false);
         this->mGraphicOptionsSection->SetActive(false);
         this->mGameOptionsSection->SetActive(!this->mGameOptionsSection->IsActive());
+        this->KeepOnScreen();
     });
     
     // Create each subsection...
@@ -495,6 +532,7 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     
     advGraphicsButton->SetPressCallback([this]() {
         this->mAdvancedGraphicOptionsSection->SetActive(!this->mAdvancedGraphicOptionsSection->IsActive());
+        this->KeepOnScreen();
     });
     
     CreateAdvancedGraphicOptionsSection(canvas, config);
