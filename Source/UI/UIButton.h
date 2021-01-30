@@ -10,7 +10,6 @@
 
 #include <functional>
 
-#include "CallbackFunction.h"
 #include "Material.h"
 
 class Texture;
@@ -23,10 +22,10 @@ public:
 	
 	void Render() override;
 	
-	void SetUpTexture(Texture* texture) { mUpTexture = texture; }
-	void SetDownTexture(Texture* texture) { mDownTexture = texture; }
-	void SetHoverTexture(Texture* texture) { mHoverTexture = texture; }
-	void SetDisabledTexture(Texture* texture) { mDisabledTexture = texture; }
+    void SetUpTexture(Texture* texture);
+    void SetDownTexture(Texture* texture);
+    void SetHoverTexture(Texture* texture);
+    void SetDisabledTexture(Texture* texture);
 	
 	void SetPressCallback(std::function<void()> callback) { mPressCallback = callback; }
 	
@@ -40,8 +39,6 @@ public:
 	
 	bool CanInteract() const { return mCanInteract; }
 	void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
-	
-protected:
 	
 private:
 	// Textures for different visual states.
@@ -66,4 +63,6 @@ private:
 	bool mPointerDown = false;
 	
 	Texture* GetDefaultTexture();
+    
+    void UpdateTexture();
 };
