@@ -308,21 +308,32 @@ float AudioManager::GetVolume(AudioType audioType) const
     return volume;
 }
 
-AudioSaveState AudioManager::SaveAudioState()
+AudioSaveState AudioManager::SaveAudioState(bool includeAmbient)
 {
     // Create state object.
     AudioSaveState state;
-    state.playingSounds = mPlayingSounds;
     
-    // Pause all playing sounds.
-    for(auto& sound : mPlayingSounds)
+    // Iterate playing sounds to seach each piece of audio (maybe).
+    for(int i = mPlayingSounds.size() - 1; i >= 0; --i)
     {
-        sound.Pause();
+        // If sound is ambient, but we don't want to include ambient in save state, ignore this sound!
+        FMOD::ChannelGroup* channelGroup;
+        mPlayingSounds[i].channel->getChannelGroup(&channelGroup);
+        if(channelGroup == mAmbientChannelGroup && !includeAmbient)
+        {
+            continue;
+        }
+        
+        // Pause sound.
+        mPlayingSounds[i].Pause();
+        
+        // Put it in the save state list.
+        state.playingSounds.push_back(mPlayingSounds[i]);
+        
+        // Pop sound out of playing sounds list.
+        std::swap(mPlayingSounds[i], mPlayingSounds.back());
+        mPlayingSounds.pop_back();
     }
-    
-    // Clear playing channels.
-    // All saved channels are no longer playing until later restored.
-    mPlayingSounds.clear();
     
     // Return audio state - up to the caller to store the state and restore it when it makes sense.
     return state;
@@ -351,11 +362,9 @@ FMOD::ChannelGroup* AudioManager::GetChannelGroupForAudioType(AudioType audioTyp
     case AudioType::SFX:
         channelGroup = mSFXChannelGroup;
         break;
-        
     case AudioType::VO:
         channelGroup = mVOChannelGroup;
         break;
-        
     case AudioType::Ambient:
         channelGroup = mAmbientChannelGroup;
         break;

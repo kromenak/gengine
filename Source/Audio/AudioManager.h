@@ -81,7 +81,7 @@ public:
     void SetVolume(AudioType audioType, float volume);
     float GetVolume(AudioType audioType) const;
     
-    AudioSaveState SaveAudioState();
+    AudioSaveState SaveAudioState(bool includeAmbient);
     void RestoreAudioState(AudioSaveState& audioState);
     
 private:
