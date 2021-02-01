@@ -26,14 +26,21 @@ class Layer
 public:
     Layer(const std::string& name);
     
-    void Enter();
-    void Exit(bool popped);
+    void Pushed();
+    void Popped();
+    
+    void Enter(Layer* fromLayer);
+    void Exit(Layer* toLayer);
 
     const std::string& GetName() const { return mName; }
     
 protected:
-    virtual void OnEnter() { }
-    virtual void OnExit() { }
+    virtual void OnEnter(Layer* fromLayer) { }
+    virtual void OnExit(Layer* toLayer) { }
+    
+    // If true, this layer keeps the previous layer's ambient audio on enter.
+    // If false, previous layer saves/pauses ambient audio before entering this layer.
+    bool mPersistAmbientState = false;
     
 private:
     // Name of the layer.

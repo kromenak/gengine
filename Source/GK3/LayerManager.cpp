@@ -16,26 +16,28 @@ Layer::Layer(const std::string& name) :
     
 }
 
-void Layer::Enter()
+void Layer::Pushed()
 {
-    std::cout << "Enter " << mName << std::endl; 
-    OnEnter();
-    
-    // Restore audio state (if any) when entering layer.
+    // Save audio state of layer below us in the stack.
+    mAudioSaveState = Services::GetAudio()->SaveAudioState(!mPersistAmbientState);
+}
+
+void Layer::Popped()
+{
+    // Restore audio state of layer below us in the stack.
     Services::GetAudio()->RestoreAudioState(mAudioSaveState);
 }
 
-void Layer::Exit(bool popped)
+void Layer::Enter(Layer* fromLayer)
+{
+    std::cout << "Enter " << mName << std::endl; 
+    OnEnter(fromLayer);
+}
+
+void Layer::Exit(Layer* toLayer)
 {
     std::cout << "Exit " << mName << std::endl;
-    OnExit();
-    
-    // If possible to pop back to this layer, save audio state for later.
-    // A "popped" state will not be returned to, so no need to save state in that case.
-    if(!popped)
-    {
-        mAudioSaveState = Services::GetAudio()->SaveAudioState();
-    }
+    OnExit(toLayer);
 }
 
 TYPE_DEF_BASE(LayerManager);
@@ -48,39 +50,48 @@ LayerManager::LayerManager()
 void LayerManager::PushLayer(Layer* layer)
 {
     // Exit layer on "top" of stack.
+    Layer* fromLayer = nullptr;
     if(mLayerStack.size() > 0)
     {
-        mLayerStack.back()->Exit(false);
+        fromLayer = mLayerStack.back();
+        fromLayer->Exit(layer);
     }
     
     // Add new layer to top, enter it.
     mLayerStack.push_back(layer);
-    mLayerStack.back()->Enter();
+    mLayerStack.back()->Pushed();
+    mLayerStack.back()->Enter(fromLayer);
 }
 
 void LayerManager::PopLayer(Layer* expectedLayer)
 {
+    // Can't pop an empty stack.
     if(mLayerStack.size() <= 0)
     {
         std::cout << "Attempting to pop layer, but stack is empty!" << std::endl;
         return;
     }
     
-    // If an expected layer is provided, make sure we're popping that one!
+    // Caller can provide an "expected layer", kind of as a way to assert that they are popping what they think they're popping.
     if(expectedLayer != nullptr && !IsTopLayer(expectedLayer))
     {
         std::cout << "Expected to pop " << expectedLayer->GetName() << ", but top layer is actually " << mLayerStack.back()->GetName() << std::endl;
         return;
     }
     
-    // Exit layer at top of stack and pop off stack.
-    mLayerStack.back()->Exit(true);
+    // Figure out layer being popped and layer entering.
+    Layer* fromLayer = mLayerStack.back();
+    Layer* toLayer = mLayerStack.size() > 1 ? mLayerStack[mLayerStack.size() - 2] : nullptr;
+    
+    // Exit from layer and pop off stack.
+    fromLayer->Exit(toLayer);
     mLayerStack.pop_back();
+    fromLayer->Popped();
     
     // New top of stack is now entered.
-    if(mLayerStack.size() > 0)
+    if(toLayer != nullptr)
     {
-        mLayerStack.back()->Enter();
+        toLayer->Enter(fromLayer);
     }
 }
 
@@ -89,7 +100,11 @@ void LayerManager::RemoveLayer(Layer* layer)
     auto it = std::find(mLayerStack.begin(), mLayerStack.end(), layer);
     if(it != mLayerStack.end())
     {
-        (*it)->Exit(true);
+        //TODO: This is sort of a "non-standard" operation that leaves the Layer stack in a weird state.
+        //TODO: Maybe we shouldn't even allow this behavior.
+        //TODO: Unclear whether removing in middle counts as exiting...and what about saved ambient state!?
+        //TODO: Fix this...get rid of it...something!
+        //(*it)->Exit(nullptr, true);
         mLayerStack.erase(it);
     }
 }
