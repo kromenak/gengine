@@ -14,8 +14,12 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 
-InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
-    mLayer("InventoryLayer")
+InventoryLayer::InventoryLayer() : Layer("InventoryLayer")
+{
+    mPersistAmbientState = true;
+}
+
+InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform)
 {
 	mCanvas = AddComponent<UICanvas>();
 	
@@ -66,6 +70,10 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
 
 void InventoryScreen::Show(const std::string& actorName, const std::set<std::string>& inventory)
 {
+    // Already showing, so don't do it again!
+    if(IsActive()) { return; }
+    
+    // Push layer onto stack.
     Services::Get<LayerManager>()->PushLayer(&mLayer);
     
 	// Save current actor name.
@@ -157,7 +165,10 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 
 void InventoryScreen::Hide()
 {
+    if(!IsActive()) { return; }
 	SetActive(false);
+    
+    // Pop off stack.
     Services::Get<LayerManager>()->PopLayer(&mLayer);
 }
 

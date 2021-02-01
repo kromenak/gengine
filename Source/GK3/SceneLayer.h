@@ -18,8 +18,8 @@ public:
     SceneLayer(Scene* scene);
     
 protected:
-    void OnEnter() override;
-    void OnExit() override;
+    void OnEnter(Layer* fromLayer) override;
+    void OnExit(Layer* toLayer) override;
     
 private:
     Scene* mScene = nullptr;

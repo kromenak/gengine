@@ -19,6 +19,12 @@ class UIButton;
 class UICanvas;
 class UIImage;
 
+class InventoryLayer : public Layer
+{
+public:
+    InventoryLayer();
+};
+
 class InventoryScreen : public Actor
 {
 public:
@@ -32,7 +38,7 @@ private:
 	const int kActiveHighlightXOffset = -4;
     
     // This screen's layer.
-    Layer mLayer;
+    InventoryLayer mLayer;
 	
 	// Canvas to render inventory UI.
 	UICanvas* mCanvas = nullptr;
