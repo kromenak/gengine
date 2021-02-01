@@ -70,27 +70,32 @@ void GameCamera::OnUpdate(float deltaTime)
     {
         SceneUpdate(deltaTime);
     }
-	
-    // If 'I' is pressed, toggle inventory.
-    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_I))
-    {
-        // If the scene is active, show the inventory.
-        // If the inventory is showing, hide it.
-        if(mSceneActive)
-        {
-            Services::Get<InventoryManager>()->ShowInventory();
-        }
-        else if(Services::Get<InventoryManager>()->IsInventoryShowing())
-        {
-            Services::Get<InventoryManager>()->HideInventory();
-        }
-    }
     
-    // If 'P' is pressed, this toggles game pause.
-    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_P))
+    // BELOW HERE: logic for player's keyboard shortcuts.
+    // Keyboard shortcut keys are only available if text input is not active.
+    if(!Services::GetInput()->IsTextInput())
     {
-        //TODO: implement pause!
-        std::cout << "Pause!" << std::endl;
+        // If 'I' is pressed, toggle inventory.
+        if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_I))
+        {
+            // If the scene is active, show the inventory.
+            // If the inventory is showing, hide it.
+            if(mSceneActive)
+            {
+                Services::Get<InventoryManager>()->ShowInventory();
+            }
+            else if(Services::Get<InventoryManager>()->IsInventoryShowing())
+            {
+                Services::Get<InventoryManager>()->HideInventory();
+            }
+        }
+        
+        // If 'P' is pressed, this toggles game pause.
+        if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_P))
+        {
+            //TODO: implement pause!
+            std::cout << "Pause!" << std::endl;
+        }
     }
 }
 
