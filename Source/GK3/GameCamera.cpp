@@ -192,7 +192,7 @@ void GameCamera::SceneUpdate(float deltaTime)
     
     // If left mouse button is held down, mouse movement contributes to camera movement.
     bool leftMousePressed = Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left);
-    if(leftMousePressed)
+    if(leftMousePressed && !UICanvas::DidWidgetEatInput())
     {
         // Pan modifier also activates if right mouse button is pressed.
         panModifierActive |= Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Right);
