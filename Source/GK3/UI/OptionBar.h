@@ -14,6 +14,7 @@
 #include "IniParser.h"
 
 class RectTransform;
+class UIButton;
 class UICanvas;
 class UILabel;
 
@@ -29,7 +30,12 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
-    RectTransform* mRootRectTransform = nullptr;
+    UICanvas* mCanvas = nullptr;
+    
+    // A large clickable area behind the action bar that stops scene interaction while visible.
+    UIButton* mSceneBlockerButton = nullptr;
+    
+    RectTransform* mOptionBarRoot = nullptr;
     
     // Main section's text fields.
     UILabel* mScoreLabel = nullptr;

@@ -42,6 +42,9 @@ protected:
 private:
 	// The action bar's canvas, which renders the UI.
 	UICanvas* mCanvas = nullptr;
+    
+    // A large clickable area behind the action bar that stops scene interaction while visible.
+    UIButton* mSceneBlockerButton = nullptr;
 	
 	// A transform that is parent for all buttons.
 	RectTransform* mButtonHolder = nullptr;

@@ -25,12 +25,26 @@ OptionBar::OptionBar() : Actor(Actor::TransformType::RectTransform)
     delete optionBarText;
     
     // Create canvas, to contain the UI components.
-    UICanvas* canvas = AddComponent<UICanvas>();
+    mCanvas = AddComponent<UICanvas>();
+    
+    // Canvas rect fills the entire screen.
+    RectTransform* rectTransform = mCanvas->GetRectTransform();
+    rectTransform->SetSizeDelta(0.0f, 0.0f);
+    rectTransform->SetAnchorMin(Vector2::Zero);
+    rectTransform->SetAnchorMax(Vector2::One);
+    
+    // The background of the action bar consists of a fullscreen clickable button area.
+    // This stops interaction with the scene while action bar is visible.
+    mSceneBlockerButton = AddComponent<UIButton>();
+    mCanvas->AddWidget(mSceneBlockerButton);
+    mSceneBlockerButton->SetPressCallback([this]() {
+        this->Hide();
+    });
     
     // Create sections.
-    CreateMainSection(canvas, optionBarConfig);
-    CreateCamerasSection(canvas, optionBarConfig);
-    CreateOptionsSection(canvas, optionBarConfig);
+    CreateMainSection(mCanvas, optionBarConfig);
+    CreateCamerasSection(mCanvas, optionBarConfig);
+    CreateOptionsSection(mCanvas, optionBarConfig);
     
     // Hide by default.
     Hide();
@@ -43,10 +57,10 @@ void OptionBar::Show()
     // Position option bar over mouse.
     // "Minus half size" because option bar's pivot is lower-left corner, but want mouse at center.
     // Also, round the "half size" to ensure the UI renders "pixel perfect" - on exact pixel spots rather than between them.
-    Vector2 halfSize = mRootRectTransform->GetSize() * 0.5f;
+    Vector2 halfSize = mOptionBarRoot->GetSize() * 0.5f;
     halfSize.x = Math::Round(halfSize.x);
     halfSize.y = Math::Round(halfSize.y);
-    mRootRectTransform->SetAnchoredPosition(Services::GetInput()->GetMousePosition() - halfSize);
+    mOptionBarRoot->SetAnchoredPosition(Services::GetInput()->GetMousePosition() - halfSize);
     
     // Force to be fully on screen.
     KeepOnScreen();
@@ -90,7 +104,7 @@ void OptionBar::OnUpdate(float deltaTime)
 void OptionBar::KeepOnScreen()
 {
     // Make sure the options bar stays on-screen.
-    mRootRectTransform->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
+    mOptionBarRoot->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
 }
 
 UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, bool setSprites = true)
@@ -133,8 +147,13 @@ UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, con
 
 void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config)
 {
+    // Create "root" actor for action bar.
+    Actor* optionBar = new Actor(Actor::TransformType::RectTransform);
+    mOptionBarRoot = optionBar->GetComponent<RectTransform>();
+    mOptionBarRoot->SetParent(mCanvas->GetRectTransform());
+    
     // Add background image.
-    UIImage* backgroundImage = AddComponent<UIImage>();
+    UIImage* backgroundImage = optionBar->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
     backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["backSprite"].value));
     
@@ -147,15 +166,12 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     backgroundImage->SetReceivesInput(true);
     
-    // Cache root rect transform for use later on.
-    mRootRectTransform = backgroundImage->GetRectTransform();
-    
     // Load font.
     Font* font = Services::GetAssets()->LoadFont(config["statusFont"].value);
     
     // Add score text.
     Actor* scoreActor = new Actor(Actor::TransformType::RectTransform);
-    scoreActor->GetTransform()->SetParent(GetTransform());
+    scoreActor->GetTransform()->SetParent(mOptionBarRoot);
     UILabel* scoreLabel = scoreActor->AddComponent<UILabel>();
     canvas->AddWidget(scoreLabel);
     
@@ -173,7 +189,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add day text.
     Actor* dayActor = new Actor(Actor::TransformType::RectTransform);
-    dayActor->GetTransform()->SetParent(GetTransform());
+    dayActor->GetTransform()->SetParent(mOptionBarRoot);
     UILabel* dayLabel = dayActor->AddComponent<UILabel>();
     canvas->AddWidget(dayLabel);
     
@@ -191,7 +207,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add time text.
     Actor* timeActor = new Actor(Actor::TransformType::RectTransform);
-    timeActor->GetTransform()->SetParent(GetTransform());
+    timeActor->GetTransform()->SetParent(mOptionBarRoot);
     UILabel* timeLabel = timeActor->AddComponent<UILabel>();
     canvas->AddWidget(timeLabel);
     
@@ -211,7 +227,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add inventory button.
     UIButton* invButton = CreateButton(config, "closed");
-    invButton->GetRectTransform()->SetParent(GetTransform());
+    invButton->GetRectTransform()->SetParent(mOptionBarRoot);
     canvas->AddWidget(invButton);
     
     invButton->SetPressCallback([this]() {
@@ -221,7 +237,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add hint button.
     UIButton* hintButton = CreateButton(config, "hint");
-    hintButton->GetRectTransform()->SetParent(GetTransform());
+    hintButton->GetRectTransform()->SetParent(mOptionBarRoot);
     canvas->AddWidget(hintButton);
     
     hintButton->SetPressCallback([]() {
@@ -230,7 +246,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add camera button.
     UIButton* cameraButton = CreateButton(config, "camera");
-    cameraButton->GetRectTransform()->SetParent(GetTransform());
+    cameraButton->GetRectTransform()->SetParent(mOptionBarRoot);
     canvas->AddWidget(cameraButton);
     
     cameraButton->SetPressCallback([this]() {
@@ -241,7 +257,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add cinematics button.
     UIButton* cinematicsOnButton = CreateButton(config, "cine");
-    cinematicsOnButton->GetRectTransform()->SetParent(GetTransform());
+    cinematicsOnButton->GetRectTransform()->SetParent(mOptionBarRoot);
     canvas->AddWidget(cinematicsOnButton);
     
     cinematicsOnButton->SetPressCallback([]() {
@@ -249,7 +265,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     });
     
     UIButton* cinematicsOffButton = CreateButton(config, "cineoff");
-    cinematicsOffButton->GetRectTransform()->SetParent(GetTransform());
+    cinematicsOffButton->GetRectTransform()->SetParent(mOptionBarRoot);
     canvas->AddWidget(cinematicsOffButton);
     
     cinematicsOffButton->SetPressCallback([]() {
@@ -258,7 +274,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add help button.
     UIButton* helpButton = CreateButton(config, "help");
-    helpButton->GetRectTransform()->SetParent(GetTransform());
+    helpButton->GetRectTransform()->SetParent(mOptionBarRoot);
     canvas->AddWidget(helpButton);
     
     helpButton->SetPressCallback([]() {
@@ -267,7 +283,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add options button.
     UIButton* optionsButton = CreateButton(config, "options");
-    optionsButton->GetRectTransform()->SetParent(GetTransform());
+    optionsButton->GetRectTransform()->SetParent(mOptionBarRoot);
     canvas->AddWidget(optionsButton);
     
     optionsButton->SetPressCallback([this]() {
@@ -278,7 +294,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add close button.
     UIButton* closeButton = CreateButton(config, "exit");
-    closeButton->GetRectTransform()->SetParent(GetTransform());
+    closeButton->GetRectTransform()->SetParent(mOptionBarRoot);
     canvas->AddWidget(closeButton);
     
     closeButton->SetPressCallback([this]() {
@@ -290,7 +306,7 @@ void OptionBar::CreateCamerasSection(UICanvas* canvas, std::unordered_map<std::s
 {
     // Make this a child of the "main section" root.
     mCamerasSection = new Actor(Actor::TransformType::RectTransform);
-    mCamerasSection->GetTransform()->SetParent(canvas->GetRectTransform());
+    mCamerasSection->GetTransform()->SetParent(mOptionBarRoot);
     
     // Add background image.
     UIImage* backgroundImage = mCamerasSection->AddComponent<UIImage>();
@@ -308,7 +324,7 @@ void OptionBar::CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::s
 {
     // Make this a child of the "main section" root.
     mOptionsSection = new Actor(Actor::TransformType::RectTransform);
-    mOptionsSection->GetTransform()->SetParent(canvas->GetRectTransform());
+    mOptionsSection->GetTransform()->SetParent(mOptionBarRoot);
     
     // Add background image.
     UIImage* backgroundImage = mOptionsSection->AddComponent<UIImage>();

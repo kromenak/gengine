@@ -18,10 +18,19 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	// Create canvas, to contain the UI components.
 	mCanvas = AddComponent<UICanvas>();
 	
-	RectTransform* rectTransform = GetComponent<RectTransform>();
+    // Canvas rect fills the entire screen.
+    RectTransform* rectTransform = mCanvas->GetRectTransform();
 	rectTransform->SetSizeDelta(0.0f, 0.0f);
 	rectTransform->SetAnchorMin(Vector2::Zero);
 	rectTransform->SetAnchorMax(Vector2::One);
+    
+    // The background of the action bar consists of a fullscreen clickable button area.
+    // This stops interaction with the scene while action bar is visible.
+    mSceneBlockerButton = AddComponent<UIButton>();
+    mCanvas->AddWidget(mSceneBlockerButton);
+    mSceneBlockerButton->SetPressCallback([this]() {
+        this->Hide();
+    });
 	
 	// Create button holder - it holds the buttons and we move it around the screen.
     // Since we will set the action bar's position based on mouse position, set the anchor to the lower-left corner.
@@ -141,9 +150,12 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	// Position action bar at pointer.
 	// This also makes sure it doesn't go offscreen.
 	CenterOnPointer();
-	
+    
 	// It's showing now!
 	mButtonHolder->GetOwner()->SetActive(true);
+    
+    // Scene blocker does receive input.
+    mSceneBlockerButton->SetReceivesInput(true);
 }
 
 void ActionBar::Hide()
@@ -158,6 +170,9 @@ void ActionBar::Hide()
 	
 	// Button holder inactive = no children show.
 	mButtonHolder->GetOwner()->SetActive(false);
+    
+    // Scene blocker no longer receives input.
+    mSceneBlockerButton->SetReceivesInput(false);
 	
 	// Call hide callback.
 	if(mHideCallback != nullptr)
