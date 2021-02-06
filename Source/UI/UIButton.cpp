@@ -31,8 +31,11 @@ void UIButton::Render()
     UpdateTexture();
 	
 	// Render.
-	mMaterial.Activate(GetWorldTransformWithSizeForRendering());
-	uiQuad->Render();
+    if(mMaterial.GetDiffuseTexture() != nullptr)
+    {
+        mMaterial.Activate(GetWorldTransformWithSizeForRendering());
+        uiQuad->Render();
+    }
 }
 
 void UIButton::SetUpTexture(Texture* texture)
@@ -64,7 +67,16 @@ void UIButton::SetDisabledTexture(Texture* texture)
 
 void UIButton::OnPointerEnter()
 {
-	GEngine::Instance()->UseHighlightCursor();
+    // If button has a texture, use cursor highlight.
+    // If button has no texture (so, perhaps an input blocker or invisible click detector), no highlight.
+    if(mMaterial.GetDiffuseTexture() != nullptr)
+    {
+        GEngine::Instance()->UseHighlightCursor();
+    }
+    else
+    {
+        GEngine::Instance()->UseDefaultCursor();
+    }
 	mPointerOver = true;
 }
 
