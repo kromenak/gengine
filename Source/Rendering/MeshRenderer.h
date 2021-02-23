@@ -25,8 +25,7 @@ public:
     MeshRenderer(Actor* actor);
     ~MeshRenderer();
 	
-	void RenderOpaque();
-	void RenderTranslucent();
+    void Render(bool opaque = true, bool translucent = true);
     
     void SetModel(Model* model);
     

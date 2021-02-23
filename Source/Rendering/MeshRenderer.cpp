@@ -24,77 +24,51 @@ MeshRenderer::~MeshRenderer()
     Services::GetRenderer()->RemoveMeshRenderer(this);
 }
 
-void MeshRenderer::RenderOpaque()
+void MeshRenderer::Render(bool opaque, bool translucent)
 {
-	// Don't render if actor is inactive or component is disabled.
-	if(!IsActiveAndEnabled()) { return; }
-	
-	Matrix4 actorWorldTransform = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
-	
-	int materialIndex = 0;
-	int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
-
-	for(int i = 0; i < mMeshes.size(); i++)
-	{
-		Matrix4 meshWorldTransformMatrix = actorWorldTransform * mMeshes[i]->GetMeshToLocalMatrix();
-		
-		auto submeshes = mMeshes[i]->GetSubmeshes();
-		for(int j = 0; j < submeshes.size(); j++)
-		{
-			Material& material = mMaterials[materialIndex];
-			
-			// Ignore translucent rendering.
-			if(!material.IsTranslucent())
-			{
-				// Activate material.
-				material.Activate(meshWorldTransformMatrix);
-				
-				// Render the submesh!
-				submeshes[j]->Render();
-			}
-			
-			// Draw debug axes if desired.
-			if(Debug::RenderSubmeshLocalAxes())
-			{
-				Debug::DrawAxes(meshWorldTransformMatrix);
-			}
-			
-			// Increase material index, but not above the max.
-			materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
-		}
-	}
-}
-
-void MeshRenderer::RenderTranslucent()
-{
-	Matrix4 actorWorldTransform = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
-	
-	int materialIndex = 0;
-	int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
-	
-	for(int i = 0; i < mMeshes.size(); i++)
-	{
-		Matrix4 meshWorldTransform = actorWorldTransform * mMeshes[i]->GetMeshToLocalMatrix();
-		
-		auto submeshes = mMeshes[i]->GetSubmeshes();
-		for(int j = 0; j < submeshes.size(); j++)
-		{
-			Material& material = mMaterials[materialIndex];
-			
-			// Ignore opaque rendering.
-			if(material.IsTranslucent())
-			{
-				// Activate material.
-				material.Activate(meshWorldTransform);
-				
-				// Render the submesh!
-				submeshes[j]->Render();
-			}
-			
-			// Increase material index, but not above the max.
-			materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
-		}
-	}
+    // Don't render if actor is inactive or component is disabled.
+    if(!IsActiveAndEnabled()) { return; }
+    
+    // Each submesh can have its own material defined. So, keep track of material index as each is rendered.
+    // If there are more submeshes than materials, then the last material is reused.
+    int materialIndex = 0;
+    int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
+    
+    // Iterate meshes and render each in turn.
+    Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
+    for(int i = 0; i < mMeshes.size(); i++)
+    {
+        // Mesh vertices are in "mesh space". Create matrix to convert to world space.
+        Matrix4 meshToWorldMatrix = localToWorldMatrix * mMeshes[i]->GetMeshToLocalMatrix();
+        
+        // Iterate each submesh.
+        auto submeshes = mMeshes[i]->GetSubmeshes();
+        for(int j = 0; j < submeshes.size(); j++)
+        {
+            Material& material = mMaterials[materialIndex];
+            
+            // If this is translucent, only render if want to render translucent stuff.
+            // Or if this is opaque, only render if want to render opaque.
+            if((opaque && !material.IsTranslucent()) ||
+               (translucent && material.IsTranslucent()))
+            {
+                // Activate material.
+                material.Activate(meshToWorldMatrix);
+                
+                // Render the submesh!
+                submeshes[j]->Render();
+                
+                // Draw debug axes if desired.
+                if(Debug::RenderSubmeshLocalAxes())
+                {
+                    Debug::DrawAxes(meshToWorldMatrix);
+                }
+            }
+            
+            // Increase material index, but not above the max.
+            materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
+        }
+    }
 }
 
 void MeshRenderer::SetModel(Model* model)

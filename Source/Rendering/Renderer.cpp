@@ -313,7 +313,7 @@ void Renderer::Render()
         // And with the z-buffer, we can render opaque meshed correctly regardless of order.
         for(auto& meshRenderer : mMeshRenderers)
         {
-            meshRenderer->RenderOpaque();
+            meshRenderer->Render();
         }
         
         // Turn off alpha test.
