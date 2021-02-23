@@ -26,25 +26,18 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 	outPath.clear();
 	
 	// Pick goal position. If "to" is walkable, we can use it directly.
+    // Otherwise, find the nearest walkable position to "to".
 	Vector2 goal;
 	if(IsWorldPosWalkable(to))
 	{
 		goal = WorldPosToTexturePos(to);
-		
-		// Since "to" is walkable, push it as the final node in the path directly.
-		// Path creation logic below assumes that we've done this up here.
-		outPath.push_back(to);
 	}
 	else
 	{
 		// If "to" is not walkable, we need to find nearest walkable position as our goal.
 		goal = FindNearestWalkableTexturePosToWorldPos(to);
-		
-		// Since "to" is NOT walkable, we don't want to push it onto the path directly.
-		// However, we can push our "nearest walkable" world pos.
-		outPath.push_back(TexturePosToWorldPos(goal));
 	}
-	
+    
 	// Pick start position. If "from" is walkable, we can use it directly.
 	Vector2 start;
 	if(IsWorldPosWalkable(from))
@@ -86,14 +79,12 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 		for(auto& neighbor : neighbors)
 		{
 			// Ignore any neighbor that has pixel color black (not walkable).
-			Color32 color = mTexture->GetPixelColor32(neighbor.x, neighbor.y);
-			if(color == Color32::Black) { continue; }
+            int index = mTexture->GetPaletteIndex(neighbor.x, neighbor.y);
+			if(index == 255) { continue; }
 			
-			// So, setting edge cost to be exactly the palette index actually gives pretty decent results.
-			//int currentIndex = mTexture->GetPaletteIndex(current.x, current.y);
-			int neighborIndex = mTexture->GetPaletteIndex(neighbor.x, neighbor.y);
-			//float edgeCost = (neighbor - current).GetLength() + neighborIndex;
-			float edgeCost = neighborIndex;
+			// As a foundation, using Euclidean distance for the heuristic is pretty safe.
+            // But as a modifier , multiplying by index (greater index means higher cost) seems to give OK results.
+            float edgeCost = (neighbor - current).GetLength() * index;
 			
 			// Ignore anything already in the closed set.
 			if(closedSet.find(neighbor) != closedSet.end())
@@ -117,8 +108,8 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 				NodeInfo nodeInfo;
 				nodeInfo.parent = current;
 				
-				//nodeInfo.h = (goal - neighbor).GetLength();
-				nodeInfo.h = 0.0f; // No heuristic? (Dijkstra)
+				nodeInfo.h = (goal - neighbor).GetLength() * index;
+				//nodeInfo.h = 0.0f; // No heuristic? (Dijkstra)
 				nodeInfo.g = infos[current].g + edgeCost;
 				infos[neighbor] = nodeInfo;
 				openSet.push_back(neighbor);
@@ -149,11 +140,9 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 		openSet.erase(nextIt);
 		closedSet.insert(current);
 	}
-	
-	// Skip goal node (we already added "to" at beginning of algorithm).
-	current = infos[current].parent;
-	
+    
 	// Iterate back to start, pushing world position of each node onto our path.
+    // This leaves the path with start node at back, goal node at front - caller can traverse back-to-front.
 	while(current != start)
 	{
 		outPath.push_back(TexturePosToWorldPos(current));
@@ -194,7 +183,9 @@ bool WalkerBoundary::IsTexturePosWalkable(Vector2 texturePos) const
 	// Cyan = this is your last warning, buddy 	(0, 255, 255)
 	// Black = totally not OK to walk 			(0, 0, 0)
 	Color32 color = mTexture->GetPixelColor32(texturePos.x, texturePos.y);
-	
+    //unsigned char index = mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
+    //std::cout << (int)index << ", " << color << std::endl;
+    
 	// Basically, if the texture color is not black, you can walk there.
 	return color != Color32::Black;
 }
@@ -203,7 +194,7 @@ Vector2 WalkerBoundary::WorldPosToTexturePos(Vector3 worldPos) const
 {
 	// If no texture, the end result is going to be zero.
 	if(mTexture == nullptr) { return Vector2::Zero; }
-	
+    
 	// Add walker boundary's world position offset.
 	// This causes the position to be relative to the texture's origin (lower left) instead of the world origin.
 	Vector2 texturePos;
@@ -236,15 +227,15 @@ Vector3 WalkerBoundary::TexturePosToWorldPos(Vector2 texturePos) const
 {
 	// If no texture, the end result is going to be zero.
 	if(mTexture == nullptr) { return Vector3::Zero; }
-	
+    
+    // A texture pos actually correlates to the bottom-left corner of the pixel.
+    // But we want center of pixel...so let's offset before the conversion!
+    texturePos.x = texturePos.x + 0.5f;
+    texturePos.y = texturePos.y + 0.5f;
+    
 	// Flip y because texture pos is from top-left, but we need lower-left for world pos conversion.
 	texturePos.y = mTexture->GetHeight() - texturePos.y;
-	
-	// A texture pos actually correlates to the bottom-left corner of the pixel.
-	// But we want center of pixel...so let's offset before the conversion!
-	texturePos.x = texturePos.x + 0.5f;
-	texturePos.y = texturePos.y + 0.5f;
-	
+    
 	// Divide by texture width/height to get normalized position within the texture (0-1).
 	Vector3 worldPos;
 	worldPos.x = texturePos.x / mTexture->GetWidth();
