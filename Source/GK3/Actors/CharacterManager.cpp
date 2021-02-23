@@ -39,6 +39,10 @@ CharacterManager::CharacterManager()
 				{
 					config.walkerHeight = entry.GetValueAsFloat();
 				}
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "ShoeThickness"))
+                {
+                    config.shoeThickness = entry.GetValueAsFloat();
+                }
 				else if(StringUtil::EqualsIgnoreCase(entry.key, "StartAnim"))
 				{
 					config.walkStartAnim = Services::GetAssets()->LoadAnimation(entry.value);
@@ -71,6 +75,30 @@ CharacterManager::CharacterManager()
 				{
 					config.hipAxesPointIndex = entry.GetValueAsInt();
 				}
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "LShoeAxisMeshIndex"))
+                {
+                    config.leftShoeAxesMeshIndex = entry.GetValueAsInt();
+                }
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "LShoeAxesGroupIndex"))
+                {
+                    config.leftShoeAxesGroupIndex = entry.GetValueAsInt();
+                }
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "LShoeAxesPointIndex"))
+                {
+                    config.leftShoeAxesPointIndex = entry.GetValueAsInt();
+                }
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "RShoeAxisMeshIndex"))
+                {
+                    config.rightShoeAxesMeshIndex = entry.GetValueAsInt();
+                }
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "RShoeAxesGroupIndex"))
+                {
+                    config.rightShoeAxesGroupIndex = entry.GetValueAsInt();
+                }
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "RShoeAxesPointIndex"))
+                {
+                    config.rightShoeAxesPointIndex = entry.GetValueAsInt();
+                }
 			}
 			
 			// Key each config by its identifier.
