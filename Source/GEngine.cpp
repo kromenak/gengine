@@ -368,6 +368,12 @@ void GEngine::Update()
 	if(deltaTime < 0.0f) { deltaTime = 0.0f; }
     if(deltaTime > 0.05f) { deltaTime = 0.05f; }
     
+    // For debugging: press F5 to slow down passage of time significantly.
+    if(mInputManager.IsKeyPressed(SDL_SCANCODE_F5))
+    {
+        deltaTime *= 0.25f;
+    }
+    
     // Update all actors.
     for(size_t i = 0; i < mActors.size(); i++)
     {
