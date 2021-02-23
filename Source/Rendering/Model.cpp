@@ -200,28 +200,40 @@ void Model::ParseFromData(char *data, int dataLength)
             std::cout << "Expected MESH identifier. Instead got " << identifier << std::endl;
             return;
         }
+        
+        // A NOTE ABOUT MODEL AXES AND CONVERSIONS
+        // GK3 Models are authored with +X Right, -Y Forward, +Z Up.
+        // To match our world coordinate system, we have two options:
+        // 1) Load everything as-is and keep in mind that "mesh space" has Y/Z axes flipped.
+        // 2) Flip Y/Z axes on load so it matches everything else.
+        // I'm going to do option #2 here, but theoretically it'd all work regardless.
+        
+        // Note that flipping the axes still leaves -Z forward...not ideal, but hard to rectify!
+        // We'll have to account for that in our math elsewhere.
 
 		// 36 bytes: i/j/k bases (aka x/y/z axes of mesh coordinate system).
 		// j/k are flipped b/c this data is in "Z-up" format, but our engine in "Y-up".
         Vector3 iBasis = reader.ReadVector3();
         Vector3 kBasis = reader.ReadVector3();
         Vector3 jBasis = reader.ReadVector3();
+        #ifdef DEBUG_OUTPUT
+        std::cout << "    Axes: " << iBasis << ", " << jBasis << ", " << kBasis << std::endl;
+        #endif
         
-        // 12 bytes: an (X, Y, Z) position in "mesh space."
-        // Each mesh within a model has a local position relative to the model origin.
+        // 12 bytes: an (X, Y, Z) position of the axes in local space.
+        // Do NOT need to flip Y/Z for this b/c it's not in mesh space, it's in local space!
 		// Ex: if a human model has arms, legs, etc - this positions them all correctly relative to one another.
 		Vector3 meshPos = reader.ReadVector3();
 		#ifdef DEBUG_OUTPUT
         std::cout << "    Mesh Position: " << meshPos << std::endl;
 		#endif
         
-		// Generate transform matrix from i/j/k bases and mesh position.
+		// Generate transform matrix from i/j/k bases and position.
 		// This mesh allows us to go from "mesh space" to "local space" (i.e. local space of an Actor).
 		Matrix4 meshToLocalMatrix;
-		meshToLocalMatrix.SetColumns(Vector4(iBasis), Vector4(jBasis), Vector4(kBasis), Vector4(meshPos));
-		meshToLocalMatrix(3, 3) = 1.0f;
+		meshToLocalMatrix.SetColumns(Vector4(iBasis), Vector4(jBasis), Vector4(kBasis), Vector4(meshPos, 1.0f));
 		
-		// Create our mesh.
+		// Create mesh.
 		Mesh* mesh = new Mesh();
 		mesh->SetMeshToLocalMatrix(meshToLocalMatrix);
 		mMeshes.push_back(mesh);
@@ -229,14 +241,13 @@ void Model::ParseFromData(char *data, int dataLength)
         // 4 bytes: Number of submeshes in this mesh.
         unsigned int numSubMeshes = reader.ReadUInt();
         
-        // 24 bytes: Two more sets of floating point values.
-        // Based on plot test, seems very likely these are min/max bound values for the mesh.
+        // 24 bytes: min & max bounds for the mesh.
 		Vector3 min;
-		Vector3 max;
 		min.x = reader.ReadFloat();
 		min.z = reader.ReadFloat();
 		min.y = reader.ReadFloat();
-		
+        
+        Vector3 max;
 		max.x = reader.ReadFloat();
 		max.z = reader.ReadFloat();
 		max.y = reader.ReadFloat();
@@ -247,7 +258,7 @@ void Model::ParseFromData(char *data, int dataLength)
 		std::cout << "    Max: " << max << std::endl;
 		#endif
         
-        // Now, we iterate over each submesh in this mesh.
+        // Now, iterate over each submesh in this mesh.
         for(int j = 0; j < numSubMeshes; j++)
         {
             #ifdef DEBUG_OUTPUT
@@ -263,7 +274,7 @@ void Model::ParseFromData(char *data, int dataLength)
                 return;
             }
 			
-            // 32 bytes: the name of the texture for this submesh
+            // 32 bytes: the name of the texture for this submesh.
             std::string textureName = reader.ReadString(32);
             #ifdef DEBUG_OUTPUT
             std::cout << "      Texture name: " << textureName << std::endl;
@@ -311,12 +322,10 @@ void Model::ParseFromData(char *data, int dataLength)
             #endif
             for(int k = 0; k < vertexCount; k++)
             {
-                float x = reader.ReadFloat();
-				float z = reader.ReadFloat();
-                float y = reader.ReadFloat();
-                vertexPositions[k * 3] = x;
-                vertexPositions[k * 3 + 1] = y;
-                vertexPositions[k * 3 + 2] = z;
+                Vector3 vertex = reader.ReadVector3();
+                vertexPositions[k * 3] = vertex.x;
+                vertexPositions[k * 3 + 1] = vertex.z;
+                vertexPositions[k * 3 + 2] = vertex.y;
                 
                 #ifdef DEBUG_OUTPUT
                 //std::cout << Vector3(x, y, z);
@@ -357,26 +366,30 @@ void Model::ParseFromData(char *data, int dataLength)
 				reader.ReadUShort(); // WHAT IS IT!?
             }
             
-            // Generate mesh from data.
+            // Generate mesh.
             MeshDefinition meshDefinition;
-            meshDefinition.meshUsage = MeshUsage::Dynamic;
+            meshDefinition.meshUsage = MeshUsage::Dynamic;  // Since vertex anims are prevalent in GK3, I think Dynamic makes sense.
+                                                            // But ideally, this would be Static for any model that doesn't animate.
             
+            // Define vertex layout.
             meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
             meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
             meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Normal);
             meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
             
+            // Define vertex data.
             meshDefinition.vertexCount = vertexCount;
             std::vector<float*> vertexData;
             vertexData.push_back(vertexPositions);
             vertexData.push_back(vertexNormals);
             vertexData.push_back(vertexUVs);
             meshDefinition.vertexData = &vertexData[0];
-        
+            
             meshDefinition.indexCount = faceCount * 3;
             meshDefinition.indexData = vertexIndexes;
             
             // Create submesh.
+            // Submesh takes ownership of the arrays passed in, so don't delete it!
             Submesh* submesh = mesh->AddSubmesh(meshDefinition);
             submesh->SetPositions(vertexPositions);
             submesh->SetNormals(vertexNormals);
