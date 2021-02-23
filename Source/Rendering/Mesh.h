@@ -49,10 +49,9 @@ private:
 	std::vector<Submesh*> mSubmeshes;
 	
     // Transforms from "mesh space" to "local space".
-	// Each Mesh in GK3 has its own position/rotation/scale,
-	// and Submesh vertices are relative to the Mesh coordinate system.
+	// Each Mesh in GK3 has its own position/rotation/scale, and Submesh vertices are relative to the Mesh coordinate system.
 	// This matrix represents the Mesh's coordinate system and can be used to transform from mesh space to parent space.
-    Matrix4 mMeshToLocalMatrix;
+    Matrix4 mMeshToLocalMatrix = Matrix4::Identity;
 	
 	// An AABB for the mesh, in its own local space.
 	AABB mAABB;
