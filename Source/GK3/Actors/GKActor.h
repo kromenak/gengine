@@ -55,7 +55,7 @@ public:
 	// Vertex animation functions.
 	void StartAnimation(VertexAnimation* anim, int framesPerSecond, bool allowMove, float time, bool fromGas);
 	void StartAbsoluteAnimation(VertexAnimation* anim, int framesPerSecond, Vector3 pos, Heading heading, float time, bool fromGas);
-	void StopAnimation(VertexAnimation* anim);
+	void StopAnimation(VertexAnimation* anim = nullptr);
 	void SampleAnimation(VertexAnimation* anim, int frame);
 	
 	///
@@ -82,7 +82,9 @@ public:
 	void SnapToFloor();
 	
 	FaceController* GetFaceController() const { return mFaceController; }
-	
+    
+    void SetWalkerDOR(GKActor* walkerDOR) { mWalkerDOR = walkerDOR; }
+    
 	Vector3 GetHeadPosition() const;
 	
 	void DumpPosition();
@@ -99,15 +101,6 @@ private:
 		Prop
 	};
 	ActorType mActorType = ActorType::Actor;
-	
-	enum class AnimMode
-	{
-		None,
-		Relative,
-		Absolute,
-		Walking
-	};
-	AnimMode mAnimMode = AnimMode::None;
 	
 	///
 	/// ACTOR AND PROP VARIABLES
@@ -131,6 +124,12 @@ private:
 	bool mVertexAnimAllowMove = false;
 	Vector3 mStartVertexAnimPosition;
 	Quaternion mStartVertexAnimRotation;
+    
+    Vector3 mStartVertexAnimMeshPos;
+    Quaternion mStartVertexAnimMeshRotation;
+    
+    Vector3 mLastMeshPos;
+    Quaternion mLastMeshRotation;
 	
 	///
 	/// ACTOR ONLY VARIABLES
@@ -144,6 +143,7 @@ private:
 	
 	// The actor's walking control.
 	Walker* mWalker = nullptr;
+    GKActor* mWalkerDOR = nullptr;
 	
 	// The actor's face control.
 	FaceController* mFaceController = nullptr;
@@ -155,11 +155,10 @@ private:
     GAS* mListenFidget = nullptr;
 	
 	void OnVertexAnimationStopped();
-	
-	void SetMeshToActorPosition();
-	void SetMeshToActorPositionUsingAnim(VertexAnimation* anim, int framesPerSecond);
-	void SetMeshToActorRotation();
-	
-	void SetActorToMeshPosition();
-	void SetActorToMeshRotation();
+    
+    void SyncMeshTransformToActor(VertexAnimation* anim = nullptr);
+    void SyncActorTransformToMesh();
+    
+    Vector3 GetMeshPosition();
+    Quaternion GetMeshRotation();
 };

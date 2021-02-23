@@ -223,11 +223,20 @@ void Scene::Load()
 		
 		//TODO: If hidden, hide.
 		
-		// If this is our ego, save a reference to it.
+		// If this is ego, save a reference to it.
 		if(actorDef->ego && actorDef == egoSceneActor)
 		{
 			mEgo = actor;
 		}
+        
+        Model* walkerDorModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
+        if(walkerDorModel != nullptr)
+        {
+            GKActor* walkerDOR = new GKActor();
+            walkerDOR->GetMeshRenderer()->SetModel(walkerDorModel);
+            actor->SetWalkerDOR(walkerDOR);
+            mObjects.push_back(walkerDOR);
+        }
 	}
 	
 	// Iterate over scene model data and prep the scene.
@@ -251,7 +260,6 @@ void Scene::Load()
 				if(modelDef->hidden)
 				{
 					actor->SetActive(false);
-					//mSceneData->GetBSP()->SetVisible(modelDef->name, false);
 				}
 				break;
 			}
@@ -275,9 +283,6 @@ void Scene::Load()
 				{
 					actor->SetVisible(false);
 				}
-				
-				//std::cout << "Hide " << modelDef->name << std::endl;
-				//mSceneData->GetBSP()->SetVisible(modelDef->name, false);
 				break;
 			}
 				
