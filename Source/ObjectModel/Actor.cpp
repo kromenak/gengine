@@ -33,6 +33,16 @@ Actor::Actor(TransformType transformType)
 	}
 }
 
+Actor::Actor(const std::string& name) : Actor()
+{
+    mName = name;
+}
+
+Actor::Actor(const std::string& name, TransformType transformType) : Actor(transformType)
+{
+    mName = name;
+}
+
 Actor::~Actor()
 {
 	//NOTE: GEngine class handles calling "delete". Others should call Destroy if needed.

@@ -35,13 +35,17 @@ public:
 	
     Actor();
 	Actor(TransformType transformType);
-	
+    Actor(const std::string& name);
+    Actor(const std::string& name, TransformType transformType);
     virtual ~Actor();
     
 	void Update(float deltaTime);
     
     template<class T> T* AddComponent();
     template<class T> T* GetComponent();
+    
+    std::string& GetName() { return mName; }
+    void SetName(const std::string& name) { mName = name; }
 	
 	// STATE
 	void SetActive(bool active);
@@ -87,6 +91,10 @@ protected:
 	virtual void OnUpdate(float deltaTime) { }
     
 private:
+    // The actor's name - meant for debugging purposes.
+    std::string mName;
+    
+    // State of the actor - used for lifetime management and whether the actor receives updates.
 	State mState = State::Active;
 	
 	// By default, actors are destroyed when a new scene loads.
