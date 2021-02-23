@@ -80,12 +80,14 @@ public:
     void Invert();
     static Quaternion Inverse(const Quaternion& quat);
     
-
+    // Difference Between Quaternions
+    // Calculates quaternion x such that (q1 * x == q2).
+    static Quaternion Diff(const Quaternion& q2, const Quaternion& q1);
     
     // Interpolate
     static void Lerp(Quaternion& result, const Quaternion& start, const Quaternion& end, float t);
     static void Slerp(Quaternion& result, const Quaternion& start, const Quaternion& end, float t);
-    
+        
     // Quaternion elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;
     float y = 0.0f;

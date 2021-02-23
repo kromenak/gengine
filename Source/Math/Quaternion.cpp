@@ -124,13 +124,30 @@ Quaternion Quaternion::operator*(const Quaternion& other) const
                       w * other.w - x * other.x - y * other.y - z * other.z);
 }
 
-Quaternion& Quaternion::operator*=(const Quaternion &other)
+Quaternion& Quaternion::operator*=(const Quaternion& other)
 {
-    x = w * other.x + x * other.w + y * other.z - z * other.y;
-    y = w * other.y + y * other.w + z * other.x - x * other.z;
-    z = w * other.z + z * other.w + x * other.y - y * other.x;
-    w = w * other.w - x * other.x - y * other.y - z * other.z;
+    // Important to not overwrite x/y/z/w right away b/c they are used for subsequent calculations!
+    float newX = w * other.x + x * other.w + y * other.z - z * other.y;
+    float newY = w * other.y + y * other.w + z * other.x - x * other.z;
+    float newZ = w * other.z + z * other.w + x * other.y - y * other.x;
+    float newW = w * other.w - x * other.x - y * other.y - z * other.z;
+    x = newX;
+    y = newY;
+    z = newZ;
+    w = newW;
     return *this;
+}
+
+Vector3 Quaternion::Rotate(const Vector3& vector) const
+{
+    //ASSERT(IsUnit());
+    float vMult = 2.0f * (x * vector.x + y * vector.y + z * vector.z);
+    float crossMult = 2.0f * w;
+    float pMult = crossMult * w - 1.0f;
+    
+    return Vector3(pMult * vector.x + vMult * x + crossMult * (y * vector.z - z * vector.y),
+                   pMult * vector.y + vMult * y + crossMult * (z * vector.x - x * vector.z),
+                   pMult * vector.z + vMult * z + crossMult * (x * vector.y - y * vector.x));
 }
 
 void Quaternion::Set(const Vector3& axis, float angle)
@@ -394,16 +411,6 @@ void Quaternion::Normalize()
 
 void Quaternion::Invert()
 {
-	// Calculate length squared, so we know if the quaternion is zero or not.
-    float lengthSq = (x * x) + (y * y) + (z * z) + (w * w);
-    
-	// If length is zero, we just return the quaternion, unaffected.
-    // This is technically an invalid operation, btw.
-	if(Math::IsZero(lengthSq))
-    {
-        return;
-    }
-    
     // For unit length quaternions, the inverse is equal to the conjugate (just negate vector part).
     if(IsUnit())
     {
@@ -413,6 +420,13 @@ void Quaternion::Invert()
     }
     else
     {
+        // Calculate length squared, so we know if the quaternion is zero or not.
+        float lengthSq = (x * x) + (y * y) + (z * z) + (w * w);
+        
+        // If length is zero, we just return the quaternion, unaffected.
+        // This is technically an invalid operation, btw.
+        if(Math::IsZero(lengthSq)) { return; }
+        
         // For non-unit quaternions, inverse is calculated by dividing by quaternion (q) times conjugate (q*).
         // After doing the math/simplifying, this means we can just divide by length squared and negate the vector part.
         float recip = 1.0f / lengthSq;
@@ -430,16 +444,17 @@ void Quaternion::Invert()
     return toInvert;
 }
 
-Vector3 Quaternion::Rotate(const Vector3& vector) const
+/*static*/ Quaternion Quaternion::Diff(const Quaternion& q2, const Quaternion& q1)
 {
-    //ASSERT(IsUnit());
-    float vMult = 2.0f * (x * vector.x + y * vector.y + z * vector.z);
-    float crossMult = 2.0f * w;
-    float pMult = crossMult * w - 1.0f;
+    // The idea behind "diff" is similar to how scalar and vector subtraction work.
+    // You can do scale "s2 - s1" (calculate value you'd add to s1 to get s2).
+    // You can do vector "v2 - v1" (calculate value you'd add to v1 to get v2).
+    // Quaternion subtraction doesn't do the same thing, but a similar value can be calculated using inverses!
     
-    return Vector3(pMult * vector.x + vMult * x + crossMult * (y * vector.z - z * vector.y),
-                   pMult * vector.y + vMult * y + crossMult * (z * vector.x - x * vector.z),
-                   pMult * vector.z + vMult * z + crossMult * (x * vector.y - y * vector.x));
+    // Inverse of q1 represents opposite rotation of q1.
+    // Then, multiplying by q2 leaves us with q, which you multiply by q1 to get q2.
+    Quaternion inv = Inverse(q1);
+    return inv * q2;
 }
 
 /*static*/ void Quaternion::Lerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)
