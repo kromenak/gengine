@@ -78,7 +78,7 @@ public:
 	void Rotate(const Vector3& axis, float angle, Space space = Space::Local);
 	void Rotate(const Quaternion& rotation, Space space = Space::Local);
 	
-	// Rotates in local space, about an axis at a world point, by an angle.
+	// Rotates about an axis at a world point, by an angle.
 	void RotateAround(const Vector3& worldPoint, const Vector3& axis, float angle);
 	void RotateAround(const Vector3& worldPoint, const Quaternion& rotation);
 	

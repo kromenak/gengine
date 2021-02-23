@@ -218,26 +218,28 @@ void Transform::Rotate(const Quaternion& rotation, Space space)
 
 void Transform::RotateAround(const Vector3& worldPoint, const Vector3& axis, float angle)
 {
-	// HOW THIS WORKS: rotating a transform normally does not change the transform's position - we just rotate about the transform's origin.
-	// To rotate about some other point, the transform's position must change during the rotation to keep positions the same relative to that point.
-	// 1) Calc offset from rotation point.
-	// 2) Rotate that offset by desired rotation.
-	// 3) Move transform to point + offset.
-	// 4) Rotate as you would normally.
-	
-	// Calculate world-space offset from point rotating around to current position.
-	Vector3 worldPos = GetWorldPosition();
-	Vector3 pointToPos = worldPos - worldPoint;
-	
-	// Create rotation about desired axis/angle.
-	Quaternion rotation(axis, angle);
-	
-	// Rotate offset from rotation point to old world pos to get a new offset.
-	// Adding that new offset to the rotation point gives us the object's new world space position.
-	SetWorldPosition(worldPoint + rotation.Rotate(pointToPos));
-	
-	// Actually rotate the transform.
-	Rotate(rotation);
+    RotateAround(worldPoint, Quaternion(axis, angle));
+}
+
+void Transform::RotateAround(const Vector3& worldPoint, const Quaternion& rotation)
+{
+    // HOW THIS WORKS: rotating a transform normally does not change the transform's position - we just rotate about the transform's origin.
+    // To rotate about some other point, the transform's position must change during the rotation to keep positions the same relative to that point.
+    // 1) Calc offset from rotation point.
+    // 2) Rotate that offset by desired rotation.
+    // 3) Move transform to point + offset.
+    // 4) Rotate as you would normally.
+    
+    // Calculate world-space offset from point rotating around to current position.
+    Vector3 worldPos = GetWorldPosition();
+    Vector3 pointToPos = worldPos - worldPoint;
+    
+    // Rotate offset from rotation point to old world pos to get a new offset.
+    // Adding that new offset to the rotation point gives us the object's new world space position.
+    SetWorldPosition(worldPoint + rotation.Rotate(pointToPos));
+    
+    // Actually rotate the transform.
+    Rotate(rotation);
 }
 
 void Transform::SetDirty()
