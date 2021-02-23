@@ -81,6 +81,12 @@ public:
     void SetVolume(AudioType audioType, float volume);
     float GetVolume(AudioType audioType) const;
     
+    void SetMuted(bool mute);
+    bool GetMuted();
+    
+    void SetMuted(AudioType audioType, bool mute);
+    bool GetMuted(AudioType audioType);
+    
     AudioSaveState SaveAudioState(bool includeAmbient);
     void RestoreAudioState(AudioSaveState& audioState);
     
@@ -102,7 +108,7 @@ private:
     // Don't want to modify sound or ambient group directly (they can be modified by others). This is JUST for fade in/out.
     FMOD::ChannelGroup* mAmbientFadeChannelGroup = nullptr;
     
-    //
+    // Timers for fading ambient audio.
     float mAmbientFadeDuration = 0.0f;
     float mAmbientFadeTimer = 0.0f;
     float mAmbientFadeTo = 0.0f;

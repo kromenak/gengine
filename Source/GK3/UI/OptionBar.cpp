@@ -160,10 +160,8 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     // Some positioning code would be easier if this was (0.5, 0.5) BUT that causes some rendering problems b/c the rect is no longer pixel perfect.
     // Mayyybe we can fix that in the RectTransform/Rect code directly...with a bit of work.
     backgroundImage->GetRectTransform()->SetPivot(Vector2::Zero);
-    
     backgroundImage->GetRectTransform()->SetAnchor(Vector2::Zero);
     backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
-    
     backgroundImage->SetReceivesInput(true);
     
     // Load font.
@@ -465,7 +463,7 @@ void OptionBar::CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<s
     canvas->AddWidget(muteToggle);
     
     muteToggle->SetToggleCallback([](bool isOn) {
-        std::cout << "Mute global toggled " << isOn << std::endl;
+        Services::GetAudio()->SetMuted(isOn);
     });
     
     //TODO: SFX volume slider
@@ -475,7 +473,7 @@ void OptionBar::CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<s
     canvas->AddWidget(sfxMuteToggle);
     
     sfxMuteToggle->SetToggleCallback([](bool isOn) {
-        std::cout << "Mute SFX toggled " << isOn << std::endl;
+        Services::GetAudio()->SetMuted(AudioType::SFX, isOn);
     });
     
     //TODO: VO volume slider
@@ -485,7 +483,7 @@ void OptionBar::CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<s
     canvas->AddWidget(voMuteToggle);
     
     voMuteToggle->SetToggleCallback([](bool isOn) {
-        std::cout << "Mute VO toggled " << isOn << std::endl;
+        Services::GetAudio()->SetMuted(AudioType::VO, isOn);
     });
     
     //TODO: Music volume slider
@@ -495,7 +493,7 @@ void OptionBar::CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<s
     canvas->AddWidget(musicMuteToggle);
     
     musicMuteToggle->SetToggleCallback([](bool isOn) {
-        std::cout << "Mute music toggled " << isOn << std::endl;
+        Services::GetAudio()->SetMuted(AudioType::Ambient, isOn);
     });
     
     //TODO: Max sounds slider

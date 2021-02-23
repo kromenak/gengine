@@ -308,6 +308,30 @@ float AudioManager::GetVolume(AudioType audioType) const
     return volume;
 }
 
+void AudioManager::SetMuted(bool mute)
+{
+    mMasterChannelGroup->setMute(mute);
+}
+
+bool AudioManager::GetMuted()
+{
+    bool mute = false;
+    mMasterChannelGroup->getMute(&mute);
+    return mute;
+}
+
+void AudioManager::SetMuted(AudioType audioType, bool mute)
+{
+    GetChannelGroupForAudioType(audioType)->setMute(mute);
+}
+
+bool AudioManager::GetMuted(AudioType audioType)
+{
+    bool mute = false;
+    GetChannelGroupForAudioType(audioType)->getMute(&mute);
+    return mute;
+}
+
 AudioSaveState AudioManager::SaveAudioState(bool includeAmbient)
 {
     // Create state object.
