@@ -18,8 +18,9 @@ public:
     GasPlayer(Actor* owner);
     
 	void SetGas(GAS* gas) { mGas = gas; }
-	
+    
 	void Play() { mNodeIndex = 0; mTimer = 0.0f; mPaused = false; }
+    void Play(GAS* gas) { mGas = gas; Play(); }
 	void Pause() { mPaused = true; }
 	void Resume() { mPaused = false; }
 	
