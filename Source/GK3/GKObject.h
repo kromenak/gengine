@@ -21,6 +21,8 @@ public:
 	// GK3 rotations are often defined in terms of a heading (360 degrees about Y-axis).
 	virtual void SetHeading(const Heading& heading);
 	Heading GetHeading() const;
+    
+    void DumpPosition();
 	
 	void SetNoun(const std::string& noun) { mNoun = noun; }
 	const std::string& GetNoun() const { return mNoun; }

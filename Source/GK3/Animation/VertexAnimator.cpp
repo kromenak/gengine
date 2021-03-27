@@ -19,27 +19,19 @@ VertexAnimator::VertexAnimator(Actor* owner) : Component(owner)
 	mMeshRenderer = owner->GetComponent<MeshRenderer>();
 }
 
-void VertexAnimator::Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback)
+void VertexAnimator::Start(const VertexAnimParams& params)
 {
-	// If we're interrupting some other anim, fire the stop callback for that other anim.
-	Stop(nullptr);
-	
-	// Save passed parameters.
-	mVertexAnimation = anim;
-	mFramesPerSecond = framesPerSecond;
-	mStopCallback = stopCallback;
-	
-	// Reset animation timer.
-	mVertexAnimationTimer = 0.0f;
-}
-
-void VertexAnimator::Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback, float time)
-{
-	Start(anim, framesPerSecond, stopCallback);
-	mVertexAnimationTimer = time;
-
-	// Sample animation at current timer value.
-	TakeSample(mVertexAnimation, mVertexAnimationTimer);
+    // If we're interrupting some other anim, stop it (fires stop callback).
+    Stop();
+    
+    // Save parameters.
+    mVertexAnimation = params.vertexAnimation;
+    mFramesPerSecond = params.framesPerSecond;
+    mAnimationTimer = params.startTime;
+    mStopCallback = params.stopCallback;
+    
+    // Sample animation immediately so mesh's positions/rotations are updated.
+    Sample(mVertexAnimation, mAnimationTimer);
 }
 
 void VertexAnimator::Stop(VertexAnimation* anim)
@@ -63,8 +55,7 @@ void VertexAnimator::Sample(VertexAnimation* animation, int frame)
 {
 	if(animation != nullptr)
 	{
-		//TODO: Should not assume 15.0f here, probably?
-		TakeSample(animation, frame * (1.0f / 15.0f));
+		TakeSample(animation, frame);
 	}
 }
 
@@ -74,19 +65,44 @@ void VertexAnimator::OnUpdate(float deltaTime)
 	if(mVertexAnimation != nullptr)
 	{
 		// Increment animation timer.
-		mVertexAnimationTimer += deltaTime;
+		mAnimationTimer += deltaTime;
 		
 		// Sample animation at current timer value, clamping to anim duration.
 		float animDuration = mVertexAnimation->GetDuration(mFramesPerSecond);
-		TakeSample(mVertexAnimation, Math::Clamp(mVertexAnimationTimer, 0.0f, animDuration));
+		TakeSample(mVertexAnimation, Math::Clamp(mAnimationTimer, 0.0f, animDuration));
 		
 		// If at the end of the animation, clear animation.
 		// GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
-		if(mVertexAnimationTimer >= animDuration)
+		if(mAnimationTimer >= animDuration)
 		{
-			Stop(nullptr);
+			Stop(mVertexAnimation);
 		}
 	}
+}
+
+void VertexAnimator::TakeSample(VertexAnimation* animation, int frame)
+{
+    // Iterate through each mesh and sample it in the vertex animation.
+    // We need to sample both vertex poses and transform poses to get the right result.
+    const std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
+    for(int i = 0; i < meshes.size(); i++)
+    {
+        const std::vector<Submesh*>& submeshes = meshes[i]->GetSubmeshes();
+        for(int j = 0; j < submeshes.size(); j++)
+        {
+            VertexAnimationVertexPose sample = animation->SampleVertexPose(frame, i, j);
+            if(sample.mFrameNumber >= 0)
+            {
+                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.mVertexPositions.data()), true);
+            }
+        }
+        
+        VertexAnimationTransformPose transformSample = animation->SampleTransformPose(frame, i);
+        if(transformSample.mFrameNumber >= 0)
+        {
+            meshes[i]->SetMeshToLocalMatrix(transformSample.GetMeshToLocalMatrix());
+        }
+    }
 }
 
 void VertexAnimator::TakeSample(VertexAnimation* animation, float time)

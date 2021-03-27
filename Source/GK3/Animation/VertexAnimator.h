@@ -10,25 +10,38 @@
 
 #include <functional>
 
+#include "Heading.h"
+#include "Vector3.h"
+
 class MeshRenderer;
 class VertexAnimation;
 
-/*
 struct VertexAnimParams
 {
 	// The anim to play.
-	VertexAnimation* anim = nullptr;
+	VertexAnimation* vertexAnimation = nullptr;
 	
 	// Rate to play the animation at.
 	int framesPerSecond = 15;
 	
 	// Time to start the animation at.
 	float startTime = 0.0f;
-	
+    
+    // An absolute anim plays from a specific position/rotation
+    // (in contrast to a "relative" anim that plays from model's last position/rotation).
+    bool absolute = false;
+    Vector3 absolutePosition;
+    Heading absoluteHeading = Heading::None;
+    
+    // If true, animation can move associated character (kind of like "root motion").
+    bool allowMove = false;
+    
+    // If true, this anim was started from an autoscript (GAS).
+    bool fromAutoScript = false;
+    
 	// A callback to fire on animation stop.
 	std::function<void()> stopCallback = nullptr;
 };
-*/
 
 class VertexAnimator : public Component
 {
@@ -36,9 +49,8 @@ class VertexAnimator : public Component
 public:
 	VertexAnimator(Actor* owner);
 	
-	void Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback);
-	void Start(VertexAnimation* anim, int framesPerSecond, std::function<void()> stopCallback, float time);
-	void Stop(VertexAnimation* anim);
+    void Start(const VertexAnimParams& params);
+	void Stop(VertexAnimation* anim = nullptr);
 	
 	void Sample(VertexAnimation* animation, int frame);
 	
@@ -62,7 +74,8 @@ private:
 	std::function<void()> mStopCallback = nullptr;
 	
 	// Timer for tracking progress on vertex animation.
-	float mVertexAnimationTimer = 0.0f;
+	float mAnimationTimer = 0.0f;
 	
+    void TakeSample(VertexAnimation* animation, int frame);
 	void TakeSample(VertexAnimation* animation, float time);
 };

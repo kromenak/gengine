@@ -123,7 +123,7 @@ void Scene::Load()
 		mCamera->SetBounds(cameraBoundsModel);
 		
 		// For debugging - we can visualize the camera bounds mesh, if desired.
-		GKActor* cameraBoundsActor = new GKActor();
+		GKProp* cameraBoundsActor = new GKProp();
 		MeshRenderer* cameraBoundsMeshRenderer = cameraBoundsActor->GetMeshRenderer();
 		cameraBoundsMeshRenderer->SetModel(cameraBoundsModel);
 		cameraBoundsMeshRenderer->SetEnabled(false);
@@ -232,7 +232,7 @@ void Scene::Load()
         Model* walkerDorModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
         if(walkerDorModel != nullptr)
         {
-            GKActor* walkerDOR = new GKActor();
+            GKProp* walkerDOR = new GKProp();
             walkerDOR->GetMeshRenderer()->SetModel(walkerDorModel);
             actor->SetWalkerDOR(walkerDOR);
             mObjects.push_back(walkerDOR);
@@ -292,7 +292,7 @@ void Scene::Load()
 			case SceneModel::Type::GasProp:
 			{
 				// Create actor.
-				GKActor* prop = new GKActor();
+				GKProp* prop = new GKProp();
 				prop->SetNoun(modelDef->noun);
 				
 				// Set model.
@@ -303,7 +303,7 @@ void Scene::Load()
 				// If it's a "gas prop", use provided gas as the fidget for the actor.
 				if(modelDef->type == SceneModel::Type::GasProp)
 				{
-					prop->SetIdleFidget(modelDef->gas);
+					prop->StartFidget(modelDef->gas);
 				}
 				break;
 			}
@@ -326,6 +326,13 @@ void Scene::Load()
 			mAnimator->Sample(modelDef->initAnim, 0);
 		}
 	}
+    
+    // Create Grace Prop!
+    GKProp* prop = new GKProp();
+    prop->SetNoun("GRACE");
+    prop->GetMeshRenderer()->SetModel(Services::GetAssets()->LoadModel("GRA.MOD"));
+    mProps.push_back(prop);
+    mObjects.push_back(prop);
     
 	// Check for and run "scene enter" actions.
 	Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");
@@ -537,22 +544,14 @@ float Scene::GetFloorY(const Vector3& position) const
 	return 0.0f;
 }
 
-GKActor* Scene::GetSceneObjectByModelName(const std::string& modelName) const
+GKProp* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 {
 	for(auto& object : mObjects)
 	{
-		MeshRenderer* meshRenderer = object->GetMeshRenderer();
-		if(meshRenderer != nullptr)
-		{
-			Model* model = meshRenderer->GetModel();
-			if(model != nullptr)
-			{
-				if(StringUtil::EqualsIgnoreCase(model->GetNameNoExtension(), modelName))
-				{
-					return object;
-				}
-			}
-		}
+        if(StringUtil::EqualsIgnoreCase(object->GetModelName(), modelName))
+        {
+            return object;
+        }
 	}
 	return nullptr;
 }
@@ -714,10 +713,10 @@ void Scene::ExecuteAction(const Action* action)
 		{
 			// Find position of the model.
 			Vector3 modelPosition;
-			GKActor* actor = GetSceneObjectByModelName(action->target);
-			if(actor != nullptr)
+			GKProp* obj = GetSceneObjectByModelName(action->target);
+			if(obj != nullptr)
 			{
-				modelPosition = actor->GetPosition();
+				modelPosition = obj->GetPosition();
 			}
 			else
 			{
@@ -739,10 +738,10 @@ void Scene::ExecuteAction(const Action* action)
 		{
 			// Find position of the model we want to "walk to see".
 			Vector3 targetPosition;
-			GKActor* actor = GetSceneObjectByModelName(action->target);
-			if(actor != nullptr)
+			GKProp* obj = GetSceneObjectByModelName(action->target);
+			if(obj != nullptr)
 			{
-				targetPosition = actor->GetPosition();
+				targetPosition = obj->GetPosition();
 			}
 			else
 			{

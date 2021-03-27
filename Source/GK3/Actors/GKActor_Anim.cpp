@@ -6,6 +6,7 @@
 #include "MeshRenderer.h"
 #include "VertexAnimator.h"
 
+/*
 void GKActor::StartAnimation(VertexAnimation* anim, int framesPerSecond, bool allowMove, float time, bool fromGas)
 {
     // Don't let a GAS anim override a non-GAS anim.
@@ -186,7 +187,7 @@ void GKActor::SyncActorTransformToMesh()
     GetTransform()->Rotate(meshRotationChange);
     mLastMeshRotation = meshRotation;
     
-    /*
+    
     // Update actor's position to match the mesh's position.
     // Mesh's position is the mesh's hip position, but with height value removed/zero'd.
     Vector3 meshPos = GetMeshPosition();
@@ -200,7 +201,6 @@ void GKActor::SyncActorTransformToMesh()
         meshRotation *= Quaternion(Vector3::UnitY, Math::kPi);
     }
     SetRotation(meshRotation);
-    */
 }
 
 Vector3 GKActor::GetMeshPosition()
@@ -221,3 +221,4 @@ Quaternion GKActor::GetMeshRotation()
     Matrix4 hipMeshToWorldMatrix = mMeshActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix();
     return hipMeshToWorldMatrix.GetRotation();
 }
+ */

@@ -29,6 +29,7 @@ class BSPActor;
 class GameCamera;
 class GKActor;
 class GKObject;
+class GKProp;
 class Ray;
 struct SceneModel;
 class SIF;
@@ -64,7 +65,7 @@ public:
 	const std::string& GetEgoName() const { return mEgoName; }
 	GKActor* GetEgo() const { return mEgo; }
 	
-	GKActor* GetSceneObjectByModelName(const std::string& modelName) const;
+	GKProp* GetSceneObjectByModelName(const std::string& modelName) const;
 	GKActor* GetActorByNoun(const std::string& noun) const;
 	
 	const ScenePosition* GetPosition(const std::string& positionName) const;
@@ -102,14 +103,14 @@ private:
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
 	
-	// All GKActors in the scene (Actors and Props).
-	std::vector<GKActor*> mObjects;
+	// All actors and props.
+	std::vector<GKProp*> mObjects;
 	
 	// Just "actors".
 	std::vector<GKActor*> mActors;
 	
 	// Just "props".
-	std::vector<GKActor*> mProps;
+	std::vector<GKProp*> mProps;
 	
 	// Actors in the BSP.
 	std::vector<BSPActor*> mBSPActors;

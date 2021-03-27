@@ -5,8 +5,6 @@
 //
 #include "GKActor.h"
 
-#include <sstream>
-
 #include "CharacterManager.h"
 #include "Debug.h"
 #include "FaceController.h"
@@ -17,34 +15,9 @@
 #include "VertexAnimator.h"
 #include "Walker.h"
 
-GKActor::GKActor() : GKObject(),
-	mActorType(ActorType::Prop)
+GKActor::GKActor(const std::string& identifier) : GKProp(true),
+	mIdentifier(identifier)
 {
-	// Create mesh actor with mesh renderer on it.
-	mMeshActor = new Actor();
-	mMeshRenderer = mMeshActor->AddComponent<MeshRenderer>();
-	
-	// Create animation player on the same object as the mesh renderer.
-	mVertexAnimator = mMeshActor->AddComponent<VertexAnimator>();
-	
-	// GasPlayer will go on the actor itself.
-	mGasPlayer = AddComponent<GasPlayer>();
-}
-
-GKActor::GKActor(const std::string& identifier) : GKObject(),
-	mIdentifier(identifier),
-	mActorType(ActorType::Actor)
-{
-	// Create mesh actor with mesh renderer on it.
-	mMeshActor = new Actor();
-	mMeshRenderer = mMeshActor->AddComponent<MeshRenderer>();
-	
-	// Create animation player on the same object as the mesh renderer.
-    mVertexAnimator = mMeshActor->AddComponent<VertexAnimator>();
-	
-	// GasPlayer will go on the actor itself.
-    mGasPlayer = AddComponent<GasPlayer>();
-	
 	// Get config for this character.
 	CharacterConfig& config = Services::Get<CharacterManager>()->GetCharacterConfig(mIdentifier);
 	mCharConfig = &config;
@@ -56,82 +29,27 @@ GKActor::GKActor(const std::string& identifier) : GKObject(),
 	// Add walker and configure it.
 	mWalker = AddComponent<Walker>();
 	mWalker->SetCharacterConfig(config);
-}
-
-void GKActor::SetHeading(const Heading& heading)
-{
-    // Update heading of this actor.
-	GKObject::SetHeading(heading);
     
-    // Update mesh to match.
-    if(mActorType == ActorType::Actor)
-    {
-        mMeshActor->SetRotation(GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
-    }
-    else
-    {
-        mMeshActor->SetRotation(GetRotation());
-    }
-}
-
-std::string GKActor::GetModelName() const
-{
-	if(mMeshRenderer == nullptr) { return std::string(); }
-	Model* model = mMeshRenderer->GetModel();
-	if(model == nullptr) { return std::string(); }
-	return model->GetNameNoExtension();
+    // Actor meshes are facing down -Z axis, but we need them to face +Z.
+    mMeshLocalRotation = Quaternion(Vector3::UnitY, Math::kPi);
 }
 
 void GKActor::StartFidget(FidgetType type)
 {
-    // Set appropriate gas to play.
     switch(type)
     {
-	case FidgetType::None:
-	case FidgetType::Custom: // Can only be started via StartCustomFidget.
-		mGasPlayer->SetGas(nullptr);
-		break;
-		
 	case FidgetType::Idle:
-		mGasPlayer->SetGas(mIdleFidget);
+		mGasPlayer->Play(mIdleFidget);
 		break;
 		
 	case FidgetType::Talk:
-		mGasPlayer->SetGas(mTalkFidget);
+		mGasPlayer->Play(mTalkFidget);
 		break;
 		
 	case FidgetType::Listen:
-		mGasPlayer->SetGas(mListenFidget);
+		mGasPlayer->Play(mListenFidget);
 		break;
     }
-	
-	// Save type we're playing.
-	mCurrentFidget = type;
-	
-	// Play it!
-	mGasPlayer->Play();
-}
-
-void GKActor::StartCustomFidget(GAS* gas)
-{
-	// Set and play.
-	mCurrentFidget = FidgetType::Custom;
-	mGasPlayer->SetGas(gas);
-	mGasPlayer->Play();
-}
-
-void GKActor::StopFidget()
-{
-	mGasPlayer->Pause();
-}
-
-void GKActor::DumpPosition()
-{
-	std::stringstream ss;
-	ss << "actor '" << GetNoun() << "' ";
-	ss << "h=" << GetHeading() << ", ";
-	ss << "pos=" << GetPosition();
-	Services::GetReports()->Log("Dump", ss.str());
 }
 
 void GKActor::TurnTo(const Heading& heading, std::function<void()> finishCallback)
@@ -181,63 +99,148 @@ void GKActor::WalkToSee(const std::string& targetName, const Vector3& targetPosi
 
 Vector3 GKActor::GetWalkDestination() const
 {
-	if(mWalker == nullptr || !mWalker->IsWalking()) { return GetPosition(); }
+	if(!mWalker->IsWalking()) { return GetPosition(); }
 	return mWalker->GetDestination();
 }
 
 void GKActor::SnapToFloor()
 {
-	if(mWalker != nullptr)
-	{
-		mWalker->SnapToFloor();
-	}
+    mWalker->SnapToFloor();
 }
 
 Vector3 GKActor::GetHeadPosition() const
 {
-	/*
-	if(mMeshRenderer != nullptr)
-	{
-		Mesh* headMesh = mMeshRenderer->GetMesh(mCharConfig->headMeshIndex);
-		if(headMesh != nullptr)
-		{
-			Vector3 headCenter = headMesh->GetAABB().GetCenter();
-			Matrix4 meshToWorld = mMeshActor->GetTransform()->GetLocalToWorldMatrix() * headMesh->GetMeshToLocalMatrix();
-			return meshToWorld.TransformPoint(headCenter);
-		}
-	}
-	*/
-	
 	// Can't determine exact head position! Just return position.
 	Vector3 position = GetPosition();
 	position.y += mCharConfig->walkerHeight;
 	return position;
 }
 
-void GKActor::OnActive()
-{
-	// My mesh becomes active when I become active.
-	mMeshActor->SetActive(true);
-}
-
-void GKActor::OnInactive()
-{
-	// My mesh becomes inactive when I become inactive.
-	mMeshActor->SetActive(false);
-}
-
 void GKActor::OnUpdate(float deltaTime)
 {
+    GKProp::OnUpdate(deltaTime);
+    
+    MeshRenderer* dorRenderer = mWalkerDOR->GetMeshRenderer();
+    Vector3 dorPos = dorRenderer->GetMesh(0)->GetSubmesh(0)->GetVertexPosition(0);
+    dorPos = (mWalkerDOR->GetTransform()->GetLocalToWorldMatrix() * dorRenderer->GetMesh(0)->GetMeshToLocalMatrix()).TransformPoint(dorPos);
+    Debug::DrawLine(dorPos, dorPos + Vector3::UnitY * 20.0f, Color32::Green);
+    
+    {
+        if(mWalkerDOR->GetVertexAnimator()->IsPlaying())
+        {
+           
+        }
+        
+        // Track mesh movement since last frame and translate actor to match.
+        Vector3 meshPosition = GetMeshPosition();
+        Vector3 meshPositionChange = meshPosition - mLastMeshPos;
+        GetTransform()->Translate(meshPositionChange);
+        mLastMeshPos = meshPosition;
+        
+        // Same idea for rotation.
+        Quaternion meshRotation = GetMeshRotation();
+        Quaternion meshRotationChange = Quaternion::Diff(meshRotation, mLastMeshRotation);
+        GetTransform()->Rotate(meshRotationChange);
+        mLastMeshRotation = meshRotation;
+    }
+    
 	// Stay on the ground.
 	SnapToFloor();
-	
-	// Actor follows mesh during animation.
-    SyncActorTransformToMesh();
+}
+
+void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
+{
+    // For relative anims, move the model so its at the same position/rotation as the model was previously.
+    // Easier said than done...anims often have wildly different model origins!
+    // Ultimately, goal here is to enable continuous seamless animation playback even if model origin changes dramatically between anims.
+    if(!animParams.absolute)
+    {
+        VertexAnimation* anim = animParams.vertexAnimation;
+        
+        // Sample the hip position/matrix from that animation at frame 0.
+        Vector3 hipMeshPos = anim->SampleVertexPosition(0, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
+        Matrix4 meshToLocalMatrix = anim->SampleTransformPose(0, mCharConfig->hipAxesMeshIndex).GetMeshToLocalMatrix();
+        
+        // Convert hip pos to world space. Transform point using mesh->world matrix.
+        Vector3 worldHipPos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * meshToLocalMatrix).TransformPoint(hipMeshPos);
+        
+        // The hips are not right at the mesh actor's position. So, calculate offset from hips to mesh actor position.
+        // Y-component is zeroed out because we don't want this to change the height, just X/Z plane position.
+        Vector3 hipPosToActor = mModelActor->GetPosition() - worldHipPos;
+        hipPosToActor.y = 0.0f;
+        
+        // Set mesh actor to the actor's position.
+        // HOWEVER, again, mesh's actual position (represented by hip pos) may be offset (by quite a large amount) from the mesh actor's position!
+        // So that's what we apply the hipToActor offset.
+        mModelActor->SetPosition(GetPosition() + hipPosToActor);
+        
+        // Update rotation.
+        mModelActor->SetRotation(GetRotation() * mMeshLocalRotation);
+    }
     
-    /*
-	if(mMeshRenderer != nullptr)
-	{
-		mMeshRenderer->DebugDrawAABBs();
-	}
-    */
+    mWalkerDOR->SetPosition(mModelActor->GetPosition());
+    mWalkerDOR->SetRotation(mModelActor->GetRotation());
+    
+    // In GK3, a "move" anim is one that is allowed to move the actor. This is like "root motion" in modern engines.
+    // When "move" anim ends, the actor/mesh stay where they are. For "non-move" anims, actor/mesh revert to initial pos/rot.
+    // Interestingly, the actor still moves with the model during non-move anims...it just reverts at the end.
+    mVertexAnimAllowMove = animParams.allowMove;
+    if(!mVertexAnimAllowMove)
+    {
+        // Save start pos/rot for the actor, so it can be reverted.
+        mStartVertexAnimPosition = GetPosition();
+        mStartVertexAnimRotation = GetRotation();
+        
+        // Save start pos/rot for the mesh, so it can be reverted.
+        mStartVertexAnimMeshPos = GetMeshPosition();
+        mStartVertexAnimMeshRotation = GetMeshRotation();
+    }
+    
+    // Save last mesh pos/rot to establish new baseline for "actor follow mesh" function.
+    mLastMeshPos = mStartVertexAnimMeshPos;
+    mLastMeshRotation = mStartVertexAnimMeshRotation;
+}
+
+void GKActor::OnVertexAnimationStop()
+{
+    // On anim stop, if vertex anim is not allowed to move actor position,
+    // we must revert actor back to position when anim started.
+    if(!mVertexAnimAllowMove)
+    {
+        // Move actor back to start position/rotation.
+        SetPosition(mStartVertexAnimPosition);
+        SetRotation(mStartVertexAnimRotation);
+        
+        // Move mesh back to starting position/rotation.
+        // These are a bit harder because mesh's position relative to mesh actor origin may vary wildly depending on animation being played.
+        // To solve that, we'll move back using relative diffs, rather than absolute values.
+        mModelActor->GetTransform()->Translate(mStartVertexAnimMeshPos - GetMeshPosition());
+        Quaternion diff = Quaternion::Diff(mStartVertexAnimMeshRotation, GetMeshRotation());
+        mModelActor->GetTransform()->RotateAround(GetPosition(), diff);
+    }
+    
+    // Because the mesh may have moved back to start pos (if not a move anim),
+    // reset the last mesh position/rotation.
+    mLastMeshPos = GetMeshPosition();
+    mLastMeshRotation = GetMeshRotation();
+    
+    // Position DOR at model.
+    mWalkerDOR->SetPosition(mModelActor->GetPosition());
+    mWalkerDOR->SetRotation(mModelActor->GetRotation());
+}
+
+Vector3 GKActor::GetMeshPosition()
+{
+    // Get hip pos and convert to world space.
+    // To do this, multiply the mesh->local with local->world to get a mesh->world matrix for transforming.
+    Vector3 meshHipPos = mModelRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
+    Vector3 worldHipPos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mModelRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshHipPos);
+    worldHipPos.y = mModelActor->GetTransform()->GetLocalToWorldMatrix().TransformPoint(Vector3::Zero).y;
+    return worldHipPos;
+}
+
+Quaternion GKActor::GetMeshRotation()
+{
+    Matrix4 hipMeshToWorldMatrix = mModelActor->GetTransform()->GetLocalToWorldMatrix() * mModelRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix();
+    return hipMeshToWorldMatrix.GetRotation();
 }

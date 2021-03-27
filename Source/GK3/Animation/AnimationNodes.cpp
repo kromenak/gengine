@@ -16,6 +16,7 @@
 #include "MeshRenderer.h"
 #include "Services.h"
 #include "Scene.h"
+#include "VertexAnimator.h"
 
 void VertexAnimNode::Play(AnimationState* animState)
 {
@@ -26,18 +27,24 @@ void VertexAnimNode::Play(AnimationState* animState)
 	if(vertexAnimation != nullptr)
 	{
 		// Also we need the object to play the vertex anim on!
-		GKActor* actor = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
-		if(actor != nullptr)
+		GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(obj != nullptr)
 		{
-			// Start absolute or relative anim.
-			if(absolute)
-			{
-				actor->StartAbsoluteAnimation(vertexAnimation, animState->animation->GetFramesPerSecond(), position - offsetFromOrigin, Heading::FromDegrees(heading - headingFromOrigin), animState->timer, animState->fromGas);
-			}
-			else
-			{
-				actor->StartAnimation(vertexAnimation, animState->animation->GetFramesPerSecond(), animState->allowMove, animState->timer, animState->fromGas);
-			}
+            VertexAnimParams params;
+            params.vertexAnimation = vertexAnimation;
+            params.framesPerSecond = animState->animation->GetFramesPerSecond();
+            params.startTime = animState->timer;
+            params.absolute = absolute;
+            if(absolute)
+            {
+                params.absolutePosition = position - offsetFromOrigin;
+                params.absoluteHeading = Heading::FromDegrees(heading - headingFromOrigin);
+            }
+            params.allowMove = animState->allowMove || absolute; // absolute anims are always "move anims".
+            params.fromAutoScript = animState->fromGas;
+            
+            // Start the anim.
+            obj->StartAnimation(params);
 		}
 	}
 }
@@ -46,10 +53,10 @@ void VertexAnimNode::Stop()
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKActor* actor = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
-		if(actor != nullptr)
+		GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(obj != nullptr)
 		{
-			actor->StopAnimation(vertexAnimation);
+            obj->StopAnimation(vertexAnimation);
 		}
 	}
 }
@@ -58,10 +65,10 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKActor* actor = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
-		if(actor != nullptr)
+		GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		if(obj != nullptr)
 		{
-			actor->SampleAnimation(vertexAnimation, frame);
+            obj->SampleAnimation(vertexAnimation, frame);
 		}
 	}
 }
@@ -85,11 +92,11 @@ void SceneModelVisibilityAnimNode::Play(AnimationState* animState)
 void ModelTextureAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKActor* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
-	if(object != nullptr)
+	GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+	if(obj != nullptr)
 	{
 		// Grab the material used to render this meshIndex/submeshIndex pair.
-		Material* material = object->GetMeshRenderer()->GetMaterial(meshIndex, submeshIndex);
+		Material* material = obj->GetMeshRenderer()->GetMaterial(meshIndex, submeshIndex);
 		if(material != nullptr)
 		{
 			// Apply the texture to that material.
@@ -105,12 +112,12 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
 void ModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKActor* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
-	if(object != nullptr)
+	GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+	if(obj != nullptr)
 	{
 		//TODO: Not sure if models need to be invisible but still updating in this scenario.
 		//For now, I'll just disable or enable the actor entirely.
-		object->SetActive(visible);
+        obj->SetActive(visible);
 	}
 }
 
@@ -128,10 +135,10 @@ void SoundAnimNode::Play(AnimationState* animState)
         // If position is based on model name, find the model and set position.
         if(!modelName.empty())
         {
-            GKActor* actor = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
-            if(actor != nullptr)
+            GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+            if(obj != nullptr)
             {
-                playPosition = actor->GetWorldPosition();
+                playPosition = obj->GetWorldPosition();
             }
         }
         
