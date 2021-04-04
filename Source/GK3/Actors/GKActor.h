@@ -53,7 +53,7 @@ public:
 	void WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	
     Vector3 GetWalkDestination() const;
-    void SetWalkerDOR(GKProp* walkerDOR) { mWalkerDOR = walkerDOR; }
+    void SetWalkerDOR(GKProp* walkerDOR);
 	void SnapToFloor();
     
 	FaceController* GetFaceController() const { return mFaceController; }

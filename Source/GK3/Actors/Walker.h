@@ -21,6 +21,7 @@
 
 class Animation;
 struct CharacterConfig;
+class GKProp;
 class Heading;
 class WalkerBoundary;
 
@@ -31,7 +32,8 @@ public:
 	Walker(Actor* owner);
 	
     void SetCharacterConfig(const CharacterConfig& characterConfig) { mCharConfig = &characterConfig; }
-	
+    void SetHeadingProp(GKProp* headingProp) { mHeadingProp = headingProp; }
+    
 	void SnapToFloor();
 	
 	void WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
@@ -46,7 +48,7 @@ protected:
 	
 private:
 	const float kAtNodeDistSq = 150.0f;
-	const float kAtHeadingRadians = Math::ToRadians(4.0f);
+	const float kAtHeadingRadians = Math::ToRadians(15.0f);
     
     // Turn speeds. A faster speed is used for turning in place when not walking.
     const float kWalkTurnSpeed = Math::kPi;
@@ -72,6 +74,8 @@ private:
 	// Walker component is attached to GKActor.
     // Remember that the actual animating mesh is a separate actor!
 	GKActor* mGKOwner = nullptr;
+    
+    GKProp* mHeadingProp = nullptr;
 	
 	// Config is vital for walker to function - contains things like
 	// walk anims and hip position data.
@@ -107,4 +111,6 @@ private:
     bool AdvancePath();
     bool TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir = 0, bool aboutOwnerPos = true);
     Quaternion GetTurnAmount(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir = 0);
+    
+    Vector3 GetHeadingDir();
 };

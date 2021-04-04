@@ -17,6 +17,7 @@ GKProp::GKProp(bool isActor) : GKObject()
     if(isActor)
     {
         mModelActor = new Actor();
+        //mModelActor->GetTransform()->SetParent(GetTransform());
     }
     else
     {

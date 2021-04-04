@@ -45,10 +45,6 @@ void Walker::WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std
     WalkTo(position, Heading::None, walkerBoundary, finishCallback);
 }
 
-Vector3 turnAnimDir;
-float turnAnimTimer = 0.0f;
-float turnAngle = 0.0f;
-
 void Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
 {
     // DEBUG: visualize goal world position and position on A* node map.
@@ -128,6 +124,7 @@ void Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBound
                 startWalkTurnAction.op = WalkOp::FollowPathStartTurnLeft;
             }
             
+            /*
             // The "start turn" anims turn the actor 135 degrees to the left or right.
             // But what if out actual desired facing is more or less than that?
             // Well, we can make this one anim work for any rotation by stealthily applying more or less rotation during the start of the anim!
@@ -138,8 +135,8 @@ void Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBound
             turnAngle = Math::Acos(Vector3::Dot(turnAnimDir, toNextDir));
             
             // Apply that turn to current facing.
-            
             turnAnimTimer = 0.0f;
+            */
             
             mWalkActions.push_back(startWalkTurnAction);
         }
@@ -193,6 +190,7 @@ void Walker::OnUpdate(float deltaTime)
         }
     }
     
+    // Process outstanding walk actions.
     if(mWalkActions.size() > 0)
     {
         WalkAction& currentAction = mWalkActions.back();
@@ -208,68 +206,8 @@ void Walker::OnUpdate(float deltaTime)
         {
             if(!AdvancePath())
             {
-                turnAnimTimer += deltaTime;
-                
-                int shoeMeshIndex = currentAction.op == WalkOp::FollowPathStartTurnLeft ? mCharConfig->leftShoeAxesMeshIndex : mCharConfig->rightShoeAxesMeshIndex;
-                int shoeSubmeshIndex = currentAction.op == WalkOp::FollowPathStartTurnLeft ? mCharConfig->leftShoeAxesGroupIndex : mCharConfig->rightShoeAxesGroupIndex;
-                int shoePointIndex = currentAction.op == WalkOp::FollowPathStartTurnLeft ? mCharConfig->leftShoeAxesPointIndex : mCharConfig->rightShoeAxesPointIndex;
-                
-                MeshRenderer* meshRenderer = mGKOwner->GetMeshRenderer();
-                Matrix4 localToWorldMatrix = meshRenderer->GetOwner()->GetTransform()->GetLocalToWorldMatrix();
-                Matrix4 meshToLocalMatrix = meshRenderer->GetMesh(shoeMeshIndex)->GetMeshToLocalMatrix();
-                Matrix4 meshToWorldMatrix = localToWorldMatrix * meshToLocalMatrix;
-                
-                Vector3 footDir = -meshToWorldMatrix.GetZAxis();
-                footDir.y = 0.0f;
-                footDir.Normalize();
-                
-                Vector3 footPos = meshToWorldMatrix.TransformPoint(meshRenderer->GetMesh(shoeMeshIndex)->GetSubmesh(shoeSubmeshIndex)->GetVertexPosition(shoePointIndex));
-                Debug::DrawLine(footPos, footPos + footDir * 10.0f, Color32::Magenta);
-                
-                Debug::DrawLine(footPos, mPath.back(), Color32::Yellow);
-                //Vector3 toNextDir = (mPath.back() - footPos).Normalize();
-                //Quaternion turnAmount = GetTurnAmount(deltaTime, footDir, toNextDir, kWalkTurnSpeed, 0);
-                //meshRenderer->GetOwner()->GetTransform()->RotateAround(footPos, turnAmount);
-                
-                GetOwner()->SetPosition(footPos);
-                mGKOwner->SetHeading(Heading::FromDirection(footDir));
-
-                
-                /*
-                if(turnAnimTimer < 1.0f)
-                {
-                    Debug::DrawLine(footPos, mPath.back(), Color32::Yellow);
-                    Vector3 toNextDir = (mPath.back() - footPos).Normalize();
-                    
-                    // So, we can turn the model during the anim, but we need to keep track of what the final facing will be.
-                    int turnDir = currentAction.op == WalkOp::FollowPathStartTurnLeft ? -1 : 1;
-                    Quaternion turnAmount = GetTurnAmount(deltaTime, footDir, toNextDir, kWalkTurnSpeed, turnDir);
-                    
-                    meshRenderer->GetOwner()->GetTransform()->RotateAround(footPos, turnAmount);
-                }
-                */
-                
-                /*
-                if(turnAnimTimer < 0.6f)
-                {
-                    Vector3 toNextDir = (mPath.back() - GetOwner()->GetPosition()).Normalize();
-                    
-                    // Here's the idea with "turning to face" for these start anims.
-                    // The anim is authored with a 135 degree turn in mind.
-                    // But obviously the actual direction the walker is turning will not always be exactly that!
-                    
-                    // So, we can turn the model during the anim, but we need to keep track of what the final facing will be.
-                    int turnDir = currentAction.op == WalkOp::FollowPathStartTurnLeft ? -1 : 1;
-                    Quaternion turnAmount = GetTurnAmount(deltaTime, turnAnimDir, toNextDir, kWalkTurnSpeed, turnDir);
-                    
-                    // Rotate the turn anim dir.
-                    turnAnimDir = turnAmount.Rotate(turnAnimDir);
-                    
-                    // Rotate the model too!
-                    Transform* meshTransform = mGKOwner->GetMeshRenderer()->GetOwner()->GetTransform();
-                    meshTransform->RotateAround(GetOwner()->GetPosition(), turnAmount);
-                }
-                */
+                Vector3 toNextDir = (mPath.back() - GetOwner()->GetPosition()).Normalize();
+                TurnToFace(deltaTime, GetOwner()->GetForward(), toNextDir, kWalkTurnSpeed);
             }
         }
         else if(currentAction.op == WalkOp::FollowPath)
@@ -340,13 +278,13 @@ void Walker::NextAction()
         else if(mWalkActions.back().op == WalkOp::FollowPathStartTurnLeft)
         {
             std::cout << "Follow Path Start (Turn Left)" << std::endl;
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(mCharConfig->walkStartTurnLeftAnim, false, false,
+            GEngine::Instance()->GetScene()->GetAnimator()->Start(mCharConfig->walkStartTurnLeftAnim, true, false,
                                                                   std::bind(&Walker::PopAndNextAction, this));
         }
         else if(mWalkActions.back().op == WalkOp::FollowPathStartTurnRight)
         {
             std::cout << "Follow Path Start (Turn Right)" << std::endl;
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(mCharConfig->walkStartTurnRightAnim, false, false,
+            GEngine::Instance()->GetScene()->GetAnimator()->Start(mCharConfig->walkStartTurnRightAnim, true, false,
                                                                   std::bind(&Walker::PopAndNextAction, this));
         }
         else if(mWalkActions.back().op == WalkOp::FollowPath)
@@ -501,7 +439,7 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& currentDir, const Vector
     if(angle > kAtHeadingRadians)
     {
         float rotateDirection = turnDir;
-        if(turnDir == 0)
+        if(rotateDirection == 0)
         {
             // Which way do I rotate to get to facing direction I want?
             // Can use y-axis of cross product to determine this.
@@ -583,4 +521,9 @@ Quaternion Walker::GetTurnAmount(float deltaTime, const Vector3& currentDir, con
     
     // Create quat and return it.
     return Quaternion(Vector3::UnitY, rotateAngle);
+}
+
+Vector3 Walker::GetHeadingDir()
+{
+    return GetOwner()->GetForward();
 }
