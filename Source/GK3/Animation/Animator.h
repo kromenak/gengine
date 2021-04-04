@@ -20,11 +20,6 @@ class MeshRenderer;
 
 struct AnimationState
 {
-	// Needed for "emplace" usage.
-	AnimationState(Animation* animation) : animation(animation) { }
-	AnimationState(Animation* animation, std::function<void()> finishCallback) :
-		animation(animation), finishCallback(finishCallback) { }
-	
 	// The animation that is playing.
 	Animation* animation = nullptr;
 	
@@ -51,6 +46,13 @@ struct AnimationState
 	// Callback that is executed when the animation finishes.
 	//TODO: What about premature stops?
 	std::function<void()> finishCallback = nullptr;
+    
+    // Needed for "emplace" usage.
+    AnimationState(Animation* animation) : animation(animation) { }
+    AnimationState(Animation* animation, std::function<void()> finishCallback) :
+        animation(animation), finishCallback(finishCallback) { }
+    
+    void Stop();
 };
 
 class Animator : public Component
@@ -64,6 +66,7 @@ public:
     void StartYak(Animation* yakAnimation, std::function<void()> finishCallback = nullptr);
     void Loop(Animation* animation);
 	void Stop(Animation* animation);
+    void StopAll();
     
 	// Sampling
 	void Sample(Animation* animation, int frame);

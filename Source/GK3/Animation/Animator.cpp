@@ -61,18 +61,10 @@ void Animator::Stop(Animation* animation)
 	if(animation == nullptr) { return; }
 	
 	// Remove all anim states that are using the passed-in animation.
-	auto newEndIt = std::remove_if(mActiveAnimations.begin(), mActiveAnimations.end(), [animation](const AnimationState& as) -> bool {
-		if(as.animation == animation)
+	auto newEndIt = std::remove_if(mActiveAnimations.begin(), mActiveAnimations.end(), [animation](AnimationState& animState) -> bool {
+		if(animState.animation == animation)
 		{
-			// If stopping an animation, be sure to also stop any running vertex animations.
-			auto& vertexAnims = animation->GetVertexAnimNodes();
-			for(auto& vertexAnim : vertexAnims)
-			{
-				if(vertexAnim->frameNumber <= as.currentFrame)
-				{
-					vertexAnim->Stop();
-				}
-			}
+            animState.Stop();
 			return true;
 		}
 		return false;
@@ -81,6 +73,15 @@ void Animator::Stop(Animation* animation)
 	// "remove_if" returns iterator to new ending (all elements to be erased are after it).
 	// So...do the erase!
 	mActiveAnimations.erase(newEndIt, mActiveAnimations.end());
+}
+
+void Animator::StopAll()
+{
+    for(auto& animState : mActiveAnimations)
+    {
+        animState.Stop();
+    }
+    mActiveAnimations.clear();
 }
 
 void Animator::Sample(Animation* animation, int frame)
@@ -120,7 +121,6 @@ void Animator::OnUpdate(float deltaTime)
 		 case, you don't want that extra "time" after frame 5 to occur, or the
 		 looped animation stutters when it loops.
 		 That's why we use "-1" to decide when to loop/finish the anim.
-		 TODO: Does that cause problems with non-looping anims? Need to see!
 		 */
 		
 		// Based on how much time has passed, we may need to increment multiple frames of animation in one update loop.
@@ -178,4 +178,20 @@ void Animator::ExecuteFrame(AnimationState& animState, int frameNumber)
 			node->Play(&animState);
 		}
 	}
+}
+
+void AnimationState::Stop()
+{
+    // If stopping an animation, be sure to also stop any running vertex animations.
+    if(animation != nullptr)
+    {
+        auto& vertexAnims = animation->GetVertexAnimNodes();
+        for(auto& vertexAnim : vertexAnims)
+        {
+            if(vertexAnim->frameNumber <= currentFrame)
+            {
+                vertexAnim->Stop();
+            }
+        }
+    }
 }

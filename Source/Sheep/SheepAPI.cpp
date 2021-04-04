@@ -992,11 +992,14 @@ RegFunc1(SetDefaultDialogueCamera, void, string, IMMEDIATE, REL_FUNC);
 shpvoid StartAnimation(std::string animationName)
 {
 	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
-	if(animation != nullptr)
-	{
-		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-		GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, false, false, currentThread->AddWait());
-	}
+    if(animation == nullptr)
+    {
+        Services::GetReports()->Log("Error", "gk3 animation '" + animationName + ".anm' not found.");
+        return 0;
+    }
+    
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, false, false, currentThread->AddWait());
 	return 0;
 }
 RegFunc1(StartAnimation, void, string, WAITABLE, REL_FUNC);
@@ -1044,7 +1047,11 @@ shpvoid StopAnimation(std::string animationName)
 }
 RegFunc1(StopAnimation, void, string, IMMEDIATE, REL_FUNC);
 
-//StopAllAnimations
+shpvoid StopAllAnimations()
+{
+    GEngine::Instance()->GetScene()->GetAnimator()->StopAll();
+}
+RegFunc0(StopAllAnimations, void, IMMEDIATE, DEV_FUNC);
 
 /*
 shpvoid StartMorphAnimation(std::string animationName, int animStartFrame, int morphFrames)
