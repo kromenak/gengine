@@ -25,8 +25,13 @@ file(GLOB_RECURSE source_files CONFIGURE_DEPENDS
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${source_files})
 
+file(GLOB_RECURSE asset_files CONFIGURE_DEPENDS
+    "Assets/*.txt" "Assets/*.shp" "Assets/*.frag" "Assets/*.vert"
+)
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${asset_files})
+
 # Add main executable - the game.
-add_executable(gk3 ${source_files})
+add_executable(gk3 ${source_files} ${asset_files})
 
 # Header locations.
 target_include_directories(gk3 PRIVATE
