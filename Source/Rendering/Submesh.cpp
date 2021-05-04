@@ -68,17 +68,14 @@ Vector3 Submesh::GetVertexPosition(int index) const
 	if(mPositions == nullptr) { return Vector3::Zero; }
 	if(index < 0 || index >= mVertexCount) { return Vector3::Zero; }
 	
-	int startOffset = index * 3;
-	return Vector3(mPositions[startOffset], mPositions[startOffset + 1], mPositions[startOffset + 2]);
+	int offset = index * 3;
+	return Vector3(mPositions[offset], mPositions[offset + 1], mPositions[offset + 2]);
 }
 
-bool Submesh::GetVertexNormal(int index, Vector3& n) const
+Vector3 Submesh::GetVertexNormal(int index) const
 {
     int offset = index * 3;
-    n.x = mNormals[offset];
-    n.y = mNormals[offset + 1];
-    n.z = mNormals[offset + 2];
-    return true;
+    return Vector3(mNormals[offset], mNormals[offset + 1], mNormals[offset + 2]);
 }
 
 int Submesh::GetTriangleCount() const
