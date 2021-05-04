@@ -48,11 +48,11 @@ protected:
 	
 private:
 	const float kAtNodeDistSq = 150.0f;
-	const float kAtHeadingRadians = Math::ToRadians(15.0f);
+	const float kAtHeadingRadians = Math::ToRadians(4.0f);
     
     // Turn speeds. A faster speed is used for turning in place when not walking.
     const float kWalkTurnSpeed = Math::kPi;
-    const float kTurnSpeed = Math::k2Pi * 2;
+    const float kTurnSpeed = Math::k2Pi;
     
     enum class WalkOp
     {
