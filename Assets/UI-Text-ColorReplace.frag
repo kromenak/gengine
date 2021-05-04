@@ -1,11 +1,10 @@
 #version 150
-
-in vec4 fColor;
 in vec2 fUV1;
 
 out vec4 oColor;
 
 // User-defined uniforms
+uniform vec4 uColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
 uniform sampler2D uDiffuse;
 uniform vec4 uReplaceColor;
 
@@ -19,7 +18,7 @@ void main()
     oColor = texel;
     if(texel.rgb == uReplaceColor.rgb)
     {
-        oColor.rgb = fColor.rgb;
+        oColor.rgb = uColor.rgb;
     }
     
     //TODO: Above "if" logic can probably be replaced with a pure math approach.
@@ -33,7 +32,7 @@ void main()
     // Set final output color.
     //oColor = texel;
     
-    // Multiply ouytput alpha by main color's alpha.
+    // Multiply output alpha by main color's alpha.
     // This is needed for "fading out".
-    oColor.a *= fColor.a;
+    oColor.a *= uColor.a;
 }

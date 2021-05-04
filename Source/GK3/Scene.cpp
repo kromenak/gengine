@@ -208,8 +208,15 @@ void Scene::Load()
 		// Put to floor right away.
 		actor->SnapToFloor();
 		
-		// Set actor's graphical appearance.
+		// Set actor's 3D model.
 		actor->GetMeshRenderer()->SetModel(actorDef->model);
+        
+        // Use lit shader.
+        std::vector<Material>& materials = actor->GetMeshRenderer()->GetMaterials();
+        for(Material& material : materials)
+        {
+            material.SetShader(Services::GetAssets()->LoadShader("3D-Tex-Lit"));
+        }
 		
 		// Save actor's GAS references.
 		actor->SetIdleFidget(actorDef->idleGas);
@@ -331,6 +338,7 @@ void Scene::Load()
     GKProp* prop = new GKProp();
     prop->SetNoun("GRACE");
     prop->GetMeshRenderer()->SetModel(Services::GetAssets()->LoadModel("GRA.MOD"));
+    prop->SetPosition(Vector3(100.0f, 0.0f, -100.0f));
     mProps.push_back(prop);
     mObjects.push_back(prop);
     

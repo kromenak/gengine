@@ -1,5 +1,4 @@
 #version 150
-
 in vec3 fTexCoords;
 
 out vec4 oColor;

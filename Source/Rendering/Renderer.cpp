@@ -178,7 +178,7 @@ bool Renderer::Initialize()
 #endif
 	
     // Load default shader.
-	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Diffuse-Tex");
+	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Tex");
 	if(defaultShader == nullptr) { return false; }
 	Material::sDefaultShader = defaultShader;
 	

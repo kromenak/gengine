@@ -1,13 +1,10 @@
 #version 150
-
 in vec3 vPos;
 in vec4 vColor;
 
 out vec4 fColor;
 
 // Built-in uniforms
-uniform mat4 gViewMatrix;
-uniform mat4 gProjMatrix;
 uniform mat4 gWorldToProjMatrix;
 uniform mat4 gObjectToWorldMatrix;
 

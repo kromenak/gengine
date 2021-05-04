@@ -1,5 +1,4 @@
 #version 150
-
 in vec4 fColor;
 in vec2 fUV1;
 in vec2 fUV2;

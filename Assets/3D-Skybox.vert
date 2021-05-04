@@ -1,5 +1,4 @@
 #version 150
-
 in vec3 vPos;
 
 out vec3 fTexCoords;

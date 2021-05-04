@@ -1,9 +1,7 @@
 #version 150
-#extension GL_ARB_explicit_attrib_location : require
-
-layout(location = 0) in vec3 vPos;
-layout(location = 1) in vec4 vColor;
-layout(location = 2) in vec2 vUV1;
+in vec3 vPos;
+in vec4 vColor;
+in vec2 vUV1;
 
 out vec4 fColor;
 out vec2 fUV1;

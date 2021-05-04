@@ -1,7 +1,7 @@
 // GK3 somehow internally knows what is or isn't a valid location in the game.
 // Thus far, I have't been able to find any data file that specifies this data. Possibly, it is hard-coded in the game's source code.
 
-// To get around this, I have created this mapping manually that'll be loaded at game launch and used to verify location code validity.
+// To get around this, I have created this mapping manually that'll be loaded at game launch and used to verify location codes.
 [LOCATIONS]
 //loc_code=loc_code_long
 off = Abbes_Office

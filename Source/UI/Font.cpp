@@ -121,7 +121,7 @@ Shader* Font::GetShader() const
 {
 	if(mColorMode == ColorMode::ColorReplace)
 	{
-		return Services::GetAssets()->LoadShader("3D-Diffuse-Tex", "UI-Text-ColorReplace");
+		return Services::GetAssets()->LoadShader("3D-Tex", "UI-Text-ColorReplace");
 	}
 	return Material::sDefaultShader;
 }
