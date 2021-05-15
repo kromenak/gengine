@@ -39,6 +39,7 @@ public:
     float operator()(int row, int col) const { return mVals[row + 4 * col]; }
     
     // Accessors - get column using [index] notation.
+    //TODO: More than once, I've tried to access matrix elements like m[10]. So, maybe this syntax is not clear. Could just make "GetColumn" functions...
     Vector4& operator[](int col) { return (*reinterpret_cast<Vector4*>(&mVals[col * 4])); }
     const Vector4& operator[](int col) const { return (*reinterpret_cast<const Vector4*>(&mVals[col * 4])); }
     
@@ -83,13 +84,12 @@ public:
     void InvertOrthogonal();
     static Matrix4 InverseOrthogonal(const Matrix4& matrix);
     
-    //IsOrthoganal
+    // Interpolation
+    static Matrix4 Lerp(const Matrix4& from, const Matrix4& to, float t);
     
     //*********************
     // Transform Functions
     //*********************
-    //IsTransform
-    
     // Extraction of transform data
     const Vector3& GetXAxis() const { return reinterpret_cast<const Vector3&>(mVals[0]); }
     const Vector3& GetYAxis() const { return reinterpret_cast<const Vector3&>(mVals[4]); }
@@ -101,6 +101,7 @@ public:
     // These assume the Vector is a column vector (and thus matrix columns are axis/translation).
     Vector3 TransformVector(const Vector3& vector) const;
     Vector3 TransformPoint(const Vector3& point) const;
+    Vector3 TransformNormal(const Vector3& normal) const;
     
     // Inverse
     void InvertTransform();

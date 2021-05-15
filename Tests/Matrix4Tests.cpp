@@ -51,7 +51,7 @@ SCENARIO("Multiply Two Matrix4")
 TEST_CASE("Test multiply Vector4 by translation Matrix4")
 {
     Matrix4 translationMatrix = Matrix4::MakeTranslate(Vector3(5, 10, 20));
-    Vector4 position(true);
+    Vector4 position(1.0f);
     
     Vector4 result = translationMatrix * position;
     REQUIRE(Math::AreEqual(result.x, 5.0f));
@@ -143,4 +143,23 @@ TEST_CASE("Extract Translation/Rotation from Matrix4")
 	
 	REQUIRE(extractedTranslation == translation);
 	REQUIRE(extractedRotation == rotation);
+}
+
+TEST_CASE("Transform a normal vector")
+{
+    Vector3 normal(1.0f, 0.0f, 0.0f);
+    Matrix4 rotationMatrix = Matrix4::MakeRotateZ(Math::kPiOver2);
+    Vector3 transformedVector = rotationMatrix.TransformVector(normal);
+    Vector3 transformedNormal = rotationMatrix.TransformNormal(normal);
+    REQUIRE(transformedNormal == Vector3(0.0f, 1.0f, 0.0f));
+    
+    Matrix4 scaleMatrix = Matrix4::MakeScale(10);
+    transformedVector = scaleMatrix.TransformVector(normal);
+    transformedNormal = scaleMatrix.TransformNormal(normal);
+    REQUIRE(transformedNormal == Vector3(1.0f, 0.0f, 0.0f));
+    
+    Matrix4 scaleAndRotateMatrix = rotationMatrix * scaleMatrix;
+    transformedVector = scaleAndRotateMatrix.TransformVector(normal);
+    transformedNormal = scaleAndRotateMatrix.TransformNormal(normal);
+    REQUIRE(transformedNormal == Vector3(0.0f, 1.0f, 0.0f));
 }

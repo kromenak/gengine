@@ -443,6 +443,7 @@ void Matrix4::Invert()
 void Matrix4::InvertOrthogonal()
 {
     // If matrix is orthogonal, the inverse is equal to the transpose!
+    //TODO: Actually check/assert this matrix is orthogonal.
     Transpose();
 }
 
@@ -450,6 +451,16 @@ void Matrix4::InvertOrthogonal()
 {
     // If matrix is orthogonal, the inverse is equal to the transpose!
     return Transpose(matrix);
+}
+
+/*static*/ Matrix4 Matrix4::Lerp(const Matrix4 &from, const Matrix4 &to, float t)
+{
+    Matrix4 ret;
+    for(int i = 0; i < 16; ++i)
+    {
+        ret.mVals[i] = Math::Lerp(from.mVals[i], to.mVals[i], t);
+    }
+    return ret;
 }
 
 //*********************
@@ -483,6 +494,37 @@ Vector3 Matrix4::TransformPoint(const Vector3& point) const
     return Vector3(mVals[0] * point[0] + mVals[4] * point[1] + mVals[8]  * point[2] + mVals[12],
                    mVals[1] * point[0] + mVals[5] * point[1] + mVals[9]  * point[2] + mVals[13],
                    mVals[2] * point[0] + mVals[6] * point[1] + mVals[10] * point[2] + mVals[14]);
+}
+
+Vector3 Matrix4::TransformNormal(const Vector3& normal) const
+{
+    // Normals don't behave like Points or Vectors when transforming.
+    // Say we transform a point as (M * p). To transform a normal, we must instead do (n * InvM).
+    
+    // For orthonormal matrices (axes are orthogonal AND unit length), inverse is equal to the transpose.
+    // In that case we have (n * InvM) == (n * TransM) == (M * n). So...same math as transforming a vector!
+    // We only need to check if upper-left 3x3 is orthonormal, since only those affect the normal math.
+    if(Math::AreEqual(GetXAxis().GetLengthSq(), 1.0f) &&
+       Math::AreEqual(GetYAxis().GetLengthSq(), 1.0f) &&
+       Math::AreEqual(GetZAxis().GetLengthSq(), 1.0f))
+    {
+        if(Math::IsZero(Vector3::Dot(GetXAxis(), GetYAxis())) &&
+           Math::IsZero(Vector3::Dot(GetYAxis(), GetZAxis())) &&
+           Math::IsZero(Vector3::Dot(GetZAxis(), GetXAxis())))
+        {
+            return TransformVector(normal);
+        }
+    }
+       
+    // But if not orthonormal, we must calculate inverse and perform (n * InvM).
+    Matrix4 inverse = Inverse(*this);
+    Vector3 newNormal(normal.x * inverse.mVals[0] + normal.y * inverse.mVals[1] + normal.z * inverse.mVals[2],
+                      normal.x * inverse.mVals[4] + normal.y * inverse.mVals[5] + normal.z * inverse.mVals[6],
+                      normal.x * inverse.mVals[8] + normal.y * inverse.mVals[9] + normal.z * inverse.mVals[10]);
+    
+    // Transforming the normal often leaves it no longer unit length.
+    // But a quick normalize puts it back in order...and it's pointing in the right direction!
+    return Vector3::Normalize(newNormal);
 }
 
 void Matrix4::InvertTransform()
