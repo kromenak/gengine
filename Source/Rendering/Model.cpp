@@ -19,8 +19,7 @@
 
 //#define DEBUG_OUTPUT
 
-Model::Model(std::string name, char* data, int dataLength) :
-    Asset(name)
+Model::Model(std::string name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }
@@ -201,62 +200,48 @@ void Model::ParseFromData(char *data, int dataLength)
             return;
         }
         
-        // A NOTE ABOUT MODEL AXES AND CONVERSIONS
-        // GK3 Models are authored with +X Right, -Y Forward, +Z Up.
-        // To match our world coordinate system, we have two options:
-        // 1) Load everything as-is and keep in mind that "mesh space" has Y/Z axes flipped.
-        // 2) Flip Y/Z axes on load so it matches everything else.
-        // I'm going to do option #2 here, but theoretically it'd all work regardless.
-        
-        // Note that flipping the axes still leaves -Z forward...not ideal, but hard to rectify!
-        // We'll have to account for that in our math elsewhere.
-
-		// 36 bytes: i/j/k bases (aka x/y/z axes of mesh coordinate system).
-		// j/k are flipped b/c this data is in "Z-up" format, but our engine in "Y-up".
+        // 36 bytes: i/j/k bases (aka x/y/z axes of mesh coordinate system).
+        // GK3 uses Y-Up, while models are Z-Up.
+        // But this matrix already has that transformation baked into it, so it's taken care of!
         Vector3 iBasis = reader.ReadVector3();
-        Vector3 kBasis = reader.ReadVector3();
         Vector3 jBasis = reader.ReadVector3();
-        #ifdef DEBUG_OUTPUT
-        std::cout << "    Axes: " << iBasis << ", " << jBasis << ", " << kBasis << std::endl;
-        #endif
+        Vector3 kBasis = reader.ReadVector3();
         
         // 12 bytes: an (X, Y, Z) position of the axes in local space.
-        // Do NOT need to flip Y/Z for this b/c it's not in mesh space, it's in local space!
-		// Ex: if a human model has arms, legs, etc - this positions them all correctly relative to one another.
-		Vector3 meshPos = reader.ReadVector3();
-		#ifdef DEBUG_OUTPUT
+        // Ex: if a human model has arms, legs, etc - this positions them all correctly relative to one another.
+        Vector3 meshPos = reader.ReadVector3();
+        #ifdef DEBUG_OUTPUT
         std::cout << "    Mesh Position: " << meshPos << std::endl;
-		#endif
+        #endif
         
-		// Generate transform matrix from i/j/k bases and position.
-		// This mesh allows us to go from "mesh space" to "local space" (i.e. local space of an Actor).
-		Matrix4 meshToLocalMatrix;
-		meshToLocalMatrix.SetColumns(Vector4(iBasis), Vector4(jBasis), Vector4(kBasis), Vector4(meshPos, 1.0f));
-		
-		// Create mesh.
-		Mesh* mesh = new Mesh();
-		mesh->SetMeshToLocalMatrix(meshToLocalMatrix);
-		mMeshes.push_back(mesh);
+        // Generate transform matrix from i/j/k bases and position.
+        // This mesh allows us to go from "mesh space" to "local space" (i.e. local space of an Actor).
+        Matrix4 meshToLocalMatrix;
+        meshToLocalMatrix.SetColumns(Vector4(iBasis), Vector4(jBasis), Vector4(kBasis), Vector4(meshPos, 1.0f));
+        #ifdef DEBUG_OUTPUT
+        //std::cout << "    Matrix: " << meshToLocalMatrix << std::endl;
+        #endif
+        
+        // Create mesh.
+        Mesh* mesh = new Mesh();
+        mesh->SetMeshToLocalMatrix(meshToLocalMatrix);
+        mMeshes.push_back(mesh);
         
         // 4 bytes: Number of submeshes in this mesh.
         unsigned int numSubMeshes = reader.ReadUInt();
         
         // 24 bytes: min & max bounds for the mesh.
-		Vector3 min;
-		min.x = reader.ReadFloat();
-		min.z = reader.ReadFloat();
-		min.y = reader.ReadFloat();
+        Vector3 min = reader.ReadVector3();
+        Vector3 max = reader.ReadVector3();
+        mesh->SetAABB(AABB(min, max));
+        #ifdef DEBUG_OUTPUT
+        std::cout << "    Min: " << min << std::endl;
+        std::cout << "    Max: " << max << std::endl;
+        #endif
         
-        Vector3 max;
-		max.x = reader.ReadFloat();
-		max.z = reader.ReadFloat();
-		max.y = reader.ReadFloat();
-		
-		mesh->SetAABB(AABB(min, max));
-		#ifdef DEBUG_OUTPUT
-		std::cout << "    Min: " << min << std::endl;
-		std::cout << "    Max: " << max << std::endl;
-		#endif
+        // We are going to use this matrix to transform some normals in a bit.
+        // But for that purpose, it needs to be transposed.
+        meshToLocalMatrix.Transpose();
         
         // Now, iterate over each submesh in this mesh.
         for(int j = 0; j < numSubMeshes; j++)
@@ -266,14 +251,14 @@ void Model::ParseFromData(char *data, int dataLength)
             #endif
             
             // 4 bytes: submesh block identifier "PRGM" (MGRP backwards).
-			// I think GK3 called these "mesh groups", which is why the identifier is "MGRP".
+            // I think GK3 called these "mesh groups", which is why the identifier is "MGRP".
             identifier = reader.ReadString(4);
             if(identifier != "PRGM")
             {
                 std::cout << "Expected MGRP identifier." << std::endl;
                 return;
             }
-			
+            
             // 32 bytes: the name of the texture for this submesh.
             std::string textureName = reader.ReadString(32);
             #ifdef DEBUG_OUTPUT
@@ -306,12 +291,12 @@ void Model::ParseFromData(char *data, int dataLength)
             std::cout << "      Face count: " << faceCount << std::endl;
             #endif
             
-            // 4 bytes: Number of LODK blocks in this submesh. Not uncommon to be 0.
-			// My guess: this is for level-of-detail variants for the submesh?
+            // 4 bytes: Number of LODK blocks in this submesh. Often 0.
+            // My guess: this is for level-of-detail variants for the submesh?
             unsigned int lodkCount = reader.ReadUInt();
-			#ifdef DEBUG_OUTPUT
+            #ifdef DEBUG_OUTPUT
             std::cout << "      LODK count: " << lodkCount << std::endl;
-			#endif
+            #endif
             
             // 4 bytes: unknown - always zero thus far.
             reader.ReadUInt();
@@ -324,11 +309,11 @@ void Model::ParseFromData(char *data, int dataLength)
             {
                 Vector3 vertex = reader.ReadVector3();
                 vertexPositions[k * 3] = vertex.x;
-                vertexPositions[k * 3 + 1] = vertex.z;
-                vertexPositions[k * 3 + 2] = vertex.y;
+                vertexPositions[k * 3 + 1] = vertex.y;
+                vertexPositions[k * 3 + 2] = vertex.z;
                 
                 #ifdef DEBUG_OUTPUT
-                //std::cout << Vector3(x, y, z);
+                //std::cout << vertex;
                 #endif
             }
             #ifdef DEBUG_OUTPUT
@@ -339,10 +324,25 @@ void Model::ParseFromData(char *data, int dataLength)
             for(int k = 0; k < vertexCount; k++)
             {
                 Vector3 normal = reader.ReadVector3();
+                
+                /*
+                 For reasons I don't quite understand, normals seem to be in "local space"
+                 (whereas vertex positions are in "mesh space"). Perhaps some optimization in the original game?
+                 
+                 For consistency, it seems better for these to also be in "mesh space". In fact,
+                 it makes the lighting look better for some animations.
+                 
+                 The matrix that transforms from mesh->local for points also transform
+                 from local->mesh for normals. So, we can just transpose that matrix (done above)
+                 and treat the normal as a vector to achieve the desired transformation
+                 without expensive inverse calculations.
+                */
+                normal = meshToLocalMatrix.TransformVector(normal);
+                
                 vertexNormals[k * 3] = normal.x;
-                vertexNormals[k * 3 + 1] = normal.z;
-                vertexNormals[k * 3 + 2] = normal.y;
-            };
+                vertexNormals[k * 3 + 1] = normal.y;
+                vertexNormals[k * 3 + 2] = normal.z;
+            }
             
             // Vertex UV coordinates.
             for(int k = 0; k < vertexCount; k++)

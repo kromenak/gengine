@@ -84,9 +84,9 @@ void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBounda
 	// Grab position/heading from first frame of the animation.
 	Vector3 walkPos = vertexAnim->SampleVertexPosition(0.0f, 15, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
 	VertexAnimationTransformPose transformPose = vertexAnim->SampleTransformPose(0.0f, 15, mCharConfig->hipAxesMeshIndex);
-	walkPos = transformPose.GetMeshToLocalMatrix().TransformPoint(walkPos);
+	walkPos = transformPose.mMeshToLocalMatrix.TransformPoint(walkPos);
 	walkPos.y = GetPosition().y;
-	Heading heading = Heading::FromQuaternion(transformPose.mLocalRotation * Quaternion(Vector3::UnitY, Math::kPi));
+	Heading heading = Heading::FromQuaternion(transformPose.mMeshToLocalMatrix.GetRotation() * mMeshLocalRotation);
 	
 	// Walk to that position/heading.
 	mWalker->WalkTo(walkPos, heading, walkerBoundary, finishCallback);
@@ -148,10 +148,10 @@ void GKActor::OnUpdate(float deltaTime)
         GetTransform()->Translate(meshPositionChange);
         mLastMeshPos = meshPosition;
         
-        // Same idea for rotation.
+        // Same idea for rotation. But ONLY track/adjust y-axis change (to avoid actors rotating weirdly).
         Quaternion meshRotation = GetMeshRotation();
         Quaternion meshRotationChange = Quaternion::Diff(meshRotation, mLastMeshRotation);
-        GetTransform()->Rotate(meshRotationChange);
+        GetTransform()->Rotate(Vector3::UnitY, meshRotationChange.GetEulerAngles().y); //GetTransform()->Rotate(meshRotationChange);
         mLastMeshRotation = meshRotation;
     }
     
@@ -161,6 +161,15 @@ void GKActor::OnUpdate(float deltaTime)
     
 	// Stay on the ground.
 	SnapToFloor();
+    
+    Vector3 modelPos = mModelActor->GetPosition();
+    modelPos.y = GetPosition().y;
+    mModelActor->SetPosition(modelPos);
+    
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_H))
+    {
+        mModelActor->GetTransform()->Rotate(Vector3::UnitY, Math::kPi * deltaTime);
+    }
 }
 
 void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
@@ -182,7 +191,7 @@ void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
         // Sample the hip position/matrix from that animation at frame 0.
         VertexAnimation* anim = animParams.vertexAnimation;
         Vector3 hipMeshPos = anim->SampleVertexPosition(0, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
-        Matrix4 meshToLocalMatrix = anim->SampleTransformPose(0, mCharConfig->hipAxesMeshIndex).GetMeshToLocalMatrix();
+        Matrix4 meshToLocalMatrix = anim->SampleTransformPose(0, mCharConfig->hipAxesMeshIndex).mMeshToLocalMatrix;
         
         // Convert hip pos to world space. Transform point using mesh->world matrix.
         Vector3 worldHipPos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * meshToLocalMatrix).TransformPoint(hipMeshPos);

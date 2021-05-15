@@ -26,21 +26,20 @@ public:
     ~MeshRenderer();
 	
     void Render(bool opaque = true, bool translucent = true);
-    
+     
     void SetModel(Model* model);
+    Model* GetModel() const { return mModel; }
     
     void SetMesh(Mesh* mesh);
     void AddMesh(Mesh* mesh);
+    const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
+    Mesh* GetMesh(int index) const;
 	
 	void SetMaterial(int index, Material material);
 	Material* GetMaterial(int index);
 	Material* GetMaterial(int meshIndex, int submeshIndex);
-	
-	Model* GetModel() const { return mModel; }
-	
-	const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
-	Mesh* GetMesh(int index) const;
-	
+    std::vector<Material>& GetMaterials() { return mMaterials; }
+    
 	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
 	
 	void DebugDrawAABBs();

@@ -91,9 +91,11 @@ VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, in
     
     // Finally, create a pose with lerp/slerp that is interpolated between the two poses.
     VertexAnimationTransformPose pose;
-    pose.mLocalPosition = Vector3::Lerp(currentTransformPose->mLocalPosition, nextTransformPose->mLocalPosition, t);
-    pose.mLocalScale = Vector3::Lerp(currentTransformPose->mLocalScale, nextTransformPose->mLocalScale, t);
-    Quaternion::Slerp(pose.mLocalRotation, currentTransformPose->mLocalRotation, nextTransformPose->mLocalRotation, t);
+    //pose.mLocalPosition = Vector3::Lerp(currentTransformPose->mLocalPosition, nextTransformPose->mLocalPosition, t);
+    //pose.mLocalScale = Vector3::Lerp(currentTransformPose->mLocalScale, nextTransformPose->mLocalScale, t);
+    //Quaternion::Slerp(pose.mLocalRotation, currentTransformPose->mLocalRotation, nextTransformPose->mLocalRotation, t);
+    
+    pose.mMeshToLocalMatrix = Matrix4::Lerp(currentTransformPose->mMeshToLocalMatrix, nextTransformPose->mMeshToLocalMatrix, t);
     return pose;
 }
 
@@ -434,8 +436,8 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     for(int k = 0; k < vertexCount; k++)
                     {
                         float x = reader.ReadFloat();
-						float z = reader.ReadFloat();
-                        float y = reader.ReadFloat();
+						float y = reader.ReadFloat();
+                        float z = reader.ReadFloat();
                         vertexPose->mVertexPositions.push_back(Vector3(x, y, z));
                     }
                 }
@@ -526,8 +528,8 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         else if(vertexDataFormat[k] == 1)
                         {
                             float x = DecompressFloatFromByte(reader.ReadByte());
-							float z = DecompressFloatFromByte(reader.ReadByte());
-                            float y = DecompressFloatFromByte(reader.ReadByte());
+							float y = DecompressFloatFromByte(reader.ReadByte());
+                            float z = DecompressFloatFromByte(reader.ReadByte());
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
                         // 2 means (X, Y, Z) are compressed in next 3 ushorts.
@@ -535,16 +537,16 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         else if(vertexDataFormat[k] == 2)
                         {
                             float x = DecompressFloatFromUShort(reader.ReadUShort());
-							float z = DecompressFloatFromUShort(reader.ReadUShort());
 							float y = DecompressFloatFromUShort(reader.ReadUShort());
+							float z = DecompressFloatFromUShort(reader.ReadUShort());
 							vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
                         // 3 means (X, Y, Z) are not compressed - just floats.
                         else if(vertexDataFormat[k] == 3)
                         {
                             float x = reader.ReadFloat();
-							float z = reader.ReadFloat();
-                            float y = reader.ReadFloat();
+							float y = reader.ReadFloat();
+                            float z = reader.ReadFloat();
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
                     }
@@ -571,12 +573,13 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     // 12 bytes: mesh's z-axis basis vector (k)
                     // 12 bytes: mesh's y-axis basis vector (j)
                     Vector3 iBasis = reader.ReadVector3();
-                    Vector3 kBasis = reader.ReadVector3();
                     Vector3 jBasis = reader.ReadVector3();
-					
+                    Vector3 kBasis = reader.ReadVector3();
+                    
 					// We can derive an import scale factor from the i/j/k basis by taking the length.
-					Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
+					//Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
 				
+                    /*
 					// If the imported model IS scaled, we need to normalize our bases before generating a rotation.
 					// Otherwise, the rotation will be off/incorrect.
 					iBasis.Normalize();
@@ -590,24 +593,28 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Mesh Rotation: " << rotQuat << std::endl;
                     #endif
+                    */
                     
                     // 12 bytes: an (X, Y, Z) offset or position for placing this mesh.
                     // Each mesh within the model has it's local offset from the model origin.
                     // This if vital, for example, if a mesh contains a human's head, legs, arms...
                     // want to position them all correctly relative to one another!
-                    float x = reader.ReadFloat();
-                    float y = reader.ReadFloat();
-					float z = reader.ReadFloat();
-                    Vector3 meshPos(x, y, z);
+                    Vector3 meshPos = reader.ReadVector3();
                     #ifdef DEBUG_OUTPUT
                     std::cout << "        Mesh Position: " << meshPos << std::endl;
                     #endif
                     
+                    // Generate transform matrix from i/j/k bases and position.
+                    // This mesh allows us to go from "mesh space" to "local space" (i.e. local space of an Actor).
+                    Matrix4 meshToLocalMatrix;
+                    meshToLocalMatrix.SetColumns(Vector4(iBasis), Vector4(jBasis), Vector4(kBasis), Vector4(meshPos, 1.0f));
+                    
                     VertexAnimationTransformPose* transformPose = new VertexAnimationTransformPose();
                     transformPose->mFrameNumber = i;
-                    transformPose->mLocalPosition = meshPos;
-                    transformPose->mLocalRotation = rotQuat;
-					transformPose->mLocalScale = scale;
+                    //transformPose->mLocalPosition = meshToLocalMatrix.GetTranslation();
+                    //transformPose->mLocalRotation = meshToLocalMatrix.GetRotation();
+                    //transformPose->mLocalScale = scale;
+                    transformPose->mMeshToLocalMatrix = meshToLocalMatrix;
                     if(i == 0)
                     {
                         mTransformPoses.push_back(transformPose);
