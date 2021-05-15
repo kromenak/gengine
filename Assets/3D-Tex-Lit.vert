@@ -14,7 +14,6 @@ uniform mat4 gObjectToWorldMatrix;
 
 // User-defined uniforms
 uniform vec4 uLightPos = vec4(-35.900139f ,98.740967f, 205.638931f, 1.0f);
-uniform mat4 uLocalToWorldMatrix;
 
 void main()
 {
@@ -26,11 +25,14 @@ void main()
     vec3 lightDir = normalize(vec3((uLightPos - worldPos).xyz));
     
     // Convert normal to world space.
-    vec3 worldNormal = (uLocalToWorldMatrix * vec4(vNormal, 0.0f)).xyz;
+    //TODO: Do inverse calc in C++ and pass down as uniform.
+    mat4 inv = inverse(gObjectToWorldMatrix);
+    vec3 worldNormal = (vec4(vNormal, 0.0f) * inv).xyz;
     
+    // Determine how much light affects vertex based on facing to light.
     float dotResult = dot(lightDir.xyz, worldNormal);
-    //fLight = vec4(worldNormal.xyz, 1.0f);
     fLight = vec4((dotResult * 0.2f), (dotResult * 0.2f), (dotResult * 0.2f), 1.0f);
+    //fLight = vec4(worldNormal.xyz, 1.0f);
     
     // Transform position obj->world->view->proj
     gl_Position = gWorldToProjMatrix * worldPos;
