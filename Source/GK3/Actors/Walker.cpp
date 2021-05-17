@@ -167,14 +167,16 @@ void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosit
         turnAction.op = WalkOp::TurnToFace;
         turnAction.facingDir = facingDir;
         mWalkActions.push_back(turnAction);
+        
+        // OK, walk sequence has been created - let's start doing it!
+        NextAction();
     }
     else
     {
-        WalkTo(targetPosition, walkerBoundary, finishCallback);
+        // Specify a "dummy" heading here so that the "turn to face" action is put into the walk plan.
+        // Later on, when the object comes into view, we'll replace this with the actual direction to turn.
+        WalkTo(targetPosition, Heading::FromDegrees(0.0f), walkerBoundary, finishCallback);
     }
-    
-    // OK, walk sequence has been created - let's start doing it!
-    NextAction();
 }
 
 float currentActionTimer = 0.0f;
@@ -199,7 +201,17 @@ void Walker::OnUpdate(float deltaTime)
         WalkAction& currentAction = mWalkActions.back();
         if(currentAction.op == WalkOp::FollowPathStart)
         {
-            if(!AdvancePath())
+            // Possible to finish path while still in the start phase, for very short paths.
+            if(AdvancePath())
+            {
+                // In this case, we want to skip all follow path bits and go right to "follow path end".
+                while(mWalkActions.size() > 0 && mWalkActions.back().op != WalkOp::FollowPathEnd)
+                {
+                    mWalkActions.pop_back();
+                }
+                NextAction();
+            }
+            else
             {
                 Vector3 toNextDir = (mPath.back() - GetOwner()->GetPosition()).Normalize();
                 TurnToFace(deltaTime, GetOwner()->GetForward(), toNextDir, kWalkTurnSpeed);
@@ -218,28 +230,23 @@ void Walker::OnUpdate(float deltaTime)
         }
         else if(currentAction.op == WalkOp::FollowPath)
         {
-            /*
             // If we have a "walk to see" target, check whether it has come into view.
-            bool stopWalkPrematurely = false;
-            if(!mWalkToSeeTarget.empty())
+            Vector3 facingDir;
+            if(IsWalkToSeeTargetInView(facingDir))
             {
-                Vector3 facingDir;
-                if(IsWalkToSeeTargetInView(facingDir))
-                {
-                    stopWalkPrematurely = true;
-                    
-                    // When doing a "walk to see," we want the actor to turn to face.
-                    mHasDesiredFacingDir = true;
-                    mDesiredFacingDir = facingDir;
-                }
+                // Make sure final action is a "turn to face" using this facing dir.
+                assert(mWalkActions[0].op == WalkOp::TurnToFace);
+                mWalkActions[0].facingDir = facingDir;
+                
+                PopAndNextAction();
             }
-            */
-            
-            if(AdvancePath())
+            // Otherwise, see if finished following path.
+            else if(AdvancePath())
             {
                 // Path is finished - move on to next step in sequence.
                 PopAndNextAction();
             }
+            // Otherwise, just keep on following that path!
             else
             {
                 // Still following path - turn to face next node in path.
@@ -352,6 +359,9 @@ void Walker::OnWalkToFinished()
 
 bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
 {
+    // Not in view if it doesn't exist!
+    if(mWalkToSeeTarget.empty()) { return false; }
+    
     Vector3 headPos = mGKOwner->GetHeadPosition();
     Debug::DrawLine(headPos, mWalkToSeeTargetPosition, Color32::Magenta);
     
