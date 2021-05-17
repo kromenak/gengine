@@ -418,6 +418,9 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObj
 	// Later, we'll check BSP and see if we hit something obscuring a prop/actor.
 	for(auto& object : mObjects)
 	{
+        // Ignore if desired.
+        if(ignore != nullptr && ignore == object) { continue; }
+        
 		// If only interested in interactive objects, skip non-interactive objects.
 		if(interactiveOnly && !object->CanInteract()) { continue; }
 		
@@ -457,6 +460,9 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObj
 				// See if hit any actor representing BSP object.
 				for(auto& bspActor : mBSPActors)
 				{
+                    // Ignore if desired.
+                    if(ignore != nullptr && ignore == bspActor) { continue; }
+                    
 					// If only interested in interactive objects, skip non-interactive objects.
 					if(interactiveOnly && !bspActor->CanInteract()) { continue; }
 					
@@ -680,7 +686,7 @@ void Scene::ExecuteAction(const Action* action)
 			}
 			break;
 		}
-		case Action::Approach::Anim: // Example use: R25 Open/Close Window, R25 Open/Close Dresser
+		case Action::Approach::Anim: // Example use: R25 Open/Close Window, Open/Close Dresser, Open/Close Drawer
 		{
 			Animation* anim = Services::GetAssets()->LoadAnimation(action->target);
 			if(anim != nullptr)
@@ -742,7 +748,7 @@ void Scene::ExecuteAction(const Action* action)
 			});
 			break;
 		}
-		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser, RC1 Look Bench/Bookstore Sign
+		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser/Plant, RC1 Look Bench/Bookstore Sign
 		{
 			// Find position of the model we want to "walk to see".
 			Vector3 targetPosition;
