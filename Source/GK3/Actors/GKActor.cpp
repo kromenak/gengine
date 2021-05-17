@@ -75,21 +75,27 @@ void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBounda
 	// Need a walker and walker boundary for any of this to work.
 	if(mWalker == nullptr || walkerBoundary == nullptr) { return; }
 	
-	// GOAL: walk the actor to the initial position of this anim.
+	// GOAL: walk the actor to the initial position/rotation of this anim.
 	// Retrieve vertex animation from animation that matches this actor's model.
 	// If no vertex anim exists, we can't walk to animation start! This is probably a developer error.
 	VertexAnimation* vertexAnim = anim->GetVertexAnimationOnFrameForModel(0, GetModelName());
 	if(vertexAnim == nullptr) { return; }
 	
-	// Grab position/heading from first frame of the animation.
-	Vector3 walkPos = vertexAnim->SampleVertexPosition(0.0f, 15, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
-	VertexAnimationTransformPose transformPose = vertexAnim->SampleTransformPose(0.0f, 15, mCharConfig->hipAxesMeshIndex);
+    // Sample position on first frame of animation - that's our walk pos.
+	Vector3 walkPos = vertexAnim->SampleVertexPosition(0, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
+	VertexAnimationTransformPose transformPose = vertexAnim->SampleTransformPose(0, mCharConfig->hipAxesMeshIndex);
 	walkPos = transformPose.mMeshToLocalMatrix.TransformPoint(walkPos);
 	walkPos.y = GetPosition().y;
+        
+    // Calculate rotation on first frame of animation - that's our heading.
 	Heading heading = Heading::FromQuaternion(transformPose.mMeshToLocalMatrix.GetRotation() * mMeshLocalRotation);
-	
+    
 	// Walk to that position/heading.
 	mWalker->WalkTo(walkPos, heading, walkerBoundary, finishCallback);
+    
+    // To visualize walk position/heading.
+    //Debug::DrawLine(walkPos, walkPos + Vector3::UnitY * 10.0f, Color32::Orange, 10.0f);
+    //Debug::DrawLine(walkPos, walkPos + heading.ToVector() * 10.0f, Color32::Red, 10.0f);
 }
 
 void GKActor::WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
@@ -174,7 +180,7 @@ void GKActor::OnUpdate(float deltaTime)
 
 void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
 {
-    std::cout << "VertexAnimStart: " << animParams.vertexAnimation->GetName() << std::endl;
+    //std::cout << "VertexAnimStart: " << animParams.vertexAnimation->GetName() << std::endl;
     // Unparent.
     //Vector3 modelActorWorldPos = mModelActor->GetTransform()->GetWorldPosition();
     //Quaternion modelActorWorldRot = mModelActor->GetTransform()->GetWorldRotation();

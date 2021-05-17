@@ -576,25 +576,6 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     Vector3 jBasis = reader.ReadVector3();
                     Vector3 kBasis = reader.ReadVector3();
                     
-					// We can derive an import scale factor from the i/j/k basis by taking the length.
-					//Vector3 scale(iBasis.GetLength(), jBasis.GetLength(), kBasis.GetLength());
-				
-                    /*
-					// If the imported model IS scaled, we need to normalize our bases before generating a rotation.
-					// Otherwise, the rotation will be off/incorrect.
-					iBasis.Normalize();
-					jBasis.Normalize();
-					kBasis.Normalize();
-                    
-                    // From the basis vectors, calculate a quaternion representing
-                    // a rotation from the standard basis to that basis. We also need to negate some elements
-                    // to represent "reflection" from a right-handed rotation to a left-handed rotation.
-                    Quaternion rotQuat = Quaternion(Matrix3::MakeBasis(iBasis, jBasis, kBasis));
-                    #ifdef DEBUG_OUTPUT
-                    std::cout << "        Mesh Rotation: " << rotQuat << std::endl;
-                    #endif
-                    */
-                    
                     // 12 bytes: an (X, Y, Z) offset or position for placing this mesh.
                     // Each mesh within the model has it's local offset from the model origin.
                     // This if vital, for example, if a mesh contains a human's head, legs, arms...
@@ -611,9 +592,6 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     
                     VertexAnimationTransformPose* transformPose = new VertexAnimationTransformPose();
                     transformPose->mFrameNumber = i;
-                    //transformPose->mLocalPosition = meshToLocalMatrix.GetTranslation();
-                    //transformPose->mLocalRotation = meshToLocalMatrix.GetRotation();
-                    //transformPose->mLocalScale = scale;
                     transformPose->mMeshToLocalMatrix = meshToLocalMatrix;
                     if(i == 0)
                     {

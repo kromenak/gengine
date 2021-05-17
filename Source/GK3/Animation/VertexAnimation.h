@@ -20,7 +20,6 @@
 struct VertexAnimationVertexPose
 {
     int mFrameNumber = 0;
-    
     std::vector<Vector3> mVertexPositions;
     VertexAnimationVertexPose* mNext = nullptr;
 };
@@ -28,23 +27,8 @@ struct VertexAnimationVertexPose
 struct VertexAnimationTransformPose
 {
     int mFrameNumber = 0;
-    
-    //Quaternion mLocalRotation;
-    //Vector3 mLocalPosition;
-    //Vector3 mLocalScale;
-    
     Matrix4 mMeshToLocalMatrix;
-    
     VertexAnimationTransformPose* mNext = nullptr;
-    
-    /*
-    Matrix4 GetMeshToLocalMatrix()
-    {
-        return Matrix4::MakeTranslate(mLocalPosition)
-		* Matrix4::MakeRotate(mLocalRotation)
-		* Matrix4::MakeScale(mLocalScale);
-    }
-    */
 };
 
 class VertexAnimation : public Asset
