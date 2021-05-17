@@ -58,15 +58,22 @@ public:
     // Rotate Vector
     Vector3 Rotate(const Vector3& vector) const;
 	
-	// Conversions To
-    void Set(const Vector3& axis, float angle); // From axis/angle
-    void Set(const Vector3& from, const Vector3& to); // From from/to facing
-    void Set(const Matrix3& rotation); // From matrix representation
-    void Set(float xRadians, float yRadians, float zRadians); // From euler angles
+	// From/To Axis/Angle
+    void Set(const Vector3& axis, float angle);
+    float GetAngle() const;
+    void GetAxisAngle(Vector3& axis, float& angle) const;
     
-	// Conversions From
-    void GetAxisAngle(Vector3& axis, float& angle) const; // To axis/angle
-	Vector3 GetEulerAngles() const; // To euler angles
+    // From Angle Between Vectors
+    void Set(const Vector3& from, const Vector3& to);
+    
+    // From Matrix
+    void Set(const Matrix3& rotation);
+    
+    // From/To Euler Angles
+    // There's more than one way to represent a rotation with Euler angles.
+    // So, avoid using Euler angles if you are assuming a rotation is about a particular axis.
+    void Set(float xRadians, float yRadians, float zRadians);
+    Vector3 GetEulerAngles() const;
     
 	// Length
 	bool IsUnit() const;

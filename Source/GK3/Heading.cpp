@@ -21,7 +21,16 @@ Heading Heading::FromRadians(float radians)
 
 Heading Heading::FromQuaternion(const Quaternion& quaternion)
 {
-	return FromRadians(quaternion.GetEulerAngles().y);
+    // A heading is really only meaningful for rotations about the up axis (Y in our case).
+    // We can't assume the passed in quaternion is always ONLY about the y-axis, so we need to isolate just the Y part.
+    
+    // We can do this by zeroing out x/z and normalize - this works b/c we're isolating one the three main coordinate axes.
+    // Math is described here: https://stackoverflow.com/questions/5782658/extracting-yaw-from-a-quaternion
+    Quaternion yRotation = quaternion;
+    yRotation.x = 0.0f;
+    yRotation.z = 0.0f;
+    yRotation.Normalize();
+	return FromRadians(yRotation.GetAngle());
 }
 
 Heading Heading::FromDirection(const Vector3& direction)

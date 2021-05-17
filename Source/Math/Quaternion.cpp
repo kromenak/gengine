@@ -176,6 +176,36 @@ void Quaternion::Set(const Vector3& axis, float angle)
     z = axis.z * sinAndNormalize;
 }
 
+float Quaternion::GetAngle() const
+{
+    return 2.0f * Math::Acos(w);
+}
+
+void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const
+{
+    // scalar part = cos(θ/2)
+    // So, we can extract the angle directly.
+    angle = 2.0f * Math::Acos(w);
+    
+    // vector part = axis * sin(θ/2)
+    // In other words, the vector part is the axis, but with length of sin(θ/2).
+    // We assume quaternion is unit length, so subtracting w^2 gives us length of just vector part (aka sin(θ/2)).
+    float length = Math::Sqrt(1.0f - (w * w));
+    
+    // Normalize vector part to get the axis!
+    if(Math::IsZero(length))
+    {
+        axis = Vector3::Zero;
+    }
+    else
+    {
+        length = 1.0f / length;
+        axis.x = x * length;
+        axis.y = y * length;
+        axis.z = z * length;
+    }
+}
+
 void Quaternion::Set(const Vector3& from, const Vector3& to)
 {
     // Creates quaternion that is a rotation between two direction vectors.r.
@@ -321,31 +351,6 @@ void Quaternion::Set(float xRadians, float yRadians, float zRadians)
     x = sinX * cosY * cosZ + cosX * sinY * sinZ;
     y = cosX * sinY * cosZ - sinX * cosY * sinZ;
     z = cosX * cosY * sinZ + sinZ * sinY * cosX;
-}
-
-void Quaternion::GetAxisAngle(Vector3& axis, float& angle) const
-{
-    // scalar part = cos(θ/2)
-    // So, we can extract the angle directly.
-    angle = 2.0f * Math::Acos(w);
-    
-    // vector part = axis * sin(θ/2)
-    // In other words, the vector part is the axis, but with length of sin(θ/2).
-    // We assume quaternion is unit length, so subtracting w^2 gives us length of just vector part (aka sin(θ/2)).
-    float length = Math::Sqrt(1.0f - (w * w));
-    
-    // Normalize vector part to get the axis!
-    if(Math::IsZero(length))
-    {
-		axis = Vector3::Zero;
-    }
-    else
-    {
-        length = 1.0f / length;
-        axis.x = x * length;
-        axis.y = y * length;
-        axis.z = z * length;
-    }
 }
 
 Vector3 Quaternion::GetEulerAngles() const

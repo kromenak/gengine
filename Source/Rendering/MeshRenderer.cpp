@@ -63,6 +63,21 @@ void MeshRenderer::Render(bool opaque, bool translucent)
                 {
                     Debug::DrawAxes(meshToWorldMatrix);
                 }
+                
+                /*
+                // Uncomment to visualize normals.
+                int vcount = submeshes[j]->GetVertexCount();
+                for(int k = 0; k < vcount; ++k)
+                {
+                    Vector3 pos = submeshes[j]->GetVertexPosition(k);
+                    pos = meshToWorldMatrix.TransformPoint(pos);
+                    
+                    Vector3 normal = submeshes[j]->GetVertexNormal(k);
+                    normal = meshToWorldMatrix.TransformNormal(normal);
+    
+                    Debug::DrawLine(pos, pos + normal, Color32::Yellow);
+                }
+                */
             }
             
             // Increase material index, but not above the max.
