@@ -87,7 +87,7 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
 
 void SceneTextureAnimNode::Play(AnimationState* animState)
 {
-	Texture* texture = Services::GetAssets()->LoadTexture(textureName);
+	Texture* texture = Services::GetAssets()->LoadSceneTexture(textureName);
 	if(texture != nullptr)
 	{
 		//TODO: Ensure sceneName matches loaded scene name?
@@ -112,7 +112,7 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
 		if(material != nullptr)
 		{
 			// Apply the texture to that material.
-			Texture* texture = Services::GetAssets()->LoadTexture(textureName);
+			Texture* texture = Services::GetAssets()->LoadSceneTexture(textureName);
 			if(texture != nullptr)
 			{
 				material->SetDiffuseTexture(texture);

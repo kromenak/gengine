@@ -185,6 +185,20 @@ Texture* AssetManager::LoadTexture(const std::string& name)
     return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), &mLoadedTextures);
 }
 
+Texture* AssetManager::LoadSceneTexture(const std::string& name)
+{
+    // Load texture per usual.
+    Texture* texture = LoadTexture(name);
+    
+    // A "scene" texture means it is rendered as part of the 3D game scene (as opposed to a 2D UI texture).
+    // These textures look better if you apply bilinear filtering.
+    if(texture != nullptr && texture->GetRenderType() != Texture::RenderType::AlphaTest)
+    {
+        texture->SetFilterMode(Texture::FilterMode::Bilinear);
+    }
+    return texture;
+}
+
 GAS* AssetManager::LoadGAS(const std::string& name)
 {
     return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), &mLoadedGases);

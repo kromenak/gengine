@@ -19,12 +19,12 @@ Skybox* GeneralBlock::CreateSkybox()
 	if(!hasSkyboxData) { return nullptr; }
 	
 	Skybox* skybox = new Skybox();
-	skybox->SetLeftTexture(Services::GetAssets()->LoadTexture(skyboxLeftTextureName));
-	skybox->SetRightTexture(Services::GetAssets()->LoadTexture(skyboxRightTextureName));
-	skybox->SetBackTexture(Services::GetAssets()->LoadTexture(skyboxBackTextureName));
-	skybox->SetFrontTexture(Services::GetAssets()->LoadTexture(skyboxFrontTextureName));
-	skybox->SetDownTexture(Services::GetAssets()->LoadTexture(skyboxDownTextureName));
-	skybox->SetUpTexture(Services::GetAssets()->LoadTexture(skyboxUpTextureName));
+	skybox->SetLeftTexture(Services::GetAssets()->LoadSceneTexture(skyboxLeftTextureName));
+	skybox->SetRightTexture(Services::GetAssets()->LoadSceneTexture(skyboxRightTextureName));
+	skybox->SetBackTexture(Services::GetAssets()->LoadSceneTexture(skyboxBackTextureName));
+	skybox->SetFrontTexture(Services::GetAssets()->LoadSceneTexture(skyboxFrontTextureName));
+	skybox->SetDownTexture(Services::GetAssets()->LoadSceneTexture(skyboxDownTextureName));
+	skybox->SetUpTexture(Services::GetAssets()->LoadSceneTexture(skyboxUpTextureName));
 	return skybox;
 }
 

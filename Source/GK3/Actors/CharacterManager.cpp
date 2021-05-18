@@ -207,7 +207,7 @@ CharacterManager::CharacterManager()
 					// First, try to load the entry's face/eyelid/forehead textures.
 					// These are derived from the section name.
 					CharacterConfig& config = it->second;
-					config.faceConfig.faceTexture = Services::GetAssets()->LoadTexture(section.name + "_face");
+					config.faceConfig.faceTexture = Services::GetAssets()->LoadSceneTexture(section.name + "_face");
 					config.faceConfig.eyelidsTexture = Services::GetAssets()->LoadTexture(section.name + "_eyelids");
 					config.faceConfig.foreheadTexture = Services::GetAssets()->LoadTexture(section.name + "_forehead");
 					

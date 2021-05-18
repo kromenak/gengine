@@ -568,7 +568,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         BSPSurface surface;
         surface.objectIndex = reader.ReadUInt();
         
-        surface.texture = Services::GetAssets()->LoadTexture(reader.ReadString(32));
+        surface.texture = Services::GetAssets()->LoadSceneTexture(reader.ReadString(32));
         
         surface.lightmapUvOffset = reader.ReadVector2();
         surface.lightmapUvScale = reader.ReadVector2();

@@ -60,6 +60,7 @@ public:
     
     Model* LoadModel(const std::string& name);
     Texture* LoadTexture(const std::string& name);
+    Texture* LoadSceneTexture(const std::string& name);
     
     GAS* LoadGAS(const std::string& name);
     Animation* LoadAnimation(const std::string& name);
