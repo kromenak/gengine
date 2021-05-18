@@ -26,6 +26,7 @@ struct VertexAnimParams
 	
 	// Time to start the animation at.
 	float startTime = 0.0f;
+    //TODO: startFrame?
     
     // An absolute anim plays from a specific position/rotation
     // (in contrast to a "relative" anim that plays from model's last position/rotation).

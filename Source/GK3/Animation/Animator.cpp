@@ -18,18 +18,30 @@ Animator::Animator(Actor* owner) : Component(owner)
     
 }
 
-void Animator::Start(Animation* animation, bool allowMove, bool fromGas, std::function<void()> finishCallback)
+void Animator::Start(const AnimParams& animParams)
 {
-	if(animation == nullptr) { return; }
-	
-	// Create anim state for animation with appropriate "allow move" value.
-	mActiveAnimations.emplace_back(animation, finishCallback);
-	mActiveAnimations.back().allowMove = allowMove;
-	mActiveAnimations.back().fromGas = fromGas;
-	
-	// Immediately execute frame 0 of the animation.
-	// Frames execute at the BEGINNING of the time slice for that frame, so frame 0 executes at t=0.
-	ExecuteFrame(mActiveAnimations.back(), 0);
+    if(animParams.animation == nullptr) { return; }
+    
+    // Create anim state for animation with appropriate "allow move" value.
+    mActiveAnimations.emplace_back(animParams.animation, animParams.finishCallback);
+    mActiveAnimations.back().allowMove = animParams.allowMove;
+    mActiveAnimations.back().fromGas = animParams.fromAutoScript;
+    mActiveAnimations.back().currentFrame = animParams.startFrame;
+    
+    // Immediately execute start frame of the animation.
+    // Frames execute at the BEGINNING of the time slice for that frame, so frame 0 executes at t=0.
+    for(int i = 0; i <= animParams.startFrame; ++i)
+    {
+        ExecuteFrame(mActiveAnimations.back(), i);
+    }
+}
+
+void Animator::Start(Animation* animation, std::function<void()> finishCallback)
+{
+    AnimParams params;
+    params.animation = animation;
+    params.finishCallback = finishCallback;
+    Start(params);
 }
 
 void Animator::StartYak(Animation* yakAnimation, std::function<void()> finishCallback)
@@ -52,7 +64,7 @@ void Animator::Loop(Animation* animation)
 	if(animation == nullptr) { return; }
 	
 	// Can start anim per usual, but just set loop flag after creation.
-	Start(animation, false, false, nullptr);
+	Start(animation);
 	mActiveAnimations.back().loop = true;
 }
 
@@ -170,11 +182,23 @@ void Animator::OnUpdate(float deltaTime)
 
 void Animator::ExecuteFrame(AnimationState& animState, int frameNumber)
 {
+    // Save executing frame #.
+    animState.executingFrame = frameNumber;
+    
+    // Get all anim nodes that begin on this frame and start them.
 	std::vector<AnimNode*>* animNodes = animState.animation->GetFrame(frameNumber);
 	if(animNodes != nullptr)
 	{
 		for(auto& node : *animNodes)
 		{
+            // If current frame != executing frame, we are "fast forwarding" - executing this frame to catch up.
+            // Most nodes don't support this (mostly just vertex anim nodes). So, skip unsupported nodes during catchup.
+            if(animState.currentFrame != animState.executingFrame && !node->PlayDuringCatchup())
+            {
+                continue;
+            }
+            
+            // Play the node!
 			node->Play(&animState);
 		}
 	}

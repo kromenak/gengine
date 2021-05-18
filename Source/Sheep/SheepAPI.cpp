@@ -999,7 +999,7 @@ shpvoid StartAnimation(std::string animationName)
     }
     
     SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, false, false, currentThread->AddWait());
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, currentThread->AddWait());
 	return 0;
 }
 RegFunc1(StartAnimation, void, string, WAITABLE, REL_FUNC);
@@ -1010,7 +1010,7 @@ shpvoid StartMoveAnimation(std::string animationName)
 	if(animation != nullptr)
 	{
 		SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-		GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, true, false, currentThread->AddWait());
+		GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, currentThread->AddWait());
 	}
 	return 0;
 }

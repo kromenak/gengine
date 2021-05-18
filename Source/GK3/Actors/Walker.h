@@ -32,7 +32,6 @@ public:
 	Walker(Actor* owner);
 	
     void SetCharacterConfig(const CharacterConfig& characterConfig) { mCharConfig = &characterConfig; }
-    void SetHeadingProp(GKProp* headingProp) { mHeadingProp = headingProp; }
     
 	void SnapToFloor();
 	
@@ -47,6 +46,7 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
+    // When this close to a position/heading, we say you are "at" the position/heading.
 	const float kAtNodeDistSq = 150.0f;
 	const float kAtHeadingRadians = Math::ToRadians(4.0f);
     
@@ -54,8 +54,11 @@ private:
     const float kWalkTurnSpeed = Math::kPi;
     const float kTurnSpeed = Math::k2Pi;
     
+    // When a walk begins, a "plan" is generated and stored in the walk actions vector.
+    // Ex: we may calculate plan: turn right, then follow path, then end move, then turn to face heading.
     enum class WalkOp
     {
+        None,
         FollowPathStart,
         FollowPathStartTurnLeft,
         FollowPathStartTurnRight,
@@ -63,19 +66,21 @@ private:
         FollowPathEnd,
         TurnToFace
     };
-    
     struct WalkAction
     {
         WalkOp op;
         Vector3 facingDir;
     };
-    std::vector<WalkAction> mWalkActions;
-	
-	// Walker component is attached to GKActor.
-    // Remember that the actual animating mesh is a separate actor!
-	GKActor* mGKOwner = nullptr;
+    std::vector<WalkAction> mWalkActions;  // Walk actions are in reverse - next action to perform is back().
     
-    GKProp* mHeadingProp = nullptr;
+    // In at least one case, it's helpful to know what the previous walk operation was.
+    WalkOp mPrevWalkOp = WalkOp::None;
+    
+    // The amount of time spent on the current walk action.
+    float mCurrentWalkActionTimer = 0.0f;
+	
+	// Walker's owner, as a GKActor.
+	GKActor* mGKOwner = nullptr;
 	
 	// Config is vital for walker to function - contains things like
 	// walk anims and hip position data.
@@ -100,17 +105,14 @@ private:
     void PopAndNextAction();
     void NextAction();
     
+    bool IsMidWalk() const { return mWalkActions.size() > 0 && mWalkActions.back().op == WalkOp::FollowPath; }
 	void ContinueWalk();
-	
 	void OnWalkToFinished();
 	
 	bool IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir);
     
     bool CalculatePath(const Vector3& startPos, const Vector3& endPos);
-    
     bool AdvancePath();
-    bool TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir = 0, bool aboutOwnerPos = true);
-    Quaternion GetTurnAmount(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir = 0);
     
-    Vector3 GetHeadingDir();
+    bool TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir = 0, bool aboutOwnerPos = true);
 };

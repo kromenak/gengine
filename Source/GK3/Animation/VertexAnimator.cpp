@@ -31,7 +31,7 @@ void VertexAnimator::Start(const VertexAnimParams& params)
     mStopCallback = params.stopCallback;
     
     // Sample animation immediately so mesh's positions/rotations are updated.
-    Sample(mVertexAnimation, mAnimationTimer);
+    TakeSample(mVertexAnimation, mAnimationTimer);
 }
 
 void VertexAnimator::Stop(VertexAnimation* anim)
@@ -125,7 +125,6 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
 		VertexAnimationTransformPose transformSample = animation->SampleTransformPose(time, mFramesPerSecond, i);
 		if(transformSample.mFrameNumber >= 0)
 		{
-			//meshes[i]->SetMeshToLocalMatrix(transformSample.GetMeshToLocalMatrix());
             meshes[i]->SetMeshToLocalMatrix(transformSample.mMeshToLocalMatrix);
 		}
 	}

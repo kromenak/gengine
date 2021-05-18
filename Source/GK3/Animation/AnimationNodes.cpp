@@ -33,7 +33,19 @@ void VertexAnimNode::Play(AnimationState* animState)
             VertexAnimParams params;
             params.vertexAnimation = vertexAnimation;
             params.framesPerSecond = animState->animation->GetFramesPerSecond();
-            params.startTime = animState->timer;
+            
+            // This logic is a bit tricky/complicated, but it is needed to support starting anims at different times.
+            // Usually, we start at t=0, but if executing frame 0, but we are on frame 20, we need to "catch up" by setting starting time for frame 20.
+            params.startTime = 0.0f;
+            if(animState->executingFrame < animState->currentFrame)
+            {
+                params.startTime = static_cast<float>(animState->currentFrame - animState->executingFrame) / params.framesPerSecond;
+            }
+            
+            // The animator may update not exactly at the time interval this frame should have executed.
+            // If we're already a fraction of time into the current frame, take that into account for smoother animations.
+            params.startTime += animState->timer;
+            
             params.absolute = absolute;
             if(absolute)
             {

@@ -22,9 +22,14 @@ struct AnimationState
 {
 	// The animation that is playing.
 	Animation* animation = nullptr;
-	
+    
 	// The current frame in the animation.
 	int currentFrame = 0;
+    
+    // The frame that is currently executing in the animation.
+    // The only time "current frame" != "executing frame" is if we "fast forwarded" the animation.
+    // Ex: if anim starts on frame 20, we still must execute 0-19 to start any vertex anims.
+    int executingFrame = 0;
 	
 	// A timer to track when we need to execute one or more additional frames.
 	// This doesn't track total animation time, just time until the next frame!
@@ -55,6 +60,24 @@ struct AnimationState
     void Stop();
 };
 
+struct AnimParams
+{
+    // The anim to play.
+    Animation* animation = nullptr;
+    
+    // Frame to start on.
+    int startFrame = 0;
+    
+    // If true, animation can move associated character (kind of like "root motion").
+    bool allowMove = false;
+    
+    // If true, this anim was started from an autoscript (GAS).
+    bool fromAutoScript = false;
+    
+    // A callback to fire on animation finish.
+    std::function<void()> finishCallback = nullptr;
+};
+
 class Animator : public Component
 {
     TYPE_DECL_CHILD();
@@ -62,7 +85,8 @@ public:
     Animator(Actor* owner);
 	
 	// Playback
-	void Start(Animation* animation, bool allowMove = false, bool fromGas = false, std::function<void()> finishCallback = nullptr);
+    void Start(const AnimParams& animParams);
+	void Start(Animation* animation, std::function<void()> finishCallback = nullptr);
     void StartYak(Animation* yakAnimation, std::function<void()> finishCallback = nullptr);
     void Loop(Animation* animation);
 	void Stop(Animation* animation);

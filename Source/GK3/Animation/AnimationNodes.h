@@ -31,6 +31,8 @@ struct AnimNode
 	virtual void Play(AnimationState* animState) = 0;
 	virtual void Stop() { } // Stop support is optional. Does nothing by default.
 	virtual void Sample(Animation* anim, int frame) { } // Sampling support is optional. Does nothing by default.
+    
+    virtual bool PlayDuringCatchup() { return false; }
 };
 
 // A node that plays a vertex animation.
@@ -57,6 +59,8 @@ struct VertexAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 	void Stop() override;
 	void Sample(Animation* anim, int frame) override;
+    
+    bool PlayDuringCatchup() override { return true; }
 };
 
 // Applies a texture to a *scene* model (aka a model within the BSP geometry).

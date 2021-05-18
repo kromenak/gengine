@@ -185,7 +185,7 @@ void FaceController::Blink()
 	}
 	
 	// Play it if you got it!
-	GEngine::Instance()->GetScene()->GetAnimator()->Start(blinkAnim, false, false, nullptr);
+	GEngine::Instance()->GetScene()->GetAnimator()->Start(blinkAnim);
 }
 
 void FaceController::Blink(const std::string& animName)
@@ -204,7 +204,7 @@ void FaceController::Blink(const std::string& animName)
 			return;
 		}
 	}
-	GEngine::Instance()->GetScene()->GetAnimator()->Start(blinkAnim, false, false, nullptr);
+	GEngine::Instance()->GetScene()->GetAnimator()->Start(blinkAnim);
 }
 
 void FaceController::SetEyeJitterEnabled(bool enabled)
