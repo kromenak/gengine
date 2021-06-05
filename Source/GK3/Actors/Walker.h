@@ -32,8 +32,6 @@ public:
 	Walker(Actor* owner);
 	
     void SetCharacterConfig(const CharacterConfig& characterConfig) { mCharConfig = &characterConfig; }
-    
-	void SnapToFloor();
 	
 	void WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);

@@ -278,8 +278,8 @@ void LipSyncAnimNode::Play(AnimationState* animState)
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
-		// The mouth texture names need to have a prefix added, based on 3-letter identifier.
-		Texture* mouthTexture = Services::GetAssets()->LoadTexture(actor->GetIdentifier() + "_" + mouthTextureName);
+		// The mouth texture names need to have a prefix added, based on 3-letter model name.
+		Texture* mouthTexture = Services::GetAssets()->LoadTexture(actor->GetModelName() + "_" + mouthTextureName);
 		if(mouthTexture != nullptr)
 		{
 			actor->GetFaceController()->SetMouth(mouthTexture);

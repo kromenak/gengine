@@ -11,13 +11,12 @@
 #include "Vector3.h"
 #include "VertexAnimator.h"
 
-GKProp::GKProp(bool isActor) : GKObject()
+GKProp::GKProp(bool separateModelActor) : GKObject()
 {
     // Create mesh actor with mesh renderer on it.
-    if(isActor)
+    if(separateModelActor)
     {
         mModelActor = new Actor();
-        //mModelActor->GetTransform()->SetParent(GetTransform());
     }
     else
     {
@@ -30,15 +29,6 @@ GKProp::GKProp(bool isActor) : GKObject()
     
     // GasPlayer will go on the actor itself.
     mGasPlayer = AddComponent<GasPlayer>();
-}
-
-void GKProp::SetHeading(const Heading& heading)
-{
-    // Update heading of this actor.
-    GKObject::SetHeading(heading);
-    
-    // Update mesh to match.
-    mModelActor->SetRotation(GetRotation() * mMeshLocalRotation);
 }
 
 std::string GKProp::GetModelName() const

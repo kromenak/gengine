@@ -21,6 +21,7 @@
 struct CharacterConfig;
 class FaceController;
 class GAS;
+class Model;
 class VertexAnimation;
 class VertexAnimator;
 struct VertexAnimParams;
@@ -29,9 +30,7 @@ class Walker;
 class GKActor : public GKProp
 {
 public:
-	GKActor(const std::string& identifier);
-	
-	const std::string& GetIdentifier() const { return mIdentifier; }
+	GKActor(Model* model);
 	
     void SetIdleFidget(GAS* fidget) { mIdleFidget = fidget; }
     void SetTalkFidget(GAS* fidget) { mTalkFidget = fidget; }
@@ -51,13 +50,16 @@ public:
 	void WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	void WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
 	void WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
-	
+    
     Vector3 GetWalkDestination() const;
     void SetWalkerDOR(GKProp* walkerDOR);
-	void SnapToFloor();
+    void SnapToFloor();
     
 	FaceController* GetFaceController() const { return mFaceController; }
 	Vector3 GetHeadPosition() const;
+    
+    void SetPosition(const Vector3& position);
+    void SetHeading(const Heading& heading) override;
 	
 protected:
 	void OnUpdate(float deltaTime) override;
@@ -66,10 +68,6 @@ protected:
     void OnVertexAnimationStop() override;
     
 private:
-	// The actor's 3-letter identifier (GAB, GRA). Matches model name by convention (GAB.MOD, GRA.MOD).
-	// Note this is NOT THE SAME as the noun (GABRIEL, GRACE).
-	std::string mIdentifier;
-	
 	// The character's configuration, which defines helpful parameters for controlling the actor.
 	const CharacterConfig* mCharConfig = nullptr;
 	
@@ -89,15 +87,22 @@ private:
     // Sometimes we allow a vertex anim to affect the actor's position.
     bool mVertexAnimAllowMove = false;
     
+    // For non-move vertex anims, the actor resets to its original position/rotation when the anim stops.
+    // So, we must save the start position/rotation for that purpose.
     Vector3 mStartVertexAnimPosition;
     Quaternion mStartVertexAnimRotation;
     
-    Vector3 mStartVertexAnimMeshPos;
-    Quaternion mStartVertexAnimMeshRotation;
+    //Vector3 mStartVertexAnimModelPosition;
+    //Quaternion mStartVertexAnimModelRotation;
     
-    Vector3 mLastMeshPos;
-    Quaternion mLastMeshRotation;
+    // Usually, the model drives the actor's position (think: root motion).
+    // To do that, we track the models last position/rotation and move the actor every frame to keep up.
+    Vector3 mLastModelPosition;
+    Quaternion mLastModelRotation;
     
-    Vector3 GetMeshPosition();
-    Quaternion GetMeshRotation();
+    Vector3 GetModelPosition();
+    Quaternion GetModelRotation();
+    
+    void SyncModelToActor();
+    void SyncActorToModel();
 };

@@ -17,9 +17,7 @@ struct VertexAnimParams;
 class GKProp : public GKObject
 {
 public:
-    GKProp(bool isActor = false);
-    
-    void SetHeading(const Heading& heading) override;
+    GKProp(bool separateModelActor = false);
     
     std::string GetModelName() const;
     
@@ -43,10 +41,6 @@ protected:
     // For props, model actor == this. But for characters, model actor is a separate actor.
     Actor* mModelActor = nullptr;
     MeshRenderer* mModelRenderer = nullptr;
-    
-    // A rotation applied to the mesh internally to get it facing the right way.
-    // For example, GKActor meshes have forward facing -Z axis, so need to be rotated PI radians.
-    Quaternion mMeshLocalRotation = Quaternion::Identity;
     
     // Many objects animate using vertex animations.
     VertexAnimator* mVertexAnimator = nullptr;

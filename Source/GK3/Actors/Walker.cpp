@@ -28,17 +28,6 @@ Walker::Walker(Actor* owner) : Component(owner),
     
 }
 
-void Walker::SnapToFloor()
-{
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene != nullptr)
-    {
-        Vector3 pos = GetOwner()->GetPosition();
-        pos.y = scene->GetFloorY(pos) + mCharConfig->shoeThickness;
-        GetOwner()->SetPosition(pos);
-    }
-}
-
 void Walker::WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
 {
     WalkTo(position, Heading::None, walkerBoundary, finishCallback);

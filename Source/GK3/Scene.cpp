@@ -175,21 +175,14 @@ void Scene::Load()
 		// NEVER spawn an ego who is not our current ego!
 		if(actorDef->ego && actorDef != egoSceneActor) { continue; }
 		
-		// The actor's 3-letter identifier (GAB, GRA, etc) can be derived from the name of the model.
-		std::string identifier;
-		if(actorDef->model != nullptr)
-		{
-			identifier = actorDef->model->GetNameNoExtension();
-		}
-		
 		// Create actor.
-		GKActor* actor = new GKActor(identifier);
+		GKActor* actor = new GKActor(actorDef->model);
 		mActors.push_back(actor);
 		mObjects.push_back(actor);
 		
 		// Set noun (GABRIEL, GRACE, etc).
 		actor->SetNoun(actorDef->noun);
-		
+        
 		// Set actor's initial position and rotation.
 		if(!actorDef->positionName.empty())
 		{
@@ -204,19 +197,6 @@ void Scene::Load()
 				std::cout << "Invalid position for actor: " << actorDef->positionName << std::endl;
 			}
 		}
-		
-		// Put to floor right away.
-		actor->SnapToFloor();
-		
-		// Set actor's 3D model.
-		actor->GetMeshRenderer()->SetModel(actorDef->model);
-        
-        // Use lit shader.
-        std::vector<Material>& materials = actor->GetMeshRenderer()->GetMaterials();
-        for(Material& material : materials)
-        {
-            material.SetShader(Services::GetAssets()->LoadShader("3D-Tex-Lit"));
-        }
 		
 		// Save actor's GAS references.
 		actor->SetIdleFidget(actorDef->idleGas);
@@ -236,7 +216,7 @@ void Scene::Load()
 			mEgo = actor;
 		}
         
-        Model* walkerDorModel = Services::GetAssets()->LoadModel("DOR_" + identifier);
+        Model* walkerDorModel = Services::GetAssets()->LoadModel("DOR_" + actor->GetModelName());
         if(walkerDorModel != nullptr)
         {
             GKProp* walkerDOR = new GKProp();
@@ -334,7 +314,7 @@ void Scene::Load()
 		}
 	}
     
-    // Create Grace Prop!
+    // Create Grace Prop! (TEMP for testing)
     GKProp* prop = new GKProp();
     prop->SetNoun("GRACE");
     prop->GetMeshRenderer()->SetModel(Services::GetAssets()->LoadModel("GRA.MOD"));
@@ -365,12 +345,12 @@ bool Scene::InitEgoPosition(const std::string& positionName)
     const ScenePosition* position = GetPosition(positionName);
 	if(position == nullptr) { return false; }
     
+    std::cout << "InitEgoPosition " << positionName << ", " << position->position << std::endl;
+    
     // Set position and heading.
     mEgo->SetPosition(position->position);
     mEgo->SetHeading(position->heading);
-	
-	// Make sure Ego stays grounded.
-	mEgo->SnapToFloor();
+    mEgo->SnapToFloor();
 	
 	// Should also set camera position/angle.
 	// Output a warning if specified position has no camera though.
