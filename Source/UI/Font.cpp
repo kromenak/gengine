@@ -174,7 +174,7 @@ void Font::ParseFromData(char* data, int dataLength)
                 {
                     mColorMode = ColorMode::AlphaBlend;
                 }
-				if(StringUtil::EqualsIgnoreCase(keyValue.value, "color replacement"))
+				else if(StringUtil::EqualsIgnoreCase(keyValue.value, "color replacement"))
 				{
                     mColorMode = ColorMode::ColorReplace;
 				}
@@ -198,6 +198,9 @@ void Font::ParseFromData(char* data, int dataLength)
 				// Defined when type is "Alpha Blend".
 				mBackgroundColor = keyValue.GetValueAsColor32();
 			}
+            //TODO: function
+            //TODO: destination opacity
+            //TODO: source opacity
 			else
 			{
 				std::cout << "Unknown font property: " << keyValue.key << std::endl;

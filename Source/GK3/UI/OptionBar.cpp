@@ -120,10 +120,29 @@ UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, con
     
     if(setSprites)
     {
-        button->SetUpTexture(Services::GetAssets()->LoadTexture(config[buttonId + "SpriteUp"].value));
-        button->SetDownTexture(Services::GetAssets()->LoadTexture(config[buttonId + "SpriteDown"].value));
-        button->SetDisabledTexture(Services::GetAssets()->LoadTexture(config[buttonId + "SpriteDis"].value));
-        button->SetHoverTexture(Services::GetAssets()->LoadTexture(config[buttonId + "SpriteHov"].value));
+        auto it = config.find(buttonId + "SpriteUp");
+        if(it != config.end())
+        {
+            button->SetUpTexture(Services::GetAssets()->LoadTexture(it->second.value));
+        }
+        
+        it = config.find(buttonId + "SpriteDown");
+        if(it != config.end())
+        {
+            button->SetDownTexture(Services::GetAssets()->LoadTexture(it->second.value));
+        }
+        
+        it = config.find(buttonId + "SpriteDis");
+        if(it != config.end())
+        {
+            button->SetDisabledTexture(Services::GetAssets()->LoadTexture(it->second.value));
+        }
+        
+        it = config.find(buttonId + "SpriteHov");
+        if(it != config.end())
+        {
+            button->SetHoverTexture(Services::GetAssets()->LoadTexture(it->second.value));
+        }
     }
     return button;
 }

@@ -299,7 +299,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 //int frameNumber = line.entries[0].GetValueAsInt();
                 
                 // Read in the option.
-				std::string option = line.entries[0].key;
+				std::string option = line.entries[1].key;
                 if(StringUtil::EqualsIgnoreCase(option, "SIMPLE"))
                 {
                     //int simpleValue = entry->GetValueAsInt();

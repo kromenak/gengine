@@ -16,7 +16,7 @@ GKObject::GKObject() : Actor()
 
 void GKObject::SetHeading(const Heading& heading)
 {
-	SetRotation(Quaternion(Vector3::UnitY, heading.ToRadians()));
+	SetRotation(heading.ToQuaternion());
 }
 
 Heading GKObject::GetHeading() const

@@ -403,7 +403,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	// If no buffer could be found, we're in trouble!
 	if(buffer == nullptr)
 	{
-		std::cout << "Asset " << upperName << " could not be loaded!" << std::endl;
+		//std::cout << "Asset " << upperName << " could not be loaded!" << std::endl;
 		return nullptr;
 	}
 	
