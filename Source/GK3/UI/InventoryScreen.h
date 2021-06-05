@@ -19,12 +19,6 @@ class UIButton;
 class UICanvas;
 class UIImage;
 
-class InventoryLayer : public Layer
-{
-public:
-    InventoryLayer();
-};
-
 class InventoryScreen : public Actor
 {
 public:
@@ -33,12 +27,14 @@ public:
 	void Show(const std::string& actorName, const std::set<std::string>& inventory);
 	void Hide();
     bool IsShowing() const;
+
+    void RefreshLayout();
 	
 private:
 	const int kActiveHighlightXOffset = -4;
     
     // This screen's layer.
-    InventoryLayer mLayer;
+    Layer mLayer;
 	
 	// Canvas to render inventory UI.
 	UICanvas* mCanvas = nullptr;
@@ -49,8 +45,9 @@ private:
 	// A highlight that appears over the active inventory item.
 	UIImage* mActiveHighlightImage = nullptr;
 	
-	// Name of the actor whose inventory we are currently viewing.
+	// Actor and inventory we are looking at.
 	std::string mCurrentActorName;
+    const std::set<std::string>* mCurrentInventory = nullptr;
 	
 	void OnItemClicked(UIButton* button, std::string itemName);
 };
