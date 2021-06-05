@@ -45,9 +45,14 @@ public:
 	InventoryManager();
 	
 	bool IsValidInventoryItem(const std::string& itemName) const;
-	
+
+    void AddInventoryItem(const std::string& itemName);
 	void AddInventoryItem(const std::string& actorName, const std::string& itemName);
+
+    void RemoveInventoryItem(const std::string& itemName);
 	void RemoveInventoryItem(const std::string& actorName, const std::string& itemName);
+
+    bool HasInventoryItem(const std::string& itemName) const;
 	bool HasInventoryItem(const std::string& actorName, const std::string& itemName) const;
 	
 	std::string GetActiveInventoryItem(const std::string& actorName) const;

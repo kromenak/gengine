@@ -101,6 +101,15 @@ bool InventoryManager::IsValidInventoryItem(const std::string& itemName) const
 	return mInventoryItems.find(itemNameLower) != mInventoryItems.end();
 }
 
+void InventoryManager::AddInventoryItem(const std::string& itemName)
+{
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr)
+    {
+        AddInventoryItem(scene->GetEgoName(), itemName);
+    }
+}
+
 void InventoryManager::AddInventoryItem(const std::string& actorName, const std::string& itemName)
 {
 	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
@@ -109,12 +118,37 @@ void InventoryManager::AddInventoryItem(const std::string& actorName, const std:
 	items.insert(itemNameLower);
 }
 
+void InventoryManager::RemoveInventoryItem(const std::string& itemName)
+{
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr)
+    {
+        RemoveInventoryItem(scene->GetEgoName(), itemName);
+    }
+}
+
 void InventoryManager::RemoveInventoryItem(const std::string& actorName, const std::string& itemName)
 {
 	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
 	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
 	std::set<std::string>& items = mInventories[actorNameLower];
 	items.erase(itemNameLower);
+
+    // Inventory item can be removed while screen is showing (ex: eating the candy).
+    if(mInventoryScreen->IsActive())
+    {
+        mInventoryScreen->RefreshLayout();
+    }
+}
+
+bool InventoryManager::HasInventoryItem(const std::string& itemName) const
+{
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr)
+    {
+        return HasInventoryItem(scene->GetEgoName(), itemName);
+    }
+    return false;
 }
 
 bool InventoryManager::HasInventoryItem(const std::string& actorName, const std::string& itemName) const
@@ -142,6 +176,12 @@ void InventoryManager::SetActiveInventoryItem(const std::string& actorName, cons
 	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
 	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
 	mActiveInventoryItems[actorNameLower] = itemNameLower;
+
+    // Active item can be changed via sheep calls while inventory is showing.
+    if(mInventoryScreen->IsActive())
+    {
+        mInventoryScreen->RefreshLayout();
+    }
 }
 
 void InventoryManager::ShowInventory()
