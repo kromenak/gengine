@@ -40,9 +40,8 @@ public:
 	void ClearActionSets();
 	
 	// Action Execution
-	bool ExecuteAction(const std::string& noun, const std::string& verb);
-	void ExecuteAction(const Action* action);
-	void ExecuteSheepAction(SheepScript* script);
+	bool ExecuteAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
+	void ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback = nullptr);
 	bool IsActionPlaying() const { return mCurrentAction != nullptr; }
 	
 	// Action Query
@@ -120,6 +119,9 @@ private:
 	// Also save the last action, in case we need it.
 	const Action* mCurrentAction = nullptr;
 	const Action* mLastAction = nullptr;
+
+    // A callback to execute when the current action finishes executing.
+    std::function<void(const Action*)> mCurrentActionFinishCallback = nullptr;
 	
 	// An identifier for an executing action.
 	// We just increment this value each time an action executes to uniquly identify each action.

@@ -100,7 +100,7 @@ void ActionManager::ClearActionSets()
 	mVerbs.clear();
 }
 
-bool ActionManager::ExecuteAction(const std::string& noun, const std::string& verb)
+bool ActionManager::ExecuteAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback)
 {
 	// Iterate action sets and find a valid candidate for this noun/verb combo.
 	// Action sets are loaded such that the LAST valid candidate we find is the one we should use.
@@ -118,13 +118,19 @@ bool ActionManager::ExecuteAction(const std::string& noun, const std::string& ve
 	// Execute action if we found a valid one.
 	if(candidate != nullptr)
 	{
-		ExecuteAction(candidate);
+		ExecuteAction(candidate, finishCallback);
 		return true;
 	}
+
+    // Well...we did technically finish I suppose!
+    if(finishCallback != nullptr)
+    {
+        finishCallback(nullptr);
+    }
 	return false;
 }
 
-void ActionManager::ExecuteAction(const Action* action)
+void ActionManager::ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback)
 {
 	if(action == nullptr)
 	{
@@ -139,6 +145,7 @@ void ActionManager::ExecuteAction(const Action* action)
 		return;
 	}
 	mCurrentAction = action;
+    mCurrentActionFinishCallback = finishCallback;
 	
 	// Log it!
 	Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", action->ToString().c_str()));
@@ -609,8 +616,15 @@ void ActionManager::OnActionExecuteFinished()
 	{
 		ShowTopicBar(mCurrentAction->noun);
 	}
-	
+
 	// Clear current action.
 	mLastAction = mCurrentAction;
 	mCurrentAction = nullptr;
+
+    // Execute finish callback if specified.
+    if(mCurrentActionFinishCallback != nullptr)
+    {
+        mCurrentActionFinishCallback(mLastAction);
+        mCurrentActionFinishCallback = nullptr;
+    }
 }
