@@ -13,7 +13,7 @@
 #include "UIImage.h"
 
 InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTransform),
-    mLayer("CloseUpLayer")
+    mLayer("CloseUpLayer", true)
 {
 	mCanvas = AddComponent<UICanvas>();
 	
@@ -94,8 +94,18 @@ bool InventoryInspectScreen::IsShowing() const
 void InventoryInspectScreen::OnClicked()
 {
 	// Show the action bar for this noun.
-	Services::Get<ActionManager>()->ShowActionBar(mInspectItemName, [](const Action* action) {
-		Services::Get<ActionManager>()->ExecuteAction(action);
+	Services::Get<ActionManager>()->ShowActionBar(mInspectItemName, [this](const Action* action) {
+
+        // Perform the action.
+		Services::Get<ActionManager>()->ExecuteAction(action, [this](const Action* action) {
+
+            // After the action completes, check if we still have the inventory item shown.
+            // In some rare cases (ex: eating a candy), the item no longer exists, so we should close this screen.
+            if(!Services::Get<InventoryManager>()->HasInventoryItem(mInspectItemName))
+            {
+                Hide();
+            }
+        });
 	});
 	
 	// We want to add an "inspect" verb, which means to show the close-up of the item.
