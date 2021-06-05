@@ -82,6 +82,7 @@ struct SheepValue
 	{
 		switch(type)
 		{
+        default:
 		case SheepValueType::Void:
 			return "void";
 		case SheepValueType::String:

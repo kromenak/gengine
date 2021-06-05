@@ -1050,6 +1050,7 @@ RegFunc1(StopAnimation, void, string, IMMEDIATE, REL_FUNC);
 shpvoid StopAllAnimations()
 {
     GEngine::Instance()->GetScene()->GetAnimator()->StopAll();
+    return 0;
 }
 RegFunc0(StopAllAnimations, void, IMMEDIATE, DEV_FUNC);
 
@@ -1129,6 +1130,7 @@ RegFunc0(DumpBuildInfo, void, IMMEDIATE, DEV_FUNC);
 shpvoid DumpLayerStack()
 {
     Services::Get<LayerManager>()->DumpLayerStack();
+    return 0;
 }
 RegFunc0(DumpLayerStack, void, IMMEDIATE, DEV_FUNC);
 

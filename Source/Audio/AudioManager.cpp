@@ -145,7 +145,7 @@ bool AudioManager::Initialize()
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
-        return;
+        return false;
     }
     
     // Set volumes for each audio type.
@@ -217,31 +217,31 @@ void AudioManager::UpdateListener(const Vector3& position, const Vector3& veloci
 
 PlayingSoundHandle AudioManager::PlaySFX(Audio* audio)
 {
-    if(audio == nullptr) { return; }
+    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     return CreateAndPlaySound(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::SFX);
 }
 
 PlayingSoundHandle AudioManager::PlaySFX3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
 {
-    if(audio == nullptr) { return; }
+    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     return CreateAndPlaySound3D(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::SFX, position, minDist, maxDist);
 }
 
 PlayingSoundHandle AudioManager::PlayVO(Audio* audio)
 {
-    if(audio == nullptr) { return; }
+    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     return CreateAndPlaySound(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::VO);
 }
 
 PlayingSoundHandle AudioManager::PlayVO3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
 {
-    if(audio == nullptr) { return; }
+    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     return CreateAndPlaySound3D(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::VO, position, minDist, maxDist);
 }
 
 PlayingSoundHandle AudioManager::PlayAmbient(Audio* audio, float fadeInTime)
 {
-    if(audio == nullptr) { return; }
+    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     
     // If specified, start fade in.
     if(fadeInTime > 0.0f)
@@ -254,7 +254,7 @@ PlayingSoundHandle AudioManager::PlayAmbient(Audio* audio, float fadeInTime)
 
 PlayingSoundHandle AudioManager::PlayAmbient3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
 {
-    if(audio == nullptr) { return; }
+    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     return CreateAndPlaySound3D(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::Ambient, position, minDist, maxDist);
 }
 
@@ -433,15 +433,15 @@ PlayingSoundHandle AudioManager::CreateAndPlaySound(const char* buffer, int buff
     mPlayingSounds.emplace_back(channel);
     
     // Return channel being played on.
-    return channel;
+    return mPlayingSounds.back();
 }
 
 PlayingSoundHandle AudioManager::CreateAndPlaySound3D(const char* buffer, int bufferLength, AudioType audioType, const Vector3 &position, float minDist, float maxDist)
 {
-    PlayingSoundHandle soundInstance = CreateAndPlaySound(buffer, bufferLength, audioType, true);
+    PlayingSoundHandle soundHandle = CreateAndPlaySound(buffer, bufferLength, audioType, true);
     
     // Assuming sound is assigned to a channel successfully, set 3D attributes.
-    if(soundInstance.channel != nullptr)
+    if(soundHandle.channel != nullptr)
     {
         // Sometimes, callers may pass negative values to mean "use default" for min/max dists.
         if(minDist < 0.0f) { minDist = kDefault3DMinDist; }
@@ -449,13 +449,14 @@ PlayingSoundHandle AudioManager::CreateAndPlaySound3D(const char* buffer, int bu
 
         // Make sure max dist isn't invalid.
         if(maxDist < minDist) { maxDist = minDist; }
-        
+
         // Set min/max distance.
-        soundInstance.channel->set3DMinMaxDistance(minDist, maxDist);
-        
+        soundHandle.channel->set3DMinMaxDistance(minDist, maxDist);
+
         // Put at desired position. No velocity right now.
-        soundInstance.channel->set3DAttributes((const FMOD_VECTOR*)&position, (const FMOD_VECTOR*)&Vector3::Zero);
+        soundHandle.channel->set3DAttributes((const FMOD_VECTOR*)&position, (const FMOD_VECTOR*)&Vector3::Zero);
     }
+    return soundHandle;
 }
 
 void AudioManager::AmbientFade(float fadeTime, float targetVolume, float startVolume)

@@ -406,7 +406,7 @@ bool Walker::CalculatePath(const Vector3& startPos, const Vector3& endPos)
             {
                 if(getRid)
                 {
-                    mPath.erase(it);
+                    it = mPath.erase(it);
                 }
                 getRid = !getRid;
             }
