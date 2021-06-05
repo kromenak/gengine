@@ -16,6 +16,13 @@ Layer::Layer(const std::string& name) :
     
 }
 
+Layer::Layer(const std::string& name, bool persistAmbientState) :
+    mName(name),
+    mPersistAmbientState(persistAmbientState)
+{
+
+}
+
 void Layer::Pushed()
 {
     // Save audio state of layer below us in the stack.

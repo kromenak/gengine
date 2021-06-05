@@ -25,6 +25,7 @@ class Layer
 {
 public:
     Layer(const std::string& name);
+    Layer(const std::string& name, bool persistAmbientState);
     
     void Pushed();
     void Popped();
