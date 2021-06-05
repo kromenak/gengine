@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 
-project(gengine VERSION 0.0.1
+project(gengine VERSION 0.0.2
                 DESCRIPTION "Gabriel Knight 3 game engine"
                 LANGUAGES C CXX)
 
