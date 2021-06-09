@@ -292,9 +292,15 @@ void Scene::Load()
 				{
 					prop->StartFidget(modelDef->gas);
 				}
+
+                // If it should be hidden by default, hide it.
+                if(modelDef->hidden)
+                {
+                    prop->SetActive(false);
+                }
 				break;
 			}
-				
+
 			default:
 				std::cout << "Unaccounted for model type: " << (int)modelDef->type << std::endl;
 				break;

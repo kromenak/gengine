@@ -95,6 +95,9 @@ void GameCamera::OnUpdate(float deltaTime)
         {
             //TODO: implement pause!
             std::cout << "Pause!" << std::endl;
+
+            // For debugging...
+            std::cout << GetPosition() << std::endl;
         }
     }
 }

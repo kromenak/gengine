@@ -5,6 +5,7 @@
 //
 #include "GKActor.h"
 
+#include "AnimationNodes.h"
 #include "CharacterManager.h"
 #include "Debug.h"
 #include "FaceController.h"
@@ -83,21 +84,35 @@ void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBounda
 	// GOAL: walk the actor to the initial position/rotation of this anim.
 	// Retrieve vertex animation from animation that matches this actor's model.
 	// If no vertex anim exists, we can't walk to animation start! This is probably a developer error.
-	VertexAnimation* vertexAnim = anim->GetVertexAnimationOnFrameForModel(0, GetModelName());
-	if(vertexAnim == nullptr) { return; }
-	
-    // Sample position on first frame of animation - that's our walk pos.
-	Vector3 walkPos = vertexAnim->SampleVertexPosition(0, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
-	VertexAnimationTransformPose transformPose = vertexAnim->SampleTransformPose(0, mCharConfig->hipAxesMeshIndex);
-	walkPos = transformPose.mMeshToLocalMatrix.TransformPoint(walkPos);
-	walkPos.y = GetPosition().y;
-        
+    VertexAnimNode* vertexAnimNode = anim->GetVertexAnimationOnFrameForModel(0, GetModelName());
+	if(vertexAnimNode == nullptr) { return; }
+
+    // Sample position/pose on first frame of animation.
+    // That gives our walk pos/rotation, BUT it is in the actor's local space.
+    Vector3 walkPos = vertexAnimNode->vertexAnimation->SampleVertexPosition(0, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
+    VertexAnimationTransformPose transformPose = vertexAnimNode->vertexAnimation->SampleTransformPose(0, mCharConfig->hipAxesMeshIndex);
+
+    // If this is an absolute animation, the above position needs to be further converted to world space.
+    Matrix4 transformMatrix = transformPose.mMeshToLocalMatrix;
+    if(vertexAnimNode->absolute)
+    {
+        Vector3 animWorldPos = vertexAnimNode->CalcAbsolutePosition();
+        Quaternion modelToActorRot(Vector3::UnitY, Math::ToRadians(vertexAnimNode->absoluteWorldToModelHeading));
+
+        Matrix4 localToWorldMatrix = Matrix4::MakeTranslate(animWorldPos) * Matrix4::MakeRotate(modelToActorRot);
+        transformMatrix = localToWorldMatrix * transformMatrix;
+    }
+
+    // Calculate walk pos in world space.
+    walkPos = transformMatrix.TransformPoint(walkPos);
+    walkPos.y = GetPosition().y;
+
     // Calculate rotation on first frame of animation - that's our heading.
-	Heading heading = Heading::FromQuaternion(transformPose.mMeshToLocalMatrix.GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
-    
-	// Walk to that position/heading.
-	mWalker->WalkTo(walkPos, heading, walkerBoundary, finishCallback);
-    
+    Heading heading = Heading::FromQuaternion(transformMatrix.GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
+
+    // Walk to that position/heading.
+    mWalker->WalkTo(walkPos, heading, walkerBoundary, finishCallback);
+
     // To visualize walk position/heading.
     //Debug::DrawLine(walkPos, walkPos + Vector3::UnitY * 10.0f, Color32::Orange, 10.0f);
     //Debug::DrawLine(walkPos, walkPos + heading.ToVector() * 10.0f, Color32::Red, 10.0f);
@@ -172,9 +187,6 @@ void GKActor::OnUpdate(float deltaTime)
         mWalkerDOR->SetPosition(mModelActor->GetPosition());
         mWalkerDOR->SetRotation(mModelActor->GetRotation());
     }
-    
-	// Stay on the ground.
-    
 }
 
 void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
@@ -208,8 +220,8 @@ void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
     }
     
     // Save last mesh pos/rot to establish new baseline for "actor follow mesh" function.
-    mLastModelPosition = GetModelPosition();
-    mLastModelRotation = GetModelRotation();
+    //mLastModelPosition = GetModelPosition();
+    //mLastModelRotation = GetModelRotation();
 }
 
 void GKActor::OnVertexAnimationStop()

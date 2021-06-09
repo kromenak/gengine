@@ -26,7 +26,7 @@ std::vector<AnimNode*>* Animation::GetFrame(int frameNumber)
     return nullptr;
 }
 
-VertexAnimation* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, const std::string& modelName)
+VertexAnimNode* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, const std::string& modelName)
 {
 	for(auto& node : mVertexAnimNodes)
 	{
@@ -34,7 +34,7 @@ VertexAnimation* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, c
 		   node->vertexAnimation != nullptr &&
 		   StringUtil::EqualsIgnoreCase(node->vertexAnimation->GetModelName(), modelName))
 		{
-			return node->vertexAnimation;
+			return node;
 		}
 	}
 	return nullptr;
@@ -84,29 +84,31 @@ void Animation::ParseFromData(char *data, int dataLength)
 				
 				// If an animation defines more entries, it means it is an absolute animation.
 				node->absolute = true;
-				
-				// Note z/y are flipped due to Maya->Game conversion.
-				node->offsetFromOrigin.x = line.entries[2].GetValueAsFloat();
-				node->offsetFromOrigin.z = line.entries[3].GetValueAsFloat();
-				node->offsetFromOrigin.y = line.entries[4].GetValueAsFloat();
-				node->headingFromOrigin = line.entries[5].GetValueAsFloat();
-				
-				// Next are (x2, z2, y2) and (angle2), if we have enough args.
-				// Note z/y are flipped, due to Maya->Game conversion.
-				// Based on examining anim files (like RC1 fountain) and expected positions,
-				// this appears to be a position to move the model to at the start of the animation?
+
+                // (x1, y1, z1) and (angle1) represent an offset/heading used to calculate position to play absolute anim.
+                // The offset in the asset goes "actor to model" but we need it to be "model to actor" later. So, that's why we negate them!
+                // Note z/y are flipped due to Maya->Game conversion.
+                node->absoluteModelToActorOffset.x = -line.entries[2].GetValueAsFloat();
+                node->absoluteModelToActorOffset.z = -line.entries[3].GetValueAsFloat();
+                node->absoluteModelToActorOffset.y = -line.entries[4].GetValueAsFloat();
+                node->absoluteModelToActorHeading = line.entries[5].GetValueAsFloat();
+
+                // Enough args for the final set of arguments?
 				if(line.entries.size() < 10) { continue; }
-				node->position.x = line.entries[6].GetValueAsFloat();
-				node->position.z = line.entries[7].GetValueAsFloat();
-				node->position.y = line.entries[8].GetValueAsFloat();
-				node->heading = line.entries[9].GetValueAsFloat();
+
+                // Next are (x2, z2, y2) and (angle2). These represent an offset/heading ALSO used to calculate position to play absolute anims.
+                // The previous vector is rotated by this heading and then added to this offset to get final position - crazy stuff! 
+                // Note z/y are flipped due to Maya->Game conversion.
+				node->absoluteWorldToModelOffset.x = line.entries[6].GetValueAsFloat();
+				node->absoluteWorldToModelOffset.z = line.entries[7].GetValueAsFloat();
+				node->absoluteWorldToModelOffset.y = line.entries[8].GetValueAsFloat();
+				node->absoluteWorldToModelHeading = line.entries[9].GetValueAsFloat();
             }
         }
 		// "STextures" changes textures on a scene (BSP) model.
         else if(StringUtil::EqualsIgnoreCase(section.name, "STEXTURES"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			
 			for(int i = 1; i < section.lines.size(); ++i)
             {
 				IniLine& line = section.lines[i];

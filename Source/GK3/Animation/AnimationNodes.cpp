@@ -45,14 +45,21 @@ void VertexAnimNode::Play(AnimationState* animState)
             // The animator may update not exactly at the time interval this frame should have executed.
             // If we're already a fraction of time into the current frame, take that into account for smoother animations.
             params.startTime += animState->timer;
-            
+
+            // If this is an absolute anim, calculate the position/heading to set the model actor to when the anim plays.
             params.absolute = absolute;
             if(absolute)
             {
-                params.absolutePosition = position - offsetFromOrigin;
-                params.absoluteHeading = Heading::FromDegrees(heading - headingFromOrigin);
+                params.absolutePosition = CalcAbsolutePosition();
+                params.absoluteHeading = Heading::FromDegrees(absoluteWorldToModelHeading - absoluteModelToActorHeading);
             }
-            params.allowMove = animState->allowMove || absolute; // absolute anims are always "move anims".
+
+            // Move anims allow the actor associated with the model to stay in its final position when the animation ends, instead of reverting.
+            // Absolute anims are always "move anims".
+            params.allowMove = animState->allowMove || absolute;
+
+            // Keep track of whether this is an autoscript anim.
+            // This is mainly b/c autoscript anims are lower priority than other anims.
             params.fromAutoScript = animState->fromGas;
             
             // Start the anim.
@@ -83,6 +90,18 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
             obj->SampleAnimation(vertexAnimation, frame);
 		}
 	}
+}
+
+Vector3 VertexAnimNode::CalcAbsolutePosition()
+{
+    // Remember, when playing an absolute animation, the model actor's origin IS NOT necessarily equal to the model's position!
+    // This depends on how the animation was authored.
+    //
+    // To calculate the absolute position, start at world origin, add "world to model" offset.
+    // Then, use the "world to model" heading to ROTATE the "model to actor" offset, and then add that to the previous position.
+    // And...you got your spot!
+    Quaternion modelToActorRot(Vector3::UnitY, Math::ToRadians(absoluteWorldToModelHeading));
+    return absoluteWorldToModelOffset + modelToActorRot.Rotate(absoluteModelToActorOffset);
 }
 
 void SceneTextureAnimNode::Play(AnimationState* animState)

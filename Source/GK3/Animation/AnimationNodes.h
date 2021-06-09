@@ -44,23 +44,27 @@ struct VertexAnimNode : public AnimNode
 	// Absolute anims need to have position and heading for the target actor set exactly for the anim to play correctly.
 	// Relative anims (aka not absolute anims) can play on the actor regardless of the actor's position.
 	bool absolute = false;
-	
-	// This is a bit confusing, and I'm not totally sure why it is structured this way.
-	// In ANM file, syntax for vertex anim is <frame_num>, <act_name>, <x1>, <y1>, <z1>, <angle1>, <x2>, <y2>, <z2>, <angle2>
-	// The first x/y/z/angle appear to be the offset from the model's authored center to the origin.
-	// The second x/y/z/angle appear to be the desired offset from the origin.
-	// In other words, to properly position an object for an animation, we do (position - offsetFromOrigin)
-	Vector3 offsetFromOrigin;
-	float headingFromOrigin = 0.0f;
-	
-	Vector3 position;
-	float heading = 0.0f;
+
+    // For absolute anim position/heading, 8 numbers are provided for two offset vectors and two headings.
+    // To get the final position/heading, you must do this math:
+    // 
+    // absolutePosition = worldToModelOffset + worldToModelQuat.Rotate(modelToActorOffset)
+    // absoluteHeading = worldToModelHeading - modelToActorHeading
+    //
+    // Why is it set up this way? Who knows, but it took forever to figure out!
+    Vector3 absoluteWorldToModelOffset;
+    float absoluteWorldToModelHeading = 0.0f;
+
+    Vector3 absoluteModelToActorOffset;
+    float absoluteModelToActorHeading = 0.0f;
 	
 	void Play(AnimationState* animState) override;
 	void Stop() override;
 	void Sample(Animation* anim, int frame) override;
     
     bool PlayDuringCatchup() override { return true; }
+
+    Vector3 CalcAbsolutePosition();
 };
 
 // Applies a texture to a *scene* model (aka a model within the BSP geometry).
