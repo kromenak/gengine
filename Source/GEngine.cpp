@@ -22,6 +22,7 @@
 #include "Scene.h"
 #include "Services.h"
 #include "TextInput.h"
+#include "Timers.h"
 
 GEngine* GEngine::sInstance = nullptr;
 
@@ -388,6 +389,9 @@ void GEngine::Update()
     
     // Update video playback.
     mVideoPlayer.Update();
+
+    // Update timers.
+    Timers::Update(deltaTime);
     
     // TODO: Move to CursorManager or something.
 	// If a sheep is running, show "wait" cursor.
@@ -409,7 +413,7 @@ void GEngine::Update()
     {
         mCursor->Update(deltaTime);
     }
-	
+
 	// Update debug visualizations.
 	Debug::Update(deltaTime);
 }

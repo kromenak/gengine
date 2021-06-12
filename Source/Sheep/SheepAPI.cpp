@@ -24,6 +24,7 @@
 #include "Services.h"
 #include "SoundtrackPlayer.h"
 #include "StringUtil.h"
+#include "Timers.h"
 #include "VerbManager.h"
 #include "VideoPlayer.h"
 
@@ -1646,21 +1647,41 @@ RegFunc0(SetTopSheep, void, IMMEDIATE, REL_FUNC);
 //SetSurfaceLow
 //SetSurfaceNormal
 
-/*
 shpvoid SetTimerMs(int milliseconds)
 {
-	// Should throw error if not waited upon!
+    // Should throw error if not waited upon!
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    if(!currentThread->mInWaitBlock)
+    {
+        Services::GetReports()->Log("Warning", "No point setting a timer if you don't wait for it to finish. " +
+                                                std::to_string(milliseconds) + " millisecond timer request ignored.");
+        ExecError();
+    }
+    else
+    {
+        Timers::AddTimerMilliseconds(static_cast<unsigned int>(milliseconds), currentThread->AddWait());
+    }
 	return 0;
 }
 RegFunc1(SetTimerMs, void, int, WAITABLE, REL_FUNC);
 
 shpvoid SetTimerSeconds(float seconds)
 {
-	// Should throw error if not waited upon!
-	return 0;
+    // Should throw error if not waited upon!
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    if(!currentThread->mInWaitBlock)
+    {
+        Services::GetReports()->Log("Warning", "No point setting a timer if you don't wait for it to finish. " +
+                                    std::to_string(seconds) + " second timer request ignored.");
+        ExecError();
+    }
+    else
+    {
+        Timers::AddTimerSeconds(seconds, currentThread->AddWait());
+    }
+    return 0;
 }
 RegFunc1(SetTimerSeconds, void, float, WAITABLE, REL_FUNC);
-*/
  
 //ThrowException
 
