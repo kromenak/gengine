@@ -360,8 +360,9 @@ void Walker::OnWalkToFinished()
     // Call finished callback.
     if(mFinishedPathCallback != nullptr)
     {
-        mFinishedPathCallback();
+        auto callback = mFinishedPathCallback;
         mFinishedPathCallback = nullptr;
+        callback();
     }
 }
 
