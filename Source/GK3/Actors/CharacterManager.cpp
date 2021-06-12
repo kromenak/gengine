@@ -354,14 +354,17 @@ CharacterConfig& CharacterManager::GetCharacterConfig(const std::string& identif
 	auto it = mCharacterConfigs.find(identifier);
 	if(it != mCharacterConfigs.end())
 	{
-		return mCharacterConfigs[identifier];
+        return it->second;
 	}
 	return mDefaultCharacterConfig;
 }
 
 bool CharacterManager::IsValidName(const std::string& name)
 {
-	if(mCharacterNouns.find(name) != mCharacterNouns.end())
+    std::string key = name;
+    StringUtil::ToUpper(key);
+
+	if(mCharacterNouns.find(key) == mCharacterNouns.end())
 	{
 		Services::GetReports()->Log("Error", StringUtil::Format("Error: who the hell is '%s'?", name.c_str()));
 		return false;
