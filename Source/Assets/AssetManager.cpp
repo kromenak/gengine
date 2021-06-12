@@ -13,6 +13,8 @@
 #include <string>
 
 #include "FileSystem.h"
+#include "imstream.h"
+#include "Services.h"
 #include "StringUtil.h"
 
 AssetManager::AssetManager()
@@ -241,7 +243,18 @@ BSPLightmap* AssetManager::LoadBSPLightmap(const std::string& name)
 
 SheepScript* AssetManager::LoadSheep(const std::string& name)
 {
-    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), &mLoadedSheeps);
+    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), &mLoadedSheeps, [](std::string& name, char* buffer, unsigned int bufferSize) {
+
+        // Determine whether this is a binary sheep asset.
+        if(bufferSize >= 8 && memcmp(buffer, "GK3Sheep", 8) == 0)
+        {
+            return new SheepScript(name, buffer, bufferSize);
+        }
+
+        // This doesn't appear to be a binary sheep file, so it might be a text sheep file.
+        // Let's try compiling it on-the-fly!
+        return Services::GetSheep()->Compile(name, imstream(buffer, bufferSize));
+    });
 }
 
 Cursor* AssetManager::LoadCursor(const std::string& name)
@@ -380,7 +393,7 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 }
 
 template<class T>
-T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache)
+T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T* (std::string&, char*, unsigned int)> createFunc)
 {
     std::string upperName = assetName;
     StringUtil::ToUpper(upperName);
@@ -408,7 +421,8 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	}
 	
 	// Generate asset from the BARN bytes.
-	T* asset = new T(upperName, buffer, bufferSize);
+    T* asset = createFunc != nullptr ? createFunc(upperName, buffer, bufferSize) : new T(upperName, buffer, bufferSize);
+	//T* asset = new T(upperName, buffer, bufferSize);
 	
 	// Delete the buffer after use (or it'll leak).
 	delete[] buffer;

@@ -5,6 +5,7 @@
 //  Created by Clark Kromenaker on 8/17/17.
 //
 #pragma once
+#include <functional>
 #include <initializer_list>
 #include <string>
 #include <vector>
@@ -123,7 +124,7 @@ private:
     
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
     
-    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache);
+    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T*(std::string&, char*, unsigned int)> createFunc = nullptr);
 	char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
 	
 	template<class T> void UnloadAssets(std::unordered_map<std::string, T*>& cache);
