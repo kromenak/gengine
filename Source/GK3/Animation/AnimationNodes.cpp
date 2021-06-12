@@ -316,6 +316,11 @@ void MoodAnimNode::Play(AnimationState* animState)
 	std::cout << actorNoun << " IN MOOD " << moodName << std::endl;
 }
 
+void ExpressionAnimNode::Play(AnimationState* animState)
+{
+    std::cout << actorNoun << " HAS EXPRESSION " << expressionName << std::endl;
+}
+
 void SpeakerAnimNode::Play(AnimationState* animState)
 {
 	std::cout << "SPEAKER IS NOW " << actorNoun << std::endl;
@@ -334,6 +339,12 @@ void SpeakerCaptionAnimNode::Play(AnimationState* animState)
 
 void DialogueCueAnimNode::Play(AnimationState* animState)
 {
-	std::cout << "DIALOGUE CUE" << std::endl;
+	//std::cout << "DIALOGUE CUE" << std::endl;
 	Services::Get<DialogueManager>()->TriggerDialogueCue();
+}
+
+void DialogueAnimNode::Play(AnimationState* animState)
+{
+    //TODO: Unsure if "numLines" and "useFidgets" are correct here.
+    Services::Get<DialogueManager>()->StartDialogue(licensePlate, 1, false, nullptr);
 }

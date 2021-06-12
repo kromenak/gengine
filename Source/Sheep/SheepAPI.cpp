@@ -1068,14 +1068,18 @@ shpvoid StartMoveAnimation(std::string animationName)
 }
 RegFunc1(StartMoveAnimation, void, string, WAITABLE, REL_FUNC);
 
-/*
 shpvoid StartMom(std::string momAnimationName)
 {
-	std::cout << "StartMom" << std::endl;
+    Animation* animation = Services::GetAssets()->LoadMomAnimation(momAnimationName);
+    if(animation != nullptr)
+    {
+        //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.
+        SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, currentThread->AddWait());
+    }
 	return 0;
 }
 RegFunc1(StartMom, void, string, WAITABLE, REL_FUNC);
-*/
  
 shpvoid LoopAnimation(std::string animationName)
 {

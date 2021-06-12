@@ -65,6 +65,7 @@ public:
     
     GAS* LoadGAS(const std::string& name);
     Animation* LoadAnimation(const std::string& name);
+    Animation* LoadMomAnimation(const std::string& name);
     VertexAnimation* LoadVertexAnimation(const std::string& name);
     
     SceneInitFile* LoadSIF(const std::string& name);
@@ -105,6 +106,7 @@ private:
 	
 	std::unordered_map<std::string, GAS*> mLoadedGases;
 	std::unordered_map<std::string, Animation*> mLoadedAnimations;
+    std::unordered_map<std::string, Animation*> mLoadedMomAnimations;
 	std::unordered_map<std::string, VertexAnimation*> mLoadedVertexAnimations;
 	
 	std::unordered_map<std::string, SceneInitFile*> mLoadedSIFs;

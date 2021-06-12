@@ -211,6 +211,14 @@ Animation* AssetManager::LoadAnimation(const std::string& name)
     return LoadAsset<Animation>(SanitizeAssetName(name, ".ANM"), &mLoadedAnimations);
 }
 
+Animation* AssetManager::LoadMomAnimation(const std::string& name)
+{
+    // GK3 has this notion of a "mother-of-all-animations" file. Thing is, it's nearly identical to a normal .ANM file...
+    // Only difference I could find is MOM files support a few more keywords.
+    // Anyway, it's all the same thing in my eyes!
+    return LoadAsset<Animation>(SanitizeAssetName(name, ".MOM"), &mLoadedMomAnimations);
+}
+
 VertexAnimation* AssetManager::LoadVertexAnimation(const std::string& name)
 {
     return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), &mLoadedVertexAnimations);

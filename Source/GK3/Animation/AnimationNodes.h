@@ -219,6 +219,16 @@ struct MoodAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A node that applies a certain "expression" (similar to a moode) to an actor.
+//TODO: Can we just use Mood for this?
+struct ExpressionAnimNode : public AnimNode
+{
+    std::string actorNoun;
+    std::string expressionName;
+
+    void Play(AnimationState* animState) override;
+};
+
 // Specifies who the speaker is.
 // This is used to determine caption colors (different characters get different colors).
 // This is ALSO used (I think) to apply talk or listen animations to conversation participants.
@@ -257,7 +267,7 @@ struct SpeakerCaptionAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
-// An empty trigger node, seems to be used to signal the end of a piece of dialogue.
+// An empty trigger node, used to signal the end of a piece of dialogue.
 // There tends to be exactly one of these at the end of in-game VO animation (YAK) files.
 // What does it do? Maybe clears captions, maybe signals to SheepScript that the VO is over. Not sure yet...
 struct DialogueCueAnimNode : public AnimNode
@@ -265,3 +275,11 @@ struct DialogueCueAnimNode : public AnimNode
 	void Play(AnimationState* animState) override;
 };
 
+// A dialogue node, triggers some YAK dialogue.
+struct DialogueAnimNode : public AnimNode
+{
+    // The dialogue to play, as a YAK "license plate" (so-called b/c the asset names all look like license plate numbers).
+    std::string licensePlate;
+
+    void Play(AnimationState* animState) override;
+};

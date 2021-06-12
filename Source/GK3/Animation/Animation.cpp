@@ -67,6 +67,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 				
 				// Frame number must be specified.
                 // <frame_num>, <act_name>, <x1>, <y1>, <z1>, <angle1>, <x2>, <y2>, <z2>, <angle2>
+                // <frame_num>, <act_name>, ABSOLUTE
                 int frameNumber = line.entries[0].GetValueAsInt();
                 
 				// Vertex animation must be specified.
@@ -78,6 +79,9 @@ void Animation::ParseFromData(char *data, int dataLength)
 				node->vertexAnimation = vertexAnim;
                 mFrames[frameNumber].push_back(node);
 				mVertexAnimNodes.push_back(node);
+
+                //TODO: Some animations have a keyword here (ABSOLUTE). Which I guess indicates that this is an absolute animation.
+                //TODO: I'm guessing this might be shorthand for "0, 0, 0, 0, 0, 0, 0, 0" which is frequently used for absolute anims.
 				
 				// See if there are enough args for the (x1, y1, z1) and (angle1) values.
 				if(line.entries.size() < 6) { continue; }
@@ -341,6 +345,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					FootstepAnimNode* node = new FootstepAnimNode();
+                    node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
 					mFrames[frameNumber].push_back(node);
                 }
@@ -350,6 +355,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					FootscuffAnimNode* node = new FootscuffAnimNode();
+                    node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
 					mFrames[frameNumber].push_back(node);
                 }
@@ -359,6 +365,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					StopSoundtrackAnimNode* node = new StopSoundtrackAnimNode();
+                    node->frameNumber = frameNumber;
 					node->soundtrackName = soundtrackName;
 					mFrames[frameNumber].push_back(node);
                 }
@@ -368,6 +375,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					PlaySoundtrackAnimNode* node = new PlaySoundtrackAnimNode();
+                    node->frameNumber = frameNumber;
 					node->soundtrackName = soundtrackName;
 					mFrames[frameNumber].push_back(node);
                 }
@@ -377,13 +385,16 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					PlaySoundtrackAnimNode* node = new PlaySoundtrackAnimNode();
+                    node->frameNumber = frameNumber;
 					node->soundtrackName = soundtrackName;
 					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "STOPALLSOUNDTRACKS"))
                 {
 					// Create and add node.
-					mFrames[frameNumber].push_back(new StopSoundtrackAnimNode());
+                    StopSoundtrackAnimNode* node = new StopSoundtrackAnimNode();
+                    node->frameNumber = frameNumber;
+					mFrames[frameNumber].push_back(node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "CAMERA"))
                 {
@@ -391,8 +402,11 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					CameraAnimNode* node = new CameraAnimNode();
+                    node->frameNumber = frameNumber;
 					node->cameraPositionName = cameraPositionName;
 					mFrames[frameNumber].push_back(node);
+
+                    //TODO: Some entries have a 4th keyword (glide) - probably indicates whether camera cuts or glides to position.
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "LIPSYNCH"))
                 {
@@ -401,6 +415,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					LipSyncAnimNode* node = new LipSyncAnimNode();
+                    node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
 					node->mouthTextureName = mouthTexName;
 					mFrames[frameNumber].push_back(node);
@@ -437,6 +452,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					FaceTexAnimNode* node = new FaceTexAnimNode();
+                    node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
 					node->textureName = textureName;
 					node->faceElement = faceElement;
@@ -469,6 +485,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					UnFaceTexAnimNode* node = new UnFaceTexAnimNode();
+                    node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
 					node->faceElement = faceElement;
 					mFrames[frameNumber].push_back(node);
@@ -485,6 +502,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					GlanceAnimNode* node = new GlanceAnimNode();
+                    node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
 					node->position = Vector3(x, y, z);
 					mFrames[frameNumber].push_back(node);
@@ -499,10 +517,26 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					MoodAnimNode* node = new MoodAnimNode();
+                    node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
 					node->moodName = moodName;
 					mFrames[frameNumber].push_back(node);
 				}
+                else if(StringUtil::EqualsIgnoreCase(keyword, "EXPRESSION"))
+                {
+                    // Read the actor name.
+                    std::string actorNoun = line.entries[2].key;
+
+                    // Read the expression name.
+                    std::string expressionName = line.entries[3].key;
+
+                    // Create and add node.
+                    ExpressionAnimNode* node = new ExpressionAnimNode();
+                    node->frameNumber = frameNumber;
+                    node->actorNoun = actorNoun;
+                    node->expressionName = expressionName;
+                    mFrames[frameNumber].push_back(node);
+                }
 				else if(StringUtil::EqualsIgnoreCase(keyword, "SPEAKER"))
                 {
 					// Read actor name.
@@ -510,6 +544,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					SpeakerAnimNode* node = new SpeakerAnimNode();
+                    node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
 					mFrames[frameNumber].push_back(node);
                 }
@@ -520,6 +555,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
 					// Create and add node.
 					CaptionAnimNode* node = new CaptionAnimNode();
+                    node->frameNumber = frameNumber;
 					node->caption = caption;
 					mFrames[frameNumber].push_back(node);
                 }
@@ -535,6 +571,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 					std::string caption = line.entries[3].key;
 					
 					SpeakerCaptionAnimNode* node = new SpeakerCaptionAnimNode();
+                    node->frameNumber = frameNumber;
 					node->endFrame = endFrame;
 					node->actorNoun = actorNoun;
 					node->caption = caption;
@@ -546,7 +583,16 @@ void Animation::ParseFromData(char *data, int dataLength)
 					
                     // Create and add node.
 					DialogueCueAnimNode* node = new DialogueCueAnimNode();
+                    node->frameNumber = frameNumber;
 					mFrames[frameNumber].push_back(node);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyword, "DIALOGUE"))
+                {
+                    // Read YAK license plate (file name).
+                    DialogueAnimNode* node = new DialogueAnimNode();
+                    node->frameNumber = frameNumber;
+                    node->licensePlate = line.entries[2].key.substr(1); // Chop off the first letter of the license plate. It contains the localization char, but ignore for now.
+                    mFrames[frameNumber].push_back(node);
                 }
                 else
                 {
