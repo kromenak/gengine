@@ -66,8 +66,11 @@ void DialogueManager::TriggerDialogueCue()
 		// Call finish callback.
 		if(mDialogueFinishCallback != nullptr)
 		{
-			mDialogueFinishCallback();
+            // Executing the callback can itself cause the callback to be set (if multiple dialogs in a row).
+            // So, set member to null before executing it.
+            auto callback = mDialogueFinishCallback;
 			mDialogueFinishCallback = nullptr;
+            callback();
 		}
 		return;
 	}

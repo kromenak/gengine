@@ -46,7 +46,7 @@ private:
 	
 	// Does the current dialogue use fidgets?
 	// If not, we don't execute talk/listen fidgets on actors.
-	bool mDialogueUsesFidgets = true;
+	bool mDialogueUsesFidgets = false;
 	
 	// Callback to call when dialogue finishes.
 	std::function<void()> mDialogueFinishCallback = nullptr;
