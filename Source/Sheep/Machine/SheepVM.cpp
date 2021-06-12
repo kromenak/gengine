@@ -15,6 +15,7 @@
 #include "StringUtil.h"
 
 //#define SHEEP_DEBUG
+//#define SHEEP_DEBUG_SYS_CALLS
 
 std::string SheepInstance::GetName()
 {
@@ -234,7 +235,7 @@ Value SheepVM::CallSysFunc(SheepThread* thread, SysImport* sysImport)
 	}
 	thread->mStack.Pop(argCount);
 	
-	/*
+    #if defined(SHEEP_DEBUG_SYS_CALLS)
 	{
 		// Pretty useful for seeing the function that was called output to the console.
 		std::cout << "SysFunc " << sysFunc->name << "(";
@@ -260,7 +261,7 @@ Value SheepVM::CallSysFunc(SheepThread* thread, SysImport* sysImport)
 		}
 		std::cout << ")" << std::endl;
 	}
-	*/
+    #endif
 	
 	// Based on argument count, call the appropriate function variant.
 	Value v = Value(0);

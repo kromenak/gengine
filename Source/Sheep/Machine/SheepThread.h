@@ -52,13 +52,7 @@ struct SheepThread
 	bool mInWaitBlock = false;
 	
 	std::string GetName() const;
-	
-	std::function<void()> AddWait()
-	{
-		if(!mInWaitBlock) { return nullptr; }
-		mWaitCounter++;
-		return std::bind(&SheepThread::OnWaitCompleted, this);
-	}
+    std::function<void()> AddWait();
 	
 private:
 	void OnWaitCompleted();
