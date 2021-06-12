@@ -580,8 +580,7 @@ shpvoid SetActorLocation(string actorName, string locationName)
 	}
 	
 	// Validate location.
-	bool locationValid = Services::Get<LocationManager>()->IsValidLocation(locationName);
-	if(!locationValid)
+	if(!Services::Get<LocationManager>()->IsValidLocation(locationName))
 	{
 		ExecError();
 		return 0;
@@ -873,21 +872,73 @@ shpvoid WalkNearModel(std::string actorName, std::string modelName)
 	return 0;
 }
 RegFunc2(WalkNearModel, void, string, string, WAITABLE, REL_FUNC);
+*/
 
 shpvoid WalkTo(std::string actorName, std::string positionName)
 {
-	std::cout << "WalkTo" << std::endl;
+    // If not in a scene, we'll just ignore walk to request.
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene == nullptr)
+    {
+        return 0;
+    }
+
+    // Get actor.
+    GKActor* actor = scene->GetActorByNoun(actorName);
+    if(actor == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+
+    // Get position.
+    const ScenePosition* scenePosition = scene->GetPosition(positionName);
+    if(scenePosition == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+    
+    // Ok, we can actually do the walk to it seems!
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    actor->WalkTo(scenePosition->position, scenePosition->heading, currentThread->AddWait());
 	return 0;
 }
 RegFunc2(WalkTo, void, string, string, WAITABLE, REL_FUNC);
 
 shpvoid WalkToAnimation(std::string actorName, std::string animationName)
 {
-	std::cout << "WalkToAnimation" << std::endl;
+    // If not in a scene, we'll just ignore walk to request.
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene == nullptr)
+    {
+        return 0;
+    }
+
+    // Get actor.
+    GKActor* actor = scene->GetActorByNoun(actorName);
+    if(actor == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+
+    // Get the animation.
+    Animation* anim = Services::GetAssets()->LoadAnimation(animationName);
+    if(anim == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+
+    // Ok, we can actually do the walk to it seems!
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    actor->WalkToAnimationStart(anim, currentThread->AddWait());
 	return 0;
 }
 RegFunc2(WalkToAnimation, void, string, string, WAITABLE, REL_FUNC);
 
+/*
 shpvoid WalkToSeeModel(std::string actorName, std::string modelName)
 {
 	std::cout << "WalkToSeeModel" << std::endl;
@@ -2222,11 +2273,13 @@ int DoesModelExist(std::string modelName)
 	GKProp* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	return object != nullptr ? 1 : 0;
 }
+RegFunc1(DoesModelExist, int, string, IMMEDIATE, REL_FUNC);
 
 int DoesSceneModelExist(std::string modelName)
 {
 	return GEngine::Instance()->GetScene()->DoesSceneModelExist(modelName) ? 1 : 0;
 }
+RegFunc1(DoesSceneModelExist, int, string, IMMEDIATE, REL_FUNC);
 
 //DumpModel
 //DumpModelNames
