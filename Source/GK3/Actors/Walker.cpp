@@ -28,16 +28,13 @@ Walker::Walker(Actor* owner) : Component(owner),
     
 }
 
-void Walker::WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+void Walker::WalkTo(const Vector3& position, std::function<void()> finishCallback)
 {
-    WalkTo(position, Heading::None, walkerBoundary, finishCallback);
+    WalkTo(position, Heading::None, finishCallback);
 }
 
-void Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+void Walker::WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
 {
-    // Save walker boundary.
-    mWalkerBoundary = walkerBoundary;
-    
     // Save finish callback.
     mFinishedPathCallback = finishCallback;
     
@@ -117,7 +114,7 @@ void Walker::WalkTo(const Vector3& position, const Heading& heading, WalkerBound
     NextAction();
 }
 
-void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback)
 {
     mWalkToSeeTarget = targetName;
     mWalkToSeeTargetPosition = targetPosition;
@@ -155,7 +152,7 @@ void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosit
     {
         // Specify a "dummy" heading here so that the "turn to face" action is put into the walk plan.
         // Later on, when the object comes into view, we'll replace this with the actual direction to turn.
-        WalkTo(targetPosition, Heading::FromDegrees(0.0f), walkerBoundary, finishCallback);
+        WalkTo(targetPosition, Heading::FromDegrees(0.0f), finishCallback);
     }
 }
 

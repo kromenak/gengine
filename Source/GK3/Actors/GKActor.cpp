@@ -60,26 +60,23 @@ void GKActor::StartFidget(FidgetType type)
 
 void GKActor::TurnTo(const Heading& heading, std::function<void()> finishCallback)
 {
-	mWalker->WalkTo(GetPosition(), heading, nullptr, finishCallback);
+	mWalker->WalkTo(GetPosition(), heading, finishCallback);
 }
 
-void GKActor::WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+void GKActor::WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
 {
-	mWalker->WalkTo(position, heading, walkerBoundary, finishCallback);
+	mWalker->WalkTo(position, heading, finishCallback);
 }
 
-void GKActor::WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+void GKActor::WalkTo(const Vector3& position, std::function<void()> finishCallback)
 {
-	mWalker->WalkTo(position, walkerBoundary, finishCallback);
+	mWalker->WalkTo(position, finishCallback);
 }
 
-void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback)
 {
 	// Need a valid anim.
 	if(anim == nullptr) { return; }
-	
-	// Need a walker and walker boundary for any of this to work.
-	if(mWalker == nullptr || walkerBoundary == nullptr) { return; }
 	
 	// GOAL: walk the actor to the initial position/rotation of this anim.
 	// Retrieve vertex animation from animation that matches this actor's model.
@@ -111,16 +108,21 @@ void GKActor::WalkToAnimationStart(Animation* anim, WalkerBoundary* walkerBounda
     Heading heading = Heading::FromQuaternion(transformMatrix.GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
 
     // Walk to that position/heading.
-    mWalker->WalkTo(walkPos, heading, walkerBoundary, finishCallback);
+    mWalker->WalkTo(walkPos, heading, finishCallback);
 
     // To visualize walk position/heading.
     //Debug::DrawLine(walkPos, walkPos + Vector3::UnitY * 10.0f, Color32::Orange, 10.0f);
     //Debug::DrawLine(walkPos, walkPos + heading.ToVector() * 10.0f, Color32::Red, 10.0f);
 }
 
-void GKActor::WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback)
+void GKActor::WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback)
 {
-	mWalker->WalkToSee(targetName, targetPosition, walkerBoundary, finishCallback);
+	mWalker->WalkToSee(targetName, targetPosition, finishCallback);
+}
+
+void GKActor::SetWalkerBoundary(WalkerBoundary* walkerBoundary)
+{
+    mWalker->SetWalkerBoundary(walkerBoundary);
 }
 
 Vector3 GKActor::GetWalkDestination() const

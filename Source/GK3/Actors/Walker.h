@@ -33,13 +33,15 @@ public:
 	
     void SetCharacterConfig(const CharacterConfig& characterConfig) { mCharConfig = &characterConfig; }
 	
-	void WalkTo(const Vector3& position, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
-	void WalkTo(const Vector3& position, const Heading& heading, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
-    void WalkToSee(const std::string& targetName, const Vector3& targetPosition, WalkerBoundary* walkerBoundary, std::function<void()> finishCallback);
+	void WalkTo(const Vector3& position, std::function<void()> finishCallback);
+	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
+    void WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback);
 	
     bool IsWalking() const { return mWalkActions.size() > 0; }
     Vector3 GetDestination() const { return mPath.size() > 0 ? mPath.front() : mGKOwner->GetPosition(); }
-	
+
+    void SetWalkerBoundary(WalkerBoundary* walkerBoundary) { mWalkerBoundary = walkerBoundary; }
+
 protected:
 	void OnUpdate(float deltaTime) override;
 	
@@ -84,7 +86,7 @@ private:
 	// walk anims and hip position data.
 	const CharacterConfig* mCharConfig = nullptr;
 	
-    // Walker boundary last used.
+    // Walker boundary currently being used.
     WalkerBoundary* mWalkerBoundary = nullptr;
     
 	// The path to follow to destination.

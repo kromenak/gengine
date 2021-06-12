@@ -205,7 +205,10 @@ void Scene::Load()
 		
 		// Start in idle state.
 		actor->StartFidget(GKActor::FidgetType::Idle);
-		
+
+        // Tell actor to use this scene's walker boundary.
+        actor->SetWalkerBoundary(mSceneData->GetWalkerBoundary());
+
 		//TODO: Apply init anim.
 		
 		//TODO: If hidden, hide.
@@ -351,8 +354,6 @@ bool Scene::InitEgoPosition(const std::string& positionName)
     const ScenePosition* position = GetPosition(positionName);
 	if(position == nullptr) { return false; }
     
-    std::cout << "InitEgoPosition " << positionName << ", " << position->position << std::endl;
-    
     // Set position and heading.
     mEgo->SetPosition(position->position);
     mEgo->SetHeading(position->heading);
@@ -496,7 +497,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 				if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
 				{
 					// Check walker boundary to see whether we can walk to this spot.
-					mEgo->WalkTo(ray.GetPoint(hitInfo.t), mSceneData->GetWalkerBoundary(), nullptr);
+					mEgo->WalkTo(ray.GetPoint(hitInfo.t), nullptr);
 				}
 			}
 		}
@@ -662,7 +663,7 @@ void Scene::ExecuteAction(const Action* action)
 			if(scenePos != nullptr)
 			{
 				Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
-				mEgo->WalkTo(scenePos->position, scenePos->heading, mSceneData->GetWalkerBoundary(), [this, action]() -> void {
+				mEgo->WalkTo(scenePos->position, scenePos->heading, [this, action]() -> void {
 					Services::Get<ActionManager>()->ExecuteAction(action);
 				});
 			}
@@ -677,7 +678,7 @@ void Scene::ExecuteAction(const Action* action)
 			Animation* anim = Services::GetAssets()->LoadAnimation(action->target);
 			if(anim != nullptr)
 			{
-				mEgo->WalkToAnimationStart(anim, mSceneData->GetWalkerBoundary(), [action]() -> void {
+				mEgo->WalkToAnimationStart(anim, [action]() -> void {
 					Services::Get<ActionManager>()->ExecuteAction(action);
 				});
 			}
@@ -749,7 +750,7 @@ void Scene::ExecuteAction(const Action* action)
 			}
 			
 			// Walk over and execute action once target is visible.
-			mEgo->WalkToSee(action->target, targetPosition, mSceneData->GetWalkerBoundary(), [this, action]() -> void {
+			mEgo->WalkToSee(action->target, targetPosition, [this, action]() -> void {
 				Services::Get<ActionManager>()->ExecuteAction(action);
 			});
 			break;
