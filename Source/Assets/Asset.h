@@ -14,6 +14,7 @@ class Asset
 {
 public:
     Asset(std::string name);
+    virtual ~Asset() { }
     
     std::string GetName() { return mName; }
     std::string GetNameNoExtension();
