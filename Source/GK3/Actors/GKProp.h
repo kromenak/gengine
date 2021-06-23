@@ -22,7 +22,7 @@ public:
     std::string GetModelName() const;
     
     void StartFidget(GAS* gas);
-    void StopFidget();
+    virtual void StopFidget();
     
     void StartAnimation(VertexAnimParams& animParams);
     void SampleAnimation(VertexAnimation* anim, int frame);
@@ -52,5 +52,5 @@ protected:
     virtual void OnVertexAnimationStop() { }
     
 private:
-    void OnVertexAnimationStopInternal() { OnVertexAnimationStop(); }
+    void OnVertexAnimationStopInternal();
 };

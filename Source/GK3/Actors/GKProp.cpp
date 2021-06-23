@@ -51,13 +51,13 @@ void GKProp::StartFidget(GAS* gas)
 
 void GKProp::StopFidget()
 {
-    mGasPlayer->Pause();
+    mGasPlayer->Stop();
 }
 
 void GKProp::StartAnimation(VertexAnimParams& animParams)
 {
     // Don't let a GAS anim override a non-GAS anim.
-    if(animParams.fromAutoScript && mVertexAnimator->IsPlaying()) { return; }
+    if(animParams.fromAutoScript && mVertexAnimator->IsPlayingNotAutoscript()) { return; }
     
     // If this is not a GAS anim, pause any running GAS.
     if(!animParams.fromAutoScript)
@@ -114,4 +114,10 @@ void GKProp::OnUpdate(float deltaTime)
         mMeshRenderer->DebugDrawAABBs();
     }
     */
+}
+
+void GKProp::OnVertexAnimationStopInternal()
+{
+    mGasPlayer->Resume();
+    OnVertexAnimationStop();
 }
