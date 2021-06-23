@@ -94,6 +94,10 @@ public:
     // Interpolate
     static void Lerp(Quaternion& result, const Quaternion& start, const Quaternion& end, float t);
     static void Slerp(Quaternion& result, const Quaternion& start, const Quaternion& end, float t);
+
+    // Isolate rotation about a particular axis
+    //TODO: Not sure if this is really a "standard operation" for quaternions, but it's helpful sometimes. Maybe a util class?
+    void IsolateY();
         
     // Quaternion elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;

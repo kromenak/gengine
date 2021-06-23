@@ -458,8 +458,8 @@ void Quaternion::Invert()
     
     // Inverse of q1 represents opposite rotation of q1.
     // Then, multiplying by q2 leaves us with q, which you multiply by q1 to get q2.
-    Quaternion inv = Inverse(q1);
-    return inv * q2;
+    Quaternion diff = Inverse(q1) * q2;
+    return diff;
 }
 
 /*static*/ void Quaternion::Lerp(Quaternion &result, const Quaternion &start, const Quaternion &end, float t)
@@ -528,6 +528,21 @@ void Quaternion::Invert()
         }
     }
     result = startInterp * start + endInterp * end;
+}
+
+void Quaternion::IsolateY()
+{
+    // We can isolate just the rotation about the Y axis by zeroing x/z and normalizing.
+    x = 0.0f;
+    z = 0.0f;
+    Normalize();
+
+    // But watch out! This can result in a Zero quat if y/w were close to zero.
+    // Revert to identity in that case.
+    if(Math::IsZero(x) && Math::IsZero(y) && Math::IsZero(z) && Math::IsZero(w))
+    {
+        w = 1.0f;
+    }
 }
 
 std::ostream& operator<<(std::ostream& os, const Quaternion& q)

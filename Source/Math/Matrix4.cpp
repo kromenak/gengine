@@ -634,7 +634,11 @@ void Matrix4::InvertTransform()
 
 /*static*/ Matrix4 Matrix4::MakeRotate(const Quaternion& quat)
 {
-    float s = 2.0f / Quaternion::Dot(quat, quat);
+    // Handle bad input. TODO: Maybe assert instead?
+    float dot = Quaternion::Dot(quat, quat);
+    if(Math::IsZero(dot)) { return Matrix4::Identity; }
+
+    float s = 2.0f / dot;
     
     float xs = s * quat.x;
     float ys = s * quat.y;
