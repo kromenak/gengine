@@ -16,11 +16,11 @@
 #include <string>
 #include <vector>
 
-#include "GKActor.h"
 #include "Vector3.h"
 
 class Animation;
 struct CharacterConfig;
+class GKActor;
 class GKProp;
 class Heading;
 class WalkerBoundary;
@@ -36,9 +36,10 @@ public:
 	void WalkTo(const Vector3& position, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback);
-	
+
+    bool AtPosition(const Vector3& position);
     bool IsWalking() const { return mWalkActions.size() > 0; }
-    Vector3 GetDestination() const { return mPath.size() > 0 ? mPath.front() : mGKOwner->GetPosition(); }
+    Vector3 GetDestination() const { return mPath.size() > 0 ? mPath.front() : Vector3::Zero; }
 
     void SetWalkerBoundary(WalkerBoundary* walkerBoundary) { mWalkerBoundary = walkerBoundary; }
 
@@ -53,7 +54,7 @@ private:
     // Turn speeds. A faster speed is used for turning in place when not walking.
     const float kWalkTurnSpeed = Math::kPi;
     const float kTurnSpeed = Math::k2Pi;
-    
+
     // When a walk begins, a "plan" is generated and stored in the walk actions vector.
     // Ex: we may calculate plan: turn right, then follow path, then end move, then turn to face heading.
     enum class WalkOp

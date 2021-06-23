@@ -55,7 +55,7 @@ void Walker::WalkTo(const Vector3& position, const Heading& heading, std::functi
     }
     
     // Do we need to walk?
-    if((GetOwner()->GetPosition() - position).GetLengthSq() > kAtNodeDistSq)
+    if(!AtPosition(position))
     {
         // We will walk, so save the "walk end" action.
         WalkAction endWalkAction;
@@ -104,7 +104,19 @@ void Walker::WalkTo(const Vector3& position, const Heading& heading, std::functi
             {
                 startWalkTurnAction.op = WalkOp::FollowPathStartTurnLeft;
             }
-            
+
+            // Make sure this actor has animations for turning left/right.
+            // A lot of actors actually don't...in which case normal starts after all.
+            if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnRight && mCharConfig->walkStartTurnRightAnim == nullptr)
+            {
+                startWalkTurnAction.op = WalkOp::FollowPathStart;
+            }
+            else if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnLeft && mCharConfig->walkStartTurnLeftAnim == nullptr)
+            {
+                startWalkTurnAction.op = WalkOp::FollowPathStart;
+            }
+
+            // Let's do it!
             mWalkActions.push_back(startWalkTurnAction);
         }
     }
@@ -154,6 +166,11 @@ void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosit
         // Later on, when the object comes into view, we'll replace this with the actual direction to turn.
         WalkTo(targetPosition, Heading::FromDegrees(0.0f), finishCallback);
     }
+}
+
+bool Walker::AtPosition(const Vector3& position)
+{
+    return (GetOwner()->GetPosition() - position).GetLengthSq() <= kAtNodeDistSq;
 }
 
 void Walker::OnUpdate(float deltaTime)
@@ -235,7 +252,8 @@ void Walker::OnUpdate(float deltaTime)
         }
         else if(currentAction.op == WalkOp::TurnToFace)
         {
-            if(TurnToFace(deltaTime, GetOwner()->GetForward(), currentAction.facingDir, kTurnSpeed))
+            //if(TurnToFace(deltaTime, GetOwner()->GetForward(), currentAction.facingDir, kTurnSpeed))
+            if(TurnToFace(deltaTime, -mGKOwner->GetMeshRenderer()->GetOwner()->GetForward(), currentAction.facingDir, kTurnSpeed))
             {
                 // Done turning to face, do next action in sequence.
                 PopAndNextAction();
@@ -456,8 +474,7 @@ bool Walker::AdvancePath()
         int atNode = -1;
         for(int i = 0; i < mPath.size(); i++)
         {
-            Vector3 toNode = mPath[i] - mGKOwner->GetPosition();
-            if(toNode.GetLengthSq() < kAtNodeDistSq)
+            if(AtPosition(mPath[i]))
             {
                 atNode = i;
                 break;
