@@ -554,7 +554,27 @@ GKProp* Scene::GetSceneObjectByModelName(const std::string& modelName) const
             return object;
         }
 	}
+    //TODO: Should we also check BSP here?
 	return nullptr;
+}
+
+GKObject* Scene::GetSceneObjectByNoun(const std::string& noun) const
+{
+    for(auto& object : mObjects)
+    {
+        if(StringUtil::EqualsIgnoreCase(object->GetNoun(), noun))
+        {
+            return object;
+        }
+    }
+    for(auto& object : mBSPActors)
+    {
+        if(StringUtil::EqualsIgnoreCase(object->GetNoun(), noun))
+        {
+            return object;
+        }
+    }
+    return nullptr;
 }
 
 GKActor* Scene::GetActorByNoun(const std::string& noun) const
