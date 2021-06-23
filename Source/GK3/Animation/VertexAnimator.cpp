@@ -29,6 +29,7 @@ void VertexAnimator::Start(const VertexAnimParams& params)
     mFramesPerSecond = params.framesPerSecond;
     mAnimationTimer = params.startTime;
     mStopCallback = params.stopCallback;
+    mFromAutoscript = params.fromAutoScript;
     
     // Sample animation immediately so mesh's positions/rotations are updated.
     TakeSample(mVertexAnimation, mAnimationTimer);

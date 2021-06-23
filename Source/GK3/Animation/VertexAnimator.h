@@ -56,6 +56,7 @@ public:
 	void Sample(VertexAnimation* animation, int frame);
 	
 	bool IsPlaying() const { return mVertexAnimation != nullptr; }
+    bool IsPlayingNotAutoscript() const { return mVertexAnimation != nullptr && !mFromAutoscript; }
 	
 protected:
 	void OnUpdate(float deltaTime) override;
@@ -76,6 +77,9 @@ private:
 	
 	// Timer for tracking progress on vertex animation.
 	float mAnimationTimer = 0.0f;
+
+    // Is this an autoscript animation?
+    bool mFromAutoscript = false;
 	
     void TakeSample(VertexAnimation* animation, int frame);
 	void TakeSample(VertexAnimation* animation, float time);
