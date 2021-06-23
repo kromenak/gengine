@@ -44,18 +44,51 @@ GKActor::GKActor(Model* model) : GKProp(true)
 
 void GKActor::StartFidget(FidgetType type)
 {
-    switch(type)
+    // Treat "Start None" as "Stop".
+    if(type == FidgetType::None)
     {
-	case FidgetType::Idle:
-		mGasPlayer->Play(mIdleFidget);
-		break;
-	case FidgetType::Talk:
-		mGasPlayer->Play(mTalkFidget);
-		break;
-	case FidgetType::Listen:
-		mGasPlayer->Play(mListenFidget);
-		break;
+        StopFidget();
+        return;
     }
+
+    // If this is already the active fidget, ignore the start request.
+    if(type == mActiveFidget)
+    {
+        return;
+    }
+
+    // Determine which fidget to start.
+    // Only *actually* set the fidget and play it if we have a non-null GAS file.
+    GAS* newFidget = GetGasForFidget(type);
+    if(newFidget != nullptr)
+    {
+        mGasPlayer->Play(newFidget);
+        mActiveFidget = type;
+    }
+}
+
+void GKActor::StopFidget()
+{
+    mGasPlayer->Stop();
+    mActiveFidget = FidgetType::None;
+}
+
+void GKActor::SetIdleFidget(GAS* fidget)
+{
+    mIdleFidget = fidget;
+    CheckUpdateActiveFidget(FidgetType::Idle);
+}
+
+void GKActor::SetTalkFidget(GAS* fidget)
+{
+    mTalkFidget = fidget;
+    CheckUpdateActiveFidget(FidgetType::Talk);
+}
+
+void GKActor::SetListenFidget(GAS* fidget)
+{
+    mListenFidget = fidget;
+    CheckUpdateActiveFidget(FidgetType::Listen);
 }
 
 void GKActor::TurnTo(const Heading& heading, std::function<void()> finishCallback)
@@ -193,6 +226,8 @@ void GKActor::OnUpdate(float deltaTime)
 
 void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
 {
+    std::cout << GetNoun() << ": Start anim " << animParams.vertexAnimation->GetNameNoExtension() << std::endl;
+
     // For relative anims, move model to match actor's position/rotation.
     if(!animParams.absolute)
     {
@@ -288,9 +323,7 @@ void GKActor::SyncModelToActor()
     Quaternion desiredRotation = GetRotation() * Quaternion(Vector3::UnitY, Math::kPi);
     Quaternion currentRotation = GetModelRotation();
     Quaternion diff = Quaternion::Diff(desiredRotation, currentRotation);
-    diff.x = 0.0f;
-    diff.z = 0.0f;
-    diff.Normalize();
+    diff.IsolateY();
     mModelActor->GetTransform()->RotateAround(GetPosition(), diff);
     
     // Save new baseline model position/rotation.
@@ -303,17 +336,54 @@ void GKActor::SyncActorToModel()
     // See how much mesh has moved and translate actor to match.
     Vector3 meshPosition = GetModelPosition();
     GetTransform()->Translate(meshPosition - mLastModelPosition);
-    //Debug::DrawLine(mLastMeshPos, meshPosition, Color32::Magenta, 5.0f);
+    Debug::DrawLine(mLastModelPosition, meshPosition, Color32::Magenta, 5.0f);
     
     // See how much mesh has rotated and translate actor to match.
     Quaternion meshRotation = GetModelRotation();
     Quaternion diff = Quaternion::Diff(meshRotation, mLastModelRotation);
-    diff.x = 0.0f;
-    diff.z = 0.0f;
-    diff.Normalize();
+    diff.IsolateY();
     GetTransform()->Rotate(diff);
     
     // Save new baseline model position/rotation.
     mLastModelPosition = meshPosition;
     mLastModelRotation = meshRotation;
+}
+
+GAS* GKActor::GetGasForFidget(FidgetType type)
+{
+    GAS* gas = nullptr;
+    switch(type)
+    {
+    case FidgetType::None:
+        break;
+    case FidgetType::Idle:
+        gas = mIdleFidget;
+        break;
+    case FidgetType::Listen:
+        gas = mListenFidget;
+        break;
+    case FidgetType::Talk:
+        gas = mTalkFidget;
+    }
+    return gas;
+}
+
+void GKActor::CheckUpdateActiveFidget(FidgetType changedType)
+{
+    // If we just changed the active fidget...
+    if(mActiveFidget == changedType)
+    {
+        GAS* fidget = GetGasForFidget(changedType);
+
+        // If the gas file for the active fidget has changed to null, that forces fidget to stop.
+        // Otherwise, we just immediately play the new gas file.
+        if(fidget == nullptr)
+        {
+            StopFidget();
+        }
+        else
+        {
+            mGasPlayer->Play(fidget);
+        }
+    }
 }

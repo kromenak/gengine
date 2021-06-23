@@ -17,6 +17,7 @@
 #include <string>
 
 #include "Heading.h"
+#include "Walker.h"
 
 struct CharacterConfig;
 class FaceController;
@@ -25,24 +26,25 @@ class Model;
 class VertexAnimation;
 class VertexAnimator;
 struct VertexAnimParams;
-class Walker;
 
 class GKActor : public GKProp
 {
 public:
 	GKActor(Model* model);
 	
-    void SetIdleFidget(GAS* fidget) { mIdleFidget = fidget; }
-    void SetTalkFidget(GAS* fidget) { mTalkFidget = fidget; }
-    void SetListenFidget(GAS* fidget) { mListenFidget = fidget; }
-	
     enum class FidgetType
     {
+        None,
         Idle,
         Talk,
         Listen
     };
 	void StartFidget(FidgetType type);
+    void StopFidget() override;
+
+    void SetIdleFidget(GAS* fidget);
+    void SetTalkFidget(GAS* fidget);
+    void SetListenFidget(GAS* fidget);
 	
 	void TurnTo(const Heading& heading, std::function<void()> finishCallback);
     
@@ -53,6 +55,7 @@ public:
 
     void SetWalkerBoundary(WalkerBoundary* walkerBoundary);
     Vector3 GetWalkDestination() const;
+    bool AtPosition(const Vector3& position) { return mWalker->AtPosition(position); }
     void SetWalkerDOR(GKProp* walkerDOR);
     void SnapToFloor();
     
@@ -71,6 +74,9 @@ protected:
 private:
 	// The character's configuration, which defines helpful parameters for controlling the actor.
 	const CharacterConfig* mCharConfig = nullptr;
+
+    // The fidget the actor is currently playing.
+    FidgetType mActiveFidget = FidgetType::None;
 	
 	// The actor's walking control.
 	Walker* mWalker = nullptr;
@@ -106,4 +112,7 @@ private:
     
     void SyncModelToActor();
     void SyncActorToModel();
+
+    GAS* GetGasForFidget(FidgetType type);
+    void CheckUpdateActiveFidget(FidgetType changedType);
 };
