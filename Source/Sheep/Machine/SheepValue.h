@@ -70,6 +70,7 @@ struct SheepValue
 		{
 		default:
 		case SheepValueType::String:
+            if(stringValue == nullptr) { return std::string(); }
 			return std::string(stringValue);
 		case SheepValueType::Float:
 			return std::to_string(floatValue);

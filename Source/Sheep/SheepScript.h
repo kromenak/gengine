@@ -61,7 +61,9 @@ public:
     int GetBytecodeLength() { return mBytecodeLength; }
     
     void Dump();
-    
+    void Decompile();
+    void Decompile(const std::string& filePath);
+
 private:
     std::vector<SysImport> mSysImports;
     

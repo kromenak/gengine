@@ -215,7 +215,6 @@ Value SheepVM::CallSysFunc(SheepThread* thread, SysImport* sysImport)
 	for(int i = 0; i < argCount; i++)
 	{
 		SheepValue& sheepValue = thread->mStack.Peek(argCount - 1 - i);
-		//SheepValue sheepValue = mStack[mStackSize - (argCount - i)];
 		int argType = sysFunc->argumentTypes[i];
 		switch(argType)
 		{
