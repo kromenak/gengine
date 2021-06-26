@@ -205,6 +205,33 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 	return false;
 }
 
+AABB MeshRenderer::GetAABB() const
+{
+    if(mMeshes.empty()) { return AABB(); }
+
+    // Calculate AABB that contains all meshes in the mesh renderer.
+    AABB toReturn;
+    for(int i = 0; i < mMeshes.size(); ++i)
+    {
+        Matrix4 meshToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix() * mMeshes[i]->GetMeshToLocalMatrix();
+
+        const AABB& meshAABB = mMeshes[i]->GetAABB();
+        Vector3 worldMin = meshToWorldMatrix.TransformPoint(meshAABB.GetMin());
+        Vector3 worldMax = meshToWorldMatrix.TransformPoint(meshAABB.GetMax());
+
+        if(i == 0)
+        {
+            toReturn = AABB(worldMin, worldMax);
+        }
+        else
+        {
+            toReturn.GrowToContain(worldMin);
+            toReturn.GrowToContain(worldMax);
+        }
+    }
+    return toReturn;
+}
+
 void MeshRenderer::DebugDrawAABBs()
 {
 	Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
@@ -216,6 +243,8 @@ void MeshRenderer::DebugDrawAABBs()
 		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
 	
 		// Debug draw the AABB.
-        Debug::DrawAABB(mesh->GetAABB(), Color32::Magenta, 60.0f, &meshToWorldMatrix);
+        Debug::DrawAABB(mesh->GetAABB(), Color32::Magenta, 0.0f, &meshToWorldMatrix);
 	}
+
+    Debug::DrawAABB(GetAABB(), Color32::Orange, 0.0f);
 }

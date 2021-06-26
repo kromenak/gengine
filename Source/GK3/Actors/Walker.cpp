@@ -388,15 +388,23 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
 {
     // Not in view if it doesn't exist!
     if(mWalkToSeeTarget.empty()) { return false; }
-    
+
+    // Get the position of the target.
+    GKProp* target = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(mWalkToSeeTarget);
+    if(target == nullptr) { return false; }
+    Vector3 targetPosition = target->GetMeshRenderer()->GetAABB().GetCenter();
+
     // Create ray from head in direction of target position.
     Vector3 headPos = mGKOwner->GetHeadPosition();
-    Vector3 dir = (mWalkToSeeTargetPosition - headPos).Normalize();
+    Vector3 dir = (targetPosition - headPos).Normalize();
     Ray ray(headPos, dir);
+    //Debug::DrawLine(targetPosition, headPos, Color32::Red);
     
     // If hit the target with the ray, it must be in view.
     SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, false, mGKOwner);
-    if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget))
+    if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget) ||
+       StringUtil::EqualsIgnoreCase(result.hitInfo.name, target->GetNoun()) ||
+       StringUtil::EqualsIgnoreCase(result.hitInfo.name, target->GetModelName()))
     {
         // Convert ray direction to a "facing" direction,
         dir.y = 0.0f;

@@ -10,6 +10,7 @@
 
 #include <vector>
 
+#include "AABB.h"
 #include "Material.h"
 
 class Mesh;
@@ -41,8 +42,9 @@ public:
     std::vector<Material>& GetMaterials() { return mMaterials; }
     
 	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
-	
-	void DebugDrawAABBs();
+
+    AABB GetAABB() const;
+    void DebugDrawAABBs();
     
 private:
 	// A model, if any was specified.
