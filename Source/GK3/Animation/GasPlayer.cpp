@@ -39,7 +39,7 @@ void GasPlayer::Play(GAS* gas)
     mTalkInterruptPosition = nullptr;
     mTalkCleanupAnims.clear();
 
-    mActiveWhenNoLongerNearNodes.clear();
+    mDistanceConditionNodes.clear();
 }
 
 void GasPlayer::Stop()
@@ -49,6 +49,14 @@ void GasPlayer::Stop()
     //TODO: ok so, here's the expected behavior here:
     //TODO: if you purposely stop a fidget (like with StopFidget), all the cleanups and such should occur.
     //TODO: if you stop a fidget due to an error (tried to set a null fidget), it's supposed to IMMEDIATELY STOP (leaving any anims mid-play).
+}
+
+void GasPlayer::SetNodeIndex(int index)
+{
+    // This function is meant to be called from some other node that wants to change this GAS player's current node.
+    // For example, IF, GOTO, LOOP, WHENNEAR, etc.
+    // We must use "index - 1" b/c ProcessNextNode will increment before executing, so we want it to increment to mNodes[index].
+    mNodeIndex = index - 1;
 }
 
 void GasPlayer::NextNode()
@@ -71,6 +79,22 @@ void GasPlayer::OnUpdate(float deltaTime)
         }
     }
 
+    // Check distance conditions. If one goes from false to true, the execution index is changed.
+    for(auto& condition : mDistanceConditionNodes)
+    {
+        bool conditionMet = condition.first->CheckCondition(this);
+        if(!condition.second && conditionMet)
+        {
+            condition.second = true;
+            SetNodeIndex(condition.first->index);
+        }
+        else if(condition.second && !conditionMet)
+        {
+            condition.second = false;
+        }
+    }
+
+    /*
     // Handle any active "when no longer near" nodes.
     for(auto it = mActiveWhenNoLongerNearNodes.begin(); it != mActiveWhenNoLongerNearNodes.end();)
     {
@@ -92,6 +116,7 @@ void GasPlayer::OnUpdate(float deltaTime)
             ++it;
         }
     }
+    */
 }
 
 void GasPlayer::ProcessNextNode()

@@ -9,13 +9,13 @@
 #include "Component.h"
 
 #include <unordered_map>
-
-#include "GasNodes.h"
+#include <utility>
 
 class Animation;
 class Animator;
 class GAS;
 class ScenePosition;
+struct WhenNearGasNode;
 
 class GasPlayer : public Component
 {
@@ -28,12 +28,11 @@ public:
 	void Resume() { mPaused = false; }
     void Stop();
 
-    // For use by GAS nodes primarily
-    void SetIndex(int index) { mNodeIndex = index - 1; }
-
+    // Below here: GAS Node Helpers
     void SetVar(char var, int value) { mVariables[var - 'A'] = value; }
     int GetVar(char var) { return mVariables[var - 'A']; }
 
+    void SetNodeIndex(int index);
     void NextNode();
 
     void SetInterruptPosition(const ScenePosition* interruptPosition) { mInterruptPosition = interruptPosition; }
@@ -42,7 +41,7 @@ public:
     void SetTalkInterruptPosition(const ScenePosition* interruptPosition) { mTalkInterruptPosition = interruptPosition; }
     void SetTalkCleanup(Animation* animNeedingCleanup, Animation* animDoingCleanup) { mTalkCleanupAnims[animNeedingCleanup] = animDoingCleanup; }
 
-    void AddWhenNoLongerNearNode(WhenNoLongerNearGasNode* node) { mActiveWhenNoLongerNearNodes.push_back(node); }
+    void AddDistanceCondition(WhenNearGasNode* node) { mDistanceConditionNodes.push_back(std::make_pair(node, false)); }
 
 protected:
 	void OnUpdate(float deltaTime) override;
@@ -82,7 +81,9 @@ private:
     // If no talk interrupts are provided, the normal cleanups are used.
     std::unordered_map<Animation*, Animation*> mTalkCleanupAnims;
 
-    std::vector<WhenNoLongerNearGasNode*> mActiveWhenNoLongerNearNodes;
+    // Nodes that do distance condition checks to determine whether to go to some label/index in the current autoscript.
+    // The "bool" is to hold if the condition is currently true - the condition only triggers when going from false to true.
+    std::vector<std::pair<WhenNearGasNode*, bool>> mDistanceConditionNodes;
 
     void ProcessNextNode();
 };

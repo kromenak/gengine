@@ -4,6 +4,7 @@
 #include "GasPlayer.h"
 #include "GEngine.h"
 #include "GKActor.h"
+#include "LocationManager.h"
 #include "Scene.h"
 
 float AnimGasNode::Execute(GasPlayer* player)
@@ -43,7 +44,7 @@ OneOfGasNode::~OneOfGasNode()
 
 float OneOfGasNode::Execute(GasPlayer* player)
 {
-    if(animNodes.size() == 0) { return 0; }
+    if(animNodes.size() == 0) { return 0.0f; }
     int randomIndex = rand() % animNodes.size();
     return animNodes[randomIndex]->Execute(player);
 }
@@ -53,12 +54,12 @@ float WaitGasNode::Execute(GasPlayer* player)
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
     int randomCheck = rand() % 100 + 1;
-    if(randomCheck > random) { return 0; }
+    if(randomCheck > random) { return 0.0f; }
 
     // We will execute this node. Decide wait time based on min/max.
-    if(minWaitTimeSeconds == maxWaitTimeSeconds) { return minWaitTimeSeconds * 1000; }
-    if(maxWaitTimeSeconds == 0 && minWaitTimeSeconds > 0) { return minWaitTimeSeconds * 1000; }
-    if(maxWaitTimeSeconds != 0 && minWaitTimeSeconds > maxWaitTimeSeconds) { return minWaitTimeSeconds * 1000; }
+    if(minWaitTimeSeconds == maxWaitTimeSeconds) { return minWaitTimeSeconds; }
+    if(maxWaitTimeSeconds == 0 && minWaitTimeSeconds > 0) { return minWaitTimeSeconds; }
+    if(maxWaitTimeSeconds != 0 && minWaitTimeSeconds > maxWaitTimeSeconds) { return minWaitTimeSeconds; }
 
     // Normal case - random between min and max.
     return (rand() % maxWaitTimeSeconds + minWaitTimeSeconds);
@@ -66,26 +67,26 @@ float WaitGasNode::Execute(GasPlayer* player)
 
 float GotoGasNode::Execute(GasPlayer* player)
 {
-    player->SetIndex(index);
-    return 0;
+    player->SetNodeIndex(index);
+    return 0.0f;
 }
 
 float SetGasNode::Execute(GasPlayer* player)
 {
     player->SetVar(varName, value);
-    return 0;
+    return 0.0f;
 }
 
 float IncGasNode::Execute(GasPlayer* player)
 {
     player->SetVar(varName, player->GetVar(varName) + 1);
-    return 0;
+    return 0.0f;
 }
 
 float DecGasNode::Execute(GasPlayer* player)
 {
     player->SetVar(varName, player->GetVar(varName) - 1);
-    return 0;
+    return 0.0f;
 }
 
 float IfGasNode::Execute(GasPlayer* player)
@@ -108,9 +109,9 @@ float IfGasNode::Execute(GasPlayer* player)
     // If so, jump to the label.
     if(meetsCondition)
     {
-        player->SetIndex(index);
+        player->SetNodeIndex(index);
     }
-    return 0;
+    return 0.0f;
 }
 
 float WalkToGasNode::Execute(GasPlayer* player)
@@ -135,7 +136,7 @@ float WalkToGasNode::Execute(GasPlayer* player)
     actor->WalkTo(walkToPos, walkToHeading, std::bind(&GasPlayer::NextNode, player));
 
     // Return -1 to disable timer system and just wait for callback.
-    return -1;
+    return -1.0f;
 }
 
 float ChooseWalkGasNode::Execute(GasPlayer* player)
@@ -173,14 +174,14 @@ float ChooseWalkGasNode::Execute(GasPlayer* player)
     actor->WalkTo(scenePosition->position, scenePosition->heading, std::bind(&GasPlayer::NextNode, player));
 
     // Return -1 to disable timer system and just wait for callback.
-    return -1;
+    return -1.0f;
 }
 
 float UseIPosGasNode::Execute(GasPlayer* player)
 {
     // We'll just assume the position name provided is valid - or else null is set.
     player->SetInterruptPosition(GEngine::Instance()->GetScene()->GetPosition(positionName));
-    return 0;
+    return 0.0f;
 }
 
 float UseCleanupGasNode::Execute(GasPlayer* player)
@@ -189,14 +190,14 @@ float UseCleanupGasNode::Execute(GasPlayer* player)
     {
         player->SetCleanup(animationNeedingCleanup, animationDoingCleanup);
     }
-    return 0;
+    return 0.0f;
 }
 
 float UseTalkIPosGasNode::Execute(GasPlayer* player)
 {
     // We'll just assume the position name provided is valid - or else null is set.
     player->SetTalkInterruptPosition(GEngine::Instance()->GetScene()->GetPosition(positionName));
-    return 0;
+    return 0.0f;
 }
 
 float UseTalkCleanupGasNode::Execute(GasPlayer* player)
@@ -205,7 +206,7 @@ float UseTalkCleanupGasNode::Execute(GasPlayer* player)
     {
         player->SetTalkCleanup(animationNeedingCleanup, animationDoingCleanup);
     }
-    return 0;
+    return 0.0f;
 }
 
 float NewIdleGasNode::Execute(GasPlayer* player)
@@ -214,13 +215,13 @@ float NewIdleGasNode::Execute(GasPlayer* player)
     return 0.0f;
 }
 
-float WhenNoLongerNearGasNode::Execute(GasPlayer* player)
+float WhenNearGasNode::Execute(GasPlayer* player)
 {
-    player->AddWhenNoLongerNearNode(this);
+    player->AddDistanceCondition(this);
     return 0.0f;
 }
 
-bool WhenNoLongerNearGasNode::CheckCondition(GasPlayer* player)
+bool WhenNearGasNode::CheckCondition(GasPlayer* player)
 {
     // Get actor associated with first noun. Fail out if not found.
     Actor* objectA = GEngine::Instance()->GetScene()->GetSceneObjectByNoun(noun);
@@ -240,14 +241,36 @@ bool WhenNoLongerNearGasNode::CheckCondition(GasPlayer* player)
     if(objectB == nullptr) { return false; }
 
     // Get distance between objects.
-    // If within distance, early out b/c we are NOT "no longer near" in that case.
     float distSq = (objectA->GetWorldPosition() - objectB->GetWorldPosition()).GetLengthSq();
-    if(distSq < distance * distance) { return false; }
+    float checkDistSq = distance * distance;
 
-    // Ok, so the objects seem to be far apart, so I'd say that means "no longer near" condition is true!
-    // Tell player to go to desired index.
-    player->SetIndex(index);
+    // See if condition is met.
+    // If "notNear" is set, then condition is met when we are farther away than the required distance.
+    // Otherwise, the condition is met when we are closer than the required distance.
+    bool conditionMet = false;
+    if(notNear && distSq >= checkDistSq)
+    {
+        conditionMet = true;
+    }
+    else if(!notNear && distSq <= checkDistSq)
+    {
+        conditionMet = true;
+    }
 
-    // Return true to tell script this condition was met and we should no longer check for this condition.
-    return true;
+    // Return true to tell caller whether this condition was met.
+    return conditionMet;
+}
+
+float DialogueGasNode::Execute(GasPlayer* player)
+{
+    // Just play the thing! Use callback method for signaling when done.
+    GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yakAnimation, std::bind(&GasPlayer::NextNode, player));
+    return -1.0f;
+}
+
+float LocationGasNode::Execute(GasPlayer* player)
+{
+    GKObject* owner = static_cast<GKObject*>(player->GetOwner());
+    Services::Get<LocationManager>()->SetActorLocation(owner->GetNoun(), location);
+    return 0.0f;
 }

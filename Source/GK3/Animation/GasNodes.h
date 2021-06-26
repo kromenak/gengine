@@ -152,7 +152,7 @@ struct UseCleanupGasNode : public GasNode
     float Execute(GasPlayer* player) override;
 };
 
-//TODO: UseNewIdleGasNode?
+//TODO: UseNewIdle (used occasionally, maybe important)
 
 // A node that defines an interrupt spot to use specifically for talking.
 struct UseTalkIPosGasNode : public GasNode
@@ -171,9 +171,10 @@ struct UseTalkCleanupGasNode : public GasNode
     float Execute(GasPlayer* player) override;
 };
 
-//TODO: UseTalkNewIdle?
+//TODO: UseTalkNewIdle (used occasionally, maybe important)
 
-//TODO: WhenNear
+//TODO: UseClearMood (never used in the game)
+//TODO: UseTalkClearMood (never used in the game)
 
 // A node that switches the actor to a new GAS script.
 //TODO: Despite the NEWIDLE keyword used in scripts, a better name for this might be like "ChangeScriptGasNode" or something.
@@ -184,9 +185,12 @@ struct NewIdleGasNode : public GasNode
     float Execute(GasPlayer* player) override;
 };
 
-// A node that goes to a label when the actor is not near the object with the specified noun.
-struct WhenNoLongerNearGasNode : public GasNode
+// A node that goes to a label when the actor is near (or not near) the object with the specified noun.
+struct WhenNearGasNode : public GasNode
 {
+    // If true, the condition is flipped to "when not near" rather than "when near".
+    bool notNear = false;
+
     // When I am more than X distance away from this noun...
     float distance = 0.0f;
     std::string noun;
@@ -201,3 +205,33 @@ struct WhenNoLongerNearGasNode : public GasNode
     float Execute(GasPlayer* player) override;
     bool CheckCondition(GasPlayer* player);
 };
+
+//TODO: WhenInView (rarely used, not mission critical)
+
+// A node that will play a line of dialog.
+struct DialogueGasNode : public GasNode
+{
+    Animation* yakAnimation = nullptr;
+
+    float Execute(GasPlayer* player) override;
+};
+
+// A node that changes the location of the actor running the autoscript.
+struct LocationGasNode : public GasNode
+{
+    std::string location;
+
+    float Execute(GasPlayer* player) override;
+};
+
+//TODO: SetMood (only used once, not mission critical)
+
+//TODO: ClearMood (never used in game)
+
+//TODO: Glance (never used in game)
+
+//TODO: TurnHead (never used in game)
+
+//TODO: LookAt (used occasionally, not mission critical)
+
+//TODO: Expression (never used in game)

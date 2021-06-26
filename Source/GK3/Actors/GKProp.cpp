@@ -109,9 +109,9 @@ void GKProp::OnInactive()
 void GKProp::OnUpdate(float deltaTime)
 {
     /*
-    if(mMeshRenderer != nullptr)
+    if(mModelRenderer != nullptr)
     {
-        mMeshRenderer->DebugDrawAABBs();
+        mModelRenderer->DebugDrawAABBs();
     }
     */
 }

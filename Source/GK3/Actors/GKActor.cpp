@@ -226,8 +226,6 @@ void GKActor::OnUpdate(float deltaTime)
 
 void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
 {
-    std::cout << GetNoun() << ": Start anim " << animParams.vertexAnimation->GetNameNoExtension() << std::endl;
-
     // For relative anims, move model to match actor's position/rotation.
     if(!animParams.absolute)
     {

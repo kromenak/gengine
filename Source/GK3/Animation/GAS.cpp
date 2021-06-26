@@ -41,7 +41,7 @@ void GAS::ParseFromData(char *data, int dataLength)
     // Because you can have a goto or if BEFORE the label declaration, we must do these at the end.
     std::vector<std::pair<std::string, GotoGasNode*>> gotoNodePairs;
     std::vector<std::pair<std::string, IfGasNode*>> ifNodePairs;
-    std::vector<std::pair<std::string, WhenNoLongerNearGasNode*>> whenNoLongerNearNodePairs;
+    std::vector<std::pair<std::string, WhenNearGasNode*>> whenNoLongerNearNodePairs;
 
     // Read in the GAS file contents one line at a time.
     std::string line;
@@ -441,26 +441,27 @@ void GAS::ParseFromData(char *data, int dataLength)
             node->newGas = Services::GetAssets()->LoadGAS(tokenizer.GetNext());
             mNodes.push_back(node);
         }
-        else if(StringUtil::EqualsIgnoreCase(command, "WHENNOLONGERNEAR"))
+        else if(StringUtil::EqualsIgnoreCase(command, "WHENNEAR") ||
+                StringUtil::EqualsIgnoreCase(command, "WHENNOLONGERNEAR"))
         {
             // Get required parameters. 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing noun in WHENNOLONGERNEAR" << std::endl;
+                std::cout << "Missing noun in WHENNEAR/WHENNOLONGERNEAR" << std::endl;
                 continue;
             }
             std::string noun = tokenizer.GetNext();
 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing distance in WHENNOLONGERNEAR" << std::endl;
+                std::cout << "Missing distance in WHENNEAR/WHENNOLONGERNEAR" << std::endl;
                 continue;
             }
             float distance = StringUtil::ToFloat(tokenizer.GetNext());
 
             if(!tokenizer.HasNext())
             {
-                std::cout << "Missing label in WHENNOLONGERNEAR" << std::endl;
+                std::cout << "Missing label in WHENNEAR/WHENNOLONGERNEAR" << std::endl;
                 continue;
             }
             std::string label = tokenizer.GetNext();
@@ -473,7 +474,8 @@ void GAS::ParseFromData(char *data, int dataLength)
                 otherNoun = tokenizer.GetNext();
             }
 
-            WhenNoLongerNearGasNode* node = new WhenNoLongerNearGasNode();
+            WhenNearGasNode* node = new WhenNearGasNode();
+            node->notNear = command.size() > 8; // if command is WHENNOLONGERNEAR...
             node->noun = noun;
             node->distance = distance;
             node->otherNoun = otherNoun;
@@ -481,6 +483,38 @@ void GAS::ParseFromData(char *data, int dataLength)
             
             // Remember that we need to come back and hook up the label index later.
             whenNoLongerNearNodePairs.push_back(std::make_pair(label, node));
+        }
+        else if(StringUtil::EqualsIgnoreCase(command, "DLG"))
+        { 
+            if(!tokenizer.HasNext())
+            {
+                std::cout << "Missing yak in DLG" << std::endl;
+                continue;
+            }
+            std::string yakName = "E" + tokenizer.GetNext();
+
+            Animation* yakAnimation = Services::GetAssets()->LoadYak(yakName);
+            if(yakAnimation == nullptr)
+            {
+                std::cout << "Invalid yak name specified in DLG" << std::endl;
+                continue;
+            }
+
+            DialogueGasNode* node = new DialogueGasNode();
+            node->yakAnimation = yakAnimation;
+            mNodes.push_back(node);
+        }
+        else if(StringUtil::EqualsIgnoreCase(command, "LOCATION"))
+        {
+            if(!tokenizer.HasNext())
+            {
+                std::cout << "Missing location in LOCATION" << std::endl;
+                continue;
+            }
+
+            LocationGasNode* node = new LocationGasNode();
+            node->location = tokenizer.GetNext();
+            mNodes.push_back(node);
         }
         else
         {
