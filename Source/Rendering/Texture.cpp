@@ -83,15 +83,29 @@ Texture::~Texture()
 
 void Texture::Activate(int textureUnit)
 {
-    glActiveTexture(GL_TEXTURE0 + textureUnit);
-    
+    // Activate desired texture unit.
+    // Only do this if desired unit is not already active! Small performance gain.
+    static int activeTextureUnit = -1;
+    if(activeTextureUnit != textureUnit)
+    {
+        glActiveTexture(GL_TEXTURE0 + textureUnit);
+        activeTextureUnit = textureUnit;
+    }
+
+    // Upload to GPU if dirty.
     if(mDirty)
     {
         UploadToGPU();
         mDirty = false;
     }
-    
-    glBindTexture(GL_TEXTURE_2D, mTextureId);
+
+    // Bind texture (again, if not already bound - small performance gain).
+    static GLuint activeTextureId[2];
+    if(activeTextureId[textureUnit] != mTextureId)
+    {
+        glBindTexture(GL_TEXTURE_2D, mTextureId);
+        activeTextureId[textureUnit] = mTextureId;
+    }
 }
 
 void Texture::Deactivate()

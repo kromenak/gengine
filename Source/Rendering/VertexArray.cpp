@@ -226,15 +226,24 @@ void VertexArray::Draw(GLenum mode) const
 
 void VertexArray::Draw(GLenum mode, unsigned int offset, unsigned int count) const
 {
-    // Bind vertex array object.
-    glBindVertexArray(mVAO);
+    // Bind vertex array object and index buffer objects.
+    // Only do this if not already bound (small performance gain).
+    static GLuint lastBoundVAO = GL_NONE;
+    if(lastBoundVAO != mVAO)
+    {
+        glBindVertexArray(mVAO);
+        lastBoundVAO = mVAO;
+
+        // Assuming we always want to bind the IBO when binding VAO...
+        if(mIBO != GL_NONE)
+        {
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
+        }
+    }
     
     // Draw method depends on whether we have indexes or not.
     if(mIBO != GL_NONE)
     {
-        // Bind index buffer.
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
-        
         // Draw "count" indices at offset.
         glDrawElements(mode, count, GL_UNSIGNED_SHORT, BUFFER_OFFSET(offset * sizeof(GLushort)));
     }

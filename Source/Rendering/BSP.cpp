@@ -352,8 +352,8 @@ void BSP::ApplyLightmap(const BSPLightmap& lightmap)
 }
 
 // For debugging BSP issues, helpful to track polygons rendered and tree depth.
-int renderedPolygonCount = 0;
-int treeDepth = 0;
+//int renderedPolygonCount = 0;
+//int treeDepth = 0;
 
 void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirection)
 {
@@ -361,8 +361,8 @@ void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirec
     mMaterial.Activate(Matrix4::Identity);
     
     // Reset render stat values.
-    renderedPolygonCount = 0;
-    treeDepth = 0;
+    //renderedPolygonCount = 0;
+    //treeDepth = 0;
     
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     RenderTree(mNodes[mRootNodeIndex], cameraPosition, cameraDirection);
@@ -433,9 +433,9 @@ void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const V
     // Render first tree.
     if(firstNodeIndex >= 0 && firstNodeIndex < mNodes.size())
     {
-        ++treeDepth;
+        //++treeDepth;
         RenderTree(mNodes[firstNodeIndex], cameraPosition, cameraDirection);
-        --treeDepth;
+        //--treeDepth;
     }
     
     // Render current, maybe (probably).
@@ -451,7 +451,7 @@ void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const V
             for(int i = node.polygonIndex; i < node.polygonIndex + node.polygonCount; i++)
             {
                 RenderPolygon(mPolygons[i], false);
-                ++renderedPolygonCount;
+                //++renderedPolygonCount;
             }
         }
         
@@ -461,7 +461,7 @@ void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const V
             for(int i = node.polygonIndex2; i < node.polygonIndex2 + node.polygonCount2; i++)
             {
                 RenderPolygon(mPolygons[i], false);
-                ++renderedPolygonCount;
+                //++renderedPolygonCount;
             }
         }
     }
@@ -469,9 +469,9 @@ void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const V
     // Render second tree.
     if(secondNodeIndex >= 0 && secondNodeIndex < mNodes.size())
     {
-        ++treeDepth;
+        //++treeDepth;
         RenderTree(mNodes[secondNodeIndex], cameraPosition, cameraDirection);
-        --treeDepth;
+        //--treeDepth;
     }
 }
 
@@ -482,39 +482,41 @@ void BSP::RenderPolygon(BSPPolygon& polygon, bool translucent)
     
     // Not going to render non-visible surfaces.
     if(!surface.visible) { return; }
-		
+
     // Retrieve texture and activate it, if possible.
-    Texture* tex = surface.texture;
-    if(tex != nullptr)
+    Texture* texture = surface.texture;
+    if(texture != nullptr)
     {
+        /*
         // If has alpha, don't render it now, but add it to the alpha chain.
-        if(tex->GetRenderType() == Texture::RenderType::Translucent && translucent)
+        if(texture->GetRenderType() == Texture::RenderType::Translucent && translucent)
         {
             polygon.next = mAlphaPolygons;
             mAlphaPolygons = &polygon;
             return;
         }
-        tex->Activate(0);
+        */
+        texture->Activate(0);
     }
     else
     {
         Texture::Deactivate();
     }
-     
+
     // Activate lightmap texture, if any.
-    Texture* lightmapTex = surface.lightmapTexture;
-    if(lightmapTex != nullptr)
+    Texture* lightmapTexture = surface.lightmapTexture;
+    if(lightmapTexture != nullptr)
     {
-        lightmapTex->Activate(1);
+        lightmapTexture->Activate(1);
     }
     
     // Lightmap scale/offsets are used in shaders to calculate proper lightmap UVs.
     Vector4 lightmapUvScaleOffset(surface.lightmapUvScale.x,
-                          surface.lightmapUvScale.y,
-                          surface.lightmapUvOffset.x,
-                          surface.lightmapUvOffset.y);
+                                  surface.lightmapUvScale.y,
+                                  surface.lightmapUvOffset.x,
+                                  surface.lightmapUvOffset.y);
     mMaterial.GetShader()->SetUniformVector4("uLightmapScaleOffset", lightmapUvScaleOffset);
-    
+
     /*
     if((surface.flags & BSPSurface::kUnknownFlag7) != 0)
     {
