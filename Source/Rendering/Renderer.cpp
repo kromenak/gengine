@@ -19,6 +19,7 @@
 #include "Matrix4.h"
 #include "MeshRenderer.h"
 #include "Model.h"
+#include "Profiler.h"
 #include "RenderTransforms.h"
 #include "Shader.h"
 #include "Skybox.h"
@@ -260,24 +261,29 @@ void Renderer::Shutdown()
 
 void Renderer::Render()
 {
-	// Enable opaque rendering (no blend, write to & test depth buffer).
-	// Do this BEFORE clear to avoid some glitchy graphics.
-	glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
-	glDepthMask(GL_TRUE); // start writing to depth buffer
-	glEnable(GL_DEPTH_TEST); // do depth comparisons and update the depth buffer
-	
-	// Clear color and depth buffers from last frame.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    PROFILER_BEGIN_SAMPLE("Renderer Clear");
+    // Enable opaque rendering (no blend, write to & test depth buffer).
+    // Do this BEFORE clear to avoid some glitchy graphics.
+    glDisable(GL_BLEND); // do not perform alpha blending (opaque rendering)
+    glDepthMask(GL_TRUE); // start writing to depth buffer
+    glEnable(GL_DEPTH_TEST); // do depth comparisons and update the depth buffer
+
+    // Clear color and depth buffers from last frame.
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    PROFILER_END_SAMPLE();
 	
 	// Render camera-oriented stuff.
     Matrix4 projectionMatrix;
     Matrix4 viewMatrix;
 	if(mCamera != nullptr)
 	{
+        PROFILER_BEGIN_SAMPLE("Renderer Generate Matrices")
         // We'll need the projection and view matrix for the camera a few times below.
         projectionMatrix = mCamera->GetProjectionMatrix();
         viewMatrix = mCamera->GetLookAtMatrix();
-        
+        PROFILER_END_SAMPLE();
+
+        PROFILER_BEGIN_SAMPLE("Render Skybox");
         // SKYBOX RENDERING
         // Draw the skybox first, which is just a little cube around the camera.
         // Don't write to depth mask, or else you can ONLY see skybox (b/c again, little cube).
@@ -291,8 +297,10 @@ void Renderer::Render()
             mSkybox->Render();
         }
         glDepthMask(GL_TRUE); // start writing to depth buffer
-        
-        // OPAQUE WORLD RENDERING
+        PROFILER_END_SAMPLE();
+
+        PROFILER_BEGIN_SAMPLE("Render BSP");
+        // OPAQUE BSP RENDERING
         // All opaque world rendering uses alpha test.
         Material::UseAlphaTest(true);
         
@@ -300,13 +308,17 @@ void Renderer::Render()
         Material::SetViewMatrix(viewMatrix);
         Material::SetProjMatrix(projectionMatrix);
         
-        // OPAQUE BSP RENDERING
         // Render opaque BSP. This should occur front-to-back, which has no overdraw.
         if(mBSP != nullptr)
         {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT); //TODO: Why does this need to be FRONT? Is that the way BSP data is authored, or is my winding order wrong?
             mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition(), mCamera->GetOwner()->GetForward());
+            glDisable(GL_CULL_FACE);
         }
-        
+        PROFILER_END_SAMPLE();
+
+        PROFILER_BEGIN_SAMPLE("Render Objects");
         // OPAQUE MESH RENDERING
         // Render opaque meshes (no particular order).
         // Sorting is probably not worthwhile b/c BSP likely mostly filled the z-buffer at this point.
@@ -318,6 +330,7 @@ void Renderer::Render()
         
         // Turn off alpha test.
         Material::UseAlphaTest(false);
+        PROFILER_END_SAMPLE();
         
         // TRANSLUCENT WORLD RENDERING
         // So far, GK3 doesn't seem to have any translucent geometry AT ALL!
@@ -325,7 +338,8 @@ void Renderer::Render()
         // If we DO need translucent rendering, it probably can only be meshes or BSP, but not both.
         //TODO: Any translucent world rendering.
     }
-    
+
+    PROFILER_BEGIN_SAMPLE("Render UI");
     // UI RENDERING (TRANSLUCENT)
     glEnable(GL_BLEND); // do alpha blending
     glDepthMask(GL_FALSE); // don't write to the depth buffer
@@ -343,7 +357,9 @@ void Renderer::Render()
     {
         canvas->Render();
     }
-    
+    PROFILER_END_SAMPLE();
+
+    PROFILER_BEGIN_SAMPLE("Render Debug");
     // OPAQUE DEBUG RENDERING
     // Switch back to opaque rendering for debug rendering.
     // Debug rendering happens after all else, so any previous function can ask for debug draws successfully.
@@ -360,9 +376,12 @@ void Renderer::Render()
     // Render debug elements.
     // Any debug commands from earlier are queued internally, and only drawn when this is called!
     Debug::Render();
+    PROFILER_END_SAMPLE();
     
 	// Present to window.
+    PROFILER_BEGIN_SAMPLE("Renderer Present");
 	SDL_GL_SwapWindow(mWindow);
+    PROFILER_END_SAMPLE();
 }
 
 void Renderer::AddMeshRenderer(MeshRenderer* mr)

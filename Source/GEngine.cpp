@@ -19,6 +19,7 @@
 #include "InventoryManager.h"
 #include "Localizer.h"
 #include "LocationManager.h"
+#include "Profiler.h"
 #include "Scene.h"
 #include "Services.h"
 #include "TextInput.h"
@@ -152,7 +153,7 @@ bool GEngine::Initialize()
 	//TEMP: Load scene as though starting a new game.
 	//TODO: Should really show logos, show title screen, allow restore or new game choice.
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-    LoadScene("R25");
+    LoadScene("RC1");
 	
 	/*
 	TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
@@ -170,15 +171,10 @@ bool GEngine::Initialize()
 		actor->GetMeshRenderer()->GetModel()->WriteToObjFile("GAB_" + std::to_string(i) + ".OBJ");
 	}
 	*/
-	
-	//SheepScript* ss = Services::GetSheep()->Compile("/Users/Clark/Projects/gengine/Assets/Conditions.shp");
-	//Services::GetSheep()->Execute(ss);
-	
-	//mReportManager.Log("Generic", "Rock & Roll");
-    
-    //mVideoPlayer.Play("Assets/GK3/intro.bik");
-    //mVideoPlayer.Play("Assets/GK3/EstLSRScan.avi");
-    //mVideoPlayer.Play("Assets/GK3/Parch1Geo.avi");
+
+    SheepScript* script = mAssetManager.LoadSheep("RC1");
+    script->Decompile();
+
     return true;
 }
 
@@ -205,6 +201,8 @@ void GEngine::Run()
     // Loop until not running anymore.
     while(mRunning)
     {
+        PROFILER_BEGIN_FRAME();
+
 		// Our main loop: inputs, updates, outputs.
         ProcessInput();
         Update();
@@ -212,6 +210,8 @@ void GEngine::Run()
 		
 		// After frame is done, check whether we need a scene change.
 		LoadSceneInternal();
+
+        PROFILER_END_FRAME();
     }
 }
 
@@ -255,6 +255,8 @@ void GEngine::UseWaitCursor()
 
 void GEngine::ProcessInput()
 {
+    PROFILER_SAMPLER(ProcessInput);
+
     // Update the input manager.
     // Retrieve input device states for us to use.
     mInputManager.Update();
@@ -344,6 +346,8 @@ void GEngine::ProcessInput()
 
 void GEngine::Update()
 {
+    PROFILER_SAMPLER(Update);
+
     // Tracks the next "GetTicks" value that is acceptable to perform an update.
     static unsigned int nextTicks = 0;
     
@@ -420,6 +424,7 @@ void GEngine::Update()
 
 void GEngine::GenerateOutputs()
 {
+    PROFILER_SAMPLER(GenerateOutputs);
     mRenderer.Render();
 }
 
