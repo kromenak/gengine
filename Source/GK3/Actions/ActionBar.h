@@ -58,10 +58,13 @@ private:
 	// Currently showing inventory button?
 	bool mHasInventoryItemButton = false;
 	
-	// Hide callback.
-	std::function<void()> mHideCallback = nullptr;
+	// Callback that executes if the action bar is canceled.
+    // This IS NOT the same as hiding! Cancel only happens if cancel button is pressed, click outside action bar, or press backspace.
+	std::function<void()> mCancelCallback = nullptr;
 	
 	UIButton* AddButton(int index, const VerbIcon& buttonIcon);
 	void RefreshButtonLayout();
 	void CenterOnPointer();
+
+    void OnCancelButtonPressed();
 };

@@ -26,10 +26,11 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
     
     // The background of the action bar consists of a fullscreen clickable button area.
     // This stops interaction with the scene while action bar is visible.
+    // It also allows clicking outside the bar to cancel it.
     mSceneBlockerButton = AddComponent<UIButton>();
     mCanvas->AddWidget(mSceneBlockerButton);
     mSceneBlockerButton->SetPressCallback([this]() {
-        this->Hide();
+        OnCancelButtonPressed();
     });
 	
 	// Create button holder - it holds the buttons and we move it around the screen.
@@ -53,14 +54,13 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback)
 {
 	// Hide if not already hidden (make sure buttons are freed).
-	mHideCallback = nullptr;
 	Hide();
 	
 	// If we don't have any actions, don't need to do anything!
 	if(actions.size() <= 0) { return; }
-	
-	// Save hide callback.
-	mHideCallback = cancelCallback;
+
+    // Save cancel callback.
+    mCancelCallback = cancelCallback;
 	
 	// Iterate over all desired actions and show a button for it.
 	bool inventoryShowing = Services::Get<InventoryManager>()->IsInventoryShowing();
@@ -141,8 +141,8 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	VerbIcon& cancelVerbIcon = verbManager->GetVerbIcon("CANCEL");
 	UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon);
 	
-	// Just hide the bar when cancel is pressed.
-	cancelButton->SetPressCallback(std::bind(&ActionBar::Hide, this));
+	// Pressing cancel button hides the bar, but it also requires an extra step. So its got its own callback.
+	cancelButton->SetPressCallback(std::bind(&ActionBar::OnCancelButtonPressed, this));
 	
 	// Refresh layout after adding all buttons to position everything correctly.
 	RefreshButtonLayout();
@@ -173,13 +173,6 @@ void ActionBar::Hide()
     
     // Scene blocker no longer receives input.
     mSceneBlockerButton->SetReceivesInput(false);
-	
-	// Call hide callback.
-	if(mHideCallback != nullptr)
-	{
-		mHideCallback();
-		mHideCallback = nullptr;
-	}
 }
 
 bool ActionBar::IsShowing() const
@@ -228,9 +221,17 @@ void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> cal
 
 void ActionBar::OnUpdate(float deltaTime)
 {
-	if(IsShowing() && Services::GetInput()->IsKeyDown(SDL_SCANCODE_BACKSPACE))
+	if(IsShowing()) 
 	{
-		Hide();
+        // Most keyboard input counts as a cancel action, unless the debug window is up.
+        if(!Services::GetInput()->IsTextInput())
+        {
+            //TODO: Check "is any key down except ~"
+            if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_BACKSPACE))
+            {
+                OnCancelButtonPressed();
+            }
+        }
 	}
 }
 
@@ -300,4 +301,15 @@ void ActionBar::CenterOnPointer()
 	
 	// Keep inside the screen.
     mButtonHolder->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
+}
+
+void ActionBar::OnCancelButtonPressed()
+{
+    Hide();
+
+    if(mCancelCallback != nullptr)
+    {
+        mCancelCallback();
+        mCancelCallback = nullptr;
+    }
 }
