@@ -40,7 +40,7 @@ public:
         Listen
     };
 	void StartFidget(FidgetType type);
-    void StopFidget() override;
+    void StopFidget(std::function<void()> callback = nullptr) override;
 
     void SetIdleFidget(GAS* fidget);
     void SetTalkFidget(GAS* fidget);

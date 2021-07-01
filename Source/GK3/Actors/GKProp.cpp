@@ -49,9 +49,9 @@ void GKProp::StartFidget(GAS* gas)
     mGasPlayer->Play(gas);
 }
 
-void GKProp::StopFidget()
+void GKProp::StopFidget(std::function<void()> callback)
 {
-    mGasPlayer->Stop();
+    mGasPlayer->Stop(callback);
 }
 
 void GKProp::StartAnimation(VertexAnimParams& animParams)

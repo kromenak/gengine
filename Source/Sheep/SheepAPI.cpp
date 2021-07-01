@@ -815,7 +815,8 @@ shpvoid StopFidget(std::string actorName)
         return 0;
     }
 
-    actor->StopFidget(); //TODO: Should be waitable for complex fidgets (a lot of cleanups perhaps).
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    actor->StopFidget(currentThread->AddWait());
 	return 0;
 }
 RegFunc1(StopFidget, void, string, WAITABLE, REL_FUNC);

@@ -1,7 +1,10 @@
 #include "GasPlayer.h"
 
+#include "Animator.h"
 #include "GAS.h"
 #include "GasNodes.h"
+#include "GEngine.h"
+#include "Scene.h"
 
 TYPE_DEF_CHILD(Component, GasPlayer);
 
@@ -42,13 +45,17 @@ void GasPlayer::Play(GAS* gas)
     mDistanceConditionNodes.clear();
 }
 
-void GasPlayer::Stop()
+void GasPlayer::Stop(std::function<void()> callback)
 {
+    // Save stop callback - we'll call this after all cleanups have completed.
+    mStopCallback = callback;
+
+    // Clear GAS script, which stops any more nodes from executing.
     mGas = nullptr;
 
-    //TODO: ok so, here's the expected behavior here:
-    //TODO: if you purposely stop a fidget (like with StopFidget), all the cleanups and such should occur.
-    //TODO: if you stop a fidget due to an error (tried to set a null fidget), it's supposed to IMMEDIATELY STOP (leaving any anims mid-play).
+    // Perform cleanups.
+    //TODO: if you stop a fidget due to an error (tried to set a null fidget), it's supposed to IMMEDIATELY STOP (leaving any anims mid-play) - no cleanups.
+    PerformCleanups();
 }
 
 void GasPlayer::SetNodeIndex(int index)
@@ -62,6 +69,21 @@ void GasPlayer::SetNodeIndex(int index)
 void GasPlayer::NextNode()
 {
     ProcessNextNode();
+}
+
+void GasPlayer::StartAnimation(Animation* anim, std::function<void()> finishCallback)
+{
+    // Save playing animation so we know whether we need to do cleanups when stopping the autoscript.
+    //TODO: This _might_ not be a good way to do this b/c the animation system might choose to NOT play a GAS animation b/c some other higher priority anim is playing.
+    //TODO: In that case, no cleanups would be necessary. So, it might be better to somehow query the Animator or VertexAnimator to determine whether a cleanup is needed.
+    mCurrentAnimation = anim;
+
+    // Play the thing.
+    AnimParams animParams;
+    animParams.animation = anim;
+    animParams.fromAutoScript = true;
+    animParams.finishCallback = finishCallback;
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
 }
 
 void GasPlayer::OnUpdate(float deltaTime)
@@ -144,4 +166,28 @@ void GasPlayer::ProcessNextNode()
     // Execute the node, which returns amount of time it will take to perform the node.
     // Note that a negative time can be returned here - this means the node will use the callback mechanism (NextNode()) instead of a timer.
     mTimer = node->Execute(this);
+}
+
+void GasPlayer::PerformCleanups()
+{
+    //TODO: Handle normal vs. talk cleanups.
+
+    // See if the currently playing autoscript animation requires any cleanups.
+    auto it = mCleanupAnims.find(mCurrentAnimation);
+    if(it == mCleanupAnims.end())
+    {
+        // No cleanup anim found - we're done!
+        if(mStopCallback != nullptr)
+        {
+            auto callback = mStopCallback;
+            mStopCallback = nullptr;
+            callback();
+        }
+        return;
+    }
+
+    // Ok, let's do the cleanup!
+    // When the cleanup finishes, this function re-calls itself, until all cleanups are done.
+    //std::cout << "Performing cleanup " << it->second->GetName() << " for anim " << it->first->GetName() << std::endl;
+    StartAnimation(it->second, std::bind(&GasPlayer::PerformCleanups, this));
 }

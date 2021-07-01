@@ -22,7 +22,7 @@ public:
     std::string GetModelName() const;
     
     void StartFidget(GAS* gas);
-    virtual void StopFidget();
+    virtual void StopFidget(std::function<void()> callback = nullptr);
     
     void StartAnimation(VertexAnimParams& animParams);
     void SampleAnimation(VertexAnimation* anim, int frame);

@@ -62,14 +62,16 @@ void GKActor::StartFidget(FidgetType type)
     GAS* newFidget = GetGasForFidget(type);
     if(newFidget != nullptr)
     {
+        //std::cout << GetNoun() << ": starting fidget " << newFidget->GetName() << std::endl;
         mGasPlayer->Play(newFidget);
         mActiveFidget = type;
     }
 }
 
-void GKActor::StopFidget()
+void GKActor::StopFidget(std::function<void()> callback)
 {
-    mGasPlayer->Stop();
+    //std::cout << GetNoun() << ": stopping all fidgets." << std::endl;
+    mGasPlayer->Stop(callback);
     mActiveFidget = FidgetType::None;
 }
 
@@ -226,6 +228,8 @@ void GKActor::OnUpdate(float deltaTime)
 
 void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
 {
+    //std::cout << GetNoun() << ": playing animation " << animParams.vertexAnimation->GetName() << std::endl;
+
     // For relative anims, move model to match actor's position/rotation.
     if(!animParams.absolute)
     {
@@ -334,7 +338,7 @@ void GKActor::SyncActorToModel()
     // See how much mesh has moved and translate actor to match.
     Vector3 meshPosition = GetModelPosition();
     GetTransform()->Translate(meshPosition - mLastModelPosition);
-    Debug::DrawLine(mLastModelPosition, meshPosition, Color32::Magenta, 5.0f);
+    //Debug::DrawLine(mLastModelPosition, meshPosition, Color32::Magenta);
     
     // See how much mesh has rotated and translate actor to match.
     Quaternion meshRotation = GetModelRotation();

@@ -8,6 +8,7 @@
 #pragma once
 #include "Component.h"
 
+#include <functional>
 #include <unordered_map>
 #include <utility>
 
@@ -26,7 +27,7 @@ public:
     void Play(GAS* gas);
 	void Pause() { mPaused = true; }
 	void Resume() { mPaused = false; }
-    void Stop();
+    void Stop(std::function<void()> callback = nullptr);
 
     // Below here: GAS Node Helpers
     void SetVar(char var, int value) { mVariables[var - 'A'] = value; }
@@ -34,6 +35,8 @@ public:
 
     void SetNodeIndex(int index);
     void NextNode();
+    
+    void StartAnimation(Animation* anim, std::function<void()> finishCallback = nullptr);
 
     void SetInterruptPosition(const ScenePosition* interruptPosition) { mInterruptPosition = interruptPosition; }
     void SetCleanup(Animation* animNeedingCleanup, Animation* animDoingCleanup) { mCleanupAnims[animNeedingCleanup] = animDoingCleanup; }
@@ -67,6 +70,14 @@ private:
     // An "interrupt position" to use if Ego requests to interact while in the middle of a walk.
     const ScenePosition* mInterruptPosition = nullptr;
 
+    // The current GAS animation being played.
+    // Needs to be saved here so we know whether we need to do a cleanup or not. 
+    Animation* mCurrentAnimation = nullptr;
+
+    // A callback to execute once a stop request finishes.
+    // A stop request may take some time due to the need to run cleanup animations.
+    std::function<void()> mStopCallback = nullptr;
+
     // Autoscripts may cause actors to play a variety of animations, putting them in odd situations.
     // But when someone wants the actor's attention, we want them to go back to their default state first.
     // "Cleanup" animations map one animation to the next one to play to continue "cleaning up" the current animation situation.
@@ -86,4 +97,6 @@ private:
     std::vector<std::pair<WhenNearGasNode*, bool>> mDistanceConditionNodes;
 
     void ProcessNextNode();
+
+    void PerformCleanups();
 };

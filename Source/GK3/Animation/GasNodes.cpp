@@ -18,10 +18,7 @@ float AnimGasNode::Execute(GasPlayer* player)
     if(animation == nullptr) { return 0; }
 
     // Play the animation!
-    AnimParams animParams;
-    animParams.animation = animation;
-    animParams.fromAutoScript = true;
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+    player->StartAnimation(animation);
 
     // HACK: When the EXACT anim duration is used, pure looping anims (like lobby fans) have a noticeable pause between loops.
     // To combat this, let's try reducing the anim duration just a tiny bit.
