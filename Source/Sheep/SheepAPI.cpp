@@ -1029,16 +1029,16 @@ RegFunc1(ContinueDialogueNoFidgets, void, int, WAITABLE, REL_FUNC);
 
 shpvoid SetConversation(std::string conversationName)
 {
-	//TODO: Why is this waitable?
-	Services::Get<DialogueManager>()->SetConversation(conversationName);
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+	Services::Get<DialogueManager>()->SetConversation(conversationName, currentThread->AddWait());
 	return 0;
 }
 RegFunc1(SetConversation, void, string, WAITABLE, REL_FUNC);
 
 shpvoid EndConversation()
 {
-	//TODO: Why is this waitable?
-	Services::Get<DialogueManager>()->EndConversation();
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+	Services::Get<DialogueManager>()->EndConversation(currentThread->AddWait());
 	return 0;
 }
 RegFunc0(EndConversation, void, WAITABLE, REL_FUNC);

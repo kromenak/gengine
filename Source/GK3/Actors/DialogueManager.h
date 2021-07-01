@@ -23,8 +23,8 @@ public:
 	
 	void SetSpeaker(const std::string& noun);
 	
-	void SetConversation(const std::string& conversation);
-	void EndConversation();
+	void SetConversation(const std::string& conversation, std::function<void()> finishCallback);
+	void EndConversation(const std::function<void()> finishCallback);
 	
 	void StartYak(const std::string& yakAnimName, std::function<void()> finishCallback);
 	
@@ -58,6 +58,15 @@ private:
 	// The current conversation. While a conversation is active, certain
 	// cameras may be used and the topic chooser appears after dialogue.
 	std::string mConversation;
+
+    // When starting/ending a conversation, we may need to wait on one or more enter/exit anims.
+    // Use this to keep track of how many anims are still outstanding.
+    int mConversationAnimWaitCount = 0;
+
+    // A callback to call once a conversation has been fully entered or exited.
+    std::function<void()> mConversationAnimFinishCallback = nullptr;
 	
 	void PlayNextDialogueLine();
+
+    void CheckConversationAnimFinishCallback();
 };

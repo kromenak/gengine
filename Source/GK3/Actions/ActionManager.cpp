@@ -386,7 +386,12 @@ void ActionManager::ShowTopicBar(const std::string& noun)
 	// See if we have any more topics to discuss with this noun (person).
 	// If not, we will pre-emptively cancel the bar and return.
 	auto actions = GetActions(noun, VerbType::Topic);
-	if(actions.size() == 0) { return; }
+	if(actions.size() == 0)
+    {
+        std::cout << "No more topics to discuss!" << std::endl;
+        OnActionBarCanceled();
+        return;
+    }
 	
 	// Show topics.
 	OutputActions(actions);
@@ -600,6 +605,10 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 void ActionManager::OnActionBarCanceled()
 {
 	std::cout << "Action bar canceled." << std::endl;
+
+    // In the original game, this appears to be called every time the action bar disables, regardless of whether it was for a conversation.
+    // This in turn calls EndConversation, which calls to DialogueManager::EndConversation.
+    Services::GetSheep()->Execute("GLB_ALL", "CodeCallEndConv$", nullptr);
 }
 
 void ActionManager::OnActionExecuteFinished()

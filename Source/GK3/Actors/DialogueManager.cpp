@@ -105,18 +105,106 @@ void DialogueManager::SetSpeaker(const std::string& noun)
 	}
 }
 
-void DialogueManager::SetConversation(const std::string& conversation)
+void DialogueManager::SetConversation(const std::string& conversation, std::function<void()> finishCallback)
 {
+    // Now in a conversation!
 	mConversation = conversation;
-	//TODO: Set camera - should get dialogue camera(s) with matching dialogueName, set to "initial" one
-	//TODO: Gather LISTENERS from SIF and play appropriate anims, set fidgets, etc.
-	std::cout << "SetConversation " << conversation << std::endl;
+    std::cout << "SetConversation " << conversation << std::endl;
+
+    // Save callback.
+    mConversationAnimFinishCallback = finishCallback;
+
+    // See if there are any dialogue cameras associated with starting this conversation (isInitial = true).
+    // If so, set that camera angle.
+    GEngine::Instance()->GetScene()->SetCameraPositionForConversation(conversation, true);
+
+    // Apply settings for this conversation.
+    // Some actors may use different talk/listen GAS for particular conversations.
+    // And some actors may need to play enter anims when starting a conversation.
+    mConversationAnimWaitCount = 0;
+    std::vector<const SceneConversation*> conversationSettings = GEngine::Instance()->GetScene()->GetSceneData()->GetConversationSettings(conversation);
+    for(auto& settings : conversationSettings)
+    {
+        // If needed, set new GAS for actor.
+        if(settings->talkGas != nullptr || settings->listenGas != nullptr)
+        {
+            GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(settings->actorName);
+            if(actor != nullptr)
+            {
+                if(settings->talkGas != nullptr)
+                {
+                    actor->SetTalkFidget(settings->talkGas);
+
+                    //TODO: Conversations often set both Talk & Idle fidgets. Looking at Gabe, it appears he starts playing his talk fidget automatically.
+                    //TODO: But if both participants set fidgets, how do you know who should start in Talk vs. Listen mode? Maybe Ego is always Talk first?
+                    actor->StartFidget(GKActor::FidgetType::Talk);
+                }
+                if(settings->listenGas != nullptr)
+                {
+                    actor->SetListenFidget(settings->listenGas);
+                }
+            }
+        }
+
+        // Play enter anim.
+        if(settings->enterAnim != nullptr)
+        {
+            ++mConversationAnimWaitCount;
+            GEngine::Instance()->GetScene()->GetAnimator()->Start(settings->enterAnim, [this]() {
+                --mConversationAnimWaitCount;
+                CheckConversationAnimFinishCallback();
+            });
+        }
+    }
+
+    // No waits? Do callback right away.
+    CheckConversationAnimFinishCallback();
 }
 
-void DialogueManager::EndConversation()
+void DialogueManager::EndConversation(std::function<void()> finishCallback)
 {
-	//TODO: Set camera - get dialogue camera(s) with matching dialogueName, set to "final" one
-	//TODO: Based on listeners involved, play any exit anims, clear fidgets, etc.
+    // No conversation? No problem.
+    if(mConversation.empty()) { return; }
+
+    // Save callback.
+    mConversationAnimFinishCallback = finishCallback;
+
+    // See if there are any dialogue cameras associated with ending this conversation (isFinal = true).
+    // If so, set that camera angle.
+    GEngine::Instance()->GetScene()->SetCameraPositionForConversation(mConversation, false);
+
+    // Play any exit anims for actors in this conversation.
+    mConversationAnimWaitCount = 0;
+    std::vector<const SceneConversation*> conversationSettings = GEngine::Instance()->GetScene()->GetSceneData()->GetConversationSettings(mConversation);
+    for(auto& settings : conversationSettings)
+    {
+        //TODO: Do we need to revert any GAS changes from starting the conversation? Or are these naturally resolved in later conversations?
+
+        // Play exit anim.
+        if(settings->exitAnim != nullptr)
+        {
+            ++mConversationAnimWaitCount;
+            GEngine::Instance()->GetScene()->GetAnimator()->Start(settings->exitAnim, [this]() {
+                --mConversationAnimWaitCount;
+                CheckConversationAnimFinishCallback();
+            });
+        }
+
+        // Have the actor go back to their idle fidget.
+        // We don't know all participants in a conversation - that data isn't stored in SIF or anything :P
+        // But if we have a conversation setting for an actor, at least we know that.
+        GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(settings->actorName);
+        if(actor != nullptr)
+        {
+            actor->StartFidget(GKActor::FidgetType::Idle);
+        }
+    }
+
+    // No waits? Do callback right away.
+    CheckConversationAnimFinishCallback();
+
+    // No longer in this conversation.
+    std::cout << "EndConversation " << mConversation << std::endl;
 	mConversation.clear();
 }
 
@@ -148,6 +236,15 @@ void DialogueManager::PlayNextDialogueLine()
 		TriggerDialogueCue();
 		return;
 	}
-	std::cout << "Playing YAK " << yak->GetName() << std::endl;
 	GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yak, nullptr);
+}
+
+void DialogueManager::CheckConversationAnimFinishCallback()
+{
+    if(mConversationAnimWaitCount == 0 && mConversationAnimFinishCallback != nullptr)
+    {
+        auto callback = mConversationAnimFinishCallback;
+        mConversationAnimFinishCallback = nullptr;
+        callback();
+    }
 }
