@@ -153,7 +153,7 @@ bool GEngine::Initialize()
 	//TEMP: Load scene as though starting a new game.
 	//TODO: Should really show logos, show title screen, allow restore or new game choice.
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-    LoadScene("RC1");
+    LoadScene("LBY");
 	
 	/*
 	TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
@@ -172,8 +172,8 @@ bool GEngine::Initialize()
 	}
 	*/
 
-    SheepScript* script = mAssetManager.LoadSheep("RC1");
-    script->Decompile();
+    //SheepScript* script = mAssetManager.LoadSheep("LBY110A");
+    //script->Decompile();
 
     return true;
 }
