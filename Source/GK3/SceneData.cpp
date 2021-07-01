@@ -59,7 +59,7 @@ void SceneData::ResolveSceneData()
     mBSPLightmap = Services::GetAssets()->LoadBSPLightmap(mGeneralSettings.sceneAssetName);
     
     // Apply lightmap to BSP.
-    if(mBSPLightmap != nullptr)
+    if(mBSPLightmap != nullptr && mBSP != nullptr)
     {
         mBSP->ApplyLightmap(*mBSPLightmap);
     }
@@ -135,6 +135,12 @@ void SceneData::ResolveSceneData()
 	{
 		AddSoundtrackBlocks(mSpecificSIF->GetSoundtrackBlocks());
 	}
+
+    AddConversationBlocks(mGeneralSIF->GetConversationBlocks());
+    if(mSpecificSIF != nullptr)
+    {
+        AddConversationBlocks(mSpecificSIF->GetConversationBlocks());
+    }
 	
 	// Clear actions from previous scene - we're about to populate here!
 	Services::Get<ActionManager>()->ClearActionSets();
@@ -153,6 +159,18 @@ void SceneData::ResolveSceneData()
 	
 	// Add global action sets (global-to-specific).
 	Services::Get<ActionManager>()->AddGlobalActionSets(mTimeblock);
+}
+
+const ScenePosition* SceneData::GetScenePosition(const std::string& positionName) const
+{
+    for(int i = 0; i < mPositions.size(); i++)
+    {
+        if(StringUtil::EqualsIgnoreCase(mPositions[i]->label, positionName))
+        {
+            return mPositions[i];
+        }
+    }
+    return nullptr;
 }
 
 const RoomSceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) const
@@ -191,16 +209,41 @@ const DialogueSceneCamera* SceneData::GetDialogueCamera(const std::string& camer
 	return nullptr;
 }
 
-const ScenePosition* SceneData::GetScenePosition(const std::string& positionName) const
+const DialogueSceneCamera* SceneData::GetInitialDialogueCameraForConversation(const std::string& conversationName) const
 {
-	for(int i = 0; i < mPositions.size(); i++)
+    for(int i = 0; i < mDialogueCameras.size(); i++)
     {
-		if(StringUtil::EqualsIgnoreCase(mPositions[i]->label, positionName))
+        if(mDialogueCameras[i]->isInitial && StringUtil::EqualsIgnoreCase(mDialogueCameras[i]->dialogueName, conversationName))
         {
-            return mPositions[i];
+            return mDialogueCameras[i];
         }
     }
     return nullptr;
+}
+
+const DialogueSceneCamera* SceneData::GetFinalDialogueCameraForConversation(const std::string& conversationName) const
+{
+    for(int i = 0; i < mDialogueCameras.size(); i++)
+    {
+        if(mDialogueCameras[i]->isFinal && StringUtil::EqualsIgnoreCase(mDialogueCameras[i]->dialogueName, conversationName))
+        {
+            return mDialogueCameras[i];
+        }
+    }
+    return nullptr;
+}
+
+std::vector<const SceneConversation*> SceneData::GetConversationSettings(const std::string& conversationName) const
+{
+    std::vector<const SceneConversation*> settings;
+    for(int i = 0; i < mConversations.size(); i++)
+    {
+        if(StringUtil::EqualsIgnoreCase(mConversations[i]->name, conversationName))
+        {
+            settings.push_back(mConversations[i]);
+        }
+    }
+    return settings;
 }
 
 void SceneData::AddActorBlocks(const std::vector<ConditionalBlock<SceneActor>>& actorBlocks)
@@ -316,6 +359,20 @@ void SceneData::AddSoundtrackBlocks(const std::vector<ConditionalBlock<Soundtrac
 			mSoundtracks.insert(mSoundtracks.end(), block.items.begin(), block.items.end());
 		}
 	}
+}
+
+void SceneData::AddConversationBlocks(const std::vector<ConditionalBlock<SceneConversation>>& conversationBlocks)
+{
+    for(auto& block : conversationBlocks)
+    {
+        if(Services::GetSheep()->Evaluate(block.condition))
+        {
+            for(auto& conversation : block.items)
+            {
+                mConversations.push_back(&conversation);
+            }
+        }
+    }
 }
 
 void SceneData::AddActionBlocks(const std::vector<ConditionalBlock<NVC*>>& actionSetBlocks, bool performNameCheck)

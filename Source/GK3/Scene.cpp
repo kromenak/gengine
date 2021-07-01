@@ -397,6 +397,19 @@ void Scene::SetCameraPosition(const std::string& cameraName)
 	mCamera->SetAngle(camera->angle);
 }
 
+void Scene::SetCameraPositionForConversation(const std::string& conversationName, bool isInitial)
+{
+    // Get dialogue camera associated with this conversation, either initial or final.
+    const DialogueSceneCamera* camera = isInitial ?
+        mSceneData->GetInitialDialogueCameraForConversation(conversationName) :
+        mSceneData->GetFinalDialogueCameraForConversation(conversationName);
+    if(camera == nullptr) { return; }
+
+    // Set camera if we found it.
+    mCamera->SetPosition(camera->position);
+    mCamera->SetAngle(camera->angle);
+}
+
 SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore) const
 {
 	SceneCastResult result;
@@ -682,7 +695,7 @@ void Scene::ExecuteAction(const Action* action)
 			const ScenePosition* scenePos = mSceneData->GetScenePosition(action->target);
 			if(scenePos != nullptr)
 			{
-				Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
+				//Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
 				mEgo->WalkTo(scenePos->position, scenePos->heading, [this, action]() -> void {
 					Services::Get<ActionManager>()->ExecuteAction(action);
 				});
@@ -745,7 +758,7 @@ void Scene::ExecuteAction(const Action* action)
 			}
 			
 			// Get vector from Ego to model.
-			Debug::DrawLine(mEgo->GetPosition(), modelPosition, Color32::Green, 60.0f);
+			//Debug::DrawLine(mEgo->GetPosition(), modelPosition, Color32::Green, 60.0f);
 			Vector3 egoToModel = modelPosition - mEgo->GetPosition();
 			
 			// Do a "turn to" heading.

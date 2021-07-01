@@ -55,6 +55,8 @@ public:
 	
     bool InitEgoPosition(const std::string& positionName);
 	void SetCameraPosition(const std::string& cameraName);
+    
+    void SetCameraPositionForConversation(const std::string& conversationName, bool isInitial);
 	
 	SceneCastResult Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore = nullptr) const;
 	
@@ -75,7 +77,8 @@ public:
 	void SetSceneModelVisibility(const std::string& modelName, bool visible);
 	bool IsSceneModelVisible(const std::string& modelName) const;
 	bool DoesSceneModelExist(const std::string& modelName) const;
-	
+
+    SceneData* GetSceneData() const { return mSceneData; }
 	Animator* GetAnimator() const { return mAnimator; }
 	SoundtrackPlayer* GetSoundtrackPlayer() const { return mSoundtrackPlayer; }
 	GameCamera* GetCamera() const { return mCamera; }

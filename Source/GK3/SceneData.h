@@ -59,9 +59,14 @@ public:
 	const RoomSceneCamera* GetRoomCamera(const std::string& cameraName) const;
 	const SceneCamera* GetCinematicCamera(const std::string& cameraName) const;
 	const DialogueSceneCamera* GetDialogueCamera(const std::string& cameraName) const;
-	
+    const DialogueSceneCamera* GetInitialDialogueCameraForConversation(const std::string& conversationName) const;
+    const DialogueSceneCamera* GetFinalDialogueCameraForConversation(const std::string& conversationName) const;
+
 	// SOUNDTRACK
 	Soundtrack* GetSoundtrack() const { return mSoundtracks.size() > 0 ? mSoundtracks.back() : nullptr; }
+
+    // CONVERSATIONS
+    std::vector<const SceneConversation*> GetConversationSettings(const std::string& conversationName) const;
 	
 private:
 	Timeblock mTimeblock;
@@ -114,6 +119,9 @@ private:
 	// Combined generic and specific soundtracks to use.
 	// Or is there ever only one???
 	std::vector<Soundtrack*> mSoundtracks;
+
+    // Combined generic and specific conversation settings to use.
+    std::vector<const SceneConversation*> mConversations;
 	
 	// Combined generic and specific action sets.
 	// Each set contains multiple actions.
@@ -129,5 +137,6 @@ private:
 	void AddDialogueCameraBlocks(const std::vector<ConditionalBlock<DialogueSceneCamera>>& cameraBlocks);
 	
 	void AddSoundtrackBlocks(const std::vector<ConditionalBlock<Soundtrack*>>& soundtrackBlocks);
+    void AddConversationBlocks(const std::vector<ConditionalBlock<SceneConversation>>& conversationBlocks);
 	void AddActionBlocks(const std::vector<ConditionalBlock<NVC*>>& actionSetBlocks, bool performNameCheck);
 };

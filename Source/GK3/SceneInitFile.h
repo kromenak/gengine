@@ -86,10 +86,9 @@ struct DialogueSceneCamera : public SceneCamera
     
     // If true, this camera appears in the toolbar when the conversation is active.
     bool showInToolbar = false; //TODO: also seems to never be used!
-	
-	//TODO: Add isInitial?
     
     // If true, camera is used when the conversation ends.
+    bool isInitial = false;
     bool isFinal = false;
 };
 
@@ -192,6 +191,25 @@ struct SceneModel
     bool hidden = false;
 };
 
+struct SceneConversation
+{
+    // Name of the conversation these settings relate to.
+    std::string name;
+
+    // Name of the actor these settings relate to.
+    // Each actor involved in the conversation has its own struct instance.
+    std::string actorName;
+
+    // Custom talk/listen autoscripts for this conversation.
+    // Only need to be specified if these differ from the actor's defaults.
+    GAS* talkGas = nullptr;
+    GAS* listenGas = nullptr;
+
+    // Animations to play when entering or exiting the conversation.
+    Animation* enterAnim = nullptr;
+    Animation* exitAnim = nullptr;
+};
+
 template<typename T>
 struct ConditionalBlock
 {
@@ -224,6 +242,8 @@ public:
 	const std::vector<ConditionalBlock<SceneRegionOrTrigger>>& GetTriggerBlocks() const { return mTriggers; }
 	
 	const std::vector<ConditionalBlock<Soundtrack*>>& GetSoundtrackBlocks() const { return mSoundtracks; }
+
+    const std::vector<ConditionalBlock<SceneConversation>>& GetConversationBlocks() const { return mConversations; }
 	
 	const std::vector<ConditionalBlock<NVC*>>& GetActionBlocks() const { return mActions; }
 	
@@ -253,6 +273,9 @@ private:
 	// AMBIENT (aka AUDIO)
 	// This one's gotta be pointers b/c a Soundtrack is a straight up Asset.
     std::vector<ConditionalBlock<Soundtrack*>> mSoundtracks;
+
+    // LISTENERS (aka CONVERSATIONS)
+    std::vector<ConditionalBlock<SceneConversation>> mConversations;
 	
 	// ACTIONS
 	// This one's also pointers b/c NVCs are Assets.

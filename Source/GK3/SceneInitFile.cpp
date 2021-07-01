@@ -459,10 +459,15 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 {
                     camera.showInToolbar = true;
                 }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initial"))
+                {
+                    camera.isInitial = true;
+                }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "final"))
                 {
                     camera.isFinal = true;
                 }
+                //TODO: FOV?
 			}
         }
     }
@@ -728,7 +733,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 {
                     region.label = keyValue.value;
                 }
-                if(StringUtil::EqualsIgnoreCase(keyValue.key, "rect"))
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "rect"))
                 {
                     region.rect = keyValue.GetValueAsRect();
                 }
@@ -756,6 +761,55 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
             if(soundtrack != nullptr)
             {
 				soundtrackBlock.items.push_back(soundtrack);
+            }
+        }
+    }
+
+    std::vector<IniSection> conversationSections = parser.GetSections("LISTENERS");
+    for(auto& section : conversationSections)
+    {
+        mConversations.emplace_back();
+        ConditionalBlock<SceneConversation>& conversationBlock = mConversations.back();
+
+        // Compile and save condition.
+        if(!section.condition.empty())
+        {
+            conversationBlock.conditionText = section.condition;
+            conversationBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+        }
+
+        // Add conversation settings.
+        for(auto& line : section.lines)
+        {
+            conversationBlock.items.emplace_back();
+            SceneConversation& convo = conversationBlock.items.back();
+
+            for(auto& keyValue : line.entries)
+            {
+                if(StringUtil::EqualsIgnoreCase(keyValue.key, "dialogue"))
+                {
+                    convo.name = keyValue.value;
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "actor"))
+                {
+                    convo.actorName = keyValue.value;
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "talk"))
+                {
+                    convo.talkGas = Services::GetAssets()->LoadGAS(keyValue.value);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "listen"))
+                {
+                    convo.listenGas = Services::GetAssets()->LoadGAS(keyValue.value);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "enter"))
+                {
+                    convo.enterAnim = Services::GetAssets()->LoadAnimation(keyValue.value);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "exit"))
+                {
+                    convo.exitAnim = Services::GetAssets()->LoadAnimation(keyValue.value);
+                }
             }
         }
     }
