@@ -23,6 +23,7 @@ struct CharacterConfig;
 class FaceController;
 class GAS;
 class Model;
+class Timeblock;
 class VertexAnimation;
 class VertexAnimator;
 struct VertexAnimParams;
@@ -31,7 +32,9 @@ class GKActor : public GKProp
 {
 public:
 	GKActor(Model* model);
-	
+
+    void Init(const Timeblock& timeblock);
+
     enum class FidgetType
     {
         None,

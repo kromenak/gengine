@@ -9,6 +9,7 @@
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 #include "Atomics.h"
 #include "Type.h"
@@ -119,8 +120,14 @@ struct CharacterConfig
 	Animation* walkStopAnim = nullptr;
 	
 	FaceConfig faceConfig;
-	
-	//TODO: Clothes anims?
+
+    // Characters can have up to three "sets of clothes."
+    // The clothes anim will perform texture swaps on the model.
+    // To determine which to apply, the animation name is queried:
+    // *Default = use if no other applies
+    // *TimeBlockStr = use if at or after this timeblock
+    static const int kMaxClothesAnims = 3;
+    std::pair<std::string, Animation*> clothesAnims[kMaxClothesAnims];
 };
 
 class CharacterManager

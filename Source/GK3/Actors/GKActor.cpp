@@ -5,6 +5,7 @@
 //
 #include "GKActor.h"
 
+#include "Animator.h"
 #include "AnimationNodes.h"
 #include "CharacterManager.h"
 #include "Debug.h"
@@ -14,6 +15,7 @@
 #include "MeshRenderer.h"
 #include "Scene.h"
 #include "Services.h"
+#include "StringUtil.h"
 #include "VertexAnimator.h"
 #include "Walker.h"
 
@@ -40,6 +42,45 @@ GKActor::GKActor(Model* model) : GKProp(true)
 	// Add walker and configure it.
 	mWalker = AddComponent<Walker>();
 	mWalker->SetCharacterConfig(config);
+}
+
+void GKActor::Init(const Timeblock& timeblock)
+{
+    // Figure out what clothes to apply, if any.
+    Animation* clothesAnim = nullptr;
+    for(int i = 0; i < CharacterConfig::kMaxClothesAnims; ++i)
+    {
+        // If any entry is not set, subsequent entries will also not be set.
+        const std::pair<std::string, Animation*>& clothes = mCharConfig->clothesAnims[i];
+        if(clothes.first.empty()) { break; }
+
+        // If timeblock string is "Default", then this is the default clothes to wear.
+        if(StringUtil::EqualsIgnoreCase(clothes.first, "Default"))
+        {
+            if(clothesAnim == nullptr)
+            {
+                clothesAnim = clothes.second;
+            }
+        }
+        else
+        {
+            // If not "Default", the string must represent a timeblock. Convert it to one.
+            Timeblock clothesTimeblock(clothes.first);
+
+            // We use these clothes if our timeblock is at or after the clothes' timeblock.
+            // For example, if a character specifies clothes for 110a, and it is 102p, we use the 110a clothes.
+            if(timeblock >= clothesTimeblock)
+            {
+                clothesAnim = clothes.second;
+            }
+        }
+    }
+
+    // Apply the clothes!
+    if(clothesAnim != nullptr)
+    {
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(clothesAnim);
+    }
 }
 
 void GKActor::StartFidget(FidgetType type)

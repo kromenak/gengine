@@ -99,6 +99,22 @@ CharacterManager::CharacterManager()
                 {
                     config.rightShoeAxesPointIndex = entry.GetValueAsInt();
                 }
+                else if(StringUtil::StartsWithIgnoreCase(entry.key, "Clothes"))
+                {
+                    // Get portion of key after "Clothes" - this indicates WHEN this clothing anim applies (e.g. day 1 10am).
+                    std::string timeblockStr(entry.key, 7);
+
+                    // Find an empty slot for this clothes anim. If no empty slot, this entry is discarded.
+                    for(int i = 0; i < CharacterConfig::kMaxClothesAnims; ++i)
+                    {
+                        if(config.clothesAnims[i].first.empty())
+                        {
+                            config.clothesAnims[i].first = timeblockStr;
+                            config.clothesAnims[i].second = Services::GetAssets()->LoadAnimation(entry.value);
+                            break;
+                        }
+                    }
+                }
 			}
 			
 			// Key each config by its identifier.

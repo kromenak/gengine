@@ -21,7 +21,7 @@ public:
 	static const AMPM AM = 0;
 	static const AMPM PM = 1;
 	
-	Timeblock() { } // Just use default values.
+    Timeblock() = default;
 	Timeblock(int day, int hour);
 	Timeblock(int day, int hour, AMPM amOrPM);
 	Timeblock(const std::string& str);
@@ -31,7 +31,11 @@ public:
 	
 	bool operator==(const Timeblock& other) const;
     bool operator!=(const Timeblock& other) const;
-	
+    bool operator<(const Timeblock& other) const;
+    bool operator>(const Timeblock& other) const;
+    bool operator<=(const Timeblock& other) const;
+    bool operator>=(const Timeblock& other) const;
+    
 	int GetDay() const { return mDay; }
 	
 	int GetHour24() const { return mHour; }

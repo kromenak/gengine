@@ -110,6 +110,35 @@ bool Timeblock::operator!=(const Timeblock& other) const
 	return !(*this == other);
 }
 
+bool Timeblock::operator<(const Timeblock& other) const
+{
+    // Definitely "less than" if my day is before other's day.
+    if(mDay < other.mDay) { return true; }
+
+    // Definitely NOT "less than" if my day is after other's day.
+    if(mDay > other.mDay) { return false; }
+
+    // Same day - check hour.
+    return mHour < other.mHour;
+}
+
+bool Timeblock::operator>(const Timeblock& other) const
+{
+    // Must be greater if neither less than nor equal to...
+    bool lessThanOrEqualTo = (*this < other) || (*this == other);
+    return !lessThanOrEqualTo;
+}
+
+bool Timeblock::operator<=(const Timeblock& other) const
+{
+    return (*this < other) || (*this == other);
+}
+
+bool Timeblock::operator>=(const Timeblock& other) const
+{
+    return (*this > other) || (*this == other);
+}
+
 int Timeblock::GetHour12() const
 {
 	if(mHour == 0) { return 12; }

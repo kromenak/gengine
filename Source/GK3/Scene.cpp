@@ -209,6 +209,9 @@ void Scene::Load()
         // Tell actor to use this scene's walker boundary.
         actor->SetWalkerBoundary(mSceneData->GetWalkerBoundary());
 
+        // Init actor.
+        actor->Init(mTimeblock);
+
 		//TODO: Apply init anim.
 		
 		//TODO: If hidden, hide.
