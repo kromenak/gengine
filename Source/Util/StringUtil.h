@@ -141,7 +141,38 @@ namespace StringUtil
         if(str1.size() != str2.size()) { return false; }
         return std::equal(str1.begin(), str1.end(), str2.begin(), iequal());
     }
-    
+
+    inline bool StartsWith(const std::string& str, const std::string& startsWith)
+    {
+        if(str.size() < startsWith.size()) { return false; }
+
+        // Using "rfind" instead of "find" (with a start index of 0) ensures that only the first position is checked.
+        // "find" could be used (check that first instance is at index 0), but it would search the entire string possibly.
+        return str.rfind(startsWith, 0) == 0;
+    }
+
+    inline bool StartsWithIgnoreCase(const std::string& str, const std::string& startsWith)
+    {
+        if(str.size() < startsWith.size()) { return false; }
+
+        // I believe if we only search from the beginning up to the size of the search string, it'll only
+        // return a result IF the string starts with the search string.
+        auto searchEndIt = str.begin() + startsWith.size();
+        return std::search(str.begin(), searchEndIt, startsWith.begin(), startsWith.end(), iequal()) != searchEndIt;
+    }
+
+    inline bool Contains(const std::string& str, const std::string& contains)
+    {
+        if(str.size() < contains.size()) { return false; }
+        return str.find(contains) != std::string::npos;
+    }
+
+    inline bool ContainsIgnoreCase(const std::string& str, const std::string& contains)
+    {
+        if(str.size() < contains.size()) { return false; }
+        return std::search(str.begin(), str.end(), contains.begin(), contains.end(), iequal()) != str.end();
+    }
+
     inline bool ToBool(const std::string& str)
     {
         // If the string is "yes" or "true", we'll say it converts to "true".
