@@ -223,11 +223,12 @@ void ActionBar::OnUpdate(float deltaTime)
 {
 	if(IsShowing()) 
 	{
-        // Most keyboard input counts as a cancel action, unless the debug window is up.
+        // Most keyboard input counts as a cancel action, unless some text input is active (like debug window).
         if(!Services::GetInput()->IsTextInput())
         {
-            //TODO: Check "is any key down except ~"
-            if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_BACKSPACE))
+            // Any key press EXCEPT ~ counts as a cancel action.
+            // This logic technically blocks any other cancel action due to key presses WHILE ~ is pressed but...close enough.
+            if(Services::GetInput()->IsAnyKeyPressed() && !Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE))
             {
                 OnCancelButtonPressed();
             }

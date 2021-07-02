@@ -83,7 +83,7 @@ void OptionBar::Hide()
 
 void OptionBar::OnUpdate(float deltaTime)
 {
-	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_L))
+	if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_L))
     {
         RectTransform* rt = static_cast<RectTransform*>(GetTransform());
         Vector2 ap = rt->GetAnchoredPosition();
@@ -91,7 +91,7 @@ void OptionBar::OnUpdate(float deltaTime)
         ap.y += 10;
         rt->SetAnchoredPosition(ap);
     }
-    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_K))
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_K))
     {
         RectTransform* rt = static_cast<RectTransform*>(GetTransform());
         Vector2 ap = rt->GetAnchoredPosition();

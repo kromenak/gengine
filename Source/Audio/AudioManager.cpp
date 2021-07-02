@@ -183,11 +183,11 @@ void AudioManager::Update(float deltaTime)
     
     /*
     // For testing fade in/out behavior.
-    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_M))
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_M))
     {
         AmbientFade(1.0f, 1.0f);
     }
-    if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_N))
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_N))
     {
         AmbientFade(1.0f, 0.0f);
     }

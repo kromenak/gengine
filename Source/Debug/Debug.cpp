@@ -166,15 +166,15 @@ void Debug::Update(float deltaTime)
 	}
 	
 	// Check for debug setting inputs.
-	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F1))
+	if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F1))
 	{
 		sRenderActorTransformAxes = !sRenderActorTransformAxes;
 	}
-	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F2))
+	if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F2))
 	{
 		sRenderSubmeshLocalAxes = !sRenderSubmeshLocalAxes;
 	}
-	if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_F3))
+	if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F3))
 	{
 		sRenderRectTransformRects = !sRenderRectTransformRects;
 	}

@@ -54,11 +54,11 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
 				// If pointer goes down or up this frame, notify whatever widget the pointer is currently over.
 				if(sMouseOverWidget != nullptr)
 				{
-					if(Services::GetInput()->IsMouseButtonDown(InputManager::MouseButton::Left))
+					if(Services::GetInput()->IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
 					{
 						sMouseOverWidget->OnPointerDown();
 					}
-					else if(Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Left))
+					else if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
 					{
 						sMouseOverWidget->OnPointerUp();
 					}

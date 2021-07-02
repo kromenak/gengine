@@ -76,7 +76,7 @@ void GameCamera::OnUpdate(float deltaTime)
     if(!Services::GetInput()->IsTextInput())
     {
         // If 'I' is pressed, toggle inventory.
-        if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_I))
+        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_I))
         {
             // If the scene is active, show the inventory.
             // If the inventory is showing, hide it.
@@ -91,7 +91,7 @@ void GameCamera::OnUpdate(float deltaTime)
         }
         
         // If 'P' is pressed, this toggles game pause.
-        if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_P))
+        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_P))
         {
             //TODO: implement pause!
             std::cout << "Pause!" << std::endl;
@@ -336,7 +336,7 @@ void GameCamera::SceneUpdate(float deltaTime)
             
             // If left mouse button is released, try to interact with whatever it is over.
             // Need to do this, even if canInteract==false, because floor can be clicked to move around.
-            if(Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Left))
+            if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
             {
                 GEngine::Instance()->GetScene()->Interact(ray, hovering);
             }
@@ -354,7 +354,7 @@ void GameCamera::SceneUpdate(float deltaTime)
         Services::GetInput()->UnlockMouse();
     }
     
-    if(Services::GetInput()->IsMouseButtonUp(InputManager::MouseButton::Right))
+    if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
     {
         mOptionBar->Show();
     }

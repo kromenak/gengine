@@ -151,7 +151,7 @@ void VideoPlayer::Update()
         }
         
         // Pressing escape skips the video.
-        if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_ESCAPE))
+        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
         {
             Stop();
         }

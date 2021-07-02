@@ -28,14 +28,18 @@ public:
     InputManager();
     
     void Update();
-    
-    bool IsKeyDown(SDL_Scancode scancode);
+
+    // Keyboard
+    bool IsKeyLeadingEdge(SDL_Scancode scancode);
     bool IsKeyPressed(SDL_Scancode scancode) { return mKeyboardState[scancode] == 1; }
-    bool IsKeyUp(SDL_Scancode scancode);
-    
-    bool IsMouseButtonDown(MouseButton button);
-    bool IsMouseButtonPressed(MouseButton button);
-    bool IsMouseButtonUp(MouseButton button);
+    bool IsKeyTrailingEdge(SDL_Scancode scancode);
+
+    bool IsAnyKeyPressed();
+
+    // Mouse
+    bool IsMouseButtonLeadingEdge(MouseButton button);
+    bool IsMouseButtonPressed(MouseButton button) { return (mMouseButtonState & SDL_BUTTON(static_cast<int>(button))); }
+    bool IsMouseButtonTrailingEdge(MouseButton button);
     
     Vector2 GetMousePosition() { return mMousePosition; }
     Vector2 GetMouseDelta() { return mMousePositionDelta; }
@@ -44,7 +48,7 @@ public:
 	void UnlockMouse();
 	bool MouseLocked() const { return mMouseLocked; }
 	
-	// Text input support
+	// Text Input
 	void StartTextInput(TextInput* textInput);
 	void StopTextInput();
 	bool IsTextInput() const { return mTextInput != nullptr; }
@@ -79,31 +83,36 @@ private:
 	TextInput* mTextInput = nullptr;
 };
 
-inline bool InputManager::IsKeyDown(SDL_Scancode scancode)
+inline bool InputManager::IsKeyLeadingEdge(SDL_Scancode scancode)
 {
     return mKeyboardState[scancode] == 1 && mPrevKeyboardState[scancode] == 0;
 }
 
-inline bool InputManager::IsKeyUp(SDL_Scancode scancode)
+inline bool InputManager::IsKeyTrailingEdge(SDL_Scancode scancode)
 {
     return mKeyboardState[scancode] == 0 && mPrevKeyboardState[scancode] == 1;
 }
 
-inline bool InputManager::IsMouseButtonDown(MouseButton button)
+inline bool InputManager::IsAnyKeyPressed()
 {
-    bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON((int)button));
-    bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON((int)button));
+    //TODO: Any faster way to do this?
+    for(int i = 0; i < mNumKeys; ++i)
+    {
+        if(mKeyboardState[i] != 0) { return true; }
+    }
+    return false;
+}
+
+inline bool InputManager::IsMouseButtonLeadingEdge(MouseButton button)
+{
+    bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
+    bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
     return pressedThisFrame && !pressedLastFrame;
 }
 
-inline bool InputManager::IsMouseButtonPressed(MouseButton button)
+inline bool InputManager::IsMouseButtonTrailingEdge(MouseButton button)
 {
-    return (mMouseButtonState & SDL_BUTTON((int)button));
-}
-
-inline bool InputManager::IsMouseButtonUp(MouseButton button)
-{
-    bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON((int)button));
-    bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON((int)button));
+    bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
+    bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
     return !pressedThisFrame && pressedLastFrame;
 }

@@ -164,7 +164,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		}
 		
 		// On release, toggle the display of the console.
-		if(Services::GetInput()->IsKeyUp(SDL_SCANCODE_GRAVE))
+		if(Services::GetInput()->IsKeyTrailingEdge(SDL_SCANCODE_GRAVE))
 		{
 			mCanvas->SetEnabled(!mCanvas->IsEnabled());
 			if(mCanvas->IsEnabled())
@@ -184,7 +184,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		if(!mCanvas->IsActiveAndEnabled()) { return; }
 		
 		// If enter is pressed, execute sheep!
-		if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_RETURN))
+		if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
 		{
 			Services::GetConsole()->ExecuteCommand(mTextInput->GetText());
 			mTextInput->Clear();
@@ -197,7 +197,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LALT))
 		{
 			// Alt+Down increases console size by one line.
-			if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_DOWN))
+			if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
 			{
 				if(mScrollbackLineCount < mMaxScrollbackLineCount)
 				{
@@ -206,7 +206,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				}
 			}
 			// Alt+Up decreases console size by one line.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_UP))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
 			{
 				if(mScrollbackLineCount > 0)
 				{
@@ -215,7 +215,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				}
 			}
 			// Alt+PgDown adds 10 lines.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_PAGEDOWN))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
 			{
 				mScrollbackLineCount += 10;
 				if(mScrollbackLineCount > mMaxScrollbackLineCount)
@@ -225,7 +225,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				Refresh();
 			}
 			// Alt+PgUp removes 10 lines.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_PAGEUP))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
 			{
 				mScrollbackLineCount -= 10;
 				if(mScrollbackLineCount < 0)
@@ -235,13 +235,13 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				Refresh();
 			}
 			// Alt+Home hides all lines.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_HOME))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_HOME))
 			{
 				mScrollbackLineCount = 0;
 				Refresh();
 			}
 			// Alt+End shows max number of lines.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_END))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_END))
 			{
 				mScrollbackLineCount = mMaxScrollbackLineCount;
 				Refresh();
@@ -252,7 +252,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LCTRL))
 		{
 			// Ctrl+Down moves scrollback down one line.
-			if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_DOWN))
+			if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
 			{
 				if(mScrollbackOffset > 0)
 				{
@@ -261,37 +261,37 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				}
 			}
 			// Ctrl+Up moves scrollback up one line.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_UP))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
 			{
 				//TODO
 			}
 			// Ctrl+PgDown moves scrollback down 10 lines.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_PAGEDOWN))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
 			{
 				//TODO
 				Refresh();
 			}
 			// Ctrl+PgUp moves scrollback up 10 lines.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_PAGEUP))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
 			{
 				//TODO
 				Refresh();
 			}
 			// Ctrl+Home moves scrollback to earliest line.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_HOME))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_HOME))
 			{
 				//TODO
 				Refresh();
 			}
 			// Ctrl+End moves scrollback to the latest line.
-			else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_END))
+			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_END))
 			{
 				mScrollbackOffset = 0;
 				Refresh();
 			}
 		}
 		
-		if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_UP))
+		if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
 		{
 			// Increment command history index if it is in-bounds.
 			// First time this happens will go from -1 to 0, which is OK!
@@ -312,7 +312,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 			mTextInput->SetText(command);
 			mTextInput->Focus();
 		}
-		else if(Services::GetInput()->IsKeyDown(SDL_SCANCODE_DOWN))
+		else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
 		{
 			// If current history index is above zero, decrement.
 			// Note that we can't decrement back to -1, per GK3 behavior.
