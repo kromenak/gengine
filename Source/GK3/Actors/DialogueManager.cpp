@@ -164,7 +164,14 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
 void DialogueManager::EndConversation(std::function<void()> finishCallback)
 {
     // No conversation? No problem.
-    if(mConversation.empty()) { return; }
+    if(mConversation.empty())
+    {
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        return;
+    }
 
     // Save callback.
     mConversationAnimFinishCallback = finishCallback;
