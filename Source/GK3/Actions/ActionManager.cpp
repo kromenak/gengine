@@ -173,6 +173,30 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 	}
 }
 
+void ActionManager::ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback)
+{
+    // We should only execute one action at a time.
+    if(mCurrentAction != nullptr)
+    {
+        //TODO: Log?
+        return;
+    }
+    mCurrentAction = &mSheepCommandAction;
+    mCurrentActionFinishCallback = finishCallback;
+
+    // Log it!
+    mSheepCommandAction.scriptText = "wait CallSheep(\"" + sheepName + "\", \"" + functionName + "\")";
+    Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", mSheepCommandAction.ToString().c_str()));
+
+    // Increment action ID.
+    mActionId++;
+
+    //TODO: We mayyyy want to actually compile a sheep script snippet and execute it here.
+    //TODO: For example, the end conversation does a `SHEEP_COMMAND:NONE:NONE`: wait CallSheep("Name", "Function") in the original game.
+    //TODO: But for now, let's just use the sheep command action as a placeholder and execute the function call.
+    Services::GetSheep()->Execute(sheepName, functionName, std::bind(&ActionManager::OnActionExecuteFinished, this));
+}
+
 const Action* ActionManager::GetAction(const std::string& noun, const std::string& verb) const
 {
 	// For any noun/verb pair, there is only ONE possible action that can be performed at any given time.
@@ -608,7 +632,7 @@ void ActionManager::OnActionBarCanceled()
 
     // In the original game, this appears to be called every time the action bar disables, regardless of whether it was for a conversation.
     // This in turn calls EndConversation, which calls to DialogueManager::EndConversation.
-    Services::GetSheep()->Execute("GLB_ALL", "CodeCallEndConv$", nullptr);
+    ExecuteSheepAction("GLB_ALL", "CodeCallEndConv$", nullptr);
 }
 
 void ActionManager::OnActionExecuteFinished()
