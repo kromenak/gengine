@@ -406,3 +406,9 @@ void Renderer::SetSkybox(Skybox* skybox)
 		mSkybox->SetMaterial(mSkyboxMaterial);
 	}
 }
+
+void Renderer::ToggleFullscreen()
+{
+    bool isFullscreen = SDL_GetWindowFlags(mWindow) & SDL_WINDOW_FULLSCREEN;
+    SDL_SetWindowFullscreen(mWindow, isFullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+}

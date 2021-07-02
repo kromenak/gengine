@@ -40,10 +40,11 @@ public:
     void SetBSP(BSP* bsp) { mBSP = bsp; }
     
 	void SetSkybox(Skybox* skybox);
-    
+
+    void ToggleFullscreen();
+
     int GetWindowWidth() { return mScreenWidth; }
 	int GetWindowHeight() { return mScreenHeight; }
-	
 	Vector2 GetWindowSize() { return Vector2(static_cast<float>(mScreenWidth), static_cast<float>(mScreenHeight)); }
     Rect GetScreenRect() { return Rect(0, 0, mScreenWidth, mScreenHeight); }
     

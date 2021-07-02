@@ -269,6 +269,7 @@ void GEngine::ProcessInput()
         {
 			case SDL_KEYDOWN:
 			{
+                // When a text input is active, controls for manipulating text and cursor pos.
 				if(event.key.keysym.sym == SDLK_BACKSPACE)
 				{
 					TextInput* textInput = mInputManager.GetTextInput();
@@ -317,6 +318,16 @@ void GEngine::ProcessInput()
 						textInput->MoveCursorToEnd();
 					}
 				}
+
+                // Alt + Enter: toggle fullscreen mode
+                else if(event.key.keysym.sym == SDLK_RETURN)
+                {
+                    SDL_Keymod modState = SDL_GetModState();
+                    if((modState & KMOD_ALT) != 0)
+                    {
+                        mRenderer.ToggleFullscreen();
+                    }
+                }
 				break;
 			}
 			
