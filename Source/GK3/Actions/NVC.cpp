@@ -163,6 +163,12 @@ void NVC::ParseFromData(char *data, int dataLength)
 				action.script = Services::GetSheep()->Compile("Case Evaluation", action.scriptText);
             }
 		}
+
+        // If a target was specified, but no approach, default to "Walk To" approach.
+        if(action.approach == Action::Approach::None && !action.target.empty())
+        {
+            action.approach = Action::Approach::WalkTo;
+        }
         
         // Add item to map.
         auto it = mNounToActions.find(action.noun);
