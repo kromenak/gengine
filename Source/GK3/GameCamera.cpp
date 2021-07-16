@@ -324,7 +324,22 @@ void GameCamera::SceneUpdate(float deltaTime)
             {
                 if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
                 {
-                    GEngine::Instance()->UseHighlightCursor();
+                    // See if the hovered item has a custom verb with an associated custom cursor.
+                    Cursor* customCursor = nullptr;
+                    if(!hovering->GetVerb().empty())
+                    {
+                        customCursor = Services::Get<VerbManager>()->GetVerbIcon(hovering->GetVerb()).cursor;
+                    }
+
+                    // Set cursor appropriately.
+                    if(customCursor != nullptr)
+                    {
+                        GEngine::Instance()->UseCustomCursor(customCursor);
+                    }
+                    else
+                    {
+                        GEngine::Instance()->UseHighlightCursor();  
+                    }
                     mLastHoveredNoun = hovering->GetNoun();
                 }
             }

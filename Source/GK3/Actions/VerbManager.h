@@ -18,13 +18,18 @@
 #include "Type.h"
 
 class Texture;
+class Cursor;
 
 struct VerbIcon
 {
+    // Button textures for the verb.
 	Texture* upTexture = nullptr;
 	Texture* downTexture = nullptr;
 	Texture* hoverTexture = nullptr;
 	Texture* disableTexture = nullptr;
+
+    // A cursor representing this verb.
+    Cursor* cursor = nullptr;
 	
 	float GetWidth() const;
 };

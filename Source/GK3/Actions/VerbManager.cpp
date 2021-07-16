@@ -48,6 +48,7 @@ VerbManager::VerbManager()
 		Texture* downTexture = nullptr;
 		Texture* hoverTexture = nullptr;
 		Texture* disableTexture = nullptr;
+        Cursor* cursor = nullptr;
 		
 		// By default, the type of each button is a verb.
 		// However, if the keyword "inventory" or "topic" are used, the button is put in those maps instead.
@@ -75,6 +76,10 @@ VerbManager::VerbManager()
 			{
 				disableTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
 			}
+            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "cursor"))
+            {
+                cursor = Services::GetAssets()->LoadCursor(keyValuePair.value);
+            }
 			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "type"))
 			{
 				if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "inventory"))
@@ -91,23 +96,24 @@ VerbManager::VerbManager()
 		
 		// As long as any texture was set, we'll save this one.
 		if(upTexture != nullptr || downTexture != nullptr ||
-		   hoverTexture != nullptr || disableTexture != nullptr)
+		   hoverTexture != nullptr || disableTexture != nullptr || cursor != nullptr)
 		{
-			VerbIcon buttonIcon;
-			buttonIcon.upTexture = upTexture;
-			buttonIcon.downTexture = downTexture;
-			buttonIcon.hoverTexture = hoverTexture;
-			buttonIcon.disableTexture = disableTexture;
+			VerbIcon verbIcon;
+			verbIcon.upTexture = upTexture;
+			verbIcon.downTexture = downTexture;
+			verbIcon.hoverTexture = hoverTexture;
+			verbIcon.disableTexture = disableTexture;
+            verbIcon.cursor = cursor;
 			
 			// Save one of these as the default icon.
 			// "Question mark" seems like as good as any!
 			if(StringUtil::EqualsIgnoreCase(keyword, "QUESTION"))
 			{
-				mDefaultIcon = buttonIcon;
+				mDefaultIcon = verbIcon;
 			}
 			
 			// Insert mapping from keyword to the button icons.
-			map->insert({ keyword, buttonIcon });
+			map->insert({ keyword, verbIcon });
 		}
 	}
 	delete[] buffer;

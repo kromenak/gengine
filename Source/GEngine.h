@@ -45,6 +45,7 @@ public:
 	void UseDefaultCursor();
 	void UseHighlightCursor();
 	void UseWaitCursor();
+    void UseCustomCursor(Cursor* cursor);
     
 private:
     // Only one instance of GEngine can exist.

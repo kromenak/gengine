@@ -253,6 +253,15 @@ void GEngine::UseWaitCursor()
 	}
 }
 
+void GEngine::UseCustomCursor(Cursor* cursor)
+{
+    if(cursor != nullptr)
+    {
+        mActiveCursor = cursor;
+        mActiveCursor->Activate();
+    }
+}
+
 void GEngine::ProcessInput()
 {
     PROFILER_SAMPLER(ProcessInput);

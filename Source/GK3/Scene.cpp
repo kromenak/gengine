@@ -521,14 +521,15 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 	}
 	
 	// We've got an object to interact with!
-	// See if it has a pre-defined verb. If so, we will immediately execute that noun/verb combo.
+	// See if it has a pre-defined verb with an associated action. If so, we will immediately execute that action (w/o showing action bar).
 	if(!interacted->GetVerb().empty())
 	{
-		std::cout << "Trying to play default verb " << interacted->GetVerb() << std::endl;
-		if(Services::Get<ActionManager>()->ExecuteAction(interacted->GetNoun(), interacted->GetVerb()))
-		{
-			return;
-		}
+        const Action* action = Services::Get<ActionManager>()->GetAction(interacted->GetNoun(), interacted->GetVerb());
+        if(action != nullptr)
+        {
+            ExecuteAction(action);
+            return;
+        }
 	}
 	
 	// No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
