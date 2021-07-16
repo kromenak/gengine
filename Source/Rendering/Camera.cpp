@@ -1,8 +1,3 @@
-//
-// Camera.cpp
-//
-// Clark Kromenaker
-//
 #include "Camera.h"
 
 #include "Actor.h"
@@ -38,6 +33,11 @@ Matrix4 Camera::GetLookAtMatrixNoTranslate()
 Matrix4 Camera::GetProjectionMatrix()
 {
     return RenderTransforms::MakePerspective(mFovAngleRad, 1.333f, mNearClipPlane, mFarClipPlane);
+}
+
+Frustum Camera::GetWorldSpaceViewFrustum()
+{
+    return Frustum(GetProjectionMatrix() * GetLookAtMatrix());
 }
 
 Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)

@@ -17,6 +17,7 @@
 #include "Sphere.h"
 #include "StringUtil.h"
 #include "Triangle.h"
+#include "VerbManager.h"
 #include "UICanvas.h"
 
 GameCamera::GameCamera()
