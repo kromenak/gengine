@@ -236,7 +236,12 @@ void GKActor::SetPosition(const Vector3& position)
 {
     // Move actor to position.
     Actor::SetPosition(position);
-    
+    //std::cout << "Set Actor Position; actorPos=" << GetPosition() << ", modelPos=" << mModelActor->GetPosition() << std::endl;
+
+    // If the actor is playing a non-move animation, it will revert to its start position when the animation ends...this will revert the SetPosition call!
+    // To resolve this, we must update the saved start position when the actor's position is manually changed.
+    mStartVertexAnimPosition = position;
+
     // Move model to align with new position.
     SyncModelToActor();
 }
@@ -247,6 +252,10 @@ void GKActor::SetHeading(const Heading& heading)
 {
     // Update heading of this actor.
     GKObject::SetHeading(heading);
+
+    // If actor is playing a non-move animation, it will revert to its start rotation when the animation ends, reverting this call.
+    // To resolve this, we must update the saved start rotation when manually setting the heading/rotation.
+    mStartVertexAnimRotation = GetRotation();
     
     // Update model to match.
     SyncModelToActor();
@@ -293,15 +302,7 @@ void GKActor::OnVertexAnimationStart(const VertexAnimParams& animParams)
         // Save start pos/rot for the actor, so it can be reverted.
         mStartVertexAnimPosition = GetPosition();
         mStartVertexAnimRotation = GetRotation();
-        
-        // Save start pos/rot for the mesh, so it can be reverted.
-        //mStartVertexAnimModelPosition = GetModelPosition();
-        //mStartVertexAnimModelRotation = GetModelRotation();
     }
-    
-    // Save last mesh pos/rot to establish new baseline for "actor follow mesh" function.
-    //mLastModelPosition = GetModelPosition();
-    //mLastModelRotation = GetModelRotation();
 }
 
 void GKActor::OnVertexAnimationStop()
@@ -313,19 +314,9 @@ void GKActor::OnVertexAnimationStop()
         // Move actor back to start position/rotation.
         Actor::SetPosition(mStartVertexAnimPosition);
         SetRotation(mStartVertexAnimRotation);
-        
+
         // Move model to match actor.
         SyncModelToActor();
-        
-        // Move mesh back to starting position/rotation.
-        // These are a bit harder because mesh's position relative to mesh actor origin may vary wildly depending on animation being played.
-        // To solve that, we'll move back using relative diffs, rather than absolute values.
-        //mModelActor->GetTransform()->Translate(mStartVertexAnimMeshPos - GetModelPosition());
-        //mModelActor->GetTransform()->RotateAround(GetPosition(), Quaternion::Diff(mStartVertexAnimMeshRotation, GetModelRotation()));
-    
-        // Because the mesh may have moved back to start pos (if not a move anim), reset the last mesh position/rotation.
-        //mLastMeshPos = GetModelPosition();
-        //mLastMeshRotation = GetModelRotation();
     }
     
     // Position DOR at model.
@@ -372,6 +363,8 @@ void GKActor::SyncModelToActor()
     // Save new baseline model position/rotation.
     mLastModelPosition = GetModelPosition();
     mLastModelRotation = GetModelRotation();
+
+    //std::cout << "Sync Model to Actor; actorPos=" << GetPosition() << ", modelPos=" << mModelActor->GetPosition() << std::endl;
 }
 
 void GKActor::SyncActorToModel()
@@ -390,6 +383,8 @@ void GKActor::SyncActorToModel()
     // Save new baseline model position/rotation.
     mLastModelPosition = meshPosition;
     mLastModelRotation = meshRotation;
+
+    //std::cout << "Sync Actor to Model; actorPos=" << GetPosition() << ", modelPos=" << mModelActor->GetPosition() << std::endl;
 }
 
 GAS* GKActor::GetGasForFidget(FidgetType type)
