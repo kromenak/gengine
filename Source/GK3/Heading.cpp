@@ -5,6 +5,8 @@
 //
 #include "Heading.h"
 
+#include "Vector2.h"
+
 Heading Heading::None = Heading();
 
 Heading Heading::FromDegrees(float degrees)
@@ -35,17 +37,16 @@ Heading Heading::FromQuaternion(const Quaternion& quaternion)
 
 Heading Heading::FromDirection(const Vector3& direction)
 {
-	// Zero out Y-component and renormalize.
-	Vector3 dir = direction;
-	dir.y = 0.0f;
+	// Convert to 2D vector on x/z plane and renormalize.
+    Vector2 dir(direction.x, direction.z);
 	dir.Normalize();
 	
-	// Calculate axis and angle of rotation.
-	Vector3 axis = Vector3::Cross(Vector3::UnitZ, dir).Normalize();
-	float angle = Math::Acos(Vector3::Dot(Vector3::UnitZ, dir));
-	
-	// Create heading from quaternion.
-	return Heading::FromQuaternion(Quaternion(axis, angle));
+	// Calculate angle of rotation. This angle is just on the x/z plane, so we can use atan2.
+    // In our case, "y" axis is to the right, "x" axis is up, so we PURPOSELY pass args as x/y rather than y/x.
+    float angle = Math::Atan2(dir.x, dir.y);
+
+	// Create heading from angle.
+    return Heading::FromRadians(angle);
 }
 
 void Heading::SetDegrees(float degrees)
