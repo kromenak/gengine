@@ -5,6 +5,9 @@
 //
 // Camera used to actually play the game. Obeys all game world laws.
 //
+// Because GK3 is technically a "3rd person" game and the player directly controls the camera,
+// you can probably consider this to be the "player actor" or "player controller". So, most user inputs are checked here.
+//
 #pragma once
 #include "Actor.h"
 

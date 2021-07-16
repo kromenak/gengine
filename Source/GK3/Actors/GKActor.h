@@ -59,6 +59,8 @@ public:
     void SetWalkerBoundary(WalkerBoundary* walkerBoundary);
     Vector3 GetWalkDestination() const;
     bool AtPosition(const Vector3& position) { return mWalker->AtPosition(position); }
+    bool IsWalking() const { return mWalker->IsWalking(); }
+    void SkipWalk() { mWalker->SkipToEnd(); }
     void SetWalkerDOR(GKProp* walkerDOR);
     void SnapToFloor();
     
@@ -101,9 +103,6 @@ private:
     // So, we must save the start position/rotation for that purpose.
     Vector3 mStartVertexAnimPosition;
     Quaternion mStartVertexAnimRotation;
-    
-    //Vector3 mStartVertexAnimModelPosition;
-    //Quaternion mStartVertexAnimModelRotation;
     
     // Usually, the model drives the actor's position (think: root motion).
     // To do that, we track the models last position/rotation and move the actor every frame to keep up.

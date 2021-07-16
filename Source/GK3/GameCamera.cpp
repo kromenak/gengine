@@ -1,8 +1,3 @@
-//
-// GameCamera.cpp
-//
-// Clark Kromenaker
-//
 #include "GameCamera.h"
 
 #include "AudioListener.h"
@@ -10,6 +5,7 @@
 #include "Collisions.h"
 #include "Debug.h"
 #include "GEngine.h"
+#include "GKActor.h"
 #include "GKObject.h"
 #include "InventoryManager.h"
 #include "OptionBar.h"
@@ -99,6 +95,17 @@ void GameCamera::OnUpdate(float deltaTime)
 
             // For debugging...
             std::cout << GetPosition() << std::endl;
+        }
+
+        // Pressing escape acts as a "skip" or "cancel" action, depending on current state of the game.
+        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+        {
+            // If ego is walking, this can skip the walk.
+            GKActor* ego = GEngine::Instance()->GetScene()->GetEgo();
+            if(ego != nullptr && ego->IsWalking())
+            {
+                ego->SkipWalk();
+            }
         }
     }
 }
@@ -369,7 +376,8 @@ void GameCamera::SceneUpdate(float deltaTime)
     {
         Services::GetInput()->UnlockMouse();
     }
-    
+
+    // Show options on right click.
     if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
     {
         mOptionBar->Show();

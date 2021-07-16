@@ -30,12 +30,14 @@ class Walker : public Component
 	TYPE_DECL_CHILD();
 public:
 	Walker(Actor* owner);
-	
+
     void SetCharacterConfig(const CharacterConfig& characterConfig) { mCharConfig = &characterConfig; }
 	
 	void WalkTo(const Vector3& position, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback);
+
+    void SkipToEnd();
 
     bool AtPosition(const Vector3& position);
     bool IsWalking() const { return mWalkActions.size() > 0; }

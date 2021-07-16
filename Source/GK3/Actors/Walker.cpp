@@ -7,8 +7,10 @@
 
 #include "Actor.h"
 #include "Animator.h"
+#include "Camera.h"
 #include "CharacterManager.h"
 #include "Debug.h"
+#include "Frustum.h"
 #include "GEngine.h"
 #include "GKActor.h"
 #include "Heading.h"
@@ -63,61 +65,110 @@ void Walker::WalkTo(const Vector3& position, const Heading& heading, std::functi
         mWalkActions.push_back(endWalkAction);
         
         // Calculate a path.
-        CalculatePath(GetOwner()->GetPosition(), position);
+        if(!CalculatePath(GetOwner()->GetPosition(), position))
+        {
+            //TODO: Force to position?
+            if(finishCallback != nullptr) { finishCallback(); }
+            return;
+        }
+
+        // Ok, we have a path (in mPath) that we can follow.
+        // One interesting bit we do is to shorten the path if a lot of nodes are off-screen.
+        // So if 90% of the path is behind the camera, Gabe can just skip to the node right before the camera and walk from there!
+        size_t originalPathSize = mPath.size();
+        Vector3 lastPoppedPathPos;
+        Frustum frustum = Services::GetRenderer()->GetCamera()->GetWorldSpaceViewFrustum();
+        while(mPath.size() > 1)
+        {
+            // If path pos is off-screen, remove it from the path.
+            if(!frustum.ContainsPoint(mPath.back()))
+            {
+                lastPoppedPathPos = mPath.back();
+                mPath.pop_back();
+            }
+            else
+            {
+                // This path pos WAS on-screen, stop shortening path!
+                // But push the last popped position back onto the path (so that Gabe starts walking _just_ off-screen.
+                if(mPath.size() < originalPathSize)
+                {
+                    mPath.push_back(lastPoppedPathPos);
+                }
+                break;
+            }
+        }
+
+        // If path was shortened, warp walker directly to last spot.
+        bool warp = mPath.size() < originalPathSize;
+        if(warp)
+        {
+            std::cout << "Warp to " << mPath.back() << std::endl;
+            mGKOwner->SetPosition(mPath.back());
+
+            if(mPath.size() > 1)
+            {
+                Vector3 dir = Vector3::Normalize(mPath[mPath.size() - 2] - mPath.back());
+                std::cout << "Warp heading " << dir << ", " << Heading::FromDirection(dir) << std::endl;
+                mGKOwner->SetHeading(Heading::FromDirection(dir));
+            }
+        }
         
         // Follow the path.
         WalkAction followPathAction;
         followPathAction.op = WalkOp::FollowPath;
         mWalkActions.push_back(followPathAction);
-        
-        // Determine start walk action. This depends on whether the next node is right in front of us, behind, etc.
-        // If first path node is in front of the walker, no need to play turn anims.
-        Vector3 toNext = (mPath.front() - GetOwner()->GetPosition()).Normalize();
-        if(Vector3::Dot(GetOwner()->GetForward(), toNext) > -0.5f)
+
+        // If did not warp, we need to determine the "start walk" action.
+        if(!warp)
         {
-            // Add start walk action, but ONLY IF wasn't previously mid-walk.
-            // If was already walking and next node is in same direction...just keep walking!
-            if(!wasMidWalk)
+            // If first path node is in front of the walker, no need to play turn anims.
+            Vector3 toNext = (mPath.front() - GetOwner()->GetPosition()).Normalize();
+            if(Vector3::Dot(GetOwner()->GetForward(), toNext) > -0.5f)
             {
-                WalkAction startWalkAction;
-                startWalkAction.op = WalkOp::FollowPathStart;
-                mWalkActions.push_back(startWalkAction);
-            }
-        }
-        else
-        {
-            // First node IS NOT in front of walker, so gotta turn using fancy anims.
-            
-            // So, we need to play start walk anim while also turning to face next node.
-            WalkAction startWalkTurnAction;
-            startWalkTurnAction.facingDir = toNext;
-            
-            // For initial direction to turn, let's use the goal node direction.
-            // Just thinking about the real world...you usually turn towards your goal, right?
-            Vector3 toLastDir = (mPath.front() - GetOwner()->GetPosition()).Normalize();
-            Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toLastDir);
-            if(cross.y > 0)
-            {
-                startWalkTurnAction.op = WalkOp::FollowPathStartTurnRight;
+                // Add start walk action, but ONLY IF wasn't previously mid-walk.
+                // If was already walking and next node is in same direction...just keep walking!
+                if(!wasMidWalk)
+                {
+                    WalkAction startWalkAction;
+                    startWalkAction.op = WalkOp::FollowPathStart;
+                    mWalkActions.push_back(startWalkAction);
+                }
             }
             else
             {
-                startWalkTurnAction.op = WalkOp::FollowPathStartTurnLeft;
-            }
+                // First node IS NOT in front of walker, so gotta turn using fancy anims.
 
-            // Make sure this actor has animations for turning left/right.
-            // A lot of actors actually don't...in which case normal starts after all.
-            if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnRight && mCharConfig->walkStartTurnRightAnim == nullptr)
-            {
-                startWalkTurnAction.op = WalkOp::FollowPathStart;
-            }
-            else if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnLeft && mCharConfig->walkStartTurnLeftAnim == nullptr)
-            {
-                startWalkTurnAction.op = WalkOp::FollowPathStart;
-            }
+                // So, we need to play start walk anim while also turning to face next node.
+                WalkAction startWalkTurnAction;
+                startWalkTurnAction.facingDir = toNext;
 
-            // Let's do it!
-            mWalkActions.push_back(startWalkTurnAction);
+                // For initial direction to turn, let's use the goal node direction.
+                // Just thinking about the real world...you usually turn towards your goal, right?
+                Vector3 toLastDir = (mPath.front() - GetOwner()->GetPosition()).Normalize();
+                Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toLastDir);
+                if(cross.y > 0)
+                {
+                    startWalkTurnAction.op = WalkOp::FollowPathStartTurnRight;
+                }
+                else
+                {
+                    startWalkTurnAction.op = WalkOp::FollowPathStartTurnLeft;
+                }
+
+                // Make sure this actor has animations for turning left/right.
+                // A lot of actors actually don't...in which case normal starts after all.
+                if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnRight && mCharConfig->walkStartTurnRightAnim == nullptr)
+                {
+                    startWalkTurnAction.op = WalkOp::FollowPathStart;
+                }
+                else if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnLeft && mCharConfig->walkStartTurnLeftAnim == nullptr)
+                {
+                    startWalkTurnAction.op = WalkOp::FollowPathStart;
+                }
+
+                // Let's do it!
+                mWalkActions.push_back(startWalkTurnAction);
+            }
         }
     }
     
@@ -165,6 +216,34 @@ void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosit
         // Specify a "dummy" heading here so that the "turn to face" action is put into the walk plan.
         // Later on, when the object comes into view, we'll replace this with the actual direction to turn.
         WalkTo(targetPosition, Heading::FromDegrees(0.0f), finishCallback);
+    }
+}
+
+void Walker::SkipToEnd()
+{
+    // Not walking? Don't need to skip.
+    if(!IsWalking()) { return; }
+
+    // Warp actor to end of path.
+    if(!mPath.empty())
+    {
+        mGKOwner->SetPosition(mPath.front());
+        if(mPath.size() > 1)
+        {
+            mGKOwner->SetHeading(Heading::FromDirection(Vector3::Normalize(mPath.front() - mPath[1])));
+        }
+    }
+
+    // Still play "end of walk" bit.
+    bool poppedAction = false;
+    while(!mWalkActions.empty() && mWalkActions.back().op != WalkOp::FollowPathEnd)
+    {
+        mWalkActions.pop_back();
+        poppedAction = true;
+    }
+    if(poppedAction)
+    {
+        NextAction();
     }
 }
 
