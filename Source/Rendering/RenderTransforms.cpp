@@ -21,9 +21,9 @@ Matrix4 RenderTransforms::MakeLookAt(const Vector3& eye, const Vector3& lookAt, 
     
     // Traditionally, OpenGL has +Z point away from view forward (RH system).
     // However, we can ignore this and use LH if we account for it in the projection matrix math.
-#if VIEW_HAND == VIEW_RH
+    #if VIEW_HAND == VIEW_RH
     viewFwd *= -1;
-#endif
+    #endif
     
     // Negating the side axis is one way we can reflect the view space, which has the effect of making world space appear right-handed!
     //viewSide *= -1;
@@ -62,7 +62,6 @@ Matrix4 RenderTransforms::MakeLookAt(const Vector3& eye, const Vector3& lookAt, 
                          viewFwd.x,  viewFwd.y,  viewFwd.z,  -Vector3::Dot(viewFwd, eye),
                          0.0f,       0.0f,     0.0f,      1.0f);
     return lookAtMatrix;
-
 }
 
 Matrix4 RenderTransforms::MakePerspective(float fovAngle, float aspectRatio, float near, float far)
@@ -91,24 +90,24 @@ Matrix4 RenderTransforms::MakePerspective(float fovAngle, float aspectRatio, flo
     // NDC uses a LH coordinate system, so if view space is RH, the matrix needs to flip that.
     // To do this, we can force the w-component in clip space to be either positive or negative, depending on our needs.
     // We want it to be negative (resulting in an axis flip) if view space is RH.
-#if VIEW_HAND == VIEW_LH
+    #if VIEW_HAND == VIEW_LH
     m(3, 2) = 1.0f;    // If view space is LH
-#else
+    #else
     m(3, 2) = -1.0f; // If view space is RH
-#endif
+    #endif
     
     // Converting z component from view to clip space is most complex.
     // It depends on LH/RH (because Z-axis direction differs) and graphics system (GL maps to [-1, 1] while DX maps to [0, 1]).
     // These equations are derived from known values (e.g. "near" equals -1 or 0). See http://www.songho.ca/opengl/gl_projectionmatrix.html for a good explanation.
-#if VIEW_HAND == VIEW_LH
+    #if VIEW_HAND == VIEW_LH
     // OpenGL, LH view space
     m(2, 2) = -(far + near) / (far - near);
     m(2, 3) = (2.0f * near * far) / (far - near);
-#else
+    #else
     // OpenGL, RH view space
     m(2, 2) = -(far + near) / (far - near);
     m(2, 3) = -(2.0f * near * far) / (far - near);
-#endif
+    #endif
     
     // DirectX, LH view space
     //m(2, 2) = far / (far - near);
@@ -139,15 +138,15 @@ Matrix4 RenderTransforms::MakeOrthographic(float left, float right, float bottom
     // Converting z component is more complex (row 3).
     // If view space is RH, the z-axis must flip during conversion.
     // And again, GL uses [-1, 1] while DX uses [0, 1].
-#if VIEW_HAND == VIEW_LH
+    #if VIEW_HAND == VIEW_LH
     // OpenGL, LH view space
     m(2, 2) = 2.0f / (far - near);
     m(2, 3) = -(far + near) / (far - near);
-#else
+    #else
     // OpenGL, RH view space
     m(2, 2) = -2.0f / (far - near);
     m(2, 3) = -(far + near) / (far - near);
-#endif
+    #endif
     
     // DirectX, LH view space
     //m(2, 2) = 1.0f / (far - near);
@@ -175,15 +174,15 @@ Matrix4 RenderTransforms::MakeOrthoBottomLeft(float width, float height)
     
     // Convert z component to clip space (row 2).
     // Again, differs by LH/RH and graphics API
-#if VIEW_HAND == VIEW_LH
+    #if VIEW_HAND == VIEW_LH
     // OpenGL, LH view space
     m(2, 2) = 1.0f;         // 2.0f / (far - near)
     //m(2, 3) = 0.0f;       // -(far + near) / (far - near)
-#else
+    #else
     // OpenGL, RH view space
     m(2, 2) = -1.0f;
     //m(2, 3) = 0.0f;
-#endif
+    #endif
     
     // DirectX, LH view space
     //m(2, 2) = 1.0f;
@@ -216,9 +215,9 @@ Vector4 RenderTransforms::ScreenPointToNDCPoint(const Vector2& screenPoint, floa
     // If LH, the value must also be negated.
     float ndcZ = (2.0f * distance) - 1.0f;
     //float ndcZ = distance; // DirectX
-#if VIEW_HAND == VIEW_LH
+    #if VIEW_HAND == VIEW_LH
     ndcZ *= -1.0f;
-#endif
+    #endif
     
     // Return NDC point.
     return Vector4(ndcX, ndcY, ndcZ, 1.0f);

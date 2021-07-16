@@ -109,7 +109,7 @@ void Matrix4::SetRows(const Vector4& row1, const Vector4& row2, const Vector4& r
     mVals[15] = row4[3];
 }
 
-void Matrix4::GetRows(Vector4& row1, Vector4& row2, Vector4& row3, Vector4& row4)
+void Matrix4::GetRows(Vector4& row1, Vector4& row2, Vector4& row3, Vector4& row4) const
 {
     row1[0] = mVals[0];
     row1[1] = mVals[4];
@@ -155,7 +155,7 @@ void Matrix4::SetColumns(const Vector4& col1, const Vector4& col2, const Vector4
     mVals[15] = col4[3];
 }
 
-void Matrix4::GetColumns(Vector4& col1, Vector4& col2, Vector4& col3, Vector4& col4)
+void Matrix4::GetColumns(Vector4& col1, Vector4& col2, Vector4& col3, Vector4& col4) const
 {
     col1[0] = mVals[0];
     col1[1] = mVals[1];
@@ -444,6 +444,7 @@ void Matrix4::InvertOrthogonal()
 {
     // If matrix is orthogonal, the inverse is equal to the transpose!
     //TODO: Actually check/assert this matrix is orthogonal.
+    //TODO: Also, if the matrix has translation, even if it is technically orthogonal, this does not work!
     Transpose();
 }
 
@@ -480,6 +481,25 @@ Quaternion Matrix4::GetRotation() const
     return q;
 }
 
+bool Matrix4::IsOrthogonal() const
+{
+    // A transform matrix is orthogonal if the upper-left 3x3 matrix meets these requirements:
+    // 1) The axes are all orthogonal (perpendicular) to one another.
+    // 2) The axes are all unit length.
+    if(Math::AreEqual(GetXAxis().GetLengthSq(), 1.0f) &&
+       Math::AreEqual(GetYAxis().GetLengthSq(), 1.0f) &&
+       Math::AreEqual(GetZAxis().GetLengthSq(), 1.0f))
+    {
+        if(Math::IsZero(Vector3::Dot(GetXAxis(), GetYAxis())) &&
+           Math::IsZero(Vector3::Dot(GetYAxis(), GetZAxis())) &&
+           Math::IsZero(Vector3::Dot(GetZAxis(), GetXAxis())))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 Vector3 Matrix4::TransformVector(const Vector3& vector) const
 {
     // Assume Vector3 is not a point, so w = 0.
@@ -498,25 +518,21 @@ Vector3 Matrix4::TransformPoint(const Vector3& point) const
 
 Vector3 Matrix4::TransformNormal(const Vector3& normal) const
 {
-    // Normals don't behave like Points or Vectors when transforming.
-    // Say we transform a point as (M * p). To transform a normal, we must instead do (n * InvM).
-    
-    // For orthonormal matrices (axes are orthogonal AND unit length), inverse is equal to the transpose.
-    // In that case we have (n * InvM) == (n * TransM) == (M * n). So...same math as transforming a vector!
-    // We only need to check if upper-left 3x3 is orthonormal, since only those affect the normal math.
-    if(Math::AreEqual(GetXAxis().GetLengthSq(), 1.0f) &&
-       Math::AreEqual(GetYAxis().GetLengthSq(), 1.0f) &&
-       Math::AreEqual(GetZAxis().GetLengthSq(), 1.0f))
+    // Say this matrix transforms points from space A to B: (pB = M * pA)
+    // That means it also transforms normals from space B to A: (nA = nB * M)
+    // In other words, normals don't transform in the same way as points/vectors.
+
+    // To have this matrix transform a normal from A to B, we must invert it: (nB = nA * invM)
+
+    // HOWEVER, there is a trick: if the matrix is orthogonal, the inverse equals the transpose: (nB = nA * transM)
+    // But in that case, it is equivalent to using the original matrix with a column vector: (nB = M * nA) - just like vectors!
+    if(IsOrthogonal())
     {
-        if(Math::IsZero(Vector3::Dot(GetXAxis(), GetYAxis())) &&
-           Math::IsZero(Vector3::Dot(GetYAxis(), GetZAxis())) &&
-           Math::IsZero(Vector3::Dot(GetZAxis(), GetXAxis())))
-        {
-            return TransformVector(normal);
-        }
+        //TODO: If we transform a normalized vector against an orthogonal matrix, is the resulting vector normalized? If so, this Normalize call my be unneeded.
+        return Vector3::Normalize(TransformVector(normal));
     }
        
-    // But if not orthonormal, we must calculate inverse and perform (n * InvM).
+    // But if not orthonormal, we must calculate inverse and perform (nA * InvM).
     Matrix4 inverse = Inverse(*this);
     Vector3 newNormal(normal.x * inverse.mVals[0] + normal.y * inverse.mVals[1] + normal.z * inverse.mVals[2],
                       normal.x * inverse.mVals[4] + normal.y * inverse.mVals[5] + normal.z * inverse.mVals[6],

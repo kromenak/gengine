@@ -5,6 +5,9 @@
 //
 #include "Plane.h"
 
+#include "Matrix4.h"
+#include "Vector4.h"
+
 Plane::Plane(const Vector3& normal, float distance) :
     normal(normal),
     distance(distance)
@@ -19,6 +22,13 @@ Plane::Plane(float normalX, float normalY, float normalZ, float distance) :
     
 }
 
+Plane::Plane(const Vector4& normalAndDist) :
+    normal(normalAndDist.x, normalAndDist.y, normalAndDist.z),
+    distance(normalAndDist.w)
+{
+
+}
+
 Plane::Plane(const Vector3& p0, const Vector3& p1, const Vector3& p2)
 {
 	// Calculate normal using cross product.
@@ -29,6 +39,47 @@ Plane::Plane(const Vector3& p0, const Vector3& p1, const Vector3& p2)
     // Plane equation is "n dot p + d = 0", therefore "n dot p = -d" or "-(n dot p) = d".
     // Any of the three points works here.
 	distance = -Vector3::Dot(normal, p0);
+}
+
+void Plane::Normalize()
+{
+    float invLength = 1.0f / normal.GetLength();
+    normal *= invLength;
+    distance *= invLength;
+}
+
+/*static*/ Plane Plane::Normalize(const Plane& plane)
+{
+    Plane p = plane;
+    p.Normalize();
+    return p;
+}
+
+void Plane::Transform(const Matrix4& aToBTransform, bool preInverted)
+{
+    // Plane transformation is similar to normal transformation.
+    // Passed in matrix transforms points from system A to system B: (pB = M * pA)
+    // But it would do the opposite for planes and normals: (pA = pB * M)
+    
+    // To get the matrix to take a plane from A to B, we must invert it: (pB = pA * invM)
+    // Unlike normals, however, we cannot avoid inversion if the matrix is orthogonal (because the translation in column 3 is used).
+
+    // Let's say the caller needs to transform a dozen planes - to improve performance, they may invert the matrix once and pass it in.
+    // If caller says the passed in matrix is already inverted, don't invert it here - just use it directly.
+    Matrix4 inverse = preInverted ? aToBTransform : Matrix4::Inverse(aToBTransform);
+
+    // Perform (pB = pA * invM).
+    float newX = normal.x * inverse(0, 0) + normal.y * inverse(1, 0) + normal.z * inverse(2, 0);
+    float newY = normal.x * inverse(0, 1) + normal.y * inverse(1, 1) + normal.z * inverse(2, 1);
+    float newZ = normal.x * inverse(0, 2) + normal.y * inverse(1, 2) + normal.z * inverse(2, 2);
+    float newD = normal.x * inverse(0, 3) + normal.y * inverse(1, 3) + normal.z * inverse(2, 3) + distance;
+    normal.x = newX;
+    normal.y = newY;
+    normal.z = newZ;
+    distance = newD;
+
+    // Make sure plane is still normalized.
+    Normalize();
 }
 
 float Plane::GetSignedDistance(const Vector3& point) const

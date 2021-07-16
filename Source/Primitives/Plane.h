@@ -22,13 +22,22 @@
 #pragma once
 #include "Vector3.h"
 
+class Vector4;
+class Matrix4;
+
 class Plane
 {
 public:
 	Plane() = default;
 	Plane(const Vector3& normal, float distance);
     Plane(float normalX, float normalY, float normalZ, float distance);
+    Plane(const Vector4& normalAndDist);
     Plane(const Vector3& p0, const Vector3& p1, const Vector3& p2);
+
+    void Normalize();
+    static Plane Normalize(const Plane& plane);
+
+    void Transform(const Matrix4& aToBTransform, bool preInverted = false);
     
     float GetSignedDistance(const Vector3& point) const;
 	float GetDistance(const Vector3& point) const;

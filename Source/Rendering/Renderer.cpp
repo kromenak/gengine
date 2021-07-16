@@ -1,9 +1,3 @@
-//
-//  Renderer.cpp
-//  GEngine
-//
-//  Created by Clark Kromenaker on 7/22/17.
-//
 #include "Renderer.h"
 
 #include <iostream>
@@ -170,13 +164,13 @@ bool Renderer::Initialize()
     // For use with alpha blending during render loop.
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     
-#if VIEW_HAND == VIEW_LH
+    #if VIEW_HAND == VIEW_LH
     // We can use left-hand or right-hand view space, but GL's depth buffer defaults assume right-hand.
     // If using left-hand, we essentially "flip" the depth buffer.
     // Clear to 0 (instead of 1) and use GL_GREATER for depth tests (rather than GL_LESS).
     glClearDepth(0);
     glDepthFunc(GL_GREATER);
-#endif
+    #endif
 	
     // Load default shader.
 	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Tex");
@@ -307,7 +301,7 @@ void Renderer::Render()
         // Set the view & projection matrices for normal 3D camera-oriented rendering.
         Material::SetViewMatrix(viewMatrix);
         Material::SetProjMatrix(projectionMatrix);
-        
+
         // Render opaque BSP. This should occur front-to-back, which has no overdraw.
         if(mBSP != nullptr)
         {

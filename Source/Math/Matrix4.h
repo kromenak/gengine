@@ -45,9 +45,9 @@ public:
     
     // More explicit Row/Column getters/setters.
     void SetRows(const Vector4& row1, const Vector4& row2, const Vector4& row3, const Vector4& row4);
-    void GetRows(Vector4& row1, Vector4& row2, Vector4& row3, Vector4& row4);
+    void GetRows(Vector4& row1, Vector4& row2, Vector4& row3, Vector4& row4) const;
     void SetColumns(const Vector4& col1, const Vector4& col2, const Vector4& col3, const Vector4& col4);
-    void GetColumns(Vector4& col1, Vector4& col2, Vector4& col3, Vector4& col4);
+    void GetColumns(Vector4& col1, Vector4& col2, Vector4& col3, Vector4& col4) const;
     
     // Implicit float conversion - allows Matrix4 to be passed as a float* argument.
     operator float*() { return mVals; }
@@ -96,7 +96,10 @@ public:
     const Vector3& GetZAxis() const { return reinterpret_cast<const Vector3&>(mVals[8]); }
     const Vector3& GetTranslation() const { return reinterpret_cast<const Vector3&>(mVals[12]); }
     Quaternion GetRotation() const;
-    
+
+    // Queries
+    bool IsOrthogonal() const;
+
     // Vector3 multiplication (assume w=1 for point, w=0 for vector)
     // These assume the Vector is a column vector (and thus matrix columns are axis/translation).
     Vector3 TransformVector(const Vector3& vector) const;

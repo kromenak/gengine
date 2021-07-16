@@ -1,8 +1,3 @@
-//
-// Material.cpp
-//
-// Clark Kromenaker
-//
 #include "Material.h"
 
 #include "Matrix4.h"
