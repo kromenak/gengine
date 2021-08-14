@@ -56,14 +56,9 @@ void GameCamera::OnUpdate(float deltaTime)
     //Vector3 testPoint2 = tri.GetClosestPoint(GetPosition());
     //Debug::DrawLine(Vector3::Zero, testPoint2, Color32::Red);
     
-    // Disallow moving camera or player inputs if an action is playing.
-    if(Services::Get<ActionManager>()->IsActionPlaying())
-    {
-        return;
-    }
-    
-    // Perform scene-only updates, if scene is active.
-    if(mSceneActive)
+    // Perform scene-only updates (camera movement, click-to-interact), if scene is active and no action is playing.
+    bool actionPlaying = Services::Get<ActionManager>()->IsActionPlaying();
+    if(!actionPlaying && mSceneActive)
     {
         SceneUpdate(deltaTime);
     }
@@ -72,22 +67,26 @@ void GameCamera::OnUpdate(float deltaTime)
     // Keyboard shortcut keys are only available if text input is not active.
     if(!Services::GetInput()->IsTextInput())
     {
-        // If 'I' is pressed, toggle inventory.
-        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_I))
+        // Some keyboard shortcuts are only available when an action is not playing.
+        if(!actionPlaying)
         {
-            // If the scene is active, show the inventory.
-            // If the inventory is showing, hide it.
-            if(mSceneActive)
+            // If 'I' is pressed, toggle inventory.
+            if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_I))
             {
-                Services::Get<InventoryManager>()->ShowInventory();
-            }
-            else if(Services::Get<InventoryManager>()->IsInventoryShowing())
-            {
-                Services::Get<InventoryManager>()->HideInventory();
+                // If the scene is active, show the inventory.
+                // If the inventory is showing, hide it.
+                if(mSceneActive)
+                {
+                    Services::Get<InventoryManager>()->ShowInventory();
+                }
+                else if(Services::Get<InventoryManager>()->IsInventoryShowing())
+                {
+                    Services::Get<InventoryManager>()->HideInventory();
+                }
             }
         }
         
-        // If 'P' is pressed, this toggles game pause.
+        // If 'P' is pressed, this toggles game pause. Works even if action is ongoing.
         if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_P))
         {
             //TODO: implement pause!
@@ -100,12 +99,7 @@ void GameCamera::OnUpdate(float deltaTime)
         // Pressing escape acts as a "skip" or "cancel" action, depending on current state of the game.
         if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
         {
-            // If ego is walking, this can skip the walk.
-            GKActor* ego = GEngine::Instance()->GetScene()->GetEgo();
-            if(ego != nullptr && ego->IsWalking())
-            {
-                ego->SkipWalk();
-            }
+            GEngine::Instance()->GetScene()->SkipCurrentAction();
         }
     }
 }

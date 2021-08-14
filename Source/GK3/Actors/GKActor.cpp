@@ -1,8 +1,3 @@
-//
-// GKActor.cpp
-//
-// Clark Kromenaker
-//
 #include "GKActor.h"
 
 #include "Animator.h"

@@ -1,8 +1,3 @@
-//
-// Scene.cpp
-//
-// Clark Kromenaker
-//
 #include "Scene.h"
 
 #include <iostream>
@@ -536,30 +531,20 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 	Services::Get<ActionManager>()->ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
 }
 
-float Scene::GetFloorY(const Vector3& position) const
+void Scene::SkipCurrentAction()
 {
-	// Calculate ray origin using passed position, but really high in the air!
-	Vector3 rayOrigin = position;
-	rayOrigin.y = 10000.0f;
-	
-	// Create ray with origin high in the sky and pointing straight down.
-	Ray downRay(rayOrigin, -Vector3::UnitY);
-	
-	// Raycast straight down and test against the floor BSP.
-	// If we hit something, just use the Y hit position as the floor's Y.
-	BSP* bsp = mSceneData->GetBSP();
-	if(bsp != nullptr)
-	{
-		RaycastHit hitInfo;
-		if(bsp->RaycastSingle(downRay, mSceneData->GetFloorModelName(), hitInfo))
-		{
-			return downRay.GetPoint(hitInfo.t).y;
-		}
-	}
-	
-	// If didn't hit floor, just return 0.
-	// TODO: Maybe we should return a default based on the floor BSP's height?
-	return 0.0f;
+    // If an action is playing, this should skip the action.
+    if(Services::Get<ActionManager>()->IsActionPlaying())
+    {
+        Services::Get<ActionManager>()->SkipCurrentAction();
+        return;
+    }
+
+    // If no action, but ego is walking, this can skip the walk.
+    if(mEgo != nullptr && mEgo->IsWalking())
+    {
+        mEgo->SkipWalk();
+    }
 }
 
 GKProp* Scene::GetSceneObjectByModelName(const std::string& modelName) const
@@ -619,6 +604,32 @@ const ScenePosition* Scene::GetPosition(const std::string& positionName) const
 		Services::GetReports()->Log("Error", "Error: '" + positionName + "' is not a valid position. Call DumpPositions() to see valid positions.");
 	}
 	return position;
+}
+
+float Scene::GetFloorY(const Vector3& position) const
+{
+    // Calculate ray origin using passed position, but really high in the air!
+    Vector3 rayOrigin = position;
+    rayOrigin.y = 10000.0f;
+
+    // Create ray with origin high in the sky and pointing straight down.
+    Ray downRay(rayOrigin, -Vector3::UnitY);
+
+    // Raycast straight down and test against the floor BSP.
+    // If we hit something, just use the Y hit position as the floor's Y.
+    BSP* bsp = mSceneData->GetBSP();
+    if(bsp != nullptr)
+    {
+        RaycastHit hitInfo;
+        if(bsp->RaycastSingle(downRay, mSceneData->GetFloorModelName(), hitInfo))
+        {
+            return downRay.GetPoint(hitInfo.t).y;
+        }
+    }
+
+    // If didn't hit floor, just return 0.
+    // TODO: Maybe we should return a default based on the floor BSP's height?
+    return 0.0f;
 }
 
 void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* texture)

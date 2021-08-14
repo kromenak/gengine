@@ -1,8 +1,3 @@
-//
-// GEngine.cpp
-//
-// Clark Kromenaker
-//
 #include "GEngine.h"
 
 #include <SDL2/SDL.h>
@@ -220,6 +215,11 @@ void GEngine::Quit()
     mRunning = false;
 }
 
+void GEngine::ForceUpdate()
+{
+    Update(0.033333333f);
+}
+
 void GEngine::UseDefaultCursor()
 {
 	if(mDefaultCursor != nullptr)
@@ -398,24 +398,14 @@ void GEngine::Update()
     {
         deltaTime *= 0.25f;
     }
-    
-    // Update all actors.
-    for(size_t i = 0; i < mActors.size(); i++)
-    {
-        mActors[i]->Update(deltaTime);
-    }
-	
-	// Delete any destroyed actors.
-	DeleteDestroyedActors();
-    
+
+    Update(deltaTime);
+
     // Also update audio system (before or after actors?)
     mAudioManager.Update(deltaTime);
     
     // Update video playback.
     mVideoPlayer.Update();
-
-    // Update timers.
-    Timers::Update(deltaTime);
     
     // TODO: Move to CursorManager or something.
 	// If a sheep is running, show "wait" cursor.
@@ -440,6 +430,21 @@ void GEngine::Update()
 
 	// Update debug visualizations.
 	Debug::Update(deltaTime);
+}
+
+void GEngine::Update(float deltaTime)
+{
+    // Update all actors.
+    for(size_t i = 0; i < mActors.size(); i++)
+    {
+        mActors[i]->Update(deltaTime);
+    }
+
+    // Delete any destroyed actors.
+    DeleteDestroyedActors();
+
+    // Update timers.
+    Timers::Update(deltaTime);
 }
 
 void GEngine::GenerateOutputs()

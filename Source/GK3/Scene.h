@@ -55,15 +55,12 @@ public:
 	
     bool InitEgoPosition(const std::string& positionName);
 	void SetCameraPosition(const std::string& cameraName);
-    
     void SetCameraPositionForConversation(const std::string& conversationName, bool isInitial);
 	
 	SceneCastResult Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore = nullptr) const;
-	
     void Interact(const Ray& ray, GKObject* interactHint = nullptr);
-	
-	float GetFloorY(const Vector3& position) const;
-	
+    void SkipCurrentAction();
+
 	const std::string& GetEgoName() const { return mEgoName; }
 	GKActor* GetEgo() const { return mEgo; }
 	
@@ -72,6 +69,7 @@ public:
 	GKActor* GetActorByNoun(const std::string& noun) const;
 	
 	const ScenePosition* GetPosition(const std::string& positionName) const;
+    float GetFloorY(const Vector3& position) const;
 	
 	void ApplyTextureToSceneModel(const std::string& modelName, Texture* texture);
 	void SetSceneModelVisibility(const std::string& modelName, bool visible);

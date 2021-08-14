@@ -44,7 +44,10 @@ public:
 	void ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback = nullptr);
 	bool IsActionPlaying() const { return mCurrentAction != nullptr; }
-	
+
+    void SkipCurrentAction();
+    bool IsSkippingCurrentAction() const { return mSkipInProgress; }
+
 	// Action Query
 	const Action* GetAction(const std::string& noun, const std::string& verb) const;
 	std::vector<const Action*> GetActions(const std::string& noun, VerbType verbType) const;
@@ -123,6 +126,9 @@ private:
 
     // A callback to execute when the current action finishes executing.
     std::function<void(const Action*)> mCurrentActionFinishCallback = nullptr;
+
+    // Are we skipping the current action? Mainly tracked to avoid recursive skips.
+    bool mSkipInProgress = false;
 	
 	// An identifier for an executing action.
 	// We just increment this value each time an action executes to uniquly identify each action.

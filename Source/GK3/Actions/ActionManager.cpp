@@ -1,8 +1,3 @@
-//
-// ActionManager.cpp
-//
-// Clark Kromenaker
-//
 #include "ActionManager.h"
 
 #include <cassert>
@@ -197,6 +192,24 @@ void ActionManager::ExecuteSheepAction(const std::string& sheepName, const std::
     Services::GetSheep()->Execute(sheepName, functionName, std::bind(&ActionManager::OnActionExecuteFinished, this));
 }
 
+void ActionManager::SkipCurrentAction()
+{
+    // Avoid recursive calls.
+    if(mSkipInProgress) { return; }
+    mSkipInProgress = true;
+
+    // The idea here is that the game's execution should immediately "skip" to the end of the current action.
+    // The most "global" and unintrusive way I can think to do that is...just run update in a loop until the action is done!
+    // So, the game is essentially running in fast-forward, in the background, and not rendering anything until the action has resolved.
+    std::cout << "Attempt skip current action..." << std::endl;
+    while(IsActionPlaying())
+    {
+        GEngine::Instance()->ForceUpdate();
+    }
+    std::cout << "Done skip current action!" << std::endl;
+    mSkipInProgress = false;
+}
+
 const Action* ActionManager::GetAction(const std::string& noun, const std::string& verb) const
 {
 	// For any noun/verb pair, there is only ONE possible action that can be performed at any given time.
@@ -384,7 +397,6 @@ std::string& ActionManager::GetVerb(int verbEnum)
 	return mVerbs[Math::Clamp(verbEnum, 0, (int)mVerbs.size() - 1)];
 }
 
-// Temp, for debugging.
 void OutputActions(const std::vector<const Action*>& actions)
 {
 	for(auto& action : actions)

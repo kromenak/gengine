@@ -36,12 +36,14 @@ public:
     void Run();
     
     void Quit();
-    
+
+    void ForceUpdate();
+
     void AddActor(Actor* actor);
     
 	void LoadScene(std::string name) { mSceneToLoad = name; }
     Scene* GetScene() { return mScene; }
-	
+    
 	void UseDefaultCursor();
 	void UseHighlightCursor();
 	void UseWaitCursor();
@@ -89,6 +91,7 @@ private:
     
     void ProcessInput();
     void Update();
+    void Update(float deltaTime);
     void GenerateOutputs();
 	
 	void LoadSceneInternal();
