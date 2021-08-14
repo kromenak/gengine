@@ -154,6 +154,8 @@ void ModelVisibilityAnimNode::Play(AnimationState* animState)
 
 void SoundAnimNode::Play(AnimationState* animState)
 {
+    if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
+
     // This will hold playing sound instance.
     PlayingSoundHandle soundInstance;
     
@@ -201,6 +203,8 @@ void SoundAnimNode::Play(AnimationState* animState)
 
 void FootstepAnimNode::Play(AnimationState* animState)
 {
+    if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
+
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
@@ -223,6 +227,8 @@ void FootstepAnimNode::Play(AnimationState* animState)
 
 void FootscuffAnimNode::Play(AnimationState* animState)
 {
+    if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
+
     //TODO: Almost identical to Footstep node, so maybe they can be combined somehow.
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
