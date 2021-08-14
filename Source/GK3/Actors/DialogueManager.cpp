@@ -243,7 +243,11 @@ void DialogueManager::PlayNextDialogueLine()
 		TriggerDialogueCue();
 		return;
 	}
-	GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yak, nullptr);
+
+    AnimParams yakAnimParams;
+    yakAnimParams.animation = yak;
+    yakAnimParams.isYak = true;
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(yakAnimParams);
 }
 
 void DialogueManager::CheckConversationAnimFinishCallback()

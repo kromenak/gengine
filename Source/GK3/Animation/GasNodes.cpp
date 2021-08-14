@@ -261,7 +261,11 @@ bool WhenNearGasNode::CheckCondition(GasPlayer* player)
 float DialogueGasNode::Execute(GasPlayer* player)
 {
     // Just play the thing! Use callback method for signaling when done.
-    GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yakAnimation, std::bind(&GasPlayer::NextNode, player));
+    AnimParams params;
+    params.animation = yakAnimation;
+    params.finishCallback = std::bind(&GasPlayer::NextNode, player);
+    params.isYak = true;
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(params);
     return -1.0f;
 }
 

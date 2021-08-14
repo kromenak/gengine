@@ -21,7 +21,7 @@
 void VertexAnimNode::Play(AnimationState* animState)
 {
 	// Make sure anim state and anim are valid - we need those.
-	if(animState == nullptr || animState->animation == nullptr) { return; }
+	if(animState == nullptr || animState->params.animation == nullptr) { return; }
 	
 	// Make sure we have a vertex anim to play...
 	if(vertexAnimation != nullptr)
@@ -32,7 +32,7 @@ void VertexAnimNode::Play(AnimationState* animState)
 		{
             VertexAnimParams params;
             params.vertexAnimation = vertexAnimation;
-            params.framesPerSecond = animState->animation->GetFramesPerSecond();
+            params.framesPerSecond = animState->params.animation->GetFramesPerSecond();
             
             // This logic is a bit tricky/complicated, but it is needed to support starting anims at different times.
             // Usually, we start at t=0, but if executing frame 0, but we are on frame 20, we need to "catch up" by setting starting time for frame 20.
@@ -56,11 +56,11 @@ void VertexAnimNode::Play(AnimationState* animState)
 
             // Move anims allow the actor associated with the model to stay in its final position when the animation ends, instead of reverting.
             // Absolute anims are always "move anims".
-            params.allowMove = animState->allowMove || absolute;
+            params.allowMove = animState->params.allowMove || absolute;
 
             // Keep track of whether this is an autoscript anim.
             // This is mainly b/c autoscript anims are lower priority than other anims.
-            params.fromAutoScript = animState->fromGas;
+            params.fromAutoScript = animState->params.fromAutoScript;
             
             // Start the anim.
             obj->StartAnimation(params);
@@ -173,7 +173,7 @@ void SoundAnimNode::Play(AnimationState* animState)
             }
         }
         
-        if(animState->isYak)
+        if(animState->params.isYak)
         {
             soundInstance = Services::GetAudio()->PlayVO3D(audio, playPosition, minDistance, maxDistance);
         }
@@ -184,7 +184,7 @@ void SoundAnimNode::Play(AnimationState* animState)
     }
     else
     {
-        if(animState->isYak)
+        if(animState->params.isYak)
         {
             soundInstance = Services::GetAudio()->PlayVO(audio);
         }

@@ -1,8 +1,3 @@
-//
-// SheepAPI.cpp
-//
-// Clark Kromenaker
-//
 #include "SheepAPI.h"
 
 #include <functional> // for std::hash
@@ -1094,7 +1089,10 @@ shpvoid LoopAnimation(std::string animationName)
 	Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
 	if(animation != nullptr)
 	{
-		GEngine::Instance()->GetScene()->GetAnimator()->Loop(animation);
+        AnimParams params;
+        params.animation = animation;
+        params.loop = true;
+		GEngine::Instance()->GetScene()->GetAnimator()->Start(params);
 	}
 	return 0;
 }
@@ -1146,7 +1144,12 @@ shpvoid StartVoiceOver(string dialogueName, int numLines)
 	Animation* yak = Services::GetAssets()->LoadYak(yakName);
 	
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yak, currentThread->AddWait());
+
+    AnimParams params;
+    params.animation = yak;
+    params.finishCallback = currentThread->AddWait();
+    params.isYak = true;
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(params);
     return 0;
 }
 RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
@@ -1155,7 +1158,12 @@ shpvoid StartYak(string yakAnimationName)
 {
 	Animation* yak = Services::GetAssets()->LoadYak(yakAnimationName);
 	SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    GEngine::Instance()->GetScene()->GetAnimator()->StartYak(yak, currentThread->AddWait());
+
+    AnimParams params;
+    params.animation = yak;
+    params.finishCallback = currentThread->AddWait();
+    params.isYak = true;
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(params);
     return 0;
 }
 RegFunc1(StartYak, void, string, WAITABLE, DEV_FUNC);
