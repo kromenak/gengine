@@ -10,6 +10,7 @@
 #include "Plane.h"
 
 class Matrix4;
+class Vector3;
 
 class Frustum
 {
@@ -18,6 +19,7 @@ public:
     Frustum(const Matrix4& matrix);
 
     bool ContainsPoint(const Vector3& point) const;
+    //Vector3 GetClosestPoint(const Vector3& point) const;
 
     // The frustum just consists of 6 planes forming the bounding area.
     // Plane normals are facing inwards.

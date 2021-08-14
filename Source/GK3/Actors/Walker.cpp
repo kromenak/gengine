@@ -1,8 +1,3 @@
-//
-// Walker.cpp
-//
-// Clark Kromenaker
-//
 #include "Walker.h"
 
 #include "Actor.h"
@@ -74,22 +69,55 @@ void Walker::WalkTo(const Vector3& position, const Heading& heading, std::functi
 
         // Ok, we have a path (in mPath) that we can follow.
         // One interesting bit we do is to shorten the path if a lot of nodes are off-screen.
-        // So if 90% of the path is behind the camera, Gabe can just skip to the node right before the camera and walk from there!
+        // So if 90% of the path is behind the camera, the walker can just skip to the node right before the camera and walk from there!
         size_t originalPathSize = mPath.size();
         Vector3 lastPoppedPathPos;
-        Frustum frustum = Services::GetRenderer()->GetCamera()->GetWorldSpaceViewFrustum();
+        Camera* camera = Services::GetRenderer()->GetCamera();
+        Frustum frustum = camera->GetWorldSpaceViewFrustum();
         while(mPath.size() > 1)
         {
-            // If path pos is off-screen, remove it from the path.
+            // Most basic check: skip path node if not within the frustum.
+            bool skipPathNode = false;
             if(!frustum.ContainsPoint(mPath.back()))
+            {
+                skipPathNode = true;
+            }
+
+            // If we think we want to skip this path node (because its outside view frustum), consider some edge cases.
+            // First, the path node is at floor level, but walkers can be rather tall.
+            // See if the walker's head will be visible in the frustum, despite the path pos being outside it.
+            if(skipPathNode)
+            {
+                Vector3 headPosAtNode = mPath.back() + Vector3::UnitY * mCharConfig->walkerHeight;
+                if(frustum.ContainsPoint(headPosAtNode))
+                {
+                    skipPathNode = false;
+                }
+            }
+
+            // If the path node is fairly close to the camera position, don't skip it.
+            // This helps to ensure that the walker doesn't "pop in" when coming in from behind the camera.
+            if(skipPathNode)
+            {
+                const float kDontSkipNodeDist = 75.0f;
+                float distSq = (mPath.back() - camera->GetOwner()->GetPosition()).GetLengthSq();
+                if(distSq < kDontSkipNodeDist * kDontSkipNodeDist)
+                {
+                    skipPathNode = false;
+                }
+            }
+
+            // Ok, all cases checked!
+            // If path node is skipped, get rid of it.
+            if(skipPathNode)
             {
                 lastPoppedPathPos = mPath.back();
                 mPath.pop_back();
             }
             else
             {
-                // This path pos WAS on-screen, stop shortening path!
-                // But push the last popped position back onto the path (so that Gabe starts walking _just_ off-screen.
+                // This path node WAS NOT skipped, stop shortening path!
+                // But push the last popped position back onto the path (so that walker starts walking _just_ off-screen).
                 if(mPath.size() < originalPathSize)
                 {
                     mPath.push_back(lastPoppedPathPos);
