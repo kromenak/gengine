@@ -651,25 +651,27 @@ void ActionManager::OnActionExecuteFinished()
 {
 	// This function should only be called if an action is playing.
 	assert(mCurrentAction != nullptr);
-	
-	// When a "talk" action ends, try to show the topic bar.
-	if(StringUtil::EqualsIgnoreCase(mCurrentAction->verb, "talk"))
-	{
-		ShowTopicBar(mCurrentAction->noun);
-	}
-	else if(Services::Get<VerbManager>()->IsTopic(mCurrentAction->verb))
-	{
-		ShowTopicBar(mCurrentAction->noun);
-	}
 
-	// Clear current action.
-	mLastAction = mCurrentAction;
-	mCurrentAction = nullptr;
+    // Clear current action.
+    // Do this BEFORE callback and topic bar checks, as those may want to start an action themselves.
+    mLastAction = mCurrentAction;
+    mCurrentAction = nullptr;
 
     // Execute finish callback if specified.
     if(mCurrentActionFinishCallback != nullptr)
     {
-        mCurrentActionFinishCallback(mLastAction);
+        auto callback = mCurrentActionFinishCallback;
         mCurrentActionFinishCallback = nullptr;
+        callback(mLastAction);
     }
+	
+	// When a "talk" action ends, try to show the topic bar.
+	if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "talk"))
+	{
+		ShowTopicBar(mLastAction->noun);
+	}
+	else if(Services::Get<VerbManager>()->IsTopic(mLastAction->verb))
+	{
+		ShowTopicBar(mLastAction->noun);
+	}
 }

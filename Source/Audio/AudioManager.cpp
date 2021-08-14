@@ -337,7 +337,7 @@ AudioSaveState AudioManager::SaveAudioState(bool includeAmbient)
     // Create state object.
     AudioSaveState state;
     
-    // Iterate playing sounds to seach each piece of audio (maybe).
+    // Iterate playing sounds to save each piece of audio (maybe).
     for(int i = mPlayingSounds.size() - 1; i >= 0; --i)
     {
         // If sound is ambient, but we don't want to include ambient in save state, ignore this sound!
