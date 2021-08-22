@@ -1073,6 +1073,10 @@ RegFunc1(StartMoveAnimation, void, string, WAITABLE, REL_FUNC);
 
 shpvoid StartMom(std::string momAnimationName)
 {
+    // Mom animation assets have a language prefix (e.g. "E" for English).
+    // So, let's add that here.
+    momAnimationName = "E" + momAnimationName;
+
     Animation* animation = Services::GetAssets()->LoadMomAnimation(momAnimationName);
     if(animation != nullptr)
     {
