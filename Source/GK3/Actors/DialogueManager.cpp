@@ -1,8 +1,3 @@
-//
-// DialogueManager.cpp
-//
-// Clark Kromenaker
-//
 #include "DialogueManager.h"
 
 #include <cctype>
@@ -23,20 +18,22 @@ void DialogueManager::StartDialogue(const std::string& licensePlate, int numLine
 	if(licensePlate.empty()) { return; }
 	//TODO: Can we assume/expect a certain length for license plates?
 	
-	// Determine the sequence number of the license plate.
-	// The last character is always the sequence number, but it can be 1-9 or A-Z.
+	// The last character is always the sequence number, but it can be 0-9 or A-Z.
+    // Convert it to a normal integer.
 	char sequenceChar = licensePlate.back();
-	if(std::isdigit(sequenceChar)) // Number 1-9
+	if(std::isdigit(sequenceChar)) // Number 0-9
 	{
 		mDialogueSequenceNumber = sequenceChar - '0';
 	}
 	else // Alpha character A-Z
 	{
-		mDialogueSequenceNumber = sequenceChar - 'A';
+        mDialogueSequenceNumber = (sequenceChar - 'A');
+        mDialogueSequenceNumber += 10;
 	}
 	
 	// Save the license plate, but chop off the sequence number.
-	mDialogueLicensePlate = licensePlate.substr(0, licensePlate.size() - 1);
+    mDialogueLicensePlate = licensePlate;
+    mDialogueLicensePlate.pop_back();
 	
 	// Save remaining lines and finish callback.
 	mRemainingDialogueLines = numLines;
@@ -225,7 +222,7 @@ void DialogueManager::PlayNextDialogueLine()
 	}
 	else
 	{
-		yakName += ('A' + mDialogueSequenceNumber);
+		yakName += ('A' + (mDialogueSequenceNumber - 10));
 	}
 	
 	// Increment sequence number.
