@@ -217,7 +217,7 @@ void GEngine::Quit()
 
 void GEngine::ForceUpdate()
 {
-    Update(0.033333333f);
+    Update(10.0f);
 }
 
 void GEngine::UseDefaultCursor()

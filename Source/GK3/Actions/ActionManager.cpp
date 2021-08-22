@@ -202,11 +202,13 @@ void ActionManager::SkipCurrentAction()
     // The most "global" and unintrusive way I can think to do that is...just run update in a loop until the action is done!
     // So, the game is essentially running in fast-forward, in the background, and not rendering anything until the action has resolved.
     std::cout << "Attempt skip current action..." << std::endl;
+    int skipCount = 0;
     while(IsActionPlaying())
     {
         GEngine::Instance()->ForceUpdate();
+        ++skipCount;
     }
-    std::cout << "Done skip current action!" << std::endl;
+    std::cout << "Skipped " << skipCount << " times" << std::endl;
     mSkipInProgress = false;
 }
 
