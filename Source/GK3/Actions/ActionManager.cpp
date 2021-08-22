@@ -537,28 +537,40 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 	}
 	
 	// Check global case conditions.
-	if(StringUtil::EqualsIgnoreCase(action->caseLabel, "all"))
+	if(StringUtil::EqualsIgnoreCase(action->caseLabel, "ALL"))
 	{
-		// all: same as "no condition" - condition is always met!
+        // For topics, "ALL" seems to have a strange meaning...it should be the "last thing" said about a topic.
+        // So, get total things that can be said about this topic, and if we are one away from that, this condition is met.
+        if(verbType == VerbType::Topic)
+        {
+            int count = 0;
+            for(auto& nvc : mActionSets)
+            {
+                count += nvc->GetActionsCount(action->noun, action->verb);
+            }
+            return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == (count - 1);
+        }
+
+		// For non-topics, functions as you'd expect: "ALL" condition is always met!
 		return true;
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "gabe_all"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "GABE_ALL"))
 	{
-		// gabe_all: condition is met if Ego is Gabriel.
+		// Condition is met if Ego is Gabriel.
 		Scene* scene = GEngine::Instance()->GetScene();
 		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
-		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "gabriel");
+		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "Gabriel");
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "grace_all"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "GRACE_ALL"))
 	{
-		// grace_all: condition is met if Ego is Grace.
+		// Condition is met if Ego is Grace.
 		Scene* scene = GEngine::Instance()->GetScene();
 		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
-		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "grace");
+		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "Grace");
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "1st_time"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "1ST_TIME"))
 	{
-		// 1st_time: condition is met if this is the first time we've executed this action (noun/verb combo).
+		// Condition is met if this is the first time we've executed this action (noun/verb combo).
 		if(verbType == VerbType::Topic)
 		{
 			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 0;
@@ -568,9 +580,10 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 0;
 		}
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "2cd_time"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "2CD_TIME"))
 	{
-		// 2cd_time: a surprising way to abbreviate "2nd time"...condition is met if this is the 2nd time we did the action.
+		// A surprising way to abbreviate "2nd time"...
+        // Condition is met if this is the 2nd time we did the action.
 		if(verbType == VerbType::Topic)
 		{
 			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 1;
@@ -580,9 +593,9 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 1;
 		}
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "3rd_time"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "3RD_TIME"))
 	{
-		// 3rd_time: and again for good measure.
+		// And again for good measure. True if this is the 3rd time we did the action.
 		if(verbType == VerbType::Topic)
 		{
 			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 2;
@@ -592,9 +605,9 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 2;
 		}
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "otr_time"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "OTR_TIME"))
 	{
-		// otr_time: condition is met if this IS NOT the first time we've executed this action (noun/verb combo).
+		// Condition is met if this IS NOT the first time we've executed this action (noun/verb combo).
 		if(verbType == VerbType::Topic)
 		{
 			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) > 0;
@@ -604,19 +617,19 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) > 0;
 		}
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "dialogue_topics_left"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "DIALOGUE_TOPICS_LEFT"))
 	{
-		// dialogue_topics_left: condition is met if there are any "topic" type actions available for this noun.
+		// Ccondition is met if there are any "topic" type actions available for this noun.
 		return HasTopicsLeft(action->noun);
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "not_dialogue_topics_left"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "NOT_DIALOGUE_TOPICS_LEFT"))
 	{
-		// not_dialogue_topics_left: condition is met if there are no more "topic" type actions available for this noun.
+		// Condition is met if there are no more "topic" type actions available for this noun.
 		return !HasTopicsLeft(action->noun);
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "time_block_override"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "TIME_BLOCK_OVERRIDE"))
 	{
-		// time_block_override: not 100% sure...only appears in timeblock-specific NVC files.
+		// Not 100% sure...only appears in timeblock-specific NVC files.
 		// Possibilities:
 		//   1) Evaluates true if this is the first scene of the timeblock.
 		//	 2) Evaluates true if NVC's timeblock equals the current timeblock.
@@ -629,7 +642,7 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 		std::cout << "Using TIME_BLOCK_OVERRIDE global condition!" << std::endl;
 		return true;
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "time_block"))
+	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "TIME_BLOCK"))
 	{
 		//TODO
 	}
@@ -668,7 +681,7 @@ void ActionManager::OnActionExecuteFinished()
     }
 	
 	// When a "talk" action ends, try to show the topic bar.
-	if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "talk"))
+	if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "TALK"))
 	{
 		ShowTopicBar(mLastAction->noun);
 	}

@@ -45,6 +45,21 @@ std::vector<const Action*> NVC::GetActions(const std::string& noun, const std::s
 	return actions;
 }
 
+int NVC::GetActionsCount(const std::string& noun, const std::string& verb) const
+{
+    // Similar logic to GetActions above, just doesn't create/return a list.
+    int count = 0;
+    const std::vector<Action>& actionsForNoun = GetActions(noun);
+    for(auto& action : actionsForNoun)
+    {
+        if(StringUtil::EqualsIgnoreCase(action.verb, verb))
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
 const Action* NVC::GetAction(const std::string& noun, const std::string& verb) const
 {
 	const std::vector<Action>& actionsForNoun = GetActions(noun);

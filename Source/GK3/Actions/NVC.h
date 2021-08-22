@@ -68,6 +68,7 @@ public:
 	const std::vector<Action*> GetActions() const { return mActions; }
 	const std::vector<Action>& GetActions(const std::string& noun) const;
 	std::vector<const Action*> GetActions(const std::string& noun, const std::string& verb) const;
+    int GetActionsCount(const std::string& noun, const std::string& verb) const;
 	const Action* GetAction(const std::string& noun, const std::string& verb) const;
 	
 	const std::unordered_map<std::string, SheepScript*>& GetCases() const { return mCaseLogic; }
