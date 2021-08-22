@@ -269,7 +269,7 @@ void StopSoundtrackAnimNode::Play(AnimationState* animState)
 
 void CameraAnimNode::Play(AnimationState* animState)
 {
-	std::cout << "MOVE CAMERA TO " << cameraPositionName << std::endl;
+    GEngine::Instance()->GetScene()->SetCameraPosition(cameraPositionName);
 }
 
 void FaceTexAnimNode::Play(AnimationState* animState)
