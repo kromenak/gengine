@@ -135,7 +135,7 @@ void Animator::OnUpdate(float deltaTime)
 
             // Break out of loop if the animation has ended.
             // In extreme cases, the timer could be large enough to cover frames that don't exist - just ignore that!
-            if(animState.currentFrame >= animState.params.animation->GetFrameCount() - 1)
+            if(animState.currentFrame >= animState.params.animation->GetFrameCount())
             {
                 break;
             }
