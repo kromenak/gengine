@@ -249,8 +249,11 @@ void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosit
 
 void Walker::SkipToEnd()
 {
-    // Not walking? Don't need to skip.
-    if(!IsWalking()) { return; }
+    // If not walking, or at the end of the walk, nothing to skip.
+    if(!IsWalking() || mWalkActions.back().op == WalkOp::FollowPathEnd || mWalkActions.back().op == WalkOp::TurnToFace)
+    {
+        return;
+    }
 
     // Warp actor to end of path.
     if(!mPath.empty())
@@ -261,6 +264,9 @@ void Walker::SkipToEnd()
             mGKOwner->SetHeading(Heading::FromDirection(Vector3::Normalize(mPath.front() - mPath[1])));
         }
     }
+
+    // Move actor back by "at position" amount, so end walk anim puts us in right spot.
+    mGKOwner->SetPosition(mGKOwner->GetPosition() - (mGKOwner->GetForward() * kAtNodeDist));
 
     // Still play "end of walk" bit.
     bool poppedAction = false;
@@ -391,7 +397,7 @@ void Walker::NextAction()
     {
         if(mWalkActions.back().op == WalkOp::FollowPathStart)
         {
-            std::cout << "Follow Path Start" << std::endl;
+            //std::cout << "Follow Path Start" << std::endl;
             
             AnimParams animParams;
             animParams.animation = mCharConfig->walkStartAnim;
@@ -401,7 +407,7 @@ void Walker::NextAction()
         }
         else if(mWalkActions.back().op == WalkOp::FollowPathStartTurnLeft)
         {
-            std::cout << "Follow Path Start (Turn Left)" << std::endl;
+            //std::cout << "Follow Path Start (Turn Left)" << std::endl;
             
             AnimParams animParams;
             animParams.animation = mCharConfig->walkStartTurnLeftAnim;
@@ -411,7 +417,7 @@ void Walker::NextAction()
         }
         else if(mWalkActions.back().op == WalkOp::FollowPathStartTurnRight)
         {
-            std::cout << "Follow Path Start (Turn Right)" << std::endl;
+            //std::cout << "Follow Path Start (Turn Right)" << std::endl;
             
             AnimParams animParams;
             animParams.animation = mCharConfig->walkStartTurnRightAnim;
@@ -421,7 +427,7 @@ void Walker::NextAction()
         }
         else if(mWalkActions.back().op == WalkOp::FollowPath)
         {
-            std::cout << "Follow Path" << std::endl;
+            //std::cout << "Follow Path" << std::endl;
             
             AnimParams animParams;
             animParams.animation = mCharConfig->walkLoopAnim;
@@ -437,7 +443,7 @@ void Walker::NextAction()
         }
         else if(mWalkActions.back().op == WalkOp::FollowPathEnd)
         {
-            std::cout << "Follow Path End" << std::endl;
+            //std::cout << "Follow Path End" << std::endl;
             GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkStartAnim);
             GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkLoopAnim);
             
@@ -449,13 +455,13 @@ void Walker::NextAction()
         }
         else if(mWalkActions.back().op == WalkOp::TurnToFace)
         {
-            std::cout << "Turn To Face" << std::endl;
+            //std::cout << "Turn To Face" << std::endl;
             // Handled in Update
         }
     }
     else
     {
-        std::cout << "Walk Sequence Done!" << std::endl;
+        //std::cout << "Walk Sequence Done!" << std::endl;
         
         // No actions left in sequence => walk is finished.
         OnWalkToFinished();
@@ -605,7 +611,7 @@ bool Walker::AdvancePath()
     }
     
     // Return whether path is completed.
-    return mPath.size() == 0;
+    return mPath.empty();
 }
 
 bool Walker::TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir, bool aboutOwnerPos)

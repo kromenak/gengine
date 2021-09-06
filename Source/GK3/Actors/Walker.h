@@ -50,7 +50,8 @@ protected:
 	
 private:
     // When this close to a position/heading, we say you are "at" the position/heading.
-	const float kAtNodeDistSq = 150.0f;
+    const float kAtNodeDist = 12.25f;
+	const float kAtNodeDistSq = kAtNodeDist * kAtNodeDist;
 	const float kAtHeadingRadians = Math::ToRadians(4.0f);
     
     // Turn speeds. A faster speed is used for turning in place when not walking.
