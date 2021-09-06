@@ -10,8 +10,13 @@
 #pragma once
 #include <functional>
 #include <string>
+#include <vector>
+#include <utility>
 
 #include "Type.h"
+
+class GKActor;
+class GAS;
 
 class DialogueManager
 {
@@ -25,6 +30,7 @@ public:
 	
 	void SetConversation(const std::string& conversation, std::function<void()> finishCallback);
 	void EndConversation(const std::function<void()> finishCallback);
+    bool InConversation() const { return !mConversation.empty(); }
 	
 	void StartYak(const std::string& yakAnimName, std::function<void()> finishCallback);
 	
@@ -58,6 +64,10 @@ private:
 	// The current conversation. While a conversation is active, certain
 	// cameras may be used and the topic chooser appears after dialogue.
 	std::string mConversation;
+
+    // Talk/listen fidgets to revert to when ending a conversation.
+    std::vector<std::pair<GKActor*, GAS*>> mSavedTalkFidgets;
+    std::vector<std::pair<GKActor*, GAS*>> mSavedListenFidgets;
 
     // When starting/ending a conversation, we may need to wait on one or more enter/exit anims.
     // Use this to keep track of how many anims are still outstanding.

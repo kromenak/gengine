@@ -48,6 +48,9 @@ public:
     void SetIdleFidget(GAS* fidget);
     void SetTalkFidget(GAS* fidget);
     void SetListenFidget(GAS* fidget);
+    GAS* GetIdleFidget() { return mIdleFidget; }
+    GAS* GetTalkFidget() { return mTalkFidget; }
+    GAS* GetListenFidget() { return mListenFidget; }
 	
 	void TurnTo(const Heading& heading, std::function<void()> finishCallback);
     

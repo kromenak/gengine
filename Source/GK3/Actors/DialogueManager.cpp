@@ -115,6 +115,10 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
     // If so, set that camera angle.
     GEngine::Instance()->GetScene()->SetCameraPositionForConversation(conversation, true);
 
+    // Clear any previously saved fidgets.
+    mSavedTalkFidgets.clear();
+    mSavedListenFidgets.clear();
+
     // Apply settings for this conversation.
     // Some actors may use different talk/listen GAS for particular conversations.
     // And some actors may need to play enter anims when starting a conversation.
@@ -130,6 +134,7 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
             {
                 if(settings->talkGas != nullptr)
                 {
+                    mSavedTalkFidgets.emplace_back(actor, actor->GetTalkFidget());
                     actor->SetTalkFidget(settings->talkGas);
 
                     //TODO: Conversations often set both Talk & Idle fidgets. Looking at Gabe, it appears he starts playing his talk fidget automatically.
@@ -138,6 +143,7 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
                 }
                 if(settings->listenGas != nullptr)
                 {
+                    mSavedListenFidgets.emplace_back(actor, actor->GetListenFidget());
                     actor->SetListenFidget(settings->listenGas);
                 }
             }
@@ -177,13 +183,23 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
     // If so, set that camera angle.
     GEngine::Instance()->GetScene()->SetCameraPositionForConversation(mConversation, false);
 
+    // Revert any fidgets that were set when entering the conversation.
+    for(auto& pair : mSavedTalkFidgets)
+    {
+        pair.first->SetTalkFidget(pair.second);
+    }
+    for(auto& pair : mSavedListenFidgets)
+    {
+        pair.first->SetListenFidget(pair.second);
+    }
+    mSavedTalkFidgets.clear();
+    mSavedListenFidgets.clear();
+
     // Play any exit anims for actors in this conversation.
     mConversationAnimWaitCount = 0;
     std::vector<const SceneConversation*> conversationSettings = GEngine::Instance()->GetScene()->GetSceneData()->GetConversationSettings(mConversation);
     for(auto& settings : conversationSettings)
     {
-        //TODO: Do we need to revert any GAS changes from starting the conversation? Or are these naturally resolved in later conversations?
-
         // Play exit anim.
         if(settings->exitAnim != nullptr)
         {
