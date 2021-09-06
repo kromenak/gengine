@@ -3,7 +3,7 @@
 #include <cassert>
 
 #include "ActionBar.h"
-#include "VerbManager.h"
+#include "DialogueManager.h"
 #include "GameProgress.h"
 #include "GKActor.h"
 #include "IniParser.h"
@@ -11,6 +11,7 @@
 #include "Services.h"
 #include "StringUtil.h"
 #include "Timeblock.h"
+#include "VerbManager.h"
 
 TYPE_DEF_BASE(ActionManager);
 
@@ -689,4 +690,8 @@ void ActionManager::OnActionExecuteFinished()
 	{
 		ShowTopicBar(mLastAction->noun);
 	}
+    else if(Services::Get<DialogueManager>()->InConversation()) // *seems* necessary to end conversations started during cutscenes (ex: Gabe/Mosely scene in Dining Room)
+    {
+        ShowTopicBar(mLastAction->noun);
+    }
 }
