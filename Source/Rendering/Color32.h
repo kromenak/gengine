@@ -13,6 +13,7 @@ class Color32
 public:
 	static Color32 Black; 	// (0, 0, 0, 255)
 	static Color32 White; 	// (255, 255, 255, 255)
+    static Color32 Gray;    // (127, 127, 127, 255)
 	
 	static Color32 Red;	  	// (255, 0, 0, 255)
 	static Color32 Green; 	// (0, 255, 0, 255)
@@ -59,8 +60,11 @@ public:
 	Color32& operator-=(const Color32& other);
 	
 	// Multiplication
-	//Color32 operator*(const Color32& other) const;
-	//Color32& operator*=(const Color32& other);
+	Color32 operator*(const Color32& other) const;
+	Color32& operator*=(const Color32& other);
+
+    // Lerp
+    static Color32 Lerp(const Color32& from, const Color32& to, float t);
 	
 private:
 	// Color components, valued 0-255 each.
