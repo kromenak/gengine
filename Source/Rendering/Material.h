@@ -33,10 +33,12 @@ public:
     Shader* GetShader() const { return mShader; }
     
     void SetColor(const std::string& name, const Color32& color);
-    //GetColor
+    const Color32* GetColor(const std::string& name) const;
     
     void SetTexture(const std::string& name, Texture* texture);
     Texture* GetTexture(const std::string& name) const;
+
+    void SetVector4(const std::string& name, const Vector4& vector);
     
     // Helpers for setting/getting frequently accessed shader uniforms.
     void SetColor(const Color32& color) { SetColor("uColor", color); }
@@ -53,9 +55,12 @@ private:
 	
     // Shader to use.
     Shader* mShader = nullptr;
-    
+
+    // Material properties/attributes. Maps a uniform variable name to a value.
+    // These will be passed to the vertex/fragment shaders during rendering.
     std::unordered_map<std::string, Color32> mColors;
     std::unordered_map<std::string, Texture*> mTextures;
+    std::unordered_map<std::string, Vector4> mVectors;
     
     //TODO: Opaque vs. transparent? Render queue value?
 };

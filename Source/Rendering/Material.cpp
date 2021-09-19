@@ -45,6 +45,8 @@ void Material::Activate(const Matrix4& objectToWorldMatrix)
     
 	// Set built-in transform matrices.
     mShader->SetUniformMatrix4("gObjectToWorldMatrix", objectToWorldMatrix);
+    mShader->SetUniformMatrix4("gWorldToObjectMatrix", Matrix4::Inverse(objectToWorldMatrix));
+
     mShader->SetUniformMatrix4("gViewMatrix", sCurrentViewMatrix);
     mShader->SetUniformMatrix4("gProjMatrix", sCurrentProjMatrix);
 	mShader->SetUniformMatrix4("gWorldToProjMatrix", sCurrentProjMatrix * sCurrentViewMatrix);
@@ -69,6 +71,12 @@ void Material::Activate(const Matrix4& objectToWorldMatrix)
             ++textureUnit;
         }
     }
+
+    // Set user-defined vector values.
+    for(auto& entry : mVectors)
+    {
+        mShader->SetUniformVector4(entry.first.c_str(), entry.second);
+    }
     
 	//TODO: May need to "deactivate" texture units if no texture is defined in material, but a texture sampler exists in the shader.
 }
@@ -76,6 +84,16 @@ void Material::Activate(const Matrix4& objectToWorldMatrix)
 void Material::SetColor(const std::string& name, const Color32& color)
 {
     mColors[name] = color;
+}
+
+const Color32* Material::GetColor(const std::string& name) const
+{
+    auto it = mColors.find(name);
+    if(it != mColors.end())
+    {
+        return &it->second;
+    }
+    return nullptr;
 }
 
 void Material::SetTexture(const std::string& name, Texture* texture)
@@ -91,6 +109,11 @@ Texture* Material::GetTexture(const std::string& name) const
         return it->second;
     }
     return nullptr;
+}
+
+void Material::SetVector4(const std::string& name, const Vector4& vector)
+{
+    mVectors[name] = vector;
 }
 
 bool Material::IsTranslucent()

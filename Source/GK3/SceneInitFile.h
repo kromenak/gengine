@@ -28,6 +28,8 @@ class WalkerBoundary;
 
 struct GeneralBlock
 {
+    // A condition that must be true for this block to be active.
+    // Condition usually relates to current timeblock or some game progress flags.
 	std::string conditionText;
 	SheepScript* condition = nullptr;
 	
@@ -42,8 +44,9 @@ struct GeneralBlock
 	bool cameraBoundsDynamic = false;
 	
 	Vector3 globalLightPosition;
+    //globalLightColor?
 	Vector3 globalLightAmbient;
-	
+    
 	std::string skyboxLeftTextureName;
 	std::string skyboxRightTextureName;
 	std::string skyboxBackTextureName;

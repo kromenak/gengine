@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "SceneInitFile.h"
+#include "SceneAsset.h"
 #include "Timeblock.h"
 
 struct Action;
@@ -26,7 +27,6 @@ class BSP;
 class BSPLightmap;
 class GKActor;
 class NVC;
-class SceneAsset;
 class Skybox;
 class Soundtrack;
 class WalkerBoundary;
@@ -41,12 +41,16 @@ public:
 	void ResolveSceneData();
 	
 	// SCENE SETTINGS
+    const Timeblock& GetTimeblock() const { return mTimeblock; }
 	BSP* GetBSP() const { return mBSP; }
 	Skybox* GetSkybox() const { return mSkybox; }
 	WalkerBoundary* GetWalkerBoundary() const { return mWalkerBoundary; }
 	const std::string& GetFloorModelName() const { return mGeneralSettings.floorModelName; }
 	const std::string& GetCameraBoundsModelName() const { return mGeneralSettings.cameraBoundsModelName; }
-	
+
+    const Vector3& GetGlobalLightPosition() const { return mGeneralSettings.globalLightPosition; }
+    const std::vector<SceneLight>& GetLights() const { return mSceneAsset->GetLights(); }
+
 	// ACTORS/MODELS
 	const std::vector<const SceneActor*>& GetActors() const { return mActors; }
 	const std::vector<const SceneModel*>& GetModels() const { return mModels; }
