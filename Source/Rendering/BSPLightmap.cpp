@@ -1,8 +1,3 @@
-//
-// BSPLightmap.cpp
-//
-// Clark Kromenaker
-//
 #include "BSPLightmap.h"
 
 #include "BinaryReader.h"
@@ -35,7 +30,7 @@ BSPLightmap::BSPLightmap(std::string name, char* data, int dataLength) :
         texture->SetWrapMode(Texture::WrapMode::Clamp);
         mLightmapTextures.push_back(texture);
     }
-    
+
     /*
     // Write out for debugging...
     for(int i = 0; i < mLightmapTextures.size(); i++)

@@ -337,7 +337,7 @@ void Model::ParseFromData(char *data, int dataLength)
                  and treat the normal as a vector to achieve the desired transformation
                  without expensive inverse calculations.
                 */
-                normal = meshToLocalMatrix.TransformVector(normal);
+                normal = meshToLocalMatrix.TransformNormal(normal);
                 
                 vertexNormals[k * 3] = normal.x;
                 vertexNormals[k * 3 + 1] = normal.y;

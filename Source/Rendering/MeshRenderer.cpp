@@ -1,8 +1,3 @@
-//
-// MeshRenderer.cpp
-//
-// Clark Kromenaker
-//
 #include "MeshRenderer.h"
 
 #include "Actor.h"
@@ -28,13 +23,14 @@ void MeshRenderer::Render(bool opaque, bool translucent)
 {
     // Don't render if actor is inactive or component is disabled.
     if(!IsActiveAndEnabled()) { return; }
-    
+   
     // Each submesh can have its own material defined. So, keep track of material index as each is rendered.
     // If there are more submeshes than materials, then the last material is reused.
     int materialIndex = 0;
     int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
     
     // Iterate meshes and render each in turn.
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
     for(int i = 0; i < mMeshes.size(); i++)
     {
@@ -63,19 +59,26 @@ void MeshRenderer::Render(bool opaque, bool translucent)
                 {
                     Debug::DrawAxes(meshToWorldMatrix);
                 }
-                
+
                 /*
                 // Uncomment to visualize normals.
                 int vcount = submeshes[j]->GetVertexCount();
                 for(int k = 0; k < vcount; ++k)
                 {
+                    Matrix4 worldToMeshMatrix = Matrix4::Inverse(meshToWorldMatrix);
+                    Vector3 lightPos = worldToMeshMatrix.TransformPoint(GEngine::Instance()->GetScene()->GetSceneData()->GetGlobalLightPosition());
+                    Vector3 lightDir = Vector3::Normalize(lightPos - submeshes[j]->GetVertexPosition(k));
+                    float dot = Vector3::Dot(submeshes[j]->GetVertexNormal(k), lightDir);
+                    Color32 color(static_cast<int>(dot * 255), 0, 0);
+
                     Vector3 pos = submeshes[j]->GetVertexPosition(k);
                     pos = meshToWorldMatrix.TransformPoint(pos);
-                    
+
                     Vector3 normal = submeshes[j]->GetVertexNormal(k);
                     normal = meshToWorldMatrix.TransformNormal(normal);
-    
-                    Debug::DrawLine(pos, pos + normal, Color32::Yellow);
+
+                    Debug::DrawLine(pos, pos + normal, color);
+                    //Debug::DrawLine(pos, pos + lightDir, Color32::Yellow);
                 }
                 */
             }
@@ -84,6 +87,7 @@ void MeshRenderer::Render(bool opaque, bool translucent)
             materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
         }
     }
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 void MeshRenderer::SetModel(Model* model)

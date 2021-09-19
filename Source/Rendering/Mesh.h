@@ -46,6 +46,7 @@ public:
 	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
 	
 private:
+    // A mesh is really just a container for one or more submeshes.
 	std::vector<Submesh*> mSubmeshes;
 	
     // Transforms from "mesh space" to "local space".

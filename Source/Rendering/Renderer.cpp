@@ -357,9 +357,12 @@ void Renderer::Render()
     // OPAQUE DEBUG RENDERING
     // Switch back to opaque rendering for debug rendering.
     // Debug rendering happens after all else, so any previous function can ask for debug draws successfully.
-    // Also, don't bother with depth write or depth test so debug lines aren't obfuscated!
-    glDisable(GL_BLEND); // do not perform alpha blending
-    
+    glDisable(GL_BLEND); // do opaque rendering
+
+    // If depth test is enabled, debug visualizations will be obscured by geometry.
+    // This is sometimes helpful, sometimes not...so toggle it on/off as needed.
+    glEnable(GL_DEPTH_TEST);
+
     // Gotta reset view/proj again...
     Material::SetViewMatrix(viewMatrix);
     Material::SetProjMatrix(projectionMatrix);
