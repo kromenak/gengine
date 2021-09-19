@@ -174,39 +174,10 @@ void Scene::Load()
 		GKActor* actor = new GKActor(actorDef->model);
 		mActors.push_back(actor);
 		mObjects.push_back(actor);
-		
-		// Set noun (GABRIEL, GRACE, etc).
-		actor->SetNoun(actorDef->noun);
-        
-		// Set actor's initial position and rotation.
-		if(!actorDef->positionName.empty())
-		{
-			const ScenePosition* scenePos = mSceneData->GetScenePosition(actorDef->positionName);
-			if(scenePos != nullptr)
-			{
-				actor->SetPosition(scenePos->position);
-				actor->SetHeading(scenePos->heading);
-			}
-			else
-			{
-				std::cout << "Invalid position for actor: " << actorDef->positionName << std::endl;
-			}
-		}
-		
-		// Save actor's GAS references.
-		actor->SetIdleFidget(actorDef->idleGas);
-		actor->SetTalkFidget(actorDef->talkGas);
-		actor->SetListenFidget(actorDef->listenGas);
-		
-		// Start in idle state.
-		actor->StartFidget(GKActor::FidgetType::Idle);
 
-        // Tell actor to use this scene's walker boundary.
-        actor->SetWalkerBoundary(mSceneData->GetWalkerBoundary());
-
-        // Init actor.
-        actor->Init(mTimeblock);
-
+        // Init from scene & actor definitions.
+        actor->Init(*mSceneData, *actorDef);
+	    
 		//TODO: Apply init anim.
 		
 		//TODO: If hidden, hide.
@@ -320,7 +291,8 @@ void Scene::Load()
 			mAnimator->Sample(modelDef->initAnim, 0);
 		}
 	}
-    
+
+    /*
     // Create Grace Prop! (TEMP for testing)
     GKProp* prop = new GKProp();
     prop->SetNoun("GRACE");
@@ -328,6 +300,7 @@ void Scene::Load()
     prop->SetPosition(Vector3(100.0f, 0.0f, -100.0f));
     mProps.push_back(prop);
     mObjects.push_back(prop);
+    */
     
 	// Check for and run "scene enter" actions.
 	Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");

@@ -20,10 +20,10 @@ GKActor::GKActor(Model* model) : GKProp(true)
     mModelRenderer->SetModel(model);
     
     // Use lit shader.
-    std::vector<Material>& materials = mModelRenderer->GetMaterials();
-    for(Material& material : materials)
+    Shader* litShader = Services::GetAssets()->LoadShader("3D-Tex-Lit");
+    for(Material& material : mModelRenderer->GetMaterials())
     {
-        material.SetShader(Services::GetAssets()->LoadShader("3D-Tex-Lit"));
+        material.SetShader(litShader);
     }
     
 	// Get config for this character.
@@ -39,9 +39,39 @@ GKActor::GKActor(Model* model) : GKProp(true)
 	mWalker->SetCharacterConfig(config);
 }
 
-void GKActor::Init(const Timeblock& timeblock)
+void GKActor::Init(const SceneData& sceneData, const SceneActor& actorDef)
 {
-    // Figure out what clothes to apply, if any.
+    // Set noun (GABRIEL, GRACE, etc).
+    SetNoun(actorDef.noun);
+
+    // Set actor's initial position and rotation.
+    if(!actorDef.positionName.empty())
+    {
+        const ScenePosition* scenePos = sceneData.GetScenePosition(actorDef.positionName);
+        if(scenePos != nullptr)
+        {
+            SetPosition(scenePos->position);
+            SetHeading(scenePos->heading);
+        }
+        else
+        {
+            std::cout << "Invalid position for actor: " << actorDef.positionName << std::endl;
+        }
+    }
+
+    // Save actor's GAS references.
+    SetIdleFidget(actorDef.idleGas);
+    SetTalkFidget(actorDef.talkGas);
+    SetListenFidget(actorDef.listenGas);
+
+    // Start in idle state.
+    StartFidget(GKActor::FidgetType::Idle);
+
+    // Tell actor to use this scene's walker boundary.
+    SetWalkerBoundary(sceneData.GetWalkerBoundary());
+
+    // Figure out what clothes anim to apply, if any.
+    const Timeblock& timeblock = sceneData.GetTimeblock();
     Animation* clothesAnim = nullptr;
     for(int i = 0; i < CharacterConfig::kMaxClothesAnims; ++i)
     {
@@ -70,11 +100,17 @@ void GKActor::Init(const Timeblock& timeblock)
             }
         }
     }
-
-    // Apply the clothes!
     if(clothesAnim != nullptr)
     {
         GEngine::Instance()->GetScene()->GetAnimator()->Start(clothesAnim);
+    }
+
+    // Apply lighting settings from scene.
+    for(Material& material : mModelRenderer->GetMaterials())
+    {
+        material.SetVector4("uLightPos", Vector4(sceneData.GetGlobalLightPosition(), 1.0f));
+        //TODO: Color?
+        //TODO: Ambient Color?
     }
 }
 
