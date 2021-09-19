@@ -1,8 +1,3 @@
-//
-// Debug.cpp
-//
-// Clark Kromenaker
-//
 #include "Debug.h"
 
 #include "AABB.h"
@@ -12,6 +7,7 @@
 #include "Plane.h"
 #include "Rect.h"
 #include "Services.h"
+#include "Sphere.h"
 #include "Triangle.h"
 #include "Vector3.h"
 
@@ -155,6 +151,33 @@ void Debug::DrawTriangle(const Triangle& triangle, const Color32& color, float d
         Debug::DrawLine(triangle.p1, triangle.p2, color, duration);
         Debug::DrawLine(triangle.p2, triangle.p0, color, duration);
     }
+}
+
+void Debug::DrawSphere(const Sphere& sphere, const Color32& color, float duration, const Matrix4* transformMatrix)
+{
+    DrawSphere(sphere.center, sphere.radius, color, duration, transformMatrix);
+}
+
+void Debug::DrawSphere(const Vector3& position, float radius, const Color32& color, float duration, const Matrix4* transformMatrix)
+{
+    Vector3 center = position;
+    if(transformMatrix != nullptr)
+    {
+        center = transformMatrix->TransformPoint(position);
+    }
+
+    // The poor man's sphere, for now: a bunch of lines emitting from the center point.
+    Vector3 fromX = position - Vector3::UnitX * radius;
+    Vector3 toX = position + Vector3::UnitX * radius;
+    Debug::DrawLine(fromX, toX, color, duration);
+
+    Vector3 fromY = position - Vector3::UnitY * radius;
+    Vector3 toY = position + Vector3::UnitY * radius;
+    Debug::DrawLine(fromY, toY, color, duration);
+
+    Vector3 fromZ = position - Vector3::UnitZ * radius;
+    Vector3 toZ = position + Vector3::UnitZ * radius;
+    Debug::DrawLine(fromZ, toZ, color, duration);
 }
 
 void Debug::Update(float deltaTime)

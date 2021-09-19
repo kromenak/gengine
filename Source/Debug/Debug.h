@@ -16,6 +16,7 @@ class Mesh;
 class Plane;
 class Rect;
 class Shader;
+class Sphere;
 class Triangle;
 class Vector3;
 
@@ -46,6 +47,9 @@ public:
     static void DrawPlane(const Plane& plane, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
     
     static void DrawTriangle(const Triangle& triangle, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
+
+    static void DrawSphere(const Sphere& sphere, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
+    static void DrawSphere(const Vector3& position, float radius, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
 	
 	static void Update(float deltaTime);
 	
