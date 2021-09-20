@@ -434,6 +434,13 @@ void GEngine::Update()
 
 void GEngine::Update(float deltaTime)
 {
+    // Update the scene (kind of temp - just for convenience).
+    // (or maybe actors should belong to a scene??? hmmmm)
+    if(mScene != nullptr)
+    {
+        mScene->Update(deltaTime);
+    }
+
     // Update all actors.
     for(size_t i = 0; i < mActors.size(); i++)
     {

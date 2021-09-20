@@ -1,8 +1,3 @@
-//
-// BSP.cpp
-//
-// Clark Kromenaker
-//
 #include "BSP.h"
 
 #include <bitset>
@@ -344,11 +339,56 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
 
 void BSP::ApplyLightmap(const BSPLightmap& lightmap)
 {
+    // Apply lightmap textures to each surface.
     const std::vector<Texture*>& lightmapTextures = lightmap.GetLightmapTextures();
     for(int i = 0; i < mSurfaces.size(); ++i)
     {
         mSurfaces[i].lightmapTexture = lightmapTextures[i];
     }
+
+    // Update light colors now that lightmap textures are populated.
+    for(auto& light : mLights)
+    {
+        if(mSurfaces[light.surfaceIndex].lightmapTexture != nullptr)
+        {
+            int width = mSurfaces[light.surfaceIndex].lightmapTexture->GetWidth();
+            int height = mSurfaces[light.surfaceIndex].lightmapTexture->GetHeight();
+            light.color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor32(width / 2, height / 2);
+        }
+    }
+}
+
+void BSP::DebugDrawAmbientLights(const Vector3& position)
+{
+    // Visualized what BSP ambient lights affect an object at a given position.
+    for(auto& light : mLights)
+    {
+        float distSq = (position - light.position).GetLengthSq();
+        if(distSq <= light.radius * light.radius)
+        {
+            Debug::DrawSphere(light.position, light.radius, light.color);
+        }
+    }
+}
+
+Color32 BSP::CalculateAmbientLightColor(const Vector3& position)
+{
+    //TODO: Unclear if this logic is right - may need more work.
+    // Start with a pitch black ambient (or would some other value make sense?).
+    Color32 color = Color32::Black;
+
+    // For each ambient light, see if the position lands inside the light's "sphere of influence."
+    for(auto& light : mLights)
+    {
+        float distSq = (position - light.position).GetLengthSq();
+        float radiusSq = light.radius * light.radius;
+        if(distSq <= radiusSq)
+        {
+            // If so, this ambient color contributes to the result, based on how close to center of sphere we are.
+            color += Color32::Lerp(light.color, Color32::Black, distSq / radiusSq);
+        }
+    }
+    return color;
 }
 
 // For debugging BSP issues, helpful to track polygons rendered and tree depth.
@@ -678,26 +718,32 @@ void BSP::ParseFromData(char *data, int dataLength)
     
     // Next up are spheres centers with radiis for each node. Not sure what these are for.
     reader.Skip(nodeCount * 16); // 4 floats per node, each float is 4 bytes
-    
-    // Next are per-surface vertex indices and triangle datas.
-    // I'm not 100% sure why this data exists - but it doesn't seem necessary to render the BSP.
-    // Since this is the last thing in the file, we can just ignore it - don't even need to skip.
-    /*
-    for(int i = 0; i < surfaceCount; i++)
+
+    for(int i = 0; i < surfaceCount; ++i)
     {
-        // Some stuff that isn't super clear/we don't currently need.
-        reader.Skip(28);
-        
+        Vector3 position = reader.ReadVector3();
+        float radius = reader.ReadFloat();
+        reader.Skip(12);
+
+        if(radius > 0.0f)
+        {
+            BSPAmbientLight light;
+            light.surfaceIndex = i;
+            light.position = position;
+            light.radius = radius;
+            light.color = Color32::Black;
+            mLights.push_back(light);
+        }
+
         // Number of indices and triangles for this surface.
         int indexCount = reader.ReadUInt();
         int triangleCount = reader.ReadUInt();
-        
-        // Next, a certain number of index values.
+
+        // Next, a certain number of vertex & triangle indexes...for what?
         for(int j = 0; j < indexCount; j++)
         {
             unsigned short vertexIndex = reader.ReadUShort();
         }
-        
         for(int j = 0; j < triangleCount; j++)
         {
             unsigned short p0Index = reader.ReadUShort();
@@ -705,7 +751,6 @@ void BSP::ParseFromData(char *data, int dataLength)
             unsigned short p2Index = reader.ReadUShort();
         }
     }
-    */
     
     // Generate mesh definition.
     MeshDefinition meshDefinition;

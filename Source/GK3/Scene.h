@@ -52,6 +52,8 @@ public:
 	
 	void Load();
 	void Unload();
+
+    void Update(float deltaTime);
 	
     bool InitEgoPosition(const std::string& positionName);
 	void SetCameraPosition(const std::string& cameraName);

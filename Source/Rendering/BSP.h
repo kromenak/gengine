@@ -100,6 +100,19 @@ struct BSPSurface
 	
 	// If true, interactive (can be hit by raycasts).
 	bool interactive = true;
+// Represents an amount of ambient light emitted from a BSP surface.
+// As dynamic models navigate the scene, they can query the BSP to calculate an approximate "ambient color" at the current position.
+struct BSPAmbientLight
+{
+    // The surface this ambient light corresponds to.
+    int surfaceIndex = 0;
+
+    // The position/radius, which defines a "sphere of influence" for the ambient light.
+    Vector3 position;
+    float radius = 1.0f;
+
+    // The color of the ambient light in this sphere, derived/divined from lightmap data.
+    Color32 color;
 };
 
 class BSP : public Asset
@@ -121,8 +134,10 @@ public:
 	bool IsVisible(std::string objectName) const;
     
 	Vector3 GetPosition(const std::string& objectName) const;
-    
+
     void ApplyLightmap(const BSPLightmap& lightmap);
+    void DebugDrawAmbientLights(const Vector3& position);
+    Color32 CalculateAmbientLightColor(const Vector3& position);
     
     void RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirection);
     void RenderTranslucent();
@@ -165,7 +180,11 @@ private:
     
     // Material for rendering BSP.
 	Material mMaterial;
-    
+
+    // Data used for determining ambient lighting for dynamic models navigating the BSP environment.
+    // Kind of like light probes, but way simpler/jankier.
+    std::vector<BSPAmbientLight> mLights;
+
     void RenderTree(const BSPNode& node, const Vector3& cameraPosition, const Vector3& cameraDirection);
     void RenderPolygon(BSPPolygon& polygon, bool translucent);
     

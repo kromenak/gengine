@@ -317,6 +317,19 @@ void Scene::Unload()
     Services::Get<LayerManager>()->RemoveLayer(&mLayer);
 }
 
+void Scene::Update(float deltaTime)
+{
+    //TEMP: for debug visualization of BSP ambient light sources.
+    mSceneData->GetBSP()->DebugDrawAmbientLights(mEgo->GetPosition());
+    
+    // Apply lighting settings from scene.
+    Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(mEgo->GetPosition());
+    for(Material& material : mEgo->GetMeshRenderer()->GetMaterials())
+    {
+        material.SetColor("uAmbientColor", ambientColor);
+    }
+}
+
 bool Scene::InitEgoPosition(const std::string& positionName)
 {
 	if(mEgo == nullptr) { return false; }
