@@ -49,7 +49,6 @@ public:
 	const std::string& GetCameraBoundsModelName() const { return mGeneralSettings.cameraBoundsModelName; }
 
     const Vector3& GetGlobalLightPosition() const { return mGeneralSettings.globalLightPosition; }
-    const std::vector<SceneLight>& GetLights() const { return mSceneAsset->GetLights(); }
 
 	// ACTORS/MODELS
 	const std::vector<const SceneActor*>& GetActors() const { return mActors; }

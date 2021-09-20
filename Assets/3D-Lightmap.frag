@@ -8,24 +8,26 @@ out vec4 oColor;
 // Built-in uniforms
 uniform float gAlphaTest;
 
-// User-defined uniforms
+// Uniforms
 uniform sampler2D uDiffuse;
+uniform float uDiffuseVisible = 1.0f; // 1 = diffuse visible, 0 = only lightmap visible
+
 uniform sampler2D uLightmap;
+uniform float uLightmapMultiplier = 2.0f;
 
 void main()
 {
-    // Grab color texel.
+    // Grab color texel. Discard if below alpha test value.
     vec4 texel = texture(uDiffuse, fUV1);
-    
-    // Discard if below alpha test value.
 	if(texel.a < gAlphaTest) { discard; }
-    
-    // Grab lightmap texel.
+
+    // Show/hide diffuse texture. May want to show just lightmap texture for debugging.
+    texel = (uDiffuseVisible * texel) + ((1.0f - uDiffuseVisible) * vec4(1.0f, 1.0f, 1.0f, 1.0f));
+
+    // Grab lightmap texel; apply multiplier.
     vec4 lightmapTexel = texture(uLightmap, fUV2);
-    
-    // Multiply into color texel - the multiplier seems needed to get correct results.
-    texel.rgb *= (lightmapTexel.rgb * 2.0f);
-    
-    // Finally, the output color.
-    oColor = texel;
+    lightmapTexel.rgb *= uLightmapMultiplier;
+
+    // Create final output color.
+    oColor = texel * lightmapTexel;
 }
