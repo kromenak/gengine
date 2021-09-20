@@ -391,6 +391,45 @@ Color32 BSP::CalculateAmbientLightColor(const Vector3& position)
     return color;
 }
 
+void BSPSurface::Activate(const Material& material)
+{
+    // Activate texture to use for diffuse color.
+    if(texture != nullptr)
+    {
+        texture->Activate(0);
+    }
+    else
+    {
+        Texture::Deactivate();
+    }
+
+    // Activate lightmap texture and multiplier.
+    if((flags & BSPSurface::kIgnoreLightmapFlag) != 0)
+    {
+        // Some surfaces ignore lightmaps.
+        // Just use "plain white" and multiplier of 1 to effectively "do nothing" in lightmap calcs.
+        Texture::White.Activate(1);
+        material.GetShader()->SetUniformFloat("uLightmapMultiplier", 1.0f);
+    }
+    else
+    {
+        // This surface DOES use lightmaps, so activate it!
+        // GK3 also implements a feature called "2x Lighting" - basically, just double lightmap colors to make the scene look brighter!
+        if(lightmapTexture != nullptr)
+        {
+            lightmapTexture->Activate(1);
+        }
+        material.GetShader()->SetUniformFloat("uLightmapMultiplier", 2.0f);
+    }
+
+    // Lightmap scale/offsets are used in shaders to calculate proper lightmap UVs.
+    Vector4 lightmapUvScaleOffset(lightmapUvScale.x,
+                                  lightmapUvScale.y,
+                                  lightmapUvOffset.x,
+                                  lightmapUvOffset.y);
+    material.GetShader()->SetUniformVector4("uLightmapScaleOffset", lightmapUvScaleOffset);
+}
+
 // For debugging BSP issues, helpful to track polygons rendered and tree depth.
 //int renderedPolygonCount = 0;
 //int treeDepth = 0;
@@ -403,11 +442,31 @@ void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirec
     // Reset render stat values.
     //renderedPolygonCount = 0;
     //treeDepth = 0;
-    
+
+    // NORMAL BSP RENDERING
+    // Process the tree and nodes to only render what's in front of the camera.
+    // Seems like it'd be quite efficient...BUT modern graphics hardware is actually quite bad at this, due to the number of draw calls!
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    RenderTree(mNodes[mRootNodeIndex], cameraPosition, cameraDirection);
+    //RenderTree(mNodes[mRootNodeIndex], cameraPosition, cameraDirection);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    
+
+    // ALTERNATIVE BSP RENDERING
+    // Just render every surface lol.
+    // Surprisingly more efficient than "correct" BSP rendering, since it's fewer draw calls.
+    for(auto& surface : mSurfaces)
+    {
+        if(!surface.visible) { continue; }
+
+        // Activate
+        surface.Activate(mMaterial);
+
+        // Draw
+        for(auto& polygon : surface.polygons)
+        {
+            mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
+            //renderedPolygonCount++;
+        }
+    }
     //std::cout << "Rendered " << renderedPolygonCount << " polygons." << std::endl;
 }
 
@@ -491,7 +550,6 @@ void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const V
             for(int i = node.polygonIndex; i < node.polygonIndex + node.polygonCount; i++)
             {
                 RenderPolygon(mPolygons[i], false);
-                //++renderedPolygonCount;
             }
         }
         
@@ -501,7 +559,6 @@ void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const V
             for(int i = node.polygonIndex2; i < node.polygonIndex2 + node.polygonCount2; i++)
             {
                 RenderPolygon(mPolygons[i], false);
-                //++renderedPolygonCount;
             }
         }
     }
@@ -523,49 +580,25 @@ void BSP::RenderPolygon(BSPPolygon& polygon, bool translucent)
     // Not going to render non-visible surfaces.
     if(!surface.visible) { return; }
 
-    // Retrieve texture and activate it, if possible.
-    Texture* texture = surface.texture;
-    if(texture != nullptr)
+    // Activate
+    surface.Activate(mMaterial);
+
+    /*
+     // If has alpha, don't render it now, but add it to the alpha chain.
+    if(surface.texture != nullptr)
     {
-        /*
-        // If has alpha, don't render it now, but add it to the alpha chain.
         if(texture->GetRenderType() == Texture::RenderType::Translucent && translucent)
         {
             polygon.next = mAlphaPolygons;
             mAlphaPolygons = &polygon;
             return;
         }
-        */
-        texture->Activate(0);
-    }
-    else
-    {
-        Texture::Deactivate();
-    }
-
-    // Activate lightmap texture, if any.
-    Texture* lightmapTexture = surface.lightmapTexture;
-    if(lightmapTexture != nullptr)
-    {
-        lightmapTexture->Activate(1);
-    }
-    
-    // Lightmap scale/offsets are used in shaders to calculate proper lightmap UVs.
-    Vector4 lightmapUvScaleOffset(surface.lightmapUvScale.x,
-                                  surface.lightmapUvScale.y,
-                                  surface.lightmapUvOffset.x,
-                                  surface.lightmapUvOffset.y);
-    mMaterial.GetShader()->SetUniformVector4("uLightmapScaleOffset", lightmapUvScaleOffset);
-
-    /*
-    if((surface.flags & BSPSurface::kUnknownFlag7) != 0)
-    {
-        Debug::DrawLine(Vector3::Zero, mVertices[mVertexIndices[polygon.vertexIndexOffset]], Color32::Magenta);
     }
     */
 
     // Draw the polygon.
     mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
+    //++renderedPolygonCount;
 }
 
 void BSP::ParseFromData(char *data, int dataLength)
@@ -617,25 +650,9 @@ void BSP::ParseFromData(char *data, int dataLength)
         
         reader.ReadFloat(); // Unknown - I had assumed this was a scale earlier, but I'm not sure.
         
-        /*
-		 FLAGS - bitmask flags that indicate some interesting aspect about this surface.
-         1 => ???
-         2 => ???
-         4 => interactable?
-         8 => invisible?
-         16 => light source?
-         32 => ???
-         64 => ???
-         128 => ???
-         
-         (RC1, rc4_pjcar uses 76 (64+8+4))
-         (RC1, windows often use 12 (8+4))
-         (RC1, street lamps have 16 sometimes)
-         (RC1, luggage has 68 (64+4))
-         (B25, toilet paper has 2)
-         (B25/RC1 - many instances of 0/1 too)
-        */
+        // Read in flags. See header for known flags.
         surface.flags = reader.ReadUInt();
+
         /*
         if(surface.flags != 0)
         {
@@ -681,6 +698,9 @@ void BSP::ParseFromData(char *data, int dataLength)
         polygon.vertexIndexCount = reader.ReadUShort();
         polygon.surfaceIndex = reader.ReadUShort();
         mPolygons.push_back(polygon);
+
+        //HACK: For now, also store the polygon directly in the surface...for alternative rendering technique.
+        mSurfaces[polygon.surfaceIndex].polygons.push_back(polygon);
     }
     
     // Iterate and read planes.
