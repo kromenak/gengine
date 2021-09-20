@@ -362,6 +362,12 @@ void GameCamera::SceneUpdate(float deltaTime)
         {
             mLastHoveredNoun.clear();
         }
+
+        // Show options on right click.
+        if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
+        {
+            mOptionBar->Show();
+        }
     }
     
     // Clear camera lock if left mouse is not pressed.
@@ -369,12 +375,6 @@ void GameCamera::SceneUpdate(float deltaTime)
     if(!leftMousePressed)
     {
         Services::GetInput()->UnlockMouse();
-    }
-
-    // Show options on right click.
-    if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
-    {
-        mOptionBar->Show();
     }
 }
 
