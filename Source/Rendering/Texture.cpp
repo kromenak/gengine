@@ -108,7 +108,7 @@ void Texture::Activate(int textureUnit)
     }
 }
 
-void Texture::Deactivate()
+/*static*/ void Texture::Deactivate()
 {
     White.Activate(0);
 }
