@@ -5,6 +5,7 @@
 //
 // Helper for setting timers that execute a callback when finished.
 //
+#include <cstdint>
 #include <functional>
 #include <vector>
 
@@ -25,4 +26,14 @@ private:
         std::function<void()> callback = nullptr;
     };
     static std::vector<Timer> mTimers;
+};
+
+// Helper for calculating delta time.
+class DeltaTimer
+{
+public:
+    float GetDeltaTime();
+
+private:
+    uint32_t mLastTicks = 0;
 };

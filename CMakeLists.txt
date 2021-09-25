@@ -57,6 +57,7 @@ target_include_directories(gk3 PRIVATE
     Source/Sheep/Machine
     Source/UI
     Source/Util
+    Source/Util/Threads
     Source/Video
     Source/Video/Decode
     Source/Video/Playback

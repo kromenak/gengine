@@ -4,7 +4,6 @@
 
 #include "ActionManager.h"
 #include "Actor.h"
-#include "VerbManager.h"
 #include "CharacterManager.h"
 #include "ConsoleUI.h"
 #include "Debug.h"
@@ -12,6 +11,7 @@
 #include "FootstepManager.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
+#include "Loader.h"
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "Profiler.h"
@@ -19,6 +19,8 @@
 #include "Services.h"
 #include "TextInput.h"
 #include "Timers.h"
+#include "ThreadPool.h"
+#include "VerbManager.h"
 
 GEngine* GEngine::sInstance = nullptr;
 
@@ -29,7 +31,12 @@ GEngine::GEngine()
 }
 
 bool GEngine::Initialize()
-{    
+{
+    TIMER_SCOPED("GEngine::Initialize");
+
+    // Init thread pool.
+    ThreadPool::Init(4);
+
 	// Initialize reports.
 	Services::SetReports(&mReportManager);
 	
@@ -138,12 +145,14 @@ bool GEngine::Initialize()
 	// Create console UI - this persists for the entire game.
 	ConsoleUI* consoleUI = new ConsoleUI(false);
 	consoleUI->SetIsDestroyOnLoad(false);
-	
-	//TEMP: Load scene as though starting a new game.
-	//TODO: Should really show logos, show title screen, allow restore or new game choice.
-	Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-    LoadScene("LBY");
-	
+
+    Loader::DoAfterLoading([this]() {
+        //TEMP: Load scene as though starting a new game.
+        //TODO: Should really show logos, show title screen, allow restore or new game choice.
+        Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
+        LoadScene("R25");
+    });
+
 	/*
 	TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
 	TODO: Maybe move this to some exporter class or something?
@@ -163,7 +172,6 @@ bool GEngine::Initialize()
 
     //SheepScript* script = mAssetManager.LoadSheep("LBY110A");
     //script->Decompile();
-
     return true;
 }
 
@@ -180,6 +188,8 @@ void GEngine::Shutdown()
     mAudioManager.Shutdown();
     
     SDL_Quit();
+
+    ThreadPool::Shutdown();
 }
 
 void GEngine::Run()
@@ -216,7 +226,7 @@ void GEngine::ForceUpdate()
 
 void GEngine::ProcessInput()
 {
-    PROFILER_SAMPLER(ProcessInput);
+    PROFILER_SCOPED(ProcessInput);
 
     // Update the input manager.
     // Retrieve input device states for us to use.
@@ -318,42 +328,22 @@ void GEngine::ProcessInput()
 
 void GEngine::Update()
 {
-    PROFILER_SAMPLER(Update);
+    PROFILER_SCOPED(Update);
 
-    // Tracks the next "GetTicks" value that is acceptable to perform an update.
-    static unsigned int nextTicks = 0;
-    
-    // Tracks the last ticks value each time we run this loop.
-    static uint32_t lastTicks = 0;
-    
-    // Limit to ~60FPS. "nextTicks" is always +16 at start of frame.
-    // If we get here again and 16ms have not passed, we wait.
-	while(SDL_GetTicks() < nextTicks) { }
-	
-    // Get current ticks and save next ticks as +16. Limits FPS to ~60.
-    uint32_t currentTicks = SDL_GetTicks();
-    nextTicks = currentTicks + 16;
-	
-    // Calculate the time delta.
-	uint32_t deltaTicks = currentTicks - lastTicks;
-    float deltaTime = deltaTicks * 0.001f;
-	
-	// Save last ticks for next frame.
-    lastTicks = currentTicks;
-    
-    // Limit the time delta. At least 0s, and at most, 0.05s.
-	if(deltaTime < 0.0f) { deltaTime = 0.0f; }
-    if(deltaTime > 0.05f) { deltaTime = 0.05f; }
-    
+    // Calculate delta time.
+    static DeltaTimer deltaTimer;
+    float deltaTime = deltaTimer.GetDeltaTime();
+
     // For debugging: press F5 to slow down passage of time significantly.
     if(mInputManager.IsKeyPressed(SDL_SCANCODE_F5))
     {
         deltaTime *= 0.25f;
     }
 
+    // Update game logic.
     Update(deltaTime);
 
-    // Also update audio system (before or after actors?)
+    // Also update audio system (before or after game logic?)
     mAudioManager.Update(deltaTime);
     
     // Update video playback.
@@ -364,6 +354,9 @@ void GEngine::Update()
 	
 	// Update debug visualizations.
 	Debug::Update(deltaTime);
+
+    // Update thread pool.
+    ThreadUtil::RunFunctionsOnMainThread();
 }
 
 void GEngine::Update(float deltaTime)
@@ -390,7 +383,7 @@ void GEngine::Update(float deltaTime)
 
 void GEngine::GenerateOutputs()
 {
-    PROFILER_SAMPLER(GenerateOutputs);
+    PROFILER_SCOPED(GenerateOutputs);
     mRenderer.Render();
 }
 

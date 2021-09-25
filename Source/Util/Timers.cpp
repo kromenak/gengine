@@ -1,5 +1,7 @@
 #include "Timers.h"
 
+#include <SDL2/SDL.h>
+
 /*static*/ std::vector<Timers::Timer> Timers::mTimers;
 
 /*static*/ void Timers::AddTimerSeconds(float seconds, std::function<void()> finishCallback)
@@ -52,4 +54,26 @@
             }
         }
     }
+}
+
+float DeltaTimer::GetDeltaTime()
+{
+    // Limit to ~60FPS.
+    // If we get here again and 16ms have not passed, we wait.
+    while(SDL_GetTicks() < mLastTicks + 16) { }
+
+    // Calculate the time delta.
+    uint32_t currentTicks = SDL_GetTicks();
+    uint32_t deltaTicks = currentTicks - mLastTicks;
+    float deltaTime = deltaTicks * 0.001f;
+
+    // Save last ticks for next frame.
+    mLastTicks = currentTicks;
+
+    // Limit the time delta. At least 0s, and at most, 0.05s.
+    if(deltaTime < 0.0f) { deltaTime = 0.0f; }
+    if(deltaTime > 0.05f) { deltaTime = 0.05f; }
+
+    // That's it!
+    return deltaTime;
 }
