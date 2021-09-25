@@ -1,8 +1,3 @@
-//
-// VertexArray.cpp
-//
-// Clark Kromenaker
-//
 #include "VertexArray.h"
 
 #include <iostream>

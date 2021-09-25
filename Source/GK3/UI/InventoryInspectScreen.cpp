@@ -53,7 +53,7 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTran
 	mCloseupImage->SetPressCallback(std::bind(&InventoryInspectScreen::OnClicked, this));
 	
 	// Hide by default.
-	Hide();
+    SetActive(false);
 }
 
 void InventoryInspectScreen::Show(const std::string& itemName)
@@ -82,6 +82,7 @@ void InventoryInspectScreen::Show(const std::string& itemName)
 
 void InventoryInspectScreen::Hide()
 {
+    if(!IsActive()) { return; }
 	SetActive(false);
     Services::Get<LayerManager>()->PopLayer(&mLayer);
 }

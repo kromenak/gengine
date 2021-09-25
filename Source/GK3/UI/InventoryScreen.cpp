@@ -61,7 +61,7 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
 	activeHighlightRectTransform->SetPivot(0.0f, 1.0f);
 	
 	// Hide inventory UI by default.
-	Hide();
+    SetActive(false);
 }
 
 void InventoryScreen::Show(const std::string& actorName, const std::set<std::string>& inventory)

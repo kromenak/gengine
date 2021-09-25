@@ -113,9 +113,6 @@ private:
 	
     // The components that are attached to this actor.
     std::vector<Component*> mComponents;
-	
-	void AddChild(Actor* child);
-	void RemoveChild(Actor* child);
 };
 
 template<class T> T* Actor::AddComponent()

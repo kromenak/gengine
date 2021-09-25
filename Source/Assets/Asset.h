@@ -4,8 +4,7 @@
 // Clark Kromenaker
 //
 // Base class for any game asset.
-// An asset is any game content loaded from the disk
-// - textures, meshes, audio, scripts, etc.
+// An asset is any game content loaded from the disk - textures, meshes, audio, scripts, etc.
 //
 #pragma once
 #include <string>

@@ -86,7 +86,7 @@ struct BSPSurface
     
     // Flags defining surface properties.
     unsigned int flags = 0;
-    static const unsigned int kUnknownFlag1 = 1;
+    static const unsigned int kUnknownFlag1 = 1; // applied on certain walls, ceilings, and floors
     static const unsigned int kUnknownFlag2 = 2; // seems to correlate to surfaces that are hard to see or not very noticeable
     static const unsigned int kUnknownFlag3 = 4; // surfaces that emit light, hit tests
     static const unsigned int kIgnoreLightmapFlag = 8; // surfaces that emit light, shadow casters, "hide these models", hit tests

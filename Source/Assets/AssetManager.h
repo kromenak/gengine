@@ -32,7 +32,7 @@
 class AssetManager
 {
 public:
-    AssetManager();
+    AssetManager() = default;
     ~AssetManager();
 	
 	// Adds a filesystem path to search for assets and bundles at.

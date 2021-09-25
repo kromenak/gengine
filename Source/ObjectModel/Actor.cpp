@@ -1,8 +1,3 @@
-//
-// Actor.cpp
-//
-// Clark Kromenaker
-//
 #include "Actor.h"
 
 #include "Debug.h"

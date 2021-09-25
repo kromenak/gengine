@@ -1,15 +1,10 @@
-//
-//  AudioManager.cpp
-//  GEngine
-//
-//  Created by Clark Kromenaker on 8/23/17.
-//
 #include "AudioManager.h"
 
 #include <iostream>
 
 #include "Audio.h"
 #include "GMath.h"
+#include "Profiler.h"
 #include "Vector3.h"
 
 PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel) :
@@ -68,6 +63,8 @@ bool PlayingSoundHandle::IsPlaying() const
 
 bool AudioManager::Initialize()
 {
+    TIMER_SCOPED("AudioManager::Initialize");
+
 	// Create the FMOD system.
     FMOD_RESULT result = FMOD::System_Create(&mSystem);
     if(result != FMOD_OK)

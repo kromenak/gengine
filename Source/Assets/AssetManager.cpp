@@ -1,9 +1,3 @@
-//
-//  AssetManager.cpp
-//  GEngine
-//
-//  Created by Clark Kromenaker on 8/17/17.
-//
 #include "AssetManager.h"
 
 #include <cstring>
@@ -16,11 +10,6 @@
 #include "imstream.h"
 #include "Services.h"
 #include "StringUtil.h"
-
-AssetManager::AssetManager()
-{
-    
-}
 
 AssetManager::~AssetManager()
 {
@@ -96,8 +85,7 @@ bool AssetManager::LoadBarn(const std::string& barnName)
 {
     // We want our dictionary key to be all uppercase.
     // Avoids confusion with case-sensitive key searches.
-    std::string dictKey = barnName;
-    StringUtil::ToUpper(dictKey);
+    std::string dictKey = StringUtil::ToUpperCopy(barnName);
     
     // If the barn is already in the map, then we don't need to load it again.
     if(mLoadedBarns.find(dictKey) != mLoadedBarns.end()) { return true; }
@@ -403,8 +391,7 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 template<class T>
 T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T* (std::string&, char*, unsigned int)> createFunc)
 {
-    std::string upperName = assetName;
-    StringUtil::ToUpper(upperName);
+    std::string upperName = StringUtil::ToUpperCopy(assetName);
     
     // See if this asset is already loaded in the cache
     // If so, we can just return it right away.
@@ -430,7 +417,6 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	
 	// Generate asset from the BARN bytes.
     T* asset = createFunc != nullptr ? createFunc(upperName, buffer, bufferSize) : new T(upperName, buffer, bufferSize);
-	//T* asset = new T(upperName, buffer, bufferSize);
 	
 	// Delete the buffer after use (or it'll leak).
 	delete[] buffer;

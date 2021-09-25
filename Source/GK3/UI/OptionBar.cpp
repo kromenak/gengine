@@ -1,8 +1,3 @@
-//
-// OptionBar.cpp
-//
-// Clark Kromenaker
-//
 #include "OptionBar.h"
 
 #include "InventoryManager.h"

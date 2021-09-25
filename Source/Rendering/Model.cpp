@@ -1,12 +1,8 @@
-//
-// Model.cpp
-//
-// Clark Kromenaker
-// 
 #include "Model.h"
 
 #include <fstream>
 #include <iostream>
+#include <bitset>
 
 #include "BinaryReader.h"
 #include "Mesh.h"
@@ -18,6 +14,11 @@
 #include "Debug.h"
 
 //#define DEBUG_OUTPUT
+#if defined(DEBUG_OUTPUT)
+#define DEBUG_MODEL_OUTPUT
+#define DEBUG_MESH_OUTPUT
+#define DEBUG_SUBMESH_OUTPUT
+#endif
 
 Model::Model(std::string name, char* data, int dataLength) : Asset(name)
 {
@@ -133,7 +134,7 @@ void Model::WriteToObjFile(std::string filePath)
 
 void Model::ParseFromData(char *data, int dataLength)
 {
-    #ifdef DEBUG_OUTPUT
+    #ifdef DEBUG_MODEL_OUTPUT
     std::cout << "MOD " << mName << std::endl;
     #endif
     BinaryReader reader(data, dataLength);
@@ -151,7 +152,7 @@ void Model::ParseFromData(char *data, int dataLength)
     
     // 4 bytes: Number of meshes in this model.
     unsigned int numMeshes = reader.ReadUInt();
-    #ifdef DEBUG_OUTPUT
+    #ifdef DEBUG_MODEL_OUTPUT
     std::cout << "  Mesh Count: " << numMeshes << std::endl;
     #endif
     
@@ -172,12 +173,27 @@ void Model::ParseFromData(char *data, int dataLength)
 	{
 		// A value of "2" indicates that this model should render as a billboard.
 		unsigned int flags = reader.ReadUInt();
+        //std::cout << std::bitset<32>(flags) << std::endl;
 		if((flags & 2) != 0)
 		{
 			//std::cout << "  Billboard Model!" << std::endl;
 			mBillboard = true;
 		}
-		
+
+        /*
+        flags = reader.ReadUInt();
+        std::cout << std::bitset<32>(flags) << std::endl;
+
+        flags = reader.ReadUInt();
+        std::cout << std::bitset<32>(flags) << std::endl;
+
+        flags = reader.ReadUInt();
+        std::cout << std::bitset<32>(flags) << std::endl;
+
+        flags = reader.ReadUInt();
+        std::cout << std::bitset<32>(flags) << std::endl;
+        */
+
 		// Unknown
 		reader.Skip(16);
 		
@@ -188,7 +204,7 @@ void Model::ParseFromData(char *data, int dataLength)
     // Now, we iterate over each mesh in the file.
     for(int i = 0; i < numMeshes; i++)
     {
-        #ifdef DEBUG_OUTPUT
+        #ifdef DEBUG_MESH_OUTPUT
         std::cout << "  Mesh " << i << std::endl;
         #endif
         
@@ -210,7 +226,7 @@ void Model::ParseFromData(char *data, int dataLength)
         // 12 bytes: an (X, Y, Z) position of the axes in local space.
         // Ex: if a human model has arms, legs, etc - this positions them all correctly relative to one another.
         Vector3 meshPos = reader.ReadVector3();
-        #ifdef DEBUG_OUTPUT
+        #ifdef DEBUG_MESH_OUTPUT
         std::cout << "    Mesh Position: " << meshPos << std::endl;
         #endif
         
@@ -218,7 +234,7 @@ void Model::ParseFromData(char *data, int dataLength)
         // This mesh allows us to go from "mesh space" to "local space" (i.e. local space of an Actor).
         Matrix4 meshToLocalMatrix;
         meshToLocalMatrix.SetColumns(Vector4(iBasis), Vector4(jBasis), Vector4(kBasis), Vector4(meshPos, 1.0f));
-        #ifdef DEBUG_OUTPUT
+        #ifdef DEBUG_MESH_OUTPUT
         //std::cout << "    Matrix: " << meshToLocalMatrix << std::endl;
         #endif
         
@@ -234,9 +250,9 @@ void Model::ParseFromData(char *data, int dataLength)
         Vector3 min = reader.ReadVector3();
         Vector3 max = reader.ReadVector3();
         mesh->SetAABB(AABB(min, max));
-        #ifdef DEBUG_OUTPUT
-        std::cout << "    Min: " << min << std::endl;
-        std::cout << "    Max: " << max << std::endl;
+        #ifdef DEBUG_MESH_OUTPUT
+        //std::cout << "    Min: " << min << std::endl;
+        //std::cout << "    Max: " << max << std::endl;
         #endif
         
         // We are going to use this matrix to transform some normals in a bit.
@@ -246,7 +262,7 @@ void Model::ParseFromData(char *data, int dataLength)
         // Now, iterate over each submesh in this mesh.
         for(int j = 0; j < numSubMeshes; j++)
         {
-            #ifdef DEBUG_OUTPUT
+            #ifdef DEBUG_SUBMESH_OUTPUT
             std::cout << "    Submesh " << j << std::endl;
             #endif
             
@@ -261,7 +277,7 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // 32 bytes: the name of the texture for this submesh.
             std::string textureName = reader.ReadString(32);
-            #ifdef DEBUG_OUTPUT
+            #ifdef DEBUG_SUBMESH_OUTPUT
             std::cout << "      Texture name: " << textureName << std::endl;
             #endif
             
@@ -275,7 +291,7 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // 4 bytes: Vertex count for this submesh.
             int vertexCount = reader.ReadUInt();
-            #ifdef DEBUG_OUTPUT
+            #ifdef DEBUG_SUBMESH_OUTPUT
             std::cout << "      Vertex count: " << vertexCount << std::endl;
             #endif
             
@@ -287,39 +303,35 @@ void Model::ParseFromData(char *data, int dataLength)
             // 4 bytes: Face count, for drawing indexed mesh. Each face has 3 vertices (triangles).
             int faceCount = reader.ReadUInt();
             unsigned short* vertexIndexes = new unsigned short[faceCount * 3];
-            #ifdef DEBUG_OUTPUT
+            #ifdef DEBUG_SUBMESH_OUTPUT
             std::cout << "      Face count: " << faceCount << std::endl;
             #endif
             
             // 4 bytes: Number of LODK blocks in this submesh. Often 0.
             // My guess: this is for level-of-detail variants for the submesh?
             unsigned int lodkCount = reader.ReadUInt();
-            #ifdef DEBUG_OUTPUT
+            #ifdef DEBUG_SUBMESH_OUTPUT
             std::cout << "      LODK count: " << lodkCount << std::endl;
             #endif
             
-            // 4 bytes: unknown - always zero thus far.
+            // 4 bytes: unknown - usually zero, sometimes one (see R25 closet doors for example).
             reader.ReadUInt();
             
             // Next we have vertex positions.
-            #ifdef DEBUG_OUTPUT
-            //std::cout << "      Vertex positions: " << std::endl;
-            #endif
             for(int k = 0; k < vertexCount; k++)
             {
                 Vector3 vertex = reader.ReadVector3();
                 vertexPositions[k * 3] = vertex.x;
                 vertexPositions[k * 3 + 1] = vertex.y;
                 vertexPositions[k * 3 + 2] = vertex.z;
-                
-                #ifdef DEBUG_OUTPUT
-                //std::cout << vertex;
-                #endif
             }
-            #ifdef DEBUG_OUTPUT
-            //std::cout << std::endl;
-            #endif
-            
+
+            // So here's an incredible HACK!
+            // Lighting on humanoid character models looks correct if normals are transformed.
+            // But it looks wrong on props? So, need some way to distinguish between the two.
+            // PROBABLY there's a better way, but this works...for now.
+            bool isActor = GetNameNoExtension().size() == 3;
+
             // Then we have vertex normals.
             for(int k = 0; k < vertexCount; k++)
             {
@@ -337,7 +349,10 @@ void Model::ParseFromData(char *data, int dataLength)
                  and treat the normal as a vector to achieve the desired transformation
                  without expensive inverse calculations.
                 */
-                normal = meshToLocalMatrix.TransformNormal(normal);
+                if(isActor)
+                {
+                    normal = meshToLocalMatrix.TransformVector(normal);
+                }
                 
                 vertexNormals[k * 3] = normal.x;
                 vertexNormals[k * 3 + 1] = normal.y;
