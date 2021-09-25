@@ -353,7 +353,24 @@ void BSP::ApplyLightmap(const BSPLightmap& lightmap)
         {
             int width = mSurfaces[light.surfaceIndex].lightmapTexture->GetWidth();
             int height = mSurfaces[light.surfaceIndex].lightmapTexture->GetHeight();
-            light.color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor32(width / 2, height / 2);
+
+            // Use a single center point to calculate the color?
+            //light.color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor32(width / 2, height / 2);
+
+            // Or sum and average all pixels in the lightmap?
+            Vector3 sums;
+            for(int i = 0; i < width; ++i)
+            {
+                for(int j = 0; j < height; ++j)
+                {
+                    Color32 color = mSurfaces[light.surfaceIndex].lightmapTexture->GetPixelColor32(i, j);
+                    sums.x += color.GetR();
+                    sums.y += color.GetG();
+                    sums.z += color.GetB();
+                }
+            }
+            sums /= width * height;
+            light.color = Color32(static_cast<int>(sums.x), static_cast<int>(sums.y), static_cast<int>(sums.z));
         }
     }
 }
@@ -364,7 +381,8 @@ void BSP::DebugDrawAmbientLights(const Vector3& position)
     for(auto& light : mLights)
     {
         float distSq = (position - light.position).GetLengthSq();
-        if(distSq <= light.radius * light.radius)
+        float radiusSq = light.radius * light.radius;
+        if(distSq <= radiusSq)
         {
             Debug::DrawSphere(light.position, light.radius, light.color);
         }
@@ -374,10 +392,8 @@ void BSP::DebugDrawAmbientLights(const Vector3& position)
 Color32 BSP::CalculateAmbientLightColor(const Vector3& position)
 {
     //TODO: Unclear if this logic is right - may need more work.
-    // Start with a pitch black ambient (or would some other value make sense?).
-    Color32 color = Color32::Black;
-
     // For each ambient light, see if the position lands inside the light's "sphere of influence."
+    Color32 color = Color32::Black;
     for(auto& light : mLights)
     {
         float distSq = (position - light.position).GetLengthSq();
@@ -389,6 +405,29 @@ Color32 BSP::CalculateAmbientLightColor(const Vector3& position)
         }
     }
     return color;
+
+    /*
+    Vector3 sum;
+    int count = 0;
+    for(auto& light : mLights)
+    {
+        float distSq = (position - light.position).GetLengthSq();
+        float radiusSq = light.radius * light.radius;
+        if(distSq <= radiusSq)
+        {
+            // If so, this ambient color contributes to the result, based on how close to center of sphere we are.
+            Color32 color = Color32::Lerp(light.color, Color32::Black, distSq / radiusSq);
+            sum.x += color.GetR() * color.GetR();
+            sum.y += color.GetG() * color.GetG();
+            sum.z += color.GetB() * color.GetB();
+            count++;
+        }
+    }
+    
+    return Color32(static_cast<int>(Math::Sqrt(sum.x / count)),
+                   static_cast<int>(Math::Sqrt(sum.y / count)),
+                   static_cast<int>(Math::Sqrt(sum.z / count)));
+    */
 }
 
 void BSPSurface::Activate(const Material& material)
@@ -456,7 +495,7 @@ void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirec
     for(auto& surface : mSurfaces)
     {
         if(!surface.visible) { continue; }
-
+        
         // Activate
         surface.Activate(mMaterial);
 
@@ -652,7 +691,6 @@ void BSP::ParseFromData(char *data, int dataLength)
         
         // Read in flags. See header for known flags.
         surface.flags = reader.ReadUInt();
-
         /*
         if(surface.flags != 0)
         {
@@ -745,7 +783,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         float radius = reader.ReadFloat();
         reader.Skip(12);
 
-        if(radius > 0.0f)
+        if(radius > 0.0f)// && (mSurfaces[i].flags & 1) != 0)
         {
             BSPAmbientLight light;
             light.surfaceIndex = i;
