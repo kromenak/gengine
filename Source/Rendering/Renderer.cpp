@@ -107,6 +107,8 @@ Mesh* uiQuad = nullptr;
 
 bool Renderer::Initialize()
 {
+    TIMER_SCOPED("Renderer::Initialize");
+
     // Init video subsystem.
     if(SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
     {
@@ -297,6 +299,8 @@ void Renderer::Render()
         // OPAQUE BSP RENDERING
         // All opaque world rendering uses alpha test.
         Material::UseAlphaTest(true);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT); //TODO: Why does this need to be FRONT? Is that the way BSP/model data is authored, or is my winding order wrong?
         
         // Set the view & projection matrices for normal 3D camera-oriented rendering.
         Material::SetViewMatrix(viewMatrix);
@@ -305,10 +309,7 @@ void Renderer::Render()
         // Render opaque BSP. This should occur front-to-back, which has no overdraw.
         if(mBSP != nullptr)
         {
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT); //TODO: Why does this need to be FRONT? Is that the way BSP data is authored, or is my winding order wrong?
             mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition(), mCamera->GetOwner()->GetForward());
-            glDisable(GL_CULL_FACE);
         }
         PROFILER_END_SAMPLE();
 
@@ -324,6 +325,7 @@ void Renderer::Render()
         
         // Turn off alpha test.
         Material::UseAlphaTest(false);
+        glDisable(GL_CULL_FACE);
         PROFILER_END_SAMPLE();
         
         // TRANSLUCENT WORLD RENDERING
