@@ -1,8 +1,3 @@
-//
-// Localizer.cpp
-//
-// Clark Kromenaker
-//
 #include "Localizer.h"
 
 #include "IniParser.h"

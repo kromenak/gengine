@@ -11,6 +11,8 @@
 class GAS;
 class GasPlayer;
 class MeshRenderer;
+class SceneData;
+struct SceneModel;
 class VertexAnimator;
 struct VertexAnimParams;
 
@@ -18,6 +20,7 @@ class GKProp : public GKObject
 {
 public:
     GKProp(bool separateModelActor = false);
+    GKProp(const SceneModel& modelDef, const SceneData& sceneData);
     
     std::string GetModelName() const;
     

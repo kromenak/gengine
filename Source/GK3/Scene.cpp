@@ -250,26 +250,9 @@ void Scene::Load()
 			case SceneModel::Type::Prop:
 			case SceneModel::Type::GasProp:
 			{
-				// Create actor.
-				GKProp* prop = new GKProp();
-				prop->SetNoun(modelDef->noun);
-				
-				// Set model.
-				prop->GetMeshRenderer()->SetModel(modelDef->model);
+				GKProp* prop = new GKProp(*modelDef, *mSceneData);
 				mProps.push_back(prop);
 				mObjects.push_back(prop);
-				
-				// If it's a "gas prop", use provided gas as the fidget for the actor.
-				if(modelDef->type == SceneModel::Type::GasProp)
-				{
-					prop->StartFidget(modelDef->gas);
-				}
-
-                // If it should be hidden by default, hide it.
-                if(modelDef->hidden)
-                {
-                    prop->SetActive(false);
-                }
 				break;
 			}
 
@@ -291,16 +274,6 @@ void Scene::Load()
 			mAnimator->Sample(modelDef->initAnim, 0);
 		}
 	}
-
-    /*
-    // Create Grace Prop! (TEMP for testing)
-    GKProp* prop = new GKProp();
-    prop->SetNoun("GRACE");
-    prop->GetMeshRenderer()->SetModel(Services::GetAssets()->LoadModel("GRA.MOD"));
-    prop->SetPosition(Vector3(100.0f, 0.0f, -100.0f));
-    mProps.push_back(prop);
-    mObjects.push_back(prop);
-    */
     
 	// Check for and run "scene enter" actions.
 	Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");

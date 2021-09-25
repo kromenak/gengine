@@ -1,13 +1,9 @@
-//
-// GKProp.cpp
-//
-// Clark Kromenaker
-//
 #include "GKProp.h"
 
 #include "GasPlayer.h"
 #include "MeshRenderer.h"
 #include "Quaternion.h"
+#include "SceneData.h"
 #include "Vector3.h"
 #include "VertexAnimator.h"
 
@@ -23,12 +19,45 @@ GKProp::GKProp(bool separateModelActor) : GKObject()
         mModelActor = this;
     }
     mModelRenderer = mModelActor->AddComponent<MeshRenderer>();
-    
+
     // Create animation player on the same object as the mesh renderer.
     mVertexAnimator = mModelActor->AddComponent<VertexAnimator>();
     
     // GasPlayer will go on the actor itself.
     mGasPlayer = AddComponent<GasPlayer>();
+}
+
+GKProp::GKProp(const SceneModel& modelDef, const SceneData& sceneData) : GKObject()
+{
+    mModelActor = this;
+    mModelRenderer = mModelActor->AddComponent<MeshRenderer>();
+
+    // Create animation player on the same object as the mesh renderer.
+    mVertexAnimator = mModelActor->AddComponent<VertexAnimator>();
+
+    // GasPlayer will go on the actor itself.
+    mGasPlayer = AddComponent<GasPlayer>();
+
+    SetNoun(modelDef.noun);
+    mModelRenderer->SetModel(modelDef.model);
+
+    Shader* litShader = Services::GetAssets()->LoadShader("3D-Tex-Lit");
+    for(Material& material : mModelRenderer->GetMaterials())
+    {
+        material.SetShader(litShader);
+        material.SetVector4("uLightPos", Vector4(sceneData.GetGlobalLightPosition(), 1.0f));
+        //material.SetColor("uAmbientColor", Color32(75, 75, 75, 0));
+        material.SetColor("uAmbientColor", Color32(126, 126, 126, 0));
+    }
+
+    // If it's a "gas prop", use provided gas as the fidget for the actor.
+    if(modelDef.type == SceneModel::Type::GasProp)
+    {
+        StartFidget(modelDef.gas);
+    }
+
+    // If it should be hidden by default, hide it.
+    SetActive(!modelDef.hidden);
 }
 
 std::string GKProp::GetModelName() const
