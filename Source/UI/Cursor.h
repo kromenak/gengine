@@ -3,7 +3,7 @@
 //
 // Clark Kromenaker
 //
-// An asset that represents a mouse cursor in the game.
+// An asset that represents a mouse cursor.
 //
 #pragma once
 #include "Asset.h"
@@ -20,20 +20,24 @@ public:
     Cursor(std::string name, char* data, int dataLength);
     ~Cursor();
     
-    void Activate();
+    void Activate(bool animate = true);
     
     void Update(float deltaTime);
     
 private:
-    Vector2 mHotspot;
-    int mFrameCount = 1;
-    float mFrameTime = 0.1f;
-    bool mAllowFading = true;
-    
-    int mFrameIndex = 0;
-    float mFrameTimer = 0.0f;
-    
+    // The frames making up the cursor.
+    // For animated cursors, there may be multiple entries.
     std::vector<SDL_Cursor*> mCursorFrames;
+
+    // If true, cursor will animate.
+    // Sometimes, we want to purposely disable this.
+    bool mAnimate = true;
+
+    // For animated cursors, the speed of the animation.
+    float mFramesPerSecond = 0.0f;
+
+    // For animated cursors, the current frame index.
+    float mFrameIndex = 0.0f;
     
     void ParseFromData(char* data, int dataLength);
 };

@@ -1,8 +1,3 @@
-//
-// Cursor.cpp
-//
-// Clark Kromenaker
-//
 #include "Cursor.h"
 
 #include <SDL2/SDL.h>
@@ -23,33 +18,35 @@ Cursor::~Cursor()
     {
         SDL_FreeCursor(frame);
     }
-    mCursorFrames.clear();
 }
 
-void Cursor::Activate()
+void Cursor::Activate(bool animate)
 {
+    // Set to first frame.
     if(mCursorFrames.size() > 0)
     {
         SDL_SetCursor(mCursorFrames[0]);
     }
-    mFrameIndex = 0;
+    mFrameIndex = 0.0f;
+
+    // Save animation pref.
+    mAnimate = animate;
 }
 
 void Cursor::Update(float deltaTime)
 {
-    // Only need to update if the frame needs to change.
-    if(mFrameCount < 2 || mFrameTime == 0.0f) { return; }
-    
-    mFrameTimer += deltaTime;
-    if(mFrameTimer > mFrameTime)
+    // Only need to update if there are multiple frames to animate.
+    if(!mAnimate || mCursorFrames.size() < 2) { return; }
+
+    // Increase timer, but keep in bounds.
+    mFrameIndex += mFramesPerSecond * deltaTime;
+    while(mFrameIndex >= mCursorFrames.size())
     {
-        mFrameTimer = 0.0f;
-        
-        mFrameIndex++;
-        mFrameIndex %= mCursorFrames.size();
-        
-        SDL_SetCursor(mCursorFrames[mFrameIndex]);
+        mFrameIndex -= mCursorFrames.size();
     }
+    
+    // Set frame.
+    SDL_SetCursor(mCursorFrames[static_cast<int>(mFrameIndex)]);
 }
 
 void Cursor::ParseFromData(char *data, int dataLength)
@@ -61,13 +58,14 @@ void Cursor::ParseFromData(char *data, int dataLength)
         std::cout << "Couldn't load texture for cursor " << mName << std::endl;
         return;
     }
-    
+
+    // Parse data from ini format.
+    Vector2 hotspot;
+    bool hotspotIsPercent = false;
+    int frameCount = 1;
+
     IniParser parser(data, dataLength);
     parser.SetMultipleKeyValuePairsPerLine(false);
-    
-    Vector2 hotspotVal;
-    bool hotspotIsPercent = false;
-    
     while(parser.ReadLine())
     {
         while(parser.ReadKeyValuePair())
@@ -77,38 +75,47 @@ void Cursor::ParseFromData(char *data, int dataLength)
             {
                 if(StringUtil::EqualsIgnoreCase(keyValue.value, "center"))
                 {
-					hotspotVal.x = 0.5f;
-					hotspotVal.y = 0.5f;
+                    hotspot.x = 0.5f;
+                    hotspot.y = 0.5f;
                     hotspotIsPercent = true;
                 }
                 else
                 {
-                    hotspotVal = keyValue.GetValueAsVector2();
+                    hotspot = keyValue.GetValueAsVector2();
                 }
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "frame count"))
             {
-                mFrameCount = keyValue.GetValueAsInt();
+                frameCount = keyValue.GetValueAsInt();
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "frame rate"))
             {
-                int frameRate = keyValue.GetValueAsInt();
-                mFrameTime = 1.0f / (float)frameRate;
+                mFramesPerSecond = keyValue.GetValueAsInt();
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "allow fading"))
             {
-                mAllowFading = keyValue.GetValueAsBool();
+                //TODO
+                //keyValue.GetValueAsBool();
             }
             // Function
             // Source Opacity
             // Destination Opacity
         }
     }
-    
-    SDL_Surface* srcSurface = texture->GetSurface();
-    int frameWidth = texture->GetWidth() / mFrameCount;
+
+    // Determine width/height of each cursor animation frame.
+    // If cursor has multiple frames, they are laid out horizontally and all equal size.
+    int frameWidth = texture->GetWidth() / frameCount;
     int frameHeight = texture->GetHeight();
-    
+
+    // If hotspot was a percent, convert to pixel position, now that we know the frame width/height.
+    if(hotspotIsPercent)
+    {
+        hotspot.x = frameWidth * hotspot.x;
+        hotspot.y = frameHeight * hotspot.y;
+    }
+
+    // Generate RGB masks (taken straight from SDL docs).
     unsigned int rmask, gmask, bmask, amask;
     #if SDL_BYTEORDER == SDL_BIG_ENDIAN
     int shift = 0;
@@ -122,26 +129,30 @@ void Cursor::ParseFromData(char *data, int dataLength)
     bmask = 0x00ff0000;
     amask = 0xff000000;
     #endif
-    
+
+    // Create a surface from the texture.
+    SDL_Surface* srcSurface = SDL_CreateRGBSurfaceFrom((void*)texture->GetPixelData(), texture->GetWidth(), texture->GetHeight(),
+                                                    32, 4 * texture->GetWidth(), rmask, gmask, bmask, amask);
+    if(srcSurface == nullptr)
+    {
+        SDL_Log("Creating surface failed: %s", SDL_GetError());
+        return;
+    }
+
     // Create cursors for each frame.
-    for(int i = 0; i < mFrameCount; i++)
+    for(int i = 0; i < frameCount; i++)
     {
         SDL_Rect srcRect;
         srcRect.x = i * frameWidth;
         srcRect.y = 0;
         srcRect.w = frameWidth;
         srcRect.h = frameHeight;
-        
+
+        // Copy frame from texture into a destination surface.
         SDL_Surface* dstSurface = SDL_CreateRGBSurface(0, frameWidth, frameHeight, 32, rmask, gmask, bmask, amask);
         SDL_BlitSurface(srcSurface, &srcRect, dstSurface, NULL);
-        
-        Vector2 hotspot = hotspotVal;
-        if(hotspotIsPercent)
-        {
-            hotspot.x = (texture->GetWidth() / mFrameCount) * hotspotVal.x;
-            hotspot.y = texture->GetHeight() * hotspotVal.y;
-        }
-        
+
+        // Use destination surface to create cursor.
         SDL_Cursor* cursor = SDL_CreateColorCursor(dstSurface, (int)hotspot.x, (int)hotspot.y);
         if(cursor == nullptr)
         {

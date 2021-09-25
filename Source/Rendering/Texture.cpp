@@ -1,8 +1,3 @@
-//
-// Texture.cpp
-//
-// Clark Kromenaker
-//
 #include "Texture.h"
 
 #include <iostream>
@@ -111,39 +106,6 @@ void Texture::Activate(int textureUnit)
 /*static*/ void Texture::Deactivate()
 {
     White.Activate(0);
-}
-
-SDL_Surface* Texture::GetSurface()
-{
-    return GetSurface(0, 0, mWidth, mHeight);
-}
-
-SDL_Surface* Texture::GetSurface(int x, int y, int width, int height)
-{
-    unsigned int rmask, gmask, bmask, amask;
-    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-    int shift = 0;
-    rmask = 0xff000000 >> shift;
-    gmask = 0x00ff0000 >> shift;
-    bmask = 0x0000ff00 >> shift;
-    amask = 0x000000ff >> shift;
-    #else // little endian, like x86
-    rmask = 0x000000ff;
-    gmask = 0x0000ff00;
-    bmask = 0x00ff0000;
-    amask = 0xff000000;
-    #endif
-    
-    int depth = 32;
-    int pitch = 4 * width;
-    
-    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom((void*)mPixels, width, height, depth, pitch,
-                                                    rmask, gmask, bmask, amask);
-    if(surface == nullptr)
-    {
-        SDL_Log("Creating surface failed: %s", SDL_GetError());
-    }
-    return surface;
 }
 
 Color32 Texture::GetPixelColor32(int x, int y)

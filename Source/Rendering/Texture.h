@@ -54,11 +54,6 @@ public:
 	// Activates the texture in the graphics library.
     void Activate(int textureUnit);
     static void Deactivate();
-	
-	// For SDL cursor stuff, convert texture to a surface.
-	//TODO: Probably move this elsewhere?
-    SDL_Surface* GetSurface();
-    SDL_Surface* GetSurface(int x, int y, int width, int height);
     
     unsigned int GetWidth() const { return mWidth; }
     unsigned int GetHeight() const { return mHeight; }
