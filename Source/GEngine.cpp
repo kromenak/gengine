@@ -39,16 +39,50 @@ bool GEngine::Initialize()
 	
     // Initialize asset manager.
     Services::SetAssets(&mAssetManager);
+
+    //TODO: Custom paths from GK3.ini should be added at a higher priority than default search paths.
     
     // Add "Assets" directory as a possible location for any file.
     mAssetManager.AddSearchPath("Assets/");
 	
 	// Add "Assets/GK3" directory, which should contain the actual assets from GK3 data folder.
+    //TODO: Maybe change this to "Data" folder, to match original game?
 	mAssetManager.AddSearchPath("Assets/GK3/");
-    
+
+    // For simplicity right now, let's just load all barns at once.
+    std::vector<std::string> barns = {
+        "ambient.brn",
+        "common.brn",
+        "core.brn",
+        "day1.brn",
+        "day2.brn",
+        "day3.brn",
+        "day23.brn",
+        "day123.brn"
+    };
+    for(auto& barn : barns)
+    {
+        TIMER_SCOPED(barn.c_str());
+        if(!mAssetManager.LoadBarn(barn))
+        {
+            std::string error = "Could not load barn: " + barn;
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                                     "GEngine",
+                                     error.c_str(),
+                                     nullptr);
+            return false;
+        }
+    }
+
     // Initialize input.
     Services::SetInput(&mInputManager);
-    
+
+    // Initialize sheep manager.
+    Services::SetSheep(&mSheepManager);
+
+    // Create layer manager.
+    Services::Set<LayerManager>(&mLayerManager);
+
     // Initialize renderer.
     if(!mRenderer.Initialize())
     {
@@ -63,52 +97,12 @@ bool GEngine::Initialize()
     }
     Services::SetAudio(&mAudioManager);
     
-    // For simplicity right now, let's just load all barns at once.
-	std::vector<std::string> barns = {
-		"ambient.brn",
-		"common.brn",
-		"core.brn",
-		"day1.brn",
-		"day2.brn",
-		"day3.brn",
-		"day23.brn",
-		"day123.brn"
-	};
-	for(auto& barn : barns)
-	{
-		if(!mAssetManager.LoadBarn(barn))
-		{
-			std::string error = "Could not load barn: " + barn;
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-									 "GEngine",
-									 error.c_str(),
-									 nullptr);
-			return false;
-		}
-	}
+    // Load cursors and use the default one to start.
+    // Must happen after barn assets are loaded.
+    Services::Set<CursorManager>(&mCursorManager);
+    mCursorManager.Init();
+    mCursorManager.UseLoadCursor();
     
-    // Initialize sheep manager.
-    Services::SetSheep(&mSheepManager);
-    
-    //SDL_Log(SDL_GetBasePath());
-    //SDL_Log(SDL_GetPrefPath("Test", "GK3"));
-	
-	// Load cursors and use the default one to start.
-	mDefaultCursor = mAssetManager.LoadCursor("C_POINT.CUR");
-	mHighlightRedCursor = mAssetManager.LoadCursor("C_ZOOM.CUR");
-	mHighlightBlueCursor = mAssetManager.LoadCursor("C_ZOOM_2.CUR");
-	mWaitCursor = mAssetManager.LoadCursor("C_WAIT.CUR");
-	UseDefaultCursor();
-    
-    //Texture* tex = mAssetManager.LoadTexture("21PAINTING1.BMP");
-    //tex->WriteToFile("PAINTING.BMP");
-    
-    //mAssetManager.WriteBarnAssetToFile("BLKMUSTACHE_3.BMP");
-    //mAssetManager.WriteAllBarnAssetsToFile(".STK", "Soundtracks");
-    
-    // Create layer manager.
-    Services::Set<LayerManager>(&mLayerManager);
-	
     // Create localizer.
     Services::Set<Localizer>(new Localizer());
     
@@ -218,48 +212,6 @@ void GEngine::Quit()
 void GEngine::ForceUpdate()
 {
     Update(10.0f);
-}
-
-void GEngine::UseDefaultCursor()
-{
-	if(mDefaultCursor != nullptr)
-	{
-		mActiveCursor = mDefaultCursor;
-		mActiveCursor->Activate();
-	}
-}
-
-void GEngine::UseHighlightCursor()
-{
-	Cursor* useCursor = mHighlightRedCursor;
-	if(mHighlightRedCursor == nullptr || mActiveCursor == mHighlightRedCursor)
-	{
-		useCursor = mHighlightBlueCursor;
-	}
-	
-	if(useCursor != nullptr)
-	{
-		mActiveCursor = useCursor;
-		mActiveCursor->Activate();
-	}
-}
-
-void GEngine::UseWaitCursor()
-{
-	if(mWaitCursor != nullptr)
-	{
-		mActiveCursor = mWaitCursor;
-		mActiveCursor->Activate();
-	}
-}
-
-void GEngine::UseCustomCursor(Cursor* cursor)
-{
-    if(cursor != nullptr)
-    {
-        mActiveCursor = cursor;
-        mActiveCursor->Activate();
-    }
 }
 
 void GEngine::ProcessInput()
@@ -406,28 +358,10 @@ void GEngine::Update()
     
     // Update video playback.
     mVideoPlayer.Update();
-    
-    // TODO: Move to CursorManager or something.
-	// If a sheep is running, show "wait" cursor.
-	// If not, go back to normal cursor.
-	if(mActionManager.IsActionPlaying())
-	{
-		UseWaitCursor();
-	}
-	else
-	{
-		if(mActiveCursor == mWaitCursor)
-		{
-			UseDefaultCursor();
-		}
-	}
-	
-	// Update active cursor.
-    if(mCursor != nullptr)
-    {
-        mCursor->Update(deltaTime);
-    }
 
+    // Update cursors.
+    mCursorManager.Update(deltaTime);
+	
 	// Update debug visualizations.
 	Debug::Update(deltaTime);
 }

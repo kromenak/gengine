@@ -336,18 +336,18 @@ void GameCamera::SceneUpdate(float deltaTime)
                     // Set cursor appropriately.
                     if(customCursor != nullptr)
                     {
-                        GEngine::Instance()->UseCustomCursor(customCursor);
+                        Services::Get<CursorManager>()->UseCustomCursor(customCursor);
                     }
                     else
                     {
-                        GEngine::Instance()->UseHighlightCursor();  
+                        Services::Get<CursorManager>()->UseHighlightCursor();
                     }
                     mLastHoveredNoun = hovering->GetNoun();
                 }
             }
             else
             {
-                GEngine::Instance()->UseDefaultCursor();
+                Services::Get<CursorManager>()->UseDefaultCursor();
                 mLastHoveredNoun.clear();
             }
             

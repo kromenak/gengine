@@ -71,18 +71,18 @@ void UIButton::OnPointerEnter()
     // If button has no texture (so, perhaps an input blocker or invisible click detector), no highlight.
     if(mMaterial.GetDiffuseTexture() != nullptr)
     {
-        GEngine::Instance()->UseHighlightCursor();
+        Services::Get<CursorManager>()->UseHighlightCursor();
     }
     else
     {
-        GEngine::Instance()->UseDefaultCursor();
+        Services::Get<CursorManager>()->UseDefaultCursor();
     }
 	mPointerOver = true;
 }
 
 void UIButton::OnPointerExit()
 {
-	GEngine::Instance()->UseDefaultCursor();
+    Services::Get<CursorManager>()->UseDefaultCursor();
 	mPointerOver = false;
 }
 

@@ -13,6 +13,7 @@
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "Console.h"
+#include "CursorManager.h"
 #include "InputManager.h"
 #include "LayerManager.h"
 #include "Renderer.h"
@@ -22,7 +23,6 @@
 
 class Actor;
 class Scene;
-class Cursor;
 
 class GEngine
 {
@@ -44,11 +44,6 @@ public:
 	void LoadScene(std::string name) { mSceneToLoad = name; }
     Scene* GetScene() { return mScene; }
     
-	void UseDefaultCursor();
-	void UseHighlightCursor();
-	void UseWaitCursor();
-    void UseCustomCursor(Cursor* cursor);
-    
 private:
     // Only one instance of GEngine can exist.
     static GEngine* sInstance;
@@ -68,6 +63,7 @@ private:
 	Console mConsole;
     VideoPlayer mVideoPlayer;
     LayerManager mLayerManager;
+    CursorManager mCursorManager;
     
     // A list of all actors that currently exist in the game.
     std::vector<Actor*> mActors;
@@ -79,16 +75,6 @@ private:
 	// Scene loads happen at the end of a frame, to avoid a scene change mid-frame.
 	std::string mSceneToLoad;
 	
-	// Cursors - maybe move these into a manager at some point?
-	Cursor* mActiveCursor = nullptr;
-	Cursor* mDefaultCursor = nullptr;
-	Cursor* mHighlightRedCursor = nullptr;
-	Cursor* mHighlightBlueCursor = nullptr;
-	Cursor* mWaitCursor = nullptr;
-	
-	// The currently active cursor.
-    Cursor* mCursor = nullptr;
-    
     void ProcessInput();
     void Update();
     void Update(float deltaTime);
