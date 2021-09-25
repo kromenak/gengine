@@ -8,7 +8,33 @@
 #include "GMath.h"
 
 uint64_t Profiler::sFrameNumber = 0L;
-std::vector<Profiler::Sample> Profiler::sActiveSamples;
+std::vector<Sample> Profiler::sActiveSamples;
+
+Stopwatch::Stopwatch()
+{
+    mStartCounter = SDL_GetPerformanceCounter();
+}
+
+double Stopwatch::GetMilliseconds() const
+{
+    // Get count delta since stopwatch started.
+    uint64_t counter = SDL_GetPerformanceCounter();
+    uint64_t count = counter - mStartCounter;
+
+    // Convert counts to milliseconds and return.
+    return (static_cast<double>(count) / SDL_GetPerformanceFrequency()) * 1000.0;
+}
+
+Sample::Sample(const char* name) :
+    mName(name)
+{
+
+}
+
+Sample::~Sample()
+{
+    printf("%s: %.2f ms\n", mName, mTimer.GetMilliseconds());
+}
 
 /*static*/ void Profiler::BeginFrame()
 {
@@ -35,23 +61,11 @@ std::vector<Profiler::Sample> Profiler::sActiveSamples;
 /*static*/ void Profiler::BeginSample(const char* name)
 {
     // Put sample in stack.
-    sActiveSamples.emplace_back();
-
-    // Record name and start time.
-    sActiveSamples.back().name = name;
-    sActiveSamples.back().startCounter = SDL_GetPerformanceCounter();
+    sActiveSamples.emplace_back(name);
 }
 
 /*static*/ void Profiler::EndSample()
 {
-    // Calculate how many milliseconds have passed since the sample was started.
-    uint64_t endFrameCounter = SDL_GetPerformanceCounter();
-    uint64_t count = endFrameCounter - sActiveSamples.back().startCounter;
-    double milliseconds = (static_cast<double>(count) / SDL_GetPerformanceFrequency()) * 1000.0;
-    
-    // Print out the stat.
-    printf("%s: %.2f ms\n", sActiveSamples.back().name, milliseconds);
-    
-    // Pop the sample off the stack.
+    // Pop the sample off the stack (prints sample info to log).
     sActiveSamples.pop_back();
 }
