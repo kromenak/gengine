@@ -1,29 +1,60 @@
 //
-//  BarnFile.h
-//  GEngine
+// Clark Kromenaker
 //
-//  Created by Clark Kromenaker on 8/4/17.
+// In GK3, a "Barn" is a blob of binary data containing assets.
+//
+// Fun fact: it is called a "Barn" because some assets are named after animals (Sheep, Yak).
+// That metaphor didn't extend super far, but you get the idea.
 //
 #pragma once
 #include <string>
 #include <unordered_map>
 
-#include "BarnAsset.h"
 #include "BinaryReader.h"
+
+enum class CompressionType
+{
+    None = 0,
+    Zlib = 1,
+    Lzo = 2
+};
+
+class BarnAsset
+{
+public:
+    // Name of barn file containing this asset.
+    // This is ONLY set if the asset is not actually contained in the current Barn (e.g. it's a "pointer" to another barn file).
+    std::string barnFileName;
+
+    // The name of the asset.
+    std::string name;
+
+    // Offset of this asset within the Barn file data blob.
+    unsigned int offset = 0;
+
+    // If the asset is compressed, and what it's compressed size is.
+    CompressionType compressionType = CompressionType::None;
+    unsigned int compressedSize = 0;
+
+    // The uncompressed size of the asset.
+    // If the asset is not compressed, this size is equal to compressedSize.
+    unsigned int uncompressedSize = 0;
+
+    // True if this BarnAsset is just a pointer to another barn file.
+    bool IsPointer() const { return !barnFileName.empty(); }
+};
 
 class BarnFile
 {
 public:
     BarnFile(const std::string& filePath);
 	
-	// Ensure we can actually read assets from this barn.
-    bool CanRead() const;
-	
 	// Retrieves an asset handle, if it exists in this bundle.
     BarnAsset* GetAsset(const std::string& assetName);
 	
 	// Extracts an asset into the provided buffer.
     bool Extract(const std::string& assetName, char* buffer, int bufferSize);
+    bool Extract(BarnAsset* asset, char* buffer, int bufferSize);
 	
 	// For debugging, write assets to file.
     bool WriteToFile(const std::string& assetName);
@@ -36,7 +67,6 @@ public:
 	// For debugging, output asset list to cout.
 	void OutputAssetList() const;
     
-	// For debugging, name of barn.
 	const std::string& GetName() const { return mName; }
 	
 private:

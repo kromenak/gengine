@@ -1,8 +1,8 @@
 //
-//  BinaryReader.h
-//  GEngine
+// Clark Kromenaker
 //
-//  Created by Clark Kromenaker on 8/5/17.
+// Wrapper around a binary data stream,
+// with helpers for reading bytes as specific types.
 //
 #pragma once
 #include <istream>

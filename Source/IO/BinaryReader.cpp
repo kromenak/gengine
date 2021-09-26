@@ -1,9 +1,3 @@
-//
-//  BinaryReader.cpp
-//  GEngine
-//
-//  Created by Clark Kromenaker on 8/5/17.
-//
 #include "BinaryReader.h"
 
 #include <fstream>

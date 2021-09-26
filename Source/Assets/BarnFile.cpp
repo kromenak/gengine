@@ -1,9 +1,3 @@
-//
-//  BarnFile.cpp
-//  GEngine
-//
-//  Created by Clark Kromenaker on 8/4/17.
-//
 #include "BarnFile.h"
 
 #include <fstream>
@@ -233,11 +227,6 @@ BarnFile::BarnFile(const std::string& filePath) :
     }
 }
 
-bool BarnFile::CanRead() const
-{
-    return mReader.OK();
-}
-
 BarnAsset* BarnFile::GetAsset(const std::string& assetName)
 {
 	auto it = mAssetMap.find(assetName);
@@ -251,27 +240,36 @@ BarnAsset* BarnFile::GetAsset(const std::string& assetName)
 bool BarnFile::Extract(const std::string& assetName, char *buffer, int bufferSize)
 {
     // Get the asset handle associated with this asset name.
-    // We fail if we can't find the asset with that name.
     BarnAsset* asset = GetAsset(assetName);
     if(asset == nullptr)
     {
-		std::cout << "No asset named " << assetName << "in Barn file!" << std::endl;
+        std::cout << "No asset named " << assetName << "in Barn file!" << std::endl;
         return false;
     }
+    return Extract(asset, buffer, bufferSize);
+}
+
+bool BarnFile::Extract(BarnAsset* asset, char* buffer, int bufferSize)
+{
+    if(asset == nullptr) { return false; }
     
     // Make sure this asset actually exists within this barn file, and it isn't a pointer to another barn file.
     if(asset->IsPointer())
     {
-		std::cout << "Asset " << assetName << " can't be extracted from Barn - it is only an asset pointer!" << std::endl;
+		std::cout << "Asset " << asset->name << " can't be extracted from Barn - it is an asset pointer!" << std::endl;
         return false;
     }
     
     // If the buffer provided is too small for the asset, we can't extract it. Ideally, the buffer is EXACTLY the right size!
     if(bufferSize < asset->uncompressedSize)
     {
-		std::cout << "Buffer is too small to cotain extracted asset." << std::endl;
+		std::cout << "Buffer is too small to contain extracted asset." << std::endl;
         return false;
     }
+
+    //TODO: With multi-threaded loading, we can get race conditions if multiple threads try to read from the same barn at the same time.
+    //TODO: To resolve that, only option I see is to guard mReader access with a mutex.
+    //TODO: zlib and lzo both claim to be thread-safe, so it's really just the reader stuff I think?
     
     // Method used to extract will depend upon the compression type for the asset.
     if(asset->compressionType == CompressionType::None)
@@ -383,11 +381,9 @@ bool BarnFile::Extract(const std::string& assetName, char *buffer, int bufferSiz
     }
     else
     {
-		std::cout << "Asset " << assetName << " has invalid compression type " << (int)asset->compressionType << std::endl;
+		std::cout << "Asset " << asset->name << " has invalid compression type " << (int)asset->compressionType << std::endl;
         return false;
     }
-    
-    // Success!
     return true;
 }
 
