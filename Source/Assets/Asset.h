@@ -1,6 +1,4 @@
 //
-// Asset.h
-//
 // Clark Kromenaker
 //
 // Base class for any game asset.

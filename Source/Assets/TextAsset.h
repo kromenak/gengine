@@ -1,6 +1,4 @@
 //
-// TextAsset.h
-//
 // Clark Kromenaker
 //
 // Sometimes, systems just need to load and read text files.
@@ -19,6 +17,7 @@ public:
     int GetTextLength() { return mTextLength; }
     
 private:
+    // The text and text length. Owned by this object, deleted on destruct.
     char* mText = nullptr;
     int mTextLength = 0;
 };

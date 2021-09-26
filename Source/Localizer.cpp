@@ -8,11 +8,10 @@ TYPE_DEF_BASE(Localizer);
 
 Localizer::Localizer()
 {
-    unsigned int bufferSize = 0;
-    char* buffer = Services::GetAssets()->LoadRaw("ESTRINGS.TXT", bufferSize);
+    TextAsset* textFile = Services::GetAssets()->LoadText("ESTRINGS.TXT");
     
     // Parse as INI file.
-    IniParser parser(buffer, bufferSize);
+    IniParser parser(textFile->GetText(), textFile->GetTextLength());
     parser.SetMultipleKeyValuePairsPerLine(false);
     
     // Read one section at a time.
@@ -26,8 +25,6 @@ Localizer::Localizer()
             mKeyToText[StringUtil::ToLowerCopy(entry.key)] = entry.value;
         }
     }
-    
-    delete[] buffer;
 }
 
 std::string Localizer::GetText(const std::string& key) const

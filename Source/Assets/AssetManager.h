@@ -1,8 +1,7 @@
 //
-//  AssetManager.h
-//  GEngine
+// Clark Kromenaker
 //
-//  Created by Clark Kromenaker on 8/17/17.
+// Manages loading and caching of assets.
 //
 #pragma once
 #include <functional>
@@ -34,7 +33,8 @@ class AssetManager
 public:
     AssetManager() = default;
     ~AssetManager();
-	
+
+    // Loose Files
 	// Adds a filesystem path to search for assets and bundles at.
     void AddSearchPath(const std::string& searchPath);
     
@@ -42,7 +42,8 @@ public:
     // Returns empty string if file is not found.
     std::string GetAssetPath(const std::string& fileName);
     std::string GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions);
-	
+
+    // Barn Files
 	// Load or unload a barn bundle.
     bool LoadBarn(const std::string& barnName);
     void UnloadBarn(const std::string& barnName);
@@ -54,7 +55,8 @@ public:
 	// Write all assets from a bundle that match a search string.
 	void WriteAllBarnAssetsToFile(const std::string& search);
 	void WriteAllBarnAssetsToFile(const std::string& search, const std::string& outputDir);
-	
+
+    // Loading Assets
     Audio* LoadAudio(const std::string& name);
     Soundtrack* LoadSoundtrack(const std::string& name);
 	Animation* LoadYak(const std::string& name);
@@ -84,8 +86,7 @@ public:
 	Shader* LoadShader(const std::string& vertName, const std::string& fragName);
     
     TextAsset* LoadText(const std::string& name);
-    
-	char* LoadRaw(const std::string& name, unsigned int& outBufferSize);
+    void UnloadText(TextAsset* text);
     
 private:
     // A list of paths to search for assets.
@@ -119,6 +120,8 @@ private:
 	std::unordered_map<std::string, SheepScript*> mLoadedSheeps;
 	
     std::unordered_map<std::string, Shader*> mLoadedShaders;
+
+    std::unordered_map<std::string, TextAsset*> mLoadedTexts;
 	
 	// Retrieve a barn bundle by name, or by contained asset.
 	BarnFile* GetBarn(const std::string& barnName);
@@ -126,8 +129,9 @@ private:
     
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
     
-    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T*(std::string&, char*, unsigned int)> createFunc = nullptr);
+    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T*(std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
 	char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
-	
+
+    template<class T> void UnloadAsset(T* asset, std::unordered_map<std::string, T*>& cache);
 	template<class T> void UnloadAssets(std::unordered_map<std::string, T*>& cache);
 };

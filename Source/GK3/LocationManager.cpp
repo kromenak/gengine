@@ -16,11 +16,10 @@ TYPE_DEF_BASE(LocationManager);
 
 LocationManager::LocationManager()
 {
-	unsigned int bufferSize = 0;
-	char* buffer = Services::GetAssets()->LoadRaw("Locations.txt", bufferSize);
+	TextAsset* textFile = Services::GetAssets()->LoadText("Locations.txt");
 	
 	// Parse as INI file.
-	IniParser parser(buffer, bufferSize);
+	IniParser parser(textFile->GetText(), textFile->GetTextLength());
 	parser.ParseAll();
 	
 	IniSection locations = parser.GetSection("LOCATIONS");
@@ -29,7 +28,6 @@ LocationManager::LocationManager()
 		IniKeyValue& entry = line.entries.front();
 		mLocCodeShortToLocCodeLong[entry.key] = entry.value;
     }
-	delete[] buffer;
     
     //TEMP: Kind of handy to read in all BSPs at once - to test unknown values and such.
     /*

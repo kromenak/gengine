@@ -13,11 +13,10 @@ CharacterManager::CharacterManager()
         // Read in info about characters.
         {
             // Get CHARACTERS text file as a raw buffer.
-            unsigned int bufferSize = 0;
-            char* buffer = Services::GetAssets()->LoadRaw("CHARACTERS.TXT", bufferSize);
+            TextAsset* textFile = Services::GetAssets()->LoadText("CHARACTERS.TXT");
 
             // Pass that along to INI parser, since it is plain text and in INI format.
-            IniParser parser(buffer, bufferSize);
+            IniParser parser(textFile->GetText(), textFile->GetTextLength());
 
             // Read one section at a time.
             // Each section correlates to one character.
@@ -117,17 +116,15 @@ CharacterManager::CharacterManager()
                 // Key each config by its identifier.
                 mCharacterConfigs[config.identifier] = config;
             }
-            delete[] buffer;
         }
 
         // Read in info about character faces.
         {
             // Get FACES text file as a raw buffer.
-            unsigned int facesBufferSize = 0;
-            char* facesBuffer = Services::GetAssets()->LoadRaw("FACES.TXT", facesBufferSize);
+            TextAsset* textFile = Services::GetAssets()->LoadText("FACES.TXT");
 
             // Pass that along to INI parser, since it is plain text and in INI format.
-            IniParser facesParser(facesBuffer, facesBufferSize);
+            IniParser facesParser(textFile->GetText(), textFile->GetTextLength());
             facesParser.SetMultipleKeyValuePairsPerLine(false); // Stops splitting on commas.
 
             // Read in each section of the FACES file.
@@ -340,16 +337,14 @@ CharacterManager::CharacterManager()
                     }
                 }
             }
-            delete[] facesBuffer;
         }
 
         // Load in valid actors list.
         {
-            unsigned int actorsBufferSize = 0;
-            char* actorsBuffer = Services::GetAssets()->LoadRaw("Actors.txt", actorsBufferSize);
+            TextAsset* textFile = Services::GetAssets()->LoadText("Actors.txt");
 
             // Parse as INI file.
-            IniParser actorsParser(actorsBuffer, actorsBufferSize);
+            IniParser actorsParser(textFile->GetText(), textFile->GetTextLength());
             actorsParser.ParseAll();
 
             IniSection actors = actorsParser.GetSection("ACTORS");
@@ -358,7 +353,6 @@ CharacterManager::CharacterManager()
                 IniKeyValue& entry = line.entries.front();
                 mCharacterNouns.insert(entry.key);
             }
-            delete[] actorsBuffer;
         }
     });
 }

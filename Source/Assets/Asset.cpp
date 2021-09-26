@@ -1,8 +1,3 @@
-//
-// Asset.cpp
-//
-// Clark Kromenaker
-//
 #include "Asset.h"
 
 #include "FileSystem.h"

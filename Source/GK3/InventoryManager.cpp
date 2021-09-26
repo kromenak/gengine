@@ -17,11 +17,10 @@ InventoryManager::InventoryManager()
 
     Loader::Load([this]() {
         // Get VERBS text file as a raw buffer.
-        unsigned int bufferSize = 0;
-        char* buffer = Services::GetAssets()->LoadRaw("INVENTORYSPRITES.TXT", bufferSize);
+        TextAsset* textFile = Services::GetAssets()->LoadText("INVENTORYSPRITES.TXT");
 
         // Pass that along to INI parser, since it is plain text and in INI format.
-        IniParser parser(buffer, bufferSize);
+        IniParser parser(textFile->GetText(), textFile->GetTextLength());
 
         // There's only one unnamed section in this file.
         while(parser.ReadLine())
@@ -71,7 +70,6 @@ InventoryManager::InventoryManager()
                 mInventoryItems[StringUtil::ToLowerCopy(entry.key)] = textures;
             }
         }
-        delete[] buffer;
     });
     
 	// Create inventory screen UI.

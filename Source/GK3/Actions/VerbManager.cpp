@@ -22,12 +22,11 @@ TYPE_DEF_BASE(VerbManager);
 
 VerbManager::VerbManager()
 {
-	// Get VERBS text file as a raw buffer.
-	unsigned int bufferSize = 0;
-	char* buffer = Services::GetAssets()->LoadRaw("VERBS.TXT", bufferSize);
+	// Get VERBS text file.
+	TextAsset* text = Services::GetAssets()->LoadText("VERBS.TXT");
 	
 	// Pass that along to INI parser, since it is plain text and in INI format.
-	IniParser parser(buffer, bufferSize);
+	IniParser parser(text->GetText(), text->GetTextLength());
 	parser.ParseAll();
 	
 	// Everything is contained within the "VERBS" section.
@@ -36,87 +35,86 @@ VerbManager::VerbManager()
 	
 	// Each line is a single button icon declaration.
 	// Format is: KEYWORD, up=, down=, hover=, disable=, type
-	for(auto& line : section.lines)
-	{
-		IniKeyValue& entry = line.entries.front();
-		
-		// This is a required value.
-		std::string keyword = StringUtil::ToLowerCopy(entry.key);
-		
-		// These values will be filled in with remaining entry keys.
-		Texture* upTexture = nullptr;
-		Texture* downTexture = nullptr;
-		Texture* hoverTexture = nullptr;
-		Texture* disableTexture = nullptr;
+    for(auto& line : section.lines)
+    {
+        IniKeyValue& entry = line.entries.front();
+
+        // This is a required value.
+        std::string keyword = StringUtil::ToLowerCopy(entry.key);
+
+        // These values will be filled in with remaining entry keys.
+        Texture* upTexture = nullptr;
+        Texture* downTexture = nullptr;
+        Texture* hoverTexture = nullptr;
+        Texture* disableTexture = nullptr;
         Cursor* cursor = nullptr;
-		
-		// By default, the type of each button is a verb.
-		// However, if the keyword "inventory" or "topic" are used, the button is put in those maps instead.
-		// This is why I bother using a pointer to a map here!
-		std::unordered_map<std::string, VerbIcon>* map = &mVerbs;
-		
-		// The remaining values are all optional.
-		// If a value isn't present, the above defaults are used.
-		for(int i = 1; i < line.entries.size(); ++i)
-		{
-			IniKeyValue& keyValuePair = line.entries[i];
-			if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "up"))
-			{
-				upTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "down"))
-			{
-				downTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "hover"))
-			{
-				hoverTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
-			}
-			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "disable"))
-			{
-				disableTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
-			}
+
+        // By default, the type of each button is a verb.
+        // However, if the keyword "inventory" or "topic" are used, the button is put in those maps instead.
+        // This is why I bother using a pointer to a map here!
+        std::unordered_map<std::string, VerbIcon>* map = &mVerbs;
+
+        // The remaining values are all optional.
+        // If a value isn't present, the above defaults are used.
+        for(int i = 1; i < line.entries.size(); ++i)
+        {
+            IniKeyValue& keyValuePair = line.entries[i];
+            if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "up"))
+            {
+                upTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "down"))
+            {
+                downTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "hover"))
+            {
+                hoverTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "disable"))
+            {
+                disableTexture = Services::GetAssets()->LoadTexture(keyValuePair.value);
+            }
             else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "cursor"))
             {
                 cursor = Services::GetAssets()->LoadCursor(keyValuePair.value);
             }
-			else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "type"))
-			{
-				if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "inventory"))
-				{
-					map = &mInventoryItems;
-				}
-				else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic"))
-						//StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
-				{
-					map = &mTopics;
-				}
-			}
-		}
-		
-		// As long as any texture was set, we'll save this one.
-		if(upTexture != nullptr || downTexture != nullptr ||
-		   hoverTexture != nullptr || disableTexture != nullptr || cursor != nullptr)
-		{
-			VerbIcon verbIcon;
-			verbIcon.upTexture = upTexture;
-			verbIcon.downTexture = downTexture;
-			verbIcon.hoverTexture = hoverTexture;
-			verbIcon.disableTexture = disableTexture;
+            else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "type"))
+            {
+                if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "inventory"))
+                {
+                    map = &mInventoryItems;
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValuePair.value, "topic"))
+                        //StringUtil::EqualsIgnoreCase(keyValuePair.value, "chat"))
+                {
+                    map = &mTopics;
+                }
+            }
+        }
+
+        // As long as any texture was set, we'll save this one.
+        if(upTexture != nullptr || downTexture != nullptr ||
+           hoverTexture != nullptr || disableTexture != nullptr || cursor != nullptr)
+        {
+            VerbIcon verbIcon;
+            verbIcon.upTexture = upTexture;
+            verbIcon.downTexture = downTexture;
+            verbIcon.hoverTexture = hoverTexture;
+            verbIcon.disableTexture = disableTexture;
             verbIcon.cursor = cursor;
-			
-			// Save one of these as the default icon.
-			// "Question mark" seems like as good as any!
-			if(StringUtil::EqualsIgnoreCase(keyword, "QUESTION"))
-			{
-				mDefaultIcon = verbIcon;
-			}
-			
-			// Insert mapping from keyword to the button icons.
-			map->insert({ keyword, verbIcon });
-		}
-	}
-	delete[] buffer;
+
+            // Save one of these as the default icon.
+            // "Question mark" seems like as good as any!
+            if(StringUtil::EqualsIgnoreCase(keyword, "QUESTION"))
+            {
+                mDefaultIcon = verbIcon;
+            }
+
+            // Insert mapping from keyword to the button icons.
+            map->insert({ keyword, verbIcon });
+        }
+    }
 }
 
 VerbIcon& VerbManager::GetInventoryIcon(const std::string& noun)

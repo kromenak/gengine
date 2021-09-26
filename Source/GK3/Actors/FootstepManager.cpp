@@ -1,8 +1,3 @@
-//
-// FootstepManager.cpp
-//
-// Clark Kromenaker
-//
 #include "FootstepManager.h"
 
 #include "IniParser.h"
@@ -15,11 +10,10 @@ FootstepManager::FootstepManager()
 {
 	// STEP 1: FLOORMAP maps texture names to a floor type.
 	// Get FLOORMAP text file as a raw buffer.
-	unsigned int bufferSize = 0;
-	char* buffer = Services::GetAssets()->LoadRaw("FLOORMAP.TXT", bufferSize);
+	TextAsset* textFile = Services::GetAssets()->LoadText("FLOORMAP.TXT");
 	
 	// Pass that along to INI parser, since it is plain text and in INI format.
-	IniParser parser(buffer, bufferSize);
+	IniParser parser(textFile->GetText(), textFile->GetTextLength());
 	
 	// There's only one section in this file - FloorMap.
 	IniSection section;
@@ -40,14 +34,13 @@ FootstepManager::FootstepManager()
 			}
 		}
 	}
-	delete[] buffer;
 	
 	// STEP 2: FOOTSTEPS maps floor types to audio files for footsteps.
 	// Next up: read in all the footstep data.
-	buffer = Services::GetAssets()->LoadRaw("FOOTSTEPS.TXT", bufferSize);
+	textFile = Services::GetAssets()->LoadText("FOOTSTEPS.TXT");
 	
 	// Again, it's just an INI text file.
-	IniParser footstepParser(buffer, bufferSize);
+	IniParser footstepParser(textFile->GetText(), textFile->GetTextLength());
 
 	// Each section in this file correlates to a shoe type.
 	while(footstepParser.ReadNextSection(section))
@@ -80,14 +73,13 @@ FootstepManager::FootstepManager()
 			}
 		}
 	}
-	delete[] buffer;
 	
 	// STEP 2: FOOTSCUFFS maps floor types to audio files for footscuffs.
 	// Finally, very similar thing with the footscuff data.
-	buffer = Services::GetAssets()->LoadRaw("FOOTSCUFFS.TXT", bufferSize);
+	textFile = Services::GetAssets()->LoadText("FOOTSCUFFS.TXT");
 	
 	// Again, it's just an INI text file.
-	IniParser footscuffParser(buffer, bufferSize);
+	IniParser footscuffParser(textFile->GetText(), textFile->GetTextLength());
 	
 	// Each section in this file correlates to a shoe type.
 	while(footscuffParser.ReadNextSection(section))
@@ -120,7 +112,6 @@ FootstepManager::FootstepManager()
 			}
 		}
 	}
-	delete[] buffer;
 }
 
 Audio* FootstepManager::GetFootstep(std::string shoeType, std::string floorTextureName)

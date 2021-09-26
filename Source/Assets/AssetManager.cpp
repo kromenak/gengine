@@ -14,6 +14,7 @@
 AssetManager::~AssetManager()
 {
 	// All the loaded stuff has to be unloaded!
+    UnloadAssets(mLoadedTexts);
 	UnloadAssets(mLoadedShaders);
 	
 	UnloadAssets(mLoadedSheeps);
@@ -107,8 +108,7 @@ bool AssetManager::LoadBarn(const std::string& barnName)
 void AssetManager::UnloadBarn(const std::string& barnName)
 {
     // We want our dictionary key to be all uppercase.
-    std::string dictKey = barnName;
-    StringUtil::ToUpper(dictKey);
+    std::string dictKey = StringUtil::ToUpperCopy(barnName);
     
     // If the barn isn't in the map, we can't unload it!
     auto iter = mLoadedBarns.find(dictKey);
@@ -265,43 +265,26 @@ Font* AssetManager::LoadFont(const std::string& name)
 
 Shader* AssetManager::LoadShader(const std::string& name)
 {
-    auto it = mLoadedShaders.find(name);
-    if(it != mLoadedShaders.end())
-    {
-        return it->second;
-    }
-    
-    std::string vertFilePath = GetAssetPath(name + ".vert");
-    std::string fragFilePath = GetAssetPath(name + ".frag");
-    
-    Shader* shader = new Shader(vertFilePath.c_str(), fragFilePath.c_str());
-	
-	// If shader couldn't be found, or failed to load for some reason, return null.
-	if(shader == nullptr || !shader->IsGood())
-	{
-		return nullptr;
-	}
-	
-	// Cache and return.
-	mLoadedShaders[name] = shader;
-    return shader;
+    // Assumes vert/frag shaders have the same name.
+    return LoadShader(name, name);
 }
 
 Shader* AssetManager::LoadShader(const std::string& vertName, const std::string& fragName)
 {
-	std::string key = vertName + fragName;
+    // Return existing shader if already loaded.
+	std::string key = StringUtil::ToUpperCopy(vertName + fragName);
 	auto it = mLoadedShaders.find(key);
 	if(it != mLoadedShaders.end())
 	{
 		return it->second;
 	}
-	
+
+    // Get paths for vert/frag shaders.
 	std::string vertFilePath = GetAssetPath(vertName + ".vert");
 	std::string fragFilePath = GetAssetPath(fragName + ".frag");
-	
+
+    // Try to load shader.
 	Shader* shader = new Shader(vertFilePath.c_str(), fragFilePath.c_str());
-	
-	// If shader couldn't be found, or failed to load for some reason, return null.
 	if(shader == nullptr || !shader->IsGood())
 	{
 		return nullptr;
@@ -314,21 +297,19 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
 
 TextAsset* AssetManager::LoadText(const std::string& name)
 {
-    return LoadAsset<TextAsset>(SanitizeAssetName(name, ""), nullptr);
+    // Specifically DO NOT delete the asset buffer when creating TextAssets, since they take direct ownership of it.
+    return LoadAsset<TextAsset>(SanitizeAssetName(name, ""), &mLoadedTexts, nullptr, false);
 }
 
-char* AssetManager::LoadRaw(const std::string& name, unsigned int& outBufferSize)
+void AssetManager::UnloadText(TextAsset* text)
 {
-	// NOTE: caller is responsible for deleting buffer!
-	//TODO: Perhaps this is a good candidate to use a unique_ptr.
-	return CreateAssetBuffer(name, outBufferSize);
+    UnloadAsset<TextAsset>(text, mLoadedTexts);
 }
 
 BarnFile* AssetManager::GetBarn(const std::string& barnName)
 {
 	// We want our dictionary key to be all uppercase.
-	std::string dictKey = barnName;
-	StringUtil::ToUpper(dictKey);
+    std::string dictKey = StringUtil::ToUpperCopy(barnName);
 	
 	// If we find it, return it.
 	auto iter = mLoadedBarns.find(dictKey);
@@ -377,8 +358,7 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
 {
     // First, convert all names to uppercase.
-    std::string sanitizedName = assetName;
-    StringUtil::ToUpper(sanitizedName);
+    std::string sanitizedName = StringUtil::ToUpperCopy(assetName);
     
     // We want to add the expected extension if no extension already exists on the name.
     if(!File::HasExtension(sanitizedName))
@@ -389,7 +369,7 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 }
 
 template<class T>
-T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T* (std::string&, char*, unsigned int)> createFunc)
+T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T* (std::string&, char*, unsigned int)> createFunc, bool deleteBuffer)
 {
     std::string upperName = StringUtil::ToUpperCopy(assetName);
     
@@ -419,14 +399,17 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
     T* asset = createFunc != nullptr ? createFunc(upperName, buffer, bufferSize) : new T(upperName, buffer, bufferSize);
 	
 	// Delete the buffer after use (or it'll leak).
-	delete[] buffer;
+    if(deleteBuffer)
+    {
+        delete[] buffer;
+    }
 	
 	// Add entry in cache, if we have a cache.
 	if(cache != nullptr)
 	{
 		(*cache)[upperName] = asset;
 	}
-        
+
 	//std::cout << "Loaded asset " << upperName << std::endl;
 	return asset;
 }
@@ -478,14 +461,26 @@ char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int
 		char* buffer = new char[outBufferSize];
 		
 		// Extract the asset to that buffer.
-		barn->Extract(assetName, buffer, outBufferSize);
-		
-		// Return the buffer.
+		barn->Extract(barnAsset, buffer, outBufferSize);
 		return buffer;
 	}
 	
 	// Couldn't find this asset!
 	return nullptr;
+}
+
+template<class T>
+void AssetManager::UnloadAsset(T* asset, std::unordered_map<std::string, T*>& cache)
+{
+    // Remove from cache.
+    auto it = cache.find(asset->GetName());
+    if(it != cache.end())
+    {
+        cache.erase(it);
+    }
+
+    // Delete asset.
+    delete asset;
 }
 
 template<class T>

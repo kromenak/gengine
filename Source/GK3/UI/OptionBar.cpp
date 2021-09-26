@@ -17,8 +17,6 @@ OptionBar::OptionBar() : Actor(Actor::TransformType::RectTransform)
     parser.SetMultipleKeyValuePairsPerLine(false);
     std::unordered_map<std::string, IniKeyValue> optionBarConfig = parser.ParseAllAsMap();
     
-    delete optionBarText;
-    
     // Create canvas, to contain the UI components.
     mCanvas = AddComponent<UICanvas>();
     
