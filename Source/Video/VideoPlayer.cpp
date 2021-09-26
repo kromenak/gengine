@@ -1,8 +1,3 @@
-//
-// VideoPlayer.cpp
-//
-// Clark Kromenaker
-//
 #include "VideoPlayer.h"
 
 #include "Actor.h"
@@ -244,8 +239,9 @@ void VideoPlayer::Stop()
     // Fire stop callback.
     if(mStopCallback != nullptr)
     {
-        mStopCallback();
+        auto callback = mStopCallback;
         mStopCallback = nullptr;
+        callback();
     }
 }
 

@@ -1,8 +1,3 @@
-//
-// VideoState.cpp
-//
-// Clark Kromenaker
-//
 #include "VideoState.h"
 
 extern "C"
