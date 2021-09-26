@@ -15,9 +15,10 @@
 class Loader
 {
 public:
+    static void Shutdown();
+
     static void Load(std::function<void()> loadFunc);
     static bool IsLoading() { return sLoadingCount > 0; }
-
     static void DoAfterLoading(std::function<void()> callback);
 
 private:

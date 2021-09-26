@@ -177,19 +177,22 @@ bool GEngine::Initialize()
 
 void GEngine::Shutdown()
 {
+    // Need to block main thread until threaded work is done.
+    // Otherwise, we might get exceptions during shutdown if main thread exits before background threads.
+    ThreadPool::Shutdown();
+    Loader::Shutdown();
+
 	// Delete all actors.
 	for(auto& actor : mActors)
 	{
 		delete actor;
 	}
 	mActors.clear();
-	
+
+    // Shutdown any subsystems.
     mRenderer.Shutdown();
     mAudioManager.Shutdown();
-    
     SDL_Quit();
-
-    ThreadPool::Shutdown();
 }
 
 void GEngine::Run()

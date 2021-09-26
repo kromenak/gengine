@@ -8,6 +8,11 @@ ThreadedTaskQueue Loader::sLoadingTasks(1);
 int Loader::sLoadingCount = 0;
 std::function<void()> Loader::sLoadingFinishedCallback;
 
+void Loader::Shutdown()
+{
+    sLoadingTasks.Shutdown();
+}
+
 void Loader::Load(std::function<void()> loadFunc)
 {
     if(loadFunc != nullptr)
