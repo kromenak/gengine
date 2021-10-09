@@ -27,9 +27,12 @@ public:
     ~MeshRenderer();
 	
     void Render(bool opaque = true, bool translucent = true);
-     
+
+    void SetShader(Shader* shader) { mShader = shader; }
+
     void SetModel(Model* model);
     Model* GetModel() const { return mModel; }
+    std::string GetModelName() const;
     
     void SetMesh(Mesh* mesh);
     void AddMesh(Mesh* mesh);
@@ -50,6 +53,10 @@ private:
 	// A model, if any was specified.
 	// NOT used for rendering (meshes are used directly). But can be helpful to keep around.
 	Model* mModel = nullptr;
+
+    // If defined, a shader to use when creating materials.
+    // If not defined, the default shader is used (3D-Tex-Unlit).
+    Shader* mShader = Material::sDefaultShader;
 	
     // A mesh component can render one or more meshes.
     // If more than one is specified, they will be rendered in order.

@@ -106,6 +106,11 @@ void MeshRenderer::SetModel(Model* model)
     }
 }
 
+std::string MeshRenderer::GetModelName() const
+{
+    return mModel != nullptr ? mModel->GetNameNoExtension() : std::string();
+}
+
 void MeshRenderer::SetMesh(Mesh* mesh)
 {
     mMeshes.clear();
@@ -123,7 +128,7 @@ void MeshRenderer::AddMesh(Mesh* mesh)
 	for(auto& submesh : submeshes)
 	{
 		// Generate materials for each mesh.
-		Material m;
+        Material m(mShader);
 		
 		// Load and set texture reference.
 		if(!submesh->GetTextureName().empty())
