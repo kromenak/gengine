@@ -34,7 +34,8 @@ bool GEngine::Initialize()
 {
     TIMER_SCOPED("GEngine::Initialize");
 
-    // Init thread pool.
+    // Init threads.
+    ThreadUtil::Init();
     ThreadPool::Init(4);
 
 	// Initialize reports.
