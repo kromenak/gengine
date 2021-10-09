@@ -2315,7 +2315,7 @@ shpvoid ClearPropGas(std::string modelName)
 
 int DoesModelExist(std::string modelName)
 {
-	GKProp* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+	GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	return object != nullptr ? 1 : 0;
 }
 RegFunc1(DoesModelExist, int, string, IMMEDIATE, REL_FUNC);
@@ -2332,7 +2332,7 @@ RegFunc1(DoesSceneModelExist, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowModel(std::string modelName)
 {
-    GKProp* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		object->SetActive(true);
@@ -2343,7 +2343,7 @@ RegFunc1(ShowModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideModel(std::string modelName)
 {
-    GKProp* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		object->SetActive(false);
@@ -2384,7 +2384,7 @@ RegFunc1(HideSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 int IsModelVisible(std::string modelName)
 {
-    GKProp* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
 	{
 		return object->IsActive() ? 1 : 0;

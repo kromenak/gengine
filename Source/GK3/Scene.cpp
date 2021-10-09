@@ -13,6 +13,7 @@
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GKActor.h"
+#include "GKProp.h"
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "GMath.h"
@@ -171,37 +172,33 @@ void Scene::Load()
 		if(actorDef->ego && actorDef != egoSceneActor) { continue; }
 		
 		// Create actor.
-		GKActor* actor = new GKActor(actorDef->model);
+		GKActor* actor = new GKActor(*actorDef);
 		mActors.push_back(actor);
-		mObjects.push_back(actor);
-
-        // Init from scene & actor definitions.
-        actor->Init(*mSceneData, *actorDef);
-	    
-		//TODO: Apply init anim.
-		
-		//TODO: If hidden, hide.
+		mPropsAndActors.push_back(actor);
 		
 		// If this is ego, save a reference to it.
 		if(actorDef->ego && actorDef == egoSceneActor)
 		{
 			mEgo = actor;
 		}
-        
-        Model* walkerDorModel = Services::GetAssets()->LoadModel("DOR_" + actor->GetModelName());
+
+        /*
+        //TODO: GK3 has these "DOR" models (Direction of Rotation?) that mimic movement during walk animations.
+        //TODO: Really unclear whether they are actually needed or not.
+        Model* walkerDorModel = Services::GetAssets()->LoadModel("DOR_" + actor->GetMeshRenderer()->GetModelName());
         if(walkerDorModel != nullptr)
         {
             GKProp* walkerDOR = new GKProp();
             walkerDOR->GetMeshRenderer()->SetModel(walkerDorModel);
-            actor->SetWalkerDOR(walkerDOR);
-            mObjects.push_back(walkerDOR);
+            mPropsAndActors.push_back(walkerDOR);
         }
+        */
 	}
 	
 	// Iterate over scene model data and prep the scene.
 	// First, we want to hide and scene models that are set to "hidden".
 	// Second, we want to spawn any non-scene models.
-	const std::vector<const SceneModel*> sceneModelDatas = mSceneData->GetModels();
+	const std::vector<const SceneModel*>& sceneModelDatas = mSceneData->GetModels();
 	for(auto& modelDef : sceneModelDatas)
 	{
 		switch(modelDef->type)
@@ -250,9 +247,9 @@ void Scene::Load()
 			case SceneModel::Type::Prop:
 			case SceneModel::Type::GasProp:
 			{
-				GKProp* prop = new GKProp(*modelDef, *mSceneData);
+				GKProp* prop = new GKProp(*modelDef);
 				mProps.push_back(prop);
-				mObjects.push_back(prop);
+				mPropsAndActors.push_back(prop);
 				break;
 			}
 
@@ -262,19 +259,7 @@ void Scene::Load()
 		}
 	}
 	
-	// After all models have been created, run through and execute init anims.
-	// Want to wait until after creating all actors, in case init anims need to touch created actors!
-	for(auto& modelDef : sceneModelDatas)
-	{
-		// Run any init anims specified.
-		// These are usually needed to correctly position the model.
-		if((modelDef->type == SceneModel::Type::Prop || modelDef->type == SceneModel::Type::GasProp)
-		   && modelDef->initAnim != nullptr)
-		{
-			mAnimator->Sample(modelDef->initAnim, 0);
-		}
-	}
-    
+	
 	// Check for and run "scene enter" actions.
 	Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");
 }
@@ -288,6 +273,41 @@ void Scene::Unload()
 	mSceneData = nullptr;
     
     Services::Get<LayerManager>()->RemoveLayer(&mLayer);
+}
+
+void Scene::Init()
+{
+    // After all models have been created, run through and execute init anims.
+    // Want to wait until after creating all actors, in case init anims need to touch created actors!
+    for(auto& modelDef : mSceneData->GetModels())
+    {
+        // Run any init anims specified.
+        // These are usually needed to correctly position the model.
+        if((modelDef->type == SceneModel::Type::Prop || modelDef->type == SceneModel::Type::GasProp)
+           && modelDef->initAnim != nullptr)
+        {
+            mAnimator->Sample(modelDef->initAnim, 0);
+        }
+    }
+
+    // Execute init anims for actors too.
+    for(auto& actorDef : mSceneData->GetActors())
+    {
+        if(actorDef->initAnim != nullptr)
+        {
+            mAnimator->Sample(actorDef->initAnim, 0);
+        }
+    }
+
+    // Init all actors and props.
+    for(auto& prop : mProps)
+    {
+        prop->Init(*mSceneData);
+    }
+    for(auto& actor : mActors)
+    {
+        actor->Init(*mSceneData);
+    }
 }
 
 void Scene::Update(float deltaTime)
@@ -373,27 +393,27 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObj
 	
 	// Check props/actors before BSP.
 	// Later, we'll check BSP and see if we hit something obscuring a prop/actor.
-	for(auto& object : mObjects)
-	{
+    for(auto& object : mPropsAndActors)
+    {
         // Ignore if desired.
         if(ignore != nullptr && ignore == object) { continue; }
-        
-		// If only interested in interactive objects, skip non-interactive objects.
-		if(interactiveOnly && !object->CanInteract()) { continue; }
-		
-		// Raycast to see if this is the closest thing we've hit.
-		// If so, we save it as our current result.
-		MeshRenderer* meshRenderer = object->GetMeshRenderer();
-		RaycastHit hitInfo;
-		if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
-		{
-			if(hitInfo.t < result.hitInfo.t)
-			{
-				result.hitInfo = hitInfo;
-				result.hitObject = object;
-			}
-		}
-	}
+
+        // If only interested in interactive objects, skip non-interactive objects.
+        if(interactiveOnly && !object->CanInteract()) { continue; }
+
+        // Raycast to see if this is the closest thing we've hit.
+        // If so, we save it as our current result.
+        MeshRenderer* meshRenderer = object->GetMeshRenderer();
+        RaycastHit hitInfo;
+        if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
+        {
+            if(hitInfo.t < result.hitInfo.t)
+            {
+                result.hitInfo = hitInfo;
+                result.hitObject = object;
+            }
+        }
+    }
 	
 	// Assign name in hit info, if anything was hit.
 	// This is because GKObjects don't currently do this during raycast.
@@ -506,11 +526,11 @@ void Scene::SkipCurrentAction()
     }
 }
 
-GKProp* Scene::GetSceneObjectByModelName(const std::string& modelName) const
+GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 {
-	for(auto& object : mObjects)
+	for(auto& object : mPropsAndActors)
 	{
-        if(StringUtil::EqualsIgnoreCase(object->GetModelName(), modelName))
+        if(StringUtil::EqualsIgnoreCase(object->GetMeshRenderer()->GetModelName(), modelName))
         {
             return object;
         }
@@ -521,7 +541,7 @@ GKProp* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 
 GKObject* Scene::GetSceneObjectByNoun(const std::string& noun) const
 {
-    for(auto& object : mObjects)
+    for(auto& object : mPropsAndActors)
     {
         if(StringUtil::EqualsIgnoreCase(object->GetNoun(), noun))
         {
@@ -639,7 +659,7 @@ void Scene::SetPaused(bool paused)
     }
     
     // Pause/unpause all objects in the scene by disabling updates.
-    for(auto& object : mObjects)
+    for(auto& object : mPropsAndActors)
     {
         object->SetUpdateEnabled(!paused);
     }
@@ -721,7 +741,7 @@ void Scene::ExecuteAction(const Action* action)
 		{
 			// Find position of the model.
 			Vector3 modelPosition;
-			GKProp* obj = GetSceneObjectByModelName(action->target);
+			GKObject* obj = GetSceneObjectByModelName(action->target);
 			if(obj != nullptr)
 			{
 				modelPosition = obj->GetPosition();
@@ -746,7 +766,7 @@ void Scene::ExecuteAction(const Action* action)
 		{
 			// Find position of the model we want to "walk to see".
 			Vector3 targetPosition;
-			GKProp* obj = GetSceneObjectByModelName(action->target);
+			GKObject* obj = GetSceneObjectByModelName(action->target);
 			if(obj != nullptr)
 			{
 				targetPosition = obj->GetPosition();

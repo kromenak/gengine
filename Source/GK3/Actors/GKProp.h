@@ -1,6 +1,4 @@
 //
-// GKProp.h
-//
 // Clark Kromenaker
 //
 // A "prop" is a dynamic 3D object in the scene that can animate and be interacted with.
@@ -19,41 +17,29 @@ struct VertexAnimParams;
 class GKProp : public GKObject
 {
 public:
-    GKProp(bool separateModelActor = false);
-    GKProp(const SceneModel& modelDef, const SceneData& sceneData);
-    
-    std::string GetModelName() const;
+    GKProp();
+    GKProp(Model* model);
+    GKProp(const SceneModel& modelDef);
+
+    void Init(const SceneData& sceneData);
     
     void StartFidget(GAS* gas);
-    virtual void StopFidget(std::function<void()> callback = nullptr);
-    
-    void StartAnimation(VertexAnimParams& animParams);
-    void SampleAnimation(VertexAnimation* anim, int frame);
-    void StopAnimation(VertexAnimation* anim = nullptr);
-    
-    MeshRenderer* GetMeshRenderer() const { return mModelRenderer; }
-    VertexAnimator* GetVertexAnimator() const { return mVertexAnimator; }
-    GasPlayer* GetGasPlayer() const { return mGasPlayer; }
+    void StopFidget(std::function<void()> callback = nullptr);
+
+    void StartAnimation(VertexAnimParams& animParams) override;
+    void SampleAnimation(VertexAnimation* anim, int frame) override;
+    void StopAnimation(VertexAnimation* anim = nullptr) override;
+    MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
 	
-protected:
-    void OnActive() override;
-    void OnInactive() override;
-	void OnUpdate(float deltaTime) override;
-    
-    // The actor/mesh renderer used to render this object's model.
-    // For props, model actor == this. But for characters, model actor is a separate actor.
-    Actor* mModelActor = nullptr;
-    MeshRenderer* mModelRenderer = nullptr;
-    
-    // Many objects animate using vertex animations.
-    VertexAnimator* mVertexAnimator = nullptr;
-    
-    // GAS player allows object to animate in an automated/scripted fashion based on some simple command statements.
-    GasPlayer* mGasPlayer = nullptr;
-    
-    virtual void OnVertexAnimationStart(const VertexAnimParams& animParams) { }
-    virtual void OnVertexAnimationStop() { }
-    
 private:
-    void OnVertexAnimationStopInternal();
+    // The prop's mesh renderer.
+    MeshRenderer* mMeshRenderer = nullptr;
+
+    // Props can animate.
+    VertexAnimator* mVertexAnimator = nullptr;
+
+    // Autoscripts can drive animation on "GAS Props".
+    GasPlayer* mGasPlayer = nullptr;
+
+    void OnVertexAnimationStop();
 };

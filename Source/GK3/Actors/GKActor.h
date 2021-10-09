@@ -1,18 +1,11 @@
 //
-// GKActor.cpp
-//
 // Clark Kromenaker
 //
-// An "actor" in the GK3 system. An actor is considered to be
-// one of the characters - like Gabe, Grace, Mosely. An actor is an entity
-// that can walk around, animate, perform facial expressions and eye contact,
-// play sound effects, etc.
-//
-// You can think of a "GK actor" as a more complex prop - it does what they do, and more.
-// The inheritance hierarchy reflects this.
+// A GK "actor" is a humanoid character or animal.
+// Actors can walk around, animate, perform facial expressions and eye contact, etc.
 //
 #pragma once
-#include "GKProp.h"
+#include "GKObject.h"
 
 #include <string>
 
@@ -22,6 +15,7 @@
 struct CharacterConfig;
 class FaceController;
 class GAS;
+class GasPlayer;
 class Model;
 struct SceneActor;
 class SceneData;
@@ -29,13 +23,15 @@ class VertexAnimation;
 class VertexAnimator;
 struct VertexAnimParams;
 
-class GKActor : public GKProp
+class GKActor : public GKObject
 {
 public:
+    GKActor();
 	GKActor(Model* model);
+    GKActor(const SceneActor& actorDef);
 
-    void Init(const SceneData& sceneData, const SceneActor& actorDef);
-
+    void Init(const SceneData& sceneData);
+    
     enum class FidgetType
     {
         None,
@@ -44,7 +40,7 @@ public:
         Listen
     };
 	void StartFidget(FidgetType type);
-    void StopFidget(std::function<void()> callback = nullptr) override;
+    void StopFidget(std::function<void()> callback = nullptr);
 
     void SetIdleFidget(GAS* fidget);
     void SetTalkFidget(GAS* fidget);
@@ -52,20 +48,17 @@ public:
     GAS* GetIdleFidget() { return mIdleFidget; }
     GAS* GetTalkFidget() { return mTalkFidget; }
     GAS* GetListenFidget() { return mListenFidget; }
-	
+
 	void TurnTo(const Heading& heading, std::function<void()> finishCallback);
-    
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, std::function<void()> finishCallback);
 	void WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback);
 	void WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback);
 
-    void SetWalkerBoundary(WalkerBoundary* walkerBoundary);
     Vector3 GetWalkDestination() const;
     bool AtPosition(const Vector3& position) { return mWalker->AtPosition(position); }
     bool IsWalking() const { return mWalker->IsWalking(); }
     void SkipWalk() { mWalker->SkipToEnd(); }
-    void SetWalkerDOR(GKProp* walkerDOR);
     void SnapToFloor();
     
 	FaceController* GetFaceController() const { return mFaceController; }
@@ -73,12 +66,16 @@ public:
     
     void SetPosition(const Vector3& position);
     void SetHeading(const Heading& heading) override;
+
+    void StartAnimation(VertexAnimParams& animParams) override;
+    void SampleAnimation(VertexAnimation* anim, int frame) override;
+    void StopAnimation(VertexAnimation* anim = nullptr) override;
+    MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
 	
 protected:
+    void OnActive() override;
+    void OnInactive() override;
 	void OnUpdate(float deltaTime) override;
-    
-    void OnVertexAnimationStart(const VertexAnimParams& animParams) override;
-    void OnVertexAnimationStop() override;
     
 private:
 	// The character's configuration, which defines helpful parameters for controlling the actor.
@@ -89,7 +86,6 @@ private:
 	
 	// The actor's walking control.
 	Walker* mWalker = nullptr;
-    GKProp* mWalkerDOR = nullptr;
 	
 	// The actor's face control.
 	FaceController* mFaceController = nullptr;
@@ -98,6 +94,17 @@ private:
     GAS* mIdleFidget = nullptr;
     GAS* mTalkFidget = nullptr;
     GAS* mListenFidget = nullptr;
+
+    // The actor/mesh renderer used to render this object's model.
+    // For props, model actor == this. But for characters, model actor is a separate actor.
+    Actor* mModelActor = nullptr;
+    MeshRenderer* mMeshRenderer = nullptr;
+
+    // Many objects animate using vertex animations.
+    VertexAnimator* mVertexAnimator = nullptr;
+
+    // GAS player allows object to animate in an automated/scripted fashion based on some simple command statements.
+    GasPlayer* mGasPlayer = nullptr;
     
     // Vertex anims often change the position of the mesh, but that doesn't mean the actor's position should change.
     // Sometimes we allow a vertex anim to affect the actor's position.
@@ -112,6 +119,8 @@ private:
     // To do that, we track the models last position/rotation and move the actor every frame to keep up.
     Vector3 mLastModelPosition;
     Quaternion mLastModelRotation;
+
+    void OnVertexAnimationStop();
     
     Vector3 GetModelPosition();
     Quaternion GetModelRotation();

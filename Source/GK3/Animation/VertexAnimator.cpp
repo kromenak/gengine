@@ -1,8 +1,3 @@
-//
-// VertexAnimator.cpp
-//
-// Clark Kromenaker
-//
 #include "VertexAnimator.h"
 
 #include <vector>

@@ -1,8 +1,3 @@
-//
-// GKObject.cpp
-//
-// Clark Kromenaker
-//
 #include "GKObject.h"
 
 #include <sstream>

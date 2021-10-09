@@ -1,6 +1,4 @@
 //
-// GKObject.h
-//
 // Clark Kromenaker
 //
 // Base class for an object of interest in a GK3 scene.
@@ -12,6 +10,10 @@
 #include "Actor.h"
 
 #include "Heading.h"
+
+class MeshRenderer;
+class VertexAnimation;
+struct VertexAnimParams;
 
 class GKObject : public Actor
 {
@@ -31,6 +33,12 @@ public:
 	const std::string& GetVerb() const { return mVerb; }
 	
 	bool CanInteract() const { return IsActive() && !mNoun.empty(); }
+
+    //TODO (but maybe OK): feels like these shouldn't be here, BUT some subclasses need these...
+    virtual void StartAnimation(VertexAnimParams& animParams) { }
+    virtual void SampleAnimation(VertexAnimation* anim, int frame) { }
+    virtual void StopAnimation(VertexAnimation* anim = nullptr) { }
+    virtual MeshRenderer* GetMeshRenderer() const { return nullptr;  }
 	
 private:
 	// A noun is used to refer to the objects in NVC logic.

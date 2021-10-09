@@ -53,6 +53,7 @@ public:
 	void Load();
 	void Unload();
 
+    void Init();
     void Update(float deltaTime);
 	
     bool InitEgoPosition(const std::string& positionName);
@@ -66,7 +67,7 @@ public:
 	const std::string& GetEgoName() const { return mEgoName; }
 	GKActor* GetEgo() const { return mEgo; }
 	
-	GKProp* GetSceneObjectByModelName(const std::string& modelName) const;
+	GKObject* GetSceneObjectByModelName(const std::string& modelName) const;
     GKObject* GetSceneObjectByNoun(const std::string& noun) const;
 	GKActor* GetActorByNoun(const std::string& noun) const;
 	
@@ -107,8 +108,9 @@ private:
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
 	
-	// All actors and props.
-	std::vector<GKProp*> mObjects;
+	// All actors and props in one list.
+    // Sometimes, we want to treat these guys in a homogenous manner, since both have Models, can be interacted with, etc.
+	std::vector<GKObject*> mPropsAndActors;
 	
 	// Just "actors".
 	std::vector<GKActor*> mActors;

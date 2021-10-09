@@ -27,7 +27,7 @@ void VertexAnimNode::Play(AnimationState* animState)
 	if(vertexAnimation != nullptr)
 	{
 		// Also we need the object to play the vertex anim on!
-		GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(obj != nullptr)
 		{
             VertexAnimParams params;
@@ -72,7 +72,7 @@ void VertexAnimNode::Stop()
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(obj != nullptr)
 		{
             obj->StopAnimation(vertexAnimation);
@@ -84,7 +84,7 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+        GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(obj != nullptr)
 		{
             obj->SampleAnimation(vertexAnimation, frame);
@@ -123,7 +123,7 @@ void SceneModelVisibilityAnimNode::Play(AnimationState* animState)
 void ModelTextureAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+	GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(obj != nullptr)
 	{
 		// Grab the material used to render this meshIndex/submeshIndex pair.
@@ -143,7 +143,7 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
 void ModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+	GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(obj != nullptr)
 	{
 		//TODO: Not sure if models need to be invisible but still updating in this scenario.
@@ -168,7 +168,7 @@ void SoundAnimNode::Play(AnimationState* animState)
         // If position is based on model name, find the model and set position.
         if(!modelName.empty())
         {
-            GKProp* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+            GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
             if(obj != nullptr)
             {
                 playPosition = obj->GetWorldPosition();
@@ -304,7 +304,7 @@ void LipSyncAnimNode::Play(AnimationState* animState)
 	if(actor != nullptr)
 	{
 		// The mouth texture names need to have a prefix added, based on 3-letter model name.
-		Texture* mouthTexture = Services::GetAssets()->LoadTexture(actor->GetModelName() + "_" + mouthTextureName);
+		Texture* mouthTexture = Services::GetAssets()->LoadTexture(actor->GetMeshRenderer()->GetModelName() + "_" + mouthTextureName);
 		if(mouthTexture != nullptr)
 		{
 			actor->GetFaceController()->SetMouth(mouthTexture);

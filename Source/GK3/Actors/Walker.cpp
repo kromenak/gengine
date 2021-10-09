@@ -8,6 +8,7 @@
 #include "Frustum.h"
 #include "GEngine.h"
 #include "GKActor.h"
+#include "GKProp.h"
 #include "Heading.h"
 #include "MeshRenderer.h"
 #include "Quaternion.h"
@@ -503,7 +504,7 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
     if(mWalkToSeeTarget.empty()) { return false; }
 
     // Get the position of the target.
-    GKProp* target = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(mWalkToSeeTarget);
+    GKObject* target = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(mWalkToSeeTarget);
     if(target == nullptr) { return false; }
     Vector3 targetPosition = target->GetMeshRenderer()->GetAABB().GetCenter();
 
@@ -517,7 +518,7 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
     SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, false, mGKOwner);
     if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget) ||
        StringUtil::EqualsIgnoreCase(result.hitInfo.name, target->GetNoun()) ||
-       StringUtil::EqualsIgnoreCase(result.hitInfo.name, target->GetModelName()))
+       StringUtil::EqualsIgnoreCase(result.hitInfo.name, target->GetMeshRenderer()->GetModelName()))
     {
         // Convert ray direction to a "facing" direction,
         dir.y = 0.0f;

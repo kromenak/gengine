@@ -7,50 +7,27 @@
 #include "Vector3.h"
 #include "VertexAnimator.h"
 
-GKProp::GKProp(bool separateModelActor) : GKObject()
+GKProp::GKProp() : GKObject()
 {
-    // Create mesh actor with mesh renderer on it.
-    if(separateModelActor)
-    {
-        mModelActor = new Actor();
-    }
-    else
-    {
-        mModelActor = this;
-    }
-    mModelRenderer = mModelActor->AddComponent<MeshRenderer>();
+    mMeshRenderer = AddComponent<MeshRenderer>();
+    mMeshRenderer->SetShader(Services::GetAssets()->LoadShader("3D-Tex-Lit"));
 
-    // Create animation player on the same object as the mesh renderer.
-    mVertexAnimator = mModelActor->AddComponent<VertexAnimator>();
+    mVertexAnimator = AddComponent<VertexAnimator>();
     
-    // GasPlayer will go on the actor itself.
     mGasPlayer = AddComponent<GasPlayer>();
 }
 
-GKProp::GKProp(const SceneModel& modelDef, const SceneData& sceneData) : GKObject()
+GKProp::GKProp(Model* model) : GKProp()
 {
-    mModelActor = this;
-    mModelRenderer = mModelActor->AddComponent<MeshRenderer>();
+    mMeshRenderer->SetModel(model);
+}
 
-    // Create animation player on the same object as the mesh renderer.
-    mVertexAnimator = mModelActor->AddComponent<VertexAnimator>();
-
-    // GasPlayer will go on the actor itself.
-    mGasPlayer = AddComponent<GasPlayer>();
-
+GKProp::GKProp(const SceneModel& modelDef) : GKProp(modelDef.model)
+{
     SetNoun(modelDef.noun);
-    mModelRenderer->SetModel(modelDef.model);
-
-    Shader* litShader = Services::GetAssets()->LoadShader("3D-Tex-Lit");
-    for(Material& material : mModelRenderer->GetMaterials())
-    {
-        material.SetShader(litShader);
-        material.SetVector4("uLightPos", Vector4(sceneData.GetGlobalLightPosition(), 1.0f));
-        //material.SetColor("uAmbientColor", Color32(75, 75, 75, 0));
-        material.SetColor("uAmbientColor", Color32(126, 126, 126, 0));
-    }
-
+    
     // If it's a "gas prop", use provided gas as the fidget for the actor.
+    //TODO: Ideally, start fidget during init, not construction.
     if(modelDef.type == SceneModel::Type::GasProp)
     {
         StartFidget(modelDef.gas);
@@ -60,27 +37,15 @@ GKProp::GKProp(const SceneModel& modelDef, const SceneData& sceneData) : GKObjec
     SetActive(!modelDef.hidden);
 }
 
-std::string GKProp::GetModelName() const
+void GKProp::Init(const SceneData& sceneData)
 {
-    if(mModelRenderer != nullptr)
+    // We can set these right away becuase props don't really move around the scene (but I guess they could though?).
+    for(Material& material : mMeshRenderer->GetMaterials())
     {
-        Model* model = mModelRenderer->GetModel();
-        if(model != nullptr)
-        {
-            return model->GetNameNoExtension();
-        }
+        material.SetVector4("uLightPos", Vector4(sceneData.GetGlobalLightPosition(), 1.0f));
+        //material.SetColor("uAmbientColor", Color32(75, 75, 75, 0));
+        material.SetColor("uAmbientColor", Color32(126, 126, 126, 0));
     }
-    return std::string();
-}
-
-void GKProp::StartFidget(GAS* gas)
-{
-    mGasPlayer->Play(gas);
-}
-
-void GKProp::StopFidget(std::function<void()> callback)
-{
-    mGasPlayer->Stop(callback);
 }
 
 void GKProp::StartAnimation(VertexAnimParams& animParams)
@@ -95,7 +60,7 @@ void GKProp::StartAnimation(VertexAnimParams& animParams)
     }
     
     // Set anim stop callback.
-    animParams.stopCallback = std::bind(&GKProp::OnVertexAnimationStopInternal, this);
+    animParams.stopCallback = std::bind(&GKProp::OnVertexAnimationStop, this);
     
     // Start the animation.
     // Note that this will sample the first frame of the animation, updating the model's positions/rotations.
@@ -104,12 +69,9 @@ void GKProp::StartAnimation(VertexAnimParams& animParams)
     // For absolute anims, position model exactly as specified.
     if(animParams.absolute)
     {
-        mModelActor->SetPosition(animParams.absolutePosition);
-        mModelActor->SetRotation(animParams.absoluteHeading.ToQuaternion());
+        SetPosition(animParams.absolutePosition);
+        SetRotation(animParams.absoluteHeading.ToQuaternion());
     }
-    
-    // Props don't need any additional logic when anims start, but subclasses (like GKActor) sure do!
-    OnVertexAnimationStart(animParams);
 }
 
 void GKProp::SampleAnimation(VertexAnimation* anim, int frame)
@@ -123,30 +85,17 @@ void GKProp::StopAnimation(VertexAnimation* anim)
     mVertexAnimator->Stop(anim);
 }
 
-void GKProp::OnActive()
+void GKProp::StartFidget(GAS* gas)
 {
-    // My mesh becomes active when I become active.
-    mModelActor->SetActive(true);
+    mGasPlayer->Play(gas);
 }
 
-void GKProp::OnInactive()
+void GKProp::StopFidget(std::function<void()> callback)
 {
-    // My mesh becomes inactive when I become inactive.
-    mModelActor->SetActive(false);
+    mGasPlayer->Stop(callback);
 }
 
-void GKProp::OnUpdate(float deltaTime)
-{
-    /*
-    if(mModelRenderer != nullptr)
-    {
-        mModelRenderer->DebugDrawAABBs();
-    }
-    */
-}
-
-void GKProp::OnVertexAnimationStopInternal()
+void GKProp::OnVertexAnimationStop()
 {
     mGasPlayer->Resume();
-    OnVertexAnimationStop();
 }
