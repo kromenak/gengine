@@ -147,11 +147,28 @@ bool GEngine::Initialize()
 	ConsoleUI* consoleUI = new ConsoleUI(false);
 	consoleUI->SetIsDestroyOnLoad(false);
 
+    /*
+    // Play opening movie.
+    mVideoPlayer.Play("Sierra.avi", true, true, [this]() {
+
+        //TODO: intro should only play automatically on first launch of the game.
+        mVideoPlayer.Play("intro.bik", true, true, [this]() {
+
+            // Wait for all loading to complete before showing the title screen.
+            Loader::DoAfterLoading([this]() {
+
+                //TODO: Actually show title screen.
+                Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
+                LoadScene("RC1");
+            });
+        });
+    });
+    */
+
+    // For dev purposes: just load right into a new game.
     Loader::DoAfterLoading([this]() {
-        //TEMP: Load scene as though starting a new game.
-        //TODO: Should really show logos, show title screen, allow restore or new game choice.
         Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-        LoadScene("R25");
+        LoadScene("RC1");
     });
 
 	/*
@@ -344,8 +361,11 @@ void GEngine::Update()
         deltaTime *= 0.25f;
     }
 
-    // Update game logic.
-    Update(deltaTime);
+    if(!Loader::IsLoading())
+    {
+        // Update game logic.
+        Update(deltaTime);
+    }
 
     // Also update audio system (before or after game logic?)
     mAudioManager.Update(deltaTime);
@@ -388,49 +408,66 @@ void GEngine::Update(float deltaTime)
 void GEngine::GenerateOutputs()
 {
     PROFILER_SCOPED(GenerateOutputs);
-    mRenderer.Render();
+    if(!Loader::IsLoading())
+    {
+        mRenderer.Render();
+    }
+}
+
+void GEngine::LoadSceneInternal()
+{
+    // Obviously no need to do anything if no load scene is defined.
+	if(mSceneToLoad.empty()) { return; }
+
+    // If background thread is performing loading, wait until that's done.
+    // If the loader is loading the scene, we don't want to "double load" or something.
+    if(Loader::IsLoading()) { return; }
+
+    // Initiate scene load on background thread.
+    Loader::Load([this]() {
+
+        // Delete the current scene, if any.
+        if(mScene != nullptr)
+        {
+            mScene->Unload();
+            delete mScene;
+            mScene = nullptr;
+        }
+
+        // Destroy any actors that are destroy on load.
+        for(auto& actor : mActors)
+        {
+            if(actor->IsDestroyOnLoad())
+            {
+                actor->Destroy();
+            }
+        }
+
+        // After destroy pass, delete destroyed actors.
+        DeleteDestroyedActors();
+
+        // Create the new scene.
+        //TODO: Scene constructor should probably ONLY take a scene name.
+        //TODO: Internally, we can call to GameProgress or whatnot as needed, but that's very GK3-specific stuff.
+        mScene = new Scene(mSceneToLoad, Services::Get<GameProgress>()->GetTimeblock());
+
+        // Load the scene - this is separate from constructor
+        // b/c load operations may need to reference the scene itself!
+        mScene->Load();
+
+        // Clear scene load request.
+        mSceneToLoad.clear();
+    });
+
+    // Once loading is done, init scene and away we go.
+    Loader::DoAfterLoading([this](){
+        mScene->Init();
+    });
 }
 
 void GEngine::AddActor(Actor* actor)
 {
     mActors.push_back(actor);
-}
-
-void GEngine::LoadSceneInternal()
-{
-	if(mSceneToLoad.empty()) { return; }
-	
-	// Delete the current scene, if any.
-	if(mScene != nullptr)
-	{
-		mScene->Unload();
-		delete mScene;
-		mScene = nullptr;
-	}
-	
-	// Destroy any actors that are destroy on load.
-	for(auto& actor : mActors)
-	{
-		if(actor->IsDestroyOnLoad())
-		{
-			actor->Destroy();
-		}
-	}
-	
-	// After destroy pass, delete destroyed actors.
-	DeleteDestroyedActors();
-	
-	// Create the new scene.
-	//TODO: Scene constructor should probably ONLY take a scene name.
-	//TODO: Internally, we can call to GameProgress or whatnot as needed, but that's very GK3-specific stuff.
-	mScene = new Scene(mSceneToLoad, Services::Get<GameProgress>()->GetTimeblock());
-	
-	// Load the scene - this is separate from constructor
-	// b/c load operations may need to reference the scene itself!
-	mScene->Load();
-	
-	// Clear scene load request.
-	mSceneToLoad.clear();
 }
 
 void GEngine::DeleteDestroyedActors()

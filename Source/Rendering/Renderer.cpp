@@ -230,7 +230,11 @@ bool Renderer::Initialize()
         Submesh* uiQuadSubmesh = uiQuad->AddSubmesh(meshDefinition);
         uiQuadSubmesh->SetRenderMode(RenderMode::Triangles);
     }
-	
+
+    // Do a single render here to make sure the window is cleared/empty.
+    // Because this is so early in the engine init process, this will basically just set clear color and present. 
+    Render();
+
     // Init succeeded!
     return true;
 }
