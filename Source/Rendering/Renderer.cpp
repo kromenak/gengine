@@ -172,7 +172,7 @@ bool Renderer::Initialize()
     };
     for(auto& shader : shaders)
     {
-        printf("Load %s\n", shader.c_str());
+        //printf("Load %s\n", shader.c_str());
         Services::GetAssets()->LoadShader(shader);
     }
 

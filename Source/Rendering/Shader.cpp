@@ -6,6 +6,7 @@
 
 #include "Color32.h"
 #include "Matrix4.h"
+#include "ThreadUtil.h"
 #include "Vector3.h"
 #include "VertexDefinition.h"
 
@@ -14,7 +15,7 @@ Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
     // Load vertex and fragment shaders, and compile them.
     GLuint vertexShader = LoadAndCompileShaderFromFile(vertShaderPath, GL_VERTEX_SHADER);
     GLuint fragmentShader = LoadAndCompileShaderFromFile(fragShaderPath, GL_FRAGMENT_SHADER);
-    
+
     // If either shader could not be compiled successfully, fail with an error.
     if(!IsShaderCompiled(vertexShader) || !IsShaderCompiled(fragmentShader))
     {
@@ -22,41 +23,41 @@ Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
         glDeleteShader(fragmentShader);
         return;
     }
-    
+
     // Assemble shader program.
     mProgram = glCreateProgram();
     glAttachShader(mProgram, vertexShader);
     glAttachShader(mProgram, fragmentShader);
-    
+
     // Bind shader attribute names to attribute indexes.
     int semanticCount = static_cast<int>(VertexAttribute::Semantic::SemanticCount);
     for(int i = 0; i < semanticCount; ++i)
     {
         glBindAttribLocation(mProgram, i, gAttributeNames[i]);
     }
-    
+
     // Link the shader program.
     glLinkProgram(mProgram);
     if(!IsProgramLinked(mProgram))
     {
         glDeleteProgram(mProgram);
         mProgram = GL_NONE;
-        
+
         glDeleteShader(vertexShader);
         glDeleteShader(fragmentShader);
         return;
     }
-    
+
     // Detach shaders after a successful link.
     glDetachShader(mProgram, vertexShader);
     glDetachShader(mProgram, fragmentShader);
-    
+
     // After shader program is compiled and linked, it's possible to query the program
     // to determine the uniforms that exist in the program.
-    
+
     // This *may* be useful in the future so that a material knows what uniforms exist.
     // But for now, we are assuming that the material has explicitly defined values for all uniforms.
-    //RefreshUniforms();
+    RefreshUniforms();
 }
 
 Shader::~Shader()
@@ -217,20 +218,27 @@ bool Shader::IsProgramLinked(GLuint program)
     return true;
 }
 
-/*
 void Shader::RefreshUniforms()
 {
-    // Save listing of uniforms used by this shader.
+    // Because this code may modify shader uniforms, we must first activate the shader.
+    Activate();
+
+    // These vars are reused when obtaining info about uniforms in loop below.
     const GLsizei kMaxUniformNameLength = 32;
     GLchar uniformNameBuffer[kMaxUniformNameLength];
     GLsizei uniformNameLength = 0;
     GLsizei uniformSize = 0;
     GLenum uniformType = GL_NONE;
-    
+
+    // Determine count of uniforms in this shader program.
     GLint uniformCount = 0;
     glGetProgramiv(mProgram, GL_ACTIVE_UNIFORMS, &uniformCount);
+
+    // Iterate uniforms and process each one.
+    int textureUnitCounter = 0;
     for(GLuint i = 0; i < uniformCount; ++i)
     {
+        // Grab uniform i.
         glGetActiveUniform(mProgram, i, kMaxUniformNameLength, &uniformNameLength, &uniformSize, &uniformType, uniformNameBuffer);
         
         // If returned name length is 0, that means the uniform is not valid (compile/link failed?).
@@ -240,9 +248,19 @@ void Shader::RefreshUniforms()
         // We want to ignore built-in OpenGL uniforms, which have "gl_" prefix.
         // We want to ignore built-in G-Engine uniforms, which have a "g" prefix.
         // So really, we can just ignore any uniform with a "g" prefix to cover both scenarios!
-        if(uniformNameLength > 0 && uniformNameBuffer[0] == 'g') { continue; }
-        printf("Uniform %d, Type %u, Name %s\n", i, uniformType, uniformNameBuffer);
-           
+        if(uniformNameBuffer[0] == 'g') { continue; }
+        //printf("Uniform %d, Type %u, Name %s\n", i, uniformType, uniformNameBuffer);
+
+        // For texture samplers, you must tell OpenGL which "texture unit" to use.
+        // If the shader only uses one texture sampler, this works automatically.
+        // But you must manually specify the unit if more than one texture is used.
+        if(uniformType == GL_SAMPLER_2D)
+        {
+            SetUniformInt(uniformNameBuffer, textureUnitCounter);
+            ++textureUnitCounter;
+        }
+
+        /*
         // Convert GLenum type to an actual enum type.
         UniformType type = UniformType::Unknown;
         switch(uniformType)
@@ -291,7 +309,7 @@ void Shader::RefreshUniforms()
             std::cout << "Unknown uniform type in shader: " << uniformType << std::endl;
             break;
         }
-        
+
         // Create and save uniform info.
         if(type != UniformType::Unknown)
         {
@@ -300,6 +318,6 @@ void Shader::RefreshUniforms()
             uniform.name = std::string(uniformNameBuffer);
             mUniforms.push_back(uniform);
         }
+        */
     }
 }
-*/

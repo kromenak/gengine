@@ -15,13 +15,8 @@ BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
     
-    // Load shader and map lightmap texture unit (remember, must activate before setting texture unit).
-    Shader* lightmapShader = Services::GetAssets()->LoadShader("3D-Lightmap");
-    lightmapShader->Activate();
-    lightmapShader->SetUniformInt("uLightmap", 1);
-    
-    // Use lightmap shader for material.
-    mMaterial.SetShader(lightmapShader);
+    // Use lightmap shader for BSP rendering.
+    mMaterial.SetShader(Services::GetAssets()->LoadShader("3D-Lightmap"));
 }
 
 bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)

@@ -78,4 +78,6 @@ private:
     
     bool IsShaderCompiled(GLuint shader);
     bool IsProgramLinked(GLuint program);
+
+    void RefreshUniforms();
 };
