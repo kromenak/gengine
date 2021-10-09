@@ -1,50 +1,18 @@
 //
-// VertexArray.h
-//
 // Clark Kromenaker
 //
 // A chunk of geometry that can be rendered by the GPU.
 // The lowest-level rendering object you can use.
 //
-// Vertex data sent to a VA is copied to the GPU right away, so the source data
-// can be discarded after creation (unless it needs to change over time).
-//
-// The VA owns its handles to the GPU resources, but it does not own any
-// allocated memory for vertex data or index data.
+// The VA creates/owns GPU resources.
+// 
+// It also allocates and manages memory for vertex/index data.
+// You can assume any data passed to VA is copied internally - so buffers do not need to be dynamically allocated.
 //
 #pragma once
 #include <GL/glew.h>
 
-#include "VertexDefinition.h"
-
-enum class MeshUsage
-{
-    Static,
-    Dynamic
-};
-
-struct MeshDefinition
-{
-    // Expected usage for this mesh.
-    // Use "dynamic" if you expect to be modifying the contents of the VA frequently.
-    MeshUsage meshUsage = MeshUsage::Static;
-    
-    // Defines the vertex data ordering and layout for this mesh.
-    VertexDefinition vertexDefinition;
-    
-    // Vertex and index counts.
-    // Important that these are set accurately, as buffer sizes are derived from these.
-    unsigned int vertexCount = 0;
-    unsigned int indexCount = 0;
-    
-    // Pointer to ALL vertex data. Note that this pointer SHOULD NOT be considered valid after VertexArray construction.
-    // For interleaved data, this should be a contiguous block of vertex structs
-    // For tightly packed data, this should be a contiguous block of "pointers to pointers" for each attribute's data.
-    void* vertexData = nullptr;
-    
-    // If indexed, pointer to vertex data. Note that this pointer SHOULD NOT be considered valid after VertexArray construction.
-    unsigned short* indexData = nullptr;
-};
+#include "MeshDefinition.h"
 
 class VertexArray
 {
@@ -61,41 +29,47 @@ public:
     VertexArray(VertexArray&& other);
     VertexArray& operator=(VertexArray&& other);
     
+    void DrawTriangles();
+    void DrawTriangles(unsigned int offset, unsigned int count);
+    
+    void DrawTriangleStrips();
+    void DrawTriangleStrips(unsigned int offset, unsigned int count);
+    
+    void DrawTriangleFans();
+    void DrawTriangleFans(unsigned int offset, unsigned int count);
+    
+    void DrawLines();
+    void DrawLines(unsigned int offset, unsigned int count);
+    
+    void Draw(GLenum mode);
+    void Draw(GLenum mode, unsigned int offset, unsigned int count);
+
+    unsigned int GetVertexCount() const { return mData.vertexCount; }
+    unsigned int GetIndexCount() const { return mData.indexCount; }
+
     void ChangeVertexData(void* data);
     void ChangeVertexData(VertexAttribute::Semantic semantic, void* data);
-    
+
+    void ChangeIndexData(unsigned short* indexes);
     void ChangeIndexData(unsigned short* indexes, unsigned int count);
     
-    void DrawTriangles() const;
-    void DrawTriangles(unsigned int offset, unsigned int count) const;
-    
-    void DrawTriangleStrips() const;
-    void DrawTriangleStrips(unsigned int offset, unsigned int count) const;
-    
-    void DrawTriangleFans() const;
-    void DrawTriangleFans(unsigned int offset, unsigned int count) const;
-    
-    void DrawLines() const;
-    void DrawLines(unsigned int offset, unsigned int count) const;
-    
-    void Draw(GLenum mode) const;
-    void Draw(GLenum mode, unsigned int offset, unsigned int count) const;
-    
 private:
-    // Definition data passed in.
-    // Note that vertex/index data pointers SHOULD NOT be considered valid after construction!
+    // Mesh data (vertices, normals, indexes, etc).
+    // This is maintained and holds CPU-side copies of all mesh data.
     MeshDefinition mData;
     
     // The VBO (vertex buffer object) holds all mesh vertex data (position, color, normals, etc).
     GLuint mVBO = GL_NONE;
+
+    // The VAO (vertex array object) provides mapping info for the VBO.
+    // The VBO is just a big chunk of memory. The VAO dictates how to interpret the memory to read vertex data.
+    GLuint mVAO = GL_NONE;
     
     // The IBO (index buffer object) holds index values for indexed geometry.
     // It's optional, but improves performance.
     GLuint mIBO = GL_NONE;
     
-    // The VAO (vertex array object) provides mapping info for the VBO.
-    // The VBO is just a big chunk of memory. The VAO dictates how to interpret the memory to read vertex data.
-    GLuint mVAO = GL_NONE;
-    
-    void RefreshIBOContents(unsigned short* indexData, int indexCount);
+    void CreateVBO();
+    void CreateVAO();
+    void RefreshIBOContents();
 };

@@ -1,8 +1,3 @@
-//
-// Skybox.cpp
-//
-// Clark Kromenaker
-//
 #include "Skybox.h"
 
 #include "Mesh.h"
@@ -74,13 +69,10 @@ void Skybox::Render()
     // Generate submesh on the fly, if not yet generated.
     if(mSkyboxMesh == nullptr)
     {
-        MeshDefinition meshDefinition;
-        meshDefinition.meshUsage = MeshUsage::Static;
-        
-        meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
-        
-        meshDefinition.vertexCount = 36;
-        meshDefinition.vertexData = points;
+        MeshDefinition meshDefinition(MeshUsage::Static, 36);
+        meshDefinition.SetVertexLayout(VertexLayout::Interleaved);
+        meshDefinition.AddVertexAttribute(VertexAttribute::Position);
+        meshDefinition.SetVertexData(points);
         
         mSkyboxMesh = new Mesh();
         mSkyboxMesh->AddSubmesh(meshDefinition);

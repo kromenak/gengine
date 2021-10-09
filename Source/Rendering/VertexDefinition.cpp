@@ -72,7 +72,7 @@ int VertexDefinition::CalculateSize() const
 int VertexDefinition::CalculateStride() const
 {
     // When data is tightly packed, the stride should be zero.
-    if(layout == Layout::Packed) { return 0; }
+    if(layout == VertexLayout::Packed) { return 0; }
     
     // For interleaved data, the stride is really just the size of a single vertex.
     return CalculateSize();
@@ -88,7 +88,7 @@ int VertexDefinition::CalculateAttributeOffset(int index, int vertexCount) const
         if(i >= attributes.size()) { break; }
         
         // When data is tightly packed, the offset can only be determined if we know the vertex count.
-        if(layout == Layout::Packed)
+        if(layout == VertexLayout::Packed)
         {
             offset += vertexCount * attributes[i].GetSize();
         }

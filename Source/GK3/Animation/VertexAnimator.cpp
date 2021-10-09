@@ -94,7 +94,7 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, int frame)
             VertexAnimationVertexPose sample = animation->SampleVertexPose(frame, i, j);
             if(sample.mFrameNumber >= 0)
             {
-                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.mVertexPositions.data()), true);
+                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.mVertexPositions.data()));
             }
         }
         
@@ -119,7 +119,7 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
 			VertexAnimationVertexPose sample = animation->SampleVertexPose(time, mFramesPerSecond, i, j);
 			if(sample.mFrameNumber >= 0)
 			{
-                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.mVertexPositions.data()), true);
+                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.mVertexPositions.data()));
 			}
 		}
 		

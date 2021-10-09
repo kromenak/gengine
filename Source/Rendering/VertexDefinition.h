@@ -1,6 +1,4 @@
 //
-// VertexDefinition.h
-//
 // Clark Kromenaker
 //
 // When sending mesh data to the GPU, we need to specify the format of the vertex data.
@@ -20,9 +18,17 @@ extern const char* gAttributeNames[];
 
 struct VertexAttribute
 {
-    // The semantic (aka meaning) of an attribute is mainly meant to uniquly identify the attribute type.
-    // There are some "common" (named) semantics here - but it's also possible to use custom integers.
-    // No two attributes in a single vertex should have the same semantic!
+     // Different combinations of type/count/etc allow for great flexibility in the format of an attribute.
+    // That being said, there are several common attribute types that are used 99% of the time. Those are pre-defined here.
+    static VertexAttribute Position;
+    static VertexAttribute Normal;
+    static VertexAttribute Color;
+    static VertexAttribute UV1;
+    static VertexAttribute UV2;
+
+    // The semantic (aka meaning) the type/usage of the attribute.
+    // There are some common semantics in this enum - but it's also possible to use custom integers.
+    // No two attributes in a vertex definition should have the same semantic!
     enum class Semantic
     {
         Position,
@@ -32,30 +38,17 @@ struct VertexAttribute
         UV2,
         SemanticCount
     };
-    
+    Semantic semantic = Semantic::Position;
+
+    // The data type for the attribute.
     // See https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml for other possible types.
-    // Currently only using Float, so no need to add them all yet.
     enum class Type
     {
         Float
     };
+    Type type = Type::Float; 
     
-    // Different combinations of type/count/normalized allow for great flexibility in the format of an attribute.
-    // That being said, there are several common attribute types that are used 99% of the time. Those are pre-defined here.
-    static VertexAttribute Position;
-    static VertexAttribute Normal;
-    static VertexAttribute Color;
-    static VertexAttribute UV1;
-    static VertexAttribute UV2;
-    
-    // Semantic acts as a unique identifier for the attribute.
-    Semantic semantic = Semantic::Position;
-    
-    // The data type of this attribute.
-    Type type = Type::Float;
-    
-    // The number of components of the type.
-    // For example, position data is 3 Floats.
+    // The number of components of the type. For example, position data is 3 Floats.
     int count = 0;
     
     // Should the data be normalized before use in shaders?
@@ -63,20 +56,20 @@ struct VertexAttribute
     bool normalize = false;
     
     int GetSize() const;
+    bool operator==(const VertexAttribute& other) const { return semantic == other.semantic; }
+};
+
+enum class VertexLayout
+{
+    Interleaved,    // [Vertex1Pos][Vertex1UV][Vertex2Pos][Vertex2UV]
+    Packed          // [Vertex1Pos][Vertex2Pos][Vertex1UV][Vertex2UV]
 };
 
 struct VertexDefinition
 {
-    // Vertex data can be specified in one of two ways:
-    // [Vertex1Pos][Vertex1UV][Vertex2Pos][Vertex2UV] (interleaved)
-    // [Vertex1Pos][Vertex2Pos][Vertex1UV][Vertex2UV] (packed)
-    // I've read that interleaved data results in better GPU cache performance, which makes sense.
-    enum class Layout
-    {
-        Interleaved,
-        Packed
-    };
-    Layout layout = Layout::Interleaved;
+    // Layout of the vertex data.
+    // I've read that interleaved data results in better GPU cache performance (since reading a single vertex requires no seeking).
+    VertexLayout layout = VertexLayout::Interleaved;
     
     // A vertex definition consists of one or more attributes.
     // Order IS important!

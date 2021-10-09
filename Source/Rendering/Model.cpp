@@ -382,34 +382,20 @@ void Model::ParseFromData(char *data, int dataLength)
             }
             
             // Generate mesh.
-            MeshDefinition meshDefinition;
-            meshDefinition.meshUsage = MeshUsage::Dynamic;  // Since vertex anims are prevalent in GK3, I think Dynamic makes sense.
-                                                            // But ideally, this would be Static for any model that doesn't animate.
+            // Since vertex anims are prevalent in GK3, I think Dynamic makes sense.
+            // But ideally, use Static for any model that doesn't animate.
+            MeshDefinition meshDefinition(MeshUsage::Dynamic, vertexCount);
+            meshDefinition.SetVertexLayout(VertexLayout::Packed);
             
-            // Define vertex layout.
-            meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
-            meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
-            meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Normal);
-            meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
-            
-            // Define vertex data.
-            meshDefinition.vertexCount = vertexCount;
-            std::vector<float*> vertexData;
-            vertexData.push_back(vertexPositions);
-            vertexData.push_back(vertexNormals);
-            vertexData.push_back(vertexUVs);
-            meshDefinition.vertexData = &vertexData[0];
-            
-            meshDefinition.indexCount = faceCount * 3;
-            meshDefinition.indexData = vertexIndexes;
+            meshDefinition.AddVertexData(VertexAttribute::Position, vertexPositions);
+            meshDefinition.AddVertexData(VertexAttribute::Normal, vertexNormals);
+            meshDefinition.AddVertexData(VertexAttribute::UV1, vertexUVs);
+
+            meshDefinition.SetIndexData(faceCount * 3, vertexIndexes);
             
             // Create submesh.
             // Submesh takes ownership of the arrays passed in, so don't delete it!
             Submesh* submesh = mesh->AddSubmesh(meshDefinition);
-            submesh->SetPositions(vertexPositions);
-            submesh->SetNormals(vertexNormals);
-            submesh->SetUV1s(vertexUVs);
-            submesh->SetIndexes(vertexIndexes);
             
             // Save texture name.
             submesh->SetTextureName(textureName);

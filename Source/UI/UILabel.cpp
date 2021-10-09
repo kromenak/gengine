@@ -225,25 +225,17 @@ void UILabel::GenerateMesh()
 		++charIndex;
 	}
 	
-    MeshDefinition meshDefinition;
-    meshDefinition.meshUsage = MeshUsage::Static;
+    MeshDefinition meshDefinition(MeshUsage::Static, vertexCount);
+    meshDefinition.SetVertexLayout(VertexLayout::Packed);
+
+    meshDefinition.AddVertexData(VertexAttribute::Position, positions);
+    meshDefinition.AddVertexData(VertexAttribute::Color, colors);
+    meshDefinition.AddVertexData(VertexAttribute::UV1, uvs);
+
+    meshDefinition.SetIndexData(indexSize, indexes);
     
-    meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Color);
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
-    
-    meshDefinition.vertexCount = vertexCount;
-    
-    std::vector<float*> data { positions, colors, uvs };
-    meshDefinition.vertexData = &data[0];
-    
-    meshDefinition.indexCount = indexSize;
-    meshDefinition.indexData = indexes;
-    
-    Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
-	
 	// This mesh should render as a "triangle strip".
 	// Vtx 1,2,3 is one triangle. Vtx 2,3,4 is the next triangle.
+    Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
 	submesh->SetRenderMode(RenderMode::Triangles);
 }

@@ -20,18 +20,18 @@
 #include "Texture.h"
 #include "UICanvas.h"
 
+// Line
 float line_vertices[] = {
 	0.0f, 0.0f, 0.0f,
 	1.0f, 1.0f, 1.0f
 };
-
 float line_colors[] = {
 	1.0f, 1.0f, 1.0f, 1.0f,
 	1.0f, 1.0f, 1.0f, 1.0f
 };
-
 Mesh* line = nullptr;
 
+// Axis
 float axis_vertices[] = {
     0.0f, 0.0f, 0.0f,
     5.0f, 0.0f, 0.0f,
@@ -40,7 +40,6 @@ float axis_vertices[] = {
     0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 5.0f
 };
-
 float axis_colors[] = {
     1.0f, 0.0f, 0.0f, 1.0f,
     1.0f, 0.0f, 0.0f, 1.0f,
@@ -49,7 +48,6 @@ float axis_colors[] = {
     0.0f, 0.0f, 1.0f, 1.0f,
     0.0f, 0.0f, 1.0f, 1.0f
 };
-
 Mesh* axes = nullptr;
 
 float quad_vertices[] = {
@@ -58,51 +56,31 @@ float quad_vertices[] = {
 	 0.5f, -0.5f, 0.0f, // lower-right
 	-0.5f, -0.5f, 0.0f, // lower-left
 };
-
 float quad_uvs[] = {
 	0.0f, 0.0f,		// upper-left
 	1.0f, 0.0f,		// upper-right
 	1.0f, 1.0f,		// lower-right
 	0.0f, 1.0f		// lower-left
 };
-
 unsigned short quad_indices[] = {
 	0, 1, 2, 	// upper-right triangle
 	2, 3, 0		// lower-left triangle
 };
-
 Mesh* quad = nullptr;
 
-float full_quad_vertices[] = {
-	-1.0f,  1.0f, 0.0f, // upper-left
-	1.0f,  1.0f, 0.0f, // upper-right
-	1.0f, -1.0f, 0.0f, // lower-right
-	-1.0f, -1.0f, 0.0f, // lower-left
-};
-
-float full_quad_uvs[] = {
-	0.0f, 1.0f,		// upper-left
-	1.0f, 1.0f,		// upper-right
-	1.0f, 0.0f,		// lower-right
-	0.0f, 0.0f		// lower-left
-};
-
-Mesh* fullQuad = nullptr;
-
+// UI Quad
 float ui_quad_vertices[] = {
 	0.0f,  1.0f, 0.0f, // upper-left
 	1.0f,  1.0f, 0.0f, // upper-right
 	1.0f,  0.0f, 0.0f, // lower-right
 	0.0f,  0.0f, 0.0f, // lower-left
 };
-
 float ui_quad_uvs[] = {
 	0.0f, 0.0f,		// upper-left
 	1.0f, 0.0f,		// upper-right
 	1.0f, 1.0f,		// lower-right
 	0.0f, 1.0f		// lower-left
 };
-
 Mesh* uiQuad = nullptr;
 
 bool Renderer::Initialize()
@@ -183,67 +161,76 @@ bool Renderer::Initialize()
     Shader* skyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
     if(skyboxShader == nullptr) { return false; }
 	mSkyboxMaterial.SetShader(skyboxShader);
+
+    // Pre-load additional shaders.
+    // One reason this is important is because GL commands can only run on the main thread.
+    // Avoid dealing with background thread loading of shaders by loading them all up front.
+    std::string shaders[] = {
+        "3D-Lightmap",
+        "3D-Tex-Lit"
+        //TODO: Others?
+    };
+    for(auto& shader : shaders)
+    {
+        printf("Load %s\n", shader.c_str());
+        Services::GetAssets()->LoadShader(shader);
+    }
+
+    // Create simple shapes (useful for debugging/visualization).
+    // Line
+    {
+        MeshDefinition meshDefinition(MeshUsage::Static, 2);
+        meshDefinition.SetVertexLayout(VertexLayout::Packed);
+
+        meshDefinition.AddVertexData(VertexAttribute::Position, line_vertices);
+        meshDefinition.AddVertexData(VertexAttribute::Color, line_colors);
+
+        line = new Mesh();
+        Submesh* lineSubmesh = line->AddSubmesh(meshDefinition);
+        lineSubmesh->SetRenderMode(RenderMode::Lines);
+    }
+
+    // Axes
+    {
+        MeshDefinition meshDefinition(MeshUsage::Static, 6);
+        meshDefinition.SetVertexLayout(VertexLayout::Packed);
+
+        meshDefinition.AddVertexData(VertexAttribute::Position, axis_vertices);
+        meshDefinition.AddVertexData(VertexAttribute::Color, axis_colors);
+
+        axes = new Mesh();
+        Submesh* axesSubmesh = axes->AddSubmesh(meshDefinition);
+        axesSubmesh->SetRenderMode(RenderMode::Lines);
+    }
     
-    MeshDefinition meshDefinition;
-    meshDefinition.meshUsage = MeshUsage::Static;
+    // Quad
+    {
+        MeshDefinition meshDefinition(MeshUsage::Static, 4);
+        meshDefinition.SetVertexLayout(VertexLayout::Packed);
+
+        meshDefinition.AddVertexData(VertexAttribute::Position, quad_vertices);
+        meshDefinition.AddVertexData(VertexAttribute::UV1, quad_uvs);
+        meshDefinition.SetIndexData(6, quad_indices);
+
+        quad = new Mesh();
+        Submesh* quadSubmesh = quad->AddSubmesh(meshDefinition);
+        quadSubmesh->SetRenderMode(RenderMode::Triangles);
+    }
     
-    meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Color);
-    std::vector<float*> vertexData;
-    
-	// Create line mesh, which is helpful for debugging.
-    vertexData.push_back(line_vertices);
-    vertexData.push_back(line_colors);
-    
-    meshDefinition.vertexCount = 2;
-    meshDefinition.vertexData = &vertexData[0];
-    
-	line = new Mesh();
-    Submesh* lineSubmesh = line->AddSubmesh(meshDefinition);
-	lineSubmesh->SetRenderMode(RenderMode::Lines);
+	// UI Quad
+    {
+        MeshDefinition meshDefinition(MeshUsage::Static, 4);
+        meshDefinition.SetVertexLayout(VertexLayout::Packed);
+
+        meshDefinition.AddVertexData(VertexAttribute::Position, ui_quad_vertices);
+        meshDefinition.AddVertexData(VertexAttribute::UV1, ui_quad_uvs);
+        meshDefinition.SetIndexData(6, quad_indices);
+
+        uiQuad = new Mesh();
+        Submesh* uiQuadSubmesh = uiQuad->AddSubmesh(meshDefinition);
+        uiQuadSubmesh->SetRenderMode(RenderMode::Triangles);
+    }
 	
-    // Create axes mesh, which is helpful for debugging.
-    meshDefinition.vertexCount = 6;
-    vertexData[0] = axis_vertices;
-    vertexData[1] = axis_colors;
-    
-    axes = new Mesh();
-    Submesh* axesSubmesh = axes->AddSubmesh(meshDefinition);
-    axesSubmesh->SetRenderMode(RenderMode::Lines);
-	
-	// Create quad mesh, which is used for UI and 2D rendering.
-    meshDefinition.vertexDefinition.attributes[1] = VertexAttribute::UV1;
-    meshDefinition.vertexCount = 4;
-    vertexData[0] = quad_vertices;
-    vertexData[1] = quad_uvs;
-    meshDefinition.indexCount = 6;
-    meshDefinition.indexData = quad_indices;
-    
-	quad = new Mesh();
-    Submesh* quadSubmesh = quad->AddSubmesh(meshDefinition);
-	quadSubmesh->SetRenderMode(RenderMode::Triangles);
-	
-	// Perhaps errantly, the normal "quad" doesn't have "full" vertex positons (using 1 instead of 0.5)
-	// Also, the UVs seemed to be upside down?
-	// Anyway, this full quad seems to work a lot better for render texture usage...perhaps I'll need to fix the quad at some point.
-    meshDefinition.vertexCount = 4;
-    vertexData[0] = full_quad_vertices;
-    vertexData[1] = full_quad_uvs;
-    
-	fullQuad = new Mesh();
-    Submesh* fullQuadSubmesh = fullQuad->AddSubmesh(meshDefinition);
-	fullQuadSubmesh->SetRenderMode(RenderMode::Triangles);
-	
-    // And a quad for UI usage...
-    meshDefinition.vertexCount = 4;
-    vertexData[0] = ui_quad_vertices;
-    vertexData[1] = ui_quad_uvs;
-    
-	uiQuad = new Mesh();
-    Submesh* uiQuadSubmesh = uiQuad->AddSubmesh(meshDefinition);
-	uiQuadSubmesh->SetRenderMode(RenderMode::Triangles);
-    
     // Init succeeded!
     return true;
 }

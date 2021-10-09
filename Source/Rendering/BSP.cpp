@@ -811,22 +811,14 @@ void BSP::ParseFromData(char *data, int dataLength)
     }
     
     // Generate mesh definition.
-    MeshDefinition meshDefinition;
-    meshDefinition.meshUsage = MeshUsage::Static;
-    
-    meshDefinition.vertexDefinition.layout = VertexDefinition::Layout::Packed;
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::Position);
-    meshDefinition.vertexDefinition.attributes.push_back(VertexAttribute::UV1);
-    
-    meshDefinition.vertexCount = static_cast<int>(mVertices.size());
-    
-    std::vector<float*> vertexData;
-    vertexData.push_back(reinterpret_cast<float*>(&mVertices[0]));
-    vertexData.push_back(reinterpret_cast<float*>(&mUVs[0]));
-    meshDefinition.vertexData = &vertexData[0];
-    
-    meshDefinition.indexCount = static_cast<int>(mVertexIndices.size());
-    meshDefinition.indexData = static_cast<unsigned short*>(&mVertexIndices[0]);
+    MeshDefinition meshDefinition(MeshUsage::Static, mVertices.size());
+    meshDefinition.SetVertexLayout(VertexLayout::Packed);
+
+    meshDefinition.AddVertexData(VertexAttribute::Position, &mVertices[0]);
+    meshDefinition.AddVertexData(VertexAttribute::UV1, &mUVs[0]);
+
+    meshDefinition.SetIndexData(mVertexIndices.size(), &mVertexIndices[0]);
+    meshDefinition.ownsData = false;
     
     // Create vertex array.
     mVertexArray = VertexArray(meshDefinition);
