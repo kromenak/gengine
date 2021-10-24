@@ -63,7 +63,6 @@ InventoryManager::InventoryManager()
                 if(textures.listTexture != nullptr && listTextureAlpha != nullptr)
                 {
                     textures.listTexture->ApplyAlphaChannel(*listTextureAlpha);
-                    textures.listTexture->UploadToGPU();
                 }
 
                 // Save to map.
