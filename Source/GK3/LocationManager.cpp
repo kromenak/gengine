@@ -1,8 +1,3 @@
-//
-// LocationManager.cpp
-//
-// Clark Kromenaker
-//
 #include "LocationManager.h"
 
 #include "GameProgress.h"

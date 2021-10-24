@@ -9,7 +9,6 @@
 #include "FileSystem.h"
 #include "imstream.h"
 #include "Services.h"
-#include "StringUtil.h"
 
 AssetManager::~AssetManager()
 {
@@ -41,7 +40,7 @@ AssetManager::~AssetManager()
 void AssetManager::AddSearchPath(const std::string& searchPath)
 {
     // If the search path already exists in the list, don't add it again.
-    if(find(mSearchPaths.begin(), mSearchPaths.end(), searchPath) != mSearchPaths.end())
+    if(std::find(mSearchPaths.begin(), mSearchPaths.end(), searchPath) != mSearchPaths.end())
     {
         return;
     }
@@ -50,6 +49,8 @@ void AssetManager::AddSearchPath(const std::string& searchPath)
 
 std::string AssetManager::GetAssetPath(const std::string& fileName)
 {
+    // We have a set of paths, at which we should search for the specified filename.
+    // So, iterate each search path and see if the file is in that folder.
     std::string assetPath;
     for(const std::string& searchPath : mSearchPaths)
     {
@@ -84,12 +85,8 @@ std::string AssetManager::GetAssetPath(const std::string& fileName, std::initial
 
 bool AssetManager::LoadBarn(const std::string& barnName)
 {
-    // We want our dictionary key to be all uppercase.
-    // Avoids confusion with case-sensitive key searches.
-    std::string dictKey = StringUtil::ToUpperCopy(barnName);
-    
     // If the barn is already in the map, then we don't need to load it again.
-    if(mLoadedBarns.find(dictKey) != mLoadedBarns.end()) { return true; }
+    if(mLoadedBarns.find(barnName) != mLoadedBarns.end()) { return true; }
     
     // Find path to barn file.
     std::string assetPath = GetAssetPath(barnName);
@@ -100,18 +97,14 @@ bool AssetManager::LoadBarn(const std::string& barnName)
     }
     
     // Load barn file.
-    BarnFile* barn = new BarnFile(assetPath);
-    mLoadedBarns[dictKey] = barn;
+    mLoadedBarns[barnName] = new BarnFile(assetPath);
 	return true;
 }
 
 void AssetManager::UnloadBarn(const std::string& barnName)
 {
-    // We want our dictionary key to be all uppercase.
-    std::string dictKey = StringUtil::ToUpperCopy(barnName);
-    
     // If the barn isn't in the map, we can't unload it!
-    auto iter = mLoadedBarns.find(dictKey);
+    auto iter = mLoadedBarns.find(barnName);
     if(iter == mLoadedBarns.end()) { return; }
     
     // Delete barn.
@@ -119,7 +112,7 @@ void AssetManager::UnloadBarn(const std::string& barnName)
     delete barn;
     
     // Remove from map.
-    mLoadedBarns.erase(dictKey);
+    mLoadedBarns.erase(barnName);
 }
 
 void AssetManager::WriteBarnAssetToFile(const std::string& assetName)
@@ -239,7 +232,8 @@ BSPLightmap* AssetManager::LoadBSPLightmap(const std::string& name)
 
 SheepScript* AssetManager::LoadSheep(const std::string& name)
 {
-    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), &mLoadedSheeps, [](std::string& name, char* buffer, unsigned int bufferSize) {
+    // Sheep assets need more complex/custom creation login, provided in the create callback.
+    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), &mLoadedSheeps, [](const std::string& name, char* buffer, unsigned int bufferSize) {
 
         // Determine whether this is a binary sheep asset.
         if(bufferSize >= 8 && memcmp(buffer, "GK3Sheep", 8) == 0)
@@ -273,7 +267,7 @@ Shader* AssetManager::LoadShader(const std::string& name)
 Shader* AssetManager::LoadShader(const std::string& vertName, const std::string& fragName)
 {
     // Return existing shader if already loaded.
-	std::string key = StringUtil::ToUpperCopy(vertName + fragName);
+	std::string key = vertName + fragName;
 	auto it = mLoadedShaders.find(key);
 	if(it != mLoadedShaders.end())
 	{
@@ -309,11 +303,8 @@ void AssetManager::UnloadText(TextAsset* text)
 
 BarnFile* AssetManager::GetBarn(const std::string& barnName)
 {
-	// We want our dictionary key to be all uppercase.
-    std::string dictKey = StringUtil::ToUpperCopy(barnName);
-	
 	// If we find it, return it.
-	auto iter = mLoadedBarns.find(dictKey);
+	auto iter = mLoadedBarns.find(barnName);
 	if(iter != mLoadedBarns.end())
 	{
 		return iter->second;
@@ -335,15 +326,12 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 			// If the correct Barn isn't available, spit out an error and fail.
 			if(asset->IsPointer())
 			{
-				auto it = mLoadedBarns.find(asset->barnFileName);
-				if(it != mLoadedBarns.end())
-				{
-					return it->second;
-				}
-				else
-				{
-					std::cout << "Asset " << fileName << " exists in Barn " << asset->barnFileName << ", but that Barn is not loaded!" << std::endl;
-				}
+                BarnFile* barn = GetBarn(asset->barnFileName);
+                if(barn == nullptr)
+                {
+                    std::cout << "Asset " << fileName << " exists in Barn " << asset->barnFileName << ", but that Barn is not loaded!" << std::endl;
+                }
+                return barn;
 			}
 			else
 			{
@@ -367,15 +355,13 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 }
 
 template<class T>
-T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T* (std::string&, char*, unsigned int)> createFunc, bool deleteBuffer)
+T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, std::function<T* (const std::string&, char*, unsigned int)> createFunc, bool deleteBuffer)
 {
-    std::string upperName = StringUtil::ToUpperCopy(assetName);
-    
     // See if this asset is already loaded in the cache
     // If so, we can just return it right away.
     if(cache != nullptr)
     {
-        auto it = cache->find(upperName);
+        auto it = cache->find(assetName);
         if(it != cache->end())
         {
             return it->second;
@@ -394,7 +380,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	}
 	
 	// Generate asset from the BARN bytes.
-    T* asset = createFunc != nullptr ? createFunc(upperName, buffer, bufferSize) : new T(upperName, buffer, bufferSize);
+    T* asset = createFunc != nullptr ? createFunc(assetName, buffer, bufferSize) : new T(assetName, buffer, bufferSize);
 	
 	// Delete the buffer after use (or it'll leak).
     if(deleteBuffer)
@@ -405,18 +391,17 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	// Add entry in cache, if we have a cache.
 	if(cache != nullptr)
 	{
-		(*cache)[upperName] = asset;
+		(*cache)[assetName] = asset;
 	}
 
-	//std::cout << "Loaded asset " << upperName << std::endl;
+	//std::cout << "Loaded asset " << assetName << std::endl;
 	return asset;
 }
 
 char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)
 {
-	// First, see if the asset exists at any asset search path.
-	// If so, we load the asset directly from file.
-	// Loose files take precedence over packaged barn assets.
+	// First, see if the asset exists as a loose file at any search path.
+    // If so, it takes priority over bundled versions of the file.
 	std::string assetPath = GetAssetPath(assetName);
 	if(!assetPath.empty())
 	{
@@ -446,7 +431,7 @@ char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int
 	BarnFile* barn = GetBarnContainingAsset(assetName);
 	if(barn != nullptr)
 	{
-		// Extract bytes from the barn file contents.
+		// Find asset entry in this barn, or fail.
 		BarnAsset* barnAsset = barn->GetAsset(assetName);
 		if(barnAsset == nullptr)
 		{
@@ -459,6 +444,7 @@ char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int
 		char* buffer = new char[outBufferSize];
 		
 		// Extract the asset to that buffer.
+        // If the asset is compressed, this will perform decompression.
 		barn->Extract(barnAsset, buffer, outBufferSize);
 		return buffer;
 	}
@@ -468,7 +454,7 @@ char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int
 }
 
 template<class T>
-void AssetManager::UnloadAsset(T* asset, std::unordered_map<std::string, T*>& cache)
+void AssetManager::UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>& cache)
 {
     // Remove from cache.
     auto it = cache.find(asset->GetName());
@@ -482,7 +468,7 @@ void AssetManager::UnloadAsset(T* asset, std::unordered_map<std::string, T*>& ca
 }
 
 template<class T>
-void AssetManager::UnloadAssets(std::unordered_map<std::string, T*>& cache)
+void AssetManager::UnloadAssets(std::unordered_map_ci<std::string, T*>& cache)
 {
 	// Delete all assets in the cache.
 	for(auto& entry : cache)

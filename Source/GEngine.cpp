@@ -51,11 +51,11 @@ bool GEngine::Initialize()
     //TODO: Custom paths from GK3.ini should be added at a higher priority than default search paths.
     
     // Add "Assets" directory as a possible location for any file.
-    mAssetManager.AddSearchPath("Assets/");
+    mAssetManager.AddSearchPath("Assets");
 	
 	// Add "Assets/GK3" directory, which should contain the actual assets from GK3 data folder.
     //TODO: Maybe change this to "Data" folder, to match original game?
-	mAssetManager.AddSearchPath("Assets/GK3/");
+	mAssetManager.AddSearchPath("Assets/GK3");
 
     // For simplicity right now, let's just load all barns at once.
     std::vector<std::string> barns = {

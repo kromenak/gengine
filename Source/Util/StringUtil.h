@@ -211,7 +211,8 @@ namespace StringUtil
     
     inline unsigned long HashCaseInsensitive(const char* str)
     {
-        // DJB2 hash, XOR variant, case-insensitive
+        // DJB2 hash, XOR variant, case-insensitive.
+        // Taken from http://www.cse.yorku.ca/~oz/hash.html
         unsigned long hash = 5381;
         int c;
         while((c = *str++))
@@ -252,8 +253,8 @@ namespace std
                                              StringUtil::CaseInsensitiveCompare>;
     
     // Type alias for case-insensitive unordered map.
-    // This version is meant primarily to allow easily swapping between unordered_map.
-    // Though it lets you specifiy a key type, the type must be std::string for it to compile!
+    // This version is meant primarily to allow easily swapping from unordered_map.
+    // Though it lets you specifiy a key template type, the type must be std::string for it to compile!
     template <typename T, typename U>
     using unordered_map_ci = std::unordered_map<T, U,
                                              StringUtil::CaseInsensitiveHash,

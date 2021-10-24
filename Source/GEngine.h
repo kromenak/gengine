@@ -1,6 +1,4 @@
 //
-// GEngine.h
-//
 // Clark Kromenaker
 //
 // The "main" engine class. This is created by main() and handles

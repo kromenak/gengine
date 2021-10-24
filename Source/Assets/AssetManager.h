@@ -24,6 +24,7 @@
 #include "Shader.h"
 #include "Sheep/SheepScript.h"
 #include "Soundtrack.h"
+#include "StringUtil.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "VertexAnimation.h"
@@ -95,33 +96,33 @@ private:
     
     // A map of loaded barn files. If an asset isn't found on any search path,
     // we then search each loaded barn file for the asset.
-    std::unordered_map<std::string, BarnFile*> mLoadedBarns;
+    std::unordered_map_ci<std::string, BarnFile*> mLoadedBarns;
     
     // A list of loaded assets, so we can just return existing assets if already loaded.
-    std::unordered_map<std::string, Audio*> mLoadedAudios;
-	std::unordered_map<std::string, Soundtrack*> mLoadedSoundtracks;
-	std::unordered_map<std::string, Animation*> mLoadedYaks;
+    std::unordered_map_ci<std::string, Audio*> mLoadedAudios;
+	std::unordered_map_ci<std::string, Soundtrack*> mLoadedSoundtracks;
+	std::unordered_map_ci<std::string, Animation*> mLoadedYaks;
 	
-	std::unordered_map<std::string, Model*> mLoadedModels;
-    std::unordered_map<std::string, Texture*> mLoadedTextures;
+	std::unordered_map_ci<std::string, Model*> mLoadedModels;
+    std::unordered_map_ci<std::string, Texture*> mLoadedTextures;
 	
-	std::unordered_map<std::string, GAS*> mLoadedGases;
-	std::unordered_map<std::string, Animation*> mLoadedAnimations;
-    std::unordered_map<std::string, Animation*> mLoadedMomAnimations;
-	std::unordered_map<std::string, VertexAnimation*> mLoadedVertexAnimations;
+	std::unordered_map_ci<std::string, GAS*> mLoadedGases;
+	std::unordered_map_ci<std::string, Animation*> mLoadedAnimations;
+    std::unordered_map_ci<std::string, Animation*> mLoadedMomAnimations;
+	std::unordered_map_ci<std::string, VertexAnimation*> mLoadedVertexAnimations;
 	
-	std::unordered_map<std::string, SceneInitFile*> mLoadedSIFs;
-	std::unordered_map<std::string, SceneAsset*> mLoadedSceneAssets;
-	std::unordered_map<std::string, NVC*> mLoadedActionSets;
+	std::unordered_map_ci<std::string, SceneInitFile*> mLoadedSIFs;
+	std::unordered_map_ci<std::string, SceneAsset*> mLoadedSceneAssets;
+	std::unordered_map_ci<std::string, NVC*> mLoadedActionSets;
     
-	std::unordered_map<std::string, BSP*> mLoadedBSPs;
-    std::unordered_map<std::string, BSPLightmap*> mLoadedBSPLightmaps;
+	std::unordered_map_ci<std::string, BSP*> mLoadedBSPs;
+    std::unordered_map_ci<std::string, BSPLightmap*> mLoadedBSPLightmaps;
     
-	std::unordered_map<std::string, SheepScript*> mLoadedSheeps;
+	std::unordered_map_ci<std::string, SheepScript*> mLoadedSheeps;
 	
-    std::unordered_map<std::string, Shader*> mLoadedShaders;
+    std::unordered_map_ci<std::string, Shader*> mLoadedShaders;
 
-    std::unordered_map<std::string, TextAsset*> mLoadedTexts;
+    std::unordered_map_ci<std::string, TextAsset*> mLoadedTexts;
 	
 	// Retrieve a barn bundle by name, or by contained asset.
 	BarnFile* GetBarn(const std::string& barnName);
@@ -129,9 +130,9 @@ private:
     
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
     
-    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map<std::string, T*>* cache, std::function<T*(std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
+    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, std::function<T*(const std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
 	char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
 
-    template<class T> void UnloadAsset(T* asset, std::unordered_map<std::string, T*>& cache);
-	template<class T> void UnloadAssets(std::unordered_map<std::string, T*>& cache);
+    template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>& cache);
+	template<class T> void UnloadAssets(std::unordered_map_ci<std::string, T*>& cache);
 };

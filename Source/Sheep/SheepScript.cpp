@@ -205,13 +205,8 @@ void SheepScript::ParseVariablesSection(BinaryReader& reader)
     // Don't need byte size of all variables.
     reader.Skip(12);
     
-    int variableCount = reader.ReadInt();
-    if(variableCount > 0)
-    {
-        std::cout << GetName() << " has variables!" << std::endl;
-    }
-    
     // Don't really need offset values for variables.
+    int variableCount = reader.ReadInt();
     reader.Skip(4 * variableCount);
     
     // Read in each variable.
