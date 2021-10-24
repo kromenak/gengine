@@ -7,6 +7,7 @@
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
 #include "GMath.h"
+#include "ThreadUtil.h"
 
 Texture Texture::White(2, 2, Color32::White);
 Texture Texture::Black(2, 2, Color32::Black);
@@ -57,7 +58,10 @@ Texture::~Texture()
 {
 	if(mTextureId != GL_NONE)
 	{
-		glDeleteTextures(1, &mTextureId);
+        GLuint textureId = mTextureId;
+        ThreadUtil::RunOnMainThread([textureId]() {
+            glDeleteTextures(1, &textureId);
+        });
 	}
 	if(mPalette != nullptr)
 	{
