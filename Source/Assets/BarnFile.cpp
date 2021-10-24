@@ -141,23 +141,19 @@ BarnFile::BarnFile(const std::string& filePath) :
         // a Barn file can contain "pointers" to assets in other Barn files.
         // If this name is empty, it means the asset is contained within THIS Barn file.
         // However, if the name isn't empty, it means the asset is in another Barn file.
-        char barnFileName[33];
-        mReader.Read(barnFileName, 32);
-        barnFileName[32] = '\0';
+        std::string barnFileName = mReader.ReadString(32);
         
         // Unknown value.
         mReader.ReadUInt();
         
         // A human-readable description for this Barn file.
         // Ex: "Gabriel Knight 3 Day 1/2/3 Common"
-        char barnDescription[40];
-        mReader.Read(barnDescription, 40);
+        std::string barnFileDescription = mReader.ReadString(40);
         
         // Unknown value.
         mReader.ReadUInt();
         
         int numAssets = mReader.ReadUInt();
-        
 		mReader.Seek(dataOffsets[i]);
         for(int j = 0; j < numAssets; j++)
         {
@@ -209,16 +205,9 @@ BarnFile::BarnFile(const std::string& filePath) :
                 }
             }
 			
-            // Read in asset name. This name appears to be null-terminated (+1).
-            // So, max size is 256 + 1 = 257.
-            //TODO: Might be better to only store a char array of the correct length?
+            // Read in asset name. +1 for null terminator.
             unsigned int assetNameLength = mReader.ReadUByte();
-            char assetName[257];
-            mReader.Read(assetName, assetNameLength + 1);
-            
-            // Save asset name.
-            asset.name = assetName;
-			
+            asset.name = mReader.ReadString(assetNameLength + 1);
 			//std::cout << asset.name << ", " << (int)asset.compressionType << ", " << asset.compressedSize << ", " << asset.uncompressedSize << std::endl;
 			
             // Map asset name to asset for fast lookup later.
@@ -277,16 +266,20 @@ bool BarnFile::Extract(BarnAsset* asset, char* buffer, int bufferSize)
         // Seek to the data possion and read the data into the buffer. Since it's already uncompressed, we're done!
         //cout << "Reading from offset " << mDataOffset + asset->offset << endl;
         //cout << "Reading " << asset->uncompressedSize << " bytes " << endl;
+        mReaderMutex.lock();
         mReader.Seek(mDataOffset + asset->offset);
         mReader.Read(buffer, asset->uncompressedSize);
+        mReaderMutex.unlock();
     }
     else if(asset->compressionType == CompressionType::Zlib)
     {
         // Read compressed data into a buffer.
         unsigned char* compressedBuffer = new unsigned char[asset->compressedSize];
+        mReaderMutex.lock();
         mReader.Seek(mDataOffset + 8 + asset->offset);
         mReader.Read(compressedBuffer, asset->compressedSize);
-    
+        mReaderMutex.unlock();
+        
         z_stream strm;
         strm.next_in = compressedBuffer;
         strm.avail_in = asset->compressedSize;
@@ -337,8 +330,10 @@ bool BarnFile::Extract(BarnAsset* asset, char* buffer, int bufferSize)
 		}
 		
 		// Read compressed data into a buffer.
+        mReaderMutex.lock();
         mReader.Seek(mDataOffset + 8 + asset->offset);
         int readCount = mReader.Read(compressedBuffer, asset->compressedSize);
+        mReaderMutex.unlock();
 		if(readCount != asset->compressedSize)
 		{
 			std::cout << "Didn't read desired number of bytes." << std::endl;

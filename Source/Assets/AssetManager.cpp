@@ -249,7 +249,8 @@ SheepScript* AssetManager::LoadSheep(const std::string& name)
 
         // This doesn't appear to be a binary sheep file, so it might be a text sheep file.
         // Let's try compiling it on-the-fly!
-        return Services::GetSheep()->Compile(name, imstream(buffer, bufferSize));
+        imstream stream(buffer, bufferSize);
+        return Services::GetSheep()->Compile(name, stream);
     });
 }
 
@@ -357,15 +358,12 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 
 std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
 {
-    // First, convert all names to uppercase.
-    std::string sanitizedName = StringUtil::ToUpperCopy(assetName);
-    
     // We want to add the expected extension if no extension already exists on the name.
-    if(!File::HasExtension(sanitizedName))
+    if(!File::HasExtension(assetName))
     {
-        sanitizedName += expectedExtension;
+        return assetName + expectedExtension;
     }
-    return sanitizedName;
+    return assetName;
 }
 
 template<class T>
@@ -386,7 +384,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map<std:
 	
 	// Retrieve the buffer, from which we'll create the asset.
 	unsigned int bufferSize = 0;
-	char* buffer = CreateAssetBuffer(upperName, bufferSize);
+	char* buffer = CreateAssetBuffer(assetName, bufferSize);
 	
 	// If no buffer could be found, we're in trouble!
 	if(buffer == nullptr)

@@ -7,10 +7,12 @@
 // That metaphor didn't extend super far, but you get the idea.
 //
 #pragma once
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
 #include "BinaryReader.h"
+#include "StringUtil.h"
 
 enum class CompressionType
 {
@@ -81,13 +83,15 @@ private:
     // The name of the barn file.
     std::string mName;
     
-    // Binary reader for extracting data.
-    BinaryReader mReader;
-    
     // Offset within the file to where the data is located.
     unsigned int mDataOffset = 0;
     
-    // Map of asset name to an asset handle.
-    // The asset needs to be extracted before it can be used.
-    std::unordered_map<std::string, BarnAsset> mAssetMap;
+    // Binary reader for extracting data.
+    // Extraction may occur on multiple threads at once, so a mutex is required to guard access.
+    BinaryReader mReader;
+    std::mutex mReaderMutex;
+    
+    // Map of asset name to an asset handle. Assets must be extracted before being used.
+    // Asset names are case-insensitive.
+    std::unordered_map_ci<std::string, BarnAsset> mAssetMap;
 };
