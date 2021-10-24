@@ -1,6 +1,4 @@
 //
-//  StringUtil.h
-//
 //  Clark Kromenaker
 //
 // "Add ons" to std::string.
@@ -11,6 +9,7 @@
 #include <cctype>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace StringUtil
@@ -141,7 +140,7 @@ namespace StringUtil
         if(str1.size() != str2.size()) { return false; }
         return std::equal(str1.begin(), str1.end(), str2.begin(), iequal());
     }
-
+    
     inline bool StartsWith(const std::string& str, const std::string& startsWith)
     {
         if(str.size() < startsWith.size()) { return false; }
@@ -209,4 +208,54 @@ namespace StringUtil
 		// Create a string from the buffer (-1 b/c we don't need the \0 for the string).
 		return std::string(buf.get(), buf.get() + size - 1);
 	}
+    
+    inline unsigned long HashCaseInsensitive(const char* str)
+    {
+        // DJB2 hash, XOR variant, case-insensitive
+        unsigned long hash = 5381;
+        int c;
+        while((c = *str++))
+        {
+            hash = ((hash << 5) + hash) ^ std::toupper(c); /* hash * 33 XOR c */
+        }
+        return hash;
+    }
+    
+    inline unsigned long HashCaseInsensitive(const std::string& str)
+    {
+        return HashCaseInsensitive(str.c_str());
+    }
+    
+    // Helper structs for using std collections with case-insensitive comparisons/hashing.
+    struct CaseInsensitiveCompare
+    {
+        bool operator() (const std::string& lhs, const std::string& rhs) const
+        {
+            return StringUtil::EqualsIgnoreCase(lhs, rhs);
+        }
+    };
+    struct CaseInsensitiveHash
+    {
+        std::size_t operator() (const std::string& str) const
+        {
+            return StringUtil::HashCaseInsensitive(str.c_str());
+        }
+    };
+}
+
+namespace std
+{
+    // Type alias for case-insensitive unordered map with string key.
+    template <typename T>
+    using string_map_ci = std::unordered_map<std::string, T,
+                                             StringUtil::CaseInsensitiveHash,
+                                             StringUtil::CaseInsensitiveCompare>;
+    
+    // Type alias for case-insensitive unordered map.
+    // This version is meant primarily to allow easily swapping between unordered_map.
+    // Though it lets you specifiy a key type, the type must be std::string for it to compile!
+    template <typename T, typename U>
+    using unordered_map_ci = std::unordered_map<T, U,
+                                             StringUtil::CaseInsensitiveHash,
+                                             StringUtil::CaseInsensitiveCompare>;
 }
