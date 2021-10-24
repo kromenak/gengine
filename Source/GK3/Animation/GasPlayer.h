@@ -1,6 +1,4 @@
 //
-// GasPlayer.cpp
-//
 // Clark Kromenaker
 //
 // A component that can play a GAS file.
@@ -11,6 +9,7 @@
 #include <functional>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 class Animation;
 class Animator;
