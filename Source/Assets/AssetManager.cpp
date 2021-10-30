@@ -112,7 +112,7 @@ void AssetManager::UnloadBarn(const std::string& barnName)
     delete barn;
     
     // Remove from map.
-    mLoadedBarns.erase(barnName);
+    mLoadedBarns.erase(iter);
 }
 
 void AssetManager::WriteBarnAssetToFile(const std::string& assetName)
@@ -368,40 +368,53 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map_ci<s
         }
     }
 	
-	// Retrieve the buffer, from which we'll create the asset.
-	unsigned int bufferSize = 0;
-	char* buffer = CreateAssetBuffer(assetName, bufferSize);
-	
-	// If no buffer could be found, we're in trouble!
-	if(buffer == nullptr)
-	{
-		//std::cout << "Asset " << upperName << " could not be loaded!" << std::endl;
-		return nullptr;
-	}
-	
-	// Generate asset from the BARN bytes.
-    T* asset = createFunc != nullptr ? createFunc(assetName, buffer, bufferSize) : new T(assetName, buffer, bufferSize);
-	
-	// Delete the buffer after use (or it'll leak).
-    if(deleteBuffer)
-    {
-        delete[] buffer;
-    }
-	
+    // Create the asset.
+    T* asset = CreateAsset(assetName, createFunc, deleteBuffer);
+    
 	// Add entry in cache, if we have a cache.
 	if(cache != nullptr)
 	{
 		(*cache)[assetName] = asset;
 	}
 
-	//std::cout << "Loaded asset " << assetName << std::endl;
+	//std::cout << "Loaded asset " << upperName << std::endl;
 	return asset;
+}
+
+template<class T>
+T* AssetManager::CreateAsset(const std::string& assetName, std::function<T* (const std::string&, char*, unsigned int)> createFunc, bool deleteBuffer)
+{
+    // Retrieve the buffer, from which we'll create the asset.
+    unsigned int bufferSize = 0;
+    char* buffer = CreateAssetBuffer(assetName, bufferSize);
+    
+    // If no buffer could be found, we're in trouble!
+    if(buffer == nullptr)
+    {
+        //std::cout << "Asset " << upperName << " could not be loaded!" << std::endl;
+        return nullptr;
+    }
+    
+    // Generate asset from the data buffer.
+    // For now, always use uppercase version of asset name for the asset, as this matches the original game.
+    std::string upperName = StringUtil::ToUpperCopy(assetName);
+    T* asset = createFunc != nullptr ? createFunc(upperName, buffer, bufferSize) : new T(upperName, buffer, bufferSize);
+    
+    // Delete the buffer after use (or it'll leak).
+    if(deleteBuffer)
+    {
+        delete[] buffer;
+    }
+    
+    // Aaaand there it is.
+    return asset;
 }
 
 char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)
 {
-	// First, see if the asset exists as a loose file at any search path.
-    // If so, it takes priority over bundled versions of the file.
+	// First, see if the asset exists at any asset search path.
+	// If so, we load the asset directly from file.
+	// Loose files take precedence over packaged barn assets.
 	std::string assetPath = GetAssetPath(assetName);
 	if(!assetPath.empty())
 	{

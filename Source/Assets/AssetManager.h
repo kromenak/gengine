@@ -131,8 +131,10 @@ private:
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
     
     template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, std::function<T*(const std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
-	char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
+	
+    template<class T> T* CreateAsset(const std::string& assetName, std::function<T*(const std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
+    char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
 
     template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>& cache);
-	template<class T> void UnloadAssets(std::unordered_map_ci<std::string, T*>& cache);
+    template<class T> void UnloadAssets(std::unordered_map_ci<std::string, T*>& cache);
 };

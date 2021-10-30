@@ -255,10 +255,6 @@ bool BarnFile::Extract(BarnAsset* asset, char* buffer, int bufferSize)
 		std::cout << "Buffer is too small to contain extracted asset." << std::endl;
         return false;
     }
-
-    //TODO: With multi-threaded loading, we can get race conditions if multiple threads try to read from the same barn at the same time.
-    //TODO: To resolve that, only option I see is to guard mReader access with a mutex.
-    //TODO: zlib and lzo both claim to be thread-safe, so it's really just the reader stuff I think?
     
     // Method used to extract will depend upon the compression type for the asset.
     if(asset->compressionType == CompressionType::None)
