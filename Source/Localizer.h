@@ -1,6 +1,4 @@
 //
-// Localizer.h
-//
 // Clark Kromenaker
 //
 // Provides a mapping from localization keys to localized text.

@@ -313,13 +313,16 @@ void Scene::Init()
 void Scene::Update(float deltaTime)
 {
     //TEMP: for debug visualization of BSP ambient light sources.
-    mSceneData->GetBSP()->DebugDrawAmbientLights(mEgo->GetPosition());
+    //mSceneData->GetBSP()->DebugDrawAmbientLights(mEgo->GetPosition());
     
-    // Apply lighting settings from scene.
-    Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(mEgo->GetPosition());
-    for(Material& material : mEgo->GetMeshRenderer()->GetMaterials())
+    // Apply ambient light to actors.
+    for(auto& actor : mActors)
     {
-        material.SetColor("uAmbientColor", ambientColor);
+        Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(actor->GetPosition());
+        for(Material& material : actor->GetMeshRenderer()->GetMaterials())
+        {
+            material.SetColor("uAmbientColor", ambientColor);
+        }
     }
 }
 
