@@ -425,7 +425,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
 				// Though this is void return, we still push type of "shpvoid" onto stack.
 				// The compiler generates an extra "Pop" instruction after a CallSysFunctionV.
 				// This matches how the original game's compiler generated instructions!
-				thread->mStack.PushInt(value.to<shpvoid>());
+				thread->mStack.PushInt(value.To<shpvoid>());
                 break;
             }
             case SheepInstruction::CallSysFunctionI:
@@ -446,7 +446,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
                 Value value = CallSysFunc(thread, sysFunc);
 				
 				// Push the int result onto the stack.
-				thread->mStack.PushInt(value.to<int>());
+				thread->mStack.PushInt(value.To<int>());
                 break;
             }
             case SheepInstruction::CallSysFunctionF:
@@ -467,7 +467,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
                 Value value = CallSysFunc(thread, sysFunc);
 				
 				// Push the float result onto the stack.
-				thread->mStack.PushFloat(value.to<float>());
+				thread->mStack.PushFloat(value.To<float>());
                 break;
             }
             case SheepInstruction::CallSysFunctionS:
@@ -488,7 +488,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
                 Value value = CallSysFunc(thread, sysFunc);
 				
 				// Push the string result onto the stack.
-				thread->mStack.PushString(value.to<std::string>().c_str()); //TODO: Seems like this could cause problems? Where is value's string coming from? What if it is deallocated???
+				thread->mStack.PushString(value.To<std::string>().c_str()); //TODO: Seems like this could cause problems? Where is value's string coming from? What if it is deallocated???
                 break;
             }
             case SheepInstruction::Branch:

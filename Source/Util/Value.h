@@ -1,6 +1,4 @@
 //
-// Value.h
-//
 // Clark Kromenaker
 //
 // A container that can hold a value of any type. Allows you to treat all
@@ -15,47 +13,86 @@
 #pragma once
 #include <cassert>
 
-// Contains points to functions that know how to copy or destroy a particular type.
+// A "type handler" encapsulates how to perform operations on a particular type.
+// It is just a set of functions that know how to copy/delete a type.
 struct TypeHandler
 {
-    void* (*copyFrom)(void *src);
-    void (*destroy)(void *p);
+    void* (*copyFrom)(void* src);
+    void (*destroy)(void* p);
+    void (*destroyArray)(void* p);
 };
 
-// A templated function that will generate unique TypeHandlers based on type provided.
+// Generates a "type handler" for the given type T.
 template<typename T>
-TypeHandler *thandler()
+TypeHandler* GetTypeHandler()
 {
     struct THandler
     {
-        static void *copyFrom(void *p) { return new T(*(T *)p); }
-        static void destroy(void *p) { delete (T *)p; }
+        static void* CopyFrom(void* p) { return new T(*(T*)p); }
+        static void  Destroy(void* p) { delete (T*)p; }
+        static void  DestroyArray(void* p) { delete[] (T*)p; }
     };
-    static TypeHandler th = { &THandler::copyFrom, &THandler::destroy };
+    static TypeHandler th = { &THandler::CopyFrom, &THandler::Destroy, &THandler::DestroyArray };
     return &th;
 }
 
-// A struct that contains some arbitrary type stored as a void pointer.
-// But the interface knows how to assign to and take from that piece of memory.
+// Encapsulates data and its type as separate objects, allowing storage of arbitrary types of data in a unforim
+// Very simple/barebones - data must be deleted manually.
+struct BasicValue
+{
+    TypeHandler* typeHandler;
+    void* data;
+    
+    BasicValue() = default;
+    template<typename T> BasicValue(T* x) : typeHandler(GetTypeHandler<T>()), data(x) { }
+    
+    void* Copy()
+    {
+        return typeHandler->copyFrom(data);
+    }
+    
+    void Delete()
+    {
+        typeHandler->destroy(data);
+        data = nullptr;
+    }
+    
+    void DeleteArray()
+    {
+        typeHandler->destroyArray(data);
+        data = nullptr;
+    }
+    
+    // Allows us to convert a value back to the original type.
+    // But note you MUST know the correct type. The assert will fail otherwise!
+    template<typename T>
+    T& To() const
+    {
+        assert(typeHandler == GetTypeHandler<T>());
+        return *(T*)data;
+    }
+};
+
+// Similar to BasicValue, but handles lifecycle of data when copied/destructed.
 struct Value
 {
     // A piece of memory to hold the value (void*), and TypeHandler that
     // explains how to manipulate that piece of memory, based on whether it's an int, string, float, etc.
-    TypeHandler *th;
-    void *p;
+    TypeHandler* typeHandler;
+    void* data;
     
-    Value(const Value& other) : th(other.th), p(th->copyFrom(other.p)) { }
-    template<typename T> Value(const T& x) : th(thandler<T>()), p(new T(x)) { }
-    ~Value() { th->destroy(p); }
+    template<typename T> Value(const T& x) : typeHandler(GetTypeHandler<T>()), data(new T(x)) { }
+    Value(const Value& other) : typeHandler(other.typeHandler), data(typeHandler->copyFrom(other.data)) { }
+    ~Value() { typeHandler->destroy(data); }
     
     // Assignment between Value objects.
     Value& operator=(const Value& other)
     {
-        if (this != &other)
+        if(this != &other)
         {
-            th->destroy(p);
-            th = other.th;
-            p = th->copyFrom(other.p);
+            typeHandler->destroy(data);
+            typeHandler = other.typeHandler;
+            data = typeHandler->copyFrom(other.data);
         }
         return *this;
     }
@@ -64,18 +101,18 @@ struct Value
     template<typename T>
     Value& operator=(const T& other)
     {
-        th->destroy(p);
-        th = thandler<T>();
-        p = new T(other);
+        typeHandler->destroy(data);
+        typeHandler = GetTypeHandler<T>();
+        data = new T(other);
         return *this;
     }
     
     // Allows us to convert a value back to the original type.
     // But note you MUST know the correct type. The assert will fail otherwise!
     template<typename T>
-    T& to() const
+    T& To() const
     {
-        assert(th == thandler<T>());
-        return *(T*)p;
+        assert(typeHandler == GetTypeHandler<T>());
+        return *(T*)data;
     }
 };

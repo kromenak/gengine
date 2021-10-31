@@ -73,7 +73,7 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 
 #define RegFunc1(name, ret, t1, waitable, dev)                     		\
     Value name(const Value& x1) {                   					\
-        return name(x1.to<t1>());                   					\
+        return name(x1.To<t1>());                   					\
     }                                               					\
     struct name##_ {                                					\
         name##_() {                                 					\
@@ -84,7 +84,7 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 
 #define RegFunc2(name, ret, t1, t2, waitable, dev)                      \
     Value name(const Value& x1, const Value& x2) {          			\
-        return name(x1.to<t1>(), x2.to<t2>());              			\
+        return name(x1.To<t1>(), x2.To<t2>());              			\
     }                                                       			\
     struct name##_ {                                        			\
         name##_() {                                         			\
@@ -95,7 +95,7 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 
 #define RegFunc3(name, ret, t1, t2, t3, waitable, dev)                      \
 	Value name(const Value& x1, const Value& x2, const Value& x3) {          			\
-		return name(x1.to<t1>(), x2.to<t2>(), x3.to<t3>());              			\
+		return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>());              			\
 	}                                                       			\
 	struct name##_ {                                        			\
 		name##_() {                                         			\
@@ -106,7 +106,7 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 
 #define RegFunc4(name, ret, t1, t2, t3, t4, waitable, dev)                      \
 	Value name(const Value& x1, const Value& x2, const Value& x3, const Value& x4) {          			\
-		return name(x1.to<t1>(), x2.to<t2>(), x3.to<t3>(), x4.to<t4>());              			\
+		return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>(), x4.To<t4>());              			\
 	}                                                       			\
 	struct name##_ {                                        			\
 		name##_() {                                         			\
@@ -117,7 +117,7 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 
 #define RegFunc5(name, ret, t1, t2, t3, t4, t5, waitable, dev)                      \
 	Value name(const Value& x1, const Value& x2, const Value& x3, const Value& x4, const Value& x5) {          			\
-		return name(x1.to<t1>(), x2.to<t2>(), x3.to<t3>(), x4.to<t4>(), x5.to<t5>());              			\
+		return name(x1.To<t1>(), x2.To<t2>(), x3.To<t3>(), x4.To<t4>(), x5.To<t5>());              			\
 	}                                                       			\
 	struct name##_ {                                        			\
 		name##_() {                                         			\
