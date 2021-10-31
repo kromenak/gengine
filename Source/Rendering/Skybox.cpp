@@ -70,9 +70,8 @@ void Skybox::Render()
     if(mSkyboxMesh == nullptr)
     {
         MeshDefinition meshDefinition(MeshUsage::Static, 36);
-        meshDefinition.SetVertexLayout(VertexLayout::Interleaved);
-        meshDefinition.AddVertexAttribute(VertexAttribute::Position);
-        meshDefinition.SetVertexData(points);
+        meshDefinition.SetVertexLayout(VertexLayout::Packed);
+        meshDefinition.AddVertexData(VertexAttribute::Position, points);
         
         mSkyboxMesh = new Mesh();
         mSkyboxMesh->AddSubmesh(meshDefinition);

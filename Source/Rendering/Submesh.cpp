@@ -10,10 +10,10 @@ Submesh::Submesh(const MeshDefinition& meshDefinition) :
     // Cache pointers to mesh data needed for submesh calculations.
     if(meshDefinition.vertexDefinition.layout == VertexLayout::Packed)
     {
-        mPositions = reinterpret_cast<float*>(meshDefinition.GetVertexData(VertexAttribute::Position));
-        mColors = reinterpret_cast<float*>(meshDefinition.GetVertexData(VertexAttribute::Color));
-        mNormals = reinterpret_cast<float*>(meshDefinition.GetVertexData(VertexAttribute::Normal));
-        mUV1 = reinterpret_cast<float*>(meshDefinition.GetVertexData(VertexAttribute::UV1));
+        mPositions = meshDefinition.GetVertexData<float>(VertexAttribute::Position);
+        mColors = meshDefinition.GetVertexData<float>(VertexAttribute::Color);
+        mNormals = meshDefinition.GetVertexData<float>(VertexAttribute::Normal);
+        mUV1 = meshDefinition.GetVertexData<float>(VertexAttribute::UV1);
     }
 }
 

@@ -1,6 +1,4 @@
 //
-// Skybox.h
-//
 // Clark Kromenaker
 //
 // Data and routines used to display a skybox around the world.

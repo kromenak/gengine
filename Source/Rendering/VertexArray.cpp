@@ -16,15 +16,15 @@ VertexArray::VertexArray(const MeshDefinition& data) :
 
 VertexArray::~VertexArray()
 {
+    // Delete data if owned.
     if(mData.ownsData)
     {
-        // Delete mesh data.
-        for(auto& ptr : mData.vertexData)
+        for(auto& data : mData.vertexData)
         {
-            delete[] ptr;
+            data.DeleteArray();
         }
         mData.vertexData.clear();
-
+        
         // Delete index data.
         delete[] mData.indexData;
     }
@@ -146,7 +146,7 @@ void VertexArray::ChangeVertexData(void* data)
 {
     // Save data locally.
     int size = mData.vertexCount * mData.vertexDefinition.CalculateSize();
-    memcpy(mData.vertexData[0], data, size);
+    memcpy(mData.vertexData[0].data, data, size);
 
     // Assuming that the data is the correct size to fill the entire buffer.
     glBindBuffer(GL_ARRAY_BUFFER, mVBO);
@@ -177,7 +177,7 @@ void VertexArray::ChangeVertexData(VertexAttribute::Semantic semantic, void* dat
         if(attribute.semantic == semantic)
         {
             // Save data locally.
-            memcpy(mData.vertexData[i], data, attributeSize);
+            memcpy(mData.vertexData[i].data, data, attributeSize);
 
             // Send to GPU.
             glBindBuffer(GL_ARRAY_BUFFER, mVBO);
@@ -246,7 +246,7 @@ void VertexArray::CreateVBO()
             GLsizeiptr attributeSize = mData.vertexCount * attribute.GetSize();
 
             // Load attribute data to GPU.
-            glBufferSubData(GL_ARRAY_BUFFER, offset, attributeSize, mData.vertexData[attributeIndex]);
+            glBufferSubData(GL_ARRAY_BUFFER, offset, attributeSize, mData.vertexData[attributeIndex].data);
 
             // Next attribute's offset is calculated by adding this attribute's size.
             offset += attributeSize;
@@ -256,7 +256,7 @@ void VertexArray::CreateVBO()
     else // Interleaved vertex layout.
     {
         // Allocate VBO of needed size, and fill it with provided vertex data (if any).
-        glBufferData(GL_ARRAY_BUFFER, size, mData.vertexData[0], usage);
+        glBufferData(GL_ARRAY_BUFFER, size, mData.vertexData[0].data, usage);
     }
 }
 

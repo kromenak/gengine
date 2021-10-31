@@ -5,6 +5,9 @@
 // Once defined, this data can be sent to the GPU to actually render the thing.
 //
 #pragma once
+#include <utility>
+
+#include "Value.h"
 #include "VertexDefinition.h"
 
 enum class MeshUsage
@@ -26,10 +29,10 @@ struct MeshDefinition
     unsigned int vertexCount = 0;
     unsigned int indexCount = 0;
 
-    // Pointers to vertex data.
+    // Vertex data.
     // For interleaved data, there should be a single element: a pointer to a list of vertex structs.
     // For packed data, there should be one element per attribute: pointers to each attribute data.
-    std::vector<void*> vertexData;
+    std::vector<BasicValue> vertexData;
 
     // A buffer of indexes, if mesh uses indexes.
     unsigned short* indexData = nullptr;
@@ -44,13 +47,50 @@ struct MeshDefinition
     void SetVertexLayout(VertexLayout layout) { vertexDefinition.layout = layout; }
 
     // For packed data: specify attribute and data together.
-    void AddVertexData(const VertexAttribute& attribute, void* data);
+    template<typename T> void AddVertexData(const VertexAttribute& attribute, T* data);
 
     // For interleaved data: specify attributes separately from singular data buffer.
     void AddVertexAttribute(const VertexAttribute& attribute);
-    void SetVertexData(void* data);
+    template<typename T> void SetVertexData(T* data);
     
     void SetIndexData(unsigned int indexCount, unsigned short* indexData);
 
-    void* GetVertexData(const VertexAttribute& attribute) const;
+    template<typename T> T* GetVertexData(const VertexAttribute& attribute) const;
 };
+
+template<typename T>
+void MeshDefinition::AddVertexData(const VertexAttribute& attribute, T* data)
+{
+    vertexDefinition.attributes.push_back(attribute);
+    vertexData.emplace_back(std::forward<T*>(data));
+}
+
+template<typename T>
+void MeshDefinition::SetVertexData(T* data)
+{
+    // "Set" overwrites all existing data.
+    if(ownsData)
+    {
+        for(auto& data : vertexData)
+        {
+            data.DeleteArray();
+        }
+    }
+    vertexData.clear();
+    
+    // Set data as only element.
+    vertexData.emplace_back(std::forward<T*>(data));
+}
+
+template<typename T>
+T* MeshDefinition::GetVertexData(const VertexAttribute& attribute) const
+{
+    for(int i = 0; i < vertexDefinition.attributes.size(); i++)
+    {
+        if(vertexDefinition.attributes[i] == attribute)
+        {
+            return reinterpret_cast<T*>(vertexData[i].data);
+        }
+    }
+    return nullptr;
+}
