@@ -46,7 +46,12 @@ protected:
 private:
     // Name of the layer.
     std::string mName;
-    
+
+    //HACK/TEMP: Should we save previous state's audio state?
+    //HACK/TEMP: Without this, cross-fading ambient audio does not work - but I just threw this in as a stop-gap.
+    //TODO: Revisit how layers save/restore audio and create a more elegant solution.
+    bool mSaveAudioState = false;
+
     // Saved audio state.
     AudioSaveState mAudioSaveState;
 };

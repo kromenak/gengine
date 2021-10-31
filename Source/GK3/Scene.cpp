@@ -126,15 +126,6 @@ void Scene::Load()
 		//cameraBoundsMeshRenderer->DebugDrawAABBs();
 	}
 	
-	// Create soundtrack player and get it playing!
-	Soundtrack* soundtrack = mSceneData->GetSoundtrack();
-	if(soundtrack != nullptr)
-	{
-		Actor* actor = new Actor();
-		mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
-		mSoundtrackPlayer->Play(soundtrack);
-	}
-	
 	// For debugging - render walker bounds overlay on game world.
 	//TODO: Move to construction system!
 	/*
@@ -258,10 +249,6 @@ void Scene::Load()
 				break;
 		}
 	}
-	
-	
-	// Check for and run "scene enter" actions.
-	Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");
 }
 
 void Scene::Unload()
@@ -308,6 +295,21 @@ void Scene::Init()
     {
         actor->Init(*mSceneData);
     }
+
+    // Swap ambient channels, when allows previous scene's music to fade out as this scene's music starts.
+    Services::GetAudio()->SwapAmbient();
+
+    // Create soundtrack player and get it playing!
+    Soundtrack* soundtrack = mSceneData->GetSoundtrack();
+    if(soundtrack != nullptr)
+    {
+        Actor* actor = new Actor();
+        mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
+        mSoundtrackPlayer->Play(soundtrack);
+    }
+
+    // Check for and run "scene enter" actions.
+    Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");
 }
 
 void Scene::Update(float deltaTime)

@@ -74,7 +74,9 @@ public:
     
     PlayingSoundHandle PlayAmbient(Audio* audio, float fadeInTime = 0.0f);
     PlayingSoundHandle PlayAmbient3D(Audio* audio, const Vector3& position, float minDist = kDefault3DMinDist, float maxDist = kDefault3DMaxDist);
-    
+
+    void SwapAmbient();
+
     void SetMasterVolume(float volume);
     float GetMasterVolume() const;
     
@@ -93,26 +95,37 @@ public:
 private:
     // Underlying FMOD system - portal to audio greatness.
     FMOD::System* mSystem = nullptr;
-        
-    // Channel groups for different types of audio. Children of "master" group.
-    // Allows changing volume based on audio type.
-    FMOD::ChannelGroup* mSFXChannelGroup = nullptr;
-    FMOD::ChannelGroup* mVOChannelGroup = nullptr;
-    FMOD::ChannelGroup* mAmbientChannelGroup = nullptr;
-    
-    // Master channel group allows modifying master volume.
-    // All other channel groups are children of this group.
+
+    // Master channel group is the final output destination for all other channel groups.
+    // Changes to this group affect all other groups.
     FMOD::ChannelGroup* mMasterChannelGroup = nullptr;
-    
-    // Channel group just for fading in/out ambient audio. Child of "ambient" channel group.
-    // Don't want to modify sound or ambient group directly (they can be modified by others). This is JUST for fade in/out.
-    FMOD::ChannelGroup* mAmbientFadeChannelGroup = nullptr;
-    
-    // Timers for fading ambient audio.
-    float mAmbientFadeDuration = 0.0f;
-    float mAmbientFadeTimer = 0.0f;
-    float mAmbientFadeTo = 0.0f;
-    float mAmbientFadeFrom = 0.0f;
+
+    // Channel group for SFX. Outputs to master channel group.
+    FMOD::ChannelGroup* mSFXChannelGroup = nullptr;
+
+    // Channel group for VO. Outputs to master channel group.
+    FMOD::ChannelGroup* mVOChannelGroup = nullptr;
+
+    // Channel group for ambient (music, background audio). Outputs to master channel group.
+    FMOD::ChannelGroup* mAmbientChannelGroup = nullptr;
+
+    // Two channel groups for ambient playback. These output to the ambient channel group.
+    // We need these separate channel groups for two reasons:
+    // 1) Support fade in/out of ambient separate from user-defined volume levels.
+    // 2) Support cross-fading between ambient tracks when changing scenes.
+    struct FadeChannelGroup
+    {
+        float fadeDuration = 0.0f;
+        float fadeTimer = 0.0f;
+        float fadeTo = 0.0f;
+        float fadeFrom = 0.0f;
+        FMOD::ChannelGroup* channelGroup = nullptr;
+
+        void Update(float deltaTime);
+        void SetFade(float fadeTime, float targetVolume, float startVolume = -1.0f);
+    };
+    FadeChannelGroup mAmbientFadeChannelGroups[2];
+    int mCurrentAmbientIndex = 0;
     
     // Volume multipliers for each audio type. This changes the range of possible volumes for a particular type of audio.
     // For example, if 0.8 is used, it means that "max volume" for that audio type is actually 80% of the "true max".
@@ -128,9 +141,4 @@ private:
     
     PlayingSoundHandle CreateAndPlaySound(const char* buffer, int bufferLength, AudioType audioType, bool is3D = false);
     PlayingSoundHandle CreateAndPlaySound3D(const char* buffer, int bufferLength, AudioType audioType, const Vector3& position, float minDist, float maxDist);
-    
-    void AmbientFade(float fadeTime, float targetVolume, float startVolume = -1.0f);
-    
-    void AmbientFadeIn(float fadeInTime);
-    void AmbientFadeOut(float fadeOutTime);
 };

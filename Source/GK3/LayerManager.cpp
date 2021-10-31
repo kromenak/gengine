@@ -1,8 +1,3 @@
-//
-// LayerManager.cpp
-//
-// Clark Kromenaker
-//
 #include "LayerManager.h"
 
 #include <sstream>
@@ -26,13 +21,19 @@ Layer::Layer(const std::string& name, bool persistAmbientState) :
 void Layer::Pushed()
 {
     // Save audio state of layer below us in the stack.
-    mAudioSaveState = Services::GetAudio()->SaveAudioState(!mPersistAmbientState);
+    if(mSaveAudioState)
+    {
+        mAudioSaveState = Services::GetAudio()->SaveAudioState(!mPersistAmbientState);
+    }
 }
 
 void Layer::Popped()
 {
     // Restore audio state of layer below us in the stack.
-    Services::GetAudio()->RestoreAudioState(mAudioSaveState);
+    if(mSaveAudioState)
+    {
+        Services::GetAudio()->RestoreAudioState(mAudioSaveState);
+    }
 }
 
 void Layer::Enter(Layer* fromLayer)

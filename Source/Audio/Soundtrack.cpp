@@ -1,8 +1,3 @@
-//
-// Soundtrack.cpp
-//
-// Clark Kromenaker
-//
 #include "Soundtrack.h"
 
 #include "StringUtil.h"

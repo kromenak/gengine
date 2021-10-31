@@ -1,8 +1,3 @@
-//
-// SoundtrackPlayer.cpp
-//
-// Clark Kromenaker
-//
 #include "SoundtrackPlayer.h"
 
 TYPE_DEF_CHILD(Component, SoundtrackPlayer);
