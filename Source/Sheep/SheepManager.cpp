@@ -1,8 +1,3 @@
-//
-// SheepManager.cpp
-//
-// Clark Kromenaker
-//
 #include "SheepManager.h"
 
 #include "Services.h"

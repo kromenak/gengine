@@ -255,14 +255,26 @@ void AudioManager::Update(float deltaTime)
     // Update crossfades.
     mAmbientCrossfade.Update(deltaTime);
     mMusicCrossfade.Update(deltaTime);
-    
+
     // See if any playing channels are no longer playing.
     for(int i = mPlayingSounds.size() - 1; i >= 0; --i)
     {
         if(!mPlayingSounds[i].IsPlaying())
         {
+            // Put dead sound on back of playing sounds vector.
             std::swap(mPlayingSounds[i], mPlayingSounds.back());
+
+            // Save callback locally.
+            auto callback = mPlayingSounds.back().mFinishCallback;
+
+            // Remove from vector.
             mPlayingSounds.pop_back();
+
+            // Execute callback if set.
+            if(callback != nullptr)
+            {
+                callback();
+            }
         }
     }
     
@@ -289,10 +301,13 @@ void AudioManager::UpdateListener(const Vector3& position, const Vector3& veloci
     }
 }
 
-PlayingSoundHandle AudioManager::PlaySFX(Audio* audio)
+PlayingSoundHandle AudioManager::PlaySFX(Audio* audio, std::function<void()> finishCallback)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound(audio, AudioType::SFX);
+
+    PlayingSoundHandle& soundHandle = CreateAndPlaySound(audio, AudioType::SFX);
+    soundHandle.mFinishCallback = finishCallback;
+    return soundHandle;
 }
 
 PlayingSoundHandle AudioManager::PlaySFX3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
@@ -516,7 +531,7 @@ FMOD::ChannelGroup* AudioManager::GetChannelGroupForAudioType(AudioType audioTyp
     }
 }
 
-PlayingSoundHandle AudioManager::CreateAndPlaySound(Audio* audio, AudioType audioType, bool is3D)
+PlayingSoundHandle& AudioManager::CreateAndPlaySound(Audio* audio, AudioType audioType, bool is3D)
 {
     // Need to pass FMOD the length of audio data.
     FMOD_CREATESOUNDEXINFO exinfo;
@@ -557,9 +572,9 @@ PlayingSoundHandle AudioManager::CreateAndPlaySound(Audio* audio, AudioType audi
     return mPlayingSounds.back();
 }
 
-PlayingSoundHandle AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3 &position, float minDist, float maxDist)
+PlayingSoundHandle& AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3 &position, float minDist, float maxDist)
 {
-    PlayingSoundHandle soundHandle = CreateAndPlaySound(audio, audioType, true);
+    PlayingSoundHandle& soundHandle = CreateAndPlaySound(audio, audioType, true);
     
     // Assuming sound is assigned to a channel successfully, set 3D attributes.
     if(soundHandle.channel != nullptr)

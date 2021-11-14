@@ -2751,7 +2751,8 @@ shpvoid PlaySound(std::string soundName)
 	Audio* audio = Services::GetAssets()->LoadAudio(soundName);
 	if(audio != nullptr)
 	{
-		Services::GetAudio()->PlaySFX(audio);
+        SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+		Services::GetAudio()->PlaySFX(audio, currentThread->AddWait());
 	}
 	return 0;
 }

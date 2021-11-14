@@ -4,6 +4,7 @@
 // Handles playback of all types of audio.
 //
 #pragma once
+#include <functional>
 #include <vector>
 
 #include <fmod.hpp>
@@ -29,7 +30,7 @@ public:
     bool IsPlaying() const;
     
 private:
-    friend class AudioManager; // Allow audio manager to access channel directly.
+    friend class AudioManager; // Allow audio manager to access internals.
 
     // The Audio asset that triggered this sound to play.
     Audio* audio = nullptr;
@@ -38,6 +39,9 @@ private:
     // Once returned, this pointer is always valid, even if the sound stops playing or the channel is reused.
     // In one of those scenarios, calls to channel functions start to return FMOD_ERR_INVALID_HANDLE or similar result codes.
     FMOD::Channel* channel = nullptr;
+
+    // Callback to execute when sound finishes playing (either naturally or via stop).
+    std::function<void()> mFinishCallback;
 };
 
 struct AudioSaveState
@@ -98,7 +102,7 @@ public:
     void Update(float deltaTime);
     void UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up);
     
-    PlayingSoundHandle PlaySFX(Audio* audio);
+    PlayingSoundHandle PlaySFX(Audio* audio, std::function<void()> finishCallback = nullptr);
     PlayingSoundHandle PlaySFX3D(Audio* audio, const Vector3& position, float minDist = kDefault3DMinDist, float maxDist = kDefault3DMaxDist);
     
     PlayingSoundHandle PlayVO(Audio* audio);
@@ -161,6 +165,6 @@ private:
     
     FMOD::ChannelGroup* GetChannelGroupForAudioType(AudioType audioType, bool forVolume) const;
     
-    PlayingSoundHandle CreateAndPlaySound(Audio* audio, AudioType audioType, bool is3D = false);
-    PlayingSoundHandle CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3& position, float minDist, float maxDist);
+    PlayingSoundHandle& CreateAndPlaySound(Audio* audio, AudioType audioType, bool is3D = false);
+    PlayingSoundHandle& CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3& position, float minDist, float maxDist);
 };
