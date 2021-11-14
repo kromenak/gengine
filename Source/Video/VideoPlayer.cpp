@@ -11,7 +11,8 @@ TYPE_DEF_BASE(VideoPlayer);
 VideoPlayer::VideoPlayer() :
     mLayer("MovieLayer")
 {
-    
+    // Movie layer should override all game audio.
+    mLayer.OverrideAudioState(true);
 }
 
 VideoPlayer::~VideoPlayer()

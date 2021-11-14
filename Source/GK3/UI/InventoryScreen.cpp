@@ -1,8 +1,3 @@
-//
-// InventoryScreen.cpp
-//
-// Clark Kromenaker
-//
 #include "InventoryScreen.h"
 
 #include "ActionBar.h"
@@ -15,8 +10,11 @@
 #include "UIImage.h"
 
 InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
-    mLayer("InventoryLayer", true)
+    mLayer("InventoryLayer")
 {
+    // Inventory overrides SFX/VO, but continues ambient audio from scene.
+    mLayer.OverrideAudioState(true, true, false);
+
 	mCanvas = AddComponent<UICanvas>();
 	
 	// Add translucent background image that tints the scene.

@@ -66,7 +66,7 @@ public:
     const DialogueSceneCamera* GetFinalDialogueCameraForConversation(const std::string& conversationName) const;
 
 	// SOUNDTRACK
-	Soundtrack* GetSoundtrack() const { return mSoundtracks.size() > 0 ? mSoundtracks.back() : nullptr; }
+    const std::vector<Soundtrack*>& GetSoundtracks() const { return mSoundtracks; }
 
     // CONVERSATIONS
     std::vector<const SceneConversation*> GetConversationSettings(const std::string& conversationName) const;

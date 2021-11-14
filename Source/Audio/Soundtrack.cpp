@@ -6,13 +6,8 @@
 #include "IniParser.h"
 #include "Services.h"
 
-int WaitNode::Execute(SoundtrackSoundType soundType)
+int WaitNode::Execute(AudioType soundType)
 {
-    // Don't execute if we've hit the repeat limit.
-    // Otherwise, increment the execution count (execution IS happening!)
-    if(repeat > 0 && repeat - executionCount <= 0) { return 0; }
-    executionCount++;
-    
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
     int randomCheck = rand() % 100 + 1;
@@ -27,13 +22,8 @@ int WaitNode::Execute(SoundtrackSoundType soundType)
     return (rand() % maxWaitTimeMs + minWaitTimeMs);
 }
 
-int SoundNode::Execute(SoundtrackSoundType soundType)
+int SoundNode::Execute(AudioType soundType)
 {
-    // Don't execute if we've hit the repeat limit.
-    // Otherwise, increment the execution count (execution IS happening!)
-    if(repeat > 0 && repeat - executionCount <= 0) { return 0; }
-    executionCount++;
-    
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
     int randomCheck = rand() % 100 + 1;
@@ -47,7 +37,12 @@ int SoundNode::Execute(SoundtrackSoundType soundType)
     PlayingSoundHandle soundInstance;
     switch(soundType)
     {
-    case SoundtrackSoundType::Ambient:
+    case AudioType::Music:
+        // Going to assume music is never 3D for now...
+        soundInstance = Services::GetAudio()->PlayMusic(audio, fadeInTimeMs * 0.001f);
+        break;
+
+    case AudioType::Ambient:
         if(is3d)
         {
             soundInstance = Services::GetAudio()->PlayAmbient3D(audio, position, minDist, maxDist);
@@ -58,7 +53,7 @@ int SoundNode::Execute(SoundtrackSoundType soundType)
         }
         break;
         
-    case SoundtrackSoundType::SFX:
+    case AudioType::SFX:
         if(is3d)
         {
             soundInstance = Services::GetAudio()->PlaySFX3D(audio, position, minDist, maxDist);
@@ -156,11 +151,17 @@ void Soundtrack::ParseFromData(char *data, int dataLength)
 				IniKeyValue& entry = line.entries[0];
                 if(StringUtil::EqualsIgnoreCase(entry.key, "SoundType"))
                 {
-                    // There are only two options: Ambient or SFX.
-                    // The default is Ambient, so we really only care if the value is SFX.
-                    if(StringUtil::EqualsIgnoreCase(entry.value, "SFX"))
+                    if(StringUtil::EqualsIgnoreCase(entry.value, "Music"))
                     {
-                        mSoundType = SoundtrackSoundType::SFX;
+                        mSoundType = AudioType::Music;
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(entry.value, "Ambient"))
+                    {
+                        mSoundType = AudioType::Ambient;
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(entry.value, "SFX"))
+                    {
+                        mSoundType = AudioType::SFX;
                     }
                 }
                 else

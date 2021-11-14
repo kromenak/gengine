@@ -1,6 +1,4 @@
 //
-// Soundtrack.h
-//
 // Clark Kromenaker
 //
 // Represents a "Soundtrack" asset, used to create dynamic musical
@@ -15,12 +13,14 @@
 #include <vector>
 #include <cstdlib>
 
+#include "AudioManager.h"
 #include "Vector3.h"
 
 struct IniSection;
 
 enum class SoundtrackSoundType
 {
+    Music,      // Audio plays on the 
     Ambient,
     SFX
 };
@@ -37,20 +37,12 @@ struct SoundtrackNode
     // Repeat count is still decremented if node is not executed due to random!
     int random = 100;
     
-    virtual int Execute(SoundtrackSoundType soundType) = 0;
+    virtual int Execute(AudioType soundType) = 0;
     
     virtual bool IsLooping()
     {
         return false;
     }
-    
-    virtual void Reset()
-    {
-        executionCount = 0;
-    }
-    
-protected:
-    int executionCount = 0;
 };
 
 struct WaitNode : public SoundtrackNode
@@ -60,7 +52,7 @@ struct WaitNode : public SoundtrackNode
     int minWaitTimeMs = 0;
     int maxWaitTimeMs = 0;
     
-    int Execute(SoundtrackSoundType soundType) override;
+    int Execute(AudioType soundType) override;
 };
 
 struct SoundNode : public SoundtrackNode
@@ -103,7 +95,7 @@ struct SoundNode : public SoundtrackNode
     std::string followModelName;
     
     bool IsLooping() override { return loop; }
-    int Execute(SoundtrackSoundType soundType) override;
+    int Execute(AudioType soundType) override;
 };
 
 struct PrsNode : public SoundtrackNode
@@ -112,7 +104,7 @@ struct PrsNode : public SoundtrackNode
     // So basically, PRS consists of multiple sound nodes, one of which is picked at random.
     std::vector<SoundNode*> soundNodes;
     
-    int Execute(SoundtrackSoundType soundType) override
+    int Execute(AudioType soundType) override
     {
         if(soundNodes.size() == 0) { return 0; }
         
@@ -126,12 +118,13 @@ class Soundtrack : public Asset
 public:
     Soundtrack(std::string name, char* data, int dataLength);
     
-    SoundtrackSoundType GetSoundType() const { return mSoundType; }
-    std::vector<SoundtrackNode*> GetNodesCopy() const { return mNodes; }
+    AudioType GetSoundType() const { return mSoundType; }
+    const std::vector<SoundtrackNode*>& GetNodes() const { return mNodes; }
     
 private:
-    // Type indicates whether this audio is considered music or SFX or what.
-    SoundtrackSoundType mSoundType = SoundtrackSoundType::Ambient;
+    // Soundtracks are usually music, but can be overridden for some cases.
+    // This dictates what channel sounds play on in the audio system.
+    AudioType mSoundType = AudioType::Music;
     
     // A soundtrack is a list of nodes that play audio or wait X seconds.
     std::vector<SoundtrackNode*> mNodes;

@@ -1,8 +1,3 @@
-//
-// InventoryInspectScreen.cpp
-//
-// Clark Kromenaker
-//
 #include "InventoryInspectScreen.h"
 
 #include "ActionBar.h"
@@ -13,8 +8,11 @@
 #include "UIImage.h"
 
 InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTransform),
-    mLayer("CloseUpLayer", true)
+    mLayer("CloseUpLayer")
 {
+    // Inventory overrides SFX/VO, but continues ambient audio from scene.
+    mLayer.OverrideAudioState(true, true, false);
+
 	mCanvas = AddComponent<UICanvas>();
 	
 	// Add black background image that blocks out the scene entirely.

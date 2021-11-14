@@ -1,6 +1,4 @@
 //
-// SoundtrackPlayer.h
-//
 // Clark Kromenaker
 //
 // A component that can play a Soundtrack asset.
@@ -19,6 +17,28 @@
 
 #include "Soundtrack.h"
 
+struct PlayingSoundtrack
+{
+public:
+    // The soundtrack currently being played.
+    Soundtrack* mSoundtrack = nullptr;
+
+    PlayingSoundtrack(Soundtrack* soundtrack);
+    void Update(float deltaTime);
+
+private:
+    void ProcessNextNode();
+
+    // Some nodes have repeat limits, so we need to know how many times we've executed each node.
+    std::vector<int> mExecutionCounts;
+
+    // Current index within soundtrack nodes that we are processing.
+    int mCurrentNodeIndex = -1;
+
+    // A timer we'll use to determine when we should move on from current node.
+    float mTimer = 0.0f;
+};
+
 class SoundtrackPlayer : public Component
 {
     TYPE_DECL_CHILD();
@@ -26,23 +46,12 @@ public:
     SoundtrackPlayer(Actor* owner);
     
     void Play(Soundtrack* soundtrack);
+    void Stop(Soundtrack* soundtrack);
+    void StopAll();
 	
 protected:
 	void OnUpdate(float deltaTime) override;
     
 private:
-    // The soundtrack currently being played.
-    Soundtrack* mSoundtrack = nullptr;
-    
-    // Copy of nodes from the soundtrack.
-    // We need to create a copy so we can update repeat values.
-    std::vector<SoundtrackNode*> mSoundtrackNodes;
-    
-    // Current index within soundtrack nodes that we are processing.
-    int mCurrentNodeIndex = 0;
-    
-    // A timer we'll use to determine when we should move on from current node.
-    float mTimer = 0.0f;
-    
-    void ProcessNextNode();
+    std::vector<PlayingSoundtrack> mPlaying;
 };

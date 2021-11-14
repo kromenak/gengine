@@ -216,8 +216,11 @@ struct SceneConversation
 template<typename T>
 struct ConditionalBlock
 {
+    // The condition under which these items should be used - SheepScript evaluates to true/false.
 	std::string conditionText;
 	SheepScript* condition = nullptr;
+
+    // The items to use under this condition.
 	std::vector<T> items;
 };
 

@@ -300,11 +300,12 @@ void Scene::Init()
     Services::GetAudio()->SwapAmbient();
 
     // Create soundtrack player and get it playing!
-    Soundtrack* soundtrack = mSceneData->GetSoundtrack();
-    if(soundtrack != nullptr)
+    Actor* actor = new Actor();
+    mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
+
+    const std::vector<Soundtrack*>& soundtracks = mSceneData->GetSoundtracks();
+    for(auto& soundtrack : soundtracks)
     {
-        Actor* actor = new Actor();
-        mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
         mSoundtrackPlayer->Play(soundtrack);
     }
 

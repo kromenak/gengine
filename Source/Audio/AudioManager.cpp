@@ -15,6 +15,15 @@ PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel) :
     
 }
 
+void PlayingSoundHandle::Stop()
+{
+    if(channel != nullptr)
+    {
+        channel->stop();
+        channel = nullptr;
+    }
+}
+
 void PlayingSoundHandle::Pause()
 {
     if(channel != nullptr)
@@ -63,7 +72,20 @@ bool PlayingSoundHandle::IsPlaying() const
     return isPlaying;
 }
 
-void AudioManager::FadeChannelGroup::SetFade(float fadeTime, float targetVolume, float startVolume)
+void Fader::Update(float deltaTime)
+{
+    if(fadeTimer < fadeDuration)
+    {
+        fadeTimer += deltaTime;
+
+        // Set volume based on lerp.
+        // Note that SetVolume can fail, but if so, we don't really care.
+        float desiredAmbientVolume = Math::Lerp(fadeFrom, fadeTo, fadeTimer / fadeDuration);
+        channelGroup->setVolume(desiredAmbientVolume);
+    }
+}
+
+void Fader::SetFade(float fadeTime, float targetVolume, float startVolume)
 {
     // Set duration and reset timer.
     fadeDuration = fadeTime;
@@ -84,17 +106,60 @@ void AudioManager::FadeChannelGroup::SetFade(float fadeTime, float targetVolume,
     }
 }
 
-void AudioManager::FadeChannelGroup::Update(float deltaTime)
+bool Crossfader::Init(FMOD::System* system, const char* name)
 {
-    if(fadeTimer < fadeDuration)
+    // Create channel group. This inputs to master channel group by default.
+    FMOD_RESULT result = system->createChannelGroup(name, &channelGroup);
+    if(result != FMOD_OK)
     {
-        fadeTimer += deltaTime;
-
-        // Set volume based on lerp.
-        // Note that SetVolume can fail, but if so, we don't really care.
-        float desiredAmbientVolume = Math::Lerp(fadeFrom, fadeTo, fadeTimer / fadeDuration);
-        channelGroup->setVolume(desiredAmbientVolume);
+        std::cout << FMOD_ErrorString(result) << std::endl;
+        return false;
     }
+
+    // Create fade channel groups that feed into the parent channel group.
+    // So you end up with [Fade Channel Group] --> [Parent Channel Group] --> [Master Channel Group] --> [Your Ears].
+    for(int i = 0; i < 2; ++i)
+    {
+        char childName[64];
+        snprintf(childName, sizeof(childName), "%s %i", name, i);
+
+        result = system->createChannelGroup(childName, &faders[i].channelGroup);
+        if(result != FMOD_OK)
+        {
+            std::cout << FMOD_ErrorString(result) << std::endl;
+            return false;
+        }
+
+        // Make the fade channel group an input to the ambient channel group.
+        result = channelGroup->addGroup(faders[i].channelGroup);
+        if(result != FMOD_OK)
+        {
+            std::cout << FMOD_ErrorString(result) << std::endl;
+            return false;
+        }
+    }
+}
+
+void Crossfader::Update(float deltaTime)
+{
+    // Update faders.
+    for(int i = 0; i < 2; ++i)
+    {
+        faders[i].Update(deltaTime);
+    }
+}
+
+void Crossfader::Swap()
+{
+    // Fade current ambient to zero.
+    faders[fadeIndex].SetFade(1.0f, 0.0f);
+
+    // Go to next ambient fade group.
+    fadeIndex++;
+    fadeIndex %= 2;
+
+    // Fade in new group.
+    faders[fadeIndex].SetFade(1.0f, 1.0f);
 }
 
 bool AudioManager::Initialize()
@@ -149,32 +214,11 @@ bool AudioManager::Initialize()
         return false;
     }
     
-    // Create ambient channel group.
-    result = mSystem->createChannelGroup("Ambient", &mAmbientChannelGroup);
-    if(result != FMOD_OK)
-    {
-        std::cout << FMOD_ErrorString(result) << std::endl;
-        return false;
-    }
+    // Create channel groups for ambient crossfade.
+    mAmbientCrossfade.Init(mSystem, "Ambient");
 
-    // Create ambient source channel groups, and set them up to input to ambient group.
-    for(int i = 0; i < 2; ++i)
-    {
-        result = mSystem->createChannelGroup("Ambient Source", &mAmbientFadeChannelGroups[i].channelGroup);
-        if(result != FMOD_OK)
-        {
-            std::cout << FMOD_ErrorString(result) << std::endl;
-            return false;
-        }
-
-        // Make the fade channel group an input to the ambient channel group.
-        result = mAmbientChannelGroup->addGroup(mAmbientFadeChannelGroups[i].channelGroup);
-        if(result != FMOD_OK)
-        {
-            std::cout << FMOD_ErrorString(result) << std::endl;
-            return false;
-        }
-    }
+    // Create channel groups for music crossfade.
+    mMusicCrossfade.Init(mSystem, "Music");
 
     // Get master channel group.
     result = mSystem->getMasterChannelGroup(&mMasterChannelGroup);
@@ -190,6 +234,7 @@ bool AudioManager::Initialize()
     SetVolume(AudioType::SFX, 1.0f);
     SetVolume(AudioType::VO, 1.0f);
     SetVolume(AudioType::Ambient, 1.0f);
+    SetVolume(AudioType::Music, 1.0f);
     
     // We initialized audio successfully!
     return true;
@@ -206,6 +251,10 @@ void AudioManager::Update(float deltaTime)
 {
     // Update FMOD system every frame.
     mSystem->update();
+
+    // Update crossfades.
+    mAmbientCrossfade.Update(deltaTime);
+    mMusicCrossfade.Update(deltaTime);
     
     // See if any playing channels are no longer playing.
     for(int i = mPlayingSounds.size() - 1; i >= 0; --i)
@@ -217,6 +266,7 @@ void AudioManager::Update(float deltaTime)
         }
     }
     
+    /*
     // For testing fade in/out behavior.
     if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_M))
     {
@@ -226,12 +276,7 @@ void AudioManager::Update(float deltaTime)
     {
         mAmbientFadeChannelGroups[mCurrentAmbientIndex].SetFade(1.0f, 0.0f);
     }
-
-    // Update ambient fade ins/outs.
-    for(int i = 0; i < 2; ++i)
-    {
-        mAmbientFadeChannelGroups[i].Update(deltaTime);
-    }
+    */
 }
 
 void AudioManager::UpdateListener(const Vector3& position, const Vector3& velocity, const Vector3& forward, const Vector3& up)
@@ -247,57 +292,74 @@ void AudioManager::UpdateListener(const Vector3& position, const Vector3& veloci
 PlayingSoundHandle AudioManager::PlaySFX(Audio* audio)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::SFX);
+    return CreateAndPlaySound(audio, AudioType::SFX);
 }
 
 PlayingSoundHandle AudioManager::PlaySFX3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound3D(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::SFX, position, minDist, maxDist);
+    return CreateAndPlaySound3D(audio, AudioType::SFX, position, minDist, maxDist);
 }
 
 PlayingSoundHandle AudioManager::PlayVO(Audio* audio)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::VO);
+    return CreateAndPlaySound(audio, AudioType::VO);
 }
 
 PlayingSoundHandle AudioManager::PlayVO3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound3D(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::VO, position, minDist, maxDist);
+    return CreateAndPlaySound3D(audio, AudioType::VO, position, minDist, maxDist);
 }
 
 PlayingSoundHandle AudioManager::PlayAmbient(Audio* audio, float fadeInTime)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    
-    // If specified, start fade in.
-    if(fadeInTime > 0.0f)
-    {
-        mAmbientFadeChannelGroups[mCurrentAmbientIndex].SetFade(fadeInTime, 1.0f, 0.0f);
-    }
-    
-    return CreateAndPlaySound(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::Ambient);
+    return CreateAndPlaySound(audio, AudioType::Ambient);
 }
 
 PlayingSoundHandle AudioManager::PlayAmbient3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound3D(audio->GetDataBuffer(), audio->GetDataBufferLength(), AudioType::Ambient, position, minDist, maxDist);
+    return CreateAndPlaySound3D(audio, AudioType::Ambient, position, minDist, maxDist);
+}
+
+PlayingSoundHandle AudioManager::PlayMusic(Audio* audio, float fadeInTime)
+{
+    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
+    return CreateAndPlaySound(audio, AudioType::Music);
+}
+
+void AudioManager::Stop(Audio* audio)
+{
+    if(audio != nullptr)
+    {
+        for(auto& sound : mPlayingSounds)
+        {
+            if(sound.audio == audio)
+            {
+                // After stopping, sound is removed from playing sounds during next update loop.
+                sound.Stop();
+                return;
+            }
+        }
+    }
+}
+
+void AudioManager::StopAll()
+{
+    for(auto& sound : mPlayingSounds)
+    {
+        sound.Stop();
+    }
+    mPlayingSounds.clear();
 }
 
 void AudioManager::SwapAmbient()
 {
-    // Fade current ambient to zero.
-    mAmbientFadeChannelGroups[mCurrentAmbientIndex].SetFade(1.0f, 0.0f);
-
-    // Go to next ambient fade group.
-    mCurrentAmbientIndex++;
-    mCurrentAmbientIndex %= 2;
-
-    // Fade in new group.
-    mAmbientFadeChannelGroups[mCurrentAmbientIndex].SetFade(1.0f, 1.0f);
+    mAmbientCrossfade.Swap();
+    mMusicCrossfade.Swap();
 }
 
 void AudioManager::SetMasterVolume(float volume)
@@ -315,9 +377,13 @@ float AudioManager::GetMasterVolume() const
 
 void AudioManager::SetVolume(AudioType audioType, float volume)
 {
-    FMOD::ChannelGroup* channelGroup = GetChannelGroupForAudioType(audioType);
+    FMOD::ChannelGroup* channelGroup = GetChannelGroupForAudioType(audioType, true);
     if(channelGroup == nullptr) { return; }
-    
+
+    // Clamp input volume to 0-1 range.
+    // Do this before applying multiplier to avoid user passing in like 200 and avoiding multiplier effects.
+    volume = Math::Clamp(volume, 0.0f, 1.0f);
+
     // Get volume multiplier for audio type.
     float multiplier = 1.0f;
     switch(audioType)
@@ -331,6 +397,8 @@ void AudioManager::SetVolume(AudioType audioType, float volume)
     case AudioType::Ambient:
         multiplier = kAmbientVolumeMultiplier;
         break;
+    case AudioType::Music:
+        multiplier = kMusicVolumeMultiplier;
     default:
         multiplier = 1.0f;
         break;
@@ -342,7 +410,7 @@ void AudioManager::SetVolume(AudioType audioType, float volume)
 
 float AudioManager::GetVolume(AudioType audioType) const
 {
-    FMOD::ChannelGroup* channelGroup = GetChannelGroupForAudioType(audioType);
+    FMOD::ChannelGroup* channelGroup = GetChannelGroupForAudioType(audioType, true);
     if(channelGroup == nullptr) { return 0.0f; }
     
     float volume = 0.0f;
@@ -364,28 +432,45 @@ bool AudioManager::GetMuted()
 
 void AudioManager::SetMuted(AudioType audioType, bool mute)
 {
-    GetChannelGroupForAudioType(audioType)->setMute(mute);
+    GetChannelGroupForAudioType(audioType, true)->setMute(mute);
 }
 
 bool AudioManager::GetMuted(AudioType audioType)
 {
     bool mute = false;
-    GetChannelGroupForAudioType(audioType)->getMute(&mute);
+    GetChannelGroupForAudioType(audioType, true)->getMute(&mute);
     return mute;
 }
 
-AudioSaveState AudioManager::SaveAudioState(bool includeAmbient)
+void AudioManager::SaveAudioState(bool sfx, bool vo, bool ambient, AudioSaveState& saveState)
 {
-    // Create state object.
-    AudioSaveState state;
-    
+    // Empty any existing stuff in the save state.
+    saveState.playingSounds.clear();
+
+    // If don't want to save anything, we can early out.
+    if(!sfx && !vo && !ambient) { return; }
+
     // Iterate playing sounds to save each piece of audio (maybe).
     for(int i = mPlayingSounds.size() - 1; i >= 0; --i)
     {
         // If sound is ambient, but we don't want to include ambient in save state, ignore this sound!
         FMOD::ChannelGroup* channelGroup;
         mPlayingSounds[i].channel->getChannelGroup(&channelGroup);
-        if(channelGroup == mAmbientChannelGroup && !includeAmbient)
+
+        // Ignore audio channels that shouldn't be included in the save state.
+        if(!sfx && channelGroup == mSFXChannelGroup)
+        {
+            continue;
+        }
+        if(!vo && channelGroup == mVOChannelGroup)
+        {
+            continue;
+        }
+        if(!ambient &&
+           (channelGroup == mAmbientCrossfade.faders[0].channelGroup ||
+            channelGroup == mAmbientCrossfade.faders[1].channelGroup ||
+            channelGroup == mMusicCrossfade.faders[0].channelGroup ||
+            channelGroup == mMusicCrossfade.faders[1].channelGroup))
         {
             continue;
         }
@@ -394,15 +479,12 @@ AudioSaveState AudioManager::SaveAudioState(bool includeAmbient)
         mPlayingSounds[i].Pause();
         
         // Put it in the save state list.
-        state.playingSounds.push_back(mPlayingSounds[i]);
+        saveState.playingSounds.push_back(mPlayingSounds[i]);
         
         // Pop sound out of playing sounds list.
         std::swap(mPlayingSounds[i], mPlayingSounds.back());
         mPlayingSounds.pop_back();
     }
-    
-    // Return audio state - up to the caller to store the state and restore it when it makes sense.
-    return state;
 }
 
 void AudioManager::RestoreAudioState(AudioSaveState& audioSaveState)
@@ -413,38 +495,34 @@ void AudioManager::RestoreAudioState(AudioSaveState& audioSaveState)
         sound.Resume();
     }
     
-    // Add channels from state back to playing channels.
+    // Add back to playing sounds.
     // We'll say that restoring audio state *does not* clear other playing audio, so just append to existing playing channels.
     mPlayingSounds.insert(mPlayingSounds.end(), audioSaveState.playingSounds.begin(), audioSaveState.playingSounds.end());
 }
 
-FMOD::ChannelGroup* AudioManager::GetChannelGroupForAudioType(AudioType audioType) const
+FMOD::ChannelGroup* AudioManager::GetChannelGroupForAudioType(AudioType audioType, bool forVolume) const
 {
-    // Determine channel group for audio.
-    FMOD::ChannelGroup* channelGroup = nullptr;
     switch(audioType)
     {
     default:
     case AudioType::SFX:
-        channelGroup = mSFXChannelGroup;
-        break;
+        return mSFXChannelGroup;
     case AudioType::VO:
-        channelGroup = mVOChannelGroup;
-        break;
+        return mVOChannelGroup;
     case AudioType::Ambient:
-        channelGroup = mAmbientFadeChannelGroups[mCurrentAmbientIndex].channelGroup;
-        break;
+        return forVolume ? mAmbientCrossfade.channelGroup : mAmbientCrossfade.GetActive();
+    case AudioType::Music:
+        return forVolume ? mMusicCrossfade.channelGroup : mMusicCrossfade.GetActive();
     }
-    return channelGroup;
 }
 
-PlayingSoundHandle AudioManager::CreateAndPlaySound(const char* buffer, int bufferLength, AudioType audioType, bool is3D)
+PlayingSoundHandle AudioManager::CreateAndPlaySound(Audio* audio, AudioType audioType, bool is3D)
 {
     // Need to pass FMOD the length of audio data.
     FMOD_CREATESOUNDEXINFO exinfo;
     memset(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
     exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
-    exinfo.length = bufferLength;
+    exinfo.length = audio->GetDataBufferLength();
     
     // Determine flags.
     FMOD_MODE mode = FMOD_OPENMEMORY | FMOD_LOOP_OFF;
@@ -455,7 +533,7 @@ PlayingSoundHandle AudioManager::CreateAndPlaySound(const char* buffer, int buff
     
     // Create the sound using the audio buffer.
     FMOD::Sound* sound = nullptr;
-    FMOD_RESULT result = mSystem->createSound(buffer, mode, &exinfo, &sound);
+    FMOD_RESULT result = mSystem->createSound(audio->GetDataBuffer(), mode, &exinfo, &sound);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
@@ -464,7 +542,7 @@ PlayingSoundHandle AudioManager::CreateAndPlaySound(const char* buffer, int buff
     
     // Play the sound, which returns the channel being played on.
     FMOD::Channel* channel = nullptr;
-    result = mSystem->playSound(sound, GetChannelGroupForAudioType(audioType), false, &channel);
+    result = mSystem->playSound(sound, GetChannelGroupForAudioType(audioType, false), false, &channel);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
@@ -473,14 +551,15 @@ PlayingSoundHandle AudioManager::CreateAndPlaySound(const char* buffer, int buff
     
     // Add to playing channels.
     mPlayingSounds.emplace_back(channel);
+    mPlayingSounds.back().audio = audio;
     
     // Return channel being played on.
     return mPlayingSounds.back();
 }
 
-PlayingSoundHandle AudioManager::CreateAndPlaySound3D(const char* buffer, int bufferLength, AudioType audioType, const Vector3 &position, float minDist, float maxDist)
+PlayingSoundHandle AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3 &position, float minDist, float maxDist)
 {
-    PlayingSoundHandle soundHandle = CreateAndPlaySound(buffer, bufferLength, audioType, true);
+    PlayingSoundHandle soundHandle = CreateAndPlaySound(audio, audioType, true);
     
     // Assuming sound is assigned to a channel successfully, set 3D attributes.
     if(soundHandle.channel != nullptr)

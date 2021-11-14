@@ -8,37 +8,24 @@
 Layer::Layer(const std::string& name) :
     mName(name)
 {
-    
-}
-
-Layer::Layer(const std::string& name, bool persistAmbientState) :
-    mName(name),
-    mPersistAmbientState(persistAmbientState)
-{
 
 }
 
-void Layer::Pushed()
+void Layer::OverrideAudioState(bool override)
 {
-    // Save audio state of layer below us in the stack.
-    if(mSaveAudioState)
-    {
-        mAudioSaveState = Services::GetAudio()->SaveAudioState(!mPersistAmbientState);
-    }
+    OverrideAudioState(override, override, override);
 }
 
-void Layer::Popped()
+void Layer::OverrideAudioState(bool overrideSFX, bool overrideVO, bool overrideAmbient)
 {
-    // Restore audio state of layer below us in the stack.
-    if(mSaveAudioState)
-    {
-        Services::GetAudio()->RestoreAudioState(mAudioSaveState);
-    }
+    mOverrideSfxAudioState = overrideSFX;
+    mOverrideVoAudioState = overrideVO;
+    mOverrideAmbientAudioState = overrideAmbient;
 }
 
 void Layer::Enter(Layer* fromLayer)
 {
-    std::cout << "Enter " << mName << std::endl; 
+    std::cout << "Enter " << mName << std::endl;
     OnEnter(fromLayer);
 }
 
@@ -46,6 +33,18 @@ void Layer::Exit(Layer* toLayer)
 {
     std::cout << "Exit " << mName << std::endl;
     OnExit(toLayer);
+}
+
+void Layer::Pushed()
+{
+    // Save previous layer's audio state if we are overriding anything.
+    Services::GetAudio()->SaveAudioState(mOverrideSfxAudioState, mOverrideVoAudioState, mOverrideAmbientAudioState, mAudioSaveState);
+}
+
+void Layer::Popped()
+{
+    // Restore previous layer's audio state on pop.
+    Services::GetAudio()->RestoreAudioState(mAudioSaveState);
 }
 
 TYPE_DEF_BASE(LayerManager);

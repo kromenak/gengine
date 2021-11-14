@@ -23,37 +23,38 @@
 // If custom enter/exit functionality is needed, this should be subclassed.
 class Layer
 {
+    friend class LayerManager; // Let LayerManager access Enter/Exit functions.
+
 public:
     Layer(const std::string& name);
-    Layer(const std::string& name, bool persistAmbientState);
     
-    void Pushed();
-    void Popped();
-    
-    void Enter(Layer* fromLayer);
-    void Exit(Layer* toLayer);
-
     const std::string& GetName() const { return mName; }
+
+    void OverrideAudioState(bool override);
+    void OverrideAudioState(bool overrideSFX, bool overrideVO, bool overrideAmbient);
     
 protected:
     virtual void OnEnter(Layer* fromLayer) { }
     virtual void OnExit(Layer* toLayer) { }
     
-    // If true, this layer keeps the previous layer's ambient audio on enter.
-    // If false, previous layer saves/pauses ambient audio before entering this layer.
-    bool mPersistAmbientState = false;
-    
 private:
     // Name of the layer.
     std::string mName;
 
-    //HACK/TEMP: Should we save previous state's audio state?
-    //HACK/TEMP: Without this, cross-fading ambient audio does not work - but I just threw this in as a stop-gap.
-    //TODO: Revisit how layers save/restore audio and create a more elegant solution.
-    bool mSaveAudioState = false;
+    // If any are true, this layer will pause the previous layer's audio when it is pushed onto the layer stack.
+    // The previous layer's audio will resume when this layer is popped off the layer stack.
+    bool mOverrideSfxAudioState = false;
+    bool mOverrideVoAudioState = false;
+    bool mOverrideAmbientAudioState = false;
 
     // Saved audio state.
     AudioSaveState mAudioSaveState;
+
+    void Enter(Layer* fromLayer);
+    void Exit(Layer* toLayer);
+
+    void Pushed();
+    void Popped();
 };
 
 class LayerManager
