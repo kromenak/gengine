@@ -1,8 +1,3 @@
-//
-// RenderTransforms.cpp
-//
-// Clark Kromenaker
-//
 #include "RenderTransforms.h"
 
 Matrix4 RenderTransforms::MakeLookAt(const Vector3& eye, const Vector3& lookAt, const Vector3& up)
@@ -91,7 +86,7 @@ Matrix4 RenderTransforms::MakePerspective(float fovAngle, float aspectRatio, flo
     // To do this, we can force the w-component in clip space to be either positive or negative, depending on our needs.
     // We want it to be negative (resulting in an axis flip) if view space is RH.
     #if VIEW_HAND == VIEW_LH
-    m(3, 2) = 1.0f;    // If view space is LH
+    m(3, 2) = 1.0f;  // If view space is LH
     #else
     m(3, 2) = -1.0f; // If view space is RH
     #endif
