@@ -1,6 +1,4 @@
 //
-// Material.h
-//
 // Clark Kromenaker
 //
 // The material describes the visual output for rendering.

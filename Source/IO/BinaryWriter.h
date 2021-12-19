@@ -1,10 +1,7 @@
 //
-// BinaryWriter.h
-//
 // Clark Kromenaker
 //
-// Wrapper around an output stream that makes it easier
-// to write out binary data.
+// Wrapper around an output stream that makes it easier to write out binary data.
 //
 #pragma once
 #include <fstream>

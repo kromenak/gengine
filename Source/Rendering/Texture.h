@@ -16,7 +16,6 @@
 #include "Color32.h"
 
 class BinaryReader;
-struct SDL_Surface;
 
 class Texture : public Asset
 {

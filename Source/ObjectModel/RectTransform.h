@@ -1,6 +1,4 @@
 //
-// RectTransform.h
-//
 // Clark Kromenaker
 //
 // A transform that transforms not just a point in 3D space,

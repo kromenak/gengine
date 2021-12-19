@@ -1,6 +1,4 @@
 //
-// IniParser.h
-//
 // Clark Kromenaker
 //
 // Parses key/value data from INI-format files.

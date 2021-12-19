@@ -1,7 +1,5 @@
 //
-//  membuf.h
-//
-//  Clark Kromenaker
+// Clark Kromenaker
 //
 // A stream buffer variation that uses an arbitrary byte array in memory.
 // C++ provides stream buffers for file and string data, but not a byte array.

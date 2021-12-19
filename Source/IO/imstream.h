@@ -1,6 +1,4 @@
 //
-// imstream.h
-//
 // Clark Kromenaker
 //
 // An "input memory stream", for reading memory via a stream.

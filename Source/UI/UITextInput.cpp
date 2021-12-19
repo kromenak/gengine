@@ -1,8 +1,3 @@
-//
-// UITextInput.cpp
-//
-// Clark Kromenaker
-//
 #include "UITextInput.h"
 
 #include "Actor.h"

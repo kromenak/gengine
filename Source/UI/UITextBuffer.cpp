@@ -1,8 +1,3 @@
-//
-// UITextBuffer.cpp
-//
-// Clark Kromenaker
-//
 #include "UITextBuffer.h"
 
 #include <string>

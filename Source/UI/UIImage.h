@@ -1,6 +1,4 @@
 //
-// UIImage.cpp
-//
 // Clark Kromenaker
 //
 // A UI element that displays an image.

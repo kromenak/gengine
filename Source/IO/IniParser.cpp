@@ -1,8 +1,3 @@
-//
-// IniParser.cpp
-//
-// Clark Kromenaker
-//
 #include "IniParser.h"
 
 #include <cstdlib>

@@ -1,8 +1,3 @@
-//
-//  membuf.cpp
-//
-//  Clark Kromenaker
-//
 #include "membuf.h"
 
 membuf::membuf(const char* data, unsigned int length) :

@@ -1,6 +1,4 @@
 //
-// UILabel.h
-//
 // Clark Kromenaker
 //
 // A UI element that displays some text.

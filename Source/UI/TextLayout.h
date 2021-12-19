@@ -1,6 +1,4 @@
 //
-// TextLayout.h
-//
 // Clark Kromenaker
 //
 // Given some text and layout constraints, is able to pre-calculate

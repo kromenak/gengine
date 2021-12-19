@@ -1,13 +1,10 @@
 //
-// UITextBuffer.h
-//
 // Clark Kromenaker
 //
 // An area that renders text. Similar to a UILabel, but it pulls
 // its text from some external "buffer."
 //
-// Initial/primary use is implementing a scrollback buffer for
-// an in-game console UI.
+// Initial/primary use is implementing a scrollback buffer for an in-game console UI.
 //
 #pragma once
 #include "UILabel.h"

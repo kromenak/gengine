@@ -1,8 +1,3 @@
-//
-// RectTransform.cpp
-//
-// Clark Kromenaker
-//
 #include "RectTransform.h"
 
 #include "Camera.h"
