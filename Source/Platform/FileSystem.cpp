@@ -26,10 +26,16 @@ std::string Path::Combine(std::initializer_list<std::string> paths)
 	{
 		// Skip empty pieces.
 		if(it->empty()) { continue; }
-		
-		// Each piece is separated by the path separator ('/' or '\').
-		combined += kSeparator;
-		combined += *it;
+
+        // Place path separator ('/' or '\') between elements.
+        // Empty check stops us from putting separators at beginning of path accidentally.
+        if(!combined.empty())
+        {
+            combined += kSeparator;
+        }
+
+        // Add path piece.
+        combined += *it;
 		
 		// Move to next element.
 		it++;
@@ -211,4 +217,32 @@ bool Directory::Create(const std::string& path)
 	}
 	return true;
     #endif
+}
+
+int64 File::Size(const std::string& filePath)
+{
+    #if defined(PLATFORM_WINDOWS)
+    // Use Windows function to get attributes and return size.
+    WIN32_FILE_ATTRIBUTE_DATA file_attr_data;
+    if(GetFileAttributesEx(filePath.c_str(), GetFileExInfoStandard, &file_attr_data))
+    {
+        // For compatibility reasons, the size is stored as two 32-bit ints, but it's meant to represent a 64-bit int.
+        // Can use the LARGE_INTEGER struct to convert to int64.
+        LARGE_INTEGER fileSize = { 0 };
+        fileSize.LowPart = file_attr_data.nFileSizeLow;
+        fileSize.HighPart = file_attr_data.nFileSizeHigh;
+        return fileSize.QuadPart;
+    }
+    #else
+    // This should work on Mac/Linux. (it may even work on Windows, depending on version)
+    struct stat stat_buf;
+    int rc = stat(filePath.c_str(), &stat_buf);
+    if(rc == 0)
+    {
+        return stat_buf.st_size;
+    }
+    #endif
+
+    // Failed to get size, so just return 0.
+    return 0;
 }

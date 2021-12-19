@@ -1,6 +1,4 @@
 //
-// FileSystem.h
-//
 // Clark Kromenaker
 //
 // Functions to perform platform-specific file system operations.
@@ -9,32 +7,18 @@
 #include <iostream>
 #include <string>
 
+#include "Atomics.h"
 #include "Platform.h"
 #include "StringTokenizer.h"
-
-namespace File
-{
-    /**
-     * Removes the extension from the file name.
-     * Just returns a copy of the current file name if no extension is present.
-     */
-    inline std::string RemoveExtension(const std::string& fileName) { return fileName.substr(0, fileName.find_last_of('.')); }
-
-    /**
-     * Checks whether a file name has an extension.
-     * Use this if you know the string doesn't have path separators - otherwise, use Path::HasExtension.
-     */
-    inline bool HasExtension(const std::string& fileName) { return fileName.find_last_of('.') != std::string::npos; }
-}
 
 namespace Path
 {
 	// Separator used for platform.
-#if defined(PLATFORM_WINDOWS)
+    #if defined(PLATFORM_WINDOWS)
 	const char kSeparator = '\\';
-#else
+    #else
 	const char kSeparator = '/';
-#endif
+    #endif
 	
 	/**
 	 * Combines pieces of path together using the appropriate path separator.
@@ -110,4 +94,24 @@ namespace Directory
 		}
 		return true;
 	}
+}
+
+namespace File
+{
+    /**
+     * Removes the extension from the file name.
+     * Just returns a copy of the current file name if no extension is present.
+     */
+    inline std::string RemoveExtension(const std::string& fileName) { return fileName.substr(0, fileName.find_last_of('.')); }
+
+    /**
+     * Checks whether a file name has an extension.
+     * Use this if you know the string doesn't have path separators - otherwise, use Path::HasExtension.
+     */
+    inline bool HasExtension(const std::string& fileName) { return fileName.find_last_of('.') != std::string::npos; }
+
+    /**
+     * Determines a file's size in bytes.
+     */
+    int64 Size(const std::string& filePath);
 }
