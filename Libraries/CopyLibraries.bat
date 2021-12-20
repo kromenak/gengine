@@ -23,5 +23,7 @@ xcopy /y %ROOTDIR%\Libraries\zlib\lib\win\x86\zlib1.dll %OUTDIR%
 
 rem Copy assets folder.
 xcopy /y /s /e /d %ROOTDIR%\Assets %OUTDIR%\Assets\
+xcopy /y /s /e /d %ROOTDIR%\Data %OUTDIR%\Data\
+xcopy /y %ROOTDIR%\GK3.ini %OUTDIR%
 
 endlocal

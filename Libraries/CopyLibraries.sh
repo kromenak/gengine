@@ -13,6 +13,8 @@ fi
 
 # Copy assets folder
 cp -r ../Assets "$ASSETS_DIR"
+cp -r ../Data "$ASSETS_DIR"
+cp ../GK3.ini "$ASSETS_DIR"
 
 # Copy libraries
 cp    ../Libraries/ffmpeg/lib/mac/libavcodec.dylib "$LIBS_DIR"

@@ -4,6 +4,8 @@
 ## Exclude copyright/licensed files
 Assets/GK3/*
 !Assets/GK3/README.md
+Data/*
+!Data/README.md
 
 ## Ignore Bin directory (where final release files go)
 /Bin
