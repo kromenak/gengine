@@ -1,8 +1,3 @@
-//
-// BinaryWriter.cpp
-//
-// Clark Kromenaker
-//
 #include "BinaryWriter.h"
 
 #include <iostream>

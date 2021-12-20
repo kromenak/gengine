@@ -1,6 +1,4 @@
 //
-// Timeblock.h
-//
 // Clark Kromenaker
 //
 // In GK3, progress through the game is measured by what time block you are currently in.

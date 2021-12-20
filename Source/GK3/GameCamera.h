@@ -1,6 +1,4 @@
 //
-// GameCamera.h
-//
 // Clark Kromenaker
 //
 // Camera used to actually play the game. Obeys all game world laws.

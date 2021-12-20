@@ -1,6 +1,4 @@
 //
-// Main.cpp
-//
 // Clark Kromenaker
 //
 // Program point of entry for all platforms.

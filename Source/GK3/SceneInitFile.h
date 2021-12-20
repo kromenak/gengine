@@ -1,9 +1,13 @@
 //
-// SceneInitFile.h
-//
 // Clark Kromenaker
 //
-// Description
+// Scene Initialization Files (SIFs for short) define the layout and structure of a scene.
+// To load a scene's actors/models/audio/logic, at least one SIF file must be specified.
+//
+// A scene can have one or more SIF files. Each scene must at least specify a "General" SIF file.
+// SIF files for specific timeblocks can also be included.
+//
+// On disk, these assets have a SIF extension.
 //
 #pragma once
 #include "Asset.h"
