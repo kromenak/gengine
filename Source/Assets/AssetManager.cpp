@@ -455,25 +455,25 @@ char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int
 	if(!assetPath.empty())
 	{
 		// Open the file, or error if failed.
-		std::ifstream file(assetPath);
+		std::ifstream file(assetPath, std::iostream::in | std::iostream::binary);
 		if(!file.good())
 		{
 			std::cout << "Found asset path, but could not open file for " << assetName << std::endl;
 			return nullptr;
 		}
-		
-		// Read the file contents into a char buffer.
-		// Important to read to intermediate std::string first!
-		// Doesn't read correctly without that bit.
-		std::stringstream bufferStream;
-		bufferStream << file.rdbuf();
-		std::string fileContentsStr = bufferStream.str();
-		
-		// Copy file contents to a char array.
-		outBufferSize = static_cast<int>(fileContentsStr.length()) + 1;
-		char* buffer = new char[fileContentsStr.length() + 1];
-		std::strcpy(buffer, fileContentsStr.c_str());
-		return buffer;
+
+        // Get size of file, so we can make a buffer for its contents.
+        int64 size = File::Size(assetPath);
+
+        // Create buffer and read in data.
+        // This may be a binary or text asset. But to be on the safe side, let's stick a null terminator on there.
+        char* buffer = new char[size + 1];
+        file.read(buffer, size);
+        buffer[size] = '\0';
+
+        // Pass out buffer size and return buffer.
+        outBufferSize = size + 1;
+        return buffer;
 	}
 	
 	// If no file to load, we'll get the asset from a barn.
