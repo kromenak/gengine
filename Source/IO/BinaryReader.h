@@ -1,8 +1,7 @@
 //
 // Clark Kromenaker
 //
-// Wrapper around a binary data stream,
-// with helpers for reading bytes as specific types.
+// Wrapper around a binary data stream, with helpers for reading bytes as specific types.
 //
 #pragma once
 #include <istream>
@@ -13,7 +12,6 @@
 class BinaryReader
 {
 public:
-	BinaryReader(const std::string& filePath);
     BinaryReader(const char* filePath);
     BinaryReader(const char* memory, unsigned int memoryLength);
     ~BinaryReader();

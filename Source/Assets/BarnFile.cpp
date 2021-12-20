@@ -12,7 +12,7 @@
 
 BarnFile::BarnFile(const std::string& filePath) :
     mName(filePath),
-    mReader(filePath)
+    mReader(filePath.c_str())
 {
     // Make sure we can actually read this file.
     if(!mReader.OK())

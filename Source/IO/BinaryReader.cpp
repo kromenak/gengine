@@ -2,13 +2,8 @@
 
 #include <fstream>
 #include <iostream>
-#include "imstream.h"
 
-BinaryReader::BinaryReader(const std::string& filePath) :
-	BinaryReader(filePath.c_str())
-{
-	
-}
+#include "imstream.h"
 
 BinaryReader::BinaryReader(const char* filePath)
 {
