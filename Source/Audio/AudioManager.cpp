@@ -138,6 +138,9 @@ bool Crossfader::Init(FMOD::System* system, const char* name)
             return false;
         }
     }
+
+    // All's good.
+    return true;
 }
 
 void Crossfader::Update(float deltaTime)
@@ -552,7 +555,7 @@ PlayingSoundHandle& AudioManager::CreateAndPlaySound(Audio* audio, AudioType aud
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
-        return PlayingSoundHandle(nullptr);
+        return mInvalidSoundHandle;
     }
     
     // Play the sound, which returns the channel being played on.
@@ -561,7 +564,7 @@ PlayingSoundHandle& AudioManager::CreateAndPlaySound(Audio* audio, AudioType aud
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
-        return PlayingSoundHandle(nullptr);
+        return mInvalidSoundHandle;
     }
     
     // Add to playing channels.

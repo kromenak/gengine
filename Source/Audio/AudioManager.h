@@ -162,6 +162,7 @@ private:
     
     // Sounds that are currently playing.
     std::vector<PlayingSoundHandle> mPlayingSounds;
+    PlayingSoundHandle mInvalidSoundHandle;
     
     FMOD::ChannelGroup* GetChannelGroupForAudioType(AudioType audioType, bool forVolume) const;
     
