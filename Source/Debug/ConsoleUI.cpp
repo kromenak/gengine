@@ -1,8 +1,3 @@
-//
-// Console.cpp
-//
-// Clark Kromenaker
-//
 #include "ConsoleUI.h"
 
 #include "UICanvas.h"
@@ -87,8 +82,9 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			// Scrollback takes up big chunk of space above horizontal rule.
 			scrollbackRT->SetAnchorMin(Vector2(0.0f, 1.0f));
 			scrollbackRT->SetAnchorMax(Vector2(1.0f, 1.0f));
-			scrollbackRT->SetSizeDelta(-20.0f, 0.0f);
+			scrollbackRT->SetSizeDelta(-10.0f, 0.0f);
 			scrollbackRT->SetPivot(0.5f, 1.0f);
+            scrollbackRT->SetAnchoredPosition(0.0f, 0.0f);
 			
 			mScrollbackBuffer = scrollbackActor->AddComponent<UITextBuffer>();
 			mCanvas->AddWidget(mScrollbackBuffer);
@@ -108,13 +104,13 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			// Input field takes up a single line below horizontal rule.
 			textInputRT->SetAnchorMin(Vector2(0.0f, 0.0f));
 			textInputRT->SetAnchorMax(Vector2(1.0f, 0.0f));
-			textInputRT->SetPivot(0.0f, 0.0f);
 			textInputRT->SetSizeDelta(0.0f, font->GetGlyphHeight());
-			textInputRT->SetAnchoredPosition(4.0f, 4.0f);
+			textInputRT->SetAnchoredPosition(4.0f, 5.0f);
+            textInputRT->SetPivot(0.0f, 0.0f);
 			
 			mTextInput = textInputActor->AddComponent<UITextInput>();
 			mCanvas->AddWidget(mTextInput);
-			
+
 			mTextInput->SetFont(font);
 			mTextInput->SetText("");
 			
@@ -126,7 +122,8 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			// Horizontal rule uses a tiling line image.
 			UIImage* caretImage = caretActor->AddComponent<UIImage>();
 			mCanvas->AddWidget(caretImage);
-			
+            caretImage->SetTexture(&Texture::White);
+
 			caretRT->SetAnchorMin(Vector2(0.0f, 0.0f));
 			caretRT->SetAnchorMax(Vector2(0.0f, 1.0f));
 			caretRT->SetPivot(0.0f, 0.0f);
@@ -142,10 +139,25 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 		float availableHeight = Services::GetRenderer()->GetWindowHeight();
 		availableHeight -= CalcInputFieldHeight();
 		mMaxScrollbackLineCount = availableHeight / mScrollbackBuffer->GetFont()->GetGlyphHeight();
+
+        // Create console activation image.
+        Actor* imageActor = new Actor(TransformType::RectTransform);
+        RectTransform* imageRT = imageActor->GetComponent<RectTransform>();
+        imageRT->SetParent(canvasTransform);
+
+        mConsoleToggleImage = imageActor->AddComponent<UIImage>();
+        mCanvas->AddWidget(mConsoleToggleImage);
+
+        Texture* texture = Services::GetAssets()->LoadTexture("CAIN");
+        Texture* textureAlpha = Services::GetAssets()->LoadTexture("CAIN_ALPHA");
+        texture->ApplyAlphaChannel(*textureAlpha);
+        mConsoleToggleImage->SetTextureAndSize(texture);
+
+        imageRT->SetAnchor(1.0f, 1.0f);
+        imageRT->SetPivot(1.0f, 1.0f);
+        imageRT->SetAnchoredPosition(-20.0f, -15.0f);
+        mConsoleToggleImage->SetEnabled(false);
 	}
-	
-	// Disable canvas so console is hidden by default.
-	mCanvas->SetEnabled(false);
 }
 
 void ConsoleUI::OnUpdate(float deltaTime)
@@ -158,19 +170,16 @@ void ConsoleUI::OnUpdate(float deltaTime)
 	else
 	{
 		// Show an indicator when the console key is pressed down, but not yet released.
-		if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE))
-		{
-			//TODO: Show "Cain" image.
-		}
+        mConsoleToggleImage->SetEnabled(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE));
 		
 		// On release, toggle the display of the console.
 		if(Services::GetInput()->IsKeyTrailingEdge(SDL_SCANCODE_GRAVE))
 		{
-			mCanvas->SetEnabled(!mCanvas->IsEnabled());
-			if(mCanvas->IsEnabled())
+            mConsoleActive = !mConsoleActive;
+            Refresh();
+
+			if(mConsoleActive)
 			{
-				Refresh();
-				mTextInput->Clear();
 				mTextInput->Focus();
 				mCommandHistoryIndex = -1;
 			}
@@ -181,9 +190,9 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		}
 		
 		// Don't bother with other console updates unless it's opened.
-		if(!mCanvas->IsActiveAndEnabled()) { return; }
+		if(!mConsoleActive) { return; }
 		
-		// If enter is pressed, execute sheep!
+		// If enter is pressed, execute command.
 		if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
 		{
 			Services::GetConsole()->ExecuteCommand(mTextInput->GetText());
@@ -247,9 +256,8 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				Refresh();
 			}
 		}
-		
 		// Ctrl plus other keys affect the position within the scrollback buffer.
-		if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LCTRL))
+		else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LCTRL))
 		{
 			// Ctrl+Down moves scrollback down one line.
 			if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
@@ -263,24 +271,28 @@ void ConsoleUI::OnUpdate(float deltaTime)
 			// Ctrl+Up moves scrollback up one line.
 			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
 			{
-				//TODO
+                if(mScrollbackOffset < Services::GetConsole()->GetScrollback().size() - mScrollbackLineCount)
+                {
+                    mScrollbackOffset++;
+                    Refresh();
+                }
 			}
 			// Ctrl+PgDown moves scrollback down 10 lines.
 			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
 			{
-				//TODO
+                mScrollbackOffset = Math::Clamp(mScrollbackOffset - mScrollbackLineCount, 0, Services::GetConsole()->GetScrollback().size() - mScrollbackLineCount);
 				Refresh();
 			}
 			// Ctrl+PgUp moves scrollback up 10 lines.
 			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
 			{
-				//TODO
+                mScrollbackOffset = Math::Clamp(mScrollbackOffset + mScrollbackLineCount, 0, Services::GetConsole()->GetScrollback().size() - mScrollbackLineCount);
 				Refresh();
 			}
 			// Ctrl+Home moves scrollback to earliest line.
 			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_HOME))
 			{
-				//TODO
+                mScrollbackOffset = Services::GetConsole()->GetScrollback().size() - mScrollbackLineCount;
 				Refresh();
 			}
 			// Ctrl+End moves scrollback to the latest line.
@@ -290,66 +302,69 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				Refresh();
 			}
 		}
-		
-		if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
-		{
-			// Increment command history index if it is in-bounds.
-			// First time this happens will go from -1 to 0, which is OK!
-			int historyLength = Services::GetConsole()->GetCommandHistoryLength();
-			if(mCommandHistoryIndex < historyLength - 1)
-			{
-				++mCommandHistoryIndex;
-			}
-			
-			// Commands in history are earliest to most recent.
-			// So, when we push "up", we want to go to the next most recent item.
-			// Have to invert our index to get that.
-			int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
-			std::string command = Services::GetConsole()->GetCommandFromHistory(commandIndex);
-			
-			// This changes the text... TODO: Better API for this?
-			mTextInput->Unfocus();
-			mTextInput->SetText(command);
-			mTextInput->Focus();
-		}
-		else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
-		{
-			// If current history index is above zero, decrement.
-			// Note that we can't decrement back to -1, per GK3 behavior.
-			if(mCommandHistoryIndex > 0)
-			{
-				--mCommandHistoryIndex;
-			}
-			
-			// As above, need to invert the index.
-			int historyLength = Services::GetConsole()->GetCommandHistoryLength();
-			int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
-			std::string command = Services::GetConsole()->GetCommandFromHistory(commandIndex);
-			
-			// This changes the text... TODO: Better API for this?
-			mTextInput->Unfocus();
-			mTextInput->SetText(command);
-			mTextInput->Focus();
-		}
+        else
+        {
+            if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
+            {
+                // Increment command history index if it is in-bounds.
+                // First time this happens will go from -1 to 0, which is OK!
+                int historyLength = Services::GetConsole()->GetCommandHistoryLength();
+                if(mCommandHistoryIndex < historyLength - 1)
+                {
+                    ++mCommandHistoryIndex;
+                }
+
+                // Commands in history are earliest to most recent.
+                // So, when we push "up", we want to go to the next most recent item.
+                // Have to invert our index to get that.
+                int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
+                std::string command = Services::GetConsole()->GetCommandFromHistory(commandIndex);
+
+                // This changes the text... TODO: Better API for this?
+                mTextInput->Unfocus();
+                mTextInput->SetText(command);
+                mTextInput->Focus();
+            }
+            else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
+            {
+                // If current history index is above zero, decrement.
+                // Note that we can't decrement back to -1, per GK3 behavior.
+                if(mCommandHistoryIndex > 0)
+                {
+                    --mCommandHistoryIndex;
+                }
+
+                // As above, need to invert the index.
+                int historyLength = Services::GetConsole()->GetCommandHistoryLength();
+                int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
+                std::string command = Services::GetConsole()->GetCommandFromHistory(commandIndex);
+
+                // This changes the text... TODO: Better API for this?
+                mTextInput->Unfocus();
+                mTextInput->SetText(command);
+                mTextInput->Focus();
+            }
+        }
 	}
 }
 
 void ConsoleUI::Refresh()
 {
+    // If console is not active, hide it.
+    if(!mConsoleActive)
+    {
+        mScrollbackBuffer->SetLineCount(0);
+        mScrollbackTransform->SetSizeDeltaY(0.0f);
+        mBackgroundTransform->SetSizeDeltaY(0.0f);
+        return;
+    }
+
+    // HR is only enabled when scroll back is visible and positioned at very end (no offset).
+    bool showHorizontalRule = mScrollbackLineCount > 0 && mScrollbackOffset == 0;
+    mHorizontalRuleActor->SetActive(showHorizontalRule);
+    
 	mScrollbackBuffer->SetLineOffset(mScrollbackOffset);
 	mScrollbackBuffer->SetLineCount(mScrollbackLineCount);
-	
-	// HR is only enabled when line count is more than zero.
-	//TODO: HR is only enabled when buffer pos is at bottom.
-	mHorizontalRuleActor->SetActive(mScrollbackLineCount > 0);
-	
-	// Calculate how many scrollback lines we actually show.
-	// HR counts as a line, so it takes some space.
-	int lineCount = mScrollbackLineCount;
-	if(mHorizontalRuleActor->IsActive())
-	{
-		--lineCount;
-	}
 	
 	// Calculate size of one line of scrollback buffer.
 	float scrollbackLineHeight = mScrollbackBuffer->GetFont()->GetGlyphHeight();
@@ -357,34 +372,13 @@ void ConsoleUI::Refresh()
 	// HR is positioned at 25 units. So, everything below HR is 25 - half line height (since HR is considered a line).
 	float height = CalcInputFieldHeight();
 	
-	// If HR is active, it takes up some space.
-	if(mHorizontalRuleActor->IsActive())
-	{
-		height += scrollbackLineHeight;
-	}
-	
 	// Each line of the scrollback takes up some space.
-	float scrollbackHeight = lineCount * scrollbackLineHeight;
+	float scrollbackHeight = (mScrollbackLineCount + 1) * scrollbackLineHeight;
 	height += scrollbackHeight;
-	
+
 	// Set height for both the entire background and the scrollback buffer.
 	mScrollbackTransform->SetSizeDeltaY(scrollbackHeight);
 	mBackgroundTransform->SetSizeDeltaY(height);
-	
-	// FOR TESTING
-	std::string bufferText;
-	for(int i = 0; i < lineCount; ++i)
-	{
-		if(i == 2)
-		{
-			bufferText += "This is a really really really long line of text. It goes on and on and on. This is some really verbose console output text. Perhaps someone should consider editing this copy to make it shorter.\n";
-		}
-		else
-		{
-			bufferText += "Line" + std::to_string(i) + "\n";
-		}
-	}
-	mScrollbackBuffer->SetText(bufferText);
 }
 
 float ConsoleUI::CalcInputFieldHeight() const

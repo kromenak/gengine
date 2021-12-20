@@ -1,21 +1,18 @@
-//
-// Console.cpp
-//
-// Clark Kromenaker
-//
 #include "Console.h"
 
 #include "Services.h"
 #include "StringUtil.h"
 
-void Console::AddToScrollback(std::string str)
+void Console::AddToScrollback(const std::string& str)
 {
+    // Push each line onto the scrollback.
 	std::vector<std::string> lines = StringUtil::Split(str, '\n');
 	for(auto& line : lines)
 	{
 		mScrollback.push_back(line);
 	}
-	
+
+    // If scrollback is too large, erase old messages to reduce size.
 	if(mScrollback.size() > kMaxScrollbackLength)
 	{
 		int extraCount = kMaxScrollbackLength - (int)mScrollback.size();
@@ -23,7 +20,7 @@ void Console::AddToScrollback(std::string str)
 	}
 }
 
-void Console::ExecuteCommand(std::string command)
+void Console::ExecuteCommand(const std::string& command)
 {
 	// Passing an empty command outputs 40 dashes.
 	// An acknowledgement that you did something meaningless.
@@ -32,6 +29,8 @@ void Console::ExecuteCommand(std::string command)
 		AddToScrollback("----------------------------------------");
 		return;
 	}
+
+    // Any console command registered is itself output to the Console log stream...
 	Services::GetReports()->Log("Console", StringUtil::Format("console command: '%s'", command.c_str()));
 	
 	// Modify command to have required syntax.
@@ -57,9 +56,25 @@ void Console::ExecuteCommand(std::string command)
 			delete sheepScript;
 		});
 	}
-	
-	// Add to history.
-	mCommandHistory.push_back(command);
+
+    // Add command to history.
+    // Commands are usually added to history, unless it matches the most recent or second-most-recent commands.
+    int historySize = mCommandHistory.size();
+    if(historySize > 0 && StringUtil::EqualsIgnoreCase(mCommandHistory[historySize - 1], command))
+    {
+        // Do nothing - don't add this command to history, since the most recent history item exactly matches it.
+    }
+    else if(historySize > 1 && StringUtil::EqualsIgnoreCase(mCommandHistory[historySize - 2], command))
+    {
+        // When the second-to-last history command is executed, the behavior is kind of unexpected/interesting.
+        // The second-to-last and last commands in history swap!
+        std::swap(mCommandHistory[historySize - 1], mCommandHistory[historySize - 2]);
+    }
+    else
+    {
+        // Just add to the history in normal way.
+        mCommandHistory.push_back(command);
+    }
 	
 	// Increment command counter.
 	mCommandCounter++;

@@ -1,6 +1,4 @@
 //
-// Console.h
-//
 // Clark Kromenaker
 //
 // The console system in GK3.
@@ -15,10 +13,10 @@ class ReportStream;
 class Console
 {
 public:
-	void AddToScrollback(std::string str);
+	void AddToScrollback(const std::string& str);
 	const std::vector<std::string>& GetScrollback() const { return mScrollback; }
-	
-	void ExecuteCommand(std::string command);
+    
+	void ExecuteCommand(const std::string& command);
 	
 	int GetCommandHistoryLength() const { return (int)mCommandHistory.size(); }
 	std::string GetCommandFromHistory(int index) const;

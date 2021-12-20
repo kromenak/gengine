@@ -1,16 +1,14 @@
 //
-// Console.h
-//
 // Clark Kromenaker
 //
-// In-game console where some log data is output
-// and sheep commands can be entered.
+// In-game console where some log data is output and sheep commands can be entered.
 //
 #pragma once
 #include "Actor.h"
 
 class RectTransform;
 class UICanvas;
+class UIImage;
 class UILabel;
 class UITextBuffer;
 class UITextInput;
@@ -43,14 +41,17 @@ private:
 	
 	// Current history index. -1 means 'not at any index'.
 	int mCommandHistoryIndex = -1;
-	
+
+    // Is console active?
+    bool mConsoleActive = false;
+
 	// The console's canvas, which renders the UI.
 	UICanvas* mCanvas = nullptr;
 	
 	// Background and scrollback transforms, resized based on some keyboard shortcuts.
 	RectTransform* mBackgroundTransform = nullptr;
 	RectTransform* mScrollbackTransform = nullptr;
-	
+
 	// Horizontal rule actor is enabled/disabled in some circumstances.
 	Actor* mHorizontalRuleActor = nullptr;
 	
@@ -59,6 +60,10 @@ private:
 	
 	// Input field, contains command text.
 	UITextInput* mTextInput = nullptr;
+
+    // Image that appears when about to activate console.
+    // Doesn't really have any functional purpose.
+    UIImage* mConsoleToggleImage = nullptr;
 	
 	void Refresh();
 	

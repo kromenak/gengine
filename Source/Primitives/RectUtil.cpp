@@ -1,8 +1,3 @@
-//
-// RectUtil.cpp
-//
-// Clark Kromenaker
-//
 #include "RectUtil.h"
 
 Rect RectUtil::CalcAnchorRect(Rect parentRect, Vector2 anchorMin, Vector2 anchorMax)
@@ -37,6 +32,13 @@ Rect RectUtil::CalcLocalRect(Rect parentRect, Vector2 anchorMin, Vector2 anchorM
 	// If pivot is (0,0), lower-left corner or rect is (0,0). If pivot is (1,1), lower-left corner is (-width, -height).
 	float rectXPos = -(rectWidth * pivot.x);
 	float rectYPos = -(rectHeight * pivot.y);
+
+    // Especially when dealing with UI and 2D text rendering, it can be important to maintain "pixel perfect" positioning of rects.
+    // For the time being, I'm going to do this for ALL rects, but it could make sense to add a "pixelPerfect" parameter, or do this in the caller when needed.
+    rectXPos = Math::Round(rectXPos);
+    rectYPos = Math::Round(rectYPos);
+    rectWidth = Math::Round(rectWidth);
+    rectHeight = Math::Round(rectHeight);
 	
 	// Construct the final thing - a rect relative to pivot point in local space!
 	return Rect(rectXPos, rectYPos, rectWidth, rectHeight);
