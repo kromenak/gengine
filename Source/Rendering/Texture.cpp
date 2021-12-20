@@ -373,6 +373,9 @@ void Texture::ParseFromData(BinaryReader &reader)
     {
         ParseFromBmpFormat(reader);
     }
+
+    // Set magenta to be transparent.
+    SetTransparentColor(Color32::Magenta);
 }
 
 void Texture::ParseFromCompressedFormat(BinaryReader& reader)
