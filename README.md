@@ -23,7 +23,7 @@ I've only tested Xcode and Visual Studio 2019 at this point, but it'll likely wo
 #### Xcode
 Install CMake (if not already installed). One easy way to do this is through Homebrew.
 
-With CMake installed, go to the project directory. Run `mkdir build && cd build && cmake -G Xcode ..`. If the command runs successfully, you'll now have a `build` directory containing an Xcode project. Build and run the `gk3` target. 
+With CMake installed, go to the project directory. Run `cmake -G Xcode -B Build`. If the command runs successfully, you'll now have a `Build` directory containing an Xcode project. Build and run the `gk3` target. 
 
 #### Visual Studio 2019
 Ensure that VS was installed with CMake support. If not, you can run the "VS 2019 Installer" to ensure the required components are installed. CMake is included in the "Desktop Development with C++" module.
