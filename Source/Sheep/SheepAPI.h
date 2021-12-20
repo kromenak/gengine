@@ -1,6 +1,4 @@
 //
-// SheepAPI.h
-//
 // Clark Kromenaker
 //
 // Provides all Sheep API system functions.
@@ -48,11 +46,31 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3, const Value& x4, const Value& x5);
 Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, const Value& x3, const Value& x4, const Value& x5, const Value& x6);
 
+extern std::map<std::string, Value(*)(const Value&)> map0;
+extern std::map<std::string, Value(*)(const Value&)> map1;
+extern std::map<std::string, Value(*)(const Value&, const Value&)> map2;
+extern std::map<std::string, Value(*)(const Value&, const Value&, const Value&)> map3;
+extern std::map<std::string, Value(*)(const Value&, const Value&, const Value&, const Value&)> map4;
+extern std::map<std::string, Value(*)(const Value&, const Value&, const Value&, const Value&, const Value&)> map5;
+extern std::map<std::string, Value(*)(const Value&, const Value&, const Value&, const Value&, const Value&, const Value&)> map6;
+extern std::map<std::string, Value(*)(const Value&, const Value&, const Value&, const Value&, const Value&, const Value&,
+                                      const Value&)> map7;
+extern std::map<std::string, Value(*)(const Value&, const Value&, const Value&, const Value&, const Value&, const Value&,
+                                      const Value&, const Value&)> map8;
+
+
 // These are used in the below macros to convert keywords into integers using ## macro operator.
 #define void_TYPE 0
 #define int_TYPE 1
 #define float_TYPE 2
 #define string_TYPE 3
+
+// When registering functions, use these for Waitable and Dev/Release options to improve readability.
+#define WAITABLE true
+#define IMMEDIATE false
+
+#define DEV_FUNC true
+#define REL_FUNC false
 
 // Macros that register functions of various argument lengths with the system.
 // Creates a function with same name as the actual function, but which uses generic "Value" args and return type.
@@ -127,6 +145,8 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 	} name##_instance
 
 #define shpvoid int
+
+void ExecError();
 
 // ACTORS
 shpvoid Blink(std::string actorName);

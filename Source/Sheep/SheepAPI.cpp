@@ -26,13 +26,6 @@
 // Required for macros to work correctly with "string" instead of "std::string".
 using namespace std;
 
-// Some defines, for readability below.
-#define WAITABLE true
-#define IMMEDIATE false
-
-#define DEV_FUNC true
-#define REL_FUNC false
-
 // A big array of all our defined system functions.
 // This is populated at program start and then never changed.
 std::vector<SysFuncDecl> sysFuncs;
@@ -108,17 +101,12 @@ std::map<std::string, Value (*)(const Value&)> map0;
 std::map<std::string, Value (*)(const Value&)> map1;
 std::map<std::string, Value (*)(const Value&, const Value&)> map2;
 std::map<std::string, Value (*)(const Value&, const Value&, const Value&)> map3;
-std::map<std::string, Value (*)(const Value&, const Value&, const Value&,
-                                const Value&)> map4;
-std::map<std::string, Value (*)(const Value&, const Value&, const Value&,
-                                const Value&, const Value&)> map5;
-std::map<std::string, Value (*)(const Value&, const Value&, const Value&,
-                                const Value&, const Value&, const Value&)> map6;
-std::map<std::string, Value (*)(const Value&, const Value&, const Value&,
-                                const Value&, const Value&, const Value&,
+std::map<std::string, Value (*)(const Value&, const Value&, const Value&, const Value&)> map4;
+std::map<std::string, Value (*)(const Value&, const Value&, const Value&, const Value&, const Value&)> map5;
+std::map<std::string, Value (*)(const Value&, const Value&, const Value&, const Value&, const Value&, const Value&)> map6;
+std::map<std::string, Value (*)(const Value&, const Value&, const Value&, const Value&, const Value&, const Value&,
                                 const Value&)> map7;
-std::map<std::string, Value (*)(const Value&, const Value&, const Value&,
-                                const Value&, const Value&, const Value&,
+std::map<std::string, Value (*)(const Value&, const Value&, const Value&, const Value&, const Value&, const Value&,
                                 const Value&, const Value&)> map8;
 
 Value CallSysFunc(const std::string& name)
@@ -2614,193 +2602,6 @@ shpvoid Warp(std::string locationAndTime)
 RegFunc1(Warp, void, string, WAITABLE, REL_FUNC);
 */
 
-// SOUND
-shpvoid EnableSound(std::string soundType)
-{
-    if(soundType.empty() || StringUtil::EqualsIgnoreCase(soundType, "global"))
-    {
-        Services::GetAudio()->SetMuted(false);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "sfx"))
-    {
-        Services::GetAudio()->SetMuted(AudioType::SFX, false);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "dialogue"))
-    {
-        Services::GetAudio()->SetMuted(AudioType::VO, false);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "ambient"))
-    {
-        Services::GetAudio()->SetMuted(AudioType::Ambient, false);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "music"))
-    {
-        Services::GetAudio()->SetMuted(AudioType::Music, false);
-    }
-    else
-    {
-        Services::GetReports()->Log("Error", StringUtil::Format("Error: unrecognized game sound type: %s.", soundType.c_str()));
-        ExecError();
-    }
-    return 0;
-}
-RegFunc1(EnableSound, void, string, IMMEDIATE, DEV_FUNC);
-
-shpvoid DisableSound(std::string soundType)
-{
-    if(soundType.empty() || StringUtil::EqualsIgnoreCase(soundType, "global"))
-    {
-        Services::GetAudio()->SetMuted(true);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "sfx"))
-    {
-        Services::GetAudio()->SetMuted(AudioType::SFX, true);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "dialogue"))
-    {
-        Services::GetAudio()->SetMuted(AudioType::VO, true);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "ambient"))
-    {
-        Services::GetAudio()->SetMuted(AudioType::Ambient, true);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "music"))
-    {
-        Services::GetAudio()->SetMuted(AudioType::Music, true);
-    }
-    else
-    {
-        Services::GetReports()->Log("Error", StringUtil::Format("Error: unrecognized game sound type: %s.", soundType.c_str()));
-        ExecError();
-    }
-    return 0;
-}
-RegFunc1(DisableSound, void, string, IMMEDIATE, DEV_FUNC);
-
-int GetVolume(std::string soundType)
-{
-    if(soundType.empty() || StringUtil::EqualsIgnoreCase(soundType, "global"))
-    {
-        return static_cast<int>(Services::GetAudio()->GetMasterVolume() * 100);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "sfx"))
-    {
-        return static_cast<int>(Services::GetAudio()->GetVolume(AudioType::SFX) * 100);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "dialogue"))
-    {
-        return static_cast<int>(Services::GetAudio()->GetVolume(AudioType::VO) * 100);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "ambient"))
-    {
-        return static_cast<int>(Services::GetAudio()->GetVolume(AudioType::Ambient) * 100);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "music"))
-    {
-        return static_cast<int>(Services::GetAudio()->GetVolume(AudioType::Music) * 100);
-    }
-    else
-    {
-        Services::GetReports()->Log("Error", StringUtil::Format("Error: unrecognized game sound type: %s.", soundType.c_str()));
-        ExecError();
-        return 0;
-    }
-}
-RegFunc1(GetVolume, void, string, IMMEDIATE, DEV_FUNC);
-
-shpvoid SetVolume(std::string soundType, int volume)
-{
-    // Clamp volume 0-100.
-    volume = Math::Clamp(volume, 0, 100);
-
-    // Internally, volumes are 0.0f - 1.0f. So, convert it.
-    float volumeNormalized = (float)volume / 100.0f;
-
-    // Aaaand set it.
-    if(soundType.empty() || StringUtil::EqualsIgnoreCase(soundType, "global"))
-    {
-        Services::GetAudio()->SetMasterVolume(volumeNormalized);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "sfx"))
-    {
-        Services::GetAudio()->SetVolume(AudioType::SFX, volumeNormalized);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "dialogue"))
-    {
-        Services::GetAudio()->SetVolume(AudioType::VO, volumeNormalized);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "ambient"))
-    {
-        Services::GetAudio()->SetVolume(AudioType::Ambient, volumeNormalized);
-    }
-    else if(StringUtil::EqualsIgnoreCase(soundType, "music"))
-    {
-        Services::GetAudio()->SetVolume(AudioType::Music, volumeNormalized);
-    }
-    else
-    {
-        Services::GetReports()->Log("Error", StringUtil::Format("Error: unrecognized game sound type: %s.", soundType.c_str()));
-        ExecError();
-    }
-    return 0;
-}
-RegFunc2(SetVolume, void, string, int, IMMEDIATE, DEV_FUNC);
-
-shpvoid PlaySound(std::string soundName)
-{
-	Audio* audio = Services::GetAssets()->LoadAudio(soundName);
-	if(audio != nullptr)
-	{
-        SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-		Services::GetAudio()->PlaySFX(audio, currentThread->AddWait());
-	}
-	return 0;
-}
-RegFunc1(PlaySound, void, string, WAITABLE, REL_FUNC);
-
-shpvoid StopSound(std::string soundName)
-{
-    // For a sound to play, it must be loaded already anyway.
-    // And if it's null, the Stop function handles that.
-    Services::GetAudio()->Stop(Services::GetAssets()->LoadAudio(soundName));
-	return 0;
-}
-RegFunc1(StopSound, void, string, IMMEDIATE, REL_FUNC);
-
-shpvoid StopAllSounds()
-{
-    Services::GetAudio()->StopAll();
-	return 0;
-}
-RegFunc0(StopAllSounds, void, IMMEDIATE, REL_FUNC);
- 
-shpvoid PlaySoundTrack(std::string soundtrackName)
-{
-	Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName);
-	if(soundtrack != nullptr)
-	{
-        GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Play(soundtrack);
-	}
-	return 0;
-}
-RegFunc1(PlaySoundTrack, void, string, WAITABLE, REL_FUNC);
-
-shpvoid StopSoundTrack(std::string soundtrackName)
-{
-    // Soundtrack must already be loaded to be playing. So, just load and pass in pointer.
-    // If it is null, Stop handles that for us.
-    GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Stop(Services::GetAssets()->LoadSoundtrack(soundtrackName));
-	return 0;
-}
-RegFunc1(StopSoundTrack, void, string, IMMEDIATE, REL_FUNC);
-
-shpvoid StopAllSoundTracks()
-{
-    GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->StopAll();
-	return 0;
-}
-RegFunc0(StopAllSoundTracks, void, IMMEDIATE, REL_FUNC);
- 
 // TRACING
 shpvoid PrintFloat(float value)
 {
