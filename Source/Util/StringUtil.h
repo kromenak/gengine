@@ -110,12 +110,12 @@ namespace StringUtil
     {
         if(std::getline(is, str))
         {
-            // "getline" reads up to the '\n' character in a file, and "eats" the '\n' too.
-            // But Windows line breaks might include the '\r' character too, like "\r\n".
-            // To deal with this semi-elegantly, we'll search for and remove the '\r' here.
-            if(!str.empty() && str[str.length() - 1] == '\r')
+            // "getline" can sometimes leave some unwanted chars on the end of the line, so let's get rid of those.
+            // "getline" discards \n on end of lines, but leaves Windows line breaks (\r) - get rid of them!
+            // For the last line in a stream, "getline" may add an extra \0 - don't need it, and causes string append bugs.
+            while(!str.empty() && (str.back() == '\r' || str.back() == '\0'))
             {
-                str.resize(str.length() - 1);
+                str.pop_back();
             }
             
             // Trim the line of any whitespaces and tabs.
