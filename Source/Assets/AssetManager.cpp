@@ -408,7 +408,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map_ci<s
     T* asset = CreateAsset(assetName, createFunc, deleteBuffer);
     
 	// Add entry in cache, if we have a cache.
-	if(cache != nullptr)
+	if(asset != nullptr && cache != nullptr)
 	{
 		(*cache)[assetName] = asset;
 	}
