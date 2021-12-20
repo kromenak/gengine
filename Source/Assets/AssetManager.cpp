@@ -9,6 +9,37 @@
 #include "FileSystem.h"
 #include "imstream.h"
 #include "Services.h"
+#include "StringUtil.h"
+
+AssetManager::AssetManager()
+{
+    // Load GK3.ini from the root directory so we can bootstrap asset search paths.
+    mSearchPaths.push_back("");
+    Config* config = LoadConfig("GK3.ini");
+    mSearchPaths.clear();
+
+    // The config should be present, but is technically optional.
+    if(config != nullptr)
+    {
+        // Load "high priority" custom paths, if any.
+        // These paths will be searched first to find any requested resources.
+        std::string customPaths = config->GetString("Custom Paths");
+        if(!customPaths.empty())
+        {
+            // Multiple paths are separated by semicolons.
+            std::vector<std::string> paths = StringUtil::Split(customPaths, ';');
+            mSearchPaths.insert(mSearchPaths.end(), paths.begin(), paths.end());
+        }
+    }
+
+    // Add hard-coded default paths *after* any custom paths specified in .INI file.
+    // Assets: loose files that aren't packed into a BRN.
+    mSearchPaths.push_back("Assets");
+
+    // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
+    mSearchPaths.push_back("Data");
+
+}
 
 AssetManager::~AssetManager()
 {
@@ -299,6 +330,11 @@ TextAsset* AssetManager::LoadText(const std::string& name)
 void AssetManager::UnloadText(TextAsset* text)
 {
     UnloadAsset<TextAsset>(text, mLoadedTexts);
+}
+
+Config* AssetManager::LoadConfig(const std::string& name)
+{
+    return LoadAsset<Config>(SanitizeAssetName(name, ".CFG"), &mLoadedConfigs);
 }
 
 BarnFile* AssetManager::GetBarn(const std::string& barnName)

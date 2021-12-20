@@ -14,6 +14,7 @@
 #include "BarnFile.h"
 #include "BSP.h"
 #include "BSPLightmap.h"
+#include "Config.h"
 #include "Cursor.h"
 #include "GAS.h"
 #include "Font.h"
@@ -32,7 +33,7 @@
 class AssetManager
 {
 public:
-    AssetManager() = default;
+    AssetManager();
     ~AssetManager();
 
     // Loose Files
@@ -88,6 +89,8 @@ public:
     
     TextAsset* LoadText(const std::string& name);
     void UnloadText(TextAsset* text);
+
+    Config* LoadConfig(const std::string& name);
     
 private:
     // A list of paths to search for assets.
@@ -123,6 +126,8 @@ private:
     std::unordered_map_ci<std::string, Shader*> mLoadedShaders;
 
     std::unordered_map_ci<std::string, TextAsset*> mLoadedTexts;
+
+    std::unordered_map_ci<std::string, Config*> mLoadedConfigs;
 	
 	// Retrieve a barn bundle by name, or by contained asset.
 	BarnFile* GetBarn(const std::string& barnName);
