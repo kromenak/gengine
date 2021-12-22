@@ -2,19 +2,20 @@
 # GK3
 ####
 ## Exclude copyright/licensed files
-Assets/GK3/*
-!Assets/GK3/README.md
 Data/*
 !Data/README.md
 
 ## Ignore Bin directory (where final release files go)
 /Bin
 
+## Ignore CMake project directories for each platform
+/Build/Mac
+/Build/Windows
+
 ####
 # Xcode
 ####
 ## Build generated
-build/
 DerivedData/
 
 ## Various settings
