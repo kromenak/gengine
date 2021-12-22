@@ -228,14 +228,14 @@ void VideoPlayer::Stop()
     if(mVideo != nullptr)
     {
         Services::Get<LayerManager>()->PopLayer();
+    
+        // Delete video to cleanup resources.
+        delete mVideo;
+        mVideo = nullptr;
+
+        // Unlock mouse on movie end. TODO: Maybe do this in the video layer?
+        Services::GetInput()->UnlockMouse();
     }
-    
-    // Delete video to cleanup resources.
-    delete mVideo;
-    mVideo = nullptr;
-    
-    // Unlock mouse on movie end. TODO: Maybe do this in the video layer?
-    Services::GetInput()->UnlockMouse();
     
     // Fire stop callback.
     if(mStopCallback != nullptr)
