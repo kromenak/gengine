@@ -8,6 +8,7 @@
 #include "ConsoleUI.h"
 #include "Debug.h"
 #include "DialogueManager.h"
+#include "FileSystem.h"
 #include "FootstepManager.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
@@ -64,7 +65,20 @@ bool GEngine::Initialize()
         TIMER_SCOPED(barn.c_str());
         if(!mAssetManager.LoadBarn(barn))
         {
-            std::string error = "Could not load barn: " + barn;
+            // Get base path and store in local string.
+            // We must free this, per SDL docs.
+            char* basePath = SDL_GetBasePath();
+            std::string resourcesPath(basePath);
+            SDL_free(basePath);
+            
+            // The base path has a / on the end, but that doesn't work with Path::Combine.
+            resourcesPath.pop_back();
+            
+            // Generate expected path for this asset.
+            std::string path = Path::Combine({ resourcesPath, "Data", barn });
+            
+            // Generate error and show error box.
+            std::string error = StringUtil::Format("Could not load barn %s.\n\nMake sure Data directory is populated before running the game.", path.c_str());
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
                                      "GEngine",
                                      error.c_str(),
