@@ -73,9 +73,12 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
 		CFRelease(fileNameCFStr);
 		
 		// File exists if resource URL is not null.
-		return resourceUrl != nullptr;
+        if(resourceUrl != nullptr)
+        {
+            return true;
+        }
 	}
-	//NOTE: if can't get a bundle ref, we purposely drop through to "failsafe" method below.
+	//NOTE: if can't get a bundle ref or resource url, we purposely drop through to "failsafe" method below.
     #endif
 	
 	// Worst case, if no platform-specific way to get a file path, we can just combine the search path and filename.
@@ -85,10 +88,7 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
 	
 	// How can you tell if the path is valid? Well, you've gotta see if you can open a stream!
 	std::ifstream f(outPath.c_str());
-	if(f.good()) { return true; }
-	
-	// Failure!
-	return false;
+    return f.good();
 }
 
 std::string Path::GetFileName(const std::string& path)
