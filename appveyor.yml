@@ -45,23 +45,19 @@ configuration: RelWithDebInfo
 # Scripts to run before build.
 before_build:
   # For Mac: generate Xcode project.
-  - sh: cmake -B build -G Xcode .
+  - sh: cmake -B build_appveyor -G Xcode .
+
+  # For Windows: generte VS project
+  - cmd: cmake -B build_appveyor -G "Visual Studio 16 2019" -A Win32
   
-  # For Windows: when you open VS, it generates a CMake "build" directory based on the contents of CMakeSettings.json.
-  # Unfortunately, there's no way to execute what VS does (or use CMakeSettings.json) from the command line.
-  # As a workaround, execute the cmake command that VS exectutes (pulled from VS CMake output log).
-  - cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
-  - cmd: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="%CONFIGURATION%" -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_MAKE_PROGRAM="ninja.exe" .
+  # Alternate approach that uses Ninja - maybe faster?
+  # Execute the cmake command that VS exectutes (pulled from VS CMake output log).
+  #- cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
+  #- cmd: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="%CONFIGURATION%" -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_MAKE_PROGRAM="ninja.exe" .
 
 build_script:
-  # For Mac: build project using xcodebuild "deploy" target. (TODO: can "cmake --build" be used here as well?)
-  # xcodebuild only works IN THE DIRECTORY with the Xcode project, which is why we must "cd" in and out.
-  - sh: cd build
-  - sh: xcodebuild -target deploy -configuration "${CONFIGURATION}"
-  - sh: cd ../
-
-  # For Windows: use the built-in CMake "build" command to compile using Ninja. 
-  - cmd: cmake --build build --target deploy
+  # This should work for both Mac and Windows.
+  - cmake --build build_appveyor --target deploy --config ${CONFIGURATION}
 
 # Scripts to run after build.
 #after_build:
@@ -73,21 +69,16 @@ build_script:
 
 # Scripts to run before tests.
 before_test:
-  # For Mac: build test target.
-  - sh: cd build
-  - sh: xcodebuild -target tests -configuration "${CONFIGURATION}"
-  - sh: cd ../
-
-  # For Windows: build test target.
-  - cmd: cmake --build build --target tests
+  # This should work for both Mac and Windows.
+  - cmake --build build_appveyor --target tests --config ${CONFIGURATION}
 
 # Scripts to run for tests.
 test_script:
   # For Mac: run tests.
-  - sh: ./build/Tests/${CONFIGURATION}/tests
+  - sh: ./build_appveyor/Tests/${CONFIGURATION}/tests
 
   # For Windows: run tests.
-  - cmd: build\Tests\tests.exe
+  - cmd: build_appveyor\Tests\%CONFIGURATION%\tests.exe
 
 # Scripts to run after tests.
 #after_test:
@@ -107,8 +98,8 @@ artifacts:
 ####
 
 # Scripts to run before deployment.
-before_deploy:
-  - echo Before Deploy
+#before_deploy:
+#  - echo Before Deploy
 
 # Deploy to GitHub Releases
 deploy:
@@ -121,8 +112,8 @@ deploy:
       secure: RziIBOU8Bm+xT4f7Yo1P0IXI2SZUitYy4qFrPthqi/Lb8/1rOYvYp1PvdDxYc/DO
 
 # Scripts to run after deployment.
-after_deploy:
-  - echo After Deploy
+#after_deploy:
+#  - echo After Deploy
 
 ####
 # Handlers
