@@ -13,12 +13,18 @@ if [ $2 = "app" ]; then
 	mkdir -p "$LIBS_DIR"
 fi
 
-# Copy libraries.
+# Copy ffmpeg libraries.
 cp ${SOURCE_DIR}/Libraries/ffmpeg/lib/mac/libavcodec.dylib "${LIBS_DIR}"
 cp ${SOURCE_DIR}/Libraries/ffmpeg/lib/mac/libavformat.dylib "${LIBS_DIR}"
 cp ${SOURCE_DIR}/Libraries/ffmpeg/lib/mac/libavutil.dylib "${LIBS_DIR}"
 cp ${SOURCE_DIR}/Libraries/ffmpeg/lib/mac/libswresample.dylib "${LIBS_DIR}"
 cp ${SOURCE_DIR}/Libraries/ffmpeg/lib/mac/libswscale.dylib "${LIBS_DIR}"
+
+# Copy fmod library.
 cp ${SOURCE_DIR}/Libraries/fmod/lib/mac/libfmod.dylib "${LIBS_DIR}"
+
+# Copy GLEW library.
 cp ${SOURCE_DIR}/Libraries/GLEW/lib/mac/libGLEW.dylib "${LIBS_DIR}"
+
+# Copy libz library.
 cp ${SOURCE_DIR}/Libraries/zlib/lib/mac/libz.dylib "${LIBS_DIR}"

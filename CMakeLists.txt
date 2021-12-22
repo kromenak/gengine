@@ -129,7 +129,15 @@ endif()
 
 # Other project settings
 if(WIN32)
-    # Nothing yet on Windows!
+    # Use repo root as debugger working directory.
+    # This allows running the game without copying Assets/Data to the Build folder.
+    set_property(TARGET gk3 PROPERTY 
+        VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+
+    # Set GK3 as the startup project.
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT gk3)
+
 elseif(APPLE)
     # Build a MacOS app (rather than command line tool).
     set_target_properties(gk3 PROPERTIES
@@ -169,7 +177,7 @@ if(WIN32)
     # Convert directories to Windows (with backslash separator).
     add_custom_command(TARGET gk3
         POST_BUILD
-        COMMAND cmd /c ${PLAT_SOURCE_DIR}\\Scripts\\PostBuild.bat ${PLAT_BINARY_DIR} ${PLAT_SOURCE_DIR}
+        COMMAND cmd /c ${PLAT_SOURCE_DIR}\\Scripts\\PostBuild.bat ${PLAT_BINARY_DIR}\\$<CONFIG> ${PLAT_SOURCE_DIR}
         VERBATIM
     )
 elseif(APPLE)
@@ -188,7 +196,7 @@ if(WIN32)
     # In VS, this target does not appear in the top bar - go to "Solution Explorer -> CMake Targets View" to build this target.
     add_custom_command(TARGET deploy
         POST_BUILD
-        COMMAND cmd /c ${PLAT_SOURCE_DIR}\\Scripts\\Deploy.bat ${PLAT_BINARY_DIR} ${PLAT_SOURCE_DIR}\\Bin\\$<CONFIG> ${PROJECT_VERSION}
+        COMMAND cmd /c ${PLAT_SOURCE_DIR}\\Scripts\\Deploy.bat ${PLAT_SOURCE_DIR} ${PLAT_BINARY_DIR}\\$<CONFIG> ${PLAT_SOURCE_DIR}\\Bin\\$<CONFIG> ${PROJECT_VERSION}
         VERBATIM
     )
 elseif(APPLE)
