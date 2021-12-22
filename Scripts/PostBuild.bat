@@ -21,9 +21,11 @@ xcopy /y %ROOTDIR%\Libraries\SDL\lib\win\x86\SDL2.dll %OUTDIR%
 rem Copy Zlib libraries.
 xcopy /y %ROOTDIR%\Libraries\zlib\lib\win\x86\zlib1.dll %OUTDIR%
 
-rem Copy assets folder.
+rem Copy assets/data folders.
 xcopy /y /s /e /d %ROOTDIR%\Assets %OUTDIR%\Assets\
 xcopy /y /s /e /d %ROOTDIR%\Data %OUTDIR%\Data\
+
+rem Copy ini file.
 xcopy /y %ROOTDIR%\GK3.ini %OUTDIR%
 
 endlocal

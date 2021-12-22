@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# For Xcode, generate schemes for targets. This ensures targets appear in target dropdown.
+set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
+
 # Set compiler warning settings (TODO: a lot of stuff to clean up after adding this!)
 #if(MSVC)
 #  add_compile_options(/W3 /wd4065)
@@ -18,13 +21,13 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #endif()
 
 # Get all cpp/h files in the Source directory using GLOB.
-# TODO: Using file(GLOB) is not recommended for generating source file list - you are supposed to explicitly list!
-# TODO: Some people use Python scripts or just manually do this...gotta decide on a solution. 
+# Supposedly using GLOB is frowned upon, but...it works really well for now sooooo.
 file(GLOB_RECURSE source_files CONFIGURE_DEPENDS 
     "Source/*.cpp" "Source/*.h" "Source/*.cc" "Source/*.hh"
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${source_files})
 
+# Do the same for Assets folder, so they also appear in IDE.
 file(GLOB_RECURSE asset_files CONFIGURE_DEPENDS
     "Assets/*.txt" "Assets/*.shp" "Assets/*.frag" "Assets/*.vert"
 )
@@ -33,7 +36,8 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${asset_files})
 # Add main executable - the game.
 add_executable(gk3 ${source_files} ${asset_files})
 
-# Header locations.
+# Add header locations.
+# For any folder listed here, you can add headers in that folder without providing a path.
 target_include_directories(gk3 PRIVATE
     Source
     Source/Assets
@@ -72,7 +76,7 @@ target_include_directories(gk3 PRIVATE
     Libraries/zlib/include
 )
 
-# Library locations.
+# Library locations/linking/copying.
 if(WIN32)
     # Specify library search directories.
     target_link_directories(gk3 PRIVATE
@@ -92,52 +96,7 @@ if(WIN32)
         SDL2                                        # SD
         opengl32                                    # OpenGL
     )
-
-    # Copies libraries to exe directory. 
-    # Gotta use "TO_NATIVE_PATH" because CMake variables use the wrong path separator for Windows.
-    file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} WIN_SOURCE_DIR)
-    file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} WIN_BINARY_DIR)
-    add_custom_command(TARGET gk3
-        POST_BUILD
-        COMMAND cmd /c ${WIN_SOURCE_DIR}\\Libraries\\CopyLibraries.bat ${WIN_BINARY_DIR} ${WIN_SOURCE_DIR}
-        VERBATIM
-    )
-
-    # Create a custom "deploy" target that runs the install script.
-    # This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
-    # In VS, this target does not appear in the top bar - go to "Solution Explorer -> CMake Targets View" to build this target.
-    add_custom_target(deploy)
-    add_custom_command(TARGET deploy
-        POST_BUILD
-        COMMAND cmd /c ${WIN_SOURCE_DIR}\\Scripts\\Install.bat ${WIN_BINARY_DIR} ${WIN_SOURCE_DIR}\\Bin\\$<CONFIG> ${PROJECT_VERSION}
-        VERBATIM
-    )
-    add_dependencies(deploy gk3)
 elseif(APPLE)
-    # Build a MacOS app (rather than command line tool).
-    set_target_properties(gk3 PROPERTIES
-        MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Xcode/MacOS/Info.plist
-        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
-
-        XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
-        XCODE_ATTRIBUTE_PRODUCT_NAME "Gabriel Knight 3"
-        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.kromenak.gengine"
-        XCODE_ATTRIBUTE_MARKETING_VERSION ${PROJECT_VERSION}
-        XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION 1
-    )
-
-    # Add xcassets file under "Resources" in project (required for AppIcon to work correctly).
-    target_sources(gk3 PRIVATE Xcode/MacOS/Assets.xcassets)
-    set_source_files_properties(Xcode/MacOS/Assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-
-    # Explicitly set rpath to look in a few places relative to the executable.
-    # Specifying "build with install rpath" stops CMake from adding individual library paths to rpath (not desired).
-    set_target_properties(gk3 PROPERTIES
-        INSTALL_RPATH "@executable_path;@executable_path/../Frameworks;@executable_path/../Libraries"
-        BUILD_WITH_INSTALL_RPATH TRUE
-    )
-
     # Specify library search directories.
     target_link_directories(gk3 PRIVATE
         Libraries/ffmpeg/lib/mac
@@ -166,25 +125,80 @@ elseif(APPLE)
         ${COREFOUNDATION_LIB}
         ${OPENGL_LIB}
     )
+endif()
 
+# Other project settings
+if(WIN32)
+    # Nothing yet on Windows!
+elseif(APPLE)
+    # Build a MacOS app (rather than command line tool).
+    set_target_properties(gk3 PROPERTIES
+        MACOSX_BUNDLE TRUE
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Xcode/MacOS/Info.plist
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
+
+        XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
+        XCODE_ATTRIBUTE_PRODUCT_NAME "Gabriel Knight 3"
+        XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER "com.kromenak.gengine"
+        XCODE_ATTRIBUTE_MARKETING_VERSION ${PROJECT_VERSION}
+        XCODE_ATTRIBUTE_CURRENT_PROJECT_VERSION 1
+    )
+
+    # Add xcassets file under "Resources" in project (required for AppIcon to work correctly).
+    target_sources(gk3 PRIVATE Xcode/MacOS/Assets.xcassets)
+    set_source_files_properties(Xcode/MacOS/Assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+
+    # Explicitly set rpath to look in a few places relative to the executable.
+    # Specifying "build with install rpath" stops CMake from adding individual library paths to rpath (not desired).
+    set_target_properties(gk3 PROPERTIES
+        INSTALL_RPATH "@executable_path;@executable_path/../Frameworks;@executable_path/../Libraries"
+        BUILD_WITH_INSTALL_RPATH TRUE
+    )
+
+    # Set working directory for Run/Profile in Xcode to the root of the repo.
+    # This allows running the game without copying Assets/Data folders into the .app.
+    set_target_properties(gk3 PROPERTIES
+        XCODE_SCHEME_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    )
+endif()
+
+# Post-build commands, to copy any libraries/assets to final locations.
+file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PLAT_SOURCE_DIR)
+file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} PLAT_BINARY_DIR)
+if(WIN32)
+    # Convert directories to Windows (with backslash separator).
+    add_custom_command(TARGET gk3
+        POST_BUILD
+        COMMAND cmd /c ${PLAT_SOURCE_DIR}\\Scripts\\PostBuild.bat ${PLAT_BINARY_DIR} ${PLAT_SOURCE_DIR}
+        VERBATIM
+    )
+elseif(APPLE)
     # Copies libraries to app bundle post-build.
     add_custom_command(TARGET gk3
         POST_BUILD
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Libraries/CopyLibraries.sh app
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/Libraries
+        COMMAND ${PLAT_SOURCE_DIR}/Scripts/PostBuild.sh ${PLAT_SOURCE_DIR} app
         VERBATIM
     )
+endif()
 
-    # Create a custom "deploy" target that runs the install script.
-    # This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
-    add_custom_target(deploy)
+# Create deploy target, which creates a final release of the game.
+# This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
+add_custom_target(deploy)
+if(WIN32)
+    # In VS, this target does not appear in the top bar - go to "Solution Explorer -> CMake Targets View" to build this target.
     add_custom_command(TARGET deploy
         POST_BUILD
-        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Scripts/Install.sh ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION}
+        COMMAND cmd /c ${PLAT_SOURCE_DIR}\\Scripts\\Deploy.bat ${PLAT_BINARY_DIR} ${PLAT_SOURCE_DIR}\\Bin\\$<CONFIG> ${PROJECT_VERSION}
         VERBATIM
     )
-    add_dependencies(deploy gk3)
+elseif(APPLE)
+    add_custom_command(TARGET deploy
+        POST_BUILD
+        COMMAND ${PLAT_SOURCE_DIR}/Scripts/Deploy.sh ${PLAT_SOURCE_DIR} ${PLAT_BINARY_DIR}/$<CONFIG> ${PLAT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION}
+        VERBATIM
+    )
 endif()
+add_dependencies(deploy gk3)
 
 # Add minilzo library (source only).
 set(LZO_SOURCES
