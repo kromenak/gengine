@@ -95,7 +95,7 @@ void SoundtrackPlayer::Stop(Soundtrack* soundtrack)
     // Find and remove.
     for(auto it = mPlaying.begin(); it != mPlaying.end(); ++it)
     {
-        if(it->mSoundtrack = soundtrack)
+        if(it->mSoundtrack == soundtrack)
         {
             // Stopping a soundtrack stops any additional nodes from executing.
             // But it DOES NOT stop currently playing audio.

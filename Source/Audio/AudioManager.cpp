@@ -313,7 +313,7 @@ PlayingSoundHandle AudioManager::PlaySFX(Audio* audio, std::function<void()> fin
     return soundHandle;
 }
 
-PlayingSoundHandle AudioManager::PlaySFX3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
+PlayingSoundHandle AudioManager::PlaySFX3D(Audio* audio, const Vector3& position, float minDist, float maxDist)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     return CreateAndPlaySound3D(audio, AudioType::SFX, position, minDist, maxDist);
@@ -325,7 +325,7 @@ PlayingSoundHandle AudioManager::PlayVO(Audio* audio)
     return CreateAndPlaySound(audio, AudioType::VO);
 }
 
-PlayingSoundHandle AudioManager::PlayVO3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
+PlayingSoundHandle AudioManager::PlayVO3D(Audio* audio, const Vector3& position, float minDist, float maxDist)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     return CreateAndPlaySound3D(audio, AudioType::VO, position, minDist, maxDist);
@@ -337,7 +337,7 @@ PlayingSoundHandle AudioManager::PlayAmbient(Audio* audio, float fadeInTime)
     return CreateAndPlaySound(audio, AudioType::Ambient);
 }
 
-PlayingSoundHandle AudioManager::PlayAmbient3D(Audio* audio, const Vector3 &position, float minDist, float maxDist)
+PlayingSoundHandle AudioManager::PlayAmbient3D(Audio* audio, const Vector3& position, float minDist, float maxDist)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
     return CreateAndPlaySound3D(audio, AudioType::Ambient, position, minDist, maxDist);

@@ -96,14 +96,14 @@ bool Config::GetKeyValue(const std::string& key, IniKeyValue& outKeyValue)
 bool Config::GetKeyValue(const std::string& sectionName, const std::string& key, IniKeyValue& outKeyValue)
 {
     // First, find the section.
-    auto& sectionIt = mConfig.find(sectionName);
+    auto sectionIt = mConfig.find(sectionName);
     if(sectionIt == mConfig.end())
     {
         return false;
     }
 
     // Next, find the key.
-    auto& keyIt = sectionIt->second.find(key);
+    auto keyIt = sectionIt->second.find(key);
     if(keyIt == sectionIt->second.end())
     {
         return false;

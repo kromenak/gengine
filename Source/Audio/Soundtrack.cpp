@@ -63,6 +63,16 @@ int SoundNode::Execute(AudioType soundType)
             soundInstance = Services::GetAudio()->PlaySFX(audio);
         }
         break;
+        
+    case AudioType::VO:
+        if(is3d)
+        {
+            soundInstance = Services::GetAudio()->PlayVO3D(audio, position, minDist, maxDist);
+        }
+        else
+        {
+            soundInstance = Services::GetAudio()->PlayVO(audio);
+        }
     }
     
     // Set sound's volume.
