@@ -56,8 +56,8 @@ before_build:
   #- cmd: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="%CONFIGURATION%" -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_MAKE_PROGRAM="ninja.exe" .
 
 build_script:
-  # This should work for both Mac and Windows.
-  - cmake --build build_appveyor --target deploy --config ${CONFIGURATION}
+  - sh: cmake --build build_appveyor --target deploy --config ${CONFIGURATION}
+  - cmd: cmake --build build_appveyor --target deploy --config %CONFIGURATION%
 
 # Scripts to run after build.
 #after_build:
@@ -69,15 +69,12 @@ build_script:
 
 # Scripts to run before tests.
 before_test:
-  # This should work for both Mac and Windows.
-  - cmake --build build_appveyor --target tests --config ${CONFIGURATION}
+  - sh: cmake --build build_appveyor --target tests --config ${CONFIGURATION}
+  - cmd: cmake --build build_appveyor --target tests --config %CONFIGURATION%
 
 # Scripts to run for tests.
 test_script:
-  # For Mac: run tests.
   - sh: ./build_appveyor/Tests/${CONFIGURATION}/tests
-
-  # For Windows: run tests.
   - cmd: build_appveyor\Tests\%CONFIGURATION%\tests.exe
 
 # Scripts to run after tests.
