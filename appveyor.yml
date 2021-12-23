@@ -2,11 +2,12 @@
 # General Config
 ####
 
+# The version number being built. Should match version in CMake/at runtime.
+# This is the ACTUAL version number used when uploading to GitHub Releases.
 environment:
   APP_VERSION: 0.0.2
 
-# Appveyor build version equals app's version number, but with an added (patch) value.
-# Ex: if app version is "0.0.1", Appveyor's version might be "0.0.1.9".
+# Appveyor version number - used only for the unique build version required by Appveyor.
 version: $(APP_VERSION)-{build}
 
 # The goal is to build and deploy occasional release milestones to GitHub.
