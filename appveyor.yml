@@ -109,7 +109,7 @@ deploy:
     description: '$(APPVEYOR_REPO_COMMIT_MESSAGE) - $(APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED)'
     force_update: true # allows multiple jobs to upload artifacts to same GitHub release
     auth_token:
-      secure: RziIBOU8Bm+xT4f7Yo1P0IXI2SZUitYy4qFrPthqi/Lb8/1rOYvYp1PvdDxYc/DO
+      secure: DuQUXjm31E4YjETAHvTdtMj9VbrNVTId39ObmB95ZXXU7oJz8j4ChuF+S4hnC7Qw
 
 # Scripts to run after deployment.
 #after_deploy:
