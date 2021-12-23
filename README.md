@@ -11,24 +11,24 @@ Currently, the project builds and runs on Mac or Windows. Here are some instruct
 ### GK3 Data Files
 This repository **does not** contain the data files from the game, since those are copyrighted material. You will need to obtain a copy of GK3 (available on Steam or GOG) to get the data files.
 
-Copy the entire contents of the game's `Data` folder into the `Assets/GK3` folder before building/running. This includes all Barn (.brn) asset bundles and all video files (.bik and .avi).
+Copy the entire contents of the game's `Data` folder into the `Data` folder before building/running. This includes all Barn (.brn) asset bundles and all video files (.bik and .avi).
 
-If you compile the project _before_ adding these data files, you can also copy them to the app bundle or exe directory after a build to get the game running.
+After building, you can also add data files. On Windows, copy them to the `Data` folder in the exe directory. On Mac, copy them to `Gabriel Knight 3.appropriate/Contents/Resources/Data`.
 
 ### Build File Generation
 The project uses CMake, which means the definitions of what targets to create, which source files to include, and which libraries to link against are defined in `CMakeLists.txt` in the project root. Using CMake, you can generate the project files for your preferred IDE. 
 
 I've only tested Xcode and Visual Studio 2019 at this point, but it'll likely work with other build systems with a bit of effort.
 
-#### Xcode
-Install CMake (if not already installed). One easy way to do this is through Homebrew.
+#### Mac (Xcode)
+Make sure Xcode and CMake are installed. Then, use terminal to execute the script at `Build/GenerateMac.sh`. The Xcode project will be generated at `Build/Mac`. Build and run the `gk3` target.
 
-With CMake installed, go to the project directory. Run `cmake -G Xcode -B Build`. If the command runs successfully, you'll now have a `Build` directory containing an Xcode project. Build and run the `gk3` target. 
+#### Windows (Visual Studio 2019)
+Install Visual Studio 2019 and CMake. When you install CMake, I'd recommend adding it to your path.
 
-#### Visual Studio 2019
-Ensure that VS was installed with CMake support. If not, you can run the "VS 2019 Installer" to ensure the required components are installed. CMake is included in the "Desktop Development with C++" module.
+Then, I'd recommend using [Git Bash](https://gitforwindows.org/) to execute the `Build/GenerateWindows.sh` script. This will generate a VS 2019 project at `Build/Windows`. Build and run the `gk3` target.
 
-With VS installed with CMake support, simply right-click on the project directory and select "Open with Visual Studio". VS will generate the project files from CMake and open it for you. Build and run the `gk3` target.
+If you'd prefer to use the native Command Prompt, you'll just need to manually run the CMake command in the bash script file instead.
 
 ## Platform Support
 The engine currently supports Mac and Windows. Most of the engine code is platform-agnostic, but there are some key things that must be taken care of to support a new platform.
@@ -87,11 +87,11 @@ Logically, the game runs, but is definitely not completable. You can walk around
 ## Running the Game
 From time to time, as new and interesting features are added to the game, I'll package and upload releases here on GitHub. These executables are not "signed" or "notarized", so your OS may complain about files being from an unknown developer. You'll have to use the OS mechanism to bypass such warnings if you want to run the game.
 
-Remember to copy the contents of GK3's "Data" folder to the "Assets/GK3" folder. If running on Mac, this folder is inside of the .app package - you'll need to right-click on "Gabriel Knight 3.app", select "Show Package Contents", and navigate to the "Resources" folder. If you don't do this, the game will provide an error message about missing "brn" files and fail to run.
+Remember to copy the contents of GK3's "Data" folder to the "Data" folder. If running on Mac, this folder is inside of the .app package - you'll need to right-click on "Gabriel Knight 3.app", select "Show Package Contents", and navigate to the "Content/Resources" folder. If you don't do this, the game will provide an error message about missing "brn" files and fail to run.
 
 As mentioned above, some functionality is implemented, but expect bugs, crashes, poor performance, and missing/incorrect behavior. Do not expect to play the entire game, or even complete a single timeblock!
 
-You can open the developer console using the `~` key, which allows you to enter commands in the Sheep language. For example, try `SetLocation("LBY")` or `PrintString("Hello World")`.
+You can open the developer console using the `~` key, which allows you to enter commands in the Sheep language. For example, try `SetLocation("LBY")` or `PrintString("Hello World")`. Check out the GitHub wiki for a list of all Sheep API functions that can be called.
 
 F1, F2, and F3 enable debug visualizations. F4 quits the game.
 
