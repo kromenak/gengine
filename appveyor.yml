@@ -7,7 +7,7 @@ environment:
 
 # Appveyor build version equals app's version number, but with an added (patch) value.
 # Ex: if app version is "0.0.1", Appveyor's version might be "0.0.1.9".
-version: $(app-version)-$(APPVEYOR_BUILD_NUMBER)
+version: $(app-version)-{build}
 
 # The goal is to build and deploy occasional release milestones to GitHub.
 # Rather than building every commit to master, we'll only build when merging into release branch.
