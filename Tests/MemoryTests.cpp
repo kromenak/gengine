@@ -210,6 +210,8 @@ TEST_CASE("Linear allocator works correctly")
 
 TEST_CASE("Freestyle allocator basic alloc/dealloc works correctly")
 {
+    // The checks in this test assume a 64-bit machine...so ignore on Win32 for now.
+    #if !defined(_WIN32)
     // Allocate some memory.
     // We know this memory is 4-byte aligned.
     unsigned char memory[1024];
@@ -263,4 +265,5 @@ TEST_CASE("Freestyle allocator basic alloc/dealloc works correctly")
     REQUIRE(allocator.GetAllocatedSize() == 0);
     REQUIRE(allocator.GetFreeBlockSize(0) == 1024);
     REQUIRE(allocator.GetFreeBlockSize(1) == 0); // there is no second free block
+    #endif
 }
