@@ -3,11 +3,11 @@
 ####
 
 environment:
-  app-version: 0.0.2
+  APP_VERSION: 0.0.2
 
 # Appveyor build version equals app's version number, but with an added (patch) value.
 # Ex: if app version is "0.0.1", Appveyor's version might be "0.0.1.9".
-version: $(app-version)-{build}
+version: $(APP_VERSION)-{build}
 
 # The goal is to build and deploy occasional release milestones to GitHub.
 # Rather than building every commit to master, we'll only build when merging into release branch.
@@ -105,8 +105,8 @@ artifacts:
 deploy:
   - provider: GitHub
     artifact: Game
-    release: 'v$(app-version)'
-    description: 'GEngine version $(app-version) for Mac and Windows'
+    release: 'v$(APP_VERSION)'
+    description: 'GEngine version $(APP_VERSION) for Mac and Windows'
     force_update: true # allows multiple jobs to upload artifacts to same GitHub release
     auth_token:
       secure: DuQUXjm31E4YjETAHvTdtMj9VbrNVTId39ObmB95ZXXU7oJz8j4ChuF+S4hnC7Qw
