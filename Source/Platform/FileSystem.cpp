@@ -194,7 +194,7 @@ bool Directory::Create(const std::string& path)
 	if(result != 0)
 	{
 		// If error is that directory already exists...great, wonderful, ok!
-		if (errno == EEXIST) { return true; }
+		if(errno == EEXIST) { return true; }
 
 		// Some error occurred.
 		std::cout << "Failed to make directory at " << path << std::endl;
@@ -209,7 +209,7 @@ bool Directory::Create(const std::string& path)
 	if(!result)
 	{
 		// If error is that directory already exists...great, wonderful, ok!
-		if (GetLastError() == ERROR_ALREADY_EXISTS) { return true; }
+		if(GetLastError() == ERROR_ALREADY_EXISTS) { return true; }
 
 		// Some error occurred.
 		std::cout << "Failed to make directory at " << path << std::endl;
@@ -245,4 +245,28 @@ int64 File::Size(const std::string& filePath)
 
     // Failed to get size, so just return 0.
     return 0;
+}
+
+char* File::ReadIntoBuffer(const std::string& filePath, uint32& outBufferSize)
+{
+    // Open the file, or error if failed.
+    std::ifstream file(filePath, std::iostream::in | std::iostream::binary);
+    if(!file.good())
+    {
+        outBufferSize = 0;
+        return nullptr;
+    }
+
+    // Get size of file, so we can make a buffer for its contents.
+    int64 size = File::Size(filePath);
+
+    // Create buffer and read in data.
+    // This may be a binary or text asset. But to be on the safe side, let's stick a null terminator on there.
+    char* buffer = new char[size + 1];
+    file.read(buffer, size);
+    buffer[size] = '\0';
+
+    // Pass out buffer size and return buffer.
+    outBufferSize = size + 1;
+    return buffer;
 }

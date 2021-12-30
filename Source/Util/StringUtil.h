@@ -174,9 +174,8 @@ namespace StringUtil
 
     inline bool ToBool(const std::string& str)
     {
-        // If the string is "yes" or "true", we'll say it converts to "true".
-        // The values "no" or "false" would convert to false...but false will also be our default return value.
-        // So, anything other than "yes" or "true" returns false.
+        // True is "on" or "yes" or "true".
+        // Anything is false.
         return EqualsIgnoreCase(str, "on") || EqualsIgnoreCase(str, "yes") || EqualsIgnoreCase(str, "true");
     }
     

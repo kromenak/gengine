@@ -9,5 +9,5 @@ Asset::Asset(std::string name) : mName(name)
 
 std::string Asset::GetNameNoExtension()
 {
-    return File::RemoveExtension(mName);
+    return Path::RemoveExtension(mName);
 }

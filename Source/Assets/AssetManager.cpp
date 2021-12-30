@@ -96,7 +96,7 @@ std::string AssetManager::GetAssetPath(const std::string& fileName)
 std::string AssetManager::GetAssetPath(const std::string& fileName, std::initializer_list<std::string> extensions)
 {
     // If already has an extension, just use the normal path find function.
-    if(File::HasExtension(fileName))
+    if(Path::HasExtension(fileName))
     {
         return GetAssetPath(fileName);
     }
@@ -383,7 +383,7 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
 {
     // We want to add the expected extension if no extension already exists on the name.
-    if(!File::HasExtension(assetName))
+    if(!Path::HasExtension(assetName))
     {
         return assetName + expectedExtension;
     }
@@ -454,26 +454,7 @@ char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int
 	std::string assetPath = GetAssetPath(assetName);
 	if(!assetPath.empty())
 	{
-		// Open the file, or error if failed.
-		std::ifstream file(assetPath, std::iostream::in | std::iostream::binary);
-		if(!file.good())
-		{
-			std::cout << "Found asset path, but could not open file for " << assetName << std::endl;
-			return nullptr;
-		}
-
-        // Get size of file, so we can make a buffer for its contents.
-        int64 size = File::Size(assetPath);
-
-        // Create buffer and read in data.
-        // This may be a binary or text asset. But to be on the safe side, let's stick a null terminator on there.
-        char* buffer = new char[size + 1];
-        file.read(buffer, size);
-        buffer[size] = '\0';
-
-        // Pass out buffer size and return buffer.
-        outBufferSize = size + 1;
-        return buffer;
+        return File::ReadIntoBuffer(assetPath, outBufferSize);
 	}
 	
 	// If no file to load, we'll get the asset from a barn.

@@ -54,6 +54,12 @@ namespace Path
      * Ex: "Assets/Data/Blah" has no extension, "Assets/Data/Blah.x" does have an extension.
      */
     bool HasExtension(const std::string& path);
+
+    /**
+     * Removes the extension from the file name.
+     * Just returns a copy of the current file name if no extension is present.
+     */
+    inline std::string RemoveExtension(const std::string& fileName) { return fileName.substr(0, fileName.find_last_of('.')); }
 }
 
 namespace Directory
@@ -99,19 +105,12 @@ namespace Directory
 namespace File
 {
     /**
-     * Removes the extension from the file name.
-     * Just returns a copy of the current file name if no extension is present.
-     */
-    inline std::string RemoveExtension(const std::string& fileName) { return fileName.substr(0, fileName.find_last_of('.')); }
-
-    /**
-     * Checks whether a file name has an extension.
-     * Use this if you know the string doesn't have path separators - otherwise, use Path::HasExtension.
-     */
-    inline bool HasExtension(const std::string& fileName) { return fileName.find_last_of('.') != std::string::npos; }
-
-    /**
      * Determines a file's size in bytes.
      */
     int64 Size(const std::string& filePath);
+
+    /**
+     * Reads file contents into a buffer.
+     */
+    char* ReadIntoBuffer(const std::string& filePath, uint32& outBufferSize);
 }
