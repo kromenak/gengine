@@ -22,6 +22,9 @@ public:
     void UseLoadCursor();
     void UseCustomCursor(Cursor* cursor);
 
+    bool IsDefaultCursor() const { return mActiveCursor == mDefaultCursor; }
+    bool IsHighlightCursor() const { return mActiveCursor == mHighlightRedCursor || mActiveCursor == mHighlightBlueCursor; }
+
 private:
     // The cursor that is currently active.
     Cursor* mActiveCursor = nullptr;

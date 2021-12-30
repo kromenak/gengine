@@ -1,9 +1,8 @@
 //
-// OptionBar.h
-//
 // Clark Kromenaker
 //
-// Description
+// UI that shows options during gameplay.
+// Appears on right-click and shows buttons for inventory, options, quit, etc.
 //
 #pragma once
 #include "Actor.h"
@@ -17,6 +16,8 @@ class RectTransform;
 class UIButton;
 class UICanvas;
 class UILabel;
+class UISlider;
+class UIToggle;
 
 class OptionBar : public Actor
 {
@@ -30,27 +31,43 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
+    // Canvas for the option bar - takes up the entire screen.
     UICanvas* mCanvas = nullptr;
     
     // A large clickable area behind the action bar that stops scene interaction while visible.
     UIButton* mSceneBlockerButton = nullptr;
-    
+
+    // Main section.
     RectTransform* mOptionBarRoot = nullptr;
-    
-    // Main section's text fields.
     UILabel* mScoreLabel = nullptr;
     UILabel* mDayLabel = nullptr;
     UILabel* mTimeLabel = nullptr;
     
-    // Camera section root.
+    // Camera section.
     Actor* mCamerasSection = nullptr;
-    
-    // Roots for all options sections.
+
+    // Options section.
     Actor* mOptionsSection = nullptr;
+    UISlider* mGlobalVolumeSlider = nullptr;
+
+    // Advanced Options section.
     Actor* mAdvancedOptionsSection = nullptr;
+
+    // Sound Options section.
     Actor* mSoundOptionsSection = nullptr;
+    UISlider* mGlobalVolumeSliderDupe = nullptr;
+    UIToggle* mMuteToggle = nullptr;
+    UIToggle* mSfxMuteToggle = nullptr;
+    UIToggle* mVoMuteToggle = nullptr;
+    UIToggle* mMusicMuteToggle = nullptr;
+
+    // Graphics Options section.
     Actor* mGraphicOptionsSection = nullptr;
+
+    // Advanced Graphics Options section.
     Actor* mAdvancedGraphicOptionsSection = nullptr;
+
+    // Game Options section.
     Actor* mGameOptionsSection = nullptr;
     
     void KeepOnScreen();
@@ -63,4 +80,7 @@ private:
     void CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     void CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     void CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
+    
+    void ToggleSoundOptions();
+    void OnGlobalVolumeSliderValueChanged(float value);
 };

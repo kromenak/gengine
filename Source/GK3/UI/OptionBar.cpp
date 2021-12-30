@@ -4,8 +4,10 @@
 #include "Services.h"
 #include "UIButton.h"
 #include "UICanvas.h"
+#include "UIDrag.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UISlider.h"
 #include "UIToggle.h"
 
 OptionBar::OptionBar() : Actor(Actor::TransformType::RectTransform)
@@ -100,10 +102,11 @@ void OptionBar::KeepOnScreen()
     mOptionBarRoot->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
 }
 
-UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, bool setSprites = true)
+UIButton* CreateButton(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, Actor* parent, bool setSprites = true)
 {
     Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
     UIButton* button = buttonActor->AddComponent<UIButton>();
+    canvas->AddWidget(button);
     button->GetRectTransform()->SetAnchor(0.0f, 1.0f);
     button->GetRectTransform()->SetPivot(0.0f, 1.0f);
     
@@ -137,13 +140,19 @@ UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, con
             button->SetHoverTexture(Services::GetAssets()->LoadTexture(it->second.value));
         }
     }
+
+    if(parent != nullptr)
+    {
+        button->GetRectTransform()->SetParent(parent->GetTransform());
+    }
     return button;
 }
 
-UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, const std::string& toggleId)
+UIToggle* CreateToggle(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config, const std::string& toggleId, Actor* parent)
 {
     Actor* toggleActor = new Actor(Actor::TransformType::RectTransform);
     UIToggle* toggle = toggleActor->AddComponent<UIToggle>();
+    canvas->AddWidget(toggle);
     toggle->GetRectTransform()->SetAnchor(0.0f, 1.0f);
     toggle->GetRectTransform()->SetPivot(0.0f, 1.0f);
     
@@ -154,7 +163,58 @@ UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, con
     toggle->SetOnTexture(Services::GetAssets()->LoadTexture(config[toggleId + "SpriteDown"].value));
     toggle->SetOffTexture(Services::GetAssets()->LoadTexture(config[toggleId + "SpriteUp"].value));
     toggle->SetDisabledTexture(Services::GetAssets()->LoadTexture(config[toggleId + "SpriteDis"].value));
+    
+    if(parent != nullptr)
+    {
+        toggle->GetRectTransform()->SetParent(parent->GetTransform());
+    }
     return toggle;
+}
+
+UISlider* CreateSlider(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config, const std::string& sliderId, Actor* parent)
+{
+    // Create slider.
+    Actor* sliderActor = new Actor(Actor::TransformType::RectTransform);
+    UISlider* slider = sliderActor->AddComponent<UISlider>();
+    canvas->AddWidget(slider);
+    slider->GetRectTransform()->SetAnchor(0.0f, 1.0f);
+    slider->GetRectTransform()->SetPivot(0.0f, 1.0f);
+
+    // Set slider min/max positions.
+    // This makes the slider's rect transform the exact width required for the min/max slider positions.
+    Vector2 minPos = config[sliderId + "Min"].GetValueAsVector2();
+    minPos.y *= -1;
+    slider->GetRectTransform()->SetAnchoredPosition(minPos);
+
+    Vector2 maxPos = config[sliderId + "Max"].GetValueAsVector2();
+    maxPos.y *= -1;
+
+    // Create slider handle actor.
+    Actor* handleActor = new Actor(Actor::TransformType::RectTransform);
+    UIImage* handleImage = handleActor->AddComponent<UIImage>();
+    canvas->AddWidget(handleImage);
+    handleImage->SetTextureAndSize(Services::GetAssets()->LoadTexture("RC_SO_SLIDER"));
+    
+    // Add drag component to the handle (so we can drag it) and tell slider to use this for dragging.
+    UIDrag* drag = handleActor->AddComponent<UIDrag>();
+    canvas->AddWidget(drag);
+    slider->SetHandleActor(handleActor);
+
+    // Set slider's vertical size to be exactly equal to handle size.
+    // This should make it so the handle can only move left/right.
+    Vector2 handleSize = handleImage->GetRectTransform()->GetSize();
+    slider->GetRectTransform()->SetSizeDeltaY(handleSize.y);
+
+    // Slider's horizontal size is slider width, PLUS width of the handle itself.
+    float sliderWidth = (maxPos.x - minPos.x);
+    slider->GetRectTransform()->SetSizeDeltaX(sliderWidth + handleSize.x);
+
+    // Set slider parent if told to.
+    if(parent != nullptr)
+    {
+        slider->GetRectTransform()->SetParent(parent->GetTransform());
+    }
+    return slider;
 }
 
 void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config)
@@ -174,8 +234,13 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     backgroundImage->GetRectTransform()->SetPivot(Vector2::Zero);
     backgroundImage->GetRectTransform()->SetAnchor(Vector2::Zero);
     backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
-    backgroundImage->SetReceivesInput(true);
-    
+
+    // The background is draggable.
+    UIDrag* drag = optionBar->AddComponent<UIDrag>();
+    canvas->AddWidget(drag);
+    drag->SetBoundaryRect(Services::GetRenderer()->GetScreenRect());
+    drag->SetUseHighlightCursor(false); // but don't highlight cursor when hovering it
+
     // Load font.
     Font* font = Services::GetAssets()->LoadFont(config["statusFont"].value);
     
@@ -236,29 +301,20 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     //TODO: Active inv item
     
     // Add inventory button.
-    UIButton* invButton = CreateButton(config, "closed");
-    invButton->GetRectTransform()->SetParent(mOptionBarRoot);
-    canvas->AddWidget(invButton);
-    
+    UIButton* invButton = CreateButton(canvas, config, "closed", optionBar);
     invButton->SetPressCallback([this]() {
         this->Hide();
         Services::Get<InventoryManager>()->ShowInventory();
     });
     
     // Add hint button.
-    UIButton* hintButton = CreateButton(config, "hint");
-    hintButton->GetRectTransform()->SetParent(mOptionBarRoot);
-    canvas->AddWidget(hintButton);
-    
+    UIButton* hintButton = CreateButton(canvas, config, "hint", optionBar);
     hintButton->SetPressCallback([]() {
         std::cout << "Hint!" << std::endl;
     });
     
     // Add camera button.
-    UIButton* cameraButton = CreateButton(config, "camera");
-    cameraButton->GetRectTransform()->SetParent(mOptionBarRoot);
-    canvas->AddWidget(cameraButton);
-    
+    UIButton* cameraButton = CreateButton(canvas, config, "camera", optionBar);
     cameraButton->SetPressCallback([this]() {
         this->mCamerasSection->SetActive(!this->mCamerasSection->IsActive());
         this->mOptionsSection->SetActive(false);
@@ -266,47 +322,32 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     });
     
     // Add cinematics button.
-    UIButton* cinematicsOnButton = CreateButton(config, "cine");
-    cinematicsOnButton->GetRectTransform()->SetParent(mOptionBarRoot);
-    canvas->AddWidget(cinematicsOnButton);
-    
+    UIButton* cinematicsOnButton = CreateButton(canvas, config, "cine", optionBar);
     cinematicsOnButton->SetPressCallback([]() {
         std::cout << "Turn cinematics on!" << std::endl;
     });
-    
-    UIButton* cinematicsOffButton = CreateButton(config, "cineoff");
-    cinematicsOffButton->GetRectTransform()->SetParent(mOptionBarRoot);
-    canvas->AddWidget(cinematicsOffButton);
-    
+    UIButton* cinematicsOffButton = CreateButton(canvas, config, "cineoff", optionBar);
     cinematicsOffButton->SetPressCallback([]() {
         std::cout << "Turn cinematics off!" << std::endl;
     });
     
     // Add help button.
-    UIButton* helpButton = CreateButton(config, "help");
-    helpButton->GetRectTransform()->SetParent(mOptionBarRoot);
-    canvas->AddWidget(helpButton);
-    
+    UIButton* helpButton = CreateButton(canvas, config, "help", optionBar);
     helpButton->SetPressCallback([]() {
         std::cout << "Help!" << std::endl;
     });
     
     // Add options button.
-    UIButton* optionsButton = CreateButton(config, "options");
-    optionsButton->GetRectTransform()->SetParent(mOptionBarRoot);
-    canvas->AddWidget(optionsButton);
-    
+    UIButton* optionsButton = CreateButton(canvas, config, "options", optionBar);
     optionsButton->SetPressCallback([this]() {
-        this->mCamerasSection->SetActive(false);
-        this->mOptionsSection->SetActive(!this->mOptionsSection->IsActive());
-        this->KeepOnScreen();
+        mCamerasSection->SetActive(false);
+        mOptionsSection->SetActive(!mOptionsSection->IsActive());
+        KeepOnScreen();
+        mGlobalVolumeSlider->SetValueSilently(Services::GetAudio()->GetMasterVolume());
     });
     
     // Add close button.
-    UIButton* closeButton = CreateButton(config, "exit");
-    closeButton->GetRectTransform()->SetParent(mOptionBarRoot);
-    canvas->AddWidget(closeButton);
-    
+    UIButton* closeButton = CreateButton(canvas, config, "exit", optionBar);
     closeButton->SetPressCallback([this]() {
         this->Hide();
     });
@@ -347,41 +388,31 @@ void OptionBar::CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::s
     backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
     
-    //TODO: Create volume slider
+    // Create volume slider.
+    mGlobalVolumeSlider = CreateSlider(canvas, config, "optSlider", mOptionsSection);
+    mGlobalVolumeSlider->SetValueChangeCallback(std::bind(&OptionBar::OnGlobalVolumeSliderValueChanged, this, std::placeholders::_1));
     
     // Create save button.
-    UIButton* saveButton = CreateButton(config, "optSave");
-    saveButton->GetRectTransform()->SetParent(mOptionsSection->GetTransform());
-    canvas->AddWidget(saveButton);
-    
+    UIButton* saveButton = CreateButton(canvas, config, "optSave", mOptionsSection);
     saveButton->SetPressCallback([]() {
         std::cout << "Save!" << std::endl;
     });
     
     // Create restore button.
-    UIButton* restoreButton = CreateButton(config, "optRestore");
-    restoreButton->GetRectTransform()->SetParent(mOptionsSection->GetTransform());
-    canvas->AddWidget(restoreButton);
-    
+    UIButton* restoreButton = CreateButton(canvas, config, "optRestore", mOptionsSection);
     restoreButton->SetPressCallback([]() {
         std::cout << "Restore!" << std::endl;
     });
     
     // Created "advanced options" button.
-    UIButton* advOptButton = CreateButton(config, "optAdvanced");
-    advOptButton->GetRectTransform()->SetParent(mOptionsSection->GetTransform());
-    canvas->AddWidget(advOptButton);
-    
+    UIButton* advOptButton = CreateButton(canvas, config, "optAdvanced", mOptionsSection);
     advOptButton->SetPressCallback([this]() {
         this->mAdvancedOptionsSection->SetActive(!this->mAdvancedOptionsSection->IsActive());
         this->KeepOnScreen();
     });
     
     // Create "quit game" button.
-    UIButton* quitButton = CreateButton(config, "optQuit");
-    quitButton->GetRectTransform()->SetParent(mOptionsSection->GetTransform());
-    canvas->AddWidget(quitButton);
-    
+    UIButton* quitButton = CreateButton(canvas, config, "optQuit", mOptionsSection);
     quitButton->SetPressCallback([this]() {
         this->Hide();
         //TODO: Show "are you sure you want to quit?" dialog.
@@ -410,22 +441,11 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
     backgroundImage->SetReceivesInput(true);
     
     // Create sound options button.
-    UIButton* soundOptsButton = CreateButton(config, "advOptSound");
-    soundOptsButton->GetRectTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
-    canvas->AddWidget(soundOptsButton);
-    
-    soundOptsButton->SetPressCallback([this]() {
-        this->mSoundOptionsSection->SetActive(!this->mSoundOptionsSection->IsActive());
-        this->mGraphicOptionsSection->SetActive(false);
-        this->mGameOptionsSection->SetActive(false);
-        this->KeepOnScreen();
-    });
+    UIButton* soundOptsButton = CreateButton(canvas, config, "advOptSound", mAdvancedOptionsSection);
+    soundOptsButton->SetPressCallback(std::bind(&OptionBar::ToggleSoundOptions, this));
     
     // Create graphics options button.
-    UIButton* graphicsOptsButton = CreateButton(config, "advOptGraphics");
-    graphicsOptsButton->GetRectTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
-    canvas->AddWidget(graphicsOptsButton);
-    
+    UIButton* graphicsOptsButton = CreateButton(canvas, config, "advOptGraphics", mAdvancedOptionsSection);
     graphicsOptsButton->SetPressCallback([this]() {
         this->mSoundOptionsSection->SetActive(false);
         this->mGraphicOptionsSection->SetActive(!this->mGraphicOptionsSection->IsActive());
@@ -434,10 +454,7 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
     });
     
     // Create game options button.
-    UIButton* gameOptsButton = CreateButton(config, "advOptGame");
-    gameOptsButton->GetRectTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
-    canvas->AddWidget(gameOptsButton);
-    
+    UIButton* gameOptsButton = CreateButton(canvas, config, "advOptGame", mAdvancedOptionsSection);
     gameOptsButton->SetPressCallback([this]() {
         this->mSoundOptionsSection->SetActive(false);
         this->mGraphicOptionsSection->SetActive(false);
@@ -467,48 +484,66 @@ void OptionBar::CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<s
     backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
     backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
-    
-    //TODO: Global volume slider
-    //Create global mute toggle.
-    UIToggle* muteToggle = CreateToggle(config, "soundOptGlobal");
-    muteToggle->GetRectTransform()->SetParent(mSoundOptionsSection->GetTransform());
-    canvas->AddWidget(muteToggle);
-    
+
+    // Create global volume slider.
+    mGlobalVolumeSliderDupe = CreateSlider(canvas, config, "optSoundGlobalSlider", mSoundOptionsSection);
+    mGlobalVolumeSliderDupe->SetValueChangeCallback(std::bind(&OptionBar::OnGlobalVolumeSliderValueChanged, this, std::placeholders::_1));
+
+    // Create global mute toggle.
+    UIToggle* muteToggle = CreateToggle(canvas, config, "soundOptGlobal", mSoundOptionsSection);
     muteToggle->SetToggleCallback([](bool isOn) {
         Services::GetAudio()->SetMuted(isOn);
     });
+    mMuteToggle = muteToggle;
     
-    //TODO: SFX volume slider
-    //Create sfx mute toggle.
-    UIToggle* sfxMuteToggle = CreateToggle(config, "soundOptSfx");
-    sfxMuteToggle->GetRectTransform()->SetParent(mSoundOptionsSection->GetTransform());
-    canvas->AddWidget(sfxMuteToggle);
-    
-    sfxMuteToggle->SetToggleCallback([](bool isOn) {
-        Services::GetAudio()->SetMuted(AudioType::SFX, isOn);
+    // Create sfx volume slider.
+    UISlider* sfxVolumeSlider = CreateSlider(canvas, config, "optSoundSfxSlider", mSoundOptionsSection);
+    sfxVolumeSlider->SetValueChangeCallback([](float value) {
+        // The SFX volume slider also controls ambient volume.
+        Services::GetAudio()->SetVolume(AudioType::SFX, value);
+        Services::GetAudio()->SetVolume(AudioType::Ambient, value);
     });
+
+    //Create sfx mute toggle.
+    UIToggle* sfxMuteToggle = CreateToggle(canvas, config, "soundOptSfx", mSoundOptionsSection);
+    sfxMuteToggle->SetToggleCallback([](bool isOn) {
+        // The SFX toggle also controls ambient.
+        Services::GetAudio()->SetMuted(AudioType::SFX, isOn);
+        Services::GetAudio()->SetMuted(AudioType::Ambient, isOn);
+    });
+    mSfxMuteToggle = sfxMuteToggle;
     
-    //TODO: VO volume slider
-    //Create VO mute toggle.
-    UIToggle* voMuteToggle = CreateToggle(config, "soundOptDialogue");
-    voMuteToggle->GetRectTransform()->SetParent(mSoundOptionsSection->GetTransform());
-    canvas->AddWidget(voMuteToggle);
-    
+    // Create VO volume slider.
+    UISlider* voVolumeSlider = CreateSlider(canvas, config, "optSoundDialogueSlider", mSoundOptionsSection);
+    voVolumeSlider->SetValueChangeCallback([](float value) {
+        Services::GetAudio()->SetVolume(AudioType::VO, value);
+    });
+
+    // Create VO mute toggle.
+    UIToggle* voMuteToggle = CreateToggle(canvas, config, "soundOptDialogue", mSoundOptionsSection);
     voMuteToggle->SetToggleCallback([](bool isOn) {
         Services::GetAudio()->SetMuted(AudioType::VO, isOn);
     });
+    mVoMuteToggle = voMuteToggle;
     
-    //TODO: Music volume slider
-    //Create music mute toggle.
-    UIToggle* musicMuteToggle = CreateToggle(config, "soundOptMusic");
-    musicMuteToggle->GetRectTransform()->SetParent(mSoundOptionsSection->GetTransform());
-    canvas->AddWidget(musicMuteToggle);
-    
-    musicMuteToggle->SetToggleCallback([](bool isOn) {
-        Services::GetAudio()->SetMuted(AudioType::Ambient, isOn);
+    // Create music volume slider.
+    UISlider* musicVolumeSlider = CreateSlider(canvas, config, "optSoundMusicSlider", mSoundOptionsSection);
+    musicVolumeSlider->SetValueChangeCallback([](float value) {
+        Services::GetAudio()->SetVolume(AudioType::Music, value);
     });
+
+    // Create music mute toggle.
+    UIToggle* musicMuteToggle = CreateToggle(canvas, config, "soundOptMusic", mSoundOptionsSection);
+    musicMuteToggle->SetToggleCallback([](bool isOn) {
+        Services::GetAudio()->SetMuted(AudioType::Music, isOn);
+    });
+    mMusicMuteToggle = musicMuteToggle;
     
-    //TODO: Max sounds slider
+    // Create max sounds slider.
+    UISlider* maxSoundsSlider = CreateSlider(canvas, config, "optSoundMusicSlider", mSoundOptionsSection);
+    maxSoundsSlider->SetValueChangeCallback([](float value) {
+        std::cout << "Changed max sounds to " << value << std::endl;
+    });
 }
 
 void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config)
@@ -535,27 +570,19 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     //TODO: Resolution dropdown
     
     // Create "incremental rendering" text (text can be "disabled", like a button, if graphics system doesn't support this option).
-    UIButton* incRenderingText = CreateButton(config, "graphOptIncrementalText", false);
-    incRenderingText->GetRectTransform()->SetParent(mGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(incRenderingText);
+    UIButton* incRenderingText = CreateButton(canvas, config, "graphOptIncrementalText", mGraphicOptionsSection, false);
     incRenderingText->SetUpTexture(Services::GetAssets()->LoadTexture(config["graphOptIncrementalEnabled"].value));
     incRenderingText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["graphOptIncrementalDisabled"].value));
     incRenderingText->SetReceivesInput(false);
     
     // Create "incremental rendering" toggle.
-    UIToggle* incRenderingToggle = CreateToggle(config, "graphOptIncremental");
-    incRenderingToggle->GetRectTransform()->SetParent(mGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(incRenderingToggle);
-    
+    UIToggle* incRenderingToggle = CreateToggle(canvas, config, "graphOptIncremental", mGraphicOptionsSection);
     incRenderingToggle->SetToggleCallback([](bool isOn) {
         std::cout << "Incremental rendering is toggled " << isOn << std::endl;
     });
     
     // Create advanced graphics options button.
-    UIButton* advGraphicsButton = CreateButton(config, "graphOptAdvanced");
-    advGraphicsButton->GetRectTransform()->SetParent(mGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(advGraphicsButton);
-    
+    UIButton* advGraphicsButton = CreateButton(canvas, config, "graphOptAdvanced", mGraphicOptionsSection);
     advGraphicsButton->SetPressCallback([this]() {
         this->mAdvancedGraphicOptionsSection->SetActive(!this->mAdvancedGraphicOptionsSection->IsActive());
         this->KeepOnScreen();
@@ -585,60 +612,43 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unord
     //TODO: Lighting quality dropdown
     
     // Create "mipmap" text (text can be "disabled", like a button, if graphics system doesn't support this option).
-    UIButton* mipmapText = CreateButton(config, "advGraphOptMipMapText", false);
-    mipmapText->GetRectTransform()->SetParent(mAdvancedGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(mipmapText);
+    UIButton* mipmapText = CreateButton(canvas, config, "advGraphOptMipMapText", mAdvancedGraphicOptionsSection, false);
     mipmapText->SetUpTexture(Services::GetAssets()->LoadTexture(config["advGraphOptMipMapEnabled"].value));
     mipmapText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["advGraphOptMipMapDisabled"].value));
     mipmapText->SetReceivesInput(false);
     
     // Create "mipmap" toggle.
-    UIToggle* mipmapToggle = CreateToggle(config, "advGraphOptMipMap");
-    mipmapToggle->GetRectTransform()->SetParent(mAdvancedGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(mipmapToggle);
-    
+    UIToggle* mipmapToggle = CreateToggle(canvas, config, "advGraphOptMipMap", mAdvancedGraphicOptionsSection);
     mipmapToggle->SetToggleCallback([](bool isOn) {
         std::cout << "Mipmap is toggled " << isOn << std::endl;
     });
     
     // Create "animation interpolation" text (text can be "disabled", like a button, if graphics system doesn't support this option).
-    UIButton* animInterpText = CreateButton(config, "advGraphOptInterpolationText", false);
-    animInterpText->GetRectTransform()->SetParent(mAdvancedGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(animInterpText);
+    UIButton* animInterpText = CreateButton(canvas, config, "advGraphOptInterpolationText", mAdvancedGraphicOptionsSection, false);
     animInterpText->SetUpTexture(Services::GetAssets()->LoadTexture(config["advGraphOptInterpolationEnabled"].value));
     animInterpText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["advGraphOptInterpolationDisabled"].value));
     animInterpText->SetReceivesInput(false);
     
     // Create "animation interpolation" toggle.
-    UIToggle* animInterpToggle = CreateToggle(config, "advGraphOptInterpolation");
-    animInterpToggle->GetRectTransform()->SetParent(mAdvancedGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(animInterpToggle);
-    
+    UIToggle* animInterpToggle = CreateToggle(canvas, config, "advGraphOptInterpolation", mAdvancedGraphicOptionsSection);
     animInterpToggle->SetToggleCallback([](bool isOn) {
         std::cout << "Anim interp is toggled " << isOn << std::endl;
     });
     
     // Create "trilinear filtering" text (text can be "disabled", like a button, if graphics system doesn't support this option).
-    UIButton* filteringText = CreateButton(config, "advGraphOptFilteringText", false);
-    filteringText->GetRectTransform()->SetParent(mAdvancedGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(filteringText);
+    UIButton* filteringText = CreateButton(canvas, config, "advGraphOptFilteringText", mAdvancedGraphicOptionsSection, false);
     filteringText->SetUpTexture(Services::GetAssets()->LoadTexture(config["advGraphOptFilteringEnabled"].value));
     filteringText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["advGraphOptFilteringDisabled"].value));
     filteringText->SetReceivesInput(false);
     
     // Create "trilinear filtering" toggle.
-    UIToggle* filteringToggle = CreateToggle(config, "advGraphOptFiltering");
-    filteringToggle->GetRectTransform()->SetParent(mAdvancedGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(filteringToggle);
-    
+    UIToggle* filteringToggle = CreateToggle(canvas, config, "advGraphOptFiltering", mAdvancedGraphicOptionsSection);
     filteringToggle->SetToggleCallback([](bool isOn) {
         std::cout << "Trilinear filtering is toggled " << isOn << std::endl;
     });
     
     // Create "lod" text (text can be "disabled", like a button, if graphics system doesn't support this option).
-    UIButton* lodText = CreateButton(config, "advGraphOptLODText", false);
-    lodText->GetRectTransform()->SetParent(mAdvancedGraphicOptionsSection->GetTransform());
-    canvas->AddWidget(lodText);
+    UIButton* lodText = CreateButton(canvas, config, "advGraphOptLODText", mAdvancedGraphicOptionsSection, false);
     lodText->SetUpTexture(Services::GetAssets()->LoadTexture(config["advGraphOptLODEnabled"].value));
     lodText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["advGraphOptLODDisabled"].value));
     lodText->SetReceivesInput(false);
@@ -664,21 +674,44 @@ void OptionBar::CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<st
     backgroundImage->SetReceivesInput(true);
     
     // Create glide camera toggle.
-    UIToggle* glideCameraToggle = CreateToggle(config, "gameOptGlide");
-    glideCameraToggle->GetRectTransform()->SetParent(mGameOptionsSection->GetTransform());
-    canvas->AddWidget(glideCameraToggle);
+    UIToggle* glideCameraToggle = CreateToggle(canvas, config, "gameOptGlide", mGameOptionsSection);
     
     // Create captions toggle.
-    UIToggle* captionsToggle = CreateToggle(config, "gameOptCaptions");
-    captionsToggle->GetRectTransform()->SetParent(mGameOptionsSection->GetTransform());
-    canvas->AddWidget(captionsToggle);
+    UIToggle* captionsToggle = CreateToggle(canvas, config, "gameOptCaptions", mGameOptionsSection);
     
     // Create keyboard controls button.
-    UIButton* controlsButton = CreateButton(config, "gameOptControls");
-    controlsButton->GetRectTransform()->SetParent(mGameOptionsSection->GetTransform());
-    canvas->AddWidget(controlsButton);
-    
+    UIButton* controlsButton = CreateButton(canvas, config, "gameOptControls", mGameOptionsSection);
     controlsButton->SetPressCallback([this]() {
         std::cout << "Controls" << std::endl;
     });
+}
+
+void OptionBar::ToggleSoundOptions()
+{
+    // Toggle UI elements and keep on-screen if size expands.
+    mSoundOptionsSection->SetActive(!mSoundOptionsSection->IsActive());
+    mGraphicOptionsSection->SetActive(false);
+    mGameOptionsSection->SetActive(false);
+    KeepOnScreen();
+
+    // If active, refresh options in this section.
+    if(mSoundOptionsSection->IsActive())
+    {
+        // Set toggles based on audio system state.
+        // NOTE: the SFX toggle affects both SFX/Ambient audio types...BUT the initial state is only based on SFX state for...idk reasons.
+        mMuteToggle->SetValue(Services::GetAudio()->GetMuted());
+        mSfxMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::SFX));
+        mVoMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::VO));
+        mMusicMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::Music));
+    }
+}
+
+void OptionBar::OnGlobalVolumeSliderValueChanged(float value)
+{
+    // Change the volume.
+    Services::GetAudio()->SetMasterVolume(value);
+
+    // Since there are two (!!) sliders for global volume, make sure they stay in-sync.
+    mGlobalVolumeSlider->SetValueSilently(value);
+    mGlobalVolumeSliderDupe->SetValueSilently(value);
 }
