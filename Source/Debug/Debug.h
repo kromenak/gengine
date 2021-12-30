@@ -1,6 +1,4 @@
 //
-// Debug.h
-//
 // Clark Kromenaker
 //
 // Provides some functions for debugging and visualizing constructs in 3D space.
@@ -42,6 +40,8 @@ public:
     static void DrawAxes(const Matrix4& worldTransform, float duration = 0.0f);
 	
     static void DrawRect(const Rect& rect, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
+    static void DrawScreenRect(const Rect& rect, const Color32& color);
+
     static void DrawAABB(const AABB& aabb, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
     
     static void DrawPlane(const Plane& plane, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);

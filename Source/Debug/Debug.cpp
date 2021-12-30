@@ -1,11 +1,13 @@
 #include "Debug.h"
 
 #include "AABB.h"
+#include "Camera.h"
 #include "Material.h"
 #include "Matrix4.h"
 #include "Mesh.h"
 #include "Plane.h"
 #include "Rect.h"
+#include "Renderer.h"
 #include "Services.h"
 #include "Sphere.h"
 #include "Triangle.h"
@@ -74,6 +76,25 @@ void Debug::DrawRect(const Rect& rect, const Color32& color, float duration, con
 	DrawLine(topLeft, topRight, color, duration);
 	DrawLine(topRight, bottomRight, color, duration);
 	DrawLine(bottomRight, bottomLeft, color, duration);
+}
+
+void Debug::DrawScreenRect(const Rect& rect, const Color32& color)
+{
+    // This rect is in screen space, so we need to convert it to work space before continuing.
+    Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(rect.GetMin(), 0.1f);
+    Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(rect.GetMax(), 0.1f);
+
+    // Generate corners of the rectangular area in 3D space.
+    Vector3 p0 = min;
+    Vector3 p1(min.x, max.y, min.z);
+    Vector3 p2 = max;
+    Vector3 p3(max.x, min.y, max.z);
+
+    // Draw lines to create rectangle.
+    DrawLine(p0, p1, color);
+    DrawLine(p1, p2, color);
+    DrawLine(p2, p3, color);
+    DrawLine(p3, p0, color);
 }
 
 void Debug::DrawAABB(const AABB& aabb, const Color32& color, float duration, const Matrix4* transformMatrix)

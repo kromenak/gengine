@@ -126,35 +126,40 @@ Rect RectTransform::GetWorldRect(bool includeChildren)
     return worldRect;
 }
 
-void RectTransform::MoveInsideRect(const Rect &other)
+void RectTransform::MoveInsideRect(const Rect& other)
 {
     // Calculate our rect, taking into account children.
     Rect ourRect = GetWorldRect(true);
+    
     Vector2 min = ourRect.GetMin();
     Vector2 max = ourRect.GetMax();
     
     Vector2 otherMin = other.GetMin();
     Vector2 otherMax = other.GetMax();
-    
-    // Apply changes to anchored position to move our rect inside other rect.
+
+    // If our rect is outside of other rect, apply a diff to move it back inside.
     Vector2 anchoredPos = GetAnchoredPosition();
     if(min.x < otherMin.x)
     {
-        anchoredPos.x = anchoredPos.x - min.x;
+        anchoredPos.x += (otherMin.x - min.x);
     }
     if(max.x > otherMax.x)
     {
-        anchoredPos.x = anchoredPos.x - (max.x - otherMax.x);
+        anchoredPos.x += (otherMax.x - max.x);
     }
     if(min.y < otherMin.y)
     {
-        anchoredPos.y = anchoredPos.y - min.y;
+        anchoredPos.y += (otherMin.y - min.y);
     }
     if(max.y > otherMax.y)
     {
-        anchoredPos.y = anchoredPos.y - (max.y - otherMax.y);
+        anchoredPos.y += (otherMax.y - max.y);
     }
     SetAnchoredPosition(anchoredPos);
+
+    // Can be helpful to visualize how this works.
+    //Debug::DrawScreenRect(ourRect, Color32::Green);
+    //Debug::DrawScreenRect(other, Color32::Red);
 }
 
 void RectTransform::CalcLocalPosition()
@@ -188,23 +193,10 @@ void RectTransform::OnUpdate(float deltaTime)
 	if(Debug::RenderRectTransformRects() || debugVisualizeRect)
 	{
         // For UI, "world space" is really "screen space". Confusing, I know.
-        // So, get screen rect, convert to world space.
 		Rect screenRect = GetWorldRect();
-        Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMin(), 0.0f);
-        Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(screenRect.GetMax(), 0.0f);
-        
-        // Generate corners of the rectangular area in 3D space.
-        Vector3 p0 = min;
-        Vector3 p1(min.x, max.y, min.z);
-        Vector3 p2 = max;
-        Vector3 p3(max.x, min.y, max.z);
-        
-        // Draw lines to create rectangle.
-        Debug::DrawLine(p0, p1, Color32::Cyan);
-        Debug::DrawLine(p1, p2, Color32::Cyan);
-        Debug::DrawLine(p2, p3, Color32::Cyan);
-        Debug::DrawLine(p3, p0, Color32::Cyan);
-        
+        Debug::DrawScreenRect(screenRect, Color32::Cyan);
+
+        // Also draw axes at pivot point.
         Vector2 pivotPos(screenRect.GetMin().x + screenRect.GetSize().x * mPivot.x, screenRect.GetMin().y + screenRect.GetSize().y * mPivot.y);
         Debug::DrawAxes(pivotPos);
 	}
