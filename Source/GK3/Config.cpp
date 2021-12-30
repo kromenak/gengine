@@ -1,6 +1,7 @@
 #include "Config.h"
 
 #include "StringUtil.h"
+#include "TextWriter.h"
 
 Config::Config(const std::string& name, char* data, int dataLength) : Asset(name)
 {
@@ -11,6 +12,36 @@ Config::Config(const std::string& name, char* data, int dataLength) : Asset(name
     {
         mConfig[section.name] = section.GetAsMap();
     }
+}
+
+void Config::Save(const std::string& path)
+{
+    TextWriter writer(path.c_str());
+
+    // Write out each section.
+    for(auto& section : mConfig)
+    {
+        writer.WriteLine("[" + section.first + "]");
+        for(auto& line : section.second)
+        {
+            writer.WriteLine(line.first + " = " + line.second.value);
+        }
+
+        // Put an empty line between sections.
+        writer.WriteLine("");
+    }
+}
+
+bool Config::HasKey(const std::string& key)
+{
+    IniKeyValue keyValue;
+    return GetKeyValue(key, keyValue);
+}
+
+bool Config::HasKey(const std::string& section, const std::string& key)
+{
+    IniKeyValue keyValue;
+    return GetKeyValue(section, key, keyValue);
 }
 
 std::string Config::GetString(const std::string& key, const std::string& defaultValue)
@@ -71,6 +102,46 @@ float Config::GetFloat(const std::string& section, const std::string& key, float
         return keyValue.GetValueAsFloat();
     }
     return defaultValue;
+}
+
+bool Config::GetBool(const std::string& key, bool defaultValue)
+{
+    IniKeyValue keyValue;
+    if(GetKeyValue(key, keyValue))
+    {
+        return keyValue.GetValueAsBool();
+    }
+    return defaultValue;
+}
+
+bool Config::GetBool(const std::string& section, const std::string& key, bool defaultValue)
+{
+    IniKeyValue keyValue;
+    if(GetKeyValue(section, key, keyValue))
+    {
+        return keyValue.GetValueAsBool();
+    }
+    return defaultValue;
+}
+
+void Config::Set(const std::string& section, const std::string& key, const std::string& value)
+{
+    mConfig[section][key].value = value;
+}
+
+void Config::Set(const std::string& section, const std::string& key, int value)
+{
+    mConfig[section][key].value = std::to_string(value);
+}
+
+void Config::Set(const std::string& section, const std::string& key, float value)
+{
+    mConfig[section][key].value = std::to_string(value);
+}
+
+void Config::Set(const std::string& section, const std::string& key, bool value)
+{
+    mConfig[section][key].value = value ? "true" : "false";
 }
 
 bool Config::GetKeyValue(const std::string& key, IniKeyValue& outKeyValue)
