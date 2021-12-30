@@ -5,9 +5,9 @@
 #include "Audio.h"
 #include "GMath.h"
 #include "Profiler.h"
-#include "Vector3.h"
-
+#include "SaveManager.h"
 #include "Services.h"
+#include "Vector3.h"
 
 PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel) :
     channel(channel)
@@ -230,14 +230,39 @@ bool AudioManager::Initialize()
         std::cout << FMOD_ErrorString(result) << std::endl;
         return false;
     }
+
+    // Set mute based on audio prefs.
+    Config* prefs = gSaveManager.GetPrefs();
+    bool globalEnabled = prefs->GetBool(PREFS_SOUND, PREFS_AUDIO_ENABLED, true);
+    SetMuted(!globalEnabled);
+
+    bool sfxEnabled = prefs->GetBool(PREFS_SOUND, PREFS_SFX_ENABLED, true);
+    SetMuted(AudioType::SFX, !sfxEnabled);
     
-    // Set volumes for each audio type.
-    // This ensures any volume multipliers have been applied.
-    //TODO: Apply player preferences for audio levels instead of always 1.0f.
-    SetVolume(AudioType::SFX, 1.0f);
-    SetVolume(AudioType::VO, 1.0f);
-    SetVolume(AudioType::Ambient, 1.0f);
-    SetVolume(AudioType::Music, 1.0f);
+    bool voEnabled = prefs->GetBool(PREFS_SOUND, PREFS_VO_ENABLED, true);
+    SetMuted(AudioType::VO, !voEnabled);
+
+    bool ambientEnabled = prefs->GetBool(PREFS_SOUND, PREFS_AMBIENT_ENABLED, true);
+    SetMuted(AudioType::Ambient, !ambientEnabled);
+
+    bool musicEnabled = prefs->GetBool(PREFS_SOUND, PREFS_MUSIC_ENABLED, true);
+    SetMuted(AudioType::Music, !musicEnabled);
+
+    // Set volumes for each audio type based on audio prefs.
+    float globalVolume = prefs->GetInt(PREFS_SOUND, PREFS_AUDIO_VOLUME, 100) / 100.0f;
+    SetMasterVolume(globalVolume);
+
+    float sfxVolume = prefs->GetInt(PREFS_SOUND, PREFS_SFX_VOLUME, 100) / 100.0f;
+    SetVolume(AudioType::SFX, sfxVolume);
+
+    float voVolume = prefs->GetInt(PREFS_SOUND, PREFS_VO_VOLUME, 100) / 100.0f;
+    SetVolume(AudioType::VO, voVolume);
+
+    float ambientVolume = prefs->GetInt(PREFS_SOUND, PREFS_AMBIENT_VOLUME, 100) / 100.0f;
+    SetVolume(AudioType::Ambient, ambientVolume);
+
+    float musicVolume = prefs->GetInt(PREFS_SOUND, PREFS_MUSIC_VOLUME, 100) / 100.0f;
+    SetVolume(AudioType::Music, musicVolume);
     
     // We initialized audio successfully!
     return true;
@@ -383,7 +408,9 @@ void AudioManager::SwapAmbient()
 void AudioManager::SetMasterVolume(float volume)
 {
     // Set volume. FMOD expects a normalized 0-1 value.
-    mMasterChannelGroup->setVolume(Math::Clamp(volume, 0.0f, 1.0f));
+    volume = Math::Clamp(volume, 0.0f, 1.0f);
+    mMasterChannelGroup->setVolume(volume);
+    gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_AUDIO_VOLUME, static_cast<int>(volume * 100));
 }
 
 float AudioManager::GetMasterVolume() const
@@ -408,15 +435,19 @@ void AudioManager::SetVolume(AudioType audioType, float volume)
     {
     case AudioType::SFX:
         multiplier = kSFXVolumeMultiplier;
+        gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_SFX_VOLUME, static_cast<int>(volume * 100));
         break;
     case AudioType::VO:
         multiplier = kVOVolumeMultiplier;
+        gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_VO_VOLUME, static_cast<int>(volume * 100));
         break;
     case AudioType::Ambient:
         multiplier = kAmbientVolumeMultiplier;
+        gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_AMBIENT_VOLUME, static_cast<int>(volume * 100));
         break;
     case AudioType::Music:
         multiplier = kMusicVolumeMultiplier;
+        gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_MUSIC_VOLUME, static_cast<int>(volume * 100));
     default:
         multiplier = 1.0f;
         break;
@@ -439,6 +470,7 @@ float AudioManager::GetVolume(AudioType audioType) const
 void AudioManager::SetMuted(bool mute)
 {
     mMasterChannelGroup->setMute(mute);
+    gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_AUDIO_ENABLED, !mute);
 }
 
 bool AudioManager::GetMuted()
@@ -451,6 +483,23 @@ bool AudioManager::GetMuted()
 void AudioManager::SetMuted(AudioType audioType, bool mute)
 {
     GetChannelGroupForAudioType(audioType, true)->setMute(mute);
+
+    // Save prefs (grr, more switches).
+    switch(audioType)
+    {
+    case AudioType::SFX:
+        gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_SFX_ENABLED, !mute);
+        break;
+    case AudioType::VO:
+        gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_VO_ENABLED, !mute);
+        break;
+    case AudioType::Ambient:
+        gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_AMBIENT_ENABLED, !mute);
+        break;
+    case AudioType::Music:
+        gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_MUSIC_ENABLED, !mute);
+        break;
+    }
 }
 
 bool AudioManager::GetMuted(AudioType audioType)
