@@ -1,10 +1,7 @@
 //
-// UIToggle.h
-//
 // Clark Kromenaker
 //
 // Similar to a UI button, but tapping it toggles an internal value on or off.
-//
 // Internally, this IS a button, but the "up" texture is changed based on the value being used.
 //
 #pragma once

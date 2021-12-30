@@ -1,8 +1,3 @@
-//
-// UIToggle.cpp
-//
-// Clark Kromenaker
-//
 #include "UIToggle.h"
 
 TYPE_DEF_CHILD(UIButton, UIToggle);

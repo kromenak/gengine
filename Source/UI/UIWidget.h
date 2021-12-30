@@ -1,6 +1,4 @@
 //
-// UIWidget.cpp
-//
 // Clark Kromenaker
 //
 // Base class for any UI element, called a "widget".

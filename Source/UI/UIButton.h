@@ -1,6 +1,4 @@
 //
-// UIButton.h
-//
 // Clark Kromenaker
 //
 // A UI element that can be touched/clicked to execute some action.

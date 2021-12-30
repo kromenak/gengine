@@ -1,8 +1,3 @@
-//
-// UIWidget.cpp
-//
-// Clark Kromenaker
-//
 #include "UIWidget.h"
 
 #include "Actor.h"

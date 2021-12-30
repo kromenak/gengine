@@ -1,8 +1,3 @@
-//
-// UIButton.cpp
-//
-// Clark Kromenaker
-//
 #include "UIButton.h"
 
 #include "Actor.h"

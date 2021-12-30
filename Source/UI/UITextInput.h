@@ -1,9 +1,7 @@
 //
-// UITextInput.h
-//
 // Clark Kromenaker
 //
-// Description
+// A text field allows the user to enter text.
 //
 #pragma once
 #include "UILabel.h"
