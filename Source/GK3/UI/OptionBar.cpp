@@ -78,22 +78,14 @@ void OptionBar::Hide()
 
 void OptionBar::OnUpdate(float deltaTime)
 {
-	if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_L))
-    {
-        RectTransform* rt = static_cast<RectTransform*>(GetTransform());
-        Vector2 ap = rt->GetAnchoredPosition();
-        ap.x += 10;
-        ap.y += 10;
-        rt->SetAnchoredPosition(ap);
-    }
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_K))
-    {
-        RectTransform* rt = static_cast<RectTransform*>(GetTransform());
-        Vector2 ap = rt->GetAnchoredPosition();
-        ap.x -= 10;
-        ap.y -= 10;
-        rt->SetAnchoredPosition(ap);
-    }
+    // Set buttons interactive only if an action is not playing.
+    bool actionActive = Services::Get<ActionManager>()->IsActionPlaying();
+    mInventoryButton->SetCanInteract(!actionActive);
+    mHintButton->SetCanInteract(!actionActive); //TODO: also base this on whether a hint is currently available...
+    mCamerasButton->SetCanInteract(!actionActive);
+    mHelpButton->SetCanInteract(!actionActive);
+    mOptionsButton->SetCanInteract(!actionActive);
+    // Note: Cinematics and Close button are always interactive.
 }
 
 void OptionBar::KeepOnScreen()
@@ -301,24 +293,24 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     //TODO: Active inv item
     
     // Add inventory button.
-    UIButton* invButton = CreateButton(canvas, config, "closed", optionBar);
-    invButton->SetPressCallback([this]() {
-        this->Hide();
+    mInventoryButton = CreateButton(canvas, config, "closed", optionBar);
+    mInventoryButton->SetPressCallback([this]() {
+        Hide();
         Services::Get<InventoryManager>()->ShowInventory();
     });
     
     // Add hint button.
-    UIButton* hintButton = CreateButton(canvas, config, "hint", optionBar);
-    hintButton->SetPressCallback([]() {
+    mHintButton = CreateButton(canvas, config, "hint", optionBar);
+    mHintButton->SetPressCallback([]() {
         std::cout << "Hint!" << std::endl;
     });
     
     // Add camera button.
-    UIButton* cameraButton = CreateButton(canvas, config, "camera", optionBar);
-    cameraButton->SetPressCallback([this]() {
-        this->mCamerasSection->SetActive(!this->mCamerasSection->IsActive());
-        this->mOptionsSection->SetActive(false);
-        this->KeepOnScreen();
+    mCamerasButton = CreateButton(canvas, config, "camera", optionBar);
+    mCamerasButton->SetPressCallback([this]() {
+        mCamerasSection->SetActive(!mCamerasSection->IsActive());
+        mOptionsSection->SetActive(false);
+        KeepOnScreen();
     });
     
     // Add cinematics button.
@@ -332,14 +324,14 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     });
     
     // Add help button.
-    UIButton* helpButton = CreateButton(canvas, config, "help", optionBar);
-    helpButton->SetPressCallback([]() {
+    mHelpButton = CreateButton(canvas, config, "help", optionBar);
+    mHelpButton->SetPressCallback([]() {
         std::cout << "Help!" << std::endl;
     });
     
     // Add options button.
-    UIButton* optionsButton = CreateButton(canvas, config, "options", optionBar);
-    optionsButton->SetPressCallback([this]() {
+    mOptionsButton = CreateButton(canvas, config, "options", optionBar);
+    mOptionsButton->SetPressCallback([this]() {
         mCamerasSection->SetActive(false);
         mOptionsSection->SetActive(!mOptionsSection->IsActive());
         KeepOnScreen();
@@ -349,7 +341,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     // Add close button.
     UIButton* closeButton = CreateButton(canvas, config, "exit", optionBar);
     closeButton->SetPressCallback([this]() {
-        this->Hide();
+        Hide();
     });
 }
 
@@ -442,7 +434,7 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
     
     // Create sound options button.
     UIButton* soundOptsButton = CreateButton(canvas, config, "advOptSound", mAdvancedOptionsSection);
-    soundOptsButton->SetPressCallback(std::bind(&OptionBar::ToggleSoundOptions, this));
+    soundOptsButton->SetPressCallback(std::bind(&OptionBar::OnSoundOptionsButtonPressed, this));
     
     // Create graphics options button.
     UIButton* graphicsOptsButton = CreateButton(canvas, config, "advOptGraphics", mAdvancedOptionsSection);
@@ -486,61 +478,57 @@ void OptionBar::CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<s
     backgroundImage->SetReceivesInput(true);
 
     // Create global volume slider.
-    mGlobalVolumeSliderDupe = CreateSlider(canvas, config, "optSoundGlobalSlider", mSoundOptionsSection);
-    mGlobalVolumeSliderDupe->SetValueChangeCallback(std::bind(&OptionBar::OnGlobalVolumeSliderValueChanged, this, std::placeholders::_1));
+    mGlobalVolumeSliderSecondary = CreateSlider(canvas, config, "optSoundGlobalSlider", mSoundOptionsSection);
+    mGlobalVolumeSliderSecondary->SetValueChangeCallback(std::bind(&OptionBar::OnGlobalVolumeSliderValueChanged, this, std::placeholders::_1));
 
     // Create global mute toggle.
-    UIToggle* muteToggle = CreateToggle(canvas, config, "soundOptGlobal", mSoundOptionsSection);
-    muteToggle->SetToggleCallback([](bool isOn) {
+    mGlobalMuteToggle = CreateToggle(canvas, config, "soundOptGlobal", mSoundOptionsSection);
+    mGlobalMuteToggle->SetToggleCallback([](bool isOn) {
         Services::GetAudio()->SetMuted(isOn);
     });
-    mMuteToggle = muteToggle;
     
     // Create sfx volume slider.
-    UISlider* sfxVolumeSlider = CreateSlider(canvas, config, "optSoundSfxSlider", mSoundOptionsSection);
-    sfxVolumeSlider->SetValueChangeCallback([](float value) {
+    mSfxVolumeSlider = CreateSlider(canvas, config, "optSoundSfxSlider", mSoundOptionsSection);
+    mSfxVolumeSlider->SetValueChangeCallback([](float value) {
         // The SFX volume slider also controls ambient volume.
         Services::GetAudio()->SetVolume(AudioType::SFX, value);
         Services::GetAudio()->SetVolume(AudioType::Ambient, value);
     });
 
     //Create sfx mute toggle.
-    UIToggle* sfxMuteToggle = CreateToggle(canvas, config, "soundOptSfx", mSoundOptionsSection);
-    sfxMuteToggle->SetToggleCallback([](bool isOn) {
+    mSfxMuteToggle = CreateToggle(canvas, config, "soundOptSfx", mSoundOptionsSection);
+    mSfxMuteToggle->SetToggleCallback([](bool isOn) {
         // The SFX toggle also controls ambient.
         Services::GetAudio()->SetMuted(AudioType::SFX, isOn);
         Services::GetAudio()->SetMuted(AudioType::Ambient, isOn);
     });
-    mSfxMuteToggle = sfxMuteToggle;
     
     // Create VO volume slider.
-    UISlider* voVolumeSlider = CreateSlider(canvas, config, "optSoundDialogueSlider", mSoundOptionsSection);
-    voVolumeSlider->SetValueChangeCallback([](float value) {
+    mVoVolumeSlider = CreateSlider(canvas, config, "optSoundDialogueSlider", mSoundOptionsSection);
+    mVoVolumeSlider->SetValueChangeCallback([](float value) {
         Services::GetAudio()->SetVolume(AudioType::VO, value);
     });
 
     // Create VO mute toggle.
-    UIToggle* voMuteToggle = CreateToggle(canvas, config, "soundOptDialogue", mSoundOptionsSection);
-    voMuteToggle->SetToggleCallback([](bool isOn) {
+    mVoMuteToggle = CreateToggle(canvas, config, "soundOptDialogue", mSoundOptionsSection);
+    mVoMuteToggle->SetToggleCallback([](bool isOn) {
         Services::GetAudio()->SetMuted(AudioType::VO, isOn);
     });
-    mVoMuteToggle = voMuteToggle;
     
     // Create music volume slider.
-    UISlider* musicVolumeSlider = CreateSlider(canvas, config, "optSoundMusicSlider", mSoundOptionsSection);
-    musicVolumeSlider->SetValueChangeCallback([](float value) {
+    mMusicVolumeSlider = CreateSlider(canvas, config, "optSoundMusicSlider", mSoundOptionsSection);
+    mMusicVolumeSlider->SetValueChangeCallback([](float value) {
         Services::GetAudio()->SetVolume(AudioType::Music, value);
     });
 
     // Create music mute toggle.
-    UIToggle* musicMuteToggle = CreateToggle(canvas, config, "soundOptMusic", mSoundOptionsSection);
-    musicMuteToggle->SetToggleCallback([](bool isOn) {
+    mMusicMuteToggle = CreateToggle(canvas, config, "soundOptMusic", mSoundOptionsSection);
+    mMusicMuteToggle->SetToggleCallback([](bool isOn) {
         Services::GetAudio()->SetMuted(AudioType::Music, isOn);
     });
-    mMusicMuteToggle = musicMuteToggle;
     
     // Create max sounds slider.
-    UISlider* maxSoundsSlider = CreateSlider(canvas, config, "optSoundMusicSlider", mSoundOptionsSection);
+    UISlider* maxSoundsSlider = CreateSlider(canvas, config, "optSoundNumSlider", mSoundOptionsSection);
     maxSoundsSlider->SetValueChangeCallback([](float value) {
         std::cout << "Changed max sounds to " << value << std::endl;
     });
@@ -686,7 +674,7 @@ void OptionBar::CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<st
     });
 }
 
-void OptionBar::ToggleSoundOptions()
+void OptionBar::OnSoundOptionsButtonPressed()
 {
     // Toggle UI elements and keep on-screen if size expands.
     mSoundOptionsSection->SetActive(!mSoundOptionsSection->IsActive());
@@ -699,10 +687,18 @@ void OptionBar::ToggleSoundOptions()
     {
         // Set toggles based on audio system state.
         // NOTE: the SFX toggle affects both SFX/Ambient audio types...BUT the initial state is only based on SFX state for...idk reasons.
-        mMuteToggle->SetValue(Services::GetAudio()->GetMuted());
+        mGlobalMuteToggle->SetValue(Services::GetAudio()->GetMuted());
         mSfxMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::SFX));
         mVoMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::VO));
         mMusicMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::Music));
+
+        // Set sliders based on audio system state.
+        // As with the toggles, SFX slider controls both SFX & Ambient volumes. However, the initial value is set from just SFX.
+        // I imagine that Ambient is internally a separate audio type, but to the end user, it is just treated as more SFX.
+        mGlobalVolumeSliderSecondary->SetValueSilently(Services::GetAudio()->GetMasterVolume());
+        mSfxVolumeSlider->SetValueSilently(Services::GetAudio()->GetVolume(AudioType::SFX));
+        mVoVolumeSlider->SetValueSilently(Services::GetAudio()->GetVolume(AudioType::VO));
+        mMusicVolumeSlider->SetValueSilently(Services::GetAudio()->GetVolume(AudioType::Music));
     }
 }
 
@@ -713,5 +709,5 @@ void OptionBar::OnGlobalVolumeSliderValueChanged(float value)
 
     // Since there are two (!!) sliders for global volume, make sure they stay in-sync.
     mGlobalVolumeSlider->SetValueSilently(value);
-    mGlobalVolumeSliderDupe->SetValueSilently(value);
+    mGlobalVolumeSliderSecondary->SetValueSilently(value);
 }

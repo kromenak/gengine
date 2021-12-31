@@ -62,6 +62,15 @@ void GameCamera::OnUpdate(float deltaTime)
     {
         SceneUpdate(deltaTime);
     }
+
+    // Show options on right-click. This works even if an action is playing.
+    if(!Services::GetInput()->MouseLocked())
+    {
+        if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
+        {
+            mOptionBar->Show();
+        }
+    }
     
     // BELOW HERE: logic for player's keyboard shortcuts.
     // Keyboard shortcut keys are only available if text input is not active.
@@ -361,12 +370,6 @@ void GameCamera::SceneUpdate(float deltaTime)
         else
         {
             mLastHoveredNoun.clear();
-        }
-
-        // Show options on right click.
-        if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
-        {
-            mOptionBar->Show();
         }
     }
     

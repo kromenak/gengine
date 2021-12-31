@@ -42,6 +42,12 @@ private:
     UILabel* mScoreLabel = nullptr;
     UILabel* mDayLabel = nullptr;
     UILabel* mTimeLabel = nullptr;
+
+    UIButton* mInventoryButton = nullptr;
+    UIButton* mHintButton = nullptr;
+    UIButton* mCamerasButton = nullptr;
+    UIButton* mHelpButton = nullptr;
+    UIButton* mOptionsButton = nullptr;
     
     // Camera section.
     Actor* mCamerasSection = nullptr;
@@ -55,11 +61,15 @@ private:
 
     // Sound Options section.
     Actor* mSoundOptionsSection = nullptr;
-    UISlider* mGlobalVolumeSliderDupe = nullptr;
-    UIToggle* mMuteToggle = nullptr;
+    UIToggle* mGlobalMuteToggle = nullptr;
     UIToggle* mSfxMuteToggle = nullptr;
     UIToggle* mVoMuteToggle = nullptr;
     UIToggle* mMusicMuteToggle = nullptr;
+
+    UISlider* mGlobalVolumeSliderSecondary = nullptr;
+    UISlider* mSfxVolumeSlider = nullptr;
+    UISlider* mVoVolumeSlider = nullptr;
+    UISlider* mMusicVolumeSlider = nullptr;
 
     // Graphics Options section.
     Actor* mGraphicOptionsSection = nullptr;
@@ -81,6 +91,6 @@ private:
     void CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     void CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     
-    void ToggleSoundOptions();
+    void OnSoundOptionsButtonPressed();
     void OnGlobalVolumeSliderValueChanged(float value);
 };
