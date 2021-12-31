@@ -1,6 +1,4 @@
 //
-// Font.h
-//
 // Clark Kromenaker
 //
 // A font that can be used to draw text in the game.

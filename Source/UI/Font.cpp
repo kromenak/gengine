@@ -21,11 +21,15 @@ Font::Font(std::string name, char* data, int dataLength) :
 	
 	// The pixel color at (1, 0) seems to always be glyph indicator color.
 	Color32 glyphStartColor = mFontTexture->GetPixelColor32(1, 0);
-	
-	// The line height is the font texture height divided by number of lines.
-	// The glyphs height is then that number, minus one (for the indicator pixel).
-	int lineHeight = mFontTexture->GetHeight() / mLineCount;
-	mGlyphHeight = lineHeight - 1; //TODO: Take baseline value into account?
+
+    // The font texture may have the font glyphs in multiple vertical lines.
+    // The height of each line can be calculated pretty easily.
+    int lineHeight = mFontTexture->GetHeight() / mLineCount;
+
+    // The glyph height is slightly smaller than the line height.
+    // The top pixel of each line is a "glyph indicator", used to determine where each glyph starts.
+    // The bottom pixel of each line appears to be ignored/discarded (based on testing).
+    mGlyphHeight = lineHeight - 2;
 	
 	// We'll start processing glyphs at (1, 0).
 	unsigned int currentX = 1;
@@ -59,9 +63,9 @@ Font::Font(std::string name, char* data, int dataLength) :
 		glyph.width = width;
 		glyph.height = mGlyphHeight;
 		
-		// Calculate top/bottom y UV values.
-		// TODO: Why is UV (0, 0) in top-left corner? Kind of unexpected...
-		float botUvY = (float)(currentY + lineHeight) / mFontTexture->GetHeight();
+		// Calculate top/bottom UV values.
+        // Each is +/- 1 because the top/bottom pixels are discarded (see glyph height explanation above).
+		float botUvY = (float)(currentY + lineHeight - 1.0f) / mFontTexture->GetHeight();
 		float topUvY = (float)(currentY + 1.0f) / mFontTexture->GetHeight();
 		
 		// Save those UV coords.
@@ -89,10 +93,7 @@ Font::Font(std::string name, char* data, int dataLength) :
     {
         mReplaceColor = mFontTexture->GetPixelColor32(0, 1);
     }
-    
-	// Update font texture with background color transparency.
-	//mFontTexture->SetTransparentColor(backgroundColor);
-	
+
 	/*
 	// Outputs glyphs for verification.
 	std::cout << "Glyphs for font " << GetName() << std::endl;
