@@ -1,8 +1,3 @@
-//
-// UILabel.cpp
-//
-// Clark Kromenaker
-//
 #include "UILabel.h"
 
 #include "Actor.h"
@@ -39,6 +34,7 @@ void UILabel::Render()
 	
 	// Render the mesh!
 	mMesh->Render();
+    //Debug::DrawScreenRect(GetRectTransform()->GetWorldRect(), Color32::Magenta);
 }
 
 void UILabel::SetFont(Font* font)
@@ -51,10 +47,9 @@ void UILabel::SetFont(Font* font)
         
         // Use font texture.
         mMaterial.SetDiffuseTexture(font->GetTexture());
-        
+
+        // Set color and replace colors.
         mMaterial.SetColor(font->GetColor());
-        
-        // If doing color replace, we want to set the replace color.
         mMaterial.SetColor("uReplaceColor", font->GetReplaceColor());
 	}
     else
@@ -63,9 +58,6 @@ void UILabel::SetFont(Font* font)
         mMaterial.SetShader(nullptr);
         mMaterial.SetDiffuseTexture(nullptr);
     }
-    
-    // Assign shader from font.
-    mMaterial.SetShader(mFont->GetShader());
     
     // Mark label dirty. Changing font may mean our mesh needs to be updated.
 	SetDirty();
@@ -161,7 +153,7 @@ void UILabel::GenerateMesh()
 		
 		float bottomY = charInfo.pos.y;
 		float topY = bottomY + glyph.height;
-		
+        
 		// Top-Left
 		positions[charIndex * 12] = leftX;
 		positions[charIndex * 12 + 1] = topY;

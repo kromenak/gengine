@@ -98,7 +98,7 @@ void UIButton::OnPointerUp()
 
 void UIButton::Press()
 {
-	if(mPressCallback && IsEnabled())
+	if(mPressCallback && IsEnabled() && CanInteract())
 	{
 		mPressCallback();
 	}
