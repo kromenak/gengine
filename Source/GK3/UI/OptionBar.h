@@ -42,6 +42,7 @@ private:
     UILabel* mScoreLabel = nullptr;
     UILabel* mDayLabel = nullptr;
     UILabel* mTimeLabel = nullptr;
+    UIButton* mActiveInventoryItemButton = nullptr;
 
     UIButton* mInventoryButton = nullptr;
     UIButton* mHintButton = nullptr;

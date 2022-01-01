@@ -48,7 +48,15 @@ OptionBar::OptionBar() : Actor(Actor::TransformType::RectTransform)
 void OptionBar::Show()
 {
     SetActive(true);
-    
+
+    // Only show the "active inventory item" button if there is an active inventory item.
+    std::string activeInvItem = Services::Get<InventoryManager>()->GetActiveInventoryItem();
+    mActiveInventoryItemButton->SetEnabled(!activeInvItem.empty());
+    if(!activeInvItem.empty())
+    {
+        mActiveInventoryItemButton->SetUpTexture(Services::Get<InventoryManager>()->GetInventoryItemIconTexture(activeInvItem));
+    }
+
     // Position option bar over mouse.
     // "Minus half size" because option bar's pivot is lower-left corner, but want mouse at center.
     // Also, round the "half size" to ensure the UI renders "pixel perfect" - on exact pixel spots rather than between them.
@@ -80,6 +88,7 @@ void OptionBar::OnUpdate(float deltaTime)
 {
     // Set buttons interactive only if an action is not playing.
     bool actionActive = Services::Get<ActionManager>()->IsActionPlaying();
+    mActiveInventoryItemButton->SetCanInteract(!actionActive);
     mInventoryButton->SetCanInteract(!actionActive);
     mHintButton->SetCanInteract(!actionActive); //TODO: also base this on whether a hint is currently available...
     mCamerasButton->SetCanInteract(!actionActive);
@@ -290,7 +299,12 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     timeLabel->SetText("10am - 12pm");
     timeLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
     
-    //TODO: Active inv item
+    // Add active inventory item button.
+    mActiveInventoryItemButton = CreateButton(canvas, config, "currInv", optionBar);
+    mActiveInventoryItemButton->SetPressCallback([this]() {
+        Hide();
+        Services::Get<InventoryManager>()->InventoryInspect();
+    });
     
     // Add inventory button.
     mInventoryButton = CreateButton(canvas, config, "closed", optionBar);

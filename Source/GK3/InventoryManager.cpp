@@ -37,36 +37,49 @@ InventoryManager::InventoryManager()
                 // Populate a textures entry for this inventory item.
                 InventoryItemTextures textures;
 
-                // Closeup texture has suffix "6_ALPHA" after entry value.
-                // Why "6_ALPHA"? Who knows! Sometimes it's even "_6_ALPHA"!
-                textures.closeupTexture = Services::GetAssets()->LoadTexture(entry.value + "6_ALPHA.BMP");
-                if(textures.closeupTexture == nullptr)
+                // Icon texture has suffix "3".
+                // One asset (MOSELYPRINT_3.BMP) did not follow the naming convention - sigh.
+                textures.iconTexture = Services::GetAssets()->LoadTexture(entry.value + "3.BMP");
+                if(textures.iconTexture == nullptr)
                 {
-                    textures.closeupTexture = Services::GetAssets()->LoadTexture(entry.value + "_6_ALPHA.BMP");
+                    textures.iconTexture = Services::GetAssets()->LoadTexture(entry.value + "_3.BMP");
                 }
 
-                // List texture has suffix "9" - again, why? Who knows!
-                // List texture also has an alpha texture.
-                // In both cases, the leading underscore is inconsistently used, so we must check for both.
+                // Closeup texture has suffix "6" or "6_ALPHA".
+                // One asset (MOSELYPRINT_6_ALPHA.BMP) did not follow the naming convention - yuck.
+                textures.closeupTexture = Services::GetAssets()->LoadTexture(entry.value + "6.BMP");
+                if(textures.closeupTexture == nullptr)
+                {
+                    textures.closeupTexture = Services::GetAssets()->LoadTexture(entry.value + "6_ALPHA.BMP");
+                    if(textures.closeupTexture == nullptr)
+                    {
+                        textures.closeupTexture = Services::GetAssets()->LoadTexture(entry.value + "_6_ALPHA.BMP");
+                    }
+                }
+
+                // List texture has a "9" suffix. Also, optionally, an alpha texture (since these show against a see-through background).
                 textures.listTexture = Services::GetAssets()->LoadTexture(entry.value + "9.BMP");
                 if(textures.listTexture == nullptr)
                 {
                     textures.listTexture = Services::GetAssets()->LoadTexture(entry.value + "_9.BMP");
                 }
-                Texture* listTextureAlpha = Services::GetAssets()->LoadTexture(entry.value + "9_OP.BMP");
-                if(listTextureAlpha == nullptr)
-                {
-                    listTextureAlpha = Services::GetAssets()->LoadTexture(entry.value + "_9_OP.BMP");
-                }
 
-                // Apply alpha channel to list texture, if we have it.
-                if(textures.listTexture != nullptr && listTextureAlpha != nullptr)
+                // If we have a list texture, attempt to find and apply alpha channel.
+                if(textures.listTexture != nullptr)
                 {
-                    textures.listTexture->ApplyAlphaChannel(*listTextureAlpha);
+                    Texture* listTextureAlpha = Services::GetAssets()->LoadTexture(entry.value + "9_OP.BMP");
+                    if(listTextureAlpha == nullptr)
+                    {
+                        listTextureAlpha = Services::GetAssets()->LoadTexture(entry.value + "_9_OP.BMP");
+                    }
+                    if(listTextureAlpha != nullptr)
+                    {
+                        textures.listTexture->ApplyAlphaChannel(*listTextureAlpha);
+                    }
                 }
 
                 // Save to map.
-                mInventoryItems[StringUtil::ToLowerCopy(entry.key)] = textures;
+                mInventoryItems[entry.key] = textures;
             }
         }
     });
@@ -95,8 +108,7 @@ InventoryManager::InventoryManager()
 
 bool InventoryManager::IsValidInventoryItem(const std::string& itemName) const
 {
-	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
-	return mInventoryItems.find(itemNameLower) != mInventoryItems.end();
+	return mInventoryItems.find(itemName) != mInventoryItems.end();
 }
 
 void InventoryManager::AddInventoryItem(const std::string& itemName)
@@ -110,10 +122,8 @@ void InventoryManager::AddInventoryItem(const std::string& itemName)
 
 void InventoryManager::AddInventoryItem(const std::string& actorName, const std::string& itemName)
 {
-	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
-	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
-	std::set<std::string>& items = mInventories[actorNameLower];
-	items.insert(itemNameLower);
+	std::set<std::string>& items = mInventories[actorName];
+	items.insert(itemName);
 }
 
 void InventoryManager::RemoveInventoryItem(const std::string& itemName)
@@ -127,10 +137,8 @@ void InventoryManager::RemoveInventoryItem(const std::string& itemName)
 
 void InventoryManager::RemoveInventoryItem(const std::string& actorName, const std::string& itemName)
 {
-	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
-	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
-	std::set<std::string>& items = mInventories[actorNameLower];
-	items.erase(itemNameLower);
+	std::set<std::string>& items = mInventories[actorName];
+	items.erase(itemName);
 
     // Inventory item can be removed while screen is showing (ex: eating the candy).
     if(mInventoryScreen->IsActive())
@@ -151,17 +159,24 @@ bool InventoryManager::HasInventoryItem(const std::string& itemName) const
 
 bool InventoryManager::HasInventoryItem(const std::string& actorName, const std::string& itemName) const
 {
-	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
-	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
-	auto it = mInventories.find(actorNameLower);
+	auto it = mInventories.find(actorName);
 	if(it == mInventories.end()) { return false; }
-	return it->second.find(itemNameLower) != it->second.end();
+	return it->second.find(itemName) != it->second.end();
+}
+
+std::string InventoryManager::GetActiveInventoryItem() const
+{
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr)
+    {
+        return GetActiveInventoryItem(scene->GetEgoName());
+    }
+    return "";
 }
 
 std::string InventoryManager::GetActiveInventoryItem(const std::string& actorName) const
 {
-	std::string activeInvKey = StringUtil::ToLowerCopy(actorName);
-	auto it = mActiveInventoryItems.find(activeInvKey);
+	auto it = mActiveInventoryItems.find(actorName);
 	if(it == mActiveInventoryItems.end())
 	{
 		return "";
@@ -171,9 +186,7 @@ std::string InventoryManager::GetActiveInventoryItem(const std::string& actorNam
 
 void InventoryManager::SetActiveInventoryItem(const std::string& actorName, const std::string& itemName)
 {
-	std::string actorNameLower = StringUtil::ToLowerCopy(actorName);
-	std::string itemNameLower = StringUtil::ToLowerCopy(itemName);
-	mActiveInventoryItems[actorNameLower] = itemNameLower;
+	mActiveInventoryItems[actorName] = itemName;
 
     // Active item can be changed via sheep calls while inventory is showing.
     if(mInventoryScreen->IsActive())
@@ -193,8 +206,7 @@ void InventoryManager::ShowInventory()
 
 void InventoryManager::ShowInventory(const std::string& actorName)
 {
-	std::string invKey = StringUtil::ToLowerCopy(actorName);
-	mInventoryScreen->Show(actorName, mInventories[invKey]);
+	mInventoryScreen->Show(actorName, mInventories[actorName]);
 }
 
 void InventoryManager::HideInventory()
@@ -205,6 +217,11 @@ void InventoryManager::HideInventory()
 bool InventoryManager::IsInventoryShowing() const
 {
 	return mInventoryScreen->IsShowing();
+}
+
+void InventoryManager::InventoryInspect()
+{
+    InventoryInspect(GetActiveInventoryItem());
 }
 
 void InventoryManager::InventoryInspect(const std::string& itemName)
@@ -222,12 +239,17 @@ bool InventoryManager::IsInventoryInspectShowing() const
     return mInventoryInspectScreen->IsShowing();
 }
 
-Texture* InventoryManager::GetInventoryItemListTexture(const std::string &itemName)
+Texture* InventoryManager::GetInventoryItemIconTexture(const std::string& itemName)
 {
-	return mInventoryItems[StringUtil::ToLowerCopy(itemName)].listTexture;
+    return mInventoryItems[itemName].iconTexture;
 }
 
-Texture* InventoryManager::GetInventoryItemCloseupTexture(const std::string &itemName)
+Texture* InventoryManager::GetInventoryItemListTexture(const std::string& itemName)
 {
-	return mInventoryItems[StringUtil::ToLowerCopy(itemName)].closeupTexture;
+	return mInventoryItems[itemName].listTexture;
+}
+
+Texture* InventoryManager::GetInventoryItemCloseupTexture(const std::string& itemName)
+{
+	return mInventoryItems[itemName].closeupTexture;
 }
