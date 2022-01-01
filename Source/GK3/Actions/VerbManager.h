@@ -1,6 +1,4 @@
 //
-// VerbManager.h
-//
 // Clark Kromenaker
 //
 // GK3 stores a mapping from Noun/Verb/Topic to button icons
@@ -15,6 +13,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "StringUtil.h"
 #include "Type.h"
 
 class Texture;
@@ -52,7 +51,7 @@ private:
 	VerbIcon mDefaultIcon;
 	
 	// Mappings from noun/verb/topic to icons.
-	std::unordered_map<std::string, VerbIcon> mInventoryItems;
-	std::unordered_map<std::string, VerbIcon> mVerbs;
-	std::unordered_map<std::string, VerbIcon> mTopics;
+	std::string_map_ci<VerbIcon> mInventoryItems;
+	std::string_map_ci<VerbIcon> mVerbs;
+	std::string_map_ci<VerbIcon> mTopics;
 };

@@ -1,13 +1,7 @@
-//
-// VerbManager.cpp
-//
-// Clark Kromenaker
-//
 #include "VerbManager.h"
 
 #include "IniParser.h"
 #include "Services.h"
-#include "StringUtil.h"
 
 float VerbIcon::GetWidth() const
 {
@@ -39,9 +33,6 @@ VerbManager::VerbManager()
     {
         IniKeyValue& entry = line.entries.front();
 
-        // This is a required value.
-        std::string keyword = StringUtil::ToLowerCopy(entry.key);
-
         // These values will be filled in with remaining entry keys.
         Texture* upTexture = nullptr;
         Texture* downTexture = nullptr;
@@ -52,7 +43,7 @@ VerbManager::VerbManager()
         // By default, the type of each button is a verb.
         // However, if the keyword "inventory" or "topic" are used, the button is put in those maps instead.
         // This is why I bother using a pointer to a map here!
-        std::unordered_map<std::string, VerbIcon>* map = &mVerbs;
+        std::string_map_ci<VerbIcon>* map = &mVerbs;
 
         // The remaining values are all optional.
         // If a value isn't present, the above defaults are used.
@@ -106,20 +97,20 @@ VerbManager::VerbManager()
 
             // Save one of these as the default icon.
             // "Question mark" seems like as good as any!
-            if(StringUtil::EqualsIgnoreCase(keyword, "QUESTION"))
+            if(StringUtil::EqualsIgnoreCase(entry.key, "QUESTION"))
             {
                 mDefaultIcon = verbIcon;
             }
 
             // Insert mapping from keyword to the button icons.
-            map->insert({ keyword, verbIcon });
+            map->insert({ entry.key, verbIcon });
         }
     }
 }
 
 VerbIcon& VerbManager::GetInventoryIcon(const std::string& noun)
 {
-	auto it = mInventoryItems.find(StringUtil::ToLowerCopy(noun));
+	auto it = mInventoryItems.find(noun);
 	if(it != mInventoryItems.end())
 	{
 		return it->second;
@@ -132,7 +123,7 @@ VerbIcon& VerbManager::GetInventoryIcon(const std::string& noun)
 
 VerbIcon& VerbManager::GetVerbIcon(const std::string& verb)
 {
-	auto it = mVerbs.find(StringUtil::ToLowerCopy(verb));
+	auto it = mVerbs.find(verb);
 	if(it != mVerbs.end())
 	{
 		return it->second;
@@ -145,7 +136,7 @@ VerbIcon& VerbManager::GetVerbIcon(const std::string& verb)
 
 VerbIcon& VerbManager::GetTopicIcon(const std::string& topic)
 {
-	auto it = mTopics.find(StringUtil::ToLowerCopy(topic));
+	auto it = mTopics.find(topic);
 	if(it != mTopics.end())
 	{
 		return it->second;
@@ -158,15 +149,15 @@ VerbIcon& VerbManager::GetTopicIcon(const std::string& topic)
 
 bool VerbManager::IsVerb(const std::string& word)
 {
-	return mVerbs.find(StringUtil::ToLowerCopy(word)) != mVerbs.end();
+	return mVerbs.find(word) != mVerbs.end();
 }
 
 bool VerbManager::IsInventoryItem(const std::string& word)
 {
-	return mInventoryItems.find(StringUtil::ToLowerCopy(word)) != mInventoryItems.end();
+	return mInventoryItems.find(word) != mInventoryItems.end();
 }
 
 bool VerbManager::IsTopic(const std::string& word)
 {
-	return mTopics.find(StringUtil::ToLowerCopy(word)) != mTopics.end();
+	return mTopics.find(word) != mTopics.end();
 }
