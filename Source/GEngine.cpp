@@ -17,10 +17,12 @@
 #include "LocationManager.h"
 #include "Paths.h"
 #include "Profiler.h"
+#include "SaveManager.h"
 #include "Scene.h"
 #include "Services.h"
 #include "TextInput.h"
 #include "Timers.h"
+#include "TitleScreen.h"
 #include "ThreadPool.h"
 #include "VerbManager.h"
 
@@ -144,29 +146,37 @@ bool GEngine::Initialize()
 	ConsoleUI* consoleUI = new ConsoleUI(false);
 	consoleUI->SetIsDestroyOnLoad(false);
 
-    /*
-    // Play opening movie.
-    mVideoPlayer.Play("Sierra.avi", true, true, [this]() {
+    // Non-debug: do the full game presentation - company logos, intro movie, title screen.
+    #if defined(NDEBUG)
+    //HACK/TODO: Ideally, we'd like to either make initial loading much shorter, OR play videos while initial loading is happening.
+    //HACK/TODO: However, my multithreading approach is clearly super incorrect and hacky, so that introduces race conditions between the renderer and game logic.
+    //HACK/TODO: For now, we'll just do loading before moving on to movies, but this is something to look at more closely.
+    Loader::DoAfterLoading([this](){
 
-        //TODO: intro should only play automatically on first launch of the game.
-        mVideoPlayer.Play("intro.bik", true, true, [this]() {
+        // Play opening movie.
+        mVideoPlayer.Play("Sierra.avi", true, true, [this](){
 
-            // Wait for all loading to complete before showing the title screen.
-            Loader::DoAfterLoading([this]() {
-
-                //TODO: Actually show title screen.
-                Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-                LoadScene("RC1");
-            });
+            // On first launch of game, show the intro movie before the title screen.
+            // Otherwise, go straight to the title screen.
+            if(gSaveManager.GetRunCount() <= 1)
+            {
+                mVideoPlayer.Play("intro.bik", true, true, [this](){
+                    new TitleScreen();
+                });
+            }
+            else
+            {
+                new TitleScreen();
+            }
         });
     });
-    */
-
-    // For dev purposes: just load right into a new game.
+    #else
+    // For dev purposes: just load right into a desired timeblock and location.
     Loader::DoAfterLoading([this]() {
         Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
         LoadScene("RC1");
     });
+    #endif
 
 	/*
 	TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
@@ -240,6 +250,13 @@ void GEngine::Quit()
 void GEngine::ForceUpdate()
 {
     Update(10.0f);
+}
+
+void GEngine::StartGame()
+{
+    //TODO: Show timeblock screen
+    Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
+    LoadScene("R25");
 }
 
 void GEngine::ProcessInput()
@@ -420,29 +437,28 @@ void GEngine::LoadSceneInternal()
     // If the loader is loading the scene, we don't want to "double load" or something.
     if(Loader::IsLoading()) { return; }
 
+    // Delete the current scene, if any.
+    if(mScene != nullptr)
+    {
+        mScene->Unload();
+        delete mScene;
+        mScene = nullptr;
+    }
+
+    // Destroy any actors that are destroy on load.
+    for(auto& actor : mActors)
+    {
+        if(actor->IsDestroyOnLoad())
+        {
+            actor->Destroy();
+        }
+    }
+
+    // After destroy pass, delete destroyed actors.
+    DeleteDestroyedActors();
+
     // Initiate scene load on background thread.
     Loader::Load([this]() {
-
-        // Delete the current scene, if any.
-        if(mScene != nullptr)
-        {
-            mScene->Unload();
-            delete mScene;
-            mScene = nullptr;
-        }
-
-        // Destroy any actors that are destroy on load.
-        for(auto& actor : mActors)
-        {
-            if(actor->IsDestroyOnLoad())
-            {
-                actor->Destroy();
-            }
-        }
-
-        // After destroy pass, delete destroyed actors.
-        DeleteDestroyedActors();
-
         // Create the new scene.
         //TODO: Scene constructor should probably ONLY take a scene name.
         //TODO: Internally, we can call to GameProgress or whatnot as needed, but that's very GK3-specific stuff.

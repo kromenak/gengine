@@ -41,6 +41,9 @@ public:
     
 	void LoadScene(std::string name) { mSceneToLoad = name; }
     Scene* GetScene() { return mScene; }
+
+    // GK-specific stuff here
+    void StartGame();
     
 private:
     // Only one instance of GEngine can exist.
