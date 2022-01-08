@@ -1,6 +1,4 @@
 //
-// Actor.h
-//
 // Clark Kromenaker
 //
 // Any object that exists in the game world and has position/rotation/scale.
@@ -42,7 +40,9 @@ public:
 	void Update(float deltaTime);
     
     template<class T> T* AddComponent();
+    template<class T, class... Args> T* AddComponent(Args&&... args);
     template<class T> T* GetComponent();
+    template<class T> T* GetComponentInParents();
     
     std::string& GetName() { return mName; }
     void SetName(const std::string& name) { mName = name; }
@@ -122,6 +122,17 @@ template<class T> T* Actor::AddComponent()
     return component;
 }
 
+template<class T, class... Args> T* Actor::AddComponent(Args&&... args)
+{
+    // This constructor allows passing arbitrary constructor arguments when adding a component.
+    // This is an example of a "parameter pack" and "perfect forwarding" in C++.
+    // The "..." define a parameter pack, which is an arbitrary list of zero or more arguments.
+    // Passing args as "Args&&" and using std::forward enables perfect forwarding (an efficiency thing, cause why not).
+    T* component = new T(this, std::forward<Args>(args)...);
+    mComponents.push_back(component);
+    return component;
+}
+
 template<class T> T* Actor::GetComponent()
 {
     for(auto& component : mComponents)
@@ -131,5 +142,22 @@ template<class T> T* Actor::GetComponent()
             return static_cast<T*>(component);
         }
     }
+    return nullptr;
+}
+
+template<class T> T* Actor::GetComponentInParents()
+{
+    // If I've got the component, just return that!
+    T* myT = GetComponent<T>();
+    if(myT != nullptr) { return myT; }
+
+    // Otherwise, search in parents.
+    Transform* parent = mTransform->GetParent();
+    if(parent != nullptr)
+    {
+        return parent->GetOwner()->GetComponentInParents<T>();
+    }
+
+    // If I have no parent, and I don't have it, return null.
     return nullptr;
 }
