@@ -34,13 +34,13 @@ public:
     Config* GetPrefs() { return mPrefs; }
     void SavePrefs();
 
+    int GetRunCount() const;
+
 private:
     // The player's game preferences.
     // Things like audio settings, graphics settings, etc go here.
     // Basically anything that is not a per-save-game value.
     Config* mPrefs = nullptr;
-
-    void LoadPrefs();
 };
 
 extern SaveManager gSaveManager;

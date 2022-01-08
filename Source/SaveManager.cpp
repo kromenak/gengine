@@ -8,7 +8,19 @@ SaveManager gSaveManager;
 
 SaveManager::SaveManager()
 {
-    LoadPrefs();
+    std::string prefsPath = Paths::GetSaveDataPath("Prefs.ini");
+
+    uint32 bufferSize = 0;
+    char* buffer = File::ReadIntoBuffer(prefsPath, bufferSize);
+    mPrefs = new Config("Prefs.ini", buffer, bufferSize);
+
+    // Increment run count.
+    int runCount = mPrefs->GetInt("App", "Run Count", 0);
+    ++runCount;
+    mPrefs->Set("App", "Run Count", runCount);
+
+    // Save changes.
+    mPrefs->Save(prefsPath);
 }
 
 SaveManager::~SaveManager()
@@ -33,19 +45,7 @@ void SaveManager::SavePrefs()
     mPrefs->Save(Paths::GetSaveDataPath("Prefs.ini"));
 }
 
-void SaveManager::LoadPrefs()
+int SaveManager::GetRunCount() const
 {
-    std::string prefsPath = Paths::GetSaveDataPath("Prefs.ini");
-
-    uint32 bufferSize = 0;
-    char* buffer = File::ReadIntoBuffer(prefsPath, bufferSize);
-    mPrefs = new Config("Prefs.ini", buffer, bufferSize);
-
-    // Increment run count.
-    int runCount = mPrefs->GetInt("App", "Run Count", 0);
-    ++runCount;
-    mPrefs->Set("App", "Run Count", runCount);
-
-    // Save changes.
-    mPrefs->Save(prefsPath);
+    return mPrefs->GetInt("App", "Run Count");
 }
