@@ -1,6 +1,4 @@
 //
-// VideoPlayer.h
-//
 // Clark Kromenaker
 //
 // Manager class for video playback.

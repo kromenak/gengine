@@ -1,6 +1,4 @@
 //
-// StatusOverlay.h
-//
 // Clark Kromenaker
 //
 // UI that displays status (location, day, time, score) at top of screen during gameplay.

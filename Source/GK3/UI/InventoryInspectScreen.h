@@ -1,6 +1,4 @@
 //
-// InventoryInspectScreen.h
-//
 // Clark Kromenaker
 //
 // UI screen that shows a closeup image of an inventory item.

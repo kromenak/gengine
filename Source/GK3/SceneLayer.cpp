@@ -1,8 +1,3 @@
-//
-// SceneLayer.cpp
-//
-// Clark Kromenaker
-//
 #include "SceneLayer.h"
 
 #include "Scene.h"

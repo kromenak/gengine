@@ -1,8 +1,3 @@
-//
-// UICanvas.cpp
-//
-// Clark Kromenaker
-//
 #include "UICanvas.h"
 
 #include "Services.h"
@@ -80,9 +75,35 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
 	}
 }
 
+/*static*/ void UICanvas::NotifyWidgetDestruct(UIWidget* widget)
+{
+    if(sMouseOverWidget == widget)
+    {
+        sMouseOverWidget = nullptr;
+    }
+}
+
 UICanvas::UICanvas(Actor* owner) : UIWidget(owner)
 {
 	sCanvases.push_back(this);
+}
+
+UICanvas::UICanvas(Actor* owner, int order) : UIWidget(owner),
+    mDrawOrder(order)
+{
+    // Attempt to find an ideal spot to slot in this canvas, based on desired draw order.
+    for(int i = 0; i < sCanvases.size(); ++i)
+    {
+        if(mDrawOrder <= sCanvases[i]->mDrawOrder)
+        {
+            sCanvases.insert(sCanvases.begin() + i, this);
+            return;
+        }
+    }
+
+    // If we get here, the draw order is higher than everything in the canvases list.
+    // So...just shove it on back!
+    sCanvases.push_back(this);
 }
 
 UICanvas::~UICanvas()

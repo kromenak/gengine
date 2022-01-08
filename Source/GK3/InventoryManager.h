@@ -24,7 +24,7 @@ class Texture;
 
 struct InventoryItemTextures
 {
-    // Icon texture: appears on the action bar as the active inventory item.
+    // Icon texture: appears on the option bar as the active inventory item.
     // Smallest image, not a lot of detail.
     Texture* iconTexture = nullptr;
 

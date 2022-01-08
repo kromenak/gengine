@@ -1,8 +1,3 @@
-//
-// StatusOverlay.cpp
-//
-// Clark Kromenaker
-//
 #include "StatusOverlay.h"
 
 #include "GameProgress.h"
@@ -16,7 +11,7 @@
 StatusOverlay::StatusOverlay() : Actor(TransformType::RectTransform)
 {
     // Needs to be a canvas so it can render stuff.
-    UICanvas* canvas = AddComponent<UICanvas>();
+    UICanvas* canvas = AddComponent<UICanvas>(0);
     
     // Take up full screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();

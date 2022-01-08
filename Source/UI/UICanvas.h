@@ -1,6 +1,4 @@
 //
-// UICanvas.h
-//
 // Clark Kromenaker
 //
 // A collection of UI components that are logically related and
@@ -19,8 +17,10 @@ public:
 	static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
 	static void UpdateInput();
 	static bool DidWidgetEatInput() { return sMouseOverWidget != nullptr; }
-	
+    static void NotifyWidgetDestruct(UIWidget* widget);
+
 	UICanvas(Actor* owner);
+    UICanvas(Actor* owner, int order);
 	~UICanvas();
 	
 	void Render() override;
@@ -36,6 +36,9 @@ private:
 	// At any time, the mouse can be over exactly one widget.
 	// (at least, unless we add multi-pointer support...shudders)
 	static UIWidget* sMouseOverWidget;
+
+    // Desired draw order for the canvas. Zero is drawn before one, one is drawn before two, etc.
+    int mDrawOrder = INT_MAX;
 	
 	// All widgets on this canvas.
 	std::vector<UIWidget*> mWidgets;

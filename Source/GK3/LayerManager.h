@@ -1,6 +1,4 @@
 //
-// LayerManager.h
-//
 // Clark Kromenaker
 //
 // A "layer" in GK3 can be thought of as a game state.

@@ -1,6 +1,4 @@
 //
-// InventoryScreen.h
-//
 // Clark Kromenaker
 //
 // UI screen that displays current inventory and inspects inventory items.

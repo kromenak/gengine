@@ -2,6 +2,7 @@
 
 #include "Actor.h"
 #include "Services.h"
+#include "UICanvas.h"
 
 TYPE_DEF_CHILD(Component, UIWidget);
 
@@ -17,7 +18,8 @@ UIWidget::UIWidget(Actor* owner) : Component(owner)
 
 UIWidget::~UIWidget()
 {
-    
+    // This is definitely a HACK - probably can be improved by refactoring how Widgets/Canvases interact.
+    UICanvas::NotifyWidgetDestruct(this);
 }
 
 Matrix4 UIWidget::GetWorldTransformWithSizeForRendering()
