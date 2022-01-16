@@ -22,6 +22,7 @@
 #include "NVC.h"
 #include "SceneAsset.h"
 #include "SceneInitFile.h"
+#include "Sequence.h"
 #include "Shader.h"
 #include "Sheep/SheepScript.h"
 #include "Soundtrack.h"
@@ -71,6 +72,7 @@ public:
     Animation* LoadAnimation(const std::string& name);
     Animation* LoadMomAnimation(const std::string& name);
     VertexAnimation* LoadVertexAnimation(const std::string& name);
+    Sequence* LoadSequence(const std::string& name);
     
     SceneInitFile* LoadSIF(const std::string& name);
     SceneAsset* LoadSceneAsset(const std::string& name);
@@ -113,6 +115,7 @@ private:
 	std::unordered_map_ci<std::string, Animation*> mLoadedAnimations;
     std::unordered_map_ci<std::string, Animation*> mLoadedMomAnimations;
 	std::unordered_map_ci<std::string, VertexAnimation*> mLoadedVertexAnimations;
+    std::unordered_map_ci<std::string, Sequence*> mLoadedSequences;
 	
 	std::unordered_map_ci<std::string, SceneInitFile*> mLoadedSIFs;
 	std::unordered_map_ci<std::string, SceneAsset*> mLoadedSceneAssets;

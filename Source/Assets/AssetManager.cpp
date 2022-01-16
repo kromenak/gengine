@@ -53,7 +53,8 @@ AssetManager::~AssetManager()
 	UnloadAssets(mLoadedActionSets);
 	UnloadAssets(mLoadedSceneAssets);
 	UnloadAssets(mLoadedSIFs);
-	
+
+    UnloadAssets(mLoadedSequences);
 	UnloadAssets(mLoadedVertexAnimations);
 	UnloadAssets(mLoadedAnimations);
 	UnloadAssets(mLoadedGases);
@@ -234,6 +235,11 @@ Animation* AssetManager::LoadMomAnimation(const std::string& name)
 VertexAnimation* AssetManager::LoadVertexAnimation(const std::string& name)
 {
     return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), &mLoadedVertexAnimations);
+}
+
+Sequence* AssetManager::LoadSequence(const std::string& name)
+{
+    return LoadAsset<Sequence>(SanitizeAssetName(name, ".SEQ"), &mLoadedSequences);
 }
 
 SceneInitFile* AssetManager::LoadSIF(const std::string& name)
