@@ -76,6 +76,11 @@ target_include_directories(gk3 PRIVATE
     Libraries/zlib/include
 )
 
+# Warning/error settings.
+if(WIN32)
+    target_compile_options(gk3 PRIVATE /wd26812)
+endif()
+
 # Library locations/linking/copying.
 if(WIN32)
     # Specify library search directories.
