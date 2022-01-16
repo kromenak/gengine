@@ -1,6 +1,7 @@
 #include "TitleScreen.h"
 
 #include "Services.h"
+#include "SoundtrackPlayer.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -48,7 +49,8 @@ TitleScreen::TitleScreen() : Actor(Actor::TransformType::RectTransform)
 
     // Add "play" button.
     UIButton* playButton = CreateButton(canvas, "TITLE_PLAY", -381.0f);
-    playButton->SetPressCallback([]() {
+    playButton->SetPressCallback([this]() {
+        Hide();
         GEngine::Instance()->StartGame();
     });
 
@@ -63,4 +65,32 @@ TitleScreen::TitleScreen() : Actor(Actor::TransformType::RectTransform)
     quitButton->SetPressCallback([]() {
         GEngine::Instance()->Quit();
     });
+
+    // Just show immediately for now.
+    Show();
+}
+
+void TitleScreen::Show()
+{
+    SetActive(true);
+    
+    // Play theme music via soundtrack system.
+    SoundtrackPlayer* soundtrackPlayer = GetComponent<SoundtrackPlayer>();
+    if(soundtrackPlayer == nullptr)
+    {
+        soundtrackPlayer = AddComponent<SoundtrackPlayer>();
+    }
+    soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("TITLETHEME"));
+}
+
+void TitleScreen::Hide()
+{
+    SetActive(false);
+
+    // Fade out theme music.
+    SoundtrackPlayer* soundtrackPlayer = GetComponent<SoundtrackPlayer>();
+    if(soundtrackPlayer != nullptr)
+    {
+        soundtrackPlayer->StopAll();
+    }
 }

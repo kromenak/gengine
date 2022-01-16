@@ -11,5 +11,8 @@ class TitleScreen : public Actor
 public:
     TitleScreen();
 
+    void Show();
+    void Hide();
+
 private:
 };
