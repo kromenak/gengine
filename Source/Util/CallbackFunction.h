@@ -1,19 +1,22 @@
 //
-// CallbackFunction.cpp
-//
 // Clark Kromenaker
 //
 // A wrapper around a function pointer.
 //
 #pragma once
+#include <cassert>
 
 template<class T>
 class CallbackFunction
 {
 public:
-    CallbackFunction(void (*ptr)(T));
+    CallbackFunction(void (*ptr)(T)) : mFuncPtr(ptr) { }
     
-    virtual void operator()(T val) const;
+    void operator()(T val) const
+    {
+        assert(mFuncPtr != nullptr);
+        mFuncPtr(val);
+    }
     
 private:
     // Pointer to the function to call.

@@ -1,21 +1,27 @@
 //
-// CallbackMethod.cpp
-//
 // Clark Kromenaker
 //
 // Like a callback function, but includes an object reference.
 // And so, we can then call the function on that object.
 //
 #pragma once
-#include "CallbackFunction.h"
+#include <cassert>
 
 template<class T, class U>
-class CallbackMethod : public CallbackFunction<U>
+class CallbackMethod
 {
 public:
-    CallbackMethod(T* objectInstance, void (T::*ptr)(U));
+    CallbackMethod(T* objectInstance, void (T::* ptr)(U)) :
+        mObjectInstance(objectInstance),
+        mMethodPtr(ptr)
+    {
+    }
     
-    void operator()(U val) const override;
+    void operator()(U val) const
+    {
+        assert(mObjectInstance != nullptr && mMethodPtr != nullptr);
+        (mObjectInstance->*mMethodPtr)(val);
+    }
     
 private:
     T* mObjectInstance = nullptr;
