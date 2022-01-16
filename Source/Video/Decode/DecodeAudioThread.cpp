@@ -1,6 +1,4 @@
 //
-// DecodeAudioThread.cpp
-//
 // Clark Kromenaker
 //
 // Thread for decoding audio data to the audio frame queue.
@@ -47,7 +45,7 @@ int DecodeAudioThread(void* arg)
             
             // Store PTS/pos/duration.
             AVRational timeBase { 1, avFrame->sample_rate };
-            af->pts = (avFrame->pts == AV_NOPTS_VALUE) ? NAN : avFrame->pts * av_q2d(timeBase);
+            af->pts = (avFrame->pts == AV_NOPTS_VALUE) ? std::numeric_limits<double>::quiet_NaN() : avFrame->pts * av_q2d(timeBase);
             af->pos = avFrame->pkt_pos;
 
             AVRational frameRational { avFrame->nb_samples, avFrame->sample_rate };

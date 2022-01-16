@@ -1,8 +1,3 @@
-//
-// Decoder.cpp
-//
-// Clark Kromenaker
-//
 #include "Decoder.h"
 
 #include "FrameQueue.h"

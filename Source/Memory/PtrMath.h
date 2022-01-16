@@ -1,6 +1,4 @@
 //
-// PtrMath.h
-//
 // Clark Kromenaker
 //
 // Helpers for performing calculations with pointers.

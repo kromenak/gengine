@@ -1,8 +1,3 @@
-//
-// LinearAllocator.cpp
-//
-// Clark Kromenaker
-//
 #include "LinearAllocator.h"
 
 #include "PtrMath.h"

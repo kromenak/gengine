@@ -1,8 +1,3 @@
-//
-// FreestyleAllocator.cpp
-//
-// Clark Kromenaker
-//
 #include "FreestyleAllocator.h"
 
 #include <cassert>

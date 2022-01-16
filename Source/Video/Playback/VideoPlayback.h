@@ -1,6 +1,4 @@
 //
-// VideoPlayback.h
-//
 // Clark Kromenaker
 //
 // Encapsulates logic to pull frames from video frame queue and convert to renderable format (texture).
@@ -37,7 +35,6 @@ private:
     // ffmpeg provides a helper library for converting between formats.
     // For ease of use, all formats are converted to RGBA for display.
     SwsContext* mRGBAConvertContext = nullptr;
-    //SwsContext* sub_convert_ctx = nullptr;
     
     // If true, playback is in "step" mode, where each frame is viewed one at a time.
     bool mStep = false;

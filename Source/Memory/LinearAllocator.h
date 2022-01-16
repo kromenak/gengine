@@ -1,6 +1,4 @@
 //
-// LinearAllocator.h
-//
 // Clark Kromenaker
 //
 // Allocates memory from a provided memory buffer in a linear fashion.
@@ -11,8 +9,6 @@
 // This is a very simple allocator with good performance. But it is rather restrictive.
 //
 #pragma once
-#include <cstddef>
-#include <cstdint>
 
 class LinearAllocator
 {

@@ -1,6 +1,4 @@
 //
-// StackAllocator.h
-//
 // Clark Kromenaker
 //
 // Allocates memory from a provided memory buffer in a stack-like fashion.

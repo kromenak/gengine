@@ -1,6 +1,4 @@
 //
-// FreestyleAllocator.h
-//
 // Clark Kromenaker
 //
 // An allocator that can accommodate allocations and deallocations of any size and in any order.

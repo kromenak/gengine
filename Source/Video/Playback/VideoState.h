@@ -1,6 +1,4 @@
 //
-// VideoState.h
-//
 // Clark Kromenaker
 //
 // A video that is being played.

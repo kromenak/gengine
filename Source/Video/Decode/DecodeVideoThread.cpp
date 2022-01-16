@@ -1,6 +1,4 @@
 //
-// VideoThread.cpp
-//
 // Clark Kromenaker
 //
 // Thread for decoding video data to the video frame queue.
@@ -92,7 +90,7 @@ int DecodeVideoThread(void* arg)
             vp->serial = is->videoDecoder.GetSerial();
             
             // Store pts/pos/duration.
-            vp->pts = (avFrame->pts == AV_NOPTS_VALUE) ? NAN : avFrame->pts * av_q2d(is->videoStream->time_base);
+            vp->pts = (avFrame->pts == AV_NOPTS_VALUE) ? std::numeric_limits<double>::quiet_NaN() : avFrame->pts * av_q2d(is->videoStream->time_base);
             vp->pos = avFrame->pkt_pos;
             vp->duration = duration;
             

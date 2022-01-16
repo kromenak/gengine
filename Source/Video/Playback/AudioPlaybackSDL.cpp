@@ -1,8 +1,3 @@
-//
-// AudioPlaybackSDL.cpp
-//
-// Clark Kromenaker
-//
 #include "AudioPlaybackSDL.h"
 
 extern "C"

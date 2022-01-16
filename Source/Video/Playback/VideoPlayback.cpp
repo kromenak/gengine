@@ -1,8 +1,3 @@
-//
-// VideoPlayback.cpp
-//
-// Clark Kromenaker
-//
 #include "VideoPlayback.h"
 
 extern "C"

@@ -410,11 +410,11 @@ void VideoState::CloseStream(int streamIndex)
     }
 }
 
-static int stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* queue)
+static bool stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* queue)
 {
     return stream_id < 0 ||
            queue->Aborted() ||
-           queue->GetPacketCount() > (MIN_FRAMES && (!queue->GetDuration() || av_q2d(st->time_base) * queue->GetDuration() > 1.0));
+           (queue->GetPacketCount() > MIN_FRAMES && (!queue->GetDuration() || av_q2d(st->time_base) * queue->GetDuration() > 1.0));
 }
 
 // Reads data from video file and puts into appropriate packet queue for further processing.
@@ -476,7 +476,7 @@ static int stream_has_enough_packets(AVStream *st, int stream_id, PacketQueue* q
                 }
                 if(is->seek_flags & AVSEEK_FLAG_BYTE)
                 {
-                    is->externalClock.SetPts(NAN, 0);
+                    is->externalClock.SetPts(std::numeric_limits<double>::quiet_NaN(), 0);
                 }
                 else
                 {

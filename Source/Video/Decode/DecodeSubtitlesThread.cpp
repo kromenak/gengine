@@ -1,6 +1,4 @@
 //
-// SubtitleThread.cpp
-//
 // Clark Kromenaker
 //
 // Thread for decoding subtitle data to the subtitle frame queue.

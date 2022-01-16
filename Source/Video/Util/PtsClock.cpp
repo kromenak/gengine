@@ -1,8 +1,3 @@
-//
-// Clock.cpp
-//
-// Clark Kromenaker
-//
 #include "PtsClock.h"
 
 extern "C"
@@ -54,7 +49,7 @@ double PtsClock::GetTime()
     // We should not return valid data until that is resolved.
     if(*mPacketQueueSerial != mSerial)
     {
-        return NAN;
+        return std::numeric_limits<double>::quiet_NaN();
     }
     
     // When paused, clock time can just be equal to last pts.

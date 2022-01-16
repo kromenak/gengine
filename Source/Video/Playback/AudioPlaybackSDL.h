@@ -1,6 +1,4 @@
 //
-// AudioPlaybackSDL.h
-//
 // Clark Kromenaker
 //
 // Encapsulates playback of audio data through SDL audio subsystem.

@@ -1,8 +1,3 @@
-//
-// Animation.cpp
-//
-// Clark Kromenaker
-//
 #include "Animation.h"
 
 #include <cctype>

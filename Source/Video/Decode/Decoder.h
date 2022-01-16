@@ -1,6 +1,4 @@
 //
-// Decoder.h
-//
 // Based very heavily off of the "Decoder" struct in ffmpeg's ffplay example.
 //
 // A decoder uses a codec to decode packets from a packet queue.
@@ -49,7 +47,7 @@ private:
     
     // Occasionally, a dequeued packet needs to be decoded more than once.
     // In that case, we just save the packet here until next decode loop so it can be used.
-    AVPacket mPendingPacket;
+    AVPacket mPendingPacket { };
     bool mPacketPending = false;
     
     // A condition to signal if the packet queue becomes empty.
@@ -63,11 +61,11 @@ private:
     // "next pts" and "next pts timebase" are reset to these values when a flush occurs.
     // Usually, default values are fine, but when stream can't seek, these are beginning of stream (aka restart the stream).
     int64_t mFlushPts = AV_NOPTS_VALUE;
-    AVRational mFlushPtsTimeBase;
+    AVRational mFlushPtsTimeBase { 0, 0 };
     
     // For audio decoding, used to calculate pts for a decoded frame.
     int64_t mNextPts = AV_NOPTS_VALUE;
-    AVRational mNextPtsTimeBase;
+    AVRational mNextPtsTimeBase { 0, 0 };
     
     // The serial of last packet sent to decoder.
     int mSerial = -1;

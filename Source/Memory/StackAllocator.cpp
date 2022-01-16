@@ -1,8 +1,3 @@
-//
-// StackAllocator.cpp
-//
-// Clark Kromenaker
-//
 #include "StackAllocator.h"
 
 #include <cassert>

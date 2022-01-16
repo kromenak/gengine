@@ -1,6 +1,4 @@
 //
-// SheepValue.h
-//
 // Clark Kromenaker
 //
 // A value in the Sheep language. Sheep only supports int, float, and string types.
@@ -26,8 +24,8 @@ struct SheepValue
         const char* stringValue;
     };
     
-    SheepValue() { }
-    SheepValue(SheepValueType t) { type = t; }
+    SheepValue() { intValue = 0; }
+    SheepValue(SheepValueType t) { type = t; intValue = 0; }
     SheepValue(int i) { type = SheepValueType::Int; intValue = i; }
     SheepValue(float f) { type = SheepValueType::Float; floatValue = f; }
     SheepValue(const char* s) { type = SheepValueType::String; stringValue = s; }

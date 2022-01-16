@@ -1,6 +1,4 @@
 //
-// Cursor.h
-//
 // Clark Kromenaker
 //
 // An asset that represents a mouse cursor.
