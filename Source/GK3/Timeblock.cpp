@@ -1,8 +1,3 @@
-//
-// Timeblock.cpp
-//
-// Clark Kromenaker
-//
 #include "Timeblock.h"
 
 Timeblock::Timeblock(int day, int hour) : mDay(day), mHour(hour)

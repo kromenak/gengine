@@ -21,6 +21,7 @@
 #include "Scene.h"
 #include "Services.h"
 #include "TextInput.h"
+#include "TimeblockScreen.h"
 #include "Timers.h"
 #include "TitleScreen.h"
 #include "ThreadPool.h"
@@ -147,7 +148,8 @@ bool GEngine::Initialize()
 	consoleUI->SetIsDestroyOnLoad(false);
 
     // Non-debug: do the full game presentation - company logos, intro movie, title screen.
-    #if defined(NDEBUG)
+    //#define FORCE_TITLE_SCREEN
+    #if defined(NDEBUG) || defined(FORCE_TITLE_SCREEN)
     //HACK/TODO: Ideally, we'd like to either make initial loading much shorter, OR play videos while initial loading is happening.
     //HACK/TODO: However, my multithreading approach is clearly super incorrect and hacky, so that introduces race conditions between the renderer and game logic.
     //HACK/TODO: For now, we'll just do loading before moving on to movies, but this is something to look at more closely.
@@ -254,9 +256,13 @@ void GEngine::ForceUpdate()
 
 void GEngine::StartGame()
 {
-    //TODO: Show timeblock screen
-    Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-    LoadScene("R25");
+    Timeblock timeblock("110A");
+    Services::Get<GameProgress>()->SetTimeblock(timeblock);
+
+    TimeblockScreen* tbScreen = new TimeblockScreen();
+    tbScreen->Show(timeblock, [this](){
+        LoadScene("R25");
+    });
 }
 
 void GEngine::ProcessInput()
