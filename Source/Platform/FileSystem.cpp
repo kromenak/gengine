@@ -177,7 +177,7 @@ bool Directory::Exists(const std::string& path)
 	if(fileAttributes == INVALID_FILE_ATTRIBUTES) { return false; }
 
 	// If attribute has directory flag, it is a directory and it does exist!
-	if(fileAttributes & FILE_ATTRIBUTE_DIRECTORY != 0) { return true; }
+	if((fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0) { return true; }
 
 	// This is not a directory.
 	return false;
