@@ -1,6 +1,4 @@
 //
-// AudioListener.h
-//
 // Clark Kromenaker
 //
 // Represents the location of the "ears" in the scene.

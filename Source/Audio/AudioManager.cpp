@@ -15,13 +15,9 @@ PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel) :
     
 }
 
-void PlayingSoundHandle::Stop()
+void PlayingSoundHandle::Stop(float fadeOutTime)
 {
-    if(channel != nullptr)
-    {
-        channel->stop();
-        channel = nullptr;
-    }
+    Services::GetAudio()->Stop(*this, fadeOutTime);
 }
 
 void PlayingSoundHandle::Pause()
@@ -72,7 +68,7 @@ bool PlayingSoundHandle::IsPlaying() const
     return isPlaying;
 }
 
-void Fader::Update(float deltaTime)
+bool Fader::Update(float deltaTime)
 {
     if(fadeTimer < fadeDuration)
     {
@@ -80,9 +76,17 @@ void Fader::Update(float deltaTime)
 
         // Set volume based on lerp.
         // Note that SetVolume can fail, but if so, we don't really care.
-        float desiredAmbientVolume = Math::Lerp(fadeFrom, fadeTo, fadeTimer / fadeDuration);
-        channelGroup->setVolume(desiredAmbientVolume);
+        float volume = Math::Lerp(fadeFrom, fadeTo, fadeTimer / fadeDuration);
+        channelControl->setVolume(volume);
+
+        // After fading out completely, stop any sounds on this channel.
+        // This stops long/looping sounds from continuing when fading back in.
+        if(volume <= 0.0f)
+        {
+            channelControl->stop();
+        }
     }
+    return fadeTimer >= fadeDuration;
 }
 
 void Fader::SetFade(float fadeTime, float targetVolume, float startVolume)
@@ -102,7 +106,7 @@ void Fader::SetFade(float fadeTime, float targetVolume, float startVolume)
     }
     else
     {
-        channelGroup->getVolume(&fadeFrom);
+        channelControl->getVolume(&fadeFrom);
     }
 }
 
@@ -123,7 +127,7 @@ bool Crossfader::Init(FMOD::System* system, const char* name)
         char childName[64];
         snprintf(childName, sizeof(childName), "%s %i", name, i);
 
-        result = system->createChannelGroup(childName, &faders[i].channelGroup);
+        result = system->createChannelGroup(childName, &faderChannelGroups[i]);
         if(result != FMOD_OK)
         {
             std::cout << FMOD_ErrorString(result) << std::endl;
@@ -131,12 +135,15 @@ bool Crossfader::Init(FMOD::System* system, const char* name)
         }
 
         // Make the fade channel group an input to the ambient channel group.
-        result = channelGroup->addGroup(faders[i].channelGroup);
+        result = channelGroup->addGroup(faderChannelGroups[i]);
         if(result != FMOD_OK)
         {
             std::cout << FMOD_ErrorString(result) << std::endl;
             return false;
         }
+
+        // Tell associated fader to use this channel group when fading.
+        faders[i].channelControl = faderChannelGroups[i];
     }
 
     // All's good.
@@ -154,14 +161,14 @@ void Crossfader::Update(float deltaTime)
 
 void Crossfader::Swap()
 {
-    // Fade current ambient to zero.
+    // Fade out current.
     faders[fadeIndex].SetFade(1.0f, 0.0f);
 
     // Go to next ambient fade group.
     fadeIndex++;
     fadeIndex %= 2;
 
-    // Fade in new group.
+    // Fade in next.
     faders[fadeIndex].SetFade(1.0f, 1.0f);
 }
 
@@ -284,6 +291,17 @@ void AudioManager::Update(float deltaTime)
     mAmbientCrossfade.Update(deltaTime);
     mMusicCrossfade.Update(deltaTime);
 
+    // Update faders.
+    for(int i = 0; i < mFaders.size(); ++i)
+    {
+        if(mFaders[i].Update(deltaTime))
+        {
+            std::swap(mFaders[i], mFaders[mFaders.size() - 1]);
+            mFaders.pop_back();
+            --i;
+        }
+    }
+    
     // See if any playing channels are no longer playing.
     for(int i = mPlayingSounds.size() - 1; i >= 0; --i)
     {
@@ -371,7 +389,14 @@ PlayingSoundHandle AudioManager::PlayAmbient3D(Audio* audio, const Vector3& posi
 PlayingSoundHandle AudioManager::PlayMusic(Audio* audio, float fadeInTime)
 {
     if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound(audio, AudioType::Music);
+
+    PlayingSoundHandle& soundHandle = CreateAndPlaySound(audio, AudioType::Music);
+    if(!Math::IsZero(fadeInTime))
+    {
+        mFaders.emplace_back(soundHandle.channel);
+        mFaders.back().SetFade(fadeInTime, 1.0f, 0.0f);
+    }
+    return soundHandle;
 }
 
 void AudioManager::Stop(Audio* audio)
@@ -383,11 +408,29 @@ void AudioManager::Stop(Audio* audio)
             if(sound.audio == audio)
             {
                 // After stopping, sound is removed from playing sounds during next update loop.
-                sound.Stop();
+                Stop(sound);
                 return;
             }
         }
     }
+}
+
+void AudioManager::Stop(PlayingSoundHandle& soundHandle, float fadeOutTime)
+{
+    // Need a valid channel to stop the thing.
+    if(soundHandle.channel == nullptr) { return; }
+
+    // If no fade out is specified, just stop it right away - easy.
+    if(Math::IsZero(fadeOutTime))
+    {
+        soundHandle.channel->stop();
+        soundHandle.channel = nullptr;
+        return;
+    }
+
+    // We have to fade out before stopping it - employ a fader for this.
+    mFaders.emplace_back(soundHandle.channel);
+    mFaders.back().SetFade(fadeOutTime, 0.0f);
 }
 
 void AudioManager::StopAll()
@@ -534,10 +577,10 @@ void AudioManager::SaveAudioState(bool sfx, bool vo, bool ambient, AudioSaveStat
             continue;
         }
         if(!ambient &&
-           (channelGroup == mAmbientCrossfade.faders[0].channelGroup ||
-            channelGroup == mAmbientCrossfade.faders[1].channelGroup ||
-            channelGroup == mMusicCrossfade.faders[0].channelGroup ||
-            channelGroup == mMusicCrossfade.faders[1].channelGroup))
+           (channelGroup == mAmbientCrossfade.faderChannelGroups[0] ||
+            channelGroup == mAmbientCrossfade.faderChannelGroups[1] ||
+            channelGroup == mMusicCrossfade.faderChannelGroups[0]   ||
+            channelGroup == mMusicCrossfade.faderChannelGroups[1]))
         {
             continue;
         }

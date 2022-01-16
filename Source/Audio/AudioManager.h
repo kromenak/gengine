@@ -22,7 +22,7 @@ public:
     PlayingSoundHandle() = default;
     PlayingSoundHandle(FMOD::Channel* channel);
 
-    void Stop();
+    void Stop(float fadeOutTime = 0.0f);
     void Pause();
     void Resume();
     
@@ -64,9 +64,12 @@ struct Fader
     float fadeTimer = 0.0f;
     float fadeTo = 0.0f;
     float fadeFrom = 0.0f;
-    FMOD::ChannelGroup* channelGroup = nullptr;
+    FMOD::ChannelControl* channelControl = nullptr;
 
-    void Update(float deltaTime);
+    Fader() = default;
+    Fader(FMOD::ChannelControl* cc) : channelControl(cc) { }
+
+    bool Update(float deltaTime);
     void SetFade(float fadeTime, float targetVolume, float startVolume = -1.0f);
 };
 
@@ -79,13 +82,14 @@ struct Crossfader
 
     // Two channel groups that feed into the above channel group.
     // These are swapped between to enable crossfading of audio tracks.
+    FMOD::ChannelGroup* faderChannelGroups[2];
     Fader faders[2];
     int fadeIndex = 0;
 
     bool Init(FMOD::System* system, const char* name);
     void Update(float deltaTime);
     void Swap();
-    FMOD::ChannelGroup* GetActive() const { return faders[fadeIndex].channelGroup; }
+    FMOD::ChannelGroup* GetActive() const { return faderChannelGroups[fadeIndex]; }
 };
 
 class AudioManager
@@ -114,6 +118,7 @@ public:
     PlayingSoundHandle PlayMusic(Audio* audio, float fadeInTime = 0.0f);
 
     void Stop(Audio* audio);
+    void Stop(PlayingSoundHandle& soundHandle, float fadeOutTime = 0.0f);
     void StopAll();
 
     void SwapAmbient();
@@ -151,7 +156,10 @@ private:
     // Internally, they also consist of several FMOD channel groups used to control volume. Both output to master channel group ultimately.
     Crossfader mAmbientCrossfade;
     Crossfader mMusicCrossfade;
-    
+
+    // Any individual sound can be faded in/out. If needed, one of these faders will be used for that purpose.
+    std::vector<Fader> mFaders;
+
     // Volume multipliers for each audio type. This changes the range of possible volumes for a particular type of audio.
     // For example, if 0.8 is used, it means that "max volume" for that audio type is actually 80% of the "true max".
     // This is just helpful for achieving a good sounding mix. In particular, music tends to overpower SFX/VO, so compensate for that.

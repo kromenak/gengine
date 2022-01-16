@@ -18,11 +18,19 @@
 
 struct IniSection;
 
-enum class SoundtrackSoundType
+// Specifies how a soundtrack node behaves when the soundtrack stops prematurely.
+enum class StopMethod
 {
-    Music,      // Audio plays on the 
-    Ambient,
-    SFX
+    PlayToEnd,  // Wait until the sound finishes playing.
+    FadeOut,    // Fade out (using fadeOutTimeMs).
+    Immediate   // Stop playing immediately.
+};
+
+struct SoundtrackNodeResults
+{
+    PlayingSoundHandle soundHandle;
+    StopMethod stopMethod = StopMethod::PlayToEnd;
+    float fadeOutTimeMs = 0.0f;
 };
 
 struct SoundtrackNode
@@ -37,8 +45,8 @@ struct SoundtrackNode
     // Repeat count is still decremented if node is not executed due to random!
     int random = 100;
     
-    virtual int Execute(AudioType soundType) = 0;
-    
+    virtual int Execute(AudioType soundType, SoundtrackNodeResults& outResults) = 0;
+
     virtual bool IsLooping()
     {
         return false;
@@ -52,7 +60,7 @@ struct WaitNode : public SoundtrackNode
     int minWaitTimeMs = 0;
     int maxWaitTimeMs = 0;
     
-    int Execute(AudioType soundType) override;
+    int Execute(AudioType soundType, SoundtrackNodeResults& outResults) override;
 };
 
 struct SoundNode : public SoundtrackNode
@@ -71,12 +79,6 @@ struct SoundNode : public SoundtrackNode
     int fadeInTimeMs = 0;
     
     // Indicates how this node behaves if the Soundtrack is stopped during playback.
-    enum class StopMethod
-    {
-        PlayToEnd,  // Wait until the sound finishes playing.
-        FadeOut,    // Fade out (using fadeOutTimeMs).
-        Immediate   // Stop playing immediately.
-    };
     StopMethod stopMethod = StopMethod::PlayToEnd;
     int fadeOutTimeMs = 0;
     
@@ -95,7 +97,7 @@ struct SoundNode : public SoundtrackNode
     std::string followModelName;
     
     bool IsLooping() override { return loop; }
-    int Execute(AudioType soundType) override;
+    int Execute(AudioType soundType, SoundtrackNodeResults& outResults) override;
 };
 
 struct PrsNode : public SoundtrackNode
@@ -104,12 +106,12 @@ struct PrsNode : public SoundtrackNode
     // So basically, PRS consists of multiple sound nodes, one of which is picked at random.
     std::vector<SoundNode*> soundNodes;
     
-    int Execute(AudioType soundType) override
+    int Execute(AudioType soundType, SoundtrackNodeResults& outResults) override
     {
         if(soundNodes.size() == 0) { return 0; }
         
         int randomIndex = rand() % soundNodes.size();
-        return soundNodes[randomIndex]->Execute(soundType);
+        return soundNodes[randomIndex]->Execute(soundType, outResults);
     }
 };
 

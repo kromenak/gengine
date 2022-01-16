@@ -13,6 +13,19 @@ PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
     ProcessNextNode();
 }
 
+PlayingSoundtrack::~PlayingSoundtrack()
+{
+    // If a sound is currently playing as part of this soundtrack, we need to stop it in the desired fashion.
+    if(mSoundtrackNodeResults.stopMethod == StopMethod::Immediate)
+    {
+        mSoundtrackNodeResults.soundHandle.Stop();
+    }
+    else if(mSoundtrackNodeResults.stopMethod == StopMethod::FadeOut)
+    {
+        mSoundtrackNodeResults.soundHandle.Stop(mSoundtrackNodeResults.fadeOutTimeMs * 0.001f);
+    }
+}
+
 void PlayingSoundtrack::Update(float deltaTime)
 {
     // Decrement timer. When it gets to zero, we move onto the next node.
@@ -39,11 +52,11 @@ void PlayingSoundtrack::ProcessNextNode()
     // First off, if current node is looping...just keep doing it! It never stops!
     if(mCurrentNodeIndex >= 0 && nodes[mCurrentNodeIndex]->IsLooping())
     {
-        mTimer = nodes[mCurrentNodeIndex]->Execute(mSoundtrack->GetSoundType());
+        mTimer = nodes[mCurrentNodeIndex]->Execute(mSoundtrack->GetSoundType(), mSoundtrackNodeResults);
         return;
     }
 
-    // First, update the node index and loop if necessary.
+    // Update the node index and loop if necessary.
     mCurrentNodeIndex++;
     mCurrentNodeIndex %= nodes.size();
 
@@ -60,7 +73,7 @@ void PlayingSoundtrack::ProcessNextNode()
 
     // Ok, execute the thing.
     mExecutionCounts[mCurrentNodeIndex]++;
-    int waitMilliseconds = node->Execute(mSoundtrack->GetSoundType());
+    int waitMilliseconds = node->Execute(mSoundtrack->GetSoundType(), mSoundtrackNodeResults);
     mTimer = (float)waitMilliseconds / 1000.0f;
 }
 

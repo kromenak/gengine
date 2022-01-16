@@ -24,10 +24,15 @@ public:
     Soundtrack* mSoundtrack = nullptr;
 
     PlayingSoundtrack(Soundtrack* soundtrack);
+    ~PlayingSoundtrack();
+
     void Update(float deltaTime);
 
 private:
     void ProcessNextNode();
+
+    // The results from executing the most recent soundtrack node.
+    SoundtrackNodeResults mSoundtrackNodeResults;
 
     // Some nodes have repeat limits, so we need to know how many times we've executed each node.
     std::vector<int> mExecutionCounts;

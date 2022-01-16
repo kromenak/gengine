@@ -6,8 +6,13 @@
 #include "IniParser.h"
 #include "Services.h"
 
-int WaitNode::Execute(AudioType soundType)
+int WaitNode::Execute(AudioType soundType, SoundtrackNodeResults& outResults)
 {
+    // Since a wait node does not actually have any audio, clear the provided sound handle to reflect this.
+    outResults.soundHandle = PlayingSoundHandle();
+    outResults.stopMethod = StopMethod::Immediate;
+    outResults.fadeOutTimeMs = 0.0f;
+
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
     int randomCheck = rand() % 100 + 1;
@@ -22,7 +27,7 @@ int WaitNode::Execute(AudioType soundType)
     return (rand() % maxWaitTimeMs + minWaitTimeMs);
 }
 
-int SoundNode::Execute(AudioType soundType)
+int SoundNode::Execute(AudioType soundType, SoundtrackNodeResults& outResults)
 {
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
@@ -34,50 +39,53 @@ int SoundNode::Execute(AudioType soundType)
     if(audio == nullptr) { return 0; }
     
     // Play method differs based on sound type and whether its 3D or not.
-    PlayingSoundHandle soundInstance;
     switch(soundType)
     {
     case AudioType::Music:
         // Going to assume music is never 3D for now...
-        soundInstance = Services::GetAudio()->PlayMusic(audio, fadeInTimeMs * 0.001f);
+        outResults.soundHandle = Services::GetAudio()->PlayMusic(audio, fadeInTimeMs * 0.001f);
         break;
 
     case AudioType::Ambient:
         if(is3d)
         {
-            soundInstance = Services::GetAudio()->PlayAmbient3D(audio, position, minDist, maxDist);
+            outResults.soundHandle = Services::GetAudio()->PlayAmbient3D(audio, position, minDist, maxDist);
         }
         else
         {
-            soundInstance = Services::GetAudio()->PlayAmbient(audio, fadeInTimeMs * 0.001f);
+            outResults.soundHandle = Services::GetAudio()->PlayAmbient(audio, fadeInTimeMs * 0.001f);
         }
         break;
         
     case AudioType::SFX:
         if(is3d)
         {
-            soundInstance = Services::GetAudio()->PlaySFX3D(audio, position, minDist, maxDist);
+            outResults.soundHandle = Services::GetAudio()->PlaySFX3D(audio, position, minDist, maxDist);
         }
         else
         {
-            soundInstance = Services::GetAudio()->PlaySFX(audio);
+            outResults.soundHandle = Services::GetAudio()->PlaySFX(audio);
         }
         break;
         
     case AudioType::VO:
         if(is3d)
         {
-            soundInstance = Services::GetAudio()->PlayVO3D(audio, position, minDist, maxDist);
+            outResults.soundHandle = Services::GetAudio()->PlayVO3D(audio, position, minDist, maxDist);
         }
         else
         {
-            soundInstance = Services::GetAudio()->PlayVO(audio);
+            outResults.soundHandle = Services::GetAudio()->PlayVO(audio);
         }
     }
+
+    // Let the caller know the desired stop method, in case the soundtrack needs to stop while this node is playing.
+    outResults.stopMethod = stopMethod;
+    outResults.fadeOutTimeMs = fadeOutTimeMs;
     
     // Set sound's volume.
     // Volume is 0-100, but audio system expects 0.0-1.0.
-    soundInstance.SetVolume(volume * 0.01f);
+    outResults.soundHandle.SetVolume(volume * 0.01f);
     
     // Return audio length. Gotta convert seconds to milliseconds.
     return (int)(audio->GetDuration() * 1000.0f);
@@ -226,15 +234,15 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
             {
             default:
             case 0:
-                node->stopMethod = SoundNode::StopMethod::PlayToEnd;
+                node->stopMethod = StopMethod::PlayToEnd;
                 break;
                 
             case 1:
-                node->stopMethod = SoundNode::StopMethod::FadeOut;
+                node->stopMethod = StopMethod::FadeOut;
                 break;
                 
             case 2:
-                node->stopMethod = SoundNode::StopMethod::Immediate;
+                node->stopMethod = StopMethod::Immediate;
                 break;
             }
         }
