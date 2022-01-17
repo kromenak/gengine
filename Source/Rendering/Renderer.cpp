@@ -151,6 +151,10 @@ bool Renderer::Initialize()
     glClearDepth(0);
     glDepthFunc(GL_GREATER);
     #endif
+
+    // GK3 vertex data for models & BSP use a clockwise winding order.
+    // However, note that *indexes* are counter-clockwise...but that doesn't seem to affect how OpenGL interprets the data!
+    glFrontFace(GL_CW);
 	
     // Load default shader.
 	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Tex");
@@ -291,7 +295,6 @@ void Renderer::Render()
         // All opaque world rendering uses alpha test.
         Material::UseAlphaTest(true);
         glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT); //TODO: Why does this need to be FRONT? Is that the way BSP/model data is authored, or is my winding order wrong?
         
         // Set the view & projection matrices for normal 3D camera-oriented rendering.
         Material::SetViewMatrix(viewMatrix);
