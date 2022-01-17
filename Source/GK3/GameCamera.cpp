@@ -267,7 +267,7 @@ void GameCamera::SceneUpdate(float deltaTime)
     Vector3 forward = GetForward();
     forward.y = 0.0f;
     forward.Normalize();
-    
+
     // Calculate desired position based on all speeds.
     // We may not actually move to this exact position, due to collision.
     Vector3 position = GetPosition();
@@ -280,7 +280,7 @@ void GameCamera::SceneUpdate(float deltaTime)
     position.y = floorY + height;
     
     // Perform collision checks and resolutions.
-    ResolveCollisions(position);
+    ResolveCollisions(position, GetPosition());
     
     // Set position after resolving collisions.
     GetTransform()->SetPosition(position);
@@ -383,7 +383,7 @@ void GameCamera::SceneUpdate(float deltaTime)
 
 //TODO: In OG game, if you disable collision, go outside bounds, and re-enable, you can get back into the bounds area.
 //TODO: In other words, it seems the OG game takes triangle facing direction or containment within bounds when checking collision.
-void GameCamera::ResolveCollisions(Vector3& position)
+void GameCamera::ResolveCollisions(Vector3& newPosition, const Vector3& originalPosition)
 {
 	// No bounds model = no collision.
 	// Bounds may also be purposely disabled for debugging purposes.
@@ -399,11 +399,15 @@ void GameCamera::ResolveCollisions(Vector3& position)
 		// We need to convert camera position to local space of the mesh before doing collision check.
 		Matrix4 meshToLocal = mesh->GetMeshToLocalMatrix();
         Matrix4 localToMesh = Matrix4::InverseTransform(meshToLocal);
-		Vector3 meshPosition = localToMesh.TransformPoint(position);
+		Vector3 meshPosition = localToMesh.TransformPoint(newPosition);
+        Vector3 meshOffset = localToMesh.TransformVector(newPosition - originalPosition);
 		
-		// Create sphere at position.
-		const float kCameraColliderRadius = 20.0f;
-		Sphere s(meshPosition, kCameraColliderRadius);
+        // The radius of the sphere is derived from camera behavior in the original game.
+        // i.e. Camera y-pos when colliding with ceiling is a certain value...so I matched that.
+		const float kCameraColliderRadius = 16.0f;
+
+        // Create sphere at position.
+        Sphere s(meshPosition, kCameraColliderRadius);
 		
 		// Iterate submeshes/submesh triangles.
 		auto submeshes = mesh->GetSubmeshes();
@@ -415,37 +419,32 @@ void GameCamera::ResolveCollisions(Vector3& position)
 			{
 				if(submesh->GetTriangle(i, p0, p1, p2))
 				{
-					/*
-					if(meshNumber >= 19 && meshNumber <= 22)
-					{
-						Triangle triangle(p0, p1, p2);
-						Vector3 pointOnTriangle = triangle.GetClosestPoint(s.center);
-						Debug::DrawLine(Vector3::Zero, meshToLocal.TransformPoint(pointOnTriangle), Color32::Green);
-					}
-					*/
-					
-					// If an intersection exists, resolve it by "pushing" mesh position out.
-					Vector3 intersection;
-					if(Collisions::TestSphereTriangle(s, Triangle(p0, p1, p2), intersection))
-					{
-						meshPosition += intersection;
-						s = Sphere(meshPosition, kCameraColliderRadius);
-					}
+                    Triangle triangle(p0, p1, p2);
+
+                    // We only need to check collision if the camera is moving towards the triangle.
+                    // Triangles in GK3 are CCW, so pass false here to indicate that.
+                    Vector3 normal = triangle.GetNormal(false);
+                    float dot = Vector3::Dot(meshOffset, normal);
+                    if(dot < 0.0f)
+                    {
+                        // If an intersection exists, resolve it by "pushing" mesh position out.
+                        Vector3 intersection;
+                        if(Collisions::TestSphereTriangle(s, triangle, intersection))
+                        {
+                            meshPosition += intersection;
+                            s = Sphere(meshPosition, kCameraColliderRadius);
+                        }
+                    }
+
+                    // For debugging: draw normals.
+                    Vector3 center = meshToLocal.TransformPoint(triangle.GetCenter());
+                    Debug::DrawLine(center, center + (meshToLocal.TransformNormal(normal) * 5.0f), Color32::Blue);
 				}
-				
-				/*
-				Vector3 normal;
-				if(submesh->GetNormal(i, normal))
-				{
-					Vector3 triCenter = meshToLocal.TransformPoint((p0 + p1 + p2) / 3);
-					Debug::DrawLine(triCenter, triCenter + (normal * 10.0f), Color32::Blue);
-				}
-				*/
 			}
 		}
 		
 		// We modified the local position while iterating submeshes.
 		// We now need to go back to "world" space.
-		position = meshToLocal.TransformPoint(meshPosition);
+        newPosition = meshToLocal.TransformPoint(meshPosition);
 	}
 }
