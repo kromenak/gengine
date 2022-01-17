@@ -1,6 +1,4 @@
 //
-// Plane.h
-//
 // Clark Kromenaker
 //
 // A plane in 3D space. A plane extends infinitely, dividing 3D space into two halves.

@@ -1,6 +1,4 @@
 //
-// Sphere.h
-//
 // Clark Kromenaker
 //
 // A sphere in 3D space.

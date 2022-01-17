@@ -1,6 +1,4 @@
 //
-// Collisions.h
-//
 // Clark Kromenaker
 //
 // A static class to easily access collision checks between a variety of primitives.

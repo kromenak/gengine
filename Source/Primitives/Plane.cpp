@@ -1,8 +1,3 @@
-//
-// Plane.cpp
-//
-// Clark Kromenaker
-//
 #include "Plane.h"
 
 #include "Matrix4.h"

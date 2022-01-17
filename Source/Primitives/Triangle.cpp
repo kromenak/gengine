@@ -1,8 +1,3 @@
-//
-// Triangle.cpp
-//
-// Clark Kromenaker
-//
 #include "Triangle.h"
 
 #include "LineSegment.h"
@@ -13,7 +8,34 @@ Triangle::Triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2) :
 	p1(p1),
 	p2(p2)
 {
-	//TODO: What if the points don't form a triangle???
+	
+}
+
+Vector3 Triangle::GetNormal(bool clockwise, bool leftHand) const
+{
+    // Get two vectors defining a plane with this triangle in it.
+    Vector3 v1 = p1 - p0;
+    Vector3 v2 = p2 - p0;
+
+    // We're assuming that the points of this triangle (p0, p1, p2) are specified in clockwise winding order.
+    // Why? Following OpenGL convention: three points in order are considered clockwise.
+
+    // We are also assuming a left-handed coordinate system.
+    // Why? Because coordinate systems in this engine are usually left-handed.
+
+    // With those assumptions, the front-facing normal is v1xv2.
+    Vector3 normal = Vector3::Cross(v1, v2).Normalize();
+
+    // Now, our assumptions may be wrong.
+    // If our points are counter-clockwise, we need to flip the normal.
+    // If our coordinate system is right-handed, we need to flip the normal.
+    // If both counter-clockwise and right-handed, we flip it twice...and get the original result :P.
+    return normal * (clockwise ? 1 : -1) * (leftHand ? 1 : -1);
+}
+
+Vector3 Triangle::GetCenter() const
+{
+    return (p0 + p1 + p2) / 3;
 }
 
 bool Triangle::ContainsPoint(const Vector3& point) const

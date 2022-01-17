@@ -1,8 +1,3 @@
-//
-// Collisions.cpp
-//
-// Clark Kromenaker
-//
 #include "Collisions.h"
 
 #include "AABB.h"
