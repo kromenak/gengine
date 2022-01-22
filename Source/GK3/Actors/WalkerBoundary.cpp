@@ -1,26 +1,15 @@
-//
-// WalkerBoundary.cpp
-//
-// Clark Kromenaker
-//
 #include "WalkerBoundary.h"
 
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
 
+#include "Debug.h"
 #include "GMath.h"
 #include "Texture.h"
+#include "ResizableQueue.h"
 
-struct NodeInfo
-{
-	Vector2 parent;
-	float h;
-	float g;
-	float GetF() { return h + g; }
-};
-
-bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& outPath) const
+bool WalkerBoundary::FindPath(const Vector3& from, const Vector3& to, std::vector<Vector3>& outPath) const
 {
 	// Make sure path vector is empty.
 	outPath.clear();
@@ -50,105 +39,62 @@ bool WalkerBoundary::FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& ou
 		// Walker will move from current (unwalkable) position to this position when it starts walking.
 		start = FindNearestWalkableTexturePosToWorldPos(from);
 	}
-	
-	// Let's try some A* to figure this out...
-	std::vector<Vector2> openSet;
-	std::unordered_set<Vector2, Vector2Hash> closedSet;
-	std::unordered_map<Vector2, NodeInfo, Vector2Hash> infos;
-	
-	// Start with goal and put it in closed set.
-	Vector2 current = start;
-	closedSet.insert(current);
-	
-	// Iterate until we find the start node.
-	while(current != goal)
-	{
-		// Create neighbors array - including diagonals!
-		Vector2 neighbors[8];
-		neighbors[0] = current + Vector2::UnitY;
-		neighbors[1] = current - Vector2::UnitY;
-		neighbors[2] = current + Vector2::UnitX;
-		neighbors[3] = current - Vector2::UnitX;
-		
-		neighbors[4] = current + Vector2(1, 1);
-		neighbors[5] = current + Vector2(1, -1);
-		neighbors[6] = current + Vector2(-1, 1);
-		neighbors[7] = current + Vector2(-1, -1);
-		
-		// See if we should add neighbors to open set.
-		for(auto& neighbor : neighbors)
-		{
-			// Ignore any neighbor that has pixel color black (not walkable).
-            int index = mTexture->GetPaletteIndex(neighbor.x, neighbor.y);
-			if(index == 255) { continue; }
-			
-			// As a foundation, using Euclidean distance for the heuristic is pretty safe.
-            // But as a modifier , multiplying by index (greater index means higher cost) seems to give OK results.
-            float edgeCost = (neighbor - current).GetLength() * index;
-			
-			// Ignore anything already in the closed set.
-			if(closedSet.find(neighbor) != closedSet.end())
-			{
-				continue;
-			}
-			else if(std::find(openSet.begin(), openSet.end(), neighbor) != openSet.end())
-			{
-				// If in the open set, check for adoption.
-				// If lower g value, reparent to current.
-				float newG = infos[current].g + edgeCost;
-				if(newG < infos[neighbor].g)
-				{
-					infos[neighbor].parent = current;
-					infos[neighbor].g = newG;
-				}
-			}
-			else
-			{
-				// Found a new node - create an info for it and add to open set.
-				NodeInfo nodeInfo;
-				nodeInfo.parent = current;
-				
-				nodeInfo.h = (goal - neighbor).GetLength() * index;
-				//nodeInfo.h = 0.0f; // No heuristic? (Dijkstra)
-				nodeInfo.g = infos[current].g + edgeCost;
-				infos[neighbor] = nodeInfo;
-				openSet.push_back(neighbor);
-			}
-		}
-		
-		// Could not find a path.
-		if(openSet.empty())
-		{
-			return false;
-		}
-		
-		// Find open set item with lowest f value.
-		std::vector<Vector2>::iterator nextIt = openSet.begin();
-		float lowestF = infos[*nextIt].GetF();
-		for(auto it = openSet.begin() + 1; it != openSet.end(); it++)
-		{
-			NodeInfo nodeInfo = infos[*it];
-			if(nodeInfo.GetF() < lowestF)
-			{
-				nextIt = it;
-				lowestF = nodeInfo.GetF();
-			}
-		}
-		
-		// This'll be the next node - remove from open set, put in closed set.
-		current = *nextIt;
-		openSet.erase(nextIt);
-		closedSet.insert(current);
-	}
-    
-	// Iterate back to start, pushing world position of each node onto our path.
-    // This leaves the path with start node at back, goal node at front - caller can traverse back-to-front.
-	while(current != start)
-	{
-		outPath.push_back(TexturePosToWorldPos(current));
-		current = infos[current].parent;
-	}
-	return true;
+
+    // Use BFS to find a path.
+    // I found that BFS resulted in way better performance than A*, and similar results.
+    // In hindsight, I think this is because: a) the graph has a ton of nodes, and b) edges between nodes _aren't really_ weighted.
+    std::vector<Vector2> path;
+    if(FindPathBFS(start, goal, path))
+    // if(FindPathAStar(start, goal, path))
+    {
+        // Ok, we found a path, but it's probably too close to walls and such.
+        // So, let's try to condition it a little bit to fix that.
+        for(int i = 0; i < path.size(); ++i)
+        {
+            // We should ignore the first few nodes and last few nodes when doing conditioning.
+            // This is because start/end nodes are _exact_ destinations (i.e. character starts here and wants to get there - don't mess with it).
+            //const int kFuzzyIgnore = 4;
+            //if(i < kFuzzyIgnore) { continue; }
+            //if(i >= path.size() - kFuzzyIgnore) { break; }
+
+            // See if a neighbor is more walkable.
+            int index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
+            while(index != 0)
+            {
+                if(mTexture->GetPaletteIndex(path[i].x + 1, path[i].y) < index)
+                {
+                    path[i].x += 1;
+                }
+                else if(mTexture->GetPaletteIndex(path[i].x - 1, path[i].y) < index)
+                {
+                    path[i].x -= 1;
+                }
+                else if(mTexture->GetPaletteIndex(path[i].x, path[i].y + 1) < index)
+                {
+                    path[i].y += 1;
+                }
+                else if(mTexture->GetPaletteIndex(path[i].x, path[i].y - 1) < index)
+                {
+                    path[i].y -= 1;
+                }
+                else
+                {
+                    // No neighbor is more walkable, so break out of this loop.
+                    break;
+                }
+                index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
+            }
+        }
+
+        // Convert texture-space path to world-space path.
+        for(auto& node : path)
+        {
+            outPath.push_back(TexturePosToWorldPos(node));
+        }
+        return true;
+    }
+    return false;
+    //return FindPathAStar(start, goal, outPath);
 }
 
 Vector3 WalkerBoundary::FindNearestWalkablePosition(const Vector3& position) const
@@ -161,36 +107,63 @@ Vector3 WalkerBoundary::FindNearestWalkablePosition(const Vector3& position) con
 	return TexturePosToWorldPos(walkableTexturePos);
 }
 
-bool WalkerBoundary::IsWorldPosWalkable(Vector3 worldPos) const
+void WalkerBoundary::SetRegionBlocked(int regionIndex, int regionBoundaryIndex, bool blocked)
+{
+    bool inRegion = false;
+    for(int y = 0; y < mTexture->GetHeight(); ++y)
+    {
+        inRegion = false;
+        for(int x = 0; x < mTexture->GetWidth(); ++x)
+        {
+            int index = mTexture->GetPaletteIndex(x, y);
+
+            // Determine whether in or out of region.
+            if(!inRegion && index == regionBoundaryIndex)
+            {
+                inRegion = true;
+            }
+            if(inRegion && index != regionBoundaryIndex && index != regionIndex)
+            {
+                inRegion = false;
+            }
+
+            // If in region and blocking, convert region's index to 255.
+            // If in region and unblocking, convert black to region's index.
+            if(inRegion && ((blocked && index == regionIndex) || (!blocked && index == 255)))
+            {
+                // If blocked, set to 255, which equates to "can't walk here."
+                // If not blocked, set back to original region index.
+                mTexture->SetPaletteIndex(x, y, blocked ? 255 : regionIndex);
+            }
+        }
+    }
+}
+
+bool WalkerBoundary::IsWorldPosWalkable(const Vector3& worldPos) const
 {
 	// Convert to texture position and check that.
 	return IsTexturePosWalkable(WorldPosToTexturePos(worldPos));
 }
 
-bool WalkerBoundary::IsTexturePosWalkable(Vector2 texturePos) const
+bool WalkerBoundary::IsTexturePosWalkable(const Vector2& texturePos) const
 {
 	// If no texture...can walk anywhere?
 	if(mTexture == nullptr) { return true; }
-	
-	// The color of the pixel at pos seems to indicate whether that spot is walkable.
-	// White = totally OK to walk 				(255, 255, 255)
-	// Blue = OK to walk						(0, 0, 255)
-	// Green = sort of OK to walk 				(0, 255, 0)
-	// Red = getting less OK to walk 			(255, 0, 0)
-	// Yellow = sort of not OK to walk 			(255, 255, 0)
-	// Magenta = really pushing it here 		(255, 0, 255)
-	// Grey = pretty not OK to walk here 		(128, 128, 128)
-	// Cyan = this is your last warning, buddy 	(0, 255, 255)
-	// Black = totally not OK to walk 			(0, 0, 0)
-	Color32 color = mTexture->GetPixelColor32(texturePos.x, texturePos.y);
+
+    // Walker boundary data is defined in an indexed (palettized) texture.
+    // Palette index 0 is walkable, with indexes 1-9 indicating less and less walkable areas.
+    // Palette index 255 is "unwalkable" area.
+    // Palette indexes 128-254 are for special regions.
+
+	uint8 paletteIndex = mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
     //unsigned char index = mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
     //std::cout << (int)index << ", " << color << std::endl;
     
-	// Basically, if the texture color is not black, you can walk there.
-	return color != Color32::Black;
+	// Basically, if the palette index is not 255, you can walk there.
+	return paletteIndex != 255;
 }
 
-Vector2 WalkerBoundary::WorldPosToTexturePos(Vector3 worldPos) const
+Vector2 WalkerBoundary::WorldPosToTexturePos(const Vector3& worldPos) const
 {
 	// If no texture, the end result is going to be zero.
 	if(mTexture == nullptr) { return Vector2::Zero; }
@@ -287,4 +260,212 @@ Vector2 WalkerBoundary::FindNearestWalkableTexturePosToWorldPos(const Vector3& w
 		}
 	}
 	return nearestWalkableTexturePos;
+}
+
+bool WalkerBoundary::FindPathAStar(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const
+{
+    struct NodeInfo
+    {
+        Vector2 parent;
+        float h;
+        float g;
+        float GetF() const { return h + g; }
+    };
+
+    // Let's try some A* to figure this out...
+    std::vector<Vector2> openSet;
+    std::unordered_set<Vector2, Vector2Hash> closedSet;
+    std::unordered_map<Vector2, NodeInfo, Vector2Hash> infos;
+
+    // Start with goal and put it in closed set.
+    Vector2 current = start;
+    closedSet.insert(current);
+
+    // Iterate until we find the start node.
+    uint32_t iterations = 0;
+    while(current != goal)
+    {
+        // Create neighbors array - including diagonals!
+        Vector2 neighbors[8];
+        neighbors[0] = current + Vector2(0, 1);
+        neighbors[1] = current + Vector2(0, -1);
+        neighbors[2] = current + Vector2(1, 0);
+        neighbors[3] = current + Vector2(-1, 0);
+
+        neighbors[4] = current + Vector2(1, 1);
+        neighbors[5] = current + Vector2(1, -1);
+        neighbors[6] = current + Vector2(-1, 1);
+        neighbors[7] = current + Vector2(-1, -1);
+
+        // See if we should add neighbors to open set.
+        for(auto& neighbor : neighbors)
+        {
+            // Ignore any neighbor that has pixel color black (not walkable).
+            int index = mTexture->GetPaletteIndex(neighbor.x, neighbor.y);
+            if(index == 255) { continue; }
+
+            // As a foundation, using Euclidean distance for the heuristic is pretty safe.
+            // But as a modifier, multiplying by index (greater index means higher cost) seems to give OK results.
+            float edgeCost = (neighbor - current).GetLength() * index;
+
+            // Ignore anything already in the closed set.
+            if(closedSet.find(neighbor) != closedSet.end())
+            {
+                continue;
+            }
+            else if(std::find(openSet.begin(), openSet.end(), neighbor) != openSet.end())
+            {
+                // If in the open set, check for adoption.
+                // If lower g value, reparent to current.
+                float newG = infos[current].g + edgeCost;
+                if(newG < infos[neighbor].g)
+                {
+                    infos[neighbor].parent = current;
+                    infos[neighbor].g = newG;
+                }
+            }
+            else
+            {
+                // Found a new node - create an info for it and add to open set.
+                NodeInfo nodeInfo;
+                nodeInfo.parent = current;
+
+                nodeInfo.h = (goal - neighbor).GetLength() * index;
+                //nodeInfo.h = 0.0f; // No heuristic? (Dijkstra)
+                nodeInfo.g = infos[current].g + edgeCost;
+                infos[neighbor] = nodeInfo;
+                openSet.push_back(neighbor);
+            }
+        }
+
+        // Could not find a path.
+        if(openSet.empty())
+        {
+            return false;
+        }
+
+        // Find open set item with lowest f value.
+        std::vector<Vector2>::iterator nextIt = openSet.begin();
+        float lowestF = infos[*nextIt].GetF();
+        for(auto it = openSet.begin() + 1; it != openSet.end(); it++)
+        {
+            NodeInfo nodeInfo = infos[*it];
+            if(nodeInfo.GetF() < lowestF)
+            {
+                nextIt = it;
+                lowestF = nodeInfo.GetF();
+            }
+        }
+
+        // This'll be the next node - remove from open set, put in closed set.
+        current = *nextIt;
+        openSet.erase(nextIt);
+        closedSet.insert(current);
+        ++iterations;
+    }
+    printf("Took %u iterations\n", iterations);
+
+    // Iterate back to start, pushing world position of each node onto our path.
+    // This leaves the path with start node at back, goal node at front - caller can traverse back-to-front.
+    while(current != start)
+    {
+        outPath.push_back(current);
+        current = infos[current].parent;
+    }
+    return true;
+}
+
+bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const
+{
+    struct Node
+    {
+        Vector2 value;
+        Node* parent;
+        bool closed;
+    };
+
+    // Create set of nodes for searching.
+    // Since a lot of texture pixels are unwalkable (in most cases), this does waste a bit of memory.
+    // But it works fine (for the moment). Perhaps it can be optimized by allocating the memory one time rather than each time this function is called.
+    int width = mTexture->GetWidth();
+    int height = mTexture->GetHeight();
+    Node* nodes = new Node[width * height];
+    memset(nodes, 0, width * height * sizeof(Node));
+    for(int y = 0; y < height; ++y)
+    {
+        for(int x = 0; x < width; ++x)
+        {
+            nodes[y * width + x].value = Vector2(x, y);
+        }
+    }
+
+    // The open set when doing the search.
+    // This does some dynamic allocation that could maybe be optimized if needed.
+    ResizableQueue<Node*> openSet(width * height);
+
+    // Put start node on the open set, mark as closed/explored.
+    Node* startNode = &nodes[static_cast<int>(start.y * width + start.x)];
+    startNode->closed = true;
+    openSet.Push(startNode);
+
+    // Iterate until we either find the goal, or the open set is empty.
+    while(!openSet.Empty())
+    {
+        // If we find the goal, we purposely don't pop the node off the open set.
+        // This is used after the while-loop to check success/failure of the search.
+        Node* current = openSet.Front();
+        if(current->value == goal) { break; }
+
+        // Create neighbors array - including diagonals!
+        Vector2 neighbors[8];
+        neighbors[0] = current->value + Vector2(0, 1);
+        neighbors[1] = current->value + Vector2(0, -1);
+        neighbors[2] = current->value + Vector2(1, 0);
+        neighbors[3] = current->value + Vector2(-1, 0);
+
+        neighbors[4] = current->value + Vector2(1, 1);
+        neighbors[5] = current->value + Vector2(1, -1);
+        neighbors[6] = current->value + Vector2(-1, 1);
+        neighbors[7] = current->value + Vector2(-1, -1);
+
+        // See if we should add neighbors to open set.
+        for(auto& neighbor : neighbors)
+        {
+            // Ignore any neighbor that has pixel color black (not walkable).
+            int index = mTexture->GetPaletteIndex(neighbor.x, neighbor.y);
+            if(index == 255) { continue; }
+
+            // Ignore closed/explored neighbors.
+            Node* neighborNode = &nodes[static_cast<int>(neighbor.y * width + neighbor.x)];
+            if(neighborNode->closed) { continue; }
+
+            // Add to open set.
+            neighborNode->parent = current;
+            neighborNode->closed = true;
+            openSet.Push(neighborNode);
+        }
+
+        // Done with this node - remove from open set.
+        openSet.Pop();
+    }
+
+    // If open set is empty, we did not find the goal. No path can be generated.
+    if(openSet.Empty())
+    {
+        delete[] nodes;
+        return false;
+    }
+
+    // Iterate back to start, pushing world position of each node onto our path.
+    // This leaves the path with start node at back, goal node at front - caller can traverse back-to-front.
+    Node* current = openSet.Front();
+    while(current != nullptr)
+    {
+        outPath.push_back(current->value);
+        current = current->parent;
+    }
+
+    // We found a path! Noice.
+    delete[] nodes;
+    return true;
 }

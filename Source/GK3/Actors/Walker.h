@@ -1,6 +1,4 @@
 //
-// Walker.h
-//
 // Clark Kromenaker
 //
 // The walker (Texas Ranger) takes care of the intricacies of moving an actor's legs

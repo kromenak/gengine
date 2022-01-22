@@ -22,6 +22,7 @@
 #include "Timers.h"
 #include "VerbManager.h"
 #include "VideoPlayer.h"
+#include "WalkerBoundary.h"
 
 // Required for macros to work correctly with "string" instead of "std::string".
 using namespace std;
@@ -827,30 +828,30 @@ shpvoid WalkerBoundaryBlockModel(std::string modelName)
 }
 RegFunc1(WalkerBoundaryBlockModel, void, string, IMMEDIATE, REL_FUNC);
 
-/*
-shpvoid WalkerBoundaryBlockRegion(int regionIndex, int regionBoundaryIndex)
-{
-	std::cout << "WalkerBoundaryBlockRegion" << std::endl;
-	return 0;
-}
-RegFunc2(WalkerBoundaryBlockRegion, void, int, int, IMMEDIATE, REL_FUNC);
-*/
- 
 shpvoid WalkerBoundaryUnblockModel(std::string modelName)
 {
-	std::cout << "WalkerBoundaryUnblockModel" << std::endl;
-	return 0;
+    std::cout << "WalkerBoundaryUnblockModel" << std::endl;
+    return 0;
 }
 RegFunc1(WalkerBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
 
-/*
+shpvoid WalkerBoundaryBlockRegion(int regionIndex, int regionBoundaryIndex)
+{
+    printf("WalkerBoundaryBlockRegion(%i, %i)\n", regionIndex, regionBoundaryIndex);
+    GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, true);
+	return 0;
+}
+RegFunc2(WalkerBoundaryBlockRegion, void, int, int, IMMEDIATE, REL_FUNC);
+ 
 shpvoid WalkerBoundaryUnblockRegion(int regionIndex, int regionBoundaryIndex)
 {
 	std::cout << "WalkerBoundaryUnblockRegion" << std::endl;
+    GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, false);
 	return 0;
 }
 RegFunc2(WalkerBoundaryUnblockRegion, void, int, int, IMMEDIATE, REL_FUNC);
 
+/*
 shpvoid WalkNear(std::string actorName, std::string positionName)
 {
 	std::cout << "WalkNear" << std::endl;
@@ -1258,19 +1259,23 @@ shpvoid ShowBinocs()
 	return 0;
 }
 RegFunc0(ShowBinocs, void, IMMEDIATE, REL_FUNC);
+*/
 
 shpvoid ShowDrivingInterface()
 {
+    assert(false);
 	return 0;
 }
 RegFunc0(ShowDrivingInterface, void, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowFingerprintInterface(std::string nounName)
 {
+    assert(false);
 	return 0;
 }
 RegFunc1(ShowFingerprintInterface, void, string, IMMEDIATE, REL_FUNC);
 
+/*
 shpvoid ShowSidney()
 {
 	return 0;
@@ -2027,6 +2032,20 @@ shpvoid SetPamphletPage(int page)
 }
 RegFunc1(SetPamphletPage, void, int, WAITABLE, REL_FUNC);
 */
+
+shpvoid TurnLSRPageLeft()
+{
+    assert(false);
+    return 0;
+}
+RegFunc0(TurnLSRPageLeft, void, IMMEDIATE, REL_FUNC);
+
+shpvoid TurnLSRPageRight()
+{
+    assert(false);
+    return 0;
+}
+RegFunc0(TurnLSRPageRight, void, IMMEDIATE, REL_FUNC);
  
 // INSETS
 //DumpInsetNames

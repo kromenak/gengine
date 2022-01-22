@@ -1,6 +1,4 @@
 //
-// WalkerBoundary.h
-//
 // Clark Kromenaker
 //
 // Encapsulates logic related to determining where a walker can walk in a scene,
@@ -18,7 +16,7 @@ class Texture;
 class WalkerBoundary
 {
 public:
-	bool FindPath(Vector3 from, Vector3 to, std::vector<Vector3>& outPath) const;
+	bool FindPath(const Vector3& from, const Vector3& to, std::vector<Vector3>& outPath) const;
 	Vector3 FindNearestWalkablePosition(const Vector3& position) const;
 	
 	void SetTexture(Texture* texture) { mTexture = texture; }
@@ -29,7 +27,9 @@ public:
 	
 	void SetOffset(const Vector2& offset) { mOffset = offset; }
 	Vector2 GetOffset() const { return mOffset; }
-	
+
+    void SetRegionBlocked(int regionIndex, int regionBoundaryIndex, bool blocked);
+
 private:
 	// The texture provides vital data about walkable areas.
 	// Each pixel correlates to a spot in the scene.
@@ -39,14 +39,17 @@ private:
 	// Size specifies scale of the walker bounds relative to the 3D scene.
 	Vector2 mSize;
 	
-	// An offset for the bottom-left of the walker bounds from the origin.
+	// An offset for the bottom-left of the walker bounds from the world origin.
 	Vector2 mOffset;
 	
-	bool IsWorldPosWalkable(Vector3 worldPos) const;
-	bool IsTexturePosWalkable(Vector2 texturePos) const;
+	bool IsWorldPosWalkable(const Vector3& worldPos) const;
+	bool IsTexturePosWalkable(const Vector2& texturePos) const;
 	
-	Vector2 WorldPosToTexturePos(Vector3 worldPos) const;
+	Vector2 WorldPosToTexturePos(const Vector3& worldPos) const;
 	Vector3 TexturePosToWorldPos(Vector2 texturePos) const;
 	
 	Vector2 FindNearestWalkableTexturePosToWorldPos(const Vector3& worldPos) const;
+
+    bool FindPathAStar(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const;
+    bool FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const;
 };
