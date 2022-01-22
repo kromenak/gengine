@@ -381,8 +381,7 @@ void GameCamera::SceneUpdate(float deltaTime)
     }
 }
 
-//TODO: In OG game, if you disable collision, go outside bounds, and re-enable, you can get back into the bounds area.
-//TODO: In other words, it seems the OG game takes triangle facing direction or containment within bounds when checking collision.
+//TODO: Make this continuous so camera can't get out of bounds when moving too fast!
 void GameCamera::ResolveCollisions(Vector3& newPosition, const Vector3& originalPosition)
 {
 	// No bounds model = no collision.
@@ -437,8 +436,8 @@ void GameCamera::ResolveCollisions(Vector3& newPosition, const Vector3& original
                     }
 
                     // For debugging: draw normals.
-                    Vector3 center = meshToLocal.TransformPoint(triangle.GetCenter());
-                    Debug::DrawLine(center, center + (meshToLocal.TransformNormal(normal) * 5.0f), Color32::Blue);
+                    //Vector3 center = meshToLocal.TransformPoint(triangle.GetCenter());
+                    //Debug::DrawLine(center, center + (meshToLocal.TransformNormal(normal) * 5.0f), Color32::Blue);
 				}
 			}
 		}

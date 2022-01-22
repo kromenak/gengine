@@ -1,6 +1,4 @@
 //
-// EnumClassFlags.h
-//
 // Clark Kromenaker
 //
 // Enum classes are nice, but they don't support use as flags without writing

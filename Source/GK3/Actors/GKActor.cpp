@@ -16,7 +16,7 @@
 
 GKActor::GKActor()
 {
-    // Because of how animations work, GK Actors require a separate Actor for their models.
+    // Because of how animations work, GKActors require a separate Actor for their models.
     mModelActor = new Actor();
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
 
@@ -36,7 +36,8 @@ GKActor::GKActor(Model* model) : GKActor()
     mMeshRenderer->SetModel(model);
     
 	// Get config for this character.
-	CharacterConfig& config = Services::Get<CharacterManager>()->GetCharacterConfig(mMeshRenderer->GetModelName());
+    // It is assumed that the name of the actor's model corresponds to their three-letter character ID (e.g. GAB, GRA, MOS).
+	CharacterConfig& config = Services::Get<CharacterManager>()->GetCharacterConfig(model->GetNameNoExtension());
 	mCharConfig = &config;
 	
 	// Create and configure face controller.
@@ -322,24 +323,6 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
         mModelActor->SetRotation(animParams.absoluteHeading.ToQuaternion());
     }
 
-    // For relative anims, move model to match actor's position/rotation.
-    if(!animParams.absolute)
-    {
-        SyncModelToActor();
-    }
-
-    // In GK3, a "move" anim is one that is allowed to move the actor. This is like "root motion" in modern engines.
-    // When "move" anim ends, the actor/mesh stay where they are. For "non-move" anims, actor/mesh revert to initial pos/rot.
-    // Interestingly, the actor still moves with the model during non-move anims...it just reverts at the end.
-    mVertexAnimAllowMove = animParams.allowMove;
-    if(!mVertexAnimAllowMove)
-    {
-        // Save start pos/rot for the actor, so it can be reverted.
-        mStartVertexAnimPosition = GetPosition();
-        mStartVertexAnimRotation = GetRotation();
-    }
-
-    // Perform "OnVertexAnimationStart" logic.
     // For relative anims, move model to match actor's position/rotation.
     if(!animParams.absolute)
     {
