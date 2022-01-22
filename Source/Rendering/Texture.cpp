@@ -1,7 +1,5 @@
 #include "Texture.h"
 
-#include <iostream>
-
 #include <SDL2/SDL.h>
 
 #include "BinaryReader.h"
@@ -12,24 +10,24 @@
 Texture Texture::White(2, 2, Color32::White);
 Texture Texture::Black(2, 2, Color32::Black);
 
-Texture::Texture(unsigned int width, unsigned int height) :
+Texture::Texture(uint32 width, uint32 height) :
     Asset(""),
     mWidth(width),
     mHeight(height)
 {
     // Create pixel array of desired size.
     int pixelsSize = mWidth * mHeight * 4;
-    mPixels = new unsigned char[pixelsSize];
+    mPixels = new uint8[pixelsSize];
 }
 
-Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
+Texture::Texture(uint32 width, uint32 height, Color32 color) :
 	Asset(""),
 	mWidth(width),
 	mHeight(height)
 {
 	// Create pixel array of desired size.
 	int pixelsSize = mWidth * mHeight * 4;
-	mPixels = new unsigned char[pixelsSize];
+	mPixels = new uint8[pixelsSize];
 	
 	// Flood-fill pixels with desired color.
 	for(int i = 0; i < pixelsSize; i += 4)
@@ -41,7 +39,7 @@ Texture::Texture(unsigned int width, unsigned int height, Color32 color) :
 	}
 }
 
-Texture::Texture(std::string name, char* data, int dataLength) :
+Texture::Texture(const std::string& name, char* data, uint32 dataLength) :
     Asset(name)
 {
 	BinaryReader reader(data, dataLength);
@@ -92,11 +90,7 @@ void Texture::Activate(int textureUnit)
     }
 
     // Upload to GPU if dirty.
-    if(mDirty)
-    {
-        UploadToGPU();
-        mDirty = false;
-    }
+    UploadToGPU();
 
     // Bind texture (again, if not already bound - small performance gain).
     static GLuint activeTextureId[2];
@@ -112,31 +106,64 @@ void Texture::Activate(int textureUnit)
     White.Activate(0);
 }
 
+void Texture::SetFilterMode(FilterMode filterMode)
+{
+    mFilterMode = filterMode;
+    mDirtyFlags |= DirtyFlags::Properties;
+}
+
+void Texture::SetWrapMode(WrapMode wrapMode)
+{
+    mWrapMode = wrapMode;
+    mDirtyFlags |= DirtyFlags::Properties;
+}
+
+void Texture::SetMipmaps(bool useMipmaps)
+{
+    mMipmaps = useMipmaps;
+    mDirtyFlags |= DirtyFlags::Mipmaps;
+}
+
 Color32 Texture::GetPixelColor32(int x, int y)
 {
 	// No pixels means...just return black.
 	if(mPixels == nullptr) { return Color32::Black; }
 	
 	// Calculate index into pixels array.
-	unsigned int index = static_cast<unsigned int>((y * mWidth + x) * 4);
+	uint32 index = static_cast<uint32>((y * mWidth + x) * 4);
 	
 	// If index isn't valid...also return black.
 	if(index < 0 || index >= (mWidth * mHeight * 4)) { return Color32::Black; }
 	
-	unsigned char r = mPixels[index];
-	unsigned char g = mPixels[index + 1];
-	unsigned char b = mPixels[index + 2];
-	unsigned char a = mPixels[index + 3];
+	uint8 r = mPixels[index];
+    uint8 g = mPixels[index + 1];
+    uint8 b = mPixels[index + 2];
+    uint8 a = mPixels[index + 3];
 	return Color32(r, g, b, a);
 }
 
-unsigned char Texture::GetPaletteIndex(int x, int y)
+void Texture::SetPaletteIndex(int x, int y, uint8 val)
+{
+    // No palette indexes means we can't get a value!
+    if(mPaletteIndexes == nullptr) { return; }
+
+    // Calculate index into pixels array.
+    uint32 index = static_cast<uint32>(y * mWidth + x);
+
+    // If index isn't valid...also return zero.
+    if(index < 0 || index >= (mWidth * mHeight)) { return; }
+
+    // Got it!
+    mPaletteIndexes[index] = val;
+}
+
+uint8 Texture::GetPaletteIndex(int x, int y)
 {
 	// No palette indexes means we can't get a value!
 	if(mPaletteIndexes == nullptr) { return 0; }
 	
 	// Calculate index into pixels array.
-	unsigned int index = static_cast<unsigned int>(y * mWidth + x);
+	uint32 index = static_cast<uint32>(y * mWidth + x);
 	
 	// If index isn't valid...also return zero.
 	if(index < 0 || index >= (mWidth * mHeight)) { return 0; }
@@ -236,7 +263,7 @@ void Texture::SetTransparentColor(Color32 color)
 	}
 	
     // Mark dirty so it uploads to GPU on next use.
-    mDirty = true;
+    mDirtyFlags |= DirtyFlags::Pixels;
 }
 
 void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
@@ -265,41 +292,93 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
 
 void Texture::UploadToGPU()
 {
-	if(mTextureId == GL_NONE)
-	{
-		// Generate and bind the texture object in OpenGL.
-		glGenTextures(1, &mTextureId);
-		glBindTexture(GL_TEXTURE_2D, mTextureId);
-		
-		// Load texture data into texture object.
+    // Nothing to do.
+    if(mDirtyFlags == DirtyFlags::None) { return; }
+
+    // If this is a new texture, we must generate/bind texture object in OpenGL.
+    // We'll assume we also need to upload pixel data with any new texture.
+    if(mTextureId == GL_NONE)
+    {
+        // Generate and bind the texture object in OpenGL.
+        glGenTextures(1, &mTextureId);
+        glBindTexture(GL_TEXTURE_2D, mTextureId);
+
+        // Load texture data into texture object.
         // OpenGL assumes that pixel data is from bottom-left, BUT our pixels array is from top-left!
         // You'd think this would lead to upside-down textures in-game...BUT GK3 uses DirectX style UVs (from top-left).
         // So, this "double inversion" actually leads to textures displaying correctly in OpenGL.
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-					 mWidth, mHeight, 0,
-					 GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
-		
-		// Set filter mode for the texture.
-        GLfloat filterParam = mFilterMode == FilterMode::Point ? GL_NEAREST : GL_LINEAR;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
-        
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+                     mWidth, mHeight, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+
+        // We must upload properties when texture is first generated too.
+        mDirtyFlags |= DirtyFlags::Properties;
+    }
+    else
+    {
+        // Just bind the texture.
+        glBindTexture(GL_TEXTURE_2D, mTextureId);
+
+        // If pixel data is dirty, upload new pixel data.
+        if((mDirtyFlags & DirtyFlags::Pixels) != DirtyFlags::None)
+        {
+            glTexSubImage2D(GL_TEXTURE_2D, 0,
+                            0, 0, mWidth, mHeight,
+                            GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+        }
+    }
+
+    // Deal with changes to mipmaps enabled/disabled.
+    if((mDirtyFlags & DirtyFlags::Mipmaps) != DirtyFlags::None)
+    {
+        // If mipmaps have been enabled, generate mipmaps!
+        // Note that if mipmaps have been disabled, we don't bother destroying the mipmaps - we just won't use them (see below).
+        if(mMipmaps)
+        {
+            glGenerateMipmap(GL_TEXTURE_2D);
+        }
+
+        // Since trilinear filtering depends on mipmaps, we need to modify texture properties if trilinear filtering is enabled.
+        if(mFilterMode == FilterMode::Trilinear)
+        {
+            mDirtyFlags |= DirtyFlags::Properties;
+        }
+    }
+
+    // Deal with property changes.
+    if((mDirtyFlags & DirtyFlags::Properties) != DirtyFlags::None)
+    {
         // Set wrap mode for the texture.
         GLfloat wrapParam = mWrapMode == WrapMode::Repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapParam);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapParam);
-	}
-	else
-	{
-		// Update texture data on GPU.
-		glBindTexture(GL_TEXTURE_2D, mTextureId);
-		glTexSubImage2D(GL_TEXTURE_2D, 0,
-						0, 0, mWidth, mHeight,
-						GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
-	}
+
+        // Determine min/mag filters. These are a little complicated, based on desired filter mode and mipmaps.
+        // Defaults (GL_NEAREST) correlate to point filtering.
+        GLfloat minFilterParam = GL_NEAREST;
+        GLfloat magFilterParam = GL_NEAREST;
+        if(mFilterMode == FilterMode::Bilinear)
+        {
+            // Bilinear filtering uses GL_LINEAR. We can also use mipmaps with bilinear filtering.
+            minFilterParam = mMipmaps ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
+            magFilterParam = GL_LINEAR;
+        }
+        else if(mFilterMode == FilterMode::Trilinear)
+        {
+            // Trilinear filtering technically requires mipmaps.
+            // If we don't have mipmaps, it is really just bilinear filtering!
+            minFilterParam = mMipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
+            magFilterParam = GL_LINEAR;
+        }
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilterParam);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilterParam);
+    }
+
+    // We did it all - clear the dirty flags.
+    mDirtyFlags = DirtyFlags::None;
 }
 
-void Texture::WriteToFile(std::string filePath)
+void Texture::WriteToFile(const std::string& filePath)
 {
     BinaryWriter writer(filePath.c_str());
     
@@ -315,7 +394,9 @@ void Texture::WriteToFile(std::string filePath)
     writer.WriteInt(mWidth);    // Width of image; signed for some reason.
     writer.WriteInt(mHeight);   // Height of image; signed for some reason.
     writer.WriteUShort(1);      // Number of color planes, always 1.
-    writer.WriteUShort(32);     // Number of bits-per-pixel. Assume 32 for now.
+
+    uint16_t bitsPerPixel = (mPalette != nullptr ? 8 : 32);
+    writer.WriteUShort(bitsPerPixel); // Number of bits-per-pixel.
     writer.WriteUInt(0);        // Compression method - assumed none (0).
     writer.WriteUInt(0);        // Uncompressed size of image. Since we aren't compressing, can just use 0 as placeholder.
     writer.WriteInt(0);         // Preferred width for printing, unused.
@@ -324,21 +405,33 @@ void Texture::WriteToFile(std::string filePath)
     writer.WriteUInt(0);        // Number of important colors, unused.
     
     // COLOR TABLE - Only needed for 8BPP or less.
+    if(bitsPerPixel <= 8)
+    {
+        writer.Write(mPalette, mPaletteSize);
+    }
     
     // PIXELS
 	// Write out one row at a time, bottom to top, left to right, per BMP format standard.
-	int rowSize = CalculateBmpRowSize(32, mWidth);
+	int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
     for(int y = mHeight - 1; y >= 0; --y)
     {
 		int bytesWritten = 0;
         for(int x = 0; x < mWidth; ++x)
         {
-            int index = (y * mWidth + x) * 4;
-			writer.WriteUByte(mPixels[index + 2]); // Blue
-            writer.WriteUByte(mPixels[index + 1]); // Green
-			writer.WriteUByte(mPixels[index]); 	   // Red
-            writer.WriteUByte(0); // Alpha is ignored
-			bytesWritten += 4;
+            if(bitsPerPixel == 8)
+            {
+                writer.WriteUByte(mPaletteIndexes[(y * mWidth + x)]);
+                ++bytesWritten;
+            }
+            else if(bitsPerPixel == 32)
+            {
+                int index = (y * mWidth + x) * 4;
+                writer.WriteUByte(mPixels[index + 2]); // Blue
+                writer.WriteUByte(mPixels[index + 1]); // Green
+                writer.WriteUByte(mPixels[index]); 	   // Red
+                writer.WriteUByte(0); // Alpha is ignored
+                bytesWritten += 4;
+            }
         }
 		
 		// Add padding to write out total desired row size (padded to 4 bytes).
@@ -503,29 +596,21 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	// COLOR TABLE - only present for 8-bpp or lower images
 	if(bitsPerPixel <= 8)
 	{
-		// The number of bytes is numColors in palette, time 4 bytes each.
+		// The number of bytes is numColors in palette, times 4 bytes each.
 		// The order of the colors is blue, green, red, alpha.
-		mPalette = new unsigned char[numColorsInColorPalette * 4];
+        mPaletteSize = numColorsInColorPalette * 4;
+		mPalette = new uint8[numColorsInColorPalette * 4];
 		reader.Read(mPalette, numColorsInColorPalette * 4);
-		
-		/*
-		std::cout << GetName() << std::endl;
-		for(int i = 0; i < numColorsInColorPalette; i++)
-		{
-			Color32 color(mPalette[i * 4 + 2], mPalette[i * 4 + 1], mPalette[i * 4], mPalette[i * 4 + 3]);
-			std::cout << i << ", " << color << std::endl;
-		}
-		*/
 	}
 	
 	// PIXELS
 	// Allocate pixels array.
-	mPixels = new unsigned char[mWidth * mHeight * 4];
+	mPixels = new uint8[mWidth * mHeight * 4];
 	
 	// For 8-bpp or lower images with a palette, allocate palette indexes.
 	if(bitsPerPixel <= 8)
 	{
-		mPaletteIndexes = new unsigned char[mWidth * mHeight];
+		mPaletteIndexes = new uint8[mWidth * mHeight];
 	}
 	
 	// Read in pixel data.
@@ -534,7 +619,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	for(int y = mHeight - 1; y >= 0; --y)
 	{
 		int bytesRead = 0;
-		for(unsigned int x = 0; x < mWidth; ++x)
+		for(uint32 x = 0; x < mWidth; ++x)
 		{
 			// Calculate index into pixels array.
             int index = (y * mWidth + x) * 4;

@@ -15,6 +15,7 @@
 #include "Model.h"
 #include "Profiler.h"
 #include "RenderTransforms.h"
+#include "SaveManager.h"
 #include "Shader.h"
 #include "Skybox.h"
 #include "Texture.h"
@@ -239,6 +240,10 @@ bool Renderer::Initialize()
     // Because this is so early in the engine init process, this will basically just set clear color and present. 
     Render();
 
+    // Load rendering prefs.
+    mUseMipmaps = gSaveManager.GetPrefs()->GetBool(PREFS_HARDWARE_RENDERER, PREFS_MIPMAPS, true);
+    mUseTrilinearFiltering = gSaveManager.GetPrefs()->GetBool(PREFS_HARDWARE_RENDERER, PREFS_TRILINEAR_FILTERING, true);
+
     // Init succeeded!
     return true;
 }
@@ -404,4 +409,40 @@ void Renderer::ToggleFullscreen()
 {
     bool isFullscreen = SDL_GetWindowFlags(mWindow) & SDL_WINDOW_FULLSCREEN;
     SDL_SetWindowFullscreen(mWindow, isFullscreen ? 0 : SDL_WINDOW_FULLSCREEN);
+}
+
+void Renderer::SetUseMipmaps(bool useMipmaps)
+{
+    mUseMipmaps = useMipmaps;
+    gSaveManager.GetPrefs()->Set(PREFS_HARDWARE_RENDERER, PREFS_MIPMAPS, mUseMipmaps);
+
+    // Dynamically update loaded textures to use mipmaps.
+    for(auto& entry : Services::GetAssets()->GetLoadedTextures())
+    {
+        // The trick is that this map has both UI and scene textures. And we only want to modify *scene* textures.
+        // We can look at the current filtering setting as an indicator.
+        Texture* texture = entry.second;
+        if(texture->GetFilterMode() != Texture::FilterMode::Point)
+        {
+            texture->SetMipmaps(mUseMipmaps);
+        }
+    }
+}
+
+void Renderer::SetUseTrilinearFiltering(bool useTrilinearFiltering)
+{
+    mUseTrilinearFiltering = useTrilinearFiltering;
+    gSaveManager.GetPrefs()->Set(PREFS_HARDWARE_RENDERER, PREFS_TRILINEAR_FILTERING, mUseTrilinearFiltering);
+
+    // Dynamically update loaded textures to use trilinear filtering.
+    for(auto& entry : Services::GetAssets()->GetLoadedTextures())
+    {
+        // The trick is that this map has both UI and scene textures. And we only want to modify *scene* textures.
+        // We can look at the current filtering setting as an indicator.
+        Texture* texture = entry.second;
+        if(texture->GetFilterMode() != Texture::FilterMode::Point)
+        {
+            texture->SetFilterMode(mUseTrilinearFiltering ? Texture::FilterMode::Trilinear : Texture::FilterMode::Bilinear);
+        }
+    }
 }

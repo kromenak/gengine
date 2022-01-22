@@ -38,7 +38,6 @@ AssetManager::AssetManager()
 
     // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
     mSearchPaths.push_back("Data");
-
 }
 
 AssetManager::~AssetManager()
@@ -204,12 +203,16 @@ Texture* AssetManager::LoadSceneTexture(const std::string& name)
 {
     // Load texture per usual.
     Texture* texture = LoadTexture(name);
-    
+
     // A "scene" texture means it is rendered as part of the 3D game scene (as opposed to a 2D UI texture).
-    // These textures look better if you apply bilinear filtering.
+    // These textures look better if you apply mipmaps and filtering.
     if(texture != nullptr && texture->GetRenderType() != Texture::RenderType::AlphaTest)
     {
-        texture->SetFilterMode(Texture::FilterMode::Bilinear);
+        bool useMipmaps = Services::GetRenderer()->UseMipmaps();
+        texture->SetMipmaps(useMipmaps);
+
+        bool useTrilinearFiltering = Services::GetRenderer()->UseTrilinearFiltering();
+        texture->SetFilterMode(useTrilinearFiltering ? Texture::FilterMode::Trilinear : Texture::FilterMode::Bilinear);
     }
     return texture;
 }

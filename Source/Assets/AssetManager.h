@@ -67,6 +67,7 @@ public:
     Model* LoadModel(const std::string& name);
     Texture* LoadTexture(const std::string& name);
     Texture* LoadSceneTexture(const std::string& name);
+    const std::unordered_map_ci<std::string, Texture*>& GetLoadedTextures() { return mLoadedTextures; }
     
     GAS* LoadGAS(const std::string& name);
     Animation* LoadAnimation(const std::string& name);

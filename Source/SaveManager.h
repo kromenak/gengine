@@ -6,6 +6,7 @@
 #pragma once
 #include <string>
 
+// Sound Preferences
 #define PREFS_SOUND "Sound"
 
 #define PREFS_AUDIO_ENABLED "Sound Enabled"
@@ -19,6 +20,12 @@
 #define PREFS_VO_VOLUME "Dialogue Volume"
 #define PREFS_AMBIENT_VOLUME "Ambient Volume"
 #define PREFS_MUSIC_VOLUME "Music Volume"
+
+// Hardware Renderer Preferences
+#define PREFS_HARDWARE_RENDERER "Engine\\Hardware"
+
+#define PREFS_MIPMAPS "Mip Mapping"
+#define PREFS_TRILINEAR_FILTERING "Trilinear Filtering"
 
 class Config;
 

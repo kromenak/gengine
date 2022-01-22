@@ -586,8 +586,14 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     // Create advanced graphics options button.
     UIButton* advGraphicsButton = CreateButton(canvas, config, "graphOptAdvanced", mGraphicOptionsSection);
     advGraphicsButton->SetPressCallback([this]() {
-        this->mAdvancedGraphicOptionsSection->SetActive(!this->mAdvancedGraphicOptionsSection->IsActive());
-        this->KeepOnScreen();
+        mAdvancedGraphicOptionsSection->SetActive(!mAdvancedGraphicOptionsSection->IsActive());
+        KeepOnScreen();
+
+        if(mAdvancedGraphicOptionsSection->IsActive())
+        {
+            mMipmapsToggle->SetValue(Services::GetRenderer()->UseMipmaps());
+            mTrilinearFilteringToggle->SetValue(Services::GetRenderer()->UseTrilinearFiltering());
+        }
     });
     
     CreateAdvancedGraphicOptionsSection(canvas, config);
@@ -620,9 +626,9 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unord
     mipmapText->SetReceivesInput(false);
     
     // Create "mipmap" toggle.
-    UIToggle* mipmapToggle = CreateToggle(canvas, config, "advGraphOptMipMap", mAdvancedGraphicOptionsSection);
-    mipmapToggle->SetToggleCallback([](bool isOn) {
-        std::cout << "Mipmap is toggled " << isOn << std::endl;
+    mMipmapsToggle = CreateToggle(canvas, config, "advGraphOptMipMap", mAdvancedGraphicOptionsSection);
+    mMipmapsToggle->SetToggleCallback([](bool isOn) {
+        Services::GetRenderer()->SetUseMipmaps(isOn);
     });
     
     // Create "animation interpolation" text (text can be "disabled", like a button, if graphics system doesn't support this option).
@@ -644,9 +650,9 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unord
     filteringText->SetReceivesInput(false);
     
     // Create "trilinear filtering" toggle.
-    UIToggle* filteringToggle = CreateToggle(canvas, config, "advGraphOptFiltering", mAdvancedGraphicOptionsSection);
-    filteringToggle->SetToggleCallback([](bool isOn) {
-        std::cout << "Trilinear filtering is toggled " << isOn << std::endl;
+    mTrilinearFilteringToggle = CreateToggle(canvas, config, "advGraphOptFiltering", mAdvancedGraphicOptionsSection);
+    mTrilinearFilteringToggle->SetToggleCallback([](bool isOn) {
+        Services::GetRenderer()->SetUseTrilinearFiltering(isOn);
     });
     
     // Create "lod" text (text can be "disabled", like a button, if graphics system doesn't support this option).

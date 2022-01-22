@@ -47,11 +47,16 @@ public:
 	int GetWindowHeight() { return mScreenHeight; }
 	Vector2 GetWindowSize() { return Vector2(static_cast<float>(mScreenWidth), static_cast<float>(mScreenHeight)); }
     Rect GetScreenRect() { return Rect(0, 0, mScreenWidth, mScreenHeight); }
+
+    void SetUseMipmaps(bool useMipmaps);
+    void SetUseTrilinearFiltering(bool useTrilinearFiltering);
+    bool UseMipmaps() const { return mUseMipmaps; }
+    bool UseTrilinearFiltering() const { return mUseTrilinearFiltering; }
     
 private:
     // Screen's width and height, in pixels.
-    int mScreenWidth = 1024;
-    int mScreenHeight = 768;
+    int mScreenWidth = 800;
+    int mScreenHeight = 600;
     
     // Handle for the window object (contains the game).
     SDL_Window* mWindow = nullptr;
@@ -71,4 +76,8 @@ private:
     // A skybox to render.
 	Material mSkyboxMaterial;
     Skybox* mSkybox = nullptr;
+
+    // Global texture settings.
+    bool mUseMipmaps = true;
+    bool mUseTrilinearFiltering = true;
 };

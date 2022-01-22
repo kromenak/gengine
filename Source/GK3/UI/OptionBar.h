@@ -77,6 +77,8 @@ private:
 
     // Advanced Graphics Options section.
     Actor* mAdvancedGraphicOptionsSection = nullptr;
+    UIToggle* mMipmapsToggle = nullptr;
+    UIToggle* mTrilinearFilteringToggle = nullptr;
 
     // Game Options section.
     Actor* mGameOptionsSection = nullptr;

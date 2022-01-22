@@ -1,19 +1,20 @@
 //
-// Texture.h
-//
 // Clark Kromenaker
 //
-// 2D texture asset type. The in-memory
-// representation of .BMP assets.
+// 2D texture asset type.
+// The in-memory representation of .BMP assets.
 //
 #pragma once
 #include "Asset.h"
 
-#include <GL/glew.h>
-//#include <OpenGL/gl.h>
 #include <string>
 
+#include <GL/glew.h>
+//#include <OpenGL/gl.h>
+
+#include "Atomics.h"
 #include "Color32.h"
+#include "EnumClassFlags.h"
 
 class BinaryReader;
 
@@ -31,7 +32,8 @@ public:
     enum class FilterMode
     {
         Point,      // Use nearest neighbor when up close or far away. Can result in pixelated textures.
-        Bilinear    // Average nearby pixels when up close or far away. Blurs the texture a bit.
+        Bilinear,   // Average nearby pixels when up close or far away. Blurs the texture a bit.
+        Trilinear   // Averages between mipmap levels. If mipmaps aren't enabled, falls back on bilinear filtering.
     };
     
     // Dictates how the texture acts when U/V outside of normal 0-1 bounds are accessed.
@@ -40,13 +42,22 @@ public:
         Repeat,     // Repeat the texture.
         Clamp       // Clamp to 0-1 range.
     };
+
+    // Keep track of what data needs to be uploaded to the GPU.
+    enum class DirtyFlags : int
+    {
+        None = 0,       // Nothing is dirty.
+        Pixels = 1,     // Pixel data needs to be re-uploaded to the GPU.
+        Mipmaps = 2,    // Mipmaps have been enabled or disabled.
+        Properties = 4, // Other properties (filter mode, wrap mode, etc) have changed.
+    };
 	
 	static Texture White;
 	static Texture Black;
 	
-    Texture(unsigned int width, unsigned int height);
-	Texture(unsigned int width, unsigned int height, Color32 color);
-    Texture(std::string name, char* data, int dataLength);
+    Texture(uint32 width, uint32 height);
+	Texture(uint32 width, uint32 height, Color32 color);
+    Texture(const std::string& name, char* data, uint32 dataLength);
     Texture(BinaryReader& reader);
 	~Texture();
 	
@@ -54,28 +65,32 @@ public:
     void Activate(int textureUnit);
     static void Deactivate();
     
-    unsigned int GetWidth() const { return mWidth; }
-    unsigned int GetHeight() const { return mHeight; }
-    unsigned char* GetPixelData() const { return mPixels; }
+    uint32 GetWidth() const { return mWidth; }
+    uint32 GetHeight() const { return mHeight; }
+    uint8* GetPixelData() const { return mPixels; }
 	
 	RenderType GetRenderType() const { return mRenderType; }
 	
-    void SetFilterMode(FilterMode filterMode) { mFilterMode = filterMode; }
+    void SetFilterMode(FilterMode filterMode);
     FilterMode GetFilterMode() const { return mFilterMode; }
     
-    void SetWrapMode(WrapMode wrapMode) { mWrapMode = wrapMode; }
+    void SetWrapMode(WrapMode wrapMode);
     WrapMode GetWrapMode() const { return mWrapMode; }
+
+    void SetMipmaps(bool useMipmaps);
     
     // Coordinates are from top-left corner of texture.
 	Color32 GetPixelColor32(int x, int y);
-	unsigned char GetPaletteIndex(int x, int y);
+
+    void SetPaletteIndex(int x, int y, uint8 val);
+	uint8 GetPaletteIndex(int x, int y);
 	
 	//void Blit(Texture* source, int destX, int destY);
 	
 	// Blend's source pixels into dest based on source's alpha channel.
 	static void BlendPixels(const Texture& source, Texture& dest, int destX, int destY);
-	static void BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
-						   Texture& dest, int destX, int destY);
+    static void BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
+                            Texture& dest, int destX, int destY);
 	
 	// Alpha and transparency
 	void SetTransparentColor(Color32 color);
@@ -83,25 +98,26 @@ public:
 	
 	void UploadToGPU();
 	
-	void WriteToFile(std::string filePath);
+	void WriteToFile(const std::string& filePath);
 	
 private:
 	friend class RenderTexture; // To access OpenGL stuff.
 	
     // Texture width and height.
-    unsigned int mWidth = 0;
-    unsigned int mHeight = 0;
+    uint32 mWidth = 0;
+    uint32 mHeight = 0;
 	
 	// Some textures have palettes.
-	unsigned char* mPalette = nullptr;
+	uint8* mPalette = nullptr;
+    uint32 mPaletteSize = 0;
 	
 	// If a texture has a palette, the indexes into the palette are stored here.
-	unsigned char* mPaletteIndexes = nullptr;
+    uint8* mPaletteIndexes = nullptr;
 	
     // Pixel data, from the top-left corner of the image.
     // SDL and DirectX (I think) expect pixel data from top-left corner.
     // OpenGL expects from bottom-left, but we compensate for that by using flipped UVs!
-    unsigned char* mPixels = nullptr;
+    uint8* mPixels = nullptr;
     
     // An ID for the texture object generated in OpenGL.
     GLuint mTextureId = GL_NONE;
@@ -116,9 +132,13 @@ private:
 
     // Texture's wrap mode.
     WrapMode mWrapMode = WrapMode::Repeat;
-    
-    // If true, texture data in RAM is dirty, so we need to upload to GPU.
-    bool mDirty = true;
+
+    // If true, this texture generates and uses mipmaps when rendering.
+    bool mMipmaps = false;
+
+    // Flags indicating that texture data in RAM is dirty, so we need to upload to GPU.
+    // A newly created texture will automatically have its "dirty pixels" flag set, since we must upload pixel data before use.
+    DirtyFlags mDirtyFlags = DirtyFlags::Pixels;
 	
 	static int CalculateBmpRowSize(unsigned short bitsPerPixel, unsigned int width);
 	
@@ -126,3 +146,5 @@ private:
 	void ParseFromCompressedFormat(BinaryReader& reader);
 	void ParseFromBmpFormat(BinaryReader& reader);
 };
+
+ENUM_CLASS_FLAGS(Texture::DirtyFlags);
