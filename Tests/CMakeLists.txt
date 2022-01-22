@@ -5,6 +5,7 @@ set(TEST_SOURCES
 
     AABBTests.cpp
     CollisionTests.cpp
+    ContainerTests.cpp
     MathTests.cpp
     Matrix4Tests.cpp
     MemoryTests.cpp
@@ -29,9 +30,11 @@ target_include_directories(tests PRIVATE
     ../Source
     ../Source/Audio
     ../Source/Barn
+    ../Source/Containers
     ../Source/GK3
     ../Source/Math
     ../Source/Memory
+    ../Source/Platform
     ../Source/Primitives
     ../Source/Sheep
     ../Source/Video

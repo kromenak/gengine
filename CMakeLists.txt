@@ -13,13 +13,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # For Xcode, generate schemes for targets. This ensures targets appear in target dropdown.
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 
-# Set compiler warning settings (TODO: a lot of stuff to clean up after adding this!)
-#if(MSVC)
-#  add_compile_options(/W3 /wd4065)
-#else()
-#  add_compile_options(-Wall -Wextra -pedantic)
-#endif()
-
 # Get all cpp/h files in the Source directory using GLOB.
 # Supposedly using GLOB is frowned upon, but...it works really well for now sooooo.
 file(GLOB_RECURSE source_files CONFIGURE_DEPENDS 
@@ -42,6 +35,7 @@ target_include_directories(gk3 PRIVATE
     Source
     Source/Assets
     Source/Audio
+    Source/Containers
     Source/Debug
     Source/GK3
     Source/GK3/Actions
@@ -77,8 +71,11 @@ target_include_directories(gk3 PRIVATE
 )
 
 # Warning/error settings.
-if(WIN32)
+if(MSVC)
+    #target_compile_options(gk3 PRIVATE /W3 /wd4065)
     target_compile_options(gk3 PRIVATE /wd26812)
+else()
+    #target_compile_options(gk3 PRIVATE -Wall -Wextra -pedantic)
 endif()
 
 # Library locations/linking/copying.
