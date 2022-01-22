@@ -2,7 +2,7 @@
 
 #include "FileSystem.h"
 
-Asset::Asset(std::string name) : mName(name)
+Asset::Asset(const std::string& name) : mName(name)
 {
     
 }

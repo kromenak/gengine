@@ -10,10 +10,10 @@
 class Asset
 {
 public:
-    Asset(std::string name);
+    Asset(const std::string& name);
     virtual ~Asset() { }
     
-    std::string GetName() { return mName; }
+    const std::string& GetName() { return mName; }
     std::string GetNameNoExtension();
     
 protected:
