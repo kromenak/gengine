@@ -1,6 +1,4 @@
 //
-// BSPLightmap.h
-//
 // Clark Kromenaker
 //
 // A lightmap for BSP geometry. Contains an array of textures meant to
@@ -23,7 +21,7 @@ class Texture;
 class BSPLightmap : public Asset
 {
 public:
-    BSPLightmap(std::string name, char* data, int dataLength);
+    BSPLightmap(const std::string& name, char* data, int dataLength);
     ~BSPLightmap();
     
     const std::vector<Texture*>& GetLightmapTextures() const { return mLightmapTextures; }

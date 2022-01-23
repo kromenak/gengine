@@ -1,6 +1,4 @@
 //
-// MeshRenderer.h
-//
 // Clark Kromenaker
 //
 // Component for rendering meshes.
@@ -12,8 +10,8 @@
 
 #include "AABB.h"
 #include "Material.h"
+#include "Mesh.h" // Including MeshRenderer.h usually means you also need Mesh.h
 
-class Mesh;
 class Model;
 class Ray;
 struct RaycastHit;

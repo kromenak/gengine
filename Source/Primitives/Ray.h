@@ -1,6 +1,4 @@
 //
-// Ray.h
-//
 // Clark Kromenaker
 //
 // Represents a mathematical primitive "ray". A ray has a starting

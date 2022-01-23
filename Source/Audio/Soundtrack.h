@@ -118,7 +118,7 @@ struct PrsNode : public SoundtrackNode
 class Soundtrack : public Asset
 {
 public:
-    Soundtrack(std::string name, char* data, int dataLength);
+    Soundtrack(const std::string& name, char* data, int dataLength);
     
     AudioType GetSoundType() const { return mSoundType; }
     const std::vector<SoundtrackNode*>& GetNodes() const { return mNodes; }
@@ -131,6 +131,5 @@ private:
     // A soundtrack is a list of nodes that play audio or wait X seconds.
     std::vector<SoundtrackNode*> mNodes;
     
-    void ParseFromData(char* data, int dataLength);
     SoundNode* ParseSoundNodeFromSection(IniSection& section);
 };

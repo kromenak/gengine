@@ -1,6 +1,4 @@
 //
-// AnimationNodes.h
-//
 // Clark Kromenaker
 //
 // Various nodes that are used in constructing animations.

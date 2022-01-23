@@ -1,6 +1,4 @@
 //
-// VertexAnimation.h
-//
 // Clark Kromenaker
 //
 // A vertex animation for a particular model/mesh. For GK3, this is the in-memory representation of "ACT" file.
@@ -34,7 +32,7 @@ struct VertexAnimationTransformPose
 class VertexAnimation : public Asset
 {
 public:
-    VertexAnimation(std::string name, char* data, int dataLength);
+    VertexAnimation(const std::string& name, char* data, int dataLength);
     
     // Queries transform (position, rotation, scale) for a mesh at a frame/time.
     VertexAnimationTransformPose SampleTransformPose(int frame, int meshIndex);

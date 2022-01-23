@@ -1,8 +1,3 @@
-//
-// AnimationNodes.cpp
-//
-// Clark Kromenaker
-//
 #include "AnimationNodes.h"
 
 #include "Animation.h"
@@ -16,6 +11,7 @@
 #include "MeshRenderer.h"
 #include "Services.h"
 #include "Scene.h"
+#include "VertexAnimation.h"
 #include "VertexAnimator.h"
 
 void VertexAnimNode::Play(AnimationState* animState)

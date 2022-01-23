@@ -1,6 +1,4 @@
 //
-// Mesh.h
-//
 // Clark Kromenaker
 //
 // Renderable 3D geometry. Consists of one or more Submeshes - each Submesh

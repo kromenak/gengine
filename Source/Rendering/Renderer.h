@@ -62,7 +62,7 @@ private:
     SDL_Window* mWindow = nullptr;
     
     // Context handle for rendering in OpenGL.
-    SDL_GLContext mContext;
+    SDL_GLContext mContext = nullptr;
     
     // Our camera in the scene - we currently only support one.
     Camera* mCamera = nullptr;

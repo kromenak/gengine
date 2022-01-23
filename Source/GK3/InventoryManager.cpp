@@ -3,11 +3,13 @@
 #include "IniParser.h"
 #include "InventoryScreen.h"
 #include "InventoryInspectScreen.h"
+#include "Loader.h"
 #include "Profiler.h"
 #include "Services.h"
 #include "Scene.h"
 #include "StringUtil.h"
-#include "Loader.h"
+#include "TextAsset.h"
+#include "Texture.h"
 
 TYPE_DEF_BASE(InventoryManager);
 

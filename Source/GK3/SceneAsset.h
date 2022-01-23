@@ -1,6 +1,4 @@
 //
-// SceneAsset.h
-//
 // Clark Kromenaker
 //
 // A "scene" asset. Mainly indicates BSP and light positions for a scene.
@@ -46,7 +44,7 @@ struct SceneLight
 class SceneAsset : public Asset
 {
 public:
-    SceneAsset(std::string name, char* data, int dataLength);
+    SceneAsset(const std::string& name, char* data, int dataLength);
 	~SceneAsset();
 	
 	const std::string& GetBSPName() const { return mBspName; }

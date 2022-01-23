@@ -2,8 +2,8 @@
 
 #include "Actor.h"
 #include "Debug.h"
-#include "Mesh.h"
 #include "Model.h"
+#include "Ray.h"
 #include "Services.h"
 #include "Texture.h"
 

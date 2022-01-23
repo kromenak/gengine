@@ -1,6 +1,4 @@
 //
-// Model.h
-//
 // Clark Kromenaker
 //
 // GK3 3D model asset type. The in-memory representation of .MOD assets.
@@ -10,7 +8,7 @@
 // the container for the renderable data, like an .FBX or Maya file.
 //
 // However, Models are fairly important concepts in GK3 because the vertex animation
-// technique used requires animations to be exactly matched to particular models.
+// technique requires animations to be exactly matched to particular models.
 //
 #pragma once
 #include "Asset.h"
@@ -23,8 +21,8 @@ class Mesh;
 class Model : public Asset
 {
 public:
-    Model(std::string name, char* data, int dataLength);
-    
+    Model(const std::string& name, char* data, int dataLength);
+
     std::vector<Mesh*> GetMeshes() const { return mMeshes; }
 	
 	bool IsBillboard() const { return mBillboard; }

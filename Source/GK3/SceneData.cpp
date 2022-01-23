@@ -1,11 +1,7 @@
-//
-// SceneData.cpp
-//
-// Clark Kromenaker
-//
 #include "SceneData.h"
 
 #include "ActionManager.h"
+#include "BSP.h"
 #include "Services.h"
 #include "StringUtil.h"
 #include "WalkerBoundary.h"

@@ -3,7 +3,8 @@
 #include "IniParser.h"
 #include "Loader.h"
 #include "Services.h"
-#include "StringUtil.h"
+#include "TextAsset.h"
+#include "Texture.h"
 
 TYPE_DEF_BASE(CharacterManager);
 

@@ -2,6 +2,7 @@
 
 #include "InventoryManager.h"
 #include "Services.h"
+#include "TextAsset.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIDrag.h"

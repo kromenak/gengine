@@ -13,7 +13,7 @@
 #include "SheepScriptBuilder.h"
 #include "StringUtil.h"
 
-SheepScript::SheepScript(std::string name, char* data, int dataLength) : Asset(name)
+SheepScript::SheepScript(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }

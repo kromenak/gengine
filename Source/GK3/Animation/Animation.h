@@ -1,6 +1,4 @@
 //
-// Animation.cpp
-//
 // Clark Kromenaker
 //
 // An animation that can be played against an actor or model.
@@ -21,7 +19,7 @@ struct VertexAnimNode;
 class Animation : public Asset
 {
 public:
-    Animation(std::string name, char* data, int dataLength);
+    Animation(const std::string& name, char* data, int dataLength);
     
 	// Gets all anim nodes associated with a particular frame number. Null may be returned!
 	// Mainly used by Animator to get frame data as needed and play/sample.

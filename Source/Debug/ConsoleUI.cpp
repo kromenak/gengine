@@ -1,5 +1,7 @@
 #include "ConsoleUI.h"
 
+#include "Font.h"
+#include "Texture.h"
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"

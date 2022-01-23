@@ -12,6 +12,7 @@
 #include "Heading.h"
 #include "MeshRenderer.h"
 #include "Quaternion.h"
+#include "Ray.h"
 #include "Scene.h"
 #include "Services.h"
 #include "StringUtil.h"

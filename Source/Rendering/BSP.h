@@ -1,6 +1,4 @@
 //
-// BSP.h
-//
 // Clark Kromenaker
 //
 // Geometry data for a scene. In-memory representation of a .BSP file.
@@ -125,7 +123,7 @@ struct BSPAmbientLight
 class BSP : public Asset
 {
 public:
-    BSP(std::string name, char* data, int dataLength);
+    BSP(const std::string& name, char* data, int dataLength);
     
 	BSPActor* CreateBSPActor(const std::string& objectName);
 	

@@ -5,6 +5,7 @@
 #include "Localizer.h"
 #include "Services.h"
 #include "StringUtil.h"
+#include "TextAsset.h"
 #include "Timeblock.h"
 
 TYPE_DEF_BASE(LocationManager);

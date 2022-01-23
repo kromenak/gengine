@@ -82,7 +82,7 @@ struct Crossfader
 
     // Two channel groups that feed into the above channel group.
     // These are swapped between to enable crossfading of audio tracks.
-    FMOD::ChannelGroup* faderChannelGroups[2];
+    FMOD::ChannelGroup* faderChannelGroups[2] { nullptr, nullptr };
     Fader faders[2];
     int fadeIndex = 0;
 

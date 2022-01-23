@@ -9,27 +9,30 @@
 #include <string>
 #include <vector>
 
-#include "Animation.h"
-#include "Audio.h"
-#include "BarnFile.h"
-#include "BSP.h"
-#include "BSPLightmap.h"
-#include "Config.h"
-#include "Cursor.h"
-#include "GAS.h"
-#include "Font.h"
-#include "Model.h"
-#include "NVC.h"
-#include "SceneAsset.h"
-#include "SceneInitFile.h"
-#include "Sequence.h"
-#include "Shader.h"
-#include "Sheep/SheepScript.h"
-#include "Soundtrack.h"
 #include "StringUtil.h"
-#include "TextAsset.h"
-#include "Texture.h"
-#include "VertexAnimation.h"
+
+class BarnFile;
+
+// Forward Declarations for all asset types
+class Animation;
+class Audio;
+class BSP;
+class BSPLightmap;
+class Config;
+class Cursor;
+class Font;
+class GAS;
+class Model;
+class NVC;
+class SceneAsset;
+class SceneInitFile;
+class Sequence;
+class Shader;
+class SheepScript;
+class Soundtrack;
+class TextAsset;
+class Texture;
+class VertexAnimation;
 
 class AssetManager
 {
@@ -126,6 +129,9 @@ private:
     std::unordered_map_ci<std::string, BSPLightmap*> mLoadedBSPLightmaps;
     
 	std::unordered_map_ci<std::string, SheepScript*> mLoadedSheeps;
+
+    std::unordered_map_ci<std::string, Cursor*> mLoadedCursors;
+    std::unordered_map_ci<std::string, Font*> mLoadedFonts;
 	
     std::unordered_map_ci<std::string, Shader*> mLoadedShaders;
 
@@ -138,10 +144,14 @@ private:
 	BarnFile* GetBarnContainingAsset(const std::string& assetName);
     
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
+
+    // Two ways to load an asset:
+    // The first uses a single constructor (name, data, size).
+    // The second uses a constructor (name) and a separate load function (data, size).
+    // The latter is necessary if two assets can potentially attempt to load one another (circular dependency).
+    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, std::function<T* (const std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
+    template<class T> T* LoadAsset_SeparateLoadFunc(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer = true);
     
-    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, std::function<T*(const std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
-	
-    template<class T> T* CreateAsset(const std::string& assetName, std::function<T*(const std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
     char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
 
     template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>& cache);

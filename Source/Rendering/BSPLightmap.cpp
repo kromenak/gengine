@@ -3,11 +3,10 @@
 #include "BinaryReader.h"
 #include "Texture.h"
 
-BSPLightmap::BSPLightmap(std::string name, char* data, int dataLength) :
-    Asset(name)
+BSPLightmap::BSPLightmap(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     BinaryReader reader(data, dataLength);
-    
+
     // 4 bytes: file identifier "TULM" (MULT backwards).
     std::string identifier = reader.ReadString(4);
     if(identifier != "TLUM")
@@ -15,11 +14,11 @@ BSPLightmap::BSPLightmap(std::string name, char* data, int dataLength) :
         std::cout << "BSP lightmap asset does not have MULT identifier! Instead has " << identifier << std::endl;
         return;
     }
-    
+
     // 4 bytes: number of bitmaps in this asset.
     // This value correlates to the number of BSP surfaces in the corresponding BSP asset.
     unsigned int bitmapCount = reader.ReadUInt();
-    
+
     // Iterate and read in each bitmap in turn.
     for(unsigned int i = 0; i < bitmapCount; i++)
     {
@@ -47,5 +46,5 @@ BSPLightmap::~BSPLightmap()
     {
         delete texture;
     }
-    mLightmapTextures.clear();
 }
+

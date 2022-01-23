@@ -1,8 +1,7 @@
 //
-//  Audio.h
-//  GEngine
+// Clark Kromenaker
 //
-//  Created by Clark Kromenaker on 8/24/17.
+// Audio data - feed to audio system to hear it!
 //
 #pragma once
 #include "Asset.h"
@@ -12,7 +11,7 @@
 class Audio : public Asset
 {
 public:
-    Audio(std::string name, char* data, int dataLength);
+    Audio(const std::string& name, char* data, int dataLength);
 	~Audio();
 	
     void WriteToFile();

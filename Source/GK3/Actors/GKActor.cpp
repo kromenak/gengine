@@ -1,5 +1,6 @@
 #include "GKActor.h"
 
+#include "Animation.h"
 #include "Animator.h"
 #include "AnimationNodes.h"
 #include "CharacterManager.h"
@@ -8,9 +9,11 @@
 #include "GasPlayer.h"
 #include "GEngine.h"
 #include "MeshRenderer.h"
+#include "Model.h"
 #include "Scene.h"
 #include "Services.h"
 #include "StringUtil.h"
+#include "VertexAnimation.h"
 #include "VertexAnimator.h"
 #include "Walker.h"
 

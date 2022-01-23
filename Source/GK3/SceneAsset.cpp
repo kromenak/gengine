@@ -7,7 +7,7 @@
 #include "Skybox.h"
 #include "StringUtil.h"
 
-SceneAsset::SceneAsset(std::string name, char* data, int dataLength) : Asset(name)
+SceneAsset::SceneAsset(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }

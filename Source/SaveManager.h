@@ -6,6 +6,8 @@
 #pragma once
 #include <string>
 
+#include "Config.h" // Including SaveManager.h usually means you also need Config.h
+
 // Sound Preferences
 #define PREFS_SOUND "Sound"
 
@@ -26,8 +28,6 @@
 
 #define PREFS_MIPMAPS "Mip Mapping"
 #define PREFS_TRILINEAR_FILTERING "Trilinear Filtering"
-
-class Config;
 
 class SaveManager
 {

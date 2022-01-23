@@ -2,6 +2,7 @@
 
 #include "Actor.h"
 #include "Services.h"
+#include "Texture.h"
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "VideoState.h"

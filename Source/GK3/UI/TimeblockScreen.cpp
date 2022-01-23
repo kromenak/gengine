@@ -1,5 +1,6 @@
 #include "TimeblockScreen.h"
 
+#include "Sequence.h"
 #include "Timeblock.h"
 #include "UIButton.h"
 #include "UICanvas.h"

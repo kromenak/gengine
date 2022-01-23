@@ -1,12 +1,8 @@
-//
-// FaceController.cpp
-//
-// Clark Kromenaker
-//
 #include "FaceController.h"
 
 #include "stb_image_resize.h"
 
+#include "Animation.h"
 #include "Animator.h"
 #include "CharacterManager.h"
 #include "Texture.h"

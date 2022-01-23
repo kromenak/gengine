@@ -1,11 +1,7 @@
-//
-// SceneInitFile.cpp
-//
-// Clark Kromenaker
-//
 #include "SceneInitFile.h"
 
 #include "IniParser.h"
+#include "Model.h"
 #include "Services.h"
 #include "Skybox.h"
 #include "StringUtil.h"

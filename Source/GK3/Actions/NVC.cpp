@@ -1,8 +1,3 @@
-//
-// NVC.cpp
-//
-// Clark Kromenaker
-//
 #include "NVC.h"
 
 #include "GKActor.h"
@@ -13,7 +8,7 @@
 
 /*static*/ std::vector<Action> NVC::mEmptyActions;
 
-NVC::NVC(std::string name, char* data, int dataLength) : Asset(name)
+NVC::NVC(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }

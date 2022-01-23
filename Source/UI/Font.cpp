@@ -1,8 +1,3 @@
-//
-// Font.cpp
-//
-// Clark Kromenaker
-//
 #include "Font.h"
 
 #include "Color32.h"
@@ -10,17 +5,17 @@
 #include "Material.h"
 #include "Services.h"
 #include "StringUtil.h"
+#include "Texture.h"
 
-Font::Font(std::string name, char* data, int dataLength) :
-	Asset(name)
+Font::Font(const std::string& name, char* data, int dataLength) : Asset(name)
 {
-	ParseFromData(data, dataLength);
-	
-	// After parsing, if we have no font texture, we can't do much more.
-	if(mFontTexture == nullptr) { return; }
-	
-	// The pixel color at (1, 0) seems to always be glyph indicator color.
-	Color32 glyphStartColor = mFontTexture->GetPixelColor32(1, 0);
+    ParseFromData(data, dataLength);
+
+    // After parsing, if we have no font texture, we can't do much more.
+    if(mFontTexture == nullptr) { return; }
+
+    // The pixel color at (1, 0) seems to always be glyph indicator color.
+    Color32 glyphStartColor = mFontTexture->GetPixelColor32(1, 0);
 
     // The font texture may have the font glyphs in multiple vertical lines.
     // The height of each line can be calculated pretty easily.
@@ -30,63 +25,63 @@ Font::Font(std::string name, char* data, int dataLength) :
     // The top pixel of each line is a "glyph indicator", used to determine where each glyph starts.
     // The bottom pixel of each line appears to be ignored/discarded (based on testing).
     mGlyphHeight = lineHeight - 2;
-	
-	// We'll start processing glyphs at (1, 0).
-	unsigned int currentX = 1;
-	unsigned int currentY = 0;
-	int currentLine = 1;
-	
-	// We'll now interate the font characters and determine the UV rects
-	// within the font texture used to render each glyph.
-	for(size_t i = 0; i < mFontCharacters.size(); i++)
-	{
-		Glyph glyph;
-		glyph.character = mFontCharacters[i];
-		
-		// The width is at least 1.
-		int width = 1;
-		
-		// The left X UV coord is just where we left off for the last glyph.
-		// But right X UV requires us to find edge of next glyph (or end of texture).
-		float leftUvX = (float)currentX / mFontTexture->GetWidth();
-		for(currentX = currentX + 1; currentX < mFontTexture->GetWidth(); currentX++)
-		{
-			Color32 color = mFontTexture->GetPixelColor32(currentX, currentY);
-			if(color == glyphStartColor) { break; }
-			
-			// This pixel is black, so it is part of the glyph's width.
-			width++;
-		}
-		float rightUvX = (float)currentX / mFontTexture->GetWidth();
-		
-		// Save height/width.
-		glyph.width = width;
-		glyph.height = mGlyphHeight;
-		
-		// Calculate top/bottom UV values.
+
+    // We'll start processing glyphs at (1, 0).
+    unsigned int currentX = 1;
+    unsigned int currentY = 0;
+    int currentLine = 1;
+
+    // We'll now interate the font characters and determine the UV rects
+    // within the font texture used to render each glyph.
+    for(size_t i = 0; i < mFontCharacters.size(); i++)
+    {
+        Glyph glyph;
+        glyph.character = mFontCharacters[i];
+
+        // The width is at least 1.
+        int width = 1;
+
+        // The left X UV coord is just where we left off for the last glyph.
+        // But right X UV requires us to find edge of next glyph (or end of texture).
+        float leftUvX = (float)currentX / mFontTexture->GetWidth();
+        for(currentX = currentX + 1; currentX < mFontTexture->GetWidth(); currentX++)
+        {
+            Color32 color = mFontTexture->GetPixelColor32(currentX, currentY);
+            if(color == glyphStartColor) { break; }
+
+            // This pixel is black, so it is part of the glyph's width.
+            width++;
+        }
+        float rightUvX = (float)currentX / mFontTexture->GetWidth();
+
+        // Save height/width.
+        glyph.width = width;
+        glyph.height = mGlyphHeight;
+
+        // Calculate top/bottom UV values.
         // Each is +/- 1 because the top/bottom pixels are discarded (see glyph height explanation above).
-		float botUvY = (float)(currentY + lineHeight - 1.0f) / mFontTexture->GetHeight();
-		float topUvY = (float)(currentY + 1.0f) / mFontTexture->GetHeight();
-		
-		// Save those UV coords.
-		glyph.bottomLeftUvCoord = Vector2(leftUvX, botUvY);
-		glyph.topRightUvCoord = Vector2(rightUvX, topUvY);
-		
-		glyph.topLeftUvCoord = Vector2(leftUvX, topUvY);
-		glyph.bottomRightUvCoord = Vector2(rightUvX, botUvY);
-		
-		// Save the glyph, mapped to its character.
-		mFontGlyphs[glyph.character] = glyph;
-		
-		// If we reached the end of the font texture, go to the next line, if possible.
-		if(currentX >= mFontTexture->GetWidth() - 1 && currentLine < mLineCount)
-		{
-			currentLine++;
-			currentX = 1;
-			currentY += lineHeight;
-		}
-	}
-    
+        float botUvY = (float)(currentY + lineHeight - 1.0f) / mFontTexture->GetHeight();
+        float topUvY = (float)(currentY + 1.0f) / mFontTexture->GetHeight();
+
+        // Save those UV coords.
+        glyph.bottomLeftUvCoord = Vector2(leftUvX, botUvY);
+        glyph.topRightUvCoord = Vector2(rightUvX, topUvY);
+
+        glyph.topLeftUvCoord = Vector2(leftUvX, topUvY);
+        glyph.bottomRightUvCoord = Vector2(rightUvX, botUvY);
+
+        // Save the glyph, mapped to its character.
+        mFontGlyphs[glyph.character] = glyph;
+
+        // If we reached the end of the font texture, go to the next line, if possible.
+        if(currentX >= mFontTexture->GetWidth() - 1 && currentLine < mLineCount)
+        {
+            currentLine++;
+            currentX = 1;
+            currentY += lineHeight;
+        }
+    }
+
     // If font uses color replace logic, the pixel at (0, 1)
     // indicates what color should be replaced with the foreground color.
     if(mColorMode == ColorMode::ColorReplace)
@@ -94,15 +89,15 @@ Font::Font(std::string name, char* data, int dataLength) :
         mReplaceColor = mFontTexture->GetPixelColor32(0, 1);
     }
 
-	/*
-	// Outputs glyphs for verification.
-	std::cout << "Glyphs for font " << GetName() << std::endl;
-	for(auto& glyph : mFontGlyphs)
-	{
-		std::cout << glyph.second.character << ": " << glyph.second.width <<
-		", " << glyph.second.height << std::endl;
-	}
-	*/
+    /*
+    // Outputs glyphs for verification.
+    std::cout << "Glyphs for font " << GetName() << std::endl;
+    for(auto& glyph : mFontGlyphs)
+    {
+        std::cout << glyph.second.character << ": " << glyph.second.width <<
+        ", " << glyph.second.height << std::endl;
+    }
+    */
 }
 
 Glyph& Font::GetGlyph(char character)

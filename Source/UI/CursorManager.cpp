@@ -1,6 +1,7 @@
 #include "CursorManager.h"
 
 #include "ActionManager.h"
+#include "Cursor.h"
 #include "Loader.h"
 #include "Services.h"
 

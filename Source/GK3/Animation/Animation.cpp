@@ -6,8 +6,9 @@
 #include "IniParser.h"
 #include "Services.h"
 #include "StringUtil.h"
+#include "VertexAnimation.h"
 
-Animation::Animation(std::string name, char* data, int dataLength) : Asset(name)
+Animation::Animation(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }

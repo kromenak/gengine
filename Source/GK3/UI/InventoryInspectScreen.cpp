@@ -3,6 +3,7 @@
 #include "ActionBar.h"
 #include "ActionManager.h"
 #include "InventoryManager.h"
+#include "Texture.h"
 #include "UICanvas.h"
 #include "UIButton.h"
 #include "UIImage.h"

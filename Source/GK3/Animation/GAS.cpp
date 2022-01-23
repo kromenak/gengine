@@ -14,9 +14,9 @@
 #include "StringTokenizer.h"
 #include "StringUtil.h"
 
-GAS::GAS(std::string name, char* data, int dataLength) : Asset(name)
+GAS::GAS(const std::string& name) : Asset(name)
 {
-    ParseFromData(data, dataLength);
+
 }
 
 GAS::~GAS()
@@ -27,7 +27,7 @@ GAS::~GAS()
     }
 }
 
-void GAS::ParseFromData(char *data, int dataLength)
+void GAS::Load(char* data, int dataLength)
 {
     imstream stream(data, dataLength);
     

@@ -1,6 +1,4 @@
 //
-// Animator.cpp
-//
 // Clark Kromenaker
 //
 // Plays animations (ANM assets)!

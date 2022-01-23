@@ -6,10 +6,32 @@
 #include <sstream>
 #include <string>
 
+#include "BarnFile.h"
 #include "FileSystem.h"
 #include "imstream.h"
 #include "Services.h"
 #include "StringUtil.h"
+
+// Header Includes for all asset types
+#include "Animation.h"
+#include "Audio.h"
+#include "BSP.h"
+#include "BSPLightmap.h"
+#include "Config.h"
+#include "Cursor.h"
+#include "Font.h"
+#include "GAS.h"
+#include "Model.h"
+#include "NVC.h"
+#include "SceneAsset.h"
+#include "SceneInitFile.h"
+#include "Sequence.h"
+#include "Shader.h"
+#include "SheepScript.h"
+#include "Soundtrack.h"
+#include "TextAsset.h"
+#include "Texture.h"
+#include "VertexAnimation.h"
 
 AssetManager::AssetManager()
 {
@@ -44,9 +66,14 @@ AssetManager::~AssetManager()
 {
 	// All the loaded stuff has to be unloaded!
     UnloadAssets(mLoadedTexts);
-	UnloadAssets(mLoadedShaders);
-	
+
+    UnloadAssets(mLoadedShaders);
+
+    UnloadAssets(mLoadedFonts);
+    UnloadAssets(mLoadedCursors);
+
 	UnloadAssets(mLoadedSheeps);
+
 	UnloadAssets(mLoadedBSPs);
     UnloadAssets(mLoadedBSPLightmaps);
 	UnloadAssets(mLoadedActionSets);
@@ -176,7 +203,7 @@ void AssetManager::WriteAllBarnAssetsToFile(const std::string& search, const std
 
 Audio* AssetManager::LoadAudio(const std::string& name)
 {
-    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), &mLoadedAudios);
+    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), &mLoadedAudios, nullptr, false);
 }
 
 Soundtrack* AssetManager::LoadSoundtrack(const std::string& name)
@@ -219,7 +246,7 @@ Texture* AssetManager::LoadSceneTexture(const std::string& name)
 
 GAS* AssetManager::LoadGAS(const std::string& name)
 {
-    return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), &mLoadedGases);
+    return LoadAsset_SeparateLoadFunc<GAS>(SanitizeAssetName(name, ".GAS"), &mLoadedGases);
 }
 
 Animation* AssetManager::LoadAnimation(const std::string& name)
@@ -290,12 +317,12 @@ SheepScript* AssetManager::LoadSheep(const std::string& name)
 
 Cursor* AssetManager::LoadCursor(const std::string& name)
 {
-    return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), nullptr);
+    return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), &mLoadedCursors);
 }
 
 Font* AssetManager::LoadFont(const std::string& name)
 {
-	return LoadAsset<Font>(SanitizeAssetName(name, ".FON"), nullptr);
+	return LoadAsset<Font>(SanitizeAssetName(name, ".FON"), &mLoadedFonts);
 }
 
 Shader* AssetManager::LoadShader(const std::string& name)
@@ -402,8 +429,7 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 template<class T>
 T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, std::function<T* (const std::string&, char*, unsigned int)> createFunc, bool deleteBuffer)
 {
-    // See if this asset is already loaded in the cache
-    // If so, we can just return it right away.
+    // If already present in cache, return existing asset right away.
     if(cache != nullptr)
     {
         auto it = cache->find(assetName);
@@ -412,9 +438,15 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map_ci<s
             return it->second;
         }
     }
-	
-    // Create the asset.
-    T* asset = CreateAsset(assetName, createFunc, deleteBuffer);
+
+    // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
+    unsigned int bufferSize = 0;
+    char* buffer = CreateAssetBuffer(assetName, bufferSize);
+    if(buffer == nullptr) { return nullptr; }
+
+    // Create asset from asset buffer.
+    std::string upperName = StringUtil::ToUpperCopy(assetName);
+    T* asset = createFunc != nullptr ? createFunc(upperName, buffer, bufferSize) : new T(upperName, buffer, bufferSize);
     
 	// Add entry in cache, if we have a cache.
 	if(asset != nullptr && cache != nullptr)
@@ -422,36 +454,51 @@ T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map_ci<s
 		(*cache)[assetName] = asset;
 	}
 
-	//std::cout << "Loaded asset " << upperName << std::endl;
-	return asset;
-}
-
-template<class T>
-T* AssetManager::CreateAsset(const std::string& assetName, std::function<T* (const std::string&, char*, unsigned int)> createFunc, bool deleteBuffer)
-{
-    // Retrieve the buffer, from which we'll create the asset.
-    unsigned int bufferSize = 0;
-    char* buffer = CreateAssetBuffer(assetName, bufferSize);
-    
-    // If no buffer could be found, we're in trouble!
-    if(buffer == nullptr)
-    {
-        //std::cout << "Asset " << upperName << " could not be loaded!" << std::endl;
-        return nullptr;
-    }
-    
-    // Generate asset from the data buffer.
-    // For now, always use uppercase version of asset name for the asset, as this matches the original game.
-    std::string upperName = StringUtil::ToUpperCopy(assetName);
-    T* asset = createFunc != nullptr ? createFunc(upperName, buffer, bufferSize) : new T(upperName, buffer, bufferSize);
-    
     // Delete the buffer after use (or it'll leak).
     if(deleteBuffer)
     {
         delete[] buffer;
     }
-    
-    // Aaaand there it is.
+	return asset;
+}
+
+template<class T>
+T* AssetManager::LoadAsset_SeparateLoadFunc(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer)
+{
+    // If already present in cache, return existing asset right away.
+    if(cache != nullptr)
+    {
+        auto it = cache->find(assetName);
+        if(it != cache->end())
+        {
+            return it->second;
+        }
+    }
+
+    // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
+    unsigned int bufferSize = 0;
+    char* buffer = CreateAssetBuffer(assetName, bufferSize);
+    if(buffer == nullptr) { return nullptr; }
+
+    // Create asset.
+    std::string upperName = StringUtil::ToUpperCopy(assetName);
+    T* asset = new T(upperName);
+
+    // If there's a cache, put the asset in the cache right away.
+    // Sometimes, assets have circular depedencies, and that'll crash unless we have the item in the cache BEFORE loading!
+    if(cache != nullptr)
+    {
+        (*cache)[assetName] = asset;
+    }
+
+    // Ok, now we can load the asset's data.
+    asset->Load(buffer, bufferSize);
+
+    // Delete the buffer after use (or it'll leak).
+    if(deleteBuffer)
+    {
+        delete[] buffer;
+    }
     return asset;
 }
 

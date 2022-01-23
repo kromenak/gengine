@@ -1,8 +1,3 @@
-//
-// VertexAnimation.cpp
-//
-// Clark Kromenaker
-//
 #include "VertexAnimation.h"
 
 #include <cassert>
@@ -16,7 +11,7 @@
 
 //#define DEBUG_OUTPUT
 
-VertexAnimation::VertexAnimation(std::string name, char* data, int dataLength) : Asset(name)
+VertexAnimation::VertexAnimation(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }

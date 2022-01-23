@@ -1,6 +1,4 @@
 //
-// NVC.h
-//
 // Clark Kromenaker
 //
 // A (noun, verb, case) file, also called an "action" file.
@@ -63,7 +61,7 @@ struct Action
 class NVC : public Asset
 {
 public:
-    NVC(std::string name, char* data, int dataLength);
+    NVC(const std::string& name, char* data, int dataLength);
 	
 	const std::vector<Action*> GetActions() const { return mActions; }
 	const std::vector<Action>& GetActions(const std::string& noun) const;
@@ -77,7 +75,9 @@ private:
 	// If attempting to get actions for a noun that doesn't exist,
 	// We just return a reference to this empty vector.
 	static std::vector<Action> mEmptyActions;
-	
+
+    // A list of all actions contained in this NVC (not sorted in any particular way).
+    // Pointers into the noun-to-action map.
 	std::vector<Action*> mActions;
 	
     // Mapping of noun to actions.

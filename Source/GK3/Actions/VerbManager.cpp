@@ -2,6 +2,8 @@
 
 #include "IniParser.h"
 #include "Services.h"
+#include "TextAsset.h"
+#include "Texture.h"
 
 float VerbIcon::GetWidth() const
 {

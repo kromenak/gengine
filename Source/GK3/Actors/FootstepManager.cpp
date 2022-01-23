@@ -3,6 +3,7 @@
 #include "IniParser.h"
 #include "Random.h"
 #include "Services.h"
+#include "TextAsset.h"
 
 TYPE_DEF_BASE(FootstepManager);
 

@@ -5,6 +5,7 @@
 #include "InventoryManager.h"
 #include "RectTransform.h"
 #include "StringUtil.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"

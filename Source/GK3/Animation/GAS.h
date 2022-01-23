@@ -1,6 +1,4 @@
 //
-// GAS.cpp
-//
 // Clark Kromenaker
 //
 // A "G-Engine Auto Script". These are basic text-based logic trees
@@ -20,14 +18,14 @@ struct GasNode;
 class GAS : public Asset
 {
 public:
-    GAS(std::string name, char* data, int dataLength);
-    ~GAS() override;
+    GAS(const std::string& name);
+    ~GAS();
+
+    void Load(char* data, int dataLength);
     
     GasNode* GetNode(int index) { return mNodes[index]; }
     int GetNodeCount() { return (int)mNodes.size(); }
     
 private:
     std::vector<GasNode*> mNodes;
-    
-    void ParseFromData(char* data, int dataLength);
 };

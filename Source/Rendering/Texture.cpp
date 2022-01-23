@@ -10,8 +10,7 @@
 Texture Texture::White(2, 2, Color32::White);
 Texture Texture::Black(2, 2, Color32::Black);
 
-Texture::Texture(uint32 width, uint32 height) :
-    Asset(""),
+Texture::Texture(uint32 width, uint32 height) : Asset(""),
     mWidth(width),
     mHeight(height)
 {
@@ -20,8 +19,7 @@ Texture::Texture(uint32 width, uint32 height) :
     mPixels = new uint8[pixelsSize];
 }
 
-Texture::Texture(uint32 width, uint32 height, Color32 color) :
-	Asset(""),
+Texture::Texture(uint32 width, uint32 height, Color32 color) : Asset(""),
 	mWidth(width),
 	mHeight(height)
 {
@@ -39,15 +37,13 @@ Texture::Texture(uint32 width, uint32 height, Color32 color) :
 	}
 }
 
-Texture::Texture(const std::string& name, char* data, uint32 dataLength) :
-    Asset(name)
+Texture::Texture(const std::string& name, char* data, uint32 dataLength) : Asset(name)
 {
 	BinaryReader reader(data, dataLength);
     ParseFromData(reader);
 }
 
-Texture::Texture(BinaryReader& reader) :
-    Asset("")
+Texture::Texture(BinaryReader& reader) : Asset("")
 {
     ParseFromData(reader);
 }

@@ -91,12 +91,7 @@ int SoundNode::Execute(AudioType soundType, SoundtrackNodeResults& outResults)
     return (int)(audio->GetDuration() * 1000.0f);
 }
 
-Soundtrack::Soundtrack(std::string name, char* data, int dataLength) : Asset(name)
-{
-    ParseFromData(data, dataLength);
-}
-
-void Soundtrack::ParseFromData(char *data, int dataLength)
+Soundtrack::Soundtrack(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     IniParser parser(data, dataLength);
     IniSection section;

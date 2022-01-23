@@ -3,6 +3,7 @@
 #include "IniParser.h"
 #include "Services.h"
 #include "StringUtil.h"
+#include "TextAsset.h"
 
 TYPE_DEF_BASE(Localizer);
 

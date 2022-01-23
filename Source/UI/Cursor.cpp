@@ -7,49 +7,7 @@
 #include "StringUtil.h"
 #include "Texture.h"
 
-Cursor::Cursor(std::string name, char* data, int dataLength) : Asset(name)
-{
-    ParseFromData(data, dataLength);
-}
-
-Cursor::~Cursor()
-{
-    for(auto& frame : mCursorFrames)
-    {
-        SDL_FreeCursor(frame);
-    }
-}
-
-void Cursor::Activate(bool animate)
-{
-    // Set to first frame.
-    if(mCursorFrames.size() > 0)
-    {
-        SDL_SetCursor(mCursorFrames[0]);
-    }
-    mFrameIndex = 0.0f;
-
-    // Save animation pref.
-    mAnimate = animate;
-}
-
-void Cursor::Update(float deltaTime)
-{
-    // Only need to update if there are multiple frames to animate.
-    if(!mAnimate || mCursorFrames.size() < 2) { return; }
-
-    // Increase timer, but keep in bounds.
-    mFrameIndex += mFramesPerSecond * deltaTime;
-    while(mFrameIndex >= mCursorFrames.size())
-    {
-        mFrameIndex -= mCursorFrames.size();
-    }
-    
-    // Set frame.
-    SDL_SetCursor(mCursorFrames[static_cast<int>(mFrameIndex)]);
-}
-
-void Cursor::ParseFromData(char *data, int dataLength)
+Cursor::Cursor(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     // Texture used is always the same as the name of the cursor.
     Texture* texture = Services::GetAssets()->LoadTexture(GetNameNoExtension() + ".BMP");
@@ -132,7 +90,7 @@ void Cursor::ParseFromData(char *data, int dataLength)
 
     // Create a surface from the texture.
     SDL_Surface* srcSurface = SDL_CreateRGBSurfaceFrom((void*)texture->GetPixelData(), texture->GetWidth(), texture->GetHeight(),
-                                                    32, 4 * texture->GetWidth(), rmask, gmask, bmask, amask);
+                                                       32, 4 * texture->GetWidth(), rmask, gmask, bmask, amask);
     if(srcSurface == nullptr)
     {
         SDL_Log("Creating surface failed: %s", SDL_GetError());
@@ -160,4 +118,41 @@ void Cursor::ParseFromData(char *data, int dataLength)
         }
         mCursorFrames.push_back(cursor);
     }
+}
+
+Cursor::~Cursor()
+{
+    for(auto& frame : mCursorFrames)
+    {
+        SDL_FreeCursor(frame);
+    }
+}
+
+void Cursor::Activate(bool animate)
+{
+    // Set to first frame.
+    if(mCursorFrames.size() > 0)
+    {
+        SDL_SetCursor(mCursorFrames[0]);
+    }
+    mFrameIndex = 0.0f;
+
+    // Save animation pref.
+    mAnimate = animate;
+}
+
+void Cursor::Update(float deltaTime)
+{
+    // Only need to update if there are multiple frames to animate.
+    if(!mAnimate || mCursorFrames.size() < 2) { return; }
+
+    // Increase timer, but keep in bounds.
+    mFrameIndex += mFramesPerSecond * deltaTime;
+    while(mFrameIndex >= mCursorFrames.size())
+    {
+        mFrameIndex -= mCursorFrames.size();
+    }
+    
+    // Set frame.
+    SDL_SetCursor(mCursorFrames[static_cast<int>(mFrameIndex)]);
 }

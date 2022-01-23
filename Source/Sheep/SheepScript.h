@@ -1,6 +1,4 @@
 //
-// SheepScript.h
-//
 // Clark Kromenaker
 //
 // A compiled sheep script asset.
@@ -46,7 +44,7 @@ struct SysImport
 class SheepScript : public Asset
 {
 public:
-    SheepScript(std::string name, char* data, int dataLength);
+    SheepScript(const std::string& name, char* data, int dataLength);
     SheepScript(const std::string& name, SheepScriptBuilder& builder);
     
     SysImport* GetSysImport(int index);

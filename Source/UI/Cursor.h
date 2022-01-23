@@ -8,14 +8,12 @@
 
 #include <vector>
 
-#include "Vector2.h"
-
 struct SDL_Cursor;
 
 class Cursor : public Asset
 {
 public:
-    Cursor(std::string name, char* data, int dataLength);
+    Cursor(const std::string& name, char* data, int dataLength);
     ~Cursor();
     
     void Activate(bool animate = true);
@@ -36,6 +34,4 @@ private:
 
     // For animated cursors, the current frame index.
     float mFrameIndex = 0.0f;
-    
-    void ParseFromData(char* data, int dataLength);
 };

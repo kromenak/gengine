@@ -1,6 +1,5 @@
 #include "SaveManager.h"
 
-#include "Config.h"
 #include "FileSystem.h"
 #include "Paths.h"
 

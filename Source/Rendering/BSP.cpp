@@ -5,16 +5,19 @@
 
 #include "BinaryReader.h"
 #include "BSPActor.h"
+#include "BSPLightmap.h"
 #include "Debug.h"
 #include "Services.h"
+#include "Shader.h"
 #include "StringUtil.h"
+#include "Texture.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
-BSP::BSP(std::string name, char* data, int dataLength) : Asset(name)
+BSP::BSP(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
-    
+
     // Use lightmap shader for BSP rendering.
     mMaterial.SetShader(Services::GetAssets()->LoadShader("3D-Lightmap"));
 }

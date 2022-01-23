@@ -20,7 +20,7 @@
 #define DEBUG_SUBMESH_OUTPUT
 #endif
 
-Model::Model(std::string name, char* data, int dataLength) : Asset(name)
+Model::Model(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
 }
