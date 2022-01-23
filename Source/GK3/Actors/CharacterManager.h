@@ -6,10 +6,10 @@
 #pragma once
 #include <set>
 #include <string>
-#include <unordered_map>
 #include <utility>
 
 #include "Atomics.h"
+#include "StringUtil.h"
 #include "Type.h"
 #include "Vector2.h"
 #include "Vector3.h"
@@ -144,7 +144,7 @@ private:
 	std::set<std::string> mCharacterNouns;
 	
 	// Character configs, keyed by the 3-letter character identifier.
-	std::unordered_map<std::string, CharacterConfig> mCharacterConfigs;
+	std::unordered_map_ci<std::string, CharacterConfig> mCharacterConfigs;
 	
 	// A default character config, in case you request one that doesn't exist.
 	CharacterConfig mDefaultCharacterConfig;
