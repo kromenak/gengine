@@ -186,13 +186,13 @@ void Texture::Blit(Texture* source, int destX, int destY)
 }
 */
  
-void Texture::BlendPixels(const Texture& source, Texture& dest, int destX, int destY)
+/*static*/ void Texture::BlendPixels(const Texture& source, Texture& dest, int destX, int destY)
 {
 	BlendPixels(source, 0, 0, source.mWidth, source.mHeight, dest, destX, destY);
 }
 
-void Texture::BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
-					     Texture& dest, int destX, int destY)
+/*static*/ void Texture::BlendPixels(const Texture& source, int sourceX, int sourceY, int sourceWidth, int sourceHeight,
+					                 Texture& dest, int destX, int destY)
 {
 	// We can't copy out-of-bounds pixels from the source.
 	if(sourceX < 0 || sourceX >= static_cast<int>(source.mWidth)) { return; }
@@ -235,6 +235,7 @@ void Texture::BlendPixels(const Texture& source, int sourceX, int sourceY, int s
 	
 	// Don't upload dest to GPU here, since we might be doing a bunch of copy operations in a row.
 	// We'll leave it up to the caller to do that manually (for now).
+    dest.mDirtyFlags |= DirtyFlags::Pixels;
 }
 
 void Texture::SetTransparentColor(Color32 color)
@@ -321,6 +322,12 @@ void Texture::UploadToGPU()
             glTexSubImage2D(GL_TEXTURE_2D, 0,
                             0, 0, mWidth, mHeight,
                             GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+
+            // If using mipmaps, we must regenerate mipmaps for this texture after changing its pixels.
+            if(mMipmaps)
+            {
+                glGenerateMipmap(GL_TEXTURE_2D);
+            }
         }
     }
 
