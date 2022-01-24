@@ -381,6 +381,12 @@ void SheepScript::Decompile(const std::string& filePath)
         WriteOut(out, varDecl, indentLevel);
     }
 
+    // Write an empty space if no variables.
+    if(mVariables.empty())
+    {
+        WriteOut(out, "\n", indentLevel);
+    }
+
     --indentLevel;
     WriteOut(out, "}\n", indentLevel);
 
