@@ -286,7 +286,17 @@ void GKActor::SetPosition(const Vector3& position)
     SyncModelToActor();
 }
 
-//TODO: SetRotation?
+void GKActor::Rotate(float rotationAngle)
+{
+    // Rotate this actor by the angle.
+    GetTransform()->Rotate(Vector3::UnitY, rotationAngle);
+
+    // As with SetHeading, we must update this value to avoid reverting rotations after current anim completes.
+    mStartVertexAnimRotation = GetRotation();
+
+    // Make sure model matches this rotation.
+    SyncModelToActor();
+}
 
 void GKActor::SetHeading(const Heading& heading)
 {
@@ -309,7 +319,7 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
     // If this is not a GAS anim, pause any running GAS.
     if(!animParams.fromAutoScript)
     {
-        mGasPlayer->Pause();
+        StopFidget();
     }
 
     // Set anim stop callback.
@@ -377,8 +387,6 @@ void GKActor::OnUpdate(float deltaTime)
 
 void GKActor::OnVertexAnimationStop()
 {
-    mGasPlayer->Resume();
-
     // On anim stop, if vertex anim is not allowed to move actor position,
     // we must revert actor back to position when anim started.
     if(!mVertexAnimAllowMove)

@@ -65,6 +65,7 @@ public:
 	Vector3 GetHeadPosition() const;
     
     void SetPosition(const Vector3& position);
+    void Rotate(float rotationAngle);
     void SetHeading(const Heading& heading) override;
 
     void StartAnimation(VertexAnimParams& animParams) override;

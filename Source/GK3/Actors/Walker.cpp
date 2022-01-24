@@ -374,8 +374,7 @@ void Walker::OnUpdate(float deltaTime)
         }
         else if(currentAction.op == WalkOp::TurnToFace)
         {
-            //if(TurnToFace(deltaTime, GetOwner()->GetForward(), currentAction.facingDir, kTurnSpeed))
-            if(TurnToFace(deltaTime, -mGKOwner->GetMeshRenderer()->GetOwner()->GetForward(), currentAction.facingDir, kTurnSpeed))
+            if(TurnToFace(deltaTime, GetOwner()->GetForward(), currentAction.facingDir, kTurnSpeed))
             {
                 // Done turning to face, do next action in sequence.
                 PopAndNextAction();
@@ -504,6 +503,9 @@ void Walker::OnWalkToFinished()
         mFinishedPathCallback = nullptr;
         callback();
     }
+
+    // Idle fidget should restart when walk finishes.
+    mGKOwner->StartFidget(GKActor::FidgetType::Idle);
 }
 
 bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
@@ -630,7 +632,7 @@ bool Walker::AdvancePath()
     return mPath.empty();
 }
 
-bool Walker::TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir, bool aboutOwnerPos)
+bool Walker::TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir)
 {
     bool doneTurning = false;
     
@@ -664,15 +666,7 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& currentDir, const Vector
         
         // Rotate actor's mesh to face the desired direction, rotating around the actor's position.
         // Remember, the GKActor follows the mesh's position during animations (based on hip bone placement). But the mesh itself may have a vastly different origin b/c of playing animation.
-        Transform* meshTransform = mGKOwner->GetMeshRenderer()->GetOwner()->GetTransform();
-        if(aboutOwnerPos)
-        {
-            meshTransform->RotateAround(mGKOwner->GetPosition(), Vector3::UnitY, thisFrameRotateAngle);
-        }
-        else
-        {
-            meshTransform->Rotate(Vector3::UnitY, thisFrameRotateAngle);
-        }
+        mGKOwner->Rotate(thisFrameRotateAngle);
     }
     else
     {

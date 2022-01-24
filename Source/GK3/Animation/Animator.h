@@ -37,12 +37,12 @@ struct AnimParams
     bool loop = false;
 
     // A callback to fire on animation finish.
-    //TODO: What about premature stops?
     std::function<void()> finishCallback = nullptr;
 };
 
 struct AnimationState
 {
+    // Params that were used to initiate this animation.
     AnimParams params;
 
     // The current frame in the animation.

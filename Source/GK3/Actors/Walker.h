@@ -5,7 +5,6 @@
 // and walking from point to point in the game world.
 //
 // A walker is always associated with a GKActor.
-// The walker moves along a path using A*.
 //
 #pragma once
 #include "Component.h"
@@ -116,5 +115,5 @@ private:
     bool CalculatePath(const Vector3& startPos, const Vector3& endPos);
     bool AdvancePath();
     
-    bool TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir = 0, bool aboutOwnerPos = true);
+    bool TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir = 0);
 };
