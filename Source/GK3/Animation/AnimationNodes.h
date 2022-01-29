@@ -89,9 +89,9 @@ struct SceneModelVisibilityAnimNode : public AnimNode
 struct ModelTextureAnimNode : public AnimNode
 {
 	std::string modelName;
+    std::string textureName;
 	unsigned char meshIndex = 0;
 	unsigned char submeshIndex = 0;
-	std::string textureName;
 	
 	void Play(AnimationState* animState) override;
 };
@@ -100,7 +100,11 @@ struct ModelTextureAnimNode : public AnimNode
 struct ModelVisibilityAnimNode : public AnimNode
 {
 	std::string modelName;
-	bool visible = false;
+    bool visible = false;
+
+    // Optional mesh/submesh indexes.
+    signed char meshIndex = -1;
+    signed char submeshIndex = -1;
 	
 	void Play(AnimationState* animState) override;
 };

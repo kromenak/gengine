@@ -142,9 +142,24 @@ void ModelVisibilityAnimNode::Play(AnimationState* animState)
 	GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(obj != nullptr)
 	{
-		//TODO: Not sure if models need to be invisible but still updating in this scenario.
-		//For now, I'll just disable or enable the actor entirely.
-        obj->SetActive(visible);
+        MeshRenderer* meshRenderer = obj->GetMeshRenderer();
+        if(meshRenderer != nullptr)
+        {
+            if(meshIndex >= 0 && submeshIndex >= 0)
+            {
+                // Toggle specific submesh visibility.
+                meshRenderer->SetVisibility(meshIndex, submeshIndex, visible);
+
+                // If we're toggling specific submeshes on/off, let's assume we want the object as a whole enabled...
+                meshRenderer->SetEnabled(true);
+            }
+            else
+            {
+                // If we want to toggle the entire object visible, we can just use enable/disable.
+                //TODO: Do we want to toggle the visibility bools all back to zero in this case?
+                meshRenderer->SetEnabled(visible);
+            }
+        }
 	}
 }
 

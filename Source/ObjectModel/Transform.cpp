@@ -1,8 +1,3 @@
-//
-// Transform.cpp
-//
-// Clark Kromenaker
-//
 #include "Transform.h"
 
 TYPE_DEF_CHILD(Component, Transform);

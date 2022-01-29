@@ -201,24 +201,34 @@ void Animation::ParseFromData(char *data, int dataLength)
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
 			// Read in 2+ lines as actions.
-            for(int i = 1; i < section.lines.size(); i++)
+            for(int i = 1; i < section.lines.size(); ++i)
             {
                 IniLine& line = section.lines[i];
-                
+
+                // Two possible formats:
                 // <frame_num>, <model_name>, <on/off>
+                // <frame_num>, <model_name>, <mesh_index>, <submesh_index>, <on/off>
                 int frameNumber = line.entries[0].GetValueAsInt();
                 
                 // Read the model name.
                 std::string modelName = line.entries[1].key;
-                
-                // Read the on/off value.
-                bool visible = line.entries[2].GetValueAsBool();
-				
-				// Create and add node.
-				ModelVisibilityAnimNode* node = new ModelVisibilityAnimNode();
-				node->modelName = modelName;
-				node->visible = visible;
+
+                // Create and add node.
+                ModelVisibilityAnimNode* node = new ModelVisibilityAnimNode();
+                node->modelName = modelName;
                 mFrames[frameNumber].push_back(node);
+
+                // Read specific mesh/submesh visibility version vs. whole model version.
+                if(line.entries.size() > 3)
+                {
+                    node->meshIndex = static_cast<signed char>(line.entries[2].GetValueAsInt());
+                    node->submeshIndex = static_cast<signed char>(line.entries[3].GetValueAsInt());
+                    node->visible = line.entries[4].GetValueAsBool();
+                }
+                else
+                {
+                    node->visible = line.entries[2].GetValueAsBool();
+                }
             }
         }
 		// Triggers sounds to play on certain frames at certain locations.

@@ -176,6 +176,7 @@ namespace StringUtil
     {
         // True is "on" or "yes" or "true".
         // Anything is false.
+        // TODO: If the value is a number, should we interpret 0=FALSE, ANY OTHER NUMBER=TRUE?
         return EqualsIgnoreCase(str, "on") || EqualsIgnoreCase(str, "yes") || EqualsIgnoreCase(str, "true");
     }
     

@@ -1,5 +1,7 @@
 #include "MeshRenderer.h"
 
+#include <cassert>
+
 #include "Actor.h"
 #include "Debug.h"
 #include "Model.h"
@@ -23,10 +25,13 @@ void MeshRenderer::Render(bool opaque, bool translucent)
 {
     // Don't render if actor is inactive or component is disabled.
     if(!IsActiveAndEnabled()) { return; }
-   
-    // Each submesh can have its own material defined. So, keep track of material index as each is rendered.
-    // If there are more submeshes than materials, then the last material is reused.
-    int materialIndex = 0;
+
+    // As we iterate & render each submesh, keep track of which submesh we are currently on.
+    // This acts as an index into materials & visibility arrays.
+    int submeshIndex = 0;
+
+    // There can potentially be more submeshes than materials defined.
+    // If so, any additional submeshes just use the last material.
     int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
     
     // Iterate meshes and render each in turn.
@@ -41,50 +46,58 @@ void MeshRenderer::Render(bool opaque, bool translucent)
         auto submeshes = mMeshes[i]->GetSubmeshes();
         for(int j = 0; j < submeshes.size(); j++)
         {
-            Material& material = mMaterials[materialIndex];
-            
-            // If this is translucent, only render if want to render translucent stuff.
-            // Or if this is opaque, only render if want to render opaque.
-            if((opaque && !material.IsTranslucent()) ||
-               (translucent && material.IsTranslucent()))
+            // Make sure our assumption about max number of submeshes holds.
+            assert(submeshIndex < kMaxSubmeshes);
+
+            // Don't render anything if this submesh is invisible!
+            if(!mSubmeshInvisible[submeshIndex])
             {
-                // Activate material.
-                material.Activate(meshToWorldMatrix);
-                
-                // Render the submesh!
-                submeshes[j]->Render();
-                
-                // Draw debug axes if desired.
-                if(Debug::RenderSubmeshLocalAxes())
+                int materialIndex = Math::Min(submeshIndex, maxMaterialIndex);
+                Material& material = mMaterials[materialIndex];
+
+                // If this is translucent, only render if want to render translucent stuff.
+                // Or if this is opaque, only render if want to render opaque.
+                if((opaque && !material.IsTranslucent()) ||
+                   (translucent && material.IsTranslucent()))
                 {
-                    Debug::DrawAxes(meshToWorldMatrix);
+                    // Activate material.
+                    material.Activate(meshToWorldMatrix);
+
+                    // Render the submesh!
+                    submeshes[j]->Render();
+
+                    // Draw debug axes if desired.
+                    if(Debug::RenderSubmeshLocalAxes())
+                    {
+                        Debug::DrawAxes(meshToWorldMatrix);
+                    }
+
+                    /*
+                    // Uncomment to visualize normals.
+                    int vcount = submeshes[j]->GetVertexCount();
+                    for(int k = 0; k < vcount; ++k)
+                    {
+                        Matrix4 worldToMeshMatrix = Matrix4::Inverse(meshToWorldMatrix);
+                        Vector3 lightPos = worldToMeshMatrix.TransformPoint(GEngine::Instance()->GetScene()->GetSceneData()->GetGlobalLightPosition());
+                        Vector3 lightDir = Vector3::Normalize(lightPos - submeshes[j]->GetVertexPosition(k));
+                        float dot = Vector3::Dot(submeshes[j]->GetVertexNormal(k), lightDir);
+                        Color32 color(static_cast<int>(dot * 255), 0, 0);
+
+                        Vector3 pos = submeshes[j]->GetVertexPosition(k);
+                        pos = meshToWorldMatrix.TransformPoint(pos);
+
+                        Vector3 normal = submeshes[j]->GetVertexNormal(k);
+                        normal = meshToWorldMatrix.TransformNormal(normal);
+
+                        Debug::DrawLine(pos, pos + normal, color);
+                        //Debug::DrawLine(pos, pos + lightDir, Color32::Yellow);
+                    }
+                    */
                 }
-
-                /*
-                // Uncomment to visualize normals.
-                int vcount = submeshes[j]->GetVertexCount();
-                for(int k = 0; k < vcount; ++k)
-                {
-                    Matrix4 worldToMeshMatrix = Matrix4::Inverse(meshToWorldMatrix);
-                    Vector3 lightPos = worldToMeshMatrix.TransformPoint(GEngine::Instance()->GetScene()->GetSceneData()->GetGlobalLightPosition());
-                    Vector3 lightDir = Vector3::Normalize(lightPos - submeshes[j]->GetVertexPosition(k));
-                    float dot = Vector3::Dot(submeshes[j]->GetVertexNormal(k), lightDir);
-                    Color32 color(static_cast<int>(dot * 255), 0, 0);
-
-                    Vector3 pos = submeshes[j]->GetVertexPosition(k);
-                    pos = meshToWorldMatrix.TransformPoint(pos);
-
-                    Vector3 normal = submeshes[j]->GetVertexNormal(k);
-                    normal = meshToWorldMatrix.TransformNormal(normal);
-
-                    Debug::DrawLine(pos, pos + normal, color);
-                    //Debug::DrawLine(pos, pos + lightDir, Color32::Yellow);
-                }
-                */
             }
-            
-            // Increase material index, but not above the max.
-            materialIndex = Math::Min(materialIndex + 1, maxMaterialIndex);
+
+            // Increase submesh index.
+            ++submeshIndex;
         }
     }
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -163,17 +176,18 @@ Material* MeshRenderer::GetMaterial(int meshIndex, int submeshIndex)
 {
 	if(meshIndex >= 0 && meshIndex < mMeshes.size())
 	{
-		// Determine offset of materials for this mesh.
-		int actualIndex = 0;
-		for(int i = 0; i < meshIndex; i++)
-		{
-			actualIndex += mMeshes[i]->GetSubmeshCount();
-		}
-		actualIndex += submeshIndex;
-		
-		return GetMaterial(actualIndex);
+		return GetMaterial(GetIndexFromMeshSubmeshIndexes(meshIndex, submeshIndex));
 	}
 	return nullptr;
+}
+
+void MeshRenderer::SetVisibility(int meshIndex, int submeshIndex, bool visible)
+{
+    int index = GetIndexFromMeshSubmeshIndexes(meshIndex, submeshIndex);
+    if(index < mSubmeshInvisible.size())
+    {
+        mSubmeshInvisible[index] = !visible;
+    }
 }
 
 Mesh* MeshRenderer::GetMesh(int index) const
@@ -256,4 +270,17 @@ void MeshRenderer::DebugDrawAABBs()
 	}
 
     Debug::DrawAABB(GetAABB(), Color32::Orange, 0.0f);
+}
+
+int MeshRenderer::GetIndexFromMeshSubmeshIndexes(int meshIndex, int submeshIndex)
+{
+    // Some submesh data is stored in a 1-dimensional array (e.g. materials, visibility)
+    // But we usually have a meshIndex/submeshIndex combo. We need to convert that to a 1-D index.
+    int actualIndex = 0;
+    for(int i = 0; i < meshIndex; ++i)
+    {
+        actualIndex += mMeshes[i]->GetSubmeshCount();
+    }
+    actualIndex += submeshIndex;
+    return actualIndex;
 }

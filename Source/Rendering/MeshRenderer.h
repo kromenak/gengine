@@ -6,6 +6,7 @@
 #pragma once
 #include "Component.h"
 
+#include <bitset>
 #include <vector>
 
 #include "AABB.h"
@@ -41,6 +42,8 @@ public:
 	Material* GetMaterial(int index);
 	Material* GetMaterial(int meshIndex, int submeshIndex);
     std::vector<Material>& GetMaterials() { return mMaterials; }
+
+    void SetVisibility(int meshIndex, int submeshIndex, bool visible);
     
 	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
 
@@ -64,4 +67,12 @@ private:
     // Each mesh *must have* a material!
 	// If a mesh has multiple submeshes, each submesh *must have* a material!
     std::vector<Material> mMaterials;
+
+    // Bools for toggling visibility of individual submeshes.
+    // Would we ever have more than 32 total submeshes? Guess we'll find out!
+    // Since bitsets are all false by default, we'll set a bit to true if we want the submesh to be invisible.
+    static const int kMaxSubmeshes = 32;
+    std::bitset<kMaxSubmeshes> mSubmeshInvisible;
+
+    int GetIndexFromMeshSubmeshIndexes(int meshIndex, int submeshIndex);
 };
