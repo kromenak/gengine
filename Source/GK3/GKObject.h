@@ -36,7 +36,7 @@ public:
 
     //TODO (but maybe OK): feels like these shouldn't be here, BUT some subclasses need these...
     virtual void StartAnimation(VertexAnimParams& animParams) { }
-    virtual void SampleAnimation(VertexAnimation* anim, int frame) { }
+    virtual void SampleAnimation(VertexAnimParams& animParams, int frame) { }
     virtual void StopAnimation(VertexAnimation* anim = nullptr) { }
     virtual MeshRenderer* GetMeshRenderer() const { return nullptr;  }
 	

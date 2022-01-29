@@ -17,7 +17,6 @@
 #include "Random.h"
 #include "Scene.h"
 #include "Services.h"
-#include "SoundtrackPlayer.h"
 #include "StringUtil.h"
 #include "Timers.h"
 #include "VerbManager.h"

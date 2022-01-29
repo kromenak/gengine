@@ -117,8 +117,7 @@ struct ScenePosition
 
 struct SceneRegionOrTrigger
 {
-    // A region and trigger only vary in that the label for a
-    // trigger is a "noun".
+    // A region and trigger only vary in that the label for a trigger is a "noun".
     std::string label;
     
     // The rectangular area. Note that this is on X/Z plane, despite Rect var names.

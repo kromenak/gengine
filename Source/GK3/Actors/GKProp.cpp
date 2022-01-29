@@ -74,9 +74,9 @@ void GKProp::StartAnimation(VertexAnimParams& animParams)
     }
 }
 
-void GKProp::SampleAnimation(VertexAnimation* anim, int frame)
+void GKProp::SampleAnimation(VertexAnimParams& animParams, int frame)
 {
-    mVertexAnimator->Sample(anim, frame);
+    mVertexAnimator->Sample(animParams.vertexAnimation, frame);
 }
 
 void GKProp::StopAnimation(VertexAnimation* anim)

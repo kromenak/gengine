@@ -83,7 +83,9 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
         GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(obj != nullptr)
 		{
-            obj->SampleAnimation(vertexAnimation, frame);
+            VertexAnimParams params;
+            params.vertexAnimation = vertexAnimation;
+            obj->SampleAnimation(params, frame);
 		}
 	}
 }

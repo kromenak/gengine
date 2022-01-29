@@ -354,9 +354,17 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
     }
 }
 
-void GKActor::SampleAnimation(VertexAnimation* anim, int frame)
+void GKActor::SampleAnimation(VertexAnimParams& animParams, int frame)
 {
-    mVertexAnimator->Sample(anim, frame);
+    // Sample the animation on the desired frame.
+    mVertexAnimator->Sample(animParams.vertexAnimation, frame);
+
+    // Sampling the animation may have caused our model to be repositioned or whatnot.
+    // So, update last model position here.
+    //TODO: It feels wrong that you only update position and not rotation...
+    //TODO: But this is the only way that LHO and EST appear in the right spot in MS3???
+    mLastModelPosition = GetModelPosition();
+    //mLastModelRotation = GetModelRotation();
 }
 
 void GKActor::StopAnimation(VertexAnimation* anim)
@@ -423,9 +431,14 @@ void GKActor::SyncModelToActor()
 {
     // Move model to actor's position.
     Vector3 modelOffset = mModelActor->GetPosition() - GetModelPosition();
-    //modelOffset.y = 0.0f; // zeroed out to change just X/Z plane position.
+    /*
+    if(modelOffset.GetLength() > 1.0f)
+    {
+        Debug::DrawLine(mModelActor->GetPosition(), mModelActor->GetPosition() + modelOffset, Color32::Red, 30.0f);
+    }
+    */
     mModelActor->SetPosition(GetPosition() + modelOffset);
-    
+
     // Rotate model to actor's rotation.
     Quaternion desiredRotation = GetRotation() * Quaternion(Vector3::UnitY, Math::kPi);
     Quaternion currentRotation = GetModelRotation();
@@ -442,22 +455,27 @@ void GKActor::SyncModelToActor()
 
 void GKActor::SyncActorToModel()
 {
-    // See how much mesh has moved and translate actor to match.
-    Vector3 meshPosition = GetModelPosition();
-    GetTransform()->Translate(meshPosition - mLastModelPosition);
-    //Debug::DrawLine(mLastModelPosition, meshPosition, Color32::Magenta);
+    // See how much model has moved since last check and translate actor to match.
+    Vector3 modelPosition = GetModelPosition();
+    Vector3 modelOffset = modelPosition - mLastModelPosition;
+    /*
+    if(modelOffset.GetLength() > 1.0f)
+    {
+        Debug::DrawLine(mLastModelPosition, mLastModelPosition + Vector3::UnitY * 50.0f, Color32::Blue, 30.0f);
+        Debug::DrawLine(modelPosition, modelPosition + Vector3::UnitY * 100.0f, Color32::Blue, 30.0f);
+    }
+    */
+    GetTransform()->Translate(modelOffset);
     
     // See how much mesh has rotated and translate actor to match.
-    Quaternion meshRotation = GetModelRotation();
-    Quaternion diff = Quaternion::Diff(meshRotation, mLastModelRotation);
+    Quaternion modelRotation = GetModelRotation();
+    Quaternion diff = Quaternion::Diff(modelRotation, mLastModelRotation);
     diff.IsolateY();
     GetTransform()->Rotate(diff);
     
     // Save new baseline model position/rotation.
-    mLastModelPosition = meshPosition;
-    mLastModelRotation = meshRotation;
-
-    //std::cout << "Sync Actor to Model; actorPos=" << GetPosition() << ", modelPos=" << mModelActor->GetPosition() << std::endl;
+    mLastModelPosition = modelPosition;
+    mLastModelRotation = modelRotation;
 }
 
 GAS* GKActor::GetGasForFidget(FidgetType type)

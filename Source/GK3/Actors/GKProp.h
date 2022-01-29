@@ -27,7 +27,7 @@ public:
     void StopFidget(std::function<void()> callback = nullptr);
 
     void StartAnimation(VertexAnimParams& animParams) override;
-    void SampleAnimation(VertexAnimation* anim, int frame) override;
+    void SampleAnimation(VertexAnimParams& animParams, int frame) override;
     void StopAnimation(VertexAnimation* anim = nullptr) override;
     MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
 	
