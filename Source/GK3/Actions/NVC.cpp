@@ -155,6 +155,10 @@ void NVC::ParseFromData(char *data, int dataLength)
             {
                 action.target = keyValue.value;
             }
+            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "TalkTo"))
+            {
+                action.talkTo = keyValue.value;
+            }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "Script"))
             {
                 // A sheep expression to be evaluated for this item.

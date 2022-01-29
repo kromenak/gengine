@@ -692,6 +692,13 @@ void ActionManager::OnActionExecuteFinished()
 	}
     else if(Services::Get<DialogueManager>()->InConversation()) // *seems* necessary to end conversations started during cutscenes (ex: Gabe/Mosely scene in Dining Room)
     {
-        ShowTopicBar(mLastAction->noun);
+        if(!mLastAction->talkTo.empty())
+        {
+            ShowTopicBar(mLastAction->talkTo);
+        }
+        else
+        {
+            ShowTopicBar(mLastAction->noun);
+        }
     }
 }

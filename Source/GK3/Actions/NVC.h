@@ -47,9 +47,9 @@ struct Action
 	
 	// A target for the approach; interpreted differently depending on the approach specified.
     std::string target;
-	
-	//TODO: An undocumented parameter: after the action executes, immediately begin a conversation with this person.
-	//std::string talkTo;
+    
+    // If specified, executing this action begins talking to this person.
+	std::string talkTo;
 	
 	// A script to run when this action is executed.
 	std::string scriptText;
