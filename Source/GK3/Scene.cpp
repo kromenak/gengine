@@ -296,9 +296,6 @@ void Scene::Init()
         actor->Init(*mSceneData);
     }
 
-    // Swap ambient channels, when allows previous scene's music to fade out as this scene's music starts.
-    Services::GetAudio()->SwapAmbient();
-
     // Create soundtrack player and get it playing!
     Actor* actor = new Actor();
     mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();

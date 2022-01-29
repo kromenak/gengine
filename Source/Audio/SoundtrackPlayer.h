@@ -24,7 +24,9 @@ public:
     Soundtrack* mSoundtrack = nullptr;
 
     PlayingSoundtrack(Soundtrack* soundtrack);
-    ~PlayingSoundtrack();
+
+    void Play();
+    void Stop();
 
     void Update(float deltaTime);
 
@@ -49,6 +51,7 @@ class SoundtrackPlayer : public Component
     TYPE_DECL_CHILD();
 public:
     SoundtrackPlayer(Actor* owner);
+    ~SoundtrackPlayer();
     
     void Play(Soundtrack* soundtrack);
     void Stop(Soundtrack* soundtrack);

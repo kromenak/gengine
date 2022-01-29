@@ -3,6 +3,11 @@
 PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
     mSoundtrack(soundtrack)
 {
+    
+}
+
+void PlayingSoundtrack::Play()
+{
     // Make sure all nodes are reset.
     for(auto& node : mSoundtrack->GetNodes())
     {
@@ -13,7 +18,7 @@ PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
     ProcessNextNode();
 }
 
-PlayingSoundtrack::~PlayingSoundtrack()
+void PlayingSoundtrack::Stop()
 {
     // If a sound is currently playing as part of this soundtrack, we need to stop it in the desired fashion.
     if(mSoundtrackNodeResults.stopMethod == StopMethod::Immediate)
@@ -84,6 +89,11 @@ SoundtrackPlayer::SoundtrackPlayer(Actor* owner) : Component(owner)
     
 }
 
+SoundtrackPlayer::~SoundtrackPlayer()
+{
+    StopAll();
+}
+
 void SoundtrackPlayer::Play(Soundtrack* soundtrack)
 {
     if(soundtrack == nullptr) { return; }
@@ -99,6 +109,7 @@ void SoundtrackPlayer::Play(Soundtrack* soundtrack)
 
     // Ok, we are going to play this thing.
     mPlaying.emplace_back(soundtrack);
+    mPlaying.back().Play();
 }
 
 void SoundtrackPlayer::Stop(Soundtrack* soundtrack)
@@ -110,8 +121,11 @@ void SoundtrackPlayer::Stop(Soundtrack* soundtrack)
     {
         if(it->mSoundtrack == soundtrack)
         {
-            // Stopping a soundtrack stops any additional nodes from executing.
-            // But it DOES NOT stop currently playing audio.
+            // Stop the soundtrack.
+            // How the audio stops depends on the "Stop Method" of the current soundtrack node.
+            it->Stop();
+
+            // Erase from list.
             mPlaying.erase(it);
             return;
         }
@@ -120,8 +134,11 @@ void SoundtrackPlayer::Stop(Soundtrack* soundtrack)
 
 void SoundtrackPlayer::StopAll()
 {
-    // This will stop any further nodes from executing.
-    // Stopping a soundtrack DOES NOT stop currently playing audio.
+    // Stop all playing soundtracks.
+    for(auto& playing : mPlaying)
+    {
+        playing.Stop();
+    }
     mPlaying.clear();
 }
 

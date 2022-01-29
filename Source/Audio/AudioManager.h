@@ -152,10 +152,13 @@ private:
     // Channel group for VO. Outputs to master channel group.
     FMOD::ChannelGroup* mVOChannelGroup = nullptr;
 
+    FMOD::ChannelGroup* mAmbientChannelGroup = nullptr;
+    FMOD::ChannelGroup* mMusicChannelGroup = nullptr;
+
     // Both ambient audio and music can crossfade between scenes, so these crossfaders help with that.
     // Internally, they also consist of several FMOD channel groups used to control volume. Both output to master channel group ultimately.
-    Crossfader mAmbientCrossfade;
-    Crossfader mMusicCrossfade;
+    //Crossfader mAmbientCrossfade;
+    //Crossfader mMusicCrossfade;
 
     // Any individual sound can be faded in/out. If needed, one of these faders will be used for that purpose.
     std::vector<Fader> mFaders;
