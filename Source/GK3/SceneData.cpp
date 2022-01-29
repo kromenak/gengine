@@ -125,6 +125,12 @@ void SceneData::ResolveSceneData()
 	{
 		AddDialogueCameraBlocks(mSpecificSIF->GetDialogueCameraBlocks());
 	}
+
+    AddTriggerBlocks(mGeneralSIF->GetTriggerBlocks());
+    if(mSpecificSIF != nullptr)
+    {
+        AddTriggerBlocks(mSpecificSIF->GetTriggerBlocks());
+    }
 	
 	AddSoundtrackBlocks(mGeneralSIF->GetSoundtrackBlocks());
 	if(mSpecificSIF != nullptr)
@@ -344,6 +350,20 @@ void SceneData::AddDialogueCameraBlocks(const std::vector<ConditionalBlock<Dialo
 			}
 		}
 	}
+}
+
+void SceneData::AddTriggerBlocks(const std::vector<ConditionalBlock<SceneRegionOrTrigger>>& triggerBlocks)
+{
+    for(auto& block : triggerBlocks)
+    {
+        if(Services::GetSheep()->Evaluate(block.condition))
+        {
+            for(auto& trigger : block.items)
+            {
+                mTriggers.push_back(&trigger);
+            }
+        }
+    }
 }
 
 void SceneData::AddSoundtrackBlocks(const std::vector<ConditionalBlock<Soundtrack*>>& soundtrackBlocks)

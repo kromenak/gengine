@@ -78,6 +78,31 @@ void Debug::DrawRect(const Rect& rect, const Color32& color, float duration, con
 	DrawLine(bottomRight, bottomLeft, color, duration);
 }
 
+void Debug::DrawRectXZ(const Rect& rect, float height, const Color32& color, float duration, const Matrix4* transformMatrix)
+{
+    Vector2 min = rect.GetMin();
+    Vector2 max = rect.GetMax();
+
+    Vector3 bottomLeft(min.x, height, min.y);
+    Vector3 topRight(max.x, height, max.y);
+
+    // May need to transform to world space before drawing.
+    if(transformMatrix != nullptr)
+    {
+        bottomLeft = transformMatrix->TransformPoint(bottomLeft);
+        topRight = transformMatrix->TransformPoint(topRight);
+    }
+
+    Vector3 bottomRight(topRight.x, height, bottomLeft.z);
+    Vector3 topLeft(bottomLeft.x, height, topRight.z);
+
+    // Draw rect.
+    DrawLine(bottomLeft, topLeft, color, duration);
+    DrawLine(topLeft, topRight, color, duration);
+    DrawLine(topRight, bottomRight, color, duration);
+    DrawLine(bottomRight, bottomLeft, color, duration);
+}
+
 void Debug::DrawScreenRect(const Rect& rect, const Color32& color)
 {
     // This rect is in screen space, so we need to convert it to work space before continuing.

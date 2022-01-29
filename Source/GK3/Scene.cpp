@@ -324,6 +324,25 @@ void Scene::Update(float deltaTime)
             material.SetColor("uAmbientColor", ambientColor);
         }
     }
+
+    // Check whether Ego has tripped any triggers.
+    if(mEgo != nullptr && !mSceneData->GetTriggers().empty())
+    {
+        // Triggers consist of Rects on the X/Z plane. So, get Ego's X/Z pos.
+        Vector3 egoPos = mEgo->GetPosition();
+        Vector2 egoXZPos(egoPos.x, egoPos.z);
+
+        // See if ego is inside any trigger rect.
+        for(auto& trigger : mSceneData->GetTriggers())
+        {
+            //Debug::DrawRectXZ(trigger->rect, GetFloorY(egoPos) + 10.0f, Color32::Green);
+            if(trigger->rect.Contains(egoXZPos))
+            {
+                // If so, treat the label as a noun (e.g. GET_CLOSE) with hardcoded "WALK" verb.
+                Services::Get<ActionManager>()->ExecuteAction(trigger->label, "WALK");
+            }
+        }
+    }
 }
 
 bool Scene::InitEgoPosition(const std::string& positionName)

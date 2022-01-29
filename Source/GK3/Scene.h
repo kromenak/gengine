@@ -1,6 +1,4 @@
 //
-// Scene.h
-//
 // Clark Kromenaker
 //
 // Encapsulates all the loaded actors and components for a single conceptual

@@ -65,6 +65,9 @@ public:
     const DialogueSceneCamera* GetInitialDialogueCameraForConversation(const std::string& conversationName) const;
     const DialogueSceneCamera* GetFinalDialogueCameraForConversation(const std::string& conversationName) const;
 
+    // REGIONS/TRIGGERS
+    const std::vector<const SceneRegionOrTrigger*>& GetTriggers() const { return mTriggers; }
+
 	// SOUNDTRACK
     const std::vector<Soundtrack*>& GetSoundtracks() const { return mSoundtracks; }
 
@@ -118,9 +121,11 @@ private:
 	const RoomSceneCamera* mDefaultRoomCamera = nullptr;
 	std::vector<const SceneCamera*> mCinematicCameras;
 	std::vector<const DialogueSceneCamera*> mDialogueCameras;
+
+    // Combined regions & triggers to use.
+    std::vector<const SceneRegionOrTrigger*> mTriggers;
 	
 	// Combined generic and specific soundtracks to use.
-	// Or is there ever only one???
 	std::vector<Soundtrack*> mSoundtracks;
 
     // Combined generic and specific conversation settings to use.
@@ -138,8 +143,12 @@ private:
 	void AddRoomCameraBlocks(const std::vector<ConditionalBlock<RoomSceneCamera>>& cameraBlocks);
 	void AddCinematicCameraBlocks(const std::vector<ConditionalBlock<SceneCamera>>& cameraBlocks);
 	void AddDialogueCameraBlocks(const std::vector<ConditionalBlock<DialogueSceneCamera>>& cameraBlocks);
-	
+
+    void AddTriggerBlocks(const std::vector<ConditionalBlock<SceneRegionOrTrigger>>& triggerBlocks);
+
 	void AddSoundtrackBlocks(const std::vector<ConditionalBlock<Soundtrack*>>& soundtrackBlocks);
+
     void AddConversationBlocks(const std::vector<ConditionalBlock<SceneConversation>>& conversationBlocks);
+
 	void AddActionBlocks(const std::vector<ConditionalBlock<NVC*>>& actionSetBlocks, bool performNameCheck);
 };

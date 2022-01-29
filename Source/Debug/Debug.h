@@ -40,6 +40,7 @@ public:
     static void DrawAxes(const Matrix4& worldTransform, float duration = 0.0f);
 	
     static void DrawRect(const Rect& rect, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
+    static void DrawRectXZ(const Rect& rect, float height, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
     static void DrawScreenRect(const Rect& rect, const Color32& color);
 
     static void DrawAABB(const AABB& aabb, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
