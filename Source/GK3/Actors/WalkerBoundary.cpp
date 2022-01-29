@@ -39,7 +39,7 @@ bool WalkerBoundary::FindPath(const Vector3& from, const Vector3& to, std::vecto
 		// Walker will move from current (unwalkable) position to this position when it starts walking.
 		start = FindNearestWalkableTexturePosToWorldPos(from);
 	}
-
+    
     // Use BFS to find a path.
     // I found that BFS resulted in way better performance than A*, and similar results.
     // In hindsight, I think this is because: a) the graph has a ton of nodes, and b) edges between nodes _aren't really_ weighted.
@@ -49,13 +49,13 @@ bool WalkerBoundary::FindPath(const Vector3& from, const Vector3& to, std::vecto
     {
         // Ok, we found a path, but it's probably too close to walls and such.
         // So, let's try to condition it a little bit to fix that.
-        for(int i = 0; i < path.size(); ++i)
+        for(int i = path.size() - 1; i >= 0; --i)
         {
             // We should ignore the first few nodes and last few nodes when doing conditioning.
             // This is because start/end nodes are _exact_ destinations (i.e. character starts here and wants to get there - don't mess with it).
-            //const int kFuzzyIgnore = 4;
-            //if(i < kFuzzyIgnore) { continue; }
-            //if(i >= path.size() - kFuzzyIgnore) { break; }
+            const int kFuzzyIgnore = 4;
+            if(i > path.size() - kFuzzyIgnore) { continue; }
+            if(i < kFuzzyIgnore) { break; }
 
             // See if a neighbor is more walkable.
             int index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
@@ -93,8 +93,9 @@ bool WalkerBoundary::FindPath(const Vector3& from, const Vector3& to, std::vecto
         }
         return true;
     }
+
+    printf("Failed to find path!\n");
     return false;
-    //return FindPathAStar(start, goal, outPath);
 }
 
 Vector3 WalkerBoundary::FindNearestWalkablePosition(const Vector3& position) const
@@ -150,14 +151,15 @@ bool WalkerBoundary::IsTexturePosWalkable(const Vector2& texturePos) const
 	// If no texture...can walk anywhere?
 	if(mTexture == nullptr) { return true; }
 
+    // Make sure the position isn't outside the texture - that is NOT walkable for sure.
+    if(texturePos.x < 0 || texturePos.x >= mTexture->GetWidth()) { return false; }
+    if(texturePos.y < 0 || texturePos.y >= mTexture->GetHeight()) { return false; }
+
     // Walker boundary data is defined in an indexed (palettized) texture.
     // Palette index 0 is walkable, with indexes 1-9 indicating less and less walkable areas.
     // Palette index 255 is "unwalkable" area.
     // Palette indexes 128-254 are for special regions.
-
 	uint8 paletteIndex = mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
-    //unsigned char index = mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
-    //std::cout << (int)index << ", " << color << std::endl;
     
 	// Basically, if the palette index is not 255, you can walk there.
 	return paletteIndex != 255;

@@ -297,6 +297,7 @@ void Walker::OnUpdate(float deltaTime)
         for(int i = static_cast<int>(mPath.size()) - 2; i >= 0; i--)
         {
             Debug::DrawLine(prev, mPath[i], Color32::Orange);
+            Debug::DrawLine(mPath[i], mPath[i] + Vector3::UnitY * 10.0f, Color32::Orange);
             prev = mPath[i];
         }
     }
