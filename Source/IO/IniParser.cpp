@@ -270,44 +270,46 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             currentPos = mStream->tellg();
             continue;
         }
-        
-        // The line is a header if it starts with [ followed by a later ] (e.g. [General], [Hacks]).
-		// If this is the header for the current section, we should note it and keep reading.
-		// If this is the header for the NEXT section, we should STOP reading (since this function only reads one section and returns).
-		std::size_t endHeaderIndex = std::string::npos;
-		if(line.length() > 2 && line[0] == '[')
-		{
-			endHeaderIndex = line.find(']', 1);
-		}
-		if(endHeaderIndex != std::string::npos)
+
+        // Check if this is an INI header (e.g. [General], [Hacks]).
+        // Only check the '[' b/c GK3 sometimes forgets to put a ']' :P
+        if(line.length() > 2 && line[0] == '[')
         {
-			// If the section has entries, we can use that to determine that this header belongs to the next section.
-			// We set the stream back to before this header was read in, so next call to ReadNextSection starts at the right spot.
+            // If there are already lines in the IniSection, this must be the header for the NEXT section.
+            // So revert back to previous position and let caller know we are done reading the current section.
             if(sectionOut.lines.size() > 0)
             {
                 mStream->seekg(currentPos);
-				
-				// Return true to indicate that we read a section and there was data!
                 return true;
             }
-            
-            // Subtract the brackets to get the section name.
-            sectionOut.name = line.substr(1, endHeaderIndex - 1);
-            
+
+            // Otherwise, this is the header for the current section - let's parse it.
+            // Remove '[' and ']' from the header.
+            std::size_t endHeaderIndex = line.find(']', 1);
+            if(endHeaderIndex == std::string::npos)
+            {
+                // No ']' at end - still accept it, but don't need to remove char at end.
+                sectionOut.name = line.substr(1, std::string::npos);
+            }
+            else
+            {
+                sectionOut.name = line.substr(1, endHeaderIndex - 1);
+            }
+
             // If there's an equals sign, it means this section is conditional.
-			// A conditional section may be ignored by game code if the condition is not met.
-			// The condition is usually Sheepscript code.
+            // A conditional section may be ignored by game code if the condition is not met.
+            // The condition is usually Sheepscript code.
             std::size_t equalsIndex = sectionOut.name.find('=');
             if(equalsIndex != std::string::npos)
             {
                 sectionOut.condition = sectionOut.name.substr(equalsIndex + 1, std::string::npos);
                 sectionOut.name = sectionOut.name.substr(0, equalsIndex);
             }
-            
+
             currentPos = mStream->tellg();
             continue;
         }
-		
+        
         // From here: this is a normal line with key/value pair(s) on it.
 		// Create a line entry for the section and grab a reference to it.
 		sectionOut.lines.emplace_back();
