@@ -141,7 +141,7 @@ void InventoryScreen::RefreshLayout()
         }
 
         // If this next item will go offscreen, we should move down to next row.
-        if(x + itemTexture->GetWidth() > 1024.0f)
+        if(x + itemTexture->GetWidth() > Services::GetRenderer()->GetWindowWidth())
         {
             x = kStartX;
             y -= (itemTexture->GetHeight() + kSpacingY);
