@@ -1,16 +1,34 @@
-//
-// GameProgress.cpp
-//
-// Clark Kromenaker
-//
 #include "GameProgress.h"
 
 #include "GMath.h"
+#include "IniParser.h"
 #include "Localizer.h"
+#include "Scene.h"
 #include "Services.h"
+#include "StatusOverlay.h"
 #include "StringUtil.h"
+#include "TextAsset.h"
 
 TYPE_DEF_BASE(GameProgress);
+
+GameProgress::GameProgress()
+{
+    // Parse valid score events (and score amount) int map of score events.
+    TextAsset* textFile = Services::GetAssets()->LoadText("Scores.txt");
+    IniParser parser(textFile->GetText(), textFile->GetTextLength());
+    IniSection section;
+    while(parser.ReadNextSection(section))
+    {
+        for(auto& line : section.lines)
+        {
+            for(auto& entry : line.entries)
+            {
+                int score = entry.GetValueAsInt();
+                mScoreEvents[entry.key] = score;
+            }
+        }
+    }
+}
 
 void GameProgress::SetScore(int score)
 {
@@ -20,6 +38,39 @@ void GameProgress::SetScore(int score)
 void GameProgress::IncreaseScore(int points)
 {
 	SetScore(mScore + points);
+}
+
+void GameProgress::ChangeScore(const std::string& scoreName)
+{
+    // Make sure it is a valid score name.
+    auto validEventsIt = mScoreEvents.find(scoreName);
+    if(validEventsIt == mScoreEvents.end())
+    {
+        Services::GetReports()->Log("Error", StringUtil::Format("Illegal score name (%s)", scoreName.c_str()));
+        return;
+    }
+
+    // If we haven't already gotten this score event, we can now get it.
+    auto achievedEventsIt = mScoreEventFlags.find(scoreName);
+    if(achievedEventsIt == mScoreEventFlags.end())
+    {
+        // Flag that we've achieved this one.
+        mScoreEventFlags[scoreName] = true;
+
+        // Give the points.
+        IncreaseScore(validEventsIt->second);
+
+        // Refresh status overlay to show updated point count.
+        Scene* scene = GEngine::Instance()->GetScene();
+        if(scene != nullptr)
+        {
+            StatusOverlay* statusOverlay = scene->GetStatusOverlay();
+            if(statusOverlay != nullptr)
+            {
+                statusOverlay->Refresh();
+            }
+        }
+    }
 }
 
 void GameProgress::SetTimeblock(const Timeblock& timeblock)

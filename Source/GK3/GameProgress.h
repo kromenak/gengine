@@ -1,6 +1,4 @@
 //
-// GameProgress.h
-//
 // Clark Kromenaker
 //
 // Tracks game progress/logic variables and the state of the player
@@ -12,6 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "StringUtil.h"
 #include "Timeblock.h"
 #include "Type.h"
 
@@ -19,10 +18,13 @@ class GameProgress
 {
 	TYPE_DECL_BASE();
 public:
+    GameProgress();
+
 	int GetMaxScore() const { return kMaxScore; }
 	int GetScore() const { return mScore; }
 	void SetScore(int score);
 	void IncreaseScore(int points);
+    void ChangeScore(const std::string& scoreName);
 	
 	const Timeblock& GetTimeblock() const { return mTimeblock; }
 	const Timeblock& GetLastTimeblock() const { return mLastTimeblock; }
@@ -54,6 +56,12 @@ private:
 	// Score tracking.
     const int kMaxScore = 965; //TODO: Should be loaded from GAME.CFG
 	int mScore = 0;
+
+    // Maps a score change label (e.g. e_110a_r25_tape) to the number of points gained.
+    std::string_map_ci<int> mScoreEvents;
+
+    // Tracks which score events the player has already triggered.
+    std::string_map_ci<bool> mScoreEventFlags;
 	
 	// Current and last time blocks.
 	Timeblock mTimeblock;

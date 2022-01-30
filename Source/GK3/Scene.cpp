@@ -92,7 +92,7 @@ void Scene::Load()
 	Services::Get<LocationManager>()->IncLocationCount(mEgoName, mLocation, mTimeblock);
     
     // Create status overlay actor. Do this after setting location for accurate location!
-    new StatusOverlay();
+    mStatusOverlay = new StatusOverlay();
 	
 	// Based on location, timeblock, and game progress, resolve what data we will load into the current scene.
 	// After calling this, SceneData will have interpreted all data from SIFs and determined exactly what we should and should not load/use for the scene right now.

@@ -1894,7 +1894,7 @@ RegFunc1(SetScore, void, int, IMMEDIATE, DEV_FUNC);
 
 shpvoid ChangeScore(std::string scoreValue)
 {
-	std::cout << "ChangeScore " << scoreValue << std::endl;
+    Services::Get<GameProgress>()->ChangeScore(scoreValue);
 	return 0;
 }
 RegFunc1(ChangeScore, void, string, IMMEDIATE, REL_FUNC);

@@ -1,0 +1,515 @@
+// GK3 somehow internally knows all possible score events and what points to award in each case.
+// Thus far, I have't been able to find any data file that specifies this data. Possibly, it is hard-coded in the game's source code.
+
+// To get around that, we'll use our own data file that has all this info in it.
+[SCORES]
+e_110a_r25_tape = 2
+e_110a_r25_hanger = 2
+
+e_110a_din_enter = 4
+
+e_110a_lby_read_register = 2
+e_110a_lby_talk_jean_tour = 2
+e_110a_lby_talk_jean_two_men = 2
+e_110a_lby_talk_emilio_introduce = 2
+e_110a_lby_talk_emilio_checkin = 2
+
+e_110a_pho_phone_prince_james = 4
+
+e_110a_rc1_talk_madeline_checkin = 2
+e_110a_rc1_talk_madeline_tour = 2
+e_110a_rc1_look_at_grail_book = 2
+
+e_110a_ms2_talk_girard_introduce = 2
+e_110a_ms2_talk_girard_treasure_2nd_time = 2
+e_110a_ms2_talk_girard_grail = 2
+
+e_110a_ms3_hoverhear_howard_estelle = 2
+e_110a_ms3_talk_howard_estelle_introduce = 2
+e_110a_ms3_talk_howard_estelle_treasure = 2
+
+e_112p_lby_overhear_butane_wilkes = 2
+
+e_112p_din_talk_wilkes_introduce = 2
+
+e_112p_hal_watch_room_change = 2
+
+e_112p_chu_watch_abbe_buchelli = 2
+e_112p_chu_talk_abbe_introduce = 2
+e_112p_chu_talk_abbe_templars = 2
+e_112p_chu_talk_abbe_church_2nd_time = 2
+e_112p_chu_talk_abbe_holy_grail = 2
+e_112p_chu_talk_abbe_magdalen_2nd_time = 2
+e_112p_chu_talk_buchelli_introduce = 2
+e_112p_chu_talk_buchelli_checkin = 2
+e_112p_chu_talk_buchelli_treasure = 2
+
+e_112p_r33_talk_mosley_case = 2
+e_112p_r33_talk_mosley_grace = 2
+e_112p_r33_talk_mosley_shattenjager = 2
+e_112p_r33_sneak_catch_emilio = 5
+
+e_112p_hal_pickup_emilio_glass = 2
+
+e_102p_mop_talk_rent_bike = 2
+e_102p_mop_disguise_gabe = 10
+
+e_102p_ms2_pickup_cap = 2
+
+e_102p_cem_pickup_spray_bottle = 2
+
+e_102p_rc3_masking_tape_cat = 2
+e_102p_rc3_spray_bottle_cat = 2
+e_102p_rc3_pickup_tape = 2
+
+e_102p_lby_pickup_candy = 2
+e_102p_lby_talk_howard_estelle_room_change = 2
+e_102p_lby_push_buzzer_r33 = 2
+e_102p_lby_pickup_pen = 2
+
+e_102p_hal_candy_table = 2
+e_102p_hal_pickup_mosely_steal_passport = 5
+
+e_102p_r33_pickup_gold_coat = 2
+
+e_102p_din_pickup_syrup = 2
+
+e_102p_inventory_pen_draw_moustache = 2
+e_102p_inventory_complete_mosley_disguise = 5
+
+e_102p_map_follow_wilkes = 2
+e_102p_map_follow_buthane = 2
+
+e_talk_wilkes_introduce = 2
+e_talk_wilkes_grail = 2
+e_talk_wilkes_treasure = 2
+e_talk_wilkes_machine = 2
+
+e_notebook_wilkes_license = 2
+
+e_102p_cd1_zoom_in_madeline = 5
+
+e_102p_tr1_wallet_taxi_driver_2nd_time = 5
+
+e_102p_tr2_talk_marci_train_from_naples = 2
+e_102p_tr2_talk_marci_otr_arrivals = 2
+e_102p_tr2_think_about_arrivals = 2
+
+e_104p_lhm_talk_mosely_chat_2nd_time = 2
+
+e_notebook_mosely_license = 2
+e_notebook_emilio_license = 2
+
+e_104p_cd1_zoom_in_mosely_buthane_collide = 5
+
+e_104p_cem_overhear_abbe_buthane = 5
+
+e_104p_lhe_knock = 2
+
+e_104p_lhi_talk_larry_grail = 2
+e_104p_lhi_talk_larry_rlc = 2
+e_104p_lhi_talk_larry_templars_1st_time = 2
+e_104p_lhi_talk_larry_templars_2nd_time = 2
+e_104p_lhi_talk_larry_treasure_2nd_time = 2
+
+e_106p_cem_hide_behind_tomb = 5
+e_106p_cem_overhear_abbe_phone = 2
+e_105p_cem_tape_recorde_abbe_phone = 5
+
+e_106p_din_overhear_buchelli_wilkes = 2
+
+e_106p_lby_talk_simone_checkin = 2
+e_106p_lby_talk_simone_two_men_trunk = 2
+
+e_106p_map_follow_two_men = 2
+
+e_106p_lhe_hide_behind_tree = 5
+
+e_notebook_buchelli_license = 2
+e_notebook_howard_estelle_license = 2
+
+e_106p_r25_talk_grace_about_prince_james_men = 2
+e_106p_r25_talk_grace_about_abbe = 2
+e_106p_r25_handshake_correct = 5
+
+e_207a_r25_pickup_fingerprint_kit = 1
+
+e_sidney_search_vampires = 1
+e_sidney_search_grail = 1
+
+e_207a_hal_pickup_book = 2
+
+e_207a_din_talk_buthan_tour_group = 2
+
+e_207a_ma3_talk_abbe_introduce = 2
+
+e_207a_pou_madeline_pulls_postcard = 2
+e_207a_pou_madeline_mentions_et_in_arcadia_ego = 2
+e_207a_pou_sketchpad_emilio_doodle = 4
+
+e_207a_cd1_madeline_mentions_chateau_templar = 2
+e_207a_cd1_overhear_buthane_wilkes = 2
+e_207a_cd1_overhear_howard_estelle = 2
+e_207a_cd1_talk_buthane_serpent_rouge = 2
+e_207a_cd1_talk_buthane_t_flirt = 2
+e_207a_cd1_talk_mosely_gabriel = 2
+e_207a_cd1_talk_mosely_treasure = 2
+
+e_210a_r25_pickup_fingerprint_kit = 1
+
+e_210a_r29_exit_balcony = 4, e_210a_r29_enter_from_balcony = 2
+e_210a_r29_turn_lock = 2
+e_210a_r29_pickup_map = 2
+e_210a_r29_move_up_case = 2
+e_210a_r29_fingerprint_kit_on_gun = 2
+e_210a_r29_map_drawer = 1
+
+e_210a_r31_exit_balcony = 4, e_210a_r31_enter_from_balcony = 2
+e_210a_r31_turn_lock = 2
+e_210a_r31_search_bed = 2
+e_210a_r31_pickup_parchments = 2
+e_210a_r31_parchments_folder = 1
+e_210a_r31_pickup_suppuration_h = 2
+e_210a_r31_fingerprint_kit_mirror = 2
+
+e_210a_r27_unlock_dumb_waiter = 2
+e_210a_r27_enter_from_dumb_waiter = 4
+e_210a_r27_search_bed = 2
+
+e_210a_r21_unlock_dumb_waiter = 2
+e_210a_r21_enter_from_dumb_waiter = 4
+e_210a_r21_open_dresser = 2
+e_210a_r21_search_pants = 2
+e_210a_r21_fingerprint_kit_suitcase = 2
+
+e_210a_r23_unlock_dumb_waiter = 2
+e_210a_r23_enter_from_dumb_waiter = 4
+e_210a_r23_inspect_letter = 1
+
+e_210a_lby_talk_jean_food = 2
+
+e_210a_kit_climb_into_dumb_waiter = 2
+
+e_210a_suppuration_h_on_window_eeew = 2
+
+e_210a_open_window = 2
+e_210a_pickup_magazine = 2
+e_210a_fingerprint_kit_cigarette_pack = 2
+
+e_sidney_add_parch1 = 1
+e_sidney_add_parch2 = 1
+e_sidney_add_map = 1
+e_sidney_add_tape_abbe = 1
+e_sidney_add_fingerprint_howard = 1
+e_sidney_add_fingerprint_buthane = 1
+e_sidney_add_fingerprint_abbe = 1
+e_sidney_add_fingerprint_buchelli = 1
+e_sidney_add_license_howard = 1
+e_sidney_add_license_emilio = 1
+e_sidney_add_license_wilkes = 1
+e_sidney_add_license_buchelli = 1
+e_sidney_add_license_mosely = 1
+e_sidney_translate_tape_abbe = 3
+e_sidney_suspect_link_fingerprint_howard = 1
+e_sidney_suspect_link_fingerprint_buthane = 1
+e_sidney_suspect_link_fingerprint_abbe = 1
+e_sidney_suspect_link_fingerprint_buchelli = 1
+e_sidney_suspect_link_license_wilkes = 1
+e_sidney_suspect_link_license_emilio = 1
+e_sidney_suspect_link_license_mosely = 1
+e_sidney_suspect_link_license_buchelli = 1
+e_sidney_suspect_link_license_howard = 1
+
+e_212p_cs8_chat_abbe = 2
+
+e_212p_cse_climb_back_wall = 2
+e_212p_cse_climb_vines = 4, e_212p_cse_open_cellar_doors = 2
+
+e_212p_cs3_open_trunk = 2
+e_212p_cs3_hide_wardrobe = 2
+e_212p_cs3_move_blanket = 2
+e_212p_cs3_skethcpad_symbols = 2
+
+e_212p_cs2_fingerprint_kit_immortals_book = 2
+e_212p_cs2_read_immortals_book = 2
+e_212p_cs2_move_chair_under_protrait = 2
+e_212p_cs2_cu_montreaux_eyes = 2
+e_212p_cs2_flip_hidden_switch = 2
+e_212p_cs2_five_heads_into_pentagram = 5
+
+e_212p_cs6_enter = 2
+e_212p_cs6_talk_old_lady = 5
+
+e_202p_hal_glass_madelines_door = 2
+e_202p_hal_glass_howards_door = 2
+
+e_202p_lby_chat_wilkes = 2
+e_202p_lby_emilio_estelle_collide = 2
+e_202p_lby_fingerprint_kit_wilke_glass = 2
+e_202p_lby_fingerprint_kit_buchelli_glass = 2
+e_202p_lby_jean_wakeup_call = 2
+
+e_202p_pho_overhear_buchelli = 2
+e_202p_pho_tape_recorder_buchelli = 5
+e_202p_pho_call_prince_james = 5
+
+e_202p_r25_talk_grace_abbe = 2
+e_202p_r25_talk_grace_priory = 2
+e_202p_r25_talk_grace_bloodline_2nd_time = 2
+e_202p_r25_talk_grace_treasure = 2
+e_202p_r25_talk_grace_grail = 2
+e_202p_r25_fingerprint_kit_soda_bottle = 2
+
+e_sidney_add_fingerprint_wilkes = 1
+e_sidney_add_tape_buchelli = 1
+e_sidney_translate_tape_buchelli = 3
+e_sidney_suspect_link_fingerprint_wilkes = 1
+e_sidney_makeid_print = 2
+
+e_202p_ma3_talk_abbe_dead_guys = 2
+
+e_202p_arm_talk_mosely = 2
+e_202p_arm_vampire_answer = 2
+e_202p_arm_think_dead_faces = 2
+e_202p_arm_find_pool_o_blood = 5
+e_202p_arm_vision_vampires_1 = 2
+e_202p_arm_vision_vampires_2 = 2
+
+e_202p_vgr_look_tire_tracks = 2
+
+e_202p_vg1_enter = 2
+e_202p_vg1_notepad_copy_tires = 2
+
+e_202p_lhi_talk_larry_dead_guys_2nd_time = 2
+e_202p_lhi_talk_larry_dead_guys_3rd_time = 2
+e_202p_lhi_talk_larry_freemason = 4
+
+e_202p_lhe_hanger_window = 7
+
+e_202p_map_follow_howard = 2
+
+e_202p_wod_talk_estelle_howard = 2
+e_202p_wod_talk_estelle_site_2nd_time = 2
+
+e_202p_cse_tire_tread_match = 2
+e_202p_cse_reporter_montreaux = 5
+e_202p_cse_talk_montreaux_grail = 2
+e_202p_cse_talk_montreaux_murder = 2
+e_202p_cse_talk_montreaux_viticulture_2nd_time = 2
+e_202p_cse_talk_montreaux_viticulture_3rd_time = 2
+
+e_205p_hal_pickup_howard_glass = 2
+
+e_205p_lby_enter_gabe_moseley_leave = 2
+e_205p_lby_enter_bridge_start_scene = 2
+
+e_205p_din_overhear_gabe_mosely = 5
+
+e_205p_rc2_pickup_envelope = 2
+
+e_205p_inventory_fingerprint_kit_envelope = 2
+
+e_205p_chu_pickup_pamphlet = 2
+e_205p_chu_trace_statue = 2
+
+e_205p_off_talk_abbe_sunrise_line = 2
+e_205p_off_talk_abbe_magdalen = 2
+
+e_sidney_add_fingerprint_montreaux = 1
+e_sidney_add_fingerprint_lsr_unknown = 1
+e_sidney_add_hermetical_symbols_from_serres = 1
+e_sidney_suspect_link_fingerprint_montreaux = 1
+e_sidney_analysis_symbols_from_serres = 2
+e_sidney_map_aquarius = 5
+e_sidney_analysis_anomalies_parch1 = 2
+e_sidney_analysis_anomalies_parch2 = 2
+e_sidney_analysis_gemoetry_parch1 = 2
+e_sidney_analysis_gemoetry_parch2 = 4
+e_sidney_analysis_view_rotation_parch2 = 2
+e_sidney_map_circle = 5
+e_sidney_search_quaternity = 1
+e_sidney_search_st_michael = 1
+e_sidney_search_pythagoras = 1
+e_sidney_map_aries = 5
+e_sidney_map_serres = 2
+e_sidney_map_taurus = 5
+e_sidney_search_asmodeus = 1
+e_sidney_search_chessboard = 1
+e_sidney_search_duality = 1
+e_sidney_map_gemini = 5
+
+e_302a_lhe_hide_behind_tree = 5
+
+e_302a_lhb_shovel_dirt = 4
+
+e_302a_plo_harley_black_sedan = 2
+
+e_302a_inventory_fingerprint_kit_manuscript = 2
+
+e_302a_lhm_talk_mosely = 2
+
+e_307a_read_manuscript = 2
+e_307a_pickup_keys = 2
+
+e_307a_rmosely_room_key_r33 = 2
+e_307a_r33_move_clothes = 4
+
+e_307a_din_chat_buchelli = 2
+
+e_307a_lhm_chat_buthane = 2
+
+e_307a_ms2_wallet_postcard1 = 1
+e_307a_ms2_wallet_postcard2 = 1
+e_307a_ms2_wallet_postcard3 = 1
+
+e_307a_mop_pickup_binocs = 2
+
+e_307a_ler_pickup_note_in_cave = 2
+e_307a_ler_coordinate_device_mark_x = 2
+e_307a_ler_shovel_dig_x = 2
+e_307a_ler_use_tenier = 5
+e_307a_ler_click_point_up = 2
+
+e_sidney_add_postcard_1 = 1
+e_sidney_add_postcard_2 = 1
+e_sidney_add_postcard_3 = 1
+e_sidney_search_solomon = 1
+e_sidney_analysis_view_words_poussin = 2
+e_sidney_analysis_view_words_tenier = 2
+e_sidney_analysis_gemoetry_poussin = 2
+e_sidney_map_poussin = 5
+e_sidney_search_st_vincent = 1
+e_sidney_search_temple_solomon = 1
+e_sidney_analysis_send_email_for_floor_plan = 2
+e_sidney_map_virgo = 5
+e_sidney_search_soul = 1
+e_sidney_search_hexagram = 1
+e_sidney_search_seal = 1
+e_sidney_map_libra = 5
+
+e_310a_hal_overhear_jean_roxanne = 2
+e_310a_hal_enter_r23_see_jean_roxanne = 2
+e_310a_hal_see_mosely_sneak_from_r25 = 2
+e_310a_hal_see_madeline_exit_r33 = 2
+
+e_310a_clo_roxanne_open_r23 = 2
+
+e_310a_r33_talk_mosely_grace = 2
+
+e_310a_lby_talk_jean_wilkes = 1
+
+e_310a_lhm_look_footprint = 2
+
+e_310a_wdb_enter = 5
+e_310a_wdb_pickup_letter = 2
+e_310a_wdb_look_blood_pool = 1
+e_310a_wdb_look_knee_indents = 1
+
+e_310a_pou_talk_emilio = 2
+
+e_sidney_add_fingerprint_larry = 1
+e_sidney_suspect_link_fingerprint_larry = 1
+
+e_310a_lhi_talk_montreaux = 2
+e_310a_lhi_talk_throne = 2
+e_310a_lhi_talk_rlc = 2
+
+e_310a_r25_talk_grace_grail = 2
+e_310a_r25_talk_grace_prince_james = 2
+e_310a_r25_talk_grace_throne = 2
+e_310a_r25_talk_grace_bloodline = 2
+
+e_312p_hal_see_buchelli_sneak = 2
+
+e_sidney_email_open_temple_diagram = 2
+e_sidney_map_temple = 5
+e_sidney_map_scorpio = 5
+
+e_312p_lby_overhear_prince_james_jean = 2
+
+e_312p_din_overhear_howard_estelle = 2
+
+e_312p_mcb_pickup_note = 2
+
+e_312p_bec_pickup_handkerchief = 2
+e_312p_bec_pickup_note_from_cave = 2
+e_312p_bec_coordinate_device_find_cave = 2
+e_312p_bec_shovel_cave = 5
+
+e_312p_mcf_coordinate_device_mark_x = 2
+e_312p_mcf_shovel_dig = 2
+e_312p_mcf_pickup_note = 2
+
+e_312p_cd1_binoc_see_buchelli_bike = 5
+
+e_312p_bmb_shovel_dig = 2
+e_312p_bmb_fingerprint_kit_manuscript1 = 2
+e_312p_bmb_fingerprint_kit_manuscript2 = 2
+e_312p_bmb_fingerprint_kit_manuscript3 = 2
+e_312p_bmb_pickup_manuscript = 2
+
+e_312p_wod_talk_howard_treasure = 2
+
+e_sidney_add_sum_note = 1
+e_sidney_translate_sum = 2
+e_sidney_translate_arcadia = 5
+e_sidney_analysis_complete_anagram = 20
+e_sidney_map_saggittarius = 5
+e_sidney_add_manuscript_prints_buthane = 1
+e_sidney_add_manuscript_prints_mosley = 1
+e_sidney_add_manuscript_prints_buchelli = 1
+e_sidney_analysis_link_manuscript_prints_buthane = 1
+e_sidney_analysis_link_manuscript_prints_mosley = 1
+e_sidney_analysis_link_manuscript_prints_buchelli = 1
+
+e_303p_din_answer_1st_theif_mosely = 2
+e_303p_din_answer_1st_theif_buthane = 2
+e_303p_din_answer_1st_theif_buchelli = 2
+e_303p_din_answer_buried = 2
+e_303p_din_manuscript_no_prints = 2, e_303p_din_manuscript_prints = 10
+e_303p_din_seen_buchellis_collar_and_stub = 10
+
+e_303p_bet_enter = 2
+e_303p_bet_talk_prince_james_bloodline = 2
+e_303p_bet_talk_prince_james_negociations = 2
+e_303p_bet_talk_prince_james_viticulture = 2
+
+e_303p_ma3_talk_abbe_treasure = 2
+e_303p_ma3_talk_abbe_montreaux = 2
+e_303p_ma3_talk_abbe_excavations = 2
+e_303p_ma3_talk_abbe_throne = 2
+
+e_303p_wod_fingerprint_kit_water_bottle = 2
+
+e_sidney_suspect_link_fingerprint_estelle = 1
+e_sidney_add_fingerprint_estelle = 1
+
+e_303p_cse_climb_gate = 5
+e_303p_cse_open_garage_door = 2
+
+e_303p_gri_inspect_bats = 2
+
+e_sidney_suspect_link_fingerprint_lsr_unknown = 4
+e_sidney_email_open_symbols_from_serres = 5
+
+e_303p_lby_talk_estelle_serpent_rouge = 2
+e_303p_lby_talk_estelle_egyption_artifacts = 2
+e_303p_r31_take_vampire_cup_photo = 5
+e_303p_cem_hide_watch_emilio_mesmi = 10
+e_303p_hal_knock_r27 = 5
+
+e_temple_chessboard = 10
+e_temple_grab_pendulum = 5
+e_temple_drop_platform = 5
+e_temple_correct_symbols_scale = 10
+e_temple_radio_grace_about_solomon = 2
+e_temple_pickup_glove = 2
+e_temple_glove_fire_bowl = 5
+e_temple_place_stone_on_demon = 5
+e_temple_select_mirror = 5
+e_temple_select_yinyang = 5
+e_temple_veil_chamber_door_opens = 5
+e_temple_solve_bridge = 10
+e_temple_radio_grace_about_demon = 5
+e_temple_get_on_sarcophagus = 5
+e_temple_kill_demon = 25

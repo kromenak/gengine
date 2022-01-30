@@ -33,6 +33,7 @@ struct SceneModel;
 class SIF;
 class Skybox;
 class SoundtrackPlayer;
+class StatusOverlay;
 class Vector3;
 
 struct SceneCastResult
@@ -81,6 +82,7 @@ public:
 	Animator* GetAnimator() const { return mAnimator; }
 	SoundtrackPlayer* GetSoundtrackPlayer() const { return mSoundtrackPlayer; }
 	GameCamera* GetCamera() const { return mCamera; }
+    StatusOverlay* GetStatusOverlay() const { return mStatusOverlay; }
     
     void SetPaused(bool paused);
     
@@ -105,6 +107,9 @@ private:
 	
     // The game camera used to move around.
     GameCamera* mCamera = nullptr;
+
+    // The status overlay for the scene.
+    StatusOverlay* mStatusOverlay = nullptr;
 	
 	// All actors and props in one list.
     // Sometimes, we want to treat these guys in a homogenous manner, since both have Models, can be interacted with, etc.
