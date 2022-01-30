@@ -1,5 +1,6 @@
 #include "OptionBar.h"
 
+#include "GameProgress.h"
 #include "InventoryManager.h"
 #include "Services.h"
 #include "TextAsset.h"
@@ -57,6 +58,11 @@ void OptionBar::Show()
     {
         mActiveInventoryItemButton->SetUpTexture(Services::Get<InventoryManager>()->GetInventoryItemIconTexture(activeInvItem));
     }
+
+    // Update score label.
+    mScoreLabel->SetText(StringUtil::Format("%03i/%03i",
+                                            Services::Get<GameProgress>()->GetScore(),
+                                            Services::Get<GameProgress>()->GetMaxScore()));
 
     // Position option bar over mouse.
     // "Minus half size" because option bar's pivot is lower-left corner, but want mouse at center.
@@ -249,20 +255,19 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     // Add score text.
     Actor* scoreActor = new Actor(Actor::TransformType::RectTransform);
     scoreActor->GetTransform()->SetParent(mOptionBarRoot);
-    UILabel* scoreLabel = scoreActor->AddComponent<UILabel>();
-    canvas->AddWidget(scoreLabel);
+    mScoreLabel = scoreActor->AddComponent<UILabel>();
+    canvas->AddWidget(mScoreLabel);
     
-    scoreLabel->GetRectTransform()->SetSizeDelta(config["scoreSize"].GetValueAsVector2());
-    scoreLabel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-    scoreLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
+    mScoreLabel->GetRectTransform()->SetSizeDelta(config["scoreSize"].GetValueAsVector2());
+    mScoreLabel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
+    mScoreLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
     
     Vector2 scorePos = config["scorePos"].GetValueAsVector2();
     scorePos.y *= -1;
-    scoreLabel->GetRectTransform()->SetAnchoredPosition(scorePos);
+    mScoreLabel->GetRectTransform()->SetAnchoredPosition(scorePos);
     
-    scoreLabel->SetFont(font);
-    scoreLabel->SetText("000/965");
-    scoreLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+    mScoreLabel->SetFont(font);
+    mScoreLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
     
     // Add day text.
     Actor* dayActor = new Actor(Actor::TransformType::RectTransform);
