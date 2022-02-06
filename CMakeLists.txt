@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
 
-project(gengine VERSION 0.0.2
+project(gengine VERSION 0.0.3
                 DESCRIPTION "Gabriel Knight 3 game engine"
                 LANGUAGES C CXX)
 
@@ -76,6 +76,13 @@ if(MSVC)
     target_compile_options(gk3 PRIVATE /wd26812)
 else()
     #target_compile_options(gk3 PRIVATE -Wall -Wextra -pedantic)
+endif()
+
+# Other compiler flags
+if(MSVC)
+    target_compile_options(gk3 PRIVATE 
+        /MP     # Multithreaded compiling - it's faster
+    )
 endif()
 
 # Library locations/linking/copying.
