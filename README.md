@@ -13,7 +13,7 @@ This repository **does not** contain the data files from the game, since those a
 
 Copy the entire contents of the game's `Data` folder into the `Data` folder before building/running. This includes all Barn (.brn) asset bundles and all video files (.bik and .avi).
 
-After building, you can also add data files. On Windows, copy them to the `Data` folder in the exe directory. On Mac, copy them to `Gabriel Knight 3.appropriate/Contents/Resources/Data`.
+After building, you can also add data files. On Windows, copy them to the `Data` folder in the exe directory. On Mac, copy them to `Gabriel Knight 3.app/Contents/Resources/Data`.
 
 ### Build File Generation
 The project uses CMake, which means the definitions of what targets to create, which source files to include, and which libraries to link against are defined in `CMakeLists.txt` in the project root. Using CMake, you can generate the project files for your preferred IDE. 
