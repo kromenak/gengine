@@ -147,7 +147,7 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 	Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", action->ToString().c_str()));
 	
 	// Increment action ID.
-	mActionId++;
+	++mActionId;
 	
 	// If this is a topic, automatically increment topic counts.
 	if(Services::Get<VerbManager>()->IsTopic(action->verb))
@@ -411,7 +411,7 @@ void OutputActions(const std::vector<const Action*>& actions)
 void ActionManager::ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
 {
 	auto actions = GetActions(noun, VerbType::Normal);
-	OutputActions(actions);
+	//OutputActions(actions);
 	mActionBar->Show(noun, VerbType::Normal, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
 }
 
@@ -433,7 +433,7 @@ void ActionManager::ShowTopicBar(const std::string& noun)
     }
 	
 	// Show topics.
-	OutputActions(actions);
+	//OutputActions(actions);
 	mActionBar->Show(noun, VerbType::Topic, actions, nullptr, std::bind(&ActionManager::OnActionBarCanceled, this));
 }
 
@@ -656,8 +656,6 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 
 void ActionManager::OnActionBarCanceled()
 {
-	std::cout << "Action bar canceled." << std::endl;
-
     // In the original game, this appears to be called every time the action bar disables, regardless of whether it was for a conversation.
     // This in turn calls EndConversation, which calls to DialogueManager::EndConversation.
     ExecuteSheepAction("GLB_ALL", "CodeCallEndConv$", nullptr);

@@ -496,7 +496,11 @@ void Walker::OnWalkToFinished()
     // Make sure state variables are cleared.
     mPath.clear();
     mWalkToSeeTarget.clear();
-    
+
+    // Idle fidget should restart when walk finishes.
+    // But do this BEFORE callback, as callback may trigger anims or whatnot that want to stop fidgets.
+    mGKOwner->StartFidget(GKActor::FidgetType::Idle);
+
     // Call finished callback.
     if(mFinishedPathCallback != nullptr)
     {
@@ -504,9 +508,6 @@ void Walker::OnWalkToFinished()
         mFinishedPathCallback = nullptr;
         callback();
     }
-
-    // Idle fidget should restart when walk finishes.
-    mGKOwner->StartFidget(GKActor::FidgetType::Idle);
 }
 
 bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)

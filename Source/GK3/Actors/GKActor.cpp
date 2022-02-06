@@ -6,6 +6,7 @@
 #include "CharacterManager.h"
 #include "Debug.h"
 #include "FaceController.h"
+#include "GAS.h"
 #include "GasPlayer.h"
 #include "GEngine.h"
 #include "MeshRenderer.h"
@@ -153,7 +154,7 @@ void GKActor::StartFidget(FidgetType type)
     GAS* newFidget = GetGasForFidget(type);
     if(newFidget != nullptr)
     {
-        //std::cout << GetNoun() << ": starting fidget " << newFidget->GetName() << std::endl;
+        //printf("%s: starting fidget %s\n", GetNoun().c_str(), newFidget->GetName().c_str());
         mGasPlayer->Play(newFidget);
         mActiveFidget = type;
     }
@@ -161,7 +162,6 @@ void GKActor::StartFidget(FidgetType type)
 
 void GKActor::StopFidget(std::function<void()> callback)
 {
-    //std::cout << GetNoun() << ": stopping all fidgets." << std::endl;
     mGasPlayer->Stop(callback);
     mActiveFidget = FidgetType::None;
 }

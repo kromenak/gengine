@@ -78,6 +78,13 @@ void DialogueManager::TriggerDialogueCue()
 
 void DialogueManager::SetSpeaker(const std::string& noun)
 {
+    // Ignore setting speaker if already set to that person.
+    // This is actually kind of important sometimes, to avoid playing fidgets when not intended.
+    if(StringUtil::EqualsIgnoreCase(mSpeaker, noun))
+    {
+        return;
+    }
+
 	// If someone is no longer the speaker, have them transition to listening.
 	if(!mSpeaker.empty() && mDialogueUsesFidgets)
 	{
@@ -136,15 +143,20 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
                 {
                     mSavedTalkFidgets.emplace_back(actor, actor->GetTalkFidget());
                     actor->SetTalkFidget(settings->talkGas);
-
-                    //TODO: Conversations often set both Talk & Idle fidgets. Looking at Gabe, it appears he starts playing his talk fidget automatically.
-                    //TODO: But if both participants set fidgets, how do you know who should start in Talk vs. Listen mode? Maybe Ego is always Talk first?
-                    actor->StartFidget(GKActor::FidgetType::Talk);
                 }
                 if(settings->listenGas != nullptr)
                 {
                     mSavedListenFidgets.emplace_back(actor, actor->GetListenFidget());
                     actor->SetListenFidget(settings->listenGas);
+
+                    // Start with the listen fidget.
+                    actor->StartFidget(GKActor::FidgetType::Listen);
+                }
+
+                // Use the talk fidget by default if there were no listen fidget defined for some reason.
+                if(settings->talkGas != nullptr && settings->listenGas == nullptr)
+                {
+                    actor->StartFidget(GKActor::FidgetType::Talk);
                 }
             }
         }
