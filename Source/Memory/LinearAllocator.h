@@ -9,6 +9,7 @@
 // This is a very simple allocator with good performance. But it is rather restrictive.
 //
 #pragma once
+#include <cstddef>
 
 class LinearAllocator
 {

@@ -1,6 +1,7 @@
 #include "Console.h"
 
 #include "Services.h"
+#include "SheepScript.h"
 #include "StringUtil.h"
 
 void Console::AddToScrollback(const std::string& str)
