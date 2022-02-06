@@ -287,6 +287,11 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
 	}
 }
 
+void Texture::AddDirtyFlags(DirtyFlags flags)
+{
+    mDirtyFlags |= flags;
+}
+
 void Texture::UploadToGPU()
 {
     // Nothing to do.

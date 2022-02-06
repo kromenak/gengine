@@ -194,8 +194,8 @@ bool VideoPlayback::UpdateVideoTexture(Frame* videoFrame)
     //TODO: There may be more efficient options for displaying a video frame. Ex: YUV420 data can be loaded into texture and rendered with special shader.
     //TODO: But for now, just convert all formats to RGBA for simplicity.
     mRGBAConvertContext = sws_getCachedContext(mRGBAConvertContext,
-        avFrame->width, avFrame->height, (AVPixelFormat)avFrame->format, // from format
-        avFrame->width, avFrame->height, AV_PIX_FMT_RGBA,              // to format
+        avFrame->width, avFrame->height, (AVPixelFormat)avFrame->format,    // from format
+        avFrame->width, avFrame->height, AV_PIX_FMT_RGBA,                   // to format
         SWS_BICUBIC, nullptr, nullptr, nullptr);
     if(mRGBAConvertContext == nullptr)
     {
@@ -211,6 +211,7 @@ bool VideoPlayback::UpdateVideoTexture(Frame* videoFrame)
               dest, dest_linesize); // dest
     
     // Upload texture data to GPU.
+    mVideoTexture->AddDirtyFlags(Texture::DirtyFlags::Pixels);
     mVideoTexture->UploadToGPU();
     
     // Yep, we are uploaded.

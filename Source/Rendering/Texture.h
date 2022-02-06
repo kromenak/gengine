@@ -95,9 +95,12 @@ public:
 	// Alpha and transparency
 	void SetTransparentColor(Color32 color);
 	void ApplyAlphaChannel(const Texture& alphaTexture);
-	
+
+    // GPU upload
+    void AddDirtyFlags(DirtyFlags flags);
 	void UploadToGPU();
-	
+
+    // Export/save
 	void WriteToFile(const std::string& filePath);
 	
 private:
