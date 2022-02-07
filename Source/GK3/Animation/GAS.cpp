@@ -299,7 +299,7 @@ void GAS::Load(char* data, int dataLength)
             mNodes.push_back(node);
 
             // Remember that we need to come back and hook up the label index later.
-            ifNodePairs.push_back(std::make_pair(tokenizer.GetNext(), node));
+            ifNodePairs.push_back(std::make_pair(label, node));
         }
         else if(StringUtil::EqualsIgnoreCase(command, "WALKTO"))
         {

@@ -89,8 +89,8 @@ void GasPlayer::StartAnimation(Animation* anim, std::function<void()> finishCall
 void GasPlayer::OnUpdate(float deltaTime)
 {
     if(mGas == nullptr) { return; }
-	if(mPaused) { return; }
-    
+    if(mPaused) { return; }
+
     // Decrement timer. When it gets to zero, we move onto the next node.
     if(mTimer >= 0.0f)
     {
@@ -115,30 +115,6 @@ void GasPlayer::OnUpdate(float deltaTime)
             condition.second = false;
         }
     }
-
-    /*
-    // Handle any active "when no longer near" nodes.
-    for(auto it = mActiveWhenNoLongerNearNodes.begin(); it != mActiveWhenNoLongerNearNodes.end();)
-    {
-        if((*it)->CheckCondition(this))
-        {
-            if(mActiveWhenNoLongerNearNodes.size() > 1)
-            {
-                std::swap(*it, mActiveWhenNoLongerNearNodes.back());
-                mActiveWhenNoLongerNearNodes.pop_back();
-            }
-            else
-            {
-                mActiveWhenNoLongerNearNodes.pop_back();
-                it = mActiveWhenNoLongerNearNodes.begin();
-            }
-        }
-        else
-        {
-            ++it;
-        }
-    }
-    */
 }
 
 void GasPlayer::ProcessNextNode()
@@ -151,11 +127,10 @@ void GasPlayer::ProcessNextNode()
     }
     
     // First, update the node index and loop if necessary.
-    mNodeIndex++;
+    ++mNodeIndex;
     mNodeIndex %= mGas->GetNodeCount();
     
     // Grab the node from the list.
-    //std::cout << "Executing node " << mNodeIndex << std::endl;
     GasNode* node = mGas->GetNode(mNodeIndex);
     if(node == nullptr)
     {
