@@ -55,6 +55,7 @@ public:
     
     void Play(Soundtrack* soundtrack);
     void Stop(Soundtrack* soundtrack);
+    void Stop(const std::string& soundtrackName);
     void StopAll();
 	
 protected:

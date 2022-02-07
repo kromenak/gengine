@@ -1,5 +1,7 @@
 #include "SoundtrackPlayer.h"
 
+#include "StringUtil.h"
+
 PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
     mSoundtrack(soundtrack)
 {
@@ -120,6 +122,24 @@ void SoundtrackPlayer::Stop(Soundtrack* soundtrack)
     for(auto it = mPlaying.begin(); it != mPlaying.end(); ++it)
     {
         if(it->mSoundtrack == soundtrack)
+        {
+            // Stop the soundtrack.
+            // How the audio stops depends on the "Stop Method" of the current soundtrack node.
+            it->Stop();
+
+            // Erase from list.
+            mPlaying.erase(it);
+            return;
+        }
+    }
+}
+
+void SoundtrackPlayer::Stop(const std::string& soundtrackName)
+{
+    // Find and remove.
+    for(auto it = mPlaying.begin(); it != mPlaying.end(); ++it)
+    {
+        if(StringUtil::EqualsIgnoreCase(it->mSoundtrack->GetNameNoExtension(), soundtrackName))
         {
             // Stop the soundtrack.
             // How the audio stops depends on the "Stop Method" of the current soundtrack node.

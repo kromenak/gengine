@@ -9,8 +9,9 @@
 #include "GKActor.h"
 #include "Heading.h"
 #include "MeshRenderer.h"
-#include "Services.h"
 #include "Scene.h"
+#include "Services.h"
+#include "SoundtrackPlayer.h"
 #include "VertexAnimation.h"
 #include "VertexAnimator.h"
 
@@ -154,12 +155,11 @@ void ModelVisibilityAnimNode::Play(AnimationState* animState)
 
                 // If we're toggling specific submeshes on/off, let's assume we want the object as a whole enabled...
                 meshRenderer->SetEnabled(true);
+                obj->SetActive(true);
             }
             else
             {
-                // If we want to toggle the entire object visible, we can just use enable/disable.
-                //TODO: Do we want to toggle the visibility bools all back to zero in this case?
-                meshRenderer->SetEnabled(visible);
+                obj->SetActive(visible);
             }
         }
 	}
@@ -265,18 +265,33 @@ void FootscuffAnimNode::Play(AnimationState* animState)
 
 void PlaySoundtrackAnimNode::Play(AnimationState* animState)
 {
-	std::cout << "PLAY " << soundtrackName << std::endl;
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene == nullptr) { return; }
+
+    SoundtrackPlayer* soundtrackPlayer = scene->GetSoundtrackPlayer();
+    if(soundtrackPlayer == nullptr) { return; }
+
+    Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName);
+    if(soundtrack == nullptr) { return; }
+    soundtrackPlayer->Play(soundtrack);
 }
 
 void StopSoundtrackAnimNode::Play(AnimationState* animState)
 {
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene == nullptr) { return; }
+
+    SoundtrackPlayer* soundtrackPlayer = scene->GetSoundtrackPlayer();
+    if(soundtrackPlayer == nullptr) { return; }
+
+    // Either stop all soundtracks, or a specific one.
 	if(soundtrackName.empty())
 	{
-		std::cout << "STOP ALL SOUNDTRACKS" << std::endl;
+        soundtrackPlayer->StopAll();
 	}
 	else
 	{
-		std::cout << "STOP " << soundtrackName << std::endl;
+        soundtrackPlayer->Stop(soundtrackName);
 	}
 }
 
