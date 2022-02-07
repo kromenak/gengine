@@ -314,11 +314,13 @@ void Scene::Update(float deltaTime)
 {
     //TEMP: for debug visualization of BSP ambient light sources.
     //mSceneData->GetBSP()->DebugDrawAmbientLights(mEgo->GetPosition());
-    
+
     // Apply ambient light to actors.
     for(auto& actor : mActors)
     {
-        Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(actor->GetPosition());
+        // Use the "model position" rather than the "actor position" for more accurate lighting.
+        // For example, in RC1, Buthane's actor position is way outside the map (dark color), but her model is near the van.
+        Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(actor->GetModelPosition());
         for(Material& material : actor->GetMeshRenderer()->GetMaterials())
         {
             material.SetColor("uAmbientColor", ambientColor);

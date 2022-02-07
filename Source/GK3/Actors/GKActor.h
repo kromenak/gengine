@@ -68,6 +68,8 @@ public:
     void Rotate(float rotationAngle);
     void SetHeading(const Heading& heading) override;
 
+    Vector3 GetModelPosition();
+
     void StartAnimation(VertexAnimParams& animParams) override;
     void SampleAnimation(VertexAnimParams& animParams, int frame) override;
     void StopAnimation(VertexAnimation* anim = nullptr) override;
@@ -123,7 +125,6 @@ private:
 
     void OnVertexAnimationStop();
     
-    Vector3 GetModelPosition();
     Quaternion GetModelRotation();
     
     void SyncModelToActor();

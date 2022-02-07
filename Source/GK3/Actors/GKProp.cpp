@@ -2,6 +2,7 @@
 
 #include "GasPlayer.h"
 #include "MeshRenderer.h"
+#include "Model.h"
 #include "Quaternion.h"
 #include "SceneData.h"
 #include "Vector3.h"
@@ -20,6 +21,12 @@ GKProp::GKProp() : GKObject()
 GKProp::GKProp(Model* model) : GKProp()
 {
     mMeshRenderer->SetModel(model);
+
+    // For debugging, set name equal to model.
+    if(model != nullptr)
+    {
+        SetName(model->GetNameNoExtension());
+    }
 }
 
 GKProp::GKProp(const SceneModel& modelDef) : GKProp(modelDef.model)
