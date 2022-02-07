@@ -1,6 +1,4 @@
 //
-// FaceController.h
-//
 // Clark Kromenaker
 //
 // Controls facial elements, such as eye movement, blinking, lip movement,
@@ -90,11 +88,13 @@ private:
 	
 	Texture* mDefaultLeftEyeTexture = nullptr;
 	Texture* mDefaultRightEyeTexture = nullptr;
-	
-	// Eye textures are larger than they need to be (100x104 vs. 25x26 (1/4)).
-	// So, they need to be downsampled before being applied to the face.
-	Texture* mDownSampledLeftEyeTexture = nullptr;
-	Texture* mDownSampledRightEyeTexture = nullptr;
+
+    // Eye textures are fairly large (100x104) and are downsampled to ~1/4th the size.
+    // Exactly 1/4th would be 25x26, BUT that height is too big for some faces - 22 seems to work pretty well.
+    const int kDownSampledEyeWidth = 25;
+    const int kDownSampledEyeHeight = 22;
+	Texture* mDownsampledLeftEyeTexture = nullptr;
+	Texture* mDownsampledRightEyeTexture = nullptr;
 	
 	// A timer for how frequently the face should blink.
 	// Set randomly based on interval specified in face config.
@@ -117,4 +117,5 @@ private:
 	void RollEyeJitterTimer();
 
 	void UpdateFaceTexture();
+    void DownsampleEyeTexture(Texture* src, Texture* dst, const Vector2& offset);
 };

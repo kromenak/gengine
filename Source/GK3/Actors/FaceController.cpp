@@ -15,14 +15,14 @@ TYPE_DEF_CHILD(Component, FaceController);
 
 FaceController::FaceController(Actor* owner) : Component(owner)
 {
-	mDownSampledLeftEyeTexture = new Texture(25, 26, Color32::Black);
-	mDownSampledRightEyeTexture = new Texture(25, 26, Color32::Black);
+	mDownsampledLeftEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black);
+	mDownsampledRightEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black);
 }
 
 FaceController::~FaceController()
 {
-	delete mDownSampledLeftEyeTexture;
-	delete mDownSampledRightEyeTexture;
+	delete mDownsampledLeftEyeTexture;
+	delete mDownsampledRightEyeTexture;
 }
 
 void FaceController::SetCharacterConfig(const CharacterConfig& characterConfig)
@@ -346,47 +346,21 @@ void FaceController::UpdateFaceTexture()
 	// Downsample & copy left eye.
 	if(mCurrentLeftEyeTexture != nullptr)
 	{
-		//stbir_resize_uint8(mCurrentLeftEyeTexture->GetPixelData(), mCurrentLeftEyeTexture->GetWidth(), mCurrentLeftEyeTexture->GetHeight(), 0,
-		//				   mDownSampledLeftEyeTexture->GetPixelData(), mDownSampledLeftEyeTexture->GetWidth(), mDownSampledLeftEyeTexture->GetHeight(), 0, 4);
-		 
-		//TODO: Am I using the "bias" correctly?
-		//TODO: Is CATMULLROM the best filter? Some filters trigger an assertion if the x/y offset become too big...
-		//const Vector2& leftEyeBias = mCharacterConfig->faceConfig.leftEyeBias;
-		stbir_resize_subpixel(mCurrentLeftEyeTexture->GetPixelData(), mCurrentLeftEyeTexture->GetWidth(), mCurrentLeftEyeTexture->GetHeight(), 0,
-							  mDownSampledLeftEyeTexture->GetPixelData(), mDownSampledLeftEyeTexture->GetWidth(), mDownSampledLeftEyeTexture->GetHeight(), 0,
-							  STBIR_TYPE_UINT8, 4, -1, 0,
-							  STBIR_EDGE_WRAP, STBIR_EDGE_WRAP, STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,
-							  STBIR_COLORSPACE_LINEAR, NULL,
-							  //0.25f, 0.25f, mEyeJitterX + leftEyeBias.x, mEyeJitterY + leftEyeBias.y);
-							  0.25f, 0.25f, 0.0f, 0.0f);
-		
-		mDownSampledLeftEyeTexture->UploadToGPU();
-		
+        Vector2 offset;
+        DownsampleEyeTexture(mCurrentLeftEyeTexture, mDownsampledLeftEyeTexture, offset);
+
 		const Vector2& leftEyeOffset = mCharacterConfig->faceConfig.leftEyeOffset;
-		Texture::BlendPixels(*mDownSampledLeftEyeTexture, *mFaceTexture, leftEyeOffset.x, leftEyeOffset.y);
+		Texture::BlendPixels(*mDownsampledLeftEyeTexture, *mFaceTexture, leftEyeOffset.x, leftEyeOffset.y);
 	}
 	
 	// Downsample & copy right eye.
 	if(mCurrentRightEyeTexture != nullptr)
 	{
-		//stbir_resize_uint8(mCurrentRightEyeTexture->GetPixelData(), mCurrentRightEyeTexture->GetWidth(), mCurrentRightEyeTexture->GetHeight(), 0,
-		//				   mDownSampledRightEyeTexture->GetPixelData(), mDownSampledRightEyeTexture->GetWidth(), mDownSampledRightEyeTexture->GetHeight(), 0, 4);
-		
-		//TODO: Am I using the "bias" correctly?
-		//TODO: Is CATMULLROM the best filter? Some filters trigger an assertion if the x/y offset become too big...
-		//const Vector2& rightEyeBias = mCharacterConfig->faceConfig.rightEyeBias;
-		stbir_resize_subpixel(mCurrentRightEyeTexture->GetPixelData(), mCurrentRightEyeTexture->GetWidth(), mCurrentRightEyeTexture->GetHeight(), 0,
-							  mDownSampledRightEyeTexture->GetPixelData(), mDownSampledRightEyeTexture->GetWidth(), mDownSampledRightEyeTexture->GetHeight(), 0,
-							  STBIR_TYPE_UINT8, 4, -1, 0,
-							  STBIR_EDGE_WRAP, STBIR_EDGE_WRAP, STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,
-							  STBIR_COLORSPACE_LINEAR, NULL,
-							  //0.25f, 0.25f, mEyeJitterX + rightEyeBias.x, mEyeJitterY + rightEyeBias.y);
-							  0.25f, 0.25f, 0.0f, 0.0f);
-							  
-		mDownSampledRightEyeTexture->UploadToGPU();
-		
+        Vector2 offset;
+        DownsampleEyeTexture(mCurrentRightEyeTexture, mDownsampledRightEyeTexture, offset);
+
 		const Vector2& rightEyeOffset = mCharacterConfig->faceConfig.rightEyeOffset;
-		Texture::BlendPixels(*mDownSampledRightEyeTexture, *mFaceTexture, rightEyeOffset.x, rightEyeOffset.y);
+		Texture::BlendPixels(*mDownsampledRightEyeTexture, *mFaceTexture, rightEyeOffset.x, rightEyeOffset.y);
 	}
 	
 	// Copy eyelids texture.
@@ -405,4 +379,21 @@ void FaceController::UpdateFaceTexture()
 		
 	// Upload all changes to the GPU.
 	mFaceTexture->UploadToGPU();
+}
+
+void FaceController::DownsampleEyeTexture(Texture* src, Texture* dst, const Vector2& offset)
+{
+    // Resize source image to fit into dst.
+    stbir_resize_subpixel(src->GetPixelData(), src->GetWidth(), src->GetHeight(), 0,    // input image data
+                          dst->GetPixelData(), dst->GetWidth(), dst->GetHeight(), 0,    // output image data
+                          STBIR_TYPE_UINT8,                                             // data type
+                          4,                                                            // number of channels; these textures are RGBA
+                          -1,                                                           // alpha channel; ignore
+                          0,                                                            // flags
+                          STBIR_EDGE_CLAMP, STBIR_EDGE_CLAMP,                           // horizontal & vertical edge mode
+                          STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,             // horizontal & vertical filter mode
+                          STBIR_COLORSPACE_LINEAR,                                      // colorspace
+                          nullptr,                                                      // alloc context (???)
+                          0.25f, 0.25f,                                                 // x/y scale
+                          offset.x, offset.y);                                          // x/y offset
 }
