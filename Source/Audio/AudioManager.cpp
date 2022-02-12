@@ -9,8 +9,9 @@
 #include "Services.h"
 #include "Vector3.h"
 
-PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel) :
-    channel(channel)
+PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel, Audio* audio) :
+    channel(channel),
+    audio(audio)
 {
     
 }
@@ -297,10 +298,6 @@ void AudioManager::Update(float deltaTime)
     // Update FMOD system every frame.
     mSystem->update();
 
-    // Update crossfades.
-    //mAmbientCrossfade.Update(deltaTime);
-    //mMusicCrossfade.Update(deltaTime);
-
     // Update faders.
     for(int i = 0; i < mFaders.size(); ++i)
     {
@@ -359,48 +356,48 @@ void AudioManager::UpdateListener(const Vector3& position, const Vector3& veloci
 
 PlayingSoundHandle AudioManager::PlaySFX(Audio* audio, std::function<void()> finishCallback)
 {
-    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
+    if(audio == nullptr) { return PlayingSoundHandle(); }
 
-    PlayingSoundHandle& soundHandle = CreateAndPlaySound(audio, AudioType::SFX);
+    PlayingSoundHandle& soundHandle = CreateAndPlaySound2D(audio, AudioType::SFX);
     soundHandle.mFinishCallback = finishCallback;
     return soundHandle;
 }
 
 PlayingSoundHandle AudioManager::PlaySFX3D(Audio* audio, const Vector3& position, float minDist, float maxDist)
 {
-    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
+    if(audio == nullptr) { return PlayingSoundHandle(); }
     return CreateAndPlaySound3D(audio, AudioType::SFX, position, minDist, maxDist);
 }
 
 PlayingSoundHandle AudioManager::PlayVO(Audio* audio)
 {
-    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound(audio, AudioType::VO);
+    if(audio == nullptr) { return PlayingSoundHandle(); }
+    return CreateAndPlaySound2D(audio, AudioType::VO);
 }
 
 PlayingSoundHandle AudioManager::PlayVO3D(Audio* audio, const Vector3& position, float minDist, float maxDist)
 {
-    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
+    if(audio == nullptr) { return PlayingSoundHandle(); }
     return CreateAndPlaySound3D(audio, AudioType::VO, position, minDist, maxDist);
 }
 
 PlayingSoundHandle AudioManager::PlayAmbient(Audio* audio, float fadeInTime)
 {
-    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
-    return CreateAndPlaySound(audio, AudioType::Ambient);
+    if(audio == nullptr) { return PlayingSoundHandle(); }
+    return CreateAndPlaySound2D(audio, AudioType::Ambient);
 }
 
 PlayingSoundHandle AudioManager::PlayAmbient3D(Audio* audio, const Vector3& position, float minDist, float maxDist)
 {
-    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
+    if(audio == nullptr) { return PlayingSoundHandle(); }
     return CreateAndPlaySound3D(audio, AudioType::Ambient, position, minDist, maxDist);
 }
 
 PlayingSoundHandle AudioManager::PlayMusic(Audio* audio, float fadeInTime)
 {
-    if(audio == nullptr) { return PlayingSoundHandle(nullptr); }
+    if(audio == nullptr) { return PlayingSoundHandle(); }
 
-    PlayingSoundHandle& soundHandle = CreateAndPlaySound(audio, AudioType::Music);
+    PlayingSoundHandle& soundHandle = CreateAndPlaySound2D(audio, AudioType::Music);
     if(!Math::IsZero(fadeInTime))
     {
         mFaders.emplace_back(soundHandle.channel);
@@ -450,12 +447,6 @@ void AudioManager::StopAll()
         sound.Stop();
     }
     mPlayingSounds.clear();
-}
-
-void AudioManager::SwapAmbient()
-{
-    //mAmbientCrossfade.Swap();
-    //mMusicCrossfade.Swap();
 }
 
 void AudioManager::SetMasterVolume(float volume)
@@ -589,12 +580,6 @@ void AudioManager::SaveAudioState(bool sfx, bool vo, bool ambient, AudioSaveStat
         if(!ambient &&
            (channelGroup == mAmbientChannelGroup ||
             channelGroup == mMusicChannelGroup))
-           /*
-           (channelGroup == mAmbientCrossfade.faderChannelGroups[0] ||
-            channelGroup == mAmbientCrossfade.faderChannelGroups[1] ||
-            channelGroup == mMusicCrossfade.faderChannelGroups[0]   ||
-            channelGroup == mMusicCrossfade.faderChannelGroups[1]))
-            */
         {
             continue;
         }
@@ -635,73 +620,110 @@ FMOD::ChannelGroup* AudioManager::GetChannelGroupForAudioType(AudioType audioTyp
         return mVOChannelGroup;
     case AudioType::Ambient:
         return mAmbientChannelGroup;
-        //return forVolume ? mAmbientCrossfade.channelGroup : mAmbientCrossfade.GetActive();
     case AudioType::Music:
         return mMusicChannelGroup;
-        //return forVolume ? mMusicCrossfade.channelGroup : mMusicCrossfade.GetActive();
     }
 }
 
-PlayingSoundHandle& AudioManager::CreateAndPlaySound(Audio* audio, AudioType audioType, bool is3D)
+PlayingSoundHandle& AudioManager::CreateAndPlaySound2D(Audio* audio, AudioType audioType)
+{
+    // Create the sound from the audio buffer.
+    FMOD::Sound* sound = CreateSound(audio, false);
+    if(sound == nullptr)
+    {
+        return mInvalidSoundHandle;
+    }
+
+    // Create the channel that will play the sound in the correct channel group.
+    FMOD::Channel* channel = CreateChannel(sound, GetChannelGroupForAudioType(audioType, false));
+    if(channel == nullptr)
+    {
+        return mInvalidSoundHandle;
+    }
+
+    // For 2D audio, we don't need to set any additional attributes. So, just unpause it right away.
+    channel->setPaused(false);
+
+    // Create and return sound handle.
+    mPlayingSounds.emplace_back(channel, audio);
+    return mPlayingSounds.back();
+}
+
+PlayingSoundHandle& AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3 &position, float minDist, float maxDist)
+{
+    // Create the 3D sound from the audio buffer.
+    FMOD::Sound* sound = CreateSound(audio, true);
+    if(sound == nullptr)
+    {
+        return mInvalidSoundHandle;
+    }
+
+    // Create the channel that will play the sound in the correct channel group.
+    FMOD::Channel* channel = CreateChannel(sound, GetChannelGroupForAudioType(audioType, false));
+    if(channel == nullptr)
+    {
+        return mInvalidSoundHandle;
+    }
+
+    // Sometimes, callers may pass negative values to mean "use default" for min/max dists.
+    if(minDist < 0.0f) { minDist = kDefault3DMinDist; }
+    if(maxDist < 0.0f) { maxDist = kDefault3DMaxDist; }
+
+    // Make sure min/max dist are in valid ranges.
+    if(maxDist < minDist) { maxDist = minDist; }
+    if(minDist > maxDist) { minDist = maxDist; }
+
+    // Set distance attributes.
+    channel->set3DMinMaxDistance(minDist, maxDist);
+
+    // Set position.
+    channel->set3DAttributes((const FMOD_VECTOR*)&position, nullptr);
+
+    // Play the sound. Important to do this AFTER setting 3D attributes for correct results.
+    channel->setPaused(false);
+
+    // Add to playing channels.
+    mPlayingSounds.emplace_back(channel, audio);
+
+    // Return channel being played on.
+    return mPlayingSounds.back();
+}
+
+FMOD::Sound* AudioManager::CreateSound(Audio* audio, bool is3D)
 {
     // Need to pass FMOD the length of audio data.
     FMOD_CREATESOUNDEXINFO exinfo;
     memset(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
     exinfo.cbsize = sizeof(FMOD_CREATESOUNDEXINFO);
     exinfo.length = audio->GetDataBufferLength();
-    
+
     // Determine flags.
     FMOD_MODE mode = FMOD_OPENMEMORY | FMOD_LOOP_OFF;
     if(is3D)
     {
         mode |= FMOD_3D | FMOD_3D_LINEARSQUAREROLLOFF;
     }
-    
+
     // Create the sound using the audio buffer.
     FMOD::Sound* sound = nullptr;
     FMOD_RESULT result = mSystem->createSound(audio->GetDataBuffer(), mode, &exinfo, &sound);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
-        return mInvalidSoundHandle;
     }
-    
-    // Play the sound, which returns the channel being played on.
+    return sound;
+}
+
+FMOD::Channel* AudioManager::CreateChannel(FMOD::Sound* sound, FMOD::ChannelGroup* channelGroup)
+{
+    // Calling "playSound" creates the channel in the appropriate channel group.
+    // However, the name of the function is a bit misleading - we just create the channel, we don't play it yet (we pass true for paused arg).
+    // This is important - if you want to set 3D attributes, you must set those attributes BEFORE unpausing the channel!
     FMOD::Channel* channel = nullptr;
-    result = mSystem->playSound(sound, GetChannelGroupForAudioType(audioType, false), false, &channel);
+    FMOD_RESULT result = mSystem->playSound(sound, channelGroup, true, &channel);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
-        return mInvalidSoundHandle;
     }
-    
-    // Add to playing channels.
-    mPlayingSounds.emplace_back(channel);
-    mPlayingSounds.back().audio = audio;
-
-    // Return channel being played on.
-    return mPlayingSounds.back();
-}
-
-PlayingSoundHandle& AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3 &position, float minDist, float maxDist)
-{
-    PlayingSoundHandle& soundHandle = CreateAndPlaySound(audio, audioType, true);
-    
-    // Assuming sound is assigned to a channel successfully, set 3D attributes.
-    if(soundHandle.channel != nullptr)
-    {
-        // Sometimes, callers may pass negative values to mean "use default" for min/max dists.
-        if(minDist < 0.0f) { minDist = kDefault3DMinDist; }
-        if(maxDist < 0.0f) { maxDist = kDefault3DMaxDist; }
-
-        // Make sure max dist isn't invalid.
-        if(maxDist < minDist) { maxDist = minDist; }
-
-        // Set min/max distance.
-        soundHandle.channel->set3DMinMaxDistance(minDist, maxDist);
-
-        // Put at desired position. No velocity right now.
-        soundHandle.channel->set3DAttributes((const FMOD_VECTOR*)&position, (const FMOD_VECTOR*)&Vector3::Zero);
-    }
-    return soundHandle;
+    return channel;
 }

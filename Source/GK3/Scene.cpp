@@ -111,6 +111,10 @@ void Scene::Load()
     	mCamera->SetPosition(defaultRoomCamera->position);
     	mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.x));
 	}
+
+    // Force a camera update to make sure the audio listener is positioned correctly in the scene.
+    // This stops audio playing too loudly on scene load if the audio listener hasn't yet updated.
+    mCamera->Update(0.0f);
 	
 	// If a camera bounds model exists for this scene, pass it along to the camera.
 	Model* cameraBoundsModel = Services::GetAssets()->LoadModel(mSceneData->GetCameraBoundsModelName());

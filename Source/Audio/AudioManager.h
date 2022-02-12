@@ -20,7 +20,7 @@ class PlayingSoundHandle
 {
 public:
     PlayingSoundHandle() = default;
-    PlayingSoundHandle(FMOD::Channel* channel);
+    PlayingSoundHandle(FMOD::Channel* channel, Audio* audio);
 
     void Stop(float fadeOutTime = 0.0f);
     void Pause();
@@ -121,8 +121,6 @@ public:
     void Stop(PlayingSoundHandle& soundHandle, float fadeOutTime = 0.0f);
     void StopAll();
 
-    void SwapAmbient();
-
     void SetMasterVolume(float volume);
     float GetMasterVolume() const;
     
@@ -152,13 +150,9 @@ private:
     // Channel group for VO. Outputs to master channel group.
     FMOD::ChannelGroup* mVOChannelGroup = nullptr;
 
+    // Channel groups for ambient and music. Both output to master channel group.
     FMOD::ChannelGroup* mAmbientChannelGroup = nullptr;
     FMOD::ChannelGroup* mMusicChannelGroup = nullptr;
-
-    // Both ambient audio and music can crossfade between scenes, so these crossfaders help with that.
-    // Internally, they also consist of several FMOD channel groups used to control volume. Both output to master channel group ultimately.
-    //Crossfader mAmbientCrossfade;
-    //Crossfader mMusicCrossfade;
 
     // Any individual sound can be faded in/out. If needed, one of these faders will be used for that purpose.
     std::vector<Fader> mFaders;
@@ -176,7 +170,10 @@ private:
     PlayingSoundHandle mInvalidSoundHandle;
     
     FMOD::ChannelGroup* GetChannelGroupForAudioType(AudioType audioType, bool forVolume) const;
-    
-    PlayingSoundHandle& CreateAndPlaySound(Audio* audio, AudioType audioType, bool is3D = false);
+
+    PlayingSoundHandle& CreateAndPlaySound2D(Audio* audio, AudioType audioType);
     PlayingSoundHandle& CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3& position, float minDist, float maxDist);
+
+    FMOD::Sound* CreateSound(Audio* audio, bool is3D);
+    FMOD::Channel* CreateChannel(FMOD::Sound* sound, FMOD::ChannelGroup* channelGroup);
 };
