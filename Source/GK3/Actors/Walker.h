@@ -32,6 +32,7 @@ public:
 	
 	void WalkTo(const Vector3& position, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
+    void WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback);
 
     void SkipToEnd();
@@ -102,7 +103,13 @@ private:
 	
 	// A callback for when the end of a path is reached.
 	std::function<void()> mFinishedPathCallback = nullptr;
-	
+
+    // Is this a walk command from an autoscript?
+    // If true, we tell the animation system this is an autoscript animation, and we don't restart idle autoscript when done.
+    bool mFromAutoscript = false;
+
+    void WalkToInternal(const Vector3& position, const Heading& heading, std::function<void()> finishCallback, bool fromAutoscript);
+
     void PopAndNextAction();
     void NextAction();
     

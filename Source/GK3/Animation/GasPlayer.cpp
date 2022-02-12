@@ -15,6 +15,9 @@ GasPlayer::GasPlayer(Actor* owner) : Component(owner)
 
 void GasPlayer::Play(GAS* gas)
 {
+    // Ignore request to play GAS that is already playing.
+    if(gas == mGas) { return; }
+
     // Set GAS.
     mGas = gas;
 

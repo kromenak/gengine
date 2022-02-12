@@ -65,12 +65,14 @@ float WaitGasNode::Execute(GasPlayer* player)
 
 float GotoGasNode::Execute(GasPlayer* player)
 {
+    //std::cout << player->GetOwner()->GetName() << " Goto " << index << std::endl;
     player->SetNodeIndex(index);
     return 0.0f;
 }
 
 float SetGasNode::Execute(GasPlayer* player)
 {
+    //std::cout << player->GetOwner()->GetName() << " Set Var " << varName << " to " << value << std::endl;
     player->SetVar(varName, value);
     return 0.0f;
 }
@@ -78,12 +80,14 @@ float SetGasNode::Execute(GasPlayer* player)
 float IncGasNode::Execute(GasPlayer* player)
 {
     player->SetVar(varName, player->GetVar(varName) + 1);
+    //std::cout << player->GetOwner()->GetName() << " Inc Var " << varName << " to " << player->GetVar(varName) << std::endl;
     return 0.0f;
 }
 
 float DecGasNode::Execute(GasPlayer* player)
 {
     player->SetVar(varName, player->GetVar(varName) - 1);
+    //std::cout << player->GetOwner()->GetName() << " Dec Var " << varName << " to " << player->GetVar(varName) << std::endl;
     return 0.0f;
 }
 
@@ -131,7 +135,8 @@ float WalkToGasNode::Execute(GasPlayer* player)
     }
 
     // Start walk to.
-    actor->WalkTo(walkToPos, walkToHeading, std::bind(&GasPlayer::NextNode, player));
+    // Must use special "gas" version, or the walk/animation system will cause the current GAS script to be stopped/restarted.
+    actor->WalkToGas(walkToPos, walkToHeading, std::bind(&GasPlayer::NextNode, player));
 
     // Return -1 to disable timer system and just wait for callback.
     return -1.0f;

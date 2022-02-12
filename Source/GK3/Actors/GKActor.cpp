@@ -56,7 +56,9 @@ GKActor::GKActor(Model* model) : GKActor()
 GKActor::GKActor(const SceneActor& actorDef) : GKActor(actorDef.model)
 {
     // Set noun (GABRIEL, GRACE, etc).
+     // For debugging help, we'll also set the Actor name field to the noun.
     SetNoun(actorDef.noun);
+    SetName(actorDef.noun);
 
     // Set actor's initial position and rotation.
     if(!actorDef.positionName.empty())
@@ -189,14 +191,20 @@ void GKActor::TurnTo(const Heading& heading, std::function<void()> finishCallbac
 	mWalker->WalkTo(GetPosition(), heading, finishCallback);
 }
 
+void GKActor::WalkTo(const Vector3& position, std::function<void()> finishCallback)
+{
+    mWalker->WalkTo(position, finishCallback);
+}
+
 void GKActor::WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
 {
 	mWalker->WalkTo(position, heading, finishCallback);
 }
 
-void GKActor::WalkTo(const Vector3& position, std::function<void()> finishCallback)
+void GKActor::WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
 {
-	mWalker->WalkTo(position, finishCallback);
+    // This version of the function is needed just to tell the walker if this walk request is coming from a GAS script or not!
+    mWalker->WalkToGas(position, heading, finishCallback);
 }
 
 void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback)
