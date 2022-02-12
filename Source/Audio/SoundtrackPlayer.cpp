@@ -1,5 +1,7 @@
 #include "SoundtrackPlayer.h"
 
+#include "ActionManager.h"
+#include "Services.h"
 #include "StringUtil.h"
 
 PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
@@ -164,6 +166,8 @@ void SoundtrackPlayer::StopAll()
 
 void SoundtrackPlayer::OnUpdate(float deltaTime)
 {
+    if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
+
     for(auto& playing : mPlaying)
     {
         playing.Update(deltaTime);

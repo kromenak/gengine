@@ -251,7 +251,7 @@ void GEngine::Quit()
 
 void GEngine::ForceUpdate()
 {
-    Update(10.0f);
+    Update(0.2f);
 }
 
 void GEngine::StartGame()
