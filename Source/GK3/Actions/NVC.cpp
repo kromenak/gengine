@@ -4,7 +4,6 @@
 #include "IniParser.h"
 #include "SheepCompiler.h"
 #include "SheepScript.h"
-#include "StringUtil.h"
 
 /*static*/ std::vector<Action> NVC::mEmptyActions;
 
@@ -15,7 +14,7 @@ NVC::NVC(const std::string& name, char* data, int dataLength) : Asset(name)
 
 const std::vector<Action>& NVC::GetActions(const std::string& noun) const
 {
-	auto it = mNounToActions.find(StringUtil::ToLowerCopy(noun));
+	auto it = mNounToActions.find(noun);
 	if(it != mNounToActions.end())
 	{
 		return it->second;
@@ -25,9 +24,8 @@ const std::vector<Action>& NVC::GetActions(const std::string& noun) const
 
 std::vector<const Action*> NVC::GetActions(const std::string& noun, const std::string& verb) const
 {
-	std::vector<const Action*> actions;
-	
 	// Find any exact matches for this noun/verb combo.
+    std::vector<const Action*> actions;
 	const std::vector<Action>& actionsForNoun = GetActions(noun);
 	for(auto& action : actionsForNoun)
 	{
@@ -36,7 +34,6 @@ std::vector<const Action*> NVC::GetActions(const std::string& noun, const std::s
 			actions.push_back(&action);
 		}
 	}
-	
 	return actions;
 }
 
@@ -57,6 +54,7 @@ int NVC::GetActionsCount(const std::string& noun, const std::string& verb) const
 
 const Action* NVC::GetAction(const std::string& noun, const std::string& verb) const
 {
+    // Similar to GetActions, but only returns a single Action.
 	const std::vector<Action>& actionsForNoun = GetActions(noun);
 	for(auto& action : actionsForNoun)
 	{
@@ -66,8 +64,6 @@ const Action* NVC::GetAction(const std::string& noun, const std::string& verb) c
 			return &action;
 		}
 	}
-	
-	// Couldn't find any action for this noun/verb pair.
 	return nullptr;
 }
 
@@ -85,12 +81,10 @@ void NVC::ParseFromData(char *data, int dataLength)
         // The first entry is the noun.
 		IniKeyValue& first = line.entries.front();
         action.noun = first.key;
-		StringUtil::ToLower(action.noun);
 		
 		// Second entry is the verb.
 		IniKeyValue& second = line.entries[1];
         action.verb = second.key;
-		StringUtil::ToLower(action.verb);
         
 		// Third entry is always the case (requires a bit of trimming/conditioning sometimes).
 		IniKeyValue& third = line.entries[2];
@@ -164,17 +158,17 @@ void NVC::ParseFromData(char *data, int dataLength)
                 // A sheep expression to be evaluated for this item.
 				//TODO: Should we compile this immediately, or save it as a string and compile/execute on-demand?
 				//TODO: Based on debug output from GK3, the string value is stored SOMEWHERE in memory for debug and dump purposes.
-				action.scriptText = keyValue.value;
+				action.script.text = keyValue.value;
 				
 				// Some NVC scripts actually have a typo - missing close bracket.
 				// If that's the case, let's add it...might also be able to deal with this by adjusting parser/grammer.
-				if(action.scriptText.back() != '}')
+				if(action.script.text.back() != '}')
 				{
-					action.scriptText += '}';
+                    action.script.text.push_back('}');
 				}
 				
 				// Compile and save script.
-				action.script = Services::GetSheep()->Compile("Case Evaluation", action.scriptText);
+				action.script.script = Services::GetSheep()->Compile("Case Evaluation", action.script.text);
             }
 		}
 
@@ -224,8 +218,10 @@ void NVC::ParseFromData(char *data, int dataLength)
         auto it = mCaseLogic.find(caseLabel);
         if(it == mCaseLogic.end())
         {
-			//TODO: Again, should save string value somewhere???
-            mCaseLogic[caseLabel] = Services::GetSheep()->CompileEval(first.value);
+            SheepScriptAndText caseLogic;
+            caseLogic.text = first.value;
+            caseLogic.script = Services::GetSheep()->CompileEval(first.value);
+            mCaseLogic[caseLabel] = caseLogic;
         }
         else
         {

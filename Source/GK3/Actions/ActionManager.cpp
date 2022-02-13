@@ -15,6 +15,14 @@
 
 TYPE_DEF_BASE(ActionManager);
 
+void OutputActions(const std::vector<const Action*>& actions)
+{
+    for(auto& action : actions)
+    {
+        std::cout << "Action " << action->ToString() << std::endl;
+    }
+}
+
 void ActionManager::Init()
 {
 	// Pre-populate the Sheep Command action.
@@ -104,7 +112,7 @@ bool ActionManager::ExecuteAction(const std::string& noun, const std::string& ve
 	for(auto& actionSet : mActionSets)
 	{
 		const Action* action = actionSet->GetAction(noun, verb);
-		if(action != nullptr && IsCaseMet(action))
+		if(action != nullptr && IsCaseMet(noun, verb, action->caseLabel))
 		{
 			candidate = action;
 			continue;
@@ -157,10 +165,10 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 	
 	// If no script is associated with the action, that might be an error...
 	// But for now, we'll just treat it as action is immediately over.
-	if(action->script != nullptr)
+	if(action->script.script != nullptr)
 	{
 		// Execute action in Sheep system, call finished function when done.
-		Services::GetSheep()->Execute(action->script, std::bind(&ActionManager::OnActionExecuteFinished, this));
+		Services::GetSheep()->Execute(action->script.script, std::bind(&ActionManager::OnActionExecuteFinished, this));
 	}
 	else
 	{
@@ -181,7 +189,7 @@ void ActionManager::ExecuteSheepAction(const std::string& sheepName, const std::
     mCurrentActionFinishCallback = finishCallback;
 
     // Log it!
-    mSheepCommandAction.scriptText = "wait CallSheep(\"" + sheepName + "\", \"" + functionName + "\")";
+    mSheepCommandAction.script.text = "wait CallSheep(\"" + sheepName + "\", \"" + functionName + "\")";
     Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", mSheepCommandAction.ToString().c_str()));
 
     // Increment action ID.
@@ -229,7 +237,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 			std::vector<const Action*> actionsForAnyObject = nvc->GetActions("ANY_OBJECT", "ANY_INV_ITEM");
 			for(auto& action : actionsForAnyObject)
 			{
-				if(IsCaseMet(action))
+				if(IsCaseMet(action->noun, action->verb, action->caseLabel))
 				{
 					std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/ANY_INV_ITEM" << std::endl;
 					candidate = action;
@@ -244,7 +252,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 		std::vector<const Action*> actionsForAnyObject = nvc->GetActions("ANY_OBJECT", verb);
 		for(auto& action : actionsForAnyObject)
 		{
-			if(IsCaseMet(action))
+			if(IsCaseMet(action->noun, action->verb, action->caseLabel))
 			{
 				std::cout << "Candidate action for " << noun << "/" << verb << " matches ANY_OBJECT/" << verb << std::endl;
 				candidate = action;
@@ -261,7 +269,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 			std::vector<const Action*> actionsForAnyObject = nvc->GetActions(noun, "ANY_INV_ITEM");
 			for(auto& action : actionsForAnyObject)
 			{
-				if(IsCaseMet(action))
+				if(IsCaseMet(action->noun, action->verb, action->caseLabel))
 				{
 					std::cout << "Candidate action for " << noun << "/" << verb << " matches " << noun << "/ANY_INV_ITEM" << std::endl;
 					candidate = action;
@@ -276,7 +284,7 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 		std::vector<const Action*> actionsForAnyObject = nvc->GetActions(noun, verb);
 		for(auto& action : actionsForAnyObject)
 		{
-			if(IsCaseMet(action))
+			if(IsCaseMet(action->noun, action->verb, action->caseLabel))
 			{
 				std::cout << "Candidate action for " << noun << "/" << verb << " matches " << noun << "/" << verb << std::endl;
 				candidate = action;
@@ -327,9 +335,9 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 				validType = Services::Get<VerbManager>()->IsTopic(action.verb);
 				break;
 			}
-			
+
 			// If type is valid and the action meets any case specified, we can use this action!
-			if(validType && IsCaseMet(&action, verbType))
+			if(validType && IsCaseMet(action.noun, action.verb, action.caseLabel, verbType))
 			{
 				verbToAction[action.verb] = &action;
 				usedVerbs.insert(action.verb);
@@ -366,9 +374,9 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 				validType = Services::Get<VerbManager>()->IsTopic(action.verb);
 				break;
 			}
-			
+
 			// If type is valid and the action meets any case specified, we can use this action!
-			if(validType && IsCaseMet(&action, verbType))
+			if(validType && IsCaseMet(action.noun, action.verb, action.caseLabel, verbType))
 			{
 				verbToAction[action.verb] = &action;
 				usedVerbs.insert(action.verb);
@@ -382,6 +390,7 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 	{
 		viableActions.push_back(entry.second);
 	}
+    OutputActions(viableActions);
 	return viableActions;
 }
 
@@ -398,14 +407,6 @@ std::string& ActionManager::GetNoun(int nounEnum)
 std::string& ActionManager::GetVerb(int verbEnum)
 {
 	return mVerbs[Math::Clamp(verbEnum, 0, (int)mVerbs.size() - 1)];
-}
-
-void OutputActions(const std::vector<const Action*>& actions)
-{
-	for(auto& action : actions)
-	{
-		std::cout << "Action " << action->ToString() << std::endl;
-	}
 }
 
 void ActionManager::ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
@@ -459,7 +460,6 @@ void ActionManager::ShowTopicBar()
 
 bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const Timeblock& timeblock)
 {
-	std::string lowerName = StringUtil::ToLowerCopy(assetName);
 	
 	// First three letters are always the location code.
 	// Arguably, we could care that the location code matches the current location, but that's kind of a given.
@@ -468,13 +468,14 @@ bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const 
 	
 	// Next, there mayyy be an underscore, but maybe not.
 	// Skip the underscore, in any case.
-	if(lowerName[curIndex] == '_')
+	if(assetName[curIndex] == '_')
 	{
 		++curIndex;
 	}
-	
+
 	// See if "all" is in the name.
 	// If so, it indicates that the actions are used for all timeblocks on one or more days.
+    std::string lowerName = StringUtil::ToLowerCopy(assetName);
 	std::size_t allPos = lowerName.find("all", curIndex);
 	if(allPos != std::string::npos)
 	{
@@ -516,29 +517,70 @@ bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const 
 	return false;
 }
 
-bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
+bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, const std::string& caseLabel, VerbType verbType) const
 {
 	// Empty condition is automatically met.
-	if(action->caseLabel.empty()) { return true; }
-	
+	if(caseLabel.empty()) { return true; }
+    
 	// See if any "local" case logic matches this action and execute that case if so.
 	// Do this before "global" cases b/c an action set *could* declare an override of a global...
 	// I'd consider that "not great practice" but it does occur in the game's files a few times.
-	auto it = mCaseLogic.find(action->caseLabel);
+	auto it = mCaseLogic.find(caseLabel);
 	if(it != mCaseLogic.end())
 	{
+        // For local case logic used by topics, we need to manually check topic count.
+        // Most local case logic assumes "&& GetTopicCount(noun, verb) == 0" is implicitly appended for topics.
+        if(verbType == VerbType::Topic && Services::Get<GameProgress>()->GetTopicCount(noun, verb) != 0)
+        {
+            // So, if we get here, it means this topic has already been discussed before. Typically, it means this case is NOT met (return false).
+            // HOWEVER, there is one BIG exception.
+            // If the local case logic EXPLICITLY checks the topic count for this noun/verb pair, we should NOT early out here!
+            bool explicitlyChecksTopicCount = false;
+            size_t pos = 0;
+            while(pos != std::string::npos)
+            {
+                // Find GetTopicCount instance.
+                pos = StringUtil::FindIgnoreCase(it->second.text, "GetTopicCount", pos);
+                if(pos == std::string::npos) { break; }
+
+                // Get open/close parentheses for GetTopicCount.
+                size_t openParen = it->second.text.find('(', pos);
+                size_t closeParen = it->second.text.find(')', openParen);
+
+                // See if our noun & verb occur after the open parentesis and before the close parenthesis.
+                // If so, it would appear this case logic DOES explicitly check topic count.
+                size_t nounPos = StringUtil::FindIgnoreCase(it->second.text, noun, openParen);
+                size_t verbPos = StringUtil::FindIgnoreCase(it->second.text, verb, openParen);
+                if(nounPos < closeParen && verbPos > nounPos && verbPos < closeParen)
+                {
+                    explicitlyChecksTopicCount = true;
+                    break;
+                }
+
+                // We need to loop in case the condition logic contains multiple GetTopicCount checks.
+                pos = closeParen;
+            }
+
+            // If we don't explicitly check the topic count AND this topic has been discussed before...
+            // ...assume that we can't discuss it again, and so return false! (whew)
+            if(!explicitlyChecksTopicCount)
+            {
+                return false;
+            }
+        }
+
 		// Case evaluation logic may have magic variables n$ and v$.
 		// These variables should hold int-based identifiers for the noun/verb of the action we're evaluating.
 		// So, look those up and save the indexes!
-		int n = mNounToEnum.at(action->noun);
-		int v = mVerbToEnum.at(action->verb);
+		int n = mNounToEnum.at(noun);
+		int v = mVerbToEnum.at(verb);
 		
 		// Evaluate our condition logic with our n$ and v$ values.
-		return Services::GetSheep()->Evaluate(it->second, n, v);
+		return Services::GetSheep()->Evaluate(it->second.script, n, v);
 	}
 	
 	// Check global case conditions.
-	if(StringUtil::EqualsIgnoreCase(action->caseLabel, "ALL"))
+	if(StringUtil::EqualsIgnoreCase(caseLabel, "ALL"))
 	{
         // For topics, "ALL" seems to have a strange meaning...it should be the "last thing" said about a topic.
         // So, get total things that can be said about this topic, and if we are one away from that, this condition is met.
@@ -547,88 +589,88 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
             int count = 0;
             for(auto& nvc : mActionSets)
             {
-                count += nvc->GetActionsCount(action->noun, action->verb);
+                count += nvc->GetActionsCount(noun, verb);
             }
-            return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == (count - 1);
+            return Services::Get<GameProgress>()->GetTopicCount(noun, verb) == (count - 1);
         }
 
 		// For non-topics, functions as you'd expect: "ALL" condition is always met!
 		return true;
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "GABE_ALL"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "GABE_ALL"))
 	{
 		// Condition is met if Ego is Gabriel.
 		Scene* scene = GEngine::Instance()->GetScene();
 		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
 		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "Gabriel");
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "GRACE_ALL"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "GRACE_ALL"))
 	{
 		// Condition is met if Ego is Grace.
 		Scene* scene = GEngine::Instance()->GetScene();
 		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
 		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "Grace");
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "1ST_TIME"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "1ST_TIME"))
 	{
 		// Condition is met if this is the first time we've executed this action (noun/verb combo).
 		if(verbType == VerbType::Topic)
 		{
-			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 0;
+			return Services::Get<GameProgress>()->GetTopicCount(noun, verb) == 0;
 		}
 		else
 		{
-			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 0;
+			return Services::Get<GameProgress>()->GetNounVerbCount(noun, verb) == 0;
 		}
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "2CD_TIME"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "2CD_TIME"))
 	{
 		// A surprising way to abbreviate "2nd time"...
         // Condition is met if this is the 2nd time we did the action.
 		if(verbType == VerbType::Topic)
 		{
-			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 1;
+			return Services::Get<GameProgress>()->GetTopicCount(noun, verb) == 1;
 		}
 		else
 		{
-			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 1;
+			return Services::Get<GameProgress>()->GetNounVerbCount(noun, verb) == 1;
 		}
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "3RD_TIME"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "3RD_TIME"))
 	{
 		// And again for good measure. True if this is the 3rd time we did the action.
 		if(verbType == VerbType::Topic)
 		{
-			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) == 2;
+			return Services::Get<GameProgress>()->GetTopicCount(noun, verb) == 2;
 		}
 		else
 		{
-			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) == 2;
+			return Services::Get<GameProgress>()->GetNounVerbCount(noun, verb) == 2;
 		}
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "OTR_TIME"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "OTR_TIME"))
 	{
 		// Condition is met if this IS NOT the first time we've executed this action (noun/verb combo).
 		if(verbType == VerbType::Topic)
 		{
-			return Services::Get<GameProgress>()->GetTopicCount(action->noun, action->verb) > 0;
+			return Services::Get<GameProgress>()->GetTopicCount(noun, verb) > 0;
 		}
 		else
 		{
-			return Services::Get<GameProgress>()->GetNounVerbCount(action->noun, action->verb) > 0;
+			return Services::Get<GameProgress>()->GetNounVerbCount(noun, verb) > 0;
 		}
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "DIALOGUE_TOPICS_LEFT"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "DIALOGUE_TOPICS_LEFT"))
 	{
 		// Ccondition is met if there are any "topic" type actions available for this noun.
-		return HasTopicsLeft(action->noun);
+		return HasTopicsLeft(noun);
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "NOT_DIALOGUE_TOPICS_LEFT"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "NOT_DIALOGUE_TOPICS_LEFT"))
 	{
 		// Condition is met if there are no more "topic" type actions available for this noun.
-		return !HasTopicsLeft(action->noun);
+		return !HasTopicsLeft(noun);
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "TIME_BLOCK_OVERRIDE"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK_OVERRIDE"))
 	{
 		// Not 100% sure...only appears in timeblock-specific NVC files.
 		// Possibilities:
@@ -643,14 +685,14 @@ bool ActionManager::IsCaseMet(const Action* action, VerbType verbType) const
 		std::cout << "Using TIME_BLOCK_OVERRIDE global condition!" << std::endl;
 		return true;
 	}
-	else if(StringUtil::EqualsIgnoreCase(action->caseLabel, "TIME_BLOCK"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK"))
 	{
 		//TODO
 	}
 	//TODO: Add any more global conditions.
 	
 	// Assume any not found case is false by default.
-	std::cout << "Unknown NVC case " << action->caseLabel << std::endl;
+	std::cout << "Unknown NVC case " << caseLabel << std::endl;
 	return false;
 }
 

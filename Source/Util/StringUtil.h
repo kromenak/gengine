@@ -172,6 +172,20 @@ namespace StringUtil
         return std::search(str.begin(), str.end(), contains.begin(), contains.end(), iequal()) != str.end();
     }
 
+    inline size_t Find(const std::string& str, const std::string& toFind, size_t pos = 0)
+    {
+        if(str.size() - pos < toFind.size()) { return std::string::npos; }
+        return str.find(toFind, pos);
+    }
+
+    inline size_t FindIgnoreCase(const std::string& str, const std::string& toFind, size_t pos = 0)
+    {
+        if(str.size() - pos < toFind.size()) { return std::string::npos; }
+        auto it = std::search(str.begin() + pos, str.end(), toFind.begin(), toFind.end(), iequal());
+        if(it != str.end()) { return it - str.begin(); }
+        return std::string::npos;
+    }
+
     inline bool ToBool(const std::string& str)
     {
         // True is "on" or "yes" or "true".

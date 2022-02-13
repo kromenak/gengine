@@ -105,7 +105,7 @@ private:
 	// An action may specify a "case" under which it is valid.
 	// A case label corresponds to a bit of sheepscript that evaluates to either true or false.
 	// Cases must be stored here (rather than in Action Sets) because cases can be shared (especially global/inventory ones).
-    std::unordered_map<std::string, SheepScript*> mCaseLogic;
+    std::unordered_map<std::string, SheepScriptAndText> mCaseLogic;
 	
 	// Nouns and verbs that are currently active. Pulled out of action sets as they are loaded.
 	// We do this to support the Sheep-eval feature of specifying n$ and v$ variables as wildcards for current noun/verb.
@@ -145,7 +145,7 @@ private:
 	
 	// Returns true if the case for an action is met.
 	// A case can be a global condition, or some user-defined script to evaluate.
-	bool IsCaseMet(const Action* item, VerbType verbType = VerbType::Normal) const;
+	bool IsCaseMet(const std::string& noun, const std::string& verb, const std::string& caseLabel, VerbType verbType = VerbType::Normal) const;
 	
 	// Called when action bar is canceled (press cancel button).
 	void OnActionBarCanceled();

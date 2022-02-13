@@ -13,8 +13,19 @@
 #include <unordered_map>
 #include <vector>
 
+#include "StringUtil.h"
+
 class GKActor;
 class SheepScript;
+
+struct SheepScriptAndText
+{
+    // The sheep text; unfortunately required in some cases to check script contents.
+    std::string text;
+
+    // The compiled script.
+    SheepScript* script = nullptr;
+};
 
 struct Action
 {
@@ -52,10 +63,9 @@ struct Action
 	std::string talkTo;
 	
 	// A script to run when this action is executed.
-	std::string scriptText;
-    SheepScript* script = nullptr;
+    SheepScriptAndText script;
 	
-	std::string ToString() const { return "'" + noun + ":" + verb + ":" + caseLabel + "': " + scriptText; }
+	std::string ToString() const { return "'" + noun + ":" + verb + ":" + caseLabel + "': " + script.text; }
 };
 
 class NVC : public Asset
@@ -69,7 +79,7 @@ public:
     int GetActionsCount(const std::string& noun, const std::string& verb) const;
 	const Action* GetAction(const std::string& noun, const std::string& verb) const;
 	
-	const std::unordered_map<std::string, SheepScript*>& GetCases() const { return mCaseLogic; }
+	const std::string_map_ci<SheepScriptAndText>& GetCases() const { return mCaseLogic; }
 	
 private:
 	// If attempting to get actions for a noun that doesn't exist,
@@ -81,10 +91,10 @@ private:
 	std::vector<Action*> mActions;
 	
     // Mapping of noun to actions.
-    std::unordered_map<std::string, std::vector<Action>> mNounToActions;
+    std::string_map_ci<std::vector<Action>> mNounToActions;
     
     // Mapping of case name to sheep script to eval.
-    std::unordered_map<std::string, SheepScript*> mCaseLogic;
+    std::string_map_ci<SheepScriptAndText> mCaseLogic;
 	
 	void ParseFromData(char* data, int dataLength);
 };
