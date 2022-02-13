@@ -46,7 +46,7 @@ public:
 	Skybox* GetSkybox() const { return mSkybox; }
 	WalkerBoundary* GetWalkerBoundary() const { return mWalkerBoundary; }
 	const std::string& GetFloorModelName() const { return mGeneralSettings.floorModelName; }
-	const std::string& GetCameraBoundsModelName() const { return mGeneralSettings.cameraBoundsModelName; }
+	const std::vector<std::string>& GetCameraBoundsModelNames() const { return mGeneralSettings.cameraBoundsModelNames; }
 
     const Vector3& GetGlobalLightPosition() const { return mGeneralSettings.globalLightPosition; }
 
@@ -105,6 +105,9 @@ private:
 	
 	// Walker boundary for the scene, if any.
 	WalkerBoundary* mWalkerBoundary = nullptr;
+
+    // Models to use for camera boundaries.
+    std::vector<Model*> mCameraBoundaryModels;
 	
 	// Combined generic and specific actors to spawn.
 	std::vector<const SceneActor*> mActors;

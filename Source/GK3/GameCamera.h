@@ -9,6 +9,8 @@
 #pragma once
 #include "Actor.h"
 
+#include <vector>
+
 class GKObject;
 class Model;
 class OptionBar;
@@ -17,8 +19,8 @@ class GameCamera : public Actor
 {
 public:
     GameCamera();
-	
-	void SetBounds(Model* boundsModel) { mBoundsModel = boundsModel; }
+
+    void AddBounds(Model* model) { mBoundsModels.push_back(model); }
 	void SetBoundsEnabled(bool enabled) { mBoundsEnabled = enabled; }
 	
 	void SetAngle(const Vector2& angle);
@@ -58,7 +60,7 @@ private:
 	float mHeight = kDefaultHeight;
 	
 	// A model whose triangles are used as collision for the camera.
-	Model* mBoundsModel = nullptr;
+    std::vector<Model*> mBoundsModels;
 		
 	// If true, camera bounds are turned on. If false, they are disabled.
     bool mBoundsEnabled = true;

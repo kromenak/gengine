@@ -23,7 +23,7 @@ class Model : public Asset
 public:
     Model(const std::string& name, char* data, int dataLength);
 
-    std::vector<Mesh*> GetMeshes() const { return mMeshes; }
+    const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
 	
 	bool IsBillboard() const { return mBillboard; }
 	

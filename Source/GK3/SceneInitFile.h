@@ -43,8 +43,8 @@ struct GeneralBlock
 	std::string walkerBoundaryTextureName;
 	Vector2 walkerBoundarySize;
 	Vector2 walkerBoundaryOffset;
-	
-	std::string cameraBoundsModelName;
+
+    std::vector<std::string> cameraBoundsModelNames;
 	bool cameraBoundsDynamic = false;
 	
 	Vector3 globalLightPosition;

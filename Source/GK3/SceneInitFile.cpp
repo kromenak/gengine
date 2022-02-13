@@ -48,12 +48,9 @@ void GeneralBlock::TakeOverridesFrom(const GeneralBlock& other)
 	{
 		walkerBoundaryOffset = other.walkerBoundaryOffset;
 	}
-	
-	if(!other.cameraBoundsModelName.empty())
-	{
-		cameraBoundsModelName = other.cameraBoundsModelName;
-		cameraBoundsDynamic = other.cameraBoundsDynamic;
-	}
+
+    // Unlike others here, "overriding" camera bounds models is additive!
+    cameraBoundsModelNames.insert(cameraBoundsModelNames.end(), other.cameraBoundsModelNames.begin(), other.cameraBoundsModelNames.end());
 	
 	if(other.globalLightPosition != Vector3::Zero)
 	{
@@ -207,9 +204,8 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(first.key, "cameraBounds"))
             {
-				//TODO: Some SIF (like DIN.SIF) specify MULTIPLE CameraBounds keys.
-				//TODO: Does this imply that we need an ARRAY of cameraBoundsModelNames?
-                general.cameraBoundsModelName = first.value;
+				// Add to bounds model names.
+                general.cameraBoundsModelNames.push_back(first.value);
 				
 				// One possible option: a type.
 				if(line.entries.size() > 1)

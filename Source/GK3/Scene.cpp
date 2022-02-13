@@ -117,18 +117,25 @@ void Scene::Load()
     mCamera->Update(0.0f);
 	
 	// If a camera bounds model exists for this scene, pass it along to the camera.
-	Model* cameraBoundsModel = Services::GetAssets()->LoadModel(mSceneData->GetCameraBoundsModelName());
-	if(cameraBoundsModel != nullptr)
-	{
-		mCamera->SetBounds(cameraBoundsModel);
-		
-		// For debugging - we can visualize the camera bounds mesh, if desired.
-		GKProp* cameraBoundsActor = new GKProp();
-		MeshRenderer* cameraBoundsMeshRenderer = cameraBoundsActor->GetMeshRenderer();
-		cameraBoundsMeshRenderer->SetModel(cameraBoundsModel);
-		cameraBoundsMeshRenderer->SetEnabled(false);
-		//cameraBoundsMeshRenderer->DebugDrawAABBs();
-	}
+    for(auto& modelName : mSceneData->GetCameraBoundsModelNames())
+    {
+        Model* model = Services::GetAssets()->LoadModel(modelName);
+        if(model != nullptr)
+        {
+            mCamera->AddBounds(model);
+
+            /*
+            // For debugging - we can visualize the camera bounds mesh, if desired.
+            GKProp* cameraBoundsActor = new GKProp();
+            MeshRenderer* cameraBoundsMeshRenderer = cameraBoundsActor->GetMeshRenderer();
+            cameraBoundsMeshRenderer->SetModel(model);
+            cameraBoundsMeshRenderer->SetEnabled(false);
+            cameraBoundsMeshRenderer->DebugDrawAABBs();
+            */
+        }
+    }
+
+	
 	
 	// For debugging - render walker bounds overlay on game world.
 	//TODO: Move to construction system!
