@@ -268,7 +268,15 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     mScoreLabel->SetFont(font);
     mScoreLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
-    
+    mScoreLabel->SetVerticalAlignment(VerticalAlignment::Top);
+    mScoreLabel->SetMasked(true);
+
+    // Determine display strings for the day/time.
+    // We only have to do this on creation (and not show) because the day/time never change in the middle of a scene.
+    std::vector<std::string> dayAndTimeStrings = StringUtil::Split(Services::Get<GameProgress>()->GetTimeblockDisplayName(), ',');
+    StringUtil::Trim(dayAndTimeStrings[0]);
+    StringUtil::Trim(dayAndTimeStrings[1]);
+
     // Add day text.
     Actor* dayActor = new Actor(Actor::TransformType::RectTransform);
     dayActor->GetTransform()->SetParent(mOptionBarRoot);
@@ -284,8 +292,10 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     dayLabel->GetRectTransform()->SetAnchoredPosition(dayPos);
     
     dayLabel->SetFont(font);
-    dayLabel->SetText("Day 1");
+    dayLabel->SetText(dayAndTimeStrings[0]);
     dayLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+    dayLabel->SetVerticalAlignment(VerticalAlignment::Top);
+    dayLabel->SetMasked(true);
     
     // Add time text.
     Actor* timeActor = new Actor(Actor::TransformType::RectTransform);
@@ -302,8 +312,10 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     timeLabel->GetRectTransform()->SetAnchoredPosition(timePos);
     
     timeLabel->SetFont(font);
-    timeLabel->SetText("10am - 12pm");
+    timeLabel->SetText(dayAndTimeStrings[1]);
     timeLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+    timeLabel->SetVerticalAlignment(VerticalAlignment::Top);
+    timeLabel->SetMasked(true);
     
     // Add active inventory item button.
     mActiveInventoryItemButton = CreateButton(canvas, config, "currInv", optionBar);

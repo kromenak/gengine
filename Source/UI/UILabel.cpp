@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "StringUtil.h"
 #include "TextLayout.h"
+#include "Texture.h"
 
 TYPE_DEF_CHILD(UIWidget, UILabel);
 
@@ -107,7 +108,8 @@ void UILabel::GenerateMesh()
 	}
 	
 	// Create new text layout object with desired settings.
-	mTextLayout = TextLayout(GetRectTransform()->GetRect(), mFont,
+    Rect rect = GetRectTransform()->GetRect();
+	mTextLayout = TextLayout(rect, mFont,
 						     mHorizontalAlignment, mVerticalAlignment,
 						     mHorizontalOverflow, mVerticalOverflow);
 	
@@ -147,12 +149,39 @@ void UILabel::GenerateMesh()
 	for(auto& charInfo : charInfos)
 	{
 		Glyph& glyph = charInfo.glyph;
-		
+
 		float leftX = charInfo.pos.x;
 		float rightX = leftX + glyph.width;
 		
 		float bottomY = charInfo.pos.y;
 		float topY = bottomY + glyph.height;
+
+        float topUVy = glyph.topLeftUvCoord.y;
+        float botUVy = glyph.bottomLeftUvCoord.y;
+
+        // If desired, we can "mask" the text mesh based on the size of the label's rect.
+        // This is implemented by clamping the vertex positions and adjusting the UVs accordingly.
+        //TODO: Masking may also be possible more generally using a Mask component and shader stencils...
+        if(mMask)
+        {
+            if(topY > rect.GetMax().y)
+            {
+                float diff = rect.GetMax().y - topY;
+                topY = rect.GetMax().y;
+
+                diff /= mFont->GetTexture()->GetHeight();
+                topUVy += Math::Abs(diff);
+            }
+            if(bottomY < rect.GetMin().y)
+            {
+                float diff = rect.GetMin().y - bottomY;
+                bottomY = rect.GetMin().y;
+
+                diff /= mFont->GetTexture()->GetHeight();
+                botUVy -= Math::Abs(diff);
+            }
+            //TODO: left/right sides
+        }
         
 		// Top-Left
 		positions[charIndex * 12] = leftX;
@@ -160,7 +189,7 @@ void UILabel::GenerateMesh()
 		positions[charIndex * 12 + 2] = 0.0f;
 		
 		uvs[charIndex * 8] = glyph.topLeftUvCoord.x;
-		uvs[charIndex * 8 + 1] = glyph.topLeftUvCoord.y;
+		uvs[charIndex * 8 + 1] = topUVy;
 		
 		colors[charIndex * 16] = colorR;
 		colors[charIndex * 16 + 1] = colorG;
@@ -173,7 +202,7 @@ void UILabel::GenerateMesh()
 		positions[charIndex * 12 + 5] = 0.0f;
 		
 		uvs[charIndex * 8 + 2] = glyph.topRightUvCoord.x;
-		uvs[charIndex * 8 + 3] = glyph.topRightUvCoord.y;
+		uvs[charIndex * 8 + 3] = topUVy;
 		
 		colors[charIndex * 16 + 4] = colorR;
 		colors[charIndex * 16 + 5] = colorG;
@@ -186,7 +215,7 @@ void UILabel::GenerateMesh()
 		positions[charIndex * 12 + 8] = 0.0f;
 		
 		uvs[charIndex * 8 + 4] = glyph.bottomLeftUvCoord.x;
-		uvs[charIndex * 8 + 5] = glyph.bottomRightUvCoord.y;
+		uvs[charIndex * 8 + 5] = botUVy;
 		
 		colors[charIndex * 16 + 8] = colorR;
 		colors[charIndex * 16 + 9] = colorG;
@@ -199,7 +228,7 @@ void UILabel::GenerateMesh()
 		positions[charIndex * 12 + 11] = 0.0f;
 		
 		uvs[charIndex * 8 + 6] = glyph.bottomRightUvCoord.x;
-		uvs[charIndex * 8 + 7] = glyph.bottomRightUvCoord.y;
+		uvs[charIndex * 8 + 7] = botUVy;
 		
 		colors[charIndex * 16 + 12] = colorR;
 		colors[charIndex * 16 + 13] = colorG;

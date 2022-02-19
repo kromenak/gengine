@@ -38,6 +38,8 @@ public:
 	
 	void SetText(std::string text);
 	std::string GetText() const { return mText; }
+
+    void SetMasked(bool masked) { mMask = masked; }
     
 protected:
 	Vector2 GetCharPos(int index) const;
@@ -58,6 +60,10 @@ private:
 	// Desired word wrap and overflow settings.
 	HorizontalOverflow mHorizontalOverflow = HorizontalOverflow::Overflow;
 	VerticalOverflow mVerticalOverflow = VerticalOverflow::Overflow;
+
+    // If true, the text mesh will be clamped based on the size of the label's rect.
+    // Anything outside that rect will simply be cut off.
+    bool mMask = false;
 	
 	// The text to be displayed by the label.
 	std::string mText;

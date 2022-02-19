@@ -22,9 +22,8 @@ Font::Font(const std::string& name, char* data, int dataLength) : Asset(name)
     int lineHeight = mFontTexture->GetHeight() / mLineCount;
 
     // The glyph height is slightly smaller than the line height.
-    // The top pixel of each line is a "glyph indicator", used to determine where each glyph starts.
-    // The bottom pixel of each line appears to be ignored/discarded (based on testing).
-    mGlyphHeight = lineHeight - 2;
+    // The top pixel of each line is a "glyph indicator", used to determine where each glyph starts (ignore it).
+    mGlyphHeight = lineHeight - 1;
 
     // We'll start processing glyphs at (1, 0).
     unsigned int currentX = 1;
@@ -59,8 +58,8 @@ Font::Font(const std::string& name, char* data, int dataLength) : Asset(name)
         glyph.height = mGlyphHeight;
 
         // Calculate top/bottom UV values.
-        // Each is +/- 1 because the top/bottom pixels are discarded (see glyph height explanation above).
-        float botUvY = (float)(currentY + lineHeight - 1.0f) / mFontTexture->GetHeight();
+        // Top is +1 because the top pixel is discarded.
+        float botUvY = (float)(currentY + lineHeight) / mFontTexture->GetHeight();
         float topUvY = (float)(currentY + 1.0f) / mFontTexture->GetHeight();
 
         // Save those UV coords.
