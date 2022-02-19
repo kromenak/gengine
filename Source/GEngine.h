@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "ActionManager.h"
+#include "Atomics.h"
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "Console.h"
@@ -42,6 +43,8 @@ public:
 	void LoadScene(std::string name) { mSceneToLoad = name; }
     Scene* GetScene() { return mScene; }
 
+    uint32 GetFrameNumber() const { return mFrameNumber; }
+
     // GK-specific stuff here
     void StartGame();
     
@@ -52,6 +55,10 @@ private:
     // Is the game running? While true, we loop. When false, the game exits.
 	// False by default, but set to true after initialization.
 	bool mRunning = false;
+
+    // Tracks what frame the game is on. First full frame execution is frame 0.
+    // Assuming 60FPS, it would take ~800 days for this value to wrap. Not too concerning.
+    uint32 mFrameNumber = 0;
     
     // Subsystems.
     Renderer mRenderer;

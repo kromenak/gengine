@@ -1,6 +1,4 @@
 //
-// ActionManager.h
-//
 // Clark Kromenaker
 //
 // Manages showing/executing action bar.
@@ -11,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Atomics.h"
 #include "NVC.h"
 #include "Type.h"
 
@@ -126,6 +125,9 @@ private:
 
     // A callback to execute when the current action finishes executing.
     std::function<void(const Action*)> mCurrentActionFinishCallback = nullptr;
+
+    // What frame the current action started on.
+    uint32 mCurrentActionStartFrame = 0;
 
     // Are we skipping the current action? Mainly tracked to avoid recursive skips.
     bool mSkipInProgress = false;

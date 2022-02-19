@@ -156,6 +156,9 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 	
 	// Increment action ID.
 	++mActionId;
+
+    // Save frame this action was started on.
+    mCurrentActionStartFrame = GEngine::Instance()->GetFrameNumber();
 	
 	// If this is a topic, automatically increment topic counts.
 	if(Services::Get<VerbManager>()->IsTopic(action->verb))
@@ -218,6 +221,13 @@ void ActionManager::SkipCurrentAction()
         ++skipCount;
     }
     std::cout << "Skipped " << skipCount << " times" << std::endl;
+
+    // Stop any sounds that were started after the action began.
+    // We're assuming that any sounds started are due to the action...which may not be 100% true.
+    // If this becomes a problem, we may have to start "tagging" sounds based on where they came from in some way.
+    Services::GetAudio()->StopOnOrAfterFrame(mCurrentActionStartFrame);
+
+    // Done skipping.
     mSkipInProgress = false;
 }
 

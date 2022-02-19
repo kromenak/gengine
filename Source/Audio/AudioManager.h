@@ -10,6 +10,8 @@
 #include <fmod.hpp>
 #include <fmod_errors.h>
 
+#include "Atomics.h"
+
 class Audio;
 class Vector3;
 
@@ -42,6 +44,9 @@ private:
 
     // Callback to execute when sound finishes playing (either naturally or via stop).
     std::function<void()> mFinishCallback;
+
+    // The frame this sound started on.
+    uint32 mStartFrame = 0;
 };
 
 struct AudioSaveState
@@ -120,6 +125,7 @@ public:
     void Stop(Audio* audio);
     void Stop(PlayingSoundHandle& soundHandle, float fadeOutTime = 0.0f);
     void StopAll();
+    void StopOnOrAfterFrame(uint32 frame);
 
     void SetMasterVolume(float volume);
     float GetMasterVolume() const;

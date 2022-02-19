@@ -449,6 +449,24 @@ void AudioManager::StopAll()
     mPlayingSounds.clear();
 }
 
+void AudioManager::StopOnOrAfterFrame(uint32 frame)
+{
+    for(auto& sound : mPlayingSounds)
+    {
+        // Only interested in sounds that started on or after the given frame.
+        if(sound.mStartFrame < frame) { continue; }
+
+        // We'll ignore music and ambient sounds for now.
+        // Since this function is primarily meant for stopping sounds during an action skip...
+        FMOD::ChannelGroup* channelGroup;
+        sound.channel->getChannelGroup(&channelGroup);
+        if(channelGroup == mMusicChannelGroup || channelGroup == mAmbientChannelGroup) { continue; }
+
+        // Stop this sound.
+        sound.Stop();
+    }
+}
+
 void AudioManager::SetMasterVolume(float volume)
 {
     // Set volume. FMOD expects a normalized 0-1 value.
@@ -646,6 +664,7 @@ PlayingSoundHandle& AudioManager::CreateAndPlaySound2D(Audio* audio, AudioType a
 
     // Create and return sound handle.
     mPlayingSounds.emplace_back(channel, audio);
+    mPlayingSounds.back().mStartFrame = GEngine::Instance()->GetFrameNumber();
     return mPlayingSounds.back();
 }
 
@@ -682,10 +701,9 @@ PlayingSoundHandle& AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType a
     // Play the sound. Important to do this AFTER setting 3D attributes for correct results.
     channel->setPaused(false);
 
-    // Add to playing channels.
+    // Create and return sound handle.
     mPlayingSounds.emplace_back(channel, audio);
-
-    // Return channel being played on.
+    mPlayingSounds.back().mStartFrame = GEngine::Instance()->GetFrameNumber();
     return mPlayingSounds.back();
 }
 

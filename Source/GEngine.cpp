@@ -237,9 +237,11 @@ void GEngine::Run()
         Update();
         GenerateOutputs();
 		
-		// After frame is done, check whether we need a scene change.
+		// Check whether we need a scene change.
 		LoadSceneInternal();
 
+        // OK, this frame is done!
+        ++mFrameNumber;
         PROFILER_END_FRAME();
     }
 }
