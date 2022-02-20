@@ -84,6 +84,38 @@ float ui_quad_uvs[] = {
 };
 Mesh* uiQuad = nullptr;
 
+void DumpVideoInfo(SDL_Window* window)
+{
+    // Output drivers.
+    int driverCount = SDL_GetNumVideoDrivers();
+    for(int i = 0; i < driverCount; ++i)
+    {
+        SDL_Log("Driver %i: %s\n", i, SDL_GetVideoDriver(i));
+    }
+    SDL_Log("Current Driver: %s\n", SDL_GetCurrentVideoDriver());
+
+    // Output displays.
+    int displayCount = SDL_GetNumVideoDisplays();
+    for(int i = 0; i < displayCount; ++i)
+    {
+        float ddpi = 0.0f;
+        float hdpi = 0.0f;
+        float vdpi = 0.0f;
+        SDL_GetDisplayDPI(i, &ddpi, &hdpi, &vdpi);
+
+        SDL_Log("Display %i: %s (%f DPI)\n", i, SDL_GetDisplayName(i), ddpi);
+
+        int displayModes = SDL_GetNumDisplayModes(i);
+        for(int j = 0; j < displayModes; ++j)
+        {
+            SDL_DisplayMode mode;
+            SDL_GetDisplayMode(i, j, &mode);
+            SDL_Log("  (%i x %i @ %iHz)\n", mode.w, mode.h, mode.refresh_rate);
+        }
+    }
+    SDL_Log("Current Display Index: %i\n", SDL_GetWindowDisplayIndex(window));
+}
+
 bool Renderer::Initialize()
 {
     TIMER_SCOPED("Renderer::Initialize");
@@ -115,18 +147,8 @@ bool Renderer::Initialize()
     
     // Create OpenGL context.
     mContext = SDL_GL_CreateContext(mWindow);
-	
-	/*
-	// For debugging display count stuff...
-	int displayCount = SDL_GetNumVideoDisplays();
-	for(int i = 0; i < displayCount; i++)
-	{
-		float hdpi = 0.0f;
-		float vdpi = 0.0f;
-		SDL_GetDisplayDPI(i, nullptr, &hdpi, &vdpi);
-		//SDL_Log("%f, %f", hdpi, vdpi);
-	}
-	*/
+
+    DumpVideoInfo(mWindow);
 	
     // Initialize GLEW.
     glewExperimental = GL_TRUE;
