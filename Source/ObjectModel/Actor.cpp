@@ -52,7 +52,7 @@ Actor::~Actor()
 
 void Actor::Update(float deltaTime)
 {
-	if(mState == State::Active && mUpdateEnabled)
+	if(IsActive() && mUpdateEnabled)
 	{
         // Calculate actor's local delta time, based on time scale.
         float localDeltaTime = deltaTime * mTimeScale;
@@ -63,7 +63,10 @@ void Actor::Update(float deltaTime)
 		// Update all components.
 		for(auto& component : mComponents)
 		{
-			component->Update(localDeltaTime);
+            if(component->IsEnabled())
+            {
+                component->Update(localDeltaTime);
+            }
 		}
 		
         // If enabled, render axes at actor position.
