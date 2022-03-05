@@ -1,2 +1,2 @@
 #!/bin/sh
-cmake -S .. -B Windows -G "Visual Studio 16 2019" -A Win32
+cmake -S .. -B Windows -G "Visual Studio 17 2022" -A Win32
