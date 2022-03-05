@@ -1,8 +1,3 @@
-//
-// TextLayout.cpp
-//
-// Clark Kromenaker
-//
 #include "TextLayout.h"
 
 #include "Font.h"
@@ -79,27 +74,30 @@ void TextLayout::AddLine(const std::string& line)
 	
     // Determine bottom y-pos of this line, depending on alignment.
     float yPos = 0.0f;
-	switch(mVerticalAlignment)
-	{
-	case VerticalAlignment::Bottom:
+    switch(mVerticalAlignment)
+    {
+    case VerticalAlignment::Bottom:
         // Bottom: just use min.y
-		yPos = mRect.GetMin().y;
-        
+        yPos = mRect.GetMin().y;
+
         // If we add a new line with bottom alignment,
         // all previous characters must be moved up by one line!
-		for(auto& charInfo : mCharInfos)
-		{
-			charInfo.pos.y = charInfo.pos.y + lineHeight;
-		}
-		break;
-	case VerticalAlignment::Top:
+        for(auto& charInfo : mCharInfos)
+        {
+            charInfo.pos.y = charInfo.pos.y + lineHeight;
+        }
+        break;
+    case VerticalAlignment::Top:
         // Top: max.y is top-y, but we need bottom-y.
         // So, we must subtract line height, and also deal with how many previous lines already exist.
         yPos = mRect.GetMax().y - (lineHeight * mLineCount);
-		break;
-	//case VerticalAlignment::Center:
-	//	break;
-	}
+        break;
+    case VerticalAlignment::Center:
+        // Center: Get vertical center-point of the rect. But subtract half line height because we need bottom-y.
+        yPos = mRect.GetMin().y + (mRect.GetSize().y / 2) - (lineHeight / 2);
+        //TODO: this currently only works for single line labels! Need to factor in mLineCount too.
+        break;
+    }
 	
     // OK, we know x/y to start the line at.
     // Determine CharInfo for each text character: the glyph and position of the glyph for rendering.

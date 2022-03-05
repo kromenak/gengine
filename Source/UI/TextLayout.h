@@ -31,7 +31,7 @@ enum class VerticalAlignment
 {
 	Bottom,
 	Top,
-	//Center
+	Center
 };
 
 enum class HorizontalOverflow
