@@ -7,6 +7,7 @@
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIDrag.h"
+#include "UIDropdown.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UISlider.h"
@@ -587,8 +588,6 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     
     //TODO: 3D driver dropdown
     
-    //TODO: Resolution dropdown
-    
     // Create "incremental rendering" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* incRenderingText = CreateButton(canvas, config, "graphOptIncrementalText", mGraphicOptionsSection, false);
     incRenderingText->SetUpTexture(Services::GetAssets()->LoadTexture(config["graphOptIncrementalEnabled"].value));
@@ -615,6 +614,31 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     });
     
     CreateAdvancedGraphicOptionsSection(canvas, config);
+
+    // Resolution dropdown.
+    UIDropdown* resolutionDropdown = new UIDropdown(*canvas);
+    RectTransform* resolutionDropdownRT = resolutionDropdown->GetComponent<RectTransform>();
+
+    resolutionDropdownRT->SetParent(mGraphicOptionsSection->GetTransform());
+    resolutionDropdownRT->SetAnchor(0.0f, 1.0f);
+    resolutionDropdownRT->SetPivot(0.0f, 1.0f);
+
+    // Dropdown sizes in the config file seem wrong, at least based on what I'm expecting.
+    // e.g. this one says height is 39, but the area in the art is clearly 15...
+    Vector2 dropdownSize = config["graphOptResolutionBoxSize"].GetValueAsVector2();
+    dropdownSize.y = 15;
+
+    // Dropdown position is also a bit weird - the pos is from top-left, but it's the bottom-left corner pos.
+    Vector2 dropdownPos = config["graphOptResolutionBoxPos"].GetValueAsVector2();
+    dropdownPos.y -= dropdownSize.y;
+    dropdownPos.y *= -1;
+
+    resolutionDropdownRT->SetAnchoredPosition(dropdownPos);
+    resolutionDropdownRT->SetSizeDelta(dropdownSize);
+
+    resolutionDropdown->SetChoices({ "640 x 480", "800 x 600" });
+
+    //CreateButton(canvas, config, "graphOptResolutionSprite", 
 }
 
 void OptionBar::CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config)
