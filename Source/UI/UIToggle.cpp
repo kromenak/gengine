@@ -9,6 +9,18 @@ UIToggle::UIToggle(Actor* owner) : UIButton(owner)
     });
 }
 
+void UIToggle::SetOnTexture(Texture* texture)
+{
+    mOnTexture = texture;
+    SetValue(mIsOn);
+}
+
+void UIToggle::SetOffTexture(Texture* texture)
+{
+    mOffTexture = texture;
+    SetValue(mIsOn);
+}
+
 void UIToggle::SetValue(bool isOn)
 {
     // Change value.

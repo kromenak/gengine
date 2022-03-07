@@ -45,6 +45,7 @@ private:
     {
         Texture* texture = nullptr;
         Color32 color = Color32::Clear;
+        bool IsSet() const { return texture != nullptr || color != Color32::Clear; }
     };
     State mUpState;
     State mDownState;

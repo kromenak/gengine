@@ -27,7 +27,6 @@ void UIButton::Render()
 	if(!IsActiveAndEnabled()) { return; }
 	
     // Update the texture to use.
-    //UpdateTexture();
     UpdateMaterial();
 
     mMaterial.Activate(GetWorldTransformWithSizeForRendering());
@@ -139,24 +138,37 @@ void UIButton::UpdateMaterial()
         }
     }
 
+    // Try to find fallback state if this state is not set.
+    if(!state.IsSet())
+    {
+        if(mUpState.IsSet())
+        {
+            state = mUpState;
+        }
+        else if(mHoverState.IsSet())
+        {
+            state = mHoverState;
+        }
+        else if(mDownState.IsSet())
+        {
+            state = mDownState;
+        }
+        else
+        {
+            state = mDisabledState;
+        }
+    }
+
     // Set color - easy enough.
     mMaterial.SetColor(state.color);
 
-    // Use the state texture if specified.
-    // If not specified, search for a fallback. For example, many buttons only define an "up" or "down" state.
-    Texture* texture = state.texture;
-    if(texture == nullptr)
-    {
-        texture = GetDefaultTexture();
-    }
-
     // If we have a texture, use it!
-    if(texture != nullptr)
+    if(state.texture != nullptr)
     {
         // Make sure widget size matches texture size.
-        GetRectTransform()->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
+        GetRectTransform()->SetSizeDelta(state.texture->GetWidth(), state.texture->GetHeight());
 
         // Set texture.
-        mMaterial.SetDiffuseTexture(texture);
+        mMaterial.SetDiffuseTexture(state.texture);
     }
 }

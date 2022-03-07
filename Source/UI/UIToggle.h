@@ -17,8 +17,8 @@ class UIToggle : public UIButton
 public:
 	UIToggle(Actor* owner);
     
-    void SetOnTexture(Texture* texture) { mOnTexture = texture; }
-    void SetOffTexture(Texture* texture) { mOffTexture = texture; }
+    void SetOnTexture(Texture* texture);
+    void SetOffTexture(Texture* texture);
     
     void SetValue(bool isOn);
     
