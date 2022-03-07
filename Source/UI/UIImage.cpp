@@ -78,18 +78,16 @@ void UIImage::Render()
 	}
 }
 
-void UIImage::SetTexture(Texture* texture)
+void UIImage::SetTexture(Texture* texture, bool resizeImage)
 {
 	mMaterial.SetDiffuseTexture(texture);
+    if(resizeImage)
+    {
+        ResizeToTexture();
+    }
 }
 
-void UIImage::SetTextureAndSize(Texture *texture)
-{
-	mMaterial.SetDiffuseTexture(texture);
-	SetSizeToTextureSize();
-}
-
-void UIImage::SetSizeToTextureSize()
+void UIImage::ResizeToTexture()
 {
 	// Need a texture to do this!
 	Texture* texture = mMaterial.GetDiffuseTexture();

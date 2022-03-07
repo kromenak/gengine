@@ -4,7 +4,9 @@ TYPE_DEF_CHILD(UIButton, UIToggle);
 
 UIToggle::UIToggle(Actor* owner) : UIButton(owner)
 {
-    SetPressCallback(std::bind(&UIToggle::OnPressed, this));
+    SetPressCallback([this](UIButton* button) {
+        OnPressed();
+    });
 }
 
 void UIToggle::SetValue(bool isOn)

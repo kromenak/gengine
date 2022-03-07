@@ -35,8 +35,8 @@ OptionBar::OptionBar() : Actor(Actor::TransformType::RectTransform)
     // This stops interaction with the scene while action bar is visible.
     mSceneBlockerButton = AddComponent<UIButton>();
     mCanvas->AddWidget(mSceneBlockerButton);
-    mSceneBlockerButton->SetPressCallback([this]() {
-        this->Hide();
+    mSceneBlockerButton->SetPressCallback([this](UIButton* button) {
+        Hide();
     });
     
     // Create sections.
@@ -108,7 +108,7 @@ void OptionBar::OnUpdate(float deltaTime)
 void OptionBar::KeepOnScreen()
 {
     // Make sure the options bar stays on-screen.
-    mOptionBarRoot->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
+    mOptionBarRoot->MoveInsideRect(Services::GetRenderer()->GetWindowRect());
 }
 
 UIButton* CreateButton(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, Actor* parent, bool setSprites = true)
@@ -202,7 +202,7 @@ UISlider* CreateSlider(UICanvas* canvas, std::unordered_map<std::string, IniKeyV
     Actor* handleActor = new Actor(Actor::TransformType::RectTransform);
     UIImage* handleImage = handleActor->AddComponent<UIImage>();
     canvas->AddWidget(handleImage);
-    handleImage->SetTextureAndSize(Services::GetAssets()->LoadTexture("RC_SO_SLIDER"));
+    handleImage->SetTexture(Services::GetAssets()->LoadTexture("RC_SO_SLIDER"), true);
     
     // Add drag component to the handle (so we can drag it) and tell slider to use this for dragging.
     UIDrag* drag = handleActor->AddComponent<UIDrag>();
@@ -236,7 +236,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     // Add background image.
     UIImage* backgroundImage = optionBar->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
-    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["backSprite"].value));
+    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["backSprite"].value), true);
     
     // Some positioning code would be easier if this was (0.5, 0.5) BUT that causes some rendering problems b/c the rect is no longer pixel perfect.
     // Mayyybe we can fix that in the RectTransform/Rect code directly...with a bit of work.
@@ -247,7 +247,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     // The background is draggable.
     UIDrag* drag = optionBar->AddComponent<UIDrag>();
     canvas->AddWidget(drag);
-    drag->SetBoundaryRect(Services::GetRenderer()->GetScreenRect());
+    drag->SetBoundaryRect(Services::GetRenderer()->GetWindowRect());
     drag->SetUseHighlightCursor(false); // but don't highlight cursor when hovering it
 
     // Load font.
@@ -320,27 +320,27 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add active inventory item button.
     mActiveInventoryItemButton = CreateButton(canvas, config, "currInv", optionBar);
-    mActiveInventoryItemButton->SetPressCallback([this]() {
+    mActiveInventoryItemButton->SetPressCallback([this](UIButton* button) {
         Hide();
         Services::Get<InventoryManager>()->InventoryInspect();
     });
     
     // Add inventory button.
     mInventoryButton = CreateButton(canvas, config, "closed", optionBar);
-    mInventoryButton->SetPressCallback([this]() {
+    mInventoryButton->SetPressCallback([this](UIButton* button) {
         Hide();
         Services::Get<InventoryManager>()->ShowInventory();
     });
     
     // Add hint button.
     mHintButton = CreateButton(canvas, config, "hint", optionBar);
-    mHintButton->SetPressCallback([]() {
+    mHintButton->SetPressCallback([](UIButton* button) {
         std::cout << "Hint!" << std::endl;
     });
     
     // Add camera button.
     mCamerasButton = CreateButton(canvas, config, "camera", optionBar);
-    mCamerasButton->SetPressCallback([this]() {
+    mCamerasButton->SetPressCallback([this](UIButton* button) {
         mCamerasSection->SetActive(!mCamerasSection->IsActive());
         mOptionsSection->SetActive(false);
         KeepOnScreen();
@@ -348,23 +348,23 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add cinematics button.
     UIButton* cinematicsOnButton = CreateButton(canvas, config, "cine", optionBar);
-    cinematicsOnButton->SetPressCallback([]() {
+    cinematicsOnButton->SetPressCallback([](UIButton* button) {
         std::cout << "Turn cinematics on!" << std::endl;
     });
     UIButton* cinematicsOffButton = CreateButton(canvas, config, "cineoff", optionBar);
-    cinematicsOffButton->SetPressCallback([]() {
+    cinematicsOffButton->SetPressCallback([](UIButton* button) {
         std::cout << "Turn cinematics off!" << std::endl;
     });
     
     // Add help button.
     mHelpButton = CreateButton(canvas, config, "help", optionBar);
-    mHelpButton->SetPressCallback([]() {
+    mHelpButton->SetPressCallback([](UIButton* button) {
         std::cout << "Help!" << std::endl;
     });
     
     // Add options button.
     mOptionsButton = CreateButton(canvas, config, "options", optionBar);
-    mOptionsButton->SetPressCallback([this]() {
+    mOptionsButton->SetPressCallback([this](UIButton* button) {
         mCamerasSection->SetActive(false);
         mOptionsSection->SetActive(!mOptionsSection->IsActive());
         KeepOnScreen();
@@ -373,7 +373,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     
     // Add close button.
     UIButton* closeButton = CreateButton(canvas, config, "exit", optionBar);
-    closeButton->SetPressCallback([this]() {
+    closeButton->SetPressCallback([this](UIButton* button) {
         Hide();
     });
 }
@@ -387,7 +387,7 @@ void OptionBar::CreateCamerasSection(UICanvas* canvas, std::unordered_map<std::s
     // Add background image.
     UIImage* backgroundImage = mCamerasSection->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
-    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["camBackSprite"].value));
+    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["camBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -405,7 +405,7 @@ void OptionBar::CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::s
     // Add background image.
     UIImage* backgroundImage = mOptionsSection->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
-    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["optBackSprite"].value));
+    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["optBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -419,26 +419,26 @@ void OptionBar::CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::s
     
     // Create save button.
     UIButton* saveButton = CreateButton(canvas, config, "optSave", mOptionsSection);
-    saveButton->SetPressCallback([]() {
+    saveButton->SetPressCallback([](UIButton* button) {
         std::cout << "Save!" << std::endl;
     });
     
     // Create restore button.
     UIButton* restoreButton = CreateButton(canvas, config, "optRestore", mOptionsSection);
-    restoreButton->SetPressCallback([]() {
+    restoreButton->SetPressCallback([](UIButton* button) {
         std::cout << "Restore!" << std::endl;
     });
     
     // Created "advanced options" button.
     UIButton* advOptButton = CreateButton(canvas, config, "optAdvanced", mOptionsSection);
-    advOptButton->SetPressCallback([this]() {
+    advOptButton->SetPressCallback([this](UIButton* button) {
         this->mAdvancedOptionsSection->SetActive(!this->mAdvancedOptionsSection->IsActive());
         this->KeepOnScreen();
     });
     
     // Create "quit game" button.
     UIButton* quitButton = CreateButton(canvas, config, "optQuit", mOptionsSection);
-    quitButton->SetPressCallback([this]() {
+    quitButton->SetPressCallback([this](UIButton* button) {
         this->Hide();
         //TODO: Show "are you sure you want to quit?" dialog.
         GEngine::Instance()->Quit();
@@ -457,7 +457,7 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
     // Add background image.
     UIImage* backgroundImage = mAdvancedOptionsSection->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
-    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["advOptBackSprite"].value));
+    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["advOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -467,24 +467,19 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
     
     // Create sound options button.
     UIButton* soundOptsButton = CreateButton(canvas, config, "advOptSound", mAdvancedOptionsSection);
-    soundOptsButton->SetPressCallback(std::bind(&OptionBar::OnSoundOptionsButtonPressed, this));
+    soundOptsButton->SetPressCallback(std::bind(&OptionBar::OnSoundOptionsButtonPressed, this, std::placeholders::_1));
     
     // Create graphics options button.
     UIButton* graphicsOptsButton = CreateButton(canvas, config, "advOptGraphics", mAdvancedOptionsSection);
-    graphicsOptsButton->SetPressCallback([this]() {
-        this->mSoundOptionsSection->SetActive(false);
-        this->mGraphicOptionsSection->SetActive(!this->mGraphicOptionsSection->IsActive());
-        this->mGameOptionsSection->SetActive(false);
-        this->KeepOnScreen();
-    });
+    graphicsOptsButton->SetPressCallback(std::bind(&OptionBar::OnGraphicsOptionsButtonPressed, this, std::placeholders::_1));
     
     // Create game options button.
     UIButton* gameOptsButton = CreateButton(canvas, config, "advOptGame", mAdvancedOptionsSection);
-    gameOptsButton->SetPressCallback([this]() {
-        this->mSoundOptionsSection->SetActive(false);
-        this->mGraphicOptionsSection->SetActive(false);
-        this->mGameOptionsSection->SetActive(!this->mGameOptionsSection->IsActive());
-        this->KeepOnScreen();
+    gameOptsButton->SetPressCallback([this](UIButton* button) {
+        mSoundOptionsSection->SetActive(false);
+        mGraphicOptionsSection->SetActive(false);
+        mGameOptionsSection->SetActive(!this->mGameOptionsSection->IsActive());
+        KeepOnScreen();
     });
     
     // Create each subsection...
@@ -502,7 +497,7 @@ void OptionBar::CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<s
     // Add background image.
     UIImage* backgroundImage = mSoundOptionsSection->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
-    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["soundOptBackSprite"].value));
+    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["soundOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -576,7 +571,7 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     // Add background image.
     UIImage* backgroundImage = mGraphicOptionsSection->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
-    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["graphicsOptBackSprite"].value));
+    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["graphicsOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -602,7 +597,7 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     
     // Create advanced graphics options button.
     UIButton* advGraphicsButton = CreateButton(canvas, config, "graphOptAdvanced", mGraphicOptionsSection);
-    advGraphicsButton->SetPressCallback([this]() {
+    advGraphicsButton->SetPressCallback([this](UIButton* button) {
         mAdvancedGraphicOptionsSection->SetActive(!mAdvancedGraphicOptionsSection->IsActive());
         KeepOnScreen();
 
@@ -615,9 +610,9 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     
     CreateAdvancedGraphicOptionsSection(canvas, config);
 
-    // Resolution dropdown.
-    UIDropdown* resolutionDropdown = new UIDropdown(*canvas);
-    RectTransform* resolutionDropdownRT = resolutionDropdown->GetComponent<RectTransform>();
+    // Resolution dropdown (create after other elements so dropdown box draws above everything).
+    mResolutionDropdown = new UIDropdown(*canvas);
+    RectTransform* resolutionDropdownRT = mResolutionDropdown->GetComponent<RectTransform>();
 
     resolutionDropdownRT->SetParent(mGraphicOptionsSection->GetTransform());
     resolutionDropdownRT->SetAnchor(0.0f, 1.0f);
@@ -636,9 +631,13 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
     resolutionDropdownRT->SetAnchoredPosition(dropdownPos);
     resolutionDropdownRT->SetSizeDelta(dropdownSize);
 
-    resolutionDropdown->SetChoices({ "640 x 480", "800 x 600" });
-
-    //CreateButton(canvas, config, "graphOptResolutionSprite", 
+    mResolutionDropdown->SetCallback([](int selectedIndex){
+        const std::vector<Renderer::Resolution>& resolutions = Services::GetRenderer()->GetResolutions();
+        if(selectedIndex >= 0 && selectedIndex < resolutions.size())
+        {
+            Services::GetRenderer()->SetWindowSize(resolutions[selectedIndex].width, resolutions[selectedIndex].height);
+        }
+    });
 }
 
 void OptionBar::CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config)
@@ -650,7 +649,7 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unord
     // Add background image.
     UIImage* backgroundImage = mAdvancedGraphicOptionsSection->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
-    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["advGraphOptBackSprite"].value));
+    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["advGraphOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -715,7 +714,7 @@ void OptionBar::CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<st
     // Add background image.
     UIImage* backgroundImage = mGameOptionsSection->AddComponent<UIImage>();
     canvas->AddWidget(backgroundImage);
-    backgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture(config["gameOptBackSprite"].value));
+    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["gameOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -731,12 +730,12 @@ void OptionBar::CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<st
     
     // Create keyboard controls button.
     UIButton* controlsButton = CreateButton(canvas, config, "gameOptControls", mGameOptionsSection);
-    controlsButton->SetPressCallback([this]() {
+    controlsButton->SetPressCallback([this](UIButton* button) {
         std::cout << "Controls" << std::endl;
     });
 }
 
-void OptionBar::OnSoundOptionsButtonPressed()
+void OptionBar::OnSoundOptionsButtonPressed(UIButton* button)
 {
     // Toggle UI elements and keep on-screen if size expands.
     mSoundOptionsSection->SetActive(!mSoundOptionsSection->IsActive());
@@ -772,4 +771,26 @@ void OptionBar::OnGlobalVolumeSliderValueChanged(float value)
     // Since there are two (!!) sliders for global volume, make sure they stay in-sync.
     mGlobalVolumeSlider->SetValueSilently(value);
     mGlobalVolumeSliderSecondary->SetValueSilently(value);
+}
+
+void OptionBar::OnGraphicsOptionsButtonPressed(UIButton* button)
+{
+    mSoundOptionsSection->SetActive(false);
+    mGraphicOptionsSection->SetActive(!this->mGraphicOptionsSection->IsActive());
+    mGameOptionsSection->SetActive(false);
+    KeepOnScreen();
+
+    // Repopulate resolutions dropdown choices.
+    // These could change if you move the game window to a new display.
+    std::vector<std::string> resolutionStrings;
+    for(auto& resolution : Services::GetRenderer()->GetResolutions())
+    {
+        resolutionStrings.push_back(StringUtil::Format("%i x %i", resolution.width, resolution.height));
+    }
+    mResolutionDropdown->SetChoices(resolutionStrings);
+
+    // Set current resolution in dropdown as the current choice.
+    int currentWidth = Services::GetRenderer()->GetWindowWidth();
+    int currentHeight = Services::GetRenderer()->GetWindowHeight();
+    mResolutionDropdown->SetCurrentChoice(StringUtil::Format("%i x %i", currentWidth, currentHeight));
 }

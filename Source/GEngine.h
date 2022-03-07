@@ -39,6 +39,7 @@ public:
     void ForceUpdate();
 
     void AddActor(Actor* actor);
+    const std::vector<Actor*>& GetActors() const { return mActors; }
     
 	void LoadScene(std::string name) { mSceneToLoad = name; }
     Scene* GetScene() { return mScene; }

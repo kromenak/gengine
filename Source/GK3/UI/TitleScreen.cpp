@@ -43,26 +43,26 @@ TitleScreen::TitleScreen() : Actor(Actor::TransformType::RectTransform)
 
     // Add "intro" button.
     UIButton* introButton = CreateButton(canvas, "TITLE_INTRO", -505.0f);
-    introButton->SetPressCallback([]() {
+    introButton->SetPressCallback([](UIButton* button) {
         Services::Get<VideoPlayer>()->Play("intro.bik", true, true, nullptr);
     });
 
     // Add "play" button.
     UIButton* playButton = CreateButton(canvas, "TITLE_PLAY", -381.0f);
-    playButton->SetPressCallback([this]() {
+    playButton->SetPressCallback([this](UIButton* button) {
         Hide();
         GEngine::Instance()->StartGame();
     });
 
     // Add "restore" button.
     UIButton* restoreButton = CreateButton(canvas, "TITLE_RESTORE", -257.0f);
-    restoreButton->SetPressCallback([]() {
+    restoreButton->SetPressCallback([](UIButton* button) {
         std::cout << "Restore!" << std::endl;
     });
 
     // Add "quit" button.
     UIButton* quitButton = CreateButton(canvas, "TITLE_QUIT", -135.0f);
-    quitButton->SetPressCallback([]() {
+    quitButton->SetPressCallback([](UIButton* button) {
         GEngine::Instance()->Quit();
     });
 

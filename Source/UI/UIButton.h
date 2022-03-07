@@ -8,6 +8,7 @@
 
 #include <functional>
 
+#include "Color32.h"
 #include "Material.h"
 
 class Texture;
@@ -19,13 +20,13 @@ public:
 	UIButton(Actor* actor);
 	
 	void Render() override;
-	
-    void SetUpTexture(Texture* texture);
-    void SetDownTexture(Texture* texture);
-    void SetHoverTexture(Texture* texture);
-    void SetDisabledTexture(Texture* texture);
-	
-	void SetPressCallback(std::function<void()> callback) { mPressCallback = callback; }
+    
+    void SetUpTexture(Texture* texture, const Color32& color = Color32::White);
+    void SetDownTexture(Texture* texture, const Color32& color = Color32::White);
+    void SetHoverTexture(Texture* texture, const Color32& color = Color32::White);
+    void SetDisabledTexture(Texture* texture, const Color32& color = Color32::White);
+
+	void SetPressCallback(std::function<void(UIButton*)> callback) { mPressCallback = callback; }
 	
 	void OnPointerEnter() override;
 	void OnPointerExit() override;
@@ -39,12 +40,16 @@ public:
 	void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
 	
 private:
-	// Textures for different visual states.
-	// Up (normal), Down (pressed), Hover, and Disabled.
-	Texture* mUpTexture = nullptr;
-	Texture* mDownTexture = nullptr;
-	Texture* mHoverTexture = nullptr;
-	Texture* mDisabledTexture = nullptr;
+    // Defines what the button looks like in each state.
+    struct State
+    {
+        Texture* texture = nullptr;
+        Color32 color = Color32::Clear;
+    };
+    State mUpState;
+    State mDownState;
+    State mHoverState;
+    State mDisabledState;
 	
 	// Is the button interactive?
 	// If not, it appears as a "disabled" button (e.g. grayed out) if a disabled texture is provided.
@@ -54,13 +59,12 @@ private:
 	Material mMaterial;
 	
 	// Callback to execute when the button is pressed.
-	std::function<void()> mPressCallback;
+	std::function<void(UIButton*)> mPressCallback;
 	
 	// Tracks pointer enter/exit and up/down for visual state and press checks.
 	bool mPointerOver = false;
 	bool mPointerDown = false;
 	
 	Texture* GetDefaultTexture();
-    
-    void UpdateTexture();
+    void UpdateMaterial();
 };

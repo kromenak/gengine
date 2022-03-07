@@ -153,7 +153,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
         Texture* texture = Services::GetAssets()->LoadTexture("CAIN");
         Texture* textureAlpha = Services::GetAssets()->LoadTexture("CAIN_ALPHA");
         texture->ApplyAlphaChannel(*textureAlpha);
-        mConsoleToggleImage->SetTextureAndSize(texture);
+        mConsoleToggleImage->SetTexture(texture, true);
 
         imageRT->SetAnchor(1.0f, 1.0f);
         imageRT->SetPivot(1.0f, 1.0f);

@@ -26,7 +26,9 @@ UIDropdown::UIDropdown(UICanvas& canvas) : Actor(Actor::TransformType::RectTrans
         mExpandButton->SetDownTexture(Services::GetAssets()->LoadTexture("RC_ARW_DWN"));
         mExpandButton->SetHoverTexture(Services::GetAssets()->LoadTexture("RC_ARW_HI"));
 
-        mExpandButton->SetPressCallback(std::bind(&UIDropdown::OnExpandButtonPressed, this));
+        mExpandButton->SetPressCallback([this](UIButton* button) {
+            OnExpandButtonPressed();
+        });
     }
 
     // Create current choice field.
@@ -145,8 +147,10 @@ void UIDropdown::SetChoices(const std::vector<std::string>& choices)
 
             // NOTE: Changing the button's texture currently updates the RectTransform's size. So do this before changing RT properties.
             UIButton* button = buttonActor->AddComponent<UIButton>();
-            //button->SetUpTexture(&Texture::White);
-            //button->SetHoverTexture(&Texture::Black);
+            button->SetUpTexture(nullptr, Color32::Gray);
+            button->SetHoverTexture(nullptr, Color32(200, 200, 200, 255));
+            button->SetDownTexture(nullptr, Color32(200, 200, 200, 255));
+            button->SetPressCallback(std::bind(&UIDropdown::OnSelectionPressed, this, std::placeholders::_1));
 
             // Expand to fill width, anchor to top of box, and set pivot to top-left.
             RectTransform* buttonRT = buttonActor->GetComponent<RectTransform>();
@@ -176,6 +180,14 @@ void UIDropdown::SetChoices(const std::vector<std::string>& choices)
     }
 }
 
+void UIDropdown::SetCurrentChoice(const std::string& choice)
+{
+    // The current choice can be set separately from the list of choices.
+    // Sometimes the current choice is not one of the valid choice selections!
+    // Ex: if you set resolution to something in Prefs.ini that isn't usually supported.
+    mCurrentChoiceLabel->SetText(choice);
+}
+
 void UIDropdown::OnExpandButtonPressed()
 {
     // Toggle box active or inactive.
@@ -193,4 +205,26 @@ void UIDropdown::OnExpandButtonPressed()
             yPos -= selection.transform->GetSize().y;
         }
     }
+}
+
+void UIDropdown::OnSelectionPressed(UIButton* button)
+{
+    // Figure out which selection was pressed.
+    if(mCallback != nullptr)
+    {
+        for(int i = 0; i < mSelections.size(); ++i)
+        {
+            if(mSelections[i].button == button)
+            {
+                // Update current selection text.
+                mCurrentChoiceLabel->SetText(mSelections[i].label->GetText());
+
+                // Let others know that the selection changed.
+                mCallback(i);
+            }
+        }
+    }
+
+    // Hide the dropdown selection box.
+    mBoxRT->GetOwner()->SetActive(false);
 }

@@ -24,15 +24,12 @@ public:
     UIImage(Actor* actor);
 	
     void Render() override;
-	
-	void SetTexture(Texture* texture);
-	void SetTextureAndSize(Texture* texture);
-	
-	void SetSizeToTextureSize();
-	
-	void SetColor(const Color32& color);
-	
+
+    void SetColor(const Color32& color);
+	void SetTexture(Texture* texture, bool resizeImage = false);
 	void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
+
+    void ResizeToTexture();
 	
 private:
 	Material mMaterial;

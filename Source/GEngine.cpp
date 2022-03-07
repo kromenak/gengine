@@ -355,10 +355,22 @@ void GEngine::ProcessInput()
 				}
 				break;
 			}
+
+            case SDL_WINDOWEVENT:
+            {
+                if(event.window.event == SDL_WINDOWEVENT_MOVED)
+                {
+                    // Let renderer know so it can process and take any action.
+                    mRenderer.OnWindowPositionChanged();
+                }
+                break;
+            }
 				
             case SDL_QUIT:
+            {
                 Quit();
                 break;
+            }
         }
     }
     

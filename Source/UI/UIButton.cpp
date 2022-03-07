@@ -16,6 +16,10 @@ UIButton::UIButton(Actor* owner) : UIWidget(owner)
 {
 	// By default, a button ought to receive input.
     SetReceivesInput(true);
+
+    // Tell material to use white texture by default.
+    // As a result, if a texture is never set (color-only button), it'll still work.
+    mMaterial.SetDiffuseTexture(&Texture::White);
 }
 
 void UIButton::Render()
@@ -23,48 +27,51 @@ void UIButton::Render()
 	if(!IsActiveAndEnabled()) { return; }
 	
     // Update the texture to use.
-    UpdateTexture();
-	
-	// Render.
-    if(mMaterial.GetDiffuseTexture() != nullptr)
-    {
-        mMaterial.Activate(GetWorldTransformWithSizeForRendering());
-        uiQuad->Render();
-    }
+    //UpdateTexture();
+    UpdateMaterial();
+
+    mMaterial.Activate(GetWorldTransformWithSizeForRendering());
+    uiQuad->Render();
 }
 
-void UIButton::SetUpTexture(Texture* texture)
+void UIButton::SetUpTexture(Texture* texture, const Color32& color)
 {
+    mUpState.texture = texture;
+    mUpState.color = color;
+
     // Set texture and update.
-    // It's important to call "UpdateTexture" here b/c it updates the dimensions of the widget.
+    // It's important to update material here b/c it updates the dimensions of the widget.
     // If not called here, dimensions aren't updated until next render, which can cause layout issues for one frame.
-    mUpTexture = texture;
-    UpdateTexture();
+    UpdateMaterial();
 }
 
-void UIButton::SetDownTexture(Texture* texture)
+void UIButton::SetDownTexture(Texture* texture, const Color32& color)
 {
-    mDownTexture = texture;
-    UpdateTexture();
+    mDownState.texture = texture;
+    mDownState.color = color;
+    UpdateMaterial();
 }
 
-void UIButton::SetHoverTexture(Texture* texture)
+void UIButton::SetHoverTexture(Texture* texture, const Color32& color)
 {
-    mHoverTexture = texture;
-    UpdateTexture();
+    mHoverState.texture = texture;
+    mHoverState.color = color;
+    UpdateMaterial();
 }
 
-void UIButton::SetDisabledTexture(Texture* texture)
+void UIButton::SetDisabledTexture(Texture* texture, const Color32& color)
 {
-    mDisabledTexture = texture;
-    UpdateTexture();
+    mDisabledState.texture = texture;
+    mDisabledState.color = color;
+    UpdateMaterial();
 }
 
 void UIButton::OnPointerEnter()
 {
     // If button has a texture, use cursor highlight.
     // If button has no texture (so, perhaps an input blocker or invisible click detector), no highlight.
-    if(mMaterial.GetDiffuseTexture() != nullptr)
+    const Color32* color = mMaterial.GetColor("uColor");
+    if(mMaterial.GetDiffuseTexture() != nullptr && color != nullptr && color->GetA() > 0)
     {
         Services::Get<CursorManager>()->UseHighlightCursor();
     }
@@ -100,54 +107,56 @@ void UIButton::Press()
 {
 	if(mPressCallback && IsEnabled() && CanInteract())
 	{
-		mPressCallback();
+		mPressCallback(this);
 	}
 }
 
 Texture* UIButton::GetDefaultTexture()
 {
-	if(mUpTexture != nullptr) { return mUpTexture; }
-	if(mHoverTexture != nullptr) { return mHoverTexture; }
-	if(mDownTexture != nullptr) { return mDownTexture; }
-	return mDisabledTexture;
+	if(mUpState.texture != nullptr) { return mUpState.texture; }
+	if(mHoverState.texture != nullptr) { return mHoverState.texture; }
+	if(mDownState.texture != nullptr) { return mDownState.texture; }
+	return mDisabledState.texture;
 }
 
-void UIButton::UpdateTexture()
+void UIButton::UpdateMaterial()
 {
-    // Figure out which texture we want to use.
-    // Start by getting a default texture. If none exists, we can't render.
-    Texture* texture = GetDefaultTexture();
-    if(texture == nullptr) { return; }
-    
-    // If can interact, texture to use depends on up/down/hover texture availability and button state.
-    // If can't interact, just use disabled texture if we have it!
+    // Figure out which state to use.
+    State& state = mDisabledState;
     if(mCanInteract)
     {
-        // This logic favors showing pressed, then hovered, then up states.
-        if(mPointerDown && mDownTexture != nullptr)
+        if(mPointerDown)
         {
-            texture = mDownTexture;
+            state = mDownState;
         }
-        else if(mPointerOver && mHoverTexture != nullptr)
+        else if(mPointerOver)
         {
-            texture = mHoverTexture;
+            state = mHoverState;
         }
-        else if(mUpTexture != nullptr)
+        else
         {
-            texture = mUpTexture;
+            state = mUpState;
         }
     }
-    else
+
+    // Set color - easy enough.
+    mMaterial.SetColor(state.color);
+
+    // Use the state texture if specified.
+    // If not specified, search for a fallback. For example, many buttons only define an "up" or "down" state.
+    Texture* texture = state.texture;
+    if(texture == nullptr)
     {
-        if(mDisabledTexture != nullptr)
-        {
-            texture = mDisabledTexture;
-        }
+        texture = GetDefaultTexture();
     }
-    
-    // Make sure widget size matches texture size.
-    GetRectTransform()->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
-    
-    // Set texture.
-    mMaterial.SetDiffuseTexture(texture);
+
+    // If we have a texture, use it!
+    if(texture != nullptr)
+    {
+        // Make sure widget size matches texture size.
+        GetRectTransform()->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
+
+        // Set texture.
+        mMaterial.SetDiffuseTexture(texture);
+    }
 }

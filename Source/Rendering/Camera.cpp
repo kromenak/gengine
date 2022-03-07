@@ -32,7 +32,8 @@ Matrix4 Camera::GetLookAtMatrixNoTranslate()
 
 Matrix4 Camera::GetProjectionMatrix()
 {
-    return RenderTransforms::MakePerspective(mFovAngleRad, 1.333f, mNearClipPlane, mFarClipPlane);
+    Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
+    return RenderTransforms::MakePerspective(mFovAngleRad, windowSize.x / windowSize.y, mNearClipPlane, mFarClipPlane);
 }
 
 Frustum Camera::GetWorldSpaceViewFrustum()

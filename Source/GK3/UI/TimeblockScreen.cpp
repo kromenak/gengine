@@ -67,7 +67,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, std::function<void()> cal
     SetActive(true);
 
     std::string timeblockString = timeblock.ToString();
-    mBackgroundImage->SetTextureAndSize(Services::GetAssets()->LoadTexture("TBT" + timeblockString + ".BMP"));
+    mBackgroundImage->SetTexture(Services::GetAssets()->LoadTexture("TBT" + timeblockString + ".BMP"), true);
 
     // Position the text image. This is unfortunately not consistent for every timeblock!
     mTextImage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
@@ -86,7 +86,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, std::function<void()> cal
     // Populate first image in text animation sequence.
     if(mAnimSequence != nullptr)
     {
-        mTextImage->SetTextureAndSize(mAnimSequence->GetTexture(0));
+        mTextImage->SetTexture(mAnimSequence->GetTexture(0), true);
     }
 
     // Play "tick tock" sound effect.
@@ -144,7 +144,7 @@ void TimeblockScreen::OnUpdate(float deltaTime)
         mAnimTimer += mAnimSequence->GetFramesPerSecond() * deltaTime;
 
         int frameIndex = Math::Clamp(static_cast<int>(mAnimTimer), 0, mAnimSequence->GetTextureCount() - 1);
-        mTextImage->SetTextureAndSize(mAnimSequence->GetTexture(frameIndex));
+        mTextImage->SetTexture(mAnimSequence->GetTexture(frameIndex), true);
     }
 
     // Track how long we have been on this screen.

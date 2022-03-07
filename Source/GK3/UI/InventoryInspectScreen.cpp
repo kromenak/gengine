@@ -35,7 +35,9 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTran
 	exitButton->SetDownTexture(Services::GetAssets()->LoadTexture("EXITD.BMP"));
 	exitButton->SetHoverTexture(Services::GetAssets()->LoadTexture("EXITHOV.BMP"));
 	exitButton->SetDisabledTexture(Services::GetAssets()->LoadTexture("EXITDIS.BMP"));
-	exitButton->SetPressCallback(std::bind(&InventoryInspectScreen::Hide, this));
+    exitButton->SetPressCallback([this](UIButton* button) {
+        Hide();
+    });
 	
 	RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
 	exitButtonRectTransform->SetParent(inventoryRectTransform);
@@ -49,7 +51,9 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTran
 	mCloseupImage = closeupActor->AddComponent<UIButton>();
 	mCanvas->AddWidget(mCloseupImage);
 	mCloseupImage->GetRectTransform()->SetParent(inventoryRectTransform);
-	mCloseupImage->SetPressCallback(std::bind(&InventoryInspectScreen::OnClicked, this));
+    mCloseupImage->SetPressCallback([this](UIButton* button) {
+        OnClicked();
+    });
 	
 	// Hide by default.
     SetActive(false);

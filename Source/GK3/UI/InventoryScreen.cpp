@@ -38,7 +38,9 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
 	exitButton->SetDownTexture(Services::GetAssets()->LoadTexture("EXITD.BMP"));
 	exitButton->SetHoverTexture(Services::GetAssets()->LoadTexture("EXITHOV.BMP"));
 	exitButton->SetDisabledTexture(Services::GetAssets()->LoadTexture("EXITDIS.BMP"));
-	exitButton->SetPressCallback(std::bind(&InventoryScreen::Hide, this));
+    exitButton->SetPressCallback([this](UIButton* button) {
+        Hide();
+    });
 	
 	RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
 	exitButtonRectTransform->SetParent(inventoryRectTransform);
@@ -50,7 +52,7 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
 	// Create active inventory item highlight, but hide by default.
 	Actor* activeHighlightActor = new Actor(TransformType::RectTransform);
 	mActiveHighlightImage = activeHighlightActor->AddComponent<UIImage>();
-	mActiveHighlightImage->SetTextureAndSize(Services::GetAssets()->LoadTexture("INV_HIGHLIGHT.BMP"));
+	mActiveHighlightImage->SetTexture(Services::GetAssets()->LoadTexture("INV_HIGHLIGHT.BMP"), true);
 	mActiveHighlightImage->SetEnabled(false);
 	mCanvas->AddWidget(mActiveHighlightImage);
 	
@@ -181,8 +183,8 @@ void InventoryScreen::RefreshLayout()
         button->SetUpTexture(itemTexture);
 
         // Set button callback.
-        button->SetPressCallback([this, button, item]() {
-            this->OnItemClicked(button, item);
+        button->SetPressCallback([this, button, item](UIButton* button) {
+            OnItemClicked(button, item);
         });
 
         // See if this is the active inventory item.

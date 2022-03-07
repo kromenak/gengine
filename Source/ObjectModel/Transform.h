@@ -81,7 +81,9 @@ public:
 	// Rotates about an axis at a world point, by an angle.
 	void RotateAround(const Vector3& worldPoint, const Vector3& axis, float angle);
 	void RotateAround(const Vector3& worldPoint, const Quaternion& rotation);
-	
+
+    void SetDirty();
+
 protected:
 	virtual void CalcLocalPosition() { }
 	
@@ -104,8 +106,6 @@ protected:
 	// If we have any children, they are in the children vector.
 	Transform* mParent = nullptr;
 	std::vector<Transform*> mChildren;
-	
-	void SetDirty();
 	
 	void AddChild(Transform* child);
 	void RemoveChild(Transform* child);

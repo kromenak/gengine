@@ -15,6 +15,7 @@
 class RectTransform;
 class UIButton;
 class UICanvas;
+class UIDropdown;
 class UILabel;
 class UISlider;
 class UIToggle;
@@ -72,6 +73,7 @@ private:
 
     // Graphics Options section.
     Actor* mGraphicOptionsSection = nullptr;
+    UIDropdown* mResolutionDropdown = nullptr;
 
     // Advanced Graphics Options section.
     Actor* mAdvancedGraphicOptionsSection = nullptr;
@@ -92,6 +94,8 @@ private:
     void CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     void CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
     
-    void OnSoundOptionsButtonPressed();
+    void OnSoundOptionsButtonPressed(UIButton* button);
     void OnGlobalVolumeSliderValueChanged(float value);
+
+    void OnGraphicsOptionsButtonPressed(UIButton* button);
 };

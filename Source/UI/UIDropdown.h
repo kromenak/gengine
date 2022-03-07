@@ -22,6 +22,8 @@ public:
     UIDropdown(UICanvas& canvas);
 
     void SetChoices(const std::vector<std::string>& choices);
+    void SetCurrentChoice(const std::string& choice);
+
     void SetCallback(std::function<void(int)> callback) { mCallback = callback; }
 
 private:
@@ -55,4 +57,5 @@ private:
     std::function<void(int)> mCallback;
 
     void OnExpandButtonPressed();
+    void OnSelectionPressed(UIButton* button);
 };

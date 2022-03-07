@@ -1,6 +1,4 @@
 //
-// Color32.h
-//
 // Clark Kromenaker
 //
 // A 32-bit RGBA color (1 byte per component)
@@ -11,6 +9,8 @@
 class Color32
 {
 public:
+    static Color32 Clear;   // (0, 0, 0, 0)
+
 	static Color32 Black; 	// (0, 0, 0, 255)
 	static Color32 White; 	// (255, 255, 255, 255)
     static Color32 Gray;    // (127, 127, 127, 255)

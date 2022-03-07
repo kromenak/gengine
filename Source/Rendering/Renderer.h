@@ -26,6 +26,12 @@ class Skybox;
 class Renderer
 {
 public:
+    struct Resolution
+    {
+        int width = 0;
+        int height = 0;
+    };
+
     bool Initialize();
     void Shutdown();
     
@@ -43,10 +49,14 @@ public:
 
     void ToggleFullscreen();
 
-    int GetWindowWidth() { return mScreenWidth; }
-	int GetWindowHeight() { return mScreenHeight; }
-	Vector2 GetWindowSize() { return Vector2(static_cast<float>(mScreenWidth), static_cast<float>(mScreenHeight)); }
-    Rect GetScreenRect() { return Rect(0, 0, mScreenWidth, mScreenHeight); }
+    const std::vector<Resolution>& GetResolutions();
+    void SetWindowSize(int width, int height);
+    void OnWindowPositionChanged();
+
+    int GetWindowWidth() { return mCurrentResolution.width; }
+	int GetWindowHeight() { return mCurrentResolution.height; }
+	Vector2 GetWindowSize() { return Vector2(static_cast<float>(GetWindowWidth()), static_cast<float>(GetWindowHeight())); }
+    Rect GetWindowRect() { return Rect(0, 0, GetWindowWidth(), GetWindowHeight()); }
 
     void SetUseMipmaps(bool useMipmaps);
     void SetUseTrilinearFiltering(bool useTrilinearFiltering);
@@ -54,9 +64,15 @@ public:
     bool UseTrilinearFiltering() const { return mUseTrilinearFiltering; }
     
 private:
+    // Default width & height on first run, or if no other preference is specified.
+    const int kDefaultScreenWidth = 640;
+    const int kDefaultScreenHeight = 480;
+
     // Screen's width and height, in pixels.
-    int mScreenWidth = 800;
-    int mScreenHeight = 600;
+    Resolution mCurrentResolution;
+
+    // Possible resolutions.
+    std::vector<std::vector<Resolution>> mResolutions;
     
     // Handle for the window object (contains the game).
     SDL_Window* mWindow = nullptr;
@@ -80,4 +96,6 @@ private:
     // Global texture settings.
     bool mUseMipmaps = true;
     bool mUseTrilinearFiltering = true;
+
+    void DetectAvailableResolutions();
 };

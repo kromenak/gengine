@@ -29,7 +29,7 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
     // It also allows clicking outside the bar to cancel it.
     mSceneBlockerButton = AddComponent<UIButton>();
     mCanvas->AddWidget(mSceneBlockerButton);
-    mSceneBlockerButton->SetPressCallback([this]() {
+    mSceneBlockerButton->SetPressCallback([this](UIButton* button) {
         OnCancelButtonPressed();
     });
 	
@@ -92,7 +92,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 		
 		// Set up button callback to execute the action.
 		const Action* action = actions[i];
-		actionButton->SetPressCallback([this, action, executeCallback]() {
+		actionButton->SetPressCallback([this, action, executeCallback](UIButton* button) {
 			// Hide action bar on button press.
 			this->Hide();
 			
@@ -127,7 +127,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 			
 			// Create callback for inventory button press.
 			const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName);
-			invButton->SetPressCallback([this, invAction, executeCallback]() {
+			invButton->SetPressCallback([this, invAction, executeCallback](UIButton* button) {
 				// Hide action bar on button press.
 				this->Hide();
 				
@@ -142,7 +142,9 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon);
 	
 	// Pressing cancel button hides the bar, but it also requires an extra step. So its got its own callback.
-	cancelButton->SetPressCallback(std::bind(&ActionBar::OnCancelButtonPressed, this));
+    cancelButton->SetPressCallback([this](UIButton* button) {
+        OnCancelButtonPressed();
+    });
 	
 	// Refresh layout after adding all buttons to position everything correctly.
 	RefreshButtonLayout();
@@ -185,7 +187,7 @@ void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> ca
 	// Add button at index 0.
 	VerbIcon& icon = Services::Get<VerbManager>()->GetVerbIcon(verb);
 	UIButton* button = AddButton(0, icon);
-	button->SetPressCallback([this, callback]() {
+	button->SetPressCallback([this, callback](UIButton* button) {
 		this->Hide();
 		callback();
 	});
@@ -209,7 +211,7 @@ void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> cal
 	
 	// Add button with callback at index.
 	UIButton* button = AddButton(static_cast<int>(mButtons.size() - skipCount), icon);
-	button->SetPressCallback([this, callback]() {
+	button->SetPressCallback([this, callback](UIButton* button) {
 		this->Hide();
 		callback();
 	});
@@ -301,7 +303,7 @@ void ActionBar::CenterOnPointer()
 	mButtonHolder->SetAnchoredPosition(Services::GetInput()->GetMousePosition());
 	
 	// Keep inside the screen.
-    mButtonHolder->MoveInsideRect(Services::GetRenderer()->GetScreenRect());
+    mButtonHolder->MoveInsideRect(Services::GetRenderer()->GetWindowRect());
 }
 
 void ActionBar::OnCancelButtonPressed()

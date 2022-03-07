@@ -2,6 +2,8 @@
 
 #include "GMath.h"
 
+Color32 Color32::Clear(0, 0, 0, 0);
+
 Color32 Color32::Black(0, 0, 0, 255);
 Color32 Color32::White(255, 255, 255, 255);
 Color32 Color32::Gray(127, 127, 127, 255);
