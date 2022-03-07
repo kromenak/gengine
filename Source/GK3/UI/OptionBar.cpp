@@ -247,7 +247,7 @@ void OptionBar::CreateMainSection(UICanvas* canvas, std::unordered_map<std::stri
     // The background is draggable.
     UIDrag* drag = optionBar->AddComponent<UIDrag>();
     canvas->AddWidget(drag);
-    drag->SetBoundaryRect(Services::GetRenderer()->GetWindowRect());
+    drag->SetBoundaryRectTransform(mCanvas->GetRectTransform());
     drag->SetUseHighlightCursor(false); // but don't highlight cursor when hovering it
 
     // Load font.

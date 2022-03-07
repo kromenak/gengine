@@ -39,6 +39,9 @@ void UISlider::SetHandleActor(Actor* handleActor)
     mHandle->GetRectTransform()->SetAnchor(0.0f, 0.5f);
     mHandle->GetRectTransform()->SetPivot(0.0f, 0.5f);
     mHandle->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+
+    // Confine drag within the slider area.
+    mHandle->SetBoundaryRectTransform(GetRectTransform());
 }
 
 void UISlider::SetValue(float value)
@@ -71,10 +74,6 @@ void UISlider::OnUpdate(float deltaTime)
 {
     if(mHandle != nullptr)
     {
-        // Confine drag within the slider area.
-        // Need to do this in OnUpdate in case our RectTransform moves around.
-        mHandle->SetBoundaryRect(GetRectTransform()->GetWorldRect());
-
         // If handle is being dragged, the value is driven by slider position.
         // If handle is not dragged, slider position is driven by value.
         if(mHandle->IsDragging())

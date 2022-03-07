@@ -41,13 +41,6 @@ void UIDrag::OnPointerUp()
 
 void UIDrag::OnUpdate(float deltaTime)
 {
-    /*
-    if(mBoundaryRect.GetSize().GetLengthSq() > 0.0f)
-    {
-        Debug::DrawScreenRect(mBoundaryRect, Color32::Magenta);
-    }
-    */
-
     // If dragging, update transform to follow pointer.
     if(mDragging)
     {
@@ -60,9 +53,9 @@ void UIDrag::OnUpdate(float deltaTime)
             GetRectTransform()->SetAnchoredPosition(anchoredPos);
 
             // Keep within boundary rect, if rect is valid/set.
-            if(mBoundaryRect.GetSize().GetLengthSq() > 0.0f)
+            if(mBoundaryRectTransform != nullptr)
             {
-                GetRectTransform()->MoveInsideRect(mBoundaryRect);
+                GetRectTransform()->MoveInsideRect(mBoundaryRectTransform->GetWorldRect());
             }
         }
 

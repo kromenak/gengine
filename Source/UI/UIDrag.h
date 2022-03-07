@@ -23,7 +23,7 @@ public:
     void OnPointerDown() override;
     void OnPointerUp() override;
 
-    void SetBoundaryRect(const Rect& boundaryRect) { mBoundaryRect = boundaryRect; }
+    void SetBoundaryRectTransform(RectTransform* rectTransform) { mBoundaryRectTransform = rectTransform; }
     void SetUseHighlightCursor(bool useHighlightCursor) { mUseHighlightCursor = useHighlightCursor; }
 
     bool IsDragging() const { return mDragging; }
@@ -39,7 +39,7 @@ private:
     bool mPointerHovering = false;
 
     // If set, the dragged object will stay within this rect.
-    Rect mBoundaryRect;
+    RectTransform* mBoundaryRectTransform = nullptr;
 
     // If true, use highlight cursor to indicate this is interactive.
     bool mUseHighlightCursor = true;
