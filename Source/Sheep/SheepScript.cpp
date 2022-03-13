@@ -104,8 +104,9 @@ void SheepScript::ParseFromData(char *data, int dataLength)
     {
         int offset = dataOffsets[i] + headerSize;
         reader.Seek(offset);
-        
-        std::string section = reader.ReadString(12);
+
+        std::string section;
+        reader.ReadStringBuffer(12, section);
         if(section == "SysImports")
         {
             ParseSysImportsSection(reader);
@@ -151,15 +152,15 @@ void SheepScript::ParseSysImportsSection(BinaryReader& reader)
         
         // Read in name from length.
         // Length is always one more, due to null terminator.
-        short nameLength = reader.ReadShort();
-        import.name = reader.ReadString(nameLength + 1);;
+        reader.ReadShortString(import.name);
+        reader.Skip(1); // skip null terminator, baked into data
         
-        import.returnType = reader.ReadByte();
+        import.returnType = reader.ReadSByte();
         
-        char argumentCount = reader.ReadByte();
+        char argumentCount = reader.ReadSByte();
         for(int j = 0; j < argumentCount; j++)
         {
-            import.argumentTypes.push_back(reader.ReadByte());
+            import.argumentTypes.push_back(reader.ReadSByte());
         }
         
         mSysImports.push_back(import);
@@ -216,8 +217,9 @@ void SheepScript::ParseVariablesSection(BinaryReader& reader)
         
         // Read in name from length.
         // Length is always one more, due to null terminator.
-        short nameLength = reader.ReadShort();
-        std::string name = reader.ReadString(nameLength + 1);
+        std::string name;
+        reader.ReadShortString(name);
+        reader.Skip(1); // skip null terminator, baked into data
         
         // Type is either int, float, or string.
         int type = reader.ReadInt();
@@ -261,9 +263,10 @@ void SheepScript::ParseFunctionsSection(BinaryReader& reader)
     {
         // Read in name from length.
         // Length is always one more, due to null terminator.
-        short nameLength = reader.ReadShort();
-        std::string name = reader.ReadString(nameLength + 1);
-		
+        std::string name;
+        reader.ReadShortString(name);
+        reader.Skip(1); // skip null terminator, baked into data
+        
 		// Always lowercase the name, since sheepscript is case-insensitive.
 		// This ensures we can always lookup, regardless of given name case.
 		StringUtil::ToLower(name);
@@ -442,7 +445,7 @@ void SheepScript::Decompile(const std::string& filePath)
         }
 
         // Read instruction.
-        char byte = reader.ReadUByte();
+        char byte = reader.ReadByte();
         SheepInstruction instruction = (SheepInstruction)byte;
         
         // Break when read instruction fails (perhaps due to reading past end of file/mem stream).
@@ -505,7 +508,7 @@ void SheepScript::Decompile(const std::string& filePath)
             tempReader.Seek(reader.GetPosition());
             while(tempReader.GetPosition() < branchAddress)
             {
-                SheepInstruction instruction = (SheepInstruction)tempReader.ReadByte();
+                SheepInstruction instruction = (SheepInstruction)tempReader.ReadSByte();
                 if(instruction == SheepInstruction::Branch)
                 {
                     int nextBranchAddress = tempReader.ReadInt();

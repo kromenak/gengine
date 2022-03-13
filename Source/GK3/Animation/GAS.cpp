@@ -8,7 +8,7 @@
 #include "Animator.h"
 #include "GasNodes.h"
 #include "GasPlayer.h"
-#include "imstream.h"
+#include "mstream.h"
 #include "Scene.h"
 #include "Services.h"
 #include "StringTokenizer.h"

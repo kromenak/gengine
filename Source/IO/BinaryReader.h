@@ -16,34 +16,56 @@ public:
     BinaryReader(const char* memory, unsigned int memoryLength);
     ~BinaryReader();
 	
-	// Should only read if OK is true, and should only use read value if OK is still true after reading!
-	bool OK() const
-	{
-		// Remember, "good" returns true as long as fail/bad/eof bits are all false.
-		return mStream->good();
-	}
-    
+    // Should only write if OK is true.
+    // Remember, "good" returns true as long as fail/bad/eof bits are all false.
+    bool OK() const { return mStream->good(); }
+
+    // Position
     void Seek(int position);
     void Skip(int size);
-    
-	int GetPosition() const { return (int)mStream->tellg(); }
-    
+    int GetPosition() const { return static_cast<int>(mStream->tellg()); }
+
+    // Read arbitrary char data6
     int Read(char* buffer, int size);
     int Read(unsigned char* buffer, int size);
-    
-    std::string ReadString(int length);
-    
-    uint8_t ReadUByte();
-    int8_t ReadByte();
+
+    // Read numeric types
+    uint8_t ReadByte();
+    int8_t ReadSByte();
     
     uint16_t ReadUShort();
     int16_t ReadShort();
     
     uint32_t ReadUInt();
     int32_t ReadInt();
+
+    uint64_t ReadULong();
+    int64_t ReadLong();
     
     float ReadFloat();
     double ReadDouble();
+
+    // Read strings of known size
+    std::string ReadString(uint32_t size);
+    void ReadString(uint32_t size, std::string& str);
+    void ReadString(uint64_t size, std::string& str);
+
+    // Read strings w/ size encoded as 8/16/32/64-bit value
+    std::string ReadTinyString();
+    void ReadTinyString(std::string& str);
+
+    std::string ReadShortString();
+    void ReadShortString(std::string& str);
+
+    std::string ReadMedString();
+    void ReadMedString(std::string& str);
+
+    std::string ReadLongString();
+    void ReadLongString(std::string& str);
+
+    // Read string from fixed-size buffer.
+    std::string ReadStringBuffer(uint32_t bufferSize);
+    void ReadStringBuffer(uint32_t bufferSize, std::string& str);
 
     // For convenience - reading in some more commonly encountered complex types.
     Vector2 ReadVector2();

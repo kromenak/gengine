@@ -669,9 +669,10 @@ void BSP::ParseFromData(char *data, int dataLength)
     int polygonCount = reader.ReadUInt();
     
     // Iterate and read all names.
+    mObjectNames.resize(nameCount);
     for(int i = 0; i < nameCount; i++)
     {
-        mObjectNames.push_back(reader.ReadString(32));
+        reader.ReadStringBuffer(32, mObjectNames[i]);
     }
     
     // Iterate and read surfaces.
@@ -679,8 +680,8 @@ void BSP::ParseFromData(char *data, int dataLength)
     {
         BSPSurface surface;
         surface.objectIndex = reader.ReadUInt();
-        
-        surface.texture = Services::GetAssets()->LoadSceneTexture(reader.ReadString(32));
+
+        surface.texture = Services::GetAssets()->LoadSceneTexture(reader.ReadStringBuffer(32));
         
         surface.lightmapUvOffset = reader.ReadVector2();
         surface.lightmapUvScale = reader.ReadVector2();

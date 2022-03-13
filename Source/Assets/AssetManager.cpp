@@ -8,7 +8,7 @@
 
 #include "BarnFile.h"
 #include "FileSystem.h"
-#include "imstream.h"
+#include "mstream.h"
 #include "Services.h"
 #include "StringUtil.h"
 

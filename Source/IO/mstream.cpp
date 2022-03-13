@@ -1,0 +1,99 @@
+#include "mstream.h"
+
+membuf::membuf(char* data, unsigned int length)
+{
+    // setg is used for input (reading)
+    // setp is used for output (writing)
+    // We don't know if this membuf will be used for reading or writing, so just do both!
+    setg(data, data, data + length);
+    setp(data, data + length);
+}
+
+std::streampos membuf::seekoff(std::streamoff off, std::ios_base::seekdir way, std::ios_base::openmode which)
+{
+    // Determine whether we're doing out or in.
+    bool out = ((which & std::ios_base::out) != 0);
+    bool in = ((which & std::ios_base::in) != 0);
+    if(!out && !in) { return -1; }
+
+    // Determine which pointers to use for beg/cur/end.
+    char* beg = nullptr;
+    char* cur = nullptr;
+    char* end = nullptr;
+    if(out)
+    {
+        beg = pbase();
+        cur = pptr();
+        end = epptr();
+    }
+    else if(in)
+    {
+        beg = eback();
+        cur = gptr();
+        end = egptr();
+    }
+
+    // Need these pointers to be valid!
+    if(beg == nullptr || cur == nullptr || end == nullptr)
+    {
+        return -1;
+    }
+
+    // Calculate update based on way and offset.
+    if(way == std::ios_base::beg)
+    {
+        cur = beg + off;
+    }
+    else if(way == std::ios_base::cur)
+    {
+        cur += off;
+    }
+    else if(way == std::ios_base::end)
+    {
+        cur = end - off;
+    }
+
+    // Clamp to begin/end.
+    if(cur > end)
+    {
+        cur = end;
+    }
+    else if(cur < beg)
+    {
+        cur = beg;
+    }
+
+    // Update pointers.
+    if(out)
+    {
+        setp(beg, cur, end);
+    }
+    else if(in)
+    {
+        setg(beg, cur, end);
+    }
+
+    // Return current offset from beginning.
+    return cur - beg;
+}
+
+std::streampos membuf::seekpos(std::streampos pos, std::ios_base::openmode which)
+{
+    // This just always goes from the beginning.
+    return seekoff(pos, std::ios_base::beg, which);
+}
+
+imstream::imstream(const char* data, unsigned int length) :
+    std::istream(&buffer),
+    buffer(const_cast<char*>(data), length) // you'd expect an imstream to be const (reading only, no writing), and it is...
+                                            // but in this case, you've got to "trust us" because streambufs require non-const pointers
+{
+
+}
+
+omstream::omstream(char* data, unsigned int length) :
+    std::ostream(&buffer),
+    buffer(data, length)
+{
+
+}

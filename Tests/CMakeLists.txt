@@ -6,6 +6,7 @@ set(TEST_SOURCES
     AABBTests.cpp
     CollisionTests.cpp
     ContainerTests.cpp
+    IOTests.cpp
     MathTests.cpp
     Matrix4Tests.cpp
     MemoryTests.cpp
@@ -32,6 +33,7 @@ target_include_directories(tests PRIVATE
     ../Source/Barn
     ../Source/Containers
     ../Source/GK3
+    ../Source/IO
     ../Source/Math
     ../Source/Memory
     ../Source/Platform
@@ -43,6 +45,10 @@ target_include_directories(tests PRIVATE
 # Game source files being tested.
 target_sources(tests PRIVATE
     ../Source/GK3/Timeblock.cpp
+
+    ../Source/IO/BinaryReader.cpp
+    ../Source/IO/BinaryWriter.cpp
+    ../Source/IO/mstream.cpp
 
     ../Source/Math/Matrix3.cpp
     ../Source/Math/Matrix4.cpp

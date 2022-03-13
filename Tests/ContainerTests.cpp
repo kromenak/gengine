@@ -15,11 +15,11 @@ struct TestObject
 {
     TestObject(int value) : value(value)
     {
-        printf("Construct\n");
+        //printf("Construct\n");
     }
     ~TestObject()
     {
-        printf("Destruct\n");
+        //printf("Destruct\n");
     }
     int value = 0;
 };

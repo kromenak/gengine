@@ -335,7 +335,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     
     // Name of .MOD file this animation data is for.
     // TODO: May want to hash and save this for verification before playback, to avoid mismatched model/anim playing.
-    mModelName = reader.ReadString(32);
+    reader.ReadStringBuffer(32, mModelName);
     #ifdef DEBUG_OUTPUT
     std::cout << "  Model Name: " << mModelName << std::endl;
     std::cout << "  Mesh Count: " << meshCount << std::endl;
@@ -383,7 +383,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
             while(byteCount > 0)
             {
                 // 1 byte: A flag indicating what type of data is coming next.
-                unsigned int dataId = reader.ReadUByte();
+                unsigned int dataId = reader.ReadByte();
                 byteCount -= 1;
                 
                 // Identifier 0 is uncompressed vertex data.
@@ -522,9 +522,9 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
 						// This tends to be used for storing vertex position delta for internal vertices in a mesh.
                         else if(vertexDataFormat[k] == 1)
                         {
-                            float x = DecompressFloatFromByte(reader.ReadByte());
-							float y = DecompressFloatFromByte(reader.ReadByte());
-                            float z = DecompressFloatFromByte(reader.ReadByte());
+                            float x = DecompressFloatFromByte(reader.ReadSByte());
+							float y = DecompressFloatFromByte(reader.ReadSByte());
+                            float z = DecompressFloatFromByte(reader.ReadSByte());
                             vertexPose->mVertexPositions.push_back(prevPositions[k] + Vector3(x, y, z));
                         }
                         // 2 means (X, Y, Z) are compressed in next 3 ushorts.

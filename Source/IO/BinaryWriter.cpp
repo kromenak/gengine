@@ -1,14 +1,17 @@
 #include "BinaryWriter.h"
 
-#include <iostream>
+#include <fstream>
+
+#include "mstream.h"
 
 BinaryWriter::BinaryWriter(const char* filePath)
 {
     mStream = new std::ofstream(filePath, std::ios::out | std::ios::binary);
-    if(!mStream->good())
-    {
-        std::cout << "BinaryWriter can't write to file " << filePath << "!" << std::endl;
-    }
+}
+
+BinaryWriter::BinaryWriter(char* memory, unsigned int memoryLength)
+{
+    mStream = new omstream(memory, memoryLength);
 }
 
 BinaryWriter::~BinaryWriter()
@@ -26,22 +29,17 @@ void BinaryWriter::Skip(int size)
     mStream->seekp(size, std::ios::cur);
 }
 
-void BinaryWriter::Write(char* buffer, int size)
+void BinaryWriter::Write(const char* buffer, int size)
 {
     mStream->write(buffer, size);
 }
 
-void BinaryWriter::Write(unsigned char* buffer, int size)
+void BinaryWriter::Write(const unsigned char* buffer, int size)
 {
     mStream->write((char*)buffer, size);
 }
 
-void BinaryWriter::WriteString(std::string val)
-{
-    mStream->write(val.c_str(), val.size());
-}
-
-void BinaryWriter::WriteUByte(uint8_t val)
+void BinaryWriter::WriteByte(uint8_t val)
 {
     mStream->write(reinterpret_cast<char*>(&val), 1);
 }
@@ -71,6 +69,16 @@ void BinaryWriter::WriteInt(int32_t val)
     mStream->write(reinterpret_cast<char*>(&val), 4);
 }
 
+void BinaryWriter::WriteULong(uint64_t val)
+{
+    mStream->write(reinterpret_cast<char*>(&val), 8);
+}
+
+void BinaryWriter::WriteLong(int64_t val)
+{
+    mStream->write(reinterpret_cast<char*>(&val), 8);
+}
+
 void BinaryWriter::WriteFloat(float val)
 {
     mStream->write(reinterpret_cast<char*>(&val), 4);
@@ -79,4 +87,58 @@ void BinaryWriter::WriteFloat(float val)
 void BinaryWriter::WriteDouble(double val)
 {
     mStream->write(reinterpret_cast<char*>(&val), 8);
+}
+
+void BinaryWriter::WriteString(const std::string& str)
+{
+    // Writing a string without recording its size!
+    // This is fine if writer & reader have established a clear protocol.
+    mStream->write(str.c_str(), str.size());
+}
+
+void BinaryWriter::WriteTinyString(const std::string& str)
+{
+    // A "tiny" string must be <= 255 chars.
+    WriteByte(static_cast<uint8_t>(str.size()));
+    WriteString(str);
+}
+
+void BinaryWriter::WriteShortString(const std::string& str)
+{
+    // A "short" string must be <= 65,535 chars (really quite a large string).
+    WriteUShort(static_cast<uint16_t>(str.size()));
+    WriteString(str);
+}
+
+void BinaryWriter::WriteMedString(const std::string& str)
+{
+    // A "medium" string can have length up to max size of unsigned 32-bit integer.
+    WriteUInt(static_cast<uint32_t>(str.size()));
+    WriteString(str);
+}
+
+void BinaryWriter::WriteLongString(const std::string& str)
+{
+    // A "long" string can have length up to max size of unsigned 64-bit integer.
+    WriteULong(static_cast<uint64_t>(str.size()));
+    WriteString(str);
+}
+
+void BinaryWriter::WriteStringBuffer(const std::string& str, uint32_t bufferSize)
+{
+    // Write the string data, but not more than the passed in size!
+    // This *may* truncate the string data, if not careful.
+    uint32_t writeSize = str.size();
+    if(writeSize > bufferSize)
+    {
+        writeSize = bufferSize;
+    }
+    mStream->write(str.c_str(), writeSize);
+
+    // Fill remaining space (if any) with null terminators.
+    while(writeSize < bufferSize)
+    {
+        mStream->put('\0');
+        ++writeSize;
+    }
 }

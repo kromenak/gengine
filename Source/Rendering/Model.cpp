@@ -276,7 +276,7 @@ void Model::ParseFromData(char *data, int dataLength)
             }
             
             // 32 bytes: the name of the texture for this submesh.
-            std::string textureName = reader.ReadString(32);
+            std::string textureName = reader.ReadStringBuffer(32);
             #ifdef DEBUG_SUBMESH_OUTPUT
             std::cout << "      Texture name: " << textureName << std::endl;
             #endif

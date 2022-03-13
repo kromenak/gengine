@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#include "imstream.h"
+#include "mstream.h"
 #include "StringUtil.h"
 
 float IniKeyValue::GetValueAsFloat() const

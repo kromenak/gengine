@@ -379,7 +379,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
 	while(!stopReading)
     {
 		// Read instruction.
-        char instruction = reader.ReadUByte();
+        char instruction = reader.ReadByte();
 		
 		// Break when read instruction fails (perhaps due to reading past end of file/mem stream).
 		if(!reader.OK()) { break; }

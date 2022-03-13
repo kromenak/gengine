@@ -1,6 +1,4 @@
 //
-// MemoryTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for memory-related functions.

@@ -428,16 +428,16 @@ void Texture::WriteToFile(const std::string& filePath)
         {
             if(bitsPerPixel == 8)
             {
-                writer.WriteUByte(mPaletteIndexes[(y * mWidth + x)]);
+                writer.WriteByte(mPaletteIndexes[(y * mWidth + x)]);
                 ++bytesWritten;
             }
             else if(bitsPerPixel == 32)
             {
                 int index = (y * mWidth + x) * 4;
-                writer.WriteUByte(mPixels[index + 2]); // Blue
-                writer.WriteUByte(mPixels[index + 1]); // Green
-                writer.WriteUByte(mPixels[index]); 	   // Red
-                writer.WriteUByte(0); // Alpha is ignored
+                writer.WriteByte(mPixels[index + 2]); // Blue
+                writer.WriteByte(mPixels[index + 1]); // Green
+                writer.WriteByte(mPixels[index]); 	   // Red
+                writer.WriteByte(0); // Alpha is ignored
                 bytesWritten += 4;
             }
         }
@@ -445,7 +445,7 @@ void Texture::WriteToFile(const std::string& filePath)
 		// Add padding to write out total desired row size (padded to 4 bytes).
 		while(bytesWritten < rowSize)
 		{
-			writer.WriteUByte(0);
+			writer.WriteByte(0);
 			bytesWritten++;
 		}
     }
@@ -636,7 +636,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 			if(bitsPerPixel == 8)
 			{
 				// Read in the palette index and save it.
-				int paletteIndex = reader.ReadUByte();
+				int paletteIndex = reader.ReadByte();
 				mPaletteIndexes[(y * mWidth + x)] = paletteIndex;
 				bytesRead++;
 				
@@ -664,9 +664,9 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
                 
 				// Pixel data in the BMP file is BGR.
                 // Internal pixel data is RGBA, so reorganize on read in.
-				mPixels[index + 2] = reader.ReadUByte(); // Blue
-				mPixels[index + 1] = reader.ReadUByte(); // Green
-				mPixels[index] = reader.ReadUByte(); 	 // Red
+				mPixels[index + 2] = reader.ReadByte(); // Blue
+				mPixels[index + 1] = reader.ReadByte(); // Green
+				mPixels[index] = reader.ReadByte(); 	 // Red
 				bytesRead += 3;
 				
 				// BI_RGB format doesn't save any alpha, even if 32 bits per pixel.

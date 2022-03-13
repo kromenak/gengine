@@ -141,14 +141,15 @@ BarnFile::BarnFile(const std::string& filePath) :
         // a Barn file can contain "pointers" to assets in other Barn files.
         // If this name is empty, it means the asset is contained within THIS Barn file.
         // However, if the name isn't empty, it means the asset is in another Barn file.
-        std::string barnFileName = mReader.ReadString(32);
-        
+        std::string barnFileName;
+        mReader.ReadStringBuffer(32, barnFileName);
+
         // Unknown value.
         mReader.ReadUInt();
         
         // A human-readable description for this Barn file.
         // Ex: "Gabriel Knight 3 Day 1/2/3 Common"
-        std::string barnFileDescription = mReader.ReadString(40);
+        mReader.Skip(40);
         
         // Unknown value.
         mReader.ReadUInt();
@@ -172,10 +173,10 @@ BarnFile::BarnFile(const std::string& filePath) :
             
             // Unknown values.
             mReader.ReadUInt();
-            mReader.ReadUByte();
+            mReader.ReadByte();
             
             // Read in compression type.
-            asset.compressionType = (CompressionType)mReader.ReadUByte();
+            asset.compressionType = (CompressionType)mReader.ReadByte();
             
             // Compression type 3 should just be treated as type none.
             // Not sure if type 3 is actually different in some way?
@@ -206,9 +207,10 @@ BarnFile::BarnFile(const std::string& filePath) :
             }
 			
             // Read in asset name. +1 for null terminator.
-            unsigned int assetNameLength = mReader.ReadUByte();
-            asset.name = mReader.ReadString(assetNameLength + 1);
-			//std::cout << asset.name << ", " << (int)asset.compressionType << ", " << asset.compressedSize << ", " << asset.uncompressedSize << std::endl;
+            unsigned int assetNameLength = mReader.ReadByte();
+            mReader.ReadString(assetNameLength, asset.name);
+            mReader.Skip(1); // null terminator is also present - skip it
+            //std::cout << asset.name << ", " << (int)asset.compressionType << ", " << asset.compressedSize << ", " << asset.uncompressedSize << std::endl;
 			
             // Map asset name to asset for fast lookup later.
             mAssetMap[asset.name] = asset;
