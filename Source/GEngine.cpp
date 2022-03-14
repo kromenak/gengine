@@ -356,6 +356,12 @@ void GEngine::ProcessInput()
 				break;
 			}
 
+            case SDL_MOUSEWHEEL:
+            {
+                mInputManager.OnMouseWheelScroll(Vector2(event.wheel.x, event.wheel.y));
+                break;
+            }
+
             case SDL_WINDOWEVENT:
             {
                 if(event.window.event == SDL_WINDOWEVENT_MOVED)

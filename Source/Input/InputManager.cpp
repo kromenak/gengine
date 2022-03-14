@@ -1,8 +1,3 @@
-//
-// InputManager.cpp
-//
-// Clark Kromenaker
-//
 #include "InputManager.h"
 
 #include "Services.h"
@@ -25,6 +20,9 @@ void InputManager::Update()
     
     // Copy previous mouse state each frame.
     mPrevMouseButtonState = mMouseButtonState;
+
+    // Clear previous frame's mouse wheel scroll.
+    mMouseWheelScrollDelta = Vector2::Zero;
     
     // This queries device state from the OS. Marks switch from
     // "last frame values" to "current frame values".

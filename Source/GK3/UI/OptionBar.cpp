@@ -612,6 +612,7 @@ void OptionBar::CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map
 
     // Resolution dropdown (create after other elements so dropdown box draws above everything).
     mResolutionDropdown = new UIDropdown(*canvas);
+    mResolutionDropdown->SetMaxVisibleChoices(5);
     RectTransform* resolutionDropdownRT = mResolutionDropdown->GetComponent<RectTransform>();
 
     resolutionDropdownRT->SetParent(mGraphicOptionsSection->GetTransform());

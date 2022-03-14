@@ -1,6 +1,4 @@
 //
-// InputManager.h
-//
 // Clark Kromenaker
 //
 // Central spot that allows other systems to query for input events.
@@ -43,7 +41,10 @@ public:
     
     Vector2 GetMousePosition() { return mMousePosition; }
     Vector2 GetMouseDelta() { return mMousePositionDelta; }
-	
+
+    void OnMouseWheelScroll(const Vector2& scroll) { mMouseWheelScrollDelta = scroll; }
+    const Vector2& GetMouseWheelScrollDelta() const { return mMouseWheelScrollDelta; }
+
 	void LockMouse();
 	void UnlockMouse();
 	bool MouseLocked() const { return mMouseLocked; }
@@ -74,6 +75,9 @@ private:
     
     // The mouse's position delta for this frame.
     Vector2 mMousePositionDelta;
+
+    // Amount of scrolling on the mouse wheel detected this frame.
+    Vector2 mMouseWheelScrollDelta;
 		
 	// Is the mouse locked?
 	bool mMouseLocked = false;

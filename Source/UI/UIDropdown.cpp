@@ -136,11 +136,70 @@ void UIDropdown::SetChoices(const std::vector<std::string>& choices)
     // Save choices internally.
     mChoices = choices;
 
-    // Generate dropdown selections.
-    for(int i = 0; i < mChoices.size(); ++i)
+    // If scrolled, reset back to top.
+    mChoicesOffset = 0;
+
+    // Update UI.
+    RefreshChoicesUI();
+}
+
+void UIDropdown::SetCurrentChoice(const std::string& choice)
+{
+    // The current choice can be set separately from the list of choices.
+    // Sometimes the current choice is not one of the valid choice selections!
+    // Ex: if you set resolution to something in Prefs.ini that isn't usually supported.
+    mCurrentChoiceLabel->SetText(choice);
+}
+
+void UIDropdown::OnUpdate(float deltaTime)
+{
+    // Check for changing visible choices based on mouse scroll wheel.
+    if(mChoices.size() > mMaxVisibleChoices)
     {
+        // See if mouse wheel has scrolled atall.
+        Vector2 mouseWheelScrollDelta = Services::GetInput()->GetMouseWheelScrollDelta();
+        if(mouseWheelScrollDelta.y != 0)
+        {
+            // If so, increment or decrement choice offset up to min/max.
+            int oldChoiceOffset = mChoicesOffset;
+            if(mouseWheelScrollDelta.y > 0 && mChoicesOffset > 0)
+            {
+                --mChoicesOffset;
+            }
+            else if(mouseWheelScrollDelta.y < 0 && mChoicesOffset < mChoices.size() - mMaxVisibleChoices)
+            {
+                ++mChoicesOffset;
+            }
+
+            // If offset changed, refresh displayed choices.
+            if(mChoicesOffset != oldChoiceOffset)
+            {
+                RefreshChoicesUI();
+            }
+        }
+    }
+}
+
+void UIDropdown::RefreshChoicesUI()
+{
+    // Hide all existing choices, in case choices were removed.
+    for(auto& choiceUI : mChoiceUIs)
+    {
+        choiceUI.transform->GetOwner()->SetActive(false);
+    }
+
+    // Generate dropdown choices.
+    for(int i = mChoicesOffset; i < mChoices.size(); ++i)
+    {
+        // If max visible choices are limited, only spawn up to max items.
+        int choiceUIIndex = i - mChoicesOffset;
+        if(mMaxVisibleChoices > 0 && choiceUIIndex >= mMaxVisibleChoices)
+        {
+            break;
+        }
+        
         // We may need to create a new selection.
-        if(i >= mSelections.size())
+        if(choiceUIIndex >= mChoiceUIs.size())
         {
             Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
             buttonActor->GetTransform()->SetParent(mBoxRT);
@@ -170,22 +229,16 @@ void UIDropdown::SetChoices(const std::vector<std::string>& choices)
             mCanvas.AddWidget(button);
             mCanvas.AddWidget(label);
 
-            mSelections.emplace_back();
-            mSelections.back().transform = buttonRT;
-            mSelections.back().button = button;
-            mSelections.back().label = label;
+            mChoiceUIs.emplace_back();
+            mChoiceUIs.back().transform = buttonRT;
+            mChoiceUIs.back().button = button;
+            mChoiceUIs.back().label = label;
         }
 
-        mSelections[i].label->SetText(mChoices[i]);
+        // Set active and set text.
+        mChoiceUIs[choiceUIIndex].transform->GetOwner()->SetActive(true);
+        mChoiceUIs[choiceUIIndex].label->SetText(mChoices[i]);
     }
-}
-
-void UIDropdown::SetCurrentChoice(const std::string& choice)
-{
-    // The current choice can be set separately from the list of choices.
-    // Sometimes the current choice is not one of the valid choice selections!
-    // Ex: if you set resolution to something in Prefs.ini that isn't usually supported.
-    mCurrentChoiceLabel->SetText(choice);
 }
 
 void UIDropdown::OnExpandButtonPressed()
@@ -199,7 +252,7 @@ void UIDropdown::OnExpandButtonPressed()
     if(isActive)
     {
         int yPos = 0.0f;
-        for(auto& selection : mSelections)
+        for(auto& selection : mChoiceUIs)
         {
             selection.transform->SetAnchoredPosition(0.0f, yPos);
             yPos -= selection.transform->GetSize().y;
@@ -212,15 +265,15 @@ void UIDropdown::OnSelectionPressed(UIButton* button)
     // Figure out which selection was pressed.
     if(mCallback != nullptr)
     {
-        for(int i = 0; i < mSelections.size(); ++i)
+        for(int i = 0; i < mChoiceUIs.size(); ++i)
         {
-            if(mSelections[i].button == button)
+            if(mChoiceUIs[i].button == button)
             {
                 // Update current selection text.
-                mCurrentChoiceLabel->SetText(mSelections[i].label->GetText());
+                mCurrentChoiceLabel->SetText(mChoiceUIs[i].label->GetText());
 
                 // Let others know that the selection changed.
-                mCallback(i);
+                mCallback(mChoicesOffset + i);
             }
         }
     }
