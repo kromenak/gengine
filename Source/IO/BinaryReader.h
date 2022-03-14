@@ -4,6 +4,7 @@
 // Wrapper around a binary data stream, with helpers for reading bytes as specific types.
 //
 #pragma once
+#include <cstdint>
 #include <istream>
 
 #include "Vector2.h"
@@ -13,7 +14,7 @@ class BinaryReader
 {
 public:
     BinaryReader(const char* filePath);
-    BinaryReader(const char* memory, unsigned int memoryLength);
+    BinaryReader(const char* memory, uint32_t memoryLength);
     ~BinaryReader();
 	
     // Should only write if OK is true.
@@ -21,13 +22,13 @@ public:
     bool OK() const { return mStream->good(); }
 
     // Position
-    void Seek(int position);
-    void Skip(int size);
-    int GetPosition() const { return static_cast<int>(mStream->tellg()); }
+    void Seek(int32_t position);
+    void Skip(int32_t count);
+    int32_t GetPosition() const { return static_cast<int32_t>(mStream->tellg()); }
 
-    // Read arbitrary char data6
-    int Read(char* buffer, int size);
-    int Read(unsigned char* buffer, int size);
+    // Read arbitrary char data
+    int32_t Read(char* buffer, uint32_t size);
+    int32_t Read(unsigned char* buffer, uint32_t size);
 
     // Read numeric types
     uint8_t ReadByte();

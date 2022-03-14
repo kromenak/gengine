@@ -9,7 +9,7 @@ BinaryReader::BinaryReader(const char* filePath)
     mStream = new std::ifstream(filePath, std::ios::in | std::ios::binary);
 }
 
-BinaryReader::BinaryReader(const char* memory, unsigned int memoryLength)
+BinaryReader::BinaryReader(const char* memory, uint32_t memoryLength)
 {
     mStream = new imstream(memory, memoryLength);
 }
@@ -19,7 +19,7 @@ BinaryReader::~BinaryReader()
     delete mStream;
 }
 
-void BinaryReader::Seek(int position)
+void BinaryReader::Seek(int32_t position)
 {
 	// It's possible we've hit EOF, especially if we're jumping around a lot.
 	// If we are trying to seek on an EOF stream, clear the error flags and do the seek.
@@ -30,18 +30,18 @@ void BinaryReader::Seek(int position)
     mStream->seekg(position, std::ios::beg);
 }
 
-void BinaryReader::Skip(int size)
+void BinaryReader::Skip(int32_t count)
 {
-    mStream->seekg(size, std::ios::cur);
+    mStream->seekg(count, std::ios::cur);
 }
 
-int BinaryReader::Read(char* buffer, int size)
+int32_t BinaryReader::Read(char* buffer, uint32_t size)
 {
     mStream->read(buffer, size);
     return (int)mStream->gcount();
 }
 
-int BinaryReader::Read(unsigned char* buffer, int size)
+int32_t BinaryReader::Read(unsigned char* buffer, uint32_t size)
 {
     mStream->read((char*)buffer, size);
     return (int)mStream->gcount();
@@ -133,7 +133,6 @@ void BinaryReader::ReadString(uint32_t size, std::string& str)
     str.resize(size);
 
     // Directly modify the string data; a little dangerous!
-    // Since std::string doesn't count null terminator as part of length, neither will we. So, add it to the end.
     mStream->read(const_cast<char*>(str.data()), size);
 }
 

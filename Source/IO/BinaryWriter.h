@@ -4,13 +4,14 @@
 // Wrapper around an output stream that makes it easier to write out binary data.
 //
 #pragma once
+#include <cstdint>
 #include <ostream>
 
 class BinaryWriter
 {
 public:
     BinaryWriter(const char* filePath);
-    BinaryWriter(char* memory, unsigned int memoryLength);
+    BinaryWriter(char* memory, uint32_t memoryLength);
     ~BinaryWriter();
 	
 	// Should only write if OK is true.
@@ -18,13 +19,13 @@ public:
     bool OK() const { return mStream->good(); }
 
     // Position
-    void Seek(int position);
-    void Skip(int size);
-    int GetPosition() const { return static_cast<int>(mStream->tellp()); }
+    void Seek(int32_t position);
+    void Skip(int32_t count);
+    int32_t GetPosition() const { return static_cast<int32_t>(mStream->tellp()); }
 
     // Write arbitrary char data
-    void Write(const char* buffer, int size);
-    void Write(const unsigned char* buffer, int size);
+    void Write(const char* buffer, uint32_t size);
+    void Write(const unsigned char* buffer, uint32_t size);
 
     // Write numeric types
     void WriteByte(uint8_t val);

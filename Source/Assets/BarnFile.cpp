@@ -206,9 +206,8 @@ BarnFile::BarnFile(const std::string& filePath) :
                 }
             }
 			
-            // Read in asset name. +1 for null terminator.
-            unsigned int assetNameLength = mReader.ReadByte();
-            mReader.ReadString(assetNameLength, asset.name);
+            // Read in asset name.
+            mReader.ReadTinyString(asset.name);
             mReader.Skip(1); // null terminator is also present - skip it
             //std::cout << asset.name << ", " << (int)asset.compressionType << ", " << asset.compressedSize << ", " << asset.uncompressedSize << std::endl;
 			

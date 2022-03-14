@@ -1,12 +1,12 @@
 #include "mstream.h"
 
-membuf::membuf(char* data, unsigned int length)
+membuf::membuf(char* data, uint32_t length)
 {
     // setg is used for input (reading)
     // setp is used for output (writing)
     // We don't know if this membuf will be used for reading or writing, so just do both!
     setg(data, data, data + length);
-    setp(data, data + length);
+    setp(data, data, data + length);
 }
 
 std::streampos membuf::seekoff(std::streamoff off, std::ios_base::seekdir way, std::ios_base::openmode which)
@@ -83,7 +83,7 @@ std::streampos membuf::seekpos(std::streampos pos, std::ios_base::openmode which
     return seekoff(pos, std::ios_base::beg, which);
 }
 
-imstream::imstream(const char* data, unsigned int length) :
+imstream::imstream(const char* data, uint32_t length) :
     std::istream(&buffer),
     buffer(const_cast<char*>(data), length) // you'd expect an imstream to be const (reading only, no writing), and it is...
                                             // but in this case, you've got to "trust us" because streambufs require non-const pointers
@@ -91,7 +91,7 @@ imstream::imstream(const char* data, unsigned int length) :
 
 }
 
-omstream::omstream(char* data, unsigned int length) :
+omstream::omstream(char* data, uint32_t length) :
     std::ostream(&buffer),
     buffer(data, length)
 {

@@ -9,7 +9,7 @@ BinaryWriter::BinaryWriter(const char* filePath)
     mStream = new std::ofstream(filePath, std::ios::out | std::ios::binary);
 }
 
-BinaryWriter::BinaryWriter(char* memory, unsigned int memoryLength)
+BinaryWriter::BinaryWriter(char* memory, uint32_t memoryLength)
 {
     mStream = new omstream(memory, memoryLength);
 }
@@ -19,24 +19,30 @@ BinaryWriter::~BinaryWriter()
     delete mStream;
 }
 
-void BinaryWriter::Seek(int position)
+void BinaryWriter::Seek(int32_t position)
 {
+    // It's possible we've hit EOF, especially if we're jumping around a lot.
+    // If we are trying to seek on an EOF stream, clear the error flags and do the seek.
+    if(!mStream->good() && mStream->eof())
+    {
+        mStream->clear();
+    }
     mStream->seekp(position, std::ios::beg);
 }
 
-void BinaryWriter::Skip(int size)
+void BinaryWriter::Skip(int32_t count)
 {
-    mStream->seekp(size, std::ios::cur);
+    mStream->seekp(count, std::ios::cur);
 }
 
-void BinaryWriter::Write(const char* buffer, int size)
+void BinaryWriter::Write(const char* buffer, uint32_t size)
 {
     mStream->write(buffer, size);
 }
 
-void BinaryWriter::Write(const unsigned char* buffer, int size)
+void BinaryWriter::Write(const unsigned char* buffer, uint32_t size)
 {
-    mStream->write((char*)buffer, size);
+    mStream->write(reinterpret_cast<const char*>(buffer), size);
 }
 
 void BinaryWriter::WriteByte(uint8_t val)
