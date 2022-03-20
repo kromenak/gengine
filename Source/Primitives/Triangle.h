@@ -12,6 +12,9 @@ public:
     Triangle() = default;
 	Triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2);
 
+    Vector3& operator[](int i) { return (&p0)[i]; }
+    const Vector3& operator[](int i) const { return (&p0)[i]; }
+
     Vector3 GetNormal(bool clockwise = true, bool leftHand = true) const;
     Vector3 GetCenter() const;
 

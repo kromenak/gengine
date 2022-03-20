@@ -1,6 +1,4 @@
 //
-// LineSegment.h
-//
 // Clark Kromenaker
 //
 // A line segment extends between two points (start and end points).

@@ -42,7 +42,7 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
             Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
             Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
 			RaycastHit hitInfo;
-			if(Collisions::TestRayTriangle(ray, p0, p1, p2, hitInfo))
+			if(Intersect::TestRayTriangle(ray, p0, p1, p2, hitInfo.t))
             {
                 if(hitInfo.t < outHitInfo.t)
                 {
@@ -79,7 +79,7 @@ bool BSP::RaycastSingle(const Ray& ray, std::string name, RaycastHit& outHitInfo
 		{
             Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
             Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
-			if(Collisions::TestRayTriangle(ray, p0, p1, p2, outHitInfo))
+			if(Intersect::TestRayTriangle(ray, p0, p1, p2, outHitInfo.t))
 			{
 				// Save name of hit object.
 				outHitInfo.name = name;
@@ -110,7 +110,7 @@ std::vector<RaycastHit> BSP::RaycastAll(const Ray& ray)
             Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
             Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
 			RaycastHit hitInfo;
-			if(Collisions::TestRayTriangle(ray, p0, p1, p2, hitInfo))
+			if(Intersect::TestRayTriangle(ray, p0, p1, p2, hitInfo.t))
 			{
 				// Save hit object name.
                 hitInfo.name = mObjectNames[surface.objectIndex];
@@ -132,7 +132,7 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
 	{
 		Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i]];
 		Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i + 1]];
-		if(Collisions::TestRayTriangle(ray, p0, p1, p2, outHitInfo))
+		if(Intersect::TestRayTriangle(ray, p0, p1, p2, outHitInfo.t))
 		{
 			return true;
 		}

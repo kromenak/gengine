@@ -1,8 +1,3 @@
-//
-// LineSegment.cpp
-//
-// Clark Kromenaker
-//
 #include "LineSegment.h"
 
 LineSegment::LineSegment(const Vector3& start, const Vector3& end) :

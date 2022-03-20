@@ -434,7 +434,7 @@ void GameCamera::ResolveCollisions(Vector3& newPosition, const Vector3& original
                         {
                             // If an intersection exists, resolve it by "pushing" mesh position out.
                             Vector3 intersection;
-                            if(Collisions::TestSphereTriangle(s, triangle, intersection))
+                            if(Intersect::TestSphereTriangle(s, triangle, intersection))
                             {
                                 meshPosition += intersection;
                                 s = Sphere(meshPosition, kCameraColliderRadius);

@@ -1,6 +1,4 @@
 //
-// Rect.h
-//
 // Clark Kromenaker
 //
 // A 2D rectangular area.

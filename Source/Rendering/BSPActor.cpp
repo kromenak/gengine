@@ -31,7 +31,7 @@ void BSPActor::SetInteractive(bool interactive)
 bool BSPActor::Raycast(const Ray& ray, RaycastHit& hitInfo)
 {
 	// Do a check against the AABB first.
-	if(Collisions::TestRayAABB(ray, mAABB, hitInfo))
+	if(Intersect::TestRayAABB(ray, mAABB, hitInfo.t))
 	{
 		// If AABB check succeeds, do a per-polygon test.
 		for(auto& polygon : mPolygons)

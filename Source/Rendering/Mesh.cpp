@@ -47,7 +47,7 @@ Submesh* Mesh::AddSubmesh(const MeshDefinition& meshDefinition)
 bool Mesh::Raycast(const Ray& ray, RaycastHit& hitInfo)
 {
 	// Check against Mesh's AABB to see if we hit it.
-	if(Collisions::TestRayAABB(ray, mAABB, hitInfo))
+	if(Intersect::TestRayAABB(ray, mAABB, hitInfo.t))
 	{
 		// If hit the AABB, do a per-triangle check as well for more precise detection.
 		// For example, Gabe's AABBs are pretty rough, so you can select him when clicking nowhere near him (a foot left of his arm).

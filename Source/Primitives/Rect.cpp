@@ -1,8 +1,3 @@
-//
-// Rect.cpp
-//
-// Clark Kromenaker
-//
 #include "Rect.h"
 
 Rect::Rect(float x, float y) : x(x), y(y)

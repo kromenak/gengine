@@ -1,8 +1,3 @@
-//
-// AABB.cpp
-//
-// Clark Kromenaker
-//
 #include "AABB.h"
 
 AABB::AABB(const Vector3& min, const Vector3& max) :

@@ -1,6 +1,4 @@
 //
-// AABB.h
-//
 // Clark Kromenaker
 //
 // An "axis-aligned bounding box." A simple rectangular bounding volume

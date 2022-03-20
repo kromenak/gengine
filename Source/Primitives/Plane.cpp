@@ -10,6 +10,13 @@ Plane::Plane(const Vector3& normal, float distance) :
 	
 }
 
+Plane::Plane(const Vector3& normal, const Vector3& p0) :
+    normal(normal),
+    distance(-Vector3::Dot(p0, normal)) // (p dot n + d = 0), therefore (d = -(p dot n))
+{
+
+}
+
 Plane::Plane(float normalX, float normalY, float normalZ, float distance) :
     normal(normalX, normalY, normalZ),
     distance(distance)

@@ -114,8 +114,7 @@ bool Submesh::Raycast(const Ray& ray)
 		Vector3 vert1 = GetVertexPosition(mIndexes[i]);
 		Vector3 vert2 = GetVertexPosition(mIndexes[i + 1]);
 		Vector3 vert3 = GetVertexPosition(mIndexes[i + 2]);
-		
-		if(Collisions::TestRayTriangle(ray, vert1, vert2, vert3, hitInfo))
+		if(Intersect::TestRayTriangle(ray, vert1, vert2, vert3, hitInfo.t))
 		{
 			return true;
 		}
