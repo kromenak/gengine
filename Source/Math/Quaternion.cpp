@@ -1,8 +1,3 @@
-//
-// Quaternion.cpp
-//
-// Clark Kromenaker
-//
 #include "Quaternion.h"
 
 #include "Matrix3.h"
@@ -543,6 +538,44 @@ void Quaternion::IsolateY()
     {
         w = 1.0f;
     }
+}
+
+void Quaternion::Decompose(const Vector3& axis, Quaternion& aboutAxis, Quaternion& aboutPerpendicularAxis)
+{
+    // This algorithm is referred to as "swing twist decomposition."
+    // It allows you to decompose a quaterion into two parts:
+    // 1) The "twist" - the part that rotates about a given axis/direction.
+    // 2) The "swing" - the part that rotates about an axis perpendicular to the given axis/direction.
+
+    // Project our axis onto desired axis.
+    Vector3 proj = Vector3::Project(Vector3(x, y, z), axis);
+
+    // Use that to generate quat with rotation about that axis.
+    // This is the "twist."
+    aboutAxis.x = proj.x;
+    aboutAxis.y = proj.y;
+    aboutAxis.z = proj.z;
+    aboutAxis.w = w;
+    aboutAxis.Normalize();
+
+    // Use "twist" with original rotation to calculate the "swing."
+    aboutPerpendicularAxis = Quaternion::Inverse(aboutAxis) * (*this);
+}
+
+Quaternion Quaternion::Isolate(const Vector3& axis)
+{
+    Quaternion aboutAxis;
+    Quaternion aboutPerpAxis;
+    Decompose(axis, aboutAxis, aboutPerpAxis);
+    return aboutAxis;
+}
+
+Quaternion Quaternion::Discard(const Vector3& axis)
+{
+    Quaternion aboutAxis;
+    Quaternion aboutPerpAxis;
+    Decompose(axis, aboutAxis, aboutPerpAxis);
+    return aboutPerpAxis;
 }
 
 std::ostream& operator<<(std::ostream& os, const Quaternion& q)

@@ -1,6 +1,4 @@
 //
-// Quaternion.h
-//
 // Clark Kromenaker
 //
 // A quaternion represents a rotation in 3D space.
@@ -98,6 +96,13 @@ public:
     // Isolate rotation about a particular axis
     //TODO: Not sure if this is really a "standard operation" for quaternions, but it's helpful sometimes. Maybe a util class?
     void IsolateY();
+
+    // Decompose a quaternion into part about an axis and part about a perpendicular axis.
+    void Decompose(const Vector3& axis, Quaternion& aboutAxis, Quaternion& aboutPerpendicularAxis);
+
+    // Using decomposition, isolate rotation about a particular axis, or conversely, discard rotation about a particular axis.
+    Quaternion Isolate(const Vector3& axis);
+    Quaternion Discard(const Vector3& axis);
         
     // Quaternion elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;

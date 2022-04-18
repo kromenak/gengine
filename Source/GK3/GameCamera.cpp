@@ -225,6 +225,17 @@ void GameCamera::SceneUpdate(float deltaTime)
                 turnSpeed -= kRotationSpeed;
             }
         }
+
+        // Handle spacebar input, which resets camera pitch/height.
+        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_SPACE))
+        {
+            // Reset pitch by discarding all rotation about the right axis, while keeping all else.
+            Quaternion current = GetTransform()->GetRotation();
+            GetTransform()->SetRotation(current.Discard(GetRight()));
+
+            // Resetting height is a bit more straightforward.
+            mHeight = kDefaultHeight;
+        }
     }
     
     // If left mouse button is held down, mouse movement contributes to camera movement.
