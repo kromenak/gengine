@@ -1,6 +1,4 @@
 //
-// Vector2.h
-//
 // Clark Kromenaker
 // 
 // A 2D vector.

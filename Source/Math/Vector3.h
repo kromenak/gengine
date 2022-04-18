@@ -1,6 +1,4 @@
 //
-// Vector3.h
-//
 // Clark Kromenaker
 //
 // A 3D vector.

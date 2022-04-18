@@ -169,10 +169,10 @@ void Debug::DrawAABB(const AABB& aabb, const Color32& color, float duration, con
     DrawLine(p3, p7, color, duration);
 }
 
-void Debug::DrawPlane(const Plane& plane, const Color32& color, float duration, const Matrix4* transformMatrix)
+void Debug::DrawPlane(const Plane& plane, const Vector3& point, const Color32& color, float duration, const Matrix4* transformMatrix)
 {
-    // Get closest point to origin.
-    Vector3 pointOnPlane = plane.GetClosestPoint(Vector3::Zero);
+    // Get closest point on plane to the given reference point.
+    Vector3 pointOnPlane = plane.GetClosestPoint(point);
     
     // Draw a box at that point, then a short line indicating direction of the normal.
     DrawAABB(AABB(pointOnPlane, 4.0f, 4.0f, 4.0f), color, duration, transformMatrix);

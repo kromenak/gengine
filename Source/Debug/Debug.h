@@ -45,7 +45,7 @@ public:
 
     static void DrawAABB(const AABB& aabb, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
     
-    static void DrawPlane(const Plane& plane, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
+    static void DrawPlane(const Plane& plane, const Vector3& point, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
     
     static void DrawTriangle(const Triangle& triangle, const Color32& color, float duration = 0.0f, const Matrix4* transformMatrix = nullptr);
 

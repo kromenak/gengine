@@ -1,8 +1,3 @@
-//
-// Vector2.cpp
-//
-// Clark Kromenaker
-//
 #include "Vector2.h"
 
 #include "Vector3.h"

@@ -1,8 +1,3 @@
-//
-// Vector3.h
-//
-// Clark Kromenaker
-//
 #include "Vector3.h"
 
 #include "Vector2.h"
@@ -174,7 +169,7 @@ Vector3& Vector3::Normalize()
     
     // This math actually does scalar projection ((a dot b) / ||b||).
     // And then it multiplies by (b / ||b||) to get a vector rather than a scalar.
-    // Fortunately, we can avoid sqrt because b is normalized twice!.
+    // Fortunately, we can avoid sqrt because b is normalized twice!
     return (b * (Dot(a, b) / Dot(b, b)));
 }
 

@@ -1,6 +1,4 @@
 //
-// Vector4.h
-//
 // Clark Kromenaker
 // 
 // A 4D vector.
