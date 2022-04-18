@@ -77,11 +77,21 @@ void GameCamera::OnUpdate(float deltaTime)
     }
 
     // Show options on right-click. This works even if an action is playing.
-    if(!Services::GetInput()->MouseLocked())
+    if(!mUsedMouseInputsForMouseLock)
     {
         if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
         {
             mOptionBar->Show();
+        }
+    }
+
+    // If no mouse button is pressed, we can clear the mouse locked with current inputs flag.
+    if(mUsedMouseInputsForMouseLock)
+    {
+        if(!Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left) &&
+           !Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Right))
+        {
+            mUsedMouseInputsForMouseLock = false;
         }
     }
     
@@ -232,6 +242,7 @@ void GameCamera::SceneUpdate(float deltaTime)
         // Lock the mouse!
         if(mouseDelta.GetLengthSq() > 0.0f)
         {
+            mUsedMouseInputsForMouseLock = true;
             Services::GetInput()->LockMouse();
         }
         

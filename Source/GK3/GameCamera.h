@@ -56,6 +56,10 @@ private:
     
     // Option bar - used to change settings, quit game, etc.
     OptionBar* mOptionBar = nullptr;
+
+    // Track if current mouse inputs were used for mouse lock. If so, must release all mouse buttons before doing other mouse actions.
+    // This is helpful/necessary to avoid accidentally opening option bar when releasing mouse buttons after mouse lock.
+    bool mUsedMouseInputsForMouseLock = false;
 	
 	// Height of camera above ground. Always try to maintain some height above ground.
 	// So, if moving down a hill, the camera follows the slope, for example.
