@@ -1,6 +1,7 @@
 #include "Collisions.h"
 
 #include "AABB.h"
+#include "Debug.h"
 #include "GMath.h"
 #include "Line.h"
 #include "Plane.h"
@@ -229,78 +230,92 @@ bool Intersect::LineLine2D(const Vector2& line0P0, const Vector2& line0P1, const
     return true;
 }
 
-bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, const Vector3& sphereVelocity, float& outSphereT)
+bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, const Vector3& sphereMoveOffset, float& outSphereT, Vector3& outCollisionNormal)
 {
     // Adapted (after A LOT of head scratching and experimenting) from flipcode.com/archives/Moving_Sphere_VS_Triangle_Collision.shtml
-    // Get sphere move direction from velocity.
-    Vector3 moveDir = Vector3::Normalize(sphereVelocity);
+    
+    // Sphere must be moving towards triangle to collide. Even if actively intersecting, if not moving toward triangle front, no collision.
+    // Allows moving in-bounds from out-of-bounds on a map, but not vice-versa, for example.
     Vector3 triNormal = triangle.GetNormal();
-
-    // Sphere must be moving towards triangle to collide.
-    // Even if the two are actively intersecting, if not moving towards the triangle, it's not considered a collision.
-    // This allows, for example, moving in-bounds from out-of-bounds on a map, but not vice-versa.
-    if(Vector3::Dot(triNormal, moveDir) > -0.001f)
+    if(Vector3::Dot(triNormal, sphereMoveOffset) >= 0)
     {
         return false;
     }
 
+    // We'll do three passes to check collision with the triangle interior, the triangle vertices, and triangle edges.
+    // As we go, we'll keep track of the "closest" collision we find a t-value for.
     bool collided = false;
     float smallestT = FLT_MAX;
 
     // PASS 1: SPHERE VS PLANE
-    // Create a plane from the triangle and see if the sphere intersects that plane (and if so, whether point of intersection is within the triangle).
+    // Get plane containing triangle and see if sphere intersects that plane (and if so, if point of intersection is within triangle).
+    // Observe also: if sphere DOES NOT intersect triangle plane, we early out b/c there's no chance of edge/vert collision in that case.
     {
-        // Create a plane from the triangle.
+        // Create plane from the triangle.
         Plane plane(triNormal, triangle.p0);
 
         // Get signed distance from plane to sphere center.
-        // This value is positive if "in front of" plane (in direction normal is facing) and negative otherwise.
-        float signedDistSphereToPlane = plane.GetSignedDistance(sphere.center);
+        // This value is positive if sphere is "in front of" plane (in direction normal is facing) and negative otherwise.
+        float signedDistToPlane = plane.GetSignedDistance(sphere.center);
 
-        // If too far away on negative side, the sphere is not intersecting the plane AND is moving away from it - ignore!
-        if(signedDistSphereToPlane < -sphere.radius)
+        // If sphere is behind plane and distance is farther than radius, sphere is not intersecting plane AND is on non-solid side of triangle anyway.
+        // No possibility of intersecting with this triangle (not even an edge or vertex).
+        if(signedDistToPlane < -sphere.radius)
         {
             return false;
         }
 
-        // Plane is not intersecting with sphere, BUT the sphere is moving towards the plane!
-        if(signedDistSphereToPlane > sphere.radius)
+        // If sphere is intersecting plane, but is more on the negative side (signedDist < 0), we will skip the surface check.
+        // But we still will need to check edge/vertex in this case.
+        //if(signedDistToPlane >= sphere.radius)
+        if(signedDistToPlane >= 0)
         {
-            // "h" is dist from center of sphere to plane.
-            // Subtract sphere radius to get dist from sphere surface to plane.
-            signedDistSphereToPlane -= sphere.radius;
+            // The signed dist is sphere *center* to plane. 
+            // Subtract radius to get signed dist from sphere *surface* to plane.
+            signedDistToPlane -= sphere.radius;
 
-            // Check for edge case where direction of movement is parallel to the surface of the plane.
-            // The sphere only has a chance to hit the plane if NOT moving parallel to plane surface.
-            float dot = Vector3::Dot(triNormal, sphereVelocity);
-            if(dot != 0)
+            // Use scalar projection to isolate amount of move offset in direction of normal (https://www.geogebra.org/m/XShfg9r8).
+            // Since we want a positive distance here, negate normal so vectors are in same direction (remember, they are "roughly opposite" b/c we checked that earlier).6
+            float offsetDistTowardsTri = Vector3::Dot(-triNormal, sphereMoveOffset);
+
+            // t-value is then a %: dist to plane out of total dist we might try to move this frame.
+            float t = signedDistToPlane / offsetDistTowardsTri;
+
+            // If t > 1.0f, it means distance to plane is greater than the movement amount this frame.
+            // In other words, the point of intersection with the plane is beyond our max movement - no collision!
+            // So, we don't need to check anything else - it's not possible to intersect with the triangle in this case (even edges/verts).
+            if(t > 1.0f)
             {
-                // Determine "t value" where sphere collides with plane.
-                float t = -signedDistSphereToPlane / dot; //TODO: Why does this equation work?
+                return false;
+            }
 
-                // If t is greater than 1, then the point of intersection with the plane is beyond our max movement.
-                // So, we don't need to check anything else.
-                if(t > 1.0f)
+            // Use t-value to determine exact point on plane where collision occurs.
+            Vector3 moveDir = Vector3::Normalize(sphereMoveOffset);
+            Vector3 pointOnSphere = sphere.center + moveDir * sphere.radius;
+            Vector3 pointOnPlane = pointOnSphere + sphereMoveOffset * t;
+
+            // See if the point is inside the triangle. If so, this is a sphere intersection!
+            if(triangle.ContainsPoint(pointOnPlane))
+            {
+                /*
+                // Debug visualization for big negative t values. Trying to understand why that happens...
+                if(t < -2.0f)
                 {
-                    return false;
+                    Debug::DrawSphere(sphere, Color32::Green, 120.0f);
+                    Debug::DrawLine(sphere.center, sphere.center + moveDir, Color32::Red, 120.0f);
+                    Debug::DrawLine(sphere.center, pointOnPlane, Color32::Magenta, 120.0f);
+                    Debug::DrawTriangle(triangle, Color32::Yellow, 120.0f);
+                    Debug::DrawLine(triangle.GetCenter(), triangle.GetCenter() + triangle.GetNormal() * 5.0f, Color32::Yellow, 120.0f);
                 }
+                */
 
-                // Use "t" to determine exact point on plane where collision occurs.
-                Vector3 pointOnSphere = sphere.center + moveDir * sphere.radius;
-                Vector3 pointOnPlane = pointOnSphere + sphereVelocity * t;
+                collided = true;
+                smallestT = t;
+                outCollisionNormal = triNormal;
 
-                // See if the point is inside the triangle.
-                // If so, this is a sphere intersection!
-                if(triangle.ContainsPoint(pointOnPlane))
-                {
-                    smallestT = t;
-                    collided = true;
-
-                    // If needed: point on sphere where collision would occur, point on triangle where collision would occur, normal of collision
-                    //Vector3 pointOnSphere = pointOnSphere;
-                    //Vector3 pointOnTriangle = pointOnPlane;
-                    //Vector3 normal = triNormal;
-                }
+                // If needed: point on sphere where collision would occur, point on triangle where collision would occur.
+                //Vector3 pointOnSphere = pointOnSphere;
+                //Vector3 pointOnTriangle = pointOnPlane;
             }
         }
     }
@@ -314,7 +329,7 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
         // The other will be based on the move direction of the sphere (going towards the sphere, so opposite of move dir).
         // This is hard to visualize, but think about how move direction affects the lines (or check out the Unity scene).
         Vector3 lineP0 = triangle[i];
-        Vector3 lineP1 = lineP0 + (-sphereVelocity);
+        Vector3 lineP1 = lineP0 + (-sphereMoveOffset);
         Line line(lineP0, lineP1);
 
         // See if sphere intersects with this line.
@@ -336,14 +351,15 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
         }
 
         // See if this is a closer collision than any other found.
-        if(t < smallestT)
+        if(t < smallestT && t >= 0.0f)
         {
             smallestT = t;
             collided = true;
 
-            //Vector3 pointOnSphere = line.GetPoint(t);
+            Vector3 pointOnSphere = line.GetPoint(t);
+            outCollisionNormal = Vector3::Normalize(sphere.center - pointOnSphere);
+            
             //Vector3 pointOnTriangle = triangle[i];
-            //Vector3 normal = Vector3::Normalize(sphere.center - pointOnSphere);
         }
     }
 
@@ -359,29 +375,29 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
         Vector3 p1 = triangle[j];
 
         // Create a third point opposite of move dir.
-        Vector3 p2 = p1 + (-sphereVelocity);
+        Vector3 p2 = p1 + (-sphereMoveOffset);
 
         // Create a plane from these points.
         // Each plane is kind of like a side of a "tunnel" shaped like the triangle (though remember planes extend infinitely).
         Plane plane(p0, p1, p2);
-
+        
         // If the sphere is not intersecting with the plane, we can ignore this edge.
         // We can check this by comparing the distance.
         float centerToPlaneDist = plane.GetDistance(sphere.center);
-        if(centerToPlaneDist > sphere.radius)
+        if(centerToPlaneDist >= sphere.radius)
         {
             continue;
         }
 
         // Get closest point on edge plane to sphere center.
         Vector3 closestPointOnPlane = plane.GetClosestPoint(sphere.center);
-        //Debug::DrawLine(sphere.center, closestPointOnPlane, Color.red);
+        //Debug::DrawLine(sphere.center, closestPointOnPlane, Color32::Orange);
 
         // From that closest point on edge plane, now get the closest point on the edge line.
         // This point IS NOT necessarily on the triangle edge (remember, lines are infinite in both directions).
         Line edgeLine(p0, p1);
         Vector3 closestPointOnEdgeLine = edgeLine.GetClosestPoint(closestPointOnPlane);
-        //Debug::DrawLine(closestPointOnPlane, closestPointOnEdgeLine, Color.green);
+        //Debug::DrawLine(closestPointOnPlane, closestPointOnEdgeLine, Color32::Green);
 
         // A right-triangle is formed, with the hypotenuse length equal to sphere radius, and another side's length equal to sphere-center-to-plane.
         // Using pythagorean theorem, we can calculate length of remaining side.
@@ -390,7 +406,7 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
         // The side length allows us to calculate the closest point on the sphere to the edge.
         Vector3 edgePlaneToEdgeLineDir = Vector3::Normalize(closestPointOnEdgeLine - closestPointOnPlane);
         Vector3 closestPointOnSphere = closestPointOnPlane + edgePlaneToEdgeLineDir * sideLength;
-        //Debug::DrawLine(sphere.center, closestPointOnSphere, Color.magenta);
+        //Debug::DrawLine(sphere.center, closestPointOnSphere, Color32::Magenta);
 
         // Determine whether we'll use x/y/z components for 2D line test.
         // We want to use the two SMALLEST components.
@@ -417,19 +433,19 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
 
         // Create a point near the closest point on the sphere, in the movement direction.
         // This allows us to create a line in that direction.
-        Vector3 pointInMoveDir = closestPointOnSphere + sphereVelocity;
+        Vector3 pointInMoveDir = closestPointOnSphere + sphereMoveOffset;
 
         // Do an intersection test between (a 2D line from sphere point in move dir) and (a 2D line along the edge of the triangle).
         float line0T = 0.0f;
         bool res = Intersect::LineLine2D(Vector2(closestPointOnSphere[a0], closestPointOnSphere[a1]), Vector2(pointInMoveDir[a0], pointInMoveDir[a1]),
                                            Vector2(p0[a0], p0[a1]), Vector2(p1[a0], p1[a1]), line0T);
-        if(!res || line0T < 0)
+        if(!res)
         {
             continue;
         }
 
         // Determine point of intersection along edge.
-        Vector3 triEdgeIntersectPoint = closestPointOnSphere + sphereVelocity * line0T;
+        Vector3 triEdgeIntersectPoint = closestPointOnSphere + sphereMoveOffset * line0T;
 
         // Make sure the intersect point is actually between the two edge points (and not outside the triangle).
         // We can detect this with dot product vects from intersection point to each tri point should face *away* from one another.
@@ -439,16 +455,19 @@ bool Collide::SphereTriangle(const Sphere& sphere, const Triangle& triangle, con
         }
 
         // If this is a better result than either phase 1 or phase 2, use this!
-        if(line0T < smallestT)
+        if(line0T < smallestT && line0T >= 0.0f)
         {
-            smallestT = line0T;
             collided = true;
+            smallestT = line0T;
+            outCollisionNormal = Vector3::Normalize(sphere.center - closestPointOnSphere);
 
             //Vector3 pointOnSphere = closestPointOnSphere;
             //Vector3 pointOnTriangle = triEdgeIntersectPoint;
-            //Vector3 normal = Vector3::Normalize(sphere.center - closestPointOnSphere);
         }
     }
+
+    // Pass back smallest/nearest t-value.
+    outSphereT = smallestT;
 
     // Return whether a collision occurred.
     return collided;

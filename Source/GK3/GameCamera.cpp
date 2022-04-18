@@ -40,24 +40,34 @@ void GameCamera::SetAngle(float yaw, float pitch)
 
 void GameCamera::OnUpdate(float deltaTime)
 {
-    //Vector3 planeOffset = -Vector3::UnitZ * 50.0f;
-    //Debug::DrawLine(Vector3::Zero, planeOffset, Color32::Magenta);
-    
-    //Plane plane2(Vector3::UnitZ, 50.0f);
-    //Plane plane2(planeOffset,
-    //             planeOffset + (Vector3::UnitX * 250.0f),
-    //             planeOffset + (Vector3::UnitY * 100.0f));
-    //Vector3 testPoint = plane2.GetClosestPoint(GetPosition());
-    //Debug::DrawLine(Vector3::Zero, testPoint, Color32::Green);
-    
-    //Vector3 triOffset = Vector3::UnitZ * 200.0f;
-    //Triangle tri(triOffset,
-    //             (Vector3::UnitX * 250.0f) + triOffset,
-    //             (Vector3::UnitY * 100.0f) + triOffset);
-    //tri.DebugDraw(Color32::Yellow);
-    
-    //Vector3 testPoint2 = tri.GetClosestPoint(GetPosition());
-    //Debug::DrawLine(Vector3::Zero, testPoint2, Color32::Red);
+    /*
+    {
+        static Vector3 sphereStartPos(50.0f, 40.0f, 150.0f);
+        static Vector3 sphereEndPos(100.0f, 80.0f, 300.0f);
+        static Vector3 sphereCurrentPos = sphereStartPos;
+
+        if(!mBoundsModels.empty() && mBoundsEnabled)
+        {
+             // Draw spheres for debug visualization.
+            Sphere sphere(sphereStartPos, kCameraColliderRadius);
+            Sphere sphereEnd(sphereEndPos, kCameraColliderRadius);
+
+            Debug::DrawSphere(sphere, Color32::Blue);
+            Debug::DrawSphere(sphereEnd, Color32::Red);
+            Debug::DrawLine(sphereStartPos, sphereEndPos, Color32::White);
+            
+            // Test collision resolution code.
+            //Vector3 collidePos = ResolveCollisions(sphereCurrentPos, sphereEndPos - sphereCurrentPos);
+            //Sphere sphereCurrent(collidePos, kCameraColliderRadius);
+            //Debug::DrawSphere(sphereCurrent, Color32::Green);
+
+            Vector3 moveOffset = Vector3::Normalize(sphereEndPos - sphereStartPos) * 5.0f * deltaTime;
+            sphereCurrentPos = ResolveCollisions(sphereCurrentPos, moveOffset);
+            Sphere sphereCurrent(sphereCurrentPos, kCameraColliderRadius);
+            Debug::DrawSphere(sphereCurrent, Color32::Green);
+        }
+    }
+    */
     
     // Perform scene-only updates (camera movement, click-to-interact), if scene is active and no action is playing.
     bool actionPlaying = Services::Get<ActionManager>()->IsActionPlaying();
@@ -281,9 +291,12 @@ void GameCamera::SceneUpdate(float deltaTime)
     float height = mHeight + verticalSpeed * deltaTime;
     float floorY = GEngine::Instance()->GetScene()->GetFloorY(position);
     position.y = floorY + height;
-    
+
+    // Determine offset from start to end position.
+    Vector3 moveOffset = position - GetPosition();
+
     // Perform collision checks and resolutions.
-    ResolveCollisions(position, GetPosition());
+    position = ResolveCollisions(GetPosition(), moveOffset);
     
     // Set position after resolving collisions.
     GetTransform()->SetPosition(position);
@@ -384,73 +397,156 @@ void GameCamera::SceneUpdate(float deltaTime)
     }
 }
 
-//TODO: Make this continuous so camera can't get out of bounds when moving too fast!
-void GameCamera::ResolveCollisions(Vector3& newPosition, const Vector3& originalPosition)
+Vector3 GameCamera::ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset)
 {
 	// No bounds model = no collision.
 	// Bounds may also be purposely disabled for debugging purposes.
-	if(mBoundsModels.empty() || !mBoundsEnabled) { return; }
-
-    // Do collision for each bounds model.
-    for(auto& model : mBoundsModels)
+	if(mBoundsModels.empty() || !mBoundsEnabled || Services::GetInput()->IsKeyPressed(SDL_SCANCODE_SPACE))
     {
-        // We'll represent the camera with a sphere and the bounds are a model (triangles).
-        // Iterate and do a collision check against the triangles of the bounds model.
-        auto& meshes = model->GetMeshes();
-        for(auto& mesh : meshes)
+        return startPosition + moveOffset;
+    }
+
+    // No movement means no need to resolve collisions.
+    if(Math::IsZero(moveOffset.GetLengthSq()))
+    {
+        return startPosition;
+    }
+
+    // Ok, we begin at the start position.
+    Vector3 currentPosition = startPosition;
+    Vector3 currentMoveOffset = moveOffset;
+
+    // We need to check for collisions with any triangles along the path from camera's start to end point this frame.
+    // If a collision occurs, the velocity is "redirected" along the collided surface, and collisions must then be checked again (i.e. iteratively/recursively).
+    // So, that's why we must loop here until the velocity gets close to zero (or we detect no more collisions).
+    int passCount = 0;
+    while(currentMoveOffset.GetLengthSq() > 0.0f && passCount < 2)
+    {
+        ++passCount;
+
+        // Assume, by default, we haven't collided with anything.
+        // "t" represents % of velocity we will move, so a default of 1 means "didn't collide with anything => move full amount".
+        bool collided = false;
+        float smallestT = 1.0f;
+        Vector3 collisionNormal;
+        Triangle collideTriangle;
+        
+        // Create sphere at current position.
+        Sphere sphere(currentPosition, kCameraColliderRadius);
+
+        /*
         {
-            // Bounds model is positioned at (0,0,0) in world space (so no need to multiply local to world...it's identity).
-            // BUT each mesh in the model has its own local coordinate system!
-            // We need to convert camera position to local space of the mesh before doing collision check.
-            Matrix4 meshToLocal = mesh->GetMeshToLocalMatrix();
-            Matrix4 localToMesh = Matrix4::InverseTransform(meshToLocal);
-            Vector3 meshPosition = localToMesh.TransformPoint(newPosition);
-            Vector3 meshOffset = localToMesh.TransformVector(newPosition - originalPosition);
+            Vector3 p0 = Vector3::UnitZ * 200.0f + Vector3::UnitY * 10.0f;
+            Vector3 p1 = p0 + (Vector3::UnitY * 100.0f);
+            Vector3 p2 = p0 + (Vector3::UnitX * 250.0f);
+            Vector3 p3 = p2 + (Vector3::UnitY * 100.0f);
 
-            // The radius of the sphere is derived from camera behavior in the original game.
-            // i.e. Camera y-pos when colliding with ceiling is a certain value...so I matched that.
-            const float kCameraColliderRadius = 16.0f;
+            Triangle t1(p0, p1, p2);
+            Debug::DrawTriangle(t1, Color32::Yellow);
+            Debug::DrawLine(t1.GetCenter(), t1.GetCenter() + t1.GetNormal() * 10.0f, Color32::Yellow);
 
-            // Create sphere at position.
-            Sphere s(meshPosition, kCameraColliderRadius);
-
-            // Iterate submeshes/submesh triangles.
-            auto submeshes = mesh->GetSubmeshes();
-            for(auto& submesh : submeshes)
+            //Triangle t2(p1, p3, p2);
+            //Debug::DrawTriangle(t2, Color32::Yellow);
+            //Debug::DrawLine(t2.GetCenter(), t2.GetCenter() + t2.GetNormal() * 10.0f, Color32::Yellow);
+            std::vector<Triangle> tris { t1 }; // t2 };
+            for(auto& tri : tris)
             {
-                Vector3 p0, p1, p2;
-                int triangleCount = submesh->GetTriangleCount();
-                for(int i = 0; i < triangleCount; i++)
+                // Check collision and record the t/normal if it's smaller than any previously discovered one.
+                float sphereT = 0.0f;
+                Vector3 normal;
+                if(Collide::SphereTriangle(sphere, tri, currentMoveOffset, sphereT, normal))
                 {
-                    if(submesh->GetTriangle(i, p0, p1, p2))
+                    if(sphereT < smallestT)
                     {
-                        Triangle triangle(p0, p1, p2);
-
-                        // We only need to check collision if the camera is moving towards the triangle.
-                        // Triangles in GK3 are CCW, so pass false here to indicate that.
-                        Vector3 normal = triangle.GetNormal(false);
-                        float dot = Vector3::Dot(meshOffset, normal);
-                        if(dot < 0.0f)
-                        {
-                            // If an intersection exists, resolve it by "pushing" mesh position out.
-                            Vector3 intersection;
-                            if(Intersect::TestSphereTriangle(s, triangle, intersection))
-                            {
-                                meshPosition += intersection;
-                                s = Sphere(meshPosition, kCameraColliderRadius);
-                            }
-                        }
-
-                        // For debugging: draw normals.
-                        //Vector3 center = meshToLocal.TransformPoint(triangle.GetCenter());
-                        //Debug::DrawLine(center, center + (meshToLocal.TransformNormal(normal) * 5.0f), Color32::Blue);
+                        collided = true;
+                        smallestT = sphereT;
+                        collisionNormal = normal;
+                        collideTriangle = tri;
                     }
                 }
             }
-
-            // We modified the local position while iterating submeshes.
-            // We now need to go back to "world" space.
-            newPosition = meshToLocal.TransformPoint(meshPosition);
         }
+        */
+
+        // Check collision against each individual triangle of each bounds model.
+        for(auto& model : mBoundsModels)
+        {
+            auto& meshes = model->GetMeshes();
+            for(auto& mesh : meshes)
+            {
+                // Bounds model is positioned at (0,0,0) in world space (so no need to multiply local to world...it's identity).
+                Matrix4 meshToWorld = mesh->GetMeshToLocalMatrix();
+
+                auto submeshes = mesh->GetSubmeshes();
+                for(auto& submesh : submeshes)
+                {
+                    int triangleCount = submesh->GetTriangleCount();
+                    for(int i = 0; i < triangleCount; ++i)
+                    {
+                        Vector3 p0, p1, p2;
+                        if(submesh->GetTriangle(i, p0, p1, p2))
+                        {
+                            // Transform triangle to world space.
+                            p0 = meshToWorld.TransformPoint(p0);
+                            p1 = meshToWorld.TransformPoint(p1);
+                            p2 = meshToWorld.TransformPoint(p2);
+                            Triangle triangle(p0, p1, p2);
+
+                            // Check collision and record the t/normal if it's smaller than any previously discovered one.
+                            float sphereT = 0.0f;
+                            Vector3 normal;
+                            if(Collide::SphereTriangle(sphere, triangle, currentMoveOffset, sphereT, normal))
+                            {
+                                if(sphereT < smallestT)
+                                {
+                                    collided = true;
+                                    smallestT = sphereT;
+                                    collisionNormal = normal;
+                                    collideTriangle = triangle;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Move sphere.
+        Vector3 moveFrom = currentPosition;
+        currentPosition += currentMoveOffset * smallestT;
+        //Debug::DrawLine(moveFrom, currentPosition, Color32::Cyan);
+        //std::cout << "Moved from " << moveFrom << " to " << currentPosition << "; offset=" << currentMoveOffset << ", t=" << smallestT << std::endl;
+
+        // If we didn't collide with anything, we are done.
+        if(!collided)
+        {
+            break;
+        }
+
+        //Debug::DrawTriangle(collideTriangle, Color32::Yellow);
+        //Debug::DrawLine(collideTriangle.GetCenter(), collideTriangle.GetCenter() + collideTriangle.GetNormal() * 5.0f, Color32::Yellow);
+
+        // We DID collide with something, so the camera's movement was cut short. This means only a portion of its velocity was utilized.
+        // If we just stopped here, the camera's movement would be quite jerky and hard to control.
+        // To have it "glide" along walls and obstacles, we must "redirect" remaining velocity in a new direction and then do collision checks again.
+
+        // Calculate a plane representing the surface of the triangle we collided with.
+        Plane tangentPlane(collisionNormal, currentPosition);
+        //Debug::DrawPlane(tangentPlane, currentPosition, Color32::Magenta);
+
+        // Project velocity onto tangent plane, which then gives us a new velocity.
+        // The "size" of the velocity is dictated by how much we were facing the wall - head on gives small velocity, at a steep angle gives larger velocity.
+        // But the velocity *should* always grow smaller each iteration.
+        Vector3 tangentPoint = tangentPlane.GetClosestPoint(moveFrom + currentMoveOffset);
+
+        //Debug::DrawLine(moveFrom, moveFrom + currentMoveOffset, Color32::Magenta, 10.0f);
+        //Debug::DrawLine(moveFrom + currentMoveOffset, tangentPoint, Color32::Blue, 10.0f);
+        //Debug::DrawLine(currentPosition, tangentPoint, Color32::White, 10.0f);
+
+        currentMoveOffset = tangentPoint - currentPosition;
+        //Debug::DrawLine(currentPosition, currentPosition + currentMoveOffset, Color32::Red);
     }
+    
+    // Return whatever our final position was!
+    return currentPosition;
 }

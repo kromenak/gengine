@@ -79,5 +79,5 @@ namespace Intersect
 //
 namespace Collide
 {
-    bool SphereTriangle(const Sphere& sphere, const Triangle& triangle, const Vector3& sphereVelocity, float& outSphereT);
+    bool SphereTriangle(const Sphere& sphere, const Triangle& triangle, const Vector3& sphereVelocity, float& outSphereT, Vector3& outCollisionNormal);
 }

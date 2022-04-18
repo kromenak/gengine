@@ -46,6 +46,10 @@ private:
 	// Mouse range in pixels to move as fast as keyboard keys.
 	// Smaller values mean mouse movement is more sensitive/speedier.
 	const float kMouseRangePixels = 50.0f;
+
+    // For collision, the camera is represented as a sphere. This is the sphere's radius.
+    // This value was derived from trial & error.
+    const float kCameraColliderRadius = 16.0f;
 	
 	// Reference to underlying camera component.
     Camera* mCamera = nullptr;
@@ -73,6 +77,6 @@ private:
     bool mSceneActive = true;
 	
     void SceneUpdate(float deltaTime);
-    
-	void ResolveCollisions(Vector3& newPosition, const Vector3& originalPosition);
+
+    Vector3 ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset);
 };
