@@ -11,6 +11,14 @@ Camera::Camera(Actor* owner) : Component(owner)
     Services::GetRenderer()->SetCamera(this);
 }
 
+Camera::~Camera()
+{
+    if(Services::GetRenderer()->GetCamera() == this)
+    {
+        Services::GetRenderer()->SetCamera(nullptr);
+    }
+}
+
 Matrix4 Camera::GetLookAtMatrix()
 {
     Vector3 eye = GetOwner()->GetPosition();

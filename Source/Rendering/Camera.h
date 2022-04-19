@@ -20,6 +20,7 @@ class Camera : public Component
     TYPE_DECL_CHILD();
 public:
     Camera(Actor* owner);
+    ~Camera();
     
     Matrix4 GetLookAtMatrix();
     Matrix4 GetLookAtMatrixNoTranslate();
