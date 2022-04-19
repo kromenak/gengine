@@ -114,7 +114,7 @@ void GameProgress::ClearFlag(const std::string& flagName)
 
 int GameProgress::GetGameVariable(const std::string& varName) const
 {
-	auto it = mGameVariables.find(StringUtil::ToLowerCopy(varName));
+	auto it = mGameVariables.find(varName);
 	if(it != mGameVariables.end())
 	{
 		return it->second;
@@ -124,17 +124,17 @@ int GameProgress::GetGameVariable(const std::string& varName) const
 
 void GameProgress::SetGameVariable(const std::string& varName, int value)
 {
-	mGameVariables[StringUtil::ToLowerCopy(varName)] = value;
+	mGameVariables[varName] = value;
 }
 
 void GameProgress::IncGameVariable(const std::string& varName)
 {
-	++mGameVariables[StringUtil::ToLowerCopy(varName)];
+	++mGameVariables[varName];
 }
 
 int GameProgress::GetChatCount(const std::string& noun) const
 {
-	auto it = mChatCounts.find(StringUtil::ToLowerCopy(noun));
+	auto it = mChatCounts.find(noun);
 	if(it != mChatCounts.end())
 	{
 		return it->second;
@@ -144,78 +144,82 @@ int GameProgress::GetChatCount(const std::string& noun) const
 
 void GameProgress::SetChatCount(const std::string& noun, int count)
 {
-	mChatCounts[StringUtil::ToLowerCopy(noun)] = count;
+	mChatCounts[noun] = count;
 }
 
 void GameProgress::IncChatCount(const std::string& noun)
 {
-	++mChatCounts[StringUtil::ToLowerCopy(noun)];
+	++mChatCounts[noun];
 }
 
 int GameProgress::GetTopicCount(const std::string& noun, const std::string& topic) const
 {
-	// Key is noun+topic.
-	// Make sure it's all lowercase, for consistency.
-	std::string key = noun + topic;
-	StringUtil::ToLower(key);
-	
-	// Find and return, or return default.
-	auto it = mTopicCounts.find(key);
-	if(it != mTopicCounts.end())
-	{
-		return it->second;
-	}
-	return 0;
+    return GetTopicCount(Scene::GetEgoName(), noun, topic);
+}
+
+int GameProgress::GetTopicCount(const std::string& actor, const std::string& noun, const std::string& topic) const
+{
+    // Find and return, or return default.
+    auto it = mTopicCounts.find(actor + noun + topic);
+    if(it != mTopicCounts.end())
+    {
+        return it->second;
+    }
+    return 0;
 }
 
 void GameProgress::SetTopicCount(const std::string& noun, const std::string& topic, int count)
 {
-	// Key is noun+topic.
-	// Make sure it's all lowercase, for consistency.
-	std::string key = noun + topic;
-	StringUtil::ToLower(key);
-	mTopicCounts[key] = count;
+    SetTopicCount(Scene::GetEgoName(), noun, topic, count);
+}
+
+void GameProgress::SetTopicCount(const std::string& actor, const std::string& noun, const std::string& topic, int count)
+{
+    mTopicCounts[actor + noun + topic] = count;
 }
 
 void GameProgress::IncTopicCount(const std::string& noun, const std::string& topic)
 {
-	// Key is noun+topic.
-	// Make sure it's all lowercase, for consistency.
-	std::string key = noun + topic;
-	StringUtil::ToLower(key);
-	++mTopicCounts[key];
+    IncTopicCount(Scene::GetEgoName(), noun, topic);
+}
+
+void GameProgress::IncTopicCount(const std::string& actor, const std::string& noun, const std::string& topic)
+{
+    ++mTopicCounts[actor + noun + topic];
 }
 
 int GameProgress::GetNounVerbCount(const std::string& noun, const std::string& verb) const
 {
-	// Key is noun+verb.
-	// Make sure it's all lowercase, for consistency.
-	std::string key = noun + verb;
-	StringUtil::ToLower(key);
-	
-	// Find and return, or return default.
-	auto it = mNounVerbCounts.find(key);
-	if(it != mNounVerbCounts.end())
-	{
-		return it->second;
-	}
-	return 0;
+    return GetNounVerbCount(Scene::GetEgoName(), noun, verb);
+}
+
+int GameProgress::GetNounVerbCount(const std::string& actor, const std::string& noun, const std::string& verb) const
+{
+    // Find and return, or return default.
+    auto it = mNounVerbCounts.find(actor + noun + verb);
+    if(it != mNounVerbCounts.end())
+    {
+        return it->second;
+    }
+    return 0;
 }
 
 void GameProgress::SetNounVerbCount(const std::string& noun, const std::string& verb, int count)
 {
-	// Key is noun+verb.
-	// Make sure it's all lowercase, for consistency.
-	std::string key = noun + verb;
-	StringUtil::ToLower(key);
-	mNounVerbCounts[key] = count;
+    SetNounVerbCount(Scene::GetEgoName(), noun, verb, count);
+}
+
+void GameProgress::SetNounVerbCount(const std::string& actor, const std::string& noun, const std::string& verb, int count)
+{
+    mNounVerbCounts[actor + noun + verb] = count;
 }
 
 void GameProgress::IncNounVerbCount(const std::string& noun, const std::string& verb)
 {
-	// Key is noun+verb.
-	// Make sure it's all lowercase, for consistency.
-	std::string key = noun + verb;
-	StringUtil::ToLower(key);
-	++mNounVerbCounts[key];
+    IncNounVerbCount(Scene::GetEgoName(), noun, verb);
+}
+
+void GameProgress::IncNounVerbCount(const std::string& actor, const std::string& noun, const std::string& verb)
+{
+    ++mNounVerbCounts[actor + noun + verb];
 }
