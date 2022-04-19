@@ -1,0 +1,82 @@
+symbols
+{
+	
+}
+
+code
+{
+	CheckTimeblockComplete$()
+	{
+		if(IsCurrentTime("110A"))
+		{
+			Call("CheckTimeblockComplete110A$");
+		}
+	}
+
+	CheckTimeblockComplete110A$()
+	{
+		// Must be at RC1 to complete 110A timeblock.
+		if(IsCurrentLocation("RC1") == 0)
+		{
+			return;
+		}
+
+		// Must have met Mosely. COFFEE_POT/POUR gets set during dining room cutscene.
+		if(GetNounVerbCount("COFFEE_POT", "POUR") == 0)
+		{
+			return;
+		}
+
+		// Must have called Prince James from one of the three phones.
+		if(GetNounVerbCount("PHONE", "PRINCE_JAMES_CARD") == 0 &&
+		   GetNounVerbCount("OTR_PHONE_1", "PRINCE_JAMES_CARD") == 0 &&
+		   GetNounVerbCount("OTR_PHONE_2", "PRINCE_JAMES_CARD") == 0)
+		{
+			return;
+		}
+
+		// Must have read the register.
+		if(GetNounVerbCount("REGISTER", "READ") == 0)
+		{
+			return;
+		}
+
+		// Must have at least met Emilio.
+		if(GetTopicCount("EMILIO", "T_INTRODUCE") == 0)
+		{
+			return;
+		}
+
+		// Must ask Buthane about check in times.
+		if(GetTopicCount("BUTHANE", "T_CHECK_IN") < 2)
+		{
+			return;
+		}
+
+		// Must see the "San Greal" display at the bookstore.
+		if(GetNounVerbCount("SAN_GREAL_WORDS", "LOOK") == 0)
+		{
+			return;
+		}
+
+		// Must talk to Girard about Holy Grail.
+		if(GetTopicCount("GIRARD", "T_HOLY_GRAIL") == 0)
+		{
+			return;
+		}
+
+		// Must at least introduce to Howard/Estelle.
+		if(GetTopicCount("LADY_H_ESTELLE", "T_INTRODUCE") == 0)
+		{
+			return;
+		}
+
+		// Ok, go to next timeblock!
+		SetTime("112P");
+	}
+
+	GoToNextTimeblock$()
+	{
+		PrintString("Load next timeblock");
+	}
+}
