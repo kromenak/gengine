@@ -28,6 +28,16 @@
 
 extern Mesh* quad;
 
+/*static*/ const std::string& Scene::GetEgoName()
+{
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr)
+    {
+        return scene->mEgoName;
+    }
+    return "Gabriel";
+}
+
 Scene::Scene(const std::string& name, const std::string& timeblock) :
     Scene(name, Timeblock(timeblock))
 {

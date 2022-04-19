@@ -115,11 +115,7 @@ bool InventoryManager::IsValidInventoryItem(const std::string& itemName) const
 
 void InventoryManager::AddInventoryItem(const std::string& itemName)
 {
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene != nullptr)
-    {
-        AddInventoryItem(scene->GetEgoName(), itemName);
-    }
+    AddInventoryItem(Scene::GetEgoName(), itemName);
 }
 
 void InventoryManager::AddInventoryItem(const std::string& actorName, const std::string& itemName)
@@ -130,11 +126,7 @@ void InventoryManager::AddInventoryItem(const std::string& actorName, const std:
 
 void InventoryManager::RemoveInventoryItem(const std::string& itemName)
 {
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene != nullptr)
-    {
-        RemoveInventoryItem(scene->GetEgoName(), itemName);
-    }
+    RemoveInventoryItem(Scene::GetEgoName(), itemName);
 }
 
 void InventoryManager::RemoveInventoryItem(const std::string& actorName, const std::string& itemName)
@@ -151,12 +143,7 @@ void InventoryManager::RemoveInventoryItem(const std::string& actorName, const s
 
 bool InventoryManager::HasInventoryItem(const std::string& itemName) const
 {
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene != nullptr)
-    {
-        return HasInventoryItem(scene->GetEgoName(), itemName);
-    }
-    return false;
+    return HasInventoryItem(Scene::GetEgoName(), itemName);
 }
 
 bool InventoryManager::HasInventoryItem(const std::string& actorName, const std::string& itemName) const
@@ -168,12 +155,7 @@ bool InventoryManager::HasInventoryItem(const std::string& actorName, const std:
 
 std::string InventoryManager::GetActiveInventoryItem() const
 {
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene != nullptr)
-    {
-        return GetActiveInventoryItem(scene->GetEgoName());
-    }
-    return "";
+    return GetActiveInventoryItem(Scene::GetEgoName());
 }
 
 std::string InventoryManager::GetActiveInventoryItem(const std::string& actorName) const
@@ -199,11 +181,7 @@ void InventoryManager::SetActiveInventoryItem(const std::string& actorName, cons
 
 void InventoryManager::ShowInventory()
 {
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene != nullptr)
-    {
-        ShowInventory(scene->GetEgoName());
-    }
+    ShowInventory(Scene::GetEgoName());
 }
 
 void InventoryManager::ShowInventory(const std::string& actorName)

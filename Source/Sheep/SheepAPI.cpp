@@ -354,14 +354,14 @@ int GetEgoLocationCount(std::string locationName)
 	}
 	
 	// Get it!
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	return Services::Get<LocationManager>()->GetLocationCountForCurrentTimeblock(egoName, locationName);
 }
 RegFunc1(GetEgoLocationCount, int, string, IMMEDIATE, REL_FUNC);
 
 std::string GetEgoName()
 {
-	return GEngine::Instance()->GetScene()->GetEgoName();
+	return Scene::GetEgoName();
 }
 RegFunc0(GetEgoName, string, IMMEDIATE, REL_FUNC);
 
@@ -495,7 +495,7 @@ RegFunc1(IsActorOffstage, int, string, IMMEDIATE, REL_FUNC);
 
 int IsCurrentEgo(string actorName)
 {
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	return StringUtil::EqualsIgnoreCase(egoName, actorName) ? 1 : 0;
 }
 RegFunc1(IsCurrentEgo, int, string, IMMEDIATE, REL_FUNC);
@@ -623,7 +623,7 @@ shpvoid SetEgoLocationCount(std::string locationName, int count)
 	}
 	
 	// Set it!
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	Services::Get<LocationManager>()->SetLocationCountForCurrentTimeblock(egoName, locationName, count);
 	return 0;
 }
@@ -954,7 +954,7 @@ int WasEgoEverInLocation(string locationName)
 	}
 	
 	// Returns if Ego was EVER in a location during ANY timeblock!
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	int locationCount = Services::Get<LocationManager>()->GetLocationCountAcrossAllTimeblocks(egoName, locationName);
 	return locationCount > 0 ? 1 : 0;
 }
@@ -2106,7 +2106,7 @@ shpvoid CombineInvItems(std::string firstItemName, std::string secondItemName,
 	
 	// This function doesn't actually check whether you HAVE any of the items involved in the combining or output.
 	// It simply removes the first two (whether they exist or not) and adds the combined (whether you already have it or not).
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, firstItemName);
 	Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, secondItemName);
 	Services::Get<InventoryManager>()->AddInventoryItem(egoName, combinedItemName);
@@ -2117,7 +2117,7 @@ RegFunc3(CombineInvItems, void, string, string, string, IMMEDIATE, REL_FUNC);
 int DoesEgoHaveInvItem(std::string itemName)
 {
 	// This function does work with invalid inventory item names.
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName);
 	return hasItem ? 1 : 0;
 }
@@ -2149,7 +2149,7 @@ shpvoid EgoTakeInvItem(std::string itemName)
 	}
 	
 	// Add to inventory of Ego.
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	Services::Get<InventoryManager>()->AddInventoryItem(egoName, itemName);
 	return 0;
 }
@@ -2157,7 +2157,7 @@ RegFunc1(EgoTakeInvItem, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DumpEgoActiveInvItem()
 {
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	std::string activeItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
 	if(activeItem.empty())
 	{
@@ -2181,7 +2181,7 @@ shpvoid SetEgoActiveInvItem(std::string itemName)
 	}
 	
 	// If the item we are setting active is not in our inventory, output a warning (but let it go anyway).
-	const std::string& egoName = GEngine::Instance()->GetScene()->GetEgoName();
+	const std::string& egoName = Scene::GetEgoName();
 	if(!Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName))
 	{
 		Services::GetReports()->Log("Warning", egoName + " does not have " + itemName + ".");

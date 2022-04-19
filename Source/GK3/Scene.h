@@ -45,6 +45,8 @@ struct SceneCastResult
 class Scene
 {
 public:
+    static const std::string& GetEgoName();
+
     Scene(const std::string& name, const std::string& timeblock);
 	Scene(const std::string& name, const Timeblock& timeblock);
 	~Scene();
@@ -62,8 +64,7 @@ public:
 	SceneCastResult Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore = nullptr) const;
     void Interact(const Ray& ray, GKObject* interactHint = nullptr);
     void SkipCurrentAction();
-
-	const std::string& GetEgoName() const { return mEgoName; }
+    
 	GKActor* GetEgo() const { return mEgo; }
 	
 	GKObject* GetSceneObjectByModelName(const std::string& modelName) const;
