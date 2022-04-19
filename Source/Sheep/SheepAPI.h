@@ -72,6 +72,10 @@ extern std::map<std::string, Value(*)(const Value&, const Value&, const Value&, 
 #define DEV_FUNC true
 #define REL_FUNC false
 
+// All Sheep functions must return a value (this is just b/c of C++ Value class usage).
+// So, just do a special/dummy define for any "void" Sheep function to return.
+#define shpvoid int
+
 // Macros that register functions of various argument lengths with the system.
 // Creates a function with same name as the actual function, but which uses generic "Value" args and return type.
 // The generic function just calls the real function with correct argument types.
@@ -143,8 +147,6 @@ extern std::map<std::string, Value(*)(const Value&, const Value&, const Value&, 
 			AddSysFuncDecl(#name, ret##_TYPE, { t1##_TYPE, t2##_TYPE, t3##_TYPE, t4##_TYPE, t5##_TYPE }, waitable, dev); \
 		}                                                   			\
 	} name##_instance
-
-#define shpvoid int
 
 void ExecError();
 
@@ -520,44 +522,49 @@ shpvoid CommitCaseLogic(); // DEV
 shpvoid DumpCaseCode(); // DEV
 shpvoid ResetCaseLogic(); // DEV
 
-int GetFlag(std::string flagName);
+int GetFlag(const std::string& flagName);
 int GetFlagInt(int flagEnum);
-shpvoid SetFlag(std::string flagName);
-shpvoid ClearFlag(std::string flagName);
+shpvoid SetFlag(const std::string& flagName);
+shpvoid ClearFlag(const std::string& flagName);
 
 shpvoid DumpFlags(); // DEV
 shpvoid DumpNouns(); // DEV
 
-int GetChatCount(std::string noun);
+int GetChatCount(const std::string& noun);
 int GetChatCountInt(int nounEnum);
 shpvoid SetChatCount(std::string noun, int count); // DEV
 
-int GetGameVariableInt(std::string varName);
-shpvoid IncGameVariableInt(std::string varName);
-shpvoid SetGameVariableInt(std::string varName, int value);
+int GetGameVariableInt(const std::string& varName);
+shpvoid IncGameVariableInt(const std::string& varName);
+shpvoid SetGameVariableInt(const std::string& varName, int value);
 
-int GetNounVerbCount(std::string noun, std::string verb);
+int GetNounVerbCount(const std::string& noun, const std::string& verb);
 int GetNounVerbCountInt(int nounEnum, int verbEnum);
-shpvoid IncNounVerbCount(std::string noun, std::string verb);
-shpvoid IncNounVerbCountBoth(std::string noun, std::string verb);
-shpvoid SetNounVerbCount(std::string noun, std::string verb, int count);
-shpvoid SetNounVerbCountBoth(std::string noun, std::string verb, int count);
-shpvoid TriggerNounVerb(std::string noun, std::string verb); // DEV
+shpvoid IncNounVerbCount(const std::string& noun, const std::string& verb);
+shpvoid IncNounVerbCountBoth(const std::string& noun, const std::string& verb);
+shpvoid SetNounVerbCount(const std::string& noun, const std::string& verb, int count);
+shpvoid SetNounVerbCountBoth(const std::string& noun, const std::string& verb, int count);
+shpvoid TriggerNounVerb(const std::string& noun, const std::string& verb); // DEV
 
 int GetScore();
 shpvoid IncreaseScore(int value);
 shpvoid SetScore(int score); // DEV
-shpvoid ChangeScore(std::string scoreValue);
+shpvoid ChangeScore(const std::string& scoreValue);
 
-int GetTopicCount(std::string noun, std::string verb);
+int GetTopicCount(const std::string& noun, const std::string& verb);
 int GetTopicCountInt(int nounEnum, int verbEnum);
-int HasTopicsLeft(std::string noun);
+int HasTopicsLeft(const std::string& noun);
 shpvoid SetTopicCount(std::string noun, std::string verb, int count); // DEV
 
-int IsCurrentLocation(std::string location);
-int IsCurrentTime(std::string timeblock);
-int WasLastLocation(std::string location);
+int IsCurrentTime(const std::string& timeblock);
 int WasLastTime(std::string timeblock);
+shpvoid SetTime(const std::string& timeblock); // WAIT
+
+int IsCurrentLocation(const std::string& location);
+int WasLastLocation(std::string location);
+shpvoid SetLocation(const std::string& location); // WAIT
+
+shpvoid SetLocationTime(const std::string& location, const std::string& timeblock); // WAIT
 
 shpvoid ResetGameData(); // DEV
 
@@ -664,10 +671,6 @@ shpvoid DumpPositions(); // DEV
 shpvoid DumpTimes(); // DEV
 
 shpvoid ReEnter(); // DEV, WAIT
-
-shpvoid SetLocation(std::string location); // WAIT
-shpvoid SetLocationTime(std::string location, std::string timeblock); // WAIT
-shpvoid SetTime(std::string timeblock); // WAIT
 
 shpvoid SetScene(std::string sceneName); // WAIT
 

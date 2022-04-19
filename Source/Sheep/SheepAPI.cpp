@@ -1725,7 +1725,7 @@ RegFunc1(SetTimerSeconds, void, float, WAITABLE, REL_FUNC);
 //DumpCaseLogic
 //ResetCaseLogic
 
-int GetFlag(std::string flagName)
+int GetFlag(const std::string& flagName)
 {
 	return Services::Get<GameProgress>()->GetFlag(flagName);
 }
@@ -1743,14 +1743,14 @@ int GetFlagInt(int flagEnum)
 RegFunc1(GetFlagInt, int, int, IMMEDIATE, REL_FUNC);
 */
  
-shpvoid SetFlag(std::string flagName)
+shpvoid SetFlag(const std::string& flagName)
 {
 	Services::Get<GameProgress>()->SetFlag(flagName);
 	return 0;
 }
 RegFunc1(SetFlag, void, string, IMMEDIATE, REL_FUNC);
 
-shpvoid ClearFlag(std::string flagName)
+shpvoid ClearFlag(const std::string& flagName)
 {
 	Services::Get<GameProgress>()->ClearFlag(flagName);
 	return 0;
@@ -1767,21 +1767,17 @@ RegFunc0(DumpFlags, void, IMMEDIATE, DEV_FUNC);
  
 //DumpNouns
 
-int GetChatCount(std::string noun)
+int GetChatCount(const std::string& noun)
 {
 	return Services::Get<GameProgress>()->GetChatCount(noun);
 }
 RegFunc1(GetChatCount, int, string, IMMEDIATE, REL_FUNC);
 
-/*
 int GetChatCountInt(int nounEnum)
 {
-	//TODO: Should be able to call this from sheep using $n variable.
-	std::cout << "GetChatCountInt" << std::endl;
-	return 0;
+    return GetChatCount(Services::Get<ActionManager>()->GetNoun(nounEnum));
 }
 RegFunc1(GetChatCountInt, int, int, IMMEDIATE, REL_FUNC);
-*/
  
 shpvoid SetChatCount(std::string noun, int count)
 {
@@ -1790,43 +1786,40 @@ shpvoid SetChatCount(std::string noun, int count)
 }
 RegFunc2(SetChatCount, void, string, int, IMMEDIATE, DEV_FUNC);
 
-int GetGameVariableInt(std::string varName)
+int GetGameVariableInt(const std::string& varName)
 {
 	return Services::Get<GameProgress>()->GetGameVariable(varName);
 }
 RegFunc1(GetGameVariableInt, int, string, IMMEDIATE, REL_FUNC);
 
-shpvoid IncGameVariableInt(std::string varName)
+shpvoid IncGameVariableInt(const std::string& varName)
 {
 	Services::Get<GameProgress>()->IncGameVariable(varName);
 	return 0;
 }
 RegFunc1(IncGameVariableInt, void, string, IMMEDIATE, REL_FUNC);
 
-shpvoid SetGameVariableInt(std::string varName, int value)
+shpvoid SetGameVariableInt(const std::string& varName, int value)
 {
 	Services::Get<GameProgress>()->SetGameVariable(varName, value);
 	return 0;
 }
 RegFunc2(SetGameVariableInt, void, string, int, IMMEDIATE, REL_FUNC);
 
-int GetNounVerbCount(std::string noun, std::string verb)
+int GetNounVerbCount(const std::string& noun, const std::string& verb)
 {
 	return Services::Get<GameProgress>()->GetNounVerbCount(noun, verb);
 }
 RegFunc2(GetNounVerbCount, int, string, string, IMMEDIATE, REL_FUNC);
 
-/*
 int GetNounVerbCountInt(int nounEnum, int verbEnum)
 {
-	//TODO: Should be able to call this from sheep using $n and $v variables.
-	std::cout << "GetNounVerbCountInt" << std::endl;
-	return 0;
+    return GetNounVerbCount(Services::Get<ActionManager>()->GetNoun(nounEnum),
+                            Services::Get<ActionManager>()->GetVerb(verbEnum));
 }
 RegFunc2(GetNounVerbCountInt, int, int, int, IMMEDIATE, REL_FUNC);
-*/
  
-shpvoid IncNounVerbCount(string noun, string verb)
+shpvoid IncNounVerbCount(const string& noun, const string& verb)
 {
 	//TODO: Throw an error if the given noun corresponds to a "Topic".
 	Services::Get<GameProgress>()->IncNounVerbCount(noun, verb);
@@ -1834,16 +1827,16 @@ shpvoid IncNounVerbCount(string noun, string verb)
 }
 RegFunc2(IncNounVerbCount, void, string, string, IMMEDIATE, REL_FUNC);
 
-shpvoid IncNounVerbCountBoth(string noun, string verb)
+shpvoid IncNounVerbCountBoth(const string& noun, const string& verb)
 {
-	//TODO: HelpCommand says this sets the noun/verb count for both Gabe and Grace.
-	//TODO: Does that imply SetNounVerbCount tracks per-Ego?
-	Services::Get<GameProgress>()->IncNounVerbCount(noun, verb);
+    //TODO: Throw an error if the given noun corresponds to a "Topic".
+    Services::Get<GameProgress>()->IncNounVerbCount("Gabriel", noun, verb);
+	Services::Get<GameProgress>()->IncNounVerbCount("Grace", noun, verb);
 	return 0;
 }
 RegFunc2(IncNounVerbCountBoth, void, string, string, IMMEDIATE, REL_FUNC);
 
-shpvoid SetNounVerbCount(string noun, string verb, int count)
+shpvoid SetNounVerbCount(const std::string& noun, const std::string& verb, int count)
 {
 	//TODO: Throw an error if the given noun corresponds to a "Topic".
 	Services::Get<GameProgress>()->SetNounVerbCount(noun, verb, count);
@@ -1851,15 +1844,16 @@ shpvoid SetNounVerbCount(string noun, string verb, int count)
 }
 RegFunc3(SetNounVerbCount, void, string, string, int, IMMEDIATE, REL_FUNC);
 
-shpvoid SetNounVerbCountBoth(string noun, string verb, int count)
+shpvoid SetNounVerbCountBoth(const std::string& noun, const std::string& verb, int count)
 {
-	//TODO: HelpCommand says this sets the noun/verb count for both Gabe and Grace.
-	//TODO: Does that imply SetNounVerbCount tracks per-Ego?
-	return SetNounVerbCount(noun, verb, count);
+    //TODO: Throw an error if the given noun corresponds to a "Topic".
+    Services::Get<GameProgress>()->SetNounVerbCount("Gabriel", noun, verb, count);
+    Services::Get<GameProgress>()->SetNounVerbCount("Grace", noun, verb, count);
+    return 0;
 }
 RegFunc3(SetNounVerbCountBoth, void, string, string, int, IMMEDIATE, REL_FUNC);
 
-shpvoid TriggerNounVerb(std::string noun, std::string verb)
+shpvoid TriggerNounVerb(const std::string& noun, const std::string& verb)
 {
 	//TODO: Validate noun or throw error.
 	//TODO: Validate verb or throw error.
@@ -1892,14 +1886,14 @@ shpvoid SetScore(int score)
 }
 RegFunc1(SetScore, void, int, IMMEDIATE, DEV_FUNC);
 
-shpvoid ChangeScore(std::string scoreValue)
+shpvoid ChangeScore(const std::string& scoreValue)
 {
     Services::Get<GameProgress>()->ChangeScore(scoreValue);
 	return 0;
 }
 RegFunc1(ChangeScore, void, string, IMMEDIATE, REL_FUNC);
 
-int GetTopicCount(std::string noun, std::string verb)
+int GetTopicCount(const std::string& noun, const std::string& verb)
 {
 	//TODO: Validate noun. Must be a valid noun. Seems to include any scene nouns, inventory nouns, actor nouns.
 	if(!Services::Get<VerbManager>()->IsTopic(verb))
@@ -1919,7 +1913,7 @@ int GetTopicCountInt(int nounEnum, int verbEnum)
 }
 RegFunc2(GetTopicCountInt, int, int, int, IMMEDIATE, REL_FUNC);
  
-int HasTopicsLeft(std::string noun)
+int HasTopicsLeft(const std::string& noun)
 {
 	//TODO: Validate noun.
 	bool hasTopics = Services::Get<ActionManager>()->HasTopicsLeft(noun);
@@ -1936,14 +1930,14 @@ shpvoid SetTopicCount(std::string noun, std::string verb, int count)
 }
 RegFunc3(SetTopicCount, void, string, string, int, IMMEDIATE, DEV_FUNC);
  
-int IsCurrentLocation(std::string location)
+int IsCurrentLocation(const std::string& location)
 {
 	std::string currentLocation = Services::Get<LocationManager>()->GetLocation();
 	return StringUtil::EqualsIgnoreCase(currentLocation, location) ? 1 : 0;
 }
 RegFunc1(IsCurrentLocation, int, string, IMMEDIATE, REL_FUNC);
 
-int IsCurrentTime(std::string timeblock)
+int IsCurrentTime(const std::string& timeblock)
 {
 	std::string currentTimeblock = Services::Get<GameProgress>()->GetTimeblock().ToString();
 	return StringUtil::EqualsIgnoreCase(currentTimeblock, timeblock) ? 1 : 0;
@@ -2577,14 +2571,14 @@ RegFunc1(CallSceneFunction, void, string, WAITABLE, REL_FUNC);
 
 //ReEnter
 
-shpvoid SetLocation(std::string location)
+shpvoid SetLocation(const std::string& location)
 {
 	GEngine::Instance()->LoadScene(location);
 	return 0;
 }
 RegFunc1(SetLocation, void, string, WAITABLE, REL_FUNC);
 
-shpvoid SetLocationTime(std::string location, std::string timeblock)
+shpvoid SetLocationTime(const std::string& location, const std::string& timeblock)
 {
 	Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
 	GEngine::Instance()->LoadScene(location);
