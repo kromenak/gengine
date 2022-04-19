@@ -10,6 +10,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace StringUtil
@@ -271,6 +272,10 @@ namespace std
     // Though it lets you specifiy a key template type, the type must be std::string for it to compile!
     template <typename T, typename U>
     using unordered_map_ci = std::unordered_map<T, U,
+                                             StringUtil::CaseInsensitiveHash,
+                                             StringUtil::CaseInsensitiveCompare>;
+
+    using string_set_ci = std::unordered_set<std::string,
                                              StringUtil::CaseInsensitiveHash,
                                              StringUtil::CaseInsensitiveCompare>;
 }
