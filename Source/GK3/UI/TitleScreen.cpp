@@ -7,7 +7,7 @@
 #include "UIImage.h"
 #include "VideoPlayer.h"
 
-UIButton* CreateButton(UICanvas* canvas, const std::string& buttonId, float xPos)
+static UIButton* CreateButton(UICanvas* canvas, const std::string& buttonId, float xPos)
 {
     Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
     UIButton* button = buttonActor->AddComponent<UIButton>();

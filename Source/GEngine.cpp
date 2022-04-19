@@ -262,7 +262,7 @@ void GEngine::StartGame()
     Services::Get<GameProgress>()->SetTimeblock(timeblock);
 
     TimeblockScreen* tbScreen = new TimeblockScreen();
-    tbScreen->Show(timeblock, [this](){
+    tbScreen->Show(timeblock, 5.0f, [this](){
         LoadScene("R25");
     });
 }

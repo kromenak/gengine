@@ -1,6 +1,8 @@
 #include "TimeblockScreen.h"
 
+#include "Scene.h"
 #include "Sequence.h"
+#include "SoundtrackPlayer.h"
 #include "Timeblock.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -28,6 +30,20 @@ static std::pair<Timeblock, Vector2> timeblockTextPositions[] = {
     { Timeblock(3, 18), Vector2(14.0f, 64.0f) },
     { Timeblock(3, 21), Vector2(14.0f, 64.0f) }
 };
+
+static UIButton* CreateButton(UICanvas* canvas, const std::string& buttonId)
+{
+    Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+    UIButton* button = buttonActor->AddComponent<UIButton>();
+    canvas->AddWidget(button);
+
+    // Set textures.
+    button->SetUpTexture(Services::GetAssets()->LoadTexture(buttonId + "_U.BMP"));
+    button->SetDownTexture(Services::GetAssets()->LoadTexture(buttonId + "_D.BMP"));
+    button->SetHoverTexture(Services::GetAssets()->LoadTexture(buttonId + "_H.BMP"));
+    button->SetDisabledTexture(Services::GetAssets()->LoadTexture(buttonId + "_X.BMP"));
+    return button;
+}
 
 TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
 {
@@ -58,14 +74,38 @@ TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
     mTextImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     mTextImage->GetRectTransform()->SetPivot(0.0f, 0.0f);
     mTextImage->GetRectTransform()->SetAnchoredPosition(14.0f, 64.0f);
+
+    // Add "continue" button.
+    mContinueButton = CreateButton(canvas, "TB_CONT");
+    mContinueButton->GetRectTransform()->SetParent(backgroundImageActor->GetTransform());
+    mContinueButton->GetRectTransform()->SetAnchor(0.0f, 0.0f);
+    mContinueButton->GetRectTransform()->SetPivot(0.0f, 0.0f);
+    mContinueButton->GetRectTransform()->SetAnchoredPosition(90.0f, 16.0f);
+    mContinueButton->SetPressCallback([this](UIButton* button){
+        Hide();
+        if(mCallback) { mCallback(); }
+    });
+
+    // Add "save" button.
+    mSaveButton = CreateButton(canvas, "TB_SAVE");
+    mSaveButton->GetRectTransform()->SetParent(backgroundImageActor->GetTransform());
+    mSaveButton->GetRectTransform()->SetAnchor(0.0f, 0.0f);
+    mSaveButton->GetRectTransform()->SetPivot(0.0f, 0.0f);
+    mSaveButton->GetRectTransform()->SetAnchoredPosition(180.0f, 16.0f);
+    mSaveButton->SetPressCallback([](UIButton* button){
+        printf("Save\n");
+    });
 }
 
-void TimeblockScreen::Show(const Timeblock& timeblock, std::function<void()> callback)
+void TimeblockScreen::Show(const Timeblock& timeblock, float timer, std::function<void()> callback)
 {
+    mScreenTimer = timer;
     mCallback = callback;
 
+    // Show the screen.
     SetActive(true);
 
+    // Load background image for this timeblock.
     std::string timeblockString = timeblock.ToString();
     mBackgroundImage->SetTexture(Services::GetAssets()->LoadTexture("TBT" + timeblockString + ".BMP"), true);
 
@@ -82,6 +122,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, std::function<void()> cal
     // Load sequence containing animation.
     mAnimSequence = Services::GetAssets()->LoadSequence("D" + timeblockString);
     mTextImage->SetEnabled(mAnimSequence != nullptr);
+    mAnimTimer = 0.0f;
 
     // Populate first image in text animation sequence.
     if(mAnimSequence != nullptr)
@@ -92,9 +133,20 @@ void TimeblockScreen::Show(const Timeblock& timeblock, std::function<void()> cal
     // Play "tick tock" sound effect.
     Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("CLOCKTIMEBLOCK.WAV"), nullptr);
 
-    // Reset timers.
-    mAnimTimer = 0.0f;
-    mScreenTimer = 0.0f;
+    // Hide buttons if this screen is on a timer.
+    mContinueButton->SetEnabled(mScreenTimer <= 0.0f);
+    mSaveButton->SetEnabled(mScreenTimer <= 0.0f);
+
+    // Fade out any soundtrack from the previous scene as well.
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr)
+    {
+        SoundtrackPlayer* stp = scene->GetSoundtrackPlayer();
+        if(stp != nullptr)
+        {
+            stp->StopAll();
+        }
+    }
 }
 
 void TimeblockScreen::Hide()
@@ -147,12 +199,14 @@ void TimeblockScreen::OnUpdate(float deltaTime)
         mTextImage->SetTexture(mAnimSequence->GetTexture(frameIndex), true);
     }
 
-    // Track how long we have been on this screen.
-    // The timeblock screen automatically exits after enough time has passed.
-    mScreenTimer += deltaTime;
-    if(mScreenTimer > 5.0f)
+    // If a timer was specified, count down until we automatically exit.
+    if(mScreenTimer > 0.0f)
     {
-        Hide();
-        if(mCallback) { mCallback(); }
+        mScreenTimer -= deltaTime;
+        if(mScreenTimer <= 0.0f)
+        {
+            Hide();
+            if(mCallback) { mCallback(); }
+        }
     }
 }

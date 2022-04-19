@@ -10,6 +10,7 @@
 
 class Sequence;
 class Timeblock;
+class UIButton;
 class UIImage;
 
 class TimeblockScreen : public Actor
@@ -17,7 +18,7 @@ class TimeblockScreen : public Actor
 public:
     TimeblockScreen();
 
-    void Show(const Timeblock& timeblock, std::function<void()> callback);
+    void Show(const Timeblock& timeblock, float timer, std::function<void()> callback);
     void Hide();
 
 protected:
@@ -29,6 +30,11 @@ private:
 
     // The onscreen text (showing like "Day 1 10AM") is actually a series of images.
     UIImage* mTextImage = nullptr;
+
+    // Buttons for continuing and saving.
+    // If a timer is passed in, these buttons are hidden. If no timer, this screen stays up until a "Continue" is pressed.
+    UIButton* mContinueButton = nullptr;
+    UIButton* mSaveButton = nullptr;
 
     // Sequence and timer for the on-screen text animation.
     Sequence* mAnimSequence = nullptr;
