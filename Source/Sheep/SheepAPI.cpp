@@ -18,6 +18,7 @@
 #include "Scene.h"
 #include "Services.h"
 #include "StringUtil.h"
+#include "TimeblockScreen.h"
 #include "Timers.h"
 #include "VerbManager.h"
 #include "VideoPlayer.h"
@@ -2586,11 +2587,29 @@ shpvoid SetLocationTime(const std::string& location, const std::string& timebloc
 }
 RegFunc2(SetLocationTime, void, string, string, WAITABLE, REL_FUNC);
 
-shpvoid SetTime(std::string timeblock)
+shpvoid SetTime(const std::string& timeblock)
 {
-	// Change time, but load in to the same scene we are currently in.
-	Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
-	GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
+    // If already in the desired timeblock, we do nothing.
+    Timeblock newTimeblock(timeblock);
+    if(Services::Get<GameProgress>()->GetTimeblock() == newTimeblock)
+    {
+        return 0;
+    }
+
+    // Change time to new timeblock.
+    Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
+
+    // Unload the current scene.
+    GEngine::Instance()->UnloadScene();
+    
+    // Show timeblock screen.
+    TimeblockScreen* tbScreen = new TimeblockScreen();
+    tbScreen->Show(timeblock, 0.0f, [](){
+
+        // We're assuming that just the time changed here, so load back into same location.
+        GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
+    });
+    
 	return 0;
 }
 RegFunc1(SetTime, void, string, WAITABLE, REL_FUNC);

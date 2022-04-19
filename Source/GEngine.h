@@ -42,6 +42,7 @@ public:
     const std::vector<Actor*>& GetActors() const { return mActors; }
     
 	void LoadScene(std::string name) { mSceneToLoad = name; }
+    void UnloadScene();
     Scene* GetScene() { return mScene; }
 
     uint32 GetFrameNumber() const { return mFrameNumber; }

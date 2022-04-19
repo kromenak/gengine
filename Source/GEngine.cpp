@@ -464,25 +464,8 @@ void GEngine::LoadSceneInternal()
     if(Loader::IsLoading()) { return; }
 
     // Delete the current scene, if any.
-    if(mScene != nullptr)
-    {
-        mScene->Unload();
-        delete mScene;
-        mScene = nullptr;
-    }
-
-    // Destroy any actors that are destroy on load.
-    for(auto& actor : mActors)
-    {
-        if(actor->IsDestroyOnLoad())
-        {
-            actor->Destroy();
-        }
-    }
-
-    // After destroy pass, delete destroyed actors.
-    DeleteDestroyedActors();
-
+    UnloadScene();
+    
     // Initiate scene load on background thread.
     Loader::Load([this]() {
         // Create the new scene.
@@ -502,6 +485,28 @@ void GEngine::LoadSceneInternal()
     Loader::DoAfterLoading([this](){
         mScene->Init();
     });
+}
+
+void GEngine::UnloadScene()
+{
+    if(mScene != nullptr)
+    {
+        mScene->Unload();
+        delete mScene;
+        mScene = nullptr;
+    }
+
+    // Destroy any actors that are destroy on load.
+    for(auto& actor : mActors)
+    {
+        if(actor->IsDestroyOnLoad())
+        {
+            actor->Destroy();
+        }
+    }
+
+    // After destroy pass, delete destroyed actors.
+    DeleteDestroyedActors();
 }
 
 void GEngine::AddActor(Actor* actor)
