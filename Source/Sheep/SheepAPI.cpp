@@ -2574,7 +2574,7 @@ RegFunc1(CallSceneFunction, void, string, WAITABLE, REL_FUNC);
 
 shpvoid SetLocation(const std::string& location)
 {
-	GEngine::Instance()->LoadScene(location);
+    Services::Get<LocationManager>()->ChangeLocation(location);
 	return 0;
 }
 RegFunc1(SetLocation, void, string, WAITABLE, REL_FUNC);
@@ -2609,7 +2609,6 @@ shpvoid SetTime(const std::string& timeblock)
         // We're assuming that just the time changed here, so load back into same location.
         GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
     });
-    
 	return 0;
 }
 RegFunc1(SetTime, void, string, WAITABLE, REL_FUNC);

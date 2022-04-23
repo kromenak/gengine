@@ -167,10 +167,42 @@ void LocationManager::DumpLocations() const
 	//TODO
 }
 
+void LocationManager::ChangeLocation(const std::string& location)
+{
+    // No need to change if we're already there.
+    if(mLocation == location) { return; }
+
+    //TODO: Show scene transitioner.
+
+    // Set new location.
+    SetLocation(location);
+
+    // Check for timeblock completion.
+    Timeblock currentTimeblock = Services::Get<GameProgress>()->GetTimeblock();
+    Services::GetSheep()->Execute(Services::GetAssets()->LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [location, currentTimeblock](){
+
+        // See whether a timeblock change occurred.
+        // If so, we should early out - the timeblock change logic handles any location and time change.
+        Timeblock newTimeblock = Services::Get<GameProgress>()->GetTimeblock();
+        if(newTimeblock != currentTimeblock)
+        {
+            return;
+        }
+
+        // Otherwise, we can move ahead with changing the scene.
+        GEngine::Instance()->LoadScene(location);
+
+        //TODO: Hide scene transitioner.
+    });
+}
+
 void LocationManager::SetLocation(const std::string& location)
 {
-	mLastLocation = mLocation;
-	mLocation = location;
+    if(mLocation != location)
+    {
+        mLastLocation = mLocation;
+        mLocation = location;
+    }
 }
 
 std::string LocationManager::GetLocationDisplayName() const

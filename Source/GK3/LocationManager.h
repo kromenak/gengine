@@ -23,6 +23,8 @@ public:
 	
 	bool IsValidLocation(const std::string& locationCode) const;
 	void DumpLocations() const;
+
+    void ChangeLocation(const std::string& location);
 	
 	std::string GetLocation() const { return mLocation; }
 	std::string GetLastLocation() const { return mLastLocation; }
