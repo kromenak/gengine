@@ -314,84 +314,29 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 	// Iterate all loaded action sets to find valid actions for this noun.
 	for(auto& actionSet : mActionSets)
 	{
-		// Within a single action set, we only want to use the first matching verb.
-		// Ex: if NOUN, VERB, CASE1 matches and is then followed by NOUN, VERB, CASE2 (which also matches), ignore the second one.
-		std::unordered_set<std::string> usedVerbs;
-		
-		// "ANY_OBJECT" is a wildcard. Any action with a noun of "ANY_OBJECT" can be valid for any noun passed in.
-		// These are lowest-priority, so we do them first (they might be overwritten later).
-		const std::vector<Action>& anyObjectActions = actionSet->GetActions("ANY_OBJECT");
-		for(auto& action : anyObjectActions)
-		{
-			// The "ANY_INV_ITEM" wildcard only matches if a specific verb was provided.
-			// This function doesn't let you specify a verb, so this never matches.
-			bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
-			if(isWildcardInvItem) { continue; }
-			
-			// Ignore this action if the verb has already been used in this action set.
-			if(usedVerbs.find(action.verb) != usedVerbs.end()) { continue; }
-			
-			// The action's verb must be of the correct type for us to use it.
-			bool validType = false;
-			switch(verbType)
-			{
-			case VerbType::Normal:
-				validType = Services::Get<VerbManager>()->IsVerb(action.verb);
-				break;
-			case VerbType::Inventory:
-				validType = Services::Get<VerbManager>()->IsInventoryItem(action.verb);
-				break;
-			case VerbType::Topic:
-				validType = Services::Get<VerbManager>()->IsTopic(action.verb);
-				break;
-			}
+        // Within an action set, we only want to use the first matching action.
+        // Ex: if NOUN, VERB, CASE1 matches and is then followed by NOUN, VERB, CASE2 (which also matches), the second one is ignored.
+        std::unordered_set<std::string> usedVerbs;
 
-			// If type is valid and the action meets any case specified, we can use this action!
-			if(validType && IsCaseMet(action.noun, action.verb, action.caseLabel, verbType))
-			{
-				verbToAction[action.verb] = &action;
-				usedVerbs.insert(action.verb);
-			}
-		}
-		
-		// Clear used verbs here - we allow an exact match to overwrite a wildcard match.
-		// Ex: ANY_OBJECT, LOOK, CASE1 matches, but then CANDY, LOOK, CASE2 matches exactly - use the second one.
-		usedVerbs.clear();
+        // "ANY_OBJECT" is a wildcard. Any action with a noun of "ANY_OBJECT" can be valid for any noun passed in.
+        // These are lowest-priority, so we do them first (they might be overwritten later).
+        AddValidActionsToMap("ANY_OBJECT", verbType, actionSet, verbToAction, usedVerbs);
+
+        // Clear used verbs, which allows higher-priority passes to overwrite ANY_OBJECT actions.
+        // Ex: ANY_OBJECT, LOOK, CASE1 matches, but then CANDY, LOOK, CASE2 matches exactly - use the second one.
+        usedVerbs.clear();
 		
 		// Check actions that map directly to this noun.
-		const std::vector<Action>& nounActions = actionSet->GetActions(noun);
-		for(auto& action : nounActions)
-		{
-			// The "ANY_INV_ITEM" wildcard only matches if a specific verb was provided.
-			// This function doesn't let you specify a verb, so this never matches.
-			bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
-			if(isWildcardInvItem) { continue; }
-			
-			// Ignore this action if the verb has already been used in this action set.
-			if(usedVerbs.find(action.verb) != usedVerbs.end()) { continue; }
-						
-			// The action's verb must be of the correct type for us to use it.
-			bool validType = false;
-			switch(verbType)
-			{
-			case VerbType::Normal:
-				validType = Services::Get<VerbManager>()->IsVerb(action.verb);
-				break;
-			case VerbType::Inventory:
-				validType = Services::Get<VerbManager>()->IsInventoryItem(action.verb);
-				break;
-			case VerbType::Topic:
-				validType = Services::Get<VerbManager>()->IsTopic(action.verb);
-				break;
-			}
+        AddValidActionsToMap(noun, verbType, actionSet, verbToAction, usedVerbs);
 
-			// If type is valid and the action meets any case specified, we can use this action!
-			if(validType && IsCaseMet(action.noun, action.verb, action.caseLabel, verbType))
-			{
-				verbToAction[action.verb] = &action;
-				usedVerbs.insert(action.verb);
-			}
-		}
+        // SO...in GK3, the nouns LADY_HOWARD & ESTELLE both mysteriously also match the noun LADY_H_ESTELLE.
+        // I haven't found any data-driven spot where this equivalence is defined. It *may* be hard-coded in the original game?
+        // Anyway, either of these nouns should also match LADY_H_ESTELLE noun.
+        if(StringUtil::EqualsIgnoreCase(noun, "LADY_HOWARD") || StringUtil::EqualsIgnoreCase(noun, "ESTELLE"))
+        {
+            // Note that I AM NOT clearing usedVerbs b/c I think if an action matched specifically LADY_HOWARD or ESTELLE, it shouldn't be overridden with this version.
+            AddValidActionsToMap("LADY_H_ESTELLE", verbType, actionSet, verbToAction, usedVerbs);
+        }
 	}
 	
 	// Finally, convert our map to a vector to return.
@@ -704,6 +649,46 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	// Assume any not found case is false by default.
 	std::cout << "Unknown NVC case " << caseLabel << std::endl;
 	return false;
+}
+
+void ActionManager::AddValidActionsToMap(const std::string& noun, VerbType verbType, NVC* actionSet,
+                                         std::unordered_map<std::string, const Action*>& verbToAction,
+                                         std::unordered_set<std::string>& usedVerbs) const
+{
+    // Get the actions from the action set associated with this noun.
+    const std::vector<Action>& actions = actionSet->GetActions(noun);
+    for(auto& action : actions)
+    {
+        // The "ANY_INV_ITEM" wildcard only matches if a specific verb was provided.
+        // This function doesn't let you specify a verb, so this should never match.
+        bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
+        if(isWildcardInvItem) { continue; }
+
+        // Ignore this action if the verb is already marked as used.
+        if(usedVerbs.find(action.verb) != usedVerbs.end()) { continue; }
+
+        // The action's verb must be of the correct type for us to use it.
+        bool validType = false;
+        switch(verbType)
+        {
+        case VerbType::Normal:
+            validType = Services::Get<VerbManager>()->IsVerb(action.verb);
+            break;
+        case VerbType::Inventory:
+            validType = Services::Get<VerbManager>()->IsInventoryItem(action.verb);
+            break;
+        case VerbType::Topic:
+            validType = Services::Get<VerbManager>()->IsTopic(action.verb);
+            break;
+        }
+
+        // If type is valid and the action meets any case specified, we can use this action!
+        if(validType && IsCaseMet(action.noun, action.verb, action.caseLabel, verbType))
+        {
+            verbToAction[action.verb] = &action;
+            usedVerbs.insert(action.verb);
+        }
+    }
 }
 
 void ActionManager::OnActionBarCanceled()

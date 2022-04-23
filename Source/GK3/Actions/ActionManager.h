@@ -1,7 +1,9 @@
 //
 // Clark Kromenaker
 //
-// Manages showing/executing action bar.
+// Manages which actions are available for which nouns given current game state.
+// 
+// Also provides an API for showing the action bar and executing actions.
 //
 #pragma once
 #include <functional>
@@ -37,6 +39,11 @@ public:
 	void AddInventoryActionSets(const Timeblock& timeblock);
 	void AddGlobalActionSets(const Timeblock& timeblock);
 	void ClearActionSets();
+
+    // Action Query
+    const Action* GetAction(const std::string& noun, const std::string& verb) const;
+    std::vector<const Action*> GetActions(const std::string& noun, VerbType verbType) const;
+    bool HasTopicsLeft(const std::string& noun) const;
 	
 	// Action Execution
 	bool ExecuteAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
@@ -46,12 +53,7 @@ public:
 
     void SkipCurrentAction();
     bool IsSkippingCurrentAction() const { return mSkipInProgress; }
-
-	// Action Query
-	const Action* GetAction(const std::string& noun, const std::string& verb) const;
-	std::vector<const Action*> GetActions(const std::string& noun, VerbType verbType) const;
-	bool HasTopicsLeft(const std::string& noun) const;
-	
+    
 	// Int-Identifier to Noun/Verb
 	std::string& GetNoun(int nounEnum);
 	std::string& GetVerb(int verbEnum);
@@ -64,6 +66,7 @@ public:
 	ActionBar* GetActionBar() const { return mActionBar; }
 	
 private:
+    // These "global" action sets are loaded for every scene during the appropriate timeblocks.
 	const std::string kGlobalActionSets[11] {
 		"GLB_ALL.NVC",
 		"GLB_23ALL.NVC",
@@ -77,7 +80,8 @@ private:
 		"GLB312P.NVC",
 		"GLB306P.NVC"
 	};
-	
+
+    // These inventory-related actions are loaded for every scene during the appropriate timeblocks.
 	const std::string kInventoryActionSets[16] {
 		"INV_ALL.NVC",
 		"INV_1ALL.NVC",
@@ -98,7 +102,7 @@ private:
 	};
 	
 	// Action sets that are currently active. Note that these change pretty frequently (i.e. on scene change).
-	// When asked to show action bar, the game uses these to determine what valid actions are for a noun.
+	// The game uses these to determine the valid actions for a noun when showing the action bar.
 	std::vector<NVC*> mActionSets;
 	
 	// An action may specify a "case" under which it is valid.
@@ -117,12 +121,14 @@ private:
 	// An action that's used for "Sheep Commands."
 	// When an arbitrary SheepScript needs to execute through the action system, we use this Action object.
 	Action mSheepCommandAction;
-	
-	// When an action is playing, we save it here. Only one action can play at a time.
-	// Also save the last action, in case we need it.
-	const Action* mCurrentAction = nullptr;
-	const Action* mLastAction = nullptr;
 
+    // The last action is cached in case we need to know what action was performed last.
+    // This is most useful when re-showing the topic bar after dialogue cutscenes.
+    const Action* mLastAction = nullptr;
+	
+	// The action that is currently playing/executing. Only one action may execute at a time.
+	const Action* mCurrentAction = nullptr;
+    
     // A callback to execute when the current action finishes executing.
     std::function<void(const Action*)> mCurrentActionFinishCallback = nullptr;
 
@@ -132,22 +138,24 @@ private:
     // Are we skipping the current action? Mainly tracked to avoid recursive skips.
     bool mSkipInProgress = false;
 	
-	// An identifier for an executing action.
-	// We just increment this value each time an action executes to uniquly identify each action.
+	// An identifier for an executing action. Increment on each execution to uniquely identify actions.6
 	// This mirrors what's output in GK3 when dumping actions.
 	int mActionId = 0;
 	
 	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;
 	
-	// Some assets should only be loaded for certain timeblocks.
-	// The asset name indicates this (e.g. GLB_12ALL.NVC or GLB_110A.NVC).
+	// Some assets should only be loaded for certain timeblocks. The asset name indicates this (e.g. GLB_12ALL.NVC or GLB_110A.NVC).
 	// Checks asset name against current timeblock to see if the asset should be used.
 	bool IsActionSetForTimeblock(const std::string& assetName, const Timeblock& timeblock);
 	
-	// Returns true if the case for an action is met.
-	// A case can be a global condition, or some user-defined script to evaluate.
+	// Returns true if the case for an action is met. A case can be a global condition, or some user-defined script to evaluate.
 	bool IsCaseMet(const std::string& noun, const std::string& verb, const std::string& caseLabel, VerbType verbType = VerbType::Normal) const;
+
+    // Queries an action set for a particular noun & desired verb type. If matches are found, they are added to the provided map.
+    void AddValidActionsToMap(const std::string& noun, VerbType verbType, NVC* actionSet,
+                              std::unordered_map<std::string, const Action*>& verbToAction,
+                              std::unordered_set<std::string>& usedVerbs) const;
 	
 	// Called when action bar is canceled (press cancel button).
 	void OnActionBarCanceled();
