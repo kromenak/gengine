@@ -35,6 +35,7 @@ class SceneData
 {
 public:
 	SceneData(const std::string& location, const std::string& timeblock);
+    ~SceneData();
 	
 	// SCENE RESOLUTION
 	const SceneActor* DetermineWhoEgoWillBe() const;

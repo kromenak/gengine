@@ -15,6 +15,14 @@ SceneData::SceneData(const std::string& location, const std::string& timeblock) 
 	//TODO: If no general SIF...that's not good!
 }
 
+SceneData::~SceneData()
+{
+    if(mBSP != nullptr)
+    {
+        Services::GetAssets()->UnloadBSP(mBSP);
+    }
+}
+
 const SceneActor* SceneData::DetermineWhoEgoWillBe() const
 {
 	// If there's a specific SIF, it will override ego choice - check it first.

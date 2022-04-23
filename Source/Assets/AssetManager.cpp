@@ -292,6 +292,11 @@ BSP* AssetManager::LoadBSP(const std::string& name)
     return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), &mLoadedBSPs);
 }
 
+void AssetManager::UnloadBSP(BSP* bsp)
+{
+    UnloadAsset<BSP>(bsp, &mLoadedBSPs);
+}
+
 BSPLightmap* AssetManager::LoadBSPLightmap(const std::string& name)
 {
     return LoadAsset<BSPLightmap>(SanitizeAssetName(name, ".MUL"), &mLoadedBSPLightmaps);
@@ -365,7 +370,7 @@ TextAsset* AssetManager::LoadText(const std::string& name)
 
 void AssetManager::UnloadText(TextAsset* text)
 {
-    UnloadAsset<TextAsset>(text, mLoadedTexts);
+    UnloadAsset<TextAsset>(text, &mLoadedTexts);
 }
 
 Config* AssetManager::LoadConfig(const std::string& name)
@@ -540,13 +545,16 @@ char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int
 }
 
 template<class T>
-void AssetManager::UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>& cache)
+void AssetManager::UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>* cache)
 {
     // Remove from cache.
-    auto it = cache.find(asset->GetName());
-    if(it != cache.end())
+    if(cache != nullptr)
     {
-        cache.erase(it);
+        auto it = cache->find(asset->GetName());
+        if(it != cache->end())
+        {
+            cache->erase(it);
+        }
     }
 
     // Delete asset.

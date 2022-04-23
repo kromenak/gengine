@@ -83,6 +83,8 @@ public:
     NVC* LoadNVC(const std::string& name);
     
     BSP* LoadBSP(const std::string& name);
+    void UnloadBSP(BSP* bsp);
+
     BSPLightmap* LoadBSPLightmap(const std::string& name);
     
     SheepScript* LoadSheep(const std::string& name);
@@ -154,6 +156,6 @@ private:
     
     char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
 
-    template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>& cache);
+    template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>* cache = nullptr);
     template<class T> void UnloadAssets(std::unordered_map_ci<std::string, T*>& cache);
 };

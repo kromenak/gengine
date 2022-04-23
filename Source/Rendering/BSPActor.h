@@ -1,6 +1,4 @@
 //
-// BSPActor.h
-//
 // Clark Kromenaker
 //
 // An actor formed by a portion of BSP geometry.

@@ -1,8 +1,3 @@
-//
-// BSPActor.cpp
-//
-// Clark Kromenaker
-//
 #include "BSPActor.h"
 
 BSPActor::BSPActor(BSP* bsp, const std::string& name) : GKObject(),
