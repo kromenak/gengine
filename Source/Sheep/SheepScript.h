@@ -44,6 +44,8 @@ struct SysImport
 class SheepScript : public Asset
 {
 public:
+    static bool IsSheepDataCompiled(char* data, int dataLength);
+
     SheepScript(const std::string& name, char* data, int dataLength);
     SheepScript(const std::string& name, SheepScriptBuilder& builder);
     

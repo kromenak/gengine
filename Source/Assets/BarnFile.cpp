@@ -8,6 +8,7 @@
 #include "zlib.h"
 
 #include "FileSystem.h"
+#include "SheepScript.h"
 #include "Texture.h"
 
 BarnFile::BarnFile(const std::string& filePath) :
@@ -428,13 +429,19 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string outpu
 	if(Extract(assetName, assetData, asset->uncompressedSize))
 	{
 		// Textures can't be written directly to file and open correctly.
-		// Handle those separately (TODO: More modular/extenable way to do this?)
+		// Handle those separately (TODO: More modular/extendable way to do this?)
 		if(assetName.find(".BMP") != std::string::npos)
 		{
 			Texture tex(assetName, assetData, asset->uncompressedSize);
 			tex.WriteToFile(outputPath);
 			result = true;
 		}
+        else if(assetName.find(".SHP") != std::string::npos && SheepScript::IsSheepDataCompiled(assetData, asset->uncompressedSize))
+        {
+            // If sheep asset is compiled, we need to decompile it to get any useful data.
+            SheepScript script(assetName, assetData, asset->uncompressedSize);
+            script.Decompile(outputPath);
+        }
 		else
 		{
 			// Most other assets can just be written out directly.

@@ -303,7 +303,7 @@ SheepScript* AssetManager::LoadSheep(const std::string& name)
     return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), &mLoadedSheeps, [](const std::string& name, char* buffer, unsigned int bufferSize) {
 
         // Determine whether this is a binary sheep asset.
-        if(bufferSize >= 8 && memcmp(buffer, "GK3Sheep", 8) == 0)
+        if(SheepScript::IsSheepDataCompiled(buffer, bufferSize))
         {
             return new SheepScript(name, buffer, bufferSize);
         }

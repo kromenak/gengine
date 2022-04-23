@@ -1,9 +1,3 @@
-//
-//  SheepScript.cpp
-//  GEngine
-//
-//  Created by Clark Kromenaker on 7/23/17.
-//
 #include "SheepScript.h"
 
 #include <iostream>
@@ -12,6 +6,13 @@
 #include "BinaryReader.h"
 #include "SheepScriptBuilder.h"
 #include "StringUtil.h"
+
+/*static*/ bool SheepScript::IsSheepDataCompiled(char* data, int dataLength)
+{
+    // If the first 8 bytes of the data is GK3Sheep, we'll assume this is valid compiled Sheepscript data.
+    // Otherwise, it may be a text-based (uncompiled) Sheepscript, or some other data entirely.
+    return dataLength >= 8 && memcmp(data, "GK3Sheep", 8) == 0;
+}
 
 SheepScript::SheepScript(const std::string& name, char* data, int dataLength) : Asset(name)
 {
@@ -319,7 +320,7 @@ void WriteOut(std::ofstream& out, const std::string& str, int indentLevel)
     {
         out << "    ";
     }
-    out << str << std::endl;
+    out << str << "\n";
 }
 
 void SheepScript::Decompile()
@@ -387,11 +388,15 @@ void SheepScript::Decompile(const std::string& filePath)
     // Write an empty space if no variables.
     if(mVariables.empty())
     {
-        WriteOut(out, "\n", indentLevel);
+        WriteOut(out, "", indentLevel);
     }
 
+    // Close "symbols" section.
     --indentLevel;
-    WriteOut(out, "}\n", indentLevel);
+    WriteOut(out, "}", indentLevel);
+
+    // Extra empty line between symbols and code sections.
+    WriteOut(out, "", indentLevel);
 
     // Write code section.
     WriteOut(out, "code", indentLevel);
