@@ -519,6 +519,15 @@ Vector3 GameCamera::ResolveCollisions(const Vector3& startPosition, const Vector
                             Vector3 normal;
                             if(Collide::SphereTriangle(sphere, triangle, currentMoveOffset, sphereT, normal))
                             {
+                                // If a triangle reports a negative-t collision, it means we are already intersecting it.
+                                // We better be actively intersecting in this case.
+                                //TODO: Probably Collide::SphereTriangle should handle this internally?
+                                Vector3 intersectPoint;
+                                if(sphereT < 0.0f && !Intersect::TestSphereTriangle(sphere, triangle, intersectPoint))
+                                {
+                                    continue;
+                                }
+
                                 if(sphereT < smallestT)
                                 {
                                     collided = true;
