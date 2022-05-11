@@ -45,7 +45,7 @@ struct SceneCastResult
 class Scene
 {
 public:
-    static const std::string& GetEgoName();
+    static const char* GetEgoName();
 
     Scene(const std::string& name, const std::string& timeblock);
 	Scene(const std::string& name, const Timeblock& timeblock);
