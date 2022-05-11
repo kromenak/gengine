@@ -190,6 +190,12 @@ void TimeblockScreen::OnUpdate(float deltaTime)
     //std::cout << mBackgroundImage->GetRectTransform()->GetSize() << ", " << mTextImage->GetRectTransform()->GetSize() << ", " << anchoredPos << std::endl;
     */
 
+    // Shortcut key for pressing continue button.
+    if(mContinueButton->IsEnabled() && Services::GetInput()->IsKeyTrailingEdge(SDL_SCANCODE_C))
+    {
+        mContinueButton->Press();
+    }
+
     // Animate the timeblock text sequence.
     if(mAnimSequence != nullptr)
     {
