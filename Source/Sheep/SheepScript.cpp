@@ -625,7 +625,12 @@ void SheepScript::Decompile(const std::string& filePath)
             std::string* stringPtr = GetStringConst(offsetValue.intValue);
             if(stringPtr != nullptr)
             {
-                std::string fullString = "\"" + *stringPtr + "\"";
+                std::string fullString = "\"" + *stringPtr;
+                if(fullString.back() == '\0')
+                {
+                    fullString.pop_back();
+                }
+                fullString.push_back('"');
                 savedStrings.push_back(fullString);
                 stack.PushString(savedStrings.back().c_str());
             }

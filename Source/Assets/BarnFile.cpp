@@ -441,6 +441,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string outpu
             // If sheep asset is compiled, we need to decompile it to get any useful data.
             SheepScript script(assetName, assetData, asset->uncompressedSize);
             script.Decompile(outputPath);
+            result = true;
         }
 		else
 		{
@@ -462,7 +463,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string outpu
 	}
 	else
 	{
-		std::cout << "Error while extracting asset." << std::endl;
+		std::cout << "Error while extracting " << asset->name << std::endl;
 	}
 	
 	// Delete our new'd asset data array, no longer needed.
