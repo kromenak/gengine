@@ -1,9 +1,6 @@
-//
-// ActionBar.cpp
-//
-// Clark Kromenaker
-//
 #include "ActionBar.h"
+
+#include <algorithm>
 
 #include "InventoryManager.h"
 #include "Scene.h"
@@ -51,13 +48,33 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	Hide();
 }
 
+struct SortActions
+{
+    bool operator()(const Action* a, const Action* b)
+    {
+        // First off, if this is INSPECT or INSPECT_UNDO, it should always come first.
+        if(StringUtil::EqualsIgnoreCase(a->verb, "INSPECT") || StringUtil::EqualsIgnoreCase(a->verb, "INSPECT_UNDO"))
+        {
+            return true;
+        }
+        if(StringUtil::EqualsIgnoreCase(b->verb, "INSPECT") || StringUtil::EqualsIgnoreCase(b->verb, "INSPECT_UNDO"))
+        {
+            return false;
+        }
+
+        // Remaining ones can just be sorted by verb.
+        return a->verb < b->verb;
+    }
+};
+
 void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback)
 {
 	// Hide if not already hidden (make sure buttons are freed).
 	Hide();
 	
 	// If we don't have any actions, don't need to do anything!
-	if(actions.size() <= 0) { return; }
+	if(actions.empty()) { return; }
+    std::sort(actions.begin(), actions.end(), SortActions());
 
     // Save cancel callback.
     mCancelCallback = cancelCallback;
@@ -80,12 +97,12 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 		if(verbType == VerbType::Normal)
 		{
 			VerbIcon& buttonIcon = verbManager->GetVerbIcon(actions[i]->verb);
-			actionButton = AddButton(buttonIndex, buttonIcon);
+			actionButton = AddButton(buttonIndex, buttonIcon, actions[i]->verb);
 		}
 		else if(verbType == VerbType::Topic)
 		{
 			VerbIcon& buttonIcon = verbManager->GetTopicIcon(actions[i]->verb);
-			actionButton = AddButton(buttonIndex, buttonIcon);
+			actionButton = AddButton(buttonIndex, buttonIcon, actions[i]->verb);
 		}
 		if(actionButton == nullptr) { continue; }
 		++buttonIndex;
@@ -113,8 +130,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	if(verbType == VerbType::Normal)
 	{
 		// Get active inventory item for current ego.
-        const std::string& egoName = Scene::GetEgoName();
-		std::string activeItemName = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
+		std::string activeItemName = Services::Get<InventoryManager>()->GetActiveInventoryItem();
 		
 		// Show inventory button if there's an active inventory item AND it is not the object we're interacting with.
 		// In other words, don't allow using an object on itself!
@@ -122,11 +138,11 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 		if(mHasInventoryItemButton)
 		{
 			VerbIcon& invVerbIcon = verbManager->GetInventoryIcon(activeItemName);
-			UIButton* invButton = AddButton(buttonIndex, invVerbIcon);
+			UIButton* invButton = AddButton(buttonIndex, invVerbIcon, "INV");
 			++buttonIndex;
 			
 			// Create callback for inventory button press.
-			const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName);
+            const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName);
 			invButton->SetPressCallback([this, invAction, executeCallback](UIButton* button) {
 				// Hide action bar on button press.
 				this->Hide();
@@ -139,7 +155,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	
 	// Always put cancel button on the end.
 	VerbIcon& cancelVerbIcon = verbManager->GetVerbIcon("CANCEL");
-	UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon);
+	UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon, "CANCEL");
 	
 	// Pressing cancel button hides the bar, but it also requires an extra step. So its got its own callback.
     cancelButton->SetPressCallback([this](UIButton* button) {
@@ -165,8 +181,8 @@ void ActionBar::Hide()
 	// Disable all buttons and put them on the free stack.
 	for(auto& button : mButtons)
 	{
-		button->SetEnabled(false);
-		mFreeButtons.push(button);
+		button.button->SetEnabled(false);
+		mFreeButtons.push(button.button);
 	}
 	mButtons.clear();
 	
@@ -182,11 +198,23 @@ bool ActionBar::IsShowing() const
 	return mButtonHolder->IsActiveAndEnabled();
 }
 
+bool ActionBar::HasVerb(const std::string& verb) const
+{
+    for(auto& button : mButtons)
+    {
+        if(StringUtil::EqualsIgnoreCase(button.verb, verb))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> callback)
 {
 	// Add button at index 0.
 	VerbIcon& icon = Services::Get<VerbManager>()->GetVerbIcon(verb);
-	UIButton* button = AddButton(0, icon);
+	UIButton* button = AddButton(0, icon, verb);
 	button->SetPressCallback([this, callback](UIButton* button) {
 		this->Hide();
 		callback();
@@ -201,7 +229,7 @@ void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> cal
 {
 	VerbIcon& icon = Services::Get<VerbManager>()->GetVerbIcon(verb);
 	
-	// Action bar order is always [VERBS][INV_ITEM][CANCEL]
+	// Action bar order is always [INSPECT][VERBS][INV_ITEM][CANCEL]
 	// So, skip 1 for cancel button, and maybe skip another one if inventory item is shown.
 	int skipCount = 1;
 	if(mHasInventoryItemButton)
@@ -210,7 +238,7 @@ void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> cal
 	}
 	
 	// Add button with callback at index.
-	UIButton* button = AddButton(static_cast<int>(mButtons.size() - skipCount), icon);
+	UIButton* button = AddButton(static_cast<int>(mButtons.size() - skipCount), icon, verb);
 	button->SetPressCallback([this, callback](UIButton* button) {
 		this->Hide();
 		callback();
@@ -238,7 +266,7 @@ void ActionBar::OnUpdate(float deltaTime)
 	}
 }
 
-UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon)
+UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon, const std::string& verb)
 {
 	// Reuse a free button or create a new one.
 	UIButton* button = nullptr;
@@ -265,7 +293,7 @@ UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon)
 	}
 	
 	// Put into buttons array at desired position.
-	mButtons.insert(mButtons.begin() + index, button);
+    mButtons.insert(mButtons.begin() + index, { verb, button });
 	
 	// Set size correctly.
 	button->GetRectTransform()->SetSizeDelta(buttonIcon.GetWidth(), buttonIcon.GetWidth());
@@ -285,7 +313,7 @@ void ActionBar::RefreshButtonLayout()
 	for(auto& button : mButtons)
 	{		
 		// Position correctly, relative to previous buttons.
-		RectTransform* buttonRT = button->GetRectTransform();
+		RectTransform* buttonRT = button.button->GetRectTransform();
 		buttonRT->SetAnchor(Vector2::Zero);
 		buttonRT->SetPivot(0.0f, 0.0f);
 		buttonRT->SetAnchoredPosition(Vector2(xPos, 0.0f));

@@ -32,7 +32,8 @@ public:
 	void Hide();
 	
 	bool IsShowing() const;
-	
+
+    bool HasVerb(const std::string& verb) const;
 	void AddVerbToFront(const std::string& verb, std::function<void()> callback);
 	void AddVerbToBack(const std::string& verb, std::function<void()> callback);
 	
@@ -48,12 +49,17 @@ private:
 	
 	// A transform that is parent for all buttons.
 	RectTransform* mButtonHolder = nullptr;
-	
+    
 	// Buttons that are created, but not shown. These can be reused when needed.
 	std::stack<UIButton*> mFreeButtons;
 	
 	// The buttons currently showing on the action bar, in order left-to-right.
-	std::vector<UIButton*> mButtons;
+    struct ActionButton
+    {
+        std::string verb;
+        UIButton* button = nullptr;
+    };
+	std::vector<ActionButton> mButtons;
 	
 	// Currently showing inventory button?
 	bool mHasInventoryItemButton = false;
@@ -62,7 +68,7 @@ private:
     // This IS NOT the same as hiding! Cancel only happens if cancel button is pressed, click outside action bar, or press backspace.
 	std::function<void()> mCancelCallback = nullptr;
 	
-	UIButton* AddButton(int index, const VerbIcon& buttonIcon);
+	UIButton* AddButton(int index, const VerbIcon& buttonIcon, const std::string& verb);
 	void RefreshButtonLayout();
 	void CenterOnPointer();
 

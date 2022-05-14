@@ -366,8 +366,7 @@ std::string& ActionManager::GetVerb(int verbEnum)
 
 void ActionManager::ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
 {
-	auto actions = GetActions(noun, VerbType::Normal);
-	//OutputActions(actions);
+	std::vector<const Action*> actions = GetActions(noun, VerbType::Normal);
 	mActionBar->Show(noun, VerbType::Normal, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
 }
 
@@ -389,7 +388,6 @@ void ActionManager::ShowTopicBar(const std::string& noun)
     }
 	
 	// Show topics.
-	//OutputActions(actions);
 	mActionBar->Show(noun, VerbType::Topic, actions, nullptr, std::bind(&ActionManager::OnActionBarCanceled, this));
 }
 
