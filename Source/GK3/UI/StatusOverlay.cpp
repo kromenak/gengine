@@ -30,16 +30,21 @@ StatusOverlay::StatusOverlay() : Actor(TransformType::RectTransform)
     // The size of this RT is the "hover area" for showing the status text.
     RectTransform* statusTextRT = mStatusLabel->GetRectTransform();
     statusTextRT->SetParent(rectTransform);
-    
+
+    // Anchor to top-center of screen, stretch to fill horizontal space.
     statusTextRT->SetAnchorMin(Vector2(0.0f, 1.0f));
     statusTextRT->SetAnchorMax(Vector2(1.0f, 1.0f));
-    
-    // Some care is actually needed so that these numbers result in "pixel perfect" rendering.
-    // So, be careful! Maybe we can take care of this as the canvas layer eventually.
     statusTextRT->SetPivot(0.5f, 1.0f);
-    statusTextRT->SetSizeDeltaX(-4.0f);
+
+    // Make tall enough to fit the text.
     statusTextRT->SetSizeDeltaY(20.0f);
-    
+
+    // Reduce horizontal space a bit to give some padding on left/right edges of screen.
+    statusTextRT->SetSizeDeltaX(-8.0f);
+
+    // Move down a little bit to give padding on top.
+    statusTextRT->SetAnchoredPosition(0.0f, -6.0f);
+   
     // Refresh text with latest location, timeblock, score, etc.
     Refresh();
 }
