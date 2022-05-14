@@ -242,48 +242,59 @@ void GameCamera::SceneUpdate(float deltaTime)
     bool leftMousePressed = Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left);
     if(leftMousePressed && !UICanvas::DidWidgetEatInput())
     {
-        // Pan modifier also activates if right mouse button is pressed.
-        panModifierActive |= Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Right);
-        
-        // Mouse delta is in pixels.
-        // We normalize this by estimating "max pixel movement" per frame.
-        Vector2 mouseDelta = Services::GetInput()->GetMouseDelta();
-        mouseDelta /= kMouseRangePixels;
-        
-        // Lock the mouse!
-        if(mouseDelta.GetLengthSq() > 0.0f)
+        // Track click start position for turning on mouse-based camera movement.
+        // To avoid mistakenly enabling this, you must move the mouse some distance before it enables.
+        Vector2 mousePosition = Services::GetInput()->GetMousePosition();
+        if(Services::GetInput()->IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
         {
+            mClickStartPos = mousePosition;
+        }
+        else if((mClickStartPos - mousePosition).GetLengthSq() > 5 * 5)
+        {
+            // Moved the mouse far enough, so enable mouse lock.
             mUsedMouseInputsForMouseLock = true;
             Services::GetInput()->LockMouse();
         }
-        
-        // Mouse y-axis affect depends on modifiers.
-        if(pitchModifierActive)
+
+        // Do mouse-based movements if mouse lock is active.
+        if(Services::GetInput()->MouseLocked())
         {
-            pitchSpeed += mouseDelta.y * kRotationSpeed;
-        }
-        else if(panModifierActive)
-        {
-            verticalSpeed += mouseDelta.y * kSpeed;
-        }
-        else
-        {
-            forwardSpeed += mouseDelta.y * kSpeed;
-        }
-        
-        // Mouse x-axis affect also depends on modifiers.
-        // Note that pitch modifier and no modifier do the same thing!
-        if(pitchModifierActive)
-        {
-            turnSpeed += mouseDelta.x * kRotationSpeed;
-        }
-        else if(panModifierActive)
-        {
-            strafeSpeed += mouseDelta.x * kSpeed;
-        }
-        else
-        {
-            turnSpeed += mouseDelta.x * kRotationSpeed;
+            // Pan modifier also activates if right mouse button is pressed.
+            panModifierActive |= Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Right);
+
+            // Mouse delta is in pixels.
+            // We normalize this by estimating "max pixel movement" per frame.
+            Vector2 mouseDelta = Services::GetInput()->GetMouseDelta();
+            mouseDelta /= kMouseRangePixels;
+
+            // Mouse y-axis affect depends on modifiers.
+            if(pitchModifierActive)
+            {
+                pitchSpeed += mouseDelta.y * kRotationSpeed;
+            }
+            else if(panModifierActive)
+            {
+                verticalSpeed += mouseDelta.y * kSpeed;
+            }
+            else
+            {
+                forwardSpeed += mouseDelta.y * kSpeed;
+            }
+
+            // Mouse x-axis affect also depends on modifiers.
+            // Note that pitch modifier and no modifier do the same thing!
+            if(pitchModifierActive)
+            {
+                turnSpeed += mouseDelta.x * kRotationSpeed;
+            }
+            else if(panModifierActive)
+            {
+                strafeSpeed += mouseDelta.x * kSpeed;
+            }
+            else
+            {
+                turnSpeed += mouseDelta.x * kRotationSpeed;
+            }
         }
     }
     

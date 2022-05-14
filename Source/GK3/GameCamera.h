@@ -43,9 +43,13 @@ private:
 	// Camera rotation speed in radians/second. Again, trial and error!
 	const float kRotationSpeed = Math::kPi / 2.0f;
 	
-	// Mouse range in pixels to move as fast as keyboard keys.
-	// Smaller values mean mouse movement is more sensitive/speedier.
-	const float kMouseRangePixels = 50.0f;
+    // How much you have to move the mouse (in pixels) to go as fast as keyboard keys. Derived from trial and error.
+    // Smaller values make mouse movement more sensitive and speedier.
+	const float kMouseRangePixels = 12.0f;
+
+    // How far you need to move the mouse (in pixels) from click start pos to enable mouse-based movement.
+    // Again...trial and error.
+    const float kMouseMoveDistSq = 25.0f;
 
     // For collision, the camera is represented as a sphere. This is the sphere's radius.
     // This value was derived from trial & error.
@@ -56,6 +60,10 @@ private:
     
     // Option bar - used to change settings, quit game, etc.
     OptionBar* mOptionBar = nullptr;
+
+    // When mouse is clicked, this is start position of the click.
+    // Used to determine when to enable mouse-based camera movement.
+    Vector2 mClickStartPos;
 
     // Track if current mouse inputs were used for mouse lock. If so, must release all mouse buttons before doing other mouse actions.
     // This is helpful/necessary to avoid accidentally opening option bar when releasing mouse buttons after mouse lock.
