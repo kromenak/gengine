@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 
+#include "ActionBar.h"
 #include "ActionManager.h"
 #include "Animator.h"
 #include "BSPActor.h"
@@ -553,6 +554,28 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 	
 	// No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
 	Services::Get<ActionManager>()->ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
+
+    // Add INSPECT if not present.
+    //TODO: Should be INSPECT_UNDO if already inspecting this thing.
+    ActionBar* actionBar = Services::Get<ActionManager>()->GetActionBar();
+    if(!actionBar->HasVerb("INSPECT"))
+    {
+        actionBar->AddVerbToFront("INSPECT", [interacted](){
+            std::cout << "Inspect " << interacted->GetNoun() << std::endl;
+            //TODO: Set NOUN as inspected object
+            //TODO: Call custom action that executes Sheep for InspectObject();
+        });
+    }
+    /*
+    if(!actionBar->HasVerb("INSPECT_UNDO"))
+    {
+        actionBar->AddVerbToFront("INSPECT_UNDO", [interacted](){
+            std::cout << "Uninspect " << interacted->GetNoun() << std::endl;
+            //TODO: Clear inspected object
+            //TODO: Call custom action that executes Sheep for UninspectObject();
+        });
+    }
+    */
 }
 
 void Scene::SkipCurrentAction()

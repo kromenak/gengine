@@ -112,9 +112,12 @@ void InventoryInspectScreen::OnClicked()
         });
 	});
 	
-	// We want to add an "inspect" verb, which means to show the close-up of the item.
+	// Since we're showing the close-up, add INSPECT_UNDO to back out of the close-up.
 	ActionBar* actionBar = Services::Get<ActionManager>()->GetActionBar();
-	actionBar->AddVerbToFront("INSPECT_UNDO", []() {
-		Services::Get<InventoryManager>()->InventoryUninspect();
-	});
+    if(!actionBar->HasVerb("INSPECT_UNDO"))
+    {
+        actionBar->AddVerbToFront("INSPECT_UNDO", [](){
+            Services::Get<InventoryManager>()->InventoryUninspect();
+        });
+    }
 }
