@@ -391,8 +391,10 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
     // But it works fine (for the moment). Perhaps it can be optimized by allocating the memory one time rather than each time this function is called.
     int width = mTexture->GetWidth();
     int height = mTexture->GetHeight();
-    Node* nodes = new Node[width * height];
-    memset(nodes, 0, width * height * sizeof(Node));
+    int nodeCount = width * height;
+
+    Node* nodes = new Node[nodeCount];
+    memset(nodes, 0, nodeCount * sizeof(Node));
     for(int y = 0; y < height; ++y)
     {
         for(int x = 0; x < width; ++x)
@@ -403,7 +405,7 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
 
     // The open set when doing the search.
     // This does some dynamic allocation that could maybe be optimized if needed.
-    ResizableQueue<Node*> openSet(width * height);
+    ResizableQueue<Node*> openSet(nodeCount);
 
     // Put start node on the open set, mark as closed/explored.
     Node* startNode = &nodes[static_cast<int>(start.y * width + start.x)];
@@ -438,7 +440,13 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
             if(index == 255) { continue; }
 
             // Ignore closed/explored neighbors.
-            Node* neighborNode = &nodes[static_cast<int>(neighbor.y * width + neighbor.x)];
+            int nodeIndex = static_cast<int>(neighbor.y * width + neighbor.x);
+            if(nodeIndex < 0 || nodeIndex >= width * height)
+            {
+                continue;
+            }
+
+            Node* neighborNode = &nodes[nodeIndex];
             if(neighborNode->closed) { continue; }
 
             // Add to open set.
