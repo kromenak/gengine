@@ -68,10 +68,9 @@ private:
 	// If a mesh has multiple submeshes, each submesh *must have* a material!
     std::vector<Material> mMaterials;
 
-    // Bools for toggling visibility of individual submeshes.
-    // Would we ever have more than 32 total submeshes? Guess we'll find out!
-    // Since bitsets are all false by default, we'll set a bit to true if we want the submesh to be invisible.
-    static const int kMaxSubmeshes = 32;
+    // Visibility toggles for individual submeshes. Since bitsets are false by default, a true value means the submesh is invisible.
+    // Would we ever have more than 64 total submeshes? Guess we'll find out! Should take up 8 bytes per MeshRenderer.
+    static const int kMaxSubmeshes = 64;
     std::bitset<kMaxSubmeshes> mSubmeshInvisible;
 
     int GetIndexFromMeshSubmeshIndexes(int meshIndex, int submeshIndex);
