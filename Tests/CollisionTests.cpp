@@ -21,10 +21,10 @@ TEST_CASE("Sphere intersect triangle works")
 			   Vector3(5.0f,  2.0f,  0.0f));
 	
 	Vector3 intersect;
-	REQUIRE(Collisions::TestSphereTriangle(s, t, intersect));
+	REQUIRE(Intersect::TestSphereTriangle(s, t, intersect));
 	REQUIRE(intersect == Vector3(-5.0f, 0.0f, 0.0f));
 	
 	// Move sphere by intersection amount.
 	Sphere s2(Vector3::Zero + intersect, 10.0f);
-	REQUIRE(!Collisions::TestSphereTriangle(s2, t, intersect));
+	REQUIRE(!Intersect::TestSphereTriangle(s2, t, intersect));
 }

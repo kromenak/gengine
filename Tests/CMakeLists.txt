@@ -32,12 +32,14 @@ target_include_directories(tests PRIVATE
     ../Source/Audio
     ../Source/Barn
     ../Source/Containers
+    ../Source/Debug
     ../Source/GK3
     ../Source/IO
     ../Source/Math
     ../Source/Memory
     ../Source/Platform
     ../Source/Primitives
+    ../Source/Rendering
     ../Source/Sheep
     ../Source/Video
 )
@@ -63,6 +65,7 @@ target_sources(tests PRIVATE
 
     ../Source/Primitives/AABB.cpp
     ../Source/Primitives/Collisions.cpp
+    ../Source/Primitives/Line.cpp
     ../Source/Primitives/LineSegment.cpp
     ../Source/Primitives/Plane.cpp
     ../Source/Primitives/Rect.cpp
