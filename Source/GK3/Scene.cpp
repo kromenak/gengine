@@ -238,6 +238,7 @@ void Scene::Load()
 			{
 				BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
 				mBSPActors.push_back(actor);
+                mHitTestActors.push_back(actor);
 				
 				actor->SetNoun(modelDef->noun);
 				actor->SetVerb(modelDef->verb);
@@ -592,6 +593,18 @@ void Scene::SkipCurrentAction()
     {
         mEgo->SkipWalk();
     }
+}
+
+BSPActor* Scene::GetHitTestObjectByModelName(const std::string& modelName) const
+{
+    for(auto& object : mBSPActors)
+    {
+        if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
+        {
+            return object;
+        }
+    }
+    return nullptr;
 }
 
 GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const

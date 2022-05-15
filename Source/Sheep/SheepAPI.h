@@ -643,6 +643,9 @@ int IsSceneModelVisible(std::string modelName);
 shpvoid StartPropFidget(std::string modelName);
 shpvoid StopPropFidget(std::string modelName);
 
+shpvoid EnableHitTestModel(const std::string& modelName);
+shpvoid DisableHitTestModel(const std::string& modelName);
+
 // REPORTS (ALL DEV)
 shpvoid AddStreamContent(std::string streamName, std::string content);
 shpvoid ClearStreamContent(std::string streamName);

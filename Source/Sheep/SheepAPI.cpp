@@ -4,6 +4,7 @@
 #include <sstream> // for int->hex
 
 #include "Animator.h"
+#include "BSPActor.h"
 #include "Camera.h"
 #include "CharacterManager.h"
 #include "DialogueManager.h"
@@ -2415,6 +2416,28 @@ shpvoid StopPropFidget(std::string modelName)
 }
 RegFunc1(StopPropFidget, void, string, IMMEDIATE, REL_FUNC);
 */
+
+shpvoid EnableHitTestModel(const std::string& modelName)
+{
+    BSPActor* hitTestActor = GEngine::Instance()->GetScene()->GetHitTestObjectByModelName(modelName);
+    if(hitTestActor != nullptr)
+    {
+        hitTestActor->SetInteractive(true);
+    }
+    return 0;
+}
+RegFunc1(EnableHitTestModel, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid DisableHitTestModel(const std::string& modelName)
+{
+    BSPActor* hitTestActor = GEngine::Instance()->GetScene()->GetHitTestObjectByModelName(modelName);
+    if(hitTestActor != nullptr)
+    {
+        hitTestActor->SetInteractive(false);
+    }
+    return 0;
+}
+RegFunc1(DisableHitTestModel, void, string, IMMEDIATE, REL_FUNC);
  
 // REPORTS
 shpvoid AddStreamContent(std::string streamName, std::string content)

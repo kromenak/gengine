@@ -66,7 +66,8 @@ public:
     void SkipCurrentAction();
     
 	GKActor* GetEgo() const { return mEgo; }
-	
+
+    BSPActor* GetHitTestObjectByModelName(const std::string& modelName) const;
 	GKObject* GetSceneObjectByModelName(const std::string& modelName) const;
     GKObject* GetSceneObjectByNoun(const std::string& noun) const;
 	GKActor* GetActorByNoun(const std::string& noun) const;
@@ -124,6 +125,9 @@ private:
 	
 	// Actors in the BSP.
 	std::vector<BSPActor*> mBSPActors;
+
+    // Actors that are marked as hit test models.
+    std::vector<BSPActor*> mHitTestActors;
 	
     // The name of actor and actor who we are controlling in the scene.
 	// We sometimes need just the name - that's safer during scene loading.
