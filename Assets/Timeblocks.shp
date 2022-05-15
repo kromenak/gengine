@@ -11,11 +11,27 @@ code
 		{
 			Call("CheckTimeblockComplete110A$");
 		}
+		else if(IsCurrentTime("112P"))
+		{
+			Call("CheckTimeblockComplete112P$");
+		}
+		else if(IsCurrentTime("102P"))
+		{
+			Call("CheckTimeblockComplete102P$");
+		}
+		else if(IsCurrentTime("104P"))
+		{
+			Call("CheckTimeblockComplete104P$");
+		}
+		else if(IsCurrentTime("106P"))
+		{
+			Call("CheckTimeblockComplete106P$");
+		}
 	}
 
 	CheckTimeblockComplete110A$()
 	{
-		// Must be at RC1 to complete 110A timeblock.
+		// Must be at RC1 to complete timeblock.
 		if(IsCurrentLocation("RC1") == 0)
 		{
 			return;
@@ -75,8 +91,86 @@ code
 		SetTime("112P");
 	}
 
-	GoToNextTimeblock$()
+	CheckTimeblockComplete112P$()
 	{
-		PrintString("Load next timeblock");
+		// Must be at RC1 to complete timeblock.
+		if(IsCurrentLocation("RC1") == 0)
+		{
+			return;
+		}
+
+		// Must have met Buchelli and talked about Check-In Time.
+		if(GetTopicCount("BUCHELLI", "T_CHECK_IN") < 1)
+		{
+			return;
+		}
+
+		// Must have met Abbe and talked about Templars.
+		if(GetTopicCount("ABBE", "T_TEMPLARS") < 1)
+		{
+			return;
+		}
+
+		// Must have witnessed Lady Howard & Emilio switching rooms...
+		// OR viewed the updated Hotel Registry.
+		if(!GetFlag("SeenLHRoomSwitch") && GetNounVerbCount("REGISTER", "READ") < 2)
+		{
+			return;
+		}
+
+		// Must have talked to Mosely about Case, Grace, and Schattenjagers.
+		if(GetTopicCount("MOSELY", "T_CASE") < 1 ||
+		   GetTopicCount("MOSELY", "T_GRACE") < 1 ||
+		   GetTopicCount("MOSELY", "T_SCHATTENJAGER") < 1)
+		{
+			return;
+		}
+
+		// Ok, go to next timeblock!
+		SetTime("102P");
+	}
+
+	CheckTimeblockComplete102P$()
+	{
+		// Must be on the Map screen.
+
+		// Must have rented moped (shudders).
+
+		// Must have followed Buthane.
+
+		// Must have followed Wilkes.
+
+		// Must have either:
+		// A) "Think" at the Train Station arrival board & bribed taxi driver
+		// B) Talked to Larry about Templars
+
+		// OK, go to next timeblock!
+		//SetTime("104P");
+	}
+
+	CheckTimeblockComplete104P$()
+	{
+		// Must be at MOP.
+		if(IsCurrentLocation("MOP") == 0)
+		{
+			return;
+		}
+
+		// Must have done BOTH:
+		// A) "Think" at the Train Station arrival board & bribed taxi driver
+		// B) Talked to Larry about Templars
+
+		// Must have used the binocs to spy on Mosely/Buthane from Chateau de Blanchefort.
+
+		// Must have introduced yourself to Wilkes.
+		// This technically can be done earlier (112P or 102P) but MUST be done now.
+
+		// OK, go to next timeblock!
+		//SetTime("106P");
+	}
+
+	CheckTimeblockComplete106P$()
+	{
+		//...
 	}
 }
