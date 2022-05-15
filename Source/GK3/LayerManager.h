@@ -71,6 +71,7 @@ public:
     // Query layer state.
     bool IsTopLayer(const Layer* layer) const;
     bool IsTopLayer(const std::string& name) const;
+    bool IsLayerInStack(const std::string& name) const;
     
     // Debug output.
     void DumpLayerStack();

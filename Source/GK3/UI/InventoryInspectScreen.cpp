@@ -105,7 +105,8 @@ void InventoryInspectScreen::OnClicked()
 
             // After the action completes, check if we still have the inventory item shown.
             // In some rare cases (ex: eating a candy), the item no longer exists, so we should close this screen.
-            if(!Services::Get<InventoryManager>()->HasInventoryItem(mInspectItemName))
+            bool isInInventory = Services::Get<LayerManager>()->IsLayerInStack("InventoryLayer");
+            if(isInInventory && !Services::Get<InventoryManager>()->HasInventoryItem(mInspectItemName))
             {
                 Hide();
             }

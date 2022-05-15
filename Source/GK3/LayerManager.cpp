@@ -126,6 +126,18 @@ bool LayerManager::IsTopLayer(const std::string& name) const
     return mLayerStack.size() > 0 && StringUtil::EqualsIgnoreCase(name, mLayerStack.back()->GetName());
 }
 
+bool LayerManager::IsLayerInStack(const std::string& name) const
+{
+    for(auto& layer : mLayerStack)
+    {
+        if(StringUtil::EqualsIgnoreCase(layer->GetName(), name))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void LayerManager::DumpLayerStack()
 {
     std::stringstream ss;
