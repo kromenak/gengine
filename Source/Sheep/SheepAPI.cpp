@@ -2332,7 +2332,7 @@ RegFunc1(DoesSceneModelExist, int, string, IMMEDIATE, REL_FUNC);
 //DumpModelNames
 //DumpSceneModelNames
 
-shpvoid ShowModel(std::string modelName)
+shpvoid ShowModel(const std::string& modelName)
 {
     GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)
@@ -2343,7 +2343,7 @@ shpvoid ShowModel(std::string modelName)
 }
 RegFunc1(ShowModel, void, string, IMMEDIATE, REL_FUNC);
 
-shpvoid HideModel(std::string modelName)
+shpvoid HideModel(const std::string& modelName)
 {
     GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
 	if(object != nullptr)

@@ -628,8 +628,8 @@ shpvoid DumpModel(std::string modelName); // DEV
 shpvoid DumpModelNames(); // DEV
 shpvoid DumpSceneModelNames(); // DEV
 
-shpvoid ShowModel(std::string modelName);
-shpvoid HideModel(std::string modelName);
+shpvoid ShowModel(const std::string& modelName);
+shpvoid HideModel(const std::string& modelName);
 
 shpvoid ShowModelGroup(std::string groupName);
 shpvoid HideModelGroup(std::string groupName);

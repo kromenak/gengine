@@ -93,21 +93,23 @@ void Scene::Load()
 	{
 		mEgoName = egoSceneActor->noun;
 	}
-	
-	// Set location.
-	Services::Get<LocationManager>()->SetLocation(mLocation);
-	
-	// Increment location counter IMMEDIATELY.
-	// We know this b/c various scripts that need to run on "1st time enter" or similar check if count==1.
-	// For those to evaluate correctly, we need to do this BEFORE we even parse scene data or anything.
-	Services::Get<LocationManager>()->IncLocationCount(mEgoName, mLocation, mTimeblock);
-    
-    // Create status overlay actor. Do this after setting location for accurate location!
+
+    // Set location.
+    Services::Get<LocationManager>()->SetLocation(mLocation);
+
+    // Create status overlay actor.
+    // Do this after setting location so it shows the correct location!
     mStatusOverlay = new StatusOverlay();
-	
-	// Based on location, timeblock, and game progress, resolve what data we will load into the current scene.
-	// After calling this, SceneData will have interpreted all data from SIFs and determined exactly what we should and should not load/use for the scene right now.
-	mSceneData->ResolveSceneData();
+    
+    // Based on location, timeblock, and game progress, resolve what data we will load into the current scene.
+    // Do this BEFORE incrementing location count, as SIF conditions sometimes do "zero-checks" (e.g. if current location count == 0).
+    // After this, SceneData will have combined all SIFs and parsed all conditions to determine exactly what actors/models/etc to used right now.
+    mSceneData->ResolveSceneData();
+
+    // Increment location counter after resolving scene data.
+    // Despite SIFs sometimes doing "zero-checks," other NVC and SHP scripts typically do "one-checks".
+    // E.g. run on "1st time enter" checks count == 1.
+    Services::Get<LocationManager>()->IncLocationCount(mEgoName, mLocation, mTimeblock);
 	
 	// Set BSP to be rendered.
     Services::GetRenderer()->SetBSP(mSceneData->GetBSP());
@@ -146,8 +148,6 @@ void Scene::Load()
         }
     }
 
-	
-	
 	// For debugging - render walker bounds overlay on game world.
 	//TODO: Move to construction system!
 	/*
