@@ -121,7 +121,7 @@ void InventoryManager::AddInventoryItem(const std::string& itemName)
 void InventoryManager::AddInventoryItem(const std::string& actorName, const std::string& itemName)
 {
 	std::set<std::string>& items = mInventories[actorName];
-	items.insert(itemName);
+	items.insert(StringUtil::ToUpperCopy(itemName));
 }
 
 void InventoryManager::RemoveInventoryItem(const std::string& itemName)
@@ -132,7 +132,7 @@ void InventoryManager::RemoveInventoryItem(const std::string& itemName)
 void InventoryManager::RemoveInventoryItem(const std::string& actorName, const std::string& itemName)
 {
 	std::set<std::string>& items = mInventories[actorName];
-	items.erase(itemName);
+	items.erase(StringUtil::ToUpperCopy(itemName));
 
     // Inventory item can be removed while screen is showing (ex: eating the candy).
     if(mInventoryScreen->IsActive())
@@ -150,7 +150,7 @@ bool InventoryManager::HasInventoryItem(const std::string& actorName, const std:
 {
 	auto it = mInventories.find(actorName);
 	if(it == mInventories.end()) { return false; }
-	return it->second.find(itemName) != it->second.end();
+	return it->second.find(StringUtil::ToUpperCopy(itemName)) != it->second.end();
 }
 
 std::string InventoryManager::GetActiveInventoryItem() const
