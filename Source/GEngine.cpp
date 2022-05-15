@@ -176,7 +176,7 @@ bool GEngine::Initialize()
     // For dev purposes: just load right into a desired timeblock and location.
     Loader::DoAfterLoading([this]() {
         Services::Get<GameProgress>()->SetTimeblock(Timeblock("110A"));
-        LoadScene("RC1");
+        LoadScene("R25");
     });
     #endif
 
@@ -196,9 +196,6 @@ bool GEngine::Initialize()
 		actor->GetMeshRenderer()->GetModel()->WriteToObjFile("GAB_" + std::to_string(i) + ".OBJ");
 	}
 	*/
-
-    //SheepScript* script = mAssetManager.LoadSheep("LBY110A");
-    //script->Decompile();
     return true;
 }
 
