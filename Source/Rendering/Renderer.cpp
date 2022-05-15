@@ -182,8 +182,7 @@ bool Renderer::Initialize()
     
     // Create OpenGL context.
     mContext = SDL_GL_CreateContext(mWindow);
-
-    DumpVideoInfo(mWindow);
+    //DumpVideoInfo(mWindow);
 	
     // Initialize GLEW.
     glewExperimental = GL_TRUE;
