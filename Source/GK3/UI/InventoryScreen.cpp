@@ -183,7 +183,7 @@ void InventoryScreen::RefreshLayout()
         button->SetUpTexture(itemTexture);
 
         // Set button callback.
-        button->SetPressCallback([this, button, item](UIButton* button) {
+        button->SetPressCallback([this, item](UIButton* button) {
             OnItemClicked(button, item);
         });
 

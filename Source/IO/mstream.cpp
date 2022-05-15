@@ -6,7 +6,7 @@ membuf::membuf(char* data, uint32_t length)
     // setp is used for output (writing)
     // We don't know if this membuf will be used for reading or writing, so just do both!
     setg(data, data, data + length);
-    setp(data, data, data + length);
+    setp(data, data + length);
 }
 
 std::streampos membuf::seekoff(std::streamoff off, std::ios_base::seekdir way, std::ios_base::openmode which)
@@ -62,11 +62,15 @@ std::streampos membuf::seekoff(std::streamoff off, std::ios_base::seekdir way, s
     {
         cur = beg;
     }
+    
+    // Calc where we are in the stream.
+    std::streampos offset = cur - beg;
 
     // Update pointers.
     if(out)
     {
-        setp(beg, cur, end);
+        setp(beg, end);
+        pbump(offset);
     }
     else if(in)
     {
@@ -74,7 +78,7 @@ std::streampos membuf::seekoff(std::streamoff off, std::ios_base::seekdir way, s
     }
 
     // Return current offset from beginning.
-    return cur - beg;
+    return offset;
 }
 
 std::streampos membuf::seekpos(std::streampos pos, std::ios_base::openmode which)
