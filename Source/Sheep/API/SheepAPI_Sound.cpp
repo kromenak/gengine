@@ -1,4 +1,4 @@
-#include "SheepAPI.h"
+#include "SheepAPI_Sound.h"
 
 #include "AudioManager.h"
 #include "GEngine.h"
@@ -9,7 +9,7 @@
 
 using namespace std;
 
-shpvoid EnableSound(std::string soundType)
+shpvoid EnableSound(const std::string& soundType)
 {
     if(soundType.empty() || StringUtil::EqualsIgnoreCase(soundType, "global"))
     {
@@ -40,7 +40,7 @@ shpvoid EnableSound(std::string soundType)
 }
 RegFunc1(EnableSound, void, string, IMMEDIATE, DEV_FUNC);
 
-shpvoid DisableSound(std::string soundType)
+shpvoid DisableSound(const std::string& soundType)
 {
     if(soundType.empty() || StringUtil::EqualsIgnoreCase(soundType, "global"))
     {
@@ -71,7 +71,7 @@ shpvoid DisableSound(std::string soundType)
 }
 RegFunc1(DisableSound, void, string, IMMEDIATE, DEV_FUNC);
 
-int GetVolume(std::string soundType)
+int GetVolume(const std::string& soundType)
 {
     if(soundType.empty() || StringUtil::EqualsIgnoreCase(soundType, "global"))
     {
@@ -102,7 +102,7 @@ int GetVolume(std::string soundType)
 }
 RegFunc1(GetVolume, void, string, IMMEDIATE, DEV_FUNC);
 
-shpvoid SetVolume(std::string soundType, int volume)
+shpvoid SetVolume(const std::string& soundType, int volume)
 {
     // Clamp volume 0-100.
     volume = Math::Clamp(volume, 0, 100);
@@ -140,7 +140,7 @@ shpvoid SetVolume(std::string soundType, int volume)
 }
 RegFunc2(SetVolume, void, string, int, IMMEDIATE, DEV_FUNC);
 
-shpvoid PlaySound(std::string soundName)
+shpvoid PlaySound(const std::string& soundName)
 {
     Audio* audio = Services::GetAssets()->LoadAudio(soundName);
     if(audio != nullptr)
@@ -152,7 +152,7 @@ shpvoid PlaySound(std::string soundName)
 }
 RegFunc1(PlaySound, void, string, WAITABLE, REL_FUNC);
 
-shpvoid StopSound(std::string soundName)
+shpvoid StopSound(const std::string& soundName)
 {
     // For a sound to play, it must be loaded already anyway.
     // And if it's null, the Stop function handles that.
@@ -168,7 +168,7 @@ shpvoid StopAllSounds()
 }
 RegFunc0(StopAllSounds, void, IMMEDIATE, REL_FUNC);
 
-shpvoid PlaySoundTrack(std::string soundtrackName)
+shpvoid PlaySoundTrack(const std::string& soundtrackName)
 {
     Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName);
     if(soundtrack != nullptr)
@@ -179,7 +179,7 @@ shpvoid PlaySoundTrack(std::string soundtrackName)
 }
 RegFunc1(PlaySoundTrack, void, string, WAITABLE, REL_FUNC);
 
-shpvoid StopSoundTrack(std::string soundtrackName)
+shpvoid StopSoundTrack(const std::string& soundtrackName)
 {
     // Soundtrack must already be loaded to be playing. So, just load and pass in pointer.
     // If it is null, Stop handles that for us.

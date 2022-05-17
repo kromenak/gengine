@@ -1,16 +1,11 @@
-//
-// SheepVM.cpp
-//
-// Clark Kromenaker
-//
 #include "SheepVM.h"
 
 #include <iostream>
 
 #include "BinaryReader.h"
 #include "GMath.h"
-#include "SheepAPI.h"
 #include "SheepScript.h"
+#include "SheepSysFunc.h"
 #include "Services.h"
 #include "StringUtil.h"
 
@@ -194,11 +189,11 @@ SheepThread* SheepVM::GetThread()
 	return useThread;
 }
 
-Value SheepVM::CallSysFunc(SheepThread* thread, SysImport* sysImport)
+Value SheepVM::CallSysFunc(SheepThread* thread, SysFuncImport* sysImport)
 {
 	// Retrieve system function declaration for the system function import.
 	// We need the full declaration to know whether this is a waitable function!
-	SysFuncDecl* sysFunc = GetSysFuncDecl(sysImport);
+	SysFunc* sysFunc = GetSysFunc(sysImport);
 	if(sysFunc == nullptr)
 	{
 		std::cout << "Sheep uses undeclared function " << sysImport->name << std::endl;
@@ -408,7 +403,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
             case SheepInstruction::CallSysFunctionV:
             {
                 int functionIndex = reader.ReadInt();
-                SysImport* sysFunc = script->GetSysImport(functionIndex);
+                SysFuncImport* sysFunc = script->GetSysImport(functionIndex);
 				if(sysFunc == nullptr)
 				{
 					std::cout << "Invalid function index " << functionIndex << std::endl;
@@ -431,7 +426,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
             case SheepInstruction::CallSysFunctionI:
             {
                 int functionIndex = reader.ReadInt();
-                SysImport* sysFunc = script->GetSysImport(functionIndex);
+                SysFuncImport* sysFunc = script->GetSysImport(functionIndex);
 				if(sysFunc == nullptr)
 				{
 					std::cout << "Invalid function index " << functionIndex << std::endl;
@@ -452,7 +447,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
             case SheepInstruction::CallSysFunctionF:
             {
                 int functionIndex = reader.ReadInt();
-                SysImport* sysFunc = script->GetSysImport(functionIndex);
+                SysFuncImport* sysFunc = script->GetSysImport(functionIndex);
 				if(sysFunc == nullptr)
 				{
 					std::cout << "Invalid function index " << functionIndex << std::endl;
@@ -473,7 +468,7 @@ void SheepVM::ExecuteInternal(SheepThread* thread)
             case SheepInstruction::CallSysFunctionS:
             {
                 int functionIndex = reader.ReadInt();
-                SysImport* sysFunc = script->GetSysImport(functionIndex);
+                SysFuncImport* sysFunc = script->GetSysImport(functionIndex);
 				if(sysFunc == nullptr)
 				{
 					std::cout << "Invalid function index " << functionIndex << std::endl;

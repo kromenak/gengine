@@ -34,7 +34,7 @@ SheepScript::SheepScript(const std::string& name, SheepScriptBuilder& builder) :
     std::copy(bytecodeVec.begin(), bytecodeVec.end(), mBytecode);
 }
 
-SysImport* SheepScript::GetSysImport(int index)
+SysFuncImport* SheepScript::GetSysImport(int index)
 {
     if(index < 0 || index >= mSysImports.size()) { return nullptr; }
     return &mSysImports[index];
@@ -50,7 +50,7 @@ std::string* SheepScript::GetStringConst(int offset)
 	return nullptr;
 }
 
-int SheepScript::GetFunctionOffset(std::string functionName)
+int SheepScript::GetFunctionOffset(const std::string& functionName)
 {
 	// All sheep functions are case-insensitive. So, we only use lowercase names for consistency.
 	std::string lowerFunctionName = StringUtil::ToLowerCopy(functionName);
@@ -141,15 +141,17 @@ void SheepScript::ParseSysImportsSection(BinaryReader& reader)
     // Don't need header size (x2).
     // Don't need byte size of all imports.
     reader.Skip(12);
-    
+
+    // Get # of SysFuncs this script uses.
     int functionCount = reader.ReadInt();
     
     // Don't really need offset values for functions.
     reader.Skip(4 * functionCount);
-    
+
+    // Parse each SysFunc.
     for(int i = 0; i < functionCount; i++)
     {
-        SysImport import;
+        SysFuncImport import;
         
         // Read in name from length.
         // Length is always one more, due to null terminator.
@@ -469,7 +471,7 @@ void SheepScript::Decompile(const std::string& filePath)
         case SheepInstruction::CallSysFunctionF:
         {
             int functionIndex = reader.ReadInt();
-            SysImport* sysFunc = GetSysImport(functionIndex);
+            SysFuncImport* sysFunc = GetSysImport(functionIndex);
 
             // Build function call command from stack.
             std::string funcCall = sysFunc->name + "(";

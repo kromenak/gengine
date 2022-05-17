@@ -15,7 +15,7 @@
 #include "Value.h"
 
 class SheepScript;
-struct SysImport;
+struct SysFuncImport;
 
 // GK3 calls these "Object Code" instances.
 // Basically, a loaded instance of a sheep script with variables and such.
@@ -126,7 +126,7 @@ private:
 	SheepInstance* GetInstance(SheepScript* script);
 	SheepThread* GetThread();
 	
-    Value CallSysFunc(SheepThread* thread, SysImport* sysImport);
+    Value CallSysFunc(SheepThread* thread, SysFuncImport* sysImport);
 	
 	SheepThread* ExecuteInternal(SheepScript* script, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback);
 	SheepThread* ExecuteInternal(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback);

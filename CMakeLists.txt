@@ -51,6 +51,7 @@ target_include_directories(gk3 PRIVATE
     Source/Rendering
     Source/Reports
     Source/Sheep
+    Source/Sheep/API
     Source/Sheep/Compiler
     Source/Sheep/Machine
     Source/UI

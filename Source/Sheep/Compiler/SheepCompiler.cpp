@@ -1,9 +1,3 @@
-//
-//  SheepCompiler.cpp
-//  GEngine
-//
-//  Created by Clark Kromenaker on 7/24/17.
-//
 #include "SheepCompiler.h"
 
 #include <cassert>
@@ -12,7 +6,6 @@
 
 #include "FileSystem.h"
 #include "Services.h"
-#include "SheepAPI.h"
 #include "SheepScriptBuilder.h"
 #include "StringUtil.h"
 

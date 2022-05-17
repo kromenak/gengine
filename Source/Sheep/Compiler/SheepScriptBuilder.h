@@ -95,7 +95,7 @@ public:
 	const std::string& GetSection() const { return mSection; }
 	
 	// After "building" the script's bytecode and tables, these functions are used to access that data.
-    std::vector<SysImport> GetSysImports() { return mSysImports; }
+    std::vector<SysFuncImport> GetSysImports() { return mSysImports; }
     std::unordered_map<int, std::string> GetStringConsts() { return mStringConstsByOffset; }
     std::vector<SheepValue> GetVariables() { return mVariables; }
     std::unordered_map<std::string, int> GetFunctions() { return mFunctions; }
@@ -109,7 +109,7 @@ private:
 	std::string mScriptName;
 	
     // Definition for any system functions used.
-    std::vector<SysImport> mSysImports;
+    std::vector<SysFuncImport> mSysImports;
 	
 	// When building system function calls, its useful to keep track of the args given by the user.
 	// If the arg count doesn't match the expected number of arguments, we can generate a compiler error.

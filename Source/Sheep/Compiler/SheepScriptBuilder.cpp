@@ -1,14 +1,9 @@
-//
-// SheepScriptBuilder.cpp
-//
-// Clark Kromenaker
-//
 #include "SheepScriptBuilder.h"
 
 #include <iostream>
 
 #include "Services.h"
-#include "SheepAPI.h"
+#include "SheepSysFunc.h"
 #include "StringUtil.h"
 
 //#define DEBUG_BUILDER
@@ -223,7 +218,7 @@ SheepValueType SheepScriptBuilder::CallSysFunc(std::string sysFuncName, const Lo
 	
 	// All possible system functions are pre-registered in a table.
 	// Make sure this system function exists!
-	SysFuncDecl* sysFunc = GetSysFuncDecl(StringUtil::ToLowerCopy(sysFuncName));
+	SysFunc* sysFunc = GetSysFunc(StringUtil::ToLowerCopy(sysFuncName));
 	if(sysFunc == nullptr)
 	{
 		LogError(loc, "system function '" + sysFuncName + "' not found in export table.");
@@ -372,7 +367,7 @@ SheepValueType SheepScriptBuilder::CallSysFunc(std::string sysFuncName, const Lo
 	AddIntArg(sysFuncIndex);
 	
 	// Add sys func to imports list, if not already present.
-	// Note that this "slices" the SysFuncDecl down to just a SysImport, but that's OK!
+	// Note that this "slices" the SysFunc down to just a SysFuncImport, but that's OK!
 	if(sysFuncIndex == mSysImports.size())
 	{
 		mSysImports.push_back(*sysFunc);
