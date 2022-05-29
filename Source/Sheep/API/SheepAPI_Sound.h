@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related audio and sound effects.
+//
 #pragma once
 #include "SheepSysFunc.h"
 

@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to controlling Animations.
+//
 #pragma once
 #include "SheepSysFunc.h"
 

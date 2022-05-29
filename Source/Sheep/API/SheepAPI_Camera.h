@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to camera settings and behavior.
+//
 #pragma once
 #include "SheepSysFunc.h"
 

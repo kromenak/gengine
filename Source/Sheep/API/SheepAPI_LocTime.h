@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to manipulating location and time.
+//
 #pragma once
 #include "SheepSysFunc.h"
 

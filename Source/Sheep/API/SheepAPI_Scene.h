@@ -1,3 +1,9 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to querying or manipulating the scene or
+// coordinating multiple scene objects.
+//
 #pragma once
 #include "SheepSysFunc.h"
 

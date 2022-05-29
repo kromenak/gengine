@@ -22,7 +22,7 @@ std::function<void()> SheepThread::AddWait()
 {
     if(!mInWaitBlock) { return nullptr; }
 
-    mWaitCounter++;
+    ++mWaitCounter;
     //std::cout << GetName() << " added wait (" << mWaitCounter << " waits total)" << std::endl;
     return std::bind(&SheepThread::OnWaitCompleted, this);
 }

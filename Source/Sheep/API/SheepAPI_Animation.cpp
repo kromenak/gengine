@@ -15,9 +15,8 @@ shpvoid StartAnimation(const std::string& animationName)
         Services::GetReports()->Log("Error", "gk3 animation '" + animationName + ".anm' not found.");
         return 0;
     }
-
-    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, currentThread->AddWait());
+    
+    GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, AddWait());
     return 0;
 }
 RegFunc1(StartAnimation, void, string, WAITABLE, REL_FUNC);
@@ -59,8 +58,7 @@ shpvoid StartMoveAnimation(const std::string& animationName)
     Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
     if(animation != nullptr)
     {
-        SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, currentThread->AddWait());
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, AddWait());
     }
     return 0;
 }
@@ -74,8 +72,7 @@ shpvoid StartMom(const std::string& momAnimationName)
     if(animation != nullptr)
     {
         //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.
-        SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, currentThread->AddWait());
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, AddWait());
     }
     return 0;
 }

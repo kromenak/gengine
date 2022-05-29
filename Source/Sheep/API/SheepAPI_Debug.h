@@ -1,7 +1,11 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to debugging and development tools.
+//
 #pragma once
 #include "SheepSysFunc.h"
 
-// DEBUG
 int GetDebugFlag(const std::string& flagName);
 shpvoid SetDebugFlag(const std::string& flagName);
 shpvoid ClearDebugFlag(const std::string& flagName);
@@ -18,6 +22,7 @@ shpvoid DumpPathFileMap();
 shpvoid DumpUsedPaths();
 shpvoid DumpUsedFiles();
 shpvoid DumpLayerStack(); // DEV
+shpvoid DumpBuildInfo(); // DEV
 
 shpvoid ReportMemoryUsage();
 shpvoid ReportSurfaceMemoryUsage();

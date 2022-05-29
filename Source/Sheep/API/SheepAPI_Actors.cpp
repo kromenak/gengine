@@ -278,11 +278,87 @@ shpvoid StopFidget(const std::string& actorName)
     if(actor == nullptr)
     {
         ExecError();
-        return 0;
     }
-
-    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    actor->StopFidget(currentThread->AddWait());
+    else
+    {
+        actor->StopFidget(AddWait());
+    }
     return 0;
 }
 RegFunc1(StopFidget, void, string, WAITABLE, REL_FUNC);
+
+/*
+ shpvoid SetWalkAnim(std::string actorName, std::string start, std::string cont,
+                     std::string startTurnLeft, std::string startTurnRight)
+ {
+     std::cout << "SetWalkAnim" << std::endl;
+     return 0;
+ }
+ RegFunc5(SetWalkAnim, void, string, string, string, string, string, IMMEDIATE, REL_FUNC);
+ 
+shpvoid TurnHead(std::string actorName, int percentX, int percentY, int durationMs)
+{
+ std::cout << "TurnHead" << std::endl;
+ return 0;
+}
+RegFunc4(TurnHead, void, string, int, int, int, WAITABLE, REL_FUNC);
+
+shpvoid TurnToModel(std::string actorName, std::string modelName)
+{
+ std::cout << "TurnToModel" << std::endl;
+ return 0;
+}
+RegFunc2(TurnToModel, void, string, string, WAITABLE, REL_FUNC);
+
+shpvoid LookitActor(std::string actorName, std::string otherActorName,
+                     std::string componentsSpec, float durationSec)
+{
+    return 0;
+}
+RegFunc4(LookitActor, void, string, string, string, float, IMMEDIATE, REL_FUNC);
+
+shpvoid LookitActorQuick(std::string actorName, std::string otherActorName,
+                         std::string componentsSpec, float durationSec)
+{
+    return 0;
+}
+RegFunc4(LookitActorQuick, void, string, string, string, float, IMMEDIATE, REL_FUNC);
+
+shpvoid LookitModel(std::string actorName, std::string modelName,
+                    std::string componentsSpec, float durationSec)
+{
+    return 0;
+}
+RegFunc4(LookitModel, void, string, string, string, float, IMMEDIATE, REL_FUNC);
+
+shpvoid LookitModelQuick(std::string actorName, std::string modelName,
+                         std::string componentsSpec, float durationSec)
+{
+    return 0;
+}
+RegFunc4(LookitModelQuick, void, string, string, string, float, IMMEDIATE, REL_FUNC);
+
+shpvoid LookitModelX(std::string actorName, std::string modelName, int mesh,
+                     std::string boxModifier, float offsetX, float offsetY, float offsetZ,
+                     std::string componentsSpec, float durationSec)
+{
+    return 0;
+}
+//TODO: Need a new RegFuncX for 9 arguments!
+
+//LookitModelQuickX
+
+//LookitNoun
+
+//LookitNounQuick
+
+//LookitPoint
+
+//LookitCameraAngle
+
+//LookitMouse
+
+//LookitPlayer
+
+//LookitCancel
+*/

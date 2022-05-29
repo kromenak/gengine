@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to manipulating inventories.
+//
 #pragma once
 #include "SheepSysFunc.h"
 

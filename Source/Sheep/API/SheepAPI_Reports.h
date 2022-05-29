@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to the reports system and logging.
+//
 #pragma once
 #include "SheepSysFunc.h"
 

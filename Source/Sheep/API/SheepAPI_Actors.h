@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to controlling Actors (and Models/Props).
+//
 #pragma once
 #include "SheepSysFunc.h"
 

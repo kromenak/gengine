@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to dialogue and voice-overs.
+//
 #pragma once
 #include "SheepSysFunc.h"
 

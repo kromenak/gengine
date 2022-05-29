@@ -182,3 +182,13 @@ void ExecError()
 {
     Services::GetSheep()->FlagExecutionError();
 }
+
+std::function<void()> AddWait()
+{
+    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    if(currentThread != nullptr)
+    {
+        return currentThread->AddWait();
+    }
+    return nullptr;
+}

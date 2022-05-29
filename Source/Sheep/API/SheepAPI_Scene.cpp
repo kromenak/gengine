@@ -324,8 +324,7 @@ shpvoid WalkTo(const std::string& actorName, const std::string& positionName)
     }
 
     // Ok, we can actually do the walk to it seems!
-    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    actor->WalkTo(scenePosition->position, scenePosition->heading, currentThread->AddWait());
+    actor->WalkTo(scenePosition->position, scenePosition->heading, AddWait());
     return 0;
 }
 RegFunc2(WalkTo, void, string, string, WAITABLE, REL_FUNC);
@@ -356,8 +355,7 @@ shpvoid WalkToAnimation(const std::string& actorName, const std::string& animati
     }
 
     // Ok, we can actually do the walk to it seems!
-    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
-    actor->WalkToAnimationStart(anim, currentThread->AddWait());
+    actor->WalkToAnimationStart(anim, AddWait());
     return 0;
 }
 RegFunc2(WalkToAnimation, void, string, string, WAITABLE, REL_FUNC);

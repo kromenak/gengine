@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// Sheep SysFuncs related to manipulating game assets.
+//
 #pragma once
 #include "SheepSysFunc.h"
 
