@@ -92,17 +92,17 @@ public:
     // Interpolate
     static void Lerp(Quaternion& result, const Quaternion& start, const Quaternion& end, float t);
     static void Slerp(Quaternion& result, const Quaternion& start, const Quaternion& end, float t);
-
-    // Isolate rotation about a particular axis
-    //TODO: Not sure if this is really a "standard operation" for quaternions, but it's helpful sometimes. Maybe a util class?
-    void IsolateY();
-
+    
     // Decompose a quaternion into part about an axis and part about a perpendicular axis.
-    void Decompose(const Vector3& axis, Quaternion& aboutAxis, Quaternion& aboutPerpendicularAxis);
+    void Decompose(const Vector3& axis, Quaternion& aboutAxis) const;
+    void Decompose(const Vector3& axis, Quaternion& aboutAxis, Quaternion& aboutPerpendicularAxis) const;
 
     // Using decomposition, isolate rotation about a particular axis, or conversely, discard rotation about a particular axis.
-    Quaternion Isolate(const Vector3& axis);
-    Quaternion Discard(const Vector3& axis);
+    Quaternion Isolate(const Vector3& axis) const;
+    Quaternion Discard(const Vector3& axis) const;
+
+    // Isolate just Y axis. Slightly faster (less computation) than the general case.
+    void IsolateY();
         
     // Quaternion elements. Order is important (memory layout is sometimes assumed).
     float x = 0.0f;

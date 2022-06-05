@@ -125,7 +125,8 @@ void GameCamera::OnUpdate(float deltaTime)
             std::cout << "Pause!" << std::endl;
 
             // For debugging...
-            std::cout << GetPosition() << std::endl;
+            std::cout << "Pos: " << GetPosition() << ", Heading: " << Heading::FromQuaternion(GetRotation()) << std::endl;
+            
         }
 
         // Pressing escape acts as a "skip" or "cancel" action, depending on current state of the game.

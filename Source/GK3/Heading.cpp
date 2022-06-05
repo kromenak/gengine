@@ -1,41 +1,34 @@
-//
-// Heading.cpp
-//
-// Clark Kromenaker
-//
 #include "Heading.h"
 
 #include "Vector2.h"
 
-Heading Heading::None = Heading();
+/*static*/ Heading Heading::None = Heading();
 
-Heading Heading::FromDegrees(float degrees)
+/*static*/ Heading Heading::FromDegrees(float degrees)
 {
 	Heading heading;
 	heading.SetDegrees(degrees);
 	return heading;
 }
 
-Heading Heading::FromRadians(float radians)
+/*static*/ Heading Heading::FromRadians(float radians)
 {
 	return FromDegrees(Math::ToDegrees(radians));
 }
 
-Heading Heading::FromQuaternion(const Quaternion& quaternion)
+/*static*/ Heading Heading::FromQuaternion(const Quaternion& quaternion)
 {
     // A heading is really only meaningful for rotations about the up axis (Y in our case).
     // We can't assume the passed in quaternion is always ONLY about the y-axis, so we need to isolate just the Y part.
-    
-    // We can do this by zeroing out x/z and normalize - this works b/c we're isolating one the three main coordinate axes.
-    // Math is described here: https://stackoverflow.com/questions/5782658/extracting-yaw-from-a-quaternion
     Quaternion yRotation = quaternion;
-    yRotation.x = 0.0f;
-    yRotation.z = 0.0f;
-    yRotation.Normalize();
-	return FromRadians(yRotation.GetAngle());
+    yRotation.IsolateY();
+
+    // Converting the quaternion directly to an angle (using GetAxisAngle) gives some undesirable results when wrapping around from 360 to 0.
+    // To avoid this, just convert the quaternion to a direction, and then pass off to that logic to calculate final heading.
+    return FromDirection(yRotation.Rotate(Vector3::UnitZ));
 }
 
-Heading Heading::FromDirection(const Vector3& direction)
+/*static*/ Heading Heading::FromDirection(const Vector3& direction)
 {
 	// Convert to 2D vector on x/z plane and renormalize.
     Vector2 dir(direction.x, direction.z);

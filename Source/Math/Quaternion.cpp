@@ -525,22 +525,18 @@ void Quaternion::Invert()
     result = startInterp * start + endInterp * end;
 }
 
-void Quaternion::IsolateY()
+void Quaternion::Decompose(const Vector3& axis, Quaternion& aboutAxis) const
 {
-    // We can isolate just the rotation about the Y axis by zeroing x/z and normalizing.
-    x = 0.0f;
-    z = 0.0f;
-    Normalize();
-
-    // But watch out! This can result in a Zero quat if y/w were close to zero.
-    // Revert to identity in that case.
-    if(Math::IsZero(x) && Math::IsZero(y) && Math::IsZero(z) && Math::IsZero(w))
-    {
-        w = 1.0f;
-    }
+    // Use this version of Decompose if you don't care about the perpendicular axis - that's the (potentially) expensive part anyway.
+    Vector3 proj = Vector3::Project(Vector3(x, y, z), axis);
+    aboutAxis.x = proj.x;
+    aboutAxis.y = proj.y;
+    aboutAxis.z = proj.z;
+    aboutAxis.w = w;
+    aboutAxis.Normalize();
 }
 
-void Quaternion::Decompose(const Vector3& axis, Quaternion& aboutAxis, Quaternion& aboutPerpendicularAxis)
+void Quaternion::Decompose(const Vector3& axis, Quaternion& aboutAxis, Quaternion& aboutPerpendicularAxis) const
 {
     // This algorithm is referred to as "swing twist decomposition."
     // It allows you to decompose a quaterion into two parts:
@@ -562,20 +558,34 @@ void Quaternion::Decompose(const Vector3& axis, Quaternion& aboutAxis, Quaternio
     aboutPerpendicularAxis = Quaternion::Inverse(aboutAxis) * (*this);
 }
 
-Quaternion Quaternion::Isolate(const Vector3& axis)
+Quaternion Quaternion::Isolate(const Vector3& axis) const
 {
     Quaternion aboutAxis;
-    Quaternion aboutPerpAxis;
-    Decompose(axis, aboutAxis, aboutPerpAxis);
+    Decompose(axis, aboutAxis);
     return aboutAxis;
 }
 
-Quaternion Quaternion::Discard(const Vector3& axis)
+Quaternion Quaternion::Discard(const Vector3& axis) const
 {
     Quaternion aboutAxis;
     Quaternion aboutPerpAxis;
     Decompose(axis, aboutAxis, aboutPerpAxis);
     return aboutPerpAxis;
+}
+
+void Quaternion::IsolateY()
+{
+    // We can isolate just the rotation about the Y axis by zeroing x/z and normalizing.
+    x = 0.0f;
+    z = 0.0f;
+    Normalize();
+
+    // But watch out! This can result in a Zero quat if y/w were close to zero.
+    // Revert to identity in that case.
+    if(Math::IsZero(x) && Math::IsZero(y) && Math::IsZero(z) && Math::IsZero(w))
+    {
+        w = 1.0f;
+    }
 }
 
 std::ostream& operator<<(std::ostream& os, const Quaternion& q)

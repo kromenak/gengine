@@ -242,7 +242,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
     {
         WalkAction turnAction;
         turnAction.op = WalkOp::TurnToFace;
-        turnAction.facingDir = heading.ToVector();
+        turnAction.facingDir = heading.ToDirection();
         mWalkActions.push_back(turnAction);
     }
 
