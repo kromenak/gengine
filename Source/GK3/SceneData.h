@@ -1,6 +1,4 @@
 //
-// SceneData.h
-//
 // Clark Kromenaker
 //
 // The logic in GK3 for what scene assets should be loaded and used for

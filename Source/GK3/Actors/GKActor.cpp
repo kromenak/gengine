@@ -56,7 +56,7 @@ GKActor::GKActor(Model* model) : GKActor()
 GKActor::GKActor(const SceneActor& actorDef) : GKActor(actorDef.model)
 {
     // Set noun (GABRIEL, GRACE, etc).
-     // For debugging help, we'll also set the Actor name field to the noun.
+    // For debugging help, we'll also set the Actor name field to the noun.
     SetNoun(actorDef.noun);
     SetName(actorDef.noun);
 
@@ -213,7 +213,7 @@ void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finish
 	if(anim == nullptr) { return; }
 	
 	// GOAL: walk the actor to the initial position/rotation of this anim.
-	// Retrieve vertex animation from animation that matches this actor's model.
+	// Retrieve vertex animation that matches this actor's model.
 	// If no vertex anim exists, we can't walk to animation start! This is probably a developer error.
     VertexAnimNode* vertexAnimNode = anim->GetVertexAnimationOnFrameForModel(0, mMeshRenderer->GetModelName());
 	if(vertexAnimNode == nullptr) { return; }
@@ -223,7 +223,7 @@ void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finish
     Vector3 walkPos = vertexAnimNode->vertexAnimation->SampleVertexPosition(0, mCharConfig->hipAxesMeshIndex, mCharConfig->hipAxesGroupIndex, mCharConfig->hipAxesPointIndex);
     VertexAnimationTransformPose transformPose = vertexAnimNode->vertexAnimation->SampleTransformPose(0, mCharConfig->hipAxesMeshIndex);
 
-    // If this is an absolute animation, the above position needs to be further converted to world space.
+    // If this is an absolute animation, the above position needs to be converted to world space.
     Matrix4 transformMatrix = transformPose.mMeshToLocalMatrix;
     if(vertexAnimNode->absolute)
     {
@@ -266,7 +266,7 @@ void GKActor::SnapToFloor()
     if(scene != nullptr)
     {
         Vector3 pos = GetPosition();
-        pos.y = scene->GetFloorY(pos) + mCharConfig->shoeThickness;
+        pos.y = scene->GetFloorY(pos);
         SetPosition(pos);
     }
 }
@@ -343,7 +343,7 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
         mModelActor->SetPosition(animParams.absolutePosition);
         mModelActor->SetRotation(animParams.absoluteHeading.ToQuaternion());
     }
-
+    
     // For relative anims, move model to match actor's position/rotation.
     if(!animParams.absolute)
     {
@@ -422,10 +422,30 @@ Vector3 GKActor::GetModelPosition()
     // To do this, multiply the mesh->local with local->world to get a mesh->world matrix for transforming.
     Vector3 meshHipPos = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
     Vector3 worldHipPos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshHipPos);
+
+    // Get left/right shoe positions.
+    Vector3 meshLeftShoePos = mMeshRenderer->GetMesh(mCharConfig->leftShoeAxesMeshIndex)->GetSubmesh(mCharConfig->leftShoeAxesGroupIndex)->GetVertexPosition(mCharConfig->leftShoeAxesPointIndex);
+    Vector3 worldLeftShoePos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->leftShoeAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshLeftShoePos);
+
+    Vector3 meshRightShoePos = mMeshRenderer->GetMesh(mCharConfig->rightShoeAxesMeshIndex)->GetSubmesh(mCharConfig->rightShoeAxesGroupIndex)->GetVertexPosition(mCharConfig->rightShoeAxesPointIndex);
+    Vector3 worldRightShoePos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->rightShoeAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshRightShoePos);
+
+    Debug::DrawLine(worldHipPos, worldLeftShoePos, Color32::Cyan);
+    Debug::DrawLine(worldHipPos, worldRightShoePos, Color32::Red);
+    //Debug::DrawLine(worldLeftShoePos, worldRightShoePos, Color32::Magenta);
     
-    // Hips are not at floor level, but we want position at floor level.
-    worldHipPos.y = mModelActor->GetTransform()->GetLocalToWorldMatrix().TransformPoint(Vector3::Zero).y;
-    return worldHipPos;
+    // Use left/right shoe positions to determine our floor position.
+    // We're assuming that the actor's lowest foot, minus show thickness, is the floor height.
+    Vector3 floorPos = worldHipPos;
+    floorPos.y = Math::Min(worldLeftShoePos.y, worldRightShoePos.y);
+    floorPos.y -= mCharConfig->shoeThickness;
+
+    Vector3 leftShoeToHips = worldHipPos - worldLeftShoePos;
+    Vector3 rightShoeToHips = worldHipPos - worldRightShoePos;
+    Vector3 modelForward = Vector3::Normalize(Vector3::Cross(rightShoeToHips, leftShoeToHips));
+    Debug::DrawLine(floorPos, floorPos + modelForward * 5, Color32::Magenta);
+
+    return floorPos;
 }
 
 Quaternion GKActor::GetModelRotation()
@@ -439,12 +459,10 @@ void GKActor::SyncModelToActor()
 {
     // Move model to actor's position.
     Vector3 modelOffset = mModelActor->GetPosition() - GetModelPosition();
-    /*
-    if(modelOffset.GetLength() > 1.0f)
-    {
-        Debug::DrawLine(mModelActor->GetPosition(), mModelActor->GetPosition() + modelOffset, Color32::Red, 30.0f);
-    }
-    */
+    //if(modelOffset.GetLength() > 1.0f)
+    //{
+    //    Debug::DrawLine(mModelActor->GetPosition(), mModelActor->GetPosition() + modelOffset, Color32::Red, 30.0f);
+    //}
     mModelActor->SetPosition(GetPosition() + modelOffset);
 
     // Rotate model to actor's rotation.
@@ -457,23 +475,20 @@ void GKActor::SyncModelToActor()
     // Save new baseline model position/rotation.
     mLastModelPosition = GetModelPosition();
     mLastModelRotation = GetModelRotation();
-
-    //std::cout << "Sync Model to Actor; actorPos=" << GetPosition() << ", modelPos=" << mModelActor->GetPosition() << std::endl;
 }
 
 void GKActor::SyncActorToModel()
 {
     // See how much model has moved since last check and translate actor to match.
     Vector3 modelPosition = GetModelPosition();
-    Vector3 modelOffset = modelPosition - mLastModelPosition;
-    /*
-    if(modelOffset.GetLength() > 1.0f)
-    {
-        Debug::DrawLine(mLastModelPosition, mLastModelPosition + Vector3::UnitY * 50.0f, Color32::Blue, 30.0f);
-        Debug::DrawLine(modelPosition, modelPosition + Vector3::UnitY * 100.0f, Color32::Blue, 30.0f);
-    }
-    */
-    GetTransform()->Translate(modelOffset);
+    GetTransform()->SetPosition(modelPosition);
+    //Vector3 modelOffset = modelPosition - mLastModelPosition;
+    //GetTransform()->Translate(modelOffset);
+    //if(modelOffset.GetLength() > 1.0f)
+    //{
+    //    Debug::DrawLine(mLastModelPosition, mLastModelPosition + Vector3::UnitY * 50.0f, Color32::Blue, 30.0f);
+    //    Debug::DrawLine(modelPosition, modelPosition + Vector3::UnitY * 100.0f, Color32::Blue, 30.0f);
+    //}
     
     // See how much mesh has rotated and translate actor to match.
     Quaternion modelRotation = GetModelRotation();

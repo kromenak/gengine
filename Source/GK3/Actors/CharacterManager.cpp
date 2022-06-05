@@ -72,7 +72,7 @@ CharacterManager::CharacterManager()
                     {
                         config.hipAxesPointIndex = entry.GetValueAsInt();
                     }
-                    else if(StringUtil::EqualsIgnoreCase(entry.key, "LShoeAxisMeshIndex"))
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "LShoeAxesMeshIndex"))
                     {
                         config.leftShoeAxesMeshIndex = entry.GetValueAsInt();
                     }
@@ -84,7 +84,7 @@ CharacterManager::CharacterManager()
                     {
                         config.leftShoeAxesPointIndex = entry.GetValueAsInt();
                     }
-                    else if(StringUtil::EqualsIgnoreCase(entry.key, "RShoeAxisMeshIndex"))
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "RShoeAxesMeshIndex"))
                     {
                         config.rightShoeAxesMeshIndex = entry.GetValueAsInt();
                     }

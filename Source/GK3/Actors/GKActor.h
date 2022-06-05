@@ -56,7 +56,6 @@ public:
 	void WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback);
 	void WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback);
     
-
     Vector3 GetWalkDestination() const;
     bool AtPosition(const Vector3& position) { return mWalker->AtPosition(position); }
     bool IsWalking() const { return mWalker->IsWalking(); }
@@ -86,15 +85,15 @@ private:
 	// The character's configuration, which defines helpful parameters for controlling the actor.
 	const CharacterConfig* mCharConfig = nullptr;
 
-    // The fidget the actor is currently playing.
-    FidgetType mActiveFidget = FidgetType::None;
-	
 	// The actor's walking control.
 	Walker* mWalker = nullptr;
 	
 	// The actor's face control.
 	FaceController* mFaceController = nullptr;
     
+    // The fidget the actor is currently playing.
+    FidgetType mActiveFidget = FidgetType::None;
+
     // GAS scripts to use when actor is idle, talking, or listening.
     GAS* mIdleFidget = nullptr;
     GAS* mTalkFidget = nullptr;

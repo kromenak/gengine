@@ -1,6 +1,4 @@
 //
-// VertexAnimator.h
-//
 // Clark Kromenaker
 //
 // A component that can play vertex animations on an actor.
