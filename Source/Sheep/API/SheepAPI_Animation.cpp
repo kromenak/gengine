@@ -58,7 +58,11 @@ shpvoid StartMoveAnimation(const std::string& animationName)
     Animation* animation = Services::GetAssets()->LoadAnimation(animationName);
     if(animation != nullptr)
     {
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, AddWait());
+        AnimParams animParams;
+        animParams.animation = animation;
+        animParams.allowMove = true;
+        animParams.finishCallback = AddWait();
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
     }
     return 0;
 }
