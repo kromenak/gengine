@@ -57,8 +57,8 @@ struct VertexAnimNode : public AnimNode
     float absoluteModelToActorHeading = 0.0f;
 	
 	void Play(AnimationState* animState) override;
-	void Stop() override;
-	void Sample(Animation* anim, int frame) override;
+    void Sample(Animation* anim, int frame) override;
+    void Stop() override;
     
     bool PlayDuringCatchup() override { return true; }
 

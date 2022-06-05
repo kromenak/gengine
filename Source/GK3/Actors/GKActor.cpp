@@ -367,12 +367,29 @@ void GKActor::SampleAnimation(VertexAnimParams& animParams, int frame)
     // Sample the animation on the desired frame.
     mVertexAnimator->Sample(animParams.vertexAnimation, frame);
 
-    // Sampling the animation may have caused our model to be repositioned or whatnot.
-    // So, update last model position here.
-    //TODO: It feels wrong that you only update position and not rotation...
-    //TODO: But this is the only way that LHO and EST appear in the right spot in MS3???
-    mLastModelPosition = GetModelPosition();
-    //mLastModelRotation = GetModelRotation();
+    // For absolute anims, position model exactly as specified.
+    if(animParams.absolute)
+    {
+        mModelActor->SetPosition(animParams.absolutePosition);
+        mModelActor->SetRotation(animParams.absoluteHeading.ToQuaternion());
+    }
+
+    // For relative anims, move model to match actor's position/rotation.
+    if(!animParams.absolute)
+    {
+        SyncModelToActor();
+    }
+
+    // In GK3, a "move" anim is one that is allowed to move the actor. This is like "root motion" in modern engines.
+    // When "move" anim ends, the actor/mesh stay where they are. For "non-move" anims, actor/mesh revert to initial pos/rot.
+    // Interestingly, the actor still moves with the model during non-move anims...it just reverts at the end.
+    mVertexAnimAllowMove = animParams.allowMove;
+    if(!mVertexAnimAllowMove)
+    {
+        // Save start pos/rot for the actor, so it can be reverted.
+        mStartVertexAnimPosition = GetPosition();
+        mStartVertexAnimRotation = GetRotation();
+    }
 }
 
 void GKActor::StopAnimation(VertexAnimation* anim)

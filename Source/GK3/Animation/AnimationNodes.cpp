@@ -65,6 +65,35 @@ void VertexAnimNode::Play(AnimationState* animState)
 	}
 }
 
+void VertexAnimNode::Sample(Animation* anim, int frame)
+{
+    if(vertexAnimation != nullptr)
+    {
+        GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+        if(obj != nullptr)
+        {
+            VertexAnimParams params;
+            params.vertexAnimation = vertexAnimation;
+            //params.framesPerSecond?
+
+            // If this is an absolute anim, calculate the position/heading to set the model actor to when the anim plays.
+            params.absolute = absolute;
+            if(absolute)
+            {
+                params.absolutePosition = CalcAbsolutePosition();
+                params.absoluteHeading = Heading::FromDegrees(absoluteWorldToModelHeading - absoluteModelToActorHeading);
+            }
+
+            // Move anims allow the actor associated with the model to stay in its final position when the animation ends, instead of reverting.
+            // Absolute anims are always "move anims".
+            params.allowMove = absolute;
+
+            // Sample the anim.
+            obj->SampleAnimation(params, frame);
+        }
+    }
+}
+
 void VertexAnimNode::Stop()
 {
 	if(vertexAnimation != nullptr)
@@ -73,20 +102,6 @@ void VertexAnimNode::Stop()
 		if(obj != nullptr)
 		{
             obj->StopAnimation(vertexAnimation);
-		}
-	}
-}
-
-void VertexAnimNode::Sample(Animation* anim, int frame)
-{
-	if(vertexAnimation != nullptr)
-	{
-        GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
-		if(obj != nullptr)
-		{
-            VertexAnimParams params;
-            params.vertexAnimation = vertexAnimation;
-            obj->SampleAnimation(params, frame);
 		}
 	}
 }
