@@ -75,6 +75,8 @@ public:
     void SampleAnimation(VertexAnimParams& animParams, int frame) override;
     void StopAnimation(VertexAnimation* anim = nullptr) override;
     MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
+
+    const CharacterConfig* GetConfig() const { return mCharConfig; }
 	
 protected:
     void OnActive() override;

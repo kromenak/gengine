@@ -29,16 +29,16 @@ void FaceController::SetCharacterConfig(const CharacterConfig& characterConfig)
 {
 	// Save character config.
 	mCharacterConfig = &characterConfig;
-	
+
 	// Save reference to face texture.
-	mFaceTexture = mCharacterConfig->faceConfig.faceTexture;
+	mFaceTexture = mCharacterConfig->faceConfig->faceTexture;
 	
 	// Grab references to default mouth/eyelids/forehead textures.
-	mDefaultMouthTexture = Services::GetAssets()->LoadTexture(mCharacterConfig->identifier + "_MOUTH00");
-	mDefaultEyelidsTexture = mCharacterConfig->faceConfig.eyelidsTexture;
-	mDefaultForeheadTexture = mCharacterConfig->faceConfig.foreheadTexture;
-	mDefaultLeftEyeTexture = mCharacterConfig->faceConfig.leftEyeTexture;
-	mDefaultRightEyeTexture = mCharacterConfig->faceConfig.rightEyeTexture;
+    mDefaultMouthTexture = mCharacterConfig->faceConfig->mouthTexture;
+	mDefaultEyelidsTexture = mCharacterConfig->faceConfig->eyelidsTexture;
+	mDefaultForeheadTexture = mCharacterConfig->faceConfig->foreheadTexture;
+	mDefaultLeftEyeTexture = mCharacterConfig->faceConfig->leftEyeTexture;
+	mDefaultRightEyeTexture = mCharacterConfig->faceConfig->rightEyeTexture;
 	
 	// Currents are just the defaults...uhh, by default.
 	mCurrentMouthTexture = mDefaultMouthTexture;
@@ -170,13 +170,13 @@ void FaceController::Blink()
 		// Each blink anim has a probability between 0 and 100.
 		// So, we use this to decide which one to do.
 		int rand = Random::Range(0, 101);
-		if(rand < mCharacterConfig->faceConfig.blinkAnim1Probability)
+		if(rand < mCharacterConfig->faceConfig->blinkAnim1Probability)
 		{
-			blinkAnim = mCharacterConfig->faceConfig.blinkAnim1;
+			blinkAnim = mCharacterConfig->faceConfig->blinkAnim1;
 		}
 		else
 		{
-			blinkAnim = mCharacterConfig->faceConfig.blinkAnim2;
+			blinkAnim = mCharacterConfig->faceConfig->blinkAnim2;
 		}
 	}
 	
@@ -186,10 +186,10 @@ void FaceController::Blink()
 
 void FaceController::Blink(const std::string& animName)
 {
-	Animation* blinkAnim = mCharacterConfig->faceConfig.blinkAnim1;
+	Animation* blinkAnim = mCharacterConfig->faceConfig->blinkAnim1;
 	if(!StringUtil::EqualsIgnoreCase(blinkAnim->GetNameNoExtension(), animName))
 	{
-		blinkAnim = mCharacterConfig->faceConfig.blinkAnim2;
+		blinkAnim = mCharacterConfig->faceConfig->blinkAnim2;
 		if(!StringUtil::EqualsIgnoreCase(blinkAnim->GetNameNoExtension(), animName))
 		{
 			//TODO: This seems to be an AssetManager-level warning?
@@ -217,10 +217,10 @@ void FaceController::EyeJitter()
 	//TODO: This eye jitter behavior doesn't seem quite right...
 	//TODO: Maybe I have to limit x/y between max, but ALSO only allow at most 2px movement each time?
 	//TODO: Or something else...anyway, it can definitely be better.
-	float maxX = mCharacterConfig->faceConfig.maxEyeJitterDistance.x;
+	float maxX = mCharacterConfig->faceConfig->maxEyeJitterDistance.x;
 	mEyeJitterX = Random::Range(-maxX, maxX);
 	
-	float maxY = mCharacterConfig->faceConfig.maxEyeJitterDistance.y;
+	float maxY = mCharacterConfig->faceConfig->maxEyeJitterDistance.y;
 	mEyeJitterY = Random::Range(-maxY, maxY);
 	
 	UpdateFaceTexture();
@@ -230,7 +230,7 @@ void FaceController::DoExpression(const std::string& expression)
 {
 	// Expressions are named as combination of identifier and expression string.
 	// E.g. Gabriel Frown becomes GABFROWN.ANM.
-	std::string animName = mCharacterConfig->identifier + expression;
+	std::string animName = mCharacterConfig->faceConfig->identifier + expression;
 	Animation* animation = Services::GetAssets()->LoadAnimation(animName);
 	if(animation != nullptr)
 	{
@@ -246,8 +246,8 @@ void FaceController::DoExpression(const std::string& expression)
 
 void FaceController::SetMood(const std::string& mood)
 {
-	std::string moodOnName = mCharacterConfig->identifier + mood + "on";
-	std::string moodOffName = mCharacterConfig->identifier + mood + "off";
+	std::string moodOnName = mCharacterConfig->faceConfig->identifier + mood + "on";
+	std::string moodOffName = mCharacterConfig->faceConfig->identifier + mood + "off";
 	
 	// Make sure mood animations exist.
 	Animation* enterAnimation = Services::GetAssets()->LoadAnimation(moodOnName);
@@ -309,7 +309,7 @@ void FaceController::RollBlinkTimer()
 	int waitMs = 8000;
 	if(mCharacterConfig != nullptr)
 	{
-		const Vector2& blinkFrequency = mCharacterConfig->faceConfig.blinkFrequency;
+		const Vector2& blinkFrequency = mCharacterConfig->faceConfig->blinkFrequency;
 		waitMs = Random::Range((int)blinkFrequency.x, (int)blinkFrequency.y);
 	}
 	
@@ -323,7 +323,7 @@ void FaceController::RollEyeJitterTimer()
 	int waitMs = 0;
 	if(mCharacterConfig != nullptr)
 	{
-		const Vector2& jitterFrequency = mCharacterConfig->faceConfig.eyeJitterFrequency;
+		const Vector2& jitterFrequency = mCharacterConfig->faceConfig->eyeJitterFrequency;
 		waitMs = Random::Range((int)jitterFrequency.x, (int)jitterFrequency.y);
 	}
 	
@@ -339,7 +339,7 @@ void FaceController::UpdateFaceTexture()
 	// Copy mouth texture.
 	if(mCurrentMouthTexture != nullptr)
 	{
-		const Vector2& mouthOffset = mCharacterConfig->faceConfig.mouthOffset;
+		const Vector2& mouthOffset = mCharacterConfig->faceConfig->mouthOffset;
 		Texture::BlendPixels(*mCurrentMouthTexture, *mFaceTexture, mouthOffset.x, mouthOffset.y);
 	}
 		
@@ -349,7 +349,7 @@ void FaceController::UpdateFaceTexture()
         Vector2 offset;
         DownsampleEyeTexture(mCurrentLeftEyeTexture, mDownsampledLeftEyeTexture, offset);
 
-		const Vector2& leftEyeOffset = mCharacterConfig->faceConfig.leftEyeOffset;
+		const Vector2& leftEyeOffset = mCharacterConfig->faceConfig->leftEyeOffset;
 		Texture::BlendPixels(*mDownsampledLeftEyeTexture, *mFaceTexture, leftEyeOffset.x, leftEyeOffset.y);
 	}
 	
@@ -359,21 +359,21 @@ void FaceController::UpdateFaceTexture()
         Vector2 offset;
         DownsampleEyeTexture(mCurrentRightEyeTexture, mDownsampledRightEyeTexture, offset);
 
-		const Vector2& rightEyeOffset = mCharacterConfig->faceConfig.rightEyeOffset;
+		const Vector2& rightEyeOffset = mCharacterConfig->faceConfig->rightEyeOffset;
 		Texture::BlendPixels(*mDownsampledRightEyeTexture, *mFaceTexture, rightEyeOffset.x, rightEyeOffset.y);
 	}
 	
 	// Copy eyelids texture.
 	if(mCurrentEyelidsTexture != nullptr)
 	{
-		const Vector2& eyelidsOffset = mCharacterConfig->faceConfig.eyelidsOffset;
+		const Vector2& eyelidsOffset = mCharacterConfig->faceConfig->eyelidsOffset;
 		Texture::BlendPixels(*mCurrentEyelidsTexture, *mFaceTexture, eyelidsOffset.x, eyelidsOffset.y);
 	}
 	
 	// Copy forehead texture.
 	if(mCurrentForeheadTexture != nullptr)
 	{
-		const Vector2& foreheadOffset = mCharacterConfig->faceConfig.foreheadOffset;
+		const Vector2& foreheadOffset = mCharacterConfig->faceConfig->foreheadOffset;
 		Texture::BlendPixels(*mCurrentForeheadTexture, *mFaceTexture, foreheadOffset.x, foreheadOffset.y);
 	}
 		

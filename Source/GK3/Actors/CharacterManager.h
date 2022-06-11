@@ -20,10 +20,13 @@ class Texture;
 
 struct FaceConfig
 {
+    std::string identifier;
+
 	// Default textures for face/eyelids/forehead.
 	Texture* faceTexture = nullptr;
 	Texture* eyelidsTexture = nullptr;
 	Texture* foreheadTexture = nullptr;
+    Texture* mouthTexture = nullptr;
 	
 	// Left and right eye textures.
 	Texture* leftEyeTexture = nullptr;
@@ -116,8 +119,8 @@ struct CharacterConfig
 	
 	Animation* walkLoopAnim = nullptr;
 	Animation* walkStopAnim = nullptr;
-	
-	FaceConfig faceConfig;
+
+    FaceConfig* faceConfig = nullptr;
 
     // Characters can have up to three "sets of clothes."
     // The clothes anim will perform texture swaps on the model.
@@ -142,9 +145,15 @@ private:
 	// Set of valid nouns referring to characters.
 	// Used to verify sheep commands are valid.
 	std::set<std::string> mCharacterNouns;
-	
+
+    // Face configs, keyed by the 3-letter "face" identifiers.
+    // Usually, the face identifier is equal to the character identifer (e.g. GAB/GAB, GRA/GRA).
+    // However, they can differ for character variants - e.g. MO2 (Mosely w/ Newspaper) uses face MOS.
+    std::string_map_ci<FaceConfig> mFaceConfigs;
+    FaceConfig mDefaultFaceConfig;
+
 	// Character configs, keyed by the 3-letter character identifier.
-	std::unordered_map_ci<std::string, CharacterConfig> mCharacterConfigs;
+	std::string_map_ci<CharacterConfig> mCharacterConfigs;
 	
 	// A default character config, in case you request one that doesn't exist.
 	CharacterConfig mDefaultCharacterConfig;

@@ -11,22 +11,230 @@ TYPE_DEF_BASE(CharacterManager);
 CharacterManager::CharacterManager()
 {
     Loader::Load([this]() {
-        // Read in info about characters.
+
+        // Read in faces first, as character configs reference these.
+        {
+            // Get FACES text file as a raw buffer.
+            TextAsset* textFile = Services::GetAssets()->LoadText("FACES.TXT");
+
+            // Pass that along to INI parser, since it is plain text and in INI format.
+            IniParser facesParser(textFile->GetText(), textFile->GetTextLength());
+            facesParser.SetMultipleKeyValuePairsPerLine(false); // Stops splitting on commas.
+
+            // All face configs start from this template.
+            // Note that the DEFAULTS section occurs before any face config instance, so that's why this works.
+            FaceConfig defaultFaceConfig;
+
+            // Read in each section of the FACES file.
+            IniSection section;
+            while(facesParser.ReadNextSection(section))
+            {
+                // Default section contains some values to use if not defined for a particular character.
+                if(StringUtil::EqualsIgnoreCase(section.name, "Default"))
+                {
+                    for(auto& line : section.lines)
+                    {
+                        IniKeyValue& entry = line.entries.front();
+                        if(StringUtil::EqualsIgnoreCase(entry.key, "Max Look Distance"))
+                        {
+                            defaultFaceConfig.maxEyeLookDistance = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Jitter Frequency"))
+                        {
+                           defaultFaceConfig.eyeJitterFrequency = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Jitter Distance"))
+                        {
+                            defaultFaceConfig.maxEyeJitterDistance = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Field of View"))
+                        {
+                            defaultFaceConfig.eyeFieldOfView = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Short Field of View"))
+                        {
+                            defaultFaceConfig.eyeShortFieldOfView = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Separation"))
+                        {
+                            defaultFaceConfig.eyeSeparation = entry.GetValueAsFloat();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Radius"))
+                        {
+                            defaultFaceConfig.headRadius = entry.GetValueAsFloat();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Center Offset"))
+                        {
+                            defaultFaceConfig.headCenterOffset = entry.GetValueAsVector3();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Frequency"))
+                        {
+                            defaultFaceConfig.blinkFrequency = entry.GetValueAsVector2();
+                        }
+                    }
+
+                    // Save as a fallback for characters who don't have faces defined for one reason or another.
+                    mDefaultFaceConfig = defaultFaceConfig;
+                }
+                else if(StringUtil::EqualsIgnoreCase(section.name, "Eyes"))
+                {
+                    // Eyes section contains eye definitions.
+                    // But they are all the same...<bitmap> = 4x4, DownSampleOnly
+                    // No need to read in.
+                }
+                else
+                {
+                    // Must be an instance of a face config.
+                    auto it = mFaceConfigs.emplace(section.name, defaultFaceConfig).first; // returns pair (iterator, bool)
+                    FaceConfig& faceConfig = it->second;
+                    faceConfig.identifier = section.name;
+
+                    // First, try to load the entry's face/eyelid/forehead textures.
+                    // These are derived from the section name.
+                    faceConfig.faceTexture = Services::GetAssets()->LoadSceneTexture(section.name + "_face");
+                    faceConfig.eyelidsTexture = Services::GetAssets()->LoadTexture(section.name + "_eyelids");
+                    faceConfig.foreheadTexture = Services::GetAssets()->LoadTexture(section.name + "_forehead");
+                    faceConfig.mouthTexture = Services::GetAssets()->LoadTexture(section.name + "_mouth00");
+
+                    // Each entry is a face property for the character.
+                    for(auto& line : section.lines)
+                    {
+                        IniKeyValue& entry = line.entries.front();
+                        if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Name"))
+                        {
+                            faceConfig.leftEyeTexture = Services::GetAssets()->LoadTexture(entry.value);
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Name"))
+                        {
+                            faceConfig.rightEyeTexture = Services::GetAssets()->LoadTexture(entry.value);
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Offset"))
+                        {
+                            faceConfig.leftEyeOffset = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Offset"))
+                        {
+                            faceConfig.rightEyeOffset = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Bias"))
+                        {
+                            faceConfig.leftEyeBias = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Bias"))
+                        {
+                            faceConfig.rightEyeBias = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Look Distance"))
+                        {
+                            faceConfig.maxEyeLookDistance = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Jitter Frequency"))
+                        {
+                            faceConfig.eyeJitterFrequency = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Jitter Distance"))
+                        {
+                            faceConfig.maxEyeLookDistance = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Field of View"))
+                        {
+                            faceConfig.eyeFieldOfView = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Short Field of View"))
+                        {
+                            faceConfig.eyeShortFieldOfView = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Separation"))
+                        {
+                            faceConfig.eyeSeparation = entry.GetValueAsFloat();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Radius"))
+                        {
+                            faceConfig.headRadius = entry.GetValueAsFloat();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Center Offset"))
+                        {
+                            faceConfig.headCenterOffset = entry.GetValueAsVector3();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Forehead Offset"))
+                        {
+                            faceConfig.foreheadOffset = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eyelids Offset"))
+                        {
+                            faceConfig.eyelidsOffset = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eyelids Alpha Channel"))
+                        {
+                            faceConfig.eyelidsAlphaChannel = Services::GetAssets()->LoadTexture(entry.value);
+
+                            // If we have eyelids and an alpha channel, just apply it right away, why not?
+                            if(faceConfig.eyelidsTexture != nullptr && faceConfig.eyelidsAlphaChannel != nullptr)
+                            {
+                                faceConfig.eyelidsTexture->ApplyAlphaChannel(*faceConfig.eyelidsAlphaChannel);
+                            }
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Anims"))
+                        {
+                            // Value will be a comma-separated list of elements. Gotta split them up.
+                            std::vector<std::string> tokens = StringUtil::Split(entry.value, ',');
+
+                            // First element is an animation name, second is a probability, and so on.
+                            // Technically, I think the system was meant to support a variable-sized list of anims and probabilities.
+                            // But in practice, it seems to only have ever supported 2 blink anims per character.
+                            for(int i = 0; i < tokens.size(); i += 2)
+                            {
+                                if(i == 0)
+                                {
+                                    faceConfig.blinkAnim1 = Services::GetAssets()->LoadAnimation(tokens[i]);
+                                    faceConfig.blinkAnim1Probability = (i + 1 < tokens.size()) ? StringUtil::ToInt(tokens[i + 1]) : 0;
+                                }
+                                else
+                                {
+                                    faceConfig.blinkAnim2 = Services::GetAssets()->LoadAnimation(tokens[i]);
+                                    faceConfig.blinkAnim2Probability = (i + 1 < tokens.size()) ? StringUtil::ToInt(tokens[i + 1]) : 0;
+                                }
+                            }
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Frequency"))
+                        {
+                            faceConfig.blinkFrequency = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Mouth Offset"))
+                        {
+                            faceConfig.mouthOffset = entry.GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Mouth Size"))
+                        {
+                            faceConfig.mouthSize = entry.GetValueAsVector2();
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Read in characters.
         {
             // Get CHARACTERS text file as a raw buffer.
             TextAsset* textFile = Services::GetAssets()->LoadText("CHARACTERS.TXT");
 
             // Pass that along to INI parser, since it is plain text and in INI format.
             IniParser parser(textFile->GetText(), textFile->GetTextLength());
-
+            
             // Read one section at a time.
             // Each section correlates to one character.
             // The section name is the character's three-letter code (GAB, ABE, GRA, etc).
             IniSection section;
             while(parser.ReadNextSection(section))
             {
-                CharacterConfig config;
+                auto it = mCharacterConfigs.emplace(section.name, CharacterConfig()).first;
+
+                CharacterConfig& config = it->second;
                 config.identifier = section.name;
+
+                // Use character identifier as face identifier, by default.
+                // An override may be specified while parsing this section.
+                std::string faceIdentifer = config.identifier;
 
                 // Each entry in a section is some property about the character.
                 for(auto& line : section.lines)
@@ -112,230 +320,22 @@ CharacterManager::CharacterManager()
                             }
                         }
                     }
-                }
-
-                // Key each config by its identifier.
-                mCharacterConfigs[config.identifier] = config;
-            }
-        }
-
-        // Read in info about character faces.
-        {
-            // Get FACES text file as a raw buffer.
-            TextAsset* textFile = Services::GetAssets()->LoadText("FACES.TXT");
-
-            // Pass that along to INI parser, since it is plain text and in INI format.
-            IniParser facesParser(textFile->GetText(), textFile->GetTextLength());
-            facesParser.SetMultipleKeyValuePairsPerLine(false); // Stops splitting on commas.
-
-            // Read in each section of the FACES file.
-            IniSection section;
-            while(facesParser.ReadNextSection(section))
-            {
-                // Default section contains some values to use if not defined for a particular character.
-                if(StringUtil::EqualsIgnoreCase(section.name, "Default"))
-                {
-                    // Some variables to hold defaults.
-                    Vector2 maxEyeLookDistanceDefault;
-                    Vector2 eyeJitterFrequencyDefault;
-                    Vector2 maxEyeJitterDistanceDefault;
-                    Vector2 eyeFieldOfViewDefault;
-                    Vector2 eyeShortFieldOfViewDefault;
-                    float eyeSeparationDefault = 0.0f;
-                    float headRadiusDefault = 0.0f;
-                    Vector3 headCenterOffsetDefault;
-                    Vector2 blinkFrequencyDefault;
-
-                    // Read in default values.
-                    for(auto& line : section.lines)
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "MouthName"))
                     {
-                        IniKeyValue& entry = line.entries.front();
-                        if(StringUtil::EqualsIgnoreCase(entry.key, "Max Look Distance"))
-                        {
-                            maxEyeLookDistanceDefault = entry.GetValueAsVector2();
-                        }
-                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Jitter Frequency"))
-                        {
-                            eyeJitterFrequencyDefault = entry.GetValueAsVector2();
-                        }
-                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Jitter Distance"))
-                        {
-                            maxEyeJitterDistanceDefault = entry.GetValueAsVector2();
-                        }
-                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Field of View"))
-                        {
-                            eyeFieldOfViewDefault = entry.GetValueAsVector2();
-                        }
-                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Short Field of View"))
-                        {
-                            eyeShortFieldOfViewDefault = entry.GetValueAsVector2();
-                        }
-                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Separation"))
-                        {
-                            eyeSeparationDefault = entry.GetValueAsFloat();
-                        }
-                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Radius"))
-                        {
-                            headRadiusDefault = entry.GetValueAsFloat();
-                        }
-                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Center Offset"))
-                        {
-                            headCenterOffsetDefault = entry.GetValueAsVector3();
-                        }
-                        else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Frequency"))
-                        {
-                            blinkFrequencyDefault = entry.GetValueAsVector2();
-                        }
-                    }
-
-                    // Apply defaults to all character face configs.
-                    for(auto& pair : mCharacterConfigs)
-                    {
-                        CharacterConfig& config = pair.second;
-                        config.faceConfig.maxEyeLookDistance = maxEyeLookDistanceDefault;
-                        config.faceConfig.eyeJitterFrequency = eyeJitterFrequencyDefault;
-                        config.faceConfig.maxEyeJitterDistance = maxEyeJitterDistanceDefault;
-                        config.faceConfig.eyeFieldOfView = eyeFieldOfViewDefault;
-                        config.faceConfig.eyeShortFieldOfView = eyeShortFieldOfViewDefault;
-                        config.faceConfig.eyeSeparation = eyeSeparationDefault;
-                        config.faceConfig.headRadius = headRadiusDefault;
-                        config.faceConfig.headCenterOffset = headCenterOffsetDefault;
-                        config.faceConfig.blinkFrequency = blinkFrequencyDefault;
+                        faceIdentifer = entry.value;
                     }
                 }
-                else if(StringUtil::EqualsIgnoreCase(section.name, "Eyes"))
+
+                // Try to assign a face config.
+                auto faceIt = mFaceConfigs.find(faceIdentifer);
+                if(faceIt != mFaceConfigs.end())
                 {
-                    // Eyes section contains eye definitions.
-                    // But they are all the same...<bitmap> = 4x4, DownSampleOnly
-                    // No need to read in.
+                    config.faceConfig = &faceIt->second;
                 }
                 else
                 {
-                    // If the section name matches a character identifier, this section is the face info for that character!
-                    auto it = mCharacterConfigs.find(section.name);
-                    if(it != mCharacterConfigs.end())
-                    {
-                        // First, try to load the entry's face/eyelid/forehead textures.
-                        // These are derived from the section name.
-                        CharacterConfig& config = it->second;
-                        config.faceConfig.faceTexture = Services::GetAssets()->LoadSceneTexture(section.name + "_face");
-                        config.faceConfig.eyelidsTexture = Services::GetAssets()->LoadTexture(section.name + "_eyelids");
-                        config.faceConfig.foreheadTexture = Services::GetAssets()->LoadTexture(section.name + "_forehead");
-
-                        // Each entry is a face property for the character.
-                        for(auto& line : section.lines)
-                        {
-                            IniKeyValue& entry = line.entries.front();
-                            if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Name"))
-                            {
-                                config.faceConfig.leftEyeTexture = Services::GetAssets()->LoadTexture(entry.value);
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Name"))
-                            {
-                                config.faceConfig.rightEyeTexture = Services::GetAssets()->LoadTexture(entry.value);
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Offset"))
-                            {
-                                config.faceConfig.leftEyeOffset = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Offset"))
-                            {
-                                config.faceConfig.rightEyeOffset = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Bias"))
-                            {
-                                config.faceConfig.leftEyeBias = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Bias"))
-                            {
-                                config.faceConfig.rightEyeBias = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Look Distance"))
-                            {
-                                config.faceConfig.maxEyeLookDistance = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Jitter Frequency"))
-                            {
-                                config.faceConfig.eyeJitterFrequency = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Jitter Distance"))
-                            {
-                                config.faceConfig.maxEyeLookDistance = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Field of View"))
-                            {
-                                config.faceConfig.eyeFieldOfView = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Short Field of View"))
-                            {
-                                config.faceConfig.eyeShortFieldOfView = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Separation"))
-                            {
-                                config.faceConfig.eyeSeparation = entry.GetValueAsFloat();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Radius"))
-                            {
-                                config.faceConfig.headRadius = entry.GetValueAsFloat();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Head Center Offset"))
-                            {
-                                config.faceConfig.headCenterOffset = entry.GetValueAsVector3();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Forehead Offset"))
-                            {
-                                config.faceConfig.foreheadOffset = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Eyelids Offset"))
-                            {
-                                config.faceConfig.eyelidsOffset = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Eyelids Alpha Channel"))
-                            {
-                                config.faceConfig.eyelidsAlphaChannel = Services::GetAssets()->LoadTexture(entry.value);
-
-                                // If we have eyelids and an alpha channel, just apply it right away, why not?
-                                if(config.faceConfig.eyelidsTexture != nullptr && config.faceConfig.eyelidsAlphaChannel != nullptr)
-                                {
-                                    config.faceConfig.eyelidsTexture->ApplyAlphaChannel(*config.faceConfig.eyelidsAlphaChannel);
-                                }
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Anims"))
-                            {
-                                // Value will be a comma-separated list of elements. Gotta split them up.
-                                std::vector<std::string> tokens = StringUtil::Split(entry.value, ',');
-
-                                // First element is an animation name, second is a probability, and so on.
-                                // Technically, I think the system was meant to support a variable-sized list of anims and probabilities.
-                                // But in practice, it seems to only have ever supported 2 blink anims per character.
-                                for(int i = 0; i < tokens.size(); i += 2)
-                                {
-                                    if(i == 0)
-                                    {
-                                        config.faceConfig.blinkAnim1 = Services::GetAssets()->LoadAnimation(tokens[i]);
-                                        config.faceConfig.blinkAnim1Probability = (i + 1 < tokens.size()) ? StringUtil::ToInt(tokens[i + 1]) : 0;
-                                    }
-                                    else
-                                    {
-                                        config.faceConfig.blinkAnim2 = Services::GetAssets()->LoadAnimation(tokens[i]);
-                                        config.faceConfig.blinkAnim2Probability = (i + 1 < tokens.size()) ? StringUtil::ToInt(tokens[i + 1]) : 0;
-                                    }
-                                }
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Blink Frequency"))
-                            {
-                                config.faceConfig.blinkFrequency = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Mouth Offset"))
-                            {
-                                config.faceConfig.mouthOffset = entry.GetValueAsVector2();
-                            }
-                            else if(StringUtil::EqualsIgnoreCase(entry.key, "Mouth Size"))
-                            {
-                                config.faceConfig.mouthSize = entry.GetValueAsVector2();
-                            }
-                        }
-                    }
+                    config.faceConfig = &mDefaultFaceConfig;
+                    Services::GetReports()->Log("Error", StringUtil::Format("Error: Missing face config '%s'", faceIdentifer.c_str()));
                 }
             }
         }

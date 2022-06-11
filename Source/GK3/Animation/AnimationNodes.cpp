@@ -2,6 +2,7 @@
 
 #include "Animation.h"
 #include "Animator.h"
+#include "CharacterManager.h"
 #include "DialogueManager.h"
 #include "FaceController.h"
 #include "FootstepManager.h"
@@ -346,8 +347,8 @@ void LipSyncAnimNode::Play(AnimationState* animState)
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
-		// The mouth texture names need to have a prefix added, based on 3-letter model name.
-		Texture* mouthTexture = Services::GetAssets()->LoadTexture(actor->GetMeshRenderer()->GetModelName() + "_" + mouthTextureName);
+		// The mouth texture name is based on the current face config for the character.
+		Texture* mouthTexture = Services::GetAssets()->LoadTexture(actor->GetConfig()->faceConfig->identifier + "_" + mouthTextureName);
 		if(mouthTexture != nullptr)
 		{
 			actor->GetFaceController()->SetMouth(mouthTexture);
