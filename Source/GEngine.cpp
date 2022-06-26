@@ -11,6 +11,7 @@
 #include "FileSystem.h"
 #include "FootstepManager.h"
 #include "GameProgress.h"
+#include "GK3UI.h"
 #include "InventoryManager.h"
 #include "Loader.h"
 #include "Localizer.h"
@@ -21,9 +22,7 @@
 #include "Scene.h"
 #include "Services.h"
 #include "TextInput.h"
-#include "TimeblockScreen.h"
 #include "Timers.h"
-#include "TitleScreen.h"
 #include "ThreadPool.h"
 #include "VerbManager.h"
 
@@ -163,12 +162,12 @@ bool GEngine::Initialize()
             if(gSaveManager.GetRunCount() <= 1)
             {
                 mVideoPlayer.Play("intro.bik", true, true, [this](){
-                    new TitleScreen();
+                    gGK3UI.ShowTitleScreen();
                 });
             }
             else
             {
-                new TitleScreen();
+                gGK3UI.ShowTitleScreen();
             }
         });
     });
@@ -258,8 +257,7 @@ void GEngine::StartGame()
     Timeblock timeblock("110A");
     Services::Get<GameProgress>()->SetTimeblock(timeblock);
 
-    TimeblockScreen* tbScreen = new TimeblockScreen();
-    tbScreen->Show(timeblock, 5.0f, [this](){
+    gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [this](){
         LoadScene("R25");
     });
 }

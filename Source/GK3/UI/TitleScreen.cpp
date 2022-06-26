@@ -65,9 +65,6 @@ TitleScreen::TitleScreen() : Actor(Actor::TransformType::RectTransform)
     quitButton->SetPressCallback([](UIButton* button) {
         GEngine::Instance()->Quit();
     });
-
-    // Just show immediately for now.
-    Show();
 }
 
 void TitleScreen::Show()

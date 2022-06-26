@@ -2,6 +2,7 @@
 
 #include "CharacterManager.h"
 #include "GameProgress.h"
+#include "GK3UI.h"
 #include "LocationManager.h"
 #include "Scene.h"
 #include "Services.h"
@@ -183,9 +184,7 @@ shpvoid SetTime(const std::string& timeblock)
     GEngine::Instance()->UnloadScene();
 
     // Show timeblock screen.
-    TimeblockScreen* tbScreen = new TimeblockScreen();
-    tbScreen->Show(timeblock, 0.0f, [](){
-
+    gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, []() {
         // We're assuming that just the time changed here, so load back into same location.
         GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
     });

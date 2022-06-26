@@ -1,6 +1,7 @@
 #include "SheepAPI_GK3.h"
 
 #include "GEngine.h"
+#include "GK3UI.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ RegFunc0(QuitApp, void, IMMEDIATE, DEV_FUNC);
 
 shpvoid ShowDrivingInterface()
 {
-    assert(false);
+    gGK3UI.ShowDrivingScreen();
     return 0;
 }
 RegFunc0(ShowDrivingInterface, void, IMMEDIATE, REL_FUNC);
