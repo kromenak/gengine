@@ -49,20 +49,29 @@ Vector2 IniKeyValue::GetValueAsVector2() const
 
 Vector3 IniKeyValue::GetValueAsVector3() const
 {
-    // We assume the string form of {4.23, 5.23, 10.04}
-    // First, let's get rid of the braces.
-    std::string noBraces = value;
-    if(noBraces[0] == '{' && noBraces[noBraces.size() - 1] == '}')
+    // We generally assume the string form of {4.23, 5.23, 10.04}.
+    // However, GK3 data has some occasional typos and inconsistencies we must account for.
+
+    // Trim leading non-numeric values.
+    // This is usually just '{', but other garbage data (from typos) exists in some cases.
+    int firstNumIndex = -1;
+    for(int i = 0; i < value.length(); ++i)
     {
-        noBraces = value.substr(1, value.length() - 2);
+        if(std::isdigit(value[i]))
+        {
+            firstNumIndex = i;
+            break;
+        }
     }
-	else if(noBraces[0] == '{')
-	{
-		// Error resiliance: some typos exist, like missing closing bracket.
-		// Don't want it to crash the game :P
-		noBraces = value.substr(1, value.length() - 1);
-	}
-    
+    if(firstNumIndex == -1) { return Vector3::Zero; }
+
+    // Trim training non-numeric values. Usually just '}'.
+    std::string noBraces = value.substr(firstNumIndex);
+    while(!noBraces.empty() && !std::isdigit(noBraces.back()))
+    {
+        noBraces.pop_back();
+    }
+
     // Find the two commas.
     std::size_t firstCommaIndex = noBraces.find(',');
     if(firstCommaIndex == std::string::npos)
@@ -77,7 +86,7 @@ Vector3 IniKeyValue::GetValueAsVector3() const
     
     // Split at commas.
     std::string firstNum = noBraces.substr(0, firstCommaIndex);
-    std::string secondNum = noBraces.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex);
+    std::string secondNum = noBraces.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1);
     std::string thirdNum = noBraces.substr(secondCommaIndex + 1, std::string::npos);
     
     // Convert to numbers and return.
