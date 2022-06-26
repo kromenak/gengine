@@ -79,6 +79,12 @@ void UIButton::OnPointerEnter()
         Services::Get<CursorManager>()->UseDefaultCursor();
     }
 	mPointerOver = true;
+
+    // Play hover sound, if set.
+    if(mHoverSound != nullptr)
+    {
+        Services::GetAudio()->PlaySFX(mHoverSound);
+    }
 }
 
 void UIButton::OnPointerExit()

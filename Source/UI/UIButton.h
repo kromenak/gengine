@@ -11,6 +11,7 @@
 #include "Color32.h"
 #include "Material.h"
 
+class Audio;
 class Texture;
 
 class UIButton : public UIWidget
@@ -27,6 +28,8 @@ public:
     void SetDisabledTexture(Texture* texture, const Color32& color = Color32::White);
 
 	void SetPressCallback(std::function<void(UIButton*)> callback) { mPressCallback = callback; }
+
+    void SetHoverSound(Audio* sound) { mHoverSound = sound; }
 	
 	void OnPointerEnter() override;
 	void OnPointerExit() override;
@@ -65,6 +68,9 @@ private:
 	// Tracks pointer enter/exit and up/down for visual state and press checks.
 	bool mPointerOver = false;
 	bool mPointerDown = false;
+
+    // Optional hover audio.
+    Audio* mHoverSound = nullptr;
 	
 	Texture* GetDefaultTexture();
     void UpdateMaterial();
