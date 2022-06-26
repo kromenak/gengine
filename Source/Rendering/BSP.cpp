@@ -152,7 +152,11 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
 			break;
 		}
 	}
-	if(objectIndex == -1) { return nullptr; }
+	if(objectIndex == -1)
+    {
+        Services::GetReports()->Log("Error", StringUtil::Format("Error: scene '%s' does not have a scene model of name '%s'", "", objectName.c_str()));
+        return nullptr;
+    }
 	
 	// OK, we found it! Create the actor.
 	BSPActor* actor = new BSPActor(this, objectName);

@@ -220,6 +220,7 @@ void Scene::Load()
 			case SceneModel::Type::Scene:
 			{
 				BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
+                if(actor == nullptr) { break; }
 				mBSPActors.push_back(actor);
 				
 				actor->SetNoun(modelDef->noun);
@@ -237,6 +238,7 @@ void Scene::Load()
 			case SceneModel::Type::HitTest:
 			{
 				BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
+                if(actor == nullptr) { break; }
 				mBSPActors.push_back(actor);
                 mHitTestActors.push_back(actor);
 				

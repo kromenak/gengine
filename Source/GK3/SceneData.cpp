@@ -11,8 +11,6 @@ SceneData::SceneData(const std::string& location, const std::string& timeblock) 
 	// Load general and specific SIF assets.
 	mGeneralSIF = Services::GetAssets()->LoadSIF(location);
 	mSpecificSIF = Services::GetAssets()->LoadSIF(location + timeblock);
-	
-	//TODO: If no general SIF...that's not good!
 }
 
 SceneData::~SceneData()
@@ -25,21 +23,29 @@ SceneData::~SceneData()
 
 const SceneActor* SceneData::DetermineWhoEgoWillBe() const
 {
-	// If there's a specific SIF, it will override ego choice - check it first.
-	const SceneActor* ego = mSpecificSIF != nullptr ? mSpecificSIF->FindCurrentEgo() : nullptr;
-	
-	// If couldn't find ego in specific SIF, we'll have to use the general SIF.
-	return ego != nullptr ? ego : mGeneralSIF->FindCurrentEgo();
+    // Try to ascertain who is ego from the specific timeblock SIF.
+    const SceneActor* ego = nullptr;
+    if(mSpecificSIF != nullptr)
+    {
+        ego = mSpecificSIF->FindCurrentEgo();
+    }
+
+    // If no specific timeblock SIF, or it just didn't contain any ego info, fall back to general SIF.
+    if(ego == nullptr && mGeneralSIF != nullptr)
+    {
+        ego = mGeneralSIF->FindCurrentEgo();
+    }
+    return ego;
 }
 
 void SceneData::ResolveSceneData()
 {
-	// We need a SIF, at least.
-	if(mGeneralSIF == nullptr) { return; }
-	
 	// GENERAL
-	// Take general block from general SIF to start.
-	mGeneralSettings = mGeneralSIF->FindCurrentGeneralBlock();
+    // Take general block from general SIF to start.
+    if(mGeneralSIF != nullptr)
+    {
+        mGeneralSettings = mGeneralSIF->FindCurrentGeneralBlock();
+    }
 	
 	// If there's a specific SIF, also get that general block and merge with the other one.
 	// Specific SIF settings override general SIF settings, if set.
@@ -58,6 +64,10 @@ void SceneData::ResolveSceneData()
 	{
 		mBSP = Services::GetAssets()->LoadBSP(mSceneAsset->GetBSPName());
 	}
+    else
+    {
+        mBSP = Services::GetAssets()->LoadBSP("DEFAULT.BSP");
+    }
     
     // Load BSP lightmap data.
     mBSPLightmap = Services::GetAssets()->LoadBSPLightmap(mGeneralSettings.sceneAssetName);
@@ -90,63 +100,93 @@ void SceneData::ResolveSceneData()
 	}
 	
 	// Build list of actors to use in the scene based on contents of the two SIFs.
-	AddActorBlocks(mGeneralSIF->GetActorBlocks());
+    if(mGeneralSIF != nullptr)
+    {
+        AddActorBlocks(mGeneralSIF->GetActorBlocks());
+    }
 	if(mSpecificSIF != nullptr)
 	{
 		AddActorBlocks(mSpecificSIF->GetActorBlocks());
 	}
 	
 	// Build list of models to use in the scene based on contents of the two SIFS.
-	AddModelBlocks(mGeneralSIF->GetModelBlocks());
+    if(mGeneralSIF != nullptr)
+    {
+        AddModelBlocks(mGeneralSIF->GetModelBlocks());
+    }
 	if(mSpecificSIF != nullptr)
 	{
 		AddModelBlocks(mSpecificSIF->GetModelBlocks());
 	}
 	
 	// And so on...
-	AddPositionBlocks(mGeneralSIF->GetPositionBlocks());
+    if(mGeneralSIF != nullptr)
+    {
+        AddPositionBlocks(mGeneralSIF->GetPositionBlocks());
+    }
 	if(mSpecificSIF != nullptr)
 	{
 		AddPositionBlocks(mSpecificSIF->GetPositionBlocks());
 	}
-	
-	AddInspectCameraBlocks(mGeneralSIF->GetInspectCameraBlocks());
+
+    if(mGeneralSIF != nullptr)
+    {
+        AddInspectCameraBlocks(mGeneralSIF->GetInspectCameraBlocks());
+    }
 	if(mSpecificSIF != nullptr)
 	{
 		AddInspectCameraBlocks(mSpecificSIF->GetInspectCameraBlocks());
 	}
-	
-	AddRoomCameraBlocks(mGeneralSIF->GetRoomCameraBlocks());
+
+    if(mGeneralSIF != nullptr)
+    {
+        AddRoomCameraBlocks(mGeneralSIF->GetRoomCameraBlocks());
+    }
 	if(mSpecificSIF != nullptr)
 	{
 		AddRoomCameraBlocks(mSpecificSIF->GetRoomCameraBlocks());
 	}
-	
-	AddCinematicCameraBlocks(mGeneralSIF->GetCinematicCameraBlocks());
+
+    if(mGeneralSIF != nullptr)
+    {
+        AddCinematicCameraBlocks(mGeneralSIF->GetCinematicCameraBlocks());
+    }
 	if(mSpecificSIF != nullptr)
 	{
 		AddCinematicCameraBlocks(mSpecificSIF->GetCinematicCameraBlocks());
 	}
-	
-	AddDialogueCameraBlocks(mGeneralSIF->GetDialogueCameraBlocks());
+
+    if(mGeneralSIF != nullptr)
+    {
+        AddDialogueCameraBlocks(mGeneralSIF->GetDialogueCameraBlocks());
+    }
 	if(mSpecificSIF != nullptr)
 	{
 		AddDialogueCameraBlocks(mSpecificSIF->GetDialogueCameraBlocks());
 	}
 
-    AddTriggerBlocks(mGeneralSIF->GetTriggerBlocks());
+    if(mGeneralSIF != nullptr)
+    {
+        AddTriggerBlocks(mGeneralSIF->GetTriggerBlocks());
+    }
     if(mSpecificSIF != nullptr)
     {
         AddTriggerBlocks(mSpecificSIF->GetTriggerBlocks());
     }
-	
-	AddSoundtrackBlocks(mGeneralSIF->GetSoundtrackBlocks());
+
+    if(mGeneralSIF != nullptr)
+    {
+        AddSoundtrackBlocks(mGeneralSIF->GetSoundtrackBlocks());
+    }
 	if(mSpecificSIF != nullptr)
 	{
 		AddSoundtrackBlocks(mSpecificSIF->GetSoundtrackBlocks());
 	}
 
-    AddConversationBlocks(mGeneralSIF->GetConversationBlocks());
+    if(mGeneralSIF != nullptr)
+    {
+        AddConversationBlocks(mGeneralSIF->GetConversationBlocks());
+    }
     if(mSpecificSIF != nullptr)
     {
         AddConversationBlocks(mSpecificSIF->GetConversationBlocks());
@@ -159,7 +199,10 @@ void SceneData::ResolveSceneData()
 	Services::Get<ActionManager>()->AddInventoryActionSets(mTimeblock);
 	
 	// Add current scene general SIF action sets conditionally (in order defined in SIF file).
-	AddActionBlocks(mGeneralSIF->GetActionBlocks(), true);
+    if(mGeneralSIF != nullptr)
+    {
+        AddActionBlocks(mGeneralSIF->GetActionBlocks(), true);
+    }
 	
 	// Add current scene specific SIFs action sets unconditionally (in order defined in SIF file).
 	if(mSpecificSIF != nullptr)
