@@ -26,8 +26,8 @@ public:
 
     void ChangeLocation(const std::string& location);
 	
-	std::string GetLocation() const { return mLocation; }
-	std::string GetLastLocation() const { return mLastLocation; }
+	const std::string& GetLocation() const { return mLocation; }
+	const std::string& GetLastLocation() const { return mLastLocation; }
 	void SetLocation(const std::string& location);
     
     std::string GetLocationDisplayName() const;

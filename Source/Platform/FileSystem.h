@@ -85,7 +85,7 @@ namespace Directory
 	 *
 	 * If making foo/bar/xyz, and none exist, each will be created in turn.
 	 */
-	inline bool CreateAll(std::string path)
+	inline bool CreateAll(const std::string& path)
 	{
 		StringTokenizer tokenizer(path, { '/' });
 		std::string buildPath;

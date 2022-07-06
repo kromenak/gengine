@@ -30,7 +30,8 @@ public:
 	void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
 
     void ResizeToTexture();
-	
+    void ResizeToFitPreserveAspect(const Vector2& area);
+
 private:
 	Material mMaterial;
 	RenderMode mRenderMode = RenderMode::Normal;

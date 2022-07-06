@@ -80,6 +80,7 @@ public:
     void SetMipmaps(bool useMipmaps);
     
     // Coordinates are from top-left corner of texture.
+    void SetPixelColor32(int x, int y, const Color32& color);
 	Color32 GetPixelColor32(int x, int y);
 
     void SetPaletteIndex(int x, int y, uint8 val);

@@ -117,30 +117,15 @@ void VideoPlayer::Update()
         // If not letterboxing, and video size doesn't match the video's aspect ratio, stretching or warping may occur.
         if(mLetterbox && videoTexture != nullptr)
         {
-            float videoWidth = videoTexture->GetWidth();
-            float videoHeight = videoTexture->GetHeight();
-            
-            // Start by filling the width of the area.
-            float widthRatio = videoSize.x / videoWidth;
-            float newWidth = videoWidth * widthRatio;
-            float newHeight = videoHeight * widthRatio;
-            
-            // If height is too large still for display area, scale again.
-            if(newHeight > videoSize.y)
-            {
-                float heightRatio = videoSize.y / newHeight;
-                newWidth *= heightRatio;
-                newHeight *= heightRatio;
-            }
-            
-            // Save updated video size.
-            videoSize.x = newWidth;
-            videoSize.y = newHeight;
+            // Letterbox: fit the area, but preserve aspect ratio.
+            mVideoImage->ResizeToFitPreserveAspect(videoSize);
         }
-        
-        // At long last, set video image size.
-        mVideoImage->GetRectTransform()->SetSizeDelta(videoSize);
-        
+        else
+        {
+            // No letterbox, just use video size as-is.
+            mVideoImage->GetRectTransform()->SetSizeDelta(videoSize);
+        }
+
         // Check for video end - call Stop if so to clean up video and call callback.
         if(mVideo->IsStopped())
         {

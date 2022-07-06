@@ -78,6 +78,11 @@ void UIImage::Render()
 	}
 }
 
+void UIImage::SetColor(const Color32& color)
+{
+    mMaterial.SetColor(color);
+}
+
 void UIImage::SetTexture(Texture* texture, bool resizeImage)
 {
 	mMaterial.SetDiffuseTexture(texture);
@@ -97,7 +102,30 @@ void UIImage::ResizeToTexture()
 	GetRectTransform()->SetSizeDelta(texture->GetWidth(), texture->GetHeight());
 }
 
-void UIImage::SetColor(const Color32& color)
+void UIImage::ResizeToFitPreserveAspect(const Vector2& area)
 {
-	mMaterial.SetColor(color);
+    // Need a texture to do this!
+    Texture* texture = mMaterial.GetDiffuseTexture();
+    if(texture == nullptr) { return; }
+
+    // Get width/height of texture.
+    float width = texture->GetWidth();
+    float height = texture->GetHeight();
+
+    // Figure out new width/height for the texture if it filled the available area's width.
+    float widthRatio = area.x / width;
+    float newWidth = width * widthRatio;
+    float newHeight = height * widthRatio;
+
+    // However, if filling the width results in going offscreen vertically, we need to resize with that in mind instead!
+    if(newHeight > area.y)
+    {
+        float heightRatio = area.y / newHeight;
+        newWidth *= heightRatio;
+        newHeight *= heightRatio;
+    }
+
+    // Set the size accordingly.
+    GetRectTransform()->SetSizeDelta(newWidth, newHeight);
 }
+

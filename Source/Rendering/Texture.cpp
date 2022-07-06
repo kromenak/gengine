@@ -120,6 +120,23 @@ void Texture::SetMipmaps(bool useMipmaps)
     mDirtyFlags |= DirtyFlags::Mipmaps;
 }
 
+void Texture::SetPixelColor32(int x, int y, const Color32& color)
+{
+    // Need pixels to do this.
+    if(mPixels == nullptr) { return; }
+
+    // Make sure the index is valid.
+    uint32 index = (y * mWidth + x) * 4;
+    if(index < 0 || index >= (mWidth * mHeight * 4)) { return; }
+
+    // Set it.
+    mPixels[index] = color.GetR();
+    mPixels[index + 1] = color.GetG();
+    mPixels[index + 2] = color.GetB();
+    mPixels[index + 3] = color.GetA();
+    mDirtyFlags |= DirtyFlags::Pixels;
+}
+
 Color32 Texture::GetPixelColor32(int x, int y)
 {
 	// No pixels means...just return black.

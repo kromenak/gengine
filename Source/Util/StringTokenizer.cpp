@@ -1,11 +1,8 @@
-//
-// StringTokenizer.cpp
-//
-// Clark Kromenaker
-//
 #include "StringTokenizer.h"
 
-StringTokenizer::StringTokenizer(std::string str, std::initializer_list<char> splitChars)
+#include <cassert>
+
+StringTokenizer::StringTokenizer(const std::string& str, std::initializer_list<char> splitChars)
 {
     int startIndex = 0;
     for(int i = 0; i < str.size(); i++)
@@ -29,14 +26,8 @@ StringTokenizer::StringTokenizer(std::string str, std::initializer_list<char> sp
     }
 }
 
-std::string StringTokenizer::GetNext()
+const std::string& StringTokenizer::GetNext()
 {
-    if(mIndex < mTokens.size())
-    {
-        return mTokens[mIndex++];
-    }
-    else
-    {
-        return "";
-    }
+    assert(mIndex < mTokens.size());
+    return mTokens[mIndex++];
 }

@@ -1,6 +1,4 @@
 //
-// StringTokenizer.cpp
-//
 // Clark Kromenaker
 //
 // Given a string, provides a way to get pieces of it one at a time.
@@ -13,10 +11,10 @@
 class StringTokenizer
 {
 public:
-    StringTokenizer(std::string str, std::initializer_list<char> splitChars);
+    StringTokenizer(const std::string& str, std::initializer_list<char> splitChars);
     
-    bool HasNext() { return mIndex < mTokens.size(); }
-    std::string GetNext();
+    bool HasNext() const { return mIndex < mTokens.size(); }
+    const std::string& GetNext();
     
 private:
     std::vector<std::string> mTokens;

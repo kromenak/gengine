@@ -53,7 +53,7 @@ void Console::ExecuteCommand(const std::string& command)
 	// If compiled successfully, execute it!
 	if(sheepScript != nullptr)
 	{
-		Services::GetSheep()->Execute(sheepScript, [sheepScript]() -> void {
+		Services::GetSheep()->Execute(sheepScript, [sheepScript]() {
 			delete sheepScript;
 		});
 	}

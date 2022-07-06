@@ -36,7 +36,7 @@ RegFunc1(ShowFingerprintInterface, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid FollowOnDrivingMap(int followState)
 {
-    std::cout << "FollowOnDrivingMap" << std::endl;
+    gGK3UI.ShowDrivingScreen(followState);
     return 0;
 }
 RegFunc1(FollowOnDrivingMap, void, int, WAITABLE, REL_FUNC);

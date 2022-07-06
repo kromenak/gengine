@@ -196,12 +196,46 @@ void ActionManager::ExecuteSheepAction(const std::string& sheepName, const std::
     Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", mSheepCommandAction.ToString().c_str()));
 
     // Increment action ID.
-    mActionId++;
+    ++mActionId;
 
     //TODO: We mayyyy want to actually compile a sheep script snippet and execute it here.
     //TODO: For example, the end conversation does a `SHEEP_COMMAND:NONE:NONE`: wait CallSheep("Name", "Function") in the original game.
     //TODO: But for now, let's just use the sheep command action as a placeholder and execute the function call.
     Services::GetSheep()->Execute(sheepName, functionName, std::bind(&ActionManager::OnActionExecuteFinished, this));
+}
+
+void ActionManager::ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback)
+{
+    // We should only execute one action at a time.
+    if(mCurrentAction != nullptr)
+    {
+        //TODO: Log?
+        return;
+    }
+    mCurrentAction = &mSheepCommandAction;
+    mCurrentActionFinishCallback = finishCallback;
+
+    // Log it!
+    mSheepCommandAction.script.text = sheepScriptText;
+    Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", mSheepCommandAction.ToString().c_str()));
+
+    // Increment action ID.
+    ++mActionId;
+    
+    // Compile and execute sheep from text.
+    //TODO: Compiler currently requires wrapping braces. Maybe fix that?
+    SheepScript* sheepScript = Services::GetSheep()->Compile("ActionSheep", "{ " + sheepScriptText + " }");
+    if(sheepScript != nullptr)
+    {
+        Services::GetSheep()->Execute(sheepScript, [this, sheepScript]() {
+            delete sheepScript;
+            OnActionExecuteFinished();
+        });
+    }
+    else
+    {
+        OnActionExecuteFinished();
+    }
 }
 
 void ActionManager::SkipCurrentAction()

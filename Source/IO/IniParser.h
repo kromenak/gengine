@@ -62,6 +62,7 @@ public:
     // MODE C: Read line by line by line.
     bool ReadLine();
     bool ReadKeyValuePair();
+    const std::string& GetLine() const { return mCurrentLine; }
     const IniKeyValue& GetKeyValue() { return mCurrentKeyValue; }
     
     void SetMultipleKeyValuePairsPerLine(bool areThere) { mMultipleKeyValuePairsPerLine = areThere; }
