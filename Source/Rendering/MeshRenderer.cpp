@@ -46,11 +46,12 @@ void MeshRenderer::Render(bool opaque, bool translucent)
         auto submeshes = mMeshes[i]->GetSubmeshes();
         for(int j = 0; j < submeshes.size(); j++)
         {
-            // Make sure our assumption about max number of submeshes holds.
-            assert(submeshIndex < kMaxSubmeshes);
+            // Some meshes can have quite a few submeshes, but it seems wasteful to store visible bits for ALL of them.
+            // So, we'll assume if some mesh has a ton of submeshes, that only the first 64 can be invisible. Everything >64 is always visible.
+            bool submeshVisible = submeshIndex >= kMaxSubmeshes || !mSubmeshInvisible[submeshIndex];
 
             // Don't render anything if this submesh is invisible!
-            if(!mSubmeshInvisible[submeshIndex])
+            if(submeshVisible)
             {
                 int materialIndex = Math::Min(submeshIndex, maxMaterialIndex);
                 Material& material = mMaterials[materialIndex];
