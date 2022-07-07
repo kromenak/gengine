@@ -36,8 +36,8 @@ public:
 	void SetHorizontalOverflow(HorizontalOverflow ho) { mHorizontalOverflow = ho; }
 	void SetVerticalOverflow(VerticalOverflow vo) { mVerticalOverflow = vo; }
 	
-	void SetText(std::string text);
-	std::string GetText() const { return mText; }
+	void SetText(const std::string& text);
+	const std::string& GetText() const { return mText; }
 
     void SetMasked(bool masked) { mMask = masked; }
     

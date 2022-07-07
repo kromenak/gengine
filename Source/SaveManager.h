@@ -31,6 +31,8 @@
     #define PREF_WINDOW_X "Start X"
     #define PREF_WINDOW_Y "Start Y"
 
+    #define PREF_CAPTIONS "Captions"
+
 // Hardware Renderer Preferences
 #define PREFS_HARDWARE_RENDERER "Engine\\Hardware"
     #define PREFS_MIPMAPS "Mip Mapping"

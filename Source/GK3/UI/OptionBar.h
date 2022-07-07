@@ -82,7 +82,8 @@ private:
 
     // Game Options section.
     Actor* mGameOptionsSection = nullptr;
-    
+    UIToggle* mCaptionsToggle = nullptr;
+
     void KeepOnScreen();
     
     void CreateMainSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
@@ -98,4 +99,6 @@ private:
     void OnGlobalVolumeSliderValueChanged(float value);
 
     void OnGraphicsOptionsButtonPressed(UIButton* button);
+
+    void OnGameOptionsButtonPressed(UIButton* button);
 };

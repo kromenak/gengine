@@ -70,7 +70,7 @@ void UILabel::SetColor(const Color32& color)
     mMaterial.SetColor(color);
 }
 
-void UILabel::SetText(std::string text)
+void UILabel::SetText(const std::string& text)
 {
 	if(text != mText)
 	{

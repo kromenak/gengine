@@ -258,10 +258,10 @@ struct CaptionAnimNode : public AnimNode
 struct SpeakerCaptionAnimNode : public AnimNode
 {
 	// The frame to stop showing the caption on.
-	int endFrame = 0;
+	int endFrameNumber = 0;
 	
 	// The actor who will be speaking.
-	std::string actorNoun;
+	std::string speaker;
 	
 	// The caption to show.
 	std::string caption;

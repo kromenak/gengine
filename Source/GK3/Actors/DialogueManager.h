@@ -1,6 +1,4 @@
 //
-// DialogueManager.h
-//
 // Clark Kromenaker
 //
 // Handles complexities of executing dialogue and conversations.
@@ -27,13 +25,12 @@ public:
 	void TriggerDialogueCue();
 	
 	void SetSpeaker(const std::string& noun);
+    const std::string& GetSpeaker() const { return mSpeaker; }
 	
 	void SetConversation(const std::string& conversation, std::function<void()> finishCallback);
 	void EndConversation(const std::function<void()> finishCallback);
     bool InConversation() const { return !mConversation.empty(); }
-	
-	void StartYak(const std::string& yakAnimName, std::function<void()> finishCallback);
-	
+    
 private:
 	// A "license plate" is an identifier for a "YAK" or "VO WAV" file. They look like this: 0CAEI1IQ71
 	// YAKs are localized; if the VO file is 0CAEI1IQ71, the YAK is E0CAEI1IQ71.YAK (the "E" indicates "English").

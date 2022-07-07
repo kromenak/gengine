@@ -6,6 +6,7 @@
 #include "DialogueManager.h"
 #include "FaceController.h"
 #include "FootstepManager.h"
+#include "GK3UI.h"
 #include "GKActor.h"
 #include "GKActor.h"
 #include "Heading.h"
@@ -373,28 +374,34 @@ void ExpressionAnimNode::Play(AnimationState* animState)
 
 void SpeakerAnimNode::Play(AnimationState* animState)
 {
-	std::cout << "SPEAKER IS NOW " << actorNoun << std::endl;
 	Services::Get<DialogueManager>()->SetSpeaker(actorNoun);
 }
 
 void CaptionAnimNode::Play(AnimationState* animState)
 {
-	std::cout << "CAPTION: " << caption << std::endl;
+    gGK3UI.AddCaption(caption, Services::Get<DialogueManager>()->GetSpeaker());
 }
 
 void SpeakerCaptionAnimNode::Play(AnimationState* animState)
 {
-	std::cout << "SPEAKER " << actorNoun << " w/ CAPTION: " << caption << std::endl;
+    // Add the caption.
+    gGK3UI.AddCaption(caption, speaker);
+
+    // Calculate duration in seconds.
+    // We know how many frames the caption should be up, so multiply that by seconds per frame.
+    int frameCount = endFrameNumber - frameNumber;
+    float duration = frameCount * animState->params.animation->GetFrameDuration();
+    gGK3UI.FinishCaption(duration);
 }
 
 void DialogueCueAnimNode::Play(AnimationState* animState)
 {
-	//std::cout << "DIALOGUE CUE" << std::endl;
 	Services::Get<DialogueManager>()->TriggerDialogueCue();
+    gGK3UI.FinishCaption();
 }
 
 void DialogueAnimNode::Play(AnimationState* animState)
 {
-    //TODO: Unsure if "numLines" and "useFidgets" are correct here.
+    //TODO: Unsure if "numLines" and "playFidgets" are correct here.
     Services::Get<DialogueManager>()->StartDialogue(licensePlate, 1, false, nullptr);
 }

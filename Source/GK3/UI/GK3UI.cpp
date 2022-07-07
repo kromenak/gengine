@@ -1,5 +1,6 @@
 #include "GK3UI.h"
 
+#include "CaptionsOverlay.h"
 #include "DrivingScreen.h"
 #include "SceneTransitioner.h"
 #include "TimeblockScreen.h"
@@ -79,5 +80,23 @@ void GK3UI::HideSceneTransitioner()
     if(mSceneTransitioner != nullptr)
     {
         mSceneTransitioner->Hide();
+    }
+}
+
+void GK3UI::AddCaption(const std::string& caption, const std::string& speaker)
+{
+    if(mCaptionsOverlay == nullptr)
+    {
+        mCaptionsOverlay = new CaptionsOverlay();
+        mCaptionsOverlay->SetIsDestroyOnLoad(false);
+    }
+    mCaptionsOverlay->AddCaption(caption, speaker);
+}
+
+void GK3UI::FinishCaption(float delay)
+{
+    if(mCaptionsOverlay != nullptr)
+    {
+        mCaptionsOverlay->AdvanceCaption(delay);
     }
 }

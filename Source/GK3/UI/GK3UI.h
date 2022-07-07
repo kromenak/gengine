@@ -5,7 +5,9 @@
 //
 #pragma once
 #include <functional>
+#include <string>
 
+class CaptionsOverlay;
 class DrivingScreen;
 class SceneTransitioner;
 class Timeblock;
@@ -21,6 +23,9 @@ public:
     void ShowSceneTransitioner();
     void HideSceneTransitioner();
 
+    void AddCaption(const std::string& caption, const std::string& speaker = "NOTLISTED");
+    void FinishCaption(float delay = 1.0f);
+
     void ShowDrivingScreen(int followState = 0);
 
 private:
@@ -28,6 +33,8 @@ private:
     TimeblockScreen* mTimeblockScreen = nullptr;
 
     SceneTransitioner* mSceneTransitioner = nullptr;
+
+    CaptionsOverlay* mCaptionsOverlay = nullptr;
 
     DrivingScreen* mDrivingScreen = nullptr;
 };

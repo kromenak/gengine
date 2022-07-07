@@ -557,7 +557,13 @@ void Animation::ParseFromData(char *data, int dataLength)
                 else if(StringUtil::EqualsIgnoreCase(keyword, "CAPTION"))
                 {
 					// Read caption.
-					std::string caption = line.entries[2].key;
+                    // Unfortunately, the caption *may* contain commas, which interfers with the INI parser. Need to loop to populate.
+                    std::string caption = line.entries[2].key;
+                    for(int i = 3; i < line.entries.size(); ++i)
+                    {
+                        caption += ", ";
+                        caption += line.entries[i].key;
+                    }
 					
 					// Create and add node.
 					CaptionAnimNode* node = new CaptionAnimNode();
@@ -574,12 +580,18 @@ void Animation::ParseFromData(char *data, int dataLength)
 					std::string actorNoun = line.entries[3].key;
 					
 					// Read caption.
-					std::string caption = line.entries[3].key;
+                    // Unfortunately, the caption *may* contain commas, which interfers with the INI parser. Need to loop to populate.
+                    std::string caption = line.entries[3].key;
+                    for(int i = 4; i < line.entries.size(); ++i)
+                    {
+                        caption += ", ";
+                        caption += line.entries[i].key;
+                    }
 					
 					SpeakerCaptionAnimNode* node = new SpeakerCaptionAnimNode();
                     node->frameNumber = frameNumber;
-					node->endFrame = endFrame;
-					node->actorNoun = actorNoun;
+					node->endFrameNumber = endFrame;
+					node->speaker = actorNoun;
 					node->caption = caption;
 					mFrames[frameNumber].push_back(node);
                 }

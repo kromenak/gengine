@@ -1,5 +1,6 @@
 #include "OptionBar.h"
 
+#include "CaptionsOverlay.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
 #include "Services.h"
@@ -475,12 +476,7 @@ void OptionBar::CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_ma
     
     // Create game options button.
     UIButton* gameOptsButton = CreateButton(canvas, config, "advOptGame", mAdvancedOptionsSection);
-    gameOptsButton->SetPressCallback([this](UIButton* button) {
-        mSoundOptionsSection->SetActive(false);
-        mGraphicOptionsSection->SetActive(false);
-        mGameOptionsSection->SetActive(!this->mGameOptionsSection->IsActive());
-        KeepOnScreen();
-    });
+    gameOptsButton->SetPressCallback(std::bind(&OptionBar::OnGameOptionsButtonPressed, this, std::placeholders::_1));
     
     // Create each subsection...
     CreateSoundOptionsSection(canvas, config);
@@ -727,8 +723,11 @@ void OptionBar::CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<st
     UIToggle* glideCameraToggle = CreateToggle(canvas, config, "gameOptGlide", mGameOptionsSection);
     
     // Create captions toggle.
-    UIToggle* captionsToggle = CreateToggle(canvas, config, "gameOptCaptions", mGameOptionsSection);
-    
+    mCaptionsToggle = CreateToggle(canvas, config, "gameOptCaptions", mGameOptionsSection);
+    mCaptionsToggle->SetToggleCallback([](bool isOn) {
+        CaptionsOverlay::SetCaptionsEnabled(isOn);
+    });
+
     // Create keyboard controls button.
     UIButton* controlsButton = CreateButton(canvas, config, "gameOptControls", mGameOptionsSection);
     controlsButton->SetPressCallback([this](UIButton* button) {
@@ -794,4 +793,15 @@ void OptionBar::OnGraphicsOptionsButtonPressed(UIButton* button)
     int currentWidth = Services::GetRenderer()->GetWindowWidth();
     int currentHeight = Services::GetRenderer()->GetWindowHeight();
     mResolutionDropdown->SetCurrentChoice(StringUtil::Format("%i x %i", currentWidth, currentHeight));
+}
+
+void OptionBar::OnGameOptionsButtonPressed(UIButton* button)
+{
+    mSoundOptionsSection->SetActive(false);
+    mGraphicOptionsSection->SetActive(false);
+    mGameOptionsSection->SetActive(!this->mGameOptionsSection->IsActive());
+    KeepOnScreen();
+
+    // Make sure captions toggle reflects the current preference.
+    mCaptionsToggle->SetValue(CaptionsOverlay::CaptionsEnabled());
 }
