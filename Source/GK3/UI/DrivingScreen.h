@@ -20,6 +20,9 @@ class UIImage;
 class DrivingScreen : public Actor
 {
 public:
+    // The Driving Map contains a set of Nodes representing locations.
+    // Between nodes, there are connections, with each connection being made of of a set of intermediate points.
+    // This data is primarily used for positioning blips and having them follow paths.
     struct PathData
     {
         struct Segment
@@ -54,21 +57,17 @@ public:
     enum class FollowMode
     {
         None,
-        Buthane,
-        Wilkes,
-        Mosely,
-        LadyHowardEstelle1,
-        LadyHowardEstelle2,
-        PrinceJamesMen
+        Buthane,            // Follow Buthan 102P
+        Wilkes,             // Follow Wilkes 102P
+        LadyHoward,         // Follow Lady Howard & Estelle 104P
+        PrinceJamesMen,     // Follow Prince James' Men 106P
+        Estelle,            // Follow Estelle 202P
     };
 
     DrivingScreen();
 
     void Show(FollowMode followMode = FollowMode::None);
     void Hide();
-
-protected:
-    void OnUpdate(float deltaTime) override;
 
 private:
     // The canvas for this screen.
@@ -88,13 +87,32 @@ private:
     // Can't seem to find this in the game's assets, but we can make our own pretty easily.
     Texture* mBlipTexture = nullptr;
 
+    // Path data for the map.
     PathData mPathData;
-    
+
+    // Blips that exist on the map.
     std::vector<DrivingScreenBlip*> mBlips;
-    
+
+    // Colors for blips.
+    const Color32 kEgoColor = Color32::Green;
+    const Color32 kButhaneColor = Color32(198, 182, 255); // Pink
+    const Color32 kWilkesColor = Color32(247, 150, 57); // Orange
+    const Color32 kEstelleColor = Color32(33, 56, 140); // Purple
+    const Color32 kJamesMenColor = Color32(24, 146, 49); // Dark Green
+
+    // Indexes for blips.
+    // Better for Ego to be a larger index so it draws on top of other blips.
+    const int kNpc1Index = 0;
+    const int kNpc2Index = 1;
+    const int kEgoIndex = 2;
+
+    void SetLocationButtonsInteractive(bool interactive);
+    void ExitToLocation(const std::string& locationCode);
+
     void AddLocation(const std::string& locationCode, const std::string& buttonId, const Vector2& buttonPos);
     void LoadPaths();
 
     DrivingScreenBlip* CreateBlip();
     void PlaceBlips(FollowMode followMode);
+    void OnFollowDone();
 };

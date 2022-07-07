@@ -17,7 +17,8 @@
 
 DrivingScreen::DrivingScreen() : Actor(Actor::TransformType::RectTransform)
 {
-    mCanvas = AddComponent<UICanvas>(0);
+    // Driving screen should draw above scene transitioner so it doesn't appear on this screen.
+    mCanvas = AddComponent<UICanvas>(1);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -102,16 +103,17 @@ void DrivingScreen::Show(FollowMode followMode)
 
     // CSD (Coume Sourde) only available after following Madeline.
     // LHM (Lhomme Mort) is in the same boat.
-    //TODO!
-    mLocationButtons["CSD"]->SetEnabled(false);
-    mLocationButtons["LHM"]->SetEnabled(false);
+    bool showCSD_LHM = Services::Get<GameProgress>()->GetNounVerbCount("BUTHANE", "FOLLOW") > 0 && followMode != FollowMode::Buthane;
+    mLocationButtons["CSD"]->SetEnabled(showCSD_LHM);
+    mLocationButtons["LHM"]->SetEnabled(showCSD_LHM);
 
     // LER (L'Ermitage) only available after following Wilkes.
-    //TODO!
-    mLocationButtons["LER"]->SetEnabled(false);
+    bool showLER = Services::Get<GameProgress>()->GetNounVerbCount("WILKES", "FOLLOW") > 0 && followMode != FollowMode::Wilkes;
+    mLocationButtons["LER"]->SetEnabled(showLER);
 
-    // WOD (Woods) only available after following Lady Howard & Estelle.
-    mLocationButtons["WOD"]->SetEnabled(false);
+    // WOD (Woods) only available after following Estelle on Day 2.
+    bool showWOD = Services::Get<GameProgress>()->GetNounVerbCount("ESTELLE", "FOLLOW") > 0 && followMode != FollowMode::Estelle;
+    mLocationButtons["WOD"]->SetEnabled(showWOD);
 
     // Make sure the map fits snugly in the window area, with aspect ratio preserved.
     // We do this every time the UI shows in case resolution has changed.
@@ -127,8 +129,17 @@ void DrivingScreen::Show(FollowMode followMode)
         soundtrackPlayer = AddComponent<SoundtrackPlayer>();
     }
 
-    // Play general map music.
-    soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("MAPGABEGENDAY1.STK"));
+    // Play map music.
+    // The game's files define a number of map soundtrack variants, based on day and ego and who you're following.
+    // But at the end of the day, only these two appear to have ever been used.
+    if(followMode == FollowMode::None)
+    {
+        soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("MAPGABEGENDAY1.STK"));
+    }
+    else
+    {
+        soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("MAPFOLLOWGEN.STK"));
+    }
 
     // Also play motorcycle driving away SFX.
     soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("MAPHARLEYAWAY.STK"));
@@ -154,9 +165,23 @@ void DrivingScreen::Hide()
     }
 }
 
-void DrivingScreen::OnUpdate(float deltaTime)
+void DrivingScreen::SetLocationButtonsInteractive(bool interactive)
 {
-    
+    // This doesn't hide the buttons; it just makes them interactive or not.
+    for(auto& button : mLocationButtons)
+    {
+        button.second->SetCanInteract(interactive);
+    }
+}
+
+void DrivingScreen::ExitToLocation(const std::string& locationCode)
+{
+    // Change to the desired location.
+    Services::Get<LocationManager>()->ChangeLocation(locationCode, [this]() {
+
+        // Hide the map screen after scene load is done.
+        Hide();
+    });
 }
 
 void DrivingScreen::AddLocation(const std::string& locationCode, const std::string& buttonId, const Vector2& buttonPos)
@@ -206,11 +231,8 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     button->SetPressCallback([this, locationCode](UIButton* button) {
         Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("MAPBUTTON.WAV"));
 
-        Services::Get<LocationManager>()->ChangeLocation(locationCode);
-
-        //TODO: Should hide AFTER scene and location change is done.
-        //TODO: That just requires adding a callback mechanism to ChangeLocation & LoadScene.
-        Hide();
+        // Change to the desired location.
+        ExitToLocation(locationCode);
     });
 
     // Cache button for later.
@@ -350,10 +372,6 @@ DrivingScreenBlip* DrivingScreen::CreateBlip()
 
 void DrivingScreen::PlaceBlips(FollowMode followMode)
 {
-    const int kNpc1Index = 0;
-    const int kNpc2Index = 1;
-    const int kEgoIndex = 2;
-    
     // Determine scale factor for the map image, now that it's been scaled up/down...
     Vector2 mapImageSize = mMapImage->GetRectTransform()->GetSize();
     Vector2 mapScale(mapImageSize.x / mMapTexture->GetWidth(), mapImageSize.y / mMapTexture->GetHeight());
@@ -365,7 +383,8 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
     }
 
     // Blip 0 will always be the player.
-    mBlips[kEgoIndex]->SetColor(Color32::Green);
+    mBlips[kEgoIndex]->SetActive(true);
+    mBlips[kEgoIndex]->SetColor(kEgoColor);
     mBlips[kEgoIndex]->SetBlinkEnabled(true);
     mBlips[kEgoIndex]->ClearPath();
 
@@ -387,42 +406,51 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
         if(Services::Get<GameProgress>()->GetTimeblock() == Timeblock(1, 2, Timeblock::PM))
         {
             // Buthane drives in circles, starting at PL3.
-            mBlips[kNpc1Index]->SetActive(true);
-            mBlips[kNpc1Index]->SetColor(Color32(198, 182, 255)); // Pink
-            mBlips[kNpc1Index]->AddPathNode("PL3");
-            mBlips[kNpc1Index]->AddPathNode("RL1");
-            mBlips[kNpc1Index]->AddPathNode("IN4");
-            mBlips[kNpc1Index]->AddPathNode("VGR");
-            mBlips[kNpc1Index]->AddPathNode("PL4");
-            mBlips[kNpc1Index]->AddPathNode("BEC");
-            mBlips[kNpc1Index]->AddPathNode("PL5");
-            mBlips[kNpc1Index]->AddPathNode("TR1");
-            mBlips[kNpc1Index]->AddPathNode("IN1");
-            mBlips[kNpc1Index]->AddPathNode("LHE");
-            mBlips[kNpc1Index]->AddPathNode("PLO");
-            mBlips[kNpc1Index]->SetLoopPath(true);
+            // But she no longer appears on the map after LHM is enabled.
+            if(!mLocationButtons["LHM"]->IsEnabled())
+            {
+                mBlips[kNpc1Index]->SetActive(true);
+                mBlips[kNpc1Index]->SetColor(kButhaneColor);
+                mBlips[kNpc1Index]->AddPathNode("PL3");
+                mBlips[kNpc1Index]->AddPathNode("RL1");
+                mBlips[kNpc1Index]->AddPathNode("IN4");
+                mBlips[kNpc1Index]->AddPathNode("VGR");
+                mBlips[kNpc1Index]->AddPathNode("PL4");
+                mBlips[kNpc1Index]->AddPathNode("BEC");
+                mBlips[kNpc1Index]->AddPathNode("PL5");
+                mBlips[kNpc1Index]->AddPathNode("TR1");
+                mBlips[kNpc1Index]->AddPathNode("IN1");
+                mBlips[kNpc1Index]->AddPathNode("LHE");
+                mBlips[kNpc1Index]->AddPathNode("PLO");
+                mBlips[kNpc1Index]->SetLoopPath(true);
+            }
 
             // Wilkes drives in circles, starting at LHE.
-            mBlips[kNpc2Index]->SetActive(true);
-            mBlips[kNpc2Index]->SetColor(Color32(247, 150, 57)); // Orange
-            mBlips[kNpc2Index]->AddPathNode("LHE");
-            mBlips[kNpc2Index]->AddPathNode("PLO");
-            mBlips[kNpc2Index]->AddPathNode("PL3");
-            mBlips[kNpc2Index]->AddPathNode("RL1");
-            mBlips[kNpc2Index]->AddPathNode("IN4");
-            mBlips[kNpc2Index]->AddPathNode("VGR");
-            mBlips[kNpc2Index]->AddPathNode("PL4");
-            mBlips[kNpc2Index]->AddPathNode("BEC");
-            mBlips[kNpc2Index]->AddPathNode("PL5");
-            mBlips[kNpc2Index]->AddPathNode("TR1");
-            mBlips[kNpc2Index]->AddPathNode("IN1");
-            mBlips[kNpc2Index]->SetLoopPath(true);
+            // But he no longer appears on the map after LER is enabled.
+            if(!mLocationButtons["LER"]->IsEnabled())
+            {
+                mBlips[kNpc2Index]->SetActive(true);
+                mBlips[kNpc2Index]->SetColor(kWilkesColor);
+                mBlips[kNpc2Index]->AddPathNode("LHE");
+                mBlips[kNpc2Index]->AddPathNode("PLO");
+                mBlips[kNpc2Index]->AddPathNode("PL3");
+                mBlips[kNpc2Index]->AddPathNode("RL1");
+                mBlips[kNpc2Index]->AddPathNode("IN4");
+                mBlips[kNpc2Index]->AddPathNode("VGR");
+                mBlips[kNpc2Index]->AddPathNode("PL4");
+                mBlips[kNpc2Index]->AddPathNode("BEC");
+                mBlips[kNpc2Index]->AddPathNode("PL5");
+                mBlips[kNpc2Index]->AddPathNode("TR1");
+                mBlips[kNpc2Index]->AddPathNode("IN1");
+                mBlips[kNpc2Index]->SetLoopPath(true);
+            }
         }
         else if(Services::Get<GameProgress>()->GetTimeblock() == Timeblock(1, 4, Timeblock::PM))
         {
             // Lady Howard & Estelle drive in circles, starting at PLO.
+            // They never disappear during the timeblock.
             mBlips[kNpc1Index]->SetActive(true);
-            mBlips[kNpc1Index]->SetColor(Color32(33, 56, 140)); // Purple
+            mBlips[kNpc1Index]->SetColor(kEstelleColor);
             mBlips[kNpc1Index]->AddPathNode("PLO");
             mBlips[kNpc1Index]->AddPathNode("PL3");
             mBlips[kNpc1Index]->AddPathNode("RL1");
@@ -439,34 +467,63 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
         else if(Services::Get<GameProgress>()->GetTimeblock() == Timeblock(1, 6, Timeblock::PM))
         {
             // Mallory & MacDougall drive in circles, COUNTER-CLOCKWISE, starting at LHE.
-            mBlips[kNpc1Index]->SetActive(true);
-            mBlips[kNpc1Index]->SetColor(Color32(24, 146, 49)); // Dark Green
-            mBlips[kNpc1Index]->AddPathNode("LHE");
-            mBlips[kNpc1Index]->AddPathNode("IN1");
-            mBlips[kNpc1Index]->AddPathNode("TR1");
-            mBlips[kNpc1Index]->AddPathNode("PL5");
-            mBlips[kNpc1Index]->AddPathNode("BEC");
-            mBlips[kNpc1Index]->AddPathNode("PL4");
-            mBlips[kNpc1Index]->AddPathNode("VGR");
-            mBlips[kNpc1Index]->AddPathNode("IN4");
-            mBlips[kNpc1Index]->AddPathNode("RL1");
-            mBlips[kNpc1Index]->AddPathNode("PL3");
-            mBlips[kNpc1Index]->AddPathNode("PLO");
-            mBlips[kNpc1Index]->SetLoopPath(true);
+            // They no longer appear after they've been followed.
+            if(Services::Get<GameProgress>()->GetNounVerbCount("TWO_MEN", "FOLLOW") == 0)
+            {
+                mBlips[kNpc1Index]->SetActive(true);
+                mBlips[kNpc1Index]->SetColor(kJamesMenColor);
+                mBlips[kNpc1Index]->AddPathNode("LHE");
+                mBlips[kNpc1Index]->AddPathNode("IN1");
+                mBlips[kNpc1Index]->AddPathNode("TR1");
+                mBlips[kNpc1Index]->AddPathNode("PL5");
+                mBlips[kNpc1Index]->AddPathNode("BEC");
+                mBlips[kNpc1Index]->AddPathNode("PL4");
+                mBlips[kNpc1Index]->AddPathNode("VGR");
+                mBlips[kNpc1Index]->AddPathNode("IN4");
+                mBlips[kNpc1Index]->AddPathNode("RL1");
+                mBlips[kNpc1Index]->AddPathNode("PL3");
+                mBlips[kNpc1Index]->AddPathNode("PLO");
+                mBlips[kNpc1Index]->SetLoopPath(true);
+            }
         }
         else if(Services::Get<GameProgress>()->GetTimeblock() == Timeblock(2, 2, Timeblock::PM))
         {
             // Lady Howard & Estelle drive in circles, starting at PL3. 
-            //TODO: Lady Howard & Estelle DO NOT appear on the map until after you:
-            // 1) Confront Larry Chester
-            // 2) Exhaust actions at Devil's Armchair
-            // 3) Discuss all topics with Mosely & Grace in R25
-            //TODO: What's the best condition to check for that?
-            mBlips[kNpc1Index]->SetActive(true);
-            mBlips[kNpc1Index]->SetColor(Color32(33, 56, 140)); // Purple
-            mBlips[kNpc1Index]->AddPathNode("PL3");
-            mBlips[kNpc1Index]->AddPathNode("RL1");
-            mBlips[kNpc1Index]->AddPathNode("IN4");
+            if(Services::Get<LocationManager>()->IsActorAtLocation("ESTELLE", "MAP"))
+            {
+                mBlips[kNpc1Index]->SetActive(true);
+                mBlips[kNpc1Index]->SetColor(kEstelleColor);
+                mBlips[kNpc1Index]->AddPathNode("PL3");
+                mBlips[kNpc1Index]->AddPathNode("RL1");
+                mBlips[kNpc1Index]->AddPathNode("IN4");
+                mBlips[kNpc1Index]->AddPathNode("VGR");
+                mBlips[kNpc1Index]->AddPathNode("PL4");
+                mBlips[kNpc1Index]->AddPathNode("BEC");
+                mBlips[kNpc1Index]->AddPathNode("PL5");
+                mBlips[kNpc1Index]->AddPathNode("TR1");
+                mBlips[kNpc1Index]->AddPathNode("IN1");
+                mBlips[kNpc1Index]->AddPathNode("LHE");
+                mBlips[kNpc1Index]->AddPathNode("PLO");
+                mBlips[kNpc1Index]->SetLoopPath(true);
+            }
+        }
+    }
+    else // We're following someone!
+    {
+        // Don't allow pressing buttons until we're done following.
+        SetLocationButtonsInteractive(false);
+
+        // This does not match the original game, but I really prefer if the ego blip DOES NOT blink during follow mode.
+        mBlips[kEgoIndex]->SetBlinkEnabled(false);
+
+        // Whoever we follow is always NPC 1.
+        mBlips[kNpc1Index]->SetActive(true);
+
+        // Set up the particular follow path based on who we are following...
+        if(followMode == FollowMode::Buthane)
+        {
+            // Buthane will stop at PL2. Define her ENTIRE route here...
+            mBlips[kNpc1Index]->SetColor(kButhaneColor);
             mBlips[kNpc1Index]->AddPathNode("VGR");
             mBlips[kNpc1Index]->AddPathNode("PL4");
             mBlips[kNpc1Index]->AddPathNode("BEC");
@@ -475,39 +532,175 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             mBlips[kNpc1Index]->AddPathNode("IN1");
             mBlips[kNpc1Index]->AddPathNode("LHE");
             mBlips[kNpc1Index]->AddPathNode("PLO");
-            mBlips[kNpc1Index]->SetLoopPath(true);
-        }
-    }
-    else if(followMode == FollowMode::Buthane)
-    {
-        // Buthane will stop at PL2. Define her ENTIRE route here...
-        mBlips[kNpc1Index]->SetActive(true);
-        mBlips[kNpc1Index]->SetColor(Color32(198, 182, 255)); // Pink
-        mBlips[kNpc1Index]->AddPathNode("VGR");
-        mBlips[kNpc1Index]->AddPathNode("PL4");
-        mBlips[kNpc1Index]->AddPathNode("BEC");
-        mBlips[kNpc1Index]->AddPathNode("PL5");
-        mBlips[kNpc1Index]->AddPathNode("TR1");
-        mBlips[kNpc1Index]->AddPathNode("IN1");
-        mBlips[kNpc1Index]->AddPathNode("LHE");
-        mBlips[kNpc1Index]->AddPathNode("PLO");
-        mBlips[kNpc1Index]->AddPathNode("PL3");
-        mBlips[kNpc1Index]->AddPathNode("RL1");
-        mBlips[kNpc1Index]->AddPathNode("IN4");
-        mBlips[kNpc1Index]->AddPathNode("IN3");
-        mBlips[kNpc1Index]->AddPathNode("PL2");
+            mBlips[kNpc1Index]->AddPathNode("PL3");
+            mBlips[kNpc1Index]->AddPathNode("RL1");
+            mBlips[kNpc1Index]->AddPathNode("IN4");
+            mBlips[kNpc1Index]->AddPathNode("IN3");
+            mBlips[kNpc1Index]->AddPathNode("PL2");
 
-        // If possible, pick up the path LATER based on where we started following her.
+            // Expose two new locations on the map once we're done following Buthane.
+            // Also play a little piece of dialogue.
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+                OnFollowDone();
+                mLocationButtons["CSD"]->SetEnabled(true);
+                mLocationButtons["LHM"]->SetEnabled(true);
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"2196L3WL71\", 1)");
+            });
+        }
+        else if(followMode == FollowMode::Wilkes)
+        {
+            // Wilkes will stop at PL4. But he always starts from PL0.
+            mBlips[kNpc1Index]->SetColor(kWilkesColor);
+            mBlips[kNpc1Index]->AddPathNode("PLO");
+            mBlips[kNpc1Index]->AddPathNode("PL3");
+            mBlips[kNpc1Index]->AddPathNode("RL1");
+            mBlips[kNpc1Index]->AddPathNode("IN4");
+            mBlips[kNpc1Index]->AddPathNode("VGR");
+            mBlips[kNpc1Index]->AddPathNode("PL4");
+            
+            // Expose one new location on the map once we're done following Wilkes.
+            // Also play a little piece of dialogue.
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+                OnFollowDone();
+                mLocationButtons["LER"]->SetEnabled(true);
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"2196L3WLM1\", 1)");
+            });
+        }
+        else if(followMode == FollowMode::LadyHoward)
+        {
+            mBlips[kNpc1Index]->SetColor(kEstelleColor);
+
+            // So, there are two spots we can follow Lady Howard from, and in both cases, we want to do a complete circuit :P
+            // Let's write this out...
+            std::string currLocation = Services::Get<LocationManager>()->GetLocation();
+            if(StringUtil::EqualsIgnoreCase(currLocation, "PLO"))
+            {
+                mBlips[kNpc1Index]->AddPathNode("PLO");
+                mBlips[kNpc1Index]->AddPathNode("PL3");
+                mBlips[kNpc1Index]->AddPathNode("RL1");
+                mBlips[kNpc1Index]->AddPathNode("IN4");
+                mBlips[kNpc1Index]->AddPathNode("VGR");
+                mBlips[kNpc1Index]->AddPathNode("PL4");
+                mBlips[kNpc1Index]->AddPathNode("BEC");
+                mBlips[kNpc1Index]->AddPathNode("PL5");
+                mBlips[kNpc1Index]->AddPathNode("TR1");
+                mBlips[kNpc1Index]->AddPathNode("IN1");
+                mBlips[kNpc1Index]->AddPathNode("LHE");
+                mBlips[kNpc1Index]->AddPathNode("PLO");
+            }
+            else // This should be from PL4, but let's use it as a general fallback.
+            {
+                mBlips[kNpc1Index]->AddPathNode("PL4");
+                mBlips[kNpc1Index]->AddPathNode("BEC");
+                mBlips[kNpc1Index]->AddPathNode("PL5");
+                mBlips[kNpc1Index]->AddPathNode("TR1");
+                mBlips[kNpc1Index]->AddPathNode("IN1");
+                mBlips[kNpc1Index]->AddPathNode("LHE");
+                mBlips[kNpc1Index]->AddPathNode("PLO");
+                mBlips[kNpc1Index]->AddPathNode("PL3");
+                mBlips[kNpc1Index]->AddPathNode("RL1");
+                mBlips[kNpc1Index]->AddPathNode("IN4");
+                mBlips[kNpc1Index]->AddPathNode("VGR");
+                mBlips[kNpc1Index]->AddPathNode("PL4");
+            }
+
+            // Just play a piece of dialogue after following the path and go back to previous location.
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this, currLocation]() {
+                OnFollowDone();
+
+                // Play dialogue ("they're just driving around the valley - forget that").
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"21A6L3WLX1\", 1)", [this, currLocation](const Action* action){
+                    // This one automatically puts you back where you started.
+                    ExitToLocation(currLocation);
+                });
+            });
+        }
+        else if(followMode == FollowMode::PrinceJamesMen)
+        {
+            mBlips[kNpc1Index]->SetColor(kJamesMenColor);
+
+            // This one's got a couple possible follow locations:
+            // If from PLO or LER, we use one path.
+            // If from RLC, we use another path. We can assume this is the "else" case.
+            std::string currLocation = Services::Get<LocationManager>()->GetLocation();
+            if(StringUtil::EqualsIgnoreCase(currLocation, "PLO") || StringUtil::EqualsIgnoreCase(currLocation, "LER"))
+            {
+                // Do a complete circuit starting at LHE.
+                mBlips[kNpc1Index]->AddPathNode("LHE");
+                mBlips[kNpc1Index]->AddPathNode("IN1");
+                mBlips[kNpc1Index]->AddPathNode("TR1");
+                mBlips[kNpc1Index]->AddPathNode("PL5");
+                mBlips[kNpc1Index]->AddPathNode("BEC");
+                mBlips[kNpc1Index]->AddPathNode("PL4");
+                mBlips[kNpc1Index]->AddPathNode("VGR");
+                mBlips[kNpc1Index]->AddPathNode("IN4");
+                mBlips[kNpc1Index]->AddPathNode("RL1");
+                mBlips[kNpc1Index]->AddPathNode("PL3");
+                mBlips[kNpc1Index]->AddPathNode("PLO");
+                mBlips[kNpc1Index]->AddPathNode("LHE");
+            }
+            else
+            {
+                // Do a circuit starting at RLC.
+                mBlips[kNpc1Index]->AddPathNode("MOP");
+                mBlips[kNpc1Index]->AddPathNode("IN2");
+                mBlips[kNpc1Index]->AddPathNode("IN1");
+                mBlips[kNpc1Index]->AddPathNode("TR1");
+                mBlips[kNpc1Index]->AddPathNode("PL5");
+                mBlips[kNpc1Index]->AddPathNode("BEC");
+                mBlips[kNpc1Index]->AddPathNode("PL4");
+                mBlips[kNpc1Index]->AddPathNode("VGR");
+                mBlips[kNpc1Index]->AddPathNode("IN4");
+                mBlips[kNpc1Index]->AddPathNode("RL1");
+                mBlips[kNpc1Index]->AddPathNode("PL3");
+                mBlips[kNpc1Index]->AddPathNode("PLO");
+                mBlips[kNpc1Index]->AddPathNode("LHE");
+            }
+
+            // Play dialogue once we reach LHE.
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+                OnFollowDone();
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"21F6L3WBH1\", 1)");
+            });
+        }
+        else if(followMode == FollowMode::Estelle)
+        {
+            mBlips[kNpc1Index]->SetColor(kEstelleColor);
+
+            // Estelle follows a circuit from TR1 to PL5.
+            mBlips[kNpc1Index]->AddPathNode("TR1");
+            mBlips[kNpc1Index]->AddPathNode("IN1");
+            mBlips[kNpc1Index]->AddPathNode("LHE");
+            mBlips[kNpc1Index]->AddPathNode("PLO");
+            mBlips[kNpc1Index]->AddPathNode("PL3");
+            mBlips[kNpc1Index]->AddPathNode("RL1");
+            mBlips[kNpc1Index]->AddPathNode("IN4");
+            mBlips[kNpc1Index]->AddPathNode("VGR");
+            mBlips[kNpc1Index]->AddPathNode("PL4");
+            mBlips[kNpc1Index]->AddPathNode("BEC");
+            mBlips[kNpc1Index]->AddPathNode("PL5");
+
+            // Play dialogue and show new location once we reach PL5.
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+                OnFollowDone();
+                mLocationButtons["WOD"]->SetEnabled(true);
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"21K6L3WJI1\", 1)");
+            });
+        }
+
+        // On the path defined for the NPC, always skip to wherever we are along that route, so it looks like we followed from the correct spot.
         mBlips[kNpc1Index]->SkipToPathNode(Services::Get<LocationManager>()->GetLocation());
 
         // Ego follows this blip.
         mBlips[kEgoIndex]->SetFollow(mBlips[kNpc1Index]);
+    }   
+}
 
-        // Do a little something once the path completes.
-        mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
-            mLocationButtons["CSD"]->SetEnabled(true);
-            mLocationButtons["LHM"]->SetEnabled(true);
-            Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"2196L3WL71\", 1)");
-        });
-    }
+void DrivingScreen::OnFollowDone()
+{
+    // We can interact with buttons again.
+    SetLocationButtonsInteractive(true);
+
+    // Blink ego blip again.
+    mBlips[kEgoIndex]->SetBlinkEnabled(true);
 }

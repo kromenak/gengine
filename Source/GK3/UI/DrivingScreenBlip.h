@@ -23,8 +23,10 @@ public:
     void ClearPath();
     void SetLoopPath(bool loop) { mLoopPath = loop; }
     void SkipToPathNode(const std::string& nodeName);
-    void SetFollow(DrivingScreenBlip* other) { mFollowBlip = other; }
     void SetPathCompleteCallback(std::function<void()> callback) { mPathCompleteCallback = callback; }
+
+    // Following
+    void SetFollow(DrivingScreenBlip* other) { mFollowBlip = other; }
 
     // Positioning
     void SetMapScale(const Vector2& mapScale) { mMapScale = mapScale; }
@@ -54,7 +56,7 @@ private:
     int mConnectionIndex = 0;
 
     // Amount of time to wait at each node/segment position along a path being followed.
-    const float kPathNodeWaitTime = 0.25f;
+    const float kPathNodeWaitTime = 0.2f;
     float mPathFollowTimer = 0.0f;
 
     // If true, the path loops once reaching the end.
@@ -66,7 +68,12 @@ private:
     // If set, this blip should follow this other blip's movement.
     DrivingScreenBlip* mFollowBlip = nullptr;
 
+    // Whoever is following us will use this point for their position.
+    Vector2 mFollowPoint;
+
     // For tracking whether the blip blinks. By default, no blinking.
     float mBlinkInterval = 0.0f;
     float mBlinkTimer = 0.0f;
+
+    void UpdatePathing(float deltaTime);
 };
