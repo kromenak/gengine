@@ -80,8 +80,7 @@ int IsActorAtLocation(const std::string& actorName, const std::string& locationN
     }
 
     // See if actor location matches specified location.
-    std::string location = Services::Get<LocationManager>()->GetActorLocation(actorName);
-    return StringUtil::EqualsIgnoreCase(location, locationName) ? 1 : 0;
+    return Services::Get<LocationManager>()->IsActorAtLocation(actorName, locationName) ? 1 : 0;
 }
 RegFunc2(IsActorAtLocation, int, string, string, IMMEDIATE, REL_FUNC);
 
