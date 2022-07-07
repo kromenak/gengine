@@ -67,23 +67,29 @@ void UIButton::SetDisabledTexture(Texture* texture, const Color32& color)
 
 void UIButton::OnPointerEnter()
 {
-    // If button has a texture, use cursor highlight.
-    // If button has no texture (so, perhaps an input blocker or invisible click detector), no highlight.
-    const Color32* color = mMaterial.GetColor("uColor");
-    if(mMaterial.GetDiffuseTexture() != nullptr && color != nullptr && color->GetA() > 0)
-    {
-        Services::Get<CursorManager>()->UseHighlightCursor();
-    }
-    else
-    {
-        Services::Get<CursorManager>()->UseDefaultCursor();
-    }
-	mPointerOver = true;
+    // Record pointer over.
+    mPointerOver = true;
 
-    // Play hover sound, if set.
-    if(mHoverSound != nullptr)
+    // Only show interaction prompts (visual cursor change, audio) if we can actually interact with it.
+    if(mCanInteract)
     {
-        Services::GetAudio()->PlaySFX(mHoverSound);
+        // If button has a texture, use cursor highlight.
+        // If button has no texture (so, perhaps an input blocker or invisible click detector), no highlight.
+        const Color32* color = mMaterial.GetColor("uColor");
+        if(mMaterial.GetDiffuseTexture() != nullptr && color != nullptr && color->GetA() > 0)
+        {
+            Services::Get<CursorManager>()->UseHighlightCursor();
+        }
+        else
+        {
+            Services::Get<CursorManager>()->UseDefaultCursor();
+        }
+
+        // Play hover sound, if set.
+        if(mHoverSound != nullptr)
+        {
+            Services::GetAudio()->PlaySFX(mHoverSound);
+        }
     }
 }
 
