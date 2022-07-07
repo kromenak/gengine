@@ -65,6 +65,7 @@ public:
     };
 
     DrivingScreen();
+    ~DrivingScreen();
 
     void Show(FollowMode followMode = FollowMode::None);
     void Hide();

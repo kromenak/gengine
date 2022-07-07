@@ -69,6 +69,12 @@ DrivingScreen::DrivingScreen() : Actor(Actor::TransformType::RectTransform)
     }
 }
 
+DrivingScreen::~DrivingScreen()
+{
+    // We created this, so we must delete it.
+    delete mBlipTexture;
+}
+
 void DrivingScreen::Show(FollowMode followMode)
 {
     // Set which locations are present depending on game state.
