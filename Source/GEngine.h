@@ -5,6 +5,7 @@
 // init, running the game loop, shutdown, and some coordination between systems.
 //
 #pragma once
+#include <functional>
 #include <vector>
 
 #include "ActionManager.h"
@@ -41,7 +42,7 @@ public:
     void AddActor(Actor* actor);
     const std::vector<Actor*>& GetActors() const { return mActors; }
     
-	void LoadScene(std::string name) { mSceneToLoad = name; }
+	void LoadScene(const std::string& name, std::function<void()> callback = nullptr) { mSceneToLoad = name; mSceneLoadedCallback = callback; }
     void UnloadScene();
     Scene* GetScene() { return mScene; }
 
@@ -84,6 +85,9 @@ private:
 	// A scene that's been requested to load. If empty, no pending scene change.
 	// Scene loads happen at the end of a frame, to avoid a scene change mid-frame.
 	std::string mSceneToLoad;
+
+    // Callback to execute when scene load completes.
+    std::function<void()> mSceneLoadedCallback = nullptr;
 	
     void ProcessInput();
     void Update();

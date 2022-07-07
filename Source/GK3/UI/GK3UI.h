@@ -7,6 +7,7 @@
 #include <functional>
 
 class DrivingScreen;
+class SceneTransitioner;
 class Timeblock;
 class TimeblockScreen;
 class TitleScreen;
@@ -16,11 +17,18 @@ class GK3UI
 public:
     void ShowTitleScreen();
     void ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::function<void()> callback);
+    
+    void ShowSceneTransitioner();
+    void HideSceneTransitioner();
+
     void ShowDrivingScreen(int followState = 0);
 
 private:
     TitleScreen* mTitleScreen = nullptr;
     TimeblockScreen* mTimeblockScreen = nullptr;
+
+    SceneTransitioner* mSceneTransitioner = nullptr;
+
     DrivingScreen* mDrivingScreen = nullptr;
 };
 

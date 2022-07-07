@@ -479,6 +479,13 @@ void GEngine::LoadSceneInternal()
     // Once loading is done, init scene and away we go.
     Loader::DoAfterLoading([this](){
         mScene->Init();
+
+        // Execute scene load callback, if any.
+        if(mSceneLoadedCallback != nullptr)
+        {
+            mSceneLoadedCallback();
+            mSceneLoadedCallback = nullptr;
+        }
     });
 }
 

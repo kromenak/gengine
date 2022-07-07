@@ -1,6 +1,7 @@
 #include "GK3UI.h"
 
 #include "DrivingScreen.h"
+#include "SceneTransitioner.h"
 #include "TimeblockScreen.h"
 #include "TitleScreen.h"
 
@@ -47,7 +48,7 @@ void GK3UI::ShowDrivingScreen(int followState)
     // 3 is supposed to be for following Mosely during 102P timeblock. However, this appears to not be in the final game?
     else if(followState == 4)
     {
-        mDrivingScreen->Show(DrivingScreen::FollowMode::LadyHowardEstelle1);
+        mDrivingScreen->Show(DrivingScreen::FollowMode::LadyHoward);
     }
     else if(followState == 5)
     {
@@ -55,10 +56,28 @@ void GK3UI::ShowDrivingScreen(int followState)
     }
     else if(followState == 6)
     {
-        mDrivingScreen->Show(DrivingScreen::FollowMode::LadyHowardEstelle2);
+        mDrivingScreen->Show(DrivingScreen::FollowMode::Estelle);
     }
     else
     {
         mDrivingScreen->Show();
+    }
+}
+
+void GK3UI::ShowSceneTransitioner()
+{
+    if(mSceneTransitioner == nullptr)
+    {
+        mSceneTransitioner = new SceneTransitioner();
+        mSceneTransitioner->SetIsDestroyOnLoad(false);
+    }
+    mSceneTransitioner->Show();
+}
+
+void GK3UI::HideSceneTransitioner()
+{
+    if(mSceneTransitioner != nullptr)
+    {
+        mSceneTransitioner->Hide();
     }
 }
