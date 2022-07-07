@@ -182,26 +182,7 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 
 void ActionManager::ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback)
 {
-    // We should only execute one action at a time.
-    if(mCurrentAction != nullptr)
-    {
-        //TODO: Log?
-        return;
-    }
-    mCurrentAction = &mSheepCommandAction;
-    mCurrentActionFinishCallback = finishCallback;
-
-    // Log it!
-    mSheepCommandAction.script.text = "wait CallSheep(\"" + sheepName + "\", \"" + functionName + "\")";
-    Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", mSheepCommandAction.ToString().c_str()));
-
-    // Increment action ID.
-    ++mActionId;
-
-    //TODO: We mayyyy want to actually compile a sheep script snippet and execute it here.
-    //TODO: For example, the end conversation does a `SHEEP_COMMAND:NONE:NONE`: wait CallSheep("Name", "Function") in the original game.
-    //TODO: But for now, let's just use the sheep command action as a placeholder and execute the function call.
-    Services::GetSheep()->Execute(sheepName, functionName, std::bind(&ActionManager::OnActionExecuteFinished, this));
+    ExecuteSheepAction("wait CallSheep(\"" + sheepName + "\", \"" + functionName + "\")", finishCallback);
 }
 
 void ActionManager::ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback)
@@ -234,6 +215,7 @@ void ActionManager::ExecuteSheepAction(const std::string& sheepScriptText, std::
     }
     else
     {
+        // If sheep fails to compile, still finish the action to avoid softlocking.
         OnActionExecuteFinished();
     }
 }
