@@ -15,9 +15,11 @@ TYPE_DEF_BASE(InventoryManager);
 
 InventoryManager::InventoryManager()
 {
-    TIMER_SCOPED("InventoryManager Construct");
+    TIMER_SCOPED("InventoryManager::InventoryManager");
 
     Loader::Load([this]() {
+        TIMER_SCOPED("InventoryManager::Load");
+
         // Get VERBS text file as a raw buffer.
         TextAsset* textFile = Services::GetAssets()->LoadText("INVENTORYSPRITES.TXT");
 
@@ -84,6 +86,8 @@ InventoryManager::InventoryManager()
                 mInventoryItems[entry.key] = textures;
             }
         }
+
+        Services::GetAssets()->UnloadText(textFile);
     });
     
 	// Create inventory screen UI.

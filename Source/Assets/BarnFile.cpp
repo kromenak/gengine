@@ -91,7 +91,7 @@ BarnFile::BarnFile(const std::string& filePath) :
     // Seek to table of contents offset.
     mReader.Seek(tocOffset);
     
-    // First value in toc is number of toc entries.
+    // First value in TOC is number of TOC entries.
     unsigned int tocEntryCount = mReader.ReadUInt();
     
     // Each toc entry will specify a header offset and a data offset.
@@ -102,7 +102,7 @@ BarnFile::BarnFile(const std::string& filePath) :
     dataOffsets.reserve(tocEntryCount);
     
     // For each toc entry, read in relevant data.
-    for(int i = 0; i < tocEntryCount; i++)
+    for(int i = 0; i < tocEntryCount; ++i)
     {
         // The type is either "DDir" or "Data".
         // DDir specifies a directory of assets.
@@ -110,10 +110,7 @@ BarnFile::BarnFile(const std::string& filePath) :
         unsigned int type = mReader.ReadUInt();
         
         // Some unknown values.
-        mReader.ReadUInt();
-        mReader.ReadUInt();
-        mReader.ReadUInt();
-        mReader.ReadUInt();
+        mReader.Skip(16);
         
         // Read header and data offsets.
         unsigned int headerOffset = mReader.ReadUInt();
@@ -134,7 +131,8 @@ BarnFile::BarnFile(const std::string& filePath) :
     
     // Now we need to iterate over each header/data offset pair in turn.
     // The header specifies data that is common to all assets in the data section.
-    for(int i = 0; i < headerOffsets.size(); i++)
+    mReferencedBarns.resize(tocEntryCount);
+    for(int i = 0; i < headerOffsets.size(); ++i)
     {
         mReader.Seek(headerOffsets[i]);
         
@@ -142,39 +140,36 @@ BarnFile::BarnFile(const std::string& filePath) :
         // a Barn file can contain "pointers" to assets in other Barn files.
         // If this name is empty, it means the asset is contained within THIS Barn file.
         // However, if the name isn't empty, it means the asset is in another Barn file.
-        std::string barnFileName;
-        mReader.ReadStringBuffer(32, barnFileName);
+        mReader.ReadStringBuffer(32, mReferencedBarns[i]);
+        bool isPointer = !mReferencedBarns[i].empty();
 
-        // Unknown value.
-        mReader.ReadUInt();
-        
-        // A human-readable description for this Barn file.
-        // Ex: "Gabriel Knight 3 Day 1/2/3 Common"
-        mReader.Skip(40);
-        
-        // Unknown value.
-        mReader.ReadUInt();
-        
+        // 4 bytes - unknown value
+        // 40 bytes - a human-readable description for this Barn file
+        // 4 bytes - unknown value
+        mReader.Skip(48);
+
         int numAssets = mReader.ReadUInt();
 		mReader.Seek(dataOffsets[i]);
-        for(int j = 0; j < numAssets; j++)
+        for(int j = 0; j < numAssets; ++j)
         {
             BarnAsset asset;
             
             // The asset should save which Barn file it is in.
             // This will help later when trying to load assets.
-            asset.barnFileName = barnFileName;
+            if(isPointer)
+            {
+                asset.barnFileName = &mReferencedBarns[i];
+            }
             
-            // Asset size, in bytes, but we need to read compression
-            // value before we know whether this is compressed or uncompressed size.
-            unsigned int assetSize = mReader.ReadUInt();
+            // Asset size, in bytes.
+            // But we need to read compression type before we know whether this is compressed or uncompressed size.
+            asset.size = mReader.ReadUInt();
             
             // Read in the asset offset. This is the offset from the start of the data section.
             asset.offset = mReader.ReadUInt();
             
             // Unknown values.
-            mReader.ReadUInt();
-            mReader.ReadByte();
+            mReader.Skip(5);
             
             // Read in compression type.
             asset.compressionType = (CompressionType)mReader.ReadByte();
@@ -185,33 +180,12 @@ BarnFile::BarnFile(const std::string& filePath) :
             {
                 asset.compressionType = CompressionType::None;
             }
-            
-            // If no compression, uncompressed/compressed sizes are the same.
-            // If compressed, we only know the compressed size for now.
-            if(asset.compressionType == CompressionType::None)
-            {
-                asset.uncompressedSize = asset.compressedSize = assetSize;
-            }
-            else
-            {
-                asset.compressedSize = assetSize;
-                
-                // If the barn file name is empty, it means the asset is in THIS file.
-                // So, we can actually seek to that offset in the file and read the uncompressed size.
-                if(!asset.IsPointer())
-                {
-                    int pos = mReader.GetPosition();
-                    mReader.Seek(mDataOffset + asset.offset);
-                    asset.uncompressedSize = mReader.ReadUInt();
-                    mReader.Seek(pos);
-                }
-            }
 			
             // Read in asset name.
             mReader.ReadTinyString(asset.name);
             mReader.Skip(1); // null terminator is also present - skip it
             //std::cout << asset.name << ", " << (int)asset.compressionType << ", " << asset.compressedSize << ", " << asset.uncompressedSize << std::endl;
-			
+
             // Map asset name to asset for fast lookup later.
             mAssetMap[asset.name] = asset;
         }
@@ -228,156 +202,156 @@ BarnAsset* BarnFile::GetAsset(const std::string& assetName)
     return nullptr;
 }
 
-bool BarnFile::Extract(const std::string& assetName, char *buffer, int bufferSize)
+char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)
 {
+    // Use a sane default value for this.
+    outBufferSize = 0;
+
     // Get the asset handle associated with this asset name.
     BarnAsset* asset = GetAsset(assetName);
     if(asset == nullptr)
     {
         std::cout << "No asset named " << assetName << "in Barn file!" << std::endl;
-        return false;
+        return nullptr;
     }
-    return Extract(asset, buffer, bufferSize);
-}
 
-bool BarnFile::Extract(BarnAsset* asset, char* buffer, int bufferSize)
-{
-    if(asset == nullptr) { return false; }
-    
-    // Make sure this asset actually exists within this barn file, and it isn't a pointer to another barn file.
+     // Make sure this asset actually exists within this barn file, and it isn't a pointer to another barn file.
     if(asset->IsPointer())
     {
-		std::cout << "Asset " << asset->name << " can't be extracted from Barn - it is an asset pointer!" << std::endl;
-        return false;
+        std::cout << "Can't create asset buffer for " << asset->name << " - it is an asset pointer!" << std::endl;
+        return nullptr;
     }
-    
-    // If the buffer provided is too small for the asset, we can't extract it. Ideally, the buffer is EXACTLY the right size!
-    if(bufferSize < asset->uncompressedSize)
-    {
-		std::cout << "Buffer is too small to contain extracted asset." << std::endl;
-        return false;
-    }
-    
+
     // Method used to extract will depend upon the compression type for the asset.
     if(asset->compressionType == CompressionType::None)
     {
-        // Seek to the data possion and read the data into the buffer. Since it's already uncompressed, we're done!
-        //cout << "Reading from offset " << mDataOffset + asset->offset << endl;
-        //cout << "Reading " << asset->uncompressedSize << " bytes " << endl;
+        // Allocate buffer to hold asset data.
+        char* buffer = new char[asset->size];
+        outBufferSize = asset->size;
+
+        // Seek to the data and read into the buffer. Since it's already uncompressed, we're done!
         mReaderMutex.lock();
         mReader.Seek(mDataOffset + asset->offset);
-        mReader.Read(buffer, asset->uncompressedSize);
+        mReader.Read(buffer, asset->size);
         mReaderMutex.unlock();
+        return buffer;
     }
-    else if(asset->compressionType == CompressionType::Zlib)
+
+    // Otherwise, data is compressed.
+    // Create buffer to hold compressed data.
+    unsigned char* compressedBuffer = new unsigned char[asset->size];
+
+    // Read compressed data into a buffer.
+    // Also grab the decompressed asset size while we're there.
+    mReaderMutex.lock();
+    mReader.Seek(mDataOffset + asset->offset);
+    outBufferSize = mReader.ReadUInt();
+    mReader.Skip(4);
+    int readCount = mReader.Read(compressedBuffer, asset->size);
+    mReaderMutex.unlock();
+
+    // Make sure we read what we were expecting.
+    if(readCount != asset->size)
     {
-        // Read compressed data into a buffer.
-        unsigned char* compressedBuffer = new unsigned char[asset->compressedSize];
-        mReaderMutex.lock();
-        mReader.Seek(mDataOffset + 8 + asset->offset);
-        mReader.Read(compressedBuffer, asset->compressedSize);
-        mReaderMutex.unlock();
+        std::cout << "Didn't read desired number of bytes." << std::endl;
+        delete[] compressedBuffer;
+        return nullptr;
+    }
         
+    // Create buffer for uncompressed data.
+    char* buffer = new char[outBufferSize];
+
+    // How we decompress the data depends on the compression type...
+    if(asset->compressionType == CompressionType::Zlib)
+    {
+        // Create params object.
         z_stream strm;
         strm.next_in = compressedBuffer;
-        strm.avail_in = asset->compressedSize;
+        strm.avail_in = asset->size;
         strm.next_out = (unsigned char*)buffer;
-        strm.avail_out = bufferSize;
+        strm.avail_out = outBufferSize;
         strm.zalloc = Z_NULL;
         strm.zfree = Z_NULL;
         strm.opaque = Z_NULL;
-        
+
         // Make sure zlib is initialized for "inflation".
         int result = inflateInit(&strm);
         if(result != Z_OK)
         {
-			std::cout << "Error when calling inflateInit: " << result << std::endl;
+            std::cout << "Error when calling inflateInit: " << result << std::endl;
             delete[] compressedBuffer;
-            return false;
+            delete[] buffer;
+            return nullptr;
         }
-        
+
         // Inflate the data!
         result = inflate(&strm, Z_FINISH);
         if(result != Z_STREAM_END)
         {
-			std::cout << "Inflate didn't inflate entire stream, or an error occurred: " << result << std::endl;
+            std::cout << "Inflate didn't inflate entire stream, or an error occurred: " << result << std::endl;
             delete[] compressedBuffer;
-            return false;
+            delete[] buffer;
+            return nullptr;
         }
-        
+
         // Uninit zlib.
         result = inflateEnd(&strm);
         if(result != Z_OK)
         {
-			std::cout << "Error while ending inflate: " << result << std::endl;
+            std::cout << "Error while ending inflate: " << result << std::endl;
             delete[] compressedBuffer;
+            delete[] buffer;
             return false;
         }
-
-        // Delete compressed data buffer.
-        delete[] compressedBuffer;
     }
     else if(asset->compressionType == CompressionType::Lzo)
     {
-		// Create buffer to hold compressed data.
-        unsigned char* compressedBuffer = new unsigned char[asset->compressedSize];
-		if(compressedBuffer == nullptr)
-		{
-			std::cout << "Out of memory" << std::endl;
-			return false;
-		}
-		
-		// Read compressed data into a buffer.
-        mReaderMutex.lock();
-        mReader.Seek(mDataOffset + 8 + asset->offset);
-        int readCount = mReader.Read(compressedBuffer, asset->compressedSize);
-        mReaderMutex.unlock();
-		if(readCount != asset->compressedSize)
-		{
-			std::cout << "Didn't read desired number of bytes." << std::endl;
-			delete[] compressedBuffer;
-			return false;
-		}
-		
         // Make sure LZO library is initialized.
-		static bool initLzo = false;
-		if(!initLzo)
-		{
-			int initResult = lzo_init();
-			if(initResult == LZO_E_OK)
-			{
-				initLzo = true;
-			}
-			else
-			{
-				std::cout << "Failed to init LZO!" << std::endl;
-				delete[] compressedBuffer;
-				return false;
-			}
-		}
-		
+        static bool initLzo = false;
+        if(!initLzo)
+        {
+            int initResult = lzo_init();
+            if(initResult == LZO_E_OK)
+            {
+                initLzo = true;
+            }
+            else
+            {
+                std::cout << "Failed to init LZO!" << std::endl;
+                delete[] compressedBuffer;
+                delete[] buffer;
+                return nullptr;
+            }
+        }
+        
         // Decompress using LZO library. GK3 data appears to be compressed with lzo1x.
-		//std::cout << asset->name << ": decompressing " << asset->compressedSize << " bytes to a buffer of size " << bufferSize << std::endl;
-		int result = lzo1x_decompress((lzo_bytep)compressedBuffer, (lzo_uint)asset->compressedSize, (lzo_bytep)buffer, (lzo_uintp)&bufferSize, nullptr);
-		
-		// Delete compressed data buffer.
-		delete[] compressedBuffer;
-		
-		// For some reason *most* GK3 data decompresses with result of LZO_E_INPUT_NOT_CONSUMED.
-		// This still works OK. It may indicate that "compressedSize" passed is larger than the compressed data.
-		// I'll let it slide for now...but it might indicate an earlier read error, or I'm missing something somewhere.
-		if(result != LZO_E_OK && result != LZO_E_INPUT_NOT_CONSUMED)
-		{
-			std::cout << "Error during LZO decompress: " << result << std::endl;
-			return false;
-		}
+        //std::cout << asset->name << ": decompressing " << asset->compressedSize << " bytes to a buffer of size " << bufferSize << std::endl;
+        int result = lzo1x_decompress((lzo_bytep)compressedBuffer, (lzo_uint)asset->size, (lzo_bytep)buffer, (lzo_uintp)&outBufferSize, nullptr);
+        
+        // For some reason *most* GK3 data decompresses with result of LZO_E_INPUT_NOT_CONSUMED.
+        // This still works OK. It may indicate that "compressedSize" passed is larger than the compressed data.
+        // I'll let it slide for now...but it might indicate an earlier read error, or I'm missing something somewhere.
+        if(result != LZO_E_OK && result != LZO_E_INPUT_NOT_CONSUMED)
+        {
+            std::cout << "Error during LZO decompress: " << result << std::endl;
+            delete[] compressedBuffer;
+            delete[] buffer;
+            return nullptr;
+        }
     }
     else
     {
-		std::cout << "Asset " << asset->name << " has invalid compression type " << (int)asset->compressionType << std::endl;
-        return false;
+        std::cout << "Asset " << asset->name << " has invalid compression type " << (int)asset->compressionType << std::endl;
+        delete[] compressedBuffer;
+        delete[] buffer;
+        return nullptr;
     }
-    return true;
+
+    // Delete compressed data buffer.
+    delete[] compressedBuffer;
+
+    // Return decompressed buffer.
+    return buffer;
 }
 
 bool BarnFile::WriteToFile(const std::string& assetName)
@@ -385,7 +359,7 @@ bool BarnFile::WriteToFile(const std::string& assetName)
 	return WriteToFile(assetName, "");
 }
 
-bool BarnFile::WriteToFile(const std::string& assetName, const std::string outputDir)
+bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outputDir)
 {
 	// Retrieve the asset handle, first of all.
 	BarnAsset* asset = GetAsset(assetName);
@@ -425,21 +399,22 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string outpu
 	
 	// Extract the asset and write it to file.
 	bool result = false;
-	char* assetData = new char[asset->uncompressedSize];
-	if(Extract(assetName, assetData, asset->uncompressedSize))
+    unsigned int bufferSize = 0;
+    char* assetData = CreateAssetBuffer(assetName, bufferSize);
+	if(assetData != nullptr)
 	{
 		// Textures can't be written directly to file and open correctly.
 		// Handle those separately (TODO: More modular/extendable way to do this?)
 		if(assetName.find(".BMP") != std::string::npos)
 		{
-			Texture tex(assetName, assetData, asset->uncompressedSize);
+			Texture tex(assetName, assetData, bufferSize);
 			tex.WriteToFile(outputPath);
 			result = true;
 		}
-        else if(assetName.find(".SHP") != std::string::npos && SheepScript::IsSheepDataCompiled(assetData, asset->uncompressedSize))
+        else if(assetName.find(".SHP") != std::string::npos && SheepScript::IsSheepDataCompiled(assetData, bufferSize))
         {
             // If sheep asset is compiled, we need to decompile it to get any useful data.
-            SheepScript script(assetName, assetData, asset->uncompressedSize);
+            SheepScript script(assetName, assetData, bufferSize);
             script.Decompile(outputPath);
             result = true;
         }
@@ -449,7 +424,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string outpu
 			std::ofstream fileStream(outputPath);
 			if(fileStream.good())
 			{
-				fileStream.write(assetData, asset->uncompressedSize);
+				fileStream.write(assetData, bufferSize);
 				fileStream.close();
 				result = true;
 			}
@@ -457,7 +432,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string outpu
 	}
 	
 	// Output the result of the write.
-	if(result == true)
+	if(result)
 	{
 		std::cout << "Wrote out " << asset->name << std::endl;
 	}
@@ -478,7 +453,7 @@ void BarnFile::WriteAllToFile(const std::string& search)
 	return WriteAllToFile(search, "");
 }
 
-void BarnFile::WriteAllToFile(const std::string& search, const std::string outputDir)
+void BarnFile::WriteAllToFile(const std::string& search, const std::string& outputDir)
 {
 	// Search through all assets for the search term.
 	// If it's found, write the asset to file.
@@ -496,26 +471,15 @@ void BarnFile::WriteAllToFile(const std::string& search, const std::string outpu
 
 void BarnFile::OutputAssetList() const
 {
-	for(auto it = mAssetMap.begin(); it != mAssetMap.end(); it++)
-	{
-		// Don't output asset pointers.
-		if(!it->second.barnFileName.empty()) { continue; }
-		
-		// Name and compression type.
-		std::cout << it->second.name << " - " << (int)it->second.compressionType;
-		
-		// Compressed and uncompressed sizes.
-		std::cout << " - " << it->second.compressedSize;
-		if(it->second.compressionType != CompressionType::None)
-		{
-			std::cout << " - " << it->second.uncompressedSize;
-		}
-		
-		// Barn name.
-		if(!it->second.barnFileName.empty())
-		{
-			std::cout << " (" << it->second.barnFileName << ")";
-		}
-		std::cout << std::endl;
-	}
+    for(auto& entry : mAssetMap)
+    {
+        // Don't output asset pointers.
+        if(entry.second.IsPointer()) { continue; }
+
+        // Name and compression type.
+        std::cout << entry.second.name << " - " << (int)entry.second.compressionType;
+
+        // Size.
+        std::cout << " - " << entry.second.size << std::endl;
+    }
 }

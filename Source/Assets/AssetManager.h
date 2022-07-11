@@ -107,7 +107,7 @@ private:
     
     // A map of loaded barn files. If an asset isn't found on any search path,
     // we then search each loaded barn file for the asset.
-    std::unordered_map_ci<std::string, BarnFile*> mLoadedBarns;
+    std::unordered_map_ci<std::string, BarnFile> mLoadedBarns;
     
     // A list of loaded assets, so we can just return existing assets if already loaded.
     std::unordered_map_ci<std::string, Audio*> mLoadedAudios;

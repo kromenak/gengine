@@ -19,6 +19,7 @@
 #include "LocationManager.h"
 #include "GMath.h"
 #include "MeshRenderer.h"
+#include "Profiler.h"
 #include "RectTransform.h"
 #include "Services.h"
 #include "SoundtrackPlayer.h"
@@ -68,13 +69,15 @@ Scene::~Scene()
 
 void Scene::Load()
 {
+    TIMER_SCOPED("Scene::Load");
+
 	// If this is true, we are calling load when scene is already loaded!
 	if(mSceneData != nullptr)
 	{
 		//TODO: Ignore for now, but maybe we should Unload and then re-Load?
 		return;
 	}
-	
+
     // Scene layer is now active!
     Services::Get<LayerManager>()->PushLayer(&mLayer);
     

@@ -10,7 +10,7 @@
 
 int main(int argc, const char* argv[])
 {
-    printf("Application Start!\n");
+    printf("GEngine vX.Y.Z\n");
 
     // Create the engine.
 	GEngine engine;

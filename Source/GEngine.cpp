@@ -463,6 +463,7 @@ void GEngine::LoadSceneInternal()
     
     // Initiate scene load on background thread.
     Loader::Load([this]() {
+        TIMER_SCOPED("GEngine::LoadSceneInternal::Load");
         // Create the new scene.
         //TODO: Scene constructor should probably ONLY take a scene name.
         //TODO: Internally, we can call to GameProgress or whatnot as needed, but that's very GK3-specific stuff.

@@ -2,6 +2,7 @@
 
 #include "IniParser.h"
 #include "Loader.h"
+#include "Profiler.h"
 #include "Services.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -11,6 +12,7 @@ TYPE_DEF_BASE(CharacterManager);
 CharacterManager::CharacterManager()
 {
     Loader::Load([this]() {
+        TIMER_SCOPED("CharacterManager::Load");
 
         // Read in faces first, as character configs reference these.
         {
@@ -335,7 +337,6 @@ CharacterManager::CharacterManager()
                 else
                 {
                     config.faceConfig = &mDefaultFaceConfig;
-                    Services::GetReports()->Log("Error", StringUtil::Format("Error: Missing face config '%s'", faceIdentifer.c_str()));
                 }
             }
         }

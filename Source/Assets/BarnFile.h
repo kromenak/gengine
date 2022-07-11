@@ -21,12 +21,11 @@ enum class CompressionType
     Lzo = 2
 };
 
-class BarnAsset
+struct BarnAsset
 {
-public:
     // Name of barn file containing this asset.
-    // This is ONLY set if the asset is not actually contained in the current Barn (e.g. it's a "pointer" to another barn file).
-    std::string barnFileName;
+    // This is ONLY non-null if the asset is contained in some other Barn (e.g. it's a "pointer" to another Barn file).
+    std::string* barnFileName = nullptr;
 
     // The name of the asset.
     std::string name;
@@ -34,37 +33,35 @@ public:
     // Offset of this asset within the Barn file data blob.
     unsigned int offset = 0;
 
-    // If the asset is compressed, and what it's compressed size is.
+    // The size of this asset's data in the Barn file data blob.
+    unsigned int size = 0;
+
+    // Compression type for this asset.
+    // If set, the asset needs to be decompressed to be usable.
     CompressionType compressionType = CompressionType::None;
-    unsigned int compressedSize = 0;
-
-    // The uncompressed size of the asset.
-    // If the asset is not compressed, this size is equal to compressedSize.
-    unsigned int uncompressedSize = 0;
-
+    
     // True if this BarnAsset is just a pointer to another barn file.
-    bool IsPointer() const { return !barnFileName.empty(); }
+    bool IsPointer() const { return barnFileName != nullptr; }
 };
 
 class BarnFile
 {
 public:
     BarnFile(const std::string& filePath);
-	
+
 	// Retrieves an asset handle, if it exists in this bundle.
     BarnAsset* GetAsset(const std::string& assetName);
-	
-	// Extracts an asset into the provided buffer.
-    bool Extract(const std::string& assetName, char* buffer, int bufferSize);
-    bool Extract(BarnAsset* asset, char* buffer, int bufferSize);
-	
+
+    // Creates a buffer containing the desired asset. Caller owns the returned buffer.
+    char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
+
 	// For debugging, write assets to file.
     bool WriteToFile(const std::string& assetName);
-	bool WriteToFile(const std::string& assetName, const std::string outputDir);
+	bool WriteToFile(const std::string& assetName, const std::string& outputDir);
 	
 	// For debugging, write assets to file whose names match a search string.
 	void WriteAllToFile(const std::string& search);
-	void WriteAllToFile(const std::string& search, const std::string outputDir);
+	void WriteAllToFile(const std::string& search, const std::string& outputDir);
 	
 	// For debugging, output asset list to cout.
 	void OutputAssetList() const;
@@ -90,8 +87,12 @@ private:
     // Extraction may occur on multiple threads at once, so a mutex is required to guard access.
     BinaryReader mReader;
     std::mutex mReaderMutex;
+
+    // If *this* Barn contains pointers to *other* Barns, this contains the names of those other Barns.
+    // Individual assets that are pointers will point to these elements.
+    std::vector<std::string> mReferencedBarns;
     
     // Map of asset name to an asset handle. Assets must be extracted before being used.
     // Asset names are case-insensitive.
-    std::unordered_map_ci<std::string, BarnAsset> mAssetMap;
+    std::string_map_ci<BarnAsset> mAssetMap;
 };

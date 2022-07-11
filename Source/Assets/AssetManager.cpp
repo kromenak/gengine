@@ -92,7 +92,7 @@ AssetManager::~AssetManager()
 	UnloadAssets(mLoadedSoundtracks);
 	UnloadAssets(mLoadedAudios);
 	
-	UnloadAssets(mLoadedBarns);
+    mLoadedBarns.clear();
 }
 
 void AssetManager::AddSearchPath(const std::string& searchPath)
@@ -110,7 +110,7 @@ std::string AssetManager::GetAssetPath(const std::string& fileName)
     // We have a set of paths, at which we should search for the specified filename.
     // So, iterate each search path and see if the file is in that folder.
     std::string assetPath;
-    for(const std::string& searchPath : mSearchPaths)
+    for(auto& searchPath : mSearchPaths)
     {
         if(Path::FindFullPath(fileName, searchPath, assetPath))
         {
@@ -155,7 +155,7 @@ bool AssetManager::LoadBarn(const std::string& barnName)
     }
     
     // Load barn file.
-    mLoadedBarns[barnName] = new BarnFile(assetPath);
+    mLoadedBarns.emplace(barnName, assetPath);
 	return true;
 }
 
@@ -164,10 +164,6 @@ void AssetManager::UnloadBarn(const std::string& barnName)
     // If the barn isn't in the map, we can't unload it!
     auto iter = mLoadedBarns.find(barnName);
     if(iter == mLoadedBarns.end()) { return; }
-    
-    // Delete barn.
-    BarnFile* barn = iter->second;
-    delete barn;
     
     // Remove from map.
     mLoadedBarns.erase(iter);
@@ -197,7 +193,7 @@ void AssetManager::WriteAllBarnAssetsToFile(const std::string& search, const std
 	// Pass the buck to all loaded barn files.
 	for(auto& entry : mLoadedBarns)
 	{
-		entry.second->WriteAllToFile(search, outputDir);
+		entry.second.WriteAllToFile(search, outputDir);
 	}
 }
 
@@ -384,7 +380,7 @@ BarnFile* AssetManager::GetBarn(const std::string& barnName)
 	auto iter = mLoadedBarns.find(barnName);
 	if(iter != mLoadedBarns.end())
 	{
-		return iter->second;
+		return &iter->second;
 	}
 	
 	//TODO: Maybe load barn if not loaded?
@@ -394,25 +390,25 @@ BarnFile* AssetManager::GetBarn(const std::string& barnName)
 BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 {
 	// Iterate over all loaded barn files to find the asset.
-	for(const auto& entry : mLoadedBarns)
+	for(auto& entry : mLoadedBarns)
 	{
-		BarnAsset* asset = entry.second->GetAsset(fileName);
+		BarnAsset* asset = entry.second.GetAsset(fileName);
 		if(asset != nullptr)
 		{
 			// If the asset is a pointer, we need to redirect to the correct BarnFile.
 			// If the correct Barn isn't available, spit out an error and fail.
 			if(asset->IsPointer())
 			{
-                BarnFile* barn = GetBarn(asset->barnFileName);
+                BarnFile* barn = GetBarn(*asset->barnFileName);
                 if(barn == nullptr)
                 {
-                    std::cout << "Asset " << fileName << " exists in Barn " << asset->barnFileName << ", but that Barn is not loaded!" << std::endl;
+                    std::cout << "Asset " << fileName << " exists in Barn " << (*asset->barnFileName) << ", but that Barn is not loaded!" << std::endl;
                 }
                 return barn;
 			}
 			else
 			{
-				return entry.second;
+				return &entry.second;
 			}
 		}
 	}
@@ -522,22 +518,7 @@ char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int
 	BarnFile* barn = GetBarnContainingAsset(assetName);
 	if(barn != nullptr)
 	{
-		// Find asset entry in this barn, or fail.
-		BarnAsset* barnAsset = barn->GetAsset(assetName);
-		if(barnAsset == nullptr)
-		{
-			std::cout << "Asset " << assetName << " appears to be in barn " << barn->GetName() << " (based on asset manifest), but could not retrieve the asset!" << std::endl;
-			return nullptr;
-		}
-		
-		// Create a buffer of the correct size.
-		outBufferSize = barnAsset->uncompressedSize;
-		char* buffer = new char[outBufferSize];
-		
-		// Extract the asset to that buffer.
-        // If the asset is compressed, this will perform decompression.
-		barn->Extract(barnAsset, buffer, outBufferSize);
-		return buffer;
+        return barn->CreateAssetBuffer(assetName, outBufferSize);
 	}
 	
 	// Couldn't find this asset!
