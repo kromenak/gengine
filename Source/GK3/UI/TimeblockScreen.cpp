@@ -56,12 +56,13 @@ TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
     rectTransform->SetAnchorMax(Vector2::One);
 
     // Add a black background that covers the entire canvas.
-    UIImage* backgroundImage = AddComponent<UIImage>();
-    canvas->AddWidget(backgroundImage);
-    backgroundImage->SetColor(Color32::Black);
+    UIImage* blackBackgroundImage = AddComponent<UIImage>();
+    canvas->AddWidget(blackBackgroundImage);
+    blackBackgroundImage->SetColor(Color32::Black);
 
     // Add background image.
     Actor* backgroundImageActor = new Actor(Actor::TransformType::RectTransform);
+    backgroundImageActor->GetTransform()->SetParent(GetTransform());
     mBackgroundImage = backgroundImageActor->AddComponent<UIImage>();
     canvas->AddWidget(mBackgroundImage);
 
