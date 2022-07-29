@@ -95,7 +95,7 @@ void SheepScriptBuilder::StartFunction(std::string functionName)
 	
 	// All sheep functions are case-insensitive.
 	// So, lower-case the function name in the hash table, so we can lookup consistently.
-    mFunctions[StringUtil::ToLowerCopy(functionName)] = (int)mBytecode.size();
+    mFunctions[functionName] = (int)mBytecode.size();
 }
 
 void SheepScriptBuilder::EndFunction(std::string functionName)

@@ -12,6 +12,7 @@
 
 #include "SheepSysFunc.h"
 #include "SheepVM.h"
+#include "StringUtil.h"
 
 class BinaryReader;
 class SheepScriptBuilder;
@@ -31,6 +32,7 @@ public:
     std::vector<SheepValue> GetVariables() { return mVariables; }
     
     int GetFunctionOffset(const std::string& functionName);
+    const std::string* GetFunctionAtOffset(int offset) const;
     
     char* GetBytecode() { return mBytecode; }
     int GetBytecodeLength() { return mBytecodeLength; }
@@ -51,7 +53,7 @@ private:
     std::vector<SheepValue> mVariables;
     
     // Maps a function name to it's offset in the bytecode.
-	std::unordered_map<std::string, int> mFunctions;
+	std::string_map_ci<int> mFunctions;
     
     // The bytecode, grabbed directly from the code section.
     // Just pass this to the VM and aaaaawayyyyy we go!

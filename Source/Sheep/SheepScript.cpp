@@ -52,16 +52,25 @@ std::string* SheepScript::GetStringConst(int offset)
 
 int SheepScript::GetFunctionOffset(const std::string& functionName)
 {
-	// All sheep functions are case-insensitive. So, we only use lowercase names for consistency.
-	std::string lowerFunctionName = StringUtil::ToLowerCopy(functionName);
-	
 	// Find it and return it, or fail with -1 offset.
-    auto it = mFunctions.find(lowerFunctionName);
+    auto it = mFunctions.find(functionName);
     if(it != mFunctions.end())
     {
         return it->second;
     }
     return -1;
+}
+
+const std::string* SheepScript::GetFunctionAtOffset(int offset) const
+{
+    for(auto& entry : mFunctions)
+    {
+        if(entry.second == offset)
+        {
+            return &entry.first;
+        }
+    }
+    return nullptr;
 }
 
 void SheepScript::Dump()
@@ -257,22 +266,18 @@ void SheepScript::ParseFunctionsSection(BinaryReader& reader)
     // Don't need byte size of all functions.
     reader.Skip(12);
     
-    int functionCount = reader.ReadInt();
-    
     // Don't really need offset values for functions.
+    int functionCount = reader.ReadInt();
     reader.Skip(4 * functionCount);
-    
-    for(int i = 0; i < functionCount; i++)
+
+    // Do need to read in each function though!
+    for(int i = 0; i < functionCount; ++i)
     {
         // Read in name from length.
         // Length is always one more, due to null terminator.
         std::string name;
         reader.ReadShortString(name);
         reader.Skip(1); // skip null terminator, baked into data
-        
-		// Always lowercase the name, since sheepscript is case-insensitive.
-		// This ensures we can always lookup, regardless of given name case.
-		StringUtil::ToLower(name);
 		
 		// 2 bytes: unknown
         reader.Skip(2);

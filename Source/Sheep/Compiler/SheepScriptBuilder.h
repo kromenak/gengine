@@ -1,6 +1,4 @@
 //
-// SheepScriptBuilder.h
-//
 // Clark Kromenaker
 //
 // When parsing Sheep tokens during compilation, this builder is used to
@@ -13,6 +11,7 @@
 
 #include "SheepScript.h"
 #include "sheep.tab.hh"
+#include "StringUtil.h"
 
 class SheepCompiler;
 
@@ -98,7 +97,7 @@ public:
     std::vector<SysFuncImport> GetSysImports() { return mSysImports; }
     std::unordered_map<int, std::string> GetStringConsts() { return mStringConstsByOffset; }
     std::vector<SheepValue> GetVariables() { return mVariables; }
-    std::unordered_map<std::string, int> GetFunctions() { return mFunctions; }
+    std::string_map_ci<int> GetFunctions() { return mFunctions; }
     std::vector<char> GetBytecode() { return mBytecode; }
     
 private:
@@ -127,7 +126,7 @@ private:
     std::unordered_map<std::string, int> mVariableIndexByName;
     
     // Maps a function name to it's offset in the bytecode.
-    std::unordered_map<std::string, int> mFunctions;
+    std::string_map_ci<int> mFunctions;
     
     // For gotos, a map of label to bytecode offset.
     std::unordered_map<std::string, int> mGotoLabelsToOffsets;
