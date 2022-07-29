@@ -1,8 +1,3 @@
-//
-// SheepThread.cpp
-//
-// Clark Kromenaker
-//
 #include "SheepThread.h"
 
 #include <iostream>
@@ -31,7 +26,7 @@ void SheepThread::OnWaitCompleted()
 {
 	assert(mInWaitBlock);
 	assert(mWaitCounter > 0);
-	mWaitCounter--;
+	--mWaitCounter;
     //std::cout << GetName() << " removed wait (" << mWaitCounter << " waits remain)" << std::endl;
 
 	if(mBlocked && mWaitCounter == 0)

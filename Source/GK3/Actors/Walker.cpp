@@ -129,6 +129,7 @@ bool Walker::AtPosition(const Vector3& position)
 void Walker::OnUpdate(float deltaTime)
 {
     // Debug draw the path.
+    /*
     if(mPath.size() > 0)
     {
         Vector3 prev = mPath.back();
@@ -139,6 +140,7 @@ void Walker::OnUpdate(float deltaTime)
             prev = mPath[i];
         }
     }
+    */
 
     // Process outstanding walk actions.
     if(mWalkActions.size() > 0)

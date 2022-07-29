@@ -1,6 +1,4 @@
 //
-// SheepManager.h
-//
 // Clark Kromenaker
 //
 // Manager for compiling and executing sheep scripts.
@@ -37,6 +35,4 @@ private:
 	
 	// Executes binary bytecode sheep scripts.
 	SheepVM mVirtualMachine;
-	
-	std::string mEvalHusk = "symbols { int n$ = 0; int v$ = 0; } code { X$() %s }";
 };

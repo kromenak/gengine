@@ -222,7 +222,7 @@ char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& ou
         return nullptr;
     }
 
-    // Method used to extract will depend upon the compression type for the asset.
+    // If this is an uncompressed asset, we can simply read the bytes and be done with it - easy.
     if(asset->compressionType == CompressionType::None)
     {
         // Allocate buffer to hold asset data.
@@ -237,7 +237,7 @@ char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& ou
         return buffer;
     }
 
-    // Otherwise, data is compressed.
+    // Otherwise, data is compressed - we need to read in compressed data, and then use an appropriate decompressor.
     // Create buffer to hold compressed data.
     unsigned char* compressedBuffer = new unsigned char[asset->size];
 
@@ -476,10 +476,7 @@ void BarnFile::OutputAssetList() const
         // Don't output asset pointers.
         if(entry.second.IsPointer()) { continue; }
 
-        // Name and compression type.
-        std::cout << entry.second.name << " - " << (int)entry.second.compressionType;
-
-        // Size.
-        std::cout << " - " << entry.second.size << std::endl;
+        // Output the info.
+        std::cout << entry.second.name << " - " << static_cast<int>(entry.second.compressionType) << " - " << entry.second.size << std::endl;
     }
 }

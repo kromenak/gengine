@@ -113,7 +113,7 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
 {
     // Now in a conversation!
 	mConversation = conversation;
-    std::cout << "SetConversation " << conversation << std::endl;
+    //std::cout << "SetConversation " << conversation << std::endl;
 
     // Save callback.
     mConversationAnimFinishCallback = finishCallback;
@@ -236,7 +236,7 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
     CheckConversationAnimFinishCallback();
 
     // No longer in this conversation.
-    std::cout << "EndConversation " << mConversation << std::endl;
+    //std::cout << "EndConversation " << mConversation << std::endl;
 	mConversation.clear();
 }
 

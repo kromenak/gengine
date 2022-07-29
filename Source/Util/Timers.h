@@ -1,6 +1,4 @@
 //
-// Timers.h
-//
 // Clark Kromenaker
 //
 // Helper for setting timers that execute a callback when finished.

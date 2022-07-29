@@ -268,7 +268,7 @@ RegFunc1(WalkerBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryBlockRegion(int regionIndex, int regionBoundaryIndex)
 {
-    printf("WalkerBoundaryBlockRegion(%i, %i)\n", regionIndex, regionBoundaryIndex);
+    //printf("WalkerBoundaryBlockRegion(%i, %i)\n", regionIndex, regionBoundaryIndex);
     GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, true);
     return 0;
 }
@@ -276,7 +276,7 @@ RegFunc2(WalkerBoundaryBlockRegion, void, int, int, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryUnblockRegion(int regionIndex, int regionBoundaryIndex)
 {
-    std::cout << "WalkerBoundaryUnblockRegion" << std::endl;
+    //std::cout << "WalkerBoundaryUnblockRegion" << std::endl;
     GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, false);
     return 0;
 }

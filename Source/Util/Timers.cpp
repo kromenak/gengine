@@ -8,7 +8,7 @@
 {
     // See if we can reuse a previously created timer.
     //TODO: Obviously iterating like this could become problematic if we have a ton of timers...but it might be fine for now.
-    for(unsigned int i = 0; i < mTimers.size(); i++)
+    for(unsigned int i = 0; i < mTimers.size(); ++i)
     {
         // Any timer with no callback is effectively useless...
         if(mTimers[i].callback == nullptr)

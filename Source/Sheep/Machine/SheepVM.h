@@ -1,6 +1,4 @@
 //
-// SheepVM.h
-//
 // Clark Kromenaker
 //
 // A virtual machine for executing Sheep bytecode.
@@ -116,11 +114,16 @@ public:
 	void FlagExecutionError() { mExecutionError = true; }
 	
 private:
+    // Instances of SheepScripts that have been created for execution.
 	std::vector<SheepInstance*> mSheepInstances;
+
+    // Threads that have been created for executing SheepScript instances.
 	std::vector<SheepThread*> mSheepThreads;
-	
+
+    // The thread that is currently executing, if any.
 	SheepThread* mCurrentThread = nullptr;
-	
+
+    // If true, the current Sheep thread has encountered an execution error.
 	bool mExecutionError = false;
 		
 	SheepInstance* GetInstance(SheepScript* script);

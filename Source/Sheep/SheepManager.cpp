@@ -20,7 +20,10 @@ SheepScript* SheepManager::Compile(const std::string& name, std::istream& stream
 
 SheepScript* SheepManager::CompileEval(const std::string& sheep)
 {
-	std::string fullSheep = StringUtil::Format(mEvalHusk, sheep.c_str());
+    // Each eval occurs within a small "husk" consisting of two vars (n/v) and a single function called X$.
+    // The passed in Sheep is the body of function X$
+    const char* kEvalHusk = "symbols { int n$ = 0; int v$ = 0; } code { X$() %s }";
+	std::string fullSheep = StringUtil::Format(kEvalHusk, sheep.c_str());
 	return mCompiler.Compile("Case Evaluation", fullSheep);
 }
 

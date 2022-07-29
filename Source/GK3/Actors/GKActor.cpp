@@ -447,8 +447,8 @@ Vector3 GKActor::GetModelPosition()
     Vector3 meshRightShoePos = mMeshRenderer->GetMesh(mCharConfig->rightShoeAxesMeshIndex)->GetSubmesh(mCharConfig->rightShoeAxesGroupIndex)->GetVertexPosition(mCharConfig->rightShoeAxesPointIndex);
     Vector3 worldRightShoePos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->rightShoeAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshRightShoePos);
 
-    Debug::DrawLine(worldHipPos, worldLeftShoePos, Color32::Cyan);
-    Debug::DrawLine(worldHipPos, worldRightShoePos, Color32::Red);
+    //Debug::DrawLine(worldHipPos, worldLeftShoePos, Color32::Cyan);
+    //Debug::DrawLine(worldHipPos, worldRightShoePos, Color32::Red);
     //Debug::DrawLine(worldLeftShoePos, worldRightShoePos, Color32::Magenta);
     
     // Use left/right shoe positions to determine our floor position.
@@ -460,7 +460,7 @@ Vector3 GKActor::GetModelPosition()
     Vector3 leftShoeToHips = worldHipPos - worldLeftShoePos;
     Vector3 rightShoeToHips = worldHipPos - worldRightShoePos;
     Vector3 modelForward = Vector3::Normalize(Vector3::Cross(rightShoeToHips, leftShoeToHips));
-    Debug::DrawLine(floorPos, floorPos + modelForward * 5, Color32::Magenta);
+    //Debug::DrawLine(floorPos, floorPos + modelForward * 5, Color32::Magenta);
 
     return floorPos;
 }

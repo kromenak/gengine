@@ -1,13 +1,10 @@
 //
-// SheepThread.h
-//
 // Clark Kromenaker
 //
 // Sheep is (currently) single-threaded. But each "thread" represents a
 // different bytecode sequence at a different state of execution.
 //
 #pragma once
-
 #include <functional>
 #include <string>
 
@@ -59,8 +56,6 @@ private:
 	
 	//TODO
 	// owning layer?
-	// int mFunctionOffset = 0;
 	// debug info?
 	// is preloading only?
-	// bool mIsCurrentlyBlocking = false;
 };

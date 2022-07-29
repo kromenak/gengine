@@ -136,7 +136,7 @@ SheepInstance* SheepVM::GetInstance(SheepScript* script)
 	// Ex: call IncCounter$ in same sheep, the counter variable should still be incremented after returning.
 	for(auto& instance : mSheepInstances)
 	{
-		if(instance->mSheepScript == script)
+		if(instance->mSheepScript == script) //TODO: What about reference count???
 		{
 			return instance;
 		}
@@ -159,6 +159,8 @@ SheepInstance* SheepVM::GetInstance(SheepScript* script)
 		context = new SheepInstance();
 		mSheepInstances.push_back(context);
 	}
+
+    // Cache SheepScript associated with this context.
 	context->mSheepScript = script;
 	
 	// Create copy of variables for assignment during execution.
@@ -337,7 +339,7 @@ SheepThread* SheepVM::ExecuteInternal(SheepInstance* instance, int bytecodeOffse
 
 void SheepVM::ExecuteInternal(SheepThread* thread)
 {
-	// Store previous thread and set passed in thead as the currently executing thread.
+	// Store previous thread and set passed in thread as the currently executing thread.
 	SheepThread* prevThread = mCurrentThread;
 	mCurrentThread = thread;
 	
