@@ -45,13 +45,17 @@ void Layer::Popped()
 {
     // Restore previous layer's audio state on pop.
     Services::GetAudio()->RestoreAudioState(mAudioSaveState);
+
+    // When a layer is popped, all associated executing SheepScripts should stop immediately.
+    Services::GetSheep()->StopExecution(mName);
 }
 
 TYPE_DEF_BASE(LayerManager);
 
-LayerManager::LayerManager()
+LayerManager::LayerManager() :
+    mGlobalLayer("GlobalLayer")
 {
-    
+    PushLayer(&mGlobalLayer);
 }
 
 void LayerManager::PushLayer(Layer* layer)
@@ -72,8 +76,8 @@ void LayerManager::PushLayer(Layer* layer)
 
 void LayerManager::PopLayer(Layer* expectedLayer)
 {
-    // Can't pop an empty stack.
-    if(mLayerStack.size() <= 0)
+    // Can't pop an empty stack. We also don't allow popping the bottom/global layer.
+    if(mLayerStack.size() <= 1)
     {
         std::cout << "Attempting to pop layer, but stack is empty!" << std::endl;
         return;
