@@ -111,12 +111,19 @@ bool ActionManager::ExecuteAction(const std::string& noun, const std::string& ve
 	const Action* candidate = nullptr;
 	for(auto& actionSet : mActionSets)
 	{
-		const Action* action = actionSet->GetAction(noun, verb);
-		if(action != nullptr && IsCaseMet(noun, verb, action->caseLabel))
-		{
-			candidate = action;
-			continue;
-		}
+        std::vector<const Action*> actions = actionSet->GetActions(noun, verb);
+        for(auto& action : actions)
+        {
+            if(action != nullptr && IsCaseMet(noun, verb, action->caseLabel))
+            {
+                candidate = action;
+
+                // It's important to "break" out here and not consider additional candidates in this action set.
+                // Action sets are ordered such that special cases appear before general cases.
+                // So if a special case was met, we want that over the general case!
+                break;
+            }
+        }
 	}
 	
 	// Execute action if we found a valid one.
@@ -631,7 +638,7 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "DIALOGUE_TOPICS_LEFT"))
 	{
-		// Ccondition is met if there are any "topic" type actions available for this noun.
+		// Condition is met if there are any "topic" type actions available for this noun.
 		return HasTopicsLeft(noun);
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "NOT_DIALOGUE_TOPICS_LEFT"))
@@ -641,22 +648,14 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK_OVERRIDE"))
 	{
-		// Not 100% sure...only appears in timeblock-specific NVC files.
-		// Possibilities:
-		//   1) Evaluates true if this is the first scene of the timeblock.
-		//	 2) Evaluates true if NVC's timeblock equals the current timeblock.
-		//   3) Evaluates true always...just acts as a "ALL" for a timeblock.
-		
-		// Example use of this:
-		// RC1_ALL.NVC has (TELE_SIGN, LOOK, GABE_ALL), which executes some VO.
-		// RC1110A.NVC has (TELE_SIGN, LOOK, TIME_BLOCK_OVERRIDE), which executes different VO.
-		// So...seems the idea would be to play the timeblock-specific VO during that timeblock, but fall back on general one otherwise?
-		std::cout << "Using TIME_BLOCK_OVERRIDE global condition!" << std::endl;
-		return true;
+        // A bit unclear, but appears that this condition is always met.
+        // It indicates an override in a timeblock-specific SIF that should be used instead of the ALL variant in the general SIF.
+        return true;
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK"))
 	{
-		//TODO
+        // Also unclear, but may just be a variant/shorthand for TIME_BLOCK_OVERRIDE.
+        return true;
 	}
 	//TODO: Add any more global conditions.
 	
