@@ -16,7 +16,7 @@ void Console::AddToScrollback(const std::string& str)
     // If scrollback is too large, erase old messages to reduce size.
 	if(mScrollback.size() > kMaxScrollbackLength)
 	{
-		int extraCount = kMaxScrollbackLength - (int)mScrollback.size();
+        int extraCount = static_cast<int>(mScrollback.size()) - kMaxScrollbackLength;
 		mScrollback.erase(mScrollback.begin(), mScrollback.begin() + extraCount);
 	}
 }
