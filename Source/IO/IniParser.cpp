@@ -57,7 +57,8 @@ Vector3 IniKeyValue::GetValueAsVector3() const
     int firstNumIndex = -1;
     for(int i = 0; i < value.length(); ++i)
     {
-        if(std::isdigit(value[i]))
+        // Also need to check '-' for symbol preceding negative numbers.
+        if(std::isdigit(value[i]) || value[i] == '-')
         {
             firstNumIndex = i;
             break;
