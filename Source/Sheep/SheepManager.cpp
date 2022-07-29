@@ -18,32 +18,31 @@ SheepScript* SheepManager::Compile(const std::string& name, std::istream& stream
     return mCompiler.Compile(name, stream);
 }
 
+void SheepManager::Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag)
+{
+    // If no tag is provided, fall back on using the current layer's name.
+    const std::string& realTag = tag.empty() ? Services::Get<LayerManager>()->GetTopLayerName() : tag;
+
+    // Pass to VM for execution.
+	mVirtualMachine.Execute(script, finishCallback, realTag);
+}
+
+void SheepManager::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
+{
+    // If no tag is provided, fall back on using the current layer's name.
+    const std::string& realTag = tag.empty() ? Services::Get<LayerManager>()->GetTopLayerName() : tag;
+
+    // Pass to VM for execution.
+	mVirtualMachine.Execute(script, functionName, finishCallback, tag);
+}
+
 SheepScript* SheepManager::CompileEval(const std::string& sheep)
 {
     // Each eval occurs within a small "husk" consisting of two vars (n/v) and a single function called X$.
     // The passed in Sheep is the body of function X$
     const char* kEvalHusk = "symbols { int n$ = 0; int v$ = 0; } code { X$() %s }";
-	std::string fullSheep = StringUtil::Format(kEvalHusk, sheep.c_str());
-	return mCompiler.Compile("Case Evaluation", fullSheep);
-}
-
-void SheepManager::Execute(const std::string& sheepName, const std::string& functionName, std::function<void()> finishCallback)
-{
-	SheepScript* script = Services::GetAssets()->LoadSheep(sheepName);
-	if(script != nullptr)
-	{
-		Execute(script, functionName, finishCallback);
-	}
-}
-
-void SheepManager::Execute(SheepScript* script, std::function<void()> finishCallback)
-{
-	mVirtualMachine.Execute(script, finishCallback);
-}
-
-void SheepManager::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback)
-{
-	mVirtualMachine.Execute(script, functionName, finishCallback);
+    std::string fullSheep = StringUtil::Format(kEvalHusk, sheep.c_str());
+    return mCompiler.Compile("Case Evaluation", fullSheep);
 }
 
 bool SheepManager::Evaluate(SheepScript* script)

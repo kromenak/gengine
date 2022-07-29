@@ -13,21 +13,27 @@
 class SheepManager
 {
 public:
+    // Compilation - convert text-based SheepScript to a compiled SheepScript.
     SheepScript* Compile(const char* filePath);
     SheepScript* Compile(const std::string& name, const std::string& sheep);
     SheepScript* Compile(const std::string& name, std::istream& stream);
-	SheepScript* CompileEval(const std::string& sheep);
-    
-	void Execute(const std::string& sheepName, const std::string& functionName, std::function<void()> finishCallback);
-	void Execute(SheepScript* script, std::function<void()> finishCallback);
-	void Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback);
 	
+    // Execution - execute a compiled SheepScript.
+	void Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag = "");
+	void Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag = "");
+
+    // Evaluation - special form of SheepScript; only boolean logic is allowed, must evaluate to true or false. Waiting/callbacks are not allowed.
+    SheepScript* CompileEval(const std::string& sheep);
     bool Evaluate(SheepScript* script);
 	bool Evaluate(SheepScript* script, int n, int v);
-	
+
+    // VM Manipulation
+    void StopExecution(const std::string& tag) { mVirtualMachine.StopExecution(tag); }
+    void FlagExecutionError() { mVirtualMachine.FlagExecutionError(); }
+
+    // VM State Queries
 	SheepThread* GetCurrentThread() const { return mVirtualMachine.GetCurrentThread(); }
-	bool IsAnyRunning() const { return mVirtualMachine.IsAnyRunning(); }
-	void FlagExecutionError() { mVirtualMachine.FlagExecutionError(); }
+	bool IsAnyThreadRunning() const { return mVirtualMachine.IsAnyThreadRunning(); }
 	
 private:
 	// Compiles text-based sheep script into sheep bytecode, represented as a SheepScript asset.

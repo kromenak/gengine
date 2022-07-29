@@ -99,6 +99,9 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 // Flags execution error in a SysFunc.
 void ExecError();
 
+// Gets the tag associated with the current Sheep thread.
+const std::string& GetSheepTag();
+
 // Adds a "wait" to the current Sheep thread.
 // The current Sheep thread will suspend execution until the returned callback gets called.
 std::function<void()> AddWait();

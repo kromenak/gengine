@@ -36,8 +36,6 @@ struct SheepInstance
 	std::string GetName();
 };
 
-// Notify Links?
-
 enum class SheepInstruction
 {
     SitnSpin            = 0x00,
@@ -98,27 +96,31 @@ enum class SheepInstruction
 class SheepVM
 {
 	friend struct SheepThread;
+    friend struct NotifyLink;
 public:
 	SheepVM() = default;
 	~SheepVM();
     
-	void Execute(SheepScript* script, std::function<void()> finishCallback);
-	void Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback);
-	void Execute(SheepScript* script, int bytecodeOffset, std::function<void()> finishCallback);
+	void Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag = "");
+	void Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag = "");
 	
     bool Evaluate(SheepScript* script, int n, int v);
-	
+
+    void StopExecution(const std::string& tag);
+    void FlagExecutionError() { mExecutionError = true; }
+
 	SheepThread* GetCurrentThread() const { return mCurrentThread; }
-	bool IsAnyRunning() const;
-	
-	void FlagExecutionError() { mExecutionError = true; }
-	
+	bool IsAnyThreadRunning() const;
+
 private:
     // Instances of SheepScripts that have been created for execution.
 	std::vector<SheepInstance*> mSheepInstances;
 
     // Threads that have been created for executing SheepScript instances.
 	std::vector<SheepThread*> mSheepThreads;
+
+    // Notify links that have been created.
+    //std::vector<NotifyLink*> mNotifyLinks;
 
     // The thread that is currently executing, if any.
 	SheepThread* mCurrentThread = nullptr;
@@ -127,11 +129,11 @@ private:
 	bool mExecutionError = false;
 		
 	SheepInstance* GetInstance(SheepScript* script);
-	SheepThread* GetThread();
+	SheepThread* GetIdleThread();
+    //NotifyLink* GetNotifyLink(SheepThread* thread);
 	
     Value CallSysFunc(SheepThread* thread, SysFuncImport* sysImport);
-	
-	SheepThread* ExecuteInternal(SheepScript* script, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback);
-	SheepThread* ExecuteInternal(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback);
-	void ExecuteInternal(SheepThread* thread);
+
+	SheepThread* StartExecution(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag);
+	void ContinueExecution(SheepThread* thread);
 };

@@ -18,7 +18,8 @@ struct SheepThread
 	// Reference to this thread's virtual machine.
 	SheepVM* mVirtualMachine = nullptr;
 	
-	// The sheep attached to this thread.
+	// The sheep instance attached to this thread.
+    // Encapsulates SheepScript to run, as well as current variable state.
 	SheepInstance* mContext = nullptr;
 	
 	// Each thread has its own stack.
@@ -47,7 +48,14 @@ struct SheepThread
 	// If true, the thread is executing code inside a wait block.
 	// Before exiting the wait block, all waited upon functions must complete.
 	bool mInWaitBlock = false;
-	
+
+    // A tag allows executing threads to be identified/categorized/grouped. Currently used to stop a set of threads prematurely.
+    // Tags are inherited - if a thread starts another thread, that "child" thread gets the same tag.
+    // (this is similar to the "owning layer" in the original game, but a bit more generalized)
+    std::string mTag;
+
+    void Reset();
+
 	std::string GetName() const;
     std::function<void()> AddWait();
 	

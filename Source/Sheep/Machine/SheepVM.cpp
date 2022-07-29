@@ -33,13 +33,17 @@ SheepVM::~SheepVM()
 	}
 }
 
-void SheepVM::Execute(SheepScript* script, std::function<void()> finishCallback)
+void SheepVM::Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag)
 {
-	// Just default to zero offset (aka the first function in the script).
-	Execute(script, 0, finishCallback);
+    // This function assumes a byte offset of 0, which is just the first function in the SheepScript.
+    // Try to ascertain what the function name is...
+    const std::string* firstFuncName = script->GetFunctionAtOffset(0);
+
+	// Execute from bytecode offset 0. There should always be a valid function name, but if not, fallback on a generic "X$".
+    StartExecution(GetInstance(script), 0, (firstFuncName != nullptr ? *firstFuncName : "X$"), finishCallback, tag);
 }
 
-void SheepVM::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback)
+void SheepVM::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
 {
 	// We need a valid script.
 	if(script == nullptr)
@@ -65,12 +69,7 @@ void SheepVM::Execute(SheepScript* script, const std::string& functionName, std:
 	}
 	
 	// Execute at bytecode offset.
-	ExecuteInternal(script, bytecodeOffset, functionName, finishCallback);
-}
-
-void SheepVM::Execute(SheepScript* script, int bytecodeOffset, std::function<void()> finishCallback)
-{
-	ExecuteInternal(script, bytecodeOffset, "X$", finishCallback);
+	StartExecution(GetInstance(script), bytecodeOffset, functionName, finishCallback, tag);
 }
 
 bool SheepVM::Evaluate(SheepScript* script, int n, int v)
@@ -92,7 +91,7 @@ bool SheepVM::Evaluate(SheepScript* script, int n, int v)
 	
 	//std::cout << "SHEEP EVALUATE START - Stack size is " << mStackSize << std::endl;
     // Execute the script, per usual.
-    SheepThread* thread = ExecuteInternal(instance, 0, "X$", nullptr);
+    SheepThread* thread = StartExecution(instance, 0, "X$", nullptr, "");
     
     // If stack is empty, return false.
 	if(thread->mStack.Size() == 0) { return false; }
@@ -117,7 +116,18 @@ bool SheepVM::Evaluate(SheepScript* script, int n, int v)
     return false;
 }
 
-bool SheepVM::IsAnyRunning() const
+void SheepVM::StopExecution(const std::string& tag)
+{
+    for(auto& thread : mSheepThreads)
+    {
+        if(thread->mRunning && StringUtil::EqualsIgnoreCase(thread->mTag, tag))
+        {
+            thread->mRunning = false;
+        }
+    }
+}
+
+bool SheepVM::IsAnyThreadRunning() const
 {
 	for(auto& thread : mSheepThreads)
 	{
@@ -168,7 +178,7 @@ SheepInstance* SheepVM::GetInstance(SheepScript* script)
 	return context;
 }
 
-SheepThread* SheepVM::GetThread()
+SheepThread* SheepVM::GetIdleThread()
 {
 	// Recycle a previously used thread, if possible.
 	SheepThread* useThread = nullptr;
@@ -188,6 +198,9 @@ SheepThread* SheepVM::GetThread()
 		useThread->mVirtualMachine = this;
 		mSheepThreads.push_back(useThread);
 	}
+
+    // Make sure thread is in a default state and return.
+    useThread->Reset();
 	return useThread;
 }
 
@@ -300,14 +313,7 @@ Value SheepVM::CallSysFunc(SheepThread* thread, SysFuncImport* sysImport)
 	return v;
 }
 
-SheepThread* SheepVM::ExecuteInternal(SheepScript *script, int bytecodeOffset,
-        const std::string &functionName, std::function<void ()> finishCallback)
-{
-	return ExecuteInternal(GetInstance(script), bytecodeOffset, functionName, finishCallback);
-}
-
-SheepThread* SheepVM::ExecuteInternal(SheepInstance* instance, int bytecodeOffset,
-									  const std::string& functionName, std::function<void()> finishCallback)
+SheepThread* SheepVM::StartExecution(SheepInstance* instance, int bytecodeOffset, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
 {
 	// A valid execution context is required.
 	if(instance == nullptr)
@@ -320,24 +326,27 @@ SheepThread* SheepVM::ExecuteInternal(SheepInstance* instance, int bytecodeOffse
 	}
 	
 	// Create a sheep thread to perform the execution.
-	SheepThread* thread = GetThread();
+	SheepThread* thread = GetIdleThread();
 	thread->mContext = instance;
 	thread->mWaitCallback = finishCallback;
 	thread->mCodeOffset = bytecodeOffset;
+
+    // Save the tag so we can identify later.
+    thread->mTag = tag;
 	
 	// Save name and start offset (for debugging/info).
 	thread->mFunctionName = functionName;
-	thread->mFunctionStartOffset = bytecodeOffset;
+    thread->mFunctionStartOffset = bytecodeOffset;
 	
 	// The thread is using this execution context.
 	instance->mReferenceCount++;
 	
 	// Start the thread of execution.
-	ExecuteInternal(thread);
+	ContinueExecution(thread);
 	return thread;
 }
 
-void SheepVM::ExecuteInternal(SheepThread* thread)
+void SheepVM::ContinueExecution(SheepThread* thread)
 {
 	// Store previous thread and set passed in thread as the currently executing thread.
 	SheepThread* prevThread = mCurrentThread;

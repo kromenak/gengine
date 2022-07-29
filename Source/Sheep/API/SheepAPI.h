@@ -1,7 +1,7 @@
 //
 // Clark Kromenaker
 //
-// Declares all Sheep SysFuncs that can be called from SheepScripts at runtime.
+// Core Sheep SysFuncs for manipulating the Sheep system itself.
 //
 #pragma once
 #include "SheepScript.h"
