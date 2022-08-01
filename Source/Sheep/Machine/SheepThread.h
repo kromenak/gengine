@@ -35,6 +35,9 @@ struct SheepThread
 	// If true, this thread is executing the attached sheep.
 	// This is still "true" while "waiting" on something else.
 	bool mRunning = false;
+
+    // If true, the thread is currently blocked.
+    // This happens when we're in a wait block, but not all waitable things have returned yet.
 	bool mBlocked = false;
 	
 	// If set, some other thread is waiting for this thread to complete before continuing.

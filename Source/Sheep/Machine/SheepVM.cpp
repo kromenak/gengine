@@ -144,6 +144,12 @@ void SheepVM::StopExecution(const std::string& tag)
         {
             thread->mRunning = false;
 
+            // Thread is no longer using execution context.
+            if(thread->mContext != nullptr)
+            {
+                thread->mContext->mReferenceCount--;
+            }
+
             // Since we stopped this thread prematurely, decouple any NotifyLinks still in progress.
             // The NotifyLink will still wait for its callback, but with no attached thread, it'll take no action.
             for(auto& notifyLink : mNotifyLinks)
@@ -170,19 +176,19 @@ SheepInstance* SheepVM::GetInstance(SheepScript* script)
 {
 	// Don't create without a valid script.
 	if(script == nullptr) { return nullptr; }
-	
-	// If an instance already exists for this sheep, just reuse that one.
-	// This *might* be important b/c we want variables in the same script to be shared.
-	// Ex: call IncCounter$ in same sheep, the counter variable should still be incremented after returning.
+
+    // If an instance already exists for this SheepScript, AND it is actively being used (reference count > 0), reuse that instance!
+    // This is important so that function calls within the same SheepScript persist variables.
+    // TODO: The condition *may* be even more strict than this (e.g. only if same SheepScript and called from SheepThread running this context).
 	for(auto& instance : mSheepInstances)
 	{
-		if(instance->mSheepScript == script) //TODO: What about reference count???
+		if(instance->mSheepScript == script && instance->mReferenceCount > 0)
 		{
 			return instance;
 		}
 	}
 	
-	// Try to reuse an execution context that is no longer being used.
+	// No active instance to use, so try to reuse an instance that is no longer being used.
 	SheepInstance* context = nullptr;
 	for(auto& instance : mSheepInstances)
 	{
@@ -203,7 +209,8 @@ SheepInstance* SheepVM::GetInstance(SheepScript* script)
     // Cache SheepScript associated with this context.
 	context->mSheepScript = script;
 	
-	// Create copy of variables for assignment during execution.
+	// Create NEW variables for assignment during execution.
+    // This is VERY important so the SheepScript has correct vars with correct initial values.
 	context->mVariables = script->GetVariables();
 	return context;
 }
