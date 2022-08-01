@@ -286,8 +286,11 @@ void Scene::Unload()
 	
 	delete mSceneData;
 	mSceneData = nullptr;
-    
-    Services::Get<LayerManager>()->RemoveLayer(&mLayer);
+
+    while(Services::Get<LayerManager>()->IsLayerInStack(&mLayer))
+    {
+        Services::Get<LayerManager>()->PopLayer();
+    }
 }
 
 void Scene::Init()

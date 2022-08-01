@@ -106,28 +106,19 @@ void LayerManager::PopLayer(Layer* expectedLayer)
     }
 }
 
-void LayerManager::RemoveLayer(Layer* layer)
-{
-    auto it = std::find(mLayerStack.begin(), mLayerStack.end(), layer);
-    if(it != mLayerStack.end())
-    {
-        //TODO: This is sort of a "non-standard" operation that leaves the Layer stack in a weird state.
-        //TODO: Maybe we shouldn't even allow this behavior.
-        //TODO: Unclear whether removing in middle counts as exiting...and what about saved ambient state!?
-        //TODO: Fix this...get rid of it...something!
-        //(*it)->Exit(nullptr, true);
-        mLayerStack.erase(it);
-    }
-}
-
 bool LayerManager::IsTopLayer(const Layer* layer) const
 {
-    return mLayerStack.size() > 0 && mLayerStack.back() == layer;
+    return !mLayerStack.empty() && mLayerStack.back() == layer;
 }
 
 bool LayerManager::IsTopLayer(const std::string& name) const
 {
-    return mLayerStack.size() > 0 && StringUtil::EqualsIgnoreCase(name, mLayerStack.back()->GetName());
+    return !mLayerStack.empty() && StringUtil::EqualsIgnoreCase(name, mLayerStack.back()->GetName());
+}
+
+bool LayerManager::IsLayerInStack(const Layer* layer) const
+{
+    return std::find(mLayerStack.begin(), mLayerStack.end(), layer) != mLayerStack.end();
 }
 
 bool LayerManager::IsLayerInStack(const std::string& name) const

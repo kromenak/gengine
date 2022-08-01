@@ -65,12 +65,10 @@ public:
     void PushLayer(Layer* layer);
     void PopLayer(Layer* expectedLayer = nullptr);
     
-    // Removes layer, even if not on top of stack.
-    void RemoveLayer(Layer* layer);
-    
     // Query layer state.
     bool IsTopLayer(const Layer* layer) const;
     bool IsTopLayer(const std::string& name) const;
+    bool IsLayerInStack(const Layer* layer) const;
     bool IsLayerInStack(const std::string& name) const;
 
     // Query current state.
