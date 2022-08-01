@@ -21,6 +21,25 @@ std::string SheepInstance::GetName()
 	return "";
 }
 
+std::function<void()> NotifyLink::AddNotify()
+{
+    notified = false;
+    return std::bind(&NotifyLink::OnNotify, this);
+}
+
+void NotifyLink::OnNotify()
+{
+    // Here's the key/whole point to a NotifyLink: the callback is ignored if no SheepThread is set.
+    // This allows systems outside Sheep to work without having to worry about whether a SheepThread is still running or not.
+    if(thread != nullptr)
+    {
+        thread->RemoveWait();
+        thread = nullptr;
+    }
+    notified = true;
+}
+
+
 SheepVM::~SheepVM()
 {
 	for(auto& instance : mSheepInstances)
@@ -118,11 +137,22 @@ bool SheepVM::Evaluate(SheepScript* script, int n, int v)
 
 void SheepVM::StopExecution(const std::string& tag)
 {
+    // Find all running threads with this tag, and stop them!
     for(auto& thread : mSheepThreads)
     {
         if(thread->mRunning && StringUtil::EqualsIgnoreCase(thread->mTag, tag))
         {
             thread->mRunning = false;
+
+            // Since we stopped this thread prematurely, decouple any NotifyLinks still in progress.
+            // The NotifyLink will still wait for its callback, but with no attached thread, it'll take no action.
+            for(auto& notifyLink : mNotifyLinks)
+            {
+                if(notifyLink->thread == thread)
+                {
+                    notifyLink->thread = nullptr;
+                }
+            }
         }
     }
 }
@@ -202,6 +232,30 @@ SheepThread* SheepVM::GetIdleThread()
     // Make sure thread is in a default state and return.
     useThread->Reset();
 	return useThread;
+}
+
+NotifyLink* SheepVM::GetNotifyLink()
+{
+    // Try to reuse an existing notify link, if possible.
+    NotifyLink* toUse = nullptr;
+    for(auto& notifyLink : mNotifyLinks)
+    {
+        // A NotifyLink is available if it has no Thread attached, AND it is in the notified state.
+        // If no thread, but not notified, it is still in use b/c we're waiting for some system to call back.
+        if(notifyLink->thread == nullptr && notifyLink->notified)
+        {
+            toUse = notifyLink;
+            break;
+        }
+    }
+
+    // Create a new one if needed.
+    if(toUse == nullptr)
+    {
+        toUse = new NotifyLink();
+        mNotifyLinks.push_back(toUse);
+    }
+    return toUse;
 }
 
 Value SheepVM::CallSysFunc(SheepThread* thread, SysFuncImport* sysImport)

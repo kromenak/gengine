@@ -7,6 +7,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "SheepThread.h"
 #include "SheepValue.h"
@@ -34,6 +35,23 @@ struct SheepInstance
 	int mReferenceCount = 0;
 	
 	std::string GetName();
+};
+
+// Allows a SheepThread to wait for a callback, but also allows it to detach if it no longer cares.
+// Ex: say a SheepThread starts a long-running timer, BUT is stopped prematurely.
+// Ex: The timer callback will still occur - we can't control that anymore. But using a notify link allows us to ignore the result.
+struct NotifyLink
+{
+    // The SheepThread, if any, associated with this instance.
+    // If null, any OnNotify call will have no effect.
+    SheepThread* thread = nullptr;
+
+    // State of this instance.
+    // If waiting for a callback, this is false. If callback was received, this is true.
+    bool notified = true;
+    
+    std::function<void()> AddNotify();
+    void OnNotify();
 };
 
 enum class SheepInstruction
@@ -120,7 +138,7 @@ private:
 	std::vector<SheepThread*> mSheepThreads;
 
     // Notify links that have been created.
-    //std::vector<NotifyLink*> mNotifyLinks;
+    std::vector<NotifyLink*> mNotifyLinks;
 
     // The thread that is currently executing, if any.
 	SheepThread* mCurrentThread = nullptr;
@@ -130,7 +148,7 @@ private:
 		
 	SheepInstance* GetInstance(SheepScript* script);
 	SheepThread* GetIdleThread();
-    //NotifyLink* GetNotifyLink(SheepThread* thread);
+    NotifyLink* GetNotifyLink();
 	
     Value CallSysFunc(SheepThread* thread, SysFuncImport* sysImport);
 

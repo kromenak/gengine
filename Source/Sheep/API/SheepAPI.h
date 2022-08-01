@@ -31,11 +31,11 @@ shpvoid CallGlobalSheep(const std::string& sheepFileName, const std::string& fun
 
 shpvoid CallIndexedSheep(const std::string& sheepFileName, int sheepIndex, const std::string& functionName); // DEV, WAIT
 
-shpvoid NukeAllSheep(); // DEV
-shpvoid NukeSheep(const std::string& sheepName); // DEV
-
 shpvoid SetGlobalSheep();
 shpvoid SetTopSheep();
+
+shpvoid NukeAllSheep(); // DEV
+shpvoid NukeSheep(const std::string& sheepName); // DEV
 
 shpvoid EnableSheepCaching(); // DEV
 shpvoid DisableSheepCaching(); // DEV

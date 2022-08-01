@@ -40,19 +40,21 @@ std::function<void()> SheepThread::AddWait()
     ++mWaitCounter;
     //std::cout << GetName() << " added wait (" << mWaitCounter << " waits total)" << std::endl;
 
-    return std::bind(&SheepThread::OnWaitCompleted, this);
+    NotifyLink* notifyLink = mVirtualMachine->GetNotifyLink();
+    notifyLink->thread = this;
+    return notifyLink->AddNotify();
+    //return std::bind(&SheepThread::OnWaitCompleted, this);
 }
 
-void SheepThread::OnWaitCompleted()
+void SheepThread::RemoveWait()
 {
-	assert(mInWaitBlock);
-	assert(mWaitCounter > 0);
-	--mWaitCounter;
+    assert(mInWaitBlock);
+    assert(mWaitCounter > 0);
+    --mWaitCounter;
     //std::cout << GetName() << " removed wait (" << mWaitCounter << " waits remain)" << std::endl;
-
-    //TODO: Instead of checking mRunning here, use NotifyLink!
-	if(mRunning && mBlocked && mWaitCounter == 0)
-	{
-		mVirtualMachine->ContinueExecution(this);
-	}
+    
+    if(mBlocked && mWaitCounter == 0)
+    {
+        mVirtualMachine->ContinueExecution(this);
+    }
 }

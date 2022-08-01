@@ -166,3 +166,10 @@ RegFunc0(SetTopSheep, void, IMMEDIATE, REL_FUNC);
  
 //NukeAllSheep
 //NukeSheep
+
+shpvoid DumpSheepEngine()
+{
+    //TODO;
+    return 0;
+}
+RegFunc0(DumpSheepEngine, void, IMMEDIATE, DEV_FUNC);

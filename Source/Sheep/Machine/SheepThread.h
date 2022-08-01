@@ -57,13 +57,13 @@ struct SheepThread
     void Reset();
 
 	std::string GetName() const;
+
     std::function<void()> AddWait();
-	
-private:
-	void OnWaitCompleted();
-	
+    void RemoveWait();
+    
 	//TODO
 	// owning layer?
 	// debug info?
 	// is preloading only?
 };
+
