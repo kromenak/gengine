@@ -43,6 +43,9 @@ public:
 	void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
 	
 private:
+    // When a button is down, it gets some special treatment/logic. So, we need to keep track of it!
+    static UIButton* sDownButton;
+
     // Defines what the button looks like in each state.
     struct State
     {

@@ -17,10 +17,12 @@ public:
     virtual ~UIWidget();
     
 	virtual void Render() = 0;
-	
+
+    // Called when pointer enters/exits the bounds of this widget.
 	virtual void OnPointerEnter() { }
 	virtual void OnPointerExit() { }
-	
+
+    // Called when pointer down/up when within the bounds of this widget.
 	virtual void OnPointerDown() { }
 	virtual void OnPointerUp() { }
 	

@@ -10,6 +10,8 @@
 
 extern Mesh* uiQuad;
 
+UIButton* UIButton::sDownButton = nullptr;
+
 TYPE_DEF_CHILD(UIWidget, UIButton);
 
 UIButton::UIButton(Actor* owner) : UIWidget(owner)
@@ -67,9 +69,13 @@ void UIButton::SetDisabledTexture(Texture* texture, const Color32& color)
 
 void UIButton::OnPointerEnter()
 {
+    // If pointer was pressed down on a button, and it wasn't this button, ignore any pointer enters.
+    // The pressed down button becomes "focused"/exclusive (so to speak) until the pointer is released, allowing selecting any button again.
+    if(sDownButton != nullptr && sDownButton != this) { return; }
+
     // Record pointer over.
     mPointerOver = true;
-
+    
     // Only show interaction prompts (visual cursor change, audio) if we can actually interact with it.
     if(mCanInteract)
     {
@@ -102,6 +108,9 @@ void UIButton::OnPointerExit()
 void UIButton::OnPointerDown()
 {
 	mPointerDown = true;
+
+    // Got the pointer down event, so we must be the down button now.
+    sDownButton = this;
 }
 
 void UIButton::OnPointerUp()
@@ -112,6 +121,9 @@ void UIButton::OnPointerUp()
 		Press();
 	}
 	mPointerDown = false;
+
+    // Pointer is up, so we are no longer down.
+    sDownButton = nullptr;
 }
 
 void UIButton::Press()
@@ -132,15 +144,28 @@ Texture* UIButton::GetDefaultTexture()
 
 void UIButton::UpdateMaterial()
 {
+    // If marked as pointer down, but pointer was released, clear that flag.
+    // This can happen if mouse is pressed down on this widget, but released outside of the widget.
+    if(mPointerDown && !Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left))
+    {
+        mPointerDown = false;
+
+        // Since pointer is up, there's no way there can be any down button right now.
+        sDownButton = nullptr;
+    }
+
     // Figure out which state to use.
     State& state = mDisabledState;
     if(mCanInteract)
     {
-        if(mPointerDown)
+        // The button shows as down when pressed down, but only if pointer is also over the button.
+        // You can press down on a button and then move the pointer all over before releasing it!
+        if(mPointerDown && mPointerOver)
         {
             state = mDownState;
         }
-        else if(mPointerOver)
+        // When in pointer down state, but moving pointer all over, the button should still show as hovered.
+        else if(mPointerOver || mPointerDown) 
         {
             state = mHoverState;
         }
