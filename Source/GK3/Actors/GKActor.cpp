@@ -38,6 +38,10 @@ GKActor::GKActor(Model* model) : GKActor()
 {
     // Set actor's 3D model.
     mMeshRenderer->SetModel(model);
+
+    // Use the model's name as the name of the actor.
+    // This is sometimes used for gameplay logic, so be careful about changing this!
+    SetName(mMeshRenderer->GetModelName());
     
 	// Get config for this character.
     // It is assumed that the name of the actor's model corresponds to their three-letter character ID (e.g. GAB, GRA, MOS).
@@ -58,7 +62,6 @@ GKActor::GKActor(const SceneActor& actorDef) : GKActor(actorDef.model)
     // Set noun (GABRIEL, GRACE, etc).
     // For debugging help, we'll also set the Actor name field to the noun.
     SetNoun(actorDef.noun);
-    SetName(actorDef.noun);
 
     // Set actor's initial position and rotation.
     if(!actorDef.positionName.empty())
@@ -249,9 +252,9 @@ void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finish
     //Debug::DrawLine(walkPos, walkPos + heading.ToVector() * 10.0f, Color32::Red, 10.0f);
 }
 
-void GKActor::WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback)
+void GKActor::WalkToSee(GKObject* target, std::function<void()> finishCallback)
 {
-	mWalker->WalkToSee(targetName, targetPosition, finishCallback);
+    mWalker->WalkToSee(target, finishCallback);
 }
 
 Vector3 GKActor::GetWalkDestination() const
@@ -396,6 +399,11 @@ void GKActor::StopAnimation(VertexAnimation* anim)
 {
     // NOTE: passing nullptr will stop ALL playing animations.
     mVertexAnimator->Stop(anim);
+}
+
+AABB GKActor::GetAABB()
+{
+    return mMeshRenderer->GetAABB();
 }
 
 void GKActor::OnActive()

@@ -42,14 +42,13 @@ void Walker::WalkToGas(const Vector3& position, const Heading& heading, std::fun
     WalkToInternal(position, heading, finishCallback, true);
 }
 
-void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback)
+void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
 {
-    mWalkToSeeTarget = targetName;
-    mWalkToSeeTargetPosition = targetPosition;
+    mWalkToSeeTarget = target;
 
     // Not from autoscript, for sure.
     mFromAutoscript = false;
-    
+
     // Check whether thing is already in view.
     // If so, we don't even need to walk (but may need to turn-to-face).
     Vector3 facingDir;
@@ -57,11 +56,11 @@ void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosit
     {
         // Be sure to save finish callback in this case - it usually happens in walk to.
         mFinishedPathCallback = finishCallback;
-        
+
         // Clear current walk.
         bool wasMidWalk = IsMidWalk();
         mWalkActions.clear();
-        
+
         // If mid-walk, we need to stop walking before turning.
         if(wasMidWalk)
         {
@@ -69,13 +68,13 @@ void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosit
             stopWalkAction.op = WalkOp::FollowPathEnd;
             mWalkActions.push_back(stopWalkAction);
         }
-        
+
         // No need to walk, but do turn to face the thing.
         WalkAction turnAction;
         turnAction.op = WalkOp::TurnToFace;
         turnAction.facingDir = facingDir;
         mWalkActions.push_back(turnAction);
-        
+
         // OK, walk sequence has been created - let's start doing it!
         NextAction();
     }
@@ -83,7 +82,7 @@ void Walker::WalkToSee(const std::string& targetName, const Vector3& targetPosit
     {
         // Specify a "dummy" heading here so that the "turn to face" action is put into the walk plan.
         // Later on, when the object comes into view, we'll replace this with the actual direction to turn.
-        WalkTo(targetPosition, Heading::FromDegrees(0.0f), finishCallback);
+        WalkTo(target->GetPosition(), Heading::FromDegrees(0.0f), finishCallback);
     }
 }
 
@@ -520,9 +519,11 @@ void Walker::ContinueWalk()
 
 void Walker::OnWalkToFinished()
 {
-    // Make sure state variables are cleared.
+    // No more path.
     mPath.clear();
-    mWalkToSeeTarget.clear();
+
+    // No more target.
+    mWalkToSeeTarget = nullptr;
 
     // Idle fidget should restart when walk finishes.
     // But do this BEFORE callback, as callback may trigger anims or whatnot that want to stop fidgets.
@@ -543,24 +544,24 @@ void Walker::OnWalkToFinished()
 bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
 {
     // Not in view if it doesn't exist!
-    if(mWalkToSeeTarget.empty()) { return false; }
+    if(mWalkToSeeTarget == nullptr) { return false; }
 
-    // Get the position of the target.
-    GKObject* target = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(mWalkToSeeTarget);
-    if(target == nullptr) { return false; }
-    Vector3 targetPosition = target->GetMeshRenderer()->GetAABB().GetCenter();
+    //TODO: Could maybe cache this AABB to reduce per-frame computation.
+    AABB targetAABB = mWalkToSeeTarget->GetAABB();
+    //Debug::DrawAABB(targetAABB, Color32::Orange, 5.0f);
 
     // Create ray from head in direction of target position.
     Vector3 headPos = mGKOwner->GetHeadPosition();
-    Vector3 dir = (targetPosition - headPos).Normalize();
+    Vector3 dir = (targetAABB.GetCenter() - headPos).Normalize();
     Ray ray(headPos, dir);
-    //Debug::DrawLine(targetPosition, headPos, Color32::Red);
+    //Debug::DrawLine(targetAABB.GetCenter(), headPos, Color32::Red);
     
     // If hit the target with the ray, it must be in view.
     SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, false, mGKOwner);
-    if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget) ||
-       StringUtil::EqualsIgnoreCase(result.hitInfo.name, target->GetNoun()) ||
-       StringUtil::EqualsIgnoreCase(result.hitInfo.name, target->GetMeshRenderer()->GetModelName()))
+    //std::cout << result.hitInfo.name << " vs " << mWalkToSeeTarget->GetName() << std::endl;
+
+    if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
+       StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()))
     {
         // Convert ray direction to a "facing" direction,
         dir.y = 0.0f;

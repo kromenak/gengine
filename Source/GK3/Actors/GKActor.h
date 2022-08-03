@@ -54,7 +54,7 @@ public:
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
 	void WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback);
-	void WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback);
+    void WalkToSee(GKObject* target, std::function<void()> finishCallback);
     
     Vector3 GetWalkDestination() const;
     bool AtPosition(const Vector3& position) { return mWalker->AtPosition(position); }
@@ -75,6 +75,7 @@ public:
     void SampleAnimation(VertexAnimParams& animParams, int frame) override;
     void StopAnimation(VertexAnimation* anim = nullptr) override;
     MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
+    AABB GetAABB() override;
 
     const CharacterConfig* GetConfig() const { return mCharConfig; }
 	

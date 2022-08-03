@@ -18,6 +18,7 @@
 class Animation;
 struct CharacterConfig;
 class GKActor;
+class GKObject;
 class GKProp;
 class Heading;
 class WalkerBoundary;
@@ -33,7 +34,7 @@ public:
 	void WalkTo(const Vector3& position, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
-    void WalkToSee(const std::string& targetName, const Vector3& targetPosition, std::function<void()> finishCallback);
+    void WalkToSee(GKObject* target, std::function<void()> finishCallback);
 
     void SkipToEnd();
 
@@ -95,11 +96,8 @@ private:
     // Note that this path is BACKWARDS - the goal is front() and next node to go to is back().
 	std::vector<Vector3> mPath;
 	
-	// A target (e.g. model name) that we are walking to see.
-	// If set, the walker will end walking prematurely when it detects that the target model is in view.
-	// The idea is that the walker doesn't need to walk right next to some things - it makes sense to stop when it comes into view.
-	std::string mWalkToSeeTarget;
-	Vector3 mWalkToSeeTargetPosition;
+	// A target (e.g. model) that we are walking to see.
+    GKObject* mWalkToSeeTarget = nullptr;
 	
 	// A callback for when the end of a path is reached.
 	std::function<void()> mFinishedPathCallback = nullptr;

@@ -9,6 +9,7 @@
 #pragma once
 #include "Actor.h"
 
+#include "AABB.h"
 #include "Heading.h"
 
 class MeshRenderer;
@@ -33,12 +34,14 @@ public:
 	const std::string& GetVerb() const { return mVerb; }
 	
 	bool CanInteract() const { return IsActive() && !mNoun.empty(); }
-
+    
     //TODO (but maybe OK): feels like these shouldn't be here, BUT some subclasses need these...
     virtual void StartAnimation(VertexAnimParams& animParams) { }
     virtual void SampleAnimation(VertexAnimParams& animParams, int frame) { }
     virtual void StopAnimation(VertexAnimation* anim = nullptr) { }
     virtual MeshRenderer* GetMeshRenderer() const { return nullptr;  }
+
+    virtual AABB GetAABB() { return AABB(GetPosition(), 1.0f, 1.0f, 1.0f); }
 	
 private:
 	// A noun is used to refer to the objects in NVC logic.

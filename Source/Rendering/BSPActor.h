@@ -19,9 +19,9 @@ public:
 	
 	void AddSurface(BSPSurface* surface) { mSurfaces.push_back(surface); }
 	void AddPolygon(BSPPolygon* polygon) { mPolygons.push_back(polygon); }
+
 	void SetAABB(const AABB& aabb) { mAABB = aabb; }
-	
-	const std::string& GetName() const { return mName; }
+    AABB GetAABB() override { return mAABB; }
 	
 	void SetVisible(bool visible);
 	void SetInteractive(bool interactive);
@@ -36,9 +36,6 @@ protected:
 private:
 	// The BSP this actor was created from.
 	BSP* mBSP = nullptr;
-	
-	// The name of the object in the BSP.
-	std::string mName;
 	
 	// An AABB around the BSP geometry that makes up the object.
 	AABB mAABB;

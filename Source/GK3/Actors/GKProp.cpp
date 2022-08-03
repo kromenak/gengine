@@ -22,11 +22,9 @@ GKProp::GKProp(Model* model) : GKProp()
 {
     mMeshRenderer->SetModel(model);
 
-    // For debugging, set name equal to model.
-    if(model != nullptr)
-    {
-        SetName(model->GetNameNoExtension());
-    }
+    // Use the model's name as the name of the actor.
+    // This is sometimes used for gameplay logic, so be careful about changing this!
+    SetName(mMeshRenderer->GetModelName());
 }
 
 GKProp::GKProp(const SceneModel& modelDef) : GKProp(modelDef.model)
@@ -90,6 +88,11 @@ void GKProp::StopAnimation(VertexAnimation* anim)
 {
     // NOTE: passing nullptr will stop ALL playing animations.
     mVertexAnimator->Stop(anim);
+}
+
+AABB GKProp::GetAABB()
+{
+    return mMeshRenderer->GetAABB();
 }
 
 void GKProp::StartFidget(GAS* gas)

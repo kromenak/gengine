@@ -619,7 +619,7 @@ GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 {
 	for(auto& object : mPropsAndActors)
 	{
-        if(StringUtil::EqualsIgnoreCase(object->GetMeshRenderer()->GetModelName(), modelName))
+        if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
         {
             return object;
         }
@@ -853,22 +853,33 @@ void Scene::ExecuteAction(const Action* action)
 		}
 		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser/Plant, RC1 Look Bench/Bookstore Sign
 		{
-			// Find position of the model we want to "walk to see".
-			Vector3 targetPosition;
-			GKObject* obj = GetSceneObjectByModelName(action->target);
-			if(obj != nullptr)
-			{
-				targetPosition = obj->GetPosition();
-			}
-			else
-			{
-				targetPosition = mSceneData->GetBSP()->GetPosition(action->target);
-			}
-			
-			// Walk over and execute action once target is visible.
-			mEgo->WalkToSee(action->target, targetPosition, [this, action]() -> void {
-				Services::Get<ActionManager>()->ExecuteAction(action);
-			});
+            // The target could be a scene model, or it could be BSP. Figure it out!
+            GKObject* obj = GetSceneObjectByModelName(action->target);
+            if(obj == nullptr)
+            {
+                for(auto bspActor : mBSPActors)
+                {
+                    if(StringUtil::EqualsIgnoreCase(bspActor->GetName(), action->target))
+                    {
+                        obj = bspActor;
+                        break;
+                    }
+                }
+            }
+
+            // If we found the object, walk to see it.
+            // If didn't find it, print a warning/error and just execute right away.
+            if(obj != nullptr)
+            {
+                mEgo->WalkToSee(obj, [this, action]() -> void{
+                    Services::Get<ActionManager>()->ExecuteAction(action);
+                });
+            }
+            else
+            {
+                std::cout << "Could not find WalkToSee target " << action->target << std::endl;
+                Services::Get<ActionManager>()->ExecuteAction(action);
+            }
 			break;
 		}
 		case Action::Approach::None:
