@@ -197,14 +197,20 @@ void Walker::OnUpdate(float deltaTime)
                 
                 PopAndNextAction();
             }
-            // Otherwise, see if finished following path.
-            else if(AdvancePath())
+            else if(AdvancePath()) // Otherwise, see if finished following path.
             {
                 // Path is finished - move on to next step in sequence.
+                // If we get here, the "walk to see" target never came into view. So, force-set it to something reasonable!
+                if(mWalkToSeeTarget != nullptr)
+                {
+                    assert(mWalkActions[0].op == WalkOp::TurnToFace);
+                    Vector3 dir = mWalkToSeeTarget->GetPosition() - mGKOwner->GetPosition();
+                    dir.y = 0.0f;
+                    mWalkActions[0].facingDir = Vector3::Normalize(dir);
+                }
                 PopAndNextAction();
             }
-            // Otherwise, just keep on following that path!
-            else
+            else // Otherwise, just keep on following that path!
             {
                 // Still following path - turn to face next node in path.
                 Vector3 toNext = mPath.back() - GetOwner()->GetPosition();
