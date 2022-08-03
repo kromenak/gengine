@@ -90,21 +90,21 @@ struct CharacterConfig
 {
 	std::string identifier;
 	
-	uint8 headMeshIndex = 0;
+	int8 headMeshIndex = -1;
 	Vector4 headFov; 			// left, top, right, bottom
 	Vector4 headComfortableFov;
 	
-    uint8 hipAxesMeshIndex = 0;
-    uint8 hipAxesGroupIndex = 0;
-	uint16 hipAxesPointIndex = 0;
+    int8 hipAxesMeshIndex = -1;
+    int8 hipAxesGroupIndex = -1;
+	int16 hipAxesPointIndex = -1;
 	
-    uint8 leftShoeAxesMeshIndex = 0;
-    uint8 leftShoeAxesGroupIndex = 0;
-    uint16 leftShoeAxesPointIndex = 0;
+    int8 leftShoeAxesMeshIndex = -1;
+    int8 leftShoeAxesGroupIndex = -1;
+    int16 leftShoeAxesPointIndex = -1;
 	
-    uint8 rightShoeAxesMeshIndex = 0;
-    uint8 rightShoeAxesGroupIndex = 0;
-    uint16 rightShoeAxesPointIndex = 0;
+    int8 rightShoeAxesMeshIndex = -1;
+    int8 rightShoeAxesGroupIndex = -1;
+    int16 rightShoeAxesPointIndex = -1;
 	
 	float walkerHeight = 72.0f;
 	float shoeThickness = 0.75f;

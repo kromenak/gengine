@@ -210,6 +210,11 @@ void GKActor::WalkToGas(const Vector3& position, const Heading& heading, std::fu
     mWalker->WalkToGas(position, heading, finishCallback);
 }
 
+void GKActor::WalkToSee(GKObject* target, std::function<void()> finishCallback)
+{
+    mWalker->WalkToSee(target, finishCallback);
+}
+
 void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback)
 {
 	// Need a valid anim.
@@ -252,11 +257,6 @@ void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finish
     //Debug::DrawLine(walkPos, walkPos + heading.ToVector() * 10.0f, Color32::Red, 10.0f);
 }
 
-void GKActor::WalkToSee(GKObject* target, std::function<void()> finishCallback)
-{
-    mWalker->WalkToSee(target, finishCallback);
-}
-
 Vector3 GKActor::GetWalkDestination() const
 {
 	if(!mWalker->IsWalking()) { return GetPosition(); }
@@ -276,8 +276,16 @@ void GKActor::SnapToFloor()
 
 Vector3 GKActor::GetHeadPosition() const
 {
-	// Just use height from floor to approximate head position.
-    //TODO: Could probably use head mesh index data from character config? Might be a bit more accurate?
+    // Get center point of head mesh.
+    Mesh* headMesh = mMeshRenderer->GetMesh(mCharConfig->headMeshIndex);
+    if(headMesh != nullptr)
+    {
+        Vector3 meshHeadPos = headMesh->GetAABB().GetCenter();
+        Vector3 worldHeadPos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * headMesh->GetMeshToLocalMatrix()).TransformPoint(meshHeadPos);
+        return worldHeadPos;
+    }
+
+    // If head mesh isn't present for some reason, approximate based on position and height.
 	Vector3 position = GetPosition();
 	position.y += mCharConfig->walkerHeight;
 	return position;
@@ -297,10 +305,10 @@ void GKActor::SetPosition(const Vector3& position)
     SyncModelToActor();
 }
 
-void GKActor::Rotate(float rotationAngle)
+void GKActor::Rotate(float angle)
 {
     // Rotate this actor by the angle.
-    GetTransform()->Rotate(Vector3::UnitY, rotationAngle);
+    GetTransform()->Rotate(Vector3::UnitY, angle);
 
     // As with SetHeading, we must update this value to avoid reverting rotations after current anim completes.
     mStartVertexAnimRotation = GetRotation();

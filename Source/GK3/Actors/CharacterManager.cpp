@@ -306,6 +306,10 @@ CharacterManager::CharacterManager()
                     {
                         config.rightShoeAxesPointIndex = entry.GetValueAsInt();
                     }
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "HeadMeshIndex"))
+                    {
+                        config.headMeshIndex = entry.GetValueAsInt();
+                    }
                     else if(StringUtil::StartsWithIgnoreCase(entry.key, "Clothes"))
                     {
                         // Get portion of key after "Clothes" - this indicates WHEN this clothing anim applies (e.g. day 1 10am).

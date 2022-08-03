@@ -53,8 +53,8 @@ public:
     void WalkTo(const Vector3& position, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
-	void WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback);
     void WalkToSee(GKObject* target, std::function<void()> finishCallback);
+	void WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback);
     
     Vector3 GetWalkDestination() const;
     bool AtPosition(const Vector3& position) { return mWalker->AtPosition(position); }
