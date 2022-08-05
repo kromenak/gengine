@@ -90,12 +90,11 @@ void Animator::Sample(Animation* animation, int frame)
 void Animator::OnUpdate(float deltaTime)
 {
 	// Iterate over each active animation state and update it.
-	auto it = mActiveAnimations.begin();
-	while(it != mActiveAnimations.end())
-	{
-		// Increment animation timer.
-		AnimationState& animState = *it;
-		animState.timer += deltaTime;
+    int size = mActiveAnimations.size();
+    for(int i = 0; i < size; ++i)
+    {
+        // Increment animation timer.
+        mActiveAnimations[i].timer += deltaTime;
 		
 		/*
 		 Say we have a 6-frame animation:
@@ -109,58 +108,58 @@ void Animator::OnUpdate(float deltaTime)
 		 case, you don't want that extra "time" after frame 5 to occur, or the
 		 looped animation stutters when it loops.
 		 That's why we use "-1" to decide when to loop/finish the anim.
-		 */
+		*/
 		
 		// Based on how much time has passed, we may need to increment multiple frames of animation in one update loop.
 		// For example, if timer is 0.3, and timePerFrame is 0.1, we need to update 3 times.
-		float timePerFrame = animState.params.animation->GetFrameDuration();
-		while(animState.timer >= timePerFrame)
+		float timePerFrame = mActiveAnimations[i].params.animation->GetFrameDuration();
+		while(mActiveAnimations[i].timer >= timePerFrame)
 		{
 			// WE ARE EXECUTING A FRAME!
 			
 			// Decrement timer by amount for one frame.
 			// "timer" now contains how much time we are ahead of the current frame.
-			animState.timer -= timePerFrame;
+            mActiveAnimations[i].timer -= timePerFrame;
 			
 			// Increment the frame.
 			// Frame 0 happens immediately on anim start. Each executed frame is then one more.
-			animState.currentFrame++;
+            mActiveAnimations[i].currentFrame++;
 			
 			// If looping, wrap around the current frame when we reach the end!
 			// Note the "-1" because first and last frames are the same for a looping anim!
-			if(animState.params.loop)
+			if(mActiveAnimations[i].params.loop)
 			{
-				animState.currentFrame %= animState.params.animation->GetFrameCount() - 1;
+                mActiveAnimations[i].currentFrame %= mActiveAnimations[i].params.animation->GetFrameCount() - 1;
 			}
 
             // Break out of loop if the animation has ended.
             // In extreme cases, the timer could be large enough to cover frames that don't exist - just ignore that!
-            if(animState.currentFrame >= animState.params.animation->GetFrameCount())
+            if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount())
             {
                 break;
             }
 			
 			// Execute any actions/anim nodes on the current frame.
-			ExecuteFrame(animState, animState.currentFrame);
+			ExecuteFrame(mActiveAnimations[i], mActiveAnimations[i].currentFrame);
 		}
-		
-		// If the animation has ended, remove it from the active animation states.
-		if(animState.currentFrame >= animState.params.animation->GetFrameCount() - 1)
-		{
-			// Do the finish callback!
-			if(animState.params.finishCallback != nullptr)
-			{
-				animState.params.finishCallback();
-			}
 
-			// Erase the anim state.
-			it = mActiveAnimations.erase(it);
-		}
-		else
-		{
-			++it;
-		}
-	}
+		// If the animation has ended, fire animation finished callback.
+        // Note that a callback *can* trigger more anims to be added (via Start). So, there's some danger of "modifying while iterating" here.
+        // But that's OK - we only modify items that were already in the list at start of OnUpdate.
+        if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount() - 1 && mActiveAnimations[i].params.finishCallback != nullptr)
+        {
+            mActiveAnimations[i].params.finishCallback();
+        }
+    }
+
+    // Remove animations that are done.
+    for(int i = size - 1; i >= 0; --i)
+    {
+        if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount() - 1)
+        {
+            mActiveAnimations.erase(mActiveAnimations.begin() + i);
+        }
+    }
 }
 
 void Animator::ExecuteFrame(AnimationState& animState, int frameNumber)

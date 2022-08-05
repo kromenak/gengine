@@ -17,6 +17,7 @@
 #include "Services.h"
 #include "StringUtil.h"
 #include "Vector3.h"
+#include "VertexAnimator.h"
 #include "WalkerBoundary.h"
 
 TYPE_DEF_CHILD(Component, Walker);
@@ -144,6 +145,14 @@ void Walker::OnUpdate(float deltaTime)
     // Process outstanding walk actions.
     if(mWalkActions.size() > 0)
     {
+        // Kind of a HACK: if we're walking, and action manager is skipping, move to end of movement ASAP.
+        // Without this, walks during fast-forwards can get stuck and cause the game to freeze.
+        //TODO: *Probably* a better way to handle this, with a substantial refactor...
+        if(Services::Get<ActionManager>()->IsSkippingCurrentAction())
+        {
+            SkipToEnd();
+        }
+
         // Increase current action timer.
         mCurrentWalkActionTimer += deltaTime;
 
@@ -199,8 +208,8 @@ void Walker::OnUpdate(float deltaTime)
             }
             else if(AdvancePath()) // Otherwise, see if finished following path.
             {
-                // Path is finished - move on to next step in sequence.
-                // If we get here, the "walk to see" target never came into view. So, force-set it to something reasonable!
+                // If we get here and we have a "walk to see" target, it means we got to end of path without ever actully seeing the thing!
+                // So, force-set it to something reasonable!
                 if(mWalkToSeeTarget != nullptr)
                 {
                     assert(mWalkActions[0].op == WalkOp::TurnToFace);
@@ -208,10 +217,25 @@ void Walker::OnUpdate(float deltaTime)
                     dir.y = 0.0f;
                     mWalkActions[0].facingDir = Vector3::Normalize(dir);
                 }
+
+                // Path is finished - move on to next step in sequence.
                 PopAndNextAction();
             }
             else // Otherwise, just keep on following that path!
             {
+                // If walk anim has ended, we need to start it again.
+                if(mNeedContinueWalkAnim)
+                {
+                    mNeedContinueWalkAnim = false;
+                    
+                    AnimParams animParams;
+                    animParams.animation = mCharConfig->walkLoopAnim;
+                    animParams.allowMove = true;
+                    animParams.fromAutoScript = mFromAutoscript;
+                    animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
+                    GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+                }
+
                 // Still following path - turn to face next node in path.
                 Vector3 toNext = mPath.back() - GetOwner()->GetPosition();
                 toNext.y = 0.0f;
@@ -471,7 +495,7 @@ void Walker::NextAction()
             animParams.animation = mCharConfig->walkLoopAnim;
             animParams.allowMove = true;
             animParams.fromAutoScript = mFromAutoscript;
-            animParams.finishCallback = std::bind(&Walker::ContinueWalk, this);
+            animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
             
             if(mPrevWalkOp == WalkOp::FollowPathStartTurnRight)
             {
@@ -508,19 +532,11 @@ void Walker::NextAction()
     }
 }
 
-void Walker::ContinueWalk()
+void Walker::OnWalkAnimFinished()
 {
-    // This function is just a helper to loop the "walk loop" anim.
-    // Just make sure the current action is still "follow path" and if so we can play the loop anim one more time.
-    if(mWalkActions.size() > 0 && mWalkActions.back().op == WalkOp::FollowPath)
-    {
-        AnimParams animParams;
-        animParams.animation = mCharConfig->walkLoopAnim;
-        animParams.allowMove = true;
-        animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = std::bind(&Walker::ContinueWalk, this);
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
-    }
+    // Set flag so that we continue the walk anim during the next update loop.
+    // A flag-based system is needed (rather than just continuing right here) to avoid infinite loops with high delta time values!
+    mNeedContinueWalkAnim = true;
 }
 
 void Walker::OnWalkToFinished()

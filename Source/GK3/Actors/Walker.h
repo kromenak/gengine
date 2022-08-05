@@ -106,13 +106,16 @@ private:
     // If true, we tell the animation system this is an autoscript animation, and we don't restart idle autoscript when done.
     bool mFromAutoscript = false;
 
+    // If true, need to continue walk anim during next update loop.
+    bool mNeedContinueWalkAnim = false;
+
     void WalkToInternal(const Vector3& position, const Heading& heading, std::function<void()> finishCallback, bool fromAutoscript);
 
     void PopAndNextAction();
     void NextAction();
     
     bool IsMidWalk() const { return mWalkActions.size() > 0 && mWalkActions.back().op == WalkOp::FollowPath; }
-	void ContinueWalk();
+	void OnWalkAnimFinished();
 	void OnWalkToFinished();
 	
 	bool IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir);
