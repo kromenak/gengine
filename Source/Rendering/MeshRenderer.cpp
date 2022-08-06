@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "Actor.h"
+#include "Collisions.h"
 #include "Debug.h"
 #include "Model.h"
 #include "Ray.h"
@@ -220,7 +221,11 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 		// See if the local ray intersects the local space triangles of the mesh.
 		if(mesh->Raycast(localRay, hitInfo))
 		{
-			//TODO: Convert hit info back to world space.
+            // The "t" value calculated in Raycast is in mesh space, but caller probably needs it in world space.
+            // So, convert "t" back to world space before returning.
+            Vector3 hitPoint = localRay.GetPoint(hitInfo.t);
+            Vector3 hitPointWorldPos = meshToWorldMatrix.TransformPoint(hitPoint);
+            hitInfo.t = (ray.origin - hitPointWorldPos).GetLength();
 			return true;
 		}
 	}

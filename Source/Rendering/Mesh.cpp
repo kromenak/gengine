@@ -1,8 +1,3 @@
-//
-// Mesh.cpp
-//
-// Clark Kromenaker
-//
 #include "Mesh.h"
 
 #include <cassert>
