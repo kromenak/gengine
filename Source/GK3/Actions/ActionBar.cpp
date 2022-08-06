@@ -73,7 +73,6 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	Hide();
 	
 	// If we don't have any actions, don't need to do anything!
-	if(actions.empty()) { return; }
     std::sort(actions.begin(), actions.end(), SortActions());
 
     // Save cancel callback.
