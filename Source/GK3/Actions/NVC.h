@@ -73,7 +73,7 @@ class NVC : public Asset
 public:
     NVC(const std::string& name, char* data, int dataLength);
 	
-	const std::vector<Action*> GetActions() const { return mActions; }
+	const std::vector<Action*>& GetActions() const { return mActions; }
 	const std::vector<Action>& GetActions(const std::string& noun) const;
 	std::vector<const Action*> GetActions(const std::string& noun, const std::string& verb) const;
     int GetActionsCount(const std::string& noun, const std::string& verb) const;

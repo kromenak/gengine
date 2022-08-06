@@ -38,36 +38,50 @@ void ActionManager::Init()
 void ActionManager::AddActionSet(const std::string& assetName)
 {
 	NVC* actionSet = Services::GetAssets()->LoadNVC(assetName);
-	if(actionSet != nullptr)
-	{
-		Services::GetReports()->Log("Generic", StringUtil::Format("Reading NVC file: %s", assetName.c_str()));
-		mActionSets.push_back(actionSet);
+    if(actionSet == nullptr) { return; }
+
+	Services::GetReports()->Log("Generic", StringUtil::Format("Reading NVC file: %s", assetName.c_str()));
+	mActionSets.push_back(actionSet);
+
+    // Populate actions map.
+    const std::vector<Action*>& actions = actionSet->GetActions();
+    for(auto& action : actions)
+    {
+        // Retrieve innermost map for this noun/verb combo.
+        std::string_map_ci<Action*>& actionsForNounVerb = mActions[action->noun][action->verb];
+
+        // Make sure there isn't already an exact noun/verb/case combo present.
+        // This is considered an error, and any duplicates are ignored - only the first instance is used.
+        auto it = actionsForNounVerb.find(action->caseLabel);
+        if(it != actionsForNounVerb.end())
+        {
+            //TODO: ERROR!
+            continue;
+        }
+
+        // Add action to map.
+        actionsForNounVerb[action->caseLabel] = action;
+
+        // Add nouns & verbs to lists/maps.
+        // This allows us to convert a noun/verb to a unique integer-based ID, and back again.
+        // Doing this primarily to support n$ and v$ requirement in Sheep eval logic...
+        auto nounIt = mNounToEnum.find(action->noun);
+        if(nounIt == mNounToEnum.end())
+        {
+            mNounToEnum[action->noun] = (int)mNouns.size();
+            mNouns.push_back(action->noun);
+        }
+        auto verbIt = mVerbToEnum.find(action->verb);
+        if(verbIt == mVerbToEnum.end())
+        {
+            mVerbToEnum[action->verb] = (int)mVerbs.size();
+            mVerbs.push_back(action->verb);
+        }
+    }
 		
-		// Also build case logic map.
-		auto caseLogic = actionSet->GetCases();
-		mCaseLogic.insert(caseLogic.begin(), caseLogic.end());
-		
-		// Iterate actions and add nouns/verbs to lists and maps.
-		// This allows us to convert a noun/verb to a unique integer-based ID, and back again.
-		// Doing this primarily to support n$ and v$ requirement in Sheep eval logic...
-		const std::vector<Action*> actions = actionSet->GetActions();
-		for(auto& action : actions)
-		{
-			auto nounIt = mNounToEnum.find(action->noun);
-			if(nounIt == mNounToEnum.end())
-			{
-				mNounToEnum[action->noun] = (int)mNouns.size();
-				mNouns.push_back(action->noun);
-			}
-			
-			auto verbIt = mVerbToEnum.find(action->verb);
-			if(verbIt == mVerbToEnum.end())
-			{
-				mVerbToEnum[action->verb] = (int)mVerbs.size();
-				mVerbs.push_back(action->verb);
-			}
-		}
-	}
+	// Also build custom case logic map.
+    const std::string_map_ci<SheepScriptAndText>& caseLogic = actionSet->GetCases();
+    mCaseLogic.insert(caseLogic.begin(), caseLogic.end());
 }
 
 void ActionManager::AddActionSetIfForTimeblock(const std::string& assetName, const Timeblock& timeblock)
@@ -96,6 +110,7 @@ void ActionManager::AddInventoryActionSets(const Timeblock& timeblock)
 
 void ActionManager::ClearActionSets()
 {
+    mActions.clear();
 	mActionSets.clear();
 	mCaseLogic.clear();
 	mNounToEnum.clear();
@@ -250,6 +265,8 @@ void ActionManager::SkipCurrentAction()
     // If this becomes a problem, we may have to start "tagging" sounds based on where they came from in some way.
     Services::GetAudio()->StopOnOrAfterFrame(mCurrentActionStartFrame);
 
+    //TODO: Also hide any subtitles, since we skipped everything.
+
     // Done skipping.
     mSkipInProgress = false;
 }
@@ -327,49 +344,163 @@ const Action* ActionManager::GetAction(const std::string& noun, const std::strin
 	return candidate;
 }
 
+void ActionManager::AddActionsToMap(const std::string& noun, VerbType verbType, std::unordered_map<std::string, const Action*>& map) const
+{
+    auto nounEntry = mActions.find(noun);
+    if(nounEntry != mActions.end())
+    {
+        for(auto& verbEntry : nounEntry->second)
+        {
+            // The "ANY_INV_ITEM" wildcard only matches if a specific verb was provided.
+            // This function doesn't let you specify a verb, so this should never match.
+            bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(verbEntry.first, "ANY_INV_ITEM");
+            if(isWildcardInvItem) { continue; }
+
+            // The verb must be of the correct type for us to use nounEntry.
+            bool validType = false;
+            switch(verbType)
+            {
+            case VerbType::Normal:
+                validType = Services::Get<VerbManager>()->IsVerb(verbEntry.first);
+                break;
+            case VerbType::Inventory:
+                validType = Services::Get<VerbManager>()->IsInventoryItem(verbEntry.first);
+                break;
+            case VerbType::Topic:
+                validType = Services::Get<VerbManager>()->IsTopic(verbEntry.first);
+                break;
+            }
+            if(!validType) { continue; }
+
+            // OK, this noun/verb combo seems fine. Now let's iterate all the cases.
+            Action* action = nullptr;
+            int highestCaseScore = 0;
+            for(auto& caseEntry : verbEntry.second)
+            {
+                // The case must be met, for one.
+                bool caseMet = IsCaseMet(noun, verbEntry.first, caseEntry.first, verbType);
+                if(!caseMet) { continue; }
+
+                // OK, this NVC is totally valid!
+                // The only reason we wouldn't use it is if a higher-priority case is met.
+                
+                // Determine a "score" value for this action's CASE label. A higher score means the CASE has higher priority.
+                // CASE Priority (Lowest to Highest):
+                // ALL
+                // GABE_ALL / GRACE_ALL
+                // TIME_BLOCK
+                // OTR_TIME
+                // DIALOGUE_TOPICS_LEFT / NOT_DIALOGUE_TOPICS_LEFT
+                // TIME_BLOCK_OVERRIDE
+                // Custom Logic - alphabetical order (very strange, imo)
+                // 1ST_TIME / 2CD_TIME / 3RD_TIME
+                int caseScore = 0;
+                if(StringUtil::EqualsIgnoreCase(caseEntry.first, "ALL"))
+                {
+                    caseScore = 1;
+                }
+                else if(StringUtil::EqualsIgnoreCase(caseEntry.first, "GABE_ALL") ||
+                        StringUtil::EqualsIgnoreCase(caseEntry.first, "GRACE_ALL"))
+                {
+                    caseScore = 2;
+                }
+                else if(StringUtil::EqualsIgnoreCase(caseEntry.first, "TIME_BLOCK"))
+                {
+                    caseScore = 3;
+                }
+                else if(StringUtil::EqualsIgnoreCase(caseEntry.first, "OTR_TIME") ||
+                        StringUtil::ContainsIgnoreCase(caseEntry.first, "_OTR")) // Custom logic with _OTR also get this priority.
+                {
+                    caseScore = 4;
+                }
+                else if(StringUtil::EqualsIgnoreCase(caseEntry.first, "DIALOGUE_TOPICS_LEFT") ||
+                        StringUtil::EqualsIgnoreCase(caseEntry.first, "NOT_DIALOGUE_TOPICS_LEFT"))
+                {
+                    caseScore = 5;
+                }
+                else if(StringUtil::EqualsIgnoreCase(caseEntry.first, "TIME_BLOCK_OVERRIDE"))
+                {
+                    caseScore = 6;
+                }
+                else if(StringUtil::EqualsIgnoreCase(caseEntry.first, "1ST_TIME") ||
+                        StringUtil::EqualsIgnoreCase(caseEntry.first, "2CD_TIME") ||
+                        StringUtil::EqualsIgnoreCase(caseEntry.first, "3RD_TIME"))
+                {
+                    caseScore = 8;
+                }
+                else
+                {
+                    caseScore = 7;
+
+                    // If the highest scoring case we currently have is ALSO custom logic, see if this custom logic's label is first alphabetically.
+                    // The first one alphabetically is the one we use.
+                    if(action != nullptr && highestCaseScore == 7)
+                    {
+                        std::string currentCase = StringUtil::ToLowerCopy(action->caseLabel);
+                        std::string newCase = StringUtil::ToLowerCopy(caseEntry.first);
+                        if(strcmp(newCase.c_str(), currentCase.c_str()) < 0)
+                        {
+                            action = caseEntry.second;
+                        }
+                    }
+                }
+
+                // If we found a case with a higher score, we'll use that instead.
+                if(caseScore > highestCaseScore)
+                {
+                    highestCaseScore = caseScore;
+                    action = caseEntry.second;
+                }
+            }
+
+            // Map verb to action.
+            if(action != nullptr)
+            {
+                map[verbEntry.first] = action;
+            }
+        }
+    }
+}
+
 std::vector<const Action*> ActionManager::GetActions(const std::string& noun, VerbType verbType) const
 {
-	// As we find actions for this noun, we don't want repeated "verbs".
-	// For example, if two actions exist for the verb "LOOK", we don't want two look actions on the action bar!
-	// So, keep track of the verb-to-action mappings; only the first verb with a true case will be used.
-	std::unordered_map<std::string, const Action*> verbToAction;
-	
-	// Iterate all loaded action sets to find valid actions for this noun.
-	for(auto& actionSet : mActionSets)
-	{
-        // Within an action set, we only want to use the first matching action.
-        // Ex: if NOUN, VERB, CASE1 matches and is then followed by NOUN, VERB, CASE2 (which also matches), the second one is ignored.
-        std::unordered_set<std::string> usedVerbs;
+    // "ANY_OBJECT" is a wildcard. Any action with a noun of "ANY_OBJECT" can be valid for any noun passed in.
+    // These are lowest-priority, so we do them first (they might be overwritten later).
+    std::unordered_map<std::string, const Action*> verbToAction;
+    AddActionsToMap("ANY_OBJECT", verbType, verbToAction);
 
-        // "ANY_OBJECT" is a wildcard. Any action with a noun of "ANY_OBJECT" can be valid for any noun passed in.
-        // These are lowest-priority, so we do them first (they might be overwritten later).
-        AddValidActionsToMap("ANY_OBJECT", verbType, actionSet, verbToAction, usedVerbs);
+    // Next, get specific actions for this particular noun.
+    std::unordered_map<std::string, const Action*> verbToActionSpecific;
+    AddActionsToMap(noun, verbType, verbToActionSpecific);
 
-        // Clear used verbs, which allows higher-priority passes to overwrite ANY_OBJECT actions.
-        // Ex: ANY_OBJECT, LOOK, CASE1 matches, but then CANDY, LOOK, CASE2 matches exactly - use the second one.
-        usedVerbs.clear();
-		
-		// Check actions that map directly to this noun.
-        AddValidActionsToMap(noun, verbType, actionSet, verbToAction, usedVerbs);
+    // Combine the two maps.
+    // If a verb exists in both maps, the specific version overwrites the more general ANY_OBJECT version.
+    for(auto& entry : verbToActionSpecific)
+    {
+        verbToAction[entry.first] = entry.second;
+    }
 
-        // SO...in GK3, the nouns LADY_HOWARD & ESTELLE both mysteriously also match the noun LADY_H_ESTELLE.
-        // I haven't found any data-driven spot where this equivalence is defined. It *may* be hard-coded in the original game?
-        // Anyway, either of these nouns should also match LADY_H_ESTELLE noun.
-        if(StringUtil::EqualsIgnoreCase(noun, "LADY_HOWARD") || StringUtil::EqualsIgnoreCase(noun, "ESTELLE"))
+    // SO...in GK3, the nouns LADY_HOWARD & ESTELLE both mysteriously also match the noun LADY_H_ESTELLE.
+    // I haven't found any data-driven spot where this equivalence is defined. It *may* be hard-coded in the original game?
+    // Anyway, either of these nouns should also match LADY_H_ESTELLE noun.
+    if(StringUtil::EqualsIgnoreCase(noun, "LADY_HOWARD") || StringUtil::EqualsIgnoreCase(noun, "ESTELLE"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("LADY_H_ESTELLE", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
         {
-            // Note that I AM NOT clearing usedVerbs b/c I think if an action matched specifically LADY_HOWARD or ESTELLE, it shouldn't be overridden with this version.
-            AddValidActionsToMap("LADY_H_ESTELLE", verbType, actionSet, verbToAction, usedVerbs);
+            verbToAction[entry.first] = entry.second;
         }
-	}
-	
-	// Finally, convert our map to a vector to return.
-	std::vector<const Action*> viableActions;
-	for(auto entry : verbToAction)
-	{
-		viableActions.push_back(entry.second);
-	}
-    OutputActions(viableActions);
-	return viableActions;
+    }
+
+    // Finally, convert our map to a vector to return.
+    std::vector<const Action*> viableActions;
+    for(auto entry : verbToAction)
+    {
+        viableActions.push_back(entry.second);
+    }
+    //OutputActions(viableActions);
+    return viableActions;
 }
 
 bool ActionManager::HasTopicsLeft(const std::string &noun) const
@@ -405,7 +536,6 @@ void ActionManager::ShowTopicBar(const std::string& noun)
 	auto actions = GetActions(noun, VerbType::Topic);
 	if(actions.size() == 0)
     {
-        std::cout << "No more topics to discuss!" << std::endl;
         OnActionBarCanceled();
         return;
     }
@@ -559,6 +689,7 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	if(StringUtil::EqualsIgnoreCase(caseLabel, "ALL"))
 	{
         // For topics, "ALL" seems to have a strange meaning...it should be the "last thing" said about a topic.
+        /*
         // So, get total things that can be said about this topic, and if we are one away from that, this condition is met.
         if(verbType == VerbType::Topic)
         {
@@ -569,8 +700,9 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
             }
             return Services::Get<GameProgress>()->GetTopicCount(noun, verb) == (count - 1);
         }
+        */
 
-		// For non-topics, functions as you'd expect: "ALL" condition is always met!
+		// "ALL" is always met!
 		return true;
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "GABE_ALL"))
@@ -646,62 +778,27 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 		// Condition is met if there are no more "topic" type actions available for this noun.
 		return !HasTopicsLeft(noun);
 	}
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK"))
+    {
+        // This condition always returns true.
+        // In an NVC file, it typically signifies a variant action for the specific timeblock that overrides one of the general SIF actions.
+        return true;
+    }
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK_OVERRIDE"))
 	{
-        // A bit unclear, but appears that this condition is always met.
-        // It indicates an override in a timeblock-specific SIF that should be used instead of the ALL variant in the general SIF.
+        // This condition is identical to TIME_BLOCK, but it has higher priority when multiple actions can be used.
         return true;
 	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "TIME_BLOCK"))
-	{
-        // Also unclear, but may just be a variant/shorthand for TIME_BLOCK_OVERRIDE.
-        return true;
-	}
+    else if(StringUtil::EqualsIgnoreCase(caseLabel, "EGG"))
+    {
+        //TODO: Return true if easter eggs are enabled.
+        return false;
+    }
 	//TODO: Add any more global conditions.
 	
 	// Assume any not found case is false by default.
 	std::cout << "Unknown NVC case " << caseLabel << std::endl;
 	return false;
-}
-
-void ActionManager::AddValidActionsToMap(const std::string& noun, VerbType verbType, NVC* actionSet,
-                                         std::unordered_map<std::string, const Action*>& verbToAction,
-                                         std::unordered_set<std::string>& usedVerbs) const
-{
-    // Get the actions from the action set associated with this noun.
-    const std::vector<Action>& actions = actionSet->GetActions(noun);
-    for(auto& action : actions)
-    {
-        // The "ANY_INV_ITEM" wildcard only matches if a specific verb was provided.
-        // This function doesn't let you specify a verb, so this should never match.
-        bool isWildcardInvItem = StringUtil::EqualsIgnoreCase(action.verb, "ANY_INV_ITEM");
-        if(isWildcardInvItem) { continue; }
-
-        // Ignore this action if the verb is already marked as used.
-        if(usedVerbs.find(action.verb) != usedVerbs.end()) { continue; }
-
-        // The action's verb must be of the correct type for us to use it.
-        bool validType = false;
-        switch(verbType)
-        {
-        case VerbType::Normal:
-            validType = Services::Get<VerbManager>()->IsVerb(action.verb);
-            break;
-        case VerbType::Inventory:
-            validType = Services::Get<VerbManager>()->IsInventoryItem(action.verb);
-            break;
-        case VerbType::Topic:
-            validType = Services::Get<VerbManager>()->IsTopic(action.verb);
-            break;
-        }
-
-        // If type is valid and the action meets any case specified, we can use this action!
-        if(validType && IsCaseMet(action.noun, action.verb, action.caseLabel, verbType))
-        {
-            verbToAction[action.verb] = &action;
-            usedVerbs.insert(action.verb);
-        }
-    }
 }
 
 void ActionManager::OnActionBarCanceled()

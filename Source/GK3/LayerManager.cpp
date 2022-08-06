@@ -25,13 +25,13 @@ void Layer::OverrideAudioState(bool overrideSFX, bool overrideVO, bool overrideA
 
 void Layer::Enter(Layer* fromLayer)
 {
-    std::cout << "Enter " << mName << std::endl;
+    //std::cout << "Enter " << mName << std::endl;
     OnEnter(fromLayer);
 }
 
 void Layer::Exit(Layer* toLayer)
 {
-    std::cout << "Exit " << mName << std::endl;
+    //std::cout << "Exit " << mName << std::endl;
     OnExit(toLayer);
 }
 

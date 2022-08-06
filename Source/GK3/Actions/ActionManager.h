@@ -13,6 +13,7 @@
 
 #include "Atomics.h"
 #include "NVC.h"
+#include "StringUtil.h"
 #include "Type.h"
 
 class ActionBar;
@@ -105,19 +106,23 @@ private:
 	// Action sets that are currently active. Note that these change pretty frequently (i.e. on scene change).
 	// The game uses these to determine the valid actions for a noun when showing the action bar.
 	std::vector<NVC*> mActionSets;
+
+    // Nested maps that map each unique valid Noun/Verb/Case combo to a specific Action.
+    // Think of this like a lookup - map[noun] gives you all the actions for that noun, map[noun][verb] gives all actions for that noun/verb, etc.
+    std::string_map_ci<std::string_map_ci<std::string_map_ci<Action*>>> mActions;
 	
 	// An action may specify a "case" under which it is valid.
 	// A case label corresponds to a bit of sheepscript that evaluates to either true or false.
 	// Cases must be stored here (rather than in Action Sets) because cases can be shared (especially global/inventory ones).
-    std::unordered_map<std::string, SheepScriptAndText> mCaseLogic;
+    std::string_map_ci<SheepScriptAndText> mCaseLogic;
 	
 	// Nouns and verbs that are currently active. Pulled out of action sets as they are loaded.
 	// We do this to support the Sheep-eval feature of specifying n$ and v$ variables as wildcards for current noun/verb.
 	// To use these, we must map each active noun/verb to an integer and back again.
 	std::vector<std::string> mNouns;
-	std::unordered_map<std::string, int> mNounToEnum;
+	std::string_map_ci<int> mNounToEnum;
 	std::vector<std::string> mVerbs;
-	std::unordered_map<std::string, int> mVerbToEnum;
+	std::string_map_ci<int> mVerbToEnum;
 	
 	// An action that's used for "Sheep Commands."
 	// When an arbitrary SheepScript needs to execute through the action system, we use this Action object.
@@ -153,10 +158,8 @@ private:
 	// Returns true if the case for an action is met. A case can be a global condition, or some user-defined script to evaluate.
 	bool IsCaseMet(const std::string& noun, const std::string& verb, const std::string& caseLabel, VerbType verbType = VerbType::Normal) const;
 
-    // Queries an action set for a particular noun & desired verb type. If matches are found, they are added to the provided map.
-    void AddValidActionsToMap(const std::string& noun, VerbType verbType, NVC* actionSet,
-                              std::unordered_map<std::string, const Action*>& verbToAction,
-                              std::unordered_set<std::string>& usedVerbs) const;
+    // Populates provided map with actions that are valid for the given noun.
+    void AddActionsToMap(const std::string& noun, VerbType verbType, std::unordered_map<std::string, const Action*>& map) const;
 	
 	// Called when action bar is canceled (press cancel button).
 	void OnActionBarCanceled();
