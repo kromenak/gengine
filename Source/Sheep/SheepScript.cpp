@@ -439,7 +439,7 @@ void SheepScript::Decompile(const std::string& filePath)
                 WriteOut(out, "}\n", indentLevel);
             }
 
-            WriteOut(out, offsetsIt->second, indentLevel);
+            WriteOut(out, offsetsIt->second + "()", indentLevel);
             WriteOut(out, "{", indentLevel);
             ++indentLevel;
 

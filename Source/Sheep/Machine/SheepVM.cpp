@@ -314,13 +314,13 @@ Value SheepVM::CallSysFunc(SheepThread* thread, SysFuncImport* sysImport)
 			switch(sysFunc->argumentTypes[i])
 			{
 			case 1:
-				std::cout << args[i].to<int>();
+				std::cout << args[i].To<int>();
 				break;
 			case 2:
-				std::cout << args[i].to<float>();
+				std::cout << args[i].To<float>();
 				break;
 			case 3:
-				std::cout << args[i].to<std::string>();
+				std::cout << args[i].To<std::string>();
 				break;
 			}
 
