@@ -126,6 +126,12 @@ void InventoryManager::AddInventoryItem(const std::string& actorName, const std:
 {
 	std::set<std::string>& items = mInventories[actorName];
 	items.insert(StringUtil::ToUpperCopy(itemName));
+
+    // Inventory item can be added while screen is showing (ex: combining items to create a new item).
+    if(mInventoryScreen->IsActive())
+    {
+        mInventoryScreen->RefreshLayout();
+    }
 }
 
 void InventoryManager::RemoveInventoryItem(const std::string& itemName)

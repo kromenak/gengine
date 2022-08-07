@@ -150,8 +150,6 @@ RegFunc0(InventoryUninspect, void, IMMEDIATE, REL_FUNC);
 
 shpvoid SetInvItemStatus(const std::string& itemName, const std::string& status)
 {
-    std::cout << "SetInvItemStatus: " << itemName << ", " << status << std::endl;
-
     // The item name must be valid.
     bool argumentError = false;
     if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
