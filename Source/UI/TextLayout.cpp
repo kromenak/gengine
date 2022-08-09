@@ -52,7 +52,13 @@ void TextLayout::AddLine(const std::string& line)
     }
 	
     // Height of the line is easier - always glyph height from the font.
-	int lineHeight = mFont->GetGlyphHeight();
+    int lineHeight = mFont->GetGlyphHeight();
+
+    // If this isn't the first line, append an extra buffer for the space between the lines.
+    if(mLineCount > 1)
+    {
+        lineHeight += 1;
+    }
 	
     // Determine initial left x-pos of this line, depending on alignment.
 	float xPos = 0.0f;
