@@ -103,6 +103,12 @@ void MeshRenderer::Render(bool opaque, bool translucent)
         }
     }
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    
+    // Optionally some AABB drawing.
+    if(Debug::RenderAABBs())
+    {
+        DebugDrawAABBs();
+    }
 }
 
 void MeshRenderer::SetModel(Model* model)
@@ -263,6 +269,7 @@ AABB MeshRenderer::GetAABB() const
 
 void MeshRenderer::DebugDrawAABBs()
 {
+    // The local-to-world matrix for this Actor is required for all meshes.
 	Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
 	
 	// Raycast against triangles in the mesh.
@@ -275,7 +282,8 @@ void MeshRenderer::DebugDrawAABBs()
         Debug::DrawAABB(mesh->GetAABB(), Color32::Magenta, 0.0f, &meshToWorldMatrix);
 	}
 
-    Debug::DrawAABB(GetAABB(), Color32::Orange, 0.0f);
+    // Also draw the MeshRenderer's OVERALL AABB in a different color.
+    Debug::DrawAABB(GetAABB(), Color32::Orange);
 }
 
 int MeshRenderer::GetIndexFromMeshSubmeshIndexes(int meshIndex, int submeshIndex)

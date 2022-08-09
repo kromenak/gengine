@@ -23,6 +23,7 @@ Shader* Debug::sDrawShader = nullptr;
 bool Debug::sRenderActorTransformAxes = false;
 bool Debug::sRenderSubmeshLocalAxes = false;
 bool Debug::sRenderRectTransformRects = false;
+bool Debug::sRenderAABBs = false;
 
 void Debug::DrawLine(const Vector3& from, const Vector3& to, const Color32& color, float duration)
 {
@@ -247,6 +248,10 @@ void Debug::Update(float deltaTime)
 	{
 		sRenderRectTransformRects = !sRenderRectTransformRects;
 	}
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F5))
+    {
+        sRenderAABBs = !sRenderAABBs;
+    }
 }
 
 void Debug::Render()

@@ -1,6 +1,6 @@
 #include "BSPActor.h"
 
-//#include "Debug.h"
+#include "Debug.h"
 
 BSPActor::BSPActor(BSP* bsp, const std::string& name) : GKObject(),
 	mBSP(bsp)
@@ -57,14 +57,12 @@ void BSPActor::OnInactive()
 
 void BSPActor::OnUpdate(float deltaTime)
 {
-    /*
 	// Draw debug AABB to visualize interactable BSP objects in the scene.
 	// Noun check stops visualizing non-interactive BSP objects.
-	if(!GetNoun().empty())
+	if(Debug::RenderAABBs() && !GetNoun().empty())
 	{
-        Debug::DrawAABB(mAABB, Color32::Green);
+        Debug::DrawAABB(mAABB, Color32::Orange);
 	}
-    */
 }
 
 

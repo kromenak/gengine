@@ -59,6 +59,7 @@ public:
 	static bool RenderActorTransformAxes() { return sRenderActorTransformAxes; }
 	static bool RenderSubmeshLocalAxes() { return sRenderSubmeshLocalAxes; }
 	static bool RenderRectTransformRects() { return sRenderRectTransformRects; }
+    static bool RenderAABBs() { return sRenderAABBs; }
 	
 private:
 	static std::list<DrawCommand> sDrawCommands;
@@ -68,4 +69,5 @@ private:
 	static bool sRenderActorTransformAxes;
 	static bool sRenderSubmeshLocalAxes;
 	static bool sRenderRectTransformRects;
+    static bool sRenderAABBs;
 };
