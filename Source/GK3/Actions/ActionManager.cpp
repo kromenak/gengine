@@ -8,6 +8,7 @@
 #include "GKActor.h"
 #include "GK3UI.h"
 #include "IniParser.h"
+#include "Profiler.h"
 #include "Scene.h"
 #include "Services.h"
 #include "StringUtil.h"
@@ -239,13 +240,14 @@ void ActionManager::SkipCurrentAction()
     // The idea here is that the game's execution should immediately "skip" to the end of the current action.
     // The most "global" and unintrusive way I can think to do that is...just run update in a loop until the action is done!
     // So, the game is essentially running in fast-forward, in the background, and not rendering anything until the action has resolved.
+    Stopwatch stopwatch;
     int skipCount = 0;
     while(IsActionPlaying())
     {
         GEngine::Instance()->ForceUpdate();
         ++skipCount;
     }
-    Services::GetReports()->Log("Console", StringUtil::Format("skipped %i times, skip duration: %i msec", skipCount, 0));
+    Services::GetReports()->Log("Console", StringUtil::Format("skipped %i times, skip duration: %i msec", skipCount, static_cast<int>(stopwatch.GetMilliseconds())));
 
     // Do this again AFTER skipping to stop any audio that may have been triggered during the forced updates.
     //TODO: The audio system, or Sheep system, could mayyyybe not play audio during skips. But that might be quite intrusive.

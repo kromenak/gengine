@@ -38,7 +38,7 @@ Sample::Sample(const char* name) :
 
 Sample::~Sample()
 {
-    printf("%s: %.2f ms\n", mName, mTimer.GetMilliseconds());
+    printf("[%s] %.2f ms\n", mName, mTimer.GetMilliseconds());
 }
 
 /*static*/ void Profiler::BeginFrame()
