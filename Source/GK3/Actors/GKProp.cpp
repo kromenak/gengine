@@ -81,7 +81,15 @@ void GKProp::StartAnimation(VertexAnimParams& animParams)
 
 void GKProp::SampleAnimation(VertexAnimParams& animParams, int frame)
 {
+    // Sample the animation on the specified frame.
     mVertexAnimator->Sample(animParams.vertexAnimation, frame);
+
+    // For absolute anims, position model exactly as specified.
+    if(animParams.absolute)
+    {
+        SetPosition(animParams.absolutePosition);
+        SetRotation(animParams.absoluteHeading.ToQuaternion());
+    }
 }
 
 void GKProp::StopAnimation(VertexAnimation* anim)
