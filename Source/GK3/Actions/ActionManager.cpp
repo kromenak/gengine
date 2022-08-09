@@ -38,9 +38,11 @@ void ActionManager::Init()
 
 void ActionManager::AddActionSet(const std::string& assetName)
 {
+    // Read in the asset.
 	NVC* actionSet = Services::GetAssets()->LoadNVC(assetName);
     if(actionSet == nullptr) { return; }
 
+    // Log that we're parsing this NVC.
 	Services::GetReports()->Log("Generic", StringUtil::Format("Reading NVC file: %s", assetName.c_str()));
 
     // Populate actions map.
@@ -230,6 +232,10 @@ void ActionManager::SkipCurrentAction()
     if(mSkipInProgress) { return; }
     mSkipInProgress = true;
 
+    // Stop any VO or SFX that started playing on or after the start of the action.
+    // Assuming that all VO/SFX playing were DUE TO the current action...may not be 100% true. If it's a problem, may have to "tag" sounds somehow.
+    Services::GetAudio()->StopOnOrAfterFrame(mCurrentActionStartFrame);
+
     // The idea here is that the game's execution should immediately "skip" to the end of the current action.
     // The most "global" and unintrusive way I can think to do that is...just run update in a loop until the action is done!
     // So, the game is essentially running in fast-forward, in the background, and not rendering anything until the action has resolved.
@@ -241,9 +247,8 @@ void ActionManager::SkipCurrentAction()
     }
     Services::GetReports()->Log("Console", StringUtil::Format("skipped %i times, skip duration: %i msec", skipCount, 0));
 
-    // Stop any sounds that were started after the action began.
-    // We're assuming that any sounds started are due to the action...which may not be 100% true.
-    // If this becomes a problem, we may have to start "tagging" sounds based on where they came from in some way.
+    // Do this again AFTER skipping to stop any audio that may have been triggered during the forced updates.
+    //TODO: The audio system, or Sheep system, could mayyyybe not play audio during skips. But that might be quite intrusive.
     Services::GetAudio()->StopOnOrAfterFrame(mCurrentActionStartFrame);
 
     // Also hide any subtitles, since we skipped everything.

@@ -242,25 +242,31 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
 
 void DialogueManager::PlayNextDialogueLine()
 {
-	// Construct YAK name from stored plate/sequence number.
-	std::string yakName = "E" + mDialogueLicensePlate;
-	if(mDialogueSequenceNumber < 10)
-	{
-		yakName += ('0' + mDialogueSequenceNumber);
-	}
-	else
-	{
-		yakName += ('A' + (mDialogueSequenceNumber - 10));
-	}
-	
-	// Increment sequence number.
-	mDialogueSequenceNumber++;
-	
 	// Playing a line, so decrement remaining lines.
 	mRemainingDialogueLines--;
-	
-	// Load and execute the YAK!
-	// To trigger the next line of dialogue, YAKs contain a DIALOGUECUE, which causes "TriggerDialogueCue" to be called (below).
+
+    // If we're skipping an action right now, it seems safe (?) to just trigger the dialogue cue and skip loading the YAK entirely.
+    if(Services::Get<ActionManager>()->IsSkippingCurrentAction())
+    {
+        TriggerDialogueCue();
+        return;
+    }
+
+    // Construct YAK name from stored plate/sequence number.
+    std::string yakName = "E" + mDialogueLicensePlate;
+    if(mDialogueSequenceNumber < 10)
+    {
+        yakName += ('0' + mDialogueSequenceNumber);
+    }
+    else
+    {
+        yakName += ('A' + (mDialogueSequenceNumber - 10));
+    }
+
+    // Increment sequence number.
+    mDialogueSequenceNumber++;
+
+	// Load the YAK! If we can't find it for some reason, output an error and move on right away.
 	Animation* yak = Services::GetAssets()->LoadYak(yakName);
 	if(yak == nullptr)
 	{
@@ -269,6 +275,8 @@ void DialogueManager::PlayNextDialogueLine()
 		return;
 	}
 
+    // Play the YAK.
+    // To trigger the next line of dialogue, YAKs contain a DIALOGUECUE, which causes "TriggerDialogueCue" to be called.
     AnimParams yakAnimParams;
     yakAnimParams.animation = yak;
     yakAnimParams.isYak = true;
