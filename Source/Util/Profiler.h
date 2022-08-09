@@ -30,6 +30,8 @@ class Stopwatch
 {
 public:
     Stopwatch();
+
+    void Reset();
     double GetMilliseconds() const;
 
 private:

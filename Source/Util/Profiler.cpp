@@ -12,6 +12,11 @@ std::vector<Sample> Profiler::sActiveSamples;
 
 Stopwatch::Stopwatch()
 {
+    Reset();
+}
+
+void Stopwatch::Reset()
+{
     mStartCounter = SDL_GetPerformanceCounter();
 }
 

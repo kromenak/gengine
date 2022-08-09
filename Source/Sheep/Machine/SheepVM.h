@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 
+#include "Profiler.h"
 #include "SheepThread.h"
 #include "SheepValue.h"
 #include "Value.h"
@@ -49,6 +50,10 @@ struct NotifyLink
     // State of this instance.
     // If waiting for a callback, this is false. If callback was received, this is true.
     bool notified = true;
+
+    // This can be helpful to debug unexpectedly long callbacks.
+    //int id = 0;
+    //Stopwatch stopwatch;
     
     std::function<void()> AddNotify();
     void OnNotify();

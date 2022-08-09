@@ -23,12 +23,19 @@ std::string SheepInstance::GetName()
 
 std::function<void()> NotifyLink::AddNotify()
 {
+    //static int idCounter = 0;
+    //id = idCounter++;
+    //stopwatch.Reset();
+    //std::cout << "OnNotify " << id << " START" << std::endl;
+    
     notified = false;
     return std::bind(&NotifyLink::OnNotify, this);
 }
 
 void NotifyLink::OnNotify()
 {
+    //std::cout << "OnNotify " << id << " END (" << stopwatch.GetMilliseconds() << " ms)" << std::endl;
+
     // Here's the key/whole point to a NotifyLink: the callback is ignored if no SheepThread is set.
     // This allows systems outside Sheep to work without having to worry about whether a SheepThread is still running or not.
     if(thread != nullptr)
@@ -38,7 +45,6 @@ void NotifyLink::OnNotify()
     }
     notified = true;
 }
-
 
 SheepVM::~SheepVM()
 {
