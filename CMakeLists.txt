@@ -13,6 +13,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # For Xcode, generate schemes for targets. This ensures targets appear in target dropdown.
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 
+# Generate header containing info about build environment.
+# Important to put the generated file in BINARY_DIR - otherwise, we may have conflicts if we create multiple CMake target projects in the same repo.
+include(CheckIncludeFile)
+CHECK_INCLUDE_FILE(sys/stat.h HAVE_STAT_H)
+configure_file("${PROJECT_SOURCE_DIR}/Source/Platform/BuildEnv.h.in" "${CMAKE_CURRENT_BINARY_DIR}/BuildEnv.h")
+
 # Get all cpp/h files in the Source directory using GLOB.
 # Supposedly using GLOB is frowned upon, but...it works really well for now sooooo.
 file(GLOB_RECURSE source_files CONFIGURE_DEPENDS 
@@ -32,6 +38,7 @@ add_executable(gk3 ${source_files} ${asset_files})
 # Add header locations.
 # For any folder listed here, you can add headers in that folder without providing a path.
 target_include_directories(gk3 PRIVATE
+    # Source include dirs
     Source
     Source/Assets
     Source/Audio
@@ -61,6 +68,8 @@ target_include_directories(gk3 PRIVATE
     Source/Video/Decode
     Source/Video/Playback
     Source/Video/Util
+
+    # Library include dirs
     Libraries/ffmpeg/include
     Libraries/Flex/include
     Libraries/fmod/inc
@@ -69,6 +78,9 @@ target_include_directories(gk3 PRIVATE
     Libraries/SDL/include
     Libraries/stb
     Libraries/zlib/include
+
+    # Required for including BuildEnv.h
+    "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
 # Warning/error settings.

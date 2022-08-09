@@ -1,6 +1,4 @@
 //
-// Platform.h
-//
 // Clark Kromenaker
 //
 // Helper for platform-abstraction. Provides a uniform/simplified way

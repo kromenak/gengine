@@ -2,13 +2,18 @@
 
 #include <fstream>
 
+#include "BuildEnv.h"
 #include "Platform.h"
+
 #if defined(PLATFORM_MAC)
 #include <CoreFoundation/CoreFoundation.h>
 #include <dirent.h>
-#include <sys/stat.h>
 #elif defined(PLATFORM_WINDOWS)
 #include <Windows.h>
+#endif
+
+#if defined(HAVE_STAT_H)
+#include <sys/stat.h>
 #endif
 
 std::string Path::Combine(std::initializer_list<std::string> paths)
@@ -85,10 +90,18 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
 	// This'll probably give us something like "Assets/File.txt"
 	// C++ is able to load relative files, assuming the current working directory (cwd) is as expected.
     outPath = Path::Combine({ relativeSearchPath, fileName });
-	
-	// How can you tell if the path is valid? Well, you've gotta see if you can open a stream!
+
+    // Use some method to determine if the file exists or not.
+    #if defined(HAVE_STAT_H)
+    // On systems that have stat.h header, we can use this method. This is technically POSIX-only, but Windows has the header too...
+    // Some people on StackOverflow found this to be faster than other methods: https://stackoverflow.com/a/12774387/782181
+    struct stat buffer;
+    return (stat(outPath.c_str(), &buffer) == 0);
+    #else
+    // Using just standard C++, we can tell if a file exists by opening a stream and seeing if it works.
 	std::ifstream f(outPath.c_str());
     return f.good();
+    #endif
 }
 
 std::string Path::GetFileName(const std::string& path)
