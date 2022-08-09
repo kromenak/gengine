@@ -141,7 +141,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 			++buttonIndex;
 			
 			// Create callback for inventory button press.
-            const Action* invAction = Services::Get<ActionManager>()->GetAction(actions[0]->noun, activeItemName);
+            const Action* invAction = Services::Get<ActionManager>()->GetAction(noun, activeItemName);
 			invButton->SetPressCallback([this, invAction, executeCallback](UIButton* button) {
 				// Hide action bar on button press.
 				this->Hide();

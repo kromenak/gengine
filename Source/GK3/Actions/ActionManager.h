@@ -102,17 +102,13 @@ private:
 		"INV312P.NVC",
 		"INV303P.NVC"
 	};
-	
-	// Action sets that are currently active. Note that these change pretty frequently (i.e. on scene change).
-	// The game uses these to determine the valid actions for a noun when showing the action bar.
-	std::vector<NVC*> mActionSets;
 
     // Nested maps that map each unique valid Noun/Verb/Case combo to a specific Action.
     // Think of this like a lookup - map[noun] gives you all the actions for that noun, map[noun][verb] gives all actions for that noun/verb, etc.
     std::string_map_ci<std::string_map_ci<std::string_map_ci<Action*>>> mActions;
 	
 	// An action may specify a "case" under which it is valid.
-	// A case label corresponds to a bit of sheepscript that evaluates to either true or false.
+	// A case label corresponds to a bit of SheepScript that evaluates to either true or false.
 	// Cases must be stored here (rather than in Action Sets) because cases can be shared (especially global/inventory ones).
     std::string_map_ci<SheepScriptAndText> mCaseLogic;
 	
@@ -146,7 +142,7 @@ private:
 	
 	// An identifier for an executing action. Increment on each execution to uniquely identify actions.6
 	// This mirrors what's output in GK3 when dumping actions.
-	int mActionId = 0;
+	uint32 mActionId = 0;
 	
 	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;
@@ -159,8 +155,9 @@ private:
 	bool IsCaseMet(const std::string& noun, const std::string& verb, const std::string& caseLabel, VerbType verbType = VerbType::Normal) const;
 
     // Populates provided map with actions that are valid for the given noun.
+    Action* GetHighestPriorityAction(const std::string& noun, const std::string& verb, VerbType verbType) const;
     void AddActionsToMap(const std::string& noun, VerbType verbType, std::unordered_map<std::string, const Action*>& map) const;
-	
+    
 	// Called when action bar is canceled (press cancel button).
 	void OnActionBarCanceled();
 	
