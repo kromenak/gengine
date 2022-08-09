@@ -25,6 +25,8 @@ public:
     void AddCaption(const std::string& caption, const std::string& speaker);
     void AdvanceCaption(float delay);
 
+    void HideAll();
+
 protected:
     void OnUpdate(float deltaTime);
 

@@ -25,6 +25,7 @@ public:
 
     void AddCaption(const std::string& caption, const std::string& speaker = "NOTLISTED");
     void FinishCaption(float delay = 1.0f);
+    void HideAllCaptions();
 
     void ShowDrivingScreen(int followState = 0);
 

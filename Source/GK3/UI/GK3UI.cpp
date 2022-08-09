@@ -100,3 +100,11 @@ void GK3UI::FinishCaption(float delay)
         mCaptionsOverlay->AdvanceCaption(delay);
     }
 }
+
+void GK3UI::HideAllCaptions()
+{
+    if(mCaptionsOverlay != nullptr)
+    {
+        mCaptionsOverlay->HideAll();
+    }
+}

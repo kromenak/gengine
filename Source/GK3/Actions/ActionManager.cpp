@@ -6,6 +6,7 @@
 #include "DialogueManager.h"
 #include "GameProgress.h"
 #include "GKActor.h"
+#include "GK3UI.h"
 #include "IniParser.h"
 #include "Scene.h"
 #include "Services.h"
@@ -245,7 +246,8 @@ void ActionManager::SkipCurrentAction()
     // If this becomes a problem, we may have to start "tagging" sounds based on where they came from in some way.
     Services::GetAudio()->StopOnOrAfterFrame(mCurrentActionStartFrame);
 
-    //TODO: Also hide any subtitles, since we skipped everything.
+    // Also hide any subtitles, since we skipped everything.
+    gGK3UI.HideAllCaptions();
 
     // Done skipping.
     mSkipInProgress = false;

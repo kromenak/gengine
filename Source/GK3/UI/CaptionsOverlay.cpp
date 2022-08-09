@@ -96,7 +96,7 @@ void CaptionsOverlay::AddCaption(const std::string& captionText, const std::stri
         RectTransform* rt = caption.backing->GetRectTransform();
         rt->SetAnchorMin(Vector2::Zero);
         rt->SetAnchorMax(Vector2(1.0f, 0.0f));
-        rt->SetPivot(Vector2::Zero); // Pivot at bottom-left.
+        rt->SetPivot(0.5f, 0.0f); // Pivot at bottom-center.
         rt->SetAnchoredPosition(0.0f, 0.0f);
     }
     else
@@ -157,6 +157,19 @@ void CaptionsOverlay::AdvanceCaption(float delay)
         {
             RemoveOldestCaption();
         }
+    }
+}
+
+void CaptionsOverlay::HideAll()
+{
+    while(!mActiveCaptions.empty())
+    {
+        // Move all active captions to free.
+        mFreeCaptions.push_back(mActiveCaptions.back());
+        mActiveCaptions.pop_back();
+
+        // Deactivate the freed caption so it's no longer visible.
+        mFreeCaptions.back().actor->SetActive(false);
     }
 }
 
