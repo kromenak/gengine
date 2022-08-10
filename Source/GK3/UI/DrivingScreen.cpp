@@ -107,14 +107,16 @@ void DrivingScreen::Show(FollowMode followMode)
     //TODO!
     mLocationButtons["BMB"]->SetEnabled(false);
 
-    // CSD (Coume Sourde) only available after following Madeline.
+    // CSD (Coume Sourde) only available after following Madeline (or on/after Day 1, 4PM).
     // LHM (Lhomme Mort) is in the same boat.
     bool showCSD_LHM = Services::Get<GameProgress>()->GetNounVerbCount("BUTHANE", "FOLLOW") > 0 && followMode != FollowMode::Buthane;
+    showCSD_LHM = showCSD_LHM || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
     mLocationButtons["CSD"]->SetEnabled(showCSD_LHM);
     mLocationButtons["LHM"]->SetEnabled(showCSD_LHM);
 
-    // LER (L'Ermitage) only available after following Wilkes.
+    // LER (L'Ermitage) only available after following Wilkes (or on/after Day 1, 4PM).
     bool showLER = Services::Get<GameProgress>()->GetNounVerbCount("WILKES", "FOLLOW") > 0 && followMode != FollowMode::Wilkes;
+    showLER = showLER || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
     mLocationButtons["LER"]->SetEnabled(showLER);
 
     // WOD (Woods) only available after following Estelle on Day 2.
