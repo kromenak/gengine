@@ -129,10 +129,12 @@ private:
     // Actors that are marked as hit test models.
     std::vector<BSPActor*> mHitTestActors;
 	
-    // The name of actor and actor who we are controlling in the scene.
-	// We sometimes need just the name - that's safer during scene loading.
-	std::string mEgoName;
+	// The Actor the player is controlling in this scene.
     GKActor* mEgo = nullptr;
+
+    // The name of the last Ego the player was controlling, including the current scene.
+    // This is static so we can query who was the last Ego even if a scene is not loaded (e.g. on the Map).
+    static std::string mEgoName;
 	
 	void ExecuteAction(const Action* action);
 };

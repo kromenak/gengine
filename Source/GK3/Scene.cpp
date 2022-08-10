@@ -30,14 +30,11 @@
 
 extern Mesh* quad;
 
+std::string Scene::mEgoName;
+
 /*static*/ const char* Scene::GetEgoName()
 {
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene != nullptr)
-    {
-        return scene->mEgoName.c_str();
-    }
-    return "Gabriel";
+    return mEgoName.c_str();
 }
 
 Scene::Scene(const std::string& name, const std::string& timeblock) :
@@ -87,14 +84,9 @@ void Scene::Load()
 	// It's generally important that we know how our "ego" will be as soon as possible.
 	// This is because the scene loading *itself* may check who ego is to do certain things!
 	const SceneActor* egoSceneActor = mSceneData->DetermineWhoEgoWillBe();
-	//TODO: If no ego, I guess we fail loading!?
-	if(egoSceneActor == nullptr)
+	if(egoSceneActor != nullptr)
 	{
-		std::cout << "No ego actor could be predicted for scene!" << std::endl;
-	}
-	else
-	{
-		mEgoName = egoSceneActor->noun;
+        mEgoName = egoSceneActor->noun;
 	}
 
     // Set location.
