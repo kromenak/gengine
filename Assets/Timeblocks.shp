@@ -1,6 +1,6 @@
 symbols
 {
-	
+	int count$ = 0;
 }
 
 code
@@ -130,22 +130,61 @@ code
 		SetTime("102P");
 	}
 
+	CountTrainStationAndLarryActions$()
+	{
+		// Reset counter to 0.
+		count$ = 0;
+
+		// Increment if we did train station actions.
+		if(GetNounVerbCount("ARRIVALS_IN_CU", "THINK") > 0 && GetNounVerbCount("TAXI_DRIVER", "WALLET") == 2)
+		{
+			count$ = count$ + 1;
+		}
+
+		// Increment if we talked to Larry about Templars.
+		if(GetTopicCount("LARRY", "T_TEMPLARS") >= 2)
+		{
+			count$ = count$ + 1;
+		}
+	}
+
 	CheckTimeblockComplete102P$()
 	{
 		// Must be on the Map screen.
+		if(IsCurrentLocation("MAP") == 0)
+		{
+			return;
+		}
 
-		// Must have rented moped (shudders).
+		// Must have rented moped. We'll assume that, if you've got the keys, you're good.
+		if(DoesEgoHaveInvItem("MOPED_KEYS") == 0)
+		{
+			return;
+		}
 
 		// Must have followed Buthane.
+		if(GetNounVerbCount("BUTHANE", "FOLLOW") == 0)
+		{
+			return;
+		}
 
 		// Must have followed Wilkes.
+		if(GetNounVerbCount("WILKES", "FOLLOW") == 0)
+		{
+			return;
+		}
 
 		// Must have either:
 		// A) "Think" at the Train Station arrival board & bribed taxi driver
 		// B) Talked to Larry about Templars
+		Call("CountTrainStationAndLarryActions$");
+		if(count$ == 0)
+		{
+			return;
+		}
 
 		// OK, go to next timeblock!
-		//SetTime("104P");
+		SetTime("104P");
 	}
 
 	CheckTimeblockComplete104P$()
@@ -159,14 +198,27 @@ code
 		// Must have done BOTH:
 		// A) "Think" at the Train Station arrival board & bribed taxi driver
 		// B) Talked to Larry about Templars
-
-		// Must have used the binocs to spy on Mosely/Buthane from Chateau de Blanchefort.
+		Call("CountTrainStationAndLarryActions$");
+		if(count$ < 2)
+		{
+			return;
+		}
 
 		// Must have introduced yourself to Wilkes.
 		// This technically can be done earlier (112P or 102P) but MUST be done now.
+		if(GetTopicCount("WILKES", "T_INTRODUCE") == 0)
+		{
+			return;
+		}
+
+		// Must have used the binocs to spy on Mosely/Buthane from Chateau de Blanchefort.
+		if(GetNounVerbCount("VIEW_OF_LHOMME_MORE", "BINOCULARS") == 0)
+		{
+			return;
+		}
 
 		// OK, go to next timeblock!
-		//SetTime("106P");
+		SetTime("106P");
 	}
 
 	CheckTimeblockComplete106P$()
