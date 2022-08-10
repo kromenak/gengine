@@ -301,7 +301,7 @@ char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& ou
             std::cout << "Error while ending inflate: " << result << std::endl;
             delete[] compressedBuffer;
             delete[] buffer;
-            return false;
+            return nullptr;
         }
     }
     else if(asset->compressionType == CompressionType::Lzo)

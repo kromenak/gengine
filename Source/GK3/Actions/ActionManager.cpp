@@ -11,6 +11,7 @@
 #include "Profiler.h"
 #include "Scene.h"
 #include "Services.h"
+#include "SheepScript.h"
 #include "StringUtil.h"
 #include "Timeblock.h"
 #include "VerbManager.h"

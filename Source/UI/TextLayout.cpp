@@ -155,8 +155,9 @@ void TextLayout::AddLine(const std::string& line)
                 // Top: just move down "one line's worth".
 				yPos += lineHeight;
 				break;
-			//case VerticalAlignment::Center:
-			//	break;
+			case VerticalAlignment::Center:
+                std::cout << "CENTER VERTICAL ALIGNMENT NOT ACCOUNTED FOR!" << std::endl;
+				break;
 			}
 		}
 		
