@@ -530,19 +530,23 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	// Check global case conditions.
 	if(StringUtil::EqualsIgnoreCase(caseLabel, "ALL"))
 	{
-        // For topics, "ALL" seems to have a strange meaning...it should be the "last thing" said about a topic.
-        /*
+        // For topics, "ALL" has some strange behavior. Despite appearances, it is not ALWAYS available! It is the last thing to be said about a topic.
+        // For example, take JEAN:T_TWO_MEN in Lobby on Day 1, 10AM. If you don't do this special logic, the last dialogue can be played forever.
         // So, get total things that can be said about this topic, and if we are one away from that, this condition is met.
         if(verbType == VerbType::Topic)
         {
-            int count = 0;
-            for(auto& nvc : mActionSets)
+            int topicCount = 0;
+            auto it = mActions.find(noun);
+            if(it != mActions.end())
             {
-                count += nvc->GetActionsCount(noun, verb);
+                auto it2 = it->second.find(verb);
+                if(it2 != it->second.end())
+                {
+                    topicCount = it2->second.size();
+                }
             }
-            return Services::Get<GameProgress>()->GetTopicCount(noun, verb) == (count - 1);
+            return Services::Get<GameProgress>()->GetTopicCount(noun, verb) == (topicCount - 1);
         }
-        */
 
 		// "ALL" is always met!
 		return true;
