@@ -39,11 +39,11 @@ public:
 
     void ForceUpdate();
 
-    void AddActor(Actor* actor);
+    void AddActor(Actor* actor) { mActors.push_back(actor); }
     const std::vector<Actor*>& GetActors() const { return mActors; }
     
-	void LoadScene(const std::string& name, std::function<void()> callback = nullptr) { mSceneToLoad = name; mSceneLoadedCallback = callback; }
-    void UnloadScene();
+    void LoadScene(const std::string& name, std::function<void()> callback = nullptr);
+    
     Scene* GetScene() { return mScene; }
 
     uint32 GetFrameNumber() const { return mFrameNumber; }
@@ -95,6 +95,7 @@ private:
     void GenerateOutputs();
 	
 	void LoadSceneInternal();
+    void UnloadScene();
 	
 	void DeleteDestroyedActors();
 };

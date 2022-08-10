@@ -249,8 +249,13 @@ void GEngine::Quit()
 
 void GEngine::ForceUpdate()
 {
-    //Update(0.2f);
     Update(10.0f);
+}
+
+void GEngine::LoadScene(const std::string& name, std::function<void()> callback)
+{
+    mSceneToLoad = name;
+    mSceneLoadedCallback = callback;
 }
 
 void GEngine::StartGame()
@@ -511,11 +516,6 @@ void GEngine::UnloadScene()
 
     // After destroy pass, delete destroyed actors.
     DeleteDestroyedActors();
-}
-
-void GEngine::AddActor(Actor* actor)
-{
-    mActors.push_back(actor);
 }
 
 void GEngine::DeleteDestroyedActors()

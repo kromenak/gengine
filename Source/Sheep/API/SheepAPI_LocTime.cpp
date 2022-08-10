@@ -180,7 +180,8 @@ shpvoid SetTime(const std::string& timeblock)
     Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
 
     // Unload the current scene.
-    GEngine::Instance()->UnloadScene();
+    // We'll load into a dummy scene (called XXX) that's got nothing in it.
+    GEngine::Instance()->LoadScene("XXX");
 
     // Show timeblock screen.
     gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, []() {

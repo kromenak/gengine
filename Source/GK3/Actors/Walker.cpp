@@ -660,7 +660,7 @@ bool Walker::AdvancePath()
 {
     if(mPath.size() > 0)
     {
-        Debug::DrawLine(GetOwner()->GetPosition(), mPath.back(), Color32::White);
+        //Debug::DrawLine(GetOwner()->GetPosition(), mPath.back(), Color32::White);
         
         // When walking, we're always mainly interested in getting to the end of the path.
         // Particularly, don't ONLY check distance to last node!
