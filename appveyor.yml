@@ -5,7 +5,7 @@
 # The version number being built. Should match version in CMake/at runtime.
 # This is the ACTUAL version number used when uploading to GitHub Releases.
 environment:
-  APP_VERSION: 0.0.5
+  APP_VERSION: 0.0.6
 
 # Appveyor version number - used only for the unique build version required by Appveyor.
 version: $(APP_VERSION)-{build}
