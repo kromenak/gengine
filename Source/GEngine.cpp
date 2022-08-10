@@ -458,14 +458,19 @@ void GEngine::GenerateOutputs()
 void GEngine::LoadSceneInternal()
 {
     // Obviously no need to do anything if no load scene is defined.
-	if(mSceneToLoad.empty()) { return; }
+	if(mSceneToLoad.empty() && !mUnloadScene) { return; }
 
     // If background thread is performing loading, wait until that's done.
     // If the loader is loading the scene, we don't want to "double load" or something.
     if(Loader::IsLoading()) { return; }
 
     // Delete the current scene, if any.
-    UnloadScene();
+    UnloadSceneInternal();
+    mUnloadScene = false; // we did it
+
+    // It's possible we just wanted to unload the current scene without loading a new scene.
+    // So, early out in that case.
+    if(mSceneToLoad.empty()) { return; }
     
     // Initiate scene load on background thread.
     Loader::Load([this]() {
@@ -496,7 +501,7 @@ void GEngine::LoadSceneInternal()
     });
 }
 
-void GEngine::UnloadScene()
+void GEngine::UnloadSceneInternal()
 {
     if(mScene != nullptr)
     {

@@ -43,7 +43,8 @@ public:
     const std::vector<Actor*>& GetActors() const { return mActors; }
     
     void LoadScene(const std::string& name, std::function<void()> callback = nullptr);
-    
+    void UnloadScene() { mUnloadScene = true; }
+
     Scene* GetScene() { return mScene; }
 
     uint32 GetFrameNumber() const { return mFrameNumber; }
@@ -86,6 +87,9 @@ private:
 	// Scene loads happen at the end of a frame, to avoid a scene change mid-frame.
 	std::string mSceneToLoad;
 
+    // If set, we explicitly want to unload the current scene without loading a new scene.
+    bool mUnloadScene = false;
+
     // Callback to execute when scene load completes.
     std::function<void()> mSceneLoadedCallback = nullptr;
 	
@@ -95,7 +99,7 @@ private:
     void GenerateOutputs();
 	
 	void LoadSceneInternal();
-    void UnloadScene();
+    void UnloadSceneInternal();
 	
 	void DeleteDestroyedActors();
 };
