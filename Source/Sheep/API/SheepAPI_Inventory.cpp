@@ -37,6 +37,9 @@ shpvoid CombineInvItems(const std::string& firstItemName, const std::string& sec
     Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, firstItemName);
     Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, secondItemName);
     Services::Get<InventoryManager>()->AddInventoryItem(egoName, combinedItemName);
+
+    // The newly added item becomes the active inventory item.
+    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, combinedItemName);
     return 0;
 }
 RegFunc3(CombineInvItems, void, string, string, string, IMMEDIATE, REL_FUNC);
@@ -78,6 +81,9 @@ shpvoid EgoTakeInvItem(const std::string& itemName)
     // Add to inventory of Ego.
     const std::string& egoName = Scene::GetEgoName();
     Services::Get<InventoryManager>()->AddInventoryItem(egoName, itemName);
+
+    // This also makes the item active.
+    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, itemName);
     return 0;
 }
 RegFunc1(EgoTakeInvItem, void, string, IMMEDIATE, REL_FUNC);
