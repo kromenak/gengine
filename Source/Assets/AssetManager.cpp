@@ -298,22 +298,26 @@ BSPLightmap* AssetManager::LoadBSPLightmap(const std::string& name)
     return LoadAsset<BSPLightmap>(SanitizeAssetName(name, ".MUL"), &mLoadedBSPLightmaps);
 }
 
+//TODO: For some reason, on Mac/Clang, when compiling in Release mode, using this as a Lambda with std::function causes a malloc error and crash.
+//TODO: I've converted it to a normal function with a function pointer for now...which seems to work. But why?
+SheepScript* LoadSheepFunc(const std::string& assetName, char* buffer, unsigned int bufferSize)
+{
+    // Determine whether this is a binary sheep asset.
+    if(SheepScript::IsSheepDataCompiled(buffer, bufferSize))
+    {
+        return new SheepScript(assetName, buffer, bufferSize);
+    }
+
+    // This doesn't appear to be a binary sheep file, so it might be a text sheep file.
+    // Let's try compiling it on-the-fly!
+    imstream stream(buffer, bufferSize);
+    return Services::GetSheep()->Compile(assetName, stream);
+}
+
 SheepScript* AssetManager::LoadSheep(const std::string& name)
 {
     // Sheep assets need more complex/custom creation login, provided in the create callback.
-    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), &mLoadedSheeps, [](const std::string& name, char* buffer, unsigned int bufferSize) {
-
-        // Determine whether this is a binary sheep asset.
-        if(SheepScript::IsSheepDataCompiled(buffer, bufferSize))
-        {
-            return new SheepScript(name, buffer, bufferSize);
-        }
-
-        // This doesn't appear to be a binary sheep file, so it might be a text sheep file.
-        // Let's try compiling it on-the-fly!
-        imstream stream(buffer, bufferSize);
-        return Services::GetSheep()->Compile(name, stream);
-    });
+    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), &mLoadedSheeps, &LoadSheepFunc);
 }
 
 Cursor* AssetManager::LoadCursor(const std::string& name)
@@ -428,7 +432,7 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 }
 
 template<class T>
-T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, std::function<T* (const std::string&, char*, unsigned int)> createFunc, bool deleteBuffer)
+T* AssetManager::LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, T*(*createFunc)(const std::string&, char*, unsigned int), bool deleteBuffer)
 {
     // If already present in cache, return existing asset right away.
     if(cache != nullptr)

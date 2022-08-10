@@ -151,7 +151,7 @@ private:
     // The first uses a single constructor (name, data, size).
     // The second uses a constructor (name) and a separate load function (data, size).
     // The latter is necessary if two assets can potentially attempt to load one another (circular dependency).
-    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, std::function<T* (const std::string&, char*, unsigned int)> createFunc = nullptr, bool deleteBuffer = true);
+    template<class T> T* LoadAsset(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, T*(*createFunc)(const std::string&, char*, unsigned int) = nullptr, bool deleteBuffer = true);
     template<class T> T* LoadAsset_SeparateLoadFunc(const std::string& assetName, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer = true);
     
     char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
