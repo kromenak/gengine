@@ -32,6 +32,7 @@ public:
     bool IsKeyPressed(SDL_Scancode scancode) { return mKeyboardState[scancode] == 1; }
     bool IsKeyTrailingEdge(SDL_Scancode scancode);
 
+    bool IsAnyKeyLeadingEdge();
     bool IsAnyKeyPressed();
 
     // Mouse
@@ -95,6 +96,16 @@ inline bool InputManager::IsKeyLeadingEdge(SDL_Scancode scancode)
 inline bool InputManager::IsKeyTrailingEdge(SDL_Scancode scancode)
 {
     return mKeyboardState[scancode] == 0 && mPrevKeyboardState[scancode] == 1;
+}
+
+inline bool InputManager::IsAnyKeyLeadingEdge()
+{
+    //TODO: Any faster way to do this?
+    for(int i = 0; i < mNumKeys; ++i)
+    {
+        if(mKeyboardState[i] == 1 && mPrevKeyboardState[i] == 0) { return true; }
+    }
+    return false;
 }
 
 inline bool InputManager::IsAnyKeyPressed()

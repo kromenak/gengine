@@ -257,7 +257,7 @@ void ActionBar::OnUpdate(float deltaTime)
         {
             // Any key press EXCEPT ~ counts as a cancel action.
             // This logic technically blocks any other cancel action due to key presses WHILE ~ is pressed but...close enough.
-            if(Services::GetInput()->IsAnyKeyPressed() && !Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE))
+            if(Services::GetInput()->IsAnyKeyLeadingEdge() && !Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE))
             {
                 OnCancelButtonPressed();
             }
