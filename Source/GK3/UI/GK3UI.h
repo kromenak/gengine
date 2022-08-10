@@ -28,6 +28,7 @@ public:
     void HideAllCaptions();
 
     void ShowDrivingScreen(int followState = 0);
+    bool FollowingOnDrivingScreen();
 
 private:
     TitleScreen* mTitleScreen = nullptr;

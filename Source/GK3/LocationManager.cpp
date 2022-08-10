@@ -183,6 +183,18 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
     // This is important to do BEFORE checking for timeblock completion, as that logic looks for locations sometimes.
     SetLocation(location);
 
+    //HACK: Don't check timeblock completion if following someone on driving screen.
+    //HACK: Fixes premature timeblock completion in 1102P if last action performed is follow.
+    if(gGK3UI.FollowingOnDrivingScreen())
+    {
+        // Change scene and done.
+        GEngine::Instance()->LoadScene(location, [callback](){
+            gGK3UI.HideSceneTransitioner();
+            if(callback != nullptr) { callback(); }
+        });
+        return;
+    }
+
     // Check for timeblock completion.
     Timeblock currentTimeblock = Services::Get<GameProgress>()->GetTimeblock();
     Services::GetSheep()->Execute(Services::GetAssets()->LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [location, callback, currentTimeblock]() {

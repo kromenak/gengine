@@ -70,6 +70,8 @@ public:
     void Show(FollowMode followMode = FollowMode::None);
     void Hide();
 
+    bool FollowingSomeone() const { return mFollowMode != FollowMode::None; }
+
 private:
     // The canvas for this screen.
     UICanvas* mCanvas = nullptr;
@@ -93,6 +95,9 @@ private:
 
     // Blips that exist on the map.
     std::vector<DrivingScreenBlip*> mBlips;
+
+    // If we're following someone, this will be set appropriately.
+    FollowMode mFollowMode = FollowMode::None;
 
     // Colors for blips.
     const Color32 kEgoColor = Color32::Green;

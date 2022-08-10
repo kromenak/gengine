@@ -126,6 +126,7 @@ void DrivingScreen::Show(FollowMode followMode)
     mMapImage->ResizeToFitPreserveAspect(Services::GetRenderer()->GetWindowSize());
     
     // Put all blips in starting positions, with paths set if needed.
+    mFollowMode = followMode;
     PlaceBlips(followMode);
     
     // Add soundtrack player, if not yet present.

@@ -65,6 +65,15 @@ void GK3UI::ShowDrivingScreen(int followState)
     }
 }
 
+bool GK3UI::FollowingOnDrivingScreen()
+{
+    if(mDrivingScreen != nullptr)
+    {
+        return mDrivingScreen->FollowingSomeone();
+    }
+    return false;
+}
+
 void GK3UI::ShowSceneTransitioner()
 {
     if(mSceneTransitioner == nullptr)
