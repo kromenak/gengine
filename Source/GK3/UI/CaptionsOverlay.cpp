@@ -30,7 +30,7 @@
 CaptionsOverlay::CaptionsOverlay() : Actor(Actor::TransformType::RectTransform)
 {
     // Draw order should be equal to the status overlay.
-    mCanvas = AddComponent<UICanvas>(0);
+    mCanvas = AddComponent<UICanvas>(8);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();

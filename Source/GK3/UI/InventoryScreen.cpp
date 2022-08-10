@@ -16,7 +16,7 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
     // Inventory overrides SFX/VO, but continues ambient audio from scene.
     mLayer.OverrideAudioState(true, true, false);
 
-	mCanvas = AddComponent<UICanvas>();
+	mCanvas = AddComponent<UICanvas>(0);
 	
 	// Add translucent background image that tints the scene.
 	UIImage* background = AddComponent<UIImage>();

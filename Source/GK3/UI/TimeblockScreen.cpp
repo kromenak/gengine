@@ -47,7 +47,7 @@ static UIButton* CreateButton(UICanvas* canvas, const std::string& buttonId)
 
 TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
 {
-    UICanvas* canvas = AddComponent<UICanvas>(1);
+    UICanvas* canvas = AddComponent<UICanvas>(7);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();

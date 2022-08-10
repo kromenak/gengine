@@ -13,7 +13,7 @@
 ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 {
 	// Create canvas, to contain the UI components.
-	mCanvas = AddComponent<UICanvas>();
+	mCanvas = AddComponent<UICanvas>(5);
 	
     // Canvas rect fills the entire screen.
     RectTransform* rectTransform = mCanvas->GetRectTransform();

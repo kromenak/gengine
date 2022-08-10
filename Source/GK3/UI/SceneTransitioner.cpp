@@ -7,7 +7,7 @@
 SceneTransitioner::SceneTransitioner() : Actor(Actor::TransformType::RectTransform)
 {
     // Draw scene transitioner above the normal scene.
-    UICanvas* canvas = AddComponent<UICanvas>(0);
+    UICanvas* canvas = AddComponent<UICanvas>(3);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
