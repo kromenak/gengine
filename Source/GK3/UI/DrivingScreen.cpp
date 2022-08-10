@@ -238,6 +238,74 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     button->SetPressCallback([this, locationCode](UIButton* button) {
         Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("MAPBUTTON.WAV"));
 
+        // Whenever you go to a location on the driving map, it's assumed that your bike also moves there.
+        // Each location has it's own integer code (of course) that is rather arbitrary.
+        int bikeLocation = -1;
+        if(locationCode == "PL5")
+        {
+            bikeLocation = 0;
+        }
+        else if(locationCode == "PL4")
+        {
+            bikeLocation = 1;
+        }
+        else if(locationCode == "VGR")
+        {
+            bikeLocation = 2;
+        }
+        else if(locationCode == "PL2")
+        {
+            bikeLocation = 3;
+        }
+        else if(locationCode == "PL1")
+        {
+            bikeLocation = 4;
+        }
+        else if(locationCode == "PL3")
+        {
+            bikeLocation = 5;
+        }
+        else if(locationCode == "BEC")
+        {
+            bikeLocation = 6;
+        }
+        else if(locationCode == "MCB")
+        {
+            bikeLocation = 7;
+        }
+        else if(locationCode == "POU")
+        {
+            bikeLocation = 8;
+        }
+        else if(locationCode == "PL6")
+        {
+            bikeLocation = 9;
+        }
+        else if(locationCode == "MOP")
+        {
+            bikeLocation = 10;
+        }
+        else if(locationCode == "LHE")
+        {
+            bikeLocation = 11;
+        }
+        else if(locationCode == "PLO")
+        {
+            bikeLocation = 12;
+        }
+        else if(locationCode == "RL1")
+        {
+            bikeLocation = 13;
+        }
+        else if(locationCode == "TR1")
+        {
+            bikeLocation = 14;
+        }
+        if(bikeLocation != -1)
+        {
+            Services::Get<GameProgress>()->SetGameVariable("BikeLocation", bikeLocation);
+        }
+
         // Change to the desired location.
         ExitToLocation(locationCode);
     });
