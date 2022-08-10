@@ -40,27 +40,22 @@ void Animator::Start(const AnimParams& animParams)
     // Frames execute at the BEGINNING of the time slice for that frame, so frame 0 executes at t=0.
     for(int i = 0; i <= animParams.startFrame; ++i)
     {
-        ExecuteFrame(mActiveAnimations.back(), i);
+        ExecuteFrame(mActiveAnimations.size() - 1, i);
     }
 }
 
 void Animator::Stop(Animation* animation)
 {
 	if(animation == nullptr) { return; }
-	
-	// Remove all anim states that are using the passed-in animation.
-	auto newEndIt = std::remove_if(mActiveAnimations.begin(), mActiveAnimations.end(), [animation](AnimationState& animState) -> bool {
-		if(animState.params.animation == animation)
-		{
+
+    // Prematurely stop any active anim states matching this animation.
+    for(auto& animState : mActiveAnimations)
+    {
+        if(!animState.done && animState.params.animation == animation)
+        {
             animState.Stop();
-			return true;
-		}
-		return false;
-	});
-	
-	// "remove_if" returns iterator to new ending (all elements to be erased are after it).
-	// So...do the erase!
-	mActiveAnimations.erase(newEndIt, mActiveAnimations.end());
+        }
+    }
 }
 
 void Animator::StopAll()
@@ -69,7 +64,6 @@ void Animator::StopAll()
     {
         animState.Stop();
     }
-    mActiveAnimations.clear();
 }
 
 void Animator::Sample(Animation* animation, int frame)
@@ -93,6 +87,9 @@ void Animator::OnUpdate(float deltaTime)
     int size = mActiveAnimations.size();
     for(int i = 0; i < size; ++i)
     {
+        // Skip any entries that are done.
+        if(mActiveAnimations[i].done) { continue; }
+
         // Increment animation timer.
         mActiveAnimations[i].timer += deltaTime;
 		
@@ -140,13 +137,23 @@ void Animator::OnUpdate(float deltaTime)
             }
 			
 			// Execute any actions/anim nodes on the current frame.
-			ExecuteFrame(mActiveAnimations[i], mActiveAnimations[i].currentFrame);
+			ExecuteFrame(i, mActiveAnimations[i].currentFrame);
 		}
 
-		// If the animation has ended, fire animation finished callback.
-        // Note that a callback *can* trigger more anims to be added (via Start). So, there's some danger of "modifying while iterating" here.
-        // But that's OK - we only modify items that were already in the list at start of OnUpdate.
-        if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount() - 1 && mActiveAnimations[i].params.finishCallback != nullptr)
+		// If the animation has finished, mark it as done.
+        if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount() - 1)
+        {
+            mActiveAnimations[i].done = true;
+        }
+    }
+
+    // Process any finish callbacks.
+    // FYI: This can lead to recursive sorts of things where new active animations are added or scene is changed (destroying the Animator!).
+    // So, gotta be a bit careful here...
+    size = mActiveAnimations.size();
+    for(int i = 0; i < size; ++i)
+    {
+        if(mActiveAnimations[i].done && mActiveAnimations[i].params.finishCallback != nullptr)
         {
             mActiveAnimations[i].params.finishCallback();
         }
@@ -155,33 +162,33 @@ void Animator::OnUpdate(float deltaTime)
     // Remove animations that are done.
     for(int i = size - 1; i >= 0; --i)
     {
-        if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount() - 1)
+        if(mActiveAnimations[i].done)
         {
             mActiveAnimations.erase(mActiveAnimations.begin() + i);
         }
     }
 }
 
-void Animator::ExecuteFrame(AnimationState& animState, int frameNumber)
+void Animator::ExecuteFrame(int animIndex, int frameNumber)
 {
     // Save executing frame #.
-    animState.executingFrame = frameNumber;
+    mActiveAnimations[animIndex].executingFrame = frameNumber;
     
     // Get all anim nodes that begin on this frame and start them.
-	std::vector<AnimNode*>* animNodes = animState.params.animation->GetFrame(frameNumber);
+	std::vector<AnimNode*>* animNodes = mActiveAnimations[animIndex].params.animation->GetFrame(frameNumber);
 	if(animNodes != nullptr)
 	{
 		for(auto& node : *animNodes)
 		{
             // If current frame != executing frame, we are "fast forwarding" - executing this frame to catch up.
             // Most nodes don't support this (mostly just vertex anim nodes). So, skip unsupported nodes during catchup.
-            if(animState.currentFrame != animState.executingFrame && !node->PlayDuringCatchup())
+            if(mActiveAnimations[animIndex].currentFrame != mActiveAnimations[animIndex].executingFrame && !node->PlayDuringCatchup())
             {
                 continue;
             }
             
             // Play the node!
-			node->Play(&animState);
+			node->Play(&mActiveAnimations[animIndex]);
 		}
 	}
 }
@@ -189,15 +196,21 @@ void Animator::ExecuteFrame(AnimationState& animState, int frameNumber)
 void AnimationState::Stop()
 {
     // If stopping an animation, be sure to also stop any running vertex animations.
-    if(params.animation != nullptr)
+    if(!done)
     {
-        auto& vertexAnims = params.animation->GetVertexAnimNodes();
-        for(auto& vertexAnim : vertexAnims)
+        if(params.animation != nullptr)
         {
-            if(vertexAnim->frameNumber <= currentFrame)
+            auto& vertexAnims = params.animation->GetVertexAnimNodes();
+            for(auto& vertexAnim : vertexAnims)
             {
-                vertexAnim->Stop();
+                if(vertexAnim->frameNumber <= currentFrame)
+                {
+                    vertexAnim->Stop();
+                }
             }
         }
     }
+
+    // Done if stopped.
+    done = true;
 }

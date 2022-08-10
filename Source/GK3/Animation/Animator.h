@@ -57,6 +57,9 @@ struct AnimationState
     // This doesn't track total animation time, just time until the next frame!
     float timer = 0.0f;
 
+    // If true, this AnimState is no longer being actively used and can be erased/recycled.
+    bool done = false;
+
     void Stop();
 };
 
@@ -83,5 +86,5 @@ private:
 	// in the middle of the list at arbitrary times...not sure if the list is big enough or we do it often enough to get benefits?
 	std::vector<AnimationState> mActiveAnimations;
 	
-	void ExecuteFrame(AnimationState& animState, int frameNumber);
+	void ExecuteFrame(int animIndex, int frameNumber);
 };
