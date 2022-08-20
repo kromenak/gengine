@@ -240,6 +240,14 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     button->SetPressCallback([this, locationCode](UIButton* button) {
         Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("MAPBUTTON.WAV"));
 
+        // Check conditions under which we would NOT allow going to this location.
+        // Don't allow going to Larry's place during timeblock 106P.
+        if(locationCode == "LHE" && Services::Get<GameProgress>()->GetTimeblock() == Timeblock(1, 6, Timeblock::PM))
+        {
+            Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"21F4F625S1\", 1)");
+            return;
+        }
+
         // Whenever you go to a location on the driving map, it's assumed that your bike also moves there.
         // Each location has it's own integer code (of course) that is rather arbitrary.
         int bikeLocation = -1;
