@@ -3,6 +3,7 @@
 #include "Font.h"
 #include "IniParser.h"
 #include "SaveManager.h"
+#include "Scene.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "UICanvas.h"
@@ -59,10 +60,6 @@ CaptionsOverlay::CaptionsOverlay() : Actor(Actor::TransformType::RectTransform)
                 }
             }
         }
-
-        // Kind of annoying HACK, but the speaker is set to "UNKNOWN" for most voiceovers.
-        // We want this to map to the VOICEOVER font.
-        mSpeakerToFont["UNKNOWN"] = mSpeakerToFont["VOICEOVER"];
     }
     Services::GetAssets()->UnloadText(fontColors);
 }
@@ -109,13 +106,27 @@ void CaptionsOverlay::AddCaption(const std::string& captionText, const std::stri
     // Make sure the caption object is active, especially when recycling.
     caption.actor->SetActive(true);
 
-    // Set font based on speaker.
+    // Determine which font to use.
+    // There's an initial default that's used if no other case matches.
     Font* font = mDefaultFont;
-    auto it = mSpeakerToFont.find(speaker);
-    if(it != mSpeakerToFont.end())
+
+    // If "UNKNOWN" is specified, we assume the speaker is whoever is Ego.
+    // Otherwise, grab from the font list.
+    std::string_map_ci<Font*>::iterator fontIt;
+    if(StringUtil::EqualsIgnoreCase(speaker, "UNKNOWN"))
     {
-        font = it->second;
+        fontIt = mSpeakerToFont.find(Scene::GetEgoName());
     }
+    else
+    {
+        fontIt = mSpeakerToFont.find(speaker);
+    }
+    if(fontIt != mSpeakerToFont.end())
+    {
+        font = fontIt->second;
+    }
+
+    // Set font based on speaker.
     caption.label->SetFont(font);
 
     // Set caption rect height based on font used and amount of text lines needed.
