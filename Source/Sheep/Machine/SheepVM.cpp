@@ -150,6 +150,13 @@ void SheepVM::StopExecution(const std::string& tag)
         {
             thread->mRunning = false;
 
+            // Even though we're stopping a Sheep prematurely, we should still execute its wait callback.
+            // Sometimes, important things are waiting for a Sheep to finish (like the Action system), so they need to know.
+            if(thread->mWaitCallback != nullptr)
+            {
+                thread->mWaitCallback();
+            }
+
             // Thread is no longer using execution context.
             if(thread->mContext != nullptr)
             {
