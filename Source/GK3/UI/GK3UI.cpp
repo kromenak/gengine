@@ -3,6 +3,7 @@
 #include "CaptionsOverlay.h"
 #include "DrivingScreen.h"
 #include "SceneTransitioner.h"
+#include "Sidney.h"
 #include "TimeblockScreen.h"
 #include "TitleScreen.h"
 
@@ -26,6 +27,50 @@ void GK3UI::ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::fu
         mTimeblockScreen->SetIsDestroyOnLoad(false);
     }
     mTimeblockScreen->Show(timeblock, timer, callback);
+}
+
+void GK3UI::ShowSceneTransitioner()
+{
+    if(mSceneTransitioner == nullptr)
+    {
+        mSceneTransitioner = new SceneTransitioner();
+        mSceneTransitioner->SetIsDestroyOnLoad(false);
+    }
+    mSceneTransitioner->Show();
+}
+
+void GK3UI::HideSceneTransitioner()
+{
+    if(mSceneTransitioner != nullptr)
+    {
+        mSceneTransitioner->Hide();
+    }
+}
+
+void GK3UI::AddCaption(const std::string& caption, const std::string& speaker)
+{
+    if(mCaptionsOverlay == nullptr)
+    {
+        mCaptionsOverlay = new CaptionsOverlay();
+        mCaptionsOverlay->SetIsDestroyOnLoad(false);
+    }
+    mCaptionsOverlay->AddCaption(caption, speaker);
+}
+
+void GK3UI::FinishCaption(float delay)
+{
+    if(mCaptionsOverlay != nullptr)
+    {
+        mCaptionsOverlay->AdvanceCaption(delay);
+    }
+}
+
+void GK3UI::HideAllCaptions()
+{
+    if(mCaptionsOverlay != nullptr)
+    {
+        mCaptionsOverlay->HideAll();
+    }
 }
 
 void GK3UI::ShowDrivingScreen(int followState)
@@ -74,46 +119,12 @@ bool GK3UI::FollowingOnDrivingScreen()
     return false;
 }
 
-void GK3UI::ShowSceneTransitioner()
+void GK3UI::ShowSidney()
 {
-    if(mSceneTransitioner == nullptr)
+    if(mSidney == nullptr)
     {
-        mSceneTransitioner = new SceneTransitioner();
-        mSceneTransitioner->SetIsDestroyOnLoad(false);
+        mSidney = new Sidney();
+        mSidney->SetIsDestroyOnLoad(false);
     }
-    mSceneTransitioner->Show();
-}
-
-void GK3UI::HideSceneTransitioner()
-{
-    if(mSceneTransitioner != nullptr)
-    {
-        mSceneTransitioner->Hide();
-    }
-}
-
-void GK3UI::AddCaption(const std::string& caption, const std::string& speaker)
-{
-    if(mCaptionsOverlay == nullptr)
-    {
-        mCaptionsOverlay = new CaptionsOverlay();
-        mCaptionsOverlay->SetIsDestroyOnLoad(false);
-    }
-    mCaptionsOverlay->AddCaption(caption, speaker);
-}
-
-void GK3UI::FinishCaption(float delay)
-{
-    if(mCaptionsOverlay != nullptr)
-    {
-        mCaptionsOverlay->AdvanceCaption(delay);
-    }
-}
-
-void GK3UI::HideAllCaptions()
-{
-    if(mCaptionsOverlay != nullptr)
-    {
-        mCaptionsOverlay->HideAll();
-    }
+    mSidney->Show();
 }

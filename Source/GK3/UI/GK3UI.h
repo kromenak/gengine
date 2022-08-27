@@ -10,6 +10,7 @@
 class CaptionsOverlay;
 class DrivingScreen;
 class SceneTransitioner;
+class Sidney;
 class Timeblock;
 class TimeblockScreen;
 class TitleScreen;
@@ -30,6 +31,8 @@ public:
     void ShowDrivingScreen(int followState = 0);
     bool FollowingOnDrivingScreen();
 
+    void ShowSidney();
+
 private:
     TitleScreen* mTitleScreen = nullptr;
     TimeblockScreen* mTimeblockScreen = nullptr;
@@ -39,6 +42,8 @@ private:
     CaptionsOverlay* mCaptionsOverlay = nullptr;
 
     DrivingScreen* mDrivingScreen = nullptr;
+
+    Sidney* mSidney = nullptr;
 };
 
 extern GK3UI gGK3UI;

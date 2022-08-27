@@ -34,6 +34,13 @@ shpvoid ShowFingerprintInterface(const std::string& nounName)
 }
 RegFunc1(ShowFingerprintInterface, void, string, IMMEDIATE, REL_FUNC);
 
+shpvoid ShowSidney()
+{
+    gGK3UI.ShowSidney();
+    return 0;
+}
+RegFunc0(ShowSidney, void, IMMEDIATE, REL_FUNC);
+
 shpvoid FollowOnDrivingMap(int followState)
 {
     gGK3UI.ShowDrivingScreen(followState);
