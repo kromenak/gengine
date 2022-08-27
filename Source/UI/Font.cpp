@@ -128,6 +128,7 @@ void Font::ParseFromData(char* data, int dataLength)
 	parser.SetMultipleKeyValuePairsPerLine(false);
 	
 	// Read each line, and each key/pair, one at a time.
+    Texture* alphaTexture = nullptr;
 	while(parser.ReadLine())
 	{
 		while(parser.ReadKeyValuePair())
@@ -144,7 +145,7 @@ void Font::ParseFromData(char* data, int dataLength)
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "alpha channel"))
 			{
-				//TODO
+                alphaTexture = Services::GetAssets()->LoadTexture(keyValue.value);
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "line count"))
 			{
@@ -173,25 +174,33 @@ void Font::ParseFromData(char* data, int dataLength)
 				{
                     mColorMode = ColorMode::ColorReplace;
 				}
-                else
-                {
-                    std::cout << "Unknown font type: " << keyValue.value << std::endl;
-                }
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "color"))
 			{
 				// Defined when type is "Color Replacement".
-				mColor = keyValue.GetValueAsColor32();
+                // The value is sometimes empty, which means we should just use the default.
+                if(!keyValue.value.empty())
+                {
+                    mColor = keyValue.GetValueAsColor32();
+                }
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "foreground color"))
 			{
 				// Defined when type is "Alpha Blend".
-				mColor = keyValue.GetValueAsColor32();
+                // The value is sometimes empty, which means we should just use the default.
+                if(!keyValue.value.empty())
+                {
+                    mColor = keyValue.GetValueAsColor32();
+                }
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "background color"))
 			{
 				// Defined when type is "Alpha Blend".
-				mBackgroundColor = keyValue.GetValueAsColor32();
+                // The value is sometimes empty, which means we should just use the default.
+                if(!keyValue.value.empty())
+                {
+                    mBackgroundColor = keyValue.GetValueAsColor32();
+                }
 			}
             //TODO: function
             //TODO: destination opacity
@@ -209,4 +218,10 @@ void Font::ParseFromData(char* data, int dataLength)
 	{
 		mFontTexture = Services::GetAssets()->LoadTexture(GetNameNoExtension());
 	}
+
+    // If we have an alpha channel apply it to the font texture.
+    if(mFontTexture != nullptr && alphaTexture != nullptr)
+    {
+        mFontTexture->ApplyAlphaChannel(*alphaTexture);
+    }
 }
