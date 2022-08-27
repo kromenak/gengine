@@ -106,9 +106,13 @@ void Debug::DrawRectXZ(const Rect& rect, float height, const Color32& color, flo
 
 void Debug::DrawScreenRect(const Rect& rect, const Color32& color)
 {
+    // We need a camera before we can draw screen rects.
+    Camera* camera = Services::GetRenderer()->GetCamera();
+    if(camera == nullptr) { return; }
+
     // This rect is in screen space, so we need to convert it to work space before continuing.
-    Vector3 min = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(rect.GetMin(), 0.1f);
-    Vector3 max = Services::GetRenderer()->GetCamera()->ScreenToWorldPoint(rect.GetMax(), 0.1f);
+    Vector3 min = camera->ScreenToWorldPoint(rect.GetMin(), 0.1f);
+    Vector3 max = camera->ScreenToWorldPoint(rect.GetMax(), 0.1f);
 
     // Generate corners of the rectangular area in 3D space.
     Vector3 p0 = min;
