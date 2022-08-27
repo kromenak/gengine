@@ -302,6 +302,9 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
 		unsigned char alpha = useRgbForAlpha ? alphaTexture.mPixels[(i * 4)] : alphaTexture.mPixels[(i * 4) + 3];
 		mPixels[(i * 4) + 3] = alpha;
 	}
+
+    // If an alpha channel is applied, we'll assume this texture is now translucent.
+    mRenderType = RenderType::Translucent;
 }
 
 void Texture::AddDirtyFlags(DirtyFlags flags)
@@ -406,29 +409,57 @@ void Texture::UploadToGPU()
 void Texture::WriteToFile(const std::string& filePath)
 {
     BinaryWriter writer(filePath.c_str());
-    
+
+    // Determine the DIB header size. This depends on whether we need alpha support or not.
+    // The most basic DIB header format (BITMAPINFOHEADER) is 40 bytes, but does not support an alpha channel.
+    // To get alpha channel, BITMAPV4HEADER format is used, which is 108 bytes.
+    int dibHeaderSize = mRenderType == RenderType::Translucent ? 108 : 40;
+
+    // When we need to write out alpha data, the compression method BI_BITFIELDS (3) is used.
+    // Otherwise, BI_RGB (0) is fine - no compression in other words.
+    int compressionMethod = mRenderType == RenderType::Translucent ? 3 : 0;
+
     // BMP HEADER
+    const int kBMPHeaderSize = 14;
     writer.WriteString("BM");
     writer.WriteUInt(0);    // Size of file in bytes. Optional to fill in.
     writer.WriteUShort(0);  // Reserved/empty
     writer.WriteUShort(0);  // Reserved/empty
-    writer.WriteUInt(54);   // Offset to image data (from beginning of this file)
+    writer.WriteUInt(kBMPHeaderSize + dibHeaderSize);   // Offset to image data (from beginning of this file)
     
     // DIB HEADER
-    writer.WriteUInt(40);       // Size of this header, always 40 bytes.
-    writer.WriteInt(mWidth);    // Width of image; signed for some reason.
-    writer.WriteInt(mHeight);   // Height of image; signed for some reason.
-    writer.WriteUShort(1);      // Number of color planes, always 1.
+    writer.WriteUInt(dibHeaderSize);        // Size of DIB header. Indicates which header version is being used.
+    writer.WriteInt(mWidth);                // Width of image; signed for some reason.
+    writer.WriteInt(mHeight);               // Height of image; signed for some reason.
+    writer.WriteUShort(1);                  // Number of color planes, always 1.
 
     uint16_t bitsPerPixel = (mPalette != nullptr ? 8 : 32);
-    writer.WriteUShort(bitsPerPixel); // Number of bits-per-pixel.
-    writer.WriteUInt(0);        // Compression method - assumed none (0).
-    writer.WriteUInt(0);        // Uncompressed size of image. Since we aren't compressing, can just use 0 as placeholder.
-    writer.WriteInt(0);         // Preferred width for printing, unused.
-    writer.WriteInt(0);         // Preferred height for printing, unused.
-    writer.WriteUInt(0);        // Number of palette colors, unused.
-    writer.WriteUInt(0);        // Number of important colors, unused.
-    
+    writer.WriteUShort(bitsPerPixel);                   // Number of bits-per-pixel.
+    writer.WriteUInt(compressionMethod);                // Compression method.
+    writer.WriteUInt(mWidth * mHeight * bitsPerPixel);  // Uncompressed size of image.
+    writer.WriteInt(0);                                 // Preferred width for printing, unused.
+    writer.WriteInt(0);                                 // Preferred height for printing, unused.
+    writer.WriteUInt(0);                                // Number of palette colors, unused.
+    writer.WriteUInt(0);                                // Number of important colors, unused.
+
+    // If this image has alpha, and we're thus writing out a BITMAPV4HEADER DIB header, we need to write out some additional fields.
+    if(mRenderType == RenderType::Translucent)
+    {
+        // Define masks for each color component. This is just using the default used by BMP format anyway.
+        writer.WriteUInt(0x00FF0000); // Red
+        writer.WriteUInt(0x0000FF00); // Green
+        writer.WriteUInt(0x000000FF); // Blue
+        writer.WriteUInt(0xFF000000); // Alpha
+
+        // We must write out a bunch of color space info, but it's mostly dummy/zeros.
+        // Writing "Win " at the beginning uses the Windows color space.
+        writer.WriteString("Win ");
+        for(int i = 0; i < 12; ++i)
+        {
+            writer.WriteUInt(0);
+        }
+    }
+
     // COLOR TABLE - Only needed for 8BPP or less.
     if(bitsPerPixel <= 8)
     {
@@ -453,8 +484,8 @@ void Texture::WriteToFile(const std::string& filePath)
                 int index = (y * mWidth + x) * 4;
                 writer.WriteByte(mPixels[index + 2]); // Blue
                 writer.WriteByte(mPixels[index + 1]); // Green
-                writer.WriteByte(mPixels[index]); 	   // Red
-                writer.WriteByte(0); // Alpha is ignored
+                writer.WriteByte(mPixels[index]); 	  // Red
+                writer.WriteByte(mPixels[index + 3]); // Alpha
                 bytesWritten += 4;
             }
         }
@@ -549,7 +580,7 @@ void Texture::ParseFromCompressedFormat(BinaryReader& reader)
 		}
 	}
 	
-	// This seeeeems to work consistently - if the top-left pixel has no alpha, flag as alpha test.
+	// This seeeeems to work consistently - if the top-left pixel is fully transparent, flag as alpha test.
 	if(mHeight > 0 && mWidth > 0 && mPixels[3] == 0)
 	{
 		mRenderType = RenderType::AlphaTest;
@@ -624,8 +655,8 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 		// The number of bytes is numColors in palette, times 4 bytes each.
 		// The order of the colors is blue, green, red, alpha.
         mPaletteSize = numColorsInColorPalette * 4;
-		mPalette = new uint8[numColorsInColorPalette * 4];
-		reader.Read(mPalette, numColorsInColorPalette * 4);
+		mPalette = new uint8[mPaletteSize];
+		reader.Read(mPalette, mPaletteSize);
 	}
 	
 	// PIXELS
@@ -670,7 +701,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 					
 					// As long as the BMP format is BI_RGB, we can assume the image does not have any alpha data.
 					// In these cases, the alpha value is usually zero.
-					// But we actually want to interpret that as 255 (full alpha).
+					// But we actually want to interpret that as 255 (fully opaque).
 					mPixels[index + 3] = 255; //palette[paletteByteIndex + 3];
 				}
 			}
@@ -687,7 +718,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 				bytesRead += 3;
 				
 				// BI_RGB format doesn't save any alpha, even if 32 bits per pixel.
-				// We'll use a placeholder of 255 (full alpha).
+				// We'll use a placeholder of 255 (fullly opaque).
 				mPixels[index + 3] = 255; // Alpha
 			}
 			else
