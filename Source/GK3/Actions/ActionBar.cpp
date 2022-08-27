@@ -27,7 +27,10 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
     mSceneBlockerButton = AddComponent<UIButton>();
     mCanvas->AddWidget(mSceneBlockerButton);
     mSceneBlockerButton->SetPressCallback([this](UIButton* button) {
-        OnCancelButtonPressed();
+        if(mAllowDismiss)
+        {
+            OnCancelButtonPressed();
+        }
     });
 	
 	// Create button holder - it holds the buttons and we move it around the screen.
@@ -153,13 +156,16 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	}
 	
 	// Always put cancel button on the end.
-	VerbIcon& cancelVerbIcon = verbManager->GetVerbIcon("CANCEL");
-	UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon, "CANCEL");
-	
-	// Pressing cancel button hides the bar, but it also requires an extra step. So its got its own callback.
-    cancelButton->SetPressCallback([this](UIButton* button) {
-        OnCancelButtonPressed();
-    });
+    if(mAllowCancel)
+    {
+        VerbIcon& cancelVerbIcon = verbManager->GetVerbIcon("CANCEL");
+        UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon, "CANCEL");
+
+        // Pressing cancel button hides the bar, but it also requires an extra step. So its got its own callback.
+        cancelButton->SetPressCallback([this](UIButton* button){
+            OnCancelButtonPressed();
+        });
+    }
 	
 	// Refresh layout after adding all buttons to position everything correctly.
 	RefreshButtonLayout();
@@ -253,7 +259,7 @@ void ActionBar::OnUpdate(float deltaTime)
 	if(IsShowing()) 
 	{
         // Most keyboard input counts as a cancel action, unless some text input is active (like debug window).
-        if(!Services::GetInput()->IsTextInput())
+        if(!Services::GetInput()->IsTextInput() && mAllowDismiss)
         {
             // Any key press EXCEPT ~ counts as a cancel action.
             // This logic technically blocks any other cancel action due to key presses WHILE ~ is pressed but...close enough.

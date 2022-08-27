@@ -1,5 +1,7 @@
 #include "SheepAPI_GameLogic.h"
 
+#include "ActionBar.h"
+#include "ActionManager.h"
 #include "GameProgress.h"
 #include "Random.h"
 #include "Services.h"
@@ -211,6 +213,27 @@ shpvoid SetChatCount(std::string noun, int count)
     return 0;
 }
 RegFunc2(SetChatCount, void, string, int, IMMEDIATE, DEV_FUNC);
+
+shpvoid SetVerbModal(int modalState)
+{
+    Services::Get<ActionManager>()->GetActionBar()->SetAllowDismiss(modalState == 0);
+    return 0;
+}
+RegFunc1(SetVerbModal, void, int, IMMEDIATE, REL_FUNC);
+
+shpvoid StartVerbCancel()
+{
+    Services::Get<ActionManager>()->GetActionBar()->SetAllowCancel(true);
+    return 0;
+}
+RegFunc0(StartVerbCancel, void, IMMEDIATE, REL_FUNC);
+
+shpvoid StopVerbCancel()
+{
+    Services::Get<ActionManager>()->GetActionBar()->SetAllowCancel(false);
+    return 0;
+}
+RegFunc0(StopVerbCancel, void, IMMEDIATE, REL_FUNC);
 
 /*
 shpvoid SetGameTimer(std::string noun, std::string verb, int milliseconds)
