@@ -482,50 +482,62 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	// Empty condition is automatically met.
 	if(caseLabel.empty()) { return true; }
     
-	// See if any "local" case logic matches this action and execute that case if so.
-	// Do this before "global" cases b/c an action set *could* declare an override of a global...
-	// I'd consider that "not great practice" but it does occur in the game's files a few times.
+	// Is this custom case logic? If so, check the custom case!
 	auto it = mCaseLogic.find(caseLabel);
 	if(it != mCaseLogic.end())
 	{
-        // For local case logic used by topics, we need to manually check topic count.
-        // Most local case logic assumes "&& GetTopicCount(noun, verb) == 0" is implicitly appended for topics.
+        // Annoying problem: for topics, if the topic count is not EXPLICITLY checked as part of the logic, it appears to be IMPLICITLY checked.
+        // This means we need to check topic count and force-fail the case if "GetTopicCount(NOUN, VERB)" is not explicitly in the case logic.
         if(verbType == VerbType::Topic && Services::Get<GameProgress>()->GetTopicCount(noun, verb) != 0)
         {
-            // So, if we get here, it means this topic has already been discussed before. Typically, it means this case is NOT met (return false).
-            // HOWEVER, there is one BIG exception.
-            // If the local case logic EXPLICITLY checks the topic count for this noun/verb pair, we should NOT early out here!
-            bool explicitlyChecksTopicCount = false;
-            size_t pos = 0;
-            while(pos != std::string::npos)
+            // BUT! A caveat! Some verbs specifically are exempt from this logic.
+            // Frustrating but...the logic in the data files looks identical, but they behave differently.
+            // Does not appear to be defined in a data-driven way.
+            static std::string_set_ci sIgnoreImplicitTopicCount = {
+                "T_HANDSHAKE_A",
+                "T_HANDSHAKE_B",
+                "T_HANDSHAKE_C",
+                "T_HANDSHAKE_D",
+                "T_HANDSHAKE_E"
+            };
+            if(sIgnoreImplicitTopicCount.find(verb) == sIgnoreImplicitTopicCount.end())
             {
-                // Find GetTopicCount instance.
-                pos = StringUtil::FindIgnoreCase(it->second.text, "GetTopicCount", pos);
-                if(pos == std::string::npos) { break; }
-
-                // Get open/close parentheses for GetTopicCount.
-                size_t openParen = it->second.text.find('(', pos);
-                size_t closeParen = it->second.text.find(')', openParen);
-
-                // See if our noun & verb occur after the open parentesis and before the close parenthesis.
-                // If so, it would appear this case logic DOES explicitly check topic count.
-                size_t nounPos = StringUtil::FindIgnoreCase(it->second.text, noun, openParen);
-                size_t verbPos = StringUtil::FindIgnoreCase(it->second.text, verb, openParen);
-                if(nounPos < closeParen && verbPos > nounPos && verbPos < closeParen)
+                // So, if we get here, it means this topic has already been discussed before, and it's not on the above ignore list.
+                
+                // Typically, this means this case is NOT met (IMPLICIT count check means we already discussed this topic).
+                // HOWEVER, if the case logic EXPLICITLY checks topic count, we need to run the case logic normally.
+                bool explicitlyChecksTopicCount = false;
+                size_t pos = 0;
+                while(pos != std::string::npos)
                 {
-                    explicitlyChecksTopicCount = true;
-                    break;
+                    // Find GetTopicCount instance.
+                    pos = StringUtil::FindIgnoreCase(it->second.text, "GetTopicCount", pos);
+                    if(pos == std::string::npos) { break; }
+
+                    // Get open/close parentheses for GetTopicCount.
+                    size_t openParen = it->second.text.find('(', pos);
+                    size_t closeParen = it->second.text.find(')', openParen);
+
+                    // See if our noun & verb occur after the open parentesis and before the close parenthesis.
+                    // If so, it would appear this case logic DOES explicitly check topic count.
+                    size_t nounPos = StringUtil::FindIgnoreCase(it->second.text, noun, openParen);
+                    size_t verbPos = StringUtil::FindIgnoreCase(it->second.text, verb, openParen);
+                    if(nounPos < closeParen && verbPos > nounPos && verbPos < closeParen)
+                    {
+                        explicitlyChecksTopicCount = true;
+                        break;
+                    }
+
+                    // We need to loop in case the condition logic contains multiple GetTopicCount checks.
+                    pos = closeParen;
                 }
 
-                // We need to loop in case the condition logic contains multiple GetTopicCount checks.
-                pos = closeParen;
-            }
-
-            // If we don't explicitly check the topic count AND this topic has been discussed before...
-            // ...assume that we can't discuss it again, and so return false! (whew)
-            if(!explicitlyChecksTopicCount)
-            {
-                return false;
+                // If we don't explicitly check the topic count AND this topic has been discussed before...
+                // ...assume that we can't discuss it again, and so return false! (whew)
+                if(!explicitlyChecksTopicCount)
+                {
+                    return false;
+                }
             }
         }
 
