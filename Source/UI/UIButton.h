@@ -41,6 +41,8 @@ public:
 	
 	bool CanInteract() const { return mCanInteract; }
 	void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
+
+    void SetResizeBasedOnTexture(bool resize) { mResizeBasedOnTexture = resize; }
 	
 private:
     // When a button is down, it gets some special treatment/logic. So, we need to keep track of it!
@@ -61,7 +63,11 @@ private:
 	// Is the button interactive?
 	// If not, it appears as a "disabled" button (e.g. grayed out) if a disabled texture is provided.
 	bool mCanInteract = true;
-	
+
+    // If true, button is resized based on texture used for the current state.
+    // If false, we assume the button size is manually set, or driven by anchors and parenting.
+    bool mResizeBasedOnTexture = true;
+
 	// Material used for rendering.
 	Material mMaterial;
 	

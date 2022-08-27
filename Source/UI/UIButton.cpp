@@ -204,7 +204,7 @@ void UIButton::UpdateMaterial()
     {
         // If our rect transform's anchors are equal, we'll assume we want the size of the rect to equal the texture size.
         // However, if NOT equal, then size is dictated by parent and anchors, so don't mess with it. (On the Map screen, for example).
-        if(GetRectTransform()->GetAnchorMin() == GetRectTransform()->GetAnchorMax())
+        if(mResizeBasedOnTexture && GetRectTransform()->GetAnchorMin() == GetRectTransform()->GetAnchorMax())
         {
             GetRectTransform()->SetSizeDelta(state.texture->GetWidth(), state.texture->GetHeight());
         }
