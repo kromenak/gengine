@@ -169,18 +169,12 @@ void LocationManager::DumpLocations() const
 
 void LocationManager::ChangeLocation(const std::string& location, std::function<void()> callback)
 {
-    // No need to change if we're already there.
-    if(mLocation == location)
-    {
-        if(callback != nullptr) { callback(); }
-        return;
-    }
-
     // Show scene transitioner.
     gGK3UI.ShowSceneTransitioner();
 
     // Set new location.
     // This is important to do BEFORE checking for timeblock completion, as that logic looks for locations sometimes.
+    bool sameLocation = (mLocation == location);
     SetLocation(location);
 
     //HACK: Don't check timeblock completion if following someone on driving screen.
@@ -197,7 +191,7 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
 
     // Check for timeblock completion.
     Timeblock currentTimeblock = Services::Get<GameProgress>()->GetTimeblock();
-    Services::GetSheep()->Execute(Services::GetAssets()->LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [location, callback, currentTimeblock]() {
+    Services::GetSheep()->Execute(Services::GetAssets()->LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [sameLocation, location, callback, currentTimeblock]() {
 
         // See whether a timeblock change occurred.
         // If so, we should early out - the timeblock change logic handles any location and time change.
@@ -209,11 +203,20 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
             return;
         }
 
-        // Otherwise, we can move ahead with changing the scene.
-        GEngine::Instance()->LoadScene(location, [callback]() {
+        // No need to change if we're already there.
+        if(sameLocation)
+        {
             gGK3UI.HideSceneTransitioner();
             if(callback != nullptr) { callback(); }
-        });
+        }
+        else
+        {
+            // Otherwise, we can move ahead with changing the scene.
+            GEngine::Instance()->LoadScene(location, [callback](){
+                gGK3UI.HideSceneTransitioner();
+                if(callback != nullptr) { callback(); }
+            });
+        }
     });
 }
 
