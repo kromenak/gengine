@@ -337,6 +337,17 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // Also GRACE and MOSELY both matching GRACE_N_MOSE...
+    if(StringUtil::EqualsIgnoreCase(noun, "GRACE") || StringUtil::EqualsIgnoreCase(noun, "MOSELY"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("GRACE_N_MOSE", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
     // Finally, convert our map to a vector to return.
     std::vector<const Action*> viableActions;
     for(auto entry : verbToAction)
