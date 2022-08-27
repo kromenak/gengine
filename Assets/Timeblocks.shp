@@ -213,7 +213,7 @@ code
 		// Must have used the binocs to spy on Mosely/Buthane from Chateau de Blanchefort.
 		//if(GetNounVerbCount("VIEW_OF_LHOMME_MORE", "BINOCULARS") == 0)
 		//{
-		//	return;`
+		//	return;
 		//}
 
 		// OK, go to next timeblock!
@@ -222,6 +222,20 @@ code
 
 	CheckTimeblockComplete106P$()
 	{
-		//...
+		// Must be at R25.
+		if(IsCurrentLocation("R25") == 0)
+		{
+			return;
+		}
+
+		// Must have asked Grace & Mosely about Abbe Arnaud.
+		// There are other requirements to get to this point, but you can only do this if you've done everything else.
+		if(GetTopicCount("GRACE_N_MOSE", "T_ABBE") == 0)
+		{
+			return;
+		}
+
+		// OK, go to next timeblock!
+		SetTime("207A");
 	}
 }
