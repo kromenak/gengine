@@ -14,11 +14,11 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTran
     // Inventory overrides SFX/VO, but continues ambient audio from scene.
     mLayer.OverrideAudioState(true, true, false);
 
-	mCanvas = AddComponent<UICanvas>(1);
+    // Add canvas to render UI elements.
+	AddComponent<UICanvas>(1);
 	
 	// Add black background image that blocks out the scene entirely.
 	UIImage* background = AddComponent<UIImage>();
-	mCanvas->AddWidget(background);
 	background->SetTexture(&Texture::Black);
 	
 	RectTransform* inventoryRectTransform = GetComponent<RectTransform>();
@@ -28,8 +28,8 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTran
 	
 	// Add exit button to bottom-left corner of screen.
 	Actor* exitButtonActor = new Actor(TransformType::RectTransform);
+    exitButtonActor->GetTransform()->SetParent(GetTransform());
 	UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
-	mCanvas->AddWidget(exitButton);
 	
 	exitButton->SetUpTexture(Services::GetAssets()->LoadTexture("EXITN.BMP"));
 	exitButton->SetDownTexture(Services::GetAssets()->LoadTexture("EXITD.BMP"));
@@ -48,8 +48,8 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTran
 	
 	// Create closeup image. It's just positioned at center of screen, which is default.
 	Actor* closeupActor = new Actor(TransformType::RectTransform);
+    closeupActor->GetTransform()->SetParent(GetTransform());
 	mCloseupImage = closeupActor->AddComponent<UIButton>();
-	mCanvas->AddWidget(mCloseupImage);
 	mCloseupImage->GetRectTransform()->SetParent(inventoryRectTransform);
     mCloseupImage->SetPressCallback([this](UIButton* button) {
         OnClicked();

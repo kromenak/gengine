@@ -31,7 +31,7 @@
 CaptionsOverlay::CaptionsOverlay() : Actor(Actor::TransformType::RectTransform)
 {
     // Draw order should be equal to the status overlay.
-    mCanvas = AddComponent<UICanvas>(8);
+    AddComponent<UICanvas>(8);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -74,16 +74,14 @@ void CaptionsOverlay::AddCaption(const std::string& captionText, const std::stri
     {
         // Make a new one.
         caption.actor = new Actor(Actor::TransformType::RectTransform);
-        caption.actor->GetTransform()->SetParent(mCanvas->GetRectTransform());
+        caption.actor->GetTransform()->SetParent(GetTransform());
 
         // Add backing image. This is just a fully opaque black background.
         caption.backing = caption.actor->AddComponent<UIImage>();
-        mCanvas->AddWidget(caption.backing);
         caption.backing->SetTexture(&Texture::Black);
 
         // Add label. This should fill space horizontally, with horizontal centering, top alignment.
         caption.label = caption.actor->AddComponent<UILabel>();
-        mCanvas->AddWidget(caption.label);
         caption.label->SetHorizonalAlignment(HorizontalAlignment::Center);
         caption.label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
         caption.label->SetVerticalAlignment(VerticalAlignment::Top);

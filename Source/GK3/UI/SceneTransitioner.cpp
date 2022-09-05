@@ -7,7 +7,7 @@
 SceneTransitioner::SceneTransitioner() : Actor(Actor::TransformType::RectTransform)
 {
     // Draw scene transitioner above the normal scene.
-    UICanvas* canvas = AddComponent<UICanvas>(3);
+    AddComponent<UICanvas>(3);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -17,7 +17,6 @@ SceneTransitioner::SceneTransitioner() : Actor(Actor::TransformType::RectTransfo
 
     // Add overlay image that eats input.
     mOverlay = AddComponent<UIImage>();
-    canvas->AddWidget(mOverlay);
     mOverlay->SetReceivesInput(true);
 
     // Overlay is see-through, but it tints the screen.

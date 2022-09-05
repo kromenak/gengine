@@ -12,7 +12,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 	mMini(mini)
 {
 	// Add canvas for UI rendering. Draws above most other stuff.
-	mCanvas = AddComponent<UICanvas>(10);
+	AddComponent<UICanvas>(10);
 	
 	// Create screen-sized canvas.
 	RectTransform* canvasTransform = GetComponent<RectTransform>();
@@ -37,7 +37,6 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 	{
 		backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("SNAKY"));
 	}
-	mCanvas->AddWidget(backgroundImage);
 	
 	// Mini and full consoles have different anchoring properties.
 	// Mini is a box that is anchored to a corner of the screen.
@@ -65,7 +64,6 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			
 			// Horizontal rule uses a tiling line image.
 			UIImage* hrImage = mHorizontalRuleActor->AddComponent<UIImage>();
-			mCanvas->AddWidget(hrImage);
 			
 			// Anchor along bottom edge of the console, with enough space for the input line below.
 			hrTransform->SetAnchorMin(Vector2(0.0f, 0.0f));
@@ -89,7 +87,6 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
             scrollbackRT->SetAnchoredPosition(0.0f, 0.0f);
 			
 			mScrollbackBuffer = scrollbackActor->AddComponent<UITextBuffer>();
-			mCanvas->AddWidget(mScrollbackBuffer);
 			
 			Font* font = Services::GetAssets()->LoadFont("F_CONSOLE_DISPLAY");
 			mScrollbackBuffer->SetFont(font);
@@ -111,7 +108,6 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
             textInputRT->SetPivot(0.0f, 0.0f);
 			
 			mTextInput = textInputActor->AddComponent<UITextInput>();
-			mCanvas->AddWidget(mTextInput);
 
 			mTextInput->SetFont(font);
 			mTextInput->SetText("");
@@ -123,7 +119,6 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			
 			// Horizontal rule uses a tiling line image.
 			UIImage* caretImage = caretActor->AddComponent<UIImage>();
-			mCanvas->AddWidget(caretImage);
             caretImage->SetTexture(&Texture::White);
 
 			caretRT->SetAnchorMin(Vector2(0.0f, 0.0f));
@@ -148,7 +143,6 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
         imageRT->SetParent(canvasTransform);
 
         mConsoleToggleImage = imageActor->AddComponent<UIImage>();
-        mCanvas->AddWidget(mConsoleToggleImage);
 
         Texture* texture = Services::GetAssets()->LoadTexture("CAIN");
         Texture* textureAlpha = Services::GetAssets()->LoadTexture("CAIN_ALPHA");

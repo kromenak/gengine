@@ -6,12 +6,11 @@
 #include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UITextInput.h"
 
-UIButton* CreateBasicTextButton(UICanvas* canvas, Actor* parent, const Vector2& pos, const std::string& text)
+UIButton* CreateBasicTextButton(Actor* parent, const Vector2& pos, const std::string& text)
 {
     // Create actor as child of parent.
     Actor* actor = new Actor(Actor::TransformType::RectTransform);
@@ -19,7 +18,6 @@ UIButton* CreateBasicTextButton(UICanvas* canvas, Actor* parent, const Vector2& 
 
     // Add button to actor & canvas.
     UIButton* button = actor->AddComponent<UIButton>();
-    canvas->AddWidget(button);
 
     // Position from top-left, constant size.
     button->GetRectTransform()->SetPivot(0.0f, 1.0f);
@@ -34,7 +32,6 @@ UIButton* CreateBasicTextButton(UICanvas* canvas, Actor* parent, const Vector2& 
 
     // Add button text.
     UILabel* buttonLabel = actor->AddComponent<UILabel>();
-    canvas->AddWidget(buttonLabel);
 
     // Font and alignment are constant for now.
     buttonLabel->SetFont(Services::GetAssets()->LoadFont("SID_PDN_10_L.FON"));
@@ -44,13 +41,12 @@ UIButton* CreateBasicTextButton(UICanvas* canvas, Actor* parent, const Vector2& 
     return button;
 }
 
-void SidneySearch::Init(UICanvas* canvas)
+void SidneySearch::Init(Actor* parent)
 {
     // Add background. This will also be the root for this screen.
     mRoot = new Actor(Actor::TransformType::RectTransform);
-    mRoot->GetTransform()->SetParent(canvas->GetRectTransform());
+    mRoot->GetTransform()->SetParent(parent->GetTransform());
     UIImage* backgroundImage = mRoot->AddComponent<UIImage>();
-    canvas->AddWidget(backgroundImage);
     backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_BKGND.BMP"), true);
 
     // Receive input to avoid sending inputs to main screen below this screen.
@@ -61,7 +57,6 @@ void SidneySearch::Init(UICanvas* canvas)
         Actor* mainMenuButtonActor = new Actor(Actor::TransformType::RectTransform);
         mainMenuButtonActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIButton* mainMenuButton = mainMenuButtonActor->AddComponent<UIButton>();
-        canvas->AddWidget(mainMenuButton);
 
         mainMenuButton->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
         mainMenuButton->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
@@ -79,7 +74,6 @@ void SidneySearch::Init(UICanvas* canvas)
 
         // Add exit button text.
         UILabel* mainMenuLabel = mainMenuButtonActor->AddComponent<UILabel>();
-        canvas->AddWidget(mainMenuLabel);
         mainMenuLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_18.FON"));
         mainMenuLabel->SetText("MAIN MENU");
         mainMenuLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
@@ -93,7 +87,6 @@ void SidneySearch::Init(UICanvas* canvas)
             Actor* menuBarActor = new Actor(Actor::TransformType::RectTransform);
             menuBarActor->GetTransform()->SetParent(mRoot->GetTransform());
             UIImage* menuBarImage = menuBarActor->AddComponent<UIImage>();
-            canvas->AddWidget(menuBarImage);
 
             menuBarImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_STRETCH.BMP"), true);
             menuBarImage->SetRenderMode(UIImage::RenderMode::Tiled);
@@ -109,7 +102,6 @@ void SidneySearch::Init(UICanvas* canvas)
             Actor* menuBarTopActor = new Actor(Actor::TransformType::RectTransform);
             menuBarTopActor->GetTransform()->SetParent(mRoot->GetTransform());
             UIImage* menuBarTopImage = menuBarTopActor->AddComponent<UIImage>();
-            canvas->AddWidget(menuBarTopImage);
 
             menuBarTopImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_TOPSTRIP_LR.BMP"), true);
             menuBarTopImage->SetRenderMode(UIImage::RenderMode::Tiled);
@@ -124,7 +116,6 @@ void SidneySearch::Init(UICanvas* canvas)
                 Actor* menuBarAngleActor = new Actor(Actor::TransformType::RectTransform);
                 menuBarAngleActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
                 UIImage* menuBarAngleImage = menuBarAngleActor->AddComponent<UIImage>();
-                canvas->AddWidget(menuBarAngleImage);
 
                 menuBarAngleImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_TOPANGLE_LR.BMP"), true);
 
@@ -138,7 +129,6 @@ void SidneySearch::Init(UICanvas* canvas)
                 Actor* screenNameActor = new Actor(Actor::TransformType::RectTransform);
                 screenNameActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
                 UILabel* screenNameLabel = screenNameActor->AddComponent<UILabel>();
-                canvas->AddWidget(screenNameLabel);
 
                 screenNameLabel->SetFont(Services::GetAssets()->LoadFont("SID_EMB_18.FON"));
                 screenNameLabel->SetText("SEARCH");
@@ -160,7 +150,6 @@ void SidneySearch::Init(UICanvas* canvas)
         Actor* searchBarActor = new Actor(Actor::TransformType::RectTransform);
         searchBarActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIImage* searchBarImage = searchBarActor->AddComponent<UIImage>();
-        canvas->AddWidget(searchBarImage);
 
         searchBarImage->SetTexture(&Texture::Black);
         searchBarImage->SetColor(Color32(0, 0, 0, 128));
@@ -171,18 +160,17 @@ void SidneySearch::Init(UICanvas* canvas)
         searchBarImage->GetRectTransform()->SetSizeDelta(520.0f, 48.0f);
 
         // Reset button.
-        UIButton* resetButton = CreateBasicTextButton(canvas, searchBarActor, Vector2(14.0f, -17.0f), "RESET");
+        UIButton* resetButton = CreateBasicTextButton(searchBarActor, Vector2(14.0f, -17.0f), "RESET");
         resetButton->SetPressCallback(std::bind(&SidneySearch::OnResetButtonPressed, this, std::placeholders::_1));
 
         // Search button.
-        UIButton* searchButton = CreateBasicTextButton(canvas, searchBarActor, Vector2(426.0f, -17.0f), "SEARCH");
+        UIButton* searchButton = CreateBasicTextButton(searchBarActor, Vector2(426.0f, -17.0f), "SEARCH");
         searchButton->SetPressCallback(std::bind(&SidneySearch::OnSearchButtonPressed, this, std::placeholders::_1));
 
         // Text input field.
         Actor* searchInputActor = new Actor(Actor::TransformType::RectTransform);
         searchInputActor->GetTransform()->SetParent(searchBarActor->GetTransform());
         UIImage* searchInputImage = searchInputActor->AddComponent<UIImage>();
-        canvas->AddWidget(searchInputImage);
 
         searchInputImage->SetTexture(&Texture::Black);
 
@@ -192,7 +180,6 @@ void SidneySearch::Init(UICanvas* canvas)
         searchInputImage->GetRectTransform()->SetSizeDelta(320.0f, 15.0f);
 
         mTextInput = searchInputActor->AddComponent<UITextInput>();
-        canvas->AddWidget(mTextInput);
         mTextInput->SetFont(Services::GetAssets()->LoadFont("F_TIMES.FON"));
         mTextInput->SetVerticalAlignment(VerticalAlignment::Bottom);
         mTextInput->SetText("");
@@ -201,7 +188,6 @@ void SidneySearch::Init(UICanvas* canvas)
         Actor* caretActor = new Actor(Actor::TransformType::RectTransform);
         caretActor->GetTransform()->SetParent(searchInputActor->GetTransform());
         UIImage* caretImage = caretActor->AddComponent<UIImage>();
-        canvas->AddWidget(caretImage);
 
         caretImage->SetTexture(&Texture::White);
 
@@ -219,7 +205,6 @@ void SidneySearch::Init(UICanvas* canvas)
         Actor* navBarActor = new Actor(Actor::TransformType::RectTransform);
         navBarActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIImage* navBarImage = navBarActor->AddComponent<UIImage>();
-        canvas->AddWidget(navBarImage);
 
         navBarImage->SetTexture(&Texture::Black);
         navBarImage->SetColor(Color32(0, 0, 0, 128));
@@ -230,13 +215,13 @@ void SidneySearch::Init(UICanvas* canvas)
         navBarImage->GetRectTransform()->SetSizeDelta(520.0f, 28.0f);
 
         // Back button.
-        UIButton* backButton = CreateBasicTextButton(canvas, navBarActor, Vector2(63.0f, -8.0f), "BACK");
+        UIButton* backButton = CreateBasicTextButton(navBarActor, Vector2(63.0f, -8.0f), "BACK");
         backButton->SetPressCallback([](UIButton* button){
             printf("Back\n");
         });
 
         // Forward button.
-        UIButton* fwdButton = CreateBasicTextButton(canvas, navBarActor, Vector2(155.0f, -8.0f), "FORWARD");
+        UIButton* fwdButton = CreateBasicTextButton(navBarActor, Vector2(155.0f, -8.0f), "FORWARD");
         fwdButton->SetPressCallback([](UIButton* button){
             printf("Forward\n");
         });
@@ -247,7 +232,6 @@ void SidneySearch::Init(UICanvas* canvas)
         Actor* resultsBackgroundActor = new Actor(Actor::TransformType::RectTransform);
         resultsBackgroundActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIImage* resultsBackgroundImage = resultsBackgroundActor->AddComponent<UIImage>();
-        canvas->AddWidget(resultsBackgroundImage);
 
         resultsBackgroundImage->SetTexture(&Texture::Black);
         resultsBackgroundImage->SetColor(Color32(0, 0, 0, 128)); // Black Semi-Transparent
@@ -260,7 +244,6 @@ void SidneySearch::Init(UICanvas* canvas)
         //TODO: So there is a big undertaking here to implement a whole HTML parsing system.
         //TODO: For the moment though, I'll just use a label to display a simple result output.
         mTempResultsLabel = resultsBackgroundActor->AddComponent<UILabel>();
-        canvas->AddWidget(mTempResultsLabel);
         mTempResultsLabel->SetFont(Services::GetAssets()->LoadFont("F_TIMES.FON"));
         mTempResultsLabel->SetHorizonalAlignment(HorizontalAlignment::Left);
         mTempResultsLabel->SetVerticalAlignment(VerticalAlignment::Top);

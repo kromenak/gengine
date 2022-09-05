@@ -14,7 +14,6 @@
 
 class RectTransform;
 class UIButton;
-class UICanvas;
 class UIDropdown;
 class UILabel;
 class UISlider;
@@ -32,9 +31,6 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
-    // Canvas for the option bar - takes up the entire screen.
-    UICanvas* mCanvas = nullptr;
-    
     // A large clickable area behind the action bar that stops scene interaction while visible.
     UIButton* mSceneBlockerButton = nullptr;
 
@@ -86,14 +82,14 @@ private:
 
     void KeepOnScreen();
     
-    void CreateMainSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
-    void CreateCamerasSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
-    void CreateOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
-    void CreateAdvancedOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
-    void CreateSoundOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
-    void CreateGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
-    void CreateAdvancedGraphicOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
-    void CreateGameOptionsSection(UICanvas* canvas, std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateMainSection(std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateCamerasSection(std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateAdvancedOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateSoundOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateAdvancedGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
+    void CreateGameOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
     
     void OnSoundOptionsButtonPressed(UIButton* button);
     void OnGlobalVolumeSliderValueChanged(float value);

@@ -14,6 +14,13 @@ UIWidget::UIWidget(Actor* owner) : Component(owner)
 	{
 		std::cout << "Attempting to attach UI widget to an Actor that doesn't have a RectTransform. This will cause problems!" << std::endl;
 	}
+
+    // Notify nearest canvas (if any) in transform hierarchy that widget was just added.
+    UICanvas* canvas = GetOwner()->GetComponentInParents<UICanvas>();
+    if(canvas != nullptr)
+    {
+        canvas->AddWidget(this);
+    }
 }
 
 UIWidget::~UIWidget()

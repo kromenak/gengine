@@ -7,11 +7,11 @@
 #include "UIImage.h"
 #include "VideoPlayer.h"
 
-static UIButton* CreateButton(UICanvas* canvas, const std::string& buttonId, float xPos)
+static UIButton* CreateButton(Actor* parent, const std::string& buttonId, float xPos)
 {
     Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+    buttonActor->GetTransform()->SetParent(parent->GetTransform());
     UIButton* button = buttonActor->AddComponent<UIButton>();
-    canvas->AddWidget(button);
 
     // Set textures.
     button->SetUpTexture(Services::GetAssets()->LoadTexture(buttonId + "_U.BMP"));
@@ -28,7 +28,7 @@ static UIButton* CreateButton(UICanvas* canvas, const std::string& buttonId, flo
 
 TitleScreen::TitleScreen() : Actor(Actor::TransformType::RectTransform)
 {
-    UICanvas* canvas = AddComponent<UICanvas>(0);
+    AddComponent<UICanvas>(0);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -38,30 +38,29 @@ TitleScreen::TitleScreen() : Actor(Actor::TransformType::RectTransform)
 
     // Add title screen background image.
     UIImage* background = AddComponent<UIImage>();
-    canvas->AddWidget(background);
     background->SetTexture(Services::GetAssets()->LoadTexture("TITLE.BMP"));
 
     // Add "intro" button.
-    UIButton* introButton = CreateButton(canvas, "TITLE_INTRO", -505.0f);
+    UIButton* introButton = CreateButton(this, "TITLE_INTRO", -505.0f);
     introButton->SetPressCallback([](UIButton* button) {
         Services::Get<VideoPlayer>()->Play("intro.bik", true, true, nullptr);
     });
 
     // Add "play" button.
-    UIButton* playButton = CreateButton(canvas, "TITLE_PLAY", -381.0f);
+    UIButton* playButton = CreateButton(this, "TITLE_PLAY", -381.0f);
     playButton->SetPressCallback([this](UIButton* button) {
         Hide();
         GEngine::Instance()->StartGame();
     });
 
     // Add "restore" button.
-    UIButton* restoreButton = CreateButton(canvas, "TITLE_RESTORE", -257.0f);
+    UIButton* restoreButton = CreateButton(this, "TITLE_RESTORE", -257.0f);
     restoreButton->SetPressCallback([](UIButton* button) {
         std::cout << "Restore!" << std::endl;
     });
 
     // Add "quit" button.
-    UIButton* quitButton = CreateButton(canvas, "TITLE_QUIT", -135.0f);
+    UIButton* quitButton = CreateButton(this, "TITLE_QUIT", -135.0f);
     quitButton->SetPressCallback([](UIButton* button) {
         GEngine::Instance()->Quit();
     });

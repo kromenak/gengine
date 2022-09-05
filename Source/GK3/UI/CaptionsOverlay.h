@@ -10,7 +10,6 @@
 
 #include "StringUtil.h"
 
-class UICanvas;
 class UIImage;
 class UILabel;
 
@@ -33,10 +32,7 @@ protected:
 private:
     // Are captions enabled? This is an int b/c we need to represent more than 2 values (not loaded, disabled, enabled).
     static int sCaptionsEnabled;
-
-    // This overlay's canvas.
-    UICanvas* mCanvas = nullptr;
-
+    
     // Mapping from speaker NOUN to font.
     // Used to decide which font to use depending on who is speaking.
     std::string_map_ci<Font*> mSpeakerToFont;

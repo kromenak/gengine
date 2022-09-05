@@ -14,7 +14,6 @@
 #include "LayerManager.h"
 
 class UIButton;
-class UICanvas;
 class UIImage;
 
 class InventoryScreen : public Actor
@@ -33,10 +32,7 @@ private:
     
     // This screen's layer.
     Layer mLayer;
-	
-	// Canvas to render inventory UI.
-	UICanvas* mCanvas = nullptr;
-	
+    
 	// Created item buttons - can reuse on repeat visits.
 	std::vector<UIButton*> mItemButtons;
 	

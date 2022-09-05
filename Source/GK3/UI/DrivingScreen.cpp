@@ -18,7 +18,7 @@
 DrivingScreen::DrivingScreen() : Actor(Actor::TransformType::RectTransform)
 {
     // Driving screen should draw above scene transitioner so it doesn't appear on this screen.
-    mCanvas = AddComponent<UICanvas>(4);
+    AddComponent<UICanvas>(4);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -28,7 +28,6 @@ DrivingScreen::DrivingScreen() : Actor(Actor::TransformType::RectTransform)
     
     // Add black background that eats input.
     UIImage* background = AddComponent<UIImage>();
-    mCanvas->AddWidget(background);
     background->SetTexture(&Texture::Black);
     background->SetReceivesInput(true);
 
@@ -36,7 +35,6 @@ DrivingScreen::DrivingScreen() : Actor(Actor::TransformType::RectTransform)
     mMapActor = new Actor(Actor::TransformType::RectTransform);
     mMapActor->GetTransform()->SetParent(GetTransform());
     UIImage* mapImage = mMapActor->AddComponent<UIImage>();
-    mCanvas->AddWidget(mapImage);
     mMapTexture = Services::GetAssets()->LoadTexture("DM_BASE.BMP");
     mapImage->SetTexture(mMapTexture, true);
     mMapImage = mapImage;
@@ -199,7 +197,6 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
     buttonActor->GetTransform()->SetParent(mMapActor->GetTransform());
     UIButton* button = buttonActor->AddComponent<UIButton>();
-    mCanvas->AddWidget(button);
 
     // Set textures.
     Texture* upTexture = Services::GetAssets()->LoadTexture("DM_" + buttonId + "_UL.BMP");
@@ -449,7 +446,6 @@ DrivingScreenBlip* DrivingScreen::CreateBlip()
 
     // Add image and use the blip texture.
     UIImage* blipImage = blip->AddComponent<UIImage>();
-    mCanvas->AddWidget(blipImage);
     blipImage->SetTexture(mBlipTexture, true);
     blip->SetImage(blipImage);
     return blip;

@@ -31,11 +31,11 @@ static std::pair<Timeblock, Vector2> timeblockTextPositions[] = {
     { Timeblock(3, 21), Vector2(14.0f, 64.0f) }
 };
 
-static UIButton* CreateButton(UICanvas* canvas, const std::string& buttonId)
+static UIButton* CreateButton(Actor* parent, const std::string& buttonId)
 {
     Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+    buttonActor->GetTransform()->SetParent(parent->GetTransform());
     UIButton* button = buttonActor->AddComponent<UIButton>();
-    canvas->AddWidget(button);
 
     // Set textures.
     button->SetUpTexture(Services::GetAssets()->LoadTexture(buttonId + "_U.BMP"));
@@ -47,7 +47,7 @@ static UIButton* CreateButton(UICanvas* canvas, const std::string& buttonId)
 
 TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
 {
-    UICanvas* canvas = AddComponent<UICanvas>(7);
+    AddComponent<UICanvas>(7);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -57,27 +57,24 @@ TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
 
     // Add a black background that covers the entire canvas.
     UIImage* blackBackgroundImage = AddComponent<UIImage>();
-    canvas->AddWidget(blackBackgroundImage);
     blackBackgroundImage->SetColor(Color32::Black);
 
     // Add background image.
     Actor* backgroundImageActor = new Actor(Actor::TransformType::RectTransform);
     backgroundImageActor->GetTransform()->SetParent(GetTransform());
     mBackgroundImage = backgroundImageActor->AddComponent<UIImage>();
-    canvas->AddWidget(mBackgroundImage);
 
     // Add timeblock text image.
     Actor* textActor = new Actor(Actor::TransformType::RectTransform);
     textActor->GetTransform()->SetParent(backgroundImageActor->GetTransform());
     mTextImage = textActor->AddComponent<UIImage>();
-    canvas->AddWidget(mTextImage);
 
     mTextImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     mTextImage->GetRectTransform()->SetPivot(0.0f, 0.0f);
     mTextImage->GetRectTransform()->SetAnchoredPosition(14.0f, 64.0f);
 
     // Add "continue" button.
-    mContinueButton = CreateButton(canvas, "TB_CONT");
+    mContinueButton = CreateButton(this, "TB_CONT");
     mContinueButton->GetRectTransform()->SetParent(backgroundImageActor->GetTransform());
     mContinueButton->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     mContinueButton->GetRectTransform()->SetPivot(0.0f, 0.0f);
@@ -88,7 +85,7 @@ TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
     });
 
     // Add "save" button.
-    mSaveButton = CreateButton(canvas, "TB_SAVE");
+    mSaveButton = CreateButton(this, "TB_SAVE");
     mSaveButton->GetRectTransform()->SetParent(backgroundImageActor->GetTransform());
     mSaveButton->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     mSaveButton->GetRectTransform()->SetPivot(0.0f, 0.0f);

@@ -2,20 +2,19 @@
 
 #include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
 
-UIDropdown::UIDropdown(UICanvas& canvas) : Actor(Actor::TransformType::RectTransform),
-    mCanvas(canvas)
+UIDropdown::UIDropdown(Actor* parent) : Actor(Actor::TransformType::RectTransform)
 {
+    GetTransform()->SetParent(parent->GetTransform());
+
     // Create expand button.
     {
         Actor* expandButtonActor = new Actor(Actor::TransformType::RectTransform);
         expandButtonActor->GetTransform()->SetParent(GetTransform());
 
         mExpandButton = expandButtonActor->AddComponent<UIButton>();
-        canvas.AddWidget(mExpandButton);
 
         // Position from top-right corner. Nudge 1 pixel to the left for correct look.
         mExpandButton->GetRectTransform()->SetAnchor(1.0f, 1.0f);
@@ -37,7 +36,6 @@ UIDropdown::UIDropdown(UICanvas& canvas) : Actor(Actor::TransformType::RectTrans
         currentChoiceActor->GetTransform()->SetParent(GetTransform());
 
         mCurrentChoiceLabel = currentChoiceActor->AddComponent<UILabel>();
-        canvas.AddWidget(mCurrentChoiceLabel);
 
         // Anchor to fill size of parent, but put pivot to bottom-left.
         // Then, decrease horizontal size by width of expand button. Because pivot is on left, all size decrease occurs on the right!
@@ -68,7 +66,6 @@ UIDropdown::UIDropdown(UICanvas& canvas) : Actor(Actor::TransformType::RectTrans
 
         // Put a gray background inside the box.
         UIImage* background = boxActor->AddComponent<UIImage>();
-        canvas.AddWidget(background);
         background->SetColor(Color32::Gray);
 
         // Create border images for bottom/top/left/right.
@@ -79,7 +76,6 @@ UIDropdown::UIDropdown(UICanvas& canvas) : Actor(Actor::TransformType::RectTrans
             sideActor->GetTransform()->SetParent(boxActor->GetTransform());
 
             UIImage* image = sideActor->AddComponent<UIImage>();
-            canvas.AddWidget(image);
 
             // Set texture.
             Texture* texture = nullptr;
@@ -225,10 +221,7 @@ void UIDropdown::RefreshChoicesUI()
             label->SetFont(Services::GetAssets()->LoadFont("F_ARIAL_T8"));
             label->SetHorizonalAlignment(HorizontalAlignment::Center);
             label->SetVerticalAlignment(VerticalAlignment::Center);
-
-            mCanvas.AddWidget(button);
-            mCanvas.AddWidget(label);
-
+            
             mChoiceUIs.emplace_back();
             mChoiceUIs.back().transform = buttonRT;
             mChoiceUIs.back().button = button;

@@ -12,14 +12,13 @@
 
 class RectTransform;
 class UIButton;
-class UICanvas;
 class UIImage;
 class UILabel;
 
 class UIDropdown : public Actor
 {
 public:
-    UIDropdown(UICanvas& canvas);
+    UIDropdown(Actor* parent);
 
     void SetMaxVisibleChoices(int max) { mMaxVisibleChoices = max; }
 
@@ -32,9 +31,6 @@ protected:
     void OnUpdate(float deltaTime);
 
 private:
-    // The canvas this dropdown is part of.
-    UICanvas& mCanvas;
-
     // The button you press to expand the dropdown.
     UIButton* mExpandButton = nullptr;
 

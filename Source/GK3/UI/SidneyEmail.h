@@ -6,12 +6,10 @@
 #pragma once
 #include "Actor.h"
 
-class UICanvas;
-
 class SidneyEmail
 {
 public:
-    void Init(UICanvas* canvas);
+    void Init(Actor* parent);
 
     void Show();
     void Hide();

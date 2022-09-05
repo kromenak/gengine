@@ -6,7 +6,6 @@
 #pragma once
 #include "Actor.h"
 
-class UICanvas;
 class UIButton;
 
 class InventoryInspectScreen : public Actor
@@ -22,9 +21,6 @@ private:
     // This screen's layer.
     Layer mLayer;
     
-	// Canvas to render UI.
-	UICanvas* mCanvas = nullptr;
-	
 	// Image to display the closeup of the item.
 	// Needs to be a button b/c we can click to show action bar.
 	UIButton* mCloseupImage = nullptr;

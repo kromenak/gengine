@@ -8,12 +8,11 @@
 #include "UIImage.h"
 #include "UILabel.h"
 
-UIButton* CreateMainButton(UICanvas* canvas, Actor* parent, const std::string& buttonId, float xPos)
+UIButton* CreateMainButton(Actor* parent, const std::string& buttonId, float xPos)
 {
     Actor* actor = new Actor(Actor::TransformType::RectTransform);
     actor->GetTransform()->SetParent(parent->GetTransform());
     UIButton* button = actor->AddComponent<UIButton>();
-    canvas->AddWidget(button);
 
     button->GetRectTransform()->SetPivot(0.0f, 1.0f);
     button->GetRectTransform()->SetAnchor(0.0f, 1.0f);
@@ -30,7 +29,7 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
 {
     // Sidney will be layered near the bottom.
     // A lot of stuff needs to appear above it (inventory, status overlay, etc).
-    mCanvas = AddComponent<UICanvas>(-1);
+    AddComponent<UICanvas>(-1);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -40,7 +39,6 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
 
     // Add black background that eats input.
     UIImage* background = AddComponent<UIImage>();
-    mCanvas->AddWidget(background);
     background->SetTexture(&Texture::Black);
     background->SetReceivesInput(true);
 
@@ -48,7 +46,6 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
     Actor* desktopBackground = new Actor(Actor::TransformType::RectTransform);
     desktopBackground->GetTransform()->SetParent(GetTransform());
     UIImage* desktopBackgroundImage = desktopBackground->AddComponent<UIImage>();
-    mCanvas->AddWidget(desktopBackgroundImage);
     desktopBackgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_MAIN_SCN.BMP"), true);
 
     // Add exit button as child of desktop background.
@@ -56,7 +53,6 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
         Actor* exitButtonActor = new Actor(Actor::TransformType::RectTransform);
         exitButtonActor->GetTransform()->SetParent(desktopBackground->GetTransform());
         UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
-        mCanvas->AddWidget(exitButton);
 
         exitButton->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
         exitButton->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
@@ -74,7 +70,6 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
 
         // Add exit button text.
         UILabel* exitLabel = exitButtonActor->AddComponent<UILabel>();
-        mCanvas->AddWidget(exitLabel);
         exitLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_18.FON"));
         exitLabel->SetText("EXIT");
         exitLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
@@ -87,42 +82,42 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
         const float kButtonSpacing = 79.0f;
 
         float buttonPos = kButtonStart;
-        UIButton* searchButton = CreateMainButton(mCanvas, desktopBackground, "SEARCH", buttonPos);
+        UIButton* searchButton = CreateMainButton(desktopBackground, "SEARCH", buttonPos);
         searchButton->SetPressCallback([this](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
             mSearch.Show();
         });
 
         buttonPos += kButtonSpacing;
-        UIButton* emailButton = CreateMainButton(mCanvas, desktopBackground, "EMAIL", buttonPos);
+        UIButton* emailButton = CreateMainButton(desktopBackground, "EMAIL", buttonPos);
         emailButton->SetPressCallback([this](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
             mEmail.Show();
         });
 
         buttonPos += kButtonSpacing;
-        UIButton* filesButton = CreateMainButton(mCanvas, desktopBackground, "FILES", buttonPos);
+        UIButton* filesButton = CreateMainButton(desktopBackground, "FILES", buttonPos);
         filesButton->SetPressCallback([](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
             printf("Files\n");
         });
 
         buttonPos += kButtonSpacing;
-        UIButton* analyzeButton = CreateMainButton(mCanvas, desktopBackground, "ANALYZE", buttonPos);
+        UIButton* analyzeButton = CreateMainButton(desktopBackground, "ANALYZE", buttonPos);
         analyzeButton->SetPressCallback([](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
             printf("Analyze\n");
         });
 
         buttonPos += kButtonSpacing;
-        UIButton* translateButton = CreateMainButton(mCanvas, desktopBackground, "TRANSL", buttonPos);
+        UIButton* translateButton = CreateMainButton(desktopBackground, "TRANSL", buttonPos);
         translateButton->SetPressCallback([](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
             printf("Translate\n");
         });
 
         buttonPos += kButtonSpacing;
-        UIButton* dataButton = CreateMainButton(mCanvas, desktopBackground, "ADDATA", buttonPos);
+        UIButton* dataButton = CreateMainButton(desktopBackground, "ADDATA", buttonPos);
         dataButton->SetPressCallback([](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
 
@@ -132,14 +127,14 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
         });
 
         buttonPos += kButtonSpacing;
-        UIButton* idButton = CreateMainButton(mCanvas, desktopBackground, "MAKEID", buttonPos);
+        UIButton* idButton = CreateMainButton(desktopBackground, "MAKEID", buttonPos);
         idButton->SetPressCallback([](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
             printf("Make ID\n");
         });
 
         buttonPos += kButtonSpacing;
-        UIButton* suspectsButton = CreateMainButton(mCanvas, desktopBackground, "SUSPT", buttonPos);
+        UIButton* suspectsButton = CreateMainButton(desktopBackground, "SUSPT", buttonPos);
         suspectsButton->SetPressCallback([](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
             printf("Suspects\n");
@@ -151,7 +146,6 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
         Actor* newEmailActor = new Actor(Actor::TransformType::RectTransform);
         newEmailActor->GetTransform()->SetParent(desktopBackground->GetTransform());
         mNewEmailLabel = newEmailActor->AddComponent<UILabel>();
-        mCanvas->AddWidget(mNewEmailLabel);
 
         mNewEmailLabel->SetFont(Services::GetAssets()->LoadFont("SID_PDN_10_GRN.FON"));
         mNewEmailLabel->SetText("NEW E-MAIL");
@@ -165,8 +159,8 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
     }
 
     // Create subscreens.
-    mSearch.Init(mCanvas);
-    mEmail.Init(mCanvas);
+    mSearch.Init(this);
+    mEmail.Init(this);
 }
 
 void Sidney::Show()

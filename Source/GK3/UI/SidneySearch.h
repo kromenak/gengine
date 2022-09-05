@@ -10,14 +10,13 @@
 
 class Actor;
 class UIButton;
-class UICanvas;
 class UILabel;
 class UITextInput;
 
 class SidneySearch
 {
 public:
-    void Init(UICanvas* canvas);
+    void Init(Actor* parent);
 
     void Show();
     void Hide();

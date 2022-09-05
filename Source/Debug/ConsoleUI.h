@@ -7,7 +7,6 @@
 #include "Actor.h"
 
 class RectTransform;
-class UICanvas;
 class UIImage;
 class UILabel;
 class UITextBuffer;
@@ -44,10 +43,7 @@ private:
 
     // Is console active?
     bool mConsoleActive = false;
-
-	// The console's canvas, which renders the UI.
-	UICanvas* mCanvas = nullptr;
-	
+    
 	// Background and scrollback transforms, resized based on some keyboard shortcuts.
 	RectTransform* mBackgroundTransform = nullptr;
 	RectTransform* mScrollbackTransform = nullptr;

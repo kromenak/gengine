@@ -16,11 +16,11 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
     // Inventory overrides SFX/VO, but continues ambient audio from scene.
     mLayer.OverrideAudioState(true, true, false);
 
-	mCanvas = AddComponent<UICanvas>(0);
+    // Add canvas for rendering UI elements.
+	AddComponent<UICanvas>(0);
 	
 	// Add translucent background image that tints the scene.
 	UIImage* background = AddComponent<UIImage>();
-	mCanvas->AddWidget(background);
 	background->SetTexture(&Texture::Black);
 	background->SetColor(Color32(0, 0, 0, 128));
 	
@@ -31,8 +31,8 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
 	
 	// Add exit button to bottom-left corner of screen.
 	Actor* exitButtonActor = new Actor(TransformType::RectTransform);
+    exitButtonActor->GetTransform()->SetParent(GetTransform());
 	UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
-	mCanvas->AddWidget(exitButton);
 	
 	exitButton->SetUpTexture(Services::GetAssets()->LoadTexture("EXITN.BMP"));
 	exitButton->SetDownTexture(Services::GetAssets()->LoadTexture("EXITD.BMP"));
@@ -51,10 +51,10 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
 	
 	// Create active inventory item highlight, but hide by default.
 	Actor* activeHighlightActor = new Actor(TransformType::RectTransform);
+    activeHighlightActor->GetTransform()->SetParent(GetTransform());
 	mActiveHighlightImage = activeHighlightActor->AddComponent<UIImage>();
 	mActiveHighlightImage->SetTexture(Services::GetAssets()->LoadTexture("INV_HIGHLIGHT.BMP"), true);
 	mActiveHighlightImage->SetEnabled(false);
-	mCanvas->AddWidget(mActiveHighlightImage);
 	
 	RectTransform* activeHighlightRectTransform = mActiveHighlightImage->GetRectTransform();
 	activeHighlightRectTransform->SetParent(inventoryRectTransform);
@@ -162,12 +162,10 @@ void InventoryScreen::RefreshLayout()
         else
         {
             Actor* itemActor = new Actor(TransformType::RectTransform);
-            itemActor->SetIsDestroyOnLoad(false);
+            itemActor->GetTransform()->SetParent(GetTransform());
             button = itemActor->AddComponent<UIButton>();
-            mCanvas->AddWidget(button);
 
             buttonRT = itemActor->GetComponent<RectTransform>();
-            buttonRT->SetParent(GetComponent<RectTransform>());
             buttonRT->SetAnchor(Vector2(0.0f, 1.0f));
             buttonRT->SetPivot(0.0f, 1.0f);
 

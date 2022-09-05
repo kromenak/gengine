@@ -2,17 +2,15 @@
 
 #include "Texture.h"
 #include "UIButton.h"
-#include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
 
-void SidneyEmail::Init(UICanvas* canvas)
+void SidneyEmail::Init(Actor* parent)
 {
     // Add background. This will also be the root for this screen.
     mRoot = new Actor(Actor::TransformType::RectTransform);
-    mRoot->GetTransform()->SetParent(canvas->GetRectTransform());
+    mRoot->GetTransform()->SetParent(parent->GetTransform());
     UIImage* backgroundImage = mRoot->AddComponent<UIImage>();
-    canvas->AddWidget(backgroundImage);
     backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_BKGND.BMP"), true);
 
     // Receive input to avoid sending inputs to main screen below this screen.
@@ -23,7 +21,6 @@ void SidneyEmail::Init(UICanvas* canvas)
         Actor* mainMenuButtonActor = new Actor(Actor::TransformType::RectTransform);
         mainMenuButtonActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIButton* mainMenuButton = mainMenuButtonActor->AddComponent<UIButton>();
-        canvas->AddWidget(mainMenuButton);
 
         mainMenuButton->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
         mainMenuButton->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
@@ -41,7 +38,6 @@ void SidneyEmail::Init(UICanvas* canvas)
 
         // Add exit button text.
         UILabel* mainMenuLabel = mainMenuButtonActor->AddComponent<UILabel>();
-        canvas->AddWidget(mainMenuLabel);
         mainMenuLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_18.FON"));
         mainMenuLabel->SetText("MAIN MENU");
         mainMenuLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
@@ -55,7 +51,6 @@ void SidneyEmail::Init(UICanvas* canvas)
             Actor* menuBarActor = new Actor(Actor::TransformType::RectTransform);
             menuBarActor->GetTransform()->SetParent(mRoot->GetTransform());
             UIImage* menuBarImage = menuBarActor->AddComponent<UIImage>();
-            canvas->AddWidget(menuBarImage);
 
             menuBarImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_STRETCH.BMP"), true);
             menuBarImage->SetRenderMode(UIImage::RenderMode::Tiled);
@@ -71,7 +66,6 @@ void SidneyEmail::Init(UICanvas* canvas)
             Actor* menuBarTopActor = new Actor(Actor::TransformType::RectTransform);
             menuBarTopActor->GetTransform()->SetParent(mRoot->GetTransform());
             UIImage* menuBarTopImage = menuBarTopActor->AddComponent<UIImage>();
-            canvas->AddWidget(menuBarTopImage);
 
             menuBarTopImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_TOPSTRIP_LR.BMP"), true);
             menuBarTopImage->SetRenderMode(UIImage::RenderMode::Tiled);
@@ -86,7 +80,6 @@ void SidneyEmail::Init(UICanvas* canvas)
                 Actor* menuBarAngleActor = new Actor(Actor::TransformType::RectTransform);
                 menuBarAngleActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
                 UIImage* menuBarAngleImage = menuBarAngleActor->AddComponent<UIImage>();
-                canvas->AddWidget(menuBarAngleImage);
 
                 menuBarAngleImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_TOPANGLE_LR.BMP"), true);
 
@@ -100,7 +93,6 @@ void SidneyEmail::Init(UICanvas* canvas)
                 Actor* screenNameActor = new Actor(Actor::TransformType::RectTransform);
                 screenNameActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
                 UILabel* screenNameLabel = screenNameActor->AddComponent<UILabel>();
-                canvas->AddWidget(screenNameLabel);
 
                 screenNameLabel->SetFont(Services::GetAssets()->LoadFont("SID_EMB_18.FON"));
                 screenNameLabel->SetText("E-MAIL");

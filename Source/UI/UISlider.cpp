@@ -18,22 +18,16 @@ void UISlider::Render()
 
 void UISlider::SetHandleActor(Actor* handleActor)
 {
+    // We'll require that the handle is a child of the slider itself.
+    handleActor->GetTransform()->SetParent(GetRectTransform());
+
     // Grab drag component.
     mHandle = handleActor->GetComponent<UIDrag>();
-
-    //TODO: It'd be nice to do something like this, BUT...how to add it to the canvas?
-    //TODO: Currently, widgets don't know about their canvases, and they aren't added automatically.
-    //TODO: So, improving that flow/process is probably a good idea.
-    /*
     if(mHandle == nullptr)
     {
-        mHandle = mHandleActor->AddComponent<UIDrag>();
+        mHandle = handleActor->AddComponent<UIDrag>();
     }
-    */
-
-    // We'll require that the handle is a child of the slider itself.
-    mHandle->GetRectTransform()->SetParent(GetRectTransform());
-
+    
     // We're going to assume for now: this is a horizontal slider with min value on left, max value on right.
     // Set handle anchor/pivot so that at anchored position (0, 0) it'll be at value 0.
     mHandle->GetRectTransform()->SetAnchor(0.0f, 0.5f);

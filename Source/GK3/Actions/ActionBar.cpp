@@ -13,10 +13,10 @@
 ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 {
 	// Create canvas, to contain the UI components.
-	mCanvas = AddComponent<UICanvas>(5);
+	UICanvas* canvas = AddComponent<UICanvas>(5);
 	
     // Canvas rect fills the entire screen.
-    RectTransform* rectTransform = mCanvas->GetRectTransform();
+    RectTransform* rectTransform = canvas->GetRectTransform();
 	rectTransform->SetSizeDelta(0.0f, 0.0f);
 	rectTransform->SetAnchorMin(Vector2::Zero);
 	rectTransform->SetAnchorMax(Vector2::One);
@@ -25,7 +25,6 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
     // This stops interaction with the scene while action bar is visible.
     // It also allows clicking outside the bar to cancel it.
     mSceneBlockerButton = AddComponent<UIButton>();
-    mCanvas->AddWidget(mSceneBlockerButton);
     mSceneBlockerButton->SetPressCallback([this](UIButton* button) {
         if(mAllowDismiss)
         {
@@ -290,11 +289,7 @@ UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon, const std:
 	{
 		Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
 		buttonActor->GetTransform()->SetParent(mButtonHolder);
-		
 		button = buttonActor->AddComponent<UIButton>();
-		
-		// Add button as a widget.
-		mCanvas->AddWidget(button);
 	}
 	
 	// Put into buttons array at desired position.

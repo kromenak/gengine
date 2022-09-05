@@ -10,7 +10,6 @@
 #include "SidneySearch.h"
 
 class UIButton;
-class UICanvas;
 class UIImage;
 class UILabel;
 
@@ -26,9 +25,6 @@ protected:
     void OnUpdate(float deltaTime) override;
 
 private:
-    // The canvas for this screen.
-    UICanvas* mCanvas = nullptr;
-
     // New email label.
     UILabel* mNewEmailLabel = nullptr;
 

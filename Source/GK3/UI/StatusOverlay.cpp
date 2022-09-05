@@ -11,7 +11,7 @@
 StatusOverlay::StatusOverlay() : Actor(TransformType::RectTransform)
 {
     // Needs to be a canvas so it can render stuff.
-    UICanvas* canvas = AddComponent<UICanvas>(2);
+    AddComponent<UICanvas>(2);
     
     // Take up full screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -21,10 +21,10 @@ StatusOverlay::StatusOverlay() : Actor(TransformType::RectTransform)
     
     // Create status text actor at top of screen.
     Actor* statusTextActor = new Actor(TransformType::RectTransform);
+    statusTextActor->GetTransform()->SetParent(GetTransform());
     mStatusLabel = statusTextActor->AddComponent<UILabel>();
     mStatusLabel->SetFont(Services::GetAssets()->LoadFont("F_STATUS_FADE"));
     mStatusLabel->SetVerticalAlignment(VerticalAlignment::Top);
-    canvas->AddWidget(mStatusLabel);
     
     // Status text is anchored to top of screen with pivot at top-center.
     // The size of this RT is the "hover area" for showing the status text.
