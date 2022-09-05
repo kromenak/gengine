@@ -109,7 +109,11 @@ InventoryManager::InventoryManager()
 	AddInventoryItem("GABRIEL", "TAPE_RECORDER");
 	AddInventoryItem("GABRIEL", "WALLET");
 	
-	//TODO: Give Grace starting inventory items.
+	// Give Grace starting inventory items.
+    AddInventoryItem("GRACE", "GRACE_WALLET");
+    AddInventoryItem("GRACE", "GRACES_PASSPORT");
+    AddInventoryItem("GRACE", "R25_ROOM_KEY");
+    AddInventoryItem("GRACE", "SKETCHPAD");
 }
 
 bool InventoryManager::IsValidInventoryItem(const std::string& itemName) const
