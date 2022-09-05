@@ -5,13 +5,13 @@
 #include "UIImage.h"
 #include "UILabel.h"
 
-UIDropdown::UIDropdown(Actor* parent) : Actor(Actor::TransformType::RectTransform)
+UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
 {
     GetTransform()->SetParent(parent->GetTransform());
 
     // Create expand button.
     {
-        Actor* expandButtonActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* expandButtonActor = new Actor(TransformType::RectTransform);
         expandButtonActor->GetTransform()->SetParent(GetTransform());
 
         mExpandButton = expandButtonActor->AddComponent<UIButton>();
@@ -32,7 +32,7 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(Actor::TransformType::RectTransfor
 
     // Create current choice field.
     {
-        Actor* currentChoiceActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* currentChoiceActor = new Actor(TransformType::RectTransform);
         currentChoiceActor->GetTransform()->SetParent(GetTransform());
 
         mCurrentChoiceLabel = currentChoiceActor->AddComponent<UILabel>();
@@ -54,7 +54,7 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(Actor::TransformType::RectTransfor
 
     // Create downdown expand box.
     {
-        Actor* boxActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* boxActor = new Actor(TransformType::RectTransform);
         boxActor->GetTransform()->SetParent(GetTransform());
 
         // The expand box is anchored to the bottom edge of the dropdown's rect.
@@ -72,7 +72,7 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(Actor::TransformType::RectTransfor
         // I'm going to skip the corner images because...they don't seem necessary!
         for(int i = 0; i < 4; ++i)
         {
-            Actor* sideActor = new Actor(Actor::TransformType::RectTransform);
+            Actor* sideActor = new Actor(TransformType::RectTransform);
             sideActor->GetTransform()->SetParent(boxActor->GetTransform());
 
             UIImage* image = sideActor->AddComponent<UIImage>();
@@ -197,7 +197,7 @@ void UIDropdown::RefreshChoicesUI()
         // We may need to create a new selection.
         if(choiceUIIndex >= mChoiceUIs.size())
         {
-            Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+            Actor* buttonActor = new Actor(TransformType::RectTransform);
             buttonActor->GetTransform()->SetParent(mBoxRT);
 
             // NOTE: Changing the button's texture currently updates the RectTransform's size. So do this before changing RT properties.

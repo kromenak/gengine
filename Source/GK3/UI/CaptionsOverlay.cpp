@@ -28,7 +28,7 @@
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_CAPTIONS, enabled);
 }
 
-CaptionsOverlay::CaptionsOverlay() : Actor(Actor::TransformType::RectTransform)
+CaptionsOverlay::CaptionsOverlay() : Actor(TransformType::RectTransform)
 {
     // Draw order should be equal to the status overlay.
     AddComponent<UICanvas>(8);
@@ -73,7 +73,7 @@ void CaptionsOverlay::AddCaption(const std::string& captionText, const std::stri
     if(mFreeCaptions.empty())
     {
         // Make a new one.
-        caption.actor = new Actor(Actor::TransformType::RectTransform);
+        caption.actor = new Actor(TransformType::RectTransform);
         caption.actor->GetTransform()->SetParent(GetTransform());
 
         // Add backing image. This is just a fully opaque black background.

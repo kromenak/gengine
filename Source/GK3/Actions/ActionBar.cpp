@@ -34,7 +34,7 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	
 	// Create button holder - it holds the buttons and we move it around the screen.
     // Since we will set the action bar's position based on mouse position, set the anchor to the lower-left corner.
-	Actor* buttonHolderActor = new Actor(Actor::TransformType::RectTransform);
+	Actor* buttonHolderActor = new Actor(TransformType::RectTransform);
 	mButtonHolder = buttonHolderActor->GetComponent<RectTransform>();
 	mButtonHolder->SetParent(rectTransform);
 	mButtonHolder->SetAnchorMin(Vector2::Zero);
@@ -287,7 +287,7 @@ UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon, const std:
 	}
 	else
 	{
-		Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+		Actor* buttonActor = new Actor(TransformType::RectTransform);
 		buttonActor->GetTransform()->SetParent(mButtonHolder);
 		button = buttonActor->AddComponent<UIButton>();
 	}

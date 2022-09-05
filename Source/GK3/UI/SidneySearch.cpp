@@ -13,7 +13,7 @@
 UIButton* CreateBasicTextButton(Actor* parent, const Vector2& pos, const std::string& text)
 {
     // Create actor as child of parent.
-    Actor* actor = new Actor(Actor::TransformType::RectTransform);
+    Actor* actor = new Actor(TransformType::RectTransform);
     actor->GetTransform()->SetParent(parent->GetTransform());
 
     // Add button to actor & canvas.
@@ -44,7 +44,7 @@ UIButton* CreateBasicTextButton(Actor* parent, const Vector2& pos, const std::st
 void SidneySearch::Init(Actor* parent)
 {
     // Add background. This will also be the root for this screen.
-    mRoot = new Actor(Actor::TransformType::RectTransform);
+    mRoot = new Actor(TransformType::RectTransform);
     mRoot->GetTransform()->SetParent(parent->GetTransform());
     UIImage* backgroundImage = mRoot->AddComponent<UIImage>();
     backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_BKGND.BMP"), true);
@@ -54,7 +54,7 @@ void SidneySearch::Init(Actor* parent)
 
     // Add main menu button.
     {
-        Actor* mainMenuButtonActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* mainMenuButtonActor = new Actor(TransformType::RectTransform);
         mainMenuButtonActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIButton* mainMenuButton = mainMenuButtonActor->AddComponent<UIButton>();
 
@@ -84,7 +84,7 @@ void SidneySearch::Init(Actor* parent)
     {
         // Bar that stretches across entire screen.
         {
-            Actor* menuBarActor = new Actor(Actor::TransformType::RectTransform);
+            Actor* menuBarActor = new Actor(TransformType::RectTransform);
             menuBarActor->GetTransform()->SetParent(mRoot->GetTransform());
             UIImage* menuBarImage = menuBarActor->AddComponent<UIImage>();
 
@@ -99,7 +99,7 @@ void SidneySearch::Init(Actor* parent)
 
         // Bar that extends from top-right, used to give enough height for the screen name label.
         {
-            Actor* menuBarTopActor = new Actor(Actor::TransformType::RectTransform);
+            Actor* menuBarTopActor = new Actor(TransformType::RectTransform);
             menuBarTopActor->GetTransform()->SetParent(mRoot->GetTransform());
             UIImage* menuBarTopImage = menuBarTopActor->AddComponent<UIImage>();
 
@@ -113,7 +113,7 @@ void SidneySearch::Init(Actor* parent)
 
             // Triangle bit that slopes downward.
             {
-                Actor* menuBarAngleActor = new Actor(Actor::TransformType::RectTransform);
+                Actor* menuBarAngleActor = new Actor(TransformType::RectTransform);
                 menuBarAngleActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
                 UIImage* menuBarAngleImage = menuBarAngleActor->AddComponent<UIImage>();
 
@@ -126,7 +126,7 @@ void SidneySearch::Init(Actor* parent)
 
             // Screen name label.
             {
-                Actor* screenNameActor = new Actor(Actor::TransformType::RectTransform);
+                Actor* screenNameActor = new Actor(TransformType::RectTransform);
                 screenNameActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
                 UILabel* screenNameLabel = screenNameActor->AddComponent<UILabel>();
 
@@ -147,7 +147,7 @@ void SidneySearch::Init(Actor* parent)
     // Add search bar.
     {
         // Background.
-        Actor* searchBarActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* searchBarActor = new Actor(TransformType::RectTransform);
         searchBarActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIImage* searchBarImage = searchBarActor->AddComponent<UIImage>();
 
@@ -168,7 +168,7 @@ void SidneySearch::Init(Actor* parent)
         searchButton->SetPressCallback(std::bind(&SidneySearch::OnSearchButtonPressed, this, std::placeholders::_1));
 
         // Text input field.
-        Actor* searchInputActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* searchInputActor = new Actor(TransformType::RectTransform);
         searchInputActor->GetTransform()->SetParent(searchBarActor->GetTransform());
         UIImage* searchInputImage = searchInputActor->AddComponent<UIImage>();
 
@@ -185,7 +185,7 @@ void SidneySearch::Init(Actor* parent)
         mTextInput->SetText("");
 
         // Create text input field caret.
-        Actor* caretActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* caretActor = new Actor(TransformType::RectTransform);
         caretActor->GetTransform()->SetParent(searchInputActor->GetTransform());
         UIImage* caretImage = caretActor->AddComponent<UIImage>();
 
@@ -202,7 +202,7 @@ void SidneySearch::Init(Actor* parent)
     // Add navigation bar.
     {
         // Background.
-        Actor* navBarActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* navBarActor = new Actor(TransformType::RectTransform);
         navBarActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIImage* navBarImage = navBarActor->AddComponent<UIImage>();
 
@@ -229,7 +229,7 @@ void SidneySearch::Init(Actor* parent)
 
     // Add search result text area.
     {
-        Actor* resultsBackgroundActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* resultsBackgroundActor = new Actor(TransformType::RectTransform);
         resultsBackgroundActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIImage* resultsBackgroundImage = resultsBackgroundActor->AddComponent<UIImage>();
 

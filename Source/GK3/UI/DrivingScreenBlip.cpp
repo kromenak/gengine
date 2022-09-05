@@ -1,6 +1,6 @@
 #include "DrivingScreenBlip.h"
 
-DrivingScreenBlip::DrivingScreenBlip(const DrivingScreen::PathData& pathData) : Actor(Actor::TransformType::RectTransform),
+DrivingScreenBlip::DrivingScreenBlip(const DrivingScreen::PathData& pathData) : Actor(TransformType::RectTransform),
     mPathData(pathData)
 {
     // Position from top-left corner of map.

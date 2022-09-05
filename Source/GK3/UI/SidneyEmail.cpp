@@ -8,7 +8,7 @@
 void SidneyEmail::Init(Actor* parent)
 {
     // Add background. This will also be the root for this screen.
-    mRoot = new Actor(Actor::TransformType::RectTransform);
+    mRoot = new Actor(TransformType::RectTransform);
     mRoot->GetTransform()->SetParent(parent->GetTransform());
     UIImage* backgroundImage = mRoot->AddComponent<UIImage>();
     backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_BKGND.BMP"), true);
@@ -18,7 +18,7 @@ void SidneyEmail::Init(Actor* parent)
 
     // Add main menu button.
     {
-        Actor* mainMenuButtonActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* mainMenuButtonActor = new Actor(TransformType::RectTransform);
         mainMenuButtonActor->GetTransform()->SetParent(mRoot->GetTransform());
         UIButton* mainMenuButton = mainMenuButtonActor->AddComponent<UIButton>();
 
@@ -48,7 +48,7 @@ void SidneyEmail::Init(Actor* parent)
     {
         // Bar that stretches across entire screen.
         {
-            Actor* menuBarActor = new Actor(Actor::TransformType::RectTransform);
+            Actor* menuBarActor = new Actor(TransformType::RectTransform);
             menuBarActor->GetTransform()->SetParent(mRoot->GetTransform());
             UIImage* menuBarImage = menuBarActor->AddComponent<UIImage>();
 
@@ -63,7 +63,7 @@ void SidneyEmail::Init(Actor* parent)
 
         // Bar that extends from top-right, used to give enough height for the screen name label.
         {
-            Actor* menuBarTopActor = new Actor(Actor::TransformType::RectTransform);
+            Actor* menuBarTopActor = new Actor(TransformType::RectTransform);
             menuBarTopActor->GetTransform()->SetParent(mRoot->GetTransform());
             UIImage* menuBarTopImage = menuBarTopActor->AddComponent<UIImage>();
 
@@ -77,7 +77,7 @@ void SidneyEmail::Init(Actor* parent)
 
             // Triangle bit that slopes downward.
             {
-                Actor* menuBarAngleActor = new Actor(Actor::TransformType::RectTransform);
+                Actor* menuBarAngleActor = new Actor(TransformType::RectTransform);
                 menuBarAngleActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
                 UIImage* menuBarAngleImage = menuBarAngleActor->AddComponent<UIImage>();
 
@@ -90,7 +90,7 @@ void SidneyEmail::Init(Actor* parent)
 
             // Screen name label.
             {
-                Actor* screenNameActor = new Actor(Actor::TransformType::RectTransform);
+                Actor* screenNameActor = new Actor(TransformType::RectTransform);
                 screenNameActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
                 UILabel* screenNameLabel = screenNameActor->AddComponent<UILabel>();
 

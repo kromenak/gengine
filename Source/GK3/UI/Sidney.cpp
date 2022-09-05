@@ -10,7 +10,7 @@
 
 UIButton* CreateMainButton(Actor* parent, const std::string& buttonId, float xPos)
 {
-    Actor* actor = new Actor(Actor::TransformType::RectTransform);
+    Actor* actor = new Actor(TransformType::RectTransform);
     actor->GetTransform()->SetParent(parent->GetTransform());
     UIButton* button = actor->AddComponent<UIButton>();
 
@@ -25,7 +25,7 @@ UIButton* CreateMainButton(Actor* parent, const std::string& buttonId, float xPo
     return button;
 }
 
-Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
+Sidney::Sidney() : Actor(TransformType::RectTransform)
 {
     // Sidney will be layered near the bottom.
     // A lot of stuff needs to appear above it (inventory, status overlay, etc).
@@ -43,14 +43,14 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
     background->SetReceivesInput(true);
 
     // Add desktop background image.
-    Actor* desktopBackground = new Actor(Actor::TransformType::RectTransform);
+    Actor* desktopBackground = new Actor(TransformType::RectTransform);
     desktopBackground->GetTransform()->SetParent(GetTransform());
     UIImage* desktopBackgroundImage = desktopBackground->AddComponent<UIImage>();
     desktopBackgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_MAIN_SCN.BMP"), true);
 
     // Add exit button as child of desktop background.
     {
-        Actor* exitButtonActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* exitButtonActor = new Actor(TransformType::RectTransform);
         exitButtonActor->GetTransform()->SetParent(desktopBackground->GetTransform());
         UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
 
@@ -143,7 +143,7 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
 
     // Add "New Email" label.
     {
-        Actor* newEmailActor = new Actor(Actor::TransformType::RectTransform);
+        Actor* newEmailActor = new Actor(TransformType::RectTransform);
         newEmailActor->GetTransform()->SetParent(desktopBackground->GetTransform());
         mNewEmailLabel = newEmailActor->AddComponent<UILabel>();
 

@@ -15,6 +15,14 @@
 #include "Transform.h"
 #include "Services.h"
 
+// As a rule, all all Actors must have a Transform.
+// This allows specifying which type to construct with.
+enum class TransformType
+{
+    Transform,
+    RectTransform
+};
+
 class Actor
 {
 public:
@@ -23,12 +31,6 @@ public:
 		Active,
 		Inactive,
 		Destroyed
-	};
-	
-	enum class TransformType
-	{
-		Transform,
-		RectTransform
 	};
 	
     Actor();

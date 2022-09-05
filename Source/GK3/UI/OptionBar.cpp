@@ -14,7 +14,7 @@
 #include "UISlider.h"
 #include "UIToggle.h"
 
-OptionBar::OptionBar() : Actor(Actor::TransformType::RectTransform)
+OptionBar::OptionBar() : Actor(TransformType::RectTransform)
 {
     // Load layout text file, parse to key/value map, and then delete it.
     TextAsset* optionBarText = Services::GetAssets()->LoadText("RC_LAYOUT.TXT");
@@ -113,7 +113,7 @@ void OptionBar::KeepOnScreen()
 
 UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, Actor* parent, bool setSprites = true)
 {
-    Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* buttonActor = new Actor(TransformType::RectTransform);
     buttonActor->GetTransform()->SetParent(parent->GetTransform());
     UIButton* button = buttonActor->AddComponent<UIButton>();
     button->GetRectTransform()->SetAnchor(0.0f, 1.0f);
@@ -154,7 +154,7 @@ UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, con
 
 UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, const std::string& toggleId, Actor* parent)
 {
-    Actor* toggleActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* toggleActor = new Actor(TransformType::RectTransform);
     toggleActor->GetTransform()->SetParent(parent->GetTransform());
 
     UIToggle* toggle = toggleActor->AddComponent<UIToggle>();
@@ -174,7 +174,7 @@ UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, con
 UISlider* CreateSlider(std::unordered_map<std::string, IniKeyValue>& config, const std::string& sliderId, Actor* parent)
 {
     // Create slider.
-    Actor* sliderActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* sliderActor = new Actor(TransformType::RectTransform);
     sliderActor->GetTransform()->SetParent(parent->GetTransform());
     
     UISlider* slider = sliderActor->AddComponent<UISlider>();
@@ -191,7 +191,7 @@ UISlider* CreateSlider(std::unordered_map<std::string, IniKeyValue>& config, con
     maxPos.y *= -1;
 
     // Create slider handle actor.
-    Actor* handleActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* handleActor = new Actor(TransformType::RectTransform);
     slider->SetHandleActor(handleActor);
 
     // Add handle image.
@@ -212,7 +212,7 @@ UISlider* CreateSlider(std::unordered_map<std::string, IniKeyValue>& config, con
 void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
     // Create "root" actor for action bar.
-    Actor* optionBar = new Actor(Actor::TransformType::RectTransform);
+    Actor* optionBar = new Actor(TransformType::RectTransform);
     mOptionBarRoot = optionBar->GetComponent<RectTransform>();
     mOptionBarRoot->SetParent(GetTransform());
     
@@ -235,7 +235,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     Font* font = Services::GetAssets()->LoadFont(config["statusFont"].value);
     
     // Add score text.
-    Actor* scoreActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* scoreActor = new Actor(TransformType::RectTransform);
     scoreActor->GetTransform()->SetParent(mOptionBarRoot);
     mScoreLabel = scoreActor->AddComponent<UILabel>();
     
@@ -259,7 +259,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     StringUtil::Trim(dayAndTimeStrings[1]);
 
     // Add day text.
-    Actor* dayActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* dayActor = new Actor(TransformType::RectTransform);
     dayActor->GetTransform()->SetParent(mOptionBarRoot);
     UILabel* dayLabel = dayActor->AddComponent<UILabel>();
     
@@ -278,7 +278,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     dayLabel->SetMasked(true);
     
     // Add time text.
-    Actor* timeActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* timeActor = new Actor(TransformType::RectTransform);
     timeActor->GetTransform()->SetParent(mOptionBarRoot);
     UILabel* timeLabel = timeActor->AddComponent<UILabel>();
     
@@ -359,7 +359,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
 void OptionBar::CreateCamerasSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
     // Make this a child of the "main section" root.
-    mCamerasSection = new Actor(Actor::TransformType::RectTransform);
+    mCamerasSection = new Actor(TransformType::RectTransform);
     mCamerasSection->GetTransform()->SetParent(mOptionBarRoot);
     
     // Add background image.
@@ -376,7 +376,7 @@ void OptionBar::CreateCamerasSection(std::unordered_map<std::string, IniKeyValue
 void OptionBar::CreateOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
     // Make this a child of the "main section" root.
-    mOptionsSection = new Actor(Actor::TransformType::RectTransform);
+    mOptionsSection = new Actor(TransformType::RectTransform);
     mOptionsSection->GetTransform()->SetParent(mOptionBarRoot);
     
     // Add background image.
@@ -427,7 +427,7 @@ void OptionBar::CreateOptionsSection(std::unordered_map<std::string, IniKeyValue
 void OptionBar::CreateAdvancedOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
     // Make this a child of the "options section" root.
-    mAdvancedOptionsSection = new Actor(Actor::TransformType::RectTransform);
+    mAdvancedOptionsSection = new Actor(TransformType::RectTransform);
     mAdvancedOptionsSection->GetTransform()->SetParent(mOptionsSection->GetTransform());
     
     // Add background image.
@@ -461,7 +461,7 @@ void OptionBar::CreateAdvancedOptionsSection(std::unordered_map<std::string, Ini
 void OptionBar::CreateSoundOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
     // Make this a child of the "options section" root.
-    mSoundOptionsSection = new Actor(Actor::TransformType::RectTransform);
+    mSoundOptionsSection = new Actor(TransformType::RectTransform);
     mSoundOptionsSection->GetTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
     
     // Add background image.
@@ -534,7 +534,7 @@ void OptionBar::CreateSoundOptionsSection(std::unordered_map<std::string, IniKey
 void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
     // Make this a child of the "options section" root.
-    mGraphicOptionsSection = new Actor(Actor::TransformType::RectTransform);
+    mGraphicOptionsSection = new Actor(TransformType::RectTransform);
     mGraphicOptionsSection->GetTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
     
     // Add background image.
@@ -612,7 +612,7 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
 void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
     // Make this a child of the "options section" root.
-    mAdvancedGraphicOptionsSection = new Actor(Actor::TransformType::RectTransform);
+    mAdvancedGraphicOptionsSection = new Actor(TransformType::RectTransform);
     mAdvancedGraphicOptionsSection->GetTransform()->SetParent(mGraphicOptionsSection->GetTransform());
     
     // Add background image.
@@ -676,7 +676,7 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
 void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
     // Make this a child of the "options section" root.
-    mGameOptionsSection = new Actor(Actor::TransformType::RectTransform);
+    mGameOptionsSection = new Actor(TransformType::RectTransform);
     mGameOptionsSection->GetTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
     
     // Add background image.

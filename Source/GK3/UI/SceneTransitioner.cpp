@@ -4,7 +4,7 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 
-SceneTransitioner::SceneTransitioner() : Actor(Actor::TransformType::RectTransform)
+SceneTransitioner::SceneTransitioner() : Actor(TransformType::RectTransform)
 {
     // Draw scene transitioner above the normal scene.
     AddComponent<UICanvas>(3);

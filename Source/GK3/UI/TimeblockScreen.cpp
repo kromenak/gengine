@@ -33,7 +33,7 @@ static std::pair<Timeblock, Vector2> timeblockTextPositions[] = {
 
 static UIButton* CreateButton(Actor* parent, const std::string& buttonId)
 {
-    Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* buttonActor = new Actor(TransformType::RectTransform);
     buttonActor->GetTransform()->SetParent(parent->GetTransform());
     UIButton* button = buttonActor->AddComponent<UIButton>();
 
@@ -45,7 +45,7 @@ static UIButton* CreateButton(Actor* parent, const std::string& buttonId)
     return button;
 }
 
-TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
+TimeblockScreen::TimeblockScreen() : Actor(TransformType::RectTransform)
 {
     AddComponent<UICanvas>(7);
 
@@ -60,12 +60,12 @@ TimeblockScreen::TimeblockScreen() : Actor(Actor::TransformType::RectTransform)
     blackBackgroundImage->SetColor(Color32::Black);
 
     // Add background image.
-    Actor* backgroundImageActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* backgroundImageActor = new Actor(TransformType::RectTransform);
     backgroundImageActor->GetTransform()->SetParent(GetTransform());
     mBackgroundImage = backgroundImageActor->AddComponent<UIImage>();
 
     // Add timeblock text image.
-    Actor* textActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* textActor = new Actor(TransformType::RectTransform);
     textActor->GetTransform()->SetParent(backgroundImageActor->GetTransform());
     mTextImage = textActor->AddComponent<UIImage>();
 

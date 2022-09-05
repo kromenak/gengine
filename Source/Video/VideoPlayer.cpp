@@ -24,7 +24,7 @@ VideoPlayer::~VideoPlayer()
 void VideoPlayer::Initialize()
 {
     // Create canvas actor that sticks around forever.
-    mVideoCanvasActor = new Actor(Actor::TransformType::RectTransform);
+    mVideoCanvasActor = new Actor(TransformType::RectTransform);
     mVideoCanvasActor->SetIsDestroyOnLoad(false);
     mVideoCanvasActor->AddComponent<UICanvas>();
     
@@ -38,13 +38,13 @@ void VideoPlayer::Initialize()
     mVideoBackgroundImage = mVideoCanvasActor->AddComponent<UIImage>();
     
     // Create black background image, used for letterbox effect.
-    Actor* videoBackgroundActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* videoBackgroundActor = new Actor(TransformType::RectTransform);
     videoBackgroundActor->GetTransform()->SetParent(mVideoCanvasActor->GetTransform());
     mVideoLetterbox = videoBackgroundActor->AddComponent<UIImage>();
     mVideoLetterbox->SetColor(Color32::Black);
     
     // Create video image, which shows actual video playback.
-    Actor* videoActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* videoActor = new Actor(TransformType::RectTransform);
     videoActor->GetTransform()->SetParent(mVideoCanvasActor->GetTransform());
     mVideoImage = videoActor->AddComponent<UIImage>();
     

@@ -15,7 +15,7 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 
-DrivingScreen::DrivingScreen() : Actor(Actor::TransformType::RectTransform)
+DrivingScreen::DrivingScreen() : Actor(TransformType::RectTransform)
 {
     // Driving screen should draw above scene transitioner so it doesn't appear on this screen.
     AddComponent<UICanvas>(4);
@@ -32,7 +32,7 @@ DrivingScreen::DrivingScreen() : Actor(Actor::TransformType::RectTransform)
     background->SetReceivesInput(true);
 
     // Add map background image.
-    mMapActor = new Actor(Actor::TransformType::RectTransform);
+    mMapActor = new Actor(TransformType::RectTransform);
     mMapActor->GetTransform()->SetParent(GetTransform());
     UIImage* mapImage = mMapActor->AddComponent<UIImage>();
     mMapTexture = Services::GetAssets()->LoadTexture("DM_BASE.BMP");
@@ -194,7 +194,7 @@ void DrivingScreen::ExitToLocation(const std::string& locationCode)
 void DrivingScreen::AddLocation(const std::string& locationCode, const std::string& buttonId, const Vector2& buttonPos)
 {
     // Create button actor & widget.
-    Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* buttonActor = new Actor(TransformType::RectTransform);
     buttonActor->GetTransform()->SetParent(mMapActor->GetTransform());
     UIButton* button = buttonActor->AddComponent<UIButton>();
 

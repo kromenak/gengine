@@ -9,7 +9,7 @@
 
 static UIButton* CreateButton(Actor* parent, const std::string& buttonId, float xPos)
 {
-    Actor* buttonActor = new Actor(Actor::TransformType::RectTransform);
+    Actor* buttonActor = new Actor(TransformType::RectTransform);
     buttonActor->GetTransform()->SetParent(parent->GetTransform());
     UIButton* button = buttonActor->AddComponent<UIButton>();
 
@@ -26,7 +26,7 @@ static UIButton* CreateButton(Actor* parent, const std::string& buttonId, float 
     return button;
 }
 
-TitleScreen::TitleScreen() : Actor(Actor::TransformType::RectTransform)
+TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
 {
     AddComponent<UICanvas>(0);
 
