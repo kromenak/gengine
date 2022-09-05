@@ -1,6 +1,9 @@
 #include "SidneySearch.h"
 
 #include "Actor.h"
+#include "GameProgress.h"
+#include "IniParser.h"
+#include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -67,7 +70,7 @@ void SidneySearch::Init(UICanvas* canvas)
 
         //TODO: Exit button uses a stretch-based image solution (kind of like 9-slice, more like 3-slice).
         mainMenuButton->SetResizeBasedOnTexture(false);
-        mainMenuButton->SetUpTexture(&Texture::White);
+        mainMenuButton->SetUpTexture(&Texture::Black);
 
         mainMenuButton->SetPressCallback([&](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDEXIT.WAV"));
@@ -169,15 +172,11 @@ void SidneySearch::Init(UICanvas* canvas)
 
         // Reset button.
         UIButton* resetButton = CreateBasicTextButton(canvas, searchBarActor, Vector2(14.0f, -17.0f), "RESET");
-        resetButton->SetPressCallback([](UIButton* button){
-            printf("Reset\n");
-        });
+        resetButton->SetPressCallback(std::bind(&SidneySearch::OnResetButtonPressed, this, std::placeholders::_1));
 
         // Search button.
         UIButton* searchButton = CreateBasicTextButton(canvas, searchBarActor, Vector2(426.0f, -17.0f), "SEARCH");
-        searchButton->SetPressCallback([](UIButton* button){
-            printf("Search\n");
-        });
+        searchButton->SetPressCallback(std::bind(&SidneySearch::OnSearchButtonPressed, this, std::placeholders::_1));
 
         // Text input field.
         Actor* searchInputActor = new Actor(Actor::TransformType::RectTransform);
@@ -222,7 +221,8 @@ void SidneySearch::Init(UICanvas* canvas)
         UIImage* navBarImage = navBarActor->AddComponent<UIImage>();
         canvas->AddWidget(navBarImage);
 
-        navBarImage->SetTexture(&Texture::White);
+        navBarImage->SetTexture(&Texture::Black);
+        navBarImage->SetColor(Color32(0, 0, 0, 128));
 
         navBarImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
         navBarImage->GetRectTransform()->SetAnchor(0.0f, 1.0f);
@@ -243,19 +243,53 @@ void SidneySearch::Init(UICanvas* canvas)
     }
 
     // Add search result text area.
-    Actor* resultsBackgroundActor = new Actor(Actor::TransformType::RectTransform);
-    resultsBackgroundActor->GetTransform()->SetParent(mRoot->GetTransform());
-    UIImage* resultsBackgroundImage = resultsBackgroundActor->AddComponent<UIImage>();
-    canvas->AddWidget(resultsBackgroundImage);
+    {
+        Actor* resultsBackgroundActor = new Actor(Actor::TransformType::RectTransform);
+        resultsBackgroundActor->GetTransform()->SetParent(mRoot->GetTransform());
+        UIImage* resultsBackgroundImage = resultsBackgroundActor->AddComponent<UIImage>();
+        canvas->AddWidget(resultsBackgroundImage);
 
-    resultsBackgroundImage->SetTexture(&Texture::Black);
-    resultsBackgroundImage->SetColor(Color32(0, 0, 0, 128)); // Black Semi-Transparent
+        resultsBackgroundImage->SetTexture(&Texture::Black);
+        resultsBackgroundImage->SetColor(Color32(0, 0, 0, 128)); // Black Semi-Transparent
 
-    resultsBackgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    resultsBackgroundImage->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-    resultsBackgroundImage->GetRectTransform()->SetAnchoredPosition(60.0f, -136.0f);
-    resultsBackgroundImage->GetRectTransform()->SetSizeDelta(520.0f, 254.0f);
+        resultsBackgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
+        resultsBackgroundImage->GetRectTransform()->SetAnchor(0.0f, 1.0f);
+        resultsBackgroundImage->GetRectTransform()->SetAnchoredPosition(60.0f, -136.0f);
+        resultsBackgroundImage->GetRectTransform()->SetSizeDelta(520.0f, 254.0f);
 
+        //TODO: So there is a big undertaking here to implement a whole HTML parsing system.
+        //TODO: For the moment though, I'll just use a label to display a simple result output.
+        mTempResultsLabel = resultsBackgroundActor->AddComponent<UILabel>();
+        canvas->AddWidget(mTempResultsLabel);
+        mTempResultsLabel->SetFont(Services::GetAssets()->LoadFont("F_TIMES.FON"));
+        mTempResultsLabel->SetHorizonalAlignment(HorizontalAlignment::Left);
+        mTempResultsLabel->SetVerticalAlignment(VerticalAlignment::Top);
+    }
+
+    // Read in all the search terms and correlated pages.
+    TextAsset* textFile = Services::GetAssets()->LoadText("SIDSEARCH.TXT");
+    IniParser parser(textFile->GetText(), textFile->GetTextLength());
+    parser.SetMultipleKeyValuePairsPerLine(false);
+
+    // Each section's name correlates to the associated HTML page.
+    // Each section then has a single line ("text") with a comma-separated list of terms.
+    IniSection section;
+    while(parser.ReadNextSection(section))
+    {
+        for(auto& line : section.lines)
+        {
+            if(line.entries[0].key == "text")
+            {
+                std::vector<std::string> terms = StringUtil::Split(line.entries[0].value, ',');
+                for(auto& term : terms)
+                {
+                    mSearchTerms[term] = section.name;
+                }
+            }
+        }
+    }
+
+    // Hide by default.
     Hide();
 }
 
@@ -268,4 +302,41 @@ void SidneySearch::Show()
 void SidneySearch::Hide()
 {
     mRoot->SetActive(false);
+}
+
+void SidneySearch::OnUpdate(float deltaTime)
+{
+    if(!mRoot->IsActive()) { return; }
+
+    // If enter is pressed, act like a search was done.
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
+    {
+        OnSearchButtonPressed(nullptr);
+    }
+}
+
+void SidneySearch::OnSearchButtonPressed(UIButton* button)
+{
+    auto it = mSearchTerms.find(mTextInput->GetText());
+    if(it != mSearchTerms.end())
+    {
+        mTempResultsLabel->SetText(it->second);
+
+        // Searching certain terms leads to point increases and flag setting.
+        //TODO: Figure out how to make this data-driven!
+        if(StringUtil::EqualsIgnoreCase(it->second, "Vampire.html"))
+        {
+            Services::Get<GameProgress>()->ChangeScore("e_sidney_search_vampires");
+            Services::Get<GameProgress>()->SetFlag("Vampire");
+        }
+    }
+    else
+    {
+        mTempResultsLabel->SetText("Not found");
+    }
+}
+
+void SidneySearch::OnResetButtonPressed(UIButton* button)
+{
+    mTextInput->Clear();
 }

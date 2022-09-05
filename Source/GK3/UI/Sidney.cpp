@@ -1,5 +1,7 @@
 #include "Sidney.h"
 
+#include "ActionManager.h"
+#include "LocationManager.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -26,8 +28,9 @@ UIButton* CreateMainButton(UICanvas* canvas, Actor* parent, const std::string& b
 
 Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
 {
-    // Let's put Sidney at same draw order as Driving Screen.
-    mCanvas = AddComponent<UICanvas>(4);
+    // Sidney will be layered near the bottom.
+    // A lot of stuff needs to appear above it (inventory, status overlay, etc).
+    mCanvas = AddComponent<UICanvas>(-1);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();
@@ -92,9 +95,9 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
 
         buttonPos += kButtonSpacing;
         UIButton* emailButton = CreateMainButton(mCanvas, desktopBackground, "EMAIL", buttonPos);
-        emailButton->SetPressCallback([](UIButton* button){
+        emailButton->SetPressCallback([this](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
-            printf("Email\n");
+            mEmail.Show();
         });
 
         buttonPos += kButtonSpacing;
@@ -122,7 +125,10 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
         UIButton* dataButton = CreateMainButton(mCanvas, desktopBackground, "ADDATA", buttonPos);
         dataButton->SetPressCallback([](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
-            printf("Add Data\n");
+
+            //TODO: Grace says this line if you try to add data in 207A.
+            //TODO: When does she stop saying this and let you add data? Is it based on the current timeblock?
+            Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"0264G2ZPF1\", 2)");
         });
 
         buttonPos += kButtonSpacing;
@@ -141,17 +147,79 @@ Sidney::Sidney() : Actor(Actor::TransformType::RectTransform)
     }
 
     // Add "New Email" label.
+    {
+        Actor* newEmailActor = new Actor(Actor::TransformType::RectTransform);
+        newEmailActor->GetTransform()->SetParent(desktopBackground->GetTransform());
+        mNewEmailLabel = newEmailActor->AddComponent<UILabel>();
+        mCanvas->AddWidget(mNewEmailLabel);
+
+        mNewEmailLabel->SetFont(Services::GetAssets()->LoadFont("SID_PDN_10_GRN.FON"));
+        mNewEmailLabel->SetText("NEW E-MAIL");
+        mNewEmailLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
+        mNewEmailLabel->SetVerticalAlignment(VerticalAlignment::Top);
+
+        mNewEmailLabel->GetRectTransform()->SetPivot(1.0f, 1.0f);
+        mNewEmailLabel->GetRectTransform()->SetAnchor(1.0f, 1.0f);
+        mNewEmailLabel->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+        mNewEmailLabel->GetRectTransform()->SetSizeDelta(100.0f, 20.0f);
+    }
 
     // Create subscreens.
     mSearch.Init(mCanvas);
+    mEmail.Init(mCanvas);
 }
 
 void Sidney::Show()
 {
+    // Show Sidney UI.
     SetActive(true);
+
+    //TODO: We'll assume there is ALWAYS new email for the moment...
+    bool newEmail = true;
+
+    // Hide the "new email" label by default, regardless of new email state.
+    // If we DO have new email, this will blink on in a moment.
+    mNewEmailLabel->SetEnabled(false);
+
+    // If no new email, set this timer to -1. The label will never appear.
+    // Otherwise, set to blink interval to have it blink on and off.
+    mNewEmailBlinkTimer = newEmail ? kNewEmailBlinkInterval : -1;
+
+    // If there is new email, play the "new email" audio cue.
+    if(newEmail)
+    {
+        Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("NEWEMAIL.WAV"));
+    }
 }
 
 void Sidney::Hide()
 {
+    // Hide Sidney UI.
     SetActive(false);
+
+    // Whenever you exit Sidney, no matter where you are in the game, you warp to R25.
+    // This makes sense under the assumption that you only access Sidney in R25 anyway!
+    Services::Get<LocationManager>()->ChangeLocation("R25", [](){
+
+        // This special function warps Ego to the "sitting at desk" position and plays the stand up animation.
+        Services::Get<ActionManager>()->ExecuteSheepAction("R25_ALL", "ExitSidney$");
+    });
+}
+
+void Sidney::OnUpdate(float deltaTime)
+{
+    // Track timer countdown for new email to blink in the corner.
+    if(mNewEmailBlinkTimer > 0.0f)
+    {
+        mNewEmailBlinkTimer -= deltaTime;
+        if(mNewEmailBlinkTimer <= 0.0f)
+        {
+            mNewEmailLabel->SetEnabled(!mNewEmailLabel->IsEnabled());
+            mNewEmailBlinkTimer = kNewEmailBlinkInterval;
+        }
+    }
+
+    // Update each screen in turn.
+    // Each screen will early out if not active.
+    mSearch.OnUpdate(deltaTime);
 }
