@@ -51,6 +51,9 @@ public:
 	void ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
+
+    void QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
+
 	bool IsActionPlaying() const { return mCurrentAction != nullptr; }
 
     void SkipCurrentAction();
@@ -127,15 +130,24 @@ private:
     // The last action is cached in case we need to know what action was performed last.
     // This is most useful when re-showing the topic bar after dialogue cutscenes.
     const Action* mLastAction = nullptr;
-	
+    
 	// The action that is currently playing/executing. Only one action may execute at a time.
 	const Action* mCurrentAction = nullptr;
     
     // A callback to execute when the current action finishes executing.
     std::function<void(const Action*)> mCurrentActionFinishCallback = nullptr;
-
+    
     // What frame the current action started on.
     uint32 mCurrentActionStartFrame = 0;
+
+    // In rare cases, we may need to queue actions to execute when the current one is finished.
+    // Primary use case is executing actions on a timer - if timer expires DURING another action, we need to wait until that one finishes!
+    struct ActionAndCallback
+    {
+        const Action* action = nullptr;
+        std::function<void(const Action*)> callback = nullptr;
+    };
+    std::vector<ActionAndCallback> mActionQueue;
 
     // Are we skipping the current action? Mainly tracked to avoid recursive skips.
     bool mSkipInProgress = false;
@@ -146,6 +158,8 @@ private:
 	
 	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;
+
+    
 	
 	// Some assets should only be loaded for certain timeblocks. The asset name indicates this (e.g. GLB_12ALL.NVC or GLB_110A.NVC).
 	// Checks asset name against current timeblock to see if the asset should be used.

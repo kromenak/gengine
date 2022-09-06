@@ -146,14 +146,14 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 {
 	if(action == nullptr)
 	{
-		//TODO: Log
+        Services::GetReports()->Log("Actions", "Can't play null action!");
 		return;
 	}
 	
 	// We should only execute one action at a time.
 	if(mCurrentAction != nullptr)
 	{
-		//TODO: Log?
+        Services::GetReports()->Log("Actions", StringUtil::Format("Skipping NVC %s - another action is in progress", action->ToString().c_str()));
 		return;
 	}
 	mCurrentAction = action;
@@ -198,7 +198,7 @@ void ActionManager::ExecuteSheepAction(const std::string& sheepScriptText, std::
     // We should only execute one action at a time.
     if(mCurrentAction != nullptr)
     {
-        //TODO: Log?
+        Services::GetReports()->Log("Actions", StringUtil::Format("Skipping NVC %s - another action is in progress", mSheepCommandAction.ToString().c_str()));
         return;
     }
     mCurrentAction = &mSheepCommandAction;
@@ -226,6 +226,26 @@ void ActionManager::ExecuteSheepAction(const std::string& sheepScriptText, std::
         // If sheep fails to compile, still finish the action to avoid softlocking.
         OnActionExecuteFinished();
     }
+}
+
+void ActionManager::QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback)
+{
+    // For this noun/verb pair, find the best Action to use in the current scenario.
+    Action* action = GetHighestPriorityAction(noun, verb, VerbType::Normal);
+    if(action == nullptr) { return; }
+
+    // If no action is playing, we can just play it right now.
+    if(!IsActionPlaying())
+    {
+        ExecuteAction(action, finishCallback);
+        return;
+    }
+
+    // Otherwise, queue action to play after.
+    ActionAndCallback entry;
+    entry.action = action;
+    entry.callback = finishCallback;
+    mActionQueue.push_back(entry);
 }
 
 void ActionManager::SkipCurrentAction()
@@ -860,5 +880,14 @@ void ActionManager::OnActionExecuteFinished()
         {
             ShowTopicBar(mLastAction->noun);
         }
+    }
+    else if(!IsActionPlaying() && !mActionQueue.empty())
+    {
+        // Retrieve front item, but remove it BEFORE executing.
+        ActionAndCallback front = mActionQueue.front();
+        mActionQueue.erase(mActionQueue.begin());
+
+        // Execute the action.
+        ExecuteAction(front.action, front.callback);
     }
 }
