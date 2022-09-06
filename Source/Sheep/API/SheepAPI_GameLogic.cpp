@@ -235,14 +235,14 @@ shpvoid StopVerbCancel()
 }
 RegFunc0(StopVerbCancel, void, IMMEDIATE, REL_FUNC);
 
-/*
-shpvoid SetGameTimer(std::string noun, std::string verb, int milliseconds)
+shpvoid SetGameTimer(const std::string& noun, const std::string& verb, int milliseconds)
 {
-    std::cout << "SetGameTimer" << std::endl;
+    Timers::AddTimerMilliseconds(static_cast<unsigned int>(milliseconds), [noun, verb](){
+        Services::Get<ActionManager>()->QueueAction(noun, verb);
+    });
     return 0;
 }
 RegFunc3(SetGameTimer, void, string, string, int, IMMEDIATE, REL_FUNC);
-*/
 
 shpvoid SetTimerMs(int milliseconds)
 {

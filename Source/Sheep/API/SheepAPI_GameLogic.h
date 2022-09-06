@@ -51,7 +51,7 @@ shpvoid StartVerbCancel();
 shpvoid StopVerbCancel();
 
 // GAME BEHAVIOR
-shpvoid SetGameTimer(std::string noun, std::string verb, int milliseconds);
+shpvoid SetGameTimer(const std::string& noun, const std::string& verb, int milliseconds);
 shpvoid SetTimerMs(int milliseconds); // WAIT
 shpvoid SetTimerSeconds(float seconds); // WAIT
 
