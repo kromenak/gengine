@@ -33,7 +33,7 @@ void SheepManager::Execute(SheepScript* script, const std::string& functionName,
     const std::string& realTag = tag.empty() ? Services::Get<LayerManager>()->GetTopLayerName() : tag;
 
     // Pass to VM for execution.
-	mVirtualMachine.Execute(script, functionName, finishCallback, tag);
+	mVirtualMachine.Execute(script, functionName, finishCallback, realTag);
 }
 
 SheepScript* SheepManager::CompileEval(const std::string& sheep)
