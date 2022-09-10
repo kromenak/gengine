@@ -237,10 +237,9 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(first.key, "skybox"))
             {
-				for(int i = 1; i < section.lines.size(); ++i)
+				for(int i = 1; i < line.entries.size(); ++i)
 				{
 					IniKeyValue& keyValue = line.entries[i];
-					
                     if(StringUtil::EqualsIgnoreCase(keyValue.key, "left"))
                     {
 						general.skyboxLeftTextureName = keyValue.value;
