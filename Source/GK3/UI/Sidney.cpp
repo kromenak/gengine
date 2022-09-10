@@ -189,6 +189,20 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
     // Create subscreens.
     mSearch.Init(this);
     mEmail.Init(this);
+
+    // Build directory structure.
+    mData.emplace_back();
+    mData.back().name = "Images";
+    mData.emplace_back();
+    mData.back().name = "Audio";
+    mData.emplace_back();
+    mData.back().name = "Text";
+    mData.emplace_back();
+    mData.back().name = "Fingerprints";
+    mData.emplace_back();
+    mData.back().name = "Licenses";
+    mData.emplace_back(); // TODO: this one doesn't appear in the list until you find your first shape
+    mData.back().name = "Shapes";
 }
 
 void Sidney::Show()
@@ -226,6 +240,21 @@ void Sidney::Hide()
         // This special function warps Ego to the "sitting at desk" position and plays the stand up animation.
         Services::Get<ActionManager>()->ExecuteSheepAction("R25_ALL", "ExitSidney$");
     });
+}
+
+bool Sidney::HasFile(const std::string& fileName)
+{
+    for(auto& dir : mData)
+    {
+        for(auto& file : dir.files)
+        {
+            if(StringUtil::EqualsIgnoreCase(file.name, fileName))
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 void Sidney::OnUpdate(float deltaTime)

@@ -6,6 +6,9 @@
 #pragma once
 #include "Actor.h"
 
+#include <string>
+#include <vector>
+
 #include "SidneyEmail.h"
 #include "SidneySearch.h"
 
@@ -21,6 +24,8 @@ public:
     void Show();
     void Hide();
 
+    bool HasFile(const std::string& fileName);
+
 protected:
     void OnUpdate(float deltaTime) override;
 
@@ -35,4 +40,16 @@ private:
     // Various subscreens.
     SidneySearch mSearch;
     SidneyEmail mEmail;
+
+    // The "hard drive" directory & file structure for Sidney.
+    struct SidneyFile
+    {
+        std::string name;
+    };
+    struct SidneyDirectory
+    {
+        std::string name;
+        std::vector<SidneyFile> files;
+    };
+    std::vector<SidneyDirectory> mData;
 };

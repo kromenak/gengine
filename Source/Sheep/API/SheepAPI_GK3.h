@@ -12,7 +12,9 @@ shpvoid QuitApp(); // DEV
 
 shpvoid ShowBinocs();
 shpvoid ShowFingerprintInterface(const std::string& nounName);
+
 shpvoid ShowSidney();
+int DoesSidneyFileExist(const std::string& fileName);
 
 shpvoid ShowDrivingInterface();
 shpvoid FollowOnDrivingMap(int followState); // WAIT

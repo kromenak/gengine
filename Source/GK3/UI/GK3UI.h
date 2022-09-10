@@ -31,6 +31,7 @@ public:
     void ShowDrivingScreen(int followState = 0);
     bool FollowingOnDrivingScreen();
 
+    Sidney* GetSidney();
     void ShowSidney();
 
 private:

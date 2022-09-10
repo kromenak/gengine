@@ -119,12 +119,17 @@ bool GK3UI::FollowingOnDrivingScreen()
     return false;
 }
 
-void GK3UI::ShowSidney()
+Sidney* GK3UI::GetSidney()
 {
     if(mSidney == nullptr)
     {
         mSidney = new Sidney();
         mSidney->SetIsDestroyOnLoad(false);
     }
-    mSidney->Show();
+    return mSidney;
+}
+
+void GK3UI::ShowSidney()
+{
+    GetSidney()->Show();
 }
