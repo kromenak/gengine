@@ -2,6 +2,7 @@
 
 #include "ActionManager.h"
 #include "LocationManager.h"
+#include "Scene.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -85,14 +86,32 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         UIButton* searchButton = CreateMainButton(desktopBackground, "SEARCH", buttonPos);
         searchButton->SetPressCallback([this](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
-            mSearch.Show();
+
+            // Gabe refuses to use the search system.
+            if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+            {
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O6I2ZQR1\", 1)");
+            }
+            else
+            {
+                mSearch.Show();
+            }
         });
 
         buttonPos += kButtonSpacing;
         UIButton* emailButton = CreateMainButton(desktopBackground, "EMAIL", buttonPos);
         emailButton->SetPressCallback([this](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
-            mEmail.Show();
+
+            // Gabe also doesn't want to use email.
+            if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+            {
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O1E2ZQR1\", 1)");
+            }
+            else
+            {
+                mEmail.Show();
+            }
         });
 
         buttonPos += kButtonSpacing;
@@ -106,7 +125,16 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         UIButton* analyzeButton = CreateMainButton(desktopBackground, "ANALYZE", buttonPos);
         analyzeButton->SetPressCallback([](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
-            printf("Analyze\n");
+
+            // Gabe also doesn't want to analyze stuff.
+            if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+            {
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O7A2ZQR1\", 1)");
+            }
+            else
+            {
+                printf("Analyze\n");
+            }
         });
 
         buttonPos += kButtonSpacing;
