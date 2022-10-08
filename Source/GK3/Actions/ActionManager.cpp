@@ -732,7 +732,9 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                     caseScore = 1;
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.first, "GABE_ALL") ||
-                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL"))
+                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL") ||
+                        StringUtil::EqualsIgnoreCase(entry.first, "GABE_ALL_INV") ||
+                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL_INV"))
                 {
                     caseScore = 2;
                 }
@@ -765,6 +767,8 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                     // Custom case logic is only overridden by 1st/2nd/3rd time cases.
                     caseScore = 7;
 
+                    //TODO: This logic doesn't seem entirely accurate - for example, it doesn't work correctly with GABE_ALL_INV vs. IN_SIDNEY_ADD_DATA.
+                    //TODO: Added custom logic above to deal with that, but...we may need to revise this!
                     // If we've already encountered a valid custom case before, AND this custom case is also valid, ties are handled alphabetically.
                     // This seems strange to me, but then again, you've got to handle a tie somehow I guess?
                     if(action != nullptr && highestScore == 7)
