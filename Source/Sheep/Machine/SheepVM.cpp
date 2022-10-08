@@ -148,13 +148,18 @@ void SheepVM::StopExecution(const std::string& tag)
     {
         if(thread->mRunning && StringUtil::EqualsIgnoreCase(thread->mTag, tag))
         {
+            Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is exiting");
             thread->mRunning = false;
 
             // Even though we're stopping a Sheep prematurely, we should still execute its wait callback.
             // Sometimes, important things are waiting for a Sheep to finish (like the Action system), so they need to know.
             if(thread->mWaitCallback != nullptr)
             {
-                thread->mWaitCallback();
+                // Important to CLEAR the callback, so it doesn't errantly get called twice (here and in ContinueExecution).
+                // For example, consider a SysFunc call that leads to StopExecution being called. ContinueExecution would still run to completion!
+                auto callback = thread->mWaitCallback;
+                thread->mWaitCallback = nullptr;
+                callback();
             }
 
             // Thread is no longer using execution context.
@@ -1165,6 +1170,12 @@ void SheepVM::ContinueExecution(SheepThread* thread)
 				std::cout << "Unaccounted for Sheep Instruction: " << (int)instruction << std::endl;
                 break;
             }
+        }
+
+        // If thread is no longer running, we should stop executing instructions.
+        if(!thread->mRunning)
+        {
+            break;
         }
     }
 	
