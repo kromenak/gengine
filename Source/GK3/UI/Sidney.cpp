@@ -1,6 +1,8 @@
 #include "Sidney.h"
 
 #include "ActionManager.h"
+#include "GameProgress.h"
+#include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Scene.h"
 #include "Texture.h"
@@ -9,21 +11,24 @@
 #include "UIImage.h"
 #include "UILabel.h"
 
-UIButton* CreateMainButton(Actor* parent, const std::string& buttonId, float xPos)
+namespace
 {
-    Actor* actor = new Actor(TransformType::RectTransform);
-    actor->GetTransform()->SetParent(parent->GetTransform());
-    UIButton* button = actor->AddComponent<UIButton>();
+    UIButton* CreateMainButton(Actor* parent, const std::string& buttonId, float xPos)
+    {
+        Actor* actor = new Actor(TransformType::RectTransform);
+        actor->GetTransform()->SetParent(parent->GetTransform());
+        UIButton* button = actor->AddComponent<UIButton>();
 
-    button->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    button->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-    button->GetRectTransform()->SetAnchoredPosition(xPos, -24.0f);
+        button->GetRectTransform()->SetPivot(0.0f, 1.0f);
+        button->GetRectTransform()->SetAnchor(0.0f, 1.0f);
+        button->GetRectTransform()->SetAnchoredPosition(xPos, -24.0f);
 
-    button->SetUpTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_U.BMP"));
-    button->SetHoverTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_H.BMP"));
-    button->SetDownTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_D.BMP"));
-    button->SetDisabledTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_X.BMP"));
-    return button;
+        button->SetUpTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_U.BMP"));
+        button->SetHoverTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_H.BMP"));
+        button->SetDownTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_D.BMP"));
+        button->SetDisabledTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_X.BMP"));
+        return button;
+    }
 }
 
 Sidney::Sidney() : Actor(TransformType::RectTransform)
@@ -146,12 +151,34 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
 
         buttonPos += kButtonSpacing;
         UIButton* dataButton = CreateMainButton(desktopBackground, "ADDATA", buttonPos);
-        dataButton->SetPressCallback([](UIButton* button){
+        dataButton->SetPressCallback([this](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
 
-            //TODO: Grace says this line if you try to add data in 207A.
-            //TODO: When does she stop saying this and let you add data? Is it based on the current timeblock?
-            Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"0264G2ZPF1\", 2)");
+            // If you try to use this button before 210A, Grace says she has nothing to scan.
+            // After that, the player gets to decide.
+            const Timeblock& timeblock = Services::Get<GameProgress>()->GetTimeblock();
+            if(timeblock == Timeblock(2, 7))
+            {
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"0264G2ZPF1\", 2)");
+            }
+            else
+            {
+                // Show box indicating that we need input.
+                mAddDataLabel->SetText("** AWAITING INPUT **");
+                mAddDataBox->SetActive(true);
+
+                // This puts the player in a non-interactive state for a moment (so they can read the text box) and then shows the inventory.
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait SetTimerSeconds(2); ShowInventory();", [this](const Action* action){
+                    mAddDataBox->SetActive(false);
+                    mAddingData = true;
+
+                    // This is required for the Inventory NVC to know that scanning items is allowed.
+                    Services::Get<GameProgress>()->SetFlag("UsingScanner");
+
+                    // Clear scanner variable. Inventory code will set this if we've successfully scanned any item.
+                    Services::Get<GameProgress>()->SetGameVariable("SidScanner", 0);
+                });
+            }
         });
 
         buttonPos += kButtonSpacing;
@@ -186,6 +213,31 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         mNewEmailLabel->GetRectTransform()->SetSizeDelta(100.0f, 20.0f);
     }
 
+    // Add "Add Data" label and backgrounds.
+    {
+        Actor* outerBoxActor = new Actor(TransformType::RectTransform);
+        outerBoxActor->GetTransform()->SetParent(desktopBackground->GetTransform());
+        mAddDataBox = outerBoxActor;
+
+        UIImage* outerBoxImage = outerBoxActor->AddComponent<UIImage>();
+        outerBoxImage->SetColor(Color32(0, 0, 0, 160)); // Lighter Black Semi-Transparent
+        outerBoxImage->GetRectTransform()->SetSizeDelta(248.0f, 44.0f);
+
+        Actor* innerBoxActor = new Actor(TransformType::RectTransform);
+        innerBoxActor->GetTransform()->SetParent(outerBoxActor->GetTransform());
+
+        UIImage* innerBoxImage = innerBoxActor->AddComponent<UIImage>();
+        innerBoxImage->SetColor(Color32(0, 0, 0, 180));  // Darker Black Semi-Transparent
+        innerBoxImage->GetRectTransform()->SetSizeDelta(220.0f, 17.0f);
+
+        mAddDataLabel = innerBoxActor->AddComponent<UILabel>();
+        mAddDataLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+        mAddDataLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_14_GRN.FON"));
+
+        // Hide by default.
+        mAddDataBox->SetActive(false);
+    }
+
     // Create subscreens.
     mSearch.Init(this);
     mEmail.Init(this);
@@ -203,6 +255,46 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
     mData.back().name = "Licenses";
     mData.emplace_back(); // TODO: this one doesn't appear in the list until you find your first shape
     mData.back().name = "Shapes";
+
+    // Build list of known files.
+    //TODO: Would be cool if this was data-driven?
+    mKnownFiles.emplace_back("Fingerprints", "fileAbbePrint"); // 1
+    mKnownFiles.emplace_back("Fingerprints", "fileBuchelliPrint");
+    mKnownFiles.emplace_back("Fingerprints", "fileButhanePrint");
+    mKnownFiles.emplace_back("Fingerprints", "fileEstellePrint");
+    mKnownFiles.emplace_back("Fingerprints", "fileLadyHowardPrint");
+    mKnownFiles.emplace_back("Fingerprints", "fileMontreauxPrint");
+    mKnownFiles.emplace_back("Fingerprints", "fileWilkesPrint");
+    mKnownFiles.emplace_back("Fingerprints", "fileMoselyPrint");
+    mKnownFiles.emplace_back("Fingerprints", "fileLarryPrint");
+    mKnownFiles.emplace_back("Fingerprints", "fileWilkesPrint2"); // 10
+    mKnownFiles.emplace_back("Fingerprints", "fileBuchelliPrint2"); 
+    mKnownFiles.emplace_back("Fingerprints", "fileUnknownPrint1");
+    mKnownFiles.emplace_back("Fingerprints", "fileUnknownPrint2");
+    mKnownFiles.emplace_back("Fingerprints", "fileUnknownPrint3");
+    mKnownFiles.emplace_back("Fingerprints", "fileUnknownPrint4");
+    mKnownFiles.emplace_back("Fingerprints", "fileUnknownPrint5");
+    mKnownFiles.emplace_back("Fingerprints", "fileUnknownPrint6");
+    mKnownFiles.emplace_back("Fingerprints", "fileLSR1Print"); // Unused?
+    mKnownFiles.emplace_back("Fingerprints", "fileEstellesLSRPrint");
+    mKnownFiles.emplace_back("Images", "fileMap"); // 20
+    mKnownFiles.emplace_back("Images", "fileParchment1");
+    mKnownFiles.emplace_back("Images", "fileParchment2");
+    mKnownFiles.emplace_back("Images", "filePoussinPostcard");
+    mKnownFiles.emplace_back("Images", "fileTeniersPostcard1");
+    mKnownFiles.emplace_back("Images", "fileTeniersPostcard2");
+    mKnownFiles.emplace_back("Images", "fileHermeticSymbols");
+    mKnownFiles.emplace_back("Images", "fileSUMNote");
+    mKnownFiles.emplace_back("Audio", "fileAbbeTape");
+    mKnownFiles.emplace_back("Audio", "fileBuchelliTape");
+    mKnownFiles.emplace_back("Text", "fileArcadiaText"); // 30
+    mKnownFiles.emplace_back("Text", "fileTempleOfSolomonText"); //TODO: Is this a text type?
+    mKnownFiles.emplace_back("Images", "fileHermeticSymbols"); //TODO: Seems doubled up and unused?
+    mKnownFiles.emplace_back("Licenses", "fileBuchelliLicense");
+    mKnownFiles.emplace_back("Licenses", "fileEmilioLicense");
+    mKnownFiles.emplace_back("Licenses", "fileLadyHowardLicense");
+    mKnownFiles.emplace_back("Licenses", "fileMoselyLicense");
+    mKnownFiles.emplace_back("Licenses", "fileWilkesLicense");
 }
 
 void Sidney::Show()
@@ -257,8 +349,88 @@ bool Sidney::HasFile(const std::string& fileName)
     return false;
 }
 
+bool Sidney::HasFile(const std::string& type, const std::string& fileName)
+{
+    for(auto& dir : mData)
+    {
+        if(StringUtil::EqualsIgnoreCase(dir.name, type))
+        {
+            return dir.HasFile(fileName);
+        }
+    }
+    return false;
+}
+
+void Sidney::AddFile(const std::string& type, const std::string& fileName)
+{
+    for(auto& dir : mData)
+    {
+        if(StringUtil::EqualsIgnoreCase(dir.name, type))
+        {
+            // Already have this one!
+            if(dir.HasFile(fileName)) { return; }
+
+            dir.files.emplace_back();
+            dir.files.back().name = fileName;
+        }
+    }
+}
+
 void Sidney::OnUpdate(float deltaTime)
 {
+    // When adding data, Sidney should not update.
+    // We mainly wait for the inventory layer to be closed.
+    if(mAddingData)
+    {
+        // Wait for player to close inventory.
+        if(!Services::Get<InventoryManager>()->IsInventoryShowing() && !Services::Get<ActionManager>()->IsActionPlaying())
+        {
+            // Clear "using scanner" flag.
+            Services::Get<GameProgress>()->ClearFlag("UsingScanner");
+            mAddingData = false;
+
+            // Determine whether something was successfully scanned into Sidney.
+            int sidneyScannerVal = Services::Get<GameProgress>()->GetGameVariable("SidScanner");
+            if(sidneyScannerVal == 0)
+            {
+                // Show box indicating that input was aborted.
+                mAddDataLabel->SetText("** INPUT ABORTED **");
+                mAddDataBox->SetActive(true);
+
+                // This puts the player in a non-interactive state for a moment (so they can read the text box) and then puts them back on the main screen.
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait SetTimerSeconds(2);", [this](const Action* action){
+                    mAddDataBox->SetActive(false);
+                });
+            }
+            else
+            {
+                // Show box (and SFX) indicating we are scanning an item.
+                mAddDataLabel->SetText("** SCANNING ITEM **"); //TODO: Should blink Green/Gold.
+                mAddDataBox->SetActive(true);
+                Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDSCAN.WAV"));
+
+                // Based on the scanner value set by inventory code, correlate that to a particular file.
+                // Unfortunately, these numbers don't seem to correlate to anything in particular...
+                switch(sidneyScannerVal)
+                {
+                case 21: // Parchment 1
+                    break;
+                case 22: // Parchment 2
+                    break;
+                }
+
+                // This puts the player in a non-interactive state for a moment (so they can read the text box and hear SFX).
+                Services::Get<ActionManager>()->ExecuteSheepAction("wait SetTimerSeconds(2.5);", [this](const Action* action){
+                    mAddDataBox->SetActive(false);
+                    
+                    //TODO: Show the "Input Complete" box/unskippable cutscene.
+                    //TODO: File names shown during this cutscene are accessibly BY sidneyScannerVal in ESIDNEY.TXT!
+                });
+            }
+        }
+        return;
+    }
+
     // Track timer countdown for new email to blink in the corner.
     if(mNewEmailBlinkTimer > 0.0f)
     {
