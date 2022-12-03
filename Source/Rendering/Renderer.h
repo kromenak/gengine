@@ -45,10 +45,10 @@ public:
     void SetUseTrilinearFiltering(bool useTrilinearFiltering);
     bool UseMipmaps() const { return mUseMipmaps; }
     bool UseTrilinearFiltering() const { return mUseTrilinearFiltering; }
-    
-private:
+
     void ChangeResolution(const Window::Resolution& resolution);
-    
+
+private:
     // Context handle for rendering in OpenGL.
     SDL_GLContext mContext = nullptr;
     

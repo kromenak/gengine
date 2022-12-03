@@ -87,7 +87,9 @@ Mesh* uiQuad = nullptr;
 bool Renderer::Initialize()
 {
     TIMER_SCOPED("Renderer::Initialize");
-    
+
+    Window::Create("Gabriel Knight 3");
+
     // Tell SDL we want to use OpenGL 3.3
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
@@ -102,10 +104,9 @@ bool Renderer::Initialize()
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-
     
     // Create OpenGL context.
-    mContext = SDL_GL_CreateContext(mWindow);
+    mContext = SDL_GL_CreateContext(Window::Get());
     //DumpVideoInfo(mWindow);
 	
     // Initialize GLEW.
@@ -352,7 +353,7 @@ void Renderer::Render()
     
 	// Present to window.
     PROFILER_BEGIN_SAMPLE("Renderer Present");
-	SDL_GL_SwapWindow(mWindow);
+	SDL_GL_SwapWindow(Window::Get());
     PROFILER_END_SAMPLE();
 }
 
