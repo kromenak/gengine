@@ -1,7 +1,7 @@
 #include "InputManager.h"
 
-#include "Services.h"
 #include "UICanvas.h"
+#include "Window.h"
 
 InputManager::InputManager()
 {
@@ -51,7 +51,7 @@ void InputManager::Update()
 	{
 		// INVERT the mouse Y.
 		// SDL returns mouse coords from top-left, but we want it from bottom-left.
-		mouseY = Services::GetRenderer()->GetWindowHeight() - mouseY;
+		mouseY = Window::GetHeight() - mouseY;
 		
 		// Calculate delta from last mouse position.
 		int deltaX = static_cast<int>(mouseX - mMousePosition.x);

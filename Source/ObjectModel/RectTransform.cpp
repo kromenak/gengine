@@ -3,7 +3,7 @@
 #include "Camera.h"
 #include "Debug.h"
 #include "RectUtil.h"
-#include "Services.h"
+#include "Window.h"
 
 TYPE_DEF_CHILD(Transform, RectTransform);
 
@@ -81,7 +81,7 @@ Rect RectTransform::GetRect() const
 	Rect parentRect;
 	if(mParent == nullptr || !mParent->IsTypeOf(RectTransform::GetType()))
 	{
-		Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
+        Vector2 windowSize = Window::GetSize();
 		parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
 	}
 	else
@@ -168,7 +168,7 @@ void RectTransform::CalcLocalPosition()
 	Vector2 parentPivot;
 	if(mParent == nullptr || !mParent->IsTypeOf(RectTransform::GetType()))
 	{
-		Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
+        Vector2 windowSize = Window::GetSize();
 		parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
 		parentPivot = Vector2(0.0f, 0.0f);
 	}

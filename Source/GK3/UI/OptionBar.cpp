@@ -13,6 +13,7 @@
 #include "UILabel.h"
 #include "UISlider.h"
 #include "UIToggle.h"
+#include "Window.h"
 
 OptionBar::OptionBar() : Actor(TransformType::RectTransform)
 {
@@ -108,7 +109,7 @@ void OptionBar::OnUpdate(float deltaTime)
 void OptionBar::KeepOnScreen()
 {
     // Make sure the options bar stays on-screen.
-    mOptionBarRoot->MoveInsideRect(Services::GetRenderer()->GetWindowRect());
+    mOptionBarRoot->MoveInsideRect(Window::GetRect());
 }
 
 UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, Actor* parent, bool setSprites = true)
@@ -601,10 +602,10 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
     resolutionDropdownRT->SetSizeDelta(dropdownSize);
 
     mResolutionDropdown->SetCallback([](int selectedIndex){
-        const std::vector<Renderer::Resolution>& resolutions = Services::GetRenderer()->GetResolutions();
+        const std::vector<Window::Resolution>& resolutions = Window::GetResolutions();
         if(selectedIndex >= 0 && selectedIndex < resolutions.size())
         {
-            Services::GetRenderer()->SetWindowSize(resolutions[selectedIndex].width, resolutions[selectedIndex].height);
+            Services::GetRenderer()->ChangeResolution(resolutions[selectedIndex]);
         }
     });
 }
@@ -753,16 +754,16 @@ void OptionBar::OnGraphicsOptionsButtonPressed(UIButton* button)
     // Repopulate resolutions dropdown choices.
     // These could change if you move the game window to a new display.
     std::vector<std::string> resolutionStrings;
-    for(auto& resolution : Services::GetRenderer()->GetResolutions())
+    for(auto& resolution : Window::GetResolutions())
     {
-        resolutionStrings.push_back(StringUtil::Format("%i x %i", resolution.width, resolution.height));
+        resolutionStrings.push_back(StringUtil::Format("%u x %u", resolution.width, resolution.height));
     }
     mResolutionDropdown->SetChoices(resolutionStrings);
 
     // Set current resolution in dropdown as the current choice.
-    int currentWidth = Services::GetRenderer()->GetWindowWidth();
-    int currentHeight = Services::GetRenderer()->GetWindowHeight();
-    mResolutionDropdown->SetCurrentChoice(StringUtil::Format("%i x %i", currentWidth, currentHeight));
+    uint32_t currentWidth = Window::GetWidth();
+    uint32_t currentHeight = Window::GetHeight();
+    mResolutionDropdown->SetCurrentChoice(StringUtil::Format("%u x %u", currentWidth, currentHeight));
 }
 
 void OptionBar::OnGameOptionsButtonPressed(UIButton* button)

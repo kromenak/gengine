@@ -7,6 +7,7 @@
 #include "UILabel.h"
 #include "UITextBuffer.h"
 #include "UITextInput.h"
+#include "Window.h"
 
 ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 	mMini(mini)
@@ -133,7 +134,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 		
 		// Calculate max number of lines in the console.
 		//TODO: Need to recalculate this if the screen resolution changes.
-		float availableHeight = Services::GetRenderer()->GetWindowHeight();
+        float availableHeight = Window::GetHeight();
 		availableHeight -= CalcInputFieldHeight();
 		mMaxScrollbackLineCount = availableHeight / mScrollbackBuffer->GetFont()->GetGlyphHeight();
 

@@ -5,18 +5,15 @@
 //
 #pragma once
 #include <GL/glew.h>
-//#include <OpenGL/gl.h>
 
-class Material;
+#include "Material.h"
+
 class Mesh;
 class Texture;
 
 class Skybox
 {
 public:
-    Skybox();
-	~Skybox();
-	
     void Render();
     
 	void SetRightTexture(Texture* texture);
@@ -28,8 +25,6 @@ public:
     
     void SetAzimuth(float azimuth) { mAzimuth = azimuth; }
 	
-	void SetMaterial(Material& material) { mMaterial = &material; }
-    
 private:
     // Textures for various sides of the skybox.
     Texture* mRightTexture = nullptr;
@@ -49,7 +44,7 @@ private:
     GLuint mCubemapTextureId = GL_NONE;
 	
 	// Material used for rendering.
-	Material* mMaterial = nullptr;
+	Material mMaterial;
 	
 	void SetDefaultTexture(Texture* texture);
 };

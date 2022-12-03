@@ -25,6 +25,7 @@
 #include "Timers.h"
 #include "ThreadPool.h"
 #include "VerbManager.h"
+#include "Window.h"
 
 GEngine* GEngine::sInstance = nullptr;
 
@@ -340,7 +341,7 @@ void GEngine::ProcessInput()
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_ALT) != 0)
                     {
-                        mRenderer.ToggleFullscreen();
+                        Window::ToggleFullscreen();
                     }
                 }
 				break;
@@ -368,7 +369,7 @@ void GEngine::ProcessInput()
                 if(event.window.event == SDL_WINDOWEVENT_MOVED)
                 {
                     // Let renderer know so it can process and take any action.
-                    mRenderer.OnWindowPositionChanged();
+                    Window::OnPositionChanged();
                 }
                 break;
             }
@@ -420,7 +421,7 @@ void GEngine::Update()
 	// Update debug visualizations.
 	Debug::Update(deltaTime);
 
-    // Update thread pool.
+    // Run any waiting functions on the main thread.
     ThreadUtil::RunFunctionsOnMainThread();
 }
 

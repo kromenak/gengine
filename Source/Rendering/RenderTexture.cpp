@@ -1,8 +1,3 @@
-//
-// RenderTexture.cpp
-//
-// Clark Kromenaker
-//
 #include "RenderTexture.h"
 
 #include <iostream>

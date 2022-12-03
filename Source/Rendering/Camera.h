@@ -1,6 +1,4 @@
 //
-// Camera.h
-//
 // Clark Kromenaker
 //
 // Represents a virtual camera in the game world. At least one is required to render anything!

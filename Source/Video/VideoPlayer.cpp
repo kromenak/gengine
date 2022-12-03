@@ -6,6 +6,7 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "VideoState.h"
+#include "Window.h"
 
 TYPE_DEF_BASE(VideoPlayer);
 
@@ -80,7 +81,7 @@ void VideoPlayer::Update()
             break;
             
         case SizeMode::Fullscreen:
-            videoSize = Services::GetRenderer()->GetWindowSize();
+            videoSize = Window::GetSize();
             break;
             
         case SizeMode::Custom:

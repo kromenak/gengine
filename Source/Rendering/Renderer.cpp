@@ -84,54 +84,9 @@ float ui_quad_uvs[] = {
 };
 Mesh* uiQuad = nullptr;
 
-void DumpVideoInfo(SDL_Window* window)
-{
-    // Output drivers.
-    int driverCount = SDL_GetNumVideoDrivers();
-    for(int i = 0; i < driverCount; ++i)
-    {
-        SDL_Log("Driver %i: %s\n", i, SDL_GetVideoDriver(i));
-    }
-    SDL_Log("Current Driver: %s\n", SDL_GetCurrentVideoDriver());
-
-    // Output displays.
-    int displayCount = SDL_GetNumVideoDisplays();
-    for(int i = 0; i < displayCount; ++i)
-    {
-        float ddpi = 0.0f;
-        float hdpi = 0.0f;
-        float vdpi = 0.0f;
-        SDL_GetDisplayDPI(i, &ddpi, &hdpi, &vdpi);
-
-        SDL_Log("Display %i: %s (%f DPI)\n", i, SDL_GetDisplayName(i), ddpi);
-
-        SDL_DisplayMode mode;
-        SDL_GetCurrentDisplayMode(i, &mode);
-        SDL_Log("  Current Display Mode: (%i x %i @ %iHz)\n", mode.w, mode.h, mode.refresh_rate);
-
-        SDL_GetDesktopDisplayMode(i, &mode);
-        SDL_Log("  Desktop Display Mode: (%i x %i @ %iHz)\n", mode.w, mode.h, mode.refresh_rate);
-
-        int displayModes = SDL_GetNumDisplayModes(i);
-        SDL_Log("  Num Display Modes: %i \n", displayModes);
-        for(int j = 0; j < displayModes; ++j)
-        {
-            SDL_GetDisplayMode(i, j, &mode);
-            SDL_Log("  (%i x %i @ %iHz)\n", mode.w, mode.h, mode.refresh_rate);
-        }
-    }
-    SDL_Log("Current Display Index: %i\n", SDL_GetWindowDisplayIndex(window));
-}
-
 bool Renderer::Initialize()
 {
     TIMER_SCOPED("Renderer::Initialize");
-
-    // Init video subsystem.
-    if(SDL_InitSubSystem(SDL_INIT_VIDEO) != 0)
-    {
-        return false;
-    }
     
     // Tell SDL we want to use OpenGL 3.3
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -148,37 +103,6 @@ bool Renderer::Initialize()
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 
-    DetectAvailableResolutions();
-
-    // Determine what window creation params to use.
-    Uint32 flags = SDL_WINDOW_OPENGL;
-    if(gSaveManager.GetPrefs()->GetBool(PREFS_ENGINE, PREF_FULLSCREEN, false))
-    {
-        flags |= SDL_WINDOW_FULLSCREEN;
-    }
-
-    // Determine desired window position.
-    std::string xStr = gSaveManager.GetPrefs()->GetString(PREFS_ENGINE, PREF_WINDOW_X, "center");
-    int xPos = SDL_WINDOWPOS_CENTERED;
-    if(!StringUtil::EqualsIgnoreCase(xStr, "center") && !StringUtil::EqualsIgnoreCase(xStr, "default"))
-    {
-        xPos = StringUtil::ToInt(xStr);
-    }
-
-    std::string yStr = gSaveManager.GetPrefs()->GetString(PREFS_ENGINE, PREF_WINDOW_Y, "center");
-    int yPos = SDL_WINDOWPOS_CENTERED;
-    if(!StringUtil::EqualsIgnoreCase(yStr, "center") && !StringUtil::EqualsIgnoreCase(yStr, "default"))
-    {
-        yPos = StringUtil::ToInt(yStr);
-    }
-
-    // Determine desired window size.
-    mCurrentResolution.width = gSaveManager.GetPrefs()->GetInt(PREFS_ENGINE, PREF_SCREEN_WIDTH, kDefaultScreenWidth);
-    mCurrentResolution.height = gSaveManager.GetPrefs()->GetInt(PREFS_ENGINE, PREF_SCREEN_HEIGHT, kDefaultScreenHeight);
-
-    // Create a window.
-    mWindow = SDL_CreateWindow("Gabriel Knight 3", xPos, yPos, mCurrentResolution.width, mCurrentResolution.height, flags);
-    if(!mWindow) { return false; }
     
     // Create OpenGL context.
     mContext = SDL_GL_CreateContext(mWindow);
@@ -217,11 +141,6 @@ bool Renderer::Initialize()
 	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Tex");
 	if(defaultShader == nullptr) { return false; }
 	Material::sDefaultShader = defaultShader;
-	
-    // Load skybox shader and create material.
-    Shader* skyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
-    if(skyboxShader == nullptr) { return false; }
-	mSkyboxMaterial.SetShader(skyboxShader);
 
     // Pre-load additional shaders.
     // One reason this is important is because GL commands can only run on the main thread.
@@ -307,8 +226,7 @@ bool Renderer::Initialize()
 void Renderer::Shutdown()
 {
     SDL_GL_DeleteContext(mContext);
-    SDL_DestroyWindow(mWindow);
-    SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    Window::Destroy();
 }
 
 void Renderer::Render()
@@ -399,7 +317,7 @@ void Renderer::Render()
     // UI uses a view/proj setup for now - world space for UI maps to pixel size of screen.
     // Bottom-left corner of screen is origin, +x is right, +y is up.
     Material::SetViewMatrix(Matrix4::Identity);
-    Material::SetProjMatrix(RenderTransforms::MakeOrthoBottomLeft(static_cast<float>(GetWindowWidth()), static_cast<float>(GetWindowHeight())));
+    Material::SetProjMatrix(RenderTransforms::MakeOrthoBottomLeft(static_cast<float>(Window::GetWidth()), static_cast<float>(Window::GetHeight())));
     
     // Render UI elements.
     // Any renderable UI element is contained within a Canvas.
@@ -455,100 +373,6 @@ void Renderer::RemoveMeshRenderer(MeshRenderer* mr)
 void Renderer::SetSkybox(Skybox* skybox)
 {
 	mSkybox = skybox;
-	if(mSkybox != nullptr)
-	{
-		mSkybox->SetMaterial(mSkyboxMaterial);
-	}
-}
-
-void Renderer::ToggleFullscreen()
-{
-    // Get current setting and toggle it.
-    bool isFullscreen = SDL_GetWindowFlags(mWindow) & SDL_WINDOW_FULLSCREEN;
-    isFullscreen = !isFullscreen;
-
-    // Change display mode.
-    SDL_SetWindowFullscreen(mWindow, isFullscreen ? SDL_WINDOW_FULLSCREEN : 0);
-
-    // Save preference.
-    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_FULLSCREEN, isFullscreen);
-}
-
-const std::vector<Renderer::Resolution>& Renderer::GetResolutions()
-{
-    int displayIndex = SDL_GetWindowDisplayIndex(mWindow);
-    return mResolutions[displayIndex];
-}
-
-void Renderer::SetWindowSize(int width, int height)
-{
-    // The way we set the window size depends on whether we're fullscreen or not.
-    bool isFullscreen = SDL_GetWindowFlags(mWindow) & SDL_WINDOW_FULLSCREEN;
-    if(!isFullscreen)
-    {
-        // When not fullscreen, just set the window size.
-        // And there's no technical limitation on the window size really.
-        SDL_SetWindowSize(mWindow, width, height);
-    }
-    else
-    {
-        // In fullscreen, we've got to use a resolution supported by the monitor.
-        // Grab the display index the game is currently presenting on.
-        int displayIndex = SDL_GetWindowDisplayIndex(mWindow);
-
-        // Create a desired mode with given width/height. Assume 60Hz and whatever pixel format is fine.
-        SDL_DisplayMode desiredMode;
-        desiredMode.w = width;
-        desiredMode.h = height;
-        desiredMode.refresh_rate = 60;
-        desiredMode.format = SDL_PIXELFORMAT_UNKNOWN;
-
-        // Find the closest supported mode to our desired mode.
-        SDL_DisplayMode supportedMode;
-        SDL_GetClosestDisplayMode(displayIndex, &desiredMode, &supportedMode);
-
-        // Set the display mode.
-        SDL_SetWindowDisplayMode(mWindow, &supportedMode);
-
-        // Update passed width/height to match supported mode (so we save a valid pref).
-        width = supportedMode.w;
-        height = supportedMode.h;
-    }
-
-    // Change the OpenGL viewport to match the new width/height.
-    // If you don't do this, the window size changes but the area rendered to doesn't change.
-    glViewport(0, 0, width, height);
-
-    // Save preference.
-    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_SCREEN_WIDTH, width);
-    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_SCREEN_HEIGHT, height);
-
-    // Save new resolution.
-    mCurrentResolution.width = width;
-    mCurrentResolution.height = height;
-
-    // Because some RectTransforms may rely on the window size, we need to dirty all root RectTransforms in the scene.
-    for(auto& actor : GEngine::Instance()->GetActors())
-    {
-        if(actor->GetTransform()->GetParent() == nullptr &&
-           actor->GetTransform()->IsTypeOf(RectTransform::GetType()))
-        {
-            actor->GetTransform()->SetDirty();
-        }
-    }
-}
-
-void Renderer::OnWindowPositionChanged()
-{
-    // Save new display index, in case window moved to new display.
-    int displayIndex = SDL_GetWindowDisplayIndex(mWindow);
-    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_MONITOR, displayIndex);
-
-    // Save new x/y position of window.
-    int x, y;
-    SDL_GetWindowPosition(mWindow, &x, &y);
-    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_WINDOW_X, x);
-    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_WINDOW_Y, y);
 }
 
 void Renderer::SetUseMipmaps(bool useMipmaps)
@@ -587,37 +411,21 @@ void Renderer::SetUseTrilinearFiltering(bool useTrilinearFiltering)
     }
 }
 
-void Renderer::DetectAvailableResolutions()
+void Renderer::ChangeResolution(const Window::Resolution& resolution)
 {
-    // For each display, generate a list of supported resolutions.
-    int displayCount = SDL_GetNumVideoDisplays();
-    for(int i = 0; i < displayCount; ++i)
+    Window::SetResolution(resolution);
+    
+    // Change the OpenGL viewport to match the new width/height.
+    // If you don't do this, the window size changes but the area rendered to doesn't change.
+    glViewport(0, 0, resolution.width, resolution.height);
+
+    // Because some RectTransforms may rely on the window size, we need to dirty all root RectTransforms in the scene.
+    for(auto& actor : GEngine::Instance()->GetActors())
     {
-        mResolutions.emplace_back();
-        std::vector<Resolution>& resolutions = mResolutions.back();
-
-        // Iterate each display mode supported by this monitor and populate a list of resolutions.
-        // NOTE: Technically, in windowed mode, ANY resolution is valid - these resolutions are really only for fullscreen.
-        // NOTE: But for simplicity, we'll use the same resolution set for windowed & fullscreen modes. Other resolutions can be set in the prefs file directly.
-        int displayModes = SDL_GetNumDisplayModes(i);
-        for(int j = 0; j < displayModes; ++j)
+        if(actor->GetTransform()->GetParent() == nullptr &&
+           actor->GetTransform()->IsTypeOf(RectTransform::GetType()))
         {
-            SDL_DisplayMode mode;
-            SDL_GetDisplayMode(i, j, &mode);
-
-            // There are likely some supported resolutions that we can safely ignore.
-            // For example, if the height is larger than the width, that isn't a great choice for this type of game!
-            if(mode.h >= mode.w) { continue; }
-
-            // GetDisplayMode will contain dupes for different supported refresh rates.
-            // Only add one entry per resolution. Fortunately, the display modes are sorted so this works.
-            if(resolutions.empty() || (resolutions.back().width != mode.w || resolutions.back().height != mode.h))
-            {
-                Resolution res;
-                res.width = mode.w;
-                res.height = mode.h;
-                resolutions.push_back(res);
-            }
+            actor->GetTransform()->SetDirty();
         }
     }
 }

@@ -54,16 +54,6 @@ float points[] = {
      10.0f, -10.0f,  10.0f
 };
 
-Skybox::Skybox()
-{
-	
-}
-
-Skybox::~Skybox()
-{
-	
-}
-
 void Skybox::Render()
 {
     // Generate submesh on the fly, if not yet generated.
@@ -75,6 +65,10 @@ void Skybox::Render()
         
         mSkyboxMesh = new Mesh();
         mSkyboxMesh->AddSubmesh(meshDefinition);
+        
+        // Also use this opportunity to set the shader on the material.
+        Shader* skyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
+        mMaterial.SetShader(skyboxShader);
     }
     
     if(mCubemapTextureId == GL_NONE)
@@ -132,8 +126,7 @@ void Skybox::Render()
     }
 	
 	// Activate the material (or fail).
-	if(mMaterial == nullptr) { return; }
-	mMaterial->Activate(Matrix4::Identity);
+	mMaterial.Activate(Matrix4::Identity);
 	
 	// Activate and bind the cubemap texture.
     glActiveTexture(GL_TEXTURE0);

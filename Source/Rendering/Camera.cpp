@@ -3,6 +3,7 @@
 #include "Actor.h"
 #include "RenderTransforms.h"
 #include "Services.h"
+#include "Window.h"
 
 TYPE_DEF_CHILD(Component, Camera);
 
@@ -40,7 +41,7 @@ Matrix4 Camera::GetLookAtMatrixNoTranslate()
 
 Matrix4 Camera::GetProjectionMatrix()
 {
-    Vector2 windowSize = Services::GetRenderer()->GetWindowSize();
+    Vector2 windowSize = Window::GetSize();
     return RenderTransforms::MakePerspective(mFovAngleRad, windowSize.x / windowSize.y, mNearClipPlane, mFarClipPlane);
 }
 
@@ -52,8 +53,8 @@ Frustum Camera::GetWorldSpaceViewFrustum()
 Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 {
     // First, convert point to NDC space.
-	float screenWidth = Services::GetRenderer()->GetWindowWidth();
-	float screenHeight = Services::GetRenderer()->GetWindowHeight();
+	float screenWidth = Window::GetWidth();
+	float screenHeight = Window::GetHeight();
     Vector4 point = RenderTransforms::ScreenPointToNDCPoint(screenPoint, distance, screenWidth, screenHeight);
     
     // Usually, a point is converted from world to NDC using a "worldToProjection" matrix.

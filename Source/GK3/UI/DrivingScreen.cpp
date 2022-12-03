@@ -14,6 +14,7 @@
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
+#include "Window.h"
 
 DrivingScreen::DrivingScreen() : Actor(TransformType::RectTransform)
 {
@@ -123,7 +124,7 @@ void DrivingScreen::Show(FollowMode followMode)
 
     // Make sure the map fits snugly in the window area, with aspect ratio preserved.
     // We do this every time the UI shows in case resolution has changed.
-    mMapImage->ResizeToFitPreserveAspect(Services::GetRenderer()->GetWindowSize());
+    mMapImage->ResizeToFitPreserveAspect(Window::GetSize());
     
     // Put all blips in starting positions, with paths set if needed.
     mFollowMode = followMode;

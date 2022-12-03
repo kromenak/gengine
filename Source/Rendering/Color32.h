@@ -40,6 +40,7 @@ public:
 	bool operator!=(const Color32& other) const;
 	
 	// Accessors
+    //TODO: Get rid of SetRGBA/GetRGBA - direct access is fine.
 	void SetR(unsigned char newR) { r = newR; }
 	void SetG(unsigned char newG) { g = newG; }
 	void SetB(unsigned char newB) { b = newB; }
@@ -66,7 +67,6 @@ public:
     // Lerp
     static Color32 Lerp(const Color32& from, const Color32& to, float t);
 	
-private:
 	// Color components, valued 0-255 each.
 	// Order is important for memory layout!
 	unsigned char r = 0;

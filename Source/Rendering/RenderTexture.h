@@ -1,6 +1,4 @@
 //
-// RenderTexture.h
-//
 // Clark Kromenaker
 //
 // A texture that can be rendered to. When activated, render commands
@@ -13,7 +11,6 @@
 //
 #pragma once
 #include <GL/glew.h>
-//#include <OpenGL/gl.h>
 
 #include "Texture.h"
 

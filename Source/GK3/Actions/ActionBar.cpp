@@ -9,6 +9,7 @@
 #include "UICanvas.h"
 #include "UILabel.h"
 #include "VerbManager.h"
+#include "Window.h"
 
 ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 {
@@ -331,7 +332,7 @@ void ActionBar::CenterOnPointer()
 	mButtonHolder->SetAnchoredPosition(Services::GetInput()->GetMousePosition());
 	
 	// Keep inside the screen.
-    mButtonHolder->MoveInsideRect(Services::GetRenderer()->GetWindowRect());
+    mButtonHolder->MoveInsideRect(Window::GetRect());
 }
 
 void ActionBar::OnCancelButtonPressed()

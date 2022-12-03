@@ -1,6 +1,4 @@
 //
-// Shader.h
-//
 // Clark Kromenaker
 //
 // A compiled and linked shader program.

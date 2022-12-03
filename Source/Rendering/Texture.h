@@ -10,7 +10,6 @@
 #include <string>
 
 #include <GL/glew.h>
-//#include <OpenGL/gl.h>
 
 #include "Atomics.h"
 #include "Color32.h"

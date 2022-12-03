@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "Color32.h"
 #include "Vector2.h"
 
 class DrivingScreenBlip;

@@ -9,6 +9,7 @@
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
+#include "Window.h"
 
 InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
     mLayer("InventoryLayer")
@@ -143,7 +144,7 @@ void InventoryScreen::RefreshLayout()
         }
 
         // If this next item will go offscreen, we should move down to next row.
-        if(x + itemTexture->GetWidth() > Services::GetRenderer()->GetWindowWidth())
+        if(x + itemTexture->GetWidth() > Window::GetWidth())
         {
             x = kStartX;
             y -= (itemTexture->GetHeight() + kSpacingY);
