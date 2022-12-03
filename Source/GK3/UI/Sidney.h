@@ -54,7 +54,9 @@ private:
     {
         std::string type;
         std::string name;
+        SidneyFile() = default;
         SidneyFile(const std::string& type, const std::string& name) : type(type), name(name) { }
+        SidneyFile(const SidneyFile&) = default;
     };
     struct SidneyDirectory
     {
