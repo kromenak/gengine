@@ -112,7 +112,7 @@ bool GEngine::Initialize()
     mCursorManager.UseLoadCursor();
     
     // Create localizer.
-    Services::Set<Localizer>(new Localizer());
+    Services::Set<Localizer>(new Localizer("STRINGS.TXT"));
     
 	// Load verb manager.
 	Services::Set<VerbManager>(new VerbManager());
