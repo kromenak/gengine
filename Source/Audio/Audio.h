@@ -13,8 +13,6 @@ class Audio : public Asset
 public:
     Audio(const std::string& name, char* data, int dataLength);
 	~Audio();
-	
-    void WriteToFile();
     
     char* GetDataBuffer() const { return mDataBuffer; }
     int GetDataBufferLength() const { return mDataBufferLength; }

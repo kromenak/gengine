@@ -19,17 +19,6 @@ Audio::~Audio()
 	delete[] mDataBuffer;
 }
 
-void Audio::WriteToFile()
-{
-    std::ofstream fileStream(mName);
-    if(fileStream.good())
-    {
-        fileStream.write(mDataBuffer, mDataBufferLength);
-        fileStream.close();
-        std::cout << "Wrote out " << mName << std::endl;
-    }
-}
-
 void Audio::ParseFromData(char* data, int dataLength)
 {
     BinaryReader reader(data, dataLength);

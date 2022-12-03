@@ -421,7 +421,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
 		else
 		{
 			// Most other assets can just be written out directly.
-			std::ofstream fileStream(outputPath);
+			std::ofstream fileStream(outputPath, std::istream::out | std::istream::binary);
 			if(fileStream.good())
 			{
 				fileStream.write(assetData, bufferSize);
