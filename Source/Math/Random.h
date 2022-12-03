@@ -1,6 +1,4 @@
 //
-// Random.h
-//
 // Clark Kromenaker
 //
 // Wrapper for random number utilities.

@@ -9,7 +9,9 @@
 #include <string>
 #include <vector>
 
+#include "SidneyAddData.h"
 #include "SidneyEmail.h"
+#include "SidneyFiles.h"
 #include "SidneySearch.h"
 #include "StringUtil.h"
 
@@ -36,6 +38,10 @@ private:
     // New email label.
     UILabel* mNewEmailLabel = nullptr;
 
+    // If true, play "New Email" SFX on next update.
+    // Doing this avoids issue where this SFX won't play when you use Action Skip.
+    bool mPlayNewEmailSfx = false;
+
     // Controls email label blink behavior.
     const float kNewEmailBlinkInterval = 0.5f;
     float mNewEmailBlinkTimer = -1.0f;
@@ -48,33 +54,6 @@ private:
     // Various subscreens.
     SidneySearch mSearch;
     SidneyEmail mEmail;
-
-    // The "hard drive" directory & file structure for Sidney.
-    struct SidneyFile
-    {
-        std::string type;
-        std::string name;
-        SidneyFile() = default;
-        SidneyFile(const std::string& type, const std::string& name) : type(type), name(name) { }
-        SidneyFile(const SidneyFile&) = default;
-    };
-    struct SidneyDirectory
-    {
-        std::string name;
-        std::vector<SidneyFile> files;
-
-        bool HasFile(const std::string& fileName)
-        {
-            for(auto& file : files)
-            {
-                if(StringUtil::EqualsIgnoreCase(file.name, fileName)) { return true; }
-            }
-            return false;
-        }
-    };
-    std::vector<SidneyDirectory> mData;
-
-    // A list of files that *can* be scanned into Sidney.
-    // The index is important, as that's how the "Add Data" & localization mechanisms identify a file.
-    std::vector<SidneyFile> mKnownFiles;
+    SidneyFiles mFiles;
+    SidneyAddData mAddData;
 };
