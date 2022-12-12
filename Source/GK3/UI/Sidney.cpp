@@ -5,6 +5,7 @@
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Scene.h"
+#include "SidneyUtil.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -77,7 +78,7 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         // Add exit button text.
         UILabel* exitLabel = exitButtonActor->AddComponent<UILabel>();
         exitLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_18.FON"));
-        exitLabel->SetText("EXIT");
+        exitLabel->SetText(SidneyUtil::GetMainScreenLocalizer().GetText("MenuItem9"));
         exitLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         exitLabel->SetVerticalAlignment(VerticalAlignment::Center);
     }
@@ -121,9 +122,9 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
 
         buttonPos += kButtonSpacing;
         UIButton* filesButton = CreateMainButton(desktopBackground, "FILES", buttonPos);
-        filesButton->SetPressCallback([](UIButton* button){
+        filesButton->SetPressCallback([this](UIButton* button){
             Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
-            printf("Files\n");
+            mFiles.Show();
         });
 
         buttonPos += kButtonSpacing;

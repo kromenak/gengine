@@ -6,7 +6,6 @@
 #pragma once
 #include <unordered_map>
 
-#include "Localizer.h"
 #include "Vector2.h"
 
 class Actor;
@@ -31,9 +30,6 @@ private:
     // Other Sidney modules this module needs to interface with.
     Sidney* mSidney = nullptr;
     SidneyFiles* mSidneyFiles = nullptr;
-
-    // Localizations for this module.
-    Localizer mLocalizer;
 
     // If true, we're actively adding data.
     bool mAddingData = false;

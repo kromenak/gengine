@@ -28,8 +28,6 @@ public:
     void Hide();
 
     bool HasFile(const std::string& fileName);
-    bool HasFile(const std::string& type, const std::string& fileName);
-    void AddFile(const std::string& type, const std::string& fileName);
 
 protected:
     void OnUpdate(float deltaTime) override;

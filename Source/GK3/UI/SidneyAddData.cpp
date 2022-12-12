@@ -15,9 +15,6 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     mSidney = sidney;
     mSidneyFiles = sidneyFiles;
 
-    // Load localizations.
-    mLocalizer.Load("SIDNEY.TXT", "AddData Screen");
-
     // Add "Add Data" dialog box.
     {
         mAddDataBox = new Actor(TransformType::RectTransform);
@@ -190,7 +187,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                     mInputCompleteBox->SetActive(true);
 
                     // Figure out name of this item, which will be added to the input box.
-                    mTextToType = mLocalizer.GetText("ScanItem" + std::to_string(sidneyFileIndex + 1));
+                    mTextToType = SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(sidneyFileIndex + 1));
                     mTextToTypeIndex = 0;
                     mTextToTypeTimer = Random::Range(kMinMaxTypeInterval.x, kMinMaxTypeInterval.y);
                 });
