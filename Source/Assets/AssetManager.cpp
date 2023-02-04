@@ -219,7 +219,16 @@ Model* AssetManager::LoadModel(const std::string& name)
 
 Texture* AssetManager::LoadTexture(const std::string& name)
 {
-    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), &mLoadedTextures);
+    // Load texture, attempting to add .BMP extension if asset name has no extension.
+    Texture* texture = LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), &mLoadedTextures);
+
+    //HACK: If a period exists in the asset name, it can mess up extension adding logic. (Ex: "PREP.HTOP" should resolve to "PREP.HTOP.BMP")
+    //HACK: To fix this, if a texture load fails, try again forcing the BMP extension.
+    if(texture == nullptr)
+    {
+        texture = LoadAsset<Texture>(name + ".BMP", &mLoadedTextures);
+    }
+    return texture;
 }
 
 Texture* AssetManager::LoadSceneTexture(const std::string& name)
@@ -365,7 +374,7 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
 TextAsset* AssetManager::LoadText(const std::string& name)
 {
     // Specifically DO NOT delete the asset buffer when creating TextAssets, since they take direct ownership of it.
-    return LoadAsset<TextAsset>(SanitizeAssetName(name, ""), &mLoadedTexts, nullptr, false);
+    return LoadAsset<TextAsset>(name, &mLoadedTexts, nullptr, false);
 }
 
 void AssetManager::UnloadText(TextAsset* text)
