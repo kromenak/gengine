@@ -8,6 +8,7 @@
 
 #include "Color32.h"
 #include "Matrix4.h"
+#include "Sphere.h"
 
 class AABB;
 class Mesh;

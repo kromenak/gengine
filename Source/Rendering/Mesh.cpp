@@ -49,7 +49,7 @@ bool Mesh::Raycast(const Ray& ray, RaycastHit& hitInfo)
 		// This isn't how the original game works, so I think they must do a per-triangle check as well.
 		for(auto& submesh : mSubmeshes)
 		{
-			if(submesh->Raycast(ray))
+			if(submesh->Raycast(ray, hitInfo))
 			{
 				return true;
 			}

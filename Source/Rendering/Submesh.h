@@ -10,6 +10,7 @@
 #include "Vector3.h"
 #include "VertexArray.h"
 
+struct RaycastHit;
 class Ray;
 
 enum class RenderMode
@@ -37,7 +38,7 @@ public:
 	int GetTriangleCount() const;
 	bool GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) const;
 	
-	bool Raycast(const Ray& ray);
+	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
     
     void SetPositions(float* positions);
     float* GetPositions() { return mPositions; }

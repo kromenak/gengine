@@ -9,7 +9,6 @@
 #include "Rect.h"
 #include "Renderer.h"
 #include "Services.h"
-#include "Sphere.h"
 #include "Triangle.h"
 #include "Vector3.h"
 

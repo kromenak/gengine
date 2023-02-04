@@ -100,15 +100,15 @@ bool Submesh::GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) cons
 	return false;
 }
 
-bool Submesh::Raycast(const Ray& ray)
+bool Submesh::Raycast(const Ray& ray, RaycastHit& hitInfo)
 {
 	if(mRenderMode != RenderMode::Triangles || mIndexes == nullptr)
 	{
 		std::cout << "Submesh::Raycast only supports Triangle meshes with indexes for now - aborting." << std::endl;
 		return false;
 	}
-	
-    RaycastHit hitInfo;
+
+    // See if the ray hits any triangle.
 	for(int i = 0; i < mVertexArray.GetIndexCount(); i += 3)
 	{
 		Vector3 vert1 = GetVertexPosition(mIndexes[i]);

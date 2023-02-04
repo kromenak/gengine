@@ -231,6 +231,7 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
             // So, convert "t" back to world space before returning.
             Vector3 hitPoint = localRay.GetPoint(hitInfo.t);
             Vector3 hitPointWorldPos = meshToWorldMatrix.TransformPoint(hitPoint);
+            //Debug::DrawSphere(Sphere(hitPointWorldPos, 1.0f), Color32::Red, 1.0f);
             hitInfo.t = (ray.origin - hitPointWorldPos).GetLength();
 			return true;
 		}

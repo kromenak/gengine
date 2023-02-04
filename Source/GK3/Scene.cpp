@@ -454,6 +454,8 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObj
         RaycastHit hitInfo;
         if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
         {
+            //Vector3 worldPos = ray.GetPoint(hitInfo.t);
+            //printf("Raycast hit %s, yPos=%f\n", object->GetNoun().c_str(), worldPos.y);
             if(hitInfo.t < result.hitInfo.t)
             {
                 result.hitInfo = hitInfo;
@@ -466,6 +468,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObj
 	// This is because GKObjects don't currently do this during raycast.
 	if(result.hitObject != nullptr)
 	{
+        //Debug::DrawSphere(Sphere(ray.GetPoint(result.hitInfo.t), 1.0f), Color32::Red, 1.0f);
 		result.hitInfo.name = result.hitObject->GetNoun();
 	}
 	
