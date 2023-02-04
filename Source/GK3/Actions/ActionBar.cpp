@@ -139,12 +139,26 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 		mHasInventoryItemButton = !activeItemName.empty() && !StringUtil::EqualsIgnoreCase(activeItemName, noun);
 		if(mHasInventoryItemButton)
 		{
-			VerbIcon& invVerbIcon = verbManager->GetInventoryIcon(activeItemName);
+            // Usually, the name of the inventory item correlates EXACTLY to the verb used for that item.
+            // However, this isn't the case in a few instances. This seems like a developer error.
+            // I don't see any place where a mapping is defined, so I think it must be hardcoded (like this).
+            std::string invItemVerb = activeItemName;
+            if(StringUtil::EqualsIgnoreCase(activeItemName, "FINGERPRINT_KIT_GRACES"))
+            {
+                invItemVerb = "FINGERPRINT_KIT";
+            }
+            else if(StringUtil::EqualsIgnoreCase(activeItemName, "PREPARATION_H_TUBE"))
+            {
+                invItemVerb = "PREPARATION_H";
+            }
+
+            // Create a button for this inventory item.
+			VerbIcon& invVerbIcon = verbManager->GetInventoryIcon(invItemVerb);
 			UIButton* invButton = AddButton(buttonIndex, invVerbIcon, "INV");
 			++buttonIndex;
 			
 			// Create callback for inventory button press.
-            const Action* invAction = Services::Get<ActionManager>()->GetAction(noun, activeItemName);
+            const Action* invAction = Services::Get<ActionManager>()->GetAction(noun, invItemVerb);
 			invButton->SetPressCallback([this, invAction, executeCallback](UIButton* button) {
 				// Hide action bar on button press.
 				this->Hide();
