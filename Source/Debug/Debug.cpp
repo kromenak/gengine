@@ -18,11 +18,77 @@ extern Mesh* axes;
 std::list<DrawCommand> Debug::sDrawCommands;
 Shader* Debug::sDrawShader = nullptr;
 
+FlagSet Debug::sDebugFlags;
+
 // Default debug settings.
 bool Debug::sRenderActorTransformAxes = false;
 bool Debug::sRenderSubmeshLocalAxes = false;
 bool Debug::sRenderRectTransformRects = false;
-bool Debug::sRenderAABBs = false;
+
+void Debug::Update(float deltaTime)
+{
+    // Decrement timers in all draw commands.
+    for(auto& command : sDrawCommands)
+    {
+        command.timer -= deltaTime;
+    }
+
+    // Check for debug setting inputs.
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F1))
+    {
+        sRenderActorTransformAxes = !sRenderActorTransformAxes;
+    }
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F2))
+    {
+        sRenderSubmeshLocalAxes = !sRenderSubmeshLocalAxes;
+    }
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F3))
+    {
+        sRenderRectTransformRects = !sRenderRectTransformRects;
+    }
+    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F5))
+    {
+        Debug::ToggleFlag("ShowBoundingBoxes");
+    }
+}
+
+void Debug::Render()
+{
+    if(sDrawShader == nullptr)
+    {
+        sDrawShader = Services::GetAssets()->LoadShader("3D-Color");
+    }
+
+    // We can just use any old material for now (uses default shader under the hood).
+    Material material(sDrawShader);
+
+    // Iterate over all draw commands and render them.
+    auto it = sDrawCommands.begin();
+    while(it != sDrawCommands.end())
+    {
+        DrawCommand& command = *it;
+
+        // Set color and world transform.
+        material.SetColor(command.color);
+        material.Activate(command.worldTransformMatrix);
+
+        // Draw the mesh.
+        if(command.mesh != nullptr)
+        {
+            command.mesh->Render();
+        }
+
+        // Erase from list if time is up.
+        if(command.timer <= 0.0f)
+        {
+            it = sDrawCommands.erase(it);
+        }
+        else
+        {
+            it++;
+        }
+    }
+}
 
 void Debug::DrawLine(const Vector3& from, const Vector3& to, const Color32& color, float duration)
 {
@@ -230,67 +296,3 @@ void Debug::DrawSphere(const Vector3& position, float radius, const Color32& col
     Debug::DrawLine(fromZ, toZ, color, duration);
 }
 
-void Debug::Update(float deltaTime)
-{
-	// Decrement timers in all draw commands.
-	for(auto& command : sDrawCommands)
-	{
-		command.timer -= deltaTime;
-	}
-	
-	// Check for debug setting inputs.
-	if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F1))
-	{
-		sRenderActorTransformAxes = !sRenderActorTransformAxes;
-	}
-	if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F2))
-	{
-		sRenderSubmeshLocalAxes = !sRenderSubmeshLocalAxes;
-	}
-	if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F3))
-	{
-		sRenderRectTransformRects = !sRenderRectTransformRects;
-	}
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F5))
-    {
-        sRenderAABBs = !sRenderAABBs;
-    }
-}
-
-void Debug::Render()
-{
-    if(sDrawShader == nullptr)
-    {
-        sDrawShader = Services::GetAssets()->LoadShader("3D-Color");
-    }
-    
-	// We can just use any old material for now (uses default shader under the hood).
-    Material material(sDrawShader);
-	
-	// Iterate over all draw commands and render them.
-	auto it = sDrawCommands.begin();
-	while(it != sDrawCommands.end())
-	{
-		DrawCommand& command = *it;
-		
-		// Set color and world transform.
-		material.SetColor(command.color);
-        material.Activate(command.worldTransformMatrix);
-		
-		// Draw the mesh.
-		if(command.mesh != nullptr)
-		{
-			command.mesh->Render();
-		}
-		
-		// Erase from list if time is up.
-		if(command.timer <= 0.0f)
-		{
-			it = sDrawCommands.erase(it);
-		}
-		else
-		{
-			it++;
-		}
-	}
-}

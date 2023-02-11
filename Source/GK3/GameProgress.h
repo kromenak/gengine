@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "FlagSet.h"
 #include "StringUtil.h"
 #include "Timeblock.h"
 #include "Type.h"
@@ -34,9 +35,10 @@ public:
     std::string GetTimeblockDisplayName() const;
 
     // Flags
-	bool GetFlag(const std::string& flagName) const;
-	void SetFlag(const std::string& flagName);
-	void ClearFlag(const std::string& flagName);
+    bool GetFlag(const std::string& flagName) const { return mGameFlags.Get(flagName); }
+    void SetFlag(const std::string& flagName) { mGameFlags.Set(flagName); }
+    void ClearFlag(const std::string& flagName) { mGameFlags.Clear(flagName); }
+    void DumpFlags() const { mGameFlags.Dump("game"); }
 
     // Game Variables
 	int GetGameVariable(const std::string& varName) const;
@@ -80,8 +82,7 @@ private:
 	Timeblock mLastTimeblock;
 	
 	// General-use true/false flags for game logic.
-	// Absence of a flag implies false; otherwise, true.
-	std::string_set_ci mGameFlags;
+    FlagSet mGameFlags;
 	
 	// Tracks the number of times the player has chatted with a noun.
 	std::string_map_ci<int> mChatCounts;

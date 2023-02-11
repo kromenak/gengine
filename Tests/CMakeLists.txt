@@ -41,6 +41,7 @@ target_include_directories(tests PRIVATE
     ../Source/Primitives
     ../Source/Rendering
     ../Source/Sheep
+    ../Source/Util
     ../Source/Video
 )
 

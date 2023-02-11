@@ -88,30 +88,6 @@ std::string GameProgress::GetTimeblockDisplayName() const
     return Services::Get<Localizer>()->GetText("Day" + mTimeblock.ToString());
 }
 
-bool GameProgress::GetFlag(const std::string& flagName) const
-{
-	// If the flag exists, it implies a "true" value.
-	// Absence of flag implies "false" value.
-	auto it = mGameFlags.find(flagName);
-	return it != mGameFlags.end();
-}
-
-void GameProgress::SetFlag(const std::string& flagName)
-{
-	// Doesn't matter whether we are setting an already set flag.
-	mGameFlags.insert(flagName);
-}
-
-void GameProgress::ClearFlag(const std::string& flagName)
-{
-	// Erase the flag from the container to "clear" it.
-	auto it = mGameFlags.find(flagName);
-	if(it != mGameFlags.end())
-	{
-		mGameFlags.erase(it);
-	}
-}
-
 int GameProgress::GetGameVariable(const std::string& varName) const
 {
 	auto it = mGameVariables.find(varName);

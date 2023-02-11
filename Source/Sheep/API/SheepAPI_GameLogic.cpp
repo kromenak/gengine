@@ -70,13 +70,12 @@ shpvoid ClearFlag(const std::string& flagName)
 }
 RegFunc1(ClearFlag, void, string, IMMEDIATE, REL_FUNC);
 
-/*
 shpvoid DumpFlags()
 {
+    Services::Get<GameProgress>()->DumpFlags();
     return 0;
 }
 RegFunc0(DumpFlags, void, IMMEDIATE, DEV_FUNC);
-*/
 
 int GetGameVariableInt(const std::string& varName)
 {
