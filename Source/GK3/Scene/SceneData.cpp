@@ -4,6 +4,7 @@
 #include "BSP.h"
 #include "Services.h"
 #include "StringUtil.h"
+#include "Texture.h"
 #include "WalkerBoundary.h"
 
 SceneData::SceneData(const std::string& location, const std::string& timeblock) : mTimeblock(timeblock)
@@ -93,8 +94,12 @@ void SceneData::ResolveSceneData()
 	// Also figure out whether we have a walker boundary - if so, create one.
 	if(!mGeneralSettings.walkerBoundaryTextureName.empty())
 	{
+        // Small thing, but since Texture class automatically uses magenta as a transparent color, clear that in this case.
+        Texture* walkerTexture = Services::GetAssets()->LoadTexture(mGeneralSettings.walkerBoundaryTextureName);
+        walkerTexture->ClearTransparentColor();
+
 		mWalkerBoundary = new WalkerBoundary();
-		mWalkerBoundary->SetTexture(Services::GetAssets()->LoadTexture(mGeneralSettings.walkerBoundaryTextureName));
+		mWalkerBoundary->SetTexture(walkerTexture);
 		mWalkerBoundary->SetSize(mGeneralSettings.walkerBoundarySize);
 		mWalkerBoundary->SetOffset(mGeneralSettings.walkerBoundaryOffset);
 	}

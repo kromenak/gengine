@@ -255,7 +255,7 @@ void Texture::Blit(Texture* source, int destX, int destY)
     dest.mDirtyFlags |= DirtyFlags::Pixels;
 }
 
-void Texture::SetTransparentColor(Color32 color)
+void Texture::SetTransparentColor(const Color32& color)
 {
 	if(mPixels == nullptr) { return; }
 	
@@ -276,6 +276,21 @@ void Texture::SetTransparentColor(Color32 color)
 		}
 	}
 	
+    // Mark dirty so it uploads to GPU on next use.
+    mDirtyFlags |= DirtyFlags::Pixels;
+}
+
+void Texture::ClearTransparentColor()
+{
+    if(mPixels == nullptr) { return; }
+
+    // Make sure all pixels are opaque.
+    int pixelByteCount = mWidth * mHeight * 4;
+    for(int i = 0; i < pixelByteCount; i += 4)
+    {
+        mPixels[i + 3] = 255;
+    }
+
     // Mark dirty so it uploads to GPU on next use.
     mDirtyFlags |= DirtyFlags::Pixels;
 }

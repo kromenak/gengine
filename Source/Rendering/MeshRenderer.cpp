@@ -268,7 +268,7 @@ AABB MeshRenderer::GetAABB() const
     return toReturn;
 }
 
-void MeshRenderer::DebugDrawAABBs()
+void MeshRenderer::DebugDrawAABBs(const Color32& color, const Color32& meshColor)
 {
     // The local-to-world matrix for this Actor is required for all meshes.
 	Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
@@ -280,11 +280,11 @@ void MeshRenderer::DebugDrawAABBs()
 		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
 	
 		// Debug draw the AABB.
-        Debug::DrawAABB(mesh->GetAABB(), Color32::Magenta, 0.0f, &meshToWorldMatrix);
+        Debug::DrawAABB(mesh->GetAABB(), meshColor, 0.0f, &meshToWorldMatrix);
 	}
 
     // Also draw the MeshRenderer's OVERALL AABB in a different color.
-    Debug::DrawAABB(GetAABB(), Color32::Orange);
+    Debug::DrawAABB(GetAABB(), color);
 }
 
 int MeshRenderer::GetIndexFromMeshSubmeshIndexes(int meshIndex, int submeshIndex)

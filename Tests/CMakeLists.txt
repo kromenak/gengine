@@ -34,6 +34,7 @@ target_include_directories(tests PRIVATE
     ../Source/Containers
     ../Source/Debug
     ../Source/GK3
+    ../Source/GK3/Scene
     ../Source/IO
     ../Source/Math
     ../Source/Memory

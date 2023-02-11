@@ -93,7 +93,8 @@ public:
                             Texture& dest, int destX, int destY);
 	
 	// Alpha and transparency
-	void SetTransparentColor(Color32 color);
+	void SetTransparentColor(const Color32& color);
+    void ClearTransparentColor();
 	void ApplyAlphaChannel(const Texture& alphaTexture);
 
     // GPU upload

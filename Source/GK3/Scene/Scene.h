@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "Collisions.h"
+#include "SceneConstruction.h"
 #include "SceneData.h"
 #include "SceneLayer.h"
 #include "Timeblock.h"
@@ -80,18 +81,20 @@ public:
 	bool IsSceneModelVisible(const std::string& modelName) const;
 	bool DoesSceneModelExist(const std::string& modelName) const;
 
+    void SetPaused(bool paused);
+
     SceneData* GetSceneData() const { return mSceneData; }
 	Animator* GetAnimator() const { return mAnimator; }
 	SoundtrackPlayer* GetSoundtrackPlayer() const { return mSoundtrackPlayer; }
 	GameCamera* GetCamera() const { return mCamera; }
     StatusOverlay* GetStatusOverlay() const { return mStatusOverlay; }
-    
-    void SetPaused(bool paused);
+    SceneConstruction& GetConstruction() { return mConstruction; }
     
 private:
 	// Location is 3-letter code (e.g. DIN).
+    std::string mLocation;
+    
 	// Timeblock is day/time code (e.g. 110A).
-	std::string mLocation;
 	Timeblock mTimeblock;
     
     // Layer for the scene.
@@ -135,6 +138,9 @@ private:
     // The name of the last Ego the player was controlling, including the current scene.
     // This is static so we can query who was the last Ego even if a scene is not loaded (e.g. on the Map).
     static std::string mEgoName;
+
+    // Helper class for dealing with scene construction (e.g. editor/tool) support.
+    SceneConstruction mConstruction;
 	
 	void ExecuteAction(const Action* action);
 };

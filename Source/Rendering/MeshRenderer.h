@@ -48,7 +48,7 @@ public:
 	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
 
     AABB GetAABB() const;
-    void DebugDrawAABBs();
+    void DebugDrawAABBs(const Color32& color = Color32::White, const Color32& meshColor = Color32(255, 255, 132));
     
 private:
 	// A model, if any was specified.

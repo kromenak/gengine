@@ -9,7 +9,7 @@
 #include "Services.h"
 #include "Window.h"
 
-//#include "MainMenuTool.h"
+#include "MainMenuTool.h"
 
 namespace
 {
@@ -57,11 +57,11 @@ void Tools::Render()
     // Render construction mode.
     //TODO: This is *kind of* not the right spot for this, since tools render *after* debug drawing stuff.
     //TODO: So any Debug::Draw* calls will be on frame late. But maybe that's no big deal?
-    //Scene* scene = GEngine::Instance()->GetScene();
-    //if(scene != nullptr)
-    //{
-    //    scene->GetConstruction().Render();
-    //}
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr)
+    {
+        scene->GetConstruction().Render();
+    }
 
     // Start a new frame.
     ImGui_ImplOpenGL3_NewFrame();
@@ -69,8 +69,8 @@ void Tools::Render()
     ImGui::NewFrame();
 
     // Render any tools.
-    //mainMenu.Render();
-    ImGui::ShowDemoWindow();
+    mainMenu.Render();
+    //ImGui::ShowDemoWindow();
 
     // Render with OpenGL.
     ImGui::Render();

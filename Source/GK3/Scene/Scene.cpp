@@ -28,8 +28,6 @@
 #include "Walker.h"
 #include "WalkerBoundary.h"
 
-extern Mesh* quad;
-
 std::string Scene::mEgoName;
 
 /*static*/ const char* Scene::GetEgoName()
@@ -131,47 +129,9 @@ void Scene::Load()
         if(model != nullptr)
         {
             mCamera->AddBounds(model);
-
-            /*
-            // For debugging - we can visualize the camera bounds mesh, if desired.
-            GKProp* cameraBoundsActor = new GKProp();
-            MeshRenderer* cameraBoundsMeshRenderer = cameraBoundsActor->GetMeshRenderer();
-            cameraBoundsMeshRenderer->SetModel(model);
-            cameraBoundsMeshRenderer->SetEnabled(false);
-            cameraBoundsMeshRenderer->DebugDrawAABBs();
-            */
         }
     }
-
-	// For debugging - render walker bounds overlay on game world.
-	//TODO: Move to construction system!
-	/*
-	{
-		WalkerBoundary* walkerBoundary = mSceneData->GetWalkerBoundary();
-		if(walkerBoundary != nullptr)
-		{
-			Actor* walkerBoundaryActor = new Actor();
-			
-			MeshRenderer* walkerBoundaryMeshRenderer = walkerBoundaryActor->AddComponent<MeshRenderer>();
-			walkerBoundaryMeshRenderer->SetMesh(quad);
-			
-			Material m;
-			m.SetDiffuseTexture(walkerBoundary->GetTexture());
-			walkerBoundaryMeshRenderer->SetMaterial(0, m);
-			
-			Vector3 size = walkerBoundary->GetSize();
-			Vector3 offset = walkerBoundary->GetOffset();
-			offset.x = -offset.x + size.x * 0.5f;
-			offset.z = -offset.y + size.y * 0.5f;
-			offset.y = 0.1f; // Offset slightly up to avoid z-fighting with floor (in most scenes).
-			
-			walkerBoundaryActor->SetPosition(offset);
-			walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
-			walkerBoundaryActor->SetScale(size);
-		}
-	}
-	*/
-	
+    
 	// Create actors for the scene.
 	const std::vector<const SceneActor*>& sceneActorDatas = mSceneData->GetActors();
 	for(auto& actorDef : sceneActorDatas)
@@ -269,6 +229,9 @@ void Scene::Load()
 				break;
 		}
 	}
+
+    // Init construction system.
+    mConstruction.Init(mSceneData);
 }
 
 void Scene::Unload()
