@@ -24,12 +24,13 @@ public:
     };
     
     InputManager();
+    ~InputManager();
     
     void Update();
 
     // Keyboard
     bool IsKeyLeadingEdge(SDL_Scancode scancode);
-    bool IsKeyPressed(SDL_Scancode scancode) { return mKeyboardState[scancode] == 1; }
+    bool IsKeyPressed(SDL_Scancode scancode) { return mCurrKeyboardState[scancode] == 1; }
     bool IsKeyTrailingEdge(SDL_Scancode scancode);
 
     bool IsAnyKeyLeadingEdge();
@@ -60,10 +61,14 @@ private:
     // KEYBOARD
     // Number of keys on the keyboard.
     int mNumKeys = 0;
-    
+
+    // Pointer to keyboard state reported by SDL.
+    // SDL owns this memory, and it's updated automatically when SDL_PumpEvents is called.
+    const uint8_t* mKeyboardState = nullptr;
+
     // A byte array where each byte indicates if a key is up or down.
 	// Current and previous states, so we can check for up or down moments.
-    const uint8_t* mKeyboardState = nullptr;
+    const uint8_t* mCurrKeyboardState = nullptr;
     uint8_t* mPrevKeyboardState = nullptr;
     
     // MOUSE
@@ -90,12 +95,12 @@ private:
 
 inline bool InputManager::IsKeyLeadingEdge(SDL_Scancode scancode)
 {
-    return mKeyboardState[scancode] == 1 && mPrevKeyboardState[scancode] == 0;
+    return mCurrKeyboardState[scancode] == 1 && mPrevKeyboardState[scancode] == 0;
 }
 
 inline bool InputManager::IsKeyTrailingEdge(SDL_Scancode scancode)
 {
-    return mKeyboardState[scancode] == 0 && mPrevKeyboardState[scancode] == 1;
+    return mCurrKeyboardState[scancode] == 0 && mPrevKeyboardState[scancode] == 1;
 }
 
 inline bool InputManager::IsAnyKeyLeadingEdge()
@@ -103,7 +108,7 @@ inline bool InputManager::IsAnyKeyLeadingEdge()
     //TODO: Any faster way to do this?
     for(int i = 0; i < mNumKeys; ++i)
     {
-        if(mKeyboardState[i] == 1 && mPrevKeyboardState[i] == 0) { return true; }
+        if(mCurrKeyboardState[i] == 1 && mPrevKeyboardState[i] == 0) { return true; }
     }
     return false;
 }
@@ -113,7 +118,7 @@ inline bool InputManager::IsAnyKeyPressed()
     //TODO: Any faster way to do this?
     for(int i = 0; i < mNumKeys; ++i)
     {
-        if(mKeyboardState[i] != 0) { return true; }
+        if(mCurrKeyboardState[i] != 0) { return true; }
     }
     return false;
 }

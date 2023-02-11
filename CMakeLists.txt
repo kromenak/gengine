@@ -61,6 +61,7 @@ target_include_directories(gk3 PRIVATE
     Source/Sheep/API
     Source/Sheep/Compiler
     Source/Sheep/Machine
+    Source/Tools
     Source/UI
     Source/Util
     Source/Util/Threads
@@ -74,6 +75,8 @@ target_include_directories(gk3 PRIVATE
     Libraries/Flex/include
     Libraries/fmod/inc
     Libraries/GLEW/include
+    Libraries/imgui
+    Libraries/imgui/backends
     Libraries/minilzo
     Libraries/stb
     Libraries/zlib/include
@@ -255,5 +258,19 @@ set(STB_SOURCES
 target_sources(gk3 PRIVATE ${STB_SOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${STB_SOURCES})
 
+# Add imgui library (source only).
+set(IMGUI_SOURCES
+    Libraries/imgui/imgui.cpp
+    Libraries/imgui/imgui_demo.cpp
+    Libraries/imgui/imgui_draw.cpp
+    Libraries/imgui/imgui_tables.cpp
+    Libraries/imgui/imgui_widgets.cpp
+    Libraries/imgui/backends/imgui_impl_opengl3.cpp
+    Libraries/imgui/backends/imgui_impl_sdl.cpp
+)
+target_sources(gk3 PRIVATE ${IMGUI_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${IMGUI_SOURCES})
+
 # Add tests subdirectory (creates the "tests" target).
 add_subdirectory(Tests)
+

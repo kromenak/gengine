@@ -28,8 +28,10 @@ class Renderer
 public:
     bool Initialize();
     void Shutdown();
-    
+
+    void Clear();
     void Render();
+    void Present();
     
     void SetCamera(Camera* camera) { mCamera = camera; }
     Camera* GetCamera() { return mCamera; }
@@ -47,6 +49,8 @@ public:
     bool UseTrilinearFiltering() const { return mUseTrilinearFiltering; }
 
     void ChangeResolution(const Window::Resolution& resolution);
+
+    SDL_GLContext GetGLContext() { return mContext; }
 
 private:
     // Context handle for rendering in OpenGL.

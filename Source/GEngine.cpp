@@ -24,6 +24,7 @@
 #include "TextInput.h"
 #include "Timers.h"
 #include "ThreadPool.h"
+#include "Tools.h"
 #include "VerbManager.h"
 #include "Window.h"
 
@@ -97,6 +98,9 @@ bool GEngine::Initialize()
         return false;
     }
     Services::SetRenderer(&mRenderer);
+
+    // Init tools.
+    Tools::Init();
     
     // Initialize audio.
     if(!mAudioManager.Initialize())
@@ -213,6 +217,9 @@ void GEngine::Shutdown()
 	}
 	mActors.clear();
 
+    // Shutdown tools.
+    Tools::Shutdown();
+
     // Shutdown any subsystems.
     mRenderer.Shutdown();
     mAudioManager.Shutdown();
@@ -281,10 +288,16 @@ void GEngine::ProcessInput()
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
+        // Send all events to tools to handle.
+        Tools::ProcessEvent(event);
+
         switch(event.type)
         {
 			case SDL_KEYDOWN:
 			{
+                // Ignore if tool overlay is eating keyboard inputs.
+                if(Tools::EatingKeyboardInputs()) { break; }
+
                 // When a text input is active, controls for manipulating text and cursor pos.
 				if(event.key.keysym.sym == SDLK_BACKSPACE)
 				{
@@ -349,6 +362,9 @@ void GEngine::ProcessInput()
 			
 			case SDL_TEXTINPUT:
 			{
+                // Ignore if tool overlay is eating keyboard inputs.
+                if(Tools::EatingKeyboardInputs()) { break; }
+
 				//TODO: Make sure not copy or pasting.
 				TextInput* textInput = mInputManager.GetTextInput();
 				if(textInput != nullptr)
@@ -421,6 +437,9 @@ void GEngine::Update()
 	// Update debug visualizations.
 	Debug::Update(deltaTime);
 
+    // Update tools.
+    Tools::Update();
+
     // Run any waiting functions on the main thread.
     ThreadUtil::RunFunctionsOnMainThread();
 }
@@ -452,7 +471,17 @@ void GEngine::GenerateOutputs()
     PROFILER_SCOPED(GenerateOutputs);
     if(!Loader::IsLoading())
     {
+        // Clear screen.
+        mRenderer.Clear();
+
+        // Render the game scene.
         mRenderer.Render();
+
+        // Render any tools over the game scene.
+        Tools::Render();
+
+        // Present the final result to screen.
+        mRenderer.Present();
     }
 }
 

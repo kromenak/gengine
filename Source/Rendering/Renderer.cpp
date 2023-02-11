@@ -230,7 +230,7 @@ void Renderer::Shutdown()
     Window::Destroy();
 }
 
-void Renderer::Render()
+void Renderer::Clear()
 {
     PROFILER_BEGIN_SAMPLE("Renderer Clear");
     // Enable opaque rendering (no blend, write to & test depth buffer).
@@ -242,7 +242,10 @@ void Renderer::Render()
     // Clear color and depth buffers from last frame.
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     PROFILER_END_SAMPLE();
-	
+}
+
+void Renderer::Render()
+{
 	// Render camera-oriented stuff.
     Matrix4 projectionMatrix;
     Matrix4 viewMatrix;
@@ -350,10 +353,13 @@ void Renderer::Render()
     // Any debug commands from earlier are queued internally, and only drawn when this is called!
     Debug::Render();
     PROFILER_END_SAMPLE();
-    
-	// Present to window.
+}
+
+void Renderer::Present()
+{
+    // Present to window.
     PROFILER_BEGIN_SAMPLE("Renderer Present");
-	SDL_GL_SwapWindow(Window::Get());
+    SDL_GL_SwapWindow(Window::Get());
     PROFILER_END_SAMPLE();
 }
 
