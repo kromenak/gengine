@@ -4,7 +4,7 @@
 // Encapsulates playback of audio data through SDL audio subsystem.
 //
 #pragma once
-#include <SDL2/SDL.h>
+#include <SDL.h>
 extern "C"
 {
     #include <libavformat/avformat.h>

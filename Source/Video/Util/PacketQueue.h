@@ -14,7 +14,7 @@ extern "C"
 {
     #include <libavformat/avformat.h> // For AVPacket
 }
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 struct PacketQueue
 {

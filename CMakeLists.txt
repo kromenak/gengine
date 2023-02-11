@@ -75,7 +75,6 @@ target_include_directories(gk3 PRIVATE
     Libraries/fmod/inc
     Libraries/GLEW/include
     Libraries/minilzo
-    Libraries/SDL/include
     Libraries/stb
     Libraries/zlib/include
 
@@ -100,12 +99,16 @@ endif()
 
 # Library locations/linking/copying.
 if(WIN32)
+    target_include_directories(gk3 PRIVATE
+        Libraries/SDL/win/include
+    )
+
     # Specify library search directories.
     target_link_directories(gk3 PRIVATE
         Libraries/ffmpeg/lib/win
         Libraries/fmod/lib/win
         Libraries/GLEW/lib/win/x86
-        Libraries/SDL/lib/win/x86
+        Libraries/SDL/win/lib/x86
         Libraries/zlib/lib/win/x86
     )
 
@@ -115,10 +118,14 @@ if(WIN32)
         fmod                                        # fmod
         glew32                                      # GLEW
         zlib                                        # zlib
-        SDL2                                        # SD
+        SDL2                                        # SDL
         opengl32                                    # OpenGL
     )
 elseif(APPLE)
+    target_include_directories(gk3 PRIVATE
+        Libraries/SDL/SDL2.framework/Headers
+    )
+
     # Specify library search directories.
     target_link_directories(gk3 PRIVATE
         Libraries/ffmpeg/lib/mac

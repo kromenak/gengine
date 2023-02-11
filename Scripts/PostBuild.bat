@@ -16,7 +16,7 @@ rem Copy GLEW libraries.
 xcopy /y %ROOTDIR%\Libraries\GLEW\lib\win\x86\glew32.dll %OUTDIR%
 
 rem Copy SDL libraries.
-xcopy /y %ROOTDIR%\Libraries\SDL\lib\win\x86\SDL2.dll %OUTDIR%
+xcopy /y %ROOTDIR%\Libraries\SDL\win\lib\x86\SDL2.dll %OUTDIR%
 
 rem Copy Zlib libraries.
 xcopy /y %ROOTDIR%\Libraries\zlib\lib\win\x86\zlib1.dll %OUTDIR%

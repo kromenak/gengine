@@ -1,6 +1,6 @@
 #include "Cursor.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "IniParser.h"
 #include "Services.h"

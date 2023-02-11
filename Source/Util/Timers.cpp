@@ -1,6 +1,6 @@
 #include "Timers.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 /*static*/ std::vector<Timers::Timer> Timers::mTimers;
 

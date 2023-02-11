@@ -10,7 +10,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "Rect.h"
 #include "Vector2.h"

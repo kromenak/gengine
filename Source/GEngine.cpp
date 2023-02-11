@@ -1,6 +1,6 @@
 #include "GEngine.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include "ActionManager.h"
 #include "Actor.h"

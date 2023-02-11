@@ -12,7 +12,7 @@ extern "C"
 {
     #include <libavformat/avformat.h> // For AVRational
 }
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 struct FrameQueue;
 struct PacketQueue;
