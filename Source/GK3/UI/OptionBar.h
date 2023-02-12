@@ -78,6 +78,7 @@ private:
 
     // Game Options section.
     Actor* mGameOptionsSection = nullptr;
+    UIToggle* mCameraGlideToggle = nullptr;
     UIToggle* mCaptionsToggle = nullptr;
 
     void KeepOnScreen();

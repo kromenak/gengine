@@ -18,6 +18,9 @@ class OptionBar;
 class GameCamera : public Actor
 {
 public:
+    static void SetCameraGlideEnabled(bool enabled);
+    static bool IsCameraGlideEnabled();
+
     GameCamera();
 
     void AddBounds(Model* model) { mBoundsModels.push_back(model); }

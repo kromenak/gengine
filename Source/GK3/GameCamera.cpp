@@ -12,12 +12,23 @@
 #include "Model.h"
 #include "OptionBar.h"
 #include "Ray.h"
+#include "SaveManager.h"
 #include "Scene.h"
 #include "Sphere.h"
 #include "StringUtil.h"
 #include "Triangle.h"
 #include "VerbManager.h"
 #include "UICanvas.h"
+
+/*static*/ bool GameCamera::IsCameraGlideEnabled()
+{
+    return gSaveManager.GetPrefs()->GetBool(PREFS_ENGINE, PREF_CAMERA_GLIDE, true);
+}
+
+/*static*/ void GameCamera::SetCameraGlideEnabled(bool enabled)
+{
+    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_CAMERA_GLIDE, enabled);
+}
 
 GameCamera::GameCamera()
 {
@@ -184,7 +195,11 @@ void GameCamera::SceneUpdate(float deltaTime)
     if(mGliding)
     {
         float t = Math::Clamp(mGlideTimer / kGlideDuration, 0.0f, 1.0f);
-
+        if(!IsCameraGlideEnabled())
+        {
+            t = 1.0f;
+        }
+        
         // Interpolate towards desired position.
         GetTransform()->SetPosition(Vector3::Lerp(mGlideStartPos, mGlidePosition, t));
 

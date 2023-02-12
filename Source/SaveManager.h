@@ -31,6 +31,7 @@
     #define PREF_WINDOW_X "Start X"
     #define PREF_WINDOW_Y "Start Y"
 
+    #define PREF_CAMERA_GLIDE "Camera Glide"
     #define PREF_CAPTIONS "Captions"
 
 // Hardware Renderer Preferences

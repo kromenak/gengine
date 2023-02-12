@@ -1,6 +1,7 @@
 #include "OptionBar.h"
 
 #include "CaptionsOverlay.h"
+#include "GameCamera.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
 #include "Services.h"
@@ -691,8 +692,11 @@ void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyV
     backgroundImage->SetReceivesInput(true);
     
     // Create glide camera toggle.
-    UIToggle* glideCameraToggle = CreateToggle(config, "gameOptGlide", mGameOptionsSection);
-    
+    mCameraGlideToggle = CreateToggle(config, "gameOptGlide", mGameOptionsSection);
+    mCameraGlideToggle->SetToggleCallback([](bool isOn){
+        GameCamera::SetCameraGlideEnabled(isOn);
+    });
+
     // Create captions toggle.
     mCaptionsToggle = CreateToggle(config, "gameOptCaptions", mGameOptionsSection);
     mCaptionsToggle->SetToggleCallback([](bool isOn) {
@@ -773,6 +777,7 @@ void OptionBar::OnGameOptionsButtonPressed(UIButton* button)
     mGameOptionsSection->SetActive(!this->mGameOptionsSection->IsActive());
     KeepOnScreen();
 
-    // Make sure captions toggle reflects the current preference.
+    // Make sure toggles reflect the current preferences.
+    mCameraGlideToggle->SetValue(GameCamera::IsCameraGlideEnabled());
     mCaptionsToggle->SetValue(CaptionsOverlay::CaptionsEnabled());
 }
