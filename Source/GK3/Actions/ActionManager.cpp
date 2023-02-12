@@ -18,21 +18,28 @@
 
 TYPE_DEF_BASE(ActionManager);
 
-void OutputActions(const std::vector<const Action*>& actions)
+namespace
 {
-    for(auto& action : actions)
+    void OutputActions(const std::vector<const Action*>& actions)
     {
-        std::cout << "Action " << action->ToString() << std::endl;
+        for(auto& action : actions)
+        {
+            std::cout << "Action " << action->ToString() << std::endl;
+        }
+    }
+}
+
+ActionManager::~ActionManager()
+{
+    // Clean up any leftover script in the custom action.
+    if(mCustomAction.script.script != nullptr)
+    {
+        delete mCustomAction.script.script;
     }
 }
 
 void ActionManager::Init()
 {
-	// Pre-populate the Sheep Command action.
-	mSheepCommandAction.noun = "SHEEP_COMMAND";
-	mSheepCommandAction.verb = "NONE";
-	mSheepCommandAction.caseLabel = "NONE";
-	
 	// Create action bar, which will be used to choose nouns/verbs by the player.
 	mActionBar = new ActionBar();
 	mActionBar->SetIsDestroyOnLoad(false);
@@ -126,27 +133,23 @@ bool ActionManager::ExecuteAction(const std::string& noun, const std::string& ve
 {
     // For this noun/verb pair, find the best Action to use in the current scenario.
     Action* action = GetHighestPriorityAction(noun, verb, VerbType::Normal);
-    
-	// Execute action if we found one.
-	if(action != nullptr)
-	{
-		ExecuteAction(action, finishCallback);
-		return true;
-	}
 
-    // Well...we did technically finish I suppose!
-    if(finishCallback != nullptr)
-    {
-        finishCallback(nullptr);
-    }
-	return false;
+    // Execute the action. This handles the null case internally.
+    ExecuteAction(action, finishCallback);
+
+    // Return true if we actually played an action, false if not.
+    return action != nullptr;
 }
 
 void ActionManager::ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback)
 {
+    // Early out if action is null.
 	if(action == nullptr)
 	{
-        Services::GetReports()->Log("Actions", "Can't play null action!");
+        if(finishCallback != nullptr)
+        {
+            finishCallback(action);
+        }
 		return;
 	}
 	
@@ -195,37 +198,43 @@ void ActionManager::ExecuteSheepAction(const std::string& sheepName, const std::
 
 void ActionManager::ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback)
 {
+    // This is just a custom action using specific NOUN/VERB/CASE values.
+    ExecuteCustomAction("SHEEP_COMMAND", "NONE", "NONE", sheepScriptText, finishCallback);
+}
+
+void ActionManager::ExecuteCustomAction(const std::string& noun, const std::string& verb, const std::string& caseLabel, const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback)
+{
     // We should only execute one action at a time.
     if(mCurrentAction != nullptr)
     {
-        Services::GetReports()->Log("Actions", StringUtil::Format("Skipping NVC %s - another action is in progress", mSheepCommandAction.ToString().c_str()));
+        // Kind of a HACK, but we need a temp custom object in this case.
+        Action tempAction;
+        tempAction.noun = noun;
+        tempAction.verb = verb;
+        tempAction.caseLabel = caseLabel;
+        tempAction.script.text = sheepScriptText;
+        Services::GetReports()->Log("Actions", StringUtil::Format("Skipping NVC %s - another action is in progress", tempAction.ToString().c_str()));
         return;
     }
-    mCurrentAction = &mSheepCommandAction;
-    mCurrentActionFinishCallback = finishCallback;
 
-    // Log it!
-    mSheepCommandAction.script.text = sheepScriptText;
-    Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", mSheepCommandAction.ToString().c_str()));
-
-    // Increment action ID.
-    ++mActionId;
+    // Clean up any leftover script from last run.
+    if(mCustomAction.script.script != nullptr)
+    {
+        delete mCustomAction.script.script;
+        mCustomAction.script.script = nullptr;
+    }
     
-    // Compile and execute sheep from text.
-    //TODO: Compiler currently requires wrapping braces. Maybe fix that?
-    SheepScript* sheepScript = Services::GetSheep()->Compile("ActionSheep", "{ " + sheepScriptText + " }");
-    if(sheepScript != nullptr)
-    {
-        Services::GetSheep()->Execute(sheepScript, [this, sheepScript]() {
-            delete sheepScript;
-            OnActionExecuteFinished();
-        });
-    }
-    else
-    {
-        // If sheep fails to compile, still finish the action to avoid softlocking.
-        OnActionExecuteFinished();
-    }
+    // Populate action.
+    mCustomAction.noun = noun;
+    mCustomAction.verb = verb;
+    mCustomAction.caseLabel = caseLabel;
+
+    // Compile script.
+    mCustomAction.script.text = sheepScriptText;
+    mCustomAction.script.script = Services::GetSheep()->Compile("ActionSheep", "{ " + sheepScriptText + " }");
+
+    // Use normal action flow from here.
+    ExecuteAction(&mCustomAction, finishCallback);
 }
 
 void ActionManager::QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback)

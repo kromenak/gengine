@@ -32,6 +32,8 @@ class ActionManager
 {
 	TYPE_DECL_BASE();
 public:
+    ~ActionManager();
+
 	void Init();
 	
 	// Action Set Population
@@ -51,6 +53,8 @@ public:
 	void ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
+    void ExecuteCustomAction(const std::string& noun, const std::string& verb, const std::string& caseLabel,
+                             const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
 
     void QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
 
@@ -122,10 +126,10 @@ private:
 	std::string_map_ci<int> mNounToEnum;
 	std::vector<std::string> mVerbs;
 	std::string_map_ci<int> mVerbToEnum;
-	
-	// An action that's used for "Sheep Commands."
-	// When an arbitrary SheepScript needs to execute through the action system, we use this Action object.
-	Action mSheepCommandAction;
+
+    // An action that's used for executing custom "JIT" actions.
+    // Used for arbitrary SheepScript execution via action system, as well as misc custom commands.
+    Action mCustomAction;
 
     // The last action is cached in case we need to know what action was performed last.
     // This is most useful when re-showing the topic bar after dialogue cutscenes.
