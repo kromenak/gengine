@@ -57,6 +57,7 @@ public:
 	const ScenePosition* GetScenePosition(const std::string& positionName) const;
 	
 	// CAMERAS
+    const SceneCamera* GetInspectCamera(const std::string& nounOrModel) const;
 	const RoomSceneCamera* GetDefaultRoomCamera() const { return mDefaultRoomCamera; }
 	const RoomSceneCamera* GetRoomCamera(const std::string& cameraName) const;
 	const SceneCamera* GetCinematicCamera(const std::string& cameraName) const;

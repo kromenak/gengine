@@ -78,6 +78,13 @@ shpvoid CameraBoundaryUnblockModel(std::string modelName)
 RegFunc1(CameraBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
 */
 
+shpvoid GlideToCameraAngle(const std::string& cameraName)
+{
+    GEngine::Instance()->GetScene()->GlideToCameraPosition(cameraName, AddWait());
+    return 0;
+}
+RegFunc1(GlideToCameraAngle, void, string, WAITABLE, REL_FUNC);
+
 shpvoid CutToCameraAngle(const std::string& cameraName)
 {
     GEngine::Instance()->GetScene()->SetCameraPosition(cameraName);
@@ -100,27 +107,23 @@ shpvoid ForceCutToCameraAngle(const std::string& cameraName)
 }
 RegFunc1(ForceCutToCameraAngle, void, string, IMMEDIATE, REL_FUNC);
 
-/*
-shpvoid DefaultInspect(std::string noun)
+shpvoid DefaultInspect(const std::string& noun)
 {
-    std::cout << "DefaultInspect" << std::endl;
+    GEngine::Instance()->GetScene()->InspectObject(noun, AddWait());
     return 0;
 }
 RegFunc1(DefaultInspect, void, string, WAITABLE, REL_FUNC);
-*/
 
 shpvoid InspectObject()
 {
-    //TODO: What is "current object"? This just seems to output an error when run in OG game.
+    GEngine::Instance()->GetScene()->InspectActiveObject(AddWait());
     return 0;
 }
 RegFunc0(InspectObject, void, WAITABLE, REL_FUNC);
 
-/*
 shpvoid Uninspect()
 {
-    // Glide back to camera position/heading before inspecting object.
+    GEngine::Instance()->GetScene()->UninspectObject(AddWait());
     return 0;
 }
 RegFunc0(Uninspect, void, WAITABLE, REL_FUNC);
-*/

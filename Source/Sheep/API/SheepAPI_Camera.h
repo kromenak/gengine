@@ -28,8 +28,7 @@ shpvoid CameraBoundaryUnblockModel(const std::string& modelName);
 shpvoid GlideToCameraAngle(const std::string& cameraName); // WAIT
 
 shpvoid CutToCameraAngle(const std::string& cameraName);
-shpvoid CutToCameraAngleX(float horizAngle, float vertAngle,
-                          float x, float y, float z); // DEV
+shpvoid CutToCameraAngleX(float horizAngle, float vertAngle, float x, float y, float z); // DEV
 shpvoid ForceCutToCameraAngle(const std::string& cameraName);
 
 int GetCameraAngleCount(); // DEV

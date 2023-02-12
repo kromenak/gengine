@@ -397,6 +397,34 @@ void Scene::SetCameraPositionForConversation(const std::string& conversationName
     mCamera->SetAngle(camera->angle);
 }
 
+void Scene::GlideToCameraPosition(const std::string& cameraName, std::function<void()> finishCallback)
+{
+    // Find camera or fail. Any *named* camera type is valid.
+    const SceneCamera* camera = mSceneData->GetRoomCamera(cameraName);
+    if(camera == nullptr)
+    {
+        camera = mSceneData->GetCinematicCamera(cameraName);
+        if(camera == nullptr)
+        {
+            camera = mSceneData->GetDialogueCamera(cameraName);
+        }
+    }
+
+    // If couldn't find a camera with this name, error out!
+    if(camera == nullptr)
+    {
+        Services::GetReports()->Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        return;
+    }
+
+    // Do the glide.
+    mCamera->Glide(camera->position, camera->angle, finishCallback);
+}
+
 SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore) const
 {
 	SceneCastResult result;
@@ -506,6 +534,9 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 		}
 		return;
 	}
+
+    // Looks like we're interacting with something interesting.
+    mActiveObject = interacted;
 	
 	// We've got an object to interact with!
 	// See if it has a pre-defined verb with an associated action. If so, we will immediately execute that action (w/o showing action bar).
@@ -521,28 +552,28 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 	
 	// No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
 	Services::Get<ActionManager>()->ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
-
-    // Add INSPECT if not present.
-    //TODO: Should be INSPECT_UNDO if already inspecting this thing.
     ActionBar* actionBar = Services::Get<ActionManager>()->GetActionBar();
-    if(!actionBar->HasVerb("INSPECT"))
+  
+    // Add INSPECT/UNINSPECT if not present.
+    bool alreadyInspecting = StringUtil::EqualsIgnoreCase(interacted->GetNoun(), mCamera->GetInspectNoun());
+    if(alreadyInspecting)
     {
-        actionBar->AddVerbToFront("INSPECT", [interacted](){
-            std::cout << "Inspect " << interacted->GetNoun() << std::endl;
-            //TODO: Set NOUN as inspected object
-            //TODO: Call custom action that executes Sheep for InspectObject();
-        });
+        if(!actionBar->HasVerb("INSPECT_UNDO"))
+        {
+            actionBar->AddVerbToFront("INSPECT_UNDO", [interacted](){
+                Services::Get<ActionManager>()->ExecuteCustomAction(interacted->GetNoun(), "INSPECT_UNDO", "ALL", "wait UnInspect()");
+            });
+        }
     }
-    /*
-    if(!actionBar->HasVerb("INSPECT_UNDO"))
+    else
     {
-        actionBar->AddVerbToFront("INSPECT_UNDO", [interacted](){
-            std::cout << "Uninspect " << interacted->GetNoun() << std::endl;
-            //TODO: Clear inspected object
-            //TODO: Call custom action that executes Sheep for UninspectObject();
-        });
+        if(!actionBar->HasVerb("INSPECT"))
+        {
+            actionBar->AddVerbToFront("INSPECT", [interacted](){
+                Services::Get<ActionManager>()->ExecuteCustomAction(interacted->GetNoun(), "INSPECT", "ALL", "wait InspectObject()");
+            });
+        }
     }
-    */
 }
 
 void Scene::SkipCurrentAction()
@@ -718,6 +749,89 @@ void Scene::SetPaused(bool paused)
     {
         actor->GetMeshRenderer()->GetOwner()->SetUpdateEnabled(!paused);
     }
+}
+
+void Scene::InspectActiveObject(std::function<void()> finishCallback)
+{
+    // We need an active object, for one.
+    if(mActiveObject == nullptr)
+    {
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        return;
+    }
+
+    // Inspect that object.
+    InspectObject(mActiveObject->GetNoun(), finishCallback);
+}
+
+void Scene::InspectObject(const std::string& noun, std::function<void()> finishCallback)
+{
+    // Try to get inspect camera for this noun.
+    const SceneCamera* inspectCamera = mSceneData->GetInspectCamera(noun);
+
+    // If that fails, there can also be an inspect camera associated with the *model* name for this noun.
+    if(inspectCamera == nullptr)
+    {
+        // See if we can find the object associated with this noun.
+        GKObject* sceneObject = GetSceneObjectByNoun(noun);
+        if(sceneObject != nullptr)
+        {
+            // For BSP objects, the BSP object name is stored in the "Name" field.
+            inspectCamera = mSceneData->GetInspectCamera(sceneObject->GetName());
+
+            // If that didn't work, try with the model name in the mesh renderer as a last resort.
+            if(inspectCamera == nullptr && sceneObject->GetMeshRenderer() != nullptr)
+            {
+                inspectCamera = mSceneData->GetInspectCamera(sceneObject->GetMeshRenderer()->GetModelName());
+            }
+        }
+    }
+
+    // After all that, if we have an inspect camera, use it!
+    if(inspectCamera != nullptr)
+    {
+        mCamera->Inspect(noun, inspectCamera->position, inspectCamera->angle, finishCallback);
+    }
+    else // No inspect camera for this noun
+    {
+        // This does actually happen for dynamic objects (like any humanoid/walker).
+        // So, we need to support this. Find an inspect position on-the-fly!
+        bool foundActor = false;
+        for(GKActor* actor : mActors)
+        {
+            if(StringUtil::EqualsIgnoreCase(actor->GetNoun(), noun))
+            {
+                // For starters, at head level, looking toward them sounds reasonable.
+                Vector3 facing = actor->GetForward();
+                Vector3 inspectPos = actor->GetHeadPosition() + facing * 50.0f;
+
+                float yaw = Heading::FromDirection(-facing).ToRadians();
+                Vector2 inspectAngle(yaw, 0.0f);
+
+                //TODO: If the actor is facing a wall or something, it's pretty likely the camera will go out-of-bounds.
+                //TODO: The original game seems to check this and move the camera around to a valid spot on the sides/back.
+                
+                // Use the calculated inspect position and angle.
+                mCamera->Inspect(noun, inspectPos, inspectAngle, finishCallback);
+                foundActor = true;
+                break;
+            }
+        }
+
+        // Worst case, there's no inspect camera for this thing, so let's give up!
+        if(!foundActor && finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+    }
+}
+
+void Scene::UninspectObject(std::function<void()> finishCallback)
+{
+    mCamera->Uninspect(finishCallback);
 }
 
 void Scene::ExecuteAction(const Action* action)

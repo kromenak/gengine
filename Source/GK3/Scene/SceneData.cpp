@@ -231,6 +231,18 @@ const ScenePosition* SceneData::GetScenePosition(const std::string& positionName
     return nullptr;
 }
 
+const SceneCamera* SceneData::GetInspectCamera(const std::string& nounOrModel) const
+{
+    for(const SceneCamera* camera : mInspectCameras)
+    {
+        if(StringUtil::EqualsIgnoreCase(camera->label, nounOrModel))
+        {
+            return camera;
+        }
+    }
+    return nullptr;
+}
+
 const RoomSceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) const
 {
 	for(int i = 0; i < mRoomCameras.size(); i++)

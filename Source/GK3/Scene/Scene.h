@@ -61,6 +61,7 @@ public:
     bool InitEgoPosition(const std::string& positionName);
 	void SetCameraPosition(const std::string& cameraName);
     void SetCameraPositionForConversation(const std::string& conversationName, bool isInitial);
+    void GlideToCameraPosition(const std::string& cameraName, std::function<void()> finishCallback);
 	
 	SceneCastResult Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore = nullptr) const;
     void Interact(const Ray& ray, GKObject* interactHint = nullptr);
@@ -82,6 +83,10 @@ public:
 	bool DoesSceneModelExist(const std::string& modelName) const;
 
     void SetPaused(bool paused);
+
+    void InspectActiveObject(std::function<void()> finishCallback);
+    void InspectObject(const std::string& noun, std::function<void()> finishCallback);
+    void UninspectObject(std::function<void()> finishCallback);
 
     SceneData* GetSceneData() const { return mSceneData; }
 	Animator* GetAnimator() const { return mAnimator; }
@@ -138,6 +143,10 @@ private:
     // The name of the last Ego the player was controlling, including the current scene.
     // This is static so we can query who was the last Ego even if a scene is not loaded (e.g. on the Map).
     static std::string mEgoName;
+
+    // The most recently "active" object.
+    // In other words, the last object the action bar was shown for.
+    GKObject* mActiveObject = nullptr;
 
     // Helper class for dealing with scene construction (e.g. editor/tool) support.
     SceneConstruction mConstruction;

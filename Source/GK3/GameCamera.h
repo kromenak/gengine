@@ -25,7 +25,13 @@ public:
 	
 	void SetAngle(const Vector2& angle);
 	void SetAngle(float yaw, float pitch);
-	
+
+    void Glide(const Vector3& position, const Vector2& angle, std::function<void()> callback);
+
+    void Inspect(const std::string& noun, const Vector3& position, const Vector2& angle, std::function<void()> callback);
+    void Uninspect(std::function<void()> callback);
+    const std::string& GetInspectNoun() const { return mInspectNoun; }
+
 	Camera* GetCamera() { return mCamera; }
     
     void SetSceneActive(bool active) { mSceneActive = active; }
@@ -34,6 +40,22 @@ protected:
     void OnUpdate(float deltaTime) override;
     
 private:
+    // Reference to underlying camera component.
+    Camera* mCamera = nullptr;
+
+    // Option bar - used to change settings, quit game, etc.
+    OptionBar* mOptionBar = nullptr;
+
+    // The last object hovered over. Used for toggling cursor highlight color.
+    std::string mLastHoveredNoun;
+
+    // If true, scene is "active", so perform scene updates (e.g. camera movement).
+    // When scene is not active, game camera still handles some user input stuff.
+    bool mSceneActive = true;
+
+    //////////////////
+    // MOVEMENT
+    //////////////////
 	// Camera movement speed in units/second.
 	// A modifier key (alt) causes the camera to move even faster.
 	// These values were derived from trial and error!
@@ -55,12 +77,6 @@ private:
     // This value was derived from trial & error.
     const float kCameraColliderRadius = 16.0f;
 	
-	// Reference to underlying camera component.
-    Camera* mCamera = nullptr;
-    
-    // Option bar - used to change settings, quit game, etc.
-    OptionBar* mOptionBar = nullptr;
-
     // When mouse is clicked, this is start position of the click.
     // Used to determine when to enable mouse-based camera movement.
     Vector2 mClickStartPos;
@@ -74,19 +90,47 @@ private:
 	// Default value is derived from trial and error!
 	const float kDefaultHeight = 60.0f;
 	float mHeight = kDefaultHeight;
-	
+
+    //////////////////
+    // COLLISION
+    //////////////////
 	// A model whose triangles are used as collision for the camera.
     std::vector<Model*> mBoundsModels;
 		
 	// If true, camera bounds are turned on. If false, they are disabled.
     bool mBoundsEnabled = true;
 	
-	// The last object hovered over. Used for toggling cursor highlight color.
-	std::string mLastHoveredNoun;
-    
-    // If true, scene is "active", so perform scene updates (e.g. camera movement).
-    // When scene is not active, game camera still handles some user input stuff.
-    bool mSceneActive = true;
+    //////////////////
+    // GLIDING
+    //////////////////
+    // If true, we are performing a glide operation/
+    bool mGliding = false;
+
+    // Start glide position/rotation.
+    Vector3 mGlideStartPos;
+    Quaternion mGlideStartRot;
+
+    // End glide position/rotation.
+    Vector3 mGlidePosition;
+    Quaternion mGlideRotation;
+
+    // Duration of the glide.
+    // The original game uses an EXTREMELY short duration - imo it looks a bit better slower.
+    const float kGlideDuration = 0.25f;
+    float mGlideTimer = 0.0f;
+
+    // Callback for end of glide.
+    std::function<void()> mEndGlideCallback = nullptr;
+
+    //////////////////
+    // INSPECTION
+    //////////////////
+    // The scene noun we are inspecting.
+    std::string mInspectNoun;
+
+    // Start position/rotation when inspecting (so we can later do an uninspect).
+    Vector3 mInspectStartPos;
+    Quaternion mInspectStartRot;
 	
     void SceneUpdate(float deltaTime);
 
