@@ -18,80 +18,110 @@ VertexAnimation::VertexAnimation(const std::string& name, char* data, int dataLe
 
 VertexAnimationTransformPose VertexAnimation::SampleTransformPose(int frame, int meshIndex)
 {
-    VertexAnimationTransformPose* currentTransformPose = mTransformPoses[meshIndex];
-    while(currentTransformPose != nullptr && currentTransformPose->mFrameNumber != frame)
+    // Make sure we're in bounds.
+    if(meshIndex >= 0 && meshIndex < mTransformPoses.size())
     {
-        currentTransformPose = currentTransformPose->mNext;
+        // Start with first transform pose defined.
+        VertexAnimationTransformPose* currentTransformPose = mTransformPoses[meshIndex];
+        while(currentTransformPose != nullptr)
+        {
+            // We found an exact frame match - done!
+            if(currentTransformPose->mFrameNumber == frame)
+            {
+                break;
+            }
+
+            // If there's no next pose, use this one.
+            // Also if no pose exists for the exact frame, the rule is to use the closest previous pose instead.
+            if(currentTransformPose->mNext == nullptr || currentTransformPose->mNext->mFrameNumber > frame)
+            {
+                break;
+            }
+
+            // This pose is no good - move to next one.
+            currentTransformPose = currentTransformPose->mNext;
+        }
+
+        // Return what we found.
+        if(currentTransformPose != nullptr)
+        {
+            return *currentTransformPose;
+        }
     }
-    if(currentTransformPose == nullptr)
-    {
-        VertexAnimationTransformPose pose;
-        pose.mFrameNumber = -1;
-        return pose;
-    }
-    return *currentTransformPose;
+
+    // Error case: just return something invalid.
+    VertexAnimationTransformPose invalidPose;
+    invalidPose.mFrameNumber = -1;
+    return invalidPose;
 }
 
 VertexAnimationTransformPose VertexAnimation::SampleTransformPose(float time, int framesPerSecond, int meshIndex)
 {
-    // Calculate how many seconds should be used for a single frame.
-    float secondsPerFrame = 1.0f / framesPerSecond;
-    
-    // Caller may pass in a global time that extends beyond the local time of this particular animation.
-    // Desire here is for the animation to "loop", so we calculate how many seconds in we are.
-    float duration = GetDuration(framesPerSecond);
-    float localTime = time;
-    if(localTime > duration)
+    // Make sure we're in bounds.
+    if(meshIndex >= 0 && meshIndex < mTransformPoses.size())
     {
-        localTime = Math::Mod(time, duration);
+        // Calculate how many seconds should be used for a single frame.
+        float secondsPerFrame = 1.0f / framesPerSecond;
+
+        // Caller may pass in a global time that extends beyond the local time of this particular animation.
+        // Desire here is for the animation to "loop", so we calculate how many seconds in we are.
+        float duration = GetDuration(framesPerSecond);
+        float localTime = time;
+        if(localTime > duration)
+        {
+            localTime = Math::Mod(time, duration);
+        }
+
+        // Determine between which two transform poses the desired local time is located.
+        // E.g. if local time is 50% between frames 5 and 6, we want to interpolate 50% between the poses for those frames.
+        float currentPoseTime = 0.0f;
+        float nextPoseTime = 0.0f;
+        VertexAnimationTransformPose* firstTransformPose = mTransformPoses[meshIndex];
+        VertexAnimationTransformPose* currentTransformPose = firstTransformPose;
+        while(currentTransformPose != nullptr && currentTransformPose->mNext != nullptr)
+        {
+            currentPoseTime = secondsPerFrame * currentTransformPose->mFrameNumber;
+            nextPoseTime = secondsPerFrame * currentTransformPose->mNext->mFrameNumber;
+            if(nextPoseTime > localTime) { break; }
+
+            // Move on to next one.
+            currentTransformPose = currentTransformPose->mNext;
+        }
+
+        // Make sure we found a pose we can use as current.
+        if(currentTransformPose != nullptr)
+        {
+            // GK3 does a somewhat wasteful thing: poses are expected to be defined for all frames. If NOT, use the closes previous frame.
+            // SO: if the next pose IS NOT for the next frame, we just use the current pose with no interpolation.
+            VertexAnimationTransformPose* nextTransformPose = currentTransformPose->mNext;
+            if(nextTransformPose == nullptr || nextTransformPose->mFrameNumber != (currentTransformPose->mFrameNumber + 1))
+            {
+                // Clamp approach.
+                //nextTransformPose = currentTransformPose;
+                //nextPoseTime = currentPoseTime;
+                return *currentTransformPose;
+            }
+
+            // From here, we have two poses that need to be interpolated.
+            // Determine our "t" value between the prev and next pose.
+            float t = 1.0f;
+            if(!Math::IsZero(nextPoseTime - currentPoseTime))
+            {
+                t = (localTime - currentPoseTime) / (nextPoseTime - currentPoseTime);
+            }
+            assert(t >= 0.0f && t <= 1.0f);
+
+            // Finally, create a pose with lerp/slerp that is interpolated between the two poses.
+            VertexAnimationTransformPose pose;
+            pose.mMeshToLocalMatrix = Matrix4::Lerp(currentTransformPose->mMeshToLocalMatrix, nextTransformPose->mMeshToLocalMatrix, t);
+            return pose;
+        }
     }
-    
-    // Determine between which two transform poses the desired local time is located.
-    // E.g. if local time is 50% between pose 5 and 6, we  want to interpolate 50% between those two poses.
-    float currentPoseTime = 0.0f;
-    float nextPoseTime = 0.0f;
-    VertexAnimationTransformPose* firstTransformPose = mTransformPoses[meshIndex];
-    VertexAnimationTransformPose* currentTransformPose = firstTransformPose;
-    while(currentTransformPose->mNext != nullptr)
-    {
-        currentPoseTime = secondsPerFrame * currentTransformPose->mFrameNumber;
-        nextPoseTime = secondsPerFrame * currentTransformPose->mNext->mFrameNumber;
-        if(nextPoseTime > localTime) { break; }
-        
-        // Move on to next one.
-        currentTransformPose = currentTransformPose->mNext;
-    }
-    
-    // If there is no "next" pose, we can either loop to the first pose, or "clamp" on the last pose.
-    // Testing suggests GK3 expects the "clamp" approach, but more generally, a parameter for this might make sense.
-    VertexAnimationTransformPose* nextTransformPose = currentTransformPose->mNext;
-    if(nextTransformPose == nullptr)
-    {
-        // Clamp approach.
-        nextTransformPose = currentTransformPose;
-        nextPoseTime = currentPoseTime;
-        
-        // Loop approach.
-        //nextTransformPose = firstTransformPose;
-        //nextPoseTime = GetDuration(framesPerSecond);
-    }
-    
-    // Determine our "t" value between the prev and next pose.
-    float t = 1.0f;
-    if(!Math::IsZero(nextPoseTime - currentPoseTime))
-    {
-        t = (localTime - currentPoseTime) / (nextPoseTime - currentPoseTime);
-    }
-    assert(t >= 0.0f && t <= 1.0f);
-    
-    // Finally, create a pose with lerp/slerp that is interpolated between the two poses.
-    VertexAnimationTransformPose pose;
-    //pose.mLocalPosition = Vector3::Lerp(currentTransformPose->mLocalPosition, nextTransformPose->mLocalPosition, t);
-    //pose.mLocalScale = Vector3::Lerp(currentTransformPose->mLocalScale, nextTransformPose->mLocalScale, t);
-    //Quaternion::Slerp(pose.mLocalRotation, currentTransformPose->mLocalRotation, nextTransformPose->mLocalRotation, t);
-    
-    pose.mMeshToLocalMatrix = Matrix4::Lerp(currentTransformPose->mMeshToLocalMatrix, nextTransformPose->mMeshToLocalMatrix, t);
-    return pose;
+
+    // Error case: just return something invalid.
+    VertexAnimationTransformPose invalidPose;
+    invalidPose.mFrameNumber = -1;
+    return invalidPose;
 }
 
 VertexAnimationVertexPose VertexAnimation::SampleVertexPose(int frame, int meshIndex, int submeshIndex)
@@ -107,107 +137,124 @@ VertexAnimationVertexPose VertexAnimation::SampleVertexPose(int frame, int meshI
             firstVertexPose = it2->second;
         }
     }
-    
-    // If no vertex pose was found, we'll have to return an error state.
-    if(firstVertexPose == nullptr)
+
+    // Make sure we found a valid pose.
+    if(firstVertexPose != nullptr)
     {
-        VertexAnimationVertexPose pose;
-        pose.mFrameNumber = -1;
-        return pose;
+        // Find pose for desired frame.
+        VertexAnimationVertexPose* currentVertexPose = firstVertexPose;
+        while(currentVertexPose != nullptr)
+        {
+            // Exact match - bingo.
+            if(currentVertexPose->mFrameNumber == frame)
+            {
+                break;
+            }
+
+            // If there's no next pose, use this one.
+            // Also if no pose exists for the exact frame, the rule is to use the closest previous pose instead.
+            if(currentVertexPose->mNext == nullptr || currentVertexPose->mNext->mFrameNumber > frame)
+            {
+                break;
+            }
+
+            // Not this one - move on.
+            currentVertexPose = currentVertexPose->mNext;
+        }
+
+        // Make sure we found a valid pose.
+        if(currentVertexPose != nullptr)
+        {
+            // No interpolation needed, since we're just returning a particular frame number.
+            return *currentVertexPose;
+        }
     }
-    
-    // Find pose for desired frame.
-    VertexAnimationVertexPose* currentVertexPose = firstVertexPose;
-    while(currentVertexPose != nullptr && currentVertexPose->mFrameNumber != frame)
-    {
-        currentVertexPose = currentVertexPose->mNext;
-    }
-    if(currentVertexPose == nullptr)
-    {
-        VertexAnimationVertexPose pose;
-        pose.mFrameNumber = -1;
-        return pose;
-    }
-    
-    // No interpolation needed, since we're just returning a particular frame number.
-    return *currentVertexPose;
+
+    // Error case: return something invalid.
+    VertexAnimationVertexPose invalidPose;
+    invalidPose.mFrameNumber = -1;
+    return invalidPose;
 }
 
 VertexAnimationVertexPose VertexAnimation::SampleVertexPose(float time, int framesPerSecond, int meshIndex, int submeshIndex)
 {
-	float duration = GetDuration(framesPerSecond);
-	float localTime = time;
-	if(localTime > duration)
-	{
-		localTime = Math::Mod(time, duration);
-	}
-	
-    float currentPoseTime = 0.0f;
-    float nextPoseTime = 0.0f;
-	
-	// Find the first vertex pose defined for this mesh/submesh.
-	VertexAnimationVertexPose* firstVertexPose = nullptr;
-	auto it = mVertexPoses.find(meshIndex);
-	if(it != mVertexPoses.end())
-	{
-		auto it2 = it->second.find(submeshIndex);
-		if(it2 != it->second.end())
-		{
-			firstVertexPose = it2->second;
-		}
-	}
-	
-	// If no vertex pose was found, we'll have to return an error state.
-	if(firstVertexPose == nullptr)
-	{
-		VertexAnimationVertexPose pose;
-		pose.mFrameNumber = -1;
-		return pose;
-	}
-	
-	// Calculate how many seconds should be used for a single frame - used later.
-    float secondsPerFrame = 1.0f / framesPerSecond;
-	
-	// Determine the poses right before the desired local time on the animation.
-    VertexAnimationVertexPose* currentVertexPose = firstVertexPose;
-    while(currentVertexPose->mNext != nullptr)
+    // Find the first vertex pose defined for this mesh/submesh.
+    VertexAnimationVertexPose* firstVertexPose = nullptr;
+    auto it = mVertexPoses.find(meshIndex);
+    if(it != mVertexPoses.end())
     {
-        currentPoseTime = secondsPerFrame * currentVertexPose->mFrameNumber;
-        nextPoseTime = secondsPerFrame * currentVertexPose->mNext->mFrameNumber;
-        if(nextPoseTime > localTime) { break; }
-		
-        currentVertexPose = currentVertexPose->mNext;
+        auto it2 = it->second.find(submeshIndex);
+        if(it2 != it->second.end())
+        {
+            firstVertexPose = it2->second;
+        }
     }
-	
-	// Get the next pose, after the desired local time.
-	// If it doesn't exist, loop back to the first pose.
-    VertexAnimationVertexPose* nextVertexPose = currentVertexPose->mNext;
-    if(nextVertexPose == nullptr)
+
+    // Make sure we found a pose.
+    if(firstVertexPose != nullptr)
     {
-		// Clamp approach.
-		nextVertexPose = currentVertexPose;
-		nextPoseTime = currentPoseTime;
-		
-		// Loop approach.
-        //nextVertexPose = firstVertexPose;
-        //nextPoseTime = GetDuration(framesPerSecond);
+        // Calculate how many seconds should be used for a single frame - used later.
+        float secondsPerFrame = 1.0f / framesPerSecond;
+
+        // Caller may pass in a global time that extends beyond the local time of this particular animation.
+        // Desire here is for the animation to "loop", so we calculate how many seconds in we are.
+        float duration = GetDuration(framesPerSecond);
+        float localTime = time;
+        if(localTime > duration)
+        {
+            localTime = Math::Mod(time, duration);
+        }
+
+        // Determine the poses right before the desired local time on the animation.
+        float currentPoseTime = 0.0f;
+        float nextPoseTime = 0.0f;
+        VertexAnimationVertexPose* currentVertexPose = firstVertexPose;
+        while(currentVertexPose->mNext != nullptr)
+        {
+            currentPoseTime = secondsPerFrame * currentVertexPose->mFrameNumber;
+            nextPoseTime = secondsPerFrame * currentVertexPose->mNext->mFrameNumber;
+            if(nextPoseTime > localTime) { break; }
+
+            currentVertexPose = currentVertexPose->mNext;
+        }
+
+        // Make sure we found a valid pose.
+        if(currentVertexPose != nullptr)
+        {
+            // GK3 does a somewhat wasteful thing: poses are expected to be defined for all frames. If NOT, use the closes previous frame.
+            // SO: if the next pose IS NOT for the next frame, we just use the current pose with no interpolation.
+            VertexAnimationVertexPose* nextVertexPose = currentVertexPose->mNext;
+            if(nextVertexPose == nullptr || nextVertexPose->mFrameNumber != (currentVertexPose->mFrameNumber + 1))
+            {
+                // Clamp approach.
+                //nextVertexPose = currentVertexPose;
+                //nextPoseTime = currentPoseTime;
+                return *currentVertexPose;
+            }
+
+            // Otherwise, we must lerp between two poses.
+            // Determine our "t" value between the current and next pose.
+            float t = 1.0f;
+            if(!Math::IsZero(nextPoseTime - currentPoseTime))
+            {
+                t = (localTime - currentPoseTime) / (nextPoseTime - currentPoseTime);
+            }
+            assert(t >= 0.0f && t <= 1.0f);
+
+            // Now calculate interpolated positions between current and next poses for this time t.
+            VertexAnimationVertexPose pose;
+            for(int i = 0; i < currentVertexPose->mVertexPositions.size(); i++)
+            {
+                pose.mVertexPositions.push_back(Vector3::Lerp(currentVertexPose->mVertexPositions[i], nextVertexPose->mVertexPositions[i], t));
+            }
+            return pose;
+        }
     }
-    
-    // Determine our "t" value between the current and next pose.
-    float t = 1.0f;
-    if(!Math::IsZero(nextPoseTime - currentPoseTime))
-    {
-        t = (localTime - currentPoseTime) / (nextPoseTime - currentPoseTime);
-    }
-    assert(t >= 0.0f && t <= 1.0f);
-	
-    // Now calculate interpolated positions between current and next poses for this time t.
-	VertexAnimationVertexPose pose;
-    for(int i = 0; i < currentVertexPose->mVertexPositions.size(); i++)
-    {
-        pose.mVertexPositions.push_back(Vector3::Lerp(currentVertexPose->mVertexPositions[i], nextVertexPose->mVertexPositions[i], t));
-    }
-    return pose;
+
+    // Error case: return something invalid.
+    VertexAnimationVertexPose invalidPose;
+    invalidPose.mFrameNumber = -1;
+    return invalidPose;
 }
 
 Vector3 VertexAnimation::SampleVertexPosition(int frame, int meshIndex, int submeshIndex, int vertexIndex)
@@ -350,10 +397,9 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
         offsets.push_back(reader.ReadUInt());
     }
     
+	// Read in data for each keyframe.
     std::unordered_map<int, VertexAnimationVertexPose*> lastVertexPoseLookup;
     std::unordered_map<int, VertexAnimationTransformPose*> lastTransformPoseLookup;
-	
-	// Read in data for each keyframe.
     for(int i = 0; i < mFrameCount; i++)
     {
         #ifdef DEBUG_OUTPUT
@@ -563,7 +609,6 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                     assert(blockByteCount == 48);
                     byteCount -= blockByteCount + 4;
                     
-                    // These are in i,k,j order, rather than i,j,k, likely due to 3DS Max conventions.
                     // 12 bytes: mesh's x-axis basis vector (i)
                     // 12 bytes: mesh's z-axis basis vector (k)
                     // 12 bytes: mesh's y-axis basis vector (j)
