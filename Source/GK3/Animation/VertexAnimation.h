@@ -15,18 +15,23 @@
 #include "Matrix4.h"
 #include "Vector3.h"
 
-struct VertexAnimationVertexPose
+struct VertexAnimationPose
 {
-    int mFrameNumber = 0;
-    std::vector<Vector3> mVertexPositions;
-    VertexAnimationVertexPose* mNext = nullptr;
+    int frameNumber = 0;
+    VertexAnimationPose* next = nullptr;
+
+    VertexAnimationPose* GetForFrame(int frame);
+    void GetForTime(float time, int framesPerSecond, VertexAnimationPose*& current, VertexAnimationPose*& next, float& t);
 };
 
-struct VertexAnimationTransformPose
+struct VertexAnimationVertexPose : public VertexAnimationPose
+{   
+    std::vector<Vector3> vertexPositions;
+};
+
+struct VertexAnimationTransformPose : public VertexAnimationPose
 {
-    int mFrameNumber = 0;
-    Matrix4 mMeshToLocalMatrix;
-    VertexAnimationTransformPose* mNext = nullptr;
+    Matrix4 meshToLocalMatrix;
 };
 
 class VertexAnimation : public Asset

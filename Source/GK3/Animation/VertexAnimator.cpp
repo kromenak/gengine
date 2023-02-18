@@ -87,16 +87,16 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, int frame)
         for(int j = 0; j < submeshes.size(); j++)
         {
             VertexAnimationVertexPose sample = animation->SampleVertexPose(frame, i, j);
-            if(sample.mFrameNumber >= 0)
+            if(sample.frameNumber >= 0)
             {
-                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.mVertexPositions.data()));
+                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.vertexPositions.data()));
             }
         }
         
         VertexAnimationTransformPose transformSample = animation->SampleTransformPose(frame, i);
-        if(transformSample.mFrameNumber >= 0)
+        if(transformSample.frameNumber >= 0)
         {
-            meshes[i]->SetMeshToLocalMatrix(transformSample.mMeshToLocalMatrix);
+            meshes[i]->SetMeshToLocalMatrix(transformSample.meshToLocalMatrix);
         }
     }
 }
@@ -112,16 +112,16 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
 		for(int j = 0; j < submeshes.size(); j++)
 		{
 			VertexAnimationVertexPose sample = animation->SampleVertexPose(time, mFramesPerSecond, i, j);
-			if(sample.mFrameNumber >= 0)
+			if(sample.frameNumber >= 0)
 			{
-                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.mVertexPositions.data()));
+                submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.vertexPositions.data()));
 			}
 		}
 		
 		VertexAnimationTransformPose transformSample = animation->SampleTransformPose(time, mFramesPerSecond, i);
-		if(transformSample.mFrameNumber >= 0)
+		if(transformSample.frameNumber >= 0)
 		{
-            meshes[i]->SetMeshToLocalMatrix(transformSample.mMeshToLocalMatrix);
+            meshes[i]->SetMeshToLocalMatrix(transformSample.meshToLocalMatrix);
 		}
 	}
 }
