@@ -35,9 +35,13 @@ struct SidneyFile
 
     // Type of this file (is it an image, audio, text, etc?).
     SidneyFileType type;
+
+    // A score name associated with adding this file.
+    std::string scoreName;
     
     SidneyFile() = default;
     SidneyFile(SidneyFileType type, const std::string& name) : type(type), name(name) { }
+    SidneyFile(SidneyFileType type, const std::string& name, const std::string& scoreName) : type(type), name(name), scoreName(scoreName) { }
     SidneyFile(const SidneyFile&) = default;
     SidneyFile(SidneyFile&&) = default;
 };
@@ -74,8 +78,10 @@ public:
     void Hide();
 
     void AddFile(int fileIndex);
-    bool HasFile(const std::string& fileName) const;
+    bool HasFile(int fileIndex);
     int GetMaxFileIndex() const { return mAllFiles.size() - 1; }
+
+    bool HasFile(const std::string& fileName) const;
 
 private:
     // The data in the file system. This is stuff that has been scanned into Sidney by the player.

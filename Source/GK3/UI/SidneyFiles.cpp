@@ -1,5 +1,6 @@
 #include "SidneyFiles.h"
 
+#include "GameProgress.h"
 #include "Sidney.h"
 #include "SidneyUtil.h"
 #include "Texture.h"
@@ -31,43 +32,43 @@ void SidneyFiles::Init(Sidney* parent)
 
     // Build list of known files.
     //TODO: Would be cool if this was data-driven?
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileAbbePrint"); // 1
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileBuchelliPrint");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileButhanePrint");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileEstellePrint");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLadyHowardPrint");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileMontreauxPrint");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileWilkesPrint");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileMoselyPrint");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLarryPrint");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileWilkesPrint2"); // 10
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileAbbePrint",        "e_sidney_add_fingerprint_abbe");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileBuchelliPrint",    "e_sidney_add_fingerprint_buchelli");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileButhanePrint",     "e_sidney_add_fingerprint_buthane");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileEstellePrint",     "e_sidney_add_fingerprint_estelle");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLadyHowardPrint",  "e_sidney_add_fingerprint_howard");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileMontreauxPrint",   "e_sidney_add_fingerprint_montreaux");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileWilkesPrint",      "e_sidney_add_fingerprint_wilkes");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileMoselyPrint");     //TODO: Hmm, no score event for this one?
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLarryPrint",       "e_sidney_add_fingerprint_larry");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileWilkesPrint2");
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileBuchelliPrint2");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint1");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint2");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint3");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint1",    "e_sidney_add_manuscript_prints_buthane");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint2",    "e_sidney_add_manuscript_prints_mosley");
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint3",    "e_sidney_add_manuscript_prints_buchelli");
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint4");
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint5");
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint6");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLSR1Print"); // Unused?
+    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLSR1Print");               // Unused?
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileEstellesLSRPrint");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileMap"); // 20
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileParchment1");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileParchment2");
-    mAllFiles.emplace_back(SidneyFileType::Image, "filePoussinPostcard");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileTeniersPostcard1");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileTeniersPostcard2");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileHermeticSymbols");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileSUMNote");
-    mAllFiles.emplace_back(SidneyFileType::Audio, "fileAbbeTape");
-    mAllFiles.emplace_back(SidneyFileType::Audio, "fileBuchelliTape");
-    mAllFiles.emplace_back(SidneyFileType::Text, "fileArcadiaText"); // 30
-    mAllFiles.emplace_back(SidneyFileType::Text, "fileTempleOfSolomonText"); //TODO: Is this a text type?
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileHermeticSymbols"); //TODO: Seems doubled up and unused?
-    mAllFiles.emplace_back(SidneyFileType::License, "fileBuchelliLicense");
-    mAllFiles.emplace_back(SidneyFileType::License, "fileEmilioLicense");
-    mAllFiles.emplace_back(SidneyFileType::License, "fileLadyHowardLicense");
-    mAllFiles.emplace_back(SidneyFileType::License, "fileMoselyLicense");
-    mAllFiles.emplace_back(SidneyFileType::License, "fileWilkesLicense");
+    mAllFiles.emplace_back(SidneyFileType::Image,       "fileMap",              "e_sidney_add_map"); // 20
+    mAllFiles.emplace_back(SidneyFileType::Image,       "fileParchment1",       "e_sidney_add_parch1");
+    mAllFiles.emplace_back(SidneyFileType::Image,       "fileParchment2",       "e_sidney_add_parch2");
+    mAllFiles.emplace_back(SidneyFileType::Image,       "filePoussinPostcard",  "e_sidney_add_postcard_1");
+    mAllFiles.emplace_back(SidneyFileType::Image,       "fileTeniersPostcard1", "e_sidney_add_postcard_2");
+    mAllFiles.emplace_back(SidneyFileType::Image,       "fileTeniersPostcard2", "e_sidney_add_postcard_3");
+    mAllFiles.emplace_back(SidneyFileType::Image,       "fileHermeticSymbols",  "e_sidney_add_hermetical_symbols_from_serres");
+    mAllFiles.emplace_back(SidneyFileType::Image,       "fileSUMNote",          "e_sidney_add_sum_note");
+    mAllFiles.emplace_back(SidneyFileType::Audio,       "fileAbbeTape",         "e_sidney_add_tape_abbe");
+    mAllFiles.emplace_back(SidneyFileType::Audio,       "fileBuchelliTape",     "e_sidney_add_tape_buchelli");
+    mAllFiles.emplace_back(SidneyFileType::Text,        "fileArcadiaText"); // 30
+    mAllFiles.emplace_back(SidneyFileType::Text,        "fileTempleOfSolomonText");     //TODO: Is this a text type?
+    mAllFiles.emplace_back(SidneyFileType::Image,       "fileHermeticSymbols");         //TODO: Seems doubled up and unused?
+    mAllFiles.emplace_back(SidneyFileType::License,     "fileBuchelliLicense",  "e_sidney_add_license_buchelli");
+    mAllFiles.emplace_back(SidneyFileType::License,     "fileEmilioLicense",    "e_sidney_add_license_emilio");
+    mAllFiles.emplace_back(SidneyFileType::License,     "fileLadyHowardLicense","e_sidney_add_license_howard");
+    mAllFiles.emplace_back(SidneyFileType::License,     "fileMoselyLicense",    "e_sidney_add_license_mosely");
+    mAllFiles.emplace_back(SidneyFileType::License,     "fileWilkesLicense",    "e_sidney_add_license_wilkes");
 
     // Set file indexes (as this is how files are referenced when adding).
     for(int i = 0; i < mAllFiles.size(); ++i)
@@ -171,8 +172,19 @@ void SidneyFiles::AddFile(int fileIndex)
         if(dir.type == mAllFiles[fileIndex].type && !dir.HasFile(mAllFiles[fileIndex].name))
         {
             dir.files.emplace_back(mAllFiles[fileIndex]);
+
+            // Add to score if there's a score event.
+            if(!mAllFiles[fileIndex].scoreName.empty())
+            {
+                Services::Get<GameProgress>()->ChangeScore(mAllFiles[fileIndex].scoreName);
+            }
         }
     }
+}
+
+bool SidneyFiles::HasFile(int fileIndex)
+{
+    return HasFile(mAllFiles[fileIndex].name);
 }
 
 bool SidneyFiles::HasFile(const std::string& fileName) const
