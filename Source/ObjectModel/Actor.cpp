@@ -92,10 +92,28 @@ void Actor::SetActive(bool active)
 		if(oldState == State::Active && mState == State::Inactive)
 		{
 			OnInactive();
+
+            // Enabled components become marked as disabled.
+            for(auto& component : mComponents)
+            {
+                if(component->IsEnabled())
+                {
+                    component->OnDisable();
+                }
+            }
 		}
 		else if(oldState == State::Inactive && mState == State::Active)
 		{
 			OnActive();
+
+            // Enabled components are back to being enabled.
+            for(auto& component : mComponents)
+            {
+                if(component->IsEnabled())
+                {
+                    component->OnEnable();
+                }
+            }
 		}
 	}
 }

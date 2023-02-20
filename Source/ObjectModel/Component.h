@@ -21,16 +21,19 @@ public:
     
     Actor* GetOwner() const { return mOwner; }
 	
-	void SetEnabled(bool enabled) { mEnabled = enabled; }
+    void SetEnabled(bool enabled);
 	bool IsEnabled() const { return mEnabled; }
 	
 	bool IsActiveAndEnabled() const;
     
 protected:
+    virtual void OnEnable() { }
+    virtual void OnDisable() { }
 	virtual void OnUpdate(float deltaTime) { }
 	
 private:
 	// The component's owner.
+    friend class Actor;
 	Actor* mOwner = nullptr;
 	
 	// Is the component enabled? If not, OnUpdate won't be called.
