@@ -9,6 +9,7 @@
 #include <functional>
 
 #include "Heading.h"
+#include "Profiler.h" // For Stopwatch
 #include "Vector3.h"
 
 class MeshRenderer;
@@ -57,6 +58,8 @@ public:
     bool IsPlayingNotAutoscript() const { return mVertexAnimation != nullptr && !mFromAutoscript; }
 	
 protected:
+    void OnEnable() override;
+    void OnDisable() override;
 	void OnUpdate(float deltaTime) override;
 	
 private:
@@ -75,6 +78,10 @@ private:
 	
 	// Timer for tracking progress on vertex animation.
 	float mAnimationTimer = 0.0f;
+
+    // Problem: GK3 assumes objects continue to animate when they are not visible. But inactive objects don't Update!
+    // To work around that, we'll use this timer to track how long a VertexAnimator is disabled.
+    Stopwatch mDisabledTimer;
 
     // Is this an autoscript animation?
     bool mFromAutoscript = false;

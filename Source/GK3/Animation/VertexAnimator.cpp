@@ -28,6 +28,10 @@ void VertexAnimator::Start(const VertexAnimParams& params)
     
     // Sample animation immediately so mesh's positions/rotations are updated.
     TakeSample(mVertexAnimation, mAnimationTimer);
+
+    // The disabled timer is only useful to track how long this component was disabled so an animation can catch up.
+    // When a new animation starts, we should reset this so it times from the beginning of the new animation.
+    mDisabledTimer.Reset();
 }
 
 void VertexAnimator::Stop(VertexAnimation* anim)
@@ -53,6 +57,19 @@ void VertexAnimator::Sample(VertexAnimation* animation, int frame)
 	{
 		TakeSample(animation, frame);
 	}
+}
+
+void VertexAnimator::OnEnable()
+{
+    // When we are enabled, perform a BIG update to correspond with the disabled period.
+    // This lets the animation "catch up" (as though the playing animation was playing the entire time the object was disabled).
+    OnUpdate(mDisabledTimer.GetSeconds());
+}
+
+void VertexAnimator::OnDisable()
+{
+    // On disable, reset our disabled timer.
+    mDisabledTimer.Reset();
 }
 
 void VertexAnimator::OnUpdate(float deltaTime)

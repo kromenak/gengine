@@ -26,13 +26,15 @@ class ScopedProfiler;
 #define TIMER_SCOPED(x) Sample timerScopedSample(x);
 
 // Core time tracker: returns amount of time since creation.
+//TODO: Maybe move to Timers utility file? Useful outside of profiling too!
 class Stopwatch
 {
 public:
     Stopwatch();
 
     void Reset();
-    double GetMilliseconds() const;
+    float GetMilliseconds() const;
+    float GetSeconds() const;
 
 private:
     uint64_t mStartCounter = 0L;

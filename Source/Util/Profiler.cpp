@@ -20,14 +20,20 @@ void Stopwatch::Reset()
     mStartCounter = SDL_GetPerformanceCounter();
 }
 
-double Stopwatch::GetMilliseconds() const
+float Stopwatch::GetMilliseconds() const
 {
-    // Get count delta since stopwatch started.
+    // Convert to milliseconds.
+    return GetSeconds() * 1000.0f;
+}
+
+float Stopwatch::GetSeconds() const
+{
+    // Get counter delta since stopwatch started.
     uint64_t counter = SDL_GetPerformanceCounter();
     uint64_t count = counter - mStartCounter;
 
-    // Convert counts to milliseconds and return.
-    return (static_cast<double>(count) / SDL_GetPerformanceFrequency()) * 1000.0;
+    // Convert to seconds.
+    return (static_cast<float>(count) / SDL_GetPerformanceFrequency());
 }
 
 Sample::Sample(const char* name) :
