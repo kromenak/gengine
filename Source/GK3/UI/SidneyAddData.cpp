@@ -3,6 +3,7 @@
 #include "GameProgress.h"
 #include "InventoryManager.h"
 #include "Random.h"
+#include "Scene.h"
 #include "Sidney.h"
 #include "SidneyFiles.h"
 #include "SidneyUtil.h"
@@ -152,6 +153,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
             int sidneyFileIndex = Services::Get<GameProgress>()->GetGameVariable("SidScanner") - 1;
             if(sidneyFileIndex < 0 || sidneyFileIndex > mSidneyFiles->GetMaxFileIndex())
             {
+                // CASE 1: No valid object was selected to scan.
                 // Show box indicating that input was aborted.
                 mAddDataBox->SetActive(true);
 
@@ -165,8 +167,22 @@ void SidneyAddData::OnUpdate(float deltaTime)
                     mAddDataBox->SetActive(false);
                 });
             }
-            else
+            else if(mSidneyFiles->HasFile(sidneyFileIndex))
             {
+                // CASE 2: Valid object selected, but already scanned it.
+                // Ego says "I already scanned it!"
+                if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+                {
+                    Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O4G2K6R1\", 1)");
+                }
+                else
+                {
+                    Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O4G716R1\", 1)");
+                }
+            }
+            else 
+            {
+                // CASE 3: Valid object selected, not scanned yet.
                 // Show box (and SFX) indicating we are scanning an item.
                 mAddDataBox->SetActive(true);
                 Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDSCAN.WAV"));
@@ -176,11 +192,11 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 mAddDataLabel->SetFont(mGreenFont);
                 mAddDataColorTimer = kAddDataColorToggleInterval;
                 
-                // Add the desired file to Sidney.
-                mSidneyFiles->AddFile(sidneyFileIndex);
-
                 // This puts the player in a non-interactive state for a moment (so they can read the text box and hear SFX).
                 Services::Get<ActionManager>()->ExecuteSheepAction("wait SetTimerSeconds(2);", [this, sidneyFileIndex](const Action* action){
+
+                    // Add the desired file to Sidney.
+                    mSidneyFiles->AddFile(sidneyFileIndex);
 
                     // Hide "Add Data" box and show "Input Complete" box.
                     mAddDataBox->SetActive(false);
@@ -188,6 +204,9 @@ void SidneyAddData::OnUpdate(float deltaTime)
 
                     // Figure out name of this item, which will be added to the input box.
                     mTextToType = SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(sidneyFileIndex + 1));
+
+                    // Reset type text.
+                    mFileNameLabel->SetText("");
                     mTextToTypeIndex = 0;
                     mTextToTypeTimer = Random::Range(kMinMaxTypeInterval.x, kMinMaxTypeInterval.y);
                 });
@@ -250,6 +269,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 else
                 {
                     // We typed everything AND showed the OK button being pressed. Close this box!
+                    Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDBUTTON5"));
                     mInputCompleteBox->SetActive(false);
                 }
             }
