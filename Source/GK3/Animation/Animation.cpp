@@ -552,7 +552,10 @@ void Animation::ParseFromData(char *data, int dataLength)
 					SpeakerAnimNode* node = new SpeakerAnimNode();
                     node->frameNumber = frameNumber;
 					node->actorNoun = actorNoun;
-					mFrames[frameNumber].push_back(node);
+
+                    // When CAPTION and SPEAKER nodes exist on the same frame, it's important the SPEAKER nodes are processed first.
+                    // To help with that, we'll always put SPEAKER nodes at the beginning of the node list.
+                    mFrames[frameNumber].insert(mFrames[frameNumber].begin(), node);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "CAPTION"))
                 {
