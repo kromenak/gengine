@@ -13,7 +13,7 @@ Cursor::Cursor(const std::string& name, char* data, int dataLength) : Asset(name
     Texture* texture = Services::GetAssets()->LoadTexture(GetNameNoExtension() + ".BMP");
     if(texture == nullptr)
     {
-        std::cout << "Couldn't load texture for cursor " << mName << std::endl;
+        printf("Create cursor %s failed: couldn't load texture.\n", mName.c_str());
         return;
     }
 
@@ -89,11 +89,16 @@ Cursor::Cursor(const std::string& name, char* data, int dataLength) : Asset(name
     #endif
 
     // Create a surface from the texture.
-    SDL_Surface* srcSurface = SDL_CreateRGBSurfaceFrom((void*)texture->GetPixelData(), texture->GetWidth(), texture->GetHeight(),
-                                                       32, 4 * texture->GetWidth(), rmask, gmask, bmask, amask);
+    const Uint32 kTextureBytesPerPixel = 4;
+    const Uint32 kTextureBitsPerPixel = kTextureBytesPerPixel * 8;
+    Uint32 texturePitch = kTextureBytesPerPixel * texture->GetWidth();
+    SDL_Surface* srcSurface = SDL_CreateRGBSurfaceFrom(texture->GetPixelData(), texture->GetWidth(), texture->GetHeight(),
+                                                       kTextureBitsPerPixel,
+                                                       texturePitch,
+                                                       rmask, gmask, bmask, amask);
     if(srcSurface == nullptr)
     {
-        SDL_Log("Creating surface failed: %s", SDL_GetError());
+        printf("Create cursor %s failed: couldn't create surface from texture (%s).\n", mName.c_str(), SDL_GetError());
         return;
     }
 
@@ -107,14 +112,22 @@ Cursor::Cursor(const std::string& name, char* data, int dataLength) : Asset(name
         srcRect.h = frameHeight;
 
         // Copy frame from texture into a destination surface.
-        SDL_Surface* dstSurface = SDL_CreateRGBSurface(0, frameWidth, frameHeight, 32, rmask, gmask, bmask, amask);
-        SDL_BlitSurface(srcSurface, &srcRect, dstSurface, NULL);
+        SDL_Surface* dstSurface = SDL_CreateRGBSurface(0, frameWidth, frameHeight, kTextureBitsPerPixel, rmask, gmask, bmask, amask);
+        if(dstSurface == nullptr)
+        {
+            printf("Create cursor %s failed: couldn't create dest surface for frame %i (%s).\n", mName.c_str(), i, SDL_GetError());
+        }
+        int result = SDL_BlitSurface(srcSurface, &srcRect, dstSurface, nullptr);
+        if(result != 0)
+        {
+            printf("Create cursor %s failed: couldn't blit to dest surface for frame %i (%s).\n", mName.c_str(), i, SDL_GetError());
+        }
 
         // Use destination surface to create cursor.
         SDL_Cursor* cursor = SDL_CreateColorCursor(dstSurface, (int)hotspot.x, (int)hotspot.y);
         if(cursor == nullptr)
         {
-            std::cout << "Create cursor failed: " << SDL_GetError() << std::endl;
+            printf("Create cursor %s failed: couldn't create cursor frame %i (%s).\n", mName.c_str(), i, SDL_GetError());
         }
         mCursorFrames.push_back(cursor);
     }
