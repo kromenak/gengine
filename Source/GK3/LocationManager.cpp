@@ -174,7 +174,7 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
 
     // Set new location.
     // This is important to do BEFORE checking for timeblock completion, as that logic looks for locations sometimes.
-    bool sameLocation = (mLocation == location);
+    bool sameLocation = StringUtil::EqualsIgnoreCase(mLocation, location);
     SetLocation(location);
 
     //HACK: Don't check timeblock completion if following someone on driving screen.
@@ -222,7 +222,7 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
 
 void LocationManager::SetLocation(const std::string& location)
 {
-    if(mLocation != location)
+    if(!StringUtil::EqualsIgnoreCase(mLocation, location))
     {
         mLastLocation = mLocation;
         mLocation = location;
