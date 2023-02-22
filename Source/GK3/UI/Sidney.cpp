@@ -194,6 +194,9 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
     mEmail.Init(this);
     mFiles.Init(this);
     mAddData.Init(this, &mFiles);
+
+    // Not active by default.
+    SetActive(false);
 }
 
 void Sidney::Show()
