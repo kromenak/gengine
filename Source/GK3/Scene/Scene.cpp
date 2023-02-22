@@ -259,7 +259,8 @@ void Scene::Init()
         if((modelDef->type == SceneModel::Type::Prop || modelDef->type == SceneModel::Type::GasProp)
            && modelDef->initAnim != nullptr)
         {
-            mAnimator->Sample(modelDef->initAnim, 0);
+            //printf("Applying init anim for %s\n", modelDef->name.c_str());
+            mAnimator->Sample(modelDef->initAnim, 0, modelDef->name);
         }
     }
 

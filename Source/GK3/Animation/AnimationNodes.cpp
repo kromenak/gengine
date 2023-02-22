@@ -67,7 +67,7 @@ void VertexAnimNode::Play(AnimationState* animState)
 	}
 }
 
-void VertexAnimNode::Sample(Animation* anim, int frame)
+void VertexAnimNode::Sample(int frame)
 {
     if(vertexAnimation != nullptr)
     {
@@ -91,6 +91,7 @@ void VertexAnimNode::Sample(Animation* anim, int frame)
             params.allowMove = absolute;
 
             // Sample the anim.
+            printf("Sample anim on obj %s\n", obj->GetName().c_str());
             obj->SampleAnimation(params, frame);
         }
     }
@@ -106,6 +107,11 @@ void VertexAnimNode::Stop()
             obj->StopAnimation(vertexAnimation);
 		}
 	}
+}
+
+bool VertexAnimNode::AppliesToModel(const std::string& modelName)
+{
+    return vertexAnimation != nullptr && StringUtil::EqualsIgnoreCase(modelName, vertexAnimation->GetModelName());
 }
 
 Vector3 VertexAnimNode::CalcAbsolutePosition()
@@ -130,10 +136,20 @@ void SceneTextureAnimNode::Play(AnimationState* animState)
 	}
 }
 
+void SceneTextureAnimNode::Sample(int frame)
+{
+    Play(nullptr);
+}
+
 void SceneModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	//TODO: Ensure sceneName matches loaded scene name?
 	GEngine::Instance()->GetScene()->SetSceneModelVisibility(sceneModelName, visible);
+}
+
+void SceneModelVisibilityAnimNode::Sample(int frame)
+{
+    Play(nullptr);
 }
 
 void ModelTextureAnimNode::Play(AnimationState* animState)
@@ -154,6 +170,11 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
 			}
 		}
 	}
+}
+
+void ModelTextureAnimNode::Sample(int frame)
+{
+    Play(nullptr);
 }
 
 void ModelVisibilityAnimNode::Play(AnimationState* animState)
@@ -180,6 +201,11 @@ void ModelVisibilityAnimNode::Play(AnimationState* animState)
             }
         }
 	}
+}
+
+void ModelVisibilityAnimNode::Sample(int frame)
+{
+    Play(nullptr);
 }
 
 void SoundAnimNode::Play(AnimationState* animState)
@@ -327,6 +353,11 @@ void CameraAnimNode::Play(AnimationState* animState)
     GEngine::Instance()->GetScene()->SetCameraPosition(cameraPositionName);
 }
 
+void CameraAnimNode::Sample(int frame)
+{
+    Play(nullptr);
+}
+
 void FaceTexAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
@@ -342,6 +373,11 @@ void FaceTexAnimNode::Play(AnimationState* animState)
 	}
 }
 
+void FaceTexAnimNode::Sample(int frame)
+{
+    Play(nullptr);
+}
+
 void UnFaceTexAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
@@ -350,6 +386,11 @@ void UnFaceTexAnimNode::Play(AnimationState* animState)
 	{
 		actor->GetFaceController()->Clear(faceElement);
 	}
+}
+
+void UnFaceTexAnimNode::Sample(int frame)
+{
+    Play(nullptr);
 }
 
 void LipSyncAnimNode::Play(AnimationState* animState)
@@ -367,9 +408,19 @@ void LipSyncAnimNode::Play(AnimationState* animState)
 	}
 }
 
+void LipSyncAnimNode::Sample(int frame)
+{
+    Play(nullptr);
+}
+
 void GlanceAnimNode::Play(AnimationState* animState)
 {
 	std::cout << actorNoun << " GLANCE AT " << position << std::endl;
+}
+
+void GlanceAnimNode::Sample(int frame)
+{
+    Play(nullptr);
 }
 
 void MoodAnimNode::Play(AnimationState* animState)
@@ -377,9 +428,19 @@ void MoodAnimNode::Play(AnimationState* animState)
 	std::cout << actorNoun << " IN MOOD " << moodName << std::endl;
 }
 
+void MoodAnimNode::Sample(int frame)
+{
+    Play(nullptr);
+}
+
 void ExpressionAnimNode::Play(AnimationState* animState)
 {
     std::cout << actorNoun << " HAS EXPRESSION " << expressionName << std::endl;
+}
+
+void ExpressionAnimNode::Sample(int frame)
+{
+    Play(nullptr);
 }
 
 void SpeakerAnimNode::Play(AnimationState* animState)
@@ -387,9 +448,19 @@ void SpeakerAnimNode::Play(AnimationState* animState)
 	Services::Get<DialogueManager>()->SetSpeaker(actorNoun);
 }
 
+void SpeakerAnimNode::Sample(int frame)
+{
+    Play(nullptr);
+}
+
 void CaptionAnimNode::Play(AnimationState* animState)
 {
     gGK3UI.AddCaption(caption, Services::Get<DialogueManager>()->GetSpeaker());
+}
+
+void CaptionAnimNode::Sample(int frame)
+{
+    Play(nullptr);
 }
 
 void SpeakerCaptionAnimNode::Play(AnimationState* animState)
@@ -404,14 +475,29 @@ void SpeakerCaptionAnimNode::Play(AnimationState* animState)
     gGK3UI.FinishCaption(duration);
 }
 
+void SpeakerCaptionAnimNode::Sample(int frame)
+{
+    Play(nullptr);
+}
+
 void DialogueCueAnimNode::Play(AnimationState* animState)
 {
 	Services::Get<DialogueManager>()->TriggerDialogueCue();
     gGK3UI.FinishCaption();
 }
 
+void DialogueCueAnimNode::Sample(int frame)
+{
+    Play(nullptr);
+}
+
 void DialogueAnimNode::Play(AnimationState* animState)
 {
     //TODO: Unsure if "numLines" and "playFidgets" are correct here.
     Services::Get<DialogueManager>()->StartDialogue(licensePlate, 1, false, nullptr);
+}
+
+void DialogueAnimNode::Sample(int frame)
+{
+    Play(nullptr);
 }

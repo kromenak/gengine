@@ -76,9 +76,27 @@ void Animator::Sample(Animation* animation, int frame)
 	{
 		for(auto& node : *frameData)
 		{
-			node->Sample(animation, frame);
+			node->Sample(frame);
 		}
 	}
+}
+
+void Animator::Sample(Animation* animation, int frame, const std::string& modelName)
+{
+    if(animation == nullptr) { return; }
+
+    // Similar to above, but ONLY sample nodes that are relevant to this model.
+    std::vector<AnimNode*>* frameData = animation->GetFrame(frame);
+    if(frameData != nullptr)
+    {
+        for(auto& node : *frameData)
+        {
+            if(node->AppliesToModel(modelName))
+            {
+                node->Sample(frame);
+            }
+        }
+    }
 }
 
 void Animator::OnUpdate(float deltaTime)

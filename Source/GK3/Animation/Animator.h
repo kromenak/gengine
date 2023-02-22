@@ -77,6 +77,7 @@ public:
     
 	// Animation Sampling
 	void Sample(Animation* animation, int frame);
+    void Sample(Animation* animation, int frame, const std::string& modelName);
 	
 protected:
 	void OnUpdate(float deltaTime) override;

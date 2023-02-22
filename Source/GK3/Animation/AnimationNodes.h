@@ -12,6 +12,7 @@
 #include <string>
 
 #include "FaceController.h"
+#include "StringUtil.h"
 #include "Vector3.h"
 
 class Animation;
@@ -28,9 +29,10 @@ struct AnimNode
 	
 	virtual void Play(AnimationState* animState) = 0;
 	virtual void Stop() { } // Stop support is optional. Does nothing by default.
-	virtual void Sample(Animation* anim, int frame) { } // Sampling support is optional. Does nothing by default.
+	virtual void Sample(int frame) { } // Sampling support is optional. Does nothing by default.
     
     virtual bool PlayDuringCatchup() { return false; }
+    virtual bool AppliesToModel(const std::string& modelName) { return false; }
 };
 
 // A node that plays a vertex animation.
@@ -57,10 +59,11 @@ struct VertexAnimNode : public AnimNode
     float absoluteModelToActorHeading = 0.0f;
 	
 	void Play(AnimationState* animState) override;
-    void Sample(Animation* anim, int frame) override;
+    void Sample(int frame) override;
     void Stop() override;
     
     bool PlayDuringCatchup() override { return true; }
+    bool AppliesToModel(const std::string& modelName) override;
 
     Vector3 CalcAbsolutePosition();
 };
@@ -73,6 +76,7 @@ struct SceneTextureAnimNode : public AnimNode
 	std::string textureName;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // Changes visibility of a *scene* model (aka a model within the BSP geometry).
@@ -83,6 +87,7 @@ struct SceneModelVisibilityAnimNode : public AnimNode
 	bool visible = false;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // Changes a models texture (a model loaded from a .MOD file).
@@ -94,6 +99,9 @@ struct ModelTextureAnimNode : public AnimNode
 	unsigned char submeshIndex = 0;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
+
+    bool AppliesToModel(const std::string& modelNameIn) override { return StringUtil::EqualsIgnoreCase(modelNameIn, modelName); }
 };
 
 // Changes visibility of a model (a model loaded from a .MOD file).
@@ -107,6 +115,9 @@ struct ModelVisibilityAnimNode : public AnimNode
     signed char submeshIndex = -1;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
+
+    bool AppliesToModel(const std::string& modelNameIn) override { return StringUtil::EqualsIgnoreCase(modelNameIn, modelName); }
 };
 
 // A node that plays a sound effect.
@@ -172,6 +183,7 @@ struct CameraAnimNode : public AnimNode
 	std::string cameraPositionName;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // A node that changes a part of an actor's face.
@@ -182,6 +194,7 @@ struct FaceTexAnimNode : public AnimNode
 	FaceElement faceElement = FaceElement::Mouth;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // A node that reverts part of an actor's face to the default.
@@ -191,6 +204,7 @@ struct UnFaceTexAnimNode : public AnimNode
 	FaceElement faceElement = FaceElement::Mouth;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // A node that changes an actor's mouth texture, for lip-sync during VO.
@@ -200,6 +214,7 @@ struct LipSyncAnimNode : public AnimNode
 	std::string mouthTextureName;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // A node that causes an actor to look towards a position briefly.
@@ -210,6 +225,7 @@ struct GlanceAnimNode : public AnimNode
 	Vector3 position;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // A node that applies a certain "mood" (face combination) to an actor.
@@ -219,6 +235,7 @@ struct MoodAnimNode : public AnimNode
 	std::string moodName;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // A node that applies a certain "expression" (similar to a moode) to an actor.
@@ -229,6 +246,7 @@ struct ExpressionAnimNode : public AnimNode
     std::string expressionName;
 
     void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // Specifies who the speaker is.
@@ -240,6 +258,7 @@ struct SpeakerAnimNode : public AnimNode
 	std::string actorNoun;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // Contains a caption to show on-screen.
@@ -250,6 +269,7 @@ struct CaptionAnimNode : public AnimNode
 	std::string caption;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // Speaker and caption data rolled into one.
@@ -267,6 +287,7 @@ struct SpeakerCaptionAnimNode : public AnimNode
 	std::string caption;
 	
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // An empty trigger node, used to signal the end of a piece of dialogue.
@@ -275,6 +296,7 @@ struct SpeakerCaptionAnimNode : public AnimNode
 struct DialogueCueAnimNode : public AnimNode
 {
 	void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
 
 // A dialogue node, triggers some YAK dialogue.
@@ -284,4 +306,5 @@ struct DialogueAnimNode : public AnimNode
     std::string licensePlate;
 
     void Play(AnimationState* animState) override;
+    void Sample(int frame) override;
 };
