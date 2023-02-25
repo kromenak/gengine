@@ -147,8 +147,13 @@ void Model::ParseFromData(char *data, int dataLength)
         return;
     }
     
-    // 4 bytes: First 2 are a major/minor version number. Next 2 unknown.
-    reader.ReadUInt();
+    // 2 bytes: A major/minor version number. Next 2 unknown.
+    reader.ReadByte(); // minor
+    reader.ReadByte(); // major
+
+    // 2 bytes: Unknown (always 0 so far)
+    reader.ReadUShort();
+    //printf("%s unknown %u\n", mName.c_str(), unknown);
     
     // 4 bytes: Number of meshes in this model.
     unsigned int numMeshes = reader.ReadUInt();
@@ -173,7 +178,7 @@ void Model::ParseFromData(char *data, int dataLength)
 	{
 		// A value of "2" indicates that this model should render as a billboard.
 		unsigned int flags = reader.ReadUInt();
-        //std::cout << std::bitset<32>(flags) << std::endl;
+        //std::cout << mName << ": " << std::bitset<32>(flags) << std::endl;
 		if((flags & 2) != 0)
 		{
 			//std::cout << "  Billboard Model!" << std::endl;
@@ -182,19 +187,17 @@ void Model::ParseFromData(char *data, int dataLength)
 
         /*
         flags = reader.ReadUInt();
-        std::cout << std::bitset<32>(flags) << std::endl;
+        std::cout << mName << ": " << std::bitset<32>(flags) << std::endl;
 
         flags = reader.ReadUInt();
-        std::cout << std::bitset<32>(flags) << std::endl;
+        std::cout << mName << ": " << std::bitset<32>(flags) << std::endl;
 
         flags = reader.ReadUInt();
-        std::cout << std::bitset<32>(flags) << std::endl;
+        std::cout << mName << ": " << std::bitset<32>(flags) << std::endl;
 
         flags = reader.ReadUInt();
-        std::cout << std::bitset<32>(flags) << std::endl;
+        std::cout << mName << ": " << std::bitset<32>(flags) << std::endl;
         */
-
-		// Unknown
 		reader.Skip(16);
 		
 		// 4 bytes: unknown - has thus far always been the number 8.

@@ -53,6 +53,16 @@ void GKProp::Init(const SceneData& sceneData)
     }
 }
 
+void GKProp::StartFidget(GAS* gas)
+{
+    mGasPlayer->Play(gas);
+}
+
+void GKProp::StopFidget(std::function<void()> callback)
+{
+    mGasPlayer->Stop(callback);
+}
+
 void GKProp::StartAnimation(VertexAnimParams& animParams)
 {
     // Don't let a GAS anim override a non-GAS anim.
@@ -101,16 +111,6 @@ void GKProp::StopAnimation(VertexAnimation* anim)
 AABB GKProp::GetAABB()
 {
     return mMeshRenderer->GetAABB();
-}
-
-void GKProp::StartFidget(GAS* gas)
-{
-    mGasPlayer->Play(gas);
-}
-
-void GKProp::StopFidget(std::function<void()> callback)
-{
-    mGasPlayer->Stop(callback);
 }
 
 void GKProp::OnVertexAnimationStop()

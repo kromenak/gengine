@@ -32,6 +32,9 @@ struct VertexAnimParams
     bool absolute = false;
     Vector3 absolutePosition;
     Heading absoluteHeading = Heading::None;
+
+    // If specified, it means this anim follows a parent object's movement. Should not be set for absolute anims.
+    Actor* parent = nullptr;
     
     // If true, animation can move associated character (kind of like "root motion").
     bool allowMove = false;
@@ -54,8 +57,8 @@ public:
 	
 	void Sample(VertexAnimation* animation, int frame);
 	
-	bool IsPlaying() const { return mVertexAnimation != nullptr; }
-    bool IsPlayingNotAutoscript() const { return mVertexAnimation != nullptr && !mFromAutoscript; }
+	bool IsPlaying() const { return mCurrentParams.vertexAnimation != nullptr; }
+    bool IsPlayingNotAutoscript() const { return mCurrentParams.vertexAnimation != nullptr && !mCurrentParams.fromAutoScript; }
 	
 protected:
     void OnEnable() override;
@@ -65,16 +68,10 @@ protected:
 private:
 	// The mesh renderer that will be animated.
 	MeshRenderer* mMeshRenderer = nullptr;
-	
-	// How many frames per second to run at. Default is 15 (from GK3 docs).
-	int mFramesPerSecond = 15;
-	
-	// A currently running vertex animation, if any.
-	VertexAnimation* mVertexAnimation = nullptr;
-	
-	// Callback that is fired when the animation stops.
-	// "Stops" means manually stopped OR reached end of playback!
-	std::function<void()> mStopCallback = nullptr;
+
+    // Params for current animation (if any).
+    // Currently running animation, FPS, stop callback, parent - all stored in here!
+    VertexAnimParams mCurrentParams;
 	
 	// Timer for tracking progress on vertex animation.
 	float mAnimationTimer = 0.0f;
@@ -82,9 +79,6 @@ private:
     // Problem: GK3 assumes objects continue to animate when they are not visible. But inactive objects don't Update!
     // To work around that, we'll use this timer to track how long a VertexAnimator is disabled.
     Stopwatch mDisabledTimer;
-
-    // Is this an autoscript animation?
-    bool mFromAutoscript = false;
 	
     void TakeSample(VertexAnimation* animation, int frame);
 	void TakeSample(VertexAnimation* animation, float time);

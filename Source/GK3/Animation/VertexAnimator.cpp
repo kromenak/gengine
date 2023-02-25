@@ -20,14 +20,11 @@ void VertexAnimator::Start(const VertexAnimParams& params)
     Stop();
     
     // Save parameters.
-    mVertexAnimation = params.vertexAnimation;
-    mFramesPerSecond = params.framesPerSecond;
+    mCurrentParams = params;
     mAnimationTimer = params.startTime;
-    mStopCallback = params.stopCallback;
-    mFromAutoscript = params.fromAutoScript;
     
     // Sample animation immediately so mesh's positions/rotations are updated.
-    TakeSample(mVertexAnimation, mAnimationTimer);
+    TakeSample(mCurrentParams.vertexAnimation, mAnimationTimer);
 
     // The disabled timer is only useful to track how long this component was disabled so an animation can catch up.
     // When a new animation starts, we should reset this so it times from the beginning of the new animation.
@@ -37,17 +34,17 @@ void VertexAnimator::Start(const VertexAnimParams& params)
 void VertexAnimator::Stop(VertexAnimation* anim)
 {
 	// Stop if animation matches playing one OR null was passed in.
-	if(mVertexAnimation != nullptr && (mVertexAnimation == anim || anim == nullptr))
+	if(mCurrentParams.vertexAnimation != nullptr && (mCurrentParams.vertexAnimation == anim || anim == nullptr))
 	{
 		// Fire stop callback if an animation was in progress.
-		if(mStopCallback != nullptr)
+		if(mCurrentParams.stopCallback != nullptr)
 		{
-			mStopCallback();
+            mCurrentParams.stopCallback();
 		}
 		
 		// Reset state data.
-		mVertexAnimation = nullptr;
-		mStopCallback = nullptr;
+        mCurrentParams.vertexAnimation = nullptr;
+        mCurrentParams.stopCallback = nullptr;
 	}
 }
 
@@ -75,21 +72,28 @@ void VertexAnimator::OnDisable()
 void VertexAnimator::OnUpdate(float deltaTime)
 {
 	// Need a vertex animation to update.
-	if(mVertexAnimation != nullptr)
+	if(mCurrentParams.vertexAnimation != nullptr)
 	{
 		// Increment animation timer.
 		mAnimationTimer += deltaTime;
 		
 		// Sample animation at current timer value, clamping to anim duration.
-		float animDuration = mVertexAnimation->GetDuration(mFramesPerSecond);
-		TakeSample(mVertexAnimation, Math::Clamp(mAnimationTimer, 0.0f, animDuration));
+		float animDuration = mCurrentParams.vertexAnimation->GetDuration(mCurrentParams.framesPerSecond);
+		TakeSample(mCurrentParams.vertexAnimation, Math::Clamp(mAnimationTimer, 0.0f, animDuration));
 		
 		// If at the end of the animation, clear animation.
 		// GK3 doesn't really have the concept of a "looping" animation. Looping is handled by higher-level control scripts.
 		if(mAnimationTimer >= animDuration)
 		{
-			Stop(mVertexAnimation);
+			Stop(mCurrentParams.vertexAnimation);
 		}
+
+        // Position relative to parent.
+        if(mCurrentParams.parent != nullptr)
+        {
+            GetOwner()->GetTransform()->SetPosition(mCurrentParams.parent->GetPosition());
+            GetOwner()->GetTransform()->SetRotation(mCurrentParams.parent->GetRotation());
+        }
 	}
 }
 
@@ -128,14 +132,14 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
 		const std::vector<Submesh*>& submeshes = meshes[i]->GetSubmeshes();
 		for(int j = 0; j < submeshes.size(); j++)
 		{
-			VertexAnimationVertexPose sample = animation->SampleVertexPose(time, mFramesPerSecond, i, j);
+			VertexAnimationVertexPose sample = animation->SampleVertexPose(time, mCurrentParams.framesPerSecond, i, j);
 			if(sample.frameNumber >= 0)
 			{
                 submeshes[j]->SetPositions(reinterpret_cast<float*>(sample.vertexPositions.data()));
 			}
 		}
 		
-		VertexAnimationTransformPose transformSample = animation->SampleTransformPose(time, mFramesPerSecond, i);
+		VertexAnimationTransformPose transformSample = animation->SampleTransformPose(time, mCurrentParams.framesPerSecond, i);
 		if(transformSample.frameNumber >= 0)
 		{
             meshes[i]->SetMeshToLocalMatrix(transformSample.meshToLocalMatrix);

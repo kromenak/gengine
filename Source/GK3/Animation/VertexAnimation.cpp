@@ -330,9 +330,9 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
         return;
     }
     
-    // 4 bytes: Unknown - probably a version number for the file format.
-    reader.ReadUInt();
-    
+    // 4 bytes: Unknown - probably a version number for the file format. Appears to always be "258".
+    uint32_t unknown = reader.ReadUInt();
+
     // 4 bytes: Number of keyframes in the animation.
     mFrameCount = reader.ReadUInt();
     

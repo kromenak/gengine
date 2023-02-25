@@ -53,6 +53,24 @@ void VertexAnimNode::Play(AnimationState* animState)
                 params.absoluteHeading = Heading::FromDegrees(absoluteWorldToModelHeading - absoluteModelToActorHeading);
             }
 
+            // If not an absolute anim, see if the animation's name is prefixed by the name of a model in the scene.
+            // If so...we will treat that model as our parent (so, we move/rotate to match them).
+            // (This feels like a HACK, but the original game also does this parenting, but the assets themselves have no flags/indicators about it.)
+            // (So, they must do it in some similar way to this, unless I'm missing something?)
+            if(!absolute)
+            {
+                // e.g. Grab the "ROX" from "ROX_SPRAYANDWIPE2.ANM".
+                std::string prefix = animState->params.animation->GetName().substr(0, 3);
+
+                // If a parent exists, and it isn't ourselves, use it!
+                GKObject* parent = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(prefix);
+                if(parent != nullptr && parent != obj)
+                {
+                    params.parent = parent->GetMeshRenderer()->GetOwner();
+                    //printf("Found parent %s for %s\n", parent->GetName().c_str(), obj->GetName().c_str());
+                }
+            }
+
             // Move anims allow the actor associated with the model to stay in its final position when the animation ends, instead of reverting.
             // Absolute anims are always "move anims".
             params.allowMove = animState->params.allowMove || absolute;
@@ -91,7 +109,6 @@ void VertexAnimNode::Sample(int frame)
             params.allowMove = absolute;
 
             // Sample the anim.
-            printf("Sample anim on obj %s\n", obj->GetName().c_str());
             obj->SampleAnimation(params, frame);
         }
     }
