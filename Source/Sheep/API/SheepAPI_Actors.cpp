@@ -95,6 +95,8 @@ shpvoid GlanceX(std::string actorName, int leftPercentX, int leftPercentY,
 }
 */
 
+// SetEyeOffsets
+
 shpvoid SetMood(const std::string& actorName, const std::string& moodName)
 {
     // Get actor and make sure it's valid.
@@ -287,15 +289,56 @@ shpvoid StopFidget(const std::string& actorName)
 }
 RegFunc1(StopFidget, void, string, WAITABLE, REL_FUNC);
 
-/*
- shpvoid SetWalkAnim(std::string actorName, std::string start, std::string cont,
-                     std::string startTurnLeft, std::string startTurnRight)
- {
-     std::cout << "SetWalkAnim" << std::endl;
-     return 0;
- }
- RegFunc5(SetWalkAnim, void, string, string, string, string, string, IMMEDIATE, REL_FUNC);
- 
+
+shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, const std::string& cont,
+                    const std::string& startTurnLeft, const std::string& startTurnRight)
+{
+    // Get the Actor.
+    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    if(actor == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+
+    // Load start/loop anims. Neither is optional.
+    Animation* startAnim = Services::GetAssets()->LoadAnimation(start);
+    Animation* loopAnim = Services::GetAssets()->LoadAnimation(cont);
+    if(startAnim == nullptr || loopAnim == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+
+    // Turn anims are optional. We only throw errors if they are specified and not found.
+    Animation* startTurnLeftAnim = nullptr;
+    if(!startTurnLeft.empty())
+    {
+        startTurnLeftAnim = Services::GetAssets()->LoadAnimation(startTurnLeft);
+        if(startTurnLeftAnim == nullptr)
+        {
+            ExecError();
+            return 0;
+        }
+    }
+    Animation* startTurnRightAnim = nullptr;
+    if(!startTurnRight.empty())
+    {
+        startTurnRightAnim  = Services::GetAssets()->LoadAnimation(startTurnRight);
+        if(startTurnRightAnim == nullptr)
+        {
+            ExecError();
+            return 0;
+        }
+    }
+
+    actor->GetWalker()->SetWalkAnims(startAnim, loopAnim, startTurnLeftAnim, startTurnRightAnim);
+    return 0;
+}
+RegFunc5(SetWalkAnim, void, string, string, string, string, string, IMMEDIATE, REL_FUNC);
+
+
+ /*
 shpvoid TurnHead(std::string actorName, int percentX, int percentY, int durationMs)
 {
  std::cout << "TurnHead" << std::endl;

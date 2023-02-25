@@ -55,11 +55,8 @@ public:
     void WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToSee(GKObject* target, std::function<void()> finishCallback);
 	void WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback);
-    
     Vector3 GetWalkDestination() const;
-    bool AtPosition(const Vector3& position) { return mWalker->AtPosition(position); }
-    bool IsWalking() const { return mWalker->IsWalking(); }
-    void SkipWalk() { mWalker->SkipToEnd(); }
+    Walker* GetWalker() const { return mWalker; }
     void SnapToFloor();
     
 	FaceController* GetFaceController() const { return mFaceController; }

@@ -28,6 +28,22 @@ Walker::Walker(Actor* owner) : Component(owner),
     
 }
 
+void Walker::SetCharacterConfig(const CharacterConfig& characterConfig)
+{
+    mCharConfig = &characterConfig;
+    SetWalkAnims(mCharConfig->walkStartAnim, mCharConfig->walkLoopAnim,
+                 mCharConfig->walkStartTurnLeftAnim, mCharConfig->walkStartTurnRightAnim);
+}
+
+void Walker::SetWalkAnims(Animation* startAnim, Animation* loopAnim,
+                          Animation* startTurnLeftAnim, Animation* startTurnRightAnim)
+{
+    mWalkStartAnim = startAnim;
+    mWalkLoopAnim = loopAnim;
+    mWalkStartTurnLeftAnim = startTurnLeftAnim;
+    mWalkStartTurnRightAnim = startTurnRightAnim;
+}
+
 void Walker::WalkTo(const Vector3& position, std::function<void()> finishCallback)
 {
     WalkTo(position, Heading::None, finishCallback);
@@ -229,7 +245,7 @@ void Walker::OnUpdate(float deltaTime)
                     mNeedContinueWalkAnim = false;
                     
                     AnimParams animParams;
-                    animParams.animation = mCharConfig->walkLoopAnim;
+                    animParams.animation = mWalkLoopAnim;
                     animParams.allowMove = true;
                     animParams.fromAutoScript = mFromAutoscript;
                     animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
@@ -414,11 +430,11 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
 
                 // Make sure this actor has animations for turning left/right.
                 // A lot of actors actually don't...in which case normal starts after all.
-                if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnRight && mCharConfig->walkStartTurnRightAnim == nullptr)
+                if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnRight && mWalkStartTurnRightAnim == nullptr)
                 {
                     startWalkTurnAction.op = WalkOp::FollowPathStart;
                 }
-                else if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnLeft && mCharConfig->walkStartTurnLeftAnim == nullptr)
+                else if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnLeft && mWalkStartTurnLeftAnim == nullptr)
                 {
                     startWalkTurnAction.op = WalkOp::FollowPathStart;
                 }
@@ -459,7 +475,7 @@ void Walker::NextAction()
             //std::cout << "Follow Path Start" << std::endl;
             
             AnimParams animParams;
-            animParams.animation = mCharConfig->walkStartAnim;
+            animParams.animation = mWalkStartAnim;
             animParams.allowMove = true;
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
@@ -470,7 +486,7 @@ void Walker::NextAction()
             //std::cout << "Follow Path Start (Turn Left)" << std::endl;
             
             AnimParams animParams;
-            animParams.animation = mCharConfig->walkStartTurnLeftAnim;
+            animParams.animation = mWalkStartTurnLeftAnim;
             animParams.allowMove = true;
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
@@ -481,7 +497,7 @@ void Walker::NextAction()
             //std::cout << "Follow Path Start (Turn Right)" << std::endl;
             
             AnimParams animParams;
-            animParams.animation = mCharConfig->walkStartTurnRightAnim;
+            animParams.animation = mWalkStartTurnRightAnim;
             animParams.allowMove = true;
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
@@ -492,7 +508,7 @@ void Walker::NextAction()
             //std::cout << "Follow Path" << std::endl;
             
             AnimParams animParams;
-            animParams.animation = mCharConfig->walkLoopAnim;
+            animParams.animation = mWalkLoopAnim;
             animParams.allowMove = true;
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
@@ -507,9 +523,10 @@ void Walker::NextAction()
         else if(mWalkActions.back().op == WalkOp::FollowPathEnd)
         {
             //std::cout << "Follow Path End" << std::endl;
-            GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkStartAnim);
-            GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkLoopAnim);
-            
+            GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartAnim);
+            GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
+
+            // Play walk stop anim.
             AnimParams animParams;
             animParams.animation = mCharConfig->walkStopAnim;
             animParams.allowMove = true;

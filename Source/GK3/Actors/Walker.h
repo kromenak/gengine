@@ -29,8 +29,10 @@ class Walker : public Component
 public:
 	Walker(Actor* owner);
 
-    void SetCharacterConfig(const CharacterConfig& characterConfig) { mCharConfig = &characterConfig; }
-	
+    void SetCharacterConfig(const CharacterConfig& characterConfig);
+    void SetWalkAnims(Animation* startAnim, Animation* loopAnim,
+                      Animation* startTurnLeftAnim, Animation* startTurnRightAnim);
+
 	void WalkTo(const Vector3& position, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
@@ -84,11 +86,17 @@ private:
 	
 	// Walker's owner, as a GKActor.
 	GKActor* mGKOwner = nullptr;
-	
-	// Config is vital for walker to function - contains things like
-	// walk anims and hip position data.
-	const CharacterConfig* mCharConfig = nullptr;
-	
+
+    // Config is vital for walker to function - contains things like walk anims and hip position data.
+    const CharacterConfig* mCharConfig = nullptr;
+
+    // Walk animations currently in use.
+    // Need to store separate from CharacterConfig because they can be overridden in some circumstances.
+    Animation* mWalkStartAnim = nullptr;
+    Animation* mWalkLoopAnim = nullptr;
+    Animation* mWalkStartTurnLeftAnim = nullptr;
+    Animation* mWalkStartTurnRightAnim = nullptr;
+
     // Walker boundary currently being used.
     WalkerBoundary* mWalkerBoundary = nullptr;
     

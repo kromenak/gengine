@@ -587,9 +587,9 @@ void Scene::SkipCurrentAction()
     }
 
     // If no action, but ego is walking, this can skip the walk.
-    if(mEgo != nullptr && mEgo->IsWalking())
+    if(mEgo != nullptr && mEgo->GetWalker()->IsWalking())
     {
-        mEgo->SkipWalk();
+        mEgo->GetWalker()->SkipToEnd();
     }
 }
 

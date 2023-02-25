@@ -156,7 +156,7 @@ float ChooseWalkGasNode::Execute(GasPlayer* player)
     while(counter < positionNames.size())
     {
         const ScenePosition* candidate = GEngine::Instance()->GetScene()->GetPosition(positionNames[randomIndex]);
-        if(candidate != nullptr && !actor->AtPosition(candidate->position))
+        if(candidate != nullptr && !actor->GetWalker()->AtPosition(candidate->position))
         {
             // Found a position that works!
             scenePosition = candidate;
