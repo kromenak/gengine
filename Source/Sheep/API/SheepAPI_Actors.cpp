@@ -289,6 +289,29 @@ shpvoid StopFidget(const std::string& actorName)
 }
 RegFunc1(StopFidget, void, string, WAITABLE, REL_FUNC);
 
+shpvoid ActionWaitClearRegion(const std::string& actorName, int regionId, float destAccuracy, const std::string& exitPosition)
+{
+    // Get the actor.
+    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    if(actor == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+
+    // Get the scene position.
+    const ScenePosition* scenePosition = GEngine::Instance()->GetScene()->GetPosition(exitPosition);
+    if(scenePosition == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+
+    // Clear the area!
+    actor->GetWalker()->WalkOutOfRegion(regionId, scenePosition->position, scenePosition->heading, AddWait());
+    return 0;
+}
+RegFunc4(ActionWaitClearRegion, void, string, int, float, string, WAITABLE, REL_FUNC);
 
 shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, const std::string& cont,
                     const std::string& startTurnLeft, const std::string& startTurnRight)
@@ -336,7 +359,6 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     return 0;
 }
 RegFunc5(SetWalkAnim, void, string, string, string, string, string, IMMEDIATE, REL_FUNC);
-
 
  /*
 shpvoid TurnHead(std::string actorName, int percentX, int percentY, int durationMs)

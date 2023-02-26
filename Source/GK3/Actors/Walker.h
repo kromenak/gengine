@@ -38,6 +38,8 @@ public:
     void WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
     void WalkToSee(GKObject* target, std::function<void()> finishCallback);
 
+    void WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const Heading& exitHeading, std::function<void()> finishCallback);
+
     void SkipToEnd();
 
     bool AtPosition(const Vector3& position);
@@ -106,7 +108,11 @@ private:
 	
 	// A target (e.g. model) that we are walking to see.
     GKObject* mWalkToSeeTarget = nullptr;
-	
+
+    // A callback for exiting a region.
+    int mExitRegionIndex = -1;
+    std::function<void()> mExitRegionCallback = nullptr;
+
 	// A callback for when the end of a path is reached.
 	std::function<void()> mFinishedPathCallback = nullptr;
 

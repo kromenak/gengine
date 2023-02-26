@@ -103,6 +103,34 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
     }
 }
 
+void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const Heading& exitHeading, std::function<void()> finishCallback)
+{
+    // For now, we can only track one "exit region" request at a time. So clear other if set.
+    if(mExitRegionCallback != nullptr)
+    {
+        auto callback = mExitRegionCallback;
+        mExitRegionCallback = nullptr;
+        callback();
+    }
+
+    // First of all, if we're not in the region, we don't have to do anything.
+    if(mWalkerBoundary == nullptr || mWalkerBoundary->GetRegionIndex(GetOwner()->GetPosition()) != regionIndex)
+    {
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        return;
+    }
+
+    // Save exit region callback.
+    mExitRegionIndex = regionIndex;
+    mExitRegionCallback = finishCallback;
+
+    // We ARE in the region - get outta there!
+    WalkTo(exitPosition, exitHeading, nullptr);
+}
+
 void Walker::SkipToEnd()
 {
     // If not walking, or at the end of the walk, nothing to skip.
@@ -124,7 +152,7 @@ void Walker::SkipToEnd()
     // Move actor back by "at position" amount, so end walk anim puts us in right spot.
     mGKOwner->SetPosition(mGKOwner->GetPosition() - (mGKOwner->GetForward() * kAtNodeDist));
 
-    // Still play "end of walk" bit.
+    // Remove all walk ops except for the "follow path end" op.
     bool poppedAction = false;
     while(!mWalkActions.empty() && mWalkActions.back().op != WalkOp::FollowPathEnd)
     {
@@ -267,13 +295,26 @@ void Walker::OnUpdate(float deltaTime)
             }
         }
     }
+
+    // Check if we exited any desired region.
+    if(mExitRegionIndex >= 0)
+    {
+        if(mExitRegionCallback == nullptr)
+        {
+            mExitRegionIndex = -1;
+        }
+        else if(mWalkerBoundary == nullptr || mWalkerBoundary->GetRegionIndex(GetOwner()->GetPosition()) != mExitRegionIndex)
+        {
+            mExitRegionIndex = -1;
+            auto callback = mExitRegionCallback;
+            mExitRegionCallback = nullptr;
+            callback();
+        }
+    }
 }
 
 void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std::function<void()> finishCallback, bool fromAutoscript)
 {
-    // Save finish callback.
-    mFinishedPathCallback = finishCallback;
-
     // Save if from autoscript.
     mFromAutoscript = fromAutoscript;
 
@@ -445,6 +486,9 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
         }
     }
 
+    // Save finish callback.
+    mFinishedPathCallback = finishCallback;
+    
     // OK, walk sequence has been created - let's start doing it!
     //std::cout << "Walk Sequence Begin!" << std::endl;
     NextAction();
