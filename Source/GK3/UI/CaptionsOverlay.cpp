@@ -180,6 +180,9 @@ void CaptionsOverlay::HideAll()
         // Deactivate the freed caption so it's no longer visible.
         mFreeCaptions.back().actor->SetActive(false);
     }
+
+    // Clear advance timer, since all are hidden.
+    mAdvanceTimer = 0.0f;
 }
 
 void CaptionsOverlay::OnUpdate(float deltaTime)
