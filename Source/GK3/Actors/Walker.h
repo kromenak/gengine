@@ -21,6 +21,7 @@ class GKActor;
 class GKObject;
 class GKProp;
 class Heading;
+class Texture;
 class WalkerBoundary;
 
 class Walker : public Component
@@ -29,6 +30,7 @@ class Walker : public Component
 public:
 	Walker(Actor* owner);
 
+    void SetWalkerBoundary(WalkerBoundary* walkerBoundary) { mWalkerBoundary = walkerBoundary; }
     void SetCharacterConfig(const CharacterConfig& characterConfig);
     void SetWalkAnims(Animation* startAnim, Animation* loopAnim,
                       Animation* startTurnLeftAnim, Animation* startTurnRightAnim);
@@ -46,7 +48,7 @@ public:
     bool IsWalking() const { return mWalkActions.size() > 0; }
     Vector3 GetDestination() const { return mPath.size() > 0 ? mPath.front() : Vector3::Zero; }
 
-    void SetWalkerBoundary(WalkerBoundary* walkerBoundary) { mWalkerBoundary = walkerBoundary; }
+    Texture* GetFloorTypeWalkingOn() const;
 
 protected:
 	void OnUpdate(float deltaTime) override;

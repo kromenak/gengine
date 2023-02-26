@@ -57,6 +57,7 @@ public:
 	void WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback);
     Vector3 GetWalkDestination() const;
     Walker* GetWalker() const { return mWalker; }
+    const std::string& GetShoeType() const;
     void SnapToFloor();
     
 	FaceController* GetFaceController() const { return mFaceController; }

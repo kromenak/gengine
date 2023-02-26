@@ -14,6 +14,7 @@
 #include "Scene.h"
 #include "Services.h"
 #include "SoundtrackPlayer.h"
+#include "Texture.h"
 #include "VertexAnimation.h"
 #include "VertexAnimator.h"
 
@@ -293,10 +294,11 @@ void FootstepAnimNode::Play(AnimationState* animState)
 	if(actor != nullptr)
 	{
 		// Get the actor's shoe type.
-		std::string shoeType = "Male Leather";
+        std::string shoeType = actor->GetShoeType();
 		
 		// Query the texture used on the floor where the actor is walking.
-		std::string floorTextureName = "carpet1";
+        Texture* floorTexture = actor->GetWalker()->GetFloorTypeWalkingOn();
+		std::string floorTextureName = floorTexture != nullptr ? floorTexture->GetNameNoExtension() : "carpet1";
 		
 		// Get the footstep sound.
 		Audio* footstepAudio = Services::Get<FootstepManager>()->GetFootstep(shoeType, floorTextureName);
@@ -318,10 +320,11 @@ void FootscuffAnimNode::Play(AnimationState* animState)
 	if(actor != nullptr)
 	{
 		// Get the actor's shoe type.
-		std::string shoeType = "Male Leather";
+		std::string shoeType = actor->GetShoeType();
 		
-		// Query the texture used on the floor where the actor is walking.
-		std::string floorTextureName = "carpet1";
+        // Query the texture used on the floor where the actor is walking.
+        Texture* floorTexture = actor->GetWalker()->GetFloorTypeWalkingOn();
+        std::string floorTextureName = floorTexture != nullptr ? floorTexture->GetNameNoExtension() : "carpet1";
 		
 		// Get the scuff sound.
 		Audio* footscuffAudio = Services::Get<FootstepManager>()->GetFootscuff(shoeType, floorTextureName);

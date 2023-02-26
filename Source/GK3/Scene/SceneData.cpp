@@ -73,10 +73,17 @@ void SceneData::ResolveSceneData()
     // Load BSP lightmap data.
     mBSPLightmap = Services::GetAssets()->LoadBSPLightmap(mGeneralSettings.sceneAssetName);
     
-    // Apply lightmap to BSP.
-    if(mBSPLightmap != nullptr && mBSP != nullptr)
+    // Configure BSP, if we have one.
+    if(mBSP != nullptr)
     {
-        mBSP->ApplyLightmap(*mBSPLightmap);
+        // Apply lightmap to BSP.
+        if(mBSPLightmap != nullptr)
+        {
+            mBSP->ApplyLightmap(*mBSPLightmap);
+        }
+
+        // Save floor name in BSP. This enables easier querying of floor data.
+        mBSP->SetFloorObjectName(mGeneralSettings.floorModelName);
     }
 	
 	// Figure out if we have a skybox, and set it to be rendered.

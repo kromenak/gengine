@@ -690,6 +690,17 @@ float Scene::GetFloorY(const Vector3& position) const
     return 0.0f;
 }
 
+Texture* Scene::GetFloorTexture(const Vector3& position) const
+{
+    BSP* bsp = mSceneData->GetBSP();
+    if(bsp == nullptr) { return nullptr; }
+
+    float height = 0.0f;
+    Texture* texture = nullptr;
+    bsp->GetFloorInfo(position, height, texture);
+    return texture;
+}
+
 void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* texture)
 {
 	mSceneData->GetBSP()->SetTexture(modelName, texture);

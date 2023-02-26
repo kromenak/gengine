@@ -22,6 +22,67 @@ BSP::BSP(const std::string& name, char* data, int dataLength) : Asset(name)
     mMaterial.SetShader(Services::GetAssets()->LoadShader("3D-Lightmap"));
 }
 
+BSPActor* BSP::CreateBSPActor(const std::string& objectName)
+{
+    // Find index for object name or fail.
+    int objectIndex = -1;
+    for(int i = 0; i < mObjectNames.size(); i++)
+    {
+        if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
+        {
+            objectIndex = i;
+            break;
+        }
+    }
+    if(objectIndex == -1)
+    {
+        Services::GetReports()->Log("Error", StringUtil::Format("Error: scene '%s' does not have a scene model of name '%s'", "", objectName.c_str()));
+        return nullptr;
+    }
+
+    // OK, we found it! Create the actor.
+    BSPActor* actor = new BSPActor(this, objectName);
+
+    // Generate AABB from this BSP object's position data.
+    bool firstPoint = true;
+    AABB aabb;
+    for(int surfaceIndex = 0; surfaceIndex < mSurfaces.size(); surfaceIndex++)
+    {
+        if(mSurfaces[surfaceIndex].objectIndex == objectIndex)
+        {
+            actor->AddSurface(&mSurfaces[surfaceIndex]);
+
+            for(int polygonIndex = 0; polygonIndex < mPolygons.size(); polygonIndex++)
+            {
+                if(mPolygons[polygonIndex].surfaceIndex == surfaceIndex)
+                {
+                    actor->AddPolygon(&mPolygons[polygonIndex]);
+
+                    int start = mPolygons[polygonIndex].vertexIndexOffset;
+                    int end = start + mPolygons[polygonIndex].vertexIndexCount;
+                    for(int k = start; k < end; k++)
+                    {
+                        if(firstPoint)
+                        {
+                            aabb = AABB(mVertices[mVertexIndices[k]], mVertices[mVertexIndices[k]]);
+                            firstPoint = false;
+                        }
+                        else
+                        {
+                            aabb.GrowToContain(mVertices[mVertexIndices[k]]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    actor->SetAABB(aabb);
+
+    // Position actor at center of BSP object position.
+    actor->SetPosition(GetPosition(objectName));
+    return actor;
+}
+
 bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
 {
 	// Values for tracking closest found hit.
@@ -64,7 +125,7 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
 	return true;
 }
 
-bool BSP::RaycastSingle(const Ray& ray, std::string name, RaycastHit& outHitInfo)
+bool BSP::RaycastSingle(const Ray& ray, const std::string& name, RaycastHit& outHitInfo)
 {
 	for(auto& polygon : mPolygons)
 	{
@@ -140,65 +201,41 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
 	return false;
 }
 
-BSPActor* BSP::CreateBSPActor(const std::string& objectName)
+void BSP::GetFloorInfo(const Vector3& position, float& height, Texture*& texture)
 {
-	// Find index for object name or fail.
-	int objectIndex = -1;
-	for(int i = 0; i < mObjectNames.size(); i++)
-	{
-		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
-		{
-			objectIndex = i;
-			break;
-		}
-	}
-	if(objectIndex == -1)
+    // Calculate ray origin using passed position, but really high in the air!
+    Vector3 rayOrigin = position;
+    rayOrigin.y = 10000.0f;
+
+    // Create ray with origin high in the sky and pointing straight down.
+    Ray ray(rayOrigin, -Vector3::UnitY);
+
+    // Iterate polygons.
+    for(auto& polygon : mPolygons)
     {
-        Services::GetReports()->Log("Error", StringUtil::Format("Error: scene '%s' does not have a scene model of name '%s'", "", objectName.c_str()));
-        return nullptr;
+        // Only consider polygons that are part of the floor object.
+        BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
+        if(!StringUtil::EqualsIgnoreCase(mObjectNames[surface.objectIndex], mFloorObjectName)) { continue; }
+
+        // See if ray intersects any triangles in this polygon.
+        Vector3 p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
+        for(int i = 1; i < polygon.vertexIndexCount - 1; i++)
+        {
+            Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
+            Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
+            float t = 0.0f;
+            if(Intersect::TestRayTriangle(ray, p0, p1, p2, t))
+            {
+                height = ray.GetPoint(t).y;
+                texture = surface.texture;
+                return;
+            }
+        }
     }
-	
-	// OK, we found it! Create the actor.
-	BSPActor* actor = new BSPActor(this, objectName);
-	
-	// Generate AABB from this BSP object's position data.
-	bool firstPoint = true;
-	AABB aabb;
-	for(int surfaceIndex = 0; surfaceIndex < mSurfaces.size(); surfaceIndex++)
-	{
-        if(mSurfaces[surfaceIndex].objectIndex == objectIndex)
-		{
-			actor->AddSurface(&mSurfaces[surfaceIndex]);
-			
-			for(int polygonIndex = 0; polygonIndex < mPolygons.size(); polygonIndex++)
-			{
-                if(mPolygons[polygonIndex].surfaceIndex == surfaceIndex)
-				{
-					actor->AddPolygon(&mPolygons[polygonIndex]);
-					
-                    int start = mPolygons[polygonIndex].vertexIndexOffset;
-                    int end = start + mPolygons[polygonIndex].vertexIndexCount;
-					for(int k = start; k < end; k++)
-					{
-						if(firstPoint)
-						{
-							aabb = AABB(mVertices[mVertexIndices[k]], mVertices[mVertexIndices[k]]);
-							firstPoint = false;
-						}
-						else
-						{
-							aabb.GrowToContain(mVertices[mVertexIndices[k]]);
-						}
-					}
-				}
-			}
-		}
-	}
-	actor->SetAABB(aabb);
-	
-	// Position actor at center of BSP object position.
-	actor->SetPosition(GetPosition(objectName));
-	return actor;
+
+    // Didn't hit anything.
+    height = 0.0f;
+    texture = nullptr;
 }
 
 void BSP::SetVisible(std::string objectName, bool visible)

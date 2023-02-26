@@ -11,14 +11,15 @@
 #include <unordered_map>
 #include <vector>
 
+#include "StringUtil.h"
 #include "Type.h"
 
 class Audio;
 
 struct ShoeSounds
 {
-	std::unordered_map<std::string, std::vector<Audio*>> floorTypeToFootsteps;
-	std::unordered_map<std::string, std::vector<Audio*>> floorTypeToFootscuffs;
+	std::string_map_ci<std::vector<Audio*>> floorTypeToFootsteps;
+	std::string_map_ci<std::vector<Audio*>> floorTypeToFootscuffs;
 };
 
 class FootstepManager
@@ -27,16 +28,16 @@ class FootstepManager
 public:
 	FootstepManager();
 	
-	Audio* GetFootstep(std::string shoeType, std::string floorTextureName);
-	Audio* GetFootscuff(std::string shoeType, std::string floorTextureName);
+	Audio* GetFootstep(const std::string& shoeType, const std::string& floorTextureName);
+	Audio* GetFootscuff(const std::string& shoeType, const std::string& floorTextureName);
 	
 private:
 	// There's probably a more efficient way to store this stuff.
 	// But let's do something simple for now.
 	
 	// Need to be able to determine a floor type from a texture name.
-	std::unordered_map<std::string, std::string> mTextureNameToFloorType;
+	std::string_map_ci<std::string> mTextureNameToFloorType;
 	
 	// Need to be able to get get audio lists by shoe type.
-	std::unordered_map<std::string, ShoeSounds> mShoeTypeToShoeSounds;
+	std::string_map_ci<ShoeSounds> mShoeTypeToShoeSounds;
 };

@@ -128,9 +128,12 @@ public:
 	BSPActor* CreateBSPActor(const std::string& objectName);
 	
     bool RaycastNearest(const Ray& ray, RaycastHit& outHitInfo);
-	bool RaycastSingle(const Ray& ray, std::string name, RaycastHit& outHitInfo);
+	bool RaycastSingle(const Ray& ray, const std::string& name, RaycastHit& outHitInfo);
 	std::vector<RaycastHit> RaycastAll(const Ray& ray);
 	bool RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo);
+
+    void SetFloorObjectName(const std::string& floorObjectName) { mFloorObjectName = floorObjectName; }
+    void GetFloorInfo(const Vector3& position, float& height, Texture*& texture);
 	
 	void SetVisible(std::string objectName, bool visible);
 	void SetTexture(std::string objectName, Texture* texture);
@@ -189,6 +192,9 @@ private:
     // Data used for determining ambient lighting for dynamic models navigating the BSP environment.
     // Kind of like light probes, but way simpler/jankier.
     std::vector<BSPAmbientLight> mLights;
+
+    // The name of the BSP object that represents the floor.
+    std::string mFloorObjectName;
 
     void RenderTree(const BSPNode& node, const Vector3& cameraPosition, const Vector3& cameraDirection);
     void RenderPolygon(BSPPolygon& polygon, bool translucent);

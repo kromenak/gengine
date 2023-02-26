@@ -115,7 +115,7 @@ FootstepManager::FootstepManager()
 	}
 }
 
-Audio* FootstepManager::GetFootstep(std::string shoeType, std::string floorTextureName)
+Audio* FootstepManager::GetFootstep(const std::string& shoeType, const std::string& floorTextureName)
 {
 	// First off, look up the floor type that correlates to this floor texture.
 	// If we can't find it, no footstep sound!
@@ -150,7 +150,7 @@ Audio* FootstepManager::GetFootstep(std::string shoeType, std::string floorTextu
 	return footstepSounds[Random::Range(0, (int)footstepSounds.size())];
 }
 
-Audio* FootstepManager::GetFootscuff(std::string shoeType, std::string floorTextureName)
+Audio* FootstepManager::GetFootscuff(const std::string& shoeType, const std::string& floorTextureName)
 {
 	// First off, look up the floor type that correlates to this floor texture.
 	// If we can't find it, no footstep sound!

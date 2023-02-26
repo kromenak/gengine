@@ -274,6 +274,19 @@ void GKActor::SnapToFloor()
     }
 }
 
+const std::string& GKActor::GetShoeType() const
+{
+    if(mCharConfig != nullptr)
+    {
+        return mCharConfig->shoeType;
+    }
+    else
+    {
+        static std::string default = "Male Leather";
+        return default;
+    }
+}
+
 Vector3 GKActor::GetHeadPosition() const
 {
     // Get center point of head mesh.
