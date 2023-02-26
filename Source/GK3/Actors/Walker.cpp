@@ -342,6 +342,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
     }
 
     // Do we need to walk?
+    bool doNextAction = true;
     if(!AtPosition(position))
     {
         // We will walk, so save the "walk end" action.
@@ -454,6 +455,11 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
                     startWalkAction.op = WalkOp::FollowPathStart;
                     mWalkActions.push_back(startWalkAction);
                 }
+                else
+                {
+                    // In this case, we were already walking, and not warping - DO NOT play the next action right away!
+                    doNextAction = false;
+                }
             }
             else
             {
@@ -498,7 +504,10 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
     
     // OK, walk sequence has been created - let's start doing it!
     //std::cout << "Walk Sequence Begin!" << std::endl;
-    NextAction();
+    if(doNextAction)
+    {
+        NextAction();
+    }
 }
 
 void Walker::PopAndNextAction()
