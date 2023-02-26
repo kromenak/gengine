@@ -9,7 +9,7 @@
 #include "Texture.h"
 #include "ResizableQueue.h"
 
-bool WalkerBoundary::FindPath(const Vector3& from, const Vector3& to, std::vector<Vector3>& outPath) const
+bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorldPos, std::vector<Vector3>& outPath) const
 {
 	// Make sure path vector is empty.
 	outPath.clear();
@@ -17,27 +17,27 @@ bool WalkerBoundary::FindPath(const Vector3& from, const Vector3& to, std::vecto
 	// Pick goal position. If "to" is walkable, we can use it directly.
     // Otherwise, find the nearest walkable position to "to".
 	Vector2 goal;
-	if(IsWorldPosWalkable(to))
+	if(IsWorldPosWalkable(toWorldPos))
 	{
-		goal = WorldPosToTexturePos(to);
+		goal = WorldPosToTexturePos(toWorldPos);
 	}
 	else
 	{
 		// If "to" is not walkable, we need to find nearest walkable position as our goal.
-		goal = FindNearestWalkableTexturePosToWorldPos(to);
+		goal = FindNearestWalkableTexturePosToWorldPos(toWorldPos);
 	}
     
 	// Pick start position. If "from" is walkable, we can use it directly.
 	Vector2 start;
-	if(IsWorldPosWalkable(from))
+	if(IsWorldPosWalkable(fromWorldPos))
 	{
-		start = WorldPosToTexturePos(from);
+		start = WorldPosToTexturePos(fromWorldPos);
 	}
 	else
 	{
 		// If "from" is not walkable, find nearest walkable and use that instead.
 		// Walker will move from current (unwalkable) position to this position when it starts walking.
-		start = FindNearestWalkableTexturePosToWorldPos(from);
+		start = FindNearestWalkableTexturePosToWorldPos(fromWorldPos);
 	}
     
     // Use BFS to find a path.
@@ -98,45 +98,86 @@ bool WalkerBoundary::FindPath(const Vector3& from, const Vector3& to, std::vecto
     return false;
 }
 
-Vector3 WalkerBoundary::FindNearestWalkablePosition(const Vector3& position) const
+Vector3 WalkerBoundary::FindNearestWalkablePosition(const Vector3& worldPos) const
 {
 	// Easy case: the position provided is already walkable.
-	if(IsWorldPosWalkable(position)) { return position; }
+	if(IsWorldPosWalkable(worldPos)) { return worldPos; }
 	
 	// Find nearest walkable position on texture, convert to world space.
-	Vector2 walkableTexturePos = FindNearestWalkableTexturePosToWorldPos(position);
+	Vector2 walkableTexturePos = FindNearestWalkableTexturePosToWorldPos(worldPos);
 	return TexturePosToWorldPos(walkableTexturePos);
 }
 
 void WalkerBoundary::SetRegionBlocked(int regionIndex, int regionBoundaryIndex, bool blocked)
 {
-    bool inRegion = false;
-    for(int y = 0; y < mTexture->GetHeight(); ++y)
+    if(blocked)
     {
-        inRegion = false;
-        for(int x = 0; x < mTexture->GetWidth(); ++x)
+        mUnwalkableRegions.insert(regionIndex);
+        mUnwalkableRegions.insert(regionBoundaryIndex);
+    }
+    else
+    {
+        mUnwalkableRegions.erase(regionIndex);
+        mUnwalkableRegions.erase(regionBoundaryIndex);
+    }
+}
+
+int WalkerBoundary::GetRegionIndex(const Vector3& worldPos)
+{
+    return GetRegionForTexturePos(WorldPosToTexturePos(worldPos));
+}
+
+void WalkerBoundary::SetUnwalkableRect(const std::string& name, const Rect& worldRect)
+{
+    // If this name already exists, we'll update instead of add.
+    int index = -1;
+    for(int i = 0; i < mUnwalkableRects.size(); ++i)
+    {
+        if(StringUtil::EqualsIgnoreCase(mUnwalkableRects[i].first, name))
         {
-            int index = mTexture->GetPaletteIndex(x, y);
-
-            // Determine whether in or out of region.
-            if(!inRegion && index == regionBoundaryIndex)
-            {
-                inRegion = true;
-            }
-            if(inRegion && index != regionBoundaryIndex && index != regionIndex)
-            {
-                inRegion = false;
-            }
-
-            // If in region and blocking, convert region's index to 255.
-            // If in region and unblocking, convert black to region's index.
-            if(inRegion && ((blocked && index == regionIndex) || (!blocked && index == 255)))
-            {
-                // If blocked, set to 255, which equates to "can't walk here."
-                // If not blocked, set back to original region index.
-                mTexture->SetPaletteIndex(x, y, blocked ? 255 : regionIndex);
-            }
+            index = i;
+            break;
         }
+    }
+
+    // Convert rect min/max to texture space.
+    // The annoying thing here is that the rect's x/y correspond to x/z in world space.
+    Vector2 worldMin = worldRect.GetMin();
+    Vector2 worldMax = worldRect.GetMax();
+    Vector2 textureMin = WorldPosToTexturePos(Vector3(worldMin.x, 0.0f, worldMin.y));
+    Vector2 textureMax = WorldPosToTexturePos(Vector3(worldMax.x, 0.0f, worldMax.y));
+
+    // Add or replace unwalkable rect.
+    if(index == -1)
+    {
+        mUnwalkableRects.emplace_back(std::make_pair(name, Rect(textureMin, textureMax)));
+    }
+    else
+    {
+        mUnwalkableRects[index].second = Rect(textureMin, textureMax);
+    }
+}
+
+void WalkerBoundary::ClearUnwalkableRect(const std::string& name)
+{
+    // Find and erase by name.
+    for(int i = 0; i < mUnwalkableRects.size(); ++i)
+    {
+        if(StringUtil::EqualsIgnoreCase(mUnwalkableRects[i].first, name))
+        {
+            mUnwalkableRects.erase(mUnwalkableRects.begin() + i);
+            return;
+        }
+    }
+}
+
+void WalkerBoundary::DrawUnwalkableRects()
+{
+    for(auto& entry : mUnwalkableRects)
+    {
+        Vector3 worldMin = TexturePosToWorldPos(entry.second.GetMin());
+        Vector3 worldMax = TexturePosToWorldPos(entry.second.GetMax());
+        Debug::DrawRectXZ(Rect(Vector2(worldMin.x, worldMin.z), Vector2(worldMax.x, worldMax.z)), 15.0f, Color32::Orange);
     }
 }
 
@@ -148,22 +189,23 @@ bool WalkerBoundary::IsWorldPosWalkable(const Vector3& worldPos) const
 
 bool WalkerBoundary::IsTexturePosWalkable(const Vector2& texturePos) const
 {
-	// If no texture...can walk anywhere?
-	if(mTexture == nullptr) { return true; }
+    // Unwalkable if region associated with this texture pos is in the unwalkable regions set.
+    if(mUnwalkableRegions.count(GetRegionForTexturePos(texturePos)) > 0)
+    {
+        return false;
+    }
 
-    // Make sure the position isn't outside the texture - that is NOT walkable for sure.
-    if(texturePos.x < 0 || texturePos.x >= mTexture->GetWidth()) { return false; }
-    if(texturePos.y < 0 || texturePos.y >= mTexture->GetHeight()) { return false; }
+    // Also unwalkable if this position is inside an unwalkable rect.
+    for(auto& unwalkableRect : mUnwalkableRects)
+    {
+        if(unwalkableRect.second.Contains(texturePos))
+        {
+            return false;
+        }
+    }
 
-    // Walker boundary data is defined in an indexed (palettized) texture.
-    // Palette index 0 is walkable, with indexes 1-9 indicating less and less walkable areas.
-    // Palette index 255 is "unwalkable" area.
-    // Palette indexes 128-254 are for special regions.
-	uint8 paletteIndex = mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
-
-	// If the palette index is not 255, you can walk there.
-    // Also trying to disallow 9/8/7. These are all very close to the edge, and it looks weird if walker goes there (e.g. clipping into walls).
-	return paletteIndex != 255 && paletteIndex != 9 && paletteIndex != 8 && paletteIndex != 7;
+    // Looks like it's walkable!
+    return true;
 }
 
 Vector2 WalkerBoundary::WorldPosToTexturePos(const Vector3& worldPos) const
@@ -263,6 +305,22 @@ Vector2 WalkerBoundary::FindNearestWalkableTexturePosToWorldPos(const Vector3& w
 		}
 	}
 	return nearestWalkableTexturePos;
+}
+
+int WalkerBoundary::GetRegionForTexturePos(const Vector2& texturePos) const
+{
+    // If no walker texture, return zero, which is always a walkable region.
+    if(mTexture == nullptr) { return 0; }
+
+    // It position is out of bounds, use unwalkable index 255.
+    if(texturePos.x < 0 || texturePos.x >= mTexture->GetWidth()) { return 255; }
+    if(texturePos.y < 0 || texturePos.y >= mTexture->GetHeight()) { return 255; }
+
+    // The region is just the palette index.
+    // Palette index 0 is walkable, with indexes 1-9 indicating less and less walkable areas.
+    // Palette index 255 is "unwalkable" area.
+    // Palette indexes 128-254 are for special regions.
+    return mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
 }
 
 bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const

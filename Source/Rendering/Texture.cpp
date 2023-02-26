@@ -137,7 +137,7 @@ void Texture::SetPixelColor32(int x, int y, const Color32& color)
     mDirtyFlags |= DirtyFlags::Pixels;
 }
 
-Color32 Texture::GetPixelColor32(int x, int y)
+Color32 Texture::GetPixelColor32(int x, int y) const
 {
 	// No pixels means...just return black.
 	if(mPixels == nullptr) { return Color32::Black; }
@@ -170,7 +170,7 @@ void Texture::SetPaletteIndex(int x, int y, uint8 val)
     mPaletteIndexes[index] = val;
 }
 
-uint8 Texture::GetPaletteIndex(int x, int y)
+uint8 Texture::GetPaletteIndex(int x, int y) const
 {
 	// No palette indexes means we can't get a value!
 	if(mPaletteIndexes == nullptr) { return 0; }

@@ -231,7 +231,7 @@ void Scene::Load()
 	}
 
     // Init construction system.
-    mConstruction.Init(mSceneData);
+    mConstruction.Init(this, mSceneData);
 }
 
 void Scene::Unload()

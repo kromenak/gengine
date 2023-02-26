@@ -5,14 +5,18 @@
 #include "Mesh.h"
 #include "MeshRenderer.h"
 #include "Model.h"
+#include "Scene.h"
 #include "SceneData.h"
 #include "Services.h"
 #include "WalkerBoundary.h"
 
 extern Mesh* quad;
 
-void SceneConstruction::Init(SceneData* sceneData)
+void SceneConstruction::Init(Scene* scene, SceneData* sceneData)
 {
+    mScene = scene;
+    mSceneData = sceneData;
+
     // If a camera bounds model exists for this scene, pass it along to the camera.
     for(auto& modelName : sceneData->GetCameraBoundsModelNames())
     {
@@ -66,6 +70,12 @@ void SceneConstruction::Render()
                 Debug::DrawAABB(mesh->GetAABB(), Color32::Red, 0.0f, &mesh->GetMeshToLocalMatrix());
             }
         }
+    }
+
+    // Render unwalkable rects when the walker boundary visualization is active.
+    if(mWalkerBoundaryActor != nullptr && mWalkerBoundaryActor->IsActive())
+    {
+        mSceneData->GetWalkerBoundary()->DrawUnwalkableRects();
     }
 }
 

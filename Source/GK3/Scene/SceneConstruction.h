@@ -9,12 +9,13 @@
 
 class Actor;
 class Model;
+class Scene;
 class SceneData;
 
 class SceneConstruction
 {
 public:
-    void Init(SceneData* sceneData);
+    void Init(Scene* scene, SceneData* sceneData);
 
     void Render();
 
@@ -25,6 +26,9 @@ public:
     bool GetShowWalkerBoundary() const;
 
 private:
+    Scene* mScene = nullptr;
+    SceneData* mSceneData = nullptr;
+
     // Camera bounds visualization support.
     bool mShowCameraBounds = false;
     std::vector<Model*> mCameraBoundsModels;

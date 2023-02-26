@@ -3,6 +3,7 @@
 #include "BSPActor.h"
 #include "GEngine.h"
 #include "GKActor.h"
+#include "MeshRenderer.h"
 #include "Scene.h"
 #include "SceneData.h"
 #include "StringUtil.h"
@@ -254,14 +255,32 @@ RegFunc1(HideModelGroup, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryBlockModel(const std::string& modelName)
 {
-    std::cout << "WalkerBoundaryBlockModel" << std::endl;
+    // Find the object/model or fail.
+    printf("WalkerBoundaryBlockModel %s\n", modelName.c_str());
+    GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    if(obj == nullptr || obj->GetMeshRenderer() == nullptr)
+    {
+        ExecError();
+        return 0;
+    }
+
+    // Get the AABB for the object, as this is the area that's blocked.
+    AABB modelAABB = obj->GetMeshRenderer()->GetAABB();
+    Vector3 min = modelAABB.GetMin();
+    Vector3 max = modelAABB.GetMax();
+
+    // We need to convert to a Rect, as the walker boundary is flat.
+    // So, just get rid of the Y-component.
+    Rect worldRect(Vector2(min.x, min.z), Vector2(max.x, max.z));
+    GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetUnwalkableRect(modelName, worldRect);
     return 0;
 }
 RegFunc1(WalkerBoundaryBlockModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryUnblockModel(const std::string& modelName)
 {
-    std::cout << "WalkerBoundaryUnblockModel" << std::endl;
+    printf("WalkerBoundaryUnblockModel %s\n", modelName.c_str());
+    GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->ClearUnwalkableRect(modelName);
     return 0;
 }
 RegFunc1(WalkerBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
@@ -276,7 +295,6 @@ RegFunc2(WalkerBoundaryBlockRegion, void, int, int, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryUnblockRegion(int regionIndex, int regionBoundaryIndex)
 {
-    //std::cout << "WalkerBoundaryUnblockRegion" << std::endl;
     GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, false);
     return 0;
 }
