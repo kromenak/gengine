@@ -127,33 +127,18 @@ Rect IniKeyValue::GetValueAsRect() const
     {
         noBraces = value.substr(1, value.length() - 2);
     }
-    
-    // Find the three commas.
-    std::size_t firstCommaIndex = noBraces.find(',');
-    if(firstCommaIndex == std::string::npos)
+
+    // Split into 4 elements, divided by commas.
+    // In at least one instance, errant commas can trip this up, so discard empty elements.
+    std::vector<std::string> elements = StringUtil::Split(noBraces, ',', true);
+    if(elements.size() < 4)
     {
-		return Rect();
+        return Rect();
     }
-    std::size_t secondCommaIndex = noBraces.find(',', firstCommaIndex + 1);
-    if(secondCommaIndex == std::string::npos)
-    {
-		return Rect();
-    }
-	std::size_t thirdCommaIndex = noBraces.find(',', secondCommaIndex + 1);
-	if(thirdCommaIndex == std::string::npos)
-	{
-		return Rect();
-	}
-    
-    // Split at commas.
-    std::string firstNum = noBraces.substr(0, firstCommaIndex);
-    std::string secondNum = noBraces.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex);
-    std::string thirdNum = noBraces.substr(secondCommaIndex + 1, thirdCommaIndex - secondCommaIndex);
-    std::string fourthNum = noBraces.substr(thirdCommaIndex + 1, std::string::npos);
-	
+
     // Convert to numbers and return.
-	Vector2 p1(std::stof(firstNum), std::stof(secondNum));
-	Vector2 p2(std::stof(thirdNum), std::stof(fourthNum));
+	Vector2 p1(std::stof(elements[0]), std::stof(elements[1]));
+	Vector2 p2(std::stof(elements[2]), std::stof(elements[3]));
     return Rect(p1, p2);
 }
 

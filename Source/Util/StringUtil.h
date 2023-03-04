@@ -75,13 +75,14 @@ namespace StringUtil
 		str.erase(std::remove(str.begin(), str.end(), remove), str.end());
 	}
     
-    inline std::vector<std::string> Split(const std::string& str, char delim)
+    inline std::vector<std::string> Split(const std::string& str, char delim, bool removeEmpty = false)
     {
         std::stringstream ss(str);
         std::vector<std::string> tokens;
         std::string item;
         while(getline(ss, item, delim))
         {
+            if(removeEmpty && item.empty()) { continue; }
             tokens.push_back(item);
         }
         return tokens;
