@@ -34,6 +34,10 @@ code
 		{
 			wait Call("CheckTimeblockComplete207A$");
 		}
+		else if(IsCurrentTime("210A"))
+		{
+			wait Call("CheckTimeblockComplete210A$");
+		}
 	}
 
 	CheckTimeblockComplete110A$()
@@ -272,5 +276,26 @@ code
 
 		// OK, go to next timeblock!
 		SetTime("210A");
+	}
+
+	CheckTimeblockComplete210A$()
+	{
+		// Must be at LBY.
+		if(IsCurrentLocation("LBY") == 0)
+		{
+			return;
+		}
+
+		// There are several things that must be done for this timeblock to end. However, these are all checked by a condition in the Lobby NVC.
+		// This triggers a cutscene where Jean & Roxanne offer to make lunch for Gabe. The timeblock then ends.
+		// That cutscene appears to use this Noun/Verb count as an indicator that the timeblock should end.
+		if(GetNounVerbCount("MAID", "FOLLOW") == 0)
+		{
+			return;
+		}
+
+		// OK, go to next timeblock!
+		// In this case, we also need to switch to a new location (Chateau de Serras).
+		SetLocationTime("CSE", "212P");
 	}
 }
