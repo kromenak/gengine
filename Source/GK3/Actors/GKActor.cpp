@@ -282,8 +282,8 @@ const std::string& GKActor::GetShoeType() const
     }
     else
     {
-        static std::string default = "Male Leather";
-        return default;
+        static std::string defaultShoeType = "Male Leather";
+        return defaultShoeType;
     }
 }
 
