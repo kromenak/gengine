@@ -84,9 +84,10 @@ void DialogueManager::SetSpeaker(const std::string& noun)
     {
         return;
     }
-
+    
 	// If someone is no longer the speaker, have them transition to listening.
-	if(!mSpeaker.empty() && mDialogueUsesFidgets)
+    bool isUnknownSpeaker = StringUtil::EqualsIgnoreCase(mSpeaker, "UNKNOWN");
+	if(!mSpeaker.empty() && !isUnknownSpeaker && mDialogueUsesFidgets)
 	{
 		GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(mSpeaker);
 		if(actor != nullptr)
@@ -99,7 +100,7 @@ void DialogueManager::SetSpeaker(const std::string& noun)
 	mSpeaker = noun;
 	
 	// Have the new speaker play talk animation.
-	if(mDialogueUsesFidgets)
+	if(mDialogueUsesFidgets && !isUnknownSpeaker)
 	{
 		GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(mSpeaker);
 		if(actor != nullptr)
