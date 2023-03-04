@@ -338,6 +338,54 @@ void SheepScript::Decompile()
 
 void SheepScript::Decompile(const std::string& filePath)
 {
+    // Rather tedious, but first thing we need to do is iterate bytecode once to find all goto addresses.
+    // We'll generate unique labels for each one.
+    std::unordered_map<int, std::string> gotoLabels;
+    {
+        BinaryReader goToReader(mBytecode, mBytecodeLength);
+        if(!goToReader.OK()) { return; }
+
+        while(true)
+        {
+            uint8_t byte = goToReader.ReadByte();
+            if(!goToReader.OK()) { break; }
+
+            SheepInstruction instruction = static_cast<SheepInstruction>(byte);
+            switch(instruction)
+            {
+            case SheepInstruction::CallSysFunctionV:
+            case SheepInstruction::CallSysFunctionI:
+            case SheepInstruction::CallSysFunctionS:
+            case SheepInstruction::CallSysFunctionF:
+            case SheepInstruction::Branch:
+            case SheepInstruction::BranchIfZero:
+            case SheepInstruction::StoreI:
+            case SheepInstruction::StoreF:
+            case SheepInstruction::StoreS:
+            case SheepInstruction::LoadI:
+            case SheepInstruction::LoadF:
+            case SheepInstruction::LoadS:
+            case SheepInstruction::PushI:
+            case SheepInstruction::PushF:
+            case SheepInstruction::PushS:
+            case SheepInstruction::IToF:
+            case SheepInstruction::FToI:
+            {
+                goToReader.ReadInt();
+                break;
+            }
+            case SheepInstruction::BranchGoto:
+            {
+                int branchAddress = goToReader.ReadInt();
+                gotoLabels[branchAddress] = "Label" + std::to_string(gotoLabels.size()) + "$";
+                break;
+            }
+            default:
+                break;
+            }
+        }
+    }
+
     // Create reader for the bytecode.
     BinaryReader reader(mBytecode, mBytecodeLength);
     if(!reader.OK()) { return; }
@@ -444,6 +492,15 @@ void SheepScript::Decompile(const std::string& filePath)
             ++indentLevel;
 
             inIfElseBlock = false;
+        }
+
+        // Write a go-to label if we are at the correct address.
+        {
+            auto gotoLabelIt = gotoLabels.find(reader.GetPosition());
+            if(gotoLabelIt != gotoLabels.end())
+            {
+                WriteOut(out, gotoLabelIt->second + ":", 0);
+            }
         }
         
         // If we hit the address at the back of the "end block addresses" stack, it indicates we've hit the end of an if block.
@@ -554,7 +611,13 @@ void SheepScript::Decompile(const std::string& filePath)
         case SheepInstruction::BranchGoto:
         {
             int branchAddress = reader.ReadInt();
-            WriteOut(out, "goto <unknown>;", indentLevel); //TODO: Would be cool to generate labels, but tricky if goto is after label. Need to do two passes.
+
+            // Write a go-to for the label corresponding to this address.
+            auto gotoLabelIt = gotoLabels.find(branchAddress);
+            if(gotoLabelIt != gotoLabels.end())
+            {
+                WriteOut(out, "goto " + gotoLabelIt->second + ";", indentLevel);
+            }
             break;
         }
         case SheepInstruction::BranchIfZero:
