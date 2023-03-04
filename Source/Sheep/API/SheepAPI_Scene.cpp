@@ -256,7 +256,6 @@ RegFunc1(HideModelGroup, void, string, IMMEDIATE, REL_FUNC);
 shpvoid WalkerBoundaryBlockModel(const std::string& modelName)
 {
     // Find the object/model or fail.
-    printf("WalkerBoundaryBlockModel %s\n", modelName.c_str());
     GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
     if(obj == nullptr || obj->GetMeshRenderer() == nullptr)
     {
@@ -279,7 +278,6 @@ RegFunc1(WalkerBoundaryBlockModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryUnblockModel(const std::string& modelName)
 {
-    printf("WalkerBoundaryUnblockModel %s\n", modelName.c_str());
     GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->ClearUnwalkableRect(modelName);
     return 0;
 }

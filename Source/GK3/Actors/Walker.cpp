@@ -112,22 +112,13 @@ void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const
         mExitRegionCallback = nullptr;
         callback();
     }
-
-    // First of all, if we're not in the region, we don't have to do anything.
-    if(mWalkerBoundary == nullptr || mWalkerBoundary->GetRegionIndex(GetOwner()->GetPosition()) != regionIndex)
-    {
-        if(finishCallback != nullptr)
-        {
-            finishCallback();
-        }
-        return;
-    }
-
-    // Save exit region callback.
+    
+    // Save exit region and callback.
     mExitRegionIndex = regionIndex;
     mExitRegionCallback = finishCallback;
 
-    // We ARE in the region - get outta there!
+    // Attempt to leave the region by moving towards the exit position/heading.
+    // Even if already outside the region, we want to let this go for at least one frame. When Update is called, it'll get cleared.
     WalkTo(exitPosition, exitHeading, nullptr);
 }
 
