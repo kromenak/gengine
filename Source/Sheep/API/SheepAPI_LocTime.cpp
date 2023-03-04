@@ -193,8 +193,11 @@ RegFunc1(SetTime, void, string, WAITABLE, REL_FUNC);
 
 shpvoid SetLocationTime(const std::string& location, const std::string& timeblock)
 {
-    Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
-    GEngine::Instance()->LoadScene(location);
+    // Set the location, but do not actually go to that scene yet.
+    Services::Get<LocationManager>()->SetLocation(location);
+
+    // Set the time. This will show the timeblock screen and actually load the location.
+    SetTime(timeblock);
     return 0;
 }
 RegFunc2(SetLocationTime, void, string, string, WAITABLE, REL_FUNC);
