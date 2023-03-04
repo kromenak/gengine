@@ -313,6 +313,9 @@ void Walker::OnUpdate(float deltaTime)
 
 void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std::function<void()> finishCallback, bool fromAutoscript)
 {
+    // Clear continue walk anim flag. Since we're starting a new walk.
+    mNeedContinueWalkAnim = false;
+
     // Save if from autoscript.
     mFromAutoscript = fromAutoscript;
 
