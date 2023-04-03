@@ -88,7 +88,13 @@ bool Renderer::Initialize()
 {
     TIMER_SCOPED("Renderer::Initialize");
 
+    // Create the game window.
     Window::Create("Gabriel Knight 3");
+    if(Window::Get() == nullptr)
+    {
+        printf("Failed to create game window!\n");
+        return false;
+    }
 
     // Tell SDL we want to use OpenGL 3.3
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
@@ -107,13 +113,19 @@ bool Renderer::Initialize()
     
     // Create OpenGL context.
     mContext = SDL_GL_CreateContext(Window::Get());
+    if(mContext == nullptr)
+    {
+        printf("GLcontext is null!\n");
+        return false;
+    }
     //DumpVideoInfo(mWindow);
 	
     // Initialize GLEW.
     glewExperimental = GL_TRUE;
-    if(glewInit() != GLEW_OK)
+    GLenum glewInitResult = glewInit();
+    if(glewInitResult != GLEW_OK)
     {
-        SDL_Log("Failed to initialize GLEW.");
+        printf("glewInit failed! Error: %s\n", glewGetErrorString(glewInitResult));
         return false;
     }
     

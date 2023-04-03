@@ -208,6 +208,7 @@ void VertexArray::ChangeIndexData(unsigned short* indexes, unsigned int count)
     // Same thing with index buffer. If size changed, need to recreate it!
     if(mData.indexData != nullptr && mData.indexCount != count)
     {
+        assert(mData.ownsData);
         delete[] mData.indexData;
         mData.indexData = new unsigned short[count];
     }
