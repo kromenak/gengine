@@ -3,6 +3,7 @@
 #include <cctype>
 
 #include "AnimationNodes.h"
+#include "FileSystem.h"
 #include "IniParser.h"
 #include "Services.h"
 #include "StringUtil.h"
@@ -11,6 +12,18 @@
 Animation::Animation(const std::string& name, char* data, int dataLength) : Asset(name)
 {
     ParseFromData(data, dataLength);
+}
+
+Animation::~Animation()
+{
+    // Be sure to delete dynamically allocated memory.
+    for(auto& frameEntry : mFrames)
+    {
+        for(auto& frameAnimNode : frameEntry.second)
+        {
+            delete frameAnimNode;
+        }
+    }
 }
 
 std::vector<AnimNode*>* Animation::GetFrame(int frameNumber)
@@ -38,6 +51,8 @@ VertexAnimNode* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, co
 
 void Animation::ParseFromData(char *data, int dataLength)
 {
+    bool isYak = Path::HasExtension(GetName(), ".yak");
+
     IniParser parser(data, dataLength);
     IniSection section;
     while(parser.ReadNextSection(section))
@@ -258,7 +273,14 @@ void Animation::ParseFromData(char *data, int dataLength)
 				// Create node here - remaining entries are optional.
 				SoundAnimNode* node = new SoundAnimNode();
 				node->frameNumber = frameNumber;
-				node->audio = Services::GetAssets()->LoadAudio(soundName);
+                if(isYak)
+                {
+                    node->audio = Services::GetAssets()->LoadAudio(soundName, AssetLoadScope::Scene);
+                }
+                else
+                {
+                    node->audio = Services::GetAssets()->LoadAudio(soundName);
+                }
 				node->volume = volume;
 				mFrames[frameNumber].push_back(node);
 				

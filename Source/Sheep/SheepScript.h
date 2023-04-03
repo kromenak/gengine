@@ -24,7 +24,8 @@ public:
 
     SheepScript(const std::string& name, char* data, int dataLength);
     SheepScript(const std::string& name, SheepScriptBuilder& builder);
-    
+    ~SheepScript();
+
     SysFuncImport* GetSysImport(int index);
     
     std::string* GetStringConst(int offset);

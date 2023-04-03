@@ -56,6 +56,10 @@ SheepVM::~SheepVM()
 	{
 		delete thread;
 	}
+    for(auto& notifyLink : mNotifyLinks)
+    {
+        delete notifyLink;
+    }
 }
 
 void SheepVM::Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag)

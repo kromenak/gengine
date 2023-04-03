@@ -14,6 +14,8 @@ class Texture;
 class Skybox
 {
 public:
+    ~Skybox();
+
     void Render();
     
 	void SetRightTexture(Texture* texture);

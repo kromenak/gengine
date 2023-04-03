@@ -51,6 +51,7 @@ shpvoid CallSheep(const std::string& fileName, const std::string& functionName)
     SheepScript* script = Services::GetAssets()->LoadSheep(fileName);
     if(script == nullptr)
     {
+        Services::GetReports()->Log("Error", StringUtil::Format("Error: unable to find sheep file `%s`", fileName.c_str()));
         ExecError();
         return 0;
     }

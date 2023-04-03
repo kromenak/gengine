@@ -5,6 +5,7 @@
 //
 #pragma once
 #include <functional>
+#include <unordered_map>
 #include <vector>
 
 #include <fmod.hpp>
@@ -127,6 +128,8 @@ public:
     void StopAll();
     void StopOnOrAfterFrame(uint32 frame);
 
+    void ReleaseAudioData(Audio* audio);
+
     void SetMasterVolume(float volume);
     float GetMasterVolume() const;
     
@@ -174,6 +177,10 @@ private:
     // Sounds that are currently playing.
     std::vector<PlayingSoundHandle> mPlayingSounds;
     PlayingSoundHandle mInvalidSoundHandle;
+
+    // Mapping from Audio assets to FMOD's internal sound instances.
+    // This mapping stops us from creating multiple FMOD sounds for a single Audio (essentially a memory leak).
+    std::unordered_map<Audio*, FMOD::Sound*> mFmodAudioData;
     
     FMOD::ChannelGroup* GetChannelGroupForAudioType(AudioType audioType, bool forVolume) const;
 

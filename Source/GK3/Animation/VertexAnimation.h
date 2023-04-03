@@ -20,6 +20,8 @@ struct VertexAnimationPose
     int frameNumber = 0;
     VertexAnimationPose* next = nullptr;
 
+    virtual ~VertexAnimationPose() { } 
+
     VertexAnimationPose* GetForFrame(int frame);
     void GetForTime(float time, int framesPerSecond, VertexAnimationPose*& current, VertexAnimationPose*& next, float& t);
 };
@@ -38,7 +40,8 @@ class VertexAnimation : public Asset
 {
 public:
     VertexAnimation(const std::string& name, char* data, int dataLength);
-    
+    ~VertexAnimation();
+
     // Queries transform (position, rotation, scale) for a mesh at a frame/time.
     VertexAnimationTransformPose SampleTransformPose(int frame, int meshIndex);
     VertexAnimationTransformPose SampleTransformPose(float time, int framesPerSecond, int meshIndex);

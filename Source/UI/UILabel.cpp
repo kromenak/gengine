@@ -16,6 +16,11 @@ UILabel::UILabel(Actor* owner) : UIWidget(owner)
 	
 }
 
+UILabel::~UILabel()
+{
+    delete mMesh;
+}
+
 void UILabel::Render()
 {
 	if(!IsActiveAndEnabled()) { return; }

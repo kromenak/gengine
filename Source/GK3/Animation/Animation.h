@@ -20,7 +20,8 @@ class Animation : public Asset
 {
 public:
     Animation(const std::string& name, char* data, int dataLength);
-    
+    ~Animation();
+
 	// Gets all anim nodes associated with a particular frame number. Null may be returned!
 	// Mainly used by Animator to get frame data as needed and play/sample.
 	//TODO: Might be better to move code from Animator that uses this into Animation directly.

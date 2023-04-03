@@ -20,6 +20,11 @@ SceneData::~SceneData()
     {
         Services::GetAssets()->UnloadBSP(mBSP);
     }
+
+    if(mOwnsSkybox && mSkybox != nullptr)
+    {
+        delete mSkybox;
+    }
 }
 
 const SceneActor* SceneData::DetermineWhoEgoWillBe() const
@@ -96,6 +101,7 @@ void SceneData::ResolveSceneData()
 	if(mSkybox == nullptr)
 	{
 		mSkybox = mGeneralSettings.CreateSkybox();
+        mOwnsSkybox = true;
 	}
 	
 	// Also figure out whether we have a walker boundary - if so, create one.

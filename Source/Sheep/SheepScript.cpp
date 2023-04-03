@@ -34,6 +34,11 @@ SheepScript::SheepScript(const std::string& name, SheepScriptBuilder& builder) :
     std::copy(bytecodeVec.begin(), bytecodeVec.end(), mBytecode);
 }
 
+SheepScript::~SheepScript()
+{
+    delete[] mBytecode;
+}
+
 SysFuncImport* SheepScript::GetSysImport(int index)
 {
     if(index < 0 || index >= mSysImports.size()) { return nullptr; }
@@ -312,6 +317,7 @@ void SheepScript::ParseCodeSection(BinaryReader& reader)
     reader.ReadInt();
     
     // The rest is just bytecode!
+    assert(mBytecode == nullptr);
     mBytecode = new char[mBytecodeLength];
     reader.Read(mBytecode, mBytecodeLength);
 }

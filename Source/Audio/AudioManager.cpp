@@ -467,6 +467,17 @@ void AudioManager::StopOnOrAfterFrame(uint32 frame)
     }
 }
 
+void AudioManager::ReleaseAudioData(Audio* audio)
+{
+    // If an FMOD sound instance exists for this Audio asset, release the FMOD sound, freeing its internal memory.
+    auto it = mFmodAudioData.find(audio);
+    if(it != mFmodAudioData.end())
+    {
+        it->second->release();
+        mFmodAudioData.erase(audio);
+    }
+}
+
 void AudioManager::SetMasterVolume(float volume)
 {
     // Set volume. FMOD expects a normalized 0-1 value.
@@ -709,6 +720,13 @@ PlayingSoundHandle& AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType a
 
 FMOD::Sound* AudioManager::CreateSound(Audio* audio, bool is3D)
 {
+    // If we've already got an FMOD sound instance for this Audio, use that.
+    auto it = mFmodAudioData.find(audio);
+    if(it != mFmodAudioData.end())
+    {
+        return it->second;
+    }
+
     // Need to pass FMOD the length of audio data.
     FMOD_CREATESOUNDEXINFO exinfo;
     memset(&exinfo, 0, sizeof(FMOD_CREATESOUNDEXINFO));
@@ -722,13 +740,18 @@ FMOD::Sound* AudioManager::CreateSound(Audio* audio, bool is3D)
         mode |= FMOD_3D | FMOD_3D_LINEARSQUAREROLLOFF;
     }
 
-    // Create the sound using the audio buffer.
+    // Create the sound using the audio data buffer.
     FMOD::Sound* sound = nullptr;
     FMOD_RESULT result = mSystem->createSound(audio->GetDataBuffer(), mode, &exinfo, &sound);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
     }
+
+    // Cache sound for reuse if this Audio is played again.
+    mFmodAudioData[audio] = sound;
+
+    // Return sound.
     return sound;
 }
 

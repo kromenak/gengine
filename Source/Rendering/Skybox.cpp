@@ -54,6 +54,15 @@ float points[] = {
      10.0f, -10.0f,  10.0f
 };
 
+Skybox::~Skybox()
+{
+    // Delete skybox mesh.
+    delete mSkyboxMesh;
+
+    // Delete cubemap texture.
+    glDeleteTextures(1, &mCubemapTextureId);
+}
+
 void Skybox::Render()
 {
     // Generate submesh on the fly, if not yet generated.
@@ -70,7 +79,8 @@ void Skybox::Render()
         Shader* skyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
         mMaterial.SetShader(skyboxShader);
     }
-    
+
+    // Generate cubemap texture, if not yet generated.
     if(mCubemapTextureId == GL_NONE)
     {
         glActiveTexture(GL_TEXTURE0);

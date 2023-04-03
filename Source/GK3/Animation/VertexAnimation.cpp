@@ -86,6 +86,34 @@ VertexAnimation::VertexAnimation(const std::string& name, char* data, int dataLe
     ParseFromData(data, dataLength);
 }
 
+VertexAnimation::~VertexAnimation()
+{
+    for(auto& outerEntry : mVertexPoses)
+    {
+        for(auto& innerEntry : outerEntry.second)
+        {
+            VertexAnimationPose* pose = innerEntry.second;
+            while(pose != nullptr)
+            {
+                VertexAnimationPose* temp = pose;
+                pose = pose->next;
+                delete temp;
+            }
+        }
+    }
+
+    for(auto& poseElement : mTransformPoses)
+    {
+        VertexAnimationPose* pose = poseElement;
+        while(pose != nullptr)
+        {
+            VertexAnimationPose* temp = pose;
+            pose = pose->next;
+            delete temp;
+        }
+    }
+}
+
 VertexAnimationTransformPose VertexAnimation::SampleTransformPose(int frame, int meshIndex)
 {
     // Make sure we're in bounds.

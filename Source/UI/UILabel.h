@@ -21,6 +21,7 @@ class UILabel : public UIWidget
 	TYPE_DECL_CHILD();
 public:
 	UILabel(Actor* owner);
+    ~UILabel();
 	
 	void Render() override;
 	

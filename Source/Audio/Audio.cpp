@@ -4,6 +4,7 @@
 #include <fstream>
 
 #include "BinaryReader.h"
+#include "Services.h"
 
 Audio::Audio(const std::string& name, char* data, int dataLength) : Asset(name),
     mDataBuffer(data),
@@ -17,6 +18,9 @@ Audio::Audio(const std::string& name, char* data, int dataLength) : Asset(name),
 Audio::~Audio()
 {
 	delete[] mDataBuffer;
+
+    // FMOD allocates memory internally when playing an Audio file. Let it know it can get free of that memory.
+    Services::GetAudio()->ReleaseAudioData(this);
 }
 
 void Audio::ParseFromData(char* data, int dataLength)

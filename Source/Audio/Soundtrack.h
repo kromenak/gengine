@@ -44,13 +44,11 @@ struct SoundtrackNode
     // Percent chance this node will be executed. Should be 1-100.
     // Repeat count is still decremented if node is not executed due to random!
     int random = 100;
-    
-    virtual int Execute(AudioType soundType, SoundtrackNodeResults& outResults) = 0;
 
-    virtual bool IsLooping()
-    {
-        return false;
-    }
+    virtual ~SoundtrackNode() { }
+
+    virtual int Execute(AudioType soundType, SoundtrackNodeResults& outResults) = 0;
+    virtual bool IsLooping() { return false; }
 };
 
 struct WaitNode : public SoundtrackNode
@@ -119,6 +117,7 @@ class Soundtrack : public Asset
 {
 public:
     Soundtrack(const std::string& name, char* data, int dataLength);
+    ~Soundtrack();
     
     AudioType GetSoundType() const { return mSoundType; }
     const std::vector<SoundtrackNode*>& GetNodes() const { return mNodes; }

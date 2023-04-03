@@ -102,6 +102,7 @@ private:
 	// 3) Skybox from General SIF's Scene Model.
 	// 4) Skybox from General SIF.
 	Skybox* mSkybox = nullptr;
+    bool mOwnsSkybox = false;
 	
 	// Walker boundary for the scene, if any.
 	WalkerBoundary* mWalkerBoundary = nullptr;

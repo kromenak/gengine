@@ -190,6 +190,15 @@ Soundtrack::Soundtrack(const std::string& name, char* data, int dataLength) : As
     }
 }
 
+Soundtrack::~Soundtrack()
+{
+    // Delete dynamically allocated nodes.
+    for(auto& node : mNodes)
+    {
+        delete node;
+    }
+}
+
 SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
 {
     SoundNode* node = new SoundNode();

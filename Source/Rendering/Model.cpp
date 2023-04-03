@@ -25,6 +25,14 @@ Model::Model(const std::string& name, char* data, int dataLength) : Asset(name)
     ParseFromData(data, dataLength);
 }
 
+Model::~Model()
+{
+    for(auto& mesh : mMeshes)
+    {
+        delete mesh;
+    }
+}
+
 void Model::WriteToObjFile(std::string filePath)
 {
 	std::ofstream out(filePath, std::ios::out);
