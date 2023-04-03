@@ -170,22 +170,39 @@ RegFunc1(WasLastTime, int, string, IMMEDIATE, REL_FUNC);
 shpvoid SetTime(const std::string& timeblock)
 {
     // If already in the desired timeblock, we do nothing.
+    Timeblock oldTimeblock = Services::Get<GameProgress>()->GetTimeblock();
     Timeblock newTimeblock(timeblock);
-    if(Services::Get<GameProgress>()->GetTimeblock() == newTimeblock)
+    if(oldTimeblock == newTimeblock)
     {
         return 0;
     }
 
-    // Change time to new timeblock.
-    Services::Get<GameProgress>()->SetTimeblock(Timeblock(timeblock));
-    
     // Unload the current scene.
     GEngine::Instance()->UnloadScene();
 
-    // Show timeblock screen.
-    gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, []() {
-        // We're assuming that just the time changed here, so load back into same location.
-        GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
+    // Play ending movie (if any) for the timeblock we are leaving.
+    std::function<void()> waitable = AddWait();
+    Services::Get<VideoPlayer>()->Play(oldTimeblock.ToString() + "end", true, true, [newTimeblock, waitable](){
+
+        // Change time to new timeblock.
+        Services::Get<GameProgress>()->SetTimeblock(newTimeblock);
+
+        // Show timeblock screen.
+        gGK3UI.ShowTimeblockScreen(newTimeblock, 0.0f, [newTimeblock, waitable](){
+
+            // Show beginning movie (if any) for the new timeblock.
+            Services::Get<VideoPlayer>()->Play(newTimeblock.ToString() + "begin", true, true, [waitable](){
+
+                // Reload our current location in the new timeblock.
+                GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
+
+                // Notify waitable 'cause we are done here.
+                if(waitable != nullptr)
+                {
+                    waitable();
+                }
+            });
+        });
     });
     return 0;
 }

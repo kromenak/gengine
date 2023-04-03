@@ -271,9 +271,6 @@ code
 			return;
 		}
 
-		// This timeblock has an ending movie too!
-		wait PlayFullScreenMovie("207aend");
-
 		// OK, go to next timeblock!
 		SetTime("210A");
 	}

@@ -178,7 +178,7 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
     SetLocation(location);
 
     //HACK: Don't check timeblock completion if following someone on driving screen.
-    //HACK: Fixes premature timeblock completion in 1102P if last action performed is follow.
+    //HACK: Fixes premature timeblock completion in 102P if last action performed is follow.
     if(gGK3UI.FollowingOnDrivingScreen())
     {
         // Change scene and done.
