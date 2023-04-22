@@ -160,14 +160,15 @@ bool Renderer::Initialize()
     // Avoid dealing with background thread loading of shaders by loading them all up front.
     std::string shaders[] = {
         "3D-Lightmap",
-        "3D-Tex-Lit"
-        //TODO: Others?
+        "3D-Tex-Lit",
+        "3D-Skybox"
     };
     for(auto& shader : shaders)
     {
         //printf("Load %s\n", shader.c_str());
         Services::GetAssets()->LoadShader(shader);
     }
+    Services::GetAssets()->LoadShader("3D-Tex", "UI-Text-ColorReplace");
 
     // Create simple shapes (useful for debugging/visualization).
     // Line
