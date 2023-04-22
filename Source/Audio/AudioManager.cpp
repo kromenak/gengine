@@ -580,6 +580,7 @@ void AudioManager::SetVolume(AudioType audioType, float volume)
     case AudioType::Music:
         multiplier = kMusicVolumeMultiplier;
         gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_MUSIC_VOLUME, static_cast<int>(volume * 100));
+        break;
     default:
         multiplier = 1.0f;
         break;
