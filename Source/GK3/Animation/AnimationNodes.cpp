@@ -285,6 +285,31 @@ void SoundAnimNode::Play(AnimationState* animState)
     soundInstance.SetVolume(volume * 0.01f);
 }
 
+namespace
+{
+    void PlayFootSound(bool scuff, GKActor* actor)
+    {
+        // Get the actor's shoe type.
+        std::string shoeType = actor->GetShoeType();
+
+        // Query the texture used on the floor where the actor is walking.
+        Texture* floorTexture = actor->GetWalker()->GetFloorTypeWalkingOn();
+        std::string floorTextureName = floorTexture != nullptr ? floorTexture->GetNameNoExtension() : "carpet1";
+
+        // Get the footstep sound.
+        Audio* footAudio = scuff ? Services::Get<FootstepManager>()->GetFootscuff(shoeType, floorTextureName)
+            : Services::Get<FootstepManager>()->GetFootstep(shoeType, floorTextureName);
+        if(footAudio != nullptr)
+        {
+            // Play the sound at the actor's world position, which is near their feet anyways.
+            // The min/max distances for footsteps are derived from experimenting with the original game.
+            const int kMinFootstepDist = 30.0f;
+            const int kMaxFootstepDist = 400.0f;
+            Services::GetAudio()->PlaySFX3D(footAudio, actor->GetWorldPosition(), kMinFootstepDist, kMaxFootstepDist);
+        }
+    }
+}
+
 void FootstepAnimNode::Play(AnimationState* animState)
 {
     if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
@@ -293,20 +318,8 @@ void FootstepAnimNode::Play(AnimationState* animState)
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
-		// Get the actor's shoe type.
-        std::string shoeType = actor->GetShoeType();
-		
-		// Query the texture used on the floor where the actor is walking.
-        Texture* floorTexture = actor->GetWalker()->GetFloorTypeWalkingOn();
-		std::string floorTextureName = floorTexture != nullptr ? floorTexture->GetNameNoExtension() : "carpet1";
-		
-		// Get the footstep sound.
-		Audio* footstepAudio = Services::Get<FootstepManager>()->GetFootstep(shoeType, floorTextureName);
-		if(footstepAudio != nullptr)
-		{
-            //TODO: May want to play the sound at the actor's foot position by querying model.
-            Services::GetAudio()->PlaySFX3D(footstepAudio, actor->GetWorldPosition());
-		}
+        // Play a footstep.
+        PlayFootSound(false, actor);
 	}
 }
 
@@ -314,25 +327,12 @@ void FootscuffAnimNode::Play(AnimationState* animState)
 {
     if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
 
-    //TODO: Almost identical to Footstep node, so maybe they can be combined somehow.
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
-		// Get the actor's shoe type.
-		std::string shoeType = actor->GetShoeType();
-		
-        // Query the texture used on the floor where the actor is walking.
-        Texture* floorTexture = actor->GetWalker()->GetFloorTypeWalkingOn();
-        std::string floorTextureName = floorTexture != nullptr ? floorTexture->GetNameNoExtension() : "carpet1";
-		
-		// Get the scuff sound.
-		Audio* footscuffAudio = Services::Get<FootstepManager>()->GetFootscuff(shoeType, floorTextureName);
-		if(footscuffAudio != nullptr)
-		{
-            //TODO: May want to play the sound at the actor's foot position by querying model.
-            Services::GetAudio()->PlaySFX3D(footscuffAudio, actor->GetWorldPosition());
-        }
+        // Play a foot scuff.
+        PlayFootSound(true, actor);
 	}
 }
 

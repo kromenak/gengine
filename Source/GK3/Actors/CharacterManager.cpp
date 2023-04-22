@@ -250,6 +250,10 @@ CharacterManager::CharacterManager()
                     {
                         config.shoeThickness = entry.GetValueAsFloat();
                     }
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "ShoeType"))
+                    {
+                        config.shoeType = entry.value;
+                    }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StartAnim"))
                     {
                         config.walkStartAnim = Services::GetAssets()->LoadAnimation(entry.value);
