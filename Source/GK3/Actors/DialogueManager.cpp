@@ -268,7 +268,7 @@ void DialogueManager::PlayNextDialogueLine()
     mDialogueSequenceNumber++;
 
 	// Load the YAK! If we can't find it for some reason, output an error and move on right away.
-	Animation* yak = Services::GetAssets()->LoadYak(yakName);
+	Animation* yak = Services::GetAssets()->LoadYak(yakName, AssetScope::Scene);
 	if(yak == nullptr)
 	{
 		std::cout << "Could not find YAK called " << yakName << ". Skipping to next dialogue line." << std::endl;

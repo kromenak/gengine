@@ -325,8 +325,8 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     }
 
     // Load start/loop anims. Neither is optional.
-    Animation* startAnim = Services::GetAssets()->LoadAnimation(start);
-    Animation* loopAnim = Services::GetAssets()->LoadAnimation(cont);
+    Animation* startAnim = Services::GetAssets()->LoadAnimation(start, AssetScope::Scene);
+    Animation* loopAnim = Services::GetAssets()->LoadAnimation(cont, AssetScope::Scene);
     if(startAnim == nullptr || loopAnim == nullptr)
     {
         ExecError();
@@ -337,7 +337,7 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     Animation* startTurnLeftAnim = nullptr;
     if(!startTurnLeft.empty())
     {
-        startTurnLeftAnim = Services::GetAssets()->LoadAnimation(startTurnLeft);
+        startTurnLeftAnim = Services::GetAssets()->LoadAnimation(startTurnLeft, AssetScope::Scene);
         if(startTurnLeftAnim == nullptr)
         {
             ExecError();
@@ -347,7 +347,7 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     Animation* startTurnRightAnim = nullptr;
     if(!startTurnRight.empty())
     {
-        startTurnRightAnim  = Services::GetAssets()->LoadAnimation(startTurnRight);
+        startTurnRightAnim  = Services::GetAssets()->LoadAnimation(startTurnRight, AssetScope::Scene);
         if(startTurnRightAnim == nullptr)
         {
             ExecError();

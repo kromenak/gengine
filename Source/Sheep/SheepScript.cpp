@@ -14,7 +14,7 @@
     return dataLength >= 8 && memcmp(data, "GK3Sheep", 8) == 0;
 }
 
-SheepScript::SheepScript(const std::string& name, char* data, int dataLength) : Asset(name)
+SheepScript::SheepScript(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     ParseFromData(data, dataLength);
 }

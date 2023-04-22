@@ -3,7 +3,7 @@
 #include "BinaryReader.h"
 #include "Texture.h"
 
-BSPLightmap::BSPLightmap(const std::string& name, char* data, int dataLength) : Asset(name)
+BSPLightmap::BSPLightmap(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     BinaryReader reader(data, dataLength);
 

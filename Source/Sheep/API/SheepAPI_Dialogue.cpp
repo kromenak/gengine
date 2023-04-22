@@ -11,7 +11,7 @@ using namespace std;
 shpvoid StartVoiceOver(const std::string& dialogueName, int numLines)
 {
     std::string yakName = "E" + dialogueName;
-    Animation* yak = Services::GetAssets()->LoadYak(yakName);
+    Animation* yak = Services::GetAssets()->LoadYak(yakName, AssetScope::Scene);
     
     AnimParams params;
     params.animation = yak;
@@ -24,7 +24,7 @@ RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
 
 shpvoid StartYak(const std::string& yakAnimationName)
 {
-    Animation* yak = Services::GetAssets()->LoadYak(yakAnimationName);
+    Animation* yak = Services::GetAssets()->LoadYak(yakAnimationName, AssetScope::Scene);
 
     AnimParams params;
     params.animation = yak;

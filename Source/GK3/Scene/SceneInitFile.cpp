@@ -15,12 +15,12 @@ Skybox* GeneralBlock::CreateSkybox()
 	if(!hasSkyboxData) { return nullptr; }
 	
 	Skybox* skybox = new Skybox();
-	skybox->SetLeftTexture(Services::GetAssets()->LoadSceneTexture(skyboxLeftTextureName));
-	skybox->SetRightTexture(Services::GetAssets()->LoadSceneTexture(skyboxRightTextureName));
-	skybox->SetBackTexture(Services::GetAssets()->LoadSceneTexture(skyboxBackTextureName));
-	skybox->SetFrontTexture(Services::GetAssets()->LoadSceneTexture(skyboxFrontTextureName));
-	skybox->SetDownTexture(Services::GetAssets()->LoadSceneTexture(skyboxDownTextureName));
-	skybox->SetUpTexture(Services::GetAssets()->LoadSceneTexture(skyboxUpTextureName));
+	skybox->SetLeftTexture(Services::GetAssets()->LoadSceneTexture(skyboxLeftTextureName, AssetScope::Scene));
+	skybox->SetRightTexture(Services::GetAssets()->LoadSceneTexture(skyboxRightTextureName, AssetScope::Scene));
+	skybox->SetBackTexture(Services::GetAssets()->LoadSceneTexture(skyboxBackTextureName, AssetScope::Scene));
+	skybox->SetFrontTexture(Services::GetAssets()->LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene));
+	skybox->SetDownTexture(Services::GetAssets()->LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene));
+	skybox->SetUpTexture(Services::GetAssets()->LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene));
 	return skybox;
 }
 
@@ -87,7 +87,7 @@ void GeneralBlock::TakeOverridesFrom(const GeneralBlock& other)
 	}
 }
 
-SceneInitFile::SceneInitFile(const std::string& name, char* data, int dataLength) : Asset(name)
+SceneInitFile::SceneInitFile(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     ParseFromData(data, dataLength);
 }
@@ -531,7 +531,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 			{
 				if(StringUtil::EqualsIgnoreCase(keyValue.key, "model"))
                 {
-                    actor.model = Services::GetAssets()->LoadModel(keyValue.value);
+                    actor.model = Services::GetAssets()->LoadModel(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun"))
                 {
@@ -556,7 +556,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initAnim"))
                 {
-                    actor.initAnim = Services::GetAssets()->LoadAnimation(keyValue.value);
+                    actor.initAnim = Services::GetAssets()->LoadAnimation(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "hidden"))
                 {
@@ -640,7 +640,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initanim"))
                 {
-                    model.initAnim = Services::GetAssets()->LoadAnimation(keyValue.value);
+                    model.initAnim = Services::GetAssets()->LoadAnimation(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "hidden"))
                 {
@@ -658,7 +658,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                (model.type == SceneModel::Type::Prop ||
                 model.type == SceneModel::Type::GasProp))
             {
-                model.model = Services::GetAssets()->LoadModel(model.name);
+                model.model = Services::GetAssets()->LoadModel(model.name, GetScope());
             }
         }
     }
@@ -748,7 +748,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 		// Add soundtracks.
         for(auto& line : section.lines)
         {
-            Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(line.entries[0].key);
+            Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(line.entries[0].key, GetScope());
             if(soundtrack != nullptr)
             {
 				soundtrackBlock.items.push_back(soundtrack);
@@ -795,11 +795,11 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "enter"))
                 {
-                    convo.enterAnim = Services::GetAssets()->LoadAnimation(keyValue.value);
+                    convo.enterAnim = Services::GetAssets()->LoadAnimation(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "exit"))
                 {
-                    convo.exitAnim = Services::GetAssets()->LoadAnimation(keyValue.value);
+                    convo.exitAnim = Services::GetAssets()->LoadAnimation(keyValue.value, GetScope());
                 }
             }
         }
@@ -820,7 +820,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         
         for(auto& line : section.lines)
         {
-            NVC* nvc = Services::GetAssets()->LoadNVC(line.entries[0].key);
+            NVC* nvc = Services::GetAssets()->LoadNVC(line.entries[0].key, GetScope());
             if(nvc != nullptr)
             {
                 actionBlock.items.push_back(nvc);

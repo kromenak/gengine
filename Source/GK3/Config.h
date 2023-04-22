@@ -17,7 +17,7 @@
 class Config : public Asset
 {
 public:
-    Config(const std::string& name, char* data, int dataLength);
+    Config(const std::string& name, AssetScope scope, char* data, int dataLength);
 
     void Save(const std::string& path);
 

@@ -142,7 +142,7 @@ RegFunc2(SetVolume, void, string, int, IMMEDIATE, DEV_FUNC);
 
 shpvoid PlaySound(const std::string& soundName)
 {
-    Audio* audio = Services::GetAssets()->LoadAudio(soundName);
+    Audio* audio = Services::GetAssets()->LoadAudio(soundName, AssetScope::Scene);
     if(audio != nullptr)
     {
         Services::GetAudio()->PlaySFX(audio, AddWait());
@@ -155,7 +155,7 @@ shpvoid StopSound(const std::string& soundName)
 {
     // For a sound to play, it must be loaded already anyway.
     // And if it's null, the Stop function handles that.
-    Services::GetAudio()->Stop(Services::GetAssets()->LoadAudio(soundName));
+    Services::GetAudio()->Stop(Services::GetAssets()->LoadAudio(soundName, AssetScope::Scene));
     return 0;
 }
 RegFunc1(StopSound, void, string, IMMEDIATE, REL_FUNC);
@@ -169,7 +169,7 @@ RegFunc0(StopAllSounds, void, IMMEDIATE, REL_FUNC);
 
 shpvoid PlaySoundTrack(const std::string& soundtrackName)
 {
-    Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName);
+    Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName, AssetScope::Scene);
     if(soundtrack != nullptr)
     {
         GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Play(soundtrack);
@@ -182,7 +182,7 @@ shpvoid StopSoundTrack(const std::string& soundtrackName)
 {
     // Soundtrack must already be loaded to be playing. So, just load and pass in pointer.
     // If it is null, Stop handles that for us.
-    GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Stop(Services::GetAssets()->LoadSoundtrack(soundtrackName));
+    GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Stop(Services::GetAssets()->LoadSoundtrack(soundtrackName, AssetScope::Scene));
     return 0;
 }
 RegFunc1(StopSoundTrack, void, string, IMMEDIATE, REL_FUNC);

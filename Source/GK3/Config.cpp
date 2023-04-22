@@ -3,7 +3,7 @@
 #include "StringUtil.h"
 #include "TextWriter.h"
 
-Config::Config(const std::string& name, char* data, int dataLength) : Asset(name)
+Config::Config(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     // Read in each section and store it.
     IniParser parser(data, dataLength);

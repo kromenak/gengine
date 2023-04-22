@@ -6,7 +6,7 @@
 #include "IniParser.h"
 #include "Services.h"
 
-int WaitNode::Execute(AudioType soundType, SoundtrackNodeResults& outResults)
+int WaitNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
 {
     // Since a wait node does not actually have any audio, clear the provided sound handle to reflect this.
     outResults.soundHandle = PlayingSoundHandle();
@@ -27,7 +27,7 @@ int WaitNode::Execute(AudioType soundType, SoundtrackNodeResults& outResults)
     return (rand() % maxWaitTimeMs + minWaitTimeMs);
 }
 
-int SoundNode::Execute(AudioType soundType, SoundtrackNodeResults& outResults)
+int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
 {
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
@@ -35,11 +35,11 @@ int SoundNode::Execute(AudioType soundType, SoundtrackNodeResults& outResults)
     if(randomCheck > random) { return 0; }
     
     // Definitely want to play the sound, if it exists.
-    Audio* audio = Services::GetAssets()->LoadAudio(soundName);
+    Audio* audio = Services::GetAssets()->LoadAudio(soundName, soundtrack->GetScope());
     if(audio == nullptr) { return 0; }
     
     // Play method differs based on sound type and whether its 3D or not.
-    switch(soundType)
+    switch(soundtrack->GetSoundType())
     {
     case AudioType::Music:
         // Going to assume music is never 3D for now...
@@ -91,7 +91,15 @@ int SoundNode::Execute(AudioType soundType, SoundtrackNodeResults& outResults)
     return (int)(audio->GetDuration() * 1000.0f);
 }
 
-Soundtrack::Soundtrack(const std::string& name, char* data, int dataLength) : Asset(name)
+int PrsNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
+{
+    if(soundNodes.size() == 0) { return 0; }
+
+    int randomIndex = rand() % soundNodes.size();
+    return soundNodes[randomIndex]->Execute(soundtrack, outResults);
+}
+
+Soundtrack::Soundtrack(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     IniParser parser(data, dataLength);
     IniSection section;

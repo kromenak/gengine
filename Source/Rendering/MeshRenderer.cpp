@@ -154,7 +154,8 @@ void MeshRenderer::AddMesh(Mesh* mesh)
 		// Load and set texture reference.
 		if(!submesh->GetTextureName().empty())
 		{
-			Texture* tex = Services::GetAssets()->LoadSceneTexture(submesh->GetTextureName());
+            // The scope here would depend on whether this MeshRenderer is scene-specific or persists between scenes.
+			Texture* tex = Services::GetAssets()->LoadSceneTexture(submesh->GetTextureName(), GetOwner()->IsDestroyOnLoad() ? AssetScope::Scene : AssetScope::Global);
 			m.SetDiffuseTexture(tex);
 		}
 		

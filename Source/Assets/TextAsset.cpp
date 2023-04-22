@@ -2,7 +2,7 @@
 
 #include <cstring>
 
-TextAsset::TextAsset(const std::string& name, char* data, int dataLength) : Asset(name),
+TextAsset::TextAsset(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope),
     mText(data),
     mTextLength(dataLength)
 {

@@ -61,7 +61,7 @@ void PlayingSoundtrack::ProcessNextNode()
     // First off, if current node is looping...just keep doing it! It never stops!
     if(mCurrentNodeIndex >= 0 && nodes[mCurrentNodeIndex]->IsLooping())
     {
-        mTimer = nodes[mCurrentNodeIndex]->Execute(mSoundtrack->GetSoundType(), mSoundtrackNodeResults);
+        mTimer = nodes[mCurrentNodeIndex]->Execute(mSoundtrack, mSoundtrackNodeResults);
         return;
     }
 
@@ -82,7 +82,7 @@ void PlayingSoundtrack::ProcessNextNode()
 
     // Ok, execute the thing.
     mExecutionCounts[mCurrentNodeIndex]++;
-    int waitMilliseconds = node->Execute(mSoundtrack->GetSoundType(), mSoundtrackNodeResults);
+    int waitMilliseconds = node->Execute(mSoundtrack, mSoundtrackNodeResults);
     mTimer = (float)waitMilliseconds / 1000.0f;
 }
 

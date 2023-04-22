@@ -325,7 +325,7 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
 void DrivingScreen::LoadPaths()
 {
     // Load path data.
-    TextAsset* pathData = Services::GetAssets()->LoadText("PATHDATA.TXT");
+    TextAsset* pathData = Services::GetAssets()->LoadText("PATHDATA.TXT", AssetScope::Manual);
 
     // Pass 1: Read in nodes and segments.
     {
@@ -415,7 +415,7 @@ void DrivingScreen::LoadPaths()
     }
 
     // Don't need path data asset anymore.
-    Services::GetAssets()->UnloadText(pathData);
+    delete pathData;
 }
 
 DrivingScreenBlip* DrivingScreen::CreateBlip()

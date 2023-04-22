@@ -21,7 +21,7 @@ InventoryManager::InventoryManager()
         TIMER_SCOPED("InventoryManager::Load");
 
         // Get VERBS text file as a raw buffer.
-        TextAsset* textFile = Services::GetAssets()->LoadText("INVENTORYSPRITES.TXT");
+        TextAsset* textFile = Services::GetAssets()->LoadText("INVENTORYSPRITES.TXT", AssetScope::Manual);
 
         // Pass that along to INI parser, since it is plain text and in INI format.
         IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -86,8 +86,7 @@ InventoryManager::InventoryManager()
                 mInventoryItems[entry.key] = textures;
             }
         }
-
-        Services::GetAssets()->UnloadText(textFile);
+        delete textFile;
     });
     
 	// Create inventory screen UI.

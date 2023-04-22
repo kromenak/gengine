@@ -81,7 +81,7 @@ void VertexAnimationPose::GetForTime(float time, int framesPerSecond, VertexAnim
     }
 }
 
-VertexAnimation::VertexAnimation(const std::string& name, char* data, int dataLength) : Asset(name)
+VertexAnimation::VertexAnimation(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     ParseFromData(data, dataLength);
 }

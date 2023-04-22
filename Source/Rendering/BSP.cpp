@@ -14,7 +14,7 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
-BSP::BSP(const std::string& name, char* data, int dataLength) : Asset(name)
+BSP::BSP(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     ParseFromData(data, dataLength);
 
@@ -722,7 +722,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         BSPSurface surface;
         surface.objectIndex = reader.ReadUInt();
 
-        surface.texture = Services::GetAssets()->LoadSceneTexture(reader.ReadStringBuffer(32));
+        surface.texture = Services::GetAssets()->LoadSceneTexture(reader.ReadStringBuffer(32), GetScope());
         
         surface.lightmapUvOffset = reader.ReadVector2();
         surface.lightmapUvScale = reader.ReadVector2();

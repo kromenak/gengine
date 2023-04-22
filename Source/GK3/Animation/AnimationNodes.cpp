@@ -146,7 +146,7 @@ Vector3 VertexAnimNode::CalcAbsolutePosition()
 
 void SceneTextureAnimNode::Play(AnimationState* animState)
 {
-	Texture* texture = Services::GetAssets()->LoadSceneTexture(textureName);
+	Texture* texture = Services::GetAssets()->LoadSceneTexture(textureName, AssetScope::Scene);
 	if(texture != nullptr)
 	{
 		//TODO: Ensure sceneName matches loaded scene name?
@@ -181,7 +181,7 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
 		if(material != nullptr)
 		{
 			// Apply the texture to that material.
-			Texture* texture = Services::GetAssets()->LoadSceneTexture(textureName);
+			Texture* texture = Services::GetAssets()->LoadSceneTexture(textureName, AssetScope::Scene);
 			if(texture != nullptr)
 			{
 				material->SetDiffuseTexture(texture);
@@ -344,7 +344,7 @@ void PlaySoundtrackAnimNode::Play(AnimationState* animState)
     SoundtrackPlayer* soundtrackPlayer = scene->GetSoundtrackPlayer();
     if(soundtrackPlayer == nullptr) { return; }
 
-    Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName);
+    Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName, AssetScope::Scene);
     if(soundtrack == nullptr) { return; }
     soundtrackPlayer->Play(soundtrack);
 }

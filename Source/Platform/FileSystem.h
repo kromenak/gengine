@@ -50,10 +50,11 @@ namespace Path
 
     /**
      * Given a file name or path, returns true if an extension is present.
+     * If an expected extension is provided, only returns true if THAT SPECIFIC extension is present.
      * Any path with a "." in the last token is considered to have an extension.
      * Ex: "Assets/Data/Blah" has no extension, "Assets/Data/Blah.x" does have an extension.
      */
-    bool HasExtension(const std::string& path);
+    bool HasExtension(const std::string& path, const std::string& expectedExtension = "");
 
     /**
      * Removes the extension from the file name.

@@ -9,7 +9,7 @@
 #include "StringUtil.h"
 #include "VertexAnimation.h"
 
-Animation::Animation(const std::string& name, char* data, int dataLength) : Asset(name)
+Animation::Animation(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     ParseFromData(data, dataLength);
 }
@@ -82,7 +82,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 int frameNumber = line.entries[0].GetValueAsInt();
                 
 				// Vertex animation must be specified.
-				VertexAnimation* vertexAnim = Services::GetAssets()->LoadVertexAnimation(line.entries[1].key);
+				VertexAnimation* vertexAnim = Services::GetAssets()->LoadVertexAnimation(line.entries[1].key, GetScope());
 				
 				// Create and push back the animation node. Remaining fields are optional.
                 VertexAnimNode* node = new VertexAnimNode();
@@ -275,7 +275,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 				node->frameNumber = frameNumber;
                 if(isYak)
                 {
-                    node->audio = Services::GetAssets()->LoadAudio(soundName, AssetLoadScope::Scene);
+                    node->audio = Services::GetAssets()->LoadAudio(soundName, AssetScope::Scene);
                 }
                 else
                 {

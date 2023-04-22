@@ -6,7 +6,7 @@
 #include "Services.h"
 #include "StringUtil.h"
 
-Sequence::Sequence(const std::string& name, char* data, int dataLength) : Asset(name)
+Sequence::Sequence(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     IniParser parser(data, dataLength);
     parser.SetMultipleKeyValuePairsPerLine(false);
@@ -24,7 +24,7 @@ Sequence::Sequence(const std::string& name, char* data, int dataLength) : Asset(
                 std::vector<std::string> textureNames = StringUtil::Split(keyValuePair.value, ',');
                 for(auto& name : textureNames)
                 {
-                    mTextures.push_back(Services::GetAssets()->LoadTexture(name));
+                    mTextures.push_back(Services::GetAssets()->LoadTexture(name, GetScope()));
                 }
             }
         }

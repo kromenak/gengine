@@ -7,7 +7,7 @@
 
 /*static*/ std::vector<Action> NVC::mEmptyActions;
 
-NVC::NVC(const std::string& name, char* data, int dataLength) : Asset(name)
+NVC::NVC(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     ParseFromData(data, dataLength);
 }

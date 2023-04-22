@@ -2,12 +2,14 @@
 
 #include "FileSystem.h"
 
-Asset::Asset(const std::string& name) : mName(name)
+Asset::Asset(const std::string& name, AssetScope scope) :
+    mName(name),
+    mScope(scope)
 {
     
 }
 
-std::string Asset::GetNameNoExtension()
+std::string Asset::GetNameNoExtension() const
 {
     return Path::RemoveExtension(mName);
 }

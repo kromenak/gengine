@@ -56,7 +56,7 @@ public:
 	
     Texture(uint32 width, uint32 height);
 	Texture(uint32 width, uint32 height, Color32 color);
-    Texture(const std::string& name, char* data, uint32 dataLength);
+    Texture(const std::string& name, AssetScope scope, char* data, uint32 dataLength);
     Texture(BinaryReader& reader);
 	~Texture();
 	

@@ -10,7 +10,7 @@
 #include "Vector3.h"
 #include "VertexDefinition.h"
 
-Shader::Shader(const char* vertShaderPath, const char* fragShaderPath)
+Shader::Shader(const char* vertShaderPath, const char* fragShaderPath) : Asset(vertShaderPath)
 {
     // Load vertex and fragment shaders, and compile them.
     GLuint vertexShader = LoadAndCompileShaderFromFile(vertShaderPath, GL_VERTEX_SHADER);

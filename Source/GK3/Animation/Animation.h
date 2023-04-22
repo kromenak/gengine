@@ -19,7 +19,7 @@ struct VertexAnimNode;
 class Animation : public Asset
 {
 public:
-    Animation(const std::string& name, char* data, int dataLength);
+    Animation(const std::string& name, AssetScope scope, char* data, int dataLength);
     ~Animation();
 
 	// Gets all anim nodes associated with a particular frame number. Null may be returned!

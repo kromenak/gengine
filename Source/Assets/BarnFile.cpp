@@ -407,14 +407,14 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
 		// Handle those separately (TODO: More modular/extendable way to do this?)
 		if(assetName.find(".BMP") != std::string::npos)
 		{
-			Texture tex(assetName, assetData, bufferSize);
+			Texture tex(assetName, AssetScope::Manual, assetData, bufferSize);
 			tex.WriteToFile(outputPath);
 			result = true;
 		}
         else if(assetName.find(".SHP") != std::string::npos && SheepScript::IsSheepDataCompiled(assetData, bufferSize))
         {
             // If sheep asset is compiled, we need to decompile it to get any useful data.
-            SheepScript script(assetName, assetData, bufferSize);
+            SheepScript script(assetName, AssetScope::Manual, assetData, bufferSize);
             script.Decompile(outputPath);
             result = true;
         }

@@ -123,7 +123,7 @@ struct BSPAmbientLight
 class BSP : public Asset
 {
 public:
-    BSP(const std::string& name, char* data, int dataLength);
+    BSP(const std::string& name, AssetScope scope, char* data, int dataLength);
     
 	BSPActor* CreateBSPActor(const std::string& objectName);
 	

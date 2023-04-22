@@ -4,6 +4,7 @@
 
 #include "BuildEnv.h"
 #include "Platform.h"
+#include "StringUtil.h"
 
 #if defined(PLATFORM_MAC)
 #include <CoreFoundation/CoreFoundation.h>
@@ -148,7 +149,7 @@ std::string Path::GetFileNameNoExtension(const std::string& path)
 	return filename.substr(0, pos);
 }
 
-bool Path::HasExtension(const std::string& path)
+bool Path::HasExtension(const std::string& path, const std::string& expectedExtension)
 {
     // If empty, no extension.
     if(path.empty()) { return false; }
@@ -168,7 +169,19 @@ bool Path::HasExtension(const std::string& path)
     
     // We definitely have an extension period in the path to get here.
     // So, if no separator exists, an extension exists. Or, if last separate is before extension period, an extension exists.
-    return lastSeparatorPos == std::string::npos || lastSeparatorPos < lastExtensionPos;
+    bool hasExtension = (lastSeparatorPos == std::string::npos || lastSeparatorPos < lastExtensionPos);
+
+    // Check specific extension if desired.
+    if(hasExtension && !expectedExtension.empty())
+    {
+        if(!std::equal(path.begin() + lastExtensionPos, path.end(), expectedExtension.begin(), StringUtil::iequal()))
+        {
+            hasExtension = false;
+        }
+    }
+
+    // Return what we got!
+    return hasExtension;
 }
 
 bool Directory::Exists(const std::string& path)

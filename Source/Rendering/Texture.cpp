@@ -37,7 +37,7 @@ Texture::Texture(uint32 width, uint32 height, Color32 color) : Asset(""),
 	}
 }
 
-Texture::Texture(const std::string& name, char* data, uint32 dataLength) : Asset(name)
+Texture::Texture(const std::string& name, AssetScope scope, char* data, uint32 dataLength) : Asset(name, scope)
 {
 	BinaryReader reader(data, dataLength);
     ParseFromData(reader);

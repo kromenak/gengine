@@ -6,7 +6,7 @@
 #include "BinaryReader.h"
 #include "Services.h"
 
-Audio::Audio(const std::string& name, char* data, int dataLength) : Asset(name),
+Audio::Audio(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope),
     mDataBuffer(data),
     mDataBufferLength(dataLength)
 {

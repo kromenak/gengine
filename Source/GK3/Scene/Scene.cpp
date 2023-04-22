@@ -125,7 +125,7 @@ void Scene::Load()
 	// If a camera bounds model exists for this scene, pass it along to the camera.
     for(auto& modelName : mSceneData->GetCameraBoundsModelNames())
     {
-        Model* model = Services::GetAssets()->LoadModel(modelName);
+        Model* model = Services::GetAssets()->LoadModel(modelName, AssetScope::Scene);
         if(model != nullptr)
         {
             mCamera->AddBounds(model);

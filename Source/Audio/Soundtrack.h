@@ -33,6 +33,8 @@ struct SoundtrackNodeResults
     float fadeOutTimeMs = 0.0f;
 };
 
+class Soundtrack;
+
 struct SoundtrackNode
 {
     // Number of times node will execute before being ignored.
@@ -47,7 +49,7 @@ struct SoundtrackNode
 
     virtual ~SoundtrackNode() { }
 
-    virtual int Execute(AudioType soundType, SoundtrackNodeResults& outResults) = 0;
+    virtual int Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults) = 0;
     virtual bool IsLooping() { return false; }
 };
 
@@ -58,7 +60,7 @@ struct WaitNode : public SoundtrackNode
     int minWaitTimeMs = 0;
     int maxWaitTimeMs = 0;
     
-    int Execute(AudioType soundType, SoundtrackNodeResults& outResults) override;
+    int Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults) override;
 };
 
 struct SoundNode : public SoundtrackNode
@@ -95,7 +97,7 @@ struct SoundNode : public SoundtrackNode
     std::string followModelName;
     
     bool IsLooping() override { return loop; }
-    int Execute(AudioType soundType, SoundtrackNodeResults& outResults) override;
+    int Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults) override;
 };
 
 struct PrsNode : public SoundtrackNode
@@ -104,19 +106,13 @@ struct PrsNode : public SoundtrackNode
     // So basically, PRS consists of multiple sound nodes, one of which is picked at random.
     std::vector<SoundNode*> soundNodes;
     
-    int Execute(AudioType soundType, SoundtrackNodeResults& outResults) override
-    {
-        if(soundNodes.size() == 0) { return 0; }
-        
-        int randomIndex = rand() % soundNodes.size();
-        return soundNodes[randomIndex]->Execute(soundType, outResults);
-    }
+    int Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults) override;
 };
 
 class Soundtrack : public Asset
 {
 public:
-    Soundtrack(const std::string& name, char* data, int dataLength);
+    Soundtrack(const std::string& name, AssetScope scope, char* data, int dataLength);
     ~Soundtrack();
     
     AudioType GetSoundType() const { return mSoundType; }

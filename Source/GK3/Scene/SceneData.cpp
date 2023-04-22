@@ -10,17 +10,12 @@
 SceneData::SceneData(const std::string& location, const std::string& timeblock) : mTimeblock(timeblock)
 {
 	// Load general and specific SIF assets.
-	mGeneralSIF = Services::GetAssets()->LoadSIF(location);
-	mSpecificSIF = Services::GetAssets()->LoadSIF(location + timeblock);
+	mGeneralSIF = Services::GetAssets()->LoadSIF(location, AssetScope::Scene);
+	mSpecificSIF = Services::GetAssets()->LoadSIF(location + timeblock, AssetScope::Scene);
 }
 
 SceneData::~SceneData()
 {
-    if(mBSP != nullptr)
-    {
-        Services::GetAssets()->UnloadBSP(mBSP);
-    }
-
     if(mOwnsSkybox && mSkybox != nullptr)
     {
         delete mSkybox;
@@ -62,13 +57,13 @@ void SceneData::ResolveSceneData()
 	}
 	
 	// Load the desired scene asset - chosen based on settings block.
-	mSceneAsset = Services::GetAssets()->LoadSceneAsset(mGeneralSettings.sceneAssetName);
+	mSceneAsset = Services::GetAssets()->LoadSceneAsset(mGeneralSettings.sceneAssetName, AssetScope::Scene);
 	
 	// Load the BSP data, which is specified by the scene model.
 	// If this is null, the game will still work...but there's no BSP geometry!
 	if(mSceneAsset != nullptr)
 	{
-		mBSP = Services::GetAssets()->LoadBSP(mSceneAsset->GetBSPName());
+		mBSP = Services::GetAssets()->LoadBSP(mSceneAsset->GetBSPName(), AssetScope::Scene);
 	}
     else
     {
@@ -76,7 +71,7 @@ void SceneData::ResolveSceneData()
     }
     
     // Load BSP lightmap data.
-    mBSPLightmap = Services::GetAssets()->LoadBSPLightmap(mGeneralSettings.sceneAssetName);
+    mBSPLightmap = Services::GetAssets()->LoadBSPLightmap(mGeneralSettings.sceneAssetName, AssetScope::Scene);
     
     // Configure BSP, if we have one.
     if(mBSP != nullptr)
@@ -108,7 +103,7 @@ void SceneData::ResolveSceneData()
 	if(!mGeneralSettings.walkerBoundaryTextureName.empty())
 	{
         // Small thing, but since Texture class automatically uses magenta as a transparent color, clear that in this case.
-        Texture* walkerTexture = Services::GetAssets()->LoadTexture(mGeneralSettings.walkerBoundaryTextureName);
+        Texture* walkerTexture = Services::GetAssets()->LoadTexture(mGeneralSettings.walkerBoundaryTextureName, AssetScope::Scene);
         walkerTexture->ClearTransparentColor();
 
 		mWalkerBoundary = new WalkerBoundary();

@@ -4,6 +4,8 @@
 // A compiled and linked shader program.
 //
 #pragma once
+#include "Asset.h"
+
 #include <string>
 #include <vector>
 
@@ -45,7 +47,7 @@ struct Uniform
     std::string name;
 };
 
-class Shader
+class Shader : public Asset
 {
 public:
     Shader(const char* vertShaderPath, const char* fragShaderPath);

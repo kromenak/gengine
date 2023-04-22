@@ -7,7 +7,7 @@
 #include "StringUtil.h"
 #include "Texture.h"
 
-Font::Font(const std::string& name, char* data, int dataLength) : Asset(name)
+Font::Font(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     ParseFromData(data, dataLength);
 
@@ -159,11 +159,11 @@ void Font::ParseFromData(char* data, int dataLength)
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "bitmap name"))
 			{
-				mFontTexture = Services::GetAssets()->LoadTexture(keyValue.value);
+				mFontTexture = Services::GetAssets()->LoadTexture(keyValue.value, GetScope());
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "alpha channel"))
 			{
-                alphaTexture = Services::GetAssets()->LoadTexture(keyValue.value);
+                alphaTexture = Services::GetAssets()->LoadTexture(keyValue.value, GetScope());
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "line count"))
 			{
@@ -234,7 +234,7 @@ void Font::ParseFromData(char* data, int dataLength)
 	// a font texture with the same name as the font itself.
 	if(mFontTexture == nullptr)
 	{
-		mFontTexture = Services::GetAssets()->LoadTexture(GetNameNoExtension());
+		mFontTexture = Services::GetAssets()->LoadTexture(GetNameNoExtension(), GetScope());
 	}
 
     // If we have an alpha channel apply it to the font texture.

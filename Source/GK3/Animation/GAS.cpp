@@ -14,7 +14,7 @@
 #include "StringTokenizer.h"
 #include "StringUtil.h"
 
-GAS::GAS(const std::string& name) : Asset(name)
+GAS::GAS(const std::string& name, AssetScope scope) : Asset(name, scope)
 {
 
 }
@@ -493,7 +493,7 @@ void GAS::Load(char* data, int dataLength)
             }
             std::string yakName = "E" + tokenizer.GetNext();
 
-            Animation* yakAnimation = Services::GetAssets()->LoadYak(yakName);
+            Animation* yakAnimation = Services::GetAssets()->LoadYak(yakName, GetScope());
             if(yakAnimation == nullptr)
             {
                 std::cout << "Invalid yak name specified in DLG" << std::endl;

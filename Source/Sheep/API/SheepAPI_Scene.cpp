@@ -363,7 +363,7 @@ shpvoid WalkToAnimation(const std::string& actorName, const std::string& animati
     }
 
     // Get the animation.
-    Animation* anim = Services::GetAssets()->LoadAnimation(animationName);
+    Animation* anim = Services::GetAssets()->LoadAnimation(animationName, AssetScope::Scene);
     if(anim == nullptr)
     {
         ExecError();

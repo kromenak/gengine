@@ -40,7 +40,7 @@ CaptionsOverlay::CaptionsOverlay() : Actor(TransformType::RectTransform)
     rectTransform->SetAnchorMax(Vector2::One);
 
     // Load font data.
-    TextAsset* fontColors = Services::GetAssets()->LoadText("FONTCOLOR.TXT");
+    TextAsset* fontColors = Services::GetAssets()->LoadText("FONTCOLOR.TXT", AssetScope::Manual);
     {
         IniParser parser(fontColors->GetText(), fontColors->GetTextLength());
         parser.ParseAll();
@@ -61,7 +61,7 @@ CaptionsOverlay::CaptionsOverlay() : Actor(TransformType::RectTransform)
             }
         }
     }
-    Services::GetAssets()->UnloadText(fontColors);
+    delete fontColors;
 }
 
 void CaptionsOverlay::AddCaption(const std::string& captionText, const std::string& speaker)

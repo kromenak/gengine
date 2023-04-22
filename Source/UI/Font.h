@@ -34,7 +34,7 @@ struct Glyph
 class Font : public Asset
 {
 public:
-    Font(const std::string& name, char* data, int dataLength);
+    Font(const std::string& name, AssetScope scope, char* data, int dataLength);
 	
 	Texture* GetTexture() const { return mFontTexture; }
 	Glyph& GetGlyph(char character);

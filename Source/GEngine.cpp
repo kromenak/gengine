@@ -551,6 +551,9 @@ void GEngine::UnloadSceneInternal()
 
     // After destroy pass, delete destroyed actors.
     DeleteDestroyedActors();
+
+    // Unload any assets scoped to just the current scene.
+    mAssetManager.UnloadAssets(AssetScope::Scene);
 }
 
 void GEngine::DeleteDestroyedActors()

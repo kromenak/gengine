@@ -20,7 +20,7 @@ void SceneConstruction::Init(Scene* scene, SceneData* sceneData)
     // If a camera bounds model exists for this scene, pass it along to the camera.
     for(auto& modelName : sceneData->GetCameraBoundsModelNames())
     {
-        Model* model = Services::GetAssets()->LoadModel(modelName);
+        Model* model = Services::GetAssets()->LoadModel(modelName, AssetScope::Scene);
         if(model != nullptr)
         {
             mCameraBoundsModels.push_back(model);

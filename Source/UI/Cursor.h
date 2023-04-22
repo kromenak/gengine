@@ -13,7 +13,7 @@ struct SDL_Cursor;
 class Cursor : public Asset
 {
 public:
-    Cursor(const std::string& name, char* data, int dataLength);
+    Cursor(const std::string& name, AssetScope scope, char* data, int dataLength);
     ~Cursor();
     
     void Activate(bool animate = true);

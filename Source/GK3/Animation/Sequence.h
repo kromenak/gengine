@@ -24,7 +24,7 @@ class Texture;
 class Sequence : public Asset
 {
 public:
-    Sequence(const std::string& name, char* data, int dataLength);
+    Sequence(const std::string& name, AssetScope scope, char* data, int dataLength);
 
     int GetFramesPerSecond() const { return mFramesPerSecond; }
 

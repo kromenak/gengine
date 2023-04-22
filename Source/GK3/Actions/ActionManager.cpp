@@ -48,7 +48,7 @@ void ActionManager::Init()
 void ActionManager::AddActionSet(const std::string& assetName)
 {
     // Read in the asset.
-	NVC* actionSet = Services::GetAssets()->LoadNVC(assetName);
+	NVC* actionSet = Services::GetAssets()->LoadNVC(assetName, AssetScope::Scene);
     if(actionSet == nullptr) { return; }
 
     // Log that we're parsing this NVC.

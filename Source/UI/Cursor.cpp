@@ -7,10 +7,10 @@
 #include "StringUtil.h"
 #include "Texture.h"
 
-Cursor::Cursor(const std::string& name, char* data, int dataLength) : Asset(name)
+Cursor::Cursor(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     // Texture used is always the same as the name of the cursor.
-    Texture* texture = Services::GetAssets()->LoadTexture(GetNameNoExtension() + ".BMP");
+    Texture* texture = Services::GetAssets()->LoadTexture(GetNameNoExtension(), GetScope());
     if(texture == nullptr)
     {
         printf("Create cursor %s failed: couldn't load texture.\n", mName.c_str());

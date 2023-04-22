@@ -44,7 +44,7 @@ struct SceneLight
 class SceneAsset : public Asset
 {
 public:
-    SceneAsset(const std::string& name, char* data, int dataLength);
+    SceneAsset(const std::string& name, AssetScope scope, char* data, int dataLength);
 	~SceneAsset();
 	
 	const std::string& GetBSPName() const { return mBspName; }
