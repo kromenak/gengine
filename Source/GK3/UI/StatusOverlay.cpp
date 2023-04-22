@@ -71,16 +71,20 @@ void StatusOverlay::Refresh()
 
 void StatusOverlay::OnUpdate(float deltaTime)
 {
+    // Force show the status label if mouse is over it.
     if(mStatusLabel->GetRectTransform()->GetWorldRect().Contains(Services::GetInput()->GetMousePosition()))
     {
         mShowTimer = kShowTime;
     }
-    
-    if(mShowTimer > 0.0f)
+
+    // Decrement timer for showing status overlay.
+    // BUT don't decrement during action skip, so you can see the point change if you skipped an action.
+    if(mShowTimer > 0.0f && !Services::Get<ActionManager>()->IsSkippingCurrentAction())
     {
         mShowTimer -= deltaTime;
     }
-    
+
+    // Update status color based on time remaining.
     Color32 color = mStatusLabel->GetColor();
     float t = Math::Clamp(mShowTimer / kStartFadeTime, 0.0f, 1.0f);
     color.SetA(Math::Lerp((unsigned char)0, (unsigned char)255, t));
