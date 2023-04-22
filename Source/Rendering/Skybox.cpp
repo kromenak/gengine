@@ -71,6 +71,7 @@ void Skybox::Render()
         MeshDefinition meshDefinition(MeshUsage::Static, 36);
         meshDefinition.SetVertexLayout(VertexLayout::Packed);
         meshDefinition.AddVertexData(VertexAttribute::Position, points);
+        meshDefinition.ownsData = false;
         
         mSkyboxMesh = new Mesh();
         mSkyboxMesh->AddSubmesh(meshDefinition);
