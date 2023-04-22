@@ -129,7 +129,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, std::functio
     }
 
     // Play "tick tock" sound effect.
-    Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("CLOCKTIMEBLOCK.WAV"), nullptr);
+    Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("CLOCKTIMEBLOCK.WAV"));
 
     // Hide buttons if this screen is on a timer.
     mContinueButton->SetEnabled(mScreenTimer <= 0.0f);

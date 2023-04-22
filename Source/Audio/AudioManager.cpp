@@ -9,9 +9,9 @@
 #include "Services.h"
 #include "Vector3.h"
 
-PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel, Audio* audio) :
+PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel, FMOD::Sound* sound) :
     channel(channel),
-    audio(audio)
+    sound(sound)
 {
     
 }
@@ -291,12 +291,16 @@ void AudioManager::Shutdown()
 	// Close and release FMOD system.
     FMOD_RESULT result = mSystem->close();
     result = mSystem->release();
+    mSystem = nullptr;
 }
 
 void AudioManager::Update(float deltaTime)
 {
     // Update FMOD system every frame.
-    mSystem->update();
+    if(mSystem != nullptr)
+    {
+        mSystem->update();
+    }
 
     // Update faders.
     for(int i = 0; i < mFaders.size(); ++i)
@@ -328,6 +332,30 @@ void AudioManager::Update(float deltaTime)
             {
                 callback();
             }
+        }
+    }
+
+    // We just checked for stopped sounds, so all playing sounds are actually playing.
+    // So, we can release any waiting FMOD::Sounds if no playing sound is using it.
+    for(int i = mWaitingToRelease.size() - 1; i >= 0; --i)
+    {
+        bool stillPlaying = false;
+        for(auto& playingSound : mPlayingSounds)
+        {
+            if(playingSound.sound == mWaitingToRelease[i])
+            {
+                stillPlaying = true;
+                break;
+            }
+        }
+
+        // Not playing? Release it finally!
+        if(!stillPlaying)
+        {
+            mWaitingToRelease[i]->release();
+
+            std::swap(mWaitingToRelease[i], mWaitingToRelease.back());
+            mWaitingToRelease.pop_back();
         }
     }
     
@@ -410,13 +438,17 @@ void AudioManager::Stop(Audio* audio)
 {
     if(audio != nullptr)
     {
-        for(auto& sound : mPlayingSounds)
+        auto it = mFmodAudioData.find(audio);
+        if(it != mFmodAudioData.end())
         {
-            if(sound.audio == audio)
+            for(auto& sound : mPlayingSounds)
             {
-                // After stopping, sound is removed from playing sounds during next update loop.
-                Stop(sound);
-                return;
+                if(sound.sound == it->second)
+                {
+                    // After stopping, sound is removed from playing sounds during next update loop.
+                    Stop(sound);
+                    return;
+                }
             }
         }
     }
@@ -469,12 +501,39 @@ void AudioManager::StopOnOrAfterFrame(uint32 frame)
 
 void AudioManager::ReleaseAudioData(Audio* audio)
 {
-    // If an FMOD sound instance exists for this Audio asset, release the FMOD sound, freeing its internal memory.
+    // Find whether FMOD sound data exists for this audio file.
     auto it = mFmodAudioData.find(audio);
     if(it != mFmodAudioData.end())
     {
-        it->second->release();
-        mFmodAudioData.erase(audio);
+        // See if the sound is still playing.
+        bool stillPlaying = false;
+        for(auto& playingSound : mPlayingSounds)
+        {
+            if(playingSound.sound == it->second)
+            {
+                stillPlaying = true;
+                break;
+            }
+        }
+
+        // If still playing, add it to list of data to release AFTER done playing.
+        // Otherwise, we can release it right now!
+        if(stillPlaying)
+        {
+            mWaitingToRelease.push_back(it->second);
+        }
+        else
+        {
+            // Only release the sound if the system is valid.
+            // In the case of cleaning up after shutdown, the system has already been released, so the sound has also been released.
+            if(mSystem != nullptr)
+            {
+                it->second->release();
+            }
+        }
+
+        // Erase audio->sound mapping.
+        mFmodAudioData.erase(it);
     }
 }
 
@@ -657,7 +716,7 @@ FMOD::ChannelGroup* AudioManager::GetChannelGroupForAudioType(AudioType audioTyp
 PlayingSoundHandle& AudioManager::CreateAndPlaySound2D(Audio* audio, AudioType audioType)
 {
     // Create the sound from the audio buffer.
-    FMOD::Sound* sound = CreateSound(audio, false);
+    FMOD::Sound* sound = CreateSound(audio, audioType, false);
     if(sound == nullptr)
     {
         return mInvalidSoundHandle;
@@ -674,7 +733,7 @@ PlayingSoundHandle& AudioManager::CreateAndPlaySound2D(Audio* audio, AudioType a
     channel->setPaused(false);
 
     // Create and return sound handle.
-    mPlayingSounds.emplace_back(channel, audio);
+    mPlayingSounds.emplace_back(channel, sound);
     mPlayingSounds.back().mStartFrame = GEngine::Instance()->GetFrameNumber();
     return mPlayingSounds.back();
 }
@@ -682,7 +741,7 @@ PlayingSoundHandle& AudioManager::CreateAndPlaySound2D(Audio* audio, AudioType a
 PlayingSoundHandle& AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3 &position, float minDist, float maxDist)
 {
     // Create the 3D sound from the audio buffer.
-    FMOD::Sound* sound = CreateSound(audio, true);
+    FMOD::Sound* sound = CreateSound(audio, audioType, true);
     if(sound == nullptr)
     {
         return mInvalidSoundHandle;
@@ -713,12 +772,12 @@ PlayingSoundHandle& AudioManager::CreateAndPlaySound3D(Audio* audio, AudioType a
     channel->setPaused(false);
 
     // Create and return sound handle.
-    mPlayingSounds.emplace_back(channel, audio);
+    mPlayingSounds.emplace_back(channel, sound);
     mPlayingSounds.back().mStartFrame = GEngine::Instance()->GetFrameNumber();
     return mPlayingSounds.back();
 }
 
-FMOD::Sound* AudioManager::CreateSound(Audio* audio, bool is3D)
+FMOD::Sound* AudioManager::CreateSound(Audio* audio, AudioType audioType, bool is3D)
 {
     // If we've already got an FMOD sound instance for this Audio, use that.
     auto it = mFmodAudioData.find(audio);
@@ -739,6 +798,14 @@ FMOD::Sound* AudioManager::CreateSound(Audio* audio, bool is3D)
     {
         mode |= FMOD_3D | FMOD_3D_LINEARSQUAREROLLOFF;
     }
+    /*
+    //TODO: Ambient/Music audio sometimes causes a FPS dip when loading.
+    if(audioType == AudioType::Ambient || audioType == AudioType::Music)
+    {
+        mode |= FMOD_NONBLOCKING;  // This *may* work, but can't start the sound until getOpenState returns "Ready"
+        mode |= FMOD_CREATESTREAM; // This works, but crashes if audio data buffer is deleted before the audio stops. Maybe use a file or persistent barn data?
+    }
+    */
 
     // Create the sound using the audio data buffer.
     FMOD::Sound* sound = nullptr;

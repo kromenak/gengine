@@ -23,7 +23,7 @@ class PlayingSoundHandle
 {
 public:
     PlayingSoundHandle() = default;
-    PlayingSoundHandle(FMOD::Channel* channel, Audio* audio);
+    PlayingSoundHandle(FMOD::Channel* channel, FMOD::Sound* sound);
 
     void Stop(float fadeOutTime = 0.0f);
     void Pause();
@@ -35,8 +35,8 @@ public:
 private:
     friend class AudioManager; // Allow audio manager to access internals.
 
-    // The Audio asset that triggered this sound to play.
-    Audio* audio = nullptr;
+    // Sound data being played.
+    FMOD::Sound* sound = nullptr;
     
     // An FMOD "channel" represents a single playing sound. Channel* is returned by PlaySound.
     // Once returned, this pointer is always valid, even if the sound stops playing or the channel is reused.
@@ -181,12 +181,16 @@ private:
     // Mapping from Audio assets to FMOD's internal sound instances.
     // This mapping stops us from creating multiple FMOD sounds for a single Audio (essentially a memory leak).
     std::unordered_map<Audio*, FMOD::Sound*> mFmodAudioData;
+
+    // When an Audio asset is deleted, we want to release the underlying FMOD sound data too.
+    // However, if the sound is still playing, we don't want to release until it ends or stops.
+    std::vector<FMOD::Sound*> mWaitingToRelease;
     
     FMOD::ChannelGroup* GetChannelGroupForAudioType(AudioType audioType, bool forVolume) const;
 
     PlayingSoundHandle& CreateAndPlaySound2D(Audio* audio, AudioType audioType);
     PlayingSoundHandle& CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3& position, float minDist, float maxDist);
 
-    FMOD::Sound* CreateSound(Audio* audio, bool is3D);
+    FMOD::Sound* CreateSound(Audio* audio, AudioType audioType, bool is3D);
     FMOD::Channel* CreateChannel(FMOD::Sound* sound, FMOD::ChannelGroup* channelGroup);
 };
