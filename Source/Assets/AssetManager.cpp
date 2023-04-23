@@ -447,6 +447,12 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
         auto it = cache->find(assetName);
         if(it != cache->end())
         {
+            // One caveat: if the cached asset has a narrower scope than what's being requested, we must PROMOTE the scope.
+            // For example, a cached asset with SCENE scope being requested at GLOBAL scope must convert to GLOBAL scope.
+            if(it->second->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
+            {
+                it->second->SetScope(AssetScope::Global);
+            }
             return it->second;
         }
     }
@@ -479,11 +485,17 @@ template<class T>
 T* AssetManager::LoadAsset_SeparateLoadFunc(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer)
 {
     // If already present in cache, return existing asset right away.
-    if(cache != nullptr)
+    if(cache != nullptr && scope != AssetScope::Manual)
     {
         auto it = cache->find(assetName);
         if(it != cache->end())
         {
+            // One caveat: if the cached asset has a narrower scope than what's being requested, we must PROMOTE the scope.
+            // For example, a cached asset with SCENE scope being requested at GLOBAL scope must convert to GLOBAL scope.
+            if(it->second->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
+            {
+                it->second->SetScope(AssetScope::Global);
+            }
             return it->second;
         }
     }
@@ -499,7 +511,7 @@ T* AssetManager::LoadAsset_SeparateLoadFunc(const std::string& assetName, AssetS
 
     // If there's a cache, put the asset in the cache right away.
     // Sometimes, assets have circular depedencies, and that'll crash unless we have the item in the cache BEFORE loading!
-    if(cache != nullptr)
+    if(cache != nullptr && scope != AssetScope::Manual)
     {
         (*cache)[assetName] = asset;
     }
