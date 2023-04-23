@@ -20,14 +20,14 @@
 
 GKActor::GKActor()
 {
-    // Because of how animations work, GKActors require a separate Actor for their models.
+    // Because of how animation movements and offsets work in GK3, a separate Actor is required for the 3D model.
     mModelActor = new Actor();
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
 
     // Actors use lit shader.
     mMeshRenderer->SetShader(Services::GetAssets()->LoadShader("3D-Tex-Lit"));
 
-     // Create animation player on the same object as the mesh renderer.
+    // Create animation player on the same object as the mesh renderer.
     mVertexAnimator = mModelActor->AddComponent<VertexAnimator>();
 
     // GasPlayer will go on the actor itself.
@@ -55,12 +55,14 @@ GKActor::GKActor(Model* model) : GKActor()
 	// Add walker and configure it.
 	mWalker = AddComponent<Walker>();
 	mWalker->SetCharacterConfig(config);
+
+    // Init the model so it faces the same way as the Actor (in case the model isn't authored with the usual -Z is forward).
+    SyncModelToActor();
 }
 
 GKActor::GKActor(const SceneActor& actorDef) : GKActor(actorDef.model)
 {
-    // Set noun (GABRIEL, GRACE, etc).
-    // For debugging help, we'll also set the Actor name field to the noun.
+    // Set noun (GABRIEL, GRACE, etc) used to refer to Actor in Noun/Verb/Case logic.
     SetNoun(actorDef.noun);
 
     // Set actor's initial position and rotation.
@@ -306,9 +308,8 @@ Vector3 GKActor::GetHeadPosition() const
 
 void GKActor::SetPosition(const Vector3& position)
 {
-    // Move actor to position.
+    // Move actor to position using base class behavior.
     Actor::SetPosition(position);
-    //std::cout << "Set Actor Position; actorPos=" << GetPosition() << ", modelPos=" << mModelActor->GetPosition() << std::endl;
 
     // If the actor is playing a non-move animation, it will revert to its start position when the animation ends...this will revert the SetPosition call!
     // To resolve this, we must update the saved start position when the actor's position is manually changed.
@@ -368,15 +369,17 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
         mModelActor->SetRotation(animParams.absoluteHeading.ToQuaternion());
     }
     
-    // For relative anims, move model to match actor's position/rotation.
+    // Relative anims play with the 3D model starting at the Actor's current position/rotation.
+    // So, do a sync to ensure the 3D model is at the Actor's position.
+    //TODO: Should this occur before we call VertexAnimator::Start?
     if(!animParams.absolute)
     {
         SyncModelToActor();
     }
 
-    // In GK3, a "move" anim is one that is allowed to move the actor. This is like "root motion" in modern engines.
-    // When "move" anim ends, the actor/mesh stay where they are. For "non-move" anims, actor/mesh revert to initial pos/rot.
-    // Interestingly, the actor still moves with the model during non-move anims...it just reverts at the end.
+    // In GK3, a "move" anim keeps the model & actor at their final position/rotation when the animation reaches its end.
+    // Non-move anims revert the model/actor back to their start positions/rotations when the animation ends.
+    // So, if this is NOT a move animation, store current position/rotation so we can revert at the end.
     mVertexAnimAllowMove = animParams.allowMove;
     if(!mVertexAnimAllowMove)
     {
@@ -441,21 +444,21 @@ void GKActor::OnInactive()
 
 void GKActor::OnUpdate(float deltaTime)
 {
-    GKObject::OnUpdate(deltaTime);
-    
     // Have actor follow model movement.
     SyncActorToModel();
+
+    // OPTIONAL: draw axes to visualize Actor position and facing.
+    //Debug::DrawAxes(GetTransform()->GetLocalToWorldMatrix());
 }
 
 void GKActor::OnVertexAnimationStop()
 {
-    // On anim stop, if vertex anim is not allowed to move actor position,
-    // we must revert actor back to position when anim started.
+    // If this wasn't a "move" anim, we must revert back to the initial position/rotation on animation end.
     if(!mVertexAnimAllowMove)
     {
         // Move actor back to start position/rotation.
         Actor::SetPosition(mStartVertexAnimPosition);
-        SetRotation(mStartVertexAnimRotation);
+        Actor::SetRotation(mStartVertexAnimRotation);
 
         // Move model to match actor.
         SyncModelToActor();
@@ -485,10 +488,11 @@ Vector3 GKActor::GetModelPosition()
     Vector3 floorPos = worldHipPos;
     floorPos.y = Math::Min(worldLeftShoePos.y, worldRightShoePos.y);
     floorPos.y -= mCharConfig->shoeThickness;
-
-    Vector3 leftShoeToHips = worldHipPos - worldLeftShoePos;
-    Vector3 rightShoeToHips = worldHipPos - worldRightShoePos;
-    Vector3 modelForward = Vector3::Normalize(Vector3::Cross(rightShoeToHips, leftShoeToHips));
+    
+    // EXPERIMENT: Trying to obtain a consistent forward based on shoes? Not sure if this works.
+    //Vector3 leftShoeToHips = worldHipPos - worldLeftShoePos;
+    //Vector3 rightShoeToHips = worldHipPos - worldRightShoePos;
+    //Vector3 modelForward = Vector3::Normalize(Vector3::Cross(rightShoeToHips, leftShoeToHips));
     //Debug::DrawLine(floorPos, floorPos + modelForward * 5, Color32::Magenta);
 
     return floorPos;
@@ -503,44 +507,67 @@ Quaternion GKActor::GetModelRotation()
 
 void GKActor::SyncModelToActor()
 {
-    // Move model to actor's position.
-    Vector3 modelOffset = mModelActor->GetPosition() - GetModelPosition();
-    //if(modelOffset.GetLength() > 1.0f)
-    //{
-    //    Debug::DrawLine(mModelActor->GetPosition(), mModelActor->GetPosition() + modelOffset, Color32::Red, 30.0f);
-    //}
-    mModelActor->SetPosition(GetPosition() + modelOffset);
+    // MOVE MODEL TO ACTOR POSITION
+    {
+        // Here's a tricky thing: the 3D model's *visual* position IS NOT always identical to the 3D model's actor position!
+        // The 3D model vertices may be significantly offset in the local space of the 3D model actor.
+        // To account for that, calculate that offset of the 3D model in local space.
+        Vector3 modelVisualOffset = mModelActor->GetPosition() - GetModelPosition();
+        
+        // Move the model actor to our position, taking this offset into account.
+        // This causes the model's visuals to be exactly at our position.
+        mModelActor->SetPosition(GetPosition() + modelVisualOffset);
+    }
 
-    // Rotate model to actor's rotation.
-    Quaternion desiredRotation = GetRotation() * Quaternion(Vector3::UnitY, Math::kPi);
-    Quaternion currentRotation = GetModelRotation();
-    Quaternion diff = Quaternion::Diff(desiredRotation, currentRotation);
-    diff.IsolateY();
-    mModelActor->GetTransform()->RotateAround(GetPosition(), diff);
-    
-    // Save new baseline model position/rotation.
+    // ROTATE MODEL TO ACTOR ROTATION
+    {
+        // We want the model to face the same direction as us.
+        // Remember, 3D character models are *backwards* (forward is down the negative Z axis), so the desired rotation is our rotation + 180 degrees.
+        Quaternion desiredRotation = GetRotation() * Quaternion(Vector3::UnitY, Math::kPi);
+
+        // Get the 3D model's current *visual* rotation (which may differ from the 3D model's actor's rotation).
+        Quaternion currentRotation = GetModelRotation();
+
+        // Get the diff, but only about the Y-axis, to go from models current rotation to the desired rotation.
+        Quaternion diff = Quaternion::Diff(desiredRotation, currentRotation);
+        diff.IsolateY();
+
+        // Apply that rotation so the model is now visually facing the same direction as us.
+        mModelActor->GetTransform()->RotateAround(GetPosition(), diff);
+    }
+
+    // Model's position and rotation have changed, so save updated "last known" values.
     mLastModelPosition = GetModelPosition();
     mLastModelRotation = GetModelRotation();
 }
 
 void GKActor::SyncActorToModel()
 {
-    // See how much model has moved since last check and translate actor to match.
+    // MOVE OUR POSITION TO MODEL POSITION
     Vector3 modelPosition = GetModelPosition();
-    GetTransform()->SetPosition(modelPosition);
-    //Vector3 modelOffset = modelPosition - mLastModelPosition;
-    //GetTransform()->Translate(modelOffset);
-    //if(modelOffset.GetLength() > 1.0f)
-    //{
-    //    Debug::DrawLine(mLastModelPosition, mLastModelPosition + Vector3::UnitY * 50.0f, Color32::Blue, 30.0f);
-    //    Debug::DrawLine(modelPosition, modelPosition + Vector3::UnitY * 100.0f, Color32::Blue, 30.0f);
-    //}
-    
-    // See how much mesh has rotated and translate actor to match.
+    {
+        // Fortunately, this is pretty easy: get the model's visual position, put our position there.
+        GetTransform()->SetPosition(modelPosition);
+    }
+
+    // MOVE OUR ROTATION TO MODEL ROTATION
     Quaternion modelRotation = GetModelRotation();
-    Quaternion diff = Quaternion::Diff(modelRotation, mLastModelRotation);
-    diff.IsolateY();
-    GetTransform()->Rotate(diff);
+    {
+        // Unfortunately, we can't just set this directly b/c the rotation calculated does not always visually align with what forward should be.
+        // For example, the hip forward during most animations match the visuals, but for the "turn before walk" anim, it doesn't (was that an authoring error?).
+        // In other words, either my calculation is wrong, or the models were not authored consistently.
+        
+        // To get around this, we can try to utilize a "diff" approach.
+        // We know that if the model's rotation changes, the diff represents an amount of rotation that occurred visually.
+        // So, we can calculate that diff and apply an equal rotation to ourselves to (hopefully) keep our rotation correct.
+
+        // Get diff from last time we checked, only about Y-axis.
+        Quaternion diff = Quaternion::Diff(modelRotation, mLastModelRotation);
+        diff.IsolateY();
+
+        // Rotate ourselves by that amount.
+        GetTransform()->Rotate(diff);
+    }
     
     // Save new baseline model position/rotation.
     mLastModelPosition = modelPosition;
@@ -562,6 +589,7 @@ GAS* GKActor::GetGasForFidget(FidgetType type)
         break;
     case FidgetType::Talk:
         gas = mTalkFidget;
+        break;
     }
     return gas;
 }

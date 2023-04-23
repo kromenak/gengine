@@ -31,6 +31,7 @@ void Animator::Start(const AnimParams& animParams)
         }
         return;
     }
+    //printf("Start animation %s\n", animParams.animation->GetName().c_str());
     
     // Create anim state for animation with appropriate "allow move" value.
     mActiveAnimations.emplace_back();
