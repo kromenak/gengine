@@ -78,7 +78,7 @@ void GAS::Load(char* data, int dataLength)
             
             // Read in the required field (anim name).
             AnimGasNode* node = new AnimGasNode();
-            node->animation = Services::GetAssets()->LoadAnimation(tokenizer.GetNext());
+            node->animation = Services::GetAssets()->LoadAnimation(tokenizer.GetNext(), GetScope());
             
             // Read in optional fields.
             if(tokenizer.HasNext())
@@ -111,7 +111,7 @@ void GAS::Load(char* data, int dataLength)
             
             // Read in the required field (anim name).
             AnimGasNode* node = new AnimGasNode();
-            node->animation = Services::GetAssets()->LoadAnimation(tokenizer.GetNext());
+            node->animation = Services::GetAssets()->LoadAnimation(tokenizer.GetNext(), GetScope());
             
             // Read in optional fields.
             if(tokenizer.HasNext())
@@ -398,15 +398,15 @@ void GAS::Load(char* data, int dataLength)
                 if(isUseTalk)
                 {
                     UseTalkCleanupGasNode* node = new UseTalkCleanupGasNode();
-                    node->animationNeedingCleanup = Services::GetAssets()->LoadAnimation(animNeedingCleanupName);
-                    node->animationDoingCleanup = Services::GetAssets()->LoadAnimation(animDoingCleanupName);
+                    node->animationNeedingCleanup = Services::GetAssets()->LoadAnimation(animNeedingCleanupName, GetScope());
+                    node->animationDoingCleanup = Services::GetAssets()->LoadAnimation(animDoingCleanupName, GetScope());
                     mNodes.push_back(node);
                 }
                 else
                 {
                     UseCleanupGasNode* node = new UseCleanupGasNode();
-                    node->animationNeedingCleanup = Services::GetAssets()->LoadAnimation(animNeedingCleanupName);
-                    node->animationDoingCleanup = Services::GetAssets()->LoadAnimation(animDoingCleanupName);
+                    node->animationNeedingCleanup = Services::GetAssets()->LoadAnimation(animNeedingCleanupName, GetScope());
+                    node->animationDoingCleanup = Services::GetAssets()->LoadAnimation(animDoingCleanupName, GetScope());
                     mNodes.push_back(node);
                 }
             }
@@ -438,7 +438,7 @@ void GAS::Load(char* data, int dataLength)
             }
 
             NewIdleGasNode* node = new NewIdleGasNode();
-            node->newGas = Services::GetAssets()->LoadGAS(tokenizer.GetNext());
+            node->newGas = Services::GetAssets()->LoadGAS(tokenizer.GetNext(), GetScope());
             mNodes.push_back(node);
         }
         else if(StringUtil::EqualsIgnoreCase(command, "WHENNEAR") ||

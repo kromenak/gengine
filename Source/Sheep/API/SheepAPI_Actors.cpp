@@ -164,7 +164,7 @@ shpvoid SetIdleGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = Services::GetAssets()->LoadGAS(gasName);
+    GAS* fidget = Services::GetAssets()->LoadGAS(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
         Services::GetReports()->Log("Error", "Attempted to load an invalid fidget file: " + gasName);
@@ -193,7 +193,7 @@ shpvoid SetListenGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = Services::GetAssets()->LoadGAS(gasName);
+    GAS* fidget = Services::GetAssets()->LoadGAS(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
         Services::GetReports()->Log("Error", "Attempted to load an invalid fidget file: " + gasName);
@@ -222,7 +222,7 @@ shpvoid SetTalkGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = Services::GetAssets()->LoadGAS(gasName);
+    GAS* fidget = Services::GetAssets()->LoadGAS(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
         Services::GetReports()->Log("Error", "Attempted to load an invalid fidget file: " + gasName);

@@ -875,7 +875,7 @@ void Scene::ExecuteAction(const Action* action)
 		}
 		case Action::Approach::Anim: // Example use: R25 Open/Close Window, Open/Close Dresser, Open/Close Drawer
 		{
-			Animation* anim = Services::GetAssets()->LoadAnimation(action->target);
+			Animation* anim = Services::GetAssets()->LoadAnimation(action->target, AssetScope::Scene);
 			if(anim != nullptr)
 			{
 				mEgo->WalkToAnimationStart(anim, [action]() -> void {
