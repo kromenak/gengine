@@ -174,7 +174,7 @@ float ChooseWalkGasNode::Execute(GasPlayer* player)
     if(scenePosition == nullptr) { return 0; }
     
     // Start walk to.
-    actor->WalkTo(scenePosition->position, scenePosition->heading, std::bind(&GasPlayer::NextNode, player));
+    actor->WalkToGas(scenePosition->position, scenePosition->heading, std::bind(&GasPlayer::NextNode, player));
 
     // Return -1 to disable timer system and just wait for callback.
     return -1.0f;
