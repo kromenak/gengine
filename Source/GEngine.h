@@ -44,10 +44,12 @@ public:
     
     void LoadScene(const std::string& name, std::function<void()> callback = nullptr);
     void UnloadScene() { mUnloadScene = true; }
-
     Scene* GetScene() { return mScene; }
 
     uint32 GetFrameNumber() const { return mFrameNumber; }
+
+    void SetTimeMultiplier(float multiplier) { mTimeMultiplier = multiplier; }
+    float GetTimeMultiplier() const { return mTimeMultiplier; }
 
     // GK-specific stuff here
     void StartGame();
@@ -63,7 +65,11 @@ private:
     // Tracks what frame the game is on. First full frame execution is frame 0.
     // Assuming 60FPS, it would take ~800 days for this value to wrap. Not too concerning.
     uint32 mFrameNumber = 0;
-    
+
+    // A multiplier to affect how fast the game updates compared to realtime.
+    // Less than 1 makes the game run slower than realtime, more than 1 makes it run faster than realtime.
+    float mTimeMultiplier = 1.0f;
+
     // Subsystems.
     Renderer mRenderer;
     AudioManager mAudioManager;

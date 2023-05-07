@@ -411,13 +411,7 @@ void GEngine::Update()
 
     // Calculate delta time.
     static DeltaTimer deltaTimer;
-    float deltaTime = deltaTimer.GetDeltaTime();
-
-    // For debugging: press F5 to slow down passage of time significantly.
-    if(mInputManager.IsKeyPressed(SDL_SCANCODE_F5))
-    {
-        deltaTime *= 0.25f;
-    }
+    float deltaTime = deltaTimer.GetDeltaTime() * mTimeMultiplier;
 
     if(!Loader::IsLoading())
     {
