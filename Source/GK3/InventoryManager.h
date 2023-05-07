@@ -22,21 +22,6 @@ class InventoryScreen;
 class InventoryInspectScreen;
 class Texture;
 
-struct InventoryItemTextures
-{
-    // Icon texture: appears on the option bar as the active inventory item.
-    // Smallest image, not a lot of detail.
-    Texture* iconTexture = nullptr;
-
-    // List texture: appears on the inventory screen, in the list.
-    // Medium-size image, with alpha layer usually.
-	Texture* listTexture = nullptr;
-
-    // Closeup texture: appears in the inventory item closeup screen.
-    // Largest image, most detail.
-	Texture* closeupTexture = nullptr;
-};
-
 class InventoryManager
 {
 	TYPE_DECL_BASE();
@@ -73,8 +58,28 @@ public:
 	Texture* GetInventoryItemCloseupTexture(const std::string& itemName);
 	
 private:
-	// A map from name to textures used for that inventory item.
+	// Maps an inventory item's name to its graphical representations.
 	// Allows us to look up inventory textures AND determine whether an inventory item is "valid".
+    struct InventoryItemTextures
+    {
+        // String used as a prefix to load these textures.
+        std::string textureNamePrefix;
+
+        // Icon texture: appears on the option bar as the active inventory item.
+        // Smallest image, not a lot of detail.
+        Texture* iconTexture = nullptr;
+
+        // List texture: appears on the inventory screen, in the list.
+        // Medium-size image, with alpha layer usually.
+        Texture* listTexture = nullptr;
+
+        // Closeup texture: appears in the inventory item closeup screen.
+        // Largest image, most detail.
+        Texture* closeupTexture = nullptr;
+
+        InventoryItemTextures() = default;
+        InventoryItemTextures(const std::string& prefix) : textureNamePrefix(prefix) { }
+    };
 	std::string_map_ci<InventoryItemTextures> mInventoryItems;
 	
 	// Inventories for actors.
