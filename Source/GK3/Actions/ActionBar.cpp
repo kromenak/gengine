@@ -268,6 +268,17 @@ void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> cal
 	CenterOnPointer();
 }
 
+void ActionBar::SetVerbEnabled(const std::string& verb, bool enabled)
+{
+    for(auto& button : mButtons)
+    {
+        if(StringUtil::EqualsIgnoreCase(button.verb, verb))
+        {
+            button.button->SetCanInteract(enabled);
+        }
+    }
+}
+
 void ActionBar::OnUpdate(float deltaTime)
 {
 	if(IsShowing()) 
@@ -296,6 +307,7 @@ UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon, const std:
 		
 		// Make sure button is enabled.
 		button->SetEnabled(true);
+        button->SetCanInteract(true);
 		
 		// Make sure any old callbacks are no longer set (since we recycle the buttons).
 		button->SetPressCallback(nullptr);

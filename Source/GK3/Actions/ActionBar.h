@@ -33,6 +33,7 @@ public:
     bool HasVerb(const std::string& verb) const;
 	void AddVerbToFront(const std::string& verb, std::function<void()> callback);
 	void AddVerbToBack(const std::string& verb, std::function<void()> callback);
+    void SetVerbEnabled(const std::string& verb, bool enabled);
 
     void SetAllowCancel(bool allowCancel) { mAllowCancel = allowCancel; }
     void SetAllowDismiss(bool allowDismiss) { mAllowDismiss = allowDismiss; }

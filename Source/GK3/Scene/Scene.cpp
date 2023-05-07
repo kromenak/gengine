@@ -564,6 +564,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
             actionBar->AddVerbToFront("INSPECT_UNDO", [interacted](){
                 Services::Get<ActionManager>()->ExecuteCustomAction(interacted->GetNoun(), "INSPECT_UNDO", "ALL", "wait UnInspect()");
             });
+            actionBar->SetVerbEnabled("INSPECT_UNDO", !mCamera->IsForcedCinematicMode());
         }
     }
     else
@@ -573,6 +574,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
             actionBar->AddVerbToFront("INSPECT", [interacted](){
                 Services::Get<ActionManager>()->ExecuteCustomAction(interacted->GetNoun(), "INSPECT", "ALL", "wait InspectObject()");
             });
+            actionBar->SetVerbEnabled("INSPECT", !mCamera->IsForcedCinematicMode());
         }
     }
 }
