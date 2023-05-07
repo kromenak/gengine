@@ -155,61 +155,61 @@ void UIButton::UpdateMaterial()
     }
 
     // Figure out which state to use.
-    State& state = mDisabledState;
+    State* state = &mDisabledState;
     if(mCanInteract)
     {
         // The button shows as down when pressed down, but only if pointer is also over the button.
         // You can press down on a button and then move the pointer all over before releasing it!
         if(mPointerDown && mPointerOver)
         {
-            state = mDownState;
+            state = &mDownState;
         }
         // When in pointer down state, but moving pointer all over, the button should still show as hovered.
         else if(mPointerOver || mPointerDown) 
         {
-            state = mHoverState;
+            state = &mHoverState;
         }
         else
         {
-            state = mUpState;
+            state = &mUpState;
         }
     }
 
     // Try to find fallback state if this state is not set.
-    if(!state.IsSet())
+    if(!state->IsSet())
     {
         if(mUpState.IsSet())
         {
-            state = mUpState;
+            state = &mUpState;
         }
         else if(mHoverState.IsSet())
         {
-            state = mHoverState;
+            state = &mHoverState;
         }
         else if(mDownState.IsSet())
         {
-            state = mDownState;
+            state = &mDownState;
         }
         else
         {
-            state = mDisabledState;
+            state = &mDisabledState;
         }
     }
 
     // Set color - easy enough.
-    mMaterial.SetColor(state.color);
+    mMaterial.SetColor(state->color);
 
     // If we have a texture, use it!
-    if(state.texture != nullptr)
+    if(state != nullptr && state->texture != nullptr)
     {
         // If our rect transform's anchors are equal, we'll assume we want the size of the rect to equal the texture size.
         // However, if NOT equal, then size is dictated by parent and anchors, so don't mess with it. (On the Map screen, for example).
         if(mResizeBasedOnTexture && GetRectTransform()->GetAnchorMin() == GetRectTransform()->GetAnchorMax())
         {
-            GetRectTransform()->SetSizeDelta(state.texture->GetWidth(), state.texture->GetHeight());
+            GetRectTransform()->SetSizeDelta(state->texture->GetWidth(), state->texture->GetHeight());
         }
         
         // Set texture.
-        mMaterial.SetDiffuseTexture(state.texture);
+        mMaterial.SetDiffuseTexture(state->texture);
     }
 }
