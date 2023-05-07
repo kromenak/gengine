@@ -21,6 +21,9 @@ public:
     static void SetCameraGlideEnabled(bool enabled);
     static bool IsCameraGlideEnabled();
 
+    static void SetCinematicsEnabled(bool enabled);
+    static bool AreCinematicsEnabled();
+
     GameCamera();
 
     void AddBounds(Model* model) { mBoundsModels.push_back(model); }
@@ -28,6 +31,9 @@ public:
 	
 	void SetAngle(const Vector2& angle);
 	void SetAngle(float yaw, float pitch);
+
+    void SetForcedCinematicMode(bool forced) { mForcedCinematicMode = forced; }
+    bool IsForcedCinematicMode() const { return mForcedCinematicMode; }
 
     void Glide(const Vector3& position, const Vector2& angle, std::function<void()> callback);
 
@@ -55,6 +61,11 @@ private:
     // If true, scene is "active", so perform scene updates (e.g. camera movement).
     // When scene is not active, game camera still handles some user input stuff.
     bool mSceneActive = true;
+
+    // In forced cinematic mode, the camera has two special behaviors:
+    // 1) Even if cinematics are disabled, the camera will obey "cut to camera angle" sheep calls.
+    // 2) All movement or rotation of the camera is disabled.
+    bool mForcedCinematicMode = false;
 
     //////////////////
     // MOVEMENT
@@ -136,6 +147,7 @@ private:
     Quaternion mInspectStartRot;
 	
     void SceneUpdate(float deltaTime);
+    void SceneUpdateMovement(float deltaTime);
 
     Vector3 ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset);
 };

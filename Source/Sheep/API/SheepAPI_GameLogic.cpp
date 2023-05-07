@@ -279,6 +279,19 @@ shpvoid SetTimerSeconds(float seconds)
 }
 RegFunc1(SetTimerSeconds, void, float, WAITABLE, REL_FUNC);
 
+float GetTimeMultiplier()
+{
+    return GEngine::Instance()->GetTimeMultiplier();
+}
+RegFunc0(GetTimeMultiplier, float, IMMEDIATE, REL_FUNC);
+
+shpvoid SetTimeMultiplier(float multiplier)
+{
+    GEngine::Instance()->SetTimeMultiplier(multiplier);
+    return 0;
+}
+RegFunc1(SetTimeMultiplier, void, float, IMMEDIATE, REL_FUNC);
+
 float GetRandomFloat(float lower, float upper)
 {
     return Random::Range(lower, upper);

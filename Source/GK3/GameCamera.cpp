@@ -20,14 +20,24 @@
 #include "VerbManager.h"
 #include "UICanvas.h"
 
+/*static*/ void GameCamera::SetCameraGlideEnabled(bool enabled)
+{
+    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_CAMERA_GLIDE, enabled);
+}
+
 /*static*/ bool GameCamera::IsCameraGlideEnabled()
 {
     return gSaveManager.GetPrefs()->GetBool(PREFS_ENGINE, PREF_CAMERA_GLIDE, true);
 }
 
-/*static*/ void GameCamera::SetCameraGlideEnabled(bool enabled)
+/*static*/ void GameCamera::SetCinematicsEnabled(bool enabled)
 {
-    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_CAMERA_GLIDE, enabled);
+    gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_CINEMATICS, enabled);
+}
+
+/*static*/ bool GameCamera::AreCinematicsEnabled()
+{
+    return gSaveManager.GetPrefs()->GetBool(PREFS_ENGINE, PREF_CINEMATICS, true);
 }
 
 GameCamera::GameCamera()
@@ -223,6 +233,11 @@ void GameCamera::SceneUpdate(float deltaTime)
         return;
     }
 
+    // It's possible our height was changed due to a script moving the camera.
+    // Make sure height is correct before we do our updates.
+    float startFloorY = GEngine::Instance()->GetScene()->GetFloorY(GetPosition());
+    mHeight = GetPosition().y - startFloorY;
+
     // Nothing else can happen while an action is occurring.
     bool actionPlaying = Services::Get<ActionManager>()->IsActionPlaying();
     if(actionPlaying)
@@ -230,220 +245,9 @@ void GameCamera::SceneUpdate(float deltaTime)
         return;
     }
 
-    // It's possible our height was changed due to a script moving the camera.
-    // Make sure height is correct before we do our updates.
-    float startFloorY = GEngine::Instance()->GetScene()->GetFloorY(GetPosition());
-    mHeight = GetPosition().y - startFloorY;
+    // Update camera movement/rotation.
+    SceneUpdateMovement(deltaTime);
     
-    // We don't move/turn unless some input causes it.
-    float forwardSpeed = 0.0f;
-    float strafeSpeed = 0.0f;
-    float turnSpeed = 0.0f;
-    float pitchSpeed = 0.0f;
-    float verticalSpeed = 0.0f;
-    
-    // Pan/Pan modifiers are activated with CTRL/SHIFT keys.
-    // These work EVEN IF text input is active.
-    bool panModifierActive = Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LCTRL) ||
-                             Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RCTRL);;
-    bool pitchModifierActive = Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LSHIFT) ||
-                               Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RSHIFT);
-    
-    // W/S/A/D and Up/Down/Left/Right only work if text input isn't stealing input.
-    if(!Services::GetInput()->IsTextInput())
-    {
-        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_W) ||
-           Services::GetInput()->IsKeyPressed(SDL_SCANCODE_UP))
-        {
-            if(pitchModifierActive)
-            {
-                pitchSpeed += kRotationSpeed;
-            }
-            else if(panModifierActive)
-            {
-                verticalSpeed += kSpeed;
-            }
-            else
-            {
-                forwardSpeed += kSpeed;
-            }
-        }
-        else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_S) ||
-                Services::GetInput()->IsKeyPressed(SDL_SCANCODE_DOWN))
-        {
-            if(pitchModifierActive)
-            {
-                pitchSpeed -= kRotationSpeed;
-            }
-            else if(panModifierActive)
-            {
-                verticalSpeed -= kSpeed;
-            }
-            else
-            {
-                forwardSpeed -= kSpeed;
-            }
-        }
-        
-        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_D) ||
-           Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RIGHT))
-        {
-            if(pitchModifierActive)
-            {
-                turnSpeed += kRotationSpeed;
-            }
-            else if(panModifierActive)
-            {
-                strafeSpeed += kSpeed;
-            }
-            else
-            {
-                turnSpeed += kRotationSpeed;
-            }
-        }
-        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_A) ||
-           Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LEFT))
-        {
-            if(pitchModifierActive)
-            {
-                turnSpeed -= kRotationSpeed;
-            }
-            else if(panModifierActive)
-            {
-                strafeSpeed -= kSpeed;
-            }
-            else
-            {
-                turnSpeed -= kRotationSpeed;
-            }
-        }
-
-        // Handle spacebar input, which resets camera pitch/height.
-        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_SPACE))
-        {
-            // Reset pitch by discarding all rotation about the right axis, while keeping all else.
-            Quaternion current = GetTransform()->GetRotation();
-            GetTransform()->SetRotation(current.Discard(GetRight()));
-
-            // Resetting height is a bit more straightforward.
-            mHeight = kDefaultHeight;
-        }
-    }
-    
-    // If left mouse button is held down, mouse movement contributes to camera movement.
-    bool leftMousePressed = Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left);
-    if(leftMousePressed && !UICanvas::DidWidgetEatInput())
-    {
-        // Track click start position for turning on mouse-based camera movement.
-        // To avoid mistakenly enabling this, you must move the mouse some distance before it enables.
-        Vector2 mousePosition = Services::GetInput()->GetMousePosition();
-        if(Services::GetInput()->IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
-        {
-            mClickStartPos = mousePosition;
-        }
-        else if((mClickStartPos - mousePosition).GetLengthSq() > 5 * 5)
-        {
-            // Moved the mouse far enough, so enable mouse lock.
-            mUsedMouseInputsForMouseLock = true;
-            Services::GetInput()->LockMouse();
-        }
-
-        // Do mouse-based movements if mouse lock is active.
-        if(Services::GetInput()->MouseLocked())
-        {
-            // Pan modifier also activates if right mouse button is pressed.
-            panModifierActive |= Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Right);
-
-            // Mouse delta is in pixels.
-            // We normalize this by estimating "max pixel movement" per frame.
-            Vector2 mouseDelta = Services::GetInput()->GetMouseDelta();
-            mouseDelta /= kMouseRangePixels;
-
-            // Mouse y-axis affect depends on modifiers.
-            if(pitchModifierActive)
-            {
-                pitchSpeed += mouseDelta.y * kRotationSpeed;
-            }
-            else if(panModifierActive)
-            {
-                verticalSpeed += mouseDelta.y * kSpeed;
-            }
-            else
-            {
-                forwardSpeed += mouseDelta.y * kSpeed;
-            }
-
-            // Mouse x-axis affect also depends on modifiers.
-            // Note that pitch modifier and no modifier do the same thing!
-            if(pitchModifierActive)
-            {
-                turnSpeed += mouseDelta.x * kRotationSpeed;
-            }
-            else if(panModifierActive)
-            {
-                strafeSpeed += mouseDelta.x * kSpeed;
-            }
-            else
-            {
-                turnSpeed += mouseDelta.x * kRotationSpeed;
-            }
-        }
-    }
-    
-    // Alt keys just increase all speeds!
-    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LALT) ||
-       Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RALT))
-    {
-        forwardSpeed *= kFastSpeedMultiplier;
-        strafeSpeed *= kFastSpeedMultiplier;
-        turnSpeed *= kFastSpeedMultiplier;
-        pitchSpeed *= kFastSpeedMultiplier;
-        verticalSpeed *= kFastSpeedMultiplier;
-    }
-    
-    // For forward movement, we want to disregard any y-facing; just move on X/Z plane.
-    Vector3 forward = GetForward();
-    forward.y = 0.0f;
-    forward.Normalize();
-
-    // Calculate desired position based on all speeds.
-    // We may not actually move to this exact position, due to collision.
-    Vector3 position = GetPosition();
-    position += forward * forwardSpeed * deltaTime;
-    position += GetRight() * strafeSpeed * deltaTime;
-    
-    // Calculate new desired height and apply that to position y.
-    float height = mHeight + verticalSpeed * deltaTime;
-    float floorY = GEngine::Instance()->GetScene()->GetFloorY(position);
-    position.y = floorY + height;
-
-    // Determine offset from start to end position.
-    Vector3 moveOffset = position - GetPosition();
-
-    // Perform collision checks and resolutions.
-    position = ResolveCollisions(GetPosition(), moveOffset);
-    
-    // Set position after resolving collisions.
-    GetTransform()->SetPosition(position);
-    
-    // Height may also be affected by collision. After resolving,
-    // we can see if our height changed and save it.
-    float newFloorY = GEngine::Instance()->GetScene()->GetFloorY(position);
-    float heightForReal = position.y - newFloorY;
-    mHeight = heightForReal;
-    
-    // Apply turn movement.
-    GetTransform()->Rotate(Vector3::UnitY, turnSpeed * deltaTime, Transform::Space::World);
-    
-    // Apply pitch movement.
-    GetTransform()->Rotate(GetRight(), -pitchSpeed * deltaTime, Transform::Space::World);
-
-    // If we were inspecting something, but we move the camera, that "breaks" the inspect state.
-    if(moveOffset.GetLengthSq() > 1)
-    {
-        mInspectNoun.clear();
-    }
-
     // Raycast to the ground and always maintain a desired height.
     //TODO: This does not apply when camera boundaries are disabled!
     //TODO: Doesn't apply when middle mouse button is held???
@@ -451,7 +255,7 @@ void GameCamera::SceneUpdate(float deltaTime)
     if(scene != nullptr)
     {
         Vector3 pos = GetPosition();
-        floorY = scene->GetFloorY(pos);
+        float floorY = scene->GetFloorY(pos);
         pos.y = floorY + mHeight;
         SetPosition(pos);
     }
@@ -522,9 +326,224 @@ void GameCamera::SceneUpdate(float deltaTime)
     
     // Clear camera lock if left mouse is not pressed.
     // Do this AFTER interact check to avoid interacting with things when exiting mouse locked movement mode.
-    if(!leftMousePressed)
+    if(!Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left))
     {
         Services::GetInput()->UnlockMouse();
+    }
+}
+
+void GameCamera::SceneUpdateMovement(float deltaTime)
+{
+    // No movements are allowed during forced cinematic mode.
+    if(mForcedCinematicMode) { return; }
+
+    // We don't move/turn unless some input causes it.
+    float forwardSpeed = 0.0f;
+    float strafeSpeed = 0.0f;
+    float turnSpeed = 0.0f;
+    float pitchSpeed = 0.0f;
+    float verticalSpeed = 0.0f;
+
+    // Pan/Pan modifiers are activated with CTRL/SHIFT keys.
+    // These work EVEN IF text input is active.
+    bool panModifierActive = Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LCTRL) ||
+        Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RCTRL);;
+    bool pitchModifierActive = Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LSHIFT) ||
+        Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RSHIFT);
+
+    // W/S/A/D and Up/Down/Left/Right only work if text input isn't stealing input.
+    if(!Services::GetInput()->IsTextInput())
+    {
+        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_W) ||
+           Services::GetInput()->IsKeyPressed(SDL_SCANCODE_UP))
+        {
+            if(pitchModifierActive)
+            {
+                pitchSpeed += kRotationSpeed;
+            }
+            else if(panModifierActive)
+            {
+                verticalSpeed += kSpeed;
+            }
+            else
+            {
+                forwardSpeed += kSpeed;
+            }
+        }
+        else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_S) ||
+                Services::GetInput()->IsKeyPressed(SDL_SCANCODE_DOWN))
+        {
+            if(pitchModifierActive)
+            {
+                pitchSpeed -= kRotationSpeed;
+            }
+            else if(panModifierActive)
+            {
+                verticalSpeed -= kSpeed;
+            }
+            else
+            {
+                forwardSpeed -= kSpeed;
+            }
+        }
+
+        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_D) ||
+           Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RIGHT))
+        {
+            if(pitchModifierActive)
+            {
+                turnSpeed += kRotationSpeed;
+            }
+            else if(panModifierActive)
+            {
+                strafeSpeed += kSpeed;
+            }
+            else
+            {
+                turnSpeed += kRotationSpeed;
+            }
+        }
+        if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_A) ||
+           Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LEFT))
+        {
+            if(pitchModifierActive)
+            {
+                turnSpeed -= kRotationSpeed;
+            }
+            else if(panModifierActive)
+            {
+                strafeSpeed -= kSpeed;
+            }
+            else
+            {
+                turnSpeed -= kRotationSpeed;
+            }
+        }
+
+        // Handle spacebar input, which resets camera pitch/height.
+        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_SPACE))
+        {
+            // Reset pitch by discarding all rotation about the right axis, while keeping all else.
+            Quaternion current = GetTransform()->GetRotation();
+            GetTransform()->SetRotation(current.Discard(GetRight()));
+
+            // Resetting height is a bit more straightforward.
+            mHeight = kDefaultHeight;
+        }
+    }
+
+    // If left mouse button is held down, mouse movement contributes to camera movement.
+    bool leftMousePressed = Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left);
+    if(leftMousePressed && !UICanvas::DidWidgetEatInput())
+    {
+        // Track click start position for turning on mouse-based camera movement.
+        // To avoid mistakenly enabling this, you must move the mouse some distance before it enables.
+        Vector2 mousePosition = Services::GetInput()->GetMousePosition();
+        if(Services::GetInput()->IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
+        {
+            mClickStartPos = mousePosition;
+        }
+        else if((mClickStartPos - mousePosition).GetLengthSq() > 5 * 5)
+        {
+            // Moved the mouse far enough, so enable mouse lock.
+            mUsedMouseInputsForMouseLock = true;
+            Services::GetInput()->LockMouse();
+        }
+
+        // Do mouse-based movements if mouse lock is active.
+        if(Services::GetInput()->MouseLocked())
+        {
+            // Pan modifier also activates if right mouse button is pressed.
+            panModifierActive |= Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Right);
+
+            // Mouse delta is in pixels.
+            // We normalize this by estimating "max pixel movement" per frame.
+            Vector2 mouseDelta = Services::GetInput()->GetMouseDelta();
+            mouseDelta /= kMouseRangePixels;
+
+            // Mouse y-axis affect depends on modifiers.
+            if(pitchModifierActive)
+            {
+                pitchSpeed += mouseDelta.y * kRotationSpeed;
+            }
+            else if(panModifierActive)
+            {
+                verticalSpeed += mouseDelta.y * kSpeed;
+            }
+            else
+            {
+                forwardSpeed += mouseDelta.y * kSpeed;
+            }
+
+            // Mouse x-axis affect also depends on modifiers.
+            // Note that pitch modifier and no modifier do the same thing!
+            if(pitchModifierActive)
+            {
+                turnSpeed += mouseDelta.x * kRotationSpeed;
+            }
+            else if(panModifierActive)
+            {
+                strafeSpeed += mouseDelta.x * kSpeed;
+            }
+            else
+            {
+                turnSpeed += mouseDelta.x * kRotationSpeed;
+            }
+        }
+    }
+
+    // Alt keys just increase all speeds!
+    if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LALT) ||
+       Services::GetInput()->IsKeyPressed(SDL_SCANCODE_RALT))
+    {
+        forwardSpeed *= kFastSpeedMultiplier;
+        strafeSpeed *= kFastSpeedMultiplier;
+        turnSpeed *= kFastSpeedMultiplier;
+        pitchSpeed *= kFastSpeedMultiplier;
+        verticalSpeed *= kFastSpeedMultiplier;
+    }
+
+    // For forward movement, we want to disregard any y-facing; just move on X/Z plane.
+    Vector3 forward = GetForward();
+    forward.y = 0.0f;
+    forward.Normalize();
+
+    // Calculate desired position based on all speeds.
+    // We may not actually move to this exact position, due to collision.
+    Vector3 position = GetPosition();
+    position += forward * forwardSpeed * deltaTime;
+    position += GetRight() * strafeSpeed * deltaTime;
+
+    // Calculate new desired height and apply that to position y.
+    float height = mHeight + verticalSpeed * deltaTime;
+    float floorY = GEngine::Instance()->GetScene()->GetFloorY(position);
+    position.y = floorY + height;
+
+    // Determine offset from start to end position.
+    Vector3 moveOffset = position - GetPosition();
+
+    // Perform collision checks and resolutions.
+    position = ResolveCollisions(GetPosition(), moveOffset);
+
+    // Set position after resolving collisions.
+    GetTransform()->SetPosition(position);
+
+    // Height may also be affected by collision. After resolving,
+    // we can see if our height changed and save it.
+    float newFloorY = GEngine::Instance()->GetScene()->GetFloorY(position);
+    float heightForReal = position.y - newFloorY;
+    mHeight = heightForReal;
+
+    // Apply turn movement.
+    GetTransform()->Rotate(Vector3::UnitY, turnSpeed * deltaTime, Transform::Space::World);
+
+    // Apply pitch movement.
+    GetTransform()->Rotate(GetRight(), -pitchSpeed * deltaTime, Transform::Space::World);
+
+    // If we were inspecting something, but we move the camera, that "breaks" the inspect state.
+    if(moveOffset.GetLengthSq() > 1)
+    {
+        mInspectNoun.clear();
     }
 }
 

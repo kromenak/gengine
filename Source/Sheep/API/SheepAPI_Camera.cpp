@@ -3,6 +3,7 @@
 #include "Camera.h"
 #include "GameCamera.h"
 #include "GEngine.h"
+#include "SaveManager.h"
 #include "Scene.h"
 
 using namespace std;
@@ -46,6 +47,20 @@ shpvoid SetCameraFOV(float fov)
 }
 RegFunc1(SetCameraFOV, void, float, IMMEDIATE, REL_FUNC);
 
+shpvoid EnableCinematics()
+{
+    GameCamera::SetCinematicsEnabled(true);
+    return 0;
+}
+RegFunc0(EnableCinematics, void, IMMEDIATE, REL_FUNC);
+
+shpvoid DisableCinematics()
+{
+    GameCamera::SetCinematicsEnabled(false);
+    return 0;
+}
+RegFunc0(DisableCinematics, void, IMMEDIATE, REL_FUNC);
+
 shpvoid EnableCameraBoundaries()
 {
     GEngine::Instance()->GetScene()->GetCamera()->SetBoundsEnabled(true);
@@ -87,7 +102,11 @@ RegFunc1(GlideToCameraAngle, void, string, WAITABLE, REL_FUNC);
 
 shpvoid CutToCameraAngle(const std::string& cameraName)
 {
-    GEngine::Instance()->GetScene()->SetCameraPosition(cameraName);
+    // This version of the function only cuts the camera if cinematics are enabled, OR forced cinematics is temporarily enabled.
+    if(GameCamera::AreCinematicsEnabled() || GEngine::Instance()->GetScene()->GetCamera()->IsForcedCinematicMode())
+    {
+        GEngine::Instance()->GetScene()->SetCameraPosition(cameraName);
+    }
     return 0;
 }
 RegFunc1(CutToCameraAngle, void, string, IMMEDIATE, REL_FUNC);
@@ -106,6 +125,13 @@ shpvoid ForceCutToCameraAngle(const std::string& cameraName)
     return 0;
 }
 RegFunc1(ForceCutToCameraAngle, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid SetForcedCameraCuts(int flag)
+{
+    GEngine::Instance()->GetScene()->GetCamera()->SetForcedCinematicMode(flag != 0 ? true : false);
+    return 0;
+}
+RegFunc1(SetForcedCameraCuts, void, int, IMMEDIATE, REL_FUNC);
 
 shpvoid DefaultInspect(const std::string& noun)
 {

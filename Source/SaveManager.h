@@ -33,6 +33,7 @@
 
     #define PREF_CAMERA_GLIDE "Camera Glide"
     #define PREF_CAPTIONS "Captions"
+    #define PREF_CINEMATICS "Cinematics"
 
 // Hardware Renderer Preferences
 #define PREFS_HARDWARE_RENDERER "Engine\\Hardware"

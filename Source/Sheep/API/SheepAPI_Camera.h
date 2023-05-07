@@ -12,8 +12,8 @@ shpvoid SetCameraGlide(int glide);
 float GetCameraFOV();
 shpvoid SetCameraFOV(float fov);
 
-shpvoid EnableCinematics(); // DEV
-shpvoid DisableCinematics(); // DEV
+shpvoid EnableCinematics();
+shpvoid DisableCinematics();
 
 shpvoid DumpCamera(); // DEV
 
@@ -29,7 +29,9 @@ shpvoid GlideToCameraAngle(const std::string& cameraName); // WAIT
 
 shpvoid CutToCameraAngle(const std::string& cameraName);
 shpvoid CutToCameraAngleX(float horizAngle, float vertAngle, float x, float y, float z); // DEV
+
 shpvoid ForceCutToCameraAngle(const std::string& cameraName);
+shpvoid SetForcedCameraCuts(int flag);
 
 int GetCameraAngleCount(); // DEV
 std::string GetIndexedCameraAngle(int index); // DEV

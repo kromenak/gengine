@@ -67,6 +67,9 @@ void OptionBar::Show()
                                             Services::Get<GameProgress>()->GetScore(),
                                             Services::Get<GameProgress>()->GetMaxScore()));
 
+    // Make sure any immediately visible buttons reflect the correct state.
+    RefreshCinematicsButtonState();
+
     // Position option bar over mouse.
     // "Minus half size" because option bar's pivot is lower-left corner, but want mouse at center.
     // Also, round the "half size" to ensure the UI renders "pixel perfect" - on exact pixel spots rather than between them.
@@ -327,15 +330,13 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     });
     
     // Add cinematics button.
-    UIButton* cinematicsOnButton = CreateButton(config, "cine", optionBar);
-    cinematicsOnButton->SetPressCallback([](UIButton* button) {
-        std::cout << "Turn cinematics on!" << std::endl;
-    });
-    UIButton* cinematicsOffButton = CreateButton(config, "cineoff", optionBar);
-    cinematicsOffButton->SetPressCallback([](UIButton* button) {
-        std::cout << "Turn cinematics off!" << std::endl;
-    });
-    
+    mCinematicsOffButton = CreateButton(config, "cine", optionBar);
+    mCinematicsOffButton->SetPressCallback(std::bind(&OptionBar::OnCinematicsButtonPressed, this, std::placeholders::_1));
+
+    mCinematicsOnButton = CreateButton(config, "cineoff", optionBar);
+    mCinematicsOnButton->SetPressCallback(std::bind(&OptionBar::OnCinematicsButtonPressed, this, std::placeholders::_1));
+    RefreshCinematicsButtonState();
+
     // Add help button.
     mHelpButton = CreateButton(config, "help", optionBar);
     mHelpButton->SetPressCallback([](UIButton* button) {
@@ -708,6 +709,28 @@ void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyV
     controlsButton->SetPressCallback([this](UIButton* button) {
         std::cout << "Controls" << std::endl;
     });
+}
+
+void OptionBar::OnCinematicsButtonPressed(UIButton* button)
+{
+    if(button == mCinematicsOffButton)
+    {
+        GameCamera::SetCinematicsEnabled(false);
+        printf("Cinematics OFF\n");
+    }
+    else if(button == mCinematicsOnButton)
+    {
+        GameCamera::SetCinematicsEnabled(true);
+        printf("Cinematics ON\n");
+    }
+    RefreshCinematicsButtonState();
+}
+
+void OptionBar::RefreshCinematicsButtonState()
+{
+    bool cinematicsEnabled = GameCamera::AreCinematicsEnabled();
+    mCinematicsOffButton->SetEnabled(cinematicsEnabled);
+    mCinematicsOnButton->SetEnabled(!cinematicsEnabled);
 }
 
 void OptionBar::OnSoundOptionsButtonPressed(UIButton* button)
