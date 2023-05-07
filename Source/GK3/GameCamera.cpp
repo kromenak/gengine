@@ -238,13 +238,6 @@ void GameCamera::SceneUpdate(float deltaTime)
     float startFloorY = GEngine::Instance()->GetScene()->GetFloorY(GetPosition());
     mHeight = GetPosition().y - startFloorY;
 
-    // Nothing else can happen while an action is occurring.
-    bool actionPlaying = Services::Get<ActionManager>()->IsActionPlaying();
-    if(actionPlaying)
-    {
-        return;
-    }
-
     // Update camera movement/rotation.
     SceneUpdateMovement(deltaTime);
     
@@ -259,70 +252,9 @@ void GameCamera::SceneUpdate(float deltaTime)
         pos.y = floorY + mHeight;
         SetPosition(pos);
     }
-    
-    // Handle hovering and clicking on scene objects.
-    //TODO: Original game seems to ONLY check this when the mouse cursor moves or is clicked (in other words, on input).
-    //TODO: Maybe we should do that too?
-    if(!Services::GetInput()->MouseLocked())
-    {
-        // Only allow scene interaction if pointer isn't over a UI widget.
-        if(!UICanvas::DidWidgetEatInput())
-        {
-            // Calculate mouse click ray.
-            Vector2 mousePos = Services::GetInput()->GetMousePosition();
-            Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
-            Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
-            Vector3 dir = (worldPos2 - worldPos).Normalize();
-            Ray ray(worldPos, dir);
-            
-            // Cast into the scene to see if we're over an interactive object.
-            SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, true);
-        
-            // If we can interact with whatever we are pointing at, highlight the cursor.
-            // Note we call "UseHighlightCursor" when start hovering OR we switch hover to new object.
-            // This toggles red/blue highlight.
-            GKObject* hovering = result.hitObject;
-            if(hovering != nullptr)
-            {
-                if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
-                {
-                    // See if the hovered item has a custom verb with an associated custom cursor.
-                    Cursor* customCursor = nullptr;
-                    if(!hovering->GetVerb().empty())
-                    {
-                        customCursor = Services::Get<VerbManager>()->GetVerbIcon(hovering->GetVerb()).cursor;
-                    }
 
-                    // Set cursor appropriately.
-                    if(customCursor != nullptr)
-                    {
-                        Services::Get<CursorManager>()->UseCustomCursor(customCursor);
-                    }
-                    else
-                    {
-                        Services::Get<CursorManager>()->UseHighlightCursor();
-                    }
-                    mLastHoveredNoun = hovering->GetNoun();
-                }
-            }
-            else
-            {
-                Services::Get<CursorManager>()->UseDefaultCursor();
-                mLastHoveredNoun.clear();
-            }
-            
-            // If left mouse button is released, try to interact with whatever it is over.
-            // Need to do this, even if canInteract==false, because floor can be clicked to move around.
-            if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
-            {
-                GEngine::Instance()->GetScene()->Interact(ray, hovering);
-            }
-        }
-        else
-        {
-            mLastHoveredNoun.clear();
-        }
-    }
+    // Check for scene interaction based on mouse pointer position and mouse button presses.
+    SceneUpdateInteract(deltaTime);
     
     // Clear camera lock if left mouse is not pressed.
     // Do this AFTER interact check to avoid interacting with things when exiting mouse locked movement mode.
@@ -336,6 +268,12 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
 {
     // No movements are allowed during forced cinematic mode.
     if(mForcedCinematicMode) { return; }
+
+    // Movement is not allowed during actions UNLESS cinematic camera is disabled.
+    if(Services::Get<ActionManager>()->IsActionPlaying() && AreCinematicsEnabled())
+    {
+        return;
+    }
 
     // We don't move/turn unless some input causes it.
     float forwardSpeed = 0.0f;
@@ -544,6 +482,79 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
     if(moveOffset.GetLengthSq() > 1)
     {
         mInspectNoun.clear();
+    }
+}
+
+void GameCamera::SceneUpdateInteract(float deltaTime)
+{
+    // Never allowed to interact while an action is playing.
+    if(Services::Get<ActionManager>()->IsActionPlaying())
+    {
+        return;
+    }
+
+    // Handle hovering and clicking on scene objects.
+    //TODO: Original game seems to ONLY check this when the mouse cursor moves or is clicked (in other words, on input).
+    //TODO: Maybe we should do that too?
+    if(!Services::GetInput()->MouseLocked())
+    {
+        // Only allow scene interaction if pointer isn't over a UI widget.
+        if(!UICanvas::DidWidgetEatInput())
+        {
+            // Calculate mouse click ray.
+            Vector2 mousePos = Services::GetInput()->GetMousePosition();
+            Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
+            Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
+            Vector3 dir = (worldPos2 - worldPos).Normalize();
+            Ray ray(worldPos, dir);
+
+            // Cast into the scene to see if we're over an interactive object.
+            SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, true);
+
+            // If we can interact with whatever we are pointing at, highlight the cursor.
+            // Note we call "UseHighlightCursor" when start hovering OR we switch hover to new object.
+            // This toggles red/blue highlight.
+            GKObject* hovering = result.hitObject;
+            if(hovering != nullptr)
+            {
+                if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
+                {
+                    // See if the hovered item has a custom verb with an associated custom cursor.
+                    Cursor* customCursor = nullptr;
+                    if(!hovering->GetVerb().empty())
+                    {
+                        customCursor = Services::Get<VerbManager>()->GetVerbIcon(hovering->GetVerb()).cursor;
+                    }
+
+                    // Set cursor appropriately.
+                    if(customCursor != nullptr)
+                    {
+                        Services::Get<CursorManager>()->UseCustomCursor(customCursor);
+                    }
+                    else
+                    {
+                        Services::Get<CursorManager>()->UseHighlightCursor();
+                    }
+                    mLastHoveredNoun = hovering->GetNoun();
+                }
+            }
+            else
+            {
+                Services::Get<CursorManager>()->UseDefaultCursor();
+                mLastHoveredNoun.clear();
+            }
+
+            // If left mouse button is released, try to interact with whatever it is over.
+            // Need to do this, even if canInteract==false, because floor can be clicked to move around.
+            if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
+            {
+                GEngine::Instance()->GetScene()->Interact(ray, hovering);
+            }
+        }
+        else
+        {
+            mLastHoveredNoun.clear();
+        }
     }
 }
 

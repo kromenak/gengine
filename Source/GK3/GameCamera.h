@@ -148,6 +148,7 @@ private:
 	
     void SceneUpdate(float deltaTime);
     void SceneUpdateMovement(float deltaTime);
+    void SceneUpdateInteract(float deltaTime);
 
     Vector3 ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset);
 };
