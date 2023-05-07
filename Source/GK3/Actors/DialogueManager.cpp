@@ -5,6 +5,7 @@
 #include "ActionManager.h"
 #include "Animation.h"
 #include "Animator.h"
+#include "GameCamera.h"
 #include "GEngine.h"
 #include "GKActor.h"
 #include "Scene.h"
@@ -121,7 +122,10 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
 
     // See if there are any dialogue cameras associated with starting this conversation (isInitial = true).
     // If so, set that camera angle.
-    GEngine::Instance()->GetScene()->SetCameraPositionForConversation(conversation, true);
+    if(GameCamera::AreCinematicsEnabled())
+    {
+        GEngine::Instance()->GetScene()->SetCameraPositionForConversation(conversation, true);
+    }
 
     // Clear any previously saved fidgets.
     mSavedTalkFidgets.clear();
@@ -194,7 +198,10 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
 
     // See if there are any dialogue cameras associated with ending this conversation (isFinal = true).
     // If so, set that camera angle.
-    GEngine::Instance()->GetScene()->SetCameraPositionForConversation(mConversation, false);
+    if(GameCamera::AreCinematicsEnabled())
+    {
+        GEngine::Instance()->GetScene()->SetCameraPositionForConversation(mConversation, false);
+    }
 
     // Revert any fidgets that were set when entering the conversation.
     for(auto& pair : mSavedTalkFidgets)
