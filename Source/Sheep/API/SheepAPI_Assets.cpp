@@ -46,3 +46,12 @@ shpvoid Extract(const std::string& fileSpec, const std::string& outputPath)
     return 0;
 }
 RegFunc2(Extract, void, string, string, IMMEDIATE, REL_FUNC);
+
+shpvoid NeedDiscResources(int discNum)
+{
+    // In the original game, this would check that all the resources from disk 1/2/3 were loaded.
+    // If not, it would show the prompt to "Please Insert CD X".
+    // This isn't needed right now, but could be implemented for completeness if we really wanted.
+    return 0;
+}
+RegFunc1(NeedDiscResources, void, int, IMMEDIATE, REL_FUNC);

@@ -13,6 +13,7 @@ shpvoid RescanPaths(); // DEV
 
 // ASSET EXTRACTION
 shpvoid Extract(const std::string& fileSpec, const std::string& outputPath);
+shpvoid ExtractResourceDir(const std::string& outputFileName);
 
 shpvoid SaveSprite(const std::string& spriteName, const std::string& fileName); // DEV
 shpvoid SaveTexture(const std::string& textureName, const std::string& fileName); // DEV
@@ -40,3 +41,6 @@ shpvoid UnloadTexture(const std::string& textureName); // DEV
 shpvoid Edit(const std::string& fileName); // DEV
 shpvoid Open(const std::string& fileName); // DEV
 shpvoid OpenFile(const std::string& fileName); // DEV
+
+// MISC
+shpvoid NeedDiscResources(int discNum);

@@ -33,6 +33,9 @@ int IsWalkingActorNear(const std::string& actorName, const std::string& position
 std::string GetIndexedPosition(int index); // DEV
 int GetPositionCount(); // DEV
 
+// ACTORS
+int DoesActorExist(const std::string& actorName);
+
 // MODELS
 int DoesModelExist(const std::string& modelName);
 shpvoid DumpModelNames(); // DEV

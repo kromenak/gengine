@@ -149,6 +149,13 @@ int GetPositionCount()
 RegFunc0(GetPositionCount, int, IMMEDIATE, DEV_FUNC);
 */
 
+int DoesActorExist(const std::string& actorName)
+{
+    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    return actor != nullptr ? 1 : 0;
+}
+RegFunc1(DoesActorExist, int, string, IMMEDIATE, REL_FUNC);
+
 int DoesModelExist(const std::string& modelName)
 {
     GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
@@ -285,7 +292,6 @@ RegFunc1(WalkerBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryBlockRegion(int regionIndex, int regionBoundaryIndex)
 {
-    //printf("WalkerBoundaryBlockRegion(%i, %i)\n", regionIndex, regionBoundaryIndex);
     GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, true);
     return 0;
 }
