@@ -4,55 +4,59 @@
 #include "Services.h"
 #include "Texture.h"
 
-float points[] = {
-    // Back
-    -10.0f,  10.0f, -10.0f, // Top-left
-    -10.0f, -10.0f, -10.0f, // Bottom-left
-     10.0f, -10.0f, -10.0f, // Bottom-right
-     10.0f, -10.0f, -10.0f, // Bottom-right
-     10.0f,  10.0f, -10.0f, // Top-right
-    -10.0f,  10.0f, -10.0f, // Top-left
-    
-    // Left
-    -10.0f, -10.0f,  10.0f,
-    -10.0f, -10.0f, -10.0f,
-    -10.0f,  10.0f, -10.0f,
-    -10.0f,  10.0f, -10.0f,
-    -10.0f,  10.0f,  10.0f,
-    -10.0f, -10.0f,  10.0f,
-    
-    // Right
-    10.0f, -10.0f, -10.0f,
-    10.0f, -10.0f,  10.0f,
-    10.0f,  10.0f,  10.0f,
-    10.0f,  10.0f,  10.0f,
-    10.0f,  10.0f, -10.0f,
-    10.0f, -10.0f, -10.0f,
-    
-    // Front
-    -10.0f, -10.0f,  10.0f,
-    -10.0f,  10.0f,  10.0f,
-     10.0f,  10.0f,  10.0f,
-     10.0f,  10.0f,  10.0f,
-     10.0f, -10.0f,  10.0f,
-    -10.0f, -10.0f,  10.0f,
-    
-    // Top
-    -10.0f,  10.0f, -10.0f, // Back-left
-     10.0f,  10.0f, -10.0f, // Back-right
-     10.0f,  10.0f,  10.0f, // Front-right
-     10.0f,  10.0f,  10.0f, // Front-right
-    -10.0f,  10.0f,  10.0f, // Front-left
-    -10.0f,  10.0f, -10.0f, // Back-left
+namespace
+{
+    const float kSkyboxSize = 20.0f;
+    float points[] = {
+        // Back
+        -kSkyboxSize,  kSkyboxSize, -kSkyboxSize, // Top-left
+        -kSkyboxSize, -kSkyboxSize, -kSkyboxSize, // Bottom-left
+         kSkyboxSize, -kSkyboxSize, -kSkyboxSize, // Bottom-right
+         kSkyboxSize, -kSkyboxSize, -kSkyboxSize, // Bottom-right
+         kSkyboxSize,  kSkyboxSize, -kSkyboxSize, // Top-right
+        -kSkyboxSize,  kSkyboxSize, -kSkyboxSize, // Top-left
 
-    // Bottom
-    -10.0f, -10.0f, -10.0f,
-    -10.0f, -10.0f,  10.0f,
-     10.0f, -10.0f, -10.0f,
-     10.0f, -10.0f, -10.0f,
-    -10.0f, -10.0f,  10.0f,
-     10.0f, -10.0f,  10.0f
-};
+        // Left
+        -kSkyboxSize, -kSkyboxSize,  kSkyboxSize,
+        -kSkyboxSize, -kSkyboxSize, -kSkyboxSize,
+        -kSkyboxSize,  kSkyboxSize, -kSkyboxSize,
+        -kSkyboxSize,  kSkyboxSize, -kSkyboxSize,
+        -kSkyboxSize,  kSkyboxSize,  kSkyboxSize,
+        -kSkyboxSize, -kSkyboxSize,  kSkyboxSize,
+
+        // Right
+        kSkyboxSize, -kSkyboxSize, -kSkyboxSize,
+        kSkyboxSize, -kSkyboxSize,  kSkyboxSize,
+        kSkyboxSize,  kSkyboxSize,  kSkyboxSize,
+        kSkyboxSize,  kSkyboxSize,  kSkyboxSize,
+        kSkyboxSize,  kSkyboxSize, -kSkyboxSize,
+        kSkyboxSize, -kSkyboxSize, -kSkyboxSize,
+
+        // Front
+        -kSkyboxSize, -kSkyboxSize,  kSkyboxSize,
+        -kSkyboxSize,  kSkyboxSize,  kSkyboxSize,
+         kSkyboxSize,  kSkyboxSize,  kSkyboxSize,
+         kSkyboxSize,  kSkyboxSize,  kSkyboxSize,
+         kSkyboxSize, -kSkyboxSize,  kSkyboxSize,
+        -kSkyboxSize, -kSkyboxSize,  kSkyboxSize,
+
+        // Top
+        -kSkyboxSize,  kSkyboxSize, -kSkyboxSize, // Back-left
+         kSkyboxSize,  kSkyboxSize, -kSkyboxSize, // Back-right
+         kSkyboxSize,  kSkyboxSize,  kSkyboxSize, // Front-right
+         kSkyboxSize,  kSkyboxSize,  kSkyboxSize, // Front-right
+        -kSkyboxSize,  kSkyboxSize,  kSkyboxSize, // Front-left
+        -kSkyboxSize,  kSkyboxSize, -kSkyboxSize, // Back-left
+
+        // Bottom
+        -kSkyboxSize, -kSkyboxSize, -kSkyboxSize,
+        -kSkyboxSize, -kSkyboxSize,  kSkyboxSize,
+         kSkyboxSize, -kSkyboxSize, -kSkyboxSize,
+         kSkyboxSize, -kSkyboxSize, -kSkyboxSize,
+        -kSkyboxSize, -kSkyboxSize,  kSkyboxSize,
+         kSkyboxSize, -kSkyboxSize,  kSkyboxSize
+    };
+}
 
 Skybox::~Skybox()
 {
