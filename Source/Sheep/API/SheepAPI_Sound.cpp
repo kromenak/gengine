@@ -100,7 +100,7 @@ int GetVolume(const std::string& soundType)
         return 0;
     }
 }
-RegFunc1(GetVolume, void, string, IMMEDIATE, DEV_FUNC);
+RegFunc1(GetVolume, int, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid SetVolume(const std::string& soundType, int volume)
 {
