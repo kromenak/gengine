@@ -3,22 +3,37 @@
 #include "Camera.h"
 #include "GameCamera.h"
 #include "GEngine.h"
+#include "GKObject.h"
+#include "MeshRenderer.h"
 #include "SaveManager.h"
 #include "Scene.h"
 
 using namespace std;
 
+namespace
+{
+    Camera* GetCamera()
+    {
+        Scene* scene = GEngine::Instance()->GetScene();
+        if(scene != nullptr)
+        {
+            GameCamera* gameCamera = GEngine::Instance()->GetScene()->GetCamera();
+            if(gameCamera != nullptr)
+            {
+                return gameCamera->GetCamera();
+            }
+        }
+        return nullptr;
+    }
+}
+
 float GetCameraFOV()
 {
     // Dig down to grab the value.
-    GameCamera* gameCamera = GEngine::Instance()->GetScene()->GetCamera();
-    if(gameCamera != nullptr)
+    Camera* camera = GetCamera();
+    if(camera != nullptr)
     {
-        Camera* camera = gameCamera->GetCamera();
-        if(camera != nullptr)
-        {
-            return camera->GetCameraFovDegrees();
-        }
+        return camera->GetCameraFovDegrees();
     }
     return 0.0f;
 }
@@ -34,18 +49,58 @@ shpvoid SetCameraFOV(float fov)
     }
 
     // Dig down to actually set it.
-    GameCamera* gameCamera = GEngine::Instance()->GetScene()->GetCamera();
-    if(gameCamera != nullptr)
+    Camera* camera = GetCamera();
+    if(camera != nullptr)
     {
-        Camera* camera = gameCamera->GetCamera();
-        if(camera != nullptr)
-        {
-            camera->SetCameraFovDegrees(fov);
-        }
+        camera->SetCameraFovDegrees(fov);
     }
     return 0;
 }
 RegFunc1(SetCameraFOV, void, float, IMMEDIATE, REL_FUNC);
+
+float GetCameraClipBack()
+{
+    Camera* camera = GetCamera();
+    if(camera != nullptr)
+    {
+        return camera->GetFarClipPlaneDistance();
+    }
+    return 0.0f;
+}
+RegFunc0(GetCameraClipBack, float, IMMEDIATE, REL_FUNC);
+
+shpvoid SetCameraClipBack(float distance)
+{
+    Camera* camera = GetCamera();
+    if(camera != nullptr)
+    {
+        camera->SetFarClipPlaneDistance(distance);
+    }
+    return 0;
+}
+RegFunc1(SetCameraClipBack, void, float, IMMEDIATE, REL_FUNC);
+
+float GetCameraClipFront()
+{
+    Camera* camera = GetCamera();
+    if(camera != nullptr)
+    {
+        return camera->GetNearClipPlaneDistance();
+    }
+    return 0.0f;
+}
+RegFunc0(GetCameraClipFront, float, IMMEDIATE, REL_FUNC);
+
+shpvoid SetCameraClipFront(float distance)
+{
+    Camera* camera = GetCamera();
+    if(camera != nullptr)
+    {
+        camera->SetNearClipPlaneDistance(distance);
+    }
+    return 0;
+}
+RegFunc1(SetCameraClipFront, void, float, IMMEDIATE, REL_FUNC);
 
 shpvoid EnableCinematics()
 {
@@ -77,21 +132,36 @@ shpvoid DisableCameraBoundaries()
 }
 RegFunc0(DisableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
 
-/*
-shpvoid CameraBoundaryBlockModel(std::string modelName)
+
+shpvoid CameraBoundaryBlockModel(const std::string& modelName)
 {
-    std::cout << "CameraBoundaryBlockModel" << std::endl;
+    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    if(object != nullptr)
+    {
+        MeshRenderer* meshRenderer = object->GetMeshRenderer();
+        if(meshRenderer != nullptr)
+        {
+            GEngine::Instance()->GetScene()->GetCamera()->AddBounds(meshRenderer->GetModel());
+        }
+    }
     return 0;
 }
 RegFunc1(CameraBoundaryBlockModel, void, string, IMMEDIATE, REL_FUNC);
 
-shpvoid CameraBoundaryUnblockModel(std::string modelName)
+shpvoid CameraBoundaryUnblockModel(const std::string& modelName)
 {
-    std::cout << "CameraBoundaryUnblockModel" << std::endl;
+    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    if(object != nullptr)
+    {
+        MeshRenderer* meshRenderer = object->GetMeshRenderer();
+        if(meshRenderer != nullptr)
+        {
+            GEngine::Instance()->GetScene()->GetCamera()->RemoveBounds(meshRenderer->GetModel());
+        }
+    }
     return 0;
 }
 RegFunc1(CameraBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
-*/
 
 shpvoid GlideToCameraAngle(const std::string& cameraName)
 {
@@ -132,6 +202,13 @@ shpvoid SetForcedCameraCuts(int flag)
     return 0;
 }
 RegFunc1(SetForcedCameraCuts, void, int, IMMEDIATE, REL_FUNC);
+
+shpvoid ClearForcedCameraCuts()
+{
+    GEngine::Instance()->GetScene()->GetCamera()->SetForcedCinematicMode(false);
+    return 0;
+}
+RegFunc0(ClearForcedCameraCuts, void, IMMEDIATE, REL_FUNC);
 
 shpvoid DefaultInspect(const std::string& noun)
 {

@@ -49,6 +49,15 @@ GameCamera::GameCamera()
     mOptionBar = new OptionBar();
 }
 
+void GameCamera::RemoveBounds(Model* model)
+{
+    auto it = std::find(mBoundsModels.begin(), mBoundsModels.end(), model);
+    if(it != mBoundsModels.end())
+    {
+        mBoundsModels.erase(it);
+    }
+}
+
 void GameCamera::SetAngle(const Vector2& angle)
 {
 	SetAngle(angle.x, angle.y);

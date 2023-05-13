@@ -27,6 +27,7 @@ public:
     GameCamera();
 
     void AddBounds(Model* model) { mBoundsModels.push_back(model); }
+    void RemoveBounds(Model* model);
 	void SetBoundsEnabled(bool enabled) { mBoundsEnabled = enabled; }
 	
 	void SetAngle(const Vector2& angle);

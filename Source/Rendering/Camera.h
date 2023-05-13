@@ -33,12 +33,19 @@ public:
 	
 	void SetCameraFovRadians(float fovRad);
     void SetCameraFovDegrees(float fovDeg);
+
+    float GetNearClipPlaneDistance() const { return mNearClipPlane; }
+    void SetNearClipPlaneDistance(float distance) { mNearClipPlane = distance; }
+
+    float GetFarClipPlaneDistance() const { return mFarClipPlane; }
+    void SetFarClipPlaneDistance(float distance) { mFarClipPlane = distance; }
 	
 private:
     // Field of view angle, in radians, for perspective projection.
     float mFovAngleRad = 1.0472f;
     
     // Near and far clipping planes, for any projection type.
-    float mNearClipPlane = 1.0f;
-    float mFarClipPlane = 10000.0f;
+    // The default values are taken from what GK3 uses by default.
+    float mNearClipPlane = 12.0f;
+    float mFarClipPlane = 24000.0f;
 };
