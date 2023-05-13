@@ -51,11 +51,12 @@ void Console::ExecuteCommand(const std::string& command)
 	SheepScript* sheepScript = Services::GetSheep()->Compile(scriptName, modCommand);
 	
 	// If compiled successfully, execute it!
+    // Execute this as a "Global" sheep (attached to the bottom layer) to avoid it being killed if it pops the top layer.
 	if(sheepScript != nullptr)
 	{
 		Services::GetSheep()->Execute(sheepScript, [sheepScript]() {
 			delete sheepScript;
-		});
+		}, Services::Get<LayerManager>()->GetBottomLayerName());
 	}
 
     // Add command to history.
