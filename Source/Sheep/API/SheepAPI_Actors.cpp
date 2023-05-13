@@ -313,6 +313,14 @@ shpvoid ActionWaitClearRegion(const std::string& actorName, int regionId, float 
 }
 RegFunc4(ActionWaitClearRegion, void, string, int, float, string, WAITABLE, REL_FUNC);
 
+shpvoid ClearRegion(const std::string& actorName, int regionId, float destAccuracy, const std::string& exitPosition)
+{
+    // Seems identical?
+    ActionWaitClearRegion(actorName, regionId, destAccuracy, exitPosition);
+    return 0;
+}
+RegFunc4(ClearRegion, void, string, int, float, string, WAITABLE, REL_FUNC);
+
 shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, const std::string& cont,
                     const std::string& startTurnLeft, const std::string& startTurnRight)
 {

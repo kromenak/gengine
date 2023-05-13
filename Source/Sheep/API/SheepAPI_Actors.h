@@ -38,7 +38,8 @@ shpvoid StartTalkFidget(const std::string& actorName); // WAIT
 shpvoid StopFidget(const std::string& actorName); // WAIT
 
 // WALKING
-shpvoid ActionWaitClearRegion(const std::string& actorName, int regionId, float destAccuracy, const std::string& exitPosition);
+shpvoid ActionWaitClearRegion(const std::string& actorName, int regionId, float destAccuracy, const std::string& exitPosition); // WAIT
+shpvoid ClearRegion(const std::string& actorName, int regionId, float destAccuracy, const std::string& exitPosition); // WAIT
 
 shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, const std::string& cont,
                     const std::string& startTurnLeft, const std::string& startTurnRight);
