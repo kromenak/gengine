@@ -84,13 +84,14 @@ void CaptionsOverlay::AddCaption(const std::string& captionText, const std::stri
         caption.label = caption.actor->AddComponent<UILabel>();
         caption.label->SetHorizonalAlignment(HorizontalAlignment::Center);
         caption.label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
-        caption.label->SetVerticalAlignment(VerticalAlignment::Top);
+        caption.label->SetVerticalAlignment(VerticalAlignment::Bottom);
 
         // The caption should stretch to fill horizontal screen space.
         // But vertically, it is anchored to the bottom of the screen.
         RectTransform* rt = caption.backing->GetRectTransform();
         rt->SetAnchorMin(Vector2::Zero);
         rt->SetAnchorMax(Vector2(1.0f, 0.0f));
+        rt->SetSizeDelta(0.0f, 0.0f);
         rt->SetPivot(0.5f, 0.0f); // Pivot at bottom-center.
         rt->SetAnchoredPosition(0.0f, 0.0f);
     }
@@ -127,11 +128,11 @@ void CaptionsOverlay::AddCaption(const std::string& captionText, const std::stri
     // Set font based on speaker.
     caption.label->SetFont(font);
 
-    // Set caption rect height based on font used and amount of text lines needed.
-    caption.backing->GetRectTransform()->SetSizeDeltaY(font->GetGlyphHeight());
-
     // Set text.
     caption.label->SetText(captionText);
+
+    // Set caption rect height based on font used and amount of text lines needed.
+    caption.backing->GetRectTransform()->SetSizeDeltaY(font->GetGlyphHeight() * caption.label->GetLineCount());
 
     // Add to active captions.
     mActiveCaptions.push_back(caption);

@@ -41,6 +41,8 @@ public:
 	const std::string& GetText() const { return mText; }
 
     void SetMasked(bool masked) { mMask = masked; }
+
+    int GetLineCount();
     
 protected:
 	Vector2 GetCharPos(int index) const;

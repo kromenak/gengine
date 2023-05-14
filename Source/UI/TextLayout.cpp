@@ -37,24 +37,76 @@ void TextLayout::AddLine(const std::string& line)
 	}
     
     // OK, we have a line of text that has no line breaks in it.
-    // However, we may need to add a line break if line is too long and horizontal overflow mode is "wrap"!
-    
-    // Add one line.
+    // We will be adding at least one line as a result.
     ++mLineCount;
     
-    // Determine length of this line.
-    //TODO: This logic DOES NOT currently account for horizontal wrapping correctly!
+    // Determine the length of this line.
+    // This is made more complex b/c we may need to "wrap" the text if it extends beyond the width of our rect.
+    int nextLineStartDueToWrap = -1;
+    int actualLineLength = line.size();
     int lineWidth = 0;
-    for(size_t i = 0; i < line.size(); ++i)
     {
-        Glyph& glyph = mFont->GetGlyph(line[i]);
-        lineWidth += glyph.width;
+        int lastSpaceIndex = -1;
+        int lastSpaceWidth = -1;
+        for(size_t i = 0; i < line.size(); ++i)
+        {
+            // Get the glyph for this character.
+            Glyph& glyph = mFont->GetGlyph(line[i]);
+
+            // If wrapping, check for when adding a glyph causes the line width to exceed the rect width.
+            // In that case, we will need to wrap to another line.
+            if(mHorizontalOverflow == HorizontalOverflow::Wrap)
+            {
+                int newWidth = lineWidth + glyph.width;
+                if(newWidth > mRect.width)
+                {
+                    // Try to wrap the text on a space to keep full words on one line.
+                    // Worst case, if no space was present, just wrap on the current character.
+                    if(lastSpaceIndex >= 0)
+                    {
+                        actualLineLength = lastSpaceIndex + 1;
+                        nextLineStartDueToWrap = lastSpaceIndex + 1;
+                        lineWidth = lastSpaceWidth;
+                    }
+                    else
+                    {
+                        actualLineLength = i;
+                        nextLineStartDueToWrap = actualLineLength;
+                    }
+                    break;
+                }
+                lineWidth = newWidth;
+
+                // Track whenever we see a space, as that may be where we need to "backtrack" to perform a line wrap.
+                if(line[i] == ' ')
+                {
+                    lastSpaceIndex = i;
+                    lastSpaceWidth = lineWidth;
+                }
+            }
+            else
+            {
+                // No line wrap? Easy mode - just keep making the line longer.
+                lineWidth += glyph.width;
+            }
+        }
+    }
+
+    // If we are artificially line wrapping, trim any extra spaces from the end (so they don't mess up text positioning).
+    if(actualLineLength < line.size())
+    {
+        Glyph& glyph = mFont->GetGlyph(' ');
+        while(actualLineLength > 0 && line[actualLineLength - 1] == ' ')
+        {
+            --actualLineLength;
+            lineWidth -= glyph.width;
+        }
     }
 	
     // Height of the line is easier - always glyph height from the font.
     int lineHeight = mFont->GetGlyphHeight();
 
-    // If this isn't the first line, append an extra buffer for the space between the lines.
+    // If this isn't the first line, append an extra buffer pixel for the space between the lines.
     if(mLineCount > 1)
     {
         lineHeight += 1;
@@ -107,60 +159,13 @@ void TextLayout::AddLine(const std::string& line)
 	
     // OK, we know x/y to start the line at.
     // Determine CharInfo for each text character: the glyph and position of the glyph for rendering.
-	for(size_t i = 0; i < line.size(); ++i)
+	for(size_t i = 0; i < actualLineLength; ++i)
 	{
 		Glyph& glyph = mFont->GetGlyph(line[i]);
 		
 		float leftX = xPos;
 		float rightX = xPos + glyph.width;
-		
-        //TODO: This KIND OF works, but I think horizontal wrap detection should really occur earlier in this function
-        //TODO: to avoid duplicate code AND get correct results!
-		// If this glyph will extend outside the horizontal bounds of the rect, and we want to wrap, move to a new line!
-        if(mHorizontalOverflow == HorizontalOverflow::Wrap &&
-		   (leftX < mRect.GetMin().x || rightX > mRect.GetMax().x))
-		{
-            // Adding another line!
-            ++mLineCount;
-            
-            // Determine new x-pos for this next line.
-			switch(mHorizontalAlignment)
-			{
-			case HorizontalAlignment::Left:
-				xPos = mRect.GetMin().x;
-				break;
-			case HorizontalAlignment::Right:
-                //TODO: This doesn't seem correct - shouldn't it be "remainingLineWidth" or something?
-				xPos = mRect.GetMax().x - lineWidth;
-				break;
-			case HorizontalAlignment::Center:
-                std::cout << "CENTER HORIZONTAL ALIGNMENT NOT ACCOUNTED FOR!" << std::endl;
-				break;
-			}
-			
-            // Determine new y-pos for this next line.
-			switch(mVerticalAlignment)
-			{
-			case VerticalAlignment::Bottom:
-				yPos = mRect.GetMin().y;
-                
-                // If we add a new line with bottom alignment,
-                // all previous characters must be moved up by one line!
-				for(auto& charInfo : mCharInfos)
-				{
-					charInfo.pos.y += lineHeight;
-				}
-				break;
-			case VerticalAlignment::Top:
-                // Top: just move down "one line's worth".
-				yPos += lineHeight;
-				break;
-			case VerticalAlignment::Center:
-                std::cout << "CENTER VERTICAL ALIGNMENT NOT ACCOUNTED FOR!" << std::endl;
-				break;
-			}
-		}
-		
+
 		// Calc bottom and top.
 		float bottomY = yPos;
 		float topY = yPos + glyph.height;
@@ -181,6 +186,12 @@ void TextLayout::AddLine(const std::string& line)
 		
 	// Save whatever the next glyph pos would be.
 	mNextCharPos = Vector2(xPos, yPos);
+
+    // If we have an artificial wrap, do the next line with the substring after what we've already processed.
+    if(nextLineStartDueToWrap >= 0)
+    {
+        AddLine(line.substr(nextLineStartDueToWrap));
+    }
 }
 
 const TextLayout::CharInfo* TextLayout::GetChar(int index) const
