@@ -49,8 +49,8 @@ private:
 	Vector2 mOffset;
 
     // Regions that are not walkable.
-    // By default 255 (black areas) are not walkable. Also disallow 9/8/7 as they are very close to the edges and look weird to walk there!
-    std::unordered_set<int> mUnwalkableRegions = { 255, 9, 8, 7 };
+    // By default 255 (black areas) are not walkable. Also disallow 9/8 as they are very close to the edges and look weird to walk there!
+    std::unordered_set<int> mUnwalkableRegions = { 255, 9, 8 };
 
     // Rectangular areas that are blocked and unwalkable.
     std::vector<std::pair<std::string, Rect>> mUnwalkableRects;
