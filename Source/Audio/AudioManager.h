@@ -192,5 +192,7 @@ private:
     PlayingSoundHandle& CreateAndPlaySound3D(Audio* audio, AudioType audioType, const Vector3& position, float minDist, float maxDist);
 
     FMOD::Sound* CreateSound(Audio* audio, AudioType audioType, bool is3D);
+    void DestroySound(FMOD::Sound* sound);
+
     FMOD::Channel* CreateChannel(FMOD::Sound* sound, FMOD::ChannelGroup* channelGroup);
 };

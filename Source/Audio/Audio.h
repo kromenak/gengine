@@ -27,9 +27,6 @@ private:
     char* mDataBuffer = nullptr;
     int mDataBufferLength = 0;
     
-    // What type of audio is this?
-    bool mIsMusic = false;
-    
     // The length of the audio file, calculated from taking (data size / samples per second).
     float mDuration = 0.0f;
     

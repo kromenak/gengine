@@ -352,7 +352,7 @@ void AudioManager::Update(float deltaTime)
         // Not playing? Release it finally!
         if(!stillPlaying)
         {
-            mWaitingToRelease[i]->release();
+            DestroySound(mWaitingToRelease[i]);
 
             std::swap(mWaitingToRelease[i], mWaitingToRelease.back());
             mWaitingToRelease.pop_back();
@@ -524,12 +524,7 @@ void AudioManager::ReleaseAudioData(Audio* audio)
         }
         else
         {
-            // Only release the sound if the system is valid.
-            // In the case of cleaning up after shutdown, the system has already been released, so the sound has also been released.
-            if(mSystem != nullptr)
-            {
-                it->second->release();
-            }
+            DestroySound(it->second);
         }
 
         // Erase audio->sound mapping.
@@ -799,21 +794,30 @@ FMOD::Sound* AudioManager::CreateSound(Audio* audio, AudioType audioType, bool i
     {
         mode |= FMOD_3D | FMOD_3D_LINEARSQUAREROLLOFF;
     }
-    /*
-    //TODO: Ambient/Music audio sometimes causes a FPS dip when loading.
+
+    // For music and ambient audio, stream it to avoid FPS drops when loading.
+    // To stream the audio, we need to make sure the streaming buffer is never deleted while we're using it.
+    // To achieve this, I'll just make a copy of the audio data.
+    char* audioBuffer = audio->GetDataBuffer();
     if(audioType == AudioType::Ambient || audioType == AudioType::Music)
     {
-        mode |= FMOD_NONBLOCKING;  // This *may* work, but can't start the sound until getOpenState returns "Ready"
-        mode |= FMOD_CREATESTREAM; // This works, but crashes if audio data buffer is deleted before the audio stops. Maybe use a file or persistent barn data?
+        mode |= FMOD_CREATESTREAM;
+        audioBuffer = new char[audio->GetDataBufferLength()];
+        memcpy(audioBuffer, audio->GetDataBuffer(), exinfo.length);
     }
-    */
 
     // Create the sound using the audio data buffer.
     FMOD::Sound* sound = nullptr;
-    FMOD_RESULT result = mSystem->createSound(audio->GetDataBuffer(), mode, &exinfo, &sound);
+    FMOD_RESULT result = mSystem->createSound(audioBuffer, mode, &exinfo, &sound);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
+    }
+
+    // If we made a copy of the audio data (for streaming audio), save it as userdata so we can delete it later.
+    if(audioBuffer != audio->GetDataBuffer())
+    {
+        sound->setUserData(audioBuffer);
     }
 
     // Cache sound for reuse if this Audio is played again.
@@ -821,6 +825,28 @@ FMOD::Sound* AudioManager::CreateSound(Audio* audio, AudioType audioType, bool i
 
     // Return sound.
     return sound;
+}
+
+void AudioManager::DestroySound(FMOD::Sound* sound)
+{
+    // If userdata was set for this sound, it is audio data that was created for this sound.
+    // Since the sound is being destroyed, the associated audio data can also be destroyed.
+    void* userData = nullptr;
+    sound->getUserData(&userData);
+
+    // Only release the sound if the system is valid.
+    // In the case of cleaning up after shutdown, the system has already been released, so the sound has also been released.
+    if(mSystem != nullptr)
+    {
+        sound->release();
+    }
+
+    // Destroy the audio data buffer associated with the sound, if any.
+    if(userData != nullptr)
+    {
+        uint8_t* audioData = static_cast<uint8_t*>(userData);
+        delete[] audioData;
+    }
 }
 
 FMOD::Channel* AudioManager::CreateChannel(FMOD::Sound* sound, FMOD::ChannelGroup* channelGroup)
