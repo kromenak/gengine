@@ -42,10 +42,13 @@ void SceneConstruction::Init(Scene* scene, SceneData* sceneData)
         walkerBoundaryMeshRenderer->SetMaterial(0, m);
 
         Vector3 size = walkerBoundary->GetSize();
+        size.z = 1.0f;
+
         Vector3 offset = walkerBoundary->GetOffset();
         offset.x = -offset.x + size.x * 0.5f;
         offset.z = -offset.y + size.y * 0.5f;
-        offset.y = 0.1f; // Offset slightly up to avoid z-fighting with floor (in most scenes).
+        offset.y = scene->GetFloorY(Vector3::Zero);
+        offset.y += 0.1f; // Offset slightly up to avoid z-fighting with floor (in most scenes).
 
         walkerBoundaryActor->SetPosition(offset);
         walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
