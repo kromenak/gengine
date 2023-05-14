@@ -22,7 +22,7 @@ shpvoid SetConversation(const std::string& conversationName); // WAIT
 shpvoid EndConversation(); // WAIT
 
 // CAPTIONS
-shpvoid AddCaptionDefault(const std::string& captionText); // DEV
-shpvoid AddCaptionEgo(const std::string& captionText); // DEV
-shpvoid AddCaptionVoiceOver(const std::string& captionText); // DEV
+shpvoid AddCaptionDefault(const std::string& captionText);
+shpvoid AddCaptionEgo(const std::string& captionText);
+shpvoid AddCaptionVoiceOver(const std::string& captionText);
 shpvoid ClearCaptionText(); // DEV

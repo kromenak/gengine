@@ -3,6 +3,7 @@
 #include "Animator.h"
 #include "DialogueManager.h"
 #include "GEngine.h"
+#include "GK3UI.h"
 #include "Scene.h"
 #include "Services.h"
 
@@ -82,3 +83,31 @@ shpvoid EndConversation()
     return 0;
 }
 RegFunc0(EndConversation, void, WAITABLE, REL_FUNC);
+
+shpvoid AddCaptionDefault(const std::string& captionText)
+{
+    gGK3UI.AddCaption(captionText);
+    return 0;
+}
+RegFunc1(AddCaptionDefault, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid AddCaptionEgo(const std::string& captionText)
+{
+    gGK3UI.AddCaption(captionText, Scene::GetEgoName());
+    return 0;
+}
+RegFunc1(AddCaptionEgo, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid AddCaptionVoiceOver(const std::string& captionText)
+{
+    gGK3UI.AddCaption(captionText, "VOICEOVER");
+    return 0;
+}
+RegFunc1(AddCaptionVoiceOver, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid ClearCaptionText()
+{
+    gGK3UI.HideAllCaptions();
+    return 0;
+}
+RegFunc0(ClearCaptionText, void, IMMEDIATE, DEV_FUNC);
