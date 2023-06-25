@@ -140,7 +140,7 @@ void Scene::Load()
 		if(actorDef->ego && actorDef != egoSceneActor) { continue; }
 		
 		// Create actor.
-		GKActor* actor = new GKActor(*actorDef);
+		GKActor* actor = new GKActor(actorDef);
 		mActors.push_back(actor);
 		mPropsAndActors.push_back(actor);
 		
@@ -150,17 +150,18 @@ void Scene::Load()
 			mEgo = actor;
 		}
 
-        /*
-        //TODO: GK3 has these "DOR" models (Direction of Rotation?) that mimic movement during walk animations.
-        //TODO: Really unclear whether they are actually needed or not.
+        // Create DOR prop, if one exists for this actor.
+        // The DOR model assists with calculating an actor's facing direction, particularly while walking.
         Model* walkerDorModel = Services::GetAssets()->LoadModel("DOR_" + actor->GetMeshRenderer()->GetModelName());
         if(walkerDorModel != nullptr)
         {
-            GKProp* walkerDOR = new GKProp();
-            walkerDOR->GetMeshRenderer()->SetModel(walkerDorModel);
+            GKProp* walkerDOR = new GKProp(walkerDorModel);
+            actor->SetModelFacingHelper(walkerDOR);
             mPropsAndActors.push_back(walkerDOR);
+
+            // Disable DOR mesh renderer so you can't see the placeholder model.
+            walkerDOR->GetMeshRenderer()->SetEnabled(false);
         }
-        */
 	}
 	
 	// Iterate over scene model data and prep the scene.
@@ -250,6 +251,16 @@ void Scene::Unload()
 
 void Scene::Init()
 {
+    // Init all actors and props.
+    for(auto& prop : mProps)
+    {
+        prop->Init(*mSceneData);
+    }
+    for(auto& actor : mActors)
+    {
+        actor->Init(*mSceneData);
+    }
+
     // After all models have been created, run through and execute init anims.
     // Want to wait until after creating all actors, in case init anims need to touch created actors!
     for(auto& modelDef : mSceneData->GetModels())
@@ -263,26 +274,7 @@ void Scene::Init()
             mAnimator->Sample(modelDef->initAnim, 0, modelDef->name);
         }
     }
-
-    // Execute init anims for actors too.
-    for(auto& actorDef : mSceneData->GetActors())
-    {
-        if(actorDef->initAnim != nullptr)
-        {
-            mAnimator->Sample(actorDef->initAnim, 0);
-        }
-    }
-
-    // Init all actors and props.
-    for(auto& prop : mProps)
-    {
-        prop->Init(*mSceneData);
-    }
-    for(auto& actor : mActors)
-    {
-        actor->Init(*mSceneData);
-    }
-
+    
     // Create soundtrack player and get it playing!
     Actor* actor = new Actor();
     mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
@@ -307,7 +299,7 @@ void Scene::Update(float deltaTime)
     {
         // Use the "model position" rather than the "actor position" for more accurate lighting.
         // For example, in RC1, Buthane's actor position is way outside the map (dark color), but her model is near the van.
-        Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(actor->GetModelPosition());
+        Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(actor->GetFloorPosition());
         for(Material& material : actor->GetMeshRenderer()->GetMaterials())
         {
             material.SetColor("uAmbientColor", ambientColor);

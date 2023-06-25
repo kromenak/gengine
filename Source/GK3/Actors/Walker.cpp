@@ -130,12 +130,24 @@ void Walker::SkipToEnd()
         return;
     }
 
+    // Stop current animation, if any. This ensures any complex walk anim (like turn left/right) doesn't continue.
+    if(mCurrentWalkAnim != nullptr)
+    {
+        GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCurrentWalkAnim);
+        mCurrentWalkAnim = nullptr;
+    }
+
+    // Sample walk start anim to ensure 3d model is in a sane default state, facing straight ahead.
+    GEngine::Instance()->GetScene()->GetAnimator()->Sample(mWalkStartAnim, 0);
+
     // Warp actor to end of path.
     if(!mPath.empty())
     {
+        //Debug::DrawLine(mPath.front(), mPath.front() + Vector3::UnitY * 10.0f, Color32::Blue, 10.0f);
         mGKOwner->SetPosition(mPath.front());
         if(mPath.size() > 1)
         {
+            //Debug::DrawLine(mPath.front(), mPath.front() + Vector3::Normalize(mPath.front() - mPath[1]) * 10.0f, Color32::Green, 10.0f);
             mGKOwner->SetHeading(Heading::FromDirection(Vector3::Normalize(mPath.front() - mPath[1])));
         }
     }
@@ -170,10 +182,11 @@ Texture* Walker::GetFloorTypeWalkingOn() const
 
 void Walker::OnUpdate(float deltaTime)
 {
-    // Debug draw the path.
-    /*
-    if(mPath.size() > 0)
+    // Debug draw the path if desired.
+    if(mPath.size() > 0 && Debug::GetFlag("ShowWalkerPaths"))
     {
+        Debug::DrawLine(mGKOwner->GetPosition(), mPath.back(), Color32::White);
+
         Vector3 prev = mPath.back();
         for(int i = static_cast<int>(mPath.size()) - 2; i >= 0; i--)
         {
@@ -182,7 +195,6 @@ void Walker::OnUpdate(float deltaTime)
             prev = mPath[i];
         }
     }
-    */
 
     // Process outstanding walk actions.
     if(mWalkActions.size() > 0)
@@ -276,6 +288,7 @@ void Walker::OnUpdate(float deltaTime)
                     animParams.fromAutoScript = mFromAutoscript;
                     animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
                     GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+                    mCurrentWalkAnim = mWalkLoopAnim;
                 }
 
                 // Still following path - turn to face next node in path.
@@ -512,6 +525,9 @@ void Walker::PopAndNextAction()
         mPrevWalkOp = mWalkActions.back().op;
         mWalkActions.pop_back();
     }
+
+    // Clear current animation.
+    mCurrentWalkAnim = nullptr;
     
     // Go to next action.
     NextAction();
@@ -534,6 +550,7 @@ void Walker::NextAction()
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
             GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+            mCurrentWalkAnim = mWalkStartAnim;
         }
         else if(mWalkActions.back().op == WalkOp::FollowPathStartTurnLeft)
         {
@@ -545,6 +562,7 @@ void Walker::NextAction()
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
             GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+            mCurrentWalkAnim = mWalkStartTurnLeftAnim;
         }
         else if(mWalkActions.back().op == WalkOp::FollowPathStartTurnRight)
         {
@@ -556,6 +574,7 @@ void Walker::NextAction()
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
             GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+            mCurrentWalkAnim = mWalkStartTurnRightAnim;
         }
         else if(mWalkActions.back().op == WalkOp::FollowPath)
         {
@@ -573,6 +592,7 @@ void Walker::NextAction()
             }
             
             GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+            mCurrentWalkAnim = mWalkLoopAnim;
         }
         else if(mWalkActions.back().op == WalkOp::FollowPathEnd)
         {
@@ -587,6 +607,7 @@ void Walker::NextAction()
             animParams.fromAutoScript = mFromAutoscript;
             animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
             GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+            mCurrentWalkAnim = mCharConfig->walkStopAnim;
         }
         else if(mWalkActions.back().op == WalkOp::TurnToFace)
         {
@@ -608,6 +629,7 @@ void Walker::OnWalkAnimFinished()
     // Set flag so that we continue the walk anim during the next update loop.
     // A flag-based system is needed (rather than just continuing right here) to avoid infinite loops with high delta time values!
     mNeedContinueWalkAnim = true;
+    mCurrentWalkAnim = nullptr;
 }
 
 void Walker::OnWalkToFinished()

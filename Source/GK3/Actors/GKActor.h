@@ -26,12 +26,11 @@ struct VertexAnimParams;
 class GKActor : public GKObject
 {
 public:
-    GKActor();
-	GKActor(Model* model);
-    GKActor(const SceneActor& actorDef);
+    GKActor(const SceneActor* actorDef);
 
     void Init(const SceneData& sceneData);
-    
+
+    // Fidgets
     enum class FidgetType
     {
         None,
@@ -49,6 +48,7 @@ public:
     GAS* GetTalkFidget() { return mTalkFidget; }
     GAS* GetListenFidget() { return mListenFidget; }
 
+    // Walker
 	void TurnTo(const Heading& heading, std::function<void()> finishCallback);
     void WalkTo(const Vector3& position, std::function<void()> finishCallback);
 	void WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback);
@@ -62,12 +62,11 @@ public:
     
 	FaceController* GetFaceController() const { return mFaceController; }
 	Vector3 GetHeadPosition() const;
-    
+    Vector3 GetFloorPosition() const;
+
     void SetPosition(const Vector3& position);
     void Rotate(float rotationAngle);
     void SetHeading(const Heading& heading) override;
-
-    Vector3 GetModelPosition();
 
     void StartAnimation(VertexAnimParams& animParams) override;
     void SampleAnimation(VertexAnimParams& animParams, int frame) override;
@@ -76,6 +75,8 @@ public:
     AABB GetAABB() override;
 
     const CharacterConfig* GetConfig() const { return mCharConfig; }
+
+    void SetModelFacingHelper(GKProp* helper) { mModelFacingHelper = helper; }
 	
 protected:
     void OnActive() override;
@@ -83,6 +84,9 @@ protected:
 	void OnUpdate(float deltaTime) override;
     
 private:
+    // The "definition" used to construct this GKActor.
+    const SceneActor* mActorDef = nullptr;
+
 	// The character's configuration, which defines helpful parameters for controlling the actor.
 	const CharacterConfig* mCharConfig = nullptr;
 
@@ -100,17 +104,20 @@ private:
     GAS* mTalkFidget = nullptr;
     GAS* mListenFidget = nullptr;
 
+    // GAS player is used to execute fidgets.
+    GasPlayer* mGasPlayer = nullptr;
+
     // The actor/mesh renderer used to render this object's model.
-    // For props, model actor == this. But for characters, model actor is a separate actor.
     Actor* mModelActor = nullptr;
     MeshRenderer* mMeshRenderer = nullptr;
+
+    // Often, we can calculate the facing of the model from the model itself.
+    // Sometimes however, GK3 uses a helper object that animates alongside an animation to track the facing direction.
+    GKProp* mModelFacingHelper = nullptr;
 
     // Many objects animate using vertex animations.
     VertexAnimator* mVertexAnimator = nullptr;
 
-    // GAS player allows object to animate in an automated/scripted fashion based on some simple command statements.
-    GasPlayer* mGasPlayer = nullptr;
-    
     // Vertex anims often change the position of the mesh, but that doesn't mean the actor's position should change.
     // Sometimes we allow a vertex anim to affect the actor's position.
     bool mVertexAnimAllowMove = false;
@@ -120,17 +127,11 @@ private:
     Vector3 mStartVertexAnimPosition;
     Quaternion mStartVertexAnimRotation;
     
-    // Usually, the model drives the actor's position (think: root motion).
-    // To do that, we track the models last position/rotation and move the actor every frame to keep up.
-    Vector3 mLastModelPosition;
-    Quaternion mLastModelRotation;
-
     void OnVertexAnimationStop();
-    
-    Quaternion GetModelRotation();
-    
-    void SyncModelToActor();
-    void SyncActorToModel();
+
+    Vector3 GetModelFacingDirection() const;
+    void SetModelPositionToActorPosition();
+    void SetModelRotationToActorRotation();
 
     GAS* GetGasForFidget(FidgetType type);
     void CheckUpdateActiveFidget(FidgetType changedType);

@@ -567,20 +567,6 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                     actor.ego = true;
                 }
 			}
-            
-            // If no GAS files were loaded, try to use defaults.
-            if(actor.idleGas == nullptr)
-            {
-                actor.idleGas = Services::GetAssets()->LoadGAS(actor.model->GetNameNoExtension() + "Idle");
-            }
-            if(actor.talkGas == nullptr)
-            {
-                actor.talkGas = Services::GetAssets()->LoadGAS(actor.model->GetNameNoExtension() + "Talk");
-            }
-            if(actor.listenGas == nullptr)
-            {
-                actor.listenGas = actor.talkGas;
-            }
         }
     }
     

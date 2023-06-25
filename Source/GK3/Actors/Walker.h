@@ -46,6 +46,7 @@ public:
 
     bool AtPosition(const Vector3& position);
     bool IsWalking() const { return mWalkActions.size() > 0; }
+    bool IsWalkingExceptTurn() const { return IsWalking() && mWalkActions.back().op != WalkOp::TurnToFace; }
     Vector3 GetDestination() const { return mPath.size() > 0 ? mPath.front() : Vector3::Zero; }
 
     Texture* GetFloorTypeWalkingOn() const;
@@ -100,6 +101,9 @@ private:
     Animation* mWalkLoopAnim = nullptr;
     Animation* mWalkStartTurnLeftAnim = nullptr;
     Animation* mWalkStartTurnRightAnim = nullptr;
+
+    // The walk animation that is currently playing.
+    Animation* mCurrentWalkAnim = nullptr;
 
     // Walker boundary currently being used.
     WalkerBoundary* mWalkerBoundary = nullptr;
