@@ -291,11 +291,16 @@ void Model::ParseFromData(char *data, int dataLength)
             #ifdef DEBUG_SUBMESH_OUTPUT
             std::cout << "      Texture name: " << textureName << std::endl;
             #endif
-            
-            // 4 bytes: unknown - often is (0x00FFFFFF), but not always.
-            // Have also seen: 0x03773BB3, 0xFF000000, 0x50261200
-            // Maybe a color value?
-            reader.ReadUInt();
+
+            // 4 bytes: a color/tint for this submesh (in 0xAABBGGRR format).
+            // Note: alpha value always seems to be 0x00 here - we actually want to us 0xFF or the object will be invisible!
+            // Note: unclear if there would ever be a semi-transparent object, or if the alpha can always be ignored.
+            uint32_t colorInt = reader.ReadUInt();
+            uint8_t r = colorInt & 0xFF;
+            uint8_t g = (colorInt >> 8)  & 0xFF;
+            uint8_t b = (colorInt >> 16) & 0xFF;
+            //uint8_t a = (colorInt >> 24) & 0xFF;
+            Color32 color(r, g, b, 255u);
 
             // 4 bytes: unknown - seems to usually be 1, sometimes 0.
             reader.ReadUInt();
@@ -410,6 +415,9 @@ void Model::ParseFromData(char *data, int dataLength)
             
             // Save texture name.
             submesh->SetTextureName(textureName);
+
+            // Save color.
+            submesh->SetColor(color);
             
             // Next comes LODK blocks for this mesh group.
             // Not totally sure what these are for, but maybe LOD groups?

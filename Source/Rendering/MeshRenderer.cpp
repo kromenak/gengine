@@ -160,6 +160,13 @@ void MeshRenderer::AddMesh(Mesh* mesh)
 			Texture* tex = Services::GetAssets()->LoadSceneTexture(submesh->GetTextureName(), GetOwner()->IsDestroyOnLoad() ? AssetScope::Scene : AssetScope::Global);
 			m.SetDiffuseTexture(tex);
 		}
+        else
+        {
+            m.SetDiffuseTexture(&Texture::White);
+        }
+
+        // Set color.
+        m.SetColor(submesh->GetColor());
 		
 		// Add to materials list.
 		mMaterials.push_back(m);

@@ -7,6 +7,7 @@
 #pragma once
 #include <string>
 
+#include "Color32.h"
 #include "Vector3.h"
 #include "VertexArray.h"
 
@@ -60,6 +61,9 @@ public:
     // Might make sense to move this to like a subclass or something?
     void SetTextureName(const std::string& textureName) { mTextureName = textureName; }
     const std::string& GetTextureName() const { return mTextureName; }
+
+    void SetColor(const Color32& color) { mColor = color; }
+    const Color32& GetColor() const { return mColor; }
 	
 private:
     // Indicates how this mesh is rendered.
@@ -79,4 +83,7 @@ private:
     
 	// Name of the default texture to use for this submesh.
 	std::string mTextureName;
+
+    // A color/tint applied to the entire submesh.
+    Color32 mColor = Color32::White;
 };
