@@ -19,7 +19,8 @@ public:
 	
 	Vector2 GetMin() const { return Vector2(x, y); }
 	Vector2 GetMax() const { return Vector2(x + width, y + height); }
-	
+    Vector2 GetCenter() const { return Vector2(x + (width * 0.5f), y + (height * 0.5f)); }
+
 	Vector2 GetSize() const { return Vector2(width, height); }
 	
     void Contain(const Rect& other);

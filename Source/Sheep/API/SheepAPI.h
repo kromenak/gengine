@@ -17,10 +17,10 @@
 #include "SheepAPI_GK3.h"
 #include "SheepAPI_Inventory.h"
 #include "SheepAPI_LocTime.h"
+#include "SheepAPI_Rendering.h"
 #include "SheepAPI_Reports.h"
 #include "SheepAPI_Scene.h"
 #include "SheepAPI_Sound.h"
-#include "SheepAPI_Rendering.h"
 
 shpvoid Call(const std::string& functionName); // WAIT
 shpvoid CallDefaultSheep(const std::string& sheepFileName); // WAIT

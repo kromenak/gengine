@@ -62,6 +62,30 @@ CaptionsOverlay::CaptionsOverlay() : Actor(TransformType::RectTransform)
         }
     }
     delete fontColors;
+
+    /*
+    {
+        Actor* actor = new Actor(TransformType::RectTransform);
+        actor->GetTransform()->SetParent(GetTransform());
+
+        // Add backing image. This is just a fully opaque black background.
+        UIImage* backing = actor->AddComponent<UIImage>();
+        backing->SetTexture(&Texture::Black);
+
+        // Add label. This should fill space horizontally, with horizontal centering, top alignment.
+        UILabel* label = actor->AddComponent<UILabel>();
+        label->SetHorizonalAlignment(HorizontalAlignment::Center);
+        label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
+        label->SetVerticalAlignment(VerticalAlignment::Top);
+        label->SetFont(mDefaultFont);
+
+        // The caption should stretch to fill horizontal screen space.
+        // But vertically, it is anchored to the bottom of the screen.
+        RectTransform* rt = label->GetRectTransform();
+
+        label->SetText("Non, Monsieur, but most of the guests arrive last night, Oui?  And I was . . . Excusez-moi . . . not on duty.   We have a number of gentlemen staying at the hotel.  As to their luggage, I cannot say.");
+    }
+    */
 }
 
 void CaptionsOverlay::AddCaption(const std::string& captionText, const std::string& speaker)

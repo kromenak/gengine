@@ -33,7 +33,7 @@ Model::~Model()
     }
 }
 
-void Model::WriteToObjFile(std::string filePath)
+void Model::WriteToObjFile(const std::string& filePath)
 {
 	std::ofstream out(filePath, std::ios::out);
     if(!out.good())

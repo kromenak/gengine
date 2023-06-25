@@ -113,17 +113,19 @@ void MeshRenderer::Render(bool opaque, bool translucent)
 
 void MeshRenderer::SetModel(Model* model)
 {
-    if(model == nullptr) { return; }
 	mModel = model;
     
     // Clear any existing.
     mMeshes.clear();
     mMaterials.clear();
-    
+
     // Add each mesh.
-    for(auto& mesh : model->GetMeshes())
+    if(model != nullptr)
     {
-        AddMesh(mesh);
+        for(auto& mesh : model->GetMeshes())
+        {
+            AddMesh(mesh);
+        }
     }
 }
 
