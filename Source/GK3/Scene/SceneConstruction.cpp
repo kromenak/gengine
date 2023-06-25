@@ -80,6 +80,15 @@ void SceneConstruction::Render()
     {
         mSceneData->GetWalkerBoundary()->DrawUnwalkableRects();
     }
+
+    // Render regions if desired.
+    if(mShowRegions)
+    {
+        for(auto& trigger : mSceneData->GetTriggers())
+        {
+            Debug::DrawRectXZ(trigger->rect, mScene->GetFloorY(trigger->rect.GetCenter()) + 10.0f, Color32::Green);
+        }
+    }
 }
 
 void SceneConstruction::SetShowWalkerBoundary(bool show)

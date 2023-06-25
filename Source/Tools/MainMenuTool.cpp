@@ -41,11 +41,18 @@ void MainMenuTool::Render()
             {
                 construction.SetShowCameraBounds(!construction.GetShowCameraBounds());
             }
+            if(ImGui::MenuItem("Regions/Triggers", nullptr, construction.GetShowRegions()))
+            {
+                construction.SetShowRegions(!construction.GetShowRegions());
+            }
             if(ImGui::MenuItem("Walker Bounds", nullptr, construction.GetShowWalkerBoundary()))
             {
                 construction.SetShowWalkerBoundary(!construction.GetShowWalkerBoundary());
             }
-
+            if(ImGui::MenuItem("Walker Paths", nullptr, Debug::GetFlag("ShowWalkerPaths")))
+            {
+                Debug::ToggleFlag("ShowWalkerPaths");
+            }
             ImGui::EndMenu();
         }
 

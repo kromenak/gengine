@@ -25,6 +25,9 @@ public:
     void SetShowWalkerBoundary(bool show);
     bool GetShowWalkerBoundary() const;
 
+    void SetShowRegions(bool show) { mShowRegions = show; }
+    bool GetShowRegions() const { return mShowRegions; }
+
 private:
     Scene* mScene = nullptr;
     SceneData* mSceneData = nullptr;
@@ -35,4 +38,7 @@ private:
 
     // Walker boundary visualization.
     Actor* mWalkerBoundaryActor = nullptr;
+
+    // Region visualization support.
+    bool mShowRegions = false;
 };
