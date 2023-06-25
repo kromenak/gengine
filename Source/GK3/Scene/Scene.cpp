@@ -608,7 +608,13 @@ GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
             return object;
         }
 	}
-    //TODO: Should we also check BSP here?
+    for(auto& object : mBSPActors)
+    {
+        if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
+        {
+            return object;
+        }
+    }
 	return nullptr;
 }
 
@@ -890,10 +896,34 @@ void Scene::ExecuteAction(const Action* action)
 		}
 		case Action::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
 		{
-			Services::Get<ActionManager>()->ExecuteAction(action);
+            // Find the scene object from the model name.
+            GKObject* obj = GetSceneObjectByModelName(action->target);
+            if(obj != nullptr)
+            {
+                // HACK: We need to find a walkable position near the model's position.
+                // HACK: However, "FindNearestWalkablePosition" (currently) can return walkable *but unreachable* positions.
+                // HACK: To help alleviate that (for now), let's calculate a "near" position in the direction of Ego.
+                // HACK: This "hints" to the walk system that the walk pos should be walkable from Ego's position.
+                Vector3 modelToEgoDir = Vector3::Normalize(mEgo->GetPosition() - obj->GetPosition());
+                Vector3 nearPos = obj->GetPosition() + modelToEgoDir * 25.0f;
+                Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(nearPos);
+
+                // We also want "turn to" behavior if already at the walk pos.
+                Heading walkHeading = Heading::FromDirection(obj->GetPosition() - walkPos);
+
+                // Walk there, then do the action.
+                mEgo->WalkTo(walkPos, walkHeading, [action](){
+                    Services::Get<ActionManager>()->ExecuteAction(action);
+                });
+            }
+            else
+            {
+                // Just do the action if model could not be found.
+                Services::Get<ActionManager>()->ExecuteAction(action);
+            }
 			break;
 		}
-		case Action::Approach::Region: // Only use: RC1 "No Vacancies" Sign
+		case Action::Approach::Region: // Never used in GK3 (it does appear once in a SIF file, but it is misconfigured with an invalid region anyway).
 		{
 			Services::Get<ActionManager>()->ExecuteAction(action);
 			break;
