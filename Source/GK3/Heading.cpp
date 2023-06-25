@@ -4,16 +4,30 @@
 
 /*static*/ Heading Heading::None = Heading();
 
-/*static*/ Heading Heading::FromDegrees(float degrees)
-{
-	Heading heading;
-	heading.SetDegrees(degrees);
-	return heading;
-}
-
 /*static*/ Heading Heading::FromRadians(float radians)
 {
-	return FromDegrees(Math::ToDegrees(radians));
+    Heading heading;
+    heading.SetRadians(radians);
+    return heading;
+}
+
+/*static*/ Heading Heading::FromDegrees(float degrees)
+{
+    return FromRadians(Math::ToRadians(degrees));
+}
+
+/*static*/ Heading Heading::FromDirection(const Vector3& direction)
+{
+    // Convert to 2D vector on x/z plane and renormalize.
+    Vector2 dir(direction.x, direction.z);
+    dir.Normalize();
+
+    // Calculate angle of rotation. This angle is just on the x/z plane, so we can use atan2.
+    // In our case, "y" axis is to the right, "x" axis is up, so we PURPOSELY pass args as x/y rather than y/x.
+    float angle = Math::Atan2(dir.x, dir.y);
+
+    // Create heading from angle.
+    return Heading::FromRadians(angle);
 }
 
 /*static*/ Heading Heading::FromQuaternion(const Quaternion& quaternion)
@@ -28,33 +42,19 @@
     return FromDirection(yRotation.Rotate(Vector3::UnitZ));
 }
 
-/*static*/ Heading Heading::FromDirection(const Vector3& direction)
+void Heading::SetRadians(float radians)
 {
-	// Convert to 2D vector on x/z plane and renormalize.
-    Vector2 dir(direction.x, direction.z);
-	dir.Normalize();
-	
-	// Calculate angle of rotation. This angle is just on the x/z plane, so we can use atan2.
-    // In our case, "y" axis is to the right, "x" axis is up, so we PURPOSELY pass args as x/y rather than y/x.
-    float angle = Math::Atan2(dir.x, dir.y);
+    mRadians = radians;
 
-	// Create heading from angle.
-    return Heading::FromRadians(angle);
-}
+    // Make sure stored value is within valid range (0 - 2*PI).
+    // Note this also works for negative values.
+    mRadians = Math::Mod(mRadians, Math::k2Pi);
 
-void Heading::SetDegrees(float degrees)
-{
-	mDegrees = degrees;
-	
-	// Make sure value is within range of -360 to 360.
-	// Note this also works for negative values. (-361 % 360 = -1).
-	mDegrees = Math::Mod(mDegrees, 360.0f);
-	
-	// If less than zero...just add 360!
-	if(mDegrees < 0.0f)
-	{
-		mDegrees += 360.0f;
-	}
+    // If less than zero...just add 2PI!
+    if(mRadians < 0.0f)
+    {
+        mRadians += Math::k2Pi;
+    }
 }
 
 std::ostream& operator<<(std::ostream& os, const Heading& h)

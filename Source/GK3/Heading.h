@@ -1,7 +1,7 @@
 //
 // Clark Kromenaker
 //
-// A heading is a yaw-only rotation (about the y-axis) defined in degrees 0 - 360.
+// A heading is a yaw-only rotation (about the y-axis).
 //
 #pragma once
 
@@ -17,28 +17,30 @@ class Heading
 public:
 	// Represents a "no heading" or "invalid heading" option.
 	static Heading None;
-	
-	static Heading FromDegrees(float degrees);
-	static Heading FromRadians(float radians);
+
+    // Headings are currently implemented as immutable objects.
+    // So, you can't modify a heading - you can only create a new one.
+    static Heading FromRadians(float radians);
+    static Heading FromDegrees(float degrees);
+    static Heading FromDirection(const Vector3& direction);
 	static Heading FromQuaternion(const Quaternion& quaternion);
-	static Heading FromDirection(const Vector3& direction);
+    
+	float ToDegrees() const { return Math::ToDegrees(mRadians); }
+	float ToRadians() const { return mRadians; }
+	Quaternion ToQuaternion() const { return Quaternion(Vector3::UnitY, mRadians); }
+    Vector3 ToDirection() const { return Vector3::Normalize(Vector3(Math::Sin(mRadians), 0.0f, Math::Cos(mRadians)));  }
+
+	bool IsValid() const { return mRadians >= 0.0f && mRadians <= Math::k2Pi; }
 	
-	float ToDegrees() const { return mDegrees; }
-	float ToRadians() const { return Math::ToRadians(mDegrees); }
-	Quaternion ToQuaternion() const { return Quaternion(Vector3::UnitY, ToRadians()); }
-	Vector3 ToDirection() const { return ToQuaternion().Rotate(Vector3::UnitZ); }
-	
-	bool IsValid() const { return mDegrees >= 0.0f && mDegrees <= 360.0f; }
-	
-	std::string ToString() const { return std::to_string(mDegrees); }
+	std::string ToString() const { return std::to_string(ToDegrees()); }
 	
 private:
-	// A heading is represented internally as degrees 0-360.
+    // A heading is represented as an angle 0 to 2PI.
     // Default of -1 represents an invalid/unset heading.
-	float mDegrees = -1.0f;
+    float mRadians = -1.0f;
 
     Heading() = default;
-	void SetDegrees(float degrees);
+    void SetRadians(float radians);
 };
 
 std::ostream& operator<<(std::ostream& os, const Heading& h);
