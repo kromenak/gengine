@@ -11,14 +11,12 @@
 
 using namespace std;
 
-/*
-shpvoid CallSceneFunction(std::string parameter)
+shpvoid CallSceneFunction(const std::string& parameter)
 {
-    std::cout << "CallSceneFunction" << std::endl;
+    printf("Call Scene Function %s\n", parameter.c_str());
     return 0;
 }
 RegFunc1(CallSceneFunction, void, string, WAITABLE, REL_FUNC);
-*/
 
 int IsCurrentEgo(const std::string& actorName)
 {

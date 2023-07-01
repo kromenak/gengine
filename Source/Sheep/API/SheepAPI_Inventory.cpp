@@ -44,116 +44,6 @@ shpvoid CombineInvItems(const std::string& firstItemName, const std::string& sec
 }
 RegFunc3(CombineInvItems, void, string, string, string, IMMEDIATE, REL_FUNC);
 
-int DoesEgoHaveInvItem(const std::string& itemName)
-{
-    // This function does work with invalid inventory item names.
-    const std::string& egoName = Scene::GetEgoName();
-    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName);
-    return hasItem ? 1 : 0;
-}
-RegFunc1(DoesEgoHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
-
-int DoesGabeHaveInvItem(const std::string& itemName)
-{
-    // This function does work with invalid inventory item names.
-    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem("Gabriel", itemName);
-    return hasItem ? 1 : 0;
-}
-RegFunc1(DoesGabeHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
-
-int DoesGraceHaveInvItem(const std::string& itemName)
-{
-    // This function does work with invalid inventory item names.
-    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem("Grace", itemName);
-    return hasItem ? 1 : 0;
-}
-RegFunc1(DoesGraceHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
-
-shpvoid EgoTakeInvItem(const std::string& itemName)
-{
-    // It must be a valid inventory item.
-    if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
-    {
-        Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
-        return 0;
-    }
-
-    // Add to inventory of Ego.
-    const std::string& egoName = Scene::GetEgoName();
-    Services::Get<InventoryManager>()->AddInventoryItem(egoName, itemName);
-
-    // This also makes the item active.
-    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, itemName);
-    return 0;
-}
-RegFunc1(EgoTakeInvItem, void, string, IMMEDIATE, REL_FUNC);
-
-shpvoid DumpEgoActiveInvItem()
-{
-    const std::string& egoName = Scene::GetEgoName();
-    std::string activeItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(egoName);
-    if(activeItem.empty())
-    {
-        Services::GetReports()->Log("Dump", "Ego active inventory item is 'NONE'.");
-    }
-    else
-    {
-        Services::GetReports()->Log("Dump", "Ego active inventory item is '" + activeItem + "'.");
-    }
-    return 0;
-}
-RegFunc0(DumpEgoActiveInvItem, void, IMMEDIATE, DEV_FUNC);
-
-shpvoid SetEgoActiveInvItem(const std::string& itemName)
-{
-    // It must be a valid inventory item.
-    if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
-    {
-        Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
-        return 0;
-    }
-
-    // If the item we are setting active is not in our inventory, output a warning (but let it go anyway).
-    const std::string& egoName = Scene::GetEgoName();
-    if(!Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName))
-    {
-        Services::GetReports()->Log("Warning", egoName + " does not have " + itemName + ".");
-    }
-
-    // Set the inventory item!
-    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, itemName);
-    return 0;
-}
-RegFunc1(SetEgoActiveInvItem, void, string, IMMEDIATE, REL_FUNC);
-
-shpvoid ShowInventory()
-{
-    Services::Get<InventoryManager>()->ShowInventory();
-    return 0;
-}
-RegFunc0(ShowInventory, void, IMMEDIATE, REL_FUNC);
-
-shpvoid HideInventory()
-{
-    Services::Get<InventoryManager>()->HideInventory();
-    return 0;
-}
-RegFunc0(HideInventory, void, IMMEDIATE, REL_FUNC);
-
-shpvoid InventoryInspect(const std::string& itemName)
-{
-    Services::Get<InventoryManager>()->InventoryInspect(itemName);
-    return 0;
-}
-RegFunc1(InventoryInspect, void, string, IMMEDIATE, REL_FUNC);
-
-shpvoid InventoryUninspect()
-{
-    Services::Get<InventoryManager>()->InventoryUninspect();
-    return 0;
-}
-RegFunc0(InventoryUninspect, void, IMMEDIATE, REL_FUNC);
-
 shpvoid SetInvItemStatus(const std::string& itemName, const std::string& status)
 {
     // The item name must be valid.
@@ -222,6 +112,128 @@ shpvoid SetInvItemStatus(const std::string& itemName, const std::string& status)
     return 0;
 }
 RegFunc2(SetInvItemStatus, void, string, string, IMMEDIATE, REL_FUNC);
+
+int DoesGabeHaveInvItem(const std::string& itemName)
+{
+    // This function does work with invalid inventory item names.
+    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem("Gabriel", itemName);
+    return hasItem ? 1 : 0;
+}
+RegFunc1(DoesGabeHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
+
+int DoesGraceHaveInvItem(const std::string& itemName)
+{
+    // This function does work with invalid inventory item names.
+    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem("Grace", itemName);
+    return hasItem ? 1 : 0;
+}
+RegFunc1(DoesGraceHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
+
+shpvoid EgoTakeInvItem(const std::string& itemName)
+{
+    // It must be a valid inventory item.
+    if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
+    {
+        Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
+        return 0;
+    }
+
+    // Add to inventory of Ego.
+    const std::string& egoName = Scene::GetEgoName();
+    Services::Get<InventoryManager>()->AddInventoryItem(egoName, itemName);
+
+    // This also makes the item active.
+    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, itemName);
+    return 0;
+}
+RegFunc1(EgoTakeInvItem, void, string, IMMEDIATE, REL_FUNC);
+
+int DoesEgoHaveInvItem(const std::string& itemName)
+{
+    // This function does work with invalid inventory item names.
+    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem(Scene::GetEgoName(), itemName);
+    return hasItem ? 1 : 0;
+}
+RegFunc1(DoesEgoHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
+
+shpvoid DumpEgoActiveInvItem()
+{
+    std::string activeItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(Scene::GetEgoName());
+    if(activeItem.empty())
+    {
+        Services::GetReports()->Log("Dump", "Ego active inventory item is 'NONE'.");
+    }
+    else
+    {
+        Services::GetReports()->Log("Dump", "Ego active inventory item is '" + activeItem + "'.");
+    }
+    return 0;
+}
+RegFunc0(DumpEgoActiveInvItem, void, IMMEDIATE, DEV_FUNC);
+
+shpvoid SetEgoActiveInvItem(const std::string& itemName)
+{
+    // It must be a valid inventory item.
+    if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
+    {
+        Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
+        return 0;
+    }
+
+    // If the item we are setting active is not in our inventory, output a warning (but let it go anyway).
+    const std::string& egoName = Scene::GetEgoName();
+    if(!Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName))
+    {
+        Services::GetReports()->Log("Warning", egoName + " does not have " + itemName + ".");
+    }
+
+    // Set the inventory item!
+    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, itemName);
+    return 0;
+}
+RegFunc1(SetEgoActiveInvItem, void, string, IMMEDIATE, REL_FUNC);
+
+int IsActiveInvItem(const std::string& itemName)
+{
+    std::string activeItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(Scene::GetEgoName());
+    if(StringUtil::EqualsIgnoreCase(activeItem, itemName))
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+RegFunc1(IsActiveInvItem, int, string, IMMEDIATE, REL_FUNC);
+
+shpvoid ShowInventory()
+{
+    Services::Get<InventoryManager>()->ShowInventory();
+    return 0;
+}
+RegFunc0(ShowInventory, void, IMMEDIATE, REL_FUNC);
+
+shpvoid HideInventory()
+{
+    Services::Get<InventoryManager>()->HideInventory();
+    return 0;
+}
+RegFunc0(HideInventory, void, IMMEDIATE, REL_FUNC);
+
+shpvoid InventoryInspect(const std::string& itemName)
+{
+    Services::Get<InventoryManager>()->InventoryInspect(itemName);
+    return 0;
+}
+RegFunc1(InventoryInspect, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid InventoryUninspect()
+{
+    Services::Get<InventoryManager>()->InventoryUninspect();
+    return 0;
+}
+RegFunc0(InventoryUninspect, void, IMMEDIATE, REL_FUNC);
 
 int IsTopLayerInventory()
 {
