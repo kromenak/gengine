@@ -8,16 +8,12 @@
 #include "Frustum.h"
 #include "GEngine.h"
 #include "GKActor.h"
-#include "GKProp.h"
 #include "Heading.h"
-#include "MeshRenderer.h"
-#include "Quaternion.h"
 #include "Ray.h"
 #include "Scene.h"
 #include "Services.h"
 #include "StringUtil.h"
 #include "Vector3.h"
-#include "VertexAnimator.h"
 #include "WalkerBoundary.h"
 
 TYPE_DEF_CHILD(Component, Walker);
@@ -63,6 +59,9 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
 {
     mWalkToSeeTarget = target;
 
+    // Be sure to save finish callback in this case - it usually happens in walk to.
+    mFinishedPathCallback = finishCallback;
+
     // Not from autoscript, for sure.
     mFromAutoscript = false;
 
@@ -71,35 +70,34 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
     Vector3 facingDir;
     if(IsWalkToSeeTargetInView(facingDir))
     {
-        // Be sure to save finish callback in this case - it usually happens in walk to.
-        mFinishedPathCallback = finishCallback;
+        WalkOp currentWalkOp = GetCurrentWalkOp();
 
-        // Clear current walk.
-        bool wasMidWalk = IsMidWalk();
+        // Time to create a new walk plan.
         mWalkActions.clear();
 
-        // If mid-walk, we need to stop walking before turning.
-        if(wasMidWalk)
+        // We definitely need a turn-to-face.
+        mTurnToFaceDir = facingDir;
+        mWalkActions.push_back(WalkOp::TurnToFace);
+
+        // If we were walking, we no longer need to!
+        // We should stop our walk, play walk end anim, and do the turn to face.
+        if(currentWalkOp > WalkOp::None && currentWalkOp < WalkOp::FollowPathEnd)
         {
-            WalkAction stopWalkAction;
-            stopWalkAction.op = WalkOp::FollowPathEnd;
-            mWalkActions.push_back(stopWalkAction);
+            StopAllWalkAnimations();
+            mWalkActions.push_back(WalkOp::FollowPathEnd);
         }
 
-        // No need to walk, but do turn to face the thing.
-        WalkAction turnAction;
-        turnAction.op = WalkOp::TurnToFace;
-        turnAction.facingDir = facingDir;
-        mWalkActions.push_back(turnAction);
-
         // OK, walk sequence has been created - let's start doing it!
-        NextAction();
+        if(currentWalkOp != GetCurrentWalkOp())
+        {
+            NextAction();
+        }
     }
     else
     {
         // Specify a "dummy" heading here so that the "turn to face" action is put into the walk plan.
         // Later on, when the object comes into view, we'll replace this with the actual direction to turn.
-        WalkTo(target->GetPosition(), Heading::FromDegrees(0.0f), finishCallback);
+        WalkToInternal(target->GetPosition(), Heading::FromDegrees(0.0f), finishCallback, false);
     }
 }
 
@@ -108,7 +106,7 @@ void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const
     // For now, we can only track one "exit region" request at a time. So clear other if set.
     if(mExitRegionCallback != nullptr)
     {
-        auto callback = mExitRegionCallback;
+        std::function<void()> callback = mExitRegionCallback;
         mExitRegionCallback = nullptr;
         callback();
     }
@@ -125,17 +123,13 @@ void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const
 void Walker::SkipToEnd()
 {
     // If not walking, or at the end of the walk, nothing to skip.
-    if(!IsWalking() || mWalkActions.back().op == WalkOp::FollowPathEnd || mWalkActions.back().op == WalkOp::TurnToFace)
+    if(!IsWalking() || mWalkActions.back() == WalkOp::FollowPathEnd || mWalkActions.back() == WalkOp::TurnToFace)
     {
         return;
     }
 
-    // Stop current animation, if any. This ensures any complex walk anim (like turn left/right) doesn't continue.
-    if(mCurrentWalkAnim != nullptr)
-    {
-        GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCurrentWalkAnim);
-        mCurrentWalkAnim = nullptr;
-    }
+    // Stop all walk animations, since we're about to force the walk end anim to play.
+    StopAllWalkAnimations();
 
     // Sample walk start anim to ensure 3d model is in a sane default state, facing straight ahead.
     GEngine::Instance()->GetScene()->GetAnimator()->Sample(mWalkStartAnim, 0);
@@ -157,7 +151,7 @@ void Walker::SkipToEnd()
 
     // Remove all walk ops except for the "follow path end" op.
     bool poppedAction = false;
-    while(!mWalkActions.empty() && mWalkActions.back().op != WalkOp::FollowPathEnd)
+    while(!mWalkActions.empty() && mWalkActions.back() != WalkOp::FollowPathEnd)
     {
         mWalkActions.pop_back();
         poppedAction = true;
@@ -197,7 +191,8 @@ void Walker::OnUpdate(float deltaTime)
     }
 
     // Process outstanding walk actions.
-    if(mWalkActions.size() > 0)
+    WalkOp currentWalkOp = GetCurrentWalkOp();
+    if(currentWalkOp != WalkOp::None)
     {
         // Kind of a HACK: if we're walking, and action manager is skipping, move to end of movement ASAP.
         // Without this, walks during fast-forwards can get stuck and cause the game to freeze.
@@ -214,14 +209,13 @@ void Walker::OnUpdate(float deltaTime)
         mGKOwner->SnapToFloor();
 
         // Handle the current walk action.
-        WalkAction& currentAction = mWalkActions.back();
-        if(currentAction.op == WalkOp::FollowPathStart)
+        if(currentWalkOp == WalkOp::FollowPathStart)
         {
             // Possible to finish path while still in the start phase, for very short paths.
             if(AdvancePath())
             {
                 // In this case, we want to skip all follow path bits and go right to "follow path end".
-                while(mWalkActions.size() > 0 && mWalkActions.back().op != WalkOp::FollowPathEnd)
+                while(GetCurrentWalkOp() != WalkOp::FollowPathEnd)
                 {
                     mWalkActions.pop_back();
                 }
@@ -231,10 +225,10 @@ void Walker::OnUpdate(float deltaTime)
             {
                 Vector3 toNext = mPath.back() - GetOwner()->GetPosition();
                 toNext.y = 0.0f;
-                TurnToFace(deltaTime, GetOwner()->GetForward(), toNext.Normalize(), kWalkTurnSpeed);
+                TurnToFace(deltaTime, toNext.Normalize(), kWalkTurnSpeed);
             }
         }
-        else if(currentAction.op == WalkOp::FollowPathStartTurnLeft || currentAction.op == WalkOp::FollowPathStartTurnRight)
+        else if(currentWalkOp == WalkOp::FollowPathStartTurnLeft || currentWalkOp == WalkOp::FollowPathStartTurnRight)
         {
             if(!AdvancePath())
             {
@@ -244,20 +238,18 @@ void Walker::OnUpdate(float deltaTime)
                 {
                     Vector3 toNext = mPath.back() - GetOwner()->GetPosition();
                     toNext.y = 0.0f;
-                    TurnToFace(deltaTime, GetOwner()->GetForward(), toNext.Normalize(), kWalkTurnSpeed);
+                    TurnToFace(deltaTime, toNext.Normalize(), kWalkTurnSpeed);
                 }
             }
         }
-        else if(currentAction.op == WalkOp::FollowPath)
+        else if(currentWalkOp == WalkOp::FollowPath)
         {
             // If we have a "walk to see" target, check whether it has come into view.
             Vector3 facingDir;
             if(IsWalkToSeeTargetInView(facingDir))
             {
                 // Make sure final action is a "turn to face" using this facing dir.
-                assert(mWalkActions[0].op == WalkOp::TurnToFace);
-                mWalkActions[0].facingDir = facingDir;
-                
+                mTurnToFaceDir = facingDir;
                 PopAndNextAction();
             }
             else if(AdvancePath()) // Otherwise, see if finished following path.
@@ -266,10 +258,9 @@ void Walker::OnUpdate(float deltaTime)
                 // So, force-set it to something reasonable!
                 if(mWalkToSeeTarget != nullptr)
                 {
-                    assert(mWalkActions[0].op == WalkOp::TurnToFace);
                     Vector3 dir = mWalkToSeeTarget->GetPosition() - mGKOwner->GetPosition();
                     dir.y = 0.0f;
-                    mWalkActions[0].facingDir = Vector3::Normalize(dir);
+                    mTurnToFaceDir = Vector3::Normalize(dir);
                 }
 
                 // Path is finished - move on to next step in sequence.
@@ -288,18 +279,17 @@ void Walker::OnUpdate(float deltaTime)
                     animParams.fromAutoScript = mFromAutoscript;
                     animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
                     GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
-                    mCurrentWalkAnim = mWalkLoopAnim;
                 }
 
                 // Still following path - turn to face next node in path.
                 Vector3 toNext = mPath.back() - GetOwner()->GetPosition();
                 toNext.y = 0.0f;
-                TurnToFace(deltaTime, GetOwner()->GetForward(), toNext.Normalize(), kWalkTurnSpeed);
+                TurnToFace(deltaTime, toNext.Normalize(), kWalkTurnSpeed);
             }
         }
-        else if(currentAction.op == WalkOp::TurnToFace)
+        else if(currentWalkOp == WalkOp::TurnToFace)
         {
-            if(TurnToFace(deltaTime, GetOwner()->GetForward(), currentAction.facingDir, kTurnSpeed))
+            if(TurnToFace(deltaTime, mTurnToFaceDir, kTurnSpeed))
             {
                 // Done turning to face, do next action in sequence.
                 PopAndNextAction();
@@ -317,7 +307,8 @@ void Walker::OnUpdate(float deltaTime)
         else if(mWalkerBoundary == nullptr || mWalkerBoundary->GetRegionIndex(GetOwner()->GetPosition()) != mExitRegionIndex)
         {
             mExitRegionIndex = -1;
-            auto callback = mExitRegionCallback;
+
+            std::function<void()> callback = mExitRegionCallback;
             mExitRegionCallback = nullptr;
             callback();
         }
@@ -332,185 +323,103 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
     // Save if from autoscript.
     mFromAutoscript = fromAutoscript;
 
-    // It's possible for a "walk to" to be received in the middle of another walk sequence.
-    // In that case, the current walk sequence is canceled and a new one is constructed.
-    bool wasMidWalk = IsMidWalk();
+    // Save finish callback.
+    mFinishedPathCallback = finishCallback;
 
-    // Ok, starting a new walk plan.
+    // Time to create a new walk plan.
+    WalkOp currentWalkOp = GetCurrentWalkOp();
     mWalkActions.clear();
 
     // If heading is specified, save "turn to face" action.
     if(heading.IsValid())
     {
-        WalkAction turnAction;
-        turnAction.op = WalkOp::TurnToFace;
-        turnAction.facingDir = heading.ToDirection();
-        mWalkActions.push_back(turnAction);
+        mTurnToFaceDir = heading.ToDirection();
+        mWalkActions.push_back(WalkOp::TurnToFace);
     }
 
     // Do we need to walk?
-    bool doNextAction = true;
     if(!AtPosition(position))
     {
-        // We will walk, so save the "walk end" action.
-        WalkAction endWalkAction;
-        endWalkAction.op = WalkOp::FollowPathEnd;
-        mWalkActions.push_back(endWalkAction);
-
         // Calculate a path.
-        if(!CalculatePath(GetOwner()->GetPosition(), position))
-        {
-            //TODO: Force to position?
-            if(finishCallback != nullptr) { finishCallback(); }
-            return;
-        }
+        CalculatePath(GetOwner()->GetPosition(), position);
 
-        // Ok, we have a path (in mPath) that we can follow.
-        // One interesting bit we do is to shorten the path if a lot of nodes are off-screen.
-        // So if 90% of the path is behind the camera, the walker can just skip to the node right before the camera and walk from there!
-        size_t originalPathSize = mPath.size();
-        if(!fromAutoscript)
+        // Attempt to shorten the path, if applicable, to speed up the walk process.
+        bool shortened = CalculateShortenedPath();
+
+        // We will walk, so there's always a "walk end" action.
+        mWalkActions.push_back(WalkOp::FollowPathEnd);
+
+        // We need an action to follow the path.
+        mWalkActions.push_back(WalkOp::FollowPath);
+
+        // We need a start walk, but NOT if the path was shortened.
+        // In that case, the walker warps to the nearest offscreen position, so the start walk can be skipped.
+        if(!shortened)
         {
-            Vector3 lastPoppedPathPos;
-            Camera* camera = Services::GetRenderer()->GetCamera();
-            Frustum frustum = camera->GetWorldSpaceViewFrustum();
-            while(mPath.size() > 1)
+            // Need to decide which start anim to play.
+            WalkOp startOp = WalkOp::FollowPathStart;
+
+            bool hasTurnToStartAnims = mWalkStartTurnLeftAnim != nullptr && mWalkStartTurnRightAnim != nullptr;
+            if(hasTurnToStartAnims)
             {
-                // Most basic check: skip path node if not within the frustum.
-                bool skipPathNode = false;
-                if(!frustum.ContainsPoint(mPath.back()))
+                Vector3 toNext = (mPath.front() - GetOwner()->GetPosition()).Normalize();
+                if(Vector3::Dot(GetOwner()->GetForward(), toNext) < -0.5f)
                 {
-                    skipPathNode = true;
-                }
-
-                // If we think we want to skip this path node (because its outside view frustum), consider some edge cases.
-                // First, the path node is at floor level, but walkers can be rather tall.
-                // See if the walker's head will be visible in the frustum, despite the path pos being outside it.
-                if(skipPathNode)
-                {
-                    Vector3 headPosAtNode = mPath.back() + Vector3::UnitY * mCharConfig->walkerHeight;
-                    if(frustum.ContainsPoint(headPosAtNode))
+                     // For initial direction to turn, let's use the goal node direction.
+                    // Just thinking about the real world...you usually turn towards your goal, right?
+                    Vector3 toLastDir = (mPath.front() - GetOwner()->GetPosition()).Normalize();
+                    Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toLastDir);
+                    if(cross.y > 0)
                     {
-                        skipPathNode = false;
+                        startOp = WalkOp::FollowPathStartTurnRight;
+                    }
+                    else
+                    {
+                        startOp = WalkOp::FollowPathStartTurnLeft;
                     }
                 }
-
-                // If the path node is fairly close to the camera position, don't skip it.
-                // This helps to ensure that the walker doesn't "pop in" when coming in from behind the camera.
-                if(skipPathNode)
-                {
-                    const float kDontSkipNodeDist = 75.0f;
-                    float distSq = (mPath.back() - camera->GetOwner()->GetPosition()).GetLengthSq();
-                    if(distSq < kDontSkipNodeDist * kDontSkipNodeDist)
-                    {
-                        skipPathNode = false;
-                    }
-                }
-
-                // Ok, all cases checked!
-                // If path node is skipped, get rid of it.
-                if(skipPathNode)
-                {
-                    lastPoppedPathPos = mPath.back();
-                    mPath.pop_back();
-                }
-                else
-                {
-                    // This path node WAS NOT skipped, stop shortening path!
-                    // But push the last popped position back onto the path (so that walker starts walking _just_ off-screen).
-                    if(mPath.size() < originalPathSize)
-                    {
-                        mPath.push_back(lastPoppedPathPos);
-                    }
-                    break;
-                }
             }
-        }
 
-        // If path was shortened, warp walker directly to last spot.
-        bool warp = mPath.size() < originalPathSize;
-        if(warp)
-        {
-            std::cout << "Warp to " << mPath.back() << std::endl;
-            mGKOwner->SetPosition(mPath.back());
-
-            if(mPath.size() > 1)
-            {
-                Vector3 dir = Vector3::Normalize(mPath[mPath.size() - 2] - mPath.back());
-                std::cout << "Warp heading " << dir << ", " << Heading::FromDirection(dir) << std::endl;
-                mGKOwner->SetHeading(Heading::FromDirection(dir));
-            }
-        }
-
-        // Follow the path.
-        WalkAction followPathAction;
-        followPathAction.op = WalkOp::FollowPath;
-        mWalkActions.push_back(followPathAction);
-
-        // If did not warp, we need to determine the "start walk" action.
-        if(!warp)
-        {
-            // If first path node is in front of the walker, no need to play turn anims.
-            Vector3 toNext = (mPath.front() - GetOwner()->GetPosition()).Normalize();
-            if(Vector3::Dot(GetOwner()->GetForward(), toNext) > -0.5f)
-            {
-                // Add start walk action, but ONLY IF wasn't previously mid-walk.
-                // If was already walking and next node is in same direction...just keep walking!
-                if(!wasMidWalk)
-                {
-                    WalkAction startWalkAction;
-                    startWalkAction.op = WalkOp::FollowPathStart;
-                    mWalkActions.push_back(startWalkAction);
-                }
-                else
-                {
-                    // In this case, we were already walking, and not warping - DO NOT play the next action right away!
-                    doNextAction = false;
-                }
-            }
-            else
-            {
-                // First node IS NOT in front of walker, so gotta turn using fancy anims.
-
-                // So, we need to play start walk anim while also turning to face next node.
-                WalkAction startWalkTurnAction;
-                startWalkTurnAction.facingDir = toNext;
-
-                // For initial direction to turn, let's use the goal node direction.
-                // Just thinking about the real world...you usually turn towards your goal, right?
-                Vector3 toLastDir = (mPath.front() - GetOwner()->GetPosition()).Normalize();
-                Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toLastDir);
-                if(cross.y > 0)
-                {
-                    startWalkTurnAction.op = WalkOp::FollowPathStartTurnRight;
-                }
-                else
-                {
-                    startWalkTurnAction.op = WalkOp::FollowPathStartTurnLeft;
-                }
-
-                // Make sure this actor has animations for turning left/right.
-                // A lot of actors actually don't...in which case normal starts after all.
-                if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnRight && mWalkStartTurnRightAnim == nullptr)
-                {
-                    startWalkTurnAction.op = WalkOp::FollowPathStart;
-                }
-                else if(startWalkTurnAction.op == WalkOp::FollowPathStartTurnLeft && mWalkStartTurnLeftAnim == nullptr)
-                {
-                    startWalkTurnAction.op = WalkOp::FollowPathStart;
-                }
-
-                // Let's do it!
-                mWalkActions.push_back(startWalkTurnAction);
-            }
+            // Ok, we chose a start walk op.
+            mWalkActions.push_back(startOp);
         }
     }
 
-    // Save finish callback.
-    mFinishedPathCallback = finishCallback;
+    // OK, so full walk sequence is created.
+    // However, we need to account for starting a new walk sequence while a previous one was already in progress!
+    bool doNextAction = true;
+    {
+        // We are already doing a start anim, so we can skip doing one now.
+        // When the current walk start anim finishes, it will continue the walk with the new path.
+        if(currentWalkOp >= WalkOp::FollowPathStart && currentWalkOp <= WalkOp::FollowPathStartTurnRight)
+        {
+            doNextAction = false;
+        }
+
+        // We are already walking.
+        // We can completely skip the start anims, and just wait for the current walk anim to finish.
+        if(currentWalkOp == WalkOp::FollowPath)
+        {
+            while(GetCurrentWalkOp() < WalkOp::FollowPath)
+            {
+                mWalkActions.pop_back();
+            }
+            doNextAction = false;
+        }
+
+        // We are ending a previous walk.
+        // Let's just wait for the walk end anim to finish, and then it can kick off the walk start action in its callback.
+        if(currentWalkOp == WalkOp::FollowPathEnd)
+        {
+            doNextAction = false;
+        }
+
+        // Here, the old walk op was either "turn to face" or "none".
+        // In both cases, we don't really have to do anything. But we do want to play the next action.
+    }
     
     // OK, walk sequence has been created - let's start doing it!
-    //std::cout << "Walk Sequence Begin!" << std::endl;
+    //std::cout << "Walk Sequence Begin" << std::endl;
     if(doNextAction)
     {
         NextAction();
@@ -522,13 +431,10 @@ void Walker::PopAndNextAction()
     // Pop action from sequence.
     if(mWalkActions.size() > 0)
     {
-        mPrevWalkOp = mWalkActions.back().op;
+        mPrevWalkOp = mWalkActions.back();
         mWalkActions.pop_back();
     }
 
-    // Clear current animation.
-    mCurrentWalkAnim = nullptr;
-    
     // Go to next action.
     NextAction();
 }
@@ -538,84 +444,78 @@ void Walker::NextAction()
     mCurrentWalkActionTimer = 0.0f;
     
     // Do next action in sequence, if any.
-    if(mWalkActions.size() > 0)
+    WalkOp currentWalkOp = GetCurrentWalkOp();
+    if(currentWalkOp == WalkOp::FollowPathStart)
     {
-        if(mWalkActions.back().op == WalkOp::FollowPathStart)
-        {
-            //std::cout << "Follow Path Start" << std::endl;
+        //std::cout << "Follow Path Start" << std::endl;
             
-            AnimParams animParams;
-            animParams.animation = mWalkStartAnim;
-            animParams.allowMove = true;
-            animParams.fromAutoScript = mFromAutoscript;
-            animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
-            mCurrentWalkAnim = mWalkStartAnim;
-        }
-        else if(mWalkActions.back().op == WalkOp::FollowPathStartTurnLeft)
-        {
-            //std::cout << "Follow Path Start (Turn Left)" << std::endl;
-            
-            AnimParams animParams;
-            animParams.animation = mWalkStartTurnLeftAnim;
-            animParams.allowMove = true;
-            animParams.fromAutoScript = mFromAutoscript;
-            animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
-            mCurrentWalkAnim = mWalkStartTurnLeftAnim;
-        }
-        else if(mWalkActions.back().op == WalkOp::FollowPathStartTurnRight)
-        {
-            //std::cout << "Follow Path Start (Turn Right)" << std::endl;
-            
-            AnimParams animParams;
-            animParams.animation = mWalkStartTurnRightAnim;
-            animParams.allowMove = true;
-            animParams.fromAutoScript = mFromAutoscript;
-            animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
-            mCurrentWalkAnim = mWalkStartTurnRightAnim;
-        }
-        else if(mWalkActions.back().op == WalkOp::FollowPath)
-        {
-            //std::cout << "Follow Path" << std::endl;
-            
-            AnimParams animParams;
-            animParams.animation = mWalkLoopAnim;
-            animParams.allowMove = true;
-            animParams.fromAutoScript = mFromAutoscript;
-            animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
-            
-            if(mPrevWalkOp == WalkOp::FollowPathStartTurnRight)
-            {
-                animParams.startFrame = 10;
-            }
-            
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
-            mCurrentWalkAnim = mWalkLoopAnim;
-        }
-        else if(mWalkActions.back().op == WalkOp::FollowPathEnd)
-        {
-            //std::cout << "Follow Path End" << std::endl;
-            GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartAnim);
-            GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
-
-            // Play walk stop anim.
-            AnimParams animParams;
-            animParams.animation = mCharConfig->walkStopAnim;
-            animParams.allowMove = true;
-            animParams.fromAutoScript = mFromAutoscript;
-            animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
-            mCurrentWalkAnim = mCharConfig->walkStopAnim;
-        }
-        else if(mWalkActions.back().op == WalkOp::TurnToFace)
-        {
-            //std::cout << "Turn To Face" << std::endl;
-            // Handled in Update
-        }
+        AnimParams animParams;
+        animParams.animation = mWalkStartAnim;
+        animParams.allowMove = true;
+        animParams.fromAutoScript = mFromAutoscript;
+        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
     }
-    else
+    else if(currentWalkOp == WalkOp::FollowPathStartTurnLeft)
+    {
+        //std::cout << "Follow Path Start (Turn Left)" << std::endl;
+            
+        AnimParams animParams;
+        animParams.animation = mWalkStartTurnLeftAnim;
+        animParams.allowMove = true;
+        animParams.fromAutoScript = mFromAutoscript;
+        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+    }
+    else if(currentWalkOp == WalkOp::FollowPathStartTurnRight)
+    {
+        //std::cout << "Follow Path Start (Turn Right)" << std::endl;
+            
+        AnimParams animParams;
+        animParams.animation = mWalkStartTurnRightAnim;
+        animParams.allowMove = true;
+        animParams.fromAutoScript = mFromAutoscript;
+        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+    }
+    else if(currentWalkOp == WalkOp::FollowPath)
+    {
+        //std::cout << "Follow Path" << std::endl;
+            
+        AnimParams animParams;
+        animParams.animation = mWalkLoopAnim;
+        animParams.allowMove = true;
+        animParams.fromAutoScript = mFromAutoscript;
+        animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
+
+        //TODO: Trying to make the transition from turn-right to walk anim more smooth, but this is probably not right.
+        if(mPrevWalkOp == WalkOp::FollowPathStartTurnRight)
+        {
+            animParams.startFrame = 10;
+        }
+            
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+    }
+    else if(currentWalkOp == WalkOp::FollowPathEnd)
+    {
+        //std::cout << "Follow Path End" << std::endl;
+        GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartAnim);
+        GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
+
+        // Play walk stop anim.
+        AnimParams animParams;
+        animParams.animation = mCharConfig->walkStopAnim;
+        animParams.allowMove = true;
+        animParams.fromAutoScript = mFromAutoscript;
+        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+    }
+    else if(currentWalkOp == WalkOp::TurnToFace)
+    {
+        //std::cout << "Turn To Face" << std::endl;
+        // Handled in Update
+    }
+    else // WalkOp::None
     {
         //std::cout << "Walk Sequence Done!" << std::endl;
         
@@ -629,7 +529,6 @@ void Walker::OnWalkAnimFinished()
     // Set flag so that we continue the walk anim during the next update loop.
     // A flag-based system is needed (rather than just continuing right here) to avoid infinite loops with high delta time values!
     mNeedContinueWalkAnim = true;
-    mCurrentWalkAnim = nullptr;
 }
 
 void Walker::OnWalkToFinished()
@@ -650,13 +549,13 @@ void Walker::OnWalkToFinished()
     // Call finished callback.
     if(mFinishedPathCallback != nullptr)
     {
-        auto callback = mFinishedPathCallback;
+        std::function<void()> callback = mFinishedPathCallback;
         mFinishedPathCallback = nullptr;
         callback();
     }
 }
 
-bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
+bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
 {
     // Not in view if it doesn't exist!
     if(mWalkToSeeTarget == nullptr) { return false; }
@@ -686,11 +585,9 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir)
     return false;
 }
 
-bool Walker::CalculatePath(const Vector3& startPos, const Vector3& endPos)
+void Walker::CalculatePath(const Vector3& startPos, const Vector3& endPos)
 {
-    if(mWalkerBoundary == nullptr) { return false; }
-    
-    if(mWalkerBoundary->FindPath(startPos, endPos, mPath))
+    if(mWalkerBoundary != nullptr && mWalkerBoundary->FindPath(startPos, endPos, mPath))
     {
         // Try to reduce the number of nodes in the path.
         // The walker nodes are very close to one another.
@@ -746,7 +643,89 @@ bool Walker::CalculatePath(const Vector3& startPos, const Vector3& endPos)
         mPath.push_back(endPos);
         mPath.push_back(startPos);
     }
-    return true;
+}
+
+bool Walker::CalculateShortenedPath()
+{
+    // Autoscript paths should NOT be shortened (or...should this be non-ego paths?).
+    if(mFromAutoscript)
+    {
+        return false;
+    }
+
+    // Ok, we have a path (in mPath) that we can follow.
+    // But if 90% of the path is behind the camera, the walker can just skip to the node right before the camera and walk from there!
+    size_t originalPathSize = mPath.size();
+    Vector3 lastPoppedPathPos;
+    Camera* camera = Services::GetRenderer()->GetCamera();
+    Frustum frustum = camera->GetWorldSpaceViewFrustum();
+    while(mPath.size() > 1)
+    {
+        // Most basic check: skip path node if not within the frustum.
+        bool skipPathNode = false;
+        if(!frustum.ContainsPoint(mPath.back()))
+        {
+            skipPathNode = true;
+        }
+
+        // If we think we want to skip this path node (because its outside view frustum), consider some edge cases.
+        // First, the path node is at floor level, but walkers can be rather tall.
+        // See if the walker's head will be visible in the frustum, despite the path pos being outside it.
+        if(skipPathNode)
+        {
+            Vector3 headPosAtNode = mPath.back() + Vector3::UnitY * mCharConfig->walkerHeight;
+            if(frustum.ContainsPoint(headPosAtNode))
+            {
+                skipPathNode = false;
+            }
+        }
+
+        // If the path node is fairly close to the camera position, don't skip it.
+        // This helps to ensure that the walker doesn't "pop in" when coming in from behind the camera.
+        if(skipPathNode)
+        {
+            const float kDontSkipNodeDist = 75.0f;
+            float distSq = (mPath.back() - camera->GetOwner()->GetPosition()).GetLengthSq();
+            if(distSq < kDontSkipNodeDist * kDontSkipNodeDist)
+            {
+                skipPathNode = false;
+            }
+        }
+
+        // Ok, all cases checked!
+        // If path node is skipped, get rid of it.
+        if(skipPathNode)
+        {
+            lastPoppedPathPos = mPath.back();
+            mPath.pop_back();
+        }
+        else
+        {
+            // This path node WAS NOT skipped, stop shortening path!
+            // But push the last popped position back onto the path (so that walker starts walking _just_ off-screen).
+            if(mPath.size() < originalPathSize)
+            {
+                mPath.push_back(lastPoppedPathPos);
+            }
+            break;
+        }
+    }
+
+    // If path was shortened, warp walker directly to last spot.
+    bool pathWasShortened = mPath.size() < originalPathSize;
+    if(pathWasShortened)
+    {
+        std::cout << "Warp to " << mPath.back() << std::endl;
+        mGKOwner->SetPosition(mPath.back());
+
+        if(mPath.size() > 1)
+        {
+            Vector3 dir = Vector3::Normalize(mPath[mPath.size() - 2] - mPath.back());
+            std::cout << "Warp heading " << dir << ", " << Heading::FromDirection(dir) << std::endl;
+            mGKOwner->SetHeading(Heading::FromDirection(dir));
+        }
+    }
+    return pathWasShortened;
 }
 
 bool Walker::AdvancePath()
@@ -780,15 +759,16 @@ bool Walker::AdvancePath()
     return mPath.empty();
 }
 
-bool Walker::TurnToFace(float deltaTime, const Vector3& currentDir, const Vector3& desiredDir, float turnSpeed, int turnDir)
+bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSpeed)
 {
     bool doneTurning = false;
+    Vector3 currentDir = GetOwner()->GetForward();
     
     // What angle do I need to rotate to face the desired direction?
     float currToDesiredAngle = Math::Acos(Vector3::Dot(currentDir, desiredDir));
     if(currToDesiredAngle > kAtHeadingRadians)
     {
-        float rotateDirection = turnDir;
+        float rotateDirection = 0;
         if(rotateDirection == 0)
         {
             // Which way do I rotate to get to facing direction I want?
@@ -821,4 +801,13 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& currentDir, const Vector
         doneTurning = true;
     }
     return doneTurning;
+}
+
+void Walker::StopAllWalkAnimations()
+{
+    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartAnim, true);
+    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartTurnLeftAnim, true);
+    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartTurnRightAnim, true);
+    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkLoopAnim, true);
+    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkStopAnim, true);
 }

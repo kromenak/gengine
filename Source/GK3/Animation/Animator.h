@@ -72,7 +72,7 @@ public:
 	// Animation Playback
     void Start(Animation* animation, std::function<void()> finishCallback = nullptr);
     void Start(const AnimParams& animParams);
-	void Stop(Animation* animation);
+	void Stop(Animation* animation, bool skipFinishCallback = false);
     void StopAll();
     
 	// Animation Sampling

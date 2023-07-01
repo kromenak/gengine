@@ -45,7 +45,7 @@ void Animator::Start(const AnimParams& animParams)
     }
 }
 
-void Animator::Stop(Animation* animation)
+void Animator::Stop(Animation* animation, bool skipFinishCallback)
 {
 	if(animation == nullptr) { return; }
 
@@ -55,6 +55,12 @@ void Animator::Stop(Animation* animation)
         if(!animState.done && animState.params.animation == animation)
         {
             animState.Stop();
+
+            // Clear the finish callback if we don't want it to be executed.
+            if(skipFinishCallback)
+            {
+                animState.params.finishCallback = nullptr;
+            }
         }
     }
 }
