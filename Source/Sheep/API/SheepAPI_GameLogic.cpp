@@ -4,6 +4,7 @@
 #include "ActionManager.h"
 #include "GameProgress.h"
 #include "Random.h"
+#include "Scene.h"
 #include "Services.h"
 #include "SheepManager.h"
 #include "Timers.h"
@@ -236,10 +237,7 @@ RegFunc0(StopVerbCancel, void, IMMEDIATE, REL_FUNC);
 
 shpvoid SetGameTimer(const std::string& noun, const std::string& verb, int milliseconds)
 {
-    //TODO: This timer SHOULD NOT proceed if the game is paused or in an inventory screen!
-    Timers::AddTimerMilliseconds(static_cast<unsigned int>(milliseconds), [noun, verb](){
-        Services::Get<ActionManager>()->QueueAction(noun, verb);
-    });
+    GEngine::Instance()->GetScene()->SetGameTimer(noun, verb, milliseconds * 0.001f);
     return 0;
 }
 RegFunc3(SetGameTimer, void, string, string, int, IMMEDIATE, REL_FUNC);

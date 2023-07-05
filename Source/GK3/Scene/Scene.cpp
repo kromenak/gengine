@@ -291,6 +291,8 @@ void Scene::Init()
 
 void Scene::Update(float deltaTime)
 {
+    if(mPaused) { return; }
+
     //TEMP: for debug visualization of BSP ambient light sources.
     //mSceneData->GetBSP()->DebugDrawAmbientLights(mEgo->GetPosition());
 
@@ -322,6 +324,19 @@ void Scene::Update(float deltaTime)
                 // If so, treat the label as a noun (e.g. GET_CLOSE) with hardcoded "WALK" verb.
                 Services::Get<ActionManager>()->ExecuteAction(trigger->label, "WALK");
             }
+        }
+    }
+
+    // Decrement any game timers.
+    for(int i = mGameTimers.size() - 1; i >= 0; --i)
+    {
+        mGameTimers[i].secondsRemaining -= deltaTime;
+        
+        // If another action is already playing, we wait until it is finished before executing this one (and removing it from the list).
+        if(mGameTimers[i].secondsRemaining <= 0.0f && !Services::Get<ActionManager>()->IsActionPlaying())
+        {
+            Services::Get<ActionManager>()->ExecuteAction(mGameTimers[i].noun, mGameTimers[i].verb);
+            mGameTimers.erase(mGameTimers.begin() + i);
         }
     }
 }
@@ -721,8 +736,18 @@ bool Scene::DoesSceneModelExist(const std::string& modelName) const
 	return mSceneData->GetBSP()->Exists(modelName);
 }
 
+void Scene::SetGameTimer(const std::string& noun, const std::string& verb, float seconds)
+{
+    mGameTimers.emplace_back();
+    mGameTimers.back().secondsRemaining = seconds;
+    mGameTimers.back().noun = noun;
+    mGameTimers.back().verb = verb;
+}
+
 void Scene::SetPaused(bool paused)
 {
+    mPaused = paused;
+
     // Pause/unpause sound track player.
     if(mSoundtrackPlayer != nullptr)
     {

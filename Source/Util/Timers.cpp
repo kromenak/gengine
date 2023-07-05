@@ -29,7 +29,7 @@
 
 /*static*/ void Timers::AddTimerMilliseconds(unsigned int milliseconds, std::function<void()> finishCallback)
 {
-    return AddTimerSeconds(milliseconds / 1000.0f, finishCallback);
+    return AddTimerSeconds(milliseconds * 0.001f, finishCallback);
 }
 
 /*static*/ void Timers::Update(float deltaTime)
