@@ -22,7 +22,7 @@ public:
     GameProgress();
 
     // Score Tracking
-	int GetMaxScore() const { return kMaxScore; }
+	int GetMaxScore() const { return mMaxScore; }
 	int GetScore() const { return mScore; }
 	void SetScore(int score);
 	void IncreaseScore(int points);
@@ -68,7 +68,7 @@ public:
 	
 private:
 	// Score tracking.
-    const int kMaxScore = 965; //TODO: Should be loaded from GAME.CFG
+    int mMaxScore = 965;
 	int mScore = 0;
 
     // Maps a score change label (e.g. e_110a_r25_tape) to the number of points gained.

@@ -1,5 +1,6 @@
 #include "GameProgress.h"
 
+#include "Config.h"
 #include "GMath.h"
 #include "IniParser.h"
 #include "Localizer.h"
@@ -13,7 +14,7 @@ TYPE_DEF_BASE(GameProgress);
 
 GameProgress::GameProgress()
 {
-    // Parse valid score events (and score amount) int map of score events.
+    // Parse valid score events (and score amount) into map of score events.
     TextAsset* textFile = Services::GetAssets()->LoadText("Scores.txt");
     IniParser parser(textFile->GetText(), textFile->GetTextLength());
     IniSection section;
@@ -28,11 +29,18 @@ GameProgress::GameProgress()
             }
         }
     }
+
+    // Load max score from config file.
+    Config* config = Services::GetAssets()->LoadConfig("GAME.CFG");
+    if(config != nullptr)
+    {
+        mMaxScore = config->GetInt("Logic", "Max Score", mMaxScore);
+    }
 }
 
 void GameProgress::SetScore(int score)
 {
-	mScore = Math::Clamp(score, 0, kMaxScore);
+	mScore = Math::Clamp(score, 0, mMaxScore);
 }
 
 void GameProgress::IncreaseScore(int points)
