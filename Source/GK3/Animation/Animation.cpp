@@ -288,7 +288,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 				if(line.entries.size() < 4) { continue; }
 			
                 // If any optional arguments are present, this is a 3D sound.
-                node->is3D = true;
+                node->is3d = true;
                 
 				// HACK: the next argument might be a model name OR a sound position (x, y, z).
 				// To determine, let's just see if the first char is a digit.

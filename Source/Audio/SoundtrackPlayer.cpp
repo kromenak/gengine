@@ -37,6 +37,13 @@ void PlayingSoundtrack::Stop()
 
 void PlayingSoundtrack::Update(float deltaTime)
 {
+    // If the current node is looping, we can early out - there is NO way to advance past a looping node.
+    // The actual looping behavior is controlled by the audio system.
+    if(mCurrentNodeIndex >= 0 && mSoundtrack->GetNodes()[mCurrentNodeIndex]->IsLooping())
+    {
+        return;
+    }
+
     // Decrement timer. When it gets to zero, we move onto the next node.
     if(mTimer >= 0.0f)
     {
@@ -55,13 +62,6 @@ void PlayingSoundtrack::ProcessNextNode()
     if(nodes.size() == 0)
     {
         mTimer = 0.0f;
-        return;
-    }
-
-    // First off, if current node is looping...just keep doing it! It never stops!
-    if(mCurrentNodeIndex >= 0 && nodes[mCurrentNodeIndex]->IsLooping())
-    {
-        mTimer = nodes[mCurrentNodeIndex]->Execute(mSoundtrack, mSoundtrackNodeResults);
         return;
     }
 

@@ -228,13 +228,17 @@ void ModelVisibilityAnimNode::Sample(int frame)
 
 void SoundAnimNode::Play(AnimationState* animState)
 {
+    // Don't play new sounds during action skip.
     if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
 
-    // This will hold playing sound instance.
-    PlayingSoundHandle soundInstance;
+    // Create play audio params struct.
+    PlayAudioParams playParams;
+    playParams.audio = audio;
+    playParams.audioType = animState->params.isYak ? AudioType::VO : AudioType::SFX;
     
     // If 3D, do a bit more work to determine position.
-    if(is3D)
+    playParams.is3d = is3d;
+    if(is3d)
     {
         // Use specified position by default.
         Vector3 playPosition = position;
@@ -258,31 +262,18 @@ void SoundAnimNode::Play(AnimationState* animState)
                 }
             }
         }
-        
-        if(animState->params.isYak)
-        {
-            soundInstance = Services::GetAudio()->PlayVO3D(audio, playPosition, minDistance, maxDistance);
-        }
-        else
-        {
-            soundInstance = Services::GetAudio()->PlaySFX3D(audio, playPosition, minDistance, maxDistance);
-        }
+
+        playParams.position = playPosition;
+        playParams.minDist = minDistance;
+        playParams.maxDist = maxDistance;
     }
-    else
-    {
-        if(animState->params.isYak)
-        {
-            soundInstance = Services::GetAudio()->PlayVO(audio);
-        }
-        else
-        {
-            soundInstance = Services::GetAudio()->PlaySFX(audio);
-        }
-    }
+
+    // This will hold playing sound instance.
+    PlayingSoundHandle soundHandle = Services::GetAudio()->Play(playParams);
     
     // Set volume after sound is created.
     // Volume is 0-100, but audio system expects 0.0-1.0.
-    soundInstance.SetVolume(volume * 0.01f);
+    soundHandle.SetVolume(volume * 0.01f);
 }
 
 namespace
@@ -305,7 +296,16 @@ namespace
             // The min/max distances for footsteps are derived from experimenting with the original game.
             const int kMinFootstepDist = 30.0f;
             const int kMaxFootstepDist = 400.0f;
-            Services::GetAudio()->PlaySFX3D(footAudio, actor->GetWorldPosition(), kMinFootstepDist, kMaxFootstepDist);
+
+            PlayAudioParams playParams;
+            playParams.audio = footAudio;
+            playParams.audioType = AudioType::SFX;
+
+            playParams.is3d = true;
+            playParams.position = actor->GetWorldPosition();
+            playParams.minDist = kMinFootstepDist;
+            playParams.maxDist = kMaxFootstepDist;
+            Services::GetAudio()->Play(playParams);
         }
     }
 }

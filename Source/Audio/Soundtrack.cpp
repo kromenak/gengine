@@ -37,48 +37,28 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
     // Definitely want to play the sound, if it exists.
     Audio* audio = Services::GetAssets()->LoadAudio(soundName, soundtrack->GetScope());
     if(audio == nullptr) { return 0; }
-    
-    // Play method differs based on sound type and whether its 3D or not.
-    switch(soundtrack->GetSoundType())
-    {
-    case AudioType::Music:
-        // Going to assume music is never 3D for now...
-        outResults.soundHandle = Services::GetAudio()->PlayMusic(audio, fadeInTimeMs * 0.001f);
-        break;
 
-    case AudioType::Ambient:
-        if(is3d)
-        {
-            outResults.soundHandle = Services::GetAudio()->PlayAmbient3D(audio, position, minDist, maxDist);
-        }
-        else
-        {
-            outResults.soundHandle = Services::GetAudio()->PlayAmbient(audio, fadeInTimeMs * 0.001f);
-        }
-        break;
-        
-    case AudioType::SFX:
-        if(is3d)
-        {
-            outResults.soundHandle = Services::GetAudio()->PlaySFX3D(audio, position, minDist, maxDist);
-        }
-        else
-        {
-            outResults.soundHandle = Services::GetAudio()->PlaySFX(audio);
-        }
-        break;
-        
-    case AudioType::VO:
-        if(is3d)
-        {
-            outResults.soundHandle = Services::GetAudio()->PlayVO3D(audio, position, minDist, maxDist);
-        }
-        else
-        {
-            outResults.soundHandle = Services::GetAudio()->PlayVO(audio);
-        }
+    // Create audio play params struct.
+    PlayAudioParams playParams;
+    playParams.audio = audio;
+    playParams.audioType = soundtrack->GetSoundType();
+    playParams.fadeInTime = fadeInTimeMs * 0.001f;
+
+    // Handle 3D parameters.
+    playParams.is3d = is3d;
+    if(is3d)
+    {
+        playParams.position = position;
+        playParams.minDist = minDist;
+        playParams.maxDist = maxDist;
     }
 
+    // Set looping or not.
+    playParams.loopCount = loop ? -1 : 0;
+
+    // Get the sound playing!
+    outResults.soundHandle = Services::GetAudio()->Play(playParams);
+    
     // Let the caller know the desired stop method, in case the soundtrack needs to stop while this node is playing.
     outResults.stopMethod = stopMethod;
     outResults.fadeOutTimeMs = fadeOutTimeMs;

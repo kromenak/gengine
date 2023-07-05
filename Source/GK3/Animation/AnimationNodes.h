@@ -126,7 +126,7 @@ struct SoundAnimNode : public AnimNode
 	Audio* audio = nullptr;
     
     // Not 3D unless a model/position is specified.
-    bool is3D = false;
+    bool is3d = false;
 	
 	// 0 = no sound, 100 = max volume
 	int volume = 100;
