@@ -45,6 +45,10 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     introButton->SetPressCallback([](UIButton* button) {
         Services::Get<VideoPlayer>()->Play("intro.bik", true, true, nullptr);
     });
+    if(GEngine::Instance()->IsDemoMode())
+    {
+        introButton->SetCanInteract(false);
+    }
 
     // Add "play" button.
     UIButton* playButton = CreateButton(this, "TITLE_PLAY", -381.0f);
@@ -58,6 +62,10 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     restoreButton->SetPressCallback([](UIButton* button) {
         std::cout << "Restore!" << std::endl;
     });
+    if(GEngine::Instance()->IsDemoMode())
+    {
+        restoreButton->SetCanInteract(false);
+    }
 
     // Add "quit" button.
     UIButton* quitButton = CreateButton(this, "TITLE_QUIT", -135.0f);

@@ -78,3 +78,10 @@ shpvoid TurnLSRPageRight()
     return 0;
 }
 RegFunc0(TurnLSRPageRight, void, IMMEDIATE, REL_FUNC);
+
+shpvoid FinishedScreen()
+{
+    printf("A WINNER IS YOU!\n");
+    return 0;
+}
+RegFunc0(FinishedScreen, void, IMMEDIATE, REL_FUNC);

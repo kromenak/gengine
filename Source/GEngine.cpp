@@ -54,32 +54,38 @@ bool GEngine::Initialize()
     // Initialize asset manager.
     Services::SetAssets(&mAssetManager);
 
+    // See if the demo barn is present. If so, we'll load the game in demo mode.
+    mDemoMode = mAssetManager.LoadBarn("Gk3demo.brn");
+
     // For simplicity right now, let's just load all barns at once.
-    std::vector<std::string> barns = {
-        "ambient.brn",
-        "common.brn",
-        "core.brn",
-        "day1.brn",
-        "day2.brn",
-        "day3.brn",
-        "day23.brn",
-        "day123.brn"
-    };
-    for(auto& barn : barns)
+    if(!mDemoMode)
     {
-        TIMER_SCOPED(barn.c_str());
-        if(!mAssetManager.LoadBarn(barn))
+        std::vector<std::string> barns = {
+            "ambient.brn",
+            "common.brn",
+            "core.brn",
+            "day1.brn",
+            "day2.brn",
+            "day3.brn",
+            "day23.brn",
+            "day123.brn"
+        };
+        for(auto& barn : barns)
         {
-            // Generate expected path for this asset.
-            std::string path = Paths::GetDataPath(Path::Combine({ "Data", barn }));
-            
-            // Generate error and show error box.
-            std::string error = StringUtil::Format("Could not load barn %s.\n\nMake sure Data directory is populated before running the game.", path.c_str());
-            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                                     "Gabriel Knight 3",
-                                     error.c_str(),
-                                     nullptr);
-            return false;
+            TIMER_SCOPED(barn.c_str());
+            if(!mAssetManager.LoadBarn(barn))
+            {
+                // Generate expected path for this asset.
+                std::string path = Paths::GetDataPath(Path::Combine({ "Data", barn }));
+
+                // Generate error and show error box.
+                std::string error = StringUtil::Format("Could not load barn %s.\n\nMake sure Data directory is populated before running the game.", path.c_str());
+                SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                                         "Gabriel Knight 3",
+                                         error.c_str(),
+                                         nullptr);
+                return false;
+            }
         }
     }
 
@@ -159,22 +165,30 @@ bool GEngine::Initialize()
     //HACK/TODO: For now, we'll just do loading before moving on to movies, but this is something to look at more closely.
     Loader::DoAfterLoading([this](){
 
-        // Play opening movie.
-        mVideoPlayer.Play("Sierra.avi", true, true, [this](){
+        // Demo mode only shows the title screen.
+        if(mDemoMode)
+        {
+            gGK3UI.ShowTitleScreen();
+        }
+        else
+        {
+            // Play opening movie.
+            mVideoPlayer.Play("Sierra.avi", true, true, [this](){
 
-            // On first launch of game, show the intro movie before the title screen.
-            // Otherwise, go straight to the title screen.
-            if(gSaveManager.GetRunCount() <= 1)
-            {
-                mVideoPlayer.Play("intro.bik", true, true, [this](){
+                // On first launch of game, show the intro movie before the title screen.
+                // Otherwise, go straight to the title screen.
+                if(gSaveManager.GetRunCount() <= 1)
+                {
+                    mVideoPlayer.Play("intro.bik", true, true, [this](){
+                        gGK3UI.ShowTitleScreen();
+                    });
+                }
+                else
+                {
                     gGK3UI.ShowTitleScreen();
-                });
-            }
-            else
-            {
-                gGK3UI.ShowTitleScreen();
-            }
-        });
+                }
+            });
+        }
     });
     #else
     // For dev purposes: just load right into a desired timeblock and location.
@@ -268,12 +282,26 @@ void GEngine::LoadScene(const std::string& name, std::function<void()> callback)
 
 void GEngine::StartGame()
 {
-    Timeblock timeblock("110A");
-    Services::Get<GameProgress>()->SetTimeblock(timeblock);
+    if(mDemoMode)
+    {
+        // Demo mode - load to Day 2, 12P at CSE.
+        Timeblock timeblock("212P");
+        Services::Get<GameProgress>()->SetTimeblock(timeblock);
 
-    gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [this](){
-        LoadScene("R25");
-    });
+        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [this](){
+            LoadScene("CSE");
+        });
+    }
+    else
+    {
+        // Not demo mode - load to Day 1, 10AM in R25.
+        Timeblock timeblock("110A");
+        Services::Get<GameProgress>()->SetTimeblock(timeblock);
+
+        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [this](){
+            LoadScene("R25");
+        });
+    }
 }
 
 void GEngine::ProcessInput()

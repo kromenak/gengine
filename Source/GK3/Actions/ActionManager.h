@@ -162,9 +162,7 @@ private:
 	
 	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;
-
     
-	
 	// Some assets should only be loaded for certain timeblocks. The asset name indicates this (e.g. GLB_12ALL.NVC or GLB_110A.NVC).
 	// Checks asset name against current timeblock to see if the asset should be used.
 	bool IsActionSetForTimeblock(const std::string& assetName, const Timeblock& timeblock);

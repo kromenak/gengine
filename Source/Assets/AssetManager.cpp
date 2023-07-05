@@ -125,7 +125,6 @@ bool AssetManager::LoadBarn(const std::string& barnName)
     std::string assetPath = GetAssetPath(barnName);
     if(assetPath.empty())
     {
-        std::cout << "Barn doesn't exist at any search path." << std::endl;
 		return false;
     }
     

@@ -97,6 +97,14 @@ bool InventoryInspectScreen::IsShowing() const
 
 void InventoryInspectScreen::OnClicked()
 {
+    // In demo mode, the inventory inspect screen is "misused" to show some placards to the player explaining what the game is about.
+    // In this context, clicking each item just goes to the next one with the TURN_RIGHT action.
+    if(GEngine::Instance()->IsDemoMode() && StringUtil::StartsWithIgnoreCase(mInspectItemName, "MS3I"))
+    {
+        Services::Get<ActionManager>()->ExecuteAction(mInspectItemName, "TURN_RIGHT");
+        return;
+    }
+
 	// Show the action bar for this noun.
 	Services::Get<ActionManager>()->ShowActionBar(mInspectItemName, [this](const Action* action) {
 

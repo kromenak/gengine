@@ -182,7 +182,7 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 	if(action->script.script != nullptr)
 	{
 		// Execute action in Sheep system, call finished function when done.
-		Services::GetSheep()->Execute(action->script.script, std::bind(&ActionManager::OnActionExecuteFinished, this));
+		Services::GetSheep()->Execute(action->script.script, std::bind(&ActionManager::OnActionExecuteFinished, this), "SceneLayer");
 	}
 	else
 	{

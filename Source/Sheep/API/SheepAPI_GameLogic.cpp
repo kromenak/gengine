@@ -236,6 +236,7 @@ RegFunc0(StopVerbCancel, void, IMMEDIATE, REL_FUNC);
 
 shpvoid SetGameTimer(const std::string& noun, const std::string& verb, int milliseconds)
 {
+    //TODO: This timer SHOULD NOT proceed if the game is paused or in an inventory screen!
     Timers::AddTimerMilliseconds(static_cast<unsigned int>(milliseconds), [noun, verb](){
         Services::Get<ActionManager>()->QueueAction(noun, verb);
     });

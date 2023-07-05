@@ -42,6 +42,8 @@ shpvoid ForceCutToCameraAngle(const std::string& cameraName);
 shpvoid SetForcedCameraCuts(int flag);
 shpvoid ClearForcedCameraCuts();
 
+shpvoid SetCameraAngleType(const std::string& cameraName, const std::string& type);
+
 int GetCameraAngleCount(); // DEV
 std::string GetIndexedCameraAngle(int index); // DEV
 shpvoid DumpCameraAngles(); // DEV

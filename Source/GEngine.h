@@ -53,6 +53,7 @@ public:
 
     // GK-specific stuff here
     void StartGame();
+    bool IsDemoMode() const { return mDemoMode; }
     
 private:
     // Only one instance of GEngine can exist.
@@ -69,6 +70,9 @@ private:
     // A multiplier to affect how fast the game updates compared to realtime.
     // Less than 1 makes the game run slower than realtime, more than 1 makes it run faster than realtime.
     float mTimeMultiplier = 1.0f;
+
+    // If true, the game runs as the "demo" version of the game.
+    bool mDemoMode = false;
 
     // Subsystems.
     Renderer mRenderer;

@@ -23,3 +23,5 @@ shpvoid SetPamphletPage(int page);
 
 shpvoid TurnLSRPageLeft();
 shpvoid TurnLSRPageRight();
+
+shpvoid FinishedScreen();

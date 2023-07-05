@@ -210,6 +210,13 @@ shpvoid ClearForcedCameraCuts()
 }
 RegFunc0(ClearForcedCameraCuts, void, IMMEDIATE, REL_FUNC);
 
+shpvoid SetCameraAngleType(const std::string& cameraName, const std::string& type)
+{
+    printf("SetCameraAngleType(%s, %s)\n", cameraName.c_str(), type.c_str());
+    return 0;
+}
+RegFunc2(SetCameraAngleType, void, string, string, IMMEDIATE, REL_FUNC);
+
 shpvoid DefaultInspect(const std::string& noun)
 {
     GEngine::Instance()->GetScene()->InspectObject(noun, AddWait());
@@ -230,3 +237,10 @@ shpvoid Uninspect()
     return 0;
 }
 RegFunc0(Uninspect, void, WAITABLE, REL_FUNC);
+
+shpvoid InspectModelUsingAngle(const std::string& modelName, const std::string& cameraName)
+{
+    printf("InspectModelUsingAngle(%s, %s)\n", modelName.c_str(), cameraName.c_str());
+    return 0;
+}
+RegFunc2(InspectModelUsingAngle, void, string, string, IMMEDIATE, REL_FUNC);
