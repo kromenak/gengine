@@ -440,7 +440,11 @@ void GlanceAnimNode::Sample(int frame)
 
 void MoodAnimNode::Play(AnimationState* animState)
 {
-	std::cout << actorNoun << " IN MOOD " << moodName << std::endl;
+    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+    if(actor != nullptr)
+    {
+        actor->GetFaceController()->SetMood(moodName);
+    }
 }
 
 void MoodAnimNode::Sample(int frame)
@@ -450,7 +454,11 @@ void MoodAnimNode::Sample(int frame)
 
 void ExpressionAnimNode::Play(AnimationState* animState)
 {
-    std::cout << actorNoun << " HAS EXPRESSION " << expressionName << std::endl;
+    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+    if(actor != nullptr)
+    {
+        actor->GetFaceController()->DoExpression(expressionName);
+    }
 }
 
 void ExpressionAnimNode::Sample(int frame)
