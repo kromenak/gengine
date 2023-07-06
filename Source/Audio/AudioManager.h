@@ -110,6 +110,9 @@ struct PlayAudioParams
     // The amount of time to fade in the sound. Zero means no fade-in.
     float fadeInTime = 0.0f;
 
+    // The volume to play the audio at, from 0.0f (0%) to 1.0f (100%).
+    float volume = 1.0f;
+
     // Number of times to loop.
     // -1 = loop forever, 0 = no loop, 1+ = loop X many times
     int loopCount = 0;

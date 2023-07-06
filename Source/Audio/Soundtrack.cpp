@@ -42,7 +42,12 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
     PlayAudioParams playParams;
     playParams.audio = audio;
     playParams.audioType = soundtrack->GetSoundType();
+
+    // Fade in time is specified in milliseconds, but audio system wants it in seconds.
     playParams.fadeInTime = fadeInTimeMs * 0.001f;
+
+    // Volume is specified as 0-100, but audio system expects 0.0-1.0.
+    playParams.volume = volume * 0.01f;
 
     // Handle 3D parameters.
     playParams.is3d = is3d;
@@ -62,10 +67,6 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
     // Let the caller know the desired stop method, in case the soundtrack needs to stop while this node is playing.
     outResults.stopMethod = stopMethod;
     outResults.fadeOutTimeMs = fadeOutTimeMs;
-    
-    // Set sound's volume.
-    // Volume is 0-100, but audio system expects 0.0-1.0.
-    outResults.soundHandle.SetVolume(volume * 0.01f);
     
     // Return audio length. Gotta convert seconds to milliseconds.
     return (int)(audio->GetDuration() * 1000.0f);

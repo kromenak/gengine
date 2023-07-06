@@ -457,6 +457,7 @@ PlayingSoundHandle AudioManager::Play(const PlayAudioParams& params)
     }
 
     // Handle fade-in time if specified.
+    float volume = Math::Clamp(params.volume, 0.0f, 1.0f);
     if(!Math::IsZero(params.fadeInTime))
     {
         // Force channel volume to start value to avoid any single frame wrong volumes.
@@ -464,7 +465,12 @@ PlayingSoundHandle AudioManager::Play(const PlayAudioParams& params)
 
         // Create a fader, which will tick each frame and adjust volume as needed.
         mFaders.emplace_back(channel);
-        mFaders.back().SetFade(params.fadeInTime, 1.0f, 0.0f);
+        mFaders.back().SetFade(params.fadeInTime, volume, 0.0f);
+    }
+    else
+    {
+        // If not fading in, just set the volume directly.
+        channel->setVolume(volume);
     }
 
     // Ok, all attributes should be set - let's play the sound!

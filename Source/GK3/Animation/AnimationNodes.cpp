@@ -235,14 +235,17 @@ void SoundAnimNode::Play(AnimationState* animState)
     PlayAudioParams playParams;
     playParams.audio = audio;
     playParams.audioType = animState->params.isYak ? AudioType::VO : AudioType::SFX;
-    
+
+    // Volume is specified as 0-100, but audio system expects 0.0-1.0.
+    playParams.volume = volume * 0.01f;
+
     // If 3D, do a bit more work to determine position.
     playParams.is3d = is3d;
     if(is3d)
     {
         // Use specified position by default.
         Vector3 playPosition = position;
-        
+
         // If position is based on model name, find the model and set position.
         if(!modelName.empty())
         {
@@ -268,12 +271,7 @@ void SoundAnimNode::Play(AnimationState* animState)
         playParams.maxDist = maxDistance;
     }
 
-    // This will hold playing sound instance.
-    PlayingSoundHandle soundHandle = Services::GetAudio()->Play(playParams);
-    
-    // Set volume after sound is created.
-    // Volume is 0-100, but audio system expects 0.0-1.0.
-    soundHandle.SetVolume(volume * 0.01f);
+    Services::GetAudio()->Play(playParams);
 }
 
 namespace
