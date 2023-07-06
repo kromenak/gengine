@@ -45,7 +45,7 @@ private:
     float mFovAngleRad = 1.0472f;
     
     // Near and far clipping planes, for any projection type.
-    // The default values are taken from what GK3 uses by default.
-    float mNearClipPlane = 12.0f;
+    // GK3 seems to use 12.0f/24000.0f, but 12.0f doesn't look great in GEngine, so going to use a smaller value.
+    float mNearClipPlane = 1.0f;
     float mFarClipPlane = 24000.0f;
 };
