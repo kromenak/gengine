@@ -319,7 +319,7 @@ void Scene::Update(float deltaTime)
         for(auto& trigger : mSceneData->GetTriggers())
         {
             //Debug::DrawRectXZ(trigger->rect, GetFloorY(egoPos) + 10.0f, Color32::Green);
-            if(trigger->rect.Contains(egoXZPos))
+            if(trigger->rect.Contains(egoXZPos) && !Services::Get<ActionManager>()->IsActionPlaying())
             {
                 // If so, treat the label as a noun (e.g. GET_CLOSE) with hardcoded "WALK" verb.
                 Services::Get<ActionManager>()->ExecuteAction(trigger->label, "WALK");
