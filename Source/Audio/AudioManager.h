@@ -29,10 +29,11 @@ public:
     void Stop(float fadeOutTime = 0.0f);
     void Pause();
     void Resume();
-    
-    void SetVolume(float volume);
     bool IsPlaying() const;
     
+    void SetVolume(float volume);
+    void SetPosition(const Vector3& position);
+
 private:
     friend class AudioManager; // Allow audio manager to access internals.
 

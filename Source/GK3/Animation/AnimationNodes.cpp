@@ -252,17 +252,7 @@ void SoundAnimNode::Play(AnimationState* animState)
             GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
             if(obj != nullptr)
             {
-                // Models in GK3 are often authored such that the "visual" position of the model does not match the world position.
-                // It's usually more accurate to find the center-point of the mesh's AABB.
-                MeshRenderer* meshRenderer = obj->GetMeshRenderer();
-                if(meshRenderer != nullptr)
-                {
-                    playPosition = meshRenderer->GetAABB().GetCenter();
-                }
-                else
-                {
-                    playPosition = obj->GetWorldPosition();
-                }
+                playPosition = obj->GetAudioPosition();
             }
         }
 

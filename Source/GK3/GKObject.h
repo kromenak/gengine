@@ -42,6 +42,8 @@ public:
     virtual MeshRenderer* GetMeshRenderer() const { return nullptr;  }
 
     virtual AABB GetAABB() { return AABB(GetPosition(), 1.0f, 1.0f, 1.0f); }
+
+    Vector3 GetAudioPosition() const;
 	
 private:
 	// A noun is used to refer to the objects in NVC logic.

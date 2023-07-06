@@ -36,16 +36,6 @@ void PlayingSoundHandle::Resume()
     }
 }
 
-void PlayingSoundHandle::SetVolume(float volume)
-{
-    // This may fail if the channel handle is no longer valid.
-    // But that means we're trying to set volume for a sound that's not playing. So...it doesn't matter.
-    if(channel != nullptr)
-    {
-        channel->setVolume(Math::Clamp(volume, 0.0f, 1.0f));
-    }
-}
-
 bool PlayingSoundHandle::IsPlaying() const
 {
     // No channel means not playing.
@@ -66,6 +56,24 @@ bool PlayingSoundHandle::IsPlaying() const
     
     // Assuming OK was returned, either the channel is playing or not!
     return isPlaying;
+}
+
+void PlayingSoundHandle::SetVolume(float volume)
+{
+    // This may fail if the channel handle is no longer valid.
+    // But that means we're trying to set volume for a sound that's not playing. So...it doesn't matter.
+    if(channel != nullptr)
+    {
+        channel->setVolume(Math::Clamp(volume, 0.0f, 1.0f));
+    }
+}
+
+void PlayingSoundHandle::SetPosition(const Vector3& position)
+{
+    if(channel != nullptr)
+    {
+        channel->set3DAttributes((const FMOD_VECTOR*)&position, nullptr);
+    }
 }
 
 bool Fader::Update(float deltaTime)

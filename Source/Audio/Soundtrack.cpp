@@ -3,7 +3,10 @@
 #include "StringUtil.h"
 
 #include "Audio.h"
+#include "GEngine.h"
+#include "GKObject.h"
 #include "IniParser.h"
+#include "Scene.h"
 #include "Services.h"
 
 int WaitNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
@@ -54,6 +57,16 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
     if(is3d)
     {
         playParams.position = position;
+        if(!followModelName.empty())
+        {
+            GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(followModelName);
+            if(obj != nullptr)
+            {
+                outResults.followObj = obj;
+                playParams.position = obj->GetAudioPosition();
+            }
+        }
+
         playParams.minDist = minDist;
         playParams.maxDist = maxDist;
     }

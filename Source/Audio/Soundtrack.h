@@ -16,6 +16,7 @@
 #include "AudioManager.h"
 #include "Vector3.h"
 
+class GKObject;
 struct IniSection;
 
 // Specifies how a soundtrack node behaves when the soundtrack stops prematurely.
@@ -31,6 +32,7 @@ struct SoundtrackNodeResults
     PlayingSoundHandle soundHandle;
     StopMethod stopMethod = StopMethod::PlayToEnd;
     float fadeOutTimeMs = 0.0f;
+    GKObject* followObj = nullptr;
 };
 
 class Soundtrack;

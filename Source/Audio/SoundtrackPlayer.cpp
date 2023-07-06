@@ -1,6 +1,7 @@
 #include "SoundtrackPlayer.h"
 
 #include "ActionManager.h"
+#include "GKActor.h"
 #include "Services.h"
 #include "StringUtil.h"
 
@@ -37,6 +38,12 @@ void PlayingSoundtrack::Stop()
 
 void PlayingSoundtrack::Update(float deltaTime)
 {
+    // If the previous node designated a follow object, keep the playing sound's 3D position updated to "follow" that object.
+    if(mSoundtrackNodeResults.followObj != nullptr)
+    {
+        mSoundtrackNodeResults.soundHandle.SetPosition(mSoundtrackNodeResults.followObj->GetAudioPosition());
+    }
+
     // If the current node is looping, we can early out - there is NO way to advance past a looping node.
     // The actual looping behavior is controlled by the audio system.
     if(mCurrentNodeIndex >= 0 && mSoundtrack->GetNodes()[mCurrentNodeIndex]->IsLooping())
