@@ -7,6 +7,7 @@
 #include "ActionManager.h"
 #include "Animator.h"
 #include "BSPActor.h"
+#include "Camera.h"
 #include "CharacterManager.h"
 #include "Collisions.h"
 #include "Color32.h"
@@ -390,6 +391,7 @@ void Scene::SetCameraPosition(const std::string& cameraName)
 	// Set position/angle.
 	mCamera->SetPosition(camera->position);
 	mCamera->SetAngle(camera->angle);
+    mCamera->GetCamera()->SetCameraFovDegrees(camera->fov);
 }
 
 void Scene::SetCameraPositionForConversation(const std::string& conversationName, bool isInitial)
@@ -403,6 +405,7 @@ void Scene::SetCameraPositionForConversation(const std::string& conversationName
     // Set camera if we found it.
     mCamera->SetPosition(camera->position);
     mCamera->SetAngle(camera->angle);
+    mCamera->GetCamera()->SetCameraFovDegrees(camera->fov);
 }
 
 void Scene::GlideToCameraPosition(const std::string& cameraName, std::function<void()> finishCallback)
@@ -430,6 +433,7 @@ void Scene::GlideToCameraPosition(const std::string& cameraName, std::function<v
     }
 
     // Do the glide.
+    //TODO: Set FOV here or no?
     mCamera->Glide(camera->position, camera->angle, finishCallback);
 }
 

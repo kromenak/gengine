@@ -306,6 +306,10 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                     camera.angle.x = Math::ToRadians(angleDeg.x);
 					camera.angle.y = Math::ToRadians(angleDeg.y);
                 }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "fov"))
+                {
+                    camera.fov = keyValue.GetValueAsFloat();
+                }
 			}
         }
     }
@@ -347,6 +351,10 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 					Vector2 angleDeg = keyValue.GetValueAsVector2();
                     camera.angle.x = Math::ToRadians(angleDeg.x);
                     camera.angle.y = Math::ToRadians(angleDeg.y);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "fov"))
+                {
+                    camera.fov = keyValue.GetValueAsFloat();
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "default"))
                 {
@@ -396,6 +404,10 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                     camera.angle.x = Math::ToRadians(angleDeg.x);
                     camera.angle.y = Math::ToRadians(angleDeg.y);
                 }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "fov"))
+                {
+                    camera.fov = keyValue.GetValueAsFloat();
+                }
 			}
         }
     }
@@ -437,6 +449,10 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 					Vector2 angleDeg = keyValue.GetValueAsVector2();
                     camera.angle.x = Math::ToRadians(angleDeg.x);
                     camera.angle.y = Math::ToRadians(angleDeg.y);
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "fov"))
+                {
+                    camera.fov = keyValue.GetValueAsFloat();
                 }
 				else if(StringUtil::EqualsIgnoreCase(keyValue.key, "dialogue"))
                 {

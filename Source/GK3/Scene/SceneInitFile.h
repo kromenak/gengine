@@ -73,6 +73,9 @@ struct SceneCamera
     
     // Camera's position.
     Vector3 position;
+
+    // Camera's FOV.
+    float fov = 60.0f;
 };
 
 struct RoomSceneCamera : public SceneCamera
