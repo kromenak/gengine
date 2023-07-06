@@ -207,6 +207,15 @@ bool AudioManager::Initialize()
         std::cout << FMOD_ErrorString(result) << std::endl;
         return false;
     }
+
+    // After some trial/error, it seems like GK3's rolloff is quicker than FMOD's default.
+    // Using a value of 2.0f for "rolloffScale" causes volume to diminish a bit more quickly as you move away from an object.
+    result = mSystem->set3DSettings(1.0f, 1.0f, 2.0f);
+    if(result != FMOD_OK)
+    {
+        std::cout << FMOD_ErrorString(result) << std::endl;
+        return false;
+    }
     
     // Create SFX channel group.
     result = mSystem->createChannelGroup("SFX", &mSFXChannelGroup);

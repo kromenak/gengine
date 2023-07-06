@@ -292,8 +292,8 @@ namespace
         {
             // Play the sound at the actor's world position, which is near their feet anyways.
             // The min/max distances for footsteps are derived from experimenting with the original game.
-            const int kMinFootstepDist = 30.0f;
-            const int kMaxFootstepDist = 400.0f;
+            const int kMinFootstepDist = 60.0f;
+            const int kMaxFootstepDist = 800.0f;
 
             PlayAudioParams playParams;
             playParams.audio = footAudio;
