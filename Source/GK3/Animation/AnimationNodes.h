@@ -181,6 +181,7 @@ struct StopSoundtrackAnimNode : public AnimNode
 struct CameraAnimNode : public AnimNode
 {
 	std::string cameraPositionName;
+    bool glide = false;
 	
 	void Play(AnimationState* animState) override;
     void Sample(int frame) override;

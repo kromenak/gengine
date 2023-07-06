@@ -368,7 +368,14 @@ void StopSoundtrackAnimNode::Play(AnimationState* animState)
 
 void CameraAnimNode::Play(AnimationState* animState)
 {
-    GEngine::Instance()->GetScene()->SetCameraPosition(cameraPositionName);
+    if(glide)
+    {
+        GEngine::Instance()->GetScene()->GlideToCameraPosition(cameraPositionName, nullptr);
+    }
+    else
+    {
+        GEngine::Instance()->GetScene()->SetCameraPosition(cameraPositionName);
+    }
 }
 
 void CameraAnimNode::Sample(int frame)
