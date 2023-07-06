@@ -355,7 +355,6 @@ void GKActor::SetHeading(const Heading& heading)
     mStartVertexAnimRotation = GetRotation();
 
     SetModelRotationToActorRotation();
-   
 }
 
 void GKActor::StartAnimation(VertexAnimParams& animParams)
@@ -518,20 +517,32 @@ Vector3 GKActor::GetModelFacingDirection() const
         Vector3 worldPoint3 = meshToWorldMatrix.TransformPoint(arrowSubmesh->GetVertexPosition(2));
 
         // (Optionally) visualize the facing helper triangle in world space.
-        //Debug::DrawLine(worldPoint1, worldPoint2, Color32::Blue);
-        //Debug::DrawLine(worldPoint2, worldPoint3, Color32::Blue);
-        //Debug::DrawLine(worldPoint3, worldPoint1, Color32::Blue);
-        //Debug::DrawLine(worldPoint1, worldPoint1 + facingDir * 5.0f, Color32::Blue);
-        //Debug::DrawLine(GetPosition(), mModelFacingHelper->GetPosition(), Color32::White);
+        /*
+        {
+            //Debug::DrawLine(worldPoint1, worldPoint1 + Vector3::UnitY * 10.0f, Color32::Green);
+            //Debug::DrawLine(worldPoint2, worldPoint2 + Vector3::UnitY * 10.0f, Color32::Cyan);
+            //Debug::DrawLine(worldPoint3, worldPoint3 + Vector3::UnitY * 10.0f, Color32::Magenta);
 
-        //Vector3 temp = Vector3::Normalize(worldPoint1 - ((worldPoint2 + worldPoint3) / 2));
-        //Debug::DrawLine(GetPosition(), GetPosition() + temp * 10, Color32::Red, 10.0f);
+            Debug::DrawLine(worldPoint1, worldPoint2, Color32::Blue);
+            Debug::DrawLine(worldPoint2, worldPoint3, Color32::Blue);
+            Debug::DrawLine(worldPoint3, worldPoint1, Color32::Blue);
+            Debug::DrawLine(GetPosition(), mModelFacingHelper->GetPosition(), Color32::White);
+        }
+        */
 
         // SCENARIO A: We have a model facing helper, and it is currently in use (it's animating or we are walking).
         if(mModelFacingHelper->GetComponent<VertexAnimator>()->IsPlaying() || mWalker->IsWalkingExceptTurn())
         {
             // Use those three points to calculate a facing direction. The "point" of the arrow is pt 1.
-            facingDir = Vector3::Normalize(worldPoint1 - ((worldPoint2 + worldPoint3) / 2));
+            // OF COURSE these points aren't consistent...Mosely uses different ones.
+            if(StringUtil::EqualsIgnoreCase(GetName(), "MOS"))
+            {
+                facingDir = Vector3::Normalize(worldPoint3 - ((worldPoint1 + worldPoint2) / 2));
+            }
+            else
+            {
+                facingDir = Vector3::Normalize(worldPoint1 - ((worldPoint2 + worldPoint3) / 2));
+            }
         }
         else // SCENARIO B: We have a model facing helper, but not currently in use.
         {
@@ -553,9 +564,13 @@ Vector3 GKActor::GetModelFacingDirection() const
             facingDir = Vector3::Normalize(perp);
 
             // (Optionally) visualize this method.
-            //Debug::DrawLine(worldRightShoePos, worldLeftShoePos, Color32::Magenta, 0.0f);
-            //Debug::DrawLine(worldHeadPos, worldRightShoePos, Color32::Magenta, 0.0f);
-            //Debug::DrawLine(worldHeadPos, worldLeftShoePos, Color32::Magenta, 0.0f);
+            /*
+            {
+                Debug::DrawLine(worldRightShoePos, worldLeftShoePos, Color32::Magenta, 0.0f);
+                Debug::DrawLine(worldHeadPos, worldRightShoePos, Color32::Magenta, 0.0f);
+                Debug::DrawLine(worldHeadPos, worldLeftShoePos, Color32::Magenta, 0.0f);
+            }
+            */
 
             // If we use this approach, be sure to keep the facing helper synchronized.
             mModelFacingHelper->SetPosition(mModelActor->GetPosition());
@@ -569,6 +584,8 @@ Vector3 GKActor::GetModelFacingDirection() const
         Matrix4 hipMeshToWorldMatrix = mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix();
         facingDir = -hipMeshToWorldMatrix.GetYAxis();
     }
+
+    //Debug::DrawLine(GetPosition(), GetPosition() + facingDir * 10.0f, Color32::Blue);
     return facingDir;
 }
 

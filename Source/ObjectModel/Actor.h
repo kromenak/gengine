@@ -46,7 +46,7 @@ public:
     template<class T> T* GetComponent();
     template<class T> T* GetComponentInParents();
     
-    std::string& GetName() { return mName; }
+    const std::string& GetName() const { return mName; }
     void SetName(const std::string& name) { mName = name; }
 	
 	// STATE
