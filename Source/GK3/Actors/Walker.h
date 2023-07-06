@@ -145,4 +145,6 @@ private:
     bool TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSpeed);
 
     void StopAllWalkAnimations();
+
+    void OutputWalkerPlan();
 };

@@ -16,6 +16,8 @@
 #include "Vector3.h"
 #include "WalkerBoundary.h"
 
+//#define DEBUG_WALKER
+
 TYPE_DEF_CHILD(Component, Walker);
 
 Walker::Walker(Actor* owner) : Component(owner),
@@ -86,6 +88,7 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
             StopAllWalkAnimations();
             mWalkActions.push_back(WalkOp::FollowPathEnd);
         }
+        OutputWalkerPlan();
 
         // OK, walk sequence has been created - let's start doing it!
         if(currentWalkOp != GetCurrentWalkOp())
@@ -123,7 +126,8 @@ void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const
 void Walker::SkipToEnd()
 {
     // If not walking, or at the end of the walk, nothing to skip.
-    if(!IsWalking() || mWalkActions.back() == WalkOp::FollowPathEnd || mWalkActions.back() == WalkOp::TurnToFace)
+    WalkOp currentWalkOp = GetCurrentWalkOp();
+    if(currentWalkOp == WalkOp::None || currentWalkOp == WalkOp::FollowPathEnd || currentWalkOp == WalkOp::TurnToFace)
     {
         return;
     }
@@ -145,6 +149,9 @@ void Walker::SkipToEnd()
             mGKOwner->SetHeading(Heading::FromDirection(Vector3::Normalize(mPath.front() - mPath[1])));
         }
     }
+
+    // Clear the path - we don't need to follow it anymore.
+    mPath.clear();
 
     // Move actor back by "at position" amount, so end walk anim puts us in right spot.
     mGKOwner->SetPosition(mGKOwner->GetPosition() - (mGKOwner->GetForward() * kAtNodeDist));
@@ -200,6 +207,9 @@ void Walker::OnUpdate(float deltaTime)
         if(Services::Get<ActionManager>()->IsSkippingCurrentAction())
         {
             SkipToEnd();
+
+            // Be sure to update the current op, since the skip action may have changed it.
+            currentWalkOp = GetCurrentWalkOp();
         }
 
         // Increase current action timer.
@@ -329,7 +339,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
     // Time to create a new walk plan.
     WalkOp currentWalkOp = GetCurrentWalkOp();
     mWalkActions.clear();
-
+    
     // If heading is specified, save "turn to face" action.
     if(heading.IsValid())
     {
@@ -417,6 +427,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
         // Here, the old walk op was either "turn to face" or "none".
         // In both cases, we don't really have to do anything. But we do want to play the next action.
     }
+    OutputWalkerPlan();
     
     // OK, walk sequence has been created - let's start doing it!
     //std::cout << "Walk Sequence Begin" << std::endl;
@@ -447,8 +458,10 @@ void Walker::NextAction()
     WalkOp currentWalkOp = GetCurrentWalkOp();
     if(currentWalkOp == WalkOp::FollowPathStart)
     {
-        //std::cout << "Follow Path Start" << std::endl;
-            
+        #if defined(DEBUG_WALKER)
+        std::cout << "Follow Path Start" << std::endl;
+        #endif
+
         AnimParams animParams;
         animParams.animation = mWalkStartAnim;
         animParams.allowMove = true;
@@ -458,8 +471,10 @@ void Walker::NextAction()
     }
     else if(currentWalkOp == WalkOp::FollowPathStartTurnLeft)
     {
-        //std::cout << "Follow Path Start (Turn Left)" << std::endl;
-            
+        #if defined(DEBUG_WALKER)
+        std::cout << "Follow Path Start (Turn Left)" << std::endl;
+        #endif
+
         AnimParams animParams;
         animParams.animation = mWalkStartTurnLeftAnim;
         animParams.allowMove = true;
@@ -469,8 +484,10 @@ void Walker::NextAction()
     }
     else if(currentWalkOp == WalkOp::FollowPathStartTurnRight)
     {
-        //std::cout << "Follow Path Start (Turn Right)" << std::endl;
-            
+        #if defined(DEBUG_WALKER)
+        std::cout << "Follow Path Start (Turn Right)" << std::endl;
+        #endif
+
         AnimParams animParams;
         animParams.animation = mWalkStartTurnRightAnim;
         animParams.allowMove = true;
@@ -480,8 +497,10 @@ void Walker::NextAction()
     }
     else if(currentWalkOp == WalkOp::FollowPath)
     {
-        //std::cout << "Follow Path" << std::endl;
-            
+        #if defined(DEBUG_WALKER)
+        std::cout << "Follow Path" << std::endl;
+        #endif
+
         AnimParams animParams;
         animParams.animation = mWalkLoopAnim;
         animParams.allowMove = true;
@@ -498,7 +517,9 @@ void Walker::NextAction()
     }
     else if(currentWalkOp == WalkOp::FollowPathEnd)
     {
-        //std::cout << "Follow Path End" << std::endl;
+        #if defined(DEBUG_WALKER)
+        std::cout << "Follow Path End" << std::endl;
+        #endif
         GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartAnim);
         GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
 
@@ -512,13 +533,17 @@ void Walker::NextAction()
     }
     else if(currentWalkOp == WalkOp::TurnToFace)
     {
-        //std::cout << "Turn To Face" << std::endl;
+        #if defined(DEBUG_WALKER)
+        std::cout << "Turn To Face " << mTurnToFaceDir << std::endl;
+        #endif
         // Handled in Update
     }
     else // WalkOp::None
     {
-        //std::cout << "Walk Sequence Done!" << std::endl;
-        
+        #if defined(DEBUG_WALKER)
+        std::cout << "Walk Sequence Done!" << std::endl;
+        #endif
+
         // No actions left in sequence => walk is finished.
         OnWalkToFinished();
     }
@@ -810,4 +835,40 @@ void Walker::StopAllWalkAnimations()
     GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartTurnRightAnim, true);
     GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkLoopAnim, true);
     GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkStopAnim, true);
+}
+
+void Walker::OutputWalkerPlan()
+{
+    #if defined(DEBUG_WALKER)
+    printf("%s: Walker Plan Created:\n", mGKOwner->GetNoun().c_str());
+    for(int i = mWalkActions.size() - 1; i >= 0; --i)
+    {
+        int num = mWalkActions.size() - i - 1;
+        switch(mWalkActions[i])
+        {
+        case WalkOp::None:
+            printf("\t%i: None\n", num);
+            break;
+        case WalkOp::FollowPathStart:
+            printf("\t%i: FollowPathStart\n", num);
+            break;
+        case WalkOp::FollowPathStartTurnLeft:
+            printf("\t%i: FollowPathStartTurnLeft\n", num);
+            break;
+        case WalkOp::FollowPathStartTurnRight:
+            printf("\t%i: FollowPathStartTurnRight\n", num);
+            break;
+        case WalkOp::FollowPath:
+            printf("\t%i: FollowPath\n", num);
+            break;
+        case WalkOp::FollowPathEnd:
+            printf("\t%i: FollowPathEnd\n", num);
+            break;
+        case WalkOp::TurnToFace:
+            printf("\t%i: TurnToFace ", num);
+            std::cout << mTurnToFaceDir << std::endl;
+            break;
+        }
+    }
+    #endif
 }
