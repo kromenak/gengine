@@ -1,6 +1,8 @@
 #include "SheepAPI_Scene.h"
 
+#include "Animator.h"
 #include "BSPActor.h"
+#include "CharacterManager.h"
 #include "GEngine.h"
 #include "GKActor.h"
 #include "MeshRenderer.h"
@@ -54,9 +56,15 @@ shpvoid SetActorPosition(const std::string& actorName, const std::string& positi
         return 0;
     }
 
-    // Docs are unclear about this, but in GK3, this definitely also sets heading.
+    // Set the position.
     actor->SetPosition(scenePosition->position);
+
+    // Docs are unclear about this, but appears that heading is also set.
     actor->SetHeading(scenePosition->heading);
+
+    // This also *appears* to sample the actor's walk anim, to ensure the character is in a default "standing" position.
+    // If we don't do this, the characters are sometimes positioned incorrectly (e.g. 207A Poussin's Tomb).
+    GEngine::Instance()->GetScene()->GetAnimator()->Sample(actor->GetConfig()->walkStartAnim, 0);
     return 0;
 }
 RegFunc2(SetActorPosition, void, string, string, IMMEDIATE, REL_FUNC);
