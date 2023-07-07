@@ -3,6 +3,7 @@
 #include "Animation.h"
 #include "Animator.h"
 #include "AnimationNodes.h"
+#include "BSP.h"
 #include "CharacterManager.h"
 #include "Debug.h"
 #include "FaceController.h"
@@ -261,13 +262,9 @@ Vector3 GKActor::GetWalkDestination() const
 
 void GKActor::SnapToFloor()
 {
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene != nullptr)
-    {
-        Vector3 pos = GetPosition();
-        pos.y = scene->GetFloorY(pos);
-        SetPosition(pos);
-    }
+    Vector3 pos = GetPosition();
+    pos.y = mFloorHeight;
+    SetPosition(pos);
 }
 
 const std::string& GKActor::GetShoeType() const
@@ -331,7 +328,11 @@ void GKActor::SetPosition(const Vector3& position)
     // To resolve this, we must update the saved start position when the actor's position is manually changed.
     mStartVertexAnimPosition = position;
 
+    // Move model to desired new position.
     SetModelPositionToActorPosition();
+
+    // Update floor info, since actor moved to a new spot.
+    RefreshFloorInfo();
 }
 
 void GKActor::Rotate(float angle)
@@ -342,6 +343,7 @@ void GKActor::Rotate(float angle)
     // As with SetHeading, we must update this value to avoid reverting rotations after current anim completes.
     mStartVertexAnimRotation = GetRotation();
 
+    // Rotate model to desired new rotation.
     SetModelRotationToActorRotation();
 }
 
@@ -354,6 +356,7 @@ void GKActor::SetHeading(const Heading& heading)
     // To resolve this, we must update the saved start rotation when manually setting the heading/rotation.
     mStartVertexAnimRotation = GetRotation();
 
+    // Rotate model to desired new rotation.
     SetModelRotationToActorRotation();
 }
 
@@ -487,6 +490,9 @@ void GKActor::OnUpdate(float deltaTime)
         // Rotate desired direction and amount.
         GetTransform()->Rotate(Vector3::UnitY, angleRadians);
     }
+
+    // Update floor info based on updated position.
+    RefreshFloorInfo();
 }
 
 void GKActor::OnVertexAnimationStop()
@@ -633,6 +639,15 @@ void GKActor::SetModelRotationToActorRotation()
     if(mModelFacingHelper != nullptr)
     {
         mModelFacingHelper->SetRotation(mModelActor->GetRotation());
+    }
+}
+
+void GKActor::RefreshFloorInfo()
+{
+    Scene* scene = GEngine::Instance()->GetScene();
+    if(scene != nullptr && scene->GetSceneData() != nullptr && scene->GetSceneData()->GetBSP() != nullptr)
+    {
+        scene->GetSceneData()->GetBSP()->GetFloorInfo(GetPosition(), mFloorHeight, mFloorTexture);
     }
 }
 

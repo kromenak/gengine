@@ -272,7 +272,7 @@ namespace
         std::string shoeType = actor->GetShoeType();
 
         // Query the texture used on the floor where the actor is walking.
-        Texture* floorTexture = actor->GetWalker()->GetFloorTypeWalkingOn();
+        Texture* floorTexture = actor->GetFloorTypeWalkingOn();
         std::string floorTextureName = floorTexture != nullptr ? floorTexture->GetNameNoExtension() : "carpet1";
 
         // Get the footstep sound.

@@ -57,13 +57,17 @@ public:
 	void WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback);
     Vector3 GetWalkDestination() const;
     Walker* GetWalker() const { return mWalker; }
+
+    // Floors
     const std::string& GetShoeType() const;
     void SnapToFloor();
-    
+    Vector3 GetFloorPosition() const;
+    Texture* GetFloorTypeWalkingOn() const { return mFloorTexture; }
+
+    // Face/Head
 	FaceController* GetFaceController() const { return mFaceController; }
 	Vector3 GetHeadPosition() const;
-    Vector3 GetFloorPosition() const;
-
+    
     void SetPosition(const Vector3& position);
     void Rotate(float rotationAngle);
     void SetHeading(const Heading& heading) override;
@@ -92,6 +96,10 @@ private:
 
 	// The actor's walking control.
 	Walker* mWalker = nullptr;
+
+    // Currently detected floor height and texture.
+    float mFloorHeight = 0.0f;
+    Texture* mFloorTexture = nullptr;
 	
 	// The actor's face control.
 	FaceController* mFaceController = nullptr;
@@ -132,6 +140,8 @@ private:
     Vector3 GetModelFacingDirection() const;
     void SetModelPositionToActorPosition();
     void SetModelRotationToActorRotation();
+
+    void RefreshFloorInfo();
 
     GAS* GetGasForFidget(FidgetType type);
     void CheckUpdateActiveFidget(FidgetType changedType);

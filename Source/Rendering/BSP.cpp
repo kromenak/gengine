@@ -201,8 +201,28 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
 	return false;
 }
 
-void BSP::GetFloorInfo(const Vector3& position, float& height, Texture*& texture)
+void BSP::SetFloorObjectName(const std::string& floorObjectName)
 {
+    // Figure out index for the floor object.
+    for(int i = 0; i < mObjectNames.size(); ++i)
+    {
+        if(StringUtil::EqualsIgnoreCase(mObjectNames[i], floorObjectName))
+        {
+            mFloorObjectIndex = i;
+            break;
+        }
+    }
+}
+
+void BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture)
+{
+    // Didn't hit anything by default.
+    outHeight = 0.0f;
+    outTexture = nullptr;
+
+    // No floor was defined - early out.
+    if(mFloorObjectIndex < 0) { return; }
+
     // Calculate ray origin using passed position, but really high in the air!
     Vector3 rayOrigin = position;
     rayOrigin.y = 10000.0f;
@@ -211,11 +231,12 @@ void BSP::GetFloorInfo(const Vector3& position, float& height, Texture*& texture
     Ray ray(rayOrigin, -Vector3::UnitY);
 
     // Iterate polygons.
+    float nearestT = FLT_MAX;
     for(auto& polygon : mPolygons)
     {
         // Only consider polygons that are part of the floor object.
         BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
-        if(!StringUtil::EqualsIgnoreCase(mObjectNames[surface.objectIndex], mFloorObjectName)) { continue; }
+        if(surface.objectIndex != mFloorObjectIndex) { continue; }
 
         // See if ray intersects any triangles in this polygon.
         Vector3 p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
@@ -224,21 +245,17 @@ void BSP::GetFloorInfo(const Vector3& position, float& height, Texture*& texture
             Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
             Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
             float t = 0.0f;
-            if(Intersect::TestRayTriangle(ray, p0, p1, p2, t))
+            if(Intersect::TestRayTriangle(ray, p0, p1, p2, t) && t < nearestT)
             {
-                height = ray.GetPoint(t).y;
-                texture = surface.texture;
-                return;
+                nearestT = t;
+                outHeight = ray.GetPoint(t).y;
+                outTexture = surface.texture;
             }
         }
     }
-
-    // Didn't hit anything.
-    height = 0.0f;
-    texture = nullptr;
 }
 
-void BSP::SetVisible(std::string objectName, bool visible)
+void BSP::SetVisible(const std::string& objectName, bool visible)
 {
 	// Find index of the object name.
 	int index = -1;
@@ -264,7 +281,7 @@ void BSP::SetVisible(std::string objectName, bool visible)
 	}
 }
 
-void BSP::SetTexture(std::string objectName, Texture* texture)
+void BSP::SetTexture(const std::string& objectName, Texture* texture)
 {
 	// Find index of the object name.
 	int index = -1;
@@ -290,7 +307,7 @@ void BSP::SetTexture(std::string objectName, Texture* texture)
 	}
 }
 
-bool BSP::Exists(std::string objectName) const
+bool BSP::Exists(const std::string& objectName) const
 {
 	for(int i = 0; i < mObjectNames.size(); i++)
 	{
@@ -302,7 +319,7 @@ bool BSP::Exists(std::string objectName) const
 	return false;
 }
 
-bool BSP::IsVisible(std::string objectName) const
+bool BSP::IsVisible(const std::string& objectName) const
 {
 	// Find index of the object name.
 	int index = -1;

@@ -49,8 +49,6 @@ public:
     bool IsWalkingExceptTurn() const { return IsWalking() && mWalkActions.back() != WalkOp::TurnToFace; }
     Vector3 GetDestination() const { return mPath.size() > 0 ? mPath.front() : Vector3::Zero; }
 
-    Texture* GetFloorTypeWalkingOn() const;
-
 protected:
 	void OnUpdate(float deltaTime) override;
 	

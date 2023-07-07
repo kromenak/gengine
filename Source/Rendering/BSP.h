@@ -132,14 +132,14 @@ public:
 	std::vector<RaycastHit> RaycastAll(const Ray& ray);
 	bool RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo);
 
-    void SetFloorObjectName(const std::string& floorObjectName) { mFloorObjectName = floorObjectName; }
-    void GetFloorInfo(const Vector3& position, float& height, Texture*& texture);
+    void SetFloorObjectName(const std::string& floorObjectName);
+    void GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture);
 	
-	void SetVisible(std::string objectName, bool visible);
-	void SetTexture(std::string objectName, Texture* texture);
+	void SetVisible(const std::string& objectName, bool visible);
+	void SetTexture(const std::string& objectName, Texture* texture);
 	
-	bool Exists(std::string objectName) const;
-	bool IsVisible(std::string objectName) const;
+	bool Exists(const std::string& objectName) const;
+	bool IsVisible(const std::string& objectName) const;
     
 	Vector3 GetPosition(const std::string& objectName) const;
 
@@ -193,8 +193,8 @@ private:
     // Kind of like light probes, but way simpler/jankier.
     std::vector<BSPAmbientLight> mLights;
 
-    // The name of the BSP object that represents the floor.
-    std::string mFloorObjectName;
+    // Index of the object used for the floor in the BSP.
+    int mFloorObjectIndex = -1;
 
     void RenderTree(const BSPNode& node, const Vector3& cameraPosition, const Vector3& cameraDirection);
     void RenderPolygon(BSPPolygon& polygon, bool translucent);

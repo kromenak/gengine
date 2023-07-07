@@ -685,39 +685,13 @@ const ScenePosition* Scene::GetPosition(const std::string& positionName) const
 
 float Scene::GetFloorY(const Vector3& position) const
 {
-    // Calculate ray origin using passed position, but really high in the air!
-    Vector3 rayOrigin = position;
-    rayOrigin.y = 10000.0f;
-
-    // Create ray with origin high in the sky and pointing straight down.
-    Ray downRay(rayOrigin, -Vector3::UnitY);
-
-    // Raycast straight down and test against the floor BSP.
-    // If we hit something, just use the Y hit position as the floor's Y.
     BSP* bsp = mSceneData->GetBSP();
-    if(bsp != nullptr)
-    {
-        RaycastHit hitInfo;
-        if(bsp->RaycastSingle(downRay, mSceneData->GetFloorModelName(), hitInfo))
-        {
-            return downRay.GetPoint(hitInfo.t).y;
-        }
-    }
-
-    // If didn't hit floor, just return 0.
-    // TODO: Maybe we should return a default based on the floor BSP's height?
-    return 0.0f;
-}
-
-Texture* Scene::GetFloorTexture(const Vector3& position) const
-{
-    BSP* bsp = mSceneData->GetBSP();
-    if(bsp == nullptr) { return nullptr; }
+    if(bsp == nullptr) { return 0.0f; }
 
     float height = 0.0f;
     Texture* texture = nullptr;
     bsp->GetFloorInfo(position, height, texture);
-    return texture;
+    return height;
 }
 
 void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* texture)

@@ -174,13 +174,6 @@ bool Walker::AtPosition(const Vector3& position)
     return (GetOwner()->GetPosition() - position).GetLengthSq() <= kAtNodeDistSq;
 }
 
-Texture* Walker::GetFloorTypeWalkingOn() const
-{
-    Scene* scene = GEngine::Instance()->GetScene();
-    if(scene == nullptr) { return nullptr; }
-    return scene->GetFloorTexture(GetOwner()->GetPosition());
-}
-
 void Walker::OnUpdate(float deltaTime)
 {
     // Debug draw the path if desired.
