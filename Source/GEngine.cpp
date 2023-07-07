@@ -280,6 +280,12 @@ void GEngine::LoadScene(const std::string& name, std::function<void()> callback)
     mSceneLoadedCallback = callback;
 }
 
+void GEngine::UnloadScene(std::function<void()> callback)
+{
+    mUnloadScene = true;
+    mSceneUnloadedCallback = callback;
+}
+
 void GEngine::StartGame()
 {
     if(mDemoMode)
@@ -576,6 +582,14 @@ void GEngine::UnloadSceneInternal()
 
     // Unload any assets scoped to just the current scene.
     mAssetManager.UnloadAssets(AssetScope::Scene);
+
+    // Do callback if any.
+    if(mSceneUnloadedCallback != nullptr)
+    {
+        std::function<void()> callback = mSceneUnloadedCallback;
+        mSceneUnloadedCallback = nullptr;
+        callback();
+    }
 }
 
 void GEngine::DeleteDestroyedActors()

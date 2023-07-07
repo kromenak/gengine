@@ -43,7 +43,7 @@ public:
     const std::vector<Actor*>& GetActors() const { return mActors; }
     
     void LoadScene(const std::string& name, std::function<void()> callback = nullptr);
-    void UnloadScene() { mUnloadScene = true; }
+    void UnloadScene(std::function<void()> callback = nullptr);
     Scene* GetScene() { return mScene; }
 
     uint32 GetFrameNumber() const { return mFrameNumber; }
@@ -100,9 +100,10 @@ private:
     // If set, we explicitly want to unload the current scene without loading a new scene.
     bool mUnloadScene = false;
 
-    // Callback to execute when scene load completes.
+    // Callback to execute when scene load/unload completes.
     std::function<void()> mSceneLoadedCallback = nullptr;
-	
+    std::function<void()> mSceneUnloadedCallback = nullptr;
+
     void ProcessInput();
     void Update();
     void Update(float deltaTime);
