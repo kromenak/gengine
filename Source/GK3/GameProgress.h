@@ -30,8 +30,12 @@ public:
 
     // Timeblock
 	const Timeblock& GetTimeblock() const { return mTimeblock; }
-	const Timeblock& GetLastTimeblock() const { return mLastTimeblock; }
-	void SetTimeblock(const Timeblock& timeblock);
+    void SetTimeblock(const Timeblock& timeblock);
+
+    void SetChangingTimeblock(bool changing) { mChangingTimeblock = changing; }
+    bool IsChangingTimeblock() const { return mChangingTimeblock; }
+
+    const Timeblock& GetLastTimeblock() const { return mLastTimeblock; }
     std::string GetTimeblockDisplayName() const;
 
     // Flags
@@ -80,6 +84,9 @@ private:
 	// Current and last time blocks.
 	Timeblock mTimeblock;
 	Timeblock mLastTimeblock;
+
+    // If true, we are currently changing timeblocks.
+    bool mChangingTimeblock = false;
 	
 	// General-use true/false flags for game logic.
     FlagSet mGameFlags;

@@ -177,30 +177,37 @@ shpvoid SetTime(const std::string& timeblock)
         return 0;
     }
 
+    // Report that a timeblock change IS occurring (though it hasn't fully happened yet).
+    Services::Get<GameProgress>()->SetChangingTimeblock(true);
+    
     // Unload the current scene.
-    GEngine::Instance()->UnloadScene();
-
-    // Play ending movie (if any) for the timeblock we are leaving.
     std::function<void()> waitable = AddWait();
-    Services::Get<VideoPlayer>()->Play(oldTimeblock.ToString() + "end", true, true, [newTimeblock, waitable](){
+    GEngine::Instance()->UnloadScene([oldTimeblock, newTimeblock, waitable](){
+        
+        // Play ending movie (if any) for the timeblock we are leaving.
+        Services::Get<VideoPlayer>()->Play(oldTimeblock.ToString() + "end", true, true, [newTimeblock, waitable](){
 
-        // Change time to new timeblock.
-        Services::Get<GameProgress>()->SetTimeblock(newTimeblock);
+            // Show timeblock screen.
+            gGK3UI.ShowTimeblockScreen(newTimeblock, 0.0f, [newTimeblock, waitable](){
 
-        // Show timeblock screen.
-        gGK3UI.ShowTimeblockScreen(newTimeblock, 0.0f, [newTimeblock, waitable](){
+                // Change time to new timeblock.
+                Services::Get<GameProgress>()->SetTimeblock(newTimeblock);
 
-            // Show beginning movie (if any) for the new timeblock.
-            Services::Get<VideoPlayer>()->Play(newTimeblock.ToString() + "begin", true, true, [waitable](){
+                // Show beginning movie (if any) for the new timeblock.
+                Services::Get<VideoPlayer>()->Play(newTimeblock.ToString() + "begin", true, true, [waitable](){
 
-                // Reload our current location in the new timeblock.
-                GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
+                    // Reload our current location in the new timeblock.
+                    GEngine::Instance()->LoadScene(Services::Get<LocationManager>()->GetLocation());
 
-                // Notify waitable 'cause we are done here.
-                if(waitable != nullptr)
-                {
-                    waitable();
-                }
+                    // Done changing timeblock.
+                    Services::Get<GameProgress>()->SetChangingTimeblock(false);
+
+                    // Notify waitable 'cause we are done here.
+                    if(waitable != nullptr)
+                    {
+                        waitable();
+                    }
+                });
             });
         });
     });

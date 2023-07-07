@@ -193,10 +193,9 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
     Timeblock currentTimeblock = Services::Get<GameProgress>()->GetTimeblock();
     Services::GetSheep()->Execute(Services::GetAssets()->LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [sameLocation, location, callback, currentTimeblock]() {
 
-        // See whether a timeblock change occurred.
+        // See whether a timeblock change is occurring.
         // If so, we should early out - the timeblock change logic handles any location and time change.
-        Timeblock newTimeblock = Services::Get<GameProgress>()->GetTimeblock();
-        if(newTimeblock != currentTimeblock)
+        if(Services::Get<GameProgress>()->IsChangingTimeblock())
         {
             gGK3UI.HideSceneTransitioner();
             if(callback != nullptr) { callback(); }
