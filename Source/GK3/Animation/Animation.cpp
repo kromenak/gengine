@@ -83,13 +83,25 @@ void Animation::ParseFromData(char *data, int dataLength)
                 
 				// Vertex animation must be specified.
 				VertexAnimation* vertexAnim = Services::GetAssets()->LoadVertexAnimation(line.entries[1].key, GetScope());
-				
+                
 				// Create and push back the animation node. Remaining fields are optional.
                 VertexAnimNode* node = new VertexAnimNode();
                 node->frameNumber = frameNumber;
 				node->vertexAnimation = vertexAnim;
-                mFrames[frameNumber].push_back(node);
-				mVertexAnimNodes.push_back(node);
+
+                //HACK: If this is a facing direction helper (DOR), make sure it animated *before* other objects.
+                //HACK: Some logic in GKActor for calculating facing direction only works if the DOR gets sampled first.
+                bool isDor = StringUtil::StartsWithIgnoreCase(vertexAnim->GetName(), "DOR_");
+                if(isDor)
+                {
+                    mFrames[frameNumber].insert(mFrames[frameNumber].begin(), node);
+                    mVertexAnimNodes.insert(mVertexAnimNodes.begin(), node);
+                }
+                else
+                {
+                    mFrames[frameNumber].push_back(node);
+                    mVertexAnimNodes.push_back(node);
+                }
 
                 //TODO: Some animations have a keyword here (ABSOLUTE). Which I guess indicates that this is an absolute animation.
                 //TODO: I'm guessing this might be shorthand for "0, 0, 0, 0, 0, 0, 0, 0" which is frequently used for absolute anims.

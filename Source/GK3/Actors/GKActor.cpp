@@ -387,7 +387,6 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
     
     // Relative anims play with the 3D model starting at the Actor's current position/rotation.
     // So, do a sync to ensure the 3D model is at the Actor's position.
-    //TODO: Should this occur before we call VertexAnimator::Start?
     if(!animParams.absolute)
     {
         SetModelPositionToActorPosition();
@@ -585,7 +584,7 @@ Vector3 GKActor::GetModelFacingDirection() const
     }
     else // SCENARIO C: No facing helper, this is a very simple Actor (e.g. Chicken).
     {
-         // Get the hip axis, convert y-axis to a facing direction.
+        // Get the hip axis, convert y-axis to a facing direction.
         // Remember, models are facing down negative z-axis, so need to negate the axis we get back here.
         Matrix4 hipMeshToWorldMatrix = mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix();
         facingDir = -hipMeshToWorldMatrix.GetYAxis();
