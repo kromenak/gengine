@@ -181,6 +181,18 @@ namespace StringUtil
         return std::search(str.begin(), str.end(), contains.begin(), contains.end(), iequal()) != str.end();
     }
 
+    inline bool EndsWith(const std::string& str, const std::string& endsWith)
+    {
+        if(endsWith.size() > str.size()) { return false; }
+        return std::equal(endsWith.rbegin(), endsWith.rend(), str.rbegin());
+    }
+
+    inline bool EndsWithIgnoreCase(const std::string& str, const std::string& endsWith)
+    {
+        if(endsWith.size() > str.size()) { return false; }
+        return std::equal(endsWith.rbegin(), endsWith.rend(), str.rbegin(), iequal());
+    }
+
     inline size_t Find(const std::string& str, const std::string& toFind, size_t pos = 0)
     {
         if(str.size() - pos < toFind.size()) { return std::string::npos; }

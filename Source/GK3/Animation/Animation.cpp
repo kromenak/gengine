@@ -83,6 +83,11 @@ void Animation::ParseFromData(char *data, int dataLength)
                 
 				// Vertex animation must be specified.
 				VertexAnimation* vertexAnim = Services::GetAssets()->LoadVertexAnimation(line.entries[1].key, GetScope());
+                if(vertexAnim == nullptr)
+                {
+                    printf("Failed to load vertex animation %s!\n", line.entries[1].key.c_str());
+                    continue;
+                }
                 
 				// Create and push back the animation node. Remaining fields are optional.
                 VertexAnimNode* node = new VertexAnimNode();

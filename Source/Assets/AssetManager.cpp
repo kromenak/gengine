@@ -429,8 +429,15 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 
 std::string AssetManager::SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension)
 {
-    // We want to add the expected extension if no extension already exists on the name.
-    if(!Path::HasExtension(assetName))
+    // If a three-letter extension already exists, accept it and assume the caller knows what they're doing.
+    int lastIndex = assetName.size() - 1;
+    if(lastIndex > 3 && assetName[lastIndex - 3] == '.')
+    {
+        return assetName;
+    }
+
+    // No three-letter extension, add the expected extension.
+    if(!Path::HasExtension(assetName, expectedExtension))
     {
         return assetName + expectedExtension;
     }

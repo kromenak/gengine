@@ -153,35 +153,40 @@ bool Path::HasExtension(const std::string& path, const std::string& expectedExte
 {
     // If empty, no extension.
     if(path.empty()) { return false; }
-    
-    // Find last dot in path.
-    size_t lastExtensionPos = path.find_last_of('.');
-    
-    // No period in the string? Guess we have no extension.
-    if(lastExtensionPos == std::string::npos)
-    {
-        return false;
-    }
-    
-    // Need to make sure last '.' is in the last part of the path.
-    // "Assets/Foo.proj/Blah" is not considered to have an extension, for example.
-    size_t lastSeparatorPos = path.find_last_of(kSeparator);
-    
-    // We definitely have an extension period in the path to get here.
-    // So, if no separator exists, an extension exists. Or, if last separate is before extension period, an extension exists.
-    bool hasExtension = (lastSeparatorPos == std::string::npos || lastSeparatorPos < lastExtensionPos);
 
-    // Check specific extension if desired.
-    if(hasExtension && !expectedExtension.empty())
+    // Having an expected extension can actually make this easier.
+    // Just make sure the path ends with the expected extension.
+    if(!expectedExtension.empty())
     {
-        if(!std::equal(path.begin() + lastExtensionPos, path.end(), expectedExtension.begin(), StringUtil::iequal()))
+        // Make sure the extension string includes the dot at the front.
+        std::string extension = expectedExtension;
+        if(extension[0] != '.')
         {
-            hasExtension = false;
+            extension.insert(extension.begin(), '.');
         }
-    }
 
-    // Return what we got!
-    return hasExtension;
+        // Check if the path ends with the expected extension - easy peasy.
+        return StringUtil::EndsWithIgnoreCase(path, expectedExtension);
+    }
+    else // No expected extension - we just need to verify ANY extension is present.
+    {
+        // Find last dot in path.
+        size_t lastExtensionPos = path.find_last_of('.');
+
+        // No period in the string? Guess we have no extension.
+        if(lastExtensionPos == std::string::npos)
+        {
+            return false;
+        }
+
+         // Need to make sure last '.' is in the last part of the path.
+        // "Assets/Foo.proj/Blah" is not considered to have an extension, for example.
+        size_t lastSeparatorPos = path.find_last_of(kSeparator);
+
+        // We definitely have an extension period in the path to get here.
+        // So, if no separator exists, an extension exists. Or, if last separator is before extension period, an extension exists.
+        return (lastSeparatorPos == std::string::npos || lastSeparatorPos < lastExtensionPos);
+    }
 }
 
 bool Directory::Exists(const std::string& path)
