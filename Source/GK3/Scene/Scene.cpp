@@ -22,6 +22,7 @@
 #include "MeshRenderer.h"
 #include "Profiler.h"
 #include "RectTransform.h"
+#include "SceneFunctions.h"
 #include "Services.h"
 #include "SoundtrackPlayer.h"
 #include "StatusOverlay.h"
@@ -288,6 +289,9 @@ void Scene::Init()
 
     // Check for and run "scene enter" actions.
     Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");
+
+    // If there's an "Init" SceneFunction for this Scene, execute it.
+    SceneFunctions::Execute("Init");
 }
 
 void Scene::Update(float deltaTime)

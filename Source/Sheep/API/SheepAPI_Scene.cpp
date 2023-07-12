@@ -8,6 +8,7 @@
 #include "MeshRenderer.h"
 #include "Scene.h"
 #include "SceneData.h"
+#include "SceneFunctions.h"
 #include "StringUtil.h"
 #include "WalkerBoundary.h"
 
@@ -15,7 +16,7 @@ using namespace std;
 
 shpvoid CallSceneFunction(const std::string& parameter)
 {
-    printf("Call Scene Function %s\n", parameter.c_str());
+    SceneFunctions::Execute(parameter);
     return 0;
 }
 RegFunc1(CallSceneFunction, void, string, WAITABLE, REL_FUNC);
