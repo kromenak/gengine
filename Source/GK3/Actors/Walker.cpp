@@ -100,7 +100,7 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
     {
         // Specify a "dummy" heading here so that the "turn to face" action is put into the walk plan.
         // Later on, when the object comes into view, we'll replace this with the actual direction to turn.
-        WalkToInternal(target->GetPosition(), Heading::FromDegrees(0.0f), finishCallback, false);
+        WalkToInternal(target->GetAABB().GetCenter(), Heading::FromDegrees(0.0f), finishCallback, false);
     }
 }
 
