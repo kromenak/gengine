@@ -30,7 +30,8 @@ GKProp::GKProp(Model* model) : GKProp()
 GKProp::GKProp(const SceneModel& modelDef) : GKProp(modelDef.model)
 {
     SetNoun(modelDef.noun);
-    
+    SetVerb(modelDef.verb);
+
     // If it's a "gas prop", use provided gas as the fidget for the actor.
     //TODO: Ideally, start fidget during init, not construction.
     if(modelDef.type == SceneModel::Type::GasProp)

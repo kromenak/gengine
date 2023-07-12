@@ -185,8 +185,8 @@ struct SceneModel
     // Noun associated with this object, for interactivity.
     std::string noun;
     
-    // Usually, verbs are specified in the NVC file. But it is allowed to
-    // specify a verb here if only a single verb response is possible.
+    // Usually, verbs are specified in the NVC file.
+    // But it can be specified here if only a single verb is possible.
     std::string verb;
     
     // An animation played on init. Only first frame will be applied.
