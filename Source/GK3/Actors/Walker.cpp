@@ -587,11 +587,12 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
     Vector3 dir = (targetAABB.GetCenter() - headPos).Normalize();
     Ray ray(headPos, dir);
     //Debug::DrawLine(targetAABB.GetCenter(), headPos, Color32::Red);
-    
-    // If hit the target with the ray, it must be in view.
-    SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, false, mGKOwner);
-    //std::cout << result.hitInfo.name << " vs " << mWalkToSeeTarget->GetName() << std::endl;
 
+    // Cast a ray from our head in the direction of the target AABB.
+    GKObject* obj = static_cast<GKObject*>(mGKOwner);
+    SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, false, &obj);
+
+    // If hit the target with the ray, it must be in view.
     if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
        StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()))
     {

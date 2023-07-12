@@ -437,17 +437,28 @@ void Scene::GlideToCameraPosition(const std::string& cameraName, std::function<v
     mCamera->Glide(camera->position, camera->angle, finishCallback);
 }
 
-SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore) const
+SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** ignore, int ignoreCount) const
 {
-	SceneCastResult result;
-	
 	// Check props/actors before BSP.
 	// Later, we'll check BSP and see if we hit something obscuring a prop/actor.
-    for(auto& object : mPropsAndActors)
+    SceneCastResult result;
+    for(GKObject* object : mPropsAndActors)
     {
         // Ignore if desired.
-        if(ignore != nullptr && ignore == object) { continue; }
-
+        if(ignore != nullptr)
+        {
+            bool shouldIgnore = false;
+            for(int i = 0; i < ignoreCount; ++i)
+            {
+                if(ignore[i] == object)
+                {
+                    shouldIgnore = true;
+                    break;
+                }
+            }
+            if(shouldIgnore) { continue; }
+        }
+        
         // If only interested in interactive objects, skip non-interactive objects.
         if(interactiveOnly && !object->CanInteract()) { continue; }
 
@@ -476,36 +487,37 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, const GKObj
 	}
 	
 	// Check BSP for any hit interactable object.
-	BSP* bsp = mSceneData->GetBSP();
-	if(bsp != nullptr)
-	{
-		RaycastHit hitInfo;
-		if(bsp->RaycastNearest(ray, hitInfo))
-		{
-			// If "t" is smaller, then the BSP object obscured any previous hit.
-			if(hitInfo.t < result.hitInfo.t)
-			{
-				result.hitInfo = hitInfo;
-				
-				// See if hit any actor representing BSP object.
-				for(auto& bspActor : mBSPActors)
-				{
-                    // Ignore if desired.
-                    if(ignore != nullptr && ignore == bspActor) { continue; }
-                    
-					// If only interested in interactive objects, skip non-interactive objects.
-					if(interactiveOnly && !bspActor->CanInteract()) { continue; }
-					
-					// Check whether this is the BSP actor we hit.
-					if(StringUtil::EqualsIgnoreCase(bspActor->GetName(), hitInfo.name))
-					{
-						result.hitObject = bspActor;
-						break;
-					}
-				}
-			}
-		}
-	}
+    for(BSPActor* object : mBSPActors)
+    {
+        // Ignore if desired.
+        if(ignore != nullptr)
+        {
+            bool shouldIgnore = false;
+            for(int i = 0; i < ignoreCount; ++i)
+            {
+                if(ignore[i] == object)
+                {
+                    shouldIgnore = true;
+                    break;
+                }
+            }
+            if(shouldIgnore) { continue; }
+        }
+
+        // If only interested in interactive objects, skip non-interactive objects.
+        if(interactiveOnly && !object->CanInteract()) { continue; }
+
+        // Raycast to see if we hit this thing.
+        RaycastHit hitInfo;
+        if(object->Raycast(ray, hitInfo))
+        {
+            if(hitInfo.t < result.hitInfo.t)
+            {
+                result.hitInfo = hitInfo;
+                result.hitObject = object;
+            }
+        }
+    }
 	return result;
 }
 
@@ -964,19 +976,8 @@ void Scene::ExecuteAction(const Action* action)
 		}
 		case Action::Approach::WalkToSee: // Example use: R25 Look Painting/Couch/Dresser/Plant, RC1 Look Bench/Bookstore Sign
 		{
-            // The target could be a scene model, or it could be BSP. Figure it out!
+            // Find the target object by name.
             GKObject* obj = GetSceneObjectByModelName(action->target);
-            if(obj == nullptr)
-            {
-                for(auto bspActor : mBSPActors)
-                {
-                    if(StringUtil::EqualsIgnoreCase(bspActor->GetName(), action->target))
-                    {
-                        obj = bspActor;
-                        break;
-                    }
-                }
-            }
 
             // If we found the object, walk to see it.
             // If didn't find it, print a warning/error and just execute right away.

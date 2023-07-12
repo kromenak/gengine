@@ -63,7 +63,7 @@ public:
     void SetCameraPositionForConversation(const std::string& conversationName, bool isInitial);
     void GlideToCameraPosition(const std::string& cameraName, std::function<void()> finishCallback);
 	
-	SceneCastResult Raycast(const Ray& ray, bool interactiveOnly, const GKObject* ignore = nullptr) const;
+	SceneCastResult Raycast(const Ray& ray, bool interactiveOnly, GKObject** ignore = nullptr, int ignoreCount = 1) const;
     void Interact(const Ray& ray, GKObject* interactHint = nullptr);
     void SkipCurrentAction();
     

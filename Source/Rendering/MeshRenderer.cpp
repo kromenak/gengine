@@ -219,9 +219,10 @@ Mesh* MeshRenderer::GetMesh(int index) const
 
 bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 {
-	Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
-	
-	// Raycast against triangles in the mesh.
+    // Get our local to world matrix.
+    const Matrix4& localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
+
+	// Go through each mesh and see if the ray has hit the mesh.
 	for(auto& mesh : mMeshes)
 	{
 		// Calculate world->local space transform by creating object->local and inverting.

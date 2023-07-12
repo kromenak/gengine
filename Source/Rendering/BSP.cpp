@@ -97,11 +97,11 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
         BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
         if(!surface.interactive) { continue; }
 		
-        Vector3 p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
+        Vector3& p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
         for(int i = 1; i < polygon.vertexIndexCount - 1; i++)
         {
-            Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
-            Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
+            Vector3& p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
+            Vector3& p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
 			RaycastHit hitInfo;
 			if(Intersect::TestRayTriangle(ray, p0, p1, p2, hitInfo.t))
             {
