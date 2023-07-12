@@ -98,6 +98,7 @@ endif()
 # Other compiler flags
 if(MSVC)
     target_compile_options(gk3 PRIVATE 
+        /JMC    # Enable "Just My Code" to skip system/library code when debugging
         /MP     # Multithreaded compiling - it's faster
     )
 endif()
