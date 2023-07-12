@@ -50,7 +50,7 @@ public:
 	
 	// Action Execution
 	bool ExecuteAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
-	void ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback = nullptr);
+	void ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback = nullptr, bool log = true);
     void ExecuteSheepAction(const std::string& sheepName, const std::string& functionName, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteCustomAction(const std::string& noun, const std::string& verb, const std::string& caseLabel,

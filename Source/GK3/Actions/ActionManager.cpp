@@ -141,7 +141,7 @@ bool ActionManager::ExecuteAction(const std::string& noun, const std::string& ve
     return action != nullptr;
 }
 
-void ActionManager::ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback)
+void ActionManager::ExecuteAction(const Action* action, std::function<void(const Action*)> finishCallback, bool log)
 {
     // Early out if action is null.
 	if(action == nullptr)
@@ -163,7 +163,11 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
     mCurrentActionFinishCallback = finishCallback;
 	
 	// Log it!
-	Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", action->ToString().c_str()));
+    // This is conditional b/c scene actions are actually logged earlier (before the approach finishes).
+    if(log)
+    {
+        Services::GetReports()->Log("Actions", StringUtil::Format("Playing NVC %s", action->ToString().c_str()));
+    }
 	
 	// Increment action ID.
 	++mActionId;

@@ -883,12 +883,12 @@ void Scene::ExecuteAction(const Action* action)
 			{
 				//Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
 				mEgo->WalkTo(scenePos->position, scenePos->heading, [this, action]() -> void {
-					Services::Get<ActionManager>()->ExecuteAction(action);
+					Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 				});
 			}
 			else
 			{
-				Services::Get<ActionManager>()->ExecuteAction(action);
+				Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 			}
 			break;
 		}
@@ -898,19 +898,19 @@ void Scene::ExecuteAction(const Action* action)
 			if(anim != nullptr)
 			{
 				mEgo->WalkToAnimationStart(anim, [action]() -> void {
-					Services::Get<ActionManager>()->ExecuteAction(action);
+					Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 				});
 			}
 			else
 			{
-				Services::Get<ActionManager>()->ExecuteAction(action);
+				Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 			}
 			break;
 		}
 		case Action::Approach::Near: // Never used in GK3.
 		{
 			std::cout << "Executed NEAR approach type!" << std::endl;
-			Services::Get<ActionManager>()->ExecuteAction(action);
+			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 			break;
 		}
 		case Action::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
@@ -932,25 +932,25 @@ void Scene::ExecuteAction(const Action* action)
 
                 // Walk there, then do the action.
                 mEgo->WalkTo(walkPos, walkHeading, [action](){
-                    Services::Get<ActionManager>()->ExecuteAction(action);
+                    Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
                 });
             }
             else
             {
                 // Just do the action if model could not be found.
-                Services::Get<ActionManager>()->ExecuteAction(action);
+                Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
             }
 			break;
 		}
 		case Action::Approach::Region: // Never used in GK3 (it does appear once in a SIF file, but it is misconfigured with an invalid region anyway).
 		{
-			Services::Get<ActionManager>()->ExecuteAction(action);
+			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 			break;
 		}
 		case Action::Approach::TurnTo: // Never used in GK3.
 		{
 			std::cout << "Executed TURNTO approach type!" << std::endl;
-			Services::Get<ActionManager>()->ExecuteAction(action);
+			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 			break;
 		}
 		case Action::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
@@ -974,7 +974,7 @@ void Scene::ExecuteAction(const Action* action)
 			// Do a "turn to" heading.
 			Heading turnToHeading = Heading::FromDirection(egoToModel);
 			mEgo->TurnTo(turnToHeading, [this, action]() -> void {
-				Services::Get<ActionManager>()->ExecuteAction(action);
+				Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 			});
 			break;
 		}
@@ -988,26 +988,26 @@ void Scene::ExecuteAction(const Action* action)
             if(obj != nullptr)
             {
                 mEgo->WalkToSee(obj, [this, action]() -> void{
-                    Services::Get<ActionManager>()->ExecuteAction(action);
+                    Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
                 });
             }
             else
             {
                 std::cout << "Could not find WalkToSee target " << action->target << std::endl;
-                Services::Get<ActionManager>()->ExecuteAction(action);
+                Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
             }
 			break;
 		}
 		case Action::Approach::None:
 		{
 			// Just do it!
-			Services::Get<ActionManager>()->ExecuteAction(action);
+			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 			break;
 		}
 		default:
 		{
 			Services::GetReports()->Log("Error", "Invalid approach " + std::to_string(static_cast<int>(action->approach)));
-			Services::Get<ActionManager>()->ExecuteAction(action);
+			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
 			break;
 		}
 	}
