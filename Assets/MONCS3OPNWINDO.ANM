@@ -1,0 +1,12 @@
+// GEngine: copied from game assets to fix a typo.
+[HEADER]
+41
+
+[ACTIONS]
+2
+0,mon_MonCs3OpnWindo,25.7, -109.3, 37.0, 0.0, 26.2, -106.1, 37.0, 0.0
+0,cs3_wndwfrm_opn01_MonCs3OpnWind,25.7, -109.3, 37.0, 0.0, 26.2, -106.1, 37.0, 0.0 // Changed "cs3_wndwfrm_opn01_MonCs3OpnWindo" to "cs3_wndwfrm_opn01_MonCs3OpnWind"
+
+[SOUNDS]
+1
+15,WinHomO_2.wav,100,cs3_wndwfrm_opn01,65,650
