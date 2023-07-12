@@ -727,7 +727,25 @@ void Animation::ParseFromData(char *data, int dataLength)
                         // Read YAK license plate (file name).
                         DialogueAnimNode* node = new DialogueAnimNode();
                         node->frameNumber = frameNumber;
-                        node->licensePlate = line.entries[2].key.substr(1); // Chop off the first letter of the license plate. It contains the localization char, but ignore for now.
+
+                        // ANM/MOM/YAK files *almost* always prepend the language code (E) to the license plat. *Almost* always.
+                        // Since it's not consistent however, we need to come up with a hueristic to get it working all the time...
+                        
+                        // If the first character is a number, there is no language code - use as-is.
+                        if(isdigit(line.entries[2].key[0]))
+                        {
+                            node->licensePlate = line.entries[2].key;
+                        }
+                        else if(line.entries[2].key[0] == 'C' || line.entries[2].key[0] == 'D')
+                        {
+                            // A handful of YAK files start with C or D and do not have language codes - use as-is.
+                            node->licensePlate = line.entries[2].key;
+                        }
+                        else // Appears to have a language code - remove the first character.
+                        {
+                            node->licensePlate = line.entries[2].key.substr(1);
+                        }
+                        
                         mFrames[frameNumber].push_back(node);
                     }
                 }

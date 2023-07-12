@@ -155,7 +155,7 @@ void Model::ParseFromData(char *data, int dataLength)
         return;
     }
     
-    // 2 bytes: A major/minor version number. Next 2 unknown.
+    // 2 bytes: A major/minor version number.
     reader.ReadByte(); // minor
     reader.ReadByte(); // major
 
@@ -178,7 +178,7 @@ void Model::ParseFromData(char *data, int dataLength)
     // Could maybe be a floating-point value? 0x000C842 = 100.0f
     reader.ReadUInt();
 	
-	// Unknown
+	// 4 bytes: unknown
 	reader.Skip(4);
     
     // 24 bytes: mostly unknown - most files have had zeros here thus far.
