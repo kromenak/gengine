@@ -38,6 +38,10 @@ code
 		{
 			wait Call("CheckTimeblockComplete210A$");
 		}
+		else if(IsCurrentTime("212P"))
+		{
+			wait Call("CheckTimeblockComplete212P$")
+		}
 	}
 
 	CheckTimeblockComplete110A$()
@@ -214,6 +218,7 @@ code
 		{
 			return;
 		}
+
 		// Must have introduced yourself to Wilkes.
 		// This technically can be done earlier (112P or 102P) but MUST be done now.
 		if(GetTopicCount("WILKES", "T_INTRODUCE") == 0)
@@ -252,6 +257,8 @@ code
 
 	CheckTimeblockComplete207A$()
 	{
+		// NOTE: the way this timeblock ends is Chateau de Blanchfort's Sheep will change the location to R25 after all conditions have been met.
+
 		// Must be at R25.
 		if(IsCurrentLocation("R25") == 0)
 		{
@@ -264,9 +271,17 @@ code
 			return;
 		}
 
-		// To finish the timeblock, you must have gone on the tour, visited Poussin's Tomb, and visited the Chateau.
-		// The *exact* conditions for that are a bit unclear, but these should suffice.
+		// The original game won't let you clear the timeblock simply by using SetLocation from CD1 back to R25.
+		// These topic conditions are also checked:
+
+		// Must have talked to these three about Le Serpent Rouge.
 		if(GetTopicCount("EMILIO", "T_LE_SERPENT_ROUGE") < 1 || GetTopicCount("MOSELY", "T_LE_SERPENT_ROUGE") < 1 || GetTopicCount("BUTHANE", "T_LE_SERPENT_ROUGE") < 1)
+		{
+			return;
+		}
+
+		// Must have talked to Mosely about Gabe, Grace, Treasure.
+		if(GetTopicCount("MOSELY", "T_GABRIEL") < 1 || GetTopicCount("MOSELY", "T_MOSELY") < 1 || GetTopicCount("MOSELY", "T_TREASURE") < 1)
 		{
 			return;
 		}
@@ -294,5 +309,25 @@ code
 		// OK, go to next timeblock!
 		// In this case, we also need to switch to a new location (Chateau de Serras).
 		SetLocationTime("CSE", "212P");
+	}
+
+	CheckTimeblockComplete212P$()
+	{
+		// Must be at R25.
+		// This location is set at the end of the final cutscene.
+		if(IsCurrentLocation("R25") == 0)
+		{
+			return;
+		}
+
+		// Must have talked to the old lady in the cellar.
+		if(GetNounVerbCount("OLD_LADY", "TALK") == 0)
+		{
+			return;
+		}
+
+		// OK, go to next timeblock!
+		// In this case, we also need to switch to a new location (Chateau de Serras).
+		SetTime("202P");
 	}
 }
