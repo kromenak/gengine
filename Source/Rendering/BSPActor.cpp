@@ -22,6 +22,7 @@ void BSPActor::SetInteractive(bool interactive)
 	{
 		surface->interactive = interactive;
 	}
+    SetActive(interactive);
 }
 
 bool BSPActor::Raycast(const Ray& ray, RaycastHit& hitInfo)
