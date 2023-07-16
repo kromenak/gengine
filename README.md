@@ -6,27 +6,29 @@ The goal of this project is to create a cross-platform game engine capable of pl
 See [my blog post](http://clarkkromenaker.com/post/gengine-01-introduction/) introducing the project for more in-depth info!
 
 ## Getting Started
-Currently, the project builds and runs on Mac or Windows. Here are some instructions to get up and running.
+Currently, GEngine runs on Mac or Windows. Here's how to get up and running.
 
 ### GK3 Data Files
-This repository **does not** contain the data files from the game, since those are copyrighted material. You will need to obtain a copy of GK3 (available on Steam or GOG) to get the data files.
+This repository **does not** contain the game's data files, since those are copyrighted material. You will need to obtain a copy of GK3 (available on Steam or GOG) to get the data files. The data files are all Barn (.brn) asset bundles and all video files (.bik and .avi) in the game's `Data` directory.
 
-Copy the entire contents of the game's `Data` folder into the `Data` folder before building/running. This includes all Barn (.brn) asset bundles and all video files (.bik and .avi).
+If building from source, put all data files into the `Data` directory before building/running.
 
-After building, you can also add data files. On Windows, copy them to the `Data` folder in the exe directory. On Mac, copy them to `Gabriel Knight 3.app/Contents/Resources/Data`.
+Prebuilt executables (such as those obtained on the "Releases" page) also require data files to be copied before running. On Windows, copy them to the `Data` folder in the exe directory. On Mac, copy them to `Gabriel Knight 3.app/Contents/Resources/Data`.
+
+The [Gabriel Knight 3 demo](https://archive.org/details/GabrielKnight3BloodOfTheSacredBloodOfTheDamnedDemo) is also supported. Simply copy `Gk3demo.brn` into the data folder. The engine will detect this file and launch in "demo mode". This is a way you can test out the engine without purchasing the full game.
 
 ### Build File Generation
-The project uses CMake, which means the definitions of what targets to create, which source files to include, and which libraries to link against are defined in `CMakeLists.txt` in the project root. Using CMake, you can generate the project files for your preferred IDE. 
+The project uses CMake, which means the definitions of what targets to create, which source files to include, and which libraries to link against are defined in `CMakeLists.txt` in the project root. Using CMake, you can generate the project files for your preferred IDE.
 
-I've only tested Xcode and Visual Studio 2019 at this point, but it'll likely work with other build systems with a bit of effort.
+I've only tested Xcode and Visual Studio at this point, but it'll likely work with other build systems with a bit of effort.
 
 #### Mac (Xcode)
 Make sure Xcode and CMake are installed. Then, use terminal to execute the script at `Build/GenerateMac.sh`. The Xcode project will be generated at `Build/Mac`. Build and run the `gk3` target.
 
-#### Windows (Visual Studio 2019)
-Install Visual Studio 2019 and CMake. When you install CMake, I'd recommend adding it to your path.
+#### Windows (Visual Studio 2022)
+Install Visual Studio 2022 and CMake. When you install CMake, I'd recommend adding it to your path.
 
-Then, I'd recommend using [Git Bash](https://gitforwindows.org/) to execute the `Build/GenerateWindows.sh` script. This will generate a VS 2019 project at `Build/Windows`. Build and run the `gk3` target.
+Then, I'd recommend using [Git Bash](https://gitforwindows.org/) to execute the `Build/GenerateWindows.sh` script. This will generate a VS 2022 project at `Build/Windows`. Build and run the `gk3` target.
 
 If you'd prefer to use the native Command Prompt, you'll just need to manually run the CMake command in the bash script file instead.
 
@@ -102,7 +104,8 @@ F1, F2, and F3 enable debug visualizations. F4 quits the game.
 ## License
 This project is licensed under the GNU GPLv3 License - see the [LICENSE.md](LICENSE.md) file for details.
 
-## Acknowledgments
-* Sierra On-Line, who inspired me as a kid and still do today
-* Jane Jensen, for creating and designing the GK series
-* [GK3 Tools](https://sourceforge.net/projects/gk3tools/), which provided guidance on BRN, BSP, and ACT file formats
+## Acknowledgments/Thanks
+* Sierra On-Line: they inspired me to get into game development long ago, and they still inspire me today
+* Jane Jensen: for creating and designing such a compelling video game series
+* The GK3 Team: for creating a super fun game, and including a wealth of docs hidden in the data files
+* [GK3 Tools](https://sourceforge.net/projects/gk3tools/): for providing guidance on reverse engineering BRN, BSP, and ACT file formats
