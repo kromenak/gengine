@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "BSP.h"
 #include "Services.h"
+#include "Skybox.h"
 #include "StringUtil.h"
 #include "Texture.h"
 #include "WalkerBoundary.h"
