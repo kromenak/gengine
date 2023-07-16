@@ -81,7 +81,7 @@ RegFunc0(TurnLSRPageRight, void, IMMEDIATE, REL_FUNC);
 
 shpvoid FinishedScreen()
 {
-    printf("A WINNER IS YOU!\n");
+    gGK3UI.ShowFinishedScreen();
     return 0;
 }
 RegFunc0(FinishedScreen, void, IMMEDIATE, REL_FUNC);

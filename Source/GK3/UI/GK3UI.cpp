@@ -2,12 +2,19 @@
 
 #include "CaptionsOverlay.h"
 #include "DrivingScreen.h"
+#include "FinishedScreen.h"
 #include "SceneTransitioner.h"
 #include "Sidney.h"
 #include "TimeblockScreen.h"
 #include "TitleScreen.h"
 
 GK3UI gGK3UI;
+
+namespace
+{
+    // NOTE: Putting this here to avoid name clash with "FinishedScreen" Sheep API call.
+    FinishedScreen* mFinishedScreen = nullptr;
+}
 
 void GK3UI::ShowTitleScreen()
 {
@@ -27,6 +34,16 @@ void GK3UI::ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::fu
         mTimeblockScreen->SetIsDestroyOnLoad(false);
     }
     mTimeblockScreen->Show(timeblock, timer, callback);
+}
+
+void GK3UI::ShowFinishedScreen()
+{
+    if(mFinishedScreen == nullptr)
+    {
+        mFinishedScreen = new FinishedScreen();
+        mFinishedScreen->SetIsDestroyOnLoad(false);
+    }
+    mFinishedScreen->Show();
 }
 
 void GK3UI::ShowSceneTransitioner()
