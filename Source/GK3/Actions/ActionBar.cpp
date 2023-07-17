@@ -164,7 +164,14 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 				this->Hide();
 				
 				// Execute the action, which will likely run some SheepScript.
-				executeCallback(invAction);
+                if(executeCallback != nullptr)
+                {
+                    executeCallback(invAction);
+                }
+                else
+                {
+                    Services::Get<ActionManager>()->ExecuteAction(invAction);
+                }
 			});
 		}
 	}
