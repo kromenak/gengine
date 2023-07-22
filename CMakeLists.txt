@@ -101,6 +101,10 @@ if(MSVC)
         /JMC    # Enable "Just My Code" to skip system/library code when debugging
         /MP     # Multithreaded compiling - it's faster
     )
+elseif(APPLE)
+    target_compile_options(gk3 PRIVATE
+        $<$<CONFIG:RelWithDebInfo>:-O>  # Workaround: currently seeing crashes and performance issues with -O2 optimization; use -O1 instead.
+    )
 endif()
 
 # Library locations/linking/copying.
