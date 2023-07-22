@@ -45,6 +45,9 @@ public:
 	Camera* GetCamera() { return mCamera; }
     
     void SetSceneActive(bool active) { mSceneActive = active; }
+    
+    void SaveFov();
+    void RestoreFov();
 	
 protected:
     void OnUpdate(float deltaTime) override;
@@ -67,6 +70,11 @@ private:
     // 1) Even if cinematics are disabled, the camera will obey "cut to camera angle" sheep calls.
     // 2) All movement or rotation of the camera is disabled.
     bool mForcedCinematicMode = false;
+    
+    // Cutscenes sometimes set the camera FOV, but forget to set it back afterwards.
+    // To combat this, we remember the FOV pre-action and revert it afterwards.
+    // (After some testing, even the original game does this!)
+    float mSavedCameraFOV = 0.0f;
 
     //////////////////
     // MOVEMENT

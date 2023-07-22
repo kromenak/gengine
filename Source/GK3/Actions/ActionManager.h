@@ -159,6 +159,10 @@ private:
 	// An identifier for an executing action. Increment on each execution to uniquely identify actions.6
 	// This mirrors what's output in GK3 when dumping actions.
 	uint32 mActionId = 0;
+    
+    // The field-of-view of the camera when action starts, so we can set it back after.
+    // In the original game, I observed that this is stored and reverted after an action completes.
+    float mActionStartCameraFov = 0.0f;
 	
 	// Action bar, which the player uses to perform actions on scene objects.
 	ActionBar* mActionBar = nullptr;

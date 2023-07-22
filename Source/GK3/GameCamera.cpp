@@ -109,6 +109,16 @@ void GameCamera::Uninspect(std::function<void()> callback)
     }
 }
 
+void GameCamera::SaveFov()
+{
+    mSavedCameraFOV = mCamera->GetCameraFovRadians();
+}
+
+void GameCamera::RestoreFov()
+{
+    mCamera->SetCameraFovRadians(mSavedCameraFOV);
+}
+
 void GameCamera::OnUpdate(float deltaTime)
 {
     /*

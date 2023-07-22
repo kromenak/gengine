@@ -5,6 +5,7 @@
 #include "ActionBar.h"
 #include "DialogueManager.h"
 #include "GameProgress.h"
+#include "GameCamera.h"
 #include "GKActor.h"
 #include "GK3UI.h"
 #include "IniParser.h"
@@ -171,6 +172,9 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 	
 	// Increment action ID.
 	++mActionId;
+    
+    // Remember current camera FOV.
+    GEngine::Instance()->GetScene()->GetCamera()->SaveFov();
 
     // Save frame this action was started on.
     mCurrentActionStartFrame = GEngine::Instance()->GetFrameNumber();
@@ -869,6 +873,9 @@ void ActionManager::OnActionExecuteFinished()
     // Do this BEFORE callback and topic bar checks, as those may want to start an action themselves.
     mLastAction = mCurrentAction;
     mCurrentAction = nullptr;
+    
+    // Restore current camera FOV.
+    GEngine::Instance()->GetScene()->GetCamera()->RestoreFov();
 
     // Execute finish callback if specified.
     if(mCurrentActionFinishCallback != nullptr)
