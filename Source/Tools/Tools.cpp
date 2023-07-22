@@ -13,6 +13,9 @@
 
 namespace
 {
+    // Have tools been initialized?
+    bool toolsInitialized = false;
+    
     // Are tools active globally?
     bool toolsActive = false;
 
@@ -22,23 +25,34 @@ namespace
 
 void Tools::Init()
 {
-    // Create IMGUI context.
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
+    if(!toolsInitialized)
+    {
+        // Create IMGUI context.
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
 
-    // Init for SDL & OpenGL.
-    ImGui_ImplSDL2_InitForOpenGL(Window::Get(), Services::GetRenderer()->GetGLContext());
-    ImGui_ImplOpenGL3_Init("#version 150");
+        // Init for SDL & OpenGL.
+        ImGui_ImplSDL2_InitForOpenGL(Window::Get(), Services::GetRenderer()->GetGLContext());
+        ImGui_ImplOpenGL3_Init("#version 150");
 
-    // We'll use dark mode.
-    ImGui::StyleColorsDark();
+        // We'll use dark mode.
+        ImGui::StyleColorsDark();
+        
+        toolsInitialized = true;
+    }
 }
 
 void Tools::Shutdown()
 {
-    ImGui_ImplOpenGL3_Shutdown();
-    ImGui_ImplSDL2_Shutdown();
-    ImGui::DestroyContext();
+    if(toolsInitialized)
+    {
+        // Shutdown/destroy in reverse order of initialization.
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplSDL2_Shutdown();
+        ImGui::DestroyContext();
+        
+        toolsInitialized = false;
+    }
 }
 
 void Tools::Update()
