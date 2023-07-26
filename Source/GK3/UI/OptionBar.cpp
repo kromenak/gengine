@@ -8,6 +8,7 @@
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "InventoryManager.h"
+#include "Renderer.h"
 #include "TextAsset.h"
 #include "UIButton.h"
 #include "UICanvas.h"

@@ -14,6 +14,7 @@
 #include "Profiler.h"
 #include "ReportManager.h"
 #include "Scene.h"
+#include "SheepManager.h"
 #include "SheepScript.h"
 #include "StringUtil.h"
 #include "Timeblock.h"

@@ -1,7 +1,9 @@
 #include "SheepAPI_Sound.h"
 
+#include "AssetManager.h"
 #include "AudioManager.h"
 #include "GEngine.h"
+#include "ReportManager.h"
 #include "Scene.h"
 #include "SoundtrackPlayer.h"
 #include "StringUtil.h"

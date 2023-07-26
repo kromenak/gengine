@@ -3,6 +3,7 @@
 #include <cctype>
 
 #include "ActionManager.h"
+#include "AssetManager.h"
 #include "Animation.h"
 #include "Animator.h"
 #include "GameCamera.h"

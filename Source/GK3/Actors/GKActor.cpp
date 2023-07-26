@@ -3,6 +3,7 @@
 #include "Animation.h"
 #include "Animator.h"
 #include "AnimationNodes.h"
+#include "AssetManager.h"
 #include "BSP.h"
 #include "CharacterManager.h"
 #include "Debug.h"

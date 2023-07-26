@@ -5,6 +5,8 @@
 #include <imgui_impl_sdl.h>
 
 #include "GEngine.h"
+#include "InputManager.h"
+#include "Renderer.h"
 #include "Scene.h"
 #include "Window.h"
 

@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "AssetManager.h"
 #include "Audio.h"
 #include "GEngine.h"
 #include "GMath.h"

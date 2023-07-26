@@ -7,6 +7,7 @@
 #include "IniParser.h"
 #include "Localizer.h"
 #include "ReportManager.h"
+#include "SheepManager.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
 #include "Timeblock.h"

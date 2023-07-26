@@ -1,10 +1,14 @@
 #include "GEngine.h"
 
+#include <cassert>
+
 #include <SDL.h>
 
 #include "ActionManager.h"
+#include "AssetManager.h"
 #include "Actor.h"
 #include "CharacterManager.h"
+#include "Console.h"
 #include "ConsoleUI.h"
 #include "CursorManager.h"
 #include "Debug.h"
@@ -19,6 +23,8 @@
 #include "LocationManager.h"
 #include "Paths.h"
 #include "Profiler.h"
+#include "ReportManager.h"
+#include "Renderer.h"
 #include "SaveManager.h"
 #include "Scene.h"
 #include "TextInput.h"

@@ -1,7 +1,10 @@
 #include "DrivingScreen.h"
 
+#include <cassert>
+
 #include "ActionManager.h"
 #include "Animator.h"
+#include "AssetManager.h"
 #include "DrivingScreenBlip.h"
 #include "GameProgress.h"
 #include "GEngine.h"

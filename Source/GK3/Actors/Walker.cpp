@@ -11,6 +11,7 @@
 #include "GKActor.h"
 #include "Heading.h"
 #include "Ray.h"
+#include "Renderer.h"
 #include "Scene.h"
 #include "StringUtil.h"
 #include "Vector3.h"

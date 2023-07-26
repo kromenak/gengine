@@ -1,11 +1,13 @@
 #include "SheepAPI_Scene.h"
 
 #include "Animator.h"
+#include "AssetManager.h"
 #include "BSPActor.h"
 #include "CharacterManager.h"
 #include "GEngine.h"
 #include "GKActor.h"
 #include "MeshRenderer.h"
+#include "ReportManager.h"
 #include "Scene.h"
 #include "SceneData.h"
 #include "SceneFunctions.h"

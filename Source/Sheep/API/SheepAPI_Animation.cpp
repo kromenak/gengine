@@ -3,6 +3,7 @@
 #include "Animator.h"
 #include "AssetManager.h"
 #include "GEngine.h"
+#include "ReportManager.h"
 #include "Scene.h"
 
 using namespace std;

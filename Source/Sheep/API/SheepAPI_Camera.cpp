@@ -5,6 +5,7 @@
 #include "GEngine.h"
 #include "GKObject.h"
 #include "MeshRenderer.h"
+#include "ReportManager.h"
 #include "SaveManager.h"
 #include "Scene.h"
 

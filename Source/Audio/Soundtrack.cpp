@@ -1,12 +1,12 @@
 #include "Soundtrack.h"
 
-#include "StringUtil.h"
-
+#include "AssetManager.h"
 #include "Audio.h"
 #include "GEngine.h"
 #include "GKObject.h"
 #include "IniParser.h"
 #include "Scene.h"
+#include "StringUtil.h"
 
 int WaitNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
 {

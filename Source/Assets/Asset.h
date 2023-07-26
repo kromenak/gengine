@@ -22,7 +22,7 @@ class Asset
 {
 public:
     Asset(const std::string& name, AssetScope scope = AssetScope::Global);
-    virtual ~Asset() { }
+    virtual ~Asset() = default;
     
     const std::string& GetName() const { return mName; }
     std::string GetNameNoExtension() const;

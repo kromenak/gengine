@@ -1,8 +1,10 @@
 #include "SheepAPI_Actors.h"
 
+#include "AssetManager.h"
 #include "FaceController.h"
 #include "GEngine.h"
 #include "GKActor.h"
+#include "ReportManager.h"
 #include "Scene.h"
 
 using namespace std;
