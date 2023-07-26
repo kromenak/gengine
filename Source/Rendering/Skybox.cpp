@@ -1,7 +1,7 @@
 #include "Skybox.h"
 
+#include "AssetManager.h"
 #include "Mesh.h"
-#include "Services.h"
 #include "Texture.h"
 
 namespace
@@ -81,7 +81,7 @@ void Skybox::Render()
         mSkyboxMesh->AddSubmesh(meshDefinition);
         
         // Also use this opportunity to set the shader on the material.
-        Shader* skyboxShader = Services::GetAssets()->LoadShader("3D-Skybox");
+        Shader* skyboxShader = gAssetManager.LoadShader("3D-Skybox");
         mMaterial.SetShader(skyboxShader);
     }
 

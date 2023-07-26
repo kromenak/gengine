@@ -29,7 +29,7 @@ public:
     int GetFramesPerSecond() const { return mFramesPerSecond; }
 
     int GetTextureCount() { return mTextures.size(); }
-    Texture* GetTexture(int index) { return (index >= 0 && index < mTextures.size()) ? mTextures[index] : nullptr; }
+    Texture* GetTexture(uint32_t index) { return (index < mTextures.size()) ? mTextures[index] : nullptr; }
 
 private:
     int mFramesPerSecond = 15;

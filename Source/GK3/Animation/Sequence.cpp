@@ -2,8 +2,8 @@
 
 #include <string>
 
+#include "AssetManager.h"
 #include "IniParser.h"
-#include "Services.h"
 #include "StringUtil.h"
 
 Sequence::Sequence(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
@@ -22,9 +22,9 @@ Sequence::Sequence(const std::string& name, AssetScope scope, char* data, int da
             else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "Sprite List"))
             {
                 std::vector<std::string> textureNames = StringUtil::Split(keyValuePair.value, ',');
-                for(auto& name : textureNames)
+                for(auto& texName : textureNames)
                 {
-                    mTextures.push_back(Services::GetAssets()->LoadTexture(name, GetScope()));
+                    mTextures.push_back(gAssetManager.LoadTexture(texName, GetScope()));
                 }
             }
         }

@@ -24,8 +24,8 @@ BarnFile::BarnFile(const std::string& filePath) :
     
 	// 8 bytes: two specific 4-byte ints must appear at the beginning of the file.
     // In text form, this is a string "GK3!Barn".
-    unsigned int gameIdentifier = mReader.ReadUInt();
-    unsigned int barnIdentifier = mReader.ReadUInt();
+    uint32_t gameIdentifier = mReader.ReadUInt();
+    uint32_t barnIdentifier = mReader.ReadUInt();
     if(gameIdentifier != kGameIdentifier && barnIdentifier != kBarnIdentifier)
     {
 		std::cout << "Invalid file type!" << std::endl;
@@ -39,7 +39,7 @@ BarnFile::BarnFile(const std::string& filePath) :
     
     // This value indicates the offset past the file header data to what I'd
     // call the "table of contents" or "toc".
-    unsigned int tocOffset = mReader.ReadUInt();
+    uint32_t tocOffset = mReader.ReadUInt();
 
     // This additional header data can be read in if desired, but it
     // isn't really relevant to the file functionality.
@@ -80,7 +80,7 @@ BarnFile::BarnFile(const std::string& filePath) :
         // 2-bytes: unknown variable value.
         mReader.ReadShort();
         
-        // Copyright notice!
+        // Copyright notice
         char copyright[65];
         mReader.Read(copyright, 64);
         copyright[64] = '\0';
@@ -92,29 +92,29 @@ BarnFile::BarnFile(const std::string& filePath) :
     mReader.Seek(tocOffset);
     
     // First value in TOC is number of TOC entries.
-    unsigned int tocEntryCount = mReader.ReadUInt();
+    uint32_t tocEntryCount = mReader.ReadUInt();
     
     // Each toc entry will specify a header offset and a data offset.
-	std::vector<unsigned int> headerOffsets;
+	std::vector<uint32_t> headerOffsets;
     headerOffsets.reserve(tocEntryCount);
     
-	std::vector<unsigned int> dataOffsets;
+	std::vector<uint32_t> dataOffsets;
     dataOffsets.reserve(tocEntryCount);
     
     // For each toc entry, read in relevant data.
-    for(int i = 0; i < tocEntryCount; ++i)
+    for(uint32_t i = 0; i < tocEntryCount; ++i)
     {
         // The type is either "DDir" or "Data".
         // DDir specifies a directory of assets.
         // Data specifies file offset to start reading actual data.
-        unsigned int type = mReader.ReadUInt();
+        uint32_t type = mReader.ReadUInt();
         
         // Some unknown values.
         mReader.Skip(16);
         
         // Read header and data offsets.
-        unsigned int headerOffset = mReader.ReadUInt();
-        unsigned int dataOffset = mReader.ReadUInt();
+        uint32_t headerOffset = mReader.ReadUInt();
+        uint32_t dataOffset = mReader.ReadUInt();
         
         // For DDir, we'll save the offsets so we can iterate over them below.
         // For Data, we'll just save the data offset value.
@@ -132,7 +132,7 @@ BarnFile::BarnFile(const std::string& filePath) :
     // Now we need to iterate over each header/data offset pair in turn.
     // The header specifies data that is common to all assets in the data section.
     mReferencedBarns.resize(tocEntryCount);
-    for(int i = 0; i < headerOffsets.size(); ++i)
+    for(size_t i = 0; i < headerOffsets.size(); ++i)
     {
         mReader.Seek(headerOffsets[i]);
         
@@ -140,7 +140,7 @@ BarnFile::BarnFile(const std::string& filePath) :
         // a Barn file can contain "pointers" to assets in other Barn files.
         // If this name is empty, it means the asset is contained within THIS Barn file.
         // However, if the name isn't empty, it means the asset is in another Barn file.
-        mReader.ReadStringBuffer(32, mReferencedBarns[i]);
+        mReader.ReadString(32, mReferencedBarns[i]);
         bool isPointer = !mReferencedBarns[i].empty();
 
         // 4 bytes - unknown value
@@ -182,7 +182,7 @@ BarnFile::BarnFile(const std::string& filePath) :
             }
 			
             // Read in asset name.
-            mReader.ReadTinyString(asset.name);
+            mReader.ReadString8(asset.name);
             mReader.Skip(1); // null terminator is also present - skip it
             //std::cout << asset.name << ", " << (int)asset.compressionType << ", " << asset.compressedSize << ", " << asset.uncompressedSize << std::endl;
 
@@ -247,7 +247,7 @@ char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& ou
     mReader.Seek(mDataOffset + asset->offset);
     outBufferSize = mReader.ReadUInt();
     mReader.Skip(4);
-    int readCount = mReader.Read(compressedBuffer, asset->size);
+    uint32_t readCount = mReader.Read(compressedBuffer, asset->size);
     mReaderMutex.unlock();
 
     // Make sure we read what we were expecting.

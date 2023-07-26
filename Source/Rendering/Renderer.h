@@ -1,8 +1,7 @@
 //
-//  Renderer.h
-//  GEngine
+// Clark Kromenaker
 //
-//  Created by Clark Kromenaker on 7/22/17.
+// Manages all things rendering.
 //
 #pragma once
 #include <string>
@@ -72,3 +71,5 @@ private:
     bool mUseMipmaps = true;
     bool mUseTrilinearFiltering = true;
 };
+
+extern Renderer gRenderer;

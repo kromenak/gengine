@@ -1,14 +1,15 @@
 #include "VideoPlayer.h"
 
 #include "Actor.h"
-#include "Services.h"
+#include "AssetManager.h"
+#include "ReportManager.h"
 #include "Texture.h"
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "VideoState.h"
 #include "Window.h"
 
-TYPE_DEF_BASE(VideoPlayer);
+VideoPlayer gVideoPlayer;
 
 VideoPlayer::VideoPlayer() :
     mLayer("MovieLayer")
@@ -131,7 +132,7 @@ void VideoPlayer::Update()
         }
         
         // Pressing escape skips the video.
-        if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
         {
             Stop();
         }
@@ -153,10 +154,10 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     Stop();
     
     // Push video layer.
-    Services::Get<LayerManager>()->PushLayer(&mLayer);
+    gLayerManager.PushLayer(&mLayer);
     
     // Log movie play.
-    Services::GetReports()->Log("Generic", "PlayMovie: trying to play " + name);
+    gReportManager.Log("Generic", "PlayMovie: trying to play " + name);
     
     // Save callback.
     mStopCallback = stopCallback;
@@ -184,7 +185,7 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     
     // The name passed is just a filename (e.g. "intro.bik"). Need to convert that into a full path.
     // Names can also be passed with or without extension, so we have to try to resolve any ambiguous name.
-    std::string videoPath = Services::GetAssets()->GetAssetPath(name, { "bik", "avi" });
+    std::string videoPath = gAssetManager.GetAssetPath(name, { "bik", "avi" });
     
     // Create new video.
     mVideo = new VideoState(videoPath.c_str());
@@ -193,14 +194,14 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     // If stopped, something happened, and video will not play.
     if(mVideo->IsStopped())
     {
-        Services::GetReports()->Log("Error", "No movie specified for the movie layer.");
+        gReportManager.Log("Error", "No movie specified for the movie layer.");
         Stop();
         return;
     }
     
     // If we got here, movie seems to be playing ok!
     // Lock the mouse so it isn't visible and doesn't change position.
-    Services::GetInput()->LockMouse();
+    gInputManager.LockMouse();
     
     //TODO: Some video files have subtitles associated with them, but the subtitles are not part of the movie file.
     //TODO: Need to check for a YAK file of the same name and use that to display subtitles during movie playback.
@@ -211,14 +212,14 @@ void VideoPlayer::Stop()
     // Pop video layer.
     if(mVideo != nullptr)
     {
-        Services::Get<LayerManager>()->PopLayer();
+        gLayerManager.PopLayer();
     
         // Delete video to cleanup resources.
         delete mVideo;
         mVideo = nullptr;
 
         // Unlock mouse on movie end. TODO: Maybe do this in the video layer?
-        Services::GetInput()->UnlockMouse();
+        gInputManager.UnlockMouse();
     }
     
     // Fire stop callback.

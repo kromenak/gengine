@@ -89,17 +89,44 @@ target_include_directories(gk3 PRIVATE
 
 # Warning/error settings.
 if(MSVC)
-    #target_compile_options(gk3 PRIVATE /W3 /wd4065)
-    target_compile_options(gk3 PRIVATE /wd26812)
+    target_compile_options(gk3 PRIVATE /Wall
+        /wd4061 # Disable "unhandled case in switch with default" warning
+        /wd4065 # Disable "switch contains default and no cases" warning
+        /wd4100 # Disable "unreferenced formal parameter" warning
+        /wd4191 # Disable "unsafe conversion" warning (used by imgui)
+        /wd4242
+        /wd4263 /wd4264 # Disable "virtual function in base class has same name & different signature" warning
+        /wd4355 # Disable "this used in base member init list" warning
+        /wd4365
+        /wd4505 # Disable "unreferenced function with internal linkage" warning
+        /wd4514 # Disable "unused function" warning
+        /wd4625 # Disable "copy constructor implicitly deleted" warning
+        /wd4626 # Disable "assignment operator implicitly deleted" warning
+        /wd4668 # Disable "preprocessor macro not defined" warning
+        /wd4710 # Disable "function was not inlined" warning
+        /wd4774 # Disable "snprintf format not literal" warning (though this might be good to fix)
+        /wd4820 # Disable "padding added" warning
+        /wd5026 # Disable "move constructor implicitly deleted" warning
+        /wd5027 # Disable "move assignment operator implicitly deleted" warning
+        /wd5039 # Disable "pointer to potentially throwing extern c function" warning
+        /wd5045 # Disable "Spectre mitigation" warning
+        /wd5219 # Disable "implicit conversion from x to y" warning
+        /wd5245 # Disable "unreferenced function with internal linkage has been removed" warning
+    )
+    #target_compile_options(gk3 PRIVATE /wd26812)
 else()
     #target_compile_options(gk3 PRIVATE -Wall -Wextra -pedantic)
 endif()
 
 # Other compiler flags
 if(MSVC)
+    target_compile_definitions(gk3 PRIVATE
+        _CRT_SECURE_NO_WARNINGS     # Don't display warnings for using unsecure standard C/C++ functions.
+    )
     target_compile_options(gk3 PRIVATE 
-        /JMC    # Enable "Just My Code" to skip system/library code when debugging
-        /MP     # Multithreaded compiling - it's faster
+        /fp:fast    # Optimize floating point math for speed.
+        /JMC        # Enable "Just My Code" to skip system/library code when debugging.
+        /MP         # Multithreaded compiling - it's faster.
     )
 elseif(APPLE)
     target_compile_options(gk3 PRIVATE

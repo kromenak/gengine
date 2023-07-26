@@ -8,16 +8,14 @@
 #include <unordered_map>
 
 #include "StringUtil.h"
-#include "Type.h"
 
 class Localizer
 {
-    TYPE_DECL_BASE();
 public:
     Localizer() = default;
     Localizer(const std::string& fileName, const std::string& sectionName = "");
 
-    void Load(const std::string& fileName, const std::string& sectionName);
+    void Load(const std::string& fileName, const std::string& sectionName = "");
 
     //TODO: Change Locale
     
@@ -26,3 +24,6 @@ public:
 private:
     std::string_map_ci<std::string> mKeyToText;
 };
+
+// It's possible to create many Localizer instances, but there is also one "main" localizer.
+extern Localizer gLocalizer;

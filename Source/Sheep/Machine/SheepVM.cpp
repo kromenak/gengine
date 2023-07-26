@@ -4,9 +4,9 @@
 
 #include "BinaryReader.h"
 #include "GMath.h"
+#include "ReportManager.h"
 #include "SheepScript.h"
 #include "SheepSysFunc.h"
-#include "Services.h"
 #include "StringUtil.h"
 
 //#define SHEEP_DEBUG
@@ -152,7 +152,7 @@ void SheepVM::StopExecution(const std::string& tag)
     {
         if(thread->mRunning && StringUtil::EqualsIgnoreCase(thread->mTag, tag))
         {
-            Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is exiting");
+            gReportManager.Log("SheepMachine", "Sheep " + thread->GetName() + " is exiting");
             thread->mRunning = false;
 
             // Even though we're stopping a Sheep prematurely, we should still execute its wait callback.
@@ -388,7 +388,7 @@ Value SheepVM::CallSysFunc(SheepThread* thread, SysFuncImport* sysImport)
 	// Output a general execution exception if we encountered a problem in the sys func call.
 	if(mExecutionError)
 	{
-		Services::GetReports()->Log("Error", StringUtil::Format("An error occurred while executing %s", thread->GetName().c_str()));
+		gReportManager.Log("Error", StringUtil::Format("An error occurred while executing %s", thread->GetName().c_str()));
 		mExecutionError = false;
 	}
 	
@@ -439,13 +439,13 @@ void SheepVM::ContinueExecution(SheepThread* thread)
 	if(!thread->mRunning)
 	{
 		thread->mRunning = true;
-		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " created and starting");
+		gReportManager.Log("SheepMachine", "Sheep " + thread->GetName() + " created and starting");
 	}
 	else if(thread->mInWaitBlock)
 	{
 		thread->mBlocked = false;
 		thread->mInWaitBlock = false;
-		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " released at line -1");
+		gReportManager.Log("SheepMachine", "Sheep " + thread->GetName() + " released at line -1");
 	}
 	
 	// Get instance/script we'll be using.
@@ -1196,7 +1196,7 @@ void SheepVM::ContinueExecution(SheepThread* thread)
 	// If we get here and the thread IS running, it means the thread was blocked due to a wait!
 	if(!thread->mRunning)
 	{
-		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is exiting");
+		gReportManager.Log("SheepMachine", "Sheep " + thread->GetName() + " is exiting");
 		
 		// Thread is no longer using execution context.
 		thread->mContext->mReferenceCount--;
@@ -1209,11 +1209,11 @@ void SheepVM::ContinueExecution(SheepThread* thread)
 	}
 	else if(thread->mInWaitBlock)
 	{
-		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is blocked at line -1");
+		gReportManager.Log("SheepMachine", "Sheep " + thread->GetName() + " is blocked at line -1");
 	}
 	else
 	{
-		Services::GetReports()->Log("SheepMachine", "Sheep " + thread->GetName() + " is in some weird unexpected state!");
+		gReportManager.Log("SheepMachine", "Sheep " + thread->GetName() + " is in some weird unexpected state!");
 	}
 	
 	// Restore previously executing thread.

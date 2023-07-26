@@ -1,5 +1,6 @@
 #include "UIDropdown.h"
 
+#include "AssetManager.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UIImage.h"
@@ -21,9 +22,9 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
         mExpandButton->GetRectTransform()->SetPivot(1.0f, 1.0f);
         mExpandButton->GetRectTransform()->SetAnchoredPosition(-1.0f, 0.0f);
 
-        mExpandButton->SetUpTexture(Services::GetAssets()->LoadTexture("RC_ARW_R"));
-        mExpandButton->SetDownTexture(Services::GetAssets()->LoadTexture("RC_ARW_DWN"));
-        mExpandButton->SetHoverTexture(Services::GetAssets()->LoadTexture("RC_ARW_HI"));
+        mExpandButton->SetUpTexture(gAssetManager.LoadTexture("RC_ARW_R"));
+        mExpandButton->SetDownTexture(gAssetManager.LoadTexture("RC_ARW_DWN"));
+        mExpandButton->SetHoverTexture(gAssetManager.LoadTexture("RC_ARW_HI"));
 
         mExpandButton->SetPressCallback([this](UIButton* button) {
             OnExpandButtonPressed();
@@ -48,7 +49,7 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
         // Font choice is not specified in UI spec file, so figured it out via trial and error.
         mCurrentChoiceLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mCurrentChoiceLabel->SetVerticalAlignment(VerticalAlignment::Center);
-        mCurrentChoiceLabel->SetFont(Services::GetAssets()->LoadFont("F_ARIAL_T8"));
+        mCurrentChoiceLabel->SetFont(gAssetManager.LoadFont("F_ARIAL_T8"));
         mCurrentChoiceLabel->SetText("800 x 600");
     }
 
@@ -81,11 +82,11 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
             Texture* texture = nullptr;
             if(i < 2)
             {
-                texture = Services::GetAssets()->LoadTexture("RC_BOX_TOP");
+                texture = gAssetManager.LoadTexture("RC_BOX_TOP");
             }
             else
             {
-                texture = Services::GetAssets()->LoadTexture("RC_BOX_SIDE");
+                texture = gAssetManager.LoadTexture("RC_BOX_SIDE");
             }
             image->SetRenderMode(UIImage::RenderMode::Tiled);
             image->SetTexture(texture);
@@ -153,7 +154,7 @@ void UIDropdown::OnUpdate(float deltaTime)
     if(mChoices.size() > mMaxVisibleChoices)
     {
         // See if mouse wheel has scrolled atall.
-        Vector2 mouseWheelScrollDelta = Services::GetInput()->GetMouseWheelScrollDelta();
+        Vector2 mouseWheelScrollDelta = gInputManager.GetMouseWheelScrollDelta();
         if(mouseWheelScrollDelta.y != 0)
         {
             // If so, increment or decrement choice offset up to min/max.
@@ -218,7 +219,7 @@ void UIDropdown::RefreshChoicesUI()
 
             // Create center-aligned label.
             UILabel* label = buttonActor->AddComponent<UILabel>();
-            label->SetFont(Services::GetAssets()->LoadFont("F_ARIAL_T8"));
+            label->SetFont(gAssetManager.LoadFont("F_ARIAL_T8"));
             label->SetHorizonalAlignment(HorizontalAlignment::Center);
             label->SetVerticalAlignment(VerticalAlignment::Center);
             

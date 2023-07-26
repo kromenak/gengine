@@ -28,22 +28,22 @@ struct BSPNode
     // Indexes of front and back nodes.
     // Front is in front of the plane for this node; back is behind the plane.
     // These appear to be 65535 (ushort max value) if invalid/null.
-    unsigned short frontChildIndex;
-    unsigned short backChildIndex;
+    uint16_t frontChildIndex;
+    uint16_t backChildIndex;
     
     // Each node has a plane that divides child geometry into "front" and "back".
     // By testing what side of the plane the camera is on, correct order to draw geometry can be determined.
-    unsigned short planeIndex;
+    uint16_t planeIndex;
     
     // Polygons associated with this node (offset + count into polygon list).
     // This makes up the majority of the BSP geometry.
-    unsigned short polygonIndex;
-    unsigned short polygonCount;
+    uint16_t polygonIndex;
+    uint16_t polygonCount;
     
     // Less commonly used, but a second set of polygons for this node.
     // These appear to be used for rendering 2-sided polygons (though I haven't totally figured that out yet).
-    unsigned short polygonIndex2;
-    unsigned short polygonCount2;
+    uint16_t polygonIndex2;
+    uint16_t polygonCount2;
 };
 
 // A polygon is made up of at least three vertices and can be rendered.
@@ -51,12 +51,12 @@ struct BSPPolygon
 {
     // Index of surface this polygon belongs to.
     // The surface defines appearance (texture, lightmap) and other properties.
-    unsigned short surfaceIndex;
+    uint16_t surfaceIndex;
     
     // BSP is rendered using indexed geometry.
     // These are an offset + count into the index array, defining what vertices make up this polygon.
-    unsigned short vertexIndexOffset;
-    unsigned short vertexIndexCount;
+    uint16_t vertexIndexOffset;
+    uint16_t vertexIndexCount;
 	
 	// Used for creating a linked list of alpha surfaces.
     BSPPolygon* next = nullptr;
@@ -68,7 +68,7 @@ struct BSPSurface
 {
     // An "object" is really just a name - a way to group surfaces logically.
     // For example, several surfaces could make up a "door" object.
-    unsigned int objectIndex = 0;
+    uint32_t objectIndex = 0;
     
     // The texture used for this surface.
     Texture* texture = nullptr;
@@ -83,14 +83,14 @@ struct BSPSurface
     Vector2 lightmapUvScale;
     
     // Flags defining surface properties.
-    unsigned int flags = 0;
-    static const unsigned int kUnknownFlag1 = 1; // applied on certain walls, ceilings, and floors
-    static const unsigned int kUnknownFlag2 = 2; // seems to correlate to surfaces that are hard to see or not very noticeable
-    static const unsigned int kUnknownFlag3 = 4; // surfaces that emit light, hit tests
-    static const unsigned int kIgnoreLightmapFlag = 8; // surfaces that emit light, shadow casters, "hide these models", hit tests
-    static const unsigned int kUnknownFlag5 = 16; // lamp shades, light fixtures, lanterns, stained glass, chandilier, sconces, etc.
-    static const unsigned int kUnknownFlag6 = 32; // possibly never used - couldn't find in any BSP
-    static const unsigned int kUnknownFlag7 = 64; // some RC1, ARM, CDB, LHE, PLO, TE5 (shadow bridge) objects have this
+    uint32_t flags = 0;
+    static const uint32_t kUnknownFlag1 = 1; // applied on certain walls, ceilings, and floors
+    static const uint32_t kUnknownFlag2 = 2; // seems to correlate to surfaces that are hard to see or not very noticeable
+    static const uint32_t kUnknownFlag3 = 4; // surfaces that emit light, hit tests
+    static const uint32_t kIgnoreLightmapFlag = 8; // surfaces that emit light, shadow casters, "hide these models", hit tests
+    static const uint32_t kUnknownFlag5 = 16; // lamp shades, light fixtures, lanterns, stained glass, chandilier, sconces, etc.
+    static const uint32_t kUnknownFlag6 = 32; // possibly never used - couldn't find in any BSP
+    static const uint32_t kUnknownFlag7 = 64; // some RC1, ARM, CDB, LHE, PLO, TE5 (shadow bridge) objects have this
     
     // If true, this surface is rendered.
     bool visible = true;
@@ -110,7 +110,7 @@ struct BSPSurface
 struct BSPAmbientLight
 {
     // The surface this ambient light corresponds to.
-    int surfaceIndex = 0;
+    uint32_t surfaceIndex = 0;
 
     // The position/radius, which defines a "sphere of influence" for the ambient light.
     Vector3 position;

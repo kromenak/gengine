@@ -1,5 +1,6 @@
 #include "DrivingScreen.h"
 
+#include "ActionManager.h"
 #include "Animator.h"
 #include "DrivingScreenBlip.h"
 #include "GameProgress.h"
@@ -36,7 +37,7 @@ DrivingScreen::DrivingScreen() : Actor(TransformType::RectTransform)
     mMapActor = new Actor(TransformType::RectTransform);
     mMapActor->GetTransform()->SetParent(GetTransform());
     UIImage* mapImage = mMapActor->AddComponent<UIImage>();
-    mMapTexture = Services::GetAssets()->LoadTexture("DM_BASE.BMP");
+    mMapTexture = gAssetManager.LoadTexture("DM_BASE.BMP");
     mapImage->SetTexture(mMapTexture, true);
     mMapImage = mapImage;
     
@@ -85,7 +86,7 @@ void DrivingScreen::Show(FollowMode followMode)
     // TR1 (Train Station) is always available.
 
     // ARM (Devil's Armchair) is only available on or after Day 2, 2pm.
-    const Timeblock& currentTimeblock = Services::Get<GameProgress>()->GetTimeblock();
+    const Timeblock& currentTimeblock = gGameProgress.GetTimeblock();
     mLocationButtons["ARM"]->SetEnabled(currentTimeblock >= Timeblock(2, 2, Timeblock::PM));
 
     // CSE (Chateau de Serras) only available after going on the tour on Day 2, Noon.
@@ -108,18 +109,18 @@ void DrivingScreen::Show(FollowMode followMode)
 
     // CSD (Coume Sourde) only available after following Madeline (or on/after Day 1, 4PM).
     // LHM (Lhomme Mort) is in the same boat.
-    bool showCSD_LHM = Services::Get<GameProgress>()->GetNounVerbCount("BUTHANE", "FOLLOW") > 0 && followMode != FollowMode::Buthane;
+    bool showCSD_LHM = gGameProgress.GetNounVerbCount("BUTHANE", "FOLLOW") > 0 && followMode != FollowMode::Buthane;
     showCSD_LHM = showCSD_LHM || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
     mLocationButtons["CSD"]->SetEnabled(showCSD_LHM);
     mLocationButtons["LHM"]->SetEnabled(showCSD_LHM);
 
     // LER (L'Ermitage) only available after following Wilkes (or on/after Day 1, 4PM).
-    bool showLER = Services::Get<GameProgress>()->GetNounVerbCount("WILKES", "FOLLOW") > 0 && followMode != FollowMode::Wilkes;
+    bool showLER = gGameProgress.GetNounVerbCount("WILKES", "FOLLOW") > 0 && followMode != FollowMode::Wilkes;
     showLER = showLER || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
     mLocationButtons["LER"]->SetEnabled(showLER);
 
     // WOD (Woods) only available after following Estelle on Day 2.
-    bool showWOD = Services::Get<GameProgress>()->GetNounVerbCount("ESTELLE", "FOLLOW") > 0 && followMode != FollowMode::Estelle;
+    bool showWOD = gGameProgress.GetNounVerbCount("ESTELLE", "FOLLOW") > 0 && followMode != FollowMode::Estelle;
     mLocationButtons["WOD"]->SetEnabled(showWOD);
 
     // Make sure the map fits snugly in the window area, with aspect ratio preserved.
@@ -142,19 +143,19 @@ void DrivingScreen::Show(FollowMode followMode)
     // But at the end of the day, only these two appear to have ever been used.
     if(followMode == FollowMode::None)
     {
-        soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("MAPGABEGENDAY1.STK"));
+        soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPGABEGENDAY1.STK"));
     }
     else
     {
-        soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("MAPFOLLOWGEN.STK"));
+        soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPFOLLOWGEN.STK"));
     }
 
     // Also play motorcycle driving away SFX.
-    soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("MAPHARLEYAWAY.STK"));
+    soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPHARLEYAWAY.STK"));
 
     // The map shows as a special location called "Map".
     // Unload the current scene and set the location as such.
-    Services::Get<LocationManager>()->ChangeLocation("MAP");
+    gLocationManager.ChangeLocation("MAP");
 
     // Actually show the UI.
     SetActive(true);
@@ -169,7 +170,7 @@ void DrivingScreen::Hide()
     if(soundtrackPlayer != nullptr)
     {
         soundtrackPlayer->StopAll();
-        soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("MAPHARLEYARRIVE.STK"));
+        soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPHARLEYARRIVE.STK"));
     }
 }
 
@@ -185,7 +186,7 @@ void DrivingScreen::SetLocationButtonsInteractive(bool interactive)
 void DrivingScreen::ExitToLocation(const std::string& locationCode)
 {
     // Change to the desired location.
-    Services::Get<LocationManager>()->ChangeLocation(locationCode, [this]() {
+    gLocationManager.ChangeLocation(locationCode, [this]() {
 
         // Hide the map screen after scene load is done.
         Hide();
@@ -200,19 +201,19 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     UIButton* button = buttonActor->AddComponent<UIButton>();
 
     // Set textures.
-    Texture* upTexture = Services::GetAssets()->LoadTexture("DM_" + buttonId + "_UL.BMP");
+    Texture* upTexture = gAssetManager.LoadTexture("DM_" + buttonId + "_UL.BMP");
     button->SetUpTexture(upTexture);
-    button->SetDownTexture(Services::GetAssets()->LoadTexture("DM_" + buttonId + ".BMP"));
-    button->SetHoverTexture(Services::GetAssets()->LoadTexture("DM_" + buttonId + ".BMP"));
+    button->SetDownTexture(gAssetManager.LoadTexture("DM_" + buttonId + ".BMP"));
+    button->SetHoverTexture(gAssetManager.LoadTexture("DM_" + buttonId + ".BMP"));
     
     // The map scales up or down depending on window resolution.
     // In order for the buttons to appear at the correct positions and scales, we need to do some fancy anchoring...
     {
-        float mapWidth = mMapTexture->GetWidth();
-        float mapHeight = mMapTexture->GetHeight();
+        float mapWidth = static_cast<float>(mMapTexture->GetWidth());
+        float mapHeight = static_cast<float>(mMapTexture->GetHeight());
 
-        float buttonWidth = upTexture->GetWidth();
-        float buttonHeight = upTexture->GetHeight();
+        float buttonWidth = static_cast<float>(upTexture->GetWidth());
+        float buttonHeight = static_cast<float>(upTexture->GetHeight());
 
         // Min anchors are at bottom-left of screen, max anchors top-right.
         // Unfortunately, the passed-in position is top-left corner...
@@ -232,17 +233,17 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     }
 
     // Play sound effect when hovering these buttons.
-    button->SetHoverSound(Services::GetAssets()->LoadAudio("MAPSWOOSH.WAV"));
+    button->SetHoverSound(gAssetManager.LoadAudio("MAPSWOOSH.WAV"));
 
     // On press, go to the map location.
     button->SetPressCallback([this, locationCode](UIButton* button) {
-        Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("MAPBUTTON.WAV"));
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("MAPBUTTON.WAV"));
 
         // Check conditions under which we would NOT allow going to this location.
         // Don't allow going to Larry's place during timeblock 106P.
-        if(locationCode == "LHE" && Services::Get<GameProgress>()->GetTimeblock() == Timeblock(1, 6, Timeblock::PM))
+        if(locationCode == "LHE" && gGameProgress.GetTimeblock() == Timeblock(1, 6, Timeblock::PM))
         {
-            Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"21F4F625S1\", 1)");
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"21F4F625S1\", 1)");
             return;
         }
 
@@ -311,7 +312,7 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
         }
         if(bikeLocation != -1)
         {
-            Services::Get<GameProgress>()->SetGameVariable("BikeLocation", bikeLocation);
+            gGameProgress.SetGameVariable("BikeLocation", bikeLocation);
         }
 
         // Change to the desired location.
@@ -325,7 +326,7 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
 void DrivingScreen::LoadPaths()
 {
     // Load path data.
-    TextAsset* pathData = Services::GetAssets()->LoadText("PATHDATA.TXT", AssetScope::Manual);
+    TextAsset* pathData = gAssetManager.LoadText("PATHDATA.TXT", AssetScope::Manual);
 
     // Pass 1: Read in nodes and segments.
     {
@@ -473,7 +474,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
     // Start player at current location. During normal play, this'll always be a node that exists on the map.
     // When debugging and such, you might show the driving interface at some unusual spot. We'll fall back on showing player at MOP in that case.
     mBlips[kEgoIndex]->SetMapPosition("MOP");
-    mBlips[kEgoIndex]->SetMapPosition(Services::Get<LocationManager>()->GetLocation());
+    mBlips[kEgoIndex]->SetMapPosition(gLocationManager.GetLocation());
 
     // The other blips are only present in some circumstances. Deactivate them by default.
     mBlips[kNpc1Index]->SetActive(false);
@@ -485,7 +486,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
     // The only blips that appear in this case are the idle loops of some characters depending on the timeblock.
     if(followMode == FollowMode::None)
     {
-        if(Services::Get<GameProgress>()->GetTimeblock() == Timeblock(1, 2, Timeblock::PM))
+        if(gGameProgress.GetTimeblock() == Timeblock(1, 2, Timeblock::PM))
         {
             // Buthane drives in circles, starting at PL3.
             // But she no longer appears on the map after LHM is enabled.
@@ -527,7 +528,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
                 mBlips[kNpc2Index]->SetLoopPath(true);
             }
         }
-        else if(Services::Get<GameProgress>()->GetTimeblock() == Timeblock(1, 4, Timeblock::PM))
+        else if(gGameProgress.GetTimeblock() == Timeblock(1, 4, Timeblock::PM))
         {
             // Lady Howard & Estelle drive in circles, starting at PLO.
             // They never disappear during the timeblock.
@@ -546,11 +547,11 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             mBlips[kNpc1Index]->AddPathNode("LHE");
             mBlips[kNpc1Index]->SetLoopPath(true);
         }
-        else if(Services::Get<GameProgress>()->GetTimeblock() == Timeblock(1, 6, Timeblock::PM))
+        else if(gGameProgress.GetTimeblock() == Timeblock(1, 6, Timeblock::PM))
         {
             // Mallory & MacDougall drive in circles, COUNTER-CLOCKWISE, starting at LHE.
             // They no longer appear after they've been followed.
-            if(Services::Get<GameProgress>()->GetNounVerbCount("TWO_MEN", "FOLLOW") == 0)
+            if(gGameProgress.GetNounVerbCount("TWO_MEN", "FOLLOW") == 0)
             {
                 mBlips[kNpc1Index]->SetActive(true);
                 mBlips[kNpc1Index]->SetColor(kJamesMenColor);
@@ -568,10 +569,10 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
                 mBlips[kNpc1Index]->SetLoopPath(true);
             }
         }
-        else if(Services::Get<GameProgress>()->GetTimeblock() == Timeblock(2, 2, Timeblock::PM))
+        else if(gGameProgress.GetTimeblock() == Timeblock(2, 2, Timeblock::PM))
         {
             // Lady Howard & Estelle drive in circles, starting at PL3. 
-            if(Services::Get<LocationManager>()->IsActorAtLocation("ESTELLE", "MAP"))
+            if(gLocationManager.IsActorAtLocation("ESTELLE", "MAP"))
             {
                 mBlips[kNpc1Index]->SetActive(true);
                 mBlips[kNpc1Index]->SetColor(kEstelleColor);
@@ -626,7 +627,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
                 OnFollowDone();
                 mLocationButtons["CSD"]->SetEnabled(true);
                 mLocationButtons["LHM"]->SetEnabled(true);
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"2196L3WL71\", 1)");
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"2196L3WL71\", 1)");
             });
         }
         else if(followMode == FollowMode::Wilkes)
@@ -645,7 +646,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
                 OnFollowDone();
                 mLocationButtons["LER"]->SetEnabled(true);
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"2196L3WLM1\", 1)");
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"2196L3WLM1\", 1)");
             });
         }
         else if(followMode == FollowMode::LadyHoward)
@@ -654,7 +655,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
 
             // So, there are two spots we can follow Lady Howard from, and in both cases, we want to do a complete circuit :P
             // Let's write this out...
-            std::string currLocation = Services::Get<LocationManager>()->GetLocation();
+            std::string currLocation = gLocationManager.GetLocation();
             if(StringUtil::EqualsIgnoreCase(currLocation, "PLO"))
             {
                 mBlips[kNpc1Index]->AddPathNode("PLO");
@@ -691,7 +692,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
                 OnFollowDone();
 
                 // Play dialogue ("they're just driving around the valley - forget that").
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"21A6L3WLX1\", 1)", [this, currLocation](const Action* action){
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"21A6L3WLX1\", 1)", [this, currLocation](const Action* action){
                     // This one automatically puts you back where you started.
                     ExitToLocation(currLocation);
                 });
@@ -704,7 +705,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             // This one's got a couple possible follow locations:
             // If from PLO or LER, we use one path.
             // If from RLC, we use another path. We can assume this is the "else" case.
-            std::string currLocation = Services::Get<LocationManager>()->GetLocation();
+            std::string currLocation = gLocationManager.GetLocation();
             if(StringUtil::EqualsIgnoreCase(currLocation, "PLO") || StringUtil::EqualsIgnoreCase(currLocation, "LER"))
             {
                 // Do a complete circuit starting at LHE.
@@ -742,7 +743,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             // Play dialogue once we reach LHE.
             mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
                 OnFollowDone();
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"21F6L3WBH1\", 1)");
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"21F6L3WBH1\", 1)");
             });
         }
         else if(followMode == FollowMode::Estelle)
@@ -766,12 +767,12 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
                 OnFollowDone();
                 mLocationButtons["WOD"]->SetEnabled(true);
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"21K6L3WJI1\", 1)");
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"21K6L3WJI1\", 1)");
             });
         }
 
         // On the path defined for the NPC, always skip to wherever we are along that route, so it looks like we followed from the correct spot.
-        mBlips[kNpc1Index]->SkipToPathNode(Services::Get<LocationManager>()->GetLocation());
+        mBlips[kNpc1Index]->SkipToPathNode(gLocationManager.GetLocation());
 
         // Ego follows this blip.
         mBlips[kEgoIndex]->SetFollow(mBlips[kNpc1Index]);

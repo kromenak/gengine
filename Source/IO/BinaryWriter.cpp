@@ -19,7 +19,7 @@ BinaryWriter::~BinaryWriter()
     delete mStream;
 }
 
-void BinaryWriter::Seek(int32_t position)
+void BinaryWriter::Seek(uint32_t position)
 {
     // It's possible we've hit EOF, especially if we're jumping around a lot.
     // If we are trying to seek on an EOF stream, clear the error flags and do the seek.
@@ -30,9 +30,18 @@ void BinaryWriter::Seek(int32_t position)
     mStream->seekp(position, std::ios::beg);
 }
 
-void BinaryWriter::Skip(int32_t count)
+void BinaryWriter::Skip(uint32_t count)
 {
     mStream->seekp(count, std::ios::cur);
+}
+
+uint32_t BinaryWriter::GetPosition() const
+{
+    // Technically, tellp can return -1 in an error state.
+    // But we just want it to return 0 for our purposes.
+    std::streampos pos = mStream->tellp();
+    if(pos < 0) { pos = 0; }
+    return static_cast<uint32_t>(pos);
 }
 
 void BinaryWriter::Write(const char* buffer, uint32_t size)
@@ -95,11 +104,30 @@ void BinaryWriter::WriteDouble(double val)
     mStream->write(reinterpret_cast<char*>(&val), 8);
 }
 
-void BinaryWriter::WriteString(const std::string& str)
+void BinaryWriter::WriteString(const std::string& str, uint32_t bufferSize)
 {
+    // Determine size of string.
+    // If a buffer size is specified, the size can't exceed that length.
+    uint32_t writeSize = str.size();
+    if(bufferSize > 0 && writeSize > bufferSize)
+    {
+        writeSize = bufferSize;
+    }
+
     // Writing a string without recording its size!
     // This is fine if writer & reader have established a clear protocol.
-    mStream->write(str.c_str(), str.size());
+    mStream->write(str.c_str(), writeSize);
+
+    // If a buffer size was specified, make sure we write the full buffer.
+    // Fill remaining space (if any) with zero (null terminators).
+    if(bufferSize > 0)
+    {
+        while(writeSize < bufferSize)
+        {
+            mStream->put('\0');
+            ++writeSize;
+        }
+    }
 }
 
 void BinaryWriter::WriteTinyString(const std::string& str)
@@ -121,30 +149,4 @@ void BinaryWriter::WriteMedString(const std::string& str)
     // A "medium" string can have length up to max size of unsigned 32-bit integer.
     WriteUInt(static_cast<uint32_t>(str.size()));
     WriteString(str);
-}
-
-void BinaryWriter::WriteLongString(const std::string& str)
-{
-    // A "long" string can have length up to max size of unsigned 64-bit integer.
-    WriteULong(static_cast<uint64_t>(str.size()));
-    WriteString(str);
-}
-
-void BinaryWriter::WriteStringBuffer(const std::string& str, uint32_t bufferSize)
-{
-    // Write the string data, but not more than the passed in size!
-    // This *may* truncate the string data, if not careful.
-    uint32_t writeSize = str.size();
-    if(writeSize > bufferSize)
-    {
-        writeSize = bufferSize;
-    }
-    mStream->write(str.c_str(), writeSize);
-
-    // Fill remaining space (if any) with null terminators.
-    while(writeSize < bufferSize)
-    {
-        mStream->put('\0');
-        ++writeSize;
-    }
 }

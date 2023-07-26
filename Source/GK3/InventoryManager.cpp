@@ -1,24 +1,19 @@
 #include "InventoryManager.h"
 
+#include "AssetManager.h"
 #include "IniParser.h"
 #include "InventoryScreen.h"
 #include "InventoryInspectScreen.h"
 #include "Loader.h"
 #include "Profiler.h"
-#include "Services.h"
 #include "Scene.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
 #include "Texture.h"
 
-namespace
-{
+InventoryManager gInventoryManager;
 
-}
-
-TYPE_DEF_BASE(InventoryManager);
-
-InventoryManager::InventoryManager()
+void InventoryManager::Init()
 {
     TIMER_SCOPED("InventoryManager::InventoryManager");
 
@@ -26,7 +21,7 @@ InventoryManager::InventoryManager()
         TIMER_SCOPED("InventoryManager::Load");
 
         // Get VERBS text file as a raw buffer.
-        TextAsset* textFile = Services::GetAssets()->LoadText("INVENTORYSPRITES.TXT", AssetScope::Manual);
+        TextAsset* textFile = gAssetManager.LoadText("INVENTORYSPRITES.TXT", AssetScope::Manual);
 
         // Pass that along to INI parser, since it is plain text and in INI format.
         IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -211,10 +206,10 @@ Texture* InventoryManager::GetInventoryItemIconTexture(const std::string& itemNa
     if(it->second.iconTexture != nullptr) { return it->second.iconTexture; }
 
     // Load the texture fresh.
-    it->second.iconTexture = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "3.BMP");
+    it->second.iconTexture = gAssetManager.LoadTexture(it->second.textureNamePrefix + "3.BMP");
     if(it->second.iconTexture == nullptr)
     {
-        it->second.iconTexture = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "_3.BMP");
+        it->second.iconTexture = gAssetManager.LoadTexture(it->second.textureNamePrefix + "_3.BMP");
     }
     return it->second.iconTexture;
 }
@@ -230,19 +225,19 @@ Texture* InventoryManager::GetInventoryItemListTexture(const std::string& itemNa
 
     // Otherwise, load the texture!
     // List texture has a "9" suffix. Also, optionally, an alpha texture (since these show against a see-through background).
-    it->second.listTexture = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "9.BMP");
+    it->second.listTexture = gAssetManager.LoadTexture(it->second.textureNamePrefix + "9.BMP");
     if(it->second.listTexture == nullptr)
     {
-        it->second.listTexture = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "_9.BMP");
+        it->second.listTexture = gAssetManager.LoadTexture(it->second.textureNamePrefix + "_9.BMP");
     }
 
     // If we have a list texture, attempt to find and apply alpha channel.
     if(it->second.listTexture != nullptr)
     {
-        Texture* listTextureAlpha = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "9_OP.BMP");
+        Texture* listTextureAlpha = gAssetManager.LoadTexture(it->second.textureNamePrefix + "9_OP.BMP");
         if(listTextureAlpha == nullptr)
         {
-            listTextureAlpha = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "_9_OP.BMP");
+            listTextureAlpha = gAssetManager.LoadTexture(it->second.textureNamePrefix + "_9_OP.BMP");
         }
         if(listTextureAlpha != nullptr)
         {
@@ -263,13 +258,13 @@ Texture* InventoryManager::GetInventoryItemCloseupTexture(const std::string& ite
 
     // Closeup texture has suffix "6" or "6_ALPHA".
     // One asset (MOSELYPRINT_6_ALPHA.BMP) did not follow the naming convention - yuck.
-    it->second.closeupTexture = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "6.BMP");
+    it->second.closeupTexture = gAssetManager.LoadTexture(it->second.textureNamePrefix + "6.BMP");
     if(it->second.closeupTexture == nullptr)
     {
-        it->second.closeupTexture = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "6_ALPHA.BMP");
+        it->second.closeupTexture = gAssetManager.LoadTexture(it->second.textureNamePrefix + "6_ALPHA.BMP");
         if(it->second.closeupTexture == nullptr)
         {
-            it->second.closeupTexture = Services::GetAssets()->LoadTexture(it->second.textureNamePrefix + "_6_ALPHA.BMP");
+            it->second.closeupTexture = gAssetManager.LoadTexture(it->second.textureNamePrefix + "_6_ALPHA.BMP");
         }
     }
     return it->second.closeupTexture;

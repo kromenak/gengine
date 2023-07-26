@@ -10,7 +10,6 @@ class Cursor;
 
 class CursorManager
 {
-    TYPE_DECL_BASE();
 public:
     void Init();
 
@@ -35,3 +34,5 @@ private:
     Cursor* mHighlightBlueCursor = nullptr;
     Cursor* mWaitCursor = nullptr;
 };
+
+extern CursorManager gCursorManager;

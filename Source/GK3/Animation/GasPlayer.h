@@ -14,7 +14,7 @@
 class Animation;
 class Animator;
 class GAS;
-class ScenePosition;
+struct ScenePosition;
 struct WhenNearGasNode;
 
 class GasPlayer : public Component

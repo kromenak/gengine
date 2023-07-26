@@ -93,6 +93,8 @@ private:
 	TextInput* mTextInput = nullptr;
 };
 
+extern InputManager gInputManager;
+
 inline bool InputManager::IsKeyLeadingEdge(SDL_Scancode scancode)
 {
     return mCurrKeyboardState[scancode] == 1 && mPrevKeyboardState[scancode] == 0;

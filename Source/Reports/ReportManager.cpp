@@ -1,9 +1,6 @@
-//
-// ReportManager.cpp
-//
-// Clark Kromenaker
-//
 #include "ReportManager.h"
+
+ReportManager gReportManager;
 
 ReportManager::ReportManager()
 {

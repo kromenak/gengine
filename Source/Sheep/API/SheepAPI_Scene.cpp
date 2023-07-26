@@ -90,7 +90,7 @@ int IsActorNear(const std::string& actorName, const std::string& positionName, f
     // Make sure distance is valid.
     if(distance < 0.0f)
     {
-        Services::GetReports()->Log("Warning", StringUtil::Format("Warning: distance of %f is not valid - must be >= 0.", distance));
+        gReportManager.Log("Warning", StringUtil::Format("Warning: distance of %f is not valid - must be >= 0.", distance));
         ExecError();
         return 0;
     }
@@ -118,7 +118,7 @@ int IsWalkingActorNear(const std::string& actorName, const std::string& position
     // Make sure distance is valid.
     if(distance < 0.0f)
     {
-        Services::GetReports()->Log("Warning", StringUtil::Format("Warning: distance of %f is not valid - must be >= 0.", distance));
+        gReportManager.Log("Warning", StringUtil::Format("Warning: distance of %f is not valid - must be >= 0.", distance));
         ExecError();
         return 0;
     }
@@ -376,7 +376,7 @@ shpvoid WalkToAnimation(const std::string& actorName, const std::string& animati
     }
 
     // Get the animation.
-    Animation* anim = Services::GetAssets()->LoadAnimation(animationName, AssetScope::Scene);
+    Animation* anim = gAssetManager.LoadAnimation(animationName, AssetScope::Scene);
     if(anim == nullptr)
     {
         ExecError();

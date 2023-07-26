@@ -1,18 +1,18 @@
 #include "SheepAPI_Animation.h"
 
 #include "Animator.h"
+#include "AssetManager.h"
 #include "GEngine.h"
 #include "Scene.h"
-#include "Services.h"
 
 using namespace std;
 
 shpvoid StartAnimation(const std::string& animationName)
 {
-    Animation* animation = Services::GetAssets()->LoadAnimation(animationName, AssetScope::Scene);
+    Animation* animation = gAssetManager.LoadAnimation(animationName, AssetScope::Scene);
     if(animation == nullptr)
     {
-        Services::GetReports()->Log("Error", "gk3 animation '" + animationName + ".anm' not found.");
+        gReportManager.Log("Error", "gk3 animation '" + animationName + ".anm' not found.");
         return 0;
     }
     
@@ -23,7 +23,7 @@ RegFunc1(StartAnimation, void, string, WAITABLE, REL_FUNC);
 
 shpvoid LoopAnimation(const std::string& animationName)
 {
-    Animation* animation = Services::GetAssets()->LoadAnimation(animationName, AssetScope::Scene);
+    Animation* animation = gAssetManager.LoadAnimation(animationName, AssetScope::Scene);
     if(animation != nullptr)
     {
         AnimParams params;
@@ -37,7 +37,7 @@ RegFunc1(LoopAnimation, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid StopAnimation(const std::string& animationName)
 {
-    Animation* animation = Services::GetAssets()->LoadAnimation(animationName, AssetScope::Scene);
+    Animation* animation = gAssetManager.LoadAnimation(animationName, AssetScope::Scene);
     if(animation != nullptr)
     {
         GEngine::Instance()->GetScene()->GetAnimator()->Stop(animation);
@@ -55,7 +55,7 @@ RegFunc0(StopAllAnimations, void, IMMEDIATE, DEV_FUNC);
 
 shpvoid StartMoveAnimation(const std::string& animationName)
 {
-    Animation* animation = Services::GetAssets()->LoadAnimation(animationName, AssetScope::Scene);
+    Animation* animation = gAssetManager.LoadAnimation(animationName, AssetScope::Scene);
     if(animation != nullptr)
     {
         AnimParams animParams;
@@ -72,7 +72,7 @@ shpvoid StartMom(const std::string& momAnimationName)
 {
     // Mom animation assets have a language prefix (e.g. "E" for English).
     // So, let's add that here.
-    Animation* animation = Services::GetAssets()->LoadMomAnimation("E" + momAnimationName, AssetScope::Scene);
+    Animation* animation = gAssetManager.LoadMomAnimation("E" + momAnimationName, AssetScope::Scene);
     if(animation != nullptr)
     {
         //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.

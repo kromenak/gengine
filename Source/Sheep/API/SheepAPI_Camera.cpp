@@ -44,7 +44,7 @@ shpvoid SetCameraFOV(float fov)
     // Clamp argument in valid range.
     if(fov < 1.0f || fov > 180.0f)
     {
-        Services::GetReports()->Log("Warning", "Warning: camera FOV must be between 1 and 180. Clamping to fit...");
+        gReportManager.Log("Warning", "Warning: camera FOV must be between 1 and 180. Clamping to fit...");
         fov = Math::Clamp(fov, 1.0f, 180.0f);
     }
 

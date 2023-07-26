@@ -3,8 +3,8 @@
 #include <iostream>
 #include <fstream>
 
+#include "AudioManager.h"
 #include "BinaryReader.h"
-#include "Services.h"
 
 Audio::Audio(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope),
     mDataBuffer(data),
@@ -20,7 +20,7 @@ Audio::~Audio()
 	delete[] mDataBuffer;
 
     // FMOD allocates memory internally when playing an Audio file. Let it know it can get free of that memory.
-    Services::GetAudio()->ReleaseAudioData(this);
+    gAudioManager.ReleaseAudioData(this);
 }
 
 void Audio::ParseFromData(char* data, int dataLength)
@@ -56,14 +56,14 @@ void Audio::ParseFromData(char* data, int dataLength)
     }
     
     // 4 bytes: length of the subchunk data.
-    unsigned int chunkSize = reader.ReadUInt();
+    uint32_t chunkSize = reader.ReadUInt();
     
     // From here: "fact" chunk is formatChunkSize bytes ahead.
     // Or, for PCM, "data" chunk is formatChunkSize bytes ahead.
     // The next bit of data (format) indicates PCM vs other.
     
     // 2 bytes: the format used by the data.
-    unsigned short format = reader.ReadUShort();
+    uint16_t format = reader.ReadUShort();
     //mIsMusic = (format == kMp3Format);
     
     // 2 bytes: the number of channels (1 = mono, 2 = stereo, etc).
@@ -73,7 +73,7 @@ void Audio::ParseFromData(char* data, int dataLength)
     reader.ReadUInt();
     
     // 4 bytes: data rate ((sampleRate * bitsPerSample * channels) / 8).
-    unsigned int byteRate = reader.ReadUInt();
+    uint32_t byteRate = reader.ReadUInt();
     
     // 2 bytes: data block size in bytes (bitsPerSample * channels)
     // 2 bytes: bits per sample
@@ -112,8 +112,8 @@ void Audio::ParseFromData(char* data, int dataLength)
         return;
     }
     
-    unsigned int dataChunkSize = reader.ReadUInt();
+    uint32_t dataChunkSize = reader.ReadUInt();
     //std::cout << "Data chunk size is " << dataChunkSize << std::endl;
     
-    mDuration = dataChunkSize / byteRate;
+    mDuration = static_cast<float>(dataChunkSize) / static_cast<float>(byteRate);
 }

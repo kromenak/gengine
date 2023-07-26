@@ -30,14 +30,13 @@ struct VerbIcon
     // A cursor representing this verb.
     Cursor* cursor = nullptr;
 	
-	float GetWidth() const;
+    float GetWidth() const;
 };
 
 class VerbManager
 {
-	TYPE_DECL_BASE();
 public:
-	VerbManager();
+    void Init();
 	
 	VerbIcon& GetInventoryIcon(const std::string& noun);
 	VerbIcon& GetVerbIcon(const std::string& verb);
@@ -55,3 +54,5 @@ private:
 	std::string_map_ci<VerbIcon> mVerbs;
 	std::string_map_ci<VerbIcon> mTopics;
 };
+
+extern VerbManager gVerbManager;

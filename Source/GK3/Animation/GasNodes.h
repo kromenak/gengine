@@ -52,8 +52,8 @@ struct OneOfGasNode : public GasNode
 struct WaitGasNode : public GasNode
 {
     // Range of time to wait.
-    int minWaitTimeSeconds = 0;
-    int maxWaitTimeSeconds = 0;
+    float minWaitTimeSeconds = 0.0f;
+    float maxWaitTimeSeconds = 0.0f;
 
     float Execute(GasPlayer* player) override;
 };

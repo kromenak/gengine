@@ -1,22 +1,22 @@
 #include "Camera.h"
 
 #include "Actor.h"
+#include "Renderer.h"
 #include "RenderTransforms.h"
-#include "Services.h"
 #include "Window.h"
 
 TYPE_DEF_CHILD(Component, Camera);
 
 Camera::Camera(Actor* owner) : Component(owner)
 {
-    Services::GetRenderer()->SetCamera(this);
+    gRenderer.SetCamera(this);
 }
 
 Camera::~Camera()
 {
-    if(Services::GetRenderer()->GetCamera() == this)
+    if(gRenderer.GetCamera() == this)
     {
-        Services::GetRenderer()->SetCamera(nullptr);
+        gRenderer.SetCamera(nullptr);
     }
 }
 
@@ -53,8 +53,8 @@ Frustum Camera::GetWorldSpaceViewFrustum()
 Vector3 Camera::ScreenToWorldPoint(const Vector2& screenPoint, float distance)
 {
     // First, convert point to NDC space.
-	float screenWidth = Window::GetWidth();
-	float screenHeight = Window::GetHeight();
+	float screenWidth = static_cast<float>(Window::GetWidth());
+	float screenHeight = static_cast<float>(Window::GetHeight());
     Vector4 point = RenderTransforms::ScreenPointToNDCPoint(screenPoint, distance, screenWidth, screenHeight);
     
     // Usually, a point is converted from world to NDC using a "worldToProjection" matrix.

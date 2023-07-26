@@ -1,19 +1,19 @@
 #include "CursorManager.h"
 
 #include "ActionManager.h"
+#include "AssetManager.h"
 #include "Cursor.h"
 #include "Loader.h"
-#include "Services.h"
 
-TYPE_DEF_BASE(CursorManager);
+CursorManager gCursorManager;
 
 void CursorManager::Init()
 {
     // Can't do this in constructor b/c Assets might not yet be available.
-    mDefaultCursor = Services::GetAssets()->LoadCursor("C_POINT.CUR");
-    mHighlightRedCursor = Services::GetAssets()->LoadCursor("C_ZOOM.CUR");
-    mHighlightBlueCursor = Services::GetAssets()->LoadCursor("C_ZOOM_2.CUR");
-    mWaitCursor = Services::GetAssets()->LoadCursor("C_WAIT.CUR");
+    mDefaultCursor = gAssetManager.LoadCursor("C_POINT.CUR");
+    mHighlightRedCursor = gAssetManager.LoadCursor("C_ZOOM.CUR");
+    mHighlightBlueCursor = gAssetManager.LoadCursor("C_ZOOM_2.CUR");
+    mWaitCursor = gAssetManager.LoadCursor("C_WAIT.CUR");
 }
 
 void CursorManager::Update(float deltaTime)
@@ -24,7 +24,7 @@ void CursorManager::Update(float deltaTime)
     {
         UseLoadCursor();
     }
-    else if(Services::Get<ActionManager>()->IsActionPlaying())
+    else if(gActionManager.IsActionPlaying())
     {
         UseWaitCursor();
     }

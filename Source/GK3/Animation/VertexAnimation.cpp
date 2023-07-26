@@ -35,12 +35,12 @@ VertexAnimationPose* VertexAnimationPose::GetForFrame(int frame)
     return pose;
 }
 
-void VertexAnimationPose::GetForTime(float time, int framesPerSecond, VertexAnimationPose*& current, VertexAnimationPose*& next, float& t)
+void VertexAnimationPose::GetForTime(float time, int framesPerSecond, VertexAnimationPose*& outCurrent, VertexAnimationPose*& outNext, float& outT)
 {
     // Set out vars to defaults.
-    current = this;
-    next = nullptr;
-    t = 0.0f;
+    outCurrent = this;
+    outNext = nullptr;
+    outT = 0.0f;
 
     // NOTE: we're assuming the time passed in is "local" - within the duration of the full animation.
     // Calculate how many seconds should be used for a single frame.
@@ -50,34 +50,34 @@ void VertexAnimationPose::GetForTime(float time, int framesPerSecond, VertexAnim
     // E.g. if local time is 50% between frames 5 and 6, we want to interpolate 50% between the poses for those frames.
     float currentPoseTime = 0.0f;
     float nextPoseTime = 0.0f;
-    while(current != nullptr && current->next != nullptr)
+    while(outCurrent != nullptr && outCurrent->next != nullptr)
     {
-        currentPoseTime = secondsPerFrame * current->frameNumber;
-        nextPoseTime = secondsPerFrame * current->next->frameNumber;
+        currentPoseTime = secondsPerFrame * outCurrent->frameNumber;
+        nextPoseTime = secondsPerFrame * outCurrent->next->frameNumber;
         if(nextPoseTime > time) { break; }
 
         // Move on to next one.
-        current = current->next;
+        outCurrent = outCurrent->next;
     }
 
     // Make sure we found a valid current pose.
-    if(current != nullptr)
+    if(outCurrent != nullptr)
     {
         // GK3 does a somewhat wasteful thing: poses are expected to be defined for all frames. If NOT, use the closes previous frame.
         // SO: if the next pose IS NOT for the next frame, we just use the current pose with no interpolation.
-        next = current->next;
-        if(next == nullptr || next->frameNumber != (current->frameNumber + 1))
+        outNext = outCurrent->next;
+        if(outNext == nullptr || outNext->frameNumber != (outCurrent->frameNumber + 1))
         {
-            next = nullptr;
+            outNext = nullptr;
             return;
         }
 
         // Calculate a "t" value for interpolating between the two poses.
         if(!Math::IsZero(nextPoseTime - currentPoseTime))
         {
-            t = (time - currentPoseTime) / (nextPoseTime - currentPoseTime);
+            outT = (time - currentPoseTime) / (nextPoseTime - currentPoseTime);
         }
-        assert(t >= 0.0f && t <= 1.0f);
+        assert(outT >= 0.0f && outT <= 1.0f);
     }
 }
 
@@ -359,7 +359,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     }
     
     // 4 bytes: Unknown - probably a version number for the file format. Appears to always be "258".
-    uint32_t unknown = reader.ReadUInt();
+    reader.ReadUInt();
 
     // 4 bytes: Number of keyframes in the animation.
     mFrameCount = reader.ReadUInt();
@@ -374,7 +374,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
     
     // Name of .MOD file this animation data is for.
     // TODO: May want to hash and save this for verification before playback, to avoid mismatched model/anim playing.
-    reader.ReadStringBuffer(32, mModelName);
+    reader.ReadString(32, mModelName);
     #ifdef DEBUG_OUTPUT
     std::cout << "  Model Name: " << mModelName << std::endl;
     std::cout << "  Mesh Count: " << meshCount << std::endl;
@@ -532,7 +532,7 @@ void VertexAnimation::ParseFromData(char *data, int dataLength)
                         unsigned int val3 = (byte & 0x30) >> 4;
                         unsigned int val4 = (byte & 0xC0) >> 6;
 
-                        vertexDataFormat[k] = val1;        // Masking 0000 0011
+                        vertexDataFormat[k] = val1;            // Masking 0000 0011
                         if(k + 1 < vertexCount)
                         {
                             vertexDataFormat[k + 1] = val2;    // Masking 0000 1100
@@ -676,10 +676,10 @@ float VertexAnimation::DecompressFloatFromByte(unsigned char val)
     float sign = (signFlag == 0) ? 1.0f : -1.0f;
     
 	// Whole portion is 2 bits - masked by 0111 1111, then shift 5.
-	float whole = (val & 0x7F) >> 5;
+	float whole = static_cast<float>((val & 0x7F) >> 5);
 	
 	// Fractional portion is 5 bits - masked by 0001 1111.
-    float frac = (float)(val & 0x1F) / 32.0f;
+    float frac = static_cast<float>(val & 0x1F) / 32.0f;
     return sign * (whole + frac);
 }
 
@@ -690,9 +690,9 @@ float VertexAnimation::DecompressFloatFromUShort(unsigned short val)
     float sign = (signFlag == 0) ? 1.0f : -1.0f;
     
 	// Whole portion is 7 bits - masked by 0111 1111 1111 1111, then shift 8.
-	float whole = (val & 0x7FFF) >> 8;
+	float whole = static_cast<float>((val & 0x7FFF) >> 8);
 	
 	// Fractional portion is 8 bits - masked by 0000 0000 1111 1111.
-    float frac = (float)(val & 0x00FF) / 256.0f;
+    float frac = static_cast<float>(val & 0x00FF) / 256.0f;
     return sign * (whole + frac);
 }

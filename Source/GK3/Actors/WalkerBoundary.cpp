@@ -131,7 +131,7 @@ void WalkerBoundary::SetUnwalkableRect(const std::string& name, const Rect& worl
 {
     // If this name already exists, we'll update instead of add.
     int index = -1;
-    for(int i = 0; i < mUnwalkableRects.size(); ++i)
+    for(size_t i = 0; i < mUnwalkableRects.size(); ++i)
     {
         if(StringUtil::EqualsIgnoreCase(mUnwalkableRects[i].first, name))
         {
@@ -161,7 +161,7 @@ void WalkerBoundary::SetUnwalkableRect(const std::string& name, const Rect& worl
 void WalkerBoundary::ClearUnwalkableRect(const std::string& name)
 {
     // Find and erase by name.
-    for(int i = 0; i < mUnwalkableRects.size(); ++i)
+    for(size_t i = 0; i < mUnwalkableRects.size(); ++i)
     {
         if(StringUtil::EqualsIgnoreCase(mUnwalkableRects[i].first, name))
         {

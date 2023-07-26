@@ -23,7 +23,7 @@ struct VertexAnimationPose
     virtual ~VertexAnimationPose() { } 
 
     VertexAnimationPose* GetForFrame(int frame);
-    void GetForTime(float time, int framesPerSecond, VertexAnimationPose*& current, VertexAnimationPose*& next, float& t);
+    void GetForTime(float time, int framesPerSecond, VertexAnimationPose*& outCurrent, VertexAnimationPose*& outNext, float& outT);
 };
 
 struct VertexAnimationVertexPose : public VertexAnimationPose

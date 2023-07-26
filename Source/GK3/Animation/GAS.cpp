@@ -1,16 +1,17 @@
 #include "GAS.h"
 
+#include <cassert>
 #include <iostream>
 #include <string>
 #include <vector>
 #include <unordered_map>
 
 #include "Animator.h"
+#include "AssetManager.h"
 #include "GasNodes.h"
 #include "GasPlayer.h"
 #include "mstream.h"
 #include "Scene.h"
-#include "Services.h"
 #include "StringTokenizer.h"
 #include "StringUtil.h"
 
@@ -78,7 +79,7 @@ void GAS::Load(char* data, int dataLength)
             
             // Read in the required field (anim name).
             AnimGasNode* node = new AnimGasNode();
-            node->animation = Services::GetAssets()->LoadAnimation(tokenizer.GetNext(), GetScope());
+            node->animation = gAssetManager.LoadAnimation(tokenizer.GetNext(), GetScope());
             
             // Read in optional fields.
             if(tokenizer.HasNext())
@@ -111,7 +112,7 @@ void GAS::Load(char* data, int dataLength)
             
             // Read in the required field (anim name).
             AnimGasNode* node = new AnimGasNode();
-            node->animation = Services::GetAssets()->LoadAnimation(tokenizer.GetNext(), GetScope());
+            node->animation = gAssetManager.LoadAnimation(tokenizer.GetNext(), GetScope());
             
             // Read in optional fields.
             if(tokenizer.HasNext())
@@ -137,20 +138,26 @@ void GAS::Load(char* data, int dataLength)
             
             // Read in min wait time.
             WaitGasNode* node = new WaitGasNode();
-            node->minWaitTimeSeconds = StringUtil::ToInt(tokenizer.GetNext());
+            node->minWaitTimeSeconds = StringUtil::ToFloat(tokenizer.GetNext());
             
-            // Read in optional fields: max wait time and random.
+            // Optional token (max wait time).
             if(tokenizer.HasNext())
             {
-                node->maxWaitTimeSeconds = StringUtil::ToInt(tokenizer.GetNext());
+                node->maxWaitTimeSeconds = StringUtil::ToFloat(tokenizer.GetNext());
                 node->maxWaitTimeSeconds = Math::Max(node->minWaitTimeSeconds, node->maxWaitTimeSeconds);
             }
             else
             {
                 node->maxWaitTimeSeconds = node->minWaitTimeSeconds;
             }
+
+            // Optional token (random chance).
+            // There's at least one spot where the GAS data has an errant extra field (WAIT 2, 5, FALSE, 40).
+            // So, we really want to just read the LAST token here.
             if(tokenizer.HasNext())
             {
+                tokenizer.SetIndex(tokenizer.GetTokenCount() - 1);
+                assert(tokenizer.HasNext());
                 node->random = StringUtil::ToInt(tokenizer.GetNext());
             }
             
@@ -398,15 +405,15 @@ void GAS::Load(char* data, int dataLength)
                 if(isUseTalk)
                 {
                     UseTalkCleanupGasNode* node = new UseTalkCleanupGasNode();
-                    node->animationNeedingCleanup = Services::GetAssets()->LoadAnimation(animNeedingCleanupName, GetScope());
-                    node->animationDoingCleanup = Services::GetAssets()->LoadAnimation(animDoingCleanupName, GetScope());
+                    node->animationNeedingCleanup = gAssetManager.LoadAnimation(animNeedingCleanupName, GetScope());
+                    node->animationDoingCleanup = gAssetManager.LoadAnimation(animDoingCleanupName, GetScope());
                     mNodes.push_back(node);
                 }
                 else
                 {
                     UseCleanupGasNode* node = new UseCleanupGasNode();
-                    node->animationNeedingCleanup = Services::GetAssets()->LoadAnimation(animNeedingCleanupName, GetScope());
-                    node->animationDoingCleanup = Services::GetAssets()->LoadAnimation(animDoingCleanupName, GetScope());
+                    node->animationNeedingCleanup = gAssetManager.LoadAnimation(animNeedingCleanupName, GetScope());
+                    node->animationDoingCleanup = gAssetManager.LoadAnimation(animDoingCleanupName, GetScope());
                     mNodes.push_back(node);
                 }
             }
@@ -438,7 +445,7 @@ void GAS::Load(char* data, int dataLength)
             }
 
             NewIdleGasNode* node = new NewIdleGasNode();
-            node->newGas = Services::GetAssets()->LoadGAS(tokenizer.GetNext(), GetScope());
+            node->newGas = gAssetManager.LoadGAS(tokenizer.GetNext(), GetScope());
             mNodes.push_back(node);
         }
         else if(StringUtil::EqualsIgnoreCase(command, "WHENNEAR") ||
@@ -493,7 +500,7 @@ void GAS::Load(char* data, int dataLength)
             }
             std::string yakName = "E" + tokenizer.GetNext();
 
-            Animation* yakAnimation = Services::GetAssets()->LoadYak(yakName, GetScope());
+            Animation* yakAnimation = gAssetManager.LoadYak(yakName, GetScope());
             if(yakAnimation == nullptr)
             {
                 std::cout << "Invalid yak name specified in DLG" << std::endl;

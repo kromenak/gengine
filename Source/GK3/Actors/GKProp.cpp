@@ -1,5 +1,6 @@
 #include "GKProp.h"
 
+#include "AssetManager.h"
 #include "GasPlayer.h"
 #include "MeshRenderer.h"
 #include "Model.h"
@@ -11,7 +12,7 @@
 GKProp::GKProp() : GKObject()
 {
     mMeshRenderer = AddComponent<MeshRenderer>();
-    mMeshRenderer->SetShader(Services::GetAssets()->LoadShader("3D-Tex-Lit"));
+    mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit"));
 
     mVertexAnimator = AddComponent<VertexAnimator>();
     

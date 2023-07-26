@@ -1,13 +1,13 @@
 #include "SceneConstruction.h"
 
 #include "Actor.h"
+#include "AssetManager.h"
 #include "Debug.h"
 #include "Mesh.h"
 #include "MeshRenderer.h"
 #include "Model.h"
 #include "Scene.h"
 #include "SceneData.h"
-#include "Services.h"
 #include "WalkerBoundary.h"
 
 extern Mesh* quad;
@@ -17,10 +17,10 @@ void SceneConstruction::Init(Scene* scene, SceneData* sceneData)
     mScene = scene;
     mSceneData = sceneData;
 
-    // If a camera bounds model exists for this scene, pass it along to the camera.
+    // Record camera bounds models for visualization purposes.
     for(auto& modelName : sceneData->GetCameraBoundsModelNames())
     {
-        Model* model = Services::GetAssets()->LoadModel(modelName, AssetScope::Scene);
+        Model* model = gAssetManager.LoadModel(modelName, AssetScope::Scene);
         if(model != nullptr)
         {
             mCameraBoundsModels.push_back(model);
@@ -48,7 +48,7 @@ void SceneConstruction::Init(Scene* scene, SceneData* sceneData)
         offset.x = -offset.x + size.x * 0.5f;
         offset.z = -offset.y + size.y * 0.5f;
         offset.y = scene->GetFloorY(Vector3::Zero);
-        offset.y += 0.1f; // Offset slightly up to avoid z-fighting with floor (in most scenes).
+        offset.y += 1.0f; // Offset slightly up to avoid z-fighting with floor (in most scenes).
 
         walkerBoundaryActor->SetPosition(offset);
         walkerBoundaryActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));

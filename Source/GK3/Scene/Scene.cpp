@@ -6,6 +6,7 @@
 #include "ActionBar.h"
 #include "ActionManager.h"
 #include "Animator.h"
+#include "AssetManager.h"
 #include "BSPActor.h"
 #include "Camera.h"
 #include "CharacterManager.h"
@@ -22,8 +23,9 @@
 #include "MeshRenderer.h"
 #include "Profiler.h"
 #include "RectTransform.h"
+#include "Renderer.h"
+#include "ReportManager.h"
 #include "SceneFunctions.h"
-#include "Services.h"
 #include "SoundtrackPlayer.h"
 #include "StatusOverlay.h"
 #include "StringUtil.h"
@@ -76,7 +78,7 @@ void Scene::Load()
 	}
 
     // Scene layer is now active!
-    Services::Get<LayerManager>()->PushLayer(&mLayer);
+    gLayerManager.PushLayer(&mLayer);
     
 	// Creating scene data loads SIFs, but does nothing else yet!
 	mSceneData = new SceneData(mLocation, mTimeblock.ToString());
@@ -90,7 +92,7 @@ void Scene::Load()
 	}
 
     // Set location.
-    Services::Get<LocationManager>()->SetLocation(mLocation);
+    gLocationManager.SetLocation(mLocation);
 
     // Create status overlay actor.
     // Do this after setting location so it shows the correct location!
@@ -104,13 +106,13 @@ void Scene::Load()
     // Increment location counter after resolving scene data.
     // Despite SIFs sometimes doing "zero-checks," other NVC and SHP scripts typically do "one-checks".
     // E.g. run on "1st time enter" checks count == 1.
-    Services::Get<LocationManager>()->IncLocationCount(mEgoName, mLocation, mTimeblock);
+    gLocationManager.IncLocationCount(mEgoName, mLocation, mTimeblock);
 	
 	// Set BSP to be rendered.
-    Services::GetRenderer()->SetBSP(mSceneData->GetBSP());
+    gRenderer.SetBSP(mSceneData->GetBSP());
     
     // Figure out if we have a skybox, and set it to be rendered.
-    Services::GetRenderer()->SetSkybox(mSceneData->GetSkybox());
+    gRenderer.SetSkybox(mSceneData->GetSkybox());
 	
 	// Position the camera at the the default position and heading.
 	const SceneCamera* defaultRoomCamera = mSceneData->GetDefaultRoomCamera();
@@ -127,7 +129,7 @@ void Scene::Load()
 	// If a camera bounds model exists for this scene, pass it along to the camera.
     for(auto& modelName : mSceneData->GetCameraBoundsModelNames())
     {
-        Model* model = Services::GetAssets()->LoadModel(modelName, AssetScope::Scene);
+        Model* model = gAssetManager.LoadModel(modelName, AssetScope::Scene);
         if(model != nullptr)
         {
             mCamera->AddBounds(model);
@@ -154,7 +156,7 @@ void Scene::Load()
 
         // Create DOR prop, if one exists for this actor.
         // The DOR model assists with calculating an actor's facing direction, particularly while walking.
-        Model* walkerDorModel = Services::GetAssets()->LoadModel("DOR_" + actor->GetMeshRenderer()->GetModelName());
+        Model* walkerDorModel = gAssetManager.LoadModel("DOR_" + actor->GetMeshRenderer()->GetModelName());
         if(walkerDorModel != nullptr)
         {
             GKProp* walkerDOR = new GKProp(walkerDorModel);
@@ -239,15 +241,15 @@ void Scene::Load()
 
 void Scene::Unload()
 {
-	Services::GetRenderer()->SetBSP(nullptr);
-	Services::GetRenderer()->SetSkybox(nullptr);
+	gRenderer.SetBSP(nullptr);
+	gRenderer.SetSkybox(nullptr);
 	
 	delete mSceneData;
 	mSceneData = nullptr;
 
-    while(Services::Get<LayerManager>()->IsLayerInStack(&mLayer))
+    while(gLayerManager.IsLayerInStack(&mLayer))
     {
-        Services::Get<LayerManager>()->PopLayer();
+        gLayerManager.PopLayer();
     }
 }
 
@@ -288,7 +290,7 @@ void Scene::Init()
     }
 
     // Check for and run "scene enter" actions.
-    Services::Get<ActionManager>()->ExecuteAction("SCENE", "ENTER");
+    gActionManager.ExecuteAction("SCENE", "ENTER");
 
     // If there's an "Init" SceneFunction for this Scene, execute it.
     SceneFunctions::Execute("Init");
@@ -324,10 +326,10 @@ void Scene::Update(float deltaTime)
         for(auto& trigger : mSceneData->GetTriggers())
         {
             //Debug::DrawRectXZ(trigger->rect, GetFloorY(egoPos) + 10.0f, Color32::Green);
-            if(trigger->rect.Contains(egoXZPos) && !Services::Get<ActionManager>()->IsActionPlaying())
+            if(trigger->rect.Contains(egoXZPos) && !gActionManager.IsActionPlaying())
             {
                 // If so, treat the label as a noun (e.g. GET_CLOSE) with hardcoded "WALK" verb.
-                Services::Get<ActionManager>()->ExecuteAction(trigger->label, "WALK");
+                gActionManager.ExecuteAction(trigger->label, "WALK");
             }
         }
     }
@@ -338,9 +340,9 @@ void Scene::Update(float deltaTime)
         mGameTimers[i].secondsRemaining -= deltaTime;
         
         // If another action is already playing, we wait until it is finished before executing this one (and removing it from the list).
-        if(mGameTimers[i].secondsRemaining <= 0.0f && !Services::Get<ActionManager>()->IsActionPlaying())
+        if(mGameTimers[i].secondsRemaining <= 0.0f && !gActionManager.IsActionPlaying())
         {
-            Services::Get<ActionManager>()->ExecuteAction(mGameTimers[i].noun, mGameTimers[i].verb);
+            gActionManager.ExecuteAction(mGameTimers[i].noun, mGameTimers[i].verb);
             mGameTimers.erase(mGameTimers.begin() + i);
         }
     }
@@ -363,7 +365,7 @@ bool Scene::InitEgoPosition(const std::string& positionName)
 	// Output a warning if specified position has no camera though.
 	if(position->cameraName.empty())
 	{
-		Services::GetReports()->Log("Warning", "No camera information is supplied in position '" + positionName + "'.");
+		gReportManager.Log("Warning", "No camera information is supplied in position '" + positionName + "'.");
 		return true;
 	}
 	
@@ -388,7 +390,7 @@ void Scene::SetCameraPosition(const std::string& cameraName)
 	// If couldn't find a camera with this name, error out!
 	if(camera == nullptr)
 	{
-		Services::GetReports()->Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
+		gReportManager.Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
 		return;
 	}
 	
@@ -428,7 +430,7 @@ void Scene::GlideToCameraPosition(const std::string& cameraName, std::function<v
     // If couldn't find a camera with this name, error out!
     if(camera == nullptr)
     {
-        Services::GetReports()->Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
+        gReportManager.Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
         if(finishCallback != nullptr)
         {
             finishCallback();
@@ -528,10 +530,10 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
 void Scene::Interact(const Ray& ray, GKObject* interactHint)
 {
 	// Ignore scene interaction while the action bar is showing.
-	if(Services::Get<ActionManager>()->IsActionBarShowing()) { return; }
+	if(gActionManager.IsActionBarShowing()) { return; }
 	
 	// Also ignore scene interaction when inventory is up.
-	if(Services::Get<InventoryManager>()->IsInventoryShowing()) { return; }
+	if(gInventoryManager.IsInventoryShowing()) { return; }
 	
 	// Get interacted object.
 	GKObject* interacted = interactHint;
@@ -570,7 +572,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 	// See if it has a pre-defined verb with an associated action. If so, we will immediately execute that action (w/o showing action bar).
 	if(!interacted->GetVerb().empty())
 	{
-        const Action* action = Services::Get<ActionManager>()->GetAction(interacted->GetNoun(), interacted->GetVerb());
+        const Action* action = gActionManager.GetAction(interacted->GetNoun(), interacted->GetVerb());
         if(action != nullptr)
         {
             ExecuteAction(action);
@@ -579,8 +581,8 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 	}
 	
 	// No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
-	Services::Get<ActionManager>()->ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
-    ActionBar* actionBar = Services::Get<ActionManager>()->GetActionBar();
+	gActionManager.ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
+    ActionBar* actionBar = gActionManager.GetActionBar();
   
     // Add INSPECT/UNINSPECT if not present.
     bool alreadyInspecting = StringUtil::EqualsIgnoreCase(interacted->GetNoun(), mCamera->GetInspectNoun());
@@ -589,7 +591,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
         if(!actionBar->HasVerb("INSPECT_UNDO"))
         {
             actionBar->AddVerbToFront("INSPECT_UNDO", [interacted](){
-                Services::Get<ActionManager>()->ExecuteCustomAction(interacted->GetNoun(), "INSPECT_UNDO", "ALL", "wait UnInspect()");
+                gActionManager.ExecuteCustomAction(interacted->GetNoun(), "INSPECT_UNDO", "ALL", "wait UnInspect()");
             });
             actionBar->SetVerbEnabled("INSPECT_UNDO", !mCamera->IsForcedCinematicMode());
         }
@@ -599,7 +601,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
         if(!actionBar->HasVerb("INSPECT"))
         {
             actionBar->AddVerbToFront("INSPECT", [interacted](){
-                Services::Get<ActionManager>()->ExecuteCustomAction(interacted->GetNoun(), "INSPECT", "ALL", "wait InspectObject()");
+                gActionManager.ExecuteCustomAction(interacted->GetNoun(), "INSPECT", "ALL", "wait InspectObject()");
             });
             actionBar->SetVerbEnabled("INSPECT", !mCamera->IsForcedCinematicMode());
         }
@@ -609,9 +611,9 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 void Scene::SkipCurrentAction()
 {
     // If an action is playing, this should skip the action.
-    if(Services::Get<ActionManager>()->IsActionPlaying())
+    if(gActionManager.IsActionPlaying())
     {
-        Services::Get<ActionManager>()->SkipCurrentAction();
+        gActionManager.SkipCurrentAction();
         return;
     }
 
@@ -681,7 +683,7 @@ GKActor* Scene::GetActorByNoun(const std::string& noun) const
 			return actor;
 		}
 	}
-	Services::GetReports()->Log("Error", "Error: Who the hell is '" + noun + "'?");
+	gReportManager.Log("Error", "Error: Who the hell is '" + noun + "'?");
 	return nullptr;
 }
 
@@ -694,7 +696,7 @@ const ScenePosition* Scene::GetPosition(const std::string& positionName) const
 	}
 	if(position == nullptr)
 	{
-		Services::GetReports()->Log("Error", "Error: '" + positionName + "' is not a valid position. Call DumpPositions() to see valid positions.");
+		gReportManager.Log("Error", "Error: '" + positionName + "' is not a valid position. Call DumpPositions() to see valid positions.");
 	}
 	return position;
 }
@@ -871,7 +873,7 @@ void Scene::ExecuteAction(const Action* action)
 	if(action == nullptr) { return; }
 	
 	// Log to "Actions" stream.
-	Services::GetReports()->Log("Actions", "Playing NVC " + action->ToString());
+	gReportManager.Log("Actions", "Playing NVC " + action->ToString());
 	
 	// Before executing the NVC, we need to handle any approach.
 	switch(action->approach)
@@ -883,34 +885,34 @@ void Scene::ExecuteAction(const Action* action)
 			{
 				//Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
 				mEgo->WalkTo(scenePos->position, scenePos->heading, [this, action]() -> void {
-					Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+					gActionManager.ExecuteAction(action, nullptr, false);
 				});
 			}
 			else
 			{
-				Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+				gActionManager.ExecuteAction(action, nullptr, false);
 			}
 			break;
 		}
 		case Action::Approach::Anim: // Example use: R25 Open/Close Window, Open/Close Dresser, Open/Close Drawer
 		{
-			Animation* anim = Services::GetAssets()->LoadAnimation(action->target, AssetScope::Scene);
+			Animation* anim = gAssetManager.LoadAnimation(action->target, AssetScope::Scene);
 			if(anim != nullptr)
 			{
 				mEgo->WalkToAnimationStart(anim, [action]() -> void {
-					Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+					gActionManager.ExecuteAction(action, nullptr, false);
 				});
 			}
 			else
 			{
-				Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+				gActionManager.ExecuteAction(action, nullptr, false);
 			}
 			break;
 		}
 		case Action::Approach::Near: // Never used in GK3.
 		{
 			std::cout << "Executed NEAR approach type!" << std::endl;
-			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+			gActionManager.ExecuteAction(action, nullptr, false);
 			break;
 		}
 		case Action::Approach::NearModel: // Example use: RC1 Bookstore Door, Hallway R25 Door
@@ -932,25 +934,25 @@ void Scene::ExecuteAction(const Action* action)
 
                 // Walk there, then do the action.
                 mEgo->WalkTo(walkPos, walkHeading, [action](){
-                    Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+                    gActionManager.ExecuteAction(action, nullptr, false);
                 });
             }
             else
             {
                 // Just do the action if model could not be found.
-                Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+                gActionManager.ExecuteAction(action, nullptr, false);
             }
 			break;
 		}
 		case Action::Approach::Region: // Never used in GK3 (it does appear once in a SIF file, but it is misconfigured with an invalid region anyway).
 		{
-			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+			gActionManager.ExecuteAction(action, nullptr, false);
 			break;
 		}
 		case Action::Approach::TurnTo: // Never used in GK3.
 		{
 			std::cout << "Executed TURNTO approach type!" << std::endl;
-			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+			gActionManager.ExecuteAction(action, nullptr, false);
 			break;
 		}
 		case Action::Approach::TurnToModel: // Example use: R25 Couch Sit, most B25
@@ -974,7 +976,7 @@ void Scene::ExecuteAction(const Action* action)
 			// Do a "turn to" heading.
 			Heading turnToHeading = Heading::FromDirection(egoToModel);
 			mEgo->TurnTo(turnToHeading, [this, action]() -> void {
-				Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+				gActionManager.ExecuteAction(action, nullptr, false);
 			});
 			break;
 		}
@@ -988,26 +990,26 @@ void Scene::ExecuteAction(const Action* action)
             if(obj != nullptr)
             {
                 mEgo->WalkToSee(obj, [this, action]() -> void{
-                    Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+                    gActionManager.ExecuteAction(action, nullptr, false);
                 });
             }
             else
             {
                 std::cout << "Could not find WalkToSee target " << action->target << std::endl;
-                Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+                gActionManager.ExecuteAction(action, nullptr, false);
             }
 			break;
 		}
 		case Action::Approach::None:
 		{
 			// Just do it!
-			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+			gActionManager.ExecuteAction(action, nullptr, false);
 			break;
 		}
 		default:
 		{
-			Services::GetReports()->Log("Error", "Invalid approach " + std::to_string(static_cast<int>(action->approach)));
-			Services::Get<ActionManager>()->ExecuteAction(action, nullptr, false);
+			gReportManager.Log("Error", "Invalid approach " + std::to_string(static_cast<int>(action->approach)));
+			gActionManager.ExecuteAction(action, nullptr, false);
 			break;
 		}
 	}

@@ -9,7 +9,8 @@
 #include "BarnFile.h"
 #include "FileSystem.h"
 #include "mstream.h"
-#include "Services.h"
+#include "Renderer.h"
+#include "SheepManager.h"
 #include "StringUtil.h"
 
 // Header Includes for all asset types
@@ -32,6 +33,8 @@
 #include "TextAsset.h"
 #include "Texture.h"
 #include "VertexAnimation.h"
+
+AssetManager gAssetManager;
 
 AssetManager::AssetManager()
 {
@@ -214,10 +217,10 @@ Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scop
     // These textures look better if you apply mipmaps and filtering.
     if(texture != nullptr && texture->GetRenderType() != Texture::RenderType::AlphaTest)
     {
-        bool useMipmaps = Services::GetRenderer()->UseMipmaps();
+        bool useMipmaps = gRenderer.UseMipmaps();
         texture->SetMipmaps(useMipmaps);
 
-        bool useTrilinearFiltering = Services::GetRenderer()->UseTrilinearFiltering();
+        bool useTrilinearFiltering = gRenderer.UseTrilinearFiltering();
         texture->SetFilterMode(useTrilinearFiltering ? Texture::FilterMode::Trilinear : Texture::FilterMode::Bilinear);
     }
     return texture;
@@ -289,7 +292,7 @@ SheepScript* LoadSheepFunc(const std::string& assetName, AssetScope scope, char*
     // This doesn't appear to be a binary sheep file, so it might be a text sheep file.
     // Let's try compiling it on-the-fly!
     imstream stream(buffer, bufferSize);
-    return Services::GetSheep()->Compile(assetName, stream);
+    return gSheepManager.Compile(assetName, stream);
 }
 
 SheepScript* AssetManager::LoadSheep(const std::string& name, AssetScope scope)

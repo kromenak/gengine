@@ -70,12 +70,12 @@ public:
 	
 private:
 	// Identifiers required to verify file type.
-    const int kGameIdentifier = 0x21334B47; // GK3!
-    const int kBarnIdentifier = 0x6E726142; // Barn
+    const uint32_t kGameIdentifier = 0x21334B47; // GK3!
+    const uint32_t kBarnIdentifier = 0x6E726142; // Barn
 	
 	// Identifiers required to identify data section.
-    const int kDDirIdentifier = 0x44446972; // DDir
-    const int kDataIdentifier = 0x44617461; // Data
+    const uint32_t kDDirIdentifier = 0x44446972; // DDir
+    const uint32_t kDataIdentifier = 0x44617461; // Data
     
     // The name of the barn file.
     std::string mName;

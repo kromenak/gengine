@@ -16,7 +16,6 @@
 #include <unordered_map>
 
 #include "StringUtil.h"
-#include "Type.h"
 
 class InventoryScreen;
 class InventoryInspectScreen;
@@ -24,9 +23,8 @@ class Texture;
 
 class InventoryManager
 {
-	TYPE_DECL_BASE();
 public:
-	InventoryManager();
+    void Init();
 	
 	bool IsValidInventoryItem(const std::string& itemName) const;
 
@@ -95,3 +93,5 @@ private:
 	InventoryScreen* mInventoryScreen = nullptr;
 	InventoryInspectScreen* mInventoryInspectScreen = nullptr;
 };
+
+extern InventoryManager gInventoryManager;

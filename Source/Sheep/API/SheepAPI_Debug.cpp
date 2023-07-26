@@ -2,7 +2,6 @@
 
 #include "Debug.h"
 #include "LayerManager.h"
-#include "Services.h"
 
 using namespace std;
 
@@ -42,7 +41,7 @@ RegFunc0(DumpDebugFlags, void, IMMEDIATE, DEV_FUNC);
 
 shpvoid DumpLayerStack()
 {
-    Services::Get<LayerManager>()->DumpLayerStack();
+    gLayerManager.DumpLayerStack();
     return 0;
 }
 RegFunc0(DumpLayerStack, void, IMMEDIATE, DEV_FUNC);

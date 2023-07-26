@@ -14,6 +14,7 @@
 #include "Vector2.h"
 
 class DrivingScreenBlip;
+class Texture;
 class UIButton;
 class UIImage;
 

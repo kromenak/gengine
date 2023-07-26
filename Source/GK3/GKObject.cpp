@@ -3,7 +3,7 @@
 #include <sstream>
 
 #include "MeshRenderer.h"
-#include "Services.h"
+#include "ReportManager.h"
 
 GKObject::GKObject() : Actor()
 {
@@ -26,7 +26,7 @@ void GKObject::DumpPosition()
     ss << "actor '" << GetNoun() << "' ";
     ss << "h=" << GetHeading() << ", ";
     ss << "pos=" << GetPosition();
-    Services::GetReports()->Log("Dump", ss.str());
+    gReportManager.Log("Dump", ss.str());
 }
 
 Vector3 GKObject::GetAudioPosition() const

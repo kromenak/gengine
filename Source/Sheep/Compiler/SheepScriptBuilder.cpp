@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "Services.h"
+#include "SheepCompiler.h"
 #include "SheepSysFunc.h"
 #include "StringUtil.h"
 
@@ -247,7 +247,7 @@ SheepValueType SheepScriptBuilder::CallSysFunc(std::string sysFuncName, const Lo
 	
 	// Check that arg types are compatible.
 	bool argTypesCompatible = true;
-	for(int i = 0; i < sysFunc->argumentTypes.size(); i++)
+	for(size_t i = 0; i < sysFunc->argumentTypes.size(); i++)
 	{
 		SheepValue& value = mSysFuncArgs[i];
 		int argType = sysFunc->argumentTypes[i];

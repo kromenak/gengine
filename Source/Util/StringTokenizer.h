@@ -15,8 +15,12 @@ public:
     
     bool HasNext() const { return mIndex < mTokens.size(); }
     const std::string& GetNext();
+
+    size_t GetTokenCount() const { return mTokens.size(); }
+
+    void SetIndex(size_t index) { mIndex = index; }
     
 private:
     std::vector<std::string> mTokens;
-    int mIndex = 0;
+    size_t mIndex = 0;
 };

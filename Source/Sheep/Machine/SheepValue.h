@@ -37,6 +37,8 @@ struct SheepValue
 		switch(type)
 		{
 		default:
+        case SheepValueType::Void:
+            printf("Warning: converting unexpected SheepValue type to int.\n");
 		case SheepValueType::Int:
 			return intValue;
 		case SheepValueType::Float:
@@ -52,6 +54,8 @@ struct SheepValue
 		switch(type)
 		{
 		default:
+        case SheepValueType::Void:
+            printf("Warning: converting unexpected SheepValue type to float.\n");
 		case SheepValueType::Float:
 			return floatValue;
 		case SheepValueType::Int:
@@ -67,6 +71,8 @@ struct SheepValue
 		switch(type)
 		{
 		default:
+        case SheepValueType::Void:
+            printf("Warning: converting unexpected SheepValue type to string.\n");
 		case SheepValueType::String:
             if(stringValue == nullptr) { return std::string(); }
 			return std::string(stringValue);

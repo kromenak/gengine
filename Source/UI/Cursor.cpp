@@ -2,15 +2,15 @@
 
 #include <SDL.h>
 
+#include "AssetManager.h"
 #include "IniParser.h"
-#include "Services.h"
 #include "StringUtil.h"
 #include "Texture.h"
 
 Cursor::Cursor(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
 {
     // Texture used is always the same as the name of the cursor.
-    Texture* texture = Services::GetAssets()->LoadTexture(GetNameNoExtension(), GetScope());
+    Texture* texture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());
     if(texture == nullptr)
     {
         printf("Create cursor %s failed: couldn't load texture.\n", mName.c_str());
@@ -48,7 +48,7 @@ Cursor::Cursor(const std::string& name, AssetScope scope, char* data, int dataLe
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "frame rate"))
             {
-                mFramesPerSecond = keyValue.GetValueAsInt();
+                mFramesPerSecond = static_cast<float>(keyValue.GetValueAsInt());
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "allow fading"))
             {

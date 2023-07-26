@@ -1,7 +1,8 @@
 #include "UIDrag.h"
 
+#include "CursorManager.h"
 #include "Debug.h"
-#include "Services.h"
+#include "InputManager.h"
 
 TYPE_DEF_CHILD(UIWidget, UIDrag);
 
@@ -44,12 +45,12 @@ void UIDrag::OnUpdate(float deltaTime)
     // If dragging, update transform to follow pointer.
     if(mDragging)
     {
-        Vector2 mouseDelta = Services::GetInput()->GetMouseDelta();
+        Vector2 mouseDelta = gInputManager.GetMouseDelta();
         if(mouseDelta.GetLengthSq() > 0.0f)
         {
             // Move anchored position to match.
             Vector2 anchoredPos = GetRectTransform()->GetAnchoredPosition();
-            anchoredPos += Services::GetInput()->GetMouseDelta();
+            anchoredPos += gInputManager.GetMouseDelta();
             GetRectTransform()->SetAnchoredPosition(anchoredPos);
 
             // Keep within boundary rect, if rect is valid/set.
@@ -61,7 +62,7 @@ void UIDrag::OnUpdate(float deltaTime)
 
         // Failsafe: in some edge cases, you can move the mouse in such a way (while releasing the mouse button) to avoid the OnPointerUp callback.
         // To combat this, if dragging, check for mouse up to cancel drag.
-        if(!Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left))
+        if(!gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Left))
         {
             mDragging = false;
             UpdateCursor();
@@ -73,13 +74,13 @@ void UIDrag::UpdateCursor()
 {
     if(mUseHighlightCursor && (mDragging || mPointerHovering))
     {
-        if(Services::Get<CursorManager>()->IsDefaultCursor())
+        if(gCursorManager.IsDefaultCursor())
         {
-            Services::Get<CursorManager>()->UseHighlightCursor();
+            gCursorManager.UseHighlightCursor();
         }
     }
     else
     {
-        Services::Get<CursorManager>()->UseDefaultCursor();
+        gCursorManager.UseDefaultCursor();
     }
 }

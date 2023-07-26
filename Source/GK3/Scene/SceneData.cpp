@@ -1,8 +1,10 @@
 #include "SceneData.h"
 
 #include "ActionManager.h"
+#include "AssetManager.h"
 #include "BSP.h"
-#include "Services.h"
+#include "ReportManager.h"
+#include "SheepManager.h"
 #include "Skybox.h"
 #include "StringUtil.h"
 #include "Texture.h"
@@ -11,8 +13,8 @@
 SceneData::SceneData(const std::string& location, const std::string& timeblock) : mTimeblock(timeblock)
 {
 	// Load general and specific SIF assets.
-	mGeneralSIF = Services::GetAssets()->LoadSIF(location, AssetScope::Scene);
-	mSpecificSIF = Services::GetAssets()->LoadSIF(location + timeblock, AssetScope::Scene);
+	mGeneralSIF = gAssetManager.LoadSIF(location, AssetScope::Scene);
+	mSpecificSIF = gAssetManager.LoadSIF(location + timeblock, AssetScope::Scene);
 }
 
 SceneData::~SceneData()
@@ -58,21 +60,21 @@ void SceneData::ResolveSceneData()
 	}
 	
 	// Load the desired scene asset - chosen based on settings block.
-	mSceneAsset = Services::GetAssets()->LoadSceneAsset(mGeneralSettings.sceneAssetName, AssetScope::Scene);
+	mSceneAsset = gAssetManager.LoadSceneAsset(mGeneralSettings.sceneAssetName, AssetScope::Scene);
 	
 	// Load the BSP data, which is specified by the scene model.
 	// If this is null, the game will still work...but there's no BSP geometry!
 	if(mSceneAsset != nullptr)
 	{
-		mBSP = Services::GetAssets()->LoadBSP(mSceneAsset->GetBSPName(), AssetScope::Scene);
+		mBSP = gAssetManager.LoadBSP(mSceneAsset->GetBSPName(), AssetScope::Scene);
 	}
     else
     {
-        mBSP = Services::GetAssets()->LoadBSP("DEFAULT.BSP");
+        mBSP = gAssetManager.LoadBSP("DEFAULT.BSP");
     }
     
     // Load BSP lightmap data.
-    mBSPLightmap = Services::GetAssets()->LoadBSPLightmap(mGeneralSettings.sceneAssetName, AssetScope::Scene);
+    mBSPLightmap = gAssetManager.LoadBSPLightmap(mGeneralSettings.sceneAssetName, AssetScope::Scene);
     
     // Configure BSP, if we have one.
     if(mBSP != nullptr)
@@ -104,7 +106,7 @@ void SceneData::ResolveSceneData()
 	if(!mGeneralSettings.walkerBoundaryTextureName.empty())
 	{
         // Small thing, but since Texture class automatically uses magenta as a transparent color, clear that in this case.
-        Texture* walkerTexture = Services::GetAssets()->LoadTexture(mGeneralSettings.walkerBoundaryTextureName, AssetScope::Scene);
+        Texture* walkerTexture = gAssetManager.LoadTexture(mGeneralSettings.walkerBoundaryTextureName, AssetScope::Scene);
         walkerTexture->ClearTransparentColor();
 
 		mWalkerBoundary = new WalkerBoundary();
@@ -207,10 +209,10 @@ void SceneData::ResolveSceneData()
     }
 	
 	// Clear actions from previous scene - we're about to populate here!
-	Services::Get<ActionManager>()->ClearActionSets();
+	gActionManager.ClearActionSets();
 	
 	// Add inventory action sets first (global-to-specific).
-	Services::Get<ActionManager>()->AddInventoryActionSets(mTimeblock);
+	gActionManager.AddInventoryActionSets(mTimeblock);
 	
 	// Add current scene general SIF action sets conditionally (in order defined in SIF file).
     if(mGeneralSIF != nullptr)
@@ -225,12 +227,12 @@ void SceneData::ResolveSceneData()
 	}
 	
 	// Add global action sets (global-to-specific).
-	Services::Get<ActionManager>()->AddGlobalActionSets(mTimeblock);
+	gActionManager.AddGlobalActionSets(mTimeblock);
 }
 
 const ScenePosition* SceneData::GetScenePosition(const std::string& positionName) const
 {
-    for(int i = 0; i < mPositions.size(); i++)
+    for(size_t i = 0; i < mPositions.size(); i++)
     {
         if(StringUtil::EqualsIgnoreCase(mPositions[i]->label, positionName))
         {
@@ -254,7 +256,7 @@ const SceneCamera* SceneData::GetInspectCamera(const std::string& nounOrModel) c
 
 const RoomSceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) const
 {
-	for(int i = 0; i < mRoomCameras.size(); i++)
+	for(size_t i = 0; i < mRoomCameras.size(); i++)
 	{
 		if(StringUtil::EqualsIgnoreCase(mRoomCameras[i]->label, cameraName))
 		{
@@ -266,7 +268,7 @@ const RoomSceneCamera* SceneData::GetRoomCamera(const std::string& cameraName) c
 
 const SceneCamera* SceneData::GetCinematicCamera(const std::string& cameraName) const
 {
-	for(int i = 0; i < mCinematicCameras.size(); i++)
+	for(size_t i = 0; i < mCinematicCameras.size(); i++)
 	{
 		if(StringUtil::EqualsIgnoreCase(mCinematicCameras[i]->label, cameraName))
 		{
@@ -278,7 +280,7 @@ const SceneCamera* SceneData::GetCinematicCamera(const std::string& cameraName) 
 
 const DialogueSceneCamera* SceneData::GetDialogueCamera(const std::string& cameraName) const
 {
-	for(int i = 0; i < mDialogueCameras.size(); i++)
+	for(size_t i = 0; i < mDialogueCameras.size(); i++)
 	{
 		if(StringUtil::EqualsIgnoreCase(mDialogueCameras[i]->label, cameraName))
 		{
@@ -290,7 +292,7 @@ const DialogueSceneCamera* SceneData::GetDialogueCamera(const std::string& camer
 
 const DialogueSceneCamera* SceneData::GetInitialDialogueCameraForConversation(const std::string& conversationName) const
 {
-    for(int i = 0; i < mDialogueCameras.size(); i++)
+    for(size_t i = 0; i < mDialogueCameras.size(); i++)
     {
         if(mDialogueCameras[i]->isInitial && StringUtil::EqualsIgnoreCase(mDialogueCameras[i]->dialogueName, conversationName))
         {
@@ -302,7 +304,7 @@ const DialogueSceneCamera* SceneData::GetInitialDialogueCameraForConversation(co
 
 const DialogueSceneCamera* SceneData::GetFinalDialogueCameraForConversation(const std::string& conversationName) const
 {
-    for(int i = 0; i < mDialogueCameras.size(); i++)
+    for(size_t i = 0; i < mDialogueCameras.size(); i++)
     {
         if(mDialogueCameras[i]->isFinal && StringUtil::EqualsIgnoreCase(mDialogueCameras[i]->dialogueName, conversationName))
         {
@@ -315,7 +317,7 @@ const DialogueSceneCamera* SceneData::GetFinalDialogueCameraForConversation(cons
 std::vector<const SceneConversation*> SceneData::GetConversationSettings(const std::string& conversationName) const
 {
     std::vector<const SceneConversation*> settings;
-    for(int i = 0; i < mConversations.size(); i++)
+    for(size_t i = 0; i < mConversations.size(); i++)
     {
         if(StringUtil::EqualsIgnoreCase(mConversations[i]->name, conversationName))
         {
@@ -329,7 +331,7 @@ void SceneData::AddActorBlocks(const std::vector<ConditionalBlock<SceneActor>>& 
 {
 	for(auto& block : actorBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			for(auto& actor : block.items)
 			{
@@ -343,7 +345,7 @@ void SceneData::AddModelBlocks(const std::vector<ConditionalBlock<SceneModel>>& 
 {
 	for(auto& block : modelBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			for(auto& model : block.items)
 			{
@@ -357,7 +359,7 @@ void SceneData::AddPositionBlocks(const std::vector<ConditionalBlock<ScenePositi
 {
 	for(auto& block : positionBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			for(auto& position : block.items)
 			{
@@ -371,7 +373,7 @@ void SceneData::AddInspectCameraBlocks(const std::vector<ConditionalBlock<SceneC
 {
 	for(auto& block : cameraBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			for(auto& camera : block.items)
 			{
@@ -385,7 +387,7 @@ void SceneData::AddRoomCameraBlocks(const std::vector<ConditionalBlock<RoomScene
 {
 	for(auto& block : cameraBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			for(auto& camera : block.items)
 			{
@@ -405,7 +407,7 @@ void SceneData::AddCinematicCameraBlocks(const std::vector<ConditionalBlock<Scen
 {
 	for(auto& block : cameraBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			for(auto& camera : block.items)
 			{
@@ -419,7 +421,7 @@ void SceneData::AddDialogueCameraBlocks(const std::vector<ConditionalBlock<Dialo
 {
 	for(auto& block : cameraBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			for(auto& camera : block.items)
 			{
@@ -433,7 +435,7 @@ void SceneData::AddTriggerBlocks(const std::vector<ConditionalBlock<SceneRegionO
 {
     for(auto& block : triggerBlocks)
     {
-        if(Services::GetSheep()->Evaluate(block.condition))
+        if(gSheepManager.Evaluate(block.condition))
         {
             for(auto& trigger : block.items)
             {
@@ -447,7 +449,7 @@ void SceneData::AddSoundtrackBlocks(const std::vector<ConditionalBlock<Soundtrac
 {
 	for(auto& block : soundtrackBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			mSoundtracks.insert(mSoundtracks.end(), block.items.begin(), block.items.end());
 		}
@@ -458,7 +460,7 @@ void SceneData::AddConversationBlocks(const std::vector<ConditionalBlock<SceneCo
 {
     for(auto& block : conversationBlocks)
     {
-        if(Services::GetSheep()->Evaluate(block.condition))
+        if(gSheepManager.Evaluate(block.condition))
         {
             for(auto& conversation : block.items)
             {
@@ -472,23 +474,23 @@ void SceneData::AddActionBlocks(const std::vector<ConditionalBlock<NVC*>>& actio
 {
 	for(auto& block : actionSetBlocks)
 	{
-		if(Services::GetSheep()->Evaluate(block.condition))
+		if(gSheepManager.Evaluate(block.condition))
 		{
 			for(auto& nvc : block.items)
 			{
 				if(performNameCheck)
 				{
-					Services::Get<ActionManager>()->AddActionSetIfForTimeblock(nvc->GetName(), mTimeblock);
+					gActionManager.AddActionSetIfForTimeblock(nvc->GetName(), mTimeblock);
 				}
 				else
 				{
-					Services::Get<ActionManager>()->AddActionSet(nvc->GetName());
+					gActionManager.AddActionSet(nvc->GetName());
 				}
 			}
 		}
 		else
 		{
-			Services::GetReports()->Log("Generic", StringUtil::Format("Skipping header `%s`.", block.conditionText.c_str()));
+			gReportManager.Log("Generic", StringUtil::Format("Skipping header `%s`.", block.conditionText.c_str()));
 		}
 	}
 }

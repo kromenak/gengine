@@ -9,9 +9,8 @@
 #include "GEngine.h"
 #include "GKActor.h"
 #include "Scene.h"
-#include "Services.h"
 
-TYPE_DEF_BASE(DialogueManager);
+DialogueManager gDialogueManager;
 
 void DialogueManager::StartDialogue(const std::string& licensePlate, int numLines, bool playFidgets, std::function<void()> finishCallback)
 {
@@ -254,7 +253,7 @@ void DialogueManager::PlayNextDialogueLine()
 	mRemainingDialogueLines--;
 
     // If we're skipping an action right now, it seems safe (?) to just trigger the dialogue cue and skip loading the YAK entirely.
-    if(Services::Get<ActionManager>()->IsSkippingCurrentAction())
+    if(gActionManager.IsSkippingCurrentAction())
     {
         TriggerDialogueCue();
         return;
@@ -264,18 +263,18 @@ void DialogueManager::PlayNextDialogueLine()
     std::string yakName = "E" + mDialogueLicensePlate;
     if(mDialogueSequenceNumber < 10)
     {
-        yakName += ('0' + mDialogueSequenceNumber);
+        yakName += ('0' + static_cast<char>(mDialogueSequenceNumber));
     }
     else
     {
-        yakName += ('A' + (mDialogueSequenceNumber - 10));
+        yakName += ('A' + static_cast<char>(mDialogueSequenceNumber - 10));
     }
 
     // Increment sequence number.
     mDialogueSequenceNumber++;
 
 	// Load the YAK! If we can't find it for some reason, output an error and move on right away.
-	Animation* yak = Services::GetAssets()->LoadYak(yakName, AssetScope::Scene);
+	Animation* yak = gAssetManager.LoadYak(yakName, AssetScope::Scene);
 	if(yak == nullptr)
 	{
 		std::cout << "Could not find YAK called " << yakName << ". Skipping to next dialogue line." << std::endl;

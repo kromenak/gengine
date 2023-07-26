@@ -22,13 +22,13 @@ public:
     bool OK() const { return mStream->good(); }
 
     // Position
-    void Seek(int32_t position);
-    void Skip(int32_t count);
-    int32_t GetPosition() const { return static_cast<int32_t>(mStream->tellg()); }
+    void Seek(uint32_t position);
+    void Skip(uint32_t count);
+    uint32_t GetPosition() const;
 
     // Read arbitrary char data
-    int32_t Read(char* buffer, uint32_t size);
-    int32_t Read(unsigned char* buffer, uint32_t size);
+    uint32_t Read(char* buffer, uint32_t size);
+    uint32_t Read(unsigned char* buffer, uint32_t size);
 
     // Read numeric types
     uint8_t ReadByte();
@@ -46,27 +46,19 @@ public:
     float ReadFloat();
     double ReadDouble();
 
-    // Read strings of known size
+    // Read strings of fixed maximum size.
     std::string ReadString(uint32_t size);
     void ReadString(uint32_t size, std::string& str);
-    void ReadString(uint64_t size, std::string& str);
 
-    // Read strings w/ size encoded as 8/16/32/64-bit value
-    std::string ReadTinyString();
-    void ReadTinyString(std::string& str);
+    // Read strings w/ size encoded as 8/16/32-bit values
+    std::string ReadString8();
+    void ReadString8(std::string& str);
 
-    std::string ReadShortString();
-    void ReadShortString(std::string& str);
+    std::string ReadString16();
+    void ReadString16(std::string& str);
 
-    std::string ReadMedString();
-    void ReadMedString(std::string& str);
-
-    std::string ReadLongString();
-    void ReadLongString(std::string& str);
-
-    // Read string from fixed-size buffer.
-    std::string ReadStringBuffer(uint32_t bufferSize);
-    void ReadStringBuffer(uint32_t bufferSize, std::string& str);
+    std::string ReadString32();
+    void ReadString32(std::string& str);
 
     // For convenience - reading in some more commonly encountered complex types.
     Vector2 ReadVector2();

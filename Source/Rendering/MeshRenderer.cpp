@@ -3,23 +3,24 @@
 #include <cassert>
 
 #include "Actor.h"
+#include "AssetManager.h"
 #include "Collisions.h"
 #include "Debug.h"
 #include "Model.h"
 #include "Ray.h"
-#include "Services.h"
+#include "Renderer.h"
 #include "Texture.h"
 
 TYPE_DEF_CHILD(Component, MeshRenderer);
 
 MeshRenderer::MeshRenderer(Actor* owner) : Component(owner)
 {
-    Services::GetRenderer()->AddMeshRenderer(this);
+    gRenderer.AddMeshRenderer(this);
 }
 
 MeshRenderer::~MeshRenderer()
 {
-    Services::GetRenderer()->RemoveMeshRenderer(this);
+    gRenderer.RemoveMeshRenderer(this);
 }
 
 void MeshRenderer::Render(bool opaque, bool translucent)
@@ -38,14 +39,14 @@ void MeshRenderer::Render(bool opaque, bool translucent)
     // Iterate meshes and render each in turn.
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
-    for(int i = 0; i < mMeshes.size(); i++)
+    for(size_t i = 0; i < mMeshes.size(); i++)
     {
         // Mesh vertices are in "mesh space". Create matrix to convert to world space.
         Matrix4 meshToWorldMatrix = localToWorldMatrix * mMeshes[i]->GetMeshToLocalMatrix();
         
         // Iterate each submesh.
-        auto submeshes = mMeshes[i]->GetSubmeshes();
-        for(int j = 0; j < submeshes.size(); j++)
+        const std::vector<Submesh*>& submeshes = mMeshes[i]->GetSubmeshes();
+        for(size_t j = 0; j < submeshes.size(); j++)
         {
             // Some meshes can have quite a few submeshes, but it seems wasteful to store visible bits for ALL of them.
             // So, we'll assume if some mesh has a ton of submeshes, that only the first 64 can be invisible. Everything >64 is always visible.
@@ -157,7 +158,7 @@ void MeshRenderer::AddMesh(Mesh* mesh)
 		if(!submesh->GetTextureName().empty())
 		{
             // The scope here would depend on whether this MeshRenderer is scene-specific or persists between scenes.
-			Texture* tex = Services::GetAssets()->LoadSceneTexture(submesh->GetTextureName(), GetOwner()->IsDestroyOnLoad() ? AssetScope::Scene : AssetScope::Global);
+			Texture* tex = gAssetManager.LoadSceneTexture(submesh->GetTextureName(), GetOwner()->IsDestroyOnLoad() ? AssetScope::Scene : AssetScope::Global);
 			m.SetDiffuseTexture(tex);
 		}
         else
@@ -258,7 +259,7 @@ AABB MeshRenderer::GetAABB() const
 
     // Calculate AABB that contains all meshes in the mesh renderer.
     AABB toReturn;
-    for(int i = 0; i < mMeshes.size(); ++i)
+    for(size_t i = 0; i < mMeshes.size(); ++i)
     {
         Matrix4 meshToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix() * mMeshes[i]->GetMeshToLocalMatrix();
 

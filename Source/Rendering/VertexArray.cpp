@@ -166,7 +166,7 @@ void VertexArray::ChangeVertexData(VertexAttribute::Semantic semantic, void* dat
 
     // For tightly packed data, we can determine the "sub data" and update just a portion.
     int offset = 0;
-    for(int i = 0; i < mData.vertexDefinition.attributes.size(); ++i)
+    for(size_t i = 0; i < mData.vertexDefinition.attributes.size(); ++i)
     {
         VertexAttribute& attribute = mData.vertexDefinition.attributes[i];
 

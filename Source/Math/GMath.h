@@ -1,6 +1,4 @@
 //
-// GMath.h
-//
 // Clark Kromenaker
 //
 // General purpose math functions.

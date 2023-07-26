@@ -25,7 +25,8 @@ class Layer
 
 public:
     Layer(const std::string& name);
-    
+    virtual ~Layer() = default;
+
     const std::string& GetName() const { return mName; }
 
     void OverrideAudioState(bool override);
@@ -57,7 +58,6 @@ private:
 
 class LayerManager
 {
-    TYPE_DECL_BASE();
 public:
     LayerManager();
     
@@ -86,3 +86,5 @@ private:
     // The "global" layer - always exists at the bottom of the layer stack.
     Layer mGlobalLayer;
 };
+
+extern LayerManager gLayerManager;

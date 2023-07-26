@@ -7,14 +7,13 @@
 #include "GKObject.h"
 #include "IniParser.h"
 #include "Scene.h"
-#include "Services.h"
 
 int WaitNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
 {
     // Since a wait node does not actually have any audio, clear the provided sound handle to reflect this.
     outResults.soundHandle = PlayingSoundHandle();
     outResults.stopMethod = StopMethod::Immediate;
-    outResults.fadeOutTimeMs = 0.0f;
+    outResults.fadeOutTimeMs = 0;
 
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
@@ -38,7 +37,7 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
     if(randomCheck > random) { return 0; }
     
     // Definitely want to play the sound, if it exists.
-    Audio* audio = Services::GetAssets()->LoadAudio(soundName, soundtrack->GetScope());
+    Audio* audio = gAssetManager.LoadAudio(soundName, soundtrack->GetScope());
     if(audio == nullptr) { return 0; }
 
     // Create audio play params struct.
@@ -75,7 +74,7 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
     playParams.loopCount = loop ? -1 : 0;
 
     // Get the sound playing!
-    outResults.soundHandle = Services::GetAudio()->Play(playParams);
+    outResults.soundHandle = gAudioManager.Play(playParams);
     
     // Let the caller know the desired stop method, in case the soundtrack needs to stop while this node is playing.
     outResults.stopMethod = stopMethod;
@@ -225,7 +224,7 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "Loop"))
         {
-            node->loop = entry.GetValueAsInt();
+            node->loop = entry.GetValueAsInt() != 0;
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "FadeInMs"))
         {
@@ -258,15 +257,15 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "3D"))
         {
-            node->is3d = entry.GetValueAsInt();
+            node->is3d = entry.GetValueAsInt() != 0;
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "MinDist"))
         {
-            node->minDist = entry.GetValueAsInt();
+            node->minDist = entry.GetValueAsFloat();
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "MaxDist"))
         {
-            node->maxDist = entry.GetValueAsInt();
+            node->maxDist = entry.GetValueAsFloat();
         }
         else if(StringUtil::EqualsIgnoreCase(entry.key, "X"))
         {

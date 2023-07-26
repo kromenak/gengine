@@ -17,9 +17,8 @@ class Timeblock;
 
 class LocationManager
 {
-	TYPE_DECL_BASE();
 public:
-	LocationManager();
+    void Init();
 	
 	bool IsValidLocation(const std::string& locationCode) const;
 	void DumpLocations() const;
@@ -72,3 +71,5 @@ private:
 	// A mapping of actor to location. If not present, the actor is "offstage".
 	std::string_map_ci<std::string> mActorLocations;
 };
+
+extern LocationManager gLocationManager;

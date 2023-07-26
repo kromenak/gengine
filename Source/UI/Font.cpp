@@ -1,9 +1,9 @@
 #include "Font.h"
 
+#include "AssetManager.h"
 #include "Color32.h"
 #include "IniParser.h"
 #include "Material.h"
-#include "Services.h"
 #include "StringUtil.h"
 #include "Texture.h"
 
@@ -134,7 +134,7 @@ Shader* Font::GetShader() const
 {
 	if(mColorMode == ColorMode::ColorReplace)
 	{
-		return Services::GetAssets()->LoadShader("3D-Tex", "UI-Text-ColorReplace");
+		return gAssetManager.LoadShader("3D-Tex", "UI-Text-ColorReplace");
 	}
 	return Material::sDefaultShader;
 }
@@ -159,11 +159,11 @@ void Font::ParseFromData(char* data, int dataLength)
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "bitmap name"))
 			{
-				mFontTexture = Services::GetAssets()->LoadTexture(keyValue.value, GetScope());
+				mFontTexture = gAssetManager.LoadTexture(keyValue.value, GetScope());
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "alpha channel"))
 			{
-                alphaTexture = Services::GetAssets()->LoadTexture(keyValue.value, GetScope());
+                alphaTexture = gAssetManager.LoadTexture(keyValue.value, GetScope());
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "line count"))
 			{
@@ -234,7 +234,7 @@ void Font::ParseFromData(char* data, int dataLength)
 	// a font texture with the same name as the font itself.
 	if(mFontTexture == nullptr)
 	{
-		mFontTexture = Services::GetAssets()->LoadTexture(GetNameNoExtension(), GetScope());
+		mFontTexture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());
 	}
 
     // If we have an alpha channel apply it to the font texture.

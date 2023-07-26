@@ -1,8 +1,8 @@
 #include "SheepAPI_Inventory.h"
 
 #include "InventoryManager.h"
+#include "ReportManager.h"
 #include "Scene.h"
-#include "Services.h"
 #include "StringUtil.h"
 
 using namespace std;
@@ -11,20 +11,20 @@ shpvoid CombineInvItems(const std::string& firstItemName, const std::string& sec
 {
     // All three items must be valid.
     // Output error messages for ALL invalid items before early out.
-    bool firstItemValid = Services::Get<InventoryManager>()->IsValidInventoryItem(firstItemName);
-    bool secondItemValid = Services::Get<InventoryManager>()->IsValidInventoryItem(secondItemName);
-    bool combinedItemValid = Services::Get<InventoryManager>()->IsValidInventoryItem(combinedItemName);
+    bool firstItemValid = gInventoryManager.IsValidInventoryItem(firstItemName);
+    bool secondItemValid = gInventoryManager.IsValidInventoryItem(secondItemName);
+    bool combinedItemValid = gInventoryManager.IsValidInventoryItem(combinedItemName);
     if(!firstItemValid)
     {
-        Services::GetReports()->Log("Error", "'" + firstItemName + "' is not a valid inventory item name.");
+        gReportManager.Log("Error", "'" + firstItemName + "' is not a valid inventory item name.");
     }
     if(!secondItemValid)
     {
-        Services::GetReports()->Log("Error", "'" + secondItemName + "' is not a valid inventory item name.");
+        gReportManager.Log("Error", "'" + secondItemName + "' is not a valid inventory item name.");
     }
     if(!combinedItemValid)
     {
-        Services::GetReports()->Log("Error", "'" + combinedItemName + "' is not a valid inventory item name.");
+        gReportManager.Log("Error", "'" + combinedItemName + "' is not a valid inventory item name.");
     }
     if(!firstItemValid || !secondItemValid || !combinedItemValid)
     {
@@ -34,12 +34,12 @@ shpvoid CombineInvItems(const std::string& firstItemName, const std::string& sec
     // This function doesn't actually check whether you HAVE any of the items involved in the combining or output.
     // It simply removes the first two (whether they exist or not) and adds the combined (whether you already have it or not).
     const std::string& egoName = Scene::GetEgoName();
-    Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, firstItemName);
-    Services::Get<InventoryManager>()->RemoveInventoryItem(egoName, secondItemName);
-    Services::Get<InventoryManager>()->AddInventoryItem(egoName, combinedItemName);
+    gInventoryManager.RemoveInventoryItem(egoName, firstItemName);
+    gInventoryManager.RemoveInventoryItem(egoName, secondItemName);
+    gInventoryManager.AddInventoryItem(egoName, combinedItemName);
 
     // The newly added item becomes the active inventory item.
-    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, combinedItemName);
+    gInventoryManager.SetActiveInventoryItem(egoName, combinedItemName);
     return 0;
 }
 RegFunc3(CombineInvItems, void, string, string, string, IMMEDIATE, REL_FUNC);
@@ -48,9 +48,9 @@ shpvoid SetInvItemStatus(const std::string& itemName, const std::string& status)
 {
     // The item name must be valid.
     bool argumentError = false;
-    if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
+    if(!gInventoryManager.IsValidInventoryItem(itemName))
     {
-        Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
+        gReportManager.Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
         argumentError = true;
     }
 
@@ -69,7 +69,7 @@ shpvoid SetInvItemStatus(const std::string& itemName, const std::string& status)
     }
     if(!validStatus)
     {
-        Services::GetReports()->Log("Error", "Error: '" + status + "' is not a valid inventory status.");
+        gReportManager.Log("Error", "Error: '" + status + "' is not a valid inventory status.");
         argumentError = true;
     }
 
@@ -89,25 +89,25 @@ shpvoid SetInvItemStatus(const std::string& itemName, const std::string& status)
         // NotPlaced = not in the game = make sure neither ego has it.
         // Placed = placed in the game, but not in anyone's inventory = make sure neither ego has it.
         // Used = item is used and no longer available = make sure neither ego has it.
-        Services::Get<InventoryManager>()->RemoveInventoryItem("Gabriel", itemName);
-        Services::Get<InventoryManager>()->RemoveInventoryItem("Grace", itemName);
+        gInventoryManager.RemoveInventoryItem("Gabriel", itemName);
+        gInventoryManager.RemoveInventoryItem("Grace", itemName);
     }
     else if(StringUtil::EqualsIgnoreCase(status, "GraceHas"))
     {
         // Grace has, but also implies that Gabriel DOES NOT have!
-        Services::Get<InventoryManager>()->AddInventoryItem("Grace", itemName);
-        Services::Get<InventoryManager>()->RemoveInventoryItem("Gabriel", itemName);
+        gInventoryManager.AddInventoryItem("Grace", itemName);
+        gInventoryManager.RemoveInventoryItem("Gabriel", itemName);
     }
     else if(StringUtil::EqualsIgnoreCase(status, "GabeHas"))
     {
         // Gabe has, but also implies that Grace DOES NOT have!
-        Services::Get<InventoryManager>()->AddInventoryItem("Gabriel", itemName);
-        Services::Get<InventoryManager>()->RemoveInventoryItem("Grace", itemName);
+        gInventoryManager.AddInventoryItem("Gabriel", itemName);
+        gInventoryManager.RemoveInventoryItem("Grace", itemName);
     }
     else if(StringUtil::EqualsIgnoreCase(status, "BothHave"))
     {
-        Services::Get<InventoryManager>()->AddInventoryItem("Gabriel", itemName);
-        Services::Get<InventoryManager>()->AddInventoryItem("Grace", itemName);
+        gInventoryManager.AddInventoryItem("Gabriel", itemName);
+        gInventoryManager.AddInventoryItem("Grace", itemName);
     }
     return 0;
 }
@@ -116,7 +116,7 @@ RegFunc2(SetInvItemStatus, void, string, string, IMMEDIATE, REL_FUNC);
 int DoesGabeHaveInvItem(const std::string& itemName)
 {
     // This function does work with invalid inventory item names.
-    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem("Gabriel", itemName);
+    bool hasItem = gInventoryManager.HasInventoryItem("Gabriel", itemName);
     return hasItem ? 1 : 0;
 }
 RegFunc1(DoesGabeHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
@@ -124,7 +124,7 @@ RegFunc1(DoesGabeHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
 int DoesGraceHaveInvItem(const std::string& itemName)
 {
     // This function does work with invalid inventory item names.
-    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem("Grace", itemName);
+    bool hasItem = gInventoryManager.HasInventoryItem("Grace", itemName);
     return hasItem ? 1 : 0;
 }
 RegFunc1(DoesGraceHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
@@ -132,18 +132,18 @@ RegFunc1(DoesGraceHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
 shpvoid EgoTakeInvItem(const std::string& itemName)
 {
     // It must be a valid inventory item.
-    if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
+    if(!gInventoryManager.IsValidInventoryItem(itemName))
     {
-        Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
+        gReportManager.Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
         return 0;
     }
 
     // Add to inventory of Ego.
     const std::string& egoName = Scene::GetEgoName();
-    Services::Get<InventoryManager>()->AddInventoryItem(egoName, itemName);
+    gInventoryManager.AddInventoryItem(egoName, itemName);
 
     // This also makes the item active.
-    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, itemName);
+    gInventoryManager.SetActiveInventoryItem(egoName, itemName);
     return 0;
 }
 RegFunc1(EgoTakeInvItem, void, string, IMMEDIATE, REL_FUNC);
@@ -151,21 +151,21 @@ RegFunc1(EgoTakeInvItem, void, string, IMMEDIATE, REL_FUNC);
 int DoesEgoHaveInvItem(const std::string& itemName)
 {
     // This function does work with invalid inventory item names.
-    bool hasItem = Services::Get<InventoryManager>()->HasInventoryItem(Scene::GetEgoName(), itemName);
+    bool hasItem = gInventoryManager.HasInventoryItem(Scene::GetEgoName(), itemName);
     return hasItem ? 1 : 0;
 }
 RegFunc1(DoesEgoHaveInvItem, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DumpEgoActiveInvItem()
 {
-    std::string activeItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(Scene::GetEgoName());
+    std::string activeItem = gInventoryManager.GetActiveInventoryItem(Scene::GetEgoName());
     if(activeItem.empty())
     {
-        Services::GetReports()->Log("Dump", "Ego active inventory item is 'NONE'.");
+        gReportManager.Log("Dump", "Ego active inventory item is 'NONE'.");
     }
     else
     {
-        Services::GetReports()->Log("Dump", "Ego active inventory item is '" + activeItem + "'.");
+        gReportManager.Log("Dump", "Ego active inventory item is '" + activeItem + "'.");
     }
     return 0;
 }
@@ -174,28 +174,28 @@ RegFunc0(DumpEgoActiveInvItem, void, IMMEDIATE, DEV_FUNC);
 shpvoid SetEgoActiveInvItem(const std::string& itemName)
 {
     // It must be a valid inventory item.
-    if(!Services::Get<InventoryManager>()->IsValidInventoryItem(itemName))
+    if(!gInventoryManager.IsValidInventoryItem(itemName))
     {
-        Services::GetReports()->Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
+        gReportManager.Log("Error", "Error: '" + itemName + "' is not a valid inventory item name.");
         return 0;
     }
 
     // If the item we are setting active is not in our inventory, output a warning (but let it go anyway).
     const std::string& egoName = Scene::GetEgoName();
-    if(!Services::Get<InventoryManager>()->HasInventoryItem(egoName, itemName))
+    if(!gInventoryManager.HasInventoryItem(egoName, itemName))
     {
-        Services::GetReports()->Log("Warning", egoName + " does not have " + itemName + ".");
+        gReportManager.Log("Warning", egoName + " does not have " + itemName + ".");
     }
 
     // Set the inventory item!
-    Services::Get<InventoryManager>()->SetActiveInventoryItem(egoName, itemName);
+    gInventoryManager.SetActiveInventoryItem(egoName, itemName);
     return 0;
 }
 RegFunc1(SetEgoActiveInvItem, void, string, IMMEDIATE, REL_FUNC);
 
 int IsActiveInvItem(const std::string& itemName)
 {
-    std::string activeItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(Scene::GetEgoName());
+    std::string activeItem = gInventoryManager.GetActiveInventoryItem(Scene::GetEgoName());
     if(StringUtil::EqualsIgnoreCase(activeItem, itemName))
     {
         return 1;
@@ -209,28 +209,28 @@ RegFunc1(IsActiveInvItem, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowInventory()
 {
-    Services::Get<InventoryManager>()->ShowInventory();
+    gInventoryManager.ShowInventory();
     return 0;
 }
 RegFunc0(ShowInventory, void, IMMEDIATE, REL_FUNC);
 
 shpvoid HideInventory()
 {
-    Services::Get<InventoryManager>()->HideInventory();
+    gInventoryManager.HideInventory();
     return 0;
 }
 RegFunc0(HideInventory, void, IMMEDIATE, REL_FUNC);
 
 shpvoid InventoryInspect(const std::string& itemName)
 {
-    Services::Get<InventoryManager>()->InventoryInspect(itemName);
+    gInventoryManager.InventoryInspect(itemName);
     return 0;
 }
 RegFunc1(InventoryInspect, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid InventoryUninspect()
 {
-    Services::Get<InventoryManager>()->InventoryUninspect();
+    gInventoryManager.InventoryUninspect();
     return 0;
 }
 RegFunc0(InventoryUninspect, void, IMMEDIATE, REL_FUNC);
@@ -238,8 +238,8 @@ RegFunc0(InventoryUninspect, void, IMMEDIATE, REL_FUNC);
 int IsTopLayerInventory()
 {
     // This returns true if top layer is inventory OR inventory inspect screens.
-    bool anyShowing = Services::Get<InventoryManager>()->IsInventoryShowing() ||
-        Services::Get<InventoryManager>()->IsInventoryInspectShowing();
+    bool anyShowing = gInventoryManager.IsInventoryShowing() ||
+        gInventoryManager.IsInventoryInspectShowing();
     return anyShowing ? 1 : 0;
 }
 RegFunc0(IsTopLayerInventory, int, IMMEDIATE, REL_FUNC);

@@ -1,10 +1,11 @@
 #include "UIButton.h"
 
 #include "Actor.h"
+#include "AudioManager.h"
 #include "Camera.h"
+#include "CursorManager.h"
 #include "Debug.h"
 #include "Mesh.h"
-#include "Services.h"
 #include "RectTransform.h"
 #include "Texture.h"
 
@@ -84,24 +85,24 @@ void UIButton::OnPointerEnter()
         const Color32* color = mMaterial.GetColor("uColor");
         if(mMaterial.GetDiffuseTexture() != nullptr && color != nullptr && color->GetA() > 0)
         {
-            Services::Get<CursorManager>()->UseHighlightCursor();
+            gCursorManager.UseHighlightCursor();
         }
         else
         {
-            Services::Get<CursorManager>()->UseDefaultCursor();
+            gCursorManager.UseDefaultCursor();
         }
 
         // Play hover sound, if set.
         if(mHoverSound != nullptr)
         {
-            Services::GetAudio()->PlaySFX(mHoverSound);
+            gAudioManager.PlaySFX(mHoverSound);
         }
     }
 }
 
 void UIButton::OnPointerExit()
 {
-    Services::Get<CursorManager>()->UseDefaultCursor();
+    gCursorManager.UseDefaultCursor();
 	mPointerOver = false;
 }
 
@@ -146,7 +147,7 @@ void UIButton::UpdateMaterial()
 {
     // If marked as pointer down, but pointer was released, clear that flag.
     // This can happen if mouse is pressed down on this widget, but released outside of the widget.
-    if(mPointerDown && !Services::GetInput()->IsMouseButtonPressed(InputManager::MouseButton::Left))
+    if(mPointerDown && !gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Left))
     {
         mPointerDown = false;
 

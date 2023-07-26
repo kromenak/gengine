@@ -1,6 +1,8 @@
 #include "SidneySearch.h"
 
 #include "Actor.h"
+#include "AssetManager.h"
+#include "AudioManager.h"
 #include "GameProgress.h"
 #include "IniParser.h"
 #include "SidneyUtil.h"
@@ -35,7 +37,7 @@ UIButton* CreateBasicTextButton(Actor* parent, const Vector2& pos, const std::st
     UILabel* buttonLabel = actor->AddComponent<UILabel>();
 
     // Font and alignment are constant for now.
-    buttonLabel->SetFont(Services::GetAssets()->LoadFont("SID_PDN_10_L.FON"));
+    buttonLabel->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
     buttonLabel->SetText(text);
     buttonLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
     buttonLabel->SetVerticalAlignment(VerticalAlignment::Bottom);
@@ -48,7 +50,7 @@ void SidneySearch::Init(Actor* parent)
     mRoot = new Actor(TransformType::RectTransform);
     mRoot->GetTransform()->SetParent(parent->GetTransform());
     UIImage* backgroundImage = mRoot->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_BKGND.BMP"), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture("S_BKGND.BMP"), true);
 
     // Receive input to avoid sending inputs to main screen below this screen.
     backgroundImage->SetReceivesInput(true);
@@ -69,13 +71,13 @@ void SidneySearch::Init(Actor* parent)
         mainMenuButton->SetUpTexture(&Texture::Black);
 
         mainMenuButton->SetPressCallback([&](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDEXIT.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDEXIT.WAV"));
             Hide();
         });
 
         // Add exit button text.
         UILabel* mainMenuLabel = mainMenuButtonActor->AddComponent<UILabel>();
-        mainMenuLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_18.FON"));
+        mainMenuLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
         mainMenuLabel->SetText("MAIN MENU");
         mainMenuLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mainMenuLabel->SetVerticalAlignment(VerticalAlignment::Center);
@@ -120,7 +122,7 @@ void SidneySearch::Init(Actor* parent)
         searchInputImage->GetRectTransform()->SetSizeDelta(320.0f, 15.0f);
 
         mTextInput = searchInputActor->AddComponent<UITextInput>();
-        mTextInput->SetFont(Services::GetAssets()->LoadFont("F_TIMES.FON"));
+        mTextInput->SetFont(gAssetManager.LoadFont("F_TIMES.FON"));
         mTextInput->SetVerticalAlignment(VerticalAlignment::Bottom);
         mTextInput->SetText("");
 
@@ -184,13 +186,13 @@ void SidneySearch::Init(Actor* parent)
         //TODO: So there is a big undertaking here to implement a whole HTML parsing system.
         //TODO: For the moment though, I'll just use a label to display a simple result output.
         mTempResultsLabel = resultsBackgroundActor->AddComponent<UILabel>();
-        mTempResultsLabel->SetFont(Services::GetAssets()->LoadFont("F_TIMES.FON"));
+        mTempResultsLabel->SetFont(gAssetManager.LoadFont("F_TIMES.FON"));
         mTempResultsLabel->SetHorizonalAlignment(HorizontalAlignment::Left);
         mTempResultsLabel->SetVerticalAlignment(VerticalAlignment::Top);
     }
 
     // Read in all the search terms and correlated pages.
-    TextAsset* textFile = Services::GetAssets()->LoadText("SIDSEARCH.TXT");
+    TextAsset* textFile = gAssetManager.LoadText("SIDSEARCH.TXT");
     IniParser parser(textFile->GetText(), textFile->GetTextLength());
     parser.SetMultipleKeyValuePairsPerLine(false);
 
@@ -232,7 +234,7 @@ void SidneySearch::OnUpdate(float deltaTime)
     if(!mRoot->IsActive()) { return; }
 
     // If enter is pressed, act like a search was done.
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
     {
         OnSearchButtonPressed(nullptr);
     }
@@ -249,8 +251,8 @@ void SidneySearch::OnSearchButtonPressed(UIButton* button)
         //TODO: Figure out how to make this data-driven!
         if(StringUtil::EqualsIgnoreCase(it->second, "Vampire.html"))
         {
-            Services::Get<GameProgress>()->ChangeScore("e_sidney_search_vampires");
-            Services::Get<GameProgress>()->SetFlag("Vampire");
+            gGameProgress.ChangeScore("e_sidney_search_vampires");
+            gGameProgress.SetFlag("Vampire");
         }
     }
     else

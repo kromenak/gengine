@@ -2,8 +2,8 @@
 
 #include <iostream>
 
+#include "AssetManager.h"
 #include "IniParser.h"
-#include "Services.h"
 #include "Skybox.h"
 #include "StringUtil.h"
 
@@ -47,32 +47,32 @@ void SceneAsset::ParseFromData(char *data, int dataLength)
                 IniKeyValue& entry = line.entries.front();
                 if(StringUtil::EqualsIgnoreCase(entry.key, "left"))
                 {
-                    Texture* texture = Services::GetAssets()->LoadSceneTexture(entry.value, GetScope());
+                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     mSkybox->SetLeftTexture(texture);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "right"))
                 {
-                    Texture* texture = Services::GetAssets()->LoadSceneTexture(entry.value, GetScope());
+                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     mSkybox->SetRightTexture(texture);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "front"))
                 {
-                    Texture* texture = Services::GetAssets()->LoadSceneTexture(entry.value, GetScope());
+                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     mSkybox->SetFrontTexture(texture);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "back"))
                 {
-                    Texture* texture = Services::GetAssets()->LoadSceneTexture(entry.value, GetScope());
+                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     mSkybox->SetBackTexture(texture);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "up"))
                 {
-                    Texture* texture = Services::GetAssets()->LoadSceneTexture(entry.value, GetScope());
+                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     mSkybox->SetUpTexture(texture);
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.key, "down"))
                 {
-                    Texture* texture = Services::GetAssets()->LoadSceneTexture(entry.value, GetScope());
+                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     mSkybox->SetDownTexture(texture);
                 }
             }

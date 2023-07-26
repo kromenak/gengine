@@ -5,7 +5,6 @@
 #include "LaserHead.h"
 #include "LocationManager.h"
 #include "Scene.h"
-#include "Services.h"
 #include "SoundtrackPlayer.h"
 
 std::string_map_ci<std::function<void()>> SceneFunctions::sSceneFunctions;
@@ -80,7 +79,7 @@ void SceneFunctions::Execute(const std::string& functionName)
     }
 
     // Get current location.
-    const std::string& location = Services::Get<LocationManager>()->GetLocation();
+    const std::string& location = gLocationManager.GetLocation();
 
     // Generate a function key and see if it exists in the map.
     std::string key = location + "-" + functionName;

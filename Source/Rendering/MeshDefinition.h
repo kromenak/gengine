@@ -53,7 +53,7 @@ struct MeshDefinition
     void AddVertexAttribute(const VertexAttribute& attribute);
     template<typename T> void SetVertexData(T* data);
     
-    void SetIndexData(unsigned int indexCount, unsigned short* indexData);
+    void SetIndexData(unsigned int count, unsigned short* data);
 
     template<typename T> T* GetVertexData(const VertexAttribute& attribute) const;
 };
@@ -85,7 +85,7 @@ void MeshDefinition::SetVertexData(T* data)
 template<typename T>
 T* MeshDefinition::GetVertexData(const VertexAttribute& attribute) const
 {
-    for(int i = 0; i < vertexDefinition.attributes.size(); i++)
+    for(size_t i = 0; i < vertexDefinition.attributes.size(); i++)
     {
         if(vertexDefinition.attributes[i] == attribute)
         {

@@ -1,5 +1,7 @@
 #include "SidneyAddData.h"
 
+#include "ActionManager.h"
+#include "AssetManager.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
 #include "Random.h"
@@ -32,8 +34,8 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
         innerBoxImage->SetColor(Color32(0, 0, 0, 180));  // Darker Black Semi-Transparent
         innerBoxImage->GetRectTransform()->SetSizeDelta(220.0f, 17.0f);
 
-        mGreenFont = Services::GetAssets()->LoadFont("SID_TEXT_14_GRN.FON");
-        mYellowFont = Services::GetAssets()->LoadFont("SID_TEXT_14.FON");
+        mGreenFont = gAssetManager.LoadFont("SID_TEXT_14_GRN.FON");
+        mYellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
 
         mAddDataLabel = innerBoxActor->AddComponent<UILabel>();
         mAddDataLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
@@ -57,7 +59,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
             staticTextActor->GetTransform()->SetParent(mInputCompleteBox->GetTransform());
 
             UILabel* staticTextLabel = staticTextActor->AddComponent<UILabel>();
-            staticTextLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_14.FON"));
+            staticTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
             staticTextLabel->SetText("** INPUT COMPLETE **");
             staticTextLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
@@ -71,7 +73,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
             staticTextActor->GetTransform()->SetParent(mInputCompleteBox->GetTransform());
 
             UILabel* staticTextLabel = staticTextActor->AddComponent<UILabel>();
-            staticTextLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_14.FON"));
+            staticTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
             staticTextLabel->SetText("FILE NAME:");
             staticTextLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
@@ -85,7 +87,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
             fileNameActor->GetTransform()->SetParent(mInputCompleteBox->GetTransform());
 
             mFileNameLabel = fileNameActor->AddComponent<UILabel>();
-            mFileNameLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_14.FON"));
+            mFileNameLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
             mFileNameLabel->SetText(" ");
             mFileNameLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
@@ -108,10 +110,10 @@ void SidneyAddData::Start()
 {
     // If you try to use this button before 210A, Grace says she has nothing to scan.
     // After that, the player gets to decide.
-    const Timeblock& timeblock = Services::Get<GameProgress>()->GetTimeblock();
+    const Timeblock& timeblock = gGameProgress.GetTimeblock();
     if(timeblock == Timeblock(2, 7))
     {
-        Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"0264G2ZPF1\", 2)");
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"0264G2ZPF1\", 2)");
     }
     else
     {
@@ -124,15 +126,15 @@ void SidneyAddData::Start()
         mAddDataColorTimer = -1.0f;
 
         // This puts the player in a non-interactive state for a moment (so they can read the text box) and then shows the inventory.
-        Services::Get<ActionManager>()->ExecuteSheepAction("wait SetTimerSeconds(2); ShowInventory();", [this](const Action* action){
+        gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2); ShowInventory();", [this](const Action* action){
             mAddDataBox->SetActive(false);
             mAddingData = true;
 
             // This is required for the Inventory NVC to know that scanning items is allowed.
-            Services::Get<GameProgress>()->SetFlag("UsingScanner");
+            gGameProgress.SetFlag("UsingScanner");
 
             // Clear scanner variable. Inventory code will set this if we've successfully scanned any item.
-            Services::Get<GameProgress>()->SetGameVariable("SidScanner", 0);
+            gGameProgress.SetGameVariable("SidScanner", 0);
         });
     }
 }
@@ -143,14 +145,14 @@ void SidneyAddData::OnUpdate(float deltaTime)
     if(mAddingData)
     {
         // Wait for player to close inventory.
-        if(!Services::Get<InventoryManager>()->IsInventoryShowing() && !Services::Get<ActionManager>()->IsActionPlaying())
+        if(!gInventoryManager.IsInventoryShowing() && !gActionManager.IsActionPlaying())
         {
             // Clear "using scanner" flag.
-            Services::Get<GameProgress>()->ClearFlag("UsingScanner");
+            gGameProgress.ClearFlag("UsingScanner");
             mAddingData = false;
 
             // Determine whether something was successfully scanned into Sidney.
-            int sidneyFileIndex = Services::Get<GameProgress>()->GetGameVariable("SidScanner") - 1;
+            int sidneyFileIndex = gGameProgress.GetGameVariable("SidScanner") - 1;
             if(sidneyFileIndex < 0 || sidneyFileIndex > mSidneyFiles->GetMaxFileIndex())
             {
                 // CASE 1: No valid object was selected to scan.
@@ -163,7 +165,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 mAddDataColorTimer = -1.0f;
                 
                 // This puts the player in a non-interactive state for a moment (so they can read the text box) and then puts them back on the main screen.
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait SetTimerSeconds(2);", [this](const Action* action){
+                gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2);", [this](const Action* action){
                     mAddDataBox->SetActive(false);
                 });
             }
@@ -173,11 +175,11 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 // Ego says "I already scanned it!"
                 if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
                 {
-                    Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O4G2K6R1\", 1)");
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O4G2K6R1\", 1)");
                 }
                 else
                 {
-                    Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O4G716R1\", 1)");
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O4G716R1\", 1)");
                 }
             }
             else 
@@ -185,7 +187,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 // CASE 3: Valid object selected, not scanned yet.
                 // Show box (and SFX) indicating we are scanning an item.
                 mAddDataBox->SetActive(true);
-                Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDSCAN.WAV"));
+                gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDSCAN.WAV"));
 
                 // Start with green text, but it will blink on an interval.
                 mAddDataLabel->SetText("** SCANNING ITEM **"); //TODO: Should blink Green/Gold.
@@ -193,10 +195,10 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 mAddDataColorTimer = kAddDataColorToggleInterval;
                 
                 // This puts the player in a non-interactive state for a moment (so they can read the text box and hear SFX).
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait SetTimerSeconds(2);", [this, sidneyFileIndex](const Action* action){
+                gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2);", [this, sidneyFileIndex](const Action* action){
 
                     // Add the desired file to Sidney.
-                    mSidneyFiles->AddFile(sidneyFileIndex);
+                    mSidneyFiles->AddFile(static_cast<size_t>(sidneyFileIndex));
 
                     // Hide "Add Data" box and show "Input Complete" box.
                     mAddDataBox->SetActive(false);
@@ -263,13 +265,13 @@ void SidneyAddData::OnUpdate(float deltaTime)
 
                     // Play random "key press" SFX from set of sounds.
                     int index = Random::Range(1, 5);
-                    Audio* audio = Services::GetAssets()->LoadAudio("COMPKEYSIN" + std::to_string(index));
-                    Services::GetAudio()->PlaySFX(audio);
+                    Audio* audio = gAssetManager.LoadAudio("COMPKEYSIN" + std::to_string(index));
+                    gAudioManager.PlaySFX(audio);
                 }
                 else
                 {
                     // We typed everything AND showed the OK button being pressed. Close this box!
-                    Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDBUTTON5"));
+                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTTON5"));
                     mInputCompleteBox->SetActive(false);
                 }
             }

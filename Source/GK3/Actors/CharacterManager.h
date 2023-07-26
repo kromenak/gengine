@@ -133,10 +133,9 @@ struct CharacterConfig
 
 class CharacterManager
 {
-	TYPE_DECL_BASE();
 public:
-	CharacterManager();
-	
+    void Init();
+
 	CharacterConfig& GetCharacterConfig(const std::string& identifier);
 	
 	bool IsValidName(const std::string& name);
@@ -158,3 +157,5 @@ private:
 	// A default character config, in case you request one that doesn't exist.
 	CharacterConfig mDefaultCharacterConfig;
 };
+
+extern CharacterManager gCharacterManager;

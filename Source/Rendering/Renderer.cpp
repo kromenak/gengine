@@ -7,9 +7,11 @@
 #include <vector>
 
 #include "Actor.h"
+#include "AssetManager.h"
 #include "BSP.h"
 #include "Debug.h"
 #include "Camera.h"
+#include "GEngine.h"
 #include "Matrix4.h"
 #include "MeshRenderer.h"
 #include "Model.h"
@@ -84,6 +86,8 @@ float ui_quad_uvs[] = {
 };
 Mesh* uiQuad = nullptr;
 
+Renderer gRenderer;
+
 bool Renderer::Initialize()
 {
     TIMER_SCOPED("Renderer::Initialize");
@@ -151,7 +155,7 @@ bool Renderer::Initialize()
     glFrontFace(GL_CW);
 	
     // Load default shader.
-	Shader* defaultShader = Services::GetAssets()->LoadShader("3D-Tex");
+	Shader* defaultShader = gAssetManager.LoadShader("3D-Tex");
 	if(defaultShader == nullptr) { return false; }
 	Material::sDefaultShader = defaultShader;
 
@@ -166,9 +170,9 @@ bool Renderer::Initialize()
     for(auto& shader : shaders)
     {
         //printf("Load %s\n", shader.c_str());
-        Services::GetAssets()->LoadShader(shader);
+        gAssetManager.LoadShader(shader);
     }
-    Services::GetAssets()->LoadShader("3D-Tex", "UI-Text-ColorReplace");
+    gAssetManager.LoadShader("3D-Tex", "UI-Text-ColorReplace");
 
     // Create simple shapes (useful for debugging/visualization).
     // Line
@@ -358,9 +362,11 @@ void Renderer::Render()
     // Gotta reset view/proj again...
     Material::SetViewMatrix(viewMatrix);
     Material::SetProjMatrix(projectionMatrix);
-    
+
+    #if defined(_DEBUG)
     // Render an axis at the world origin.
     Debug::DrawAxes(Vector3::Zero);
+    #endif
     
     // Render debug elements.
     // Any debug commands from earlier are queued internally, and only drawn when this is called!
@@ -401,7 +407,7 @@ void Renderer::SetUseMipmaps(bool useMipmaps)
     gSaveManager.GetPrefs()->Set(PREFS_HARDWARE_RENDERER, PREFS_MIPMAPS, mUseMipmaps);
 
     // Dynamically update loaded textures to use mipmaps.
-    for(auto& entry : Services::GetAssets()->GetLoadedTextures())
+    for(auto& entry : gAssetManager.GetLoadedTextures())
     {
         // The trick is that this map has both UI and scene textures. And we only want to modify *scene* textures.
         // We can look at the current filtering setting as an indicator.
@@ -419,7 +425,7 @@ void Renderer::SetUseTrilinearFiltering(bool useTrilinearFiltering)
     gSaveManager.GetPrefs()->Set(PREFS_HARDWARE_RENDERER, PREFS_TRILINEAR_FILTERING, mUseTrilinearFiltering);
 
     // Dynamically update loaded textures to use trilinear filtering.
-    for(auto& entry : Services::GetAssets()->GetLoadedTextures())
+    for(auto& entry : gAssetManager.GetLoadedTextures())
     {
         // The trick is that this map has both UI and scene textures. And we only want to modify *scene* textures.
         // We can look at the current filtering setting as an indicator.

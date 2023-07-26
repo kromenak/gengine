@@ -1,7 +1,6 @@
 #include "UITextInput.h"
 
 #include "Actor.h"
-#include "Services.h"
 
 TYPE_DEF_CHILD(UILabel, UITextInput);
 
@@ -17,7 +16,7 @@ void UITextInput::Focus()
 	{
 		// Start capturing keyboard input with current input contents as starter value.
 		mTextInput.SetText(GetText());
-		Services::GetInput()->StartTextInput(&mTextInput);
+		gInputManager.StartTextInput(&mTextInput);
 		
 		// Reset caret blink info.
 		mCaretBlickTimer = mCaretBlinkInterval;
@@ -37,7 +36,7 @@ void UITextInput::Unfocus()
 	if(mFocused)
 	{
 		// Stop capturing keyboard input.
-		Services::GetInput()->StopTextInput();
+		gInputManager.StopTextInput();
 		
 		// Turn off any caret.
 		if(mCaret != nullptr)
@@ -60,9 +59,9 @@ void UITextInput::Clear()
 void UITextInput::OnUpdate(float deltaTime)
 {
 	// If mouse is down in the rect, let's assume that means we are focused.
-	if(Services::GetInput()->IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
+	if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
 	{
-		bool focus = GetRectTransform()->GetWorldRect().Contains(Services::GetInput()->GetMousePosition());
+		bool focus = GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition());
 		if(!mFocused && focus)
 		{
 			Focus();

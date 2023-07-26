@@ -1,6 +1,6 @@
 #include "FlagSet.h"
 
-#include "Services.h"
+#include "ReportManager.h"
 
 bool FlagSet::Get(const std::string& flag) const
 {
@@ -65,5 +65,5 @@ void FlagSet::Dump(const std::string& label) const
     {
         dump += StringUtil::Format("flag \"%s\" is true\n", entry.c_str());
     }
-    Services::GetReports()->Log("Dump", dump);
+    gReportManager.Log("Dump", dump);
 }

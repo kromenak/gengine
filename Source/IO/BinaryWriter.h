@@ -19,9 +19,9 @@ public:
     bool OK() const { return mStream->good(); }
 
     // Position
-    void Seek(int32_t position);
-    void Skip(int32_t count);
-    int32_t GetPosition() const { return static_cast<int32_t>(mStream->tellp()); }
+    void Seek(uint32_t position);
+    void Skip(uint32_t count);
+    uint32_t GetPosition() const;
 
     // Write arbitrary char data
     void Write(const char* buffer, uint32_t size);
@@ -43,17 +43,14 @@ public:
     void WriteFloat(float val);
     void WriteDouble(double val);
 
-    // Write string w/o size info (reader better know size ahead of time)
-    void WriteString(const std::string& str);
+    // Write string w/o size info (reader better know size ahead of time).
+    // If buffer size is specified, exactly that sized buffer will be written (with truncation or padding as needed).
+    void WriteString(const std::string& str, uint32_t bufferSize = 0);
 
-    // Write strings with size info encoded as 8/16/32/64-bit value
+    // Write strings with size info encoded as 8/16/32/64-bit value.
     void WriteTinyString(const std::string& str);
     void WriteShortString(const std::string& str);
     void WriteMedString(const std::string& str);
-    void WriteLongString(const std::string& str);
-
-    // Writes string to fixed-size buffer w/ null terminator
-    void WriteStringBuffer(const std::string& str, uint32_t bufferSize);
 
 private:
     // Stream we are writing to.

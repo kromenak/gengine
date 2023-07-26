@@ -30,7 +30,7 @@ Vector3 Triangle::GetNormal(bool clockwise, bool leftHand) const
     // If our points are counter-clockwise, we need to flip the normal.
     // If our coordinate system is right-handed, we need to flip the normal.
     // If both counter-clockwise and right-handed, we flip it twice...and get the original result :P.
-    return normal * (clockwise ? 1 : -1) * (leftHand ? 1 : -1);
+    return normal * (clockwise ? 1.0f : -1.0f) * (leftHand ? 1.0f : -1.0f);
 }
 
 Vector3 Triangle::GetCenter() const

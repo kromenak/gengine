@@ -50,18 +50,20 @@ namespace Window
 
                 // GetDisplayMode will contain dupes for different supported refresh rates.
                 // Only add one entry per resolution. Fortunately, the display modes are sorted so this works.
-                if(resolutions.empty() || (resolutions.back().width != mode.w || resolutions.back().height != mode.h))
+                uint32_t modeWidth = static_cast<uint32_t>(mode.w);
+                uint32_t modeHeight = static_cast<uint32_t>(mode.h);
+                if(resolutions.empty() || (resolutions.back().width != modeWidth || resolutions.back().height != modeHeight))
                 {
                     Resolution res;
-                    res.width = mode.w;
-                    res.height = mode.h;
+                    res.width = modeWidth;
+                    res.height = modeHeight;
                     resolutions.push_back(res);
                 }
             }
         }
     }
     
-    void DumpVideoInfo(SDL_Window* window)
+    void DumpVideoInfo(SDL_Window* dumpWindow)
     {
         // Output drivers.
         int driverCount = SDL_GetNumVideoDrivers();
@@ -99,7 +101,7 @@ namespace Window
         }
         
         // Output display that window is currently showing on.
-        SDL_Log("Current Display Index: %i\n", SDL_GetWindowDisplayIndex(window));
+        SDL_Log("Current Display Index: %i\n", SDL_GetWindowDisplayIndex(dumpWindow));
     }
 }
 

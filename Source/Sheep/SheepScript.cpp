@@ -121,7 +121,7 @@ void SheepScript::ParseFromData(char *data, int dataLength)
         reader.Seek(offset);
 
         std::string section;
-        reader.ReadStringBuffer(12, section);
+        reader.ReadString(12, section);
         if(section == "SysImports")
         {
             ParseSysImportsSection(reader);
@@ -169,7 +169,7 @@ void SheepScript::ParseSysImportsSection(BinaryReader& reader)
         
         // Read in name from length.
         // Length is always one more, due to null terminator.
-        reader.ReadShortString(import.name);
+        reader.ReadString16(import.name);
         reader.Skip(1); // skip null terminator, baked into data
         
         import.returnType = reader.ReadSByte();
@@ -235,7 +235,7 @@ void SheepScript::ParseVariablesSection(BinaryReader& reader)
         // Read in name from length.
         // Length is always one more, due to null terminator.
         std::string name;
-        reader.ReadShortString(name);
+        reader.ReadString16(name);
         reader.Skip(1); // skip null terminator, baked into data
         
         // Type is either int, float, or string.
@@ -281,7 +281,7 @@ void SheepScript::ParseFunctionsSection(BinaryReader& reader)
         // Read in name from length.
         // Length is always one more, due to null terminator.
         std::string name;
-        reader.ReadShortString(name);
+        reader.ReadString16(name);
         reader.Skip(1); // skip null terminator, baked into data
 		
 		// 2 bytes: unknown

@@ -1,5 +1,6 @@
 #include "CaptionsOverlay.h"
 
+#include "AssetManager.h"
 #include "Font.h"
 #include "IniParser.h"
 #include "SaveManager.h"
@@ -40,7 +41,7 @@ CaptionsOverlay::CaptionsOverlay() : Actor(TransformType::RectTransform)
     rectTransform->SetAnchorMax(Vector2::One);
 
     // Load font data.
-    TextAsset* fontColors = Services::GetAssets()->LoadText("FONTCOLOR.TXT", AssetScope::Manual);
+    TextAsset* fontColors = gAssetManager.LoadText("FONTCOLOR.TXT", AssetScope::Manual);
     {
         IniParser parser(fontColors->GetText(), fontColors->GetTextLength());
         parser.ParseAll();
@@ -52,11 +53,11 @@ CaptionsOverlay::CaptionsOverlay() : Actor(TransformType::RectTransform)
             {
                 if(StringUtil::EqualsIgnoreCase(entry.key, "NOTLISTED"))
                 {
-                    mDefaultFont = Services::GetAssets()->LoadFont("F_" + entry.value);
+                    mDefaultFont = gAssetManager.LoadFont("F_" + entry.value);
                 }
                 else
                 {
-                    mSpeakerToFont[entry.key] = Services::GetAssets()->LoadFont("F_" + entry.value);
+                    mSpeakerToFont[entry.key] = gAssetManager.LoadFont("F_" + entry.value);
                 }
             }
         }
@@ -156,7 +157,8 @@ void CaptionsOverlay::AddCaption(const std::string& captionText, const std::stri
     caption.label->SetText(captionText);
 
     // Set caption rect height based on font used and amount of text lines needed.
-    caption.backing->GetRectTransform()->SetSizeDeltaY(font->GetGlyphHeight() * caption.label->GetLineCount());
+    float height = static_cast<float>(font->GetGlyphHeight() * caption.label->GetLineCount());
+    caption.backing->GetRectTransform()->SetSizeDeltaY(height);
 
     // Add to active captions.
     mActiveCaptions.push_back(caption);

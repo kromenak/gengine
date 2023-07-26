@@ -102,10 +102,10 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, int frame)
     // Iterate through each mesh and sample it in the vertex animation.
     // We need to sample both vertex poses and transform poses to get the right result.
     const std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
-    for(int i = 0; i < meshes.size(); i++)
+    for(size_t i = 0; i < meshes.size(); i++)
     {
         const std::vector<Submesh*>& submeshes = meshes[i]->GetSubmeshes();
-        for(int j = 0; j < submeshes.size(); j++)
+        for(size_t j = 0; j < submeshes.size(); j++)
         {
             VertexAnimationVertexPose sample = animation->SampleVertexPose(frame, i, j);
             if(sample.frameNumber >= 0)
@@ -127,10 +127,10 @@ void VertexAnimator::TakeSample(VertexAnimation* animation, float time)
 	// Iterate through each mesh and sample it in the vertex animation.
 	// We need to sample both vertex poses and transform poses to get the right result.
 	const std::vector<Mesh*> meshes = mMeshRenderer->GetMeshes();
-	for(int i = 0; i < meshes.size(); i++)
+	for(size_t i = 0; i < meshes.size(); i++)
 	{
 		const std::vector<Submesh*>& submeshes = meshes[i]->GetSubmeshes();
-		for(int j = 0; j < submeshes.size(); j++)
+		for(size_t j = 0; j < submeshes.size(); j++)
 		{
 			VertexAnimationVertexPose sample = animation->SampleVertexPose(time, mCurrentParams.framesPerSecond, i, j);
 			if(sample.frameNumber >= 0)

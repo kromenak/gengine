@@ -164,8 +164,8 @@ void FreestyleAllocator::Reset()
     mFreeListHead->next = nullptr;
     
     // Reset stats.
-    size_t mAllocationCount = 0;
-    size_t mAllocatedSize = 0;
+    mAllocationCount = 0;
+    mAllocatedSize = 0;
 }
 
 size_t FreestyleAllocator::GetFreeBlockSize(int i)

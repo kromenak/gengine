@@ -1,9 +1,10 @@
 #include "StatusOverlay.h"
 
+#include "ActionManager.h"
+#include "AssetManager.h"
 #include "GameProgress.h"
 #include "Localizer.h"
 #include "LocationManager.h"
-#include "Services.h"
 #include "StringUtil.h"
 #include "UICanvas.h"
 #include "UILabel.h"
@@ -23,7 +24,7 @@ StatusOverlay::StatusOverlay() : Actor(TransformType::RectTransform)
     Actor* statusTextActor = new Actor(TransformType::RectTransform);
     statusTextActor->GetTransform()->SetParent(GetTransform());
     mStatusLabel = statusTextActor->AddComponent<UILabel>();
-    mStatusLabel->SetFont(Services::GetAssets()->LoadFont("F_STATUS_FADE"));
+    mStatusLabel->SetFont(gAssetManager.LoadFont("F_STATUS_FADE"));
     mStatusLabel->SetVerticalAlignment(VerticalAlignment::Top);
     
     // Status text is anchored to top of screen with pivot at top-center.
@@ -51,13 +52,13 @@ StatusOverlay::StatusOverlay() : Actor(TransformType::RectTransform)
 
 void StatusOverlay::Refresh()
 {
-    std::string locationName = Services::Get<LocationManager>()->GetLocationDisplayName();
-    std::string timeblockName = Services::Get<GameProgress>()->GetTimeblockDisplayName();
+    std::string locationName = gLocationManager.GetLocationDisplayName();
+    std::string timeblockName = gGameProgress.GetTimeblockDisplayName();
     
-    std::string scoreLoc = Services::Get<Localizer>()->GetText("ScoreText");
-    std::string scoreText = StringUtil::Format(scoreLoc,
-                                               Services::Get<GameProgress>()->GetScore(),
-                                               Services::Get<GameProgress>()->GetMaxScore());
+    std::string scoreLoc = gLocalizer.GetText("ScoreText");
+    std::string scoreText = StringUtil::Format(scoreLoc.c_str(),
+                                               gGameProgress.GetScore(),
+                                               gGameProgress.GetMaxScore());
     
     std::string statusText = StringUtil::Format("%s, %s, %s",
                                                 locationName.c_str(),
@@ -72,14 +73,14 @@ void StatusOverlay::Refresh()
 void StatusOverlay::OnUpdate(float deltaTime)
 {
     // Force show the status label if mouse is over it.
-    if(mStatusLabel->GetRectTransform()->GetWorldRect().Contains(Services::GetInput()->GetMousePosition()))
+    if(mStatusLabel->GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition()))
     {
         mShowTimer = kShowTime;
     }
 
     // Decrement timer for showing status overlay.
     // BUT don't decrement during action skip, so you can see the point change if you skipped an action.
-    if(mShowTimer > 0.0f && !Services::Get<ActionManager>()->IsSkippingCurrentAction())
+    if(mShowTimer > 0.0f && !gActionManager.IsSkippingCurrentAction())
     {
         mShowTimer -= deltaTime;
     }

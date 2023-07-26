@@ -3,9 +3,10 @@
 #include "ActionBar.h"
 #include "ActionManager.h"
 #include "GameProgress.h"
+#include "GEngine.h"
 #include "Random.h"
+#include "ReportManager.h"
 #include "Scene.h"
-#include "Services.h"
 #include "SheepManager.h"
 #include "Timers.h"
 #include "VerbManager.h"
@@ -14,34 +15,34 @@ using namespace std;
 
 int GetScore()
 {
-    return Services::Get<GameProgress>()->GetScore();
+    return gGameProgress.GetScore();
 }
 RegFunc0(GetScore, int, IMMEDIATE, REL_FUNC);
 
 shpvoid IncreaseScore(int value)
 {
-    Services::Get<GameProgress>()->IncreaseScore(value);
+    gGameProgress.IncreaseScore(value);
     return 0;
 }
 RegFunc1(IncreaseScore, void, int, IMMEDIATE, REL_FUNC);
 
 shpvoid SetScore(int score)
 {
-    Services::Get<GameProgress>()->SetScore(score);
+    gGameProgress.SetScore(score);
     return 0;
 }
 RegFunc1(SetScore, void, int, IMMEDIATE, DEV_FUNC);
 
 shpvoid ChangeScore(const std::string& scoreValue)
 {
-    Services::Get<GameProgress>()->ChangeScore(scoreValue);
+    gGameProgress.ChangeScore(scoreValue);
     return 0;
 }
 RegFunc1(ChangeScore, void, string, IMMEDIATE, REL_FUNC);
 
 int GetFlag(const std::string& flagName)
 {
-    return Services::Get<GameProgress>()->GetFlag(flagName);
+    return gGameProgress.GetFlag(flagName);
 }
 RegFunc1(GetFlag, int, string, IMMEDIATE, REL_FUNC);
 
@@ -59,62 +60,62 @@ RegFunc1(GetFlagInt, int, int, IMMEDIATE, REL_FUNC);
  
 shpvoid SetFlag(const std::string& flagName)
 {
-    Services::Get<GameProgress>()->SetFlag(flagName);
+    gGameProgress.SetFlag(flagName);
     return 0;
 }
 RegFunc1(SetFlag, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ClearFlag(const std::string& flagName)
 {
-    Services::Get<GameProgress>()->ClearFlag(flagName);
+    gGameProgress.ClearFlag(flagName);
     return 0;
 }
 RegFunc1(ClearFlag, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DumpFlags()
 {
-    Services::Get<GameProgress>()->DumpFlags();
+    gGameProgress.DumpFlags();
     return 0;
 }
 RegFunc0(DumpFlags, void, IMMEDIATE, DEV_FUNC);
 
 int GetGameVariableInt(const std::string& varName)
 {
-    return Services::Get<GameProgress>()->GetGameVariable(varName);
+    return gGameProgress.GetGameVariable(varName);
 }
 RegFunc1(GetGameVariableInt, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid IncGameVariableInt(const std::string& varName)
 {
-    Services::Get<GameProgress>()->IncGameVariable(varName);
+    gGameProgress.IncGameVariable(varName);
     return 0;
 }
 RegFunc1(IncGameVariableInt, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid SetGameVariableInt(const std::string& varName, int value)
 {
-    Services::Get<GameProgress>()->SetGameVariable(varName, value);
+    gGameProgress.SetGameVariable(varName, value);
     return 0;
 }
 RegFunc2(SetGameVariableInt, void, string, int, IMMEDIATE, REL_FUNC);
 
 int GetNounVerbCount(const std::string& noun, const std::string& verb)
 {
-    return Services::Get<GameProgress>()->GetNounVerbCount(noun, verb);
+    return gGameProgress.GetNounVerbCount(noun, verb);
 }
 RegFunc2(GetNounVerbCount, int, string, string, IMMEDIATE, REL_FUNC);
 
 int GetNounVerbCountInt(int nounEnum, int verbEnum)
 {
-    return GetNounVerbCount(Services::Get<ActionManager>()->GetNoun(nounEnum),
-                            Services::Get<ActionManager>()->GetVerb(verbEnum));
+    return GetNounVerbCount(gActionManager.GetNoun(nounEnum),
+                            gActionManager.GetVerb(verbEnum));
 }
 RegFunc2(GetNounVerbCountInt, int, int, int, IMMEDIATE, REL_FUNC);
  
 shpvoid IncNounVerbCount(const string& noun, const string& verb)
 {
     //TODO: Throw an error if the given noun corresponds to a "Topic".
-    Services::Get<GameProgress>()->IncNounVerbCount(noun, verb);
+    gGameProgress.IncNounVerbCount(noun, verb);
     return 0;
 }
 RegFunc2(IncNounVerbCount, void, string, string, IMMEDIATE, REL_FUNC);
@@ -122,8 +123,8 @@ RegFunc2(IncNounVerbCount, void, string, string, IMMEDIATE, REL_FUNC);
 shpvoid IncNounVerbCountBoth(const string& noun, const string& verb)
 {
     //TODO: Throw an error if the given noun corresponds to a "Topic".
-    Services::Get<GameProgress>()->IncNounVerbCount("Gabriel", noun, verb);
-    Services::Get<GameProgress>()->IncNounVerbCount("Grace", noun, verb);
+    gGameProgress.IncNounVerbCount("Gabriel", noun, verb);
+    gGameProgress.IncNounVerbCount("Grace", noun, verb);
     return 0;
 }
 RegFunc2(IncNounVerbCountBoth, void, string, string, IMMEDIATE, REL_FUNC);
@@ -131,7 +132,7 @@ RegFunc2(IncNounVerbCountBoth, void, string, string, IMMEDIATE, REL_FUNC);
 shpvoid SetNounVerbCount(const std::string& noun, const std::string& verb, int count)
 {
     //TODO: Throw an error if the given noun corresponds to a "Topic".
-    Services::Get<GameProgress>()->SetNounVerbCount(noun, verb, count);
+    gGameProgress.SetNounVerbCount(noun, verb, count);
     return 0;
 }
 RegFunc3(SetNounVerbCount, void, string, string, int, IMMEDIATE, REL_FUNC);
@@ -139,8 +140,8 @@ RegFunc3(SetNounVerbCount, void, string, string, int, IMMEDIATE, REL_FUNC);
 shpvoid SetNounVerbCountBoth(const std::string& noun, const std::string& verb, int count)
 {
     //TODO: Throw an error if the given noun corresponds to a "Topic".
-    Services::Get<GameProgress>()->SetNounVerbCount("Gabriel", noun, verb, count);
-    Services::Get<GameProgress>()->SetNounVerbCount("Grace", noun, verb, count);
+    gGameProgress.SetNounVerbCount("Gabriel", noun, verb, count);
+    gGameProgress.SetNounVerbCount("Grace", noun, verb, count);
     return 0;
 }
 RegFunc3(SetNounVerbCountBoth, void, string, string, int, IMMEDIATE, REL_FUNC);
@@ -149,10 +150,10 @@ shpvoid TriggerNounVerb(const std::string& noun, const std::string& verb)
 {
     //TODO: Validate noun or throw error.
     //TODO: Validate verb or throw error.
-    bool success = Services::Get<ActionManager>()->ExecuteAction(noun, verb);
+    bool success = gActionManager.ExecuteAction(noun, verb);
     if(!success)
     {
-        Services::GetReports()->Log("Error", "Error: unable to trigger noun-verb combination " + noun + ":" + verb);
+        gReportManager.Log("Error", "Error: unable to trigger noun-verb combination " + noun + ":" + verb);
     }
     return 0;
 }
@@ -161,19 +162,19 @@ RegFunc2(TriggerNounVerb, void, string, string, IMMEDIATE, DEV_FUNC);
 int GetTopicCount(const std::string& noun, const std::string& verb)
 {
     //TODO: Validate noun. Must be a valid noun. Seems to include any scene nouns, inventory nouns, actor nouns.
-    if(!Services::Get<VerbManager>()->IsTopic(verb))
+    if(!gVerbManager.IsTopic(verb))
     {
-        Services::GetReports()->Log("Error", "Error: '" + verb + " is not a valid verb name.");
+        gReportManager.Log("Error", "Error: '" + verb + " is not a valid verb name.");
         return 0;
     }
-    return Services::Get<GameProgress>()->GetTopicCount(noun, verb);
+    return gGameProgress.GetTopicCount(noun, verb);
 }
 RegFunc2(GetTopicCount, int, string, string, IMMEDIATE, REL_FUNC);
 
 int GetTopicCountInt(int nounEnum, int verbEnum)
 {
-    std::string noun = Services::Get<ActionManager>()->GetNoun(nounEnum);
-    std::string verb = Services::Get<ActionManager>()->GetVerb(verbEnum);
+    std::string noun = gActionManager.GetNoun(nounEnum);
+    std::string verb = gActionManager.GetVerb(verbEnum);
     return GetTopicCount(noun, verb);
 }
 RegFunc2(GetTopicCountInt, int, int, int, IMMEDIATE, REL_FUNC);
@@ -181,7 +182,7 @@ RegFunc2(GetTopicCountInt, int, int, int, IMMEDIATE, REL_FUNC);
 int HasTopicsLeft(const std::string& noun)
 {
     //TODO: Validate noun.
-    bool hasTopics = Services::Get<ActionManager>()->HasTopicsLeft(noun);
+    bool hasTopics = gActionManager.HasTopicsLeft(noun);
     return hasTopics ? 1 : 0;
 }
 RegFunc1(HasTopicsLeft, int, string, IMMEDIATE, REL_FUNC);
@@ -190,47 +191,47 @@ shpvoid SetTopicCount(std::string noun, std::string verb, int count)
 {
     //TODO: Validate noun or report error.
     //TODO: Validate verb or report error.
-    Services::Get<GameProgress>()->SetTopicCount(noun, verb, count);
+    gGameProgress.SetTopicCount(noun, verb, count);
     return 0;
 }
 RegFunc3(SetTopicCount, void, string, string, int, IMMEDIATE, DEV_FUNC);
 
 int GetChatCount(const std::string& noun)
 {
-    return Services::Get<GameProgress>()->GetChatCount(noun);
+    return gGameProgress.GetChatCount(noun);
 }
 RegFunc1(GetChatCount, int, string, IMMEDIATE, REL_FUNC);
 
 int GetChatCountInt(int nounEnum)
 {
-    return GetChatCount(Services::Get<ActionManager>()->GetNoun(nounEnum));
+    return GetChatCount(gActionManager.GetNoun(nounEnum));
 }
 RegFunc1(GetChatCountInt, int, int, IMMEDIATE, REL_FUNC);
  
 shpvoid SetChatCount(std::string noun, int count)
 {
-    Services::Get<GameProgress>()->SetChatCount(noun, count);
+    gGameProgress.SetChatCount(noun, count);
     return 0;
 }
 RegFunc2(SetChatCount, void, string, int, IMMEDIATE, DEV_FUNC);
 
 shpvoid SetVerbModal(int modalState)
 {
-    Services::Get<ActionManager>()->GetActionBar()->SetAllowDismiss(modalState == 0);
+    gActionManager.GetActionBar()->SetAllowDismiss(modalState == 0);
     return 0;
 }
 RegFunc1(SetVerbModal, void, int, IMMEDIATE, REL_FUNC);
 
 shpvoid StartVerbCancel()
 {
-    Services::Get<ActionManager>()->GetActionBar()->SetAllowCancel(true);
+    gActionManager.GetActionBar()->SetAllowCancel(true);
     return 0;
 }
 RegFunc0(StartVerbCancel, void, IMMEDIATE, REL_FUNC);
 
 shpvoid StopVerbCancel()
 {
-    Services::Get<ActionManager>()->GetActionBar()->SetAllowCancel(false);
+    gActionManager.GetActionBar()->SetAllowCancel(false);
     return 0;
 }
 RegFunc0(StopVerbCancel, void, IMMEDIATE, REL_FUNC);
@@ -245,10 +246,10 @@ RegFunc3(SetGameTimer, void, string, string, int, IMMEDIATE, REL_FUNC);
 shpvoid SetTimerMs(int milliseconds)
 {
     // Should throw error if not waited upon!
-    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    SheepThread* currentThread = gSheepManager.GetCurrentThread();
     if(!currentThread->mInWaitBlock)
     {
-        Services::GetReports()->Log("Warning", "No point setting a timer if you don't wait for it to finish. " +
+        gReportManager.Log("Warning", "No point setting a timer if you don't wait for it to finish. " +
                                                 std::to_string(milliseconds) + " millisecond timer request ignored.");
         ExecError();
     }
@@ -263,10 +264,10 @@ RegFunc1(SetTimerMs, void, int, WAITABLE, REL_FUNC);
 shpvoid SetTimerSeconds(float seconds)
 {
     // Should throw error if not waited upon!
-    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    SheepThread* currentThread = gSheepManager.GetCurrentThread();
     if(!currentThread->mInWaitBlock)
     {
-        Services::GetReports()->Log("Warning", "No point setting a timer if you don't wait for it to finish. " +
+        gReportManager.Log("Warning", "No point setting a timer if you don't wait for it to finish. " +
                                     std::to_string(seconds) + " second timer request ignored.");
         ExecError();
     }

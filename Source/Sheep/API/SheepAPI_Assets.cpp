@@ -1,12 +1,12 @@
 #include "SheepAPI_Assets.h"
 
-#include "Services.h"
+#include "AssetManager.h"
 
 using namespace std;
 
 shpvoid AddPath(const std::string& pathName)
 {
-    Services::GetAssets()->AddSearchPath(pathName);
+    gAssetManager.AddSearchPath(pathName);
     return 0;
 }
 RegFunc1(AddPath, void, string, IMMEDIATE, DEV_FUNC);
@@ -37,11 +37,11 @@ shpvoid Extract(const std::string& fileSpec, const std::string& outputPath)
     // If a path is provided, absolute or relative paths will work.
     if(outputPath.empty())
     {
-        Services::GetAssets()->WriteBarnAssetToFile(fileSpec);
+        gAssetManager.WriteBarnAssetToFile(fileSpec);
     }
     else
     {
-        Services::GetAssets()->WriteBarnAssetToFile(fileSpec, outputPath);
+        gAssetManager.WriteBarnAssetToFile(fileSpec, outputPath);
     }
     return 0;
 }

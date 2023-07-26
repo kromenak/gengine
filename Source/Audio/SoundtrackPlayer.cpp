@@ -2,7 +2,6 @@
 
 #include "ActionManager.h"
 #include "GKActor.h"
-#include "Services.h"
 #include "StringUtil.h"
 
 PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
@@ -14,10 +13,8 @@ PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
 void PlayingSoundtrack::Play()
 {
     // Make sure all nodes are reset.
-    for(auto& node : mSoundtrack->GetNodes())
-    {
-        mExecutionCounts.push_back(0);
-    }
+    mExecutionCounts.clear();
+    mExecutionCounts.resize(mSoundtrack->GetNodes().size());
 
     // Get things rolling.
     ProcessNextNode();
@@ -164,7 +161,7 @@ void SoundtrackPlayer::Stop(const std::string& soundtrackName)
 void SoundtrackPlayer::StopAll()
 {
     // Stop all playing soundtracks.
-    for(auto& playing : mPlaying)
+    for(PlayingSoundtrack& playing : mPlaying)
     {
         playing.Stop();
     }
@@ -173,9 +170,9 @@ void SoundtrackPlayer::StopAll()
 
 void SoundtrackPlayer::OnUpdate(float deltaTime)
 {
-    if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
+    if(gActionManager.IsSkippingCurrentAction()) { return; }
 
-    for(auto& playing : mPlaying)
+    for(PlayingSoundtrack& playing : mPlaying)
     {
         playing.Update(deltaTime);
     }

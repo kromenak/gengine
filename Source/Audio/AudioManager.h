@@ -37,14 +37,14 @@ public:
 private:
     friend class AudioManager; // Allow audio manager to access internals.
 
-    // Sound data being played.
-    FMOD::Sound* sound = nullptr;
-    
     // An FMOD "channel" represents a single playing sound. Channel* is returned by PlaySound.
     // Once returned, this pointer is always valid, even if the sound stops playing or the channel is reused.
     // In one of those scenarios, calls to channel functions start to return FMOD_ERR_INVALID_HANDLE or similar result codes.
     FMOD::Channel* channel = nullptr;
 
+    // Sound data being played.
+    FMOD::Sound* sound = nullptr;
+    
     // Callback to execute when sound finishes playing (either naturally or via stop).
     std::function<void()> mFinishCallback;
 
@@ -219,3 +219,5 @@ private:
     FMOD::ChannelGroup* GetChannelGroupForAudioType(AudioType audioType) const;
     FMOD::Channel* CreateChannel(FMOD::Sound* sound, FMOD::ChannelGroup* channelGroup);
 };
+
+extern AudioManager gAudioManager;

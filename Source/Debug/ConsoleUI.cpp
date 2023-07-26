@@ -1,5 +1,7 @@
 #include "ConsoleUI.h"
 
+#include "AssetManager.h"
+#include "Console.h"
 #include "Font.h"
 #include "Texture.h"
 #include "UICanvas.h"
@@ -32,11 +34,11 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 	backgroundImage->SetRenderMode(UIImage::RenderMode::Tiled);
 	if(mini)
 	{
-		backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("MINISNAKY"));
+		backgroundImage->SetTexture(gAssetManager.LoadTexture("MINISNAKY"));
 	}
 	else
 	{
-		backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("SNAKY"));
+		backgroundImage->SetTexture(gAssetManager.LoadTexture("SNAKY"));
 	}
 	
 	// Mini and full consoles have different anchoring properties.
@@ -64,7 +66,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			hrTransform->SetParent(mBackgroundTransform);
 			
 			// Horizontal rule uses a tiling line image.
-			UIImage* hrImage = mHorizontalRuleActor->AddComponent<UIImage>();
+			mHorizontalRuleActor->AddComponent<UIImage>();
 			
 			// Anchor along bottom edge of the console, with enough space for the input line below.
 			hrTransform->SetAnchorMin(Vector2(0.0f, 0.0f));
@@ -89,13 +91,13 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			
 			mScrollbackBuffer = scrollbackActor->AddComponent<UITextBuffer>();
 			
-			Font* font = Services::GetAssets()->LoadFont("F_CONSOLE_DISPLAY");
+			Font* font = gAssetManager.LoadFont("F_CONSOLE_DISPLAY");
 			mScrollbackBuffer->SetFont(font);
 		}
 		
 		// Create text input field.
 		{
-			Font* font = Services::GetAssets()->LoadFont("F_CONSOLE_COMMAND");
+			Font* font = gAssetManager.LoadFont("F_CONSOLE_COMMAND");
 			
 			Actor* textInputActor = new Actor(TransformType::RectTransform);
 			RectTransform* textInputRT = textInputActor->GetComponent<RectTransform>();
@@ -104,7 +106,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			// Input field takes up a single line below horizontal rule.
 			textInputRT->SetAnchorMin(Vector2(0.0f, 0.0f));
 			textInputRT->SetAnchorMax(Vector2(1.0f, 0.0f));
-			textInputRT->SetSizeDelta(0.0f, font->GetGlyphHeight());
+			textInputRT->SetSizeDelta(0.0f, static_cast<float>(font->GetGlyphHeight()));
 			textInputRT->SetAnchoredPosition(4.0f, 5.0f);
             textInputRT->SetPivot(0.0f, 0.0f);
 			
@@ -134,9 +136,9 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 		
 		// Calculate max number of lines in the console.
 		//TODO: Need to recalculate this if the screen resolution changes.
-        float availableHeight = Window::GetHeight();
+        float availableHeight = static_cast<float>(Window::GetHeight());
 		availableHeight -= CalcInputFieldHeight();
-		mMaxScrollbackLineCount = availableHeight / mScrollbackBuffer->GetFont()->GetGlyphHeight();
+        mMaxScrollbackLineCount = static_cast<int>(availableHeight / mScrollbackBuffer->GetFont()->GetGlyphHeight());
 
         // Create console activation image.
         Actor* imageActor = new Actor(TransformType::RectTransform);
@@ -145,8 +147,8 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 
         mConsoleToggleImage = imageActor->AddComponent<UIImage>();
 
-        Texture* texture = Services::GetAssets()->LoadTexture("CAIN");
-        Texture* textureAlpha = Services::GetAssets()->LoadTexture("CAIN_ALPHA");
+        Texture* texture = gAssetManager.LoadTexture("CAIN");
+        Texture* textureAlpha = gAssetManager.LoadTexture("CAIN_ALPHA");
         texture->ApplyAlphaChannel(*textureAlpha);
         mConsoleToggleImage->SetTexture(texture, true);
 
@@ -167,10 +169,10 @@ void ConsoleUI::OnUpdate(float deltaTime)
 	else
 	{
 		// Show an indicator when the console key is pressed down, but not yet released.
-        mConsoleToggleImage->SetEnabled(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE));
+        mConsoleToggleImage->SetEnabled(gInputManager.IsKeyPressed(SDL_SCANCODE_GRAVE));
 		
 		// On release, toggle the display of the console.
-		if(Services::GetInput()->IsKeyTrailingEdge(SDL_SCANCODE_GRAVE))
+		if(gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_GRAVE))
 		{
             mConsoleActive = !mConsoleActive;
             Refresh();
@@ -190,9 +192,9 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		if(!mConsoleActive) { return; }
 		
 		// If enter is pressed, execute command.
-		if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
+		if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
 		{
-			Services::GetConsole()->ExecuteCommand(mTextInput->GetText());
+			gConsole.ExecuteCommand(mTextInput->GetText());
 			mTextInput->Clear();
 			
 			// Executing a command resets command history.
@@ -200,10 +202,10 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		}
 		
 		// Alt plus other keys affect the size of the full console.
-		if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LALT))
+		if(gInputManager.IsKeyPressed(SDL_SCANCODE_LALT))
 		{
 			// Alt+Down increases console size by one line.
-			if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
+			if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
 			{
 				if(mScrollbackLineCount < mMaxScrollbackLineCount)
 				{
@@ -212,7 +214,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				}
 			}
 			// Alt+Up decreases console size by one line.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
 			{
 				if(mScrollbackLineCount > 0)
 				{
@@ -221,7 +223,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				}
 			}
 			// Alt+PgDown adds 10 lines.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
 			{
 				mScrollbackLineCount += 10;
 				if(mScrollbackLineCount > mMaxScrollbackLineCount)
@@ -231,7 +233,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				Refresh();
 			}
 			// Alt+PgUp removes 10 lines.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
 			{
 				mScrollbackLineCount -= 10;
 				if(mScrollbackLineCount < 0)
@@ -241,23 +243,23 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				Refresh();
 			}
 			// Alt+Home hides all lines.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_HOME))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_HOME))
 			{
 				mScrollbackLineCount = 0;
 				Refresh();
 			}
 			// Alt+End shows max number of lines.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_END))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_END))
 			{
 				mScrollbackLineCount = mMaxScrollbackLineCount;
 				Refresh();
 			}
 		}
 		// Ctrl plus other keys affect the position within the scrollback buffer.
-		else if(Services::GetInput()->IsKeyPressed(SDL_SCANCODE_LCTRL))
+		else if(gInputManager.IsKeyPressed(SDL_SCANCODE_LCTRL))
 		{
 			// Ctrl+Down moves scrollback down one line.
-			if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
+			if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
 			{
 				if(mScrollbackOffset > 0)
 				{
@@ -266,34 +268,34 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				}
 			}
 			// Ctrl+Up moves scrollback up one line.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
 			{
-                if(mScrollbackOffset < Services::GetConsole()->GetScrollback().size() - mScrollbackLineCount)
+                if(mScrollbackOffset < gConsole.GetScrollback().size() - mScrollbackLineCount)
                 {
                     mScrollbackOffset++;
                     Refresh();
                 }
 			}
 			// Ctrl+PgDown moves scrollback down 10 lines.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEDOWN))
 			{
-                mScrollbackOffset = Math::Clamp(mScrollbackOffset - mScrollbackLineCount, 0, Services::GetConsole()->GetScrollback().size() - mScrollbackLineCount);
+                mScrollbackOffset = Math::Clamp(mScrollbackOffset - mScrollbackLineCount, 0, gConsole.GetScrollback().size() - mScrollbackLineCount);
 				Refresh();
 			}
 			// Ctrl+PgUp moves scrollback up 10 lines.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_PAGEUP))
 			{
-                mScrollbackOffset = Math::Clamp(mScrollbackOffset + mScrollbackLineCount, 0, Services::GetConsole()->GetScrollback().size() - mScrollbackLineCount);
+                mScrollbackOffset = Math::Clamp(mScrollbackOffset + mScrollbackLineCount, 0, gConsole.GetScrollback().size() - mScrollbackLineCount);
 				Refresh();
 			}
 			// Ctrl+Home moves scrollback to earliest line.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_HOME))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_HOME))
 			{
-                mScrollbackOffset = Services::GetConsole()->GetScrollback().size() - mScrollbackLineCount;
+                mScrollbackOffset = gConsole.GetScrollback().size() - mScrollbackLineCount;
 				Refresh();
 			}
 			// Ctrl+End moves scrollback to the latest line.
-			else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_END))
+			else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_END))
 			{
 				mScrollbackOffset = 0;
 				Refresh();
@@ -301,11 +303,11 @@ void ConsoleUI::OnUpdate(float deltaTime)
 		}
         else
         {
-            if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
+            if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
             {
                 // Increment command history index if it is in-bounds.
                 // First time this happens will go from -1 to 0, which is OK!
-                int historyLength = Services::GetConsole()->GetCommandHistoryLength();
+                int historyLength = gConsole.GetCommandHistoryLength();
                 if(mCommandHistoryIndex < historyLength - 1)
                 {
                     ++mCommandHistoryIndex;
@@ -315,14 +317,14 @@ void ConsoleUI::OnUpdate(float deltaTime)
                 // So, when we push "up", we want to go to the next most recent item.
                 // Have to invert our index to get that.
                 int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
-                std::string command = Services::GetConsole()->GetCommandFromHistory(commandIndex);
+                std::string command = gConsole.GetCommandFromHistory(commandIndex);
 
                 // This changes the text... TODO: Better API for this?
                 mTextInput->Unfocus();
                 mTextInput->SetText(command);
                 mTextInput->Focus();
             }
-            else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
+            else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
             {
                 // If current history index is above zero, decrement.
                 // Note that we can't decrement back to -1, per GK3 behavior.
@@ -332,9 +334,9 @@ void ConsoleUI::OnUpdate(float deltaTime)
                 }
 
                 // As above, need to invert the index.
-                int historyLength = Services::GetConsole()->GetCommandHistoryLength();
+                int historyLength = gConsole.GetCommandHistoryLength();
                 int commandIndex = (historyLength - 1) - mCommandHistoryIndex;
-                std::string command = Services::GetConsole()->GetCommandFromHistory(commandIndex);
+                std::string command = gConsole.GetCommandFromHistory(commandIndex);
 
                 // This changes the text... TODO: Better API for this?
                 mTextInput->Unfocus();
@@ -364,13 +366,13 @@ void ConsoleUI::Refresh()
 	mScrollbackBuffer->SetLineCount(mScrollbackLineCount);
 	
 	// Calculate size of one line of scrollback buffer.
-	float scrollbackLineHeight = mScrollbackBuffer->GetFont()->GetGlyphHeight();
+	int scrollbackLineHeight = mScrollbackBuffer->GetFont()->GetGlyphHeight();
 	
 	// HR is positioned at 25 units. So, everything below HR is 25 - half line height (since HR is considered a line).
 	float height = CalcInputFieldHeight();
 	
 	// Each line of the scrollback takes up some space.
-	float scrollbackHeight = (mScrollbackLineCount + 1) * scrollbackLineHeight;
+	float scrollbackHeight = static_cast<float>((mScrollbackLineCount + 1) * scrollbackLineHeight);
 	height += scrollbackHeight;
 
 	// Set height for both the entire background and the scrollback buffer.

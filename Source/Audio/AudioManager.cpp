@@ -3,10 +3,12 @@
 #include <iostream>
 
 #include "Audio.h"
+#include "GEngine.h"
 #include "GMath.h"
 #include "Profiler.h"
 #include "SaveManager.h"
-#include "Services.h"
+
+AudioManager gAudioManager;
 
 PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel, FMOD::Sound* sound) :
     channel(channel),
@@ -17,7 +19,7 @@ PlayingSoundHandle::PlayingSoundHandle(FMOD::Channel* channel, FMOD::Sound* soun
 
 void PlayingSoundHandle::Stop(float fadeOutTime)
 {
-    Services::GetAudio()->Stop(*this, fadeOutTime);
+    gAudioManager.Stop(*this, fadeOutTime);
 }
 
 void PlayingSoundHandle::Pause()
@@ -299,7 +301,7 @@ bool AudioManager::Initialize()
     SetVolume(AudioType::Music, musicVolume);
 
     // Grab defaults from GAME.CFG.
-    Config* config = Services::GetAssets()->LoadConfig("GAME.CFG");
+    Config* config = gAssetManager.LoadConfig("GAME.CFG");
     if(config != nullptr)
     {
         mDefault3DMinDist = config->GetFloat("Sound", "Default Sound Min Distance", mDefault3DMinDist);
@@ -327,7 +329,7 @@ void AudioManager::Update(float deltaTime)
     }
 
     // Update faders.
-    for(int i = 0; i < mFaders.size(); ++i)
+    for(size_t i = 0; i < mFaders.size(); ++i)
     {
         if(mFaders[i].Update(deltaTime))
         {
@@ -385,11 +387,11 @@ void AudioManager::Update(float deltaTime)
     
     /*
     // For testing fade in/out behavior.
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_M))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_M))
     {
         mAmbientFadeChannelGroups[mCurrentAmbientIndex].SetFade(1.0f, 1.0f);
     }
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_N))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_N))
     {
         mAmbientFadeChannelGroups[mCurrentAmbientIndex].SetFade(1.0f, 0.0f);
     }

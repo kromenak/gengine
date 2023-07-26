@@ -77,7 +77,7 @@ void Shader::SetUniformInt(const char* name, int value)
 {
     if(mProgram != GL_NONE)
     {
-        GLuint loc = glGetUniformLocation(mProgram, name);
+        GLint loc = glGetUniformLocation(mProgram, name);
         if(loc >= 0)
         {
             glUniform1i(loc, value);
@@ -89,7 +89,7 @@ void Shader::SetUniformFloat(const char* name, float value)
 {
     if(mProgram != GL_NONE)
     {
-        GLuint loc = glGetUniformLocation(mProgram, name);
+        GLint loc = glGetUniformLocation(mProgram, name);
         if(loc >= 0)
         {
             glUniform1f(loc, value);
@@ -101,7 +101,7 @@ void Shader::SetUniformVector3(const char* name, const Vector3& vector)
 {
     if(mProgram != GL_NONE)
     {
-        GLuint loc = glGetUniformLocation(mProgram, name);
+        GLint loc = glGetUniformLocation(mProgram, name);
         if(loc >= 0)
         {
             glUniform3f(loc, vector.x, vector.y, vector.z);
@@ -113,7 +113,7 @@ void Shader::SetUniformVector4(const char *name, const Vector4& vector)
 {
     if(mProgram != GL_NONE)
     {
-        GLuint loc = glGetUniformLocation(mProgram, name);
+        GLint loc = glGetUniformLocation(mProgram, name);
         if(loc >= 0)
         {
             glUniform4f(loc, vector.x, vector.y, vector.z, vector.w);
@@ -125,7 +125,7 @@ void Shader::SetUniformMatrix4(const char* name, const Matrix4& mat)
 {
     if(mProgram != GL_NONE)
     {
-        GLuint loc = glGetUniformLocation(mProgram, name);
+        GLint loc = glGetUniformLocation(mProgram, name);
         if(loc >= 0)
         {
             glUniformMatrix4fv(loc, 1, GL_FALSE, mat);
@@ -137,7 +137,7 @@ void Shader::SetUniformColor(const char* name, const Color32& color)
 {
     if(mProgram != GL_NONE)
     {
-        GLuint loc = glGetUniformLocation(mProgram, name);
+        GLint loc = glGetUniformLocation(mProgram, name);
         if(loc >= 0)
         {
             glUniform4f(loc, color.GetR() / 255.0f, color.GetG() / 255.0f, color.GetB() / 255.0f, color.GetA() / 255.0f);
@@ -236,7 +236,7 @@ void Shader::RefreshUniforms()
 
     // Iterate uniforms and process each one.
     int textureUnitCounter = 0;
-    for(GLuint i = 0; i < uniformCount; ++i)
+    for(GLint i = 0; i < uniformCount; ++i)
     {
         // Grab uniform i.
         glGetActiveUniform(mProgram, i, kMaxUniformNameLength, &uniformNameLength, &uniformSize, &uniformType, uniformNameBuffer);

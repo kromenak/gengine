@@ -30,7 +30,6 @@ enum class VerbType
 
 class ActionManager
 {
-	TYPE_DECL_BASE();
 public:
     ~ActionManager();
 
@@ -184,3 +183,5 @@ private:
 	// Called when an action finishes executing.
 	void OnActionExecuteFinished();
 };
+
+extern ActionManager gActionManager;

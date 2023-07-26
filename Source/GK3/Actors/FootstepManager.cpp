@@ -1,17 +1,17 @@
 #include "FootstepManager.h"
 
+#include "AssetManager.h"
 #include "IniParser.h"
 #include "Random.h"
-#include "Services.h"
 #include "TextAsset.h"
 
-TYPE_DEF_BASE(FootstepManager);
+FootstepManager gFootstepManager;
 
-FootstepManager::FootstepManager()
+void FootstepManager::Init()
 {
 	// STEP 1: FLOORMAP maps texture names to a floor type.
 	// Get FLOORMAP text file as a raw buffer.
-	TextAsset* textFile = Services::GetAssets()->LoadText("FLOORMAP.TXT");
+	TextAsset* textFile = gAssetManager.LoadText("FLOORMAP.TXT");
 	
 	// Pass that along to INI parser, since it is plain text and in INI format.
 	IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -28,7 +28,7 @@ FootstepManager::FootstepManager()
 			// All values are texture names (with no extension).
 			// Note the value of the first entry is also used (it is a valid texture name too).
 			// Map them to the floor type.
-			for(int i = 0; i < line.entries.size(); ++i)
+			for(size_t i = 0; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& current = line.entries[i];
 				mTextureNameToFloorType[current.value] = floorType;
@@ -38,7 +38,7 @@ FootstepManager::FootstepManager()
 	
 	// STEP 2: FOOTSTEPS maps floor types to audio files for footsteps.
 	// Next up: read in all the footstep data.
-	textFile = Services::GetAssets()->LoadText("FOOTSTEPS.TXT");
+	textFile = gAssetManager.LoadText("FOOTSTEPS.TXT");
 	
 	// Again, it's just an INI text file.
 	IniParser footstepParser(textFile->GetText(), textFile->GetTextLength());
@@ -63,10 +63,10 @@ FootstepManager::FootstepManager()
 			auto& footsteps = shoeSounds.floorTypeToFootsteps[floorType];
 			
 			// All values are audio files that go along with this shoeType/floorType pair.
-			for(int i = 0; i < line.entries.size(); ++i)
+			for(size_t i = 0; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& current = line.entries[i];
-				Audio* audio = Services::GetAssets()->LoadAudio(current.value);
+				Audio* audio = gAssetManager.LoadAudio(current.value);
 				if(audio != nullptr)
 				{
 					footsteps.push_back(audio);
@@ -77,7 +77,7 @@ FootstepManager::FootstepManager()
 	
 	// STEP 2: FOOTSCUFFS maps floor types to audio files for footscuffs.
 	// Finally, very similar thing with the footscuff data.
-	textFile = Services::GetAssets()->LoadText("FOOTSCUFFS.TXT");
+	textFile = gAssetManager.LoadText("FOOTSCUFFS.TXT");
 	
 	// Again, it's just an INI text file.
 	IniParser footscuffParser(textFile->GetText(), textFile->GetTextLength());
@@ -102,10 +102,10 @@ FootstepManager::FootstepManager()
 			auto& footscuffs = shoeSounds.floorTypeToFootscuffs[floorType];
 			
 			// All values are audio files that go along with this shoeType/floorType pair.
-			for(int i = 0; i < line.entries.size(); ++i)
+			for(size_t i = 0; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& current = line.entries[i];
-				Audio* audio = Services::GetAssets()->LoadAudio(current.value);
+				Audio* audio = gAssetManager.LoadAudio(current.value);
 				if(audio != nullptr)
 				{
 					footscuffs.push_back(audio);

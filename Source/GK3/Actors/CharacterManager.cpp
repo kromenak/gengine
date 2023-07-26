@@ -1,15 +1,16 @@
 #include "CharacterManager.h"
 
+#include "AssetManager.h"
 #include "IniParser.h"
 #include "Loader.h"
 #include "Profiler.h"
-#include "Services.h"
+#include "ReportManager.h"
 #include "TextAsset.h"
 #include "Texture.h"
 
-TYPE_DEF_BASE(CharacterManager);
+CharacterManager gCharacterManager;
 
-CharacterManager::CharacterManager()
+void CharacterManager::Init()
 {
     Loader::Load([this]() {
         TIMER_SCOPED("CharacterManager::Load");
@@ -17,7 +18,7 @@ CharacterManager::CharacterManager()
         // Read in faces first, as character configs reference these.
         {
             // Get FACES text file as a raw buffer.
-            TextAsset* textFile = Services::GetAssets()->LoadText("FACES.TXT");
+            TextAsset* textFile = gAssetManager.LoadText("FACES.TXT");
 
             // Pass that along to INI parser, since it is plain text and in INI format.
             IniParser facesParser(textFile->GetText(), textFile->GetTextLength());
@@ -93,10 +94,10 @@ CharacterManager::CharacterManager()
 
                     // First, try to load the entry's face/eyelid/forehead textures.
                     // These are derived from the section name.
-                    faceConfig.faceTexture = Services::GetAssets()->LoadSceneTexture(section.name + "_face");
-                    faceConfig.eyelidsTexture = Services::GetAssets()->LoadTexture(section.name + "_eyelids");
-                    faceConfig.foreheadTexture = Services::GetAssets()->LoadTexture(section.name + "_forehead");
-                    faceConfig.mouthTexture = Services::GetAssets()->LoadTexture(section.name + "_mouth00");
+                    faceConfig.faceTexture = gAssetManager.LoadSceneTexture(section.name + "_face");
+                    faceConfig.eyelidsTexture = gAssetManager.LoadTexture(section.name + "_eyelids");
+                    faceConfig.foreheadTexture = gAssetManager.LoadTexture(section.name + "_forehead");
+                    faceConfig.mouthTexture = gAssetManager.LoadTexture(section.name + "_mouth00");
 
                     // Each entry is a face property for the character.
                     for(auto& line : section.lines)
@@ -104,11 +105,11 @@ CharacterManager::CharacterManager()
                         IniKeyValue& entry = line.entries.front();
                         if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Name"))
                         {
-                            faceConfig.leftEyeTexture = Services::GetAssets()->LoadTexture(entry.value);
+                            faceConfig.leftEyeTexture = gAssetManager.LoadTexture(entry.value);
                         }
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Right Eye Name"))
                         {
-                            faceConfig.rightEyeTexture = Services::GetAssets()->LoadTexture(entry.value);
+                            faceConfig.rightEyeTexture = gAssetManager.LoadTexture(entry.value);
                         }
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Left Eye Offset"))
                         {
@@ -168,7 +169,7 @@ CharacterManager::CharacterManager()
                         }
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Eyelids Alpha Channel"))
                         {
-                            faceConfig.eyelidsAlphaChannel = Services::GetAssets()->LoadTexture(entry.value);
+                            faceConfig.eyelidsAlphaChannel = gAssetManager.LoadTexture(entry.value);
 
                             // If we have eyelids and an alpha channel, just apply it right away, why not?
                             if(faceConfig.eyelidsTexture != nullptr && faceConfig.eyelidsAlphaChannel != nullptr)
@@ -184,16 +185,16 @@ CharacterManager::CharacterManager()
                             // First element is an animation name, second is a probability, and so on.
                             // Technically, I think the system was meant to support a variable-sized list of anims and probabilities.
                             // But in practice, it seems to only have ever supported 2 blink anims per character.
-                            for(int i = 0; i < tokens.size(); i += 2)
+                            for(size_t i = 0; i < tokens.size(); i += 2)
                             {
                                 if(i == 0)
                                 {
-                                    faceConfig.blinkAnim1 = Services::GetAssets()->LoadAnimation(tokens[i]);
+                                    faceConfig.blinkAnim1 = gAssetManager.LoadAnimation(tokens[i]);
                                     faceConfig.blinkAnim1Probability = (i + 1 < tokens.size()) ? StringUtil::ToInt(tokens[i + 1]) : 0;
                                 }
                                 else
                                 {
-                                    faceConfig.blinkAnim2 = Services::GetAssets()->LoadAnimation(tokens[i]);
+                                    faceConfig.blinkAnim2 = gAssetManager.LoadAnimation(tokens[i]);
                                     faceConfig.blinkAnim2Probability = (i + 1 < tokens.size()) ? StringUtil::ToInt(tokens[i + 1]) : 0;
                                 }
                             }
@@ -218,7 +219,7 @@ CharacterManager::CharacterManager()
         // Read in characters.
         {
             // Get CHARACTERS text file as a raw buffer.
-            TextAsset* textFile = Services::GetAssets()->LoadText("CHARACTERS.TXT");
+            TextAsset* textFile = gAssetManager.LoadText("CHARACTERS.TXT");
 
             // Pass that along to INI parser, since it is plain text and in INI format.
             IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -256,63 +257,63 @@ CharacterManager::CharacterManager()
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StartAnim"))
                     {
-                        config.walkStartAnim = Services::GetAssets()->LoadAnimation(entry.value);
+                        config.walkStartAnim = gAssetManager.LoadAnimation(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "ContAnim"))
                     {
-                        config.walkLoopAnim = Services::GetAssets()->LoadAnimation(entry.value);
+                        config.walkLoopAnim = gAssetManager.LoadAnimation(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StopAnim"))
                     {
-                        config.walkStopAnim = Services::GetAssets()->LoadAnimation(entry.value);
+                        config.walkStopAnim = gAssetManager.LoadAnimation(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StartTurnRightAnim"))
                     {
-                        config.walkStartTurnRightAnim = Services::GetAssets()->LoadAnimation(entry.value);
+                        config.walkStartTurnRightAnim = gAssetManager.LoadAnimation(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "StartTurnLeftAnim"))
                     {
-                        config.walkStartTurnLeftAnim = Services::GetAssets()->LoadAnimation(entry.value);
+                        config.walkStartTurnLeftAnim = gAssetManager.LoadAnimation(entry.value);
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "HipAxesMeshIndex"))
                     {
-                        config.hipAxesMeshIndex = entry.GetValueAsInt();
+                        config.hipAxesMeshIndex = static_cast<int8_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "HipAxesGroupIndex"))
                     {
-                        config.hipAxesGroupIndex = entry.GetValueAsInt();
+                        config.hipAxesGroupIndex = static_cast<int8_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "HipAxesPointIndex"))
                     {
-                        config.hipAxesPointIndex = entry.GetValueAsInt();
+                        config.hipAxesPointIndex = static_cast<int16_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "LShoeAxesMeshIndex"))
                     {
-                        config.leftShoeAxesMeshIndex = entry.GetValueAsInt();
+                        config.leftShoeAxesMeshIndex = static_cast<int8_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "LShoeAxesGroupIndex"))
                     {
-                        config.leftShoeAxesGroupIndex = entry.GetValueAsInt();
+                        config.leftShoeAxesGroupIndex = static_cast<int8_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "LShoeAxesPointIndex"))
                     {
-                        config.leftShoeAxesPointIndex = entry.GetValueAsInt();
+                        config.leftShoeAxesPointIndex = static_cast<int16_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "RShoeAxesMeshIndex"))
                     {
-                        config.rightShoeAxesMeshIndex = entry.GetValueAsInt();
+                        config.rightShoeAxesMeshIndex = static_cast<int8_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "RShoeAxesGroupIndex"))
                     {
-                        config.rightShoeAxesGroupIndex = entry.GetValueAsInt();
+                        config.rightShoeAxesGroupIndex = static_cast<int8_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "RShoeAxesPointIndex"))
                     {
-                        config.rightShoeAxesPointIndex = entry.GetValueAsInt();
+                        config.rightShoeAxesPointIndex = static_cast<int16_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::EqualsIgnoreCase(entry.key, "HeadMeshIndex"))
                     {
-                        config.headMeshIndex = entry.GetValueAsInt();
+                        config.headMeshIndex = static_cast<int8_t>(entry.GetValueAsInt());
                     }
                     else if(StringUtil::StartsWithIgnoreCase(entry.key, "Clothes"))
                     {
@@ -325,7 +326,7 @@ CharacterManager::CharacterManager()
                             if(config.clothesAnims[i].first.empty())
                             {
                                 config.clothesAnims[i].first = timeblockStr;
-                                config.clothesAnims[i].second = Services::GetAssets()->LoadAnimation(entry.value);
+                                config.clothesAnims[i].second = gAssetManager.LoadAnimation(entry.value);
                                 break;
                             }
                         }
@@ -351,7 +352,7 @@ CharacterManager::CharacterManager()
 
         // Load in valid actors list.
         {
-            TextAsset* textFile = Services::GetAssets()->LoadText("Actors.txt");
+            TextAsset* textFile = gAssetManager.LoadText("Actors.txt");
 
             // Parse as INI file.
             IniParser actorsParser(textFile->GetText(), textFile->GetTextLength());
@@ -384,7 +385,7 @@ bool CharacterManager::IsValidName(const std::string& name)
 
 	if(mCharacterNouns.find(key) == mCharacterNouns.end())
 	{
-		Services::GetReports()->Log("Error", StringUtil::Format("Error: who the hell is '%s'?", name.c_str()));
+		gReportManager.Log("Error", StringUtil::Format("Error: who the hell is '%s'?", name.c_str()));
 		return false;
 	}
 	return true;

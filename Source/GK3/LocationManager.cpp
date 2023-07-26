@@ -1,19 +1,21 @@
 #include "LocationManager.h"
 
+#include "AssetManager.h"
 #include "GameProgress.h"
+#include "GEngine.h"
 #include "GK3UI.h"
 #include "IniParser.h"
 #include "Localizer.h"
-#include "Services.h"
+#include "ReportManager.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
 #include "Timeblock.h"
 
-TYPE_DEF_BASE(LocationManager);
+LocationManager gLocationManager;
 
-LocationManager::LocationManager()
+void LocationManager::Init()
 {
-	TextAsset* textFile = Services::GetAssets()->LoadText("Locations.txt");
+	TextAsset* textFile = gAssetManager.LoadText("Locations.txt");
 	
 	// Parse as INI file.
 	IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -143,7 +145,7 @@ LocationManager::LocationManager()
     for(auto& name : allBsp)
     {
         std::cout << "Loading " << name << " BSP..." << std::endl;
-        Services::GetAssets()->LoadBSP(name);
+        gAssetManager.LoadBSP(name);
         std::cout << "Done loading " << name << " BSP." << std::endl;
     }
     */
@@ -157,7 +159,7 @@ bool LocationManager::IsValidLocation(const std::string& locationCode) const
 	bool isValid = mLocCodeShortToLocCodeLong.find(locationCode) != mLocCodeShortToLocCodeLong.end();
 	if(!isValid)
 	{
-		Services::GetReports()->Log("Error", "Error: '" + locationCode + "' is not a valid location name. Call DumpLocations() to see valid locations.");
+		gReportManager.Log("Error", "Error: '" + locationCode + "' is not a valid location name. Call DumpLocations() to see valid locations.");
 	}
 	return isValid;
 }
@@ -190,12 +192,12 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
     }
 
     // Check for timeblock completion.
-    Timeblock currentTimeblock = Services::Get<GameProgress>()->GetTimeblock();
-    Services::GetSheep()->Execute(Services::GetAssets()->LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [sameLocation, location, callback, currentTimeblock]() {
+    Timeblock currentTimeblock = gGameProgress.GetTimeblock();
+    gSheepManager.Execute(gAssetManager.LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [sameLocation, location, callback, currentTimeblock]() {
 
         // See whether a timeblock change is occurring.
         // If so, we should early out - the timeblock change logic handles any location and time change.
-        if(Services::Get<GameProgress>()->IsChangingTimeblock())
+        if(gGameProgress.IsChangingTimeblock())
         {
             gGK3UI.HideSceneTransitioner();
             if(callback != nullptr) { callback(); }
@@ -236,7 +238,7 @@ std::string LocationManager::GetLocationDisplayName() const
 std::string LocationManager::GetLocationDisplayName(const std::string& location) const
 {
     // Keys for timeblocks are in form "loc_r25".
-    return Services::Get<Localizer>()->GetText("loc_" + location);
+    return gLocalizer.GetText("loc_" + location);
 }
 
 int LocationManager::GetLocationCountAcrossAllTimeblocks(const std::string& actorName, const std::string& location)
@@ -246,12 +248,12 @@ int LocationManager::GetLocationCountAcrossAllTimeblocks(const std::string& acto
 
 int LocationManager::GetCurrentLocationCountForCurrentTimeblock(const std::string& actorName) const
 {
-	return GetLocationCount(actorName, mLocation, Services::Get<GameProgress>()->GetTimeblock());
+	return GetLocationCount(actorName, mLocation, gGameProgress.GetTimeblock());
 }
 
 int LocationManager::GetLocationCountForCurrentTimeblock(const std::string& actorName, const std::string& location) const
 {
-	return GetLocationCount(actorName, location, Services::Get<GameProgress>()->GetTimeblock());
+	return GetLocationCount(actorName, location, gGameProgress.GetTimeblock());
 }
 
 int LocationManager::GetLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock) const
@@ -272,12 +274,12 @@ int LocationManager::GetLocationCount(const std::string& actorName, const std::s
 
 void LocationManager::IncCurrentLocationCountForCurrentTimeblock(const std::string& actorName)
 {
-	IncLocationCount(actorName, mLocation, Services::Get<GameProgress>()->GetTimeblock());
+	IncLocationCount(actorName, mLocation, gGameProgress.GetTimeblock());
 }
 
 void LocationManager::IncLocationCountForCurrentTimeblock(const std::string &actorName, const std::string &location)
 {
-	IncLocationCount(actorName, mLocation, Services::Get<GameProgress>()->GetTimeblock());
+	IncLocationCount(actorName, mLocation, gGameProgress.GetTimeblock());
 }
 
 void LocationManager::IncLocationCount(const std::string& actorName, const std::string& location, const Timeblock& timeblock)
@@ -297,7 +299,7 @@ void LocationManager::IncLocationCount(const std::string& actorName, const std::
 void LocationManager::SetLocationCountForCurrentTimeblock(const std::string& actorName, const std::string& location, int count)
 {
 	// Get current timeblock as string.
-	std::string timeblock = Services::Get<GameProgress>()->GetTimeblock().ToString();
+	std::string timeblock = gGameProgress.GetTimeblock().ToString();
 
 	// Increment timeblock-specific location count. This version should NOT change the global one!
 	mActorLocationTimeblockCounts[actorName + location + timeblock] = count;

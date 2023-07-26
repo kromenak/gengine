@@ -3,11 +3,12 @@
 #include <bitset>
 #include <iostream>
 
+#include "AssetManager.h"
 #include "BinaryReader.h"
 #include "BSPActor.h"
 #include "BSPLightmap.h"
 #include "Debug.h"
-#include "Services.h"
+#include "ReportManager.h"
 #include "Shader.h"
 #include "StringUtil.h"
 #include "Texture.h"
@@ -19,14 +20,14 @@ BSP::BSP(const std::string& name, AssetScope scope, char* data, int dataLength) 
     ParseFromData(data, dataLength);
 
     // Use lightmap shader for BSP rendering.
-    mMaterial.SetShader(Services::GetAssets()->LoadShader("3D-Lightmap"));
+    mMaterial.SetShader(gAssetManager.LoadShader("3D-Lightmap"));
 }
 
 BSPActor* BSP::CreateBSPActor(const std::string& objectName)
 {
     // Find index for object name or fail.
     int objectIndex = -1;
-    for(int i = 0; i < mObjectNames.size(); i++)
+    for(size_t i = 0; i < mObjectNames.size(); i++)
     {
         if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
         {
@@ -36,7 +37,7 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
     }
     if(objectIndex == -1)
     {
-        Services::GetReports()->Log("Error", StringUtil::Format("Error: scene '%s' does not have a scene model of name '%s'", "", objectName.c_str()));
+        gReportManager.Log("Error", StringUtil::Format("Error: scene '%s' does not have a scene model of name '%s'", "", objectName.c_str()));
         return nullptr;
     }
 
@@ -46,13 +47,13 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
     // Generate AABB from this BSP object's position data.
     bool firstPoint = true;
     AABB aabb;
-    for(int surfaceIndex = 0; surfaceIndex < mSurfaces.size(); surfaceIndex++)
+    for(size_t surfaceIndex = 0; surfaceIndex < mSurfaces.size(); surfaceIndex++)
     {
         if(mSurfaces[surfaceIndex].objectIndex == objectIndex)
         {
             actor->AddSurface(&mSurfaces[surfaceIndex]);
 
-            for(int polygonIndex = 0; polygonIndex < mPolygons.size(); polygonIndex++)
+            for(size_t polygonIndex = 0; polygonIndex < mPolygons.size(); polygonIndex++)
             {
                 if(mPolygons[polygonIndex].surfaceIndex == surfaceIndex)
                 {
@@ -204,7 +205,7 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
 void BSP::SetFloorObjectName(const std::string& floorObjectName)
 {
     // Figure out index for the floor object.
-    for(int i = 0; i < mObjectNames.size(); ++i)
+    for(size_t i = 0; i < mObjectNames.size(); ++i)
     {
         if(StringUtil::EqualsIgnoreCase(mObjectNames[i], floorObjectName))
         {
@@ -309,7 +310,7 @@ void BSP::SetTexture(const std::string& objectName, Texture* texture)
 
 bool BSP::Exists(const std::string& objectName) const
 {
-	for(int i = 0; i < mObjectNames.size(); i++)
+	for(size_t i = 0; i < mObjectNames.size(); i++)
 	{
 		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
 		{
@@ -368,11 +369,11 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
 	// Find index of a surface.
 	Vector3 pos = Vector3::Zero;
 	int vertexCount = 0;
-	for(int i = 0; i < mSurfaces.size(); i++)
+	for(size_t i = 0; i < mSurfaces.size(); i++)
 	{
         if(mSurfaces[i].objectIndex == objectIndex)
 		{
-			for(int j = 0; j < mPolygons.size(); j++)
+			for(size_t j = 0; j < mPolygons.size(); j++)
 			{
                 if(mPolygons[j].surfaceIndex == i)
 				{
@@ -397,7 +398,7 @@ void BSP::ApplyLightmap(const BSPLightmap& lightmap)
 {
     // Apply lightmap textures to each surface.
     const std::vector<Texture*>& lightmapTextures = lightmap.GetLightmapTextures();
-    for(int i = 0; i < mSurfaces.size(); ++i)
+    for(size_t i = 0; i < mSurfaces.size(); ++i)
     {
         mSurfaces[i].lightmapTexture = lightmapTextures[i];
     }
@@ -730,7 +731,7 @@ void BSP::ParseFromData(char *data, int dataLength)
     mObjectNames.resize(nameCount);
     for(int i = 0; i < nameCount; i++)
     {
-        reader.ReadStringBuffer(32, mObjectNames[i]);
+        reader.ReadString(32, mObjectNames[i]);
     }
     
     // Iterate and read surfaces.
@@ -739,7 +740,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         BSPSurface surface;
         surface.objectIndex = reader.ReadUInt();
 
-        surface.texture = Services::GetAssets()->LoadSceneTexture(reader.ReadStringBuffer(32), GetScope());
+        surface.texture = gAssetManager.LoadSceneTexture(reader.ReadString(32), GetScope());
         
         surface.lightmapUvOffset = reader.ReadVector2();
         surface.lightmapUvScale = reader.ReadVector2();
@@ -857,13 +858,13 @@ void BSP::ParseFromData(char *data, int dataLength)
         // Next, a certain number of vertex & triangle indexes...for what?
         for(int j = 0; j < indexCount; j++)
         {
-            unsigned short vertexIndex = reader.ReadUShort();
+            /*unsigned short vertexIndex = */reader.ReadUShort();
         }
         for(int j = 0; j < triangleCount; j++)
         {
-            unsigned short p0Index = reader.ReadUShort();
-            unsigned short p1Index = reader.ReadUShort();
-            unsigned short p2Index = reader.ReadUShort();
+            /*unsigned short p0Index = */reader.ReadUShort();
+            /*unsigned short p1Index = */reader.ReadUShort();
+            /*unsigned short p2Index = */reader.ReadUShort();
         }
     }
     

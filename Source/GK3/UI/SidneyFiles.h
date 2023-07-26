@@ -26,16 +26,16 @@ enum class SidneyFileType
 // A single file in the system.
 struct SidneyFile
 {
+    // Type of this file (is it an image, audio, text, etc?).
+    SidneyFileType type;
+
     // Unique *internal* name for this file. Not displayed to player!
     // This is used by Sheep to identify files it wants to add.
     std::string name;
 
     // This file's unique index. This is what's used to get the localized name.
     int index = -1;
-
-    // Type of this file (is it an image, audio, text, etc?).
-    SidneyFileType type;
-
+    
     // A score name associated with adding this file.
     std::string scoreName;
     
@@ -77,8 +77,8 @@ public:
     void Show();
     void Hide();
 
-    void AddFile(int fileIndex);
-    bool HasFile(int fileIndex);
+    void AddFile(size_t fileIndex);
+    bool HasFile(size_t fileIndex);
     int GetMaxFileIndex() const { return mAllFiles.size() - 1; }
 
     bool HasFile(const std::string& fileName) const;
@@ -97,7 +97,7 @@ private:
 
     // Labels used to populate the file list. Can be reused/repurposed as the list changes.
     std::vector<UILabel*> mFileListLabels;
-    int mFileListLabelIndex = 0;
+    size_t mFileListLabelIndex = 0;
     
     UILabel* GetFileListLabel();
     void RefreshFileListUI();

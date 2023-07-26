@@ -44,7 +44,7 @@ ActionBar::ActionBar() : Actor(TransformType::RectTransform)
 	
 	// To have button holder appear in correct spot, we need the holder to be the right height.
 	// So, just use one of the buttons to get a valid height.
-	VerbIcon& cancelVerbIcon = Services::Get<VerbManager>()->GetVerbIcon("CANCEL");
+	VerbIcon& cancelVerbIcon = gVerbManager.GetVerbIcon("CANCEL");
 	mButtonHolder->SetSizeDelta(cancelVerbIcon.GetWidth(), cancelVerbIcon.GetWidth());
 	
 	// Hide by default.
@@ -82,10 +82,9 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
     mCancelCallback = cancelCallback;
 	
 	// Iterate over all desired actions and show a button for it.
-	bool inventoryShowing = Services::Get<InventoryManager>()->IsInventoryShowing();
-	VerbManager* verbManager = Services::Get<VerbManager>();
+	bool inventoryShowing = gInventoryManager.IsInventoryShowing();
 	int buttonIndex = 0;
-	for(int i = 0; i < actions.size(); ++i)
+	for(size_t i = 0; i < actions.size(); ++i)
 	{
 		// Kind of a HACK, but it does the trick...if inventory is showing, hide all PICKUP verbs.
 		// You can't PICKUP something you already have. And the PICKUP icon is used in inventory to represent "make active".
@@ -98,12 +97,12 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 		UIButton* actionButton = nullptr;
 		if(verbType == VerbType::Normal)
 		{
-			VerbIcon& buttonIcon = verbManager->GetVerbIcon(actions[i]->verb);
+			VerbIcon& buttonIcon = gVerbManager.GetVerbIcon(actions[i]->verb);
 			actionButton = AddButton(buttonIndex, buttonIcon, actions[i]->verb);
 		}
 		else if(verbType == VerbType::Topic)
 		{
-			VerbIcon& buttonIcon = verbManager->GetTopicIcon(actions[i]->verb);
+			VerbIcon& buttonIcon = gVerbManager.GetTopicIcon(actions[i]->verb);
 			actionButton = AddButton(buttonIndex, buttonIcon, actions[i]->verb);
 		}
 		if(actionButton == nullptr) { continue; }
@@ -123,7 +122,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 			}
 			else
 			{
-				Services::Get<ActionManager>()->ExecuteAction(action);
+				gActionManager.ExecuteAction(action);
 			}
 		});
 	}
@@ -132,7 +131,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	if(verbType == VerbType::Normal)
 	{
 		// Get active inventory item for current ego.
-		std::string activeItemName = Services::Get<InventoryManager>()->GetActiveInventoryItem();
+		std::string activeItemName = gInventoryManager.GetActiveInventoryItem();
 		
 		// Show inventory button if there's an active inventory item AND it is not the object we're interacting with.
 		// In other words, don't allow using an object on itself!
@@ -153,12 +152,12 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
             }
 
             // Create a button for this inventory item.
-			VerbIcon& invVerbIcon = verbManager->GetInventoryIcon(invItemVerb);
+			VerbIcon& invVerbIcon = gVerbManager.GetInventoryIcon(invItemVerb);
 			UIButton* invButton = AddButton(buttonIndex, invVerbIcon, "INV");
 			++buttonIndex;
 			
 			// Create callback for inventory button press.
-            const Action* invAction = Services::Get<ActionManager>()->GetAction(noun, invItemVerb);
+            const Action* invAction = gActionManager.GetAction(noun, invItemVerb);
 			invButton->SetPressCallback([this, invAction, executeCallback](UIButton* button) {
 				// Hide action bar on button press.
 				this->Hide();
@@ -170,7 +169,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
                 }
                 else
                 {
-                    Services::Get<ActionManager>()->ExecuteAction(invAction);
+                    gActionManager.ExecuteAction(invAction);
                 }
 			});
 		}
@@ -179,7 +178,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	// Always put cancel button on the end.
     if(mAllowCancel)
     {
-        VerbIcon& cancelVerbIcon = verbManager->GetVerbIcon("CANCEL");
+        VerbIcon& cancelVerbIcon = gVerbManager.GetVerbIcon("CANCEL");
         UIButton* cancelButton = AddButton(buttonIndex, cancelVerbIcon, "CANCEL");
 
         // Pressing cancel button hides the bar, but it also requires an extra step. So its got its own callback.
@@ -239,7 +238,7 @@ bool ActionBar::HasVerb(const std::string& verb) const
 void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> callback)
 {
 	// Add button at index 0.
-	VerbIcon& icon = Services::Get<VerbManager>()->GetVerbIcon(verb);
+	VerbIcon& icon = gVerbManager.GetVerbIcon(verb);
 	UIButton* button = AddButton(0, icon, verb);
 	button->SetPressCallback([this, callback](UIButton* button) {
 		this->Hide();
@@ -253,7 +252,7 @@ void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> ca
 
 void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> callback)
 {
-	VerbIcon& icon = Services::Get<VerbManager>()->GetVerbIcon(verb);
+	VerbIcon& icon = gVerbManager.GetVerbIcon(verb);
 	
 	// Action bar order is always [INSPECT][VERBS][INV_ITEM][CANCEL]
 	// So, skip 1 for cancel button, and maybe skip another one if inventory item is shown.
@@ -291,11 +290,11 @@ void ActionBar::OnUpdate(float deltaTime)
 	if(IsShowing()) 
 	{
         // Most keyboard input counts as a cancel action, unless some text input is active (like debug window).
-        if(!Services::GetInput()->IsTextInput() && mAllowDismiss)
+        if(!gInputManager.IsTextInput() && mAllowDismiss)
         {
             // Any key press EXCEPT ~ counts as a cancel action.
             // This logic technically blocks any other cancel action due to key presses WHILE ~ is pressed but...close enough.
-            if(Services::GetInput()->IsAnyKeyLeadingEdge() && !Services::GetInput()->IsKeyPressed(SDL_SCANCODE_GRAVE))
+            if(gInputManager.IsAnyKeyLeadingEdge() && !gInputManager.IsKeyPressed(SDL_SCANCODE_GRAVE))
             {
                 OnCancelButtonPressed();
             }
@@ -362,7 +361,7 @@ void ActionBar::RefreshButtonLayout()
 void ActionBar::CenterOnPointer()
 {
 	// Position action bar at mouse position.
-	mButtonHolder->SetAnchoredPosition(Services::GetInput()->GetMousePosition());
+	mButtonHolder->SetAnchoredPosition(gInputManager.GetMousePosition());
 	
 	// Keep inside the screen.
     mButtonHolder->MoveInsideRect(Window::GetRect());

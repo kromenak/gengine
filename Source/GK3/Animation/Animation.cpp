@@ -3,9 +3,9 @@
 #include <cctype>
 
 #include "AnimationNodes.h"
+#include "AssetManager.h"
 #include "FileSystem.h"
 #include "IniParser.h"
-#include "Services.h"
 #include "StringUtil.h"
 #include "VertexAnimation.h"
 
@@ -70,7 +70,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         {
 			// First line is number of action entries...but we can just determine that from the number of lines!
 			// Read in 2+ lines as actions.
-            for(int i = 1; i < section.lines.size(); ++i)
+            for(size_t i = 1; i < section.lines.size(); ++i)
             {
 				IniLine& line = section.lines[i];
 				
@@ -82,7 +82,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                 int frameNumber = line.entries[0].GetValueAsInt();
                 
 				// Vertex animation must be specified.
-				VertexAnimation* vertexAnim = Services::GetAssets()->LoadVertexAnimation(line.entries[1].key, GetScope());
+				VertexAnimation* vertexAnim = gAssetManager.LoadVertexAnimation(line.entries[1].key, GetScope());
                 if(vertexAnim == nullptr)
                 {
                     printf("Failed to load vertex animation %s!\n", line.entries[1].key.c_str());
@@ -141,7 +141,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "STEXTURES"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			for(int i = 1; i < section.lines.size(); ++i)
+			for(size_t i = 1; i < section.lines.size(); ++i)
             {
 				IniLine& line = section.lines[i];
 				
@@ -171,7 +171,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
 			// Read in 2+ lines as actions.
-            for(int i = 1; i < section.lines.size(); i++)
+            for(size_t i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
                 
@@ -200,7 +200,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
 			// Read in 2+ lines as actions.
-            for(int i = 1; i < section.lines.size(); i++)
+            for(size_t i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
                 
@@ -233,7 +233,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
 			// Read in 2+ lines as actions.
-            for(int i = 1; i < section.lines.size(); ++i)
+            for(size_t i = 1; i < section.lines.size(); ++i)
             {
                 IniLine& line = section.lines[i];
 
@@ -268,7 +268,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
 			// Read in lines 2+ as sounds.
-            for(int i = 1; i < section.lines.size(); i++)
+            for(size_t i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
                 
@@ -292,11 +292,11 @@ void Animation::ParseFromData(char *data, int dataLength)
 				node->frameNumber = frameNumber;
                 if(isYak)
                 {
-                    node->audio = Services::GetAssets()->LoadAudio(soundName, AssetScope::Scene);
+                    node->audio = gAssetManager.LoadAudio(soundName, AssetScope::Scene);
                 }
                 else
                 {
-                    node->audio = Services::GetAssets()->LoadAudio(soundName);
+                    node->audio = gAssetManager.LoadAudio(soundName);
                 }
 				node->volume = volume;
 
@@ -311,7 +311,7 @@ void Animation::ParseFromData(char *data, int dataLength)
                     // Probably a better way to do this is add IniParser logic to check entry type (int, float, string, etc).
                     // Also, a position requires at least 6 arguments total.
                     bool usesPosition = std::isdigit(line.entries[3].value[0]) && line.entries.size() >= 6;
-                    int distIndex = 0;
+                    size_t distIndex = 0;
                     if(!usesPosition)
                     {
                         node->modelName = line.entries[3].key;
@@ -319,9 +319,9 @@ void Animation::ParseFromData(char *data, int dataLength)
                     }
                     else
                     {
-                        int x = line.entries[3].GetValueAsInt();
-                        int y = line.entries[4].GetValueAsInt();
-                        int z = line.entries[5].GetValueAsInt();
+                        float x = line.entries[3].GetValueAsFloat();
+                        float y = line.entries[4].GetValueAsFloat();
+                        float z = line.entries[5].GetValueAsFloat();
                         node->position = Vector3(x, y, z);
                         distIndex = 6;
                     }
@@ -329,11 +329,11 @@ void Animation::ParseFromData(char *data, int dataLength)
                     // Read in min/max distance for sound, if entries are present.
                     if(distIndex < line.entries.size())
                     {
-                        node->minDistance = line.entries[distIndex].GetValueAsInt();
+                        node->minDistance = line.entries[distIndex].GetValueAsFloat();
                     }
                     if(distIndex + 1 < line.entries.size())
                     {
-                        node->maxDistance = line.entries[distIndex + 1].GetValueAsInt();
+                        node->maxDistance = line.entries[distIndex + 1].GetValueAsFloat();
                     }
                 }
 
@@ -346,7 +346,7 @@ void Animation::ParseFromData(char *data, int dataLength)
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
 			// Read in 2+ lines as actions.
-            for(int i = 1; i < section.lines.size(); i++)
+            for(size_t i = 1; i < section.lines.size(); i++)
             {
 				IniLine& line = section.lines[i];
 				
@@ -381,7 +381,7 @@ void Animation::ParseFromData(char *data, int dataLength)
 		// to isolate extremely specific to GK3 stuff here?
         else if(StringUtil::EqualsIgnoreCase(section.name, "GK3"))
         {
-            for(int i = 1; i < section.lines.size(); i++)
+            for(size_t i = 1; i < section.lines.size(); i++)
             {
                 IniLine& line = section.lines[i];
                 
@@ -478,9 +478,9 @@ void Animation::ParseFromData(char *data, int dataLength)
                         node->cameraPositionName = line.entries[2].key;
 
                         // If there is any additional GLIDE keyword, it means the camera should glide.
-                        for(int i = 3; i < line.entries.size(); ++i)
+                        for(size_t j = 3; j < line.entries.size(); ++j)
                         {
-                            if(StringUtil::EqualsIgnoreCase(line.entries[i].key, "GLIDE"))
+                            if(StringUtil::EqualsIgnoreCase(line.entries[j].key, "GLIDE"))
                             {
                                 node->glide = true;
                                 break;
@@ -592,10 +592,10 @@ void Animation::ParseFromData(char *data, int dataLength)
                         // Read the actor name.
                         std::string actorNoun = line.entries[2].key;
 
-                        // X/Y/Z position. //TODO: Do z/y also need to be flipped?
-                        int x = line.entries[3].GetValueAsInt();
-                        int y = line.entries[4].GetValueAsInt();
-                        int z = line.entries[5].GetValueAsInt();
+                        // X/Y/Z position.
+                        float x = line.entries[3].GetValueAsFloat();
+                        float y = line.entries[4].GetValueAsFloat();
+                        float z = line.entries[5].GetValueAsFloat();
 
                         // Create and add node.
                         GlanceAnimNode* node = new GlanceAnimNode();
@@ -669,10 +669,10 @@ void Animation::ParseFromData(char *data, int dataLength)
                         // Read caption.
                         // Unfortunately, the caption *may* contain commas, which interfers with the INI parser. Need to loop to populate.
                         std::string caption = line.entries[2].key;
-                        for(int i = 3; i < line.entries.size(); ++i)
+                        for(size_t j = 3; j < line.entries.size(); ++j)
                         {
                             caption += ", ";
-                            caption += line.entries[i].key;
+                            caption += line.entries[j].key;
                         }
 
                         // Create and add node.
@@ -696,10 +696,10 @@ void Animation::ParseFromData(char *data, int dataLength)
                         // Read caption.
                         // Unfortunately, the caption *may* contain commas, which interfers with the INI parser. Need to loop to populate.
                         std::string caption = line.entries[3].key;
-                        for(int i = 4; i < line.entries.size(); ++i)
+                        for(size_t j = 4; j < line.entries.size(); ++j)
                         {
                             caption += ", ";
-                            caption += line.entries[i].key;
+                            caption += line.entries[j].key;
                         }
 
                         SpeakerCaptionAnimNode* node = new SpeakerCaptionAnimNode();

@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "FileSystem.h"
-#include "Services.h"
+#include "ReportManager.h"
 #include "SheepScriptBuilder.h"
 #include "StringUtil.h"
 
@@ -89,7 +89,7 @@ void SheepCompiler::Warning(SheepScriptBuilder* builder, const Sheep::location& 
 	std::string reportMsg = StringUtil::Format("GK3 compiler warning at '%s' (line %d, col %d) <%s>\n%s",
 											   name.c_str(), line, col, section.c_str(),
 											   message.c_str());
-	Services::GetReports()->Log("SheepCompilerWarning", reportMsg);
+	gReportManager.Log("SheepCompilerWarning", reportMsg);
 }
 
 void SheepCompiler::Error(SheepScriptBuilder* builder, const Sheep::location& location, const std::string& message)
@@ -103,5 +103,5 @@ void SheepCompiler::Error(SheepScriptBuilder* builder, const Sheep::location& lo
 	std::string reportMsg = StringUtil::Format("GK3 compiler error at '%s' (line %d, col %d) <%s>\n%s",
 											   name.c_str(), line, col, section.c_str(),
 											   message.c_str());
-	Services::GetReports()->Log("SheepCompilerError", reportMsg);
+	gReportManager.Log("SheepCompilerError", reportMsg);
 }

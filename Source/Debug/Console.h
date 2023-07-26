@@ -43,3 +43,5 @@ private:
 	// Report stream for console output.
 	ReportStream* mConsoleReportStream = nullptr;
 };
+
+extern Console gConsole;

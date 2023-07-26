@@ -1,6 +1,6 @@
 #include "UICanvas.h"
 
-#include "Services.h"
+#include "InputManager.h"
 
 TYPE_DEF_CHILD(UIWidget, UICanvas);
 
@@ -30,7 +30,7 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
             
 			// See whether the pointer is over this widget.
 			RectTransform* widgetRT = widget->GetRectTransform();
-			if(widgetRT->GetWorldRect().Contains(Services::GetInput()->GetMousePosition()))
+			if(widgetRT->GetWorldRect().Contains(gInputManager.GetMousePosition()))
 			{
 				// Pointer is over this widget, but it is not the "over" widget yet!
 				if(sMouseOverWidget != widget)
@@ -49,11 +49,11 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
 				// If pointer goes down or up this frame, notify whatever widget the pointer is currently over.
 				if(sMouseOverWidget != nullptr)
 				{
-					if(Services::GetInput()->IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
+					if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
 					{
 						sMouseOverWidget->OnPointerDown();
 					}
-					else if(Services::GetInput()->IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
+					else if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
 					{
 						sMouseOverWidget->OnPointerUp();
 					}

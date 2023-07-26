@@ -6,7 +6,6 @@
 
 #include "GEngine.h"
 #include "Scene.h"
-#include "Services.h"
 #include "Window.h"
 
 #include "MainMenuTool.h"
@@ -32,7 +31,7 @@ void Tools::Init()
         ImGui::CreateContext();
 
         // Init for SDL & OpenGL.
-        ImGui_ImplSDL2_InitForOpenGL(Window::Get(), Services::GetRenderer()->GetGLContext());
+        ImGui_ImplSDL2_InitForOpenGL(Window::Get(), gRenderer.GetGLContext());
         ImGui_ImplOpenGL3_Init("#version 150");
 
         // We'll use dark mode.
@@ -58,7 +57,7 @@ void Tools::Shutdown()
 void Tools::Update()
 {
     // Toggle tools with Tab key.
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_TAB))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_TAB))
     {
         toolsActive = !toolsActive;
     }

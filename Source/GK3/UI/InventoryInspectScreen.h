@@ -6,6 +6,8 @@
 #pragma once
 #include "Actor.h"
 
+#include "LayerManager.h"
+
 class UIButton;
 
 class InventoryInspectScreen : public Actor

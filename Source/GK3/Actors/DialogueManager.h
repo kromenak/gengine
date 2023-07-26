@@ -18,7 +18,6 @@ class GAS;
 
 class DialogueManager
 {
-	TYPE_DECL_BASE();
 public:
 	void StartDialogue(const std::string& licensePlate, int numLines, bool playFidgets, std::function<void()> finishCallback);
 	void ContinueDialogue(int numLines, bool playFidgets, std::function<void()> finishCallback);
@@ -77,3 +76,5 @@ private:
 
     void CheckConversationAnimFinishCallback();
 };
+
+extern DialogueManager gDialogueManager;

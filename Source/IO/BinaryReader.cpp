@@ -19,7 +19,7 @@ BinaryReader::~BinaryReader()
     delete mStream;
 }
 
-void BinaryReader::Seek(int32_t position)
+void BinaryReader::Seek(uint32_t position)
 {
 	// It's possible we've hit EOF, especially if we're jumping around a lot.
 	// If we are trying to seek on an EOF stream, clear the error flags and do the seek.
@@ -27,24 +27,33 @@ void BinaryReader::Seek(int32_t position)
 	{
 		mStream->clear();
 	}
-    mStream->seekg(position, std::ios::beg);
+    mStream->seekg(static_cast<std::streamoff>(position), std::ios::beg);
 }
 
-void BinaryReader::Skip(int32_t count)
+void BinaryReader::Skip(uint32_t count)
 {
-    mStream->seekg(count, std::ios::cur);
+    mStream->seekg(static_cast<std::streamoff>(count), std::ios::cur);
 }
 
-int32_t BinaryReader::Read(char* buffer, uint32_t size)
+uint32_t BinaryReader::GetPosition() const
+{
+    // Technically, tellg can return -1 in an error state.
+    // But we just want it to return 0 for our purposes.
+    std::streampos pos = mStream->tellg();
+    if(pos < 0) { pos = 0; }
+    return static_cast<uint32_t>(pos);
+}
+
+uint32_t BinaryReader::Read(char* buffer, uint32_t size)
 {
     mStream->read(buffer, size);
-    return (int)mStream->gcount();
+    return static_cast<uint32_t>(mStream->gcount());
 }
 
-int32_t BinaryReader::Read(unsigned char* buffer, uint32_t size)
+uint32_t BinaryReader::Read(unsigned char* buffer, uint32_t size)
 {
     mStream->read((char*)buffer, size);
-    return (int)mStream->gcount();
+    return static_cast<uint32_t>(mStream->gcount());
 }
 
 uint8_t BinaryReader::ReadByte()
@@ -134,87 +143,51 @@ void BinaryReader::ReadString(uint32_t size, std::string& str)
 
     // Directly modify the string data; a little dangerous!
     mStream->read(const_cast<char*>(str.data()), size);
-}
-
-void BinaryReader::ReadString(uint64_t size, std::string& str)
-{
-    // Same as above, but for insanely long string!? Would this ever be used???
-    // Also, this probably won't work in 32-bit apps anyway, since std::string size_t would be 32-bit.
-    str.resize(size);
-    mStream->read(const_cast<char*>(str.data()), size);
-}
-
-std::string BinaryReader::ReadTinyString()
-{
-    uint8_t size = ReadByte();
-    return ReadString(size);
-}
-
-void BinaryReader::ReadTinyString(std::string& str)
-{
-    uint8_t size = ReadByte();
-    ReadString(static_cast<uint32_t>(size), str);
-}
-
-std::string BinaryReader::ReadShortString()
-{
-    uint16_t size = ReadUShort();
-    return ReadString(size);
-}
-
-void BinaryReader::ReadShortString(std::string& str)
-{
-    uint16_t size = ReadUShort();
-    ReadString(static_cast<uint32_t>(size), str);
-}
-
-std::string BinaryReader::ReadMedString()
-{
-    uint32_t size = ReadUInt();
-    return ReadString(size);
-}
-
-void BinaryReader::ReadMedString(std::string& str)
-{
-    uint32_t size = ReadUInt();
-    ReadString(size, str);
-}
-
-std::string BinaryReader::ReadLongString()
-{
-    uint64_t size = ReadULong();
-    std::string str;
-    ReadString(size, str);
-    return str;
-}
-
-void BinaryReader::ReadLongString(std::string& str)
-{
-    uint64_t size = ReadULong();
-    ReadString(size, str);
-}
-
-std::string BinaryReader::ReadStringBuffer(uint32_t bufferSize)
-{
-    std::string str;
-    ReadStringBuffer(bufferSize, str);
-    return str;
-}
-
-void BinaryReader::ReadStringBuffer(uint32_t bufferSize, std::string& str)
-{
-    // Read string per usual. BUT this may give incorrect results:
-    // If buffer size is greater than string size (due to null terminator), str.size() is incorrect
-    ReadString(bufferSize, str);
 
     // Reduce string size if null terminator exists before end of string.
-    for(int i = 0; i < str.size(); ++i)
+    for(size_t i = 0; i < str.size(); ++i)
     {
         if(str[i] == '\0')
         {
             str.resize(i);
         }
     }
+}
+
+std::string BinaryReader::ReadString8()
+{
+    uint8_t size = ReadByte();
+    return ReadString(size);
+}
+
+void BinaryReader::ReadString8(std::string& str)
+{
+    uint8_t size = ReadByte();
+    ReadString(static_cast<uint32_t>(size), str);
+}
+
+std::string BinaryReader::ReadString16()
+{
+    uint16_t size = ReadUShort();
+    return ReadString(size);
+}
+
+void BinaryReader::ReadString16(std::string& str)
+{
+    uint16_t size = ReadUShort();
+    ReadString(static_cast<uint32_t>(size), str);
+}
+
+std::string BinaryReader::ReadString32()
+{
+    uint32_t size = ReadUInt();
+    return ReadString(size);
+}
+
+void BinaryReader::ReadString32(std::string& str)
+{
+    uint32_t size = ReadUInt();
+    ReadString(size, str);
 }
 
 Vector2 BinaryReader::ReadVector2()

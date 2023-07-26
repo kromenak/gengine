@@ -73,7 +73,7 @@ LaserHead::LaserHead(Actor* owner, int index) : Component(owner),
     }
 
     // Set the game variable so Sheep logic knows what rotation this head is at.
-    Services::Get<GameProgress>()->SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
+    gGameProgress.SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
 }
 
 void LaserHead::SetLaserEnabled(bool enabled)
@@ -91,7 +91,7 @@ void LaserHead::TurnLeft()
     if(mTurnIndex < 4)
     {
         ++mTurnIndex;
-        Services::Get<GameProgress>()->SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
+        gGameProgress.SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
 
         mTurnTimer = 0.0f;
     }
@@ -102,7 +102,7 @@ void LaserHead::TurnRight()
     if(mTurnIndex > 0)
     {
         --mTurnIndex;
-        Services::Get<GameProgress>()->SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
+        gGameProgress.SetGameVariable("Cs2Head" + std::to_string(mIndex + 1), mTurnIndex);
 
         mTurnTimer = 0.0f;
     }

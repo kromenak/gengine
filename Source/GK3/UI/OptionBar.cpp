@@ -1,10 +1,13 @@
 #include "OptionBar.h"
 
+#include "ActionManager.h"
+#include "AssetManager.h"
+#include "AudioManager.h"
 #include "CaptionsOverlay.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
+#include "GEngine.h"
 #include "InventoryManager.h"
-#include "Services.h"
 #include "TextAsset.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -19,7 +22,7 @@
 OptionBar::OptionBar() : Actor(TransformType::RectTransform)
 {
     // Load layout text file, parse to key/value map, and then delete it.
-    TextAsset* optionBarText = Services::GetAssets()->LoadText("RC_LAYOUT.TXT");
+    TextAsset* optionBarText = gAssetManager.LoadText("RC_LAYOUT.TXT");
     
     IniParser parser(optionBarText->GetText(), optionBarText->GetTextLength());
     parser.SetMultipleKeyValuePairsPerLine(false);
@@ -55,17 +58,17 @@ void OptionBar::Show()
     SetActive(true);
 
     // Only show the "active inventory item" button if there is an active inventory item.
-    std::string activeInvItem = Services::Get<InventoryManager>()->GetActiveInventoryItem();
+    std::string activeInvItem = gInventoryManager.GetActiveInventoryItem();
     mActiveInventoryItemButton->SetEnabled(!activeInvItem.empty());
     if(!activeInvItem.empty())
     {
-        mActiveInventoryItemButton->SetUpTexture(Services::Get<InventoryManager>()->GetInventoryItemIconTexture(activeInvItem));
+        mActiveInventoryItemButton->SetUpTexture(gInventoryManager.GetInventoryItemIconTexture(activeInvItem));
     }
 
     // Update score label.
     mScoreLabel->SetText(StringUtil::Format("%03i/%03i",
-                                            Services::Get<GameProgress>()->GetScore(),
-                                            Services::Get<GameProgress>()->GetMaxScore()));
+                                            gGameProgress.GetScore(),
+                                            gGameProgress.GetMaxScore()));
 
     // Make sure any immediately visible buttons reflect the correct state.
     RefreshCinematicsButtonState();
@@ -76,7 +79,7 @@ void OptionBar::Show()
     Vector2 halfSize = mOptionBarRoot->GetSize() * 0.5f;
     halfSize.x = Math::Round(halfSize.x);
     halfSize.y = Math::Round(halfSize.y);
-    mOptionBarRoot->SetAnchoredPosition(Services::GetInput()->GetMousePosition() - halfSize);
+    mOptionBarRoot->SetAnchoredPosition(gInputManager.GetMousePosition() - halfSize);
     
     // Force to be fully on screen.
     KeepOnScreen();
@@ -100,7 +103,7 @@ void OptionBar::Hide()
 void OptionBar::OnUpdate(float deltaTime)
 {
     // Set buttons interactive only if an action is not playing.
-    bool actionActive = Services::Get<ActionManager>()->IsActionPlaying();
+    bool actionActive = gActionManager.IsActionPlaying();
     mActiveInventoryItemButton->SetCanInteract(!actionActive);
     mInventoryButton->SetCanInteract(!actionActive);
     mHintButton->SetCanInteract(!actionActive); //TODO: also base this on whether a hint is currently available...
@@ -133,25 +136,25 @@ UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, con
         auto it = config.find(buttonId + "SpriteUp");
         if(it != config.end())
         {
-            button->SetUpTexture(Services::GetAssets()->LoadTexture(it->second.value));
+            button->SetUpTexture(gAssetManager.LoadTexture(it->second.value));
         }
         
         it = config.find(buttonId + "SpriteDown");
         if(it != config.end())
         {
-            button->SetDownTexture(Services::GetAssets()->LoadTexture(it->second.value));
+            button->SetDownTexture(gAssetManager.LoadTexture(it->second.value));
         }
         
         it = config.find(buttonId + "SpriteDis");
         if(it != config.end())
         {
-            button->SetDisabledTexture(Services::GetAssets()->LoadTexture(it->second.value));
+            button->SetDisabledTexture(gAssetManager.LoadTexture(it->second.value));
         }
         
         it = config.find(buttonId + "SpriteHov");
         if(it != config.end())
         {
-            button->SetHoverTexture(Services::GetAssets()->LoadTexture(it->second.value));
+            button->SetHoverTexture(gAssetManager.LoadTexture(it->second.value));
         }
     }
     return button;
@@ -170,9 +173,9 @@ UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, con
     togglePos.y *= -1;
     toggle->GetRectTransform()->SetAnchoredPosition(togglePos);
     
-    toggle->SetOnTexture(Services::GetAssets()->LoadTexture(config[toggleId + "SpriteDown"].value));
-    toggle->SetOffTexture(Services::GetAssets()->LoadTexture(config[toggleId + "SpriteUp"].value));
-    toggle->SetDisabledTexture(Services::GetAssets()->LoadTexture(config[toggleId + "SpriteDis"].value));
+    toggle->SetOnTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDown"].value));
+    toggle->SetOffTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteUp"].value));
+    toggle->SetDisabledTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDis"].value));
     return toggle;
 }
 
@@ -201,7 +204,7 @@ UISlider* CreateSlider(std::unordered_map<std::string, IniKeyValue>& config, con
 
     // Add handle image.
     UIImage* handleImage = handleActor->AddComponent<UIImage>();
-    handleImage->SetTexture(Services::GetAssets()->LoadTexture("RC_SO_SLIDER"), true);
+    handleImage->SetTexture(gAssetManager.LoadTexture("RC_SO_SLIDER"), true);
     
     // Set slider's vertical size to be exactly equal to handle size.
     // This should make it so the handle can only move left/right.
@@ -223,7 +226,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     
     // Add background image.
     UIImage* backgroundImage = optionBar->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["backSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["backSprite"].value), true);
     
     // Some positioning code would be easier if this was (0.5, 0.5) BUT that causes some rendering problems b/c the rect is no longer pixel perfect.
     // Mayyybe we can fix that in the RectTransform/Rect code directly...with a bit of work.
@@ -237,7 +240,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     drag->SetUseHighlightCursor(false); // but don't highlight cursor when hovering it
 
     // Load font.
-    Font* font = Services::GetAssets()->LoadFont(config["statusFont"].value);
+    Font* font = gAssetManager.LoadFont(config["statusFont"].value);
     
     // Add score text.
     Actor* scoreActor = new Actor(TransformType::RectTransform);
@@ -259,7 +262,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
 
     // Determine display strings for the day/time.
     // We only have to do this on creation (and not show) because the day/time never change in the middle of a scene.
-    std::vector<std::string> dayAndTimeStrings = StringUtil::Split(Services::Get<GameProgress>()->GetTimeblockDisplayName(), ',');
+    std::vector<std::string> dayAndTimeStrings = StringUtil::Split(gGameProgress.GetTimeblockDisplayName(), ',');
     StringUtil::Trim(dayAndTimeStrings[0]);
     StringUtil::Trim(dayAndTimeStrings[1]);
 
@@ -305,14 +308,14 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     mActiveInventoryItemButton = CreateButton(config, "currInv", optionBar);
     mActiveInventoryItemButton->SetPressCallback([this](UIButton* button) {
         Hide();
-        Services::Get<InventoryManager>()->InventoryInspect();
+        gInventoryManager.InventoryInspect();
     });
     
     // Add inventory button.
     mInventoryButton = CreateButton(config, "closed", optionBar);
     mInventoryButton->SetPressCallback([this](UIButton* button) {
         Hide();
-        Services::Get<InventoryManager>()->ShowInventory();
+        gInventoryManager.ShowInventory();
     });
     
     // Add hint button.
@@ -349,7 +352,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
         mCamerasSection->SetActive(false);
         mOptionsSection->SetActive(!mOptionsSection->IsActive());
         KeepOnScreen();
-        mGlobalVolumeSlider->SetValueSilently(Services::GetAudio()->GetMasterVolume());
+        mGlobalVolumeSlider->SetValueSilently(gAudioManager.GetMasterVolume());
     });
     
     // Add close button.
@@ -367,7 +370,7 @@ void OptionBar::CreateCamerasSection(std::unordered_map<std::string, IniKeyValue
     
     // Add background image.
     UIImage* backgroundImage = mCamerasSection->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["camBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["camBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -384,7 +387,7 @@ void OptionBar::CreateOptionsSection(std::unordered_map<std::string, IniKeyValue
     
     // Add background image.
     UIImage* backgroundImage = mOptionsSection->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["optBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["optBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -435,7 +438,7 @@ void OptionBar::CreateAdvancedOptionsSection(std::unordered_map<std::string, Ini
     
     // Add background image.
     UIImage* backgroundImage = mAdvancedOptionsSection->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["advOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["advOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -469,7 +472,7 @@ void OptionBar::CreateSoundOptionsSection(std::unordered_map<std::string, IniKey
     
     // Add background image.
     UIImage* backgroundImage = mSoundOptionsSection->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["soundOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["soundOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -484,47 +487,47 @@ void OptionBar::CreateSoundOptionsSection(std::unordered_map<std::string, IniKey
     // Create global mute toggle.
     mGlobalMuteToggle = CreateToggle(config, "soundOptGlobal", mSoundOptionsSection);
     mGlobalMuteToggle->SetToggleCallback([](bool isOn) {
-        Services::GetAudio()->SetMuted(isOn);
+        gAudioManager.SetMuted(isOn);
     });
     
     // Create sfx volume slider.
     mSfxVolumeSlider = CreateSlider(config, "optSoundSfxSlider", mSoundOptionsSection);
     mSfxVolumeSlider->SetValueChangeCallback([](float value) {
         // The SFX volume slider also controls ambient volume.
-        Services::GetAudio()->SetVolume(AudioType::SFX, value);
-        Services::GetAudio()->SetVolume(AudioType::Ambient, value);
+        gAudioManager.SetVolume(AudioType::SFX, value);
+        gAudioManager.SetVolume(AudioType::Ambient, value);
     });
 
     //Create sfx mute toggle.
     mSfxMuteToggle = CreateToggle(config, "soundOptSfx", mSoundOptionsSection);
     mSfxMuteToggle->SetToggleCallback([](bool isOn) {
         // The SFX toggle also controls ambient.
-        Services::GetAudio()->SetMuted(AudioType::SFX, isOn);
-        Services::GetAudio()->SetMuted(AudioType::Ambient, isOn);
+        gAudioManager.SetMuted(AudioType::SFX, isOn);
+        gAudioManager.SetMuted(AudioType::Ambient, isOn);
     });
     
     // Create VO volume slider.
     mVoVolumeSlider = CreateSlider(config, "optSoundDialogueSlider", mSoundOptionsSection);
     mVoVolumeSlider->SetValueChangeCallback([](float value) {
-        Services::GetAudio()->SetVolume(AudioType::VO, value);
+        gAudioManager.SetVolume(AudioType::VO, value);
     });
 
     // Create VO mute toggle.
     mVoMuteToggle = CreateToggle(config, "soundOptDialogue", mSoundOptionsSection);
     mVoMuteToggle->SetToggleCallback([](bool isOn) {
-        Services::GetAudio()->SetMuted(AudioType::VO, isOn);
+        gAudioManager.SetMuted(AudioType::VO, isOn);
     });
     
     // Create music volume slider.
     mMusicVolumeSlider = CreateSlider(config, "optSoundMusicSlider", mSoundOptionsSection);
     mMusicVolumeSlider->SetValueChangeCallback([](float value) {
-        Services::GetAudio()->SetVolume(AudioType::Music, value);
+        gAudioManager.SetVolume(AudioType::Music, value);
     });
 
     // Create music mute toggle.
     mMusicMuteToggle = CreateToggle(config, "soundOptMusic", mSoundOptionsSection);
     mMusicMuteToggle->SetToggleCallback([](bool isOn) {
-        Services::GetAudio()->SetMuted(AudioType::Music, isOn);
+        gAudioManager.SetMuted(AudioType::Music, isOn);
     });
     
     // Create max sounds slider.
@@ -542,7 +545,7 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
     
     // Add background image.
     UIImage* backgroundImage = mGraphicOptionsSection->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["graphicsOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["graphicsOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -556,8 +559,8 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
     
     // Create "incremental rendering" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* incRenderingText = CreateButton(config, "graphOptIncrementalText", mGraphicOptionsSection, false);
-    incRenderingText->SetUpTexture(Services::GetAssets()->LoadTexture(config["graphOptIncrementalEnabled"].value));
-    incRenderingText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["graphOptIncrementalDisabled"].value));
+    incRenderingText->SetUpTexture(gAssetManager.LoadTexture(config["graphOptIncrementalEnabled"].value));
+    incRenderingText->SetDisabledTexture(gAssetManager.LoadTexture(config["graphOptIncrementalDisabled"].value));
     incRenderingText->SetReceivesInput(false);
     
     // Create "incremental rendering" toggle.
@@ -574,8 +577,8 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
 
         if(mAdvancedGraphicOptionsSection->IsActive())
         {
-            mMipmapsToggle->SetValue(Services::GetRenderer()->UseMipmaps());
-            mTrilinearFilteringToggle->SetValue(Services::GetRenderer()->UseTrilinearFiltering());
+            mMipmapsToggle->SetValue(gRenderer.UseMipmaps());
+            mTrilinearFilteringToggle->SetValue(gRenderer.UseTrilinearFiltering());
         }
     });
     
@@ -607,7 +610,7 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
         const std::vector<Window::Resolution>& resolutions = Window::GetResolutions();
         if(selectedIndex >= 0 && selectedIndex < resolutions.size())
         {
-            Services::GetRenderer()->ChangeResolution(resolutions[selectedIndex]);
+            gRenderer.ChangeResolution(resolutions[selectedIndex]);
         }
     });
 }
@@ -620,7 +623,7 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
     
     // Add background image.
     UIImage* backgroundImage = mAdvancedGraphicOptionsSection->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["advGraphOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["advGraphOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -633,20 +636,20 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
     
     // Create "mipmap" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* mipmapText = CreateButton(config, "advGraphOptMipMapText", mAdvancedGraphicOptionsSection, false);
-    mipmapText->SetUpTexture(Services::GetAssets()->LoadTexture(config["advGraphOptMipMapEnabled"].value));
-    mipmapText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["advGraphOptMipMapDisabled"].value));
+    mipmapText->SetUpTexture(gAssetManager.LoadTexture(config["advGraphOptMipMapEnabled"].value));
+    mipmapText->SetDisabledTexture(gAssetManager.LoadTexture(config["advGraphOptMipMapDisabled"].value));
     mipmapText->SetReceivesInput(false);
     
     // Create "mipmap" toggle.
     mMipmapsToggle = CreateToggle(config, "advGraphOptMipMap", mAdvancedGraphicOptionsSection);
     mMipmapsToggle->SetToggleCallback([](bool isOn) {
-        Services::GetRenderer()->SetUseMipmaps(isOn);
+        gRenderer.SetUseMipmaps(isOn);
     });
     
     // Create "animation interpolation" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* animInterpText = CreateButton(config, "advGraphOptInterpolationText", mAdvancedGraphicOptionsSection, false);
-    animInterpText->SetUpTexture(Services::GetAssets()->LoadTexture(config["advGraphOptInterpolationEnabled"].value));
-    animInterpText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["advGraphOptInterpolationDisabled"].value));
+    animInterpText->SetUpTexture(gAssetManager.LoadTexture(config["advGraphOptInterpolationEnabled"].value));
+    animInterpText->SetDisabledTexture(gAssetManager.LoadTexture(config["advGraphOptInterpolationDisabled"].value));
     animInterpText->SetReceivesInput(false);
     
     // Create "animation interpolation" toggle.
@@ -657,20 +660,20 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
     
     // Create "trilinear filtering" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* filteringText = CreateButton(config, "advGraphOptFilteringText", mAdvancedGraphicOptionsSection, false);
-    filteringText->SetUpTexture(Services::GetAssets()->LoadTexture(config["advGraphOptFilteringEnabled"].value));
-    filteringText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["advGraphOptFilteringDisabled"].value));
+    filteringText->SetUpTexture(gAssetManager.LoadTexture(config["advGraphOptFilteringEnabled"].value));
+    filteringText->SetDisabledTexture(gAssetManager.LoadTexture(config["advGraphOptFilteringDisabled"].value));
     filteringText->SetReceivesInput(false);
     
     // Create "trilinear filtering" toggle.
     mTrilinearFilteringToggle = CreateToggle(config, "advGraphOptFiltering", mAdvancedGraphicOptionsSection);
     mTrilinearFilteringToggle->SetToggleCallback([](bool isOn) {
-        Services::GetRenderer()->SetUseTrilinearFiltering(isOn);
+        gRenderer.SetUseTrilinearFiltering(isOn);
     });
     
     // Create "lod" text (text can be "disabled", like a button, if graphics system doesn't support this option).
     UIButton* lodText = CreateButton(config, "advGraphOptLODText", mAdvancedGraphicOptionsSection, false);
-    lodText->SetUpTexture(Services::GetAssets()->LoadTexture(config["advGraphOptLODEnabled"].value));
-    lodText->SetDisabledTexture(Services::GetAssets()->LoadTexture(config["advGraphOptLODDisabled"].value));
+    lodText->SetUpTexture(gAssetManager.LoadTexture(config["advGraphOptLODEnabled"].value));
+    lodText->SetDisabledTexture(gAssetManager.LoadTexture(config["advGraphOptLODDisabled"].value));
     lodText->SetReceivesInput(false);
     
     //TODO: LOD Slider
@@ -684,7 +687,7 @@ void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyV
     
     // Add background image.
     UIImage* backgroundImage = mGameOptionsSection->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture(config["gameOptBackSprite"].value), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture(config["gameOptBackSprite"].value), true);
     
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
@@ -746,25 +749,25 @@ void OptionBar::OnSoundOptionsButtonPressed(UIButton* button)
     {
         // Set toggles based on audio system state.
         // NOTE: the SFX toggle affects both SFX/Ambient audio types...BUT the initial state is only based on SFX state for...idk reasons.
-        mGlobalMuteToggle->SetValue(Services::GetAudio()->GetMuted());
-        mSfxMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::SFX));
-        mVoMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::VO));
-        mMusicMuteToggle->SetValue(Services::GetAudio()->GetMuted(AudioType::Music));
+        mGlobalMuteToggle->SetValue(gAudioManager.GetMuted());
+        mSfxMuteToggle->SetValue(gAudioManager.GetMuted(AudioType::SFX));
+        mVoMuteToggle->SetValue(gAudioManager.GetMuted(AudioType::VO));
+        mMusicMuteToggle->SetValue(gAudioManager.GetMuted(AudioType::Music));
 
         // Set sliders based on audio system state.
         // As with the toggles, SFX slider controls both SFX & Ambient volumes. However, the initial value is set from just SFX.
         // I imagine that Ambient is internally a separate audio type, but to the end user, it is just treated as more SFX.
-        mGlobalVolumeSliderSecondary->SetValueSilently(Services::GetAudio()->GetMasterVolume());
-        mSfxVolumeSlider->SetValueSilently(Services::GetAudio()->GetVolume(AudioType::SFX));
-        mVoVolumeSlider->SetValueSilently(Services::GetAudio()->GetVolume(AudioType::VO));
-        mMusicVolumeSlider->SetValueSilently(Services::GetAudio()->GetVolume(AudioType::Music));
+        mGlobalVolumeSliderSecondary->SetValueSilently(gAudioManager.GetMasterVolume());
+        mSfxVolumeSlider->SetValueSilently(gAudioManager.GetVolume(AudioType::SFX));
+        mVoVolumeSlider->SetValueSilently(gAudioManager.GetVolume(AudioType::VO));
+        mMusicVolumeSlider->SetValueSilently(gAudioManager.GetVolume(AudioType::Music));
     }
 }
 
 void OptionBar::OnGlobalVolumeSliderValueChanged(float value)
 {
     // Change the volume.
-    Services::GetAudio()->SetMasterVolume(value);
+    gAudioManager.SetMasterVolume(value);
 
     // Since there are two (!!) sliders for global volume, make sure they stay in-sync.
     mGlobalVolumeSlider->SetValueSilently(value);

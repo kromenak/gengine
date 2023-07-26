@@ -1,8 +1,9 @@
 #include "SceneInitFile.h"
 
+#include "AssetManager.h"
 #include "IniParser.h"
 #include "Model.h"
-#include "Services.h"
+#include "SheepManager.h"
 #include "Skybox.h"
 #include "StringUtil.h"
 
@@ -15,12 +16,12 @@ Skybox* GeneralBlock::CreateSkybox()
 	if(!hasSkyboxData) { return nullptr; }
 	
 	Skybox* skybox = new Skybox();
-	skybox->SetLeftTexture(Services::GetAssets()->LoadSceneTexture(skyboxLeftTextureName, AssetScope::Scene));
-	skybox->SetRightTexture(Services::GetAssets()->LoadSceneTexture(skyboxRightTextureName, AssetScope::Scene));
-	skybox->SetBackTexture(Services::GetAssets()->LoadSceneTexture(skyboxBackTextureName, AssetScope::Scene));
-	skybox->SetFrontTexture(Services::GetAssets()->LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene));
-	skybox->SetDownTexture(Services::GetAssets()->LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene));
-	skybox->SetUpTexture(Services::GetAssets()->LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene));
+	skybox->SetLeftTexture(gAssetManager.LoadSceneTexture(skyboxLeftTextureName, AssetScope::Scene));
+	skybox->SetRightTexture(gAssetManager.LoadSceneTexture(skyboxRightTextureName, AssetScope::Scene));
+	skybox->SetBackTexture(gAssetManager.LoadSceneTexture(skyboxBackTextureName, AssetScope::Scene));
+	skybox->SetFrontTexture(gAssetManager.LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene));
+	skybox->SetDownTexture(gAssetManager.LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene));
+	skybox->SetUpTexture(gAssetManager.LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene));
 	return skybox;
 }
 
@@ -120,7 +121,7 @@ const SceneActor* SceneInitFile::FindCurrentEgo() const
 		// If we found an ego, just make sure the block condition passes. If so, we can use it.
 		if(egoInBlock != nullptr)
 		{
-			if(Services::GetSheep()->Evaluate(actorBlock.condition))
+			if(gSheepManager.Evaluate(actorBlock.condition))
 			{
 				bestPick = egoInBlock;
 			}
@@ -140,7 +141,7 @@ GeneralBlock SceneInitFile::FindCurrentGeneralBlock() const
 	for(auto& gb : mGeneralBlocks)
 	{
 		// Only use this block if the condition passes.
-		if(Services::GetSheep()->Evaluate(gb.condition))
+		if(gSheepManager.Evaluate(gb.condition))
 		{
 			block.TakeOverridesFrom(gb);
 		}
@@ -167,7 +168,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         {
 			// Why is this called "Int Evaluation"? Not sure - but testing in GK3 seems to suggest it is...
 			general.conditionText = section.condition;
-			general.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+			general.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Handle all key/value pairs in this block.
@@ -189,7 +190,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 				
 				// Remaining key/values are size/offset of the texture in 3D space.
 				// This is used as a 2D overlay on the X/Z plane to determine walkable area.
-				for(int i = 1; i < line.entries.size(); ++i)
+				for(size_t i = 1; i < line.entries.size(); ++i)
 				{
 					IniKeyValue& keyValue = line.entries[i];
 					if(StringUtil::EqualsIgnoreCase(keyValue.key, "size"))
@@ -221,7 +222,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(first.key, "globalLight"))
             {
-				for(int i = 1; i < line.entries.size(); ++i)
+				for(size_t i = 1; i < line.entries.size(); ++i)
 				{
 					IniKeyValue& keyValue = line.entries[i];
 					if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
@@ -237,7 +238,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(first.key, "skybox"))
             {
-				for(int i = 1; i < line.entries.size(); ++i)
+				for(size_t i = 1; i < line.entries.size(); ++i)
 				{
 					IniKeyValue& keyValue = line.entries[i];
                     if(StringUtil::EqualsIgnoreCase(keyValue.key, "left"))
@@ -280,7 +281,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			cameraBlock.conditionText = section.condition;
-			cameraBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+			cameraBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Handle creation of each camera in this block.
@@ -324,7 +325,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			cameraBlock.conditionText = section.condition;
-			cameraBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+			cameraBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Handle creation of each camera in this block.
@@ -338,7 +339,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 			camera.label = first.key;
 			
 			// Followed by one or more optional attributes.
-			for(int i = 1; i < line.entries.size(); ++i)
+			for(size_t i = 1; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& keyValue = line.entries[i];
 				if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
@@ -376,7 +377,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			cameraBlock.conditionText = section.condition;
-			cameraBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+			cameraBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Handle creation of each camera in this block.
@@ -390,7 +391,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 			camera.label = first.key;
             
 			// Followed by one or more optional attributes.
-			for(int i = 1; i < line.entries.size(); ++i)
+			for(size_t i = 1; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& keyValue = line.entries[i];
 				if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
@@ -422,7 +423,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			cameraBlock.conditionText = section.condition;
-			cameraBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+			cameraBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Create each camera in this block.
@@ -436,7 +437,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 			camera.label = first.key;
             
 			// Followed by one or more optional attributes.
-			for(int i = 1; i < line.entries.size(); ++i)
+			for(size_t i = 1; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& keyValue = line.entries[i];
 				if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
@@ -490,7 +491,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			positionBlock.conditionText = section.condition;
-			positionBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+			positionBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Create each scene position.
@@ -504,7 +505,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 			position.label = first.key;
             
 			// Followed by one or more optional attributes.
-			for(int i = 1; i < line.entries.size(); ++i)
+			for(size_t i = 1; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& keyValue = line.entries[i];
 				if(StringUtil::EqualsIgnoreCase(keyValue.key, "pos"))
@@ -534,7 +535,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			actorBlock.conditionText = section.condition;
-			actorBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+			actorBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Create each actor defined in the block.
@@ -547,7 +548,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 			{
 				if(StringUtil::EqualsIgnoreCase(keyValue.key, "model"))
                 {
-                    actor.model = Services::GetAssets()->LoadModel(keyValue.value, GetScope());
+                    actor.model = gAssetManager.LoadModel(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "noun"))
                 {
@@ -560,19 +561,19 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "idle"))
                 {
-                    actor.idleGas = Services::GetAssets()->LoadGAS(keyValue.value);
+                    actor.idleGas = gAssetManager.LoadGAS(keyValue.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "talk"))
                 {
-                    actor.talkGas = Services::GetAssets()->LoadGAS(keyValue.value);
+                    actor.talkGas = gAssetManager.LoadGAS(keyValue.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "listen"))
                 {
-                    actor.listenGas = Services::GetAssets()->LoadGAS(keyValue.value);
+                    actor.listenGas = gAssetManager.LoadGAS(keyValue.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initAnim"))
                 {
-                    actor.initAnim = Services::GetAssets()->LoadAnimation(keyValue.value, GetScope());
+                    actor.initAnim = gAssetManager.LoadAnimation(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "hidden"))
                 {
@@ -597,7 +598,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			modelBlock.conditionText = section.condition;
-            modelBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+            modelBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Create each model defined in block.
@@ -642,7 +643,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initanim"))
                 {
-                    model.initAnim = Services::GetAssets()->LoadAnimation(keyValue.value, GetScope());
+                    model.initAnim = gAssetManager.LoadAnimation(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "hidden"))
                 {
@@ -650,7 +651,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "gas"))
                 {
-                    model.gas = Services::GetAssets()->LoadGAS(keyValue.value);
+                    model.gas = gAssetManager.LoadGAS(keyValue.value);
                 }
 			}
             
@@ -660,7 +661,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                (model.type == SceneModel::Type::Prop ||
                 model.type == SceneModel::Type::GasProp))
             {
-                model.model = Services::GetAssets()->LoadModel(model.name, GetScope());
+                model.model = gAssetManager.LoadModel(model.name, GetScope());
             }
         }
     }
@@ -676,7 +677,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			regionBlock.conditionText = section.condition;
-            regionBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+            regionBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Create each region.
@@ -690,7 +691,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
 			region.label = first.key;
             
 			// Followed by one or more optional attributes.
-			for(int i = 1; i < line.entries.size(); ++i)
+			for(size_t i = 1; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& keyValue = line.entries[i];
 				if(StringUtil::EqualsIgnoreCase(keyValue.key, "rect"))
@@ -711,7 +712,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			triggerBlock.conditionText = section.condition;
-            triggerBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+            triggerBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Create each trigger defined.
@@ -744,13 +745,13 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			soundtrackBlock.conditionText = section.condition;
-            soundtrackBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+            soundtrackBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
 		// Add soundtracks.
         for(auto& line : section.lines)
         {
-            Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(line.entries[0].key, GetScope());
+            Soundtrack* soundtrack = gAssetManager.LoadSoundtrack(line.entries[0].key, GetScope());
             if(soundtrack != nullptr)
             {
 				soundtrackBlock.items.push_back(soundtrack);
@@ -768,7 +769,7 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
             conversationBlock.conditionText = section.condition;
-            conversationBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+            conversationBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
 
         // Add conversation settings.
@@ -789,19 +790,19 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "talk"))
                 {
-                    convo.talkGas = Services::GetAssets()->LoadGAS(keyValue.value);
+                    convo.talkGas = gAssetManager.LoadGAS(keyValue.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "listen"))
                 {
-                    convo.listenGas = Services::GetAssets()->LoadGAS(keyValue.value);
+                    convo.listenGas = gAssetManager.LoadGAS(keyValue.value);
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "enter"))
                 {
-                    convo.enterAnim = Services::GetAssets()->LoadAnimation(keyValue.value, GetScope());
+                    convo.enterAnim = gAssetManager.LoadAnimation(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "exit"))
                 {
-                    convo.exitAnim = Services::GetAssets()->LoadAnimation(keyValue.value, GetScope());
+                    convo.exitAnim = gAssetManager.LoadAnimation(keyValue.value, GetScope());
                 }
             }
         }
@@ -817,12 +818,12 @@ void SceneInitFile::ParseFromData(char *data, int dataLength)
         if(!section.condition.empty())
         {
 			actionBlock.conditionText = section.condition;
-            actionBlock.condition = Services::GetSheep()->Compile("Int Evaluation", section.condition);
+            actionBlock.condition = gSheepManager.Compile("Int Evaluation", section.condition);
         }
         
         for(auto& line : section.lines)
         {
-            NVC* nvc = Services::GetAssets()->LoadNVC(line.entries[0].key, GetScope());
+            NVC* nvc = gAssetManager.LoadNVC(line.entries[0].key, GetScope());
             if(nvc != nullptr)
             {
                 actionBlock.items.push_back(nvc);

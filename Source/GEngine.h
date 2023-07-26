@@ -8,18 +8,14 @@
 #include <functional>
 #include <vector>
 
-#include "ActionManager.h"
 #include "Atomics.h"
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "Console.h"
-#include "CursorManager.h"
 #include "InputManager.h"
-#include "LayerManager.h"
 #include "Renderer.h"
 #include "SheepManager.h"
 #include "ReportManager.h"
-#include "VideoPlayer.h"
 
 class Actor;
 class Scene;
@@ -74,19 +70,6 @@ private:
     // If true, the game runs as the "demo" version of the game.
     bool mDemoMode = false;
 
-    // Subsystems.
-    Renderer mRenderer;
-    AudioManager mAudioManager;
-    AssetManager mAssetManager;
-    InputManager mInputManager;
-    SheepManager mSheepManager;
-	ReportManager mReportManager;
-	ActionManager mActionManager;
-	Console mConsole;
-    VideoPlayer mVideoPlayer;
-    LayerManager mLayerManager;
-    CursorManager mCursorManager;
-    
     // A list of all actors that currently exist in the game.
     std::vector<Actor*> mActors;
     

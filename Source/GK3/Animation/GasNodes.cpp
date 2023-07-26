@@ -6,13 +6,14 @@
 #include "GEngine.h"
 #include "GKActor.h"
 #include "LocationManager.h"
+#include "Random.h"
 #include "Scene.h"
 
 float AnimGasNode::Execute(GasPlayer* player)
 {
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
-    int randomCheck = rand() % 100 + 1;
+    int randomCheck = Random::Range(1, 101);
     if(randomCheck > random) { return 0; }
 
     // Must have a valid animation, and GasPlayer, and Animator.
@@ -42,16 +43,15 @@ OneOfGasNode::~OneOfGasNode()
 
 float OneOfGasNode::Execute(GasPlayer* player)
 {
-    if(animNodes.size() == 0) { return 0.0f; }
-    int randomIndex = rand() % animNodes.size();
-    return animNodes[randomIndex]->Execute(player);
+    if(animNodes.empty()) { return 0.0f; }
+    return animNodes[Random::Range(0, animNodes.size())]->Execute(player);
 }
 
 float WaitGasNode::Execute(GasPlayer* player)
 {
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
-    int randomCheck = rand() % 100 + 1;
+    int randomCheck = Random::Range(1, 101);
     if(randomCheck > random) { return 0.0f; }
 
     // We will execute this node. Decide wait time based on min/max.
@@ -60,7 +60,7 @@ float WaitGasNode::Execute(GasPlayer* player)
     if(maxWaitTimeSeconds != 0 && minWaitTimeSeconds > maxWaitTimeSeconds) { return minWaitTimeSeconds; }
 
     // Normal case - random between min and max.
-    return (rand() % maxWaitTimeSeconds + minWaitTimeSeconds);
+    return Random::Range(minWaitTimeSeconds, maxWaitTimeSeconds);
 }
 
 float GotoGasNode::Execute(GasPlayer* player)
@@ -150,8 +150,8 @@ float ChooseWalkGasNode::Execute(GasPlayer* player)
     if(actor == nullptr) { return 0; }
 
     // Randomly choose a position from the list.
-    int randomIndex = rand() % positionNames.size();
-    int counter = 0;
+    int randomIndex = Random::Range(0, positionNames.size());
+    size_t counter = 0;
     const ScenePosition* scenePosition = nullptr;
     while(counter < positionNames.size())
     {
@@ -166,7 +166,7 @@ float ChooseWalkGasNode::Execute(GasPlayer* player)
         // Either candidate was null (unlikely) or actor's already at that position (more likely).
         // Either way, we can't use the randomly selected position! Just increment forward until we find one that works...
         randomIndex = (randomIndex + 1) % positionNames.size();
-        counter++;
+        ++counter;
     }
 
     // At this point, if we don't have a position to use, we have to just skip this node.
@@ -278,6 +278,6 @@ float DialogueGasNode::Execute(GasPlayer* player)
 float LocationGasNode::Execute(GasPlayer* player)
 {
     GKObject* owner = static_cast<GKObject*>(player->GetOwner());
-    Services::Get<LocationManager>()->SetActorLocation(owner->GetNoun(), location);
+    gLocationManager.SetActorLocation(owner->GetNoun(), location);
     return 0.0f;
 }

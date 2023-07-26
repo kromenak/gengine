@@ -1,18 +1,19 @@
 #include "AnimationNodes.h"
 
+#include "ActionManager.h"
 #include "Animation.h"
 #include "Animator.h"
+#include "AssetManager.h"
 #include "CharacterManager.h"
 #include "DialogueManager.h"
 #include "FaceController.h"
 #include "FootstepManager.h"
 #include "GK3UI.h"
 #include "GKActor.h"
-#include "GKActor.h"
+#include "GEngine.h"
 #include "Heading.h"
 #include "MeshRenderer.h"
 #include "Scene.h"
-#include "Services.h"
 #include "SoundtrackPlayer.h"
 #include "Texture.h"
 #include "VertexAnimation.h"
@@ -146,7 +147,7 @@ Vector3 VertexAnimNode::CalcAbsolutePosition()
 
 void SceneTextureAnimNode::Play(AnimationState* animState)
 {
-	Texture* texture = Services::GetAssets()->LoadSceneTexture(textureName, AssetScope::Scene);
+	Texture* texture = gAssetManager.LoadSceneTexture(textureName, AssetScope::Scene);
 	if(texture != nullptr)
 	{
 		//TODO: Ensure sceneName matches loaded scene name?
@@ -181,7 +182,7 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
 		if(material != nullptr)
 		{
 			// Apply the texture to that material.
-			Texture* texture = Services::GetAssets()->LoadSceneTexture(textureName, AssetScope::Scene);
+			Texture* texture = gAssetManager.LoadSceneTexture(textureName, AssetScope::Scene);
 			if(texture != nullptr)
 			{
 				material->SetDiffuseTexture(texture);
@@ -229,7 +230,7 @@ void ModelVisibilityAnimNode::Sample(int frame)
 void SoundAnimNode::Play(AnimationState* animState)
 {
     // Don't play new sounds during action skip.
-    if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
+    if(gActionManager.IsSkippingCurrentAction()) { return; }
 
     // Create play audio params struct.
     PlayAudioParams playParams;
@@ -261,7 +262,7 @@ void SoundAnimNode::Play(AnimationState* animState)
         playParams.maxDist = maxDistance;
     }
 
-    Services::GetAudio()->Play(playParams);
+    gAudioManager.Play(playParams);
 }
 
 namespace
@@ -276,14 +277,14 @@ namespace
         std::string floorTextureName = floorTexture != nullptr ? floorTexture->GetNameNoExtension() : "carpet1";
 
         // Get the footstep sound.
-        Audio* footAudio = scuff ? Services::Get<FootstepManager>()->GetFootscuff(shoeType, floorTextureName)
-            : Services::Get<FootstepManager>()->GetFootstep(shoeType, floorTextureName);
+        Audio* footAudio = scuff ? gFootstepManager.GetFootscuff(shoeType, floorTextureName)
+            : gFootstepManager.GetFootstep(shoeType, floorTextureName);
         if(footAudio != nullptr)
         {
             // Play the sound at the actor's world position, which is near their feet anyways.
             // The min/max distances for footsteps are derived from experimenting with the original game.
-            const int kMinFootstepDist = 60.0f;
-            const int kMaxFootstepDist = 800.0f;
+            const float kMinFootstepDist = 60.0f;
+            const float kMaxFootstepDist = 800.0f;
 
             PlayAudioParams playParams;
             playParams.audio = footAudio;
@@ -293,14 +294,14 @@ namespace
             playParams.position = actor->GetWorldPosition();
             playParams.minDist = kMinFootstepDist;
             playParams.maxDist = kMaxFootstepDist;
-            Services::GetAudio()->Play(playParams);
+            gAudioManager.Play(playParams);
         }
     }
 }
 
 void FootstepAnimNode::Play(AnimationState* animState)
 {
-    if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
+    if(gActionManager.IsSkippingCurrentAction()) { return; }
 
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
@@ -313,7 +314,7 @@ void FootstepAnimNode::Play(AnimationState* animState)
 
 void FootscuffAnimNode::Play(AnimationState* animState)
 {
-    if(Services::Get<ActionManager>()->IsSkippingCurrentAction()) { return; }
+    if(gActionManager.IsSkippingCurrentAction()) { return; }
 
 	// Get actor using the specified noun.
 	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
@@ -332,7 +333,7 @@ void PlaySoundtrackAnimNode::Play(AnimationState* animState)
     SoundtrackPlayer* soundtrackPlayer = scene->GetSoundtrackPlayer();
     if(soundtrackPlayer == nullptr) { return; }
 
-    Soundtrack* soundtrack = Services::GetAssets()->LoadSoundtrack(soundtrackName, AssetScope::Scene);
+    Soundtrack* soundtrack = gAssetManager.LoadSoundtrack(soundtrackName, AssetScope::Scene);
     if(soundtrack == nullptr) { return; }
     soundtrackPlayer->Play(soundtrack);
 }
@@ -380,7 +381,7 @@ void FaceTexAnimNode::Play(AnimationState* animState)
 	if(actor != nullptr)
 	{
 		// In this case, the texture name is what it is.
-		Texture* texture = Services::GetAssets()->LoadTexture(textureName);
+		Texture* texture = gAssetManager.LoadTexture(textureName);
 		if(texture != nullptr)
 		{
 			actor->GetFaceController()->Set(faceElement, texture);
@@ -415,7 +416,7 @@ void LipSyncAnimNode::Play(AnimationState* animState)
 	if(actor != nullptr)
 	{
 		// The mouth texture name is based on the current face config for the character.
-		Texture* mouthTexture = Services::GetAssets()->LoadTexture(actor->GetConfig()->faceConfig->identifier + "_" + mouthTextureName);
+		Texture* mouthTexture = gAssetManager.LoadTexture(actor->GetConfig()->faceConfig->identifier + "_" + mouthTextureName);
 		if(mouthTexture != nullptr)
 		{
 			actor->GetFaceController()->SetMouth(mouthTexture);
@@ -468,7 +469,7 @@ void ExpressionAnimNode::Sample(int frame)
 
 void SpeakerAnimNode::Play(AnimationState* animState)
 {
-	Services::Get<DialogueManager>()->SetSpeaker(actorNoun);
+	gDialogueManager.SetSpeaker(actorNoun);
 }
 
 void SpeakerAnimNode::Sample(int frame)
@@ -478,7 +479,7 @@ void SpeakerAnimNode::Sample(int frame)
 
 void CaptionAnimNode::Play(AnimationState* animState)
 {
-    gGK3UI.AddCaption(caption, Services::Get<DialogueManager>()->GetSpeaker());
+    gGK3UI.AddCaption(caption, gDialogueManager.GetSpeaker());
 }
 
 void CaptionAnimNode::Sample(int frame)
@@ -505,7 +506,7 @@ void SpeakerCaptionAnimNode::Sample(int frame)
 
 void DialogueCueAnimNode::Play(AnimationState* animState)
 {
-	Services::Get<DialogueManager>()->TriggerDialogueCue();
+	gDialogueManager.TriggerDialogueCue();
     gGK3UI.FinishCaption();
 }
 
@@ -517,7 +518,7 @@ void DialogueCueAnimNode::Sample(int frame)
 void DialogueAnimNode::Play(AnimationState* animState)
 {
     //TODO: Unsure if "numLines" and "playFidgets" are correct here.
-    Services::Get<DialogueManager>()->StartDialogue(licensePlate, 1, false, nullptr);
+    gDialogueManager.StartDialogue(licensePlate, 1, false, nullptr);
 }
 
 void DialogueAnimNode::Sample(int frame)

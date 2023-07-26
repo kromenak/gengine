@@ -1,6 +1,7 @@
 #include "SidneyUtil.h"
 
 #include "Actor.h"
+#include "AssetManager.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
@@ -32,7 +33,7 @@ UIButton* SidneyUtil::CreateTextButton(Actor* parent, const std::string& text, c
     UILabel* buttonLabel = actor->AddComponent<UILabel>();
 
     // Set font and alignment.
-    buttonLabel->SetFont(Services::GetAssets()->LoadFont(font));
+    buttonLabel->SetFont(gAssetManager.LoadFont(font));
     buttonLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
     buttonLabel->SetVerticalAlignment(VerticalAlignment::Bottom);
 
@@ -49,7 +50,7 @@ void SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName)
         menuBarActor->GetTransform()->SetParent(parent->GetTransform());
         UIImage* menuBarImage = menuBarActor->AddComponent<UIImage>();
 
-        menuBarImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_STRETCH.BMP"), true);
+        menuBarImage->SetTexture(gAssetManager.LoadTexture("S_BAR_STRETCH.BMP"), true);
         menuBarImage->SetRenderMode(UIImage::RenderMode::Tiled);
 
         menuBarImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
@@ -64,7 +65,7 @@ void SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName)
         menuBarTopActor->GetTransform()->SetParent(parent->GetTransform());
         UIImage* menuBarTopImage = menuBarTopActor->AddComponent<UIImage>();
 
-        menuBarTopImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_TOPSTRIP_LR.BMP"), true);
+        menuBarTopImage->SetTexture(gAssetManager.LoadTexture("S_BAR_TOPSTRIP_LR.BMP"), true);
         menuBarTopImage->SetRenderMode(UIImage::RenderMode::Tiled);
 
         menuBarTopImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
@@ -78,7 +79,7 @@ void SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName)
             menuBarAngleActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
             UIImage* menuBarAngleImage = menuBarAngleActor->AddComponent<UIImage>();
 
-            menuBarAngleImage->SetTexture(Services::GetAssets()->LoadTexture("S_BAR_TOPANGLE_LR.BMP"), true);
+            menuBarAngleImage->SetTexture(gAssetManager.LoadTexture("S_BAR_TOPANGLE_LR.BMP"), true);
 
             menuBarAngleImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
             menuBarAngleImage->GetRectTransform()->SetAnchor(0.0f, 1.0f); // Anchor to Top-Left
@@ -91,7 +92,7 @@ void SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName)
             screenNameActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
             UILabel* screenNameLabel = screenNameActor->AddComponent<UILabel>();
 
-            screenNameLabel->SetFont(Services::GetAssets()->LoadFont("SID_EMB_18.FON"));
+            screenNameLabel->SetFont(gAssetManager.LoadFont("SID_EMB_18.FON"));
             screenNameLabel->SetText(screenName);
             screenNameLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
             screenNameLabel->SetVerticalAlignment(VerticalAlignment::Top);

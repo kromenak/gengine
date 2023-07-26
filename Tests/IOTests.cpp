@@ -51,7 +51,7 @@ TEST_CASE("Read/Write binary memory works")
     REQUIRE(writer.GetPosition() == 47);
 
     std::string strBufferIn = "Smaller than buffer";
-    writer.WriteStringBuffer(strBufferIn, 32);
+    writer.WriteString(strBufferIn, 32);
     REQUIRE(writer.GetPosition() == 79);
 
     // Check that we can seek & skip.
@@ -104,11 +104,11 @@ TEST_CASE("Read/Write binary memory works")
     REQUIRE(strcmp(textOut, textIn) == 0);
     REQUIRE(reader.GetPosition() == 31);
 
-    std::string strOut = reader.ReadTinyString();
+    std::string strOut = reader.ReadString8();
     REQUIRE(strOut == strIn);
     REQUIRE(reader.GetPosition() == 47);
 
-    std::string strBufferOut = reader.ReadStringBuffer(32);
+    std::string strBufferOut = reader.ReadString(32);
     REQUIRE(strBufferOut == strBufferIn);
     REQUIRE(reader.GetPosition() == 79);
 

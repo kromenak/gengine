@@ -2,7 +2,8 @@
 
 #include <sstream>
 
-#include "Services.h"
+#include "ReportManager.h"
+#include "SheepManager.h"
 #include "StringUtil.h"
 
 Layer::Layer(const std::string& name) :
@@ -38,19 +39,19 @@ void Layer::Exit(Layer* toLayer)
 void Layer::Pushed()
 {
     // Save previous layer's audio state if we are overriding anything.
-    Services::GetAudio()->SaveAudioState(mOverrideSfxAudioState, mOverrideVoAudioState, mOverrideAmbientAudioState, mAudioSaveState);
+    gAudioManager.SaveAudioState(mOverrideSfxAudioState, mOverrideVoAudioState, mOverrideAmbientAudioState, mAudioSaveState);
 }
 
 void Layer::Popped()
 {
     // Restore previous layer's audio state on pop.
-    Services::GetAudio()->RestoreAudioState(mAudioSaveState);
+    gAudioManager.RestoreAudioState(mAudioSaveState);
 
     // When a layer is popped, all associated executing SheepScripts should stop immediately.
-    Services::GetSheep()->StopExecution(mName);
+    gSheepManager.StopExecution(mName);
 }
 
-TYPE_DEF_BASE(LayerManager);
+LayerManager gLayerManager;
 
 LayerManager::LayerManager() :
     mGlobalLayer("GlobalLayer")
@@ -147,5 +148,5 @@ void LayerManager::DumpLayerStack()
     }
     
     // Log to dump stream.
-    Services::GetReports()->Log("Dump", ss.str());
+    gReportManager.Log("Dump", ss.str());
 }

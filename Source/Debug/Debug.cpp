@@ -1,14 +1,15 @@
 #include "Debug.h"
 
 #include "AABB.h"
+#include "AssetManager.h"
 #include "Camera.h"
+#include "InputManager.h"
 #include "Material.h"
 #include "Matrix4.h"
 #include "Mesh.h"
 #include "Plane.h"
 #include "Rect.h"
 #include "Renderer.h"
-#include "Services.h"
 #include "Triangle.h"
 #include "Vector3.h"
 
@@ -34,19 +35,19 @@ void Debug::Update(float deltaTime)
     }
 
     // Check for debug setting inputs.
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F1))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F1))
     {
         sRenderActorTransformAxes = !sRenderActorTransformAxes;
     }
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F2))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F2))
     {
         sRenderSubmeshLocalAxes = !sRenderSubmeshLocalAxes;
     }
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F3))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F3))
     {
         sRenderRectTransformRects = !sRenderRectTransformRects;
     }
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_F5))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F5))
     {
         Debug::ToggleFlag("ShowBoundingBoxes");
     }
@@ -56,7 +57,7 @@ void Debug::Render()
 {
     if(sDrawShader == nullptr)
     {
-        sDrawShader = Services::GetAssets()->LoadShader("3D-Color");
+        sDrawShader = gAssetManager.LoadShader("3D-Color");
     }
 
     // We can just use any old material for now (uses default shader under the hood).
@@ -172,7 +173,7 @@ void Debug::DrawRectXZ(const Rect& rect, float height, const Color32& color, flo
 void Debug::DrawScreenRect(const Rect& rect, const Color32& color)
 {
     // We need a camera before we can draw screen rects.
-    Camera* camera = Services::GetRenderer()->GetCamera();
+    Camera* camera = gRenderer.GetCamera();
     if(camera == nullptr) { return; }
 
     // This rect is in screen space, so we need to convert it to work space before continuing.

@@ -1,5 +1,7 @@
 #include "SidneyEmail.h"
 
+#include "AssetManager.h"
+#include "AudioManager.h"
 #include "SidneyUtil.h"
 #include "Texture.h"
 #include "UIButton.h"
@@ -12,7 +14,7 @@ void SidneyEmail::Init(Actor* parent)
     mRoot = new Actor(TransformType::RectTransform);
     mRoot->GetTransform()->SetParent(parent->GetTransform());
     UIImage* backgroundImage = mRoot->AddComponent<UIImage>();
-    backgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_BKGND.BMP"), true);
+    backgroundImage->SetTexture(gAssetManager.LoadTexture("S_BKGND.BMP"), true);
 
     // Receive input to avoid sending inputs to main screen below this screen.
     backgroundImage->SetReceivesInput(true);
@@ -33,13 +35,13 @@ void SidneyEmail::Init(Actor* parent)
         mainMenuButton->SetUpTexture(&Texture::Black);
 
         mainMenuButton->SetPressCallback([&](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDEXIT.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDEXIT.WAV"));
             Hide();
         });
 
         // Add exit button text.
         UILabel* mainMenuLabel = mainMenuButtonActor->AddComponent<UILabel>();
-        mainMenuLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_18.FON"));
+        mainMenuLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
         mainMenuLabel->SetText("MAIN MENU");
         mainMenuLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mainMenuLabel->SetVerticalAlignment(VerticalAlignment::Center);

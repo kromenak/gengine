@@ -11,6 +11,7 @@
 
 #include <vector>
 
+class Camera;
 class GKObject;
 class Model;
 class OptionBar;

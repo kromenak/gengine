@@ -1,7 +1,6 @@
 #include "UIWidget.h"
 
 #include "Actor.h"
-#include "Services.h"
 #include "UICanvas.h"
 
 TYPE_DEF_CHILD(Component, UIWidget);

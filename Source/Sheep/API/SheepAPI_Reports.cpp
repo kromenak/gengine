@@ -1,38 +1,38 @@
 #include "SheepAPI_Reports.h"
 
+#include <iomanip>
 #include <sstream>
 
 #include "ReportManager.h"
 #include "StringUtil.h"
-#include "Services.h"
 
 using namespace std;
 
 // TRACING
 shpvoid PrintFloat(float value)
 {
-    Services::GetReports()->Log("SheepScript", std::to_string(value));
+    gReportManager.Log("SheepScript", std::to_string(value));
     return 0;
 }
 RegFunc1(PrintFloat, void, float, IMMEDIATE, DEV_FUNC);
 
 shpvoid PrintFloatX(const std::string& category, float value)
 {
-    Services::GetReports()->Log(category, std::to_string(value));
+    gReportManager.Log(category, std::to_string(value));
     return 0;
 }
 RegFunc2(PrintFloatX, void, string, float, IMMEDIATE, DEV_FUNC);
 
 shpvoid PrintInt(int value)
 {
-    Services::GetReports()->Log("SheepScript", std::to_string(value));
+    gReportManager.Log("SheepScript", std::to_string(value));
     return 0;
 }
 RegFunc1(PrintInt, void, int, IMMEDIATE, DEV_FUNC);
 
 shpvoid PrintIntX(const std::string& category, int value)
 {
-    Services::GetReports()->Log(category, std::to_string(value));
+    gReportManager.Log(category, std::to_string(value));
     return 0;
 }
 RegFunc2(PrintIntX, void, string, int, IMMEDIATE, DEV_FUNC);
@@ -41,7 +41,7 @@ shpvoid PrintIntHex(int value)
 {
     std::stringstream ss;
     ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << value;
-    Services::GetReports()->Log("SheepScript", ss.str());
+    gReportManager.Log("SheepScript", ss.str());
     return 0;
 }
 RegFunc1(PrintIntHex, void, int, IMMEDIATE, DEV_FUNC);
@@ -50,21 +50,21 @@ shpvoid PrintIntHexX(const std::string& category, int value)
 {
     std::stringstream ss;
     ss << std::hex << std::setw(2) << std::setfill('0') << std::uppercase << value;
-    Services::GetReports()->Log(category, ss.str());
+    gReportManager.Log(category, ss.str());
     return 0;
 }
 RegFunc2(PrintIntHexX, void, string, int, IMMEDIATE, DEV_FUNC);
 
 shpvoid PrintString(const std::string& string)
 {
-    Services::GetReports()->Log("SheepScript", string);
+    gReportManager.Log("SheepScript", string);
     return 0;
 }
 RegFunc1(PrintString, void, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid PrintStringX(const std::string& category, const std::string& string)
 {
-    Services::GetReports()->Log(category, string);
+    gReportManager.Log(category, string);
     return 0;
 }
 RegFunc2(PrintStringX, void, string, string, IMMEDIATE, DEV_FUNC);
@@ -125,14 +125,14 @@ shpvoid AddStreamContent(const std::string& streamName, const std::string& conte
         //ERROR: Unknown content!
     }
 
-    //Services::GetReports()->AddStreamContent(streamName, content);
+    //gReportManager.AddStreamContent(streamName, content);
     return 0;
 }
 RegFunc2(AddStreamContent, void, string, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid ClearStreamContent(const std::string& streamName)
 {
-    Services::GetReports()->ClearStreamContent(streamName);
+    gReportManager.ClearStreamContent(streamName);
     return 0;
 }
 RegFunc1(ClearStreamContent, void, string, IMMEDIATE, DEV_FUNC);
@@ -151,7 +151,7 @@ RegFunc2(AddStreamOutput, void, string, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid ClearStreamOutput(const std::string& streamName)
 {
-    Services::GetReports()->ClearStreamOutput(streamName);
+    gReportManager.ClearStreamOutput(streamName);
     return 0;
 }
 RegFunc1(ClearStreamOutput, void, string, IMMEDIATE, DEV_FUNC);
@@ -164,14 +164,14 @@ RegFunc2(RemoveStreamOutput, void, string, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid DisableStream(const std::string& streamName)
 {
-    Services::GetReports()->DisableStream(streamName);
+    gReportManager.DisableStream(streamName);
     return 0;
 }
 RegFunc1(DisableStream, void, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid EnableStream(const std::string& streamName)
 {
-    Services::GetReports()->EnableStream(streamName);
+    gReportManager.EnableStream(streamName);
     return 0;
 }
 RegFunc1(EnableStream, void, string, IMMEDIATE, DEV_FUNC);
@@ -196,14 +196,14 @@ RegFunc2(SetStreamAction, void, string, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid SetStreamFilename(const std::string& streamName, const std::string& filename)
 {
-    Services::GetReports()->SetStreamFilename(streamName, filename);
+    gReportManager.SetStreamFilename(streamName, filename);
     return 0;
 }
 RegFunc2(SetStreamFilename, void, string, string, IMMEDIATE, DEV_FUNC);
 
 shpvoid SetStreamFileTruncate(const std::string& streamName, int truncate)
 {
-    Services::GetReports()->SetStreamFileTruncate(streamName, truncate != 0);
+    gReportManager.SetStreamFileTruncate(streamName, truncate != 0);
     return 0;
 }
 RegFunc2(SetStreamFileTruncate, void, string, int, IMMEDIATE, DEV_FUNC);

@@ -6,14 +6,12 @@
 #pragma once
 #include <vector>
 
-#include "Vector3.h"
-#include "Quaternion.h"
-#include "Matrix4.h"
-
 #include "Component.h"
 #include "InputManager.h"
+#include "Matrix4.h"
+#include "Quaternion.h"
 #include "Transform.h"
-#include "Services.h"
+#include "Vector3.h"
 
 // As a rule, all all Actors must have a Transform.
 // This allows specifying which type to construct with.

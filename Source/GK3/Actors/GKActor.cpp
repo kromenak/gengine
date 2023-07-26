@@ -14,7 +14,6 @@
 #include "MeshRenderer.h"
 #include "Model.h"
 #include "Scene.h"
-#include "Services.h"
 #include "StringUtil.h"
 #include "VertexAnimation.h"
 #include "VertexAnimator.h"
@@ -31,7 +30,7 @@ GKActor::GKActor(const SceneActor* actorDef) :
     SetName(mActorDef->model->GetNameNoExtension());
 
     // Grab this character's config using its three-letter "character ID".
-    CharacterConfig& config = Services::Get<CharacterManager>()->GetCharacterConfig(GetName());
+    CharacterConfig& config = gCharacterManager.GetCharacterConfig(GetName());
     mCharConfig = &config;
 
     // Create a separate Actor for the GKActor's 3D model visuals.
@@ -41,7 +40,7 @@ GKActor::GKActor(const SceneActor* actorDef) :
     // Add 3D model renderer using lit textured shader.
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
     mMeshRenderer->SetModel(mActorDef->model);
-    mMeshRenderer->SetShader(Services::GetAssets()->LoadShader("3D-Tex-Lit"));
+    mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit"));
     
     // Add vertex animator so the 3D model can be animated.
     mVertexAnimator = mModelActor->AddComponent<VertexAnimator>();

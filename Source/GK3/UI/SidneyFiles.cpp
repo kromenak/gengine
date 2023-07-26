@@ -1,5 +1,6 @@
 #include "SidneyFiles.h"
 
+#include "AssetManager.h"
 #include "GameProgress.h"
 #include "Sidney.h"
 #include "SidneyUtil.h"
@@ -71,7 +72,7 @@ void SidneyFiles::Init(Sidney* parent)
     mAllFiles.emplace_back(SidneyFileType::License,     "fileWilkesLicense",    "e_sidney_add_license_wilkes");
 
     // Set file indexes (as this is how files are referenced when adding).
-    for(int i = 0; i < mAllFiles.size(); ++i)
+    for(size_t i = 0; i < mAllFiles.size(); ++i)
     {
         mAllFiles[i].index = i;
     }
@@ -83,8 +84,9 @@ void SidneyFiles::Init(Sidney* parent)
         mRoot->GetTransform()->SetParent(parent->GetTransform());
 
         RectTransform* rt = mRoot->GetComponent<RectTransform>();
-        Texture* backgroundTexture = Services::GetAssets()->LoadTexture("S_BKGND.BMP");
-        rt->SetSizeDelta(backgroundTexture->GetWidth(), backgroundTexture->GetHeight());
+        Texture* backgroundTexture = gAssetManager.LoadTexture("S_BKGND.BMP");
+        rt->SetSizeDelta(static_cast<float>(backgroundTexture->GetWidth()),
+                         static_cast<float>(backgroundTexture->GetHeight()));
     }
 
     // Add dialog background.
@@ -118,9 +120,9 @@ void SidneyFiles::Init(Sidney* parent)
         closeButton->GetRectTransform()->SetAnchor(0.0f, 1.0f);
         closeButton->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
 
-        closeButton->SetUpTexture(Services::GetAssets()->LoadTexture("CLOSEWIN_UP.BMP"));
-        closeButton->SetDownTexture(Services::GetAssets()->LoadTexture("CLOSEWIN_DOWN.BMP"));
-        closeButton->SetHoverTexture(Services::GetAssets()->LoadTexture("CLOSEWIN_HOVER.BMP"));
+        closeButton->SetUpTexture(gAssetManager.LoadTexture("CLOSEWIN_UP.BMP"));
+        closeButton->SetDownTexture(gAssetManager.LoadTexture("CLOSEWIN_DOWN.BMP"));
+        closeButton->SetHoverTexture(gAssetManager.LoadTexture("CLOSEWIN_HOVER.BMP"));
         
         closeButton->SetPressCallback([this](UIButton* button){
             Hide();
@@ -138,7 +140,7 @@ void SidneyFiles::Init(Sidney* parent)
         titleLabel->GetRectTransform()->SetAnchorMax(1.0f, 1.0f); // Fill space horizontally, anchor to top.
         titleLabel->GetRectTransform()->SetSizeDeltaY(20.0f);
 
-        titleLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_18.FON"));
+        titleLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
         titleLabel->SetText("File List");
         titleLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         titleLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -161,9 +163,9 @@ void SidneyFiles::Hide()
     mRoot->SetActive(false);
 }
 
-void SidneyFiles::AddFile(int fileIndex)
+void SidneyFiles::AddFile(size_t fileIndex)
 {
-    if(fileIndex < 0 || fileIndex >= mAllFiles.size()) { return; }
+    if(fileIndex >= mAllFiles.size()) { return; }
 
     // Find appropriate directory.
     for(auto& dir : mData)
@@ -176,14 +178,15 @@ void SidneyFiles::AddFile(int fileIndex)
             // Add to score if there's a score event.
             if(!mAllFiles[fileIndex].scoreName.empty())
             {
-                Services::Get<GameProgress>()->ChangeScore(mAllFiles[fileIndex].scoreName);
+                gGameProgress.ChangeScore(mAllFiles[fileIndex].scoreName);
             }
         }
     }
 }
 
-bool SidneyFiles::HasFile(int fileIndex)
+bool SidneyFiles::HasFile(size_t fileIndex)
 {
+    if(fileIndex >= mAllFiles.size()) { return false; }
     return HasFile(mAllFiles[fileIndex].name);
 }
 
@@ -247,22 +250,22 @@ void SidneyFiles::RefreshFileListUI()
 
         // Create the label for the directory itself.
         // This has a leading "-" and uses gray colored text.
-        UILabel* label = GetFileListLabel();
-        label->SetEnabled(true);
-        label->GetRectTransform()->SetAnchoredPosition(topLeft);
-        label->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_14_UL.FON"));
-        label->SetText("-" + SidneyUtil::GetMainScreenLocalizer().GetText(dir.name));
+        UILabel* dirLabel = GetFileListLabel();
+        dirLabel->SetEnabled(true);
+        dirLabel->GetRectTransform()->SetAnchoredPosition(topLeft);
+        dirLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14_UL.FON"));
+        dirLabel->SetText("-" + SidneyUtil::GetMainScreenLocalizer().GetText(dir.name));
         topLeft.y -= 16.0f;
 
         // Create labels for each file within the directory.
         // These are indented slightly and use gold colored text.
         for(auto& file : dir.files)
         {
-            UILabel* label = GetFileListLabel();
-            label->SetEnabled(true);
-            label->GetRectTransform()->SetAnchoredPosition(topLeft);
-            label->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_14.FON"));
-            label->SetText("  " + SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(file.index + 1)));
+            UILabel* fileLabel = GetFileListLabel();
+            fileLabel->SetEnabled(true);
+            fileLabel->GetRectTransform()->SetAnchoredPosition(topLeft);
+            fileLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            fileLabel->SetText("  " + SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(file.index + 1)));
             topLeft.y -= 16.0f;
         }
     }

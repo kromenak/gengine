@@ -31,7 +31,7 @@ struct SoundtrackNodeResults
 {
     PlayingSoundHandle soundHandle;
     StopMethod stopMethod = StopMethod::PlayToEnd;
-    float fadeOutTimeMs = 0.0f;
+    int fadeOutTimeMs = 0;
     GKObject* followObj = nullptr;
 };
 

@@ -10,6 +10,7 @@
 
 #include "StringUtil.h"
 
+class Font;
 class UIImage;
 class UILabel;
 

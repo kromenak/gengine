@@ -1,10 +1,12 @@
 #include "Localizer.h"
 
+#include <cassert>
+
+#include "AssetManager.h"
 #include "IniParser.h"
-#include "Services.h"
 #include "TextAsset.h"
 
-TYPE_DEF_BASE(Localizer);
+Localizer gLocalizer;
 
 Localizer::Localizer(const std::string& fileName, const std::string& sectionName)
 {
@@ -20,7 +22,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
     // GK3 translations are stored in INI files with various sections.
     // Sometimes, we don't care about the sections - we just load the entire file into a single localizer.
     // However, sometimes sections have duplicate keys - in that case, it's better to treat each section as it's own localizer.
-    TextAsset* textFile = Services::GetAssets()->LoadText(localeFileName);
+    TextAsset* textFile = gAssetManager.LoadText(localeFileName);
 
     // Parse as INI file.
     // Ignore multiple key values per line b/c a comma is going to be part of the translation copy, rather than another key/value on the same line.

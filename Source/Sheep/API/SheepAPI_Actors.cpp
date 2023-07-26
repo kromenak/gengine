@@ -164,10 +164,10 @@ shpvoid SetIdleGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = Services::GetAssets()->LoadGAS(gasName, AssetScope::Scene);
+    GAS* fidget = gAssetManager.LoadGAS(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
-        Services::GetReports()->Log("Error", "Attempted to load an invalid fidget file: " + gasName);
+        gReportManager.Log("Error", "Attempted to load an invalid fidget file: " + gasName);
     }
     actor->SetIdleFidget(fidget);
     return 0;
@@ -193,10 +193,10 @@ shpvoid SetListenGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = Services::GetAssets()->LoadGAS(gasName, AssetScope::Scene);
+    GAS* fidget = gAssetManager.LoadGAS(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
-        Services::GetReports()->Log("Error", "Attempted to load an invalid fidget file: " + gasName);
+        gReportManager.Log("Error", "Attempted to load an invalid fidget file: " + gasName);
     }
     actor->SetListenFidget(fidget);
     return 0;
@@ -222,10 +222,10 @@ shpvoid SetTalkGAS(const std::string& actorName, const std::string& gasName)
 
     // Load the fidget.
     // If the fidget doesn't exist, we still set it, but we output an error.
-    GAS* fidget = Services::GetAssets()->LoadGAS(gasName, AssetScope::Scene);
+    GAS* fidget = gAssetManager.LoadGAS(gasName, AssetScope::Scene);
     if(fidget == nullptr)
     {
-        Services::GetReports()->Log("Error", "Attempted to load an invalid fidget file: " + gasName);
+        gReportManager.Log("Error", "Attempted to load an invalid fidget file: " + gasName);
     }
     actor->SetTalkFidget(fidget);
     return 0;
@@ -333,8 +333,8 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     }
 
     // Load start/loop anims. Neither is optional.
-    Animation* startAnim = Services::GetAssets()->LoadAnimation(start, AssetScope::Scene);
-    Animation* loopAnim = Services::GetAssets()->LoadAnimation(cont, AssetScope::Scene);
+    Animation* startAnim = gAssetManager.LoadAnimation(start, AssetScope::Scene);
+    Animation* loopAnim = gAssetManager.LoadAnimation(cont, AssetScope::Scene);
     if(startAnim == nullptr || loopAnim == nullptr)
     {
         ExecError();
@@ -345,7 +345,7 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     Animation* startTurnLeftAnim = nullptr;
     if(!startTurnLeft.empty())
     {
-        startTurnLeftAnim = Services::GetAssets()->LoadAnimation(startTurnLeft, AssetScope::Scene);
+        startTurnLeftAnim = gAssetManager.LoadAnimation(startTurnLeft, AssetScope::Scene);
         if(startTurnLeftAnim == nullptr)
         {
             ExecError();
@@ -355,7 +355,7 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
     Animation* startTurnRightAnim = nullptr;
     if(!startTurnRight.empty())
     {
-        startTurnRightAnim  = Services::GetAssets()->LoadAnimation(startTurnRight, AssetScope::Scene);
+        startTurnRightAnim  = gAssetManager.LoadAnimation(startTurnRight, AssetScope::Scene);
         if(startTurnRightAnim == nullptr)
         {
             ExecError();

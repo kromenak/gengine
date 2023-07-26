@@ -4,6 +4,8 @@
 #include "UICanvas.h"
 #include "Window.h"
 
+InputManager gInputManager;
+
 InputManager::InputManager()
 {
     // Retrieve SDL keyboard state and number of keys.

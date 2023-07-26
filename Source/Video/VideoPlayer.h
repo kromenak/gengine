@@ -17,7 +17,6 @@ struct VideoState;
 
 class VideoPlayer
 {
-    TYPE_DECL_BASE();
 public:
     VideoPlayer();
     ~VideoPlayer();
@@ -72,3 +71,5 @@ private:
     // Callback that is fired when video playback stops (either due to EOF or skip).
     std::function<void()> mStopCallback = nullptr;
 };
+
+extern VideoPlayer gVideoPlayer;

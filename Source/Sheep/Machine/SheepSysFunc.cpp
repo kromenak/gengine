@@ -2,7 +2,6 @@
 
 #include <iostream>
 
-#include "Services.h"
 #include "SheepManager.h"
 #include "StringUtil.h"
 
@@ -180,19 +179,19 @@ Value CallSysFunc(const std::string& name, const Value& x1, const Value& x2, con
 
 void ExecError()
 {
-    Services::GetSheep()->FlagExecutionError();
+    gSheepManager.FlagExecutionError();
 }
 
 const std::string& GetSheepTag()
 {
-    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    SheepThread* currentThread = gSheepManager.GetCurrentThread();
     assert(currentThread != nullptr);
     return currentThread->mTag;
 }
 
 std::function<void()> AddWait()
 {
-    SheepThread* currentThread = Services::GetSheep()->GetCurrentThread();
+    SheepThread* currentThread = gSheepManager.GetCurrentThread();
     if(currentThread != nullptr)
     {
         return currentThread->AddWait();

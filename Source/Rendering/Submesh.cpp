@@ -109,7 +109,7 @@ bool Submesh::Raycast(const Ray& ray, RaycastHit& hitInfo)
 	}
 
     // See if the ray hits any triangle.
-	for(int i = 0; i < mVertexArray.GetIndexCount(); i += 3)
+	for(uint32_t i = 0; i < mVertexArray.GetIndexCount(); i += 3)
 	{
 		Vector3 vert1 = GetVertexPosition(mIndexes[i]);
 		Vector3 vert2 = GetVertexPosition(mIndexes[i + 1]);

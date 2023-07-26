@@ -161,3 +161,5 @@ private:
     template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>* cache = nullptr);
     template<class T> void UnloadAssets(std::unordered_map_ci<std::string, T*>& cache, AssetScope scope = AssetScope::Global);
 };
+
+extern AssetManager gAssetManager;

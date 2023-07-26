@@ -1,5 +1,7 @@
 #include "TimeblockScreen.h"
 
+#include "AssetManager.h"
+#include "GEngine.h"
 #include "Scene.h"
 #include "Sequence.h"
 #include "SoundtrackPlayer.h"
@@ -38,10 +40,10 @@ static UIButton* CreateButton(Actor* parent, const std::string& buttonId)
     UIButton* button = buttonActor->AddComponent<UIButton>();
 
     // Set textures.
-    button->SetUpTexture(Services::GetAssets()->LoadTexture(buttonId + "_U.BMP"));
-    button->SetDownTexture(Services::GetAssets()->LoadTexture(buttonId + "_D.BMP"));
-    button->SetHoverTexture(Services::GetAssets()->LoadTexture(buttonId + "_H.BMP"));
-    button->SetDisabledTexture(Services::GetAssets()->LoadTexture(buttonId + "_X.BMP"));
+    button->SetUpTexture(gAssetManager.LoadTexture(buttonId + "_U.BMP"));
+    button->SetDownTexture(gAssetManager.LoadTexture(buttonId + "_D.BMP"));
+    button->SetHoverTexture(gAssetManager.LoadTexture(buttonId + "_H.BMP"));
+    button->SetDisabledTexture(gAssetManager.LoadTexture(buttonId + "_X.BMP"));
     return button;
 }
 
@@ -105,7 +107,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, std::functio
 
     // Load background image for this timeblock.
     std::string timeblockString = timeblock.ToString();
-    mBackgroundImage->SetTexture(Services::GetAssets()->LoadTexture("TBT" + timeblockString + ".BMP"), true);
+    mBackgroundImage->SetTexture(gAssetManager.LoadTexture("TBT" + timeblockString + ".BMP"), true);
 
     // Position the text image. This is unfortunately not consistent for every timeblock!
     mTextImage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
@@ -118,7 +120,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, std::functio
     }
 
     // Load sequence containing animation.
-    mAnimSequence = Services::GetAssets()->LoadSequence("D" + timeblockString);
+    mAnimSequence = gAssetManager.LoadSequence("D" + timeblockString);
     mTextImage->SetEnabled(mAnimSequence != nullptr);
     mAnimTimer = 0.0f;
 
@@ -129,7 +131,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, std::functio
     }
 
     // Play "tick tock" sound effect.
-    Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("CLOCKTIMEBLOCK.WAV"));
+    gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
 
     // Hide buttons if this screen is on a timer.
     mContinueButton->SetEnabled(mScreenTimer <= 0.0f);
@@ -156,31 +158,31 @@ void TimeblockScreen::Hide()
 void TimeblockScreen::OnUpdate(float deltaTime)
 {
     /*
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_RIGHTBRACKET))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RIGHTBRACKET))
     {
         timeblockIndex = Math::Clamp(timeblockIndex + 1, 0, 16);
         Show(timeblockTextPositions[timeblockIndex].first);
     }
-    else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_LEFTBRACKET))
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_LEFTBRACKET))
     {
         timeblockIndex = Math::Clamp(timeblockIndex - 1, 0, 16);
         Show(timeblockTextPositions[timeblockIndex].first);
     }
     
     Vector2 anchoredPos = mTextImage->GetRectTransform()->GetAnchoredPosition();
-    if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_UP))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_UP))
     {
         anchoredPos.y++;
     }
-    else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_DOWN))
     {
         anchoredPos.y--;
     }
-    else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_RIGHT))
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RIGHT))
     {
         anchoredPos.x++;
     }
-    else if(Services::GetInput()->IsKeyLeadingEdge(SDL_SCANCODE_LEFT))
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_LEFT))
     {
         anchoredPos.x--;
     }
@@ -189,7 +191,7 @@ void TimeblockScreen::OnUpdate(float deltaTime)
     */
 
     // Shortcut key for pressing continue button.
-    if(mContinueButton->IsEnabled() && Services::GetInput()->IsKeyTrailingEdge(SDL_SCANCODE_C))
+    if(mContinueButton->IsEnabled() && gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_C))
     {
         mContinueButton->Press();
     }

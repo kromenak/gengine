@@ -17,9 +17,8 @@
 
 class GameProgress
 {
-	TYPE_DECL_BASE();
 public:
-    GameProgress();
+    void Init();
 
     // Score Tracking
 	int GetMaxScore() const { return mMaxScore; }
@@ -107,3 +106,4 @@ private:
 	std::string_map_ci<int> mGameVariables;
 };
 
+extern GameProgress gGameProgress;

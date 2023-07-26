@@ -1,5 +1,7 @@
 #include "DrivingScreenBlip.h"
 
+#include "StringUtil.h"
+
 DrivingScreenBlip::DrivingScreenBlip(const DrivingScreen::PathData& pathData) : Actor(TransformType::RectTransform),
     mPathData(pathData)
 {
@@ -41,7 +43,7 @@ void DrivingScreenBlip::ClearPath()
 
 void DrivingScreenBlip::SkipToPathNode(const std::string& nodeName)
 {
-    for(int i = 0; i < mPath.size(); ++i)
+    for(size_t i = 0; i < mPath.size(); ++i)
     {
         if(StringUtil::EqualsIgnoreCase(mPath[i]->name, nodeName))
         {

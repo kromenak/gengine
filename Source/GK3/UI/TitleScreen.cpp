@@ -1,6 +1,7 @@
 #include "TitleScreen.h"
 
-#include "Services.h"
+#include "AssetManager.h"
+#include "GEngine.h"
 #include "SoundtrackPlayer.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -14,10 +15,10 @@ static UIButton* CreateButton(Actor* parent, const std::string& buttonId, float 
     UIButton* button = buttonActor->AddComponent<UIButton>();
 
     // Set textures.
-    button->SetUpTexture(Services::GetAssets()->LoadTexture(buttonId + "_U.BMP"));
-    button->SetDownTexture(Services::GetAssets()->LoadTexture(buttonId + "_D.BMP"));
-    button->SetHoverTexture(Services::GetAssets()->LoadTexture(buttonId + "_H.BMP"));
-    button->SetDisabledTexture(Services::GetAssets()->LoadTexture(buttonId + "_X.BMP"));
+    button->SetUpTexture(gAssetManager.LoadTexture(buttonId + "_U.BMP"));
+    button->SetDownTexture(gAssetManager.LoadTexture(buttonId + "_D.BMP"));
+    button->SetHoverTexture(gAssetManager.LoadTexture(buttonId + "_H.BMP"));
+    button->SetDisabledTexture(gAssetManager.LoadTexture(buttonId + "_X.BMP"));
 
     // Anchor to bottom-right and position based off that.
     button->GetRectTransform()->SetAnchor(1.0f, 0.0f);
@@ -38,12 +39,12 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
 
     // Add title screen background image.
     UIImage* background = AddComponent<UIImage>();
-    background->SetTexture(Services::GetAssets()->LoadTexture("TITLE.BMP"));
+    background->SetTexture(gAssetManager.LoadTexture("TITLE.BMP"));
 
     // Add "intro" button.
     UIButton* introButton = CreateButton(this, "TITLE_INTRO", -505.0f);
     introButton->SetPressCallback([](UIButton* button) {
-        Services::Get<VideoPlayer>()->Play("intro.bik", true, true, nullptr);
+        gVideoPlayer.Play("intro.bik", true, true, nullptr);
     });
     if(GEngine::Instance()->IsDemoMode())
     {
@@ -84,7 +85,7 @@ void TitleScreen::Show()
     {
         soundtrackPlayer = AddComponent<SoundtrackPlayer>();
     }
-    soundtrackPlayer->Play(Services::GetAssets()->LoadSoundtrack("TITLETHEME"));
+    soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("TITLETHEME"));
 }
 
 void TitleScreen::Hide()

@@ -1,5 +1,6 @@
 #include "Walker.h"
 
+#include "ActionManager.h"
 #include "Actor.h"
 #include "Animator.h"
 #include "Camera.h"
@@ -11,7 +12,6 @@
 #include "Heading.h"
 #include "Ray.h"
 #include "Scene.h"
-#include "Services.h"
 #include "StringUtil.h"
 #include "Vector3.h"
 #include "WalkerBoundary.h"
@@ -197,7 +197,7 @@ void Walker::OnUpdate(float deltaTime)
         // Kind of a HACK: if we're walking, and action manager is skipping, move to end of movement ASAP.
         // Without this, walks during fast-forwards can get stuck and cause the game to freeze.
         //TODO: *Probably* a better way to handle this, with a substantial refactor...
-        if(Services::Get<ActionManager>()->IsSkippingCurrentAction())
+        if(gActionManager.IsSkippingCurrentAction())
         {
             SkipToEnd();
 
@@ -676,7 +676,7 @@ bool Walker::CalculateShortenedPath()
     // But if 90% of the path is behind the camera, the walker can just skip to the node right before the camera and walk from there!
     size_t originalPathSize = mPath.size();
     Vector3 lastPoppedPathPos;
-    Camera* camera = Services::GetRenderer()->GetCamera();
+    Camera* camera = gRenderer.GetCamera();
     Frustum frustum = camera->GetWorldSpaceViewFrustum();
     while(mPath.size() > 1)
     {
@@ -796,7 +796,7 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSp
             
             // If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
             // In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
-            rotateDirection = cross.y >= 0.0f ? 1 : -1;
+            rotateDirection = cross.y >= 0.0f ? 1.0f : -1.0f;
         }
         
         // Determine how much we'll rotate this frame.

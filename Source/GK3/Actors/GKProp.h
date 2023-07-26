@@ -9,6 +9,7 @@
 class GAS;
 class GasPlayer;
 class MeshRenderer;
+class Model;
 class SceneData;
 struct SceneModel;
 class VertexAnimator;

@@ -24,9 +24,8 @@ struct ShoeSounds
 
 class FootstepManager
 {
-	TYPE_DECL_BASE();
 public:
-	FootstepManager();
+    void Init();
 	
 	Audio* GetFootstep(const std::string& shoeType, const std::string& floorTextureName);
 	Audio* GetFootscuff(const std::string& shoeType, const std::string& floorTextureName);
@@ -41,3 +40,5 @@ private:
 	// Need to be able to get get audio lists by shoe type.
 	std::string_map_ci<ShoeSounds> mShoeTypeToShoeSounds;
 };
+
+extern FootstepManager gFootstepManager;

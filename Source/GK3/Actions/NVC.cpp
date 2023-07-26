@@ -3,6 +3,7 @@
 #include "GKActor.h"
 #include "IniParser.h"
 #include "SheepCompiler.h"
+#include "SheepManager.h"
 #include "SheepScript.h"
 
 /*static*/ std::vector<Action> NVC::mEmptyActions;
@@ -94,7 +95,7 @@ void NVC::ParseFromData(char *data, int dataLength)
 		action.caseLabel = caseLabel;
         
         // From here, we have some optional stuff.
-		for(int i = 3; i < line.entries.size(); ++i)
+		for(size_t i = 3; i < line.entries.size(); ++i)
 		{
 			IniKeyValue& keyValue = line.entries[i];
 			
@@ -168,7 +169,7 @@ void NVC::ParseFromData(char *data, int dataLength)
 				}
 				
 				// Compile and save script.
-				action.script.script = Services::GetSheep()->Compile("Case Evaluation", action.script.text);
+				action.script.script = gSheepManager.Compile("Case Evaluation", action.script.text);
             }
 		}
 
@@ -220,7 +221,7 @@ void NVC::ParseFromData(char *data, int dataLength)
         {
             SheepScriptAndText caseLogic;
             caseLogic.text = first.value;
-            caseLogic.script = Services::GetSheep()->CompileEval(first.value);
+            caseLogic.script = gSheepManager.CompileEval(first.value);
             mCaseLogic[caseLabel] = caseLogic;
         }
         else

@@ -1,6 +1,7 @@
 #include "Sidney.h"
 
 #include "ActionManager.h"
+#include "AssetManager.h"
 #include "GameProgress.h"
 #include "InventoryManager.h"
 #include "LocationManager.h"
@@ -24,10 +25,10 @@ namespace
         button->GetRectTransform()->SetAnchor(0.0f, 1.0f);
         button->GetRectTransform()->SetAnchoredPosition(xPos, -24.0f);
 
-        button->SetUpTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_U.BMP"));
-        button->SetHoverTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_H.BMP"));
-        button->SetDownTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_D.BMP"));
-        button->SetDisabledTexture(Services::GetAssets()->LoadTexture("B_" + buttonId + "_X.BMP"));
+        button->SetUpTexture(gAssetManager.LoadTexture("B_" + buttonId + "_U.BMP"));
+        button->SetHoverTexture(gAssetManager.LoadTexture("B_" + buttonId + "_H.BMP"));
+        button->SetDownTexture(gAssetManager.LoadTexture("B_" + buttonId + "_D.BMP"));
+        button->SetDisabledTexture(gAssetManager.LoadTexture("B_" + buttonId + "_X.BMP"));
         return button;
     }
 }
@@ -53,7 +54,7 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
     Actor* desktopBackground = new Actor(TransformType::RectTransform);
     desktopBackground->GetTransform()->SetParent(GetTransform());
     UIImage* desktopBackgroundImage = desktopBackground->AddComponent<UIImage>();
-    desktopBackgroundImage->SetTexture(Services::GetAssets()->LoadTexture("S_MAIN_SCN.BMP"), true);
+    desktopBackgroundImage->SetTexture(gAssetManager.LoadTexture("S_MAIN_SCN.BMP"), true);
 
     // Add exit button as child of desktop background.
     {
@@ -71,13 +72,13 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         exitButton->SetUpTexture(&Texture::White);
 
         exitButton->SetPressCallback([this](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDBUTTON3.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTTON3.WAV"));
             Hide();
         });
 
         // Add exit button text.
         UILabel* exitLabel = exitButtonActor->AddComponent<UILabel>();
-        exitLabel->SetFont(Services::GetAssets()->LoadFont("SID_TEXT_18.FON"));
+        exitLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
         exitLabel->SetText(SidneyUtil::GetMainScreenLocalizer().GetText("MenuItem9"));
         exitLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         exitLabel->SetVerticalAlignment(VerticalAlignment::Center);
@@ -91,12 +92,12 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         float buttonPos = kButtonStart;
         UIButton* searchButton = CreateMainButton(desktopBackground, "SEARCH", buttonPos);
         searchButton->SetPressCallback([this](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
 
             // Gabe refuses to use the search system.
             if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
             {
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O6I2ZQR1\", 1)");
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O6I2ZQR1\", 1)");
             }
             else
             {
@@ -107,12 +108,12 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* emailButton = CreateMainButton(desktopBackground, "EMAIL", buttonPos);
         emailButton->SetPressCallback([this](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
 
             // Gabe also doesn't want to use email.
             if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
             {
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O1E2ZQR1\", 1)");
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O1E2ZQR1\", 1)");
             }
             else
             {
@@ -123,19 +124,19 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* filesButton = CreateMainButton(desktopBackground, "FILES", buttonPos);
         filesButton->SetPressCallback([this](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
             mFiles.Show();
         });
 
         buttonPos += kButtonSpacing;
         UIButton* analyzeButton = CreateMainButton(desktopBackground, "ANALYZE", buttonPos);
         analyzeButton->SetPressCallback([](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
 
             // Gabe also doesn't want to analyze stuff.
             if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
             {
-                Services::Get<ActionManager>()->ExecuteSheepAction("wait StartDialogue(\"02O7A2ZQR1\", 1)");
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7A2ZQR1\", 1)");
             }
             else
             {
@@ -146,28 +147,28 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         buttonPos += kButtonSpacing;
         UIButton* translateButton = CreateMainButton(desktopBackground, "TRANSL", buttonPos);
         translateButton->SetPressCallback([](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
             printf("Translate\n");
         });
 
         buttonPos += kButtonSpacing;
         UIButton* dataButton = CreateMainButton(desktopBackground, "ADDATA", buttonPos);
         dataButton->SetPressCallback([this](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
             mAddData.Start();
         });
 
         buttonPos += kButtonSpacing;
         UIButton* idButton = CreateMainButton(desktopBackground, "MAKEID", buttonPos);
         idButton->SetPressCallback([](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
             printf("Make ID\n");
         });
 
         buttonPos += kButtonSpacing;
         UIButton* suspectsButton = CreateMainButton(desktopBackground, "SUSPT", buttonPos);
         suspectsButton->SetPressCallback([](UIButton* button){
-            Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("SIDENTER.WAV"));
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
             printf("Suspects\n");
         });
     }
@@ -178,7 +179,7 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
         newEmailActor->GetTransform()->SetParent(desktopBackground->GetTransform());
         mNewEmailLabel = newEmailActor->AddComponent<UILabel>();
 
-        mNewEmailLabel->SetFont(Services::GetAssets()->LoadFont("SID_PDN_10_GRN.FON"));
+        mNewEmailLabel->SetFont(gAssetManager.LoadFont("SID_PDN_10_GRN.FON"));
         mNewEmailLabel->SetText("NEW E-MAIL");
         mNewEmailLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
         mNewEmailLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -226,10 +227,10 @@ void Sidney::Hide()
 
     // Whenever you exit Sidney, no matter where you are in the game, you warp to R25.
     // This makes sense under the assumption that you only access Sidney in R25 anyway!
-    Services::Get<LocationManager>()->ChangeLocation("R25", [](){
+    gLocationManager.ChangeLocation("R25", [](){
 
         // This special function warps Ego to the "sitting at desk" position and plays the stand up animation.
-        Services::Get<ActionManager>()->ExecuteSheepAction("R25_ALL", "ExitSidney$");
+        gActionManager.ExecuteSheepAction("R25_ALL", "ExitSidney$");
     });
 }
 
@@ -250,9 +251,9 @@ void Sidney::OnUpdate(float deltaTime)
 
     // Play "New Email" SFX the first chance we get.
     // If we do this during an action skip, the action skip logic will stomp this audio. So, wait until no skip is happening.
-    if(mPlayNewEmailSfx && !Services::Get<ActionManager>()->IsSkippingCurrentAction())
+    if(mPlayNewEmailSfx && !gActionManager.IsSkippingCurrentAction())
     {
-        Services::GetAudio()->PlaySFX(Services::GetAssets()->LoadAudio("NEWEMAIL.WAV"));
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("NEWEMAIL.WAV"));
         mPlayNewEmailSfx = false;
     }
 

@@ -2,8 +2,10 @@
 
 #include "ActionBar.h"
 #include "ActionManager.h"
+#include "AssetManager.h"
 #include "InventoryManager.h"
 #include "RectTransform.h"
+#include "ReportManager.h"
 #include "StringUtil.h"
 #include "Texture.h"
 #include "UIButton.h"
@@ -35,10 +37,10 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
     exitButtonActor->GetTransform()->SetParent(GetTransform());
 	UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
 	
-	exitButton->SetUpTexture(Services::GetAssets()->LoadTexture("EXITN.BMP"));
-	exitButton->SetDownTexture(Services::GetAssets()->LoadTexture("EXITD.BMP"));
-	exitButton->SetHoverTexture(Services::GetAssets()->LoadTexture("EXITHOV.BMP"));
-	exitButton->SetDisabledTexture(Services::GetAssets()->LoadTexture("EXITDIS.BMP"));
+	exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
+	exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
+	exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
+	exitButton->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
     exitButton->SetPressCallback([this](UIButton* button) {
         Hide();
     });
@@ -54,7 +56,7 @@ InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
 	Actor* activeHighlightActor = new Actor(TransformType::RectTransform);
     activeHighlightActor->GetTransform()->SetParent(GetTransform());
 	mActiveHighlightImage = activeHighlightActor->AddComponent<UIImage>();
-	mActiveHighlightImage->SetTexture(Services::GetAssets()->LoadTexture("INV_HIGHLIGHT.BMP"), true);
+	mActiveHighlightImage->SetTexture(gAssetManager.LoadTexture("INV_HIGHLIGHT.BMP"), true);
 	mActiveHighlightImage->SetEnabled(false);
 	
 	RectTransform* activeHighlightRectTransform = mActiveHighlightImage->GetRectTransform();
@@ -72,7 +74,7 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
     if(IsActive()) { return; }
     
     // Push layer onto stack.
-    Services::Get<LayerManager>()->PushLayer(&mLayer);
+    gLayerManager.PushLayer(&mLayer);
 
     // Save current actor name and inventory.
     mCurrentActorName = actorName;
@@ -91,7 +93,7 @@ void InventoryScreen::Hide()
 	SetActive(false);
     
     // Pop off stack.
-    Services::Get<LayerManager>()->PopLayer(&mLayer);
+    gLayerManager.PopLayer(&mLayer);
 
     // Clear inventory data.
     mCurrentActorName.clear();
@@ -100,7 +102,7 @@ void InventoryScreen::Hide()
 
 bool InventoryScreen::IsShowing() const
 {
-    return Services::Get<LayerManager>()->IsTopLayer(&mLayer);
+    return gLayerManager.IsTopLayer(&mLayer);
 }
 
 void InventoryScreen::RefreshLayout()
@@ -121,7 +123,7 @@ void InventoryScreen::RefreshLayout()
     }
 
     // Get active inventory item for actor.
-    std::string activeInventoryItem = Services::Get<InventoryManager>()->GetActiveInventoryItem(mCurrentActorName);
+    std::string activeInventoryItem = gInventoryManager.GetActiveInventoryItem(mCurrentActorName);
 
     // Populate the inventory screen.
     const float kStartX = 60.0f;
@@ -131,15 +133,15 @@ void InventoryScreen::RefreshLayout()
 
     float x = kStartX;
     float y = kStartY;
-    int counter = 0;
+    size_t counter = 0;
     for(auto& item : *mCurrentInventory)
     {
         // Only bother creating/positioning list item if we have a valid texture for it.
         //TODO: Use a placeholder/error texture?
-        Texture* itemTexture = Services::Get<InventoryManager>()->GetInventoryItemListTexture(item);
+        Texture* itemTexture = gInventoryManager.GetInventoryItemListTexture(item);
         if(itemTexture == nullptr)
         {
-            Services::GetReports()->Log("Error", "No inventory item texture found for " + item);
+            gReportManager.Log("Error", "No inventory item texture found for " + item);
             continue;
         }
 
@@ -172,7 +174,7 @@ void InventoryScreen::RefreshLayout()
 
             mItemButtons.push_back(button);
         }
-        counter++;
+        ++counter;
 
         // Set position/size for button.
         buttonRT->SetAnchoredPosition(x, y);
@@ -203,16 +205,16 @@ void InventoryScreen::RefreshLayout()
 void InventoryScreen::OnItemClicked(UIButton* button, std::string itemName)
 {
 	// Show the action bar for this noun.
-    Services::Get<ActionManager>()->ShowActionBar(itemName, nullptr);
+    gActionManager.ShowActionBar(itemName, nullptr);
 	
 	// We want to add a "pickup" verb, which means to make the item the active inventory item.
-	ActionBar* actionBar = Services::Get<ActionManager>()->GetActionBar();
+	ActionBar* actionBar = gActionManager.GetActionBar();
 	actionBar->AddVerbToBack("PICKUP", [this, button, itemName]() {
-        Services::Get<InventoryManager>()->SetActiveInventoryItem(this->mCurrentActorName, itemName);
+        gInventoryManager.SetActiveInventoryItem(this->mCurrentActorName, itemName);
 	});
 	
 	// We want to add an "inspect" verb, which means to show the close-up of the item.
 	actionBar->AddVerbToFront("INSPECT", [itemName]() {
-		Services::Get<InventoryManager>()->InventoryInspect(itemName);
+		gInventoryManager.InventoryInspect(itemName);
 	});
 }

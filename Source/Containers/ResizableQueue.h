@@ -201,7 +201,7 @@ private:
         // But since we now have a much bigger array (twice the size), move looped-around elements to the end.
         if(mSize > 0 && mTail <= mHead)
         {
-            int oldIndex = 0;
+            uint32 oldIndex = 0;
             while(oldIndex < mTail)
             {
                 reinterpret_cast<T*>(newData)[oldCapacity + oldIndex] = reinterpret_cast<T*>(mData)[oldIndex];

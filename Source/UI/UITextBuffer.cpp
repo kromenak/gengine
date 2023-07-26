@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "Services.h"
+#include "Console.h"
 
 TYPE_DEF_CHILD(UILabel, UITextBuffer);
 
@@ -14,7 +14,7 @@ UITextBuffer::UITextBuffer(Actor* owner) : UILabel(owner)
 
 void UITextBuffer::OnUpdate(float deltaTime)
 {
-	auto& scrollback = Services::GetConsole()->GetScrollback();
+	auto& scrollback = gConsole.GetScrollback();
 	if(mLastBufferLength != scrollback.size())
 	{
 		SetDirty();
@@ -24,7 +24,7 @@ void UITextBuffer::OnUpdate(float deltaTime)
 
 void UITextBuffer::PopulateTextLayout(TextLayout& textLayout)
 {
-	auto& scrollback = Services::GetConsole()->GetScrollback();
+	auto& scrollback = gConsole.GetScrollback();
 	
 	int startIndex = (int)scrollback.size() - mLineOffset - mLineCount;
 	if(startIndex < 0)

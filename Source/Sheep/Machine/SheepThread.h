@@ -11,7 +11,7 @@
 #include "SheepStack.h"
 
 class SheepVM;
-class SheepInstance;
+struct SheepInstance;
 
 struct SheepThread
 {

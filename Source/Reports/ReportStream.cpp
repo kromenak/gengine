@@ -1,17 +1,13 @@
-//
-// ReportStream.cpp
-//
-// Clark Kromenaker
-//
 #include "ReportStream.h"
 
 #include <ctime>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 
+#include "Console.h"
 #include "GameProgress.h"
 #include "LocationManager.h"
-#include "Services.h"
 #include "SystemUtil.h"
 
 ReportStream::ReportStream(std::string name) :
@@ -34,7 +30,7 @@ void ReportStream::Log(std::string content)
 	// Handle console output type
 	if((mOutput & ReportOutput::Console) != ReportOutput::None)
 	{
-		Services::GetConsole()->AddToScrollback(output);
+		gConsole.AddToScrollback(output);
 	}
 	
 	// Handle debugger output type.
@@ -89,7 +85,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			{
 				outputStr << "*";
 			}
-			outputStr << " TB: '" << Services::Get<GameProgress>()->GetTimeblock() << "' ";
+			outputStr << " TB: '" << gGameProgress.GetTimeblock() << "' ";
 		}
 		if((mContent & ReportContent::Location) != ReportContent::None)
 		{
@@ -97,7 +93,7 @@ std::string ReportStream::BuildOutputString(const std::string& content)
 			{
 				outputStr << "*";
 			}
-			outputStr << " Loc: '" << Services::Get<LocationManager>()->GetLocation() << "' ";
+			outputStr << " Loc: '" << gLocationManager.GetLocation() << "' ";
 		}
 		if((mContent & ReportContent::Date) != ReportContent::None)
 		{

@@ -1,7 +1,9 @@
 #include "SheepManager.h"
 
-#include "Services.h"
+#include "LayerManager.h"
 #include "StringUtil.h"
+
+SheepManager gSheepManager;
 
 SheepScript* SheepManager::Compile(const char* filePath)
 {
@@ -21,7 +23,7 @@ SheepScript* SheepManager::Compile(const std::string& name, std::istream& stream
 void SheepManager::Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag)
 {
     // If no tag is provided, fall back on using the current layer's name.
-    const std::string& realTag = tag.empty() ? Services::Get<LayerManager>()->GetTopLayerName() : tag;
+    const std::string& realTag = tag.empty() ? gLayerManager.GetTopLayerName() : tag;
 
     // Pass to VM for execution.
 	mVirtualMachine.Execute(script, finishCallback, realTag);
@@ -30,7 +32,7 @@ void SheepManager::Execute(SheepScript* script, std::function<void()> finishCall
 void SheepManager::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
 {
     // If no tag is provided, fall back on using the current layer's name.
-    const std::string& realTag = tag.empty() ? Services::Get<LayerManager>()->GetTopLayerName() : tag;
+    const std::string& realTag = tag.empty() ? gLayerManager.GetTopLayerName() : tag;
 
     // Pass to VM for execution.
 	mVirtualMachine.Execute(script, functionName, finishCallback, realTag);

@@ -1,21 +1,23 @@
 #include "GameProgress.h"
 
+#include "AssetManager.h"
 #include "Config.h"
+#include "GEngine.h"
 #include "GMath.h"
 #include "IniParser.h"
 #include "Localizer.h"
+#include "ReportManager.h"
 #include "Scene.h"
-#include "Services.h"
 #include "StatusOverlay.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
 
-TYPE_DEF_BASE(GameProgress);
+GameProgress gGameProgress;
 
-GameProgress::GameProgress()
+void GameProgress::Init()
 {
     // Parse valid score events (and score amount) into map of score events.
-    TextAsset* textFile = Services::GetAssets()->LoadText("Scores.txt");
+    TextAsset* textFile = gAssetManager.LoadText("Scores.txt");
     IniParser parser(textFile->GetText(), textFile->GetTextLength());
     IniSection section;
     while(parser.ReadNextSection(section))
@@ -31,7 +33,7 @@ GameProgress::GameProgress()
     }
 
     // Load max score from config file.
-    Config* config = Services::GetAssets()->LoadConfig("GAME.CFG");
+    Config* config = gAssetManager.LoadConfig("GAME.CFG");
     if(config != nullptr)
     {
         mMaxScore = config->GetInt("Logic", "Max Score", mMaxScore);
@@ -54,7 +56,7 @@ void GameProgress::ChangeScore(const std::string& scoreName)
     auto validEventsIt = mScoreEvents.find(scoreName);
     if(validEventsIt == mScoreEvents.end())
     {
-        Services::GetReports()->Log("Error", StringUtil::Format("Illegal score name (%s)", scoreName.c_str()));
+        gReportManager.Log("Error", StringUtil::Format("Illegal score name (%s)", scoreName.c_str()));
         return;
     }
 
@@ -93,7 +95,7 @@ void GameProgress::SetTimeblock(const Timeblock& timeblock)
 std::string GameProgress::GetTimeblockDisplayName() const
 {
     // Keys for timeblocks are in form "Day110A".
-    return Services::Get<Localizer>()->GetText("Day" + mTimeblock.ToString());
+    return gLocalizer.GetText("Day" + mTimeblock.ToString());
 }
 
 int GameProgress::GetGameVariable(const std::string& varName) const

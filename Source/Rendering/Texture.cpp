@@ -127,7 +127,7 @@ void Texture::SetPixelColor32(int x, int y, const Color32& color)
 
     // Make sure the index is valid.
     uint32 index = (y * mWidth + x) * 4;
-    if(index < 0 || index >= (mWidth * mHeight * 4)) { return; }
+    if(index >= (mWidth * mHeight * 4)) { return; }
 
     // Set it.
     mPixels[index] = color.GetR();
@@ -146,7 +146,7 @@ Color32 Texture::GetPixelColor32(int x, int y) const
 	uint32 index = static_cast<uint32>((y * mWidth + x) * 4);
 	
 	// If index isn't valid...also return black.
-	if(index < 0 || index >= (mWidth * mHeight * 4)) { return Color32::Black; }
+	if(index >= (mWidth * mHeight * 4)) { return Color32::Black; }
 	
 	uint8 r = mPixels[index];
     uint8 g = mPixels[index + 1];
@@ -164,7 +164,7 @@ void Texture::SetPaletteIndex(int x, int y, uint8 val)
     uint32 index = static_cast<uint32>(y * mWidth + x);
 
     // If index isn't valid...also return zero.
-    if(index < 0 || index >= (mWidth * mHeight)) { return; }
+    if(index >= (mWidth * mHeight)) { return; }
 
     // Got it!
     mPaletteIndexes[index] = val;
@@ -179,7 +179,7 @@ uint8 Texture::GetPaletteIndex(int x, int y) const
 	uint32 index = static_cast<uint32>(y * mWidth + x);
 	
 	// If index isn't valid...also return zero.
-	if(index < 0 || index >= (mWidth * mHeight)) { return 0; }
+	if(index >= (mWidth * mHeight)) { return 0; }
 	
 	// Got it!
 	return mPaletteIndexes[index];
@@ -392,14 +392,14 @@ void Texture::UploadToGPU()
     if((mDirtyFlags & DirtyFlags::Properties) != DirtyFlags::None)
     {
         // Set wrap mode for the texture.
-        GLfloat wrapParam = mWrapMode == WrapMode::Repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+        GLint wrapParam = mWrapMode == WrapMode::Repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapParam);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapParam);
 
         // Determine min/mag filters. These are a little complicated, based on desired filter mode and mipmaps.
         // Defaults (GL_NEAREST) correlate to point filtering.
-        GLfloat minFilterParam = GL_NEAREST;
-        GLfloat magFilterParam = GL_NEAREST;
+        GLint minFilterParam = GL_NEAREST;
+        GLint magFilterParam = GL_NEAREST;
         if(mFilterMode == FilterMode::Bilinear)
         {
             // Bilinear filtering uses GL_LINEAR. We can also use mipmaps with bilinear filtering.
@@ -484,10 +484,10 @@ void Texture::WriteToFile(const std::string& filePath)
     // PIXELS
 	// Write out one row at a time, bottom to top, left to right, per BMP format standard.
 	int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
-    for(int y = mHeight - 1; y >= 0; --y)
+    for(uint32_t y = mHeight - 1; y >= 0; --y)
     {
 		int bytesWritten = 0;
-        for(int x = 0; x < mWidth; ++x)
+        for(uint32_t x = 0; x < mWidth; ++x)
         {
             if(bitsPerPixel == 8)
             {
@@ -562,9 +562,9 @@ void Texture::ParseFromCompressedFormat(BinaryReader& reader)
     
     // Read in pixel data.
     // This pixel data is stored top-left to bottom-right, so we don't flip (our pixel array starts at top-left corner).
-	for(int y = 0; y < mHeight; ++y)
+	for(uint32_t y = 0; y < mHeight; ++y)
 	{
-		for(int x = 0; x < mWidth; ++x)
+		for(uint32_t x = 0; x < mWidth; ++x)
 		{
 			int current = (y  * mWidth + x) * 4;
 			uint16_t pixel = reader.ReadUShort();
@@ -699,7 +699,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 			if(bitsPerPixel == 8)
 			{
 				// Read in the palette index and save it.
-				int paletteIndex = reader.ReadByte();
+				uint8_t paletteIndex = reader.ReadByte();
 				mPaletteIndexes[(y * mWidth + x)] = paletteIndex;
 				bytesRead++;
 				

@@ -42,3 +42,5 @@ private:
 	// Executes binary bytecode sheep scripts.
 	SheepVM mVirtualMachine;
 };
+
+extern SheepManager gSheepManager;
