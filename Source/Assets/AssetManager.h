@@ -38,8 +38,8 @@ class VertexAnimation;
 class AssetManager
 {
 public:
-    AssetManager();
-    ~AssetManager();
+    void Init();
+    void Shutdown();
 
     // Loose Files
 	// Adds a filesystem path to search for assets and bundles at.

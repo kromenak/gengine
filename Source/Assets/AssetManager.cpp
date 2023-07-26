@@ -36,7 +36,7 @@
 
 AssetManager gAssetManager;
 
-AssetManager::AssetManager()
+void AssetManager::Init()
 {
     // Load GK3.ini from the root directory so we can bootstrap asset search paths.
     mSearchPaths.push_back("");
@@ -65,7 +65,7 @@ AssetManager::AssetManager()
     mSearchPaths.push_back("Data");
 }
 
-AssetManager::~AssetManager()
+void AssetManager::Shutdown()
 {
 	// Unload all assets.
     UnloadAssets(AssetScope::Global);

@@ -54,6 +54,9 @@ bool GEngine::Initialize()
 	// Tell console to log itself to the "Console" report stream.
 	gConsole.SetReportStream(&gReportManager.GetReportStream("Console"));
 
+    // Init asset manager.
+    gAssetManager.Init();
+
     // See if the demo barn is present. If so, we'll load the game in demo mode.
     mDemoMode = gAssetManager.LoadBarn("Gk3demo.brn");
 
@@ -220,9 +223,17 @@ void GEngine::Shutdown()
     // Shutdown tools.
     Tools::Shutdown();
 
-    // Shutdown any subsystems.
+    // Even though asset manager is initialized first...
+    // We want to shut it down earlier b/c its assets may need to destroy data in the rendering/audio systems.
+    gAssetManager.Shutdown();
+
+    // Shutdown renderer.
     gRenderer.Shutdown();
+
+    // Shutdown audio system.
     gAudioManager.Shutdown();
+
+    // Shutdown SDL.
     SDL_Quit();
 }
 
