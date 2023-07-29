@@ -8,9 +8,9 @@
 //
 #pragma once
 #include <string>
-#include <unordered_map>
 
 #include "ReportStream.h"
+#include "StringUtil.h"
 
 class ReportManager
 {
@@ -43,7 +43,7 @@ public:
 
 private:
 	// All defined streams, keyed by stream name.
-	std::unordered_map<std::string, ReportStream> mStreams;
+	std::unordered_map_ci<std::string, ReportStream> mStreams;
 	
 	ReportStream& GetOrCreateStream(const std::string& streamName);
 };
