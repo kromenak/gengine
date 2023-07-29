@@ -20,17 +20,17 @@
 #define DEBUG_SUBMESH_OUTPUT
 #endif
 
-Model::Model(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
-{
-    ParseFromData(data, dataLength);
-}
-
 Model::~Model()
 {
     for(auto& mesh : mMeshes)
     {
         delete mesh;
     }
+}
+
+void Model::Load(char* data, int dataLength)
+{
+    ParseFromData(data, dataLength);
 }
 
 void Model::WriteToObjFile(const std::string& filePath)

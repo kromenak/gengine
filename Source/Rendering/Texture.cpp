@@ -37,12 +37,6 @@ Texture::Texture(uint32 width, uint32 height, Color32 color) : Asset(""),
 	}
 }
 
-Texture::Texture(const std::string& name, AssetScope scope, char* data, uint32 dataLength) : Asset(name, scope)
-{
-	BinaryReader reader(data, dataLength);
-    ParseFromData(reader);
-}
-
 Texture::Texture(BinaryReader& reader) : Asset("")
 {
     ParseFromData(reader);
@@ -72,6 +66,12 @@ Texture::~Texture()
 		delete[] mPixels;
 		mPixels = nullptr;
 	}
+}
+
+void Texture::Load(char* data, int dataLength)
+{
+    BinaryReader reader(data, dataLength);
+    ParseFromData(reader);
 }
 
 void Texture::Activate(int textureUnit)

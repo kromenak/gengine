@@ -21,8 +21,10 @@ class Texture;
 class BSPLightmap : public Asset
 {
 public:
-    BSPLightmap(const std::string& name, AssetScope scope, char* data, int dataLength);
+    BSPLightmap(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~BSPLightmap();
+
+    void Load(char* data, int dataLength);
     
     const std::vector<Texture*>& GetLightmapTextures() const { return mLightmapTextures; }
     

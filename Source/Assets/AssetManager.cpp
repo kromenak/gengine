@@ -228,7 +228,7 @@ Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scop
 
 GAS* AssetManager::LoadGAS(const std::string& name, AssetScope scope)
 {
-    return LoadAsset_SeparateLoadFunc<GAS>(SanitizeAssetName(name, ".GAS"), scope, &mLoadedGases);
+    return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), scope, &mLoadedGases);
 }
 
 Animation* AssetManager::LoadAnimation(const std::string& name, AssetScope scope)
@@ -279,26 +279,9 @@ BSPLightmap* AssetManager::LoadBSPLightmap(const std::string& name, AssetScope s
     return LoadAsset<BSPLightmap>(SanitizeAssetName(name, ".MUL"), scope, &mLoadedBSPLightmaps);
 }
 
-//TODO: For some reason, on Mac/Clang, when compiling in Release mode, using this as a Lambda with std::function causes a malloc error and crash.
-//TODO: I've converted it to a normal function with a function pointer for now...which seems to work. But why?
-SheepScript* LoadSheepFunc(const std::string& assetName, AssetScope scope, char* buffer, unsigned int bufferSize)
-{
-    // Determine whether this is a binary sheep asset.
-    if(SheepScript::IsSheepDataCompiled(buffer, bufferSize))
-    {
-        return new SheepScript(assetName, scope, buffer, bufferSize);
-    }
-
-    // This doesn't appear to be a binary sheep file, so it might be a text sheep file.
-    // Let's try compiling it on-the-fly!
-    imstream stream(buffer, bufferSize);
-    return gSheepManager.Compile(assetName, stream);
-}
-
 SheepScript* AssetManager::LoadSheep(const std::string& name, AssetScope scope)
 {
-    // Sheep assets need more complex/custom creation login, provided in the create callback.
-    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), scope, &mLoadedSheeps, &LoadSheepFunc);
+    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), scope, &mLoadedSheeps);
 }
 
 Cursor* AssetManager::LoadCursor(const std::string& name, AssetScope scope)
@@ -448,7 +431,7 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 }
 
 template<class T>
-T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, T*(*createFunc)(const std::string&, AssetScope, char*, unsigned int), bool deleteBuffer)
+T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer)
 {
     // If already present in cache, return existing asset right away.
     if(cache != nullptr && scope != AssetScope::Manual)
@@ -466,66 +449,23 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
         }
     }
     //printf("Loading asset %s\n", assetName.c_str());
-
-    // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
-    unsigned int bufferSize = 0;
-    char* buffer = CreateAssetBuffer(assetName, bufferSize);
-    if(buffer == nullptr) { return nullptr; }
-
-    // Create asset from asset buffer.
-    std::string upperName = StringUtil::ToUpperCopy(assetName);
-    T* asset = createFunc != nullptr ? createFunc(upperName, scope, buffer, bufferSize) : new T(upperName, scope, buffer, bufferSize);
     
-	// Add entry in cache, if we have a cache.
-	if(asset != nullptr && cache != nullptr && scope != AssetScope::Manual)
-	{
-		(*cache)[assetName] = asset;
-	}
-
-    // Delete the buffer after use (or it'll leak).
-    if(deleteBuffer)
-    {
-        delete[] buffer;
-    }
-	return asset;
-}
-
-template<class T>
-T* AssetManager::LoadAsset_SeparateLoadFunc(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer)
-{
-    // If already present in cache, return existing asset right away.
-    if(cache != nullptr && scope != AssetScope::Manual)
-    {
-        auto it = cache->find(assetName);
-        if(it != cache->end())
-        {
-            // One caveat: if the cached asset has a narrower scope than what's being requested, we must PROMOTE the scope.
-            // For example, a cached asset with SCENE scope being requested at GLOBAL scope must convert to GLOBAL scope.
-            if(it->second->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
-            {
-                it->second->SetScope(AssetScope::Global);
-            }
-            return it->second;
-        }
-    }
-
-    // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
-    unsigned int bufferSize = 0;
-    char* buffer = CreateAssetBuffer(assetName, bufferSize);
-    if(buffer == nullptr) { return nullptr; }
-
-    // Create asset.
+    // Create asset from asset buffer.
     std::string upperName = StringUtil::ToUpperCopy(assetName);
     T* asset = new T(upperName, scope);
 
-    // If there's a cache, put the asset in the cache right away.
-    // Sometimes, assets have circular depedencies, and that'll crash unless we have the item in the cache BEFORE loading!
-    if(cache != nullptr && scope != AssetScope::Manual)
+    // Add entry in cache, if we have a cache.
+    if(asset != nullptr && cache != nullptr && scope != AssetScope::Manual)
     {
         (*cache)[assetName] = asset;
     }
 
-    // Ok, now we can load the asset's data.
+    // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
+    unsigned int bufferSize = 0;
+    char* buffer = CreateAssetBuffer(assetName, bufferSize);
+    if(buffer == nullptr) { return nullptr; }
+
+    // Load the asset on the main thread.
     asset->Load(buffer, bufferSize);
 
     // Delete the buffer after use (or it'll leak).
@@ -533,7 +473,7 @@ T* AssetManager::LoadAsset_SeparateLoadFunc(const std::string& assetName, AssetS
     {
         delete[] buffer;
     }
-    return asset;
+	return asset;
 }
 
 char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)

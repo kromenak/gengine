@@ -11,8 +11,10 @@
 class Audio : public Asset
 {
 public:
-    Audio(const std::string& name, AssetScope scope, char* data, int dataLength);
+    Audio(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 	~Audio();
+
+    void Load(char* data, int dataLength);
     
     char* GetDataBuffer() const { return mDataBuffer; }
     int GetDataBufferLength() const { return mDataBufferLength; }

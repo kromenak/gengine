@@ -9,11 +9,6 @@
 #include "StringUtil.h"
 #include "VertexAnimation.h"
 
-Animation::Animation(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
-{
-    ParseFromData(data, dataLength);
-}
-
 Animation::~Animation()
 {
     // Be sure to delete dynamically allocated memory.
@@ -24,6 +19,11 @@ Animation::~Animation()
             delete frameAnimNode;
         }
     }
+}
+
+void Animation::Load(char* data, int dataLength)
+{
+    ParseFromData(data, dataLength);
 }
 
 std::vector<AnimNode*>* Animation::GetFrame(int frameNumber)
@@ -437,12 +437,10 @@ void Animation::ParseFromData(char *data, int dataLength)
                     // [FRAME] PLAYSOUNDTRACK [STK_NAME]
                     if(line.entries.size() >= 3)
                     {
-                        std::string soundtrackName = line.entries[2].key;
-
                         // Create and add node.
                         PlaySoundtrackAnimNode* node = new PlaySoundtrackAnimNode();
                         node->frameNumber = frameNumber;
-                        node->soundtrackName = soundtrackName;
+                        node->soundtrackName = line.entries[2].key;
                         mFrames[frameNumber].push_back(node);
                     }
                 }
@@ -451,12 +449,10 @@ void Animation::ParseFromData(char *data, int dataLength)
                     // [FRAME] PLAYSOUNDTRACKTBS [STK_NAME]
                     if(line.entries.size() >= 3)
                     {
-                        std::string soundtrackName = line.entries[2].key;
-
                         // Create and add node.
                         PlaySoundtrackAnimNode* node = new PlaySoundtrackAnimNode();
                         node->frameNumber = frameNumber;
-                        node->soundtrackName = soundtrackName;
+                        node->soundtrackName = line.entries[2].key;
                         mFrames[frameNumber].push_back(node);
                     }
                 }

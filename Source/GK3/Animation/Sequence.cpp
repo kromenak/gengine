@@ -6,7 +6,7 @@
 #include "IniParser.h"
 #include "StringUtil.h"
 
-Sequence::Sequence(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
+void Sequence::Load(char* data, int dataLength)
 {
     IniParser parser(data, dataLength);
     parser.SetMultipleKeyValuePairsPerLine(false);

@@ -114,8 +114,10 @@ struct PrsNode : public SoundtrackNode
 class Soundtrack : public Asset
 {
 public:
-    Soundtrack(const std::string& name, AssetScope scope, char* data, int dataLength);
+    Soundtrack(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Soundtrack();
+
+    void Load(char* data, int dataLength);
     
     AudioType GetSoundType() const { return mSoundType; }
     const std::vector<SoundtrackNode*>& GetNodes() const { return mNodes; }

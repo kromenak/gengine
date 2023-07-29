@@ -7,7 +7,15 @@
 #include "StringUtil.h"
 #include "Texture.h"
 
-Cursor::Cursor(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
+Cursor::~Cursor()
+{
+    for(auto& frame : mCursorFrames)
+    {
+        SDL_FreeCursor(frame);
+    }
+}
+
+void Cursor::Load(char* data, int dataLength)
 {
     // Texture used is always the same as the name of the cursor.
     Texture* texture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());
@@ -130,14 +138,6 @@ Cursor::Cursor(const std::string& name, AssetScope scope, char* data, int dataLe
             printf("Create cursor %s failed: couldn't create cursor frame %i (%s).\n", mName.c_str(), i, SDL_GetError());
         }
         mCursorFrames.push_back(cursor);
-    }
-}
-
-Cursor::~Cursor()
-{
-    for(auto& frame : mCursorFrames)
-    {
-        SDL_FreeCursor(frame);
     }
 }
 

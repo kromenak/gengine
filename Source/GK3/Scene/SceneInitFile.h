@@ -233,8 +233,10 @@ struct ConditionalBlock
 class SceneInitFile : public Asset
 {
 public:
-	SceneInitFile(const std::string& name, AssetScope scope, char* data, int dataLength);
+    SceneInitFile(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 	~SceneInitFile();
+
+    void Load(char* data, int dataLength);
 	
 	const SceneActor* FindCurrentEgo() const;
 	GeneralBlock FindCurrentGeneralBlock() const;

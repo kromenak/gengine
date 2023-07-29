@@ -15,11 +15,6 @@
 #include "StringTokenizer.h"
 #include "StringUtil.h"
 
-GAS::GAS(const std::string& name, AssetScope scope) : Asset(name, scope)
-{
-
-}
-
 GAS::~GAS()
 {
     for(auto& node : mNodes)

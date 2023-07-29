@@ -4,6 +4,8 @@
 #include <fstream>
 
 #include "BinaryReader.h"
+#include "mstream.h"
+#include "SheepManager.h"
 #include "SheepScriptBuilder.h"
 #include "StringUtil.h"
 
@@ -14,29 +16,46 @@
     return dataLength >= 8 && memcmp(data, "GK3Sheep", 8) == 0;
 }
 
-SheepScript::SheepScript(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
+SheepScript::SheepScript(const std::string& name, SheepScriptBuilder& builder) : Asset(name)
 {
-    ParseFromData(data, dataLength);
+    Load(builder);
 }
 
-SheepScript::SheepScript(const std::string& name, SheepScriptBuilder& builder) : Asset(name)
+SheepScript::~SheepScript()
+{
+    delete[] mBytecode;
+}
+
+void SheepScript::Load(char* data, int dataLength)
+{
+    // If the data is already compiled, we can just parse it directly.
+    if(IsSheepDataCompiled(data, dataLength))
+    {
+        ParseFromData(data, dataLength);
+        return;
+    }
+
+    // If the data is in uncompiled text format, we must compile it!
+    SheepCompiler compiler;
+    imstream stream(data, dataLength);
+    if(compiler.Compile(GetNameNoExtension(), stream))
+    {
+        Load(compiler.GetCompiledBuilder());
+    }
+}
+
+void SheepScript::Load(const SheepScriptBuilder& builder)
 {
     // Just copy these directly.
     mSysImports = builder.GetSysImports();
     mStringConsts = builder.GetStringConsts();
     mVariables = builder.GetVariables();
     mFunctions = builder.GetFunctions();
-	
-    // Bytecode needs to convert from std::vector to byte array.
-    std::vector<char> bytecodeVec = builder.GetBytecode();
-    mBytecodeLength = (int)bytecodeVec.size();
-    mBytecode = new char[mBytecodeLength];
-    std::copy(bytecodeVec.begin(), bytecodeVec.end(), mBytecode);
-}
 
-SheepScript::~SheepScript()
-{
-    delete[] mBytecode;
+    // Bytecode needs to convert from std::vector to byte array.
+    mBytecodeLength = builder.GetBytecode().size();
+    mBytecode = new char[mBytecodeLength];
+    std::copy(builder.GetBytecode().begin(), builder.GetBytecode().end(), mBytecode);
 }
 
 SysFuncImport* SheepScript::GetSysImport(int index)

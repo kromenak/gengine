@@ -10,8 +10,10 @@
 class TextAsset : public Asset
 {
 public:
-    TextAsset(const std::string& name, AssetScope scope, char* data, int dataLength);
+    TextAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~TextAsset();
+
+    void Load(char* data, int dataLength);
     
     char* GetText() { return mText; }
     int GetTextLength() { return mTextLength; }

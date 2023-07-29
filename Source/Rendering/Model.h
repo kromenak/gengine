@@ -21,8 +21,10 @@ class Mesh;
 class Model : public Asset
 {
 public:
-    Model(const std::string& name, AssetScope scope, char* data, int dataLength);
+    Model(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Model();
+
+    void Load(char* data, int dataLength);
 
     const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
 	

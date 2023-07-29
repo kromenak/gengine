@@ -44,8 +44,10 @@ struct SceneLight
 class SceneAsset : public Asset
 {
 public:
-    SceneAsset(const std::string& name, AssetScope scope, char* data, int dataLength);
+    SceneAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 	~SceneAsset();
+
+    void Load(char* data, int dataLength);
 	
 	const std::string& GetBSPName() const { return mBspName; }
     Skybox* GetSkybox() const { return mSkybox; }

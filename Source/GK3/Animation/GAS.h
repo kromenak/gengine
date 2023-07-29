@@ -18,7 +18,7 @@ struct GasNode;
 class GAS : public Asset
 {
 public:
-    GAS(const std::string& name, AssetScope scope);
+    GAS(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~GAS();
 
     void Load(char* data, int dataLength);

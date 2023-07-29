@@ -8,7 +8,7 @@
 
 /*static*/ std::vector<Action> NVC::mEmptyActions;
 
-NVC::NVC(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
+void NVC::Load(char* data, int dataLength)
 {
     ParseFromData(data, dataLength);
 }

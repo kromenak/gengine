@@ -92,7 +92,16 @@ int PrsNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
     return soundNodes[randomIndex]->Execute(soundtrack, outResults);
 }
 
-Soundtrack::Soundtrack(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
+Soundtrack::~Soundtrack()
+{
+    // Delete dynamically allocated nodes.
+    for(auto& node : mNodes)
+    {
+        delete node;
+    }
+}
+
+void Soundtrack::Load(char* data, int dataLength)
 {
     IniParser parser(data, dataLength);
     IniSection section;
@@ -188,15 +197,6 @@ Soundtrack::Soundtrack(const std::string& name, AssetScope scope, char* data, in
         {
             std::cout << "Unexpected section name: " << section.name << std::endl;
         }
-    }
-}
-
-Soundtrack::~Soundtrack()
-{
-    // Delete dynamically allocated nodes.
-    for(auto& node : mNodes)
-    {
-        delete node;
     }
 }
 

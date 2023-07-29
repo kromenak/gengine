@@ -7,14 +7,14 @@
 #include "Skybox.h"
 #include "StringUtil.h"
 
-SceneAsset::SceneAsset(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
-{
-    ParseFromData(data, dataLength);
-}
-
 SceneAsset::~SceneAsset()
 {
 	delete mSkybox;
+}
+
+void SceneAsset::Load(char* data, int dataLength)
+{
+    ParseFromData(data, dataLength);
 }
 
 void SceneAsset::ParseFromData(char *data, int dataLength)

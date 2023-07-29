@@ -15,7 +15,7 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
-BSP::BSP(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
+void BSP::Load(char* data, int dataLength)
 {
     ParseFromData(data, dataLength);
 

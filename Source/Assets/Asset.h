@@ -21,7 +21,6 @@ enum class AssetScope
 class Asset
 {
 public:
-    Asset(const std::string& name, AssetScope scope = AssetScope::Global);
     virtual ~Asset() = default;
     
     const std::string& GetName() const { return mName; }
@@ -31,6 +30,9 @@ public:
     AssetScope GetScope() const { return mScope; }
     
 protected:
+    // You should not be able to create an instance of this class - only subclasses are allowed.
+    Asset(const std::string& name, AssetScope scope = AssetScope::Global);
+
     // Asset's name, typically including an extension.
     std::string mName;
 

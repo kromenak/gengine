@@ -22,9 +22,12 @@ class SheepScript : public Asset
 public:
     static bool IsSheepDataCompiled(char* data, int dataLength);
 
-    SheepScript(const std::string& name, AssetScope scope, char* data, int dataLength);
+    SheepScript(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     SheepScript(const std::string& name, SheepScriptBuilder& builder);
     ~SheepScript();
+
+    void Load(char* data, int dataLength);
+    void Load(const SheepScriptBuilder& builder);
 
     SysFuncImport* GetSysImport(int index);
     

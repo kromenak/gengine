@@ -88,14 +88,14 @@ void GeneralBlock::TakeOverridesFrom(const GeneralBlock& other)
 	}
 }
 
-SceneInitFile::SceneInitFile(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
-{
-    ParseFromData(data, dataLength);
-}
-
 SceneInitFile::~SceneInitFile()
 {
 	//TODO: delete any block conditions - we own them after compiling!
+}
+
+void SceneInitFile::Load(char* data, int dataLength)
+{
+    ParseFromData(data, dataLength);
 }
 
 const SceneActor* SceneInitFile::FindCurrentEgo() const

@@ -71,7 +71,9 @@ struct Action
 class NVC : public Asset
 {
 public:
-    NVC(const std::string& name, AssetScope scope, char* data, int dataLength);
+    NVC(const std::string& name, AssetScope scope) : Asset(name, scope) { }
+
+    void Load(char* data, int dataLength);
 	
 	const std::vector<Action*>& GetActions() const { return mActions; }
 	const std::vector<Action>& GetActions(const std::string& noun) const;

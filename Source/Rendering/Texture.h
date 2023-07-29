@@ -56,9 +56,11 @@ public:
 	
     Texture(uint32 width, uint32 height);
 	Texture(uint32 width, uint32 height, Color32 color);
-    Texture(const std::string& name, AssetScope scope, char* data, uint32 dataLength);
+    Texture(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     Texture(BinaryReader& reader);
 	~Texture();
+
+    void Load(char* data, int dataLength);
 	
 	// Activates the texture in the graphics library.
     void Activate(int textureUnit);

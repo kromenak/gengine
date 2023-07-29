@@ -81,11 +81,6 @@ void VertexAnimationPose::GetForTime(float time, int framesPerSecond, VertexAnim
     }
 }
 
-VertexAnimation::VertexAnimation(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope)
-{
-    ParseFromData(data, dataLength);
-}
-
 VertexAnimation::~VertexAnimation()
 {
     for(auto& outerEntry : mVertexPoses)
@@ -112,6 +107,11 @@ VertexAnimation::~VertexAnimation()
             delete temp;
         }
     }
+}
+
+void VertexAnimation::Load(char* data, int dataLength)
+{
+    ParseFromData(data, dataLength);
 }
 
 VertexAnimationTransformPose VertexAnimation::SampleTransformPose(int frame, int meshIndex)

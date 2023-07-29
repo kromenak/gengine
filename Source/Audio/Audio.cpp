@@ -6,21 +6,22 @@
 #include "AudioManager.h"
 #include "BinaryReader.h"
 
-Audio::Audio(const std::string& name, AssetScope scope, char* data, int dataLength) : Asset(name, scope),
-    mDataBuffer(data),
-    mDataBufferLength(dataLength)
-{
-    // Note that AssetManager typically deletes the data buffer after the asset is created.
-    // But for Audio, it knows to not do this - so it's OK for us to save the data pointer.
-    ParseFromData(data, dataLength);
-}
-
 Audio::~Audio()
 {
 	delete[] mDataBuffer;
 
     // FMOD allocates memory internally when playing an Audio file. Let it know it can get free of that memory.
     gAudioManager.ReleaseAudioData(this);
+}
+
+void Audio::Load(char* data, int dataLength)
+{
+    // Note that AssetManager typically deletes the data buffer after the asset is created.
+    // But for Audio, it knows to not do this - so it's OK for us to save the data pointer.
+    mDataBuffer = data;
+    mDataBufferLength = dataLength;
+    
+    ParseFromData(data, dataLength);
 }
 
 void Audio::ParseFromData(char* data, int dataLength)

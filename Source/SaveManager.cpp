@@ -11,7 +11,8 @@ SaveManager::SaveManager()
 
     uint32 bufferSize = 0;
     char* buffer = File::ReadIntoBuffer(prefsPath, bufferSize);
-    mPrefs = new Config("Prefs.ini", AssetScope::Manual, buffer, bufferSize);
+    mPrefs = new Config("Prefs.ini", AssetScope::Manual);
+    mPrefs->Load(buffer, bufferSize);
 
     // Increment run count.
     int runCount = mPrefs->GetInt("App", "Run Count", 0);

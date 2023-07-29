@@ -39,8 +39,10 @@ struct VertexAnimationTransformPose : public VertexAnimationPose
 class VertexAnimation : public Asset
 {
 public:
-    VertexAnimation(const std::string& name, AssetScope scope, char* data, int dataLength);
+    VertexAnimation(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~VertexAnimation();
+
+    void Load(char* data, int dataLength);
 
     // Queries transform (position, rotation, scale) for a mesh at a frame/time.
     VertexAnimationTransformPose SampleTransformPose(int frame, int meshIndex);
