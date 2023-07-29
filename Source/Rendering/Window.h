@@ -47,4 +47,8 @@ namespace Window
     // Position
     void SetPosition(int x, int y);
     void OnPositionChanged();
+
+    // Title
+    void SetTitle(const char* title);
+    const char* GetTitle();
 };

@@ -87,6 +87,11 @@ target_include_directories(gk3 PRIVATE
     "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
+# Common defines.
+target_compile_definitions(gk3 PRIVATE
+    $<$<CONFIG:Debug>:DEBUG>
+)
+
 # Warning/error settings.
 if(MSVC)
     target_compile_options(gk3 PRIVATE /Wall

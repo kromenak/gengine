@@ -410,9 +410,11 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
         resampled_data_size = data_size;
     }
 
-#ifdef DEBUG
+    /*
+    #ifdef DEBUG
     double prevAudioClock = audio_clock;
-#endif
+    #endif
+    */
     
     // Update the audio clock with latest frame pts.
     if(!isnan(af->pts))
@@ -424,14 +426,16 @@ int AudioPlaybackSDL::DecodeFrame(VideoState* is)
         audio_clock = NAN;
     }
     audio_clock_serial = af->serial;
-    
-#ifdef DEBUG
+
+    /*
+    #ifdef DEBUG
     static double last_clock;
     printf("audio: delay=%0.3f clock=%0.3f clock0=%0.3f\n",
            audio_clock - last_clock,
            audio_clock, prevAudioClock);
     last_clock = audio_clock;
-#endif
+    #endif
+    */
     return resampled_data_size;
 }
 

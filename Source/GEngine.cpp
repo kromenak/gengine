@@ -447,12 +447,29 @@ void GEngine::Update()
 
     // Calculate delta time.
     static DeltaTimer deltaTimer;
-    float deltaTime = deltaTimer.GetDeltaTime() * mTimeMultiplier;
+    float deltaTime = deltaTimer.GetDeltaTime();
+
+    // In debug, calculate a running average FPS and display it in the window's title bar.
+    #if defined(DEBUG)
+    {
+        // Current FPS is inverse of delta time.
+        float currentFps = 1.0f / deltaTime;
+
+        // We can utilize a moving average calculation. (https://en.wikipedia.org/wiki/Moving_average#Cumulative_average)
+        // "cumulative average equals previous cumulative average, times n, plus new data, all divided by n+1.
+        // (in our case, n = frame number counter)
+        static float averageFps = 0.0f;
+        averageFps = ((averageFps * mFrameNumber) + currentFps) / (mFrameNumber + 1);
+
+        // Set title to show updated value.
+        Window::SetTitle(StringUtil::Format("Gabriel Knight 3 (%.2f FPS)", averageFps).c_str());
+    }
+    #endif
 
     if(!Loader::IsLoading())
     {
         // Update game logic.
-        Update(deltaTime);
+        Update(deltaTime * mTimeMultiplier);
     }
 
     // Also update audio system (before or after game logic?)

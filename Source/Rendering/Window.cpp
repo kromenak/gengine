@@ -284,3 +284,13 @@ void Window::OnPositionChanged()
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_WINDOW_X, x);
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_WINDOW_Y, y);
 }
+
+void Window::SetTitle(const char* title)
+{
+    SDL_SetWindowTitle(window, title);
+}
+
+const char* Window::GetTitle()
+{
+    return SDL_GetWindowTitle(window);
+}
