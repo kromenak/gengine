@@ -92,13 +92,14 @@ bool GEngine::Initialize()
         }
     }
 
-    // Initialize renderer.
+    // Initialize renderer. Depends on AssetManager being initalized.
+    // After this function executes, the game window will be visible.
     if(!gRenderer.Initialize())
     {
         return false;
     }
 
-    // Init tools.
+    // Init tools - depends on Renderer being initialized.
     Tools::Init();
     
     // Initialize audio.
@@ -106,6 +107,9 @@ bool GEngine::Initialize()
     {
         return false;
     }
+
+    // Init input system.
+    gInputManager.Init();
     
     // Load cursors and use the default one to start.
     // Must happen after barn assets are loaded.

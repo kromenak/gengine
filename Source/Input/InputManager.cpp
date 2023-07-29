@@ -6,21 +6,21 @@
 
 InputManager gInputManager;
 
-InputManager::InputManager()
+InputManager::~InputManager()
+{
+    delete[] mPrevKeyboardState;
+}
+
+void InputManager::Init()
 {
     // Retrieve SDL keyboard state and number of keys.
     mKeyboardState = SDL_GetKeyboardState(&mNumKeys);
 
     // Use returned keyboard state as our current keyboard state.
     mCurrKeyboardState = mKeyboardState;
-    
+
     // Allocate previous keyboard state array.
     mPrevKeyboardState = new uint8_t[mNumKeys];
-}
-
-InputManager::~InputManager()
-{
-    delete[] mPrevKeyboardState;
 }
 
 void InputManager::Update()

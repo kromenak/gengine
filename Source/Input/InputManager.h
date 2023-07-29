@@ -23,9 +23,9 @@ public:
         Right
     };
     
-    InputManager();
     ~InputManager();
-    
+
+    void Init();
     void Update();
 
     // Keyboard
