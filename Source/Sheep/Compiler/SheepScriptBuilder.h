@@ -21,9 +21,11 @@ using Location = Sheep::Parser::location_type;
 class SheepScriptBuilder
 {
 public:
-    SheepScriptBuilder(SheepCompiler* compiler, const std::string& name);
+    SheepScriptBuilder();
 	~SheepScriptBuilder();
-    
+
+    void SetCompiler(SheepCompiler* compiler) { mCompiler = compiler; }
+
 	void BeginSymbols() { mSection = "Symbols"; }
 	
     void AddStringConst(std::string str);
@@ -90,22 +92,18 @@ public:
     
     void Breakpoint();
 	
-	const std::string& GetName() const { return mScriptName; }
 	const std::string& GetSection() const { return mSection; }
 	
 	// After "building" the script's bytecode and tables, these functions are used to access that data.
-    std::vector<SysFuncImport> GetSysImports() { return mSysImports; }
-    std::unordered_map<int, std::string> GetStringConsts() { return mStringConstsByOffset; }
-    std::vector<SheepValue> GetVariables() { return mVariables; }
-    std::string_map_ci<int> GetFunctions() { return mFunctions; }
-    std::vector<char> GetBytecode() { return mBytecode; }
+    const std::vector<SysFuncImport>& GetSysImports() const { return mSysImports; }
+    const std::unordered_map<int, std::string>& GetStringConsts() const { return mStringConstsByOffset; }
+    const std::vector<SheepValue>& GetVariables() const { return mVariables; }
+    const std::string_map_ci<int>& GetFunctions() const { return mFunctions; }
+    const std::vector<char>& GetBytecode() const { return mBytecode; }
     
 private:
 	// Reference back to the compiler.
 	SheepCompiler* mCompiler = nullptr;
-	
-	// Name of the script being compiled.
-	std::string mScriptName;
 	
     // Definition for any system functions used.
     std::vector<SysFuncImport> mSysImports;

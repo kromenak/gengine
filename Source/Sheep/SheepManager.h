@@ -36,9 +36,6 @@ public:
 	bool IsAnyThreadRunning() const { return mVirtualMachine.IsAnyThreadRunning(); }
 	
 private:
-	// Compiles text-based sheep script into sheep bytecode, represented as a SheepScript asset.
-    SheepCompiler mCompiler;
-	
 	// Executes binary bytecode sheep scripts.
 	SheepVM mVirtualMachine;
 };
