@@ -158,15 +158,19 @@ bool Path::HasExtension(const std::string& path, const std::string& expectedExte
     // Just make sure the path ends with the expected extension.
     if(!expectedExtension.empty())
     {
-        // Make sure the extension string includes the dot at the front.
-        std::string extension = expectedExtension;
-        if(extension[0] != '.')
+        // If the expected extension includes the dot, just make sure the path ends with this extension.
+        if(expectedExtension[0] == '.')
         {
-            extension.insert(extension.begin(), '.');
+            return StringUtil::EndsWithIgnoreCase(path, expectedExtension);
         }
-
-        // Check if the path ends with the expected extension - easy peasy.
-        return StringUtil::EndsWithIgnoreCase(path, expectedExtension);
+        else // expected extension doesn't include a dot
+        {
+            // We still need the path to end with the expected extension.
+            // However, we also need to verify that the character before the expected extension is a dot in the path!
+            return path.size() > expectedExtension.size() &&
+                path[path.size() - expectedExtension.size() - 1] == '.' &&
+                StringUtil::EndsWithIgnoreCase(path, expectedExtension);
+        }        
     }
     else // No expected extension - we just need to verify ANY extension is present.
     {

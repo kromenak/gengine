@@ -22,9 +22,9 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
         mExpandButton->GetRectTransform()->SetPivot(1.0f, 1.0f);
         mExpandButton->GetRectTransform()->SetAnchoredPosition(-1.0f, 0.0f);
 
-        mExpandButton->SetUpTexture(gAssetManager.LoadTexture("RC_ARW_R"));
-        mExpandButton->SetDownTexture(gAssetManager.LoadTexture("RC_ARW_DWN"));
-        mExpandButton->SetHoverTexture(gAssetManager.LoadTexture("RC_ARW_HI"));
+        mExpandButton->SetUpTexture(gAssetManager.LoadTexture("RC_ARW_R.BMP"));
+        mExpandButton->SetDownTexture(gAssetManager.LoadTexture("RC_ARW_DWN.BMP"));
+        mExpandButton->SetHoverTexture(gAssetManager.LoadTexture("RC_ARW_HI.BMP"));
 
         mExpandButton->SetPressCallback([this](UIButton* button) {
             OnExpandButtonPressed();
@@ -82,11 +82,11 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
             Texture* texture = nullptr;
             if(i < 2)
             {
-                texture = gAssetManager.LoadTexture("RC_BOX_TOP");
+                texture = gAssetManager.LoadTexture("RC_BOX_TOP.BMP");
             }
             else
             {
-                texture = gAssetManager.LoadTexture("RC_BOX_SIDE");
+                texture = gAssetManager.LoadTexture("RC_BOX_SIDE.BMP");
             }
             image->SetRenderMode(UIImage::RenderMode::Tiled);
             image->SetTexture(texture);

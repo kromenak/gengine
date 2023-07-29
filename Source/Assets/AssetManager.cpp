@@ -176,7 +176,7 @@ void AssetManager::WriteAllBarnAssetsToFile(const std::string& search, const std
 
 Audio* AssetManager::LoadAudio(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mLoadedAudios, nullptr, false);
+    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mLoadedAudios, false);
 }
 
 Soundtrack* AssetManager::LoadSoundtrack(const std::string& name, AssetScope scope)
@@ -197,15 +197,7 @@ Model* AssetManager::LoadModel(const std::string& name, AssetScope scope)
 Texture* AssetManager::LoadTexture(const std::string& name, AssetScope scope)
 {
     // Load texture, attempting to add .BMP extension if asset name has no extension.
-    Texture* texture = LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mLoadedTextures);
-
-    //HACK: If a period exists in the asset name, it can mess up extension adding logic. (Ex: "PREP.HTOP" should resolve to "PREP.HTOP.BMP")
-    //HACK: To fix this, if a texture load fails, try again forcing the BMP extension.
-    if(texture == nullptr)
-    {
-        texture = LoadAsset<Texture>(name + ".BMP", scope, &mLoadedTextures);
-    }
-    return texture;
+    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mLoadedTextures);
 }
 
 Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scope)
@@ -297,7 +289,7 @@ Font* AssetManager::LoadFont(const std::string& name, AssetScope scope)
 TextAsset* AssetManager::LoadText(const std::string& name, AssetScope scope)
 {
     // Specifically DO NOT delete the asset buffer when creating TextAssets, since they take direct ownership of it.
-    return LoadAsset<TextAsset>(name, scope, &mLoadedTexts, nullptr, false);
+    return LoadAsset<TextAsset>(name, scope, &mLoadedTexts, false);
 }
 
 Config* AssetManager::LoadConfig(const std::string& name)

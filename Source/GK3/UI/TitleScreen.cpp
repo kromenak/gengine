@@ -85,7 +85,7 @@ void TitleScreen::Show()
     {
         soundtrackPlayer = AddComponent<SoundtrackPlayer>();
     }
-    soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("TITLETHEME"));
+    soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("TITLETHEME.STK"));
 }
 
 void TitleScreen::Hide()

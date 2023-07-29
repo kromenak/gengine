@@ -34,11 +34,11 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 	backgroundImage->SetRenderMode(UIImage::RenderMode::Tiled);
 	if(mini)
 	{
-		backgroundImage->SetTexture(gAssetManager.LoadTexture("MINISNAKY"));
+		backgroundImage->SetTexture(gAssetManager.LoadTexture("MINISNAKY.BMP"));
 	}
 	else
 	{
-		backgroundImage->SetTexture(gAssetManager.LoadTexture("SNAKY"));
+		backgroundImage->SetTexture(gAssetManager.LoadTexture("SNAKY.BMP"));
 	}
 	
 	// Mini and full consoles have different anchoring properties.
@@ -147,8 +147,8 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 
         mConsoleToggleImage = imageActor->AddComponent<UIImage>();
 
-        Texture* texture = gAssetManager.LoadTexture("CAIN");
-        Texture* textureAlpha = gAssetManager.LoadTexture("CAIN_ALPHA");
+        Texture* texture = gAssetManager.LoadTexture("CAIN.BMP");
+        Texture* textureAlpha = gAssetManager.LoadTexture("CAIN_ALPHA.BMP");
         texture->ApplyAlphaChannel(*textureAlpha);
         mConsoleToggleImage->SetTexture(texture, true);
 
