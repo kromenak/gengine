@@ -2,16 +2,15 @@
 
 #include "AssetManager.h"
 #include "FaceController.h"
-#include "GEngine.h"
 #include "GKActor.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 
 using namespace std;
 
 shpvoid Blink(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
         actor->GetFaceController()->Blink();
@@ -26,7 +25,7 @@ RegFunc1(Blink, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid BlinkX(const std::string& actorName, const std::string& blinkAnim)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
         actor->GetFaceController()->Blink(blinkAnim);
@@ -41,7 +40,7 @@ RegFunc2(BlinkX, void, string, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EnableEyeJitter(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
         actor->GetFaceController()->SetEyeJitterEnabled(true);
@@ -56,7 +55,7 @@ RegFunc1(EnableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DisableEyeJitter(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
         actor->GetFaceController()->SetEyeJitterEnabled(false);
@@ -71,7 +70,7 @@ RegFunc1(DisableEyeJitter, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EyeJitter(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
         actor->GetFaceController()->EyeJitter();
@@ -102,7 +101,7 @@ shpvoid GlanceX(std::string actorName, int leftPercentX, int leftPercentY,
 shpvoid SetMood(const std::string& actorName, const std::string& moodName)
 {
     // Get actor and make sure it's valid.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -119,7 +118,7 @@ RegFunc2(SetMood, void, string, string, IMMEDIATE, REL_FUNC);
 shpvoid ClearMood(const std::string& actorName)
 {
     // Get actor and make sure it's valid.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -134,7 +133,7 @@ RegFunc1(ClearMood, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid Expression(const std::string& actorName, const std::string& expression)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
         actor->GetFaceController()->DoExpression(expression);
@@ -150,7 +149,7 @@ RegFunc2(Expression, void, string, string, IMMEDIATE, REL_FUNC);
 shpvoid SetIdleGAS(const std::string& actorName, const std::string& gasName)
 {
     // Get actor and make sure it's valid.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -179,7 +178,7 @@ RegFunc2(SetIdleGAS, void, string, string, WAITABLE, REL_FUNC); // NOTE: functio
 shpvoid SetListenGAS(const std::string& actorName, const std::string& gasName)
 {
     // Get actor and make sure it's valid.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -208,7 +207,7 @@ RegFunc2(SetListenGAS, void, string, string, WAITABLE, REL_FUNC); // NOTE: funct
 shpvoid SetTalkGAS(const std::string& actorName, const std::string& gasName)
 {
     // Get actor and make sure it's valid.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -236,7 +235,7 @@ RegFunc2(SetTalkGAS, void, string, string, WAITABLE, REL_FUNC); // NOTE: functio
 
 shpvoid StartIdleFidget(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -250,7 +249,7 @@ RegFunc1(StartIdleFidget, void, string, WAITABLE, REL_FUNC);
 
 shpvoid StartListenFidget(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -264,7 +263,7 @@ RegFunc1(StartListenFidget, void, string, WAITABLE, REL_FUNC);
 
 shpvoid StartTalkFidget(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -278,7 +277,7 @@ RegFunc1(StartTalkFidget, void, string, WAITABLE, REL_FUNC);
 
 shpvoid StopFidget(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -294,7 +293,7 @@ RegFunc1(StopFidget, void, string, WAITABLE, REL_FUNC);
 shpvoid ActionWaitClearRegion(const std::string& actorName, int regionId, float destAccuracy, const std::string& exitPosition)
 {
     // Get the actor.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();
@@ -302,7 +301,7 @@ shpvoid ActionWaitClearRegion(const std::string& actorName, int regionId, float 
     }
 
     // Get the scene position.
-    const ScenePosition* scenePosition = GEngine::Instance()->GetScene()->GetPosition(exitPosition);
+    const ScenePosition* scenePosition = gSceneManager.GetScene()->GetPosition(exitPosition);
     if(scenePosition == nullptr)
     {
         ExecError();
@@ -327,7 +326,7 @@ shpvoid SetWalkAnim(const std::string& actorName, const std::string& start, cons
                     const std::string& startTurnLeft, const std::string& startTurnRight)
 {
     // Get the Actor.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor == nullptr)
     {
         ExecError();

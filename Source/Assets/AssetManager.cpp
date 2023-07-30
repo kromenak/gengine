@@ -8,10 +8,12 @@
 
 #include "BarnFile.h"
 #include "FileSystem.h"
+#include "Loader.h"
 #include "mstream.h"
 #include "Renderer.h"
 #include "SheepManager.h"
 #include "StringUtil.h"
+#include "ThreadPool.h"
 
 // Header Includes for all asset types
 #include "Animation.h"
@@ -179,6 +181,11 @@ Audio* AssetManager::LoadAudio(const std::string& name, AssetScope scope)
     return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mLoadedAudios, false);
 }
 
+Audio* AssetManager::LoadAudioAsync(const std::string& name, AssetScope scope)
+{
+    return LoadAssetAsync<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mLoadedAudios, false);
+}
+
 Soundtrack* AssetManager::LoadSoundtrack(const std::string& name, AssetScope scope)
 {
     return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), scope, &mLoadedSoundtracks);
@@ -196,8 +203,12 @@ Model* AssetManager::LoadModel(const std::string& name, AssetScope scope)
 
 Texture* AssetManager::LoadTexture(const std::string& name, AssetScope scope)
 {
-    // Load texture, attempting to add .BMP extension if asset name has no extension.
-    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mLoadedTextures);
+    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mLoadedTextures);     
+}
+
+Texture* AssetManager::LoadTextureAsync(const std::string& name, AssetScope scope)
+{
+    return LoadAssetAsync<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mLoadedTextures);
 }
 
 Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scope)
@@ -279,6 +290,11 @@ SheepScript* AssetManager::LoadSheep(const std::string& name, AssetScope scope)
 Cursor* AssetManager::LoadCursor(const std::string& name, AssetScope scope)
 {
     return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), scope, &mLoadedCursors);
+}
+
+Cursor* AssetManager::LoadCursorAsync(const std::string& name, AssetScope scope)
+{
+    return LoadAssetAsync<Cursor>(SanitizeAssetName(name, ".CUR"), scope, &mLoadedCursors);
 }
 
 Font* AssetManager::LoadFont(const std::string& name, AssetScope scope)
@@ -422,7 +438,7 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
     return assetName;
 }
 
-template<class T>
+template<typename T>
 T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer)
 {
     // If already present in cache, return existing asset right away.
@@ -466,6 +482,68 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
         delete[] buffer;
     }
 	return asset;
+}
+
+template<typename T>
+T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer, std::function<void(T*)> callback)
+{
+    // If already present in cache, return existing asset right away.
+    if(cache != nullptr && scope != AssetScope::Manual)
+    {
+        auto it = cache->find(assetName);
+        if(it != cache->end())
+        {
+            // One caveat: if the cached asset has a narrower scope than what's being requested, we must PROMOTE the scope.
+            // For example, a cached asset with SCENE scope being requested at GLOBAL scope must convert to GLOBAL scope.
+            if(it->second->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
+            {
+                it->second->SetScope(AssetScope::Global);
+            }
+            return it->second;
+        }
+    }
+    //printf("Loading asset %s\n", assetName.c_str());
+
+    // Create asset from asset buffer.
+    std::string upperName = StringUtil::ToUpperCopy(assetName);
+    T* asset = new T(upperName, scope);
+
+    // Add entry in cache, if we have a cache.
+    if(asset != nullptr && cache != nullptr && scope != AssetScope::Manual)
+    {
+        (*cache)[assetName] = asset;
+    }
+    
+    // Load in background.
+    Loader::AddLoadingTask();
+    ThreadPool::AddTask([this, deleteBuffer](void* arg){
+        T* asset = static_cast<T*>(arg);
+        //printf("Loading asset: %s\n", asset->GetName().c_str());
+
+        // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
+        unsigned int bufferSize = 0;
+        char* buffer = CreateAssetBuffer(asset->GetName(), bufferSize);
+        if(buffer == nullptr) { return nullptr; }
+
+        // Ok, now we can load the asset's data.
+        asset->Load(buffer, bufferSize);
+
+        // Delete the buffer after use (or it'll leak).
+        if(deleteBuffer)
+        {
+            delete[] buffer;
+        }
+    }, asset, [this, asset, callback](){
+        //printf("Loaded asset: %s\n", asset->GetName().c_str());
+        if(callback != nullptr)
+        {
+            callback(asset);
+        }
+        Loader::RemoveLoadingTask();
+    });
+
+    // Return the created asset.
+    return asset;
 }
 
 char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)

@@ -4,10 +4,9 @@
 
 #include "Debug.h"
 #include "GameProgress.h"
-#include "GEngine.h"
 #include "GKObject.h"
 #include "Ray.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "Vector3.h"
 
 TYPE_DEF_CHILD(Component, LaserHead);
@@ -50,7 +49,7 @@ LaserHead::LaserHead(Actor* owner, int index) : Component(owner),
     gkOwner->SetPosition(position);
 
     // Also gotta handle the lasers!
-    mLaser = GEngine::Instance()->GetScene()->GetSceneObjectByModelName("cs2laser_0" + std::to_string(index + 1));
+    mLaser = gSceneManager.GetScene()->GetSceneObjectByModelName("cs2laser_0" + std::to_string(index + 1));
     if(mLaser != nullptr)
     {
         // Store laser for later use when raycasting.
@@ -134,7 +133,7 @@ void LaserHead::OnUpdate(float deltaTime)
         Ray ray(mLaser->GetWorldPosition() + GetOwner()->GetForward() * 10.0f, GetOwner()->GetForward());
 
         // Do a raycast, see what we hit.
-        SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, false, lasers, 5);
+        SceneCastResult result = gSceneManager.GetScene()->Raycast(ray, false, lasers, 5);
 
         // The lasers are 100 units long by default.
         // Determine whether we need to increase or decrease scale to get the correct effect.

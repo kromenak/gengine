@@ -81,7 +81,7 @@ void MeshRenderer::Render(bool opaque, bool translucent)
                     for(int k = 0; k < vcount; ++k)
                     {
                         Matrix4 worldToMeshMatrix = Matrix4::Inverse(meshToWorldMatrix);
-                        Vector3 lightPos = worldToMeshMatrix.TransformPoint(GEngine::Instance()->GetScene()->GetSceneData()->GetGlobalLightPosition());
+                        Vector3 lightPos = worldToMeshMatrix.TransformPoint(gSceneManager.GetScene()->GetSceneData()->GetGlobalLightPosition());
                         Vector3 lightDir = Vector3::Normalize(lightPos - submeshes[j]->GetVertexPosition(k));
                         float dot = Vector3::Dot(submeshes[j]->GetVertexNormal(k), lightDir);
                         Color32 color(static_cast<int>(dot * 255), 0, 0);

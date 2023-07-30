@@ -3,8 +3,7 @@
 #include "Animator.h"
 #include "GAS.h"
 #include "GasNodes.h"
-#include "GEngine.h"
-#include "Scene.h"
+#include "SceneManager.h"
 
 TYPE_DEF_CHILD(Component, GasPlayer);
 
@@ -86,7 +85,7 @@ void GasPlayer::StartAnimation(Animation* anim, std::function<void()> finishCall
     animParams.animation = anim;
     animParams.fromAutoScript = true;
     animParams.finishCallback = finishCallback;
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+    gSceneManager.GetScene()->GetAnimator()->Start(animParams);
 }
 
 void GasPlayer::OnUpdate(float deltaTime)

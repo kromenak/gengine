@@ -7,9 +7,8 @@
 #include "Animation.h"
 #include "Animator.h"
 #include "GameCamera.h"
-#include "GEngine.h"
 #include "GKActor.h"
-#include "Scene.h"
+#include "SceneManager.h"
 
 DialogueManager gDialogueManager;
 
@@ -90,7 +89,7 @@ void DialogueManager::SetSpeaker(const std::string& noun)
     bool isUnknownSpeaker = StringUtil::EqualsIgnoreCase(mSpeaker, "UNKNOWN");
 	if(!mSpeaker.empty() && !isUnknownSpeaker && mDialogueUsesFidgets)
 	{
-		GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(mSpeaker);
+		GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(mSpeaker);
 		if(actor != nullptr)
 		{
 			actor->StartFidget(GKActor::FidgetType::Listen);
@@ -103,7 +102,7 @@ void DialogueManager::SetSpeaker(const std::string& noun)
 	// Have the new speaker play talk animation.
 	if(mDialogueUsesFidgets && !isUnknownSpeaker)
 	{
-		GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(mSpeaker);
+		GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(mSpeaker);
 		if(actor != nullptr)
 		{
 			actor->StartFidget(GKActor::FidgetType::Talk);
@@ -124,7 +123,7 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
     // If so, set that camera angle.
     if(GameCamera::AreCinematicsEnabled())
     {
-        GEngine::Instance()->GetScene()->SetCameraPositionForConversation(conversation, true);
+        gSceneManager.GetScene()->SetCameraPositionForConversation(conversation, true);
     }
 
     // Clear any previously saved fidgets.
@@ -135,13 +134,13 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
     // Some actors may use different talk/listen GAS for particular conversations.
     // And some actors may need to play enter anims when starting a conversation.
     mConversationAnimWaitCount = 0;
-    std::vector<const SceneConversation*> conversationSettings = GEngine::Instance()->GetScene()->GetSceneData()->GetConversationSettings(conversation);
+    std::vector<const SceneConversation*> conversationSettings = gSceneManager.GetScene()->GetSceneData()->GetConversationSettings(conversation);
     for(auto& settings : conversationSettings)
     {
         // If needed, set new GAS for actor.
         if(settings->talkGas != nullptr || settings->listenGas != nullptr)
         {
-            GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(settings->actorName);
+            GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(settings->actorName);
             if(actor != nullptr)
             {
                 if(settings->talkGas != nullptr)
@@ -170,7 +169,7 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
         if(settings->enterAnim != nullptr)
         {
             ++mConversationAnimWaitCount;
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(settings->enterAnim, [this]() {
+            gSceneManager.GetScene()->GetAnimator()->Start(settings->enterAnim, [this]() {
                 --mConversationAnimWaitCount;
                 CheckConversationAnimFinishCallback();
             });
@@ -200,7 +199,7 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
     // If so, set that camera angle.
     if(GameCamera::AreCinematicsEnabled())
     {
-        GEngine::Instance()->GetScene()->SetCameraPositionForConversation(mConversation, false);
+        gSceneManager.GetScene()->SetCameraPositionForConversation(mConversation, false);
     }
 
     // Revert any fidgets that were set when entering the conversation.
@@ -217,14 +216,14 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
 
     // Play any exit anims for actors in this conversation.
     mConversationAnimWaitCount = 0;
-    std::vector<const SceneConversation*> conversationSettings = GEngine::Instance()->GetScene()->GetSceneData()->GetConversationSettings(mConversation);
+    std::vector<const SceneConversation*> conversationSettings = gSceneManager.GetScene()->GetSceneData()->GetConversationSettings(mConversation);
     for(auto& settings : conversationSettings)
     {
         // Play exit anim.
         if(settings->exitAnim != nullptr)
         {
             ++mConversationAnimWaitCount;
-            GEngine::Instance()->GetScene()->GetAnimator()->Start(settings->exitAnim, [this]() {
+            gSceneManager.GetScene()->GetAnimator()->Start(settings->exitAnim, [this]() {
                 --mConversationAnimWaitCount;
                 CheckConversationAnimFinishCallback();
             });
@@ -233,7 +232,7 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
         // Have the actor go back to their idle fidget.
         // We don't know all participants in a conversation - that data isn't stored in SIF or anything :P
         // But if we have a conversation setting for an actor, at least we know that.
-        GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(settings->actorName);
+        GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(settings->actorName);
         if(actor != nullptr)
         {
             actor->StartFidget(GKActor::FidgetType::Idle);
@@ -288,7 +287,7 @@ void DialogueManager::PlayNextDialogueLine()
     AnimParams yakAnimParams;
     yakAnimParams.animation = yak;
     yakAnimParams.isYak = true;
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(yakAnimParams);
+    gSceneManager.GetScene()->GetAnimator()->Start(yakAnimParams);
 }
 
 void DialogueManager::CheckConversationAnimFinishCallback()

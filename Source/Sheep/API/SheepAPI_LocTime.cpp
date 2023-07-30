@@ -2,11 +2,10 @@
 
 #include "CharacterManager.h"
 #include "GameProgress.h"
-#include "GEngine.h"
 #include "GK3UI.h"
 #include "LocationManager.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "TimeblockScreen.h"
 #include "VideoPlayer.h"
 
@@ -184,7 +183,7 @@ shpvoid SetTime(const std::string& timeblock)
     
     // Unload the current scene.
     std::function<void()> waitable = AddWait();
-    GEngine::Instance()->UnloadScene([oldTimeblock, newTimeblock, waitable](){
+    gSceneManager.UnloadScene([oldTimeblock, newTimeblock, waitable](){
         
         // Play ending movie (if any) for the timeblock we are leaving.
         gVideoPlayer.Play(oldTimeblock.ToString() + "end", true, true, [newTimeblock, waitable](){
@@ -199,7 +198,7 @@ shpvoid SetTime(const std::string& timeblock)
                 gVideoPlayer.Play(newTimeblock.ToString() + "begin", true, true, [waitable](){
 
                     // Reload our current location in the new timeblock.
-                    GEngine::Instance()->LoadScene(gLocationManager.GetLocation());
+                    gSceneManager.LoadScene(gLocationManager.GetLocation());
 
                     // Done changing timeblock.
                     gGameProgress.SetChangingTimeblock(false);

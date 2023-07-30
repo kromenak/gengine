@@ -6,13 +6,11 @@
 
 #include "ActionManager.h"
 #include "AssetManager.h"
-#include "Actor.h"
 #include "CharacterManager.h"
 #include "Console.h"
 #include "ConsoleUI.h"
 #include "CursorManager.h"
 #include "Debug.h"
-#include "DialogueManager.h"
 #include "FileSystem.h"
 #include "FootstepManager.h"
 #include "GameProgress.h"
@@ -26,7 +24,7 @@
 #include "ReportManager.h"
 #include "Renderer.h"
 #include "SaveManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "TextInput.h"
 #include "Timers.h"
 #include "ThreadPool.h"
@@ -147,47 +145,29 @@ bool GEngine::Initialize()
 	ConsoleUI* consoleUI = new ConsoleUI(false);
 	consoleUI->SetIsDestroyOnLoad(false);
 
+    // INIT DONE! Move on to starting the game flow.
     // Non-debug: do the full game presentation - company logos, intro movie, title screen.
-    //#define FORCE_TITLE_SCREEN
+    #define FORCE_TITLE_SCREEN
     #if defined(NDEBUG) || defined(FORCE_TITLE_SCREEN)
-    //HACK/TODO: Ideally, we'd like to either make initial loading much shorter, OR play videos while initial loading is happening.
-    //HACK/TODO: However, my multithreading approach is clearly super incorrect and hacky, so that introduces race conditions between the renderer and game logic.
-    //HACK/TODO: For now, we'll just do loading before moving on to movies, but this is something to look at more closely.
-    Loader::DoAfterLoading([this](){
-
-        // Demo mode only shows the title screen.
-        if(mDemoMode)
-        {
-            gGK3UI.ShowTitleScreen();
-        }
-        else
-        {
-            // Play opening movie.
-            gVideoPlayer.Play("Sierra.avi", true, true, [this](){
-
-                // On first launch of game, show the intro movie before the title screen.
-                // Otherwise, go straight to the title screen.
-                if(gSaveManager.GetRunCount() <= 1)
-                {
-                    gVideoPlayer.Play("intro.bik", true, true, [this](){
-                        gGK3UI.ShowTitleScreen();
-                    });
-                }
-                else
-                {
-                    gGK3UI.ShowTitleScreen();
-                }
-            });
-        }
-    });
+    // In demo mode, wait for async stuff to load and then show the title screen.
+    if(mDemoMode)
+    {
+        ShowTitleScreen();
+    }
+    else // not demo
+    {
+        ShowOpeningMovies();
+    }
     #else
     // For dev purposes: just load right into a desired timeblock and location.
+    printf("Waiting for init to finish (%u)\n", SDL_GetTicks());
     Loader::DoAfterLoading([this]() {
         //gGameProgress.SetTimeblock(Timeblock("210A"));
         //LoadScene("R29");
         //gGameProgress.SetGameVariable("MaidCleaningPath210a", 8);
-        gGameProgress.SetTimeblock(Timeblock("110A"));
-        LoadScene("R25");
+        //gGameProgress.SetTimeblock(Timeblock("110A"));
+        //LoadScene("R25");
+        printf("Done initializing (%u)\n", SDL_GetTicks());
     });
     #endif
 
@@ -217,12 +197,8 @@ void GEngine::Shutdown()
     ThreadPool::Shutdown();
     Loader::Shutdown();
 
-	// Delete all actors.
-	for(auto& actor : mActors)
-	{
-		delete actor;
-	}
-	mActors.clear();
+    // Shutdown scene manager (unloads scene and deletes all actors).
+    gSceneManager.Shutdown();
 
     // Shutdown tools.
     Tools::Shutdown();
@@ -257,7 +233,7 @@ void GEngine::Run()
         GenerateOutputs();
 		
 		// Check whether we need a scene change.
-		LoadSceneInternal();
+        gSceneManager.UpdateLoading();
 
         // OK, this frame is done!
         ++mFrameNumber;
@@ -275,18 +251,6 @@ void GEngine::ForceUpdate()
     Update(10.0f);
 }
 
-void GEngine::LoadScene(const std::string& name, std::function<void()> callback)
-{
-    mSceneToLoad = name;
-    mSceneLoadedCallback = callback;
-}
-
-void GEngine::UnloadScene(std::function<void()> callback)
-{
-    mUnloadScene = true;
-    mSceneUnloadedCallback = callback;
-}
-
 void GEngine::StartGame()
 {
     if(mDemoMode)
@@ -295,8 +259,8 @@ void GEngine::StartGame()
         Timeblock timeblock("212P");
         gGameProgress.SetTimeblock(timeblock);
 
-        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [this](){
-            LoadScene("CSE");
+        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [](){
+            gSceneManager.LoadScene("CSE");
         });
     }
     else
@@ -305,10 +269,39 @@ void GEngine::StartGame()
         Timeblock timeblock("110A");
         gGameProgress.SetTimeblock(timeblock);
 
-        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [this](){
-            LoadScene("R25");
+        gGK3UI.ShowTimeblockScreen(timeblock, 5.0f, [](){
+            gSceneManager.LoadScene("R25");
         });
     }
+}
+
+void GEngine::ShowOpeningMovies()
+{
+    // Play opening movie.
+    gVideoPlayer.Play("Sierra.avi", true, true, [this](){
+
+        // On first launch of game, show the intro movie before the title screen.
+        // Otherwise, go straight to the title screen.
+        if(gSaveManager.GetRunCount() <= 1)
+        {
+            gVideoPlayer.Play("intro.bik", true, true, [this](){
+                ShowTitleScreen();
+            });
+        }
+        else
+        {
+            ShowTitleScreen();
+        }
+    });
+}
+
+void GEngine::ShowTitleScreen()
+{
+    // Make sure all background loading completes before showing title screen.
+    // (not 100% technically necessary, this is just a good "airlock" to ensure all stuff is loaded)
+    Loader::DoAfterLoading([](){
+        gGK3UI.ShowTitleScreen();
+    });
 }
 
 void GEngine::ProcessInput()
@@ -493,22 +486,9 @@ void GEngine::Update()
 
 void GEngine::Update(float deltaTime)
 {
-    // Update the scene (kind of temp - just for convenience).
-    // (or maybe actors should belong to a scene??? hmmmm)
-    if(mScene != nullptr)
-    {
-        mScene->Update(deltaTime);
-    }
-
-    // Update all actors.
-    for(size_t i = 0; i < mActors.size(); i++)
-    {
-        mActors[i]->Update(deltaTime);
-    }
-
-    // Delete any destroyed actors.
-    DeleteDestroyedActors();
-
+    // Update the scene.
+    gSceneManager.Update(deltaTime);
+    
     // Update timers.
     Timers::Update(deltaTime);
 }
@@ -516,118 +496,18 @@ void GEngine::Update(float deltaTime)
 void GEngine::GenerateOutputs()
 {
     PROFILER_SCOPED(GenerateOutputs);
-    if(!Loader::IsLoading())
-    {
-        // Clear screen.
-        gRenderer.Clear();
 
-        // Render the game scene.
-        gRenderer.Render();
+    if(gSceneManager.IsSceneLoading()) { return; }
 
-        // Render any tools over the game scene.
-        Tools::Render();
+    // Clear screen.
+    gRenderer.Clear();
 
-        // Present the final result to screen.
-        gRenderer.Present();
-    }
-}
+    // Render the game scene.
+    gRenderer.Render();
 
-void GEngine::LoadSceneInternal()
-{
-    // Obviously no need to do anything if no load scene is defined.
-	if(mSceneToLoad.empty() && !mUnloadScene) { return; }
+    // Render any tools over the game scene.
+    Tools::Render();
 
-    // If background thread is performing loading, wait until that's done.
-    // If the loader is loading the scene, we don't want to "double load" or something.
-    if(Loader::IsLoading()) { return; }
-
-    // Delete the current scene, if any.
-    UnloadSceneInternal();
-    mUnloadScene = false; // we did it
-
-    // It's possible we just wanted to unload the current scene without loading a new scene.
-    // So, early out in that case.
-    if(mSceneToLoad.empty()) { return; }
-    
-    // Initiate scene load on background thread.
-    Loader::Load([this]() {
-        TIMER_SCOPED("GEngine::LoadSceneInternal::Load");
-        // Create the new scene.
-        //TODO: Scene constructor should probably ONLY take a scene name.
-        //TODO: Internally, we can call to GameProgress or whatnot as needed, but that's very GK3-specific stuff.
-        mScene = new Scene(mSceneToLoad, gGameProgress.GetTimeblock());
-
-        // Load the scene - this is separate from constructor
-        // b/c load operations may need to reference the scene itself!
-        mScene->Load();
-
-        // Clear scene load request.
-        mSceneToLoad.clear();
-    });
-
-    // Once loading is done, init scene and away we go.
-    Loader::DoAfterLoading([this](){
-        mScene->Init();
-
-        // Execute scene load callback, if any.
-        if(mSceneLoadedCallback != nullptr)
-        {
-            mSceneLoadedCallback();
-            mSceneLoadedCallback = nullptr;
-        }
-    });
-}
-
-void GEngine::UnloadSceneInternal()
-{
-    if(mScene != nullptr)
-    {
-        mScene->Unload();
-        delete mScene;
-        mScene = nullptr;
-    }
-
-    // Destroy any actors that are destroy on load.
-    for(auto& actor : mActors)
-    {
-        if(actor->IsDestroyOnLoad())
-        {
-            actor->Destroy();
-        }
-    }
-
-    // After destroy pass, delete destroyed actors.
-    DeleteDestroyedActors();
-
-    // Unload any assets scoped to just the current scene.
-    gAssetManager.UnloadAssets(AssetScope::Scene);
-
-    // Do callback if any.
-    if(mSceneUnloadedCallback != nullptr)
-    {
-        std::function<void()> callback = mSceneUnloadedCallback;
-        mSceneUnloadedCallback = nullptr;
-        callback();
-    }
-}
-
-void GEngine::DeleteDestroyedActors()
-{
-	//TODO: Maybe switch to a "swap to end then delete" strategy.
-	
-	// Use iterator so we can carefully erase and delete actors without too many headaches.
-	auto it = mActors.begin();
-	while(it != mActors.end())
-	{
-		if((*it)->IsDestroyed())
-		{
-			Actor* actor = (*it);
-			it = mActors.erase(it);
-			delete actor;
-		}
-		else
-		{
-			++it;
-		}
-	}
+    // Present the final result to screen.
+    gRenderer.Present();
 }

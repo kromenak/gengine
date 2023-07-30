@@ -1,8 +1,7 @@
 #include "TimeblockScreen.h"
 
 #include "AssetManager.h"
-#include "GEngine.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "Sequence.h"
 #include "SoundtrackPlayer.h"
 #include "Timeblock.h"
@@ -138,7 +137,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, std::functio
     mSaveButton->SetEnabled(mScreenTimer <= 0.0f);
 
     // Fade out any soundtrack from the previous scene as well.
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene != nullptr)
     {
         SoundtrackPlayer* stp = scene->GetSoundtrackPlayer();

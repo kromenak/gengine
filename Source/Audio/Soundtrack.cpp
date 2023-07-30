@@ -2,10 +2,10 @@
 
 #include "AssetManager.h"
 #include "Audio.h"
-#include "GEngine.h"
 #include "GKObject.h"
 #include "IniParser.h"
 #include "Scene.h"
+#include "SceneManager.h"
 #include "StringUtil.h"
 
 int WaitNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
@@ -58,7 +58,7 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
         playParams.position = position;
         if(!followModelName.empty())
         {
-            GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(followModelName);
+            GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(followModelName);
             if(obj != nullptr)
             {
                 outResults.followObj = obj;

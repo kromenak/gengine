@@ -6,7 +6,7 @@
 #include "GEngine.h"
 #include "Random.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "SheepManager.h"
 #include "Timers.h"
 #include "VerbManager.h"
@@ -238,7 +238,7 @@ RegFunc0(StopVerbCancel, void, IMMEDIATE, REL_FUNC);
 
 shpvoid SetGameTimer(const std::string& noun, const std::string& verb, int milliseconds)
 {
-    GEngine::Instance()->GetScene()->SetGameTimer(noun, verb, milliseconds * 0.001f);
+    gSceneManager.GetScene()->SetGameTimer(noun, verb, milliseconds * 0.001f);
     return 0;
 }
 RegFunc3(SetGameTimer, void, string, string, int, IMMEDIATE, REL_FUNC);

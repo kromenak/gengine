@@ -11,12 +11,12 @@
 #include "BSP.h"
 #include "Debug.h"
 #include "Camera.h"
-#include "GEngine.h"
 #include "Matrix4.h"
 #include "MeshRenderer.h"
 #include "Model.h"
 #include "Profiler.h"
 #include "RenderTransforms.h"
+#include "SceneManager.h"
 #include "SaveManager.h"
 #include "Shader.h"
 #include "Skybox.h"
@@ -446,7 +446,7 @@ void Renderer::ChangeResolution(const Window::Resolution& resolution)
     glViewport(0, 0, resolution.width, resolution.height);
 
     // Because some RectTransforms may rely on the window size, we need to dirty all root RectTransforms in the scene.
-    for(auto& actor : GEngine::Instance()->GetActors())
+    for(auto& actor : gSceneManager.GetActors())
     {
         if(actor->GetTransform()->GetParent() == nullptr &&
            actor->GetTransform()->IsTypeOf(RectTransform::GetType()))

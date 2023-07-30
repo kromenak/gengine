@@ -9,7 +9,7 @@
 // Room 25, Train Station, etc). The game can only be "in" one scene at a time.
 //
 // From GK3 docs: "a stage is everything associated with a specific game location
-// during a specific timeblock (e.g. Dining Room, Day 1, 10am).
+// during a specific timeblock (e.g. Dining Room, Day 1, 10am)."
 //
 #pragma once
 #include <string>
@@ -47,9 +47,8 @@ class Scene
 {
 public:
     static const char* GetEgoName();
-
-    Scene(const std::string& name, const std::string& timeblock);
-	Scene(const std::string& name, const Timeblock& timeblock);
+    
+	Scene(const std::string& name);
 	~Scene();
 	
 	void Load();
@@ -140,6 +139,7 @@ private:
     std::vector<BSPActor*> mHitTestActors;
 	
 	// The Actor the player is controlling in this scene.
+    const SceneActor* mEgoSceneActor = nullptr;
     GKActor* mEgo = nullptr;
 
     // The name of the last Ego the player was controlling, including the current scene.

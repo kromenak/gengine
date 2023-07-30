@@ -10,11 +10,10 @@
 #include "FaceController.h"
 #include "GAS.h"
 #include "GasPlayer.h"
-#include "GEngine.h"
 #include "GKProp.h"
 #include "MeshRenderer.h"
 #include "Model.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "StringUtil.h"
 #include "VertexAnimation.h"
 #include "VertexAnimator.h"
@@ -62,12 +61,12 @@ void GKActor::Init(const SceneData& sceneData)
 {
     // FIRST: sampling the first frame of the "walk start" anim ensures all 3D models are at a sane default.
     // This matches the behavior of the original game when a GKActor is spawned with no position or fidgets.
-    GEngine::Instance()->GetScene()->GetAnimator()->Sample(mCharConfig->walkStartAnim, 0);
+    gSceneManager.GetScene()->GetAnimator()->Sample(mCharConfig->walkStartAnim, 0);
 
     // Set actor's initial position and rotation, if any was specified.
     if(!mActorDef->positionName.empty())
     {
-        const ScenePosition* scenePos = GEngine::Instance()->GetScene()->GetPosition(mActorDef->positionName);
+        const ScenePosition* scenePos = gSceneManager.GetScene()->GetPosition(mActorDef->positionName);
         if(scenePos != nullptr)
         {
             SetPosition(scenePos->position);
@@ -121,7 +120,7 @@ void GKActor::Init(const SceneData& sceneData)
     }
     if(clothesAnim != nullptr)
     {
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(clothesAnim);
+        gSceneManager.GetScene()->GetAnimator()->Start(clothesAnim);
     }
 
     // Apply lighting settings from scene.
@@ -133,7 +132,7 @@ void GKActor::Init(const SceneData& sceneData)
     }
 
     // Sample an init anim (if any) that poses the GKActor as needed for scene start.
-    GEngine::Instance()->GetScene()->GetAnimator()->Sample(mActorDef->initAnim, 0);
+    gSceneManager.GetScene()->GetAnimator()->Sample(mActorDef->initAnim, 0);
 }
 
 void GKActor::StartFidget(FidgetType type)
@@ -643,7 +642,7 @@ void GKActor::SetModelRotationToActorRotation()
 
 void GKActor::RefreshFloorInfo()
 {
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene != nullptr && scene->GetSceneData() != nullptr && scene->GetSceneData()->GetBSP() != nullptr)
     {
         scene->GetSceneData()->GetBSP()->GetFloorInfo(GetPosition(), mFloorHeight, mFloorTexture);

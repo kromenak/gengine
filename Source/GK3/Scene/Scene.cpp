@@ -39,15 +39,9 @@ std::string Scene::mEgoName;
     return mEgoName.c_str();
 }
 
-Scene::Scene(const std::string& name, const std::string& timeblock) :
-    Scene(name, Timeblock(timeblock))
-{
-    
-}
-
-Scene::Scene(const std::string& name, const Timeblock& timeblock) :
+Scene::Scene(const std::string& name) :
 	mLocation(name),
-	mTimeblock(timeblock),
+	mTimeblock(gGameProgress.GetTimeblock()),
     mLayer(this)
 {
 	// Create game camera.
@@ -56,10 +50,20 @@ Scene::Scene(const std::string& name, const Timeblock& timeblock) :
 	// Create animation player.
 	Actor* animationActor = new Actor();
 	mAnimator = animationActor->AddComponent<Animator>();
+
+    // Scene layer is now active!
+    gLayerManager.PushLayer(&mLayer);
 }
 
 Scene::~Scene()
 {
+    // Remove scene layer from stack (as well as all layers above it).
+    while(gLayerManager.IsLayerInStack(&mLayer))
+    {
+        gLayerManager.PopLayer();
+    }
+
+    // Unload the scene if it wasn't done manually before deleting the scene.
 	if(mSceneData != nullptr)
 	{
 		Unload();
@@ -77,82 +81,42 @@ void Scene::Load()
 		return;
 	}
 
-    // Scene layer is now active!
-    gLayerManager.PushLayer(&mLayer);
-    
-	// Creating scene data loads SIFs, but does nothing else yet!
-	mSceneData = new SceneData(mLocation, mTimeblock.ToString());
-	
-	// It's generally important that we know how our "ego" will be as soon as possible.
-	// This is because the scene loading *itself* may check who ego is to do certain things!
-	const SceneActor* egoSceneActor = mSceneData->DetermineWhoEgoWillBe();
-	if(egoSceneActor != nullptr)
-	{
-        mEgoName = egoSceneActor->noun;
-	}
-
     // Set location.
     gLocationManager.SetLocation(mLocation);
 
-    // Create status overlay actor.
-    // Do this after setting location so it shows the correct location!
-    mStatusOverlay = new StatusOverlay();
-    
+    // Creating scene data loads SIFs, but does nothing else yet!
+    mSceneData = new SceneData(mLocation, mTimeblock.ToString());
+
+    // It's generally important that we know how our "ego" will be as soon as possible.
+    // This is because the scene loading *itself* may check who ego is to do certain things!
+    mEgoSceneActor = mSceneData->DetermineWhoEgoWillBe();
+    if(mEgoSceneActor != nullptr)
+    {
+        mEgoName = mEgoSceneActor->noun;
+    }
+
     // Based on location, timeblock, and game progress, resolve what data we will load into the current scene.
     // Do this BEFORE incrementing location count, as SIF conditions sometimes do "zero-checks" (e.g. if current location count == 0).
     // After this, SceneData will have combined all SIFs and parsed all conditions to determine exactly what actors/models/etc to used right now.
     mSceneData->ResolveSceneData();
 
-    // Increment location counter after resolving scene data.
-    // Despite SIFs sometimes doing "zero-checks," other NVC and SHP scripts typically do "one-checks".
-    // E.g. run on "1st time enter" checks count == 1.
-    gLocationManager.IncLocationCount(mEgoName, mLocation, mTimeblock);
-	
-	// Set BSP to be rendered.
-    gRenderer.SetBSP(mSceneData->GetBSP());
-    
-    // Figure out if we have a skybox, and set it to be rendered.
-    gRenderer.SetSkybox(mSceneData->GetSkybox());
-	
-	// Position the camera at the the default position and heading.
-	const SceneCamera* defaultRoomCamera = mSceneData->GetDefaultRoomCamera();
-	if(defaultRoomCamera != nullptr)
-	{
-    	mCamera->SetPosition(defaultRoomCamera->position);
-    	mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.x));
-	}
-
-    // Force a camera update to make sure the audio listener is positioned correctly in the scene.
-    // This stops audio playing too loudly on scene load if the audio listener hasn't yet updated.
-    mCamera->Update(0.0f);
-	
-	// If a camera bounds model exists for this scene, pass it along to the camera.
-    for(auto& modelName : mSceneData->GetCameraBoundsModelNames())
+    // Create actors for the scene.
+    const std::vector<const SceneActor*>& sceneActorDatas = mSceneData->GetActors();
+    for(auto& actorDef : sceneActorDatas)
     {
-        Model* model = gAssetManager.LoadModel(modelName, AssetScope::Scene);
-        if(model != nullptr)
+        // NEVER spawn an ego who is not our current ego!
+        if(actorDef->ego && actorDef != mEgoSceneActor) { continue; }
+
+        // Create actor.
+        GKActor* actor = new GKActor(actorDef);
+        mActors.push_back(actor);
+        mPropsAndActors.push_back(actor);
+
+        // If this is ego, save a reference to it.
+        if(actorDef->ego && actorDef == mEgoSceneActor)
         {
-            mCamera->AddBounds(model);
+            mEgo = actor;
         }
-    }
-    
-	// Create actors for the scene.
-	const std::vector<const SceneActor*>& sceneActorDatas = mSceneData->GetActors();
-	for(auto& actorDef : sceneActorDatas)
-	{
-		// NEVER spawn an ego who is not our current ego!
-		if(actorDef->ego && actorDef != egoSceneActor) { continue; }
-		
-		// Create actor.
-		GKActor* actor = new GKActor(actorDef);
-		mActors.push_back(actor);
-		mPropsAndActors.push_back(actor);
-		
-		// If this is ego, save a reference to it.
-		if(actorDef->ego && actorDef == egoSceneActor)
-		{
-			mEgo = actor;
-		}
 
         // Create DOR prop, if one exists for this actor.
         // The DOR model assists with calculating an actor's facing direction, particularly while walking.
@@ -166,74 +130,74 @@ void Scene::Load()
             // Disable DOR mesh renderer so you can't see the placeholder model.
             walkerDOR->GetMeshRenderer()->SetEnabled(false);
         }
-	}
-	
-	// Iterate over scene model data and prep the scene.
-	// First, we want to hide and scene models that are set to "hidden".
-	// Second, we want to spawn any non-scene models.
-	const std::vector<const SceneModel*>& sceneModelDatas = mSceneData->GetModels();
-	for(auto& modelDef : sceneModelDatas)
-	{
-		switch(modelDef->type)
-		{
-			// "Scene" type models are ones that are baked into the BSP geometry.
-			case SceneModel::Type::Scene:
-			{
-				BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
-                if(actor == nullptr) { break; }
-				mBSPActors.push_back(actor);
-				
-				actor->SetNoun(modelDef->noun);
-				actor->SetVerb(modelDef->verb);
-				
-				// If it should be hidden by default, tell the BSP to hide it.
-				if(modelDef->hidden)
-				{
-					actor->SetActive(false);
-				}
-				break;
-			}
-				
-			// "HitTest" type models should be hidden, but still interactive.
-			case SceneModel::Type::HitTest:
-			{
-				BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
-                if(actor == nullptr) { break; }
-				mBSPActors.push_back(actor);
-                mHitTestActors.push_back(actor);
-				
-				actor->SetNoun(modelDef->noun);
-				actor->SetVerb(modelDef->verb);
-				
-				// Hit tests, if hidden, are completely deactivated.
-				// However, if not hidden, they are still not visible, but they DO receive ray casts.
-				if(modelDef->hidden)
-				{
-					actor->SetActive(false);
-				}
-				else
-				{
-					actor->SetVisible(false);
-				}
-				break;
-			}
-				
-			// "Prop" and "GasProp" models both render their own model geometry.
-			// Only difference for a "GasProp" is that it uses a provided Gas file too.
-			case SceneModel::Type::Prop:
-			case SceneModel::Type::GasProp:
-			{
-				GKProp* prop = new GKProp(*modelDef);
-				mProps.push_back(prop);
-				mPropsAndActors.push_back(prop);
-				break;
-			}
+    }
 
-			default:
-				std::cout << "Unaccounted for model type: " << (int)modelDef->type << std::endl;
-				break;
-		}
-	}
+    // Iterate over scene model data and prep the scene.
+    // First, we want to hide any scene models that are set to "hidden".
+    // Second, we want to spawn any non-scene models.
+    const std::vector<const SceneModel*>& sceneModelDatas = mSceneData->GetModels();
+    for(auto& modelDef : sceneModelDatas)
+    {
+        switch(modelDef->type)
+        {
+        // "Scene" type models are ones that are baked into the BSP geometry.
+        case SceneModel::Type::Scene:
+        {
+            BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
+            if(actor == nullptr) { break; }
+            mBSPActors.push_back(actor);
+
+            actor->SetNoun(modelDef->noun);
+            actor->SetVerb(modelDef->verb);
+
+            // If it should be hidden by default, tell the BSP to hide it.
+            if(modelDef->hidden)
+            {
+                actor->SetActive(false);
+            }
+            break;
+        }
+
+        // "HitTest" type models should be hidden, but still interactive.
+        case SceneModel::Type::HitTest:
+        {
+            BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
+            if(actor == nullptr) { break; }
+            mBSPActors.push_back(actor);
+            mHitTestActors.push_back(actor);
+
+            actor->SetNoun(modelDef->noun);
+            actor->SetVerb(modelDef->verb);
+
+            // Hit tests, if hidden, are completely deactivated.
+            // However, if not hidden, they are still not visible, but they DO receive ray casts.
+            if(modelDef->hidden)
+            {
+                actor->SetActive(false);
+            }
+            else
+            {
+                actor->SetVisible(false);
+            }
+            break;
+        }
+
+        // "Prop" and "GasProp" models both render their own model geometry.
+        // Only difference for a "GasProp" is that it uses a provided Gas file too.
+        case SceneModel::Type::Prop:
+        case SceneModel::Type::GasProp:
+        {
+            GKProp* prop = new GKProp(*modelDef);
+            mProps.push_back(prop);
+            mPropsAndActors.push_back(prop);
+            break;
+        }
+
+        default:
+            std::cout << "Unaccounted for model type: " << (int)modelDef->type << std::endl;
+            break;
+        }
+    }
 
     // Init construction system.
     mConstruction.Init(this, mSceneData);
@@ -246,15 +210,47 @@ void Scene::Unload()
 	
 	delete mSceneData;
 	mSceneData = nullptr;
-
-    while(gLayerManager.IsLayerInStack(&mLayer))
-    {
-        gLayerManager.PopLayer();
-    }
 }
 
 void Scene::Init()
 {
+    // Create status overlay actor.
+    // Do this after setting location so it shows the correct location!
+    mStatusOverlay = new StatusOverlay();
+    
+    // Increment location counter after resolving scene data.
+    // Despite SIFs sometimes doing "zero-checks," other NVC and SHP scripts typically do "one-checks".
+    // E.g. run on "1st time enter" checks count == 1.
+    gLocationManager.IncLocationCount(mEgoName, mLocation, mTimeblock);
+
+    // Set BSP to be rendered.
+    gRenderer.SetBSP(mSceneData->GetBSP());
+
+    // Figure out if we have a skybox, and set it to be rendered.
+    gRenderer.SetSkybox(mSceneData->GetSkybox());
+
+    // Position the camera at the the default position and heading.
+    const SceneCamera* defaultRoomCamera = mSceneData->GetDefaultRoomCamera();
+    if(defaultRoomCamera != nullptr)
+    {
+        mCamera->SetPosition(defaultRoomCamera->position);
+        mCamera->SetRotation(Quaternion(Vector3::UnitY, defaultRoomCamera->angle.x));
+    }
+
+    // Force a camera update to make sure the audio listener is positioned correctly in the scene.
+    // This stops audio playing too loudly on scene load if the audio listener hasn't yet updated.
+    mCamera->Update(0.0f);
+
+    // If a camera bounds model exists for this scene, pass it along to the camera.
+    for(auto& modelName : mSceneData->GetCameraBoundsModelNames())
+    {
+        Model* model = gAssetManager.LoadModel(modelName, AssetScope::Scene);
+        if(model != nullptr)
+        {
+            mCamera->AddBounds(model);
+        }
+    }
+    
     // Init all actors and props.
     for(auto& prop : mProps)
     {
@@ -703,12 +699,11 @@ const ScenePosition* Scene::GetPosition(const std::string& positionName) const
 
 float Scene::GetFloorY(const Vector3& position) const
 {
-    BSP* bsp = mSceneData->GetBSP();
-    if(bsp == nullptr) { return 0.0f; }
+    if(mSceneData == nullptr || mSceneData->GetBSP() == nullptr) { return 0.0f; }
 
     float height = 0.0f;
     Texture* texture = nullptr;
-    bsp->GetFloorInfo(position, height, texture);
+    mSceneData->GetBSP()->GetFloorInfo(position, height, texture);
     return height;
 }
 

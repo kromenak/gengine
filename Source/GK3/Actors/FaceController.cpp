@@ -6,11 +6,10 @@
 #include "Animator.h"
 #include "AssetManager.h"
 #include "CharacterManager.h"
-#include "GEngine.h"
 #include "Texture.h"
 #include "Random.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "StringUtil.h"
 
 TYPE_DEF_CHILD(Component, FaceController);
@@ -183,7 +182,7 @@ void FaceController::Blink()
 	}
 	
 	// Play it if you got it!
-	GEngine::Instance()->GetScene()->GetAnimator()->Start(blinkAnim);
+	gSceneManager.GetScene()->GetAnimator()->Start(blinkAnim);
 }
 
 void FaceController::Blink(const std::string& animName)
@@ -202,7 +201,7 @@ void FaceController::Blink(const std::string& animName)
 			return;
 		}
 	}
-	GEngine::Instance()->GetScene()->GetAnimator()->Start(blinkAnim);
+	gSceneManager.GetScene()->GetAnimator()->Start(blinkAnim);
 }
 
 void FaceController::SetEyeJitterEnabled(bool enabled)
@@ -236,7 +235,7 @@ void FaceController::DoExpression(const std::string& expression)
 	Animation* animation = gAssetManager.LoadAnimation(animName);
 	if(animation != nullptr)
 	{
-		GEngine::Instance()->GetScene()->GetAnimator()->Start(animation);
+		gSceneManager.GetScene()->GetAnimator()->Start(animation);
 	}
 	else
 	{
@@ -266,7 +265,7 @@ void FaceController::SetMood(const std::string& mood)
 	mExitMoodAnimation = exitAnimation;
 	
 	// Play mood on animation.
-	GEngine::Instance()->GetScene()->GetAnimator()->Start(mEnterMoodAnimation);
+	gSceneManager.GetScene()->GetAnimator()->Start(mEnterMoodAnimation);
 }
 
 void FaceController::ClearMood()
@@ -275,7 +274,7 @@ void FaceController::ClearMood()
 	if(mMood.empty()) { return; }
 	
 	// Play mood off animation.
-	GEngine::Instance()->GetScene()->GetAnimator()->Start(mExitMoodAnimation);
+	gSceneManager.GetScene()->GetAnimator()->Start(mExitMoodAnimation);
 	
 	// Clear mood state.
 	mMood.clear();

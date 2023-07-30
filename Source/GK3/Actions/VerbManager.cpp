@@ -55,23 +55,23 @@ void VerbManager::Init()
             IniKeyValue& keyValuePair = line.entries[i];
             if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "up"))
             {
-                upTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                upTexture = gAssetManager.LoadTextureAsync(keyValuePair.value);
             }
             else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "down"))
             {
-                downTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                downTexture = gAssetManager.LoadTextureAsync(keyValuePair.value);
             }
             else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "hover"))
             {
-                hoverTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                hoverTexture = gAssetManager.LoadTextureAsync(keyValuePair.value);
             }
             else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "disable"))
             {
-                disableTexture = gAssetManager.LoadTexture(keyValuePair.value);
+                disableTexture = gAssetManager.LoadTextureAsync(keyValuePair.value);
             }
             else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "cursor"))
             {
-                cursor = gAssetManager.LoadCursor(keyValuePair.value);
+                cursor = gAssetManager.LoadCursorAsync(keyValuePair.value);
             }
             else if(StringUtil::EqualsIgnoreCase(keyValuePair.key, "type"))
             {

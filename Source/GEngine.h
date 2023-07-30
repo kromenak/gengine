@@ -5,12 +5,7 @@
 // init, running the game loop, shutdown, and some coordination between systems.
 //
 #pragma once
-#include <functional>
-#include <string>
-#include <vector>
-
-class Actor;
-class Scene;
+#include <cstdint>
 
 class GEngine
 {
@@ -26,13 +21,6 @@ public:
     void Quit();
 
     void ForceUpdate();
-
-    void AddActor(Actor* actor) { mActors.push_back(actor); }
-    const std::vector<Actor*>& GetActors() const { return mActors; }
-    
-    void LoadScene(const std::string& name, std::function<void()> callback = nullptr);
-    void UnloadScene(std::function<void()> callback = nullptr);
-    Scene* GetScene() { return mScene; }
 
     uint32_t GetFrameNumber() const { return mFrameNumber; }
 
@@ -62,30 +50,11 @@ private:
     // If true, the game runs as the "demo" version of the game.
     bool mDemoMode = false;
 
-    // A list of all actors that currently exist in the game.
-    std::vector<Actor*> mActors;
-    
-    // The currently active scene. There can be only one at a time (sure about that?).
-    Scene* mScene = nullptr;
-	
-	// A scene that's been requested to load. If empty, no pending scene change.
-	// Scene loads happen at the end of a frame, to avoid a scene change mid-frame.
-	std::string mSceneToLoad;
-
-    // If set, we explicitly want to unload the current scene without loading a new scene.
-    bool mUnloadScene = false;
-
-    // Callback to execute when scene load/unload completes.
-    std::function<void()> mSceneLoadedCallback = nullptr;
-    std::function<void()> mSceneUnloadedCallback = nullptr;
+    void ShowOpeningMovies();
+    void ShowTitleScreen();
 
     void ProcessInput();
     void Update();
     void Update(float deltaTime);
     void GenerateOutputs();
-	
-	void LoadSceneInternal();
-    void UnloadSceneInternal();
-	
-	void DeleteDestroyedActors();
 };

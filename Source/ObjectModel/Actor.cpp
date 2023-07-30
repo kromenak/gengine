@@ -2,12 +2,12 @@
 
 #include "Debug.h"
 #include "Component.h"
-#include "GEngine.h"
 #include "RectTransform.h"
+#include "SceneManager.h"
 
 Actor::Actor()
 {
-    GEngine::Instance()->AddActor(this);
+    gSceneManager.AddActor(this);
 	
 	// Add transform component.
 	mTransform = AddComponent<Transform>();
@@ -15,7 +15,7 @@ Actor::Actor()
 
 Actor::Actor(TransformType transformType)
 {
-	GEngine::Instance()->AddActor(this);
+	gSceneManager.AddActor(this);
 	
 	// Add transform component.
 	if(transformType == TransformType::Transform)

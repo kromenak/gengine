@@ -66,7 +66,7 @@ void FootstepManager::Init()
 			for(size_t i = 0; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& current = line.entries[i];
-				Audio* audio = gAssetManager.LoadAudio(current.value);
+				Audio* audio = gAssetManager.LoadAudioAsync(current.value);
 				if(audio != nullptr)
 				{
 					footsteps.push_back(audio);
@@ -105,7 +105,7 @@ void FootstepManager::Init()
 			for(size_t i = 0; i < line.entries.size(); ++i)
 			{
 				IniKeyValue& current = line.entries[i];
-				Audio* audio = gAssetManager.LoadAudio(current.value);
+				Audio* audio = gAssetManager.LoadAudioAsync(current.value);
 				if(audio != nullptr)
 				{
 					footscuffs.push_back(audio);

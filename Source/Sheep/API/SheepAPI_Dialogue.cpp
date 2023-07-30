@@ -3,9 +3,8 @@
 #include "Animator.h"
 #include "AssetManager.h"
 #include "DialogueManager.h"
-#include "GEngine.h"
 #include "GK3UI.h"
-#include "Scene.h"
+#include "SceneManager.h"
 
 using namespace std;
 
@@ -18,7 +17,7 @@ shpvoid StartVoiceOver(const std::string& dialogueName, int numLines)
     params.animation = yak;
     params.finishCallback = AddWait();
     params.isYak = true;
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(params);
+    gSceneManager.GetScene()->GetAnimator()->Start(params);
     return 0;
 }
 RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
@@ -31,7 +30,7 @@ shpvoid StartYak(const std::string& yakAnimationName)
     params.animation = yak;
     params.finishCallback = AddWait();
     params.isYak = true;
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(params);
+    gSceneManager.GetScene()->GetAnimator()->Start(params);
     return 0;
 }
 RegFunc1(StartYak, void, string, WAITABLE, DEV_FUNC);

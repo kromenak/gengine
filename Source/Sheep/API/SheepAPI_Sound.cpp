@@ -2,9 +2,8 @@
 
 #include "AssetManager.h"
 #include "AudioManager.h"
-#include "GEngine.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "SoundtrackPlayer.h"
 #include "StringUtil.h"
 
@@ -173,7 +172,7 @@ shpvoid PlaySoundTrack(const std::string& soundtrackName)
     Soundtrack* soundtrack = gAssetManager.LoadSoundtrack(soundtrackName, AssetScope::Scene);
     if(soundtrack != nullptr)
     {
-        GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Play(soundtrack);
+        gSceneManager.GetScene()->GetSoundtrackPlayer()->Play(soundtrack);
     }
     return 0;
 }
@@ -183,14 +182,14 @@ shpvoid StopSoundTrack(const std::string& soundtrackName)
 {
     // Soundtrack must already be loaded to be playing. So, just load and pass in pointer.
     // If it is null, Stop handles that for us.
-    GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Stop(gAssetManager.LoadSoundtrack(soundtrackName, AssetScope::Scene));
+    gSceneManager.GetScene()->GetSoundtrackPlayer()->Stop(gAssetManager.LoadSoundtrack(soundtrackName, AssetScope::Scene));
     return 0;
 }
 RegFunc1(StopSoundTrack, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid StopAllSoundTracks()
 {
-    GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->StopAll();
+    gSceneManager.GetScene()->GetSoundtrackPlayer()->StopAll();
     return 0;
 }
 RegFunc0(StopAllSoundTracks, void, IMMEDIATE, REL_FUNC);

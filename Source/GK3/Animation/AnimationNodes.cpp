@@ -10,10 +10,9 @@
 #include "FootstepManager.h"
 #include "GK3UI.h"
 #include "GKActor.h"
-#include "GEngine.h"
 #include "Heading.h"
 #include "MeshRenderer.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "SoundtrackPlayer.h"
 #include "Texture.h"
 #include "VertexAnimation.h"
@@ -28,7 +27,7 @@ void VertexAnimNode::Play(AnimationState* animState)
 	if(vertexAnimation != nullptr)
 	{
 		// Also we need the object to play the vertex anim on!
-		GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(obj != nullptr)
 		{
             VertexAnimParams params;
@@ -65,7 +64,7 @@ void VertexAnimNode::Play(AnimationState* animState)
                 std::string prefix = animState->params.animation->GetName().substr(0, 3);
 
                 // If a parent exists, and it isn't ourselves, use it!
-                GKObject* parent = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(prefix);
+                GKObject* parent = gSceneManager.GetScene()->GetSceneObjectByModelName(prefix);
                 if(parent != nullptr && parent != obj)
                 {
                     params.parent = parent->GetMeshRenderer()->GetOwner();
@@ -91,7 +90,7 @@ void VertexAnimNode::Sample(int frame)
 {
     if(vertexAnimation != nullptr)
     {
-        GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+        GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
         if(obj != nullptr)
         {
             VertexAnimParams params;
@@ -120,7 +119,7 @@ void VertexAnimNode::Stop()
 {
 	if(vertexAnimation != nullptr)
 	{
-		GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
+		GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(vertexAnimation->GetModelName());
 		if(obj != nullptr)
 		{
             obj->StopAnimation(vertexAnimation);
@@ -151,7 +150,7 @@ void SceneTextureAnimNode::Play(AnimationState* animState)
 	if(texture != nullptr)
 	{
 		//TODO: Ensure sceneName matches loaded scene name?
-		GEngine::Instance()->GetScene()->ApplyTextureToSceneModel(sceneModelName, texture);
+		gSceneManager.GetScene()->ApplyTextureToSceneModel(sceneModelName, texture);
 	}
 }
 
@@ -163,7 +162,7 @@ void SceneTextureAnimNode::Sample(int frame)
 void SceneModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	//TODO: Ensure sceneName matches loaded scene name?
-	GEngine::Instance()->GetScene()->SetSceneModelVisibility(sceneModelName, visible);
+	gSceneManager.GetScene()->SetSceneModelVisibility(sceneModelName, visible);
 }
 
 void SceneModelVisibilityAnimNode::Sample(int frame)
@@ -174,7 +173,7 @@ void SceneModelVisibilityAnimNode::Sample(int frame)
 void ModelTextureAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+	GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
 	if(obj != nullptr)
 	{
 		// Grab the material used to render this meshIndex/submeshIndex pair.
@@ -199,7 +198,7 @@ void ModelTextureAnimNode::Sample(int frame)
 void ModelVisibilityAnimNode::Play(AnimationState* animState)
 {
 	// Get actor by model name.
-	GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+	GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
 	if(obj != nullptr)
 	{
         MeshRenderer* meshRenderer = obj->GetMeshRenderer();
@@ -250,7 +249,7 @@ void SoundAnimNode::Play(AnimationState* animState)
         // If position is based on model name, find the model and set position.
         if(!modelName.empty())
         {
-            GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+            GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
             if(obj != nullptr)
             {
                 playPosition = obj->GetAudioPosition();
@@ -304,7 +303,7 @@ void FootstepAnimNode::Play(AnimationState* animState)
     if(gActionManager.IsSkippingCurrentAction()) { return; }
 
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
         // Play a footstep.
@@ -317,7 +316,7 @@ void FootscuffAnimNode::Play(AnimationState* animState)
     if(gActionManager.IsSkippingCurrentAction()) { return; }
 
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
         // Play a foot scuff.
@@ -327,7 +326,7 @@ void FootscuffAnimNode::Play(AnimationState* animState)
 
 void PlaySoundtrackAnimNode::Play(AnimationState* animState)
 {
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene == nullptr) { return; }
 
     SoundtrackPlayer* soundtrackPlayer = scene->GetSoundtrackPlayer();
@@ -340,7 +339,7 @@ void PlaySoundtrackAnimNode::Play(AnimationState* animState)
 
 void StopSoundtrackAnimNode::Play(AnimationState* animState)
 {
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene == nullptr) { return; }
 
     SoundtrackPlayer* soundtrackPlayer = scene->GetSoundtrackPlayer();
@@ -361,11 +360,11 @@ void CameraAnimNode::Play(AnimationState* animState)
 {
     if(glide)
     {
-        GEngine::Instance()->GetScene()->GlideToCameraPosition(cameraPositionName, nullptr);
+        gSceneManager.GetScene()->GlideToCameraPosition(cameraPositionName, nullptr);
     }
     else
     {
-        GEngine::Instance()->GetScene()->SetCameraPosition(cameraPositionName);
+        gSceneManager.GetScene()->SetCameraPosition(cameraPositionName);
     }
 }
 
@@ -377,7 +376,7 @@ void CameraAnimNode::Sample(int frame)
 void FaceTexAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
 		// In this case, the texture name is what it is.
@@ -397,7 +396,7 @@ void FaceTexAnimNode::Sample(int frame)
 void UnFaceTexAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
 		actor->GetFaceController()->Clear(faceElement);
@@ -412,7 +411,7 @@ void UnFaceTexAnimNode::Sample(int frame)
 void LipSyncAnimNode::Play(AnimationState* animState)
 {
 	// Get actor using the specified noun.
-	GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+	GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorNoun);
 	if(actor != nullptr)
 	{
 		// The mouth texture name is based on the current face config for the character.
@@ -441,7 +440,7 @@ void GlanceAnimNode::Sample(int frame)
 
 void MoodAnimNode::Play(AnimationState* animState)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorNoun);
     if(actor != nullptr)
     {
         actor->GetFaceController()->SetMood(moodName);
@@ -455,7 +454,7 @@ void MoodAnimNode::Sample(int frame)
 
 void ExpressionAnimNode::Play(AnimationState* animState)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorNoun);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorNoun);
     if(actor != nullptr)
     {
         actor->GetFaceController()->DoExpression(expressionName);

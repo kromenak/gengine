@@ -6,7 +6,6 @@
 #include "Collisions.h"
 #include "CursorManager.h"
 #include "Debug.h"
-#include "GEngine.h"
 #include "GKActor.h"
 #include "GKObject.h"
 #include "InventoryManager.h"
@@ -15,7 +14,7 @@
 #include "OptionBar.h"
 #include "Ray.h"
 #include "SaveManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "Sphere.h"
 #include "StringUtil.h"
 #include "Triangle.h"
@@ -215,7 +214,7 @@ void GameCamera::OnUpdate(float deltaTime)
         // Pressing escape acts as a "skip" or "cancel" action, depending on current state of the game.
         if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
         {
-            GEngine::Instance()->GetScene()->SkipCurrentAction();
+            gSceneManager.GetScene()->SkipCurrentAction();
         }
     }
 }
@@ -256,7 +255,7 @@ void GameCamera::SceneUpdate(float deltaTime)
 
     // It's possible our height was changed due to a script moving the camera.
     // Make sure height is correct before we do our updates.
-    float startFloorY = GEngine::Instance()->GetScene()->GetFloorY(GetPosition());
+    float startFloorY = gSceneManager.GetScene()->GetFloorY(GetPosition());
     mHeight = GetPosition().y - startFloorY;
 
     // Update camera movement/rotation.
@@ -265,7 +264,7 @@ void GameCamera::SceneUpdate(float deltaTime)
     // Raycast to the ground and always maintain a desired height.
     //TODO: This does not apply when camera boundaries are disabled!
     //TODO: Doesn't apply when middle mouse button is held???
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene != nullptr)
     {
         Vector3 pos = GetPosition();
@@ -475,7 +474,7 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
 
     // Calculate new desired height and apply that to position y.
     float height = mHeight + verticalSpeed * deltaTime;
-    float floorY = GEngine::Instance()->GetScene()->GetFloorY(position);
+    float floorY = gSceneManager.GetScene()->GetFloorY(position);
     position.y = floorY + height;
 
     // Determine offset from start to end position.
@@ -489,7 +488,7 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
 
     // Height may also be affected by collision. After resolving,
     // we can see if our height changed and save it.
-    float newFloorY = GEngine::Instance()->GetScene()->GetFloorY(position);
+    float newFloorY = gSceneManager.GetScene()->GetFloorY(position);
     float heightForReal = position.y - newFloorY;
     mHeight = heightForReal;
 
@@ -530,7 +529,7 @@ void GameCamera::SceneUpdateInteract(float deltaTime)
             Ray ray(worldPos, dir);
 
             // Cast into the scene to see if we're over an interactive object.
-            SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, true);
+            SceneCastResult result = gSceneManager.GetScene()->Raycast(ray, true);
 
             // If we can interact with whatever we are pointing at, highlight the cursor.
             // Note we call "UseHighlightCursor" when start hovering OR we switch hover to new object.
@@ -569,7 +568,7 @@ void GameCamera::SceneUpdateInteract(float deltaTime)
             // Need to do this, even if canInteract==false, because floor can be clicked to move around.
             if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
             {
-                GEngine::Instance()->GetScene()->Interact(ray, hovering);
+                gSceneManager.GetScene()->Interact(ray, hovering);
             }
         }
         else

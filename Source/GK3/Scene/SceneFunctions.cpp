@@ -1,10 +1,9 @@
 #include "SceneFunctions.h"
 
-#include "GEngine.h"
 #include "GKObject.h"
 #include "LaserHead.h"
 #include "LocationManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "SoundtrackPlayer.h"
 
 std::string_map_ci<std::function<void()>> SceneFunctions::sSceneFunctions;
@@ -19,7 +18,7 @@ namespace
         // Find each head in the scene and add the LaserHead component to each.
         for(int i = 0; i < 5; ++i)
         {
-            GKObject* head = GEngine::Instance()->GetScene()->GetSceneObjectByModelName("cs2head0" + std::to_string(i + 1));
+            GKObject* head = gSceneManager.GetScene()->GetSceneObjectByModelName("cs2head0" + std::to_string(i + 1));
             if(head != nullptr)
             {
                 // Save a reference for use in other functions.
@@ -40,7 +39,7 @@ namespace
         }
 
         // Somewhat randomly, this function is also responsible for stopping the current soundtrack.
-        GEngine::Instance()->GetScene()->GetSoundtrackPlayer()->Stop("NocturneSlow");
+        gSceneManager.GetScene()->GetSoundtrackPlayer()->Stop("NocturneSlow");
     }
 
     void CS2_Head1TurnLeft() { cs2LaserHeads[0]->TurnLeft(); }

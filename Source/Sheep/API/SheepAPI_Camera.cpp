@@ -2,12 +2,11 @@
 
 #include "Camera.h"
 #include "GameCamera.h"
-#include "GEngine.h"
 #include "GKObject.h"
 #include "MeshRenderer.h"
 #include "ReportManager.h"
 #include "SaveManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 
 using namespace std;
 
@@ -15,10 +14,10 @@ namespace
 {
     Camera* GetCamera()
     {
-        Scene* scene = GEngine::Instance()->GetScene();
+        Scene* scene = gSceneManager.GetScene();
         if(scene != nullptr)
         {
-            GameCamera* gameCamera = GEngine::Instance()->GetScene()->GetCamera();
+            GameCamera* gameCamera = gSceneManager.GetScene()->GetCamera();
             if(gameCamera != nullptr)
             {
                 return gameCamera->GetCamera();
@@ -119,7 +118,7 @@ RegFunc0(DisableCinematics, void, IMMEDIATE, REL_FUNC);
 
 shpvoid EnableCameraBoundaries()
 {
-    GEngine::Instance()->GetScene()->GetCamera()->SetBoundsEnabled(true);
+    gSceneManager.GetScene()->GetCamera()->SetBoundsEnabled(true);
     return 0;
 }
 RegFunc0(EnableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
@@ -128,7 +127,7 @@ shpvoid DisableCameraBoundaries()
 {
     // Note that this only disables camera boundaries until the next scene load.
     // This reflects the behavior in the OG game.
-    GEngine::Instance()->GetScene()->GetCamera()->SetBoundsEnabled(false);
+    gSceneManager.GetScene()->GetCamera()->SetBoundsEnabled(false);
     return 0;
 }
 RegFunc0(DisableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
@@ -136,13 +135,13 @@ RegFunc0(DisableCameraBoundaries, void, IMMEDIATE, DEV_FUNC);
 
 shpvoid CameraBoundaryBlockModel(const std::string& modelName)
 {
-    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
     if(object != nullptr)
     {
         MeshRenderer* meshRenderer = object->GetMeshRenderer();
         if(meshRenderer != nullptr)
         {
-            GEngine::Instance()->GetScene()->GetCamera()->AddBounds(meshRenderer->GetModel());
+            gSceneManager.GetScene()->GetCamera()->AddBounds(meshRenderer->GetModel());
         }
     }
     return 0;
@@ -151,13 +150,13 @@ RegFunc1(CameraBoundaryBlockModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid CameraBoundaryUnblockModel(const std::string& modelName)
 {
-    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
     if(object != nullptr)
     {
         MeshRenderer* meshRenderer = object->GetMeshRenderer();
         if(meshRenderer != nullptr)
         {
-            GEngine::Instance()->GetScene()->GetCamera()->RemoveBounds(meshRenderer->GetModel());
+            gSceneManager.GetScene()->GetCamera()->RemoveBounds(meshRenderer->GetModel());
         }
     }
     return 0;
@@ -166,7 +165,7 @@ RegFunc1(CameraBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid GlideToCameraAngle(const std::string& cameraName)
 {
-    GEngine::Instance()->GetScene()->GlideToCameraPosition(cameraName, AddWait());
+    gSceneManager.GetScene()->GlideToCameraPosition(cameraName, AddWait());
     return 0;
 }
 RegFunc1(GlideToCameraAngle, void, string, WAITABLE, REL_FUNC);
@@ -174,9 +173,9 @@ RegFunc1(GlideToCameraAngle, void, string, WAITABLE, REL_FUNC);
 shpvoid CutToCameraAngle(const std::string& cameraName)
 {
     // This version of the function only cuts the camera if cinematics are enabled, OR forced cinematics is temporarily enabled.
-    if(GameCamera::AreCinematicsEnabled() || GEngine::Instance()->GetScene()->GetCamera()->IsForcedCinematicMode())
+    if(GameCamera::AreCinematicsEnabled() || gSceneManager.GetScene()->GetCamera()->IsForcedCinematicMode())
     {
-        GEngine::Instance()->GetScene()->SetCameraPosition(cameraName);
+        gSceneManager.GetScene()->SetCameraPosition(cameraName);
     }
     return 0;
 }
@@ -192,21 +191,21 @@ RegFunc5(CutToCameraAngleX, void, float, float, float, float, float, IMMEDIATE, 
 
 shpvoid ForceCutToCameraAngle(const std::string& cameraName)
 {
-    GEngine::Instance()->GetScene()->SetCameraPosition(cameraName);
+    gSceneManager.GetScene()->SetCameraPosition(cameraName);
     return 0;
 }
 RegFunc1(ForceCutToCameraAngle, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid SetForcedCameraCuts(int flag)
 {
-    GEngine::Instance()->GetScene()->GetCamera()->SetForcedCinematicMode(flag != 0 ? true : false);
+    gSceneManager.GetScene()->GetCamera()->SetForcedCinematicMode(flag != 0 ? true : false);
     return 0;
 }
 RegFunc1(SetForcedCameraCuts, void, int, IMMEDIATE, REL_FUNC);
 
 shpvoid ClearForcedCameraCuts()
 {
-    GEngine::Instance()->GetScene()->GetCamera()->SetForcedCinematicMode(false);
+    gSceneManager.GetScene()->GetCamera()->SetForcedCinematicMode(false);
     return 0;
 }
 RegFunc0(ClearForcedCameraCuts, void, IMMEDIATE, REL_FUNC);
@@ -220,21 +219,21 @@ RegFunc2(SetCameraAngleType, void, string, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DefaultInspect(const std::string& noun)
 {
-    GEngine::Instance()->GetScene()->InspectObject(noun, AddWait());
+    gSceneManager.GetScene()->InspectObject(noun, AddWait());
     return 0;
 }
 RegFunc1(DefaultInspect, void, string, WAITABLE, REL_FUNC);
 
 shpvoid InspectObject()
 {
-    GEngine::Instance()->GetScene()->InspectActiveObject(AddWait());
+    gSceneManager.GetScene()->InspectActiveObject(AddWait());
     return 0;
 }
 RegFunc0(InspectObject, void, WAITABLE, REL_FUNC);
 
 shpvoid Uninspect()
 {
-    GEngine::Instance()->GetScene()->UninspectObject(AddWait());
+    gSceneManager.GetScene()->UninspectObject(AddWait());
     return 0;
 }
 RegFunc0(Uninspect, void, WAITABLE, REL_FUNC);

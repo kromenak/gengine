@@ -2,12 +2,11 @@
 
 #include "AssetManager.h"
 #include "Config.h"
-#include "GEngine.h"
 #include "GMath.h"
 #include "IniParser.h"
 #include "Localizer.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "StatusOverlay.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
@@ -71,7 +70,7 @@ void GameProgress::ChangeScore(const std::string& scoreName)
         IncreaseScore(validEventsIt->second);
 
         // Refresh status overlay to show updated point count.
-        Scene* scene = GEngine::Instance()->GetScene();
+        Scene* scene = gSceneManager.GetScene();
         if(scene != nullptr)
         {
             StatusOverlay* statusOverlay = scene->GetStatusOverlay();

@@ -4,11 +4,10 @@
 #include "AssetManager.h"
 #include "BSPActor.h"
 #include "CharacterManager.h"
-#include "GEngine.h"
 #include "GKActor.h"
 #include "MeshRenderer.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "SceneData.h"
 #include "SceneFunctions.h"
 #include "StringUtil.h"
@@ -38,7 +37,7 @@ RegFunc0(GetEgoName, string, IMMEDIATE, REL_FUNC);
 
 shpvoid InitEgoPosition(const std::string& positionName)
 {
-    if(!GEngine::Instance()->GetScene()->InitEgoPosition(positionName))
+    if(!gSceneManager.GetScene()->InitEgoPosition(positionName))
     {
         ExecError();
     }
@@ -49,8 +48,8 @@ RegFunc1(InitEgoPosition, void, string, IMMEDIATE, REL_FUNC);
 shpvoid SetActorPosition(const std::string& actorName, const std::string& positionName)
 {
     // Get needed data.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
-    const ScenePosition* scenePosition = GEngine::Instance()->GetScene()->GetPosition(positionName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
+    const ScenePosition* scenePosition = gSceneManager.GetScene()->GetPosition(positionName);
 
     // If either is null, log an error.
     if(actor == nullptr || scenePosition == nullptr)
@@ -67,14 +66,14 @@ shpvoid SetActorPosition(const std::string& actorName, const std::string& positi
 
     // This also *appears* to sample the actor's walk anim, to ensure the character is in a default "standing" position.
     // If we don't do this, the characters are sometimes positioned incorrectly (e.g. 207A Poussin's Tomb).
-    GEngine::Instance()->GetScene()->GetAnimator()->Sample(actor->GetConfig()->walkStartAnim, 0);
+    gSceneManager.GetScene()->GetAnimator()->Sample(actor->GetConfig()->walkStartAnim, 0);
     return 0;
 }
 RegFunc2(SetActorPosition, void, string, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DumpActorPosition(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
         actor->DumpPosition();
@@ -98,10 +97,10 @@ int IsActorNear(const std::string& actorName, const std::string& positionName, f
     }
 
     // Get actor and position, or fail.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
-        const ScenePosition* scenePosition = GEngine::Instance()->GetScene()->GetPosition(positionName);
+        const ScenePosition* scenePosition = gSceneManager.GetScene()->GetPosition(positionName);
         if(scenePosition != nullptr)
         {
             // Distance check.
@@ -126,10 +125,10 @@ int IsWalkingActorNear(const std::string& actorName, const std::string& position
     }
 
     // Get actor and position, or fail.
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     if(actor != nullptr)
     {
-        const ScenePosition* scenePosition = GEngine::Instance()->GetScene()->GetPosition(positionName);
+        const ScenePosition* scenePosition = gSceneManager.GetScene()->GetPosition(positionName);
         if(scenePosition != nullptr)
         {
             return (actor->GetWalkDestination() - scenePosition->position).GetLengthSq() < distance * distance;
@@ -160,21 +159,21 @@ RegFunc0(GetPositionCount, int, IMMEDIATE, DEV_FUNC);
 
 int DoesActorExist(const std::string& actorName)
 {
-    GKActor* actor = GEngine::Instance()->GetScene()->GetActorByNoun(actorName);
+    GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(actorName);
     return actor != nullptr ? 1 : 0;
 }
 RegFunc1(DoesActorExist, int, string, IMMEDIATE, REL_FUNC);
 
 int DoesModelExist(const std::string& modelName)
 {
-    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
     return object != nullptr ? 1 : 0;
 }
 RegFunc1(DoesModelExist, int, string, IMMEDIATE, REL_FUNC);
 
 int IsModelVisible(const std::string& modelName)
 {
-    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
     if(object != nullptr)
     {
         return object->IsActive() ? 1 : 0;
@@ -185,7 +184,7 @@ RegFunc1(IsModelVisible, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowModel(const std::string& modelName)
 {
-    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
     if(object != nullptr)
     {
         object->SetActive(true);
@@ -196,7 +195,7 @@ RegFunc1(ShowModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideModel(const std::string& modelName)
 {
-    GKObject* object = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* object = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
     if(object != nullptr)
     {
         object->SetActive(false);
@@ -207,33 +206,33 @@ RegFunc1(HideModel, void, string, IMMEDIATE, REL_FUNC);
 
 int DoesSceneModelExist(const std::string& modelName)
 {
-    return GEngine::Instance()->GetScene()->DoesSceneModelExist(modelName) ? 1 : 0;
+    return gSceneManager.GetScene()->DoesSceneModelExist(modelName) ? 1 : 0;
 }
 RegFunc1(DoesSceneModelExist, int, string, IMMEDIATE, REL_FUNC);
 
 int IsSceneModelVisible(const std::string& modelName)
 {
-    return GEngine::Instance()->GetScene()->IsSceneModelVisible(modelName) ? 1 : 0;
+    return gSceneManager.GetScene()->IsSceneModelVisible(modelName) ? 1 : 0;
 }
 RegFunc1(IsSceneModelVisible, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowSceneModel(const std::string& modelName)
 {
-    GEngine::Instance()->GetScene()->SetSceneModelVisibility(modelName, true);
+    gSceneManager.GetScene()->SetSceneModelVisibility(modelName, true);
     return 0;
 }
 RegFunc1(ShowSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideSceneModel(const std::string& modelName)
 {
-    GEngine::Instance()->GetScene()->SetSceneModelVisibility(modelName, false);
+    gSceneManager.GetScene()->SetSceneModelVisibility(modelName, false);
     return 0;
 }
 RegFunc1(HideSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid EnableHitTestModel(const std::string& modelName)
 {
-    BSPActor* hitTestActor = GEngine::Instance()->GetScene()->GetHitTestObjectByModelName(modelName);
+    BSPActor* hitTestActor = gSceneManager.GetScene()->GetHitTestObjectByModelName(modelName);
     if(hitTestActor != nullptr)
     {
         hitTestActor->SetInteractive(true);
@@ -244,7 +243,7 @@ RegFunc1(EnableHitTestModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid DisableHitTestModel(const std::string& modelName)
 {
-    BSPActor* hitTestActor = GEngine::Instance()->GetScene()->GetHitTestObjectByModelName(modelName);
+    BSPActor* hitTestActor = gSceneManager.GetScene()->GetHitTestObjectByModelName(modelName);
     if(hitTestActor != nullptr)
     {
         hitTestActor->SetInteractive(false);
@@ -272,7 +271,7 @@ RegFunc1(HideModelGroup, void, string, IMMEDIATE, REL_FUNC);
 shpvoid WalkerBoundaryBlockModel(const std::string& modelName)
 {
     // Find the object/model or fail.
-    GKObject* obj = GEngine::Instance()->GetScene()->GetSceneObjectByModelName(modelName);
+    GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
     if(obj == nullptr || obj->GetMeshRenderer() == nullptr)
     {
         ExecError();
@@ -287,28 +286,28 @@ shpvoid WalkerBoundaryBlockModel(const std::string& modelName)
     // We need to convert to a Rect, as the walker boundary is flat.
     // So, just get rid of the Y-component.
     Rect worldRect(Vector2(min.x, min.z), Vector2(max.x, max.z));
-    GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetUnwalkableRect(modelName, worldRect);
+    gSceneManager.GetScene()->GetSceneData()->GetWalkerBoundary()->SetUnwalkableRect(modelName, worldRect);
     return 0;
 }
 RegFunc1(WalkerBoundaryBlockModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryUnblockModel(const std::string& modelName)
 {
-    GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->ClearUnwalkableRect(modelName);
+    gSceneManager.GetScene()->GetSceneData()->GetWalkerBoundary()->ClearUnwalkableRect(modelName);
     return 0;
 }
 RegFunc1(WalkerBoundaryUnblockModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryBlockRegion(int regionIndex, int regionBoundaryIndex)
 {
-    GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, true);
+    gSceneManager.GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, true);
     return 0;
 }
 RegFunc2(WalkerBoundaryBlockRegion, void, int, int, IMMEDIATE, REL_FUNC);
 
 shpvoid WalkerBoundaryUnblockRegion(int regionIndex, int regionBoundaryIndex)
 {
-    GEngine::Instance()->GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, false);
+    gSceneManager.GetScene()->GetSceneData()->GetWalkerBoundary()->SetRegionBlocked(regionIndex, regionBoundaryIndex, false);
     return 0;
 }
 RegFunc2(WalkerBoundaryUnblockRegion, void, int, int, IMMEDIATE, REL_FUNC);
@@ -332,7 +331,7 @@ RegFunc2(WalkNearModel, void, string, string, WAITABLE, REL_FUNC);
 shpvoid WalkTo(const std::string& actorName, const std::string& positionName)
 {
     // If not in a scene, we'll just ignore walk to request.
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene == nullptr)
     {
         return 0;
@@ -363,7 +362,7 @@ RegFunc2(WalkTo, void, string, string, WAITABLE, REL_FUNC);
 shpvoid WalkToAnimation(const std::string& actorName, const std::string& animationName)
 {
     // If not in a scene, we'll just ignore walk to request.
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene == nullptr)
     {
         return 0;

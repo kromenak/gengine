@@ -3,15 +3,14 @@
 #include <imgui.h>
 
 #include "Debug.h"
-#include "GEngine.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "SceneConstruction.h"
 #include "Tools.h"
 
 void MainMenuTool::Render()
 {
     // This menu won't be super valuable if the scene is null.
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene == nullptr) { return; }
 
     // Get construction object.

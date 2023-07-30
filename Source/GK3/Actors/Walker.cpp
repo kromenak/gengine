@@ -7,12 +7,11 @@
 #include "CharacterManager.h"
 #include "Debug.h"
 #include "Frustum.h"
-#include "GEngine.h"
 #include "GKActor.h"
 #include "Heading.h"
 #include "Ray.h"
 #include "Renderer.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "StringUtil.h"
 #include "Vector3.h"
 #include "WalkerBoundary.h"
@@ -137,7 +136,7 @@ void Walker::SkipToEnd()
     StopAllWalkAnimations();
 
     // Sample walk start anim to ensure 3d model is in a sane default state, facing straight ahead.
-    GEngine::Instance()->GetScene()->GetAnimator()->Sample(mWalkStartAnim, 0);
+    gSceneManager.GetScene()->GetAnimator()->Sample(mWalkStartAnim, 0);
 
     // Warp actor to end of path.
     if(!mPath.empty())
@@ -282,7 +281,7 @@ void Walker::OnUpdate(float deltaTime)
                     animParams.allowMove = true;
                     animParams.fromAutoScript = mFromAutoscript;
                     animParams.finishCallback = std::bind(&Walker::OnWalkAnimFinished, this);
-                    GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+                    gSceneManager.GetScene()->GetAnimator()->Start(animParams);
                 }
 
                 // Still following path - turn to face next node in path.
@@ -461,7 +460,7 @@ void Walker::NextAction()
         animParams.allowMove = true;
         animParams.fromAutoScript = mFromAutoscript;
         animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::FollowPathStartTurnLeft)
     {
@@ -474,7 +473,7 @@ void Walker::NextAction()
         animParams.allowMove = true;
         animParams.fromAutoScript = mFromAutoscript;
         animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::FollowPathStartTurnRight)
     {
@@ -487,7 +486,7 @@ void Walker::NextAction()
         animParams.allowMove = true;
         animParams.fromAutoScript = mFromAutoscript;
         animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::FollowPath)
     {
@@ -507,15 +506,15 @@ void Walker::NextAction()
             animParams.startFrame = 10;
         }
             
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::FollowPathEnd)
     {
         #if defined(DEBUG_WALKER)
         std::cout << "Follow Path End" << std::endl;
         #endif
-        GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartAnim);
-        GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
+        gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartAnim);
+        gSceneManager.GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
 
         // Play walk stop anim.
         AnimParams animParams;
@@ -523,7 +522,7 @@ void Walker::NextAction()
         animParams.allowMove = true;
         animParams.fromAutoScript = mFromAutoscript;
         animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::TurnToFace)
     {
@@ -591,7 +590,7 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
 
     // Cast a ray from our head in the direction of the target AABB.
     GKObject* obj = static_cast<GKObject*>(mGKOwner);
-    SceneCastResult result = GEngine::Instance()->GetScene()->Raycast(ray, false, &obj);
+    SceneCastResult result = gSceneManager.GetScene()->Raycast(ray, false, &obj);
 
     // If hit the target with the ray, it must be in view.
     if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
@@ -652,7 +651,7 @@ void Walker::CalculatePath(const Vector3& startPos, const Vector3& endPos)
         // So, let's factor that into our final path too.
         for(auto& node : mPath)
         {
-            node.y = GEngine::Instance()->GetScene()->GetFloorY(node);
+            node.y = gSceneManager.GetScene()->GetFloorY(node);
         }
     }
     else
@@ -825,11 +824,11 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSp
 
 void Walker::StopAllWalkAnimations()
 {
-    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartAnim, true);
-    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartTurnLeftAnim, true);
-    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkStartTurnRightAnim, true);
-    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mWalkLoopAnim, true);
-    GEngine::Instance()->GetScene()->GetAnimator()->Stop(mCharConfig->walkStopAnim, true);
+    gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartAnim, true);
+    gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartTurnLeftAnim, true);
+    gSceneManager.GetScene()->GetAnimator()->Stop(mWalkStartTurnRightAnim, true);
+    gSceneManager.GetScene()->GetAnimator()->Stop(mWalkLoopAnim, true);
+    gSceneManager.GetScene()->GetAnimator()->Stop(mCharConfig->walkStopAnim, true);
 }
 
 void Walker::OutputWalkerPlan()

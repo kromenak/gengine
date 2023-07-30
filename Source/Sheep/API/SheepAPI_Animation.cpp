@@ -2,9 +2,8 @@
 
 #include "Animator.h"
 #include "AssetManager.h"
-#include "GEngine.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 
 using namespace std;
 
@@ -17,7 +16,7 @@ shpvoid StartAnimation(const std::string& animationName)
         return 0;
     }
     
-    GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, AddWait());
+    gSceneManager.GetScene()->GetAnimator()->Start(animation, AddWait());
     return 0;
 }
 RegFunc1(StartAnimation, void, string, WAITABLE, REL_FUNC);
@@ -30,7 +29,7 @@ shpvoid LoopAnimation(const std::string& animationName)
         AnimParams params;
         params.animation = animation;
         params.loop = true;
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(params);
+        gSceneManager.GetScene()->GetAnimator()->Start(params);
     }
     return 0;
 }
@@ -41,7 +40,7 @@ shpvoid StopAnimation(const std::string& animationName)
     Animation* animation = gAssetManager.LoadAnimation(animationName, AssetScope::Scene);
     if(animation != nullptr)
     {
-        GEngine::Instance()->GetScene()->GetAnimator()->Stop(animation);
+        gSceneManager.GetScene()->GetAnimator()->Stop(animation);
     }
     return 0;
 }
@@ -49,7 +48,7 @@ RegFunc1(StopAnimation, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid StopAllAnimations()
 {
-    GEngine::Instance()->GetScene()->GetAnimator()->StopAll();
+    gSceneManager.GetScene()->GetAnimator()->StopAll();
     return 0;
 }
 RegFunc0(StopAllAnimations, void, IMMEDIATE, DEV_FUNC);
@@ -63,7 +62,7 @@ shpvoid StartMoveAnimation(const std::string& animationName)
         animParams.animation = animation;
         animParams.allowMove = true;
         animParams.finishCallback = AddWait();
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animParams);
+        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     return 0;
 }
@@ -77,7 +76,7 @@ shpvoid StartMom(const std::string& momAnimationName)
     if(animation != nullptr)
     {
         //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.
-        GEngine::Instance()->GetScene()->GetAnimator()->Start(animation, AddWait());
+        gSceneManager.GetScene()->GetAnimator()->Start(animation, AddWait());
     }
     return 0;
 }

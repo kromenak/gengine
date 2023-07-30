@@ -4,10 +4,9 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 
-#include "GEngine.h"
 #include "InputManager.h"
 #include "Renderer.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "Window.h"
 
 #include "MainMenuTool.h"
@@ -72,7 +71,7 @@ void Tools::Render()
     // Render construction mode.
     //TODO: This is *kind of* not the right spot for this, since tools render *after* debug drawing stuff.
     //TODO: So any Debug::Draw* calls will be on frame late. But maybe that's no big deal?
-    Scene* scene = GEngine::Instance()->GetScene();
+    Scene* scene = gSceneManager.GetScene();
     if(scene != nullptr)
     {
         scene->GetConstruction().Render();

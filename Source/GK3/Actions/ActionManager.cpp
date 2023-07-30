@@ -13,7 +13,7 @@
 #include "IniParser.h"
 #include "Profiler.h"
 #include "ReportManager.h"
-#include "Scene.h"
+#include "SceneManager.h"
 #include "SheepManager.h"
 #include "SheepScript.h"
 #include "StringUtil.h"
@@ -177,7 +177,7 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 	++mActionId;
     
     // Remember current camera FOV.
-    GEngine::Instance()->GetScene()->GetCamera()->SaveFov();
+    gSceneManager.GetScene()->GetCamera()->SaveFov();
 
     // Save frame this action was started on.
     mCurrentActionStartFrame = GEngine::Instance()->GetFrameNumber();
@@ -618,16 +618,12 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "GABE_ALL"))
 	{
 		// Condition is met if Ego is Gabriel.
-		Scene* scene = GEngine::Instance()->GetScene();
-		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
-		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "Gabriel");
+        return StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel");
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "GRACE_ALL"))
 	{
 		// Condition is met if Ego is Grace.
-		Scene* scene = GEngine::Instance()->GetScene();
-		GKActor* ego = scene != nullptr ? scene->GetEgo() : nullptr;
-		return ego != nullptr && StringUtil::EqualsIgnoreCase(ego->GetNoun(), "Grace");
+        return StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace");
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "1ST_TIME"))
 	{
@@ -878,7 +874,7 @@ void ActionManager::OnActionExecuteFinished()
     mCurrentAction = nullptr;
     
     // Restore current camera FOV.
-    GEngine::Instance()->GetScene()->GetCamera()->RestoreFov();
+    gSceneManager.GetScene()->GetCamera()->RestoreFov();
 
     // Execute finish callback if specified.
     if(mCurrentActionFinishCallback != nullptr)

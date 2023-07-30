@@ -2,11 +2,11 @@
 
 #include "AssetManager.h"
 #include "GameProgress.h"
-#include "GEngine.h"
 #include "GK3UI.h"
 #include "IniParser.h"
 #include "Localizer.h"
 #include "ReportManager.h"
+#include "SceneManager.h"
 #include "SheepManager.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
@@ -185,7 +185,7 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
     if(gGK3UI.FollowingOnDrivingScreen())
     {
         // Change scene and done.
-        GEngine::Instance()->LoadScene(location, [callback](){
+        gSceneManager.LoadScene(location, [callback](){
             gGK3UI.HideSceneTransitioner();
             if(callback != nullptr) { callback(); }
         });
@@ -214,7 +214,7 @@ void LocationManager::ChangeLocation(const std::string& location, std::function<
         else
         {
             // Otherwise, we can move ahead with changing the scene.
-            GEngine::Instance()->LoadScene(location, [callback](){
+            gSceneManager.LoadScene(location, [callback](){
                 gGK3UI.HideSceneTransitioner();
                 if(callback != nullptr) { callback(); }
             });
