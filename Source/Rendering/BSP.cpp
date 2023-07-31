@@ -708,7 +708,7 @@ void BSP::ParseFromData(char *data, int dataLength)
         std::cout << "BSP file does not have SCEN identifier! Instead has " << identifier << std::endl;
         return;
     }
-    
+
     // 4 bytes: version number
     // 4 bytes: content size in bytes
     reader.Skip(8);
@@ -835,39 +835,49 @@ void BSP::ParseFromData(char *data, int dataLength)
     // Next up are spheres centers with radiis for each node. Not sure what these are for.
     reader.Skip(nodeCount * 16); // 4 floats per node, each float is 4 bytes
 
-    for(int i = 0; i < surfaceCount; ++i)
+    // The remaining data is NOT present in all BSP files (ex: DEFAULT.BSP).
+    // So, only read it if there appears to be more data in the file.
+    uint32_t position = reader.GetPosition();
+    if(position < dataLength)
     {
-        Vector3 position = reader.ReadVector3();
-        float radius = reader.ReadFloat();
-        reader.Skip(12);
-
-        if(radius > 0.0f)// && (mSurfaces[i].flags & 1) != 0)
+        for(int i = 0; i < surfaceCount; ++i)
         {
-            BSPAmbientLight light;
-            light.surfaceIndex = i;
-            light.position = position;
-            light.radius = radius;
-            light.color = Color32::Black;
-            mLights.push_back(light);
-        }
+            Vector3 position = reader.ReadVector3();
+            float radius = reader.ReadFloat();
+            reader.Skip(12);
 
-        // Number of indices and triangles for this surface.
-        int indexCount = reader.ReadUInt();
-        int triangleCount = reader.ReadUInt();
+            if(radius > 0.0f)// && (mSurfaces[i].flags & 1) != 0)
+            {
+                BSPAmbientLight light;
+                light.surfaceIndex = i;
+                light.position = position;
+                light.radius = radius;
+                light.color = Color32::Black;
+                mLights.push_back(light);
+            }
 
-        // Next, a certain number of vertex & triangle indexes...for what?
-        for(int j = 0; j < indexCount; j++)
-        {
-            /*unsigned short vertexIndex = */reader.ReadUShort();
-        }
-        for(int j = 0; j < triangleCount; j++)
-        {
-            /*unsigned short p0Index = */reader.ReadUShort();
-            /*unsigned short p1Index = */reader.ReadUShort();
-            /*unsigned short p2Index = */reader.ReadUShort();
+            // Number of indices and triangles for this surface.
+            uint32_t indexCount = reader.ReadUInt();
+            uint32_t triangleCount = reader.ReadUInt();
+
+            // Next, a certain number of vertex & triangle indexes...for what?
+            /*
+            for(uint32_t j = 0; j < indexCount; j++)
+            {
+                reader.ReadUShort(); // vertexIndex
+            }
+            for(uint32_t j = 0; j < triangleCount; j++)
+            {
+                reader.ReadUShort(); // p0Index
+                reader.ReadUShort(); // p1Index
+                reader.ReadUShort(); // p2Index
+            }
+            */
+            reader.Skip(indexCount * 2); // 2 bytes per index
+            reader.Skip(triangleCount * 6); // 6 bytes per triangle
         }
     }
-    
+
     // Generate mesh definition.
     MeshDefinition meshDefinition(MeshUsage::Static, mVertices.size());
     meshDefinition.SetVertexLayout(VertexLayout::Packed);

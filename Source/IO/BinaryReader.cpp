@@ -112,7 +112,6 @@ int64_t BinaryReader::ReadLong()
     return val;
 }
 
-
 float BinaryReader::ReadFloat()
 {
     float val;

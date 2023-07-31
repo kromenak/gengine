@@ -22,6 +22,8 @@ void SceneManager::Shutdown()
 
 void SceneManager::Update(float deltaTime)
 {
+    if(mSceneLoading) { return; }
+
     if(mScene != nullptr)
     {
         mScene->Update(deltaTime);

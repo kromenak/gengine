@@ -15,7 +15,7 @@
 class membuf : public std::streambuf
 {
 public:
-    membuf(char* data, uint32_t length);
+    membuf(char* data, uint32_t length, std::ios_base::openmode which);
 
 protected:
     std::streampos seekoff(std::streamoff off, std::ios_base::seekdir way,

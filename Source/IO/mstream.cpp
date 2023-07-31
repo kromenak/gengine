@@ -1,12 +1,17 @@
 #include "mstream.h"
 
-membuf::membuf(char* data, uint32_t length)
+membuf::membuf(char* data, uint32_t length, std::ios_base::openmode which)
 {
     // setg is used for input (reading)
     // setp is used for output (writing)
-    // We don't know if this membuf will be used for reading or writing, so just do both!
-    setg(data, data, data + length);
-    setp(data, data + length);
+    if((which & std::ios_base::out) != 0)
+    {
+        setp(data, data + length);
+    }
+    else if((which & std::ios_base::in) != 0)
+    {
+        setg(data, data, data + length);
+    }
 }
 
 std::streampos membuf::seekoff(std::streamoff off, std::ios_base::seekdir way, std::ios_base::openmode which)
@@ -89,15 +94,15 @@ std::streampos membuf::seekpos(std::streampos pos, std::ios_base::openmode which
 
 imstream::imstream(const char* data, uint32_t length) :
     std::istream(&buffer),
-    buffer(const_cast<char*>(data), length) // you'd expect an imstream to be const (reading only, no writing), and it is...
-                                            // but in this case, you've got to "trust us" because streambufs require non-const pointers
+    buffer(const_cast<char*>(data), length, std::ios_base::in)  // you'd expect an imstream to be const (reading only, no writing), and it is...
+                                                                // but in this case, you've got to "trust us" because streambufs require non-const pointers
 {
 
 }
 
 omstream::omstream(char* data, uint32_t length) :
     std::ostream(&buffer),
-    buffer(data, length)
+    buffer(data, length, std::ios_base::out)
 {
 
 }
