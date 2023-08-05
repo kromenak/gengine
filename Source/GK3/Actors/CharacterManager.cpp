@@ -18,7 +18,7 @@ void CharacterManager::Init()
         // Read in faces first, as character configs reference these.
         {
             // Get FACES text file as a raw buffer.
-            TextAsset* textFile = gAssetManager.LoadText("FACES.TXT");
+            TextAsset* textFile = gAssetManager.LoadText("FACES.TXT", AssetScope::Manual);
 
             // Pass that along to INI parser, since it is plain text and in INI format.
             IniParser facesParser(textFile->GetText(), textFile->GetTextLength());
@@ -214,12 +214,15 @@ void CharacterManager::Init()
                     }
                 }
             }
+
+            // Done with this asset.
+            delete textFile;
         }
         
         // Read in characters.
         {
             // Get CHARACTERS text file as a raw buffer.
-            TextAsset* textFile = gAssetManager.LoadText("CHARACTERS.TXT");
+            TextAsset* textFile = gAssetManager.LoadText("CHARACTERS.TXT", AssetScope::Manual);
 
             // Pass that along to INI parser, since it is plain text and in INI format.
             IniParser parser(textFile->GetText(), textFile->GetTextLength());
@@ -348,11 +351,14 @@ void CharacterManager::Init()
                     config.faceConfig = &mDefaultFaceConfig;
                 }
             }
+
+            // Done with this asset.
+            delete textFile;
         }
 
         // Load in valid actors list.
         {
-            TextAsset* textFile = gAssetManager.LoadText("Actors.txt");
+            TextAsset* textFile = gAssetManager.LoadText("Actors.txt", AssetScope::Manual);
 
             // Parse as INI file.
             IniParser actorsParser(textFile->GetText(), textFile->GetTextLength());
@@ -364,6 +370,9 @@ void CharacterManager::Init()
                 IniKeyValue& entry = line.entries.front();
                 mCharacterNouns.insert(entry.key);
             }
+
+            // Done with this asset.
+            delete textFile;
         }
     });
 }

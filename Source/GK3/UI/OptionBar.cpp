@@ -23,7 +23,7 @@
 OptionBar::OptionBar() : Actor(TransformType::RectTransform)
 {
     // Load layout text file, parse to key/value map, and then delete it.
-    TextAsset* optionBarText = gAssetManager.LoadText("RC_LAYOUT.TXT");
+    TextAsset* optionBarText = gAssetManager.LoadText("RC_LAYOUT.TXT", AssetScope::Manual);
     
     IniParser parser(optionBarText->GetText(), optionBarText->GetTextLength());
     parser.SetMultipleKeyValuePairsPerLine(false);
@@ -52,6 +52,8 @@ OptionBar::OptionBar() : Actor(TransformType::RectTransform)
     
     // Hide by default.
     Hide();
+
+    delete optionBarText;
 }
 
 void OptionBar::Show()

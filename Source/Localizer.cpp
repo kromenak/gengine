@@ -22,7 +22,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
     // GK3 translations are stored in INI files with various sections.
     // Sometimes, we don't care about the sections - we just load the entire file into a single localizer.
     // However, sometimes sections have duplicate keys - in that case, it's better to treat each section as it's own localizer.
-    TextAsset* textFile = gAssetManager.LoadText(localeFileName);
+    TextAsset* textFile = gAssetManager.LoadText(localeFileName, AssetScope::Manual);
 
     // Parse as INI file.
     // Ignore multiple key values per line b/c a comma is going to be part of the translation copy, rather than another key/value on the same line.
@@ -58,6 +58,9 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
             mKeyToText[entry.key] = entry.value;
         }
     }
+
+    // Done with text asset.
+    delete textFile;
 }
 
 std::string Localizer::GetText(const std::string& key) const

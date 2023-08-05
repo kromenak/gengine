@@ -20,7 +20,7 @@ VerbManager gVerbManager;
 void VerbManager::Init()
 {
 	// Get VERBS text file.
-	TextAsset* text = gAssetManager.LoadText("VERBS.TXT");
+	TextAsset* text = gAssetManager.LoadText("VERBS.TXT", AssetScope::Manual);
 	
 	// Pass that along to INI parser, since it is plain text and in INI format.
 	IniParser parser(text->GetText(), text->GetTextLength());
@@ -109,6 +109,9 @@ void VerbManager::Init()
             map->insert({ entry.key, verbIcon });
         }
     }
+
+    // Done with this asset.
+    delete text;
 }
 
 VerbIcon& VerbManager::GetInventoryIcon(const std::string& noun)
