@@ -10,109 +10,126 @@ FootstepManager gFootstepManager;
 void FootstepManager::Init()
 {
 	// STEP 1: FLOORMAP maps texture names to a floor type.
-	// Get FLOORMAP text file as a raw buffer.
-	TextAsset* textFile = gAssetManager.LoadText("FLOORMAP.TXT");
-	
-	// Pass that along to INI parser, since it is plain text and in INI format.
-	IniParser parser(textFile->GetText(), textFile->GetTextLength());
-	
-	// There's only one section in this file - FloorMap.
-	IniSection section;
-	while(parser.ReadNextSection(section))
-	{
-		for(auto& line : section.lines)
-		{
-			// Key of first entry is the floor type.
-			std::string floorType = line.entries[0].key;
-			
-			// All values are texture names (with no extension).
-			// Note the value of the first entry is also used (it is a valid texture name too).
-			// Map them to the floor type.
-			for(size_t i = 0; i < line.entries.size(); ++i)
-			{
-				IniKeyValue& current = line.entries[i];
-				mTextureNameToFloorType[current.value] = floorType;
-			}
-		}
-	}
+    {
+        // Get FLOORMAP text file as a raw buffer.
+        TextAsset* textFile = gAssetManager.LoadText("FLOORMAP.TXT", AssetScope::Manual);
+
+        // Pass that along to INI parser, since it is plain text and in INI format.
+        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+
+        // There's only one section in this file - FloorMap.
+        IniSection section;
+        while(parser.ReadNextSection(section))
+        {
+            for(auto& line : section.lines)
+            {
+                // Key of first entry is the floor type.
+                std::string floorType = line.entries[0].key;
+
+                // All values are texture names (with no extension).
+                // Note the value of the first entry is also used (it is a valid texture name too).
+                // Map them to the floor type.
+                for(size_t i = 0; i < line.entries.size(); ++i)
+                {
+                    IniKeyValue& current = line.entries[i];
+                    mTextureNameToFloorType[current.value] = floorType;
+                }
+            }
+        }
+
+        // Done with this asset.
+        delete textFile;
+    }
 	
 	// STEP 2: FOOTSTEPS maps floor types to audio files for footsteps.
-	// Next up: read in all the footstep data.
-	textFile = gAssetManager.LoadText("FOOTSTEPS.TXT");
-	
-	// Again, it's just an INI text file.
-	IniParser footstepParser(textFile->GetText(), textFile->GetTextLength());
+    {
+        // Next up: read in all the footstep data.
+        TextAsset* textFile = gAssetManager.LoadText("FOOTSTEPS.TXT", AssetScope::Manual);
 
-	// Each section in this file correlates to a shoe type.
-	while(footstepParser.ReadNextSection(section))
-	{
-		// Section name is the shoe type.
-		std::string shoeType = section.name;
-		
-		// This will either return an existing list or create a new one.
-		ShoeSounds& shoeSounds = mShoeTypeToShoeSounds[shoeType];
-		
-		// Each entry maps a floor type to an audio file name.
-		for(auto& line : section.lines)
-		{
-			// Key of first entry is the floor type.
-			std::string floorType = line.entries[0].key;
-			
-			// Grab the audio vector for this floor type.
-			// Gets an existing list or creates a new empty one.
-			auto& footsteps = shoeSounds.floorTypeToFootsteps[floorType];
-			
-			// All values are audio files that go along with this shoeType/floorType pair.
-			for(size_t i = 0; i < line.entries.size(); ++i)
-			{
-				IniKeyValue& current = line.entries[i];
-				Audio* audio = gAssetManager.LoadAudioAsync(current.value);
-				if(audio != nullptr)
-				{
-					footsteps.push_back(audio);
-				}
-			}
-		}
-	}
+        // Again, it's just an INI text file.
+        IniParser footstepParser(textFile->GetText(), textFile->GetTextLength());
+
+        // Each section in this file correlates to a shoe type.
+        IniSection section;
+        while(footstepParser.ReadNextSection(section))
+        {
+            // Section name is the shoe type.
+            std::string shoeType = section.name;
+
+            // This will either return an existing list or create a new one.
+            ShoeSounds& shoeSounds = mShoeTypeToShoeSounds[shoeType];
+
+            // Each entry maps a floor type to an audio file name.
+            for(auto& line : section.lines)
+            {
+                // Key of first entry is the floor type.
+                std::string floorType = line.entries[0].key;
+
+                // Grab the audio vector for this floor type.
+                // Gets an existing list or creates a new empty one.
+                auto& footsteps = shoeSounds.floorTypeToFootsteps[floorType];
+
+                // All values are audio files that go along with this shoeType/floorType pair.
+                for(size_t i = 0; i < line.entries.size(); ++i)
+                {
+                    IniKeyValue& current = line.entries[i];
+                    Audio* audio = gAssetManager.LoadAudioAsync(current.value);
+                    if(audio != nullptr)
+                    {
+                        footsteps.push_back(audio);
+                    }
+                }
+            }
+        }
+
+        // Done with this asset.
+        delete textFile;
+    }
 	
-	// STEP 2: FOOTSCUFFS maps floor types to audio files for footscuffs.
-	// Finally, very similar thing with the footscuff data.
-	textFile = gAssetManager.LoadText("FOOTSCUFFS.TXT");
-	
-	// Again, it's just an INI text file.
-	IniParser footscuffParser(textFile->GetText(), textFile->GetTextLength());
-	
-	// Each section in this file correlates to a shoe type.
-	while(footscuffParser.ReadNextSection(section))
-	{
-		// Section name is the shoe type.
-		std::string shoeType = section.name;
-		
-		// This will either return an existing list or create a new one.
-		ShoeSounds& shoeSounds = mShoeTypeToShoeSounds[shoeType];
-		
-		// Each entry maps a floor type to an audio file name.
-		for(auto& line : section.lines)
-		{
-			// Key of first entry is the floor type.
-			std::string floorType = line.entries[0].key;
-			
-			// Grab the audio vector for this floor type.
-			// Again, gets an existing list or creates a new empty one.
-			auto& footscuffs = shoeSounds.floorTypeToFootscuffs[floorType];
-			
-			// All values are audio files that go along with this shoeType/floorType pair.
-			for(size_t i = 0; i < line.entries.size(); ++i)
-			{
-				IniKeyValue& current = line.entries[i];
-				Audio* audio = gAssetManager.LoadAudioAsync(current.value);
-				if(audio != nullptr)
-				{
-					footscuffs.push_back(audio);
-				}
-			}
-		}
-	}
+	// STEP 3: FOOTSCUFFS maps floor types to audio files for footscuffs.
+    {
+        // Finally, very similar thing with the footscuff data.
+        TextAsset* textFile = gAssetManager.LoadText("FOOTSCUFFS.TXT", AssetScope::Manual);
+
+        // Again, it's just an INI text file.
+        IniParser footscuffParser(textFile->GetText(), textFile->GetTextLength());
+
+        // Each section in this file correlates to a shoe type.
+        IniSection section;
+        while(footscuffParser.ReadNextSection(section))
+        {
+            // Section name is the shoe type.
+            std::string shoeType = section.name;
+
+            // This will either return an existing list or create a new one.
+            ShoeSounds& shoeSounds = mShoeTypeToShoeSounds[shoeType];
+
+            // Each entry maps a floor type to an audio file name.
+            for(auto& line : section.lines)
+            {
+                // Key of first entry is the floor type.
+                std::string floorType = line.entries[0].key;
+
+                // Grab the audio vector for this floor type.
+                // Again, gets an existing list or creates a new empty one.
+                auto& footscuffs = shoeSounds.floorTypeToFootscuffs[floorType];
+
+                // All values are audio files that go along with this shoeType/floorType pair.
+                for(size_t i = 0; i < line.entries.size(); ++i)
+                {
+                    IniKeyValue& current = line.entries[i];
+                    Audio* audio = gAssetManager.LoadAudioAsync(current.value);
+                    if(audio != nullptr)
+                    {
+                        footscuffs.push_back(audio);
+                    }
+                }
+            }
+        }
+
+        // Done with this asset.
+        delete textFile;
+    }
 }
 
 Audio* FootstepManager::GetFootstep(const std::string& shoeType, const std::string& floorTextureName)

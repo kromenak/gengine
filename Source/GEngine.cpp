@@ -147,7 +147,7 @@ bool GEngine::Initialize()
 
     // INIT DONE! Move on to starting the game flow.
     // Non-debug: do the full game presentation - company logos, intro movie, title screen.
-    #define FORCE_TITLE_SCREEN
+    //#define FORCE_TITLE_SCREEN
     #if defined(NDEBUG) || defined(FORCE_TITLE_SCREEN)
     // In demo mode, wait for async stuff to load and then show the title screen.
     if(mDemoMode)
@@ -160,14 +160,9 @@ bool GEngine::Initialize()
     }
     #else
     // For dev purposes: just load right into a desired timeblock and location.
-    printf("Waiting for init to finish (%u)\n", SDL_GetTicks());
     Loader::DoAfterLoading([this]() {
-        //gGameProgress.SetTimeblock(Timeblock("210A"));
-        //LoadScene("R29");
-        //gGameProgress.SetGameVariable("MaidCleaningPath210a", 8);
-        //gGameProgress.SetTimeblock(Timeblock("110A"));
-        //LoadScene("R25");
-        printf("Done initializing (%u)\n", SDL_GetTicks());
+        gGameProgress.SetTimeblock(Timeblock("110A"));
+        gSceneManager.LoadScene("R25");
     });
     #endif
 

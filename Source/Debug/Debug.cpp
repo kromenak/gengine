@@ -176,7 +176,7 @@ void Debug::DrawScreenRect(const Rect& rect, const Color32& color)
     Camera* camera = gRenderer.GetCamera();
     if(camera == nullptr) { return; }
 
-    // This rect is in screen space, so we need to convert it to work space before continuing.
+    // This rect is in screen space, so we need to convert it to world space before continuing.
     Vector3 min = camera->ScreenToWorldPoint(rect.GetMin(), 0.1f);
     Vector3 max = camera->ScreenToWorldPoint(rect.GetMax(), 0.1f);
 
