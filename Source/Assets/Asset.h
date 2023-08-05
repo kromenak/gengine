@@ -31,7 +31,7 @@ public:
     
 protected:
     // You should not be able to create an instance of this class - only subclasses are allowed.
-    Asset(const std::string& name, AssetScope scope = AssetScope::Global);
+    Asset(const std::string& name, AssetScope scope = AssetScope::Manual);
 
     // Asset's name, typically including an extension.
     std::string mName;
