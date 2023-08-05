@@ -17,10 +17,13 @@ void SceneLayer::OnEnter(Layer* fromLayer)
 
 void SceneLayer::OnExit(Layer* toLayer)
 {
-    mScene->SetPaused(true);
-    
-    // Ambient audio (aka music) is sometimes NOT disabled when pushing on a layer.
-    // For example, when inventory is showing, scene music continues to play.
-    //TODO: Probably doesn't make sense to keep this here - OnEnter, other layers should maybe disable soundtrack if desired?
-    mScene->GetSoundtrackPlayer()->SetEnabled(toLayer != nullptr && StringUtil::EqualsIgnoreCase(toLayer->GetName(), "InventoryLayer"));
+    if(mScene->IsLoaded())
+    {
+        mScene->SetPaused(true);
+
+        // Ambient audio (aka music) is sometimes NOT disabled when pushing on a layer.
+        // For example, when inventory is showing, scene music continues to play.
+        //TODO: Probably doesn't make sense to keep this here - OnEnter, other layers should maybe disable soundtrack if desired?
+        mScene->GetSoundtrackPlayer()->SetEnabled(toLayer != nullptr && StringUtil::EqualsIgnoreCase(toLayer->GetName(), "InventoryLayer"));
+    }
 }

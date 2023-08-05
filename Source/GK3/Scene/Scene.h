@@ -53,6 +53,7 @@ public:
 	
 	void Load();
 	void Unload();
+    bool IsLoaded() const { return mSceneData != nullptr; }
 
     void Init();
     void Update(float deltaTime);
