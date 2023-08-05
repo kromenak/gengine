@@ -24,7 +24,7 @@ public:
     BSPLightmap(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~BSPLightmap();
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
     
     const std::vector<Texture*>& GetLightmapTextures() const { return mLightmapTextures; }
     

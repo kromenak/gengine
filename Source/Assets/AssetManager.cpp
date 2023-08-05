@@ -15,7 +15,7 @@
 #include "StringUtil.h"
 #include "ThreadPool.h"
 
-// Header Includes for all asset types
+// Includes for all asset types
 #include "Animation.h"
 #include "Audio.h"
 #include "BSP.h"
@@ -71,7 +71,8 @@ void AssetManager::Shutdown()
 {
 	// Unload all assets.
     UnloadAssets(AssetScope::Global);
-	
+
+    // Clear all loaded barns.
     mLoadedBarns.clear();
 }
 
@@ -469,8 +470,8 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
     }
 
     // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
-    unsigned int bufferSize = 0;
-    char* buffer = CreateAssetBuffer(assetName, bufferSize);
+    uint32_t bufferSize = 0;
+    uint8_t* buffer = CreateAssetBuffer(assetName, bufferSize);
     if(buffer == nullptr) { return nullptr; }
 
     // Load the asset on the main thread.
@@ -521,9 +522,9 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
         //printf("Loading asset: %s\n", asset->GetName().c_str());
 
         // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
-        unsigned int bufferSize = 0;
-        char* buffer = CreateAssetBuffer(asset->GetName(), bufferSize);
-        if(buffer == nullptr) { return nullptr; }
+        uint32_t bufferSize = 0;
+        uint8_t* buffer = CreateAssetBuffer(asset->GetName(), bufferSize);
+        if(buffer == nullptr) { return; }
 
         // Ok, now we can load the asset's data.
         asset->Load(buffer, bufferSize);
@@ -546,7 +547,7 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
     return asset;
 }
 
-char* AssetManager::CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)
+uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize)
 {
 	// First, see if the asset exists at any asset search path.
 	// If so, we load the asset directly from file.

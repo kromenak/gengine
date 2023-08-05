@@ -21,7 +21,7 @@ Animation::~Animation()
     }
 }
 
-void Animation::Load(char* data, int dataLength)
+void Animation::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
 }
@@ -49,7 +49,7 @@ VertexAnimNode* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, co
 	return nullptr;
 }
 
-void Animation::ParseFromData(char *data, int dataLength)
+void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     bool isYak = Path::HasExtension(GetName(), ".yak");
 

@@ -28,7 +28,7 @@ Model::~Model()
     }
 }
 
-void Model::Load(char* data, int dataLength)
+void Model::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
 }
@@ -140,7 +140,7 @@ void Model::WriteToObjFile(const std::string& filePath)
 	}
 }
 
-void Model::ParseFromData(char *data, int dataLength)
+void Model::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     #ifdef DEBUG_MODEL_OUTPUT
     std::cout << "MOD " << mName << std::endl;

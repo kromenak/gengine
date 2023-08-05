@@ -12,12 +12,12 @@ SceneAsset::~SceneAsset()
 	delete mSkybox;
 }
 
-void SceneAsset::Load(char* data, int dataLength)
+void SceneAsset::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
 }
 
-void SceneAsset::ParseFromData(char *data, int dataLength)
+void SceneAsset::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     IniParser parser(data, dataLength);
     parser.SetMultipleKeyValuePairsPerLine(false);

@@ -15,7 +15,7 @@ Cursor::~Cursor()
     }
 }
 
-void Cursor::Load(char* data, int dataLength)
+void Cursor::Load(uint8_t* data, uint32_t dataLength)
 {
     // Texture used is always the same as the name of the cursor.
     Texture* texture = gAssetManager.LoadTexture(GetNameNoExtension(), GetScope());

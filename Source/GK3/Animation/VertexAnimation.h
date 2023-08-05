@@ -42,7 +42,7 @@ public:
     VertexAnimation(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~VertexAnimation();
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
 
     // Queries transform (position, rotation, scale) for a mesh at a frame/time.
     VertexAnimationTransformPose SampleTransformPose(int frame, int meshIndex);
@@ -78,7 +78,7 @@ private:
 	// Subsequent poses for the mesh are stored in the "next" of the first pose.
     std::vector<VertexAnimationTransformPose*> mTransformPoses;
     
-    void ParseFromData(char* data, int dataLength);
+    void ParseFromData(uint8_t* data, uint32_t dataLength);
     
     float DecompressFloatFromByte(unsigned char val);
     float DecompressFloatFromUShort(unsigned short val);

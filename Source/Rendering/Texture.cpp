@@ -10,22 +10,22 @@
 Texture Texture::White(2, 2, Color32::White);
 Texture Texture::Black(2, 2, Color32::Black);
 
-Texture::Texture(uint32 width, uint32 height) : Asset(""),
+Texture::Texture(uint32_t width, uint32_t height) : Asset(""),
     mWidth(width),
     mHeight(height)
 {
     // Create pixel array of desired size.
     int pixelsSize = mWidth * mHeight * 4;
-    mPixels = new uint8[pixelsSize];
+    mPixels = new uint8_t[pixelsSize];
 }
 
-Texture::Texture(uint32 width, uint32 height, Color32 color) : Asset(""),
+Texture::Texture(uint32_t width, uint32_t height, Color32 color) : Asset(""),
 	mWidth(width),
 	mHeight(height)
 {
 	// Create pixel array of desired size.
 	int pixelsSize = mWidth * mHeight * 4;
-	mPixels = new uint8[pixelsSize];
+	mPixels = new uint8_t[pixelsSize];
 	
 	// Flood-fill pixels with desired color.
 	for(int i = 0; i < pixelsSize; i += 4)
@@ -68,7 +68,7 @@ Texture::~Texture()
 	}
 }
 
-void Texture::Load(char* data, int dataLength)
+void Texture::Load(uint8_t* data, uint32_t dataLength)
 {
     BinaryReader reader(data, dataLength);
     ParseFromData(reader);
@@ -126,7 +126,7 @@ void Texture::SetPixelColor32(int x, int y, const Color32& color)
     if(mPixels == nullptr) { return; }
 
     // Make sure the index is valid.
-    uint32 index = (y * mWidth + x) * 4;
+    uint32_t index = (y * mWidth + x) * 4;
     if(index >= (mWidth * mHeight * 4)) { return; }
 
     // Set it.
@@ -143,25 +143,25 @@ Color32 Texture::GetPixelColor32(int x, int y) const
 	if(mPixels == nullptr) { return Color32::Black; }
 	
 	// Calculate index into pixels array.
-	uint32 index = static_cast<uint32>((y * mWidth + x) * 4);
+	uint32_t index = static_cast<uint32_t>((y * mWidth + x) * 4);
 	
 	// If index isn't valid...also return black.
 	if(index >= (mWidth * mHeight * 4)) { return Color32::Black; }
 	
-	uint8 r = mPixels[index];
-    uint8 g = mPixels[index + 1];
-    uint8 b = mPixels[index + 2];
-    uint8 a = mPixels[index + 3];
+	uint8_t r = mPixels[index];
+    uint8_t g = mPixels[index + 1];
+    uint8_t b = mPixels[index + 2];
+    uint8_t a = mPixels[index + 3];
 	return Color32(r, g, b, a);
 }
 
-void Texture::SetPaletteIndex(int x, int y, uint8 val)
+void Texture::SetPaletteIndex(int x, int y, uint8_t val)
 {
     // No palette indexes means we can't get a value!
     if(mPaletteIndexes == nullptr) { return; }
 
     // Calculate index into pixels array.
-    uint32 index = static_cast<uint32>(y * mWidth + x);
+    uint32_t index = static_cast<uint32_t>(y * mWidth + x);
 
     // If index isn't valid...also return zero.
     if(index >= (mWidth * mHeight)) { return; }
@@ -170,13 +170,13 @@ void Texture::SetPaletteIndex(int x, int y, uint8 val)
     mPaletteIndexes[index] = val;
 }
 
-uint8 Texture::GetPaletteIndex(int x, int y) const
+uint8_t Texture::GetPaletteIndex(int x, int y) const
 {
 	// No palette indexes means we can't get a value!
 	if(mPaletteIndexes == nullptr) { return 0; }
 	
 	// Calculate index into pixels array.
-	uint32 index = static_cast<uint32>(y * mWidth + x);
+	uint32_t index = static_cast<uint32_t>(y * mWidth + x);
 	
 	// If index isn't valid...also return zero.
 	if(index >= (mWidth * mHeight)) { return 0; }
@@ -670,18 +670,18 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 		// The number of bytes is numColors in palette, times 4 bytes each.
 		// The order of the colors is blue, green, red, alpha.
         mPaletteSize = numColorsInColorPalette * 4;
-		mPalette = new uint8[mPaletteSize];
+		mPalette = new uint8_t[mPaletteSize];
 		reader.Read(mPalette, mPaletteSize);
 	}
 	
 	// PIXELS
 	// Allocate pixels array.
-	mPixels = new uint8[mWidth * mHeight * 4];
+	mPixels = new uint8_t[mWidth * mHeight * 4];
 	
 	// For 8-bpp or lower images with a palette, allocate palette indexes.
 	if(bitsPerPixel <= 8)
 	{
-		mPaletteIndexes = new uint8[mWidth * mHeight];
+		mPaletteIndexes = new uint8_t[mWidth * mHeight];
 	}
 	
 	// Read in pixel data.
@@ -690,7 +690,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 	for(int y = mHeight - 1; y >= 0; --y)
 	{
 		int bytesRead = 0;
-		for(uint32 x = 0; x < mWidth; ++x)
+		for(uint32_t x = 0; x < mWidth; ++x)
 		{
 			// Calculate index into pixels array.
             int index = (y * mWidth + x) * 4;

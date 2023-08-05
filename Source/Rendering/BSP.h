@@ -124,7 +124,7 @@ class BSP : public Asset
 {
 public:
     BSP(const std::string& name, AssetScope scope) : Asset(name, scope) { }
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
     
 	BSPActor* CreateBSPActor(const std::string& objectName);
 	
@@ -200,5 +200,5 @@ private:
     void RenderTree(const BSPNode& node, const Vector3& cameraPosition, const Vector3& cameraDirection);
     void RenderPolygon(BSPPolygon& polygon, bool translucent);
     
-    void ParseFromData(char* data, int dataLength);
+    void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

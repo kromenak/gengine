@@ -9,9 +9,9 @@ BinaryWriter::BinaryWriter(const char* filePath)
     mStream = new std::ofstream(filePath, std::ios::out | std::ios::binary);
 }
 
-BinaryWriter::BinaryWriter(char* memory, uint32_t memoryLength)
+BinaryWriter::BinaryWriter(uint8_t* memory, uint32_t memoryLength)
 {
-    mStream = new omstream(memory, memoryLength);
+    mStream = new omstream(reinterpret_cast<char*>(memory), memoryLength);
 }
 
 BinaryWriter::~BinaryWriter()
@@ -44,12 +44,7 @@ uint32_t BinaryWriter::GetPosition() const
     return static_cast<uint32_t>(pos);
 }
 
-void BinaryWriter::Write(const char* buffer, uint32_t size)
-{
-    mStream->write(buffer, size);
-}
-
-void BinaryWriter::Write(const unsigned char* buffer, uint32_t size)
+void BinaryWriter::Write(const uint8_t* buffer, uint32_t size)
 {
     mStream->write(reinterpret_cast<const char*>(buffer), size);
 }

@@ -16,7 +16,7 @@ public:
     Cursor(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Cursor();
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
     
     void Activate(bool animate = true);
     

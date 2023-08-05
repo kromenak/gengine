@@ -73,7 +73,7 @@ class NVC : public Asset
 public:
     NVC(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
 	
 	const std::vector<Action*>& GetActions() const { return mActions; }
 	const std::vector<Action>& GetActions(const std::string& noun) const;
@@ -98,5 +98,5 @@ private:
     // Mapping of case name to sheep script to eval.
     std::string_map_ci<SheepScriptAndText> mCaseLogic;
 	
-	void ParseFromData(char* data, int dataLength);
+	void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

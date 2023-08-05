@@ -7,6 +7,7 @@
 // That metaphor didn't extend super far, but you get the idea.
 //
 #pragma once
+#include <cstdint>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -31,10 +32,10 @@ struct BarnAsset
     std::string name;
 
     // Offset of this asset within the Barn file data blob.
-    unsigned int offset = 0;
+    uint32_t offset = 0;
 
     // The size of this asset's data in the Barn file data blob.
-    unsigned int size = 0;
+    uint32_t size = 0;
 
     // Compression type for this asset.
     // If set, the asset needs to be decompressed to be usable.
@@ -53,7 +54,7 @@ public:
     BarnAsset* GetAsset(const std::string& assetName);
 
     // Creates a buffer containing the desired asset. Caller owns the returned buffer.
-    char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
+    uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
 
 	// For debugging, write assets to file.
     bool WriteToFile(const std::string& assetName);
@@ -81,7 +82,7 @@ private:
     std::string mName;
     
     // Offset within the file to where the data is located.
-    unsigned int mDataOffset = 0;
+    uint32_t mDataOffset = 0;
     
     // Binary reader for extracting data.
     // Extraction may occur on multiple threads at once, so a mutex is required to guard access.

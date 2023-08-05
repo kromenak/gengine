@@ -93,7 +93,7 @@ SceneInitFile::~SceneInitFile()
 	//TODO: delete any block conditions - we own them after compiling!
 }
 
-void SceneInitFile::Load(char* data, int dataLength)
+void SceneInitFile::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
 }
@@ -151,7 +151,7 @@ GeneralBlock SceneInitFile::FindCurrentGeneralBlock() const
 	return block;
 }
 
-void SceneInitFile::ParseFromData(char *data, int dataLength)
+void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     IniParser parser(data, dataLength);
     parser.ParseAll();

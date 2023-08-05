@@ -109,7 +109,7 @@ VertexAnimation::~VertexAnimation()
     }
 }
 
-void VertexAnimation::Load(char* data, int dataLength)
+void VertexAnimation::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
 }
@@ -343,7 +343,7 @@ Vector3 VertexAnimation::SampleVertexPosition(float time, int framesPerSecond, i
     return Vector3::Zero;
 }
 
-void VertexAnimation::ParseFromData(char *data, int dataLength)
+void VertexAnimation::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     #ifdef DEBUG_OUTPUT
     std::cout << "Vertex Animation " << mName << std::endl;

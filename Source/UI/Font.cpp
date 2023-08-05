@@ -7,7 +7,7 @@
 #include "StringUtil.h"
 #include "Texture.h"
 
-void Font::Load(char* data, int dataLength)
+void Font::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
 
@@ -139,7 +139,7 @@ Shader* Font::GetShader() const
 	return Material::sDefaultShader;
 }
 
-void Font::ParseFromData(char* data, int dataLength)
+void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
 	// Font is in INI format, but only one key per line.
 	IniParser parser(data, dataLength);

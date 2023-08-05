@@ -14,18 +14,15 @@ Audio::~Audio()
     gAudioManager.ReleaseAudioData(this);
 }
 
-void Audio::Load(char* data, int dataLength)
+void Audio::Load(uint8_t* data, uint32_t dataLength)
 {
     // Note that AssetManager typically deletes the data buffer after the asset is created.
     // But for Audio, it knows to not do this - so it's OK for us to save the data pointer.
     mDataBuffer = data;
     mDataBufferLength = dataLength;
-    
-    ParseFromData(data, dataLength);
-}
 
-void Audio::ParseFromData(char* data, int dataLength)
-{
+    // The audio manager can read this data as-is (it's just WAV data).
+    // But parsing it can be helpful to retrieve some info, like duration, for later use.
     BinaryReader reader(data, dataLength);
     
     // First 4 bytes: chunk ID "RIFF".

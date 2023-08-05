@@ -236,7 +236,7 @@ public:
     SceneInitFile(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 	~SceneInitFile();
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
 	
 	const SceneActor* FindCurrentEgo() const;
 	GeneralBlock FindCurrentGeneralBlock() const;
@@ -295,5 +295,5 @@ private:
 	// This one's also pointers b/c NVCs are Assets.
     std::vector<ConditionalBlock<NVC*>> mActions;
 	
-	void ParseFromData(char* data, int dataLength);
+	void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

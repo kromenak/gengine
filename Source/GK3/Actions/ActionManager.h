@@ -11,7 +11,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "Atomics.h"
 #include "NVC.h"
 #include "StringUtil.h"
 #include "Type.h"
@@ -141,7 +140,7 @@ private:
     std::function<void(const Action*)> mCurrentActionFinishCallback = nullptr;
     
     // What frame the current action started on.
-    uint32 mCurrentActionStartFrame = 0;
+    uint32_t mCurrentActionStartFrame = 0;
 
     // In rare cases, we may need to queue actions to execute when the current one is finished.
     // Primary use case is executing actions on a timer - if timer expires DURING another action, we need to wait until that one finishes!
@@ -157,7 +156,7 @@ private:
 	
 	// An identifier for an executing action. Increment on each execution to uniquely identify actions.6
 	// This mirrors what's output in GK3 when dumping actions.
-	uint32 mActionId = 0;
+    uint32_t mActionId = 0;
     
     // The field-of-view of the camera when action starts, so we can set it back after.
     // In the original game, I observed that this is stored and reverted after an action completes.

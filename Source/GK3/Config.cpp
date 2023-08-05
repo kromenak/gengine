@@ -3,7 +3,7 @@
 #include "StringUtil.h"
 #include "TextWriter.h"
 
-void Config::Load(char* data, int dataLength)
+void Config::Load(uint8_t* data, uint32_t dataLength)
 {
     // Read in each section and store it.
     IniParser parser(data, dataLength);

@@ -12,7 +12,7 @@ BSPLightmap::~BSPLightmap()
     }
 }
 
-void BSPLightmap::Load(char* data, int dataLength)
+void BSPLightmap::Load(uint8_t* data, uint32_t dataLength)
 {
     BinaryReader reader(data, dataLength);
 

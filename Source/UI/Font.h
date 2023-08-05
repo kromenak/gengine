@@ -35,7 +35,7 @@ class Font : public Asset
 {
 public:
     Font(const std::string& name, AssetScope scope) : Asset(name, scope) { }
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
 
 	Texture* GetTexture() const { return mFontTexture; }
 	Glyph& GetGlyph(char character);
@@ -96,5 +96,5 @@ private:
 	// A mapping from character to glyph.
 	std::unordered_map<char, Glyph> mFontGlyphs;
 	
-	void ParseFromData(char* data, int dataLength);
+	void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

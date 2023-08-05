@@ -47,7 +47,7 @@ public:
     SceneAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 	~SceneAsset();
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
 	
 	const std::string& GetBSPName() const { return mBspName; }
     Skybox* GetSkybox() const { return mSkybox; }
@@ -62,5 +62,5 @@ private:
     // Lights defined for this scene.
     //std::vector<SceneLight> mLights;
     
-    void ParseFromData(char* data, int dataLength);
+    void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

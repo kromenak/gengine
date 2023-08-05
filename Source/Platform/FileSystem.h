@@ -4,10 +4,10 @@
 // Functions to perform platform-specific file system operations.
 //
 #pragma once
+#include <cstdint>
 #include <iostream>
 #include <string>
 
-#include "Atomics.h"
 #include "Platform.h"
 #include "StringTokenizer.h"
 
@@ -108,10 +108,10 @@ namespace File
     /**
      * Determines a file's size in bytes.
      */
-    int64 Size(const std::string& filePath);
+    uint64_t Size(const std::string& filePath);
 
     /**
      * Reads file contents into a buffer.
      */
-    char* ReadIntoBuffer(const std::string& filePath, uint32& outBufferSize);
+    uint8_t* ReadIntoBuffer(const std::string& filePath, uint32_t& outBufferSize);
 }

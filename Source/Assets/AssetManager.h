@@ -159,7 +159,7 @@ private:
     template<typename T> T* LoadAsset(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer = true);
     template<typename T> T* LoadAssetAsync(const std::string& name, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer = true, std::function<void(T*)> callback = nullptr);
 
-    char* CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize);
+    uint8_t* CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize);
 
     template<class T> void UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>* cache = nullptr);
     template<class T> void UnloadAssets(std::unordered_map_ci<std::string, T*>& cache, AssetScope scope = AssetScope::Global);

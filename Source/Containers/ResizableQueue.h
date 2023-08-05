@@ -12,9 +12,8 @@
 #pragma once
 #include <cassert>
 #include <cstring>
+#include <cstdint>
 #include <cstdlib>
-
-#include "Atomics.h"
 
 template<typename T>
 class ResizableQueue
@@ -25,7 +24,7 @@ public:
     class Iterator
     {
     public:
-        Iterator(uint32 index, uint32 remaining, T* data, uint32 dataSize) : index(index), remaining(remaining), data(data), dataSize(dataSize) { }
+        Iterator(uint32_t index, uint32_t remaining, T* data, uint32_t dataSize) : index(index), remaining(remaining), data(data), dataSize(dataSize) { }
         void operator++() { ++index; index %= dataSize; --remaining; }
         bool operator==(const Iterator& other) const { return index == other.index && remaining == other.remaining; }
         bool operator!=(const Iterator& other) const { return !(*this == other); }
@@ -34,18 +33,18 @@ public:
     private:
         // Track index into data array.
         // To differentiate "empty" and "full", we need to track remaining elements in list.
-        uint32 index;
-        uint32 remaining;
+        uint32_t index;
+        uint32_t remaining;
         T* data;
-        uint32 dataSize;
+        uint32_t dataSize;
     };
     Iterator begin() { return Iterator(mHead, mSize, reinterpret_cast<T*>(mData), mCapacity); }
     Iterator end() { return Iterator(mTail, 0, reinterpret_cast<T*>(mData), mCapacity); }
 
-    ResizableQueue(uint32 initialCapacity) :
+    ResizableQueue(uint32_t initialCapacity) :
         mCapacity(initialCapacity)
     {
-        mData = new uint8[initialCapacity * sizeof(T)];
+        mData = new uint8_t[initialCapacity * sizeof(T)];
     }
 
     ~ResizableQueue()
@@ -141,21 +140,21 @@ public:
         }
     }
 
-    T& operator[](uint32 i)
+    T& operator[](uint32_t i)
     {
         assert(i < mSize);
-        uint32 index = (mHead + i) % mCapacity;
+        uint32_t index = (mHead + i) % mCapacity;
         return reinterpret_cast<T*>(mData)[index];
     }
 
-    const T& operator[](uint32 i) const
+    const T& operator[](uint32_t i) const
     {
         assert(i < mSize);
-        uint32 index = (mHead + i) % mCapacity;
+        uint32_t index = (mHead + i) % mCapacity;
         return reinterpret_cast<T*>(mData)[index];
     }
 
-    uint32 Capacity() const
+    uint32_t Capacity() const
     {
         return mCapacity;
     }
@@ -165,34 +164,34 @@ public:
         return mSize == 0;
     }
 
-    uint32 Size() const
+    uint32_t Size() const
     {
         return mSize;
     }
 
 private:
     // The array that stores the items.
-    uint8* mData = nullptr;
+    uint8_t* mData = nullptr;
 
     // The current capacity of the queue.
-    uint32 mCapacity = 0;
+    uint32_t mCapacity = 0;
 
     // The number of items currently in the queue.
-    uint32 mSize = 0;
+    uint32_t mSize = 0;
 
     // The queue is implemented as a circular array. This enables implementing a queue using a contiguous array (rather than a linked list).
     // Items are pushed to the back of the array (moving the tail) and read from the front (moving the head), with wraparound.
-    uint32 mHead = 0;
-    uint32 mTail = 0;
+    uint32_t mHead = 0;
+    uint32_t mTail = 0;
 
     void IncreaseCapacity()
     {
         // Let's just double capacity each time.
-        uint32 oldCapacity = mCapacity;
+        uint32_t oldCapacity = mCapacity;
         mCapacity *= 2;
 
         // Create a new array for elements.
-        uint8* newData = new uint8[mCapacity * sizeof(T)];
+        uint8_t* newData = new uint8_t[mCapacity * sizeof(T)];
 
         // Copy contents from old array to new array.
         memcpy(newData, mData, oldCapacity * sizeof(T));
@@ -201,7 +200,7 @@ private:
         // But since we now have a much bigger array (twice the size), move looped-around elements to the end.
         if(mSize > 0 && mTail <= mHead)
         {
-            uint32 oldIndex = 0;
+            uint32_t oldIndex = 0;
             while(oldIndex < mTail)
             {
                 reinterpret_cast<T*>(newData)[oldCapacity + oldIndex] = reinterpret_cast<T*>(mData)[oldIndex];

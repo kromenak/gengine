@@ -9,8 +9,8 @@ SaveManager::SaveManager()
 {
     std::string prefsPath = Paths::GetSaveDataPath("Prefs.ini");
 
-    uint32 bufferSize = 0;
-    char* buffer = File::ReadIntoBuffer(prefsPath, bufferSize);
+    uint32_t bufferSize = 0;
+    uint8_t* buffer = File::ReadIntoBuffer(prefsPath, bufferSize);
     mPrefs = new Config("Prefs.ini", AssetScope::Manual);
     mPrefs->Load(buffer, bufferSize);
 

@@ -5,6 +5,7 @@
 // Does contain some special-sauce unique to GK3.
 //
 #pragma once
+#include <cstdint>
 #include <fstream>
 #include <unordered_map>
 #include <vector>
@@ -46,7 +47,7 @@ class IniParser
 {
 public:
     IniParser(const char* filePath);
-    IniParser(const char* memory, unsigned int memoryLength);
+    IniParser(const uint8_t* memory, uint32_t memoryLength);
     ~IniParser();
     
     // MODE A: Read it all in at once and use it.

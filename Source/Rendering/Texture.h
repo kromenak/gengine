@@ -11,7 +11,6 @@
 
 #include <GL/glew.h>
 
-#include "Atomics.h"
 #include "Color32.h"
 #include "EnumClassFlags.h"
 
@@ -54,21 +53,21 @@ public:
 	static Texture White;
 	static Texture Black;
 	
-    Texture(uint32 width, uint32 height);
-	Texture(uint32 width, uint32 height, Color32 color);
+    Texture(uint32_t width, uint32_t height);
+	Texture(uint32_t width, uint32_t height, Color32 color);
     Texture(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     Texture(BinaryReader& reader);
 	~Texture();
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
 	
 	// Activates the texture in the graphics library.
     void Activate(int textureUnit);
     static void Deactivate();
     
-    uint32 GetWidth() const { return mWidth; }
-    uint32 GetHeight() const { return mHeight; }
-    uint8* GetPixelData() const { return mPixels; }
+    uint32_t GetWidth() const { return mWidth; }
+    uint32_t GetHeight() const { return mHeight; }
+    uint8_t* GetPixelData() const { return mPixels; }
 	
 	RenderType GetRenderType() const { return mRenderType; }
 	
@@ -84,8 +83,8 @@ public:
     void SetPixelColor32(int x, int y, const Color32& color);
 	Color32 GetPixelColor32(int x, int y) const;
 
-    void SetPaletteIndex(int x, int y, uint8 val);
-	uint8 GetPaletteIndex(int x, int y) const;
+    void SetPaletteIndex(int x, int y, uint8_t val);
+    uint8_t GetPaletteIndex(int x, int y) const;
 	
 	//void Blit(Texture* source, int destX, int destY);
 	
@@ -110,20 +109,20 @@ private:
 	friend class RenderTexture; // To access OpenGL stuff.
 	
     // Texture width and height.
-    uint32 mWidth = 0;
-    uint32 mHeight = 0;
+    uint32_t mWidth = 0;
+    uint32_t mHeight = 0;
 	
 	// Some textures have palettes.
-	uint8* mPalette = nullptr;
-    uint32 mPaletteSize = 0;
+    uint8_t* mPalette = nullptr;
+    uint32_t mPaletteSize = 0;
 	
 	// If a texture has a palette, the indexes into the palette are stored here.
-    uint8* mPaletteIndexes = nullptr;
+    uint8_t* mPaletteIndexes = nullptr;
 	
     // Pixel data, from the top-left corner of the image.
     // SDL and DirectX (I think) expect pixel data from top-left corner.
     // OpenGL expects from bottom-left, but we compensate for that by using flipped UVs!
-    uint8* mPixels = nullptr;
+    uint8_t* mPixels = nullptr;
     
     // An ID for the texture object generated in OpenGL.
     GLuint mTextureId = GL_NONE;

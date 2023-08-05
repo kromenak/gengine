@@ -7,6 +7,7 @@
 // Usually loaded from the disk, but could be created at runtime as well.
 //
 #pragma once
+#include <cstdint>
 #include <string>
 
 // Assets can have an assigned scope, which helps to inform memory management.

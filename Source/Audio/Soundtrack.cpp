@@ -101,7 +101,7 @@ Soundtrack::~Soundtrack()
     }
 }
 
-void Soundtrack::Load(char* data, int dataLength)
+void Soundtrack::Load(uint8_t* data, uint32_t dataLength)
 {
     IniParser parser(data, dataLength);
     IniSection section;

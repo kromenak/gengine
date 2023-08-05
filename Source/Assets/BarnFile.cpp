@@ -148,9 +148,9 @@ BarnFile::BarnFile(const std::string& filePath) :
         // 4 bytes - unknown value
         mReader.Skip(48);
 
-        int numAssets = mReader.ReadUInt();
+        uint32_t numAssets = mReader.ReadUInt();
 		mReader.Seek(dataOffsets[i]);
-        for(int j = 0; j < numAssets; ++j)
+        for(uint32_t j = 0; j < numAssets; ++j)
         {
             BarnAsset asset;
             
@@ -172,11 +172,11 @@ BarnFile::BarnFile(const std::string& filePath) :
             mReader.Skip(5);
             
             // Read in compression type.
-            asset.compressionType = (CompressionType)mReader.ReadByte();
+            asset.compressionType = static_cast<CompressionType>(mReader.ReadByte());
             
             // Compression type 3 should just be treated as type none.
             // Not sure if type 3 is actually different in some way?
-            if((int)asset.compressionType == 3)
+            if(static_cast<int>(asset.compressionType) == 3)
             {
                 asset.compressionType = CompressionType::None;
             }
@@ -202,7 +202,7 @@ BarnAsset* BarnFile::GetAsset(const std::string& assetName)
     return nullptr;
 }
 
-char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& outBufferSize)
+uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize)
 {
     // Use a sane default value for this.
     outBufferSize = 0;
@@ -226,7 +226,7 @@ char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& ou
     if(asset->compressionType == CompressionType::None)
     {
         // Allocate buffer to hold asset data.
-        char* buffer = new char[asset->size];
+        uint8_t* buffer = new uint8_t[asset->size];
         outBufferSize = asset->size;
 
         // Seek to the data and read into the buffer. Since it's already uncompressed, we're done!
@@ -239,7 +239,7 @@ char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& ou
 
     // Otherwise, data is compressed - we need to read in compressed data, and then use an appropriate decompressor.
     // Create buffer to hold compressed data.
-    unsigned char* compressedBuffer = new unsigned char[asset->size];
+    uint8_t* compressedBuffer = new uint8_t[asset->size];
 
     // Read compressed data into a buffer.
     // Also grab the decompressed asset size while we're there.
@@ -259,16 +259,16 @@ char* BarnFile::CreateAssetBuffer(const std::string& assetName, unsigned int& ou
     }
         
     // Create buffer for uncompressed data.
-    char* buffer = new char[outBufferSize];
+    uint8_t* buffer = new uint8_t[outBufferSize];
 
     // How we decompress the data depends on the compression type...
     if(asset->compressionType == CompressionType::Zlib)
     {
         // Create params object.
-        z_stream strm;
+        z_stream strm {};
         strm.next_in = compressedBuffer;
         strm.avail_in = asset->size;
-        strm.next_out = (unsigned char*)buffer;
+        strm.next_out = buffer;
         strm.avail_out = outBufferSize;
         strm.zalloc = Z_NULL;
         strm.zfree = Z_NULL;
@@ -400,7 +400,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
 	// Extract the asset and write it to file.
 	bool result = false;
     unsigned int bufferSize = 0;
-    char* assetData = CreateAssetBuffer(assetName, bufferSize);
+    uint8_t* assetData = CreateAssetBuffer(assetName, bufferSize);
 	if(assetData != nullptr)
 	{
 		// Textures can't be written directly to file and open correctly.
@@ -412,7 +412,8 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
 			tex.WriteToFile(outputPath);
 			result = true;
 		}
-        else if(assetName.find(".SHP") != std::string::npos && SheepScript::IsSheepDataCompiled(assetData, bufferSize))
+        else if(assetName.find(".SHP") != std::string::npos &&
+                SheepScript::IsSheepDataCompiled(assetData, bufferSize))
         {
             // If sheep asset is compiled, we need to decompile it to get any useful data.
             SheepScript script(assetName, AssetScope::Manual);
@@ -426,7 +427,7 @@ bool BarnFile::WriteToFile(const std::string& assetName, const std::string& outp
 			std::ofstream fileStream(outputPath, std::istream::out | std::istream::binary);
 			if(fileStream.good())
 			{
-				fileStream.write(assetData, bufferSize);
+				fileStream.write(reinterpret_cast<char*>(assetData), bufferSize);
 				fileStream.close();
 				result = true;
 			}

@@ -20,13 +20,13 @@ class SheepScriptBuilder;
 class SheepScript : public Asset
 {
 public:
-    static bool IsSheepDataCompiled(char* data, int dataLength);
+    static bool IsSheepDataCompiled(uint8_t* data, uint32_t dataLength);
 
     SheepScript(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     SheepScript(const std::string& name, SheepScriptBuilder& builder);
     ~SheepScript();
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
     void Load(const SheepScriptBuilder& builder);
 
     SysFuncImport* GetSysImport(int index);
@@ -64,7 +64,7 @@ private:
     char* mBytecode = nullptr;
     int mBytecodeLength = 0;
     
-    void ParseFromData(char* data, int dataLength);
+    void ParseFromData(uint8_t* data, uint32_t dataLength);
     void ParseSysImportsSection(BinaryReader& reader);
     void ParseStringConstsSection(BinaryReader& reader);
     void ParseVariablesSection(BinaryReader& reader);

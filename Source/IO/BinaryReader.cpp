@@ -9,9 +9,15 @@ BinaryReader::BinaryReader(const char* filePath)
     mStream = new std::ifstream(filePath, std::ios::in | std::ios::binary);
 }
 
-BinaryReader::BinaryReader(const char* memory, uint32_t memoryLength)
+BinaryReader::BinaryReader(const uint8_t* memory, uint32_t memoryLength)
 {
-    mStream = new imstream(memory, memoryLength);
+    mStream = new imstream(reinterpret_cast<const char*>(memory), memoryLength);
+}
+
+BinaryReader::BinaryReader(const char* memory, uint32_t memoryLength) :
+    BinaryReader(reinterpret_cast<const uint8_t*>(memory), memoryLength)
+{
+    
 }
 
 BinaryReader::~BinaryReader()
@@ -44,15 +50,9 @@ uint32_t BinaryReader::GetPosition() const
     return static_cast<uint32_t>(pos);
 }
 
-uint32_t BinaryReader::Read(char* buffer, uint32_t size)
+uint32_t BinaryReader::Read(uint8_t* buffer, uint32_t size)
 {
-    mStream->read(buffer, size);
-    return static_cast<uint32_t>(mStream->gcount());
-}
-
-uint32_t BinaryReader::Read(unsigned char* buffer, uint32_t size)
-{
-    mStream->read((char*)buffer, size);
+    mStream->read(reinterpret_cast<char*>(buffer), size);
     return static_cast<uint32_t>(mStream->gcount());
 }
 

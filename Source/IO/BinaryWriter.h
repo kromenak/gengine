@@ -11,7 +11,7 @@ class BinaryWriter
 {
 public:
     BinaryWriter(const char* filePath);
-    BinaryWriter(char* memory, uint32_t memoryLength);
+    BinaryWriter(uint8_t* memory, uint32_t memoryLength);
     ~BinaryWriter();
 	
 	// Should only write if OK is true.
@@ -23,9 +23,8 @@ public:
     void Skip(uint32_t count);
     uint32_t GetPosition() const;
 
-    // Write arbitrary char data
-    void Write(const char* buffer, uint32_t size);
-    void Write(const unsigned char* buffer, uint32_t size);
+    // Write arbitrary data
+    void Write(const uint8_t* buffer, uint32_t size);
 
     // Write numeric types
     void WriteByte(uint8_t val);

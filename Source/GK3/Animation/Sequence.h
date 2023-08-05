@@ -25,8 +25,7 @@ class Sequence : public Asset
 {
 public:
     Sequence(const std::string& name, AssetScope scope) : Asset(name, scope) { }
-
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
 
     int GetFramesPerSecond() const { return mFramesPerSecond; }
 

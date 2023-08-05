@@ -547,7 +547,7 @@ void AudioManager::StopAll()
     mPlayingSounds.clear();
 }
 
-void AudioManager::StopOnOrAfterFrame(uint32 frame)
+void AudioManager::StopOnOrAfterFrame(uint32_t frame)
 {
     for(auto& sound : mPlayingSounds)
     {
@@ -787,17 +787,17 @@ FMOD::Sound* AudioManager::CreateSound(Audio* audio, AudioType audioType, bool i
     // For music and ambient audio, stream it to avoid FPS drops when loading.
     // To stream the audio, we need to make sure the streaming buffer is never deleted while we're using it.
     // To achieve this, I'll just make a copy of the audio data.
-    char* audioBuffer = audio->GetDataBuffer();
+    uint8_t* audioBuffer = audio->GetDataBuffer();
     if(audioType == AudioType::Ambient || audioType == AudioType::Music)
     {
         mode |= FMOD_CREATESTREAM;
-        audioBuffer = new char[audio->GetDataBufferLength()];
+        audioBuffer = new uint8_t[audio->GetDataBufferLength()];
         memcpy(audioBuffer, audio->GetDataBuffer(), exinfo.length);
     }
 
     // Create the sound using the audio data buffer.
     FMOD::Sound* sound = nullptr;
-    FMOD_RESULT result = mSystem->createSound(audioBuffer, mode, &exinfo, &sound);
+    FMOD_RESULT result = mSystem->createSound(reinterpret_cast<char*>(audioBuffer), mode, &exinfo, &sound);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;

@@ -9,7 +9,7 @@
 #include "SheepScriptBuilder.h"
 #include "StringUtil.h"
 
-/*static*/ bool SheepScript::IsSheepDataCompiled(char* data, int dataLength)
+/*static*/ bool SheepScript::IsSheepDataCompiled(uint8_t* data, uint32_t dataLength)
 {
     // If the first 8 bytes of the data is GK3Sheep, we'll assume this is valid compiled Sheepscript data.
     // Otherwise, it may be a text-based (uncompiled) Sheepscript, or some other data entirely.
@@ -26,7 +26,7 @@ SheepScript::~SheepScript()
     delete[] mBytecode;
 }
 
-void SheepScript::Load(char* data, int dataLength)
+void SheepScript::Load(uint8_t* data, uint32_t dataLength)
 {
     // If the data is already compiled, we can just parse it directly.
     if(IsSheepDataCompiled(data, dataLength))
@@ -37,7 +37,7 @@ void SheepScript::Load(char* data, int dataLength)
 
     // If the data is in uncompiled text format, we must compile it!
     SheepCompiler compiler;
-    imstream stream(data, dataLength);
+    imstream stream(reinterpret_cast<char*>(data), dataLength);
     if(compiler.Compile(GetNameNoExtension(), stream))
     {
         Load(compiler.GetCompiledBuilder());
@@ -105,7 +105,7 @@ void SheepScript::Dump()
     std::cout << "--------------------------------------------------------------------------" << std::endl;
 }
 
-void SheepScript::ParseFromData(char *data, int dataLength)
+void SheepScript::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     BinaryReader reader(data, dataLength);
     
@@ -338,7 +338,7 @@ void SheepScript::ParseCodeSection(BinaryReader& reader)
     // The rest is just bytecode!
     assert(mBytecode == nullptr);
     mBytecode = new char[mBytecodeLength];
-    reader.Read(mBytecode, mBytecodeLength);
+    reader.Read(reinterpret_cast<uint8_t*>(mBytecode), mBytecodeLength);
 }
 
 /**

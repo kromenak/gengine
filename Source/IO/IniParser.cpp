@@ -165,10 +165,10 @@ IniParser::IniParser(const char* filePath)
     }
 }
 
-IniParser::IniParser(const char* memory, unsigned int memoryLength)
+IniParser::IniParser(const uint8_t* memory, uint32_t memoryLength)
 {
     // Create stream to read from memory.
-    mStream = new imstream(memory, memoryLength);
+    mStream = new imstream(reinterpret_cast<const char*>(memory), memoryLength);
 }
 
 IniParser::~IniParser()

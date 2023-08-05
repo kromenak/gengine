@@ -15,7 +15,7 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
-void BSP::Load(char* data, int dataLength)
+void BSP::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
 
@@ -697,7 +697,7 @@ void BSP::RenderPolygon(BSPPolygon& polygon, bool translucent)
     //++renderedPolygonCount;
 }
 
-void BSP::ParseFromData(char *data, int dataLength)
+void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     BinaryReader reader(data, dataLength);
     

@@ -14,6 +14,7 @@ class BinaryReader
 {
 public:
     BinaryReader(const char* filePath);
+    BinaryReader(const uint8_t* memory, uint32_t memoryLength);
     BinaryReader(const char* memory, uint32_t memoryLength);
     ~BinaryReader();
 	
@@ -27,8 +28,7 @@ public:
     uint32_t GetPosition() const;
 
     // Read arbitrary char data
-    uint32_t Read(char* buffer, uint32_t size);
-    uint32_t Read(unsigned char* buffer, uint32_t size);
+    uint32_t Read(uint8_t* buffer, uint32_t size);
 
     // Read numeric types
     uint8_t ReadByte();

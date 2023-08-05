@@ -6,7 +6,7 @@
 #include "IniParser.h"
 #include "StringUtil.h"
 
-void Sequence::Load(char* data, int dataLength)
+void Sequence::Load(uint8_t* data, uint32_t dataLength)
 {
     IniParser parser(data, dataLength);
     parser.SetMultipleKeyValuePairsPerLine(false);

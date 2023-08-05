@@ -24,7 +24,7 @@ public:
     Model(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Model();
 
-    void Load(char* data, int dataLength);
+    void Load(uint8_t* data, uint32_t dataLength);
 
     const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
 	
@@ -39,5 +39,5 @@ private:
 	// If true, the model should be rendered as a billboard.
 	bool mBillboard = false;
 	
-    void ParseFromData(char* data, int dataLength);
+    void ParseFromData(uint8_t* data, uint32_t dataLength);
 };

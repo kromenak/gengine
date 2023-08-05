@@ -8,7 +8,7 @@
 
 /*static*/ std::vector<Action> NVC::mEmptyActions;
 
-void NVC::Load(char* data, int dataLength)
+void NVC::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
 }
@@ -68,7 +68,7 @@ const Action* NVC::GetAction(const std::string& noun, const std::string& verb) c
 	return nullptr;
 }
 
-void NVC::ParseFromData(char *data, int dataLength)
+void NVC::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     IniParser parser(data, dataLength);
     parser.ParseAll();

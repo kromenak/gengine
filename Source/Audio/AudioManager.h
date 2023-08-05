@@ -11,7 +11,6 @@
 #include <fmod.hpp>
 #include <fmod_errors.h>
 
-#include "Atomics.h"
 #include "Vector3.h"
 
 class Audio;
@@ -49,7 +48,7 @@ private:
     std::function<void()> mFinishCallback;
 
     // The frame this sound started on.
-    uint32 mStartFrame = 0;
+    uint32_t mStartFrame = 0;
 };
 
 struct AudioSaveState
@@ -149,7 +148,7 @@ public:
     void Stop(Audio* audio);
     void Stop(PlayingSoundHandle& soundHandle, float fadeOutTime = 0.0f);
     void StopAll();
-    void StopOnOrAfterFrame(uint32 frame);
+    void StopOnOrAfterFrame(uint32_t frame);
 
     void ReleaseAudioData(Audio* audio);
 

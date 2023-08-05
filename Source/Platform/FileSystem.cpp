@@ -254,7 +254,7 @@ bool Directory::Create(const std::string& path)
     #endif
 }
 
-int64 File::Size(const std::string& filePath)
+uint64_t File::Size(const std::string& filePath)
 {
     #if defined(PLATFORM_WINDOWS)
     // Use Windows function to get attributes and return size.
@@ -263,7 +263,7 @@ int64 File::Size(const std::string& filePath)
     {
         // For compatibility reasons, the size is stored as two 32-bit ints, but it's meant to represent a 64-bit int.
         // Can use the LARGE_INTEGER struct to convert to int64.
-        LARGE_INTEGER fileSize = { 0 };
+        ULARGE_INTEGER fileSize = { 0 };
         fileSize.LowPart = file_attr_data.nFileSizeLow;
         fileSize.HighPart = file_attr_data.nFileSizeHigh;
         return fileSize.QuadPart;
@@ -282,7 +282,7 @@ int64 File::Size(const std::string& filePath)
     return 0;
 }
 
-char* File::ReadIntoBuffer(const std::string& filePath, uint32& outBufferSize)
+uint8_t* File::ReadIntoBuffer(const std::string& filePath, uint32_t& outBufferSize)
 {
     // Open the file, or error if failed.
     std::ifstream file(filePath, std::iostream::in | std::iostream::binary);
@@ -293,12 +293,12 @@ char* File::ReadIntoBuffer(const std::string& filePath, uint32& outBufferSize)
     }
 
     // Get size of file, so we can make a buffer for its contents.
-    int64 size = File::Size(filePath);
+    uint64_t size = File::Size(filePath);
 
     // Create buffer and read in data.
     // This may be a binary or text asset. But to be on the safe side, let's stick a null terminator on there.
-    char* buffer = new char[size + 1];
-    file.read(buffer, size);
+    uint8_t* buffer = new uint8_t[size + 1];
+    file.read(reinterpret_cast<char*>(buffer), size);
     buffer[size] = '\0';
 
     // Pass out buffer size and return buffer.
