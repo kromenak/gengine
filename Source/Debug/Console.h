@@ -18,27 +18,28 @@ public:
     
 	void ExecuteCommand(const std::string& command);
 	
-	int GetCommandHistoryLength() const { return (int)mCommandHistory.size(); }
-	std::string GetCommandFromHistory(int index) const;
+    size_t GetCommandHistoryLength() const { return mCommandHistory.size(); }
+	const std::string& GetCommandFromHistory(size_t index) const;
 	
 	void SetReportStream(ReportStream* reportStream) { mConsoleReportStream = reportStream; }
 	
 private:
 	// Max scrollback lines we will store.
-	const unsigned int kMaxScrollbackLength = 1000;
+	const uint32_t kMaxScrollbackLength = 1000;
 	
 	// The scrollback buffer. Split into individual lines.
+    // Newest items are at the end of the list.
 	std::vector<std::string> mScrollback;
 	
 	// Max number of commands we will store in history.
-	const unsigned int kMaxCommandHistoryLength = 40;
+	const uint32_t kMaxCommandHistoryLength = 40;
 	
 	// History of executed commands.
 	std::vector<std::string> mCommandHistory;
 	
 	// Counts commands executed via console.
 	// Used primarily as an identifier when compiling console commands.
-	int mCommandCounter = 0;
+    uint32_t mCommandCounter = 0;
 	
 	// Report stream for console output.
 	ReportStream* mConsoleReportStream = nullptr;

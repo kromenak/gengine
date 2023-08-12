@@ -10,6 +10,28 @@ TextLayout::CharInfo& TextLayout::CharInfo::operator=(const TextLayout::CharInfo
 	return *this;
 }
 
+/*static*/ float TextLayout::GetLineHeight(Font* font, int lineNumber)
+{
+    // The first line's height is just the glyph height.
+    // Second and on lines have one extra pixel for spacing.
+    return lineNumber <= 1 ? font->GetGlyphHeight() : font->GetGlyphHeight() + 1;
+}
+
+/*static*/ float TextLayout::GetTotalLineHeight(Font* font, int lineCount)
+{
+    // Height is based on number of lines, with first line slightly shorter than the rest.
+    float height = 0.0f;
+    if(lineCount > 0)
+    {
+        height += GetLineHeight(font, 1);
+    }
+    if(lineCount > 1)
+    {
+        height += (lineCount - 1) * GetLineHeight(font, 2);
+    }
+    return height;
+}
+
 TextLayout::TextLayout(const Rect& rect, Font* font,
 	HorizontalAlignment ha, VerticalAlignment va,
 	HorizontalOverflow ho, VerticalOverflow vo) :
@@ -103,15 +125,9 @@ void TextLayout::AddLine(const std::string& line)
         }
     }
 	
-    // Height of the line is easier - always glyph height from the font.
-    int lineHeight = mFont->GetGlyphHeight();
+    // Get height of the line based on font and number of lines.
+    int lineHeight = GetLineHeight(mFont, mLineCount);
 
-    // If this isn't the first line, append an extra buffer pixel for the space between the lines.
-    if(mLineCount > 1)
-    {
-        lineHeight += 1;
-    }
-	
     // Determine initial left x-pos of this line, depending on alignment.
 	float xPos = 0.0f;
 	switch(mHorizontalAlignment)

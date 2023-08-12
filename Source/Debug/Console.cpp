@@ -20,7 +20,7 @@ void Console::AddToScrollback(const std::string& str)
     // If scrollback is too large, erase old messages to reduce size.
 	if(mScrollback.size() > kMaxScrollbackLength)
 	{
-        int extraCount = static_cast<int>(mScrollback.size()) - kMaxScrollbackLength;
+        uint32_t extraCount = mScrollback.size() - kMaxScrollbackLength;
 		mScrollback.erase(mScrollback.begin(), mScrollback.begin() + extraCount);
 	}
 }
@@ -86,11 +86,7 @@ void Console::ExecuteCommand(const std::string& command)
 	mCommandCounter++;
 }
 
-std::string Console::GetCommandFromHistory(int index) const
+const std::string& Console::GetCommandFromHistory(size_t index) const
 {
-	if(index < 0 || index >= static_cast<int>(mCommandHistory.size()))
-	{
-		return "";
-	}
 	return mCommandHistory[index];
 }

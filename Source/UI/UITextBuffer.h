@@ -15,21 +15,22 @@ class UITextBuffer : public UILabel
 public:
 	UITextBuffer(Actor* owner);
 	
-	void SetLineCount(int lineCount) { mLineCount = lineCount; SetDirty(); }
-	void SetLineOffset(int lineOffset) { mLineOffset = lineOffset; SetDirty(); }
+	void SetLineCount(uint32_t lineCount) { mLineCount = lineCount; SetDirty(); }
+	void SetLineOffset(uint32_t lineOffset) { mLineOffset = lineOffset; SetDirty(); }
+
+    float CalculateHeight() const;
 	
 protected:
 	void OnUpdate(float deltaTime) override;
-	
 	void PopulateTextLayout(TextLayout& textLayout) override;
 	
 private:
 	// Number of lines to display in the buffer.
-	int mLineCount = 10;
+	uint32_t mLineCount = 10;
 	
 	// Offset from the end of the buffer to display.
-	int mLineOffset = 0;
+    uint32_t mLineOffset = 0;
 	
 	// Last recorded buffer length; to determine whether we need to update the layout!
-	int mLastBufferLength = 0;
+    size_t mLastBufferLength = 0;
 };

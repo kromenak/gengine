@@ -60,6 +60,9 @@ public:
         // Position of the text character (bottom-left corner).
 		Vector2 pos;
 	};
+
+    static float GetLineHeight(Font* font, int lineNumber);
+    static float GetTotalLineHeight(Font* font, int lineCount);
 	
     TextLayout() = default;
 	TextLayout(const Rect& rect, Font* font,
@@ -69,17 +72,17 @@ public:
 	TextLayout(TextLayout& other) = default;
 	TextLayout(TextLayout&& other) = default;
 	TextLayout& operator=(const TextLayout& other) = default;
-	
+
+    // Lines
 	void AddLine(const std::string& line);
-	
-	int GetCharCount() const { return (int)mCharInfos.size(); }
 	int GetLineCount() const { return mLineCount; }
-	
+
+    // Chars
+    int GetCharCount() const { return (int)mCharInfos.size(); }
 	const CharInfo* GetChar(int index) const;
 	const std::vector<CharInfo>& GetChars() const { return mCharInfos; }
-	
 	Vector2 GetNextCharPos() const { return mNextCharPos; }
-	
+
 private:
 	// The rect in which the text will be laid out.
 	Rect mRect;
@@ -97,7 +100,7 @@ private:
 	
 	// The total number of lines.
 	int mLineCount = 0;
-	
+
 	// Info about each char that will be rendered.
 	std::vector<CharInfo> mCharInfos;
 	
