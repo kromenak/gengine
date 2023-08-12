@@ -1,6 +1,4 @@
 //
-// TextInput.h
-//
 // Clark Kromenaker
 //
 // Provides operations for editing a piece of text with a keyboard.
@@ -11,7 +9,7 @@
 class TextInput
 {
 public:
-	void Insert(std::string text);
+	void Insert(const std::string& text);
 	void Insert(const char* text, int count);
 	void Insert(char c);
 	

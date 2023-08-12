@@ -7,6 +7,7 @@
 #include "ActionManager.h"
 #include "AssetManager.h"
 #include "CharacterManager.h"
+#include "Clipboard.h"
 #include "Console.h"
 #include "ConsoleUI.h"
 #include "CursorManager.h"
@@ -370,6 +371,47 @@ void GEngine::ProcessInput()
 						textInput->MoveCursorToEnd();
 					}
 				}
+
+                // Ctrl + C: Copy text from text input.
+                // Ctrl + X: Cut text from text input.
+                // Ctrl + V: Past text from text input.
+                else if(event.key.keysym.sym == SDLK_c)
+                {
+                    SDL_Keymod modState = SDL_GetModState();
+                    if((modState & KMOD_CTRL) != 0)
+                    {
+                        TextInput* textInput = gInputManager.GetTextInput();
+                        if(textInput != nullptr)
+                        {
+                            Clipboard::SetClipboardText(textInput->GetText().c_str());
+                        }
+                    }
+                }
+                else if(event.key.keysym.sym == SDLK_x)
+                {
+                    SDL_Keymod modState = SDL_GetModState();
+                    if((modState & KMOD_CTRL) != 0)
+                    {
+                        TextInput* textInput = gInputManager.GetTextInput();
+                        if(textInput != nullptr)
+                        {
+                            Clipboard::SetClipboardText(textInput->GetText().c_str());
+                            textInput->SetText("");
+                        }
+                    }
+                }
+                else if(event.key.keysym.sym == SDLK_v)
+                {
+                    SDL_Keymod modState = SDL_GetModState();
+                    if((modState & KMOD_CTRL) != 0)
+                    {
+                        TextInput* textInput = gInputManager.GetTextInput();
+                        if(textInput != nullptr)
+                        {
+                            textInput->Insert(Clipboard::GetClipboardText());
+                        }
+                    }
+                }
 
                 // Alt + Enter: toggle fullscreen mode
                 else if(event.key.keysym.sym == SDLK_RETURN)

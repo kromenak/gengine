@@ -1,13 +1,8 @@
-//
-// TextInput.cpp
-//
-// Clark Kromenaker
-//
 #include "TextInput.h"
 
 #include <iostream>
 
-void TextInput::Insert(std::string text)
+void TextInput::Insert(const std::string& text)
 {
 	Insert(text.c_str(), (int)text.size());
 }

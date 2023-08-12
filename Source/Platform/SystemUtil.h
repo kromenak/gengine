@@ -1,6 +1,4 @@
 //
-// SystemUtil.h
-//
 // Clark Kromenaker
 //
 // Some cross-platform helper functions for querying the system.
