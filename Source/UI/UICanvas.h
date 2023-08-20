@@ -10,6 +10,8 @@
 #pragma once
 #include "UIWidget.h"
 
+#include <climits>
+
 class UICanvas : public UIWidget
 {
 	TYPE_DECL_CHILD();

@@ -25,20 +25,21 @@ struct SheepValue
     };
     
     SheepValue() { intValue = 0; }
-    SheepValue(SheepValueType t) { type = t; intValue = 0; }
-    SheepValue(int i) { type = SheepValueType::Int; intValue = i; }
-    SheepValue(float f) { type = SheepValueType::Float; floatValue = f; }
-    SheepValue(const char* s) { type = SheepValueType::String; stringValue = s; }
+    explicit SheepValue(SheepValueType t) { type = t; intValue = 0; }
+    explicit SheepValue(int i) { type = SheepValueType::Int; intValue = i; }
+    explicit SheepValue(float f) { type = SheepValueType::Float; floatValue = f; }
+    explicit SheepValue(const char* s) { type = SheepValueType::String; stringValue = s; }
 	~SheepValue() { }
 	
 	// Helpers for implicit conversions between Int/Float when needed.
-	int GetInt()
+	int GetInt() const
 	{
 		switch(type)
 		{
 		default:
         case SheepValueType::Void:
             printf("Warning: converting unexpected SheepValue type to int.\n");
+            return intValue;
 		case SheepValueType::Int:
 			return intValue;
 		case SheepValueType::Float:
@@ -49,13 +50,14 @@ struct SheepValue
 		}
 	}
 	
-	float GetFloat()
+	float GetFloat() const
 	{
 		switch(type)
 		{
 		default:
         case SheepValueType::Void:
             printf("Warning: converting unexpected SheepValue type to float.\n");
+            return floatValue;
 		case SheepValueType::Float:
 			return floatValue;
 		case SheepValueType::Int:
@@ -66,16 +68,16 @@ struct SheepValue
 		}
 	}
 	
-	std::string GetString()
+	std::string GetString() const
 	{
 		switch(type)
 		{
 		default:
         case SheepValueType::Void:
             printf("Warning: converting unexpected SheepValue type to string.\n");
+            return stringValue != nullptr ? std::string(stringValue) : std::string();
 		case SheepValueType::String:
-            if(stringValue == nullptr) { return std::string(); }
-			return std::string(stringValue);
+            return stringValue != nullptr ? std::string(stringValue) : std::string();
 		case SheepValueType::Float:
 			return std::to_string(floatValue);
 		case SheepValueType::Int:
@@ -83,7 +85,7 @@ struct SheepValue
 		}
 	}
 	
-	std::string GetTypeString()
+	std::string GetTypeString() const
 	{
 		switch(type)
 		{

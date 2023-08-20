@@ -310,7 +310,7 @@ Vector3 VertexAnimation::SampleVertexPosition(float time, int framesPerSecond, i
     }
 
     // Make sure we found a valid first pose.
-    if(firstVertexPose == nullptr)
+    if(firstVertexPose != nullptr)
     {
         float duration = GetDuration(framesPerSecond);
         float localTime = time;

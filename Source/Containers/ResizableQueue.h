@@ -82,7 +82,7 @@ public:
         }
 
         // Get pointer to alloc location.
-        uint8* allocAt = &mData[mTail * sizeof(T)];
+        uint8_t* allocAt = &mData[mTail * sizeof(T)];
 
         // Allocate a new T at that memory location.
         new(allocAt) T(std::forward<Args>(args)...);

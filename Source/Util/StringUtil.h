@@ -7,6 +7,7 @@
 #pragma once
 #include <algorithm>
 #include <cctype>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -129,11 +130,7 @@ namespace StringUtil
         if(std::getline(is, str))
         {
             // Get rid of anything after a comment.
-            size_t commentStart = str.find("//");
-            if(commentStart != std::string::npos)
-            {
-                str = str.substr(0, commentStart);
-            }
+            TrimComment(str);
 
             // "getline" can sometimes leave some unwanted chars on the end of the line, so let's get rid of those.
             // "getline" discards \n on end of lines, but leaves Windows line breaks (\r) - get rid of them!

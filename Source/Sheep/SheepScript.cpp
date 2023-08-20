@@ -1,5 +1,6 @@
 #include "SheepScript.h"
 
+#include <cstring>
 #include <iostream>
 #include <fstream>
 

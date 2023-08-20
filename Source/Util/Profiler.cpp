@@ -51,7 +51,7 @@ Sample::~Sample()
 {
     sActiveSamples.clear();
 
-    printf("===== Begin Frame %lli =====\n", sFrameNumber);
+    printf("===== Begin Frame %llu =====\n", sFrameNumber);
     BeginSample("Total");
 }
 
@@ -63,7 +63,7 @@ Sample::~Sample()
 
     // End overall frame sample.
     EndSample();
-    printf("===== End Frame %lli =====\n", sFrameNumber);
+    printf("===== End Frame %llu =====\n", sFrameNumber);
 
     // Increment frame number at end of frame (if you do this at beginning, it just means there's no frame 0).
     sFrameNumber++;

@@ -1,5 +1,6 @@
 #include "AudioManager.h"
 
+#include <cstring>
 #include <iostream>
 
 #include "AssetManager.h"
@@ -308,7 +309,7 @@ bool AudioManager::Initialize()
         mDefault3DMinDist = config->GetFloat("Sound", "Default Sound Min Distance", mDefault3DMinDist);
         mDefault3DMaxDist = config->GetFloat("Sound", "Default Sound Max Distance", mDefault3DMaxDist);
     }
-    
+
     // We initialized audio successfully!
     return true;
 }
@@ -316,8 +317,8 @@ bool AudioManager::Initialize()
 void AudioManager::Shutdown()
 {
 	// Close and release FMOD system.
-    FMOD_RESULT result = mSystem->close();
-    result = mSystem->release();
+    mSystem->close();
+    mSystem->release();
     mSystem = nullptr;
 }
 

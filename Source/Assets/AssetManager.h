@@ -10,9 +10,8 @@
 #include <vector>
 
 #include "Asset.h"
+#include "BarnFile.h"
 #include "StringUtil.h"
-
-class BarnFile;
 
 // Forward Declarations for all asset types
 class Animation;

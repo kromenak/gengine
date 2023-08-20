@@ -7,6 +7,8 @@ void Config::Load(uint8_t* data, uint32_t dataLength)
 {
     // Read in each section and store it.
     IniParser parser(data, dataLength);
+    parser.SetMultipleKeyValuePairsPerLine(false);
+
     IniSection section;
     while(parser.ReadNextSection(section))
     {

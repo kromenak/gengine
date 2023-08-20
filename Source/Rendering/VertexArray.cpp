@@ -1,5 +1,6 @@
 #include "VertexArray.h"
 
+#include <cstring>
 #include <iostream>
 
 #include "ThreadUtil.h"

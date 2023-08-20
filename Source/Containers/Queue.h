@@ -11,11 +11,10 @@
 //
 #pragma once
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 
-#include "Atomics.h"
-
-template<typename T, uint32 TCapacity>
+template<typename T, uint32_t TCapacity>
 class Queue
 {
 public:
@@ -24,7 +23,7 @@ public:
     class Iterator
     {
     public:
-        Iterator(uint32 index, uint32 remaining, T* data) : index(index), remaining(remaining), data(data) { }
+        Iterator(uint32_t index, uint32_t remaining, T* data) : index(index), remaining(remaining), data(data) { }
         void operator++() { ++index; index %= TCapacity; --remaining; }
         bool operator==(const Iterator& other) const { return index == other.index && remaining == other.remaining; }
         bool operator!=(const Iterator& other) const { return !(*this == other); }
@@ -33,8 +32,8 @@ public:
     private:
         // Track index into data array.
         // To differentiate "empty" and "full", we need to track remaining elements in list.
-        uint32 index;
-        uint32 remaining;
+        uint32_t index;
+        uint32_t remaining;
         T* data;
     };
     Iterator begin() { return Iterator(mHead, mSize, reinterpret_cast<T*>(mData)); }
@@ -66,7 +65,7 @@ public:
         assert(mSize < TCapacity);
 
         // Get pointer to alloc location.
-        uint8* allocAt = &mData[mTail * sizeof(T)];
+        uint8_t* allocAt = &mData[mTail * sizeof(T)];
 
         // Allocate a new T at that memory location.
         new(allocAt) T(std::forward<Args>(args)...);
@@ -123,21 +122,21 @@ public:
         }
     }
 
-    T& operator[](uint32 i)
+    T& operator[](uint32_t i)
     {
         assert(i < mSize);
-        uint32 index = (mHead + i) % TCapacity;
+        uint32_t index = (mHead + i) % TCapacity;
         return reinterpret_cast<T*>(mData)[index];
     }
 
-    const T& operator[](uint32 i) const
+    const T& operator[](uint32_t i) const
     {
         assert(i < mSize);
-        uint32 index = (mHead + i) % TCapacity;
+        uint32_t index = (mHead + i) % TCapacity;
         return reinterpret_cast<T*>(mData)[index];
     }
 
-    uint32 Capacity() const
+    uint32_t Capacity() const
     {
         return TCapacity;
     }
@@ -147,20 +146,20 @@ public:
         return mSize == 0;
     }
 
-    uint32 Size() const
+    uint32_t Size() const
     {
         return mSize;
     }
 
 private:
     // Memory to store elements.
-    alignas(alignof(T)) uint8 mData[TCapacity * sizeof(T)] = { 0 };
+    alignas(alignof(T)) uint8_t mData[TCapacity * sizeof(T)] = { 0 };
 
     // Number of elements currently in queue.
-    uint32 mSize = 0;
+    uint32_t mSize = 0;
 
     // The queue is implemented as a circular array. This enables implementing a queue using a contiguous array (rather than a linked list).
     // Items are pushed to the back of the array (moving the tail) and read from the front (moving the head), with wraparound.
-    uint32 mHead = 0;
-    uint32 mTail = 0;
+    uint32_t mHead = 0;
+    uint32_t mTail = 0;
 };

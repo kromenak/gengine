@@ -1,12 +1,7 @@
 #include "NVC.h"
 
-#include "GKActor.h"
 #include "IniParser.h"
-#include "SheepCompiler.h"
 #include "SheepManager.h"
-#include "SheepScript.h"
-
-/*static*/ std::vector<Action> NVC::mEmptyActions;
 
 void NVC::Load(uint8_t* data, uint32_t dataLength)
 {
@@ -18,9 +13,13 @@ const std::vector<Action>& NVC::GetActions(const std::string& noun) const
 	auto it = mNounToActions.find(noun);
 	if(it != mNounToActions.end())
 	{
-		return it->second;
+        return it->second;
 	}
-	return mEmptyActions;
+    else
+    {
+        static std::vector<Action> mEmptyActions;
+        return mEmptyActions;
+    }
 }
 
 std::vector<const Action*> NVC::GetActions(const std::string& noun, const std::string& verb) const
@@ -191,9 +190,9 @@ void NVC::ParseFromData(uint8_t* data, uint32_t dataLength)
 	// After all actions have been read in, iterate and save pointers to each in a vector.
 	// When action set will be used, we must iterate all actions to map nouns and verbs.
 	// Perhaps I can make this more efficient at some point...
-	for(auto it = mNounToActions.begin(); it != mNounToActions.end(); it++)
+	for(auto& mNounToAction : mNounToActions)
 	{
-		std::vector<Action>& actions = it->second;
+		std::vector<Action>& actions = mNounToAction.second;
 		for(auto& action : actions)
 		{
 			mActions.push_back(&action);

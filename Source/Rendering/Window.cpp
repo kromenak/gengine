@@ -1,8 +1,9 @@
 #include "Window.h"
 
-#include <cassert>
+#include <map>
 #include <vector>
 
+#include "Platform.h"
 #include "SaveManager.h"
 #include "StringUtil.h"
 
@@ -21,8 +22,14 @@ namespace Window
     // For each display/monitor, the supported resolutions.
     // Indexed by [displayIndex][resolutionIndex].
     std::vector<std::vector<Resolution>> supportedResolutions;
+
+    int ResolutionHash(const Resolution& res)
+    {
+        // Not a great hash...but it does the trick.
+        return static_cast<int>(res.width) * 1000 + static_cast<int>(res.height);
+    }
     
-    void DetectSupportedResolutions()
+    void DetectSupportedResolutions(bool fullscreen)
     {
         // Clear, in case this is called multiple times.
         // Possibly monitors could be plugged in or removed, in which case calling this again is a good idea.
@@ -32,8 +39,10 @@ namespace Window
         int displayCount = SDL_GetNumVideoDisplays();
         for(int i = 0; i < displayCount; ++i)
         {
-            supportedResolutions.emplace_back();
-            std::vector<Resolution>& resolutions = supportedResolutions.back();
+            // As we iterate display modes, we'll keep a map of supported resolutions. Using a map enables two things:
+            // 1) Resolutions are ordered.
+            // 2) Avoid duplicate resolutions.
+            std::map<int, Resolution> resolutions;
 
             // Iterate each display mode supported by this monitor and populate a list of resolutions.
             // NOTE: Technically, in windowed mode, ANY resolution is valid - these resolutions are really only for fullscreen.
@@ -48,17 +57,31 @@ namespace Window
                 // For example, if the height is larger than the width, that isn't a great choice for this type of game!
                 if(mode.h >= mode.w) { continue; }
 
-                // GetDisplayMode will contain dupes for different supported refresh rates.
-                // Only add one entry per resolution. Fortunately, the display modes are sorted so this works.
-                uint32_t modeWidth = static_cast<uint32_t>(mode.w);
-                uint32_t modeHeight = static_cast<uint32_t>(mode.h);
-                if(resolutions.empty() || (resolutions.back().width != modeWidth || resolutions.back().height != modeHeight))
-                {
-                    Resolution res;
-                    res.width = modeWidth;
-                    res.height = modeHeight;
-                    resolutions.push_back(res);
-                }
+                Resolution res;
+                res.width = static_cast<uint32_t>(mode.w);
+                res.height = static_cast<uint32_t>(mode.h);
+                resolutions[ResolutionHash(res)] = res;
+            }
+
+            // If not fullscreen, ensure a few common/expected resolutions are present.
+            // Particularly on Linux, the display mode enumeration may not be exhaustive.
+            if(!fullscreen)
+            {
+                Resolution res = { 640, 480 };
+                resolutions[ResolutionHash(res)] = res;
+
+                res = { 800, 600 };
+                resolutions[ResolutionHash(res)] = res;
+
+                res = { 1024, 768 };
+                resolutions[ResolutionHash(res)] = res;
+            }
+
+            // Convert resolutions map into a list.
+            supportedResolutions.emplace_back();
+            for(auto& entry : resolutions)
+            {
+                supportedResolutions.back().push_back(entry.second);
             }
         }
     }
@@ -161,7 +184,7 @@ void Window::Create(const char* title, int x, int y, int w, int h, Uint32 flags)
     }
     
     // This is good a time as any to query and store available resolutions.
-    DetectSupportedResolutions();
+    DetectSupportedResolutions((flags & SDL_WINDOW_FULLSCREEN) != 0);
     
     // Create the window.
     window = SDL_CreateWindow(title, x, y, w, h, flags);
@@ -195,6 +218,9 @@ void Window::SetFullscreen(bool fullscreen)
 
     // Save preference.
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_FULLSCREEN, fullscreen);
+
+    // Update supported resolutions list.
+    DetectSupportedResolutions(fullscreen);
 }
 
 bool Window::IsFullscreen()
@@ -204,9 +230,7 @@ bool Window::IsFullscreen()
 
 void Window::ToggleFullscreen()
 {
-    // Get current setting and toggle it.
-    bool isFullscreen = IsFullscreen();
-    SetFullscreen(!isFullscreen);
+    SetFullscreen(!IsFullscreen());
 }
 
 const std::vector<Window::Resolution>& Window::GetResolutions()
@@ -222,8 +246,8 @@ const Window::Resolution& Window::GetResolution()
 
 void Window::SetResolution(const Resolution& resolution)
 {
-    int width = resolution.width;
-    int height = resolution.height;
+    int width = static_cast<int>(resolution.width);
+    int height = static_cast<int>(resolution.height);
     
     // The way we set the window size depends on whether we're fullscreen or not.
     bool isFullscreen = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;

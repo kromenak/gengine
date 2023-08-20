@@ -248,8 +248,9 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
     imstream::pos_type currentPos = mStream->tellg();
     
     // Just read the whole file one line at a time...
-	// GetLineSanitized ensures: no line break or tab characters, no whitespace before/after, etc.
+	// GetLineSanitized ensures: no line break or tab characters, no whitespace before/after, removes comments, etc.
     std::string line;
+    bool inBlockComment = false;
     while(StringUtil::GetLineSanitized(*mStream, line))
     {
         // Ignore empty lines.
@@ -258,11 +259,21 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             currentPos = mStream->tellg();
             continue;
         }
-        
-        // Ignore comment lines.
-        if(line.length() >= 2 && line[0] == '/' && line[1] == '/')
+
+        // Handle/ignore block comments. Starts with "/*" and ends with "*/".
+        // NOTE: this logic is not perfect (what if block comment starts at end of a valid line? or a valid line exists after an end?).
+        // NOTE: but this might be fine for current needs.
+        if(StringUtil::StartsWith(line, "/*"))
         {
-            currentPos = mStream->tellg();
+            inBlockComment = true;
+            continue;
+        }
+        if(inBlockComment)
+        {
+            if(StringUtil::Contains(line, "*/"))
+            {
+                inBlockComment = false;
+            }
             continue;
         }
 
@@ -358,15 +369,6 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
                 currentKeyValuePair = line;
                 line.clear();
             }
-			
-			// Trim off any comment on the line.
-			StringUtil::TrimComment(currentKeyValuePair);
-			
-			// Get rid of any rogue tab characters.
-			StringUtil::RemoveAll(currentKeyValuePair, '\t');
-			
-            // Trim any whitespace.
-            StringUtil::Trim(currentKeyValuePair);
             
 			// Build the key/value object, to be filled with data next.
 			iniLine.entries.emplace_back();
@@ -380,7 +382,7 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
                 keyValue.key = currentKeyValuePair.substr(0, equalsIndex);
                 keyValue.value = currentKeyValuePair.substr(equalsIndex + 1, std::string::npos);
 				
-				// Ooof, we may also have to trim these now...
+				// If the key/value line had any spaces around the equal sign, we also want to get rid of those after splitting.
 				StringUtil::Trim(keyValue.key);
 				StringUtil::Trim(keyValue.value);
             }
@@ -410,9 +412,6 @@ bool IniParser::ReadLine()
     {
         // Ignore empty lines.
         if(line.empty()) { continue; }
-        
-        // Ignore comment lines.
-        if(line.length() > 2 && line[0] == '/' && line[1] == '/') { continue; }
         
         // Detect headers and react to them, but don't stop parsing.
         if(line.length() > 2 && line[0] == '[' && line[line.length() - 1] == ']')

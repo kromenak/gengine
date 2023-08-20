@@ -223,7 +223,7 @@ Matrix3 Matrix3::operator*(const Matrix3& rhs) const
 Matrix3& Matrix3::operator*=(const Matrix3& rhs)
 {
     Matrix3 result = *this * rhs;
-    for(int i = 0; i < 16; i++)
+    for(int i = 0; i < 9; i++)
     {
         mVals[i] = result.mVals[i];
     }

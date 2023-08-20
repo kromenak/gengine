@@ -179,8 +179,8 @@ void TextLayout::AddLine(const std::string& line)
 	{
 		Glyph& glyph = mFont->GetGlyph(line[i]);
 		
-		float leftX = xPos;
-		float rightX = xPos + glyph.width;
+		//float leftX = xPos;
+		//float rightX = xPos + glyph.width;
 
 		// Calc bottom and top.
 		float bottomY = yPos;

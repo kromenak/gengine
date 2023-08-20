@@ -25,6 +25,7 @@ public:
 
     // Write arbitrary data
     void Write(const uint8_t* buffer, uint32_t size);
+    void Write(const char* buffer, uint32_t size);
 
     // Write numeric types
     void WriteByte(uint8_t val);

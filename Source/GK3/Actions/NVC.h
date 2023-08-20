@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "SheepScript.h"
 #include "StringUtil.h"
 
 class GKActor;
@@ -84,10 +85,6 @@ public:
 	const std::string_map_ci<SheepScriptAndText>& GetCases() const { return mCaseLogic; }
 	
 private:
-	// If attempting to get actions for a noun that doesn't exist,
-	// We just return a reference to this empty vector.
-	static std::vector<Action> mEmptyActions;
-
     // A list of all actions contained in this NVC (not sorted in any particular way).
     // Pointers into the noun-to-action map.
 	std::vector<Action*> mActions;

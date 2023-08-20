@@ -5,12 +5,15 @@
 //
 #include "catch.hh"
 
+#include <cstdint>
+#include <cstring>
+
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
 
 TEST_CASE("Read/Write binary memory works")
 {
-    char memory[256];
+    uint8_t memory[256];
 
     // Create writer, test default state.
     BinaryWriter writer(memory, 256);

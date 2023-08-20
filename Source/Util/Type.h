@@ -31,11 +31,11 @@ private:                                                            \
 public:                                                             \
     static Type GetType() { return type; }                          \
     static const char* GetTypeName() { return typeName; }           \
-    bool IsTypeOf(const Type t) const { return t == type; }         \
+    bool IsTypeOf(const Type t) const { return t == type; }
 
 #define TYPE_DEF(nameOfClass)                                                         \
 const Type nameOfClass::type = std::hash<std::string>()(SYMBOL_TO_STR(nameOfClass));  \
-const char* nameOfClass::typeName = SYMBOL_TO_STR(nameOfClass);                       \
+const char* nameOfClass::typeName = SYMBOL_TO_STR(nameOfClass);
 //////////////////////////////////////////////
 
 //////////////////////////////////////////////
@@ -46,10 +46,10 @@ private:                                                            \
                                                                     \
 public:                                                             \
     static Type GetType() { return type; }                          \
-    virtual bool IsTypeOf(const Type t) const { return t == type; } \
+    virtual bool IsTypeOf(const Type t) const { return t == type; }
 
 #define TYPE_DEF_BASE(nameOfClass)                                                    \
-const Type nameOfClass::type = std::hash<std::string>()(SYMBOL_TO_STR(nameOfClass));  \
+const Type nameOfClass::type = std::hash<std::string>()(SYMBOL_TO_STR(nameOfClass));
 //////////////////////////////////////////////
 
 //////////////////////////////////////////////
@@ -60,12 +60,12 @@ private:                                                    \
                                                             \
 public:                                                     \
     static Type GetType() { return type; }                  \
-    virtual bool IsTypeOf(const Type t) const override;     \
+    virtual bool IsTypeOf(const Type t) const override;
 
 #define TYPE_DEF_CHILD(nameOfParentClass, nameOfChildClass)                                         \
 const Type nameOfChildClass::type = std::hash<std::string>()(SYMBOL_TO_STR(nameOfChildClass));      \
                                                                                                     \
 bool nameOfChildClass::IsTypeOf(const Type t) const {                                               \
     return t == nameOfChildClass::type ? true : nameOfParentClass::IsTypeOf(t);                     \
-}                                                                                                   \
+}
 //////////////////////////////////////////////

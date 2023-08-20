@@ -186,9 +186,9 @@ void VideoState::TogglePause()
     externalClock.SetPtsToCurrentTime();
     
     // Toggle pause.
-    mState = (mState == State::Paused ? mState = State::Playing : mState = State::Paused);
+    mState = (mState == State::Paused ? State::Playing : State::Paused);
     
-    // Propogate to all clocks.
+    // Propagate to all clocks.
     audioClock.SetPaused(mState == State::Paused);
     videoClock.SetPaused(mState == State::Paused);
     externalClock.SetPaused(mState == State::Paused);

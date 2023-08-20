@@ -11,11 +11,10 @@
 //
 #pragma once
 #include <cassert>
+#include <cstdint>
 #include <cstring>
 
-#include "Atomics.h"
-
-template<typename T, uint32 TCapacity>
+template<typename T, uint32_t TCapacity>
 class Stack
 {
 public:
@@ -24,7 +23,7 @@ public:
     class Iterator
     {
     public:
-        Iterator(uint32 index, T* data) : index(index), data(data) { }
+        Iterator(uint32_t index, T* data) : index(index), data(data) { }
         void operator++() { --index; }
         bool operator==(const Iterator& other) const { return index == other.index; }
         bool operator!=(const Iterator& other) const { return index != other.index;  }
@@ -32,7 +31,7 @@ public:
 
     private:
         // The "index" here is +1 the actual index. This is so "end" can be represented with index 0.
-        uint32 index;
+        uint32_t index;
         T* data;
     };
     Iterator begin() { return Iterator(mSize, reinterpret_cast<T*>(mData)); }
@@ -60,7 +59,7 @@ public:
         assert(mSize < TCapacity);
 
         // Get pointer to alloc location.
-        uint8* allocAt = &mData[mSize * sizeof(T)];
+        uint8_t* allocAt = &mData[mSize * sizeof(T)];
 
         // Allocate a new T at that memory location.
         new(allocAt) T(std::forward<Args>(args)...);
@@ -103,19 +102,19 @@ public:
         return reinterpret_cast<T*>(mData)[mSize - 1];
     }
 
-    T& operator[](uint32 i)
+    T& operator[](uint32_t i)
     {
         assert(i < mSize);
         return reinterpret_cast<T*>(mData)[i];
     }
 
-    const T& operator[](uint32 i) const
+    const T& operator[](uint32_t i) const
     {
         assert(i < mSize);
         return reinterpret_cast<T*>(mData)[i];
     }
 
-    uint32 Capacity() const
+    uint32_t Capacity() const
     {
         return TCapacity;
     }
@@ -125,15 +124,15 @@ public:
         return mSize == 0;
     }
 
-    uint32 Size() const
+    uint32_t Size() const
     {
         return mSize;
     }
 
 private:
     // Memory to store elements.
-    alignas(alignof(T)) uint8 mData[TCapacity * sizeof(T)] = { 0 };
+    alignas(alignof(T)) uint8_t mData[TCapacity * sizeof(T)] = { 0 };
 
     // Number of elements currently in stack.
-    uint32 mSize = 0;
+    uint32_t mSize = 0;
 };

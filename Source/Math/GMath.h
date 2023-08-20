@@ -2,7 +2,9 @@
 // Clark Kromenaker
 //
 // General purpose math functions.
-// Called "GMath" to avoid potential name conflict on Windows.
+//
+// NOTE: Called "GMath" to avoid potential name conflict on Windows.
+// NOTE: Using global functions (e.g. ::sqrtf instead of std::sqrtf) due to non-conformant C++11 compiler on Linux.
 //
 #pragma once
 #include <algorithm>
@@ -21,7 +23,7 @@ namespace Math
     
     inline float Sqrt(float val)
     {
-        return std::sqrtf(val);
+        return ::sqrtf(val);
     }
     
     inline float InvSqrt(float val)
@@ -29,12 +31,12 @@ namespace Math
         //TODO: this could be replaced by a faster (but approximate) calculation
         //TODO: the famous "fast inverse square root!"
         //TODO: https://www.slideshare.net/maksym_zavershynskyi/fast-inverse-square-root
-        return (1.0f / std::sqrtf(val));
+        return (1.0f / ::sqrtf(val));
     }
     
     inline bool IsZero(float val)
     {
-		return (std::fabsf(val) < kEpsilon);
+		return (::fabsf(val) < kEpsilon);
     }
     
     inline bool AreEqual(float a, float b)
@@ -60,32 +62,32 @@ namespace Math
     
     inline float Sin(float radians)
     {
-        return std::sinf(radians);
+        return ::sinf(radians);
     }
     
     inline float Asin(float ratio)
     {
-        return std::asinf(ratio);
+        return ::asinf(ratio);
     }
     
     inline float Cos(float radians)
     {
-        return std::cosf(radians);
+        return ::cosf(radians);
     }
     
     inline float Acos(float ratio)
     {
-        return std::acosf(ratio);
+        return ::acosf(ratio);
     }
     
     inline float Tan(float radians)
     {
-        return std::tanf(radians);
+        return ::tanf(radians);
     }
     
     inline float Atan(float ratio)
     {
-        return std::atanf(ratio);
+        return ::atanf(ratio);
     }
 
 	inline float Atan2(float y, float x)

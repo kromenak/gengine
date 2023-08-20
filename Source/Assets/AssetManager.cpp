@@ -6,7 +6,6 @@
 #include <sstream>
 #include <string>
 
-#include "BarnFile.h"
 #include "FileSystem.h"
 #include "Loader.h"
 #include "mstream.h"
@@ -30,7 +29,6 @@
 #include "SceneInitFile.h"
 #include "Sequence.h"
 #include "Shader.h"
-#include "SheepScript.h"
 #include "Soundtrack.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -458,7 +456,6 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
         }
     }
     //printf("Loading asset %s\n", assetName.c_str());
-    
     // Create asset from asset buffer.
     std::string upperName = StringUtil::ToUpperCopy(assetName);
     T* asset = new T(upperName, scope);
@@ -488,6 +485,13 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
 template<typename T>
 T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer, std::function<void(T*)> callback)
 {
+    #if defined(PLATFORM_LINUX)
+    //TEMP(?): Linux doesn't like this multithreading code, and I don't really blame it!
+    //TODO: Revisit async asset loading - probably need to wrap caches in mutexes I'd think? Or some other issue?
+    T* asset = LoadAsset<T>(assetName, scope, cache, deleteBuffer);
+    if(callback != nullptr) { callback(asset); }
+    return asset;
+    #else
     // If already present in cache, return existing asset right away.
     if(cache != nullptr && scope != AssetScope::Manual)
     {
@@ -545,6 +549,7 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
 
     // Return the created asset.
     return asset;
+    #endif
 }
 
 uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t& outBufferSize)

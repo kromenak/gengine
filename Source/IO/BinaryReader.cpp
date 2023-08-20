@@ -56,6 +56,12 @@ uint32_t BinaryReader::Read(uint8_t* buffer, uint32_t size)
     return static_cast<uint32_t>(mStream->gcount());
 }
 
+uint32_t BinaryReader::Read(char* buffer, uint32_t size)
+{
+    mStream->read(buffer, size);
+    return static_cast<uint32_t>(mStream->gcount());
+}
+
 uint8_t BinaryReader::ReadByte()
 {
     uint8_t val;

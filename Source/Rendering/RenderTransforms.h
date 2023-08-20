@@ -7,8 +7,6 @@
 // Includes look-at matrix, projection matrix, unproject matrix, etc.
 //
 #pragma once
-#include "Platform.h"
-
 #include "Matrix4.h"
 #include "Vector2.h"
 #include "Vector3.h"

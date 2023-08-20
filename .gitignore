@@ -8,9 +8,17 @@ Data/*
 ## Ignore Bin directory (where final release files go)
 /Bin
 
+# Ignore Debug/Release folders
+/[Dd]ebug/
+/[Rr]elease/
+
 ## Ignore CMake project directories for each platform
 /Build/Mac
 /Build/Windows
+/Build/Linux*
+
+## Ignore imgui generated files
+imgui.ini
 
 ####
 # Xcode
@@ -39,7 +47,12 @@ xcuserdata/
 ####
 .vs
 *.vcproj.user
+.vscode
 
-/[Dd]ebug/
-/[Rr]elease/
-imgui.ini
+
+
+####
+# CLion
+####
+.idea
+cmake-build-*

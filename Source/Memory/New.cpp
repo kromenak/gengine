@@ -15,6 +15,12 @@ void operator delete(void* mem) noexcept
     std::free(mem);
 }
 
+void operator delete(void* mem, size_t size) noexcept
+{
+    //std::cout << "delete" << std::endl;
+    std::free(mem);
+}
+
 void* operator new[](size_t size)
 {
     //std::cout << "new[] " << size << std::endl;
@@ -24,5 +30,11 @@ void* operator new[](size_t size)
 void operator delete[](void* mem) noexcept
 {
     //std::cout << "delete[]" << std::endl;
+    std::free(mem);
+}
+
+void operator delete[](void* mem, size_t size) noexcept
+{
+    //std::cout << "delete" << std::endl;
     std::free(mem);
 }

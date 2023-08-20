@@ -29,6 +29,7 @@ public:
 
     // Read arbitrary char data
     uint32_t Read(uint8_t* buffer, uint32_t size);
+    uint32_t Read(char* buffer, uint32_t size);
 
     // Read numeric types
     uint8_t ReadByte();

@@ -5,6 +5,7 @@
 // Once defined, this data can be sent to the GPU to actually render the thing.
 //
 #pragma once
+#include <cstddef>
 #include <utility>
 
 #include "Value.h"

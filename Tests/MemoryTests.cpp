@@ -28,12 +28,12 @@ TEST_CASE("Pointer Add/Subtract/Diff are correct")
     REQUIRE(PtrMath::Diff(charPtr2, charPtr1) == -49);
     
     // Adding a negative (subtracts).
-    array[57] = 1989;
+    array[57] = 124;
     charPtr1 = (char*)PtrMath::Add(&array[67], -10);
     REQUIRE(*charPtr1 == array[57]);
     
     // Subtracting a negative (adds).
-    array[71] = 789;
+    array[71] = 103;
     charPtr1 = (char*)PtrMath::Subtract(&array[65], -6);
     REQUIRE(*charPtr1 == array[71]);
     

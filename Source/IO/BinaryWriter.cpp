@@ -49,6 +49,11 @@ void BinaryWriter::Write(const uint8_t* buffer, uint32_t size)
     mStream->write(reinterpret_cast<const char*>(buffer), size);
 }
 
+void BinaryWriter::Write(const char* buffer, uint32_t size)
+{
+    mStream->write(buffer, size);
+}
+
 void BinaryWriter::WriteByte(uint8_t val)
 {
     mStream->write(reinterpret_cast<char*>(&val), 1);

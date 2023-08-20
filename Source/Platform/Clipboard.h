@@ -5,8 +5,6 @@
 // (Originally thought this would be more difficult, but turns out SDL provides support for this whew).
 //
 #pragma once
-#include "Platform.h"
-
 #include <SDL.h>
 
 namespace Clipboard

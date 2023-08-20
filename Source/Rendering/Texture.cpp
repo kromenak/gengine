@@ -1,10 +1,7 @@
 #include "Texture.h"
 
-#include <SDL.h>
-
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
-#include "GMath.h"
 #include "ThreadUtil.h"
 
 Texture Texture::White(2, 2, Color32::White);
@@ -484,19 +481,20 @@ void Texture::WriteToFile(const std::string& filePath)
     // PIXELS
 	// Write out one row at a time, bottom to top, left to right, per BMP format standard.
 	int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
-    for(uint32_t y = mHeight - 1; y >= 0; --y)
+    for(uint32_t y = mHeight; y > 0; --y)
     {
+        uint32_t height = y - 1;
 		int bytesWritten = 0;
         for(uint32_t x = 0; x < mWidth; ++x)
         {
             if(bitsPerPixel == 8)
             {
-                writer.WriteByte(mPaletteIndexes[(y * mWidth + x)]);
+                writer.WriteByte(mPaletteIndexes[(height * mWidth + x)]);
                 ++bytesWritten;
             }
             else if(bitsPerPixel == 32)
             {
-                int index = (y * mWidth + x) * 4;
+                uint32_t index = (height * mWidth + x) * 4;
                 writer.WriteByte(mPixels[index + 2]); // Blue
                 writer.WriteByte(mPixels[index + 1]); // Green
                 writer.WriteByte(mPixels[index]); 	  // Red
@@ -733,7 +731,7 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 				bytesRead += 3;
 				
 				// BI_RGB format doesn't save any alpha, even if 32 bits per pixel.
-				// We'll use a placeholder of 255 (fullly opaque).
+				// We'll use a placeholder of 255 (fully opaque).
 				mPixels[index + 3] = 255; // Alpha
 			}
 			else
