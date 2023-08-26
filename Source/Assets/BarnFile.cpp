@@ -326,7 +326,10 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
         
         // Decompress using LZO library. GK3 data appears to be compressed with lzo1x.
         //std::cout << asset->name << ": decompressing " << asset->compressedSize << " bytes to a buffer of size " << bufferSize << std::endl;
-        int result = lzo1x_decompress((lzo_bytep)compressedBuffer, (lzo_uint)asset->size, (lzo_bytep)buffer, (lzo_uintp)&outBufferSize, nullptr);
+        lzo_bytep compressedPtr = static_cast<lzo_bytep>(compressedBuffer);
+        lzo_bytep bufferPtr = static_cast<lzo_bytep>(buffer);
+        lzo_uint bufferSize = 0;
+        int result = lzo1x_decompress(compressedPtr, asset->size, bufferPtr, &bufferSize, nullptr);
         
         // For some reason *most* GK3 data decompresses with result of LZO_E_INPUT_NOT_CONSUMED.
         // This still works OK. It may indicate that "compressedSize" passed is larger than the compressed data.
@@ -338,6 +341,9 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
             delete[] buffer;
             return nullptr;
         }
+
+        // Set buffer size for caller to use.
+        outBufferSize = static_cast<uint32_t>(bufferSize);
     }
     else
     {
