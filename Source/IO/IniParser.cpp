@@ -388,10 +388,12 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
             }
             else
             {
-                keyValue.key = currentKeyValuePair;
-				
-				// In this case, set "value" to same thing so that we can still use "value" and value getters.
+                // Trim any whitespace from the key/value pair.
+                StringUtil::Trim(currentKeyValuePair);
+
+				// In this case, set "key" and "value" to same thing so that we can still use "value" and value getters.
 				//TODO: Seems kind of wasteful - perhaps we can say "use key field only" in this case; may want to augment/change GetValueAsX functions to work with this.
+                keyValue.key = currentKeyValuePair;
                 keyValue.value = currentKeyValuePair;
             }
         }
