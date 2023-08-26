@@ -74,7 +74,7 @@ bool GEngine::Initialize()
         };
         for(auto& barn : barns)
         {
-            TIMER_SCOPED(barn.c_str());
+            TIMER_SCOPED_VAR(barn.c_str(), barnTimer);
             if(!gAssetManager.LoadBarn(barn))
             {
                 // Generate expected path for this asset.
@@ -91,7 +91,7 @@ bool GEngine::Initialize()
         }
     }
 
-    // Initialize renderer. Depends on AssetManager being initalized.
+    // Initialize renderer. Depends on AssetManager being initialized.
     // After this function executes, the game window will be visible.
     if(!gRenderer.Initialize())
     {
@@ -161,7 +161,7 @@ bool GEngine::Initialize()
     }
     #else
     // For dev purposes: just load right into a desired timeblock and location.
-    Loader::DoAfterLoading([this]() {
+    Loader::DoAfterLoading([]() {
         gGameProgress.SetTimeblock(Timeblock("110A"));
         gSceneManager.LoadScene("R25");
     });
@@ -247,7 +247,7 @@ void GEngine::ForceUpdate()
     Update(10.0f);
 }
 
-void GEngine::StartGame()
+void GEngine::StartGame() const
 {
     if(mDemoMode)
     {
@@ -375,7 +375,7 @@ void GEngine::ProcessInput()
                 // Ctrl + C: Copy text from text input.
                 // Ctrl + X: Cut text from text input.
                 // Ctrl + V: Past text from text input.
-                else if(event.key.keysym.sym == SDLK_c)
+				else if(event.key.keysym.sym == SDLK_c)
                 {
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_CTRL) != 0)
@@ -387,7 +387,7 @@ void GEngine::ProcessInput()
                         }
                     }
                 }
-                else if(event.key.keysym.sym == SDLK_x)
+				else if(event.key.keysym.sym == SDLK_x)
                 {
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_CTRL) != 0)
@@ -400,7 +400,7 @@ void GEngine::ProcessInput()
                         }
                     }
                 }
-                else if(event.key.keysym.sym == SDLK_v)
+				else if(event.key.keysym.sym == SDLK_v)
                 {
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_CTRL) != 0)
@@ -414,7 +414,7 @@ void GEngine::ProcessInput()
                 }
 
                 // Alt + Enter: toggle fullscreen mode
-                else if(event.key.keysym.sym == SDLK_RETURN)
+				else if(event.key.keysym.sym == SDLK_RETURN)
                 {
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_ALT) != 0)
@@ -430,7 +430,6 @@ void GEngine::ProcessInput()
                 // Ignore if tool overlay is eating keyboard inputs.
                 if(Tools::EatingKeyboardInputs()) { break; }
 
-				//TODO: Make sure not copy or pasting.
 				TextInput* textInput = gInputManager.GetTextInput();
 				if(textInput != nullptr)
 				{
@@ -486,10 +485,10 @@ void GEngine::Update()
         float currentFps = 1.0f / deltaTime;
 
         // We can utilize a moving average calculation. (https://en.wikipedia.org/wiki/Moving_average#Cumulative_average)
-        // "cumulative average equals previous cumulative average, times n, plus new data, all divided by n+1.
+        // "cumulative average equals previous cumulative average, times n, plus new data, all divided by n+1"
         // (in our case, n = frame number counter)
         static float averageFps = 0.0f;
-        averageFps = ((averageFps * mFrameNumber) + currentFps) / (mFrameNumber + 1);
+        averageFps = ((averageFps * static_cast<float>(mFrameNumber)) + currentFps) / static_cast<float>(mFrameNumber + 1);
 
         // Set title to show updated value.
         Window::SetTitle(StringUtil::Format("Gabriel Knight 3 (%.2f FPS)", averageFps).c_str());

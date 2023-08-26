@@ -32,9 +32,6 @@ public:
 	Color32(int r, int g, int b);
 	Color32(int r, int g, int b, int a);
 	
-	// Copy
-	Color32(const Color32& other);
-	
 	// Equality
 	bool operator==(const Color32& other) const;
 	bool operator!=(const Color32& other) const;

@@ -13,7 +13,7 @@ class Localizer
 {
 public:
     Localizer() = default;
-    Localizer(const std::string& fileName, const std::string& sectionName = "");
+    explicit Localizer(const std::string& fileName, const std::string& sectionName = "");
 
     void Load(const std::string& fileName, const std::string& sectionName = "");
 

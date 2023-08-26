@@ -45,12 +45,6 @@ Color32::Color32(int r, int g, int b, int a)
 	this->a = (unsigned char)Math::Clamp(a, 0, 255);
 }
 
-Color32::Color32(const Color32& other) :
-	r(other.r), g(other.g), b(other.b), a(other.a)
-{
-	
-}
-
 bool Color32::operator==(const Color32& other) const
 {
 	return (Math::AreEqual(r, other.r) &&

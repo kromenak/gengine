@@ -24,7 +24,6 @@
     timer.secondsRemaining = seconds;
     timer.callback = finishCallback;
     mTimers.push_back(timer);
-    return;
 }
 
 /*static*/ void Timers::AddTimerMilliseconds(unsigned int milliseconds, std::function<void()> finishCallback)
@@ -66,7 +65,7 @@ float DeltaTimer::GetDeltaTime()
     // Calculate the time delta.
     uint32_t currentTicks = SDL_GetTicks();
     uint32_t deltaTicks = currentTicks - mLastTicks;
-    float deltaTime = deltaTicks * 0.001f;
+    float deltaTime = static_cast<float>(deltaTicks) * 0.001f;
 
     // Save last ticks for next frame.
     mLastTicks = currentTicks;

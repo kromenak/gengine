@@ -28,7 +28,7 @@ public:
     float GetTimeMultiplier() const { return mTimeMultiplier; }
 
     // GK-specific stuff here
-    void StartGame();
+    void StartGame() const;
     bool IsDemoMode() const { return mDemoMode; }
     
 private:

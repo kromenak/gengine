@@ -109,14 +109,14 @@ namespace StringUtil
     {
         // Remove any whitespace on left/right.
         Trim(str);
-        if(str.size() == 0) { return; }
+        if(str.empty()) { return; }
         
         // Check if first char is a quote, and remove if so.
         if(str[0] == '"')
         {
             str.erase(str.begin());
         }
-        if(str.size() == 0) { return; }
+        if(str.empty()) { return; }
         
         // Check if last char is a quote, and remove if so.
         if(str[str.size() - 1] == '"')

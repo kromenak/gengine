@@ -11,18 +11,16 @@
 	#include <TargetConditionals.h>
 	#if defined(TARGET_OS_OSX)
 		#define PLATFORM_MAC
+        #define ENV64
 	#else
 		#error "Unknown Apple Platform"
 	#endif
 #elif defined(_WIN32)
 	#define PLATFORM_WINDOWS
+    #define ENV32
 #elif defined(__linux__)
     #define PLATFORM_LINUX
+    #define ENV64
 #else
 	#error "Unknown Platform"
-#endif
-
-// A define for all platforms that are expected to have posix headers.
-#if defined(PLATFORM_MAC) || defined(PLATFORM_LINUX)
-    #define PLATFORM_POSIX
 #endif

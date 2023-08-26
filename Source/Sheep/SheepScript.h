@@ -39,7 +39,7 @@ public:
     const std::string* GetFunctionAtOffset(int offset) const;
     
     char* GetBytecode() { return mBytecode; }
-    int GetBytecodeLength() { return mBytecodeLength; }
+    int GetBytecodeLength() const { return mBytecodeLength; }
     
     void Dump();
     void Decompile();

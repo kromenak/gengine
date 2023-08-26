@@ -23,7 +23,10 @@ class ScopedProfiler;
 
 // These defines are ALWAYS available.
 // Sometimes we want to time things even when not all profiling tools are enabled.
-#define TIMER_SCOPED(x) Sample timerScopedSample(x);
+#define TIMER_SCOPED(name) Sample timerScopedSample(name);
+
+// Variant that lets you specify the variable name (to avoid shadowing local variables).
+#define TIMER_SCOPED_VAR(name, varName) Sample varName(name);
 
 // Core time tracker: returns amount of time since creation.
 //TODO: Maybe move to Timers utility file? Useful outside of profiling too!
