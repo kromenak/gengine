@@ -45,8 +45,39 @@ if [ ${PLATFORM} = "Linux" ]; then
 	# Copy over .ini file.
 	cp "${ROOT_DIR}/GK3.ini" "${DEPLOY_DIR}"
 
+	# Copy the application (and rename to be player-facing).
 	cp "${BUILD_DIR}/gk3" "${DEPLOY_DIR}/Gabriel Knight 3"
 
-	#zip -r GK3-Linux-${VERSION_NUM}.zip ${DEPLOY_DIR}/*
+	# Replace the rpath of the application.
+	# The "$ORIGIN" keyword uses the path of the executable at runtime.
+	patchelf --set-rpath '$ORIGIN' "${DEPLOY_DIR}/Gabriel Knight 3"
+
+	# Copy over all the libraries.
+	cp "${ROOT_DIR}/Libraries/ffmpeg/lib/linux/libavcodec.so" "${DEPLOY_DIR}"
+	cp "${ROOT_DIR}/Libraries/ffmpeg/lib/linux/libavformat.so" "${DEPLOY_DIR}"
+	cp "${ROOT_DIR}/Libraries/ffmpeg/lib/linux/libavutil.so" "${DEPLOY_DIR}"
+	cp "${ROOT_DIR}/Libraries/ffmpeg/lib/linux/libswresample.so" "${DEPLOY_DIR}"
+	cp "${ROOT_DIR}/Libraries/ffmpeg/lib/linux/libswscale.so" "${DEPLOY_DIR}"
+
+	cp "${ROOT_DIR}/Libraries/fmod/lib/linux/libfmod.so" "${DEPLOY_DIR}"
+	cp "${ROOT_DIR}/Libraries/GLEW/lib/linux/libGLEW.so" "${DEPLOY_DIR}"
+	cp "${ROOT_DIR}/Libraries/zlib/lib/linux/libz.so" "${DEPLOY_DIR}"
+	cp "${ROOT_DIR}/Libraries/SDL/linux/lib/libSDL2.so" "${DEPLOY_DIR}"
+
+	# Create a copy of the deploy directory called "Gabriel Knight 3".
+	# This is needed so that unzipping the zip file creates a folder with the proper name.
+	FINAL_ZIP_SRC="${DEPLOY_DIR}/../Gabriel Knight 3"
+	rm -rf "${FINAL_ZIP_SRC}"
+	cp -r "${DEPLOY_DIR}" "${FINAL_ZIP_SRC}"
+	
+	# CD over to the zip folder root and generate the zip file.
+	cd "${FINAL_ZIP_SRC}"
+	FINAL_ZIP_NAME="GK3-Linux-${VERSION_NUM}.zip"
+	zip -r ${FINAL_ZIP_NAME} "../Gabriel Knight 3"
+
+	# Move the zip file back to the deploy directory (that's where appveyor expects it for artifacting).
+	# Also delete the temporary zip src directory.
+	cp ${FINAL_ZIP_NAME} ${DEPLOY_DIR}
+	rm -rf "${FINAL_ZIP_SRC}"
 fi
 

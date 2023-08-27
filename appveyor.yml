@@ -26,10 +26,11 @@ max_jobs: 1
 # Environment Config
 ####
 
-# Build for Windows and Mac.
+# Build for Windows, Mac, and Linux.
 image: 
   - macos
-  - Visual Studio 2019
+  - Ubuntu
+  - Visual Studio 2022
 
 # Init script runs before cloning the repo.
 #init:
@@ -46,22 +47,33 @@ image:
 # Can be one of (Debug, Release, RelWithDebInfo, MinSizeRel) - from CMake.
 configuration: RelWithDebInfo
 
-# Scripts to run before build.
-before_build:
-  # For Mac: generate Xcode project.
-  - sh: cmake -B build_appveyor -G Xcode .
+for:
+-
+  matrix:
+    only:
+      -image: macos
+  before_build:
+    - sh: cmake -B build_appveyor -G Xcode
+  build_script:
+    - sh: cmake --build build_appveyor --target deploy --config ${CONFIGURATION}
 
-  # For Windows: generte VS project
-  - cmd: cmake -B build_appveyor -G "Visual Studio 16 2019" -A Win32
-  
-  # Alternate approach that uses Ninja - maybe faster?
-  # Execute the cmake command that VS exectutes (pulled from VS CMake output log).
-  #- cmd: call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat"
-  #- cmd: cmake -B build -G "Ninja" -DCMAKE_BUILD_TYPE:STRING="%CONFIGURATION%" -DCMAKE_C_COMPILER:FILEPATH="cl.exe" -DCMAKE_CXX_COMPILER:FILEPATH="cl.exe" -DCMAKE_MAKE_PROGRAM="ninja.exe" .
+-
+  matrix:
+    only:
+      -image: Ubuntu
+  before_build:
+    - sh: cmake -B build_appveyor -DCMAKE_BUILD_TYPE=${CONFIGURATION}
+  build_script:
+    - sh: cmake --build build_appveyor --target deploy
 
-build_script:
-  - sh: cmake --build build_appveyor --target deploy --config ${CONFIGURATION}
-  - cmd: cmake --build build_appveyor --target deploy --config %CONFIGURATION%
+-
+  matrix:
+    only:
+      -image: Visual Studio 2022
+  before_build:
+    - cmd: cmake -B build_appveyor -G "Visual Studio 17 2022" -A Win32
+  build_script:
+    - cmd: cmake --build build_appveyor --target deploy --config %CONFIGURATION%
 
 # Scripts to run after build.
 #after_build:
@@ -71,15 +83,33 @@ build_script:
 # Tests Config
 ####
 
-# Scripts to run before tests.
-before_test:
-  - sh: cmake --build build_appveyor --target tests --config ${CONFIGURATION}
-  - cmd: cmake --build build_appveyor --target tests --config %CONFIGURATION%
+for:
+-
+  matrix:
+    only:
+      -image: macos
+  before_test:
+    - sh: cmake --build build_appveyor --target tests --config ${CONFIGURATION}
+  test_script:
+    - sh: ./build_appveyor/Tests/${CONFIGURATION}/tests
 
-# Scripts to run for tests.
-test_script:
-  - sh: ./build_appveyor/Tests/${CONFIGURATION}/tests
-  - cmd: build_appveyor\Tests\%CONFIGURATION%\tests.exe
+-
+  matrix:
+    only:
+      -image: Ubuntu
+  before_test:
+    - sh: cmake --build build_appveyor --target tests
+  test_script:
+    - sh: ./build_appveyor/Tests/tests
+
+-
+  matrix:
+    only:
+      -image: Visual Studio 2022
+  before_test:
+    - cmd: cmake --build build_appveyor --target tests --config %CONFIGURATION%
+  test_script:
+    - cmd: build_appveyor\Tests\%CONFIGURATION%\tests.exe
 
 # Scripts to run after tests.
 #after_test:
@@ -107,7 +137,7 @@ deploy:
   - provider: GitHub
     artifact: Game
     release: 'v$(APP_VERSION)'
-    description: 'GEngine version $(APP_VERSION) for Mac and Windows'
+    description: 'GEngine version $(APP_VERSION)'
     force_update: true # allows multiple jobs to upload artifacts to same GitHub release
     auth_token:
       secure: +FLIpiKwFVgZmhUkmcDZK9P727eAjboXu+dfZ5G8xnNETVhPbRkIV57ckpcSr6Rz
