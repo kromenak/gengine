@@ -388,6 +388,35 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // Also a boat load of exceptions at Day 2, 2PM, Devil's Armchair...
+    if(StringUtil::EqualsIgnoreCase(noun, "DEAD_CLOTHES_HE1") || StringUtil::EqualsIgnoreCase(noun, "DEAD_CLOTHES_HE2"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("DEAD_CLOTHES", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+    if(StringUtil::EqualsIgnoreCase(noun, "DEAD_THROAT_HE1") || StringUtil::EqualsIgnoreCase(noun, "DEAD_THROAT_HE2"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("DEAD_THROATS", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+    if(StringUtil::EqualsIgnoreCase(noun, "DEAD_FACES_HE1") || StringUtil::EqualsIgnoreCase(noun, "DEAD_FACES_HE2"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("DEAD_FACES", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
     // Finally, convert our map to a vector to return.
     std::vector<const Action*> viableActions;
     for(auto entry : verbToAction)
