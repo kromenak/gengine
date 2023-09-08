@@ -89,6 +89,20 @@ Vector3 IniKeyValue::GetValueAsVector3() const
     std::string firstNum = noBraces.substr(0, firstCommaIndex);
     std::string secondNum = noBraces.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1);
     std::string thirdNum = noBraces.substr(secondCommaIndex + 1, std::string::npos);
+
+    // Handle too many negative signs. Yes, this is actually an issue (e.g. Devil's Armchair).
+    while(firstNum.size() >= 2 && firstNum[0] == '-' && firstNum[1] == '-')
+    {
+        firstNum.erase(0, 1);
+    }
+    while(secondNum.size() >= 2 && secondNum[0] == '-' && secondNum[1] == '-')
+    {
+        secondNum.erase(0, 1);
+    }
+    while(thirdNum.size() >= 2 && thirdNum[0] == '-' && thirdNum[1] == '-')
+    {
+        thirdNum.erase(0, 1);
+    }
     
     // Convert to numbers and return.
     return Vector3(std::stof(firstNum), std::stof(secondNum), std::stof(thirdNum));
@@ -383,13 +397,13 @@ bool IniParser::ReadNextSection(IniSection& sectionOut)
                 keyValue.value = currentKeyValuePair.substr(equalsIndex + 1, std::string::npos);
 				
 				// If the key/value line had any spaces around the equal sign, we also want to get rid of those after splitting.
-				StringUtil::Trim(keyValue.key);
-				StringUtil::Trim(keyValue.value);
+				StringUtil::TrimWhitespace(keyValue.key);
+				StringUtil::TrimWhitespace(keyValue.value);
             }
             else
             {
                 // Trim any whitespace from the key/value pair.
-                StringUtil::Trim(currentKeyValuePair);
+                StringUtil::TrimWhitespace(currentKeyValuePair);
 
 				// In this case, set "key" and "value" to same thing so that we can still use "value" and value getters.
 				//TODO: Seems kind of wasteful - perhaps we can say "use key field only" in this case; may want to augment/change GetValueAsX functions to work with this.

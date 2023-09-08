@@ -76,6 +76,15 @@ namespace StringUtil
     {
         Trim(str, ' ');
     }
+
+    inline void TrimWhitespace(std::string& str)
+    {
+        while(!str.empty() && str.front() == ' ' || str.front() == '\t' || str.back() == ' ' || str.back() == '\t')
+        {
+            Trim(str, ' ');
+            Trim(str, '\t');
+        }
+    }
 	
 	inline void TrimComment(std::string& str)
 	{
