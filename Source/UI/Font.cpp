@@ -66,6 +66,13 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
             currentX = 1;
             currentY += lineHeight;
 
+            // If we get past the bottom of the font texture, break out of loop - quit trying to find glyphs.
+            // Can happen due to data errors - ex: SID_PDN_12 font lists more chars in .FON file than there are glyphs in the BMP asset!
+            if(currentY > mFontTexture->GetHeight())
+            {
+                break;
+            }
+
             // We need to "redo" this glyph on the next line.
             --i;
             continue;
