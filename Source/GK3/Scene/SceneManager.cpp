@@ -29,10 +29,12 @@ void SceneManager::Update(float deltaTime)
         mScene->Update(deltaTime);
     }
 
-    // Update all actors.
-    for(Actor* actor : mActors)
+    // Update actors, but *don't* update actors that are added when updating other actors!
+    // To guard against this, get size first and only update to that point.
+    size_t size = mActors.size();
+    for(int i = 0; i < size; ++i)
     {
-        actor->Update(deltaTime);
+        mActors[i]->Update(deltaTime);
     }
 
     // Delete any destroyed actors.
