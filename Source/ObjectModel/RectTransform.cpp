@@ -46,6 +46,87 @@ void RectTransform::SetPivot(const Vector2& pivot)
 	SetDirty();
 }
 
+void RectTransform::SetAnchor(AnchorPreset preset, bool setPivot)
+{
+    switch(preset)
+    {
+    case AnchorPreset::TopLeft:
+        SetAnchor(Vector2(0.0f, 1.0f));
+        if(setPivot) { SetPivot(Vector2(0.0f, 1.0f)); }
+        break;
+
+    case AnchorPreset::Top:
+        SetAnchor(Vector2(0.5f, 1.0f));
+        if(setPivot) { SetPivot(Vector2(0.5f, 1.0f)); }
+        break;
+
+    case AnchorPreset::TopStretch:
+        SetAnchorMin(Vector2(0.0f, 1.0f));
+        SetAnchorMax(Vector2(1.0f, 1.0f));
+        if(setPivot) { SetPivot(Vector2(0.5f, 1.0f)); }
+        break;
+
+    case AnchorPreset::TopRight:
+        SetAnchor(Vector2(1.0f, 1.0f));
+        if(setPivot) { SetPivot(Vector2(1.0f, 1.0f)); }
+        break;
+
+    case AnchorPreset::Left:
+        SetAnchor(Vector2(0.0f, 0.5f));
+        if(setPivot) { SetPivot(Vector2(0.0f, 0.5f)); }
+        break;
+
+    case AnchorPreset::LeftStretch:
+        SetAnchorMin(Vector2(0.0f, 0.0f));
+        SetAnchorMax(Vector2(0.0f, 1.0f));
+        if(setPivot) { SetPivot(Vector2(0.0f, 0.5f)); }
+        break;
+
+    case AnchorPreset::Center:
+        SetAnchor(Vector2(0.5f, 0.5f));
+        if(setPivot) { SetPivot(Vector2(0.5f, 0.5f)); }
+        break;
+
+    case AnchorPreset::CenterStretch:
+        SetAnchorMin(Vector2(0.0f, 0.0f));
+        SetAnchorMax(Vector2(1.0f, 1.0f));
+        if(setPivot) { SetPivot(Vector2(0.5f, 0.5f)); }
+        break;
+
+    case AnchorPreset::Right:
+        SetAnchor(Vector2(1.0f, 0.5f));
+        if(setPivot) { SetPivot(Vector2(1.0f, 0.5f)); }
+        break;
+
+    case AnchorPreset::RightStretch:
+        SetAnchorMin(Vector2(1.0f, 0.0f));
+        SetAnchorMax(Vector2(1.0f, 1.0f));
+        if(setPivot) { SetPivot(Vector2(1.0f, 0.5f)); }
+        break;
+
+    case AnchorPreset::BottomLeft:
+        SetAnchor(Vector2(0.0f, 0.0f));
+        if(setPivot) { SetPivot(Vector2(0.0f, 0.0f)); }
+        break;
+
+    case AnchorPreset::Bottom:
+        SetAnchor(Vector2(0.5f, 0.0f));
+        if(setPivot) { SetPivot(Vector2(0.5f, 0.0f)); }
+        break;
+
+    case AnchorPreset::BottomStretch:
+        SetAnchorMin(Vector2(0.0f, 0.0f));
+        SetAnchorMax(Vector2(1.0f, 0.0f));
+        if(setPivot) { SetPivot(Vector2(0.5f, 0.0f)); }
+        break;
+
+    case AnchorPreset::BottomRight:
+        SetAnchor(Vector2(1.0f, 0.0f));
+        if(setPivot) { SetPivot(Vector2(1.0f, 0.0f)); }
+        break;
+    }
+}
+
 void RectTransform::SetAnchor(const Vector2& anchor)
 {
 	 mAnchorMin = anchor;
