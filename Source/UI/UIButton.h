@@ -30,6 +30,7 @@ public:
 	void SetPressCallback(std::function<void(UIButton*)> callback) { mPressCallback = callback; }
 
     void SetHoverSound(Audio* sound) { mHoverSound = sound; }
+    bool IsHovered() const { return mPointerOver; }
 	
 	void OnPointerEnter() override;
 	void OnPointerExit() override;

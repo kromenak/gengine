@@ -43,6 +43,7 @@ public:
     void SetMasked(bool masked) { mMask = masked; }
 
     int GetLineCount();
+    float GetTextWidth();
     
 protected:
 	Vector2 GetCharPos(int index) const;

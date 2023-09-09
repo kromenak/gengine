@@ -90,6 +90,38 @@ int UILabel::GetLineCount()
     return mTextLayout.GetLineCount();
 }
 
+float UILabel::GetTextWidth()
+{
+    // Before the text width can be known, an up-to-date mesh is needed.
+    GenerateMesh();
+
+    // Used generated mesh to find min/max x-positions of the glyphs.
+    float smallestX = FLT_MAX;
+    float largestX = FLT_MIN;
+    for(auto& charInfo : mTextLayout.GetChars())
+    {
+        float minX = charInfo.pos.x;
+        if(minX < smallestX)
+        {
+            smallestX = minX;
+        }
+
+        float maxX = charInfo.pos.x + charInfo.glyph.width;
+        if(maxX > largestX)
+        {
+            largestX = maxX;
+        }
+    }
+
+    //HACK: Generating the mesh above makes the label no longer "dirty".
+    //HACK: However, it may be important for UI creation code to keep the label dirty after calling this (if changing transform properties).
+    //HACK: The REAL problem is that changing a label's transform doesn't flag it as dirty, which might be good to fix!
+    SetDirty();
+
+    // The width is then the difference between the min/max x-positions.
+    return Math::Abs(largestX - smallestX);
+}
+
 Vector2 UILabel::GetCharPos(int index) const
 {
 	const TextLayout::CharInfo* charInfo = mTextLayout.GetChar(index);

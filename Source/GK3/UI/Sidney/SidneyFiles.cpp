@@ -80,7 +80,7 @@ void SidneyFiles::Init(Sidney* parent)
     // The Files UI is a bit unique. It's more of a "floating dialog" that can appear over other screens.
     // Though files UI doesn't have a background image, it's helpful to create a "dummy" rect to help with positioning things.
     {
-        mRoot = new Actor(TransformType::RectTransform);
+        mRoot = new Actor("Files", TransformType::RectTransform);
         mRoot->GetTransform()->SetParent(parent->GetTransform());
 
         RectTransform* rt = mRoot->GetComponent<RectTransform>();

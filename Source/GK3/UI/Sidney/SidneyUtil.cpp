@@ -2,11 +2,15 @@
 
 #include "Actor.h"
 #include "AssetManager.h"
+#include "SidneyButton.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UINineSlice.h"
+
+Color32 SidneyUtil::TransBgColor = Color32(0, 0, 0, 128);
 
 UIButton* SidneyUtil::CreateTextButton(Actor* parent, const std::string& text, const std::string& font,
                                        const Vector2& pivotAndAnchor, const Vector2& position, const Vector2& size)
@@ -42,12 +46,42 @@ UIButton* SidneyUtil::CreateTextButton(Actor* parent, const std::string& text, c
     return button;
 }
 
-void SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName)
+Actor* SidneyUtil::CreateBackground(Actor* parent)
+{
+    // Create actor that is child of the parent.
+    Actor* backgroundActor = new Actor(TransformType::RectTransform);
+    backgroundActor->GetTransform()->SetParent(parent->GetTransform());
+
+    // Add the background image and size to fit.
+    UIImage* backgroundImage = backgroundActor->AddComponent<UIImage>();
+    backgroundImage->SetTexture(gAssetManager.LoadTexture("S_BKGND.BMP"), true);
+
+    // Receive input to avoid sending inputs to main screen below this screen.
+    backgroundImage->SetReceivesInput(true);
+    return backgroundActor;
+}
+
+void SidneyUtil::CreateMainMenuButton(Actor* parent, std::function<void()> pressCallback)
+{
+    SidneyButton* button = new SidneyButton(parent);
+    button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
+    button->SetText(GetMainScreenLocalizer().GetText("HomeButton"));
+    button->SetWidth(94.0f);
+
+    button->SetPressCallback(pressCallback);
+    button->SetPressAudio(gAssetManager.LoadAudio("SIDEXIT.WAV"));
+
+    button->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
+    button->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
+    button->GetRectTransform()->SetAnchoredPosition(-10.0f, 10.0f); // 10x10 offset from Bottom-Right
+}
+
+Actor* SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName, float labelWidth)
 {
     // Bar that stretches across entire screen.
+    Actor* menuBarActor = new Actor(TransformType::RectTransform);
+    menuBarActor->GetTransform()->SetParent(parent->GetTransform());
     {
-        Actor* menuBarActor = new Actor(TransformType::RectTransform);
-        menuBarActor->GetTransform()->SetParent(parent->GetTransform());
         UIImage* menuBarImage = menuBarActor->AddComponent<UIImage>();
 
         menuBarImage->SetTexture(gAssetManager.LoadTexture("S_BAR_STRETCH.BMP"), true);
@@ -71,7 +105,7 @@ void SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName)
         menuBarTopImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
         menuBarTopImage->GetRectTransform()->SetAnchor(1.0f, 1.0f); // Anchor to Top-Right
         menuBarTopImage->GetRectTransform()->SetAnchoredPosition(0.0f, -16.0f);
-        menuBarTopImage->GetRectTransform()->SetSizeDeltaX(100.0f);
+        menuBarTopImage->GetRectTransform()->SetSizeDeltaX(labelWidth);
 
         // Triangle bit that slopes downward.
         {
@@ -101,9 +135,46 @@ void SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName)
             screenNameLabel->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
             screenNameLabel->GetRectTransform()->SetAnchor(1.0f, 1.0f); // Top-Right
             screenNameLabel->GetRectTransform()->SetAnchoredPosition(-4.0f, -1.0f); // Nudge a bit to get right positioning
-            screenNameLabel->GetRectTransform()->SetSizeDelta(100.0f, 18.0f);
+            screenNameLabel->GetRectTransform()->SetSizeDelta(labelWidth, 18.0f);
         }
     }
+    return menuBarActor;
+}
+
+const UINineSliceParams& SidneyUtil::GetGrayBoxParams(const Color32& centerColor)
+{
+    static UINineSliceParams params;
+    if(params.topTexture == nullptr)
+    {
+        params.topLeftTexture = gAssetManager.LoadTexture("S_BOX_CORNER_TL.BMP");
+        params.topRightTexture = gAssetManager.LoadTexture("S_BOX_CORNER_TR.BMP");
+        params.bottomLeftTexture = gAssetManager.LoadTexture("S_BOX_CORNER_BL.BMP");
+        params.bottomRightTexture = gAssetManager.LoadTexture("S_BOX_CORNER_BR.BMP");
+        params.topLeftColor = params.topRightColor = params.bottomLeftColor = params.bottomRightColor = Color32::Clear;
+
+        params.leftTexture = params.rightTexture = gAssetManager.LoadTexture("S_BOX_SIDE.BMP");
+        params.bottomTexture = params.topTexture = gAssetManager.LoadTexture("S_BOX_TOP.BMP");
+    }
+    params.centerColor = centerColor;
+    return params;
+}
+
+const UINineSliceParams& SidneyUtil::GetGoldBoxParams(const Color32& centerColor)
+{
+    static UINineSliceParams params;
+    if(params.topTexture == nullptr)
+    {
+        params.topLeftTexture = gAssetManager.LoadTexture("S_BOX_CORNER_TL_L.BMP");
+        params.topRightTexture = gAssetManager.LoadTexture("S_BOX_CORNER_TR_L.BMP");
+        params.bottomLeftTexture = gAssetManager.LoadTexture("S_BOX_CORNER_BL_L.BMP");
+        params.bottomRightTexture = gAssetManager.LoadTexture("S_BOX_CORNER_BR_L.BMP");
+        params.topLeftColor = params.topRightColor = params.bottomLeftColor = params.bottomRightColor = Color32::Clear;
+
+        params.leftTexture = params.rightTexture = gAssetManager.LoadTexture("S_BOX_SIDE_L.BMP");
+        params.bottomTexture = params.topTexture = gAssetManager.LoadTexture("S_BOX_TOP_L.BMP");
+    }
+    params.centerColor = centerColor;
+    return params;
 }
 
 const Localizer& SidneyUtil::GetMainScreenLocalizer()
@@ -115,5 +186,11 @@ const Localizer& SidneyUtil::GetMainScreenLocalizer()
 const Localizer& SidneyUtil::GetAddDataLocalizer()
 {
     static Localizer localizer("SIDNEY.TXT", "AddData Screen");
+    return localizer;
+}
+
+const Localizer& SidneyUtil::GetMakeIdLocalizer()
+{
+    static Localizer localizer("SIDNEY.TXT", "MakeID Screen");
     return localizer;
 }

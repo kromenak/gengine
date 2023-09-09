@@ -20,7 +20,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
     // Add "Add Data" dialog box.
     {
-        mAddDataBox = new Actor(TransformType::RectTransform);
+        mAddDataBox = new Actor("Add Data", TransformType::RectTransform);
         mAddDataBox->GetTransform()->SetParent(sidney->GetTransform());
 
         UIImage* outerBoxImage = mAddDataBox->AddComponent<UIImage>();
@@ -47,7 +47,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
     // Add "Input Complete" dialog box.
     {
-        mInputCompleteBox = new Actor(TransformType::RectTransform);
+        mInputCompleteBox = new Actor("Add Data Complete", TransformType::RectTransform);
         mInputCompleteBox->GetTransform()->SetParent(sidney->GetTransform());
 
         UIImage* boxImage = mInputCompleteBox->AddComponent<UIImage>();

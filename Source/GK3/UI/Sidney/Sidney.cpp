@@ -6,6 +6,7 @@
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Scene.h"
+#include "SidneyButton.h"
 #include "SidneyUtil.h"
 #include "Texture.h"
 #include "UIButton.h"
@@ -33,7 +34,7 @@ namespace
     }
 }
 
-Sidney::Sidney() : Actor(TransformType::RectTransform)
+Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
 {
     // Sidney will be layered near the bottom.
     // A lot of stuff needs to appear above it (inventory, status overlay, etc).
@@ -58,30 +59,19 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
 
     // Add exit button as child of desktop background.
     {
-        Actor* exitButtonActor = new Actor(TransformType::RectTransform);
-        exitButtonActor->GetTransform()->SetParent(desktopBackground->GetTransform());
-        UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
+        SidneyButton* button = new SidneyButton(desktopBackground);
+        button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
+        button->SetText(SidneyUtil::GetMainScreenLocalizer().GetText("MenuItem9"));
+        button->SetWidth(80.0f);
 
-        exitButton->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
-        exitButton->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
-        exitButton->GetRectTransform()->SetAnchoredPosition(-10.0f, 10.0f); // 10x10 offset from Bottom-Right
-        exitButton->GetRectTransform()->SetSizeDelta(80.0f, 18.0f);
-
-        //TODO: Exit button uses a stretch-based image solution (kind of like 9-slice, more like 3-slice).
-        exitButton->SetResizeBasedOnTexture(false);
-        exitButton->SetUpTexture(&Texture::White);
-
-        exitButton->SetPressCallback([this](UIButton* button){
-            gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTTON3.WAV"));
+        button->SetPressAudio(gAssetManager.LoadAudio("SIDBUTTON3.WAV"));
+        button->SetPressCallback([this](){
             Hide();
         });
-
-        // Add exit button text.
-        UILabel* exitLabel = exitButtonActor->AddComponent<UILabel>();
-        exitLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
-        exitLabel->SetText(SidneyUtil::GetMainScreenLocalizer().GetText("MenuItem9"));
-        exitLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
-        exitLabel->SetVerticalAlignment(VerticalAlignment::Center);
+        
+        button->GetRectTransform()->SetPivot(1.0f, 0.0f); // Bottom-Right
+        button->GetRectTransform()->SetAnchor(1.0f, 0.0f); // Bottom-Right
+        button->GetRectTransform()->SetAnchoredPosition(-10.0f, 10.0f); // 10x10 offset from Bottom-Right
     }
 
     // Add button bar for subscreens.
@@ -160,9 +150,9 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
 
         buttonPos += kButtonSpacing;
         UIButton* idButton = CreateMainButton(desktopBackground, "MAKEID", buttonPos);
-        idButton->SetPressCallback([](UIButton* button){
+        idButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
-            printf("Make ID\n");
+            mMakeId.Show();
         });
 
         buttonPos += kButtonSpacing;
@@ -195,6 +185,7 @@ Sidney::Sidney() : Actor(TransformType::RectTransform)
     mEmail.Init(this);
     mFiles.Init(this);
     mAddData.Init(this, &mFiles);
+    mMakeId.Init(this);
 
     // Not active by default.
     SetActive(false);
@@ -271,4 +262,5 @@ void Sidney::OnUpdate(float deltaTime)
     // Update each screen in turn.
     // Each screen will early out if not active.
     mSearch.OnUpdate(deltaTime);
+    mMakeId.OnUpdate(deltaTime);
 }

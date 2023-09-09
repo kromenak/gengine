@@ -12,6 +12,7 @@
 #include "SidneyAddData.h"
 #include "SidneyEmail.h"
 #include "SidneyFiles.h"
+#include "SidneyMakeId.h"
 #include "SidneySearch.h"
 #include "StringUtil.h"
 
@@ -54,4 +55,5 @@ private:
     SidneyEmail mEmail;
     SidneyFiles mFiles;
     SidneyAddData mAddData;
+    SidneyMakeId mMakeId;
 };
