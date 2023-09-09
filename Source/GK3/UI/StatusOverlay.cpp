@@ -9,7 +9,7 @@
 #include "UICanvas.h"
 #include "UILabel.h"
 
-StatusOverlay::StatusOverlay() : Actor(TransformType::RectTransform)
+StatusOverlay::StatusOverlay() : Actor("Status", TransformType::RectTransform)
 {
     // Needs to be a canvas so it can render stuff.
     AddComponent<UICanvas>(2);

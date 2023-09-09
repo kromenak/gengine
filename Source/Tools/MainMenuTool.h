@@ -9,7 +9,10 @@
 class MainMenuTool
 {
 public:
-    void Render();
+    // Flags for whether any windows/tools are active.
+    // These are here so they can be easily toggled by the main menu.
+    // And they're public so they can easily be passed around the tool system.
+    bool hierarchyToolActive = false;
 
-private:
+    void Render();
 };

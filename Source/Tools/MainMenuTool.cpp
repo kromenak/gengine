@@ -55,6 +55,16 @@ void MainMenuTool::Render()
             ImGui::EndMenu();
         }
 
+        // WINDOW menu
+        if(ImGui::BeginMenu("Window"))
+        {
+            if(ImGui::MenuItem("Hierarchy", nullptr, hierarchyToolActive))
+            {
+                hierarchyToolActive = !hierarchyToolActive;
+            }
+            ImGui::EndMenu();
+        }
+
         /*
         if(ImGui::BeginMenu("File"))
         {

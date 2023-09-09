@@ -29,7 +29,7 @@ public:
 	virtual ~Transform();
 	
 	// Local position/rotation/scale/axes accessors.
-	Vector3 GetPosition() const { return mLocalPosition; }
+	const Vector3& GetPosition() const { return mLocalPosition; }
 	void SetPosition(const Vector3& position);
 	
 	Quaternion GetRotation() const { return mLocalRotation; }

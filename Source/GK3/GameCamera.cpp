@@ -41,7 +41,7 @@
     return gSaveManager.GetPrefs()->GetBool(PREFS_ENGINE, PREF_CINEMATICS, true);
 }
 
-GameCamera::GameCamera()
+GameCamera::GameCamera() : Actor("Camera")
 {
     mCamera = AddComponent<Camera>();
     AddComponent<AudioListener>();

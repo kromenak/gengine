@@ -48,7 +48,7 @@ Scene::Scene(const std::string& name) :
 	mCamera = new GameCamera();
 	
 	// Create animation player.
-	Actor* animationActor = new Actor();
+	Actor* animationActor = new Actor("Animator");
 	mAnimator = animationActor->AddComponent<Animator>();
 
     // Scene layer is now active!
