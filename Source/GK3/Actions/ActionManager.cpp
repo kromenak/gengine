@@ -182,12 +182,6 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
     // Save frame this action was started on.
     mCurrentActionStartFrame = GEngine::Instance()->GetFrameNumber();
 	
-	// If this is a topic, automatically increment topic counts.
-	if(gVerbManager.IsTopic(action->verb))
-	{
-		gGameProgress.IncTopicCount(action->noun, action->verb);
-	}
-	
 	// If no script is associated with the action, that might be an error...
 	// But for now, we'll just treat it as action is immediately over.
 	if(action->script.script != nullptr)
@@ -555,13 +549,12 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	auto it = mCaseLogic.find(caseLabel);
 	if(it != mCaseLogic.end())
 	{
-        // Annoying problem: for topics, if the topic count is not EXPLICITLY checked as part of the logic, it appears to be IMPLICITLY checked.
-        // This means we need to check topic count and force-fail the case if "GetTopicCount(NOUN, VERB)" is not explicitly in the case logic.
-        if(verbType == VerbType::Topic && gGameProgress.GetTopicCount(noun, verb) != 0)
+        // For topics, the case logic indicates when a topic should be available, but it DOES NOT indicate when it should no longer be available!
+        // As a general rule, topics should only be discussable once (when the case is met), and then they do not appear again after being discussed.
+        if(verbType == VerbType::Topic)
         {
-            // BUT! A caveat! Some verbs specifically are exempt from this logic.
-            // Frustrating but...the logic in the data files looks identical, but they behave differently.
-            // Does not appear to be defined in a data-driven way.
+            // However, there are exceptions...these topics are allowed to appear multiple times magically.
+            //TODO: Unsure how the original game differentiates these...might be related to cancel button presence?
             static std::string_set_ci sIgnoreImplicitTopicCount = {
                 "T_HANDSHAKE_A",
                 "T_HANDSHAKE_B",
@@ -571,41 +564,19 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
             };
             if(sIgnoreImplicitTopicCount.find(verb) == sIgnoreImplicitTopicCount.end())
             {
-                // So, if we get here, it means this topic has already been discussed before, and it's not on the above ignore list.
-                
-                // Typically, this means this case is NOT met (IMPLICIT count check means we already discussed this topic).
-                // HOWEVER, if the case logic EXPLICITLY checks topic count, we need to run the case logic normally.
-                bool explicitlyChecksTopicCount = false;
-                size_t pos = 0;
-                while(pos != std::string::npos)
+                // If we've already discussed this topic, the noun/verb/case combo will exist in this set.
+                // If already present, we should NOT show this topic.
+                auto it1 = mPlayedTopics.find(noun);
+                if(it1 != mPlayedTopics.end())
                 {
-                    // Find GetTopicCount instance.
-                    pos = StringUtil::FindIgnoreCase(it->second.text, "GetTopicCount", pos);
-                    if(pos == std::string::npos) { break; }
-
-                    // Get open/close parentheses for GetTopicCount.
-                    size_t openParen = it->second.text.find('(', pos);
-                    size_t closeParen = it->second.text.find(')', openParen);
-
-                    // See if our noun & verb occur after the open parentesis and before the close parenthesis.
-                    // If so, it would appear this case logic DOES explicitly check topic count.
-                    size_t nounPos = StringUtil::FindIgnoreCase(it->second.text, noun, openParen);
-                    size_t verbPos = StringUtil::FindIgnoreCase(it->second.text, verb, openParen);
-                    if(nounPos < closeParen && verbPos > nounPos && verbPos < closeParen)
+                    auto it2 = it1->second.find(verb);
+                    if(it2 != it1->second.end())
                     {
-                        explicitlyChecksTopicCount = true;
-                        break;
+                        if(it2->second.count(caseLabel) > 0)
+                        {
+                            return false;
+                        }
                     }
-
-                    // We need to loop in case the condition logic contains multiple GetTopicCount checks.
-                    pos = closeParen;
-                }
-
-                // If we don't explicitly check the topic count AND this topic has been discussed before...
-                // ...assume that we can't discuss it again, and so return false! (whew)
-                if(!explicitlyChecksTopicCount)
-                {
-                    return false;
                 }
             }
         }
@@ -905,6 +876,16 @@ void ActionManager::OnActionExecuteFinished()
     // Restore current camera FOV.
     gSceneManager.GetScene()->GetCamera()->RestoreFov();
 
+    // If this is a topic, automatically increment topic counts.
+    if(gVerbManager.IsTopic(mLastAction->verb))
+    {
+        // Increment topic count automatically.
+        gGameProgress.IncTopicCount(mLastAction->noun, mLastAction->verb);
+
+        // Make a record that this topic action was performed.
+        mPlayedTopics[mLastAction->noun][mLastAction->verb].insert(mLastAction->caseLabel);
+    }
+    
     // Execute finish callback if specified.
     if(mCurrentActionFinishCallback != nullptr)
     {

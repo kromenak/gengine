@@ -116,7 +116,11 @@ private:
 	// A case label corresponds to a bit of SheepScript that evaluates to either true or false.
 	// Cases must be stored here (rather than in Action Sets) because cases can be shared (especially global/inventory ones).
     std::string_map_ci<SheepScriptAndText> mCaseLogic;
-	
+
+    // Tracks all Noun/Verb/Case topic combos that have been played.
+    // Comparing save files, the original game *seems* to use something like this (Member:DialogueMgr:0:mLinesPlayed) to decide if a topic is still available.
+    std::string_map_ci<std::string_map_ci<std::string_set_ci>> mPlayedTopics;
+
 	// Nouns and verbs that are currently active. Pulled out of action sets as they are loaded.
 	// We do this to support the Sheep-eval feature of specifying n$ and v$ variables as wildcards for current noun/verb.
 	// To use these, we must map each active noun/verb to an integer and back again.
