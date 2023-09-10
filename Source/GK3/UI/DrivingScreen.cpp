@@ -254,6 +254,7 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
         // Whenever you go to a location on the driving map, it's assumed that your bike also moves there.
         // Each location has it's own integer code (of course) that is rather arbitrary.
         int bikeLocation = -1;
+        std::string realLocationCode = locationCode;
         if(locationCode == "PL5")
         {
             bikeLocation = 0;
@@ -292,7 +293,17 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
         }
         else if(locationCode == "PL6")
         {
-            bikeLocation = 9;
+            // One complication: Cheateau de Serres sometimes has its gate opened.
+            // In which case, the bike is parked inside the gate.
+            if(gGameProgress.GetTimeblock() == Timeblock("202P") || gGameProgress.GetTimeblock() == Timeblock("212P"))
+            {
+                bikeLocation = 15; // inside the gate
+                realLocationCode = "CSE";
+            }
+            else
+            {
+                bikeLocation = 9; // outside the gate
+            }
         }
         else if(locationCode == "MOP")
         {
@@ -320,7 +331,7 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
         }
 
         // Change to the desired location.
-        ExitToLocation(locationCode);
+        ExitToLocation(realLocationCode);
     });
 
     // Cache button for later.
