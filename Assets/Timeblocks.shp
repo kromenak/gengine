@@ -40,7 +40,11 @@ code
 		}
 		else if(IsCurrentTime("212P"))
 		{
-			wait Call("CheckTimeblockComplete212P$")
+			wait Call("CheckTimeblockComplete212P$");
+		}
+		else if(IsCurrentTime("202P"))
+		{
+			wait Call("CheckTimeblockComplete202P$");
 		}
 	}
 
@@ -327,7 +331,28 @@ code
 		}
 
 		// OK, go to next timeblock!
-		// In this case, we also need to switch to a new location (Chateau de Serras).
 		SetTime("202P");
+	}
+
+	CheckTimeblockComplete202P$()
+	{
+		// Must be at R25.
+		if(IsCurrentLocation("R25") == 0)
+		{
+			return;
+		}
+
+		// The end-of-timeblock cutscene sets this flag to 7, which seems to indicate that we should move to the next timeblock.
+		// This only happens if the following items have been done:
+		// 1) Ask Jean for a Wake-Up call (which can only happen if you've confronted Larry & solved the alarm clock puzzle).
+		// 2) Follow Estelle to her site (which can only happen after discussing the case with Grace/Mosely).
+		// 3) Exhaust dialogue with Montreaux (which can only happen after solving ID puzzle).
+		if(GetGameVariableInt("FiveMinTimer202p") != 7)
+		{
+			return;
+		}
+
+		// OK, go to next timeblock!
+		SetTime("205P");
 	}
 }
