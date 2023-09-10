@@ -456,6 +456,12 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
         }
     }
     //printf("Loading asset %s\n", assetName.c_str());
+    
+    // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
+    uint32_t bufferSize = 0;
+    uint8_t* buffer = CreateAssetBuffer(assetName, bufferSize);
+    if(buffer == nullptr) { return nullptr; }
+
     // Create asset from asset buffer.
     std::string upperName = StringUtil::ToUpperCopy(assetName);
     T* asset = new T(upperName, scope);
@@ -465,11 +471,6 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
     {
         (*cache)[assetName] = asset;
     }
-
-    // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
-    uint32_t bufferSize = 0;
-    uint8_t* buffer = CreateAssetBuffer(assetName, bufferSize);
-    if(buffer == nullptr) { return nullptr; }
 
     // Load the asset on the main thread.
     asset->Load(buffer, bufferSize);
@@ -514,6 +515,8 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
     T* asset = new T(upperName, scope);
 
     // Add entry in cache, if we have a cache.
+    //TODO: This inserts the asset into the cache *even if* it is not a valid asset (CreateAssetBuffer returns nullptr).
+    //TODO: Ideally, we shouldn't do this - I guess we need to check if it exists before creating it???
     if(asset != nullptr && cache != nullptr && scope != AssetScope::Manual)
     {
         (*cache)[assetName] = asset;
