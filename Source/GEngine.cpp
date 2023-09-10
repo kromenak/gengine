@@ -524,6 +524,9 @@ void GEngine::Update(float deltaTime)
 {
     // Update the scene.
     gSceneManager.Update(deltaTime);
+
+    // Update location system.
+    gLocationManager.Update();
     
     // Update timers.
     Timers::Update(deltaTime);

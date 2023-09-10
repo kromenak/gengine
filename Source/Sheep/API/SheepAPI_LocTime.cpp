@@ -149,7 +149,7 @@ RegFunc1(WasLastLocation, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid SetLocation(const std::string& location)
 {
-    gLocationManager.ChangeLocation(location);
+    gLocationManager.ChangeLocation(location, AddWait());
     return 0;
 }
 RegFunc1(SetLocation, void, string, WAITABLE, REL_FUNC);

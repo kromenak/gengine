@@ -152,6 +152,18 @@ void LocationManager::Init()
     */
 }
 
+void LocationManager::Update()
+{
+    // If a location change is pending, make it happen.
+    if(!mChangeLocationTo.empty())
+    {
+        ChangeLocationInternal(mChangeLocationTo, mChangeLocationCallback);
+
+        mChangeLocationTo.clear();
+        mChangeLocationCallback = nullptr;
+    }
+}
+
 bool LocationManager::IsValidLocation(const std::string& locationCode) const
 {
 	// All location codes are 3 characters exactly.
@@ -172,54 +184,10 @@ void LocationManager::DumpLocations() const
 
 void LocationManager::ChangeLocation(const std::string& location, std::function<void()> callback)
 {
-    // Show scene transitioner.
-    gGK3UI.ShowSceneTransitioner();
-
-    // Set new location.
-    // This is important to do BEFORE checking for timeblock completion, as that logic looks for locations sometimes.
-    bool sameLocation = StringUtil::EqualsIgnoreCase(mLocation, location);
-    SetLocation(location);
-
-    //HACK: Don't check timeblock completion if following someone on driving screen.
-    //HACK: Fixes premature timeblock completion in 102P if last action performed is follow.
-    if(gGK3UI.FollowingOnDrivingScreen())
-    {
-        // Change scene and done.
-        gSceneManager.LoadScene(location, [callback](){
-            gGK3UI.HideSceneTransitioner();
-            if(callback != nullptr) { callback(); }
-        });
-        return;
-    }
-
-    // Check for timeblock completion.
-    Timeblock currentTimeblock = gGameProgress.GetTimeblock();
-    gSheepManager.Execute(gAssetManager.LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [sameLocation, location, callback, currentTimeblock]() {
-
-        // See whether a timeblock change is occurring.
-        // If so, we should early out - the timeblock change logic handles any location and time change.
-        if(gGameProgress.IsChangingTimeblock())
-        {
-            gGK3UI.HideSceneTransitioner();
-            if(callback != nullptr) { callback(); }
-            return;
-        }
-
-        // No need to change if we're already there.
-        if(sameLocation)
-        {
-            gGK3UI.HideSceneTransitioner();
-            if(callback != nullptr) { callback(); }
-        }
-        else
-        {
-            // Otherwise, we can move ahead with changing the scene.
-            gSceneManager.LoadScene(location, [callback](){
-                gGK3UI.HideSceneTransitioner();
-                if(callback != nullptr) { callback(); }
-            });
-        }
-    });
+    // Record that we want to change location. This change request will be processed on next Update call.
+    // We don't just change location right away b/c this function might be called at any time, but we want location change to happen at a known time in code.
+    mChangeLocationTo = location;
+    mChangeLocationCallback = callback;
 }
 
 void LocationManager::SetLocation(const std::string& location)
@@ -351,4 +319,55 @@ bool LocationManager::IsActorOffstage(const std::string& actorName) const
 {
 	auto it = mActorLocations.find(actorName);
 	return it == mActorLocations.end();
+}
+
+void LocationManager::ChangeLocationInternal(const std::string& location, std::function<void()> callback)
+{
+    // Show scene transitioner.
+    gGK3UI.ShowSceneTransitioner();
+
+    // Set new location.
+    // This is important to do BEFORE checking for timeblock completion, as that logic looks for locations sometimes.
+    bool sameLocation = StringUtil::EqualsIgnoreCase(mLocation, location);
+    SetLocation(location);
+
+    //HACK: Don't check timeblock completion if following someone on driving screen.
+    //HACK: Fixes premature timeblock completion in 102P if last action performed is follow.
+    if(gGK3UI.FollowingOnDrivingScreen())
+    {
+        // Change scene and done.
+        gSceneManager.LoadScene(mChangeLocationTo, [callback](){
+            gGK3UI.HideSceneTransitioner();
+            if(callback != nullptr) { callback(); }
+        });
+        return;
+    }
+
+    // Check for timeblock completion.
+    gSheepManager.Execute(gAssetManager.LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [location, callback, sameLocation](){
+
+        // See whether a timeblock change is occurring.
+        // If so, we should early out - the timeblock change logic handles any location and time change.
+        if(gGameProgress.IsChangingTimeblock())
+        {
+            gGK3UI.HideSceneTransitioner();
+            if(callback != nullptr) { callback(); }
+            return;
+        }
+
+        // No need to change if we're already there.
+        if(sameLocation)
+        {
+            gGK3UI.HideSceneTransitioner();
+            if(callback != nullptr) { callback(); }
+        }
+        else
+        {
+            // Otherwise, we can move ahead with changing the scene.
+            gSceneManager.LoadScene(location, [callback](){
+                gGK3UI.HideSceneTransitioner();
+                if(callback != nullptr) { callback(); }
+            });
+        }
+    });
 }

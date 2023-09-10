@@ -19,6 +19,7 @@ class LocationManager
 {
 public:
     void Init();
+    void Update();
 	
 	bool IsValidLocation(const std::string& locationCode) const;
 	void DumpLocations() const;
@@ -70,6 +71,12 @@ private:
 	
 	// A mapping of actor to location. If not present, the actor is "offstage".
 	std::string_map_ci<std::string> mActorLocations;
+
+    // A location we want to change to, along with a callback to call once we change to it.
+    std::string mChangeLocationTo;
+    std::function<void()> mChangeLocationCallback;
+
+    void ChangeLocationInternal(const std::string& location, std::function<void()> callback);
 };
 
 extern LocationManager gLocationManager;
