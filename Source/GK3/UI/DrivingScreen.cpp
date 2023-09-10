@@ -173,6 +173,9 @@ void DrivingScreen::Hide()
         soundtrackPlayer->StopAll();
         soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPHARLEYARRIVE.STK"));
     }
+
+    // Clear follow mode.
+    mFollowMode = FollowMode::None;
 }
 
 void DrivingScreen::SetLocationButtonsInteractive(bool interactive)
