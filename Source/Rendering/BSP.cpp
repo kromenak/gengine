@@ -15,6 +15,46 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
+void BSPSurface::Activate(const Material& material)
+{
+    // Activate texture to use for diffuse color.
+    if(texture != nullptr)
+    {
+        texture->Activate(0);
+    }
+    else
+    {
+        Texture::Deactivate();
+    }
+
+    // Activate lightmap texture and multiplier.
+    if((flags & BSPSurface::kIgnoreLightmapFlag) != 0 ||
+       (flags & BSPSurface::kShadowTextureFlag)  != 0)
+    {
+        // Some surfaces ignore lightmaps.
+        // Just use "plain white" and multiplier of 1 to effectively "do nothing" in lightmap calcs.
+        Texture::White.Activate(1);
+        material.GetShader()->SetUniformFloat("uLightmapMultiplier", 1.0f);
+    }
+    else
+    {
+        // This surface DOES use lightmaps, so activate it!
+        // GK3 also implements a feature called "2x Lighting" - basically, just double lightmap colors to make the scene look brighter!
+        if(lightmapTexture != nullptr)
+        {
+            lightmapTexture->Activate(1);
+        }
+        material.GetShader()->SetUniformFloat("uLightmapMultiplier", 2.0f);
+    }
+
+    // Lightmap scale/offsets are used in shaders to calculate proper lightmap UVs.
+    Vector4 lightmapUvScaleOffset(lightmapUvScale.x,
+                                  lightmapUvScale.y,
+                                  lightmapUvOffset.x,
+                                  lightmapUvOffset.y);
+    material.GetShader()->SetUniformVector4("uLightmapScaleOffset", lightmapUvScaleOffset);
+}
+
 void BSP::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);
@@ -26,16 +66,8 @@ void BSP::Load(uint8_t* data, uint32_t dataLength)
 BSPActor* BSP::CreateBSPActor(const std::string& objectName)
 {
     // Find index for object name or fail.
-    int objectIndex = -1;
-    for(size_t i = 0; i < mObjectNames.size(); i++)
-    {
-        if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
-        {
-            objectIndex = i;
-            break;
-        }
-    }
-    if(objectIndex == -1)
+    uint32_t objectIndex = GetObjectIndex(objectName);
+    if(objectIndex == UINT32_MAX)
     {
         gReportManager.Log("Error", StringUtil::Format("Error: scene '%s' does not have a scene model of name '%s'", "", objectName.c_str()));
         return nullptr;
@@ -204,15 +236,7 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
 
 void BSP::SetFloorObjectName(const std::string& floorObjectName)
 {
-    // Figure out index for the floor object.
-    for(size_t i = 0; i < mObjectNames.size(); ++i)
-    {
-        if(StringUtil::EqualsIgnoreCase(mObjectNames[i], floorObjectName))
-        {
-            mFloorObjectIndex = i;
-            break;
-        }
-    }
+    mFloorObjectIndex = GetObjectIndex(floorObjectName);
 }
 
 void BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture)
@@ -222,7 +246,7 @@ void BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outT
     outTexture = nullptr;
 
     // No floor was defined - early out.
-    if(mFloorObjectIndex < 0) { return; }
+    if(mFloorObjectIndex == UINT32_MAX) { return; }
 
     // Calculate ray origin using passed position, but really high in the air!
     Vector3 rayOrigin = position;
@@ -259,18 +283,8 @@ void BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outT
 void BSP::SetVisible(const std::string& objectName, bool visible)
 {
 	// Find index of the object name.
-	int index = -1;
-	for(int i = 0; i < mObjectNames.size(); i++)
-	{
-		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
-		{
-			index = i;
-			break;
-		}
-	}
-	
-	// Can't hide an object if the passed name isn't present.
-	if(index == -1) { return; }
+    uint32_t index = GetObjectIndex(objectName);
+	if(index == UINT32_MAX) { return; }
 	
 	// All surfaces belonging to this object will be hidden.
 	for(auto& surface : mSurfaces)
@@ -284,19 +298,9 @@ void BSP::SetVisible(const std::string& objectName, bool visible)
 
 void BSP::SetTexture(const std::string& objectName, Texture* texture)
 {
-	// Find index of the object name.
-	int index = -1;
-	for(int i = 0; i < mObjectNames.size(); i++)
-	{
-		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
-		{
-			index = i;
-			break;
-		}
-	}
-	
-	// Can't hide an object if the passed name isn't present.
-	if(index == -1) { return; }
+    // Find index of the object name.
+    uint32_t index = GetObjectIndex(objectName);
+    if(index == UINT32_MAX) { return; }
 	
 	// All surfaces belonging to this object will be hidden.
 	for(auto& surface : mSurfaces)
@@ -310,31 +314,14 @@ void BSP::SetTexture(const std::string& objectName, Texture* texture)
 
 bool BSP::Exists(const std::string& objectName) const
 {
-	for(size_t i = 0; i < mObjectNames.size(); i++)
-	{
-		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
-		{
-			return true;
-		}
-	}
-	return false;
+    return GetObjectIndex(objectName) != UINT32_MAX;
 }
 
 bool BSP::IsVisible(const std::string& objectName) const
 {
 	// Find index of the object name.
-	int index = -1;
-	for(int i = 0; i < mObjectNames.size(); i++)
-	{
-		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
-		{
-			index = i;
-			break;
-		}
-	}
-	
-	// If can't find object name, it's certainly not visible...
-	if(index == -1) { return false; }
+	uint32_t index = GetObjectIndex(objectName);
+	if(index == UINT32_MAX) { return false; }
 	
 	// Find any surface belonging to this object and see if it is visible.
 	for(auto& surface : mSurfaces)
@@ -352,21 +339,12 @@ bool BSP::IsVisible(const std::string& objectName) const
 Vector3 BSP::GetPosition(const std::string& objectName) const
 {
 	// Find index of the object name.
-	int objectIndex = -1;
-	for(int i = 0; i < mObjectNames.size(); i++)
-	{
-		if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
-		{
-			objectIndex = i;
-			break;
-		}
-	}
-	
-	// Couldn't find object!
+    uint32_t objectIndex = GetObjectIndex(objectName);
+
 	//TODO: Maybe we should return true/false with an out parameter?
-	if(objectIndex == -1) { return Vector3::Zero; }
+	if(objectIndex == UINT32_MAX) { return Vector3::Zero; }
 	
-	// Find index of a surface.
+	// Find all surfaces that belong to this object and sum their positions.
 	Vector3 pos = Vector3::Zero;
 	int vertexCount = 0;
 	for(size_t i = 0; i < mSurfaces.size(); i++)
@@ -391,7 +369,7 @@ Vector3 BSP::GetPosition(const std::string& objectName) const
 	}
 	
 	// Get average position.
-	return pos / vertexCount;
+	return pos / static_cast<float>(vertexCount);
 }
 
 void BSP::ApplyLightmap(const BSPLightmap& lightmap)
@@ -426,7 +404,7 @@ void BSP::ApplyLightmap(const BSPLightmap& lightmap)
                     sums.z += color.GetB();
                 }
             }
-            sums /= width * height;
+            sums /= static_cast<float>(width * height);
             light.color = Color32(static_cast<int>(sums.x), static_cast<int>(sums.y), static_cast<int>(sums.z));
         }
     }
@@ -487,72 +465,38 @@ Color32 BSP::CalculateAmbientLightColor(const Vector3& position)
     */
 }
 
-void BSPSurface::Activate(const Material& material)
-{
-    // Activate texture to use for diffuse color.
-    if(texture != nullptr)
-    {
-        texture->Activate(0);
-    }
-    else
-    {
-        Texture::Deactivate();
-    }
-
-    // Activate lightmap texture and multiplier.
-    if((flags & BSPSurface::kIgnoreLightmapFlag) != 0)
-    {
-        // Some surfaces ignore lightmaps.
-        // Just use "plain white" and multiplier of 1 to effectively "do nothing" in lightmap calcs.
-        Texture::White.Activate(1);
-        material.GetShader()->SetUniformFloat("uLightmapMultiplier", 1.0f);
-    }
-    else
-    {
-        // This surface DOES use lightmaps, so activate it!
-        // GK3 also implements a feature called "2x Lighting" - basically, just double lightmap colors to make the scene look brighter!
-        if(lightmapTexture != nullptr)
-        {
-            lightmapTexture->Activate(1);
-        }
-        material.GetShader()->SetUniformFloat("uLightmapMultiplier", 2.0f);
-    }
-
-    // Lightmap scale/offsets are used in shaders to calculate proper lightmap UVs.
-    Vector4 lightmapUvScaleOffset(lightmapUvScale.x,
-                                  lightmapUvScale.y,
-                                  lightmapUvOffset.x,
-                                  lightmapUvOffset.y);
-    material.GetShader()->SetUniformVector4("uLightmapScaleOffset", lightmapUvScaleOffset);
-}
-
 // For debugging BSP issues, helpful to track polygons rendered and tree depth.
-//int renderedPolygonCount = 0;
-//int treeDepth = 0;
+namespace
+{
+    int renderedPolygonCount = 0;
+    int treeDepth = 0;
+}
 
 void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirection)
 {
     // Activate material for rendering.
     mMaterial.Activate(Matrix4::Identity);
-    
-    // Reset render stat values.
-    //renderedPolygonCount = 0;
-    //treeDepth = 0;
 
+    // Reset render stat values.
+    renderedPolygonCount = 0;
+    treeDepth = 0;
+
+    #if defined(USE_TRUE_BSP_RENDERING)
     // NORMAL BSP RENDERING
     // Process the tree and nodes to only render what's in front of the camera.
     // Seems like it'd be quite efficient...BUT modern graphics hardware is actually quite bad at this, due to the number of draw calls!
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-    //RenderTree(mNodes[mRootNodeIndex], cameraPosition, cameraDirection);
+    RenderTree(mNodes[mRootNodeIndex], cameraPosition, cameraDirection);
     //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
+    #else
     // ALTERNATIVE BSP RENDERING
     // Just render every surface lol.
     // Surprisingly more efficient than "correct" BSP rendering, since it's fewer draw calls.
     for(auto& surface : mSurfaces)
     {
         if(!surface.visible) { continue; }
-        
+        if(surface.IsTranslucent()) { continue; }
+
         // Activate
         surface.Activate(mMaterial);
 
@@ -560,14 +504,20 @@ void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirec
         for(auto& polygon : surface.polygons)
         {
             mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
-            //renderedPolygonCount++;
+            renderedPolygonCount++;
         }
     }
+    #endif
+    
     //std::cout << "Rendered " << renderedPolygonCount << " polygons." << std::endl;
 }
 
 void BSP::RenderTranslucent()
 {
+    // Activate material for rendering.
+    mMaterial.Activate(Matrix4::Identity);
+
+    #if defined(USE_TRUE_BSP_RENDERING)
     BSPPolygon* polygon = mAlphaPolygons;
     while(polygon != nullptr)
     {
@@ -575,126 +525,35 @@ void BSP::RenderTranslucent()
         polygon = polygon->next;
     }
     mAlphaPolygons = nullptr;
+    #else
+    for(auto& surface : mSurfaces)
+    {
+        if(!surface.visible) { continue; }
+        if(!surface.IsTranslucent()) { continue; }
+
+        // Activate
+        surface.Activate(mMaterial);
+
+        // Draw
+        for(auto& polygon : surface.polygons)
+        {
+            mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
+        }
+    }
+    #endif
 }
 
-void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const Vector3& cameraDirection)
+uint32_t BSP::GetObjectIndex(const std::string& objectName) const
 {
-    // Check signed distance of point to plane to determine if point is in front of, behind, or on the plane.
-    float signedDistance = mPlanes[node.planeIndex].GetSignedDistance(cameraPosition);
-    
-    // Based on camera position/facing direction, we can sometimes avoid rendering entire parts of the BSP tree.
-    //TODO: Maybe base this on the camera's FOV rather than hardcoding?
-    const float kCameraFacingDot = 0.9f;
-    
-    // Determine render order for this node.
-    // This makes a "front-to-back" renderer, resulting in no overdraw for opaque rendering.
-    bool renderCurrent = true;
-    int firstNodeIndex = -1;
-    int secondNodeIndex = -1;
-    if(Math::IsZero(signedDistance))
+    // Even though there could be "size_t" elements in an array, the BSP file format only supports "uint32_t" elements.
+    for(size_t i = 0; i < mObjectNames.size(); i++)
     {
-        // Point is on plane - render front and back trees. Don't render current node.
-        renderCurrent = false;
-        firstNodeIndex = node.frontChildIndex;
-        secondNodeIndex = node.backChildIndex;
-    }
-    else if(signedDistance > 0.0f)
-    {
-        // Point is in front of plane - render front, then back trees.
-        firstNodeIndex = node.frontChildIndex;
-        secondNodeIndex = node.backChildIndex;
-        
-        // If in front of plane AND facing away from plane, there's no need to render the back at all.
-        float dot = Vector3::Dot(mPlanes[node.planeIndex].normal, cameraDirection);
-        if(dot > kCameraFacingDot)
+        if(StringUtil::EqualsIgnoreCase(mObjectNames[i], objectName))
         {
-            secondNodeIndex = -1;
+            return static_cast<uint32_t>(i);
         }
     }
-    else
-    {
-        // Point is behind plane - render back, then front trees.
-        firstNodeIndex = node.backChildIndex;
-        secondNodeIndex = node.frontChildIndex;
-        
-        // If behind plane AND facing away from plane, there's no need to render the front at all.
-        float dot = Vector3::Dot(mPlanes[node.planeIndex].normal, cameraDirection);
-        if(dot < -kCameraFacingDot)
-        {
-            secondNodeIndex = -1;
-        }
-    }
-    
-    // Render first tree.
-    if(firstNodeIndex >= 0 && firstNodeIndex < mNodes.size())
-    {
-        //++treeDepth;
-        RenderTree(mNodes[firstNodeIndex], cameraPosition, cameraDirection);
-        //--treeDepth;
-    }
-    
-    // Render current, maybe (probably).
-    if(renderCurrent)
-    {
-        // Determine whether polygon sets 1 & 2 are present.
-        bool hasPolygon1 = node.polygonIndex != 65535 && node.polygonCount > 0;
-        bool hasPolygon2 = node.polygonIndex2 != 65535 && node.polygonCount2 > 0;
-        
-        // Render first set of polygons.
-        if(hasPolygon1)
-        {
-            for(int i = node.polygonIndex; i < node.polygonIndex + node.polygonCount; i++)
-            {
-                RenderPolygon(mPolygons[i], false);
-            }
-        }
-        
-        // Render second set of polygons.
-        if(hasPolygon2)
-        {
-            for(int i = node.polygonIndex2; i < node.polygonIndex2 + node.polygonCount2; i++)
-            {
-                RenderPolygon(mPolygons[i], false);
-            }
-        }
-    }
-    
-    // Render second tree.
-    if(secondNodeIndex >= 0 && secondNodeIndex < mNodes.size())
-    {
-        //++treeDepth;
-        RenderTree(mNodes[secondNodeIndex], cameraPosition, cameraDirection);
-        //--treeDepth;
-    }
-}
-
-void BSP::RenderPolygon(BSPPolygon& polygon, bool translucent)
-{
-    // If we have a valid surface reference, use it to get rendering configured.
-    BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
-    
-    // Not going to render non-visible surfaces.
-    if(!surface.visible) { return; }
-
-    // Activate
-    surface.Activate(mMaterial);
-
-    /*
-     // If has alpha, don't render it now, but add it to the alpha chain.
-    if(surface.texture != nullptr)
-    {
-        if(texture->GetRenderType() == Texture::RenderType::Translucent && translucent)
-        {
-            polygon.next = mAlphaPolygons;
-            mAlphaPolygons = &polygon;
-            return;
-        }
-    }
-    */
-
-    // Draw the polygon.
-    mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
-    //++renderedPolygonCount;
+    return UINT32_MAX;
 }
 
 void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
@@ -717,27 +576,32 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
     mRootNodeIndex = reader.ReadUInt();
     
     // 36 bytes: Read in all the header count values.
-    int nameCount = reader.ReadUInt();
-    int vertexCount = reader.ReadUInt();
-    int uvCount = reader.ReadUInt();
-    int vertexIndexCount = reader.ReadUInt();
-    int otherIndexCount = reader.ReadUInt();
-    int surfaceCount = reader.ReadUInt();
-    int planeCount = reader.ReadUInt();
-    int nodeCount = reader.ReadUInt();
-    int polygonCount = reader.ReadUInt();
+    uint32_t nameCount = reader.ReadUInt();
+    uint32_t vertexCount = reader.ReadUInt();
+    uint32_t uvCount = reader.ReadUInt();
+    uint32_t vertexIndexCount = reader.ReadUInt();
+    uint32_t otherIndexCount = reader.ReadUInt();
+    uint32_t surfaceCount = reader.ReadUInt();
+    uint32_t planeCount = reader.ReadUInt();
+    uint32_t nodeCount = reader.ReadUInt();
+    uint32_t polygonCount = reader.ReadUInt();
     
     // Iterate and read all names.
     mObjectNames.resize(nameCount);
-    for(int i = 0; i < nameCount; i++)
+    for(uint32_t i = 0; i < nameCount; ++i)
     {
         reader.ReadString(32, mObjectNames[i]);
     }
+
+    // When reading surfaces, we need to keep track of whether we've previously processed a shadow texture.
+    // We don't want to process a single texture more than once!
+    std::vector<Texture*> processedShadowTextures;
     
     // Iterate and read surfaces.
-    for(int i = 0; i < surfaceCount; i++)
+    mSurfaces.resize(surfaceCount);
+    for(uint32_t i = 0; i < surfaceCount; ++i)
     {
-        BSPSurface surface;
+        BSPSurface& surface = mSurfaces[i];
         surface.objectIndex = reader.ReadUInt();
 
         surface.texture = gAssetManager.LoadSceneTexture(reader.ReadString(32), GetScope());
@@ -756,14 +620,60 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
             std::cout << mObjectNames[surface.objectIndex] << ": " << bs << std::endl;
         }
         */
-        
-        mSurfaces.push_back(surface);
+
+        // If this surface is flagged as a shadow texture, process the texture so it has alpha transparency.
+        //TODO: This is probably not how the original game handled these shadow textures, and the result doesn't look identical.
+        //TODO: Revisit this at some point in the future to get a better result!
+        if((surface.flags & BSPSurface::kShadowTextureFlag) != 0)
+        {
+            auto it = std::find(processedShadowTextures.begin(), processedShadowTextures.end(), surface.texture);
+            if(it == processedShadowTextures.end())
+            {
+                for(uint32_t y = 0; y < surface.texture->GetHeight(); ++y)
+                {
+                    for(uint32_t x = 0; x < surface.texture->GetWidth(); ++x)
+                    {
+                        // Convert RGB to floats from 0-1.
+                        Color32 color = surface.texture->GetPixelColor32(x, y);
+                        float r = color.r / 255.0f;
+                        float g = color.g / 255.0f;
+                        float b = color.b / 255.0f;
+
+                        // Get average to see "how white" is this pixel?
+                        float average = (r + g + b) / 3.0f;
+
+                        // The more white, the more transparent this pixel should be.
+                        float a = 1.0f - average;
+
+                        // Premultiply the alpha.
+                        r *= a;
+                        g *= a;
+                        b *= a;
+
+                        // Textures seem a bit too bright in game, so this darkens them a bit.
+                        const float kDarknessMultiplier = 0.6f;
+                        r *= kDarknessMultiplier;
+                        g *= kDarknessMultiplier;
+                        b *= kDarknessMultiplier;
+
+                        // Convert back to Color32.
+                        color.r = static_cast<unsigned char>(r * 255);
+                        color.g = static_cast<unsigned char>(g * 255);
+                        color.b = static_cast<unsigned char>(b * 255);
+                        color.a = static_cast<unsigned char>(a * 255);
+                        surface.texture->SetPixelColor32(x, y, color);
+                    }
+                }
+                processedShadowTextures.push_back(surface.texture);
+            }
+        }
     }
     
     // Iterate and read nodes.
-    for(int i = 0; i < nodeCount; i++)
+    mNodes.resize(nodeCount);
+    for(uint32_t i = 0; i < nodeCount; ++i)
     {
-        BSPNode node;
+        BSPNode& node = mNodes[i];
         node.frontChildIndex = reader.ReadUShort(); 
         node.backChildIndex = reader.ReadUShort();
         
@@ -778,13 +688,13 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
         // Unknown value - only known values: 0 for root node, 348, 1007, 1009, 1010, 1012, 1074, 30723 for other nodes.
         // Values seem to be the same for all nodes in a single BSP file?
         reader.ReadUShort();
-        mNodes.push_back(node);
     }
     
     // Iterate and read polygons.
-    for(int i = 0; i < polygonCount; i++)
+    mPolygons.resize(polygonCount);
+    for(uint32_t i = 0; i < polygonCount; ++i)
     {
-        BSPPolygon polygon;
+        BSPPolygon& polygon = mPolygons[i];
         polygon.vertexIndexOffset = reader.ReadUShort();
         
         // Unknown value - sometimes zero, but almost always 1073.
@@ -793,14 +703,17 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
         
         polygon.vertexIndexCount = reader.ReadUShort();
         polygon.surfaceIndex = reader.ReadUShort();
-        mPolygons.push_back(polygon);
 
-        //HACK: For now, also store the polygon directly in the surface...for alternative rendering technique.
+        // With "true" BSP rendering, maintaining a list of polygons for a surface is not needed.
+        // But otherwise, it's handy to have.
+        #if !defined(USE_TRUE_BSP_RENDERING)
         mSurfaces[polygon.surfaceIndex].polygons.push_back(polygon);
+        #endif
     }
     
     // Iterate and read planes.
-    for(int i = 0; i < planeCount; i++)
+    mPlanes.reserve(planeCount);
+    for(uint32_t i = 0; i < planeCount; ++i)
     {
         float normalX = reader.ReadFloat();
         float normalY = reader.ReadFloat();
@@ -810,21 +723,24 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
     }
     
     // Iterate and read vertices.
-    for(int i = 0; i < vertexCount; i++)
+    mVertices.resize(vertexCount);
+    for(uint32_t i = 0; i < vertexCount; ++i)
     {
-        mVertices.push_back(reader.ReadVector3());
+        mVertices[i] = reader.ReadVector3();
     }
     
     // Iterate and read UVs.
-    for(int i = 0; i < uvCount; i++)
+    mUVs.resize(uvCount);
+    for(uint32_t i = 0; i < uvCount; ++i)
     {
-        mUVs.push_back(reader.ReadVector2());
+        mUVs[i] = reader.ReadVector2();
     }
     
     // Iterate and read vertex indexes.
-    for(int i = 0; i < vertexIndexCount; i++)
+    mVertexIndices.resize(vertexIndexCount);
+    for(uint32_t i = 0; i < vertexIndexCount; ++i)
     {
-        mVertexIndices.push_back(reader.ReadUShort());
+        mVertexIndices[i] = reader.ReadUShort();
     }
     
     // Iterate and read other indexes.
@@ -840,20 +756,19 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
     uint32_t position = reader.GetPosition();
     if(position < dataLength)
     {
-        for(int i = 0; i < surfaceCount; ++i)
+        for(uint32_t i = 0; i < surfaceCount; ++i)
         {
-            Vector3 position = reader.ReadVector3();
+            Vector3 lightPos = reader.ReadVector3();
             float radius = reader.ReadFloat();
             reader.Skip(12);
 
-            if(radius > 0.0f)// && (mSurfaces[i].flags & 1) != 0)
+            if(radius > 0.0f) // && (mSurfaces[i].flags & 1) != 0)
             {
-                BSPAmbientLight light;
-                light.surfaceIndex = i;
-                light.position = position;
-                light.radius = radius;
-                light.color = Color32::Black;
-                mLights.push_back(light);
+                mLights.emplace_back();
+                mLights.back().surfaceIndex = i;
+                mLights.back().position = lightPos;
+                mLights.back().radius = radius;
+                mLights.back().color = Color32::Black;
             }
 
             // Number of indices and triangles for this surface.
@@ -891,3 +806,123 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
     // Create vertex array.
     mVertexArray = VertexArray(meshDefinition);
 }
+
+#if defined(USE_TRUE_BSP_RENDERING)
+void BSP::RenderTree(const BSPNode& node, const Vector3& cameraPosition, const Vector3& cameraDirection)
+{
+    // Check signed distance of point to plane to determine if point is in front of, behind, or on the plane.
+    float signedDistance = mPlanes[node.planeIndex].GetSignedDistance(cameraPosition);
+
+    // Based on camera position/facing direction, we can sometimes avoid rendering entire parts of the BSP tree.
+    //TODO: Maybe base this on the camera's FOV rather than hardcoding?
+    const float kCameraFacingDot = 0.9f;
+
+    // Determine render order for this node.
+    // This makes a "front-to-back" renderer, resulting in no overdraw for opaque rendering.
+    bool renderCurrent = true;
+    int firstNodeIndex = -1;
+    int secondNodeIndex = -1;
+    if(Math::IsZero(signedDistance))
+    {
+        // Point is on plane - render front and back trees. Don't render current node.
+        renderCurrent = false;
+        firstNodeIndex = node.frontChildIndex;
+        secondNodeIndex = node.backChildIndex;
+    }
+    else if(signedDistance > 0.0f)
+    {
+        // Point is in front of plane - render front, then back trees.
+        firstNodeIndex = node.frontChildIndex;
+        secondNodeIndex = node.backChildIndex;
+
+        // If in front of plane AND facing away from plane, there's no need to render the back at all.
+        float dot = Vector3::Dot(mPlanes[node.planeIndex].normal, cameraDirection);
+        if(dot > kCameraFacingDot)
+        {
+            secondNodeIndex = -1;
+        }
+    }
+    else
+    {
+        // Point is behind plane - render back, then front trees.
+        firstNodeIndex = node.backChildIndex;
+        secondNodeIndex = node.frontChildIndex;
+
+        // If behind plane AND facing away from plane, there's no need to render the front at all.
+        float dot = Vector3::Dot(mPlanes[node.planeIndex].normal, cameraDirection);
+        if(dot < -kCameraFacingDot)
+        {
+            secondNodeIndex = -1;
+        }
+    }
+
+    // Render first tree.
+    if(firstNodeIndex >= 0 && firstNodeIndex < mNodes.size())
+    {
+        ++treeDepth;
+        RenderTree(mNodes[firstNodeIndex], cameraPosition, cameraDirection);
+        --treeDepth;
+    }
+
+    // Render current, maybe (probably).
+    if(renderCurrent)
+    {
+        // Determine whether polygon sets 1 & 2 are present.
+        bool hasPolygon1 = node.polygonIndex != 65535 && node.polygonCount > 0;
+        bool hasPolygon2 = node.polygonIndex2 != 65535 && node.polygonCount2 > 0;
+
+        // Render first set of polygons.
+        if(hasPolygon1)
+        {
+            for(int i = node.polygonIndex; i < node.polygonIndex + node.polygonCount; i++)
+            {
+                RenderPolygon(mPolygons[i], false);
+            }
+        }
+
+        // Render second set of polygons.
+        if(hasPolygon2)
+        {
+            for(int i = node.polygonIndex2; i < node.polygonIndex2 + node.polygonCount2; i++)
+            {
+                RenderPolygon(mPolygons[i], false);
+            }
+        }
+    }
+
+    // Render second tree.
+    if(secondNodeIndex >= 0 && secondNodeIndex < mNodes.size())
+    {
+        ++treeDepth;
+        RenderTree(mNodes[secondNodeIndex], cameraPosition, cameraDirection);
+        --treeDepth;
+    }
+}
+
+void BSP::RenderPolygon(BSPPolygon& polygon, bool translucent)
+{
+    // If we have a valid surface reference, use it to get rendering configured.
+    BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
+
+    // Not going to render non-visible surfaces.
+    if(!surface.visible) { return; }
+
+    // Activate
+    surface.Activate(mMaterial);
+
+    // If has alpha, don't render it now, but add it to the alpha chain.
+    if(surface.texture != nullptr)
+    {
+        if(surface.texture->GetRenderType() == Texture::RenderType::Translucent && !translucent)
+        {
+            polygon.next = mAlphaPolygons;
+            mAlphaPolygons = &polygon;
+            return;
+        }
+    }
+
+    // Draw the polygon.
+    mVertexArray.DrawTriangleFans(polygon.vertexIndexOffset, polygon.vertexIndexCount);
+    ++renderedPolygonCount;
+}
+#endif

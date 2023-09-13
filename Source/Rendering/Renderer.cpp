@@ -316,17 +316,22 @@ void Renderer::Render()
         {
             meshRenderer->Render();
         }
-        
+
         // Turn off alpha test.
         Material::UseAlphaTest(false);
         glDisable(GL_CULL_FACE);
         PROFILER_END_SAMPLE();
-        
+
+        PROFILER_BEGIN_SAMPLE("Render Translucent BSP");
         // TRANSLUCENT WORLD RENDERING
-        // So far, GK3 doesn't seem to have any translucent geometry AT ALL!
-        // Everything is either opaque or alpha test.
-        // If we DO need translucent rendering, it probably can only be meshes or BSP, but not both.
-        //TODO: Any translucent world rendering.
+        glEnable(GL_BLEND); // do alpha blending
+        glDepthMask(GL_FALSE); // don't write to the depth buffer
+        glEnable(GL_DEPTH_TEST); // still test depth buffer
+        if(mBSP != nullptr)
+        {
+            mBSP->RenderTranslucent();
+        }
+        PROFILER_END_SAMPLE();
     }
 
     PROFILER_BEGIN_SAMPLE("Render UI");
