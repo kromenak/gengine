@@ -12,7 +12,7 @@ RenderTexture::RenderTexture(int width, int height) :
 	glBindFramebuffer(GL_FRAMEBUFFER, mFboId);
 	
 	// Configure generated texture as render color target for the FBO.
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mRenderTexture.mTextureId, 0);
+	//glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mRenderTexture.mTextureId, 0);
 	
 	// Set outputs for fragment data in shaders.
 	// Basically, we want our fragment shader to output to GL_COLOR_ATTACHMENT0.

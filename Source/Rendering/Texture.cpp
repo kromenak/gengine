@@ -2,6 +2,7 @@
 
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
+#include "GAPI.h"
 #include "ThreadUtil.h"
 
 Texture Texture::White(2, 2, Color32::White);
@@ -41,11 +42,11 @@ Texture::Texture(BinaryReader& reader) : Asset("")
 
 Texture::~Texture()
 {
-	if(mTextureId != GL_NONE)
+	if(mTextureHandle != nullptr)
 	{
-        GLuint textureId = mTextureId;
-        ThreadUtil::RunOnMainThread([textureId]() {
-            glDeleteTextures(1, &textureId);
+        void* texHandle = mTextureHandle;
+        ThreadUtil::RunOnMainThread([texHandle]() {
+            GAPI::Get()->DestroyTexture(texHandle);
         });
 	}
 	if(mPalette != nullptr)
@@ -71,27 +72,13 @@ void Texture::Load(uint8_t* data, uint32_t dataLength)
     ParseFromData(reader);
 }
 
-void Texture::Activate(int textureUnit)
+void Texture::Activate(uint8_t textureUnit)
 {
-    // Activate desired texture unit.
-    // Only do this if desired unit is not already active! Small performance gain.
-    static int activeTextureUnit = -1;
-    if(activeTextureUnit != textureUnit)
-    {
-        glActiveTexture(GL_TEXTURE0 + textureUnit);
-        activeTextureUnit = textureUnit;
-    }
-
     // Upload to GPU if dirty.
     UploadToGPU();
 
-    // Bind texture (again, if not already bound - small performance gain).
-    static GLuint activeTextureId[2];
-    if(activeTextureId[textureUnit] != mTextureId)
-    {
-        glBindTexture(GL_TEXTURE_2D, mTextureId);
-        activeTextureId[textureUnit] = mTextureId;
-    }
+    // Activate texture in desired texture unit.
+    GAPI::Get()->ActivateTexture(mTextureHandle, textureUnit);
 }
 
 /*static*/ void Texture::Deactivate()
@@ -329,21 +316,11 @@ void Texture::UploadToGPU()
     // Nothing to do.
     if(mDirtyFlags == DirtyFlags::None) { return; }
 
-    // If this is a new texture, we must generate/bind texture object in OpenGL.
-    // We'll assume we also need to upload pixel data with any new texture.
-    if(mTextureId == GL_NONE)
+    // If no texture handle yet, we must create a new texture in the underlying graphics API.
+    if(mTextureHandle == nullptr)
     {
-        // Generate and bind the texture object in OpenGL.
-        glGenTextures(1, &mTextureId);
-        glBindTexture(GL_TEXTURE_2D, mTextureId);
-
-        // Load texture data into texture object.
-        // OpenGL assumes that pixel data is from bottom-left, BUT our pixels array is from top-left!
-        // You'd think this would lead to upside-down textures in-game...BUT GK3 uses DirectX style UVs (from top-left).
-        // So, this "double inversion" actually leads to textures displaying correctly in OpenGL.
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-                     mWidth, mHeight, 0,
-                     GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+        // Create a texture and set pixels.
+        mTextureHandle = GAPI::Get()->CreateTexture(mWidth, mHeight, mPixels);
 
         // We must upload properties when texture is first generated too.
         mDirtyFlags |= DirtyFlags::Properties;
@@ -351,19 +328,17 @@ void Texture::UploadToGPU()
     else
     {
         // Just bind the texture.
-        glBindTexture(GL_TEXTURE_2D, mTextureId);
+        GAPI::Get()->ActivateTexture(mTextureHandle);
 
         // If pixel data is dirty, upload new pixel data.
         if((mDirtyFlags & DirtyFlags::Pixels) != DirtyFlags::None)
         {
-            glTexSubImage2D(GL_TEXTURE_2D, 0,
-                            0, 0, mWidth, mHeight,
-                            GL_RGBA, GL_UNSIGNED_BYTE, mPixels);
+            GAPI::Get()->SetTexturePixels(mTextureHandle, mWidth, mHeight, mPixels);
 
             // If using mipmaps, we must regenerate mipmaps for this texture after changing its pixels.
             if(mMipmaps)
             {
-                glGenerateMipmap(GL_TEXTURE_2D);
+                GAPI::Get()->GenerateMipmaps(mTextureHandle);
             }
         }
     }
@@ -375,7 +350,7 @@ void Texture::UploadToGPU()
         // Note that if mipmaps have been disabled, we don't bother destroying the mipmaps - we just won't use them (see below).
         if(mMipmaps)
         {
-            glGenerateMipmap(GL_TEXTURE_2D);
+            GAPI::Get()->GenerateMipmaps(mTextureHandle);
         }
 
         // Since trilinear filtering depends on mipmaps, we need to modify texture properties if trilinear filtering is enabled.
@@ -389,29 +364,10 @@ void Texture::UploadToGPU()
     if((mDirtyFlags & DirtyFlags::Properties) != DirtyFlags::None)
     {
         // Set wrap mode for the texture.
-        GLint wrapParam = mWrapMode == WrapMode::Repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE;
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapParam);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapParam);
+        GAPI::Get()->SetTextureWrapMode(mTextureHandle, mWrapMode);
 
-        // Determine min/mag filters. These are a little complicated, based on desired filter mode and mipmaps.
-        // Defaults (GL_NEAREST) correlate to point filtering.
-        GLint minFilterParam = GL_NEAREST;
-        GLint magFilterParam = GL_NEAREST;
-        if(mFilterMode == FilterMode::Bilinear)
-        {
-            // Bilinear filtering uses GL_LINEAR. We can also use mipmaps with bilinear filtering.
-            minFilterParam = mMipmaps ? GL_LINEAR_MIPMAP_NEAREST : GL_LINEAR;
-            magFilterParam = GL_LINEAR;
-        }
-        else if(mFilterMode == FilterMode::Trilinear)
-        {
-            // Trilinear filtering technically requires mipmaps.
-            // If we don't have mipmaps, it is really just bilinear filtering!
-            minFilterParam = mMipmaps ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR;
-            magFilterParam = GL_LINEAR;
-        }
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilterParam);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilterParam);
+        // Set filter mode for texture.
+        GAPI::Get()->SetTextureFilterMode(mTextureHandle, mFilterMode, mMipmaps);
     }
 
     // We did it all - clear the dirty flags.

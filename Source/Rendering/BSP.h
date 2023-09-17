@@ -136,8 +136,6 @@ public:
     BSP(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     void Load(uint8_t* data, uint32_t dataLength);
     
-	BSPActor* CreateBSPActor(const std::string& objectName);
-
     // Raycasting
     bool RaycastNearest(const Ray& ray, RaycastHit& outHitInfo);
 	bool RaycastSingle(const Ray& ray, const std::string& name, RaycastHit& outHitInfo);
@@ -149,6 +147,7 @@ public:
     void GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture);
 
     // Object Modification
+    BSPActor* CreateBSPActor(const std::string& objectName);
 	void SetVisible(const std::string& objectName, bool visible);
 	void SetTexture(const std::string& objectName, Texture* texture);
 
@@ -184,8 +183,10 @@ private:
     // Opaque rendering occurs front-to-back, and a linked list of translucent polygons are generated.
     // The linked list can be iterated afterwards to render translucent geometry in the correct order.
     // Saw this in id's Quake/Doom code and thought it was pretty cool!
+    #if defined(USE_TRUE_BSP_RENDERING)
     BSPPolygon* mAlphaPolygons = nullptr;
-    
+    #endif
+
     // Surfaces are referenced by polygons, define surface properties like texture and lighting.
     std::vector<BSPSurface> mSurfaces;
     

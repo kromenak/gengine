@@ -91,15 +91,16 @@ bool GEngine::Initialize()
         }
     }
 
+    // Init tools.
+    // Must happen before renderer b/c IMGUI renderer init depends on IMGUI context being created.
+    Tools::Init();
+
     // Initialize renderer. Depends on AssetManager being initialized.
     // After this function executes, the game window will be visible.
     if(!gRenderer.Initialize())
     {
         return false;
     }
-
-    // Init tools - depends on Renderer being initialized.
-    Tools::Init();
     
     // Initialize audio.
     if(!gAudioManager.Initialize())
@@ -195,16 +196,16 @@ void GEngine::Shutdown()
 
     // Shutdown scene manager (unloads scene and deletes all actors).
     gSceneManager.Shutdown();
-
-    // Shutdown tools.
-    Tools::Shutdown();
-
+    
     // Even though asset manager is initialized first...
     // We want to shut it down earlier b/c its assets may need to destroy data in the rendering/audio systems.
     gAssetManager.Shutdown();
 
     // Shutdown renderer.
     gRenderer.Shutdown();
+
+    // Shutdown tools.
+    Tools::Shutdown();
 
     // Shutdown audio system.
     gAudioManager.Shutdown();

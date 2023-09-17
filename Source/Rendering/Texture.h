@@ -62,7 +62,7 @@ public:
     void Load(uint8_t* data, uint32_t dataLength);
 	
 	// Activates the texture in the graphics library.
-    void Activate(int textureUnit);
+    void Activate(uint8_t textureUnit);
     static void Deactivate();
     
     uint32_t GetWidth() const { return mWidth; }
@@ -106,8 +106,6 @@ public:
 	void WriteToFile(const std::string& filePath);
 	
 private:
-	friend class RenderTexture; // To access OpenGL stuff.
-	
     // Texture width and height.
     uint32_t mWidth = 0;
     uint32_t mHeight = 0;
@@ -123,9 +121,9 @@ private:
     // SDL and DirectX (I think) expect pixel data from top-left corner.
     // OpenGL expects from bottom-left, but we compensate for that by using flipped UVs!
     uint8_t* mPixels = nullptr;
-    
-    // An ID for the texture object generated in OpenGL.
-    GLuint mTextureId = GL_NONE;
+
+    // Handle to texture in underlying graphics API.
+    void* mTextureHandle = nullptr;
 	
 	// If there's no alpha, it is an opaque texture.
 	// If it has alpha, but only 255 or 0 (on or off), it's an alpha test texture.

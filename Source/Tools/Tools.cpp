@@ -1,11 +1,10 @@
 #include "Tools.h"
 
 #include <imgui.h>
-#include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 
+#include "GAPI.h"
 #include "InputManager.h"
-#include "Renderer.h"
 #include "SceneManager.h"
 #include "Window.h"
 
@@ -30,16 +29,10 @@ void Tools::Init()
     if(!toolsInitialized)
     {
         // Create IMGUI context.
+        // We're assuming that the IMGUI graphics context is created by the rendering system.
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
-
-        // Init for SDL & OpenGL.
-        ImGui_ImplSDL2_InitForOpenGL(Window::Get(), gRenderer.GetGLContext());
-        ImGui_ImplOpenGL3_Init("#version 150");
-
-        // We'll use dark mode.
         ImGui::StyleColorsDark();
-        
         toolsInitialized = true;
     }
 }
@@ -48,11 +41,9 @@ void Tools::Shutdown()
 {
     if(toolsInitialized)
     {
-        // Shutdown/destroy in reverse order of initialization.
-        ImGui_ImplOpenGL3_Shutdown();
-        ImGui_ImplSDL2_Shutdown();
+        // Destroy IMGUI context.
+        // We're assuming that the IMGUI graphics context was destroyed by the rendering system before this happens.
         ImGui::DestroyContext();
-        
         toolsInitialized = false;
     }
 }
@@ -80,7 +71,7 @@ void Tools::Render()
     }
 
     // Start a new frame.
-    ImGui_ImplOpenGL3_NewFrame();
+    GAPI::Get()->ImGuiNewFrame();
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
@@ -93,7 +84,7 @@ void Tools::Render()
 
     // Render with OpenGL.
     ImGui::Render();
-    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+    GAPI::Get()->ImGuiRenderDrawData();
 }
 
 void Tools::SetActive(bool active)

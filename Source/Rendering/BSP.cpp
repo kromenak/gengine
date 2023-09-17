@@ -485,9 +485,7 @@ void BSP::RenderOpaque(const Vector3& cameraPosition, const Vector3& cameraDirec
     // NORMAL BSP RENDERING
     // Process the tree and nodes to only render what's in front of the camera.
     // Seems like it'd be quite efficient...BUT modern graphics hardware is actually quite bad at this, due to the number of draw calls!
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     RenderTree(mNodes[mRootNodeIndex], cameraPosition, cameraDirection);
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     #else
     // ALTERNATIVE BSP RENDERING
     // Just render every surface lol.
@@ -620,53 +618,6 @@ void BSP::ParseFromData(uint8_t* data, uint32_t dataLength)
             std::cout << mObjectNames[surface.objectIndex] << ": " << bs << std::endl;
         }
         */
-
-        // If this surface is flagged as a shadow texture, process the texture so it has alpha transparency.
-        //TODO: This is probably not how the original game handled these shadow textures, and the result doesn't look identical.
-        //TODO: Revisit this at some point in the future to get a better result!
-        if((surface.flags & BSPSurface::kShadowTextureFlag) != 0)
-        {
-            auto it = std::find(processedShadowTextures.begin(), processedShadowTextures.end(), surface.texture);
-            if(it == processedShadowTextures.end())
-            {
-                for(uint32_t y = 0; y < surface.texture->GetHeight(); ++y)
-                {
-                    for(uint32_t x = 0; x < surface.texture->GetWidth(); ++x)
-                    {
-                        // Convert RGB to floats from 0-1.
-                        Color32 color = surface.texture->GetPixelColor32(x, y);
-                        float r = color.r / 255.0f;
-                        float g = color.g / 255.0f;
-                        float b = color.b / 255.0f;
-
-                        // Get average to see "how white" is this pixel?
-                        float average = (r + g + b) / 3.0f;
-
-                        // The more white, the more transparent this pixel should be.
-                        float a = 1.0f - average;
-
-                        // Premultiply the alpha.
-                        r *= a;
-                        g *= a;
-                        b *= a;
-
-                        // Textures seem a bit too bright in game, so this darkens them a bit.
-                        const float kDarknessMultiplier = 0.6f;
-                        r *= kDarknessMultiplier;
-                        g *= kDarknessMultiplier;
-                        b *= kDarknessMultiplier;
-
-                        // Convert back to Color32.
-                        color.r = static_cast<unsigned char>(r * 255);
-                        color.g = static_cast<unsigned char>(g * 255);
-                        color.b = static_cast<unsigned char>(b * 255);
-                        color.a = static_cast<unsigned char>(a * 255);
-                        surface.texture->SetPixelColor32(x, y, color);
-                    }
-                }
-                processedShadowTextures.push_back(surface.texture);
-            }
-        }
     }
     
     // Iterate and read nodes.

@@ -20,7 +20,7 @@ enum class MeshUsage
 struct MeshDefinition
 {
     // Expected usage for this mesh.
-    // Use "dynamic" if you expect to be modifying the contents of the VA frequently.
+    // Use "dynamic" if you expect to be modifying the contents of the vertex buffer frequently.
     MeshUsage meshUsage = MeshUsage::Static;
 
     // Defines the vertex data ordering and layout for this mesh.
@@ -33,7 +33,11 @@ struct MeshDefinition
     // Vertex data.
     // For interleaved data, there should be a single element: a pointer to a list of vertex structs.
     // For packed data, there should be one element per attribute: pointers to each attribute data.
-    std::vector<BasicValue> vertexData;
+    std::vector<void*> vertexData;
+
+    // Because vertex data can be ANYTHING (floats, structs, etc), we need to know how to delete that data if we own it.
+    // The type handlers in this list mirror the vertex data list, and know how to delete the data at the same index over there.
+    std::vector<TypeHandler*> vertexDataTypeHandlers;
 
     // A buffer of indexes, if mesh uses indexes.
     unsigned short* indexData = nullptr;
@@ -49,6 +53,7 @@ struct MeshDefinition
 
     // For packed data: specify attribute and data together.
     template<typename T> void AddVertexData(const VertexAttribute& attribute, T* data);
+    void ClearVertexData();
 
     // For interleaved data: specify attributes separately from singular data buffer.
     void AddVertexAttribute(const VertexAttribute& attribute);
@@ -63,24 +68,21 @@ template<typename T>
 void MeshDefinition::AddVertexData(const VertexAttribute& attribute, T* data)
 {
     vertexDefinition.attributes.push_back(attribute);
+
+    // Store the data, as well as info on how to delete this data later.
     vertexData.emplace_back(std::forward<T*>(data));
+    vertexDataTypeHandlers.emplace_back(GetTypeHandler<T>());
 }
 
 template<typename T>
 void MeshDefinition::SetVertexData(T* data)
 {
     // "Set" overwrites all existing data.
-    if(ownsData)
-    {
-        for(auto& data : vertexData)
-        {
-            data.DeleteArray();
-        }
-    }
-    vertexData.clear();
+    ClearVertexData();
     
     // Set data as only element.
     vertexData.emplace_back(std::forward<T*>(data));
+    vertexDataTypeHandlers.emplace_back(GetTypeHandler<T>());
 }
 
 template<typename T>
@@ -90,7 +92,7 @@ T* MeshDefinition::GetVertexData(const VertexAttribute& attribute) const
     {
         if(vertexDefinition.attributes[i] == attribute)
         {
-            return reinterpret_cast<T*>(vertexData[i].data);
+            return reinterpret_cast<T*>(vertexData[i]);
         }
     }
     return nullptr;

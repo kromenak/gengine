@@ -62,6 +62,7 @@ target_include_directories(gk3 PRIVATE
     Source/Platform
     Source/Primitives
     Source/Rendering
+    Source/Rendering/Graphics
     Source/Reports
     Source/Sheep
     Source/Sheep/API

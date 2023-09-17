@@ -61,7 +61,7 @@ void Material::Activate(const Matrix4& objectToWorldMatrix)
     }
     
     // Set user-defined textures.
-    int textureUnit = 0;
+    uint8_t textureUnit = 0;
     for(auto& entry : mTextures)
     {
         if(entry.second != nullptr)

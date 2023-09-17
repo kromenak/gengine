@@ -5,10 +5,6 @@
 
 #include "ThreadUtil.h"
 
-// Some OpenGL calls take in array indexes/offsets as pointers.
-// This macro just makes the syntax clearer for the reader.
-#define BUFFER_OFFSET(i) ((char *)NULL + (i))
-
 VertexArray::VertexArray(const MeshDefinition& data) :
     mData(data)
 {
@@ -20,43 +16,36 @@ VertexArray::~VertexArray()
     // Delete data if owned.
     if(mData.ownsData)
     {
-        for(auto& data : mData.vertexData)
-        {
-            data.DeleteArray();
-        }
-        mData.vertexData.clear();
+        // Delete vertex data.
+        mData.ClearVertexData();
         
         // Delete index data.
         delete[] mData.indexData;
     }
 
-    GLuint vbo = mVBO;
-    GLuint vao = mVAO;
-    GLuint ibo = mIBO;
-    ThreadUtil::RunOnMainThread([vbo, vao, ibo]() {
-        // Delete GPU resources.
-        glDeleteBuffers(1, &vbo);
-        glDeleteVertexArrays(1, &vao);
-        glDeleteBuffers(1, &ibo);
+    // Destroy GPU resources.
+    BufferHandle vb = mVertexBuffer;
+    BufferHandle ib = mIndexBuffer;
+    ThreadUtil::RunOnMainThread([vb, ib]() {
+        GAPI::Get()->DestroyVertexBuffer(vb);
+        GAPI::Get()->DestroyIndexBuffer(ib);
     });
 }
 
-VertexArray::VertexArray(VertexArray&& other)
+VertexArray::VertexArray(VertexArray&& other) noexcept
 {
     *this = std::move(other);
 }
 
-VertexArray& VertexArray::operator=(VertexArray&& other)
+VertexArray& VertexArray::operator=(VertexArray&& other) noexcept
 {
     mData = other.mData;
-    mVBO = other.mVBO;
-    mVAO = other.mVAO;
-    mIBO = other.mIBO;
+    mVertexBuffer = other.mVertexBuffer;
+    mIndexBuffer = other.mIndexBuffer;
 
     other.mData = MeshDefinition();
-    other.mVBO = GL_NONE;
-    other.mVAO = GL_NONE;
-    other.mIBO = GL_NONE;
+    other.mVertexBuffer = nullptr;
+    other.mIndexBuffer = nullptr;
     return *this;
 }
 
@@ -65,9 +54,9 @@ void VertexArray::DrawTriangles()
     DrawTriangles(0, mData.indexCount > 0 ? mData.indexCount : mData.vertexCount);
 }
 
-void VertexArray::DrawTriangles(unsigned int offset, unsigned int count)
+void VertexArray::DrawTriangles(uint32_t offset, uint32_t count)
 {
-    Draw(GL_TRIANGLES, offset, count);
+    Draw(GAPI::Primitive::Triangles, offset, count);
 }
 
 void VertexArray::DrawTriangleStrips()
@@ -75,9 +64,9 @@ void VertexArray::DrawTriangleStrips()
     DrawTriangleStrips(0, mData.indexCount > 0 ? mData.indexCount : mData.vertexCount);
 }
 
-void VertexArray::DrawTriangleStrips(unsigned int offset, unsigned int count)
+void VertexArray::DrawTriangleStrips(uint32_t offset, uint32_t count)
 {
-    Draw(GL_TRIANGLE_STRIP, offset, count);
+    Draw(GAPI::Primitive::TriangleStrip, offset, count);
 }
 
 void VertexArray::DrawTriangleFans()
@@ -85,9 +74,9 @@ void VertexArray::DrawTriangleFans()
     DrawTriangleFans(0, mData.indexCount > 0 ? mData.indexCount : mData.vertexCount);
 }
 
-void VertexArray::DrawTriangleFans(unsigned int offset, unsigned int count)
+void VertexArray::DrawTriangleFans(uint32_t offset, uint32_t count)
 {
-    Draw(GL_TRIANGLE_FAN, offset, count);
+    Draw(GAPI::Primitive::TriangleFan, offset, count);
 }
 
 void VertexArray::DrawLines()
@@ -95,63 +84,46 @@ void VertexArray::DrawLines()
     DrawLines(0, mData.indexCount > 0 ? mData.indexCount : mData.vertexCount);
 }
 
-void VertexArray::DrawLines(unsigned int offset, unsigned int count)
+void VertexArray::DrawLines(uint32_t offset, uint32_t count)
 {
-    Draw(GL_LINES, offset, count);
+    Draw(GAPI::Primitive::Lines, offset, count);
 }
 
-void VertexArray::Draw(GLenum mode)
+void VertexArray::Draw(GAPI::Primitive mode)
 {
     Draw(mode, 0, mData.indexCount > 0 ? mData.indexCount : mData.vertexCount);
 }
 
-void VertexArray::Draw(GLenum mode, unsigned int offset, unsigned int count)
+void VertexArray::Draw(GAPI::Primitive mode, uint32_t offset, uint32_t count)
 {
-    // Create VBO/VAO/IBO if not yet created.
-    if(mVBO == GL_NONE)
-    {
-        CreateVBO();
-        CreateVAO();
-        RefreshIBOContents();
-    }
+    // Make sure vertex buffer and index buffer are ready to go.
+    CreateVertexBuffer();
+    CreateIndexBuffer();
 
-    // Bind vertex array object and index buffer objects.
-    // Only do this if not already bound (small performance gain).
-    static GLuint lastBoundVAO = GL_NONE;
-    if(lastBoundVAO != mVAO)
+    // Draw the thing!
+    if(mIndexBuffer != nullptr)
     {
-        glBindVertexArray(mVAO);
-        lastBoundVAO = mVAO;
-
-        // Assuming we always want to bind the IBO when binding VAO...
-        if(mIBO != GL_NONE)
-        {
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
-        }
-    }
-    
-    // Draw method depends on whether we have indexes or not.
-    if(mIBO != GL_NONE)
-    {
-        // Draw "count" indices at offset.
-        glDrawElements(mode, count, GL_UNSIGNED_SHORT, BUFFER_OFFSET(offset * sizeof(GLushort)));
+        GAPI::Get()->Draw(mode, mVertexBuffer, mIndexBuffer, offset, count);
     }
     else
     {
-        // Draw "count" triangles at offset.
-        glDrawArrays(mode, offset, count);
+        GAPI::Get()->Draw(mode, mVertexBuffer, offset, count);
     }
 }
 
 void VertexArray::ChangeVertexData(void* data)
 {
     // Save data locally.
-    int size = mData.vertexCount * mData.vertexDefinition.CalculateSize();
-    memcpy(mData.vertexData[0].data, data, size);
+    uint32_t size = mData.vertexCount * mData.vertexDefinition.CalculateSize();
+    memcpy(mData.vertexData[0], data, size);
 
-    // Assuming that the data is the correct size to fill the entire buffer.
-    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+    // Send to GPU if buffer already exists.
+    // Otherwise, it'll get sent when the vertex buffer is created.
+    if(mVertexBuffer != nullptr)
+    {
+        // Assuming that the data is the correct size to fill the entire buffer.
+        GAPI::Get()->SetVertexBufferData(mVertexBuffer, 0, size, data);
+    }
 }
 
 void VertexArray::ChangeVertexData(VertexAttribute::Semantic semantic, void* data)
@@ -160,7 +132,7 @@ void VertexArray::ChangeVertexData(VertexAttribute::Semantic semantic, void* dat
     // If data is interleaved, we'll just fall back on overwriting all data.
     if(mData.vertexDefinition.layout == VertexLayout::Interleaved)
     {
-        std::cout << "WARNING: You can only update an individual vertex attribute's data when using non-interleaved data!" << std::endl;
+        printf("WARNING: You can only update an individual vertex attribute's data when using non-interleaved data!\n");
         ChangeVertexData(data);
         return;
     }
@@ -178,11 +150,14 @@ void VertexArray::ChangeVertexData(VertexAttribute::Semantic semantic, void* dat
         if(attribute.semantic == semantic)
         {
             // Save data locally.
-            memcpy(mData.vertexData[i].data, data, attributeSize);
+            memcpy(mData.vertexData[i], data, attributeSize);
 
-            // Send to GPU.
-            glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-            glBufferSubData(GL_ARRAY_BUFFER, offset, attributeSize, data);
+            // Send to GPU if buffer already exists.
+            // Otherwise, it'll get sent when the vertex buffer is created.
+            if(mVertexBuffer != nullptr)
+            {
+                GAPI::Get()->SetVertexBufferData(mVertexBuffer, offset, attributeSize, data);
+            }
             return;
         }
 
@@ -191,64 +166,71 @@ void VertexArray::ChangeVertexData(VertexAttribute::Semantic semantic, void* dat
     }
 }
 
-void VertexArray::ChangeIndexData(unsigned short* indexes)
+void VertexArray::ChangeIndexData(uint16_t* indexes)
 {
     // Just assume index count has not changed.
     ChangeIndexData(indexes, mData.indexCount);
 }
 
-void VertexArray::ChangeIndexData(unsigned short* indexes, unsigned int count)
+void VertexArray::ChangeIndexData(uint16_t* indexes, uint32_t count)
 {
-    // If changing existing buffer contents, but the count is different, we must create delete old buffer and make a new one.
-    if(mIBO != GL_NONE && mData.indexCount != count)
+    // If existing index buffer size doesn't match, we need to delete the old one.
+    // It'll get recreated (with correct size) later on.
+    if(mIndexBuffer != nullptr && mData.indexCount != count)
     {
-        glDeleteBuffers(1, &mIBO);
-        mIBO = GL_NONE;
+        GAPI::Get()->DestroyIndexBuffer(mIndexBuffer);
+        mIndexBuffer = nullptr;
     }
 
-    // Same thing with index buffer. If size changed, need to recreate it!
+    // If our stored index data size doesn't match, we also need to delete this.
     if(mData.indexData != nullptr && mData.indexCount != count)
     {
         assert(mData.ownsData);
         delete[] mData.indexData;
+        mData.indexData = nullptr;
+    }
+
+    // If index data is null, we need to create the memory.
+    if(mData.indexData == nullptr)
+    {
         mData.indexData = new unsigned short[count];
     }
 
     // Update index count and index data.
     mData.indexCount = count;
-    memcpy(mData.indexData, indexes, count * sizeof(unsigned short));
-
-    // Refresh IBO contents with new data.
-    RefreshIBOContents();
+    memcpy(mData.indexData, indexes, count * sizeof(uint16_t));
+    
+    // If the index buffer exists, update the data in it.
+    if(mIndexBuffer != nullptr)
+    {
+        GAPI::Get()->SetIndexBufferData(mIndexBuffer, mData.indexCount, mData.indexData);
+    }
 }
 
-void VertexArray::CreateVBO()
+void VertexArray::CreateVertexBuffer()
 {
-    // Generate and bind VBO.
-    glGenBuffers(1, &mVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+    // Already got one? Don't need to create another one.
+    if(mVertexBuffer != nullptr)
+    {
+        return;
+    }
 
-    // Determine VBO usage and size.
-    GLenum usage = (mData.meshUsage == MeshUsage::Static) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-    GLsizeiptr size = mData.vertexCount * mData.vertexDefinition.CalculateSize();
-
-    // For packed data, we'll assume that the vertex data is a struct containing ordered pointers to each packed section.
+    // The way we create the vertex buffer depends on the layout of the data we will insert into the buffer.
     if(mData.vertexDefinition.layout == VertexLayout::Packed)
     {
-        // Create buffer of desired size, but don't fill it with anything.
-        glBufferData(GL_ARRAY_BUFFER, size, NULL, usage);
+        // With packed data, each vertex attribute has its own separate array of data.
+        // So we can't set the data at the same time we create the buffer.
+        mVertexBuffer = GAPI::Get()->CreateVertexBuffer(mData.vertexCount, mData.vertexDefinition, nullptr, mData.meshUsage);
 
-        // Iterate each attribute and load packed data for that attribute into the VBO.
+        // We need to set the data in the vertex buffer separately for each attribute.
         // We assume attributes are specified in same order data is provided in.
-        int offset = 0;
-        int attributeIndex = 0;
+        uint32_t offset = 0;
+        size_t attributeIndex = 0;
         for(auto& attribute : mData.vertexDefinition.attributes)
         {
             // Determine size of this attribute's data.
-            GLsizeiptr attributeSize = mData.vertexCount * attribute.GetSize();
-
-            // Load attribute data to GPU.
-            glBufferSubData(GL_ARRAY_BUFFER, offset, attributeSize, mData.vertexData[attributeIndex].data);
+            uint32_t attributeSize = mData.vertexCount * attribute.GetSize();
+            GAPI::Get()->SetVertexBufferData(mVertexBuffer, offset, attributeSize, mData.vertexData[attributeIndex]);
 
             // Next attribute's offset is calculated by adding this attribute's size.
             offset += attributeSize;
@@ -257,62 +239,26 @@ void VertexArray::CreateVBO()
     }
     else // Interleaved vertex layout.
     {
-        // Allocate VBO of needed size, and fill it with provided vertex data (if any).
-        glBufferData(GL_ARRAY_BUFFER, size, mData.vertexData[0].data, usage);
+        // With interleaved data, we just have one big array of vertex data.
+        // So we can create the buffer and set it's data in one command. 
+        mVertexBuffer = GAPI::Get()->CreateVertexBuffer(mData.vertexCount, mData.vertexDefinition, mData.vertexData[0], mData.meshUsage);
     }
 }
 
-void VertexArray::CreateVAO()
+void VertexArray::CreateIndexBuffer()
 {
-    // Generate and bind VAO object.
-    glGenVertexArrays(1, &mVAO);
-    glBindVertexArray(mVAO);
-
-    // Stride can be calculated once and used over and over.
-    // For packed data, stride is zero. For interleaved data, stride is size of vertex.
-    GLsizei stride = mData.vertexDefinition.CalculateStride();
-
-    // Iterate vertex attributes to define the vertex data layout in the VAO.
-    int attributeIndex = 0;
-    for(auto& attribute : mData.vertexDefinition.attributes)
+    // Already got one? Don't need to create another one.
+    if(mIndexBuffer != nullptr)
     {
-        int attributeId = static_cast<int>(attribute.semantic);
-
-        // Must enable the attribute to use it in shader code.
-        glEnableVertexAttribArray(attributeId);
-
-        // Convert attribute values to GL types.
-        GLint count = attribute.count;
-        GLenum type = GL_FLOAT; //TODO: We can assume float for now...but when supporting other attribute types, we'll need some conversion logic.
-        GLboolean normalize = attribute.normalize ? GL_TRUE : GL_FALSE;
-        int offset = mData.vertexDefinition.CalculateAttributeOffset(attributeIndex, mData.vertexCount);
-
-        // Define vertex attribute in VAO.
-        glVertexAttribPointer(attributeId, count, type, normalize, stride, BUFFER_OFFSET(offset));
-        ++attributeIndex;
+        return;
     }
-}
 
-void VertexArray::RefreshIBOContents()
-{
     // No need if index data is empty or count is zero.
     if(mData.indexData == nullptr || mData.indexCount <= 0)
     {
         return;
     }
 
-    // Either create new buffer and fill with index data, or populate existing buffer with new data.
-    if(mIBO == GL_NONE)
-    {
-        glGenBuffers(1, &mIBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
-
-        GLenum glUsage = (mData.meshUsage == MeshUsage::Static) ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, mData.indexCount * sizeof(GLushort), mData.indexData, glUsage);
-    }
-    else
-    {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mIBO);
-        glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, mData.indexCount * sizeof(GLushort), mData.indexData);
-    }
+    // Create the index buffer.
+    mIndexBuffer = GAPI::Get()->CreateIndexBuffer(mData.indexCount, mData.indexData, mData.meshUsage);
 }
