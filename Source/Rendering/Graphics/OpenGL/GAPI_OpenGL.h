@@ -31,13 +31,15 @@ public:
 
     TextureHandle CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels = nullptr) override;
     void DestroyTexture(TextureHandle handle) override;
-
     void SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, uint8_t* pixels) override;
     void GenerateMipmaps(TextureHandle handle) override;
     void SetTextureWrapMode(TextureHandle handle, Texture::WrapMode wrapMode) override;
     void SetTextureFilterMode(TextureHandle handle, Texture::FilterMode filterMode, bool useMipmaps) override;
-
     void ActivateTexture(TextureHandle handle, uint8_t textureUnit) override;
+
+    TextureHandle CreateCubemap(const CubemapParams& params) override;
+    void DestroyCubemap(TextureHandle handle) override;
+    void ActivateCubemap(TextureHandle handle) override;
 
     BufferHandle CreateVertexBuffer(uint32_t vertexCount, const VertexDefinition& vertexDefinition, void* data = nullptr, MeshUsage usage = MeshUsage::Static) override;
     void DestroyVertexBuffer(BufferHandle handle) override;

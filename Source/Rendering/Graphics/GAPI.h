@@ -111,6 +111,26 @@ public:
 
     virtual void ActivateTexture(TextureHandle handle, uint8_t textureUnit = 0) = 0;
 
+    // Cubemaps
+    struct CubemapSide
+    {
+        uint32_t width = 0;
+        uint32_t height = 0;
+        uint8_t* pixels = nullptr;
+    };
+    struct CubemapParams
+    {
+        CubemapSide left;
+        CubemapSide right;
+        CubemapSide back;
+        CubemapSide front;
+        CubemapSide bottom;
+        CubemapSide top;
+    };
+    virtual TextureHandle CreateCubemap(const CubemapParams& params) = 0;
+    virtual void DestroyCubemap(TextureHandle handle) = 0;
+    virtual void ActivateCubemap(TextureHandle handle) = 0;
+    
     // Vertex & Index Buffers
     virtual BufferHandle CreateVertexBuffer(uint32_t vertexCount, const VertexDefinition& vertexDefinition, void* data = nullptr, MeshUsage usage = MeshUsage::Static) = 0;
     virtual void DestroyVertexBuffer(BufferHandle handle) = 0;

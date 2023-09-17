@@ -1,6 +1,7 @@
 #include "Skybox.h"
 
 #include "AssetManager.h"
+#include "GAPI.h"
 #include "Mesh.h"
 #include "Texture.h"
 
@@ -64,7 +65,10 @@ Skybox::~Skybox()
     delete mSkyboxMesh;
 
     // Delete cubemap texture.
-    glDeleteTextures(1, &mCubemapTextureId);
+    if(mCubemapHandle != nullptr)
+    {
+        GAPI::Get()->DestroyCubemap(mCubemapHandle);
+    }
 }
 
 void Skybox::Render()
@@ -86,67 +90,54 @@ void Skybox::Render()
     }
 
     // Generate cubemap texture, if not yet generated.
-    if(mCubemapTextureId == GL_NONE)
+    if(mCubemapHandle == nullptr)
     {
-        glActiveTexture(GL_TEXTURE0);
-        glGenTextures(1, &mCubemapTextureId);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, mCubemapTextureId);
-        
-        // Create each texture for the cubemap.
-        // Note that we MUST create 6 textures, or the cubemap will not display properly.
-        // Also, Front is -Z and Back is +Z. Not sure if this indicates a bug, or a conversion done in the original game, or what?
+        GAPI::CubemapParams params;
         if(mRightTexture != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA,
-                         mRightTexture->GetWidth(), mRightTexture->GetHeight(), 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, mRightTexture->GetPixelData());
+            params.right.width = mRightTexture->GetWidth();
+            params.right.height = mRightTexture->GetHeight();
+            params.right.pixels = mRightTexture->GetPixelData();
         }
         if(mLeftTexture != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA,
-                         mLeftTexture->GetWidth(), mLeftTexture->GetHeight(), 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, mLeftTexture->GetPixelData());
+            params.left.width = mLeftTexture->GetWidth();
+            params.left.height = mLeftTexture->GetHeight();
+            params.left.pixels = mLeftTexture->GetPixelData();
         }
         if(mFrontTexture != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA,
-                         mFrontTexture->GetWidth(), mFrontTexture->GetHeight(), 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, mFrontTexture->GetPixelData());
+            params.front.width = mFrontTexture->GetWidth();
+            params.front.height = mFrontTexture->GetHeight();
+            params.front.pixels = mFrontTexture->GetPixelData();
         }
         if(mBackTexture != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA,
-                         mBackTexture->GetWidth(), mBackTexture->GetHeight(), 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, mBackTexture->GetPixelData());
+            params.back.width = mBackTexture->GetWidth();
+            params.back.height = mBackTexture->GetHeight();
+            params.back.pixels = mBackTexture->GetPixelData();
         }
         if(mUpTexture != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA,
-                         mUpTexture->GetWidth(), mUpTexture->GetHeight(), 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, mUpTexture->GetPixelData());
+            params.top.width = mUpTexture->GetWidth();
+            params.top.height = mUpTexture->GetHeight();
+            params.top.pixels = mUpTexture->GetPixelData();
         }
         if(mDownTexture != nullptr)
         {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA,
-                         mDownTexture->GetWidth(), mDownTexture->GetHeight(), 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, mDownTexture->GetPixelData());
+            params.bottom.width = mDownTexture->GetWidth();
+            params.bottom.height = mDownTexture->GetHeight();
+            params.bottom.pixels = mDownTexture->GetPixelData();
         }
-        
-        // These settings help to avoid visible seams around the edges of the skybox.
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        mCubemapHandle = GAPI::Get()->CreateCubemap(params);
     }
 	
 	// Activate the material (or fail).
 	mMaterial.Activate(Matrix4::Identity);
 	
 	// Activate and bind the cubemap texture.
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, mCubemapTextureId);
-	
+    GAPI::Get()->ActivateCubemap(mCubemapHandle);
+
 	// Render the skybox.
     mSkyboxMesh->Render();
 }

@@ -360,6 +360,57 @@ void GAPI_OpenGL::ActivateTexture(TextureHandle handle, uint8_t textureUnit)
     GLState::BindTexture(reinterpret_cast<GLuint>(handle));
 }
 
+TextureHandle GAPI_OpenGL::CreateCubemap(const CubemapParams& params)
+{
+    // Generate cubemap texture id.
+    GLuint cubemapTextureId = GL_NONE;
+    glGenTextures(1, &cubemapTextureId);
+
+    // Bind the texture id.
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTextureId);
+
+    // Create each texture for the cubemap.
+    // Note that we MUST create 6 textures, or the cubemap will not display properly.
+    // Also, Front is -Z and Back is +Z. Not sure if this indicates a bug, or a conversion done in the original game, or what?
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, params.right.width, params.right.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, params.right.pixels);
+
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, params.left.width, params.left.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, params.left.pixels);
+
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, params.front.width, params.front.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, params.front.pixels);
+
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, params.back.width, params.back.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, params.back.pixels);
+
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, params.top.width, params.top.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, params.top.pixels);
+
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGBA, params.bottom.width, params.bottom.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, params.bottom.pixels);
+
+    // These settings help to avoid visible seams around the edges of the skybox.
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    return reinterpret_cast<TextureHandle>(cubemapTextureId);
+}
+
+void GAPI_OpenGL::DestroyCubemap(TextureHandle handle)
+{
+    // Same as destroying any other texture.
+    DestroyTexture(handle);
+}
+
+void GAPI_OpenGL::ActivateCubemap(TextureHandle handle)
+{
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, reinterpret_cast<GLuint>(handle));
+}
+
 BufferHandle GAPI_OpenGL::CreateVertexBuffer(uint32_t vertexCount, const VertexDefinition& vertexDefinition, void* data, MeshUsage usage)
 {
     // Create vertex buffer of appropriate size.
