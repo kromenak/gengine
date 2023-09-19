@@ -1,6 +1,4 @@
 //
-// Matrix4.h
-//
 // Clark Kromenaker
 //
 // A 4x4 matrix.

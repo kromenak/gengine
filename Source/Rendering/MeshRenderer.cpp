@@ -37,7 +37,6 @@ void MeshRenderer::Render(bool opaque, bool translucent)
     int maxMaterialIndex = static_cast<int>(mMaterials.size()) - 1;
     
     // Iterate meshes and render each in turn.
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     Matrix4 localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
     for(size_t i = 0; i < mMeshes.size(); i++)
     {
@@ -103,7 +102,6 @@ void MeshRenderer::Render(bool opaque, bool translucent)
             ++submeshIndex;
         }
     }
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
     // Optionally some AABB drawing.
     if(Debug::RenderAABBs())
@@ -144,6 +142,12 @@ void MeshRenderer::SetMesh(Mesh* mesh)
 
 void MeshRenderer::AddMesh(Mesh* mesh)
 {
+    // On rare occasions, GK3 meshes have no submeshes. No point in even considering these.
+    if(mesh == nullptr || mesh->GetSubmeshCount() == 0)
+    {
+        return;
+    }
+
 	// Add mesh to array.
 	mMeshes.push_back(mesh);
 	

@@ -1,6 +1,7 @@
 #include "GKProp.h"
 
 #include "AssetManager.h"
+#include "Billboard.h"
 #include "GasPlayer.h"
 #include "MeshRenderer.h"
 #include "Model.h"
@@ -26,6 +27,12 @@ GKProp::GKProp(Model* model) : GKProp()
     // Use the model's name as the name of the actor.
     // This is sometimes used for gameplay logic, so be careful about changing this!
     SetName(mMeshRenderer->GetModelName());
+
+    // If this prop acts as a billboard, add the billboard component to it.
+    if(model->IsBillboard())
+    {
+        AddComponent<Billboard>();
+    }
 }
 
 GKProp::GKProp(const SceneModel& modelDef) : GKProp(modelDef.model)
