@@ -90,7 +90,8 @@ void SidneyMenuBar::Update()
         {
             for(SidneyButton* option : dropdown.options)
             {
-                if(option->GetButton()->IsHovered())
+                // Hovered OR animating (after a button press).
+                if(option->GetButton()->IsHovered() || option->IsAnimating())
                 {
                     showOptions = true;
                     break;

@@ -41,6 +41,8 @@ public:
 
     void Press();
 
+    bool IsAnimating() const { return mPressAnimTimer > 0.0f; }
+
 private:
     // Text label on the button.
     UILabel* mLabel = nullptr;

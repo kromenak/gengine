@@ -190,7 +190,7 @@ void SidneyMakeId::Init(Actor* parent)
         idActor->GetTransform()->SetParent(previewWindowActor->GetTransform());
 
         mIdToPrintImage = idActor->AddComponent<UIImage>();
-        mIdToPrintImage->SetTexture(gAssetManager.LoadTexture("GAB_AUTO.BMP"), true);
+        mIdToPrintImage->SetTexture(gAssetManager.LoadTexture("GAB_DOC.BMP"), true);
         mIdToPrintImage->GetRectTransform()->SetAnchor(AnchorPreset::Center);
         mIdToPrintImage->GetRectTransform()->SetAnchoredPosition(-0.5f, 0.0f); // small offset needed for pixel-perfect positioning
     }
