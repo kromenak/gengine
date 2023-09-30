@@ -177,37 +177,37 @@ void AssetManager::WriteAllBarnAssetsToFile(const std::string& search, const std
 
 Audio* AssetManager::LoadAudio(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mLoadedAudios, false);
+    return LoadAsset<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mAudioCache, false);
 }
 
 Audio* AssetManager::LoadAudioAsync(const std::string& name, AssetScope scope)
 {
-    return LoadAssetAsync<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mLoadedAudios, false);
+    return LoadAssetAsync<Audio>(SanitizeAssetName(name, ".WAV"), scope, &mAudioCache, false);
 }
 
 Soundtrack* AssetManager::LoadSoundtrack(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), scope, &mLoadedSoundtracks);
+    return LoadAsset<Soundtrack>(SanitizeAssetName(name, ".STK"), scope, &mSoundtrackCache);
 }
 
 Animation* AssetManager::LoadYak(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Animation>(SanitizeAssetName(name, ".YAK"), scope, &mLoadedYaks);
+    return LoadAsset<Animation>(SanitizeAssetName(name, ".YAK"), scope, &mYakCache);
 }
 
 Model* AssetManager::LoadModel(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Model>(SanitizeAssetName(name, ".MOD"), scope, &mLoadedModels);
+    return LoadAsset<Model>(SanitizeAssetName(name, ".MOD"), scope, &mModelCache);
 }
 
 Texture* AssetManager::LoadTexture(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mLoadedTextures);     
+    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mTextureCache);     
 }
 
 Texture* AssetManager::LoadTextureAsync(const std::string& name, AssetScope scope)
 {
-    return LoadAssetAsync<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mLoadedTextures);
+    return LoadAssetAsync<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mTextureCache);
 }
 
 Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scope)
@@ -230,12 +230,12 @@ Texture* AssetManager::LoadSceneTexture(const std::string& name, AssetScope scop
 
 GAS* AssetManager::LoadGAS(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), scope, &mLoadedGases);
+    return LoadAsset<GAS>(SanitizeAssetName(name, ".GAS"), scope, &mGasCache);
 }
 
 Animation* AssetManager::LoadAnimation(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Animation>(SanitizeAssetName(name, ".ANM"), scope, &mLoadedAnimations);
+    return LoadAsset<Animation>(SanitizeAssetName(name, ".ANM"), scope, &mAnimationCache);
 }
 
 Animation* AssetManager::LoadMomAnimation(const std::string& name, AssetScope scope)
@@ -243,73 +243,73 @@ Animation* AssetManager::LoadMomAnimation(const std::string& name, AssetScope sc
     // GK3 has this notion of a "mother-of-all-animations" file. Thing is, it's nearly identical to a normal .ANM file...
     // Only difference I could find is MOM files support a few more keywords.
     // Anyway, it's all the same thing in my eyes!
-    return LoadAsset<Animation>(SanitizeAssetName(name, ".MOM"), scope, &mLoadedMomAnimations);
+    return LoadAsset<Animation>(SanitizeAssetName(name, ".MOM"), scope, &mMomAnimationCache);
 }
 
 VertexAnimation* AssetManager::LoadVertexAnimation(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), scope, &mLoadedVertexAnimations);
+    return LoadAsset<VertexAnimation>(SanitizeAssetName(name, ".ACT"), scope, &mVertexAnimationCache);
 }
 
 Sequence* AssetManager::LoadSequence(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Sequence>(SanitizeAssetName(name, ".SEQ"), scope, &mLoadedSequences);
+    return LoadAsset<Sequence>(SanitizeAssetName(name, ".SEQ"), scope, &mSequenceCache);
 }
 
 SceneInitFile* AssetManager::LoadSIF(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<SceneInitFile>(SanitizeAssetName(name, ".SIF"), scope, &mLoadedSIFs);
+    return LoadAsset<SceneInitFile>(SanitizeAssetName(name, ".SIF"), scope, &mSifCache);
 }
 
 SceneAsset* AssetManager::LoadSceneAsset(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<SceneAsset>(SanitizeAssetName(name, ".SCN"), scope, &mLoadedSceneAssets);
+    return LoadAsset<SceneAsset>(SanitizeAssetName(name, ".SCN"), scope, &mSceneAssetCache);
 }
 
 NVC* AssetManager::LoadNVC(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<NVC>(SanitizeAssetName(name, ".NVC"), scope, &mLoadedActionSets);
+    return LoadAsset<NVC>(SanitizeAssetName(name, ".NVC"), scope, &mNvcCache);
 }
 
 BSP* AssetManager::LoadBSP(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), scope, &mLoadedBSPs);
+    return LoadAsset<BSP>(SanitizeAssetName(name, ".BSP"), scope, &mBspCache);
 }
 
 BSPLightmap* AssetManager::LoadBSPLightmap(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<BSPLightmap>(SanitizeAssetName(name, ".MUL"), scope, &mLoadedBSPLightmaps);
+    return LoadAsset<BSPLightmap>(SanitizeAssetName(name, ".MUL"), scope, &mBspLightmapCache);
 }
 
 SheepScript* AssetManager::LoadSheep(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), scope, &mLoadedSheeps);
+    return LoadAsset<SheepScript>(SanitizeAssetName(name, ".SHP"), scope, &mSheepCache);
 }
 
 Cursor* AssetManager::LoadCursor(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), scope, &mLoadedCursors);
+    return LoadAsset<Cursor>(SanitizeAssetName(name, ".CUR"), scope, &mCursorCache);
 }
 
 Cursor* AssetManager::LoadCursorAsync(const std::string& name, AssetScope scope)
 {
-    return LoadAssetAsync<Cursor>(SanitizeAssetName(name, ".CUR"), scope, &mLoadedCursors);
+    return LoadAssetAsync<Cursor>(SanitizeAssetName(name, ".CUR"), scope, &mCursorCache);
 }
 
 Font* AssetManager::LoadFont(const std::string& name, AssetScope scope)
 {
-	return LoadAsset<Font>(SanitizeAssetName(name, ".FON"), scope, &mLoadedFonts);
+	return LoadAsset<Font>(SanitizeAssetName(name, ".FON"), scope, &mFontCache);
 }
 
 TextAsset* AssetManager::LoadText(const std::string& name, AssetScope scope)
 {
     // Specifically DO NOT delete the asset buffer when creating TextAssets, since they take direct ownership of it.
-    return LoadAsset<TextAsset>(name, scope, &mLoadedTexts, false);
+    return LoadAsset<TextAsset>(name, scope, &mTextAssetCache, false);
 }
 
 Config* AssetManager::LoadConfig(const std::string& name)
 {
-    return LoadAsset<Config>(SanitizeAssetName(name, ".CFG"), AssetScope::Global, &mLoadedConfigs);
+    return LoadAsset<Config>(SanitizeAssetName(name, ".CFG"), AssetScope::Global, &mConfigCache);
 }
 
 Shader* AssetManager::LoadShader(const std::string& name)
@@ -346,35 +346,35 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
 
 void AssetManager::UnloadAssets(AssetScope scope)
 {
-    UnloadAssets(mLoadedShaders, scope);
+    mShaderCache.Unload(scope);
 
-    UnloadAssets(mLoadedConfigs, scope);
-    UnloadAssets(mLoadedTexts, scope);
-    
-    UnloadAssets(mLoadedFonts, scope);
-    UnloadAssets(mLoadedCursors, scope);
+    mConfigCache.Unload(scope);
+    mTextAssetCache.Unload(scope);
 
-    UnloadAssets(mLoadedSheeps, scope);
+    mFontCache.Unload(scope);
+    mCursorCache.Unload(scope);
 
-    UnloadAssets(mLoadedBSPLightmaps, scope);
-    UnloadAssets(mLoadedBSPs, scope);
-    
-    UnloadAssets(mLoadedActionSets, scope);
-    UnloadAssets(mLoadedSceneAssets, scope);
-    UnloadAssets(mLoadedSIFs, scope);
+    mSheepCache.Unload(scope);
 
-    UnloadAssets(mLoadedSequences, scope);
-    UnloadAssets(mLoadedVertexAnimations, scope);
-    UnloadAssets(mLoadedMomAnimations, scope);
-    UnloadAssets(mLoadedAnimations, scope);
-    UnloadAssets(mLoadedGases, scope);
+    mBspLightmapCache.Unload(scope);
+    mBspCache.Unload(scope);
 
-    UnloadAssets(mLoadedTextures, scope);
-    UnloadAssets(mLoadedModels, scope);
+    mNvcCache.Unload(scope);
+    mSceneAssetCache.Unload(scope);
+    mSifCache.Unload(scope);
 
-    UnloadAssets(mLoadedYaks, scope);
-    UnloadAssets(mLoadedSoundtracks, scope);
-    UnloadAssets(mLoadedAudios, scope);
+    mSequenceCache.Unload(scope);
+    mVertexAnimationCache.Unload(scope);
+    mMomAnimationCache.Unload(scope);
+    mAnimationCache.Unload(scope);
+    mGasCache.Unload(scope);
+
+    mTextureCache.Unload(scope);
+    mModelCache.Unload(scope);
+
+    mYakCache.Unload(scope);
+    mSoundtrackCache.Unload(scope);
+    mAudioCache.Unload(scope);
 }
 
 BarnFile* AssetManager::GetBarn(const std::string& barnName)
@@ -438,21 +438,21 @@ std::string AssetManager::SanitizeAssetName(const std::string& assetName, const 
 }
 
 template<typename T>
-T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer)
+T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, AssetCache<T>* cache, bool deleteBuffer)
 {
     // If already present in cache, return existing asset right away.
     if(cache != nullptr && scope != AssetScope::Manual)
     {
-        auto it = cache->find(assetName);
-        if(it != cache->end())
+        T* cachedAsset = cache->Get(assetName);
+        if(cachedAsset != nullptr)
         {
             // One caveat: if the cached asset has a narrower scope than what's being requested, we must PROMOTE the scope.
             // For example, a cached asset with SCENE scope being requested at GLOBAL scope must convert to GLOBAL scope.
-            if(it->second->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
+            if(cachedAsset->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
             {
-                it->second->SetScope(AssetScope::Global);
+                cachedAsset->SetScope(AssetScope::Global);
             }
-            return it->second;
+            return cachedAsset;
         }
     }
     //printf("Loading asset %s\n", assetName.c_str());
@@ -469,7 +469,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
     // Add entry in cache, if we have a cache.
     if(asset != nullptr && cache != nullptr && scope != AssetScope::Manual)
     {
-        (*cache)[assetName] = asset;
+        cache->Set(assetName, asset);
     }
 
     // Load the asset on the main thread.
@@ -484,7 +484,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, std::
 }
 
 template<typename T>
-T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, std::unordered_map_ci<std::string, T*>* cache, bool deleteBuffer, std::function<void(T*)> callback)
+T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, AssetCache<T>* cache, bool deleteBuffer, std::function<void(T*)> callback)
 {
     #if defined(PLATFORM_LINUX)
     //TEMP(?): Linux doesn't like this multithreading code, and I don't really blame it!
@@ -496,16 +496,16 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
     // If already present in cache, return existing asset right away.
     if(cache != nullptr && scope != AssetScope::Manual)
     {
-        auto it = cache->find(assetName);
-        if(it != cache->end())
+        T* cachedAsset = cache->Get(assetName);
+        if(cachedAsset != nullptr)
         {
             // One caveat: if the cached asset has a narrower scope than what's being requested, we must PROMOTE the scope.
             // For example, a cached asset with SCENE scope being requested at GLOBAL scope must convert to GLOBAL scope.
-            if(it->second->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
+            if(cachedAsset->GetScope() == AssetScope::Scene && scope == AssetScope::Global)
             {
-                it->second->SetScope(AssetScope::Global);
+                cachedAsset->SetScope(AssetScope::Global);
             }
-            return it->second;
+            return cachedAsset;
         }
     }
     //printf("Loading asset %s\n", assetName.c_str());
@@ -519,7 +519,7 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
     //TODO: Ideally, we shouldn't do this - I guess we need to check if it exists before creating it???
     if(asset != nullptr && cache != nullptr && scope != AssetScope::Manual)
     {
-        (*cache)[assetName] = asset;
+        cache->Set(assetName, asset);
     }
     
     // Load in background.
@@ -592,34 +592,4 @@ void AssetManager::UnloadAsset(T* asset, std::unordered_map_ci<std::string, T*>*
 
     // Delete asset.
     delete asset;
-}
-
-template<class T>
-void AssetManager::UnloadAssets(std::unordered_map_ci<std::string, T*>& cache, AssetScope scope)
-{
-    if(scope == AssetScope::Global)
-    {
-        // When unloading at global scope, we're really deleting everything and clearing the entire cache.
-        for(auto& entry : cache)
-        {
-            delete entry.second;
-        }
-        cache.clear();
-    }
-    else
-    {
-        // Otherwise, we are picking and choosing what we want to get rid of.
-        for(auto it = cache.begin(); it != cache.end();)
-        {
-            if((*it).second->GetScope() == scope)
-            {
-                delete (*it).second;
-                it = cache.erase(it);
-            }
-            else
-            {
-                ++it;
-            }
-        }
-    }
 }
