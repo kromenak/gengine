@@ -192,7 +192,8 @@ private:
     AssetCache<TextAsset> mTextAssetCache;
     AssetCache<Config> mConfigCache;
 
-    std::unordered_map_ci<std::string, Shader*> mLoadedShaders;
+    AssetCache<TextAsset> mShaderFileCache;
+    AssetCache<Shader> mShaderCache;
 	
 	// Retrieve a barn bundle by name, or by contained asset.
 	BarnFile* GetBarn(const std::string& barnName);

@@ -49,6 +49,17 @@ public:
     void DestroyIndexBuffer(BufferHandle handle) override;
     void SetIndexBufferData(BufferHandle handle, uint32_t indexCount, uint16_t* indexData) override;
 
+    ShaderHandle CreateShader(const uint8_t* vertSource, const uint8_t* fragSource) override;
+    void DestroyShader(ShaderHandle handle) override;
+    void ActivateShader(ShaderHandle handle) override;
+
+    void SetShaderUniformInt(ShaderHandle handle, const char* name, int value) override;
+    void SetShaderUniformFloat(ShaderHandle handle, const char* name, float value) override;
+    void SetShaderUniformVector3(ShaderHandle handle, const char* name, const Vector3& value) override;
+    void SetShaderUniformVector4(ShaderHandle handle, const char* name, const Vector4& value) override;
+    void SetShaderUniformMatrix4(ShaderHandle handle, const char* name, const Matrix4& mat) override;
+    void SetShaderUniformColor(ShaderHandle handle, const char* name, const Color32& color) override;
+
     void Draw(Primitive primitive, BufferHandle vertexBuffer) override;
     void Draw(Primitive primitive, BufferHandle vertexBuffer, uint32_t vertexOffset, uint32_t vertexCount) override;
     void Draw(Primitive primitive, BufferHandle vertexBuffer, BufferHandle indexBuffer) override;

@@ -320,27 +320,31 @@ Shader* AssetManager::LoadShader(const std::string& name)
 
 Shader* AssetManager::LoadShader(const std::string& vertName, const std::string& fragName)
 {
+    // Determine the name of this shader asset.
+    std::string shaderName = vertName;
+    if(StringUtil::EqualsIgnoreCase(vertName, fragName))
+    {
+        shaderName.push_back('_');
+        shaderName += fragName;
+    }
+
     // Return existing shader if already loaded.
-	std::string key = vertName + fragName;
-	auto it = mLoadedShaders.find(key);
-	if(it != mLoadedShaders.end())
-	{
-		return it->second;
-	}
+    Shader* cachedShader = mShaderCache.Get(shaderName);
+    if(cachedShader != nullptr)
+    {
+        return cachedShader;
+    }
 
-    // Get paths for vert/frag shaders.
-	std::string vertFilePath = GetAssetPath(vertName + ".vert");
-	std::string fragFilePath = GetAssetPath(fragName + ".frag");
+    // Ok, we have to actually load this shader...
+    // Load the vertex and fragment shader files from the disk.
+    TextAsset* vertShader = LoadAsset<TextAsset>(vertName + ".vert", AssetScope::Global, &mShaderFileCache, false);
+    TextAsset* fragShader = LoadAsset<TextAsset>(fragName + ".frag", AssetScope::Global, &mShaderFileCache, false);
 
-    // Try to load shader.
-	Shader* shader = new Shader(vertFilePath.c_str(), fragFilePath.c_str());
-	if(shader == nullptr || !shader->IsGood())
-	{
-		return nullptr;
-	}
+    // Create the shader from the text assets.
+    Shader* shader = new Shader(shaderName, vertShader, fragShader);
 	
 	// Cache and return.
-	mLoadedShaders[key] = shader;
+    mShaderCache.Set(shaderName, shader);
 	return shader;
 }
 

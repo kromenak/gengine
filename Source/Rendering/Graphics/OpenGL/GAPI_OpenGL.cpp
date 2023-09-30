@@ -4,6 +4,9 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 
+#include "Matrix4.h"
+#include "Vector3.h"
+#include "Vector4.h"
 #include "Window.h"
 
 // Some OpenGL calls take in array indexes/offsets as pointers.
@@ -529,6 +532,239 @@ void GAPI_OpenGL::SetIndexBufferData(BufferHandle handle, uint32_t indexCount, u
 
     // Update its data.
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indexCount * sizeof(GLushort), indexData);
+}
+
+namespace
+{
+    GLuint CompileShader(const char* source, GLuint shaderType)
+    {
+        // Create shader.
+        GLuint shaderId = glCreateShader(shaderType);
+
+        // Load source code.
+        glShaderSource(shaderId, 1, &source, nullptr);
+
+        // Compile it.
+        glCompileShader(shaderId);
+
+        // Ask GL whether compile succeeded.
+        GLint compileSucceeded = 0;
+        glGetShaderiv(shaderId, GL_COMPILE_STATUS, &compileSucceeded);
+
+        // If not, we'll output the error log and clean up.
+        if(compileSucceeded == GL_FALSE)
+        {
+            GLint errorLength = 0;
+            glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &errorLength);
+
+            GLchar* errorLog = new GLchar[errorLength];
+            glGetShaderInfoLog(shaderId, errorLength, &errorLength, errorLog);
+
+            printf("Failed to compile shader: %s\n", errorLog);
+            delete[] errorLog;
+            glDeleteShader(shaderId);
+            return GL_NONE;
+        }
+        return shaderId;
+    }
+
+    GLuint LinkShaderProgram(GLuint vertexShaderId, GLuint fragmentShaderId)
+    {
+        // Create a new program and attach the two shaders to it.
+        GLuint program = glCreateProgram();
+        glAttachShader(program, vertexShaderId);
+        glAttachShader(program, fragmentShaderId);
+
+        // Bind shader attribute names to attribute indexes.
+        // This must be done before linking the program.
+        int semanticCount = static_cast<int>(VertexAttribute::Semantic::SemanticCount);
+        for(int i = 0; i < semanticCount; ++i)
+        {
+            glBindAttribLocation(program, i, gAttributeNames[i]);
+        }
+
+        // Link the shader program.
+        glLinkProgram(program);
+
+        // Check whether link succeeded.
+        GLint linkSucceeded = 0;
+        glGetProgramiv(program, GL_LINK_STATUS, &linkSucceeded);
+
+        // If not, we'll output the error log.
+        if(linkSucceeded == GL_FALSE)
+        {
+            GLint errorLength = 0;
+            glGetProgramiv(program, GL_INFO_LOG_LENGTH, &errorLength);
+
+            GLchar* errorLog = new GLchar[errorLength];
+            glGetProgramInfoLog(program, errorLength, &errorLength, errorLog);
+
+            printf("Failed to link shader program: %s\n", errorLog);
+            delete[] errorLog;
+        }
+
+        // Whether link succeeded or not, detach shaders from program after link attempt.
+        glDetachShader(program, vertexShaderId);
+        glDetachShader(program, fragmentShaderId);
+
+        // If link failed, delete the program.
+        if(linkSucceeded == GL_FALSE)
+        {
+            glDeleteProgram(program);
+            program = GL_NONE;
+        }
+
+        // Delete the shader objects. They aren't needed anymore after linking.
+        glDeleteShader(vertexShaderId);
+        glDeleteShader(fragmentShaderId);
+        return program;
+    }
+}
+
+ShaderHandle GAPI_OpenGL::CreateShader(const uint8_t* vertSource, const uint8_t* fragSource)
+{
+    // Compile the shaders, or fail.
+    GLuint vertexShaderId = CompileShader(reinterpret_cast<const char*>(vertSource), GL_VERTEX_SHADER);
+    GLuint fragmentShaderId = CompileShader(reinterpret_cast<const char*>(fragSource), GL_FRAGMENT_SHADER);
+    if(vertexShaderId == GL_NONE || fragmentShaderId == GL_NONE)
+    {
+        glDeleteShader(vertexShaderId);
+        glDeleteShader(fragmentShaderId);
+        return nullptr;
+    }
+
+    // Link the shaders to create a program.
+    GLuint program = LinkShaderProgram(vertexShaderId, fragmentShaderId);
+
+    // This is not *strictly* related to creating the shader program, but it is currently required.
+    // For any 2D texture uniforms in the shader, we need to specify which "texture unit" that sampler should use.
+    // To do that, we can use reflection on the shader data to see which texture uniforms exist.
+    {
+        // We must activate the program, since we may modify uniforms below.
+        glUseProgram(program);
+
+        // Info obtained about each uniform.
+        const GLsizei kMaxUniformNameLength = 32;
+        GLchar uniformNameBuffer[kMaxUniformNameLength];
+        GLsizei uniformNameLength = 0;
+        GLsizei uniformSize = 0;
+        GLenum uniformType = GL_NONE;
+
+        // Determine count of uniforms in this shader program.
+        GLint uniformCount = 0;
+        glGetProgramiv(program, GL_ACTIVE_UNIFORMS, &uniformCount);
+
+        // Iterate uniforms and process each one.
+        int textureUnitCounter = 0;
+        for(GLint i = 0; i < uniformCount; ++i)
+        {
+            // Grab uniform i.
+            glGetActiveUniform(program, i, kMaxUniformNameLength, &uniformNameLength, &uniformSize, &uniformType, uniformNameBuffer);
+
+            // If returned name length is 0, that means the uniform is not valid (compile/link failed?).
+            if(uniformNameLength <= 0) { continue; }
+
+            // For texture samplers, you must tell OpenGL which "texture unit" to use.
+            // If the shader only uses one texture sampler, this works automatically.
+            // But you must manually specify the unit if more than one texture is used.
+            if(uniformType == GL_SAMPLER_2D)
+            {
+                SetShaderUniformInt(reinterpret_cast<ShaderHandle>(program), uniformNameBuffer, textureUnitCounter);
+                ++textureUnitCounter;
+            }
+        }
+    }
+
+    // Finally return the shader handle.
+    return reinterpret_cast<ShaderHandle>(program);
+}
+
+void GAPI_OpenGL::DestroyShader(ShaderHandle handle)
+{
+    glDeleteProgram(reinterpret_cast<GLuint>(handle));
+}
+
+void GAPI_OpenGL::ActivateShader(ShaderHandle handle)
+{
+    glUseProgram(reinterpret_cast<GLuint>(handle));
+}
+
+void GAPI_OpenGL::SetShaderUniformInt(ShaderHandle handle, const char* name, int value)
+{
+    GLuint program = reinterpret_cast<GLuint>(handle);
+    if(program != GL_NONE)
+    {
+        GLint loc = glGetUniformLocation(program, name);
+        if(loc >= 0)
+        {
+            glUniform1i(loc, value);
+        }
+    }
+}
+
+void GAPI_OpenGL::SetShaderUniformFloat(ShaderHandle handle, const char* name, float value)
+{
+    GLuint program = reinterpret_cast<GLuint>(handle);
+    if(program != GL_NONE)
+    {
+        GLint loc = glGetUniformLocation(program, name);
+        if(loc >= 0)
+        {
+            glUniform1f(loc, value);
+        }
+    }
+}
+
+void GAPI_OpenGL::SetShaderUniformVector3(ShaderHandle handle, const char* name, const Vector3& value)
+{
+    GLuint program = reinterpret_cast<GLuint>(handle);
+    if(program != GL_NONE)
+    {
+        GLint loc = glGetUniformLocation(program, name);
+        if(loc >= 0)
+        {
+            glUniform3f(loc, value.x, value.y, value.z);
+        }
+    }
+}
+
+void GAPI_OpenGL::SetShaderUniformVector4(ShaderHandle handle, const char* name, const Vector4& value)
+{
+    GLuint program = reinterpret_cast<GLuint>(handle);
+    if(program != GL_NONE)
+    {
+        GLint loc = glGetUniformLocation(program, name);
+        if(loc >= 0)
+        {
+            glUniform4f(loc, value.x, value.y, value.z, value.w);
+        }
+    }
+}
+
+void GAPI_OpenGL::SetShaderUniformMatrix4(ShaderHandle handle, const char* name, const Matrix4& mat)
+{
+    GLuint program = reinterpret_cast<GLuint>(handle);
+    if(program != GL_NONE)
+    {
+        GLint loc = glGetUniformLocation(program, name);
+        if(loc >= 0)
+        {
+            glUniformMatrix4fv(loc, 1, GL_FALSE, mat);
+        }
+    }
+}
+
+void GAPI_OpenGL::SetShaderUniformColor(ShaderHandle handle, const char* name, const Color32& color)
+{
+    GLuint program = reinterpret_cast<GLuint>(handle);
+    if(program != GL_NONE)
+    {
+        GLint loc = glGetUniformLocation(program, name);
+        if(loc >= 0)
+        {
+            glUniform4f(loc, color.GetR() / 255.0f, color.GetG() / 255.0f, color.GetB() / 255.0f, color.GetA() / 255.0f);
+        }
+    }
 }
 
 void GAPI_OpenGL::Draw(Primitive primitive, BufferHandle vertexBuffer)

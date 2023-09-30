@@ -12,8 +12,13 @@
 #include "Texture.h" // For WrapMode/FilterMode
 #include "VertexDefinition.h"
 
+class Matrix4;
+class Vector3;
+class Vector4;
+
 typedef void* TextureHandle;
 typedef void* BufferHandle;
+typedef void* ShaderHandle;
 
 class GAPI
 {
@@ -139,6 +144,18 @@ public:
     virtual BufferHandle CreateIndexBuffer(uint32_t indexCount, uint16_t* indexData = nullptr, MeshUsage usage = MeshUsage::Static) = 0;
     virtual void DestroyIndexBuffer(BufferHandle handle) = 0;
     virtual void SetIndexBufferData(BufferHandle handle, uint32_t indexCount, uint16_t* indexData) = 0;
+
+    // Shaders
+    virtual ShaderHandle CreateShader(const uint8_t* vertSource, const uint8_t* fragSource) = 0;
+    virtual void DestroyShader(ShaderHandle handle) = 0;
+    virtual void ActivateShader(ShaderHandle handle) = 0;
+
+    virtual void SetShaderUniformInt(ShaderHandle handle, const char* name, int value) = 0;
+    virtual void SetShaderUniformFloat(ShaderHandle handle, const char* name, float value) = 0;
+    virtual void SetShaderUniformVector3(ShaderHandle handle, const char* name, const Vector3& value) = 0;
+    virtual void SetShaderUniformVector4(ShaderHandle handle, const char* name, const Vector4& value) = 0;
+    virtual void SetShaderUniformMatrix4(ShaderHandle handle, const char* name, const Matrix4& mat) = 0;
+    virtual void SetShaderUniformColor(ShaderHandle handle, const char* name, const Color32& color) = 0;
 
     // Drawing
     enum class Primitive
