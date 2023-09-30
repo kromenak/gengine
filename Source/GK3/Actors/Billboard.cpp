@@ -66,7 +66,7 @@ Vector3 Billboard::GetRotatePosition()
                     minY = pos.y;
                 }
             }
-            posSum /= submesh->GetVertexCount();
+            posSum /= static_cast<float>(submesh->GetVertexCount());
         }
         posSum.y = minY;
 

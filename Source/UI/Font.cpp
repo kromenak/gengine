@@ -186,7 +186,7 @@ void Font::ParseFromData(uint8_t* data, uint32_t dataLength)
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "default char"))
 			{
-				mDefaultChar = keyValue.GetValueAsInt();
+                mDefaultChar = static_cast<unsigned char>(keyValue.GetValueAsInt());
 			}
 			else if(StringUtil::EqualsIgnoreCase(keyValue.key, "type"))
 			{

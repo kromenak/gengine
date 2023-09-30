@@ -1,8 +1,3 @@
-//
-// VertexDefinition.cpp
-//
-// Clark Kromenaker
-//
 #include "VertexDefinition.h"
 
 const char* gAttributeNames[] = {
