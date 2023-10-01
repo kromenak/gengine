@@ -10,33 +10,53 @@
 #include <vector>
 
 class Actor;
+class Font;
 class SidneyButton;
+class Texture;
 class UIButton;
+class UIImage;
+class UILabel;
 
 class SidneyMenuBar
 {
 public:
     void Init(Actor* parent, const std::string& label, float labelWidth);
-
     void Update();
+
+    void SetFirstDropdownPosition(float position);
+    void SetDropdownSpacing(float spacing);
 
     void AddDropdown(const std::string& label);
     void AddDropdownChoice(const std::string& label, std::function<void()> pressCallback);
+
+    void SetDropdownEnabled(size_t index, bool enabled);
 
 private:
     // The root of the menu bar hierarchy.
     Actor* mRoot = nullptr;
 
-    const float kFirstMenuItemPos = 14.0f;
-    const float kMenuItemSpacing = 15.0f;
-    float mNextMenuItemPos = kFirstMenuItemPos;
+    // For placing dropdowns: the next dropdown position, and the desired dropdown spacing.
+    // Modifying these while adding dropdowns allows pretty flexible placement.
+    float mDropdownSpacing = 15.0f;
+    float mNextDropdownPosition = 14.0f;
 
     // Represents dropdown menus on the menu bar.
     // Hovering an item shows the nested choices. Each choice can be clicked.
     struct Dropdown
     {
-        UIButton* root = nullptr;
+        UIButton* rootButton = nullptr;
+        UILabel* rootLabel = nullptr;
+        UIImage* rootArrow = nullptr;
+
         std::vector<SidneyButton*> options;
     };
     std::vector<Dropdown> mDropdowns;
+
+    // Fonts for enabled vs. disabled dropdowns.
+    Font* mDropdownFont = nullptr;
+    Font* mDropdownDisabledFont = nullptr;
+
+    // Arrow texture for enabled vs. disabled dropdowns.
+    Texture* mDropdownArrowTexture = nullptr;
+    Texture* mDropdownDisabledArrowTexture = nullptr;
 };

@@ -49,7 +49,12 @@ SidneyButton::SidneyButton(Actor* parent) : Actor("SidneyButton", TransformType:
 void SidneyButton::OnUpdate(float deltaTime)
 {
     // If no press anim is occurring, just change the border color when hovering.
-    if(mPressAnimTimer <= 0.0f)
+    mLabel->SetFont(mButton->CanInteract() ? mFont : mDisabledFont);
+    if(!mButton->CanInteract())
+    {
+        mBorder->SetTexturesAndColors(SidneyUtil::GetGrayBoxParams(Color32::Clear));
+    }
+    else if(mPressAnimTimer <= 0.0f)
     {
         if(mButton->IsHovered())
         {
@@ -94,13 +99,20 @@ void SidneyButton::SetWidth(float width)
     GetRectTransform()->SetSizeDeltaX(width);
 }
 
-void SidneyButton::SetFont(Font* font)
+void SidneyButton::SetFont(Font* font, Font* disabledFont)
 {
+    mFont = font;
+    mDisabledFont = disabledFont;
+    if(mDisabledFont == nullptr)
+    {
+        mDisabledFont = font;
+    }
+
     // Note: assuming that a valid size is used.
     mLabel->SetFont(font);
 
-    // As far as I can tell, the height is just a couple pixels taller than the font itself.
-    GetRectTransform()->SetSizeDeltaY(font->GetGlyphHeight() + 2);
+    // Use the font's glyph height by default.
+    GetRectTransform()->SetSizeDeltaY(font->GetGlyphHeight());
 }
 
 void SidneyButton::SetText(const std::string& text)
@@ -120,6 +132,9 @@ RectTransform* SidneyButton::GetRectTransform()
 
 void SidneyButton::Press()
 {
-    gAudioManager.PlaySFX(mPressAudio);
-    mPressAnimTimer = 0.3f;
+    if(mButton->CanInteract())
+    {
+        gAudioManager.PlaySFX(mPressAudio);
+        mPressAnimTimer = 0.3f;
+    }
 }

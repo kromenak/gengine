@@ -13,6 +13,7 @@
 #include "Vector2.h"
 
 class Actor;
+class SidneyButton;
 class UIButton;
 struct UINineSliceParams;
 
@@ -28,10 +29,13 @@ public:
     static void CreateMainMenuButton(Actor* parent, std::function<void()> pressCallback);
     static Actor* CreateMenuBar(Actor* parent, const std::string& screenName, float labelWidth);
 
+    static SidneyButton* CreateBigButton(Actor* parent);
+
     static const UINineSliceParams& GetGrayBoxParams(const Color32& centerColor);
     static const UINineSliceParams& GetGoldBoxParams(const Color32& centerColor);
 
     static const Localizer& GetMainScreenLocalizer();
+    static const Localizer& GetAnalyzeLocalizer();
     static const Localizer& GetAddDataLocalizer();
     static const Localizer& GetMakeIdLocalizer();
 };

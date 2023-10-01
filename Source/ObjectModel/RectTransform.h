@@ -44,6 +44,7 @@ public:
 	void SetSizeDelta(const Vector2& size);
 	void SetSizeDeltaX(float x);
 	void SetSizeDeltaY(float y);
+    const Vector2& GetSizeDelta() const { return mSizeDelta; }
 	
 	void SetPivot(float x, float y);
 	void SetPivot(const Vector2& pivot);

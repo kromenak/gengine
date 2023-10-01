@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "SidneyAddData.h"
+#include "SidneyAnalyze.h"
 #include "SidneyEmail.h"
 #include "SidneyFiles.h"
 #include "SidneyMakeId.h"
@@ -54,6 +55,7 @@ private:
     SidneySearch mSearch;
     SidneyEmail mEmail;
     SidneyFiles mFiles;
+    SidneyAnalyze mAnalyze;
     SidneyAddData mAddData;
     SidneyMakeId mMakeId;
 };

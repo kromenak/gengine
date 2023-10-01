@@ -120,7 +120,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
 
         buttonPos += kButtonSpacing;
         UIButton* analyzeButton = CreateMainButton(desktopBackground, "ANALYZE", buttonPos);
-        analyzeButton->SetPressCallback([](UIButton* button){
+        analyzeButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
 
             // Gabe also doesn't want to analyze stuff.
@@ -130,7 +130,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
             }
             else
             {
-                printf("Analyze\n");
+                mAnalyze.Show();
             }
         });
 
@@ -183,10 +183,11 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
     // Create subscreens.
     mSearch.Init(this);
     mEmail.Init(this);
-    mFiles.Init(this);
+    mAnalyze.Init(this, &mFiles);
     mAddData.Init(this, &mFiles);
     mMakeId.Init(this);
 
+    mFiles.Init(this);
     // Not active by default.
     SetActive(false);
 }
@@ -262,5 +263,6 @@ void Sidney::OnUpdate(float deltaTime)
     // Update each screen in turn.
     // Each screen will early out if not active.
     mSearch.OnUpdate(deltaTime);
+    mAnalyze.OnUpdate(deltaTime);
     mMakeId.OnUpdate(deltaTime);
 }

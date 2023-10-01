@@ -12,6 +12,13 @@
 
 void SidneyMenuBar::Init(Actor* parent, const std::string& label, float labelWidth)
 {
+    // Cache frequently used assets.
+    mDropdownFont = gAssetManager.LoadFont("SID_EMB_10.FON");
+    mDropdownDisabledFont = gAssetManager.LoadFont("SID_NO_EMB_10.FON");
+
+    mDropdownArrowTexture = gAssetManager.LoadTexture("S_DWNARW.BMP");
+    mDropdownDisabledArrowTexture = gAssetManager.LoadTexture("S_DWNARW_NOEMB.BMP");
+
     // Bar that stretches across entire screen.
     {
         Actor* menuBarActor = new Actor(TransformType::RectTransform);
@@ -82,11 +89,11 @@ void SidneyMenuBar::Update()
     for(Dropdown& dropdown : mDropdowns)
     {
         // Show the dropdowns options if the root is hovered.
-        bool showOptions = dropdown.root->IsHovered();
+        bool showOptions = dropdown.rootButton->IsHovered();
 
         // If the root is not hovered, BUT the dropdown options are active
         // and one of THEM is hovered, we want to show the options!
-        if(!showOptions && dropdown.options.back()->IsActive())
+        if(!showOptions && !dropdown.options.empty() && dropdown.options.back()->IsActive())
         {
             for(SidneyButton* option : dropdown.options)
             {
@@ -107,31 +114,42 @@ void SidneyMenuBar::Update()
     }
 }
 
+void SidneyMenuBar::SetFirstDropdownPosition(float position)
+{
+    mNextDropdownPosition = position;
+}
+
+void SidneyMenuBar::SetDropdownSpacing(float spacing)
+{
+    mDropdownSpacing = spacing;
+}
+
 void SidneyMenuBar::AddDropdown(const std::string& label)
 {
     Actor* dropdownActor = new Actor(TransformType::RectTransform);
     dropdownActor->GetTransform()->SetParent(mRoot->GetTransform());
 
     UILabel* dropdownLabel = dropdownActor->AddComponent<UILabel>();
-    dropdownLabel->SetFont(gAssetManager.LoadFont("SID_EMB_10.FON"));
+    dropdownLabel->SetFont(mDropdownFont);
     dropdownLabel->SetText(label);
     dropdownLabel->SetHorizonalAlignment(HorizontalAlignment::Left);
     dropdownLabel->SetVerticalAlignment(VerticalAlignment::Center);
     
     dropdownLabel->GetRectTransform()->SetPivot(0.0f, 0.0f);
     dropdownLabel->GetRectTransform()->SetAnchor(0.0f, 0.0f);
-    dropdownLabel->GetRectTransform()->SetAnchoredPosition(mNextMenuItemPos, 1.0f);
+    dropdownLabel->GetRectTransform()->SetAnchoredPosition(mNextDropdownPosition, 1.0f);
 
     float labelWidth = dropdownLabel->GetTextWidth() + 16.0f;
     dropdownLabel->GetRectTransform()->SetSizeDelta(labelWidth, 13.0f);
 
     // Add dropdown nib.
+    UIImage* downArrowImage = nullptr;
     {
         Actor* downArrowActor = new Actor(TransformType::RectTransform);
         downArrowActor->GetTransform()->SetParent(dropdownActor->GetTransform());
 
-        UIImage* downArrowImage = downArrowActor->AddComponent<UIImage>();
-        downArrowImage->SetTexture(gAssetManager.LoadTexture("S_DWNARW.BMP"), true);
+        downArrowImage = downArrowActor->AddComponent<UIImage>();
+        downArrowImage->SetTexture(mDropdownArrowTexture, true);
 
         downArrowImage->GetRectTransform()->SetPivot(1.0f, 0.0f);
         downArrowImage->GetRectTransform()->SetAnchor(1.0f, 0.0f);
@@ -140,18 +158,21 @@ void SidneyMenuBar::AddDropdown(const std::string& label)
     }
 
     mDropdowns.emplace_back();
-    mDropdowns.back().root = dropdownActor->AddComponent<UIButton>();
-    mNextMenuItemPos += labelWidth + kMenuItemSpacing;
+    mDropdowns.back().rootButton = dropdownActor->AddComponent<UIButton>();
+    mDropdowns.back().rootLabel = dropdownLabel;
+    mDropdowns.back().rootArrow = downArrowImage;
+    mNextDropdownPosition += labelWidth + mDropdownSpacing;
 }
 
 void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<void()> pressCallback)
 {
     assert(!mDropdowns.empty());
 
-    SidneyButton* button = new SidneyButton(mDropdowns.back().root->GetOwner());
+    SidneyButton* button = new SidneyButton(mDropdowns.back().rootButton->GetOwner());
     button->SetText(label);
     button->SetTextAlignment(HorizontalAlignment::Left);
     button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+    button->GetRectTransform()->SetSizeDeltaY(button->GetRectTransform()->GetSizeDelta().y + 2); // looks better with a little extra height
     button->SetWidth(100.0f);
     button->SetPressCallback(pressCallback);
 
@@ -164,4 +185,20 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<vo
     button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     button->GetRectTransform()->SetAnchoredPosition(0.0f, -13.0f + mDropdowns.back().options.size() * -13.0f);
     mDropdowns.back().options.emplace_back(button);
+}
+
+void SidneyMenuBar::SetDropdownEnabled(size_t index, bool enabled)
+{
+    if(index >= mDropdowns.size()) { return; }
+
+    if(enabled)
+    {
+        mDropdowns[index].rootLabel->SetFont(mDropdownFont);
+        mDropdowns[index].rootArrow->SetTexture(mDropdownArrowTexture);
+    }
+    else
+    {
+        mDropdowns[index].rootLabel->SetFont(mDropdownDisabledFont);
+        mDropdowns[index].rootArrow->SetTexture(mDropdownDisabledArrowTexture);
+    }
 }

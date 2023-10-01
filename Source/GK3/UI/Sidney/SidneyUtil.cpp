@@ -141,6 +141,13 @@ Actor* SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName, f
     return menuBarActor;
 }
 
+SidneyButton* SidneyUtil::CreateBigButton(Actor* parent)
+{
+    SidneyButton* button = new SidneyButton(parent);
+    button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"), gAssetManager.LoadFont("SID_TEXT_18_UL.FON"));
+    return button;
+}
+
 const UINineSliceParams& SidneyUtil::GetGrayBoxParams(const Color32& centerColor)
 {
     static UINineSliceParams params;
@@ -180,6 +187,12 @@ const UINineSliceParams& SidneyUtil::GetGoldBoxParams(const Color32& centerColor
 const Localizer& SidneyUtil::GetMainScreenLocalizer()
 {
     static Localizer localizer("SIDNEY.TXT", "Main Screen");
+    return localizer;
+}
+
+const Localizer& SidneyUtil::GetAnalyzeLocalizer()
+{
+    static Localizer localizer("SIDNEY.TXT", "Analyze Screen");
     return localizer;
 }
 

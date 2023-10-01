@@ -29,23 +29,28 @@ public:
 
     void OnUpdate(float deltaTime) override;
 
+    RectTransform* GetRectTransform();
+
+    UILabel* GetLabel() const { return mLabel; }
     void SetWidth(float width);
-    void SetFont(Font* font);
+    void SetFont(Font* font, Font* disabledFont = nullptr);
     void SetText(const std::string& text);
     void SetTextAlignment(HorizontalAlignment alignment);
+
+    UIButton* GetButton() const { return mButton; }
     void SetPressCallback(std::function<void()> callback) { mPressCallback = callback; }
     void SetPressAudio(Audio* audio) { mPressAudio = audio; }
-
-    RectTransform* GetRectTransform();
-    UIButton* GetButton() const { return mButton; }
-
     void Press();
 
     bool IsAnimating() const { return mPressAnimTimer > 0.0f; }
-
+    
 private:
     // Text label on the button.
     UILabel* mLabel = nullptr;
+
+    // Fonts to use when button is interactable and not.
+    Font* mFont = nullptr;
+    Font* mDisabledFont = nullptr;
 
     // Colored border around the button.
     UINineSlice* mBorder = nullptr;
