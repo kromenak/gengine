@@ -22,6 +22,7 @@ public:
     void SetViewSpaceHandedness(Handedness handedness) override;
 
     void SetViewport(int32_t x, int32_t y, uint32_t width, uint32_t height) override;
+    void SetScissorRect(bool enabled, const Rect& rect) override;
 
     void SetDepthWriteEnabled(bool enabled) override;
     void SetDepthTestEnabled(bool enabled) override;

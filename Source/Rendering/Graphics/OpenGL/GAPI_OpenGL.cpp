@@ -248,6 +248,20 @@ void GAPI_OpenGL::SetViewport(int32_t x, int32_t y, uint32_t width, uint32_t hei
                static_cast<GLsizei>(width), static_cast<GLsizei>(height));
 }
 
+void GAPI_OpenGL::SetScissorRect(bool enabled, const Rect& rect)
+{
+    if(enabled)
+    {
+        glEnable(GL_SCISSOR_TEST);
+        glScissor(static_cast<GLint>(rect.x), static_cast<GLint>(rect.y),
+                  static_cast<GLint>(rect.width), static_cast<GLint>(rect.height));
+    }
+    else
+    {
+        glDisable(GL_SCISSOR_TEST);
+    }
+}
+
 void GAPI_OpenGL::SetDepthWriteEnabled(bool enabled)
 {
     glDepthMask(enabled ? GL_TRUE : GL_FALSE);

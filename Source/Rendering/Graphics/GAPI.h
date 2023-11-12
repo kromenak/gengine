@@ -9,6 +9,7 @@
 #pragma once
 #include "Color32.h"
 #include "MeshDefinition.h"
+#include "Rect.h"
 #include "Texture.h" // For WrapMode/FilterMode
 #include "VertexDefinition.h"
 
@@ -91,6 +92,7 @@ public:
 
     // Viewport
     virtual void SetViewport(int32_t x, int32_t y, uint32_t width, uint32_t height) = 0;
+    virtual void SetScissorRect(bool enabled, const Rect& rect) = 0;
 
     // Depth Buffer
     virtual void SetDepthWriteEnabled(bool enabled) = 0;

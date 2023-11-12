@@ -30,6 +30,8 @@ public:
 	void AddWidget(UIWidget* widget);
 	void RemoveWidget(UIWidget* widget);
 	void RemoveAllWidgets() { mWidgets.clear(); }
+
+    void SetMasked(bool masked) { mMasked = masked; }
 	
 private:
 	// An array of all canvases that currently exist.
@@ -43,5 +45,7 @@ private:
     int mDrawOrder = INT_MAX;
 	
 	// All widgets on this canvas.
-	std::vector<UIWidget*> mWidgets;
+    std::vector<UIWidget*> mWidgets;
+
+    bool mMasked = false;
 };

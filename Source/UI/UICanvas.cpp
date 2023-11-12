@@ -1,5 +1,6 @@
 #include "UICanvas.h"
 
+#include "GAPI.h"
 #include "InputManager.h"
 
 TYPE_DEF_CHILD(UIWidget, UICanvas);
@@ -119,6 +120,14 @@ void UICanvas::Render()
 {
 	if(IsActiveAndEnabled())
 	{
+        // If masked, set a scissor rect on our world rect.
+        // This means that anything outside of our world rect doesn't render.
+        if(mMasked)
+        {
+            GAPI::Get()->SetScissorRect(true, GetRectTransform()->GetWorldRect());
+        }
+
+        // Render all our widgets.
 		for(auto& widget : mWidgets)
 		{
 			if(widget->IsActiveAndEnabled())
@@ -126,6 +135,12 @@ void UICanvas::Render()
 				widget->Render();
 			}
 		}
+
+        // Unset mask if we are using one.
+        if(mMasked)
+        {
+            GAPI::Get()->SetScissorRect(false, Rect());
+        }
 	}
 }
 
