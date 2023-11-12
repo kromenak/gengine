@@ -89,6 +89,16 @@ void VertexArray::DrawLines(uint32_t offset, uint32_t count)
     Draw(GAPI::Primitive::Lines, offset, count);
 }
 
+void VertexArray::DrawPoints()
+{
+    DrawPoints(0, mData.indexCount > 0 ? mData.indexCount : mData.vertexCount);
+}
+
+void VertexArray::DrawPoints(uint32_t offset, uint32_t count)
+{
+    Draw(GAPI::Primitive::Points, offset, count);
+}
+
 void VertexArray::Draw(GAPI::Primitive mode)
 {
     Draw(mode, 0, mData.indexCount > 0 ? mData.indexCount : mData.vertexCount);

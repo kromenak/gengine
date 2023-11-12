@@ -31,6 +31,9 @@ void Submesh::Render()
     case RenderMode::Lines:
         mVertexArray.DrawLines();
         break;
+    case RenderMode::Points:
+        mVertexArray.DrawPoints();
+        break;
     }
 }
 
@@ -47,6 +50,9 @@ void Submesh::Render(unsigned int offset, unsigned int count)
         break;
     case RenderMode::Lines:
         mVertexArray.DrawLines(offset, count);
+        break;
+    case RenderMode::Points:
+        mVertexArray.DrawPoints(offset, count);
         break;
 	}
 }

@@ -42,6 +42,9 @@ public:
     void DrawLines();
     void DrawLines(uint32_t offset, uint32_t count);
 
+    void DrawPoints();
+    void DrawPoints(uint32_t offset, uint32_t count);
+
     void Draw(GAPI::Primitive mode);
     void Draw(GAPI::Primitive mode, uint32_t offset, uint32_t count);
 

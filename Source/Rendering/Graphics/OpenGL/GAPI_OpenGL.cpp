@@ -87,6 +87,8 @@ namespace
     {
         switch(primitive)
         {
+        case GAPI::Primitive::Points:
+            return GL_POINTS;
         case GAPI::Primitive::Lines:
             return GL_LINES;
         default:
@@ -140,6 +142,10 @@ bool GAPI_OpenGL::Init()
     // Init OpenGL for IMGUI.
     ImGui_ImplSDL2_InitForOpenGL(Window::Get(), mContext);
     ImGui_ImplOpenGL3_Init("#version 150");
+
+    // Set a global size for GL_POINTS rendering.
+    // This is tuned for the points used in Sidney's Map Analysis - will need to set elsewhere if we need different sizes.
+    glPointSize(5.0f);
     return true;
 }
 

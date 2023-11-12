@@ -162,6 +162,7 @@ public:
     // Drawing
     enum class Primitive
     {
+        Points,
         Lines,
         Triangles,
         TriangleStrip,
