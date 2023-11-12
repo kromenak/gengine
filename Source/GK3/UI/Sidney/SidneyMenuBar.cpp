@@ -174,7 +174,22 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<vo
     button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
     button->GetRectTransform()->SetSizeDeltaY(button->GetRectTransform()->GetSizeDelta().y + 2); // looks better with a little extra height
     button->SetWidth(100.0f);
-    button->SetPressCallback(pressCallback);
+    button->SetPressCallback([this, button, pressCallback](){
+        if(pressCallback != nullptr)
+        {
+            pressCallback();
+        }
+
+        // After pressing a dropdown choice, the dropdown should close.
+        // Easiest is just make sure all dropdowns are closed at this point.
+        for(auto& dropdown : mDropdowns)
+        {
+            for(auto& choice : dropdown.options)
+            {
+                choice->SetActive(false);
+            }
+        }
+    });
 
     // This warrants more investigation, but these dropdown buttons *appear* to use different SFX on each run of the game.
     // But the sound seems consistent for the entire duration of the game's run.
