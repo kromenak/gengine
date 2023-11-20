@@ -44,6 +44,8 @@ private:
     // Hovering an item shows the nested choices. Each choice can be clicked.
     struct Dropdown
     {
+        bool enabled = true;
+
         UIButton* rootButton = nullptr;
         UILabel* rootLabel = nullptr;
         UIImage* rootArrow = nullptr;

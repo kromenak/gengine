@@ -89,7 +89,7 @@ void SidneyMenuBar::Update()
     for(Dropdown& dropdown : mDropdowns)
     {
         // Show the dropdowns options if the root is hovered.
-        bool showOptions = dropdown.rootButton->IsHovered();
+        bool showOptions = dropdown.enabled && dropdown.rootButton->IsHovered();
 
         // If the root is not hovered, BUT the dropdown options are active
         // and one of THEM is hovered, we want to show the options!
@@ -206,6 +206,7 @@ void SidneyMenuBar::SetDropdownEnabled(size_t index, bool enabled)
 {
     if(index >= mDropdowns.size()) { return; }
 
+    mDropdowns[index].enabled = enabled;
     if(enabled)
     {
         mDropdowns[index].rootLabel->SetFont(mDropdownFont);
