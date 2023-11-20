@@ -67,14 +67,14 @@ RegFunc1(SetPamphletPage, void, int, WAITABLE, REL_FUNC);
 
 shpvoid TurnLSRPageLeft()
 {
-    assert(false);
+    gInventoryManager.InventoryInspectTurnLSRPageLeft();
     return 0;
 }
 RegFunc0(TurnLSRPageLeft, void, IMMEDIATE, REL_FUNC);
 
 shpvoid TurnLSRPageRight()
 {
-    assert(false);
+    gInventoryManager.InventoryInspectTurnLSRPageRight();
     return 0;
 }
 RegFunc0(TurnLSRPageRight, void, IMMEDIATE, REL_FUNC);

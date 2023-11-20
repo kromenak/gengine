@@ -51,6 +51,9 @@ public:
 	void InventoryUninspect();
     bool IsInventoryInspectShowing() const;
 
+    void InventoryInspectTurnLSRPageLeft();
+    void InventoryInspectTurnLSRPageRight();
+
     Texture* GetInventoryItemIconTexture(const std::string& itemName);
 	Texture* GetInventoryItemListTexture(const std::string& itemName);
 	Texture* GetInventoryItemCloseupTexture(const std::string& itemName);

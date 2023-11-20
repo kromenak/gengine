@@ -196,6 +196,16 @@ bool InventoryManager::IsInventoryInspectShowing() const
     return mInventoryInspectScreen->IsShowing();
 }
 
+void InventoryManager::InventoryInspectTurnLSRPageLeft()
+{
+    mInventoryInspectScreen->TurnLSRPageLeft();
+}
+
+void InventoryManager::InventoryInspectTurnLSRPageRight()
+{
+    mInventoryInspectScreen->TurnLSRPageRight();
+}
+
 Texture* InventoryManager::GetInventoryItemIconTexture(const std::string& itemName)
 {
     // Find the item. If doesn't exist, return null.

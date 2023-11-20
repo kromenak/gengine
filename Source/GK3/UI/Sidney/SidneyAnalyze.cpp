@@ -117,8 +117,8 @@ void SidneyAnalyze::Init(Actor* parent, SidneyFiles* sidneyFiles)
                 // The game wants you to pick up these items before it thinks you have enough info to place points.
                 if(!gInventoryManager.HasInventoryItem("Church_Pamphlet") || !gInventoryManager.HasInventoryItem("LSR"))
                 {
-                    //gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O8O2ZPI1\", 1)");
-                    //return;
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O8O2ZPI1\", 1)");
+                    return;
                 }
             }
 
