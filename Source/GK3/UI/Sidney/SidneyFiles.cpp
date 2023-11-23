@@ -1,5 +1,7 @@
 #include "SidneyFiles.h"
 
+#include <algorithm>
+
 #include "AssetManager.h"
 #include "GameProgress.h"
 #include "Sidney.h"
@@ -32,7 +34,7 @@ void SidneyFiles::Init(Sidney* parent)
     mData.back().type = SidneyFileType::Shape;
 
     // Build list of known files. (TODO: Would be cool if this was data-driven?)
-    // Fingerprints (1-19)
+    // Fingerprints (0-18)
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileAbbePrint",        "ABBE_FINGERPRINT",      "e_sidney_add_fingerprint_abbe");
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileBuchelliPrint",    "BUCHELLIS_FINGERPRINT", "e_sidney_add_fingerprint_buchelli");
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileButhanePrint",     "BUTHANES_FINGERPRINT",  "e_sidney_add_fingerprint_buthane");
@@ -53,7 +55,7 @@ void SidneyFiles::Init(Sidney* parent)
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLSR1Print",        "UNKNOWN_PRINT_7");      // Unused?
     mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileEstellesLSRPrint", "UNKNOWN_PRINT_8");
 
-    // Images (20-27)
+    // Images (19-26)
     mAllFiles.emplace_back(SidneyFileType::Image, "fileMap",              "MAP",                      "e_sidney_add_map");
     mAllFiles.emplace_back(SidneyFileType::Image, "fileParchment1",       "PARCHMENT_1",              "e_sidney_add_parch1");
     mAllFiles.emplace_back(SidneyFileType::Image, "fileParchment2",       "PARCHMENT_2",              "e_sidney_add_parch2");
@@ -63,22 +65,27 @@ void SidneyFiles::Init(Sidney* parent)
     mAllFiles.emplace_back(SidneyFileType::Image, "fileHermeticSymbols",  "HERM_SYMBOLS",             "e_sidney_add_hermetical_symbols_from_serres");
     mAllFiles.emplace_back(SidneyFileType::Image, "fileSUMNote",          "I_AM_WORDS",               "e_sidney_add_sum_note");
 
-    // Audio (28-29)
+    // Audio (27-28)
     mAllFiles.emplace_back(SidneyFileType::Audio, "fileAbbeTape",     "", "e_sidney_add_tape_abbe");
     mAllFiles.emplace_back(SidneyFileType::Audio, "fileBuchelliTape", "", "e_sidney_add_tape_buchelli");
 
-    // Text (30-31)
+    // Text (29-30)
     mAllFiles.emplace_back(SidneyFileType::Text, "fileArcadiaText", "");
     mAllFiles.emplace_back(SidneyFileType::Text, "fileTempleOfSolomonText", "");     //TODO: Is this a text type?
 
     mAllFiles.emplace_back(SidneyFileType::Image, "fileHermeticSymbols", "");         //TODO: Seems doubled up and unused?
 
-    // Licenses (33-37)
+    // Licenses (32-36)
     mAllFiles.emplace_back(SidneyFileType::License, "fileBuchelliLicense",   "BUCHELLIS_LICENSE", "e_sidney_add_license_buchelli");
     mAllFiles.emplace_back(SidneyFileType::License, "fileEmilioLicense",     "EMILIOS_LICENSE",   "e_sidney_add_license_emilio");
     mAllFiles.emplace_back(SidneyFileType::License, "fileLadyHowardLicense", "HOWARDS_LICENSE",   "e_sidney_add_license_howard");
     mAllFiles.emplace_back(SidneyFileType::License, "fileMoselyLicense",     "MOSELYS_LICENSE",   "e_sidney_add_license_mosely");
     mAllFiles.emplace_back(SidneyFileType::License, "fileWilkesLicense",     "WILKES_LICENSE",    "e_sidney_add_license_wilkes");
+
+    // Shapes (37-39)
+    mAllFiles.emplace_back(SidneyFileType::Shape, "triangle");
+    mAllFiles.emplace_back(SidneyFileType::Shape, "circle");
+    mAllFiles.emplace_back(SidneyFileType::Shape, "rectangle");
 
     // Set file indexes (as this is how files are referenced when adding).
     for(size_t i = 0; i < mAllFiles.size(); ++i)
@@ -98,62 +105,8 @@ void SidneyFiles::Init(Sidney* parent)
                          static_cast<float>(backgroundTexture->GetHeight()));
     }
 
-    // Add dialog background.
-    {
-        // Create a root actor for the dialog.
-        mDialogRoot = new Actor(TransformType::RectTransform);
-        mDialogRoot->GetTransform()->SetParent(mRoot->GetTransform());
-
-        // Create a black background.
-        UIImage* backgroundImage = mDialogRoot->AddComponent<UIImage>();
-        backgroundImage->SetColor(Color32::Black);
-
-        // Receive input to avoid sending inputs to main screen below this screen.
-        backgroundImage->SetReceivesInput(true);
-
-        // Set to correct size and position.
-        RectTransform* rt = backgroundImage->GetRectTransform();
-        rt->SetSizeDelta(153.0f, 350.0f);
-        rt->SetAnchor(0.0f, 1.0f); // Top-Left
-        rt->SetPivot(0.0f, 1.0f); // Top-Left
-        rt->SetAnchoredPosition(40.0f, -66.0f);
-    }
-
-    // Add close button.
-    {
-        Actor* closeActor = new Actor(TransformType::RectTransform);
-        closeActor->GetTransform()->SetParent(mDialogRoot->GetTransform());
-
-        UIButton* closeButton = closeActor->AddComponent<UIButton>();
-        closeButton->GetRectTransform()->SetPivot(0.0f, 1.0f);
-        closeButton->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-        closeButton->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
-
-        closeButton->SetUpTexture(gAssetManager.LoadTexture("CLOSEWIN_UP.BMP"));
-        closeButton->SetDownTexture(gAssetManager.LoadTexture("CLOSEWIN_DOWN.BMP"));
-        closeButton->SetHoverTexture(gAssetManager.LoadTexture("CLOSEWIN_HOVER.BMP"));
-        
-        closeButton->SetPressCallback([this](UIButton* button){
-            Hide();
-        });
-    }
-
-    // Add title/header.
-    {
-        Actor* titleActor = new Actor(TransformType::RectTransform);
-        titleActor->GetTransform()->SetParent(mDialogRoot->GetTransform());
-
-        UILabel* titleLabel = titleActor->AddComponent<UILabel>();
-        titleLabel->GetRectTransform()->SetPivot(0.5f, 1.0f); // Top-Center
-        titleLabel->GetRectTransform()->SetAnchorMin(0.0f, 1.0f);
-        titleLabel->GetRectTransform()->SetAnchorMax(1.0f, 1.0f); // Fill space horizontally, anchor to top.
-        titleLabel->GetRectTransform()->SetSizeDeltaY(20.0f);
-
-        titleLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
-        titleLabel->SetText("File List");
-        titleLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
-        titleLabel->SetVerticalAlignment(VerticalAlignment::Top);
-    }
+    mFileList.Init(mRoot, false);
+    mShapeList.Init(mRoot, true);
 
     // Hide by default.
     Hide();
@@ -161,18 +114,18 @@ void SidneyFiles::Init(Sidney* parent)
 
 void SidneyFiles::Show(std::function<void(SidneyFile*)> selectFileCallback)
 {
-    mRoot->SetActive(true);
+    //mRoot->SetActive(true);
+    mFileList.Show(mData, selectFileCallback);
+}
 
-    // We must refresh this each time we show it, since the files may have changed since last time.
-    RefreshFileListUI();
-
-    // Save the select callback.
-    mSelectFileCallback = selectFileCallback;
+void SidneyFiles::ShowShapes(std::function<void(SidneyFile*)> selectFileCallback)
+{
+    mShapeList.Show(mData, selectFileCallback);
 }
 
 void SidneyFiles::Hide()
 {
-    mRoot->SetActive(false);
+    //mRoot->SetActive(false);
 }
 
 void SidneyFiles::AddFile(size_t fileIndex)
@@ -186,6 +139,11 @@ void SidneyFiles::AddFile(size_t fileIndex)
         if(dir.type == mAllFiles[fileIndex].type && !dir.HasFile(mAllFiles[fileIndex].name))
         {
             dir.files.emplace_back(&mAllFiles[fileIndex]);
+
+            // Sort files by index to ensure a consistent ordering when displayed in the UI.
+            std::sort(dir.files.begin(), dir.files.end(), [](SidneyFile* a, SidneyFile* b){
+                return a->index < b->index;
+            });
 
             // Add to score if there's a score event.
             if(!mAllFiles[fileIndex].scoreName.empty())
@@ -214,13 +172,161 @@ bool SidneyFiles::HasFile(const std::string& fileName) const
     return false;
 }
 
-SidneyFiles::FileListButton SidneyFiles::GetFileListButton()
+bool SidneyFiles::HasFileOfType(SidneyFileType type) const
+{
+    for(auto& dir : mData)
+    {
+        if(dir.type == type)
+        {
+            return !dir.files.empty();
+        }
+    }
+    return false;
+}
+
+void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
+{
+    mForShapes = forShapes;
+
+    // Add dialog background.
+    {
+        // Create a root actor for the dialog.
+        mWindowRoot = new Actor(TransformType::RectTransform);
+        mWindowRoot->GetTransform()->SetParent(parent->GetTransform());
+
+        // Create a black background.
+        UIImage* backgroundImage = mWindowRoot->AddComponent<UIImage>();
+        backgroundImage->SetColor(Color32::Black);
+
+        // Receive input to avoid sending inputs to main screen below this screen.
+        backgroundImage->SetReceivesInput(true);
+
+        // Set to correct size and position.
+        RectTransform* rt = backgroundImage->GetRectTransform();
+        rt->SetSizeDelta(153.0f, 350.0f);
+        rt->SetAnchor(AnchorPreset::TopLeft);
+        rt->SetAnchoredPosition(40.0f, -66.0f);
+    }
+
+    // Add close button.
+    {
+        Actor* closeActor = new Actor(TransformType::RectTransform);
+        closeActor->GetTransform()->SetParent(mWindowRoot->GetTransform());
+
+        UIButton* closeButton = closeActor->AddComponent<UIButton>();
+        closeButton->GetRectTransform()->SetPivot(0.0f, 1.0f);
+        closeButton->GetRectTransform()->SetAnchor(0.0f, 1.0f);
+        closeButton->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
+
+        closeButton->SetUpTexture(gAssetManager.LoadTexture("CLOSEWIN_UP.BMP"));
+        closeButton->SetDownTexture(gAssetManager.LoadTexture("CLOSEWIN_DOWN.BMP"));
+        closeButton->SetHoverTexture(gAssetManager.LoadTexture("CLOSEWIN_HOVER.BMP"));
+
+        closeButton->SetPressCallback([this](UIButton* button){
+            mWindowRoot->SetActive(false);
+        });
+    }
+
+    // Add title/header.
+    {
+        Actor* titleActor = new Actor(TransformType::RectTransform);
+        titleActor->GetTransform()->SetParent(mWindowRoot->GetTransform());
+
+        UILabel* titleLabel = titleActor->AddComponent<UILabel>();
+        titleLabel->GetRectTransform()->SetPivot(0.5f, 1.0f); // Top-Center
+        titleLabel->GetRectTransform()->SetAnchorMin(0.0f, 1.0f);
+        titleLabel->GetRectTransform()->SetAnchorMax(1.0f, 1.0f); // Fill space horizontally, anchor to top.
+        titleLabel->GetRectTransform()->SetSizeDeltaY(20.0f);
+
+        titleLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
+        titleLabel->SetText(forShapes ? SidneyUtil::GetAnalyzeLocalizer().GetText("ShapeList") :
+                                        SidneyUtil::GetAnalyzeLocalizer().GetText("FileList"));
+        titleLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+        titleLabel->SetVerticalAlignment(VerticalAlignment::Top);
+    }
+
+    // Hide by default.
+    mWindowRoot->SetActive(false);
+}
+
+void SidneyFiles::FileListWindow::Show(const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback)
+{
+    // Show the window.
+    mWindowRoot->SetActive(true);
+
+    // Disable all existing labels.
+    for(FileListButton& button : mButtons)
+    {
+        button.button->SetEnabled(false);
+        button.label->SetEnabled(false);
+    }
+    mButtonIndex = 0;
+
+    // Iterate and place each label.
+    Vector2 topLeft(10.0f, -28.0f);
+    for(auto& dir : data)
+    {
+        // Only show shapes if this is the shapes list.
+        // Don't show shapes in the normal file list!
+        if(mForShapes && dir.type != SidneyFileType::Shape)
+        {
+            continue;
+        }
+        if(!mForShapes && dir.type == SidneyFileType::Shape)
+        {
+            continue;
+        }
+
+        // Create the label for the directory itself.
+        // This has a leading "-" and uses gray colored text.
+        // Not used for shapes though!
+        if(!mForShapes)
+        {
+            FileListButton& dirButton = GetFileListButton();
+            dirButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
+            dirButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14_UL.FON"));
+            dirButton.label->SetText("-" + SidneyUtil::GetMainScreenLocalizer().GetText(dir.name));
+            dirButton.button->SetPressCallback(nullptr);
+            topLeft.y -= 16.0f;
+        }
+
+        // Create labels for each file within the directory.
+        // These are indented slightly and use gold colored text.
+        for(auto& file : dir.files)
+        {
+            FileListButton& fileButton = GetFileListButton();
+            fileButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
+            fileButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            fileButton.button->SetPressCallback([this, selectCallback, file](UIButton* button){
+                mWindowRoot->SetActive(false);
+                if(selectCallback != nullptr)
+                {
+                    selectCallback(file);
+                }
+            });
+
+            if(mForShapes)
+            {
+                Texture* shapeTexture = gAssetManager.LoadTexture(file->name);
+                fileButton.button->SetUpTexture(shapeTexture);
+                topLeft.y -= shapeTexture->GetHeight();
+            }
+            else
+            {
+                fileButton.label->SetText("  " + file->GetDisplayName());
+                topLeft.y -= 16.0f;
+            }   
+        }
+    }
+}
+
+SidneyFiles::FileListButton& SidneyFiles::FileListWindow::GetFileListButton()
 {
     // Need to create a new button maybe.
-    if(mFileListLabelIndex >= mFileListButtons.size())
+    if(mButtonIndex >= mButtons.size())
     {
         Actor* labelActor = new Actor(TransformType::RectTransform);
-        labelActor->GetTransform()->SetParent(mDialogRoot->GetTransform());
+        labelActor->GetTransform()->SetParent(mWindowRoot->GetTransform());
 
         UILabel* label = labelActor->AddComponent<UILabel>();
         label->GetRectTransform()->SetPivot(0.0f, 1.0f); // Top-Left
@@ -232,67 +338,19 @@ SidneyFiles::FileListButton SidneyFiles::GetFileListButton()
 
         labelActor->AddComponent<UIButton>();
 
-        mFileListButtons.emplace_back();
-        mFileListButtons.back().button = labelActor->AddComponent<UIButton>();
-        mFileListButtons.back().label = label;
+        mButtons.emplace_back();
+        mButtons.back().button = labelActor->AddComponent<UIButton>();
+        mButtons.back().label = label;
     }
 
     // We'll return this index.
-    int idx = mFileListLabelIndex;
+    int idx = mButtonIndex;
 
     // Make sure it is enabled.
-    mFileListButtons[idx].button->SetEnabled(true);
-    mFileListButtons[idx].label->SetEnabled(true);
+    mButtons[idx].button->SetEnabled(true);
+    mButtons[idx].label->SetEnabled(true);
 
     // Increment index and return the button.
-    ++mFileListLabelIndex;
-    return mFileListButtons[idx];
-}
-
-void SidneyFiles::RefreshFileListUI()
-{
-    // Disable all existing labels.
-    for(FileListButton& button : mFileListButtons)
-    {
-        button.button->SetEnabled(false);
-        button.label->SetEnabled(false);
-    }
-    mFileListLabelIndex = 0;
-
-    // Iterate and place each label.
-    Vector2 topLeft(10.0f, -28.0f);
-    for(auto& dir : mData)
-    {
-        // One unique bit of behavior: the shapes directory only appears if there's something in it.
-        if(dir.type == SidneyFileType::Shape && dir.files.empty())
-        {
-            continue;
-        }
-
-        // Create the label for the directory itself.
-        // This has a leading "-" and uses gray colored text.
-        FileListButton dirButton = GetFileListButton();
-        dirButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
-        dirButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14_UL.FON"));
-        dirButton.label->SetText("-" + SidneyUtil::GetMainScreenLocalizer().GetText(dir.name));
-        dirButton.button->SetPressCallback(nullptr);
-        topLeft.y -= 16.0f;
-
-        // Create labels for each file within the directory.
-        // These are indented slightly and use gold colored text.
-        for(auto& file : dir.files)
-        {
-            FileListButton fileButton = GetFileListButton();
-            fileButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
-            fileButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-            fileButton.label->SetText("  " + file->GetDisplayName());
-            fileButton.button->SetPressCallback([this, file](UIButton* button){
-                if(mSelectFileCallback != nullptr)
-                {
-                    mSelectFileCallback(file);
-                }
-            });
-            topLeft.y -= 16.0f;
-        }
-    }
+    ++mButtonIndex;
+    return mButtons[idx];
 }

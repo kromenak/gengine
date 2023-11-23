@@ -46,11 +46,15 @@ struct SidneyFile
 
     // A score name associated with adding this file.
     std::string scoreName;
+
+    // Has the file ever been analyzed before? Affects the behavior of opening a file in the Analyze view.
+    bool hasBeenAnalyzed = false;
     
     SidneyFile() = default;
     SidneyFile(const SidneyFile&) = default;
     SidneyFile(SidneyFile&&) = default;
 
+    SidneyFile(SidneyFileType type, const std::string& name) : type(type), name(name) { }
     SidneyFile(SidneyFileType type, const std::string& name, const std::string& invItemName) : type(type), name(name), invItemName(invItemName) { }
     SidneyFile(SidneyFileType type, const std::string& name, const std::string& invItemName, const std::string& scoreName) : type(type), name(name), invItemName(invItemName), scoreName(scoreName) { }
 
@@ -95,6 +99,7 @@ public:
     void Init(Sidney* sidney);
 
     void Show(std::function<void(SidneyFile*)> selectFileCallback = nullptr);
+    void ShowShapes(std::function<void(SidneyFile*)> selectFileCallback = nullptr);
     void Hide();
 
     void AddFile(size_t fileIndex);
@@ -102,6 +107,7 @@ public:
     int GetMaxFileIndex() const { return mAllFiles.size() - 1; }
 
     bool HasFile(const std::string& fileName) const;
+    bool HasFileOfType(SidneyFileType type) const;
 
 private:
     // The data in the file system. This is stuff that has been scanned into Sidney by the player.
@@ -111,22 +117,38 @@ private:
     // The index is important, as that's how the "Add Data" & localization mechanisms identify a file.
     std::vector<SidneyFile> mAllFiles;
 
-    // A callback for other screens to know when a file is selected by the user.
-    std::function<void(SidneyFile*)> mSelectFileCallback;
-
-    // Files dialog box UI root.
+    // Files UI root.
     Actor* mRoot = nullptr;
-    Actor* mDialogRoot = nullptr;
-
-    // Labels used to populate the file list. Can be reused/repurposed as the list changes.
+    
+    // A button used for each entry in the file list window.
     struct FileListButton
     {
         UIButton* button = nullptr;
         UILabel* label = nullptr;
     };
-    std::vector<FileListButton> mFileListButtons;
-    size_t mFileListLabelIndex = 0;
-    
-    FileListButton GetFileListButton();
-    void RefreshFileListUI();
+
+    // The game supports two different file list windows.
+    // One for most files, and then a separate one for shapes.
+    class FileListWindow
+    {
+    public:
+        void Init(Actor* parent, bool forShapes);
+
+        void Show(const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback);
+
+    private:
+        // The shapes list works a bit differently.
+        bool mForShapes = false;
+
+        // The root of the window - use to show/hide it.
+        Actor* mWindowRoot = nullptr;
+
+        // Each button is a selection in the window.
+        std::vector<FileListButton> mButtons;
+        size_t mButtonIndex = 0;
+
+        FileListButton& GetFileListButton();
+    };
+    FileListWindow mFileList;
+    FileListWindow mShapeList;
 };
