@@ -9,10 +9,10 @@
 #include <vector>
 
 #include "Material.h"
+#include "Vector2.h"
 
 class Color32;
 class Mesh;
-class Vector2;
 
 class UIPoints : public UIWidget
 {
@@ -24,8 +24,13 @@ public:
     void Render() override;
 
     void AddPoint(const Vector2& point);
+    void RemovePoint(const Vector2& point);
+    void RemovePoint(size_t index);
     void ClearPoints();
 
+    const Vector2& GetPoint(size_t index) const { return mPoints[index]; }
+    size_t GetPointsCount() const { return mPoints.size(); }
+    
     void SetColor(const Color32& color);
 
 private:

@@ -15,6 +15,7 @@ struct SidneyFile;
 class UIButton;
 class UIImage;
 class UILabel;
+class UILines;
 class UIPoints;
 
 class SidneyAnalyze
@@ -40,13 +41,30 @@ private:
     // A file that has been selected for analysis.
     SidneyFile* mAnalyzeFile = nullptr;
 
-    // A button to press to start analysis of a file.
+    // A button to press to perform analysis.
     SidneyButton* mAnalyzeButton = nullptr;
+
+    enum class State
+    {
+        Empty,
+        PreAnalyze,
+        Map,
+        Image
+    };
+    State mState = State::Empty;
     
-    // Pre-analyze UI - displays the file name/image before you press the analysis button.
+    // Pre-analyze UI - displays the file name/image before you press the analyze button.
     Actor* mPreAnalyzeWindow = nullptr;
     UILabel* mPreAnalyzeTitleLabel = nullptr;
     UIImage* mPreAnalyzeItemImage = nullptr;
+
+    // Message UI - shows a message in response to trying to analyze stuff.
+    Actor* mAnalyzeMessageWindow = nullptr;
+    UILabel* mAnalyzeMessage = nullptr;
+    
+    // Image UI - for analyzing an image.
+    Actor* mAnalyzeImageWindow = nullptr;
+    UIImage* mAnalyzeImage = nullptr;
 
     // Map UI - used for the big riddle puzzle.
     Actor* mAnalyzeMapWindow = nullptr;
@@ -62,9 +80,18 @@ private:
     {
         struct UI
         {
+            // The interactive area of the UI.
             UIButton* button = nullptr;
+
+            // The background image of the map.
             UIImage* background = nullptr;
+
+            // Points placed by the user (active and locked).
             UIPoints* points = nullptr;
+            UIPoints* lockedPoints = nullptr;
+
+            // Lines - only placed by system, not user.
+            UILines* lines = nullptr;
 
             Vector2 GetLocalPosFromMousePos();
         };
@@ -76,10 +103,18 @@ private:
     };
     MapState mMap;
 
-    void AnalyzeFile();
-    void AnalyzeMap();
+    void SetState(State state);
+    void SetStateFromFile();
 
+    void OnAnalyzeButtonPressed();
+    
     void AnalyzeMapInit();
+    void AnalyzeMapEnter();
     void AnalyzeMapUpdate(float deltaTime);
+    void AnalyzeMap();
     void AnalyzeMapSetStatusText(const std::string& text);
+
+    void AnalyzeImageInit();
+    void AnalyzeImageEnter();
+    void AnalyzeImage();
 };

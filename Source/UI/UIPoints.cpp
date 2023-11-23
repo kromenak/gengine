@@ -37,6 +37,24 @@ void UIPoints::AddPoint(const Vector2& point)
     mNeedMeshRegen = true;
 }
 
+void UIPoints::RemovePoint(const Vector2& point)
+{
+    for(int i = 0; i < mPoints.size(); ++i)
+    {
+        if(mPoints[i] == point)
+        {
+            RemovePoint(i);
+            return;
+        }
+    }
+}
+
+void UIPoints::RemovePoint(size_t index)
+{
+    mPoints.erase(mPoints.begin() + index);
+    mNeedMeshRegen = true;
+}
+
 void UIPoints::ClearPoints()
 {
     mPoints.clear();
