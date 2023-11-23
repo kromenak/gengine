@@ -171,7 +171,7 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<vo
     SidneyButton* button = new SidneyButton(mDropdowns.back().rootButton->GetOwner());
     button->SetText(label);
     button->SetTextAlignment(HorizontalAlignment::Left);
-    button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+    button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
     button->GetRectTransform()->SetSizeDeltaY(button->GetRectTransform()->GetSizeDelta().y + 2); // looks better with a little extra height
     button->SetWidth(100.0f);
     button->SetPressCallback([this, button, pressCallback](){
@@ -217,4 +217,11 @@ void SidneyMenuBar::SetDropdownEnabled(size_t index, bool enabled)
         mDropdowns[index].rootLabel->SetFont(mDropdownDisabledFont);
         mDropdowns[index].rootArrow->SetTexture(mDropdownDisabledArrowTexture);
     }
+}
+
+void SidneyMenuBar::SetDropdownChoiceEnabled(size_t dropdownIndex, size_t choiceIndex, bool enabled)
+{
+    if(dropdownIndex >= mDropdowns.size()) { return; }
+    if(choiceIndex > mDropdowns[dropdownIndex].options.size()) { return; }
+    mDropdowns[dropdownIndex].options[choiceIndex]->GetButton()->SetCanInteract(enabled);
 }

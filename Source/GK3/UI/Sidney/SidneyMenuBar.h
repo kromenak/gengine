@@ -30,6 +30,7 @@ public:
     void AddDropdownChoice(const std::string& label, std::function<void()> pressCallback);
 
     void SetDropdownEnabled(size_t index, bool enabled);
+    void SetDropdownChoiceEnabled(size_t dropdownIndex, size_t choiceIndex, bool enabled);
 
 private:
     // The root of the menu bar hierarchy.
