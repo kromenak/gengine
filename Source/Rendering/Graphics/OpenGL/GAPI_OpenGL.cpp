@@ -146,6 +146,9 @@ bool GAPI_OpenGL::Init()
     // Set a global size for GL_POINTS rendering.
     // This is tuned for the points used in Sidney's Map Analysis - will need to set elsewhere if we need different sizes.
     glPointSize(5.0f);
+
+    // Same for GL_LINES rendering.
+    glLineWidth(2.0f);
     return true;
 }
 
