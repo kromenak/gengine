@@ -31,6 +31,11 @@ void UIPoints::Render()
     mMesh->Render();
 }
 
+void UIPoints::SetColor(const Color32& color)
+{
+    mMaterial.SetColor(color);
+}
+
 void UIPoints::AddPoint(const Vector2& point)
 {
     mPoints.push_back(point);
@@ -59,11 +64,6 @@ void UIPoints::ClearPoints()
 {
     mPoints.clear();
     mNeedMeshRegen = true;
-}
-
-void UIPoints::SetColor(const Color32& color)
-{
-    mMaterial.SetColor(color);
 }
 
 void UIPoints::GenerateMesh()

@@ -23,6 +23,8 @@ public:
 
     void Render() override;
 
+    void SetColor(const Color32& color);
+
     void AddPoint(const Vector2& point);
     void RemovePoint(const Vector2& point);
     void RemovePoint(size_t index);
@@ -31,8 +33,6 @@ public:
     const Vector2& GetPoint(size_t index) const { return mPoints[index]; }
     size_t GetPointsCount() const { return mPoints.size(); }
     
-    void SetColor(const Color32& color);
-
 private:
     // The points in the set.
     std::vector<Vector2> mPoints;
