@@ -63,11 +63,22 @@ private:
     Actor* mAnalyzeMessageWindow = nullptr;
     UILabel* mAnalyzeMessage = nullptr;
     
-    // Image UI - for analyzing an image.
+    void SetState(State state);
+    void SetStateFromFile();
+
+    void OnAnalyzeButtonPressed();
+
+    void ShowAnalyzeMessage(const std::string& message);
+
+    // ANALYZE IMAGE
     Actor* mAnalyzeImageWindow = nullptr;
     UIImage* mAnalyzeImage = nullptr;
 
-    // Map UI - used for the big riddle puzzle.
+    void AnalyzeImageInit();
+    void AnalyzeImageEnter();
+    void AnalyzeImage();
+
+    // ANALYZE MAP
     Actor* mAnalyzeMapWindow = nullptr;
 
     // A status label that confirms certain map actions (e.g. placing points).
@@ -76,7 +87,7 @@ private:
 
     bool mEnteringPoints = false;
 
-    // When analyzing the map, it has a single state, but multiple views (zoomed in, zoomed out).
+    // The map screen is quite complex, so this helper class helps manage its state.
     struct MapState
     {
         struct UI
@@ -96,8 +107,10 @@ private:
 
             // Circles - placed and manipulated by the user.
             UICircles* circles = nullptr;
+            UICircles* lockedCircles = nullptr;
 
-            Vector2 GetLocalPosFromMousePos();
+            Vector2 GetLocalMousePos();
+            Vector2 GetPlacedPointNearPoint(const Vector2& point);
         };
         UI zoomedOut;
         UI zoomedIn;
@@ -113,24 +126,23 @@ private:
             ResizeShape
         };
         ClickAction zoomedOutClickAction = ClickAction::None;
-        
+
         Vector2 ZoomedOutToZoomedInPos(const Vector2& pos);
         Vector2 ZoomedInToZoomedOutPos(const Vector2& pos);
+
+        std::string GetPointLatLongText(const Vector2& zoomedInPos);
+
+        void AddShape(const std::string& shapeName);
+        void EraseShape();
+        bool IsShapeSelected();
     };
     MapState mMap;
 
-    void SetState(State state);
-    void SetStateFromFile();
+    void AnalyzeMap_Init();
+    void AnalyzeMap_EnterState();
+    void AnalyzeMap_Update(float deltaTime);
+    void AnalyzeMap_OnAnalyzeButtonPressed();
 
-    void OnAnalyzeButtonPressed();
-    
-    void AnalyzeMapInit();
-    void AnalyzeMapEnter();
-    void AnalyzeMapUpdate(float deltaTime);
-    void AnalyzeMap();
-    void AnalyzeMapSetStatusText(const std::string& text);
-
-    void AnalyzeImageInit();
-    void AnalyzeImageEnter();
-    void AnalyzeImage();
+    void AnalyzeMap_SetStatusText(const std::string& text, float duration = 5.0f);
+    void AnalyzeMap_SetPointStatusText(const std::string& baseMessage, const Vector2& zoomedInMapPos);
 };
