@@ -20,6 +20,8 @@ enum class RenderMode
 	TriangleStrip,		// A triangle is the current vertex and previous two vertices.
 	TriangleFan,		// A triangle is the first vertex and subsequent groups of two vertices.
 	Lines,				// Every 2 vertices is one line.
+    //LineStrip         // Each vertex is connected to previous one with a line.
+    LineLoop,           // Each vertex is connected to previous one with a line; final vertex connects to first vertex.
     Points              // Each vertex is a point.
 };
 

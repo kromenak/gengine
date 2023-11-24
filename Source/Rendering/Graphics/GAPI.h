@@ -164,6 +164,7 @@ public:
     {
         Points,
         Lines,
+        LineLoop,
         Triangles,
         TriangleStrip,
         TriangleFan

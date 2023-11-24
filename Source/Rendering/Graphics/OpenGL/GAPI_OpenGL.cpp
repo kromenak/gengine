@@ -91,6 +91,8 @@ namespace
             return GL_POINTS;
         case GAPI::Primitive::Lines:
             return GL_LINES;
+        case GAPI::Primitive::LineLoop:
+            return GL_LINE_LOOP;
         default:
         case GAPI::Primitive::Triangles:
             return GL_TRIANGLES;
