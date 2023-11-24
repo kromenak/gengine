@@ -84,8 +84,34 @@ void InventoryInspectScreen::Show(const std::string& itemName)
     // Save item name.
     mInspectItemName = itemName;
 
+    // If we're viewing LSR, we have to do some special stuff.
     if(IsLSR())
     {
+        // Figure out which page we should view initially. This depends on what part you're on.
+        if(gGameProgress.GetFlag("Ophiuchus"))
+        {
+            mLSRPage = 6;
+        }
+        else if(gGameProgress.GetFlag("Libra"))
+        {
+            mLSRPage = 5;
+        }
+        else if(gGameProgress.GetFlag("Leo"))
+        {
+            mLSRPage = 4;
+        }
+        else if(gGameProgress.GetFlag("Taurus"))
+        {
+            mLSRPage = 3;
+        }
+        else if(gGameProgress.GetFlag("Pisces"))
+        {
+            mLSRPage = 2;
+        }
+        else
+        {
+            mLSRPage = 1;
+        }
         InitLSR();
     }
     else
