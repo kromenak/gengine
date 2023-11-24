@@ -13,6 +13,7 @@ class SidneyButton;
 class SidneyFiles;
 struct SidneyFile;
 class UIButton;
+class UICircles;
 class UIImage;
 class UILabel;
 class UILines;
@@ -93,11 +94,26 @@ private:
             // Lines - only placed by system, not user.
             UILines* lines = nullptr;
 
+            // Circles - placed and manipulated by the user.
+            UICircles* circles = nullptr;
+
             Vector2 GetLocalPosFromMousePos();
         };
         UI zoomedOut;
         UI zoomedIn;
 
+        int selectedCircleIndex = -1;
+
+        enum class ClickAction
+        {
+            None,
+            FocusMap,
+            SelectShape,
+            MoveShape,
+            ResizeShape
+        };
+        ClickAction zoomedOutClickAction = ClickAction::None;
+        
         Vector2 ZoomedOutToZoomedInPos(const Vector2& pos);
         Vector2 ZoomedInToZoomedOutPos(const Vector2& pos);
     };
