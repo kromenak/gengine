@@ -1,8 +1,3 @@
-//
-// Matrix4.cpp
-//
-// Clark Kromenaker
-// 
 #include "Matrix4.h"
 
 #include <cmath>

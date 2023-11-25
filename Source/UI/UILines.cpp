@@ -31,15 +31,15 @@ void UILines::Render()
     mMesh->Render();
 }
 
+void UILines::SetColor(const Color32& color)
+{
+    mMaterial.SetColor(color);
+}
+
 void UILines::AddLine(const Vector2& startPoint, const Vector2& endPoint)
 {
     mLines.emplace_back(startPoint, endPoint);
     mNeedMeshRegen = true;
-}
-
-void UILines::SetColor(const Color32& color)
-{
-    mMaterial.SetColor(color);
 }
 
 void UILines::GenerateMesh()

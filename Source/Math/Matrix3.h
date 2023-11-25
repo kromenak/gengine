@@ -1,12 +1,12 @@
 //
-// Matrix3.h
-//
 // Clark Kromenaker
 //
 // A 3x3 matrix.
 //
 #pragma once
 #include <iostream>
+
+#include "Vector2.h"
 
 class Quaternion;
 class Vector3;
@@ -80,6 +80,12 @@ public:
     // Inverse
     void Invert();
     static Matrix3 Inverse(const Matrix3& matrix);
+
+    //*********************
+    // Transform Functions
+    //*********************
+    Vector2 TransformVector(const Vector2& vector) const;
+    Vector2 TransformPoint(const Vector2& point) const;
     
     //*********************
     // Factory Methods

@@ -24,10 +24,10 @@ public:
 
     void Render() override;
 
-    void AddLine(const Vector2& startPoint, const Vector2& endPoint);
-    
     void SetColor(const Color32& color);
 
+    void AddLine(const Vector2& startPoint, const Vector2& endPoint);
+    
 private:
     // The lines in the set.
     std::vector<LineSegment> mLines;
