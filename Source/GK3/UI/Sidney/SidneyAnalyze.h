@@ -18,6 +18,7 @@ class UIImage;
 class UILabel;
 class UILines;
 class UIPoints;
+class UIRectangles;
 
 class SidneyAnalyze
 {
@@ -109,6 +110,10 @@ private:
             UICircles* circles = nullptr;
             UICircles* lockedCircles = nullptr;
 
+            // Rectangles - placed and manipulated by the user.
+            UIRectangles* rectangles = nullptr;
+            UIRectangles* lockedRectangles = nullptr;
+
             Vector2 GetLocalMousePos();
             Vector2 GetPlacedPointNearPoint(const Vector2& point);
         };
@@ -116,6 +121,7 @@ private:
         UI zoomedIn;
 
         int selectedCircleIndex = -1;
+        int selectedRectangleIndex = -1;
 
         enum class ClickAction
         {
@@ -123,9 +129,12 @@ private:
             FocusMap,
             SelectShape,
             MoveShape,
-            ResizeShape
+            ResizeShape,
+            RotateShape
         };
         ClickAction zoomedOutClickAction = ClickAction::None;
+        Vector2 zoomedOutClickActionPos;
+        Vector2 zoomedOutClickShapeCenter;
 
         Vector2 ZoomedOutToZoomedInPos(const Vector2& pos);
         Vector2 ZoomedInToZoomedOutPos(const Vector2& pos);
@@ -134,13 +143,17 @@ private:
 
         void AddShape(const std::string& shapeName);
         void EraseShape();
+
         bool IsShapeSelected();
+        void ClearSelectedShape();
     };
     MapState mMap;
 
     void AnalyzeMap_Init();
     void AnalyzeMap_EnterState();
+
     void AnalyzeMap_Update(float deltaTime);
+
     void AnalyzeMap_OnAnalyzeButtonPressed();
 
     void AnalyzeMap_SetStatusText(const std::string& text, float duration = 5.0f);

@@ -16,6 +16,7 @@
 #include "UILabel.h"
 #include "UILines.h"
 #include "UIPoints.h"
+#include "UIRectangles.h"
 
 namespace
 {
@@ -36,6 +37,48 @@ namespace
     const Vector2 kPiscesCoustaussaPoint(405.0f, 1094.0f);
     const Vector2 kPiscesBezuPoint(301.0f, 385.0f);
     const Vector2 kPiscesBugarachPoint(991.0f, 327.0f);
+
+    bool IsPointOnEdgeOfRectangle(const UIRectangle& rect, const Vector2& point)
+    {
+        // Convert point to local space of the rectangle.
+        // After doing this, we can just worry about solving as though the rectangle has no rotation.
+        Vector3 localPoint = Matrix3::MakeRotateZ(-rect.angle).TransformPoint(point - rect.center);
+
+        // Calculate half width/height of the rect.
+        float halfWidth = rect.size.x * 0.5f;
+        float halfHeight = rect.size.y * 0.5f;
+
+        // Get how far the point is from the center on both axes.
+        float distFromCenterX = Math::Abs(localPoint.x);
+        float distFromCenterY = Math::Abs(localPoint.y);
+
+        // Determine whether the point was near any of the edges of the rectangle.
+        const float kCloseToEdgeDist = 2.5f;
+        bool nearLeftRightSides = Math::Abs(halfWidth - distFromCenterX) < kCloseToEdgeDist;
+        bool nearTopBottomSides = Math::Abs(halfHeight - distFromCenterY) < kCloseToEdgeDist;
+
+        // To actually be on the edge, one of those two bools must be true...
+        // ...AND the distance on the opposite axis must be within the half-size of the shape.
+        return (nearLeftRightSides && distFromCenterY <= halfHeight) || (nearTopBottomSides && distFromCenterX <= halfWidth);
+    }
+
+    bool IsPointInsideRectangle(const UIRectangle& rect, const Vector2& point)
+    {
+        // Convert point to local space of the rectangle.
+        // After doing this, we can just worry about solving as though the rectangle has no rotation.
+        Vector3 localPoint = Matrix3::MakeRotateZ(-rect.angle).TransformPoint(point - rect.center);
+
+        // Calculate half width/height of the rect.
+        float halfWidth = rect.size.x * 0.5f;
+        float halfHeight = rect.size.y * 0.5f;
+
+        // Get how far the point is from the center on both axes.
+        float distFromCenterX = Math::Abs(localPoint.x);
+        float distFromCenterY = Math::Abs(localPoint.y);
+
+        // Inside the rectangle if within half sizes on both axes.
+        return distFromCenterX < halfWidth && distFromCenterY < halfHeight;
+    }
 }
 
 Vector2 SidneyAnalyze::MapState::UI::GetLocalMousePos()
@@ -131,17 +174,50 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
     }
     else if(StringUtil::EqualsIgnoreCase(shapeName, "Circle"))
     {
-        //gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27731\", 1)");
+        if(!gGameProgress.GetFlag("Aquarius"))
+        {
+            // If you try to place a Circle before Aquarius is done, Grace won't let you. 
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27NG1\", 1)");
+        }
+        else if(gGameProgress.GetFlag("Pisces"))
+        {
+            // If you try to place after Pisces, Grace says another one isn't needed.
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27731\", 1)");
+        }
+        else
+        {
+            // During Pisces is the only time you can place a circle!
+            const Vector2 kDefaultCirclePos(599.0f, 770.0f);
+            const float kDefaultCircleRadius = 200.0f;
 
-        const Vector2 kDefaultCirclePos(599.0f, 770.0f);
-        const float kDefaultCircleRadius = 200.0f;
-
-        zoomedIn.circles->AddCircle(kDefaultCirclePos, kDefaultCircleRadius);
-        zoomedOut.circles->AddCircle(ZoomedInToZoomedOutPos(kDefaultCirclePos), (kDefaultCircleRadius / kZoomedInMapSize) * kZoomedOutMapSize);
+            zoomedIn.circles->AddCircle(kDefaultCirclePos, kDefaultCircleRadius);
+            zoomedOut.circles->AddCircle(ZoomedInToZoomedOutPos(kDefaultCirclePos), (kDefaultCircleRadius / kZoomedInMapSize) * kZoomedOutMapSize);
+        }
     }
     else if(StringUtil::EqualsIgnoreCase(shapeName, "Rectangle"))
     {
+        const Vector2 kDefaultRectanglePos(599.0f, 770.0f);
+        const Vector2 kDefaultRectangleSize(400.0f, 400.0f);
 
+        zoomedIn.rectangles->AddRectangle(kDefaultRectanglePos, kDefaultRectangleSize, Math::kPiOver4);
+        zoomedOut.rectangles->AddRectangle(ZoomedInToZoomedOutPos(kDefaultRectanglePos), ZoomedInToZoomedOutPos(kDefaultRectangleSize), Math::kPiOver4);
+
+        /*
+        if(!gGameProgress.GetFlag("Pisces"))
+        {
+            // If you haven't finished Pisces, Grace will say she's not ready for this shape.
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27NG1\", 1)");
+        }
+        else if(gGameProgress.GetFlag("Aries"))
+        {
+            // If you try to place after Aries, Grace says another one isn't needed.
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27731\", 1)");
+        }
+        else
+        {
+            // You can only place a Rectangle during Aries!
+        }
+        */
     }
 }
 
@@ -154,11 +230,31 @@ void SidneyAnalyze::MapState::EraseShape()
         zoomedIn.circles->ClearCircles();
         zoomedOut.circles->ClearCircles();
     }
+    if(selectedRectangleIndex >= 0)
+    {
+        selectedRectangleIndex = -1;
+        zoomedIn.rectangles->ClearRectangles();
+        zoomedOut.rectangles->ClearRectangles();
+    }
 }
 
 bool SidneyAnalyze::MapState::IsShapeSelected()
 {
-    return selectedCircleIndex >= 0; //TODO: other shapes too!
+    return selectedCircleIndex >= 0 || selectedRectangleIndex >= 0;
+}
+
+void SidneyAnalyze::MapState::ClearSelectedShape()
+{
+    if(selectedCircleIndex >= 0)
+    {
+        selectedCircleIndex = -1;
+        zoomedOut.circles->SetColor(kShapeZoomedOutColor);
+    }
+    if(selectedRectangleIndex >= 0)
+    {
+        selectedRectangleIndex = -1;
+        zoomedOut.rectangles->SetColor(kShapeZoomedOutColor);
+    }
 }
 
 void SidneyAnalyze::AnalyzeMap_Init()
@@ -193,6 +289,30 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedIn.background = zoomedInMapBackground->AddComponent<UIImage>();
         mMap.zoomedIn.background->SetTexture(gAssetManager.LoadTexture("SIDNEYBIGMAP.BMP"), true);
         mMap.zoomedIn.background->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+
+        // Create locked rectangles renderer.
+        {
+            Actor* rectanglesActor = new Actor(TransformType::RectTransform);
+            rectanglesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
+
+            mMap.zoomedIn.lockedRectangles = rectanglesActor->AddComponent<UIRectangles>();
+            mMap.zoomedIn.lockedRectangles->SetColor(Color32(0, 0, 255, 192));
+
+            mMap.zoomedIn.lockedRectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.lockedRectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
+
+        // Create rectangles renderer.
+        {
+            Actor* rectanglesActor = new Actor(TransformType::RectTransform);
+            rectanglesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
+
+            mMap.zoomedIn.rectangles = rectanglesActor->AddComponent<UIRectangles>();
+            mMap.zoomedIn.rectangles->SetColor(kShapeZoomedInColor);
+
+            mMap.zoomedIn.rectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.rectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
 
         // Create locked circles renderer.
         {
@@ -268,6 +388,30 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedOut.background->GetRectTransform()->SetSizeDelta(kZoomedOutMapSize, kZoomedOutMapSize);
 
         mMap.zoomedOut.button = zoomedOutMapActor->AddComponent<UIButton>();
+
+        // Create locked rectangles renderer.
+        {
+            Actor* rectanglesActor = new Actor(TransformType::RectTransform);
+            rectanglesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
+
+            mMap.zoomedOut.lockedRectangles = rectanglesActor->AddComponent<UIRectangles>();
+            mMap.zoomedOut.lockedRectangles->SetColor(Color32(0, 0, 255, 255));
+
+            mMap.zoomedOut.lockedRectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.lockedRectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
+
+        // Create rectangles renderer.
+        {
+            Actor* rectanglesActor = new Actor(TransformType::RectTransform);
+            rectanglesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
+
+            mMap.zoomedOut.rectangles = rectanglesActor->AddComponent<UIRectangles>();
+            mMap.zoomedOut.rectangles->SetColor(kShapeZoomedOutColor);
+
+            mMap.zoomedOut.rectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.rectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
 
         // Create locked circles renderer.
         {
@@ -418,21 +562,39 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
         // See if we clicked on a selectable shape. If so, it causes us to select it.
         if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
         {
+            // Check for selecting a circle.
             for(size_t i = 0; i < mMap.zoomedOut.circles->GetCirclesCount(); ++i)
             {
-                const Circle& circle = mMap.zoomedOut.circles->GetCircle(i);
-
                 // The click pos must be along the edge of the circle, not in the center.
+                const Circle& circle = mMap.zoomedOut.circles->GetCircle(i);
                 Vector2 edgePoint = circle.GetClosestSurfacePoint(zoomedOutMapPos);
                 if((edgePoint - zoomedOutMapPos).GetLengthSq() < 2.5f * 2.5f)
                 {
                     if(mMap.selectedCircleIndex != i)
                     {
+                        mMap.ClearSelectedShape();
                         mMap.selectedCircleIndex = i;
                         mMap.zoomedOut.circles->SetColor(kSelectedShapeZoomedOutColor);
                         mMap.zoomedOutClickAction = MapState::ClickAction::SelectShape;
+                        break;
                     }
-                    break;
+                }
+            }
+
+            // Check for selecting a rectangle.
+            for(size_t i = 0; i < mMap.zoomedOut.rectangles->GetCount(); ++i)
+            {
+                const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(i);
+                if(IsPointOnEdgeOfRectangle(rectangle, zoomedOutMapPos))
+                {
+                    if(mMap.selectedRectangleIndex != i)
+                    {
+                        mMap.ClearSelectedShape();
+                        mMap.selectedRectangleIndex = i;
+                        mMap.zoomedOut.rectangles->SetColor(kSelectedShapeZoomedOutColor);
+                        mMap.zoomedOutClickAction = MapState::ClickAction::SelectShape;
+                        break;
+                    }
                 }
             }
         }
@@ -440,35 +602,62 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
         // This isn't frequently used, but right-clicking actually de-selects the current shape.
         if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Right))
         {
-            if(mMap.selectedCircleIndex >= 0)
-            {
-                mMap.selectedCircleIndex = -1;
-                mMap.zoomedOut.circles->SetColor(kShapeZoomedOutColor);
-            }
+            mMap.ClearSelectedShape();
         }
 
         // We have a selected shape. See if we're hovering it and change the cursor if so.
         bool moveShapeCursor = false;
         bool resizeShapeCursor = false;
-        if(mMap.selectedCircleIndex >= 0)
+        bool rotateShapeCursor = false;
+        if(mMap.IsShapeSelected())
         {
-            const Circle& circle = mMap.zoomedOut.circles->GetCircle(mMap.selectedCircleIndex);
+            if(mMap.selectedCircleIndex >= 0)
+            {
+                const Circle& circle = mMap.zoomedOut.circles->GetCircle(mMap.selectedCircleIndex);
+                Vector2 edgePoint = circle.GetClosestSurfacePoint(zoomedOutMapPos);
+                if((edgePoint - zoomedOutMapPos).GetLengthSq() < 2.5f * 2.5f || mMap.zoomedOutClickAction == MapState::ClickAction::ResizeShape)
+                {
+                    resizeShapeCursor = true;
+                    
+                }
+                else if(circle.ContainsPoint(zoomedOutMapPos) || mMap.zoomedOutClickAction == MapState::ClickAction::MoveShape)
+                {
+                    moveShapeCursor = true;
+                }
+            }
+            else if(mMap.selectedRectangleIndex >= 0)
+            {
+                const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(mMap.selectedRectangleIndex);
+                if(IsPointOnEdgeOfRectangle(rectangle, zoomedOutMapPos))
+                {
+                    resizeShapeCursor = true;
+                }
+                else if(IsPointInsideRectangle(rectangle, zoomedOutMapPos))
+                {
+                    moveShapeCursor = true;
+                }
+                else
+                {
+                    rotateShapeCursor = true;
+                }
+            }
+        }
 
-            Vector2 edgePoint = circle.GetClosestSurfacePoint(zoomedOutMapPos);
-            if((edgePoint - zoomedOutMapPos).GetLengthSq() < 2.5f * 2.5f || mMap.zoomedOutClickAction == MapState::ClickAction::ResizeShape)
-            {
-                resizeShapeCursor = true;
-                gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGRESIZED1.CUR"));
-            }
-            else if(circle.ContainsPoint(zoomedOutMapPos) || mMap.zoomedOutClickAction == MapState::ClickAction::MoveShape)
-            {
-                moveShapeCursor = true;
-                gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGMOVE.CUR"));
-            }
-            else
-            {
-                gCursorManager.UseDefaultCursor();
-            }
+        if(resizeShapeCursor || mMap.zoomedOutClickAction == MapState::ClickAction::ResizeShape)
+        {
+            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGRESIZED1.CUR"));
+        }
+        else if(moveShapeCursor || mMap.zoomedOutClickAction == MapState::ClickAction::MoveShape)
+        {
+            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGMOVE.CUR"));
+        }
+        else if(rotateShapeCursor || mMap.zoomedOutClickAction == MapState::ClickAction::RotateShape)
+        {
+            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_TURNRIGHT.CUR"));
+        }
+        else
+        {
+            gCursorManager.UseDefaultCursor();
         }
 
         // Upon clicking the left mouse button, we commit to a certain action until the mouse button is later released.
@@ -482,9 +671,23 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
             {
                 mMap.zoomedOutClickAction = MapState::ClickAction::ResizeShape;
             }
+            else if(rotateShapeCursor)
+            {
+                mMap.zoomedOutClickAction = MapState::ClickAction::RotateShape;
+            }
             else
             {
                 mMap.zoomedOutClickAction = MapState::ClickAction::FocusMap;
+            }
+
+            mMap.zoomedOutClickActionPos = zoomedOutMapPos;
+            if(mMap.selectedCircleIndex >= 0)
+            {
+                mMap.zoomedOutClickShapeCenter = mMap.zoomedOut.circles->GetCircle(mMap.selectedCircleIndex).center;
+            }
+            if(mMap.selectedRectangleIndex >= 0)
+            {
+                mMap.zoomedOutClickShapeCenter = mMap.zoomedOut.rectangles->GetRectangle(mMap.selectedRectangleIndex).center;
             }
         }
 
@@ -495,7 +698,10 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                 if(mMap.selectedCircleIndex >= 0)
                 {
                     Circle zoomedOutCircle = mMap.zoomedOut.circles->GetCircle(mMap.selectedCircleIndex);
-                    zoomedOutCircle.center = zoomedOutMapPos;
+
+                    Vector3 expectedOffset = mMap.zoomedOutClickShapeCenter - mMap.zoomedOutClickActionPos;
+                    zoomedOutCircle.center = zoomedOutMapPos + expectedOffset;
+
                     mMap.zoomedOut.circles->ClearCircles();
                     mMap.zoomedOut.circles->AddCircle(zoomedOutCircle.center, zoomedOutCircle.radius);
 
@@ -503,19 +709,86 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     mMap.zoomedIn.circles->AddCircle(mMap.ZoomedOutToZoomedInPos(zoomedOutCircle.center),
                                                      (zoomedOutCircle.radius / kZoomedOutMapSize) * kZoomedInMapSize);
                 }
+                if(mMap.selectedRectangleIndex >= 0)
+                {
+                    UIRectangle zoomedOutRectangle = mMap.zoomedOut.rectangles->GetRectangle(mMap.selectedRectangleIndex);
+
+                    Vector3 expectedOffset = mMap.zoomedOutClickShapeCenter - mMap.zoomedOutClickActionPos;
+                    zoomedOutRectangle.center = zoomedOutMapPos + expectedOffset;
+
+                    mMap.zoomedOut.rectangles->ClearRectangles();
+                    mMap.zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
+
+                    mMap.zoomedIn.rectangles->ClearRectangles();
+                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.center),
+                                                           mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.size),
+                                                           zoomedOutRectangle.angle);
+                }
             }
             else if(mMap.zoomedOutClickAction == MapState::ClickAction::ResizeShape)
             {
                 if(mMap.selectedCircleIndex >= 0)
                 {
                     Circle zoomedOutCircle = mMap.zoomedOut.circles->GetCircle(mMap.selectedCircleIndex);
-                    zoomedOutCircle.radius = (zoomedOutCircle.center - zoomedOutMapPos).GetLength();;
+                    zoomedOutCircle.radius = (zoomedOutCircle.center - zoomedOutMapPos).GetLength();
                     mMap.zoomedOut.circles->ClearCircles();
                     mMap.zoomedOut.circles->AddCircle(zoomedOutCircle.center, zoomedOutCircle.radius);
 
                     mMap.zoomedIn.circles->ClearCircles();
                     mMap.zoomedIn.circles->AddCircle(mMap.ZoomedOutToZoomedInPos(zoomedOutCircle.center),
                                                      (zoomedOutCircle.radius / kZoomedOutMapSize) * kZoomedInMapSize);
+                }
+                if(mMap.selectedRectangleIndex >= 0)
+                {
+                    UIRectangle zoomedOutRectangle = mMap.zoomedOut.rectangles->GetRectangle(mMap.selectedRectangleIndex);
+
+                    Vector2 mouseMoveOffset = zoomedOutMapPos - mMap.zoomedOutClickActionPos;
+                    Vector2 centerToPos = zoomedOutMapPos - zoomedOutRectangle.center;
+
+                    float distChange = mouseMoveOffset.GetLength();
+                    if(Vector2::Dot(mouseMoveOffset, centerToPos) < 0)
+                    {
+                        distChange *= -1.0f;
+                    }
+                    mMap.zoomedOutClickActionPos = zoomedOutMapPos;
+
+                    zoomedOutRectangle.size.x += distChange;
+                    zoomedOutRectangle.size.y += distChange;
+
+                    mMap.zoomedOut.rectangles->ClearRectangles();
+                    mMap.zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
+
+                    mMap.zoomedIn.rectangles->ClearRectangles();
+                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.center),
+                                                           mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.size),
+                                                           zoomedOutRectangle.angle);
+                }
+            }
+            else if(mMap.zoomedOutClickAction == MapState::ClickAction::RotateShape)
+            {
+                if(mMap.selectedRectangleIndex >= 0)
+                {
+                    UIRectangle zoomedOutRectangle = mMap.zoomedOut.rectangles->GetRectangle(mMap.selectedRectangleIndex);
+
+                    Vector2 prevCenterToMouse = Vector2::Normalize(mMap.zoomedOutClickActionPos - mMap.zoomedOutClickShapeCenter);
+                    Vector2 centerToMouse = Vector2::Normalize(zoomedOutMapPos - mMap.zoomedOutClickShapeCenter);
+                    mMap.zoomedOutClickActionPos = zoomedOutMapPos;
+
+                    float angle = Math::Acos(Vector2::Dot(prevCenterToMouse, centerToMouse));
+                    Vector3 cross = Vector3::Cross(prevCenterToMouse, centerToMouse);
+                    if(cross.z < 0)
+                    {
+                        angle *= -1.0f;
+                    }
+                    zoomedOutRectangle.angle += angle;
+
+                    mMap.zoomedOut.rectangles->ClearRectangles();
+                    mMap.zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
+
+                    mMap.zoomedIn.rectangles->ClearRectangles();
+                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.center),
+                                                           mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.size),
+                                                           zoomedOutRectangle.angle);
                 }
             }
             else if(mMap.zoomedOutClickAction == MapState::ClickAction::FocusMap)
