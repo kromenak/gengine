@@ -7,11 +7,14 @@
 #include "Color32.h"
 #include "CursorManager.h"
 #include "GameProgress.h"
+#include "LocationManager.h"
 #include "RectTransform.h"
+#include "Sidney.h"
 #include "SidneyFiles.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UICircles.h"
+#include "UIGrids.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UILines.h"
@@ -201,13 +204,6 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
     }
     else if(StringUtil::EqualsIgnoreCase(shapeName, "Rectangle"))
     {
-        const Vector2 kDefaultRectanglePos(599.0f, 770.0f);
-        const Vector2 kDefaultRectangleSize(400.0f, 400.0f);
-
-        zoomedIn.rectangles->AddRectangle(kDefaultRectanglePos, kDefaultRectangleSize, Math::kPiOver4);
-        zoomedOut.rectangles->AddRectangle(ZoomedInToZoomedOutPos(kDefaultRectanglePos), ZoomedInToZoomedOutPos(kDefaultRectangleSize), Math::kPiOver4);
-
-        /*
         if(!gGameProgress.GetFlag("Pisces"))
         {
             // If you haven't finished Pisces, Grace will say she's not ready for this shape.
@@ -221,8 +217,12 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
         else
         {
             // You can only place a Rectangle during Aries!
+            const Vector2 kDefaultRectanglePos(599.0f, 770.0f);
+            const Vector2 kDefaultRectangleSize(400.0f, 400.0f);
+
+            zoomedIn.rectangles->AddRectangle(kDefaultRectanglePos, kDefaultRectangleSize, Math::kPiOver4);
+            zoomedOut.rectangles->AddRectangle(ZoomedInToZoomedOutPos(kDefaultRectanglePos), ZoomedInToZoomedOutPos(kDefaultRectangleSize), Math::kPiOver4);
         }
-        */
     }
 }
 
@@ -262,6 +262,56 @@ void SidneyAnalyze::MapState::ClearSelectedShape()
     }
 }
 
+void SidneyAnalyze::MapState::DrawGrid(uint8_t size, bool fillShape)
+{
+    if(fillShape)
+    {
+        // The game acts like you can do this whenever you want, but it's actually only possible to fill a Rectangle in one specific scenario.
+        if(zoomedOut.lockedRectangles->GetCount() > 0)
+        {
+            const UIRectangle& rect = zoomedOut.lockedRectangles->GetRectangle(0);
+            zoomedOut.grids->Add(rect.center, rect.size, rect.angle, size, false);
+
+            zoomedIn.grids->Add(ZoomedOutToZoomedInPos(rect.center), ZoomedOutToZoomedInPos(rect.size),
+                                rect.angle, size, false);
+        }
+    }
+    else
+    {
+        // Not filling a shape, so just draw one grid that fills the entire map.
+        Vector2 gridRectSize = Vector2::One * kZoomedInMapSize;
+        Vector2 gridRectCenter = gridRectSize * 0.5f;
+        zoomedIn.grids->Add(gridRectCenter, gridRectSize, 0.0f, size, true);
+
+        gridRectSize = Vector2::One * kZoomedOutMapSize;
+        gridRectCenter = gridRectSize * 0.5f;
+        zoomedOut.grids->Add(gridRectCenter, gridRectSize, 0.0f, size, true);
+    }
+}
+
+void SidneyAnalyze::MapState::LockGrid()
+{
+    if(zoomedOut.grids->GetCount() > 0)
+    {
+        const UIGrid& grid = zoomedOut.grids->GetGrid(0);
+
+        // Recreate grid in locked grids.
+        zoomedOut.lockedGrids->Add(grid.center, grid.size, grid.angle, grid.divisions, grid.drawBorder);
+        zoomedIn.lockedGrids->Add(ZoomedOutToZoomedInPos(grid.center), ZoomedOutToZoomedInPos(grid.size),
+                                  grid.angle, grid.divisions, grid.drawBorder);
+
+        // Clear non-locked grids.
+        zoomedOut.grids->Clear();
+        zoomedIn.grids->Clear();
+    }
+}
+
+void SidneyAnalyze::MapState::ClearGrid()
+{
+    zoomedIn.grids->Clear();
+    zoomedOut.grids->Clear();
+}
+
 void SidneyAnalyze::AnalyzeMap_Init()
 {
     // Create a parent "map window" object that contains all the map analysis stuff.
@@ -294,6 +344,30 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedIn.background = zoomedInMapBackground->AddComponent<UIImage>();
         mMap.zoomedIn.background->SetTexture(gAssetManager.LoadTexture("SIDNEYBIGMAP.BMP"), true);
         mMap.zoomedIn.background->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+
+        // Create locked grids renderer.
+        {
+            Actor* gridsActor = new Actor(TransformType::RectTransform);
+            gridsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
+
+            mMap.zoomedIn.lockedGrids = gridsActor->AddComponent<UIGrids>();
+            mMap.zoomedIn.lockedGrids->SetColor(Color32(0, 0, 255, 192));
+
+            mMap.zoomedIn.lockedGrids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.lockedGrids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
+
+        // Create grids renderer.
+        {
+            Actor* gridsActor = new Actor(TransformType::RectTransform);
+            gridsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
+
+            mMap.zoomedIn.grids = gridsActor->AddComponent<UIGrids>();
+            mMap.zoomedIn.grids->SetColor(kShapeZoomedInColor);
+
+            mMap.zoomedIn.grids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.grids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
 
         // Create locked rectangles renderer.
         {
@@ -393,6 +467,30 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedOut.background->GetRectTransform()->SetSizeDelta(kZoomedOutMapSize, kZoomedOutMapSize);
 
         mMap.zoomedOut.button = zoomedOutMapActor->AddComponent<UIButton>();
+
+        // Create locked grids renderer.
+        {
+            Actor* gridsActor = new Actor(TransformType::RectTransform);
+            gridsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
+
+            mMap.zoomedOut.lockedGrids = gridsActor->AddComponent<UIGrids>();
+            mMap.zoomedOut.lockedGrids->SetColor(Color32(0, 0, 255, 255));
+
+            mMap.zoomedOut.lockedGrids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.lockedGrids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
+
+        // Create grids renderer.
+        {
+            Actor* gridsActor = new Actor(TransformType::RectTransform);
+            gridsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
+
+            mMap.zoomedOut.grids = gridsActor->AddComponent<UIGrids>();
+            mMap.zoomedOut.grids->SetColor(kShapeZoomedOutColor);
+
+            mMap.zoomedOut.grids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.grids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
 
         // Create locked rectangles renderer.
         {
@@ -1005,6 +1103,12 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                Math::Approximately(angle, kRectangleRotation + Math::kPi, 0.1f) ||
                Math::Approximately(angle, kRectangleRotation + Math::kPi + Math::kPiOver2, 0.1f))
             {
+                // Clear click action, forcing the player to stop rotating the rectangle.
+                mMap.zoomedOutClickAction = MapState::ClickAction::None;
+
+                // Also clear the selection - rectangle can no longer be selected.
+                mMap.selectedRectangleIndex = -1;
+
                 // "Lock in" the correct rectangle.
                 mMap.zoomedOut.rectangles->ClearRectangles();
                 mMap.zoomedIn.rectangles->ClearRectangles();
@@ -1143,6 +1247,198 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
             // Says "map is too complex to analyze - try adding points or shapes."
             ShowAnalyzeMessage("MapNoPrimitiveNote");
         }
+    }
+
+    // Analyzing always clears point entry and shape selection.
+    mEnteringPoints = false;
+    mMap.ClearSelectedShape();
+}
+
+void SidneyAnalyze::AnalyzeMap_OnUseShapePressed()
+{
+    mSidneyFiles->ShowShapes([this](SidneyFile* selectedFile){
+        mMap.AddShape(selectedFile->name);
+    });
+}
+
+void SidneyAnalyze::AnalyzeMap_OnEraseShapePressed()
+{
+    if(mMap.IsShapeSelected())
+    {
+        // After completing Aries, the player has placed a Rectangle of the right size on the map, but it still needs to be rotated for Taurus.
+        // At this point, the game stops you from erasing the Rectangle, since that would "uncomplete" Aries.
+        bool ariesCompleted = gGameProgress.GetFlag("Aries");
+        bool taurusCompleted = gGameProgress.GetFlag("Taurus");
+        if(mMap.selectedRectangleIndex >= 0 && (ariesCompleted && !taurusCompleted))
+        {
+            // Grace says "I think that's right - I don't want to erase it."
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27LN1\", 1)");
+        }
+        else
+        {
+            mMap.EraseShape();
+        }
+    }
+    else
+    {
+        ShowAnalyzeMessage("NoShapeNote");
+    }
+}
+
+void SidneyAnalyze::AnalyzeMap_OnEnterPointsPressed()
+{
+    // Not allowed to place points until you've progressed far enough in the story for Grace to have something to plot.
+    if(gGameProgress.GetTimeblock() == Timeblock("205P"))
+    {
+        // The game wants you to pick up these items before it thinks you have enough info to place points.
+        if(!gInventoryManager.HasInventoryItem("Church_Pamphlet") || !gInventoryManager.HasInventoryItem("LSR"))
+        {
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O8O2ZPI1\", 1)");
+            return;
+        }
+    }
+
+    // Otherwise, we can place points.
+    AnalyzeMap_SetStatusText(SidneyUtil::GetAnalyzeLocalizer().GetText("EnterPointsNote"));
+    mEnteringPoints = true;
+}
+
+void SidneyAnalyze::AnalyzeMap_OnClearPointsPressed()
+{
+    mEnteringPoints = false;
+    mMap.zoomedIn.points->ClearPoints();
+    mMap.zoomedOut.points->ClearPoints();
+}
+
+void SidneyAnalyze::AnalyzeMap_OnDrawGridPressed()
+{
+    if(mMap.zoomedIn.grids->GetCount() == 0)
+    {
+        // Figure out what we want the grid to fill (whole screen or a shape).
+        std::vector<std::string> gridFillChoices = {
+            SidneyUtil::GetAnalyzeLocalizer().GetText("GridFillScreen"),
+            SidneyUtil::GetAnalyzeLocalizer().GetText("GridFillShape"),
+            SidneyUtil::GetAnalyzeLocalizer().GetText("GridCancel")
+        };
+        mSidneyFiles->ShowCustom(SidneyUtil::GetAnalyzeLocalizer().GetText("GridList"), gridFillChoices, [this](size_t fillChoiceIdx){
+            // Early out if user chose "cancel" option.
+            if(fillChoiceIdx == 2) { return; }
+
+            // Determine whether we want to fill the screen or a shape.
+            bool fillShape = (fillChoiceIdx == 1);
+
+            // Grace usually doesn't want to fill a shape.
+            // There's only one time (during Gemini) that she'll let you proceed past this point.
+            if(fillShape)
+            {
+                bool taurusDone = gGameProgress.GetFlag("Taurus");
+                bool geminiDone = gGameProgress.GetFlag("Gemini");
+                bool workingOnGemini = (taurusDone && !geminiDone);
+                if(!workingOnGemini)
+                {
+                    // "I don't think a grid will help me here."
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OD32ZNF1\", 1)");
+                    return;
+                }
+            }
+
+            // Figure out what size grid to use.
+            std::vector<std::string> gridSizeChoices = {
+                SidneyUtil::GetAnalyzeLocalizer().GetText("Grid2"),
+                SidneyUtil::GetAnalyzeLocalizer().GetText("Grid4"),
+                SidneyUtil::GetAnalyzeLocalizer().GetText("Grid8"),
+                SidneyUtil::GetAnalyzeLocalizer().GetText("Grid12"),
+                SidneyUtil::GetAnalyzeLocalizer().GetText("Grid16"),
+                SidneyUtil::GetAnalyzeLocalizer().GetText("GridCancel")
+            };
+            mSidneyFiles->ShowCustom(SidneyUtil::GetAnalyzeLocalizer().GetText("GridList"), gridSizeChoices, [this, fillShape](size_t sizeChoiceIdx){
+                // Early out if user chose "cancel" option.
+                if(sizeChoiceIdx == 5) { return; }
+
+                // Otherwise, figure out size.
+                uint8_t gridSize = 2;
+                switch(sizeChoiceIdx)
+                {
+                case 0:
+                    gridSize = 2;
+                    break;
+                case 1:
+                    gridSize = 4;
+                    break;
+                case 2:
+                    gridSize = 8;
+                    break;
+                case 3:
+                    gridSize = 12;
+                    break;
+                case 4:
+                    gridSize = 16;
+                    break;
+                }
+
+                // Draw the grid.
+                mMap.DrawGrid(gridSize, fillShape);
+
+                // Usually, drawing a grid is NOT the answer!
+                // In fact, the only time it actually helps is during Gemini if you fill the shape.
+                bool taurusDone = gGameProgress.GetFlag("Taurus");
+                bool geminiDone = gGameProgress.GetFlag("Gemini");
+                bool workingOnGemini = (taurusDone && !geminiDone);
+                if(workingOnGemini && fillShape)
+                {
+                    // Bingo!
+                    if(gridSize == 8)
+                    {
+                        // Lock the placed grid.
+                        mMap.LockGrid();
+
+                        // Grace says "That's it! That's the chessboard."
+                        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OCL2ZJL1\", 1)", [this](const Action* action){
+
+                            // Gemini AND Cancer completed in one fell swoop.
+                            gGameProgress.SetFlag("Gemini");
+                            gGameProgress.SetFlag("Cancer");
+
+                            // Hide Sidney, but not using the normal "Hide", which causes a location change we don't want in this case.
+                            mSidney->SetActive(false);
+
+                            // Ok, this is the end of the 205P timeblock. All conditions are set to move on.
+                            // We should warp to the hallway now (where the next timeblock begins).
+                            // The timeblock complete script will move to the next timeblock.
+                            gLocationManager.ChangeLocation("HAL");
+                        });
+                    }
+                    else
+                    {
+                        // Grace says "I'm not sure about the size of the grid."
+                        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OD32ZGW1\", 1)");
+                    }
+                }
+                else
+                {
+                    // Grace says "Hmm, not sure about that."
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27GT1\", 1)");
+                }
+            });
+        });
+    }
+    else
+    {
+        // Only allowed to place one grid at a time. This message says "erase other grid first."
+        ShowAnalyzeMessage("GridDispNote");
+    }
+}
+
+void SidneyAnalyze::AnalyzeMap_OnEraseGridPressed()
+{
+    if(mMap.zoomedIn.grids->GetCount() > 0)
+    {
+        mMap.ClearGrid();
+    }
+    else
+    {
+        // Display an error if there is no grid to erase.
+        ShowAnalyzeMessage("NoGridEraseNote");
     }
 }
 

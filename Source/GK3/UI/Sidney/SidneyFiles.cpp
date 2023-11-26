@@ -107,9 +107,7 @@ void SidneyFiles::Init(Sidney* parent)
 
     mFileList.Init(mRoot, false);
     mShapeList.Init(mRoot, true);
-
-    // Hide by default.
-    Hide();
+    mCustomList.Init(mRoot, false);
 }
 
 void SidneyFiles::Show(std::function<void(SidneyFile*)> selectFileCallback)
@@ -123,9 +121,9 @@ void SidneyFiles::ShowShapes(std::function<void(SidneyFile*)> selectFileCallback
     mShapeList.Show(mData, selectFileCallback);
 }
 
-void SidneyFiles::Hide()
+void SidneyFiles::ShowCustom(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback)
 {
-    //mRoot->SetActive(false);
+    mCustomList.Show(title, choices, selectCallback);
 }
 
 void SidneyFiles::AddFile(size_t fileIndex)
@@ -243,6 +241,7 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
                                         SidneyUtil::GetAnalyzeLocalizer().GetText("FileList"));
         titleLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         titleLabel->SetVerticalAlignment(VerticalAlignment::Top);
+        mTitleLabel = titleLabel;
     }
 
     // Hide by default.
@@ -317,6 +316,45 @@ void SidneyFiles::FileListWindow::Show(const std::vector<SidneyDirectory>& data,
                 topLeft.y -= 16.0f;
             }   
         }
+    }
+}
+
+void SidneyFiles::FileListWindow::Show(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback)
+{
+    // Show the window.
+    mWindowRoot->SetActive(true);
+
+    // Set the title.
+    mTitleLabel->SetText(title);
+
+    // Disable all existing labels.
+    for(FileListButton& button : mButtons)
+    {
+        button.button->SetEnabled(false);
+        button.label->SetEnabled(false);
+    }
+    mButtonIndex = 0;
+
+    // Add desired choices.
+    Vector2 topLeft(10.0f, -28.0f);
+    for(size_t i = 0; i < choices.size(); ++i)
+    {
+        FileListButton& fileButton = GetFileListButton();
+        fileButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
+        fileButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        fileButton.label->SetText(choices[i]);
+
+        // Set callback for pressing this choice.
+        fileButton.button->SetPressCallback([this, selectCallback, i](UIButton* button){
+            mWindowRoot->SetActive(false);
+            if(selectCallback != nullptr)
+            {
+                selectCallback(i);
+            }
+        });
+
+        // Move down to next label position.
+        topLeft.y -= 16.0f;
     }
 }
 

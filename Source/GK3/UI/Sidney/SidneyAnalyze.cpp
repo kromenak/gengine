@@ -1,27 +1,22 @@
 #include "SidneyAnalyze.h"
 
-#include "ActionManager.h"
 #include "AssetManager.h"
-#include "CursorManager.h"
-#include "GameProgress.h"
-#include "InventoryManager.h"
+#include "Sidney.h"
 #include "SidneyButton.h"
 #include "SidneyFiles.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
 #include "UICanvas.h"
-#include "UICircles.h"
 #include "UINineSlice.h"
 #include "UIImage.h"
-#include "UILines.h"
-#include "UIPoints.h"
 
-void SidneyAnalyze::Init(Actor* parent, SidneyFiles* sidneyFiles)
+void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 {
+    mSidney = sidney;
     mSidneyFiles = sidneyFiles;
 
     // Add background. This will also be the root for this screen.
-    mRoot = SidneyUtil::CreateBackground(parent);
+    mRoot = SidneyUtil::CreateBackground(mSidney);
     mRoot->SetName("Email");
 
     // Add main menu button.
@@ -112,23 +107,14 @@ void SidneyAnalyze::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
         // "Use Shape" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item5"), [this](){
-            mSidneyFiles->ShowShapes([this](SidneyFile* selectedFile){
-                mMap.AddShape(selectedFile->name);
-            });
+            AnalyzeMap_OnUseShapePressed();
         });
 
         // (Note: "Save Shape" is Item6, but I don't think it is used in the final game?)
 
         // "Erase Shape" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item7"), [this](){
-            if(mMap.IsShapeSelected())
-            {
-                mMap.EraseShape();
-            }
-            else
-            {
-                ShowAnalyzeMessage("NoShapeNote");
-            }
+            AnalyzeMap_OnEraseShapePressed();
         });
     }
 
@@ -137,37 +123,25 @@ void SidneyAnalyze::Init(Actor* parent, SidneyFiles* sidneyFiles)
     {
         // "Enter Points" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu4Item1"), [this](){
-
-            // Not allowed to place points until you've progressed far enough in the story for Grace to have something to plot.
-            if(gGameProgress.GetTimeblock() == Timeblock("205P"))
-            {
-                // The game wants you to pick up these items before it thinks you have enough info to place points.
-                if(!gInventoryManager.HasInventoryItem("Church_Pamphlet") || !gInventoryManager.HasInventoryItem("LSR"))
-                {
-                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O8O2ZPI1\", 1)");
-                    return;
-                }
-            }
-
-            // Otherwise, we can place points.
-            AnalyzeMap_SetStatusText(SidneyUtil::GetAnalyzeLocalizer().GetText("EnterPointsNote"));
-            mEnteringPoints = true;
+            AnalyzeMap_OnEnterPointsPressed();
         });
 
         // "Clear Points" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu4Item2"), [this](){
-            mEnteringPoints = false;
-            mMap.zoomedIn.points->ClearPoints();
-            mMap.zoomedOut.points->ClearPoints();
+            AnalyzeMap_OnClearPointsPressed();
         });
 
         //TODO: Add a divider/empty space here. (Menu4Item3)
 
         // "Draw Grid" choice.
-        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu4Item4"), nullptr);
+        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu4Item4"), [this](){
+            AnalyzeMap_OnDrawGridPressed();
+        });
 
         // "Erase Grid" choice.
-        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu4Item5"), nullptr);
+        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu4Item5"), [this](){
+            AnalyzeMap_OnEraseGridPressed();
+        });
     }
 
     // All dropdowns except "Open" are disabled by default.

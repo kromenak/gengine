@@ -46,6 +46,10 @@ code
 		{
 			wait Call("CheckTimeblockComplete202P$");
 		}
+		else if(IsCurrentTime("205P"))
+		{
+			wait Call("CheckTimeblockComplete205P$");
+		}
 	}
 
 	CheckTimeblockComplete110A$()
@@ -354,5 +358,27 @@ code
 
 		// OK, go to next timeblock!
 		SetTime("205P");
+	}
+
+	CheckTimeblockComplete205P$()
+	{
+		// This timeblock change occurs when you finish Gemini/Cancer sections of LSR at the computer.
+		// The game sets a few flags, and changes the location to HAL, which we can catch here.
+
+		// Must be in HAL.
+		if(IsCurrentLocation("HAL") == 0)
+		{
+			return;
+		}
+
+		// Must have completed Gemini & Cancer.
+		if(!GetFlag("Gemini") || !GetFlag("Cancer"))
+		{
+			return;
+		}
+
+		// Ok, seems like we can move on.
+		// (Even though it's "Day 3 2AM" it internally is called 202A).
+		SetTime("202A")
 	}
 }

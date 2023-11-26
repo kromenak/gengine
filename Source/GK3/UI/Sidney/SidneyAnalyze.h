@@ -9,11 +9,13 @@
 #include "Vector2.h"
 
 class Actor;
+class Sidney;
 class SidneyButton;
 class SidneyFiles;
 struct SidneyFile;
 class UIButton;
 class UICircles;
+class UIGrids;
 class UIImage;
 class UILabel;
 class UILines;
@@ -23,7 +25,7 @@ class UIRectangles;
 class SidneyAnalyze
 {
 public:
-    void Init(Actor* parent, SidneyFiles* sidneyFiles);
+    void Init(Sidney* sidney, SidneyFiles* sidneyFiles);
 
     void Show();
     void Hide();
@@ -31,6 +33,9 @@ public:
     void OnUpdate(float deltaTime);
 
 private:
+    // Reference to parent Sidney.
+    Sidney* mSidney = nullptr;
+
     // Sidney Files module, so we can view and select files to analyze.
     SidneyFiles* mSidneyFiles = nullptr;
 
@@ -114,6 +119,10 @@ private:
             UIRectangles* rectangles = nullptr;
             UIRectangles* lockedRectangles = nullptr;
 
+            // Grids - placed by user, but heavily controlled by system.
+            UIGrids* grids = nullptr;
+            UIGrids* lockedGrids = nullptr;
+
             Vector2 GetLocalMousePos();
             Vector2 GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints = false);
         };
@@ -146,6 +155,10 @@ private:
 
         bool IsShapeSelected();
         void ClearSelectedShape();
+
+        void DrawGrid(uint8_t size, bool fillShape);
+        void LockGrid();
+        void ClearGrid();
     };
     MapState mMap;
 
@@ -155,6 +168,12 @@ private:
     void AnalyzeMap_Update(float deltaTime);
 
     void AnalyzeMap_OnAnalyzeButtonPressed();
+    void AnalyzeMap_OnUseShapePressed();
+    void AnalyzeMap_OnEraseShapePressed();
+    void AnalyzeMap_OnEnterPointsPressed();
+    void AnalyzeMap_OnClearPointsPressed();
+    void AnalyzeMap_OnDrawGridPressed();
+    void AnalyzeMap_OnEraseGridPressed();
 
     void AnalyzeMap_SetStatusText(const std::string& text, float duration = 5.0f);
     void AnalyzeMap_SetPointStatusText(const std::string& baseMessage, const Vector2& zoomedInMapPos);

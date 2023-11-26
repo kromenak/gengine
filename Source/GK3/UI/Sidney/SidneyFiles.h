@@ -100,7 +100,7 @@ public:
 
     void Show(std::function<void(SidneyFile*)> selectFileCallback = nullptr);
     void ShowShapes(std::function<void(SidneyFile*)> selectFileCallback = nullptr);
-    void Hide();
+    void ShowCustom(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback);
 
     void AddFile(size_t fileIndex);
     bool HasFile(size_t fileIndex);
@@ -135,6 +135,7 @@ private:
         void Init(Actor* parent, bool forShapes);
 
         void Show(const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback);
+        void Show(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback);
 
     private:
         // The shapes list works a bit differently.
@@ -142,6 +143,9 @@ private:
 
         // The root of the window - use to show/hide it.
         Actor* mWindowRoot = nullptr;
+
+        // The title label.
+        UILabel* mTitleLabel = nullptr;
 
         // Each button is a selection in the window.
         std::vector<FileListButton> mButtons;
@@ -151,4 +155,6 @@ private:
     };
     FileListWindow mFileList;
     FileListWindow mShapeList;
+
+    FileListWindow mCustomList;
 };
