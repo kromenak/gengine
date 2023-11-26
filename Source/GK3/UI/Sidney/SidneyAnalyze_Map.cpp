@@ -38,6 +38,9 @@ namespace
     const Vector2 kPiscesBezuPoint(301.0f, 385.0f);
     const Vector2 kPiscesBugarachPoint(991.0f, 327.0f);
 
+    const Vector2 kTaurusSerresPoint(815.0f, 1167.0f);
+    const Vector2 kTaurusMeridianPoint(898.0f, 1128.0f);
+
     bool IsPointOnEdgeOfRectangle(const UIRectangle& rect, const Vector2& point)
     {
         // Convert point to local space of the rectangle.
@@ -87,15 +90,17 @@ Vector2 SidneyAnalyze::MapState::UI::GetLocalMousePos()
     return gInputManager.GetMousePosition() - background->GetRectTransform()->GetWorldRect().GetMin();
 }
 
-Vector2 SidneyAnalyze::MapState::UI::GetPlacedPointNearPoint(const Vector2& point)
+Vector2 SidneyAnalyze::MapState::UI::GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints)
 {
+    UIPoints* pts = useLockedPoints ? lockedPoints : points;
+
     // Iterate through points placed by the user.
     // Find one that is close enough to the desired point and return it.
     const float kCloseToPointDist = 20.0f;
     const float kCloseToPointDistSq = kCloseToPointDist * kCloseToPointDist;
-    for(size_t i = 0; i < points->GetPointsCount(); ++i)
+    for(size_t i = 0; i < pts->GetPointsCount(); ++i)
     {
-        const Vector2& placedPoint = points->GetPoint(i);
+        const Vector2& placedPoint = pts->GetPoint(i);
         if((placedPoint - point).GetLengthSq() < kCloseToPointDistSq)
         {
             return placedPoint;
@@ -631,10 +636,22 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                 if(IsPointOnEdgeOfRectangle(rectangle, zoomedOutMapPos))
                 {
                     resizeShapeCursor = true;
+
+                    // You are only allowed to resize the rectangle before Aries is complete.
+                    if(gGameProgress.GetFlag("Aries"))
+                    {
+                        resizeShapeCursor = false;
+                    }
                 }
                 else if(IsPointInsideRectangle(rectangle, zoomedOutMapPos))
                 {
                     moveShapeCursor = true;
+
+                    // You are only allowed to move the rectangle before Aries is complete.
+                    if(gGameProgress.GetFlag("Aries"))
+                    {
+                        moveShapeCursor = false;
+                    }
                 }
                 else
                 {
@@ -774,7 +791,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     Vector2 centerToMouse = Vector2::Normalize(zoomedOutMapPos - mMap.zoomedOutClickShapeCenter);
                     mMap.zoomedOutClickActionPos = zoomedOutMapPos;
 
-                    float angle = Math::Acos(Vector2::Dot(prevCenterToMouse, centerToMouse));
+                    float angle = Math::Acos(Math::Clamp(Vector2::Dot(prevCenterToMouse, centerToMouse), 0.0f, 1.0f));
                     Vector3 cross = Vector3::Cross(prevCenterToMouse, centerToMouse);
                     if(cross.z < 0)
                     {
@@ -857,6 +874,8 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
     // To complete Pisces, you must place three points on the map AND align a circle to them.
     bool aquariusDone = gGameProgress.GetFlag("Aquarius");
     bool piscesDone = gGameProgress.GetFlag("Pisces");
+    bool ariesDone = gGameProgress.GetFlag("Aries");
+    bool taurusDone = gGameProgress.GetFlag("Taurus");
     if(aquariusDone && !piscesDone)
     {
         Vector2 coustaussaPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesCoustaussaPoint);
@@ -865,7 +884,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
         if(coustaussaPoint != Vector2::Zero && bezuPoint != Vector2::Zero && bugarachPoint != Vector2::Zero)
         {
             const Vector2 kCircleCenter(168.875f, 174.5f);
-            const float kCircleRadius(121.0f);
+            const float kCircleRadius = 121.0f;
             for(size_t i = 0; i < mMap.zoomedOut.circles->GetCirclesCount(); ++i)
             {
                 const Circle& circle = mMap.zoomedOut.circles->GetCircle(i);
@@ -919,6 +938,92 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
             }
         }
     }
+    else if(piscesDone && !ariesDone)
+    {
+        // To complete Aries, the player must place a Rectangle with a certain position and size.
+        const Vector2 kRectangleCenter(168.875f, 174.5f);
+        const float kRectangleSize = 242.0f;
+        for(size_t i = 0; i < mMap.zoomedOut.rectangles->GetCount(); ++i)
+        {
+            const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(i);
+
+            float centerDiffSq = (rectangle.center - kRectangleCenter).GetLengthSq();
+            float sizeDiff = Math::Abs(rectangle.size.x - kRectangleSize);
+            if(centerDiffSq < 20 * 20 && sizeDiff < 4)
+            {
+                // Clear mouse click action, forcing player to stop manipulating the rectangle.
+                // The rectangle remains selected however.
+                mMap.zoomedOutClickAction = MapState::ClickAction::None;
+
+                // Set the rectangle to the correct position/size.
+                // Note that the rectangle IS NOT locked yet, since the player can still rotate it.
+                UIRectangle correctRectangle;
+                correctRectangle.center = kRectangleCenter;
+                correctRectangle.size = Vector2::One * kRectangleSize;
+                correctRectangle.angle = rectangle.angle;
+
+                mMap.zoomedOut.rectangles->ClearRectangles();
+                mMap.zoomedOut.rectangles->AddRectangle(correctRectangle.center, correctRectangle.size, correctRectangle.angle);
+
+                mMap.zoomedIn.rectangles->ClearRectangles();
+                mMap.zoomedIn.rectangles->AddRectangle(mMap.ZoomedOutToZoomedInPos(correctRectangle.center),
+                                                       mMap.ZoomedOutToZoomedInPos(correctRectangle.size),
+                                                       correctRectangle.angle);
+
+                // Grace is excited that we figured it out.
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7E2ZIS1\", 1)");
+
+                // We completed Aries.
+                gGameProgress.SetFlag("Aries");
+            }
+            //else
+            //{
+            //    printf("Center (%f, %f), Size (%f)\n", rectangle.center.x, rectangle.center.y, rectangle.size.x);
+            //}
+        }
+    }
+    else if(ariesDone && !taurusDone)
+    {
+        bool placedMeridianLine = mMap.zoomedIn.GetPlacedPointNearPoint(kTaurusSerresPoint, true) != Vector2::Zero;
+        if(placedMeridianLine)
+        {
+            const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(0);
+
+            // Convert the rectangle's angle to the range 0 to 2Pi.
+            float angle = rectangle.angle;
+            while(angle < 0.0f)
+            {
+                angle += Math::k2Pi;
+            }
+            angle = Math::Mod(angle, Math::k2Pi);
+            //printf("Rectangle angle is %f\n", angle);
+
+            // There are four possible orientations that are considered correct.
+            const float kRectangleRotation = 1.129951f;
+            if(Math::Approximately(angle, kRectangleRotation, 0.1f) ||
+               Math::Approximately(angle, kRectangleRotation + Math::kPiOver2, 0.1f) ||
+               Math::Approximately(angle, kRectangleRotation + Math::kPi, 0.1f) ||
+               Math::Approximately(angle, kRectangleRotation + Math::kPi + Math::kPiOver2, 0.1f))
+            {
+                // "Lock in" the correct rectangle.
+                mMap.zoomedOut.rectangles->ClearRectangles();
+                mMap.zoomedIn.rectangles->ClearRectangles();
+
+                mMap.zoomedOut.lockedRectangles->AddRectangle(rectangle.center, rectangle.size, kRectangleRotation);
+                mMap.zoomedIn.lockedRectangles->AddRectangle(mMap.ZoomedInToZoomedOutPos(rectangle.center),
+                                                             mMap.ZoomedInToZoomedOutPos(rectangle.size),
+                                                             kRectangleRotation);
+
+                // Grace is excited that we figured it out. And time moves forward a bit!
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7E2ZQB1\", 1)", [](const Action* action){
+                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
+                });
+
+                // Taurus is done.
+                gGameProgress.SetFlag("Taurus");
+            }
+        }
+    }
 }
 
 void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
@@ -926,7 +1031,8 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
     // The map analysis behavior depends on what part of the LSR riddle we're on.
     bool aquariusDone = gGameProgress.GetFlag("Aquarius");
     bool piscesDone = gGameProgress.GetFlag("Pisces");
-
+    bool ariesDone = gGameProgress.GetFlag("Aries");
+    bool taurusDone = gGameProgress.GetFlag("Taurus");
     if(!aquariusDone) // Working on Aquarius
     {
         // Player must place two points near enough to these points and press "Analyze" to pass Aquarius.
@@ -980,6 +1086,46 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
         {
             // Says "several possible linkages - use shapes or more points."
             ShowAnalyzeMessage("MapSeveralPossNote");
+        }
+    }
+    else if((piscesDone && !ariesDone) || (ariesDone && !taurusDone)) // Working on Aries OR Taurus
+    {
+        // The game allows you to put down this line early in Aries, but it must be done to complete Taurus.
+        // Find placed points that are close enough to the desired points.
+        Vector2 serresPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kTaurusSerresPoint);
+        Vector2 meridianPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kTaurusMeridianPoint);
+        if(serresPoint != Vector2::Zero && meridianPoint != Vector2::Zero)
+        {
+            // Says "line is tangential to the circle."
+            ShowAnalyzeMessage("MapLine2Note");
+
+            // Remove points placed by the player.
+            mMap.zoomedIn.points->RemovePoint(serresPoint);
+            mMap.zoomedIn.points->RemovePoint(meridianPoint);
+            mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(serresPoint));
+            mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(meridianPoint));
+
+            // It's possible for the player to place these points multiple times.
+            // But only the first placement elicits exclamations from Grace.
+            bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kTaurusSerresPoint, true) != Vector2::Zero;
+            if(!alreadyPlacedPoints)
+            {
+                // Grace says "Oh yeah, that's what the riddle means."
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZQB2\", 1)");
+
+                // Add locked points.
+                mMap.zoomedIn.lockedPoints->AddPoint(kTaurusSerresPoint);
+                mMap.zoomedIn.lockedPoints->AddPoint(kTaurusMeridianPoint);
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kTaurusSerresPoint));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kTaurusMeridianPoint));
+
+                // Place a line segment between the points.
+                mMap.zoomedIn.lines->AddLine(kTaurusSerresPoint, kTaurusMeridianPoint);
+                mMap.zoomedOut.lines->AddLine(mMap.ZoomedInToZoomedOutPos(kTaurusSerresPoint),
+                                              mMap.ZoomedInToZoomedOutPos(kTaurusMeridianPoint));
+
+                // NOTE: doing this doesn't complete Taurus - the player must rotate the square to align with these points.
+            }
         }
     }
 

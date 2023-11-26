@@ -345,14 +345,15 @@ void InventoryInspectScreen::InitLSR()
         });
 
         // Cancer can be unstarted, in-progress, or finished.
+        // Cancer is a bit weird - it shows as "in-progress" while Gemini is in-progress too.
         mLSRButtons[1]->SetEnabled(true);
         mLSRButtons[1]->GetRectTransform()->SetAnchoredPosition(170.0f, 163.0f);
         mLSRButtons[1]->GetRectTransform()->SetSizeDelta(299.0f, 97.0f);
-        if(!finishedGemini) // Unstarted
+        if(!finishedTaurus) // Unstarted
         {
             mLSRButtons[1]->SetUpTexture(nullptr, Color32::Clear);
         }
-        else if(finishedGemini && !finishedCancer) // In-Progress
+        else if((finishedTaurus && !finishedGemini) || (finishedGemini && !finishedCancer)) // In-Progress
         {
             mLSRButtons[1]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG3_CAN_LIT.BMP"));
         }

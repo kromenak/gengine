@@ -43,6 +43,11 @@ namespace Math
     {
         return IsZero(a - b);
     }
+
+    inline bool Approximately(float a, float b, float epsilon = kEpsilon)
+    {
+        return (::fabs(a - b) < epsilon);
+    }
 	
 	inline float Pow(float base, float exp)
 	{

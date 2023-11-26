@@ -115,7 +115,7 @@ private:
             UIRectangles* lockedRectangles = nullptr;
 
             Vector2 GetLocalMousePos();
-            Vector2 GetPlacedPointNearPoint(const Vector2& point);
+            Vector2 GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints = false);
         };
         UI zoomedOut;
         UI zoomedIn;
