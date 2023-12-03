@@ -27,7 +27,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     // Because the menu bar hangs down *in front of* analysis views, AND because the UI system doesn't yet have good ordering tools...
     // ...we should create the anaysis views *first* so they appear *behind* the menu bar.
     AnalyzeMap_Init();
-    AnalyzeImageInit();
+    AnalyzeImage_Init();
 
     // Add menu bar.
     mMenuBar.Init(mRoot, SidneyUtil::GetAnalyzeLocalizer().GetText("ScreenName"), 120.0f);
@@ -79,8 +79,6 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     {
         // "View Geometry" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item1"), [this](){
-            printf("View Geometry\n");
-
             if(mAnalyzeFile != nullptr)
             {
                 if(mAnalyzeFile->index == 20)
@@ -143,11 +141,6 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
             AnalyzeMap_OnEraseGridPressed();
         });
     }
-
-    // All dropdowns except "Open" are disabled by default.
-    mMenuBar.SetDropdownEnabled(1, false);
-    mMenuBar.SetDropdownEnabled(2, false);
-    mMenuBar.SetDropdownEnabled(3, false);
 
     // Add analyze button.
     {
@@ -220,41 +213,66 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
     // Analyze message box.
     {
-        mAnalyzeMessageWindow = new Actor(TransformType::RectTransform);
-        mAnalyzeMessageWindow->GetTransform()->SetParent(mRoot->GetTransform());
+        // Create root, which covers whole screen and acts as an input blocker while the message is up.
+        {
+            mAnalyzeMessageWindowRoot = new Actor(TransformType::RectTransform);
+            mAnalyzeMessageWindowRoot->GetTransform()->SetParent(mRoot->GetTransform());
 
-        UINineSlice* border = mAnalyzeMessageWindow->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
-        border->GetRectTransform()->SetSizeDelta(250.0f, 157.0f);
-        border->GetRectTransform()->SetAnchor(AnchorPreset::Center);
-        border->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+            RectTransform* inputBlockerRT = mAnalyzeMessageWindowRoot->GetComponent<RectTransform>();
+            inputBlockerRT->SetAnchor(AnchorPreset::CenterStretch);
+
+            mAnalyzeMessageWindowRoot->AddComponent<UIButton>();
+        }
+
+        // Add the window itself.
+        {
+            mAnalyzeMessageWindow = new Actor(TransformType::RectTransform);
+            mAnalyzeMessageWindow->GetTransform()->SetParent(mAnalyzeMessageWindowRoot->GetTransform());
+
+            UINineSlice* border = mAnalyzeMessageWindow->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
+            border->GetRectTransform()->SetSizeDelta(250.0f, 157.0f);
+            border->GetRectTransform()->SetAnchor(AnchorPreset::Center);
+            border->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+        }
 
         // Add message label.
-        Actor* messageActor = new Actor(TransformType::RectTransform);
-        messageActor->GetTransform()->SetParent(mAnalyzeMessageWindow->GetTransform());
+        {
+            Actor* messageActor = new Actor(TransformType::RectTransform);
+            messageActor->GetTransform()->SetParent(mAnalyzeMessageWindow->GetTransform());
 
-        mAnalyzeMessage = messageActor->AddComponent<UILabel>();
-        mAnalyzeMessage->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-        mAnalyzeMessage->SetHorizonalAlignment(HorizontalAlignment::Center);
-        mAnalyzeMessage->SetHorizontalOverflow(HorizontalOverflow::Wrap);
-        mAnalyzeMessage->SetVerticalAlignment(VerticalAlignment::Top);
-        
-        mAnalyzeMessage->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-        mAnalyzeMessage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
-        mAnalyzeMessage->GetRectTransform()->SetSizeDelta(-15.0f, -15.0f);
+            mAnalyzeMessage = messageActor->AddComponent<UILabel>();
+            mAnalyzeMessage->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            mAnalyzeMessage->SetHorizonalAlignment(HorizontalAlignment::Center);
+            mAnalyzeMessage->SetHorizontalOverflow(HorizontalOverflow::Wrap);
+            mAnalyzeMessage->SetVerticalAlignment(VerticalAlignment::Top);
 
-        SidneyButton* okButton = new SidneyButton(mAnalyzeMessageWindow);
-        okButton->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-        okButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("OKButton"));
-        okButton->SetWidth(80.0f);
+            mAnalyzeMessage->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+            mAnalyzeMessage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+            mAnalyzeMessage->GetRectTransform()->SetSizeDelta(-15.0f, -15.0f);
+        }
 
-        okButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
-        okButton->GetRectTransform()->SetAnchoredPosition(0.0f, 6.0f);
+        // Add OK button.
+        {
+            SidneyButton* okButton = new SidneyButton(mAnalyzeMessageWindow);
+            okButton->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            okButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("OKButton"));
+            okButton->SetWidth(80.0f);
 
-        okButton->SetPressCallback([this](){
-            mAnalyzeMessageWindow->SetActive(false);
-        });
-        mAnalyzeMessageWindow->SetActive(false);
+            okButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+            okButton->GetRectTransform()->SetAnchoredPosition(0.0f, 6.0f);
+
+            okButton->SetPressCallback([this](){
+                // Hide on button press.
+                mAnalyzeMessageWindowRoot->SetActive(false);
+            });
+        }
+
+        // Hide by default.
+        mAnalyzeMessageWindowRoot->SetActive(false);
     }
+
+    // Start in empty state.
+    SetState(State::Empty);
 
     // Hide by default.
     Hide();
@@ -289,6 +307,12 @@ void SidneyAnalyze::SetState(State state)
     mAnalyzeMapWindow->SetActive(false);
     mAnalyzeImageWindow->SetActive(false);
 
+    // All dropdowns except "Open" are disabled by default.
+    mMenuBar.SetDropdownEnabled(kFileDropdownIdx, true);
+    mMenuBar.SetDropdownEnabled(kTextDropdownIdx, false);
+    mMenuBar.SetDropdownEnabled(kGraphicDropdownIdx, false);
+    mMenuBar.SetDropdownEnabled(kMapDropdownIdx, false);
+
     // Save the state.
     mState = state;
 
@@ -311,7 +335,7 @@ void SidneyAnalyze::SetState(State state)
         break;
 
     case State::Image:
-        AnalyzeImageEnter();
+        AnalyzeImage_EnterState();
         break;
     }
 
@@ -354,7 +378,7 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
         AnalyzeMap_OnAnalyzeButtonPressed();
         break;
     case State::Image:
-        AnalyzeImage();
+        AnalyzeImage_OnAnalyzeButtonPressed();
         break;
     }
 
@@ -364,85 +388,6 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
 
 void SidneyAnalyze::ShowAnalyzeMessage(const std::string& message)
 {
-    mAnalyzeMessageWindow->SetActive(true);
+    mAnalyzeMessageWindowRoot->SetActive(true);
     mAnalyzeMessage->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText(message));
-}
-
-void SidneyAnalyze::AnalyzeImageInit()
-{
-    // Create a parent that contains all the image analysis stuff.
-    mAnalyzeImageWindow = new Actor(TransformType::RectTransform);
-    mAnalyzeImageWindow->GetTransform()->SetParent(mRoot->GetTransform());
-    static_cast<RectTransform*>(mAnalyzeImageWindow->GetTransform())->SetAnchor(AnchorPreset::CenterStretch);
-    static_cast<RectTransform*>(mAnalyzeImageWindow->GetTransform())->SetAnchoredPosition(0.0f, 0.0f);
-    static_cast<RectTransform*>(mAnalyzeImageWindow->GetTransform())->SetSizeDelta(0.0f, 0.0f);
-
-    // Create image that is being analyzed.
-    {
-        Actor* imageActor = new Actor(TransformType::RectTransform);
-        imageActor->GetTransform()->SetParent(mAnalyzeImageWindow->GetTransform());
-
-        mAnalyzeImage = imageActor->AddComponent<UIImage>();
-        mAnalyzeImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
-    }
-
-    // Hide by default.
-    mAnalyzeImageWindow->SetActive(false);
-}
-
-void SidneyAnalyze::AnalyzeImageEnter()
-{
-    // Show the image view.
-    mAnalyzeImageWindow->SetActive(true);
-
-    // "Text" and "Graphic" dropdowns are available when analyzing an image. Map is not.
-    mMenuBar.SetDropdownEnabled(1, true);
-    mMenuBar.SetDropdownEnabled(2, true);
-    mMenuBar.SetDropdownEnabled(3, false);
-
-    // Show correct image and menu items based on current file.
-    if(mAnalyzeFile->index == 20)
-    {
-        mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT1_BASE.BMP"), true);
-
-        mMenuBar.SetDropdownChoiceEnabled(1, 0, true);
-        mMenuBar.SetDropdownChoiceEnabled(1, 1, false);
-        mMenuBar.SetDropdownChoiceEnabled(1, 2, false);
-        mMenuBar.SetDropdownChoiceEnabled(1, 3, false);
-
-        mMenuBar.SetDropdownChoiceEnabled(2, 0, true);
-        mMenuBar.SetDropdownChoiceEnabled(2, 1, false);
-        mMenuBar.SetDropdownChoiceEnabled(2, 2, false);
-        mMenuBar.SetDropdownChoiceEnabled(2, 3, false);
-        mMenuBar.SetDropdownChoiceEnabled(2, 4, false);
-    }
-    else if(mAnalyzeFile->index == 21)
-    {
-        mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT2_BASE.BMP"), true);
-
-        mMenuBar.SetDropdownChoiceEnabled(1, 0, false);
-        mMenuBar.SetDropdownChoiceEnabled(1, 1, false);
-        mMenuBar.SetDropdownChoiceEnabled(1, 2, false);
-        mMenuBar.SetDropdownChoiceEnabled(1, 3, true);
-
-        mMenuBar.SetDropdownChoiceEnabled(2, 0, true);
-        mMenuBar.SetDropdownChoiceEnabled(2, 1, true);
-        mMenuBar.SetDropdownChoiceEnabled(2, 2, false);
-        mMenuBar.SetDropdownChoiceEnabled(2, 3, false);
-        mMenuBar.SetDropdownChoiceEnabled(2, 4, false);
-    }
-}
-
-void SidneyAnalyze::AnalyzeImage()
-{
-    // Show correct analysis message depending on the file type.
-    if(mAnalyzeFile->index == 20)
-    {
-        ShowAnalyzeMessage("AnalyzeParch1");
-    }
-    else if(mAnalyzeFile->index == 21)
-    {
-        ShowAnalyzeMessage("AnalyzeParch2");
-    }
 }

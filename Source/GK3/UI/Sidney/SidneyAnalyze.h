@@ -5,7 +5,6 @@
 //
 #pragma once
 #include "SidneyMenuBar.h"
-
 #include "Vector2.h"
 
 class Actor;
@@ -33,17 +32,30 @@ public:
     void OnUpdate(float deltaTime);
 
 private:
-    // Reference to parent Sidney.
+    // References to Sidney modules.
     Sidney* mSidney = nullptr;
-
-    // Sidney Files module, so we can view and select files to analyze.
     SidneyFiles* mSidneyFiles = nullptr;
 
     // Root of this subscreen.
     Actor* mRoot = nullptr;
 
-    // The menu bar.
+    // The analyze screen menu bar.
     SidneyMenuBar mMenuBar;
+    const size_t kFileDropdownIdx = 0;
+    const size_t kTextDropdownIdx = 1;
+    const size_t kGraphicDropdownIdx = 2;
+    const size_t kMapDropdownIdx = 3;
+
+    const size_t kTextDropdown_ExtractAnomaliesIdx = 0;
+    const size_t kTextDropdown_TranslateIdx = 1;
+    const size_t kTextDropdown_AnagramParserIdx = 2;
+    const size_t kTextDropdown_AnalyzeTextIdx = 3;
+
+    const size_t kGraphicDropdown_ViewGeometryIdx = 0;
+    const size_t kGraphicDropdown_RotateShapeIdx = 1;
+    const size_t kGraphicDropdown_ZoomClarifyIdx = 2;
+    const size_t kGraphicDropdown_UseShapeIdx = 3;
+    const size_t kGraphicDropdown_EraseShapeIdx = 4;
 
     // A file that has been selected for analysis.
     SidneyFile* mAnalyzeFile = nullptr;
@@ -51,6 +63,8 @@ private:
     // A button to press to perform analysis.
     SidneyButton* mAnalyzeButton = nullptr;
 
+    // The current state of the Analyze screen.
+    // The Analyze screen contains several "sub-screens" for analyzing different types of data.
     enum class State
     {
         Empty,
@@ -66,6 +80,7 @@ private:
     UIImage* mPreAnalyzeItemImage = nullptr;
 
     // Message UI - shows a message in response to trying to analyze stuff.
+    Actor* mAnalyzeMessageWindowRoot = nullptr;
     Actor* mAnalyzeMessageWindow = nullptr;
     UILabel* mAnalyzeMessage = nullptr;
     
@@ -80,9 +95,9 @@ private:
     Actor* mAnalyzeImageWindow = nullptr;
     UIImage* mAnalyzeImage = nullptr;
 
-    void AnalyzeImageInit();
-    void AnalyzeImageEnter();
-    void AnalyzeImage();
+    void AnalyzeImage_Init();
+    void AnalyzeImage_EnterState();
+    void AnalyzeImage_OnAnalyzeButtonPressed();
 
     // ANALYZE MAP
     Actor* mAnalyzeMapWindow = nullptr;
@@ -91,47 +106,56 @@ private:
     UILabel* mMapStatusLabel = nullptr;
     float mMapStatusLabelTimer = 0.0f;
 
-    bool mEnteringPoints = false;
-
     // The map screen is quite complex, so this helper class helps manage its state.
     struct MapState
     {
-        struct UI
+        struct View
         {
-            // The interactive area of the UI.
+            // A button to detect when the player is interacting with this view.
             UIButton* button = nullptr;
 
-            // The background image of the map.
-            UIImage* background = nullptr;
+            // The image of the map in the view.
+            // Placed map elements are also children of this Actor!
+            UIImage* mapImage = nullptr;
 
-            // Points placed by the user (active and locked).
+            // Points that have been placed on the map.
+            // Locked points are a different color and not modifiable by players.
             UIPoints* points = nullptr;
             UIPoints* lockedPoints = nullptr;
 
-            // Lines - only placed by system, not user.
+            // Lines that have been placed on the map.
+            // These are only placed by the system - players don't place these directly.
             UILines* lines = nullptr;
 
-            // Circles - placed and manipulated by the user.
+            // Circles that have been placed on the map.
+            // Locked circles are no longer modifiable by players.
             UICircles* circles = nullptr;
             UICircles* lockedCircles = nullptr;
 
-            // Rectangles - placed and manipulated by the user.
+            // Rectangles that have been placed on the map.
+            // Locked rectangles are no longer modifiable by players.
             UIRectangles* rectangles = nullptr;
             UIRectangles* lockedRectangles = nullptr;
 
-            // Grids - placed by user, but heavily controlled by system.
+            // Grids that have been placed on the map.
+            // Locked grids are no longer modifiable by players.
             UIGrids* grids = nullptr;
             UIGrids* lockedGrids = nullptr;
 
             Vector2 GetLocalMousePos();
             Vector2 GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints = false);
         };
-        UI zoomedOut;
-        UI zoomedIn;
+        View zoomedOut;
+        View zoomedIn;
 
+        // Index of selected shapes (in the UICircles/UIRectangles components).
         int selectedCircleIndex = -1;
         int selectedRectangleIndex = -1;
 
+        // Are we currently entering points?
+        bool enteringPoints = false;
+
+        // Tracks what action the current click is doing.
         enum class ClickAction
         {
             None,
@@ -142,20 +166,23 @@ private:
             RotateShape
         };
         ClickAction zoomedOutClickAction = ClickAction::None;
+
+        // For move/resize/rotate shapes, it's helpful to store some extra state data between frames.
         Vector2 zoomedOutClickActionPos;
         Vector2 zoomedOutClickShapeCenter;
 
-        Vector2 ZoomedOutToZoomedInPos(const Vector2& pos);
-        Vector2 ZoomedInToZoomedOutPos(const Vector2& pos);
-
+        // Points
+        Vector2 ToZoomedInPoint(const Vector2& pos);
+        Vector2 ToZoomedOutPoint(const Vector2& pos);
         std::string GetPointLatLongText(const Vector2& zoomedInPos);
 
+        // Shapes
         void AddShape(const std::string& shapeName);
-        void EraseShape();
+        void EraseSelectedShape();
+        bool IsAnyShapeSelected();
+        void ClearShapeSelection();
 
-        bool IsShapeSelected();
-        void ClearSelectedShape();
-
+        // Grids
         void DrawGrid(uint8_t size, bool fillShape);
         void LockGrid();
         void ClearGrid();
@@ -166,6 +193,8 @@ private:
     void AnalyzeMap_EnterState();
 
     void AnalyzeMap_Update(float deltaTime);
+    void AnalyzeMap_UpdateZoomedOutMap(float deltaTime);
+    void AnalyzeMap_UpdateZoomedInMap(float deltaTime);
 
     void AnalyzeMap_OnAnalyzeButtonPressed();
     void AnalyzeMap_OnUseShapePressed();

@@ -23,19 +23,41 @@
 
 namespace
 {
+    // Map sizes, in pixels.
     const float kZoomedOutMapSize = 342.0f;
     const float kZoomedInMapSize = 1368.0f;
 
+    // Zoomed in map view size, in pixels.
     const float kZoomedInMapViewWidth = 271.0f;
     const float kZoomedInMapViewHeight = 324.0f;
 
+    // The distance from the mouse pointer to a point for that point to be considered "hovered."
     const float kHoverPointDist = 4.0f;
     const float kHoverPointDistSq = kHoverPointDist * kHoverPointDist;
 
-    const Color32 kShapeZoomedOutColor(0, 255, 0, 255);
-    const Color32 kShapeZoomedInColor(0, 255, 0, 190);
+    // The distance from a placed point to a solution point that is considered "close enough" to trigger the solution.
+    // For example, you must place 2 points to solve Aquarius, but the placed points don't need to be exact - just close enough.
+    const float kCloseToPointDist = 20.0f;
+    const float kCloseToPointDistSq = kCloseToPointDist * kCloseToPointDist;
 
-    const Color32 kSelectedShapeZoomedOutColor(0, 0, 0, 255);
+    // The colors of unselected shapes in both views.
+    const Color32 kZoomedOutShapeColor(0, 255, 0, 255);
+    const Color32 kZoomedInShapeColor(0, 255, 0, 192);
+
+    // The color of selected shapes changes in the zoomed out view only.
+    const Color32 kZoomedOutSelectedShapeColor(0, 0, 0, 255);
+
+    // The colors of locked grids in both views.
+    const Color32 kZoomedInLockedGridColor(128, 128, 128, 192);
+    const Color32 kZoomedOutLockedGridColor(128, 128, 128, 255);
+
+    // The colors of locked shapes in both views.
+    const Color32 kZoomedInLockedShapeColor(0, 0, 255, 192);
+    const Color32 kZoomedOutLockedShapeColor(0, 0, 255, 255);
+
+    // The colors of lines in both views.
+    const Color32 kZoomedInLineColor(0, 0, 0, 192);
+    const Color32 kZoomedOutLineColor(0, 0, 0, 255);
 
     const Vector2 kPiscesCoustaussaPoint(405.0f, 1094.0f);
     const Vector2 kPiscesBezuPoint(301.0f, 385.0f);
@@ -87,20 +109,17 @@ namespace
     }
 }
 
-Vector2 SidneyAnalyze::MapState::UI::GetLocalMousePos()
+Vector2 SidneyAnalyze::MapState::View::GetLocalMousePos()
 {
     // Subtract min from mouse pos to get point relative to lower left corner.
-    return gInputManager.GetMousePosition() - background->GetRectTransform()->GetWorldRect().GetMin();
+    return gInputManager.GetMousePosition() - mapImage->GetRectTransform()->GetWorldRect().GetMin();
 }
 
-Vector2 SidneyAnalyze::MapState::UI::GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints)
+Vector2 SidneyAnalyze::MapState::View::GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints)
 {
-    UIPoints* pts = useLockedPoints ? lockedPoints : points;
-
     // Iterate through points placed by the user.
     // Find one that is close enough to the desired point and return it.
-    const float kCloseToPointDist = 20.0f;
-    const float kCloseToPointDistSq = kCloseToPointDist * kCloseToPointDist;
+    UIPoints* pts = useLockedPoints ? lockedPoints : points;
     for(size_t i = 0; i < pts->GetPointsCount(); ++i)
     {
         const Vector2& placedPoint = pts->GetPoint(i);
@@ -114,13 +133,13 @@ Vector2 SidneyAnalyze::MapState::UI::GetPlacedPointNearPoint(const Vector2& poin
     return Vector2::Zero;
 }
 
-Vector2 SidneyAnalyze::MapState::ZoomedOutToZoomedInPos(const Vector2& pos)
+Vector2 SidneyAnalyze::MapState::ToZoomedInPoint(const Vector2& pos)
 {
     // Transform point from zoomed out map coordinate to zoomed in map coordinate.
     return (pos / kZoomedOutMapSize) * kZoomedInMapSize;
 }
 
-Vector2 SidneyAnalyze::MapState::ZoomedInToZoomedOutPos(const Vector2& pos)
+Vector2 SidneyAnalyze::MapState::ToZoomedOutPoint(const Vector2& pos)
 {
     // Transform point from zoomed in map coordinate to zoomed out map coordinate.
     return (pos / kZoomedInMapSize) * kZoomedOutMapSize;
@@ -197,9 +216,8 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
             // During Pisces is the only time you can place a circle!
             const Vector2 kDefaultCirclePos(599.0f, 770.0f);
             const float kDefaultCircleRadius = 200.0f;
-
             zoomedIn.circles->AddCircle(kDefaultCirclePos, kDefaultCircleRadius);
-            zoomedOut.circles->AddCircle(ZoomedInToZoomedOutPos(kDefaultCirclePos), (kDefaultCircleRadius / kZoomedInMapSize) * kZoomedOutMapSize);
+            zoomedOut.circles->AddCircle(ToZoomedOutPoint(kDefaultCirclePos), (kDefaultCircleRadius / kZoomedInMapSize) * kZoomedOutMapSize);
         }
     }
     else if(StringUtil::EqualsIgnoreCase(shapeName, "Rectangle"))
@@ -219,19 +237,17 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
             // You can only place a Rectangle during Aries!
             const Vector2 kDefaultRectanglePos(599.0f, 770.0f);
             const Vector2 kDefaultRectangleSize(400.0f, 400.0f);
-
-            zoomedIn.rectangles->AddRectangle(kDefaultRectanglePos, kDefaultRectangleSize, Math::kPiOver4);
-            zoomedOut.rectangles->AddRectangle(ZoomedInToZoomedOutPos(kDefaultRectanglePos), ZoomedInToZoomedOutPos(kDefaultRectangleSize), Math::kPiOver4);
+            zoomedIn.rectangles->AddRectangle(kDefaultRectanglePos, kDefaultRectangleSize, 0.0f);
+            zoomedOut.rectangles->AddRectangle(ToZoomedOutPoint(kDefaultRectanglePos), ToZoomedOutPoint(kDefaultRectangleSize), 0.0f);
         }
     }
 }
 
-void SidneyAnalyze::MapState::EraseShape()
+void SidneyAnalyze::MapState::EraseSelectedShape()
 {
     if(selectedCircleIndex >= 0)
     {
         selectedCircleIndex = -1;
-
         zoomedIn.circles->ClearCircles();
         zoomedOut.circles->ClearCircles();
     }
@@ -243,22 +259,22 @@ void SidneyAnalyze::MapState::EraseShape()
     }
 }
 
-bool SidneyAnalyze::MapState::IsShapeSelected()
+bool SidneyAnalyze::MapState::IsAnyShapeSelected()
 {
     return selectedCircleIndex >= 0 || selectedRectangleIndex >= 0;
 }
 
-void SidneyAnalyze::MapState::ClearSelectedShape()
+void SidneyAnalyze::MapState::ClearShapeSelection()
 {
     if(selectedCircleIndex >= 0)
     {
         selectedCircleIndex = -1;
-        zoomedOut.circles->SetColor(kShapeZoomedOutColor);
+        zoomedOut.circles->SetColor(kZoomedOutShapeColor);
     }
     if(selectedRectangleIndex >= 0)
     {
         selectedRectangleIndex = -1;
-        zoomedOut.rectangles->SetColor(kShapeZoomedOutColor);
+        zoomedOut.rectangles->SetColor(kZoomedOutShapeColor);
     }
 }
 
@@ -271,9 +287,7 @@ void SidneyAnalyze::MapState::DrawGrid(uint8_t size, bool fillShape)
         {
             const UIRectangle& rect = zoomedOut.lockedRectangles->GetRectangle(0);
             zoomedOut.grids->Add(rect.center, rect.size, rect.angle, size, false);
-
-            zoomedIn.grids->Add(ZoomedOutToZoomedInPos(rect.center), ZoomedOutToZoomedInPos(rect.size),
-                                rect.angle, size, false);
+            zoomedIn.grids->Add(ToZoomedInPoint(rect.center), ToZoomedInPoint(rect.size), rect.angle, size, false);
         }
     }
     else
@@ -297,7 +311,7 @@ void SidneyAnalyze::MapState::LockGrid()
 
         // Recreate grid in locked grids.
         zoomedOut.lockedGrids->Add(grid.center, grid.size, grid.angle, grid.divisions, grid.drawBorder);
-        zoomedIn.lockedGrids->Add(ZoomedOutToZoomedInPos(grid.center), ZoomedOutToZoomedInPos(grid.size),
+        zoomedIn.lockedGrids->Add(ToZoomedInPoint(grid.center), ToZoomedInPoint(grid.size),
                                   grid.angle, grid.divisions, grid.drawBorder);
 
         // Clear non-locked grids.
@@ -308,6 +322,7 @@ void SidneyAnalyze::MapState::LockGrid()
 
 void SidneyAnalyze::MapState::ClearGrid()
 {
+    // Clear any placed grids.
     zoomedIn.grids->Clear();
     zoomedOut.grids->Clear();
 }
@@ -341,9 +356,9 @@ void SidneyAnalyze::AnalyzeMap_Init()
         Actor* zoomedInMapBackground = new Actor(TransformType::RectTransform);
         zoomedInMapBackground->GetTransform()->SetParent(zoomedInMapWindow->GetTransform());
 
-        mMap.zoomedIn.background = zoomedInMapBackground->AddComponent<UIImage>();
-        mMap.zoomedIn.background->SetTexture(gAssetManager.LoadTexture("SIDNEYBIGMAP.BMP"), true);
-        mMap.zoomedIn.background->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        mMap.zoomedIn.mapImage = zoomedInMapBackground->AddComponent<UIImage>();
+        mMap.zoomedIn.mapImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBIGMAP.BMP"), true);
+        mMap.zoomedIn.mapImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
 
         // Create locked grids renderer.
         {
@@ -351,7 +366,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             gridsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.lockedGrids = gridsActor->AddComponent<UIGrids>();
-            mMap.zoomedIn.lockedGrids->SetColor(Color32(0, 0, 255, 192));
+            mMap.zoomedIn.lockedGrids->SetColor(kZoomedInLockedGridColor);
 
             mMap.zoomedIn.lockedGrids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedGrids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -363,7 +378,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             gridsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.grids = gridsActor->AddComponent<UIGrids>();
-            mMap.zoomedIn.grids->SetColor(kShapeZoomedInColor);
+            mMap.zoomedIn.grids->SetColor(kZoomedInShapeColor);
 
             mMap.zoomedIn.grids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.grids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -375,7 +390,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             rectanglesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.lockedRectangles = rectanglesActor->AddComponent<UIRectangles>();
-            mMap.zoomedIn.lockedRectangles->SetColor(Color32(0, 0, 255, 192));
+            mMap.zoomedIn.lockedRectangles->SetColor(kZoomedInLockedShapeColor);
 
             mMap.zoomedIn.lockedRectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedRectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -387,7 +402,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             rectanglesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.rectangles = rectanglesActor->AddComponent<UIRectangles>();
-            mMap.zoomedIn.rectangles->SetColor(kShapeZoomedInColor);
+            mMap.zoomedIn.rectangles->SetColor(kZoomedInShapeColor);
 
             mMap.zoomedIn.rectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.rectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -399,7 +414,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             circlesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.lockedCircles = circlesActor->AddComponent<UICircles>();
-            mMap.zoomedIn.lockedCircles->SetColor(Color32(0, 0, 255, 192));
+            mMap.zoomedIn.lockedCircles->SetColor(kZoomedInLockedShapeColor);
 
             mMap.zoomedIn.lockedCircles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedCircles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -411,7 +426,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             circlesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.circles = circlesActor->AddComponent<UICircles>();
-            mMap.zoomedIn.circles->SetColor(kShapeZoomedInColor);
+            mMap.zoomedIn.circles->SetColor(kZoomedInShapeColor);
 
             mMap.zoomedIn.circles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.circles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -423,7 +438,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             linesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.lines = linesActor->AddComponent<UILines>();
-            mMap.zoomedIn.lines->SetColor(Color32(0, 0, 0, 128));
+            mMap.zoomedIn.lines->SetColor(kZoomedInLineColor);
 
             mMap.zoomedIn.lines->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lines->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -435,19 +450,19 @@ void SidneyAnalyze::AnalyzeMap_Init()
             pointsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.lockedPoints = pointsActor->AddComponent<UIPoints>();
-            mMap.zoomedIn.lockedPoints->SetColor(Color32(0, 0, 255, 192));
+            mMap.zoomedIn.lockedPoints->SetColor(kZoomedInLockedShapeColor);
 
             mMap.zoomedIn.lockedPoints->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedPoints->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
-        // Create active points renderer.
+        // Create points renderer.
         {
             Actor* pointsActor = new Actor(TransformType::RectTransform);
             pointsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.points = pointsActor->AddComponent<UIPoints>();
-            mMap.zoomedIn.points->SetColor(Color32(0, 255, 0, 192));
+            mMap.zoomedIn.points->SetColor(kZoomedInShapeColor);
 
             mMap.zoomedIn.points->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.points->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -456,17 +471,22 @@ void SidneyAnalyze::AnalyzeMap_Init()
 
     // Create zoomed out map on right.
     {
+        // Create the map image itself.
         Actor* zoomedOutMapActor = new Actor(TransformType::RectTransform);
         zoomedOutMapActor->GetTransform()->SetParent(mAnalyzeMapWindow->GetTransform());
 
-        mMap.zoomedOut.background = zoomedOutMapActor->AddComponent<UIImage>();
-        mMap.zoomedOut.background->SetTexture(gAssetManager.LoadTexture("SIDNEYLITTLEMAP.BMP"));
+        mMap.zoomedOut.mapImage = zoomedOutMapActor->AddComponent<UIImage>();
+        mMap.zoomedOut.mapImage->SetTexture(gAssetManager.LoadTexture("SIDNEYLITTLEMAP.BMP"));
 
-        mMap.zoomedOut.background->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        mMap.zoomedOut.background->GetRectTransform()->SetAnchoredPosition(289.0f, 55.0f);
-        mMap.zoomedOut.background->GetRectTransform()->SetSizeDelta(kZoomedOutMapSize, kZoomedOutMapSize);
+        mMap.zoomedOut.mapImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        mMap.zoomedOut.mapImage->GetRectTransform()->SetAnchoredPosition(289.0f, 55.0f);
+        mMap.zoomedOut.mapImage->GetRectTransform()->SetSizeDelta(kZoomedOutMapSize, kZoomedOutMapSize);
 
         mMap.zoomedOut.button = zoomedOutMapActor->AddComponent<UIButton>();
+
+        // The zoomed out map also needs a masking canvas so that moved shapes don't show outside the map border.
+        UICanvas* zoomedOutMapCanvas = zoomedOutMapActor->AddComponent<UICanvas>(-1);
+        zoomedOutMapCanvas->SetMasked(true);
 
         // Create locked grids renderer.
         {
@@ -474,7 +494,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             gridsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.lockedGrids = gridsActor->AddComponent<UIGrids>();
-            mMap.zoomedOut.lockedGrids->SetColor(Color32(0, 0, 255, 255));
+            mMap.zoomedOut.lockedGrids->SetColor(kZoomedOutLockedGridColor);
 
             mMap.zoomedOut.lockedGrids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedGrids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -486,7 +506,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             gridsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.grids = gridsActor->AddComponent<UIGrids>();
-            mMap.zoomedOut.grids->SetColor(kShapeZoomedOutColor);
+            mMap.zoomedOut.grids->SetColor(kZoomedOutShapeColor);
 
             mMap.zoomedOut.grids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.grids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -498,7 +518,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             rectanglesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.lockedRectangles = rectanglesActor->AddComponent<UIRectangles>();
-            mMap.zoomedOut.lockedRectangles->SetColor(Color32(0, 0, 255, 255));
+            mMap.zoomedOut.lockedRectangles->SetColor(kZoomedOutLockedShapeColor);
 
             mMap.zoomedOut.lockedRectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedRectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -510,7 +530,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             rectanglesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.rectangles = rectanglesActor->AddComponent<UIRectangles>();
-            mMap.zoomedOut.rectangles->SetColor(kShapeZoomedOutColor);
+            mMap.zoomedOut.rectangles->SetColor(kZoomedOutShapeColor);
 
             mMap.zoomedOut.rectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.rectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -522,7 +542,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             circlesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.lockedCircles = circlesActor->AddComponent<UICircles>();
-            mMap.zoomedOut.lockedCircles->SetColor(Color32(0, 0, 255, 255));
+            mMap.zoomedOut.lockedCircles->SetColor(kZoomedOutLockedShapeColor);
 
             mMap.zoomedOut.lockedCircles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedCircles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -534,7 +554,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             circlesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.circles = circlesActor->AddComponent<UICircles>();
-            mMap.zoomedOut.circles->SetColor(kShapeZoomedOutColor);
+            mMap.zoomedOut.circles->SetColor(kZoomedOutShapeColor);
 
             mMap.zoomedOut.circles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.circles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -546,7 +566,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             linesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.lines = linesActor->AddComponent<UILines>();
-            mMap.zoomedOut.lines->SetColor(Color32(0, 0, 0, 255));
+            mMap.zoomedOut.lines->SetColor(kZoomedOutLineColor);
 
             mMap.zoomedOut.lines->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lines->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -558,7 +578,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             pointsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.lockedPoints = pointsActor->AddComponent<UIPoints>();
-            mMap.zoomedOut.lockedPoints->SetColor(Color32(0, 0, 255, 255));
+            mMap.zoomedOut.lockedPoints->SetColor(kZoomedOutLockedShapeColor);
 
             mMap.zoomedOut.lockedPoints->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedPoints->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -570,7 +590,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             pointsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.points = pointsActor->AddComponent<UIPoints>();
-            mMap.zoomedOut.points->SetColor(Color32(0, 255, 0, 255));
+            mMap.zoomedOut.points->SetColor(kZoomedOutShapeColor);
 
             mMap.zoomedOut.points->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.points->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -584,7 +604,6 @@ void SidneyAnalyze::AnalyzeMap_Init()
 
         mMapStatusLabel = statusTextActor->AddComponent<UILabel>();
         mMapStatusLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14_GRN.FON"));
-        mMapStatusLabel->SetText("Enter points on the map");
 
         mMapStatusLabel->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mMapStatusLabel->GetRectTransform()->SetAnchoredPosition(4.0f, 13.0f);
@@ -601,24 +620,218 @@ void SidneyAnalyze::AnalyzeMap_EnterState()
     mAnalyzeMapWindow->SetActive(true);
 
     // "Graphic" and "Map" dropdowns are available when analyzing a map. Text is not.
-    mMenuBar.SetDropdownEnabled(1, false);
-    mMenuBar.SetDropdownEnabled(2, true);
-    mMenuBar.SetDropdownEnabled(3, true);
+    mMenuBar.SetDropdownEnabled(kTextDropdownIdx, false);
+    mMenuBar.SetDropdownEnabled(kGraphicDropdownIdx, true);
+    mMenuBar.SetDropdownEnabled(kMapDropdownIdx, true);
 
     // "Graphic" choices are mostly grayed out.
-    mMenuBar.SetDropdownChoiceEnabled(2, 0, false);
-    mMenuBar.SetDropdownChoiceEnabled(2, 1, false);
-    mMenuBar.SetDropdownChoiceEnabled(2, 2, false);
+    mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ViewGeometryIdx, false);
+    mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_RotateShapeIdx, false);
+    mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ZoomClarifyIdx, false);
 
     // Use & Erase Shape are enabled if we have any Shapes saved.
-    mMenuBar.SetDropdownChoiceEnabled(2, 3, mSidneyFiles->HasFileOfType(SidneyFileType::Shape));
-    mMenuBar.SetDropdownChoiceEnabled(2, 4, mSidneyFiles->HasFileOfType(SidneyFileType::Shape));
+    mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_UseShapeIdx, mSidneyFiles->HasFileOfType(SidneyFileType::Shape));
+    mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_EraseShapeIdx, mSidneyFiles->HasFileOfType(SidneyFileType::Shape));
 }
 
 void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
 {
     if(!mAnalyzeMapWindow->IsActive()) { return; }
 
+    // Hide map status label if enough time has passed.
+    if(mMapStatusLabelTimer > 0.0f)
+    {
+        mMapStatusLabelTimer -= deltaTime;
+        if(mMapStatusLabelTimer <= 0.0f)
+        {
+            mMapStatusLabel->SetEnabled(false);
+        }
+    }
+
+    // Do not update maps or LSR progress if an action is active.
+    if(gActionManager.IsActionPlaying())
+    {
+        mMenuBar.SetInteractive(false);
+        return;
+    }
+
+    // Do not update maps or LSR progress when the analyze message is visible.
+    if(mAnalyzeMessageWindow->IsActive())
+    {
+        mMenuBar.SetInteractive(false);
+        return;
+    }
+    mMenuBar.SetInteractive(true);
+
+    // Update interaction with the zoomed out map.
+    AnalyzeMap_UpdateZoomedOutMap(deltaTime);
+
+    // Update interaction with the zoomed in map.
+    AnalyzeMap_UpdateZoomedInMap(deltaTime);
+    
+    // To complete Pisces, you must place three points on the map AND align a circle to them.
+    bool aquariusDone = gGameProgress.GetFlag("Aquarius");
+    bool piscesDone = gGameProgress.GetFlag("Pisces");
+    bool ariesDone = gGameProgress.GetFlag("Aries");
+    bool taurusDone = gGameProgress.GetFlag("Taurus");
+    if(aquariusDone && !piscesDone)
+    {
+        Vector2 coustaussaPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesCoustaussaPoint);
+        Vector2 bezuPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesBezuPoint);
+        Vector2 bugarachPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesBugarachPoint);
+        if(coustaussaPoint != Vector2::Zero && bezuPoint != Vector2::Zero && bugarachPoint != Vector2::Zero)
+        {
+            const Vector2 kCircleCenter(168.875f, 174.5f);
+            const float kCircleRadius = 121.0f;
+            for(size_t i = 0; i < mMap.zoomedOut.circles->GetCirclesCount(); ++i)
+            {
+                const Circle& circle = mMap.zoomedOut.circles->GetCircle(i);
+
+                float centerDiffSq = (circle.center - kCircleCenter).GetLengthSq();
+                float radiusDiff = Math::Abs(circle.radius - kCircleRadius);
+                if(centerDiffSq < 20 * 20 && radiusDiff < 4)
+                {
+                    // Put locked points on the zoomed in map.
+                    mMap.zoomedIn.points->RemovePoint(coustaussaPoint);
+                    mMap.zoomedIn.points->RemovePoint(bezuPoint);
+                    mMap.zoomedIn.points->RemovePoint(bugarachPoint);
+
+                    mMap.zoomedIn.lockedPoints->AddPoint(kPiscesCoustaussaPoint);
+                    mMap.zoomedIn.lockedPoints->AddPoint(kPiscesBezuPoint);
+                    mMap.zoomedIn.lockedPoints->AddPoint(kPiscesBugarachPoint);
+
+                    // Same for the zoomed out map.
+                    mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(coustaussaPoint));
+                    mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(bezuPoint));
+                    mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(bugarachPoint));
+
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPiscesCoustaussaPoint));
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPiscesBezuPoint));
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPiscesBugarachPoint));
+
+                    // Put locked circle on zoomed out map.
+                    mMap.zoomedOut.circles->ClearCircles();
+                    mMap.zoomedIn.circles->ClearCircles();
+                    mMap.selectedCircleIndex = -1;
+
+                    mMap.zoomedOut.lockedCircles->AddCircle(kCircleCenter, kCircleRadius);
+                    mMap.zoomedIn.lockedCircles->AddCircle(mMap.ToZoomedInPoint(kCircleCenter), (kCircleRadius / kZoomedOutMapSize) * kZoomedInMapSize);
+
+                    // Grace is excited that we figured it out.
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OAG2ZJU2\", 2)", [](const Action* action) {
+                        gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
+                    });
+
+                    // Show confirmation message.
+                    std::string message = StringUtil::Format(SidneyUtil::GetAnalyzeLocalizer().GetText("MapCircleConfirmNote").c_str(),
+                                                             mMap.GetPointLatLongText(mMap.ToZoomedInPoint(kCircleCenter)).c_str());
+                    ShowAnalyzeMessage(message);
+
+                    // This also gets us the coordinates at the center of the circle as an inventory item.
+                    gInventoryManager.AddInventoryItem("GRACE_COORDINATE_PAPER_1");
+
+                    // We completed Pisces.
+                    gGameProgress.SetFlag("Pisces");
+                }
+            }
+        }
+    }
+    else if(piscesDone && !ariesDone)
+    {
+        // To complete Aries, the player must place a Rectangle with a certain position and size.
+        const Vector2 kRectangleCenter(168.875f, 174.5f);
+        const float kRectangleSize = 242.0f;
+        for(size_t i = 0; i < mMap.zoomedOut.rectangles->GetCount(); ++i)
+        {
+            const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(i);
+
+            float centerDiffSq = (rectangle.center - kRectangleCenter).GetLengthSq();
+            float sizeDiff = Math::Abs(rectangle.size.x - kRectangleSize);
+            if(centerDiffSq < 20 * 20 && sizeDiff < 4)
+            {
+                // Clear mouse click action, forcing player to stop manipulating the rectangle.
+                // The rectangle remains selected however.
+                mMap.zoomedOutClickAction = MapState::ClickAction::None;
+
+                // Set the rectangle to the correct position/size.
+                // Note that the rectangle IS NOT locked yet, since the player can still rotate it.
+                UIRectangle correctRectangle;
+                correctRectangle.center = kRectangleCenter;
+                correctRectangle.size = Vector2::One * kRectangleSize;
+                correctRectangle.angle = rectangle.angle;
+
+                mMap.zoomedOut.rectangles->ClearRectangles();
+                mMap.zoomedOut.rectangles->AddRectangle(correctRectangle.center, correctRectangle.size, correctRectangle.angle);
+
+                mMap.zoomedIn.rectangles->ClearRectangles();
+                mMap.zoomedIn.rectangles->AddRectangle(mMap.ToZoomedInPoint(correctRectangle.center),
+                                                       mMap.ToZoomedInPoint(correctRectangle.size),
+                                                       correctRectangle.angle);
+
+                // Grace is excited that we figured it out.
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7E2ZIS1\", 1)");
+
+                // We completed Aries.
+                gGameProgress.SetFlag("Aries");
+            }
+            //else
+            //{
+            //    printf("Center (%f, %f), Size (%f)\n", rectangle.center.x, rectangle.center.y, rectangle.size.x);
+            //}
+        }
+    }
+    else if(ariesDone && !taurusDone)
+    {
+        bool placedMeridianLine = mMap.zoomedIn.GetPlacedPointNearPoint(kTaurusSerresPoint, true) != Vector2::Zero;
+        if(placedMeridianLine)
+        {
+            const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(0);
+
+            // Convert the rectangle's angle to the range 0 to 2Pi.
+            float angle = rectangle.angle;
+            while(angle < 0.0f)
+            {
+                angle += Math::k2Pi;
+            }
+            angle = Math::Mod(angle, Math::k2Pi);
+            //printf("Rectangle angle is %f\n", angle);
+
+            // There are four possible orientations that are considered correct.
+            const float kRectangleRotation = 1.129951f;
+            if(Math::Approximately(angle, kRectangleRotation, 0.1f) ||
+               Math::Approximately(angle, kRectangleRotation + Math::kPiOver2, 0.1f) ||
+               Math::Approximately(angle, kRectangleRotation + Math::kPi, 0.1f) ||
+               Math::Approximately(angle, kRectangleRotation + Math::kPi + Math::kPiOver2, 0.1f))
+            {
+                // Clear click action, forcing the player to stop rotating the rectangle.
+                mMap.zoomedOutClickAction = MapState::ClickAction::None;
+
+                // Also clear the selection - rectangle can no longer be selected.
+                mMap.selectedRectangleIndex = -1;
+
+                // "Lock in" the correct rectangle.
+                mMap.zoomedOut.rectangles->ClearRectangles();
+                mMap.zoomedIn.rectangles->ClearRectangles();
+
+                mMap.zoomedOut.lockedRectangles->AddRectangle(rectangle.center, rectangle.size, kRectangleRotation);
+                mMap.zoomedIn.lockedRectangles->AddRectangle(mMap.ToZoomedInPoint(rectangle.center),
+                                                             mMap.ToZoomedInPoint(rectangle.size),
+                                                             kRectangleRotation);
+
+                // Grace is excited that we figured it out. And time moves forward a bit!
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7E2ZQB1\", 1)", [](const Action* action){
+                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
+                });
+
+                // Taurus is done.
+                gGameProgress.SetFlag("Taurus");
+            }
+        }
+    }
+}
+
+void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
+{
     // If mouse button is not pressed, clear click action.
     if(!gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Left))
     {
@@ -632,7 +845,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
         //printf("%f, %f\n", zoomedOutMapPos.x, zoomedOutMapPos.y);
 
         // If hovering a point (locked or not) with no selected shape, update map status text with that point's lat/long.
-        if(!mMap.IsShapeSelected())
+        if(!mMap.IsAnyShapeSelected())
         {
             bool setText = false;
             for(size_t i = 0; i < mMap.zoomedOut.points->GetPointsCount(); ++i)
@@ -641,7 +854,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                 float distToPointSq = (zoomedOutMapPos - point).GetLengthSq();
                 if(distToPointSq < kHoverPointDistSq)
                 {
-                    AnalyzeMap_SetPointStatusText("MapHoverPointNote", mMap.ZoomedOutToZoomedInPos(point));
+                    AnalyzeMap_SetPointStatusText("MapHoverPointNote", mMap.ToZoomedInPoint(point));
                     setText = true;
                     break;
                 }
@@ -654,7 +867,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     float distToPointSq = (zoomedOutMapPos - point).GetLengthSq();
                     if(distToPointSq < kHoverPointDistSq)
                     {
-                        AnalyzeMap_SetPointStatusText("MapHoverPointNote", mMap.ZoomedOutToZoomedInPos(point));
+                        AnalyzeMap_SetPointStatusText("MapHoverPointNote", mMap.ToZoomedInPoint(point));
                         setText = true;
                         break;
                     }
@@ -675,9 +888,9 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                 {
                     if(mMap.selectedCircleIndex != i)
                     {
-                        mMap.ClearSelectedShape();
+                        mMap.ClearShapeSelection();
                         mMap.selectedCircleIndex = i;
-                        mMap.zoomedOut.circles->SetColor(kSelectedShapeZoomedOutColor);
+                        mMap.zoomedOut.circles->SetColor(kZoomedOutSelectedShapeColor);
                         mMap.zoomedOutClickAction = MapState::ClickAction::SelectShape;
                         break;
                     }
@@ -692,9 +905,9 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                 {
                     if(mMap.selectedRectangleIndex != i)
                     {
-                        mMap.ClearSelectedShape();
+                        mMap.ClearShapeSelection();
                         mMap.selectedRectangleIndex = i;
-                        mMap.zoomedOut.rectangles->SetColor(kSelectedShapeZoomedOutColor);
+                        mMap.zoomedOut.rectangles->SetColor(kZoomedOutSelectedShapeColor);
                         mMap.zoomedOutClickAction = MapState::ClickAction::SelectShape;
                         break;
                     }
@@ -705,14 +918,14 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
         // This isn't frequently used, but right-clicking actually de-selects the current shape.
         if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Right))
         {
-            mMap.ClearSelectedShape();
+            mMap.ClearShapeSelection();
         }
 
         // We have a selected shape. See if we're hovering it and change the cursor if so.
         bool moveShapeCursor = false;
         bool resizeShapeCursor = false;
         bool rotateShapeCursor = false;
-        if(mMap.IsShapeSelected())
+        if(mMap.IsAnyShapeSelected())
         {
             if(mMap.selectedCircleIndex >= 0)
             {
@@ -721,7 +934,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                 if((edgePoint - zoomedOutMapPos).GetLengthSq() < 2.5f * 2.5f || mMap.zoomedOutClickAction == MapState::ClickAction::ResizeShape)
                 {
                     resizeShapeCursor = true;
-                    
+
                 }
                 else if(circle.ContainsPoint(zoomedOutMapPos) || mMap.zoomedOutClickAction == MapState::ClickAction::MoveShape)
                 {
@@ -821,7 +1034,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     mMap.zoomedOut.circles->AddCircle(zoomedOutCircle.center, zoomedOutCircle.radius);
 
                     mMap.zoomedIn.circles->ClearCircles();
-                    mMap.zoomedIn.circles->AddCircle(mMap.ZoomedOutToZoomedInPos(zoomedOutCircle.center),
+                    mMap.zoomedIn.circles->AddCircle(mMap.ToZoomedInPoint(zoomedOutCircle.center),
                                                      (zoomedOutCircle.radius / kZoomedOutMapSize) * kZoomedInMapSize);
                 }
                 if(mMap.selectedRectangleIndex >= 0)
@@ -835,8 +1048,8 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     mMap.zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
 
                     mMap.zoomedIn.rectangles->ClearRectangles();
-                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.center),
-                                                           mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.size),
+                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ToZoomedInPoint(zoomedOutRectangle.center),
+                                                           mMap.ToZoomedInPoint(zoomedOutRectangle.size),
                                                            zoomedOutRectangle.angle);
                 }
             }
@@ -850,7 +1063,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     mMap.zoomedOut.circles->AddCircle(zoomedOutCircle.center, zoomedOutCircle.radius);
 
                     mMap.zoomedIn.circles->ClearCircles();
-                    mMap.zoomedIn.circles->AddCircle(mMap.ZoomedOutToZoomedInPos(zoomedOutCircle.center),
+                    mMap.zoomedIn.circles->AddCircle(mMap.ToZoomedInPoint(zoomedOutCircle.center),
                                                      (zoomedOutCircle.radius / kZoomedOutMapSize) * kZoomedInMapSize);
                 }
                 if(mMap.selectedRectangleIndex >= 0)
@@ -874,8 +1087,8 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     mMap.zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
 
                     mMap.zoomedIn.rectangles->ClearRectangles();
-                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.center),
-                                                           mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.size),
+                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ToZoomedInPoint(zoomedOutRectangle.center),
+                                                           mMap.ToZoomedInPoint(zoomedOutRectangle.size),
                                                            zoomedOutRectangle.angle);
                 }
             }
@@ -901,14 +1114,14 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     mMap.zoomedOut.rectangles->AddRectangle(zoomedOutRectangle.center, zoomedOutRectangle.size, zoomedOutRectangle.angle);
 
                     mMap.zoomedIn.rectangles->ClearRectangles();
-                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.center),
-                                                           mMap.ZoomedOutToZoomedInPos(zoomedOutRectangle.size),
+                    mMap.zoomedIn.rectangles->AddRectangle(mMap.ToZoomedInPoint(zoomedOutRectangle.center),
+                                                           mMap.ToZoomedInPoint(zoomedOutRectangle.size),
                                                            zoomedOutRectangle.angle);
                 }
             }
             else if(mMap.zoomedOutClickAction == MapState::ClickAction::FocusMap)
             {
-                Vector2 zoomedInMapPos = mMap.ZoomedOutToZoomedInPos(zoomedOutMapPos);
+                Vector2 zoomedInMapPos = mMap.ToZoomedInPoint(zoomedOutMapPos);
                 //printf("%f, %f\n", zoomedInPos.x, zoomedInPos.y);
 
                 // The zoomed in view should center on the zoomed in pos.
@@ -936,15 +1149,18 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                 }
 
                 // Position the map based on the zoomed in rect.
-                mMap.zoomedIn.background->GetRectTransform()->SetAnchoredPosition(-zoomedInRect.GetMin());
+                mMap.zoomedIn.mapImage->GetRectTransform()->SetAnchoredPosition(-zoomedInRect.GetMin());
             }
         }
     }
+}
 
+void SidneyAnalyze::AnalyzeMap_UpdateZoomedInMap(float deltaTime)
+{
     // Clicking on the zoomed in map may perform an action in some cases.
     if(mMap.zoomedIn.button->IsHovered() && gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
     {
-        if(mEnteringPoints)
+        if(mMap.enteringPoints)
         {
             // Add point to zoomed in map at click pos.
             Vector2 zoomedInMapPos = mMap.zoomedIn.GetLocalMousePos();
@@ -952,180 +1168,10 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
             printf("Add pt at %f, %f\n", zoomedInMapPos.x, zoomedInMapPos.y);
 
             // Also convert to zoomed out map position and add point there.
-            mMap.zoomedOut.points->AddPoint(mMap.ZoomedInToZoomedOutPos(zoomedInMapPos));
+            mMap.zoomedOut.points->AddPoint(mMap.ToZoomedOutPoint(zoomedInMapPos));
 
             // When you place a point, the latitude/longitude of the point are displayed on-screen.
             AnalyzeMap_SetPointStatusText("MapEnterPointNote", zoomedInMapPos);
-        }
-    }
-
-    // Hide map status label if enough time has passed.
-    if(mMapStatusLabelTimer > 0.0f)
-    {
-        mMapStatusLabelTimer -= deltaTime;
-        if(mMapStatusLabelTimer <= 0.0f)
-        {
-            mMapStatusLabel->SetEnabled(false);
-        }
-    }
-
-    // To complete Pisces, you must place three points on the map AND align a circle to them.
-    bool aquariusDone = gGameProgress.GetFlag("Aquarius");
-    bool piscesDone = gGameProgress.GetFlag("Pisces");
-    bool ariesDone = gGameProgress.GetFlag("Aries");
-    bool taurusDone = gGameProgress.GetFlag("Taurus");
-    if(aquariusDone && !piscesDone)
-    {
-        Vector2 coustaussaPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesCoustaussaPoint);
-        Vector2 bezuPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesBezuPoint);
-        Vector2 bugarachPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesBugarachPoint);
-        if(coustaussaPoint != Vector2::Zero && bezuPoint != Vector2::Zero && bugarachPoint != Vector2::Zero)
-        {
-            const Vector2 kCircleCenter(168.875f, 174.5f);
-            const float kCircleRadius = 121.0f;
-            for(size_t i = 0; i < mMap.zoomedOut.circles->GetCirclesCount(); ++i)
-            {
-                const Circle& circle = mMap.zoomedOut.circles->GetCircle(i);
-
-                float centerDiffSq = (circle.center - kCircleCenter).GetLengthSq();
-                float radiusDiff = Math::Abs(circle.radius - kCircleRadius);
-                if(centerDiffSq < 20 * 20 && radiusDiff < 4)
-                {
-                    // Put locked points on the zoomed in map.
-                    mMap.zoomedIn.points->RemovePoint(coustaussaPoint);
-                    mMap.zoomedIn.points->RemovePoint(bezuPoint);
-                    mMap.zoomedIn.points->RemovePoint(bugarachPoint);
-
-                    mMap.zoomedIn.lockedPoints->AddPoint(kPiscesCoustaussaPoint);
-                    mMap.zoomedIn.lockedPoints->AddPoint(kPiscesBezuPoint);
-                    mMap.zoomedIn.lockedPoints->AddPoint(kPiscesBugarachPoint);
-
-                    // Same for the zoomed out map.
-                    mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(coustaussaPoint));
-                    mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(bezuPoint));
-                    mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(bugarachPoint));
-
-                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kPiscesCoustaussaPoint));
-                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kPiscesBezuPoint));
-                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kPiscesBugarachPoint));
-
-                    // Put locked circle on zoomed out map.
-                    mMap.zoomedOut.circles->ClearCircles();
-                    mMap.zoomedIn.circles->ClearCircles();
-                    mMap.selectedCircleIndex = -1;
-
-                    mMap.zoomedOut.lockedCircles->AddCircle(kCircleCenter, kCircleRadius);
-                    mMap.zoomedIn.lockedCircles->AddCircle(mMap.ZoomedOutToZoomedInPos(kCircleCenter), (kCircleRadius / kZoomedOutMapSize) * kZoomedInMapSize);
-
-                    // Grace is excited that we figured it out.
-                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OAG2ZJU2\", 2)", [](const Action* action) {
-                        gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
-                    });
-
-                    // Show confirmation message.
-                    std::string message = StringUtil::Format(SidneyUtil::GetAnalyzeLocalizer().GetText("MapCircleConfirmNote").c_str(),
-                                                             mMap.GetPointLatLongText(mMap.ZoomedOutToZoomedInPos(kCircleCenter)).c_str());
-                    ShowAnalyzeMessage(message);
-
-                    // This also gets us the coordinates at the center of the circle as an inventory item.
-                    gInventoryManager.AddInventoryItem("GRACE_COORDINATE_PAPER_1");
-
-                    // We completed Pisces.
-                    gGameProgress.SetFlag("Pisces");
-                }
-            }
-        }
-    }
-    else if(piscesDone && !ariesDone)
-    {
-        // To complete Aries, the player must place a Rectangle with a certain position and size.
-        const Vector2 kRectangleCenter(168.875f, 174.5f);
-        const float kRectangleSize = 242.0f;
-        for(size_t i = 0; i < mMap.zoomedOut.rectangles->GetCount(); ++i)
-        {
-            const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(i);
-
-            float centerDiffSq = (rectangle.center - kRectangleCenter).GetLengthSq();
-            float sizeDiff = Math::Abs(rectangle.size.x - kRectangleSize);
-            if(centerDiffSq < 20 * 20 && sizeDiff < 4)
-            {
-                // Clear mouse click action, forcing player to stop manipulating the rectangle.
-                // The rectangle remains selected however.
-                mMap.zoomedOutClickAction = MapState::ClickAction::None;
-
-                // Set the rectangle to the correct position/size.
-                // Note that the rectangle IS NOT locked yet, since the player can still rotate it.
-                UIRectangle correctRectangle;
-                correctRectangle.center = kRectangleCenter;
-                correctRectangle.size = Vector2::One * kRectangleSize;
-                correctRectangle.angle = rectangle.angle;
-
-                mMap.zoomedOut.rectangles->ClearRectangles();
-                mMap.zoomedOut.rectangles->AddRectangle(correctRectangle.center, correctRectangle.size, correctRectangle.angle);
-
-                mMap.zoomedIn.rectangles->ClearRectangles();
-                mMap.zoomedIn.rectangles->AddRectangle(mMap.ZoomedOutToZoomedInPos(correctRectangle.center),
-                                                       mMap.ZoomedOutToZoomedInPos(correctRectangle.size),
-                                                       correctRectangle.angle);
-
-                // Grace is excited that we figured it out.
-                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7E2ZIS1\", 1)");
-
-                // We completed Aries.
-                gGameProgress.SetFlag("Aries");
-            }
-            //else
-            //{
-            //    printf("Center (%f, %f), Size (%f)\n", rectangle.center.x, rectangle.center.y, rectangle.size.x);
-            //}
-        }
-    }
-    else if(ariesDone && !taurusDone)
-    {
-        bool placedMeridianLine = mMap.zoomedIn.GetPlacedPointNearPoint(kTaurusSerresPoint, true) != Vector2::Zero;
-        if(placedMeridianLine)
-        {
-            const UIRectangle& rectangle = mMap.zoomedOut.rectangles->GetRectangle(0);
-
-            // Convert the rectangle's angle to the range 0 to 2Pi.
-            float angle = rectangle.angle;
-            while(angle < 0.0f)
-            {
-                angle += Math::k2Pi;
-            }
-            angle = Math::Mod(angle, Math::k2Pi);
-            //printf("Rectangle angle is %f\n", angle);
-
-            // There are four possible orientations that are considered correct.
-            const float kRectangleRotation = 1.129951f;
-            if(Math::Approximately(angle, kRectangleRotation, 0.1f) ||
-               Math::Approximately(angle, kRectangleRotation + Math::kPiOver2, 0.1f) ||
-               Math::Approximately(angle, kRectangleRotation + Math::kPi, 0.1f) ||
-               Math::Approximately(angle, kRectangleRotation + Math::kPi + Math::kPiOver2, 0.1f))
-            {
-                // Clear click action, forcing the player to stop rotating the rectangle.
-                mMap.zoomedOutClickAction = MapState::ClickAction::None;
-
-                // Also clear the selection - rectangle can no longer be selected.
-                mMap.selectedRectangleIndex = -1;
-
-                // "Lock in" the correct rectangle.
-                mMap.zoomedOut.rectangles->ClearRectangles();
-                mMap.zoomedIn.rectangles->ClearRectangles();
-
-                mMap.zoomedOut.lockedRectangles->AddRectangle(rectangle.center, rectangle.size, kRectangleRotation);
-                mMap.zoomedIn.lockedRectangles->AddRectangle(mMap.ZoomedInToZoomedOutPos(rectangle.center),
-                                                             mMap.ZoomedInToZoomedOutPos(rectangle.size),
-                                                             kRectangleRotation);
-
-                // Grace is excited that we figured it out. And time moves forward a bit!
-                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O7E2ZQB1\", 1)", [](const Action* action){
-                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("CLOCKTIMEBLOCK.WAV"));
-                });
-
-                // Taurus is done.
-                gGameProgress.SetFlag("Taurus");
-            }
         }
     }
 }
@@ -1162,16 +1208,16 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
             mMap.zoomedIn.points->RemovePoint(cdbPoint);
             mMap.zoomedIn.lockedPoints->AddPoint(kCDBPoint);
 
-            mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(rlcPoint));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kRLCPoint));
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(rlcPoint));
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kRLCPoint));
 
-            mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(cdbPoint));
-            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kCDBPoint));
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(cdbPoint));
+            mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCDBPoint));
 
             // Add sun line through the placed points.
             mMap.zoomedIn.lines->AddLine(kRLCPoint, kSunLineEndPoint);
-            mMap.zoomedOut.lines->AddLine(mMap.ZoomedInToZoomedOutPos(kRLCPoint),
-                                          mMap.ZoomedInToZoomedOutPos(kSunLineEndPoint));
+            mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kRLCPoint),
+                                          mMap.ToZoomedOutPoint(kSunLineEndPoint));
 
             // Done with Aquarius!
             gGameProgress.SetFlag("Aquarius");
@@ -1206,8 +1252,8 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
             // Remove points placed by the player.
             mMap.zoomedIn.points->RemovePoint(serresPoint);
             mMap.zoomedIn.points->RemovePoint(meridianPoint);
-            mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(serresPoint));
-            mMap.zoomedOut.points->RemovePoint(mMap.ZoomedInToZoomedOutPos(meridianPoint));
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(serresPoint));
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(meridianPoint));
 
             // It's possible for the player to place these points multiple times.
             // But only the first placement elicits exclamations from Grace.
@@ -1220,13 +1266,13 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
                 // Add locked points.
                 mMap.zoomedIn.lockedPoints->AddPoint(kTaurusSerresPoint);
                 mMap.zoomedIn.lockedPoints->AddPoint(kTaurusMeridianPoint);
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kTaurusSerresPoint));
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ZoomedInToZoomedOutPos(kTaurusMeridianPoint));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTaurusSerresPoint));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kTaurusMeridianPoint));
 
                 // Place a line segment between the points.
                 mMap.zoomedIn.lines->AddLine(kTaurusSerresPoint, kTaurusMeridianPoint);
-                mMap.zoomedOut.lines->AddLine(mMap.ZoomedInToZoomedOutPos(kTaurusSerresPoint),
-                                              mMap.ZoomedInToZoomedOutPos(kTaurusMeridianPoint));
+                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTaurusSerresPoint),
+                                              mMap.ToZoomedOutPoint(kTaurusMeridianPoint));
 
                 // NOTE: doing this doesn't complete Taurus - the player must rotate the square to align with these points.
             }
@@ -1250,8 +1296,8 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
     }
 
     // Analyzing always clears point entry and shape selection.
-    mEnteringPoints = false;
-    mMap.ClearSelectedShape();
+    mMap.enteringPoints = false;
+    mMap.ClearShapeSelection();
 }
 
 void SidneyAnalyze::AnalyzeMap_OnUseShapePressed()
@@ -1263,7 +1309,7 @@ void SidneyAnalyze::AnalyzeMap_OnUseShapePressed()
 
 void SidneyAnalyze::AnalyzeMap_OnEraseShapePressed()
 {
-    if(mMap.IsShapeSelected())
+    if(mMap.IsAnyShapeSelected())
     {
         // After completing Aries, the player has placed a Rectangle of the right size on the map, but it still needs to be rotated for Taurus.
         // At this point, the game stops you from erasing the Rectangle, since that would "uncomplete" Aries.
@@ -1276,7 +1322,7 @@ void SidneyAnalyze::AnalyzeMap_OnEraseShapePressed()
         }
         else
         {
-            mMap.EraseShape();
+            mMap.EraseSelectedShape();
         }
     }
     else
@@ -1300,12 +1346,12 @@ void SidneyAnalyze::AnalyzeMap_OnEnterPointsPressed()
 
     // Otherwise, we can place points.
     AnalyzeMap_SetStatusText(SidneyUtil::GetAnalyzeLocalizer().GetText("EnterPointsNote"));
-    mEnteringPoints = true;
+    mMap.enteringPoints = true;
 }
 
 void SidneyAnalyze::AnalyzeMap_OnClearPointsPressed()
 {
-    mEnteringPoints = false;
+    mMap.enteringPoints = false;
     mMap.zoomedIn.points->ClearPoints();
     mMap.zoomedOut.points->ClearPoints();
 }

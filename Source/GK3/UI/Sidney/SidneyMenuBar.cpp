@@ -88,20 +88,27 @@ void SidneyMenuBar::Update()
     // Iterate and update each dropdown.
     for(Dropdown& dropdown : mDropdowns)
     {
-        // Show the dropdowns options if the root is hovered.
-        bool showOptions = dropdown.enabled && dropdown.rootButton->IsHovered();
+        // Assume not showing options to start.
+        bool showOptions = false;
 
-        // If the root is not hovered, BUT the dropdown options are active
-        // and one of THEM is hovered, we want to show the options!
-        if(!showOptions && !dropdown.options.empty() && dropdown.options.back()->IsActive())
+        // Only if interactive, consider showing options.
+        if(mInteractive)
         {
-            for(SidneyButton* option : dropdown.options)
+            // Show the dropdowns options if the root is hovered.
+            showOptions = dropdown.enabled && dropdown.rootButton->IsHovered();
+
+            // If the root is not hovered, BUT the dropdown options are active
+            // and one of THEM is hovered, we want to show the options!
+            if(!showOptions && !dropdown.options.empty() && dropdown.options.back()->IsActive())
             {
-                // Hovered OR animating (after a button press).
-                if(option->GetButton()->IsHovered() || option->IsAnimating())
+                for(SidneyButton* option : dropdown.options)
                 {
-                    showOptions = true;
-                    break;
+                    // Hovered OR animating (after a button press).
+                    if(option->GetButton()->IsHovered() || option->IsAnimating())
+                    {
+                        showOptions = true;
+                        break;
+                    }
                 }
             }
         }
