@@ -5,7 +5,7 @@ project(gengine VERSION 0.0.8
                 LANGUAGES C CXX)
 
 # Build for C++14, standard required, no extensions.
-# Using global "set" rather thant target-specific commands b/c I want all my targets to use the same rules for these.
+# Using global "set" so that all targets use the same rules.
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -14,7 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 
 # Generate header containing info about build environment.
-# Important to put the generated file in BINARY_DIR - otherwise, we may have conflicts if we create multiple CMake target projects in the same repo.
+# Important to put generated file in BINARY_DIR - otherwise, conflicts may occur when multiple projects are generated.
 include(CheckIncludeFile)
 CHECK_INCLUDE_FILE(sys/stat.h HAVE_STAT_H)
 CHECK_INCLUDE_FILE(dirent.h HAVE_DIRENT_H)
@@ -24,7 +24,7 @@ configure_file("${PROJECT_SOURCE_DIR}/Source/Platform/BuildEnv.h.in" "${CMAKE_CU
 
 # Get all cpp/h files in the Source directory using GLOB.
 # Supposedly using GLOB is frowned upon, but...it works really well for now sooooo.
-file(GLOB_RECURSE source_files CONFIGURE_DEPENDS 
+file(GLOB_RECURSE source_files CONFIGURE_DEPENDS
     "Source/*.cpp" "Source/*.h" "Source/*.cc" "Source/*.hh"
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${source_files})
@@ -35,7 +35,7 @@ file(GLOB_RECURSE asset_files CONFIGURE_DEPENDS
 )
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${asset_files})
 
-# Add main executable - the game.
+# Add main executable - the engine/game.
 add_executable(gk3 ${source_files} ${asset_files})
 
 # Add header locations.
@@ -123,34 +123,29 @@ if(MSVC)
         /wd5219 # Disable "implicit conversion from x to y" warning
         /wd5245 # Disable "unreferenced function with internal linkage has been removed" warning
     )
-    #target_compile_options(gk3 PRIVATE /wd26812)
-elseif(APPLE)
-    #target_compile_options(gk3 PRIVATE -Wall -Wextra -pedantic)
-else() # Linux
-    target_compile_options(gk3 PRIVATE 
-        -Wall
+else() # GCC/Clang
+    target_compile_options(gk3 PRIVATE
+        -Wall -Wextra
         -Wno-comment            # Disable comment formatting warnings.
         -Wno-unused-function    # Disable unused function warnings.
-
-        -Wextra
         -Wno-unused-parameter   # Disable unused function parameter warnings.
     )
 endif()
 
-# Other compiler flags
+# Other compiler flags.
 if(MSVC)
     target_compile_definitions(gk3 PRIVATE
         _CRT_SECURE_NO_WARNINGS     # Don't display warnings for using unsecure standard C/C++ functions.
     )
-    target_compile_options(gk3 PRIVATE 
+    target_compile_options(gk3 PRIVATE
         /fp:fast    # Optimize floating point math for speed.
         /JMC        # Enable "Just My Code" to skip system/library code when debugging.
         /MP         # Multithreaded compiling - it's faster.
     )
 elseif(APPLE)
-    target_compile_options(gk3 PRIVATE
-        $<$<CONFIG:RelWithDebInfo>:-O>  # Workaround: currently seeing crashes and performance issues with -O2 optimization; use -O1 instead.
-    )
+    #target_compile_options(gk3 PRIVATE
+    #    $<$<CONFIG:RelWithDebInfo>:-O>  # Workaround: currently seeing crashes and performance issues with -O2 optimization; use -O1 instead.
+    #)
 endif()
 
 # Library locations/linking/copying.
@@ -201,7 +196,7 @@ elseif(APPLE)
     find_library(OPENGL_LIB OpenGL)
 
     # Link all the libraries.
-    target_link_libraries(gk3 
+    target_link_libraries(gk3
         avcodec avformat avutil swresample swscale  # ffmpeg
         fmod                                        # fmod
         GLEW                                        # GLEW
@@ -225,7 +220,7 @@ else() # Linux
     )
 
     # Link all the libraries.
-    target_link_libraries(gk3 
+    target_link_libraries(gk3
         avcodec avformat avutil swresample swscale  # ffmpeg
         fmod                                        # fmod
         GLEW                                        # GLEW
@@ -239,13 +234,12 @@ endif()
 if(WIN32)
     # Use repo root as debugger working directory.
     # This allows running the game without copying Assets/Data to the Build folder.
-    set_property(TARGET gk3 PROPERTY 
+    set_property(TARGET gk3 PROPERTY
         VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 
     # Set GK3 as the startup project.
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT gk3)
-
 elseif(APPLE)
     # Build a MacOS app (rather than command line tool).
     set_target_properties(gk3 PROPERTIES
@@ -276,6 +270,7 @@ elseif(APPLE)
     set_target_properties(gk3 PROPERTIES
         XCODE_SCHEME_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
+    # NOTE: CLion doesn't yet have a WORKING_DIRECTORY CMake variable. It must be set manually to the repo root.
 endif()
 
 # Post-build commands, to copy any libraries/assets to final locations.
@@ -289,11 +284,26 @@ if(WIN32)
         VERBATIM
     )
 elseif(APPLE)
+    # CLion and Xcode differ in where they put the Mac App, and also how they name it. Let's support both!
+    set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/gk3.app/Contents")
+    if(XCODE)
+        set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/$<CONFIG>/Gabriel Knight 3.app/Contents")
+    endif()
+
     # Copies libraries to app bundle post-build.
+    set(LIB_FFMPEG_SRC "${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/mac")
+    set(MAC_APP_LIBRARIES "${MAC_APP_CONTENTS}/Libraries")
     add_custom_command(TARGET gk3
         POST_BUILD
-        COMMAND ${PLAT_SOURCE_DIR}/Scripts/PostBuild.sh ${PLAT_SOURCE_DIR} app
-        VERBATIM
+        COMMAND mkdir -p "${MAC_APP_LIBRARIES}"
+        COMMAND cp "${LIB_FFMPEG_SRC}/libavcodec.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND cp "${LIB_FFMPEG_SRC}/libavformat.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND cp "${LIB_FFMPEG_SRC}/libavutil.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND cp "${LIB_FFMPEG_SRC}/libswresample.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND cp "${LIB_FFMPEG_SRC}/libswscale.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND cp "${PLAT_SOURCE_DIR}/Libraries/fmod/lib/mac/libfmod.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND cp "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/mac/libGLEW.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND cp "${PLAT_SOURCE_DIR}/Libraries/zlib/lib/mac/libz.dylib" "${MAC_APP_LIBRARIES}"
     )
 else() # Linux
     add_custom_command(TARGET gk3
