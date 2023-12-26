@@ -22,7 +22,7 @@ public:
         Middle,
         Right
     };
-    
+
     ~InputManager();
 
     void Init();
@@ -37,10 +37,10 @@ public:
     bool IsAnyKeyPressed();
 
     // Mouse
-    bool IsMouseButtonLeadingEdge(MouseButton button);
-    bool IsMouseButtonPressed(MouseButton button) { return (mMouseButtonState & SDL_BUTTON(static_cast<int>(button))); }
-    bool IsMouseButtonTrailingEdge(MouseButton button);
-    
+    bool IsMouseButtonLeadingEdge(MouseButton button) const;
+    bool IsMouseButtonPressed(MouseButton button) const { return (mMouseButtonState & SDL_BUTTON(static_cast<int>(button))); }
+    bool IsMouseButtonTrailingEdge(MouseButton button) const;
+
     Vector2 GetMousePosition() { return mMousePosition; }
     Vector2 GetMouseDelta() { return mMousePositionDelta; }
 
@@ -50,13 +50,13 @@ public:
 	void LockMouse();
 	void UnlockMouse();
 	bool MouseLocked() const { return mMouseLocked; }
-	
+
 	// Text Input
 	void StartTextInput(TextInput* textInput);
 	void StopTextInput();
 	bool IsTextInput() const { return mTextInput != nullptr; }
 	TextInput* GetTextInput() { return mTextInput; }
-	
+
 private:
     // KEYBOARD
     // Number of keys on the keyboard.
@@ -70,25 +70,25 @@ private:
 	// Current and previous states, so we can check for up or down moments.
     const uint8_t* mCurrKeyboardState = nullptr;
     uint8_t* mPrevKeyboardState = nullptr;
-    
+
     // MOUSE
     // Current and previous mouse state, to detect button up and down events.
     uint32_t mMouseButtonState = 0;
     uint32_t mPrevMouseButtonState = 0;
-    
+
     // The mouse's current position in window coords.
     Vector2 mMousePosition;
-    
+
     // The mouse's position delta for this frame.
     Vector2 mMousePositionDelta;
 
     // Amount of scrolling on the mouse wheel detected this frame.
     Vector2 mMouseWheelScrollDelta;
-		
+
 	// Is the mouse locked?
 	bool mMouseLocked = false;
 	Vector2 mLockedMousePosition;
-	
+
 	// TEXT INPUT
 	TextInput* mTextInput = nullptr;
 };
@@ -125,14 +125,14 @@ inline bool InputManager::IsAnyKeyPressed()
     return false;
 }
 
-inline bool InputManager::IsMouseButtonLeadingEdge(MouseButton button)
+inline bool InputManager::IsMouseButtonLeadingEdge(MouseButton button) const
 {
     bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
     bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
     return pressedThisFrame && !pressedLastFrame;
 }
 
-inline bool InputManager::IsMouseButtonTrailingEdge(MouseButton button)
+inline bool InputManager::IsMouseButtonTrailingEdge(MouseButton button) const
 {
     bool pressedThisFrame = (mMouseButtonState & SDL_BUTTON(static_cast<int>(button)));
     bool pressedLastFrame = (mPrevMouseButtonState & SDL_BUTTON(static_cast<int>(button)));

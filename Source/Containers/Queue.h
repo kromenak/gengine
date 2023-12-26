@@ -3,7 +3,7 @@
 //
 // A queue container (first in, first out). New elements go on the back, elements are removed from the front.
 // Uses a fixed-size contiguous array of elements internally.
-// 
+//
 // Characteristics:
 // - Fixed size: max container size must be known at compile time.
 // - Contiguous: elements are contiguous in memory.
@@ -26,7 +26,7 @@ public:
         Iterator(uint32_t index, uint32_t remaining, T* data) : index(index), remaining(remaining), data(data) { }
         void operator++() { ++index; index %= TCapacity; --remaining; }
         bool operator==(const Iterator& other) const { return index == other.index && remaining == other.remaining; }
-        bool operator!=(const Iterator& other) const { return !(*this == other); }
+        bool operator!=(const Iterator& other) const { return *this != other; }
         const T& operator*() const { return data[index]; }
 
     private:
@@ -38,7 +38,7 @@ public:
     };
     Iterator begin() { return Iterator(mHead, mSize, reinterpret_cast<T*>(mData)); }
     Iterator end() { return Iterator(mTail, 0, reinterpret_cast<T*>(mData)); }
-    
+
     ~Queue()
     {
         Clear();

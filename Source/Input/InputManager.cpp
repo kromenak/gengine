@@ -31,13 +31,13 @@ void InputManager::Update()
     {
         SDL_memcpy(mPrevKeyboardState, mCurrKeyboardState, mNumKeys);
     }
-    
+
     // Copy previous mouse state each frame.
     mPrevMouseButtonState = mMouseButtonState;
 
     // Clear previous frame's mouse wheel scroll.
     mMouseWheelScrollDelta = Vector2::Zero;
-    
+
     // This queries device state from the OS.
     // Marks switch from "last frame values" to "current frame values".
     SDL_PumpEvents();
@@ -63,8 +63,8 @@ void InputManager::Update()
             int deltaX = 0;
             int deltaY = 0;
             SDL_GetRelativeMouseState(&deltaX, &deltaY);
-            mMousePositionDelta.x = deltaX;
-            mMousePositionDelta.y = -deltaY; // negate b/c we treat +y is up.
+            mMousePositionDelta.x = static_cast<float>(deltaX);
+            mMousePositionDelta.y = static_cast<float>(-deltaY); // negate b/c we treat +y is up.
 
             // Though SDL may be "under the hood" moving the mouse around in locked mode,
             // we don't update our mouse position. To us, the mouse is not moving until locked mode ends.
@@ -127,12 +127,12 @@ void InputManager::LockMouse()
 		SDL_GetMouseState(&x, &y);
 		mLockedMousePosition.x = x;
 		mLockedMousePosition.y = y;
-		
+
 		// Enable relative mode.
 		// Call GetState once to clear any store deltas.
 		SDL_SetRelativeMouseMode(SDL_TRUE);
 		SDL_GetRelativeMouseState(nullptr, nullptr);
-		
+
 		// Mouse is locked!
 		mMouseLocked = true;
 	}
@@ -144,11 +144,11 @@ void InputManager::UnlockMouse()
 	{
 		// Disable relative mode.
 		SDL_SetRelativeMouseMode(SDL_FALSE);
-		
+
 		// Move mouse back to position it was locked at.
 		// Ensures mouse cursor position doesn't change from when we entered mouse lock to left it.
 		SDL_WarpMouseInWindow(nullptr, mLockedMousePosition.x, mLockedMousePosition.y);
-		
+
 		// No longer locked.
 		mMouseLocked = false;
 	}

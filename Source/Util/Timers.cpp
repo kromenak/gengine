@@ -4,17 +4,17 @@
 
 /*static*/ std::vector<Timers::Timer> Timers::mTimers;
 
-/*static*/ void Timers::AddTimerSeconds(float seconds, std::function<void()> finishCallback)
+/*static*/ void Timers::AddTimerSeconds(float seconds, const std::function<void()>& finishCallback)
 {
     // See if we can reuse a previously created timer.
     //TODO: Obviously iterating like this could become problematic if we have a ton of timers...but it might be fine for now.
-    for(unsigned int i = 0; i < mTimers.size(); ++i)
+    for(auto& timer : mTimers)
     {
         // Any timer with no callback is effectively useless...
-        if(mTimers[i].callback == nullptr)
+        if(timer.callback == nullptr)
         {
-            mTimers[i].secondsRemaining = seconds;
-            mTimers[i].callback = finishCallback;
+            timer.secondsRemaining = seconds;
+            timer.callback = finishCallback;
             return;
         }
     }
@@ -26,9 +26,9 @@
     mTimers.push_back(timer);
 }
 
-/*static*/ void Timers::AddTimerMilliseconds(unsigned int milliseconds, std::function<void()> finishCallback)
+/*static*/ void Timers::AddTimerMilliseconds(unsigned int milliseconds, const std::function<void()>& finishCallback)
 {
-    return AddTimerSeconds(milliseconds * 0.001f, finishCallback);
+    return AddTimerSeconds(static_cast<float>(milliseconds) * 0.001f, finishCallback);
 }
 
 /*static*/ void Timers::Update(float deltaTime)

@@ -1,7 +1,5 @@
 #include "TextAsset.h"
 
-#include <cstring>
-
 TextAsset::~TextAsset()
 {
     delete[] mText;

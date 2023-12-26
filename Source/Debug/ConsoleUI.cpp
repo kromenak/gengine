@@ -16,18 +16,18 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 {
 	// Add canvas for UI rendering. Draws above most other stuff.
 	AddComponent<UICanvas>(10);
-	
+
 	// Create screen-sized canvas.
 	RectTransform* canvasTransform = GetComponent<RectTransform>();
 	canvasTransform->SetSizeDelta(0.0f, 0.0f);
 	canvasTransform->SetAnchorMin(Vector2::Zero);
 	canvasTransform->SetAnchorMax(Vector2::One);
-	
+
 	// Create background image actor and save transform (so we can move it around).
 	Actor* background = new Actor(TransformType::RectTransform);
 	mBackgroundTransform = background->GetComponent<RectTransform>();
 	mBackgroundTransform->SetParent(canvasTransform);
-	
+
 	// Add background image that is tiled.
 	// Only difference between mini and full is a different background image.
 	UIImage* backgroundImage = background->AddComponent<UIImage>();
@@ -40,13 +40,13 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 	{
 		backgroundImage->SetTexture(gAssetManager.LoadTexture("SNAKY.BMP"));
 	}
-	
+
 	// Mini and full consoles have different anchoring properties.
 	// Mini is a box that is anchored to a corner of the screen.
 	// Full is a panel that fully covers the top or bottom parts of the screen.
 	if(mini)
 	{
-		
+
 	}
 	else
 	{
@@ -80,42 +80,42 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			mHorizontalRuleActor = new Actor(TransformType::RectTransform);
 			RectTransform* hrTransform = mHorizontalRuleActor->GetComponent<RectTransform>();
 			hrTransform->SetParent(mBackgroundTransform);
-			
+
 			// Horizontal rule uses a tiling line image.
 			mHorizontalRuleActor->AddComponent<UIImage>();
-			
+
 			// Anchor along bottom edge of the console, with enough space for the input line below.
 			hrTransform->SetAnchorMin(Vector2(0.0f, 0.0f));
 			hrTransform->SetAnchorMax(Vector2(1.0f, 0.0f));
 			hrTransform->SetSizeDelta(-8.0f, 1.0f);
 			hrTransform->SetAnchoredPosition(0.0f, kHorizontalRuleOffsetFromBottom);
 		}
-		
+
 		// Create text input field.
 		{
 			Font* font = gAssetManager.LoadFont("F_CONSOLE_COMMAND");
-			
+
 			Actor* textInputActor = new Actor(TransformType::RectTransform);
 			RectTransform* textInputRT = textInputActor->GetComponent<RectTransform>();
 			textInputRT->SetParent(mBackgroundTransform);
-			
+
 			// Input field takes up a single line below horizontal rule.
 			textInputRT->SetAnchorMin(Vector2(0.0f, 0.0f));
 			textInputRT->SetAnchorMax(Vector2(1.0f, 0.0f));
 			textInputRT->SetSizeDelta(0.0f, static_cast<float>(font->GetGlyphHeight()));
 			textInputRT->SetAnchoredPosition(4.0f, 5.0f);
             textInputRT->SetPivot(0.0f, 0.0f);
-			
+
 			mTextInput = textInputActor->AddComponent<UITextInput>();
 
 			mTextInput->SetFont(font);
 			mTextInput->SetText("");
-			
+
 			// Create text input field caret.
 			Actor* caretActor = new Actor(TransformType::RectTransform);
 			RectTransform* caretRT = caretActor->GetComponent<RectTransform>();
 			caretRT->SetParent(textInputRT);
-			
+
 			// Horizontal rule uses a tiling line image.
 			UIImage* caretImage = caretActor->AddComponent<UIImage>();
             caretImage->SetTexture(&Texture::White);
@@ -125,11 +125,11 @@ ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
 			caretRT->SetPivot(0.0f, 0.0f);
 			caretRT->SetSizeDelta(1.0f, 4.0f);
 			caretRT->SetAnchoredPosition(0.0f, 0.0f);
-			
+
 			mTextInput->SetCaret(caretImage);
 			mTextInput->SetCaretBlinkInterval(0.5f);
 		}
-		
+
         // Create console activation image.
         {
             Actor* imageActor = new Actor(TransformType::RectTransform);
@@ -165,7 +165,7 @@ void ConsoleUI::OnUpdate(float deltaTime)
 	{
 		// Show an indicator when the console key is pressed down, but not yet released.
         mConsoleToggleImage->SetEnabled(gInputManager.IsKeyPressed(SDL_SCANCODE_GRAVE));
-		
+
 		// On release, toggle the display of the console.
 		if(gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_GRAVE))
 		{
@@ -184,21 +184,21 @@ void ConsoleUI::OnUpdate(float deltaTime)
 				mTextInput->Unfocus();
 			}
 		}
-		
+
 		// Don't bother with other console updates unless it's opened.
 		if(!mConsoleActive) { return; }
-		
+
 		// If enter is pressed, execute command in the input window.
 		if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
 		{
             // Note that it is valid to execute an empty text input, which just outputs a dashed line to the console.
 			gConsole.ExecuteCommand(mTextInput->GetText());
 			mTextInput->Clear();
-			
+
 			// Executing a command resets command history.
 			mCommandHistoryIndex = -1;
 		}
-		
+
 		// Alt plus other keys affect the size of the full console.
 		if(gInputManager.IsKeyPressed(SDL_SCANCODE_LALT) || gInputManager.IsKeyPressed(SDL_SCANCODE_RALT))
 		{
@@ -409,7 +409,7 @@ void ConsoleUI::Refresh()
     // Each line has a certain height, and there are a certain number of lines.
     float scrollbackHeight = mScrollbackBuffer->CalculateHeight();
     mScrollbackTransform->SetSizeDeltaY(scrollbackHeight);
-	
+
     // Determine height of the entire console.
     float height = kPaddingAboveScrollback + scrollbackHeight + CalcInputFieldHeight();
     if(showHorizontalRule)

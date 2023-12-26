@@ -30,7 +30,7 @@ public:
     void SetBlendEnabled(bool enabled) override;
     void SetBlendMode(BlendMode blendMode) override;
 
-    TextureHandle CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels = nullptr) override;
+    TextureHandle CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels) override;
     void DestroyTexture(TextureHandle handle) override;
     void SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, uint8_t* pixels) override;
     void GenerateMipmaps(TextureHandle handle) override;
@@ -42,7 +42,7 @@ public:
     void DestroyCubemap(TextureHandle handle) override;
     void ActivateCubemap(TextureHandle handle) override;
 
-    BufferHandle CreateVertexBuffer(uint32_t vertexCount, const VertexDefinition& vertexDefinition, void* data = nullptr, MeshUsage usage = MeshUsage::Static) override;
+    BufferHandle CreateVertexBuffer(uint32_t vertexCount, const VertexDefinition& vertexDefinition, void* data, MeshUsage usage) override;
     void DestroyVertexBuffer(BufferHandle handle) override;
     void SetVertexBufferData(BufferHandle handle, uint32_t offset, uint32_t size, void* data) override;
 

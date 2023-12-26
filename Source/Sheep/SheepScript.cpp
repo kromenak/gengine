@@ -109,7 +109,7 @@ void SheepScript::Dump()
 void SheepScript::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     BinaryReader reader(data, dataLength);
-    
+
     // First 8 bytes: file identifier "GK3Sheep".
     std::string identifier = reader.ReadString(8);
     if(identifier != "GK3Sheep")
@@ -117,24 +117,24 @@ void SheepScript::ParseFromData(uint8_t* data, uint32_t dataLength)
         std::cout << "Not valid GK3Sheep data!" << std::endl;
         return;
     }
-    
+
     // 4 bytes: maybe a format version number?
     reader.Skip(4);
-    
+
     // 4 bytes: size of header
     int headerSize = reader.ReadInt();
-    
+
     // 4 bytes: size of header, duped
     // 4 bytes: size of file contents, minus 44 byte header
     reader.Skip(8);
-    
+
     int dataCount = reader.ReadInt();
     std::vector<int> dataOffsets(dataCount);
     for(int i = 0; i < dataCount; i++)
     {
         dataOffsets[i] = reader.ReadInt();
     }
-    
+
     for(int i = 0; i < dataCount; i++)
     {
         int offset = dataOffsets[i] + headerSize;
@@ -178,7 +178,7 @@ void SheepScript::ParseSysImportsSection(BinaryReader& reader)
 
     // Get # of SysFuncs this script uses.
     int functionCount = reader.ReadInt();
-    
+
     // Don't really need offset values for functions.
     reader.Skip(4 * functionCount);
 
@@ -186,20 +186,20 @@ void SheepScript::ParseSysImportsSection(BinaryReader& reader)
     for(int i = 0; i < functionCount; i++)
     {
         SysFuncImport import;
-        
+
         // Read in name from length.
         // Length is always one more, due to null terminator.
         reader.ReadString16(import.name);
         reader.Skip(1); // skip null terminator, baked into data
-        
+
         import.returnType = reader.ReadSByte();
-        
+
         char argumentCount = reader.ReadSByte();
         for(int j = 0; j < argumentCount; j++)
         {
             import.argumentTypes.push_back(reader.ReadSByte());
         }
-        
+
         mSysImports.push_back(import);
     }
 }
@@ -209,7 +209,7 @@ void SheepScript::ParseStringConstsSection(BinaryReader& reader)
     // Already read the identifier.
     // Don't need header size (x2).
     reader.Skip(8);
-    
+
     int contentSize = reader.ReadInt();
     int stringCount = reader.ReadInt();
     std::vector<int> stringOffsets(stringCount);
@@ -217,7 +217,7 @@ void SheepScript::ParseStringConstsSection(BinaryReader& reader)
     {
         stringOffsets[i] = reader.ReadInt();
     }
-    
+
     int dataBaseOffset = reader.GetPosition();
     for(int i = 0; i < stringCount; i++)
     {
@@ -242,22 +242,22 @@ void SheepScript::ParseVariablesSection(BinaryReader& reader)
     // Don't need header size (x2).
     // Don't need byte size of all variables.
     reader.Skip(12);
-    
+
     // Don't really need offset values for variables.
     int variableCount = reader.ReadInt();
     reader.Skip(4 * variableCount);
-    
+
     // Read in each variable.
     for(int i = 0; i < variableCount; i++)
     {
         SheepValue value;
-        
+
         // Read in name from length.
         // Length is always one more, due to null terminator.
         std::string name;
         reader.ReadString16(name);
         reader.Skip(1); // skip null terminator, baked into data
-        
+
         // Type is either int, float, or string.
         int type = reader.ReadInt();
         if(type == 1)
@@ -290,7 +290,7 @@ void SheepScript::ParseFunctionsSection(BinaryReader& reader)
     // Don't need header size (x2).
     // Don't need byte size of all functions.
     reader.Skip(12);
-    
+
     // Don't really need offset values for functions.
     int functionCount = reader.ReadInt();
     reader.Skip(4 * functionCount);
@@ -303,13 +303,13 @@ void SheepScript::ParseFunctionsSection(BinaryReader& reader)
         std::string name;
         reader.ReadString16(name);
         reader.Skip(1); // skip null terminator, baked into data
-		
+
 		// 2 bytes: unknown
         reader.Skip(2);
-		
+
 		// 4 bytes: code offset for this function.
         int codeOffset = reader.ReadInt();
-		
+
 		// Save mapping of function name to code offset.
         mFunctions[name] = codeOffset;
     }
@@ -320,10 +320,10 @@ void SheepScript::ParseCodeSection(BinaryReader& reader)
     // Already read the identifier.
     // Don't need header sizes.
     reader.Skip(8);
-    
+
     // Get size in bytes of code section after header.
     mBytecodeLength = reader.ReadInt();
-    
+
     // Next is number of code sections - should always be one.
     int codeContentCount = reader.ReadInt();
     if(codeContentCount != 1)
@@ -331,11 +331,11 @@ void SheepScript::ParseCodeSection(BinaryReader& reader)
         std::cout << "Expected one!" << std::endl;
         return;
     }
-    
+
     // Next is the offset to each code content. But since
     // there's only one, this will always be zero.
     reader.ReadInt();
-    
+
     // The rest is just bytecode!
     assert(mBytecode == nullptr);
     mBytecode = new char[mBytecodeLength];
@@ -442,8 +442,8 @@ void SheepScript::Decompile(const std::string& filePath)
     ++indentLevel;
 
     // Write out all variable types, generated names, and default values.
-    std::vector<std::string> variableNames; 
-    for(int i = 0; i < mVariables.size(); ++i)
+    std::vector<std::string> variableNames;
+    for(size_t i = 0; i < mVariables.size(); ++i)
     {
         std::string varName = mVariables[i].GetTypeString() + "Var" + std::to_string(i);
         variableNames.push_back(varName);
@@ -499,7 +499,7 @@ void SheepScript::Decompile(const std::string& filePath)
 
     // Run through the bytecode, reading data as needed, but not actually executing various functions.
     // We do maintain a stack to help simulate expected values, but no actually system calls occur.
-    // The idea is to try to write out, in human readable form, the logic as much as possible. 
+    // The idea is to try to write out, in human readable form, the logic as much as possible.
     SheepStack stack;
     while(true)
     {
@@ -528,7 +528,7 @@ void SheepScript::Decompile(const std::string& filePath)
                 WriteOut(out, gotoLabelIt->second + ":", 0);
             }
         }
-        
+
         // If we hit the address at the back of the "end block addresses" stack, it indicates we've hit the end of an if block.
         // So, we need to close the current block!
         while(!endBlockAddresses.empty() && endBlockAddresses.back() == reader.GetPosition())
@@ -542,7 +542,7 @@ void SheepScript::Decompile(const std::string& filePath)
         // Read instruction.
         char byte = reader.ReadByte();
         SheepInstruction instruction = (SheepInstruction)byte;
-        
+
         // Break when read instruction fails (perhaps due to reading past end of file/mem stream).
         if(!reader.OK()) { break; }
 

@@ -19,7 +19,7 @@ public:
     static bool OnMainThread();
 
     // A centralized way to allow threads to call back to the main thread.
-    static void RunOnMainThread(std::function<void()> func);
+    static void RunOnMainThread(const std::function<void()>& func);
     static void RunFunctionsOnMainThread();
 
 private:

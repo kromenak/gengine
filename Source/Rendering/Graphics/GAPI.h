@@ -46,7 +46,7 @@ private:
     static GAPI* sCurrent;
 
 public:
-    virtual ~GAPI() { }
+    virtual ~GAPI() = default;
 
     // Init and shutdown
     virtual bool Init() = 0;
@@ -108,7 +108,7 @@ public:
     virtual void SetBlendMode(BlendMode blendMode) = 0;
 
     // Textures
-    virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels = nullptr) = 0;
+    virtual TextureHandle CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels) = 0;
     virtual void DestroyTexture(TextureHandle handle) = 0;
 
     virtual void SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, uint8_t* pixels) = 0;
@@ -116,7 +116,7 @@ public:
     virtual void SetTextureWrapMode(TextureHandle handle, Texture::WrapMode wrapMode) = 0;
     virtual void SetTextureFilterMode(TextureHandle handle, Texture::FilterMode filterMode, bool useMipmaps) = 0;
 
-    virtual void ActivateTexture(TextureHandle handle, uint8_t textureUnit = 0) = 0;
+    virtual void ActivateTexture(TextureHandle handle, uint8_t textureUnit) = 0;
 
     // Cubemaps
     struct CubemapSide
@@ -137,13 +137,13 @@ public:
     virtual TextureHandle CreateCubemap(const CubemapParams& params) = 0;
     virtual void DestroyCubemap(TextureHandle handle) = 0;
     virtual void ActivateCubemap(TextureHandle handle) = 0;
-    
+
     // Vertex & Index Buffers
-    virtual BufferHandle CreateVertexBuffer(uint32_t vertexCount, const VertexDefinition& vertexDefinition, void* data = nullptr, MeshUsage usage = MeshUsage::Static) = 0;
+    virtual BufferHandle CreateVertexBuffer(uint32_t vertexCount, const VertexDefinition& vertexDefinition, void* data, MeshUsage usage) = 0;
     virtual void DestroyVertexBuffer(BufferHandle handle) = 0;
     virtual void SetVertexBufferData(BufferHandle handle, uint32_t offset, uint32_t size, void* data) = 0;
 
-    virtual BufferHandle CreateIndexBuffer(uint32_t indexCount, uint16_t* indexData = nullptr, MeshUsage usage = MeshUsage::Static) = 0;
+    virtual BufferHandle CreateIndexBuffer(uint32_t indexCount, uint16_t* indexData, MeshUsage usage) = 0;
     virtual void DestroyIndexBuffer(BufferHandle handle) = 0;
     virtual void SetIndexBufferData(BufferHandle handle, uint32_t indexCount, uint16_t* indexData) = 0;
 

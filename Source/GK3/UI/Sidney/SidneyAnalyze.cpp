@@ -374,6 +374,11 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
     // Take the appropriate analyze action based on the item.
     switch(mState)
     {
+    default:
+    case State::Empty:
+    case State::PreAnalyze:
+        // Do nothing in these cases - Analyze button has no effect.
+        break;
     case State::Map:
         AnalyzeMap_OnAnalyzeButtonPressed();
         break;

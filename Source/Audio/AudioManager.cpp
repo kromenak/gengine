@@ -44,11 +44,11 @@ bool PlayingSoundHandle::IsPlaying() const
 {
     // No channel means not playing.
     if(channel == nullptr) { return false; }
-    
+
     // Query whether channel is playing.
     bool isPlaying = false;
     FMOD_RESULT result = channel->isPlaying(&isPlaying);
-    
+
     // If result is not OK, assume the sound is not playing.
     // Some reasons it might not be OK:
     //  - sound has stopped playing (FMOD_ERR_INVALID_HANDLE)
@@ -57,7 +57,7 @@ bool PlayingSoundHandle::IsPlaying() const
     {
         return false;
     }
-    
+
     // Assuming OK was returned, either the channel is playing or not!
     return isPlaying;
 }
@@ -165,9 +165,9 @@ bool Crossfader::Init(FMOD::System* system, const char* name)
 void Crossfader::Update(float deltaTime)
 {
     // Update faders.
-    for(int i = 0; i < 2; ++i)
+    for(auto& fader : faders)
     {
-        faders[i].Update(deltaTime);
+        fader.Update(deltaTime);
     }
 }
 
@@ -195,7 +195,7 @@ bool AudioManager::Initialize()
         std::cout << FMOD_ErrorString(result) << std::endl;
         return false;
     }
-	
+
 	// Retrieve the FMOD version.
     unsigned int version;
     result = mSystem->getVersion(&version);
@@ -204,16 +204,16 @@ bool AudioManager::Initialize()
         std::cout << FMOD_ErrorString(result) << std::endl;
         return false;
     }
-	
+
 	// Verify that the FMOD library version matches the header version.
     if(version < FMOD_VERSION)
     {
         std::cout << "FMOD lib version " << version << " doesn't match header version " <<  FMOD_VERSION << std::endl;
         return false;
     }
-	
+
 	// Initialize the FMOD system.
-    result = mSystem->init(32, FMOD_INIT_NORMAL, 0);
+    result = mSystem->init(32, FMOD_INIT_NORMAL, nullptr);
     if(result != FMOD_OK)
     {
         std::cout << FMOD_ErrorString(result) << std::endl;
@@ -228,7 +228,7 @@ bool AudioManager::Initialize()
         std::cout << FMOD_ErrorString(result) << std::endl;
         return false;
     }
-    
+
     // Create SFX channel group.
     result = mSystem->createChannelGroup("SFX", &mSFXChannelGroup);
     if(result != FMOD_OK)
@@ -236,7 +236,7 @@ bool AudioManager::Initialize()
         std::cout << FMOD_ErrorString(result) << std::endl;
         return false;
     }
-    
+
     // Create VO channel group.
     result = mSystem->createChannelGroup("VO", &mVOChannelGroup);
     if(result != FMOD_OK)
@@ -276,7 +276,7 @@ bool AudioManager::Initialize()
 
     bool sfxEnabled = prefs->GetBool(PREFS_SOUND, PREFS_SFX_ENABLED, true);
     SetMuted(AudioType::SFX, !sfxEnabled);
-    
+
     bool voEnabled = prefs->GetBool(PREFS_SOUND, PREFS_VO_ENABLED, true);
     SetMuted(AudioType::VO, !voEnabled);
 
@@ -340,7 +340,7 @@ void AudioManager::Update(float deltaTime)
             --i;
         }
     }
-    
+
     // See if any playing channels are no longer playing.
     for(int i = mPlayingSounds.size() - 1; i >= 0; --i)
     {
@@ -386,7 +386,7 @@ void AudioManager::Update(float deltaTime)
             mWaitingToRelease.pop_back();
         }
     }
-    
+
     /*
     // For testing fade in/out behavior.
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_M))
@@ -525,7 +525,7 @@ void AudioManager::Stop(PlayingSoundHandle& soundHandle, float fadeOutTime)
 {
     // Need a valid channel to stop the thing.
     if(soundHandle.channel == nullptr) { return; }
-    
+
     // If no fade out is specified, just stop it right away - easy.
     if(Math::IsZero(fadeOutTime))
     {
@@ -624,7 +624,7 @@ void AudioManager::SetVolume(AudioType audioType, float volume)
     volume = Math::Clamp(volume, 0.0f, 1.0f);
 
     // Get volume multiplier for audio type.
-    float multiplier = 1.0f;
+    float multiplier;
     switch(audioType)
     {
     case AudioType::SFX:
@@ -647,7 +647,7 @@ void AudioManager::SetVolume(AudioType audioType, float volume)
         multiplier = 1.0f;
         break;
     }
-    
+
     // Set volume. FMOD expects a normalized 0-1 value.
     channelGroup->setVolume(Math::Clamp(volume * multiplier, 0.0f, 1.0f));
 }
@@ -656,7 +656,7 @@ float AudioManager::GetVolume(AudioType audioType) const
 {
     FMOD::ChannelGroup* channelGroup = GetChannelGroupForAudioType(audioType);
     if(channelGroup == nullptr) { return 0.0f; }
-    
+
     float volume = 0.0f;
     channelGroup->getVolume(&volume);
     return volume;
@@ -734,13 +734,13 @@ void AudioManager::SaveAudioState(bool sfx, bool vo, bool ambient, AudioSaveStat
         {
             continue;
         }
-        
+
         // Pause sound.
         mPlayingSounds[i].Pause();
-        
+
         // Put it in the save state list.
         saveState.playingSounds.push_back(mPlayingSounds[i]);
-        
+
         // Pop sound out of playing sounds list.
         std::swap(mPlayingSounds[i], mPlayingSounds.back());
         mPlayingSounds.pop_back();
@@ -754,7 +754,7 @@ void AudioManager::RestoreAudioState(AudioSaveState& audioSaveState)
     {
         sound.Resume();
     }
-    
+
     // Add back to playing sounds.
     // We'll say that restoring audio state *does not* clear other playing audio, so just append to existing playing channels.
     mPlayingSounds.insert(mPlayingSounds.end(), audioSaveState.playingSounds.begin(), audioSaveState.playingSounds.end());

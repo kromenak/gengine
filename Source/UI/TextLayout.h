@@ -51,24 +51,25 @@ class TextLayout
 public:
 	struct CharInfo
 	{
-		CharInfo(Glyph& glyph, Vector2 pos) : glyph(glyph), pos(pos) { }
-		CharInfo& operator=(const CharInfo& other);
-		
+		CharInfo(Glyph& glyph, const Vector2& pos) : glyph(glyph), pos(pos) { }
+        CharInfo(const CharInfo& other) = default;
+        CharInfo& operator=(const CharInfo& other);
+
         // Glyph to use when rendering this text character.
 		Glyph& glyph;
-        
+
         // Position of the text character (bottom-left corner).
 		Vector2 pos;
 	};
 
     static float GetLineHeight(Font* font, int lineNumber);
     static float GetTotalLineHeight(Font* font, int lineCount);
-	
+
     TextLayout() = default;
 	TextLayout(const Rect& rect, Font* font,
 			   HorizontalAlignment ha, VerticalAlignment va,
 			   HorizontalOverflow ho, VerticalOverflow vo);
-	
+
 	TextLayout(TextLayout& other) = default;
 	TextLayout(TextLayout&& other) = default;
 	TextLayout& operator=(const TextLayout& other) = default;
@@ -86,24 +87,24 @@ public:
 private:
 	// The rect in which the text will be laid out.
 	Rect mRect;
-	
+
 	// The font that will be used.
 	Font* mFont = nullptr;
-	
+
 	// Horizontal and vertical alignment requirements.
 	HorizontalAlignment mHorizontalAlignment = HorizontalAlignment::Left;
 	VerticalAlignment mVerticalAlignment = VerticalAlignment::Top;
-	
+
 	// Horizontal and vertical overflow requirements.
 	HorizontalOverflow mHorizontalOverflow = HorizontalOverflow::Overflow;
 	VerticalOverflow mVerticalOverflow = VerticalOverflow::Overflow;
-	
+
 	// The total number of lines.
 	int mLineCount = 0;
 
 	// Info about each char that will be rendered.
 	std::vector<CharInfo> mCharInfos;
-	
+
 	// The position that the next char would go, if we had one.
 	Vector2 mNextCharPos;
 };

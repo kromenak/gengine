@@ -16,7 +16,7 @@ bool ThreadUtil::OnMainThread()
     return sMainThreadId == std::this_thread::get_id();
 }
 
-void ThreadUtil::RunOnMainThread(std::function<void()> func)
+void ThreadUtil::RunOnMainThread(const std::function<void()>& func)
 {
     if(func != nullptr)
     {

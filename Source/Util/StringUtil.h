@@ -18,42 +18,38 @@ namespace StringUtil
 {
     inline void ToUpper(std::string& str)
     {
-        for(size_t i = 0; i < str.size(); ++i)
+        for(char& c : str)
         {
-            str[i] = static_cast<char>(std::toupper(str[i]));
+            c = static_cast<char>(std::toupper(c));
         }
-        //std::transform(str.begin(), str.end(), str.begin(), ::toupper);
     }
-    
+
     inline std::string ToUpperCopy(std::string str)
     {
-        for(size_t i = 0; i < str.size(); ++i)
+        for(char& c : str)
         {
-            str[i] = static_cast<char>(std::toupper(str[i]));
+            c = static_cast<char>(std::toupper(c));
         }
-        //std::transform(str.begin(), str.end(), str.begin(), ::toupper);
         return str;
     }
-    
+
     inline void ToLower(std::string& str)
     {
-        for(size_t i = 0; i < str.size(); ++i)
+        for(char& c : str)
         {
-            str[i] = static_cast<char>(std::tolower(str[i]));
+            c = static_cast<char>(std::tolower(c));
         }
-        //std::transform(str.begin(), str.end(), str.begin(), ::tolower);
     }
-    
+
     inline std::string ToLowerCopy(std::string str)
     {
-        for(size_t i = 0; i < str.size(); ++i)
+        for(char& c : str)
         {
-            str[i] = static_cast<char>(std::tolower(str[i]));
+            c = static_cast<char>(std::tolower(c));
         }
-        //std::transform(str.begin(), str.end(), str.begin(), ::tolower);
         return str;
     }
-    
+
     inline void Trim(std::string& str, char trimChar)
     {
         // Find first non-space character index.
@@ -64,14 +60,14 @@ namespace StringUtil
             str.clear();
             return;
         }
-        
+
         // Find first non-space in the back.
         size_t last = str.find_last_not_of(trimChar);
-        
+
         // Trim off the front and back whitespace.
         str = str.substr(first, (last - first + 1));
     }
-    
+
     inline void Trim(std::string& str)
     {
         Trim(str, ' ');
@@ -79,13 +75,13 @@ namespace StringUtil
 
     inline void TrimWhitespace(std::string& str)
     {
-        while(!str.empty() && str.front() == ' ' || str.front() == '\t' || str.back() == ' ' || str.back() == '\t')
+        while(!str.empty() && (str.front() == ' ' || str.front() == '\t' || str.back() == ' ' || str.back() == '\t'))
         {
             Trim(str, ' ');
             Trim(str, '\t');
         }
     }
-	
+
 	inline void TrimComment(std::string& str)
 	{
 		// Trims any comment from trailing part of string.
@@ -95,12 +91,12 @@ namespace StringUtil
 			str.erase(found);
 		}
 	}
-	
+
 	inline void RemoveAll(std::string& str, char remove)
 	{
 		str.erase(std::remove(str.begin(), str.end(), remove), str.end());
 	}
-    
+
     inline std::vector<std::string> Split(const std::string& str, char delim, bool removeEmpty = false)
     {
         std::stringstream ss(str);
@@ -113,27 +109,27 @@ namespace StringUtil
         }
         return tokens;
     }
-    
+
     inline void RemoveQuotes(std::string& str)
     {
         // Remove any whitespace on left/right.
         Trim(str);
         if(str.empty()) { return; }
-        
+
         // Check if first char is a quote, and remove if so.
         if(str[0] == '"')
         {
             str.erase(str.begin());
         }
         if(str.empty()) { return; }
-        
+
         // Check if last char is a quote, and remove if so.
         if(str[str.size() - 1] == '"')
         {
             str.erase(str.end() - 1);
         }
     }
-    
+
     inline bool GetLineSanitized(std::istream& is, std::string& str)
     {
         if(std::getline(is, str))
@@ -148,7 +144,7 @@ namespace StringUtil
             {
                 str.pop_back();
             }
-            
+
             // Trim the line of any whitespaces and tabs.
             Trim(str);
             Trim(str, '\t');
@@ -156,7 +152,7 @@ namespace StringUtil
         }
         return false;
     }
-    
+
     // Struct that encapsulates a case-insensitive character comparison.
     struct iequal
     {
@@ -165,13 +161,13 @@ namespace StringUtil
             return std::toupper(c1) == std::toupper(c2);
         }
     };
-    
+
     inline bool EqualsIgnoreCase(const std::string& str1, const std::string& str2)
     {
         if(str1.size() != str2.size()) { return false; }
         return std::equal(str1.begin(), str1.end(), str2.begin(), iequal());
     }
-    
+
     inline bool StartsWith(const std::string& str, const std::string& startsWith)
     {
         if(str.size() < startsWith.size()) { return false; }
@@ -236,12 +232,12 @@ namespace StringUtil
         // TODO: If the value is a number, should we interpret 0=FALSE, ANY OTHER NUMBER=TRUE?
         return EqualsIgnoreCase(str, "on") || EqualsIgnoreCase(str, "yes") || EqualsIgnoreCase(str, "true");
     }
-    
+
     inline int ToInt(const std::string& str)
     {
         return atoi(str.c_str());
     }
-    
+
     inline float ToFloat(const std::string& str)
     {
         return static_cast<float>(atof(str.c_str()));
@@ -254,18 +250,18 @@ namespace StringUtil
 		// Per: https://en.cppreference.com/w/cpp/io/c/fprintf
 		// +1 for the \0 null terminator.
 		size_t size = snprintf(nullptr, 0, format, args ...) + 1;
-		
+
 		// Allocate a buffer to hold the formatted text.
 		// Using unique_ptr for auto-delete on return or exception.
 		std::unique_ptr<char[]> buf(new char[size]);
-		
+
 		// Actually put the formatted string in the buffer "for real".
 		snprintf(buf.get(), size, format, args ...);
-		
+
 		// Create a string from the buffer (-1 b/c we don't need the \0 for the string).
 		return std::string(buf.get(), buf.get() + size - 1);
 	}
-    
+
     inline unsigned long HashCaseInsensitive(const char* str)
     {
         // DJB2 hash, XOR variant, case-insensitive.
@@ -278,12 +274,12 @@ namespace StringUtil
         }
         return hash;
     }
-    
+
     inline unsigned long HashCaseInsensitive(const std::string& str)
     {
         return HashCaseInsensitive(str.c_str());
     }
-    
+
     // Helper structs for using std collections with case-insensitive comparisons/hashing.
     struct CaseInsensitiveCompare
     {
@@ -308,7 +304,7 @@ namespace std
     using string_map_ci = std::unordered_map<std::string, T,
                                              StringUtil::CaseInsensitiveHash,
                                              StringUtil::CaseInsensitiveCompare>;
-    
+
     // Type alias for case-insensitive unordered map.
     // This version is meant primarily to allow easily swapping from unordered_map.
     // Though it lets you specifiy a key template type, the type must be std::string for it to compile!

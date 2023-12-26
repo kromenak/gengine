@@ -37,7 +37,7 @@ void Console::ExecuteCommand(const std::string& command)
 
     // Any console command registered is itself output to the Console log stream...
 	gReportManager.Log("Console", StringUtil::Format("console command: '%s'", command.c_str()));
-	
+
 	// Modify command to have required syntax.
 	//TODO: Update compiler to accept without braces?
 	std::string modCommand = command;
@@ -49,11 +49,11 @@ void Console::ExecuteCommand(const std::string& command)
 	{
 		modCommand.push_back('}');
 	}
-	
+
 	// Compile the sheep from text.
 	std::string scriptName = StringUtil::Format("`Console`:%i", mCommandCounter);
 	SheepScript* sheepScript = gSheepManager.Compile(scriptName, modCommand);
-	
+
 	// If compiled successfully, execute it!
     // Execute this as a "Global" sheep (attached to the bottom layer) to avoid it being killed if it pops the top layer.
 	if(sheepScript != nullptr)
@@ -65,7 +65,7 @@ void Console::ExecuteCommand(const std::string& command)
 
     // Add command to history.
     // Commands are usually added to history, unless it matches the most recent or second-most-recent commands.
-    int historySize = mCommandHistory.size();
+    size_t historySize = mCommandHistory.size();
     if(historySize > 0 && StringUtil::EqualsIgnoreCase(mCommandHistory[historySize - 1], command))
     {
         // Do nothing - don't add this command to history, since the most recent history item exactly matches it.
@@ -81,7 +81,7 @@ void Console::ExecuteCommand(const std::string& command)
         // Just add to the history in normal way.
         mCommandHistory.push_back(command);
     }
-	
+
 	// Increment command counter.
 	mCommandCounter++;
 }

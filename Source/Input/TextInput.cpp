@@ -1,7 +1,5 @@
 #include "TextInput.h"
 
-#include <iostream>
-
 void TextInput::Insert(const std::string& text)
 {
 	Insert(text.c_str(), (int)text.size());
@@ -18,11 +16,11 @@ void TextInput::Insert(const char* text, int count)
 void TextInput::Insert(char c)
 {
 	// Make sure this isn't an exclude char.
-	for(int i = 0; i < 4; ++i)
+	for(char mExcludeChar : mExcludeChars)
 	{
-		if(mExcludeChars[i] == c) { return; }
+		if(mExcludeChar == c) { return; }
 	}
-	
+
 	// Add the char to our text.
 	if(mCursorPos < 0 || mCursorPos >= static_cast<int>(mText.size()))
 	{
@@ -32,7 +30,7 @@ void TextInput::Insert(char c)
 	{
 		mText.insert(mText.begin() + mCursorPos, c);
 	}
-	
+
 	// Increment cursor pos, if set.
 	if(mCursorPos >= 0)
 	{
@@ -43,9 +41,9 @@ void TextInput::Insert(char c)
 void TextInput::DeletePrev()
 {
 	// This is like pressing "backspace" on your keyboard.
-	
+
 	// Can only delete if there's any text.
-	if(mText.size() > 0)
+	if(!mText.empty())
 	{
 		// Out-of-range cursor pos means just delete from end.
 		// Otherwise, delete one before the cursor pos.
@@ -57,7 +55,7 @@ void TextInput::DeletePrev()
 		else if(mCursorPos != 0)
 		{
 			mText.erase(mCursorPos - 1, 1);
-			
+
 			// Cursor pos just decreased by one!
 			--mCursorPos;
 		}
@@ -67,9 +65,9 @@ void TextInput::DeletePrev()
 void TextInput::DeleteNext()
 {
 	// This is like pressing "delete" on your keyboard.
-	
+
 	// Can only delete if there's any text.
-	if(mText.size() > 0)
+	if(!mText.empty())
 	{
 		// For a cursor at the end of the text, this would do nothing.
 		// Otherwise, it deletes the current character.
@@ -100,7 +98,7 @@ void TextInput::MoveCursorForward()
 	{
 		++mCursorPos;
 	}
-	
+
 	// If cursor went out-of-bounds, just reset to -1 (means 'end of text').
 	if(mCursorPos >= static_cast<int>(mText.size()))
 	{
@@ -140,7 +138,7 @@ void TextInput::SetExcludeChar(int pos, char exclude)
 void TextInput::SetText(const std::string& text)
 {
 	mText = text;
-	
+
 	// Reset cursor pos if it's now too large.
 	if(mCursorPos >= static_cast<int>(mText.size()))
 	{

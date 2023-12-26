@@ -4,7 +4,7 @@
 #include "Audio.h"
 #include "GKObject.h"
 #include "IniParser.h"
-#include "Scene.h"
+#include "Random.h"
 #include "SceneManager.h"
 #include "StringUtil.h"
 
@@ -17,25 +17,25 @@ int WaitNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
 
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
-    int randomCheck = rand() % 100 + 1;
+    int randomCheck = Random::Range(1, 101);
     if(randomCheck > random) { return 0; }
-    
+
     // We will execute this node. Decide wait time based on min/max.
     if(minWaitTimeMs == maxWaitTimeMs) { return minWaitTimeMs; }
     if(maxWaitTimeMs == 0 && minWaitTimeMs > 0) { return minWaitTimeMs; }
     if(maxWaitTimeMs != 0 && minWaitTimeMs > maxWaitTimeMs) { return minWaitTimeMs; }
-    
+
     // Normal case - random between min and max.
-    return (rand() % maxWaitTimeMs + minWaitTimeMs);
+    return Random::Range(minWaitTimeMs, maxWaitTimeMs);
 }
 
 int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
 {
     // Do random check. If it fails, we don't execute.
     // But note execution count is still incremented!
-    int randomCheck = rand() % 100 + 1;
+    int randomCheck = Random::Range(1, 101);
     if(randomCheck > random) { return 0; }
-    
+
     // Definitely want to play the sound, if it exists.
     Audio* audio = gAssetManager.LoadAudio(soundName, soundtrack->GetScope());
     if(audio == nullptr) { return 0; }
@@ -46,10 +46,10 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
     playParams.audioType = soundtrack->GetSoundType();
 
     // Fade in time is specified in milliseconds, but audio system wants it in seconds.
-    playParams.fadeInTime = fadeInTimeMs * 0.001f;
+    playParams.fadeInTime = static_cast<float>(fadeInTimeMs) * 0.001f;
 
     // Volume is specified as 0-100, but audio system expects 0.0-1.0.
-    playParams.volume = volume * 0.01f;
+    playParams.volume = static_cast<float>(volume) * 0.01f;
 
     // Handle 3D parameters.
     playParams.is3d = is3d;
@@ -75,20 +75,20 @@ int SoundNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults
 
     // Get the sound playing!
     outResults.soundHandle = gAudioManager.Play(playParams);
-    
+
     // Let the caller know the desired stop method, in case the soundtrack needs to stop while this node is playing.
     outResults.stopMethod = stopMethod;
     outResults.fadeOutTimeMs = fadeOutTimeMs;
-    
+
     // Return audio length. Gotta convert seconds to milliseconds.
     return (int)(audio->GetDuration() * 1000.0f);
 }
 
 int PrsNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
 {
-    if(soundNodes.size() == 0) { return 0; }
+    if(soundNodes.empty()) { return 0; }
 
-    int randomIndex = rand() % soundNodes.size();
+    size_t randomIndex = Random::RangeSize(0, soundNodes.size());
     return soundNodes[randomIndex]->Execute(soundtrack, outResults);
 }
 
@@ -110,15 +110,14 @@ void Soundtrack::Load(uint8_t* data, uint32_t dataLength)
     {
         // If this isn't a PRS node, and we have just parsed one or more PRS nodes,
         // we need to generate the PRS node and add it to our list.
-        if(prsSoundNodes.size() > 0
-           && !StringUtil::EqualsIgnoreCase(section.name, "PRS"))
+        if(!prsSoundNodes.empty() && !StringUtil::EqualsIgnoreCase(section.name, "PRS"))
         {
             PrsNode* prsNode = new PrsNode();
             prsNode->soundNodes = prsSoundNodes;
             mNodes.push_back(prsNode);
             prsSoundNodes.clear();
         }
-        
+
         if(StringUtil::EqualsIgnoreCase(section.name, "WAIT"))
         {
             // Parse wait node keys and add to nodes list.
@@ -159,11 +158,11 @@ void Soundtrack::Load(uint8_t* data, uint32_t dataLength)
         {
             // Parse sound node.
             SoundNode* soundNode = ParseSoundNodeFromSection(section);
-            
+
             // Repeat and loop are ignored for PRS.
             soundNode->repeat = 0;
             soundNode->loop = false;
-            
+
             // Add it to prs sound nodes.
             prsSoundNodes.push_back(soundNode);
         }
@@ -241,11 +240,11 @@ SoundNode* Soundtrack::ParseSoundNodeFromSection(IniSection& section)
             case 0:
                 node->stopMethod = StopMethod::PlayToEnd;
                 break;
-                
+
             case 1:
                 node->stopMethod = StopMethod::FadeOut;
                 break;
-                
+
             case 2:
                 node->stopMethod = StopMethod::Immediate;
                 break;

@@ -43,7 +43,7 @@ public:
     // Loose Files
 	// Adds a filesystem path to search for assets and bundles at.
     void AddSearchPath(const std::string& searchPath);
-    
+
     // Given a filename, finds the path to the file if it exists on one of the search paths.
     // Returns empty string if file is not found.
     std::string GetAssetPath(const std::string& fileName);
@@ -53,11 +53,11 @@ public:
 	// Load or unload a barn bundle.
     bool LoadBarn(const std::string& barnName);
     void UnloadBarn(const std::string& barnName);
-	
+
 	// Write an asset from a bundle to a file.
     void WriteBarnAssetToFile(const std::string& assetName);
 	void WriteBarnAssetToFile(const std::string& assetName, const std::string& outputDir);
-	
+
 	// Write all assets from a bundle that match a search string.
 	void WriteAllBarnAssetsToFile(const std::string& search);
 	void WriteAllBarnAssetsToFile(const std::string& search, const std::string& outputDir);
@@ -67,32 +67,32 @@ public:
     Audio* LoadAudioAsync(const std::string& name, AssetScope scope = AssetScope::Global);
     Soundtrack* LoadSoundtrack(const std::string& name, AssetScope scope = AssetScope::Global);
 	Animation* LoadYak(const std::string& name, AssetScope scope = AssetScope::Global);
-    
+
     Model* LoadModel(const std::string& name, AssetScope scope = AssetScope::Global);
     Texture* LoadTexture(const std::string& name, AssetScope scope = AssetScope::Global);
     Texture* LoadTextureAsync(const std::string& name, AssetScope scope = AssetScope::Global);
     Texture* LoadSceneTexture(const std::string& name, AssetScope scope = AssetScope::Global);
-    const std::string_map_ci<Texture*>& GetLoadedTextures() { return mTextureCache.cache; }
-    
+    const std::string_map_ci<Texture*>& GetLoadedTextures() const { return mTextureCache.cache; }
+
     GAS* LoadGAS(const std::string& name, AssetScope scope = AssetScope::Global);
     Animation* LoadAnimation(const std::string& name, AssetScope scope = AssetScope::Global);
     Animation* LoadMomAnimation(const std::string& name, AssetScope scope = AssetScope::Global);
     VertexAnimation* LoadVertexAnimation(const std::string& name, AssetScope scope = AssetScope::Global);
     Sequence* LoadSequence(const std::string& name, AssetScope scope = AssetScope::Global);
-    
+
     SceneInitFile* LoadSIF(const std::string& name, AssetScope scope = AssetScope::Global);
     SceneAsset* LoadSceneAsset(const std::string& name, AssetScope scope = AssetScope::Global);
     NVC* LoadNVC(const std::string& name, AssetScope scope = AssetScope::Global);
-    
+
     BSP* LoadBSP(const std::string& name, AssetScope scope = AssetScope::Global);
     BSPLightmap* LoadBSPLightmap(const std::string& name, AssetScope scope = AssetScope::Global);
-    
+
     SheepScript* LoadSheep(const std::string& name, AssetScope scope = AssetScope::Global);
-    
+
     Cursor* LoadCursor(const std::string& name, AssetScope scope = AssetScope::Global);
     Cursor* LoadCursorAsync(const std::string& name, AssetScope scope = AssetScope::Global);
 	Font* LoadFont(const std::string& name, AssetScope scope = AssetScope::Global);
-	
+
     TextAsset* LoadText(const std::string& name, AssetScope scope = AssetScope::Global);
     Config* LoadConfig(const std::string& name);
 
@@ -101,16 +101,16 @@ public:
 
     // Unloading Assets
     void UnloadAssets(AssetScope scope);
-    
+
 private:
     // A list of paths to search for assets.
     // In priority order, since we'll search in order, and stop when we find the item.
     std::vector<std::string> mSearchPaths;
-    
+
     // A map of loaded barn files. If an asset isn't found on any search path,
     // we then search each loaded barn file for the asset.
     std::string_map_ci<BarnFile> mLoadedBarns;
-    
+
     // A list of loaded assets, so we can just return existing assets if already loaded.
     template<typename T>
     struct AssetCache
@@ -194,11 +194,11 @@ private:
 
     AssetCache<TextAsset> mShaderFileCache;
     AssetCache<Shader> mShaderCache;
-	
+
 	// Retrieve a barn bundle by name, or by contained asset.
 	BarnFile* GetBarn(const std::string& barnName);
 	BarnFile* GetBarnContainingAsset(const std::string& assetName);
-    
+
     std::string SanitizeAssetName(const std::string& assetName, const std::string& expectedExtension);
 
     // Two ways to load an asset:

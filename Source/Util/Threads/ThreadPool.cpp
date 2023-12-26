@@ -16,7 +16,7 @@ void ThreadedTaskQueue::AddThreads(int count)
 {
     for(int i = 0; i < count; i++)
     {
-        mThreads.emplace_back(std::bind(&ThreadedTaskQueue::TaskThread, this));
+        mThreads.emplace_back([this] { TaskThread(); });
     }
 }
 
@@ -37,7 +37,7 @@ void ThreadedTaskQueue::Shutdown()
     }
 }
 
-void ThreadedTaskQueue::AddTask(std::function<void()> task, std::function<void()> callback)
+void ThreadedTaskQueue::AddTask(const std::function<void()>& task, const std::function<void()>& callback)
 {
     // Wrap the task in a void(void*) lambda so it can be stored in the list successfully.
     AddTask([task](void* arg) {
@@ -45,7 +45,7 @@ void ThreadedTaskQueue::AddTask(std::function<void()> task, std::function<void()
     }, nullptr, callback);
 }
 
-void ThreadedTaskQueue::AddTask(std::function<void(void*)> task, void* context, std::function<void()> callback)
+void ThreadedTaskQueue::AddTask(const std::function<void(void*)>& task, void* context, const std::function<void()>& callback)
 {
     if(task != nullptr)
     {
@@ -100,12 +100,12 @@ void ThreadPool::Shutdown()
     sTaskQueue.Shutdown();
 }
 
-void ThreadPool::AddTask(std::function<void()> task, std::function<void()> callback)
+void ThreadPool::AddTask(const std::function<void()>& task, const std::function<void()>& callback)
 {
     sTaskQueue.AddTask(task, callback);
 }
 
-void ThreadPool::AddTask(std::function<void(void*)> task, void* context, std::function<void()> callback)
+void ThreadPool::AddTask(const std::function<void(void*)>& task, void* context, const std::function<void()>& callback)
 {
     sTaskQueue.AddTask(task, context, callback);
 }

@@ -13,16 +13,22 @@ namespace Random
 	// A default random generator.
 	// Seeded by the current time to ensure different results on different runs of the program.
 	static std::default_random_engine generator { (unsigned int)std::chrono::system_clock::now().time_since_epoch().count() };
-	
+
 	inline float Range(float minInclusive, float maxInclusive)
 	{
 		std::uniform_real_distribution<float> distribution(minInclusive, maxInclusive);
 		return distribution(generator);
 	}
-	
+
 	inline int Range(int minInclusive, int maxExclusive)
 	{
 		std::uniform_int_distribution<int> distribution(minInclusive, maxExclusive - 1);
 		return distribution(generator);
 	}
+
+    inline size_t RangeSize(size_t minInclusive, size_t maxExclusive)
+    {
+        std::uniform_int_distribution<size_t> distribution(minInclusive, maxExclusive - 1);
+        return distribution(generator);
+    }
 }

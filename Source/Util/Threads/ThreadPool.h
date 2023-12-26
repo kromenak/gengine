@@ -9,6 +9,7 @@
 #include <functional>
 #include <mutex>
 #include <queue>
+#include <utility>
 #include <vector>
 
 #include "ThreadUtil.h"
@@ -18,12 +19,12 @@ class ThreadedTaskQueue
 public:
     ThreadedTaskQueue(int threadCount = 0);
     ~ThreadedTaskQueue();
-    
+
     void AddThreads(int count);
     void Shutdown();
 
-    void AddTask(std::function<void()> task, std::function<void()> callback = nullptr);
-    void AddTask(std::function<void(void*)> task, void* context = nullptr, std::function<void()> callback = nullptr);
+    void AddTask(const std::function<void()>& task, const std::function<void()>& callback = nullptr);
+    void AddTask(const std::function<void(void*)>& task, void* context = nullptr, const std::function<void()>& callback = nullptr);
 
 private:
     struct Task
@@ -36,9 +37,9 @@ private:
         std::function<void()> callback;
 
         Task(std::function<void(void*)> task, void* context, std::function<void()> callback) :
-            task(task),
+            task(std::move(task)),
             context(context),
-            callback(callback)
+            callback(std::move(callback))
         {
 
         }
@@ -66,8 +67,8 @@ public:
     static void Init(int threadCount);
     static void Shutdown();
 
-    static void AddTask(std::function<void()> task, std::function<void()> callback = nullptr);
-    static void AddTask(std::function<void(void*)> task, void* context = nullptr, std::function<void()> callback = nullptr);
+    static void AddTask(const std::function<void()>& task, const std::function<void()>& callback = nullptr);
+    static void AddTask(const std::function<void(void*)>& task, void* context = nullptr, const std::function<void()>& callback = nullptr);
 
 private:
     // Just uses a threaded task queue internally.

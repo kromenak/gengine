@@ -3,7 +3,7 @@
 //
 // A queue container (first in, first out). New elements go on the back, elements are removed from the front.
 // Uses a fixed-size contiguous array of elements internally.
-// 
+//
 // Characteristics:
 // - Dynamic size: size can increase if too many elements are added.
 // - Contiguous: elements are contiguous in memory.
@@ -27,7 +27,7 @@ public:
         Iterator(uint32_t index, uint32_t remaining, T* data, uint32_t dataSize) : index(index), remaining(remaining), data(data), dataSize(dataSize) { }
         void operator++() { ++index; index %= dataSize; --remaining; }
         bool operator==(const Iterator& other) const { return index == other.index && remaining == other.remaining; }
-        bool operator!=(const Iterator& other) const { return !(*this == other); }
+        bool operator!=(const Iterator& other) const { return *this != other; }
         const T& operator*() const { return data[index]; }
 
     private:

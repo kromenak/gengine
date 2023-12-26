@@ -7,7 +7,7 @@
 PlayingSoundtrack::PlayingSoundtrack(Soundtrack* soundtrack) :
     mSoundtrack(soundtrack)
 {
-    
+
 }
 
 void PlayingSoundtrack::Play()
@@ -29,7 +29,7 @@ void PlayingSoundtrack::Stop()
     }
     else if(mSoundtrackNodeResults.stopMethod == StopMethod::FadeOut)
     {
-        mSoundtrackNodeResults.soundHandle.Stop(mSoundtrackNodeResults.fadeOutTimeMs * 0.001f);
+        mSoundtrackNodeResults.soundHandle.Stop(static_cast<float>(mSoundtrackNodeResults.fadeOutTimeMs) * 0.001f);
     }
 }
 
@@ -63,7 +63,7 @@ void PlayingSoundtrack::ProcessNextNode()
 {
     // If no nodes, can't do anything!
     auto& nodes = mSoundtrack->GetNodes();
-    if(nodes.size() == 0)
+    if(nodes.empty())
     {
         mTimer = 0.0f;
         return;
@@ -87,14 +87,14 @@ void PlayingSoundtrack::ProcessNextNode()
     // Ok, execute the thing.
     mExecutionCounts[mCurrentNodeIndex]++;
     int waitMilliseconds = node->Execute(mSoundtrack, mSoundtrackNodeResults);
-    mTimer = (float)waitMilliseconds / 1000.0f;
+    mTimer = static_cast<float>(waitMilliseconds) / 1000.0f;
 }
 
 TYPE_DEF_CHILD(Component, SoundtrackPlayer);
 
 SoundtrackPlayer::SoundtrackPlayer(Actor* owner) : Component(owner)
 {
-    
+
 }
 
 SoundtrackPlayer::~SoundtrackPlayer()
