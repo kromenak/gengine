@@ -5,8 +5,6 @@
 #include <imgui_impl_sdl.h>
 
 #include "Matrix4.h"
-#include "Vector3.h"
-#include "Vector4.h"
 #include "Window.h"
 
 // Some OpenGL calls take in array indexes/offsets as pointers.
@@ -332,25 +330,25 @@ TextureHandle GAPI_OpenGL::CreateTexture(uint32_t width, uint32_t height, uint8_
 
 void GAPI_OpenGL::DestroyTexture(TextureHandle handle)
 {
-    GLuint textureId = reinterpret_cast<GLuint>(handle);
+    GLuint textureId = reinterpret_cast<uintptr_t>(handle);
     glDeleteTextures(1, &textureId);
 }
 
 void GAPI_OpenGL::SetTexturePixels(TextureHandle handle, uint32_t width, uint32_t height, uint8_t* pixels)
 {
-    GLState::BindTexture(reinterpret_cast<GLuint>(handle));
+    GLState::BindTexture(reinterpret_cast<uintptr_t>(handle));
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 }
 
 void GAPI_OpenGL::GenerateMipmaps(TextureHandle handle)
 {
-    GLState::BindTexture(reinterpret_cast<GLuint>(handle));
+    GLState::BindTexture(reinterpret_cast<uintptr_t>(handle));
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void GAPI_OpenGL::SetTextureWrapMode(TextureHandle handle, Texture::WrapMode wrapMode)
 {
-    GLState::BindTexture(reinterpret_cast<GLuint>(handle));
+    GLState::BindTexture(reinterpret_cast<uintptr_t>(handle));
 
     GLint wrapParam = (wrapMode == Texture::WrapMode::Repeat ? GL_REPEAT : GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapParam);
@@ -359,7 +357,7 @@ void GAPI_OpenGL::SetTextureWrapMode(TextureHandle handle, Texture::WrapMode wra
 
 void GAPI_OpenGL::SetTextureFilterMode(TextureHandle handle, Texture::FilterMode filterMode, bool useMipmaps)
 {
-    GLState::BindTexture(reinterpret_cast<GLuint>(handle));
+    GLState::BindTexture(reinterpret_cast<uintptr_t>(handle));
 
     // Determine min/mag filters. These are a little complicated, based on desired filter mode and mipmaps.
     // Defaults (GL_NEAREST) correlate to point filtering.
@@ -385,12 +383,12 @@ void GAPI_OpenGL::SetTextureFilterMode(TextureHandle handle, Texture::FilterMode
 void GAPI_OpenGL::ActivateTexture(TextureHandle handle, uint8_t textureUnit)
 {
     GLState::SetTextureUnit(textureUnit);
-    GLState::BindTexture(reinterpret_cast<GLuint>(handle));
+    GLState::BindTexture(reinterpret_cast<uintptr_t>(handle));
 }
 
 TextureHandle GAPI_OpenGL::CreateCubemap(const CubemapParams& params)
 {
-    // Generate cubemap texture id.
+    // Generate cube map texture id.
     GLuint cubemapTextureId = GL_NONE;
     glGenTextures(1, &cubemapTextureId);
 
@@ -436,7 +434,7 @@ void GAPI_OpenGL::DestroyCubemap(TextureHandle handle)
 void GAPI_OpenGL::ActivateCubemap(TextureHandle handle)
 {
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, reinterpret_cast<GLuint>(handle));
+    glBindTexture(GL_TEXTURE_CUBE_MAP, reinterpret_cast<uintptr_t>(handle));
 }
 
 BufferHandle GAPI_OpenGL::CreateVertexBuffer(uint32_t vertexCount, const VertexDefinition& vertexDefinition, void* data, MeshUsage usage)
@@ -706,17 +704,17 @@ ShaderHandle GAPI_OpenGL::CreateShader(const uint8_t* vertSource, const uint8_t*
 
 void GAPI_OpenGL::DestroyShader(ShaderHandle handle)
 {
-    glDeleteProgram(reinterpret_cast<GLuint>(handle));
+    glDeleteProgram(reinterpret_cast<uintptr_t>(handle));
 }
 
 void GAPI_OpenGL::ActivateShader(ShaderHandle handle)
 {
-    glUseProgram(reinterpret_cast<GLuint>(handle));
+    glUseProgram(reinterpret_cast<uintptr_t>(handle));
 }
 
 void GAPI_OpenGL::SetShaderUniformInt(ShaderHandle handle, const char* name, int value)
 {
-    GLuint program = reinterpret_cast<GLuint>(handle);
+    GLuint program = reinterpret_cast<uintptr_t>(handle);
     if(program != GL_NONE)
     {
         GLint loc = glGetUniformLocation(program, name);
@@ -729,7 +727,7 @@ void GAPI_OpenGL::SetShaderUniformInt(ShaderHandle handle, const char* name, int
 
 void GAPI_OpenGL::SetShaderUniformFloat(ShaderHandle handle, const char* name, float value)
 {
-    GLuint program = reinterpret_cast<GLuint>(handle);
+    GLuint program = reinterpret_cast<uintptr_t>(handle);
     if(program != GL_NONE)
     {
         GLint loc = glGetUniformLocation(program, name);
@@ -742,7 +740,7 @@ void GAPI_OpenGL::SetShaderUniformFloat(ShaderHandle handle, const char* name, f
 
 void GAPI_OpenGL::SetShaderUniformVector3(ShaderHandle handle, const char* name, const Vector3& value)
 {
-    GLuint program = reinterpret_cast<GLuint>(handle);
+    GLuint program = reinterpret_cast<uintptr_t>(handle);
     if(program != GL_NONE)
     {
         GLint loc = glGetUniformLocation(program, name);
@@ -755,7 +753,7 @@ void GAPI_OpenGL::SetShaderUniformVector3(ShaderHandle handle, const char* name,
 
 void GAPI_OpenGL::SetShaderUniformVector4(ShaderHandle handle, const char* name, const Vector4& value)
 {
-    GLuint program = reinterpret_cast<GLuint>(handle);
+    GLuint program = reinterpret_cast<uintptr_t>(handle);
     if(program != GL_NONE)
     {
         GLint loc = glGetUniformLocation(program, name);
@@ -768,7 +766,7 @@ void GAPI_OpenGL::SetShaderUniformVector4(ShaderHandle handle, const char* name,
 
 void GAPI_OpenGL::SetShaderUniformMatrix4(ShaderHandle handle, const char* name, const Matrix4& mat)
 {
-    GLuint program = reinterpret_cast<GLuint>(handle);
+    GLuint program = reinterpret_cast<uintptr_t>(handle);
     if(program != GL_NONE)
     {
         GLint loc = glGetUniformLocation(program, name);
@@ -781,7 +779,7 @@ void GAPI_OpenGL::SetShaderUniformMatrix4(ShaderHandle handle, const char* name,
 
 void GAPI_OpenGL::SetShaderUniformColor(ShaderHandle handle, const char* name, const Color32& color)
 {
-    GLuint program = reinterpret_cast<GLuint>(handle);
+    GLuint program = reinterpret_cast<uintptr_t>(handle);
     if(program != GL_NONE)
     {
         GLint loc = glGetUniformLocation(program, name);
