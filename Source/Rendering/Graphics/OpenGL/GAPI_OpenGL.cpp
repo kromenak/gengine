@@ -27,9 +27,10 @@ namespace GLState
     // The active texture on each texture unit.
     const int kMaxTextureUnits = 8;
     GLuint activeTextureId[kMaxTextureUnits] = { GL_NONE };
-    void BindTexture(GLuint textureId)
+    void BindTexture(GLuint textureId, bool force = false)
     {
-        if(activeTextureId[activeTextureUnit] != textureId)
+        // As an optimization, we can try to avoid calling to OpenGL if this textureId is already bound.
+        if(force || activeTextureId[activeTextureUnit] != textureId)
         {
             glBindTexture(GL_TEXTURE_2D, textureId);
             activeTextureId[activeTextureUnit] = textureId;
@@ -315,10 +316,16 @@ void GAPI_OpenGL::SetBlendMode(BlendMode blendMode)
 
 TextureHandle GAPI_OpenGL::CreateTexture(uint32_t width, uint32_t height, uint8_t* pixels)
 {
-    // Generate and bind a texture ID.
+    // Generate a texture ID.
+    // Note that the texture ID is not guaranteed to be unique within the current run of the program!
+    // OpenGL can reuse texture IDs: "Texture names returned by a call to glGenTextures are not returned by subsequent calls, unless they are first deleted with glDeleteTextures."
     GLuint textureId = GL_NONE;
     glGenTextures(1, &textureId);
-    GLState::BindTexture(textureId);
+
+    // Bind the texture ID.
+    // We do a "force bind" here because we know this texture was just created - no way it was bound previously, so skip that optimization check!
+    // Not forcing can lead to errors if the generated texture ID is reused, and just happened to be bound previously.
+    GLState::BindTexture(textureId, true);
 
     // Create the texture, optionally loading pixel data at the same time.
     //      OpenGL assumes the pixel data is from bottom-left, but GK3 pixel arrays are from top left!
