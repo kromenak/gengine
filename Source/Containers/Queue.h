@@ -26,7 +26,7 @@ public:
         Iterator(uint32_t index, uint32_t remaining, T* data) : index(index), remaining(remaining), data(data) { }
         void operator++() { ++index; index %= TCapacity; --remaining; }
         bool operator==(const Iterator& other) const { return index == other.index && remaining == other.remaining; }
-        bool operator!=(const Iterator& other) const { return *this != other; }
+        bool operator!=(const Iterator& other) const { return !(*this == other); }
         const T& operator*() const { return data[index]; }
 
     private:
