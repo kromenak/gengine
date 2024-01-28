@@ -29,7 +29,6 @@ struct SheepValue
     explicit SheepValue(int i) { type = SheepValueType::Int; intValue = i; }
     explicit SheepValue(float f) { type = SheepValueType::Float; floatValue = f; }
     explicit SheepValue(const char* s) { type = SheepValueType::String; stringValue = s; }
-	~SheepValue() { }
 	
 	// Helpers for implicit conversions between Int/Float when needed.
 	int GetInt() const

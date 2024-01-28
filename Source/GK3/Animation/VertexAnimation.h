@@ -20,8 +20,6 @@ struct VertexAnimationPose
     int frameNumber = 0;
     VertexAnimationPose* next = nullptr;
 
-    virtual ~VertexAnimationPose() { } 
-
     VertexAnimationPose* GetForFrame(int frame);
     void GetForTime(float time, int framesPerSecond, VertexAnimationPose*& outCurrent, VertexAnimationPose*& outNext, float& outT);
 };

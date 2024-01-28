@@ -1,8 +1,3 @@
-//
-// UIImage.cpp
-//
-// Clark Kromenaker
-//
 #include "UIImage.h"
 
 #include "Actor.h"
@@ -74,7 +69,6 @@ void UIImage::Render()
 			// Revert to "normal" UVs.
 			uiQuad->GetSubmesh(0)->SetUV1s(quad_uvs);
 		}
-		//TODO: Nine-slice?
 	}
 }
 
