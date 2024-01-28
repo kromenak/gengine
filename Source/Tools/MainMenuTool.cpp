@@ -9,13 +9,6 @@
 
 void MainMenuTool::Render()
 {
-    // This menu won't be super valuable if the scene is null.
-    Scene* scene = gSceneManager.GetScene();
-    if(scene == nullptr) { return; }
-
-    // Get construction object.
-    SceneConstruction& construction = scene->GetConstruction();
-
     // Render the menu bar.
     if(ImGui::BeginMainMenuBar())
     {
@@ -29,6 +22,18 @@ void MainMenuTool::Render()
             ImGui::EndMenu();
         }
 
+        // Get current preferences for showing scene visualizations, so we can show the right state in the menu bar.
+        Scene* scene = gSceneManager.GetScene();
+        bool showSceneCameraBounds = false;
+        bool showSceneRegions = false;
+        bool showSceneWalkerBoundaries = false;
+        if(scene != nullptr)
+        {
+            showSceneCameraBounds = scene->GetConstruction().GetShowCameraBounds();
+            showSceneRegions = scene->GetConstruction().GetShowRegions();
+            showSceneWalkerBoundaries = scene->GetConstruction().GetShowWalkerBoundary();
+        }
+
         // VIEW menu
         if(ImGui::BeginMenu("View"))
         {
@@ -36,19 +41,19 @@ void MainMenuTool::Render()
             {
                 Debug::ToggleFlag("ShowBoundingBoxes");
             }
-            if(ImGui::MenuItem("Camera Bounds", nullptr, construction.GetShowCameraBounds()))
+            if(ImGui::MenuItem("Camera Bounds", nullptr, showSceneCameraBounds, scene != nullptr))
             {
-                construction.SetShowCameraBounds(!construction.GetShowCameraBounds());
+                scene->GetConstruction().SetShowCameraBounds(!showSceneCameraBounds);
             }
-            if(ImGui::MenuItem("Regions/Triggers", nullptr, construction.GetShowRegions()))
+            if(ImGui::MenuItem("Regions/Triggers", nullptr, showSceneRegions, scene != nullptr))
             {
-                construction.SetShowRegions(!construction.GetShowRegions());
+                scene->GetConstruction().SetShowRegions(!showSceneRegions);
             }
-            if(ImGui::MenuItem("Walker Bounds", nullptr, construction.GetShowWalkerBoundary()))
+            if(ImGui::MenuItem("Walker Bounds", nullptr, showSceneWalkerBoundaries, scene != nullptr))
             {
-                construction.SetShowWalkerBoundary(!construction.GetShowWalkerBoundary());
+                scene->GetConstruction().SetShowWalkerBoundary(!showSceneWalkerBoundaries);
             }
-            if(ImGui::MenuItem("Walker Paths", nullptr, Debug::GetFlag("ShowWalkerPaths")))
+            if(ImGui::MenuItem("Walker Paths", nullptr, Debug::GetFlag("ShowWalkerPaths"), scene != nullptr))
             {
                 Debug::ToggleFlag("ShowWalkerPaths");
             }
@@ -82,7 +87,6 @@ void MainMenuTool::Render()
             ImGui::EndMenu();
         }
         */
-
         ImGui::EndMainMenuBar();
     }
 }
