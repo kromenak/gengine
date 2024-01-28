@@ -11,7 +11,7 @@
 #include "VerbManager.h"
 #include "Window.h"
 
-ActionBar::ActionBar() : Actor(TransformType::RectTransform)
+ActionBar::ActionBar() : Actor("ActionBar", TransformType::RectTransform)
 {
 	// Create canvas, to contain the UI components.
 	UICanvas* canvas = AddComponent<UICanvas>(5);

@@ -13,7 +13,7 @@
 #include "UIImage.h"
 #include "Window.h"
 
-InventoryScreen::InventoryScreen() : Actor(TransformType::RectTransform),
+InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::RectTransform),
     mLayer("InventoryLayer")
 {
     // Inventory overrides SFX/VO, but continues ambient audio from scene.

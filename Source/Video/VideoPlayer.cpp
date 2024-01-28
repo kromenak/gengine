@@ -26,7 +26,7 @@ VideoPlayer::~VideoPlayer()
 void VideoPlayer::Initialize()
 {
     // Create canvas actor that sticks around forever.
-    mVideoCanvasActor = new Actor(TransformType::RectTransform);
+    mVideoCanvasActor = new Actor("VideoPlayer", TransformType::RectTransform);
     mVideoCanvasActor->SetIsDestroyOnLoad(false);
     mVideoCanvasActor->AddComponent<UICanvas>();
     

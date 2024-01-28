@@ -11,7 +11,7 @@
 #include "UITextInput.h"
 #include "Window.h"
 
-ConsoleUI::ConsoleUI(bool mini) : Actor(TransformType::RectTransform),
+ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform),
 	mMini(mini)
 {
 	// Add canvas for UI rendering. Draws above most other stuff.

@@ -11,7 +11,7 @@
 #include "UIButton.h"
 #include "UIImage.h"
 
-InventoryInspectScreen::InventoryInspectScreen() : Actor(TransformType::RectTransform),
+InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen", TransformType::RectTransform),
     mLayer("CloseUpLayer")
 {
     // Inventory overrides SFX/VO, but continues ambient audio from scene.
