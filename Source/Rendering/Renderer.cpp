@@ -337,8 +337,11 @@ void Renderer::Render()
     GAPI::Get()->SetDepthTestEnabled(true);
 
     // Gotta reset view/proj again...
-    Material::SetViewMatrix(viewMatrix);
-    Material::SetProjMatrix(projectionMatrix);
+    if(mCamera != nullptr)
+    {
+        Material::SetViewMatrix(viewMatrix);
+        Material::SetProjMatrix(projectionMatrix);
+    }
 
     #if defined(_DEBUG)
     // Render an axis at the world origin.

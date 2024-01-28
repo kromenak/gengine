@@ -27,6 +27,7 @@ public:
     Frustum GetWorldSpaceViewFrustum();
     
     Vector3 ScreenToWorldPoint(const Vector2& screenPoint, float distance);
+    static Vector3 ScreenToWorldPoint(const Vector2& screenPoint, float distance, const Matrix4& viewMatrix, const Matrix4& projectionMatrix);
     
 	float GetCameraFovRadians() const { return mFovAngleRad; }
 	float GetCameraFovDegrees() const { return Math::ToDegrees(mFovAngleRad); }
