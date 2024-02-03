@@ -27,7 +27,7 @@ max_jobs: 1
 ####
 
 # Build for Windows, Mac, and Linux.
-image: 
+image:
   - macos
   - Ubuntu
   - Visual Studio 2022
@@ -41,7 +41,7 @@ image:
 #  - echo Install
 
 ####
-# Build Config
+# Build & Tests Config
 ####
 
 # Can be one of (Debug, Release, RelWithDebInfo, MinSizeRel) - from CMake.
@@ -51,43 +51,11 @@ for:
 -
   matrix:
     only:
-      -image: macos
+      - image: macos
   before_build:
     - sh: cmake -B build_appveyor -G Xcode
   build_script:
     - sh: cmake --build build_appveyor --target deploy --config ${CONFIGURATION}
-
--
-  matrix:
-    only:
-      -image: Ubuntu
-  before_build:
-    - sh: cmake -B build_appveyor -DCMAKE_BUILD_TYPE=${CONFIGURATION}
-  build_script:
-    - sh: cmake --build build_appveyor --target deploy
-
--
-  matrix:
-    only:
-      -image: Visual Studio 2022
-  before_build:
-    - cmd: cmake -B build_appveyor -G "Visual Studio 17 2022" -A Win32
-  build_script:
-    - cmd: cmake --build build_appveyor --target deploy --config %CONFIGURATION%
-
-# Scripts to run after build.
-#after_build:
-#  - echo After Build
-
-####
-# Tests Config
-####
-
-for:
--
-  matrix:
-    only:
-      -image: macos
   before_test:
     - sh: cmake --build build_appveyor --target tests --config ${CONFIGURATION}
   test_script:
@@ -96,7 +64,11 @@ for:
 -
   matrix:
     only:
-      -image: Ubuntu
+      - image: Ubuntu
+  before_build:
+    - sh: cmake -B build_appveyor -DCMAKE_BUILD_TYPE=${CONFIGURATION}
+  build_script:
+    - sh: cmake --build build_appveyor --target deploy
   before_test:
     - sh: cmake --build build_appveyor --target tests
   test_script:
@@ -105,11 +77,19 @@ for:
 -
   matrix:
     only:
-      -image: Visual Studio 2022
+      - image: Visual Studio 2022
+  before_build:
+    - cmd: cmake -B build_appveyor -G "Visual Studio 17 2022" -A Win32
+  build_script:
+    - cmd: cmake --build build_appveyor --target deploy --config %CONFIGURATION%
   before_test:
     - cmd: cmake --build build_appveyor --target tests --config %CONFIGURATION%
   test_script:
     - cmd: build_appveyor\Tests\%CONFIGURATION%\tests.exe
+
+# Scripts to run after build.
+#after_build:
+#  - echo After Build
 
 # Scripts to run after tests.
 #after_test:
