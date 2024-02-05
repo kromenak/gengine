@@ -344,7 +344,7 @@ void LocationManager::ChangeLocationInternal(const std::string& location, std::f
     }
 
     // Check for timeblock completion.
-    gSheepManager.Execute(gAssetManager.LoadSheep("Timeblocks"), "CheckTimeblockComplete$", [location, callback, sameLocation](){
+    gSheepManager.Execute(gAssetManager.LoadSheep("Timeblocks.shp"), "CheckTimeblockComplete$", [location, callback, sameLocation](){
 
         // See whether a timeblock change is occurring.
         // If so, we should early out - the timeblock change logic handles any location and time change.
