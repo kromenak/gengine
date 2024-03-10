@@ -58,12 +58,14 @@ target_include_directories(gk3 PRIVATE
     Source/Input
     Source/IO
     Source/Math
+    Source/Memory
     Source/ObjectModel
     Source/Platform
     Source/Primitives
     Source/Rendering
     Source/Rendering/Graphics
     Source/Reports
+    Source/RTTI
     Source/Sheep
     Source/Sheep/API
     Source/Sheep/Compiler
