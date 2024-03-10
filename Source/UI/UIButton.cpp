@@ -13,7 +13,10 @@ extern Mesh* uiQuad;
 
 UIButton* UIButton::sDownButton = nullptr;
 
-TYPE_DEF_CHILD(UIWidget, UIButton);
+TYPEINFO_INIT(UIButton, UIWidget, 16)
+{
+    
+}
 
 UIButton::UIButton(Actor* owner) : UIWidget(owner)
 {

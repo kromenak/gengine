@@ -4,7 +4,10 @@
 #include "UIDrag.h"
 #include "Vector2.h"
 
-TYPE_DEF_CHILD(UIWidget, UISlider);
+TYPEINFO_INIT(UISlider, UIWidget, 26)
+{
+
+}
 
 UISlider::UISlider(Actor* owner) : UIWidget(owner)
 {

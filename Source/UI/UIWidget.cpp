@@ -3,16 +3,17 @@
 #include "Actor.h"
 #include "UICanvas.h"
 
-TYPE_DEF_CHILD(Component, UIWidget);
+TYPEINFO_INIT(UIWidget, Component, 30)
+{
+
+}
+
 
 UIWidget::UIWidget(Actor* owner) : Component(owner)
 {
 	// Get RectTransform attached to this owner.
 	mRectTransform = GetOwner()->GetComponent<RectTransform>();
-	if(mRectTransform == nullptr)
-	{
-		std::cout << "Attempting to attach UI widget to an Actor that doesn't have a RectTransform. This will cause problems!" << std::endl;
-	}
+    assert(mRectTransform != nullptr);
 
     // Notify nearest canvas (if any) in transform hierarchy that widget was just added.
     UICanvas* canvas = GetOwner()->GetComponentInParents<UICanvas>();

@@ -12,7 +12,6 @@
 #include <vector>
 
 #include "StringUtil.h"
-#include "Type.h"
 
 class Audio;
 

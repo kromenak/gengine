@@ -13,7 +13,7 @@ class UIDrag;
 
 class UISlider : public UIWidget
 {
-    TYPE_DECL_CHILD();
+    TYPEINFO(UISlider, UIWidget);
 public:
     UISlider(Actor* owner);
 

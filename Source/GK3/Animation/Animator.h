@@ -65,7 +65,7 @@ struct AnimationState
 
 class Animator : public Component
 {
-    TYPE_DECL_CHILD();
+    TYPEINFO(Animator, Component);
 public:
     Animator(Actor* owner);
 	

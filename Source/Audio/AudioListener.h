@@ -9,7 +9,7 @@
 
 class AudioListener : public Component
 {
-    TYPE_DECL_CHILD();
+    TYPEINFO(AudioListener, Component);
 public:
     AudioListener(Actor* owner);
 	

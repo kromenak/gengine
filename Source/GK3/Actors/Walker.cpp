@@ -18,7 +18,10 @@
 
 //#define DEBUG_WALKER
 
-TYPE_DEF_CHILD(Component, Walker);
+TYPEINFO_INIT(Walker, Component, 7)
+{
+
+}
 
 Walker::Walker(Actor* owner) : Component(owner),
     mGKOwner(static_cast<GKActor*>(owner))

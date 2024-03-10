@@ -2,7 +2,10 @@
 
 #include "Mesh.h"
 
-TYPE_DEF_CHILD(UIWidget, UICircles);
+TYPEINFO_INIT(UICircles, UIWidget, 17)
+{
+
+}
 
 UICircles::UICircles(Actor* owner) : UIWidget(owner)
 {

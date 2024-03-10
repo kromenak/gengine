@@ -4,7 +4,6 @@
 // Loading, managing, and choosing which cursors to use.
 //
 #pragma once
-#include "Type.h"
 
 class Cursor;
 

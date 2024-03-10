@@ -14,7 +14,7 @@ class GKObject;
 
 class LaserHead : public Component
 {
-    TYPE_DECL_CHILD();
+    TYPEINFO(LaserHead, Component);
 public:
     LaserHead(Actor* owner, int index);
 

@@ -8,13 +8,16 @@
 // E.g. a Main Menu, an Options Screen, a Popup, a Tooltip.
 //
 #pragma once
-#include "UIWidget.h"
+#include "Component.h"
 
 #include <climits>
 
-class UICanvas : public UIWidget
+class RectTransform;
+class UIWidget;
+
+class UICanvas : public Component
 {
-	TYPE_DECL_CHILD();
+    TYPEINFO(UICanvas, Component);
 public:
 	static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
 	static void UpdateInput();
@@ -25,21 +28,26 @@ public:
     UICanvas(Actor* owner, int order);
 	~UICanvas();
 	
-	void Render() override;
-	
+	void Render();
+    
 	void AddWidget(UIWidget* widget);
 	void RemoveWidget(UIWidget* widget);
 	void RemoveAllWidgets() { mWidgets.clear(); }
 
     void SetMasked(bool masked) { mMasked = masked; }
+
+    RectTransform* GetRectTransform() const { return mRectTransform; }
 	
 private:
 	// An array of all canvases that currently exist.
 	static std::vector<UICanvas*> sCanvases;
-	
+    
 	// At any time, the mouse can be over exactly one widget.
 	// (at least, unless we add multi-pointer support...shudders)
 	static UIWidget* sMouseOverWidget;
+
+    // The canvas's rect transform.
+    RectTransform* mRectTransform = nullptr;
 
     // Desired draw order for the canvas. Zero is drawn before one, one is drawn before two, etc.
     int mDrawOrder = INT_MAX;

@@ -13,7 +13,6 @@
 
 #include "NVC.h"
 #include "StringUtil.h"
-#include "Type.h"
 
 class ActionBar;
 class GKActor;

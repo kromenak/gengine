@@ -6,7 +6,10 @@
 #include "Console.h"
 #include "Font.h"
 
-TYPE_DEF_CHILD(UILabel, UITextBuffer);
+TYPEINFO_INIT(UITextBuffer, UILabel, 27)
+{
+
+}
 
 UITextBuffer::UITextBuffer(Actor* owner) : UILabel(owner)
 {

@@ -9,6 +9,7 @@
 #pragma once
 #include "Actor.h"
 
+#include <functional>
 #include <vector>
 
 class Camera;

@@ -6,7 +6,10 @@
 #include "MeshRenderer.h"
 #include "VertexAnimation.h"
 
-TYPE_DEF_CHILD(Component, Animator);
+TYPEINFO_INIT(Animator, Component, 8)
+{
+
+}
 
 Animator::Animator(Actor* owner) : Component(owner)
 {

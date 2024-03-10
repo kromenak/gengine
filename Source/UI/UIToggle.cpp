@@ -1,6 +1,9 @@
 #include "UIToggle.h"
 
-TYPE_DEF_CHILD(UIButton, UIToggle);
+TYPEINFO_INIT(UIToggle, UIButton, 29)
+{
+
+}
 
 UIToggle::UIToggle(Actor* owner) : UIButton(owner)
 {

@@ -3,7 +3,10 @@
 #include "Matrix3.h"
 #include "Mesh.h"
 
-TYPE_DEF_CHILD(UIWidget, UIRectangles);
+TYPEINFO_INIT(UIRectangles, UIWidget, 25)
+{
+
+}
 
 UIRectangles::UIRectangles(Actor* owner) : UIWidget(owner)
 {

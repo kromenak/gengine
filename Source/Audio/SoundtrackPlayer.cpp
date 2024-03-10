@@ -90,7 +90,10 @@ void PlayingSoundtrack::ProcessNextNode()
     mTimer = static_cast<float>(waitMilliseconds) / 1000.0f;
 }
 
-TYPE_DEF_CHILD(Component, SoundtrackPlayer);
+TYPEINFO_INIT(SoundtrackPlayer, Component, 5)
+{
+
+}
 
 SoundtrackPlayer::SoundtrackPlayer(Actor* owner) : Component(owner)
 {

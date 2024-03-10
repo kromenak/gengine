@@ -15,7 +15,6 @@
 #include <vector>
 
 #include "AudioManager.h"
-#include "Type.h"
 
 // Basic layer class.
 // If custom enter/exit functionality is needed, this should be subclassed.

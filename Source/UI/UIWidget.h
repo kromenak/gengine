@@ -11,7 +11,7 @@
 
 class UIWidget : public Component
 {
-    TYPE_DECL_CHILD();
+    TYPEINFO(UIWidget, Component);
 public:
     UIWidget(Actor* actor);
     virtual ~UIWidget();

@@ -8,7 +8,6 @@
 #include <string>
 
 #include "LayerManager.h"
-#include "Type.h"
 #include "Vector2.h"
 
 class Actor;

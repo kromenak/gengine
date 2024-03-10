@@ -13,7 +13,6 @@
 #include "FlagSet.h"
 #include "StringUtil.h"
 #include "Timeblock.h"
-#include "Type.h"
 
 class GameProgress
 {

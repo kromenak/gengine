@@ -16,7 +16,10 @@ static float quad_uvs[] = {
 	0.0f, 1.0f		// lower-left
 };
 
-TYPE_DEF_CHILD(UIWidget, UIImage);
+TYPEINFO_INIT(UIImage, UIWidget, 20)
+{
+
+}
 
 UIImage::UIImage(Actor* owner) : UIWidget(owner)
 {

@@ -4,7 +4,10 @@
 #include "Debug.h"
 #include "InputManager.h"
 
-TYPE_DEF_CHILD(UIWidget, UIDrag);
+TYPEINFO_INIT(UIDrag, UIWidget, 18)
+{
+
+}
 
 UIDrag::UIDrag(Actor* owner) : UIWidget(owner)
 {

@@ -5,7 +5,10 @@
 #include "RenderTransforms.h"
 #include "Window.h"
 
-TYPE_DEF_CHILD(Component, Camera);
+TYPEINFO_INIT(Camera, Component, 12)
+{
+
+}
 
 Camera::Camera(Actor* owner) : Component(owner)
 {

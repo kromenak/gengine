@@ -5,7 +5,10 @@
 
 #include "AssetManager.h"
 
-TYPE_DEF_CHILD(UIWidget, UINineSlice);
+TYPEINFO_INIT(UINineSlice, UIWidget, 23)
+{
+
+}
 
 UINineSlice::UINineSlice(Actor* actor) : UIWidget(actor)
 {

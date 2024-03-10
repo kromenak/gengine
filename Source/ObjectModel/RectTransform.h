@@ -32,7 +32,7 @@ enum class AnchorPreset
 
 class RectTransform : public Transform
 {
-	TYPE_DECL_CHILD();
+    TYPEINFO(RectTransform, Transform);
 public:
     // HACK: setting anchors/pivots/sizes can be a bit hard to visualize and error-prone.
     // By setting this to true, this RT will show its debug visualization.

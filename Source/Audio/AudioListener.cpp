@@ -5,7 +5,10 @@
 #include "Actor.h"
 #include "AudioManager.h"
 
-TYPE_DEF_CHILD(Component, AudioListener);
+TYPEINFO_INIT(AudioListener, Component, 4)
+{
+
+}
 
 AudioListener::AudioListener(Actor* owner) : Component(owner)
 {

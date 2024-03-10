@@ -4,16 +4,16 @@
 // A component is a reusable bit of functionality that can be attached to an Actor.
 //
 #pragma once
-#include "Type.h" // For homebrew RTTI.
+#include "TypeInfo.h"
 
 class Actor;
 
 class Component
 {
-    TYPE_DECL_BASE();
+    TYPEINFO(Component, NoBaseClass);
 public:
     Component(Actor* owner);
-	virtual ~Component() { }
+    virtual ~Component() = default;
     
 	void Update(float deltaTime);
     

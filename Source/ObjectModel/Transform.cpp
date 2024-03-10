@@ -1,6 +1,9 @@
 #include "Transform.h"
 
-TYPE_DEF_CHILD(Component, Transform);
+TYPEINFO_INIT(Transform, Component, 2)
+{
+
+}
 
 Transform::Transform(Actor* owner) : Component(owner),
 	mLocalPosition(0.0f, 0.0f, 0.0f),

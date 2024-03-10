@@ -6,6 +6,8 @@
 #pragma once
 #include "GKObject.h"
 
+#include <functional>
+
 class GAS;
 class GasPlayer;
 class MeshRenderer;

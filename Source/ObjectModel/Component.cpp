@@ -2,7 +2,10 @@
 
 #include "Actor.h"
 
-TYPE_DEF_BASE(Component);
+TYPEINFO_INIT(Component, NoBaseClass, 1)
+{
+
+}
 
 Component::Component(Actor* owner) : mOwner(owner)
 {

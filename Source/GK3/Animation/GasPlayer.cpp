@@ -5,7 +5,10 @@
 #include "GasNodes.h"
 #include "SceneManager.h"
 
-TYPE_DEF_CHILD(Component, GasPlayer);
+TYPEINFO_INIT(GasPlayer, Component, 9)
+{
+
+}
 
 GasPlayer::GasPlayer(Actor* owner) : Component(owner)
 {

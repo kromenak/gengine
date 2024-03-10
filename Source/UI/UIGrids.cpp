@@ -3,7 +3,10 @@
 #include "Matrix3.h"
 #include "Mesh.h"
 
-TYPE_DEF_CHILD(UIWidget, UIGrids);
+TYPEINFO_INIT(UIGrids, UIWidget, 19)
+{
+
+}
 
 UIGrids::UIGrids(Actor* owner) : UIWidget(owner)
 {

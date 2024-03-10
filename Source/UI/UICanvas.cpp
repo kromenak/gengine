@@ -1,9 +1,9 @@
 #include "UICanvas.h"
 
+#include "Actor.h"
 #include "GAPI.h"
 #include "InputManager.h"
-
-TYPE_DEF_CHILD(UIWidget, UICanvas);
+#include "UIWidget.h"
 
 std::vector<UICanvas*> UICanvas::sCanvases;
 UIWidget* UICanvas::sMouseOverWidget = nullptr;
@@ -84,14 +84,28 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
     }
 }
 
-UICanvas::UICanvas(Actor* owner) : UIWidget(owner)
+TYPEINFO_INIT(UICanvas, Component, 14)
 {
+
+}
+
+UICanvas::UICanvas(Actor* owner) : Component(owner)
+{
+    // Get RectTransform for this canvas.
+    mRectTransform = GetOwner()->GetComponent<RectTransform>();
+    assert(mRectTransform != nullptr);
+
+    // Add to list of canvases.
 	sCanvases.push_back(this);
 }
 
-UICanvas::UICanvas(Actor* owner, int order) : UIWidget(owner),
+UICanvas::UICanvas(Actor* owner, int order) : Component(owner),
     mDrawOrder(order)
 {
+    // Get RectTransform for this canvas.
+    mRectTransform = GetOwner()->GetComponent<RectTransform>();
+    assert(mRectTransform != nullptr);
+
     // Attempt to find an ideal spot to slot in this canvas, based on desired draw order.
     for(int i = 0; i < sCanvases.size(); ++i)
     {
@@ -124,7 +138,7 @@ void UICanvas::Render()
         // This means that anything outside of our world rect doesn't render.
         if(mMasked)
         {
-            GAPI::Get()->SetScissorRect(true, GetRectTransform()->GetWorldRect());
+            GAPI::Get()->SetScissorRect(true, mRectTransform->GetWorldRect());
         }
 
         // Render all our widgets.

@@ -12,7 +12,10 @@
 #include "SceneManager.h"
 #include "StringUtil.h"
 
-TYPE_DEF_CHILD(Component, FaceController);
+TYPEINFO_INIT(FaceController, Component, 6)
+{
+
+}
 
 FaceController::FaceController(Actor* owner) : Component(owner)
 {

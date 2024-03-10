@@ -2,7 +2,10 @@
 
 #include "Mesh.h"
 
-TYPE_DEF_CHILD(UIWidget, UILines);
+TYPEINFO_INIT(UILines, UIWidget, 22)
+{
+
+}
 
 UILines::UILines(Actor* owner) : UIWidget(owner)
 {

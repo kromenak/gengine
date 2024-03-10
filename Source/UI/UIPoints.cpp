@@ -2,7 +2,10 @@
 
 #include "Mesh.h"
 
-TYPE_DEF_CHILD(UIWidget, UIPoints);
+TYPEINFO_INIT(UIPoints, UIWidget, 24)
+{
+
+}
 
 UIPoints::UIPoints(Actor* owner) : UIWidget(owner)
 {

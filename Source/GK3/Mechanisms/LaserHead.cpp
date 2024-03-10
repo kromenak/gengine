@@ -9,7 +9,10 @@
 #include "SceneManager.h"
 #include "Vector3.h"
 
-TYPE_DEF_CHILD(Component, LaserHead);
+TYPEINFO_INIT(LaserHead, Component, 11)
+{
+
+}
 
 namespace
 {

@@ -14,7 +14,6 @@
 #include <unordered_map>
 
 #include "StringUtil.h"
-#include "Type.h"
 
 class Texture;
 class Cursor;

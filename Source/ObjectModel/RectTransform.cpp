@@ -5,7 +5,10 @@
 #include "RectUtil.h"
 #include "Window.h"
 
-TYPE_DEF_CHILD(Transform, RectTransform);
+TYPEINFO_INIT(RectTransform, Transform, 3)
+{
+
+}
 
 RectTransform::RectTransform(Actor* owner) : Transform(owner)
 {
@@ -160,7 +163,7 @@ void RectTransform::SetAnchoredPosition(const Vector2& anchoredPosition)
 Rect RectTransform::GetRect() const
 {
 	Rect parentRect;
-	if(mParent == nullptr || !mParent->IsTypeOf(RectTransform::GetType()))
+	if(mParent == nullptr || !mParent->IsA<RectTransform>())
 	{
         Vector2 windowSize = Window::GetSize();
 		parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
@@ -195,7 +198,7 @@ Rect RectTransform::GetWorldRect(bool includeChildren)
     {
         for(auto& child : mChildren)
         {
-            if(child->IsTypeOf(RectTransform::GetType()) && child->IsActiveAndEnabled())
+            if(child->IsA<RectTransform>() && child->IsActiveAndEnabled())
             {
                 RectTransform* childRT = static_cast<RectTransform*>(child);
                 worldRect.Contain(childRT->GetWorldRect(true));
@@ -247,7 +250,7 @@ void RectTransform::CalcLocalPosition()
 {
 	Rect parentRect;
 	Vector2 parentPivot;
-	if(mParent == nullptr || !mParent->IsTypeOf(RectTransform::GetType()))
+	if(mParent == nullptr || !mParent->IsA<RectTransform>())
 	{
         Vector2 windowSize = Window::GetSize();
 		parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);

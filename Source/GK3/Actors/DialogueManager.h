@@ -11,8 +11,6 @@
 #include <vector>
 #include <utility>
 
-#include "Type.h"
-
 class GKActor;
 class GAS;
 

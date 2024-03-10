@@ -11,7 +11,10 @@
 #include "Renderer.h"
 #include "Texture.h"
 
-TYPE_DEF_CHILD(Component, MeshRenderer);
+TYPEINFO_INIT(MeshRenderer, Component, 13)
+{
+
+}
 
 MeshRenderer::MeshRenderer(Actor* owner) : Component(owner)
 {

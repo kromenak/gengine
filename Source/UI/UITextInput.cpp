@@ -2,7 +2,10 @@
 
 #include "Actor.h"
 
-TYPE_DEF_CHILD(UILabel, UITextInput);
+TYPEINFO_INIT(UITextInput, UILabel, 28)
+{
+
+}
 
 UITextInput::UITextInput(Actor* owner) : UILabel(owner)
 {

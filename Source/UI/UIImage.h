@@ -12,15 +12,14 @@ class Color32;
 
 class UIImage : public UIWidget
 {
-	TYPE_DECL_CHILD();
-	
-	enum class RenderMode
-	{
-		Normal,	// Stretches texture if image is bigger/smaller than texture.
-		Tiled	// Keeps texture at normal size, but tiles it if image is bigger/smaller.
-	};
-	
+    TYPEINFO(UIImage, UIWidget);
 public:
+    enum class RenderMode
+    {
+        Normal,	// Stretches texture if image is bigger/smaller than texture.
+        Tiled	// Keeps texture at normal size, but tiles it if image is bigger/smaller.
+    };
+
     UIImage(Actor* actor);
 	
     void Render() override;

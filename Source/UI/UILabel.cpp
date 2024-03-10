@@ -9,7 +9,10 @@
 #include "TextLayout.h"
 #include "Texture.h"
 
-TYPE_DEF_CHILD(UIWidget, UILabel);
+TYPEINFO_INIT(UILabel, UIWidget, 21)
+{
+
+}
 
 UILabel::UILabel(Actor* owner) : UIWidget(owner)
 {

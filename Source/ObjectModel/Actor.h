@@ -137,7 +137,7 @@ template<class T> T* Actor::GetComponent()
 {
     for(auto& component : mComponents)
     {
-        if(component->IsTypeOf(T::GetType()))
+        if(component->IsA<T>())
         {
             return static_cast<T*>(component);
         }

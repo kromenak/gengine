@@ -48,7 +48,7 @@ private:
 
 class SoundtrackPlayer : public Component
 {
-    TYPE_DECL_CHILD();
+    TYPEINFO(SoundtrackPlayer, Component);
 public:
     SoundtrackPlayer(Actor* owner);
     ~SoundtrackPlayer();

@@ -16,6 +16,7 @@
 #include "MeshRenderer.h"
 #include "Model.h"
 #include "Profiler.h"
+#include "RectTransform.h"
 #include "RenderTransforms.h"
 #include "SceneManager.h"
 #include "SaveManager.h"
@@ -428,8 +429,7 @@ void Renderer::ChangeResolution(const Window::Resolution& resolution)
     // Because some RectTransforms may rely on the window size, we need to dirty all root RectTransforms in the scene.
     for(auto& actor : gSceneManager.GetActors())
     {
-        if(actor->GetTransform()->GetParent() == nullptr &&
-           actor->GetTransform()->IsTypeOf(RectTransform::GetType()))
+        if(actor->GetTransform()->GetParent() == nullptr && actor->GetTransform()->IsA<RectTransform>())
         {
             actor->GetTransform()->SetDirty();
         }
