@@ -1,6 +1,4 @@
 //
-// CollisionTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for collision/intersection logic between geometric primitives.

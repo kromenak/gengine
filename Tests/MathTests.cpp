@@ -1,6 +1,4 @@
 //
-// MathTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for general math functions.

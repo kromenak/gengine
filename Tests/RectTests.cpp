@@ -1,6 +1,4 @@
 //
-// RectTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for Rect and RectUtil.

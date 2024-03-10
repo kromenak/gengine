@@ -1,6 +1,4 @@
 //
-// VectorTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for the Vector2/Vector3/Vector4 class.

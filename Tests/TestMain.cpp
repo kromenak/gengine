@@ -1,6 +1,4 @@
 //
-// TestMain.cpp
-//
 // Clark Kromenaker
 //
 // The main function for running the test framework, Catch.

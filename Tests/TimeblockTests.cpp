@@ -1,6 +1,4 @@
 //
-// TimeblockTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for Timeblock class.

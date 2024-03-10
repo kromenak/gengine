@@ -1,6 +1,4 @@
 //
-// AABBTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for AABB class.

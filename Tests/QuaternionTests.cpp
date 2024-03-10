@@ -1,6 +1,4 @@
 //
-// QuaternionTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for the Quaternion class.

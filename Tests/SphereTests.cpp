@@ -1,6 +1,4 @@
 //
-// SphereTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for Sphere class.

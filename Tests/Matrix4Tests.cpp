@@ -1,6 +1,4 @@
 //
-// Matrix4Tests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for the Matrix4 class.

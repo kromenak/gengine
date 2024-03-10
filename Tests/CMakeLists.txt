@@ -1,22 +1,8 @@
-# Build source list.
-set(TEST_SOURCES
-    catch.hh
-    TestMain.cpp
+# Test files are just all the cpp files in this directory.
+file(GLOB TEST_SOURCES CONFIGURE_DEPENDS "*.cpp")
 
-    AABBTests.cpp
-    CollisionTests.cpp
-    ContainerTests.cpp
-    IOTests.cpp
-    MathTests.cpp
-    Matrix4Tests.cpp
-    MemoryTests.cpp
-    PlaneTests.cpp
-    QuaternionTests.cpp
-    RectTests.cpp
-    SphereTests.cpp
-    TimeblockTests.cpp
-    VectorTests.cpp
-)
+# Also add the catch.hh header file so it appears in the IDE.
+list(APPEND TEST_SOURCES "catch.hh")
 
 # Add tests executable.
 add_executable(tests ${TEST_SOURCES})
@@ -41,6 +27,7 @@ target_include_directories(tests PRIVATE
     ../Source/Platform
     ../Source/Primitives
     ../Source/Rendering
+    ../Source/RTTI
     ../Source/Sheep
     ../Source/Util
     ../Source/Video
@@ -74,4 +61,7 @@ target_sources(tests PRIVATE
     ../Source/Primitives/RectUtil.cpp
     ../Source/Primitives/Sphere.cpp
     ../Source/Primitives/Triangle.cpp
+
+    ../Source/RTTI/TypeInfo.cpp
+    ../Source/RTTI/VariableInfo.cpp
 )

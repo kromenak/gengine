@@ -1,6 +1,4 @@
 //
-// PlaneTests.cpp
-//
 // Clark Kromenaker
 //
 // Tests for Plane class
