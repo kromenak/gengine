@@ -20,7 +20,10 @@
 
 TYPEINFO_INIT(Walker, Component, 7)
 {
-
+    TYPEINFO_ADD_VAR(Walker, VariableType::Float, mCurrentWalkActionTimer);
+    TYPEINFO_ADD_VAR(Walker, VariableType::Vector3, mTurnToFaceDir);
+    TYPEINFO_ADD_VAR(Walker, VariableType::Bool, mFromAutoscript);
+    TYPEINFO_ADD_VAR(Walker, VariableType::Bool, mNeedContinueWalkAnim);
 }
 
 Walker::Walker(Actor* owner) : Component(owner),

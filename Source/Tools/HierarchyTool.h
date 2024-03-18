@@ -6,6 +6,7 @@
 #pragma once
 
 class Actor;
+class TypeInfo;
 
 class HierarchyTool
 {
@@ -17,4 +18,7 @@ private:
     Actor* mSelectedActor = nullptr;
 
     void AddTreeNodeForActor(Actor* actor);
+    const char* GetBestTypeLabelForActor(Actor* actor);
+
+    void RenderVariables(TypeInfo* typeInfo, void* instance);
 };

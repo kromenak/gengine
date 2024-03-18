@@ -26,13 +26,13 @@ public:
     const char* GetTypeName() const { return mTypeName; }
     TypeId GetTypeId() const { return mTypeId; }
 
-    virtual TypeInfo* GetBaseTypeInfo() const = 0;
+    virtual TypeInfo* GetBaseType() const = 0;
     virtual bool IsTypeOf(TypeId typeId) const = 0;
 
     //virtual void* New() const = 0;
     //template<typename T> T* New() { return static_cast<T*>(New()); }
 
-    // Type Variables (only for this type, no base classes)
+    // Type Variables
     void AddVariable(VariableType type, const char* name, size_t offset) { mVariables.emplace_back(type, name, offset); }
 
     std::vector<VariableInfo>& GetVariables() { return mVariables; }
@@ -41,9 +41,6 @@ public:
     // Type Functions
     //void AddFunction(const std::string& name, void* funcPtr) { mFunctionMap[name] = funcPtr; }
     //template<typename T> T GetFunction(const std::string& name) { static_cast<T>(mFunctionMap[name]); }
-
-    // Utility
-    virtual void PopulateTypeList(std::vector<TypeInfo*>& outVec) = 0;
 
 private:
     // The name of the type.
@@ -73,23 +70,15 @@ public:
     }
 
     // Type
-    TypeInfo* GetBaseTypeInfo() const override { return &TBase::sTypeInfo; }
+    TypeInfo* GetBaseType() const override
+    {
+        // If the base class is the "no base class" placeholder, return null to indicate we DON'T have a base type.
+        if(TBase::sTypeInfo.GetTypeId() == NO_BASE_CLASS_TYPE_ID) { return nullptr; }
+        return &TBase::sTypeInfo;
+    }
     bool IsTypeOf(TypeId typeId) const override { return typeId == GetTypeId() || (GetTypeId() != NO_BASE_CLASS_TYPE_ID && TBase::sTypeInfo.IsTypeOf(typeId)); }
 
     //void* New() const override { return new TClass(); }
-
-    // Utility
-    void PopulateTypeList(std::vector<TypeInfo*>& outVec) override
-    {
-        // Ignore the fake base class when populating the list.
-        if(GetTypeId() == NO_BASE_CLASS_TYPE_ID) { return; }
-
-        // Put our parent onto the list.
-        TBase::sTypeInfo.PopulateTypeList(outVec);
-
-        // Put ourself onto the list.
-        outVec.push_back(this);
-    }
 
 private:
     // All instances of this type.
@@ -116,7 +105,7 @@ public:
 // Macros for generating boilerplate related to TypeInfos.
 // A macro is helpful to ensure consistent naming and to generate any needed functions.
 
-// Any class that wants runtime type info must add either TYPEINFO or TYPEINFO_BASE
+// Any class that wants runtime type info must add TYPEINFO.
 #define TYPEINFO(PClass, PBaseClass) public: \
     static ConcreteTypeInfo<PClass, PBaseClass> sTypeInfo; \
     static void InitTypeInfo(); \
@@ -132,7 +121,7 @@ ConcreteTypeInfo<PClass, PBaseClass> PClass::sTypeInfo(#PClass, PTypeId); \
 void PClass::InitTypeInfo()
 
 // Use this to add a variable to the class.
-#define TYPEINFO_ADD_VAR(PClass, PType, PVar) sTypeInfo.AddVariable(VariableType::PType, #PVar, offsetof(PClass, PVar));
+#define TYPEINFO_ADD_VAR(PClass, PType, PVar) sTypeInfo.AddVariable(PType, #PVar, offsetof(PClass, PVar));
 
 
 //================

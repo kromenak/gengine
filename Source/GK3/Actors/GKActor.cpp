@@ -19,6 +19,11 @@
 #include "VertexAnimator.h"
 #include "Walker.h"
 
+TYPEINFO_INIT(GKActor, GKObject, 33)
+{
+
+}
+
 GKActor::GKActor(const SceneActor* actorDef) :
     mActorDef(actorDef)
 {

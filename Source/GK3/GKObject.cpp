@@ -5,9 +5,10 @@
 #include "MeshRenderer.h"
 #include "ReportManager.h"
 
-GKObject::GKObject() : Actor()
+TYPEINFO_INIT(GKObject, Actor, 31)
 {
-	
+    TYPEINFO_ADD_VAR(GKObject, VariableType::String, mNoun);
+    TYPEINFO_ADD_VAR(GKObject, VariableType::String, mVerb);
 }
 
 void GKObject::SetHeading(const Heading& heading)

@@ -23,6 +23,7 @@ enum class TransformType
 
 class Actor
 {
+    TYPEINFO(Actor, NoBaseClass);
 public:
 	enum class State
 	{
@@ -43,6 +44,7 @@ public:
     template<class T, class... Args> T* AddComponent(Args&&... args);
     template<class T> T* GetComponent();
     template<class T> T* GetComponentInParents();
+    const std::vector<Component*>& GetComponents() const { return mComponents; }
     
     const std::string& GetName() const { return mName; }
     void SetName(const std::string& name) { mName = name; }

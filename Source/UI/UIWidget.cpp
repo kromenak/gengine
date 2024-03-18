@@ -3,7 +3,7 @@
 #include "Actor.h"
 #include "UICanvas.h"
 
-TYPEINFO_INIT(UIWidget, Component, 30)
+TYPEINFO_INIT(UIWidget, Component, 15)
 {
 
 }

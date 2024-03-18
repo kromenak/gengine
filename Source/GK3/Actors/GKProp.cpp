@@ -10,6 +10,11 @@
 #include "Vector3.h"
 #include "VertexAnimator.h"
 
+TYPEINFO_INIT(GKProp, GKObject, 32)
+{
+    
+}
+
 GKProp::GKProp() : GKObject()
 {
     mMeshRenderer = AddComponent<MeshRenderer>();

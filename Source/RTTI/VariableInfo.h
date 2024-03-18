@@ -17,9 +17,16 @@ enum class VariableType
     Int,
     Float,
     Bool,
-    String
+    String,
+
+    Vector2,
+    Vector3,
+    Quaternion
 };
 
+//TODO: Support for Arrays (std::vector).
+//TODO: Expose variable in tool as read-only.
+//TODO: Version that supports getter/setter usage.
 class VariableInfo
 {
 public:
@@ -34,17 +41,8 @@ public:
     VariableType GetType() const { return mType; }
     const char* GetName() const { return mName; }
 
-    template<typename T>
-    T& GetRef(void* instance)
-    {
-        return *static_cast<T*>(PtrMath::Add(instance, mOffset));
-    }
-    template<>
-    int& GetRef<int>(void* instance)
-    {
-        assert(mType == VariableType::Int);
-        return *static_cast<int*>(PtrMath::Add(instance, mOffset));
-    }
+    template<typename T> T* GetPtr(void* instance) { return reinterpret_cast<T*>(PtrMath::Add(instance, mOffset)); }
+    template<typename T> T& GetRef(void* instance) { return *GetPtr<T>(instance); }
 
 private:
     // The type of the member.

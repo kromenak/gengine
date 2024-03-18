@@ -18,8 +18,9 @@ struct VertexAnimParams;
 
 class GKObject : public Actor
 {
+    TYPEINFO(GKObject, Actor);
 public:
-	GKObject();
+    GKObject() = default;
 	
 	// GK3 rotations are often defined in terms of a heading (360 degrees about Y-axis).
 	virtual void SetHeading(const Heading& heading);

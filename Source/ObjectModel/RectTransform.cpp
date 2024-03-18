@@ -7,7 +7,11 @@
 
 TYPEINFO_INIT(RectTransform, Transform, 3)
 {
-
+    TYPEINFO_ADD_VAR(RectTransform, VariableType::Vector2, mAnchorMin);
+    TYPEINFO_ADD_VAR(RectTransform, VariableType::Vector2, mAnchorMax);
+    TYPEINFO_ADD_VAR(RectTransform, VariableType::Vector2, mPivot);
+    TYPEINFO_ADD_VAR(RectTransform, VariableType::Vector2, mAnchoredPosition);
+    TYPEINFO_ADD_VAR(RectTransform, VariableType::Vector2, mSizeDelta);
 }
 
 RectTransform::RectTransform(Actor* owner) : Transform(owner)

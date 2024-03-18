@@ -25,6 +25,7 @@ struct VertexAnimParams;
 
 class GKActor : public GKObject
 {
+    TYPEINFO(GKActor, GKObject);
 public:
     GKActor(const SceneActor* actorDef);
 
