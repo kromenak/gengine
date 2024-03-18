@@ -369,6 +369,7 @@ set(IMGUI_SOURCES
     Libraries/imgui/imgui.cpp
     Libraries/imgui/imgui_demo.cpp
     Libraries/imgui/imgui_draw.cpp
+    Libraries/imgui/imgui_stdlib.cpp
     Libraries/imgui/imgui_tables.cpp
     Libraries/imgui/imgui_widgets.cpp
     Libraries/imgui/backends/imgui_impl_opengl3.cpp
