@@ -13,7 +13,7 @@
 
 TYPEINFO_INIT(MeshRenderer, Component, 13)
 {
-
+    TYPEINFO_ADD_VAR(MeshRenderer, VariableType::Asset, mModel);
 }
 
 MeshRenderer::MeshRenderer(Actor* owner) : Component(owner)

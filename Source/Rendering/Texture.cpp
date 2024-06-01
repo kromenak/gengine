@@ -5,6 +5,13 @@
 #include "GAPI.h"
 #include "ThreadUtil.h"
 
+TYPEINFO_INIT(Texture, Asset, 101)
+{
+    TYPEINFO_ADD_VAR(Texture, VariableType::Int, mWidth);
+    TYPEINFO_ADD_VAR(Texture, VariableType::Int, mHeight);
+    TYPEINFO_ADD_VAR(Texture, VariableType::Bool, mMipmaps);
+}
+
 Texture Texture::White(2, 2, Color32::White);
 Texture Texture::Black(2, 2, Color32::Black);
 

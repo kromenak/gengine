@@ -6,6 +6,7 @@
 #include "Actor.h"
 #include "Debug.h"
 #include "GameCamera.h"
+#include "InspectorUtil.h"
 #include "SceneManager.h"
 
 void HierarchyTool::Render(bool& toolActive)
@@ -16,7 +17,7 @@ void HierarchyTool::Render(bool& toolActive)
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
 
     // Begin the hierarchy window. Early out if collapsed.
-    if(!ImGui::Begin("Hierarchy", &toolActive))
+    if(!ImGui::Begin("Scene Hierarchy", &toolActive))
     {
         ImGui::End();
         return;
@@ -87,17 +88,13 @@ void HierarchyTool::Render(bool& toolActive)
                 ImGui::Separator();
 
                 // Display variables of the Actor itself.
-                RenderVariables(&mSelectedActor->GetTypeInfo(), mSelectedActor);
+                InspectorUtil::RenderVariables(&mSelectedActor->GetTypeInfo(), mSelectedActor);
 
                 // Display variablesof each component.
                 for(Component* component : mSelectedActor->GetComponents())
                 {
-                    RenderVariables(&component->GetTypeInfo(), component);
+                    InspectorUtil::RenderVariables(&component->GetTypeInfo(), component);
                 }
-
-                //Vector3 position = mSelectedActor->GetPosition();
-                //ImGui::DragFloat3("Position", reinterpret_cast<float*>(&position));
-                //mSelectedActor->SetPosition(position);
             }
         }
         ImGui::EndChild();
@@ -183,75 +180,4 @@ const char* HierarchyTool::GetBestTypeLabelForActor(Actor* actor)
 
     // Just use the actor's type name, worst case.
     return name;
-}
-
-void HierarchyTool::RenderVariables(TypeInfo* typeInfo, void* instance)
-{
-    // Display a collapsing section for the component, open by default.
-    if(ImGui::CollapsingHeader(typeInfo->GetTypeName(), ImGuiTreeNodeFlags_DefaultOpen))
-    {
-        // Since multiple components can have the same variable name (mEnabled), we need to uniquely ID *this* component's variables.
-        // This is done by pushing/popping unique IDs in IMGUI.
-        ImGui::PushID(instance);
-
-        // Indent the variables within the collapsing section.
-        ImGui::Indent();
-
-        // Iterate from subclass to base class, outputting edit fields for each registered variable.
-        while(typeInfo != nullptr)
-        {
-            for(VariableInfo& variableInfo : typeInfo->GetVariables())
-            {
-                switch(variableInfo.GetType())
-                {
-                case VariableType::Int:
-                    ImGui::InputInt(variableInfo.GetName(), &variableInfo.GetRef<int>(instance));
-                    break;
-
-                case VariableType::Bool:
-                    ImGui::Checkbox(variableInfo.GetName(), &variableInfo.GetRef<bool>(instance));
-                    break;
-
-                case VariableType::Float:
-                    ImGui::InputFloat(variableInfo.GetName(), variableInfo.GetPtr<float>(instance));
-                    break;
-
-                case VariableType::String:
-                    ImGui::InputText(variableInfo.GetName(), &variableInfo.GetRef<std::string>(instance));
-                    break;
-
-                case VariableType::Vector2:
-                    ImGui::DragFloat2(variableInfo.GetName(), variableInfo.GetPtr<float>(instance));
-                    break;
-
-                case VariableType::Vector3:
-                    ImGui::DragFloat3(variableInfo.GetName(), variableInfo.GetPtr<float>(instance));
-                    break;
-
-                case VariableType::Quaternion:
-                {
-                    Quaternion& quat = variableInfo.GetRef<Quaternion>(instance);
-                    Vector3 eulerAngles = quat.GetEulerAngles();
-                    ImGui::DragFloat3(variableInfo.GetName(), &eulerAngles.x);
-                    quat.Set(eulerAngles.x, eulerAngles.y, eulerAngles.z);
-                    break;
-                }
-
-                //TODO: Pointer-to-type variables
-                //TODO: Callbacks
-                //TODO: Assets
-                //TODO: Structs
-
-                default:
-                    // Just display name, but uneditable.
-                    ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), "%s", variableInfo.GetName());
-                    break;
-                }
-            }
-            typeInfo = typeInfo->GetBaseType();
-        }
-
-        ImGui::Unindent();
-        ImGui::PopID();
-    }
 }

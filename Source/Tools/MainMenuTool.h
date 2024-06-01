@@ -13,6 +13,7 @@ public:
     // These are here so they can be easily toggled by the main menu.
     // And they're public so they can easily be passed around the tool system.
     bool hierarchyToolActive = false;
+    bool assetsToolActive = false;
 
     void Render();
 };

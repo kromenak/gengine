@@ -5,6 +5,7 @@
 // The TypeId for a Type should stay consistent between recompiles, runs of the game, etc.
 //
 #pragma once
+#include <cstdint>
 
 // A type ID is just an integer.
 typedef uint32_t TypeId;

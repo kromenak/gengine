@@ -19,6 +19,4 @@ private:
 
     void AddTreeNodeForActor(Actor* actor);
     const char* GetBestTypeLabelForActor(Actor* actor);
-
-    void RenderVariables(TypeInfo* typeInfo, void* instance);
 };

@@ -21,7 +21,9 @@ enum class VariableType
 
     Vector2,
     Vector3,
-    Quaternion
+    Quaternion,
+
+    Asset
 };
 
 //TODO: Support for Arrays (std::vector).
@@ -45,12 +47,12 @@ public:
     template<typename T> T& GetRef(void* instance) { return *GetPtr<T>(instance); }
 
 private:
-    // The type of the member.
+    // The type of the variable.
     VariableType mType = VariableType::Int;
 
-    // The name of the member.
+    // The name of the variable.
     const char* mName = nullptr;
 
-    // This member's offset from the base address of an object instance.
+    // This variable's offset from the base address of an object instance.
     size_t mOffset = 0;
 };

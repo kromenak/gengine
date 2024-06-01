@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <string>
 
+#include "TypeInfo.h"
+
 // Assets can have an assigned scope, which helps to inform memory management.
 enum class AssetScope
 {
@@ -21,6 +23,7 @@ enum class AssetScope
 
 class Asset
 {
+    TYPEINFO(Asset, NoBaseClass);
 public:
     virtual ~Asset() = default;
     

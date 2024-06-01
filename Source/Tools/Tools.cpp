@@ -8,6 +8,7 @@
 #include "SceneManager.h"
 #include "Window.h"
 
+#include "AssetsTool.h"
 #include "HierarchyTool.h"
 #include "MainMenuTool.h"
 
@@ -22,6 +23,7 @@ namespace
     // Individual tools.
     MainMenuTool mainMenu;
     HierarchyTool hierarchy;
+    AssetsTool assets;
 }
 
 void Tools::Init()
@@ -78,6 +80,7 @@ void Tools::Render()
     // Render any tools.
     mainMenu.Render();
     hierarchy.Render(mainMenu.hierarchyToolActive);
+    assets.Render(mainMenu.assetsToolActive);
 
     // Optionally show demo window.
     //ImGui::ShowDemoWindow();

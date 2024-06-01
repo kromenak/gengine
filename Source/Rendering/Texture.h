@@ -18,6 +18,7 @@ class BinaryReader;
 
 class Texture : public Asset
 {
+    TYPEINFO(Texture, Asset);
 public:
 	enum class RenderType
 	{
