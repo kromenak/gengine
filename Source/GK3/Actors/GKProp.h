@@ -19,7 +19,7 @@ struct VertexAnimParams;
 
 class GKProp : public GKObject
 {
-    TYPEINFO(GKProp, GKObject);
+    TYPEINFO_SUB(GKProp, GKObject);
 public:
     GKProp();
     GKProp(Model* model);

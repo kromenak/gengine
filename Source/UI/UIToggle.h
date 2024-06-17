@@ -13,7 +13,7 @@ class Texture;
 
 class UIToggle : public UIButton
 {
-    TYPEINFO(UIToggle, UIButton);
+    TYPEINFO_SUB(UIToggle, UIButton);
 public:
 	UIToggle(Actor* owner);
     

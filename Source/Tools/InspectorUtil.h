@@ -7,9 +7,9 @@
 // This util has shared code for rendering a list of properties based on a Type and an instance of that type.
 //
 #pragma once
-class TypeInfo;
+class ITypeInfo;
 
 namespace InspectorUtil
 {
-    void RenderVariables(TypeInfo* typeInfo, void* instance);
+    void RenderVariables(ITypeInfo* typeInfo, void* instance);
 }

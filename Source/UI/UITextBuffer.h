@@ -11,7 +11,7 @@
 
 class UITextBuffer : public UILabel
 {
-    TYPEINFO(UITextBuffer, UILabel);
+    TYPEINFO_SUB(UITextBuffer, UILabel);
 public:
 	UITextBuffer(Actor* owner);
 	

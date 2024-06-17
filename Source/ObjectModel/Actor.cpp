@@ -7,12 +7,12 @@
 
 TYPEINFO_INIT(Actor, NoBaseClass, 30)
 {
-    TYPEINFO_ADD_VAR(Actor, VariableType::String, mName);
+    TYPEINFO_VAR(Actor, VariableType::String, mName);
     //TODO: Would be nice to display this as an actual Enum dropdown...
-    TYPEINFO_ADD_VAR(Actor, VariableType::Int, mState);
-    TYPEINFO_ADD_VAR(Actor, VariableType::Bool, mIsDestroyOnLoad);
-    TYPEINFO_ADD_VAR(Actor, VariableType::Float, mTimeScale);
-    TYPEINFO_ADD_VAR(Actor, VariableType::Bool, mUpdateEnabled);
+    TYPEINFO_VAR(Actor, VariableType::Int, mState);
+    TYPEINFO_VAR(Actor, VariableType::Bool, mIsDestroyOnLoad);
+    TYPEINFO_VAR(Actor, VariableType::Float, mTimeScale);
+    TYPEINFO_VAR(Actor, VariableType::Bool, mUpdateEnabled);
 }
 
 Actor::Actor()

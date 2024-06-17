@@ -14,12 +14,12 @@
 
 TYPEINFO_INIT(FaceController, Component, 6)
 {
-    TYPEINFO_ADD_VAR(FaceController, VariableType::Float, mBlinkTimer);
-    TYPEINFO_ADD_VAR(FaceController, VariableType::Bool, mEyeJitterEnabled);
-    TYPEINFO_ADD_VAR(FaceController, VariableType::Float, mEyeJitterTimer);
-    TYPEINFO_ADD_VAR(FaceController, VariableType::Float, mEyeJitterX);
-    TYPEINFO_ADD_VAR(FaceController, VariableType::Float, mEyeJitterY);
-    TYPEINFO_ADD_VAR(FaceController, VariableType::String, mMood);
+    TYPEINFO_VAR(FaceController, VariableType::Float, mBlinkTimer);
+    TYPEINFO_VAR(FaceController, VariableType::Bool, mEyeJitterEnabled);
+    TYPEINFO_VAR(FaceController, VariableType::Float, mEyeJitterTimer);
+    TYPEINFO_VAR(FaceController, VariableType::Float, mEyeJitterX);
+    TYPEINFO_VAR(FaceController, VariableType::Float, mEyeJitterY);
+    TYPEINFO_VAR(FaceController, VariableType::String, mMood);
 }
 
 FaceController::FaceController(Actor* owner) : Component(owner)

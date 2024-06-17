@@ -46,7 +46,7 @@ struct UINineSliceParams
 
 class UINineSlice : public UIWidget
 {
-    TYPEINFO(UINineSlice, UIWidget);
+    TYPEINFO_SUB(UINineSlice, UIWidget);
 public:
     UINineSlice(Actor* actor);
     UINineSlice(Actor* actor, const UINineSliceParams& params);

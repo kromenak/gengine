@@ -18,7 +18,7 @@ struct VertexAnimParams;
 
 class GKObject : public Actor
 {
-    TYPEINFO(GKObject, Actor);
+    TYPEINFO_SUB(GKObject, Actor);
 public:
     GKObject() = default;
 	

@@ -16,7 +16,7 @@ class Texture;
 
 class UIButton : public UIWidget
 {
-    TYPEINFO(UIButton, UIWidget);
+    TYPEINFO_SUB(UIButton, UIWidget);
 public:
 	UIButton(Actor* actor);
 	

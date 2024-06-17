@@ -10,7 +10,7 @@
 
 #include "PtrMath.h"
 
-class TypeInfo;
+class ITypeInfo;
 
 enum class VariableType
 {

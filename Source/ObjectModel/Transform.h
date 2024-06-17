@@ -17,7 +17,7 @@
 
 class Transform : public Component
 {
-    TYPEINFO(Transform, Component);
+    TYPEINFO_SUB(Transform, Component);
 public:
 	enum class Space
 	{

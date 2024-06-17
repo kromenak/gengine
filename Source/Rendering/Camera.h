@@ -15,7 +15,7 @@
 
 class Camera : public Component
 {
-    TYPEINFO(Camera, Component);
+    TYPEINFO_SUB(Camera, Component);
 public:
     Camera(Actor* owner);
     ~Camera();

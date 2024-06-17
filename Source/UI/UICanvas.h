@@ -17,7 +17,7 @@ class UIWidget;
 
 class UICanvas : public Component
 {
-    TYPEINFO(UICanvas, Component);
+    TYPEINFO_SUB(UICanvas, Component);
 public:
 	static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
 	static void UpdateInput();

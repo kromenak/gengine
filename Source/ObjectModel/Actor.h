@@ -23,7 +23,7 @@ enum class TransformType
 
 class Actor
 {
-    TYPEINFO(Actor, NoBaseClass);
+    TYPEINFO_BASE(Actor);
 public:
 	enum class State
 	{

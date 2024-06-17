@@ -63,5 +63,4 @@ target_sources(tests PRIVATE
     ../Source/Primitives/Triangle.cpp
 
     ../Source/RTTI/TypeInfo.cpp
-    ../Source/RTTI/VariableInfo.cpp
 )

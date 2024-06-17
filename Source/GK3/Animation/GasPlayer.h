@@ -19,7 +19,7 @@ struct WhenNearGasNode;
 
 class GasPlayer : public Component
 {
-    TYPEINFO(GasPlayer, Component);
+    TYPEINFO_SUB(GasPlayer, Component);
 public:
     GasPlayer(Actor* owner);
     

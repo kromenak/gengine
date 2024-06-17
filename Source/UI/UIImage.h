@@ -12,7 +12,7 @@ class Color32;
 
 class UIImage : public UIWidget
 {
-    TYPEINFO(UIImage, UIWidget);
+    TYPEINFO_SUB(UIImage, UIWidget);
 public:
     enum class RenderMode
     {

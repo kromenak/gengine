@@ -2,9 +2,9 @@
 
 TYPEINFO_INIT(Transform, Component, 2)
 {
-    TYPEINFO_ADD_VAR(Transform, VariableType::Vector3, mLocalPosition);
-    TYPEINFO_ADD_VAR(Transform, VariableType::Quaternion, mLocalRotation);
-    TYPEINFO_ADD_VAR(Transform, VariableType::Vector3, mLocalScale);
+    TYPEINFO_VAR(Transform, VariableType::Vector3, mLocalPosition);
+    TYPEINFO_VAR(Transform, VariableType::Quaternion, mLocalRotation);
+    TYPEINFO_VAR(Transform, VariableType::Vector3, mLocalScale);
 }
 
 Transform::Transform(Actor* owner) : Component(owner),

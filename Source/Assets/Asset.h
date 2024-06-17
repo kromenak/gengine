@@ -23,7 +23,7 @@ enum class AssetScope
 
 class Asset
 {
-    TYPEINFO(Asset, NoBaseClass);
+    TYPEINFO_BASE(Asset);
 public:
     virtual ~Asset() = default;
     

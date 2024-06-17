@@ -1,7 +1,14 @@
 //
 // Clark Kromenaker
 //
-// TypeInfo is a static member of a class that provides RTTI info for that class.
+// TypeInfo provides information about a type and dynamic ways to perform operations on the type.
+// Supported operations:
+//  1) Retrieving a unique type ID that is persistent across compiles, runs, and versions of the program.
+//  2) Retrieve the type name as a string.
+//  3) Check and navigate a type's inheritance hierarchy.
+//  4) Check a type's registered variables and even modify the variables on an instance.
+//  5) Check a type's registered functions and even call a function on an instance.
+//  6) Create new instances of a type dynamically.
 //
 #pragma once
 #include <string>
@@ -11,36 +18,41 @@
 #include "TypeId.h"
 #include "VariableInfo.h"
 
-// To support dynamic construction via TypeInfo, we need to know a constructor is available.
-// The default constructor could work, but it forces all classes with TypeInfo to have a default constructor, which is sometimes ambiguous/dangerous.
-// Instead, we'll define a special constructor (via a unique argument) that this system calls to constuct objects dynamically. 
-//typedef uint32_t DynamicTypeCtor;
+// Dynamic creation of an instance via TypeInfo requires a guaranteed available constructor.
+// Default constructor could work, but is ambiguous (and what if its used for some other purpose?).
+// Instead, we define a special constructor (via a unique DynamicCtor argument) that is used specifically for dynamic creation.
+struct DynamicCtor { };
 
-class TypeInfo
+// A macro that hides the complex syntax of calling a member function pointer on an instance.
+// Recommended by the C++ FAQ: https://isocpp.org/wiki/faq/pointers-to-members
+#define CALL_MEMBER_FN(PObject, PMemberFuncPtr) ((PObject).*(PMemberFuncPtr))
+
+// Abstract base class for TypeInfo.
+// Not *exactly* an interface (it has data), but close enough.
+class ITypeInfo
 {
 public:
-    TypeInfo(const char* typeName, TypeId typeId);
-    virtual ~TypeInfo() = default;
+    ITypeInfo(const char* typeName, TypeId typeId);
+    virtual ~ITypeInfo() = default;
+
+    bool operator==(const ITypeInfo& other) const { return other.mTypeId == mTypeId; }
 
     // Type
     const char* GetTypeName() const { return mTypeName; }
     TypeId GetTypeId() const { return mTypeId; }
 
-    virtual TypeInfo* GetBaseType() const = 0;
+    // Type Hierarchy
+    virtual ITypeInfo* GetBaseType() const = 0;
     virtual bool IsTypeOf(TypeId typeId) const = 0;
 
-    //virtual void* New() const = 0;
-    //template<typename T> T* New() { return static_cast<T*>(New()); }
+    // Type Instances
+    virtual void* New() const = 0;
+    template<typename T> T* New() { return static_cast<T*>(New()); }
 
     // Type Variables
     void AddVariable(VariableType type, const char* name, size_t offset) { mVariables.emplace_back(type, name, offset); }
-
     std::vector<VariableInfo>& GetVariables() { return mVariables; }
     VariableInfo* GetVariableByName(const char* name);
-
-    // Type Functions
-    //void AddFunction(const std::string& name, void* funcPtr) { mFunctionMap[name] = funcPtr; }
-    //template<typename T> T GetFunction(const std::string& name) { static_cast<T>(mFunctionMap[name]); }
 
 private:
     // The name of the type.
@@ -49,28 +61,24 @@ private:
     // A unique numeric identifier for this type.
     TypeId mTypeId = 0;
 
-    // A list of all the variables for this type.
+    // Registered variables for this type.
     std::vector<VariableInfo> mVariables;
-
-    // Functions on this type that have been registered to be callable via a name/identifier.
-    //std::unordered_map<std::string, void*> mFunctionMap;
 };
 
-// A "concrete" TypeInfo instances.
-// All instances use this class, though most manipulation happens via the base class.
+// A "concrete" TypeInfo. All types create instances of this class, though some manipulation happens via the base class.
 template<typename TClass, typename TBase>
-class ConcreteTypeInfo : public TypeInfo
+class TypeInfo : public ITypeInfo
 {
 public:
-    ConcreteTypeInfo(const char* typeName, TypeId typeId) : TypeInfo(typeName, typeId)
+    TypeInfo(const char* typeName, TypeId typeId) : ITypeInfo(typeName, typeId)
     {
         // We assume that the TypeInfo boilerplate defines a static init function for us to call.
-        // Call it here to have the type do any additional custom work (like registering members).
+        // Call it here to have the type do any additional custom work (like registering member variables/functions).
         TClass::InitTypeInfo();
     }
 
-    // Type
-    TypeInfo* GetBaseType() const override
+    // Type Hierarchy
+    ITypeInfo* GetBaseType() const override
     {
         // If the base class is the "no base class" placeholder, return null to indicate we DON'T have a base type.
         if(TBase::sTypeInfo.GetTypeId() == NO_BASE_CLASS_TYPE_ID) { return nullptr; }
@@ -78,9 +86,41 @@ public:
     }
     bool IsTypeOf(TypeId typeId) const override { return typeId == GetTypeId() || (GetTypeId() != NO_BASE_CLASS_TYPE_ID && TBase::sTypeInfo.IsTypeOf(typeId)); }
 
-    //void* New() const override { return new TClass(); }
+    // Type Instances
+    void* New() const override { return new TClass(DynamicCtor()); }
+    TClass* New() { return static_cast<TClass*>(New()); }
+
+    // Type Functions
+    typedef void(TClass::*MemberFunc)();  // use typedef and template to define function ptr type that is a member of this type.
+    void AddFunction(const char* name, MemberFunc func) { mFunctions.emplace_back(name, func); }
+    template<typename TRet, typename... Args> TRet CallFunction(const char* name, TClass* instance, Args&&... args)
+    {
+        // Find the function and call it.
+        for(Function& function : mFunctions)
+        {
+            if(strcmp(function.name, name) == 0)
+            {
+                // Need to convert general "TClass void* function" into correct function signature before calling.
+                // FORTUNATELY...C++ templates DO support this...via some pretty involved syntax...
+                TRet(TClass::*func)(Args...) = (TRet(TClass::*)(Args...))function.func;
+                return static_cast<TRet>(CALL_MEMBER_FN(*instance, func)(args...));
+            }
+        }
+        return TRet();
+    }
 
 private:
+    // Registered functions for this type.
+    // All functions are stored essentially as "void*", so they need to be converted to the correct signature before calling them.
+    // There is no checking, so calling a function pointer with the wrong signature will probably crash your program!
+    struct Function
+    {
+        const char* name = nullptr;
+        MemberFunc func = nullptr;
+        Function(const char* name, MemberFunc func) : name(name), func(func) { }
+    };
+    std::vector<Function> mFunctions;
+
     // All instances of this type.
     //std::vector<TClass*> mInstances;
 };
@@ -94,8 +134,9 @@ private:
 class NoBaseClass
 {
 public:
-    static ConcreteTypeInfo<NoBaseClass, NoBaseClass> sTypeInfo;
+    static TypeInfo<NoBaseClass, NoBaseClass> sTypeInfo;
     static void InitTypeInfo();
+    NoBaseClass(DynamicCtor ctor) { }
 };
 
 
@@ -104,37 +145,49 @@ public:
 //================
 // Macros for generating boilerplate related to TypeInfos.
 // A macro is helpful to ensure consistent naming and to generate any needed functions.
-
-// Any class that wants runtime type info must add TYPEINFO.
-#define TYPEINFO(PClass, PBaseClass) public: \
-    static ConcreteTypeInfo<PClass, PBaseClass> sTypeInfo; \
+#define INTERNAL_TYPEINFO_CORE(PClass, PBaseClass) public: \
+    typedef TypeInfo<PClass, PBaseClass> TypeInfoType; \
+    static TypeInfo<PClass, PBaseClass> sTypeInfo; \
     static void InitTypeInfo(); \
-    virtual TypeInfo& GetTypeInfo() { return sTypeInfo; } \
+
+#define INTERNAL_TYPEINFO_MEMBERFUNCS_STATIC() static const char* StaticTypeName() { return sTypeInfo.GetTypeName(); } \
+    static TypeId StaticTypeId() { return sTypeInfo.GetTypeId(); }
+
+#define INTERNAL_TYPEINFO_MEMBERFUNCS() ITypeInfo& GetTypeInfo() { return sTypeInfo; } \
     const char* GetTypeName() { return GetTypeInfo().GetTypeName(); } \
     TypeId GetTypeId() { return GetTypeInfo().GetTypeId(); } \
-    template<typename pClass> bool IsA() { return GetTypeInfo().IsTypeOf(pClass::sTypeInfo.GetTypeId()); }
-    
+    template<typename pClass> bool IsA() { return GetTypeInfo().IsTypeOf(pClass::sTypeInfo.GetTypeId()); } \
+    INTERNAL_TYPEINFO_MEMBERFUNCS_STATIC()
+
+// For basic classes with no inheritance. No polymorphism.
+#define TYPEINFO(PClass) INTERNAL_TYPEINFO_CORE(PClass, NoBaseClass) \
+    INTERNAL_TYPEINFO_MEMBERFUNCS() \
+    PClass(DynamicCtor ctor) { }
+
+// For base classes with inheritance hierarchies. Polymorphism included (see "virtual" keyword).
+#define TYPEINFO_BASE(PClass) INTERNAL_TYPEINFO_CORE(PClass, NoBaseClass) \
+    virtual INTERNAL_TYPEINFO_MEMBERFUNCS() \
+    PClass(DynamicCtor ctor) { }
+
+// For subclasses in inheritance hierarchies. Polymorphic, and calls base class's special constructor.
+#define TYPEINFO_SUB(PClass, PBaseClass) INTERNAL_TYPEINFO_CORE(PClass, PBaseClass) \
+    virtual INTERNAL_TYPEINFO_MEMBERFUNCS() \
+    PClass(DynamicCtor ctor) : PBaseClass(ctor) { }
 
 // Add this in cpp/impl to define static TypeInfo and start the InitType static function.
 #define TYPEINFO_INIT(PClass, PBaseClass, PTypeId) \
-ConcreteTypeInfo<PClass, PBaseClass> PClass::sTypeInfo(#PClass, PTypeId); \
+TypeInfo<PClass, PBaseClass> PClass::sTypeInfo(#PClass, PTypeId); \
 void PClass::InitTypeInfo()
 
-// Use this to add a variable to the class.
-#define TYPEINFO_ADD_VAR(PClass, PType, PVar) sTypeInfo.AddVariable(PType, #PVar, offsetof(PClass, PVar));
+// Use this to register a variable to the type's TypeInfo.
+#define TYPEINFO_VAR(PClass, PType, PVar) sTypeInfo.AddVariable(PType, #PVar, offsetof(PClass, PVar))
 
+// Use this to register a function to the type's TypeInfo.
+#define TYPEINFO_FUNC(PClass, PFunc) sTypeInfo.AddFunction(#PFunc, (PClass::TypeInfoType::MemberFunc)&PFunc)
 
 //================
 // TYPE INFO HELPER MACROS
 //================
 // Macros for easy access to type info accessors and queries.
-#define TYPE_NAME_STATIC(PClass) PClass::sTypeInfo.GetTypeName()
-#define TYPE_NAME(PInst) (PInst).GetTypeInfo().GetTypeName()
-
-//#define TYPE_STATIC(PClass) PClass::sTypeInfo.GetTypeId()
-//#define TYPE(PInst) (PInst).GetTypeInfo().GetTypeId()
-// 
-//#define IS_TYPE_OF(PInst, PClass) (PInst).GetTypeInfo().IsTypeOf(PClass::sTypeInfo.GetTypeId())
-
 #define IS_CHILD_TYPE(PInst1, PInst2) (PInst1).GetTypeInfo().IsTypeOf((PInst2).GetTypeInfo().GetTypeId())
-#define IS_SAME_TYPE(PInst1, PInst2) ((PInst1).GetTypeInfo().GetTypeId() == (PInst2).GetTypeInfo().GetTypeId())
+#define IS_SAME_TYPE(PInst1, PInst2) ((PInst1).GetTypeInfo() == (PInst2).GetTypeInfo())

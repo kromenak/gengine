@@ -4,7 +4,7 @@
 
 TYPEINFO_INIT(Component, NoBaseClass, 1)
 {
-    TYPEINFO_ADD_VAR(Component, VariableType::Bool, mEnabled);
+    TYPEINFO_VAR(Component, VariableType::Bool, mEnabled);
 }
 
 Component::Component(Actor* owner) : mOwner(owner)

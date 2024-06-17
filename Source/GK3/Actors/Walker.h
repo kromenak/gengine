@@ -26,7 +26,7 @@ class WalkerBoundary;
 
 class Walker : public Component
 {
-    TYPEINFO(Walker, Component);
+    TYPEINFO_SUB(Walker, Component);
 public:
 	Walker(Actor* owner);
 

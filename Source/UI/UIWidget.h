@@ -2,7 +2,6 @@
 // Clark Kromenaker
 //
 // Base class for any UI element, called a "widget".
-// This class is abstract.
 //
 #pragma once
 #include "Component.h"
@@ -11,12 +10,12 @@
 
 class UIWidget : public Component
 {
-    TYPEINFO(UIWidget, Component);
+    TYPEINFO_SUB(UIWidget, Component);
 public:
     UIWidget(Actor* actor);
     virtual ~UIWidget();
     
-	virtual void Render() = 0;
+    virtual void Render() { }
 
     // Called when pointer enters/exits the bounds of this widget.
 	virtual void OnPointerEnter() { }

@@ -7,7 +7,7 @@ TYPEINFO_INIT(NoBaseClass, NoBaseClass, NO_BASE_CLASS_TYPE_ID)
 
 }
 
-TypeInfo::TypeInfo(const char* typeName, TypeId typeId) :
+ITypeInfo::ITypeInfo(const char* typeName, TypeId typeId) :
     mTypeName(typeName),
     mTypeId(typeId)
 {
@@ -21,7 +21,7 @@ TypeInfo::TypeInfo(const char* typeName, TypeId typeId) :
     TypeDatabase::Get().RegisterType(this);
 }
 
-VariableInfo* TypeInfo::GetVariableByName(const char* name)
+VariableInfo* ITypeInfo::GetVariableByName(const char* name)
 {
     // Find a variable with this name.
     for(VariableInfo& variable : mVariables)
@@ -31,7 +31,7 @@ VariableInfo* TypeInfo::GetVariableByName(const char* name)
             return &variable;
         }
     }
-    
+
     // Can't find any variable with that name on this Type!
     return nullptr;
 }

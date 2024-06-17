@@ -27,7 +27,7 @@ struct UIGrid
 
 class UIGrids : public UIWidget
 {
-    TYPEINFO(UIGrids, UIWidget);
+    TYPEINFO_SUB(UIGrids, UIWidget);
 public:
     UIGrids(Actor* owner);
     ~UIGrids();

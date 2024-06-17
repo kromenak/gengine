@@ -12,55 +12,81 @@ namespace
     // A sample class hierarchy used to test RTTI.
     class TestBaseClass
     {
-        TYPEINFO(TestBaseClass, NoBaseClass);
+        TYPEINFO_BASE(TestBaseClass);
     public:
         int mMyInt = 0;
         float mMyFloat = 0.0f;
+
+        TestBaseClass() = default;
+        void SimpleBaseClassFunc() { mMyInt++; }
+        int ComplexBaseClassFunc(const std::vector<int>& stuff)
+        {
+            int sum = 0;
+            for(int val : stuff)
+            {
+                sum += val;
+            }
+            return sum;
+        }
     };
     TYPEINFO_INIT(TestBaseClass, NoBaseClass, 1)
     {
-        TYPEINFO_ADD_VAR(TestBaseClass, Int, mMyInt);
-        TYPEINFO_ADD_VAR(TestBaseClass, Float, mMyFloat);
+        TYPEINFO_VAR(TestBaseClass, VariableType::Int, mMyInt);
+        TYPEINFO_VAR(TestBaseClass, VariableType::Float, mMyFloat);
+
+        TYPEINFO_FUNC(TestBaseClass, SimpleBaseClassFunc);
+        TYPEINFO_FUNC(TestBaseClass, ComplexBaseClassFunc);
     }
 
     class TestSubClass : public TestBaseClass
     {
-        TYPEINFO(TestSubClass, TestBaseClass);
+        TYPEINFO_SUB(TestSubClass, TestBaseClass);
     public:
         std::string mMyString;
+
+        TestSubClass() = default;
     };
     TYPEINFO_INIT(TestSubClass, TestBaseClass, 2)
     {
-        TYPEINFO_ADD_VAR(TestSubClass, String, mMyString);
+        TYPEINFO_VAR(TestSubClass, VariableType::String, mMyString);
     }
 }
 
-// The tests...
-TEST_CASE("Type Names are correct")
+TEST_CASE("Type names are correct")
 {
-    // Make sure the type names returned match expectations.
-    TestBaseClass b;
-    REQUIRE(strcmp(TYPE_NAME_STATIC(TestBaseClass), "TestBaseClass") == 0);
-    REQUIRE(strcmp(TYPE_NAME(b), "TestBaseClass") == 0);
+    // Static type name should match expectations.
+    REQUIRE(strcmp(TestBaseClass::StaticTypeName(), "TestBaseClass") == 0);
+    REQUIRE(strcmp(TestSubClass::StaticTypeName(), "TestSubClass") == 0);
 
+    // Type name via an instance should match expectations.
+    TestBaseClass b;
+    REQUIRE(strcmp(b.GetTypeName(), "TestBaseClass") == 0);
     TestSubClass s;
-    REQUIRE(strcmp(TYPE_NAME_STATIC(TestSubClass), "TestSubClass") == 0);
-    REQUIRE(strcmp(TYPE_NAME(s), "TestSubClass") == 0);
+    REQUIRE(strcmp(s.GetTypeName(), "TestSubClass") == 0);
+
+    // Polymorphic type name checks should match expectations.
+    TestBaseClass* basePtr = &s;
+    REQUIRE(strcmp(basePtr->GetTypeName(), "TestSubClass") == 0);
 }
 
 TEST_CASE("Type IDs are correct")
 {
-    // Make sure the type IDs returned match expectations.
+    // Static type IDs should match expectations.
+    REQUIRE(TestBaseClass::StaticTypeId() == 1);
+    REQUIRE(TestSubClass::StaticTypeId() == 2);
+
+    // Type IDs via an instance should match expectations.
     TestBaseClass b;
-    REQUIRE(TestBaseClass::sTypeInfo.GetTypeId() == 1);
     REQUIRE(b.GetTypeId() == 1);
-    
     TestSubClass s;
-    REQUIRE(TestSubClass::sTypeInfo.GetTypeId() == 2);
     REQUIRE(s.GetTypeId() == 2);
+
+    // Polymorphic type IDs should match expectations.
+    TestBaseClass* basePtr = &s;
+    REQUIRE(basePtr->GetTypeId() == 2);
 }
 
-TEST_CASE("Type checking is correct")
+TEST_CASE("Type comparison is correct")
 {
     // A base class should be identified as its own type, but not a subclass type.
     TestBaseClass b;
@@ -87,50 +113,25 @@ TEST_CASE("Type checking is correct")
 
     // But not the other way around!
     REQUIRE(!IS_CHILD_TYPE(b, s));
-}
-
-TEST_CASE("Polymorphic type info works")
-{
-    // Let's say we have an instance of a subclass, but it is referenced through a base class pointer or reference...
-    TestSubClass s;
-    TestBaseClass& baseRef = s;
-    TestBaseClass* basePtr = &s;
-
-    // Do we still get the correct type name via the ref or ptr?
-    REQUIRE(strcmp(TYPE_NAME(baseRef), "TestSubClass") == 0);
-    REQUIRE(strcmp(TYPE_NAME(*basePtr), "TestSubClass") == 0);
-
-    // Correct type ID?
-    REQUIRE(baseRef.GetTypeId() == 2);
-    REQUIRE(basePtr->GetTypeId() == 2);
 
     // Correct type identification?
-    REQUIRE(baseRef.IsA<TestSubClass>());
-    REQUIRE(IS_SAME_TYPE(baseRef, *basePtr));
+    TestBaseClass* basePtr = &s;
+    REQUIRE(basePtr->IsA<TestSubClass>());
+    REQUIRE(IS_SAME_TYPE(s, *basePtr));
 }
 
-TEST_CASE("Create instance from Type works")
+TEST_CASE("Create dynamic instance works")
 {
-    /*
     // We have a subclass referenced through a base class pointer.
     TestSubClass s;
     TestBaseClass* basePtr = &s;
 
     // We should be able to create a new instance of TestSubClass via the base pointer.
-    void* newInst = basePtr->GetTypeInfo().New();
-    TestBaseClass* newBasePtr = static_cast<TestBaseClass*>(newInst);
-    REQUIRE(strcmp(TYPE_NAME(*newBasePtr), "TestSubClass") == 0);
-    REQUIRE(TYPE(*newBasePtr) == 2);
-    REQUIRE(IS_TYPE_OF(*newBasePtr, TestSubClass));
-    delete newBasePtr;
-
-    // Same thing, but more streamlined via templated New<> function.
-    TestSubClass* subPtr = basePtr->GetTypeInfo().New<TestSubClass>();
-    REQUIRE(strcmp(TYPE_NAME(*subPtr), "TestSubClass") == 0);
-    REQUIRE(TYPE(*subPtr) == 2);
-    REQUIRE(IS_TYPE_OF(*subPtr, TestSubClass));
-    delete subPtr;
-    */
+    TestBaseClass* newInst = basePtr->GetTypeInfo().New<TestBaseClass>();
+    REQUIRE(strcmp(newInst->GetTypeName(), "TestSubClass") == 0);
+    REQUIRE(newInst->GetTypeId() == 2);
+    REQUIRE(newInst->IsA<TestSubClass>());
+    delete newInst;
 }
 
 TEST_CASE("Modify variable in immediate class works")
@@ -144,17 +145,18 @@ TEST_CASE("Modify variable in immediate class works")
     // Modify variable indirectly. Value should update as expected.
     myString->GetRef<std::string>(&s) = "Hello";
     REQUIRE(s.mMyString == "Hello");
+}
 
+TEST_CASE("Call function works")
+{
+    // Attempt to call a simple function on an instance, verify it has effect.
+    TestBaseClass b;
+    REQUIRE(b.mMyInt == 0);
+    TestBaseClass::sTypeInfo.CallFunction<void>("SimpleBaseClassFunc", &b);
+    REQUIRE(b.mMyInt == 1);
 
-    /*
-    REQUIRE(s.mMyInt == 0);
-
-    // Retrieve myInt class variable from subclass instance. Should be retrievable.
-    VariableInfo* myInt = s.GetTypeInfo().GetVariableByName("mMyInt");
-    REQUIRE(myInt != nullptr);
-
-    // Modify myInt via RTTI and verify it changed as expected.
-    myInt->GetRef<int>(&s) = 10;
-    REQUIRE(s.mMyInt == 10);
-    */
+    // Call a more advanced function on an instance, verify that it works.
+    std::vector<int> blah { 5, 10, 15, 20 };
+    int result = TestBaseClass::sTypeInfo.CallFunction<int>("ComplexBaseClassFunc", &b, blah);
+    REQUIRE(result == 50);
 }

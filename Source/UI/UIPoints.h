@@ -16,7 +16,7 @@ class Mesh;
 
 class UIPoints : public UIWidget
 {
-    TYPEINFO(UIPoints, UIWidget);
+    TYPEINFO_SUB(UIPoints, UIWidget);
 public:
     UIPoints(Actor* owner);
     ~UIPoints();

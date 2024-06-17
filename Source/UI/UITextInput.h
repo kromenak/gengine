@@ -10,7 +10,7 @@
 
 class UITextInput : public UILabel
 {
-    TYPEINFO(UITextInput, UILabel);
+    TYPEINFO_SUB(UITextInput, UILabel);
 public:
 	UITextInput(Actor* owner);
 	

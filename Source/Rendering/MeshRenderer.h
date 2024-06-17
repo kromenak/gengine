@@ -20,7 +20,7 @@ class Texture;
 
 class MeshRenderer : public Component
 {
-    TYPEINFO(MeshRenderer, Component);
+    TYPEINFO_SUB(MeshRenderer, Component);
 public:
     MeshRenderer(Actor* actor);
     ~MeshRenderer();

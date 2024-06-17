@@ -10,7 +10,7 @@ class Actor;
 
 class Component
 {
-    TYPEINFO(Component, NoBaseClass);
+    TYPEINFO_BASE(Component);
 public:
     Component(Actor* owner);
     virtual ~Component() = default;

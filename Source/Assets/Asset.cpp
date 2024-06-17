@@ -4,7 +4,7 @@
 
 TYPEINFO_INIT(Asset, NoBaseClass, 100)
 {
-    TYPEINFO_ADD_VAR(Asset, VariableType::String, mName);
+    TYPEINFO_VAR(Asset, VariableType::String, mName);
 }
 
 Asset::Asset(const std::string& name, AssetScope scope) :

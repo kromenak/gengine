@@ -18,7 +18,7 @@ class Mesh;
 
 class UILabel : public UIWidget
 {
-    TYPEINFO(UILabel, UIWidget);
+    TYPEINFO_SUB(UILabel, UIWidget);
 public:
 	UILabel(Actor* owner);
     ~UILabel();

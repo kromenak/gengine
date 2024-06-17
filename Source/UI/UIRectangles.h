@@ -23,7 +23,7 @@ struct UIRectangle
 
 class UIRectangles : public UIWidget
 {
-    TYPEINFO(UIRectangles, UIWidget);
+    TYPEINFO_SUB(UIRectangles, UIWidget);
 public:
     UIRectangles(Actor* owner);
     ~UIRectangles();

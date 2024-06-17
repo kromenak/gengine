@@ -6,7 +6,6 @@
 #pragma once
 
 class Actor;
-class TypeInfo;
 
 class HierarchyTool
 {

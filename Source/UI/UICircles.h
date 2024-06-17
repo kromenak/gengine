@@ -17,7 +17,7 @@ class Vector2;
 
 class UICircles : public UIWidget
 {
-    TYPEINFO(UICircles, UIWidget);
+    TYPEINFO_SUB(UICircles, UIWidget);
 public:
     UICircles(Actor* owner);
     ~UICircles();
