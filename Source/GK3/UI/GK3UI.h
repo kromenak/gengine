@@ -9,6 +9,7 @@
 
 class CaptionsOverlay;
 class DrivingScreen;
+class SaveLoadScreen;
 class SceneTransitioner;
 class Sidney;
 class Timeblock;
@@ -21,6 +22,9 @@ public:
     void ShowTitleScreen();
     void ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::function<void()> callback);
     void ShowFinishedScreen();
+
+    void ShowSaveScreen();
+    void ShowLoadScreen();
 
     void ShowSceneTransitioner();
     void HideSceneTransitioner();
@@ -38,6 +42,7 @@ public:
 private:
     TitleScreen* mTitleScreen = nullptr;
     TimeblockScreen* mTimeblockScreen = nullptr;
+    SaveLoadScreen* mSaveLoadScreen = nullptr;
 
     SceneTransitioner* mSceneTransitioner = nullptr;
 

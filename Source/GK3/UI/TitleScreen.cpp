@@ -2,17 +2,19 @@
 
 #include "AssetManager.h"
 #include "GEngine.h"
+#include "GK3UI.h"
 #include "SoundtrackPlayer.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
+#include "UIUtil.h"
 #include "VideoPlayer.h"
+#include "Window.h"
 
 static UIButton* CreateButton(Actor* parent, const std::string& buttonId, float xPos)
 {
-    Actor* buttonActor = new Actor(TransformType::RectTransform);
-    buttonActor->GetTransform()->SetParent(parent->GetTransform());
-    UIButton* button = buttonActor->AddComponent<UIButton>();
+    UIButton* button = UIUtil::NewUIActorWithWidget<UIButton>(parent);
 
     // Set textures.
     button->SetUpTexture(gAssetManager.LoadTexture(buttonId + "_U.BMP"));
@@ -29,21 +31,17 @@ static UIButton* CreateButton(Actor* parent, const std::string& buttonId, float 
 
 TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
 {
-    AddComponent<UICanvas>(0);
+    UIUtil::AddColorCanvas(this, 0, Color32::Black);
 
-    // Canvas takes up entire screen.
-    RectTransform* rectTransform = GetComponent<RectTransform>();
-    rectTransform->SetSizeDelta(0.0f, 0.0f);
-    rectTransform->SetAnchorMin(Vector2::Zero);
-    rectTransform->SetAnchorMax(Vector2::One);
-
-    // Add title screen background image.
-    UIImage* background = AddComponent<UIImage>();
-    background->SetTexture(gAssetManager.LoadTexture("TITLE.BMP"));
-
+    // Add title screen image.
+    UIImage* titleImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
+    titleImage->SetTexture(gAssetManager.LoadTexture("TITLE.BMP"), true);
+    titleImage->ResizeToFitPreserveAspect(Window::GetSize());
+   
     // Add "intro" button.
-    UIButton* introButton = CreateButton(this, "TITLE_INTRO", -505.0f);
+    UIButton* introButton = CreateButton(titleImage->GetOwner(), "TITLE_INTRO", -505.0f);
     introButton->SetPressCallback([](UIButton* button) {
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
         gVideoPlayer.Play("intro.bik", true, true, nullptr);
     });
     if(GEngine::Instance()->IsDemoMode())
@@ -52,16 +50,18 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     }
 
     // Add "play" button.
-    UIButton* playButton = CreateButton(this, "TITLE_PLAY", -381.0f);
+    UIButton* playButton = CreateButton(titleImage->GetOwner(), "TITLE_PLAY", -381.0f);
     playButton->SetPressCallback([this](UIButton* button) {
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
         Hide();
         GEngine::Instance()->StartGame();
     });
 
     // Add "restore" button.
-    UIButton* restoreButton = CreateButton(this, "TITLE_RESTORE", -257.0f);
+    UIButton* restoreButton = CreateButton(titleImage->GetOwner(), "TITLE_RESTORE", -257.0f);
     restoreButton->SetPressCallback([](UIButton* button) {
-        std::cout << "Restore!" << std::endl;
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+        gGK3UI.ShowLoadScreen();
     });
     if(GEngine::Instance()->IsDemoMode())
     {
@@ -69,7 +69,7 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     }
 
     // Add "quit" button.
-    UIButton* quitButton = CreateButton(this, "TITLE_QUIT", -135.0f);
+    UIButton* quitButton = CreateButton(titleImage->GetOwner(), "TITLE_QUIT", -135.0f);
     quitButton->SetPressCallback([](UIButton* button) {
         GEngine::Instance()->Quit();
     });

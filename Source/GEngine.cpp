@@ -151,7 +151,7 @@ bool GEngine::Initialize()
     // Non-debug: do the full game presentation - company logos, intro movie, title screen.
     //#define FORCE_TITLE_SCREEN
     #if defined(NDEBUG) || defined(FORCE_TITLE_SCREEN)
-    // In demo mode, wait for async stuff to load and then show the title screen.
+    // In demo mode, show the title screen. Normal game shows opening movies.
     if(mDemoMode)
     {
         ShowTitleScreen();

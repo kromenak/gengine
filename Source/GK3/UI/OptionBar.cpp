@@ -7,6 +7,7 @@
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GEngine.h"
+#include "GK3UI.h"
 #include "InventoryManager.h"
 #include "Renderer.h"
 #include "TextAsset.h"
@@ -404,14 +405,16 @@ void OptionBar::CreateOptionsSection(std::unordered_map<std::string, IniKeyValue
     
     // Create save button.
     UIButton* saveButton = CreateButton(config, "optSave", mOptionsSection);
-    saveButton->SetPressCallback([](UIButton* button) {
-        std::cout << "Save!" << std::endl;
+    saveButton->SetPressCallback([this](UIButton* button) {
+        Hide();
+        gGK3UI.ShowSaveScreen();
     });
     
     // Create restore button.
     UIButton* restoreButton = CreateButton(config, "optRestore", mOptionsSection);
-    restoreButton->SetPressCallback([](UIButton* button) {
-        std::cout << "Restore!" << std::endl;
+    restoreButton->SetPressCallback([this](UIButton* button) {
+        Hide();
+        gGK3UI.ShowLoadScreen();
     });
     
     // Created "advanced options" button.

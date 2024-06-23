@@ -3,6 +3,7 @@
 #include "CaptionsOverlay.h"
 #include "DrivingScreen.h"
 #include "FinishedScreen.h"
+#include "SaveLoadScreen.h"
 #include "SceneTransitioner.h"
 #include "Sidney.h"
 #include "TimeblockScreen.h"
@@ -44,6 +45,26 @@ void GK3UI::ShowFinishedScreen()
         mFinishedScreen->SetIsDestroyOnLoad(false);
     }
     mFinishedScreen->Show();
+}
+
+void GK3UI::ShowSaveScreen()
+{
+    if(mSaveLoadScreen == nullptr)
+    {
+        mSaveLoadScreen = new SaveLoadScreen();
+        mSaveLoadScreen->SetIsDestroyOnLoad(false);
+    }
+    mSaveLoadScreen->ShowSave();
+}
+
+void GK3UI::ShowLoadScreen()
+{
+    if(mSaveLoadScreen == nullptr)
+    {
+        mSaveLoadScreen = new SaveLoadScreen();
+        mSaveLoadScreen->SetIsDestroyOnLoad(false);
+    }
+    mSaveLoadScreen->ShowLoad();
 }
 
 void GK3UI::ShowSceneTransitioner()
