@@ -8,7 +8,7 @@
 #include "TypeInfo.h"
 #include "Vector3.h"
 
-void InspectorUtil::RenderVariables(ITypeInfo* typeInfo, void* instance)
+void InspectorUtil::RenderVariables(GTypeInfo* typeInfo, void* instance)
 {
     // Display a collapsing section for the component, open by default.
     if(ImGui::CollapsingHeader(typeInfo->GetTypeName(), ImGuiTreeNodeFlags_DefaultOpen))

@@ -29,20 +29,20 @@ struct DynamicCtor { };
 
 // Abstract base class for TypeInfo.
 // Not *exactly* an interface (it has data), but close enough.
-class ITypeInfo
+class GTypeInfo
 {
 public:
-    ITypeInfo(const char* typeName, TypeId typeId);
-    virtual ~ITypeInfo() = default;
+    GTypeInfo(const char* typeName, TypeId typeId);
+    virtual ~GTypeInfo() = default;
 
-    bool operator==(const ITypeInfo& other) const { return other.mTypeId == mTypeId; }
+    bool operator==(const GTypeInfo& other) const { return other.mTypeId == mTypeId; }
 
     // Type
     const char* GetTypeName() const { return mTypeName; }
     TypeId GetTypeId() const { return mTypeId; }
 
     // Type Hierarchy
-    virtual ITypeInfo* GetBaseType() const = 0;
+    virtual GTypeInfo* GetBaseType() const = 0;
     virtual bool IsTypeOf(TypeId typeId) const = 0;
 
     // Type Instances
@@ -67,10 +67,10 @@ private:
 
 // A "concrete" TypeInfo. All types create instances of this class, though some manipulation happens via the base class.
 template<typename TClass, typename TBase>
-class TypeInfo : public ITypeInfo
+class TypeInfo : public GTypeInfo
 {
 public:
-    TypeInfo(const char* typeName, TypeId typeId) : ITypeInfo(typeName, typeId)
+    TypeInfo(const char* typeName, TypeId typeId) : GTypeInfo(typeName, typeId)
     {
         // We assume that the TypeInfo boilerplate defines a static init function for us to call.
         // Call it here to have the type do any additional custom work (like registering member variables/functions).
@@ -78,7 +78,7 @@ public:
     }
 
     // Type Hierarchy
-    ITypeInfo* GetBaseType() const override
+    GTypeInfo* GetBaseType() const override
     {
         // If the base class is the "no base class" placeholder, return null to indicate we DON'T have a base type.
         if(TBase::sTypeInfo.GetTypeId() == NO_BASE_CLASS_TYPE_ID) { return nullptr; }
@@ -153,7 +153,7 @@ public:
 #define INTERNAL_TYPEINFO_MEMBERFUNCS_STATIC() static const char* StaticTypeName() { return sTypeInfo.GetTypeName(); } \
     static TypeId StaticTypeId() { return sTypeInfo.GetTypeId(); }
 
-#define INTERNAL_TYPEINFO_MEMBERFUNCS() ITypeInfo& GetTypeInfo() { return sTypeInfo; } \
+#define INTERNAL_TYPEINFO_MEMBERFUNCS() GTypeInfo& GetTypeInfo() { return sTypeInfo; } \
     const char* GetTypeName() { return GetTypeInfo().GetTypeName(); } \
     TypeId GetTypeId() { return GetTypeInfo().GetTypeId(); } \
     template<typename pClass> bool IsA() { return GetTypeInfo().IsTypeOf(pClass::sTypeInfo.GetTypeId()); } \

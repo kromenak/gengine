@@ -19,7 +19,7 @@ public:
         return database;
     }
 
-    void RegisterType(ITypeInfo* typeInfo)
+    void RegisterType(GTypeInfo* typeInfo)
     {
         // Not going to check for duplicates - it should naturally not happen, right?
         mTypes.push_back(typeInfo);
@@ -32,8 +32,8 @@ public:
 private:
     // All Types register themselves automatically on construction.
     // So, this list is assumed to contain all Types in the game that have TypeInfo!
-    std::vector<ITypeInfo*> mTypes;
+    std::vector<GTypeInfo*> mTypes;
 
     // Maps a type ID to its type info.
-    std::unordered_map<TypeId, ITypeInfo*> mTypeIdToTypeInfo;
+    std::unordered_map<TypeId, GTypeInfo*> mTypeIdToTypeInfo;
 };
