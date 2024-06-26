@@ -60,6 +60,7 @@ target_include_directories(gk3 PRIVATE
     Source/Math
     Source/Memory
     Source/ObjectModel
+    Source/Persistence
     Source/Platform
     Source/Primitives
     Source/Rendering

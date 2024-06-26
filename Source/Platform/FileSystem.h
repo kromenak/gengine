@@ -66,14 +66,14 @@ namespace Path
 namespace Directory
 {
 	/**
-	 * Returns true if the directory at path exists, false if it doesn't.
+	 * Returns true if the directory exists, false if it doesn't.
 	 */
 	bool Exists(const std::string& path);
 	
 	/**
-	 * Creates the directory at path. Fails if the directory already exists.
+	 * Creates a directory.
 	 *
-	 * Does not create intermediate/parent directories (see MakeAllDirectories for that).
+	 * Does not create intermediate/parent directories (see CreateAll for that).
 	 * Will fail if parent directory is missing.
 	 *
 	 * Returns true on successful creation (or if directory already exists).
@@ -101,6 +101,8 @@ namespace Directory
 		}
 		return true;
 	}
+
+    std::vector<std::string> List(const std::string& path, const std::string& extension = "");
 }
 
 namespace File

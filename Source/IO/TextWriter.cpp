@@ -10,13 +10,3 @@ TextWriter::TextWriter(const char* filePath) :
         std::cout << "Can't write to text file " << filePath << std::endl;
     }
 }
-
-void TextWriter::WriteLine(const char* line)
-{
-    mStream << line << std::endl;
-}
-
-void TextWriter::WriteLine(const std::string& line)
-{
-    mStream << line << std::endl;
-}

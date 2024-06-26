@@ -74,4 +74,34 @@ namespace SystemUtil
             #error "No implementation for SystemUtil::GetCurrentUserName!"
         #endif
 	}
+
+    inline void GetTime(uint16_t& year, uint16_t& month, uint16_t& dayOfWeek, uint16_t& day,
+                        uint16_t& hour, uint16_t& minute, uint16_t& second, uint16_t& milliseconds)
+    {
+        #if defined(PLATFORM_WINDOWS)
+        {
+            SYSTEMTIME time;
+            ::GetSystemTime(&time);
+            year = time.wYear;
+            month = time.wMonth;
+            dayOfWeek = time.wDayOfWeek;
+            day = time.wDay;
+            hour = time.wHour;
+            minute = time.wMinute;
+            second = time.wSecond;
+            milliseconds = time.wMilliseconds;
+        }
+        #else
+        {
+            year = 0;
+            month = 0;
+            dayOfWeek = 0;
+            day = 0;
+            hour = 0;
+            minute = 0;
+            second = 0;
+            milliseconds = 0;
+        }
+        #endif
+    }
 }

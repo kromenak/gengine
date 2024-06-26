@@ -268,6 +268,47 @@ bool Directory::Create(const std::string& path)
     #endif
 }
 
+std::vector<std::string> Directory::List(const std::string& path, const std::string& extension)
+{
+    #if defined(PLATFORM_WINDOWS)
+    {
+        // Decide on search string.
+        std::string searchPath = path;
+        if(extension.empty())
+        {
+            searchPath += "/*.*"; // no filter, return everything
+        }
+        else
+        {
+            searchPath += "/*." + extension; // only files with specific extension
+        }
+        
+        // Use Windows FindFirstFile/FindNextFile to iterate contents of directory.
+        std::vector<std::string> files;
+        WIN32_FIND_DATA fd;
+        HANDLE hFind = ::FindFirstFile(searchPath.c_str(), &fd);
+        if(hFind != INVALID_HANDLE_VALUE)
+        {
+            do
+            {
+                // Add to file list, but skip directories.
+                bool isDirectory = fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
+                if(!isDirectory)
+                {
+                    files.push_back(fd.cFileName);
+                }
+            }
+            while(::FindNextFile(hFind, &fd));
+            ::FindClose(hFind);
+        }
+        return files;
+    }
+    #else
+        #error "No implementation for Directory::List!"
+        return std::vector<std::string>();
+    #endif
+}
+
 uint64_t File::Size(const std::string& filePath)
 {
     #if defined(PLATFORM_WINDOWS)

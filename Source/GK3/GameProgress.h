@@ -35,6 +35,7 @@ public:
 
     const Timeblock& GetLastTimeblock() const { return mLastTimeblock; }
     std::string GetTimeblockDisplayName() const;
+    std::string GetTimeblockDisplayName(const std::string& timeblockStr) const;
 
     // Flags
     bool GetFlag(const std::string& flagName) const { return mGameFlags.Get(flagName); }

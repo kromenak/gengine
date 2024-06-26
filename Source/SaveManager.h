@@ -5,8 +5,10 @@
 //
 #pragma once
 #include <string>
+#include <vector>
 
 #include "Config.h" // Including SaveManager.h usually means you also need Config.h
+#include "PersistHeader.h"
 
 // Sound Preferences
 #define PREFS_SOUND "Sound"
@@ -40,25 +42,53 @@
     #define PREFS_MIPMAPS "Mip Mapping"
     #define PREFS_TRILINEAR_FILTERING "Trilinear Filtering"
 
+struct SaveSummary
+{
+    std::string filePath;
+    PersistHeader saveInfo;
+};
+
 class SaveManager
 {
 public:
     SaveManager();
     ~SaveManager();
 
-    void Save(const std::string& saveName);
-    void Load(const std::string& saveName);
-
+    // Prefs
     Config* GetPrefs() { return mPrefs; }
     void SavePrefs();
 
     int GetRunCount() const;
+
+    // Saves
+    const std::vector<SaveSummary>& GetSaves();
+
+    void Save(const std::string& saveDescription);
+    void Load(const std::string& loadPath);
+    void HandlePendingSavesAndLoads();
 
 private:
     // The player's game preferences.
     // Things like audio settings, graphics settings, etc go here.
     // Basically anything that is not a per-save-game value.
     Config* mPrefs = nullptr;
+
+    // A path we should save the game to when it is safe to do so.
+    std::string mPendingSaveDescription;
+
+    // Similarly, a pending load game path.
+    std::string mPendingLoadPath;
+    
+    // A list of saves found on disk, for displaying in save/load screens.
+    std::vector<SaveSummary> mSaves;
+
+    // Next number to use when making a save file.
+    int mNextSaveNumber = 1;
+
+    void RescanSaveDirectory();
+
+    void SaveInternal(const std::string& saveDescription);
+    void LoadInternal(const std::string& loadPath);
 };
 
 extern SaveManager gSaveManager;

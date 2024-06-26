@@ -232,6 +232,9 @@ void GEngine::Run()
 		// Check whether we need a scene change.
         gSceneManager.UpdateLoading();
 
+        // Frame is done, do any save or loads now.
+        gSaveManager.HandlePendingSavesAndLoads();
+
         // OK, this frame is done!
         ++mFrameNumber;
         PROFILER_END_FRAME();
