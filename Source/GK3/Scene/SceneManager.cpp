@@ -9,15 +9,16 @@ SceneManager gSceneManager;
 
 void SceneManager::Shutdown()
 {
-    // Delete all actors (even the "don't destroy on load ones).
+    // Unload any loaded scene.
+    // This will delete all actors local to the scene.
+    UnloadSceneInternal();
+
+    // Delete all actors (even the "don't destroy on load" ones).
     for(auto& actor : mActors)
     {
         delete actor;
     }
     mActors.clear();
-
-    // Unload any loaded scene.
-    UnloadSceneInternal();
 }
 
 void SceneManager::Update(float deltaTime)
