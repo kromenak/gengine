@@ -9,6 +9,7 @@
 
 class CaptionsOverlay;
 class DrivingScreen;
+class ProgressBar;
 class SaveLoadScreen;
 class SceneTransitioner;
 class Sidney;
@@ -25,6 +26,12 @@ public:
 
     void ShowSaveScreen();
     void ShowLoadScreen();
+
+    void ShowGenericProgressBar();
+    void ShowSaveProgressBar();
+    void ShowLoadProgressBar();
+    void SetProgressBarProgress(float fraction);
+    void HideProgressBar();
 
     void ShowSceneTransitioner();
     void HideSceneTransitioner();
@@ -43,6 +50,8 @@ private:
     TitleScreen* mTitleScreen = nullptr;
     TimeblockScreen* mTimeblockScreen = nullptr;
     SaveLoadScreen* mSaveLoadScreen = nullptr;
+
+    ProgressBar* mProgressBar = nullptr;
 
     SceneTransitioner* mSceneTransitioner = nullptr;
 

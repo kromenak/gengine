@@ -30,4 +30,9 @@ void UIUtil::AddColorCanvas(Actor* canvasActor, int canvasOrder, const Color32& 
     background->SetReceivesInput(true);
 }
 
-
+UICanvas* UIUtil::NewUIActorWithCanvas(Actor* parent, int canvasOrder)
+{
+    Actor* uiActor = new Actor(TransformType::RectTransform);
+    uiActor->GetTransform()->SetParent(parent->GetTransform());
+    return uiActor->AddComponent<UICanvas>(canvasOrder);
+}

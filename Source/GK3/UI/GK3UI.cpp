@@ -3,6 +3,7 @@
 #include "CaptionsOverlay.h"
 #include "DrivingScreen.h"
 #include "FinishedScreen.h"
+#include "ProgressBar.h"
 #include "SaveLoadScreen.h"
 #include "SceneTransitioner.h"
 #include "Sidney.h"
@@ -65,6 +66,52 @@ void GK3UI::ShowLoadScreen()
         mSaveLoadScreen->SetIsDestroyOnLoad(false);
     }
     mSaveLoadScreen->ShowLoad();
+}
+
+void GK3UI::ShowGenericProgressBar()
+{
+    if(mProgressBar == nullptr)
+    {
+        mProgressBar = new ProgressBar();
+        mProgressBar->SetIsDestroyOnLoad(false);
+    }
+    mProgressBar->Show(ProgressBar::Type::Generic);
+}
+
+void GK3UI::ShowSaveProgressBar()
+{
+    if(mProgressBar == nullptr)
+    {
+        mProgressBar = new ProgressBar();
+        mProgressBar->SetIsDestroyOnLoad(false);
+    }
+    mProgressBar->Show(ProgressBar::Type::Save);
+}
+
+void GK3UI::ShowLoadProgressBar()
+{
+    if(mProgressBar == nullptr)
+    {
+        mProgressBar = new ProgressBar();
+        mProgressBar->SetIsDestroyOnLoad(false);
+    }
+    mProgressBar->Show(ProgressBar::Type::Load);
+}
+
+void GK3UI::SetProgressBarProgress(float fraction)
+{
+    if(mProgressBar != nullptr)
+    {
+        mProgressBar->SetProgress(fraction);
+    }
+}
+
+void GK3UI::HideProgressBar()
+{
+    if(mProgressBar != nullptr)
+    {
+        mProgressBar->Hide();
+    }
 }
 
 void GK3UI::ShowSceneTransitioner()

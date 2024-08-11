@@ -8,11 +8,13 @@
 
 class Actor;
 class Color32;
+class UICanvas;
 
 namespace UIUtil
 {
     void AddCanvas(Actor* canvasActor, int canvasOrder);
     void AddColorCanvas(Actor* canvasActor, int canvasOrder, const Color32& color);
+    UICanvas* NewUIActorWithCanvas(Actor* parent, int canvasOrder);
 
     template<typename T> T* NewUIActorWithWidget(Actor* parent)
     {

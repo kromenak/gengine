@@ -55,5 +55,6 @@ private:
 	// All widgets on this canvas.
     std::vector<UIWidget*> mWidgets;
 
+    // If true, the canvas only renders within its RectTransform borders, masking anything outside of it.
     bool mMasked = false;
 };
