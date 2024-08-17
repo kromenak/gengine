@@ -10,6 +10,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "PersistState.h"
 #include "StringUtil.h"
 
 class Timeblock;
@@ -51,6 +52,8 @@ public:
 	
 	void SetActorOffstage(const std::string& actorName);
 	bool IsActorOffstage(const std::string& actorName) const;
+
+    void OnPersist(PersistState& ps);
 	
 private:
 	// Maps a 3-letter "short" location code (e.g. din) to a "long" location code (e.g. Hotel_Dining_Room).

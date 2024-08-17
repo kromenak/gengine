@@ -1,5 +1,7 @@
 #include "Timeblock.h"
 
+#include "PersistState.h"
+
 Timeblock::Timeblock(int day, int hour) : mDay(day), mHour(hour)
 {
 	if(mDay < 1) { mDay = 1; }
@@ -138,4 +140,10 @@ int Timeblock::GetHour12() const
 {
 	if(mHour == 0) { return 12; }
 	return mHour > 12 ? mHour - 12 : mHour;
+}
+
+void Timeblock::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mDay));
+    ps.Xfer(PERSIST_VAR(mHour));
 }

@@ -182,6 +182,11 @@ bool SidneyFiles::HasFileOfType(SidneyFileType type) const
     return false;
 }
 
+void SidneyFiles::OnPersist(PersistState& ps)
+{
+
+}
+
 void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
 {
     mForShapes = forShapes;

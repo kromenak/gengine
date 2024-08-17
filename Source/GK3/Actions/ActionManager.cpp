@@ -279,7 +279,8 @@ void ActionManager::SkipCurrentAction()
     int skipCount = 0;
     while(IsActionPlaying())
     {
-        GEngine::Instance()->ForceUpdate();
+        // When testing the original game, they seem to fast forward in 10 second increments (which is part of the reason action skip breaks the "5 minute timer" part of the game).
+        GEngine::Instance()->UpdateGameWorld(10.0f);
         ++skipCount;
     }
     gReportManager.Log("Console", StringUtil::Format("skipped %i times, skip duration: %i msec", skipCount, static_cast<int>(stopwatch.GetMilliseconds())));
@@ -445,6 +446,15 @@ void ActionManager::ShowActionBar(const std::string& noun, std::function<void(co
 bool ActionManager::IsActionBarShowing() const
 {
 	return mActionBar->IsShowing();
+}
+
+void ActionManager::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mPlayedTopics));
+    ps.Xfer(PERSIST_VAR(mActionId));
+
+    // Since we aren't going to allow saving/loading during actions,
+    // we don't have to worry about saving/loading *most* stuff in here...I hope.
 }
 
 void ActionManager::ShowTopicBar(const std::string& noun)

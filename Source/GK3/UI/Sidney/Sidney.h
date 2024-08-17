@@ -17,6 +17,7 @@
 #include "SidneySearch.h"
 #include "StringUtil.h"
 
+class PersistState;
 class UIButton;
 class UIImage;
 class UILabel;
@@ -30,6 +31,8 @@ public:
     void Hide();
 
     bool HasFile(const std::string& fileName);
+
+    void OnPersist(PersistState& ps);
 
 protected:
     void OnUpdate(float deltaTime) override;

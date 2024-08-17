@@ -11,6 +11,7 @@
 #include <unordered_set>
 
 #include "FlagSet.h"
+#include "PersistState.h"
 #include "StringUtil.h"
 #include "Timeblock.h"
 
@@ -68,6 +69,8 @@ public:
     void SetNounVerbCount(const std::string& actor, const std::string& noun, const std::string& verb, int count);
 	void IncNounVerbCount(const std::string& noun, const std::string& verb);
     void IncNounVerbCount(const std::string& actor, const std::string& noun, const std::string& verb);
+
+    void OnPersist(PersistState& ps);
 	
 private:
 	// Score tracking.

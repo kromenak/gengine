@@ -231,6 +231,11 @@ bool Sidney::HasFile(const std::string& fileName)
     return mFiles.HasFile(fileName);
 }
 
+void Sidney::OnPersist(PersistState& ps)
+{
+
+}
+
 void Sidney::OnUpdate(float deltaTime)
 {
     // When adding data, Sidney should not update.

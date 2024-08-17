@@ -11,6 +11,8 @@
 #include <string>
 #include <iostream>
 
+class PersistState;
+
 typedef char AMPM;
 
 class Timeblock
@@ -44,6 +46,8 @@ public:
 	
 	AMPM GetAMPM() const { return IsAM() ? AM : PM; }
 	char GetAMPMSuffix() const { return IsAM() ? 'A' : 'P'; }
+
+    void OnPersist(PersistState& ps);
 	
 private:
 	// The day; should be 1+.

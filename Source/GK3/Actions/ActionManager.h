@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "NVC.h"
+#include "PersistState.h"
 #include "StringUtil.h"
 
 class ActionBar;
@@ -70,6 +71,8 @@ public:
 	void ShowTopicBar();
 	bool IsActionBarShowing() const;
 	ActionBar* GetActionBar() const { return mActionBar; }
+
+    void OnPersist(PersistState& ps);
 	
 private:
     // These "global" action sets are loaded for every scene during the appropriate timeblocks.
@@ -157,7 +160,7 @@ private:
     // Are we skipping the current action? Mainly tracked to avoid recursive skips.
     bool mSkipInProgress = false;
 	
-	// An identifier for an executing action. Increment on each execution to uniquely identify actions.6
+	// An identifier for an executing action. Increment on each execution to uniquely identify actions.
 	// This mirrors what's output in GK3 when dumping actions.
     uint32_t mActionId = 0;
     

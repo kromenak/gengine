@@ -15,6 +15,7 @@
 #include <string>
 #include <unordered_map>
 
+#include "PersistState.h"
 #include "StringUtil.h"
 
 class InventoryScreen;
@@ -57,6 +58,8 @@ public:
     Texture* GetInventoryItemIconTexture(const std::string& itemName);
 	Texture* GetInventoryItemListTexture(const std::string& itemName);
 	Texture* GetInventoryItemCloseupTexture(const std::string& itemName);
+
+    void OnPersist(PersistState& ps);
 	
 private:
 	// Maps an inventory item's name to its graphical representations.

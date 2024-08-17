@@ -1,7 +1,5 @@
 #include "PersistState.h"
 
-#include "BinaryReader.h"
-#include "BinaryWriter.h"
 #include "IniParser.h"
 #include "IniWriter.h"
 
@@ -79,15 +77,15 @@ void PersistState::Xfer(const char* name, std::string& value)
     }   
 }
 
-void PersistState::Xfer(const char* name, int32_t& value)
+void PersistState::Xfer(const char* name, bool& value)
 {
     if(mBinaryReader != nullptr)
     {
-        value = mBinaryReader->ReadInt();
+        value = mBinaryReader->ReadByte() != 0;
     }
     else if(mBinaryWriter != nullptr)
     {
-        mBinaryWriter->WriteInt(value);
+        mBinaryWriter->WriteByte(value ? 1 : 0);
     }
     else if(mIniReader != nullptr)
     {
@@ -95,27 +93,7 @@ void PersistState::Xfer(const char* name, int32_t& value)
     }
     else if(mIniWriter != nullptr)
     {
-        mIniWriter->WriteKeyValue(name, std::to_string(value).c_str());
-    }
-}
-
-void PersistState::Xfer(const char* name, uint32_t& value)
-{
-    if(mBinaryReader != nullptr)
-    {
-        value = mBinaryReader->ReadUInt();
-    }
-    else if(mBinaryWriter != nullptr)
-    {
-        mBinaryWriter->WriteUInt(value);
-    }
-    else if(mIniReader != nullptr)
-    {
-        //TODO
-    }
-    else if(mIniWriter != nullptr)
-    {
-        mIniWriter->WriteKeyValue(name, std::to_string(value).c_str());
+        mIniWriter->WriteKeyValue(name, value ? "true" : "false");
     }
 }
 
@@ -156,5 +134,100 @@ void PersistState::Xfer(const char* name, uint16_t& value)
     else if(mIniWriter != nullptr)
     {
         mIniWriter->WriteKeyValue(name, std::to_string(value).c_str());
+    }
+}
+
+void PersistState::Xfer(const char* name, int32_t& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value = mBinaryReader->ReadInt();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteInt(value);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        mIniWriter->WriteKeyValue(name, std::to_string(value).c_str());
+    }
+}
+
+void PersistState::Xfer(const char* name, uint32_t& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value = mBinaryReader->ReadUInt();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteUInt(value);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        mIniWriter->WriteKeyValue(name, std::to_string(value).c_str());
+    }
+}
+
+
+
+void PersistState::Xfer(const char* name, float& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value = mBinaryReader->ReadFloat();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        mIniWriter->WriteKeyValue(name, std::to_string(value).c_str());
+    }
+}
+
+void PersistState::Xfer(const char* name, std::string_set_ci& set)
+{
+    if(mBinaryReader != nullptr)
+    {
+        set.clear();
+        uint64_t size = mBinaryReader->ReadULong();
+        for(uint64_t i = 0; i < size; ++i)
+        {
+            std::string value;
+            Xfer("", value);
+            set.insert(value);
+        }
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteULong(set.size());
+        for(auto& entry : set)
+        {
+            // A little tricky - iterating elements in a set is always const (changing set elements breaks the set).
+            // But we "know" that we are writing here, so not going to write the set, only read it. So, const cast to the rescue.
+            Xfer("", const_cast<std::string&>(entry));
+        }
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
     }
 }

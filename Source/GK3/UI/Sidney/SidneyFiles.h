@@ -13,6 +13,7 @@
 #include "SidneyUtil.h"
 #include "StringUtil.h"
 
+class PersistState;
 class Sidney;
 class UIButton;
 class UILabel;
@@ -108,6 +109,8 @@ public:
 
     bool HasFile(const std::string& fileName) const;
     bool HasFileOfType(SidneyFileType type) const;
+
+    void OnPersist(PersistState& ps);
 
 private:
     // The data in the file system. This is stuff that has been scanned into Sidney by the player.

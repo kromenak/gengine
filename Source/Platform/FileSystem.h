@@ -108,6 +108,11 @@ namespace Directory
 namespace File
 {
     /**
+     * Checks if the file exists.
+     */
+    bool Exists(const std::string& filePath);
+
+    /**
      * Determines a file's size in bytes.
      */
     uint64_t Size(const std::string& filePath);

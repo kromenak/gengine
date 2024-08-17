@@ -21,6 +21,7 @@
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "Paths.h"
+#include "PersistState.h"
 #include "Profiler.h"
 #include "ReportManager.h"
 #include "Renderer.h"
@@ -246,11 +247,6 @@ void GEngine::Quit()
     mRunning = false;
 }
 
-void GEngine::ForceUpdate()
-{
-    Update(10.0f);
-}
-
 void GEngine::StartGame() const
 {
     if(mDemoMode)
@@ -273,6 +269,13 @@ void GEngine::StartGame() const
             gSceneManager.LoadScene("R25");
         });
     }
+}
+
+void GEngine::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mFrameNumber));
+    ps.Xfer(PERSIST_VAR(mTimeMultiplier));
+    ps.Xfer(PERSIST_VAR(mDemoMode));
 }
 
 void GEngine::ShowOpeningMovies()
@@ -502,8 +505,11 @@ void GEngine::Update()
     if(!Loader::IsLoading())
     {
         // Update game logic.
-        Update(deltaTime * mTimeMultiplier);
+        UpdateGameWorld(deltaTime * mTimeMultiplier);
     }
+
+    // Update location system.
+    gLocationManager.Update();
 
     // Also update audio system (before or after game logic?)
     gAudioManager.Update(deltaTime);
@@ -524,13 +530,10 @@ void GEngine::Update()
     ThreadUtil::RunFunctionsOnMainThread();
 }
 
-void GEngine::Update(float deltaTime)
+void GEngine::UpdateGameWorld(float deltaTime)
 {
     // Update the scene.
     gSceneManager.Update(deltaTime);
-
-    // Update location system.
-    gLocationManager.Update();
     
     // Update timers.
     Timers::Update(deltaTime);

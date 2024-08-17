@@ -7,6 +7,8 @@
 #pragma once
 #include <cstdint>
 
+class PersistState;
+
 class GEngine
 {
 public:
@@ -20,16 +22,18 @@ public:
     
     void Quit();
 
-    void ForceUpdate();
-
     uint32_t GetFrameNumber() const { return mFrameNumber; }
 
     void SetTimeMultiplier(float multiplier) { mTimeMultiplier = multiplier; }
     float GetTimeMultiplier() const { return mTimeMultiplier; }
 
+    void UpdateGameWorld(float deltaTime);
+
     // GK-specific stuff here
     void StartGame() const;
     bool IsDemoMode() const { return mDemoMode; }
+
+    void OnPersist(PersistState& ps);
     
 private:
     // Only one instance of GEngine can exist.
@@ -55,6 +59,5 @@ private:
 
     void ProcessInput();
     void Update();
-    void Update(float deltaTime);
     void GenerateOutputs();
 };

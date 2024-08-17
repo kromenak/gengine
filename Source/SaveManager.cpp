@@ -1,9 +1,15 @@
 #include "SaveManager.h"
 
+#include "ActionManager.h"
 #include "FileSystem.h"
 #include "GameProgress.h"
+#include "GEngine.h"
+#include "GK3UI.h"
+#include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Paths.h"
+#include "SceneManager.h"
+#include "Sidney.h"
 #include "StringUtil.h"
 #include "SystemUtil.h"
 
@@ -156,7 +162,8 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     //TODO: Thumbnail
     persistHeader.OnPersist(ps);
 
-    //TODO: SAVE ALL THE OTHER DATA...
+    // Persist the ENTIRE game...
+    OnPersist(ps);
     printf("Saved to file %s.\n", savePath.c_str());
 
     // Add to save list.
@@ -170,5 +177,59 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
 
 void SaveManager::LoadInternal(const std::string& loadPath)
 {
+    // If given a bum path, ignore it.
+    if(!File::Exists(loadPath))
+    {
+        return;
+    }
 
+    //TODO: It might be valuable to create the PersistState *before* unloading the current scene (for verification its a valid save).
+    //TODO: To do that, due to scope, we'd have to dynamically allocate though!
+    
+    // Ok, looks like we will actually load this save!
+    // Let's unload the current scene to start with a clean slate.
+    gSceneManager.UnloadScene([this, loadPath](){
+
+        // Create the persistinator.
+        PersistState ps(loadPath.c_str(), PersistFormat::Binary, PersistMode::Load);
+
+        // Read past save header.
+        SaveHeader saveHeader;
+        saveHeader.OnPersist(ps);
+
+        // Read past persist header.
+        PersistHeader persistHeader;
+        persistHeader.OnPersist(ps);
+
+        //TODO: If we can detect that the file is corrupt or not the right type or other nefarious things, early out.
+
+        // Load everything!
+        OnPersist(ps);
+
+        // Load the new scene.
+        gSceneManager.LoadScene(gLocationManager.GetLocation(), [loadPath](){
+
+            //TODO: Do we want to load any *scene* state (like positions or states of Actors)?
+            //TODO: The above solution works pretty well, but Actors will not necessarily be in the same locations or states in the newly loaded scene.
+            printf("Loaded save file %s.\n", loadPath.c_str());
+        });
+    });
+}
+
+void SaveManager::OnPersist(PersistState& ps)
+{
+    // OK, so the original GK3 had quite an impressive generalized save system. Via RTTI, it would save/load almost every class in the game!
+    // This is very cool for a variety of reasons (being able to quick save/load at virtually any moment and get the correct load result).
+    //
+    // HOWEVER, for simplicities sake, I'm going to go with a less complex approach for now:
+    // Just save important progress data and use that to reload the scene.
+    GEngine::Instance()->OnPersist(ps);
+    gLocationManager.OnPersist(ps);
+    gInventoryManager.OnPersist(ps);
+    gGameProgress.OnPersist(ps);
+    gActionManager.OnPersist(ps);
+
+    // The Sidney UI is somewhat unique in that it actually stores some important state data in there.
+    // Maybe its a sign that a "SidneyManager" would make sense? Shrug.
+    gGK3UI.GetSidney()->OnPersist(ps);
 }

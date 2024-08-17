@@ -279,3 +279,9 @@ Texture* InventoryManager::GetInventoryItemCloseupTexture(const std::string& ite
     }
     return it->second.closeupTexture;
 }
+
+void InventoryManager::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mInventories));
+    ps.Xfer(PERSIST_VAR(mActiveInventoryItems));
+}

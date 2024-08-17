@@ -213,3 +213,25 @@ void GameProgress::IncNounVerbCount(const std::string& actor, const std::string&
 {
     ++mNounVerbCounts[actor + noun + verb];
 }
+
+void GameProgress::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mMaxScore));
+    ps.Xfer(PERSIST_VAR(mScore));
+
+    ps.Xfer(PERSIST_VAR(mScoreEventFlags));
+
+    mTimeblock.OnPersist(ps);
+    mLastTimeblock.OnPersist(ps);
+
+    ps.Xfer(PERSIST_VAR(mChangingTimeblock));
+
+    // Because I'm grabbing the flags from inside the FlagSet, auto-generating the variable name doesn't look right...
+    // Maybe should just put OnPersist in FlagSet?
+    ps.Xfer("mGameFlags", mGameFlags.GetFlags());
+
+    ps.Xfer(PERSIST_VAR(mChatCounts));
+    ps.Xfer(PERSIST_VAR(mTopicCounts));
+    ps.Xfer(PERSIST_VAR(mNounVerbCounts));
+    ps.Xfer(PERSIST_VAR(mGameVariables));
+}

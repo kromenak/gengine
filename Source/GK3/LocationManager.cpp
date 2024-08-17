@@ -321,6 +321,16 @@ bool LocationManager::IsActorOffstage(const std::string& actorName) const
 	return it == mActorLocations.end();
 }
 
+void LocationManager::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mLocation));
+    ps.Xfer(PERSIST_VAR(mLastLocation));
+
+    ps.Xfer(PERSIST_VAR(mActorLocationCounts));
+    ps.Xfer(PERSIST_VAR(mActorLocationTimeblockCounts));
+    ps.Xfer(PERSIST_VAR(mActorLocations));
+}
+
 void LocationManager::ChangeLocationInternal(const std::string& location, std::function<void()> callback)
 {
     // Show scene transitioner.

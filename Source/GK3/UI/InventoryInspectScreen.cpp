@@ -322,7 +322,7 @@ void InventoryInspectScreen::InitLSR()
         bool finishedTaurus = gGameProgress.GetFlag("Taurus");
         bool finishedGemini = gGameProgress.GetFlag("Gemini");
         bool finishedCancer = gGameProgress.GetFlag("Cancer");
-        bool finishedLeo = gGameProgress.GetFlag("Leo");
+        //bool finishedLeo = gGameProgress.GetFlag("Leo");
 
         // Gemini can be unstarted, in-progress, or finished.
         mLSRButtons[0]->SetEnabled(true);

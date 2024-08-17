@@ -309,6 +309,14 @@ std::vector<std::string> Directory::List(const std::string& path, const std::str
     #endif
 }
 
+bool File::Exists(const std::string& filePath)
+{
+    // There are plenty of ways to do this, see this link: https://stackoverflow.com/a/12774387
+    // Could be optimized in a per-platform way, if desired...
+    std::ifstream f(filePath.c_str());
+    return f.good();
+}
+
 uint64_t File::Size(const std::string& filePath)
 {
     #if defined(PLATFORM_WINDOWS)

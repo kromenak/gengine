@@ -16,6 +16,8 @@ public:
 
     void Dump(const std::string& label = "") const;
 
+    std::string_set_ci& GetFlags() { return mFlags; }
+
 private:
     // The flags.
     std::string_set_ci mFlags;
