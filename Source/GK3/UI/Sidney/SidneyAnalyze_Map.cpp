@@ -133,6 +133,12 @@ Vector2 SidneyAnalyze::MapState::View::GetPlacedPointNearPoint(const Vector2& po
     return Vector2::Zero;
 }
 
+void SidneyAnalyze::MapState::View::OnPersist(PersistState& ps)
+{
+    // Points
+
+}
+
 Vector2 SidneyAnalyze::MapState::ToZoomedInPoint(const Vector2& pos)
 {
     // Transform point from zoomed out map coordinate to zoomed in map coordinate.
@@ -325,6 +331,12 @@ void SidneyAnalyze::MapState::ClearGrid()
     // Clear any placed grids.
     zoomedIn.grids->Clear();
     zoomedOut.grids->Clear();
+}
+
+void SidneyAnalyze::MapState::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(zoomedOut));
+    ps.Xfer(PERSIST_VAR(zoomedIn));
 }
 
 void SidneyAnalyze::AnalyzeMap_Init()

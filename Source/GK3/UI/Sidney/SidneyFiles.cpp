@@ -112,7 +112,6 @@ void SidneyFiles::Init(Sidney* parent)
 
 void SidneyFiles::Show(std::function<void(SidneyFile*)> selectFileCallback)
 {
-    //mRoot->SetActive(true);
     mFileList.Show(mData, selectFileCallback);
 }
 
@@ -184,7 +183,78 @@ bool SidneyFiles::HasFileOfType(SidneyFileType type) const
 
 void SidneyFiles::OnPersist(PersistState& ps)
 {
+    // We need to save the files that have been scanned into Sidney by the player, as well as the *states* of those files.
+    // This isn't entirely straightforward, but it is doable!
+    if(ps.IsSaving())
+    {
+        // The "all files" list is fully populated on init. So, the list contents should be static.
+        uint32_t size = mAllFiles.size();
+        ps.Xfer("mAllFilesSize", size);
+        for(SidneyFile& file : mAllFiles)
+        {
+            ps.Xfer("hasBeenAnalyzed", file.hasBeenAnalyzed);
+        }
 
+        // Next, we need to save the files that have been scanned in by the player.
+        // Again, the directories are pre-populated, so we'll assume same order for now.
+        size = mData.size();
+        ps.Xfer("mDataSize", size);
+        for(SidneyDirectory& dir : mData)
+        {
+            int typeNum = static_cast<int>(dir.type);
+            ps.Xfer("type", typeNum);
+
+            size = dir.files.size();
+            ps.Xfer("fileCount", size);
+            for(SidneyFile* file : dir.files)
+            {
+                ps.Xfer("index", file->index);
+            }
+        }
+    }
+    else if(ps.IsLoading())
+    {
+        // Load progress data for all known files.
+        uint32_t size = 0;
+        ps.Xfer("mAllFilesSize", size);
+        for(uint32_t i = 0; i < size; ++i)
+        {
+            ps.Xfer("hasBeenAnalyzed", mAllFiles[i].hasBeenAnalyzed);
+        }
+
+        // Load data for each directory of files scanned in by player.
+        ps.Xfer("mDataSize", size);
+        for(uint32_t i = 0; i < size; ++i)
+        {
+            // Get file type for directory.
+            int typeNum = 0;
+            ps.Xfer("type", typeNum);
+
+            // Look up the directory associated with this type.
+            SidneyDirectory* dir = nullptr;
+            for(SidneyDirectory& entry : mData)
+            {
+                if(static_cast<int>(entry.type) == typeNum)
+                {
+                    dir = &entry;
+                    break;
+                }
+            }
+
+            // Iterate files for that directory and add them to the directory.
+            uint32_t fileCount = 0;
+            ps.Xfer("fileCount", fileCount);
+            for(uint32_t j = 0; j < fileCount; ++j)
+            {
+                int index = 0;
+                ps.Xfer("index", index);
+                if(dir != nullptr && index >= 0 && index < mAllFiles.size())
+                {
+                    dir->files.push_back(&mAllFiles[index]);
+                }
+            }
+        }
+    }
 }
 
 void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)

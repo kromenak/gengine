@@ -38,6 +38,9 @@ public:
     PersistState(const char* filePath, PersistFormat format, PersistMode mode);
     ~PersistState();
 
+    bool IsSaving() const { return mMode == PersistMode::Save; }
+    bool IsLoading() const { return mMode == PersistMode::Load; }
+
     // Strings
     void Xfer(const char* name, char* value, size_t valueSize);
     void Xfer(const char* name, std::string& value);
@@ -60,10 +63,22 @@ public:
     //TODO: Double?
 
     // Collections
+    template<typename T> void Xfer(const char* name, std::vector<T>& vector);
     template<typename T> void Xfer(const char* name, std::set<T>& set);
     template<typename T> void Xfer(const char* name, std::unordered_map<std::string, T>& map);
     template<typename T> void Xfer(const char* name, std::string_map_ci<T>& map);
     void Xfer(const char* name, std::string_set_ci& set);
+
+    // Conversion (Xfer T as U)
+    template<typename T, typename U> void Xfer(const char* name, T& value)
+    {
+        U uValue = static_cast<U>(value);
+        Xfer(name, uValue);
+        value = static_cast<T>(uValue);
+    }
+
+    // Generic Fallback
+    template<typename T> void Xfer(const char* name, T& obj);
 
 private:
     PersistMode mMode = PersistMode::Save;
@@ -75,6 +90,38 @@ private:
     BinaryWriter* mBinaryWriter = nullptr;
     IniWriter* mIniWriter = nullptr;
 };
+
+template<typename T>
+inline void PersistState::Xfer(const char* name, std::vector<T>& vector)
+{
+    if(mBinaryReader != nullptr)
+    {
+        vector.clear();
+        uint64_t size = mBinaryReader->ReadULong();
+        for(uint64_t i = 0; i < size; ++i)
+        {
+            T value;
+            Xfer("", value);
+            vector.push_back(value);
+        }
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteULong(vector.size());
+        for(auto& entry : vector)
+        {
+            Xfer("", entry);
+        }
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
 
 template<typename T>
 inline void PersistState::Xfer(const char* name, std::set<T>& set)
@@ -176,4 +223,10 @@ inline void PersistState::Xfer(const char* name, std::string_map_ci<T>& map)
     {
         //TODO
     }
+}
+
+template<typename T>
+inline void PersistState::Xfer(const char* name, T& obj)
+{
+    obj.OnPersist(*this);
 }

@@ -166,6 +166,7 @@ bool GEngine::Initialize()
     Loader::DoAfterLoading([]() {
         gGameProgress.SetTimeblock(Timeblock("110A"));
         gSceneManager.LoadScene("R25");
+        //gGK3UI.ShowSaveProgressBar();
     });
     #endif
 
@@ -428,6 +429,21 @@ void GEngine::ProcessInput()
                     {
                         Window::ToggleFullscreen();
                     }
+                }
+
+                else if(event.key.keysym.sym == SDLK_u)
+                {
+                    printf("UNLOAD START\n");
+                    gSceneManager.UnloadScene([]() {
+                        printf("UNLOAD COMPLETE\n");
+                    });
+                }
+                else if(event.key.keysym.sym == SDLK_l)
+                {
+                    printf("LOAD\n");
+                    gSceneManager.LoadScene(gLocationManager.GetLocation(), [](){
+                        printf("LOAD COMPLETE\n");
+                    });
                 }
 				break;
 			}

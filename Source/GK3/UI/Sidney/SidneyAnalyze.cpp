@@ -300,6 +300,12 @@ void SidneyAnalyze::OnUpdate(float deltaTime)
     AnalyzeMap_Update(deltaTime);
 }
 
+void SidneyAnalyze::OnPersist(PersistState& ps)
+{
+    ps.Xfer<State, int>(PERSIST_VAR(mState));
+    ps.Xfer(PERSIST_VAR(mMap));
+}
+
 void SidneyAnalyze::SetState(State state)
 {
     // Turn everything off for starters.

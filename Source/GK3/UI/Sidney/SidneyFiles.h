@@ -159,5 +159,7 @@ private:
     FileListWindow mFileList;
     FileListWindow mShapeList;
 
+    // A custom list window used to select from a choice of arbitrary options.
+    // This is used during analysis to select grid size and fill options, for example.
     FileListWindow mCustomList;
 };

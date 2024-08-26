@@ -233,7 +233,8 @@ bool Sidney::HasFile(const std::string& fileName)
 
 void Sidney::OnPersist(PersistState& ps)
 {
-
+    mFiles.OnPersist(ps);
+    mAnalyze.OnPersist(ps);
 }
 
 void Sidney::OnUpdate(float deltaTime)

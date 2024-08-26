@@ -8,6 +8,7 @@
 #include "Vector2.h"
 
 class Actor;
+class PersistState;
 class Sidney;
 class SidneyButton;
 class SidneyFiles;
@@ -30,6 +31,8 @@ public:
     void Hide();
 
     void OnUpdate(float deltaTime);
+
+    void OnPersist(PersistState& ps);
 
 private:
     // References to Sidney modules.
@@ -144,6 +147,8 @@ private:
 
             Vector2 GetLocalMousePos();
             Vector2 GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints = false);
+
+            void OnPersist(PersistState& ps);
         };
         View zoomedOut;
         View zoomedIn;
@@ -186,6 +191,8 @@ private:
         void DrawGrid(uint8_t size, bool fillShape);
         void LockGrid();
         void ClearGrid();
+
+        void OnPersist(PersistState& ps);
     };
     MapState mMap;
 
