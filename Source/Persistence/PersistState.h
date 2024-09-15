@@ -18,6 +18,11 @@
 class IniParser;
 class IniWriter;
 
+class Circle;
+class LineSegment;
+class UIGrid;
+class UIRectangle;
+
 #define PERSIST_VAR(var) #var, var
 
 enum class PersistMode : uint8_t
@@ -45,9 +50,10 @@ public:
     void Xfer(const char* name, char* value, size_t valueSize);
     void Xfer(const char* name, std::string& value);
 
-    // Integers
+    // Bool
     void Xfer(const char* name, bool& value);
 
+    // Integers
     //TODO: int8_t/uint8_t
 
     void Xfer(const char* name, int16_t& value);
@@ -61,6 +67,18 @@ public:
     // Floats
     void Xfer(const char* name, float& value);
     //TODO: Double?
+
+    // Math Types
+    void Xfer(const char* name, Vector2& value);
+    void Xfer(const char* name, Vector3& value);
+
+    // Primitives
+    void Xfer(const char* name, LineSegment& value);
+    void Xfer(const char* name, Circle& value);
+
+    // UI Primitives
+    void Xfer(const char* name, UIRectangle& value);
+    void Xfer(const char* name, UIGrid& value);
 
     // Collections
     template<typename T> void Xfer(const char* name, std::vector<T>& vector);

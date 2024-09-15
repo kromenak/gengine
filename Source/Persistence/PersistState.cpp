@@ -3,6 +3,11 @@
 #include "IniParser.h"
 #include "IniWriter.h"
 
+#include "Circle.h"
+#include "LineSegment.h"
+#include "UIGrids.h"
+#include "UIRectangles.h"
+
 PersistState::PersistState(const char* filePath, PersistFormat format, PersistMode mode)
 {
     if(mode == PersistMode::Save)
@@ -177,8 +182,6 @@ void PersistState::Xfer(const char* name, uint32_t& value)
     }
 }
 
-
-
 void PersistState::Xfer(const char* name, float& value)
 {
     if(mBinaryReader != nullptr)
@@ -196,6 +199,168 @@ void PersistState::Xfer(const char* name, float& value)
     else if(mIniWriter != nullptr)
     {
         mIniWriter->WriteKeyValue(name, std::to_string(value).c_str());
+    }
+}
+
+void PersistState::Xfer(const char* name, Vector2& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value.x = mBinaryReader->ReadFloat();
+        value.y = mBinaryReader->ReadFloat();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value.x);
+        mBinaryWriter->WriteFloat(value.y);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, Vector3& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value.x = mBinaryReader->ReadFloat();
+        value.y = mBinaryReader->ReadFloat();
+        value.z = mBinaryReader->ReadFloat();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value.x);
+        mBinaryWriter->WriteFloat(value.y);
+        mBinaryWriter->WriteFloat(value.z);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, LineSegment& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value.start.x = mBinaryReader->ReadFloat();
+        value.start.y = mBinaryReader->ReadFloat();
+        value.start.z = mBinaryReader->ReadFloat();
+
+        value.end.x = mBinaryReader->ReadFloat();
+        value.end.y = mBinaryReader->ReadFloat();
+        value.end.z = mBinaryReader->ReadFloat();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value.start.x);
+        mBinaryWriter->WriteFloat(value.start.y);
+        mBinaryWriter->WriteFloat(value.start.z);
+
+        mBinaryWriter->WriteFloat(value.end.x);
+        mBinaryWriter->WriteFloat(value.end.y);
+        mBinaryWriter->WriteFloat(value.end.z);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, Circle& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value.center.x = mBinaryReader->ReadFloat();
+        value.center.y = mBinaryReader->ReadFloat();
+        value.radius = mBinaryReader->ReadFloat();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value.center.x);
+        mBinaryWriter->WriteFloat(value.center.y);
+        mBinaryWriter->WriteFloat(value.radius);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, UIRectangle& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value.center.x = mBinaryReader->ReadFloat();
+        value.center.y = mBinaryReader->ReadFloat();
+        value.size.x = mBinaryReader->ReadFloat();
+        value.size.y = mBinaryReader->ReadFloat();
+        value.angle = mBinaryReader->ReadFloat();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value.center.x);
+        mBinaryWriter->WriteFloat(value.center.y);
+        mBinaryWriter->WriteFloat(value.size.x);
+        mBinaryWriter->WriteFloat(value.size.y);
+        mBinaryWriter->WriteFloat(value.angle);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, UIGrid& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value.center.x = mBinaryReader->ReadFloat();
+        value.center.y = mBinaryReader->ReadFloat();
+        value.size.x = mBinaryReader->ReadFloat();
+        value.size.y = mBinaryReader->ReadFloat();
+        value.angle = mBinaryReader->ReadFloat();
+        value.divisions = mBinaryReader->ReadInt();
+        value.drawBorder = mBinaryReader->ReadByte() == 1;
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value.center.x);
+        mBinaryWriter->WriteFloat(value.center.y);
+        mBinaryWriter->WriteFloat(value.size.x);
+        mBinaryWriter->WriteFloat(value.size.y);
+        mBinaryWriter->WriteFloat(value.angle);
+        mBinaryWriter->WriteInt(value.divisions);
+        mBinaryWriter->WriteByte(value.drawBorder ? 1 : 0);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
     }
 }
 

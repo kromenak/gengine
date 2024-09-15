@@ -135,8 +135,198 @@ Vector2 SidneyAnalyze::MapState::View::GetPlacedPointNearPoint(const Vector2& po
 
 void SidneyAnalyze::MapState::View::OnPersist(PersistState& ps)
 {
-    // Points
+    // We *could* add OnPersist methods to the various UI classes, so we can save points/lines/etc.
+    // However, I'm unsure if I want UI code to be closely coupled to the persistence code.
+    // For now, I'll just manually save/load these UI classes here.
 
+    // Points
+    {
+        std::vector<Vector2> xferPoints;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < points->GetPointsCount(); ++i)
+            {
+                xferPoints.push_back(points->GetPoint(i));
+            }
+        }
+        ps.Xfer("points", xferPoints);
+        if(ps.IsLoading())
+        {
+            points->ClearPoints();
+            for(Vector2& p : xferPoints)
+            {
+                points->AddPoint(p);
+            }
+        }
+    }
+
+    // Locked Points
+    {
+        std::vector<Vector2> xferPoints;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < lockedPoints->GetPointsCount(); ++i)
+            {
+                xferPoints.push_back(lockedPoints->GetPoint(i));
+            }
+        }
+        ps.Xfer("lockedPoints", xferPoints);
+        if(ps.IsLoading())
+        {
+            lockedPoints->ClearPoints();
+            for(Vector2& p : xferPoints)
+            {
+                lockedPoints->AddPoint(p);
+            }
+        }
+    }
+
+    // Lines
+    {
+        std::vector<LineSegment> xferLines;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < lines->GetLinesCount(); ++i)
+            {
+                xferLines.push_back(lines->GetLine(i));
+            }
+        }
+        ps.Xfer("lines", xferLines);
+        if(ps.IsLoading())
+        {
+            lines->ClearLines();
+            for(LineSegment& ls : xferLines)
+            {
+                lines->AddLine(ls.start, ls.end);
+            }
+        }
+    }
+
+    // Circles
+    {
+        std::vector<Circle> xfer;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < circles->GetCirclesCount(); ++i)
+            {
+                xfer.push_back(circles->GetCircle(i));
+            }
+        }
+        ps.Xfer("circles", xfer);
+        if(ps.IsLoading())
+        {
+            circles->ClearCircles();
+            for(Circle& circle : xfer)
+            {
+                circles->AddCircle(circle.center, circle.radius);
+            }
+        }
+    }
+
+    // Locked Circles
+    {
+        std::vector<Circle> xfer;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < lockedCircles->GetCirclesCount(); ++i)
+            {
+                xfer.push_back(lockedCircles->GetCircle(i));
+            }
+        }
+        ps.Xfer("lockedCircles", xfer);
+        if(ps.IsLoading())
+        {
+            lockedCircles->ClearCircles();
+            for(Circle& circle : xfer)
+            {
+                lockedCircles->AddCircle(circle.center, circle.radius);
+            }
+        }
+    }
+
+    // Rectangles
+    {
+        std::vector<UIRectangle> xfer;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < rectangles->GetCount(); ++i)
+            {
+                xfer.push_back(rectangles->GetRectangle(i));
+            }
+        }
+        ps.Xfer("rectangles", xfer);
+        if(ps.IsLoading())
+        {
+            rectangles->ClearRectangles();
+            for(UIRectangle& rect : xfer)
+            {
+                rectangles->AddRectangle(rect.center, rect.size, rect.angle);
+            }
+        }
+    }
+
+    // Locked Rectangles
+    {
+        std::vector<UIRectangle> xfer;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < lockedRectangles->GetCount(); ++i)
+            {
+                xfer.push_back(lockedRectangles->GetRectangle(i));
+            }
+        }
+        ps.Xfer("lockedRectangles", xfer);
+        if(ps.IsLoading())
+        {
+            lockedRectangles->ClearRectangles();
+            for(UIRectangle& rect : xfer)
+            {
+                lockedRectangles->AddRectangle(rect.center, rect.size, rect.angle);
+            }
+        }
+    }
+
+    // Grids
+    {
+        std::vector<UIGrid> xfer;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < grids->GetCount(); ++i)
+            {
+                xfer.push_back(grids->GetGrid(i));
+            }
+        }
+        ps.Xfer("grids", xfer);
+        if(ps.IsLoading())
+        {
+            grids->Clear();
+            for(UIGrid& grid : xfer)
+            {
+                grids->Add(grid.center, grid.size, grid.angle, grid.divisions, grid.drawBorder);
+            }
+        }
+    }
+
+    // Locked Grids
+    {
+        std::vector<UIGrid> xfer;
+        if(ps.IsSaving())
+        {
+            for(int i = 0; i < lockedGrids->GetCount(); ++i)
+            {
+                xfer.push_back(lockedGrids->GetGrid(i));
+            }
+        }
+        ps.Xfer("lockedGrids", xfer);
+        if(ps.IsLoading())
+        {
+            lockedGrids->Clear();
+            for(UIGrid& grid : xfer)
+            {
+                lockedGrids->Add(grid.center, grid.size, grid.angle, grid.divisions, grid.drawBorder);
+            }
+        }
+    }
 }
 
 Vector2 SidneyAnalyze::MapState::ToZoomedInPoint(const Vector2& pos)

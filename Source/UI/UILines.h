@@ -27,6 +27,10 @@ public:
     void SetColor(const Color32& color);
 
     void AddLine(const Vector2& startPoint, const Vector2& endPoint);
+    void ClearLines();
+
+    const LineSegment& GetLine(size_t index) const { return mLines[index]; }
+    size_t GetLinesCount() const { return mLines.size(); }
     
 private:
     // The lines in the set.

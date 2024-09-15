@@ -45,6 +45,12 @@ void UILines::AddLine(const Vector2& startPoint, const Vector2& endPoint)
     mNeedMeshRegen = true;
 }
 
+void UILines::ClearLines()
+{
+    mLines.clear();
+    mNeedMeshRegen = true;
+}
+
 void UILines::GenerateMesh()
 {
     // Don't need to generate mesh if we have one and not dirty.
