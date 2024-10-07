@@ -303,12 +303,23 @@ void SaveLoadScreen::SetSelectedSaveIndex(int index)
 void SaveLoadScreen::ActivateTextInput(int index)
 {
     // Show text input over the name label.
-    mListEntries[index].nameLabel->SetText("");
     mTextInput->GetRectTransform()->SetAnchoredPosition(0.0f, index * -kRowHeight);
     mTextInput->SetEnabled(true);
 
-    // Clear any previous text leftover in the input.
-    mTextInput->Clear();
+
+    // If this is the "empty" slot at the end of the list, clear the text to enter a full name.
+    // Otherwise, the text stays so the player can keep it if they want.
+    if(index >= gSaveManager.GetSaves().size())
+    {
+        mTextInput->Clear();
+        mListEntries[index].nameLabel->SetText("");
+    }
+    else
+    {
+        // Show the previously entered text in text input.
+        mTextInput->SetText(mListEntries[index].nameLabel->GetText());
+        mListEntries[index].nameLabel->SetText("");
+    }
 
     // Player must enter text or exit out at this point.
     mTextInput->Focus();
@@ -324,7 +335,7 @@ void SaveLoadScreen::OnEntryButtonPressed(int index)
 
     // In save mode, if we select the "empty" slot when it was already selected...
     // It means we want to enter a name for the empty slot.
-    if(index == mSaveIndex && mSaveButton->IsEnabled() && index >= gSaveManager.GetSaves().size())
+    if(index == mSaveIndex && mSaveButton->IsEnabled())
     {
         ActivateTextInput(index);
     }
