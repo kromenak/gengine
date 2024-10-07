@@ -20,8 +20,8 @@ class IniWriter;
 
 class Circle;
 class LineSegment;
-class UIGrid;
-class UIRectangle;
+struct UIGrid;
+struct UIRectangle;
 
 #define PERSIST_VAR(var) #var, var
 
@@ -99,8 +99,8 @@ public:
     template<typename T> void Xfer(const char* name, T& obj);
 
 private:
-    PersistMode mMode = PersistMode::Save;
     PersistFormat mFormat = PersistFormat::Text;
+    PersistMode mMode = PersistMode::Save;
 
     BinaryReader* mBinaryReader = nullptr;
     IniParser* mIniReader = nullptr;

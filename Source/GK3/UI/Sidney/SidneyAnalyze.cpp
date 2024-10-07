@@ -17,7 +17,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
     // Add background. This will also be the root for this screen.
     mRoot = SidneyUtil::CreateBackground(mSidney);
-    mRoot->SetName("Email");
+    mRoot->SetName("Analyze");
 
     // Add main menu button.
     SidneyUtil::CreateMainMenuButton(mRoot, [this](){
@@ -42,7 +42,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
             // Show the file selector.
             mSidneyFiles->Show([this](SidneyFile* selectedFile){
-                mAnalyzeFile = selectedFile;
+                mAnalyzeFileId = selectedFile->id;
 
                 // If the file has never been analyzed before, we show the pre-analyze UI.
                 // Otherwise, we can go to the appropriate state directly.
@@ -79,19 +79,16 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     {
         // "View Geometry" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item1"), [this](){
-            if(mAnalyzeFile != nullptr)
+            if(mAnalyzeFileId == 20)
             {
-                if(mAnalyzeFile->index == 20)
-                {
-                    printf("Added triangle\n");
-                    mSidneyFiles->AddFile(37); // Triangle
-                }
-                if(mAnalyzeFile->index == 21)
-                {
-                    printf("Added circle and square\n");
-                    mSidneyFiles->AddFile(38); // Circle
-                    mSidneyFiles->AddFile(39); // Square
-                }
+                printf("Added triangle\n");
+                mSidneyFiles->AddFile(37); // Triangle
+            }
+            if(mAnalyzeFileId == 21)
+            {
+                printf("Added circle and square\n");
+                mSidneyFiles->AddFile(38); // Circle
+                mSidneyFiles->AddFile(39); // Square
             }
         });
 
@@ -215,8 +212,9 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     {
         // Create root, which covers whole screen and acts as an input blocker while the message is up.
         {
-            mAnalyzeMessageWindowRoot = new Actor(TransformType::RectTransform);
+            mAnalyzeMessageWindowRoot = new Actor("Analyze Message Window", TransformType::RectTransform);
             mAnalyzeMessageWindowRoot->GetTransform()->SetParent(mRoot->GetTransform());
+            mAnalyzeMessageWindowRoot->AddComponent<UICanvas>(1);
 
             RectTransform* inputBlockerRT = mAnalyzeMessageWindowRoot->GetComponent<RectTransform>();
             inputBlockerRT->SetAnchor(AnchorPreset::CenterStretch);
@@ -281,6 +279,10 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 void SidneyAnalyze::Show()
 {
     mRoot->SetActive(true);
+
+    // Make sure the state of the screen is up to date when entering.
+    // This is especially important to restore the UI state after loading a save game.
+    SetState(mState);
 }
 
 void SidneyAnalyze::Hide()
@@ -304,6 +306,7 @@ void SidneyAnalyze::OnPersist(PersistState& ps)
 {
     ps.Xfer<State, int>(PERSIST_VAR(mState));
     ps.Xfer(PERSIST_VAR(mMap));
+    ps.Xfer(PERSIST_VAR(mAnalyzeFileId));
 }
 
 void SidneyAnalyze::SetState(State state)
@@ -330,11 +333,18 @@ void SidneyAnalyze::SetState(State state)
         break;
 
     case State::PreAnalyze:
+    {
         // Show the pre-analyze UI with appropriate text/image for currently selected file.
         mPreAnalyzeWindow->SetActive(true);
-        mPreAnalyzeTitleLabel->SetText(mAnalyzeFile->GetDisplayName());
-        mPreAnalyzeItemImage->SetTexture(mAnalyzeFile->GetIcon());
+
+        SidneyFile* file = mSidneyFiles->GetFile(mAnalyzeFileId);
+        if(file != nullptr)
+        {
+            mPreAnalyzeTitleLabel->SetText(file->GetDisplayName());
+            mPreAnalyzeItemImage->SetTexture(file->GetIcon());
+        }
         break;
+    }
 
     case State::Map:
         AnalyzeMap_EnterState();
@@ -351,15 +361,18 @@ void SidneyAnalyze::SetState(State state)
 
 void SidneyAnalyze::SetStateFromFile()
 {
-    if(mAnalyzeFile == nullptr)
+    // No file selected - show empty.
+    SidneyFile* file = mSidneyFiles->GetFile(mAnalyzeFileId);
+    if(file == nullptr)
     {
         SetState(State::Empty);
+        return;
     }
-    else if(mAnalyzeFile->index == 19)
+    else if(file->id == 19)
     {
         SetState(State::Map);
     }
-    else if(mAnalyzeFile->type == SidneyFileType::Image)
+    else if(file->type == SidneyFileType::Image)
     {
         SetState(State::Image);
     }
@@ -372,7 +385,7 @@ void SidneyAnalyze::SetStateFromFile()
 void SidneyAnalyze::OnAnalyzeButtonPressed()
 {
     // We need a file to analyze.
-    if(mAnalyzeFile == nullptr) { return; }
+    if(mAnalyzeFileId == -1) { return; }
 
     // Set to right state depending on the file we're analyzing.
     SetStateFromFile();
@@ -394,7 +407,11 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
     }
 
     // This file has definitely been analyzed at least once now!
-    mAnalyzeFile->hasBeenAnalyzed = true;
+    SidneyFile* file = mSidneyFiles->GetFile(mAnalyzeFileId);
+    if(file != nullptr)
+    {
+        file->hasBeenAnalyzed = true;
+    }
 }
 
 void SidneyAnalyze::ShowAnalyzeMessage(const std::string& message)

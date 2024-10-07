@@ -40,7 +40,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     mMenuBar.SetDropdownEnabled(kMapDropdownIdx, false);
 
     // Show correct image and menu items based on current file.
-    if(mAnalyzeFile->index == 20) // Parchment 1
+    if(mAnalyzeFileId == 20) // Parchment 1
     {
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT1_BASE.BMP"), true);
 
@@ -55,7 +55,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_UseShapeIdx, false);
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_EraseShapeIdx, false);
     }
-    else if(mAnalyzeFile->index == 21) // Parchment 2
+    else if(mAnalyzeFileId == 21) // Parchment 2
     {
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT2_BASE.BMP"), true);
 
@@ -75,11 +75,11 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
 void SidneyAnalyze::AnalyzeImage_OnAnalyzeButtonPressed()
 {
     // Show correct analysis message depending on the file type.
-    if(mAnalyzeFile->index == 20)
+    if(mAnalyzeFileId == 20)
     {
         ShowAnalyzeMessage("AnalyzeParch1");
     }
-    else if(mAnalyzeFile->index == 21)
+    else if(mAnalyzeFileId == 21)
     {
         ShowAnalyzeMessage("AnalyzeParch2");
     }

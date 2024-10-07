@@ -532,7 +532,7 @@ void SidneyAnalyze::MapState::OnPersist(PersistState& ps)
 void SidneyAnalyze::AnalyzeMap_Init()
 {
     // Create a parent "map window" object that contains all the map analysis stuff.
-    mAnalyzeMapWindow = new Actor(TransformType::RectTransform);
+    mAnalyzeMapWindow = new Actor("Analyze Map", TransformType::RectTransform);
     mAnalyzeMapWindow->GetTransform()->SetParent(mRoot->GetTransform());
     static_cast<RectTransform*>(mAnalyzeMapWindow->GetTransform())->SetAnchor(AnchorPreset::CenterStretch);
     static_cast<RectTransform*>(mAnalyzeMapWindow->GetTransform())->SetAnchoredPosition(0.0f, 0.0f);
@@ -541,13 +541,13 @@ void SidneyAnalyze::AnalyzeMap_Init()
     // Create zoomed in map on left.
     {
         // Create an actor that represents the zoomed in window area.
-        Actor* zoomedInMapWindow = new Actor(TransformType::RectTransform);
+        Actor* zoomedInMapWindow = new Actor("Zoomed In Map", TransformType::RectTransform);
         zoomedInMapWindow->GetTransform()->SetParent(mAnalyzeMapWindow->GetTransform());
 
         mMap.zoomedIn.button = zoomedInMapWindow->AddComponent<UIButton>();
 
         // Put a canvas on it with masking! This allows us to move around the child map background and have it be masked outside the window area.
-        UICanvas* zoomedInMapCanvas = zoomedInMapWindow->AddComponent<UICanvas>(-1);
+        UICanvas* zoomedInMapCanvas = zoomedInMapWindow->AddComponent<UICanvas>(0);
         zoomedInMapCanvas->SetMasked(true);
         zoomedInMapCanvas->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         zoomedInMapCanvas->GetRectTransform()->SetAnchoredPosition(9.0f, 73.0f);
@@ -674,7 +674,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
     // Create zoomed out map on right.
     {
         // Create the map image itself.
-        Actor* zoomedOutMapActor = new Actor(TransformType::RectTransform);
+        Actor* zoomedOutMapActor = new Actor("Zoomed Out Map", TransformType::RectTransform);
         zoomedOutMapActor->GetTransform()->SetParent(mAnalyzeMapWindow->GetTransform());
 
         mMap.zoomedOut.mapImage = zoomedOutMapActor->AddComponent<UIImage>();
@@ -687,7 +687,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedOut.button = zoomedOutMapActor->AddComponent<UIButton>();
 
         // The zoomed out map also needs a masking canvas so that moved shapes don't show outside the map border.
-        UICanvas* zoomedOutMapCanvas = zoomedOutMapActor->AddComponent<UICanvas>(-1);
+        UICanvas* zoomedOutMapCanvas = zoomedOutMapActor->AddComponent<UICanvas>(0);
         zoomedOutMapCanvas->SetMasked(true);
 
         // Create locked grids renderer.

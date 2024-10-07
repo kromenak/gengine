@@ -8,8 +8,11 @@
 #include "UIGrids.h"
 #include "UIRectangles.h"
 
-PersistState::PersistState(const char* filePath, PersistFormat format, PersistMode mode)
+PersistState::PersistState(const char* filePath, PersistFormat format, PersistMode mode) :
+    mFormat(format),
+    mMode(mode)
 {
+
     if(mode == PersistMode::Save)
     {
         if(format == PersistFormat::Text)

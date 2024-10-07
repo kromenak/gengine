@@ -152,8 +152,8 @@ void SidneyAddData::OnUpdate(float deltaTime)
             mAddingData = false;
 
             // Determine whether something was successfully scanned into Sidney.
-            int sidneyFileIndex = gGameProgress.GetGameVariable("SidScanner") - 1;
-            if(sidneyFileIndex < 0 || sidneyFileIndex > mSidneyFiles->GetMaxFileIndex())
+            int sidneyFileId = gGameProgress.GetGameVariable("SidScanner") - 1;
+            if(sidneyFileId < 0 || sidneyFileId > mSidneyFiles->GetMaxFileIndex())
             {
                 // CASE 1: No valid object was selected to scan.
                 // Show box indicating that input was aborted.
@@ -169,7 +169,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                     mAddDataBox->SetActive(false);
                 });
             }
-            else if(mSidneyFiles->HasFile(sidneyFileIndex))
+            else if(mSidneyFiles->HasFile(sidneyFileId))
             {
                 // CASE 2: Valid object selected, but already scanned it.
                 // Ego says "I already scanned it!"
@@ -195,17 +195,17 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 mAddDataColorTimer = kAddDataColorToggleInterval;
                 
                 // This puts the player in a non-interactive state for a moment (so they can read the text box and hear SFX).
-                gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2);", [this, sidneyFileIndex](const Action* action){
+                gActionManager.ExecuteSheepAction("wait SetTimerSeconds(2);", [this, sidneyFileId](const Action* action){
 
                     // Add the desired file to Sidney.
-                    mSidneyFiles->AddFile(static_cast<size_t>(sidneyFileIndex));
+                    mSidneyFiles->AddFile(static_cast<size_t>(sidneyFileId));
 
                     // Hide "Add Data" box and show "Input Complete" box.
                     mAddDataBox->SetActive(false);
                     mInputCompleteBox->SetActive(true);
 
                     // Figure out name of this item, which will be added to the input box.
-                    mTextToType = SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(sidneyFileIndex + 1));
+                    mTextToType = SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(sidneyFileId + 1));
 
                     // Reset type text.
                     mFileNameLabel->SetText("");

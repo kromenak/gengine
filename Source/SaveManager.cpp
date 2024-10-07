@@ -65,7 +65,7 @@ const std::vector<SaveSummary>& SaveManager::GetSaves()
 void SaveManager::Save(const std::string& saveDescription, int saveIndex)
 {
     mPendingSaveDescription = saveDescription;
-    mPendingSaveIndex = overwriteSaveIndex;
+    mPendingSaveIndex = saveIndex;
 }
 
 void SaveManager::Load(const std::string& loadPath)

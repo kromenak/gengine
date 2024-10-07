@@ -8,6 +8,7 @@
 #include "SidneyUtil.h"
 #include "Texture.h"
 #include "UIButton.h"
+#include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
 
@@ -35,63 +36,57 @@ void SidneyFiles::Init(Sidney* parent)
 
     // Build list of known files. (TODO: Would be cool if this was data-driven?)
     // Fingerprints (0-18)
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileAbbePrint",        "ABBE_FINGERPRINT",      "e_sidney_add_fingerprint_abbe");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileBuchelliPrint",    "BUCHELLIS_FINGERPRINT", "e_sidney_add_fingerprint_buchelli");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileButhanePrint",     "BUTHANES_FINGERPRINT",  "e_sidney_add_fingerprint_buthane");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileEstellePrint",     "ESTELLES_FINGERPRINT",  "e_sidney_add_fingerprint_estelle");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLadyHowardPrint",  "HOWARDS_FINGERPRINT",   "e_sidney_add_fingerprint_howard");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileMontreauxPrint",   "MONTREAUX_FINGERPRINT", "e_sidney_add_fingerprint_montreaux");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileWilkesPrint",      "WILKES_FINGERPRINT",    "e_sidney_add_fingerprint_wilkes");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileMoselyPrint",      "MOSELYS_FINGERPRINT");  //TODO: Hmm, no score event for this one?
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLarryPrint",       "LARRYS_FINGERPRINT",    "e_sidney_add_fingerprint_larry");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileWilkesPrint2",     "WILKES_FINGERPRINT_LABELED_BUCHELLI");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileBuchelliPrint2",   "BUCHELLIS_FINGERPRINT_LABELED_WILKES");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint1",    "UNKNOWN_PRINT_1",       "e_sidney_add_manuscript_prints_buthane");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint2",    "UNKNOWN_PRINT_2",       "e_sidney_add_manuscript_prints_mosley");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint3",    "UNKNOWN_PRINT_3",       "e_sidney_add_manuscript_prints_buchelli");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint4",    "UNKNOWN_PRINT_4");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint5",    "UNKNOWN_PRINT_5");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileUnknownPrint6",    "UNKNOWN_PRINT_6");
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileLSR1Print",        "UNKNOWN_PRINT_7");      // Unused?
-    mAllFiles.emplace_back(SidneyFileType::Fingerprint, "fileEstellesLSRPrint", "UNKNOWN_PRINT_8");
+    mAllFiles.emplace_back( 0, SidneyFileType::Fingerprint, "fileAbbePrint",        "ABBE_FINGERPRINT",      "e_sidney_add_fingerprint_abbe");
+    mAllFiles.emplace_back( 1, SidneyFileType::Fingerprint, "fileBuchelliPrint",    "BUCHELLIS_FINGERPRINT", "e_sidney_add_fingerprint_buchelli");
+    mAllFiles.emplace_back( 2, SidneyFileType::Fingerprint, "fileButhanePrint",     "BUTHANES_FINGERPRINT",  "e_sidney_add_fingerprint_buthane");
+    mAllFiles.emplace_back( 3, SidneyFileType::Fingerprint, "fileEstellePrint",     "ESTELLES_FINGERPRINT",  "e_sidney_add_fingerprint_estelle");
+    mAllFiles.emplace_back( 4, SidneyFileType::Fingerprint, "fileLadyHowardPrint",  "HOWARDS_FINGERPRINT",   "e_sidney_add_fingerprint_howard");
+    mAllFiles.emplace_back( 5, SidneyFileType::Fingerprint, "fileMontreauxPrint",   "MONTREAUX_FINGERPRINT", "e_sidney_add_fingerprint_montreaux");
+    mAllFiles.emplace_back( 6, SidneyFileType::Fingerprint, "fileWilkesPrint",      "WILKES_FINGERPRINT",    "e_sidney_add_fingerprint_wilkes");
+    mAllFiles.emplace_back( 7, SidneyFileType::Fingerprint, "fileMoselyPrint",      "MOSELYS_FINGERPRINT");  //TODO: Hmm, no score event for this one?
+    mAllFiles.emplace_back( 8, SidneyFileType::Fingerprint, "fileLarryPrint",       "LARRYS_FINGERPRINT",    "e_sidney_add_fingerprint_larry");
+    mAllFiles.emplace_back( 9, SidneyFileType::Fingerprint, "fileWilkesPrint2",     "WILKES_FINGERPRINT_LABELED_BUCHELLI");
+    mAllFiles.emplace_back(10, SidneyFileType::Fingerprint, "fileBuchelliPrint2",   "BUCHELLIS_FINGERPRINT_LABELED_WILKES");
+    mAllFiles.emplace_back(11, SidneyFileType::Fingerprint, "fileUnknownPrint1",    "UNKNOWN_PRINT_1",       "e_sidney_add_manuscript_prints_buthane");
+    mAllFiles.emplace_back(12, SidneyFileType::Fingerprint, "fileUnknownPrint2",    "UNKNOWN_PRINT_2",       "e_sidney_add_manuscript_prints_mosley");
+    mAllFiles.emplace_back(13, SidneyFileType::Fingerprint, "fileUnknownPrint3",    "UNKNOWN_PRINT_3",       "e_sidney_add_manuscript_prints_buchelli");
+    mAllFiles.emplace_back(14, SidneyFileType::Fingerprint, "fileUnknownPrint4",    "UNKNOWN_PRINT_4");
+    mAllFiles.emplace_back(15, SidneyFileType::Fingerprint, "fileUnknownPrint5",    "UNKNOWN_PRINT_5");
+    mAllFiles.emplace_back(16, SidneyFileType::Fingerprint, "fileUnknownPrint6",    "UNKNOWN_PRINT_6");
+    mAllFiles.emplace_back(17, SidneyFileType::Fingerprint, "fileLSR1Print",        "UNKNOWN_PRINT_7");      // Unused?
+    mAllFiles.emplace_back(18, SidneyFileType::Fingerprint, "fileEstellesLSRPrint", "UNKNOWN_PRINT_8");
 
     // Images (19-26)
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileMap",              "MAP",                      "e_sidney_add_map");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileParchment1",       "PARCHMENT_1",              "e_sidney_add_parch1");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileParchment2",       "PARCHMENT_2",              "e_sidney_add_parch2");
-    mAllFiles.emplace_back(SidneyFileType::Image, "filePoussinPostcard",  "POUSSIN_POSTCARD",         "e_sidney_add_postcard_1");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileTeniersPostcard1", "TENIERS_POSTCARD_NO_TEMP", "e_sidney_add_postcard_2");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileTeniersPostcard2", "TENIERS_POSTCARD_TEMP",    "e_sidney_add_postcard_3");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileHermeticSymbols",  "HERM_SYMBOLS",             "e_sidney_add_hermetical_symbols_from_serres");
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileSUMNote",          "I_AM_WORDS",               "e_sidney_add_sum_note");
+    mAllFiles.emplace_back(19, SidneyFileType::Image, "fileMap",              "MAP",                      "e_sidney_add_map");
+    mAllFiles.emplace_back(20, SidneyFileType::Image, "fileParchment1",       "PARCHMENT_1",              "e_sidney_add_parch1");
+    mAllFiles.emplace_back(21, SidneyFileType::Image, "fileParchment2",       "PARCHMENT_2",              "e_sidney_add_parch2");
+    mAllFiles.emplace_back(22, SidneyFileType::Image, "filePoussinPostcard",  "POUSSIN_POSTCARD",         "e_sidney_add_postcard_1");
+    mAllFiles.emplace_back(23, SidneyFileType::Image, "fileTeniersPostcard1", "TENIERS_POSTCARD_NO_TEMP", "e_sidney_add_postcard_2");
+    mAllFiles.emplace_back(24, SidneyFileType::Image, "fileTeniersPostcard2", "TENIERS_POSTCARD_TEMP",    "e_sidney_add_postcard_3");
+    mAllFiles.emplace_back(25, SidneyFileType::Image, "fileHermeticSymbols",  "HERM_SYMBOLS",             "e_sidney_add_hermetical_symbols_from_serres");
+    mAllFiles.emplace_back(26, SidneyFileType::Image, "fileSUMNote",          "I_AM_WORDS",               "e_sidney_add_sum_note");
 
     // Audio (27-28)
-    mAllFiles.emplace_back(SidneyFileType::Audio, "fileAbbeTape",     "", "e_sidney_add_tape_abbe");
-    mAllFiles.emplace_back(SidneyFileType::Audio, "fileBuchelliTape", "", "e_sidney_add_tape_buchelli");
+    mAllFiles.emplace_back(27, SidneyFileType::Audio, "fileAbbeTape",     "", "e_sidney_add_tape_abbe");
+    mAllFiles.emplace_back(28, SidneyFileType::Audio, "fileBuchelliTape", "", "e_sidney_add_tape_buchelli");
 
     // Text (29-30)
-    mAllFiles.emplace_back(SidneyFileType::Text, "fileArcadiaText", "");
-    mAllFiles.emplace_back(SidneyFileType::Text, "fileTempleOfSolomonText", "");     //TODO: Is this a text type?
+    mAllFiles.emplace_back(29, SidneyFileType::Text, "fileArcadiaText", "");
+    mAllFiles.emplace_back(30, SidneyFileType::Text, "fileTempleOfSolomonText", "");     //TODO: Is this a text type?
 
-    mAllFiles.emplace_back(SidneyFileType::Image, "fileHermeticSymbols", "");         //TODO: Seems doubled up and unused?
+    mAllFiles.emplace_back(31, SidneyFileType::Image, "fileHermeticSymbols", "");         //TODO: Seems doubled up and unused?
 
     // Licenses (32-36)
-    mAllFiles.emplace_back(SidneyFileType::License, "fileBuchelliLicense",   "BUCHELLIS_LICENSE", "e_sidney_add_license_buchelli");
-    mAllFiles.emplace_back(SidneyFileType::License, "fileEmilioLicense",     "EMILIOS_LICENSE",   "e_sidney_add_license_emilio");
-    mAllFiles.emplace_back(SidneyFileType::License, "fileLadyHowardLicense", "HOWARDS_LICENSE",   "e_sidney_add_license_howard");
-    mAllFiles.emplace_back(SidneyFileType::License, "fileMoselyLicense",     "MOSELYS_LICENSE",   "e_sidney_add_license_mosely");
-    mAllFiles.emplace_back(SidneyFileType::License, "fileWilkesLicense",     "WILKES_LICENSE",    "e_sidney_add_license_wilkes");
+    mAllFiles.emplace_back(32, SidneyFileType::License, "fileBuchelliLicense",   "BUCHELLIS_LICENSE", "e_sidney_add_license_buchelli");
+    mAllFiles.emplace_back(33, SidneyFileType::License, "fileEmilioLicense",     "EMILIOS_LICENSE",   "e_sidney_add_license_emilio");
+    mAllFiles.emplace_back(34, SidneyFileType::License, "fileLadyHowardLicense", "HOWARDS_LICENSE",   "e_sidney_add_license_howard");
+    mAllFiles.emplace_back(35, SidneyFileType::License, "fileMoselyLicense",     "MOSELYS_LICENSE",   "e_sidney_add_license_mosely");
+    mAllFiles.emplace_back(36, SidneyFileType::License, "fileWilkesLicense",     "WILKES_LICENSE",    "e_sidney_add_license_wilkes");
 
     // Shapes (37-39)
-    mAllFiles.emplace_back(SidneyFileType::Shape, "triangle");
-    mAllFiles.emplace_back(SidneyFileType::Shape, "circle");
-    mAllFiles.emplace_back(SidneyFileType::Shape, "rectangle");
-
-    // Set file indexes (as this is how files are referenced when adding).
-    for(size_t i = 0; i < mAllFiles.size(); ++i)
-    {
-        mAllFiles[i].index = i;
-    }
+    mAllFiles.emplace_back(37, SidneyFileType::Shape, "triangle");
+    mAllFiles.emplace_back(38, SidneyFileType::Shape, "circle");
+    mAllFiles.emplace_back(39, SidneyFileType::Shape, "rectangle");
 
     // The Files UI is a bit unique. It's more of a "floating dialog" that can appear over other screens.
     // Though files UI doesn't have a background image, it's helpful to create a "dummy" rect to help with positioning things.
@@ -112,12 +107,12 @@ void SidneyFiles::Init(Sidney* parent)
 
 void SidneyFiles::Show(std::function<void(SidneyFile*)> selectFileCallback)
 {
-    mFileList.Show(mData, selectFileCallback);
+    mFileList.Show(mAllFiles, mData, selectFileCallback);
 }
 
 void SidneyFiles::ShowShapes(std::function<void(SidneyFile*)> selectFileCallback)
 {
-    mShapeList.Show(mData, selectFileCallback);
+    mShapeList.Show(mAllFiles, mData, selectFileCallback);
 }
 
 void SidneyFiles::ShowCustom(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback)
@@ -133,13 +128,13 @@ void SidneyFiles::AddFile(size_t fileIndex)
     for(auto& dir : mData)
     {
         // Add file if not already in this directory.
-        if(dir.type == mAllFiles[fileIndex].type && !dir.HasFile(mAllFiles[fileIndex].name))
+        if(dir.type == mAllFiles[fileIndex].type && !dir.HasFile(fileIndex))
         {
-            dir.files.emplace_back(&mAllFiles[fileIndex]);
+            dir.fileIds.emplace_back(fileIndex);
 
-            // Sort files by index to ensure a consistent ordering when displayed in the UI.
-            std::sort(dir.files.begin(), dir.files.end(), [](SidneyFile* a, SidneyFile* b){
-                return a->index < b->index;
+            // Sort files by ID to ensure a consistent ordering when displayed in the UI.
+            std::sort(dir.fileIds.begin(), dir.fileIds.end(), [](int a, int b){
+                return a < b;
             });
 
             // Add to score if there's a score event.
@@ -151,19 +146,37 @@ void SidneyFiles::AddFile(size_t fileIndex)
     }
 }
 
-bool SidneyFiles::HasFile(size_t fileIndex)
+bool SidneyFiles::HasFile(size_t fileId) const
 {
-    if(fileIndex >= mAllFiles.size()) { return false; }
-    return HasFile(mAllFiles[fileIndex].name);
+    for(auto& dir : mData)
+    {
+        if(dir.HasFile(fileId))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+SidneyFile* SidneyFiles::GetFile(size_t fileId)
+{
+    for(SidneyFile& file : mAllFiles)
+    {
+        if(file.id == fileId)
+        {
+            return &file;
+        }
+    }
+    return nullptr;
 }
 
 bool SidneyFiles::HasFile(const std::string& fileName) const
 {
-    for(auto& dir : mData)
+    for(auto& file : mAllFiles)
     {
-        if(dir.HasFile(fileName))
+        if(StringUtil::EqualsIgnoreCase(file.name, fileName))
         {
-            return true;
+            return HasFile(file.id);
         }
     }
     return false;
@@ -175,7 +188,7 @@ bool SidneyFiles::HasFileOfType(SidneyFileType type) const
     {
         if(dir.type == type)
         {
-            return !dir.files.empty();
+            return !dir.fileIds.empty();
         }
     }
     return false;
@@ -183,78 +196,8 @@ bool SidneyFiles::HasFileOfType(SidneyFileType type) const
 
 void SidneyFiles::OnPersist(PersistState& ps)
 {
-    // We need to save the files that have been scanned into Sidney by the player, as well as the *states* of those files.
-    // This isn't entirely straightforward, but it is doable!
-    if(ps.IsSaving())
-    {
-        // The "all files" list is fully populated on init. So, the list contents should be static.
-        uint32_t size = mAllFiles.size();
-        ps.Xfer("mAllFilesSize", size);
-        for(SidneyFile& file : mAllFiles)
-        {
-            ps.Xfer("hasBeenAnalyzed", file.hasBeenAnalyzed);
-        }
-
-        // Next, we need to save the files that have been scanned in by the player.
-        // Again, the directories are pre-populated, so we'll assume same order for now.
-        size = mData.size();
-        ps.Xfer("mDataSize", size);
-        for(SidneyDirectory& dir : mData)
-        {
-            int typeNum = static_cast<int>(dir.type);
-            ps.Xfer("type", typeNum);
-
-            size = dir.files.size();
-            ps.Xfer("fileCount", size);
-            for(SidneyFile* file : dir.files)
-            {
-                ps.Xfer("index", file->index);
-            }
-        }
-    }
-    else if(ps.IsLoading())
-    {
-        // Load progress data for all known files.
-        uint32_t size = 0;
-        ps.Xfer("mAllFilesSize", size);
-        for(uint32_t i = 0; i < size; ++i)
-        {
-            ps.Xfer("hasBeenAnalyzed", mAllFiles[i].hasBeenAnalyzed);
-        }
-
-        // Load data for each directory of files scanned in by player.
-        ps.Xfer("mDataSize", size);
-        for(uint32_t i = 0; i < size; ++i)
-        {
-            // Get file type for directory.
-            int typeNum = 0;
-            ps.Xfer("type", typeNum);
-
-            // Look up the directory associated with this type.
-            SidneyDirectory* dir = nullptr;
-            for(SidneyDirectory& entry : mData)
-            {
-                if(static_cast<int>(entry.type) == typeNum)
-                {
-                    dir = &entry;
-                    break;
-                }
-            }
-
-            // Iterate files for that directory and add them to the directory.
-            uint32_t fileCount = 0;
-            ps.Xfer("fileCount", fileCount);
-            for(uint32_t j = 0; j < fileCount; ++j)
-            {
-                int index = 0;
-                ps.Xfer("index", index);
-                if(dir != nullptr && index >= 0 && index < mAllFiles.size())
-                {
-                    dir->files.push_back(&mAllFiles[index]);
-                }
-            }
-        }
-    }
+    ps.Xfer(PERSIST_VAR(mAllFiles));
+    ps.Xfer(PERSIST_VAR(mData));
 }
 
 void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
@@ -266,6 +209,7 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
         // Create a root actor for the dialog.
         mWindowRoot = new Actor(TransformType::RectTransform);
         mWindowRoot->GetTransform()->SetParent(parent->GetTransform());
+        mWindowRoot->AddComponent<UICanvas>(1);
 
         // Create a black background.
         UIImage* backgroundImage = mWindowRoot->AddComponent<UIImage>();
@@ -323,7 +267,7 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
     mWindowRoot->SetActive(false);
 }
 
-void SidneyFiles::FileListWindow::Show(const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback)
+void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback)
 {
     // Show the window.
     mWindowRoot->SetActive(true);
@@ -366,19 +310,32 @@ void SidneyFiles::FileListWindow::Show(const std::vector<SidneyDirectory>& data,
 
         // Create labels for each file within the directory.
         // These are indented slightly and use gold colored text.
-        for(auto& file : dir.files)
+        for(int fileId : dir.fileIds)
         {
+            // Get the file associated with this ID.
+            SidneyFile* file = nullptr;
+            for(SidneyFile& f : files)
+            {
+                if(f.id == fileId)
+                {
+                    file = &f;
+                    break;
+                }
+            }
+
+            // Invalid file, ignore!
+            if(file == nullptr) { continue; }
+
+            // Create button for this file.
             FileListButton& fileButton = GetFileListButton();
             fileButton.label->GetRectTransform()->SetAnchoredPosition(topLeft);
             fileButton.label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
             fileButton.button->SetPressCallback([this, selectCallback, file](UIButton* button){
                 mWindowRoot->SetActive(false);
-                if(selectCallback != nullptr)
-                {
-                    selectCallback(file);
-                }
+                if(selectCallback != nullptr) { selectCallback(file); }
             });
 
+            // Shapes use a texture instead of a text label.
             if(mForShapes)
             {
                 Texture* shapeTexture = gAssetManager.LoadTexture(file->name);

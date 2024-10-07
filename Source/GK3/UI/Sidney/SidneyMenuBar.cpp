@@ -7,8 +7,10 @@
 #include "Random.h"
 #include "SidneyButton.h"
 #include "UIButton.h"
+#include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UIUtil.h"
 
 void SidneyMenuBar::Init(Actor* parent, const std::string& label, float labelWidth)
 {
@@ -19,10 +21,14 @@ void SidneyMenuBar::Init(Actor* parent, const std::string& label, float labelWid
     mDropdownArrowTexture = gAssetManager.LoadTexture("S_DWNARW.BMP");
     mDropdownDisabledArrowTexture = gAssetManager.LoadTexture("S_DWNARW_NOEMB.BMP");
 
+    Actor* menuBarCanvasActor = new Actor("Menu Bar", TransformType::RectTransform);
+    menuBarCanvasActor->GetTransform()->SetParent(parent->GetTransform());
+    UIUtil::AddCanvas(menuBarCanvasActor, 2);
+
     // Bar that stretches across entire screen.
     {
         Actor* menuBarActor = new Actor(TransformType::RectTransform);
-        menuBarActor->GetTransform()->SetParent(parent->GetTransform());
+        menuBarActor->GetTransform()->SetParent(menuBarCanvasActor->GetTransform());
         mRoot = menuBarActor;
 
         UIImage* menuBarImage = menuBarActor->AddComponent<UIImage>();
@@ -39,7 +45,7 @@ void SidneyMenuBar::Init(Actor* parent, const std::string& label, float labelWid
     // Bar that extends from top-right, used to give enough height for the screen name label.
     {
         Actor* menuBarTopActor = new Actor(TransformType::RectTransform);
-        menuBarTopActor->GetTransform()->SetParent(parent->GetTransform());
+        menuBarTopActor->GetTransform()->SetParent(menuBarCanvasActor->GetTransform());
         UIImage* menuBarTopImage = menuBarTopActor->AddComponent<UIImage>();
 
         menuBarTopImage->SetTexture(gAssetManager.LoadTexture("S_BAR_TOPSTRIP_LR.BMP"), true);

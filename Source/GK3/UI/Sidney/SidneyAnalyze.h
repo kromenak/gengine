@@ -61,7 +61,7 @@ private:
     const size_t kGraphicDropdown_EraseShapeIdx = 4;
 
     // A file that has been selected for analysis.
-    SidneyFile* mAnalyzeFile = nullptr;
+    int mAnalyzeFileId = -1;
 
     // A button to press to perform analysis.
     SidneyButton* mAnalyzeButton = nullptr;

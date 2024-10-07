@@ -31,11 +31,12 @@ enum class SidneyFileType
 // A single file in the system.
 struct SidneyFile
 {
+     // This file's unique identifier.
+    // The ID is important, as that's how the "Add Data" & localization mechanisms identify a file.
+    int id = -1;
+
     // Type of this file (is it an image, audio, text, etc?).
     SidneyFileType type;
-
-    // This file's unique index. This is what's used to get the localized name.
-    int index = -1;
 
     // Unique *internal* name for this file. Not displayed to player!
     // This is used by Sheep to identify files it wants to add.
@@ -55,19 +56,32 @@ struct SidneyFile
     SidneyFile(const SidneyFile&) = default;
     SidneyFile(SidneyFile&&) = default;
 
-    SidneyFile(SidneyFileType type, const std::string& name) : type(type), name(name) { }
-    SidneyFile(SidneyFileType type, const std::string& name, const std::string& invItemName) : type(type), name(name), invItemName(invItemName) { }
-    SidneyFile(SidneyFileType type, const std::string& name, const std::string& invItemName, const std::string& scoreName) : type(type), name(name), invItemName(invItemName), scoreName(scoreName) { }
+    SidneyFile(int id, SidneyFileType type, const std::string& name) : id(id), type(type), name(name) { }
+    SidneyFile(int id, SidneyFileType type, const std::string& name, const std::string& invItemName) : id(id), type(type), name(name), invItemName(invItemName) { }
+    SidneyFile(int id, SidneyFileType type, const std::string& name, const std::string& invItemName, const std::string& scoreName) : id(id), type(type), name(name), invItemName(invItemName), scoreName(scoreName) { }
 
     std::string GetDisplayName()
     {
-        return SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(index + 1));
+        // Localized display names are stored as ScanItemX, where X is ID+1.
+        return SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(id + 1));
     }
 
     Texture* GetIcon()
     {
         // We just reuse the inventory list texture for this.
         return gInventoryManager.GetInventoryItemListTexture(invItemName);
+    }
+
+    void OnPersist(PersistState& ps)
+    {
+        // Even though only "hasBeenAnalyzed" is dynamic game state data, we need to save the whole struct.
+        // This is because Xfer will clear and rebuild the ENTIRE list of files.
+        ps.Xfer(PERSIST_VAR(id));
+        ps.Xfer<SidneyFileType, int>(PERSIST_VAR(type));
+        ps.Xfer(PERSIST_VAR(name));
+        ps.Xfer(PERSIST_VAR(invItemName));
+        ps.Xfer(PERSIST_VAR(scoreName));
+        ps.Xfer(PERSIST_VAR(hasBeenAnalyzed));
     }
 };
 
@@ -81,16 +95,20 @@ struct SidneyDirectory
     // Type of file that goes in this directory.
     SidneyFileType type;
 
-    // All the files contained in this directory.
-    std::vector<SidneyFile*> files;
+    // IDs of all files contained in this directory.
+    // These IDs correspond to files stored in mAllFiles.
+    std::vector<int> fileIds;
 
-    bool HasFile(const std::string& fileName) const
+    bool HasFile(int fileId) const
     {
-        for(auto& file : files)
-        {
-            if(StringUtil::EqualsIgnoreCase(file->name, fileName)) { return true; }
-        }
-        return false;
+        return std::find(fileIds.begin(), fileIds.end(), fileId) != fileIds.end();
+    }
+
+    void OnPersist(PersistState& ps)
+    {
+        ps.Xfer(PERSIST_VAR(name));
+        ps.Xfer<SidneyFileType, int>(PERSIST_VAR(type));
+        ps.Xfer(PERSIST_VAR(fileIds));
     }
 };
 
@@ -103,8 +121,9 @@ public:
     void ShowShapes(std::function<void(SidneyFile*)> selectFileCallback = nullptr);
     void ShowCustom(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback);
 
-    void AddFile(size_t fileIndex);
-    bool HasFile(size_t fileIndex);
+    void AddFile(size_t fileId);
+    bool HasFile(size_t fileId) const;
+    SidneyFile* GetFile(size_t fileId);
     int GetMaxFileIndex() const { return mAllFiles.size() - 1; }
 
     bool HasFile(const std::string& fileName) const;
@@ -117,7 +136,6 @@ private:
     std::vector<SidneyDirectory> mData;
 
     // A list of ALL files the game knows about that *can* be scanned into Sidney.
-    // The index is important, as that's how the "Add Data" & localization mechanisms identify a file.
     std::vector<SidneyFile> mAllFiles;
 
     // Files UI root.
@@ -137,7 +155,7 @@ private:
     public:
         void Init(Actor* parent, bool forShapes);
 
-        void Show(const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback);
+        void Show(std::vector<SidneyFile>& files, const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback);
         void Show(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback);
 
     private:
