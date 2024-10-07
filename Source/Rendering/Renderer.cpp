@@ -320,11 +320,7 @@ void Renderer::Render()
     
     // Render UI elements.
     // Any renderable UI element is contained within a Canvas.
-    const std::vector<UICanvas*>& canvases = UICanvas::GetCanvases();
-    for(auto& canvas : canvases)
-    {
-        canvas->Render();
-    }
+    UICanvas::RenderCanvases();
     PROFILER_END_SAMPLE();
 
     PROFILER_BEGIN_SAMPLE("Render Debug");

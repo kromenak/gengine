@@ -76,6 +76,21 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
 	}
 }
 
+/*static*/ void UICanvas::RenderCanvases()
+{
+    // For debugging purposes, it can be handy to sort the canvases each frame, in case we change the draw order via in-editor tools.
+    #if defined(DEBUG)
+    std::sort(sCanvases.begin(), sCanvases.end(), [](UICanvas* a, UICanvas* b){
+        return a->mDrawOrder < b->mDrawOrder;
+    });
+    #endif
+
+    for(UICanvas* canvas : sCanvases)
+    {
+        canvas->Render();
+    }
+}
+
 /*static*/ void UICanvas::NotifyWidgetDestruct(UIWidget* widget)
 {
     if(sMouseOverWidget == widget)
@@ -86,7 +101,7 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
 
 TYPEINFO_INIT(UICanvas, Component, 14)
 {
-
+    TYPEINFO_VAR(UICanvas, VariableType::Int, mDrawOrder);
 }
 
 UICanvas::UICanvas(Actor* owner) : Component(owner)

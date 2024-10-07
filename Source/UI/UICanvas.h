@@ -21,6 +21,7 @@ class UICanvas : public Component
 public:
 	static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
 	static void UpdateInput();
+    static void RenderCanvases();
 	static bool DidWidgetEatInput() { return sMouseOverWidget != nullptr; }
     static void NotifyWidgetDestruct(UIWidget* widget);
 
