@@ -63,7 +63,7 @@ public:
     // Saves
     const std::vector<SaveSummary>& GetSaves();
 
-    void Save(const std::string& saveDescription);
+    void Save(const std::string& saveDescription, int saveIndex = -1);
     void Load(const std::string& loadPath);
     void HandlePendingSavesAndLoads();
 
@@ -75,6 +75,9 @@ private:
 
     // A path we should save the game to when it is safe to do so.
     std::string mPendingSaveDescription;
+
+    // When saving the game, if zero or greater, will overwrite an existing save.
+    int mPendingSaveIndex = -1;
 
     // Similarly, a pending load game path.
     std::string mPendingLoadPath;

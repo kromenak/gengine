@@ -306,7 +306,6 @@ void SaveLoadScreen::ActivateTextInput(int index)
     mTextInput->GetRectTransform()->SetAnchoredPosition(0.0f, index * -kRowHeight);
     mTextInput->SetEnabled(true);
 
-
     // If this is the "empty" slot at the end of the list, clear the text to enter a full name.
     // Otherwise, the text stays so the player can keep it if they want.
     if(index >= gSaveManager.GetSaves().size())
@@ -357,7 +356,7 @@ void SaveLoadScreen::OnSaveButtonPressed()
         else
         {
             Hide();
-            gSaveManager.Save(mTextInput->GetText());
+            gSaveManager.Save(mTextInput->GetText(), mSaveIndex);
         }
     }
     else // new save in empty slot

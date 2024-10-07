@@ -62,9 +62,10 @@ const std::vector<SaveSummary>& SaveManager::GetSaves()
     return mSaves;
 }
 
-void SaveManager::Save(const std::string& saveDescription)
+void SaveManager::Save(const std::string& saveDescription, int saveIndex)
 {
     mPendingSaveDescription = saveDescription;
+    mPendingSaveIndex = overwriteSaveIndex;
 }
 
 void SaveManager::Load(const std::string& loadPath)
@@ -135,9 +136,16 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     // Save prefs any time the game is saved.
     SavePrefs();
 
+    // Figure out save number to use.
+    int saveNumber = mNextSaveNumber;
+    if(mPendingSaveIndex >= 0)
+    {
+        saveNumber = mPendingSaveIndex + 1;
+    }
+
     // Figure out the path to save to.
-    std::string fileName = StringUtil::Format("save%04i.gk3", mNextSaveNumber);
-    std::string savePath = Path::Combine({ Paths::GetSaveDataPath(), "Save Games", fileName});
+    std::string fileName = StringUtil::Format("save%04i.gk3", saveNumber);
+    std::string savePath = Path::Combine({ Paths::GetSaveDataPath(), "Save Games", fileName });
 
     // Create the persistinator.
     PersistState ps(savePath.c_str(), PersistFormat::Binary, PersistMode::Save);
@@ -166,13 +174,21 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     OnPersist(ps);
     printf("Saved to file %s.\n", savePath.c_str());
 
-    // Add to save list.
-    mSaves.emplace_back();
-    mSaves.back().filePath = savePath;
-    mSaves.back().saveInfo = persistHeader;
+    // Update entry in save list.
+    if(mPendingSaveIndex >= 0 && mPendingSaveIndex < mSaves.size())
+    {
+        mSaves[mPendingSaveIndex].filePath = savePath;
+        mSaves[mPendingSaveIndex].saveInfo = persistHeader;
+    }
+    else
+    {
+        mSaves.emplace_back();
+        mSaves.back().filePath = savePath;
+        mSaves.back().saveInfo = persistHeader;
 
-    // We just saved to this file, so increment save number.
-    ++mNextSaveNumber;
+        // Increment save number if this wasn't an overwrite of an existing slot.
+        ++mNextSaveNumber;
+    }
 }
 
 void SaveManager::LoadInternal(const std::string& loadPath)
