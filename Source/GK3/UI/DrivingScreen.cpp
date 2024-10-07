@@ -244,11 +244,15 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("MAPBUTTON.WAV"));
 
         // Check conditions under which we would NOT allow going to this location.
-        // Don't allow going to Larry's place during timeblock 106P.
-        if(locationCode == "LHE" && gGameProgress.GetTimeblock() == Timeblock(1, 6, Timeblock::PM))
+        // Don't allow going to Larry's place during timeblock 106P and 202A.
+        if(locationCode == "LHE")
         {
-            gActionManager.ExecuteSheepAction("wait StartDialogue(\"21F4F625S1\", 1)");
-            return;
+            if(gGameProgress.GetTimeblock() == Timeblock(1, 6, Timeblock::PM) ||
+               gGameProgress.GetTimeblock() == Timeblock(2, 2, Timeblock::AM))
+            {
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"21F4F625S1\", 1)");
+                return;
+            }
         }
 
         // Whenever you go to a location on the driving map, it's assumed that your bike also moves there.

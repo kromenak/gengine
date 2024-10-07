@@ -50,6 +50,10 @@ code
 		{
 			wait Call("CheckTimeblockComplete205P$");
 		}
+		else if(IsCurrentTime("202A"))
+		{
+			wait Call("CheckTimeblockComplete202A$");
+		}
 	}
 
 	CheckTimeblockComplete110A$()
@@ -380,5 +384,25 @@ code
 		// Ok, seems like we can move on.
 		// (Even though it's "Day 3 2AM" it internally is called 202A).
 		SetTime("202A")
+	}
+
+	CheckTimeblockComplete202A$()
+	{
+		// The goal in this timeblock is to get Larry's manuscript and return to R25.
+
+		// Must be in R25.
+		if(IsCurrentLocation("R25") == 0)
+		{
+			return;
+		}
+
+		// Must have bloodline manuscript.
+		if(!DoesEgoHaveInvItem("BLOODLINE_MANUSCRIPT"))
+		{
+			return;
+		}
+
+		// OK, go to Day 3, 7AM!
+		SetTime("307A");
 	}
 }
