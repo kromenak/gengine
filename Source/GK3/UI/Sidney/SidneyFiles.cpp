@@ -61,8 +61,8 @@ void SidneyFiles::Init(Sidney* parent)
     mAllFiles.emplace_back(20, SidneyFileType::Image, "fileParchment1",       "PARCHMENT_1",              "e_sidney_add_parch1");
     mAllFiles.emplace_back(21, SidneyFileType::Image, "fileParchment2",       "PARCHMENT_2",              "e_sidney_add_parch2");
     mAllFiles.emplace_back(22, SidneyFileType::Image, "filePoussinPostcard",  "POUSSIN_POSTCARD",         "e_sidney_add_postcard_1");
-    mAllFiles.emplace_back(23, SidneyFileType::Image, "fileTeniersPostcard1", "TENIERS_POSTCARD_NO_TEMP", "e_sidney_add_postcard_2");
-    mAllFiles.emplace_back(24, SidneyFileType::Image, "fileTeniersPostcard2", "TENIERS_POSTCARD_TEMP",    "e_sidney_add_postcard_3");
+    mAllFiles.emplace_back(23, SidneyFileType::Image, "fileTeniersPostcard1", "TENIERS_POSTCARD_TEMP",    "e_sidney_add_postcard_2");
+    mAllFiles.emplace_back(24, SidneyFileType::Image, "fileTeniersPostcard2", "TENIERS_POSTCARD_NO_TEMP", "e_sidney_add_postcard_3");
     mAllFiles.emplace_back(25, SidneyFileType::Image, "fileHermeticSymbols",  "HERM_SYMBOLS",             "e_sidney_add_hermetical_symbols_from_serres");
     mAllFiles.emplace_back(26, SidneyFileType::Image, "fileSUMNote",          "I_AM_WORDS",               "e_sidney_add_sum_note");
 
