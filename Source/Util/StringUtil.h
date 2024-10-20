@@ -153,6 +153,37 @@ namespace StringUtil
         return false;
     }
 
+    inline std::string Unescape(const std::string& str)
+    {
+        // If the text of an input file contains "Hello\n", C's getline will interpret this as "Hello\\n".
+        // In other words, the text-based \n is "escaped" so that it represents the text "\n" and not the newline control character.
+
+        // However, in some cases, such as loc text, we may INTEND for the "\n" in the text to be used as a control character!
+        // In that case, we must "unescape" the control character: detect the characters '\\' and 'n' in sequence and convert to a single '\n' char.
+        std::string out;
+        for(size_t i = 0; i < str.length(); ++i)
+        {
+            if(str[i] == '\\' && i + 1 < str.length())
+            {
+                if(str[i + 1] == 'n')
+                {
+                    out.push_back('\n');
+                    ++i; // skip past 'n'
+                }
+                else if(str[i + 1] == 't')
+                {
+                    out.push_back(' '); // for now, just treat a tab control character as a space.
+                    ++i; // skip past 't'
+                }
+            }
+            else
+            {
+                out.push_back(str[i]);
+            }
+        }
+        return out;
+    }
+
     // Struct that encapsulates a case-insensitive character comparison.
     struct iequal
     {

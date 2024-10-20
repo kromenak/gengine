@@ -41,7 +41,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
         }
 
         // Each line represents a translation.
-        for(auto& line : section.lines)
+        for(IniLine& line : section.lines)
         {
             IniKeyValue& entry = line.entries.front();
 
@@ -55,7 +55,9 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
             assert(mKeyToText.find(entry.key) == mKeyToText.end());
             #endif
 
-            mKeyToText[entry.key] = entry.value;
+            // Save key and text to the map.
+            // "Unescape" the text too, since localized text is allowed to have line breaks and tab breaks and such in them.
+            mKeyToText[entry.key] = StringUtil::Unescape(entry.value);
         }
     }
 

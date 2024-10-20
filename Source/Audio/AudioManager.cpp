@@ -620,7 +620,7 @@ void AudioManager::SetVolume(AudioType audioType, float volume)
     if(channelGroup == nullptr) { return; }
 
     // Clamp input volume to 0-1 range.
-    // Do this before applying multiplier to avoid user passing in like 200 and avoiding multiplier effects.
+    // Do this before applying multiplier to avoid passing in like 5.0f and avoiding multiplier effects.
     volume = Math::Clamp(volume, 0.0f, 1.0f);
 
     // Get volume multiplier for audio type.
