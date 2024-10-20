@@ -79,24 +79,16 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     {
         // "View Geometry" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item1"), [this](){
-            if(mAnalyzeFileId == 20)
-            {
-                printf("Added triangle\n");
-                mSidneyFiles->AddFile(37); // Triangle
-            }
-            if(mAnalyzeFileId == 21)
-            {
-                printf("Added circle and square\n");
-                mSidneyFiles->AddFile(38); // Circle
-                mSidneyFiles->AddFile(39); // Square
-            }
+            AnalyzeImage_OnViewGeometryButtonPressed();
         });
 
         // "Rotate Shape" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item2"), nullptr);
 
         // "Zoom & Clarify" choice.
-        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item3"), nullptr);
+        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item3"), [this](){
+            AnalyzeImage_OnZoomClarifyButtonPressed();
+        });
 
         //TODO: Add a divider/empty space here. (Menu3Item4)
 
@@ -228,7 +220,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
             mAnalyzeMessageWindow->GetTransform()->SetParent(mAnalyzeMessageWindowRoot->GetTransform());
 
             UINineSlice* border = mAnalyzeMessageWindow->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
-            border->GetRectTransform()->SetSizeDelta(250.0f, 157.0f);
+            border->GetRectTransform()->SetSizeDelta(250.0f, 172.0f);
             border->GetRectTransform()->SetAnchor(AnchorPreset::Center);
             border->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
         }
@@ -240,7 +232,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
             mAnalyzeMessage = messageActor->AddComponent<UILabel>();
             mAnalyzeMessage->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-            mAnalyzeMessage->SetHorizonalAlignment(HorizontalAlignment::Center);
+            mAnalyzeMessage->SetHorizonalAlignment(HorizontalAlignment::Left);
             mAnalyzeMessage->SetHorizontalOverflow(HorizontalOverflow::Wrap);
             mAnalyzeMessage->SetVerticalAlignment(VerticalAlignment::Top);
 
@@ -252,9 +244,10 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
         // Add OK button.
         {
             SidneyButton* okButton = new SidneyButton(mAnalyzeMessageWindow);
-            okButton->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            okButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
             okButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("OKButton"));
             okButton->SetWidth(80.0f);
+            okButton->SetHeight(13.0f);
 
             okButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
             okButton->GetRectTransform()->SetAnchoredPosition(0.0f, 6.0f);
@@ -368,7 +361,7 @@ void SidneyAnalyze::SetStateFromFile()
         SetState(State::Empty);
         return;
     }
-    else if(file->id == 19)
+    else if(file->id == SidneyFileIds::kMap)
     {
         SetState(State::Map);
     }
@@ -406,6 +399,14 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
         break;
     }
 
+    // There's a chance attempting to analyze an image will turn up nothing interesting.
+    // This will "kick us back out" to the PreAnalyze state.
+    // In this case, we should early out and consider the file "not analyzed" (so we don't go directly to analyze state for this file later on).
+    if(mState == State::PreAnalyze)
+    {
+        return;
+    }
+    
     // This file has definitely been analyzed at least once now!
     SidneyFile* file = mSidneyFiles->GetFile(mAnalyzeFileId);
     if(file != nullptr)
@@ -417,5 +418,7 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
 void SidneyAnalyze::ShowAnalyzeMessage(const std::string& message)
 {
     mAnalyzeMessageWindowRoot->SetActive(true);
-    mAnalyzeMessage->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText(message));
+
+    std::string text = SidneyUtil::GetAnalyzeLocalizer().GetText(message);
+    mAnalyzeMessage->SetText(text);
 }

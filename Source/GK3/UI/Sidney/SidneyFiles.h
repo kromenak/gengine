@@ -18,6 +18,16 @@ class Sidney;
 class UIButton;
 class UILabel;
 
+namespace SidneyFileIds
+{
+    const int kMap = 19;
+    const int kParchment1 = 20;
+    const int kParchment2 = 21;
+    const int kPoussinPostcard = 22;
+    const int kTeniersPostcard1 = 23;
+    const int kTeniersPostcard2 = 24;
+}
+
 enum class SidneyFileType
 {
     Image,

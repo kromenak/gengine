@@ -33,6 +33,7 @@ public:
 
     UILabel* GetLabel() const { return mLabel; }
     void SetWidth(float width);
+    void SetHeight(float height);
     void SetFont(Font* font, Font* disabledFont = nullptr);
     void SetText(const std::string& text);
     void SetTextAlignment(HorizontalAlignment alignment);

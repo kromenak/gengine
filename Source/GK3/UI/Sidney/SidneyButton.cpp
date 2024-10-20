@@ -99,6 +99,11 @@ void SidneyButton::SetWidth(float width)
     GetRectTransform()->SetSizeDeltaX(width);
 }
 
+void SidneyButton::SetHeight(float height)
+{
+    GetRectTransform()->SetSizeDeltaY(height);
+}
+
 void SidneyButton::SetFont(Font* font, Font* disabledFont)
 {
     mFont = font;

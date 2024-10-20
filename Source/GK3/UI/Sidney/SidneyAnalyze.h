@@ -102,6 +102,9 @@ private:
     void AnalyzeImage_EnterState();
     void AnalyzeImage_OnAnalyzeButtonPressed();
 
+    void AnalyzeImage_OnViewGeometryButtonPressed();
+    void AnalyzeImage_OnZoomClarifyButtonPressed();
+
     // ANALYZE MAP
     Actor* mAnalyzeMapWindow = nullptr;
 
