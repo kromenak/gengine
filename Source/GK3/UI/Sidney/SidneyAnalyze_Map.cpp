@@ -437,6 +437,11 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
             zoomedOut.rectangles->AddRectangle(ToZoomedOutPoint(kDefaultRectanglePos), ToZoomedOutPoint(kDefaultRectangleSize), 0.0f);
         }
     }
+    else if(StringUtil::EqualsIgnoreCase(shapeName, "Hexagram"))
+    {
+        // If you haven't finished Pisces, Grace will say she's not ready for this shape.
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27NG1\", 1)");
+    }
 }
 
 void SidneyAnalyze::MapState::EraseSelectedShape()

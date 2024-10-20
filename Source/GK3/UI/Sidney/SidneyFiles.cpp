@@ -87,6 +87,7 @@ void SidneyFiles::Init(Sidney* parent)
     mAllFiles.emplace_back(37, SidneyFileType::Shape, "triangle");
     mAllFiles.emplace_back(38, SidneyFileType::Shape, "circle");
     mAllFiles.emplace_back(39, SidneyFileType::Shape, "rectangle");
+    mAllFiles.emplace_back(40, SidneyFileType::Shape, "hexagram");
 
     // The Files UI is a bit unique. It's more of a "floating dialog" that can appear over other screens.
     // Though files UI doesn't have a background image, it's helpful to create a "dummy" rect to help with positioning things.
