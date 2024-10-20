@@ -197,7 +197,30 @@ bool SidneyFiles::HasFileOfType(SidneyFileType type) const
 
 void SidneyFiles::OnPersist(PersistState& ps)
 {
-    ps.Xfer(PERSIST_VAR(mAllFiles));
+    //TODO: This is a bit of a HACK to deal with the fact that save/loading the all files vector overwrites any new entries on load.
+    //TODO: Maybe we should only be saving the "has been analyzed" bool...
+    if(ps.IsSaving())
+    {
+        ps.Xfer(PERSIST_VAR(mAllFiles));
+    }
+    else if(ps.IsLoading())
+    {
+        std::vector<SidneyFile> loadedFiles;
+        ps.Xfer("mAllFiles", loadedFiles);
+
+        for(SidneyFile& loadedFile : loadedFiles)
+        {
+            for(SidneyFile& file : mAllFiles)
+            {
+                if(file.id == loadedFile.id)
+                {
+                    file.hasBeenAnalyzed = loadedFile.hasBeenAnalyzed;
+                    break;
+                }
+            }
+        }
+    }
+
     ps.Xfer(PERSIST_VAR(mData));
 }
 
