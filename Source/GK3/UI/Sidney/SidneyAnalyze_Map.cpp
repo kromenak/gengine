@@ -11,6 +11,7 @@
 #include "RectTransform.h"
 #include "Sidney.h"
 #include "SidneyFiles.h"
+#include "SidneyPopup.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UICircles.h"
@@ -863,7 +864,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
     }
 
     // Do not update maps or LSR progress when the analyze message is visible.
-    if(mAnalyzeMessageWindow->IsActive())
+    if(mAnalyzePopup->IsActive())
     {
         mMenuBar.SetInteractive(false);
         return;
@@ -1487,13 +1488,13 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
     }
 
     // If you analyze the map, but there is not a more specific message to show, we always show this fallback at least.
-    if(!mAnalyzeMessageWindow->IsActive())
+    if(!mAnalyzePopup->IsActive())
     {
         // If points are placed, the message is different.
         if(mMap.zoomedIn.points->GetPointsCount() > 0 || mMap.zoomedIn.lockedPoints->GetPointsCount() > 0)
         {
             // Says "unclear how to analyze those points."
-            ShowAnalyzeMessage("MapIndeterminateNote");
+            ShowAnalyzeMessage("MapIndeterminateNote", Vector2(), HorizontalAlignment::Center);
         }
         else
         {

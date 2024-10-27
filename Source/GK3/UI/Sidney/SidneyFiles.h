@@ -26,6 +26,13 @@ namespace SidneyFileIds
     const int kPoussinPostcard = 22;
     const int kTeniersPostcard1 = 23;
     const int kTeniersPostcard2 = 24;
+
+    const int kArcadiaText = 29;
+
+    const int kTriangleShape = 37;
+    const int kCircleShape = 38;
+    const int kSquareShape = 39;
+    const int kHexagramShape = 40;
 }
 
 enum class SidneyFileType

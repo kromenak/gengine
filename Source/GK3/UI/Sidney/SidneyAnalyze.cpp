@@ -4,6 +4,7 @@
 #include "Sidney.h"
 #include "SidneyButton.h"
 #include "SidneyFiles.h"
+#include "SidneyPopup.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -201,67 +202,8 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     }
 
     // Analyze message box.
-    {
-        // Create root, which covers whole screen and acts as an input blocker while the message is up.
-        {
-            mAnalyzeMessageWindowRoot = new Actor("Analyze Message Window", TransformType::RectTransform);
-            mAnalyzeMessageWindowRoot->GetTransform()->SetParent(mRoot->GetTransform());
-            mAnalyzeMessageWindowRoot->AddComponent<UICanvas>(1);
-
-            RectTransform* inputBlockerRT = mAnalyzeMessageWindowRoot->GetComponent<RectTransform>();
-            inputBlockerRT->SetAnchor(AnchorPreset::CenterStretch);
-
-            mAnalyzeMessageWindowRoot->AddComponent<UIButton>();
-        }
-
-        // Add the window itself.
-        {
-            mAnalyzeMessageWindow = new Actor(TransformType::RectTransform);
-            mAnalyzeMessageWindow->GetTransform()->SetParent(mAnalyzeMessageWindowRoot->GetTransform());
-
-            UINineSlice* border = mAnalyzeMessageWindow->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
-            border->GetRectTransform()->SetSizeDelta(250.0f, 172.0f);
-            border->GetRectTransform()->SetAnchor(AnchorPreset::Center);
-            border->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
-        }
-
-        // Add message label.
-        {
-            Actor* messageActor = new Actor(TransformType::RectTransform);
-            messageActor->GetTransform()->SetParent(mAnalyzeMessageWindow->GetTransform());
-
-            mAnalyzeMessage = messageActor->AddComponent<UILabel>();
-            mAnalyzeMessage->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-            mAnalyzeMessage->SetHorizonalAlignment(HorizontalAlignment::Left);
-            mAnalyzeMessage->SetHorizontalOverflow(HorizontalOverflow::Wrap);
-            mAnalyzeMessage->SetVerticalAlignment(VerticalAlignment::Top);
-
-            mAnalyzeMessage->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-            mAnalyzeMessage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
-            mAnalyzeMessage->GetRectTransform()->SetSizeDelta(-15.0f, -15.0f);
-        }
-
-        // Add OK button.
-        {
-            SidneyButton* okButton = new SidneyButton(mAnalyzeMessageWindow);
-            okButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
-            okButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("OKButton"));
-            okButton->SetWidth(80.0f);
-            okButton->SetHeight(13.0f);
-
-            okButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
-            okButton->GetRectTransform()->SetAnchoredPosition(0.0f, 6.0f);
-
-            okButton->SetPressCallback([this](){
-                // Hide on button press.
-                mAnalyzeMessageWindowRoot->SetActive(false);
-            });
-        }
-
-        // Hide by default.
-        mAnalyzeMessageWindowRoot->SetActive(false);
-    }
-
+    mAnalyzePopup = new SidneyPopup(mRoot);
+    
     // Start in empty state.
     SetState(State::Empty);
 
@@ -415,10 +357,13 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
     }
 }
 
-void SidneyAnalyze::ShowAnalyzeMessage(const std::string& message)
+void SidneyAnalyze::ShowAnalyzeMessage(const std::string& message, const Vector2& position, HorizontalAlignment textAlignment)
 {
-    mAnalyzeMessageWindowRoot->SetActive(true);
+    mAnalyzePopup->ResetToDefaults();
+    mAnalyzePopup->SetWindowPosition(position);
 
-    std::string text = SidneyUtil::GetAnalyzeLocalizer().GetText(message);
-    mAnalyzeMessage->SetText(text);
+    mAnalyzePopup->SetTextAlignment(textAlignment);
+    mAnalyzePopup->SetText(message);
+    
+    mAnalyzePopup->ShowOneButton();
 }

@@ -7,17 +7,19 @@
 #include "SidneyMenuBar.h"
 #include "Vector2.h"
 
+#include "UILabel.h"
+
 class Actor;
 class PersistState;
 class Sidney;
 class SidneyButton;
 class SidneyFiles;
 struct SidneyFile;
+class SidneyPopup;
 class UIButton;
 class UICircles;
 class UIGrids;
 class UIImage;
-class UILabel;
 class UILines;
 class UIPoints;
 class UIRectangles;
@@ -83,16 +85,14 @@ private:
     UIImage* mPreAnalyzeItemImage = nullptr;
 
     // Message UI - shows a message in response to trying to analyze stuff.
-    Actor* mAnalyzeMessageWindowRoot = nullptr;
-    Actor* mAnalyzeMessageWindow = nullptr;
-    UILabel* mAnalyzeMessage = nullptr;
+    SidneyPopup* mAnalyzePopup = nullptr;
     
     void SetState(State state);
     void SetStateFromFile();
 
     void OnAnalyzeButtonPressed();
 
-    void ShowAnalyzeMessage(const std::string& message);
+    void ShowAnalyzeMessage(const std::string& message, const Vector2& position = Vector2(), HorizontalAlignment textAlignment = HorizontalAlignment::Left);
 
     // ANALYZE IMAGE
     Actor* mAnalyzeImageWindow = nullptr;

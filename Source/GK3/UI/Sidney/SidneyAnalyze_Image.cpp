@@ -5,6 +5,7 @@
 #include "AssetManager.h"
 #include "RectTransform.h"
 #include "SidneyFiles.h"
+#include "SidneyPopup.h"
 #include "UIImage.h"
 
 void SidneyAnalyze::AnalyzeImage_Init()
@@ -43,6 +44,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     // Show correct image and menu items based on current file.
     if(mAnalyzeFileId == SidneyFileIds::kParchment1) // Parchment 1
     {
+        mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT1_BASE.BMP"), true);
 
         mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, 0, true);
@@ -58,6 +60,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kParchment2) // Parchment 2
     {
+        mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT2_BASE.BMP"), true);
 
         mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_ExtractAnomaliesIdx, false);
@@ -73,13 +76,11 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
     {
+        mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -107.0f); // this one is vertically centered for some reason
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("POUSSIN.BMP"), true);
 
-        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_ExtractAnomaliesIdx, false);
-        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_TranslateIdx, false);
-        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_AnagramParserIdx, false);
-        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_AnalyzeTextIdx, false);
-
+        mMenuBar.SetDropdownEnabled(kTextDropdownIdx, false);
+        
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ViewGeometryIdx, true);
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_RotateShapeIdx, false);
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ZoomClarifyIdx, true);
@@ -88,12 +89,10 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kTeniersPostcard2)
     {
+        mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("TENIERS.BMP"), true);
 
-        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_ExtractAnomaliesIdx, false);
-        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_TranslateIdx, false);
-        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_AnagramParserIdx, false);
-        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_AnalyzeTextIdx, false);
+        mMenuBar.SetDropdownEnabled(kTextDropdownIdx, false);
 
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ViewGeometryIdx, true);
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_RotateShapeIdx, false);
@@ -120,7 +119,7 @@ void SidneyAnalyze::AnalyzeImage_OnAnalyzeButtonPressed()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kTeniersPostcard1)
     {
-        ShowAnalyzeMessage("AnalyzeTemp");
+        ShowAnalyzeMessage("AnalyzeTemp", Vector2(), HorizontalAlignment::Center);
 
         // There isn't actually anything interesting about this postcard (the message says "nothing interesting found").
         // Just force back to pre-analyze state in this case.
@@ -144,18 +143,22 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
     if(mAnalyzeFileId == SidneyFileIds::kParchment1)
     {
         printf("Added triangle\n");
-        mSidneyFiles->AddFile(37); // Triangle
+        mSidneyFiles->AddFile(SidneyFileIds::kTriangleShape); // Triangle
     }
     if(mAnalyzeFileId == SidneyFileIds::kParchment2)
     {
         printf("Added circle and square\n");
-        mSidneyFiles->AddFile(38); // Circle
-        mSidneyFiles->AddFile(39); // Square
+        mSidneyFiles->AddFile(SidneyFileIds::kCircleShape); // Circle
+        mSidneyFiles->AddFile(SidneyFileIds::kSquareShape); // Square
     }
     if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
     {
+        //TODO: Play hexagram animation.
+
         printf("Added hexagon\n");
-        mSidneyFiles->AddFile(40); // Hexagram
+        mSidneyFiles->AddFile(SidneyFileIds::kHexagramShape); // Hexagram
+
+        ShowAnalyzeMessage("GeometryPous", Vector2(180.0f, 0.0f), HorizontalAlignment::Center);
     }
 }
 
@@ -163,6 +166,21 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
 {
     if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
     {
-        ShowAnalyzeMessage("AnalyzePous");
+        // Zoom & Clarify shows a popup with a zoomed image containing "arcadia" text.
+        // Show a popup with an embedded image and yes/no options.
+        mAnalyzePopup->ResetToDefaults();
+        mAnalyzePopup->SetWindowPosition(Vector2(-106.0f, 0.0f));
+
+        mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
+        mAnalyzePopup->SetText("SaveArcadia");
+
+        mAnalyzePopup->SetImage(gAssetManager.LoadTexture("POUSSIN_ZOOM.BMP"));
+
+        // This popup has yes/no options.
+        // If yes is pressed, we save the "arcadia" text as a file.
+        mAnalyzePopup->ShowTwoButton([this](){
+            mSidneyFiles->AddFile(SidneyFileIds::kArcadiaText);
+            ShowAnalyzeMessage("SavingArcadia", Vector2(), HorizontalAlignment::Center);
+        });
     }
 }
