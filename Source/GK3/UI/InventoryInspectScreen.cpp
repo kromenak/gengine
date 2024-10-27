@@ -322,7 +322,7 @@ void InventoryInspectScreen::InitLSR()
         bool finishedTaurus = gGameProgress.GetFlag("Taurus");
         bool finishedGemini = gGameProgress.GetFlag("Gemini");
         bool finishedCancer = gGameProgress.GetFlag("Cancer");
-        //bool finishedLeo = gGameProgress.GetFlag("Leo");
+        bool finishedLeo = gGameProgress.GetFlag("Leo");
 
         // Gemini can be unstarted, in-progress, or finished.
         mLSRButtons[0]->SetEnabled(true);
@@ -373,7 +373,7 @@ void InventoryInspectScreen::InitLSR()
         {
             mLSRButtons[2]->SetUpTexture(nullptr, Color32::Clear);
         }
-        else if(finishedGemini && !finishedCancer) // In-Progress
+        else if(finishedCancer && !finishedLeo) // In-Progress
         {
             mLSRButtons[2]->SetUpTexture(gAssetManager.LoadTexture("LSR_PG3_LEO_LIT.BMP"));
         }
