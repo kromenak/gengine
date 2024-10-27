@@ -29,17 +29,19 @@ public:
 
     void OnUpdate(float deltaTime) override;
 
-    RectTransform* GetRectTransform();
+    RectTransform* GetRectTransform() const { return static_cast<RectTransform*>(GetTransform()); }
+    float GetWidth() const { return GetRectTransform()->GetSizeDelta().x; }
+    void SetWidth(float width) { GetRectTransform()->SetSizeDeltaX(width); }
+    float GetHeight() const { return GetRectTransform()->GetSizeDelta().y; }
+    void SetHeight(float height) { GetRectTransform()->SetSizeDeltaY(height); }
 
     UILabel* GetLabel() const { return mLabel; }
-    void SetWidth(float width);
-    void SetHeight(float height);
     void SetFont(Font* font, Font* disabledFont = nullptr);
     void SetText(const std::string& text);
     void SetTextAlignment(HorizontalAlignment alignment);
 
     UIButton* GetButton() const { return mButton; }
-    void SetPressCallback(std::function<void()> callback) { mPressCallback = callback; }
+    void SetPressCallback(const std::function<void()>& callback) { mPressCallback = callback; }
     void SetPressAudio(Audio* audio) { mPressAudio = audio; }
     void Press();
 

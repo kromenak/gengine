@@ -26,7 +26,7 @@ SidneyButton::SidneyButton(Actor* parent) : Actor("SidneyButton", TransformType:
     mLabel->SetMasked(true);
 
     mLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-    mLabel->GetRectTransform()->SetSizeDelta(-4.0f, 0.0f);
+    mLabel->GetRectTransform()->SetSizeDelta(-12.0f, 0.0f);
 
     // Add outer border box in gray.
     Actor* topActor = new Actor(TransformType::RectTransform);
@@ -94,16 +94,6 @@ void SidneyButton::OnUpdate(float deltaTime)
     }
 }
 
-void SidneyButton::SetWidth(float width)
-{
-    GetRectTransform()->SetSizeDeltaX(width);
-}
-
-void SidneyButton::SetHeight(float height)
-{
-    GetRectTransform()->SetSizeDeltaY(height);
-}
-
 void SidneyButton::SetFont(Font* font, Font* disabledFont)
 {
     mFont = font;
@@ -128,11 +118,6 @@ void SidneyButton::SetText(const std::string& text)
 void SidneyButton::SetTextAlignment(HorizontalAlignment alignment)
 {
     mLabel->SetHorizonalAlignment(alignment);
-}
-
-RectTransform* SidneyButton::GetRectTransform()
-{
-    return static_cast<RectTransform*>(GetTransform());
 }
 
 void SidneyButton::Press()
