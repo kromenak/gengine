@@ -196,6 +196,12 @@ const Localizer& SidneyUtil::GetAnalyzeLocalizer()
     return localizer;
 }
 
+const Localizer& SidneyUtil::GetTranslateLocalizer()
+{
+    static Localizer localizer("SIDNEY.TXT", "Translate Screen");
+    return localizer;
+}
+
 const Localizer& SidneyUtil::GetAddDataLocalizer()
 {
     static Localizer localizer("SIDNEY.TXT", "AddData Screen");

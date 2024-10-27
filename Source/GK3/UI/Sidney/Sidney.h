@@ -15,6 +15,7 @@
 #include "SidneyFiles.h"
 #include "SidneyMakeId.h"
 #include "SidneySearch.h"
+#include "SidneyTranslate.h"
 #include "StringUtil.h"
 
 class PersistState;
@@ -59,6 +60,7 @@ private:
     SidneyEmail mEmail;
     SidneyFiles mFiles;
     SidneyAnalyze mAnalyze;
+    SidneyTranslate mTranslate;
     SidneyAddData mAddData;
     SidneyMakeId mMakeId;
 };

@@ -6,7 +6,6 @@
 #pragma once
 #include "SidneyMenuBar.h"
 #include "Vector2.h"
-
 #include "UILabel.h"
 
 class Actor;
@@ -75,7 +74,8 @@ private:
         Empty,
         PreAnalyze,
         Map,
-        Image
+        Image,
+        Text
     };
     State mState = State::Empty;
     
@@ -104,6 +104,18 @@ private:
 
     void AnalyzeImage_OnViewGeometryButtonPressed();
     void AnalyzeImage_OnZoomClarifyButtonPressed();
+
+    // ANALYZE TEXT
+    Actor* mAnalyzeTextWindow = nullptr;
+    UILabel* mAnalyzeTextFileNameLabel = nullptr;
+    UILabel* mAnalyzeTextLabel = nullptr;
+
+    void AnalyzeText_Init();
+    void AnalyzeText_EnterState();
+    void AnalyzeText_OnAnalyzeButtonPressed();
+
+    void AnalyzeText_OnTranslateButtonPressed();
+    void AnalyzeText_OnAnagramParserPressed();
 
     // ANALYZE MAP
     Actor* mAnalyzeMapWindow = nullptr;

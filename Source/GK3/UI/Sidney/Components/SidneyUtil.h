@@ -36,6 +36,7 @@ public:
 
     static const Localizer& GetMainScreenLocalizer();
     static const Localizer& GetAnalyzeLocalizer();
+    static const Localizer& GetTranslateLocalizer();
     static const Localizer& GetAddDataLocalizer();
     static const Localizer& GetMakeIdLocalizer();
 };

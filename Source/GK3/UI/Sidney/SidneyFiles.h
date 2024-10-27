@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Actor.h"
+#include "AssetManager.h"
 #include "InventoryManager.h"
 #include "SidneyUtil.h"
 #include "StringUtil.h"
@@ -53,7 +54,7 @@ struct SidneyFile
     int id = -1;
 
     // Type of this file (is it an image, audio, text, etc?).
-    SidneyFileType type;
+    SidneyFileType type = SidneyFileType::Image;
 
     // Unique *internal* name for this file. Not displayed to player!
     // This is used by Sheep to identify files it wants to add.
@@ -86,7 +87,13 @@ struct SidneyFile
     Texture* GetIcon()
     {
         // We just reuse the inventory list texture for this.
-        return gInventoryManager.GetInventoryItemListTexture(invItemName);
+        Texture* texture = gInventoryManager.GetInventoryItemListTexture(invItemName);
+        if(texture == nullptr)
+        {
+            // Some files don't have an inventory item - just fall back on a generic file icon.
+            texture = gAssetManager.LoadTexture("SIDFILE_9.BMP");
+        }
+        return texture;
     }
 
     void OnPersist(PersistState& ps)

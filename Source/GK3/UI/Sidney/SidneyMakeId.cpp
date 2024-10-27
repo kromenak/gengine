@@ -22,7 +22,7 @@ void SidneyMakeId::Init(Actor* parent)
     mRoot->SetName("MakeId");
 
     // Add main menu button.
-    SidneyUtil::CreateMainMenuButton(mRoot, [&](){
+    SidneyUtil::CreateMainMenuButton(mRoot, [this](){
         Hide();
     });
 

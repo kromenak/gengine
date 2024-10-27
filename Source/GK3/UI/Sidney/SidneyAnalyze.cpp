@@ -29,6 +29,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     // ...we should create the anaysis views *first* so they appear *behind* the menu bar.
     AnalyzeMap_Init();
     AnalyzeImage_Init();
+    AnalyzeText_Init();
 
     // Add menu bar.
     mMenuBar.Init(mRoot, SidneyUtil::GetAnalyzeLocalizer().GetText("ScreenName"), 120.0f);
@@ -250,6 +251,7 @@ void SidneyAnalyze::SetState(State state)
     mPreAnalyzeWindow->SetActive(false);
     mAnalyzeMapWindow->SetActive(false);
     mAnalyzeImageWindow->SetActive(false);
+    mAnalyzeTextWindow->SetActive(false);
 
     // All dropdowns except "Open" are disabled by default.
     mMenuBar.SetDropdownEnabled(kFileDropdownIdx, true);
@@ -288,6 +290,10 @@ void SidneyAnalyze::SetState(State state)
     case State::Image:
         AnalyzeImage_EnterState();
         break;
+
+    case State::Text:
+        AnalyzeText_EnterState();
+        break;
     }
 
     // The analyze button is clickable as long as we aren't in the "Empty" state.
@@ -311,6 +317,10 @@ void SidneyAnalyze::SetStateFromFile()
     {
         SetState(State::Image);
     }
+    else if(file->type == SidneyFileType::Text)
+    {
+        SetState(State::Text);
+    }
     else
     {
         printf("Unknown analyze state!\n");
@@ -333,11 +343,17 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
     case State::PreAnalyze:
         // Do nothing in these cases - Analyze button has no effect.
         break;
+
     case State::Map:
         AnalyzeMap_OnAnalyzeButtonPressed();
         break;
+
     case State::Image:
         AnalyzeImage_OnAnalyzeButtonPressed();
+        break;
+
+    case State::Text:
+        AnalyzeText_OnAnalyzeButtonPressed();
         break;
     }
 

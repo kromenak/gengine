@@ -136,9 +136,9 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
 
         buttonPos += kButtonSpacing;
         UIButton* translateButton = CreateMainButton(desktopBackground, "TRANSL", buttonPos);
-        translateButton->SetPressCallback([](UIButton* button){
+        translateButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
-            printf("Translate\n");
+            mTranslate.Show();
         });
 
         buttonPos += kButtonSpacing;
@@ -184,10 +184,12 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
     mSearch.Init(this);
     mEmail.Init(this);
     mAnalyze.Init(this, &mFiles);
+    mTranslate.Init(this, &mFiles);
     mAddData.Init(this, &mFiles);
     mMakeId.Init(this);
 
     mFiles.Init(this);
+
     // Not active by default.
     SetActive(false);
 }
@@ -270,5 +272,6 @@ void Sidney::OnUpdate(float deltaTime)
     // Each screen will early out if not active.
     mSearch.OnUpdate(deltaTime);
     mAnalyze.OnUpdate(deltaTime);
+    mTranslate.OnUpdate(deltaTime);
     mMakeId.OnUpdate(deltaTime);
 }
