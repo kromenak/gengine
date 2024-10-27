@@ -44,6 +44,7 @@ public:
 
     int GetLineCount();
     float GetTextWidth();
+    float GetTextHeight();
     
 protected:
 	Vector2 GetCharPos(int index) const;

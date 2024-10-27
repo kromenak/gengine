@@ -125,6 +125,38 @@ float UILabel::GetTextWidth()
     return Math::Abs(largestX - smallestX);
 }
 
+float UILabel::GetTextHeight()
+{
+    // Before the text width can be known, an up-to-date mesh is needed.
+    GenerateMesh();
+
+    // Used generated mesh to find min/max y-positions of the glyphs.
+    float smallestY = FLT_MAX;
+    float largestY = FLT_MIN;
+    for(auto& charInfo : mTextLayout.GetChars())
+    {
+        float minY = charInfo.pos.y;
+        if(minY < smallestY)
+        {
+            smallestY = minY;
+        }
+
+        float maxY = charInfo.pos.y + charInfo.glyph.height;
+        if(maxY > largestY)
+        {
+            largestY = maxY;
+        }
+    }
+
+    //HACK: Generating the mesh above makes the label no longer "dirty".
+    //HACK: However, it may be important for UI creation code to keep the label dirty after calling this (if changing transform properties).
+    //HACK: The REAL problem is that changing a label's transform doesn't flag it as dirty, which might be good to fix!
+    SetDirty();
+
+    // The height is then the difference between the min/max y-positions.
+    return Math::Abs(largestY - smallestY);
+}
+
 Vector2 UILabel::GetCharPos(int index) const
 {
 	const TextLayout::CharInfo* charInfo = mTextLayout.GetChar(index);
@@ -306,9 +338,7 @@ void UILabel::GenerateMesh()
     meshDefinition.AddVertexData(VertexAttribute::UV1, uvs);
 
     meshDefinition.SetIndexData(indexSize, indexes);
-    
-	// This mesh should render as a "triangle strip".
-	// Vtx 1,2,3 is one triangle. Vtx 2,3,4 is the next triangle.
+
     Submesh* submesh = mMesh->AddSubmesh(meshDefinition);
 	submesh->SetRenderMode(RenderMode::Triangles);
 
