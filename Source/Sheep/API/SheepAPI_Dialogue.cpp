@@ -10,24 +10,15 @@ using namespace std;
 
 shpvoid StartVoiceOver(const std::string& dialogueName, int numLines)
 {
-    std::string yakName = "E" + dialogueName;
-    Animation* yak = gAssetManager.LoadYak(yakName, AssetScope::Scene);
-    
-    AnimParams params;
-    params.animation = yak;
-    params.finishCallback = AddWait();
-    params.isYak = true;
-    gSceneManager.GetScene()->GetAnimator()->Start(params);
+    gDialogueManager.StartDialogue(dialogueName, numLines, false, AddWait());
     return 0;
 }
 RegFunc2(StartVoiceOver, void, string, int, WAITABLE, REL_FUNC);
 
 shpvoid StartYak(const std::string& yakAnimationName)
 {
-    Animation* yak = gAssetManager.LoadYak(yakAnimationName, AssetScope::Scene);
-
     AnimParams params;
-    params.animation = yak;
+    params.animation = gAssetManager.LoadYak(yakAnimationName, AssetScope::Scene);
     params.finishCallback = AddWait();
     params.isYak = true;
     gSceneManager.GetScene()->GetAnimator()->Start(params);
