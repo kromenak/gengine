@@ -946,7 +946,6 @@ void Scene::ExecuteAction(const Action* action)
 		}
 		case Action::Approach::TurnTo: // Never used in GK3.
 		{
-			std::cout << "Executed TURNTO approach type!" << std::endl;
 			gActionManager.ExecuteAction(action, nullptr, false);
 			break;
 		}

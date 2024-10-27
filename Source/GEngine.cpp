@@ -431,6 +431,7 @@ void GEngine::ProcessInput()
                     }
                 }
 
+                /*
                 else if(event.key.keysym.sym == SDLK_u)
                 {
                     printf("UNLOAD START\n");
@@ -445,6 +446,7 @@ void GEngine::ProcessInput()
                         printf("LOAD COMPLETE\n");
                     });
                 }
+                */
 				break;
 			}
 			

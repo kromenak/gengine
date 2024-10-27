@@ -273,6 +273,10 @@ void RectTransform::CalcLocalPosition()
 	// Don't overwrite the z-component, which can be set freely.
 	mLocalPosition.x = localPos.x;
 	mLocalPosition.y = localPos.y;
+
+    //TODO: Could do something like this for "pixel perfect" behavior. But may need a pass on all UIs in the game, or make it an opt-in thing...
+    //mLocalPosition.x = Math::RoundToInt(localPos.x);
+    //mLocalPosition.y = Math::RoundToInt(localPos.y);
 }
 
 void RectTransform::OnUpdate(float deltaTime)
