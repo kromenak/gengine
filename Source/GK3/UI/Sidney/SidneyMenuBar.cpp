@@ -181,12 +181,26 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<vo
 {
     assert(!mDropdowns.empty());
 
+    // Create button with desired text.
     SidneyButton* button = new SidneyButton(mDropdowns.back().rootButton->GetOwner());
     button->SetText(label);
     button->SetTextAlignment(HorizontalAlignment::Left);
     button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
-    button->GetRectTransform()->SetSizeDeltaY(button->GetRectTransform()->GetSizeDelta().y + 2); // looks better with a little extra height
-    button->SetWidth(100.0f);
+
+    // Figure out desired width/height of this button.
+    // It should have a minimum size, but be bigger to fit its text, but also match any bigger item defined previously.
+    float labelWidth = Math::Max(80.0f, button->GetLabel()->GetTextWidth() + 24.0f);
+    for(SidneyButton* option : mDropdowns.back().options)
+    {
+        if(option->GetWidth() > labelWidth)
+        {
+            labelWidth = option->GetWidth();
+        }
+    }
+    button->SetWidth(labelWidth);
+    button->SetHeight(button->GetHeight() + 2); // looks better with a little extra height
+
+    // Set action on press.
     button->SetPressCallback([this, button, pressCallback](){
         if(pressCallback != nullptr)
         {
@@ -210,9 +224,21 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<vo
     int randomSfxIndex = Random::Range(1, 6);
     button->SetPressAudio(gAssetManager.LoadAudio("SIDBUTTON" + std::to_string(randomSfxIndex) + ".WAV"));
 
+    // Position button in the list.
     button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     button->GetRectTransform()->SetAnchoredPosition(0.0f, -13.0f + mDropdowns.back().options.size() * -13.0f);
+
+    // Add to list of options.
     mDropdowns.back().options.emplace_back(button);
+
+    // Backtrack and make sure any previously created option is as wide as this one.
+    for(auto& option : mDropdowns.back().options)
+    {
+        if(option->GetWidth() < labelWidth)
+        {
+            option->SetWidth(labelWidth);
+        }
+    }
 }
 
 void SidneyMenuBar::SetDropdownEnabled(size_t index, bool enabled)
