@@ -9,6 +9,7 @@
 class Actor;
 class SidneyFiles;
 class SidneyPopup;
+class UILabel;
 
 class SidneyTranslate
 {
@@ -35,4 +36,25 @@ private:
 
     // A popup for displaying messages on this screen.
     SidneyPopup* mPopup = nullptr;
+
+    Actor* mTranslateWindow = nullptr;
+    UILabel* mTranslateHeaderLabel = nullptr;
+    UILabel* mTranslateTextLabel = nullptr;
+
+    // The language we want to translate from and to.
+    enum class Language
+    {
+        English,
+        Latin,
+        French,
+        Italian
+    };
+    Language mFromLanguage = Language::English;
+    Language mToLanguage = Language::Latin;
+
+    SidneyButton* mFromButtons[4] = { 0 };
+    SidneyButton* mToButtons[4] = { 0 };
+
+    void OpenFile(int fileId);
+    void OnTranslateButtonPressed();
 };

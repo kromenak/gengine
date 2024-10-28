@@ -46,7 +46,9 @@ public:
     void Press();
 
     bool IsAnimating() const { return mPressAnimTimer > 0.0f; }
-    
+
+    void SetSelected(bool selected) { mSelected = selected; }
+
 private:
     // Text label on the button.
     UILabel* mLabel = nullptr;
@@ -69,4 +71,8 @@ private:
     // The audio to play when the button is pressed.
     // This is actually super inconsistent in the original game - unclear what the rhyme or reason is.
     Audio* mPressAudio = nullptr;
+
+    // If a Sidney button is "selected", it means that it will stay highlighted gold, even after pressing it or no longer hovering it.
+    // This is used to simulate "radio button group" style behavior.
+    bool mSelected = false;
 };

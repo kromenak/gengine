@@ -148,6 +148,15 @@ SidneyButton* SidneyUtil::CreateBigButton(Actor* parent)
     return button;
 }
 
+SidneyButton* SidneyUtil::CreateSmallButton(Actor* parent)
+{
+    SidneyButton* button = new SidneyButton(parent);
+    button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+    button->SetWidth(80.0f);
+    button->SetHeight(13.0f);
+    return button;
+}
+
 const UINineSliceParams& SidneyUtil::GetGrayBoxParams(const Color32& centerColor)
 {
     static UINineSliceParams params;

@@ -56,7 +56,7 @@ void SidneyButton::OnUpdate(float deltaTime)
     }
     else if(mPressAnimTimer <= 0.0f)
     {
-        if(mButton->IsHovered())
+        if(mButton->IsHovered() || mSelected)
         {
             mBorder->SetTexturesAndColors(SidneyUtil::GetGoldBoxParams(Color32::Clear));
         }

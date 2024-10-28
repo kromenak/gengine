@@ -30,6 +30,7 @@ public:
     static Actor* CreateMenuBar(Actor* parent, const std::string& screenName, float labelWidth);
 
     static SidneyButton* CreateBigButton(Actor* parent);
+    static SidneyButton* CreateSmallButton(Actor* parent);
 
     static const UINineSliceParams& GetGrayBoxParams(const Color32& centerColor);
     static const UINineSliceParams& GetGoldBoxParams(const Color32& centerColor);
