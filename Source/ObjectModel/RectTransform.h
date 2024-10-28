@@ -80,6 +80,8 @@ public:
     // Sometimes, you want to make sure a RectTransform is inside of some Rect area.
     // Good example: a UI widget (action bar, option bar) that you want to keep within the screen rect.
     void MoveInsideRect(const Rect& other);
+
+    void SetPixelPerfect(bool pixelPerfect) { mPixelPerfect = pixelPerfect; }
     
 protected:
 	void CalcLocalPosition() override;
@@ -105,4 +107,7 @@ private:
 	// The size of the rect area (width/height).
 	// This can usually be set as desired, but it may be overridden by anchor logic in some cases.
 	Vector2 mSizeDelta = Vector2(100.0f, 100.0f);
+
+    // If true, the RectTransform will only use whole numbers for the x/y local position.
+    bool mPixelPerfect = false;
 };

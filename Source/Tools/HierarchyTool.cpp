@@ -90,7 +90,7 @@ void HierarchyTool::Render(bool& toolActive)
                 // Display variables of the Actor itself.
                 InspectorUtil::RenderVariables(&mSelectedActor->GetTypeInfo(), mSelectedActor);
 
-                // Display variablesof each component.
+                // Display variables of each component.
                 for(Component* component : mSelectedActor->GetComponents())
                 {
                     InspectorUtil::RenderVariables(&component->GetTypeInfo(), component);
