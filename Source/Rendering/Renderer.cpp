@@ -211,7 +211,10 @@ bool Renderer::Initialize()
 
 void Renderer::Shutdown()
 {
-    GAPI::Get()->Shutdown();
+    if(GAPI::Get() != nullptr)
+    {
+        GAPI::Get()->Shutdown();
+    }
     Window::Destroy();
 }
 
