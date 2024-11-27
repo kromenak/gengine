@@ -46,7 +46,7 @@ Scene::Scene(const std::string& name) :
 {
 	// Create game camera.
 	mCamera = new GameCamera();
-	
+
 	// Create animation player.
 	Actor* animationActor = new Actor("Animator");
 	mAnimator = animationActor->AddComponent<Animator>();
@@ -207,7 +207,7 @@ void Scene::Unload()
 {
 	gRenderer.SetBSP(nullptr);
 	gRenderer.SetSkybox(nullptr);
-	
+
 	delete mSceneData;
 	mSceneData = nullptr;
 }
@@ -217,7 +217,7 @@ void Scene::Init()
     // Create status overlay actor.
     // Do this after setting location so it shows the correct location!
     mStatusOverlay = new StatusOverlay();
-    
+
     // Increment location counter after resolving scene data.
     // Despite SIFs sometimes doing "zero-checks," other NVC and SHP scripts typically do "one-checks".
     // E.g. run on "1st time enter" checks count == 1.
@@ -250,7 +250,7 @@ void Scene::Init()
             mCamera->AddBounds(model);
         }
     }
-    
+
     // Init all actors and props.
     for(auto& prop : mProps)
     {
@@ -274,7 +274,7 @@ void Scene::Init()
             mAnimator->Sample(modelDef->initAnim, 0, modelDef->name);
         }
     }
-    
+
     // Create soundtrack player and get it playing!
     Actor* actor = new Actor();
     mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
@@ -334,7 +334,7 @@ void Scene::Update(float deltaTime)
     for(int i = mGameTimers.size() - 1; i >= 0; --i)
     {
         mGameTimers[i].secondsRemaining -= deltaTime;
-        
+
         // If another action is already playing, we wait until it is finished before executing this one (and removing it from the list).
         if(mGameTimers[i].secondsRemaining <= 0.0f && !gActionManager.IsActionPlaying())
         {
@@ -347,16 +347,16 @@ void Scene::Update(float deltaTime)
 bool Scene::InitEgoPosition(const std::string& positionName)
 {
 	if(mEgo == nullptr) { return false; }
-    
+
 	// Get position.
     const ScenePosition* position = GetPosition(positionName);
 	if(position == nullptr) { return false; }
-    
+
     // Set position and heading.
     mEgo->SetPosition(position->position);
     mEgo->SetHeading(position->heading);
     mEgo->SnapToFloor();
-	
+
 	// Should also set camera position/angle.
 	// Output a warning if specified position has no camera though.
 	if(position->cameraName.empty())
@@ -364,7 +364,7 @@ bool Scene::InitEgoPosition(const std::string& positionName)
 		gReportManager.Log("Warning", "No camera information is supplied in position '" + positionName + "'.");
 		return true;
 	}
-	
+
 	// Move the camera to desired position/angle.
 	SetCameraPosition(position->cameraName);
 	return true;
@@ -382,14 +382,14 @@ void Scene::SetCameraPosition(const std::string& cameraName)
 			camera = mSceneData->GetDialogueCamera(cameraName);
 		}
 	}
-	
+
 	// If couldn't find a camera with this name, error out!
 	if(camera == nullptr)
 	{
 		gReportManager.Log("Error", "Error: '" + cameraName + "' is not a valid room camera.");
 		return;
 	}
-	
+
 	// Set position/angle.
 	mCamera->SetPosition(camera->position);
 	mCamera->SetAngle(camera->angle);
@@ -460,7 +460,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
             }
             if(shouldIgnore) { continue; }
         }
-        
+
         // If only interested in interactive objects, skip non-interactive objects.
         if(interactiveOnly && !object->CanInteract()) { continue; }
 
@@ -479,7 +479,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
             }
         }
     }
-	
+
 	// Assign name in hit info, if anything was hit.
 	// This is because GKObjects don't currently do this during raycast.
 	if(result.hitObject != nullptr)
@@ -487,7 +487,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
         //Debug::DrawSphere(Sphere(ray.GetPoint(result.hitInfo.t), 1.0f), Color32::Red, 1.0f);
 		result.hitInfo.name = result.hitObject->GetNoun();
 	}
-	
+
 	// Check BSP for any hit interactable object.
     for(BSPActor* object : mBSPActors)
     {
@@ -527,10 +527,10 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 {
 	// Ignore scene interaction while the action bar is showing.
 	if(gActionManager.IsActionBarShowing()) { return; }
-	
+
 	// Also ignore scene interaction when inventory is up.
 	if(gInventoryManager.IsInventoryShowing()) { return; }
-	
+
 	// Get interacted object.
 	GKObject* interacted = interactHint;
 	if(interacted == nullptr)
@@ -538,7 +538,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 		SceneCastResult result = Raycast(ray, true);
 		interacted = result.hitObject;
 	}
-	
+
 	// If interacted object is null, see if we hit the floor, in which case we want to walk.
 	if(interacted == nullptr)
 	{
@@ -563,7 +563,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 
     // Looks like we're interacting with something interesting.
     mActiveObject = interacted;
-	
+
 	// We've got an object to interact with!
 	// See if it has a pre-defined verb with an associated action. If so, we will immediately execute that action (w/o showing action bar).
 	if(!interacted->GetVerb().empty())
@@ -575,11 +575,11 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
             return;
         }
 	}
-	
+
 	// No pre-defined verb OR no action for that noun/verb combo - try to show action bar.
 	gActionManager.ShowActionBar(interacted->GetNoun(), std::bind(&Scene::ExecuteAction, this, std::placeholders::_1));
     ActionBar* actionBar = gActionManager.GetActionBar();
-  
+
     // Add INSPECT/UNINSPECT if not present.
     bool alreadyInspecting = StringUtil::EqualsIgnoreCase(interacted->GetNoun(), mCamera->GetInspectNoun());
     if(alreadyInspecting)
@@ -744,7 +744,7 @@ void Scene::SetPaused(bool paused)
     {
         mSoundtrackPlayer->SetEnabled(!paused);
     }
-    
+
     // Pause/unpause animator.
     //TODO: You might expect that pausing the animator is necessary to effectively pause the scene.
     //TODO: However, doing so can break actions in inventory, since voice over actions rely on the Animator.
@@ -755,7 +755,7 @@ void Scene::SetPaused(bool paused)
         mAnimator->SetEnabled(!paused);
     }
     */
-    
+
     // Tell camera if the scene is active or not.
     // We don't want to set camera inactive, because we still want it to render.
     // And we don't want to disable updates b/c camera object handles player inputs, even if scene is paused.
@@ -763,13 +763,13 @@ void Scene::SetPaused(bool paused)
     {
         mCamera->SetSceneActive(!paused);
     }
-    
+
     // Pause/unpause all objects in the scene by disabling updates.
     for(auto& object : mPropsAndActors)
     {
         object->SetUpdateEnabled(!paused);
     }
-    
+
     // For GKActors, they "internally" contain a separate actor for the 3D mesh.
     // So, we've also got to set the time scale on that.
     //TODO: Probably could hide this by adding GKObject/GKActor functions for pause/unpause.
@@ -841,7 +841,7 @@ void Scene::InspectObject(const std::string& noun, std::function<void()> finishC
 
                 //TODO: If the actor is facing a wall or something, it's pretty likely the camera will go out-of-bounds.
                 //TODO: The original game seems to check this and move the camera around to a valid spot on the sides/back.
-                
+
                 // Use the calculated inspect position and angle.
                 mCamera->Inspect(noun, inspectPos, inspectAngle, finishCallback);
                 foundActor = true;
@@ -866,10 +866,10 @@ void Scene::ExecuteAction(const Action* action)
 {
 	// Ignore nulls.
 	if(action == nullptr) { return; }
-	
+
 	// Log to "Actions" stream.
 	gReportManager.Log("Actions", "Playing NVC " + action->ToString());
-	
+
 	// Before executing the NVC, we need to handle any approach.
 	switch(action->approach)
 	{
@@ -879,7 +879,7 @@ void Scene::ExecuteAction(const Action* action)
 			if(scenePos != nullptr)
 			{
 				//Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
-				mEgo->WalkTo(scenePos->position, scenePos->heading, [this, action]() -> void {
+				mEgo->WalkTo(scenePos->position, scenePos->heading, [action]() -> void {
 					gActionManager.ExecuteAction(action, nullptr, false);
 				});
 			}
@@ -962,14 +962,14 @@ void Scene::ExecuteAction(const Action* action)
 			{
 				modelPosition = mSceneData->GetBSP()->GetPosition(action->target);
 			}
-			
+
 			// Get vector from Ego to model.
 			//Debug::DrawLine(mEgo->GetPosition(), modelPosition, Color32::Green, 60.0f);
 			Vector3 egoToModel = modelPosition - mEgo->GetPosition();
-			
+
 			// Do a "turn to" heading.
 			Heading turnToHeading = Heading::FromDirection(egoToModel);
-			mEgo->TurnTo(turnToHeading, [this, action]() -> void {
+			mEgo->TurnTo(turnToHeading, [action]() -> void {
 				gActionManager.ExecuteAction(action, nullptr, false);
 			});
 			break;
@@ -983,7 +983,7 @@ void Scene::ExecuteAction(const Action* action)
             // If didn't find it, print a warning/error and just execute right away.
             if(obj != nullptr)
             {
-                mEgo->WalkToSee(obj, [this, action]() -> void{
+                mEgo->WalkToSee(obj, [action]() -> void{
                     gActionManager.ExecuteAction(action, nullptr, false);
                 });
             }

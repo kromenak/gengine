@@ -21,22 +21,22 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
 
     // Add canvas for rendering UI elements.
 	AddComponent<UICanvas>(0);
-	
+
 	// Add translucent background image that tints the scene.
 	UIImage* background = AddComponent<UIImage>();
 	background->SetTexture(&Texture::Black);
 	background->SetColor(Color32(0, 0, 0, 128));
-	
+
 	RectTransform* inventoryRectTransform = GetComponent<RectTransform>();
 	inventoryRectTransform->SetSizeDelta(0.0f, 0.0f);
 	inventoryRectTransform->SetAnchorMin(Vector2::Zero);
 	inventoryRectTransform->SetAnchorMax(Vector2::One);
-	
+
 	// Add exit button to bottom-left corner of screen.
 	Actor* exitButtonActor = new Actor(TransformType::RectTransform);
     exitButtonActor->GetTransform()->SetParent(GetTransform());
 	UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
-	
+
 	exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
 	exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
 	exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
@@ -44,26 +44,26 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
     exitButton->SetPressCallback([this](UIButton* button) {
         Hide();
     });
-	
+
 	RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
 	exitButtonRectTransform->SetParent(inventoryRectTransform);
 	exitButtonRectTransform->SetSizeDelta(58.0f, 26.0f); // texture width/height
 	exitButtonRectTransform->SetAnchor(Vector2::Zero);
 	exitButtonRectTransform->SetAnchoredPosition(10.0f, 10.0f);
 	exitButtonRectTransform->SetPivot(0.0f, 0.0f);
-	
+
 	// Create active inventory item highlight, but hide by default.
 	Actor* activeHighlightActor = new Actor(TransformType::RectTransform);
     activeHighlightActor->GetTransform()->SetParent(GetTransform());
 	mActiveHighlightImage = activeHighlightActor->AddComponent<UIImage>();
 	mActiveHighlightImage->SetTexture(gAssetManager.LoadTexture("INV_HIGHLIGHT.BMP"), true);
 	mActiveHighlightImage->SetEnabled(false);
-	
+
 	RectTransform* activeHighlightRectTransform = mActiveHighlightImage->GetRectTransform();
 	activeHighlightRectTransform->SetParent(inventoryRectTransform);
 	activeHighlightRectTransform->SetAnchor(0.0f, 1.0f);
 	activeHighlightRectTransform->SetPivot(0.0f, 1.0f);
-	
+
 	// Hide inventory UI by default.
     SetActive(false);
 }
@@ -72,7 +72,7 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 {
     // Already showing, so don't do it again!
     if(IsActive()) { return; }
-    
+
     // Push layer onto stack.
     gLayerManager.PushLayer(&mLayer);
 
@@ -82,7 +82,7 @@ void InventoryScreen::Show(const std::string& actorName, const std::set<std::str
 
     // Layout the buttons on screen.
     RefreshLayout();
-	
+
 	// Actually show the stuff!
 	SetActive(true);
 }
@@ -91,7 +91,7 @@ void InventoryScreen::Hide()
 {
     if(!IsActive()) { return; }
 	SetActive(false);
-    
+
     // Pop off stack.
     gLayerManager.PopLayer(&mLayer);
 
@@ -206,13 +206,13 @@ void InventoryScreen::OnItemClicked(UIButton* button, std::string itemName)
 {
 	// Show the action bar for this noun.
     gActionManager.ShowActionBar(itemName, nullptr);
-	
+
 	// We want to add a "pickup" verb, which means to make the item the active inventory item.
 	ActionBar* actionBar = gActionManager.GetActionBar();
-	actionBar->AddVerbToBack("PICKUP", [this, button, itemName]() {
+	actionBar->AddVerbToBack("PICKUP", [this, itemName]() {
         gInventoryManager.SetActiveInventoryItem(this->mCurrentActorName, itemName);
 	});
-	
+
 	// We want to add an "inspect" verb, which means to show the close-up of the item.
 	actionBar->AddVerbToFront("INSPECT", [itemName]() {
 		gInventoryManager.InventoryInspect(itemName);

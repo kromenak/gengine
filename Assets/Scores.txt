@@ -1,8 +1,9 @@
-// GK3 somehow internally knows all possible score events and what points to award in each case.
-// Thus far, I have't been able to find any data file that specifies this data. Possibly, it is hard-coded in the game's source code.
+// GK3 knows all possible score events and what points to award in each case.
+// Thus far, I haven't found a data-driven mechanism for this. Possibly, it's hard-coded in the game's source code.
 
-// To get around that, we'll use our own data file that has all this info in it.
+// To get around that, this file enumerates that data. It is read/parsed at runtime.
 [SCORES]
+//score_code = score_points
 e_110a_r25_tape = 2
 e_110a_r25_hanger = 2
 

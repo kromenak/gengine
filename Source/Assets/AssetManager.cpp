@@ -106,7 +106,7 @@ std::string AssetManager::GetAssetPath(const std::string& fileName, std::initial
     {
         return GetAssetPath(fileName);
     }
-    
+
     // Otherwise, we have a filename, but multiple valid extensions.
     // A good example is a movie file. The file might be called "intro", but the extension could be "avi" or "bik".
     for(const std::string& extension : extensions)
@@ -124,14 +124,14 @@ bool AssetManager::LoadBarn(const std::string& barnName)
 {
     // If the barn is already in the map, then we don't need to load it again.
     if(mLoadedBarns.find(barnName) != mLoadedBarns.end()) { return true; }
-    
+
     // Find path to barn file.
     std::string assetPath = GetAssetPath(barnName);
     if(assetPath.empty())
     {
 		return false;
     }
-    
+
     // Load barn file.
     mLoadedBarns.emplace(barnName, assetPath);
 	return true;
@@ -142,7 +142,7 @@ void AssetManager::UnloadBarn(const std::string& barnName)
     // If the barn isn't in the map, we can't unload it!
     auto iter = mLoadedBarns.find(barnName);
     if(iter == mLoadedBarns.end()) { return; }
-    
+
     // Remove from map.
     mLoadedBarns.erase(iter);
 }
@@ -202,7 +202,7 @@ Model* AssetManager::LoadModel(const std::string& name, AssetScope scope)
 
 Texture* AssetManager::LoadTexture(const std::string& name, AssetScope scope)
 {
-    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mTextureCache);     
+    return LoadAsset<Texture>(SanitizeAssetName(name, ".BMP"), scope, &mTextureCache);
 }
 
 Texture* AssetManager::LoadTextureAsync(const std::string& name, AssetScope scope)
@@ -342,7 +342,7 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
 
     // Create the shader from the text assets.
     Shader* shader = new Shader(shaderName, vertShader, fragShader);
-	
+
 	// Cache and return.
     mShaderCache.Set(shaderName, shader);
 	return shader;
@@ -389,7 +389,7 @@ BarnFile* AssetManager::GetBarn(const std::string& barnName)
 	{
 		return &iter->second;
 	}
-	
+
 	//TODO: Maybe load barn if not loaded?
 	return nullptr;
 }
@@ -419,7 +419,7 @@ BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 			}
 		}
 	}
-	
+
 	// Didn't find the Barn containing this asset.
 	return nullptr;
 }
@@ -460,7 +460,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, Asset
         }
     }
     //printf("Loading asset %s\n", assetName.c_str());
-    
+
     // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
     uint32_t bufferSize = 0;
     uint8_t* buffer = CreateAssetBuffer(assetName, bufferSize);
@@ -525,7 +525,7 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
     {
         cache->Set(assetName, asset);
     }
-    
+
     // Load in background.
     Loader::AddLoadingTask();
     ThreadPool::AddTask([this, deleteBuffer](void* arg){
@@ -545,7 +545,7 @@ T* AssetManager::LoadAssetAsync(const std::string& assetName, AssetScope scope, 
         {
             delete[] buffer;
         }
-    }, asset, [this, asset, callback](){
+    }, asset, [asset, callback](){
         //printf("Loaded asset: %s\n", asset->GetName().c_str());
         if(callback != nullptr)
         {
@@ -569,14 +569,14 @@ uint8_t* AssetManager::CreateAssetBuffer(const std::string& assetName, uint32_t&
 	{
         return File::ReadIntoBuffer(assetPath, outBufferSize);
 	}
-	
+
 	// If no file to load, we'll get the asset from a barn.
 	BarnFile* barn = GetBarnContainingAsset(assetName);
 	if(barn != nullptr)
 	{
         return barn->CreateAssetBuffer(assetName, outBufferSize);
 	}
-	
+
 	// Couldn't find this asset!
 	return nullptr;
 }

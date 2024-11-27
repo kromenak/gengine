@@ -147,7 +147,7 @@ void SidneyMenuBar::AddDropdown(const std::string& label)
     dropdownLabel->SetText(label);
     dropdownLabel->SetHorizonalAlignment(HorizontalAlignment::Left);
     dropdownLabel->SetVerticalAlignment(VerticalAlignment::Center);
-    
+
     dropdownLabel->GetRectTransform()->SetPivot(0.0f, 0.0f);
     dropdownLabel->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     dropdownLabel->GetRectTransform()->SetAnchoredPosition(mNextDropdownPosition, 1.0f);
@@ -201,7 +201,7 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<vo
     button->SetHeight(button->GetHeight() + 2); // looks better with a little extra height
 
     // Set action on press.
-    button->SetPressCallback([this, button, pressCallback](){
+    button->SetPressCallback([this, pressCallback](){
         if(pressCallback != nullptr)
         {
             pressCallback();
