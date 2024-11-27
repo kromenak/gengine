@@ -13,6 +13,8 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <new>     // for "new" in Emplace
+#include <utility> // std::forward
 
 template<typename T, uint32_t TCapacity>
 class Queue
@@ -27,6 +29,7 @@ public:
         void operator++() { ++index; index %= TCapacity; --remaining; }
         bool operator==(const Iterator& other) const { return index == other.index && remaining == other.remaining; }
         bool operator!=(const Iterator& other) const { return !(*this == other); }
+        T& operator*() { return data[index]; }
         const T& operator*() const { return data[index]; }
 
     private:
@@ -133,7 +136,7 @@ public:
     {
         assert(i < mSize);
         uint32_t index = (mHead + i) % TCapacity;
-        return reinterpret_cast<T*>(mData)[index];
+        return reinterpret_cast<const T*>(mData)[index];
     }
 
     uint32_t Capacity() const
@@ -144,6 +147,11 @@ public:
     bool Empty() const
     {
         return mSize == 0;
+    }
+
+    bool Full() const
+    {
+        return mSize == TCapacity;
     }
 
     uint32_t Size() const

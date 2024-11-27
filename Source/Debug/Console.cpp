@@ -65,7 +65,7 @@ void Console::ExecuteCommand(const std::string& command)
 
     // Add command to history.
     // Commands are usually added to history, unless it matches the most recent or second-most-recent commands.
-    size_t historySize = mCommandHistory.size();
+    size_t historySize = mCommandHistory.Size();
     if(historySize > 0 && StringUtil::EqualsIgnoreCase(mCommandHistory[historySize - 1], command))
     {
         // Do nothing - don't add this command to history, since the most recent history item exactly matches it.
@@ -78,12 +78,16 @@ void Console::ExecuteCommand(const std::string& command)
     }
     else
     {
-        // Just add to the history in normal way.
-        mCommandHistory.push_back(command);
+        // Just add to the history in normal way. Discard the oldest item if the queue is full.
+        if(mCommandHistory.Full())
+        {
+            mCommandHistory.Pop();
+        }
+        mCommandHistory.Push(command);
     }
 
 	// Increment command counter.
-	mCommandCounter++;
+	++mCommandCounter;
 }
 
 const std::string& Console::GetCommandFromHistory(size_t index) const
