@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.17)
 
+# Set Apple architectures (do this before "project" line for correct results).
+#TODO: Update this to include arm64 (but need to rebuild dependent libraries).
+set(CMAKE_OSX_ARCHITECTURES "x86_64" CACHE STRING "")
+
+# Define G-Engine project.
 project(gengine VERSION 0.0.9
                 DESCRIPTION "Gabriel Knight 3 game engine"
                 LANGUAGES C CXX)
@@ -101,38 +106,45 @@ target_compile_definitions(gk3 PRIVATE
     $<$<CONFIG:Debug>:DEBUG>
 )
 
-# Warning/error settings.
+# Warning/error settings - generally, enable ALL warnings, but disable a subset we don't want.
 if(MSVC)
-    target_compile_options(gk3 PRIVATE /Wall
-        /wd4061 # Disable "unhandled case in switch with default" warning
-        /wd4065 # Disable "switch contains default and no cases" warning
-        /wd4100 # Disable "unreferenced formal parameter" warning
-        /wd4191 # Disable "unsafe conversion" warning (used by imgui)
-        /wd4242
-        /wd4263 /wd4264 # Disable "virtual function in base class has same name & different signature" warning
-        /wd4355 # Disable "this used in base member init list" warning
-        /wd4365
-        /wd4505 # Disable "unreferenced function with internal linkage" warning
-        /wd4514 # Disable "unused function" warning
-        /wd4625 # Disable "copy constructor implicitly deleted" warning
-        /wd4626 # Disable "assignment operator implicitly deleted" warning
-        /wd4668 # Disable "preprocessor macro not defined" warning
-        /wd4710 # Disable "function was not inlined" warning
-        /wd4774 # Disable "snprintf format not literal" warning (though this might be good to fix)
-        /wd4820 # Disable "padding added" warning
-        /wd5026 # Disable "move constructor implicitly deleted" warning
-        /wd5027 # Disable "move assignment operator implicitly deleted" warning
-        /wd5039 # Disable "pointer to potentially throwing extern c function" warning
-        /wd5045 # Disable "Spectre mitigation" warning
-        /wd5219 # Disable "implicit conversion from x to y" warning
-        /wd5245 # Disable "unreferenced function with internal linkage has been removed" warning
+    target_compile_options(gk3 PRIVATE /Wall # Enable ALL warnings...
+        # But disable some.
+        /wd4061 # unhandled case in switch with default
+        /wd4065 # switch contains default and no cases
+        /wd4100 # unreferenced formal parameter
+        /wd4191 # unsafe conversion (used by imgui)
+        /wd4242 # type conversion may result in loss of data
+        /wd4263 /wd4264 # virtual function in base class has same name & different signature
+        /wd4355 # 'this' used in base member init list
+        /wd4365 # signed/unsigned mismatch
+        /wd4505 # unreferenced function with internal linkage
+        /wd4514 # unused function
+        /wd4625 # copy constructor implicitly deleted
+        /wd4626 # assignment operator implicitly deleted
+        /wd4668 # preprocessor macro not defined
+        /wd4710 # function was not inlined
+        /wd4774 # snprintf format not literal (this might be good to fix)
+        /wd4820 # padding added
+        /wd5026 # move constructor implicitly deleted
+        /wd5027 # move assignment operator implicitly deleted
+        /wd5039 # pointer to potentially throwing extern c function
+        /wd5045 # Spectre mitigation
+        /wd5219 # implicit conversion from x to y
+        /wd5245 # unreferenced function with internal linkage has been removed
     )
 else() # GCC/Clang
-    target_compile_options(gk3 PRIVATE
-        -Wall -Wextra
-        -Wno-comment            # Disable comment formatting warnings.
-        -Wno-unused-function    # Disable unused function warnings.
-        -Wno-unused-parameter   # Disable unused function parameter warnings.
+    target_compile_options(gk3 PRIVATE -Wall -Wextra # Enable ALL warnings...
+        # But disable some.
+        -Wno-comment            # comment formatting
+        -Wno-inconsistent-missing-override # function is not marked override
+        -Wno-invalid-offsetof   # offsetof on non-standard-layout type
+        -Wno-overloaded-virtual # function hides overloaded virtual function (occurs in flex/bison generated code)
+        -Wno-sign-compare       # comparison of integers of different signs
+        -Wno-unused-but-set-variable # unused but set variable
+        -Wno-unused-function    # unused function
+        -Wno-unused-parameter   # unused function parameter
+        -Wno-unused-private-field # unused private field
     )
 endif()
 
@@ -309,11 +321,24 @@ elseif(APPLE)
         COMMAND cp "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/mac/libGLEW.dylib" "${MAC_APP_LIBRARIES}"
         COMMAND cp "${PLAT_SOURCE_DIR}/Libraries/zlib/lib/mac/libz.dylib" "${MAC_APP_LIBRARIES}"
     )
+
+    # Non-Xcode IDEs (like CLion) do not seem to automatically copy frameworks. So, do that manually.
+    # They also don't have a way to set working directory, so symbolic link Assets/Data folders to avoid copying.
+    if(NOT XCODE)
+        set(MAC_APP_FRAMEWORKS "${MAC_APP_CONTENTS}/Frameworks")
+        add_custom_command(TARGET gk3
+            POST_BUILD
+            COMMAND mkdir -p "${MAC_APP_FRAMEWORKS}"
+            COMMAND cp -R "${PLAT_SOURCE_DIR}/Libraries/SDL/SDL2.framework" "${MAC_APP_FRAMEWORKS}"
+            COMMAND ln -fs "${PLAT_SOURCE_DIR}/Assets" "${MAC_APP_CONTENTS}/Resources"
+            COMMAND ln -fs "${PLAT_SOURCE_DIR}/Data" "${MAC_APP_CONTENTS}/Resources"
+        )
+    endif()
 else() # Linux
     add_custom_command(TARGET gk3
         POST_BUILD
-        COMMAND ln -fs ${PLAT_SOURCE_DIR}/Assets ${PLAT_BINARY_DIR}
-        COMMAND ln -fs ${PLAT_SOURCE_DIR}/Data ${PLAT_BINARY_DIR}
+        COMMAND ln -fs "${PLAT_SOURCE_DIR}/Assets" "${PLAT_BINARY_DIR}"
+        COMMAND ln -fs "${PLAT_SOURCE_DIR}/Data" "${PLAT_BINARY_DIR}"
         #COMMAND ${CMAKE_COMMAND} -E copy ${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux/libavcodec.so ${PLAT_BINARY_DIR}
         #COMMAND ${CMAKE_COMMAND} -E copy ${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux/libavformat.so ${PLAT_BINARY_DIR}
         #COMMAND ${CMAKE_COMMAND} -E copy ${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux/libavutil.so ${PLAT_BINARY_DIR}
