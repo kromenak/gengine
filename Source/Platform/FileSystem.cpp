@@ -22,12 +22,12 @@ std::string Path::Combine(std::initializer_list<std::string> paths)
 {
 	// Can't combine zero paths!
 	if(paths.size() == 0) { return std::string(); }
-	
+
 	// Start the combined path with the first path piece.
 	auto it = paths.begin();
 	std::string combined = *it;
 	it++;
-	
+
 	// Append each path piece to the combined value.
 	while(it != paths.end())
 	{
@@ -43,7 +43,7 @@ std::string Path::Combine(std::initializer_list<std::string> paths)
 
         // Add path piece.
         combined += *it;
-		
+
 		// Move to next element.
 		it++;
 	}
@@ -62,7 +62,7 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
 		// We're in Apple land...gotta use CFStrings.
 		CFStringRef searchPathCFStr = CFStringCreateWithCString(CFAllocatorGetDefault(), relativeSearchPath.c_str(), kCFStringEncodingUTF8);
 		CFStringRef fileNameCFStr = CFStringCreateWithCString(CFAllocatorGetDefault(), fileName.c_str(), kCFStringEncodingUTF8);
-        
+
 		// Moment of truth: ask for the resource's URL, using the file name and search path.
 		// The OS does a bunch of stuff to determine whether this asset exists and return it.
         //TODO: This call is case-sensitive, even if OSX is not case-sensitive! Ideally, this should be case-insensitive like the OS is.
@@ -75,10 +75,10 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
 			outPath = std::string(CFStringGetCStringPtr(resourceUrlStr, kCFStringEncodingUTF8));
 			CFRelease(resourceUrlStr);
 		}
-		
+
 		CFRelease(searchPathCFStr);
 		CFRelease(fileNameCFStr);
-		
+
 		// File exists if resource URL is not null.
         if(resourceUrl != nullptr)
         {
@@ -87,7 +87,7 @@ bool Path::FindFullPath(const std::string& fileName, const std::string& relative
 	}
 	//NOTE: if can't get a bundle ref or resource url, we purposely drop through to "failsafe" method below.
     #endif
-	
+
 	// Worst case, if no platform-specific way to get a file path, we can just combine the search path and filename.
 	// This'll probably give us something like "Assets/File.txt"
 	// C++ is able to load relative files, assuming the current working directory (cwd) is as expected.
@@ -110,24 +110,24 @@ std::string Path::GetFileName(const std::string& path)
 {
 	// Make sure there's any content in the path argument.
 	if(path.empty()) { return path; }
-	
+
 	// Find the last index of the separator character.
 	size_t pos = path.find_last_of(kSeparator);
-	
+
 	// If no separator exists, just return the path as-is...
 	// it's either invalid or a single element like "MyFile".
 	if(pos == std::string::npos)
 	{
 		return path;
 	}
-	
+
 	// If pos is at end of string, return empty string.
 	// Something like "/Users/Bob/" should return "".
 	if(pos + 1 >= path.size())
 	{
 		return "";
 	}
-	
+
 	// Get everything after the separator and return it
 	return path.substr(pos + 1, std::string::npos);
 }
@@ -136,16 +136,16 @@ std::string Path::GetFileNameNoExtension(const std::string& path)
 {
 	// Get filename with extension first.
 	std::string filename = GetFileName(path);
-	
+
 	// Find extension separator, if any.
 	size_t pos = filename.find_last_of('.');
-	
+
 	// If no extension, we can just return the filename as-is.
 	if(pos == std::string::npos)
 	{
 		return filename;
 	}
-	
+
 	// Return everything before the extension separator.
 	return filename.substr(0, pos);
 }
@@ -171,7 +171,7 @@ bool Path::HasExtension(const std::string& path, const std::string& expectedExte
             return path.size() > expectedExtension.size() &&
                 path[path.size() - expectedExtension.size() - 1] == '.' &&
                 StringUtil::EndsWithIgnoreCase(path, expectedExtension);
-        }        
+        }
     }
     else // No expected extension - we just need to verify ANY extension is present.
     {
@@ -268,8 +268,47 @@ bool Directory::Create(const std::string& path)
     #endif
 }
 
+bool Directory::CreateAll(const std::string& path)
+{
+    // Split path into tokens.
+    StringTokenizer tokenizer(path, { Path::kSeparator });
+
+    // If the first character of the path was the path separator, then this appears to be an absolute Unix path.
+    // Make sure the build path is correctly started with the path separator in that case.
+    // Windows paths (e.g. "C:\") should be handled correctly automatically?
+    std::string buildPath;
+    if(!path.empty() && path[0] == Path::kSeparator)
+    {
+        buildPath.push_back('/');
+    }
+
+    // Iterate and build the path, creating each directory if it doesn't exist.
+    while(tokenizer.HasNext())
+    {
+        // Add next token to path.
+        buildPath += tokenizer.GetNext();
+
+        // Only need to create directory if it doesn't exist.
+        if(!Directory::Exists(buildPath))
+        {
+            // Try to create directory, fail if can't do it.
+            bool madeDirectory = Create(buildPath);
+            if(!madeDirectory)
+            {
+                printf("Failed to create directory %s!", buildPath.c_str());
+                return false;
+            }
+        }
+
+        // Append separator.
+        buildPath += Path::kSeparator;
+    }
+    return true;
+}
+
 std::vector<std::string> Directory::List(const std::string& path, const std::string& extension)
 {
+    std::vector<std::string> files;
     #if defined(PLATFORM_WINDOWS)
     {
         // Decide on search string.
@@ -282,9 +321,8 @@ std::vector<std::string> Directory::List(const std::string& path, const std::str
         {
             searchPath += "/*." + extension; // only files with specific extension
         }
-        
+
         // Use Windows FindFirstFile/FindNextFile to iterate contents of directory.
-        std::vector<std::string> files;
         WIN32_FIND_DATA fd;
         HANDLE hFind = ::FindFirstFile(searchPath.c_str(), &fd);
         if(hFind != INVALID_HANDLE_VALUE)
@@ -295,18 +333,46 @@ std::vector<std::string> Directory::List(const std::string& path, const std::str
                 bool isDirectory = fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY;
                 if(!isDirectory)
                 {
-                    files.push_back(fd.cFileName);
+                    files.emplace_back(fd.cFileName);
                 }
             }
             while(::FindNextFile(hFind, &fd));
             ::FindClose(hFind);
         }
-        return files;
+    }
+    #elif defined(HAVE_DIRENT_H)
+    {
+        // Open the directory for reading.
+        DIR* dir = opendir(path.c_str());
+        if(dir != nullptr)
+        {
+            // Iterate and read each file in the directory. Null is returned when we reach the end.
+            dirent* dirEntry;
+            while((dirEntry = readdir(dir)) != nullptr)
+            {
+                // We only want to list regular files; not sub-directories or other esoteric file types.
+                if(dirEntry->d_type == DT_REG)
+                {
+                    // Include file in final list depending on extension filter.
+                    if(extension.empty())
+                    {
+                        files.emplace_back(dirEntry->d_name);
+                    }
+                    else if(StringUtil::EndsWithIgnoreCase(dirEntry->d_name, extension))
+                    {
+                        files.emplace_back(dirEntry->d_name);
+                    }
+                }
+            }
+
+            // Must close directory once finished to avoid leaking handles.
+            closedir(dir);
+        }
     }
     #else
         #error "No implementation for Directory::List!"
-        return std::vector<std::string>();
     #endif
+    return files;
 }
 
 bool File::Exists(const std::string& filePath)
@@ -336,7 +402,7 @@ uint64_t File::Size(const std::string& filePath)
     #elif defined(HAVE_STAT_H)
     {
         // This should work on Mac/Linux. (it may even work on Windows, depending on version)
-        struct stat stat_buf;
+        struct stat stat_buf { };
         int rc = stat(filePath.c_str(), &stat_buf);
         if(rc == 0)
         {

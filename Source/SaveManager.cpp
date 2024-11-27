@@ -143,9 +143,17 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
         saveNumber = mPendingSaveIndex + 1;
     }
 
+    // Make sure save game folder exists.
+    std::string saveFolderPath = Path::Combine({ Paths::GetSaveDataPath(), "Save Games" });
+    if(!Directory::CreateAll(saveFolderPath))
+    {
+        printf("Failed to save; could not create \"Save Games\" folder!\n");
+        return;
+    }
+
     // Figure out the path to save to.
     std::string fileName = StringUtil::Format("save%04i.gk3", saveNumber);
-    std::string savePath = Path::Combine({ Paths::GetSaveDataPath(), "Save Games", fileName });
+    std::string savePath = Path::Combine({ saveFolderPath, fileName });
 
     // Create the persistinator.
     PersistState ps(savePath.c_str(), PersistFormat::Binary, PersistMode::Save);
@@ -201,7 +209,7 @@ void SaveManager::LoadInternal(const std::string& loadPath)
 
     //TODO: It might be valuable to create the PersistState *before* unloading the current scene (for verification its a valid save).
     //TODO: To do that, due to scope, we'd have to dynamically allocate though!
-    
+
     // Ok, looks like we will actually load this save!
     // Let's unload the current scene to start with a clean slate.
     gSceneManager.UnloadScene([this, loadPath](){

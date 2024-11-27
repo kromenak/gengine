@@ -19,13 +19,13 @@ namespace Path
     #else
 	const char kSeparator = '/';
     #endif
-	
+
 	/**
 	 * Combines pieces of path together using the appropriate path separator.
 	 * Ex: "/Applications/GK3.app" and "Contents/Blah.png" becomes "/Applications/GK3.app/Contents/Blah.png".
 	 */
 	std::string Combine(std::initializer_list<std::string> paths);
-		
+
 	/**
 	 * Given a filename and a relative search path, determine if a file exists (return value) and determines
 	 * a full path (via out variable) that can be used to read the file.
@@ -61,6 +61,21 @@ namespace Path
      * Just returns a copy of the current file name if no extension is present.
      */
     inline std::string RemoveExtension(const std::string& fileName) { return fileName.substr(0, fileName.find_last_of('.')); }
+
+    /**
+     * Detects whether a path is absolute.
+     */
+    inline bool IsAbsolute(const std::string& path)
+    {
+        #if defined(PLATFORM_WINDOWS)
+        // On Windows, a path must start with a drive letter to be absolute (e.g. "C:\").
+        // Windows also supports relative paths from root of drive (starting with "\"). Going to NOT count those for now.
+        return path.size() >= 3 && path[0] >= 'A' && path[0] <= 'Z' && path[1] == ':' && path[2] == '\\';
+        #else
+        // On Mac/Linux, pretty much just need the leading character to be the path separator.
+        return !path.empty() && path[0] == '/';
+        #endif
+    }
 }
 
 namespace Directory
@@ -69,7 +84,7 @@ namespace Directory
 	 * Returns true if the directory exists, false if it doesn't.
 	 */
 	bool Exists(const std::string& path);
-	
+
 	/**
 	 * Creates a directory.
 	 *
@@ -80,27 +95,13 @@ namespace Directory
 	 * Returns false if an error occurred.
 	 */
 	bool Create(const std::string& path);
-	
+
 	/**
-	 * Makes one or more directories in a given path.
+	 * Creates one or more directories in a given path.
 	 *
 	 * If making foo/bar/xyz, and none exist, each will be created in turn.
 	 */
-	inline bool CreateAll(const std::string& path)
-	{
-		StringTokenizer tokenizer(path, { '/' });
-		std::string buildPath;
-		while(tokenizer.HasNext())
-		{
-			buildPath += tokenizer.GetNext();
-			
-			bool madeDirectory = Create(buildPath);
-			if(!madeDirectory) { return false; }
-			
-			buildPath += Path::kSeparator;
-		}
-		return true;
-	}
+    bool CreateAll(const std::string& path);
 
     std::vector<std::string> List(const std::string& path, const std::string& extension = "");
 }
