@@ -24,11 +24,7 @@ Sample::~Sample()
 {
     sActiveSamples.clear();
 
-    #if defined(ENV64)
-    printf("===== Begin Frame %lu =====\n", sFrameNumber);
-    #else
-    printf("===== Begin Frame %llu =====\n", sFrameNumber);
-    #endif
+    printf("===== Begin Frame %" PRIu64 " =====\n", sFrameNumber);
     BeginSample("Total");
 }
 
@@ -40,11 +36,7 @@ Sample::~Sample()
 
     // End overall frame sample.
     EndSample();
-    #if defined(ENV64)
-    printf("===== End Frame %lu =====\n", sFrameNumber);
-    #else
-    printf("===== End Frame %llu =====\n", sFrameNumber);
-    #endif
+    printf("===== End Frame %" PRIu64 " =====\n", sFrameNumber);
 
     // Increment frame number at end of frame (if you do this at beginning, it just means there's no frame 0).
     sFrameNumber++;

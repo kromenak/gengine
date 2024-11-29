@@ -513,22 +513,31 @@ void GEngine::Update()
         static float sFpsDataSet[kDataSetSize] = { 0 };
         static size_t sFpsDataSetIndex = 0;
 
-        // Put FPS in data set and increment index (with wraparound).
+        // Put FPS in data set.
         sFpsDataSet[sFpsDataSetIndex] = currentFps;
+
+        // Calculate average FPS. This uses a weighted average, so recent readings have a higher weight than older readings.
+        // This gives better output than a straight average, where one slow frame makes the average drop to a constant value until it exits the data set.
+        size_t weight = kDataSetSize;
+        size_t weightsSum = 0;
+        size_t currentIndex = sFpsDataSetIndex; // start at most recent FPS sampled
+        float sum = 0.0f;
+        for(int i = 0; i < kDataSetSize; ++i)
+        {
+            sum += sFpsDataSet[currentIndex] * static_cast<float>(weight);
+            weightsSum += weight;
+            --weight;
+            currentIndex = (currentIndex == 0 ? kDataSetSize - 1 : currentIndex - 1);
+        }
+        float averageFps = sum / static_cast<float>(weightsSum);
+
+        // Increment data set index (with wraparound) for next frame.
         ++sFpsDataSetIndex;
         sFpsDataSetIndex %= kDataSetSize;
 
-        // Calculate average.
-        float sum = 0.0f;
-        for(float fps : sFpsDataSet)
-        {
-            sum += fps;
-        }
-        float averageFps = sum / static_cast<float>(kDataSetSize);
-
+        // NOTE: this is cool and efficient, but it is too conservative; if FPS ever dips, the displayed value will never again reach 60.
         // We can utilize a moving average calculation. (https://en.wikipedia.org/wiki/Moving_average#Cumulative_average)
         // "cumulative average equals previous cumulative average, times n, plus new data, all divided by n+1" (in our case, n = frame number counter)
-        // NOTE: this is cool, but it is too conservative; if FPS ever dips, the displayed value will never again reach 60.
         //static float averageFps = 0.0f;
         //averageFps = ((averageFps * static_cast<float>(mFrameNumber + 1)) + currentFps) / static_cast<float>(mFrameNumber + 2);
 

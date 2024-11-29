@@ -10,11 +10,11 @@ class ScopedProfiler;
 //#define PROFILER_ENABLED
 
 #if defined(PROFILER_ENABLED)
-    #define PROFILER_BEGIN_FRAME() Profiler::BeginFrame();
-    #define PROFILER_END_FRAME() Profiler::EndFrame();
-    #define PROFILER_BEGIN_SAMPLE(x) Profiler::BeginSample(x);
-    #define PROFILER_END_SAMPLE() Profiler::EndSample();
-    #define PROFILER_SCOPED(x) ScopedProfiler x(#x);
+    #define PROFILER_BEGIN_FRAME() Profiler::BeginFrame()
+    #define PROFILER_END_FRAME() Profiler::EndFrame()
+    #define PROFILER_BEGIN_SAMPLE(x) Profiler::BeginSample(x)
+    #define PROFILER_END_SAMPLE() Profiler::EndSample()
+    #define PROFILER_SCOPED(x) ScopedProfiler x(#x)
 #else
     #define PROFILER_BEGIN_FRAME()
     #define PROFILER_END_FRAME()
@@ -25,10 +25,10 @@ class ScopedProfiler;
 
 // These defines are ALWAYS available.
 // Sometimes we want to time things even when not all profiling tools are enabled.
-#define TIMER_SCOPED(name) Sample timerScopedSample(name);
+#define TIMER_SCOPED(name) Sample timerScopedSample(name)
 
 // Variant that lets you specify the variable name (to avoid shadowing local variables).
-#define TIMER_SCOPED_VAR(name, varName) Sample varName(name);
+#define TIMER_SCOPED_VAR(name, varName) Sample varName(name)
 
 // Named segment of time to track.
 class Sample
