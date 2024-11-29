@@ -7,19 +7,21 @@
 #pragma once
 #include <cstdint>
 
+#include "Timers.h"
+
 class PersistState;
 
 class GEngine
 {
 public:
     static GEngine* Instance() { return sInstance; }
-    
+
     GEngine();
-    
+
     bool Initialize();
     void Shutdown();
     void Run();
-    
+
     void Quit();
 
     uint32_t GetFrameNumber() const { return mFrameNumber; }
@@ -34,11 +36,11 @@ public:
     bool IsDemoMode() const { return mDemoMode; }
 
     void OnPersist(PersistState& ps);
-    
+
 private:
     // Only one instance of GEngine can exist.
     static GEngine* sInstance;
-    
+
     // Is the game running? While true, we loop. When false, the game exits.
 	// False by default, but set to true after initialization.
 	bool mRunning = false;
@@ -46,6 +48,9 @@ private:
     // Tracks what frame the game is on. First full frame execution is frame 0.
     // Assuming 60FPS, it would take ~800 days for this value to wrap. Not too concerning.
     uint32_t mFrameNumber = 0;
+
+    // Used to track how much time has passed each frame.
+    DeltaTimer mDeltaTimer;
 
     // A multiplier to affect how fast the game updates compared to realtime.
     // Less than 1 makes the game run slower than realtime, more than 1 makes it run faster than realtime.

@@ -28,7 +28,6 @@
 #include "SaveManager.h"
 #include "SceneManager.h"
 #include "TextInput.h"
-#include "Timers.h"
 #include "ThreadPool.h"
 #include "Tools.h"
 #include "VerbManager.h"
@@ -50,7 +49,7 @@ bool GEngine::Initialize()
     // Init threads.
     ThreadUtil::Init();
     ThreadPool::Init(4);
-	
+
 	// Tell console to log itself to the "Console" report stream.
 	gConsole.SetReportStream(&gReportManager.GetReportStream("Console"));
 
@@ -102,7 +101,7 @@ bool GEngine::Initialize()
     {
         return false;
     }
-    
+
     // Initialize audio.
     if(!gAudioManager.Initialize())
     {
@@ -111,39 +110,39 @@ bool GEngine::Initialize()
 
     // Init input system.
     gInputManager.Init();
-    
+
     // Load cursors and use the default one to start.
     // Must happen after barn assets are loaded.
     gCursorManager.Init();
     gCursorManager.UseLoadCursor();
-    
+
     // Create localizer.
     gLocalizer.Load("STRINGS.TXT");
-    
+
 	// Init verb manager.
     gVerbManager.Init();
-	
+
 	// Load character configs.
     gCharacterManager.Init();
-	
+
 	// Load floor configs.
     gFootstepManager.Init();
 
     // Init game progress.
     gGameProgress.Init();
-	
+
 	// Init inventory manager.
     gInventoryManager.Init();
 
     // Init location manager.
     gLocationManager.Init();
-	
+
 	// Create action manager.
     gActionManager.Init();
-	
+
     // Create video player.
     gVideoPlayer.Initialize();
-    
+
 	// Create console UI - this persists for the entire game.
 	ConsoleUI* consoleUI = new ConsoleUI(false);
 	consoleUI->SetIsDestroyOnLoad(false);
@@ -175,10 +174,10 @@ bool GEngine::Initialize()
 	TODO: Maybe move this to some exporter class or something?
 	Model* gabMod = mAssetManager.LoadModel("GAB.MOD");
 	gabMod->WriteToObjFile("GAB.OBJ");
-	
+
 	GKActor* actor = new GKActor("GAB");
 	actor->GetMeshRenderer()->SetModel(gabMod);
-	
+
 	VertexAnimation* anim = mAssetManager.LoadVertexAnimation("GAB_GABWALK.ACT");
 	for(int i = 0; i < anim->GetFrameCount(); ++i)
 	{
@@ -198,7 +197,7 @@ void GEngine::Shutdown()
 
     // Shutdown scene manager (unloads scene and deletes all actors).
     gSceneManager.Shutdown();
-    
+
     // Even though asset manager is initialized first...
     // We want to shut it down earlier b/c its assets may need to destroy data in the rendering/audio systems.
     gAssetManager.Shutdown();
@@ -220,7 +219,7 @@ void GEngine::Run()
 {
     // We are running!
     mRunning = true;
-    
+
     // Loop until not running anymore.
     while(mRunning)
     {
@@ -230,7 +229,7 @@ void GEngine::Run()
         ProcessInput();
         Update();
         GenerateOutputs();
-		
+
 		// Check whether we need a scene change.
         gSceneManager.UpdateLoading();
 
@@ -315,7 +314,7 @@ void GEngine::ProcessInput()
     // Update the input manager.
     // Retrieve input device states for us to use.
     gInputManager.Update();
-    
+
     // We'll poll for events here. Catch the quit event.
     SDL_Event event;
     while(SDL_PollEvent(&event))
@@ -449,7 +448,7 @@ void GEngine::ProcessInput()
                 */
 				break;
 			}
-			
+
 			case SDL_TEXTINPUT:
 			{
                 // Ignore if tool overlay is eating keyboard inputs.
@@ -479,7 +478,7 @@ void GEngine::ProcessInput()
                 }
                 break;
             }
-				
+
             case SDL_QUIT:
             {
                 Quit();
@@ -487,7 +486,7 @@ void GEngine::ProcessInput()
             }
         }
     }
-    
+
     // Quick quit for dev purposes.
     if(gInputManager.IsKeyPressed(SDL_SCANCODE_F4))
     {
@@ -500,20 +499,38 @@ void GEngine::Update()
     PROFILER_SCOPED(Update);
 
     // Calculate delta time.
-    static DeltaTimer deltaTimer;
-    float deltaTime = deltaTimer.GetDeltaTime();
+    float deltaTime = mDeltaTimer.GetDeltaTimeWithFpsThrottle(60, 0.05f);
+    //printf("%f ms\n", deltaTime);
 
-    // In debug, calculate a running average FPS and display it in the window's title bar.
+    // In debug, calculate an average FPS and display it in the window's title bar.
     #if defined(DEBUG)
     {
         // Current FPS is inverse of delta time.
         float currentFps = 1.0f / deltaTime;
 
+        // We'll do an average by saving the last X data points and calculating the average.
+        const size_t kDataSetSize = 60;
+        static float sFpsDataSet[kDataSetSize] = { 0 };
+        static size_t sFpsDataSetIndex = 0;
+
+        // Put FPS in data set and increment index (with wraparound).
+        sFpsDataSet[sFpsDataSetIndex] = currentFps;
+        ++sFpsDataSetIndex;
+        sFpsDataSetIndex %= kDataSetSize;
+
+        // Calculate average.
+        float sum = 0.0f;
+        for(float fps : sFpsDataSet)
+        {
+            sum += fps;
+        }
+        float averageFps = sum / static_cast<float>(kDataSetSize);
+
         // We can utilize a moving average calculation. (https://en.wikipedia.org/wiki/Moving_average#Cumulative_average)
-        // "cumulative average equals previous cumulative average, times n, plus new data, all divided by n+1"
-        // (in our case, n = frame number counter)
-        static float averageFps = 0.0f;
-        averageFps = ((averageFps * static_cast<float>(mFrameNumber)) + currentFps) / static_cast<float>(mFrameNumber + 1);
+        // "cumulative average equals previous cumulative average, times n, plus new data, all divided by n+1" (in our case, n = frame number counter)
+        // NOTE: this is cool, but it is too conservative; if FPS ever dips, the displayed value will never again reach 60.
+        //static float averageFps = 0.0f;
+        //averageFps = ((averageFps * static_cast<float>(mFrameNumber + 1)) + currentFps) / static_cast<float>(mFrameNumber + 2);
 
         // Set title to show updated value.
         Window::SetTitle(StringUtil::Format("Gabriel Knight 3 (%.2f FPS)", averageFps).c_str());
@@ -531,13 +548,13 @@ void GEngine::Update()
 
     // Also update audio system (before or after game logic?)
     gAudioManager.Update(deltaTime);
-    
+
     // Update video playback.
     gVideoPlayer.Update();
 
     // Update cursors.
     gCursorManager.Update(deltaTime);
-	
+
 	// Update debug visualizations.
 	Debug::Update(deltaTime);
 
@@ -552,7 +569,7 @@ void GEngine::UpdateGameWorld(float deltaTime)
 {
     // Update the scene.
     gSceneManager.Update(deltaTime);
-    
+
     // Update timers.
     Timers::Update(deltaTime);
 }

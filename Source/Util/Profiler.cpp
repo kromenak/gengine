@@ -1,7 +1,6 @@
 #include "Profiler.h"
 
 #include <cassert>
-#include <iostream>
 
 #include <SDL.h>
 
@@ -9,32 +8,6 @@
 
 uint64_t Profiler::sFrameNumber = 0L;
 std::vector<Sample> Profiler::sActiveSamples;
-
-Stopwatch::Stopwatch()
-{
-    Reset();
-}
-
-void Stopwatch::Reset()
-{
-    mStartCounter = SDL_GetPerformanceCounter();
-}
-
-float Stopwatch::GetMilliseconds() const
-{
-    // Convert to milliseconds.
-    return GetSeconds() * 1000.0f;
-}
-
-float Stopwatch::GetSeconds() const
-{
-    // Get counter delta since stopwatch started.
-    uint64_t counter = SDL_GetPerformanceCounter();
-    uint64_t count = counter - mStartCounter;
-
-    // Convert to seconds.
-    return (static_cast<float>(count) / static_cast<float>(SDL_GetPerformanceFrequency()));
-}
 
 Sample::Sample(const char* name) :
     mName(name)

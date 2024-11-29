@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "Timers.h"
+
 class Profiler;
 class ScopedProfiler;
 
@@ -27,21 +29,6 @@ class ScopedProfiler;
 
 // Variant that lets you specify the variable name (to avoid shadowing local variables).
 #define TIMER_SCOPED_VAR(name, varName) Sample varName(name);
-
-// Core time tracker: returns amount of time since creation.
-//TODO: Maybe move to Timers utility file? Useful outside of profiling too!
-class Stopwatch
-{
-public:
-    Stopwatch();
-
-    void Reset();
-    float GetMilliseconds() const;
-    float GetSeconds() const;
-
-private:
-    uint64_t mStartCounter = 0L;
-};
 
 // Named segment of time to track.
 class Sample
