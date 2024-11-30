@@ -9,4 +9,3 @@
 #cmakedefine HAVE_STAT_H 1
 #cmakedefine HAVE_DIRENT_H 1
 #cmakedefine HAVE_UNISTD_H 1
-#cmakedefine HAVE_LIMITS_H 1

@@ -24,7 +24,6 @@ include(CheckIncludeFile)
 CHECK_INCLUDE_FILE(sys/stat.h HAVE_STAT_H)
 CHECK_INCLUDE_FILE(dirent.h HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE(unistd.h HAVE_UNISTD_H)
-CHECK_INCLUDE_FILE(limits.h HAVE_LIMITS_H)
 configure_file("${PROJECT_SOURCE_DIR}/Source/Platform/BuildEnv.h.in" "${CMAKE_CURRENT_BINARY_DIR}/BuildEnv.h")
 
 # Get all cpp/h files in the Source directory using GLOB.
