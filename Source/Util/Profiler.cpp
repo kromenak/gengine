@@ -1,6 +1,7 @@
 #include "Profiler.h"
 
 #include <cassert>
+#include <cinttypes>
 
 #include <SDL.h>
 
