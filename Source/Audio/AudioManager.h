@@ -4,6 +4,7 @@
 // Handles playback of all types of audio.
 //
 #pragma once
+#include <cstdint>
 #include <functional>
 #include <unordered_map>
 #include <vector>

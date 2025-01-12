@@ -4,6 +4,7 @@
 // Helpers for performing calculations with pointers.
 //
 #pragma once
+#include <cstddef>
 #include <cstdint>
 
 namespace PtrMath

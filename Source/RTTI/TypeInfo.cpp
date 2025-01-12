@@ -1,5 +1,7 @@
 #include "TypeInfo.h"
 
+#include <cstring>
+
 #include "TypeDatabase.h"
 
 TYPEINFO_INIT(NoBaseClass, NoBaseClass, NO_BASE_CLASS_TYPE_ID)

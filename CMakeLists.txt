@@ -285,7 +285,7 @@ elseif(APPLE)
     set_target_properties(gk3 PROPERTIES
         XCODE_SCHEME_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
-    # NOTE: CLion doesn't yet have a WORKING_DIRECTORY CMake variable. It must be set manually to the repo root.
+    # NOTE: CLion doesn't yet have a WORKING_DIRECTORY CMake variable. We use symbolic links later on instead.
 endif()
 
 # Post-build commands, to copy any libraries/assets to final locations.
@@ -334,15 +334,21 @@ elseif(APPLE)
         )
     endif()
 else() # Linux
+    # Copy libraries post-build.
+    set(LIB_FFMPEG_SRC "${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux")
     add_custom_command(TARGET gk3
         POST_BUILD
         COMMAND ln -fs "${PLAT_SOURCE_DIR}/Assets" "${PLAT_BINARY_DIR}"
         COMMAND ln -fs "${PLAT_SOURCE_DIR}/Data" "${PLAT_BINARY_DIR}"
-        #COMMAND ${CMAKE_COMMAND} -E copy ${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux/libavcodec.so ${PLAT_BINARY_DIR}
-        #COMMAND ${CMAKE_COMMAND} -E copy ${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux/libavformat.so ${PLAT_BINARY_DIR}
-        #COMMAND ${CMAKE_COMMAND} -E copy ${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux/libavutil.so ${PLAT_BINARY_DIR}
-        #COMMAND ${CMAKE_COMMAND} -E copy ${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux/libswresample.so ${PLAT_BINARY_DIR}
-        #COMMAND ${CMAKE_COMMAND} -E copy ${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux/libswscale.so ${PLAT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libavcodec.so ${PLAT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libavformat.so ${PLAT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libavutil.so ${PLAT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libswresample.so ${PLAT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libswscale.so ${PLAT_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/fmod/lib/linux/libfmod.so" "${PLAT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/linux/libGLEW.so" "${PLAT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/zlib/lib/linux/libz.so" "${PLAT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/SDL/linux/lib/libSDL2.so" "${PLAT_BINARY_DIR}"
         VERBATIM
     )
 endif()

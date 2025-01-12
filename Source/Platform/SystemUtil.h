@@ -22,14 +22,14 @@
 // _POSIX_HOST_NAME_MAX should be defined, so use that if we can, or fall back on a default.
 #if !defined(HOST_NAME_MAX) && defined(_POSIX_HOST_NAME_MAX)
     #define HOST_NAME_MAX _POSIX_HOST_NAME_MAX
-#else
+#elif !defined(HOST_NAME_MAX)
     #define HOST_NAME_MAX 255 // based on _POSIX_HOST_NAME_MAX on macOS
 #endif
 
 // Same idea for LOGIN_NAME_MAX.
 #if !defined(LOGIN_NAME_MAX) && defined(_POSIX_LOGIN_NAME_MAX)
     #define LOGIN_NAME_MAX _POSIX_LOGIN_NAME_MAX
-#else
+#elif !defined(LOGIN_NAME_MAX)
     #define LOGIN_NAME_MAX 9 // based on _POSIX_LOGIN_NAME_MAX on macOS
 #endif
 #endif
