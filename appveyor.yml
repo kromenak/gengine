@@ -121,7 +121,7 @@ deploy:
     description: 'GEngine version $(APP_VERSION)'
     force_update: true # allows multiple jobs to upload artifacts to same GitHub release
     auth_token:
-      secure: +FLIpiKwFVgZmhUkmcDZK9P727eAjboXu+dfZ5G8xnNETVhPbRkIV57ckpcSr6Rz
+      secure: 2yE5RBOD1V+xZnKZgyN6y6qO43YccC0Fj2h9t5zdfwkjJsP35FvYqEQy+fSQ8iMq
 
 # Scripts to run after deployment.
 #after_deploy:
