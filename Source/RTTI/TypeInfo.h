@@ -11,6 +11,7 @@
 //  6) Create new instances of a type dynamically.
 //
 #pragma once
+#include <cstring>
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -183,7 +184,7 @@ void PClass::InitTypeInfo()
 #define TYPEINFO_VAR(PClass, PType, PVar) sTypeInfo.AddVariable(PType, #PVar, offsetof(PClass, PVar))
 
 // Use this to register a function to the type's TypeInfo.
-#define TYPEINFO_FUNC(PClass, PFunc) sTypeInfo.AddFunction(#PFunc, (PClass::TypeInfoType::MemberFunc)&PFunc)
+#define TYPEINFO_FUNC(PClass, PFunc) sTypeInfo.AddFunction(#PFunc, (PClass::TypeInfoType::MemberFunc)&PClass::PFunc)
 
 //================
 // TYPE INFO HELPER MACROS

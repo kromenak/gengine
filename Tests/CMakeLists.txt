@@ -8,6 +8,10 @@ list(APPEND TEST_SOURCES "catch.hh")
 add_executable(tests ${TEST_SOURCES})
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${TEST_SOURCES})
 
+# This define allows some test sources to know whether they are being compiled for the actual game or for tests.
+# Meant to help us avoid pulling too many dependencies into the test executable.
+target_compile_definitions(tests PRIVATE TESTS)
+
 # Tests have selective dependencies on GK3 sources and headers.
 # For example, if a test is testing AABBs, the test EXE needs the AABB header and source.
 # Likely I could structure my code differently to make this cleaner/more modular...but this'll do for now.

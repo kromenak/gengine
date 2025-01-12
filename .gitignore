@@ -49,10 +49,13 @@ xcuserdata/
 *.vcproj.user
 .vscode
 
-
-
 ####
 # CLion
 ####
 .idea
 cmake-build-*
+
+####
+# Appveyor
+####
+build_appveyor

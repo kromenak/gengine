@@ -47,8 +47,10 @@ public:
 	AMPM GetAMPM() const { return IsAM() ? AM : PM; }
 	char GetAMPMSuffix() const { return IsAM() ? 'A' : 'P'; }
 
+    #if !defined(TESTS)
     void OnPersist(PersistState& ps);
-	
+    #endif
+
 private:
 	// The day; should be 1+.
 	int mDay = 1;
