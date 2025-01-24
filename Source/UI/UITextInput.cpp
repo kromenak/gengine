@@ -59,21 +59,37 @@ void UITextInput::Clear()
 	//TODO: Reset caret position
 }
 
+void UITextInput::OnDisable()
+{
+    UILabel::OnDisable();
+
+    // Make sure caret is not still visible when this component is disabled.
+    if(mCaret != nullptr)
+    {
+        mCaret->SetEnabled(false);
+    }
+}
+
 void UITextInput::OnUpdate(float deltaTime)
 {
+    UILabel::OnUpdate(deltaTime);
+
 	// If mouse is down in the rect, let's assume that means we are focused.
-	if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
-	{
-		bool focus = GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition());
-		if(!mFocused && focus)
-		{
-			Focus();
-		}
-		if(mFocused && !focus)
-		{
-			Unfocus();
-		}
-	}
+    if(mAllowInputToChangeFocus)
+    {
+        if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
+        {
+            bool focus = GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition());
+            if(!mFocused && focus)
+            {
+                Focus();
+            }
+            if(mFocused && !focus)
+            {
+                Unfocus();
+            }
+        }
+    }
 	
 	// When focused, keep text up-to-date.
 	if(mFocused)
@@ -109,15 +125,23 @@ void UITextInput::OnUpdate(float deltaTime)
 			mCaret->SetEnabled(false);
 		}
 		
-		// Position caret right after last letter in the text.
-		RectTransform* caretRT = mCaret->GetOwner()->GetComponent<RectTransform>();
+		// Get caret position, which is based on the cursor pos in the text input.
+        // If no cursor pos, put at next character pos (end of text).
+        Vector2 caretPos;
 		if(mTextInput.GetCursorPos() == -1)
 		{
-			caretRT->SetAnchoredPosition(GetNextCharPos());
+            caretPos = GetNextCharPos();
 		}
 		else
 		{
-			caretRT->SetAnchoredPosition(GetCharPos(mTextInput.GetCursorPos()));
+            caretPos = GetCharPos(mTextInput.GetCursorPos());
 		}
+
+        // Factor in the text input's pivot.
+        caretPos += GetRectTransform()->GetPivot() * GetRectTransform()->GetSize();
+
+        // Set the position.
+        RectTransform* caretRT = mCaret->GetOwner()->GetComponent<RectTransform>();
+        caretRT->SetAnchoredPosition(caretPos);
 	}
 }

@@ -15,6 +15,8 @@ public:
 	
 	void DeletePrev();
 	void DeleteNext();
+
+    void SetMaxLength(int maxLength) { mMaxLength = maxLength; }
 	
 	void SetCursorPos(int pos);
 	int GetCursorPos() const { return mCursorPos; }
@@ -33,7 +35,10 @@ public:
 private:
 	// The text that's being edited.
 	std::string mText;
-	
+
+    // An optional limit on how much text can be entered. -1 means no limit.
+    int mMaxLength = -1;
+
 	// May want to exclude certain characters.
 	// This approach is extremely simplistic, but it may have some speed advantages over like a set.
 	// And we'll probably only ever need to exclude a couple chars in special situations.

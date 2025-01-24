@@ -2,7 +2,7 @@
 
 void TextInput::Insert(const std::string& text)
 {
-	Insert(text.c_str(), (int)text.size());
+	Insert(text.c_str(), static_cast<int>(text.size()));
 }
 
 void TextInput::Insert(const char* text, int count)
@@ -20,6 +20,12 @@ void TextInput::Insert(char c)
 	{
 		if(mExcludeChar == c) { return; }
 	}
+
+    // Make sure we aren't at our limit.
+    if(mText.length() >= mMaxLength)
+    {
+        return;
+    }
 
 	// Add the char to our text.
 	if(mCursorPos < 0 || mCursorPos >= static_cast<int>(mText.size()))

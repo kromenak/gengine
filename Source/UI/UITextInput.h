@@ -12,10 +12,13 @@ class UITextInput : public UILabel
 {
     TYPEINFO_SUB(UITextInput, UILabel);
 public:
-	UITextInput(Actor* owner);
-	
-	void Focus();
-	void Unfocus();
+    UITextInput(Actor* owner);
+
+    void Focus();
+    void Unfocus();
+    void AllowInputToChangeFocus(bool allow) { mAllowInputToChangeFocus = allow; }
+
+    void SetMaxLength(int maxLength) { mTextInput.SetMaxLength(maxLength); }
 	
 	void Clear();
 	
@@ -23,9 +26,13 @@ public:
 	void SetCaretBlinkInterval(float interval) { mCaretBlinkInterval = interval; }
 	
 protected:
+    void OnDisable() override;
 	void OnUpdate(float deltaTime) override;
 	
 private:
+    // If true, user input can change whether this text input is focused or not.
+    bool mAllowInputToChangeFocus = true;
+
 	// Is the text input field focused?
 	// If so, typing text will fill in the input field!
 	bool mFocused = false;
