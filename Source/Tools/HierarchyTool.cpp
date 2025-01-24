@@ -106,6 +106,13 @@ void HierarchyTool::Render(bool& toolActive)
 
     // End window.
     ImGui::End();
+
+    // This is a bit of a HACK, but if we have a selected actor, set them dirty.
+    // This allows modifying transform data in the inspector and seeing the result in real-time.
+    if(mSelectedActor != nullptr)
+    {
+        mSelectedActor->GetTransform()->SetDirty();
+    }
 }
 
 void HierarchyTool::AddTreeNodeForActor(Actor* actor)
