@@ -379,7 +379,7 @@ void SidneyAnalyze::ShowAnalyzeMessage(const std::string& message, const Vector2
     mAnalyzePopup->SetWindowPosition(position);
 
     mAnalyzePopup->SetTextAlignment(textAlignment);
-    mAnalyzePopup->SetText(message);
+    mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText(message));
     
     mAnalyzePopup->ShowOneButton();
 }

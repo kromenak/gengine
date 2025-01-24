@@ -172,7 +172,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
         mAnalyzePopup->SetWindowPosition(Vector2(-106.0f, 0.0f));
 
         mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
-        mAnalyzePopup->SetText("SaveArcadia");
+        mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("SaveArcadia"));
 
         mAnalyzePopup->SetImage(gAssetManager.LoadTexture("POUSSIN_ZOOM.BMP"));
 

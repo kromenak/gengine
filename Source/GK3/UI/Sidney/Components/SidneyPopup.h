@@ -1,3 +1,8 @@
+//
+// Clark Kromenaker
+//
+// A popup in the Sidney UI. Supports many popup variations.
+//
 #pragma once
 #include "Actor.h"
 
@@ -9,6 +14,7 @@
 class SidneyButton;
 class Texture;
 class UIImage;
+class UITextInput;
 
 class SidneyPopup : public Actor
 {
@@ -18,6 +24,7 @@ public:
     void ResetToDefaults();
 
     void SetWindowPosition(const Vector2& position);
+    void SetWindowSize(const Vector2& size);
 
     void SetText(const std::string& message);
     void SetTextAlignment(HorizontalAlignment textAlignment);
@@ -26,6 +33,11 @@ public:
 
     void ShowOneButton();
     void ShowTwoButton(const std::function<void()>& yesCallback);
+
+    void ShowTextInput(const std::function<void(const std::string&)>& submitCallback);
+
+protected:
+    void OnUpdate(float deltaTime) override;
 
 private:
     // Popup window; contains the content and buttons within the larger screen area.
@@ -43,4 +55,10 @@ private:
     // For the two button variant, yes and no buttons to press.
     SidneyButton* mYesButton = nullptr;
     SidneyButton* mNoButton = nullptr;
+
+    // For the text input version of the popup, a text input field.
+    UITextInput* mTextInput = nullptr;
+
+    // A callback for when the text input is submitted.
+    std::function<void(const std::string&)> mTextInputSubmitCallback = nullptr;
 };

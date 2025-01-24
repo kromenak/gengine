@@ -1,6 +1,7 @@
 #include "SidneyPopup.h"
 
 #include "AssetManager.h"
+#include "Font.h"
 #include "RectTransform.h"
 #include "SidneyButton.h"
 #include "SidneyUtil.h"
@@ -9,6 +10,7 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UINineSlice.h"
+#include "UITextInput.h"
 #include "UIUtil.h"
 
 SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::RectTransform)
@@ -65,6 +67,27 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
         mImage->GetRectTransform()->SetAnchoredPosition(10.0f, -10.0f);
     }
 
+    // Add a text input field.
+    {
+        mTextInput = UIUtil::NewUIActorWithWidget<UITextInput>(mWindow);
+        mTextInput->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+        mTextInput->AllowInputToChangeFocus(false); // Can't click elsewhere to unfocus this input.
+        mTextInput->SetMaxLength(8); // Don't allow too many characters to be added.
+
+        // Create text input field caret.
+        UIImage* caretImage = UIUtil::NewUIActorWithWidget<UIImage>(mTextInput->GetOwner());
+        caretImage->SetTexture(&Texture::White);
+        caretImage->SetColor(Color32(198, 170, 41));
+
+        caretImage->GetRectTransform()->SetAnchor(AnchorPreset::LeftStretch, false);
+        caretImage->GetRectTransform()->SetPivot(0.0f, 0.0f);
+        caretImage->GetRectTransform()->SetSizeDelta(2.0f, 0.0f);
+        caretImage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+
+        mTextInput->SetCaret(caretImage);
+        mTextInput->SetCaretBlinkInterval(0.5f);
+    }
+
     // Add OK button.
     {
         mOKButton = new SidneyButton(mWindow);
@@ -95,7 +118,6 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
         // Hide on button press.
         mYesButton->SetPressCallback([this](){
-            printf("Yes\n");
             SetActive(false);
         });
     }
@@ -138,6 +160,11 @@ void SidneyPopup::ResetToDefaults()
     // Assume image will be hidden by default.
     mImage->SetTexture(nullptr);
     mImage->SetEnabled(false);
+
+    // Assume text input will be hidden by default.
+    mTextInput->Clear();
+    mTextInput->SetEnabled(false);
+    mTextInputSubmitCallback = nullptr;
 }
 
 void SidneyPopup::SetWindowPosition(const Vector2& position)
@@ -145,9 +172,14 @@ void SidneyPopup::SetWindowPosition(const Vector2& position)
     mWindow->GetComponent<RectTransform>()->SetAnchoredPosition(position);
 }
 
+void SidneyPopup::SetWindowSize(const Vector2& size)
+{
+    mWindow->GetComponent<RectTransform>()->SetSizeDelta(size);
+}
+
 void SidneyPopup::SetText(const std::string& message)
 {
-    mMessage->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText(message));
+    mMessage->SetText(message);
 
     // Also adjust height to fit the size of the message.
     // +30 to account for margins around text, +6 for extra buffer between message and button.
@@ -178,10 +210,47 @@ void SidneyPopup::SetImage(Texture* texture)
     mMessage->GetRectTransform()->SetSizeDelta(0.0f, -15.0f);
 }
 
+void SidneyPopup::ShowTextInput(const std::function<void(const std::string&)>& submitCallback)
+{
+    SetActive(true);
+
+    // Hide all buttons.
+    mOKButton->SetActive(false);
+    mYesButton->SetActive(false);
+    mNoButton->SetActive(false);
+
+    // Save callback for later use.
+    mTextInputSubmitCallback = submitCallback;
+
+    // At the moment, the text input popup is highly specialized for showing one line of text next to an input field in the center of the popup.
+    // First, calculate center of window and line height.
+    Vector2 windowSize = mWindow->GetComponent<RectTransform>()->GetSizeDelta();
+    float centerY = windowSize.y / 2.0f;
+    float lineHeight = mMessage->GetFont()->GetGlyphHeight();
+
+    // Position message centered vertically, to the left.
+    mMessage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
+    mMessage->GetRectTransform()->SetPivot(0.0f, 0.5f);
+    mMessage->GetRectTransform()->SetAnchoredPosition(15.0f, centerY);
+    mMessage->GetRectTransform()->SetSizeDelta(windowSize.x / 2.0f, lineHeight);
+    float messageWidth = mMessage->GetTextWidth();
+
+    // Position text input next to message, on the right.
+    mTextInput->SetEnabled(true);
+    mTextInput->GetRectTransform()->SetAnchor(0.0f, 0.0f);
+    mTextInput->GetRectTransform()->SetPivot(0.0f, 0.5f);
+    mTextInput->GetRectTransform()->SetAnchoredPosition(15.0f + messageWidth + 5.0f, centerY);
+    mTextInput->GetRectTransform()->SetSizeDelta(windowSize.x - 20.0f - 15.0f - messageWidth, lineHeight);
+
+    // Focus the input.
+    mTextInput->Focus();
+}
+
 void SidneyPopup::ShowOneButton()
 {
     SetActive(true);
 
+    // Show only OK button.
     mOKButton->SetActive(true);
     mYesButton->SetActive(false);
     mNoButton->SetActive(false);
@@ -191,12 +260,27 @@ void SidneyPopup::ShowTwoButton(const std::function<void()>& yesCallback)
 {
     SetActive(true);
 
+    // Show yes and no buttons.
     mOKButton->SetActive(false);
     mYesButton->SetActive(true);
     mNoButton->SetActive(true);
 
+    // Set callback when yes button is pressed.
     mYesButton->SetPressCallback([this, yesCallback](){
         SetActive(false);
         yesCallback();
     });
+}
+
+void SidneyPopup::OnUpdate(float deltaTime)
+{
+    // In text input mode, we need to catch RETURN being pressed to submit the text.
+    // This also closes the popup.
+    if(mTextInput->IsEnabled() && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
+    {
+        SetActive(false);
+
+        // Do callback AFTER set active to false, in case callback triggers another popup.
+        mTextInputSubmitCallback(mTextInput->GetText());
+    }
 }
