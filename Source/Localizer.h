@@ -18,11 +18,16 @@ public:
     void Load(const std::string& fileName, const std::string& sectionName = "");
 
     //TODO: Change Locale
+    void changeLocale(const std::string& localeValue);
     
     std::string GetText(const std::string& key) const;
     
+    std::string GetLocale() const;
+    
 private:
     std::string_map_ci<std::string> mKeyToText;
+    
+    std::string locale;
 };
 
 // It's possible to create many Localizer instances, but there is also one "main" localizer.

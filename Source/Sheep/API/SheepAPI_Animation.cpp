@@ -2,6 +2,7 @@
 
 #include "Animator.h"
 #include "AssetManager.h"
+#include "Localizer.h"
 #include "ReportManager.h"
 #include "SceneManager.h"
 
@@ -72,7 +73,7 @@ shpvoid StartMom(const std::string& momAnimationName)
 {
     // Mom animation assets have a language prefix (e.g. "E" for English).
     // So, let's add that here.
-    Animation* animation = gAssetManager.LoadMomAnimation("E" + momAnimationName, AssetScope::Scene);
+    Animation* animation = gAssetManager.LoadMomAnimation(gLocalizer.GetLocale() + momAnimationName, AssetScope::Scene);
     if(animation != nullptr)
     {
         //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.

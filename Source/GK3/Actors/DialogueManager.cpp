@@ -8,6 +8,7 @@
 #include "Animator.h"
 #include "GameCamera.h"
 #include "GKActor.h"
+#include "Localizer.h"
 #include "SceneManager.h"
 
 DialogueManager gDialogueManager;
@@ -260,7 +261,7 @@ void DialogueManager::PlayNextDialogueLine()
     }
 
     // Construct YAK name from stored plate/sequence number.
-    std::string yakName = "E" + mDialogueLicensePlate;
+    std::string yakName = gLocalizer.GetLocale() + mDialogueLicensePlate;
     if(mDialogueSequenceNumber < 10)
     {
         yakName += ('0' + static_cast<char>(mDialogueSequenceNumber));
