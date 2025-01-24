@@ -2,6 +2,7 @@
 
 #include "ActionManager.h"
 #include "Actor.h"
+#include "GameProgress.h"
 #include "SidneyButton.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
@@ -53,9 +54,11 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
     }
     
     // Create window for translation area.
-    mTranslateWindow = new Actor(TransformType::RectTransform);
-    mTranslateWindow->GetTransform()->SetParent(mRoot->GetTransform());
     {
+        mTranslateWindow = new Actor(TransformType::RectTransform);
+        mTranslateWindow->GetTransform()->SetParent(mRoot->GetTransform());
+        mTranslateWindow->GetComponent<RectTransform>()->SetAnchoredPosition(0.0f, -15.0f);
+
         UINineSlice* border = mTranslateWindow->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
         border->GetRectTransform()->SetSizeDelta(526.0f, 340.0f);
 
@@ -272,6 +275,8 @@ void SidneyTranslate::OnTranslateButtonPressed()
         // "From" language must be Latin.
         if(mFromLanguage != Language::Latin)
         {
+            mPopup->ResetToDefaults();
+            mPopup->SetTextAlignment(HorizontalAlignment::Center);
             mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("WrongFrom"));
             mPopup->ShowOneButton();
             return;
@@ -285,13 +290,79 @@ void SidneyTranslate::OnTranslateButtonPressed()
             return;
         }
 
-        // Ok, translate Latin to English - that's what we want.
-        // Add the translation to the output area.
-        std::string text = mTranslateTextLabel->GetText();
-        text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(), SidneyUtil::GetTranslateLocalizer().GetText("Latin").c_str());
-        text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("ArcadiaTextT1");
-        mTranslateTextLabel->SetText(text);
+        // If we already translated it, we're done here.
+        if(gGameProgress.GetFlag("ArcadiaComplete"))
+        {
+            mPopup->ResetToDefaults();
+            mPopup->SetTextAlignment(HorizontalAlignment::Center);
+            mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("NoFurther"));
+            mPopup->ShowOneButton();
+            return;
+        }
 
-        //TODO: Show "incomplete sentence" dialog box.
+        // Ok, translate Latin to English - that's what we want.
+        // Add the translation to the output area the first time we try this.
+        if(mTranslateTextLabel->GetLineCount() < 4)
+        {
+            std::string text = mTranslateTextLabel->GetText();
+            text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(), SidneyUtil::GetTranslateLocalizer().GetText("Latin").c_str());
+            text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("ArcadiaTextT1");
+            mTranslateTextLabel->SetText(text);
+        }
+
+        // We translated to/from the right languages, but the translation is missing a word.
+        // Show "sentence incomplete - do you want to add words?" popup.
+        mPopup->ResetToDefaults();
+        mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("Subject") + "\n" + SidneyUtil::GetTranslateLocalizer().GetText("Question"));
+        mPopup->SetTextAlignment(HorizontalAlignment::Left);
+        mPopup->SetWindowPosition(Vector2(88.0f, 135.0f));
+        mPopup->SetWindowSize(Vector2(280.0f, 120.0f));
+        mPopup->ShowTwoButton([this](){
+            // Show the UI flow (popups) to allow the player to enter the missing word.
+            PromptForMissingWord();
+        });
     }
+}
+
+void SidneyTranslate::PromptForMissingWord()
+{
+    // Show the popup that asks you to specify the word to use.
+    mPopup->ResetToDefaults();
+    mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("Input"));
+    mPopup->SetWindowPosition(Vector2(88.0f, 148.0f));
+    mPopup->SetWindowSize(Vector2(250.0f, 60.0f));
+    mPopup->ShowTextInput([this](const std::string& input){
+
+        // The password issssss.....sum!
+        if(StringUtil::EqualsIgnoreCase(input, "sum"))
+        {
+            // The translation appends to the text output on screen.
+            std::string text = mTranslateTextLabel->GetText();
+            text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("ArcSUMText1");
+            text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(), SidneyUtil::GetTranslateLocalizer().GetText("Latin").c_str());
+            text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("ArcSUMTextT1");
+            text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("Updating");
+            mTranslateTextLabel->SetText(text);
+
+            // Grace says "BINGO we got it!"
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OFS2ZPF5\", 1)");
+
+            // We get some score and progress.
+            gGameProgress.ChangeScore("e_sidney_translate_arcadia");
+            gGameProgress.SetFlag("ArcadiaComplete");
+        }
+        else
+        {
+            // Wrong guess, would you like to try again? Y/N.
+            mPopup->ResetToDefaults();
+            mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("BadInput1") + "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("BadInput2"));
+            mPopup->SetTextAlignment(HorizontalAlignment::Left);
+            mPopup->SetWindowPosition(Vector2(88.0f, 135.0f));
+            mPopup->SetWindowSize(Vector2(280.0f, 120.0f));
+            mPopup->ShowTwoButton([this](){
+                // Circle back around...
+                PromptForMissingWord();
+            });
+        }
+    });
 }

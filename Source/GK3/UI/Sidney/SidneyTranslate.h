@@ -57,4 +57,5 @@ private:
 
     void OpenFile(int fileId);
     void OnTranslateButtonPressed();
+    void PromptForMissingWord();
 };
