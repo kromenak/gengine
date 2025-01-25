@@ -16,6 +16,7 @@
 #include "UICanvas.h"
 #include "UICircles.h"
 #include "UIGrids.h"
+#include "UIHexagrams.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UILines.h"
@@ -60,6 +61,7 @@ namespace
     const Color32 kZoomedInLineColor(0, 0, 0, 192);
     const Color32 kZoomedOutLineColor(0, 0, 0, 255);
 
+    // Specific points required for various parts of the LSR map puzle.
     const Vector2 kPiscesCoustaussaPoint(405.0f, 1094.0f);
     const Vector2 kPiscesBezuPoint(301.0f, 385.0f);
     const Vector2 kPiscesBugarachPoint(991.0f, 327.0f);
@@ -107,6 +109,42 @@ namespace
 
         // Inside the rectangle if within half sizes on both axes.
         return distFromCenterX < halfWidth && distFromCenterY < halfHeight;
+    }
+
+    bool IsPointOnEdgeOfHexagram(const UIHexagram& hexagram, const Vector2& point)
+    {
+        // Convert point to local space of the hexagram.
+        // After doing this, we can just worry about solving as though the hexagram has no rotation.
+        Vector3 localPoint = Matrix3::MakeRotateZ(-hexagram.angle).TransformPoint(point - hexagram.center);
+
+        // Get six hexagram points.
+        const float kAngleInterval = Math::k2Pi / 6;
+        Vector3 points[6];
+        for(int j = 0; j < 6; ++j)
+        {
+            float angle = j * kAngleInterval;
+            points[j].x = hexagram.center.x + hexagram.radius * Math::Sin(angle);
+            points[j].y = hexagram.center.y + hexagram.radius * Math::Cos(angle);
+        }
+
+        // Generate line segments for each one.
+        LineSegment segments[6] = {
+            LineSegment(points[0], points[2]),
+            LineSegment(points[2], points[4]),
+            LineSegment(points[4], points[0]),
+            LineSegment(points[1], points[3]),
+            LineSegment(points[3], points[5]),
+            LineSegment(points[5], points[1])
+        };
+        for(int i = 0; i < 6; ++i)
+        {
+            Vector2 closestPoint = segments[i].GetClosestPoint(point);
+            if((closestPoint - point).GetLength() < 4)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
 
@@ -440,8 +478,24 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
     }
     else if(StringUtil::EqualsIgnoreCase(shapeName, "Hexagram"))
     {
-        // If you haven't finished Pisces, Grace will say she's not ready for this shape.
-        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27NG1\", 1)");
+        if(!gGameProgress.GetFlag("Virgo"))
+        {
+            // If you haven't finished Virgo, Grace will say she's not ready for this shape.
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27NG1\", 1)");
+        }
+        else if(gGameProgress.GetFlag("Libra"))
+        {
+            // If you try to place after Lira, Grace says another one isn't needed.
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27731\", 1)");
+        }
+        else
+        {
+            // You can only place a hexagram during Libra!
+            const Vector2 kDefaultHexagramPos(599.0f, 770.0f);
+            const float kDefaultHexagramRadius = 200.0f;
+            zoomedIn.hexagrams->AddHexagram(kDefaultHexagramPos, kDefaultHexagramRadius, 0.0f);
+            zoomedOut.hexagrams->AddHexagram(ToZoomedOutPoint(kDefaultHexagramPos), (kDefaultHexagramRadius / kZoomedInMapSize) * kZoomedOutMapSize, 0.0f);
+        }
     }
 }
 
@@ -459,11 +513,17 @@ void SidneyAnalyze::MapState::EraseSelectedShape()
         zoomedIn.rectangles->ClearRectangles();
         zoomedOut.rectangles->ClearRectangles();
     }
+    if(selectedHexagramIndex >= 0)
+    {
+        selectedHexagramIndex = -1;
+        zoomedIn.hexagrams->ClearHexagrams();
+        zoomedOut.hexagrams->ClearHexagrams();
+    }
 }
 
 bool SidneyAnalyze::MapState::IsAnyShapeSelected()
 {
-    return selectedCircleIndex >= 0 || selectedRectangleIndex >= 0;
+    return selectedCircleIndex >= 0 || selectedRectangleIndex >= 0 || selectedHexagramIndex >= 0;
 }
 
 void SidneyAnalyze::MapState::ClearShapeSelection()
@@ -477,6 +537,11 @@ void SidneyAnalyze::MapState::ClearShapeSelection()
     {
         selectedRectangleIndex = -1;
         zoomedOut.rectangles->SetColor(kZoomedOutShapeColor);
+    }
+    if(selectedHexagramIndex >= 0)
+    {
+        selectedHexagramIndex = -1;
+        zoomedOut.hexagrams->SetColor(kZoomedOutShapeColor);
     }
 }
 
@@ -567,6 +632,30 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedIn.mapImage = zoomedInMapBackground->AddComponent<UIImage>();
         mMap.zoomedIn.mapImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBIGMAP.BMP"), true);
         mMap.zoomedIn.mapImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+
+        // Create locked hexagrams renderer.
+        {
+            Actor* hexagramsActor = new Actor(TransformType::RectTransform);
+            hexagramsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
+
+            mMap.zoomedIn.lockedHexagrams = hexagramsActor->AddComponent<UIHexagrams>();
+            mMap.zoomedIn.lockedHexagrams->SetColor(kZoomedInLockedGridColor);
+
+            mMap.zoomedIn.lockedHexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.lockedHexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
+
+        // Create hexagrams renderer.
+        {
+            Actor* hexagramsActor = new Actor(TransformType::RectTransform);
+            hexagramsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
+
+            mMap.zoomedIn.hexagrams = hexagramsActor->AddComponent<UIHexagrams>();
+            mMap.zoomedIn.hexagrams->SetColor(kZoomedInShapeColor);
+
+            mMap.zoomedIn.hexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.hexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
 
         // Create locked grids renderer.
         {
@@ -695,6 +784,30 @@ void SidneyAnalyze::AnalyzeMap_Init()
         // The zoomed out map also needs a masking canvas so that moved shapes don't show outside the map border.
         UICanvas* zoomedOutMapCanvas = zoomedOutMapActor->AddComponent<UICanvas>(0);
         zoomedOutMapCanvas->SetMasked(true);
+
+        // Create locked hexagrams renderer.
+        {
+            Actor* hexagramsActor = new Actor(TransformType::RectTransform);
+            hexagramsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
+
+            mMap.zoomedOut.lockedHexagrams = hexagramsActor->AddComponent<UIHexagrams>();
+            mMap.zoomedOut.lockedHexagrams->SetColor(kZoomedOutLockedGridColor);
+
+            mMap.zoomedOut.lockedHexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.lockedHexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
+
+        // Create hexagrams renderer.
+        {
+            Actor* hexagramsActor = new Actor(TransformType::RectTransform);
+            hexagramsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
+
+            mMap.zoomedOut.hexagrams = hexagramsActor->AddComponent<UIHexagrams>();
+            mMap.zoomedOut.hexagrams->SetColor(kZoomedOutShapeColor);
+
+            mMap.zoomedOut.hexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.hexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+        }
 
         // Create locked grids renderer.
         {
@@ -882,6 +995,8 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
     bool piscesDone = gGameProgress.GetFlag("Pisces");
     bool ariesDone = gGameProgress.GetFlag("Aries");
     bool taurusDone = gGameProgress.GetFlag("Taurus");
+    bool virgoDone = gGameProgress.GetFlag("Virgo");
+    bool libraDone = gGameProgress.GetFlag("Libra");
     if(aquariusDone && !piscesDone)
     {
         Vector2 coustaussaPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPiscesCoustaussaPoint);
@@ -1036,6 +1151,50 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
             }
         }
     }
+    else if(virgoDone && !libraDone)
+    {
+        // To complete Libra, the player must place a hexagram at a certain position, scale, and angle.
+        const Vector2 kHexagramCenter(168.875f, 174.5f);
+        const float kHexagramRadius = 121.0f;
+
+        for(size_t i = 0; i < mMap.zoomedOut.hexagrams->GetCount(); ++i)
+        {
+            const UIHexagram& hexagram = mMap.zoomedOut.hexagrams->GetHexagram(i);
+
+            // Center/radius checks are the same as for the circle earlier...
+            float centerDiffSq = (hexagram.center - kHexagramCenter).GetLengthSq();
+            float radiusDiff = Math::Abs(hexagram.radius - kHexagramRadius);
+            if(centerDiffSq < 20 * 20 && radiusDiff < 4)
+            {
+                // The hexagram needs to be in a specific rotation. But there are several valid rotations to get the correct visual effect.
+                // In practice, it comes down to being at 30 degrees, or any multiple of 30 degrees before/after that.
+
+                // Convert angle to degrees, within 0-360.
+                float angle = Math::Abs(Math::Mod(hexagram.angle, Math::k2Pi));
+                float degrees = Math::ToDegrees(angle);
+
+                // Check all valid rotations. If any match, you got it!
+                const float kCloseEnoughDegrees = 2.0f;
+                if(Math::Approximately(degrees, 30.0f, kCloseEnoughDegrees) ||
+                   Math::Approximately(degrees, 90.0f, kCloseEnoughDegrees) ||
+                   Math::Approximately(degrees, 150.0f, kCloseEnoughDegrees) ||
+                   Math::Approximately(degrees, 210.0f, kCloseEnoughDegrees) ||
+                   Math::Approximately(degrees, 270.0f, kCloseEnoughDegrees) ||
+                   Math::Approximately(degrees, 330.0f, kCloseEnoughDegrees))
+                {
+                    // Show popup saying that the shape is in the right spot.
+                    ShowAnalyzeMessage("MapShapeLockNote", Vector2(), HorizontalAlignment::Center);
+
+                    // Grace says you got it right!
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O1K2ZC73, 1)");
+
+                    // And you just finished Libra.
+                    gGameProgress.SetFlag("Libra");
+                }
+            }
+            //printf("Center (%f, %f), Size (%f), Angle (%f)\n", hexagram.center.x, hexagram.center.y, hexagram.radius, angle);
+        }
+    }
 }
 
 void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
@@ -1121,6 +1280,23 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
                     }
                 }
             }
+
+            // Check for selecting a hexagram.
+            for(size_t i = 0; i < mMap.zoomedOut.hexagrams->GetCount(); ++i)
+            {
+                const UIHexagram& hexagram = mMap.zoomedOut.hexagrams->GetHexagram(i);
+                if(IsPointOnEdgeOfHexagram(hexagram, zoomedOutMapPos))
+                {
+                    if(mMap.selectedHexagramIndex != i)
+                    {
+                        mMap.ClearShapeSelection();
+                        mMap.selectedHexagramIndex = i;
+                        mMap.zoomedOut.hexagrams->SetColor(kZoomedOutSelectedShapeColor);
+                        mMap.zoomedOutClickAction = MapState::ClickAction::SelectShape;
+                        break;
+                    }
+                }
+            }
         }
 
         // This isn't frequently used, but right-clicking actually de-selects the current shape.
@@ -1177,6 +1353,22 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
                     rotateShapeCursor = true;
                 }
             }
+            else if(mMap.selectedHexagramIndex >= 0)
+            {
+                const UIHexagram& hexagram = mMap.zoomedOut.hexagrams->GetHexagram(mMap.selectedHexagramIndex);
+                if(IsPointOnEdgeOfHexagram(hexagram, zoomedOutMapPos))
+                {
+                    resizeShapeCursor = true;
+                }
+                else if((zoomedOutMapPos - hexagram.center).GetLengthSq() < hexagram.radius* hexagram.radius)
+                {
+                    moveShapeCursor = true;
+                }
+                else
+                {
+                    rotateShapeCursor = true;
+                }
+            }
         }
 
         if(resizeShapeCursor || mMap.zoomedOutClickAction == MapState::ClickAction::ResizeShape)
@@ -1225,6 +1417,10 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
             {
                 mMap.zoomedOutClickShapeCenter = mMap.zoomedOut.rectangles->GetRectangle(mMap.selectedRectangleIndex).center;
             }
+            if(mMap.selectedHexagramIndex >= 0)
+            {
+                mMap.zoomedOutClickShapeCenter = mMap.zoomedOut.hexagrams->GetHexagram(mMap.selectedHexagramIndex).center;
+            }
         }
 
         if(gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Left))
@@ -1259,6 +1455,21 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
                     mMap.zoomedIn.rectangles->AddRectangle(mMap.ToZoomedInPoint(zoomedOutRectangle.center),
                                                            mMap.ToZoomedInPoint(zoomedOutRectangle.size),
                                                            zoomedOutRectangle.angle);
+                }
+                if(mMap.selectedHexagramIndex >= 0)
+                {
+                    UIHexagram zoomedOutHexagram = mMap.zoomedOut.hexagrams->GetHexagram(mMap.selectedHexagramIndex);
+
+                    Vector3 expectedOffset = mMap.zoomedOutClickShapeCenter - mMap.zoomedOutClickActionPos;
+                    zoomedOutHexagram.center = zoomedOutMapPos + expectedOffset;
+
+                    mMap.zoomedOut.hexagrams->ClearHexagrams();
+                    mMap.zoomedOut.hexagrams->AddHexagram(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
+
+                    mMap.zoomedIn.hexagrams->ClearHexagrams();
+                    mMap.zoomedIn.hexagrams->AddHexagram(mMap.ToZoomedInPoint(zoomedOutHexagram.center),
+                                                         (zoomedOutHexagram.radius / kZoomedOutMapSize)* kZoomedInMapSize,
+                                                         zoomedOutHexagram.angle);
                 }
             }
             else if(mMap.zoomedOutClickAction == MapState::ClickAction::ResizeShape)
@@ -1299,6 +1510,30 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
                                                            mMap.ToZoomedInPoint(zoomedOutRectangle.size),
                                                            zoomedOutRectangle.angle);
                 }
+                if(mMap.selectedHexagramIndex >= 0)
+                {
+                    UIHexagram zoomedOutHexagram = mMap.zoomedOut.hexagrams->GetHexagram(mMap.selectedHexagramIndex);
+
+                    Vector2 mouseMoveOffset = zoomedOutMapPos - mMap.zoomedOutClickActionPos;
+                    Vector2 centerToPos = zoomedOutMapPos - zoomedOutHexagram.center;
+
+                    float distChange = mouseMoveOffset.GetLength();
+                    if(Vector2::Dot(mouseMoveOffset, centerToPos) < 0)
+                    {
+                        distChange *= -1.0f;
+                    }
+                    mMap.zoomedOutClickActionPos = zoomedOutMapPos;
+
+                    zoomedOutHexagram.radius += distChange;
+
+                    mMap.zoomedOut.hexagrams->ClearHexagrams();
+                    mMap.zoomedOut.hexagrams->AddHexagram(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
+
+                    mMap.zoomedIn.hexagrams->ClearHexagrams();
+                    mMap.zoomedIn.hexagrams->AddHexagram(mMap.ToZoomedInPoint(zoomedOutHexagram.center),
+                                                         (zoomedOutHexagram.radius / kZoomedOutMapSize)* kZoomedInMapSize,
+                                                         zoomedOutHexagram.angle);
+                }
             }
             else if(mMap.zoomedOutClickAction == MapState::ClickAction::RotateShape)
             {
@@ -1325,6 +1560,30 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
                     mMap.zoomedIn.rectangles->AddRectangle(mMap.ToZoomedInPoint(zoomedOutRectangle.center),
                                                            mMap.ToZoomedInPoint(zoomedOutRectangle.size),
                                                            zoomedOutRectangle.angle);
+                }
+                if(mMap.selectedHexagramIndex >= 0)
+                {
+                    UIHexagram zoomedOutHexagram = mMap.zoomedOut.hexagrams->GetHexagram(mMap.selectedHexagramIndex);
+
+                    Vector2 prevCenterToMouse = Vector2::Normalize(mMap.zoomedOutClickActionPos - mMap.zoomedOutClickShapeCenter);
+                    Vector2 centerToMouse = Vector2::Normalize(zoomedOutMapPos - mMap.zoomedOutClickShapeCenter);
+                    mMap.zoomedOutClickActionPos = zoomedOutMapPos;
+
+                    float angle = Math::Acos(Math::Clamp(Vector2::Dot(prevCenterToMouse, centerToMouse), 0.0f, 1.0f));
+                    Vector3 cross = Vector3::Cross(prevCenterToMouse, centerToMouse);
+                    if(cross.z < 0)
+                    {
+                        angle *= -1.0f;
+                    }
+                    zoomedOutHexagram.angle += angle;
+
+                    mMap.zoomedOut.hexagrams->ClearHexagrams();
+                    mMap.zoomedOut.hexagrams->AddHexagram(zoomedOutHexagram.center, zoomedOutHexagram.radius, zoomedOutHexagram.angle);
+
+                    mMap.zoomedIn.hexagrams->ClearHexagrams();
+                    mMap.zoomedIn.hexagrams->AddHexagram(mMap.ToZoomedInPoint(zoomedOutHexagram.center),
+                                                         (zoomedOutHexagram.radius / kZoomedOutMapSize)* kZoomedInMapSize,
+                                                         zoomedOutHexagram.angle);
                 }
             }
             else if(mMap.zoomedOutClickAction == MapState::ClickAction::FocusMap)
@@ -1391,6 +1650,10 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
     bool piscesDone = gGameProgress.GetFlag("Pisces");
     bool ariesDone = gGameProgress.GetFlag("Aries");
     bool taurusDone = gGameProgress.GetFlag("Taurus");
+    bool geminiDone = gGameProgress.GetFlag("Gemini");
+    bool cancerDone = gGameProgress.GetFlag("Cancer");
+    bool leoDone = gGameProgress.GetFlag("Leo");
+    bool virgoDone = gGameProgress.GetFlag("Virgo");
     if(!aquariusDone) // Working on Aquarius
     {
         // Player must place two points near enough to these points and press "Analyze" to pass Aquarius.
@@ -1483,6 +1746,114 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
                                               mMap.ToZoomedOutPoint(kTaurusMeridianPoint));
 
                 // NOTE: doing this doesn't complete Taurus - the player must rotate the square to align with these points.
+            }
+        }
+    }
+    else if(geminiDone && cancerDone && !leoDone) // working on Leo
+    {
+        // Player must place two points near enough to these points and press "Analyze" to pass Leo.
+        const Vector2 kLermitagePoint(676.0f, 698.0f);
+        const Vector2 kPoussinTombPoint(938.0f, 1207.0f);
+
+        // See if two placed points meet the criteria to finish Leo.
+        Vector2 lermitagePoint = mMap.zoomedIn.GetPlacedPointNearPoint(kLermitagePoint);
+        Vector2 poussinTombPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPoussinTombPoint);
+        if(lermitagePoint != Vector2::Zero && poussinTombPoint != Vector2::Zero)
+        {
+            // Says "line passes through meridian at sunrise line."
+            ShowAnalyzeMessage("MapLine3Note");
+
+            // Remove points placed by the player.
+            mMap.zoomedIn.points->RemovePoint(lermitagePoint);
+            mMap.zoomedIn.points->RemovePoint(poussinTombPoint);
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(lermitagePoint));
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(poussinTombPoint));
+
+            // It's possible for the player to place these points multiple times.
+            // But only the first placement elicits exclamations from Grace.
+            bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kLermitagePoint, true) != Vector2::Zero;
+            if(!alreadyPlacedPoints)
+            {
+                // Grace says "Wow, it intersects the meridian at the same spot as the sunrise line!"
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZBY2\", 1)");
+
+                // Add locked points.
+                mMap.zoomedIn.lockedPoints->AddPoint(kLermitagePoint);
+                mMap.zoomedIn.lockedPoints->AddPoint(kPoussinTombPoint);
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kLermitagePoint));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoussinTombPoint));
+
+                // Place a line segment between the points.
+                mMap.zoomedIn.lines->AddLine(kLermitagePoint, kPoussinTombPoint);
+                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kLermitagePoint),
+                                              mMap.ToZoomedOutPoint(kPoussinTombPoint));
+
+                // Leo is done!
+                gGameProgress.SetFlag("Leo");
+            }
+        }
+    }
+    else if(leoDone && !virgoDone) // working on Virgo
+    {
+        // Player must place four points in the correct spots to pass Virgo.
+        const Vector2 kCorner1(360.0f, 312.0f);
+        const Vector2 kCorner2(578.0f, 210.0f);
+        const Vector2 kCorner3(992.0f, 1084.0f);
+        const Vector2 kCorner4(773.0f, 1188.0f);
+
+        // See if placed points meet the criteria to finish Virgo.
+        Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner1);
+        Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner2);
+        Vector2 point3 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner3);
+        Vector2 point4 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner4);
+        if(point1 != Vector2::Zero && point2 != Vector2::Zero && point3 != Vector2::Zero && point4 != Vector2::Zero)
+        {
+            // Says "points define 4-to-1 rectangle."
+            ShowAnalyzeMessage("MapRectNote", Vector2(), HorizontalAlignment::Center);
+
+            // Remove points placed by the player.
+            mMap.zoomedIn.points->RemovePoint(point1);
+            mMap.zoomedIn.points->RemovePoint(point2);
+            mMap.zoomedIn.points->RemovePoint(point3);
+            mMap.zoomedIn.points->RemovePoint(point4);
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point1));
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point2));
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point3));
+            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point4));
+
+            // It's possible for the player to place these points multiple times.
+            // But only the first placement elicits exclamations from Grace.
+            bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner1, true) != Vector2::Zero;
+            if(!alreadyPlacedPoints)
+            {
+                // Grace says "That matches Wilkes seismic charts!"
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZKI2\", 1)");
+
+                // Add locked points.
+                mMap.zoomedIn.lockedPoints->AddPoint(kCorner1);
+                mMap.zoomedIn.lockedPoints->AddPoint(kCorner2);
+                mMap.zoomedIn.lockedPoints->AddPoint(kCorner3);
+                mMap.zoomedIn.lockedPoints->AddPoint(kCorner4);
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner1));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner2));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner3));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner4));
+
+                // Place line segments between the points.
+                mMap.zoomedIn.lines->AddLine(kCorner1, kCorner2);
+                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner1), mMap.ToZoomedOutPoint(kCorner2));
+
+                mMap.zoomedIn.lines->AddLine(kCorner2, kCorner3);
+                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner2), mMap.ToZoomedOutPoint(kCorner3));
+
+                mMap.zoomedIn.lines->AddLine(kCorner3, kCorner4);
+                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner3), mMap.ToZoomedOutPoint(kCorner4));
+
+                mMap.zoomedIn.lines->AddLine(kCorner4, kCorner1);
+                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner4), mMap.ToZoomedOutPoint(kCorner1));
+
+                // Virgo is done!
+                gGameProgress.SetFlag("Virgo");
             }
         }
     }

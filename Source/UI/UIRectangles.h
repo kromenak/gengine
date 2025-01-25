@@ -39,7 +39,7 @@ public:
     size_t GetCount() const { return mRectangles.size(); }
     
 private:
-    // The lines in the set.
+    // The rectangles in the set.
     std::vector<UIRectangle> mRectangles;
 
     // Material and mesh used for rendering.

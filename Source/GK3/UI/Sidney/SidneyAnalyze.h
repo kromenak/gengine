@@ -18,6 +18,7 @@ class SidneyPopup;
 class UIButton;
 class UICircles;
 class UIGrids;
+class UIHexagrams;
 class UIImage;
 class UILines;
 class UIPoints;
@@ -160,6 +161,10 @@ private:
             UIGrids* grids = nullptr;
             UIGrids* lockedGrids = nullptr;
 
+            // Hexagrams that have been placed 
+            UIHexagrams* hexagrams = nullptr;
+            UIHexagrams* lockedHexagrams = nullptr;
+
             Vector2 GetLocalMousePos();
             Vector2 GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints = false);
 
@@ -171,6 +176,7 @@ private:
         // Index of selected shapes (in the UICircles/UIRectangles components).
         int selectedCircleIndex = -1;
         int selectedRectangleIndex = -1;
+        int selectedHexagramIndex = -1;
 
         // Are we currently entering points?
         bool enteringPoints = false;
