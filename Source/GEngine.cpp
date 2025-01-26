@@ -117,7 +117,6 @@ bool GEngine::Initialize()
     gCursorManager.UseLoadCursor();
 
     // Create localizer.
-    gLocalizer.changeLocale(gAssetManager.getLocaleFromIni());
     gLocalizer.Load("STRINGS.TXT");
 
 	// Init verb manager.

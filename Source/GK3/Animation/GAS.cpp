@@ -494,12 +494,20 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                 std::cout << "Missing yak in DLG" << std::endl;
                 continue;
             }
-            std::string yakName = gLocalizer.GetLocale()  + tokenizer.GetNext();
 
-            Animation* yakAnimation = gAssetManager.LoadYak(yakName, GetScope());
+            // Attempt to load YAK using current language. 
+            std::string yakName = tokenizer.GetNext();
+            Animation* yakAnimation = gAssetManager.LoadYak(Localizer::GetLanguagePrefix() + yakName, GetScope());
             if(yakAnimation == nullptr)
             {
-                std::cout << "Invalid yak name specified in DLG" << std::endl;
+                printf("Couldn't load yak %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), yakName.c_str(), yakName.c_str());
+
+                // But fall back and try English if we couldn't find anything.
+                yakAnimation = gAssetManager.LoadYak("E" + yakName, GetScope());
+                if(yakAnimation == nullptr)
+                {
+                    printf("Invalid yak %s specified in GAS DLG (%s)\n", yakName.c_str(), GetName().c_str());
+                }
                 continue;
             }
 

@@ -3,36 +3,58 @@
 #include <cassert>
 
 #include "AssetManager.h"
+#include "Config.h"
 #include "IniParser.h"
 #include "TextAsset.h"
 
 Localizer gLocalizer;
+
+/*static*/ const std::string& Localizer::GetLanguagePrefix()
+{
+    static std::string languagePrefix;
+    if(languagePrefix.empty())
+    {
+        // If a language prefix is specified in GK3.ini, it will override anything else.
+        Config* config = gAssetManager.LoadConfig("GK3.ini");
+        if(config->HasKey("Localization", "Locale"))
+        {
+            languagePrefix = config->GetString("Localization", "Locale", "E");
+            printf("Language preference set to %s (from GK3.ini)\n", languagePrefix.c_str());
+        }
+        else
+        {
+            // Default to English.
+            languagePrefix = "E";
+        }
+    }
+    return languagePrefix;
+}
 
 Localizer::Localizer(const std::string& fileName, const std::string& sectionName)
 {
     Load(fileName, sectionName);
 }
 
-void Localizer::changeLocale(const std::string& localeValue)
-{
-    locale = localeValue;
-}
-
-std::string Localizer::GetLocale() const
-{
-    return locale;
-}
-
 void Localizer::Load(const std::string& fileName, const std::string& sectionName)
 {
     // We assume the passed in filename does not have the language prefix attached yet.
-    // For now, we'll assume English, but we could add other localizations pretty easily.
-    std::string localeFileName = locale + fileName;
+    // Add the language prefix based on current game options.
+    std::string localeFileName = GetLanguagePrefix() + fileName;
     
     // GK3 translations are stored in INI files with various sections.
     // Sometimes, we don't care about the sections - we just load the entire file into a single localizer.
     // However, sometimes sections have duplicate keys - in that case, it's better to treat each section as its own localizer.
-    TextAsset* textFile = gAssetManager.LoadText(localeFileName, AssetScope::Manual);
+    TextAsset* textFile = gAssetManager.LoadText(GetLanguagePrefix() + fileName, AssetScope::Manual);
+    if(textFile == nullptr)
+    {
+        printf("Failed to load %s%s - falling back on English (E%s).\n", GetLanguagePrefix().c_str(), fileName.c_str(), fileName.c_str());
+        textFile = gAssetManager.LoadText("E" + fileName, AssetScope::Manual);
+        if(textFile == nullptr)
+        {
+            printf("Failed to load localization text file %s! No localized text will be loaded.\n", fileName);
+            return;
+        }
+    }
 
     // Parse as INI file.
     // Ignore multiple key values per line b/c a comma is going to be part of the translation copy, rather than another key/value on the same line.

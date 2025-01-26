@@ -12,22 +12,18 @@
 class Localizer
 {
 public:
+    static const std::string& GetLanguagePrefix();
+
     Localizer() = default;
     explicit Localizer(const std::string& fileName, const std::string& sectionName = "");
 
     void Load(const std::string& fileName, const std::string& sectionName = "");
 
-    //TODO: Change Locale
-    void changeLocale(const std::string& localeValue);
-    
     std::string GetText(const std::string& key) const;
     
-    std::string GetLocale() const;
-    
 private:
+    // Maps a localization key to the localized text.
     std::string_map_ci<std::string> mKeyToText;
-    
-    std::string locale;
 };
 
 // It's possible to create many Localizer instances, but there is also one "main" localizer.

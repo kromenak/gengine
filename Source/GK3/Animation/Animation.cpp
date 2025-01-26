@@ -717,32 +717,24 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "DIALOGUE"))
                 {
-                    // [FRAME] DIALOGUE [LICENSE_PLATE]
+                    // [FRAME] DIALOGUE [YAK_NAME]
                     if(line.entries.size() >= 3)
                     {
-                        // Read YAK license plate (file name).
+                        // Create and add node.
                         DialogueAnimNode* node = new DialogueAnimNode();
                         node->frameNumber = frameNumber;
+                        mFrames[frameNumber].push_back(node);
 
-                        // ANM/MOM/YAK files *almost* always prepend the language code (E) to the license plat. *Almost* always.
-                        // Since it's not consistent however, we need to come up with a hueristic to get it working all the time...
-                        
-                        // If the first character is a number, there is no language code - use as-is.
-                        if(isdigit(line.entries[2].key[0]))
-                        {
-                            node->licensePlate = line.entries[2].key;
-                        }
-                        else if(line.entries[2].key[0] == 'C' || line.entries[2].key[0] == 'D')
-                        {
-                            // A handful of YAK files start with C or D and do not have language codes - use as-is.
-                            node->licensePlate = line.entries[2].key;
-                        }
-                        else // Appears to have a language code - remove the first character.
+                        // The YAK name is *almost* always prefixed with the language code (E). *Almost* always.
+                        // We want to store the name *without* the language code, so detect and remove it if it's there.
+                        if(line.entries[2].key[0] == 'E')
                         {
                             node->licensePlate = line.entries[2].key.substr(1);
                         }
-                        
-                        mFrames[frameNumber].push_back(node);
+                        else
+                        {
+                            node->licensePlate = line.entries[2].key;
+                        }
                     }
                 }
                 else

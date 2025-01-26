@@ -261,7 +261,7 @@ void DialogueManager::PlayNextDialogueLine()
     }
 
     // Construct YAK name from stored plate/sequence number.
-    std::string yakName = gLocalizer.GetLocale() + mDialogueLicensePlate;
+    std::string yakName = mDialogueLicensePlate;
     if(mDialogueSequenceNumber < 10)
     {
         yakName += ('0' + static_cast<char>(mDialogueSequenceNumber));
@@ -275,12 +275,19 @@ void DialogueManager::PlayNextDialogueLine()
     mDialogueSequenceNumber++;
 
 	// Load the YAK! If we can't find it for some reason, output an error and move on right away.
-	Animation* yak = gAssetManager.LoadYak(yakName, AssetScope::Scene);
+	Animation* yak = gAssetManager.LoadYak(Localizer::GetLanguagePrefix() + yakName, AssetScope::Scene);
 	if(yak == nullptr)
 	{
-		std::cout << "Could not find YAK called " << yakName << ". Skipping to next dialogue line." << std::endl;
-		TriggerDialogueCue();
-		return;
+        printf("Couldn't load yak %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), yakName.c_str(), yakName.c_str());
+
+        // Attempt to load English version.
+        yak = gAssetManager.LoadYak("E" + yakName, AssetScope::Scene);
+        if(yak == nullptr)
+        {
+            printf("Couldn't load yak %s - skipping to next dialogue line.\n", yakName.c_str());
+            TriggerDialogueCue();
+            return;
+        }
 	}
 
     // Play the YAK.

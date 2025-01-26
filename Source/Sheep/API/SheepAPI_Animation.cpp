@@ -71,9 +71,11 @@ RegFunc1(StartMoveAnimation, void, string, WAITABLE, REL_FUNC);
 
 shpvoid StartMom(const std::string& momAnimationName)
 {
-    // Mom animation assets have a language prefix (e.g. "E" for English).
-    // So, let's add that here.
-    Animation* animation = gAssetManager.LoadMomAnimation(gLocalizer.GetLocale() + momAnimationName, AssetScope::Scene);
+    // MOM assets are localized, but the passed in name should not have a language prefix. We add the "E" here.
+
+    // NOTE: MOM assets DO NOT need to be localized! The only localized aspect to them is hardcoded YAK names.
+    // NOTE: But we can account for localizing those elsewhere.
+    Animation* animation = gAssetManager.LoadMomAnimation("E" + momAnimationName, AssetScope::Scene);
     if(animation != nullptr)
     {
         //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.

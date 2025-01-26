@@ -55,17 +55,6 @@ void AssetManager::Init()
             std::vector<std::string> paths = StringUtil::Split(customPaths, ';');
             mSearchPaths.insert(mSearchPaths.end(), paths.begin(), paths.end());
         }
-        
-        std::string locale = config->GetString("Locale");
-        if(!locale.empty())
-        {
-            std::cout << "Locale = " << locale << std::endl;
-            mLocaleFromIni = locale;
-        } else
-        {
-            std::cout << "No locale so use E (English)"<< std::endl;
-            mLocaleFromIni = "E";
-        }
     }
 
     // Add hard-coded default paths *after* any custom paths specified in .INI file.
@@ -74,11 +63,6 @@ void AssetManager::Init()
 
     // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
     mSearchPaths.push_back("Data");
-}
-
-std::string AssetManager::getLocaleFromIni()
-{
-    return mLocaleFromIni;
 }
 
 void AssetManager::Shutdown()
@@ -475,8 +459,7 @@ T* AssetManager::LoadAsset(const std::string& assetName, AssetScope scope, Asset
             return cachedAsset;
         }
     }
-    
-    printf("Loading asset %s\n", assetName.c_str());
+    //printf("Loading asset %s\n", assetName.c_str());
 
     // Create buffer containing this asset's data. If this fails, the asset doesn't exist, so we can't load it.
     uint32_t bufferSize = 0;
