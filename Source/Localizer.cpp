@@ -13,12 +13,22 @@ Localizer::Localizer(const std::string& fileName, const std::string& sectionName
     Load(fileName, sectionName);
 }
 
+void Localizer::changeLocale(const std::string& localeValue)
+{
+    locale = localeValue;
+}
+
+std::string Localizer::GetLocale() const
+{
+    return locale;
+}
+
 void Localizer::Load(const std::string& fileName, const std::string& sectionName)
 {
     // We assume the passed in filename does not have the language prefix attached yet.
     // For now, we'll assume English, but we could add other localizations pretty easily.
-    std::string localeFileName = "E" + fileName;
-
+    std::string localeFileName = locale + fileName;
+    
     // GK3 translations are stored in INI files with various sections.
     // Sometimes, we don't care about the sections - we just load the entire file into a single localizer.
     // However, sometimes sections have duplicate keys - in that case, it's better to treat each section as its own localizer.

@@ -101,11 +101,14 @@ public:
 
     // Unloading Assets
     void UnloadAssets(AssetScope scope);
+    
+    std::string getLocaleFromIni();
 
 private:
     // A list of paths to search for assets.
     // In priority order, since we'll search in order, and stop when we find the item.
     std::vector<std::string> mSearchPaths;
+    std::string mLocaleFromIni;
 
     // A map of loaded barn files. If an asset isn't found on any search path,
     // we then search each loaded barn file for the asset.

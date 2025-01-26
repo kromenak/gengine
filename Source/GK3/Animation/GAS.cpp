@@ -10,6 +10,7 @@
 #include "AssetManager.h"
 #include "GasNodes.h"
 #include "GasPlayer.h"
+#include "Localizer.h"
 #include "mstream.h"
 #include "Scene.h"
 #include "StringTokenizer.h"
@@ -493,7 +494,7 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                 std::cout << "Missing yak in DLG" << std::endl;
                 continue;
             }
-            std::string yakName = "E" + tokenizer.GetNext();
+            std::string yakName = gLocalizer.GetLocale()  + tokenizer.GetNext();
 
             Animation* yakAnimation = gAssetManager.LoadYak(yakName, GetScope());
             if(yakAnimation == nullptr)
