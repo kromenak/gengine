@@ -75,7 +75,9 @@ shpvoid StartMom(const std::string& momAnimationName)
 
     // NOTE: MOM assets DO NOT need to be localized! The only localized aspect to them is hardcoded YAK names.
     // NOTE: But we can account for localizing those elsewhere.
-    Animation* animation = gAssetManager.LoadMomAnimation("E" + momAnimationName, AssetScope::Scene);
+    //Animation* animation = gAssetManager.LoadMomAnimation("E" + momAnimationName, AssetScope::Scene);
+    // NOTE: MOM assets are localized, at least for the French version
+    Animation* animation = gAssetManager.LoadMomAnimation(Localizer::GetLanguagePrefix() + momAnimationName, AssetScope::Scene);
     if(animation != nullptr)
     {
         //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.

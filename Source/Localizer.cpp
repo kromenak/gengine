@@ -51,7 +51,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
         textFile = gAssetManager.LoadText("E" + fileName, AssetScope::Manual);
         if(textFile == nullptr)
         {
-            printf("Failed to load localization text file %s! No localized text will be loaded.\n", fileName);
+            printf("Failed to load localization text file %s! No localized text will be loaded.\n", fileName.c_str());
             return;
         }
     }
