@@ -8,6 +8,7 @@
 
 #include "FileSystem.h"
 #include "Loader.h"
+#include "Localizer.h"
 #include "mstream.h"
 #include "Renderer.h"
 #include "SheepManager.h"
@@ -62,7 +63,12 @@ void AssetManager::Init()
     mSearchPaths.push_back("Assets");
 
     // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
-    mSearchPaths.push_back("Data");
+    std::string dataFolder = "Data";
+    if (Localizer::GetLanguagePrefix()[0] != 'E')
+    {
+        dataFolder += Localizer::GetLanguagePrefix();
+    }
+    mSearchPaths.push_back(dataFolder);
 }
 
 void AssetManager::Shutdown()
