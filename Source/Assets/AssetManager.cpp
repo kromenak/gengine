@@ -402,28 +402,47 @@ BarnFile* AssetManager::GetBarn(const std::string& barnName)
 
 BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 {
-	// Iterate over all loaded barn files to find the asset.
+    auto findAssetInBarn = [&](const std::string& barnName) -> BarnFile* {
+        auto entry = mLoadedBarns.find(barnName);
+        if(entry != mLoadedBarns.end())
+        {
+            BarnAsset* asset = entry->second.GetAsset(fileName);
+            if(asset != nullptr)
+            {
+                // If the asset is a pointer, we need to redirect to the correct BarnFile.
+                // If the correct Barn isn't available, spit out an error and fail.
+                if(asset->IsPointer())
+                {
+                    BarnFile* barn = GetBarn(*asset->barnFileName);
+                    if(barn == nullptr)
+                    {
+                        std::cout << "Asset " << fileName << " exists in Barn " << (*asset->barnFileName) << ", but that Barn is not loaded!" << std::endl;
+                    }
+                    return barn;
+                }
+                else
+                {
+                    return &entry->second;
+                }
+            }
+        }
+        return nullptr;
+    };
+    
+    // Priority : Check first in override.brn
+    BarnFile* result = findAssetInBarn("override.brn");
+    if (result != nullptr) {
+        std::cout << "Asset " << fileName << " found in Barn override.brn" << std::endl;
+        return result;
+    }
+    
+    // If not present in override, iterate over all loaded barn files to find the asset.
 	for(auto& entry : mLoadedBarns)
 	{
-		BarnAsset* asset = entry.second.GetAsset(fileName);
-		if(asset != nullptr)
-		{
-			// If the asset is a pointer, we need to redirect to the correct BarnFile.
-			// If the correct Barn isn't available, spit out an error and fail.
-			if(asset->IsPointer())
-			{
-                BarnFile* barn = GetBarn(*asset->barnFileName);
-                if(barn == nullptr)
-                {
-                    std::cout << "Asset " << fileName << " exists in Barn " << (*asset->barnFileName) << ", but that Barn is not loaded!" << std::endl;
-                }
-                return barn;
-			}
-			else
-			{
-				return &entry.second;
-			}
-		}
+        result = findAssetInBarn(entry.first);
+        if (result != nullptr) {
+            return result;
+        }
 	}
 
 	// Didn't find the Barn containing this asset.
