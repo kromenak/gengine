@@ -16,10 +16,10 @@ namespace UIUtil
     void AddColorCanvas(Actor* canvasActor, int canvasOrder, const Color32& color);
     UICanvas* NewUIActorWithCanvas(Actor* parent, int canvasOrder);
 
-    template<typename T> T* NewUIActorWithWidget(Actor* parent)
+    template<typename T, typename... Args> T* NewUIActorWithWidget(Actor* parent, Args&&... args)
     {
         Actor* uiActor = new Actor(TransformType::RectTransform);
         uiActor->GetTransform()->SetParent(parent->GetTransform());
-        return uiActor->AddComponent<T>();
+        return uiActor->AddComponent<T>(std::forward<Args>(args)...);
     }
 }

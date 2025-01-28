@@ -11,6 +11,7 @@
 #include "UINineSlice.h"
 
 Color32 SidneyUtil::TransBgColor = Color32(0, 0, 0, 128);
+Color32 SidneyUtil::VeryTransBgColor = Color32(0, 0, 0, 96);
 
 UIButton* SidneyUtil::CreateTextButton(Actor* parent, const std::string& text, const std::string& font,
                                        const Vector2& pivotAndAnchor, const Vector2& position, const Vector2& size)
@@ -196,6 +197,12 @@ const UINineSliceParams& SidneyUtil::GetGoldBoxParams(const Color32& centerColor
 const Localizer& SidneyUtil::GetMainScreenLocalizer()
 {
     static Localizer localizer("SIDNEY.TXT", "Main Screen");
+    return localizer;
+}
+
+const Localizer& SidneyUtil::GetSearchLocalizer()
+{
+    static Localizer localizer("SIDNEY.TXT", "Search Screen");
     return localizer;
 }
 

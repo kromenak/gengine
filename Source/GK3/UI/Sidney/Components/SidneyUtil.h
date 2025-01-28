@@ -21,6 +21,7 @@ class SidneyUtil
 {
 public:
     static Color32 TransBgColor;
+    static Color32 VeryTransBgColor;
 
     static UIButton* CreateTextButton(Actor* parent, const std::string& text, const std::string& font,
                                       const Vector2& pivotAndAnchor, const Vector2& position, const Vector2& size);
@@ -36,6 +37,7 @@ public:
     static const UINineSliceParams& GetGoldBoxParams(const Color32& centerColor);
 
     static const Localizer& GetMainScreenLocalizer();
+    static const Localizer& GetSearchLocalizer();
     static const Localizer& GetAnalyzeLocalizer();
     static const Localizer& GetTranslateLocalizer();
     static const Localizer& GetAddDataLocalizer();
