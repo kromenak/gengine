@@ -3,6 +3,7 @@
 #include "Actor.h"
 #include "AssetManager.h"
 #include "AudioManager.h"
+#include "Font.h"
 #include "GameProgress.h"
 #include "IniParser.h"
 #include "SidneyButton.h"
@@ -14,11 +15,16 @@
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UINineSlice.h"
+#include "UIScrollRect.h"
 #include "UITextInput.h"
 #include "UIUtil.h"
 
 namespace
 {
+    const float kWebpageWidth = 520.0f;
+    const float kScrollbarWidth = 8.0f;
+    const float kWebpageContentsWidth = kWebpageWidth - kScrollbarWidth;
+
     // Crazy enough, when we show search results, we've actually got to parse some HTML here! And not particularly well formed HTML at that!
     // These structs will help to parse the HTML tree and store an in-memory representation.
 
@@ -71,8 +77,18 @@ namespace
             char c = text[textIndex];
             ++textIndex;
 
-            // Skip line breaks.
-            if(c == '\n' || c == '\r') { continue; }
+            // Treat line breaks in special ways depending on context.
+            if(c == '\n' || c == '\r')
+            {
+                if(!content.empty() && content.back() != ' ')
+                {
+                    c = ' ';
+                }
+                else
+                {
+                    continue;
+                }
+            }
 
             // We encountered a tag, but the content isn't empty.
             // Add it to the current element's contents before continuing.
@@ -230,11 +246,11 @@ void SidneySearch::Init(Actor* parent)
     // Add search bar (top area).
     {
         // Background w/ border.
-        UINineSlice* searchBarPanel = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::VeryTransBgColor));
+        UINineSlice* searchBarPanel = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
         searchBarPanel->GetRectTransform()->SetPivot(0.0f, 1.0f);
         searchBarPanel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
         searchBarPanel->GetRectTransform()->SetAnchoredPosition(60.0f, -88.0f);
-        searchBarPanel->GetRectTransform()->SetSizeDelta(520.0f, 48.0f);
+        searchBarPanel->GetRectTransform()->SetSizeDelta(kWebpageWidth, 48.0f);
         
         // Reset button.
         SidneyButton* resetButton = SidneyUtil::CreateSmallButton(searchBarPanel->GetOwner());
@@ -270,7 +286,7 @@ void SidneySearch::Init(Actor* parent)
         caretImage->SetTexture(&Texture::White);
         caretImage->GetRectTransform()->SetAnchor(AnchorPreset::LeftStretch, false);
         caretImage->GetRectTransform()->SetPivot(0.0f, 0.0f);
-        caretImage->GetRectTransform()->SetSizeDelta(1.0f, 0.0f);
+        caretImage->GetRectTransform()->SetSizeDelta(2.0f, 0.0f);
 
         mTextInput->SetCaret(caretImage);
         mTextInput->SetCaretBlinkInterval(0.5f);
@@ -279,11 +295,11 @@ void SidneySearch::Init(Actor* parent)
     // Add navigation bar (bottom area).
     {
         // Background.
-        UINineSlice* navBarPanel = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::VeryTransBgColor));
+        UINineSlice* navBarPanel = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
         navBarPanel->GetRectTransform()->SetPivot(0.0f, 1.0f);
         navBarPanel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
         navBarPanel->GetRectTransform()->SetAnchoredPosition(60.0f, -390.0f);
-        navBarPanel->GetRectTransform()->SetSizeDelta(520.0f, 28.0f);
+        navBarPanel->GetRectTransform()->SetSizeDelta(kWebpageWidth, 28.0f);
 
         // Back button.
         SidneyButton* backButton = SidneyUtil::CreateSmallButton(navBarPanel->GetOwner());
@@ -306,33 +322,23 @@ void SidneySearch::Init(Actor* parent)
 
     // Add search results web page area (middle).
     {
-        UINineSlice* resultsPanel = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::VeryTransBgColor));
+        UIImage* resultsPanel = UIUtil::NewUIActorWithWidget<UIImage>(mRoot);
+        resultsPanel->SetColor(Color32(0, 0, 0, 128));
         resultsPanel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         resultsPanel->GetRectTransform()->SetAnchoredPosition(60.0f, -136.0f);
-        resultsPanel->GetRectTransform()->SetSizeDelta(520.0f, 254.0f);
+        resultsPanel->GetRectTransform()->SetSizeDelta(kWebpageWidth, 254.0f);
         mWebPageRoot = resultsPanel->GetOwner();
-
+        
         mWebPageWidgetsCanvas = UIUtil::NewUIActorWithCanvas(resultsPanel->GetOwner(), -1);
         mWebPageWidgetsCanvas->SetMasked(true);
         mWebPageWidgetsCanvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
         mWebPageWidgetsCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
-        mWebPageWidgetsCanvas->GetRectTransform()->SetSizeDelta(-4.0f, 0.0f);
+        mWebPageWidgetsCanvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
 
-        /*
-        UIImage* resultsBackgroundImage = UIUtil::NewUIActorWithWidget<UIImage>(mRoot);
-        resultsBackgroundImage->SetTexture(&Texture::Black);
-        resultsBackgroundImage->SetColor(Color32(0, 0, 0, 128)); // Black Semi-Transparent
-        resultsBackgroundImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        resultsBackgroundImage->GetRectTransform()->SetAnchoredPosition(60.0f, -136.0f);
-        resultsBackgroundImage->GetRectTransform()->SetSizeDelta(520.0f, 254.0f);
-
-        //TODO: So there is a big undertaking here to implement a whole HTML parsing system.
-        //TODO: For the moment though, I'll just use a label to display a simple result output.
-        mResultsTextBuffer = resultsBackgroundImage->GetOwner()->AddComponent<UILabel>();
-        mResultsTextBuffer->SetFont(gAssetManager.LoadFont("F_TIMES.FON"));
-        mResultsTextBuffer->SetHorizonalAlignment(HorizontalAlignment::Left);
-        mResultsTextBuffer->SetVerticalAlignment(VerticalAlignment::Top);
-        */
+        mWebScrollRect = new UIScrollRect(mWebPageWidgetsCanvas->GetOwner());
+        mWebScrollRect->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::CenterStretch);
+        mWebScrollRect->GetComponent<RectTransform>()->SetSizeDelta(-0.0f, 0.0f);
+        mWebScrollRect->SetScrollbarWidth(kScrollbarWidth);
 
         // Web page area is disabled by default. It enables when you search for something.
         mWebPageRoot->SetActive(false);
@@ -417,6 +423,9 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 
     // Parse the HTML, starting at the root, in a depth-first way.
     // This *could* work recursively, but the algorithm is done iteratively here.
+    bool isTextContinuation = false;
+    float lastFontGlyphHeight = 0.0f;
+    bool hadBulletOnLastLine = false;
     while(!parseStack.empty())
     {
         // Each iteration of this loop parses the contents of whichever HtmlElement is at the back of the parse stack.
@@ -493,14 +502,14 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 }
 
                 // Determine what font to use.
-                std::string font = (fontSize == 2 ? "F_TIMES_2.FON" : "F_TIMES.FON");
+                std::string fontName = (fontSize == 2 ? "F_TIMES_2.FON" : "F_TIMES.FON");
                 if(bold && italic)
                 {
                     printf("HTML: unsupported text format bold AND italic...\n");
                 }
                 else if(bold)
                 {
-                    font = (fontSize == 2 ? "F_TIMES_B_2.FON" : "F_TIMES_B.FON");
+                    fontName = (fontSize == 2 ? "F_TIMES_B_2.FON" : "F_TIMES_B.FON");
                 }
                 else if(italic)
                 {
@@ -508,84 +517,155 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                     {
                         printf("HTML: unsupported text format (italic font size %i)\n", fontSize);
                     }
-                    font = "F_TIMES_I.FON";
+                    fontName = "F_TIMES_I.FON";
                 }
                 //TODO: Assets exist for underlined font (normal and +2) and bold+underlined font (normal and +2). But never used in-game?
 
                 // Links always use the link variant of the font.
                 if(!link.empty())
                 {
-                    font = "F_TIMES_L.FON";
+                    fontName = "F_TIMES_L.FON";
                 }
 
                 // Handle rendering the leaf data.
-                if(StringUtil::EqualsIgnoreCase(element.tagOrData, "P"))
+                const float kLineBreakHeight = 15.0f;
+                if(StringUtil::EqualsIgnoreCase(element.tagOrData, "P") ||
+                   StringUtil::EqualsIgnoreCase(element.tagOrData, "BR"))
                 {
+                    if(isTextContinuation && !hadBulletOnLastLine)
+                    {
+                        resultsPos.y -= lastFontGlyphHeight;
+                    }
+
                     // This just breaks to the next line.
                     resultsPos.x = 0.0f;
-                    resultsPos.y -= 10.0f;
-                }
-                else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "BR"))
-                {
-                    // Do nothing?
+                    resultsPos.y -= kLineBreakHeight;
+
+                    hadBulletOnLastLine = false;
+                    isTextContinuation = false;
                 }
                 else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "LI"))
                 {
-                    UIImage* bulletImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageWidgetsCanvas->GetOwner());
+                    UIImage* bulletImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebScrollRect);
                     bulletImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBULLET.BMP", AssetScope::Scene), true);
                     bulletImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     bulletImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
                     mWebPageWidgets.push_back(bulletImage);
 
+                    // Move over next to the bullet, but stay on the same line.
+                    // The next thing (likely some text) will go next to the bullet.
                     resultsPos.x += bulletImage->GetRectTransform()->GetRect().width + 2.0f;
+
+                    hadBulletOnLastLine = true;
+                    isTextContinuation = false;
                 }
                 else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "HR"))
                 {
-                    UIImage* hrImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageWidgetsCanvas->GetOwner());
+                    // Always flush with left side.
+                    resultsPos.x = 0.0f;
+                    resultsPos.y -= kLineBreakHeight;
+
+                    // Make an image with the horizontal rule.
+                    UIImage* hrImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebScrollRect);
                     hrImage->SetTexture(gAssetManager.LoadTexture("HORIZONTALRULE.BMP", AssetScope::Scene), true);
                     hrImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     hrImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
+                    hrImage->GetRectTransform()->SetSizeDeltaX(kWebpageContentsWidth);
                     mWebPageWidgets.push_back(hrImage);
 
+                    // Jump down below the image.
                     resultsPos.x = 0.0f;
                     resultsPos.y -= hrImage->GetRectTransform()->GetRect().height;
+
+                    isTextContinuation = false;
                 }
                 else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "IMG"))
                 {
-                    UIImage* image = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageWidgetsCanvas->GetOwner());
+                    // Create the image at the appropriate size.
+                    UIImage* image = UIUtil::NewUIActorWithWidget<UIImage>(mWebScrollRect);
                     image->SetTexture(gAssetManager.LoadTexture(element.attributes[0].value, AssetScope::Scene), true);
                     image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     image->GetRectTransform()->SetAnchoredPosition(resultsPos);
                     mWebPageWidgets.push_back(image);
 
+                    // Jump down below the image.
                     resultsPos.x = 0.0f;
                     resultsPos.y -= image->GetRectTransform()->GetRect().height;
-                }
-                else // text or text link?
-                {
-                    // Create a label with the appropriate font and text.
-                    UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(mWebPageWidgetsCanvas->GetOwner());
-                    label->SetFont(gAssetManager.LoadFont(font));
-                    label->SetText(element.tagOrData);
-                    label->SetVerticalAlignment(VerticalAlignment::Top);
-                    label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
-                    label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-                    label->GetRectTransform()->SetAnchoredPosition(resultsPos);
-                    label->GetRectTransform()->SetSizeDeltaX(520.0f);
-                    mWebPageWidgets.push_back(label);
 
-                    // If this is a link, also make this bit of text act as a button.
-                    if(!link.empty())
+                    isTextContinuation = false;
+                }
+                else // text or text link
+                {
+                    Font* font = gAssetManager.LoadFont(fontName);
+                    lastFontGlyphHeight = font->GetGlyphHeight();
+
+                    // The logic here is a bit complex due to having to *continue* pre-existing lines if they start midway through a previous line of text.
+                    const float kLineWidth = kWebpageContentsWidth;
+                    const float kMinWidthToContinueLine = 50.0f;
+                    const float kWordSeparation = 6.0f;
+                    if(!isTextContinuation)
                     {
-                        UIButton* button = label->GetOwner()->AddComponent<UIButton>();
-                        button->SetPressCallback([link, this](UIButton* button){
-                            ShowWebPage(link);
-                        });
-                        mWebPageWidgets.push_back(button);
+                        // The logic is easiest if this IS NOT a text continuation. We just create a normal label because everything is left-aligned already.
+                        UILabel* label = CreateWebPageText(element.tagOrData, font, resultsPos, kLineWidth, link);
+                        resultsPos.x = label->GetNextCharPos().x + kWordSeparation;
+                        resultsPos.y -= label->GetTextHeight();
+                        resultsPos.y += font->GetGlyphHeight();
+                    }
+                    else
+                    {
+                        // Ok, so we are rendering MORE text, and the last thing we rendered was ALSO text.
+                        // We need to make sure this new text is positioned such that it appears to flow naturally after the previous text.
+
+                        // The easiest way to achieve this right now is to finish the last line with one label, then do the rest of the text in a new label.
+
+                        // First, based on the space available in the last line, see if we can fit it all in there.
+                        Rect r(0, 0, kLineWidth - resultsPos.x, 1000.0f);
+                        TextLayout layout(r, font, HorizontalAlignment::Left, VerticalAlignment::Top, HorizontalOverflow::Wrap, VerticalOverflow::Overflow);
+                        layout.AddLine(element.tagOrData);
+
+                        if(layout.GetLineCount() == 1)
+                        {
+                            UILabel* label = CreateWebPageText(element.tagOrData, font, resultsPos, kLineWidth - resultsPos.x, link);
+                            resultsPos.x = label->GetNextCharPos().x + kWordSeparation;
+                            resultsPos.y -= label->GetTextHeight();
+                            resultsPos.y += font->GetGlyphHeight();
+                        }
+                        else
+                        {
+                            int lastCharIndexOnFirstLine = 0;
+                            float firstY = layout.GetChar(0)->pos.y;
+                            for(auto& c : layout.GetChars())
+                            {
+                                if(c.pos.y == firstY)
+                                {
+                                    ++lastCharIndexOnFirstLine;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+
+                            std::string firstLineText = element.tagOrData.substr(0, lastCharIndexOnFirstLine);
+                            std::string remainingText = element.tagOrData.substr(lastCharIndexOnFirstLine + 1);
+
+                            UILabel* lineOne = CreateWebPageText(firstLineText, font, resultsPos, kLineWidth - resultsPos.x, link);
+                            resultsPos.x = 0.0f;
+                            resultsPos.y -= lineOne->GetTextHeight();
+
+                            UILabel* remaining = CreateWebPageText(remainingText, font, resultsPos, kLineWidth, link);
+                            resultsPos.x = 0.0f;
+                            resultsPos.y -= remaining->GetTextHeight();
+                            resultsPos.y += font->GetGlyphHeight();
+                        }
                     }
 
-                    resultsPos.x = 0.0f;
-                    resultsPos.y -= label->GetTextHeight();
+                    isTextContinuation = kLineWidth - resultsPos.x > kMinWidthToContinueLine;
+                    if(!isTextContinuation)
+                    {
+                        resultsPos.x = 0.0f;
+                        resultsPos.y -= font->GetGlyphHeight();
+                    }
                 }
 
                 /*
@@ -602,6 +682,41 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 
     // Make sure the web page root UI element is active, so you can see everything!
     mWebPageRoot->SetActive(true);
+}
+
+UILabel* SidneySearch::CreateWebPageText(const std::string& text, Font* font, const Vector2& pos, float width, std::string& link)
+{
+    // Create a label with the appropriate font and text.
+    UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(mWebScrollRect);
+    label->SetFont(font);
+    label->SetText(text);
+
+    // Alignment and overflow settings are always the same.
+    label->SetHorizonalAlignment(HorizontalAlignment::Left);
+    label->SetVerticalAlignment(VerticalAlignment::Top);
+    label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
+    label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+
+    // Set position and width.
+    label->GetRectTransform()->SetAnchoredPosition(pos);
+    label->GetRectTransform()->SetSizeDeltaX(width);
+
+    // Setting the size to the text height ensures a tight fit vertically.
+    label->GetRectTransform()->SetSizeDeltaY(label->GetTextHeight());
+
+    // Add to widgets.
+    mWebPageWidgets.push_back(label);
+
+    // If this is a link, also make this bit of text act as a button.
+    if(!link.empty())
+    {
+        UIButton* button = label->GetOwner()->AddComponent<UIButton>();
+        button->SetPressCallback([link, this](UIButton* button){
+            ShowWebPage(link);
+        });
+        mWebPageWidgets.push_back(button);
+    }
+    return label;
 }
 
 void SidneySearch::ClearWebPage()

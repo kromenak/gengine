@@ -7,11 +7,14 @@
 #include <string>
 
 #include "StringUtil.h"
+#include "Vector2.h"
 
 class Actor;
+class Font;
 class UIButton;
 class UICanvas;
 class UILabel;
+class UIScrollRect;
 class UITextInput;
 class UIWidget;
 
@@ -39,6 +42,9 @@ private:
     // This is needed to mask things that go offscreen.
     UICanvas* mWebPageWidgetsCanvas = nullptr;
 
+    // For scrolling web page contents that go offscreen.
+    UIScrollRect* mWebScrollRect = nullptr;
+
     // All widgets created as part of generating a web page.
     // These need to be destroyed when no longer showing a page.
     std::vector<UIWidget*> mWebPageWidgets;
@@ -48,6 +54,8 @@ private:
 
     void ShowWebPage(const std::string& pageName);
     void ClearWebPage();
+
+    UILabel* CreateWebPageText(const std::string& text, Font* font, const Vector2& pos, float width, std::string& link);
 
     void OnSearchButtonPressed();
     void OnResetButtonPressed();
