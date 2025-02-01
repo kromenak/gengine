@@ -22,7 +22,7 @@ public:
 	
 	void Clear();
 	
-	void SetCaret(UIWidget* caret) { mCaret = caret; }
+    void SetCaret(UIWidget* caret);
 	void SetCaretBlinkInterval(float interval) { mCaretBlinkInterval = interval; }
 	
 protected:
@@ -44,4 +44,6 @@ private:
 	UIWidget* mCaret = nullptr;
 	float mCaretBlinkInterval = 0.0f;
 	float mCaretBlickTimer = 0.0f;
+
+    void UpdateCaretPosition();
 };

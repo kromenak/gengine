@@ -59,6 +59,19 @@ void UITextInput::Clear()
 	//TODO: Reset caret position
 }
 
+void UITextInput::SetCaret(UIWidget* caret)
+{
+    // Save caret.
+    mCaret = caret;
+
+    // Generate mesh, so we know the positions of the text.
+    //TODO: This is kind of a hack, we should make sure the UILabel updates its text layout when text is set rather than only on render maybe?
+    GenerateMesh();
+
+    // Position the caret in the correct spot relative to the text.
+    UpdateCaretPosition();
+}
+
 void UITextInput::OnDisable()
 {
     UILabel::OnDisable();
@@ -124,18 +137,27 @@ void UITextInput::OnUpdate(float deltaTime)
 		{
 			mCaret->SetEnabled(false);
 		}
-		
-		// Get caret position, which is based on the cursor pos in the text input.
+
+        // Put caret in correct spot.
+        UpdateCaretPosition();
+	}
+}
+
+void UITextInput::UpdateCaretPosition()
+{
+    if(mCaret != nullptr)
+    {
+        // Get desired caret position, which is based on the cursor pos in the text input.
         // If no cursor pos, put at next character pos (end of text).
         Vector2 caretPos;
-		if(mTextInput.GetCursorPos() == -1)
-		{
+        if(mTextInput.GetCursorPos() == -1)
+        {
             caretPos = GetNextCharPos();
-		}
-		else
-		{
+        }
+        else
+        {
             caretPos = GetCharPos(mTextInput.GetCursorPos());
-		}
+        }
 
         // Factor in the text input's pivot.
         caretPos += GetRectTransform()->GetPivot() * GetRectTransform()->GetSize();
@@ -143,5 +165,5 @@ void UITextInput::OnUpdate(float deltaTime)
         // Set the position.
         RectTransform* caretRT = mCaret->GetOwner()->GetComponent<RectTransform>();
         caretRT->SetAnchoredPosition(caretPos);
-	}
+    }
 }

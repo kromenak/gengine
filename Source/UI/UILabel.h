@@ -45,14 +45,15 @@ public:
     int GetLineCount();
     float GetTextWidth();
     float GetTextHeight();
+
+    Vector2 GetCharPos(int index) const;
+    Vector2 GetNextCharPos() const { return mTextLayout.GetNextCharPos(); }
     
-protected:
-	Vector2 GetCharPos(int index) const;
-	Vector2 GetNextCharPos() const { return mTextLayout.GetNextCharPos(); }
-	
+protected:	
 	virtual void PopulateTextLayout(TextLayout& textLayout);
 	
 	void SetDirty() { mNeedMeshRegen = true; }
+    void GenerateMesh();
 	
 private:
 	// The font used to display the label.
@@ -86,6 +87,4 @@ private:
 	// This is generated from the desired text before rendering.
 	Mesh* mMesh = nullptr;
 	bool mNeedMeshRegen = false;
-	
-	void GenerateMesh();
 };
