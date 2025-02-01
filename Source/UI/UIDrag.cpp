@@ -51,9 +51,18 @@ void UIDrag::OnUpdate(float deltaTime)
         Vector2 mouseDelta = gInputManager.GetMouseDelta();
         if(mouseDelta.GetLengthSq() > 0.0f)
         {
+            // If a drag direction restriction is present, limit the mouse delta to only the parts in that direction.
+            // We use a vector operation known as "scalar projection" here (dot product of a unit vector with a non-unit vector) to achieve this.
+            // The effect of scalar projection is to isolate the magnitude of the non-unit vector in the direction of the unit vector.
+            if(mAllowedDragDirection.GetLengthSq() > 0)
+            {
+                float distInDragDir = Vector2::Dot(mouseDelta, mAllowedDragDirection);
+                mouseDelta = mAllowedDragDirection * distInDragDir;
+            }
+
             // Move anchored position to match.
             Vector2 anchoredPos = GetRectTransform()->GetAnchoredPosition();
-            anchoredPos += gInputManager.GetMouseDelta();
+            anchoredPos += mouseDelta;
             GetRectTransform()->SetAnchoredPosition(anchoredPos);
 
             // Keep within boundary rect, if rect is valid/set.
