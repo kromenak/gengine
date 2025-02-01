@@ -14,9 +14,37 @@ UISlider::UISlider(Actor* owner) : UIWidget(owner)
     SetReceivesInput(true);
 }
 
-void UISlider::Render()
+void UISlider::SetOrientation(SliderOrientation orientation)
 {
-    // Anything?
+    // Save orientation.
+    mOrientation = orientation;
+
+    // Set handle anchor/pivot so that at anchored position (0, 0) it'll be at value 0.
+    // Also, limit the drag direction of the handle based on orientation.
+    if(mHandle != nullptr)
+    {
+        switch(orientation)
+        {
+        case SliderOrientation::LeftRight:
+            mHandle->GetRectTransform()->SetAnchor(AnchorPreset::Left);
+            mHandle->SetAllowedDragDirection(Vector2::UnitX);
+            break;
+        case SliderOrientation::RightLeft:
+            mHandle->GetRectTransform()->SetAnchor(AnchorPreset::Right);
+            mHandle->SetAllowedDragDirection(Vector2::UnitX);
+            break;
+        case SliderOrientation::BottomUp:
+            mHandle->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+            mHandle->SetAllowedDragDirection(Vector2::UnitY);
+            break;
+        case SliderOrientation::TopDown:
+            mHandle->GetRectTransform()->SetAnchor(AnchorPreset::Top);
+            mHandle->SetAllowedDragDirection(Vector2::UnitY);
+        }
+    }
+
+    // Make sure slider is in the correct spot based on the value.
+    SetHandleFromValue();
 }
 
 void UISlider::SetHandleActor(Actor* handleActor)
@@ -24,18 +52,15 @@ void UISlider::SetHandleActor(Actor* handleActor)
     // We'll require that the handle is a child of the slider itself.
     handleActor->GetTransform()->SetParent(GetRectTransform());
 
-    // Grab drag component.
+    // Grab drag component. If one isn't on the handle, just add one now!
     mHandle = handleActor->GetComponent<UIDrag>();
     if(mHandle == nullptr)
     {
         mHandle = handleActor->AddComponent<UIDrag>();
     }
-    
-    // We're going to assume for now: this is a horizontal slider with min value on left, max value on right.
-    // Set handle anchor/pivot so that at anchored position (0, 0) it'll be at value 0.
-    mHandle->GetRectTransform()->SetAnchor(0.0f, 0.5f);
-    mHandle->GetRectTransform()->SetPivot(0.0f, 0.5f);
-    mHandle->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+
+    // Make sure handle is anchored correctly based on desired orientation.
+    SetOrientation(mOrientation);
 
     // Confine drag within the slider area.
     mHandle->SetBoundaryRectTransform(GetRectTransform());
@@ -62,11 +87,6 @@ void UISlider::SetValueSilently(float value)
     mValue = Math::Clamp(value, 0.0f, 1.0f);
 }
 
-float UISlider::GetValue() const
-{
-    return mValue;
-}
-
 void UISlider::OnUpdate(float deltaTime)
 {
     if(mHandle != nullptr)
@@ -75,44 +95,80 @@ void UISlider::OnUpdate(float deltaTime)
         // If handle is not dragged, slider position is driven by value.
         if(mHandle->IsDragging())
         {
-            SetValueFromSlider();
+            SetValueFromHandle();
         }
         else
         {
-            SetSliderFromValue();
+            SetHandleFromValue();
         }
     }
 }
 
-void UISlider::SetSliderFromValue()
+void UISlider::SetHandleFromValue()
 {
     if(mHandle != nullptr)
     {
-        // Determine width of movement area for slider.
-        // This'll be width of slider, MINUS width of handle.
-        float width = GetRectTransform()->GetSize().x;
-        float handleWidth = mHandle->GetRectTransform()->GetSize().x;
-        float actualWidth = width - handleWidth;
+        if(mOrientation == SliderOrientation::LeftRight || mOrientation == SliderOrientation::RightLeft)
+        {
+            // Determine width of movement area for slider.
+            // This'll be width of slider, MINUS width of handle.
+            float width = GetRectTransform()->GetSize().x;
+            float handleWidth = mHandle->GetRectTransform()->GetSize().x;
+            float actualWidth = width - handleWidth;
 
-        // Calculate new handle pos.
-        Vector2 handlePos = mHandle->GetRectTransform()->GetAnchoredPosition();
-        handlePos.x = mValue * actualWidth;
-        mHandle->GetRectTransform()->SetAnchoredPosition(handlePos);
+            // Calculate new handle pos.
+            Vector2 handlePos = mHandle->GetRectTransform()->GetAnchoredPosition();
+            handlePos.x = mValue * actualWidth;
+            if(mOrientation == SliderOrientation::RightLeft)
+            {
+                handlePos.x *= -1;
+            }
+            mHandle->GetRectTransform()->SetAnchoredPosition(handlePos);
+        }
+        else
+        {
+            // Similar to above, but we use height and y-pos.
+            float height = GetRectTransform()->GetSize().y;
+            float handleHeight = mHandle->GetRectTransform()->GetSize().y;
+            float actualHeight = height - handleHeight;
+
+            // Calculate new handle pos.
+            Vector2 handlePos = mHandle->GetRectTransform()->GetAnchoredPosition();
+            handlePos.y = mValue * actualHeight;
+            if(mOrientation == SliderOrientation::TopDown)
+            {
+                handlePos.y *= -1;
+            }
+            mHandle->GetRectTransform()->SetAnchoredPosition(handlePos);
+        }
     }
 }
 
-void UISlider::SetValueFromSlider()
+void UISlider::SetValueFromHandle()
 {
     if(mHandle != nullptr)
     {
-        // As above, actual move area is slider width MINUS handle width.
-        float width = GetRectTransform()->GetSize().x;
-        float handleWidth = mHandle->GetRectTransform()->GetSize().x;
-        float actualWidth = width - handleWidth;
+        if(mOrientation == SliderOrientation::LeftRight || mOrientation == SliderOrientation::RightLeft)
+        {
+            // As above, actual move area is slider width MINUS handle width.
+            float width = GetRectTransform()->GetSize().x;
+            float handleWidth = mHandle->GetRectTransform()->GetSize().x;
+            float actualWidth = width - handleWidth;
 
-        // The handle pos is from the middle-left side of the handle, since we set the pivot to (0.0, 0.5).
-        // Therefore, the "max" position of the handle is (width - handleWidth). We need to take this into account for the final equation.
-        float handlePos = mHandle->GetRectTransform()->GetAnchoredPosition().x;
-        SetValue(handlePos / actualWidth);
+            // The handle pos is from the middle-left side of the handle, since we set the pivot to (0.0, 0.5).
+            // Therefore, the "max" position of the handle is (width - handleWidth). We need to take this into account for the final equation.
+            float handlePos = Math::Abs(mHandle->GetRectTransform()->GetAnchoredPosition().x);
+            SetValue(handlePos / actualWidth);
+        }
+        else
+        {
+            // Same but with height and y-pos.
+            float height = GetRectTransform()->GetSize().y;
+            float handleHeight = mHandle->GetRectTransform()->GetSize().y;
+            float actualHeight = height - handleHeight;
+
+            float handlePos = Math::Abs(mHandle->GetRectTransform()->GetAnchoredPosition().y);
+            SetValue(handlePos / actualHeight);
+        }
     }
 }

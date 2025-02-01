@@ -11,26 +11,38 @@
 class Texture;
 class UIDrag;
 
+enum class SliderOrientation
+{
+    LeftRight,
+    RightLeft,
+    BottomUp,
+    TopDown
+};
+
 class UISlider : public UIWidget
 {
     TYPEINFO_SUB(UISlider, UIWidget);
 public:
     UISlider(Actor* owner);
 
-    void Render() override;
+    void Render() override { }
 
+    void SetOrientation(SliderOrientation orientation);
     void SetHandleActor(Actor* handle);
 
     void SetValueChangeCallback(std::function<void(float)> callback) { mValueChangeCallback = callback; }
 
     void SetValue(float value);
     void SetValueSilently(float value);
-    float GetValue() const;
+    float GetValue() const { return mValue; }
 
 protected:
     void OnUpdate(float deltaTime) override;
 
 private:
+    // The orientation of the slider.
+    SliderOrientation mOrientation = SliderOrientation::LeftRight;
+
     // Draggable object that represents the handle.
     UIDrag* mHandle = nullptr;
 
@@ -40,6 +52,6 @@ private:
     // Called when the value of the slider changes.
     std::function<void(float)> mValueChangeCallback;
 
-    void SetSliderFromValue();
-    void SetValueFromSlider();
+    void SetHandleFromValue();
+    void SetValueFromHandle();
 };

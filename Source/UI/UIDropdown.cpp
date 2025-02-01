@@ -153,7 +153,7 @@ void UIDropdown::OnUpdate(float deltaTime)
     // Check for changing visible choices based on mouse scroll wheel.
     if(mChoices.size() > mMaxVisibleChoices)
     {
-        // See if mouse wheel has scrolled atall.
+        // See if mouse wheel has scrolled at all.
         Vector2 mouseWheelScrollDelta = gInputManager.GetMouseWheelScrollDelta();
         if(mouseWheelScrollDelta.y != 0)
         {
