@@ -82,7 +82,18 @@ void UIImage::SetColor(const Color32& color)
 
 void UIImage::SetTexture(Texture* texture, bool resizeImage)
 {
-	mMaterial.SetDiffuseTexture(texture);
+    // Setting a null texture is actually an error (the system just renders garbage or whatever was leftover from last render).
+    // So if no texture was set, go back to the default of white.
+    if(texture != nullptr)
+    {
+        mMaterial.SetDiffuseTexture(texture);
+    }
+    else
+    {
+        mMaterial.SetDiffuseTexture(&Texture::White);
+    }
+
+    // If desired, resize widget rect to match texture.
     if(resizeImage)
     {
         ResizeToTexture();
