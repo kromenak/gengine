@@ -42,8 +42,8 @@ public:
     
     template<class T> T* AddComponent();
     template<class T, class... Args> T* AddComponent(Args&&... args);
-    template<class T> T* GetComponent();
-    template<class T> T* GetComponentInParents();
+    template<class T> T* GetComponent() const;
+    template<class T> T* GetComponentInParents() const;
     const std::vector<Component*>& GetComponents() const { return mComponents; }
     
     const std::string& GetName() const { return mName; }
@@ -135,7 +135,7 @@ template<class T, class... Args> T* Actor::AddComponent(Args&&... args)
     return component;
 }
 
-template<class T> T* Actor::GetComponent()
+template<class T> T* Actor::GetComponent() const
 {
     for(auto& component : mComponents)
     {
@@ -147,7 +147,7 @@ template<class T> T* Actor::GetComponent()
     return nullptr;
 }
 
-template<class T> T* Actor::GetComponentInParents()
+template<class T> T* Actor::GetComponentInParents() const
 {
     // If I've got the component, just return that!
     T* myT = GetComponent<T>();
