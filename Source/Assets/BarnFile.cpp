@@ -11,8 +11,9 @@
 #include "SheepScript.h"
 #include "Texture.h"
 
-BarnFile::BarnFile(const std::string& filePath) :
+BarnFile::BarnFile(const std::string& filePath, BarnSearchPriority searchPriority) :
     mName(filePath),
+    mSearchPriority(searchPriority),
     mReader(filePath.c_str())
 {
     // Make sure we can actually read this file.

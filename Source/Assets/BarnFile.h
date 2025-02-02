@@ -45,10 +45,17 @@ struct BarnAsset
     bool IsPointer() const { return barnFileName != nullptr; }
 };
 
+enum class BarnSearchPriority
+{
+    Low = 0,
+    Normal = 1,
+    High = 2
+};
+
 class BarnFile
 {
 public:
-    BarnFile(const std::string& filePath);
+    BarnFile(const std::string& filePath, BarnSearchPriority searchPriority = BarnSearchPriority::Normal);
 
 	// Retrieves an asset handle, if it exists in this bundle.
     BarnAsset* GetAsset(const std::string& assetName);
@@ -68,6 +75,7 @@ public:
 	void OutputAssetList() const;
     
 	const std::string& GetName() const { return mName; }
+    BarnSearchPriority GetSearchPriority() const { return mSearchPriority; }
 	
 private:
 	// Identifiers required to verify file type.
@@ -80,6 +88,10 @@ private:
     
     // The name of the barn file.
     std::string mName;
+
+    // Specifies the priority of this Barn vs. other Barns for finding assets.
+    // Higher priority Barns are searched first, so they can override lower priority Barn files.
+    BarnSearchPriority mSearchPriority = BarnSearchPriority::Normal;
     
     // Offset within the file to where the data is located.
     uint32_t mDataOffset = 0;

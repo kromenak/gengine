@@ -51,7 +51,7 @@ public:
 
     // Barn Files
 	// Load or unload a barn bundle.
-    bool LoadBarn(const std::string& barnName);
+    bool LoadBarn(const std::string& barnName, BarnSearchPriority priority = BarnSearchPriority::Normal);
     void UnloadBarn(const std::string& barnName);
 
 	// Write an asset from a bundle to a file.
@@ -110,6 +110,10 @@ private:
     // A map of loaded barn files. If an asset isn't found on any search path,
     // we then search each loaded barn file for the asset.
     std::string_map_ci<BarnFile> mLoadedBarns;
+
+    // Tracks the highest priority we've seen for a loaded Barn.
+    // This just helps us be a bit more efficient (e.g. don't bother searching High priority if no high priority Barns even exist).
+    BarnSearchPriority mHighestBarnSearchPriority = BarnSearchPriority::Low;
 
     // A list of loaded assets, so we can just return existing assets if already loaded.
     template<typename T>

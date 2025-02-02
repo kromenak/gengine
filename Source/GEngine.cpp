@@ -62,7 +62,7 @@ bool GEngine::Initialize()
     // For simplicity right now, let's just load all barns at once.
     if(!mDemoMode)
     {
-        std::vector<std::string> barns = {
+        std::vector<std::string> requiredBarns = {
             "ambient.brn",
             "common.brn",
             "core.brn",
@@ -70,14 +70,12 @@ bool GEngine::Initialize()
             "day2.brn",
             "day3.brn",
             "day23.brn",
-            "day123.brn",
-            "override.brn"
+            "day123.brn"
         };
-        for(auto& barn : barns)
+        for(auto& barn : requiredBarns)
         {
             TIMER_SCOPED_VAR(barn.c_str(), barnTimer);
-            // override.brn is only present in all/some of the localized version of GK3
-            if(!gAssetManager.LoadBarn(barn) && barn != "override.brn")
+            if(!gAssetManager.LoadBarn(barn))
             {
                 // Generate expected path for this asset.
                 std::string path = Paths::GetDataPath(Path::Combine({ "Data", barn }));
@@ -91,6 +89,10 @@ bool GEngine::Initialize()
                 return false;
             }
         }
+
+        // Official localized versions of the game also came with a Barn called "override.brn". This barn contains assets that override ordinary assets.
+        // Try to load this, but since it's optional, it shouldn't show an error message.
+        gAssetManager.LoadBarn("override.brn", BarnSearchPriority::High);
     }
 
     // Init tools.

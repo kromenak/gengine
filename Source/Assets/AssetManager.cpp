@@ -61,14 +61,22 @@ void AssetManager::Init()
     // Add hard-coded default paths *after* any custom paths specified in .INI file.
     // Assets: loose files that aren't packed into a BRN.
     mSearchPaths.push_back("Assets");
+    //TODO: I think we could crawl the Assets folder to automatically add subfolders. Might be nice for better organization of those assets.
 
     // Data: content shipped with the original game; lowest priority so assets can be easily overridden.
-    std::string dataFolder = "Data";
-    if (Localizer::GetLanguagePrefix()[0] != 'E')
     {
-        dataFolder += Localizer::GetLanguagePrefix();
+        std::string dataFolder = "Data";
+
+        // The original game only ever shipped with one language per SKU, so there was no way to change the language after install.
+        // But we would like to support that maybe, for both official and unofficial translations.
+        // To support OFFICIAL translations, we'll use Data folders with a suffix equal to the language prefix (e.g. DataF for French, DataG for German).
+        if(Localizer::GetLanguagePrefix()[0] != 'E')
+        {
+            dataFolder += Localizer::GetLanguagePrefix();
+        }
+
+        mSearchPaths.push_back(dataFolder);
     }
-    mSearchPaths.push_back(dataFolder);
 }
 
 void AssetManager::Shutdown()
@@ -126,7 +134,7 @@ std::string AssetManager::GetAssetPath(const std::string& fileName, std::initial
     return std::string();
 }
 
-bool AssetManager::LoadBarn(const std::string& barnName)
+bool AssetManager::LoadBarn(const std::string& barnName, BarnSearchPriority priority)
 {
     // If the barn is already in the map, then we don't need to load it again.
     if(mLoadedBarns.find(barnName) != mLoadedBarns.end()) { return true; }
@@ -138,8 +146,14 @@ bool AssetManager::LoadBarn(const std::string& barnName)
 		return false;
     }
 
+    // Remember if this is the highest search priority we've seen.
+    if(priority > mHighestBarnSearchPriority)
+    {
+        mHighestBarnSearchPriority = priority;
+    }
+
     // Load barn file.
-    mLoadedBarns.emplace(barnName, assetPath);
+    mLoadedBarns.emplace(std::piecewise_construct, std::forward_as_tuple(barnName), std::forward_as_tuple(assetPath, priority));
 	return true;
 }
 
@@ -402,49 +416,42 @@ BarnFile* AssetManager::GetBarn(const std::string& barnName)
 
 BarnFile* AssetManager::GetBarnContainingAsset(const std::string& fileName)
 {
-    auto findAssetInBarn = [&](const std::string& barnName) -> BarnFile* {
-        auto entry = mLoadedBarns.find(barnName);
-        if(entry != mLoadedBarns.end())
+    // Starting at the highest priority for loaded Barn files, try to find the asset.
+    BarnSearchPriority priority = mHighestBarnSearchPriority;
+    while(priority >= BarnSearchPriority::Low)
+    {
+        for(auto& entry : mLoadedBarns)
         {
-            BarnAsset* asset = entry->second.GetAsset(fileName);
-            if(asset != nullptr)
+            // If this Barn doesn't match the priority we're currently on, skip it for now.
+            if(entry.second.GetSearchPriority() == priority)
             {
-                // If the asset is a pointer, we need to redirect to the correct BarnFile.
-                // If the correct Barn isn't available, spit out an error and fail.
-                if(asset->IsPointer())
+                BarnAsset* asset = entry.second.GetAsset(fileName);
+                if(asset != nullptr)
                 {
-                    BarnFile* barn = GetBarn(*asset->barnFileName);
-                    if(barn == nullptr)
+                    // If the asset is a pointer, we need to redirect to the correct BarnFile.
+                    // If the correct Barn isn't available, spit out an error and fail.
+                    if(asset->IsPointer())
                     {
-                        std::cout << "Asset " << fileName << " exists in Barn " << (*asset->barnFileName) << ", but that Barn is not loaded!" << std::endl;
+                        BarnFile* barn = GetBarn(*asset->barnFileName);
+                        if(barn == nullptr)
+                        {
+                            std::cout << "Asset " << fileName << " exists in Barn " << (*asset->barnFileName) << ", but that Barn is not loaded!" << std::endl;
+                        }
+                        return barn;
                     }
-                    return barn;
-                }
-                else
-                {
-                    return &entry->second;
+                    else
+                    {
+                        return &entry.second;
+                    }
                 }
             }
         }
-        return nullptr;
-    };
-    
-    // Priority : Check first in override.brn
-    BarnFile* result = findAssetInBarn("override.brn");
-    if (result != nullptr) {
-        std::cout << "Asset " << fileName << " found in Barn override.brn" << std::endl;
-        return result;
+
+        // We didn't find the asset in any barn at this priority. 
+        // Decrement to the next lowest priority.
+        priority = static_cast<BarnSearchPriority>(static_cast<int>(priority) - 1);
     }
     
-    // If not present in override, iterate over all loaded barn files to find the asset.
-	for(auto& entry : mLoadedBarns)
-	{
-        result = findAssetInBarn(entry.first);
-        if (result != nullptr) {
-            return result;
-        }
-	}
-
 	// Didn't find the Barn containing this asset.
 	return nullptr;
 }
