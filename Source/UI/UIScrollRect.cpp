@@ -108,6 +108,11 @@ float UIScrollRect::GetScrollbarWidth() const
     return mScrollbarActor->GetComponent<RectTransform>()->GetSizeDelta().x;
 }
 
+void UIScrollRect::SetNormalizedScrollValue(float normalizedScrollValue)
+{
+    mSlider->SetValue(0.0f);
+}
+
 void UIScrollRect::OnUpdate(float deltaTime)
 {
     // The scroll rect has a certain height (e.g. the viewable area of this scroll rect).

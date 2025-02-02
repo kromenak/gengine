@@ -22,6 +22,8 @@ public:
 
     void SetButtonScrollIncrement(float increment) { mButtonScrollIncrement = increment; }
 
+    void SetNormalizedScrollValue(float normalizedScrollValue);
+
 protected:
     void OnUpdate(float deltaTime) override;
 
