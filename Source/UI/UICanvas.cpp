@@ -187,9 +187,21 @@ void UICanvas::AddWidget(UIWidget* widget)
 
 void UICanvas::RemoveWidget(UIWidget* widget)
 {
+    // Find the widget and erase it from our widget list.
 	auto it = std::find(mWidgets.begin(), mWidgets.end(), widget);
 	if(it != mWidgets.end())
 	{
 		mWidgets.erase(it);
 	}
+
+    // If the widget being removed is the mouse over widget, treat this as the pointer exiting the widget.
+    if(sMouseOverWidget != nullptr && sMouseOverWidget == widget)
+    {
+        sMouseOverWidget->OnPointerExit();
+        sMouseOverWidget = nullptr;
+
+        // We also need to immediately UpdateInput so the sMouseOverWidget updates to whatever else might be under the mouse at this moment.
+        // If we don't do this, there's a chance a scene item can be clicked when a UI widget was supposed to block it.
+        UICanvas::UpdateInput();
+    }
 }
