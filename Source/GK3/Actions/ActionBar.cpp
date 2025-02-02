@@ -55,19 +55,18 @@ struct SortActions
 {
     bool operator()(const Action* a, const Action* b)
     {
-        //Check if a or b is INSPECT or INSPECT_UNDO
+        // First off, if a or b is INSPECT or INSPECT_UNDO, it should always come first.
         bool aIsInspect = StringUtil::EqualsIgnoreCase(a->verb, "INSPECT") || StringUtil::EqualsIgnoreCase(a->verb, "INSPECT_UNDO");
         bool bIsInspect = StringUtil::EqualsIgnoreCase(b->verb, "INSPECT") || StringUtil::EqualsIgnoreCase(b->verb, "INSPECT_UNDO");
-        
-        // First off, if this is INSPECT or INSPECT_UNDO, it should always come first.
-        if (aIsInspect&&!bIsInspect)
+        if(aIsInspect && !bIsInspect)
         {
             return true;
         }
-        if (!aIsInspect&&bIsInspect)
+        if(!aIsInspect && bIsInspect)
         {
             return false;
         }
+
         // Remaining ones can just be sorted by verb.
         return a->verb < b->verb;
     }

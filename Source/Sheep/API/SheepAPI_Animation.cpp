@@ -73,14 +73,20 @@ shpvoid StartMom(const std::string& momAnimationName)
 {
     // MOM assets are localized, but the passed in name should not have a language prefix. We add the "E" here.
 
-    // NOTE: MOM assets DO NOT need to be localized! The only localized aspect to them is hardcoded YAK names.
-    // NOTE: But we can account for localizing those elsewhere.
-    //Animation* animation = gAssetManager.LoadMomAnimation("E" + momAnimationName, AssetScope::Scene);
-    // NOTE: MOM assets are localized, at least for the French version
+    // MOM anims are (unfortunately) localized, even though they don't really have to be.
+    // The only aspect of a MOM that warrants localization is YAK file names embedded in the asset, and we can programmatically fix that for new languages.
+    // However, official localization (such as French) do localize these assets, so we must take that into account.
+
+    // First, try to load the localized version of the asset.
     Animation* animation = gAssetManager.LoadMomAnimation(Localizer::GetLanguagePrefix() + momAnimationName, AssetScope::Scene);
+    if(animation == nullptr)
+    {
+        // If we can't load that, fall back on the English version. For unofficial localizations, there is no need to localize these files.
+        animation = gAssetManager.LoadMomAnimation("E" + momAnimationName, AssetScope::Scene);
+    }
     if(animation != nullptr)
     {
-        //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.
+         //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.
         gSceneManager.GetScene()->GetAnimator()->Start(animation, AddWait());
     }
     return 0;
