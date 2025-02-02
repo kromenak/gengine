@@ -1,5 +1,6 @@
 #include "SidneySearch.h"
 
+#include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
 #include "AudioManager.h"
@@ -7,6 +8,7 @@
 #include "GameProgress.h"
 #include "IniParser.h"
 #include "SidneyButton.h"
+#include "SidneyPopup.h"
 #include "SidneyUtil.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -245,6 +247,9 @@ void SidneySearch::Init(Actor* parent)
     mMenuBar.Init(mRoot, "SEARCH", 100.0f);
     mMenuBar.SetFirstDropdownPosition(405.0f);
     mMenuBar.AddDropdown("History");
+
+    // Create popup.
+    mPopup = new SidneyPopup(mRoot);
     
     // Add search bar (top area).
     {
@@ -359,25 +364,66 @@ void SidneySearch::Init(Actor* parent)
     }
 
     // Read in all the search terms and correlated pages.
-    TextAsset* textFile = gAssetManager.LoadText("SIDSEARCH.TXT");
-    IniParser parser(textFile->GetText(), textFile->GetTextLength());
-    parser.SetMultipleKeyValuePairsPerLine(false);
-
-    // Each section's name correlates to the associated HTML page.
-    // Each section then has a single line ("text") with a comma-separated list of terms.
-    IniSection section;
-    while(parser.ReadNextSection(section))
     {
-        for(auto& line : section.lines)
+        TextAsset* textFile = gAssetManager.LoadText("SIDSEARCH.TXT");
+        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+        parser.SetMultipleKeyValuePairsPerLine(false);
+
+        // Each section's name correlates to the associated HTML page.
+        // Each section then has a single line ("text") with a comma-separated list of terms.
+        IniSection section;
+        while(parser.ReadNextSection(section))
         {
-            if(line.entries[0].key == "text")
+            for(auto& line : section.lines)
             {
-                std::vector<std::string> terms = StringUtil::Split(line.entries[0].value, ',');
-                for(auto& term : terms)
+                if(line.entries[0].key == "text")
                 {
-                    mSearchTerms[term] = section.name;
+                    std::vector<std::string> terms = StringUtil::Split(line.entries[0].value, ',');
+                    for(auto& term : terms)
+                    {
+                        mSearchTerms[term] = section.name;
+                    }
                 }
             }
+        }
+    }
+
+    // Read in all the dialogue triggers for visiting certain pages under certain conditions.
+    {
+        TextAsset* textFile = gAssetManager.LoadText("SIDNEYDIALOG.TXT");
+        IniParser parser(textFile->GetText(), textFile->GetTextLength());
+        parser.SetMultipleKeyValuePairsPerLine(false);
+
+        // Each section's name correlates to the associated HTML page.
+        // Each section then has key/value pairs with trigger conditions and results.
+        IniSection section;
+        while(parser.ReadNextSection(section))
+        {
+            DialogueTrigger trigger;
+            for(auto& line : section.lines)
+            {
+                if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "ME"))
+                {
+                    trigger.licensePlate = line.entries[0].value;
+                }
+                else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "Flag"))
+                {
+                    trigger.flagToSet = line.entries[0].value;
+                }
+                else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "Flags"))
+                {
+                    trigger.requiredFlags = StringUtil::Split(line.entries[0].value, ',');
+                }
+                else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "LSR"))
+                {
+                    trigger.lsrMin = line.entries[0].GetValueAsInt();
+                }
+                else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "LSRMax"))
+                {
+                    trigger.lsrMax = line.entries[0].GetValueAsInt();
+                }
+            }
+            mDialogueTriggers[section.name] = trigger;
         }
     }
 
@@ -875,6 +921,63 @@ void SidneySearch::OnSearchButtonPressed()
         // When you search for a link, it gets added to the web page history.
         AddToHistory(it->second);
         RefreshHistoryMenu();
+
+        // When you visit a page, we *may* need to trigger some dialogue.
+        auto dialogueIt = mDialogueTriggers.find(it->second);
+        if(dialogueIt != mDialogueTriggers.end())
+        {
+            // There is dialogue to trigger, now let's see if we meet all the conditions...
+            
+            // First, these triggers only occur one time.
+            // If the flag to set upon triggering this dialogue is already set, then we already triggered it - don't do it again.
+            bool metAllRequirements = !gGameProgress.GetFlag(dialogueIt->second.flagToSet);
+
+            // Second, you must be within the required LSR steps min/max inclusive.
+            if(metAllRequirements)
+            {
+                if(dialogueIt->second.lsrMin >= 0 || dialogueIt->second.lsrMax >= 0)
+                {
+                    int currentLsrStep = SidneyUtil::GetCurrentLSRStep();
+                    metAllRequirements = currentLsrStep >= dialogueIt->second.lsrMin && currentLsrStep <= dialogueIt->second.lsrMax;
+                }
+            }
+            
+            // Finally, any flag conditions must be met.
+            if(metAllRequirements)
+            {
+                for(auto& flag : dialogueIt->second.requiredFlags)
+                {
+                    // Figure out if this requirement was met. The ability to put "!SomeFlag" makes it slightly more complex.
+                    bool metFlagRequirement = false;
+                    if(flag.front() == '!')
+                    {
+                        metFlagRequirement = !gGameProgress.GetFlag(flag.substr(1));
+                    }
+                    else
+                    {
+                        metFlagRequirement = gGameProgress.GetFlag(flag);
+                    }
+
+                    // If any flag requirement isn't met, then we haven't met all the requirements.
+                    if(!metFlagRequirement)
+                    {
+                        metAllRequirements = false;
+                        break;
+                    }
+                }
+            }
+
+            // Finally, we can play the dialogue trigger if we still met all requirements.
+            if(metAllRequirements)
+            {
+                // Play the dialogue.
+                std::string command = StringUtil::Format("wait StartDialogue(\"%s\", 1)", dialogueIt->second.licensePlate.c_str());
+                gActionManager.ExecuteSheepAction(command);
+
+                // Set the flag.
+                gGameProgress.SetFlag(dialogueIt->second.flagToSet);
+            }
+        }
         
         // Searching certain terms leads to point increases and flag setting.
         //TODO: Figure out how to make this data-driven!
@@ -886,7 +989,11 @@ void SidneySearch::OnSearchButtonPressed()
     }
     else
     {
-        //mResultsTextBuffer->SetText(SidneyUtil::GetSearchLocalizer().GetText("NotFound"));
+        // Show a popup that says "what you're searching for can't be found."
+        mPopup->ResetToDefaults();
+        mPopup->SetTextAlignment(HorizontalAlignment::Center);
+        mPopup->SetText(SidneyUtil::GetSearchLocalizer().GetText("NotFound"));
+        mPopup->ShowOneButton();
     }
 }
 

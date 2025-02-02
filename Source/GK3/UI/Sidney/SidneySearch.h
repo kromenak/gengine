@@ -15,6 +15,7 @@
 class Actor;
 class Font;
 class SidneyButton;
+class SidneyPopup;
 class UIButton;
 class UICanvas;
 class UILabel;
@@ -75,6 +76,28 @@ private:
 
     // Keep track of our current position within the history when using the back/forward buttons.
     int mHistoryIndex = -1;
+
+    // A popup to display alerts and other messages.
+    SidneyPopup* mPopup = nullptr;
+
+    // Visiting some pages may trigger dialogue if certain conditions are met.
+    // This struct tracks those conditions and what to trigger.
+    struct DialogueTrigger
+    {
+        // Flag requirements to trigger this dialogue. Can include "!" for flags NOT set.
+        std::vector<std::string> requiredFlags;
+
+        // Requirement to be within a certain LSR step.
+        int lsrMin = -1;
+        int lsrMax = -1;
+        
+        // The dialogue to play when this triggers.
+        std::string licensePlate;
+
+        // A flag to set when this triggers.
+        std::string flagToSet;
+    };
+    std::string_map_ci<DialogueTrigger> mDialogueTriggers;
     
     void ShowWebPage(const std::string& pageName);
     void ClearWebPage();

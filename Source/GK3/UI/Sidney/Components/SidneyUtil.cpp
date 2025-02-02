@@ -2,6 +2,7 @@
 
 #include "Actor.h"
 #include "AssetManager.h"
+#include "GameProgress.h"
 #include "SidneyButton.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -228,4 +229,62 @@ const Localizer& SidneyUtil::GetMakeIdLocalizer()
 {
     static Localizer localizer("SIDNEY.TXT", "MakeID Screen");
     return localizer;
+}
+
+int SidneyUtil::GetCurrentLSRStep()
+{
+    int step = 0;
+    if(gGameProgress.GetFlag("Aquarius"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Pisces"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Aries"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Taurus"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Gemini"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Cancer"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Leo"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Virgo"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Libra"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Scorpio"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Ophiuchus"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Sagittarius"))
+    {
+        ++step;
+    }
+    if(gGameProgress.GetFlag("Capricorn"))
+    {
+        ++step;
+    }
+    return step;
 }

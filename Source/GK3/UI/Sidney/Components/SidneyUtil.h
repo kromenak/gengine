@@ -42,4 +42,6 @@ public:
     static const Localizer& GetTranslateLocalizer();
     static const Localizer& GetAddDataLocalizer();
     static const Localizer& GetMakeIdLocalizer();
+
+    static int GetCurrentLSRStep();
 };
