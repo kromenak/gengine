@@ -86,7 +86,8 @@ void UIButton::OnPointerEnter()
         // If button has a texture, use cursor highlight.
         // If button has no texture (so, perhaps an input blocker or invisible click detector), no highlight.
         const Color32* color = mMaterial.GetColor("uColor");
-        if(mMaterial.GetDiffuseTexture() != nullptr && color != nullptr && color->GetA() > 0)
+        if(mForceCursorHighlightOnHover ||
+           (mMaterial.GetDiffuseTexture() != nullptr && color != nullptr && color->GetA() > 0))
         {
             gCursorManager.UseHighlightCursor();
         }

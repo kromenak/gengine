@@ -44,6 +44,7 @@ public:
 	void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
 
     void SetResizeBasedOnTexture(bool resize) { mResizeBasedOnTexture = resize; }
+    void SetHighlightCursorOnHover(bool highlight) { mForceCursorHighlightOnHover = highlight; }
 	
 private:
     // When a button is down, it gets some special treatment/logic. So, we need to keep track of it!
@@ -81,6 +82,9 @@ private:
 
     // Optional hover audio.
     Audio* mHoverSound = nullptr;
+
+    // If set, this button will ALWAYS show highlighted cursor when hovered, even if not image-based.
+    bool mForceCursorHighlightOnHover = false;
 	
 	Texture* GetDefaultTexture();
     void UpdateMaterial();
