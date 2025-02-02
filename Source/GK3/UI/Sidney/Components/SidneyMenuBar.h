@@ -23,17 +23,19 @@ public:
     void Init(Actor* parent, const std::string& label, float labelWidth);
     void Update();
 
-    void SetFirstDropdownPosition(float position);
-    void SetDropdownSpacing(float spacing);
-
-    void AddDropdown(const std::string& label);
-    void AddDropdownChoice(const std::string& label, std::function<void()> pressCallback);
-
-    void SetDropdownEnabled(size_t index, bool enabled);
-    void SetDropdownChoiceEnabled(size_t dropdownIndex, size_t choiceIndex, bool enabled);
-
     void SetInteractive(bool interactive) { mInteractive = interactive; }
 
+    // Dropdowns
+    void SetFirstDropdownPosition(float position);
+    void SetDropdownSpacing(float spacing);
+    void AddDropdown(const std::string& label);
+    void SetDropdownEnabled(size_t index, bool enabled);
+
+    // Dropdown choices
+    void AddDropdownChoice(const std::string& label, std::function<void()> pressCallback);
+    void SetDropdownChoiceEnabled(size_t dropdownIndex, size_t choiceIndex, bool enabled);
+    void ClearDropdownChoices(size_t dropdownIndex);
+    
 private:
     // The root of the menu bar hierarchy.
     Actor* mRoot = nullptr;

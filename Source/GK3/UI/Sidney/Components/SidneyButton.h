@@ -26,9 +26,8 @@ class SidneyButton : public Actor
 {
 public:
     SidneyButton(Actor* parent);
-
-    void OnUpdate(float deltaTime) override;
-
+    void PrepareToDestroy();
+    
     RectTransform* GetRectTransform() const { return static_cast<RectTransform*>(GetTransform()); }
     float GetWidth() const { return GetRectTransform()->GetSizeDelta().x; }
     void SetWidth(float width) { GetRectTransform()->SetSizeDeltaX(width); }
@@ -48,6 +47,9 @@ public:
     bool IsAnimating() const { return mPressAnimTimer > 0.0f; }
 
     void SetSelected(bool selected) { mSelected = selected; }
+
+protected:
+    void OnUpdate(float deltaTime) override;
 
 private:
     // Text label on the button.

@@ -5,6 +5,7 @@
 #include "Font.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
+#include "UICanvas.h"
 #include "UIImage.h"
 #include "UINineSlice.h"
 
@@ -44,6 +45,23 @@ SidneyButton::SidneyButton(Actor* parent) : Actor("SidneyButton", TransformType:
 
     // Use a default button press sound.
     mPressAudio = gAssetManager.LoadAudio("SIDBUTTON5.WAV");
+}
+
+void SidneyButton::PrepareToDestroy()
+{
+    // This WHOLE function is basically a HACK because widgets do not properly remove themselves from canvases when they are destroyed.
+    // Can remove this function when that's fixed.
+    //HACK: we need to manually remove buttons from their widgets, for now.
+    UICanvas* canvas = GetComponentInParents<UICanvas>();
+    if(canvas != nullptr)
+    {
+        std::vector<UIWidget*> widgets;
+        GetComponents<UIWidget>(widgets, true);
+        for(UIWidget* widget : widgets)
+        {
+            canvas->RemoveWidget(widget);
+        }
+    }
 }
 
 void SidneyButton::OnUpdate(float deltaTime)

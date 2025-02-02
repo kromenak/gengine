@@ -264,3 +264,15 @@ void SidneyMenuBar::SetDropdownChoiceEnabled(size_t dropdownIndex, size_t choice
     if(choiceIndex > mDropdowns[dropdownIndex].options.size()) { return; }
     mDropdowns[dropdownIndex].options[choiceIndex]->GetButton()->SetCanInteract(enabled);
 }
+
+void SidneyMenuBar::ClearDropdownChoices(size_t dropdownIndex)
+{
+    if(dropdownIndex >= mDropdowns.size()) { return; }
+
+    for(SidneyButton* button : mDropdowns[dropdownIndex].options)
+    {
+        button->PrepareToDestroy();
+        button->Destroy();
+    }
+    mDropdowns[dropdownIndex].options.clear();
+}
