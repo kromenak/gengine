@@ -70,12 +70,14 @@ bool GEngine::Initialize()
             "day2.brn",
             "day3.brn",
             "day23.brn",
-            "day123.brn"
+            "day123.brn",
+            "override.brn"
         };
         for(auto& barn : barns)
         {
             TIMER_SCOPED_VAR(barn.c_str(), barnTimer);
-            if(!gAssetManager.LoadBarn(barn))
+            // override.brn is only present in all/some of the localized version of GK3
+            if(!gAssetManager.LoadBarn(barn) && barn != "override.brn")
             {
                 // Generate expected path for this asset.
                 std::string path = Paths::GetDataPath(Path::Combine({ "Data", barn }));

@@ -44,8 +44,9 @@ GKActor::GKActor(const SceneActor* actorDef) :
 
     // Add 3D model renderer using lit textured shader.
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
-    mMeshRenderer->SetModel(mActorDef->model);
+    // Shader must be applied first
     mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit"));
+    mMeshRenderer->SetModel(mActorDef->model);
     
     // Add vertex animator so the 3D model can be animated.
     mVertexAnimator = mModelActor->AddComponent<VertexAnimator>();

@@ -4,6 +4,8 @@
 ## Exclude copyright/licensed files
 Data/*
 !Data/README.md
+DataF
+DataG
 
 ## Ignore Bin directory (where final release files go)
 /Bin

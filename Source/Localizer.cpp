@@ -44,6 +44,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
     // GK3 translations are stored in INI files with various sections.
     // Sometimes, we don't care about the sections - we just load the entire file into a single localizer.
     // However, sometimes sections have duplicate keys - in that case, it's better to treat each section as its own localizer.
+    // NOTE: SIDNEY.TXT and SIDNEYEMAIL.TXT are always prefixed with en E even in other languages
     TextAsset* textFile = gAssetManager.LoadText(GetLanguagePrefix() + fileName, AssetScope::Manual);
     if(textFile == nullptr)
     {
@@ -51,7 +52,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
         textFile = gAssetManager.LoadText("E" + fileName, AssetScope::Manual);
         if(textFile == nullptr)
         {
-            printf("Failed to load localization text file %s! No localized text will be loaded.\n", fileName);
+            printf("Failed to load localization text file %s! No localized text will be loaded.\n", fileName.c_str());
             return;
         }
     }
