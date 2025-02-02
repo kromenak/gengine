@@ -44,6 +44,7 @@ public:
     template<class T, class... Args> T* AddComponent(Args&&... args);
     template<class T> T* GetComponent() const;
     template<class T> T* GetComponentInParents() const;
+    template<class T> void GetComponents(std::vector<T*>& outComponents, bool includeChildren = false);
     const std::vector<Component*>& GetComponents() const { return mComponents; }
     
     const std::string& GetName() const { return mName; }
@@ -162,4 +163,25 @@ template<class T> T* Actor::GetComponentInParents() const
 
     // If I have no parent, and I don't have it, return null.
     return nullptr;
+}
+
+template<class T> void Actor::GetComponents(std::vector<T*>& outComponents, bool includeChildren)
+{
+    // Iterate my components and add to list if component is of the type specified.
+    for(Component* c : mComponents)
+    {
+        if(c->IsA<T>())
+        {
+            outComponents.push_back(static_cast<T*>(c));
+        }
+    }
+
+    // If including children, recurse into our children and do the same.
+    if(includeChildren)
+    {
+        for(Transform* child : mTransform->GetChildren())
+        {
+            child->GetOwner()->GetComponents(outComponents, includeChildren);
+        }
+    }
 }
