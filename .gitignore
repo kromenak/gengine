@@ -4,8 +4,10 @@
 ## Exclude copyright/licensed files
 Data/*
 !Data/README.md
-DataF
-DataG
+
+## Exclude any override data folders for other languages (e.g. DataF) but NOT the normal Data folder.
+Data*
+!Data
 
 ## Ignore Bin directory (where final release files go)
 /Bin
