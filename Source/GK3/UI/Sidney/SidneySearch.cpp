@@ -241,8 +241,11 @@ void SidneySearch::Init(Actor* parent)
     });
     
     // Add menu bar.
-    SidneyUtil::CreateMenuBar(mRoot, "SEARCH", 100.0f);
-
+    // This menu bar only has one dropdown (web page history) that is oddly positioned...
+    mMenuBar.Init(mRoot, "SEARCH", 100.0f);
+    mMenuBar.SetFirstDropdownPosition(405.0f);
+    mMenuBar.AddDropdown("History");
+    
     // Add search bar (top area).
     {
         // Background w/ border.
@@ -302,22 +305,33 @@ void SidneySearch::Init(Actor* parent)
         navBarPanel->GetRectTransform()->SetSizeDelta(kWebpageWidth, 28.0f);
 
         // Back button.
-        SidneyButton* backButton = SidneyUtil::CreateSmallButton(navBarPanel->GetOwner());
-        backButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        backButton->GetRectTransform()->SetAnchoredPosition(63.0f, -8.0f);
-        backButton->SetText(SidneyUtil::GetSearchLocalizer().GetText("Back"));
-        backButton->SetPressCallback([](){
-            printf("Back\n");
+        mHistoryBackButton = SidneyUtil::CreateSmallButton(navBarPanel->GetOwner());
+        mHistoryBackButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        mHistoryBackButton->GetRectTransform()->SetAnchoredPosition(63.0f, -8.0f);
+        mHistoryBackButton->SetText(SidneyUtil::GetSearchLocalizer().GetText("Back"));
+        mHistoryBackButton->SetPressCallback([this](){
+            OnBackButtonPressed();
         });
+        mHistoryBackButton->GetButton()->SetCanInteract(false);
 
         // Forward button.
-        SidneyButton* fwdButton = SidneyUtil::CreateSmallButton(navBarPanel->GetOwner());
-        fwdButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        fwdButton->GetRectTransform()->SetAnchoredPosition(155.0f, -8.0f);
-        fwdButton->SetText(SidneyUtil::GetSearchLocalizer().GetText("Forward"));
-        fwdButton->SetPressCallback([](){
-            printf("Forward\n");
+        mHistoryForwardButton = SidneyUtil::CreateSmallButton(navBarPanel->GetOwner());
+        mHistoryForwardButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        mHistoryForwardButton->GetRectTransform()->SetAnchoredPosition(155.0f, -8.0f);
+        mHistoryForwardButton->SetText(SidneyUtil::GetSearchLocalizer().GetText("Forward"));
+        mHistoryForwardButton->SetPressCallback([this](){
+            OnForwardButtonPressed();
         });
+        mHistoryForwardButton->GetButton()->SetCanInteract(false);
+
+        // Hovered link target label.
+        mLinkTargetLabel = UIUtil::NewUIActorWithWidget<UILabel>(navBarPanel->GetOwner());
+        mLinkTargetLabel->GetRectTransform()->SetAnchor(AnchorPreset::Right);
+        mLinkTargetLabel->GetRectTransform()->SetAnchoredPosition(-5.0f, 0.0f);
+        mLinkTargetLabel->GetRectTransform()->SetSizeDelta(0.0f, 28.0f);
+        mLinkTargetLabel->SetFont(gAssetManager.LoadFont("F_TIMES.FON"));
+        mLinkTargetLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
+        mLinkTargetLabel->SetVerticalAlignment(VerticalAlignment::Center);
     }
 
     // Add search results web page area (middle).
@@ -335,10 +349,10 @@ void SidneySearch::Init(Actor* parent)
         mWebPageWidgetsCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
         mWebPageWidgetsCanvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
 
-        mWebScrollRect = new UIScrollRect(mWebPageWidgetsCanvas->GetOwner());
-        mWebScrollRect->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::CenterStretch);
-        mWebScrollRect->GetComponent<RectTransform>()->SetSizeDelta(-0.0f, 0.0f);
-        mWebScrollRect->SetScrollbarWidth(kScrollbarWidth);
+        mWebPageScrollRect = new UIScrollRect(mWebPageWidgetsCanvas->GetOwner());
+        mWebPageScrollRect->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::CenterStretch);
+        mWebPageScrollRect->GetComponent<RectTransform>()->SetSizeDelta(-0.0f, 0.0f);
+        mWebPageScrollRect->SetScrollbarWidth(kScrollbarWidth);
 
         // Web page area is disabled by default. It enables when you search for something.
         mWebPageRoot->SetActive(false);
@@ -391,6 +405,20 @@ void SidneySearch::OnUpdate(float deltaTime)
     {
         OnSearchButtonPressed();
     }
+
+    // If a link is hovered, we need to update the link target label.
+    mLinkTargetLabel->SetText("");
+    for(auto& entry : mWebPageLinks)
+    {
+        if(entry.first->IsHovered())
+        {
+            mLinkTargetLabel->SetText(entry.second);
+            break;
+        }
+    }
+
+    // Keep menu bar updated.
+    mMenuBar.Update();
 }
 
 void SidneySearch::ShowWebPage(const std::string& pageName)
@@ -466,6 +494,16 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
             {
                 // This is a leaf node, so we will render it.
                 // However, we need to look at the current stack of tags to see what render mods are applied.
+
+                /*
+                // NOTE: this can be helpful to debug what element is being rendered, and what tags should be applied to it.
+                std::string toRender;
+                for(int i = 0; i < parseStack.size(); ++i)
+                {
+                    toRender += parseStack[i]->tagOrData + " > ";
+                }
+                printf("Render HTML %s\n", toRender.c_str());
+                */
 
                 // For text rendering, font parameters.
                 int fontSize = 0;
@@ -546,7 +584,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 }
                 else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "LI"))
                 {
-                    UIImage* bulletImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebScrollRect);
+                    UIImage* bulletImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageScrollRect);
                     bulletImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBULLET.BMP", AssetScope::Scene), true);
                     bulletImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     bulletImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
@@ -566,7 +604,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                     resultsPos.y -= kLineBreakHeight;
 
                     // Make an image with the horizontal rule.
-                    UIImage* hrImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebScrollRect);
+                    UIImage* hrImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageScrollRect);
                     hrImage->SetTexture(gAssetManager.LoadTexture("HORIZONTALRULE.BMP", AssetScope::Scene), true);
                     hrImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     hrImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
@@ -582,7 +620,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "IMG"))
                 {
                     // Create the image at the appropriate size.
-                    UIImage* image = UIUtil::NewUIActorWithWidget<UIImage>(mWebScrollRect);
+                    UIImage* image = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageScrollRect);
                     image->SetTexture(gAssetManager.LoadTexture(element.attributes[0].value, AssetScope::Scene), true);
                     image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     image->GetRectTransform()->SetAnchoredPosition(resultsPos);
@@ -599,15 +637,27 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                     Font* font = gAssetManager.LoadFont(fontName);
                     lastFontGlyphHeight = font->GetGlyphHeight();
 
-                    // The logic here is a bit complex due to having to *continue* pre-existing lines if they start midway through a previous line of text.
-                    const float kLineWidth = kWebpageContentsWidth;
-                    const float kMinWidthToContinueLine = 50.0f;
+                    // If we're continuing the text on an existing line, we probably want to add a bit of x-pos for the space between words.
+                    // However, the exception is when the next character is punctuation.
                     const float kWordSeparation = 6.0f;
+                    if(isTextContinuation)
+                    {
+                        if(!element.tagOrData.empty() &&
+                           element.tagOrData[0] != '.' &&
+                           element.tagOrData[0] != ',' &&
+                           element.tagOrData[0] != ')')
+                        {
+                            resultsPos.x += kWordSeparation;
+                        }
+                    }
+
+                    // The logic here is a bit complex due to having to *continue* pre-existing lines if they start midway through a previous line of text.
+                    const float kMinWidthToContinueLine = 50.0f;
                     if(!isTextContinuation)
                     {
                         // The logic is easiest if this IS NOT a text continuation. We just create a normal label because everything is left-aligned already.
-                        UILabel* label = CreateWebPageText(element.tagOrData, font, resultsPos, kLineWidth, link);
-                        resultsPos.x = label->GetNextCharPos().x + kWordSeparation;
+                        UILabel* label = CreateWebPageText(element.tagOrData, font, resultsPos, kWebpageContentsWidth, link);
+                        resultsPos.x = label->GetNextCharPos().x;
                         resultsPos.y -= label->GetTextHeight();
                         resultsPos.y += font->GetGlyphHeight();
                     }
@@ -619,19 +669,28 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                         // The easiest way to achieve this right now is to finish the last line with one label, then do the rest of the text in a new label.
 
                         // First, based on the space available in the last line, see if we can fit it all in there.
-                        Rect r(0, 0, kLineWidth - resultsPos.x, 1000.0f);
+                        Rect r(0, 0, kWebpageContentsWidth - resultsPos.x, 1000.0f);
                         TextLayout layout(r, font, HorizontalAlignment::Left, VerticalAlignment::Top, HorizontalOverflow::Wrap, VerticalOverflow::Overflow);
                         layout.AddLine(element.tagOrData);
 
+                        // Best case, we can fit this all in the space on the remaining line.
                         if(layout.GetLineCount() == 1)
                         {
-                            UILabel* label = CreateWebPageText(element.tagOrData, font, resultsPos, kLineWidth - resultsPos.x, link);
-                            resultsPos.x = label->GetNextCharPos().x + kWordSeparation;
+                            UILabel* label = CreateWebPageText(element.tagOrData, font, resultsPos, kWebpageContentsWidth - resultsPos.x, link);
+                            resultsPos.x += label->GetNextCharPos().x;
                             resultsPos.y -= label->GetTextHeight();
                             resultsPos.y += font->GetGlyphHeight();
+
+                            // For proper link highlight and click areas, resize the label to equal the text width.
+                            if(!link.empty())
+                            {
+                                label->GetRectTransform()->SetSizeDeltaX(label->GetTextWidth());
+                            }
                         }
                         else
                         {
+                            // This is the harder case, where the text doesn't fit in the remaining space on the current line.
+                            // First, we need to split the text based on what fits on the current line and what fits on the next line onwards.
                             int lastCharIndexOnFirstLine = 0;
                             float firstY = layout.GetChar(0)->pos.y;
                             for(auto& c : layout.GetChars())
@@ -649,33 +708,36 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                             std::string firstLineText = element.tagOrData.substr(0, lastCharIndexOnFirstLine);
                             std::string remainingText = element.tagOrData.substr(lastCharIndexOnFirstLine + 1);
 
-                            UILabel* lineOne = CreateWebPageText(firstLineText, font, resultsPos, kLineWidth - resultsPos.x, link);
+                            // Create one label for the text that'll fit in the remaining space on the current line.
+                            UILabel* lineOne = CreateWebPageText(firstLineText, font, resultsPos, kWebpageContentsWidth - resultsPos.x, link);
                             resultsPos.x = 0.0f;
                             resultsPos.y -= lineOne->GetTextHeight();
 
-                            UILabel* remaining = CreateWebPageText(remainingText, font, resultsPos, kLineWidth, link);
-                            resultsPos.x = 0.0f;
+                            // Create another label for any remaining text that must be shunted to the next line.
+                            UILabel* remaining = CreateWebPageText(remainingText, font, resultsPos, kWebpageContentsWidth, link);
+                            resultsPos.x = remaining->GetNextCharPos().x;
                             resultsPos.y -= remaining->GetTextHeight();
                             resultsPos.y += font->GetGlyphHeight();
+
+                            // If this is a link, resize the with of the labels to ensure click/highlight area is correct.
+                            if(!link.empty())
+                            {
+                                lineOne->GetRectTransform()->SetSizeDeltaX(lineOne->GetTextWidth());
+                                remaining->GetRectTransform()->SetSizeDeltaX(remaining->GetTextWidth());
+                            }
                         }
                     }
 
-                    isTextContinuation = kLineWidth - resultsPos.x > kMinWidthToContinueLine;
+                    // If there's enough space remaining at the end of the current line, we could continue the next piece of text on this line.
+                    isTextContinuation = kWebpageContentsWidth - resultsPos.x > kMinWidthToContinueLine;
+
+                    // But if we won't continue text on this line, do a carriage return to the next line.
                     if(!isTextContinuation)
                     {
                         resultsPos.x = 0.0f;
                         resultsPos.y -= font->GetGlyphHeight();
                     }
                 }
-
-                /*
-                std::string toRender;
-                for(int i = 0; i < parseStack.size(); ++i)
-                {
-                    toRender += parseStack[i]->tagOrData + " > ";
-                }
-                printf("Render HTML %s\n", toRender.c_str());
-                */
             }
         }
     }
@@ -687,7 +749,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 UILabel* SidneySearch::CreateWebPageText(const std::string& text, Font* font, const Vector2& pos, float width, std::string& link)
 {
     // Create a label with the appropriate font and text.
-    UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(mWebScrollRect);
+    UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(mWebPageScrollRect);
     label->SetFont(font);
     label->SetText(text);
 
@@ -711,16 +773,80 @@ UILabel* SidneySearch::CreateWebPageText(const std::string& text, Font* font, co
     if(!link.empty())
     {
         UIButton* button = label->GetOwner()->AddComponent<UIButton>();
+        button->SetHighlightCursorOnHover(true);
         button->SetPressCallback([link, this](UIButton* button){
             ShowWebPage(link);
+
+            // When you click on a link, it gets added to the web page history.
+            AddToHistory(link);
+            RefreshHistoryMenu();
         });
         mWebPageWidgets.push_back(button);
+        mWebPageLinks[button] = link;
     }
     return label;
 }
 
+void SidneySearch::AddToHistory(const std::string& pageName)
+{
+    // If we add a new page to history, but we aren't at the newest page in the history, anything newer gets truncated.
+    if(mHistoryIndex != mHistory.size() - 1)
+    {
+        mHistory.erase(mHistory.begin() + mHistoryIndex + 1, mHistory.end());
+    }
+
+    // Add to history, keeping max size in mind.
+    if(mHistory.size() == kMaxHistorySize)
+    {
+        mHistory.erase(mHistory.begin());
+    }
+    mHistory.push_back(pageName);
+
+    // Our current history page is now this one.
+    mHistoryIndex = mHistory.size() - 1;
+}
+
+void SidneySearch::RefreshHistoryMenu()
+{
+    // Clear existing dropdown choices.
+    mMenuBar.ClearDropdownChoices(0);
+
+    // Repopulate dropdown choices with page history, starting with latest at top.
+    for(int i = mHistory.size() - 1; i >= 0; --i)
+    {
+        std::string dropdownText = StringUtil::Format("%i. %s", i + 1, StringUtil::ToLowerCopy(mHistory[i]).c_str());
+        std::string link = mHistory[i];
+        mMenuBar.AddDropdownChoice(dropdownText, [link, this](){
+            ShowWebPage(link);
+        });
+    }
+
+    // If the history menu changes (meaning history has been added or removed), it may also affect the history buttons.
+    RefreshHistoryButtons();
+}
+
+void SidneySearch::RefreshHistoryButtons()
+{
+    // Update whether back/forward buttons are enabled.
+    // They aren't enabled if there's no history...
+    if(mHistoryIndex == -1 || mHistory.empty())
+    {
+        mHistoryBackButton->GetButton()->SetCanInteract(false);
+        mHistoryForwardButton->GetButton()->SetCanInteract(false);
+    }
+    else
+    {
+        // If there is history, enable them when there is history in that direction.
+        mHistoryForwardButton->GetButton()->SetCanInteract(mHistoryIndex < mHistory.size() - 1);
+        mHistoryBackButton->GetButton()->SetCanInteract(mHistoryIndex > 0);
+    }
+}
+
 void SidneySearch::ClearWebPage()
 {
+    // Reset web page scroll back to the top.
+    mWebPageScrollRect->SetNormalizedScrollValue(0.0f);
+
     // Destroy all widgets that were created for this web page.
     for(UIWidget* widget : mWebPageWidgets)
     {
@@ -732,6 +858,10 @@ void SidneySearch::ClearWebPage()
     }
     mWebPageWidgets.clear();
 
+    // Clear list of web page links (they were destroyed in the previous for loop).
+    mWebPageLinks.clear();
+    
+    // Hide the web page root entirely.
     mWebPageRoot->SetActive(false);
 }
 
@@ -741,6 +871,10 @@ void SidneySearch::OnSearchButtonPressed()
     if(it != mSearchTerms.end())
     {
         ShowWebPage(it->second);
+
+        // When you search for a link, it gets added to the web page history.
+        AddToHistory(it->second);
+        RefreshHistoryMenu();
         
         // Searching certain terms leads to point increases and flag setting.
         //TODO: Figure out how to make this data-driven!
@@ -761,4 +895,18 @@ void SidneySearch::OnResetButtonPressed()
     // Reset clears any text input and hides the current web page.
     mTextInput->Clear();
     ClearWebPage();
+}
+
+void SidneySearch::OnBackButtonPressed()
+{
+    mHistoryIndex = Math::Max(mHistoryIndex - 1, 0);
+    ShowWebPage(mHistory[mHistoryIndex]);
+    RefreshHistoryButtons();
+}
+
+void SidneySearch::OnForwardButtonPressed()
+{
+    mHistoryIndex = Math::Min(mHistoryIndex + 1, mHistory.size() - 1);
+    ShowWebPage(mHistory[mHistoryIndex]);
+    RefreshHistoryButtons();
 }
