@@ -36,6 +36,7 @@ public:
 	void RemoveAllWidgets() { mWidgets.clear(); }
 
     void SetMasked(bool masked) { mMasked = masked; }
+    bool IsMasked() const { return mMasked; }
 
     RectTransform* GetRectTransform() const { return mRectTransform; }
 	

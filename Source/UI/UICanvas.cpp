@@ -17,6 +17,13 @@ UIWidget* UICanvas::sMouseOverWidget = nullptr;
 		// Ignore canvases that aren't active & enabled.
 		UICanvas* canvas = sCanvases[i];
 		if(!canvas->IsActiveAndEnabled()) { continue; }
+
+        // If this canvas is masked, the pointer must be within the canvas rect.
+        // If the pointer is not within the rect, then anything its over in this canvas isn't visible, so we should ignore it.
+        if(canvas->IsMasked() && !canvas->GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition()))
+        {
+            continue;
+        }
 		
 		// Same thing for widgets on each canvas - iterate back-to-front.
 		// Same reason as above: last widgets render on top of everything, so they should receive input events first.
