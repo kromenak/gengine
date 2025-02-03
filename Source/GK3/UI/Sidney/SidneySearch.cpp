@@ -244,7 +244,7 @@ void SidneySearch::Init(Actor* parent)
     
     // Add menu bar.
     // This menu bar only has one dropdown (web page history) that is oddly positioned...
-    mMenuBar.Init(mRoot, "SEARCH", 100.0f);
+    mMenuBar.Init(mRoot, SidneyUtil::GetSearchLocalizer().GetText("ScreenName"), 100.0f);
     mMenuBar.SetFirstDropdownPosition(405.0f);
     mMenuBar.AddDropdown("History");
 

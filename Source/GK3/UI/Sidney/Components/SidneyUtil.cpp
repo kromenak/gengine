@@ -10,6 +10,7 @@
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UINineSlice.h"
+#include "UIUtil.h"
 
 Color32 SidneyUtil::TransBgColor = Color32(0, 0, 0, 128);
 Color32 SidneyUtil::VeryTransBgColor = Color32(0, 0, 0, 96);
@@ -63,7 +64,7 @@ Actor* SidneyUtil::CreateBackground(Actor* parent)
     return backgroundActor;
 }
 
-void SidneyUtil::CreateMainMenuButton(Actor* parent, std::function<void()> pressCallback)
+void SidneyUtil::CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback)
 {
     SidneyButton* button = new SidneyButton(parent);
     button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
@@ -78,69 +79,20 @@ void SidneyUtil::CreateMainMenuButton(Actor* parent, std::function<void()> press
     button->GetRectTransform()->SetAnchoredPosition(-10.0f, 10.0f); // 10x10 offset from Bottom-Right
 }
 
-Actor* SidneyUtil::CreateMenuBar(Actor* parent, const std::string& screenName, float labelWidth)
+UIButton* SidneyUtil::CreateCloseWindowButton(Actor* parent, const std::function<void()>& pressCallback)
 {
-    // Bar that stretches across entire screen.
-    Actor* menuBarActor = new Actor(TransformType::RectTransform);
-    menuBarActor->GetTransform()->SetParent(parent->GetTransform());
-    {
-        UIImage* menuBarImage = menuBarActor->AddComponent<UIImage>();
+    UIButton* closeButton = UIUtil::NewUIActorWithWidget<UIButton>(parent);
+    closeButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+    closeButton->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
+    
+    closeButton->SetUpTexture(gAssetManager.LoadTexture("CLOSEWIN_UP.BMP"));
+    closeButton->SetDownTexture(gAssetManager.LoadTexture("CLOSEWIN_DOWN.BMP"));
+    closeButton->SetHoverTexture(gAssetManager.LoadTexture("CLOSEWIN_HOVER.BMP"));
 
-        menuBarImage->SetTexture(gAssetManager.LoadTexture("S_BAR_STRETCH.BMP"), true);
-        menuBarImage->SetRenderMode(UIImage::RenderMode::Tiled);
-
-        menuBarImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
-        menuBarImage->GetRectTransform()->SetAnchorMin(0.0f, 1.0f); // Anchor to Top, Stretch Horizontally
-        menuBarImage->GetRectTransform()->SetAnchorMax(1.0f, 1.0f);
-        menuBarImage->GetRectTransform()->SetAnchoredPosition(0.0f, -25.0f);
-    }
-
-    // Bar that extends from top-right, used to give enough height for the screen name label.
-    {
-        Actor* menuBarTopActor = new Actor(TransformType::RectTransform);
-        menuBarTopActor->GetTransform()->SetParent(parent->GetTransform());
-        UIImage* menuBarTopImage = menuBarTopActor->AddComponent<UIImage>();
-
-        menuBarTopImage->SetTexture(gAssetManager.LoadTexture("S_BAR_TOPSTRIP_LR.BMP"), true);
-        menuBarTopImage->SetRenderMode(UIImage::RenderMode::Tiled);
-
-        menuBarTopImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
-        menuBarTopImage->GetRectTransform()->SetAnchor(1.0f, 1.0f); // Anchor to Top-Right
-        menuBarTopImage->GetRectTransform()->SetAnchoredPosition(0.0f, -16.0f);
-        menuBarTopImage->GetRectTransform()->SetSizeDeltaX(labelWidth);
-
-        // Triangle bit that slopes downward.
-        {
-            Actor* menuBarAngleActor = new Actor(TransformType::RectTransform);
-            menuBarAngleActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
-            UIImage* menuBarAngleImage = menuBarAngleActor->AddComponent<UIImage>();
-
-            menuBarAngleImage->SetTexture(gAssetManager.LoadTexture("S_BAR_TOPANGLE_LR.BMP"), true);
-
-            menuBarAngleImage->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
-            menuBarAngleImage->GetRectTransform()->SetAnchor(0.0f, 1.0f); // Anchor to Top-Left
-            menuBarAngleImage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
-        }
-
-        // Screen name label.
-        {
-            Actor* screenNameActor = new Actor(TransformType::RectTransform);
-            screenNameActor->GetTransform()->SetParent(menuBarTopActor->GetTransform());
-            UILabel* screenNameLabel = screenNameActor->AddComponent<UILabel>();
-
-            screenNameLabel->SetFont(gAssetManager.LoadFont("SID_EMB_18.FON"));
-            screenNameLabel->SetText(screenName);
-            screenNameLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
-            screenNameLabel->SetVerticalAlignment(VerticalAlignment::Top);
-            screenNameLabel->SetMasked(true);
-
-            screenNameLabel->GetRectTransform()->SetPivot(1.0f, 1.0f); // Top-Right
-            screenNameLabel->GetRectTransform()->SetAnchor(1.0f, 1.0f); // Top-Right
-            screenNameLabel->GetRectTransform()->SetAnchoredPosition(-4.0f, -1.0f); // Nudge a bit to get right positioning
-            screenNameLabel->GetRectTransform()->SetSizeDelta(labelWidth, 18.0f);
-        }
-    }
-    return menuBarActor;
+    closeButton->SetPressCallback([pressCallback](UIButton* button) {
+        pressCallback();
+    });
+    return closeButton;
 }
 
 SidneyButton* SidneyUtil::CreateBigButton(Actor* parent)
@@ -204,6 +156,12 @@ const Localizer& SidneyUtil::GetMainScreenLocalizer()
 const Localizer& SidneyUtil::GetSearchLocalizer()
 {
     static Localizer localizer("SIDNEY.TXT", "Search Screen");
+    return localizer;
+}
+
+const Localizer& SidneyUtil::GetEmailLocalizer()
+{
+    static Localizer localizer("SIDNEY.TXT", "EMail Screen");
     return localizer;
 }
 

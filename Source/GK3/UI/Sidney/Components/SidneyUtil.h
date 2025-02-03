@@ -27,8 +27,8 @@ public:
                                       const Vector2& pivotAndAnchor, const Vector2& position, const Vector2& size);
 
     static Actor* CreateBackground(Actor* parent);
-    static void CreateMainMenuButton(Actor* parent, std::function<void()> pressCallback);
-    static Actor* CreateMenuBar(Actor* parent, const std::string& screenName, float labelWidth);
+    static void CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback);
+    static UIButton* CreateCloseWindowButton(Actor* parent, const std::function<void()>& pressCallback);
 
     static SidneyButton* CreateBigButton(Actor* parent);
     static SidneyButton* CreateSmallButton(Actor* parent);
@@ -38,6 +38,7 @@ public:
 
     static const Localizer& GetMainScreenLocalizer();
     static const Localizer& GetSearchLocalizer();
+    static const Localizer& GetEmailLocalizer();
     static const Localizer& GetAnalyzeLocalizer();
     static const Localizer& GetTranslateLocalizer();
     static const Localizer& GetAddDataLocalizer();

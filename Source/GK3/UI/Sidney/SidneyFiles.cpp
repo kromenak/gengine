@@ -250,23 +250,9 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
     }
 
     // Add close button.
-    {
-        Actor* closeActor = new Actor(TransformType::RectTransform);
-        closeActor->GetTransform()->SetParent(mWindowRoot->GetTransform());
-
-        UIButton* closeButton = closeActor->AddComponent<UIButton>();
-        closeButton->GetRectTransform()->SetPivot(0.0f, 1.0f);
-        closeButton->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-        closeButton->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
-
-        closeButton->SetUpTexture(gAssetManager.LoadTexture("CLOSEWIN_UP.BMP"));
-        closeButton->SetDownTexture(gAssetManager.LoadTexture("CLOSEWIN_DOWN.BMP"));
-        closeButton->SetHoverTexture(gAssetManager.LoadTexture("CLOSEWIN_HOVER.BMP"));
-
-        closeButton->SetPressCallback([this](UIButton* button){
-            mWindowRoot->SetActive(false);
-        });
-    }
+    SidneyUtil::CreateCloseWindowButton(mWindowRoot, [this](){
+        mWindowRoot->SetActive(false);
+    });
 
     // Add title/header.
     {
