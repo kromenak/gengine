@@ -630,6 +630,14 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 }
                 else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "LI"))
                 {
+                    // List items should always be on a new line.
+                    // Usually the data does this manually with a <BR> at the end, but sometimes it's forgotten.
+                    if(resultsPos.x > 0.0f)
+                    {
+                        resultsPos.x = 0.0f;
+                        resultsPos.y -= kLineBreakHeight;
+                    }
+
                     UIImage* bulletImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageScrollRect);
                     bulletImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBULLET.BMP", AssetScope::Scene), true);
                     bulletImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
