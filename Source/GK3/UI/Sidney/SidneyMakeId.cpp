@@ -345,6 +345,12 @@ void SidneyMakeId::PrintId()
                     // Grant the inventory item.
                     gInventoryManager.AddInventoryItem(invItemName);
                 }
+
+                // If we printed the correct ID, grant some score.
+                if(vo == kThatShouldWorkVO)
+                {
+                    gGameProgress.ChangeScore("e_sidney_makeid_print");
+                }
             }
         }
     }
