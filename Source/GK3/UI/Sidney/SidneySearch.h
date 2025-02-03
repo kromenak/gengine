@@ -98,10 +98,52 @@ private:
         std::string flagToSet;
     };
     std::string_map_ci<DialogueTrigger> mDialogueTriggers;
+
+    // Visiting certain pages will grant score. There's no time-based or flag-based logic to this: you can visit the pages any time.
+    // Unfortunately, this is not data-driven at all (it easily could have been by putting this data in SIDSEARCH.TXT). Hardcoding it here for now.
+    std::string_map_ci<std::string> mWebPageScoreEvents = {
+        { "Vampire.html", "e_sidney_search_vampires" },
+        { "HolyGrail.html", "e_sidney_search_grail" },
+        { "Quaternity.html", "e_sidney_search_quaternity" },
+        { "StMichael.html", "e_sidney_search_st_michael" },
+        { "Pythagoras.html", "e_sidney_search_pythagoras" },
+        { "Asmodeus.html", "e_sidney_search_asmodeus" },
+        { "Chessboard.html", "e_sidney_search_chessboard" },
+        { "Duality.html", "e_sidney_search_duality" },
+        { "Solomon.html", "e_sidney_search_solomon" },
+        { "StVincent.html", "e_sidney_search_st_vincent" },
+        { "TempleEntry.html", "e_sidney_search_temple_solomon" },
+        { "Soul.html", "e_sidney_search_soul" },
+        { "Hexagram.html", "e_sidney_search_hexagram" },
+        { "Seal.html", "e_sidney_search_seal" },
+    };
+
+    // Visiting certain pages will set flags internally. There doesn't seem to be any additional logic besides visiting the page at any time.
+    // Unfortunately, this is not data-driven at all. Hardcoding it here for now.
+    std::string_map_ci<std::string> mWebPageFlagEvents = {
+        { "Vampire.html", "Vampire" },
+        { "RA.html", "RA" },
+        { "Asmodeus.html", "Asmodeus" },
+        { "Quaternity.html", "Quaternity" },
+        { "StMichael.html", "StMichael" },
+        { "Pythagoras.html", "Pythagoras" },
+        { "Chessboard.html", "Chessboard" },
+        { "Duality.html", "Duality" },
+        { "Solomon.html", "Solomon" },
+        { "StVincent.html", "StVincent" },
+        { "TempleEntry.html", "SolomonTemple" },
+        { "Soul.html", "Soul" },
+        { "Hexagram.html", "Hexagram" },
+        { "Seal.html", "Seal" },
+        { "AlchemyTiltedSquare.html", "AlchemyTiltedSquare" },
+        { "TempleFloorplan.html", "TempleFloorplan" }
+    };
     
     void ShowWebPage(const std::string& pageName);
     void ClearWebPage();
     UILabel* CreateWebPageText(const std::string& text, Font* font, const Vector2& pos, float width, std::string& link);
+
+    void TriggerWebPageEvents(const std::string& pageName);
 
     void AddToHistory(const std::string& pageName);
     void RefreshHistoryMenu();

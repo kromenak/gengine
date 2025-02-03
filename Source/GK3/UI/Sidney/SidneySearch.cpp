@@ -798,6 +798,9 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 
     // Make sure the web page root UI element is active, so you can see everything!
     mWebPageRoot->SetActive(true);
+
+    // We are now on this web page. Trigger any known events that can happen when entering this page.
+    TriggerWebPageEvents(pageName);
 }
 
 UILabel* SidneySearch::CreateWebPageText(const std::string& text, Font* font, const Vector2& pos, float width, std::string& link)
@@ -839,6 +842,80 @@ UILabel* SidneySearch::CreateWebPageText(const std::string& text, Font* font, co
         mWebPageLinks[button] = link;
     }
     return label;
+}
+
+void SidneySearch::TriggerWebPageEvents(const std::string& pageName)
+{
+    // When you visit a page, we *may* need to trigger some dialogue.
+    auto dialogueIt = mDialogueTriggers.find(pageName);
+    if(dialogueIt != mDialogueTriggers.end())
+    {
+        // There is dialogue to trigger, now let's see if we meet all the conditions...
+
+        // First, these triggers only occur one time.
+        // If the flag to set upon triggering this dialogue is already set, then we already triggered it - don't do it again.
+        bool metAllRequirements = !gGameProgress.GetFlag(dialogueIt->second.flagToSet);
+
+        // Second, you must be within the required LSR steps min/max inclusive.
+        if(metAllRequirements)
+        {
+            if(dialogueIt->second.lsrMin >= 0 || dialogueIt->second.lsrMax >= 0)
+            {
+                int currentLsrStep = SidneyUtil::GetCurrentLSRStep();
+                metAllRequirements = currentLsrStep >= dialogueIt->second.lsrMin && currentLsrStep <= dialogueIt->second.lsrMax;
+            }
+        }
+
+        // Finally, any flag conditions must be met.
+        if(metAllRequirements)
+        {
+            for(auto& flag : dialogueIt->second.requiredFlags)
+            {
+                // Figure out if this requirement was met. The ability to put "!SomeFlag" makes it slightly more complex.
+                bool metFlagRequirement = false;
+                if(flag.front() == '!')
+                {
+                    metFlagRequirement = !gGameProgress.GetFlag(flag.substr(1));
+                }
+                else
+                {
+                    metFlagRequirement = gGameProgress.GetFlag(flag);
+                }
+
+                // If any flag requirement isn't met, then we haven't met all the requirements.
+                if(!metFlagRequirement)
+                {
+                    metAllRequirements = false;
+                    break;
+                }
+            }
+        }
+
+        // Finally, we can play the dialogue trigger if we still met all requirements.
+        if(metAllRequirements)
+        {
+            // Play the dialogue.
+            std::string command = StringUtil::Format("wait StartDialogue(\"%s\", 1)", dialogueIt->second.licensePlate.c_str());
+            gActionManager.ExecuteSheepAction(command);
+
+            // Set the flag.
+            gGameProgress.SetFlag(dialogueIt->second.flagToSet);
+        }
+    }
+
+    // Visiting certain pages may trigger score gain.
+    auto scoreEventIt = mWebPageScoreEvents.find(pageName);
+    if(scoreEventIt != mWebPageScoreEvents.end())
+    {
+        gGameProgress.ChangeScore(scoreEventIt->second);
+    }
+
+    // Visiting certain pages may trigger a flag being set for internal logic.
+    auto flagEventIt = mWebPageFlagEvents.find(pageName);
+    if(flagEventIt != mWebPageFlagEvents.end())
+    {
+        gGameProgress.SetFlag(flagEventIt->second);
+    }
 }
 
 void SidneySearch::AddToHistory(const std::string& pageName)
@@ -929,71 +1006,6 @@ void SidneySearch::OnSearchButtonPressed()
         // When you search for a link, it gets added to the web page history.
         AddToHistory(it->second);
         RefreshHistoryMenu();
-
-        // When you visit a page, we *may* need to trigger some dialogue.
-        auto dialogueIt = mDialogueTriggers.find(it->second);
-        if(dialogueIt != mDialogueTriggers.end())
-        {
-            // There is dialogue to trigger, now let's see if we meet all the conditions...
-            
-            // First, these triggers only occur one time.
-            // If the flag to set upon triggering this dialogue is already set, then we already triggered it - don't do it again.
-            bool metAllRequirements = !gGameProgress.GetFlag(dialogueIt->second.flagToSet);
-
-            // Second, you must be within the required LSR steps min/max inclusive.
-            if(metAllRequirements)
-            {
-                if(dialogueIt->second.lsrMin >= 0 || dialogueIt->second.lsrMax >= 0)
-                {
-                    int currentLsrStep = SidneyUtil::GetCurrentLSRStep();
-                    metAllRequirements = currentLsrStep >= dialogueIt->second.lsrMin && currentLsrStep <= dialogueIt->second.lsrMax;
-                }
-            }
-            
-            // Finally, any flag conditions must be met.
-            if(metAllRequirements)
-            {
-                for(auto& flag : dialogueIt->second.requiredFlags)
-                {
-                    // Figure out if this requirement was met. The ability to put "!SomeFlag" makes it slightly more complex.
-                    bool metFlagRequirement = false;
-                    if(flag.front() == '!')
-                    {
-                        metFlagRequirement = !gGameProgress.GetFlag(flag.substr(1));
-                    }
-                    else
-                    {
-                        metFlagRequirement = gGameProgress.GetFlag(flag);
-                    }
-
-                    // If any flag requirement isn't met, then we haven't met all the requirements.
-                    if(!metFlagRequirement)
-                    {
-                        metAllRequirements = false;
-                        break;
-                    }
-                }
-            }
-
-            // Finally, we can play the dialogue trigger if we still met all requirements.
-            if(metAllRequirements)
-            {
-                // Play the dialogue.
-                std::string command = StringUtil::Format("wait StartDialogue(\"%s\", 1)", dialogueIt->second.licensePlate.c_str());
-                gActionManager.ExecuteSheepAction(command);
-
-                // Set the flag.
-                gGameProgress.SetFlag(dialogueIt->second.flagToSet);
-            }
-        }
-        
-        // Searching certain terms leads to point increases and flag setting.
-        //TODO: Figure out how to make this data-driven!
-        if(StringUtil::EqualsIgnoreCase(it->second, "Vampire.html"))
-        {
-            gGameProgress.ChangeScore("e_sidney_search_vampires");
-            gGameProgress.SetFlag("Vampire");
-        }
     }
     else
     {
