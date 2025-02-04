@@ -11,7 +11,9 @@
 #include "StringUtil.h"
 
 class Actor;
+class SidneyButton;
 class UILabel;
+class UIScrollRect;
 
 class SidneyEmail
 {
@@ -32,9 +34,27 @@ private:
 
     // The window containing the email list.
     Actor* mEmailListWindow = nullptr;
+
+    // In the email list, labels that have been created to show received emails.
     std::vector<UILabel*> mEmailListItems;
 
+    // The window containing the single email view.
     Actor* mEmailWindow = nullptr;
+
+    // Label to populate with single email data.
+    UILabel* mFromLabel = nullptr;
+    UILabel* mToLabel = nullptr;
+    UILabel* mCCLabel = nullptr;
+    UILabel* mDateLabel = nullptr;
+    UILabel* mSubjectLabel = nullptr;
+
+    // Single email body labels and scroll rect.
+    UIScrollRect* mBodyScrollRect = nullptr;
+    std::vector<UILabel*> mBodyLabels;
+
+    // Buttons for actions on an email.
+    SidneyButton* mNextButton = nullptr;
+    SidneyButton* mPrevButton = nullptr;
 
     // Represents one email that can be received.
     struct Email
@@ -51,14 +71,24 @@ private:
     // Key is the email ID specified in SIDNEYEMAIL.TXT.
     std::string_map_ci<Email> mAllEmails;
 
-    // IDs of emails that have been received.
-    std::string_set_ci mReceivedEmails;
+    // IDs of emails that have been received, in order received.
+    std::vector<std::string> mReceivedEmails;
 
     // Keeps track of which emails we have read.
     std::string_set_ci mReadEmails;
 
+    // For forward/back support, the index of the email we are looking at.
+    int mCurrentEmailIndex = -1;
+
     void ReceiveEmail(const std::string& emailId);
 
     void ShowEmailList();
-    void ViewEmail(const std::string& emailId);
+    void ViewEmail(const std::string& emailId, int emailIndex);
+
+    void OnNextEmailButtonPressed();
+    void OnPrevEmailButtonPressed();
+    void OnReplyButtonPressed();
+    void OnComposeButtonPressed();
+    void OnPrintButtonPressed();
+    void OnCloseButtonPressed();
 };

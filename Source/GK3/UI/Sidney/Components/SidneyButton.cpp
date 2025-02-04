@@ -45,6 +45,9 @@ SidneyButton::SidneyButton(Actor* parent) : Actor("SidneyButton", TransformType:
 
     // Use a default button press sound.
     mPressAudio = gAssetManager.LoadAudio("SIDBUTTON5.WAV");
+
+    // Set default fonts.
+    SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
 }
 
 void SidneyButton::PrepareToDestroy()

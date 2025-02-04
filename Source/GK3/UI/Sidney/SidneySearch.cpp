@@ -355,8 +355,8 @@ void SidneySearch::Init(Actor* parent)
         mWebPageWidgetsCanvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
 
         mWebPageScrollRect = new UIScrollRect(mWebPageWidgetsCanvas->GetOwner());
-        mWebPageScrollRect->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::CenterStretch);
-        mWebPageScrollRect->GetComponent<RectTransform>()->SetSizeDelta(-0.0f, 0.0f);
+        mWebPageScrollRect->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+        mWebPageScrollRect->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
         mWebPageScrollRect->SetScrollbarWidth(kScrollbarWidth);
 
         // Web page area is disabled by default. It enables when you search for something.

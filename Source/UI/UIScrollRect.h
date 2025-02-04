@@ -9,7 +9,8 @@
 #pragma once
 #include "Actor.h"
 
-class RectTransform;
+#include "RectTransform.h"
+
 class UISlider;
 
 class UIScrollRect : public Actor
@@ -23,6 +24,8 @@ public:
     void SetButtonScrollIncrement(float increment) { mButtonScrollIncrement = increment; }
 
     void SetNormalizedScrollValue(float normalizedScrollValue);
+
+    RectTransform* GetRectTransform() const { return static_cast<RectTransform*>(GetTransform()); }
 
 protected:
     void OnUpdate(float deltaTime) override;

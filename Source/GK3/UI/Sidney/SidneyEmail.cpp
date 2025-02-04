@@ -1,18 +1,22 @@
 #include "SidneyEmail.h"
 
+#include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "Font.h"
 #include "GameProgress.h"
 #include "IniParser.h"
+#include "SidneyButton.h"
 #include "SidneyUtil.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "UIButton.h"
+#include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UINineSlice.h"
+#include "UIScrollRect.h"
 #include "UIUtil.h"
 
 void SidneyEmail::Init(Actor* parent)
@@ -95,6 +99,11 @@ void SidneyEmail::Init(Actor* parent)
                 fromBorder->GetRectTransform()->SetSizeDelta(202.0f, 18.0f);
                 fromBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 fromBorder->GetRectTransform()->SetAnchoredPosition(90.0f, -9.0f);
+
+                mFromLabel = UIUtil::NewUIActorWithWidget<UILabel>(fromBorder->GetOwner());
+                mFromLabel->SetFont(font);
+                mFromLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+                mFromLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
             }
 
             // To
@@ -110,6 +119,11 @@ void SidneyEmail::Init(Actor* parent)
                 toBorder->GetRectTransform()->SetSizeDelta(202.0f, 18.0f);
                 toBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 toBorder->GetRectTransform()->SetAnchoredPosition(90.0f, -28.0f);
+
+                mToLabel = UIUtil::NewUIActorWithWidget<UILabel>(toBorder->GetOwner());
+                mToLabel->SetFont(font);
+                mToLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+                mToLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
             }
 
             // CC
@@ -125,6 +139,11 @@ void SidneyEmail::Init(Actor* parent)
                 ccBorder->GetRectTransform()->SetSizeDelta(202.0f, 18.0f);
                 ccBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 ccBorder->GetRectTransform()->SetAnchoredPosition(90.0f, -47.0f);
+
+                mCCLabel = UIUtil::NewUIActorWithWidget<UILabel>(ccBorder->GetOwner());
+                mCCLabel->SetFont(font);
+                mCCLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+                mCCLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
             }
 
             // Subject
@@ -140,6 +159,11 @@ void SidneyEmail::Init(Actor* parent)
                 subjectBorder->GetRectTransform()->SetSizeDelta(202.0f, 18.0f);
                 subjectBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 subjectBorder->GetRectTransform()->SetAnchoredPosition(90.0f, -76.0f);
+
+                mSubjectLabel = UIUtil::NewUIActorWithWidget<UILabel>(subjectBorder->GetOwner());
+                mSubjectLabel->SetFont(font);
+                mSubjectLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+                mSubjectLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
             }
 
             // Date
@@ -148,6 +172,11 @@ void SidneyEmail::Init(Actor* parent)
                 dateBorder->GetRectTransform()->SetSizeDelta(136.0f, 18.0f);
                 dateBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 dateBorder->GetRectTransform()->SetAnchoredPosition(303.0f, -28.0f);
+
+                mDateLabel = UIUtil::NewUIActorWithWidget<UILabel>(dateBorder->GetOwner());
+                mDateLabel->SetFont(font);
+                mDateLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+                mDateLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
             }
 
             // Schattenjaeger logo.
@@ -155,6 +184,87 @@ void SidneyEmail::Init(Actor* parent)
             logoImage->SetTexture(gAssetManager.LoadTexture("S_SCHAT_LOGO.BMP"), true);
             logoImage->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
             logoImage->GetRectTransform()->SetAnchoredPosition(-7.0f, -13.0f);
+        }
+
+        // Create the body area.
+        {
+            // Create body canvas, for masking.
+            UICanvas* bodyCanvas = UIUtil::NewUIActorWithCanvas(emailWindow->GetOwner(), -1);
+            bodyCanvas->SetMasked(true);
+            bodyCanvas->GetRectTransform()->SetAnchor(AnchorPreset::Top);
+            bodyCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, -100.0f);
+            bodyCanvas->GetRectTransform()->SetSizeDelta(527.0f, 227.0f);
+
+            // Create body scroll rect.
+            mBodyScrollRect = new UIScrollRect(bodyCanvas->GetOwner());
+            mBodyScrollRect->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+            mBodyScrollRect->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+            mBodyScrollRect->SetScrollbarWidth(5.0f);
+        }
+
+        // In the footer, create all the buttons.
+        {
+            SidneyButton* nextButton = new SidneyButton(emailWindow->GetOwner());
+            nextButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Next"));
+            nextButton->SetWidth(66.0f);
+            nextButton->SetHeight(13.0f);
+            nextButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            nextButton->GetRectTransform()->SetAnchoredPosition(63.0f, 8.0f);
+            nextButton->SetPressCallback([this](){
+                OnNextEmailButtonPressed();
+            });
+            mNextButton = nextButton;
+
+            SidneyButton* prevButton = new SidneyButton(emailWindow->GetOwner());
+            prevButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Previous"));
+            prevButton->SetWidth(66.0f);
+            prevButton->SetHeight(13.0f);
+            prevButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            prevButton->GetRectTransform()->SetAnchoredPosition(141.0f, 8.0f);
+            prevButton->SetPressCallback([this](){
+                OnPrevEmailButtonPressed();
+            });
+            mPrevButton = prevButton;
+
+            SidneyButton* replyButton = new SidneyButton(emailWindow->GetOwner());
+            replyButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Reply"));
+            replyButton->SetWidth(66.0f);
+            replyButton->SetHeight(13.0f);
+            replyButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            replyButton->GetRectTransform()->SetAnchoredPosition(219.0f, 8.0f);
+            replyButton->SetPressCallback([this](){
+                OnReplyButtonPressed();
+            });
+
+            SidneyButton* composeButton = new SidneyButton(emailWindow->GetOwner());
+            composeButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Compose"));
+            composeButton->SetWidth(66.0f);
+            composeButton->SetHeight(13.0f);
+            composeButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            composeButton->GetRectTransform()->SetAnchoredPosition(297.0f, 8.0f);
+            composeButton->SetPressCallback([this](){
+                OnComposeButtonPressed();
+            });
+
+            SidneyButton* printButton = new SidneyButton(emailWindow->GetOwner());
+            printButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Print"));
+            printButton->SetWidth(66.0f);
+            printButton->SetHeight(13.0f);
+            printButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            printButton->GetRectTransform()->SetAnchoredPosition(375.0f, 8.0f);
+            printButton->SetPressCallback([this](){
+                OnPrintButtonPressed();
+            });
+
+            SidneyButton* closeButton = new SidneyButton(emailWindow->GetOwner());
+            closeButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Exit"));
+            closeButton->SetWidth(50.0f);
+            closeButton->SetHeight(13.0f);
+            closeButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            closeButton->GetRectTransform()->SetAnchoredPosition(469.0f, 8.0f);
+            closeButton->SetPressCallback([this](){
+                OnCloseButtonPressed();
+            });
         }
     }
 
@@ -201,7 +311,7 @@ void SidneyEmail::Init(Actor* parent)
                 else if(StringUtil::StartsWithIgnoreCase(line.entries[0].key, "Body"))
                 {
                     // The key contains a number, which is the index of the piece of body text.
-                    int bodyIndex = StringUtil::ToInt(line.entries[0].key.substr(4));
+                    int bodyIndex = StringUtil::ToInt(line.entries[0].key.substr(4)) - 1;
 
                     // Make sure we have enough entries to get up to this index.
                     while(email.body.size() <= bodyIndex)
@@ -250,8 +360,12 @@ void SidneyEmail::Hide()
 
 void SidneyEmail::ReceiveEmail(const std::string& emailId)
 {
-    // Add it.
-    mReceivedEmails.insert(emailId);
+    // Add it, but make sure we don't add a dupe.
+    auto it = std::find(mReceivedEmails.begin(), mReceivedEmails.end(), emailId);
+    if(it == mReceivedEmails.end())
+    {
+        mReceivedEmails.push_back(emailId);
+    }  
 }
 
 void SidneyEmail::ShowEmailList()
@@ -260,6 +374,7 @@ void SidneyEmail::ShowEmailList()
     mEmailWindow->SetActive(false);
     mEmailListWindow->SetActive(true);
 
+    // Two fonts are used, depending on whether an email is read or not.
     Font* greenFont = gAssetManager.LoadFont("SID_TEXT_14_GRN.FON");
     Font* yellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
 
@@ -279,6 +394,7 @@ void SidneyEmail::ShowEmailList()
             label = UIUtil::NewUIActorWithWidget<UILabel>(mEmailListWindow);
             label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             label->GetOwner()->AddComponent<UIButton>();
+            mEmailListItems.push_back(label);
         }
         label->GetRectTransform()->SetAnchoredPosition(listItemPos);
         
@@ -290,8 +406,8 @@ void SidneyEmail::ShowEmailList()
         label->SetText(mAllEmails[emailId].subject);
 
         // On click, we show the full view of this email.
-        label->GetOwner()->GetComponent<UIButton>()->SetPressCallback([emailId, this](UIButton* button){
-            ViewEmail(emailId);
+        label->GetOwner()->GetComponent<UIButton>()->SetPressCallback([emailId, listItemIndex, this](UIButton* button){
+            ViewEmail(emailId, listItemIndex);
         });
 
         // Make sure the label is sized tightly.
@@ -299,12 +415,144 @@ void SidneyEmail::ShowEmailList()
 
         // Move item pos to next line.
         listItemPos.y -= label->GetFont()->GetGlyphHeight();
+
+        // Increment item index.
+        ++listItemIndex;
     }
 }
 
-void SidneyEmail::ViewEmail(const std::string& emailId)
+void SidneyEmail::ViewEmail(const std::string& emailId, int emailIndex)
 {
+    // Save index of email being viewed.
+    mCurrentEmailIndex = emailIndex;
+
+    // Update prev/next button availability based on index.
+    mNextButton->GetButton()->SetCanInteract(mCurrentEmailIndex < mReceivedEmails.size() - 1);
+    mPrevButton->GetButton()->SetCanInteract(mCurrentEmailIndex > 0);
+
     // Hide the list, show the single item view.
     mEmailWindow->SetActive(true);
     mEmailListWindow->SetActive(false);
+
+    // Get the email.
+    Email& email = mAllEmails[emailId];
+
+    // Populate the metadata labels.
+    mFromLabel->SetText(email.from);
+    mToLabel->SetText(email.to);
+    mCCLabel->SetText(email.cc);
+    mDateLabel->SetText(email.date);
+    mSubjectLabel->SetText(email.subject);
+
+    // Reset scroll rect to top.
+    mBodyScrollRect->SetNormalizedScrollValue(0.0f);
+
+    // Populate body.
+    {
+        // First, hide any pre-existing labels.
+        for(auto& bodyLabel : mBodyLabels)
+        {
+            bodyLabel->SetEnabled(false);
+        }
+
+        // Now activate each needed label, populating with correct text.
+        int bodyLabelIndex = 0;
+        Vector2 bodyItemPos(8.0f, -8.0f);
+        Font* yellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
+        for(auto& bodyText : email.body)
+        {
+            // Either reuse an existing label or create a new one.
+            UILabel* label = nullptr;
+            if(bodyLabelIndex < mBodyLabels.size())
+            {
+                label = mBodyLabels[bodyLabelIndex];
+            }
+            else
+            {
+                label = UIUtil::NewUIActorWithWidget<UILabel>(mBodyScrollRect);
+                label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+                label->GetRectTransform()->SetSizeDelta(510.0f, yellowFont->GetGlyphHeight());
+                label->SetFont(yellowFont);
+                label->SetVerticalAlignment(VerticalAlignment::Top);
+                label->SetHorizontalOverflow(HorizontalOverflow::Wrap);
+                mBodyLabels.push_back(label);
+            }
+            label->SetEnabled(true);
+            label->GetRectTransform()->SetAnchoredPosition(bodyItemPos);
+
+            // Set the text.
+            label->SetText(bodyText);
+
+            // Calculate text height.
+            float textHeight = yellowFont->GetGlyphHeight();
+            if(!bodyText.empty())
+            {
+                textHeight = label->GetTextHeight();
+            }
+
+            // Resize label height to fit the text snugly.
+            label->GetRectTransform()->SetSizeDeltaY(textHeight);
+
+            // Move next line down below this text.
+            bodyItemPos.y -= textHeight;
+
+            // Increment item index.
+            ++bodyLabelIndex;
+        }
+    }
+
+    // Mark this email as read.
+    mReadEmails.insert(emailId);
+}
+
+void SidneyEmail::OnNextEmailButtonPressed()
+{
+    mCurrentEmailIndex = Math::Min(mCurrentEmailIndex + 1, mReceivedEmails.size() - 1);
+    ViewEmail(mReceivedEmails[mCurrentEmailIndex], mCurrentEmailIndex);
+}
+
+void SidneyEmail::OnPrevEmailButtonPressed()
+{
+    mCurrentEmailIndex = Math::Max(mCurrentEmailIndex - 1, 0);
+    ViewEmail(mReceivedEmails[mCurrentEmailIndex], mCurrentEmailIndex);
+}
+
+void SidneyEmail::OnReplyButtonPressed()
+{
+    // Response depends on the email.
+    if(StringUtil::EqualsIgnoreCase(mReceivedEmails[mCurrentEmailIndex], "Email1"))
+    {
+        // "Noooo thank you."
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O1V0OPF1\", 1)");
+    }
+    else if(StringUtil::EqualsIgnoreCase(mReceivedEmails[mCurrentEmailIndex], "Email2"))
+    {
+        // "Don't want to get his hopes up"
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O240OPF1\", 1)");
+    }
+    else if(StringUtil::EqualsIgnoreCase(mReceivedEmails[mCurrentEmailIndex], "Email3"))
+    {
+        // "I want to write back, but I don't know what to say"
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O570OPF1\", 1)");
+    }
+
+    // There are some emails where no response occurs at all (such as the easter egg email).
+}
+
+void SidneyEmail::OnComposeButtonPressed()
+{
+    // As far as I know, Grace always says "I don't want to write anything right now."
+    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OXI2ZZ51\", 1)");
+}
+
+void SidneyEmail::OnPrintButtonPressed()
+{
+    // As far as I know, Grace always says "I don't need to print it."
+    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OXJ2ZZ51\", 1)");
+}
+
+void SidneyEmail::OnCloseButtonPressed()
+{
+    // Goes back to the email list.
+    ShowEmailList();
 }
