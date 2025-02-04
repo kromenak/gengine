@@ -18,12 +18,13 @@ class UIScrollRect;
 class SidneyEmail
 {
 public:
-    void Init(Actor* parent);
+    void Init(Actor* parent, Actor* newEmailParent);
 
     void Show();
     void Hide();
 
-    //void OnUpdate(float deltaTime);
+    void CheckNewEmailSfx();
+    void UpdateNewEmail(float deltaTime);
 
 private:
     // Root of this subscreen.
@@ -79,6 +80,17 @@ private:
 
     // For forward/back support, the index of the email we are looking at.
     int mCurrentEmailIndex = -1;
+
+    // New email label.
+    UILabel* mNewEmailLabel = nullptr;
+
+    // If true, play "New Email" SFX on next update.
+    // Doing this avoids issue where this SFX won't play when you use Action Skip.
+    bool mPlayNewEmailSfx = false;
+
+    // Controls "new email" label blink behavior.
+    const float kNewEmailBlinkInterval = 0.5f;
+    float mNewEmailBlinkTimer = -1.0f;
 
     void ReceiveEmail(const std::string& emailId);
 

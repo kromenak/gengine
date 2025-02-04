@@ -19,7 +19,7 @@
 #include "UIScrollRect.h"
 #include "UIUtil.h"
 
-void SidneyEmail::Init(Actor* parent)
+void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 {
     // Add background. This will also be the root for this screen.
     mRoot = SidneyUtil::CreateBackground(parent);
@@ -268,6 +268,23 @@ void SidneyEmail::Init(Actor* parent)
         }
     }
 
+    // Add "New Email" label.
+    {
+        // This label appears on all subscreens, as long as you have new email.
+        // So we need to put the label above other UI elements by using a different canvas.
+        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(newEmailParent, -1);
+        canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
+        canvas->GetRectTransform()->SetAnchoredPosition(-4.0f, -3.0f);
+        canvas->GetRectTransform()->SetSizeDelta(100.0f, 20.0f);
+
+        mNewEmailLabel = canvas->GetOwner()->AddComponent<UILabel>();
+
+        mNewEmailLabel->SetFont(gAssetManager.LoadFont("SID_PDN_10_GRN.FON"));
+        mNewEmailLabel->SetText(SidneyUtil::GetEmailLocalizer().GetText("NewEMail"));
+        mNewEmailLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
+        mNewEmailLabel->SetVerticalAlignment(VerticalAlignment::Top);
+    }
+
     // Read in email data.
     {
         TextAsset* textFile = gAssetManager.LoadText(Localizer::GetLanguagePrefix() + "SIDNEYEMAIL.TXT");
@@ -358,6 +375,54 @@ void SidneyEmail::Hide()
     mRoot->SetActive(false);
 }
 
+void SidneyEmail::CheckNewEmailSfx()
+{
+    // Upon opening Sidney, if there's new email, we will play the new email SFX.
+    bool newEmail = mReceivedEmails.size() != mReadEmails.size();
+    if(newEmail)
+    {
+        mPlayNewEmailSfx = true;
+    }
+}
+
+void SidneyEmail::UpdateNewEmail(float deltaTime)
+{
+    bool newEmail = mReceivedEmails.size() != mReadEmails.size();
+    if(newEmail)
+    {
+        // Play "New Email" SFX the first chance we get.
+        // If we do this during an action skip, the action skip logic will stomp this audio. So, wait until no skip is happening.
+        if(mPlayNewEmailSfx && !gActionManager.IsSkippingCurrentAction())
+        {
+            gAudioManager.PlaySFX(gAssetManager.LoadAudio("NEWEMAIL.WAV"));
+            mPlayNewEmailSfx = false;
+        }
+
+        // If we just started blinking, set the blink interval.
+        if(mNewEmailBlinkTimer < 0)
+        {
+            mNewEmailBlinkTimer = kNewEmailBlinkInterval;
+        }
+
+        // Track timer countdown for new email to blink in the corner.
+        if(mNewEmailBlinkTimer > 0.0f)
+        {
+            mNewEmailBlinkTimer -= deltaTime;
+            if(mNewEmailBlinkTimer <= 0.0f)
+            {
+                mNewEmailLabel->SetEnabled(!mNewEmailLabel->IsEnabled());
+                mNewEmailBlinkTimer = kNewEmailBlinkInterval;
+            }
+        }
+    }
+    else
+    {
+        mNewEmailBlinkTimer = -1;
+        mNewEmailLabel->SetEnabled(false);
+        mPlayNewEmailSfx = false;
+    }
+}
+
 void SidneyEmail::ReceiveEmail(const std::string& emailId)
 {
     // Add it, but make sure we don't add a dupe.
@@ -365,7 +430,7 @@ void SidneyEmail::ReceiveEmail(const std::string& emailId)
     if(it == mReceivedEmails.end())
     {
         mReceivedEmails.push_back(emailId);
-    }  
+    }
 }
 
 void SidneyEmail::ShowEmailList()

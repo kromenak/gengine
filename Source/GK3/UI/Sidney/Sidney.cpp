@@ -163,26 +163,9 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         });
     }
 
-    // Add "New Email" label.
-    {
-        Actor* newEmailActor = new Actor(TransformType::RectTransform);
-        newEmailActor->GetTransform()->SetParent(desktopBackground->GetTransform());
-        mNewEmailLabel = newEmailActor->AddComponent<UILabel>();
-
-        mNewEmailLabel->SetFont(gAssetManager.LoadFont("SID_PDN_10_GRN.FON"));
-        mNewEmailLabel->SetText("NEW E-MAIL");
-        mNewEmailLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
-        mNewEmailLabel->SetVerticalAlignment(VerticalAlignment::Top);
-
-        mNewEmailLabel->GetRectTransform()->SetPivot(1.0f, 1.0f);
-        mNewEmailLabel->GetRectTransform()->SetAnchor(1.0f, 1.0f);
-        mNewEmailLabel->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
-        mNewEmailLabel->GetRectTransform()->SetSizeDelta(100.0f, 20.0f);
-    }
-
     // Create subscreens.
     mSearch.Init(this);
-    mEmail.Init(this);
+    mEmail.Init(this, desktopBackground);
     mAnalyze.Init(this, &mFiles);
     mTranslate.Init(this, &mFiles);
     mAddData.Init(this, &mFiles);
@@ -199,19 +182,8 @@ void Sidney::Show()
     // Show Sidney UI.
     SetActive(true);
 
-    //TODO: We'll assume there is ALWAYS new email for the moment...
-    bool newEmail = true;
-
-    // Hide the "new email" label by default, regardless of new email state.
-    // If we DO have new email, this will blink on in a moment.
-    mNewEmailLabel->SetEnabled(false);
-
-    // If no new email, set this timer to -1. The label will never appear.
-    // Otherwise, set to blink interval to have it blink on and off.
-    mNewEmailBlinkTimer = newEmail ? kNewEmailBlinkInterval : -1;
-
-    // If there is new email, play the "new email" audio cue.
-    mPlayNewEmailSfx = newEmail;
+    // Check for whether we should play the "New Email" SFX.
+    mEmail.CheckNewEmailSfx();
 }
 
 void Sidney::Hide()
@@ -241,31 +213,15 @@ void Sidney::OnPersist(PersistState& ps)
 
 void Sidney::OnUpdate(float deltaTime)
 {
+    // We want to keep the "New Email" label updating at all times.
+    mEmail.UpdateNewEmail(deltaTime);
+
     // When adding data, Sidney should not update.
     // We mainly wait for the inventory layer to be closed.
     mAddData.OnUpdate(deltaTime);
     if(mAddData.AddingData())
     {
         return;
-    }
-
-    // Play "New Email" SFX the first chance we get.
-    // If we do this during an action skip, the action skip logic will stomp this audio. So, wait until no skip is happening.
-    if(mPlayNewEmailSfx && !gActionManager.IsSkippingCurrentAction())
-    {
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("NEWEMAIL.WAV"));
-        mPlayNewEmailSfx = false;
-    }
-
-    // Track timer countdown for new email to blink in the corner.
-    if(mNewEmailBlinkTimer > 0.0f)
-    {
-        mNewEmailBlinkTimer -= deltaTime;
-        if(mNewEmailBlinkTimer <= 0.0f)
-        {
-            mNewEmailLabel->SetEnabled(!mNewEmailLabel->IsEnabled());
-            mNewEmailBlinkTimer = kNewEmailBlinkInterval;
-        }
     }
 
     // Update each screen in turn.

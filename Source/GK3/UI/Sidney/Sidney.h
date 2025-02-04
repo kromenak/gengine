@@ -39,17 +39,6 @@ protected:
     void OnUpdate(float deltaTime) override;
 
 private:
-    // New email label.
-    UILabel* mNewEmailLabel = nullptr;
-
-    // If true, play "New Email" SFX on next update.
-    // Doing this avoids issue where this SFX won't play when you use Action Skip.
-    bool mPlayNewEmailSfx = false;
-
-    // Controls email label blink behavior.
-    const float kNewEmailBlinkInterval = 0.5f;
-    float mNewEmailBlinkTimer = -1.0f;
-
     // "Add Data" dialog box.
     Actor* mAddDataBox = nullptr;
     UILabel* mAddDataLabel = nullptr;
