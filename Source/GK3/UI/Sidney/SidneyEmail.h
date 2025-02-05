@@ -23,7 +23,7 @@ public:
     void Show();
     void Hide();
 
-    void CheckNewEmailSfx();
+    void CheckNewEmail();
     void UpdateNewEmail(float deltaTime);
 
 private:

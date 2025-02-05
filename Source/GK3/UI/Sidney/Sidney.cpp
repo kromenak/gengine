@@ -183,7 +183,7 @@ void Sidney::Show()
     SetActive(true);
 
     // Check for whether we should play the "New Email" SFX.
-    mEmail.CheckNewEmailSfx();
+    mEmail.CheckNewEmail();
 }
 
 void Sidney::Hide()

@@ -346,22 +346,13 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
         }
     }
 
-    // At game start, you've already got three emails.
-    ReceiveEmail("Email1");
-    ReceiveEmail("Email2");
-    ReceiveEmail("Email3");
-
     // Hide by default.
     Hide();
 }
 
 void SidneyEmail::Show()
 {
-    // If Easter Egg system is enabled, you get the Easter Egg mail.
-    if(gGameProgress.GetFlag("Egg"))
-    {
-        ReceiveEmail("EMail6");
-    }
+    
 
     // Show entire page.
     mRoot->SetActive(true);
@@ -375,8 +366,33 @@ void SidneyEmail::Hide()
     mRoot->SetActive(false);
 }
 
-void SidneyEmail::CheckNewEmailSfx()
+void SidneyEmail::CheckNewEmail()
 {
+    // Also see if we should receive any emails.
+    // At game start, you should have three emails always.
+    ReceiveEmail("Email1");
+    ReceiveEmail("Email2");
+    ReceiveEmail("Email3");
+
+    // Starting on Day 3 12PM, you get an email about the temple of solomon floor diagram.
+    if(gGameProgress.GetTimeblock() >= Timeblock(3, 12))
+    {
+        ReceiveEmail("Email4");
+    }
+
+    // Starting on Day 3 6PM, you CAN get an email about hermetical symbols IF you analyzed them previously.
+    if(gGameProgress.GetTimeblock() >= Timeblock(3, 18))
+    {
+        //TODO: What flag indicates that we've analyzed the hermetical symbols previously?
+        ReceiveEmail("Email5");
+    }
+
+    // If Easter Egg system is enabled, you get the Easter Egg mail.
+    if(gGameProgress.GetFlag("Egg"))
+    {
+        ReceiveEmail("EMail6");
+    }
+
     // Upon opening Sidney, if there's new email, we will play the new email SFX.
     bool newEmail = mReceivedEmails.size() != mReadEmails.size();
     if(newEmail)
