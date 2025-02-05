@@ -7,11 +7,14 @@
 #include "Random.h"
 #include "Scene.h"
 #include "Sidney.h"
+#include "SidneyButton.h"
 #include "SidneyFiles.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UINineSlice.h"
+#include "UIUtil.h"
 
 void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 {
@@ -23,23 +26,24 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
         mAddDataBox = new Actor("Add Data", TransformType::RectTransform);
         mAddDataBox->GetTransform()->SetParent(sidney->GetTransform());
 
-        UIImage* outerBoxImage = mAddDataBox->AddComponent<UIImage>();
-        outerBoxImage->SetColor(Color32(0, 0, 0, 160)); // Lighter Black Semi-Transparent
+        UINineSlice* outerBoxImage = mAddDataBox->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32(0, 0, 0, 160)));
         outerBoxImage->GetRectTransform()->SetSizeDelta(248.0f, 44.0f);
 
         Actor* innerBoxActor = new Actor(TransformType::RectTransform);
         innerBoxActor->GetTransform()->SetParent(mAddDataBox->GetTransform());
 
-        UIImage* innerBoxImage = innerBoxActor->AddComponent<UIImage>();
-        innerBoxImage->SetColor(Color32(0, 0, 0, 180));  // Darker Black Semi-Transparent
+        UINineSlice* innerBoxImage = innerBoxActor->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32(0, 0, 0, 180)));
         innerBoxImage->GetRectTransform()->SetSizeDelta(220.0f, 17.0f);
 
         mGreenFont = gAssetManager.LoadFont("SID_TEXT_14_GRN.FON");
         mYellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
 
-        mAddDataLabel = innerBoxActor->AddComponent<UILabel>();
+        mAddDataLabel = UIUtil::NewUIActorWithWidget<UILabel>(innerBoxImage->GetOwner());
         mAddDataLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mAddDataLabel->SetFont(mGreenFont);
+        mAddDataLabel->SetMasked(true);
+        mAddDataLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+        mAddDataLabel->GetRectTransform()->SetSizeDelta(0.0f, -1.0f);
 
         // Hide by default.
         mAddDataBox->SetActive(false);
@@ -50,8 +54,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
         mInputCompleteBox = new Actor("Add Data Complete", TransformType::RectTransform);
         mInputCompleteBox->GetTransform()->SetParent(sidney->GetTransform());
 
-        UIImage* boxImage = mInputCompleteBox->AddComponent<UIImage>();
-        boxImage->SetColor(Color32::Black); // Black
+        UINineSlice* boxImage = mInputCompleteBox->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
         boxImage->GetRectTransform()->SetSizeDelta(240.0f, 105.0f);
 
         {
@@ -60,7 +63,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
             UILabel* staticTextLabel = staticTextActor->AddComponent<UILabel>();
             staticTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-            staticTextLabel->SetText("** INPUT COMPLETE **");
+            staticTextLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("InputComplete"));
             staticTextLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
             staticTextLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
@@ -74,7 +77,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
             UILabel* staticTextLabel = staticTextActor->AddComponent<UILabel>();
             staticTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-            staticTextLabel->SetText("FILE NAME:");
+            staticTextLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("InputPrompt"));
             staticTextLabel->SetVerticalAlignment(VerticalAlignment::Top);
 
             staticTextLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
@@ -96,9 +99,16 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
             mFileNameLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -56.5f); // .5 to keep it pixel-perfect (since height of box is odd)
             mFileNameLabel->GetRectTransform()->SetSizeDelta(226.0f, 16.0f);
 
-            mInputCompleteOKButton = SidneyUtil::CreateTextButton(mInputCompleteBox, "OK", "SID_PDN_10_L.FON",
-                                                                  Vector2(0.0f, 1.0f), Vector2(15.0f, -77.5f), Vector2(40.0f, 13.0f));
-            mInputCompleteOKButton->SetCanInteract(false);
+            
+            mInputCompleteOKButton = new SidneyButton(mInputCompleteBox);
+            mInputCompleteOKButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+            mInputCompleteOKButton->SetText(SidneyUtil::GetAddDataLocalizer().GetText("OKButton"));
+            mInputCompleteOKButton->GetButton()->SetCanInteract(false);
+
+            mInputCompleteOKButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+            mInputCompleteOKButton->GetRectTransform()->SetAnchoredPosition(15.0f, -77.5f);
+            mInputCompleteOKButton->SetWidth(40.0f);
+            mInputCompleteOKButton->SetHeight(13.0f);
         }
 
         // Hide by default.
@@ -121,7 +131,7 @@ void SidneyAddData::Start()
         mAddDataBox->SetActive(true);
 
         // Just use static green text.
-        mAddDataLabel->SetText("** AWAITING INPUT **");
+        mAddDataLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("WaitForInput"));
         mAddDataLabel->SetFont(mGreenFont);
         mAddDataColorTimer = -1.0f;
 
@@ -160,7 +170,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 mAddDataBox->SetActive(true);
 
                 // Use green text, no color change.
-                mAddDataLabel->SetText("** INPUT ABORTED **");
+                mAddDataLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("AbortInput"));
                 mAddDataLabel->SetFont(mGreenFont);
                 mAddDataColorTimer = -1.0f;
                 
@@ -190,7 +200,7 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDSCAN.WAV"));
 
                 // Start with green text, but it will blink on an interval.
-                mAddDataLabel->SetText("** SCANNING ITEM **"); //TODO: Should blink Green/Gold.
+                mAddDataLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("ScanningItem"));
                 mAddDataLabel->SetFont(mGreenFont);
                 mAddDataColorTimer = kAddDataColorToggleInterval;
                 
@@ -260,7 +270,6 @@ void SidneyAddData::OnUpdate(float deltaTime)
                     {
                         // When all letters are typed, always use a constant one-second delay before closing the box.
                         mTextToTypeTimer = 1.0f;
-                        //TODO: "Artificially" press the "complete" button.
                     }
 
                     // Play random "key press" SFX from set of sounds.
@@ -270,9 +279,14 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 }
                 else
                 {
-                    // We typed everything AND showed the OK button being pressed. Close this box!
-                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTTON5"));
-                    mInputCompleteBox->SetActive(false);
+                    // We typed everything and waited a moment.
+                    // Programmatically press the OK button and hide the box.
+                    mInputCompleteOKButton->SetPressCallback([this](){
+                        mInputCompleteBox->SetActive(false);
+                        mInputCompleteOKButton->GetButton()->SetCanInteract(false);
+                    });
+                    mInputCompleteOKButton->GetButton()->SetCanInteract(true);
+                    mInputCompleteOKButton->Press();
                 }
             }
         }

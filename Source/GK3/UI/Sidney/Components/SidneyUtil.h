@@ -23,9 +23,6 @@ public:
     static Color32 TransBgColor;
     static Color32 VeryTransBgColor;
 
-    static UIButton* CreateTextButton(Actor* parent, const std::string& text, const std::string& font,
-                                      const Vector2& pivotAndAnchor, const Vector2& position, const Vector2& size);
-
     static Actor* CreateBackground(Actor* parent);
     static void CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback);
     static UIButton* CreateCloseWindowButton(Actor* parent, const std::function<void()>& pressCallback);
