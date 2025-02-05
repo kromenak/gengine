@@ -155,6 +155,12 @@ const Localizer& SidneyUtil::GetMakeIdLocalizer()
     return localizer;
 }
 
+const Localizer& SidneyUtil::GetSuspectsLocalizer()
+{
+    static Localizer localizer("SIDNEY.TXT", "Suspects Screen");
+    return localizer;
+}
+
 int SidneyUtil::GetCurrentLSRStep()
 {
     int step = 0;

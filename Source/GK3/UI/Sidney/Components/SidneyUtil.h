@@ -40,6 +40,7 @@ public:
     static const Localizer& GetTranslateLocalizer();
     static const Localizer& GetAddDataLocalizer();
     static const Localizer& GetMakeIdLocalizer();
+    static const Localizer& GetSuspectsLocalizer();
 
     static int GetCurrentLSRStep();
 };

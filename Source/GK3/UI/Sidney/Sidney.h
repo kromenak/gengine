@@ -15,6 +15,7 @@
 #include "SidneyFiles.h"
 #include "SidneyMakeId.h"
 #include "SidneySearch.h"
+#include "SidneySuspects.h"
 #include "SidneyTranslate.h"
 #include "StringUtil.h"
 
@@ -52,4 +53,5 @@ private:
     SidneyTranslate mTranslate;
     SidneyAddData mAddData;
     SidneyMakeId mMakeId;
+    SidneySuspects mSuspects;
 };

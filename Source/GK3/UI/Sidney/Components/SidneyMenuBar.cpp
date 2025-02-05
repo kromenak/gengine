@@ -177,12 +177,19 @@ void SidneyMenuBar::AddDropdown(const std::string& label)
     mNextDropdownPosition += labelWidth + mDropdownSpacing;
 }
 
-void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<void()> pressCallback)
+void SidneyMenuBar::AddDropdownChoice(const std::string& label, const std::function<void()>& pressCallback)
 {
     assert(!mDropdowns.empty());
+    AddDropdownChoice(mDropdowns.size() - 1, label, pressCallback);
+}
+
+void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& label, const std::function<void()>& pressCallback)
+{
+    assert(dropdownIndex >= 0 && dropdownIndex < mDropdowns.size());
+    Dropdown& dropdown = mDropdowns[dropdownIndex];
 
     // Create button with desired text.
-    SidneyButton* button = new SidneyButton(mDropdowns.back().rootButton->GetOwner());
+    SidneyButton* button = new SidneyButton(dropdown.rootButton->GetOwner());
     button->SetText(label);
     button->SetTextAlignment(HorizontalAlignment::Left);
     button->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
@@ -190,7 +197,7 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<vo
     // Figure out desired width/height of this button.
     // It should have a minimum size, but be bigger to fit its text, but also match any bigger item defined previously.
     float labelWidth = Math::Max(80.0f, button->GetLabel()->GetTextWidth() + 24.0f);
-    for(SidneyButton* option : mDropdowns.back().options)
+    for(SidneyButton* option : dropdown.options)
     {
         if(option->GetWidth() > labelWidth)
         {
@@ -226,13 +233,13 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, std::function<vo
 
     // Position button in the list.
     button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    button->GetRectTransform()->SetAnchoredPosition(0.0f, -13.0f + mDropdowns.back().options.size() * -13.0f);
+    button->GetRectTransform()->SetAnchoredPosition(0.0f, -13.0f + dropdown.options.size() * -13.0f);
 
     // Add to list of options.
-    mDropdowns.back().options.emplace_back(button);
+    dropdown.options.emplace_back(button);
 
     // Backtrack and make sure any previously created option is as wide as this one.
-    for(auto& option : mDropdowns.back().options)
+    for(auto& option : dropdown.options)
     {
         if(option->GetWidth() < labelWidth)
         {

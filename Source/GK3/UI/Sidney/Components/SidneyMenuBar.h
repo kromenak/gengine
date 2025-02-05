@@ -32,9 +32,11 @@ public:
     void SetDropdownEnabled(size_t index, bool enabled);
 
     // Dropdown choices
-    void AddDropdownChoice(const std::string& label, std::function<void()> pressCallback);
+    void AddDropdownChoice(const std::string& label, const std::function<void()>& pressCallback);
+    void AddDropdownChoice(size_t dropdownIndex, const std::string& label, const std::function<void()>& pressCallback);
     void SetDropdownChoiceEnabled(size_t dropdownIndex, size_t choiceIndex, bool enabled);
     void ClearDropdownChoices(size_t dropdownIndex);
+    size_t GetDropdownChoiceCount(size_t dropdownIndex) const { return mDropdowns[dropdownIndex].options.size(); }
     
 private:
     // The root of the menu bar hierarchy.

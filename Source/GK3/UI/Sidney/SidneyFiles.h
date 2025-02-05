@@ -49,7 +49,7 @@ enum class SidneyFileType
 // A single file in the system.
 struct SidneyFile
 {
-     // This file's unique identifier.
+    // This file's unique identifier.
     // The ID is important, as that's how the "Add Data" & localization mechanisms identify a file.
     int id = -1;
 

@@ -157,9 +157,9 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
 
         buttonPos += kButtonSpacing;
         UIButton* suspectsButton = CreateMainButton(desktopBackground, "SUSPT", buttonPos);
-        suspectsButton->SetPressCallback([](UIButton* button){
+        suspectsButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
-            printf("Suspects\n");
+            mSuspects.Show();
         });
     }
 
@@ -170,6 +170,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
     mTranslate.Init(this, &mFiles);
     mAddData.Init(this, &mFiles);
     mMakeId.Init(this);
+    mSuspects.Init(this);
 
     mFiles.Init(this);
 
@@ -230,4 +231,5 @@ void Sidney::OnUpdate(float deltaTime)
     mAnalyze.OnUpdate(deltaTime);
     mTranslate.OnUpdate(deltaTime);
     mMakeId.OnUpdate(deltaTime);
+    mSuspects.OnUpdate(deltaTime);
 }
