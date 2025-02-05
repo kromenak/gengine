@@ -2,8 +2,10 @@
 
 #include <algorithm>
 
+#include "ActionManager.h"
 #include "AssetManager.h"
 #include "GameProgress.h"
+#include "Scene.h"
 #include "Sidney.h"
 #include "SidneyUtil.h"
 #include "Texture.h"
@@ -108,6 +110,31 @@ void SidneyFiles::Init(Sidney* parent)
 
 void SidneyFiles::Show(std::function<void(SidneyFile*)> selectFileCallback)
 {
+    // The first time you open the files dialog, we may play some tutorial *dialogue*. Grace only however.
+    if(!gGameProgress.GetFlag("PlayedEmptyFilelistDialog") && StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace"))
+    {
+        // See if there are no files in the system yet. If not, we hint to the player that they need to add stuff.
+        bool hasAnyFile = false;
+        for(auto& dir : mData)
+        {
+            if(!dir.fileIds.empty())
+            {
+                hasAnyFile = true;
+                break;
+            }
+        }
+
+        // If no file was entered, play the dialogue.
+        if(!hasAnyFile)
+        {
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"026Y22Z291\", 1)");
+        }
+
+        // Either we played the dialog, or there's something in the file list.
+        // In both cases, we can set this flag to true b/c we'll never need to play the dialogue again.
+        gGameProgress.SetFlag("PlayedEmptyFilelistDialog");
+    }
+
     mFileList.Show(mAllFiles, mData, selectFileCallback);
 }
 
