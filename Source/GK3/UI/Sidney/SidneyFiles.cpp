@@ -13,6 +13,8 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UINineSlice.h"
+#include "UIUtil.h"
 
 void SidneyFiles::Init(Sidney* parent)
 {
@@ -258,22 +260,18 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
     // Add dialog background.
     {
         // Create a root actor for the dialog.
-        mWindowRoot = new Actor(TransformType::RectTransform);
-        mWindowRoot->GetTransform()->SetParent(parent->GetTransform());
-        mWindowRoot->AddComponent<UICanvas>(1);
+        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(parent, 1);
+        mWindowRoot = canvas->GetOwner();
+        mWindowRoot->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
 
-        // Create a black background.
-        UIImage* backgroundImage = mWindowRoot->AddComponent<UIImage>();
-        backgroundImage->SetColor(Color32::Black);
-
+        // The nine slice puts a UIImage on the root object for the background.
         // Receive input to avoid sending inputs to main screen below this screen.
-        backgroundImage->SetReceivesInput(true);
+        mWindowRoot->GetComponent<UIImage>()->SetReceivesInput(true);
 
         // Set to correct size and position.
-        RectTransform* rt = backgroundImage->GetRectTransform();
-        rt->SetSizeDelta(153.0f, 350.0f);
-        rt->SetAnchor(AnchorPreset::TopLeft);
-        rt->SetAnchoredPosition(40.0f, -66.0f);
+        canvas->GetRectTransform()->SetSizeDelta(153.0f, 350.0f);
+        canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        canvas->GetRectTransform()->SetAnchoredPosition(40.0f, -66.0f);
     }
 
     // Add close button.
@@ -283,14 +281,17 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
 
     // Add title/header.
     {
-        Actor* titleActor = new Actor(TransformType::RectTransform);
-        titleActor->GetTransform()->SetParent(mWindowRoot->GetTransform());
+        // Add one line divider for bottom of header.
+        UIImage* headerDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(mWindowRoot);
+        headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
+        headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -20.0f);
+        headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
-        UILabel* titleLabel = titleActor->AddComponent<UILabel>();
-        titleLabel->GetRectTransform()->SetPivot(0.5f, 1.0f); // Top-Center
-        titleLabel->GetRectTransform()->SetAnchorMin(0.0f, 1.0f);
-        titleLabel->GetRectTransform()->SetAnchorMax(1.0f, 1.0f); // Fill space horizontally, anchor to top.
-        titleLabel->GetRectTransform()->SetSizeDeltaY(20.0f);
+        UILabel* titleLabel = UIUtil::NewUIActorWithWidget<UILabel>(mWindowRoot);
+        titleLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
+        titleLabel->GetRectTransform()->SetAnchoredPosition(0.0f, -2.0f);
+        titleLabel->GetRectTransform()->SetSizeDelta(0.0f, 20.0f);
 
         titleLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
         titleLabel->SetText(forShapes ? SidneyUtil::GetAnalyzeLocalizer().GetText("ShapeList") :
