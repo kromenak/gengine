@@ -81,10 +81,9 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
         footerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomStretch);
         footerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, 29.0f);
         footerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
-
-        Font* font = gAssetManager.LoadFont("SID_TEXT_14.FON");
-
+        
         // In the header, create all the data fields.
+        Font* font = gAssetManager.LoadFont("SID_TEXT_14.FON");
         {
             // From
             {

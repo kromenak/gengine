@@ -170,7 +170,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
     mTranslate.Init(this, &mFiles);
     mAddData.Init(this, &mFiles);
     mMakeId.Init(this);
-    mSuspects.Init(this);
+    mSuspects.Init(this, &mFiles);
 
     mFiles.Init(this);
 

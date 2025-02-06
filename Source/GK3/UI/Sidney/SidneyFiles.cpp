@@ -137,6 +137,7 @@ void SidneyFiles::Show(std::function<void(SidneyFile*)> selectFileCallback)
         gGameProgress.SetFlag("PlayedEmptyFilelistDialog");
     }
 
+    // Show the file list.
     mFileList.Show(mAllFiles, mData, selectFileCallback);
 }
 
@@ -148,6 +149,23 @@ void SidneyFiles::ShowShapes(std::function<void(SidneyFile*)> selectFileCallback
 void SidneyFiles::ShowCustom(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback)
 {
     mCustomList.Show(title, choices, selectCallback);
+}
+
+Actor* SidneyFiles::GetShowingFileWindow()
+{
+    if(mFileList.IsShowing())
+    {
+        return mFileList.GetWindowRoot();
+    }
+    if(mShapeList.IsShowing())
+    {
+        return mShapeList.GetWindowRoot();
+    }
+    if(mCustomList.IsShowing())
+    {
+        return mCustomList.GetWindowRoot();
+    }
+    return nullptr;
 }
 
 void SidneyFiles::AddFile(size_t fileIndex)
@@ -268,10 +286,8 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
         // Receive input to avoid sending inputs to main screen below this screen.
         mWindowRoot->GetComponent<UIImage>()->SetReceivesInput(true);
 
-        // Set to correct size and position.
+        // Set to correct size. Position is set when shown.
         canvas->GetRectTransform()->SetSizeDelta(153.0f, 350.0f);
-        canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        canvas->GetRectTransform()->SetAnchoredPosition(40.0f, -66.0f);
     }
 
     // Add close button.
@@ -307,6 +323,10 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
 
 void SidneyFiles::FileListWindow::Show(std::vector<SidneyFile>& files, const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback)
 {
+    // Reset to default position.
+    mWindowRoot->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::TopLeft);
+    mWindowRoot->GetComponent<RectTransform>()->SetAnchoredPosition(40.0f, -66.0f);
+
     // Show the window.
     mWindowRoot->SetActive(true);
 

@@ -154,50 +154,14 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
     // Add pre-analyze window.
     {
-        mPreAnalyzeWindow = new Actor(TransformType::RectTransform);
-        mPreAnalyzeWindow->GetTransform()->SetParent(mRoot->GetTransform());
+        FilePreviewWindow win = SidneyUtil::CreateFilePreviewWindow(mRoot);
+        mPreAnalyzeWindow = win.root;
+        mPreAnalyzeTitleLabel = win.header;
+        mPreAnalyzeItemImage = win.image;
 
-        UINineSlice* border = mPreAnalyzeWindow->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
-        border->GetRectTransform()->SetSizeDelta(153.0f, 167.0f);
-
-        border->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        border->GetRectTransform()->SetAnchoredPosition(40.0f, 203.0f);
-
-        // Add one line for the box header.
-        Actor* boxHeaderDividerActor = new Actor(TransformType::RectTransform);
-        boxHeaderDividerActor->GetTransform()->SetParent(mPreAnalyzeWindow->GetTransform());
-
-        UIImage* boxHeaderDividerImage = boxHeaderDividerActor->AddComponent<UIImage>();
-        boxHeaderDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
-        boxHeaderDividerImage->GetRectTransform()->SetPivot(0.5f, 1.0f);
-        boxHeaderDividerImage->GetRectTransform()->SetAnchorMin(0.0f, 1.0f);
-        boxHeaderDividerImage->GetRectTransform()->SetAnchorMax(1.0f, 1.0f);
-        boxHeaderDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -17.0f);
-        boxHeaderDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
-
-        // Add header label.
-        Actor* headerActor = new Actor(TransformType::RectTransform);
-        headerActor->GetTransform()->SetParent(mPreAnalyzeWindow->GetTransform());
-
-        mPreAnalyzeTitleLabel = headerActor->AddComponent<UILabel>();
-        mPreAnalyzeTitleLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-        mPreAnalyzeTitleLabel->SetText("Map");
-        mPreAnalyzeTitleLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
-        mPreAnalyzeTitleLabel->SetVerticalAlignment(VerticalAlignment::Top);
-        mPreAnalyzeTitleLabel->SetMasked(true);
-
-        mPreAnalyzeTitleLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
-        mPreAnalyzeTitleLabel->GetRectTransform()->SetAnchoredPosition(-8.0f, -3.0f);
-        mPreAnalyzeTitleLabel->GetRectTransform()->SetSizeDeltaY(14.0f);
-
-        // Add item image.
-        Actor* imageActor = new Actor(TransformType::RectTransform);
-        imageActor->GetTransform()->SetParent(mPreAnalyzeWindow->GetTransform());
-
-        mPreAnalyzeItemImage = imageActor->AddComponent<UIImage>();
-        mPreAnalyzeItemImage->SetTexture(gAssetManager.LoadTexture("MAP9.BMP"), true);
-        mPreAnalyzeItemImage->GetRectTransform()->SetAnchoredPosition(0.0f, -8.0f);
-
+        mPreAnalyzeWindow->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::BottomLeft);
+        mPreAnalyzeWindow->GetComponent<RectTransform>()->SetAnchoredPosition(40.0f, 203.0f);
+        
         // Hide pre-analyze window by default.
         mPreAnalyzeWindow->SetActive(false);
     }

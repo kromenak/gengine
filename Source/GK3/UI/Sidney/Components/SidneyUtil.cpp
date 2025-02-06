@@ -77,6 +77,43 @@ SidneyButton* SidneyUtil::CreateSmallButton(Actor* parent)
     return button;
 }
 
+FilePreviewWindow SidneyUtil::CreateFilePreviewWindow(Actor* parent)
+{
+    // Add window border.
+    UINineSlice* border = UIUtil::NewUIActorWithWidget<UINineSlice>(parent, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
+    border->GetRectTransform()->SetSizeDelta(153.0f, 167.0f);
+
+    // Add one line for the box header.
+    UIImage* boxHeaderDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(border->GetOwner());
+    boxHeaderDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+    boxHeaderDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
+    boxHeaderDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -17.0f);
+    boxHeaderDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
+
+    // Add header label.
+    UILabel* headerLabel = UIUtil::NewUIActorWithWidget<UILabel>(border->GetOwner());
+    headerLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+    headerLabel->SetText("Map");
+    headerLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
+    headerLabel->SetVerticalAlignment(VerticalAlignment::Top);
+    headerLabel->SetMasked(true);
+
+    headerLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
+    headerLabel->GetRectTransform()->SetAnchoredPosition(-8.0f, -3.0f);
+    headerLabel->GetRectTransform()->SetSizeDeltaY(14.0f);
+
+    // Add item image.
+    UIImage* image = UIUtil::NewUIActorWithWidget<UIImage>(border->GetOwner());
+    image->SetTexture(gAssetManager.LoadTexture("MAP9.BMP"), true);
+    image->GetRectTransform()->SetAnchoredPosition(0.0f, -8.0f);
+
+    FilePreviewWindow window;
+    window.root = border->GetOwner();
+    window.image = image;
+    window.header = headerLabel;
+    return window;
+}
+
 const UINineSliceParams& SidneyUtil::GetGrayBoxParams(const Color32& centerColor)
 {
     static UINineSliceParams params;

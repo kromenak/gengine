@@ -15,7 +15,16 @@
 class Actor;
 class SidneyButton;
 class UIButton;
+class UIImage;
+class UILabel;
 struct UINineSliceParams;
+
+struct FilePreviewWindow
+{
+    Actor* root = nullptr;
+    UILabel* header = nullptr;
+    UIImage* image = nullptr;
+};
 
 class SidneyUtil
 {
@@ -29,6 +38,8 @@ public:
 
     static SidneyButton* CreateBigButton(Actor* parent);
     static SidneyButton* CreateSmallButton(Actor* parent);
+
+    static FilePreviewWindow CreateFilePreviewWindow(Actor* parent);
 
     static const UINineSliceParams& GetGrayBoxParams(const Color32& centerColor);
     static const UINineSliceParams& GetGoldBoxParams(const Color32& centerColor);
