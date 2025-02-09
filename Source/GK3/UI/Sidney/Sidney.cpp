@@ -91,6 +91,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
             }
             else
             {
+                mFiles.HideAllFileWindows();
                 mSearch.Show();
             }
         });
@@ -107,6 +108,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
             }
             else
             {
+                mFiles.HideAllFileWindows();
                 mEmail.Show();
             }
         });
@@ -130,6 +132,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
             }
             else
             {
+                mFiles.HideAllFileWindows();
                 mAnalyze.Show();
             }
         });
@@ -138,6 +141,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         UIButton* translateButton = CreateMainButton(desktopBackground, "TRANSL", buttonPos);
         translateButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            mFiles.HideAllFileWindows();
             mTranslate.Show();
         });
 
@@ -145,6 +149,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         UIButton* dataButton = CreateMainButton(desktopBackground, "ADDATA", buttonPos);
         dataButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            mFiles.HideAllFileWindows();
             mAddData.Start();
         });
 
@@ -152,6 +157,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         UIButton* idButton = CreateMainButton(desktopBackground, "MAKEID", buttonPos);
         idButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            mFiles.HideAllFileWindows();
             mMakeId.Show();
         });
 
@@ -159,6 +165,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
         UIButton* suspectsButton = CreateMainButton(desktopBackground, "SUSPT", buttonPos);
         suspectsButton->SetPressCallback([this](UIButton* button){
             gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDENTER.WAV"));
+            mFiles.HideAllFileWindows();
             mSuspects.Show();
         });
     }
