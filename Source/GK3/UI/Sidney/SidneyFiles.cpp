@@ -151,6 +151,20 @@ void SidneyFiles::ShowCustom(const std::string& title, const std::vector<std::st
     mCustomList.Show(title, choices, selectCallback);
 }
 
+void SidneyFiles::HideAllFileWindows()
+{
+    Actor* root = GetShowingFileWindow();
+    if(root == nullptr)
+    {
+        return;
+    }
+    else
+    {
+        root->SetActive(false);
+        HideAllFileWindows();
+    }
+}
+
 Actor* SidneyFiles::GetShowingFileWindow()
 {
     if(mFileList.IsShowing())

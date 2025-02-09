@@ -53,7 +53,7 @@ public:
 
     void Render() override { }
 
-    void SetTexturesAndColors(const UINineSliceParams& params);
+    void SetTexturesAndColors(const UINineSliceParams& params, bool resizeTextures);
 
 private:
     // All nine of the images that make up the nine-slice.

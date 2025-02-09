@@ -9,6 +9,7 @@
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"
 #include "Texture.h"
+#include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UINineSlice.h"
@@ -219,7 +220,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
                     itemBorder->GetRectTransform()->SetSizeDelta(70.0f, 74.0f);
 
                     // Header border.
-                    UINineSlice* headerBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(itemBorder->GetOwner(), SidneyUtil::GetGoldBoxParams(SidneyUtil::TransBgColor));
+                    UINineSlice* headerBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(itemBorder->GetOwner(), SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
                     headerBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     headerBorder->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
                     headerBorder->GetRectTransform()->SetSizeDelta(70.0f, 18.0f);
@@ -237,6 +238,23 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
                     itemImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     itemImage->GetRectTransform()->SetAnchoredPosition(19.0f, -29.0f);
                     itemImage->GetRectTransform()->SetSizeDelta(32.0f, 30.0f);
+
+                    // The whole item has a button on it so it can be clicked/selected.
+                    UIButton* itemButton = UIUtil::NewUIActorWithWidget<UIButton>(itemBorder->GetOwner());
+                    itemButton->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+                    itemButton->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+                    itemButton->SetPressCallback([this, i](UIButton* button){
+                        OnLinkedEvidenceSelected(i);
+                    });
+
+                    // Save UI elements.
+                    mLinkedEvidenceItems[i].root = itemBorder->GetOwner();
+                    mLinkedEvidenceItems[i].border = headerBorder;
+                    mLinkedEvidenceItems[i].label = itemLabel;
+                    mLinkedEvidenceItems[i].image = itemImage;
+
+                    // Hide by default.
+                    mLinkedEvidenceItems[i].root->SetActive(false);
                 }   
             }
         }
@@ -296,6 +314,9 @@ void SidneySuspects::Show()
 
 void SidneySuspects::Hide()
 {
+    // Make sure any showing file list is closed.
+    mFiles->HideAllFileWindows();
+
     // Hide the root.
     mRoot->SetActive(false);
 }
@@ -346,6 +367,36 @@ void SidneySuspects::ShowSuspect(int index)
     else
     {
         mFingerprintImage->SetEnabled(false);
+    }
+
+    // Show linked evidence UI as needed.
+    int evidenceItemIndex = 0;
+    for(int i = 0; i < info.linkedFileIds.size(); ++i)
+    {
+        SidneyFile* file = mFiles->GetFile(info.linkedFileIds[i]);
+        if(file == nullptr) { continue; }
+
+        // Show this evidence item.
+        mLinkedEvidenceItems[evidenceItemIndex].root->SetActive(true);
+
+        // Populate the data.
+        mLinkedEvidenceItems[evidenceItemIndex].label->SetText(file->GetDisplayName());
+        mLinkedEvidenceItems[evidenceItemIndex].image->SetTexture(file->GetIcon());
+
+        // Set highlight based on whether this item is selected or not.
+        if(info.selectedLinkedFileIndex == i)
+        {
+            mLinkedEvidenceItems[evidenceItemIndex].border->SetTexturesAndColors(SidneyUtil::GetGoldBoxParams(SidneyUtil::TransBgColor), false);
+        }
+        else
+        {
+            mLinkedEvidenceItems[evidenceItemIndex].border->SetTexturesAndColors(SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor), false);
+        }
+        ++evidenceItemIndex;
+    }
+    for(; evidenceItemIndex < kMaxLinkedEvidence; ++evidenceItemIndex)
+    {
+        mLinkedEvidenceItems[evidenceItemIndex].root->SetActive(false);
     }
     
     // Save the opened suspect index.
@@ -448,6 +499,9 @@ void SidneySuspects::OnLinkToSuspectPressed()
 
     // Set selected index to the last one in the list.
     info.selectedLinkedFileIndex = info.linkedFileIds.size() - 1;
+
+    // Re-show this suspect to refresh the UI.
+    ShowSuspect(mOpenedSuspectIndex);
 }
 
 void SidneySuspects::OnUnlinkToSuspectPressed()
@@ -488,9 +542,21 @@ void SidneySuspects::OnUnlinkToSuspectPressed()
     {
         info.selectedLinkedFileIndex = Math::Clamp(info.selectedLinkedFileIndex, 0, info.linkedFileIds.size() - 1);
     }
+
+    // Re-show this suspect to refresh the UI.
+    ShowSuspect(mOpenedSuspectIndex);
 }
 
 void SidneySuspects::OnMatchAnalysisPressed()
 {
     printf("Match Analysis\n");
+}
+
+void SidneySuspects::OnLinkedEvidenceSelected(int index)
+{
+    // Change the selected file index.
+    mSuspectInfos[mOpenedSuspectIndex].selectedLinkedFileIndex = index;
+
+    // Re-show the suspect info to change the highlight.
+    ShowSuspect(mOpenedSuspectIndex);
 }

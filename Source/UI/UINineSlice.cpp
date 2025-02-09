@@ -96,36 +96,36 @@ UINineSlice::UINineSlice(Actor* actor) : UIWidget(actor)
 
 UINineSlice::UINineSlice(Actor* actor, const UINineSliceParams& params) : UINineSlice(actor)
 {
-    SetTexturesAndColors(params);
+    SetTexturesAndColors(params, true);
 }
 
-void UINineSlice::SetTexturesAndColors(const UINineSliceParams& params)
+void UINineSlice::SetTexturesAndColors(const UINineSliceParams& params, bool resizeTextures)
 {
-    mCenterImage->SetTexture(params.centerTexture, true);
+    mCenterImage->SetTexture(params.centerTexture, resizeTextures);
     mCenterImage->SetColor(params.centerColor);
 
-    mTopLeftImage->SetTexture(params.topLeftTexture, true);
+    mTopLeftImage->SetTexture(params.topLeftTexture, resizeTextures);
     mTopLeftImage->SetColor(params.topLeftColor);
 
-    mTopRightImage->SetTexture(params.topRightTexture, true);
+    mTopRightImage->SetTexture(params.topRightTexture, resizeTextures);
     mTopRightImage->SetColor(params.topRightColor);
 
-    mBottomRightImage->SetTexture(params.bottomRightTexture, true);
+    mBottomRightImage->SetTexture(params.bottomRightTexture, resizeTextures);
     mBottomRightImage->SetColor(params.bottomRightColor);
 
-    mBottomLeftImage->SetTexture(params.bottomLeftTexture, true);
+    mBottomLeftImage->SetTexture(params.bottomLeftTexture, resizeTextures);
     mBottomLeftImage->SetColor(params.bottomLeftColor);
 
-    mLeftImage->SetTexture(params.leftTexture, true);
+    mLeftImage->SetTexture(params.leftTexture, resizeTextures);
     mLeftImage->SetColor(params.leftColor);
 
-    mRightImage->SetTexture(params.rightTexture, true);
+    mRightImage->SetTexture(params.rightTexture, resizeTextures);
     mRightImage->SetColor(params.rightColor);
 
-    mBottomImage->SetTexture(params.bottomTexture, true);
+    mBottomImage->SetTexture(params.bottomTexture, resizeTextures);
     mBottomImage->SetColor(params.bottomColor);
 
-    mTopImage->SetTexture(params.topTexture, true);
+    mTopImage->SetTexture(params.topTexture, resizeTextures);
     mTopImage->SetColor(params.topColor);
 
     // When setting the textures, we resize the RectTransform to match the texture size.

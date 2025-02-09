@@ -14,7 +14,9 @@
 class Actor;
 class SidneyFiles;
 struct SidneyFile;
+class UIImage;
 class UILabel;
+class UINineSlice;
 class UITextInput;
 
 class SidneySuspects
@@ -53,6 +55,18 @@ private:
 
     // Input for notes.
     UITextInput* mNotesInput = nullptr;
+
+    // Each suspect can have up to six linked evidence items.
+    // These are the UI for each of those six items.
+    static const int kMaxLinkedEvidence = 6;
+    struct LinkedEvidenceUI
+    {
+        Actor* root = nullptr;
+        UINineSlice* border = nullptr;
+        UILabel* label = nullptr;
+        UIImage* image = nullptr;
+    };
+    LinkedEvidenceUI mLinkedEvidenceItems[kMaxLinkedEvidence];
 
     // A little window that shows a preview of the opened file.
     Actor* mFilePreviewWindow = nullptr;
@@ -119,4 +133,6 @@ private:
     void OnLinkToSuspectPressed();
     void OnUnlinkToSuspectPressed();
     void OnMatchAnalysisPressed();
+
+    void OnLinkedEvidenceSelected(int index);
 };

@@ -73,17 +73,17 @@ void SidneyButton::OnUpdate(float deltaTime)
     mLabel->SetFont(mButton->CanInteract() ? mFont : mDisabledFont);
     if(!mButton->CanInteract())
     {
-        mBorder->SetTexturesAndColors(SidneyUtil::GetGrayBoxParams(Color32::Clear));
+        mBorder->SetTexturesAndColors(SidneyUtil::GetGrayBoxParams(Color32::Clear), true);
     }
     else if(mPressAnimTimer <= 0.0f)
     {
         if(mButton->IsHovered() || mSelected)
         {
-            mBorder->SetTexturesAndColors(SidneyUtil::GetGoldBoxParams(Color32::Clear));
+            mBorder->SetTexturesAndColors(SidneyUtil::GetGoldBoxParams(Color32::Clear), true);
         }
         else
         {
-            mBorder->SetTexturesAndColors(SidneyUtil::GetGrayBoxParams(Color32::Clear));
+            mBorder->SetTexturesAndColors(SidneyUtil::GetGrayBoxParams(Color32::Clear), true);
         }
     }
     else
@@ -97,11 +97,11 @@ void SidneyButton::OnUpdate(float deltaTime)
         int blinkDiv = static_cast<int>(mPressAnimTimer * 20.0f);
         if(blinkDiv % 2 == 0)
         {
-            mBorder->SetTexturesAndColors(SidneyUtil::GetGoldBoxParams(Color32::Clear));
+            mBorder->SetTexturesAndColors(SidneyUtil::GetGoldBoxParams(Color32::Clear), true);
         }
         else
         {
-            mBorder->SetTexturesAndColors(SidneyUtil::GetGrayBoxParams(Color32::Clear));
+            mBorder->SetTexturesAndColors(SidneyUtil::GetGrayBoxParams(Color32::Clear), true);
         }
 
         // If the anim is over, execute the actual callback.

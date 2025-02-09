@@ -144,6 +144,7 @@ public:
     void Show(std::function<void(SidneyFile*)> selectFileCallback = nullptr);
     void ShowShapes(std::function<void(SidneyFile*)> selectFileCallback = nullptr);
     void ShowCustom(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback);
+    void HideAllFileWindows();
     Actor* GetShowingFileWindow();
 
     void AddFile(size_t fileId);
@@ -183,7 +184,7 @@ private:
         void Show(std::vector<SidneyFile>& files, const std::vector<SidneyDirectory>& data, std::function<void(SidneyFile*)> selectCallback);
         void Show(const std::string& title, const std::vector<std::string>& choices, std::function<void(size_t)> selectCallback);
 
-        bool IsShowing() const { return mWindowRoot->IsActive(); }
+        bool IsShowing() const { return mWindowRoot != nullptr && mWindowRoot->IsActive(); }
         Actor* GetWindowRoot() const { return mWindowRoot; }
 
     private:
