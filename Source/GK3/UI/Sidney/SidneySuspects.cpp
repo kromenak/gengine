@@ -4,6 +4,7 @@
 #include "Actor.h"
 #include "AssetManager.h"
 #include "Font.h"
+#include "GameProgress.h"
 #include "Scene.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
@@ -407,6 +408,25 @@ void SidneySuspects::ShowSuspect(int index)
 
     // Upon opening a suspect, some menu choices may enable.
     RefreshEnabledMenuChoices();
+
+    // If this is the first time accessing suspects, Gabe or Grace may play a VO line.
+    if(!gGameProgress.GetFlag("GabeSawSuspects") && !gGameProgress.GetFlag("GraceSawSuspects"))
+    {
+        // Play VO for Gabe or Grace.
+        if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+        {
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OC52ZPF2\", 1)");
+        }
+        else
+        {
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OC52ZPF1\", 1)");
+        }
+
+        // It appears that if you trigger this VO for a character, you don't get it for the other character.
+        //TODO: Setting both here, but need to check what OG does.
+        gGameProgress.SetFlag("GabeSawSuspects");
+        gGameProgress.SetFlag("GraceSawSuspects");
+    }
 }
 
 void SidneySuspects::ShowFile(SidneyFile* file)
