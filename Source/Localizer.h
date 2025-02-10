@@ -19,6 +19,7 @@ public:
 
     void Load(const std::string& fileName, const std::string& sectionName = "");
 
+    bool HasText(const std::string& key) const;
     std::string GetText(const std::string& key) const;
     
 private:

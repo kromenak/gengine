@@ -37,8 +37,13 @@ private:
     // A popup for displaying messages on this screen.
     SidneyPopup* mPopup = nullptr;
 
+    // The translate window, which is the main thing on this screen.
     Actor* mTranslateWindow = nullptr;
+
+    // Header label for what's being translated.
     UILabel* mTranslateHeaderLabel = nullptr;
+
+    // Actually displays the translated text.
     UILabel* mTranslateTextLabel = nullptr;
 
     // The language we want to translate from and to.
@@ -52,8 +57,33 @@ private:
     Language mFromLanguage = Language::English;
     Language mToLanguage = Language::Latin;
 
+    // Butons in Sidney UI for selecting from/to languages.
     SidneyButton* mFromButtons[4] = { 0 };
     SidneyButton* mToButtons[4] = { 0 };
+
+    // Known translation actions in the game.
+    struct TranslationAction
+    {
+        // File being translated.
+        int fileId = -1;
+
+        // Language to translate this file fromt.
+        Language language;
+
+        // A prefix used to generate the unlocalized and localized text.
+        std::string locPrefix;
+
+        // If set, this flag is set upon successful translation;
+        std::string progressFlag;
+
+        // If set, this score event triggers upon successful translation.
+        std::string scoreEvent;
+    };
+    std::vector<TranslationAction> mTranslations;
+
+    TranslationAction* GetTranslationAction(int fileId);
+    std::string GetLocKeyForLanguage(Language language);
+    std::string GenerateBodyText(const std::string& locPrefix);
 
     void OpenFile(int fileId);
     void OnTranslateButtonPressed();

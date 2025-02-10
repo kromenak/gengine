@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "GameProgress.h"
+#include "Scene.h"
 #include "SidneyButton.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
@@ -39,15 +40,15 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
             // Show the file selector.
             mSidneyFiles->Show([this](SidneyFile* selectedFile){
 
-                // The translate screen can only open text files.
-                if(selectedFile->type != SidneyFileType::Text)
+                // The translate screen can only open certain files.
+                if(selectedFile != nullptr && GetTranslationAction(selectedFile->id) != nullptr)
                 {
-                    mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("NotTranslatable"));
-                    mPopup->ShowOneButton();
+                    OpenFile(selectedFile->id);
                 }
                 else
                 {
-                    OpenFile(selectedFile->id);
+                    mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("NotTranslatable"));
+                    mPopup->ShowOneButton();
                 }
             });
         });
@@ -139,14 +140,13 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
         const float kFromX = 32.0f;
         const float kToX = 147.0f;
         float currY = -271.0f;
-        const char* locKeys[] = { "English", "Latin", "French", "Italian" };
         for(int i = 0; i < 4; ++i)
         {
             Language language = static_cast<Language>(i);
 
             SidneyButton* fromButton = SidneyUtil::CreateSmallButton(mTranslateWindow);
             fromButton->SetWidth(70.0f);
-            fromButton->SetText(StringUtil::ToUpperCopy(SidneyUtil::GetTranslateLocalizer().GetText(locKeys[i])));
+            fromButton->SetText(StringUtil::ToUpperCopy(GetLocKeyForLanguage(language)));
             fromButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             fromButton->GetRectTransform()->SetAnchoredPosition(kFromX, currY);
             fromButton->SetPressCallback([this, fromButton, language](){
@@ -167,7 +167,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
             SidneyButton* toButton = SidneyUtil::CreateSmallButton(mTranslateWindow);
             toButton->SetWidth(70.0f);
-            toButton->SetText(StringUtil::ToUpperCopy(SidneyUtil::GetTranslateLocalizer().GetText(locKeys[i])));
+            toButton->SetText(StringUtil::ToUpperCopy(GetLocKeyForLanguage(language)));
             toButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             toButton->GetRectTransform()->SetAnchoredPosition(kToX, currY);
             toButton->SetPressCallback([this, toButton, language](){
@@ -204,6 +204,41 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
     mPopup = new SidneyPopup(mRoot);
     mPopup->SetTextAlignment(HorizontalAlignment::Center);
 
+    // Pre-load expected translation actions you can perform on this screen.
+    {
+        // Abbe tape.
+        mTranslations.emplace_back();
+        mTranslations.back().fileId = SidneyFileIds::kAbbeTape;
+        mTranslations.back().language = Language::French;
+        mTranslations.back().locPrefix = "AbbeTape";
+        mTranslations.back().progressFlag = "TranslatedAbbeTape";
+        mTranslations.back().scoreEvent = "e_sidney_translate_tape_abbe";
+
+        // Buchelli tape.
+        mTranslations.emplace_back();
+        mTranslations.back().fileId = SidneyFileIds::kBuchelliTape;
+        mTranslations.back().language = Language::Italian;
+        mTranslations.back().locPrefix = "BuchTape";
+        mTranslations.back().progressFlag = "TranslatedBuchTape";
+        mTranslations.back().scoreEvent = "e_sidney_translate_tape_buchelli";
+
+        // SUM note.
+        mTranslations.emplace_back();
+        mTranslations.back().fileId = SidneyFileIds::kSumText;
+        mTranslations.back().language = Language::Latin;
+        mTranslations.back().locPrefix = "SUMScript";
+        mTranslations.back().progressFlag = "TranslatedSUM";
+        mTranslations.back().scoreEvent = "e_sidney_translate_sum";
+
+        // Arcadia note.
+        mTranslations.emplace_back();
+        mTranslations.back().fileId = SidneyFileIds::kArcadiaText;
+        mTranslations.back().language = Language::Latin;
+        mTranslations.back().locPrefix = "ArcadiaText";
+        mTranslations.back().progressFlag = "ArcadiaTranslated";
+        mTranslations.back().scoreEvent = "e_sidney_translate_arcadia";
+    }
+
     // Hide by default.
     Hide();
 }
@@ -223,6 +258,59 @@ void SidneyTranslate::OnUpdate(float deltaTime)
 {
     if(!mRoot->IsActive()) { return; }
     mMenuBar.Update();
+}
+
+SidneyTranslate::TranslationAction* SidneyTranslate::GetTranslationAction(int fileId)
+{
+    for(auto& action : mTranslations)
+    {
+        if(action.fileId == fileId)
+        {
+            return &action;
+        }
+    }
+    return nullptr;
+}
+
+std::string SidneyTranslate::GetLocKeyForLanguage(Language language)
+{
+    switch(language)
+    {
+    case Language::English:
+        return "English";
+    case Language::Latin:
+        return "Latin";
+    case Language::French:
+        return "French";
+    case Language::Italian:
+        return "Italian";
+    }
+}
+
+std::string SidneyTranslate::GenerateBodyText(const std::string& locPrefix)
+{
+    // The loc file has an arbitrary number of lines per translatable item. But there is a clear prefix pattern used.
+    // To generate the text to display in-game, we can just iterate and get each line in turn, until we run out of lines.
+    std::string bodyText;
+    int locIndex = 1;
+    while(true)
+    {
+        // If the loc key doesn't exist, we've hit the end of the translation for this text. Break out.
+        std::string locKey = locPrefix + std::to_string(locIndex);
+        if(!SidneyUtil::GetTranslateLocalizer().HasText(locKey)) { break; }
+
+        // Add text to body.
+        std::string bodyTextLoc = SidneyUtil::GetTranslateLocalizer().GetText(locKey);
+        bodyText += bodyTextLoc + "\n";
+        ++locIndex;
+    }
+
+    // Get rid of any trailing line break.
+    if(!bodyText.empty() && bodyText.back() == '\n')
+    {
+        bodyText.pop_back();
+    }
+    return bodyText;
 }
 
 void SidneyTranslate::OpenFile(int fileId)
@@ -249,9 +337,10 @@ void SidneyTranslate::OpenFile(int fileId)
 
     // Body text depends on the file being translated.
     std::string bodyText;
-    if(mTranslateFileId == SidneyFileIds::kArcadiaText)
+    TranslationAction* action = GetTranslationAction(mTranslateFileId);
+    if(action != nullptr)
     {
-        bodyText = SidneyUtil::GetTranslateLocalizer().GetText("ArcadiaText1");
+        bodyText = GenerateBodyText(action->locPrefix);
     }
 
     // Populate translate text with combination of those texts.
@@ -269,47 +358,67 @@ void SidneyTranslate::OpenFile(int fileId)
 
 void SidneyTranslate::OnTranslateButtonPressed()
 {
-    // Translating Arcadia text...
+    TranslationAction* action = GetTranslationAction(mTranslateFileId);
+    if(action == nullptr) { return; }
+
+    // "From" language must be correct
+    if(mFromLanguage != action->language)
+    {
+        mPopup->ResetToDefaults();
+        mPopup->SetTextAlignment(HorizontalAlignment::Center);
+        mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("WrongFrom"));
+        mPopup->ShowOneButton();
+        return;
+    }
+
+    // "To" language must be English.
+    if(mToLanguage != Language::English)
+    {
+        // Gabe or Grace say "in English please."
+        if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+        {
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OC02ZFH1\", 1)");
+        }
+        else
+        {
+            
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02oc02zq91\", 1)");
+        }
+        return;
+    }
+
+    // If we already translated it, we're done here.
+    if(gGameProgress.GetFlag(action->progressFlag))
+    {
+        mPopup->ResetToDefaults();
+        mPopup->SetTextAlignment(HorizontalAlignment::Center);
+        mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("NoFurther"));
+        mPopup->ShowOneButton();
+        return;
+    }
+
+    // Ok, we are going to do the translation!
+    std::string text = mTranslateTextLabel->GetText();
+    text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(),
+                                        SidneyUtil::GetTranslateLocalizer().GetText(GetLocKeyForLanguage(action->language)).c_str());
+    text += "\n\n" + GenerateBodyText(action->locPrefix + "T");
+    mTranslateTextLabel->SetText(text);
+
+    // Set the flag that we successfully did this translation.
+    if(!action->progressFlag.empty())
+    {
+        gGameProgress.SetFlag(action->progressFlag);
+    }
+
+    // Possibly get some score.
+    if(!action->scoreEvent.empty())
+    {
+        gGameProgress.ChangeScore(action->scoreEvent);
+    }
+
+    // For the Arcadia text, there's some additional logic needed.
     if(mTranslateFileId == SidneyFileIds::kArcadiaText)
     {
-        // "From" language must be Latin.
-        if(mFromLanguage != Language::Latin)
-        {
-            mPopup->ResetToDefaults();
-            mPopup->SetTextAlignment(HorizontalAlignment::Center);
-            mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("WrongFrom"));
-            mPopup->ShowOneButton();
-            return;
-        }
-
-        // "To" language must be English.
-        if(mToLanguage != Language::English)
-        {
-            // Grace says "in English please."
-            gActionManager.ExecuteSheepAction("wait StartDialogue(\"02oc02zq91\", 1)");
-            return;
-        }
-
-        // If we already translated it, we're done here.
-        if(gGameProgress.GetFlag("ArcadiaComplete"))
-        {
-            mPopup->ResetToDefaults();
-            mPopup->SetTextAlignment(HorizontalAlignment::Center);
-            mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("NoFurther"));
-            mPopup->ShowOneButton();
-            return;
-        }
-
-        // Ok, translate Latin to English - that's what we want.
-        // Add the translation to the output area the first time we try this.
-        if(mTranslateTextLabel->GetLineCount() < 4)
-        {
-            std::string text = mTranslateTextLabel->GetText();
-            text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(), SidneyUtil::GetTranslateLocalizer().GetText("Latin").c_str());
-            text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("ArcadiaTextT1");
-            mTranslateTextLabel->SetText(text);
-        }
-
         // We translated to/from the right languages, but the translation is missing a word.
         // Show "sentence incomplete - do you want to add words?" popup.
         mPopup->ResetToDefaults();
@@ -347,8 +456,7 @@ void SidneyTranslate::PromptForMissingWord()
             // Grace says "BINGO we got it!"
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OFS2ZPF5\", 1)");
 
-            // We get some score and progress.
-            gGameProgress.ChangeScore("e_sidney_translate_arcadia");
+            // We get some progress.
             gGameProgress.SetFlag("ArcadiaComplete");
         }
         else

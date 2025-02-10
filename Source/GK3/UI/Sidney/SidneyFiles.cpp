@@ -47,7 +47,7 @@ void SidneyFiles::Init(Sidney* parent)
     mAllFiles.emplace_back( 4, SidneyFileType::Fingerprint, "fileLadyHowardPrint",  "HOWARDS_FINGERPRINT",   "e_sidney_add_fingerprint_howard");
     mAllFiles.emplace_back( 5, SidneyFileType::Fingerprint, "fileMontreauxPrint",   "MONTREAUX_FINGERPRINT", "e_sidney_add_fingerprint_montreaux");
     mAllFiles.emplace_back( 6, SidneyFileType::Fingerprint, "fileWilkesPrint",      "WILKES_FINGERPRINT",    "e_sidney_add_fingerprint_wilkes");
-    mAllFiles.emplace_back( 7, SidneyFileType::Fingerprint, "fileMoselyPrint",      "MOSELYS_FINGERPRINT");  //TODO: Hmm, no score event for this one?
+    mAllFiles.emplace_back( 7, SidneyFileType::Fingerprint, "fileMoselyPrint",      "MOSELYS_FINGERPRINT");  // there's no score event for this one, since the player doesn't add this one directly.
     mAllFiles.emplace_back( 8, SidneyFileType::Fingerprint, "fileLarryPrint",       "LARRYS_FINGERPRINT",    "e_sidney_add_fingerprint_larry");
     mAllFiles.emplace_back( 9, SidneyFileType::Fingerprint, "fileWilkesPrint2",     "WILKES_FINGERPRINT_LABELED_BUCHELLI");
     mAllFiles.emplace_back(10, SidneyFileType::Fingerprint, "fileBuchelliPrint2",   "BUCHELLIS_FINGERPRINT_LABELED_WILKES");

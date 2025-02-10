@@ -28,6 +28,9 @@ namespace SidneyFileIds
     const int kTeniersPostcard1 = 23;
     const int kTeniersPostcard2 = 24;
 
+    const int kSumText = 26;
+    const int kAbbeTape = 27;
+    const int kBuchelliTape = 28;
     const int kArcadiaText = 29;
 
     const int kTriangleShape = 37;

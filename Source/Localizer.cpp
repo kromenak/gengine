@@ -98,6 +98,11 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
     delete textFile;
 }
 
+bool Localizer::HasText(const std::string& key) const
+{
+    return mKeyToText.find(key) != mKeyToText.end();
+}
+
 std::string Localizer::GetText(const std::string& key) const
 {
     // Return localized text, if we have it.
