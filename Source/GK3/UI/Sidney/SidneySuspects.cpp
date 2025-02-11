@@ -344,10 +344,10 @@ void SidneySuspects::ShowSuspect(int index)
     mNotesInput->SetText(info.notes);
 
     // The vehicle ID only shows if the associated file is linked.
-    bool showVehicle = mVehicleIdLinkedFiles[index] == -1;
+    bool showVehicle = mVehicleIdLinkedFiles[index].fileId == -1;
     if(!showVehicle)
     {
-        showVehicle = std::find(info.linkedFileIds.begin(), info.linkedFileIds.end(), mVehicleIdLinkedFiles[index]) != info.linkedFileIds.end();
+        showVehicle = std::find(info.linkedFileIds.begin(), info.linkedFileIds.end(), mVehicleIdLinkedFiles[index].fileId) != info.linkedFileIds.end();
     }
     if(showVehicle)
     {
@@ -359,7 +359,7 @@ void SidneySuspects::ShowSuspect(int index)
     }
 
     // Similarly, fingerprint image only shows if associated file is linked.
-    auto fingerprintFileIt = std::find(info.linkedFileIds.begin(), info.linkedFileIds.end(), mFingerprintLinkedFiles[index]);
+    auto fingerprintFileIt = std::find(info.linkedFileIds.begin(), info.linkedFileIds.end(), mFingerprintLinkedFiles[index].fileId);
     if(fingerprintFileIt != info.linkedFileIds.end())
     {
         mFingerprintImage->SetEnabled(true);
@@ -480,8 +480,8 @@ void SidneySuspects::OnLinkToSuspectPressed()
     // See if this file is one of the important ones for this suspect.
     // These are always allowed to be linked.
     bool alreadyLinked = false;
-    bool isThisSuspectsVehicleFile = (mOpenedFileId == mVehicleIdLinkedFiles[mOpenedSuspectIndex]);
-    bool isThisSuspectsFingerprintFile = (mOpenedFileId == mFingerprintLinkedFiles[mOpenedSuspectIndex]);
+    bool isThisSuspectsVehicleFile = (mOpenedFileId == mVehicleIdLinkedFiles[mOpenedSuspectIndex].fileId);
+    bool isThisSuspectsFingerprintFile = (mOpenedFileId == mFingerprintLinkedFiles[mOpenedSuspectIndex].fileId);
     if(!isThisSuspectsVehicleFile && !isThisSuspectsFingerprintFile)
     {
         // If it's NOT one of the important files, you can still link it...but only if not linked to anyone else.
@@ -520,6 +520,30 @@ void SidneySuspects::OnLinkToSuspectPressed()
     // Set selected index to the last one in the list.
     info.selectedLinkedFileIndex = info.linkedFileIds.size() - 1;
 
+    // Change score if a score name is specified.
+    if(isThisSuspectsVehicleFile)
+    {
+        if(!mVehicleIdLinkedFiles[mOpenedSuspectIndex].scoreName.empty())
+        {
+            gGameProgress.ChangeScore(mVehicleIdLinkedFiles[mOpenedSuspectIndex].scoreName);
+        }
+        if(!mVehicleIdLinkedFiles[mOpenedSuspectIndex].flag.empty())
+        {
+            gGameProgress.SetFlag(mVehicleIdLinkedFiles[mOpenedSuspectIndex].flag);
+        }
+    }
+    if(isThisSuspectsFingerprintFile)
+    {
+        if(!mFingerprintLinkedFiles[mOpenedSuspectIndex].scoreName.empty())
+        {
+            gGameProgress.ChangeScore(mFingerprintLinkedFiles[mOpenedSuspectIndex].scoreName);
+        }
+        if(!mFingerprintLinkedFiles[mOpenedSuspectIndex].flag.empty())
+        {
+            gGameProgress.SetFlag(mFingerprintLinkedFiles[mOpenedSuspectIndex].flag);
+        }
+    }
+
     // Re-show this suspect to refresh the UI.
     ShowSuspect(mOpenedSuspectIndex);
 }
@@ -534,14 +558,14 @@ void SidneySuspects::OnUnlinkToSuspectPressed()
     int selectedFileId = info.linkedFileIds[info.selectedLinkedFileIndex];
 
     // If this is one of the important files for the suspect, you actually aren't allowed to unlink it.
-    bool isThisSuspectsVehicleFile = (selectedFileId == mVehicleIdLinkedFiles[mOpenedSuspectIndex]);
-    bool isThisSuspectsFingerprintFile = (selectedFileId == mFingerprintLinkedFiles[mOpenedSuspectIndex]);
+    bool isThisSuspectsVehicleFile = (selectedFileId == mVehicleIdLinkedFiles[mOpenedSuspectIndex].fileId);
+    bool isThisSuspectsFingerprintFile = (selectedFileId == mFingerprintLinkedFiles[mOpenedSuspectIndex].fileId);
     if(isThisSuspectsVehicleFile || isThisSuspectsFingerprintFile)
     {
         // Gabe or grace say "I think that's right, I don't want to unlink it."
         if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
         {
-            gActionManager.ExecuteSheepAction("wait StartDialogue(\"2F18S27AS1\", 1)");
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"2FL8S27AS1\", 1)");
         }
         else
         {

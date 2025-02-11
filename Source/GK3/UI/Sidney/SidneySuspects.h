@@ -94,29 +94,35 @@ private:
 
     // There're certain linked files that reveal info on this screen. Or grant score.
     // This doesn't seem to be in any game data file, so hardcoding here for now, by index.
-    std::vector<int> mVehicleIdLinkedFiles = {
-        -1,  // Buthane, always shows as "Van"
-        32, 
-        33,
-        999, // Arnaud, never shows anything
-        34,
-        34,
-        36,
-        -1,  // Larry Chester, always shows "Blue Sedan"
-        -1,  // Montreaux, always shows "Auto?"
-        35
+    struct LinkedFileEvent
+    {
+        int fileId = -1;
+        std::string scoreName;
+        std::string flag;
     };
-    std::vector<int> mFingerprintLinkedFiles = {
-        2,
-        1,
-        -1,  // No print for Emilio
-        0,
-        4,
-        3,
-        6,
-        8,
-        5,
-        7
+    std::vector<LinkedFileEvent> mVehicleIdLinkedFiles = {
+        { -1, "", "" },                                                             // Buthane, always shows as "Van"
+        { 32, "e_sidney_suspect_link_license_buchelli", "IDedBuchelliVehicle" },    // Buchelli
+        { 33, "e_sidney_suspect_link_license_emilio",   "IDedEmilioVehicle" },      // Emilio
+        { 999, "",                                      "IDedAbbeVehicle" },        // Arnaud, never shows any vehicle
+        { 34, "e_sidney_suspect_link_license_howard",   "IDedHowardVehicle" },      // Lady Howard
+        { 34, "e_sidney_suspect_link_license_howard",   "IDedEstelleVehicle" },     // Estelle, same file and score event as LH
+        { 36, "e_sidney_suspect_link_license_wilkes",   "IDedWilkesVehicle" },      // Wilkes
+        { -1, "", "" },                                                             // Larry Chester, always shows "Blue Sedan"
+        { -1, "", "" },                                                             // Montreaux, always shows "Auto?"
+        { 35, "e_sidney_suspect_link_license_mosely",   "IDedMoselyVehicle" }       // Mosely
+    };
+    std::vector<LinkedFileEvent> mFingerprintLinkedFiles = {
+        { 2, "e_sidney_suspect_link_fingerprint_buthane", "" },     // Buthane
+        { 1, "e_sidney_suspect_link_fingerprint_buchelli", "" },    // Buchelli
+        { -1, "", "" },                                             // No print for Emilio
+        { 0, "e_sidney_suspect_link_fingerprint_abbe", "" },        // Arnaud
+        { 4, "e_sidney_suspect_link_fingerprint_howard", "" },      // Lady Howard
+        { 3, "e_sidney_suspect_link_fingerprint_estelle", "" },     // Estelle
+        { 6, "e_sidney_suspect_link_fingerprint_wilkes", "" },      // Wilkes
+        { 8, "e_sidney_suspect_link_fingerprint_larry", "" },       // Larry Chester
+        { 5, "e_sidney_suspect_link_fingerprint_montreaux", "" },   // Montreaux
+        { 7, "", "" }                                               // Mosely's print isn't added directly by the player, so no score event. 
     };
 
     // The index of the opened suspect, if any.
