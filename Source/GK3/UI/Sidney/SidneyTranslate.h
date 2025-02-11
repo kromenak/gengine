@@ -10,6 +10,7 @@ class Actor;
 class SidneyFiles;
 class SidneyPopup;
 class UILabel;
+class UIScrollRect;
 
 class SidneyTranslate
 {
@@ -42,6 +43,9 @@ private:
 
     // Header label for what's being translated.
     UILabel* mTranslateHeaderLabel = nullptr;
+
+    // Scroll rect containing the translated text.
+    UIScrollRect* mTranslateTextScrollRect = nullptr;
 
     // Actually displays the translated text.
     UILabel* mTranslateTextLabel = nullptr;
@@ -80,6 +84,9 @@ private:
         std::string scoreEvent;
     };
     std::vector<TranslationAction> mTranslations;
+
+    // Keeps track of whether we translated the current file yet.
+    bool mPerformedTranslation = false;
 
     TranslationAction* GetTranslationAction(int fileId);
     std::string GetLocKeyForLanguage(Language language);

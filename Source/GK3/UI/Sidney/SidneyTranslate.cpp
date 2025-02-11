@@ -9,8 +9,10 @@
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"
 #include "Texture.h"
+#include "UICanvas.h"
 #include "UIImage.h"
 #include "UINineSlice.h"
+#include "UIScrollRect.h"
 #include "UIUtil.h"
 
 void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
@@ -100,15 +102,29 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
         centerBackground->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         centerBackground->GetRectTransform()->SetAnchoredPosition(1, -18.0f);
 
+        // Add scroll area.
+        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(centerBackground->GetOwner(), -1);
+        canvas->SetMasked(true);
+        canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+        canvas->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+        canvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+
+        UIScrollRect* scrollRect = new UIScrollRect(canvas->GetOwner());
+        scrollRect->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+        scrollRect->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+        scrollRect->SetScrollbarWidth(5.0f);
+        mTranslateTextScrollRect = scrollRect;
+        
         // Create text as child of background. Fill that area, with some margins on left/right.
-        mTranslateTextLabel = UIUtil::NewUIActorWithWidget<UILabel>(centerBackground->GetOwner());
+        mTranslateTextLabel = UIUtil::NewUIActorWithWidget<UILabel>(scrollRect);
         mTranslateTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mTranslateTextLabel->SetText("** Open File: Arcad_Txt **\n\n\nEt in Arcadia Ego");
         mTranslateTextLabel->SetVerticalAlignment(VerticalAlignment::Top);
+        mTranslateTextLabel->SetHorizontalOverflow(HorizontalOverflow::Wrap);
 
-        mTranslateTextLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
-        mTranslateTextLabel->GetRectTransform()->SetSizeDelta(-16.0f, -16.0f);
-        mTranslateTextLabel->GetRectTransform()->SetPixelPerfect(true);
+        mTranslateTextLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        mTranslateTextLabel->GetRectTransform()->SetAnchoredPosition(16.0f, -16.0f);
+        mTranslateTextLabel->GetRectTransform()->SetSizeDelta(492.0f, 205.0f);
     }
 
     // Create bottom part of window: translation options.
@@ -345,6 +361,10 @@ void SidneyTranslate::OpenFile(int fileId)
 
     // Populate translate text with combination of those texts.
     mTranslateTextLabel->SetText(openFileLine + "\n\n" + bodyText);
+    mTranslateTextLabel->GetRectTransform()->SetSizeDeltaY(mTranslateTextLabel->GetTextHeight());
+
+    // Force to top.
+    mTranslateTextScrollRect->SetNormalizedScrollValue(0.0f);
 
     // Reset from/to language selectors.
     mFromLanguage = Language::English;
@@ -354,6 +374,9 @@ void SidneyTranslate::OpenFile(int fileId)
         mFromButtons[i]->SetSelected(i == 0);
         mToButtons[i]->SetSelected(i == 1);
     }
+
+    // Reset translated flag.
+    mPerformedTranslation = false;
 }
 
 void SidneyTranslate::OnTranslateButtonPressed()
@@ -388,7 +411,7 @@ void SidneyTranslate::OnTranslateButtonPressed()
     }
 
     // If we already translated it, we're done here.
-    if(gGameProgress.GetFlag(action->progressFlag))
+    if(mPerformedTranslation)
     {
         mPopup->ResetToDefaults();
         mPopup->SetTextAlignment(HorizontalAlignment::Center);
@@ -403,6 +426,11 @@ void SidneyTranslate::OnTranslateButtonPressed()
                                         SidneyUtil::GetTranslateLocalizer().GetText(GetLocKeyForLanguage(action->language)).c_str());
     text += "\n\n" + GenerateBodyText(action->locPrefix + "T");
     mTranslateTextLabel->SetText(text);
+    mTranslateTextLabel->GetRectTransform()->SetSizeDeltaY(mTranslateTextLabel->GetTextHeight());
+
+    // Theoretically, we're supposed to set the scroll rect to the exact position where the newly translated text was added.
+    // This is probably possible to calculate, but let's start with something simple - just scroll down to the bottom!
+    mTranslateTextScrollRect->SetNormalizedScrollValue(1.0f);
 
     // Set the flag that we successfully did this translation.
     if(!action->progressFlag.empty())
@@ -430,6 +458,12 @@ void SidneyTranslate::OnTranslateButtonPressed()
             // Show the UI flow (popups) to allow the player to enter the missing word.
             PromptForMissingWord();
         });
+    }
+
+    // As Gabe, if you translate the Abbe's tape, you get a little remark about how useful the computer is.
+    if(mTranslateFileId == SidneyFileIds::kAbbeTape && StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+    {
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OD95EPF2\", 1)");
     }
 }
 
