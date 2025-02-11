@@ -110,7 +110,7 @@ float UIScrollRect::GetScrollbarWidth() const
 
 void UIScrollRect::SetNormalizedScrollValue(float normalizedScrollValue)
 {
-    mSlider->SetValue(0.0f);
+    mSlider->SetValue(normalizedScrollValue);
 }
 
 void UIScrollRect::OnUpdate(float deltaTime)
