@@ -262,7 +262,33 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
 void SidneyTranslate::Show()
 {
     mRoot->SetActive(true);
+
+    // We need to make sure the correct data shows, even between runs of the game.
+    // So, open the last opened file for starters...
+    bool wasAlreadyTranslated = mPerformedTranslation; // OpenFile resets this var, so remember it.
     OpenFile(mTranslateFileId);
+
+    // If already translated, set state like it would be after translation.
+    if(wasAlreadyTranslated)
+    {
+        TranslationAction* action = GetTranslationAction(mTranslateFileId);
+        if(action != nullptr)
+        {
+            // Set from/to buttons to the correct state.
+            for(int i = 0; i < 4; ++i)
+            {
+                mFromButtons[i]->SetSelected(action->language == static_cast<Language>(i));
+            }
+            for(int i = 0; i < 4; ++i)
+            {
+                mToButtons[i]->SetSelected(i == 0);
+            }
+
+            // Append translation to output.
+            AppendTranslatedText(action);
+            mPerformedTranslation = true;
+        }
+    }
 }
 
 void SidneyTranslate::Hide()
@@ -274,6 +300,12 @@ void SidneyTranslate::OnUpdate(float deltaTime)
 {
     if(!mRoot->IsActive()) { return; }
     mMenuBar.Update();
+}
+
+void SidneyTranslate::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mTranslateFileId));
+    ps.Xfer(PERSIST_VAR(mPerformedTranslation));
 }
 
 SidneyTranslate::TranslationAction* SidneyTranslate::GetTranslationAction(int fileId)
@@ -327,6 +359,21 @@ std::string SidneyTranslate::GenerateBodyText(const std::string& locPrefix)
         bodyText.pop_back();
     }
     return bodyText;
+}
+
+void SidneyTranslate::AppendTranslatedText(TranslationAction* action)
+{
+    // Ok, we are going to do the translation!
+    std::string text = mTranslateTextLabel->GetText();
+    text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(),
+        SidneyUtil::GetTranslateLocalizer().GetText(GetLocKeyForLanguage(action->language)).c_str());
+    text += "\n\n" + GenerateBodyText(action->locPrefix + "T");
+    mTranslateTextLabel->SetText(text);
+    mTranslateTextLabel->GetRectTransform()->SetSizeDeltaY(mTranslateTextLabel->GetTextHeight());
+
+    // Theoretically, we're supposed to set the scroll rect to the exact position where the newly translated text was added.
+    // This is probably possible to calculate, but let's start with something simple - just scroll down to the bottom!
+    mTranslateTextScrollRect->SetNormalizedScrollValue(1.0f);
 }
 
 void SidneyTranslate::OpenFile(int fileId)
@@ -420,17 +467,14 @@ void SidneyTranslate::OnTranslateButtonPressed()
         return;
     }
 
-    // Ok, we are going to do the translation!
-    std::string text = mTranslateTextLabel->GetText();
-    text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(),
-                                        SidneyUtil::GetTranslateLocalizer().GetText(GetLocKeyForLanguage(action->language)).c_str());
-    text += "\n\n" + GenerateBodyText(action->locPrefix + "T");
-    mTranslateTextLabel->SetText(text);
-    mTranslateTextLabel->GetRectTransform()->SetSizeDeltaY(mTranslateTextLabel->GetTextHeight());
+    // Add translated text to the output.
+    AppendTranslatedText(action);
 
-    // Theoretically, we're supposed to set the scroll rect to the exact position where the newly translated text was added.
-    // This is probably possible to calculate, but let's start with something simple - just scroll down to the bottom!
-    mTranslateTextScrollRect->SetNormalizedScrollValue(1.0f);
+    // As Gabe, if you translate the Abbe's tape, you get a little remark about how useful the computer is.
+    if(mTranslateFileId == SidneyFileIds::kAbbeTape && !gGameProgress.GetFlag(action->progressFlag) && StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+    {
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OD95EPF2\", 1)");
+    }
 
     // Set the flag that we successfully did this translation.
     if(!action->progressFlag.empty())
@@ -460,11 +504,8 @@ void SidneyTranslate::OnTranslateButtonPressed()
         });
     }
 
-    // As Gabe, if you translate the Abbe's tape, you get a little remark about how useful the computer is.
-    if(mTranslateFileId == SidneyFileIds::kAbbeTape && StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
-    {
-        gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OD95EPF2\", 1)");
-    }
+    // The file is translated.
+    mPerformedTranslation = true;
 }
 
 void SidneyTranslate::PromptForMissingWord()

@@ -433,8 +433,20 @@ void SidneySearch::Init(Actor* parent)
 
 void SidneySearch::Show()
 {
+    // Show this screen.
     mRoot->SetActive(true);
+
+    // Focus text input.
     mTextInput->Focus();
+
+    // Handle repopulating this screen when it is shown after a save game load.
+    if(!mHistory.empty() && mHistoryIndex >= 0 && mHistoryIndex < mHistory.size())
+    {
+        if(!StringUtil::EqualsIgnoreCase(mCurrentPageName, mHistory[mHistoryIndex]))
+        {
+            ShowWebPage(mHistory[mHistoryIndex]);
+        }
+    }
 }
 
 void SidneySearch::Hide()
@@ -465,6 +477,19 @@ void SidneySearch::OnUpdate(float deltaTime)
 
     // Keep menu bar updated.
     mMenuBar.Update();
+}
+
+void SidneySearch::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mHistory));
+    ps.Xfer(PERSIST_VAR(mHistoryIndex));
+
+    std::string inputText = mTextInput->GetText();
+    ps.Xfer("mTextInput", inputText);
+    if(ps.IsLoading())
+    {
+        mTextInput->SetText(inputText);
+    }
 }
 
 void SidneySearch::ShowWebPage(const std::string& pageName)
@@ -798,6 +823,9 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 
     // Make sure the web page root UI element is active, so you can see everything!
     mWebPageRoot->SetActive(true);
+
+    // Save current page name.
+    mCurrentPageName = pageName;
 
     // We are now on this web page. Trigger any known events that can happen when entering this page.
     TriggerWebPageEvents(pageName);

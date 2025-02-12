@@ -7,6 +7,7 @@
 #include "SidneyMenuBar.h"
 
 class Actor;
+class PersistState;
 class SidneyFiles;
 class SidneyPopup;
 class UILabel;
@@ -21,6 +22,8 @@ public:
     void Hide();
 
     void OnUpdate(float deltaTime);
+
+    void OnPersist(PersistState& ps);
 
 private:
     // References to Sidney modules.
@@ -91,6 +94,7 @@ private:
     TranslationAction* GetTranslationAction(int fileId);
     std::string GetLocKeyForLanguage(Language language);
     std::string GenerateBodyText(const std::string& locPrefix);
+    void AppendTranslatedText(TranslationAction* action);
 
     void OpenFile(int fileId);
     void OnTranslateButtonPressed();

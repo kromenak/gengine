@@ -351,8 +351,6 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
 void SidneyEmail::Show()
 {
-    
-
     // Show entire page.
     mRoot->SetActive(true);
 
@@ -436,6 +434,12 @@ void SidneyEmail::UpdateNewEmail(float deltaTime)
         mNewEmailLabel->SetEnabled(false);
         mPlayNewEmailSfx = false;
     }
+}
+
+void SidneyEmail::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mReceivedEmails));
+    ps.Xfer(PERSIST_VAR(mReadEmails));
 }
 
 void SidneyEmail::ReceiveEmail(const std::string& emailId)

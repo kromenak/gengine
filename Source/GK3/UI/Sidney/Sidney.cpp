@@ -217,6 +217,14 @@ void Sidney::OnPersist(PersistState& ps)
 {
     mFiles.OnPersist(ps);
     mAnalyze.OnPersist(ps);
+
+    // Some save data wasn't included in the original save format.
+    if(ps.GetFormatVersionNumber() >= 2)
+    {
+        mSearch.OnPersist(ps);
+        mEmail.OnPersist(ps);
+        mTranslate.OnPersist(ps);
+    }
 }
 
 void Sidney::OnUpdate(float deltaTime)

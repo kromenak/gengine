@@ -14,6 +14,7 @@
 
 class Actor;
 class Font;
+class PersistState;
 class SidneyButton;
 class SidneyPopup;
 class UIButton;
@@ -32,6 +33,8 @@ public:
     void Hide();
 
     void OnUpdate(float deltaTime);
+
+    void OnPersist(PersistState& ps);
 
 private:
     // Root of this subscreen.
@@ -76,6 +79,9 @@ private:
 
     // Keep track of our current position within the history when using the back/forward buttons.
     int mHistoryIndex = -1;
+
+    // The name of the currently shown web page.
+    std::string mCurrentPageName;
 
     // A popup to display alerts and other messages.
     SidneyPopup* mPopup = nullptr;

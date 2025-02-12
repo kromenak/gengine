@@ -11,6 +11,7 @@
 #include "StringUtil.h"
 
 class Actor;
+class PersistState;
 class SidneyButton;
 class UILabel;
 class UIScrollRect;
@@ -25,6 +26,8 @@ public:
 
     void CheckNewEmail();
     void UpdateNewEmail(float deltaTime);
+
+    void OnPersist(PersistState& ps);
 
 private:
     // Root of this subscreen.
