@@ -178,6 +178,9 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     //TODO: Thumbnail
     persistHeader.OnPersist(ps);
 
+    // Set the save format version number to save with.
+    ps.SetFormatVersionNumber(saveHeader.saveVersion);
+
     // Persist the ENTIRE game...
     OnPersist(ps);
     printf("Saved to file %s.\n", savePath.c_str());
@@ -226,6 +229,10 @@ void SaveManager::LoadInternal(const std::string& loadPath)
         persistHeader.OnPersist(ps);
 
         //TODO: If we can detect that the file is corrupt or not the right type or other nefarious things, early out.
+
+        // Store the save version number in the PersistState.
+        // This allows load code to detect which version of the save file this is to try to stay compatible.
+        ps.SetFormatVersionNumber(saveHeader.saveVersion);
 
         // Load everything!
         OnPersist(ps);

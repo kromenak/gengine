@@ -46,6 +46,10 @@ public:
     bool IsSaving() const { return mMode == PersistMode::Save; }
     bool IsLoading() const { return mMode == PersistMode::Load; }
 
+    // Version
+    void SetFormatVersionNumber(int versionNumber) { mFormatVersionNumber = versionNumber; }
+    int GetFormatVersionNumber() { return mFormatVersionNumber; }
+
     // Strings
     void Xfer(const char* name, char* value, size_t valueSize);
     void Xfer(const char* name, std::string& value);
@@ -107,6 +111,8 @@ private:
 
     BinaryWriter* mBinaryWriter = nullptr;
     IniWriter* mIniWriter = nullptr;
+
+    int mFormatVersionNumber = 1;
 };
 
 template<typename T>

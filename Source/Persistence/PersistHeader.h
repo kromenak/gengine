@@ -17,7 +17,7 @@ struct SaveHeader
     char saveId[4] = { 'S', 'A', 'V', 'E' };
 
     // Save file version.
-    int32_t saveVersion = 1;
+    int32_t saveVersion = 2;
 
     // Size of this header (after this point); always 232.
     int32_t saveHeaderSize = 232;
