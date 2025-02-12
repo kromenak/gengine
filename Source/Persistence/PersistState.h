@@ -21,6 +21,7 @@ class IniWriter;
 class Circle;
 class LineSegment;
 struct UIGrid;
+struct UIHexagram;
 struct UIRectangle;
 
 #define PERSIST_VAR(var) #var, var
@@ -83,6 +84,7 @@ public:
     // UI Primitives
     void Xfer(const char* name, UIRectangle& value);
     void Xfer(const char* name, UIGrid& value);
+    void Xfer(const char* name, UIHexagram& value);
 
     // Collections
     template<typename T> void Xfer(const char* name, std::vector<T>& vector);

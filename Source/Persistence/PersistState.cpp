@@ -6,6 +6,7 @@
 #include "Circle.h"
 #include "LineSegment.h"
 #include "UIGrids.h"
+#include "UIHexagrams.h"
 #include "UIRectangles.h"
 
 PersistState::PersistState(const char* filePath, PersistFormat format, PersistMode mode) :
@@ -356,6 +357,32 @@ void PersistState::Xfer(const char* name, UIGrid& value)
         mBinaryWriter->WriteFloat(value.angle);
         mBinaryWriter->WriteInt(value.divisions);
         mBinaryWriter->WriteByte(value.drawBorder ? 1 : 0);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
+}
+
+void PersistState::Xfer(const char* name, UIHexagram& value)
+{
+    if(mBinaryReader != nullptr)
+    {
+        value.center.x = mBinaryReader->ReadFloat();
+        value.center.y = mBinaryReader->ReadFloat();
+        value.radius = mBinaryReader->ReadFloat();
+        value.angle = mBinaryReader->ReadFloat();
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->WriteFloat(value.center.x);
+        mBinaryWriter->WriteFloat(value.center.y);
+        mBinaryWriter->WriteFloat(value.radius);
+        mBinaryWriter->WriteFloat(value.angle);
     }
     else if(mIniReader != nullptr)
     {

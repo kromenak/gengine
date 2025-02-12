@@ -366,6 +366,52 @@ void SidneyAnalyze::MapState::View::OnPersist(PersistState& ps)
             }
         }
     }
+
+    // Hexagrams weren't added until version 2 of the save file.
+    if(ps.GetFormatVersionNumber() >= 2)
+    {
+        // Hexagrams
+        {
+            std::vector<UIHexagram> xfer;
+            if(ps.IsSaving())
+            {
+                for(int i = 0; i < hexagrams->GetCount(); ++i)
+                {
+                    xfer.push_back(hexagrams->GetHexagram(i));
+                }
+            }
+            ps.Xfer("hexagrams", xfer);
+            if(ps.IsLoading())
+            {
+                hexagrams->ClearHexagrams();
+                for(UIHexagram& hexagram : xfer)
+                {
+                    hexagrams->AddHexagram(hexagram.center, hexagram.radius, hexagram.angle);
+                }
+            }
+        }
+
+        // Locked Hexagrams
+        {
+            std::vector<UIHexagram> xfer;
+            if(ps.IsSaving())
+            {
+                for(int i = 0; i < lockedHexagrams->GetCount(); ++i)
+                {
+                    xfer.push_back(lockedHexagrams->GetHexagram(i));
+                }
+            }
+            ps.Xfer("lockedHexagrams", xfer);
+            if(ps.IsLoading())
+            {
+                lockedHexagrams->ClearHexagrams();
+                for(UIHexagram& hexagram : xfer)
+                {
+                    lockedHexagrams->AddHexagram(hexagram.center, hexagram.radius, hexagram.angle);
+                }
+            }
+        }
+    }
 }
 
 Vector2 SidneyAnalyze::MapState::ToZoomedInPoint(const Vector2& pos)
