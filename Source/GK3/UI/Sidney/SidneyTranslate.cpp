@@ -324,6 +324,7 @@ std::string SidneyTranslate::GetLocKeyForLanguage(Language language)
 {
     switch(language)
     {
+    default:
     case Language::English:
         return "English";
     case Language::Latin:

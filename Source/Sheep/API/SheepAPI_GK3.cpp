@@ -30,7 +30,7 @@ RegFunc0(ShowDrivingInterface, void, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowFingerprintInterface(const std::string& nounName)
 {
-    assert(false);
+    gGK3UI.ShowFingerprintInterface(nounName);
     return 0;
 }
 RegFunc1(ShowFingerprintInterface, void, string, IMMEDIATE, REL_FUNC);

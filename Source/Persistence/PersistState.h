@@ -132,7 +132,7 @@ inline void PersistState::Xfer(const char* name, std::vector<T>& vector, bool lo
         {
             if(i < vector.size())
             {
-                Xfer("", vector[i]);
+                Xfer("", vector[static_cast<size_t>(i)]);
             }
             else
             {

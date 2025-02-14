@@ -2,6 +2,7 @@
 
 #include "CaptionsOverlay.h"
 #include "DrivingScreen.h"
+#include "FingerprintScreen.h"
 #include "FinishedScreen.h"
 #include "ProgressBar.h"
 #include "SaveLoadScreen.h"
@@ -217,4 +218,14 @@ Sidney* GK3UI::GetSidney()
 void GK3UI::ShowSidney()
 {
     GetSidney()->Show();
+}
+
+void GK3UI::ShowFingerprintInterface(const std::string& nounName)
+{
+    if(mFingerprintScreen == nullptr)
+    {
+        mFingerprintScreen = new FingerprintScreen();
+        mFingerprintScreen->SetIsDestroyOnLoad(false);
+    }
+    mFingerprintScreen->Show(nounName);
 }

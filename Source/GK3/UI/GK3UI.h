@@ -9,6 +9,7 @@
 
 class CaptionsOverlay;
 class DrivingScreen;
+class FingerprintScreen;
 class ProgressBar;
 class SaveLoadScreen;
 class SceneTransitioner;
@@ -46,6 +47,8 @@ public:
     Sidney* GetSidney();
     void ShowSidney();
 
+    void ShowFingerprintInterface(const std::string& nounName);
+
 private:
     TitleScreen* mTitleScreen = nullptr;
     TimeblockScreen* mTimeblockScreen = nullptr;
@@ -60,6 +63,8 @@ private:
     DrivingScreen* mDrivingScreen = nullptr;
 
     Sidney* mSidney = nullptr;
+
+    FingerprintScreen* mFingerprintScreen = nullptr;
 };
 
 extern GK3UI gGK3UI;
