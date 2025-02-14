@@ -224,11 +224,14 @@ void Sidney::OnPersist(PersistState& ps)
         mSearch.OnPersist(ps);
         mEmail.OnPersist(ps);
         mTranslate.OnPersist(ps);
+        mSuspects.OnPersist(ps);
     }
 }
 
 void Sidney::OnUpdate(float deltaTime)
 {
+    if(!IsActive()) { return; }
+
     // We want to keep the "New Email" label updating at all times.
     mEmail.UpdateNewEmail(deltaTime);
 

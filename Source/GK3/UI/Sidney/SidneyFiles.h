@@ -21,6 +21,8 @@ class UILabel;
 
 namespace SidneyFileIds
 {
+    const int kMoselyFingerprint = 7;
+
     const int kMap = 19;
     const int kParchment1 = 20;
     const int kParchment2 = 21;

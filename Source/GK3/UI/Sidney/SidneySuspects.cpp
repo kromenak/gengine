@@ -309,8 +309,36 @@ void SidneySuspects::Show()
         }
     }
 
+    // Starting in Day 2, 2PM we show Montreaux.
+    if(gGameProgress.GetTimeblock() >= Timeblock(2, 14) && mMenuBar.GetDropdownChoiceCount(1) < 9)
+    {
+        mMenuBar.AddDropdownChoice(1, SidneyUtil::GetSuspectsLocalizer().GetText("Menu2Item9"), [this]() {
+            ShowSuspect(8);
+        });
+    }
+
+    // Starting in Day 2 5PM, we MAY show Mosely, but only if his fingerprint was gathered earlier.
+    if(gGameProgress.GetTimeblock() >= Timeblock(2, 17) && gGameProgress.GetFlag("GotPMoselyPrint") && mMenuBar.GetDropdownChoiceCount(1) < 10)
+    {
+        mMenuBar.AddDropdownChoice(1, SidneyUtil::GetSuspectsLocalizer().GetText("Menu2Item10"), [this]() {
+            ShowSuspect(9);
+        });
+
+        // Also automatically link the fingerprint.
+        mSuspectInfos[9].linkedFileIds.push_back(SidneyFileIds::kMoselyFingerprint);
+        mSuspectInfos[9].selectedLinkedFileIndex = 0;
+
+        // Also show Mosely and his fingerprint as the opened data.
+        mOpenedSuspectIndex = 9;
+        mOpenedFileId = SidneyFileIds::kMoselyFingerprint;
+    }
+
     // Show the root.
     mRoot->SetActive(true);
+
+    // Make sure the expected suspect and file are opened.
+    ShowSuspect(mOpenedSuspectIndex);
+    ShowFile(mFiles->GetFile(mOpenedFileId));
 }
 
 void SidneySuspects::Hide()
@@ -324,13 +352,37 @@ void SidneySuspects::Hide()
 
 void SidneySuspects::OnUpdate(float deltaTime)
 {
+    if(!mRoot->IsActive()) { return; }
     mMenuBar.Update();
+
+    // This is not the most efficient approach, but I think it'll do for starters...
+    // Just update the suspect notes if the input field changes.
+    if(mOpenedSuspectIndex >= 0)
+    {
+        if(mNotesInput->GetText().size() != mSuspectInfos[mOpenedSuspectIndex].notes.size())
+        {
+            mSuspectInfos[mOpenedSuspectIndex].notes = mNotesInput->GetText();
+        }
+    }
+}
+
+void SidneySuspects::OnPersist(PersistState& ps)
+{
+    ps.Xfer(PERSIST_VAR(mSuspectInfos), true);
+    ps.Xfer(PERSIST_VAR(mOpenedSuspectIndex));
+    ps.Xfer(PERSIST_VAR(mOpenedFileId));
 }
 
 void SidneySuspects::ShowSuspect(int index)
 {
+    // Invalid index? Just hide the suspect data window.
+    if(index < 0 || index >= mSuspectInfos.size())
+    {
+        mSuspectDataWindow->SetActive(false);
+        return;
+    }
+
     // Get the suspect info.
-    assert(index >= 0 && index < mSuspectInfos.size());
     SuspectInfo& info = mSuspectInfos[index];
 
     // Turn on the suspect window.

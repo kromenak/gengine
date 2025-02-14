@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "PersistState.h"
 #include "SidneyMenuBar.h"
 #include "SidneyPopup.h"
 #include "StringUtil.h"
@@ -28,6 +29,8 @@ public:
     void Hide();
 
     void OnUpdate(float deltaTime);
+
+    void OnPersist(PersistState& ps);
 
 private:
     // Ref to the file system in Sidney.
@@ -89,6 +92,13 @@ private:
 
         // Which linked file is selected.
         int selectedLinkedFileIndex = -1;
+
+        void OnPersist(PersistState& ps)
+        {
+            ps.Xfer(PERSIST_VAR(notes));
+            ps.Xfer(PERSIST_VAR(linkedFileIds));
+            ps.Xfer(PERSIST_VAR(selectedLinkedFileIndex));
+        }
     };
     std::vector<SuspectInfo> mSuspectInfos;
 
