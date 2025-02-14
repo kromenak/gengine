@@ -87,7 +87,7 @@ public:
     void Xfer(const char* name, UIHexagram& value);
 
     // Collections
-    template<typename T> void Xfer(const char* name, std::vector<T>& vector);
+    template<typename T> void Xfer(const char* name, std::vector<T>& vector, bool loadInPlace = false);
     template<typename T> void Xfer(const char* name, std::set<T>& set);
     template<typename T> void Xfer(const char* name, std::unordered_map<std::string, T>& map);
     template<typename T> void Xfer(const char* name, std::string_map_ci<T>& map);
@@ -118,17 +118,28 @@ private:
 };
 
 template<typename T>
-inline void PersistState::Xfer(const char* name, std::vector<T>& vector)
+inline void PersistState::Xfer(const char* name, std::vector<T>& vector, bool loadInPlace)
 {
     if(mBinaryReader != nullptr)
     {
-        vector.clear();
+        if(!loadInPlace)
+        {
+            vector.clear();
+        }
+
         uint64_t size = mBinaryReader->ReadULong();
         for(uint64_t i = 0; i < size; ++i)
         {
-            T value;
-            Xfer("", value);
-            vector.push_back(value);
+            if(i < vector.size())
+            {
+                Xfer("", vector[i]);
+            }
+            else
+            {
+                T value;
+                Xfer("", value);
+                vector.push_back(value);
+            }
         }
     }
     else if(mBinaryWriter != nullptr)
