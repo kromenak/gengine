@@ -43,8 +43,15 @@ private:
         {
             std::string textureName;
             Vector2 position;
+
+            std::string invItemName;
         };
         std::vector<Fingerprint> fingerprints;
+
+        // VO played when getting the print.
+        std::string noPrintLicensePlate;
+        std::string uncoverPrintLicensePlate;
+        std::string collectPrintLicensePlate;
     };
     std::string_map_ci<FingerprintObject> mObjects;
 
