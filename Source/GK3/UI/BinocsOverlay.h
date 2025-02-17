@@ -14,7 +14,9 @@
 #include "Vector2.h"
 #include "Vector3.h"
 
+class BSP;
 class GameCamera;
+class SheepScript;
 class UIButton;
 
 class BinocsOverlay : public Actor
@@ -39,6 +41,15 @@ private:
     UIButton* mZoomInButton = nullptr;
     UIButton* mZoomOutButton = nullptr;
 
+    // Button used to exit this screen.
+    UIButton* mExitButton = nullptr;
+
+    // A reference to the game camera, so we can easily update it.
+    GameCamera* mGameCamera = nullptr;
+
+    // All binocular logic zoom logic is in this SheepScript.
+    SheepScript* mBinocsScript = nullptr;
+
     // Represents a location that can be zoomed to from some other location.
     struct ZoomLocation
     {
@@ -48,13 +59,13 @@ private:
         // The name of the scene asset to use.
         std::string sceneAssetName;
 
-        // When zoomed in, the camera angle and position to start at.
-        Vector2 cameraAngle;
-        Vector3 cameraPos;
-
         // In the zoomed scene, the name of the floor model to use.
         std::string floorModelName;
 
+        // When zoomed in, the camera angle and position to start at.
+        Vector2 cameraAngle;
+        Vector3 cameraPos;
+        
         // When entering/exiting this instance, sheep functions in BINOCS.SHP to execute.
         std::string enterSheepFunctionName;
         std::string exitSheepFunctionName;
@@ -100,19 +111,28 @@ private:
             { "CD1", ZoomAngles(Vector2(332.02f, -9.31f), Vector2(350.17f, 5.11f)) }
         }}
     };
-
-    // A reference to the game camera, for convenience.
-    GameCamera* mGameCamera = nullptr;
-
+    
     // Since the game camera doesn't store its angle in this format internally, we remember and update it here.
-    Vector2 mCameraAngle;
+    Vector2 mZoomedOutCameraAngle;
+
+    // When we zoom in, the camera position/angle change.
+    // We need to save the zoomed out camera position/angle so we can restore it on zoom out.
+    Vector3 mZoomedOutCameraPos;
 
     // What location can we currently zoom into, if any?
-    std::string mCanZoomToLocCode;
+    std::string mCamZoomToLocCode;
+    ZoomLocation* mCurrentZoomLocation = nullptr;
 
     // Are we currently zoomed in?
     bool mIsZoomedIn = false;
 
+    // The camera angle when the camera is zoomed in.
+    Vector2 mZoomedInCameraAngle;
+
+    // When zoomed in, we must temporarily replace the scene's BSP geometry.
+    // We need to remember the old one so we can swap back to it when we zoom back out.
+    BSP* mZoomedOutBSP = nullptr;
+    
     void OnZoomInButtonPressed();
     void OnZoomOutButtonPressed();
 };

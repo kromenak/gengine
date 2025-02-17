@@ -2,14 +2,18 @@
 
 #include "Animator.h"
 #include "AssetManager.h"
+#include "BSP.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "IniParser.h"
 #include "LocationManager.h"
+#include "Renderer.h"
 #include "TextAsset.h"
 #include "Texture.h"
 #include "Scene.h"
+#include "SceneGeometryData.h"
 #include "SceneManager.h"
+#include "SheepManager.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
@@ -73,6 +77,7 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
         exitButton->SetPressCallback([this](UIButton* button){
             Hide();
         });
+        mExitButton = exitButton;
     }
 
     // Add zoom 50x and 5x buttons.
@@ -169,10 +174,22 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
                         else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "ENTERSHEEP"))
                         {
                             location.enterSheepFunctionName = line.entries[0].value;
+
+                            // Sheep functions are supposed to end with a $ symbol.
+                            if(!location.enterSheepFunctionName.empty() && location.enterSheepFunctionName.back() != '$')
+                            {
+                                location.enterSheepFunctionName.push_back('$');
+                            }
                         }
                         else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "EXITSHEEP"))
                         {
                             location.exitSheepFunctionName = line.entries[0].value;
+
+                            // Sheep functions are supposed to end with a $ symbol.
+                            if(!location.exitSheepFunctionName.empty() && location.exitSheepFunctionName.back() != '$')
+                            {
+                                location.exitSheepFunctionName.push_back('$');
+                            }
                         }
                     }
                 }
@@ -182,6 +199,9 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
         // We're done with this text asset.
         delete textAsset;
     }
+
+    // Load binocs sheep script.
+    mBinocsScript = gAssetManager.LoadSheep("BINOCS.SHP");
 
     // Hide by default.
     SetActive(false);
@@ -224,6 +244,8 @@ void BinocsOverlay::Hide()
     camPos.y -= 10000.0f;
     mGameCamera->SetPosition(camPos);
 
+    // Play animation to put away binocs when exiting this screen.
+    // Without this, Gabe/Grace just continue to stand with the binocs up to their faces!
     if(mCurrentUseCase != nullptr)
     {
         Animation* anim = gAssetManager.LoadAnimation(mCurrentUseCase->exitAnimName);
@@ -236,6 +258,13 @@ void BinocsOverlay::Hide()
 
 void BinocsOverlay::OnUpdate(float deltaTime)
 {
+    // Show/hide zoom in/out buttons as appropriate.
+    mZoomInButton->SetEnabled(!mIsZoomedIn);
+    mZoomOutButton->SetEnabled(mIsZoomedIn);
+
+    // Exit button is disabled when zoomed in.
+    mExitButton->SetCanInteract(!mIsZoomedIn);
+
     // Determine if camera angle should change in any direction, depending on which buttons are pressed.
     Vector2 angleChangeDir = Vector2::Zero;
     if(mUpButton->IsPressedDown())
@@ -256,23 +285,32 @@ void BinocsOverlay::OnUpdate(float deltaTime)
     }
 
     // Update camera angle.
-    // Clamp vertical angle within some bounds.
-    mCameraAngle += angleChangeDir * deltaTime;
-    mCameraAngle.y = Math::Clamp(mCameraAngle.y, -0.16259, 0.239742);
-    mGameCamera->SetAngle(mCameraAngle);
-    //printf("Camera angle is: (%f, %f)\n", Math::ToDegrees(mCameraAngle.x), Math::ToDegrees(mCameraAngle.y));
-
-    // Show/hide zoom in/out buttons as appropriate.
-    mZoomInButton->SetEnabled(!mIsZoomedIn);
-    mZoomOutButton->SetEnabled(mIsZoomedIn);
+    if(mIsZoomedIn)
+    {
+        // Clamp vertical angle within some bounds.
+        mZoomedInCameraAngle += angleChangeDir * deltaTime;
+        //mZoomedInCameraAngle.y = Math::Clamp(mZoomedOutCameraAngle.y, -0.16259, 0.239742);
+        mGameCamera->SetAngle(mZoomedInCameraAngle);
+    }
+    else
+    {
+        // Clamp vertical angle within some bounds.
+        mZoomedOutCameraAngle += angleChangeDir * deltaTime;
+        mZoomedOutCameraAngle.y = Math::Clamp(mZoomedOutCameraAngle.y, -0.16259f, 0.239742f);
+        //printf("Camera angle is: (%f, %f)\n", Math::ToDegrees(mZoomedOutCameraAngle.x), Math::ToDegrees(mZoomedOutCameraAngle.y));
+        mGameCamera->SetAngle(mZoomedOutCameraAngle);
+    }
 
     // When not zoomed in, the zoom in button is pressable only when pointing at a zoom location.
     if(!mIsZoomedIn)
     {
-        float camAngleDegX = Math::ToDegrees(mCameraAngle.x);
-        float camAngleDegY = Math::ToDegrees(mCameraAngle.y);
+        // Convert angles to degrees.
+        float camAngleDegX = Math::ToDegrees(mZoomedOutCameraAngle.x);
+        float camAngleDegY = Math::ToDegrees(mZoomedOutCameraAngle.y);
 
-        mCanZoomToLocCode.clear();
+        // Figure out if the current camera angle is within the min/max of any locations we can zoom to from this location.
+        // If so, we'll save the zoom location code.
+        mCamZoomToLocCode.clear();
         auto& map = mZoomAngles[gLocationManager.GetLocation()];
         for(auto& entry : map)
         {
@@ -281,14 +319,14 @@ void BinocsOverlay::OnUpdate(float deltaTime)
                camAngleDegY >= entry.second.minAngles.y &&
                camAngleDegY <= entry.second.maxAngles.y)
             {
-                mCanZoomToLocCode = entry.first;
+                mCamZoomToLocCode = entry.first;
             }
         }
+
+        // Zoom in button is interactable if we have a location we could zoom to.
+        mZoomInButton->SetCanInteract(!mCamZoomToLocCode.empty());
     }
-
-    // Zoom in button is interactable if we have a location we could zoom to.
-    mZoomInButton->SetCanInteract(!mCanZoomToLocCode.empty());
-
+    
     /*
     * Camera angle ranges (degrees) for each focus location.
     *
@@ -305,10 +343,63 @@ void BinocsOverlay::OnUpdate(float deltaTime)
 
 void BinocsOverlay::OnZoomInButtonPressed()
 {
-    printf("Zoom to %s\n", mCanZoomToLocCode.c_str());
+    // Get the zoom location info.
+    auto it = mCurrentUseCase->zoomLocations.find(mCamZoomToLocCode);
+    if(it == mCurrentUseCase->zoomLocations.end())
+    {
+        printf("ERROR: no info on how to zoom to %s exists for the current location/timeblock.\n", mCamZoomToLocCode.c_str());
+        return;
+    }
+    mCurrentZoomLocation = &it->second;
+
+    // Remember the camera's current position, for when we zoom back out.
+    mZoomedOutCameraPos = mGameCamera->GetPosition();
+
+    // Temporarily change the BSP used to that of the zoomed location.
+    mZoomedOutBSP = gRenderer.GetBSP();
+    SceneGeometryData geometryData;
+    geometryData.Load(mCurrentZoomLocation->sceneAssetName);
+    geometryData.GetBSP()->SetFloorObjectName(mCurrentZoomLocation->floorModelName);
+    gRenderer.SetBSP(geometryData.GetBSP());
+
+    // Update the camera position and angle for this zoom location.
+    mGameCamera->SetPosition(mCurrentZoomLocation->cameraPos);
+    mGameCamera->SetAngle(mCurrentZoomLocation->cameraAngle);
+    mZoomedInCameraAngle = mCurrentZoomLocation->cameraAngle;
+
+    // Play the entry Sheep.
+    if(!mCurrentZoomLocation->enterSheepFunctionName.empty())
+    {
+        // BINOCS.SHP *may* also have an "all" version of the enter script. This should be called if it exists.
+        std::string allFuncName = gLocationManager.GetLocation() + "all" + mCamZoomToLocCode + "ent$";
+        gSheepManager.Execute(mBinocsScript, allFuncName, nullptr);
+        gSheepManager.Execute(mBinocsScript, mCurrentZoomLocation->enterSheepFunctionName, nullptr);
+    }
+
+    // We are zoomed in!
+    printf("Zoom to %s\n", mCamZoomToLocCode.c_str());
+    mIsZoomedIn = true;
 }
 
 void BinocsOverlay::OnZoomOutButtonPressed()
 {
+    // Go back to the normal scene BSP.
+    gRenderer.SetBSP(mZoomedOutBSP);
 
+    // Set camera back to the zoomed out position and angle.
+    mGameCamera->SetPosition(mZoomedOutCameraPos);
+    mGameCamera->SetAngle(mZoomedOutCameraAngle);
+
+    // Perform some logic specific to the zoomed location.
+    if(mCurrentZoomLocation != nullptr)
+    {
+        // Play the exit sheep.
+        if(!mCurrentZoomLocation->exitSheepFunctionName.empty())
+        {
+            gSheepManager.Execute(mBinocsScript, mCurrentZoomLocation->exitSheepFunctionName, nullptr);
+        }
+    }
+
+    // No longer zoomed in.
+    mIsZoomedIn = false;
 }

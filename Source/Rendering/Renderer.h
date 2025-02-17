@@ -37,6 +37,7 @@ public:
     void RemoveMeshRenderer(MeshRenderer* mc);
     
     void SetBSP(BSP* bsp) { mBSP = bsp; }
+    BSP* GetBSP() const { return mBSP; }
     
 	void SetSkybox(Skybox* skybox);
     
