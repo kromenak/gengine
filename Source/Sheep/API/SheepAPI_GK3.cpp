@@ -28,6 +28,13 @@ shpvoid ShowDrivingInterface()
 }
 RegFunc0(ShowDrivingInterface, void, IMMEDIATE, REL_FUNC);
 
+shpvoid ShowBinocs()
+{
+    gGK3UI.ShowBinocsOverlay();
+    return 0;
+}
+RegFunc0(ShowBinocs, void, IMMEDIATE, REL_FUNC);
+
 shpvoid ShowFingerprintInterface(const std::string& nounName)
 {
     gGK3UI.ShowFingerprintInterface(nounName);

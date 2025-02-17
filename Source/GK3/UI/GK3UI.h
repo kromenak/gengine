@@ -7,6 +7,7 @@
 #include <functional>
 #include <string>
 
+class BinocsOverlay;
 class CaptionsOverlay;
 class DrivingScreen;
 class FingerprintScreen;
@@ -48,6 +49,7 @@ public:
     void ShowSidney();
 
     void ShowFingerprintInterface(const std::string& nounName);
+    void ShowBinocsOverlay();
 
 private:
     TitleScreen* mTitleScreen = nullptr;
@@ -65,6 +67,7 @@ private:
     Sidney* mSidney = nullptr;
 
     FingerprintScreen* mFingerprintScreen = nullptr;
+    BinocsOverlay* mBinocsOverlay = nullptr;
 };
 
 extern GK3UI gGK3UI;

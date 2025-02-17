@@ -1,5 +1,6 @@
 #include "GK3UI.h"
 
+#include "BinocsOverlay.h"
 #include "CaptionsOverlay.h"
 #include "DrivingScreen.h"
 #include "FingerprintScreen.h"
@@ -228,4 +229,14 @@ void GK3UI::ShowFingerprintInterface(const std::string& nounName)
         mFingerprintScreen->SetIsDestroyOnLoad(false);
     }
     mFingerprintScreen->Show(nounName);
+}
+
+void GK3UI::ShowBinocsOverlay()
+{
+    if(mBinocsOverlay == nullptr)
+    {
+        mBinocsOverlay = new BinocsOverlay();
+        mBinocsOverlay->SetIsDestroyOnLoad(false);
+    }
+    mBinocsOverlay->Show();
 }

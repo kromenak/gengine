@@ -31,6 +31,7 @@ public:
 
     void SetHoverSound(Audio* sound) { mHoverSound = sound; }
     bool IsHovered() const { return mPointerOver; }
+    bool IsPressedDown() const { return sDownButton == this; }
 	
 	void OnPointerEnter() override;
 	void OnPointerExit() override;
