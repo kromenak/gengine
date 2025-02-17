@@ -1,7 +1,11 @@
 #include "FingerprintScreen.h"
 
+#include "ActionManager.h"
 #include "AssetManager.h"
 #include "CursorManager.h"
+#include "GameProgress.h"
+#include "InventoryManager.h"
+#include "Scene.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -19,6 +23,12 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     background->SetTexture(&Texture::Black);
     background->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
     background->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+
+    // The background has a button so we can capture clicks on it.
+    UIButton* backgroundButton = AddComponent<UIButton>();
+    backgroundButton->SetPressCallback([this](UIButton* button){
+        OnBackgroundButtonPressed();
+    });
 
     // Add base background image, which shows the fingerprint box up-close.
     UIImage* baseImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
@@ -51,143 +61,276 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         });
     }
 
-    // Add button for dipping brush in the ink area.
+    // Add button for dipping brush in the dust area.
     {
-        UIButton* inkButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
-        inkButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        inkButton->GetRectTransform()->SetAnchoredPosition(149.0f, 480.0f - 337.0f);
-        inkButton->GetRectTransform()->SetSizeDelta(127.0f, 108.0f);
-        inkButton->SetPressCallback([this](UIButton* button){
-            OnInkButtonPressed();
+        UIButton* dustButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        dustButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        dustButton->GetRectTransform()->SetAnchoredPosition(149.0f, 480.0f - 337.0f);
+        dustButton->GetRectTransform()->SetSizeDelta(127.0f, 108.0f);
+        dustButton->SetPressCallback([this](UIButton* button){
+            OnDustButtonPressed();
         });
     }
 
-    // Create an actor that takes up the whole right-panel area of the interface.
-    // This will be the parent of the fingerprint object's image.
-    Actor* rightPanelActor = new Actor(TransformType::RectTransform);
-    rightPanelActor->GetTransform()->SetParent(baseImage->GetRectTransform());
-    rightPanelActor->GetComponent<RectTransform>()->SetAnchor(AnchorPreset::TopRight);
-    rightPanelActor->GetComponent<RectTransform>()->SetAnchoredPosition(-2.0f, -2.0f);
-    rightPanelActor->GetComponent<RectTransform>()->SetSizeDelta(249.0f, 476.0f);
+    // Add button for tape dispenser.
+    {
+        UIButton* tapeButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        tapeButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        tapeButton->GetRectTransform()->SetAnchoredPosition(278.0f, 103.0f);
+        tapeButton->GetRectTransform()->SetSizeDelta(106.0f, 154.0f);
+        tapeButton->SetPressCallback([this](UIButton* button){
+            OnTapeButtonPressed();
+        });
+    }
 
-    // Add image to show the object being fingerprinted.
-    mFingerprintObjectImage = UIUtil::NewUIActorWithWidget<UIImage>(rightPanelActor);
-    mFingerprintObjectImage->SetTexture(&Texture::Black);
-    mFingerprintObjectImage->GetRectTransform()->SetAnchor(AnchorPreset::Center);
-    mFingerprintObjectImage->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
+    // Add button for fingerprint cloth.
+    {
+        UIButton* clothButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        clothButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        clothButton->GetRectTransform()->SetAnchoredPosition(0.0f, 94.0f);
+        clothButton->GetRectTransform()->SetSizeDelta(140.0f, 160.0f);
+        clothButton->SetPressCallback([this](UIButton* button){
+            OnClothButtonPressed();
+        });
+    }
+
+    // Create right-panel area that shows a closeup of the object being dusted.
+    {
+        // Create a button that takes up the whole right-panel area of the interface.
+        // This has two purposes: to catch input when clicking/dragging in this area. And to help center the closeup image.
+        mRightPanelButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        mRightPanelButton->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
+        mRightPanelButton->GetRectTransform()->SetAnchoredPosition(-2.0f, -2.0f);
+        mRightPanelButton->GetRectTransform()->SetSizeDelta(249.0f, 476.0f);
+        mRightPanelButton->SetPressCallback([this](UIButton* button) {
+            OnRightPanelPressed();
+        });
+
+        // Add image to show the object being fingerprinted.
+        mFingerprintObjectImage = UIUtil::NewUIActorWithWidget<UIImage>(mRightPanelButton->GetOwner());
+        mFingerprintObjectImage->SetTexture(&Texture::Black);
+        mFingerprintObjectImage->GetRectTransform()->SetAnchor(AnchorPreset::Left);
+        mFingerprintObjectImage->GetRectTransform()->SetAnchoredPosition(0.0f, -8.0f);
+
+         // Create a set of images used to display fingerprints.
+        for(int i = 0; i < kMaxFingerprintImages; ++i)
+        {
+            mFingerprintImages[i] = UIUtil::NewUIActorWithWidget<UIImage>(mRightPanelButton->GetOwner());
+            mFingerprintImages[i]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mFingerprintImages[i]->SetEnabled(false);
+
+            mFingerprintButtons[i] = mFingerprintImages[i]->GetOwner()->AddComponent<UIButton>();
+        }
+    }
+
+    // Load needed cursors.
+    mBrushCursor = gAssetManager.LoadCursor("C_FPBRUSH.CUR");
+    mDustedBrushCursor = gAssetManager.LoadCursor("C_FPBRUSH_WDUST.CUR");
+    mTapeCursor = gAssetManager.LoadCursor("C_FPTAPE_NOFP.CUR");
+    mUsedTapeCursor = gAssetManager.LoadCursor("C_FPTAPE_FP.CUR");
 
     // UNFORTUNATELY, this is another spot where the logic doesn't seem data-driven.
     // So, we'll enumerate all the possible fingerprint instances here and nowwww.....
-    {
-        FingerprintObject& object = mObjects["HAND_MIRROR"];
-        object.textureName = "FP_LHOMIR.BMP";
-        object.uncoverPrintLicensePlate = "2O8A805PF1";
 
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_LHOMIR_P1.BMP";
-        object.fingerprints.back().position = Vector2(162.0f, 132.0f);
-        object.fingerprints.back().invItemName = "HOWARDS_FINGERPRINT";
-    }
-    {
-        FingerprintObject& object = mObjects["BOOK_IN_DRAWER"];
-        object.textureName = "FP_BOOKIMMORTALS.BMP";
-        object.uncoverPrintLicensePlate = "08BBY59411";
-
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_BOOKIMMORTALS_P1.BMP";
-        object.fingerprints.back().position = Vector2(113.0f, 144.0f);
-        object.fingerprints.back().invItemName = "MONTREAUX_FINGERPRINT";
-    }
-    {
-        FingerprintObject& object = mObjects["BLOODLINE_MANUSCRIPT"];
-        object.textureName = "FP_BLOMAN.BMP";
-        object.collectPrintLicensePlate = "1037H59291";
-
-        // The first fingerprint, collected during 302A.
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_BLOMAN_P6.BMP";
-        object.fingerprints.back().position = Vector2(206.0f, 310.0f);
-        object.fingerprints.back().invItemName = "LARRYS_FINGERPRINT";
-
-        // The next three fingerprints, collected during 312P.
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_BLOMAN_P1.BMP";
-        object.fingerprints.back().position = Vector2(202.0f, 256.0f);
-        object.fingerprints.back().invItemName = "UNKNOWN_PRINT_1";
-        // Uncover VO: 1EP02593L1
-
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_BLOMAN_P2.BMP";
-        object.fingerprints.back().position = Vector2(209.0f, 108.0f);
-        object.fingerprints.back().invItemName = "UNKNOWN_PRINT_2";
-        // Uncover VO: 1077H59291
-
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_BLOMAN_P3.BMP";
-        object.fingerprints.back().position = Vector2(200.0f, 357.0f);
-        object.fingerprints.back().invItemName = "UNKNOWN_PRINT_3";
-        // Uncover VO: 1077H59291
-
-        // When you collect first print VO: 1077H59292
-        // When you collect second print VO: 1077H59293
-        // When you collect third print VO: 1077H49294
-    }
-    {
-        FingerprintObject& object = mObjects["LSR_ENVELOPE_INV"];
-        object.textureName = "FP_LSRENV.BMP";
-        object.uncoverPrintLicensePlate = "10LEM59291";
-
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_LSRENV_P1.BMP";
-        object.fingerprints.back().position = Vector2(178.0f, 305.0f);
-        object.fingerprints.back().invItemName = "ESTELLES_FINGERPRINT_LSR";
-    }
+    // Day 2, 7AM Items (as Grace).
     {
         FingerprintObject& object = mObjects["HBHG_BOOK"];
         object.textureName = "FP_HOLYGBOOK.BMP";
         object.noPrintLicensePlate = "10LCQ59291";
+    }
 
-        // No prints on this one!
+    // Day 2, 10AM Items (while sneaking around as Gabe).
+    {
+        FingerprintObject& object = mObjects["HAND_MIRROR"];
+        object.textureName = "FP_LHOMIR.BMP";
+        
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().textureName = "FP_LHOMIR_P1.BMP";
+        object.fingerprints.back().position = Vector2(162.0f, 132.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "2O8A805PF1";
+        object.fingerprints.back().invItemName = "HOWARDS_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotMirrorHowardPrint";
+        object.fingerprints.back().scoreName = "e_210a_r31_fingerprint_kit_mirror";
+    }
+    {
+        FingerprintObject& object = mObjects["GUN_IN_CASE"];
+        object.textureName = "FP_COLT45.BMP";
+        
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().textureName = "FP_COLT45_P1.BMP";
+        object.fingerprints.back().position = Vector2(65.0f, 279.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "0J8ES05291";
+        object.fingerprints.back().collectPrintLicensePlate = "0A89N052H2";
+        object.fingerprints.back().invItemName = "BUTHANES_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotGunButhanePrint";
+        object.fingerprints.back().scoreName = "e_210a_r29_fingerprint_kit_on_gun";
+    }
+    {
+        FingerprintObject& object = mObjects["CIG_PACK_IN_DRAWER"];
+        object.textureName = "FP_CIGS.BMP";
+        
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().textureName = "FP_CIGS_P1.BMP";
+        object.fingerprints.back().position = Vector2(112.0f, 200.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "0D83M05ML1";
+        object.fingerprints.back().collectPrintLicensePlate = "0A89N052H2";
+        object.fingerprints.back().invItemName = "ABBE_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotCigPackAbbePrint";
+        object.fingerprints.back().scoreName = "e_210a_fingerprint_kit_cigarette_pack";
+    }
+    {
+        FingerprintObject& object = mObjects["SUITCASE"];
+        object.textureName = "FP_SUITCA.BMP";
+        
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().textureName = "FP_SUITCA_P1.BMP";
+        object.fingerprints.back().position = Vector2(111.0f, 370.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "0A89N052H1";
+        object.fingerprints.back().collectPrintLicensePlate = "0A89N052H2";
+        object.fingerprints.back().invItemName = "BUCHELLIS_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotSuitcaseBuchelliPrint";
+        object.fingerprints.back().scoreName = "e_210a_r21_fingerprint_kit_suitcase";
+    }
+    {
+        FingerprintObject& object = mObjects["JESUS_PICTURE"];
+        object.textureName = "FP_JESUS.BMP";
+        object.noPrintLicensePlate = "0K86F05PF1";
+    }
+
+    // Day 2, 12PM Items (as Grace at Chateau de Serres).
+    {
+        FingerprintObject& object = mObjects["BOOK_IN_DRAWER"];
+        object.textureName = "FP_BOOKIMMORTALS.BMP";
+        
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().textureName = "FP_BOOKIMMORTALS_P1.BMP";
+        object.fingerprints.back().position = Vector2(113.0f, 144.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "08BBY59411";
+        object.fingerprints.back().invItemName = "MONTREAUX_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotImmortalsMontreauxPrint";
+        object.fingerprints.back().scoreName = "e_212p_cs2_fingerprint_kit_immortals_book";
+    }
+
+    // Day 2, 2PM Items (as Gabe after 2 Men are murdered).
+    {
+        FingerprintObject& object = mObjects["DIRTY_GLASS_WILKES"];
+        object.textureName = "FP_OCTSHOT.BMP";
+        
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().textureName = "FP_OCTSHOT_P1.BMP";
+        object.fingerprints.back().position = Vector2(81.0f, 214.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "0A89N052H2";
+        object.fingerprints.back().collectPrintLicensePlate = "1EK4259NS1";
+        object.fingerprints.back().invItemName = "WILKES_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotImmortalsMontreauxPrint";
+        object.fingerprints.back().scoreName = "e_202p_lby_fingerprint_kit_wilke_glass";
     }
     {
         FingerprintObject& object = mObjects["DIRTY_GLASS_BUCHELLI"];
         object.textureName = "FP_SQRSHOT.BMP";
-        object.uncoverPrintLicensePlate = "0A89N052H2";
 
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_SQRSHOT_P1.BMP";
         object.fingerprints.back().position = Vector2(150.0f, 202.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "0A89N052H2";
         object.fingerprints.back().invItemName = "BUCHELLIS_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotImmortalsMontreauxPrint";
+        object.fingerprints.back().scoreName = "e_202p_lby_fingerprint_kit_buchelli_glass";
         //NOTE: If you already have Buchelli's print, Gabe will say: 1EK0259NS1
     }
     {
-        FingerprintObject& object = mObjects["DIRTY_GLASS_WILKES"];
-        object.textureName = "FP_OCTSHOT.BMP";
-        object.uncoverPrintLicensePlate = "0A89N052H2";
-        object.collectPrintLicensePlate = "1EK4259NS1";
+        FingerprintObject& object = mObjects["POP_BOTTLE"];
+        object.textureName = "FP_SODA.BMP";
 
         object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_OCTSHOT_P1.BMP";
-        object.fingerprints.back().position = Vector2(81.0f, 214.0f);
-        object.fingerprints.back().invItemName = "WILKES_FINGERPRINT";
+        object.fingerprints.back().textureName = "FP_SODA_P1.BMP";
+        object.fingerprints.back().position = Vector2(150.0f, 153.0f);
+        object.fingerprints.back().invItemName = "MOSELYS_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotPMoselyPrint";
+        object.fingerprints.back().scoreName = "e_202p_r25_fingerprint_kit_soda_bottle";
+    }
+
+    // Day 2, 5PM Items (as Grace during LSR).
+    {
+        FingerprintObject& object = mObjects["LSR_ENVELOPE_INV"];
+        object.textureName = "FP_LSRENV.BMP";
+        
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().textureName = "FP_LSRENV_P1.BMP";
+        object.fingerprints.back().position = Vector2(178.0f, 305.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "10LEM59291";
+        object.fingerprints.back().invItemName = "ESTELLES_FINGERPRINT_LSR";
+        object.fingerprints.back().flagName = "GotLEstellePrint";
+        object.fingerprints.back().scoreName = "e_205p_inventory_fingerprint_kit_envelope";
     }
     {
         FingerprintObject& object = mObjects["DIRTY_WINE_GLASS_BUCHELLI"];
         object.textureName = "FP_BUCHGLASS.BMP";
-        object.collectPrintLicensePlate = "1077H59291";
-
+        
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_BUCHGLASS_P1.BMP";
         object.fingerprints.back().position = Vector2(82.0f, 149.0f);
+        object.fingerprints.back().collectPrintLicensePlate = "1077H59291";
         object.fingerprints.back().invItemName = "BUCHELLIS_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotWineBuchelliPrint";
+        object.fingerprints.back().scoreName = ""; // ???
     }
     {
         FingerprintObject& object = mObjects["GLASS"];
         object.textureName = "FP_GLASS.BMP";
         object.noPrintLicensePlate = "1EPXH59291";
-
-        // No prints on this one!
     }
+
+    // Day 3 2AM (as Gabe, when we retrieves the manuscript).
+    // Also, Day 3 12PM (as Grace, when she again retrieves the manuscript).
+    {
+        FingerprintObject& object = mObjects["BLOODLINE_MANUSCRIPT"];
+        object.textureName = "FP_BLOMAN.BMP";
+        
+        // The first fingerprint, collected during 302A.
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().timeblock = Timeblock(2, 2); // Annoyingly/confusingly Day 3 2AM is called 202A internally.
+        object.fingerprints.back().textureName = "FP_BLOMAN_P6.BMP";
+        object.fingerprints.back().position = Vector2(206.0f, 310.0f);
+        object.fingerprints.back().collectPrintLicensePlate = "1037H59291";
+        object.fingerprints.back().invItemName = "LARRYS_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotMLarryPrint";
+        object.fingerprints.back().scoreName = "e_302a_inventory_fingerprint_kit_manuscript";
+
+        // The next three fingerprints, collected during 312P.
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().timeblock = Timeblock(3, 12);
+        object.fingerprints.back().textureName = "FP_BLOMAN_P1.BMP";
+        object.fingerprints.back().position = Vector2(202.0f, 256.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "1EP02593L1";
+        object.fingerprints.back().invItemName = "UNKNOWN_PRINT_1";
+        object.fingerprints.back().flagName = "GotMMoselyPrint";
+        object.fingerprints.back().scoreName = "e_312p_bmb_fingerprint_kit_manuscript1";
+
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().timeblock = Timeblock(3, 12);
+        object.fingerprints.back().textureName = "FP_BLOMAN_P2.BMP";
+        object.fingerprints.back().position = Vector2(209.0f, 108.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "1077H59291";
+        object.fingerprints.back().invItemName = "UNKNOWN_PRINT_2";
+        object.fingerprints.back().flagName = "GotMButhanePrint";
+        object.fingerprints.back().scoreName = "e_312p_bmb_fingerprint_kit_manuscript2";
+
+        object.fingerprints.emplace_back();
+        object.fingerprints.back().timeblock = Timeblock(3, 12);
+        object.fingerprints.back().textureName = "FP_BLOMAN_P3.BMP";
+        object.fingerprints.back().position = Vector2(200.0f, 357.0f);
+        object.fingerprints.back().uncoverPrintLicensePlate = "1077H59291";
+        object.fingerprints.back().invItemName = "UNKNOWN_PRINT_3";
+        object.fingerprints.back().flagName = "GotMBuchelliPrint";
+        object.fingerprints.back().scoreName = "e_312p_bmb_fingerprint_kit_manuscript3";
+
+        // When you collect first print VO: 1077H59292
+        // When you collect second print VO: 1077H59293
+        // When you collect third print VO: 1077H49294
+    }
+
+    // Day 3, 3PM (as Gabe) or 6PM (as Grace).
     {
         FingerprintObject& object = mObjects["WATER_BOTTLE_ON_MOPED"];
         object.textureName = "FP_WATBTL.BMP";
@@ -197,58 +340,11 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         object.fingerprints.back().textureName = "FP_WATBTL_P1.BMP";
         object.fingerprints.back().position = Vector2(65.0f, 279.0f); //TODO: Verify Position
         object.fingerprints.back().invItemName = "ESTELLES_FINGERPRINT";
+        object.fingerprints.back().flagName = "GotWaterBottleEstellePrint";
+        object.fingerprints.back().flagNameGrace = "GotWaterBottleEstellePrintGrace";
+        object.fingerprints.back().scoreName = "e_303p_wod_fingerprint_kit_water_bottle";
     }
-    {
-        FingerprintObject& object = mObjects["CIG_PACK_IN_DRAWER"];
-        object.textureName = "FP_CIGS.BMP";
-        object.uncoverPrintLicensePlate = "0D83M05ML1";
-        object.collectPrintLicensePlate = "0A89N052H2";
-
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_CIGS_P1.BMP";
-        object.fingerprints.back().position = Vector2(112.0f, 200.0f);
-        object.fingerprints.back().invItemName = "ABBE_FINGERPRINT";
-    }
-    {
-        FingerprintObject& object = mObjects["SUITCASE"];
-        object.textureName = "FP_SUITCA.BMP";
-        object.uncoverPrintLicensePlate = "0A89N052H1";
-        object.collectPrintLicensePlate = "0A89N052H2";
-
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_SUITCA_P1.BMP";
-        object.fingerprints.back().position = Vector2(111.0f, 370.0f);
-        object.fingerprints.back().invItemName = "BUCHELLIS_FINGERPRINT";
-    }
-    {
-        FingerprintObject& object = mObjects["POP_BOTTLE"];
-        object.textureName = "FP_SODA.BMP";
-        // No VO for this one.
-
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_SODA_P1.BMP";
-        object.fingerprints.back().position = Vector2(150.0f, 153.0f);
-        object.fingerprints.back().invItemName = "MOSELYS_FINGERPRINT";
-    }
-    {
-        FingerprintObject& object = mObjects["JESUS_PICTURE"];
-        object.textureName = "FP_JESUS.BMP";
-        object.noPrintLicensePlate = "0K86F05PF1";
-
-        // No prints on this one!
-    }
-    {
-        FingerprintObject& object = mObjects["GUN_IN_CASE"];
-        object.textureName = "FP_COLT45.BMP";
-        object.uncoverPrintLicensePlate = "0J8ES05291";
-        object.collectPrintLicensePlate = "0A89N052H2";
-
-        object.fingerprints.emplace_back();
-        object.fingerprints.back().textureName = "FP_COLT45_P1.BMP";
-        object.fingerprints.back().position = Vector2(65.0f, 279.0f);
-        object.fingerprints.back().invItemName = "BUTHANES_FINGERPRINT";
-    }
-
+    
 	// Hide by default.
     SetActive(false);
 }
@@ -257,15 +353,76 @@ void FingerprintScreen::Show(const std::string& nounName)
 {
     gLayerManager.PushLayer(&mLayer);
 
+    // Find the object associated with this noun.
     auto it = mObjects.find(nounName);
     if(it != mObjects.end())
     {
-        mFingerprintObjectImage->SetTexture(gAssetManager.LoadTexture(it->second.textureName), true);
+        mActiveObject = &it->second;
+    }
+    else
+    {
+        mActiveObject = nullptr;
+    }
+
+    // Show the object being fingerprinted in the right panel.
+    if(mActiveObject != nullptr)
+    {
+        mFingerprintObjectImage->SetTexture(gAssetManager.LoadTexture(mActiveObject->textureName), true);
     }
     else
     {
         mFingerprintObjectImage->SetTexture(&Texture::Black);
     }
+
+    // Position fingerprint images and hide them to start.
+    int imageIndex = 0;
+    if(mActiveObject != nullptr)
+    {
+        for(int fpIndex = 0; fpIndex < mActiveObject->fingerprints.size(); ++fpIndex)
+        {
+            // Can't show this fingerprint because we ran out of images!
+            if(imageIndex >= kMaxFingerprintImages)
+            {
+                printf("ERROR: Ran out of fingerprint images when showing fingerprint object!\n");
+                continue;
+            }
+
+            // Skip this fingerprint if not the right timeblock.
+            FingerprintObject::Fingerprint& fp = mActiveObject->fingerprints[fpIndex];
+            if(fp.timeblock != Timeblock(1, 0) && fp.timeblock != gGameProgress.GetTimeblock())
+            {
+                continue;
+            }
+
+            Texture* printTexture = gAssetManager.LoadTexture(fp.textureName);
+            Texture* alphaTexture = gAssetManager.LoadTexture(printTexture->GetNameNoExtension() + "A");
+            printTexture->ApplyAlphaChannel(*alphaTexture);
+
+            mFingerprintImages[imageIndex]->SetTexture(printTexture, true);
+            mFingerprintImages[imageIndex]->SetEnabled(true);
+            mFingerprintImages[imageIndex]->GetRectTransform()->SetAnchoredPosition(fp.position);
+            mFingerprintImages[imageIndex]->SetColor(Color32(0, 0, 0, 0));
+            mFingerprintAlpha[imageIndex] = 0.0f;
+
+            mFingerprintButtons[imageIndex]->SetPressCallback([this, fpIndex](UIButton* button){
+                OnFingerprintPressed(fpIndex);
+            });
+
+            // On to the next image index.
+            ++imageIndex;
+        }
+    }
+
+    // Hide any remaining fingerprint images.
+    for(; imageIndex < kMaxFingerprintImages; ++imageIndex)
+    {
+        mFingerprintImages[imageIndex]->SetEnabled(false);
+    }
+        
+    // Reset some state vars.
+    PutDownBrush(); // resets cursor state and brush image state
+    mDistanceDusted = 0.0f;
+    mTapePrintIndex = -1;
 
 	// Actually show the stuff!
 	SetActive(true);
@@ -285,23 +442,74 @@ bool FingerprintScreen::IsShowing() const
 
 void FingerprintScreen::OnUpdate(float deltaTime)
 {
-    if(mCursorState == CursorState::CleanBrush)
+    // Update cursor based on state.
+    switch(mCursorState)
     {
-        gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_FPBRUSH.BMP"));
-    }
-    else if(mCursorState == CursorState::InkedBrush)
-    {
-        gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_FPBRUSH_WDUST.BMP"));
-    }
-    else
-    {
+    default:
+    case CursorState::Normal:
         gCursorManager.UseDefaultCursor();
+        break;
+
+    case CursorState::Brush:
+        gCursorManager.UseCustomCursor(mBrushCursor);
+        break;
+
+    case CursorState::DustedBrush:
+        gCursorManager.UseCustomCursor(mDustedBrushCursor);
+        break;
+
+    case CursorState::Tape:
+        gCursorManager.UseCustomCursor(mTapeCursor);
+        break;
+
+    case CursorState::TapeWithPrint:
+        gCursorManager.UseCustomCursor(mUsedTapeCursor);
+        break;
+    }
+
+    // If using the dusted brush, AND hovering the right panel AND left button is pressed...
+    // ...we are actively dusting the object for fingerprints!
+    if(mActiveObject != nullptr && mCursorState == CursorState::DustedBrush && gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Left))
+    {
+        // Distance to drag brush before you get the "no prints" dialogue.
+        static const float kNoPrintDialogueDistance = 800.0f;
+        if(mActiveObject->fingerprints.empty())
+        {
+            if(mRightPanelButton->IsHovered())
+            {
+                mDistanceDusted += gInputManager.GetMouseDelta().GetLength();
+                if(mDistanceDusted > kNoPrintDialogueDistance)
+                {
+                    gActionManager.ExecuteSheepAction(StringUtil::Format("wait StartDialogue(\"%s\", 1)", mActiveObject->noPrintLicensePlate.c_str()), [this](const Action* action){
+                        Hide();
+                    });
+                }
+            }
+        }
+        else
+        {
+            for(int i = 0; i < kMaxFingerprintImages; ++i)
+            {
+                if(mFingerprintImages[i]->IsEnabled() && mFingerprintButtons[i]->IsHovered())
+                {
+                    float prevAlpha = mFingerprintAlpha[i];
+                    mFingerprintAlpha[i] += gInputManager.GetMouseDelta().GetLength() * deltaTime * 0.2f;
+                    mFingerprintAlpha[i] = Math::Clamp(mFingerprintAlpha[i], 0.0f, 1.0f);
+                    mFingerprintImages[i]->SetColor(Color32(0, 0, 0, mFingerprintAlpha[i] * 255));
+
+                    if(!mActiveObject->fingerprints[i].uncoverPrintLicensePlate.empty() && prevAlpha < 1.0f && mFingerprintAlpha[i] >= 1.0f)
+                    {
+                        gActionManager.ExecuteSheepAction(StringUtil::Format("wait StartDialogue(\"%s\", 1)", mActiveObject->fingerprints[i].uncoverPrintLicensePlate.c_str()));
+                    }
+                }
+            }
+        }
     }
 }
 
 void FingerprintScreen::PickUpBrush()
 {
-    mCursorState = CursorState::CleanBrush;
+    mCursorState = CursorState::Brush;
     mBrushImage->SetEnabled(false);
 }
 
@@ -311,22 +519,126 @@ void FingerprintScreen::PutDownBrush()
     mBrushImage->SetEnabled(true);
 }
 
-void FingerprintScreen::OnBrushButtonPressed()
+void FingerprintScreen::OnBackgroundButtonPressed()
 {
-    if(mCursorState == CursorState::Normal)
-    {
-        PickUpBrush();
-    }
-    else if(mCursorState == CursorState::CleanBrush || mCursorState == CursorState::InkedBrush)
+    // If you click anywhere on this screen's background with any brush, it gets put away.
+    if(mCursorState == CursorState::Brush || mCursorState == CursorState::DustedBrush)
     {
         PutDownBrush();
     }
 }
 
-void FingerprintScreen::OnInkButtonPressed()
+void FingerprintScreen::OnBrushButtonPressed()
 {
-    if(mCursorState == CursorState::CleanBrush)
+    // Clicking the brush picks it up.
+    // Clicking here when you're holding the brush puts it down.
+    if(mCursorState == CursorState::Normal)
     {
-        mCursorState = CursorState::InkedBrush;
+        PickUpBrush();
+    }
+    else if(mCursorState == CursorState::Brush || mCursorState == CursorState::DustedBrush)
+    {
+        PutDownBrush();
+    }
+}
+
+void FingerprintScreen::OnDustButtonPressed()
+{
+    if(mCursorState == CursorState::Brush)
+    {
+        mCursorState = CursorState::DustedBrush;
+    }
+}
+
+void FingerprintScreen::OnTapeButtonPressed()
+{
+    // If you click on this with the normal cursor, you get a piece of tape.
+    // With tape, you put the tape down.
+    // With a brush (dusted or not), you put the brush down.
+    if(mCursorState == CursorState::Normal)
+    {
+        mCursorState = CursorState::Tape;
+    }
+    else if(mCursorState == CursorState::Tape)
+    {
+        mCursorState = CursorState::Normal;
+    }
+    else if(mCursorState == CursorState::Brush || mCursorState == CursorState::DustedBrush)
+    {
+        PutDownBrush();
+    }
+}
+
+void FingerprintScreen::OnClothButtonPressed()
+{
+    if(mCursorState == CursorState::TapeWithPrint)
+    {
+        FingerprintObject::Fingerprint& fp = mActiveObject->fingerprints[mTapePrintIndex];
+
+        // Put the associated fingerprint inventory item in Ego's inventory.
+        if(!fp.invItemName.empty())
+        {
+            gInventoryManager.AddInventoryItem(fp.invItemName);
+        }
+
+        // Set associated flag.
+        std::string flagName = fp.flagName;
+        if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace") && !fp.flagNameGrace.empty())
+        {
+            flagName = fp.flagNameGrace;
+        }
+        if(!flagName.empty())
+        {
+            gGameProgress.SetFlag(flagName);
+        }
+
+        // Grant associated score.
+        if(!fp.scoreName.empty())
+        {
+            gGameProgress.ChangeScore(fp.scoreName);
+        }
+
+        // If there's a VO associated with collecting this print, play it!
+        if(!mActiveObject->fingerprints[mTapePrintIndex].collectPrintLicensePlate.empty())
+        {
+            std::string command = StringUtil::Format("wait StartDialogue(\"%s\", 1)", mActiveObject->fingerprints[mTapePrintIndex].collectPrintLicensePlate.c_str());
+            gActionManager.ExecuteSheepAction(command, [this](const Action* action){
+                Hide();
+            });
+        }
+        else
+        {
+            Hide();
+        }
+    }
+    else if(mCursorState == CursorState::Brush || mCursorState == CursorState::DustedBrush)
+    {
+        PutDownBrush();
+    }
+}
+
+void FingerprintScreen::OnRightPanelPressed()
+{
+    // Clicking here with undusted brush will - yep, you guessed it - put the brush away.
+    // However, clicking here with a DUSTED brush doesn't do anything - see OnUpdate for the drag logic!
+    if(mCursorState == CursorState::Brush)
+    {
+        PutDownBrush();
+    }
+}
+
+void FingerprintScreen::OnFingerprintPressed(int index)
+{
+    // These buttons are not responsive until they've been fully uncovered.
+    if(mFingerprintAlpha[index] < 1.0f) { return; }
+
+    if(mCursorState == CursorState::Brush)
+    {
+        PutDownBrush();
+    }
+    else if(mCursorState == CursorState::Tape)
+    {
+        mCursorState = CursorState::TapeWithPrint;
+        mTapePrintIndex = index;
     }
 }

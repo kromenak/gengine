@@ -52,7 +52,7 @@ void Cursor::Load(uint8_t* data, uint32_t dataLength)
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "frame count"))
             {
-                frameCount = keyValue.GetValueAsInt();
+                frameCount = Math::Max(keyValue.GetValueAsInt(), 1);
             }
             else if(StringUtil::EqualsIgnoreCase(keyValue.key, "frame rate"))
             {
