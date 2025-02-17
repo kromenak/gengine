@@ -1,7 +1,12 @@
 #include "BinocsOverlay.h"
 
+#include "Animator.h"
 #include "AssetManager.h"
 #include "GameCamera.h"
+#include "GameProgress.h"
+#include "IniParser.h"
+#include "LocationManager.h"
+#include "TextAsset.h"
 #include "Texture.h"
 #include "Scene.h"
 #include "SceneManager.h"
@@ -79,6 +84,10 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
         zoomInButton->SetDisabledTexture(gAssetManager.LoadTexture("BINOCBTNZOOMINDIS.BMP"));
         zoomInButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
         zoomInButton->GetRectTransform()->SetAnchoredPosition(-95.0f, 62.0f);
+        zoomInButton->SetPressCallback([this](UIButton* button){
+            OnZoomInButtonPressed();
+        });
+        mZoomInButton = zoomInButton;
     }
     {
         UIButton* zoomOutButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
@@ -88,6 +97,90 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
         zoomOutButton->SetDisabledTexture(gAssetManager.LoadTexture("BINOCBTNZOOMOUTDIS.BMP"));
         zoomOutButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
         zoomOutButton->GetRectTransform()->SetAnchoredPosition(-95.0f, 62.0f);
+        zoomOutButton->SetPressCallback([this](UIButton* button){
+            OnZoomOutButtonPressed();
+        });
+        mZoomOutButton = zoomOutButton;
+    }
+
+    // Read in Binocs use case data.
+    {
+        TextAsset* textAsset = gAssetManager.LoadText("BINOCS.TXT", AssetScope::Manual);
+        IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
+        parser.SetMultipleKeyValuePairsPerLine(false);
+
+        // This file is guaranteed to have its data in a specific order, so we can make some assumptions here.
+        bool readMoreData = true;
+        while(readMoreData)
+        {
+            // First, there will always be a "header section" for a specific location/timeblock combination.
+            IniSection section;
+            readMoreData = parser.ReadNextSection(section);
+            if(readMoreData)
+            {
+                // The key will be the location and timeblock strings concatenated together (e.g. CD1102P).
+                // This is what we use to key the use case map.
+                UseCase& useCase = mUseCases[section.name];
+
+                // Parse the lines within this use case.
+                std::vector<std::string> locs;
+                for(auto& line : section.lines)
+                {
+                    if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "LOC"))
+                    {
+                        locs = StringUtil::Split(line.entries[0].value, ',', true);
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "ANIM"))
+                    {
+                        useCase.exitAnimName = line.entries[0].value;
+                    }
+                }
+
+                // Then, there will be X sections following, one for each location in the LOC field of the header section.
+                for(int i = 0; i < locs.size(); ++i)
+                {
+                    readMoreData = parser.ReadNextSection(section);
+                    if(!readMoreData) { break; }
+
+                    // The location this section correlates to is embedded within the section name.
+                    // We can extract it because all sections use the same naming convention.
+                    std::string sceneAssetName = section.name.substr(7);
+                    std::string locationCode = sceneAssetName.substr(0, 3);
+
+                    // Create a zoom location entry for this location.
+                    ZoomLocation& location = useCase.zoomLocations[locationCode];
+                    location.sceneAssetName = sceneAssetName;
+
+                    // Populate from the data in this section.
+                    for(auto& line : section.lines)
+                    {
+                        if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "CAMANGLE"))
+                        {
+                            location.cameraAngle = line.entries[0].GetValueAsVector2();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "CAMPOS"))
+                        {
+                            location.cameraPos = line.entries[0].GetValueAsVector3();
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "FLOOR"))
+                        {
+                            location.floorModelName = line.entries[0].value;
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "ENTERSHEEP"))
+                        {
+                            location.enterSheepFunctionName = line.entries[0].value;
+                        }
+                        else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "EXITSHEEP"))
+                        {
+                            location.exitSheepFunctionName = line.entries[0].value;
+                        }
+                    }
+                }
+            }
+        }
+
+        // We're done with this text asset.
+        delete textAsset;
     }
 
     // Hide by default.
@@ -105,6 +198,21 @@ void BinocsOverlay::Show()
     mGameCamera->SetPosition(camPos);
 
     mGameCamera->SetAngle(Vector2::Zero);
+
+    // Figure out the use case from the current location and timeblock.
+    auto& it = mUseCases.find(gLocationManager.GetLocation() + gGameProgress.GetTimeblock().ToString());
+    if(it != mUseCases.end())
+    {
+        mCurrentUseCase = &it->second;
+    }
+    else
+    {
+        printf("ERROR: Using binocs from an invalid location or timeblock\n");
+        Hide();
+    }
+    
+    // Not zoomed in for starters.
+    mIsZoomedIn = false;
 }
 
 void BinocsOverlay::Hide()
@@ -115,6 +223,15 @@ void BinocsOverlay::Hide()
     Vector3 camPos = mGameCamera->GetPosition();
     camPos.y -= 10000.0f;
     mGameCamera->SetPosition(camPos);
+
+    if(mCurrentUseCase != nullptr)
+    {
+        Animation* anim = gAssetManager.LoadAnimation(mCurrentUseCase->exitAnimName);
+        if(anim != nullptr)
+        {
+            gSceneManager.GetScene()->GetAnimator()->Start(anim);
+        }
+    }
 }
 
 void BinocsOverlay::OnUpdate(float deltaTime)
@@ -143,8 +260,34 @@ void BinocsOverlay::OnUpdate(float deltaTime)
     mCameraAngle += angleChangeDir * deltaTime;
     mCameraAngle.y = Math::Clamp(mCameraAngle.y, -0.16259, 0.239742);
     mGameCamera->SetAngle(mCameraAngle);
+    //printf("Camera angle is: (%f, %f)\n", Math::ToDegrees(mCameraAngle.x), Math::ToDegrees(mCameraAngle.y));
 
-    printf("Camera angle is: (%f, %f)\n", Math::ToDegrees(mCameraAngle.x), Math::ToDegrees(mCameraAngle.y));
+    // Show/hide zoom in/out buttons as appropriate.
+    mZoomInButton->SetEnabled(!mIsZoomedIn);
+    mZoomOutButton->SetEnabled(mIsZoomedIn);
+
+    // When not zoomed in, the zoom in button is pressable only when pointing at a zoom location.
+    if(!mIsZoomedIn)
+    {
+        float camAngleDegX = Math::ToDegrees(mCameraAngle.x);
+        float camAngleDegY = Math::ToDegrees(mCameraAngle.y);
+
+        mCanZoomToLocCode.clear();
+        auto& map = mZoomAngles[gLocationManager.GetLocation()];
+        for(auto& entry : map)
+        {
+            if(camAngleDegX >= entry.second.minAngles.x &&
+               camAngleDegX <= entry.second.maxAngles.x &&
+               camAngleDegY >= entry.second.minAngles.y &&
+               camAngleDegY <= entry.second.maxAngles.y)
+            {
+                mCanZoomToLocCode = entry.first;
+            }
+        }
+    }
+
+    // Zoom in button is interactable if we have a location we could zoom to.
+    mZoomInButton->SetCanInteract(!mCanZoomToLocCode.empty());
 
     /*
     * Camera angle ranges (degrees) for each focus location.
@@ -162,7 +305,7 @@ void BinocsOverlay::OnUpdate(float deltaTime)
 
 void BinocsOverlay::OnZoomInButtonPressed()
 {
-
+    printf("Zoom to %s\n", mCanZoomToLocCode.c_str());
 }
 
 void BinocsOverlay::OnZoomOutButtonPressed()
