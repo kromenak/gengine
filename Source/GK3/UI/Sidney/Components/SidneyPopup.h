@@ -33,8 +33,9 @@ public:
 
     void ShowOneButton();
     void ShowTwoButton(const std::function<void()>& yesCallback);
-
     void ShowTextInput(const std::function<void(const std::string&)>& submitCallback);
+
+    void Hide();
 
 protected:
     void OnUpdate(float deltaTime) override;

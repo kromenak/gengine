@@ -101,7 +101,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
         // Hide on button press.
         mOKButton->SetPressCallback([this](){
-            SetActive(false);
+            Hide();
         });
     }
 
@@ -118,7 +118,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
         // Hide on button press.
         mYesButton->SetPressCallback([this](){
-            SetActive(false);
+            Hide();
         });
     }
 
@@ -135,12 +135,12 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
         // Hide on button press.
         mNoButton->SetPressCallback([this](){
-            SetActive(false);
+            Hide();
         });
     }
 
     // Hide by default.
-    SetActive(false);
+    Hide();
 }
 
 void SidneyPopup::ResetToDefaults()
@@ -246,6 +246,12 @@ void SidneyPopup::ShowTextInput(const std::function<void(const std::string&)>& s
     mTextInput->Focus();
 }
 
+void SidneyPopup::Hide()
+{
+    SetActive(false);
+    mTextInput->Unfocus();
+}
+
 void SidneyPopup::ShowOneButton()
 {
     SetActive(true);
@@ -267,7 +273,7 @@ void SidneyPopup::ShowTwoButton(const std::function<void()>& yesCallback)
 
     // Set callback when yes button is pressed.
     mYesButton->SetPressCallback([this, yesCallback](){
-        SetActive(false);
+        Hide();
         yesCallback();
     });
 }
@@ -278,7 +284,7 @@ void SidneyPopup::OnUpdate(float deltaTime)
     // This also closes the popup.
     if(mTextInput->IsEnabled() && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
     {
-        SetActive(false);
+        Hide();
 
         // Do callback AFTER set active to false, in case callback triggers another popup.
         mTextInputSubmitCallback(mTextInput->GetText());

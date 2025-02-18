@@ -171,6 +171,9 @@ void SaveLoadScreen::Hide()
     {
         gLayerManager.PopLayer(&mLoadLayer);
     }
+
+    // Make sure text input is no longer focused.
+    mTextInput->Unfocus();
 }
 
 void SaveLoadScreen::OnUpdate(float deltaTime)
@@ -358,6 +361,7 @@ void SaveLoadScreen::OnSaveButtonPressed()
         {
             Hide();
             gSaveManager.Save(mTextInput->GetText(), mSaveIndex);
+            mTextInput->Unfocus();
         }
     }
     else // new save in empty slot
