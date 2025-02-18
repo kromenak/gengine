@@ -23,6 +23,8 @@ class GK3UI
 {
 public:
     void ShowTitleScreen();
+    void HideTitleScreen();
+
     void ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::function<void()> callback);
     void ShowFinishedScreen();
 

@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "GameProgress.h"
+#include "GK3UI.h"
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "RectTransform.h"
@@ -376,7 +377,11 @@ void SaveLoadScreen::OnSaveButtonPressed()
 void SaveLoadScreen::OnLoadButtonPressed()
 {
     gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+
+    // Hide this screen. Also, make sure title screen is hidden (in case loading from title screen).
     Hide();
+    gGK3UI.HideTitleScreen(); //TODO: Maybe a better way to do this via the layer system?
+
     gSaveManager.Load(gSaveManager.GetSaves()[mSaveIndex].filePath);
 }
 

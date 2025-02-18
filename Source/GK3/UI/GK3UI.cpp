@@ -30,6 +30,14 @@ void GK3UI::ShowTitleScreen()
     mTitleScreen->Show();
 }
 
+void GK3UI::HideTitleScreen()
+{
+    if(mTitleScreen != nullptr)
+    {
+        mTitleScreen->Hide();
+    }
+}
+
 void GK3UI::ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::function<void()> callback)
 {
     if(mTimeblockScreen == nullptr)
