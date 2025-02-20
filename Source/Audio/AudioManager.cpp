@@ -623,33 +623,31 @@ void AudioManager::SetVolume(AudioType audioType, float volume)
     // Do this before applying multiplier to avoid passing in like 5.0f and avoiding multiplier effects.
     volume = Math::Clamp(volume, 0.0f, 1.0f);
 
-    // Get volume multiplier for audio type.
-    float multiplier;
+    // Save volume as a preference.
     switch(audioType)
     {
+    default:
     case AudioType::SFX:
-        multiplier = kSFXVolumeMultiplier;
         gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_SFX_VOLUME, static_cast<int>(volume * 100));
         break;
     case AudioType::VO:
-        multiplier = kVOVolumeMultiplier;
         gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_VO_VOLUME, static_cast<int>(volume * 100));
         break;
     case AudioType::Ambient:
-        multiplier = kAmbientVolumeMultiplier;
         gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_AMBIENT_VOLUME, static_cast<int>(volume * 100));
         break;
     case AudioType::Music:
-        multiplier = kMusicVolumeMultiplier;
         gSaveManager.GetPrefs()->Set(PREFS_SOUND, PREFS_MUSIC_VOLUME, static_cast<int>(volume * 100));
-        break;
-    default:
-        multiplier = 1.0f;
         break;
     }
 
+    // The volume passed in is the user's preference between 0% and 100% volume for this audio type.
+    // But from a design perspective, we want to make certain sound types louder or softer, so internally we apply an additional multiplier.
+    float multiplier = GetVolumeMultiplierForAudioType(audioType);
+    float internalVolume = volume * multiplier;
+
     // Set volume. FMOD expects a normalized 0-1 value.
-    channelGroup->setVolume(Math::Clamp(volume * multiplier, 0.0f, 1.0f));
+    channelGroup->setVolume(Math::Clamp(internalVolume, 0.0f, 1.0f));
 }
 
 float AudioManager::GetVolume(AudioType audioType) const
@@ -657,9 +655,12 @@ float AudioManager::GetVolume(AudioType audioType) const
     FMOD::ChannelGroup* channelGroup = GetChannelGroupForAudioType(audioType);
     if(channelGroup == nullptr) { return 0.0f; }
 
-    float volume = 0.0f;
-    channelGroup->getVolume(&volume);
-    return volume;
+    // Kind of the opposite of "set volume" - get the volume in the FMOD system first.
+    float internalVolume = 0.0f;
+    channelGroup->getVolume(&internalVolume);
+
+    // And then remove the internal multiplier to get the value for external usage.
+    return internalVolume / GetVolumeMultiplierForAudioType(audioType);
 }
 
 void AudioManager::SetMuted(bool mute)
@@ -867,4 +868,22 @@ FMOD::Channel* AudioManager::CreateChannel(FMOD::Sound* sound, FMOD::ChannelGrou
         std::cout << FMOD_ErrorString(result) << std::endl;
     }
     return channel;
+}
+
+float AudioManager::GetVolumeMultiplierForAudioType(AudioType audioType) const
+{
+    // Get volume multiplier for audio type.
+    switch(audioType)
+    {
+    case AudioType::SFX:
+        return kSFXVolumeMultiplier;
+    case AudioType::VO:
+        return kVOVolumeMultiplier;
+    case AudioType::Ambient:
+        return kAmbientVolumeMultiplier;
+    case AudioType::Music:
+        return kMusicVolumeMultiplier;
+    default:
+        return 1.0f;
+    }
 }

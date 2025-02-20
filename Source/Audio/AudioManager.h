@@ -218,6 +218,8 @@ private:
 
     FMOD::ChannelGroup* GetChannelGroupForAudioType(AudioType audioType) const;
     FMOD::Channel* CreateChannel(FMOD::Sound* sound, FMOD::ChannelGroup* channelGroup);
+
+    float GetVolumeMultiplierForAudioType(AudioType audioType) const;
 };
 
 extern AudioManager gAudioManager;
