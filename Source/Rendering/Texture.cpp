@@ -12,8 +12,8 @@ TYPEINFO_INIT(Texture, Asset, 101)
     TYPEINFO_VAR(Texture, VariableType::Bool, mMipmaps);
 }
 
-Texture Texture::White(2, 2, Color32::White);
-Texture Texture::Black(2, 2, Color32::Black);
+Texture Texture::White(1, 1, Color32::White);
+Texture Texture::Black(1, 1, Color32::Black);
 
 Texture::Texture(uint32_t width, uint32_t height) : Asset(""),
     mWidth(width),

@@ -44,6 +44,8 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         exitButton->SetPressCallback([this](UIButton* button){
             Hide();
         });
+        exitButton->SetTooltipText("fingerprintexit");
+
         exitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         exitButton->GetRectTransform()->SetAnchoredPosition(5.0f, 9.0f);
     }

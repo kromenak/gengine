@@ -44,6 +44,7 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
         exitButton->SetPressCallback([this](UIButton* button){
             Hide();
         });
+        exitButton->SetTooltipText("closeupexit");
 
         RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
         exitButtonRectTransform->SetSizeDelta(58.0f, 26.0f); // texture width/height

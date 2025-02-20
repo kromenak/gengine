@@ -127,6 +127,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 				gActionManager.ExecuteAction(action);
 			}
 		});
+        actionButton->SetTooltipText("v_" + actions[i]->verb);
 	}
 	
 	// Show inventory item button IF this is a normal action bar (not topic chooser).
@@ -174,6 +175,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
                     gActionManager.ExecuteAction(invAction);
                 }
 			});
+            invButton->SetTooltipText("v_" + invItemVerb);
 		}
 	}
 	
@@ -187,6 +189,7 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
         cancelButton->SetPressCallback([this](UIButton* button){
             OnCancelButtonPressed();
         });
+        cancelButton->SetTooltipText("v_t_cancel");
     }
 	
 	// Refresh layout after adding all buttons to position everything correctly.
@@ -246,6 +249,7 @@ void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> ca
 		this->Hide();
 		callback();
 	});
+    button->SetTooltipText("v_" + verb);
 	
 	// Refresh button positions and move bar to pointer.
 	RefreshButtonLayout();

@@ -46,6 +46,8 @@ public:
 
     void SetResizeBasedOnTexture(bool resize) { mResizeBasedOnTexture = resize; }
     void SetHighlightCursorOnHover(bool highlight) { mForceCursorHighlightOnHover = highlight; }
+
+    void SetTooltipText(const std::string& tooltipText) { mTooltipText = tooltipText; }
 	
 private:
     // When a button is down, it gets some special treatment/logic. So, we need to keep track of it!
@@ -86,7 +88,13 @@ private:
 
     // If set, this button will ALWAYS show highlighted cursor when hovered, even if not image-based.
     bool mForceCursorHighlightOnHover = false;
+
+    // An optional tooltip that is shown when this button is hovered.
+    std::string mTooltipText;
 	
 	Texture* GetDefaultTexture();
     void UpdateMaterial();
+
+    void ShowTooltip();
+    void HideTooltip();
 };

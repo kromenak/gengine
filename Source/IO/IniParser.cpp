@@ -6,6 +6,47 @@
 #include "mstream.h"
 #include "StringUtil.h"
 
+namespace
+{
+    std::string TrimVectorToCommaSeparatedString(const std::string& vectorString)
+    {
+        // Input is a string representing a 2D/3D/4D vector. May have leading/trailing cruft, like braces.
+        // Example: { -20, 30, 200, 10 }
+        // Example: 20, 5
+
+        // Trim leading non-numeric values.
+        // This is usually just '{', but other garbage data (from typos) exists in some cases.
+        int firstNumIndex = -1;
+        for(int i = 0; i < vectorString.length(); ++i)
+        {
+            // Also need to check '-' for symbol preceding negative numbers.
+            if(std::isdigit(vectorString[i]) || vectorString[i] == '-')
+            {
+                firstNumIndex = i;
+                break;
+            }
+        }
+        if(firstNumIndex == -1) { return std::string(); }
+
+        // Trim trailing non-numeric values. Usually just '}'.
+        std::string noBraces = vectorString.substr(firstNumIndex);
+        while(!noBraces.empty() && !std::isdigit(noBraces.back()))
+        {
+            noBraces.pop_back();
+        }
+        return noBraces;
+    }
+
+    void SanitizeNumberString(std::string& numberString)
+    {
+        // In at least one instance (Devil's Armchair files), too many negative signs exist before a number.
+        while(numberString.size() >= 2 && numberString[0] == '-' && numberString[1] == '-')
+        {
+            numberString.erase(0, 1);
+        }
+    }
+}
+
 float IniKeyValue::GetValueAsFloat() const
 {
     return StringUtil::ToFloat(value);
@@ -24,24 +65,20 @@ bool IniKeyValue::GetValueAsBool() const
 Vector2 IniKeyValue::GetValueAsVector2() const
 {
     // We assume the string form of {4.23, 5.23}
-    // First, let's get rid of the braces.
-    std::string noBraces = value;
-    if(noBraces[0] == '{' && noBraces[noBraces.size() - 1] == '}')
-    {
-        noBraces = value.substr(1, value.length() - 2);
-    }
+    // First, let's get rid of the braces so we just have comma-separated numbers.
+    std::string noBraces = TrimVectorToCommaSeparatedString(value);
     
-    // Find the comma index. If not present,
-    // this isn't the right form, so we fail.
+    // Find the comma index. If not present, this isn't the right form, so we fail.
     std::size_t commaIndex = noBraces.find(',');
-    if(commaIndex == std::string::npos)
-    {
-        return Vector2::Zero;
-    }
+    if(commaIndex == std::string::npos) { return Vector2::Zero; }
     
     // Split at the comma.
     std::string firstNum = noBraces.substr(0, commaIndex);
     std::string secondNum = noBraces.substr(commaIndex + 1, std::string::npos);
+
+    // Make sure the number strings appear valid.
+    SanitizeNumberString(firstNum);
+    SanitizeNumberString(secondNum);
     
     // Convert to numbers and return.
     return Vector2(std::stof(firstNum), std::stof(secondNum));
@@ -50,62 +87,57 @@ Vector2 IniKeyValue::GetValueAsVector2() const
 Vector3 IniKeyValue::GetValueAsVector3() const
 {
     // We generally assume the string form of {4.23, 5.23, 10.04}.
-    // However, GK3 data has some occasional typos and inconsistencies we must account for.
-
-    // Trim leading non-numeric values.
-    // This is usually just '{', but other garbage data (from typos) exists in some cases.
-    int firstNumIndex = -1;
-    for(int i = 0; i < value.length(); ++i)
-    {
-        // Also need to check '-' for symbol preceding negative numbers.
-        if(std::isdigit(value[i]) || value[i] == '-')
-        {
-            firstNumIndex = i;
-            break;
-        }
-    }
-    if(firstNumIndex == -1) { return Vector3::Zero; }
-
-    // Trim training non-numeric values. Usually just '}'.
-    std::string noBraces = value.substr(firstNumIndex);
-    while(!noBraces.empty() && !std::isdigit(noBraces.back()))
-    {
-        noBraces.pop_back();
-    }
+    // First, let's get rid of the braces so we just have comma-separated numbers.
+    std::string noBraces = TrimVectorToCommaSeparatedString(value);
 
     // Find the two commas.
     std::size_t firstCommaIndex = noBraces.find(',');
-    if(firstCommaIndex == std::string::npos)
-    {
-        return Vector3::Zero;
-    }
+    if(firstCommaIndex == std::string::npos) { return Vector3::Zero; }
     std::size_t secondCommaIndex = noBraces.find(',', firstCommaIndex + 1);
-    if(secondCommaIndex == std::string::npos)
-    {
-        return Vector3::Zero;
-    }
+    if(secondCommaIndex == std::string::npos) { return Vector3::Zero; }
     
     // Split at commas.
     std::string firstNum = noBraces.substr(0, firstCommaIndex);
     std::string secondNum = noBraces.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1);
     std::string thirdNum = noBraces.substr(secondCommaIndex + 1, std::string::npos);
 
-    // Handle too many negative signs. Yes, this is actually an issue (e.g. Devil's Armchair).
-    while(firstNum.size() >= 2 && firstNum[0] == '-' && firstNum[1] == '-')
-    {
-        firstNum.erase(0, 1);
-    }
-    while(secondNum.size() >= 2 && secondNum[0] == '-' && secondNum[1] == '-')
-    {
-        secondNum.erase(0, 1);
-    }
-    while(thirdNum.size() >= 2 && thirdNum[0] == '-' && thirdNum[1] == '-')
-    {
-        thirdNum.erase(0, 1);
-    }
+    // Make sure the number strings appear valid.
+    SanitizeNumberString(firstNum);
+    SanitizeNumberString(secondNum);
+    SanitizeNumberString(thirdNum);
     
     // Convert to numbers and return.
     return Vector3(std::stof(firstNum), std::stof(secondNum), std::stof(thirdNum));
+}
+
+Vector4 IniKeyValue::GetValueAsVector4() const
+{
+    // We generally assume the string form of {4.23, 5.23, 10.04, -14.3}.
+    // First, let's get rid of the braces so we just have comma-separated numbers.
+    std::string noBraces = TrimVectorToCommaSeparatedString(value);
+
+    // Find the three commas.
+    std::size_t firstCommaIndex = noBraces.find(',');
+    if(firstCommaIndex == std::string::npos) { return Vector4::Zero; }
+    std::size_t secondCommaIndex = noBraces.find(',', firstCommaIndex + 1);
+    if(secondCommaIndex == std::string::npos) { return Vector4::Zero; }
+    std::size_t thirdCommaIndex = noBraces.find(',', secondCommaIndex + 1);
+    if(thirdCommaIndex == std::string::npos) { return Vector4::Zero; }
+
+    // Split at commas.
+    std::string firstNum = noBraces.substr(0, firstCommaIndex);
+    std::string secondNum = noBraces.substr(firstCommaIndex + 1, secondCommaIndex - firstCommaIndex - 1);
+    std::string thirdNum = noBraces.substr(secondCommaIndex + 1, thirdCommaIndex - secondCommaIndex - 1);
+    std::string fourthNum = noBraces.substr(thirdCommaIndex + 1, std::string::npos);
+
+    // Make sure the number strings appear valid.
+    SanitizeNumberString(firstNum);
+    SanitizeNumberString(secondNum);
+    SanitizeNumberString(thirdNum);
+    SanitizeNumberString(fourthNum);
+
+    // Convert to numbers and return.
+    return Vector4(std::stof(firstNum), std::stof(secondNum), std::stof(thirdNum), std::stof(fourthNum));
 }
 
 Color32 IniKeyValue::GetValueAsColor32() const

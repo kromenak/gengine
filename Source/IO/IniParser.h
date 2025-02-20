@@ -14,6 +14,7 @@
 #include "Rect.h"
 #include "Vector2.h"
 #include "Vector3.h"
+#include "Vector4.h"
 
 struct IniKeyValue
 {
@@ -25,6 +26,7 @@ struct IniKeyValue
     bool GetValueAsBool() const;
     Vector2 GetValueAsVector2() const;
     Vector3 GetValueAsVector3() const;
+    Vector4 GetValueAsVector4() const;
 	Color32 GetValueAsColor32() const;
 	Rect GetValueAsRect() const;
 };

@@ -44,6 +44,7 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
     exitButton->SetPressCallback([this](UIButton* button) {
         Hide();
     });
+    exitButton->SetTooltipText("inventoryexit");
 
 	RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
 	exitButtonRectTransform->SetParent(inventoryRectTransform);

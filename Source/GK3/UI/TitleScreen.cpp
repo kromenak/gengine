@@ -22,10 +22,13 @@ static UIButton* CreateButton(Actor* parent, const std::string& buttonId, float 
     button->SetHoverTexture(gAssetManager.LoadTexture(buttonId + "_H.BMP"));
     button->SetDisabledTexture(gAssetManager.LoadTexture(buttonId + "_X.BMP"));
 
+    // The y-position of the buttons on this screen varies based on the screen resolution.
+    // While hard to 100% verify, this seems to give close to the correct result.
+    float y = 27.0f + (Window::GetSize().y - 480.0f) * 0.0917f;
+
     // Anchor to bottom-right and position based off that.
-    button->GetRectTransform()->SetAnchor(1.0f, 0.0f);
-    button->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    button->GetRectTransform()->SetAnchoredPosition(xPos, 67.0f);
+    button->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
+    button->GetRectTransform()->SetAnchoredPosition(xPos, y);
     return button;
 }
 
@@ -37,29 +40,24 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     UIImage* titleImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
     titleImage->SetTexture(gAssetManager.LoadTexture("TITLE.BMP"), true);
     titleImage->ResizeToFitPreserveAspect(Window::GetSize());
-   
-    // Add "intro" button.
-    UIButton* introButton = CreateButton(titleImage->GetOwner(), "TITLE_INTRO", -505.0f);
-    introButton->SetPressCallback([](UIButton* button) {
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
-        gVideoPlayer.Play("intro.bik", true, true, nullptr);
-    });
-    if(GEngine::Instance()->IsDemoMode())
-    {
-        introButton->SetCanInteract(false);
-    }
 
-    // Add "play" button.
-    UIButton* playButton = CreateButton(titleImage->GetOwner(), "TITLE_PLAY", -381.0f);
-    playButton->SetPressCallback([this](UIButton* button) {
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
-        Hide();
-        GEngine::Instance()->StartGame();
+    // The distance between buttons varies based on screen resolution.
+    // Not sure how true this is to the original game, but it gives pretty good-looking results.
+    float buttonX = -33.0f;
+    float distBetweenButtons = Math::RoundToInt(Math::Min(18.0f + (Window::GetSize().x - 640.0f) * 0.15f, 100.0f));
+
+    // Add "quit" button.
+    UIButton* quitButton = CreateButton(titleImage->GetOwner(), "TITLE_QUIT", buttonX);
+    quitButton->SetTooltipText("titlequit");
+    quitButton->SetPressCallback([](UIButton* button){
+        GEngine::Instance()->Quit();
     });
+    buttonX -= quitButton->GetRectTransform()->GetSize().x + distBetweenButtons;
 
     // Add "restore" button.
-    UIButton* restoreButton = CreateButton(titleImage->GetOwner(), "TITLE_RESTORE", -257.0f);
-    restoreButton->SetPressCallback([](UIButton* button) {
+    UIButton* restoreButton = CreateButton(titleImage->GetOwner(), "TITLE_RESTORE", buttonX);
+    restoreButton->SetTooltipText("titlerestore");
+    restoreButton->SetPressCallback([](UIButton* button){
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
         gGK3UI.ShowLoadScreen();
     });
@@ -67,12 +65,29 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     {
         restoreButton->SetCanInteract(false);
     }
+    buttonX -= restoreButton->GetRectTransform()->GetSize().x + distBetweenButtons;
 
-    // Add "quit" button.
-    UIButton* quitButton = CreateButton(titleImage->GetOwner(), "TITLE_QUIT", -135.0f);
-    quitButton->SetPressCallback([](UIButton* button) {
-        GEngine::Instance()->Quit();
+    // Add "play" button.
+    UIButton* playButton = CreateButton(titleImage->GetOwner(), "TITLE_PLAY", buttonX);
+    playButton->SetTooltipText("titleplay");
+    playButton->SetPressCallback([this](UIButton* button){
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+        Hide();
+        GEngine::Instance()->StartGame();
     });
+    buttonX -= playButton->GetRectTransform()->GetSize().x + distBetweenButtons;
+
+    // Add "intro" button.
+    UIButton* introButton = CreateButton(titleImage->GetOwner(), "TITLE_INTRO", buttonX);
+    introButton->SetTooltipText("titleintro");
+    introButton->SetPressCallback([](UIButton* button) {
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTN-1.WAV"));
+        gVideoPlayer.Play("intro.bik", true, true, nullptr);
+    });    
+    if(GEngine::Instance()->IsDemoMode())
+    {
+        introButton->SetCanInteract(false);
+    }
 }
 
 void TitleScreen::Show()

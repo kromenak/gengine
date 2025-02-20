@@ -8,6 +8,7 @@
 #include "Mesh.h"
 #include "RectTransform.h"
 #include "Texture.h"
+#include "Tooltip.h"
 
 extern Mesh* uiQuad;
 
@@ -101,6 +102,9 @@ void UIButton::OnPointerEnter()
         {
             gAudioManager.PlaySFX(mHoverSound);
         }
+
+        // Show tooltip, if any.
+        ShowTooltip();
     }
 }
 
@@ -108,6 +112,9 @@ void UIButton::OnPointerExit()
 {
     gCursorManager.UseDefaultCursor();
 	mPointerOver = false;
+
+    // Hide tooltip.
+    Tooltip::Get()->Hide();
 }
 
 void UIButton::OnPointerDown()
@@ -116,6 +123,9 @@ void UIButton::OnPointerDown()
 
     // Got the pointer down event, so we must be the down button now.
     sDownButton = this;
+
+    // Hide tooltip on pointer down.
+    Tooltip::Get()->Hide();
 }
 
 void UIButton::OnPointerUp()
@@ -129,6 +139,12 @@ void UIButton::OnPointerUp()
 
     // Pointer is up, so we are no longer down.
     sDownButton = nullptr;
+
+    // If the pointer is no longer down, and we're still hovered, the tooltip may reappear.
+    if(IsHovered())
+    {
+        ShowTooltip();
+    }
 }
 
 void UIButton::Press()
@@ -216,5 +232,21 @@ void UIButton::UpdateMaterial()
         
         // Set texture.
         mMaterial.SetDiffuseTexture(state->texture);
+    }
+}
+
+void UIButton::ShowTooltip()
+{
+    if(!mTooltipText.empty())
+    {
+        Tooltip::Get()->Show(mTooltipText);
+    }
+}
+
+void UIButton::HideTooltip()
+{
+    if(!mTooltipText.empty())
+    {
+        Tooltip::Get()->Hide();
     }
 }

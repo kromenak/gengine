@@ -135,6 +135,8 @@ UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, con
     buttonPos.y *= -1;
     button->GetRectTransform()->SetAnchoredPosition(buttonPos);
 
+    button->SetTooltipText("tb_" + buttonId);
+
     if(setSprites)
     {
         auto it = config.find(buttonId + "SpriteUp");
@@ -176,6 +178,8 @@ UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, con
     Vector2 togglePos = config[toggleId + "Pos"].GetValueAsVector2();
     togglePos.y *= -1;
     toggle->GetRectTransform()->SetAnchoredPosition(togglePos);
+
+    toggle->SetTooltipText("tb_" + toggleId);
 
     toggle->SetOnTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDown"].value));
     toggle->SetOffTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteUp"].value));

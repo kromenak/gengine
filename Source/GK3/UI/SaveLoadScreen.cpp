@@ -59,6 +59,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
         button->SetPressCallback([this](UIButton* button){
             OnExitButtonPressed();
         });
+        button->SetTooltipText("exitloadsave");
     }
 
     // Create save & load buttons.
@@ -76,6 +77,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
         mSaveButton->SetPressCallback([this](UIButton* button){
             OnSaveButtonPressed();
         });
+        mSaveButton->SetTooltipText("savegame");
     }
     {
         mLoadButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
@@ -91,6 +93,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
         mLoadButton->SetPressCallback([this](UIButton* button){
             OnLoadButtonPressed();
         });
+        mLoadButton->SetTooltipText("loadgame");
     }
 
     // Create actor that contains all the list items.
