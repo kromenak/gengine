@@ -239,6 +239,9 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     // Play sound effect when hovering these buttons.
     button->SetHoverSound(gAssetManager.LoadAudio("MAPSWOOSH.WAV"));
 
+    // Add tooltip.
+    button->SetTooltipText("dm_" + buttonId);
+
     // On press, go to the map location.
     button->SetPressCallback([this, locationCode](UIButton* button) {
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("MAPBUTTON.WAV"));
