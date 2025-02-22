@@ -29,6 +29,22 @@ namespace
             std::cout << "Action " << action->ToString() << std::endl;
         }
     }
+
+    int GetNounVerbCount(const std::string& noun, const std::string& verb, VerbType verbType)
+    {
+        if(verbType == VerbType::Topic)
+        {
+            return gGameProgress.GetTopicCount(noun, verb) == 0;
+        }
+        else if(StringUtil::EqualsIgnoreCase(verb, "Z_CHAT"))
+        {
+            return gGameProgress.GetChatCount(noun);
+        }
+        else
+        {
+            return gGameProgress.GetNounVerbCount(noun, verb) == 0;
+        }
+    }
 }
 
 ActionManager gActionManager;
@@ -649,52 +665,25 @@ bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, 
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "1ST_TIME"))
 	{
-		// Condition is met if this is the first time we've executed this action (noun/verb combo).
-		if(verbType == VerbType::Topic)
-		{
-			return gGameProgress.GetTopicCount(noun, verb) == 0;
-		}
-		else
-		{
-			return gGameProgress.GetNounVerbCount(noun, verb) == 0;
-		}
+        // Condition is met if this is the first time we've executed this action (noun/verb combo).
+        return GetNounVerbCount(noun, verb, verbType) == 0;
 	}
-	else if(StringUtil::EqualsIgnoreCase(caseLabel, "2CD_TIME"))
+	else if(StringUtil::EqualsIgnoreCase(caseLabel, "2CD_TIME") || StringUtil::EqualsIgnoreCase(caseLabel, "2ND_TIME"))
 	{
 		// A surprising way to abbreviate "2nd time"...
         // Condition is met if this is the 2nd time we did the action.
-		if(verbType == VerbType::Topic)
-		{
-			return gGameProgress.GetTopicCount(noun, verb) == 1;
-		}
-		else
-		{
-			return gGameProgress.GetNounVerbCount(noun, verb) == 1;
-		}
+        return GetNounVerbCount(noun, verb, verbType) == 1;
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "3RD_TIME"))
 	{
 		// And again for good measure. True if this is the 3rd time we did the action.
-		if(verbType == VerbType::Topic)
-		{
-			return gGameProgress.GetTopicCount(noun, verb) == 2;
-		}
-		else
-		{
-			return gGameProgress.GetNounVerbCount(noun, verb) == 2;
-		}
+        return GetNounVerbCount(noun, verb, verbType) == 2;
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "OTR_TIME"))
 	{
 		// Condition is met if this IS NOT the first time we've executed this action (noun/verb combo).
-		if(verbType == VerbType::Topic)
-		{
-			return gGameProgress.GetTopicCount(noun, verb) > 0;
-		}
-		else
-		{
-			return gGameProgress.GetNounVerbCount(noun, verb) > 0;
-		}
+        // However, if 2nd/3rd time actions exist, they will have higher priority than this one.
+        return GetNounVerbCount(noun, verb, verbType) > 0;
 	}
 	else if(StringUtil::EqualsIgnoreCase(caseLabel, "DIALOGUE_TOPICS_LEFT"))
 	{
