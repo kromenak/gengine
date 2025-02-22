@@ -895,6 +895,12 @@ void ActionManager::OnActionExecuteFinished()
         // Make a record that this topic action was performed.
         mPlayedTopics[mLastAction->noun][mLastAction->verb].insert(mLastAction->caseLabel);
     }
+
+    // If this is a chat, automatically increment chat counts.
+    if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "Z_CHAT"))
+    {
+        gGameProgress.IncChatCount(mLastAction->noun);
+    }
     
     // Execute finish callback if specified.
     if(mCurrentActionFinishCallback != nullptr)
