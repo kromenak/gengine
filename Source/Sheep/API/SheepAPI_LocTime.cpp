@@ -178,39 +178,11 @@ shpvoid SetTime(const std::string& timeblock)
         return 0;
     }
 
-    // Report that a timeblock change IS occurring (though it hasn't fully happened yet).
-    gGameProgress.SetChangingTimeblock(true);
-    
-    // Unload the current scene.
+    // End the current timeblock and start the next one.
+    // This function waits until the next timeblock is fully started (which can take awhile - it waits for the user to hit "continue" on the UI).
     std::function<void()> waitable = AddWait();
-    gSceneManager.UnloadScene([oldTimeblock, newTimeblock, waitable](){
-        
-        // Play ending movie (if any) for the timeblock we are leaving.
-        gVideoPlayer.Play(oldTimeblock.ToString() + "end", true, true, [newTimeblock, waitable](){
-
-            // Show timeblock screen.
-            gGK3UI.ShowTimeblockScreen(newTimeblock, 0.0f, [newTimeblock, waitable](){
-
-                // Change time to new timeblock.
-                gGameProgress.SetTimeblock(newTimeblock);
-
-                // Show beginning movie (if any) for the new timeblock.
-                gVideoPlayer.Play(newTimeblock.ToString() + "begin", true, true, [waitable](){
-
-                    // Reload our current location in the new timeblock.
-                    gSceneManager.LoadScene(gLocationManager.GetLocation());
-
-                    // Done changing timeblock.
-                    gGameProgress.SetChangingTimeblock(false);
-
-                    // Notify waitable 'cause we are done here.
-                    if(waitable != nullptr)
-                    {
-                        waitable();
-                    }
-                });
-            });
-        });
+    gGameProgress.EndCurrentTimeblock([newTimeblock, waitable](){
+        gGameProgress.StartTimeblock(newTimeblock, waitable);
     });
     return 0;
 }

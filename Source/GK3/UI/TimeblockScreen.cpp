@@ -1,6 +1,7 @@
 #include "TimeblockScreen.h"
 
 #include "AssetManager.h"
+#include "GK3UI.h"
 #include "SceneManager.h"
 #include "Sequence.h"
 #include "SoundtrackPlayer.h"
@@ -92,7 +93,7 @@ TimeblockScreen::TimeblockScreen() : Actor(TransformType::RectTransform)
     mSaveButton->GetRectTransform()->SetPivot(0.0f, 0.0f);
     mSaveButton->GetRectTransform()->SetAnchoredPosition(180.0f, 16.0f);
     mSaveButton->SetPressCallback([](UIButton* button){
-        printf("Save\n");
+        gGK3UI.ShowSaveScreen();
     });
 }
 
@@ -190,9 +191,15 @@ void TimeblockScreen::OnUpdate(float deltaTime)
     */
 
     // Shortcut key for pressing continue button.
-    if(mContinueButton->IsEnabled() && gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_C))
+    if(mContinueButton->IsEnabled() && (gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_C) || gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_ESCAPE)))
     {
         mContinueButton->Press();
+    }
+
+    // Pressing "s" is a shortcut for the save button.
+    if(mSaveButton->IsEnabled() && gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_S))
+    {
+        mSaveButton->Press();
     }
 
     // Animate the timeblock text sequence.

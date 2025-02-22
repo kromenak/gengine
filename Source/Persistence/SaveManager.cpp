@@ -237,14 +237,28 @@ void SaveManager::LoadInternal(const std::string& loadPath)
         // Load everything!
         OnPersist(ps);
 
-        // Load the new scene.
-        gSceneManager.LoadScene(gLocationManager.GetLocation(), [loadPath](){
-
-            //TODO: Do we want to load any *scene* state (like positions or states of Actors)?
-            //TODO: The above solution works pretty well, but Actors will not necessarily be in the same locations or states in the newly loaded scene.
-            printf("Loaded save file %s.\n", loadPath.c_str());
-        });
+        // If this save was made while changing timeblocks, we need to show the timeblock screen instead of going directly to the gameplay scene.
+        if(gGameProgress.IsChangingTimeblock())
+        {
+            gGameProgress.StartTimeblock(gGameProgress.GetTimeblock(), [this, loadPath](){
+                LoadInternal_PostSceneLoad(loadPath);
+            });
+        }
+        else
+        {
+            // Load the new scene directly in this case.
+            gSceneManager.LoadScene(gLocationManager.GetLocation(), [this, loadPath](){
+                LoadInternal_PostSceneLoad(loadPath);
+            });
+        }
     });
+}
+
+void SaveManager::LoadInternal_PostSceneLoad(const std::string& loadPath)
+{
+    //TODO: Do we want to load any *scene* state (like positions or states of Actors)?
+    //TODO: The above solution works pretty well, but Actors will not necessarily be in the same locations or states in the newly loaded scene.
+    printf("Loaded save file %s.\n", loadPath.c_str());
 }
 
 void SaveManager::OnPersist(PersistState& ps)

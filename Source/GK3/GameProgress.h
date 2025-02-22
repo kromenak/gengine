@@ -6,6 +6,7 @@
 // flag states, game logic variable states, noun/verb counts, etc.
 //
 #pragma once
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -31,12 +32,13 @@ public:
 	const Timeblock& GetTimeblock() const { return mTimeblock; }
     void SetTimeblock(const Timeblock& timeblock);
 
-    void SetChangingTimeblock(bool changing) { mChangingTimeblock = changing; }
-    bool IsChangingTimeblock() const { return mChangingTimeblock; }
-
     const Timeblock& GetLastTimeblock() const { return mLastTimeblock; }
     std::string GetTimeblockDisplayName() const;
     std::string GetTimeblockDisplayName(const std::string& timeblockStr) const;
+
+    void EndCurrentTimeblock(const std::function<void()>& callback);
+    void StartTimeblock(const Timeblock& timeblock, const std::function<void()>& callback);
+    bool IsChangingTimeblock() const { return mChangingTimeblock; }
 
     // Flags
     bool GetFlag(const std::string& flagName) const { return mGameFlags.Get(flagName); }

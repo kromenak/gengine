@@ -2,14 +2,17 @@
 
 #include "AssetManager.h"
 #include "Config.h"
+#include "GK3UI.h"
 #include "GMath.h"
 #include "IniParser.h"
 #include "Localizer.h"
+#include "LocationManager.h"
 #include "ReportManager.h"
 #include "SceneManager.h"
 #include "StatusOverlay.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
+#include "VideoPlayer.h"
 
 GameProgress gGameProgress;
 
@@ -100,6 +103,52 @@ std::string GameProgress::GetTimeblockDisplayName(const std::string& timeblockSt
 {
     // Keys for timeblocks are in form "Day110A".
     return gLocalizer.GetText("Day" + mTimeblock.ToString());
+}
+
+void GameProgress::EndCurrentTimeblock(const std::function<void()>& callback)
+{
+    // Report that a timeblock change IS occurring (though it hasn't fully happened yet).
+    mChangingTimeblock = true;
+
+    // Unload the current scene.
+    gSceneManager.UnloadScene([this, callback](){
+
+        // Play ending movie (if any) for the timeblock we are leaving.
+        gVideoPlayer.Play(mTimeblock.ToString() + "end", true, true, [callback](){
+
+            // That's it - timeblock is over.
+            if(callback != nullptr)
+            {
+                callback();
+            }
+        });
+    });
+}
+
+void GameProgress::StartTimeblock(const Timeblock& timeblock, const std::function<void()>& callback)
+{
+    // Change time to new timeblock.
+    SetTimeblock(timeblock);
+
+    // Show timeblock screen.
+    gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, [timeblock, callback](){
+
+        // Show beginning movie (if any) for the new timeblock.
+        gVideoPlayer.Play(timeblock.ToString() + "begin", true, true, [this, callback](){
+
+            // Reload our current location in the new timeblock.
+            gSceneManager.LoadScene(gLocationManager.GetLocation());
+
+            // Done changing timeblock.
+            mChangingTimeblock = false;
+
+            // Notify waitable 'cause we are done here.
+            if(callback != nullptr)
+            {
+                callback();
+            }
+        });
+    });
 }
 
 int GameProgress::GetGameVariable(const std::string& varName) const

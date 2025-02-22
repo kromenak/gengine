@@ -92,6 +92,7 @@ private:
 
     void SaveInternal(const std::string& saveDescription);
     void LoadInternal(const std::string& loadPath);
+    void LoadInternal_PostSceneLoad(const std::string& loadPath);
 
     void OnPersist(PersistState& ps);
 };
