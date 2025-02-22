@@ -412,6 +412,18 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // The "Chat" action is only valid if the "Talk" option is not present. Remove "Chat" if "Talk" is present.
+    // Not sure where else to check that - this seems like an OK spot.
+    auto talkIt = verbToAction.find("TALK");
+    if(talkIt != verbToAction.end())
+    {
+        auto chatIt = verbToAction.find("Z_CHAT");
+        if(chatIt != verbToAction.end())
+        {
+            verbToAction.erase(chatIt);
+        }
+    }
+
     // Finally, convert our map to a vector to return.
     std::vector<const Action*> viableActions;
     for(auto entry : verbToAction)
@@ -919,6 +931,10 @@ void ActionManager::OnActionExecuteFinished()
 	{
 		ShowTopicBar(mLastAction->noun);
 	}
+    else if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "Z_CHAT")) // chatting always seems to end the current convo/action bar.
+    {
+        OnActionBarCanceled();
+    }
     else if(gDialogueManager.InConversation()) // *seems* necessary to end conversations started during cutscenes (ex: Gabe/Mosely scene in Dining Room)
     {
         if(!mLastAction->talkTo.empty())
