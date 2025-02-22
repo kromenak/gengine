@@ -131,7 +131,7 @@ void GameProgress::StartTimeblock(const Timeblock& timeblock, const std::functio
     SetTimeblock(timeblock);
 
     // Show timeblock screen.
-    gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, [timeblock, callback](){
+    gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, [this, timeblock, callback](){
 
         // Show beginning movie (if any) for the new timeblock.
         gVideoPlayer.Play(timeblock.ToString() + "begin", true, true, [this, callback](){
