@@ -242,6 +242,7 @@ else() # Linux
         z                                           # zlib
         SDL2                                        # SDL
         GL
+        ${CMAKE_DL_LIBS}
     )
 endif()
 
