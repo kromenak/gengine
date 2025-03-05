@@ -37,7 +37,6 @@ Tooltip::Tooltip() : Actor("Tooltip", TransformType::RectTransform)
 
     Color32 backgroundColor;
     Color32 borderColor;
-    Vector4 borders;
     {
         TextAsset* textAsset = gAssetManager.LoadText("DEFAULT.TIP", AssetScope::Manual);
         IniParser parser(textAsset->GetText(), textAsset->GetTextLength());

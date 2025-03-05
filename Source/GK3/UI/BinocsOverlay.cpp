@@ -220,7 +220,7 @@ void BinocsOverlay::Show()
     mGameCamera->SetAngle(Vector2::Zero);
 
     // Figure out the use case from the current location and timeblock.
-    auto& it = mUseCases.find(gLocationManager.GetLocation() + gGameProgress.GetTimeblock().ToString());
+    auto it = mUseCases.find(gLocationManager.GetLocation() + gGameProgress.GetTimeblock().ToString());
     if(it != mUseCases.end())
     {
         mCurrentUseCase = &it->second;
@@ -230,7 +230,7 @@ void BinocsOverlay::Show()
         printf("ERROR: Using binocs from an invalid location or timeblock\n");
         Hide();
     }
-    
+
     // Not zoomed in for starters.
     mIsZoomedIn = false;
 }
@@ -326,7 +326,7 @@ void BinocsOverlay::OnUpdate(float deltaTime)
         // Zoom in button is interactable if we have a location we could zoom to.
         mZoomInButton->SetCanInteract(!mCamZoomToLocCode.empty());
     }
-    
+
     /*
     * Camera angle ranges (degrees) for each focus location.
     *

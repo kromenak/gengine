@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-#include "SidneyMenubar.h"
+#include "SidneyMenuBar.h"
 #include "StringUtil.h"
 
 class Actor;

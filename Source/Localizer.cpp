@@ -16,7 +16,7 @@ Localizer gLocalizer;
     {
         // If a language prefix is specified in GK3.ini, it will override anything else.
         Config* config = gAssetManager.LoadConfig("GK3.ini");
-        if(config->HasKey("Localization", "Locale"))
+        if(config != nullptr && config->HasKey("Localization", "Locale"))
         {
             languagePrefix = config->GetString("Localization", "Locale", "E");
             printf("Language preference set to %s (from GK3.ini)\n", languagePrefix.c_str());
@@ -40,7 +40,7 @@ void Localizer::Load(const std::string& fileName, const std::string& sectionName
     // We assume the passed in filename does not have the language prefix attached yet.
     // Add the language prefix based on current game options.
     std::string localeFileName = GetLanguagePrefix() + fileName;
-    
+
     // GK3 translations are stored in INI files with various sections.
     // Sometimes, we don't care about the sections - we just load the entire file into a single localizer.
     // However, sometimes sections have duplicate keys - in that case, it's better to treat each section as its own localizer.
@@ -111,7 +111,7 @@ std::string Localizer::GetText(const std::string& key) const
     {
         return it->second;
     }
-    
+
     // Return the key back if no localization exists.
     return key;
 }

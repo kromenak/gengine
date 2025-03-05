@@ -138,8 +138,8 @@ namespace
         };
         for(int i = 0; i < 6; ++i)
         {
-            Vector2 closestPoint = segments[i].GetClosestPoint(point);
-            if((closestPoint - point).GetLength() < 4)
+            Vector2 closestPoint = segments[i].GetClosestPoint(localPoint);
+            if((closestPoint - localPoint).GetLength() < 4)
             {
                 return true;
             }
@@ -484,7 +484,7 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
     {
         if(!gGameProgress.GetFlag("Aquarius"))
         {
-            // If you try to place a Circle before Aquarius is done, Grace won't let you. 
+            // If you try to place a Circle before Aquarius is done, Grace won't let you.
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27NG1\", 1)");
         }
         else if(gGameProgress.GetFlag("Pisces"))
