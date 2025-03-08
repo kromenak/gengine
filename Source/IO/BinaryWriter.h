@@ -13,7 +13,7 @@ public:
     BinaryWriter(const char* filePath);
     BinaryWriter(uint8_t* memory, uint32_t memoryLength);
     ~BinaryWriter();
-	
+
 	// Should only write if OK is true.
     // Remember, "good" returns true as long as fail/bad/eof bits are all false.
     bool OK() const { return mStream->good(); }
@@ -30,10 +30,10 @@ public:
     // Write numeric types
     void WriteByte(uint8_t val);
     void WriteSByte(int8_t val);
-    
+
     void WriteUShort(uint16_t val);
     void WriteShort(int16_t val);
-    
+
     void WriteUInt(uint32_t val);
     void WriteInt(int32_t val);
 
@@ -51,6 +51,9 @@ public:
     void WriteTinyString(const std::string& str);
     void WriteShortString(const std::string& str);
     void WriteMedString(const std::string& str);
+
+    // Flush
+    void Flush() { mStream->flush(); }
 
 private:
     // Stream we are writing to.

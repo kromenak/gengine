@@ -2,7 +2,9 @@
 
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
+#include "FileSystem.h"
 #include "GAPI.h"
+#include "PNGCodec.h"
 #include "ThreadUtil.h"
 
 TYPEINFO_INIT(Texture, Asset, 101)
@@ -20,7 +22,7 @@ Texture::Texture(uint32_t width, uint32_t height) : Asset(""),
     mHeight(height)
 {
     // Create pixel array of desired size.
-    int pixelsSize = mWidth * mHeight * 4;
+    size_t pixelsSize = mWidth * mHeight * 4;
     mPixels = new uint8_t[pixelsSize];
 }
 
@@ -383,95 +385,107 @@ void Texture::UploadToGPU()
 
 void Texture::WriteToFile(const std::string& filePath)
 {
-    BinaryWriter writer(filePath.c_str());
-
-    // Determine the DIB header size. This depends on whether we need alpha support or not.
-    // The most basic DIB header format (BITMAPINFOHEADER) is 40 bytes, but does not support an alpha channel.
-    // To get alpha channel, BITMAPV4HEADER format is used, which is 108 bytes.
-    int dibHeaderSize = mRenderType == RenderType::Translucent ? 108 : 40;
-
-    // When we need to write out alpha data, the compression method BI_BITFIELDS (3) is used.
-    // Otherwise, BI_RGB (0) is fine - no compression in other words.
-    int compressionMethod = mRenderType == RenderType::Translucent ? 3 : 0;
-
-    // BMP HEADER
-    const int kBMPHeaderSize = 14;
-    writer.WriteString("BM");
-    writer.WriteUInt(0);    // Size of file in bytes. Optional to fill in.
-    writer.WriteUShort(0);  // Reserved/empty
-    writer.WriteUShort(0);  // Reserved/empty
-    writer.WriteUInt(kBMPHeaderSize + dibHeaderSize);   // Offset to image data (from beginning of this file)
-
-    // DIB HEADER
-    writer.WriteUInt(dibHeaderSize);        // Size of DIB header. Indicates which header version is being used.
-    writer.WriteInt(mWidth);                // Width of image; signed for some reason.
-    writer.WriteInt(mHeight);               // Height of image; signed for some reason.
-    writer.WriteUShort(1);                  // Number of color planes, always 1.
-
-    uint16_t bitsPerPixel = (mPalette != nullptr ? 8 : 32);
-    writer.WriteUShort(bitsPerPixel);                   // Number of bits-per-pixel.
-    writer.WriteUInt(compressionMethod);                // Compression method.
-    writer.WriteUInt(mWidth * mHeight * bitsPerPixel);  // Uncompressed size of image.
-    writer.WriteInt(0);                                 // Preferred width for printing, unused.
-    writer.WriteInt(0);                                 // Preferred height for printing, unused.
-    writer.WriteUInt(0);                                // Number of palette colors, unused.
-    writer.WriteUInt(0);                                // Number of important colors, unused.
-
-    // If this image has alpha, and we're thus writing out a BITMAPV4HEADER DIB header, we need to write out some additional fields.
-    if(mRenderType == RenderType::Translucent)
+    if(Path::HasExtension(filePath, "png"))
     {
-        // Define masks for each color component. This is just using the default used by BMP format anyway.
-        writer.WriteUInt(0x00FF0000); // Red
-        writer.WriteUInt(0x0000FF00); // Green
-        writer.WriteUInt(0x000000FF); // Blue
-        writer.WriteUInt(0xFF000000); // Alpha
-
-        // We must write out a bunch of color space info, but it's mostly dummy/zeros.
-        // Writing "Win " at the beginning uses the Windows color space.
-        writer.WriteString("Win ");
-        for(int i = 0; i < 12; ++i)
-        {
-            writer.WriteUInt(0);
-        }
+        PNG::ImageData imageData;
+        imageData.width = mWidth;
+        imageData.height = mHeight;
+        imageData.bytesPerPixel = 4;
+        imageData.pixelData = mPixels;
+        PNG::Encode(imageData, filePath.c_str());
     }
-
-    // COLOR TABLE - Only needed for 8BPP or less.
-    if(bitsPerPixel <= 8)
+    else
     {
-        writer.Write(mPalette, mPaletteSize);
-    }
+        BinaryWriter writer(filePath.c_str());
 
-    // PIXELS
-	// Write out one row at a time, bottom to top, left to right, per BMP format standard.
-	int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
-    for(uint32_t y = mHeight; y > 0; --y)
-    {
-        uint32_t height = y - 1;
-		int bytesWritten = 0;
-        for(uint32_t x = 0; x < mWidth; ++x)
+        // Determine the DIB header size. This depends on whether we need alpha support or not.
+        // The most basic DIB header format (BITMAPINFOHEADER) is 40 bytes, but does not support an alpha channel.
+        // To get alpha channel, BITMAPV4HEADER format is used, which is 108 bytes.
+        int dibHeaderSize = mRenderType == RenderType::Translucent ? 108 : 40;
+
+        // When we need to write out alpha data, the compression method BI_BITFIELDS (3) is used.
+        // Otherwise, BI_RGB (0) is fine - no compression in other words.
+        int compressionMethod = mRenderType == RenderType::Translucent ? 3 : 0;
+
+        // BMP HEADER
+        const int kBMPHeaderSize = 14;
+        writer.WriteString("BM");
+        writer.WriteUInt(0);    // Size of file in bytes. Optional to fill in.
+        writer.WriteUShort(0);  // Reserved/empty
+        writer.WriteUShort(0);  // Reserved/empty
+        writer.WriteUInt(kBMPHeaderSize + dibHeaderSize);   // Offset to image data (from beginning of this file)
+
+        // DIB HEADER
+        writer.WriteUInt(dibHeaderSize);        // Size of DIB header. Indicates which header version is being used.
+        writer.WriteInt(mWidth);                // Width of image; signed for some reason.
+        writer.WriteInt(mHeight);               // Height of image; signed for some reason.
+        writer.WriteUShort(1);                  // Number of color planes, always 1.
+
+        uint16_t bitsPerPixel = (mPalette != nullptr ? 8 : 32);
+        writer.WriteUShort(bitsPerPixel);                   // Number of bits-per-pixel.
+        writer.WriteUInt(compressionMethod);                // Compression method.
+        writer.WriteUInt(mWidth * mHeight * bitsPerPixel);  // Uncompressed size of image.
+        writer.WriteInt(0);                                 // Preferred width for printing, unused.
+        writer.WriteInt(0);                                 // Preferred height for printing, unused.
+        writer.WriteUInt(0);                                // Number of palette colors, unused.
+        writer.WriteUInt(0);                                // Number of important colors, unused.
+
+        // If this image has alpha, and we're thus writing out a BITMAPV4HEADER DIB header, we need to write out some additional fields.
+        if(mRenderType == RenderType::Translucent)
         {
-            if(bitsPerPixel == 8)
+            // Define masks for each color component. This is just using the default used by BMP format anyway.
+            writer.WriteUInt(0x00FF0000); // Red
+            writer.WriteUInt(0x0000FF00); // Green
+            writer.WriteUInt(0x000000FF); // Blue
+            writer.WriteUInt(0xFF000000); // Alpha
+
+            // We must write out a bunch of color space info, but it's mostly dummy/zeros.
+            // Writing "Win " at the beginning uses the Windows color space.
+            writer.WriteString("Win ");
+            for(int i = 0; i < 12; ++i)
             {
-                writer.WriteByte(mPaletteIndexes[(height * mWidth + x)]);
-                ++bytesWritten;
-            }
-            else if(bitsPerPixel == 32)
-            {
-                uint32_t index = (height * mWidth + x) * 4;
-                writer.WriteByte(mPixels[index + 2]); // Blue
-                writer.WriteByte(mPixels[index + 1]); // Green
-                writer.WriteByte(mPixels[index]); 	  // Red
-                writer.WriteByte(mPixels[index + 3]); // Alpha
-                bytesWritten += 4;
+                writer.WriteUInt(0);
             }
         }
 
-		// Add padding to write out total desired row size (padded to 4 bytes).
-		while(bytesWritten < rowSize)
-		{
-			writer.WriteByte(0);
-			bytesWritten++;
-		}
+        // COLOR TABLE - Only needed for 8BPP or less.
+        if(bitsPerPixel <= 8)
+        {
+            writer.Write(mPalette, mPaletteSize);
+        }
+
+        // PIXELS
+        // Write out one row at a time, bottom to top, left to right, per BMP format standard.
+        int rowSize = CalculateBmpRowSize(bitsPerPixel, mWidth);
+        for(uint32_t y = mHeight; y > 0; --y)
+        {
+            uint32_t height = y - 1;
+            int bytesWritten = 0;
+            for(uint32_t x = 0; x < mWidth; ++x)
+            {
+                if(bitsPerPixel == 8)
+                {
+                    writer.WriteByte(mPaletteIndexes[(height * mWidth + x)]);
+                    ++bytesWritten;
+                }
+                else if(bitsPerPixel == 32)
+                {
+                    uint32_t index = (height * mWidth + x) * 4;
+                    writer.WriteByte(mPixels[index + 2]); // Blue
+                    writer.WriteByte(mPixels[index + 1]); // Green
+                    writer.WriteByte(mPixels[index]);     // Red
+                    writer.WriteByte(mPixels[index + 3]); // Alpha
+                    bytesWritten += 4;
+                }
+            }
+
+            // Add padding to write out total desired row size (padded to 4 bytes).
+            while(bytesWritten < rowSize)
+            {
+                writer.WriteByte(0);
+                bytesWritten++;
+            }
+        }
     }
 }
 
@@ -497,6 +511,11 @@ void Texture::ParseFromData(BinaryReader &reader)
     else if(fileIdentifier == 0x4D42) // BM
     {
         ParseFromBmpFormat(reader);
+    }
+    else if(fileIdentifier == 0x5089)
+    {
+        reader.Seek(0);
+        ParseFromPngFormat(reader);
     }
 
     // Set magenta to be transparent.
@@ -709,4 +728,16 @@ void Texture::ParseFromBmpFormat(BinaryReader& reader)
 			reader.Skip(rowSize - bytesRead);
 		}
 	}
+}
+
+void Texture::ParseFromPngFormat(BinaryReader& reader)
+{
+    PNG::ImageData imageData;
+    PNG::CodecResult result = PNG::Decode(reader, imageData);
+    if(result == PNG::CodecResult::Success)
+    {
+        mWidth = imageData.width;
+        mHeight = imageData.height;
+        mPixels = imageData.pixelData;
+    }
 }

@@ -189,6 +189,7 @@ if(WIN32)
     )
 elseif(APPLE)
     target_include_directories(gk3 PRIVATE
+        Libraries/libpng/mac/include
         Libraries/SDL/SDL2.framework/Headers
     )
 
@@ -197,6 +198,7 @@ elseif(APPLE)
         Libraries/ffmpeg/lib/mac
         Libraries/fmod/lib/mac
         Libraries/GLEW/lib/mac
+        Libraries/libpng/mac/lib
         Libraries/zlib/lib/mac
     )
 
@@ -215,10 +217,11 @@ elseif(APPLE)
         avcodec avformat avutil swresample swscale  # ffmpeg
         fmod                                        # fmod
         GLEW                                        # GLEW
+        png                                         # libpng
         z                                           # zlib
         ${SDL2}                                     # SDL
-        ${COREFOUNDATION_LIB}
-        ${OPENGL_LIB}
+        ${COREFOUNDATION_LIB}                       # Core Foundation
+        ${OPENGL_LIB}                               # OpenGL
     )
 else() # Linux
     target_include_directories(gk3 PRIVATE
@@ -241,8 +244,8 @@ else() # Linux
         GLEW                                        # GLEW
         z                                           # zlib
         SDL2                                        # SDL
-        GL
-        ${CMAKE_DL_LIBS}
+        GL                                          # OpenGL
+        ${CMAKE_DL_LIBS}                            # dlopen/dlclose
     )
 endif()
 
