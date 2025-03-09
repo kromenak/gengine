@@ -52,7 +52,7 @@ public:
     virtual bool Init() = 0;
     virtual void Shutdown() = 0;
 
-     // IMGUI Support
+    // IMGUI Support
     virtual void ImGuiNewFrame() = 0;
     virtual void ImGuiRenderDrawData() = 0;
 
@@ -93,6 +93,9 @@ public:
     // Viewport
     virtual void SetViewport(int32_t x, int32_t y, uint32_t width, uint32_t height) = 0;
     virtual void SetScissorRect(bool enabled, const Rect& rect) = 0;
+
+    // Color Buffer
+    virtual void GetScreenPixels(uint32_t width, uint32_t height, uint8_t* pixels) = 0;
 
     // Depth Buffer
     virtual void SetDepthWriteEnabled(bool enabled) = 0;

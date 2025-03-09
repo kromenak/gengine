@@ -315,6 +315,23 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
     mRenderType = RenderType::Translucent;
 }
 
+void Texture::FlipVertically()
+{
+    for(uint32_t y = 0; y < mHeight / 2; ++y)
+    {
+        uint32_t otherY = mHeight - y - 1;
+
+        uint8_t* rowAData = mPixels + (y * mWidth * 4);
+        uint8_t* rowBData = mPixels + (otherY * mWidth * 4);
+        for(uint32_t xByte = 0; xByte < mWidth * 4; ++xByte)
+        {
+            uint8_t byte = rowAData[xByte];
+            rowAData[xByte] = rowBData[xByte];
+            rowBData[xByte] = byte;
+        }
+    }
+}
+
 void Texture::AddDirtyFlags(DirtyFlags flags)
 {
     mDirtyFlags |= flags;

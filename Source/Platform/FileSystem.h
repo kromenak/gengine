@@ -26,6 +26,7 @@ namespace Path
 	 */
 	std::string Combine(std::initializer_list<std::string> paths);
 
+
 	/**
 	 * Given a filename and a relative search path, determine if a file exists (return value) and determines
 	 * a full path (via out variable) that can be used to read the file.
@@ -55,6 +56,13 @@ namespace Path
      * Ex: "Assets/Data/Blah" has no extension, "Assets/Data/Blah.x" does have an extension.
      */
     bool HasExtension(const std::string& path, const std::string& expectedExtension = "");
+
+    /**
+     * Returns just the extension for the file in the path, or empty string if no extension exists.
+     * If desired, can optionally include the ".", but that is excluded by default.
+     * Ex: "Assets/Data/Test.png" would return "png" (or ".png" if you include the dot).
+     */
+    std::string GetExtension(const std::string& path, bool includeDot = false);
 
     /**
      * Removes the extension from the file name.
@@ -103,6 +111,9 @@ namespace Directory
 	 */
     bool CreateAll(const std::string& path);
 
+    /**
+     * Lists the files in a directory, optionally filtering to only files with a specific extension.
+     */
     std::vector<std::string> List(const std::string& path, const std::string& extension = "");
 }
 

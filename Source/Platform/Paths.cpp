@@ -4,7 +4,7 @@
 
 #include "FileSystem.h"
 
-const std::string& Paths::GetSaveDataPath()
+const std::string& Paths::GetUserDataPath()
 {
     static std::string saveDataPath;
     if(saveDataPath.empty())
@@ -22,9 +22,9 @@ const std::string& Paths::GetSaveDataPath()
     return saveDataPath;
 }
 
-std::string Paths::GetSaveDataPath(const std::string& filename)
+std::string Paths::GetUserDataPath(const std::string& filename)
 {
-    return Path::Combine({ GetSaveDataPath(), filename });
+    return Path::Combine({ GetUserDataPath(), filename });
 }
 
 const std::string& Paths::GetDataPath()

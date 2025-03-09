@@ -17,7 +17,7 @@ SaveManager gSaveManager;
 
 SaveManager::SaveManager()
 {
-    std::string prefsPath = Paths::GetSaveDataPath("Prefs.ini");
+    std::string prefsPath = Paths::GetUserDataPath("Prefs.ini");
 
     uint32_t bufferSize = 0;
     uint8_t* buffer = File::ReadIntoBuffer(prefsPath, bufferSize);
@@ -44,7 +44,7 @@ SaveManager::~SaveManager()
 
 void SaveManager::SavePrefs()
 {
-    mPrefs->Save(Paths::GetSaveDataPath("Prefs.ini"));
+    mPrefs->Save(Paths::GetUserDataPath("Prefs.ini"));
 }
 
 int SaveManager::GetRunCount() const
@@ -96,11 +96,11 @@ void SaveManager::RescanSaveDirectory()
     mNextSaveNumber = 1;
 
     // Get all files with "gk3" extension in the save data directory.
-    std::vector<std::string> saveFileNames = Directory::List(Path::Combine({ Paths::GetSaveDataPath(), "Save Games" }), "gk3");
+    std::vector<std::string> saveFileNames = Directory::List(Path::Combine({ Paths::GetUserDataPath(), "Save Games" }), "gk3");
     for(std::string& saveFileName : saveFileNames)
     {
         // Load in the relevant data.
-        std::string path = Path::Combine({ Paths::GetSaveDataPath(), "Save Games", saveFileName });
+        std::string path = Path::Combine({ Paths::GetUserDataPath(), "Save Games", saveFileName });
         PersistState ps(path.c_str(), PersistFormat::Binary, PersistMode::Load);
 
         // Read in save header.
@@ -144,7 +144,7 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     }
 
     // Make sure save game folder exists.
-    std::string saveFolderPath = Path::Combine({ Paths::GetSaveDataPath(), "Save Games" });
+    std::string saveFolderPath = Path::Combine({ Paths::GetUserDataPath(), "Save Games" });
     if(!Directory::CreateAll(saveFolderPath))
     {
         printf("Failed to save; could not create \"Save Games\" folder!\n");

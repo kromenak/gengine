@@ -15,11 +15,13 @@
 #include "Matrix4.h"
 #include "MeshRenderer.h"
 #include "Model.h"
+#include "Paths.h"
 #include "Profiler.h"
 #include "RectTransform.h"
 #include "RenderTransforms.h"
-#include "SceneManager.h"
 #include "SaveManager.h"
+#include "SceneManager.h"
+#include "SequentialFilePathGenerator.h"
 #include "Shader.h"
 #include "Skybox.h"
 #include "Texture.h"
@@ -121,7 +123,7 @@ bool Renderer::Initialize()
     // GK3 vertex data for models & BSP use a clockwise winding order.
     // However, note that *indexes* are counter-clockwise...but that doesn't seem to affect how the data is interpreted?
     GAPI::Get()->SetPolygonWindingOrder(GAPI::WindingOrder::Clockwise);
-	
+
     // Load default shader.
 	Shader* defaultShader = gAssetManager.LoadShader("3D-Tex");
 	if(defaultShader == nullptr) { return false; }
@@ -168,7 +170,7 @@ bool Renderer::Initialize()
         Submesh* axesSubmesh = axes->AddSubmesh(meshDefinition);
         axesSubmesh->SetRenderMode(RenderMode::Lines);
     }
-    
+
     // Quad
     {
         MeshDefinition meshDefinition(MeshUsage::Static, 4);
@@ -182,7 +184,7 @@ bool Renderer::Initialize()
         Submesh* quadSubmesh = quad->AddSubmesh(meshDefinition);
         quadSubmesh->SetRenderMode(RenderMode::Triangles);
     }
-    
+
 	// UI Quad
     {
         MeshDefinition meshDefinition(MeshUsage::Static, 4);
@@ -198,7 +200,7 @@ bool Renderer::Initialize()
     }
 
     // Do a single render here to make sure the window is cleared/empty.
-    // Because this is so early in the engine init process, this will basically just set clear color and present. 
+    // Because this is so early in the engine init process, this will basically just set clear color and present.
     Render();
 
     // Load rendering prefs.
@@ -267,7 +269,7 @@ void Renderer::Render()
         // All opaque world rendering uses alpha test.
         Material::UseAlphaTest(true);
         GAPI::Get()->SetPolygonCullMode(GAPI::CullMode::Back);
-        
+
         // Set the view & projection matrices for normal 3D camera-oriented rendering.
         Material::SetViewMatrix(viewMatrix);
         Material::SetProjMatrix(projectionMatrix);
@@ -301,7 +303,7 @@ void Renderer::Render()
         GAPI::Get()->SetDepthTestEnabled(true);   // do still test depth buffer
 
         // Currently all translucent BSP are shadow textures or decals, which look great with Multiply blend mode.
-        GAPI::Get()->SetBlendMode(GAPI::BlendMode::Multiply); 
+        GAPI::Get()->SetBlendMode(GAPI::BlendMode::Multiply);
         if(mBSP != nullptr)
         {
             mBSP->RenderTranslucent();
@@ -320,7 +322,7 @@ void Renderer::Render()
     // Bottom-left corner of screen is origin, +x is right, +y is up.
     Material::SetViewMatrix(Matrix4::Identity);
     Material::SetProjMatrix(RenderTransforms::MakeOrthoBottomLeft(static_cast<float>(Window::GetWidth()), static_cast<float>(Window::GetHeight())));
-    
+
     // Render UI elements.
     // Any renderable UI element is contained within a Canvas.
     UICanvas::RenderCanvases();
@@ -347,7 +349,7 @@ void Renderer::Render()
     // Render an axis at the world origin.
     Debug::DrawAxes(Vector3::Zero);
     #endif
-    
+
     // Render debug elements.
     // Any debug commands from earlier are queued internally, and only drawn when this is called!
     Debug::Render();
@@ -420,7 +422,7 @@ void Renderer::SetUseTrilinearFiltering(bool useTrilinearFiltering)
 void Renderer::ChangeResolution(const Window::Resolution& resolution)
 {
     Window::SetResolution(resolution);
-    
+
     // Change the viewport to match the new width/height.
     // If you don't do this, the window size changes but the area rendered to doesn't change.
     GAPI::Get()->SetViewport(0, 0, resolution.width, resolution.height);
@@ -433,4 +435,32 @@ void Renderer::ChangeResolution(const Window::Resolution& resolution)
             actor->GetTransform()->SetDirty();
         }
     }
+}
+
+Texture* Renderer::TakeScreenshotToTexture() const
+{
+    // Create texture with window size.
+    Texture* texture = new Texture(Window::GetWidth(), Window::GetHeight());
+
+    // Get the screen pixels into the texture.
+    GAPI::Get()->GetScreenPixels(Window::GetWidth(), Window::GetHeight(), texture->GetPixelData());
+
+    // At least in OpenGL, the texture data is from bottom-left, but our texture class assumes top-left.
+    // Flipping vertically resolves that.
+    texture->FlipVertically();
+    return texture;
+}
+
+void Renderer::TakeScreenshotToFile() const
+{
+    static SequentialFilePathGenerator pathGenerator(Paths::GetUserDataPath("Screenshots"), "screenshot_%03d.png");
+
+    // Take a screenshot to texture.
+    Texture* screenshot = TakeScreenshotToTexture();
+
+    // Write the texture to the next available screenshot file.
+    screenshot->WriteToFile(pathGenerator.GenerateFilePath(true));
+
+    // No longer need the texture - delete it.
+    delete screenshot;
 }

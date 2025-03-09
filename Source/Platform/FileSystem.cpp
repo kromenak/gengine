@@ -194,6 +194,33 @@ bool Path::HasExtension(const std::string& path, const std::string& expectedExte
     }
 }
 
+std::string Path::GetExtension(const std::string& path, bool includeDot)
+{
+    // Find last dot in path.
+    size_t lastExtensionPos = path.find_last_of('.');
+
+    // No period in the string? Guess we have no extension.
+    if(lastExtensionPos == std::string::npos)
+    {
+        return std::string();
+    }
+
+    // Need to make sure last '.' is in the last part of the path.
+    // "Assets/Foo.proj/Blah" is not considered to have an extension, for example.
+    size_t lastSeparatorPos = path.find_last_of(kSeparator);
+    if(lastSeparatorPos != std::string::npos && lastSeparatorPos > lastExtensionPos)
+    {
+        return std::string();
+    }
+
+    // Return the extension part of the path.
+    if(includeDot)
+    {
+        return path.substr(lastExtensionPos);
+    }
+    return path.substr(lastExtensionPos + 1);
+}
+
 bool Directory::Exists(const std::string& path)
 {
     #if defined(PLATFORM_WINDOWS)

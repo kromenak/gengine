@@ -99,6 +99,8 @@ public:
     void ClearTransparentColor();
 	void ApplyAlphaChannel(const Texture& alphaTexture);
 
+    void FlipVertically();
+
     // GPU upload
     void AddDirtyFlags(DirtyFlags flags);
 	void UploadToGPU();

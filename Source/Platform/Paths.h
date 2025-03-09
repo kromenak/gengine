@@ -9,10 +9,10 @@
 namespace Paths
 {
     /**
-     * The "save data path" is a writable directory for preferences and save games.
+     * The "user data path" is a writable directory for user data (preferences, save games, screenshots, etc).
      */
-    const std::string& GetSaveDataPath();
-    std::string GetSaveDataPath(const std::string& filename);
+    const std::string& GetUserDataPath();
+    std::string GetUserDataPath(const std::string& filename);
 
     /**
      * The "data path" is the root directory for the game's read-only data (Assets, Data, etc).

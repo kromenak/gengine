@@ -272,6 +272,17 @@ void GAPI_OpenGL::SetScissorRect(bool enabled, const Rect& rect)
     }
 }
 
+void GAPI_OpenGL::GetScreenPixels(uint32_t width, uint32_t height, uint8_t* pixels)
+{
+    // Set "read buffer" to the front buffer. This is what is currently displayed on-screen.
+    //TODO: It can also make sense to use GL_BACK, if you want to read the back buffer pixels before it is rendered?
+    glReadBuffer(GL_FRONT);
+
+    // Read pixels into provided pixels array.
+    //TODO: Assuming for now that the we want pixels from bottom left corner (0, 0), and width/height match the screen size.
+    glReadPixels(0, 0, static_cast<GLsizei>(width), static_cast<GLsizei>(height), GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+}
+
 void GAPI_OpenGL::SetDepthWriteEnabled(bool enabled)
 {
     glDepthMask(enabled ? GL_TRUE : GL_FALSE);

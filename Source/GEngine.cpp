@@ -240,6 +240,12 @@ void GEngine::Run()
         // Frame is done, do any save or loads now.
         gSaveManager.HandlePendingSavesAndLoads();
 
+        // If F11 is pressed, take a screenshot and save it to file.
+        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_F11))
+        {
+            gRenderer.TakeScreenshotToFile();
+        }
+
         // OK, this frame is done!
         ++mFrameNumber;
         PROFILER_END_FRAME();
