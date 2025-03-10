@@ -6,7 +6,7 @@ Grab the latest zlib source code from https://zlib.net/.
 ## Linux
 You can pretty much just use the simple "configure and make" approach here. But one recommendation is to set the install folder to a local subfolder.
 ```
-./configure --prefix=out
+./configure --prefix=${PWD}/out
 make install
 ```
 
@@ -16,12 +16,17 @@ Copy headers and library files to their final locations:
 	- DO NOT copy over `share` folder, `pkgconfig` folder, or any static libraries. 
 
 ## Mac
-The instructions here are virtually identical to the Linux instructions. The main difference is that you'll copy over `dylib` files instead of `so` files (and put them in the `mac` folder of course).
+Run configure and then make/install, similar to Linux.
 
 One other thing to highlight: G-Engine currently only supports Intel-based Mac binaries. If you're on an Apple Silicon Mac, you will need to prefix build commands with an `arch` command:
 ```
-arch -arch x86_64 ./configure --prefix=out
+arch -arch x86_64 ./configure --prefix=${PWD}/out
 arch -arch x86_64 make install
+```
+
+You will likely need to change the generated library's ID so that it loads correctly at runtime:
+```
+install_name_tool -id @rpath/libz.dylib libz.dylib
 ```
 
 Copy headers and library files to their final locations:

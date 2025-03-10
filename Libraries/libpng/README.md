@@ -13,28 +13,35 @@ libpng has a dependency on zlib. So, before building, we need to make sure libpn
 
 You can pretty much just use the simple "configure and make" approach here. But one recommendation is to set the install folder to a local subfolder.
 ```
-./configure --prefix=out
+./configure --prefix=${PWD}/out
 make install
 ```
 
-This puts the built library in the `out` subfolder.
-- Replace the contents of `zlib/linux/include` with the contents from `out/include` (`zconf.h` and `zlib.h`).
-- Replace the contents of `zlib/linux/lib` with the `so` files in `out/lib`.
-- DO NOT copy over any other files (`a` files, `pkgconfig` files, `share` folder, etc).
-
 ## Mac
-The instructions here are virtually identical to the Linux instructions. The main difference is that you'll copy over `dylib` files instead of `so` files (and put them in the `mac` folder of course).
+Before building, make sure libpng can find the zlib headers. The easiest way to do this is to simply copy `zconf.h` and `zlib.h` into the `libpng` source code root folder. Make sure the headers used match the version of zlib that will be used in the final executable!
 
-One other thing to highlight: G-Engine currently only supports Intel-based Mac binaries. If you're on an Apple Silicon Mac, you will need to prefix build commands with an `arch` command:
 ```
-arch -arch x86_64 ./configure --prefix=out
+arch -arch x86_64 ./configure --prefix=${PWD}/out
 arch -arch x86_64 make install
 ```
 
-## Windows
-To build on Windows, it's easiest to use CMake to generate a Visual Studio project, and then build from there.
+You will likely need to change the generated library's ID so that it loads correctly at runtime:
+```
+install_name_tool -id @rpath/libpng.dylib out/lib/libpng.dylib
+```
 
-First, generate the CMake project:
+Also, you may need to change the zlib loader path as well:
+```
+install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.dylib out/lib/libpng.dylib
+```
+
+Copy headers and library files to their final locations:
+	- Copy the contents of `out/include/libpng16` to `Libraries/libpng/mac/include`.
+	- Copy the `dylib` files from `out/lib` to `Libraries/libpng/mac/lib`.
+	- DO NOT copy over `share` folder, `pkgconfig` folder, or any static libraries. 
+
+## Windows
+To build on Windows, it's easiest to use CMake to generate a Visual Studio project, and then build from there. First, generate the CMake project:
 ```
 cmake -S . -B _windows -G "Visual Studio 17 2022" -A Win32 -DZLIB_ROOT=~/Projects/gengine/Libraries/zlib/win/
 ```
