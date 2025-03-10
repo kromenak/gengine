@@ -5,16 +5,48 @@ DEPLOY_DIR=$3
 VERSION_NUM=$4
 PLATFORM=$5
 
+# Data validation
+if [ -z "${ROOT_DIR}" ]; then
+    exit 1;
+fi
+if [ -z "${BUILD_DIR}" ]; then
+    exit 1;
+fi
+if [ -z "${DEPLOY_DIR}" ]; then
+    exit 1;
+fi
+
 # Make sure install directory (and intermediates) exist and is empty.
 mkdir -p "${DEPLOY_DIR}"
 rm -rf "${DEPLOY_DIR}"/*
+
+if [ ${PLATFORM} = "Windows" ]; then
+    # Copy over EXE.
+    cp "${BUILD_DIR}/gk3.exe" "${DEPLOY_DIR}/GK3.exe"
+
+    # Copy over all DLLs.
+    cp "${BUILD_DIR}/"*.dll "${DEPLOY_DIR}"
+
+    # Copy Assets folder.
+    cp -r "${ROOT_DIR}/Assets" "${DEPLOY_DIR}"
+
+    # Create a Data directory with README file.
+    mkdir "${DEPLOY_DIR}/Data"
+    cp "${ROOT_DIR}/Data/README.md" "${DEPLOY_DIR}/Data/"
+
+    # Copy over ini file.
+    cp "${ROOT_DIR}/GK3.ini" "${DEPLOY_DIR}"
+
+    # Create zip.
+    cd "${DEPLOY_DIR}"
+    zip -r GK3-Win-${VERSION_NUM}.zip .
+fi
 
 if [ ${PLATFORM} = "Mac" ]; then
     APP_FILENAME="Gabriel Knight 3.app"
 
     # Copy Assets to app bundle.
     ASSETS_DIR=${BUILD_DIR}/${APP_FILENAME}/Contents/Resources
-    echo ${ASSETS_DIR}
     cp -r ${ROOT_DIR}/Assets "${ASSETS_DIR}"
 
     # Make Data directory in app bundle with README file.

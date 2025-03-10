@@ -15,8 +15,20 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Generate platform paths for source and binary directory, used later.
+file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PLAT_SOURCE_DIR)
+file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} PLAT_BINARY_DIR)
+
 # For Xcode, generate schemes for targets. This ensures targets appear in target dropdown.
 set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
+
+# CLion and Xcode differ in where they put the Mac App, and also how they name it. Let's support both!
+if(APPLE)
+    set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/gk3.app/Contents")
+    if(XCODE)
+        set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/$<CONFIG>/Gabriel Knight 3.app/Contents")
+    endif()
+endif()
 
 # Generate header containing info about build environment.
 # Important to put generated file in BINARY_DIR - otherwise, conflicts may occur when multiple projects are generated.
@@ -42,8 +54,10 @@ source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${asset_files})
 # Add main executable - the engine/game.
 add_executable(gk3 ${source_files} ${asset_files})
 
-# Add header locations.
-# For any folder listed here, you can add headers in that folder without providing a path.
+###################
+# COMPILER CONFIG
+###################
+# Add header locations. For any folder listed here, you can add headers in that folder without providing a path.
 target_include_directories(gk3 PRIVATE
     # Source include dirs
     Source
@@ -99,7 +113,7 @@ target_include_directories(gk3 PRIVATE
     "${CMAKE_CURRENT_BINARY_DIR}"
 )
 
-# Common defines.
+# Platform-agnostic defines.
 target_compile_definitions(gk3 PRIVATE
     $<$<CONFIG:Debug>:DEBUG>
 )
@@ -162,7 +176,11 @@ elseif(APPLE)
     #)
 endif()
 
+#########################
+# LIBRARY/LINKING CONFIG
+#########################
 # Library locations/linking/copying.
+set(LIBS_SRC "${PLAT_SOURCE_DIR}/Libraries")
 if(WIN32)
     target_include_directories(gk3 PRIVATE
         Libraries/libpng/win/include
@@ -189,6 +207,24 @@ if(WIN32)
         zdll                                        # zlib
         SDL2                                        # SDL
         opengl32                                    # OpenGL
+    )
+
+    # Copy libraries after build.
+    set(LIB_DEST "${PLAT_BINARY_DIR}/$<CONFIG>")
+    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/lib/win")
+    add_custom_command(TARGET gk3
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avcodec-58.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avformat-58.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avutil-56.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swresample-3.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swscale-5.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/fmod/lib/win/fmod.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/GLEW/lib/win/x86/glew32.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/libpng/win/lib/libpng16.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/SDL/win/lib/x86/SDL2.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/zlib/win/lib/zlib1.dll" "${LIB_DEST}"
+        VERBATIM
     )
 elseif(APPLE)
     target_include_directories(gk3 PRIVATE
@@ -227,6 +263,24 @@ elseif(APPLE)
         ${COREFOUNDATION_LIB}                       # Core Foundation
         ${OPENGL_LIB}                               # OpenGL
     )
+
+    # Copy libraries after build.
+    set(LIB_DEST "${MAC_APP_CONTENTS}/Libraries")
+    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/lib/mac")
+    add_custom_command(TARGET gk3
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavcodec.dylib" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavformat.dylib" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavutil.dylib" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswresample.dylib" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswscale.dylib" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/fmod/lib/mac/libfmod.dylib" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/GLEW/lib/mac/libGLEW.dylib" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/libpng/mac/lib/libpng.dylib" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/zlib/mac/lib/libz.dylib" "${LIB_DEST}"
+    )
+
 else() # Linux
     target_include_directories(gk3 PRIVATE
         Libraries/SDL/linux/include
@@ -252,9 +306,63 @@ else() # Linux
         GL                                          # OpenGL
         ${CMAKE_DL_LIBS}                            # dlopen/dlclose
     )
+
+    # Copy libraries post-build.
+    set(LIB_DEST "${PLAT_BINARY_DIR}")
+    set(LIB_FFMPEG_SRC "${LIBS_SRC}/ffmpeg/lib/linux")
+    add_custom_command(TARGET gk3
+        POST_BUILD
+        COMMAND ln -fs "${PLAT_SOURCE_DIR}/Assets" "${PLAT_BINARY_DIR}"  #TODO: Can maybe use ${CMAKE_COMMAND} -E create_symlink?
+        COMMAND ln -fs "${PLAT_SOURCE_DIR}/Data" "${PLAT_BINARY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavcodec.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavformat.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavutil.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswresample.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswscale.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/fmod/lib/linux/libfmod.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/GLEW/lib/linux/libGLEW.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/zlib/lib/linux/libz.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/SDL/linux/lib/libSDL2.so" "${LIB_DEST}"
+        VERBATIM
+    )
 endif()
 
-# Other project settings
+# Add minilzo library (source only).
+set(LZO_SOURCES
+    Libraries/minilzo/lzoconf.h
+    Libraries/minilzo/lzodefs.h
+    Libraries/minilzo/minilzo.c
+    Libraries/minilzo/minilzo.h
+)
+target_sources(gk3 PRIVATE ${LZO_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${LZO_SOURCES})
+
+# Add stb library (source only).
+set(STB_SOURCES
+    Libraries/stb/stb_image_resize.h
+    Libraries/stb/stb_image_resize.cpp
+)
+target_sources(gk3 PRIVATE ${STB_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${STB_SOURCES})
+
+# Add imgui library (source only).
+set(IMGUI_SOURCES
+    Libraries/imgui/imgui.cpp
+    Libraries/imgui/imgui_demo.cpp
+    Libraries/imgui/imgui_draw.cpp
+    Libraries/imgui/imgui_stdlib.cpp
+    Libraries/imgui/imgui_tables.cpp
+    Libraries/imgui/imgui_widgets.cpp
+    Libraries/imgui/backends/imgui_impl_opengl3.cpp
+    Libraries/imgui/backends/imgui_impl_sdl.cpp
+)
+target_sources(gk3 PRIVATE ${IMGUI_SOURCES})
+source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${IMGUI_SOURCES})
+
+##################
+# PLATFORM CONFIG
+##################
+# Here, we mostly have misc configs required to get the engine working on a specific platform, or to help with debugging.
 if(WIN32)
     # Use repo root as debugger working directory.
     # This allows running the game without copying Assets/Data to the Build folder.
@@ -294,52 +402,7 @@ elseif(APPLE)
     set_target_properties(gk3 PROPERTIES
         XCODE_SCHEME_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
-    # NOTE: CLion doesn't yet have a WORKING_DIRECTORY CMake variable. We use symbolic links later on instead.
-endif()
-
-# Post-build commands, to copy any libraries/assets to final locations.
-file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PLAT_SOURCE_DIR)
-file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} PLAT_BINARY_DIR)
-if(WIN32)
-    set(LIB_DEST "${PLAT_BINARY_DIR}/$<CONFIG>")
-    set(LIB_FFMPEG_SRC "${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/win")
-    add_custom_command(TARGET gk3
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avcodec-58.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avformat-58.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avutil-56.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swresample-3.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swscale-5.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/fmod/lib/win/fmod.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/win/x86/glew32.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/libpng/win/lib/libpng16.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/SDL/win/lib/x86/SDL2.dll" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/zlib/win/lib/zlib1.dll" "${LIB_DEST}"
-        VERBATIM
-    )
-elseif(APPLE)
-    # CLion and Xcode differ in where they put the Mac App, and also how they name it. Let's support both!
-    set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/gk3.app/Contents")
-    if(XCODE)
-        set(MAC_APP_CONTENTS "${PLAT_BINARY_DIR}/$<CONFIG>/Gabriel Knight 3.app/Contents")
-    endif()
-
-    # Copies libraries to app bundle post-build.
-    set(LIB_FFMPEG_SRC "${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/mac")
-    set(MAC_APP_LIBRARIES "${MAC_APP_CONTENTS}/Libraries")
-    add_custom_command(TARGET gk3
-        POST_BUILD
-        COMMAND mkdir -p "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavcodec.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavformat.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavutil.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswresample.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswscale.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/fmod/lib/mac/libfmod.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/mac/libGLEW.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/libpng/mac/lib/libpng.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/zlib/mac/lib/libz.dylib" "${MAC_APP_LIBRARIES}"
-    )
+    # NOTE: CLion doesn't yet have a WORKING_DIRECTORY CMake variable.
 
     # Non-Xcode IDEs (like CLion) do not seem to automatically copy frameworks. So, do that manually.
     # They also don't have a way to set working directory, so symbolic link Assets/Data folders to avoid copying.
@@ -354,81 +417,37 @@ elseif(APPLE)
         )
     endif()
 else() # Linux
-    # Copy libraries post-build.
-    set(LIB_FFMPEG_SRC "${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/linux")
+    # Add symbolic links to Assets/Data so the game runs even if working directory isn't the source root.
     add_custom_command(TARGET gk3
         POST_BUILD
-        COMMAND ln -fs "${PLAT_SOURCE_DIR}/Assets" "${PLAT_BINARY_DIR}"
+        COMMAND ln -fs "${PLAT_SOURCE_DIR}/Assets" "${PLAT_BINARY_DIR}"  #TODO: Can maybe use ${CMAKE_COMMAND} -E create_symlink?
         COMMAND ln -fs "${PLAT_SOURCE_DIR}/Data" "${PLAT_BINARY_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libavcodec.so ${PLAT_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libavformat.so ${PLAT_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libavutil.so ${PLAT_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libswresample.so ${PLAT_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_FFMPEG_SRC}/libswscale.so ${PLAT_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/fmod/lib/linux/libfmod.so" "${PLAT_BINARY_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/linux/libGLEW.so" "${PLAT_BINARY_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/zlib/lib/linux/libz.so" "${PLAT_BINARY_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/SDL/linux/lib/libSDL2.so" "${PLAT_BINARY_DIR}"
-        VERBATIM
     )
 endif()
 
 # Create deploy target, which creates a final release of the game.
 # This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
-add_custom_target(deploy)
+add_custom_target(deploy DEPENDS "deploy_output")
 if(WIN32)
-    # In VS, this target does not appear in the top bar - go to "Solution Explorer -> CMake Targets View" to build this target.
-    add_custom_command(TARGET deploy
-        POST_BUILD
-        COMMAND cmd /c ${PLAT_SOURCE_DIR}\\Scripts\\Deploy.bat ${PLAT_SOURCE_DIR} ${PLAT_BINARY_DIR}\\$<CONFIG> ${PLAT_SOURCE_DIR}\\Bin\\$<CONFIG> ${PROJECT_VERSION}
+    add_custom_command(
+        OUTPUT "deploy_output"
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Scripts/Deploy.sh" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Windows
         VERBATIM
     )
 elseif(APPLE)
-    add_custom_command(TARGET deploy
-        POST_BUILD
+    add_custom_command(
+        OUTPUT "deploy_output"
         COMMAND ${PLAT_SOURCE_DIR}/Scripts/Deploy.sh ${PLAT_SOURCE_DIR} ${PLAT_BINARY_DIR}/$<CONFIG> ${PLAT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Mac
         VERBATIM
     )
 else() # Linux
-    add_custom_command(TARGET deploy
-        POST_BUILD
+    add_custom_command(
+        OUTPUT "deploy_output"
         COMMAND ${PLAT_SOURCE_DIR}/Scripts/Deploy.sh ${PLAT_SOURCE_DIR} ${PLAT_BINARY_DIR} ${PLAT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Linux
         VERBATIM
     )
 endif()
 add_dependencies(deploy gk3)
-
-# Add minilzo library (source only).
-set(LZO_SOURCES
-    Libraries/minilzo/lzoconf.h
-    Libraries/minilzo/lzodefs.h
-    Libraries/minilzo/minilzo.c
-    Libraries/minilzo/minilzo.h
-)
-target_sources(gk3 PRIVATE ${LZO_SOURCES})
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${LZO_SOURCES})
-
-# Add stb library (source only).
-set(STB_SOURCES
-    Libraries/stb/stb_image_resize.h
-    Libraries/stb/stb_image_resize.cpp
-)
-target_sources(gk3 PRIVATE ${STB_SOURCES})
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${STB_SOURCES})
-
-# Add imgui library (source only).
-set(IMGUI_SOURCES
-    Libraries/imgui/imgui.cpp
-    Libraries/imgui/imgui_demo.cpp
-    Libraries/imgui/imgui_draw.cpp
-    Libraries/imgui/imgui_stdlib.cpp
-    Libraries/imgui/imgui_tables.cpp
-    Libraries/imgui/imgui_widgets.cpp
-    Libraries/imgui/backends/imgui_impl_opengl3.cpp
-    Libraries/imgui/backends/imgui_impl_sdl.cpp
-)
-target_sources(gk3 PRIVATE ${IMGUI_SOURCES})
-source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${IMGUI_SOURCES})
 
 # Add tests subdirectory (creates the "tests" target).
 add_subdirectory(Tests)
