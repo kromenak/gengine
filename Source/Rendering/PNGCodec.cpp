@@ -32,14 +32,14 @@ namespace
         BinaryReader* reader = static_cast<BinaryReader*>(png_get_io_ptr(pngRead));
         if(reader == nullptr)
         {
-            png_err(pngRead);
+            png_error(pngRead, "Binary reader is null!");
         }
 
         // Read the data, populating the provided data field.
         uint32_t readBytes = reader->Read(data, length);
         if(readBytes != length)
         {
-            png_err(pngRead);
+            png_error(pngRead, "Unexpected EOF!");
         }
     }
 
@@ -55,7 +55,7 @@ namespace
         BinaryWriter* writer = static_cast<BinaryWriter*>(png_get_io_ptr(pngWrite));
         if(writer == nullptr)
         {
-            png_err(pngWrite);
+            png_error(pngWrite, "Binary writer is null!");
         }
 
         // Write the data.
@@ -68,7 +68,7 @@ namespace
         BinaryWriter* writer = static_cast<BinaryWriter*>(png_get_io_ptr(pngWrite));
         if(writer == nullptr)
         {
-            png_err(pngWrite);
+            png_error(pngWrite, "Binary writer is null!");
         }
 
         // Flush the writer.
