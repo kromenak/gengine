@@ -36,17 +36,11 @@ If you'd prefer to use the native Command Prompt, you'll just need to manually r
 The engine currently supports Mac and Windows. Most of the engine code is platform-agnostic, but there are some key things that must be taken care of to support a new platform.
 
 ### Libraries
-The engine currently uses the following third-party libraries:
+The engine uses a variety of third-party libraries; see the "Built With" section below for a summary.
 
-- ffmpeg
-- fmod
-- GLEW
-- minilzo
-- SDL
-- stb
-- zlib
+All library files are included in the repo, so no libraries need be installed before building and running. To support a new platform, the library files for that platform must be built and added to the appropriate `Libraries` subdirectory.
 
-All library files are included in the repo, so no software need be installed before building and running. To support a new platform, the library files for that platform must be built and added to the appropriate `Libraries` subdirectory.
+For more info about library organizationh and how specific libraries were built, see `README.md` in the `Libraries` folder or in specific library subfolders.
 
 ### CMake
 Most of the CMake files probably don't need to change to support a new platform, but there are some platform-specific bits in there. To support a new platform, the CMake file likely needs to be modified.
@@ -63,12 +57,13 @@ After generating build files with CMake, simply run the `tests` target to run te
 
 ## Built With
 
-* [SDL](https://www.libsdl.org/) - My training wheels for cross-platform OS polling, rendering, and input
-* [ffmpeg](https://ffmpeg.org/) - Provides AVI and Bink video support. Without this library, I have no idea how I'd ever get video playback working
+* [SDL](https://www.libsdl.org/) - Cross-platform library for a variety of OS functionality
+* [ffmpeg](https://ffmpeg.org/) - Provides AVI and Bink video suppor
 * [fmod](https://www.fmod.com/) - Made SFX and music way easier than I thought possible
 * [zlib](https://www.zlib.net/) - For GK3 asset decompression
 * [minilzo](http://www.oberhumer.com/opensource/lzo/) - Also for GK3 asset decompression
 * [stb](https://github.com/nothings/stb) - Handy public domain utilities; I'm currently using the image resize algorithms
+* [libpng](http://www.libpng.org/pub/png/libpng.html) - PNG encode and decode functionality
 
 ## Contributing
 G-Engine is kind of a pet project of mine, and I'm using it primarily as a learning tool. As such, I am not actively looking for contributions.

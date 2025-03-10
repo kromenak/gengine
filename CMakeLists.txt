@@ -94,7 +94,6 @@ target_include_directories(gk3 PRIVATE
     Libraries/imgui/backends
     Libraries/minilzo
     Libraries/stb
-    Libraries/zlib/include
 
     # Required for including BuildEnv.h
     "${CMAKE_CURRENT_BINARY_DIR}"
@@ -166,7 +165,9 @@ endif()
 # Library locations/linking/copying.
 if(WIN32)
     target_include_directories(gk3 PRIVATE
+        Libraries/libpng/win/include
         Libraries/SDL/win/include
+        Libraries/zlib/win/include
     )
 
     # Specify library search directories.
@@ -174,8 +175,9 @@ if(WIN32)
         Libraries/ffmpeg/lib/win
         Libraries/fmod/lib/win
         Libraries/GLEW/lib/win/x86
+        Libraries/libpng/win/lib
         Libraries/SDL/win/lib/x86
-        Libraries/zlib/lib/win/x86
+        Libraries/zlib/win/lib
     )
 
     # Link various libraries.
@@ -183,7 +185,8 @@ if(WIN32)
         avcodec avformat avutil swresample swscale  # ffmpeg
         fmod                                        # fmod
         glew32                                      # GLEW
-        zlib                                        # zlib
+        libpng16                                    # libpng
+        zdll                                        # zlib
         SDL2                                        # SDL
         opengl32                                    # OpenGL
     )
@@ -191,6 +194,7 @@ elseif(APPLE)
     target_include_directories(gk3 PRIVATE
         Libraries/libpng/mac/include
         Libraries/SDL/SDL2.framework/Headers
+        Libraries/zlib/mac/include
     )
 
     # Specify library search directories.
@@ -199,7 +203,7 @@ elseif(APPLE)
         Libraries/fmod/lib/mac
         Libraries/GLEW/lib/mac
         Libraries/libpng/mac/lib
-        Libraries/zlib/lib/mac
+        Libraries/zlib/mac/lib
     )
 
     # Must use find_library for frameworks, such as SDL (rather than target_link_directories).
@@ -226,6 +230,7 @@ elseif(APPLE)
 else() # Linux
     target_include_directories(gk3 PRIVATE
         Libraries/SDL/linux/include
+        Libraries/zlib/linux/include
     )
 
     # Specify library search directories.
@@ -234,7 +239,7 @@ else() # Linux
         Libraries/fmod/lib/linux
         Libraries/GLEW/lib/linux
         Libraries/SDL/linux/lib
-        Libraries/zlib/lib/linux
+        Libraries/zlib/linux/lib
     )
 
     # Link all the libraries.
@@ -296,10 +301,20 @@ endif()
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR} PLAT_SOURCE_DIR)
 file(TO_NATIVE_PATH ${CMAKE_CURRENT_BINARY_DIR} PLAT_BINARY_DIR)
 if(WIN32)
-    # Convert directories to Windows (with backslash separator).
+    set(LIB_DEST "${PLAT_BINARY_DIR}/$<CONFIG>")
+    set(LIB_FFMPEG_SRC "${PLAT_SOURCE_DIR}/Libraries/ffmpeg/lib/win")
     add_custom_command(TARGET gk3
         POST_BUILD
-        COMMAND cmd /c ${PLAT_SOURCE_DIR}\\Scripts\\PostBuild.bat ${PLAT_BINARY_DIR}\\$<CONFIG> ${PLAT_SOURCE_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avcodec-58.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avformat-58.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/avutil-56.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swresample-3.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/swscale-5.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/fmod/lib/win/fmod.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/win/x86/glew32.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/libpng/win/lib/libpng16.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/SDL/win/lib/x86/SDL2.dll" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/zlib/win/lib/zlib1.dll" "${LIB_DEST}"
         VERBATIM
     )
 elseif(APPLE)
