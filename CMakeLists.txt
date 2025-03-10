@@ -330,14 +330,15 @@ elseif(APPLE)
     add_custom_command(TARGET gk3
         POST_BUILD
         COMMAND mkdir -p "${MAC_APP_LIBRARIES}"
-        COMMAND cp "${LIB_FFMPEG_SRC}/libavcodec.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND cp "${LIB_FFMPEG_SRC}/libavformat.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND cp "${LIB_FFMPEG_SRC}/libavutil.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND cp "${LIB_FFMPEG_SRC}/libswresample.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND cp "${LIB_FFMPEG_SRC}/libswscale.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND cp "${PLAT_SOURCE_DIR}/Libraries/fmod/lib/mac/libfmod.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND cp "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/mac/libGLEW.dylib" "${MAC_APP_LIBRARIES}"
-        COMMAND cp "${PLAT_SOURCE_DIR}/Libraries/zlib/lib/mac/libz.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavcodec.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavformat.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libavutil.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswresample.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswscale.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/fmod/lib/mac/libfmod.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/GLEW/lib/mac/libGLEW.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/libpng/mac/lib/libpng.dylib" "${MAC_APP_LIBRARIES}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${PLAT_SOURCE_DIR}/Libraries/zlib/mac/lib/libz.dylib" "${MAC_APP_LIBRARIES}"
     )
 
     # Non-Xcode IDEs (like CLion) do not seem to automatically copy frameworks. So, do that manually.
