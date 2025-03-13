@@ -8,10 +8,12 @@
 #include "InventoryManager.h"
 #include "LocationManager.h"
 #include "Paths.h"
+#include "Renderer.h"
 #include "SceneManager.h"
 #include "Sidney.h"
 #include "StringUtil.h"
 #include "SystemUtil.h"
+#include "Texture.h"
 
 SaveManager gSaveManager;
 
@@ -107,7 +109,7 @@ void SaveManager::RescanSaveDirectory()
         SaveHeader saveHeader;
         saveHeader.OnPersist(ps);
 
-        //TODO: If we detect that this save file is not valid with the current version of the game (basd on SaveHeader data), skip it.
+        //TODO: If we detect that this save file is not valid with the current version of the game (based on SaveHeader data), skip it.
 
         //TODO: Saves are sorted by their date (in the SaveHeader).
 
@@ -175,7 +177,24 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     persistHeader.timeblock = gGameProgress.GetTimeblock().ToString();
     persistHeader.score = gGameProgress.GetScore();
     persistHeader.maxScore = gGameProgress.GetMaxScore();
-    //TODO: Thumbnail
+
+    // Generate a thumbnail for the save game.
+    {
+        Texture* screenshot = gRenderer.TakeScreenshotToTexture();
+
+        // We want the screenshot to be 160x120. For some resolutions, this is no problem.
+        // But for wide resolutions, you end up with some stretching in the image.
+        // Figure out what we could crop the width to in order to get roughly a 4:3 aspect ratio.
+        uint32_t cropWidth = (screenshot->GetHeight() / 3) * 4;
+        uint32_t cropHeight = (screenshot->GetHeight() / 3) * 3;
+        screenshot->Crop(cropWidth, cropHeight, true);
+
+        // After cropping, resize to thumbnail size.
+        screenshot->Resize(160, 120);
+        persistHeader.thumbnailTexture = screenshot;
+    }
+
+    // Write out the persist header.
     persistHeader.OnPersist(ps);
 
     // Set the save format version number to save with.

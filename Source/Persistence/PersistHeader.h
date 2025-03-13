@@ -9,6 +9,8 @@
 #include <string>
 
 #include "PersistState.h"
+#include "PNGCodec.h"
+#include "Texture.h"
 
 struct SaveHeader
 {
@@ -109,9 +111,13 @@ struct PersistHeader
     // Current CD number.
     int32_t cdNumber = 1;
 
-    // Thumbnail size and PNG byte data.
-    int32_t thumbnailSize = 0;
-    char* thumbnailPngBytes = nullptr;
+    // The thumbnail. Owned by this struct.
+    Texture* thumbnailTexture = nullptr;
+
+    ~PersistHeader()
+    {
+        delete thumbnailTexture;
+    }
 
     void OnPersist(PersistState& ps)
     {
@@ -122,7 +128,38 @@ struct PersistHeader
         ps.Xfer("Score", score);
         ps.Xfer("Max Score", maxScore);
         ps.Xfer("Last CD", cdNumber);
-        ps.Xfer("Thumbnail-size", thumbnailSize);
-        //TODO: the thumbnail PNG data.
+
+        if(ps.IsSaving())
+        {
+            uint32_t thumbnailSize = 0;
+            uint8_t* thumbnailBytes = nullptr;
+            if(thumbnailTexture != nullptr)
+            {
+                PNG::ImageData imageData;
+                imageData.width = thumbnailTexture->GetWidth();
+                imageData.height = thumbnailTexture->GetHeight();
+                imageData.bytesPerPixel = 4;
+                imageData.pixelData = thumbnailTexture->GetPixelData();
+
+                static const size_t kPngScratchSize = 83886080;
+                static uint8_t pngScratch[kPngScratchSize];
+                
+                PNG::Encode(imageData, pngScratch, kPngScratchSize, thumbnailSize);
+                thumbnailBytes = pngScratch;
+            }
+            
+            ps.Xfer("Thumbnail-size", thumbnailSize);
+            ps.Xfer("Thumbnail", thumbnailBytes, thumbnailSize);
+        }
+        else if(ps.IsLoading())
+        {
+            uint32_t thumbnailSize = 0;
+            ps.Xfer("Thumbnail-size", thumbnailSize);
+
+            if(thumbnailSize > 0)
+            {
+                thumbnailTexture = new Texture(*ps.GetBinaryReader());
+            }
+        }
     }
 };

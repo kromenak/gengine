@@ -102,10 +102,12 @@ CodecResult PNG::Encode(const ImageData& input, const char* filePath)
     return Encode(input, writer);
 }
 
-CodecResult PNG::Encode(const ImageData& input, uint8_t*& outPngData, uint32_t& outPngDataLength)
+CodecResult PNG::Encode(const ImageData& input, uint8_t* pngData, uint32_t pngDataBufferSize, uint32_t& outPngDataLength)
 {
-    BinaryWriter writer(outPngData, outPngDataLength);
-    return Encode(input, writer);
+    BinaryWriter writer(pngData, pngDataBufferSize);
+    CodecResult result = Encode(input, writer);
+    outPngDataLength = writer.GetPosition();
+    return result;
 }
 
 CodecResult PNG::Encode(const ImageData& input, BinaryWriter& writer)

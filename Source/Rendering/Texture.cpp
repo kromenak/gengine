@@ -1,5 +1,7 @@
 #include "Texture.h"
 
+#include <stb_image_resize.h>
+
 #include "BinaryReader.h"
 #include "BinaryWriter.h"
 #include "FileSystem.h"
@@ -332,6 +334,69 @@ void Texture::FlipVertically()
     }
 }
 
+void Texture::Resize(uint32_t width, uint32_t height)
+{
+    uint8_t* newPixels = new uint8_t[width * height * 4];
+    stbir_resize_uint8(mPixels, mWidth, mHeight, 0,
+                       newPixels, width, height, 0, 4);
+    mWidth = width;
+    mHeight = height;
+    delete[] mPixels;
+    mPixels = newPixels;
+
+    AddDirtyFlags(DirtyFlags::Pixels | DirtyFlags::Properties | DirtyFlags::Mipmaps);
+}
+
+void Texture::Crop(uint32_t width, uint32_t height, bool centered)
+{
+    if(centered)
+    {
+        Crop((mWidth / 2) - (width / 2), (mHeight / 2) - (height / 2), width, height);
+    }
+    else
+    {
+        Crop(0, 0, width, height);
+    }
+}
+
+void Texture::Crop(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+    // You must crop within the current dimensions of the texture.
+    assert(x < mWidth && y < mHeight && x + width <= mWidth && y + height <= mHeight);
+
+    // Allocate new pixels for the updated size.
+    uint8_t* newPixels = new uint8_t[width * height * 4];
+
+    // Copy pixels from old to new set of pixels.
+    for(uint32_t dstY = 0; dstY < height; ++dstY)
+    {
+        for(uint32_t dstX = 0; dstX < width; ++dstX)
+        {
+            uint32_t srcX = x + dstX;
+            uint32_t srcY = y + dstY;
+
+            size_t srcOffset = ((srcY * mWidth) + srcX) * 4;
+            size_t dstOffset = ((dstY * width) + dstX) * 4;
+
+            newPixels[dstOffset] = mPixels[srcOffset];
+            newPixels[dstOffset + 1] = mPixels[srcOffset + 1];
+            newPixels[dstOffset + 2] = mPixels[srcOffset + 2];
+            newPixels[dstOffset + 3] = mPixels[srcOffset + 3];
+        }
+    }
+
+    // Save updated width/height.
+    mWidth = width;
+    mHeight = height;
+
+    // Replace pixels.
+    delete[] mPixels;
+    mPixels = newPixels;
+
+    // Mark everything as dirty.
+    AddDirtyFlags(DirtyFlags::Pixels | DirtyFlags::Properties | DirtyFlags::Mipmaps);
+}
+
 void Texture::AddDirtyFlags(DirtyFlags flags)
 {
     mDirtyFlags |= flags;
@@ -531,7 +596,9 @@ void Texture::ParseFromData(BinaryReader &reader)
     }
     else if(fileIdentifier == 0x5089)
     {
-        reader.Seek(0);
+        // We read 2 bytes to identify this as a PNG file.
+        // But then the PNG codec wants us to be at the start of the file. So...back up 2 bytes!
+        reader.Seek(reader.GetPosition() - 2);
         ParseFromPngFormat(reader);
     }
 

@@ -51,6 +51,9 @@ public:
     void SetFormatVersionNumber(int versionNumber) { mFormatVersionNumber = versionNumber; }
     int GetFormatVersionNumber() { return mFormatVersionNumber; }
 
+    // Bytes
+    void Xfer(const char* name, uint8_t* bytes, size_t bytesSize);
+
     // Strings
     void Xfer(const char* name, char* value, size_t valueSize);
     void Xfer(const char* name, std::string& value);
@@ -103,6 +106,9 @@ public:
 
     // Generic Fallback
     template<typename T> void Xfer(const char* name, T& obj);
+
+    // Helpers
+    BinaryReader* GetBinaryReader() const { return mBinaryReader; }
 
 private:
     PersistFormat mFormat = PersistFormat::Text;

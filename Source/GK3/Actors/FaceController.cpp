@@ -1,6 +1,6 @@
 #include "FaceController.h"
 
-#include "stb_image_resize.h"
+#include <stb_image_resize.h>
 
 #include "Animation.h"
 #include "Animator.h"

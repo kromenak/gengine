@@ -37,7 +37,7 @@ namespace PNG
 
     // Encode to file, byte array, or binary writer.
     CodecResult Encode(const ImageData& input, const char* filePath);
-    CodecResult Encode(const ImageData& input, uint8_t*& outPngData, uint32_t& outPngDataLength);
+    CodecResult Encode(const ImageData& input, uint8_t* pngData, uint32_t pngDataBufferSize, uint32_t& outPngDataLength);
     CodecResult Encode(const ImageData& input, BinaryWriter& writer);
 
     // Decode from file, byte array, or binary reader.

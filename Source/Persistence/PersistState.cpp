@@ -13,7 +13,6 @@ PersistState::PersistState(const char* filePath, PersistFormat format, PersistMo
     mFormat(format),
     mMode(mode)
 {
-
     if(mode == PersistMode::Save)
     {
         if(format == PersistFormat::Text)
@@ -44,6 +43,26 @@ PersistState::~PersistState()
     delete mBinaryWriter;
     delete mIniReader;
     delete mIniWriter;
+}
+
+void PersistState::Xfer(const char* name, uint8_t* bytes, size_t bytesSize)
+{
+    if(mBinaryReader != nullptr)
+    {
+        mBinaryReader->Read(bytes, bytesSize);
+    }
+    else if(mBinaryWriter != nullptr)
+    {
+        mBinaryWriter->Write(bytes, bytesSize);
+    }
+    else if(mIniReader != nullptr)
+    {
+        //TODO
+    }
+    else if(mIniWriter != nullptr)
+    {
+        //TODO
+    }
 }
 
 void PersistState::Xfer(const char* name, char* value, size_t valueSize)

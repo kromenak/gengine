@@ -5,6 +5,7 @@
 
 class RectTransform;
 class UIButton;
+class UIImage;
 class UILabel;
 class UITextInput;
 
@@ -37,6 +38,9 @@ private:
 
     // A text input field that is used to enter a save name.
     UITextInput* mTextInput = nullptr;
+
+    // An image to show the save file thumbnail.
+    UIImage* mThumbnailImage = nullptr;
 
     // For each existing save, entries in the list.
     struct SaveListEntry

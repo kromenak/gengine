@@ -139,6 +139,15 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
         mTextInput->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mTextInput->GetRectTransform()->SetSizeDelta(kLeftColumnWidth, kRowHeight);
     }
+
+    // Create image for showing save thumbnail.
+    {
+        mThumbnailImage = UIUtil::NewUIActorWithWidget<UIImage>(background->GetOwner());
+        mThumbnailImage->SetColor(Color32::White);
+        mThumbnailImage->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
+        mThumbnailImage->GetRectTransform()->SetAnchoredPosition(-14.0f, -120.0f);
+        mThumbnailImage->GetRectTransform()->SetSizeDelta(160.0f, 120.0f);
+    }
 }
 
 void SaveLoadScreen::ShowSave()
@@ -304,7 +313,20 @@ void SaveLoadScreen::PopulateSaveList()
 void SaveLoadScreen::SetSelectedSaveIndex(int index)
 {
     mSaveIndex = index;
+
+    // Update highlight position.
     mHighlight->SetAnchoredPosition(0.0f, index * -kRowHeight);
+
+    // Update the thumbnail.
+    const std::vector<SaveSummary>& saves = gSaveManager.GetSaves();
+    if(mSaveIndex >= 0 && mSaveIndex < saves.size() && saves[mSaveIndex].saveInfo.thumbnailTexture != nullptr)
+    {
+        mThumbnailImage->SetTexture(saves[mSaveIndex].saveInfo.thumbnailTexture);
+    }
+    else
+    {
+        mThumbnailImage->SetTexture(&Texture::Black);
+    }
 }
 
 void SaveLoadScreen::ActivateTextInput(int index)
