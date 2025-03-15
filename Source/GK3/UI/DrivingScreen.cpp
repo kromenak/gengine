@@ -496,7 +496,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
     // Start player at current location. During normal play, this'll always be a node that exists on the map.
     // When debugging and such, you might show the driving interface at some unusual spot. We'll fall back on showing player at MOP in that case.
     mBlips[kEgoIndex]->SetMapPosition("MOP");
-    mBlips[kEgoIndex]->SetMapPosition(gLocationManager.GetLocation());
+    mBlips[kEgoIndex]->SetMapPosition(gLocationManager.GetLastLocation());
 
     // The other blips are only present in some circumstances. Deactivate them by default.
     mBlips[kNpc1Index]->SetActive(false);
