@@ -34,7 +34,7 @@ namespace
     {
         if(verbType == VerbType::Topic)
         {
-            return gGameProgress.GetTopicCount(noun, verb) == 0;
+            return gGameProgress.GetTopicCount(noun, verb);
         }
         else if(StringUtil::EqualsIgnoreCase(verb, "Z_CHAT"))
         {
@@ -42,7 +42,7 @@ namespace
         }
         else
         {
-            return gGameProgress.GetNounVerbCount(noun, verb) == 0;
+            return gGameProgress.GetNounVerbCount(noun, verb);
         }
     }
 }
