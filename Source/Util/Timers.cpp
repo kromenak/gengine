@@ -62,7 +62,7 @@ void Timers::AddTimerSeconds(float seconds, const std::function<void()>& finishC
     timers.push_back(timer);
 }
 
-void Timers::AddTimerMilliseconds(unsigned int milliseconds, const std::function<void()>& finishCallback)
+void Timers::AddTimerMilliseconds(uint32_t milliseconds, const std::function<void()>& finishCallback)
 {
     return AddTimerSeconds(static_cast<float>(milliseconds) * 0.001f, finishCallback);
 }

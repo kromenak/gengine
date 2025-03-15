@@ -40,6 +40,7 @@ public:
 	void OnPointerUp() override;
 	
 	void Press();
+    void AnimatePress(float duration = 0.25f);
 	
 	bool CanInteract() const { return mCanInteract; }
 	void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
@@ -48,6 +49,9 @@ public:
     void SetHighlightCursorOnHover(bool highlight) { mForceCursorHighlightOnHover = highlight; }
 
     void SetTooltipText(const std::string& tooltipText) { mTooltipText = tooltipText; }
+
+protected:
+    void OnUpdate(float deltaTime) override;
 	
 private:
     // When a button is down, it gets some special treatment/logic. So, we need to keep track of it!
@@ -91,6 +95,9 @@ private:
 
     // An optional tooltip that is shown when this button is hovered.
     std::string mTooltipText;
+
+    // If non-zero, the button should appear to be pressed to graphically show a programmatic press occurred.
+    float mProgrammaticPressTimer = 0.0f;
 	
 	Texture* GetDefaultTexture();
     void UpdateMaterial();

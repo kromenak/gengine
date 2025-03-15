@@ -36,6 +36,7 @@ void UIButton::Render()
     // Update the texture to use.
     UpdateMaterial();
 
+    // Render the button quad.
     mMaterial.Activate(GetWorldTransformWithSizeForRendering());
     uiQuad->Render();
 }
@@ -151,8 +152,27 @@ void UIButton::Press()
 {
 	if(mPressCallback && IsEnabled() && CanInteract())
 	{
-		mPressCallback(this);
+        mPressCallback(this);
 	}
+}
+
+void UIButton::AnimatePress(float duration)
+{
+    mProgrammaticPressTimer = duration;
+}
+
+void UIButton::OnUpdate(float deltaTime)
+{
+    UIWidget::OnUpdate(deltaTime);
+
+    if(mProgrammaticPressTimer > 0.0f)
+    {
+        mProgrammaticPressTimer -= deltaTime;
+        if(mProgrammaticPressTimer <= 0.0f)
+        {
+            Press();
+        }
+    }
 }
 
 Texture* UIButton::GetDefaultTexture()
@@ -181,7 +201,7 @@ void UIButton::UpdateMaterial()
     {
         // The button shows as down when pressed down, but only if pointer is also over the button.
         // You can press down on a button and then move the pointer all over before releasing it!
-        if(mPointerDown && mPointerOver)
+        if((mPointerDown && mPointerOver) || mProgrammaticPressTimer > 0.1f)
         {
             state = &mDownState;
         }
