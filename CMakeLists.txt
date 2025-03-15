@@ -372,11 +372,19 @@ if(WIN32)
 
     # Set GK3 as the startup project.
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT gk3)
+
+    # Add App.rc as a source to set the Windows app icon.
+    set(APP_RESOURCES
+         Publish/Windows/App.rc
+    )
+    source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${APP_RESOURCES})
+    target_sources(gk3 PRIVATE ${APP_RESOURCES})
+
 elseif(APPLE)
-    # Build a MacOS app (rather than command line tool).
+    # Build a Mac app (rather than command line tool).
     set_target_properties(gk3 PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Xcode/MacOS/Info.plist
+        MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Publish/Mac/Info.plist
         MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
 
         XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME AppIcon
@@ -387,8 +395,8 @@ elseif(APPLE)
     )
 
     # Add xcassets file under "Resources" in project (required for AppIcon to work correctly).
-    target_sources(gk3 PRIVATE Xcode/MacOS/Assets.xcassets)
-    set_source_files_properties(Xcode/MacOS/Assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+    target_sources(gk3 PRIVATE Publish/Mac/Assets.xcassets)
+    set_source_files_properties(Publish/Mac/Assets.xcassets PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 
     # Explicitly set rpath to look in a few places relative to the executable.
     # Specifying "build with install rpath" stops CMake from adding individual library paths to rpath (not desired).
@@ -431,19 +439,19 @@ add_custom_target(deploy DEPENDS "deploy_output")
 if(WIN32)
     add_custom_command(
         OUTPUT "deploy_output"
-        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Scripts/Deploy.sh" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Windows
+        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Publish/Deploy.sh" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Windows
         VERBATIM
     )
 elseif(APPLE)
     add_custom_command(
         OUTPUT "deploy_output"
-        COMMAND ${PLAT_SOURCE_DIR}/Scripts/Deploy.sh ${PLAT_SOURCE_DIR} ${PLAT_BINARY_DIR}/$<CONFIG> ${PLAT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Mac
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Publish/Deploy.sh ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Mac
         VERBATIM
     )
 else() # Linux
     add_custom_command(
         OUTPUT "deploy_output"
-        COMMAND ${PLAT_SOURCE_DIR}/Scripts/Deploy.sh ${PLAT_SOURCE_DIR} ${PLAT_BINARY_DIR} ${PLAT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Linux
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/Publish/Deploy.sh ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Linux
         VERBATIM
     )
 endif()
