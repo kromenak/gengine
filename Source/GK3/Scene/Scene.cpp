@@ -439,87 +439,109 @@ void Scene::GlideToCameraPosition(const std::string& cameraName, std::function<v
     mCamera->Glide(camera->position, camera->angle, finishCallback);
 }
 
+namespace
+{
+    bool IsInIgnoreList(GKObject** ignoreList, int ignoreCount, GKObject* object)
+    {
+        if(ignoreList == nullptr) { return false; }
+        for(int i = 0; i < ignoreCount; ++i)
+        {
+            if(ignoreList[i] == object)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
 SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** ignore, int ignoreCount) const
 {
-	// Check props/actors before BSP.
-	// Later, we'll check BSP and see if we hit something obscuring a prop/actor.
+	// First, iterate all Props and Actors to find the closest one that was hit by the ray and meets our criteria (if any).
     SceneCastResult result;
     for(GKObject* object : mPropsAndActors)
     {
-        // Ignore if desired.
-        if(ignore != nullptr)
-        {
-            bool shouldIgnore = false;
-            for(int i = 0; i < ignoreCount; ++i)
-            {
-                if(ignore[i] == object)
-                {
-                    shouldIgnore = true;
-                    break;
-                }
-            }
-            if(shouldIgnore) { continue; }
-        }
+        // Completely ignore anything in the ignore list. It doesn't exist to us.
+        if(IsInIgnoreList(ignore, ignoreCount, object)) { continue; }
 
-        // If only interested in interactive objects, skip non-interactive objects.
-        if(interactiveOnly && !object->CanInteract()) { continue; }
-
-        // Raycast to see if this is the closest thing we've hit.
-        // If so, we save it as our current result.
-        MeshRenderer* meshRenderer = object->GetMeshRenderer();
+        // See if the ray hits this object's 3D model.
         RaycastHit hitInfo;
+        MeshRenderer* meshRenderer = object->GetMeshRenderer();
         if(meshRenderer != nullptr && meshRenderer->Raycast(ray, hitInfo))
         {
-            //Vector3 worldPos = ray.GetPoint(hitInfo.t);
-            //printf("Raycast hit %s, yPos=%f\n", object->GetNoun().c_str(), worldPos.y);
+            // We did hit the 3D model, but is it closer than anything else we've hit thus far?
             if(hitInfo.t < result.hitInfo.t)
             {
+                // It is the closest thing we've hit so far! Update the hit info struct.
+                //printf("Raycast hit prop/actor %s, t=%f\n", object->GetNoun().c_str(), hitInfo.t);
                 result.hitInfo = hitInfo;
-                result.hitObject = object;
+
+                // BUT what if the closest thing we hit is non-interactive, and we only care about interactive things?
+                // In this case, the non-interactive thing OBSCURES any previous interactive thing. Null out the hit object pointer!
+                if(interactiveOnly && !object->CanInteract())
+                {
+                    result.hitObject = nullptr;
+                }
+                else
+                {
+                    result.hitObject = object;
+                }
             }
         }
     }
 
-	// Assign name in hit info, if anything was hit.
-	// This is because GKObjects don't currently do this during raycast.
+    // The raycast logic for Actors/Props doesn't automatically fill in the HitInfo name field.
+    // So, if something was hit, do that now.
 	if(result.hitObject != nullptr)
 	{
-        //Debug::DrawSphere(Sphere(ray.GetPoint(result.hitInfo.t), 1.0f), Color32::Red, 1.0f);
 		result.hitInfo.name = result.hitObject->GetNoun();
 	}
 
-	// Check BSP for any hit interactable object.
-    for(BSPActor* object : mBSPActors)
+    // AT THIS POINT: we may or may not have hit a Prop or Actor with our ray. But now we need to see if any BSP geometry is closer.
+    
+    // Raycast against all BSP.
+    RaycastHit bspHitInfo;
+    if(mSceneData->GetBSP()->RaycastNearest(ray, bspHitInfo) && bspHitInfo.t < result.hitInfo.t)
     {
-        // Ignore if desired.
-        if(ignore != nullptr)
+        // If we get here, some BSP is DEFINITELY closer to the screen than anything the ray has hit before.
+        //printf("Raycast hit BSP %s, t=%f\n", bspHitInfo.name.c_str(), bspHitInfo.t);
+
+        // Unless we find a valid BSP object below, we can start off assuming there is no hit object.
+        // Even if there was a previously hit Prop/Actor, it must be obscured by BSP at this point.
+        result.hitInfo = bspHitInfo;
+        result.hitObject = nullptr;
+
+        // Try to identify a BSPActor that correlates to the BSP geometry that was hit (and also meets our other criteria).
+        for(BSPActor* object : mBSPActors)
         {
-            bool shouldIgnore = false;
-            for(int i = 0; i < ignoreCount; ++i)
+            // Name matches means that this BSPActor corresponds to the BSP geometry that was hit!
+            if(StringUtil::EqualsIgnoreCase(object->GetName(), bspHitInfo.name))
             {
-                if(ignore[i] == object)
+                //printf("Raycast hit BSPActor %s, t=%f\n", object->GetName().c_str(), bspHitInfo.t);
+
+                // Completely ignore anything in the ignore list. It doesn't exist to us.
+                if(IsInIgnoreList(ignore, ignoreCount, object)) { break; }
+
+                // As long as this object meets the interactivity criteria, this BSPActor is our hit object.
+                if(interactiveOnly && !object->CanInteract())
                 {
-                    shouldIgnore = true;
-                    break;
+                    result.hitObject = nullptr;
                 }
-            }
-            if(shouldIgnore) { continue; }
-        }
-
-        // If only interested in interactive objects, skip non-interactive objects.
-        if(interactiveOnly && !object->CanInteract()) { continue; }
-
-        // Raycast to see if we hit this thing.
-        RaycastHit hitInfo;
-        if(object->Raycast(ray, hitInfo))
-        {
-            if(hitInfo.t < result.hitInfo.t)
-            {
-                result.hitInfo = hitInfo;
-                result.hitObject = object;
+                else
+                {
+                    result.hitObject = object;
+                }
             }
         }
     }
+
+    // For debugging, shows a red debug shape at the ray's closest intersection point.
+    /*
+    if(result.hitInfo.t < FLT_MAX)
+    {
+        Debug::DrawSphere(Sphere(ray.GetPoint(result.hitInfo.t - 0.1f), 1.0f), Color32::Red);
+    }
+    */
 	return result;
 }
 
