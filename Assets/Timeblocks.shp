@@ -239,10 +239,10 @@ code
 		}
 
 		// Must have used the binocs to spy on Mosely/Buthane from Chateau de Blanchefort.
-		//if(GetNounVerbCount("VIEW_OF_LHOMME_MORE", "BINOCULARS") == 0)
-		//{
-		//	return;
-		//}
+		if(GetNounVerbCount("VIEW_OF_LHOMME_MORE", "BINOCULARS") == 0)
+		{
+			return;
+		}
 
 		// OK, go to next timeblock!
 		SetTime("106P");
