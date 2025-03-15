@@ -6,6 +6,7 @@
 //
 #pragma once
 #include <cstdint>
+#include <memory>
 #include <string>
 
 #include "PersistState.h"
@@ -112,12 +113,7 @@ struct PersistHeader
     int32_t cdNumber = 1;
 
     // The thumbnail. Owned by this struct.
-    Texture* thumbnailTexture = nullptr;
-
-    ~PersistHeader()
-    {
-        delete thumbnailTexture;
-    }
+    std::unique_ptr<Texture> thumbnailTexture = nullptr;
 
     void OnPersist(PersistState& ps)
     {
@@ -158,7 +154,7 @@ struct PersistHeader
 
             if(thumbnailSize > 0)
             {
-                thumbnailTexture = new Texture(*ps.GetBinaryReader());
+                thumbnailTexture = std::unique_ptr<Texture>(new Texture(*ps.GetBinaryReader()));
             }
         }
     }

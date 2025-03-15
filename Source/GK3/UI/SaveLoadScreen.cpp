@@ -321,7 +321,7 @@ void SaveLoadScreen::SetSelectedSaveIndex(int index)
     const std::vector<SaveSummary>& saves = gSaveManager.GetSaves();
     if(mSaveIndex >= 0 && mSaveIndex < saves.size() && saves[mSaveIndex].saveInfo.thumbnailTexture != nullptr)
     {
-        mThumbnailImage->SetTexture(saves[mSaveIndex].saveInfo.thumbnailTexture);
+        mThumbnailImage->SetTexture(saves[mSaveIndex].saveInfo.thumbnailTexture.get());
     }
     else
     {

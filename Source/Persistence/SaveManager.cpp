@@ -191,7 +191,7 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
 
         // After cropping, resize to thumbnail size.
         screenshot->Resize(160, 120);
-        persistHeader.thumbnailTexture = screenshot;
+        persistHeader.thumbnailTexture = std::unique_ptr<Texture>(screenshot);
     }
 
     // Write out the persist header.
@@ -208,13 +208,13 @@ void SaveManager::SaveInternal(const std::string& saveDescription)
     if(mPendingSaveIndex >= 0 && mPendingSaveIndex < mSaves.size())
     {
         mSaves[mPendingSaveIndex].filePath = savePath;
-        mSaves[mPendingSaveIndex].saveInfo = persistHeader;
+        mSaves[mPendingSaveIndex].saveInfo = std::move(persistHeader);
     }
     else
     {
         mSaves.emplace_back();
         mSaves.back().filePath = savePath;
-        mSaves.back().saveInfo = persistHeader;
+        mSaves.back().saveInfo = std::move(persistHeader);
 
         // Increment save number if this wasn't an overwrite of an existing slot.
         ++mNextSaveNumber;
