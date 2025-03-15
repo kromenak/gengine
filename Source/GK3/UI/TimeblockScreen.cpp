@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "GK3UI.h"
+#include "LocationManager.h"
 #include "SceneManager.h"
 #include "Sequence.h"
 #include "SoundtrackPlayer.h"
@@ -152,6 +153,13 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, std::functio
 void TimeblockScreen::Hide()
 {
     SetActive(false);
+
+    // If leaving this screen to the MAP location, make sure the driving screen is showing!
+    // Important when timeblock change occurs when entering map.
+    if(StringUtil::EqualsIgnoreCase(gLocationManager.GetLocation(), "MAP"))
+    {
+        gGK3UI.ShowDrivingScreen();
+    }
 }
 
 //int timeblockIndex = 0;

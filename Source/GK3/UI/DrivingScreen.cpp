@@ -68,6 +68,9 @@ DrivingScreen::DrivingScreen() : Actor(TransformType::RectTransform)
     {
         mBlips.push_back(CreateBlip());
     }
+
+    // Hide by default.
+    SetActive(false);
 }
 
 DrivingScreen::~DrivingScreen()
@@ -78,88 +81,96 @@ DrivingScreen::~DrivingScreen()
 
 void DrivingScreen::Show(FollowMode followMode)
 {
-    // Set which locations are present depending on game state.
-    // Some locations are always available, some are only present after a certain timeblock, some require following someone.
-    // LHE (Larry's Place) is always available.
-    // PLO (Chataeu de Blanchefort Parking Lot) is always available.
-    // RL1 (The Bar) is always available.
-    // RLC (Rennes-le-Chataeu) is always available.
-    // TR1 (Train Station) is always available.
-
-    // ARM (Devil's Armchair) is only available on or after Day 2, 2pm.
-    const Timeblock& currentTimeblock = gGameProgress.GetTimeblock();
-    mLocationButtons["ARM"]->SetEnabled(currentTimeblock >= Timeblock(2, 2, Timeblock::PM));
-
-    // CSE (Chateau de Serras) only available after going on the tour on Day 2, Noon.
-    mLocationButtons["CSE"]->SetEnabled(currentTimeblock >= Timeblock(2, 12, Timeblock::PM));
-
-    // POU (Poussin's Tomb) is available after the tour on Day 2, 7am.
-    mLocationButtons["POU"]->SetEnabled(currentTimeblock >= Timeblock(2, 7, Timeblock::AM));
-
-    // BEC (Bottom of Hexagram) is only available after discovering it via Le Serpent Rouge.
-    // MCB (Top of Hexagram) is the same.
-    // TRE (Treasure) as well.
-    // TODO!
-    mLocationButtons["BEC"]->SetEnabled(false);
-    mLocationButtons["MCB"]->SetEnabled(false);
-    mLocationButtons["TRE"]->SetEnabled(false);
-
-    // BMB (Red Rock) is only available after spying on Buchelli from Blanchefort.
-    //TODO!
-    mLocationButtons["BMB"]->SetEnabled(false);
-
-    // CSD (Coume Sourde) only available after following Madeline (or on/after Day 1, 4PM).
-    // LHM (Lhomme Mort) is in the same boat.
-    bool showCSD_LHM = gGameProgress.GetNounVerbCount("BUTHANE", "FOLLOW") > 0 && followMode != FollowMode::Buthane;
-    showCSD_LHM = showCSD_LHM || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
-    mLocationButtons["CSD"]->SetEnabled(showCSD_LHM);
-    mLocationButtons["LHM"]->SetEnabled(showCSD_LHM);
-
-    // LER (L'Ermitage) only available after following Wilkes (or on/after Day 1, 4PM).
-    bool showLER = gGameProgress.GetNounVerbCount("WILKES", "FOLLOW") > 0 && followMode != FollowMode::Wilkes;
-    showLER = showLER || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
-    mLocationButtons["LER"]->SetEnabled(showLER);
-
-    // WOD (Woods) only available after following Estelle on Day 2.
-    bool showWOD = gGameProgress.GetNounVerbCount("ESTELLE", "FOLLOW") > 0 && followMode != FollowMode::Estelle;
-    mLocationButtons["WOD"]->SetEnabled(showWOD);
-
-    // Make sure the map fits snugly in the window area, with aspect ratio preserved.
-    // We do this every time the UI shows in case resolution has changed.
-    mMapImage->ResizeToFitPreserveAspect(Window::GetSize());
-    
-    // Put all blips in starting positions, with paths set if needed.
-    mFollowMode = followMode;
-    PlaceBlips(followMode);
-    
-    // Add soundtrack player, if not yet present.
-    SoundtrackPlayer* soundtrackPlayer = GetComponent<SoundtrackPlayer>();
-    if(soundtrackPlayer == nullptr)
-    {
-        soundtrackPlayer = AddComponent<SoundtrackPlayer>();
-    }
-
-    // Play map music.
-    // The game's files define a number of map soundtrack variants, based on day and ego and who you're following.
-    // But at the end of the day, only these two appear to have ever been used.
-    if(followMode == FollowMode::None)
-    {
-        soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPGABEGENDAY1.STK"));
-    }
-    else
-    {
-        soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPFOLLOWGEN.STK"));
-    }
-
-    // Also play motorcycle driving away SFX.
-    soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPHARLEYAWAY.STK"));
-
     // The map shows as a special location called "Map".
     // Unload the current scene and set the location as such.
-    gLocationManager.ChangeLocation("MAP");
+    gLocationManager.ChangeLocation("MAP", [this, followMode]() {
 
-    // Actually show the UI.
-    SetActive(true);
+        // If changing to the map causes a timeblock change (such as at end of 102P), early out here.
+        // The timeblock screen will show - we'll come back to the map screen after that!
+        if(gGameProgress.IsChangingTimeblock())
+        {
+            return;
+        }
+
+        // Set which locations are present depending on game state.
+        // Some locations are always available, some are only present after a certain timeblock, some require following someone.
+        // LHE (Larry's Place) is always available.
+        // PLO (Chataeu de Blanchefort Parking Lot) is always available.
+        // RL1 (The Bar) is always available.
+        // RLC (Rennes-le-Chataeu) is always available.
+        // TR1 (Train Station) is always available.
+
+        // ARM (Devil's Armchair) is only available on or after Day 2, 2pm.
+        const Timeblock& currentTimeblock = gGameProgress.GetTimeblock();
+        mLocationButtons["ARM"]->SetEnabled(currentTimeblock >= Timeblock(2, 2, Timeblock::PM));
+
+        // CSE (Chateau de Serras) only available after going on the tour on Day 2, Noon.
+        mLocationButtons["CSE"]->SetEnabled(currentTimeblock >= Timeblock(2, 12, Timeblock::PM));
+
+        // POU (Poussin's Tomb) is available after the tour on Day 2, 7am.
+        mLocationButtons["POU"]->SetEnabled(currentTimeblock >= Timeblock(2, 7, Timeblock::AM));
+
+        // BEC (Bottom of Hexagram) is only available after discovering it via Le Serpent Rouge.
+        // MCB (Top of Hexagram) is the same.
+        // TRE (Treasure) as well.
+        // TODO!
+        mLocationButtons["BEC"]->SetEnabled(false);
+        mLocationButtons["MCB"]->SetEnabled(false);
+        mLocationButtons["TRE"]->SetEnabled(false);
+
+        // BMB (Red Rock) is only available after spying on Buchelli from Blanchefort.
+        //TODO!
+        mLocationButtons["BMB"]->SetEnabled(false);
+
+        // CSD (Coume Sourde) only available after following Madeline (or on/after Day 1, 4PM).
+        // LHM (Lhomme Mort) is in the same boat.
+        bool showCSD_LHM = gGameProgress.GetNounVerbCount("BUTHANE", "FOLLOW") > 0 && followMode != FollowMode::Buthane;
+        showCSD_LHM = showCSD_LHM || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
+        mLocationButtons["CSD"]->SetEnabled(showCSD_LHM);
+        mLocationButtons["LHM"]->SetEnabled(showCSD_LHM);
+
+        // LER (L'Ermitage) only available after following Wilkes (or on/after Day 1, 4PM).
+        bool showLER = gGameProgress.GetNounVerbCount("WILKES", "FOLLOW") > 0 && followMode != FollowMode::Wilkes;
+        showLER = showLER || currentTimeblock >= Timeblock(1, 4, Timeblock::PM);
+        mLocationButtons["LER"]->SetEnabled(showLER);
+
+        // WOD (Woods) only available after following Estelle on Day 2.
+        bool showWOD = gGameProgress.GetNounVerbCount("ESTELLE", "FOLLOW") > 0 && followMode != FollowMode::Estelle;
+        mLocationButtons["WOD"]->SetEnabled(showWOD);
+
+        // Make sure the map fits snugly in the window area, with aspect ratio preserved.
+        // We do this every time the UI shows in case resolution has changed.
+        mMapImage->ResizeToFitPreserveAspect(Window::GetSize());
+
+        // Put all blips in starting positions, with paths set if needed.
+        mFollowMode = followMode;
+        PlaceBlips(followMode);
+
+        // Add soundtrack player, if not yet present.
+        SoundtrackPlayer* soundtrackPlayer = GetComponent<SoundtrackPlayer>();
+        if(soundtrackPlayer == nullptr)
+        {
+            soundtrackPlayer = AddComponent<SoundtrackPlayer>();
+        }
+
+        // Play map music.
+        // The game's files define a number of map soundtrack variants, based on day and ego and who you're following.
+        // But at the end of the day, only these two appear to have ever been used.
+        if(followMode == FollowMode::None)
+        {
+            soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPGABEGENDAY1.STK"));
+        }
+        else
+        {
+            soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPFOLLOWGEN.STK"));
+        }
+
+        // Also play motorcycle driving away SFX.
+        soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPHARLEYAWAY.STK"));
+
+        // Actually show the UI.
+        SetActive(true);
+    });
 }
 
 void DrivingScreen::Hide()
