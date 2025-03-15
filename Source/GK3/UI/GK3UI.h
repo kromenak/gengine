@@ -53,6 +53,8 @@ public:
     void ShowFingerprintInterface(const std::string& nounName);
     void ShowBinocsOverlay();
 
+    bool IsAnyKeyPressedOutsideTextInputAndConsole();
+
 private:
     TitleScreen* mTitleScreen = nullptr;
     TimeblockScreen* mTimeblockScreen = nullptr;

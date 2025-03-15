@@ -476,6 +476,11 @@ bool ActionManager::IsActionBarShowing() const
 	return mActionBar->IsShowing();
 }
 
+void ActionManager::HideActionBar() const
+{
+    return mActionBar->Hide();
+}
+
 void ActionManager::OnPersist(PersistState& ps)
 {
     ps.Xfer(PERSIST_VAR(mPlayedTopics));

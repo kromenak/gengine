@@ -162,7 +162,14 @@ void GameCamera::OnUpdate(float deltaTime)
     {
         if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Right))
         {
-            mOptionBar->Show();
+            if(gActionManager.IsActionBarShowing())
+            {
+                gActionManager.HideActionBar();
+            }
+            else
+            {
+                mOptionBar->Show();
+            }
         }
     }
 

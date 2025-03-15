@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include "GK3UI.h"
 #include "InventoryManager.h"
 #include "Scene.h"
 #include "StringUtil.h"
@@ -295,16 +296,10 @@ void ActionBar::OnUpdate(float deltaTime)
 {
 	if(IsShowing()) 
 	{
-        // Most keyboard input counts as a cancel action, unless some text input is active (like debug window).
-        if(!gInputManager.IsTextInput() && mAllowDismiss)
+        if(mAllowDismiss && gGK3UI.IsAnyKeyPressedOutsideTextInputAndConsole())
         {
-            // Any key press EXCEPT ~ counts as a cancel action.
-            // This logic technically blocks any other cancel action due to key presses WHILE ~ is pressed but...close enough.
-            if(gInputManager.IsAnyKeyLeadingEdge() && !gInputManager.IsKeyPressed(SDL_SCANCODE_GRAVE))
-            {
-                OnCancelButtonPressed();
-            }
-        }
+            OnCancelButtonPressed();
+        }   
 	}
 }
 

@@ -115,6 +115,14 @@ void OptionBar::OnUpdate(float deltaTime)
     mHelpButton->SetCanInteract(!actionActive);
     mOptionsButton->SetCanInteract(!actionActive);
     // Note: Cinematics and Close button are always interactive.
+
+    // Most keyboard input counts as a cancel action, unless some text input is active (like debug window).
+    // Any key press EXCEPT ~ counts as a cancel action.
+    // This logic technically blocks any other cancel action due to key presses WHILE ~ is pressed but...close enough.
+    if(gGK3UI.IsAnyKeyPressedOutsideTextInputAndConsole())
+    {
+        Hide();
+    }
 }
 
 void OptionBar::KeepOnScreen()

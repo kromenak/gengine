@@ -248,3 +248,13 @@ void GK3UI::ShowBinocsOverlay()
     }
     mBinocsOverlay->Show();
 }
+
+bool GK3UI::IsAnyKeyPressedOutsideTextInputAndConsole()
+{
+    // For a few UIs, any keyboard input cancels the current UI (e.g. action bar, option bar).
+    // However, there are a few exceptions:
+    // 1) If a text input field is focused, then the keyboard input doesn't cancel the UI.
+    // 2) The ~ (GRAVE) key opens/closes the console, so it is ignored.
+    //TODO: This technically also cancels any key pressed WHILE ~ is held down. Close enough, but can be improved!
+    return !gInputManager.IsTextInput() && gInputManager.IsAnyKeyLeadingEdge() && !gInputManager.IsKeyPressed(SDL_SCANCODE_GRAVE);
+}

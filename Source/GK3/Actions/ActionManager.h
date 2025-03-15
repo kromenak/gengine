@@ -71,6 +71,7 @@ public:
 	void ShowTopicBar();
 	bool IsActionBarShowing() const;
 	ActionBar* GetActionBar() const { return mActionBar; }
+    void HideActionBar() const;
 
     void OnPersist(PersistState& ps);
 	
