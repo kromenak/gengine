@@ -399,6 +399,28 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // Also WILKES and BUCHELLI both matching WILKES_N_BUCHELLI...
+    if(StringUtil::EqualsIgnoreCase(noun, "WILKES") || StringUtil::EqualsIgnoreCase(noun, "BUCHELLI"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("WILKES_N_BUCHELLI", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
+    // Also MALLORY and MACDOUGALL both matching TWO_MEN...
+    if(StringUtil::EqualsIgnoreCase(noun, "MALLORY") || StringUtil::EqualsIgnoreCase(noun, "MACDOUGALL"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("TWO_MEN", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
     // Also a boat load of exceptions at Day 2, 2PM, Devil's Armchair...
     if(StringUtil::EqualsIgnoreCase(noun, "DEAD_CLOTHES_HE1") || StringUtil::EqualsIgnoreCase(noun, "DEAD_CLOTHES_HE2"))
     {
