@@ -48,6 +48,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
 
         exitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         exitButton->GetRectTransform()->SetAnchoredPosition(5.0f, 9.0f);
+        mExitButton = exitButton;
     }
 
     // Add brush image along with button to pick up brush.
@@ -506,6 +507,12 @@ void FingerprintScreen::OnUpdate(float deltaTime)
                 }
             }
         }
+    }
+
+    // Check for exit button shortcut.
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    {
+        mExitButton->AnimatePress();
     }
 }
 

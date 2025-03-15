@@ -45,6 +45,7 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
             Hide();
         });
         exitButton->SetTooltipText("closeupexit");
+        mExitButton = exitButton;
 
         RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
         exitButtonRectTransform->SetSizeDelta(58.0f, 26.0f); // texture width/height
@@ -165,6 +166,14 @@ void InventoryInspectScreen::TurnLSRPageRight()
         ++mLSRPage;
         if(mLSRPage > 6) { mLSRPage = 6; }
         InitLSR();
+    }
+}
+
+void InventoryInspectScreen::OnUpdate(float deltaTime)
+{
+    if(gLayerManager.IsTopLayer(&mLayer) && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    {
+        mExitButton->AnimatePress();
     }
 }
 

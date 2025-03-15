@@ -6,6 +6,8 @@
 #pragma once
 #include "Actor.h"
 
+class UIButton;
+
 class TitleScreen : public Actor
 {
 public:
@@ -14,6 +16,13 @@ public:
     void Show();
     void Hide();
 
-private:
+protected:
+    void OnUpdate(float deltaTime) override;
 
+private:
+    // Button references to support keyboard shortcuts.
+    UIButton* mIntroButton = nullptr;
+    UIButton* mPlayButton = nullptr;
+    UIButton* mRestoreButton = nullptr;
+    UIButton* mQuitButton = nullptr;
 };

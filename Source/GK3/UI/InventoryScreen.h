@@ -26,13 +26,19 @@ public:
     bool IsShowing() const;
 
     void RefreshLayout();
-	
+
+protected:
+    void OnUpdate(float deltaTime) override;
+
 private:
 	const int kActiveHighlightXOffset = -4;
     
     // This screen's layer.
     Layer mLayer;
-    
+
+    // The exit button on this screen.
+    UIButton* mExitButton = nullptr;
+
 	// Created item buttons - can reuse on repeat visits.
 	std::vector<UIButton*> mItemButtons;
 	

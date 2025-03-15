@@ -45,6 +45,7 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
         Hide();
     });
     exitButton->SetTooltipText("inventoryexit");
+    mExitButton = exitButton;
 
 	RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
 	exitButtonRectTransform->SetParent(inventoryRectTransform);
@@ -200,6 +201,14 @@ void InventoryScreen::RefreshLayout()
 
         // Next button located to the right, with spacing.
         x += itemTexture->GetWidth() + kSpacingX;
+    }
+}
+
+void InventoryScreen::OnUpdate(float deltaTime)
+{
+    if(gLayerManager.IsTopLayer(&mLayer) && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    {
+        mExitButton->AnimatePress();
     }
 }
 

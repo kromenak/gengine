@@ -21,10 +21,16 @@ public:
 
     void TurnLSRPageLeft();
     void TurnLSRPageRight();
+
+protected:
+    void OnUpdate(float deltaTime) override;
 	
 private:
     // This screen's layer.
     Layer mLayer;
+
+    // The exit button on this screen.
+    UIButton* mExitButton = nullptr;
     
 	// Image to display the closeup of the item.
 	// Needs to be a button b/c we can click to show action bar.

@@ -53,6 +53,7 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
         GEngine::Instance()->Quit();
     });
     buttonX -= quitButton->GetRectTransform()->GetSize().x + distBetweenButtons;
+    mQuitButton = quitButton;
 
     // Add "restore" button.
     UIButton* restoreButton = CreateButton(titleImage->GetOwner(), "TITLE_RESTORE", buttonX);
@@ -66,6 +67,7 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
         restoreButton->SetCanInteract(false);
     }
     buttonX -= restoreButton->GetRectTransform()->GetSize().x + distBetweenButtons;
+    mRestoreButton = restoreButton;
 
     // Add "play" button.
     UIButton* playButton = CreateButton(titleImage->GetOwner(), "TITLE_PLAY", buttonX);
@@ -76,6 +78,7 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
         GEngine::Instance()->StartGame();
     });
     buttonX -= playButton->GetRectTransform()->GetSize().x + distBetweenButtons;
+    mPlayButton = playButton;
 
     // Add "intro" button.
     UIButton* introButton = CreateButton(titleImage->GetOwner(), "TITLE_INTRO", buttonX);
@@ -88,6 +91,7 @@ TitleScreen::TitleScreen() : Actor(TransformType::RectTransform)
     {
         introButton->SetCanInteract(false);
     }
+    mIntroButton = introButton;
 }
 
 void TitleScreen::Show()
@@ -112,5 +116,25 @@ void TitleScreen::Hide()
     if(soundtrackPlayer != nullptr)
     {
         soundtrackPlayer->StopAll();
+    }
+}
+
+void TitleScreen::OnUpdate(float deltaTime)
+{
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_I))
+    {
+        mIntroButton->AnimatePress();
+    }
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_P))
+    {
+        mPlayButton->AnimatePress();
+    }
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_R))
+    {
+        mRestoreButton->AnimatePress();
+    }
+    else if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_Q))
+    {
+        mQuitButton->AnimatePress();
     }
 }

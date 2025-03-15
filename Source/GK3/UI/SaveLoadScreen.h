@@ -26,6 +26,9 @@ private:
     Layer mSaveLayer;
     Layer mLoadLayer;
 
+    // The exit button.
+    UIButton* mExitButton = nullptr;
+
     // Save and load buttons, appropriate one is enabled based on whether you want to save or load.
     UIButton* mSaveButton = nullptr;
     UIButton* mLoadButton = nullptr;

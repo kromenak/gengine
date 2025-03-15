@@ -191,15 +191,15 @@ void TimeblockScreen::OnUpdate(float deltaTime)
     */
 
     // Shortcut key for pressing continue button.
-    if(mContinueButton->IsEnabled() && (gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_C) || gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_ESCAPE)))
+    if(mContinueButton->IsEnabled() && (gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_C) || gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE)))
     {
-        mContinueButton->Press();
+        mContinueButton->AnimatePress();
     }
 
     // Pressing "s" is a shortcut for the save button.
-    if(mSaveButton->IsEnabled() && gInputManager.IsKeyTrailingEdge(SDL_SCANCODE_S))
+    if(mSaveButton->IsEnabled() && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_S))
     {
-        mSaveButton->Press();
+        mSaveButton->AnimatePress();
     }
 
     // Animate the timeblock text sequence.

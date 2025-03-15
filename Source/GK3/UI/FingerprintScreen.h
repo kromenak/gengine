@@ -36,6 +36,9 @@ private:
     Cursor* mTapeCursor = nullptr;
     Cursor* mUsedTapeCursor = nullptr;
 
+    // The exit button, for keyboard shortcut.
+    UIButton* mExitButton = nullptr;
+
     // A big button over the right panel on this screen, which shows the object closeup.
     // This is mainly used to detect when dragging in this area.
     UIButton* mRightPanelButton = nullptr;

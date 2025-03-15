@@ -46,20 +46,20 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
 
     // Create exit button.
     {
-        UIButton* button = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
-        button->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
-        button->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
-        button->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
-        button->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
+        mExitButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
+        mExitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
+        mExitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
+        mExitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
+        mExitButton->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
 
         // Anchor to bottom-right and position based off that.
-        button->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        button->GetRectTransform()->SetAnchoredPosition(5, 19.0f);
+        mExitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        mExitButton->GetRectTransform()->SetAnchoredPosition(5, 19.0f);
 
-        button->SetPressCallback([this](UIButton* button){
+        mExitButton->SetPressCallback([this](UIButton* button){
             OnExitButtonPressed();
         });
-        button->SetTooltipText("exitloadsave");
+        mExitButton->SetTooltipText("exitloadsave");
     }
 
     // Create save & load buttons.
@@ -200,17 +200,17 @@ void SaveLoadScreen::OnUpdate(float deltaTime)
     }
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
     {
-        OnExitButtonPressed();
+        mExitButton->AnimatePress();
     }
     if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_RETURN))
     {
         if(mSaveButton->IsEnabled())
         {
-            OnSaveButtonPressed();
+            mSaveButton->AnimatePress();
         }
         else if(mLoadButton->IsEnabled())
         {
-            OnLoadButtonPressed();
+            mLoadButton->AnimatePress();
         }
     }
 }
