@@ -480,12 +480,15 @@ void FingerprintScreen::OnUpdate(float deltaTime)
         {
             if(mRightPanelButton->IsHovered())
             {
-                mDistanceDusted += gInputManager.GetMouseDelta().GetLength();
-                if(mDistanceDusted > kNoPrintDialogueDistance)
+                if(mDistanceDusted < kNoPrintDialogueDistance)
                 {
-                    gActionManager.ExecuteSheepAction(StringUtil::Format("wait StartDialogue(\"%s\", 1)", mActiveObject->noPrintLicensePlate.c_str()), [this](const Action* action){
-                        Hide();
-                    });
+                    mDistanceDusted += gInputManager.GetMouseDelta().GetLength();
+                    if(mDistanceDusted > kNoPrintDialogueDistance)
+                    {
+                        gActionManager.ExecuteSheepAction(StringUtil::Format("wait StartDialogue(\"%s\", 1)", mActiveObject->noPrintLicensePlate.c_str()), [this](const Action* action){
+                            Hide();
+                        });
+                    }
                 }
             }
         }
