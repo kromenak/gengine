@@ -461,6 +461,9 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
     SceneCastResult result;
     for(GKObject* object : mPropsAndActors)
     {
+        // Ignore inactive objects.
+        if(!object->IsActive()) { continue; }
+
         // Completely ignore anything in the ignore list. It doesn't exist to us.
         if(IsInIgnoreList(ignore, ignoreCount, object)) { continue; }
 
@@ -473,7 +476,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
             if(hitInfo.t < result.hitInfo.t)
             {
                 // It is the closest thing we've hit so far! Update the hit info struct.
-                //printf("Raycast hit prop/actor %s, t=%f\n", object->GetNoun().c_str(), hitInfo.t);
+                //printf("Raycast hit prop/actor %s, noun=%s t=%f\n", object->GetName().c_str(), object->GetNoun().c_str(), hitInfo.t);
                 result.hitInfo = hitInfo;
 
                 // BUT what if the closest thing we hit is non-interactive, and we only care about interactive things?

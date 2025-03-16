@@ -11,7 +11,27 @@ Triangle::Triangle(const Vector3& p0, const Vector3& p1, const Vector3& p2) :
 	
 }
 
-Vector3 Triangle::GetNormal(bool clockwise, bool leftHand) const
+Vector3 Triangle::GetNormal(bool clockwise, bool leftHanded) const
+{
+    return GetNormal(p0, p1, p2, clockwise, leftHanded);
+}
+
+Vector3 Triangle::GetCenter() const
+{
+    return (p0 + p1 + p2) / 3;
+}
+
+bool Triangle::ContainsPoint(const Vector3& point) const
+{
+	return ContainsPoint(p0, p1, p2, point);
+}
+
+Vector3 Triangle::GetClosestPoint(const Vector3& point) const
+{
+	return GetClosestPoint(p0, p1, p2, point);
+}
+
+/*static*/ Vector3 Triangle::GetNormal(const Vector3& p0, const Vector3& p1, const Vector3& p2, bool clockwise, bool leftHanded)
 {
     // Get two vectors defining a plane with this triangle in it.
     Vector3 v1 = p1 - p0;
@@ -30,22 +50,7 @@ Vector3 Triangle::GetNormal(bool clockwise, bool leftHand) const
     // If our points are counter-clockwise, we need to flip the normal.
     // If our coordinate system is right-handed, we need to flip the normal.
     // If both counter-clockwise and right-handed, we flip it twice...and get the original result :P.
-    return normal * (clockwise ? 1.0f : -1.0f) * (leftHand ? 1.0f : -1.0f);
-}
-
-Vector3 Triangle::GetCenter() const
-{
-    return (p0 + p1 + p2) / 3;
-}
-
-bool Triangle::ContainsPoint(const Vector3& point) const
-{
-	return ContainsPoint(p0, p1, p2, point);
-}
-
-Vector3 Triangle::GetClosestPoint(const Vector3& point) const
-{
-	return GetClosestPoint(p0, p1, p2, point);
+    return normal * (clockwise ? 1.0f : -1.0f) * (leftHanded ? 1.0f : -1.0f);
 }
 
 /*static*/ bool Triangle::ContainsPoint(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& point)

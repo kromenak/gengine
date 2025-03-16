@@ -138,8 +138,6 @@ public:
     
     // Raycasting
     bool RaycastNearest(const Ray& ray, RaycastHit& outHitInfo);
-	bool RaycastSingle(const Ray& ray, const std::string& name, RaycastHit& outHitInfo);
-	std::vector<RaycastHit> RaycastAll(const Ray& ray);
 	bool RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo);
 
     // Floors

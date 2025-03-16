@@ -12,6 +12,7 @@
 #include "Shader.h"
 #include "StringUtil.h"
 #include "Texture.h"
+#include "Triangle.h"
 #include "Vector2.h"
 #include "Vector3.h"
 
@@ -122,30 +123,26 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
     outHitInfo.t = FLT_MAX;
     std::string* closest = nullptr;
 	
-	// Iterate through all polygons in the BSP and see if the ray intersects
-	// with any triangles inside the polygon. Triangles within the BSP are made
-	// up of "triangle fans", so the first vertex in a polygon is shared by all triangles.
-    for(auto& polygon : mPolygons)
+    // Iterate polygons and check each one for intersection with the ray.
+    // We must iterate ALL polygons (can't stop at first hit) in case a subsequent polygon is nearer to the start of the ray.
+    for(BSPPolygon& polygon : mPolygons)
     {
+        // Ignore polygons that are part of non-interactive surfaces.
         BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
         if(!surface.interactive) { continue; }
-		
-        Vector3& p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
-        for(int i = 1; i < polygon.vertexIndexCount - 1; i++)
+
+        // Do the raycast against the polygon.
+        RaycastHit hitInfo;
+        if(RaycastPolygon(ray, &polygon, hitInfo))
         {
-            Vector3& p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
-            Vector3& p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
-			RaycastHit hitInfo;
-			if(Intersect::TestRayTriangle(ray, p0, p1, p2, hitInfo.t))
+            // Is it closer than any other polygon so far? Then it's our nearest hit.
+            if(hitInfo.t < outHitInfo.t)
             {
-                if(hitInfo.t < outHitInfo.t)
-                {
-					// Save closest distance.
-                    outHitInfo.t = hitInfo.t;
-                    
-                    // Find surface for this polygon, and then name for the surface.
-                    closest = &mObjectNames[surface.objectIndex];
-                }
+                // Save closest distance.
+                outHitInfo.t = hitInfo.t;
+
+                // Track name of closest object hit.
+                closest = &mObjectNames[surface.objectIndex];
             }
         }
     }
@@ -158,79 +155,30 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
 	return true;
 }
 
-bool BSP::RaycastSingle(const Ray& ray, const std::string& name, RaycastHit& outHitInfo)
-{
-	for(auto& polygon : mPolygons)
-	{
-		// We're only interested in intersections with a certain object.
-		// So, if this isn't the object, we can continue!
-        BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
-        if(mObjectNames[surface.objectIndex] != name) { continue; }
-        if(!surface.interactive) { continue; }
-		
-        Vector3 p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
-        for(int i = 1; i < polygon.vertexIndexCount - 1; i++)
-		{
-            Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
-            Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
-			if(Intersect::TestRayTriangle(ray, p0, p1, p2, outHitInfo.t))
-			{
-				// Save name of hit object.
-				outHitInfo.name = name;
-				return true;
-			}
-		}
-	}
-	
-	// Couldn't find the given name, or ray didn't intersect object with given name.
-	return false;
-}
-
-std::vector<RaycastHit> BSP::RaycastAll(const Ray& ray)
-{
-	std::vector<RaycastHit> hits;
-	
-	// Iterate through all polygons in the BSP and see if the ray intersects
-	// with any triangles inside the polygon. Triangles within the BSP are made
-	// up of "triangle fans", so the first vertex in a polygon is shared by all triangles.
-	for(auto& polygon : mPolygons)
-	{
-        BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
-        if(!surface.interactive) { continue; }
-		
-        Vector3 p0 = mVertices[mVertexIndices[polygon.vertexIndexOffset]];
-        for(int i = 1; i < polygon.vertexIndexCount - 1; i++)
-		{
-            Vector3 p1 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i]];
-            Vector3 p2 = mVertices[mVertexIndices[polygon.vertexIndexOffset + i + 1]];
-			RaycastHit hitInfo;
-			if(Intersect::TestRayTriangle(ray, p0, p1, p2, hitInfo.t))
-			{
-				// Save hit object name.
-                hitInfo.name = mObjectNames[surface.objectIndex];
-				
-				// Add to hit info vector.
-				hits.push_back(hitInfo);
-			}
-		}
-	}
-
-	// Return vector of hits.
-	return hits;
-}
-
 bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo)
 {
+    // BSP polygons are made up of "triangle fans", so the first vertex is shared by all triangles in the polygon.
 	Vector3 p0 = mVertices[mVertexIndices[polygon->vertexIndexOffset]];
+
+    // Check the ray against all triangles that make up this polygon.
 	for(int i = 1; i < polygon->vertexIndexCount - 1; i++)
 	{
 		Vector3 p1 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i]];
 		Vector3 p2 = mVertices[mVertexIndices[polygon->vertexIndexOffset + i + 1]];
-		if(Intersect::TestRayTriangle(ray, p0, p1, p2, outHitInfo.t))
-		{
-			return true;
-		}
+
+        // If the ray hits the backside of the polygon, it is not a valid hit - must hit the front side.
+        // We can ensure the ray and triangle are facing towards one another using dot product.
+        if(Vector3::Dot(ray.direction, Triangle::GetNormal(p0, p1, p2)) < 0.0f)
+        {
+            // See if the ray intersects the triangle.
+            if(Intersect::TestRayTriangle(ray, p0, p1, p2, outHitInfo.t))
+            {
+                return true;
+            }
+        }
 	}
+
+    // The ray did not intersect any triangle in this polygon.
 	return false;
 }
 

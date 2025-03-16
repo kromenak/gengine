@@ -15,7 +15,7 @@ public:
     Vector3& operator[](int i) { return (&p0)[i]; }
     const Vector3& operator[](int i) const { return (&p0)[i]; }
 
-    Vector3 GetNormal(bool clockwise = true, bool leftHand = true) const;
+    Vector3 GetNormal(bool clockwise = true, bool leftHanded = true) const;
     Vector3 GetCenter() const;
 
 	bool ContainsPoint(const Vector3& point) const;
@@ -23,8 +23,9 @@ public:
 	
 	// Triangle tests may need to be done on hundreds or thousands of triangles per frame.
 	// It may be desirable to utilize triangle algorithms without creating a triangle instance.
+    static Vector3 GetNormal(const Vector3& p0, const Vector3& p1, const Vector3& p2, bool clockwise = true, bool leftHanded = true);
 	static bool ContainsPoint(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& point);
-	static Vector3 GetClosestPoint(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& point);
+    static Vector3 GetClosestPoint(const Vector3& p0, const Vector3& p1, const Vector3& p2, const Vector3& point);
 
 	// A triangle consists of three points.
     // This class doesn't guarantee these points are valid/collinear (in fact, the default constructor gives an invalid triangle!).
