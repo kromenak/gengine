@@ -145,7 +145,7 @@ void NVC::ParseFromData(uint8_t* data, uint32_t dataLength)
 					std::cout << "ERROR: invalid approach " << keyValue.value << std::endl;
 				}
             }
-            else if(StringUtil::EqualsIgnoreCase(keyValue.key, "Target"))
+            else if(StringUtil::StartsWithIgnoreCase(keyValue.key, "Targe")) // accommodates typo in at least one NVC file
             {
                 action.target = keyValue.value;
             }
