@@ -171,7 +171,8 @@ void InventoryInspectScreen::TurnLSRPageRight()
 
 void InventoryInspectScreen::OnUpdate(float deltaTime)
 {
-    if(gLayerManager.IsTopLayer(&mLayer) && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    // Escape key is a shortcut to exit. But be sure this screen's on the top of all others and no action is playing.
+    if(gLayerManager.IsTopLayer(&mLayer) && !gActionManager.IsActionPlaying() && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
     {
         mExitButton->AnimatePress();
     }
