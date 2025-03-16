@@ -26,7 +26,7 @@ public:
     PlayingSoundtrack(Soundtrack* soundtrack);
 
     void Play();
-    void Stop();
+    void Stop(bool force = false);
 
     void Update(float deltaTime);
 
@@ -56,7 +56,7 @@ public:
     void Play(Soundtrack* soundtrack);
     void Stop(Soundtrack* soundtrack);
     void Stop(const std::string& soundtrackName);
-    void StopAll();
+    void StopAll(bool force = false);
 	
 protected:
 	void OnUpdate(float deltaTime) override;

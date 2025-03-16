@@ -20,7 +20,7 @@ void PlayingSoundtrack::Play()
     ProcessNextNode();
 }
 
-void PlayingSoundtrack::Stop()
+void PlayingSoundtrack::Stop(bool force)
 {
     // If a sound is currently playing as part of this soundtrack, we need to stop it in the desired fashion.
     if(mSoundtrackNodeResults.stopMethod == StopMethod::Immediate)
@@ -30,6 +30,12 @@ void PlayingSoundtrack::Stop()
     else if(mSoundtrackNodeResults.stopMethod == StopMethod::FadeOut)
     {
         mSoundtrackNodeResults.soundHandle.Stop(static_cast<float>(mSoundtrackNodeResults.fadeOutTimeMs) * 0.001f);
+    }
+    else if(mSoundtrackNodeResults.stopMethod == StopMethod::PlayToEnd && force)
+    {
+        // In some cases, a soundtrack is forced to stop, such as when moving to a new scene.
+        // In these cases, even "play to end" sounds will stop.
+        mSoundtrackNodeResults.soundHandle.Stop();
     }
 }
 
@@ -102,7 +108,7 @@ SoundtrackPlayer::SoundtrackPlayer(Actor* owner) : Component(owner)
 
 SoundtrackPlayer::~SoundtrackPlayer()
 {
-    StopAll();
+    StopAll(true);
 }
 
 void SoundtrackPlayer::Play(Soundtrack* soundtrack)
@@ -161,12 +167,12 @@ void SoundtrackPlayer::Stop(const std::string& soundtrackName)
     }
 }
 
-void SoundtrackPlayer::StopAll()
+void SoundtrackPlayer::StopAll(bool force)
 {
     // Stop all playing soundtracks.
     for(PlayingSoundtrack& playing : mPlaying)
     {
-        playing.Stop();
+        playing.Stop(force);
     }
     mPlaying.clear();
 }
