@@ -512,7 +512,7 @@ void ActionManager::OnPersist(PersistState& ps)
     // we don't have to worry about saving/loading *most* stuff in here...I hope.
 }
 
-void ActionManager::ShowTopicBar(const std::string& noun)
+void ActionManager::ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
 {
 	// See if we have any more topics to discuss with this noun (person).
 	// If not, we will pre-emptively cancel the bar and return.
@@ -524,7 +524,7 @@ void ActionManager::ShowTopicBar(const std::string& noun)
     }
 	
 	// Show topics.
-	mActionBar->Show(noun, VerbType::Topic, actions, nullptr, std::bind(&ActionManager::OnActionBarCanceled, this));
+	mActionBar->Show(noun, VerbType::Topic, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
 }
 
 void ActionManager::ShowTopicBar()
