@@ -253,12 +253,8 @@ void DialogueManager::PlayNextDialogueLine()
 	// Playing a line, so decrement remaining lines.
 	mRemainingDialogueLines--;
 
-    // If we're skipping an action right now, it seems safe (?) to just trigger the dialogue cue and skip loading the YAK entirely.
-    if(gActionManager.IsSkippingCurrentAction())
-    {
-        TriggerDialogueCue();
-        return;
-    }
+    // NOTE: You might think we could early out here if an action skip was occurring, and save some time/effort.
+    // NOTE: However, doing so could skip important anim nodes in the YAK file (such as starting a soundtrack) that should be executed even during an action skip.
 
     // Construct YAK name from stored plate/sequence number.
     std::string yakName = mDialogueLicensePlate;
