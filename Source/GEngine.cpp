@@ -560,6 +560,9 @@ void GEngine::Update()
     {
         // Update game logic.
         UpdateGameWorld(deltaTime * mTimeMultiplier);
+
+        // Perform any pending action skips.
+        gActionManager.PerformPendingActionSkip();
     }
 
     // Update location system.

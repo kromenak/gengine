@@ -278,8 +278,18 @@ void ActionManager::QueueAction(const std::string& noun, const std::string& verb
     mActionQueue.push_back(entry);
 }
 
-void ActionManager::SkipCurrentAction()
+void ActionManager::PerformPendingActionSkip()
 {
+    // Only run this code if we want to do an action skip.
+    if(!mWantsActionSkip) { return; }
+    mWantsActionSkip = false;
+
+    // Nothing to do if we don't have an action to skip!
+    if(!IsActionPlaying())
+    {
+        return;
+    }
+
     // Avoid recursive calls.
     if(mSkipInProgress) { return; }
     mSkipInProgress = true;

@@ -58,8 +58,9 @@ public:
 
 	bool IsActionPlaying() const { return mCurrentAction != nullptr; }
 
-    void SkipCurrentAction();
-    bool IsSkippingCurrentAction() const { return mSkipInProgress; }
+    void SkipCurrentAction() { mWantsActionSkip = true; }
+    bool IsSkippingCurrentAction() const { return mWantsActionSkip || mSkipInProgress; }
+    void PerformPendingActionSkip();
     
 	// Int-Identifier to Noun/Verb
 	std::string& GetNoun(int nounEnum);
@@ -157,6 +158,9 @@ private:
         std::function<void(const Action*)> callback = nullptr;
     };
     std::vector<ActionAndCallback> mActionQueue;
+
+    // If true, an action skip has been queued for processing.
+    bool mWantsActionSkip = false;
 
     // Are we skipping the current action? Mainly tracked to avoid recursive skips.
     bool mSkipInProgress = false;

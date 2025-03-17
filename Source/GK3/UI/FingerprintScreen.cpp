@@ -532,7 +532,7 @@ void FingerprintScreen::OnUpdate(float deltaTime)
     }
 
     // Check for exit button shortcut.
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE) && !gActionManager.IsActionPlaying() && !gActionManager.IsSkippingCurrentAction())
     {
         mExitButton->AnimatePress();
     }
