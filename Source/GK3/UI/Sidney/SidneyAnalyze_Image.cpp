@@ -3,11 +3,14 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
+#include "CursorManager.h"
 #include "GameProgress.h"
 #include "RectTransform.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
 #include "UIImage.h"
+#include "UIUtil.h"
+#include "VideoPlayer.h"
 
 void SidneyAnalyze::AnalyzeImage_Init()
 {
@@ -26,6 +29,14 @@ void SidneyAnalyze::AnalyzeImage_Init()
         mAnalyzeImage = imageActor->AddComponent<UIImage>();
         mAnalyzeImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
+    }
+
+    // Create an image used to play video on this screen.
+    {
+        mAnalyzeVideoImage = UIUtil::NewUIActorWithWidget<UIImage>(mAnalyzeImageWindow);
+        mAnalyzeVideoImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        mAnalyzeVideoImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
+        mAnalyzeVideoImage->SetEnabled(false);
     }
 
     // Hide by default.
@@ -115,6 +126,10 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
 
         mMenuBar.SetDropdownEnabled(kGraphicDropdownIdx, false);
     }
+
+    // Make sure video texture is the same size as the analyze image, in case we need it.
+    mAnalyzeVideoImage->GetRectTransform()->SetAnchoredPosition(mAnalyzeImage->GetRectTransform()->GetAnchoredPosition());
+    mAnalyzeVideoImage->GetRectTransform()->SetSizeDelta(mAnalyzeImage->GetRectTransform()->GetSizeDelta());
 }
 
 void SidneyAnalyze::AnalyzeImage_OnAnalyzeButtonPressed()
@@ -210,8 +225,31 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
 {
     if(mAnalyzeFileId == SidneyFileIds::kParchment1)
     {
-        printf("Added triangle\n");
-        mSidneyFiles->AddFile(SidneyFileIds::kTriangleShape); // Triangle
+        // Show the video image.
+        mAnalyzeVideoImage->SetEnabled(true);
+
+        // Show loading cursor during movie.
+        gCursorManager.UseLoadCursor();
+
+        // Play video on video image. The video uses a green chromakey background.
+        Color32 transparentColor(3, 251, 3);
+        gVideoPlayer.Play("Parch1Geo.avi", &transparentColor, mAnalyzeVideoImage, [this](){
+
+            // Back to normal cursor.
+            gCursorManager.UseDefaultCursor();
+
+            // Set final texture state.
+            mAnalyzeVideoImage->SetTexture(gAssetManager.LoadTexture("GEOMPARCH1FINAL.BMP", AssetScope::Scene));
+
+            // Show a popup explaining the result.
+            ShowAnalyzeMessage("GeometryParch1", Vector2(180.0f, -4.0f), HorizontalAlignment::Center);
+
+            // You have obtained a triangle!
+            mSidneyFiles->AddFile(SidneyFileIds::kTriangleShape);
+
+            // Add to score.
+            gGameProgress.ChangeScore("e_sidney_analysis_gemoetry_parch1");
+        });
     }
     if(mAnalyzeFileId == SidneyFileIds::kParchment2)
     {

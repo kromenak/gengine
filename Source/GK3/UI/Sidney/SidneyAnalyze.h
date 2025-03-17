@@ -104,6 +104,7 @@ private:
     // ANALYZE IMAGE
     Actor* mAnalyzeImageWindow = nullptr;
     UIImage* mAnalyzeImage = nullptr;
+    UIImage* mAnalyzeVideoImage = nullptr;
 
     void AnalyzeImage_Init();
     void AnalyzeImage_EnterState();
