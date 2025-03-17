@@ -146,10 +146,11 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     {
         FingerprintObject& object = mObjects["HAND_MIRROR"];
         object.textureName = "FP_LHOMIR.BMP";
+        object.anchor = AnchorPreset::Center;
         
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_LHOMIR_P1.BMP";
-        object.fingerprints.back().position = Vector2(162.0f, 132.0f);
+        object.fingerprints.back().position = Vector2(163.0f, 135.0f);
         object.fingerprints.back().uncoverPrintLicensePlate = "2O8A805PF1";
         object.fingerprints.back().invItemName = "HOWARDS_FINGERPRINT";
         object.fingerprints.back().flagName = "GotMirrorHowardPrint";
@@ -158,6 +159,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     {
         FingerprintObject& object = mObjects["GUN_IN_CASE"];
         object.textureName = "FP_COLT45.BMP";
+        object.anchoredPosition = Vector2(0.0f, 12.0f);
         
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_COLT45_P1.BMP";
@@ -184,6 +186,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     {
         FingerprintObject& object = mObjects["SUITCASE"];
         object.textureName = "FP_SUITCA.BMP";
+        object.anchoredPosition = Vector2(0.0f, -8.0f);
         
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_SUITCA_P1.BMP";
@@ -218,37 +221,51 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     {
         FingerprintObject& object = mObjects["DIRTY_GLASS_WILKES"];
         object.textureName = "FP_OCTSHOT.BMP";
+        object.anchor = AnchorPreset::Center;
+        object.anchoredPosition = Vector2(0.0f, 8.0f);
         
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_OCTSHOT_P1.BMP";
         object.fingerprints.back().position = Vector2(81.0f, 214.0f);
         object.fingerprints.back().uncoverPrintLicensePlate = "0A89N052H2";
-        object.fingerprints.back().collectPrintLicensePlate = "1EK4259NS1";
         object.fingerprints.back().invItemName = "WILKES_FINGERPRINT";
-        object.fingerprints.back().flagName = "GotImmortalsMontreauxPrint";
+        object.fingerprints.back().flagName = ""; // there doesn't seem to be any flag for this print
         object.fingerprints.back().scoreName = "e_202p_lby_fingerprint_kit_wilke_glass";
+
+        // The logic for collecting this print is much more complex.
+        // Depending on how thorough the player has been so far, there may be some confusion about whose fingerprint this is...
+        object.fingerprints.back().onCollectCustomLogicFunc = [this](){
+            OnCollectWilkesDirtyGlass();
+        };
     }
     {
         FingerprintObject& object = mObjects["DIRTY_GLASS_BUCHELLI"];
         object.textureName = "FP_SQRSHOT.BMP";
+        object.anchor = AnchorPreset::Center;
 
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_SQRSHOT_P1.BMP";
         object.fingerprints.back().position = Vector2(150.0f, 202.0f);
         object.fingerprints.back().uncoverPrintLicensePlate = "0A89N052H2";
         object.fingerprints.back().invItemName = "BUCHELLIS_FINGERPRINT";
-        object.fingerprints.back().flagName = "GotImmortalsMontreauxPrint";
-        object.fingerprints.back().scoreName = "e_202p_lby_fingerprint_kit_buchelli_glass";
-        //NOTE: If you already have Buchelli's print, Gabe will say: 1EK0259NS1
+        object.fingerprints.back().flagName = "";  // there doesn't seem to be any flag for this print
+        object.fingerprints.back().scoreName = ""; // "e_202p_lby_fingerprint_kit_buchelli_glass";
+
+        // The logic for collecting this print is much more complex.
+        // Depending on how thorough the player has been so far, there may be some confusion about whose fingerprint this is...
+        object.fingerprints.back().onCollectCustomLogicFunc = [this](){
+            OnCollectBuchelliDirtyGlass();
+        };
     }
     {
         FingerprintObject& object = mObjects["POP_BOTTLE"];
         object.textureName = "FP_SODA.BMP";
+        object.anchor = AnchorPreset::Center;
 
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_SODA_P1.BMP";
         object.fingerprints.back().position = Vector2(150.0f, 153.0f);
-        object.fingerprints.back().invItemName = "MOSELYS_FINGERPRINT";
+        object.fingerprints.back().invItemName = ""; // No inventory item added for this one.
         object.fingerprints.back().flagName = "GotPMoselyPrint";
         object.fingerprints.back().scoreName = "e_202p_r25_fingerprint_kit_soda_bottle";
     }
@@ -371,6 +388,8 @@ void FingerprintScreen::Show(const std::string& nounName)
     if(mActiveObject != nullptr)
     {
         mFingerprintObjectImage->SetTexture(gAssetManager.LoadTexture(mActiveObject->textureName), true);
+        mFingerprintObjectImage->GetRectTransform()->SetAnchor(mActiveObject->anchor);
+        mFingerprintObjectImage->GetRectTransform()->SetAnchoredPosition(mActiveObject->anchoredPosition);
     }
     else
     {
@@ -587,28 +606,18 @@ void FingerprintScreen::OnClothButtonPressed()
     {
         FingerprintObject::Fingerprint& fp = mActiveObject->fingerprints[mTapePrintIndex];
 
-        // Put the associated fingerprint inventory item in Ego's inventory.
-        if(!fp.invItemName.empty())
+        // In some complex cases, we need very bespoke logic for collecting a print.
+        // If such a function is set, use it and early out of here.
+        if(fp.onCollectCustomLogicFunc != nullptr)
         {
-            gInventoryManager.AddInventoryItem(fp.invItemName);
+            fp.onCollectCustomLogicFunc();
+            return;
         }
 
-        // Set associated flag.
-        std::string flagName = fp.flagName;
-        if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace") && !fp.flagNameGrace.empty())
-        {
-            flagName = fp.flagNameGrace;
-        }
-        if(!flagName.empty())
-        {
-            gGameProgress.SetFlag(flagName);
-        }
-
-        // Grant associated score.
-        if(!fp.scoreName.empty())
-        {
-            gGameProgress.ChangeScore(fp.scoreName);
-        }
+        // From here, normal collect logic used in 99% of cases.
+        
+        // Grant inventory item, score, and logic flag associated with this print.
+        GrantInvItemFlagAndScore(fp);
 
         // If there's a VO associated with collecting this print, play it!
         if(!mActiveObject->fingerprints[mTapePrintIndex].collectPrintLicensePlate.empty())
@@ -652,5 +661,192 @@ void FingerprintScreen::OnFingerprintPressed(int index)
     {
         mCursorState = CursorState::TapeWithPrint;
         mTapePrintIndex = index;
+    }
+}
+
+void FingerprintScreen::GrantInvItemFlagAndScore(const FingerprintObject::Fingerprint& fp)
+{
+    // Put the associated fingerprint inventory item in Ego's inventory.
+    if(!fp.invItemName.empty())
+    {
+        gInventoryManager.AddInventoryItem(fp.invItemName);
+    }
+
+    // Set associated flag.
+    std::string flagName = fp.flagName;
+    if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace") && !fp.flagNameGrace.empty())
+    {
+        flagName = fp.flagNameGrace;
+    }
+    if(!flagName.empty())
+    {
+        gGameProgress.SetFlag(flagName);
+    }
+
+    // Grant associated score.
+    if(!fp.scoreName.empty())
+    {
+        gGameProgress.ChangeScore(fp.scoreName);
+    }
+}
+
+namespace
+{
+    enum DirtyGlassState
+    {
+        DG_NoPrints = 0,
+        DG_GotBuchelliPrint = 1,
+        DG_GotWilkesPrint = 2,
+        DG_GotBuchelliPrintLabeledWilkes = 3,
+        DG_GotWilkesPrintLabeledBuchelli = 4,
+        DG_GotBothPrints = 5
+    };
+}
+
+void FingerprintScreen::OnCollectWilkesDirtyGlass()
+{
+    // Go back to normal cursor.
+    mCursorState = CursorState::Normal;
+
+    // If we got Buchelli's fingerprint during 210A, then we KNOW this is Wilkes' fingerprint. Easy and done.
+    if(gGameProgress.GetFlag("GotSuitcaseBuchelliPrint"))
+    {
+        // Update state var for this little puzzle...
+        if(gGameProgress.GetGameVariable("DirtyGlassPrint") == DG_NoPrints)
+        {
+            gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotWilkesPrint);
+        }
+        else
+        {
+            gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBothPrints);
+        }
+
+        // Gabe says "this must be Wilkes' print because it doesn't look like Buchelli's print".
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"1EK4259NS1\", 1)", [this](const Action* action){
+            GrantInvItemFlagAndScore(mObjects["DIRTY_GLASS_WILKES"].fingerprints[0]);
+            Hide();
+        });
+        return;
+    }
+
+    // OK, now we have our work cut out for us: we have two dirty glasses, and we don't know whose is whose.
+    // We haven't picked any dirty glass prints yet...
+    if(gGameProgress.GetGameVariable("DirtyGlassPrint") == DG_NoPrints)
+    {
+        // This could be either Wilkes' or Buchelli's print...
+        // Gabe says "hmm...who's print is this?"
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"1EK0259291\", 1)", [this](const Action* action){
+
+            // Weirdly, the noun for this choice in the NVC is "Crow"...
+            gActionManager.ShowTopicBar("Crow", [this](const Action* action){
+
+                // If chose Wilkes...you were right! And you actually get the points for guessing this correctly (or being observant earlier in the timeblock).
+                if(StringUtil::EqualsIgnoreCase(action->verb, "T_WILKES"))
+                {
+                    gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotWilkesPrint);
+                    GrantInvItemFlagAndScore(mObjects["DIRTY_GLASS_WILKES"].fingerprints[0]);
+                }
+                else
+                {
+                    // No points in this case, but you do get a bogus inventory item.
+                    gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotWilkesPrintLabeledBuchelli);
+                    gInventoryManager.AddInventoryItem("WILKES_FINGERPRINT_LABELED_BUCHELLI");
+                }
+
+                // Gabe says "right...ok", not entirely convinced.
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"1EK0259292\", 1)", [this](const Action* action){
+                    Hide();
+                });
+            });
+        });
+    }
+    else if(gGameProgress.GetGameVariable("DirtyGlassPrint") == DG_GotBuchelliPrint)
+    {
+        // In this case, we already got Buchelli's print successfully from the other glass.
+        // So, we can deduce this print. And get the points for it.
+        gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBothPrints);
+        GrantInvItemFlagAndScore(mObjects["DIRTY_GLASS_WILKES"].fingerprints[0]);
+        Hide();
+    }
+    else if(gGameProgress.GetGameVariable("DirtyGlassPrint") == DG_GotBuchelliPrintLabeledWilkes)
+    {
+        // In this case, we incorrectly labeled Buchelli's print, so we think THIS is Buchelli's print. Whoops.
+        gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBothPrints);
+        gInventoryManager.AddInventoryItem("WILKES_FINGERPRINT_LABELED_BUCHELLI");
+        Hide();
+    }
+}
+
+void FingerprintScreen::OnCollectBuchelliDirtyGlass()
+{
+    // Go back to normal cursor.
+    mCursorState = CursorState::Normal;
+
+    // If we got Buchelli's fingerprint during 201A, then we KNOW this is Buchelli's print. Easy and done.
+    if(gGameProgress.GetFlag("GotSuitcaseBuchelliPrint"))
+    {
+        // Update state var for this little puzzle...
+        if(gGameProgress.GetGameVariable("DirtyGlassPrint") == DG_NoPrints)
+        {
+            gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBuchelliPrint);
+        }
+        else
+        {
+            gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBothPrints);
+        }
+
+        // Gabriel says "I already have this print!".
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"1EK0259NS1\", 1)", [this](const Action* action){
+            Hide();
+        });
+        return;
+    }
+
+    // OK, now we have our work cut out for us: we have two dirty glasses, and we don't know whose is whose.
+    // We haven't picked any dirty glass prints yet...
+    if(gGameProgress.GetGameVariable("DirtyGlassPrint") == DG_NoPrints)
+    {
+        // This could be either Wilkes' or Buchelli's print...
+        // Gabe says "hmm...who's print is this?"
+        gActionManager.ExecuteSheepAction("wait StartDialogue(\"1EK0259291\", 1)", [this](const Action* action){
+
+            // Weirdly, the noun for this choice in the NVC is "Dagger"...
+            gActionManager.ShowTopicBar("Dagger", [this](const Action* action){
+
+                // If chose Buchelli...you were right!
+                // There are actually no points for this, but you will get points when you take Wilkes' print next.
+                if(StringUtil::EqualsIgnoreCase(action->verb, "T_BUCHELLI"))
+                {
+                    gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBuchelliPrint);
+                    GrantInvItemFlagAndScore(mObjects["DIRTY_GLASS_BUCHELLI"].fingerprints[0]);
+                }
+                else
+                {
+                    // You guessed wrong - you are a bad detective.
+                    gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBuchelliPrintLabeledWilkes);
+                    gInventoryManager.AddInventoryItem("BUCHELLIS_FINGERPRINT_LABELED_WILKES");
+                }
+
+                // Gabe says "right...ok", not entirely convinced.
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"1EK0259292\", 1)", [this](const Action* action){
+                    Hide();
+                });
+            });
+        });
+    }
+    else if(gGameProgress.GetGameVariable("DirtyGlassPrint") == DG_GotWilkesPrint)
+    {
+        // In this case, we already got Wilkes' print successfully from the other glass.
+        // So, we can deduce this print. But no points are granted in this case.
+        gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBothPrints);
+        GrantInvItemFlagAndScore(mObjects["DIRTY_GLASS_BUCHELLI"].fingerprints[0]);
+        Hide();
+    }
+    else if(gGameProgress.GetGameVariable("DirtyGlassPrint") == DG_GotWilkesPrintLabeledBuchelli)
+    {
+        // In this case, we incorrectly labeled Wilkes' print, so we think THIS is Wilkes' print. Whoops.
+        gGameProgress.SetGameVariable("DirtyGlassPrint", DG_GotBothPrints);
+        gInventoryManager.AddInventoryItem("BUCHELLIS_FINGERPRINT_LABELED_WILKES");
+        Hide();
     }
 }

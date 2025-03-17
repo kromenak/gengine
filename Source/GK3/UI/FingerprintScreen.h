@@ -7,6 +7,7 @@
 #include "Actor.h"
 
 #include "LayerManager.h"
+#include "RectTransform.h" // AnchorPreset
 #include "StringUtil.h"
 #include "Timeblock.h"
 
@@ -60,6 +61,10 @@ private:
         // Texture corresponding to this object. Shows in right side of fingerprint UI.
         std::string textureName;
 
+        // Position for the object texture in the right panel.
+        AnchorPreset anchor = AnchorPreset::Left;
+        Vector2 anchoredPosition;
+
         // Each object that can be dusted will have zero or more fingerprints to discover.
         // This is the list of each fingerprint instance on the object.
         struct Fingerprint
@@ -87,6 +92,9 @@ private:
             // Dialogue that plays when uncovering and collecting this print.
             std::string uncoverPrintLicensePlate;
             std::string collectPrintLicensePlate;
+
+            // In some cases, a fingerprint has more complex logic.
+            std::function<void()> onCollectCustomLogicFunc = nullptr;
         };
         std::vector<Fingerprint> fingerprints;
 
@@ -127,4 +135,9 @@ private:
 
     void OnRightPanelPressed();
     void OnFingerprintPressed(int index);
+
+    void GrantInvItemFlagAndScore(const FingerprintObject::Fingerprint& fp);
+
+    void OnCollectWilkesDirtyGlass();
+    void OnCollectBuchelliDirtyGlass();
 };
