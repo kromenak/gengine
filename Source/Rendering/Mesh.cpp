@@ -39,23 +39,32 @@ Submesh* Mesh::AddSubmesh(const MeshDefinition& meshDefinition)
     return submesh;
 }
 
-bool Mesh::Raycast(const Ray& ray, RaycastHit& hitInfo)
+bool Mesh::Raycast(const Ray& ray, float& outRayT)
 {
-	// Check against Mesh's AABB to see if we hit it.
-	if(Intersect::TestRayAABB(ray, mAABB, hitInfo.t))
+    // Ensure t value is at default.
+    outRayT = FLT_MAX;
+
+	// Before we check per-triangle collision, do a broader AABB check.
+    // If we don't hit the AABB, then we shouldn't hit any triangle.
+    float aabbT = FLT_MAX;
+	if(Intersect::TestRayAABB(ray, mAABB, aabbT))
 	{
 		// If hit the AABB, do a per-triangle check as well for more precise detection.
 		// For example, Gabe's AABBs are pretty rough, so you can select him when clicking nowhere near him (a foot left of his arm).
 		// This isn't how the original game works, so I think they must do a per-triangle check as well.
-		for(auto& submesh : mSubmeshes)
+		for(Submesh* submesh : mSubmeshes)
 		{
-			if(submesh->Raycast(ray, hitInfo))
+            float submeshRayT = FLT_MAX;
+			if(submesh->Raycast(ray, submeshRayT))
 			{
-				return true;
+                if(submeshRayT < outRayT)
+                {
+                    outRayT = submeshRayT;
+                }
 			}
 		}
 	}
 	
 	// Either didn't hit AABB or did hit AABB, but failed triangle test.
-	return false;
+	return outRayT < FLT_MAX;
 }

@@ -112,28 +112,37 @@ bool Submesh::GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) cons
 	return false;
 }
 
-bool Submesh::Raycast(const Ray& ray, RaycastHit& hitInfo)
+bool Submesh::Raycast(const Ray& ray, float& outRayT)
 {
+    // Ensure out value is at default.
+    outRayT = FLT_MAX;
+
+    // This function doesn't support certain submesh configurations yet.
 	if(mRenderMode != RenderMode::Triangles || mIndexes == nullptr)
 	{
 		std::cout << "Submesh::Raycast only supports Triangle meshes with indexes for now - aborting." << std::endl;
 		return false;
 	}
 
-    // See if the ray hits any triangle.
+    // Check whether the ray hits any triangles in this submesh.
+    // Even if hit occurs, can't early out! Must check all triangles in case a closer one (lower t value) is found.
 	for(uint32_t i = 0; i < mVertexArray.GetIndexCount(); i += 3)
 	{
 		Vector3 vert1 = GetVertexPosition(mIndexes[i]);
 		Vector3 vert2 = GetVertexPosition(mIndexes[i + 1]);
 		Vector3 vert3 = GetVertexPosition(mIndexes[i + 2]);
-		if(Intersect::TestRayTriangle(ray, vert1, vert2, vert3, hitInfo.t))
+        float t = FLT_MAX;
+		if(Intersect::TestRayTriangle(ray, vert1, vert2, vert3, t))
 		{
-			return true;
+            if(t < outRayT)
+            {
+                outRayT = t;
+            }
 		}
 	}
 	
-	// Ray did not hit any triangles.
-	return false;
+	// Return whether we hit anything.
+	return outRayT < FLT_MAX;
 }
 
 void Submesh::SetPositions(float* positions)

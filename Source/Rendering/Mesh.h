@@ -41,7 +41,7 @@ public:
 	
 	const std::vector<Submesh*>& GetSubmeshes() const { return mSubmeshes; }
 	
-	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
+	bool Raycast(const Ray& ray, float& outRayT);
 	
 private:
     // A mesh is really just a container for one or more submeshes.

@@ -42,7 +42,7 @@ public:
 	int GetTriangleCount() const;
 	bool GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) const;
 	
-	bool Raycast(const Ray& ray, RaycastHit& hitInfo);
+	bool Raycast(const Ray& ray, float& outRayT);
     
     void SetPositions(float* positions);
     float* GetPositions() { return mPositions; }

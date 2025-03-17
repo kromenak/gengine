@@ -227,11 +227,14 @@ Mesh* MeshRenderer::GetMesh(int index) const
 
 bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 {
+    // Ensure hit info has default t value.
+    hitInfo.t = FLT_MAX;
+
     // Get our local to world matrix.
     const Matrix4& localToWorldMatrix = GetOwner()->GetTransform()->GetLocalToWorldMatrix();
 
 	// Go through each mesh and see if the ray has hit the mesh.
-	for(auto& mesh : mMeshes)
+	for(Mesh* mesh : mMeshes)
 	{
 		// Calculate world->local space transform by creating object->local and inverting.
 		Matrix4 meshToWorldMatrix = localToWorldMatrix * mesh->GetMeshToLocalMatrix();
@@ -244,20 +247,25 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 		Ray localRay(rayLocalPos, rayLocalDir);
 		
 		// See if the local ray intersects the local space triangles of the mesh.
-		if(mesh->Raycast(localRay, hitInfo))
+        float meshRayT = FLT_MAX;
+		if(mesh->Raycast(localRay, meshRayT))
 		{
             // The "t" value calculated in Raycast is in mesh space, but caller probably needs it in world space.
             // So, convert "t" back to world space before returning.
-            Vector3 hitPoint = localRay.GetPoint(hitInfo.t);
+            Vector3 hitPoint = localRay.GetPoint(meshRayT);
             Vector3 hitPointWorldPos = meshToWorldMatrix.TransformPoint(hitPoint);
             //Debug::DrawSphere(Sphere(hitPointWorldPos, 1.0f), Color32::Red, 1.0f);
-            hitInfo.t = (ray.origin - hitPointWorldPos).GetLength();
-			return true;
+
+            float worldT = (ray.origin - hitPointWorldPos).GetLength();
+            if(worldT < hitInfo.t)
+            {
+                hitInfo.t = worldT;
+            }
 		}
 	}
 	
 	// Ray did not intersect with any part of the mesh renderer.
-	return false;
+	return hitInfo.t < FLT_MAX;
 }
 
 AABB MeshRenderer::GetAABB() const
