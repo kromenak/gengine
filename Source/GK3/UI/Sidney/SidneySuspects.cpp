@@ -6,6 +6,7 @@
 #include "Font.h"
 #include "GameProgress.h"
 #include "Scene.h"
+#include "SidneyButton.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"
@@ -16,6 +17,7 @@
 #include "UINineSlice.h"
 #include "UITextInput.h"
 #include "UIUtil.h"
+#include "VideoPlayer.h"
 
 void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
 {
@@ -68,6 +70,7 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
     });
 
     // Create window with suspect data.
+    Font* font = gAssetManager.LoadFont("SID_TEXT_14.FON");
     {
         // Window border.
         UINineSlice* windowBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
@@ -99,7 +102,6 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
         }
 
         // In the header, create all the data fields.
-        Font* font = gAssetManager.LoadFont("SID_TEXT_14.FON");
         {
             // Name
             {
@@ -277,6 +279,85 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
     // Create popup.
     mPopup = new SidneyPopup(mRoot);
 
+    // Create match analysis window.
+    {
+        // Window border.
+        UINineSlice* windowBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
+        windowBorder->GetRectTransform()->SetSizeDelta(267.0f, 156.0f);
+        windowBorder->GetRectTransform()->SetAnchoredPosition(0.0f, -15.0f);
+        mMatchAnalysisWindow = windowBorder->GetOwner();
+        mMatchAnalysisWindow->SetActive(false);
+
+        // Add header divider border.
+        UIImage* headerDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(windowBorder->GetOwner());
+        headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+        headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
+        headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -18.0f);
+        headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
+
+        // Header label.
+        UILabel* headerLabel = UIUtil::NewUIActorWithWidget<UILabel>(windowBorder->GetOwner());
+        headerLabel->SetFont(font);
+        headerLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchTitle"));
+        headerLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+        headerLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
+        headerLabel->GetRectTransform()->SetSizeDelta(0.0f, 18.0f);
+
+        // Fingerprint border and images.
+        UINineSlice* fingerprintBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(windowBorder->GetOwner(), SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
+        fingerprintBorder->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        fingerprintBorder->GetRectTransform()->SetAnchoredPosition(18.0f, 65.0f);
+        fingerprintBorder->GetRectTransform()->SetSizeDelta(49.0f, 59.0f);
+
+        mMAFingerprintImage = UIUtil::NewUIActorWithWidget<UIImage>(fingerprintBorder->GetOwner());
+        mMAFingerprintImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        mMAFingerprintImage->GetRectTransform()->SetAnchoredPosition(4.0f, 4.0f);
+        mMAFingerprintImage->GetRectTransform()->SetSizeDelta(41.0f, 51.0f);
+
+        mMAFingerprintVideoImage = UIUtil::NewUIActorWithWidget<UIImage>(fingerprintBorder->GetOwner());
+        mMAFingerprintVideoImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        mMAFingerprintVideoImage->GetRectTransform()->SetAnchoredPosition(4.0f, 4.0f);
+        mMAFingerprintVideoImage->GetRectTransform()->SetSizeDelta(41.0f, 51.0f);
+
+        // Current action border and label.
+        UINineSlice* actionBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(windowBorder->GetOwner(), SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
+        actionBorder->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        actionBorder->GetRectTransform()->SetAnchoredPosition(85.0f, 106.0f);
+        actionBorder->GetRectTransform()->SetSizeDelta(170.0f, 18.0f);
+
+        mMAActionLabel = UIUtil::NewUIActorWithWidget<UILabel>(actionBorder->GetOwner());
+        mMAActionLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14_GRN.FON"));
+        mMAActionLabel->SetText("Working...");
+        mMAActionLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+        mMAActionLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
+        mMAActionLabel->GetRectTransform()->SetAnchoredPosition(0.0f, -1.0f);
+        mMAActionLabel->GetRectTransform()->SetSizeDelta(0.0f, 16.0f);
+
+        mMASuspectLabel = UIUtil::NewUIActorWithWidget<UILabel>(actionBorder->GetOwner());
+        mMASuspectLabel->SetFont(font);
+        mMASuspectLabel->SetText("John Wilkes");
+        mMASuspectLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
+        mMASuspectLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
+        mMASuspectLabel->GetRectTransform()->SetAnchoredPosition(0.0f, -26.0f);
+        mMASuspectLabel->GetRectTransform()->SetSizeDelta(0.0f, 18.0f);
+
+        // Create buttons.
+        mMALinkToSuspectButton = new SidneyButton(windowBorder->GetOwner());
+        mMALinkToSuspectButton->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchLink"));
+        mMALinkToSuspectButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        mMALinkToSuspectButton->GetRectTransform()->SetAnchoredPosition(12.0f, 10.0f);
+        mMALinkToSuspectButton->GetRectTransform()->SetSizeDelta(112.0f, 13.0f);
+
+        mMACloseButton = new SidneyButton(windowBorder->GetOwner());
+        mMACloseButton->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchClose"));
+        mMACloseButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        mMACloseButton->GetRectTransform()->SetAnchoredPosition(144.0f, 10.0f);
+        mMACloseButton->GetRectTransform()->SetSizeDelta(112.0f, 13.0f);
+        mMACloseButton->SetPressCallback([this](){
+            mMatchAnalysisWindow->SetActive(false);
+        });
+    }
+
     // Populate the suspect data.
     // We can do this in an unusual way: rather than having a dedicated "SUSPECTS.TXT" or whatever, the data is in the localizer.
     // So, we can just iterate and retrieve from there.
@@ -287,6 +368,18 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
         mSuspectInfos.back().nationality = SidneyUtil::GetSuspectsLocalizer().GetText("Nationality" + std::to_string(i));
         mSuspectInfos.back().vehicleId = SidneyUtil::GetSuspectsLocalizer().GetText("VehicleID" + std::to_string(i));
     }
+
+    // We also need to populate the match analysis fingerprint textures...
+    mSuspectInfos[0].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_MAD_FPRINT.BMP");
+    mSuspectInfos[1].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_VIT_FPRINT.BMP");
+    // No print for Emilio.
+    mSuspectInfos[3].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_ABE_FPRINT.BMP");
+    mSuspectInfos[4].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_LHO_FPRINT.BMP");
+    mSuspectInfos[5].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_EST_FPRINT.BMP");
+    mSuspectInfos[6].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_WIL_FPRINT.BMP");
+    mSuspectInfos[7].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_LAR_FPRINT.BMP");
+    mSuspectInfos[8].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_MON_FPRINT.BMP");
+    mSuspectInfos[9].matchAnalysisFingerprintTexture = gAssetManager.LoadTexture("S_MOS_FPRINT.BMP");
 
     // Set initial menu choices enabled or disabled.
     RefreshEnabledMenuChoices();
@@ -508,8 +601,16 @@ void SidneySuspects::RefreshEnabledMenuChoices()
     mMenuBar.SetDropdownChoiceEnabled(2, 0, suspectOpen && fileOpen);
     mMenuBar.SetDropdownChoiceEnabled(2, 1, suspectOpen && fileOpen);
 
-    // The final option is only available under very specific circumstances (TODO).
-    mMenuBar.SetDropdownChoiceEnabled(2, 2, false);
+    // The final option is only available if specific files are opened.
+    mMenuBar.SetDropdownChoiceEnabled(2, 2, mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint);
+}
+
+bool SidneySuspects::IsSuspectFingerprintLinked(int suspectIndex)
+{
+    auto fingerprintFileIt = std::find(mSuspectInfos[suspectIndex].linkedFileIds.begin(),
+                                       mSuspectInfos[suspectIndex].linkedFileIds.end(),
+                                       mFingerprintLinkedFiles[suspectIndex].fileId);
+    return fingerprintFileIt != mSuspectInfos[suspectIndex].linkedFileIds.end();
 }
 
 void SidneySuspects::OnLinkToSuspectPressed()
@@ -645,7 +746,97 @@ void SidneySuspects::OnUnlinkToSuspectPressed()
 
 void SidneySuspects::OnMatchAnalysisPressed()
 {
-    printf("Match Analysis\n");
+    Texture* fingerprintTexture = nullptr;
+    Texture* compareTexture = nullptr;
+    std::string videoName;
+    int matchSuspectIndex = -1;
+    if(mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint)
+    {
+        fingerprintTexture = gAssetManager.LoadTexture("EST_LSR_PRINT.BMP", AssetScope::Scene);
+        compareTexture = gAssetManager.LoadTexture("EST_LSR_COMPARE.BMP", AssetScope::Scene);
+        videoName = "EstLSRScan.avi";
+        matchSuspectIndex = 5;
+    }
+
+    // Show popup in its initial state.
+    mMAFingerprintImage->SetTexture(fingerprintTexture);
+    mMAFingerprintVideoImage->SetEnabled(false);
+    mMAActionLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchAnalyze"));
+    mMASuspectLabel->SetText("");
+    mMALinkToSuspectButton->GetButton()->SetCanInteract(false);
+    mMACloseButton->GetButton()->SetCanInteract(false);
+    mMatchAnalysisWindow->SetActive(true);
+
+    // Ok, we're going to put on a big show of analyzing the fingerprint and comparing it to all the suspects!
+    gAudioManager.PlaySFX(gAssetManager.LoadAudio("WORKING3.WAV", AssetScope::Scene), [this, videoName, compareTexture, matchSuspectIndex](){
+
+        // Play video file of the match analysis occurring.
+        mMAFingerprintVideoImage->SetEnabled(true);
+        gVideoPlayer.Play(videoName, nullptr, mMAFingerprintVideoImage, [this, compareTexture, matchSuspectIndex](){
+
+            // Once video completes, the video image shows the compare texture overlay.
+            mMAFingerprintVideoImage->SetTexture(compareTexture);
+
+            // Now we move on to compare mode...
+            mMAActionLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchCompare"));
+
+            OnMatchAnalysisCheckSuspect(0, matchSuspectIndex);
+
+
+            mMACloseButton->GetButton()->SetCanInteract(true);
+        });
+    });
+}
+
+void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchIndex)
+{
+    // If we've iterated all suspects and not found a match, say so.
+    if(currentIndex >= mSuspectInfos.size())
+    {
+        mMAActionLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchNone"));
+        mMASuspectLabel->SetText("");
+        mMACloseButton->GetButton()->SetCanInteract(true);
+
+        // If this is the unknown LSR fingerprint, Grace plays some dialogue about having to try again later.
+        if(mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint)
+        {
+            if(!gGameProgress.GetFlag("PlayedEstelleFPDialog"))
+            {
+                gActionManager.ExecuteDialogueAction("02OX660SL1");
+                gGameProgress.SetFlag("PlayedEstelleFPDialog");
+            }
+        }
+        return;
+    }
+
+    // If no fingerprint is linked to this suspect, we can skip them right away.
+    if(!IsSuspectFingerprintLinked(currentIndex))
+    {
+        OnMatchAnalysisCheckSuspect(currentIndex + 1, matchIndex);
+        return;
+    }
+
+    // Show this suspect in the UI to show that we are considering them.
+    mMASuspectLabel->SetText(mSuspectInfos[currentIndex].name);
+    mMAFingerprintImage->SetTexture(mSuspectInfos[currentIndex].matchAnalysisFingerprintTexture);
+
+    // Pause for a moment before showing result or moving on to next person.
+    Timers::AddTimerSeconds(2.0f, [this, currentIndex, matchIndex](){
+        // If we found a match, say so!
+        if(currentIndex == matchIndex)
+        {
+            mMAActionLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchFound"));
+            mMALinkToSuspectButton->GetButton()->SetCanInteract(true);
+            mMACloseButton->GetButton()->SetCanInteract(true);
+
+            //TODO: Any custom logic/score/dialogue here.
+        }
+        else
+        {
+            // Not a match - move on to next suspect.
+            OnMatchAnalysisCheckSuspect(currentIndex + 1, matchIndex);
+        }
+    });
 }
 
 void SidneySuspects::OnLinkedEvidenceSelected(int index)

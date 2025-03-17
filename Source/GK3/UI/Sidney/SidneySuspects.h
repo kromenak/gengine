@@ -93,6 +93,9 @@ private:
         // Which linked file is selected.
         int selectedLinkedFileIndex = -1;
 
+        // A close-up fingerprint texture used during match analysis for this suspect.
+        Texture* matchAnalysisFingerprintTexture = nullptr;
+
         void OnPersist(PersistState& ps)
         {
             ps.Xfer(PERSIST_VAR(notes));
@@ -141,14 +144,27 @@ private:
     // The ID of the opened file, if any.
     int mOpenedFileId = -1;
 
+    // MATCH ANALYSIS
+    Actor* mMatchAnalysisWindow = nullptr;
+    UIImage* mMAFingerprintImage = nullptr;
+    UIImage* mMAFingerprintVideoImage = nullptr;
+    UILabel* mMAActionLabel = nullptr;
+    UILabel* mMASuspectLabel = nullptr;
+    SidneyButton* mMALinkToSuspectButton = nullptr;
+    SidneyButton* mMACloseButton = nullptr;
+
     void ShowSuspect(int index);
     void ShowFile(SidneyFile* file);
 
     void RefreshEnabledMenuChoices();
 
+    bool IsSuspectFingerprintLinked(int suspectIndex);
+
     void OnLinkToSuspectPressed();
     void OnUnlinkToSuspectPressed();
+
     void OnMatchAnalysisPressed();
+    void OnMatchAnalysisCheckSuspect(int currentIndex, int matchIndex);
 
     void OnLinkedEvidenceSelected(int index);
 };
