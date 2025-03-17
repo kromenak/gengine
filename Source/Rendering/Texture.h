@@ -97,7 +97,7 @@ public:
 	// Alpha and transparency
 	void SetTransparentColor(const Color32& color);
     void ClearTransparentColor();
-	void ApplyAlphaChannel(const Texture& alphaTexture);
+	void ApplyAlphaChannel(const Texture& alphaTexture, bool useRGB = false);
 
     // Image Modifications
     void FlipVertically();

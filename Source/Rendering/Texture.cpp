@@ -290,7 +290,7 @@ void Texture::ClearTransparentColor()
     mDirtyFlags |= DirtyFlags::Pixels;
 }
 
-void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
+void Texture::ApplyAlphaChannel(const Texture& alphaTexture, bool useRGB)
 {
 	// For now, let's assume alpha texture has same width/height as target texture.
 	if(alphaTexture.mWidth != mWidth || alphaTexture.mHeight != mHeight)
@@ -302,15 +302,14 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture)
 	// If the alpha texture has a palette, we want to treat the R/G/B values as the alpha value.
 	// Palettized textures as alpha channels usually have palette colors like (255, 255, 255, 0) or (128, 128, 128, 0).
 	// At least, that's the case in GK3!
-	bool useRgbForAlpha = alphaTexture.mPalette != nullptr;
+	bool useRgbForAlpha = alphaTexture.mPalette != nullptr || useRGB;
 
 	// For each pixel, copy over the alpha value.
 	int pixelCount = mWidth * mHeight;
 	for(int i = 0; i < pixelCount; ++i)
 	{
 		// If RGB is alpha value, just grab R val. Otherwise, +3 to get A val.
-		unsigned char alpha = useRgbForAlpha ? alphaTexture.mPixels[(i * 4)] : alphaTexture.mPixels[(i * 4) + 3];
-		mPixels[(i * 4) + 3] = alpha;
+		mPixels[(i * 4) + 3] = useRgbForAlpha ? alphaTexture.mPixels[(i * 4)] : alphaTexture.mPixels[(i * 4) + 3];
 	}
 
     // If an alpha channel is applied, we'll assume this texture is now translucent.

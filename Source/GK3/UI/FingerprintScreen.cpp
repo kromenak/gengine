@@ -399,7 +399,7 @@ void FingerprintScreen::Show(const std::string& nounName)
 
             Texture* printTexture = gAssetManager.LoadTexture(fp.textureName);
             Texture* alphaTexture = gAssetManager.LoadTexture(printTexture->GetNameNoExtension() + "A");
-            printTexture->ApplyAlphaChannel(*alphaTexture);
+            printTexture->ApplyAlphaChannel(*alphaTexture, true);
 
             mFingerprintImages[imageIndex]->SetTexture(printTexture, true);
             mFingerprintImages[imageIndex]->SetEnabled(true);
@@ -501,7 +501,7 @@ void FingerprintScreen::OnUpdate(float deltaTime)
                     float prevAlpha = mFingerprintAlpha[i];
                     mFingerprintAlpha[i] += gInputManager.GetMouseDelta().GetLength() * deltaTime * 0.2f;
                     mFingerprintAlpha[i] = Math::Clamp(mFingerprintAlpha[i], 0.0f, 1.0f);
-                    mFingerprintImages[i]->SetColor(Color32(0, 0, 0, mFingerprintAlpha[i] * 255));
+                    mFingerprintImages[i]->SetColor(Color32(128, 128, 128, mFingerprintAlpha[i] * 255));
 
                     if(!mActiveObject->fingerprints[i].uncoverPrintLicensePlate.empty() && prevAlpha < 1.0f && mFingerprintAlpha[i] >= 1.0f)
                     {
