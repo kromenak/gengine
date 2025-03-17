@@ -128,6 +128,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     }
 
     // Make sure video texture is the same size as the analyze image, in case we need it.
+    mAnalyzeVideoImage->SetEnabled(false);
     mAnalyzeVideoImage->GetRectTransform()->SetAnchoredPosition(mAnalyzeImage->GetRectTransform()->GetAnchoredPosition());
     mAnalyzeVideoImage->GetRectTransform()->SetSizeDelta(mAnalyzeImage->GetRectTransform()->GetSizeDelta());
 }
@@ -221,6 +222,57 @@ void SidneyAnalyze::AnalyzeImage_OnExtractAnomoliesPressed()
     }
 }
 
+void SidneyAnalyze::AnalyzeImage_OnAnalyzeTextPressed()
+{
+    if(mAnalyzeFileId == SidneyFileIds::kParchment2)
+    {
+        // Play a modem SFX, so it seems like we're reaching out to the internet...
+        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDMODEM.WAV", AssetScope::Scene));
+
+        // Show a series of messages that make it seem like we're analyzing the text and downloading stuff from the internet.
+        ShowAnalyzeMessage("Text1Parch2", Vector2(), HorizontalAlignment::Center, true);
+        Timers::AddTimerSeconds(3.0f, [this](){
+            ShowAnalyzeMessage("Text2Parch2", Vector2(), HorizontalAlignment::Center, true);
+
+            Timers::AddTimerSeconds(3.0f, [this](){
+                ShowAnalyzeMessage("Text3Parch2", Vector2(), HorizontalAlignment::Center, true);
+
+                Timers::AddTimerSeconds(3.0f, [this](){
+                    mAnalyzePopup->Hide();
+
+                    // The last popup asks us to choose a language for extracting a hidden message from the text.
+                    // As with the other parchment, the hidden message is in French.
+                    mSecondaryAnalyzePopup->ResetToDefaults();
+                    mSecondaryAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Text4Parch2"));
+                    mSecondaryAnalyzePopup->ShowThreeButton([this](int buttonIndex){
+                        if(buttonIndex == 0)
+                        {
+                            mSecondaryAnalyzePopup->Hide();
+                            ShowAnalyzeMessage("Parch2French");
+                            gGameProgress.ChangeScore("e_sidney_analysis_anomalies_parch2");
+
+                            if(!gGameProgress.GetFlag("GotThemApples"))
+                            {
+                                gActionManager.ExecuteDialogueAction("02OCR2Z4L3", 2);
+                                gInventoryManager.AddInventoryItem("BLUE_APPLES_RIDDLE");
+                                gGameProgress.SetFlag("GotThemApples");
+                            }
+                        }
+                        else if(buttonIndex == 1)
+                        {
+                            ShowAnalyzeMessage("ParchEnglish", Vector2(), HorizontalAlignment::Center);
+                        }
+                        else if(buttonIndex == 2)
+                        {
+                            ShowAnalyzeMessage("ParchLatin", Vector2(), HorizontalAlignment::Center);
+                        }
+                    });
+                });
+            });
+        });
+    }
+}
+
 void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
 {
     if(mAnalyzeFileId == SidneyFileIds::kParchment1)
@@ -249,15 +301,44 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
 
             // Add to score.
             gGameProgress.ChangeScore("e_sidney_analysis_gemoetry_parch1");
+
+            // Add flag.
+            gGameProgress.SetFlag("AnalyzedGeomParchment1");
         });
     }
-    if(mAnalyzeFileId == SidneyFileIds::kParchment2)
+    else if(mAnalyzeFileId == SidneyFileIds::kParchment2)
     {
-        printf("Added circle and square\n");
-        mSidneyFiles->AddFile(SidneyFileIds::kCircleShape); // Circle
-        mSidneyFiles->AddFile(SidneyFileIds::kSquareShape); // Square
+        // Show the video image.
+        mAnalyzeVideoImage->SetEnabled(true);
+
+        // Show loading cursor during movie.
+        gCursorManager.UseLoadCursor();
+
+        // Play video on video image. The video uses a green chromakey background.
+        Color32 transparentColor(3, 251, 3);
+        gVideoPlayer.Play("Parch2Geo.avi", &transparentColor, mAnalyzeVideoImage, [this](){
+
+            // Back to normal cursor.
+            gCursorManager.UseDefaultCursor();
+
+            // Set final texture state.
+            mAnalyzeVideoImage->SetTexture(gAssetManager.LoadTexture("GEOMPARCH2FINAL.BMP", AssetScope::Scene));
+
+            // Show a popup explaining the result.
+            ShowAnalyzeMessage("GeometryParch2", Vector2(180.0f, -4.0f), HorizontalAlignment::Center);
+
+            // You have obtained a circle and a square!
+            mSidneyFiles->AddFile(SidneyFileIds::kCircleShape); // Circle
+            mSidneyFiles->AddFile(SidneyFileIds::kSquareShape); // Square
+
+            // Add to score.
+            gGameProgress.ChangeScore("e_sidney_analysis_gemoetry_parch2");
+
+            // Add flag.
+            gGameProgress.SetFlag("AnalyzedGeomParchment2");
+        });
     }
-    if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
+    else if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
     {
         //TODO: Play hexagram animation.
 
@@ -265,6 +346,44 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
         mSidneyFiles->AddFile(SidneyFileIds::kHexagramShape); // Hexagram
 
         ShowAnalyzeMessage("GeometryPous", Vector2(180.0f, 0.0f), HorizontalAlignment::Center);
+    }
+}
+
+void SidneyAnalyze::AnalyzeImage_OnRotateShapeButtonPressed()
+{
+    if(mAnalyzeFileId == SidneyFileIds::kParchment2)
+    {
+        // Show the video image.
+        mAnalyzeVideoImage->SetEnabled(true);
+
+        // Show loading cursor during movie.
+        gCursorManager.UseLoadCursor();
+
+        // Play video on video image. The video uses a green chromakey background.
+        Color32 transparentColor(3, 251, 3);
+        gVideoPlayer.Play("Parch2Zoom.avi", &transparentColor, mAnalyzeVideoImage, [this](){
+
+            // Back to normal cursor.
+            gCursorManager.UseDefaultCursor();
+
+            // Turn off video image once this video finishes.
+            mAnalyzeVideoImage->SetEnabled(false);
+            
+            // Show an image popup with the rotated image.
+            mAnalyzePopup->ResetToDefaults();
+            mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("RotateParch2"));
+            mAnalyzePopup->SetImage(gAssetManager.LoadTexture("ZION_ROT.BMP", AssetScope::Scene));
+            mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
+            mAnalyzePopup->SetWindowPosition(Vector2(-112.0f, 0.0f));
+            mAnalyzePopup->SetWindowSize(Vector2(135.0f, 243.0f));
+            mAnalyzePopup->ShowOneButton();
+
+            // Add to score.
+            gGameProgress.ChangeScore("e_sidney_analysis_view_rotation_parch2");
+
+            // Play some dialogue.
+            gActionManager.ExecuteDialogueAction("02OEV2Z4L1");
+        });
     }
 }
 

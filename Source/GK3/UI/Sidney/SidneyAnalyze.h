@@ -99,7 +99,7 @@ private:
     void OnAnalyzeButtonPressed();
 
     void ShowPreAnalyzeUI();
-    void ShowAnalyzeMessage(const std::string& message, const Vector2& position = Vector2(), HorizontalAlignment textAlignment = HorizontalAlignment::Left);
+    void ShowAnalyzeMessage(const std::string& message, const Vector2& position = Vector2(), HorizontalAlignment textAlignment = HorizontalAlignment::Left, bool noButtons = false);
 
     // ANALYZE IMAGE
     Actor* mAnalyzeImageWindow = nullptr;
@@ -111,8 +111,10 @@ private:
     void AnalyzeImage_OnAnalyzeButtonPressed();
 
     void AnalyzeImage_OnExtractAnomoliesPressed();
+    void AnalyzeImage_OnAnalyzeTextPressed();
 
     void AnalyzeImage_OnViewGeometryButtonPressed();
+    void AnalyzeImage_OnRotateShapeButtonPressed();
     void AnalyzeImage_OnZoomClarifyButtonPressed();
 
     // ANALYZE TEXT

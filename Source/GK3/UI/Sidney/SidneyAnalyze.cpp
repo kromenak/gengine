@@ -79,7 +79,9 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item3"), nullptr);
 
         // "Analyze Text" choice.
-        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item4"), nullptr);
+        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item4"), [this](){
+            AnalyzeImage_OnAnalyzeTextPressed();
+        });
     }
 
     // "Graphic" dropdown.
@@ -91,7 +93,9 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
         });
 
         // "Rotate Shape" choice.
-        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item2"), nullptr);
+        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item2"), [this](){
+            AnalyzeImage_OnRotateShapeButtonPressed();
+        });
 
         // "Zoom & Clarify" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item3"), [this](){
@@ -349,13 +353,20 @@ void SidneyAnalyze::ShowPreAnalyzeUI()
     }
 }
 
-void SidneyAnalyze::ShowAnalyzeMessage(const std::string& message, const Vector2& position, HorizontalAlignment textAlignment)
+void SidneyAnalyze::ShowAnalyzeMessage(const std::string& message, const Vector2& position, HorizontalAlignment textAlignment, bool noButtons)
 {
     mAnalyzePopup->ResetToDefaults();
     mAnalyzePopup->SetWindowPosition(position);
 
     mAnalyzePopup->SetTextAlignment(textAlignment);
     mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText(message));
-    
-    mAnalyzePopup->ShowOneButton();
+
+    if(noButtons)
+    {
+        mAnalyzePopup->ShowNoButton();
+    }
+    else
+    {
+        mAnalyzePopup->ShowOneButton();
+    }
 }

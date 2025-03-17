@@ -289,6 +289,18 @@ void SidneyPopup::Hide()
     mTextInput->Unfocus();
 }
 
+void SidneyPopup::ShowNoButton()
+{
+    SetActive(true);
+
+    mOKButton->SetActive(false);
+    mYesButton->SetActive(false);
+    mNoButton->SetActive(false);
+    mLeftButton->SetActive(false);
+    mCenterButton->SetActive(false);
+    mRightButton->SetActive(false);
+}
+
 void SidneyPopup::ShowOneButton()
 {
     SetActive(true);
