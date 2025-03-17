@@ -64,65 +64,87 @@ void VideoPlayer::Update()
         
         // Apply video texture.
         Texture* videoTexture = mVideo->GetVideoTexture();
-        mVideoImage->SetTexture(videoTexture);
-        
-        // Set position of video image and background.
-        mVideoLetterbox->GetRectTransform()->SetAnchoredPosition(mVideoPosition);
-        mVideoImage->GetRectTransform()->SetAnchoredPosition(mVideoPosition);
-        
-        // Determine video size.
-        Vector2 videoSize;
-        switch(mVideoSizeMode)
+        if(mHasTransparentColor)
         {
-        case SizeMode::Native:
-            if(videoTexture != nullptr)
-            {
-                videoSize = Vector2(videoTexture->GetWidth(), videoTexture->GetHeight());
-            }
-            break;
-            
-        case SizeMode::Fullscreen:
-            videoSize = Window::GetSize();
-            break;
-            
-        case SizeMode::Custom:
-            videoSize = mCustomVideoSize;
-            break;
+            videoTexture->SetTransparentColor(mTransparentColor);
         }
-        
-        // For fullscreen videos, don't allow upscaling more than 2x original size.
-        // This is a restriction used by the original engine.
-        // I think it's meant to stop low-res videos from looking too pixelated on larger displays.
-        if(mVideoSizeMode == SizeMode::Fullscreen && videoTexture != nullptr)
+        if(mOverrideVideoImage != nullptr)
         {
-            unsigned int maxVideoWidth = videoTexture->GetWidth() * 2;
-            unsigned int maxVideoHeight = videoTexture->GetHeight() * 2;
-            
-            if(videoSize.x > maxVideoWidth)
-            {
-                videoSize.x = maxVideoWidth;
-            }
-            if(videoSize.y > maxVideoHeight)
-            {
-                videoSize.y = maxVideoHeight;
-            }
-        }
-        
-        // Always set the letterbox to the "expected" size for video rendering.
-        // If letterboxing occurs, the video itself will be a different size than the letterbox image behind it.
-        mVideoLetterbox->GetRectTransform()->SetSizeDelta(videoSize);
-        
-        // If letterboxing is enabled, recalculate video size so to not stretch the video.
-        // If not letterboxing, and video size doesn't match the video's aspect ratio, stretching or warping may occur.
-        if(mLetterbox && videoTexture != nullptr)
-        {
-            // Letterbox: fit the area, but preserve aspect ratio.
-            mVideoImage->ResizeToFitPreserveAspect(videoSize);
+            mOverrideVideoImage->SetTexture(videoTexture);
         }
         else
         {
-            // No letterbox, just use video size as-is.
-            mVideoImage->GetRectTransform()->SetSizeDelta(videoSize);
+            mVideoImage->SetTexture(videoTexture);
+        }
+
+        // A lot of this logic only applies to the "theater viewing experience".
+        // When using an override image (probably on an in-game UI texture), a lot of this doesn't apply.
+        if(mOverrideVideoImage == nullptr)
+        {
+            // Set position of video image and background.
+            mVideoLetterbox->GetRectTransform()->SetAnchoredPosition(mVideoPosition);
+            mVideoImage->GetRectTransform()->SetAnchoredPosition(mVideoPosition);
+
+            // Determine video size.
+            Vector2 videoSize;
+            switch(mVideoSizeMode)
+            {
+            case SizeMode::Native:
+                if(videoTexture != nullptr)
+                {
+                    videoSize = Vector2(videoTexture->GetWidth(), videoTexture->GetHeight());
+                }
+                break;
+
+            case SizeMode::Fullscreen:
+                videoSize = Window::GetSize();
+                break;
+
+            case SizeMode::Custom:
+                videoSize = mCustomVideoSize;
+                break;
+            }
+
+            // For fullscreen videos, don't allow upscaling more than 2x original size.
+            // This is a restriction used by the original engine.
+            // I think it's meant to stop low-res videos from looking too pixelated on larger displays.
+            if(mVideoSizeMode == SizeMode::Fullscreen && videoTexture != nullptr)
+            {
+                unsigned int maxVideoWidth = videoTexture->GetWidth() * 2;
+                unsigned int maxVideoHeight = videoTexture->GetHeight() * 2;
+
+                if(videoSize.x > maxVideoWidth)
+                {
+                    videoSize.x = maxVideoWidth;
+                }
+                if(videoSize.y > maxVideoHeight)
+                {
+                    videoSize.y = maxVideoHeight;
+                }
+            }
+
+            // Always set the letterbox to the "expected" size for video rendering.
+            // If letterboxing occurs, the video itself will be a different size than the letterbox image behind it.
+            mVideoLetterbox->GetRectTransform()->SetSizeDelta(videoSize);
+
+            // If letterboxing is enabled, recalculate video size so to not stretch the video.
+            // If not letterboxing, and video size doesn't match the video's aspect ratio, stretching or warping may occur.
+            if(mLetterbox && videoTexture != nullptr)
+            {
+                // Letterbox: fit the area, but preserve aspect ratio.
+                mVideoImage->ResizeToFitPreserveAspect(videoSize);
+            }
+            else
+            {
+                // No letterbox, just use video size as-is.
+                mVideoImage->GetRectTransform()->SetSizeDelta(videoSize);
+            }
+
+            // Pressing escape skips the video.
+            if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+            {
+                Stop();
+            }
         }
 
         // Check for video end - call Stop if so to clean up video and call callback.
@@ -130,17 +152,11 @@ void VideoPlayer::Update()
         {
             Stop();
         }
-        
-        // Pressing escape skips the video.
-        if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
-        {
-            Stop();
-        }
     }
     
     // Only show video image when a video is playing.
     // Update UI after updating video playback in case video stops or ends prematurely.
-    mVideoCanvasActor->SetActive(mVideo != nullptr);
+    mVideoCanvasActor->SetActive(mOverrideVideoImage == nullptr && mVideo != nullptr);
 }
 
 void VideoPlayer::Play(const std::string& name)
@@ -165,6 +181,9 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     // If fullscreen, use window size as video size.
     // If not fullscreen, use size from video file.
     mVideoSizeMode = fullscreen ? SizeMode::Fullscreen : SizeMode::Native;
+
+    // This video will use the built-in video image, so null out any override.
+    mOverrideVideoImage = nullptr;
     
     // If fullscreen, background is 100% opaque.
     // If not fullscreen, background is alpha'd a bit.
@@ -207,12 +226,51 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     //TODO: Need to check for a YAK file of the same name and use that to display subtitles during movie playback.
 }
 
+void VideoPlayer::Play(const std::string& name, Color32* transparentColor, UIImage* image, const std::function<void()>& callback)
+{
+    // Stop any video that is already playing first.
+    Stop();
+
+    // Store whether we have a transparent color.
+    mHasTransparentColor = false;
+    if(transparentColor != nullptr)
+    {
+        mHasTransparentColor = true;
+        mTransparentColor = *transparentColor;
+    }
+
+    // Save override video image.
+    mOverrideVideoImage = image;
+
+    // Save stop callback.
+    mStopCallback = callback;
+
+    // The name passed is just a filename (e.g. "intro.bik"). Need to convert that into a full path.
+    // Names can also be passed with or without extension, so we have to try to resolve any ambiguous name.
+    std::string videoPath = gAssetManager.GetAssetPath(name, { "bik", "avi" });
+
+    // Create new video.
+    mVideo = new VideoState(videoPath.c_str());
+
+    // On create, video begins playing immediately, assuming no error occurs.
+    // If stopped, something happened, and video will not play.
+    if(mVideo->IsStopped())
+    {
+        gReportManager.Log("Error", "No movie specified for the movie layer.");
+        Stop();
+        return;
+    }
+}
+
 void VideoPlayer::Stop()
 {
     // Pop video layer.
     if(mVideo != nullptr)
     {
-        gLayerManager.PopLayer();
+        if(gLayerManager.IsTopLayer(&mLayer))
+        {
+            gLayerManager.PopLayer();
+        }
     
         // Delete video to cleanup resources.
         delete mVideo;

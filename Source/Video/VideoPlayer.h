@@ -7,6 +7,7 @@
 #include <functional>
 #include <string>
 
+#include "Color32.h"
 #include "LayerManager.h"
 #include "Vector2.h"
 
@@ -25,6 +26,7 @@ public:
     
     void Play(const std::string& name);
     void Play(const std::string& name, bool fullscreen, bool autoclose, std::function<void()> stopCallback);
+    void Play(const std::string& name, Color32* transparentColor, UIImage* image, const std::function<void()>& callback);
     void Stop();
     
 private:
@@ -46,6 +48,14 @@ private:
     
     // Image that displays the actual video texture.
     UIImage* mVideoImage = nullptr;
+
+    // An outside caller can specify a custom image to play the video on.
+    // If set, that's saved here.
+    UIImage* mOverrideVideoImage = nullptr;
+
+    // If set, this color in the video file will be considered transparent.
+    bool mHasTransparentColor = false;
+    Color32 mTransparentColor;
     
     // Position to show the video on-screen. Zero is center of screen.
     Vector2 mVideoPosition;
