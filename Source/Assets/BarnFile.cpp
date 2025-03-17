@@ -250,9 +250,10 @@ uint8_t* BarnFile::CreateAssetBuffer(const std::string& assetName, uint32_t& out
     mReader.Skip(4);
     uint32_t readCount = mReader.Read(compressedBuffer, asset->size);
     mReaderMutex.unlock();
-
+    
     // Make sure we read what we were expecting.
-    if(readCount != asset->size)
+    // The "-1" case can happen when reading the last file in the barn, but asset is still valid.
+    if(readCount != asset->size && readCount != asset->size - 1)
     {
         std::cout << "Didn't read desired number of bytes." << std::endl;
         delete[] compressedBuffer;
