@@ -58,7 +58,7 @@ void SidneyFiles::Init(Sidney* parent)
     mAllFiles.emplace_back(15, SidneyFileType::Fingerprint, "fileUnknownPrint5",    "UNKNOWN_PRINT_5");
     mAllFiles.emplace_back(16, SidneyFileType::Fingerprint, "fileUnknownPrint6",    "UNKNOWN_PRINT_6");
     mAllFiles.emplace_back(17, SidneyFileType::Fingerprint, "fileLSR1Print",        "UNKNOWN_PRINT_7");      // Unused?
-    mAllFiles.emplace_back(18, SidneyFileType::Fingerprint, "fileEstellesLSRPrint", "UNKNOWN_PRINT_8");
+    mAllFiles.emplace_back(18, SidneyFileType::Fingerprint, "fileEstellesLSRPrint", "ESTELLES_FINGERPRINT_LSR", "e_sidney_add_fingerprint_lsr_unknown");
 
     // Images (19-26)
     mAllFiles.emplace_back(19, SidneyFileType::Image, "fileMap",              "MAP",                      "e_sidney_add_map");
