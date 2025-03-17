@@ -33,6 +33,7 @@ public:
 
     void ShowOneButton();
     void ShowTwoButton(const std::function<void()>& yesCallback);
+    void ShowThreeButton(const std::function<void(int)>& callback);
     void ShowTextInput(const std::function<void(const std::string&)>& submitCallback);
 
     void Hide();
@@ -56,6 +57,11 @@ private:
     // For the two button variant, yes and no buttons to press.
     SidneyButton* mYesButton = nullptr;
     SidneyButton* mNoButton = nullptr;
+
+    // For the three button variant...
+    SidneyButton* mLeftButton = nullptr;
+    SidneyButton* mCenterButton = nullptr;
+    SidneyButton* mRightButton = nullptr;
 
     // For the text input version of the popup, a text input field.
     UITextInput* mTextInput = nullptr;

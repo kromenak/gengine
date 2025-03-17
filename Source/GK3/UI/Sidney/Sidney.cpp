@@ -173,7 +173,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
     // Create subscreens.
     mSearch.Init(this);
     mEmail.Init(this, desktopBackground);
-    mAnalyze.Init(this, &mFiles);
+    mAnalyze.Init(this, &mFiles, &mTranslate);
     mTranslate.Init(this, &mFiles);
     mAddData.Init(this, &mFiles);
     mMakeId.Init(this);

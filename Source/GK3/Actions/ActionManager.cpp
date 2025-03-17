@@ -258,6 +258,11 @@ void ActionManager::ExecuteCustomAction(const std::string& noun, const std::stri
     ExecuteAction(&mCustomAction, finishCallback);
 }
 
+void ActionManager::ExecuteDialogueAction(const std::string& licensePlate, int lineCount)
+{
+    ExecuteSheepAction(StringUtil::Format("wait StartDialogue(\"%s\", %d)", licensePlate.c_str(), lineCount));
+}
+
 void ActionManager::QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback)
 {
     // For this noun/verb pair, find the best Action to use in the current scenario.

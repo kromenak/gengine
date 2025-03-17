@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
+#include "GameProgress.h"
 #include "RectTransform.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
@@ -33,9 +34,6 @@ void SidneyAnalyze::AnalyzeImage_Init()
 
 void SidneyAnalyze::AnalyzeImage_EnterState()
 {
-    // Show the image view.
-    mAnalyzeImageWindow->SetActive(true);
-
     // "Text" and "Graphic" dropdowns are available when analyzing an image. Map is not.
     mMenuBar.SetDropdownEnabled(kTextDropdownIdx, true);
     mMenuBar.SetDropdownEnabled(kGraphicDropdownIdx, true);
@@ -44,6 +42,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     // Show correct image and menu items based on current file.
     if(mAnalyzeFileId == SidneyFileIds::kParchment1) // Parchment 1
     {
+        mAnalyzeImageWindow->SetActive(true);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT1_BASE.BMP"), true);
 
@@ -60,6 +59,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kParchment2) // Parchment 2
     {
+        mAnalyzeImageWindow->SetActive(true);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("PARCHMENT2_BASE.BMP"), true);
 
@@ -76,6 +76,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
     {
+        mAnalyzeImageWindow->SetActive(true);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -107.0f); // this one is vertically centered for some reason
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("POUSSIN.BMP"), true);
 
@@ -89,6 +90,7 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kTeniersPostcard2)
     {
+        mAnalyzeImageWindow->SetActive(true);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
         mAnalyzeImage->SetTexture(gAssetManager.LoadTexture("TENIERS.BMP"), true);
 
@@ -99,6 +101,19 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_ZoomClarifyIdx, true);
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_UseShapeIdx, false);
         mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_EraseShapeIdx, false);
+    }
+    else if(mAnalyzeFileId == SidneyFileIds::kSumNote)
+    {
+        // Even though you can analyze this file, the UI continues to show the pre-analyze UI.
+        ShowPreAnalyzeUI();
+
+        // Update menu bars to only allow the "Translate" option.
+        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_ExtractAnomaliesIdx, false);
+        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_TranslateIdx, true);
+        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_AnagramParserIdx, false);
+        mMenuBar.SetDropdownChoiceEnabled(kTextDropdownIdx, kTextDropdown_AnalyzeTextIdx, false);
+
+        mMenuBar.SetDropdownEnabled(kGraphicDropdownIdx, false);
     }
 }
 
@@ -135,6 +150,59 @@ void SidneyAnalyze::AnalyzeImage_OnAnalyzeButtonPressed()
         {
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02o3h2zq32\", 1)");
         }
+    }
+    else if(mAnalyzeFileId == SidneyFileIds::kSerresHermeticSymbols)
+    {
+        ShowAnalyzeMessage("AnalyzeHermNote", Vector2(), HorizontalAlignment::Center);
+
+        // You get some points for this one.
+        gGameProgress.ChangeScore("e_sidney_analysis_symbols_from_serres");
+
+        // The message says that the symbols don't exist in SIDNEY, and we need to search the internet.
+        // We'll get an email later with info about these symbols.
+        // But for now, there's no further analysis to be done.
+        SetState(SidneyAnalyze::State::PreAnalyze);
+    }
+    else if(mAnalyzeFileId == SidneyFileIds::kSumNote)
+    {
+        // Shows a message that the text can be translated. But that's it.
+        ShowAnalyzeMessage("AnalyzeSUM", Vector2(), HorizontalAlignment::Center);
+    }
+    else
+    {
+        // Unknown file - do nothing!
+        SetState(SidneyAnalyze::State::PreAnalyze);
+    }
+}
+
+void SidneyAnalyze::AnalyzeImage_OnExtractAnomoliesPressed()
+{
+    if(mAnalyzeFileId == SidneyFileIds::kParchment1)
+    {
+        mSecondaryAnalyzePopup->ResetToDefaults();
+        mSecondaryAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("ExtractParch1"));
+        mSecondaryAnalyzePopup->ShowThreeButton([this](int buttonIndex){
+            if(buttonIndex == 0)
+            {
+                mSecondaryAnalyzePopup->Hide();
+                ShowAnalyzeMessage("Parch1French");
+                gGameProgress.ChangeScore("e_sidney_analysis_anomalies_parch1");
+
+                if(!gGameProgress.GetFlag("PlayedParch1FrenchMsg"))
+                {
+                    gActionManager.ExecuteDialogueAction("02OCR2ZMX3");
+                    gGameProgress.SetFlag("PlayedParch1FrenchMsg");
+                }
+            }
+            else if(buttonIndex == 1)
+            {
+                ShowAnalyzeMessage("ParchEnglish", Vector2(), HorizontalAlignment::Center);
+            }
+            else if(buttonIndex == 2)
+            {
+                ShowAnalyzeMessage("ParchLatin", Vector2(), HorizontalAlignment::Center);
+            }
+        });
     }
 }
 

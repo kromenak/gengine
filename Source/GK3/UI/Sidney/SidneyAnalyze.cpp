@@ -11,10 +11,11 @@
 #include "UINineSlice.h"
 #include "UIImage.h"
 
-void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
+void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTranslate* sidneyTranslate)
 {
     mSidney = sidney;
     mSidneyFiles = sidneyFiles;
+    mSidneyTranslate = sidneyTranslate;
 
     // Add background. This will also be the root for this screen.
     mRoot = SidneyUtil::CreateBackground(mSidney);
@@ -64,10 +65,15 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     mMenuBar.AddDropdown(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Name"));
     {
         // "Extract Anomalies" choice.
-        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item1"), nullptr);
+        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item1"), [this](){
+            AnalyzeImage_OnExtractAnomoliesPressed();
+        });
 
         // "Translate" choice.
-        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item2"), nullptr);
+        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item2"), [this](){
+            Hide();
+            mSidneyTranslate->Show(mAnalyzeFileId);
+        });
 
         // "Anagram Parser" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item3"), nullptr);
@@ -168,6 +174,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
 
     // Analyze message box.
     mAnalyzePopup = new SidneyPopup(mRoot);
+    mSecondaryAnalyzePopup = new SidneyPopup(mRoot);
     
     // Start in empty state.
     SetState(State::Empty);
@@ -235,15 +242,7 @@ void SidneyAnalyze::SetState(State state)
 
     case State::PreAnalyze:
     {
-        // Show the pre-analyze UI with appropriate text/image for currently selected file.
-        mPreAnalyzeWindow->SetActive(true);
-
-        SidneyFile* file = mSidneyFiles->GetFile(mAnalyzeFileId);
-        if(file != nullptr)
-        {
-            mPreAnalyzeTitleLabel->SetText(file->GetDisplayName());
-            mPreAnalyzeItemImage->SetTexture(file->GetIcon());
-        }
+        ShowPreAnalyzeUI();
         break;
     }
 
@@ -334,6 +333,19 @@ void SidneyAnalyze::OnAnalyzeButtonPressed()
     if(file != nullptr)
     {
         file->hasBeenAnalyzed = true;
+    }
+}
+
+void SidneyAnalyze::ShowPreAnalyzeUI()
+{
+    // Show the pre-analyze UI with appropriate text/image for currently selected file.
+    mPreAnalyzeWindow->SetActive(true);
+
+    SidneyFile* file = mSidneyFiles->GetFile(mAnalyzeFileId);
+    if(file != nullptr)
+    {
+        mPreAnalyzeTitleLabel->SetText(file->GetDisplayName());
+        mPreAnalyzeItemImage->SetTexture(file->GetIcon());
     }
 }
 

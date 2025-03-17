@@ -139,6 +139,40 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
         });
     }
 
+    // Add buttons for three button layout.
+    {
+        {
+            mLeftButton = new SidneyButton(mWindow);
+            mLeftButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+            mLeftButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("French"));
+            mLeftButton->SetWidth(60.0f);
+            mLeftButton->SetHeight(13.0f);
+
+            mLeftButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+            mLeftButton->GetRectTransform()->SetAnchoredPosition(-70.0f, 8.0f);
+        }
+        {
+            mCenterButton = new SidneyButton(mWindow);
+            mCenterButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+            mCenterButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("English"));
+            mCenterButton->SetWidth(60.0f);
+            mCenterButton->SetHeight(13.0f);
+
+            mCenterButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+            mCenterButton->GetRectTransform()->SetAnchoredPosition(0.0f, 8.0f);
+        }
+        {
+            mRightButton = new SidneyButton(mWindow);
+            mRightButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
+            mRightButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Latin"));
+            mRightButton->SetWidth(60.0f);
+            mRightButton->SetHeight(13.0f);
+
+            mRightButton->GetRectTransform()->SetAnchor(AnchorPreset::Bottom);
+            mRightButton->GetRectTransform()->SetAnchoredPosition(70.0f, 8.0f);
+        }
+    }
+
     // Hide by default.
     Hide();
 }
@@ -218,6 +252,9 @@ void SidneyPopup::ShowTextInput(const std::function<void(const std::string&)>& s
     mOKButton->SetActive(false);
     mYesButton->SetActive(false);
     mNoButton->SetActive(false);
+    mLeftButton->SetActive(false);
+    mCenterButton->SetActive(false);
+    mRightButton->SetActive(false);
 
     // Save callback for later use.
     mTextInputSubmitCallback = submitCallback;
@@ -260,6 +297,9 @@ void SidneyPopup::ShowOneButton()
     mOKButton->SetActive(true);
     mYesButton->SetActive(false);
     mNoButton->SetActive(false);
+    mLeftButton->SetActive(false);
+    mCenterButton->SetActive(false);
+    mRightButton->SetActive(false);
 }
 
 void SidneyPopup::ShowTwoButton(const std::function<void()>& yesCallback)
@@ -270,11 +310,39 @@ void SidneyPopup::ShowTwoButton(const std::function<void()>& yesCallback)
     mOKButton->SetActive(false);
     mYesButton->SetActive(true);
     mNoButton->SetActive(true);
+    mLeftButton->SetActive(false);
+    mCenterButton->SetActive(false);
+    mRightButton->SetActive(false);
 
     // Set callback when yes button is pressed.
     mYesButton->SetPressCallback([this, yesCallback](){
         Hide();
         yesCallback();
+    });
+}
+
+void SidneyPopup::ShowThreeButton(const std::function<void(int)>& callback)
+{
+    SetActive(true);
+
+    // Show yes and no buttons.
+    mOKButton->SetActive(false);
+    mYesButton->SetActive(false);
+    mNoButton->SetActive(false);
+    mLeftButton->SetActive(true);
+    mCenterButton->SetActive(true);
+    mRightButton->SetActive(true);
+
+    // Set button press callbacks.
+    // For the one use of this in the game thus far, pressing these buttons *should not* hide the popup automatically.
+    mLeftButton->SetPressCallback([this, callback](){
+        callback(0);
+    });
+    mCenterButton->SetPressCallback([this, callback](){
+        callback(1);
+    });
+    mRightButton->SetPressCallback([this, callback](){
+        callback(2);
     });
 }
 

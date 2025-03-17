@@ -240,7 +240,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
 
         // SUM note.
         mTranslations.emplace_back();
-        mTranslations.back().fileId = SidneyFileIds::kSumText;
+        mTranslations.back().fileId = SidneyFileIds::kSumNote;
         mTranslations.back().language = Language::Latin;
         mTranslations.back().locPrefix = "SUMScript";
         mTranslations.back().progressFlag = "TranslatedSUM";
@@ -259,9 +259,19 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
     Hide();
 }
 
-void SidneyTranslate::Show()
+void SidneyTranslate::Show(int openFileId)
 {
     mRoot->SetActive(true);
+
+    // If a file ID was passed in, open it immediately.
+    if(openFileId >= 0)
+    {
+        if(openFileId != mTranslateFileId)
+        {
+            mPerformedTranslation = false;
+        }
+        mTranslateFileId = openFileId;
+    }
 
     // We need to make sure the correct data shows, even between runs of the game.
     // So, open the last opened file for starters...

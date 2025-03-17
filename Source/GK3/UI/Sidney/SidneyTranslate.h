@@ -18,7 +18,7 @@ class SidneyTranslate
 public:
     void Init(Actor* parent, SidneyFiles* sidneyFiles);
 
-    void Show();
+    void Show(int openFileId = -1);
     void Hide();
 
     void OnUpdate(float deltaTime);

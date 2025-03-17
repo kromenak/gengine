@@ -15,6 +15,7 @@ class SidneyButton;
 class SidneyFiles;
 struct SidneyFile;
 class SidneyPopup;
+class SidneyTranslate;
 class UIButton;
 class UICircles;
 class UIGrids;
@@ -27,7 +28,7 @@ class UIRectangles;
 class SidneyAnalyze
 {
 public:
-    void Init(Sidney* sidney, SidneyFiles* sidneyFiles);
+    void Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTranslate* sidneyTranslate);
 
     void Show();
     void Hide();
@@ -40,6 +41,7 @@ private:
     // References to Sidney modules.
     Sidney* mSidney = nullptr;
     SidneyFiles* mSidneyFiles = nullptr;
+    SidneyTranslate* mSidneyTranslate = nullptr;
 
     // Root of this subscreen.
     Actor* mRoot = nullptr;
@@ -87,12 +89,16 @@ private:
 
     // Message UI - shows a message in response to trying to analyze stuff.
     SidneyPopup* mAnalyzePopup = nullptr;
+
+    // There are times when we need to show two popups at once. Sigh.
+    SidneyPopup* mSecondaryAnalyzePopup = nullptr;
     
     void SetState(State state);
     void SetStateFromFile();
 
     void OnAnalyzeButtonPressed();
 
+    void ShowPreAnalyzeUI();
     void ShowAnalyzeMessage(const std::string& message, const Vector2& position = Vector2(), HorizontalAlignment textAlignment = HorizontalAlignment::Left);
 
     // ANALYZE IMAGE
@@ -102,6 +108,8 @@ private:
     void AnalyzeImage_Init();
     void AnalyzeImage_EnterState();
     void AnalyzeImage_OnAnalyzeButtonPressed();
+
+    void AnalyzeImage_OnExtractAnomoliesPressed();
 
     void AnalyzeImage_OnViewGeometryButtonPressed();
     void AnalyzeImage_OnZoomClarifyButtonPressed();

@@ -53,6 +53,7 @@ public:
     void ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteCustomAction(const std::string& noun, const std::string& verb, const std::string& caseLabel,
                              const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
+    void ExecuteDialogueAction(const std::string& licensePlate, int lineCount = 1);
 
     void QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
 
