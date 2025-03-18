@@ -465,6 +465,18 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // Same thing for the angles in the Church.
+    if(StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGELS1") || StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGELS2") ||
+       StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGELS3") || StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGLES4"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("FOUR_ANGELS", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
     // The "Chat" action is only valid if the "Talk" option is not present. Remove "Chat" if "Talk" is present.
     // Not sure where else to check that - this seems like an OK spot.
     auto talkIt = verbToAction.find("TALK");
