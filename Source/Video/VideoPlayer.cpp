@@ -148,7 +148,7 @@ void VideoPlayer::Update()
         }
 
         // Check for video end - call Stop if so to clean up video and call callback.
-        if(mVideo->IsStopped())
+        if(mVideo != nullptr && mVideo->IsStopped())
         {
             Stop();
         }
