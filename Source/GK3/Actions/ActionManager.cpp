@@ -467,7 +467,7 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 
     // Same thing for the angles in the Church.
     if(StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGELS1") || StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGELS2") ||
-       StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGELS3") || StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGLES4"))
+       StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGELS3") || StringUtil::EqualsIgnoreCase(noun, "FOUR_ANGELS4"))
     {
         verbToActionSpecific.clear();
         AddActionsToMap("FOUR_ANGELS", verbType, verbToActionSpecific);
