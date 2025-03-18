@@ -176,7 +176,7 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
             if(Intersect::TestRayTriangle(ray, p0, p1, p2, outHitInfo.t, u, v))
             {
                 // The ray definitely hit this polygon. But if this is a hit test, we need to do more work!
-                if(mSurfaces[polygon->surfaceIndex].hitTest)
+                if(mSurfaces[polygon->surfaceIndex].hitTest && mSurfaces[polygon->surfaceIndex].texture->GetRenderType() != Texture::RenderType::Opaque)
                 {
                     // When we did the Ray/Triangle intersection test, we also calculated the barycentric coordinates as a byproduct of that test.
                     // We can use those here to calculate the UV coordinates associated with the ray hit point.
