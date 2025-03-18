@@ -54,4 +54,5 @@ public:
     static const Localizer& GetSuspectsLocalizer();
 
     static int GetCurrentLSRStep();
+    static void UpdateLSRState();
 };

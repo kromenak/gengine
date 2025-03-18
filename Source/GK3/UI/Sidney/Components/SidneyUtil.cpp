@@ -255,3 +255,9 @@ int SidneyUtil::GetCurrentLSRStep()
     }
     return step;
 }
+
+void SidneyUtil::UpdateLSRState()
+{
+    // Some game logic uses this variable to trigger time advances. So, keep it up to date!
+    gGameProgress.SetGameVariable("LSRState", GetCurrentLSRStep());
+}

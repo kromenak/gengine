@@ -218,6 +218,9 @@ void SidneyAnalyze::OnPersist(PersistState& ps)
     ps.Xfer<State, int>(PERSIST_VAR(mState));
     ps.Xfer(PERSIST_VAR(mMap));
     ps.Xfer(PERSIST_VAR(mAnalyzeFileId));
+
+    // HACK: Ensure LSR state var is up-to-date, for save games that were made before we started tracking this.
+    SidneyUtil::UpdateLSRState();
 }
 
 void SidneyAnalyze::SetState(State state)

@@ -1101,6 +1101,9 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
 
                     // We completed Pisces.
                     gGameProgress.SetFlag("Pisces");
+                    gGameProgress.SetFlag("LockedCircle");
+                    gGameProgress.ChangeScore("e_sidney_map_circle");
+                    SidneyUtil::UpdateLSRState();
                 }
             }
         }
@@ -1142,6 +1145,9 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
 
                 // We completed Aries.
                 gGameProgress.SetFlag("Aries");
+                gGameProgress.SetFlag("SizedSquare");
+                gGameProgress.ChangeScore("e_sidney_map_aries");
+                SidneyUtil::UpdateLSRState();
             }
             //else
             //{
@@ -1194,6 +1200,9 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
 
                 // Taurus is done.
                 gGameProgress.SetFlag("Taurus");
+                gGameProgress.SetFlag("LockedSquare");
+                gGameProgress.ChangeScore("e_sidney_map_taurus");
+                SidneyUtil::UpdateLSRState();
             }
         }
     }
@@ -1738,6 +1747,9 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
 
             // Done with Aquarius!
             gGameProgress.SetFlag("Aquarius");
+            gGameProgress.SetFlag("PlacedSunriseLine");
+            gGameProgress.ChangeScore("e_sidney_map_aquarius");
+            SidneyUtil::UpdateLSRState();
         }
     }
     else if(aquariusDone && !piscesDone) // Working on Pisces
@@ -1790,6 +1802,10 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
                 mMap.zoomedIn.lines->AddLine(kTaurusSerresPoint, kTaurusMeridianPoint);
                 mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kTaurusSerresPoint),
                                               mMap.ToZoomedOutPoint(kTaurusMeridianPoint));
+
+                // Update game state.
+                gGameProgress.SetFlag("PlacedMeridianLine");
+                gGameProgress.ChangeScore("e_sidney_map_serres");
 
                 // NOTE: doing this doesn't complete Taurus - the player must rotate the square to align with these points.
             }
