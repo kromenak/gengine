@@ -163,11 +163,14 @@ void Scene::Load()
         {
             BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
             if(actor == nullptr) { break; }
+
             mBSPActors.push_back(actor);
             mHitTestActors.push_back(actor);
 
             actor->SetNoun(modelDef->noun);
             actor->SetVerb(modelDef->verb);
+
+            mSceneData->GetBSP()->SetHitTest(modelDef->name, true);
 
             // Hit tests, if hidden, are completely deactivated.
             // However, if not hidden, they are still not visible, but they DO receive ray casts.
@@ -647,7 +650,7 @@ void Scene::SkipCurrentAction()
 
 BSPActor* Scene::GetHitTestObjectByModelName(const std::string& modelName) const
 {
-    for(auto& object : mBSPActors)
+    for(auto& object : mHitTestActors)
     {
         if(StringUtil::EqualsIgnoreCase(object->GetName(), modelName))
         {

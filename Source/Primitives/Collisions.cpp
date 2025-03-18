@@ -185,32 +185,39 @@ bool Intersect::TestRayTriangle(const Ray& r, const Triangle& t, float& outRayT)
 
 bool Intersect::TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& p1, const Vector3& p2, float& outRayT)
 {
-	// Calculate two vectors from p0 to p1/p2.
-	Vector3 e1 = p1 - p0;
-	Vector3 e2 = p2 - p0;
-	
-	Vector3 p = Vector3::Cross(r.direction, e2);
-	float a = Vector3::Dot(e1, p);
-	
-	// If zero, means ray is parallel to triangle plane, which is not an intersection.
-	if(Math::IsZero(a)) { return false; }
-	
-	float f = 1.0f / a;
-	
-	Vector3 s = r.origin - p0;
-	float u = f * Vector3::Dot(s, p);
-	if(u < 0.0f || u > 1.0f) { return false; }
-	
-	Vector3 q = Vector3::Cross(s, e1);
-	float v = f * Vector3::Dot(r.direction, q);
-	if(v < 0.0f || u + v > 1.0f) { return false; }
-	
-	float t = f * Vector3::Dot(e2, q);
-	if(t < 0) { return false; }
-	
-	// We DID intersect the triangle. Return the point of intersection.
-	outRayT = t;
-	return true;
+    float u = 0.0f;
+    float v = 0.0f;
+    return TestRayTriangle(r, p0, p1, p2, outRayT, u, v);
+}
+
+bool Intersect::TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& p1, const Vector3& p2, float& outRayT, float& outU, float& outV)
+{
+    // Calculate two vectors from p0 to p1/p2.
+    Vector3 e1 = p1 - p0;
+    Vector3 e2 = p2 - p0;
+
+    Vector3 p = Vector3::Cross(r.direction, e2);
+    float a = Vector3::Dot(e1, p);
+
+    // If zero, means ray is parallel to triangle plane, which is not an intersection.
+    if(Math::IsZero(a)) { return false; }
+
+    float f = 1.0f / a;
+
+    Vector3 s = r.origin - p0;
+    outU = f * Vector3::Dot(s, p);
+    if(outU < 0.0f || outU > 1.0f) { return false; }
+
+    Vector3 q = Vector3::Cross(s, e1);
+    outV = f * Vector3::Dot(r.direction, q);
+    if(outV < 0.0f || outU + outV > 1.0f) { return false; }
+
+    float t = f * Vector3::Dot(e2, q);
+    if(t < 0) { return false; }
+    
+    // We DID intersect the triangle. Return the point of intersection.
+    outRayT = t;
+    return true;
 }
 
 bool Intersect::LineLine2D(const Vector2& line0P0, const Vector2& line0P1, const Vector2& line1P0, const Vector2& line1P1, float& outLine0T)

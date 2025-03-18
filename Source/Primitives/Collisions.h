@@ -56,8 +56,10 @@ namespace Intersect
 
     // Ray
     bool TestRayAABB(const Ray& r, const AABB& aabb, float& outRayT);
+    bool TestRayTriangle(const Ray& r, const Triangle& t, float& outRayT);
     bool TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& p1, const Vector3& p2, float& outRayT);
-    bool TestRayTriangle(const Ray& r, const Triangle& t, float& hitInfo);
+    bool TestRayTriangle(const Ray& r, const Vector3& p0, const Vector3& p1, const Vector3& p2, float& outRayT, float& outU, float& outV);
+    
     //bool TestRaySphere(const Ray& r, const Sphere& s);
     //bool TestRayPlane(const Ray& r, const Plane& p);
 

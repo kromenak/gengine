@@ -171,9 +171,42 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
         if(Vector3::Dot(ray.direction, Triangle::GetNormal(p0, p1, p2)) < 0.0f)
         {
             // See if the ray intersects the triangle.
-            if(Intersect::TestRayTriangle(ray, p0, p1, p2, outHitInfo.t))
+            float u = 0.0f;
+            float v = 0.0f;
+            if(Intersect::TestRayTriangle(ray, p0, p1, p2, outHitInfo.t, u, v))
             {
-                return true;
+                // The ray definitely hit this polygon. But if this is a hit test, we need to do more work!
+                if(mSurfaces[polygon->surfaceIndex].hitTest)
+                {
+                    // When we did the Ray/Triangle intersection test, we also calculated the barycentric coordinates as a byproduct of that test.
+                    // We can use those here to calculate the UV coordinates associated with the ray hit point.
+                    Vector2 uv0 = mUVs[mVertexIndices[polygon->vertexIndexOffset]];
+                    Vector2 uv1 = mUVs[mVertexIndices[polygon->vertexIndexOffset + i]];
+                    Vector2 uv2 = mUVs[mVertexIndices[polygon->vertexIndexOffset + i + 1]];
+
+                    //TODO: This math doesn't totally make sense to me, and I think it needs more scrutinizing.
+                    //TODO: Why do u/v/w not correlate to uv0/uv1/uv2 here? Why do we need to negate and flop the UVs?
+                    Vector2 pointUV = uv1 * u + uv2 * v + uv0 * (1.0f - u - v);
+                    pointUV.y *= -1.0f;
+                    pointUV.y = 1.0f - pointUV.y;
+
+                    // We got the UV, convert that into a specific pixel color from this polygon's surface texture.
+                    Vector2 pixelPos(pointUV.x * mSurfaces[polygon->surfaceIndex].texture->GetWidth(),
+                                     pointUV.y * mSurfaces[polygon->surfaceIndex].texture->GetHeight());
+                    Color32 color = mSurfaces[polygon->surfaceIndex].texture->GetPixelColor32(pixelPos.x, pixelPos.y);
+
+                    // If the color is transparent, this doesn't count as a hit - the ray "goes through" the transparent area.
+                    // But if at all opaque, we count this as a hit.
+                    if(color.a > 0)
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    // This is not a hit test object, so our lives are easier. Just return that we hit it!
+                    return true;
+                }
             }
         }
 	}
@@ -258,6 +291,22 @@ void BSP::SetTexture(const std::string& objectName, Texture* texture)
             surface.texture = texture;
 		}
 	}
+}
+
+void BSP::SetHitTest(const std::string& objectName, bool isHitTest)
+{
+    // Find index of the object name.
+    uint32_t index = GetObjectIndex(objectName);
+    if(index == UINT32_MAX) { return; }
+
+    // All surfaces belonging to this object will be hidden.
+    for(auto& surface : mSurfaces)
+    {
+        if(surface.objectIndex == index)
+        {
+            surface.hitTest = isHitTest;
+        }
+    }
 }
 
 bool BSP::Exists(const std::string& objectName) const

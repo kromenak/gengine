@@ -102,6 +102,10 @@ struct BSPSurface
 	// If true, interactive (can be hit by raycasts).
 	bool interactive = true;
 
+    // If true, this surface has been flagged as a hit test surface.
+    // This means we need to do a bit more processing for raycasts, to ensure they hit a visible pixel on the 3D object.
+    bool hitTest = false;
+
     // If not using true BSP rendering, it's efficient to store the polygons directly in the surface.
     #if !defined(USE_TRUE_BSP_RENDERING)
     std::vector<BSPPolygon> polygons;
@@ -148,6 +152,7 @@ public:
     BSPActor* CreateBSPActor(const std::string& objectName);
 	void SetVisible(const std::string& objectName, bool visible);
 	void SetTexture(const std::string& objectName, Texture* texture);
+    void SetHitTest(const std::string& objectName, bool isHitTest);
 
     // Object Queries
 	bool Exists(const std::string& objectName) const;
