@@ -1,5 +1,8 @@
 #include "SceneFunctions.h"
 
+#include "ActionManager.h"
+#include "DialogueManager.h"
+#include "GameProgress.h"
 #include "GKObject.h"
 #include "LaserHead.h"
 #include "LocationManager.h"
@@ -54,6 +57,206 @@ namespace
     void CS2_Head5TurnRight() { cs2LaserHeads[4]->TurnRight(); }
 }
 
+namespace
+{
+    // CHU
+    GKObject* angelDots[4] = { 0 }; // top, right, bottom, left
+    GKObject* angelEdges[6] = { 0 }; // left-to-top, top-to-right, right-to-bottom, bottom-to-left, top-to-bottom, left-to-right
+    int lastDotIndex = -1;
+    bool saidInitialDialogue = false;
+
+    void CHU_Erase()
+    {
+        lastDotIndex = -1;
+        for(GKObject* dot : angelDots)
+        {
+            if(dot != nullptr)
+            {
+                dot->SetActive(false);
+            }
+        }
+        for(GKObject* edge : angelEdges)
+        {
+            if(edge != nullptr)
+            {
+                edge->SetActive(false);
+            }
+        }
+        gGameProgress.SetNounVerbCount("Four_Angels", "ERASE", 0);
+    }
+
+    void ActivateEdge(int dotIndex)
+    {
+        // No edge yet.
+        if(lastDotIndex == -1) { return; }
+
+        // See what dot was last, and which is current.
+        // And activate the appropriate edge.
+        if(lastDotIndex == 0) // top
+        {
+            if(dotIndex == 1) // right
+            {
+                angelEdges[1]->SetActive(true);
+            }
+            else if(dotIndex == 2) // bottom
+            {
+                angelEdges[4]->SetActive(true);
+            }
+            else if(dotIndex == 3) // left
+            {
+                angelEdges[0]->SetActive(true);
+            }
+        }
+        else if(lastDotIndex == 1) // right
+        {
+            if(dotIndex == 0) // top
+            {
+                angelEdges[1]->SetActive(true);
+            }
+            else if(dotIndex == 2) // bottom
+            {
+                angelEdges[2]->SetActive(true);
+            }
+            else if(dotIndex == 3) // left
+            {
+                angelEdges[5]->SetActive(true);
+            }
+        }
+        else if(lastDotIndex == 2) // bottom
+        {
+            if(dotIndex == 0) // top
+            {
+                angelEdges[4]->SetActive(true);
+            }
+            else if(dotIndex == 1) // right
+            {
+                angelEdges[2]->SetActive(true);
+            }
+            else if(dotIndex == 3) // left
+            {
+                angelEdges[3]->SetActive(true);
+            }
+        }
+        else // left
+        {
+            if(dotIndex == 0) // top
+            {
+                angelEdges[0]->SetActive(true);
+            }
+            else if(dotIndex == 1) // right
+            {
+                angelEdges[5]->SetActive(true);
+            }
+            else if(dotIndex == 2) // bottom
+            {
+                angelEdges[3]->SetActive(true);
+            }
+        }
+    }
+
+    void AddDot(int dotIndex)
+    {
+        // Activate the appropriate dot.
+        angelDots[dotIndex]->SetActive(true);
+
+        // Activate the edge between this dot and the previous dot.
+        ActivateEdge(dotIndex);
+
+        // Remember this dot as the previous going forward.
+        lastDotIndex = dotIndex;
+
+        // Since we added a dot, it is valid to do an erase action.
+        // The NVC listens for this noun/verb to be non-zero to enable the erase action.
+        gGameProgress.SetNounVerbCount("Four_Angels", "ERASE", 1);
+
+        // Grace says a piece of dialogue when you lay down the first dot.
+        // She says it again each time you re-enter the scene, so it isn't controlled by a game state flag.
+        if(!saidInitialDialogue)
+        {
+            if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Grace"))
+            {
+                //TODO: Can't execute a dialogue action here, since another action may be ongoing.
+                //TODO: The original game seems to maybe have this problem too...but they do a fake "wait" period instead.
+                //gActionManager.ExecuteDialogueAction("18P1F0M021");
+                gDialogueManager.StartDialogue("18P1F0M021", 1, false, nullptr);
+            }
+            saidInitialDialogue = true;
+        }
+
+        // See if we successfully created the tilted square.
+        if(angelEdges[0]->IsActive() && angelEdges[1]->IsActive() && angelEdges[2]->IsActive() &&
+           angelEdges[3]->IsActive() && !angelEdges[4]->IsActive() && !angelEdges[5]->IsActive())
+        {
+            // This lets sheep code know that we did it.
+            gGameProgress.SetNounVerbCount("Four_Angels", "Trace", 1);
+
+            if(StringUtil::EqualsIgnoreCase(Scene::GetEgoName(), "Gabriel"))
+            {
+                //TODO: Same problem as mentioned above.
+                //gActionManager.ExecuteDialogueAction("18L9M0MZ81");
+                gDialogueManager.StartDialogue("18L9M0MZ81", 1, false, [](){
+                    CHU_Erase();
+                });
+            }
+            else
+            {
+                //TODO: Same problem as mentioned above.
+                //gActionManager.ExecuteDialogueAction("18P9M0MCE1");
+                gDialogueManager.StartDialogue("18P9M0MCE1", 1, false, [](){
+                    CHU_Erase();
+                });
+            }
+        }
+    }
+
+    void CHU_Init()
+    {
+        // Find and save dots.
+        for(int i = 0; i < 4; ++i)
+        {
+            GKObject* dot = gSceneManager.GetScene()->GetSceneObjectByModelName("chu_laserdot0" + std::to_string(i + 1));
+            if(dot != nullptr)
+            {
+                angelDots[i] = dot;
+            }
+        }
+
+        // Find and save edges.
+        for(int i = 0; i < 6; ++i)
+        {
+            GKObject* edge = gSceneManager.GetScene()->GetSceneObjectByModelName("chu_laser0" + std::to_string(i + 1));
+            if(edge != nullptr)
+            {
+                angelEdges[i] = edge;
+            }
+        }
+
+        saidInitialDialogue = false;
+    }
+
+    void CHU_Angel1()
+    {
+        AddDot(0);
+    }
+
+    void CHU_Angel2()
+    {
+        AddDot(1);
+    }
+
+    void CHU_Angel3()
+    {
+        AddDot(2);
+    }
+
+    void CHU_Angel4()
+    {
+        AddDot(3);
+    }
+
+    
+}
+
 void SceneFunctions::Execute(const std::string& functionName)
 {
     // If haven't initialized the function map, do it now.
@@ -73,6 +276,14 @@ void SceneFunctions::Execute(const std::string& functionName)
         sSceneFunctions["cs2-turnr4"] = CS2_Head4TurnRight;
         sSceneFunctions["cs2-turnl5"] = CS2_Head5TurnLeft;
         sSceneFunctions["cs2-turnr5"] = CS2_Head5TurnRight;
+
+        // CHU
+        sSceneFunctions["chu-init"] = CHU_Init;
+        sSceneFunctions["chu-angel1"] = CHU_Angel1;
+        sSceneFunctions["chu-angel2"] = CHU_Angel2;
+        sSceneFunctions["chu-angel3"] = CHU_Angel3;
+        sSceneFunctions["chu-angel4"] = CHU_Angel4;
+        sSceneFunctions["chu-erase"] = CHU_Erase;
 
         initialized = true;
     }
