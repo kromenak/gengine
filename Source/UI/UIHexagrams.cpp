@@ -9,7 +9,7 @@ TYPEINFO_INIT(UIHexagrams, UIWidget, 34)
 
 UIHexagrams::UIHexagrams(Actor* owner) : UIWidget(owner)
 {
-
+    mMaterial.SetDiffuseTexture(&Texture::White);
 }
 
 UIHexagrams::~UIHexagrams()

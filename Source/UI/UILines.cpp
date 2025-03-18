@@ -9,7 +9,7 @@ TYPEINFO_INIT(UILines, UIWidget, 22)
 
 UILines::UILines(Actor* owner) : UIWidget(owner)
 {
-
+    mMaterial.SetDiffuseTexture(&Texture::White);
 }
 
 UILines::~UILines()

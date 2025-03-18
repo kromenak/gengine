@@ -10,7 +10,7 @@ TYPEINFO_INIT(UIRectangles, UIWidget, 25)
 
 UIRectangles::UIRectangles(Actor* owner) : UIWidget(owner)
 {
-
+    mMaterial.SetDiffuseTexture(&Texture::White);
 }
 
 UIRectangles::~UIRectangles()

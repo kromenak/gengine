@@ -10,7 +10,7 @@ TYPEINFO_INIT(UIGrids, UIWidget, 19)
 
 UIGrids::UIGrids(Actor* owner) : UIWidget(owner)
 {
-
+    mMaterial.SetDiffuseTexture(&Texture::White);
 }
 
 UIGrids::~UIGrids()

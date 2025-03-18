@@ -9,7 +9,7 @@ TYPEINFO_INIT(UICircles, UIWidget, 17)
 
 UICircles::UICircles(Actor* owner) : UIWidget(owner)
 {
-
+    mMaterial.SetDiffuseTexture(&Texture::White);
 }
 
 UICircles::~UICircles()

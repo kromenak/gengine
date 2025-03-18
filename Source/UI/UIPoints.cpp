@@ -9,7 +9,7 @@ TYPEINFO_INIT(UIPoints, UIWidget, 24)
 
 UIPoints::UIPoints(Actor* owner) : UIWidget(owner)
 {
-
+    mMaterial.SetDiffuseTexture(&Texture::White);
 }
 
 UIPoints::~UIPoints()
