@@ -2085,6 +2085,9 @@ void SidneyAnalyze::AnalyzeMap_OnDrawGridPressed()
                             // Gemini AND Cancer completed in one fell swoop.
                             gGameProgress.SetFlag("Gemini");
                             gGameProgress.SetFlag("Cancer");
+                            gGameProgress.SetFlag("PlacedGrid");
+                            gGameProgress.ChangeScore("e_sidney_map_gemini");
+                            SidneyUtil::UpdateLSRState();
 
                             // Hide Sidney, but not using the normal "Hide", which causes a location change we don't want in this case.
                             mSidney->SetActive(false);
