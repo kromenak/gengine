@@ -158,7 +158,14 @@ void DrivingScreen::Show(FollowMode followMode)
         // But at the end of the day, only these two appear to have ever been used.
         if(followMode == FollowMode::None)
         {
-            soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPGABEGENDAY1.STK"));
+            if(currentTimeblock == Timeblock(2, 2))
+            {
+                soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAP302A.STK"));
+            }
+            else
+            {
+                soundtrackPlayer->Play(gAssetManager.LoadSoundtrack("MAPGABEGENDAY1.STK"));
+            }
         }
         else
         {
