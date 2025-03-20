@@ -102,13 +102,13 @@ void DrivingScreen::Show(FollowMode followMode)
 
         // ARM (Devil's Armchair) is only available on or after Day 2, 2pm.
         const Timeblock& currentTimeblock = gGameProgress.GetTimeblock();
-        mLocationButtons["ARM"]->SetEnabled(currentTimeblock >= Timeblock(2, 2, Timeblock::PM));
+        mLocationButtons["ARM"]->SetEnabled(currentTimeblock >= Timeblock(2, 2, Timeblock::PM) || currentTimeblock == Timeblock(2, 2));
 
         // CSE (Chateau de Serras) only available after going on the tour on Day 2, Noon.
-        mLocationButtons["CSE"]->SetEnabled(currentTimeblock >= Timeblock(2, 12, Timeblock::PM));
+        mLocationButtons["CSE"]->SetEnabled(currentTimeblock >= Timeblock(2, 12, Timeblock::PM) || currentTimeblock == Timeblock(2, 2));
 
         // POU (Poussin's Tomb) is available after the tour on Day 2, 7am.
-        mLocationButtons["POU"]->SetEnabled(currentTimeblock >= Timeblock(2, 7, Timeblock::AM));
+        mLocationButtons["POU"]->SetEnabled(currentTimeblock >= Timeblock(2, 7, Timeblock::AM) || currentTimeblock == Timeblock(2, 2));
 
         // BEC (Bottom of Hexagram) is only available after discovering it via Le Serpent Rouge.
         // MCB (Top of Hexagram) is the same.
