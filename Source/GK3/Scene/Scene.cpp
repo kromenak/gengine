@@ -172,15 +172,13 @@ void Scene::Load()
 
             mSceneData->GetBSP()->SetHitTest(modelDef->name, true);
 
-            // Hit tests, if hidden, are completely deactivated.
-            // However, if not hidden, they are still not visible, but they DO receive ray casts.
+            // Hit test actors are never *visible* (unless you enable a debug option).
+            actor->SetVisible(false);
+
+            // However, if hidden flag is true, it also means the actor is not interactable.
             if(modelDef->hidden)
             {
-                actor->SetActive(false);
-            }
-            else
-            {
-                actor->SetVisible(false);
+                actor->SetInteractive(false);
             }
             break;
         }
