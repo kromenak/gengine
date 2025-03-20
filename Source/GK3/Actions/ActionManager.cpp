@@ -283,6 +283,19 @@ void ActionManager::QueueAction(const std::string& noun, const std::string& verb
     mActionQueue.push_back(entry);
 }
 
+void ActionManager::WaitForActionsToComplete(const std::function<void()> callback)
+{
+    if(!IsActionPlaying() && !IsSkippingCurrentAction())
+    {
+        if(callback != nullptr) { callback(); }
+        return;
+    }
+    else
+    {
+        mAllActionsFinishedCallbacks.push_back(callback);
+    }
+}
+
 void ActionManager::PerformPendingActionSkip()
 {
     // Only run this code if we want to do an action skip.
@@ -325,6 +338,9 @@ void ActionManager::PerformPendingActionSkip()
 
     // Done skipping.
     mSkipInProgress = false;
+
+    // If anyone was waiting for all actions to complete before doing something, now they can do it.
+    SendAllActionsFinishedCallbacks();
 }
 
 const Action* ActionManager::GetAction(const std::string& noun, const std::string& verb) const
@@ -997,5 +1013,27 @@ void ActionManager::OnActionExecuteFinished()
 
         // Execute the action.
         ExecuteAction(front.action, front.callback);
+    }
+
+    // If this action completed and didn't trigger any other action, we can send the "all actions finished" callbacks.
+    // One exception: if doing an action skip DON'T trigger these here - instead trigger when action skip code finishes.
+    if(!IsActionPlaying() && !IsSkippingCurrentAction())
+    {
+        SendAllActionsFinishedCallbacks();
+    }
+}
+
+void ActionManager::SendAllActionsFinishedCallbacks()
+{
+    // All actions have completed - see if any callbacks exist for callers waiting for this to be the case.
+    if(!mAllActionsFinishedCallbacks.empty())
+    {
+        // Creating a copy, clearing, and then iterating avoids any problems with the callbacks adding to the callbacks list themselves.
+        auto completeCallbacks = mAllActionsFinishedCallbacks;
+        mAllActionsFinishedCallbacks.clear();
+        for(auto& callback : completeCallbacks)
+        {
+            callback();
+        }
     }
 }

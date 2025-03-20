@@ -56,6 +56,7 @@ public:
     void ExecuteDialogueAction(const std::string& licensePlate, int lineCount = 1);
 
     void QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
+    void WaitForActionsToComplete(const std::function<void()> callback);
 
 	bool IsActionPlaying() const { return mCurrentAction != nullptr; }
 
@@ -160,6 +161,9 @@ private:
     };
     std::vector<ActionAndCallback> mActionQueue;
 
+    // We also sometimes want to execute a callback when all actions (current or queued) have finished.
+    std::vector<std::function<void()>> mAllActionsFinishedCallbacks;
+
     // If true, an action skip has been queued for processing.
     bool mWantsActionSkip = false;
 
@@ -193,6 +197,8 @@ private:
 	
 	// Called when an action finishes executing.
 	void OnActionExecuteFinished();
+
+    void SendAllActionsFinishedCallbacks();
 };
 
 extern ActionManager gActionManager;

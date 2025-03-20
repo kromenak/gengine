@@ -633,7 +633,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 void Scene::SkipCurrentAction()
 {
     // If an action is playing, this should skip the action.
-    if(gActionManager.IsActionPlaying())
+    if(gActionManager.IsActionPlaying() && !gActionManager.IsSkippingCurrentAction())
     {
         gActionManager.SkipCurrentAction();
         return;

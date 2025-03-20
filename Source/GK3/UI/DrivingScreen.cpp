@@ -177,6 +177,20 @@ void DrivingScreen::Show(FollowMode followMode)
 
         // Actually show the UI.
         SetActive(true);
+
+        // When Gabe attempts to follow the Black Sedan during 202A timeblock, some dialogue plays over the map screen.
+        // This doesn't seem to be accounted for in any NVC or Sheepscript, so it must be hardcoded...
+        if(currentTimeblock == Timeblock(2, 2) && gGameProgress.GetNounVerbCount("CAR", "FOLLOW") == 1)
+        {
+            // Wait for any existing action or action skip to finish before executing this dialogue.
+            gActionManager.WaitForActionsToComplete([](){
+                gActionManager.ExecuteDialogueAction("2136L3W3K1", 2);
+
+                // Increment this noun/verb count to avoid playing this dialogue on the map again.
+                //TODO: This is not how the original game accomplished this...I don't know how they did it!
+                gGameProgress.IncNounVerbCount("CAR", "FOLLOW");
+            });
+        }
     });
 }
 
