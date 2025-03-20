@@ -8,6 +8,7 @@
 #include "RectTransform.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
+#include "Texture.h"
 #include "UIImage.h"
 #include "UIUtil.h"
 #include "VideoPlayer.h"
@@ -31,12 +32,14 @@ void SidneyAnalyze::AnalyzeImage_Init()
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
     }
 
-    // Create an image used to play video on this screen.
+    // Create images that are used to render videos in some cases.
     {
-        mAnalyzeVideoImage = UIUtil::NewUIActorWithWidget<UIImage>(mAnalyzeImageWindow);
-        mAnalyzeVideoImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        mAnalyzeVideoImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
-        mAnalyzeVideoImage->SetEnabled(false);
+        for(UIImage*& image : mAnalyzeVideoImages)
+        {
+            image = UIUtil::NewUIActorWithWidget<UIImage>(mAnalyzeImageWindow);
+            image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+            AnalyzeImage_ResetVideoImage(image);
+        }
     }
 
     // Hide by default.
@@ -127,10 +130,11 @@ void SidneyAnalyze::AnalyzeImage_EnterState()
         mMenuBar.SetDropdownEnabled(kGraphicDropdownIdx, false);
     }
 
-    // Make sure video texture is the same size as the analyze image, in case we need it.
-    mAnalyzeVideoImage->SetEnabled(false);
-    mAnalyzeVideoImage->GetRectTransform()->SetAnchoredPosition(mAnalyzeImage->GetRectTransform()->GetAnchoredPosition());
-    mAnalyzeVideoImage->GetRectTransform()->SetSizeDelta(mAnalyzeImage->GetRectTransform()->GetSizeDelta());
+    // Reset video images to be the size of the analyze image.
+    for(UIImage* image : mAnalyzeVideoImages)
+    {
+        AnalyzeImage_ResetVideoImage(image);
+    }
 }
 
 void SidneyAnalyze::AnalyzeImage_OnAnalyzeButtonPressed()
@@ -166,6 +170,7 @@ void SidneyAnalyze::AnalyzeImage_OnAnalyzeButtonPressed()
         {
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02o3h2zq32\", 1)");
         }
+        gGameProgress.SetFlag("AnalyzedBasePainting3");
     }
     else if(mAnalyzeFileId == SidneyFileIds::kSerresHermeticSymbols)
     {
@@ -277,21 +282,8 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
 {
     if(mAnalyzeFileId == SidneyFileIds::kParchment1)
     {
-        // Show the video image.
-        mAnalyzeVideoImage->SetEnabled(true);
-
-        // Show loading cursor during movie.
-        gCursorManager.UseLoadCursor();
-
-        // Play video on video image. The video uses a green chromakey background.
-        Color32 transparentColor(3, 251, 3);
-        gVideoPlayer.Play("Parch1Geo.avi", &transparentColor, mAnalyzeVideoImage, [this](){
-
-            // Back to normal cursor.
-            gCursorManager.UseDefaultCursor();
-
-            // Set final texture state.
-            mAnalyzeVideoImage->SetTexture(gAssetManager.LoadTexture("GEOMPARCH1FINAL.BMP", AssetScope::Scene));
+        // Play analyze video.
+        AnalyzeImage_PlayVideo("Parch1Geo.avi", mAnalyzeVideoImages[0], "GEOMPARCH1FINAL.BMP", [this](){
 
             // Show a popup explaining the result.
             ShowAnalyzeMessage("GeometryParch1", Vector2(180.0f, -4.0f), HorizontalAlignment::Center);
@@ -308,28 +300,15 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kParchment2)
     {
-        // Show the video image.
-        mAnalyzeVideoImage->SetEnabled(true);
-
-        // Show loading cursor during movie.
-        gCursorManager.UseLoadCursor();
-
-        // Play video on video image. The video uses a green chromakey background.
-        Color32 transparentColor(3, 251, 3);
-        gVideoPlayer.Play("Parch2Geo.avi", &transparentColor, mAnalyzeVideoImage, [this](){
-
-            // Back to normal cursor.
-            gCursorManager.UseDefaultCursor();
-
-            // Set final texture state.
-            mAnalyzeVideoImage->SetTexture(gAssetManager.LoadTexture("GEOMPARCH2FINAL.BMP", AssetScope::Scene));
+        // Play analyze video.
+        AnalyzeImage_PlayVideo("Parch2Geo.avi", mAnalyzeVideoImages[0], "GEOMPARCH2FINAL.BMP", [this](){
 
             // Show a popup explaining the result.
             ShowAnalyzeMessage("GeometryParch2", Vector2(180.0f, -4.0f), HorizontalAlignment::Center);
 
             // You have obtained a circle and a square!
-            mSidneyFiles->AddFile(SidneyFileIds::kCircleShape); // Circle
-            mSidneyFiles->AddFile(SidneyFileIds::kSquareShape); // Square
+            mSidneyFiles->AddFile(SidneyFileIds::kCircleShape);
+            mSidneyFiles->AddFile(SidneyFileIds::kSquareShape);
 
             // Add to score.
             gGameProgress.ChangeScore("e_sidney_analysis_gemoetry_parch2");
@@ -340,12 +319,85 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
     }
     else if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
     {
-        //TODO: Play hexagram animation.
+        // For this video, the size and position of the video is unfortunately fairly arbitrary.
+        mAnalyzeVideoImages[0]->GetRectTransform()->SetSizeDelta(431.0f, 350.0f);
+        Vector2 videoImagePos = mAnalyzeImage->GetRectTransform()->GetAnchoredPosition();
+        videoImagePos.x -= 8.0f;
+        videoImagePos.y += 68.0f;
+        mAnalyzeVideoImages[0]->GetRectTransform()->SetAnchoredPosition(videoImagePos);
 
-        printf("Added hexagon\n");
-        mSidneyFiles->AddFile(SidneyFileIds::kHexagramShape); // Hexagram
+        // Play analyze video.
+        AnalyzeImage_PlayVideo("Poussingeo.avi", mAnalyzeVideoImages[0], "GEOMPOUSSINFINAL.BMP", [this](){
 
-        ShowAnalyzeMessage("GeometryPous", Vector2(180.0f, 0.0f), HorizontalAlignment::Center);
+            // Show a popup explaining the result.
+            ShowAnalyzeMessage("GeometryPous", Vector2(180.0f, 0.0f), HorizontalAlignment::Center);
+
+            // You get a hexagram!
+            mSidneyFiles->AddFile(SidneyFileIds::kHexagramShape);
+
+            // Add to score.
+            gGameProgress.ChangeScore("e_sidney_analysis_gemoetry_poussin");
+
+            // Add flags.
+            gGameProgress.SetFlag("AnalyzedGeomPainting1");
+            gGameProgress.SetFlag("SavedHexagram");
+        });
+    }
+    else if(mAnalyzeFileId == SidneyFileIds::kTeniersPostcard2)
+    {
+        for(int i = 0; i < 2; ++i)
+        {
+            mAnalyzeVideoImages[i]->GetRectTransform()->SetSizeDelta(464.0f, 350.0f);
+            Vector2 videoImagePos = mAnalyzeImage->GetRectTransform()->GetAnchoredPosition();
+            videoImagePos.y += 20.0f;
+            mAnalyzeVideoImages[i]->GetRectTransform()->SetAnchoredPosition(videoImagePos);
+        }
+        
+        // Says "analyzing..."
+        ShowAnalyzeMessage("GeometryTenier1", Vector2(190.0f, -160.0f), HorizontalAlignment::Center);
+
+        // Play initial video.
+        AnalyzeImage_PlayVideo("TenierGeoA.avi", mAnalyzeVideoImages[0], "TENIERGEOA.BMP", [this](){
+            mAnalyzeVideoImages[0]->GetTexture()->SetTransparentColor(Color32(0, 255, 0));
+
+            // Says something about the result of the first video.
+            ShowAnalyzeMessage("GeometryTenier2", Vector2(190.0f, -160.0f), HorizontalAlignment::Center, true);
+            Timers::AddTimerSeconds(4.0f, [this](){
+
+                // Play another video.
+                AnalyzeImage_PlayVideo("TenierGeob.avi", mAnalyzeVideoImages[0], "TENIERGEOB.BMP", [this](){
+                    mAnalyzeVideoImages[0]->GetTexture()->SetTransparentColor(Color32(0, 255, 0));
+
+                    // Says something about the result of the second video.
+                    ShowAnalyzeMessage("GeometryTenier3", Vector2(190.0f, -160.0f), HorizontalAlignment::Center, true);
+                    Timers::AddTimerSeconds(4.0f, [this](){
+
+                        // Show tilted square.
+                        mAnalyzeVideoImages[0]->SetTexture(gAssetManager.LoadTexture("TENIERGEOC.BMP", AssetScope::Scene));
+                        mAnalyzeVideoImages[0]->GetTexture()->SetTransparentColor(Color32(0, 255, 0));
+                        gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDBUTTON4.WAV"));
+                        ShowAnalyzeMessage("GeometryTenier4", Vector2(190.0f, -160.0f), HorizontalAlignment::Center, true);
+
+                        // Wait a bit more.
+                        Timers::AddTimerSeconds(4.0f, [this](){
+
+                            // Final video.
+                            AnalyzeImage_PlayVideo("TenierGeoD.avi", mAnalyzeVideoImages[1], "GEOMTENNIERSFINAL.BMP", [this](){
+                                ShowAnalyzeMessage("GeometryTenier5", Vector2(190.0f, -160.0f), HorizontalAlignment::Center);
+
+                                // Grace says "I already know about the tilted square!"
+                                // You don't even get any points for all this work!
+                                if(!gGameProgress.GetFlag("AnalyzedGeomPainting3"))
+                                {
+                                    gActionManager.ExecuteDialogueAction("02O2F2ZQ37", 2);
+                                    gGameProgress.SetFlag("AnalyzedGeomPainting3");
+                                }
+                            });
+                        });
+                    });
+                });
+            });
+        });
     }
 }
 
@@ -353,21 +405,11 @@ void SidneyAnalyze::AnalyzeImage_OnRotateShapeButtonPressed()
 {
     if(mAnalyzeFileId == SidneyFileIds::kParchment2)
     {
-        // Show the video image.
-        mAnalyzeVideoImage->SetEnabled(true);
-
-        // Show loading cursor during movie.
-        gCursorManager.UseLoadCursor();
-
-        // Play video on video image. The video uses a green chromakey background.
-        Color32 transparentColor(3, 251, 3);
-        gVideoPlayer.Play("Parch2Zoom.avi", &transparentColor, mAnalyzeVideoImage, [this](){
-
-            // Back to normal cursor.
-            gCursorManager.UseDefaultCursor();
+        // Play zoom in video.
+        AnalyzeImage_PlayVideo("Parch2Zoom.avi", mAnalyzeVideoImages[2], "", [this](){
 
             // Turn off video image once this video finishes.
-            mAnalyzeVideoImage->SetEnabled(false);
+            mAnalyzeVideoImages[2]->SetEnabled(false);
             
             // Show an image popup with the rotated image.
             mAnalyzePopup->ResetToDefaults();
@@ -391,21 +433,65 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
 {
     if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
     {
-        // Zoom & Clarify shows a popup with a zoomed image containing "arcadia" text.
-        // Show a popup with an embedded image and yes/no options.
-        mAnalyzePopup->ResetToDefaults();
-        mAnalyzePopup->SetWindowPosition(Vector2(-106.0f, 0.0f));
+        // Play zoom in video.
+        AnalyzeImage_PlayVideo("poussinzoom.avi", mAnalyzeVideoImages[2], "", [this](){
 
-        mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
-        mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("SaveArcadia"));
+            // Turn off video image once this video finishes.
+            mAnalyzeVideoImages[2]->SetEnabled(false);
 
-        mAnalyzePopup->SetImage(gAssetManager.LoadTexture("POUSSIN_ZOOM.BMP"));
+            // Zoom & Clarify shows a popup with a zoomed image containing "arcadia" text.
+            // Show a popup with an embedded image and yes/no options.
+            mAnalyzePopup->ResetToDefaults();
+            mAnalyzePopup->SetWindowPosition(Vector2(-106.0f, 0.0f));
 
-        // This popup has yes/no options.
-        // If yes is pressed, we save the "arcadia" text as a file.
-        mAnalyzePopup->ShowTwoButton([this](){
-            mSidneyFiles->AddFile(SidneyFileIds::kArcadiaText);
-            ShowAnalyzeMessage("SavingArcadia", Vector2(), HorizontalAlignment::Center);
+            mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
+            mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("SaveArcadia"));
+
+            mAnalyzePopup->SetImage(gAssetManager.LoadTexture("POUSSIN_ZOOM.BMP"));
+
+            // This popup has yes/no options.
+            // If yes is pressed, we save the "arcadia" text as a file.
+            mAnalyzePopup->ShowTwoButton([this](){
+                mSidneyFiles->AddFile(SidneyFileIds::kArcadiaText);
+                ShowAnalyzeMessage("SavingArcadia", Vector2(), HorizontalAlignment::Center);
+            });
+
+            // Add to score.
+            gGameProgress.ChangeScore("e_sidney_analysis_view_words_poussin");
         });
     }
+}
+
+void SidneyAnalyze::AnalyzeImage_ResetVideoImage(UIImage* image)
+{
+    image->GetRectTransform()->SetAnchoredPosition(mAnalyzeImage->GetRectTransform()->GetAnchoredPosition());
+    image->GetRectTransform()->SetSizeDelta(mAnalyzeImage->GetRectTransform()->GetSizeDelta());
+    image->SetEnabled(false);
+}
+
+void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIImage* image, const std::string& finalTextureName, const std::function<void()>& finishCallback)
+{
+    // Make sure image is enabled.
+    image->SetEnabled(true);
+
+    // Show loading cursor during movie.
+    gCursorManager.UseLoadCursor();
+
+    // Play video on video image. The video uses a green chromakey background.
+    Color32 transparentColor(3, 251, 3);
+    gVideoPlayer.Play(videoName, &transparentColor, image, [image, finalTextureName, finishCallback](){
+
+        // Back to normal cursor.
+        gCursorManager.UseDefaultCursor();
+
+        // Set a final texture if specified.
+        Texture* finalTexture = gAssetManager.LoadTexture(finalTextureName, AssetScope::Scene);
+        if(finalTexture != nullptr)
+        {
+            image->SetTexture(finalTexture);
+        }
+
+        // Execute callback.
+        finishCallback();
+    });
 }

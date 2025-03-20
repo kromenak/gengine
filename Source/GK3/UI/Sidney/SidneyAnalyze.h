@@ -104,7 +104,7 @@ private:
     // ANALYZE IMAGE
     Actor* mAnalyzeImageWindow = nullptr;
     UIImage* mAnalyzeImage = nullptr;
-    UIImage* mAnalyzeVideoImage = nullptr;
+    UIImage* mAnalyzeVideoImages[3] = { 0 };
 
     void AnalyzeImage_Init();
     void AnalyzeImage_EnterState();
@@ -116,6 +116,9 @@ private:
     void AnalyzeImage_OnViewGeometryButtonPressed();
     void AnalyzeImage_OnRotateShapeButtonPressed();
     void AnalyzeImage_OnZoomClarifyButtonPressed();
+
+    void AnalyzeImage_ResetVideoImage(UIImage* image);
+    void AnalyzeImage_PlayVideo(const std::string& videoName, UIImage* image, const std::string& finalTextureName, const std::function<void()>& finishCallback);
 
     // ANALYZE TEXT
     Actor* mAnalyzeTextWindow = nullptr;

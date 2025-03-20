@@ -64,7 +64,7 @@ void VideoPlayer::Update()
         
         // Apply video texture.
         Texture* videoTexture = mVideo->GetVideoTexture();
-        if(mHasTransparentColor)
+        if(mHasTransparentColor && videoTexture != nullptr)
         {
             videoTexture->SetTransparentColor(mTransparentColor);
         }

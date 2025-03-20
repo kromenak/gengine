@@ -25,8 +25,11 @@ public:
     void Render() override;
 
     void SetColor(const Color32& color);
+
 	void SetTexture(Texture* texture, bool resizeImage = false);
-	void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
+    Texture* GetTexture() const { return mMaterial.GetDiffuseTexture(); }
+
+    void SetRenderMode(RenderMode mode) { mRenderMode = mode; }
 
     void ResizeToTexture();
     void ResizeToFitPreserveAspect(const Vector2& area);
