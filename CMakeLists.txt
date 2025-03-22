@@ -136,6 +136,7 @@ if(MSVC)
         /wd4626 # assignment operator implicitly deleted
         /wd4668 # preprocessor macro not defined
         /wd4710 # function was not inlined
+        /wd4711 # function was automatically inlined
         /wd4774 # snprintf format not literal (this might be good to fix)
         /wd4820 # padding added
         /wd5026 # move constructor implicitly deleted
@@ -437,9 +438,28 @@ endif()
 # This packages the built game into a zip file in the "Bin" directory, with any copyrighted material excluded.
 add_custom_target(deploy DEPENDS "deploy_output")
 if(WIN32)
+    set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    set(BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>")
+    set(DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG>")
+    set(ZIP_FILE_NAME "GK3-Win-${PROJECT_VERSION}.zip")
+
+    add_custom_command(
+        OUTPUT "deploy_output_first"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${DEPLOY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${BUILD_DIR}" "${DEPLOY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E rename "${DEPLOY_DIR}/gk3.exe" "${DEPLOY_DIR}/GK3.exe"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory "${ROOT_DIR}/Assets" "${DEPLOY_DIR}/Assets"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPLOY_DIR}/Data"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/Data/README.md" "${DEPLOY_DIR}/Data"
+        COMMAND ${CMAKE_COMMAND} -E copy "${ROOT_DIR}/GK3.ini" "${DEPLOY_DIR}"
+        VERBATIM
+    )
     add_custom_command(
         OUTPUT "deploy_output"
-        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/Publish/Deploy.sh" ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG> ${CMAKE_CURRENT_SOURCE_DIR}/Bin/$<CONFIG> ${PROJECT_VERSION} Windows
+        DEPENDS "deploy_output_first"
+        COMMAND ${CMAKE_COMMAND} -E tar cvf "${ROOT_DIR}/${ZIP_FILE_NAME}" --format=zip .
+        COMMAND ${CMAKE_COMMAND} -E rename "${ROOT_DIR}/${ZIP_FILE_NAME}" "${DEPLOY_DIR}/${ZIP_FILE_NAME}"
+        WORKING_DIRECTORY "${DEPLOY_DIR}"
         VERBATIM
     )
 elseif(APPLE)
