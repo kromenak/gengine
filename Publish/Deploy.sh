@@ -91,9 +91,5 @@ if [ ${PLATFORM} = "Linux" ]; then
     cd "${DEPLOY_DIR}"
     FINAL_ZIP_NAME="GK3-Linux-${VERSION_NUM}.zip"
     zip -r ${FINAL_ZIP_NAME} .
-
-    # Move zip to final location. Appveyor expects it to be here.
-    mv ${FINAL_ZIP_NAME} ../
-    cd ../
 fi
 

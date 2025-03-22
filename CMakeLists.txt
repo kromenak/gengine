@@ -284,6 +284,7 @@ elseif(APPLE)
 
 else() # Linux
     target_include_directories(gk3 PRIVATE
+        Libraries/libpng/linux/include
         Libraries/SDL/linux/include
         Libraries/zlib/linux/include
     )
@@ -293,6 +294,7 @@ else() # Linux
         Libraries/ffmpeg/lib/linux
         Libraries/fmod/lib/linux
         Libraries/GLEW/lib/linux
+        Libraries/libpng/linux/lib
         Libraries/SDL/linux/lib
         Libraries/zlib/linux/lib
     )
@@ -302,6 +304,7 @@ else() # Linux
         avcodec avformat avutil swresample swscale  # ffmpeg
         fmod                                        # fmod
         GLEW                                        # GLEW
+        png                                         # libpng
         z                                           # zlib
         SDL2                                        # SDL
         GL                                          # OpenGL
@@ -322,7 +325,8 @@ else() # Linux
         COMMAND ${CMAKE_COMMAND} -E copy "${LIB_FFMPEG_SRC}/libswscale.so" "${LIB_DEST}"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/fmod/lib/linux/libfmod.so" "${LIB_DEST}"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/GLEW/lib/linux/libGLEW.so" "${LIB_DEST}"
-        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/zlib/lib/linux/libz.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/libpng/linux/lib/libpng.so" "${LIB_DEST}"
+        COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/zlib/linux/lib/libz.so" "${LIB_DEST}"
         COMMAND ${CMAKE_COMMAND} -E copy "${LIBS_SRC}/SDL/linux/lib/libSDL2.so" "${LIB_DEST}"
         VERBATIM
     )

@@ -13,7 +13,7 @@ make install
 Copy headers and library files to their final locations:
 	- Copy the contents of `out/include` to `Libraries/zlib/linux/include`.
 	- Copy the `so` files from `out/lib` to `Libraries/zlib/linux/lib`.
-	- DO NOT copy over `share` folder, `pkgconfig` folder, or any static libraries. 
+	- DO NOT copy over any other folders or files.
 
 ## Mac
 Run configure and then make/install, similar to Linux.
@@ -32,7 +32,7 @@ install_name_tool -id @rpath/libz.dylib libz.dylib
 Copy headers and library files to their final locations:
 	- Copy the contents of `out/include` to `Libraries/zlib/mac/include`.
 	- Copy the `dylib` files from `out/lib` to `Libraries/zlib/mac/lib`.
-	- DO NOT copy over `share` folder, `pkgconfig` folder, or any static libraries. 
+	- DO NOT copy over `share` folder, `pkgconfig` folder, or any static libraries.
 
 ## Windows
 Make sure you have Visual Studio installed with C++ Development support. Open a "Visual Studio Developer Command Prompt" - one way to do this from within Visual Studio is to go to `Tools > Command Line > Developer Command Prompt`.

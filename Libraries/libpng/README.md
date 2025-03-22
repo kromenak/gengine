@@ -1,4 +1,4 @@
-# libpng
+.# libpng
 libpng is used to encode and decode PNG images. This is used for the screenshot tool, as well as saving screenshots for save files.
 
 Grab the latest libpng source code from http://www.libpng.org/pub/png/libpng.html.
@@ -16,6 +16,21 @@ You can pretty much just use the simple "configure and make" approach here. But 
 ./configure --prefix=${PWD}/out
 make install
 ```
+
+You can reduce the size of generated library file using the `strip` tool:
+```
+strip -S libpng16.so.16.47.0
+```
+
+You will likely need to change the SONAME baked into the library as well:
+```
+patchelf -soname libpng.so libpng16.so.16.47.0
+```
+
+Copy headers and library files to their final locations:
+	- Copy the contents of `out/include/libpng16` to `Libraries/libpng/linux/include`.
+	- Copy the `so` files from `out/lib` to `Libraries/libpng/linux/lib`.
+	- DO NOT copy over any other folders or files.
 
 ## Mac
 Before building, make sure libpng can find the zlib headers. The easiest way to do this is to simply copy `zconf.h` and `zlib.h` into the `libpng` source code root folder. Make sure the headers used match the version of zlib that will be used in the final executable!
@@ -38,7 +53,7 @@ install_name_tool -change /usr/lib/libz.1.dylib @rpath/libz.dylib out/lib/libpng
 Copy headers and library files to their final locations:
 	- Copy the contents of `out/include/libpng16` to `Libraries/libpng/mac/include`.
 	- Copy the `dylib` files from `out/lib` to `Libraries/libpng/mac/lib`.
-	- DO NOT copy over `share` folder, `pkgconfig` folder, or any static libraries. 
+	- DO NOT copy over `share` folder, `pkgconfig` folder, or any static libraries.
 
 ## Windows
 To build on Windows, it's easiest to use CMake to generate a Visual Studio project, and then build from there. First, generate the CMake project:
