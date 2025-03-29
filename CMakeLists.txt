@@ -454,6 +454,7 @@ if(WIN32)
         OUTPUT "deploy_output_first"
         COMMAND ${CMAKE_COMMAND} -E rm -rf "${DEPLOY_DIR}"
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${BUILD_DIR}" "${DEPLOY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${DEPLOY_DIR}/gk3.pdb"
         COMMAND ${CMAKE_COMMAND} -E rename "${DEPLOY_DIR}/gk3.exe" "${DEPLOY_DIR}/GK3.exe"
         COMMAND ${CMAKE_COMMAND} -E copy_directory "${ROOT_DIR}/Assets" "${DEPLOY_DIR}/Assets"
         COMMAND ${CMAKE_COMMAND} -E make_directory "${DEPLOY_DIR}/Data"
