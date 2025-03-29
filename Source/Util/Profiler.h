@@ -37,6 +37,11 @@ public:
     Sample(const char* name);
     ~Sample();
 
+    Sample(const Sample&) = default;
+    Sample(Sample&&) = default;
+    Sample& operator=(const Sample&) = default;
+    Sample& operator=(Sample&&) = default;
+
 private:
     const char* mName;
     Stopwatch mTimer;

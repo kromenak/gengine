@@ -122,6 +122,7 @@ target_compile_definitions(gk3 PRIVATE
 if(MSVC)
     target_compile_options(gk3 PRIVATE /Wall # Enable ALL warnings...
         # But disable some.
+        /wd4005 # macro redefinition
         /wd4061 # unhandled case in switch with default
         /wd4065 # switch contains default and no cases
         /wd4100 # unreferenced formal parameter
@@ -132,6 +133,7 @@ if(MSVC)
         /wd4365 # signed/unsigned mismatch
         /wd4505 # unreferenced function with internal linkage
         /wd4514 # unused function
+        /wd4611 # use of _setjmp
         /wd4625 # copy constructor implicitly deleted
         /wd4626 # assignment operator implicitly deleted
         /wd4668 # preprocessor macro not defined

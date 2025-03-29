@@ -585,9 +585,6 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 // For links, what page to link to.
                 std::string link;
 
-                // If true, we put a bullet point in front of this item.
-                bool listItem = false;
-
                 // Iterate the parse stack to see what tags this leaf node is nested within.
                 // Depending on the tags, it may alter how this leaf node renders (e.g. if we're nested within a B tag, we use a bold font).
                 for(int i = 0; i < parseStack.size(); ++i)

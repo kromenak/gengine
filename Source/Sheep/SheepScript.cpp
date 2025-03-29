@@ -603,8 +603,8 @@ void SheepScript::Decompile(const std::string& filePath)
             tempReader.Seek(reader.GetPosition());
             while(tempReader.GetPosition() < branchAddress)
             {
-                SheepInstruction instruction = (SheepInstruction)tempReader.ReadSByte();
-                if(instruction == SheepInstruction::Branch)
+                SheepInstruction nextInstruction = (SheepInstruction)tempReader.ReadSByte();
+                if(nextInstruction == SheepInstruction::Branch)
                 {
                     int nextBranchAddress = tempReader.ReadInt();
                     if(branchAddress == nextBranchAddress)

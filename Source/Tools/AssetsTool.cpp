@@ -42,10 +42,10 @@ void AssetsTool::Render(bool& toolActive)
             ImGui::PushID("Textures");
 
             // For all nodes, only expand the tree if you click on the arrow.
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+            ImGuiTreeNodeFlags assetTypeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
 
             // Draw the tree node.
-            bool node_open = ImGui::TreeNodeEx("Textures", flags, "Textures");
+            bool node_open = ImGui::TreeNodeEx("Textures", assetTypeFlags, "Textures");
 
             // If open, draw all the loaded assets of this type.
             if(node_open)
@@ -54,16 +54,16 @@ void AssetsTool::Render(bool& toolActive)
                 {
                     ImGui::PushID(entry.second);
 
-                    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+                    ImGuiTreeNodeFlags assetFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
 
                     // If selected, draw as selected.
                     if(mSelectedAsset == entry.second)
                     {
-                        flags |= ImGuiTreeNodeFlags_Selected;
+                        assetFlags |= ImGuiTreeNodeFlags_Selected;
                     }
 
                     // Draw the tree node.
-                    bool assetNodeOpen = ImGui::TreeNodeEx("Object", flags, "%s", entry.second->GetName().c_str());
+                    bool assetNodeOpen = ImGui::TreeNodeEx("Object", assetFlags, "%s", entry.second->GetName().c_str());
 
                     // If this item is clicked (and not being toggled open with arrow), set it to selected.
                     if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())

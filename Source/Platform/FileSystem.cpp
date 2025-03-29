@@ -420,7 +420,7 @@ uint64_t File::Size(const std::string& filePath)
         {
             // For compatibility reasons, the size is stored as two 32-bit ints, but it's meant to represent a 64-bit int.
             // Can use the LARGE_INTEGER struct to convert to int64.
-            ULARGE_INTEGER fileSize = { 0 };
+            ULARGE_INTEGER fileSize = { { 0 } };
             fileSize.LowPart = file_attr_data.nFileSizeLow;
             fileSize.HighPart = file_attr_data.nFileSizeHigh;
             return fileSize.QuadPart;

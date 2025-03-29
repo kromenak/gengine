@@ -75,7 +75,7 @@ std::streampos membuf::seekoff(std::streamoff off, std::ios_base::seekdir way, s
     if(out)
     {
         setp(beg, end);
-        pbump(offset);
+        pbump(static_cast<int>(offset));
     }
     else if(in)
     {
