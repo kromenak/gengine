@@ -62,14 +62,14 @@ void InspectorUtil::RenderVariables(GTypeInfo* typeInfo, void* instance)
 
                 case VariableType::Asset:
                 {
-                    Asset* asset = variableInfo.GetPtr<Asset>(instance);
-                    if(asset == nullptr)
+                    Asset** asset = variableInfo.GetPtr<Asset*>(instance);
+                    if((*asset) == nullptr)
                     {
-                        ImGui::LabelText(variableInfo.GetName(), "null [%s]", asset->GetTypeName());
+                        ImGui::LabelText(variableInfo.GetName(), "null");
                     }
                     else
                     {
-                        ImGui::LabelText(variableInfo.GetName(), "%s [%s]", asset->GetName().c_str(), asset->GetTypeName());
+                        ImGui::LabelText(variableInfo.GetName(), "%s [%s]", (*asset)->GetName().c_str(), (*asset)->GetTypeName());
                     }
                     break;
                 }
