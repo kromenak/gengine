@@ -311,6 +311,7 @@ else() # Linux
         SDL2                                        # SDL
         GL                                          # OpenGL
         ${CMAKE_DL_LIBS}                            # dlopen/dlclose
+        pthread                                     # pthread
     )
 
     # Copy libraries post-build.
