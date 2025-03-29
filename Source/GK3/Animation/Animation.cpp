@@ -346,7 +346,6 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
         else if(StringUtil::EqualsIgnoreCase(section.name, "OPTIONS"))
         {
 			// First line is number of entries...but we can just determine that from the number of lines!
-			// Read in 2+ lines as actions.
             for(size_t i = 1; i < section.lines.size(); i++)
             {
 				IniLine& line = section.lines[i];
@@ -369,7 +368,11 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
 				// Allows us to dictate the rate at which the animation proceeds.
                 else if(StringUtil::EqualsIgnoreCase(option, "FRAMERATE"))
                 {
-                    //mFramesPerSecond = entry->GetValueAsInt();
+                    // In theory, the engine supports the ability to CHANGE an animations frame rate DURING the animation!
+                    // From my modern game dev perspective, that seems like a complicated and unnecessary thing to support.
+                    // Also, in practice, GK3 only has one animation that does that, and I can't find any indication it's actually used in the final game.
+                    // So...let's just assume that a FRAMERATE option applies to the entire animation uniformly.
+                    mFramesPerSecond = line.entries[2].GetValueAsInt();
                 }
                 else
                 {

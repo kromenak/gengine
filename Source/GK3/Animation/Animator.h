@@ -83,8 +83,7 @@ protected:
 	void OnUpdate(float deltaTime) override;
 	
 private:
-	// I chose to use a linked list here b/c we may need to remove animations that are
-	// in the middle of the list at arbitrary times...not sure if the list is big enough or we do it often enough to get benefits?
+	// Animations that are currently active.
 	std::vector<AnimationState> mActiveAnimations;
 	
 	void ExecuteFrame(int animIndex, int frameNumber);
