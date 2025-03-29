@@ -34,6 +34,7 @@ public:
 	
 	void SetAngle(const Vector2& angle);
 	void SetAngle(float yaw, float pitch);
+    Vector2 GetAngle() const;
 
     void SetForcedCinematicMode(bool forced) { mForcedCinematicMode = forced; }
     bool IsForcedCinematicMode() const { return mForcedCinematicMode; }

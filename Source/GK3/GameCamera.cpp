@@ -70,6 +70,11 @@ void GameCamera::SetAngle(float yaw, float pitch)
 	SetRotation(Quaternion(Vector3::UnitY, yaw) * Quaternion(Vector3::UnitX, pitch));
 }
 
+Vector2 GameCamera::GetAngle() const
+{
+    return Vector2(GetRotation().Isolate(Vector3::UnitY).GetAngle(), GetRotation().Isolate(Vector3::UnitX).GetAngle());
+}
+
 void GameCamera::Glide(const Vector3& position, const Vector2& angle, std::function<void()> callback)
 {
     mGliding = true;

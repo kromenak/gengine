@@ -3,6 +3,7 @@
 #include "Animator.h"
 #include "AssetManager.h"
 #include "BSP.h"
+#include "Camera.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "IniParser.h"
@@ -28,6 +29,37 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
     UIImage* baseImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
     baseImage->SetTexture(gAssetManager.LoadTexture("BINOCMASK.BMP"), true);
     baseImage->SetReceivesInput(true);
+
+    // Depending on your resolution, there can be a lot of scene visible outside the binocs image.
+    // Add black overlays to cover this.
+    {
+        UIImage* topImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
+        topImage->SetTexture(&Texture::Black);
+        topImage->GetRectTransform()->SetAnchoredPosition(0.0f, 240.0f);
+        topImage->GetRectTransform()->SetPivot(0.5f, 0.0f);
+        topImage->GetRectTransform()->SetSizeDelta(10000.0f, 10000.0f);
+    }
+    {
+        UIImage* bottomImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
+        bottomImage->SetTexture(&Texture::Black);
+        bottomImage->GetRectTransform()->SetAnchoredPosition(0.0f, -240.0f);
+        bottomImage->GetRectTransform()->SetPivot(0.5f, 1.0f);
+        bottomImage->GetRectTransform()->SetSizeDelta(10000.0f, 10000.0f);
+    }
+    {
+        UIImage* leftImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
+        leftImage->SetTexture(&Texture::Black);
+        leftImage->GetRectTransform()->SetAnchoredPosition(-320.0f, 0.0f);
+        leftImage->GetRectTransform()->SetPivot(1.0f, 0.5f);
+        leftImage->GetRectTransform()->SetSizeDelta(10000.0f, 10000.0f);
+    }
+    {
+        UIImage* rightImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
+        rightImage->SetTexture(&Texture::Black);
+        rightImage->GetRectTransform()->SetAnchoredPosition(320.0f, 0.0f);
+        rightImage->GetRectTransform()->SetPivot(0.0f, 0.5f);
+        rightImage->GetRectTransform()->SetSizeDelta(10000.0f, 10000.0f);
+    }
 
     // Add arrow control image at bottom-center.
     UIImage* arrowsImage = UIUtil::NewUIActorWithWidget<UIImage>(baseImage->GetOwner());
@@ -162,6 +194,8 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
                         if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "CAMANGLE"))
                         {
                             location.cameraAngle = line.entries[0].GetValueAsVector2();
+                            location.cameraAngle.x = Math::ToRadians(location.cameraAngle.x);
+                            location.cameraAngle.y = Math::ToRadians(location.cameraAngle.y);
                         }
                         else if(StringUtil::EqualsIgnoreCase(line.entries[0].key, "CAMPOS"))
                         {
@@ -211,13 +245,21 @@ void BinocsOverlay::Show()
 {
     SetActive(true);
 
+    // The binocs operate using the normal game camera in the current scene, but perform some trickery to make things look right.
     mGameCamera = gSceneManager.GetScene()->GetCamera();
+
+    // Set the disabled scene flag in the camera, which stops normal camera movement code from running.
     mGameCamera->SetSceneActive(false);
+
+    // Raise the camera up really high in the sky, so it doesn't show any objects in the current scene.
+    // This works because the skybox looks the same regardless of position.
     Vector3 camPos = mGameCamera->GetPosition();
     camPos.y += 10000.0f;
     mGameCamera->SetPosition(camPos);
 
-    mGameCamera->SetAngle(Vector2::Zero);
+    // The binocs start at whichever angle the game camera was using.
+    // This is regardless of the direction Gabe/Grace are facing when they start using the binocs!
+    mZoomedOutCameraAngle = mGameCamera->GetAngle();
 
     // Figure out the use case from the current location and timeblock.
     auto it = mUseCases.find(gLocationManager.GetLocation() + gGameProgress.GetTimeblock().ToString());
@@ -239,10 +281,16 @@ void BinocsOverlay::Hide()
 {
     SetActive(false);
 
-    mGameCamera->SetSceneActive(true);
+    // Move the game camera back down to the ground, undoing the upward move when we shows the binocs interface.
     Vector3 camPos = mGameCamera->GetPosition();
     camPos.y -= 10000.0f;
     mGameCamera->SetPosition(camPos);
+
+    // We do not modify the camera angle at all.
+    // Whichever angle the binocs are at when you exit is what you stay at when exiting the binocs.
+
+    // Re-enable scene inputs for the camera.
+    mGameCamera->SetSceneActive(true);
 
     // Play animation to put away binocs when exiting this screen.
     // Without this, Gabe/Grace just continue to stand with the binocs up to their faces!
@@ -289,7 +337,8 @@ void BinocsOverlay::OnUpdate(float deltaTime)
     {
         // Clamp vertical angle within some bounds.
         mZoomedInCameraAngle += angleChangeDir * deltaTime;
-        //mZoomedInCameraAngle.y = Math::Clamp(mZoomedOutCameraAngle.y, -0.16259, 0.239742);
+        mZoomedInCameraAngle.x = Math::Clamp(mZoomedInCameraAngle.x, mZoomedInCameraAngleLimits.minAngles.x, mZoomedInCameraAngleLimits.maxAngles.x);
+        mZoomedInCameraAngle.y = Math::Clamp(mZoomedInCameraAngle.y, mZoomedInCameraAngleLimits.minAngles.y, mZoomedInCameraAngleLimits.maxAngles.y);
         mGameCamera->SetAngle(mZoomedInCameraAngle);
     }
     else
@@ -321,6 +370,12 @@ void BinocsOverlay::OnUpdate(float deltaTime)
             {
                 mCamZoomToLocCode = entry.first;
             }
+        }
+
+        // If this loc code isn't present in the current use case, we can't zoom there.
+        if(mCurrentUseCase != nullptr && mCurrentUseCase->zoomLocations.find(mCamZoomToLocCode) == mCurrentUseCase->zoomLocations.end())
+        {
+            mCamZoomToLocCode.clear();
         }
 
         // Zoom in button is interactable if we have a location we could zoom to.
@@ -367,6 +422,16 @@ void BinocsOverlay::OnZoomInButtonPressed()
     mGameCamera->SetAngle(mCurrentZoomLocation->cameraAngle);
     mZoomedInCameraAngle = mCurrentZoomLocation->cameraAngle;
 
+    // When zoomed in, the range of rotation on the camera is pretty low.
+    // These values aren't derived from the original game, but they seem to mimic the behavior well enough.
+    const Vector2 kZoomedInAngleRange(0.5f, 0.20f);
+    mZoomedInCameraAngleLimits.minAngles = mZoomedInCameraAngle - kZoomedInAngleRange;
+    mZoomedInCameraAngleLimits.maxAngles = mZoomedInCameraAngle + kZoomedInAngleRange;
+
+    // Zoomed in views always show at 30 degree FOV.
+    mSavedCameraFov = mGameCamera->GetCamera()->GetCameraFovDegrees();
+    mGameCamera->GetCamera()->SetCameraFovDegrees(30.0f);
+
     // Play the entry Sheep.
     if(!mCurrentZoomLocation->enterSheepFunctionName.empty())
     {
@@ -389,6 +454,9 @@ void BinocsOverlay::OnZoomOutButtonPressed()
     // Set camera back to the zoomed out position and angle.
     mGameCamera->SetPosition(mZoomedOutCameraPos);
     mGameCamera->SetAngle(mZoomedOutCameraAngle);
+
+    // Go back to previous FOV.
+    mGameCamera->GetCamera()->SetCameraFovDegrees(mSavedCameraFov);
 
     // Perform some logic specific to the zoomed location.
     if(mCurrentZoomLocation != nullptr)

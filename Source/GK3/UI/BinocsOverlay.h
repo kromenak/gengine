@@ -98,6 +98,7 @@ private:
     {
         Vector2 minAngles;
         Vector2 maxAngles;
+        ZoomAngles() = default;
         ZoomAngles(const Vector2& min, const Vector2& max) : minAngles(min), maxAngles(max) { }
     };
     std::string_map_ci<std::string_map_ci<ZoomAngles>> mZoomAngles = {
@@ -126,12 +127,18 @@ private:
     // Are we currently zoomed in?
     bool mIsZoomedIn = false;
 
+    ZoomAngles mZoomedInCameraAngleLimits;
+
     // The camera angle when the camera is zoomed in.
     Vector2 mZoomedInCameraAngle;
 
     // When zoomed in, we must temporarily replace the scene's BSP geometry.
     // We need to remember the old one so we can swap back to it when we zoom back out.
     BSP* mZoomedOutBSP = nullptr;
+
+    // When zoomed in, we always use 30 degree FOV.
+    // Save the camera's previous FOV for when we zoom back out.
+    float mSavedCameraFov = 60.0f;
     
     void OnZoomInButtonPressed();
     void OnZoomOutButtonPressed();
