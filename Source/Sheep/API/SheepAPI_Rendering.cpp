@@ -1,6 +1,7 @@
 #include "SheepAPI_Rendering.h"
 
 #include "ActionManager.h"
+#include "VideoHelper.h"
 #include "VideoPlayer.h"
 
 using namespace std;
@@ -11,7 +12,7 @@ shpvoid PlayFullScreenMovie(const std::string& movieName)
     //TODO: Double check how original game handles this.
     if(!gActionManager.IsSkippingCurrentAction())
     {
-        gVideoPlayer.Play(movieName, true, true, AddWait());
+        VideoHelper::PlayVideoWithCaptions(movieName, AddWait());
     }
     return 0;
 }
@@ -21,7 +22,7 @@ shpvoid PlayFullScreenMovieX(const std::string& movieName, int autoclose)
 {
     if(!gActionManager.IsSkippingCurrentAction())
     {
-        gVideoPlayer.Play(movieName, true, autoclose != 0 ? true : false, AddWait());
+        VideoHelper::PlayVideoWithCaptions(movieName, true, autoclose != 0 ? true : false, AddWait());
     }
     return 0;
 }
@@ -31,7 +32,7 @@ shpvoid PlayMovie(const std::string& movieName)
 {
     if(!gActionManager.IsSkippingCurrentAction())
     {
-        gVideoPlayer.Play(movieName, false, true, AddWait());
+        VideoHelper::PlayVideoWithCaptions(movieName, false, true, AddWait());
     }
     return 0;
 }

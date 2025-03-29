@@ -222,9 +222,6 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     // If we got here, movie seems to be playing ok!
     // Lock the mouse so it isn't visible and doesn't change position.
     gInputManager.LockMouse();
-    
-    //TODO: Some video files have subtitles associated with them, but the subtitles are not part of the movie file.
-    //TODO: Need to check for a YAK file of the same name and use that to display subtitles during movie playback.
 }
 
 void VideoPlayer::Play(const std::string& name, Color32* transparentColor, UIImage* image, const std::function<void()>& callback)

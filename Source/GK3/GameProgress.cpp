@@ -12,7 +12,7 @@
 #include "StatusOverlay.h"
 #include "StringUtil.h"
 #include "TextAsset.h"
-#include "VideoPlayer.h"
+#include "VideoHelper.h"
 
 GameProgress gGameProgress;
 
@@ -114,7 +114,7 @@ void GameProgress::EndCurrentTimeblock(const std::function<void()>& callback)
     gSceneManager.UnloadScene([this, callback](){
 
         // Play ending movie (if any) for the timeblock we are leaving.
-        gVideoPlayer.Play(mTimeblock.ToString() + "end", true, true, [callback](){
+        VideoHelper::PlayVideoWithCaptions(mTimeblock.ToString() + "end", [callback](){
 
             // That's it - timeblock is over.
             if(callback != nullptr)
@@ -134,7 +134,7 @@ void GameProgress::StartTimeblock(const Timeblock& timeblock, const std::functio
     gGK3UI.ShowTimeblockScreen(timeblock, 0.0f, [this, timeblock, callback](){
 
         // Show beginning movie (if any) for the new timeblock.
-        gVideoPlayer.Play(timeblock.ToString() + "begin", true, true, [this, callback](){
+        VideoHelper::PlayVideoWithCaptions(timeblock.ToString() + "begin", [this, callback](){
 
             // Reload our current location in the new timeblock.
             gSceneManager.LoadScene(gLocationManager.GetLocation());

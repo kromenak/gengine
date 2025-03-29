@@ -28,6 +28,8 @@ public:
     void Play(const std::string& name, bool fullscreen, bool autoclose, std::function<void()> stopCallback);
     void Play(const std::string& name, Color32* transparentColor, UIImage* image, const std::function<void()>& callback);
     void Stop();
+
+    bool IsPlaying() const { return mVideo != nullptr; }
     
 private:
     Layer mLayer;
