@@ -684,7 +684,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyword, "SPEAKERCAPTION"))
                 {
-                    // [FRAME] SPEAKERCAPTION [END_FRAME] [NOUN]
+                    // [FRAME] SPEAKERCAPTION [END_FRAME] [NOUN] [CAPTION]
                     if(line.entries.size() >= 4)
                     {
                         // Read end frame.
@@ -695,8 +695,8 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
 
                         // Read caption.
                         // Unfortunately, the caption *may* contain commas, which interfers with the INI parser. Need to loop to populate.
-                        std::string caption = line.entries[3].key;
-                        for(size_t j = 4; j < line.entries.size(); ++j)
+                        std::string caption = line.entries[4].key;
+                        for(size_t j = 5; j < line.entries.size(); ++j)
                         {
                             caption += ", ";
                             caption += line.entries[j].key;
