@@ -16,6 +16,7 @@
 #include "FootstepManager.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
+#include "InputManager.h"
 #include "InventoryManager.h"
 #include "Loader.h"
 #include "Localizer.h"

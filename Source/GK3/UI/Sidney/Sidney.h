@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "InputManager.h"
 #include "SidneyAddData.h"
 #include "SidneyAnalyze.h"
 #include "SidneyEmail.h"

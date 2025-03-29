@@ -8,6 +8,7 @@
 #include "Debug.h"
 #include "GKActor.h"
 #include "GKObject.h"
+#include "InputManager.h"
 #include "InventoryManager.h"
 #include "Mesh.h"
 #include "Model.h"

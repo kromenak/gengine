@@ -2,6 +2,7 @@
 
 #include "Actor.h"
 #include "AssetManager.h"
+#include "InputManager.h"
 #include "ReportManager.h"
 #include "Texture.h"
 #include "UICanvas.h"

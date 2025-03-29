@@ -4,6 +4,7 @@
 #include "AssetManager.h"
 #include "CursorManager.h"
 #include "GameProgress.h"
+#include "InputManager.h"
 #include "InventoryManager.h"
 #include "Scene.h"
 #include "Texture.h"

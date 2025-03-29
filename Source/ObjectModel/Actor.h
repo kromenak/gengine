@@ -7,7 +7,6 @@
 #include <vector>
 
 #include "Component.h"
-#include "InputManager.h"
 #include "Matrix4.h"
 #include "Quaternion.h"
 #include "Transform.h"

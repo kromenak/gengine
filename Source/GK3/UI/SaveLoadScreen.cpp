@@ -4,6 +4,7 @@
 #include "AudioManager.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
+#include "InputManager.h"
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "RectTransform.h"

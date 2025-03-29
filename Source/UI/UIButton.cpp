@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "CursorManager.h"
 #include "Debug.h"
+#include "InputManager.h"
 #include "Mesh.h"
 #include "RectTransform.h"
 #include "Texture.h"

@@ -8,6 +8,7 @@
 #include "GameProgress.h"
 #include "GEngine.h"
 #include "GK3UI.h"
+#include "InputManager.h"
 #include "InventoryManager.h"
 #include "Renderer.h"
 #include "TextAsset.h"

@@ -1,6 +1,7 @@
 #include "UITextInput.h"
 
 #include "Actor.h"
+#include "InputManager.h"
 
 TYPEINFO_INIT(UITextInput, UILabel, 28)
 {

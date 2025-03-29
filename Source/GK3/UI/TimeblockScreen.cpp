@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "GK3UI.h"
+#include "InputManager.h"
 #include "LocationManager.h"
 #include "SceneManager.h"
 #include "Sequence.h"

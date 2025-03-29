@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "AssetManager.h"
 #include "GameProgress.h"
+#include "InputManager.h"
 #include "Localizer.h"
 #include "LocationManager.h"
 #include "StringUtil.h"

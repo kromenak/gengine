@@ -7,6 +7,7 @@
 #include "Font.h"
 #include "GameProgress.h"
 #include "IniParser.h"
+#include "InputManager.h"
 #include "SidneyButton.h"
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"

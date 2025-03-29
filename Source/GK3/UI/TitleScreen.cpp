@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "GEngine.h"
 #include "GK3UI.h"
+#include "InputManager.h"
 #include "SoundtrackPlayer.h"
 #include "Texture.h"
 #include "UIButton.h"

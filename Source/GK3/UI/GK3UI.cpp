@@ -5,6 +5,7 @@
 #include "DrivingScreen.h"
 #include "FingerprintScreen.h"
 #include "FinishedScreen.h"
+#include "InputManager.h"
 #include "ProgressBar.h"
 #include "SaveLoadScreen.h"
 #include "SceneTransitioner.h"

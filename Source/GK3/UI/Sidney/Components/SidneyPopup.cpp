@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "Font.h"
+#include "InputManager.h"
 #include "RectTransform.h"
 #include "SidneyButton.h"
 #include "SidneyUtil.h"

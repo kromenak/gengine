@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "IniParser.h"
+#include "InputManager.h"
 #include "Localizer.h"
 #include "StringUtil.h"
 #include "TextAsset.h"

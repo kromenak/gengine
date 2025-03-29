@@ -2,6 +2,7 @@
 
 #include "AssetManager.h"
 #include "GEngine.h"
+#include "InputManager.h"
 #include "UICanvas.h"
 #include "UIImage.h"
 

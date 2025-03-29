@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "Console.h"
 #include "Font.h"
+#include "InputManager.h"
 #include "Texture.h"
 #include "UICanvas.h"
 #include "UIImage.h"

@@ -3,6 +3,7 @@
 #include "ActionBar.h"
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "InputManager.h"
 #include "InventoryManager.h"
 #include "RectTransform.h"
 #include "ReportManager.h"

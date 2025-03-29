@@ -5,6 +5,7 @@
 #include "AssetManager.h"
 #include "GameProgress.h"
 #include "GEngine.h"
+#include "InputManager.h"
 #include "InventoryManager.h"
 #include "Texture.h"
 #include "UICanvas.h"

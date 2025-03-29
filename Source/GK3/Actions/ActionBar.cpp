@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include "GK3UI.h"
+#include "InputManager.h"
 #include "InventoryManager.h"
 #include "Scene.h"
 #include "StringUtil.h"
