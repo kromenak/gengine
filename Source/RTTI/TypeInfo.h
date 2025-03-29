@@ -180,6 +180,10 @@ public:
 TypeInfo<PClass, PBaseClass> PClass::sTypeInfo(#PClass, PTypeId); \
 void PClass::InitTypeInfo()
 
+//#define TYPEINFO_INIT(PClass, PBaseClass) \
+//TypeInfo<PClass, PBaseClass> PClass::sTypeInfo(#PClass, GENERATE_TYPE_ID); \
+//void PClass::InitTypeInfo()
+
 // Use this to register a variable to the type's TypeInfo.
 #define TYPEINFO_VAR(PClass, PType, PVar) sTypeInfo.AddVariable(PType, #PVar, offsetof(PClass, PVar))
 

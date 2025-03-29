@@ -2,6 +2,7 @@
 
 #include <cstring>
 
+#include "StringUtil.h"
 #include "TypeDatabase.h"
 
 TYPEINFO_INIT(NoBaseClass, NoBaseClass, NO_BASE_CLASS_TYPE_ID)
@@ -16,7 +17,7 @@ GTypeInfo::GTypeInfo(const char* typeName, TypeId typeId) :
     // If an invalid type ID was passed in, we'll generate one.
     if(typeId == GENERATE_TYPE_ID)
     {
-        //TODO: If typeId is zero or invalid, generate one in a deterministic way.
+        mTypeId = StringUtil::Hash(typeName);
     }
 
     // Register this type in the database.

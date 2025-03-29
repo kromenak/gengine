@@ -311,6 +311,24 @@ namespace StringUtil
         return HashCaseInsensitive(str.c_str());
     }
 
+    inline unsigned long Hash(const char* str)
+    {
+        // DJB2 hash, XOR variant, case-insensitive.
+        // Taken from http://www.cse.yorku.ca/~oz/hash.html
+        unsigned long hash = 5381;
+        int c;
+        while((c = *str++) != 0)
+        {
+            hash = ((hash << 5) + hash) ^ c; /* hash * 33 XOR c */
+        }
+        return hash;
+    }
+
+    inline unsigned long Hash(const std::string& str)
+    {
+        return Hash(str.c_str());
+    }
+
     // Helper structs for using std collections with case-insensitive comparisons/hashing.
     struct CaseInsensitiveCompare
     {
