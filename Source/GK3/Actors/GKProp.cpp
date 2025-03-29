@@ -62,7 +62,6 @@ void GKProp::Init(const SceneData& sceneData)
     for(Material& material : mMeshRenderer->GetMaterials())
     {
         material.SetVector4("uLightPos", Vector4(sceneData.GetGlobalLightPosition(), 1.0f));
-        //material.SetColor("uAmbientColor", Color32(75, 75, 75, 0));
         material.SetColor("uAmbientColor", Color32(126, 126, 126, 0));
     }
 }

@@ -165,7 +165,8 @@ private:
 
     // Helper class for dealing with scene construction (e.g. editor/tool) support.
     SceneConstruction mConstruction;
-	
+
+    void ApplyAmbientLightColorToActors();
 	void ExecuteAction(const Action* action);
 };
 

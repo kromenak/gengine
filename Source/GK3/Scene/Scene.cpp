@@ -291,6 +291,10 @@ void Scene::Init()
 
     // If there's an "Init" SceneFunction for this Scene, execute it.
     SceneFunctions::Execute("Init");
+
+    // Make sure light colors are applied to all actors correctly before our first render.
+    // Doing this here avoids a 1-frame render with bad lighting. Do this after SCENE/ENTER action executes, since that may change actor positions.
+    ApplyAmbientLightColorToActors();
 }
 
 void Scene::Update(float deltaTime)
@@ -300,17 +304,8 @@ void Scene::Update(float deltaTime)
     //TEMP: for debug visualization of BSP ambient light sources.
     //mSceneData->GetBSP()->DebugDrawAmbientLights(mEgo->GetPosition());
 
-    // Apply ambient light to actors.
-    for(auto& actor : mActors)
-    {
-        // Use the "model position" rather than the "actor position" for more accurate lighting.
-        // For example, in RC1, Buthane's actor position is way outside the map (dark color), but her model is near the van.
-        Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(actor->GetFloorPosition());
-        for(Material& material : actor->GetMeshRenderer()->GetMaterials())
-        {
-            material.SetColor("uAmbientColor", ambientColor);
-        }
-    }
+    // Update ambient lighting on actors.
+    ApplyAmbientLightColorToActors();
 
     // Check whether Ego has tripped any triggers.
     if(mEgo != nullptr && !mSceneData->GetTriggers().empty())
@@ -886,6 +881,23 @@ void Scene::InspectObject(const std::string& noun, std::function<void()> finishC
 void Scene::UninspectObject(std::function<void()> finishCallback)
 {
     mCamera->Uninspect(finishCallback);
+}
+
+void Scene::ApplyAmbientLightColorToActors()
+{
+    // Apply ambient light to actors.
+    for(GKActor* actor : mActors)
+    {
+        // Use the "model position" rather than the "actor position" for more accurate lighting.
+        // For example, in RC1, Buthane's actor position is way outside the map (dark color), but her model is near the van.
+        Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(actor->GetFloorPosition());
+        for(Material& material : actor->GetMeshRenderer()->GetMaterials())
+        {
+            material.SetColor("uAmbientColor", ambientColor);
+        }
+    }
+
+    //TODO: Should we also do props here?
 }
 
 void Scene::ExecuteAction(const Action* action)
