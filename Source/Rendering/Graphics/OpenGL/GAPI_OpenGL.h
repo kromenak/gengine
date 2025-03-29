@@ -38,7 +38,8 @@ public:
     void GenerateMipmaps(TextureHandle handle) override;
     void SetTextureWrapMode(TextureHandle handle, Texture::WrapMode wrapMode) override;
     void SetTextureFilterMode(TextureHandle handle, Texture::FilterMode filterMode, bool useMipmaps) override;
-    void ActivateTexture(TextureHandle handle, uint8_t textureUnit) override;
+    void SetTextureUnit(uint8_t textureUnit) override;
+    void ActivateTexture(TextureHandle handle) override;
 
     TextureHandle CreateCubemap(const CubemapParams& params) override;
     void DestroyCubemap(TextureHandle handle) override;

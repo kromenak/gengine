@@ -85,15 +85,22 @@ void Texture::Load(uint8_t* data, uint32_t dataLength)
 
 void Texture::Activate(uint8_t textureUnit)
 {
+    // Make sure we're operating on the correct texture unit, first of all.
+    // If this isn't set first, operations in UploadToGPU *may* errantly unbind an existing texture on the current texture unit.
+    // This can result in weird render states (e.g. using newly uploaded lightmaps as color textures unintentionally).
+    GAPI::Get()->SetTextureUnit(textureUnit);
+
     // Upload to GPU if dirty.
     UploadToGPU();
 
-    // Activate texture in desired texture unit.
-    GAPI::Get()->ActivateTexture(mTextureHandle, textureUnit);
+    // If UploadToGPU had work to do, it probably already did this.
+    // But to be 100% sure, make sure the texture is active/bound to the texture unit!
+    GAPI::Get()->ActivateTexture(mTextureHandle);
 }
 
 /*static*/ void Texture::Deactivate()
 {
+    //TODO: should we pass in texture unit here? Seems a bit dangerous to assume unit 0.
     White.Activate(0);
 }
 
@@ -406,6 +413,10 @@ void Texture::UploadToGPU()
     // Nothing to do.
     if(mDirtyFlags == DirtyFlags::None) { return; }
 
+    //TODO: To perform upload operations, this function must change the bound texture on the current texture unit.
+    //TODO: As a result, it may be a good idea to pass in which texture unit to use?
+    //TODO: Alternatively, this function could change the bound texture, but then change it back once it's done uploading...
+
     // If no texture handle yet, we must create a new texture in the underlying graphics API.
     if(mTextureHandle == nullptr)
     {
@@ -417,9 +428,6 @@ void Texture::UploadToGPU()
     }
     else
     {
-        // Just bind the texture.
-        GAPI::Get()->ActivateTexture(mTextureHandle, 0);
-
         // If pixel data is dirty, upload new pixel data.
         if((mDirtyFlags & DirtyFlags::Pixels) != DirtyFlags::None)
         {

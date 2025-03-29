@@ -119,7 +119,8 @@ public:
     virtual void SetTextureWrapMode(TextureHandle handle, Texture::WrapMode wrapMode) = 0;
     virtual void SetTextureFilterMode(TextureHandle handle, Texture::FilterMode filterMode, bool useMipmaps) = 0;
 
-    virtual void ActivateTexture(TextureHandle handle, uint8_t textureUnit) = 0;
+    virtual void SetTextureUnit(uint8_t textureUnit) = 0;
+    virtual void ActivateTexture(TextureHandle handle) = 0;
 
     // Cubemaps
     struct CubemapSide

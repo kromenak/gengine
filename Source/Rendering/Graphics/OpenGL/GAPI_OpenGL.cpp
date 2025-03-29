@@ -398,9 +398,13 @@ void GAPI_OpenGL::SetTextureFilterMode(TextureHandle handle, Texture::FilterMode
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilterParam);
 }
 
-void GAPI_OpenGL::ActivateTexture(TextureHandle handle, uint8_t textureUnit)
+void GAPI_OpenGL::SetTextureUnit(uint8_t textureUnit)
 {
     GLState::SetTextureUnit(textureUnit);
+}
+
+void GAPI_OpenGL::ActivateTexture(TextureHandle handle)
+{
     GLState::BindTexture(reinterpret_cast<uintptr_t>(handle));
 }
 
