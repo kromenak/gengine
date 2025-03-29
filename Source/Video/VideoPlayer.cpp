@@ -29,7 +29,7 @@ void VideoPlayer::Initialize()
     // Create canvas actor that sticks around forever.
     mVideoCanvasActor = new Actor("VideoPlayer", TransformType::RectTransform);
     mVideoCanvasActor->SetIsDestroyOnLoad(false);
-    mVideoCanvasActor->AddComponent<UICanvas>();
+    mVideoCanvasActor->AddComponent<UICanvas>(6);
     
     // Size canvas rect so it always fills the entire screen.
     RectTransform* canvasRectTransform = mVideoCanvasActor->GetComponent<RectTransform>();

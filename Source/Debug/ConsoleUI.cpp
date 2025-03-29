@@ -16,7 +16,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 	mMini(mini)
 {
 	// Add canvas for UI rendering. Draws above most other stuff.
-	AddComponent<UICanvas>(10);
+	AddComponent<UICanvas>(100);
 
 	// Create screen-sized canvas.
 	RectTransform* canvasTransform = GetComponent<RectTransform>();
