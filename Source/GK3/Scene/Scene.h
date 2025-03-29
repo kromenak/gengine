@@ -47,7 +47,8 @@ class Scene
 {
 public:
     static const char* GetEgoName();
-    
+    static Animator* GetGlobalAnimator();
+
 	Scene(const std::string& name);
 	~Scene();
 	

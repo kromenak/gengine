@@ -39,6 +39,19 @@ std::string Scene::mEgoName;
     return mEgoName.c_str();
 }
 
+/*static*/ Animator* Scene::GetGlobalAnimator()
+{
+    // Otherwise, use a global animator instance.
+    static Animator* globalAnimator = nullptr;
+    if(globalAnimator == nullptr)
+    {
+        Actor* globalAnimatorActor = new Actor("Global Animator");
+        globalAnimatorActor->SetIsDestroyOnLoad(false);
+        globalAnimator = globalAnimatorActor->AddComponent<Animator>();
+    }
+    return globalAnimator;
+}
+
 Scene::Scene(const std::string& name) :
 	mLocation(name),
 	mTimeblock(gGameProgress.GetTimeblock()),
