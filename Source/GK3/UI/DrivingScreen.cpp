@@ -35,7 +35,7 @@ DrivingScreen::DrivingScreen() : Actor(TransformType::RectTransform)
     background->SetReceivesInput(true);
 
     // Add map background image.
-    mMapActor = new Actor(TransformType::RectTransform);
+    mMapActor = new Actor("Map Background", TransformType::RectTransform);
     mMapActor->GetTransform()->SetParent(GetTransform());
     UIImage* mapImage = mMapActor->AddComponent<UIImage>();
     mMapTexture = gAssetManager.LoadTexture("DM_BASE.BMP");
@@ -232,7 +232,7 @@ void DrivingScreen::ExitToLocation(const std::string& locationCode)
 void DrivingScreen::AddLocation(const std::string& locationCode, const std::string& buttonId, const Vector2& buttonPos)
 {
     // Create button actor & widget.
-    Actor* buttonActor = new Actor(TransformType::RectTransform);
+    Actor* buttonActor = new Actor(buttonId, TransformType::RectTransform);
     buttonActor->GetTransform()->SetParent(mMapActor->GetTransform());
     UIButton* button = buttonActor->AddComponent<UIButton>();
 

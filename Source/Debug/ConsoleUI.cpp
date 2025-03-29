@@ -25,7 +25,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 	canvasTransform->SetAnchorMax(Vector2::One);
 
 	// Create background image actor and save transform (so we can move it around).
-	Actor* background = new Actor(TransformType::RectTransform);
+	Actor* background = new Actor("Background", TransformType::RectTransform);
 	mBackgroundTransform = background->GetComponent<RectTransform>();
 	mBackgroundTransform->SetParent(canvasTransform);
 
@@ -61,7 +61,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 
         // Create scrollback text area.
         {
-            Actor* scrollbackActor = new Actor(TransformType::RectTransform);
+            Actor* scrollbackActor = new Actor("Scrollback", TransformType::RectTransform);
             mScrollbackTransform = scrollbackActor->GetComponent<RectTransform>();
             mScrollbackTransform->SetParent(mBackgroundTransform);
 
@@ -78,7 +78,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 
 		// Add horizontal rule for full console.
 		{
-			mHorizontalRuleActor = new Actor(TransformType::RectTransform);
+			mHorizontalRuleActor = new Actor("HR", TransformType::RectTransform);
 			RectTransform* hrTransform = mHorizontalRuleActor->GetComponent<RectTransform>();
 			hrTransform->SetParent(mBackgroundTransform);
 
@@ -96,7 +96,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 		{
 			Font* font = gAssetManager.LoadFont("F_CONSOLE_COMMAND");
 
-			Actor* textInputActor = new Actor(TransformType::RectTransform);
+			Actor* textInputActor = new Actor("Input", TransformType::RectTransform);
 			RectTransform* textInputRT = textInputActor->GetComponent<RectTransform>();
 			textInputRT->SetParent(mBackgroundTransform);
 
@@ -113,7 +113,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 			mTextInput->SetText("");
 
 			// Create text input field caret.
-			Actor* caretActor = new Actor(TransformType::RectTransform);
+			Actor* caretActor = new Actor("Caret", TransformType::RectTransform);
 			RectTransform* caretRT = caretActor->GetComponent<RectTransform>();
 			caretRT->SetParent(textInputRT);
 
@@ -133,7 +133,7 @@ ConsoleUI::ConsoleUI(bool mini) : Actor("Console", TransformType::RectTransform)
 
         // Create console activation image.
         {
-            Actor* imageActor = new Actor(TransformType::RectTransform);
+            Actor* imageActor = new Actor("Cain", TransformType::RectTransform);
             RectTransform* imageRT = imageActor->GetComponent<RectTransform>();
             imageRT->SetParent(canvasTransform);
 

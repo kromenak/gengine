@@ -34,7 +34,7 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
 	
 	// Add exit button to bottom-left corner of screen.
     {
-        Actor* exitButtonActor = new Actor(TransformType::RectTransform);
+        Actor* exitButtonActor = new Actor("Exit Button", TransformType::RectTransform);
         exitButtonActor->GetTransform()->SetParent(GetTransform());
         UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
 
@@ -57,7 +57,7 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
 	
 	// Create closeup image. It's just positioned at center of screen, which is default.
     {
-        Actor* closeupActor = new Actor(TransformType::RectTransform);
+        Actor* closeupActor = new Actor("Closeup Button", TransformType::RectTransform);
         closeupActor->GetTransform()->SetParent(GetTransform());
 
         mCloseupImage = closeupActor->AddComponent<UIButton>();
@@ -67,7 +67,7 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
     {
         for(int i = 0; i < 3; ++i)
         {
-            Actor* lsrActor = new Actor(TransformType::RectTransform);
+            Actor* lsrActor = new Actor("LSR", TransformType::RectTransform);
             lsrActor->GetTransform()->SetParent(mCloseupImage->GetRectTransform());
 
             mLSRButtons[i] = lsrActor->AddComponent<UIButton>();

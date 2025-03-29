@@ -31,7 +31,7 @@ void SceneConstruction::Init(Scene* scene, SceneData* sceneData)
     WalkerBoundary* walkerBoundary = sceneData->GetWalkerBoundary();
     if(walkerBoundary != nullptr)
     {
-        Actor* walkerBoundaryActor = new Actor();
+        Actor* walkerBoundaryActor = new Actor("WalkerBoundaryVisualizer");
         mWalkerBoundaryActor = walkerBoundaryActor;
 
         MeshRenderer* walkerBoundaryMeshRenderer = walkerBoundaryActor->AddComponent<MeshRenderer>();

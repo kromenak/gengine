@@ -22,7 +22,7 @@
 #include "UIToggle.h"
 #include "Window.h"
 
-OptionBar::OptionBar() : Actor(TransformType::RectTransform)
+OptionBar::OptionBar() : Actor("OptionBar", TransformType::RectTransform)
 {
     // Load layout text file, parse to key/value map, and then delete it.
     TextAsset* optionBarText = gAssetManager.LoadText("RC_LAYOUT.TXT", AssetScope::Manual);

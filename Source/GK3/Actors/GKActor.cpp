@@ -40,7 +40,7 @@ GKActor::GKActor(const SceneActor* actorDef) :
 
     // Create a separate Actor for the GKActor's 3D model visuals.
     // This is required b/c the 3D model often moves and is positioned independently of this GKActor instance.
-    mModelActor = new Actor();
+    mModelActor = new Actor(GetName() + "_Model");
 
     // Add 3D model renderer using lit textured shader.
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
