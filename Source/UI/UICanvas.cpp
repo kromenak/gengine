@@ -8,7 +8,7 @@
 std::vector<UICanvas*> UICanvas::sCanvases;
 UIWidget* UICanvas::sMouseOverWidget = nullptr;
 
-/*static*/ void UICanvas::UpdateInput()
+/*static*/ void UICanvas::UpdateMouseInput()
 {
 	// Iterate canvases back-to-front. Since canvases at end of list are rendered last,
 	// they should be the first to receive input events.
@@ -202,6 +202,6 @@ void UICanvas::RemoveWidget(UIWidget* widget)
 
         // We also need to immediately UpdateInput so the sMouseOverWidget updates to whatever else might be under the mouse at this moment.
         // If we don't do this, there's a chance a scene item can be clicked when a UI widget was supposed to block it.
-        UICanvas::UpdateInput();
+        UICanvas::UpdateMouseInput();
     }
 }

@@ -143,9 +143,12 @@ void SidneyButton::SetTextAlignment(HorizontalAlignment alignment)
 
 void SidneyButton::Press()
 {
-    if(mButton->CanInteract())
+    if(mPressAnimTimer <= 0.0f)
     {
-        gAudioManager.PlaySFX(mPressAudio);
-        mPressAnimTimer = 0.3f;
+        if(mButton->CanInteract())
+        {
+            gAudioManager.PlaySFX(mPressAudio);
+            mPressAnimTimer = 0.3f;
+        }
     }
 }

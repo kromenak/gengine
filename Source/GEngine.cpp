@@ -31,6 +31,7 @@
 #include "TextInput.h"
 #include "ThreadPool.h"
 #include "Tools.h"
+#include "UICanvas.h"
 #include "VerbManager.h"
 #include "VideoPlayer.h"
 #include "Window.h"
@@ -325,6 +326,12 @@ void GEngine::ProcessInput()
     // Update the input manager.
     // Retrieve input device states for us to use.
     gInputManager.Update();
+
+    // If the UI system can receive mouse input, update UI mouse input.
+    if(!Tools::EatingKeyboardInputs() && !gInputManager.IsMouseLocked() && !gActionManager.IsActionPlaying() && !Loader::IsLoading())
+    {
+        UICanvas::UpdateMouseInput();
+    }
 
     // We'll poll for events here. Catch the quit event.
     SDL_Event event;

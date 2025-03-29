@@ -10,7 +10,8 @@
 #pragma once
 #include "Component.h"
 
-#include <climits>
+#include <climits> // INT_MAX
+#include <vector>
 
 class RectTransform;
 class UIWidget;
@@ -20,7 +21,7 @@ class UICanvas : public Component
     TYPEINFO_SUB(UICanvas, Component);
 public:
 	static const std::vector<UICanvas*>& GetCanvases() { return sCanvases; }
-	static void UpdateInput();
+	static void UpdateMouseInput();
     static void RenderCanvases();
 	static bool DidWidgetEatInput() { return sMouseOverWidget != nullptr; }
     static void NotifyWidgetDestruct(UIWidget* widget);

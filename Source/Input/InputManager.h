@@ -49,7 +49,7 @@ public:
 
 	void LockMouse();
 	void UnlockMouse();
-	bool MouseLocked() const { return mMouseLocked; }
+	bool IsMouseLocked() const { return mMouseLocked; }
 
 	// Text Input
 	void StartTextInput(TextInput* textInput);

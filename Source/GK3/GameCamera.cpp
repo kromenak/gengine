@@ -417,7 +417,7 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
         }
 
         // Do mouse-based movements if mouse lock is active.
-        if(gInputManager.MouseLocked())
+        if(gInputManager.IsMouseLocked())
         {
             // Pan modifier also activates if right mouse button is pressed.
             panModifierActive |= gInputManager.IsMouseButtonPressed(InputManager::MouseButton::Right);
@@ -524,7 +524,7 @@ void GameCamera::SceneUpdateInteract(float deltaTime)
     // Handle hovering and clicking on scene objects.
     //TODO: Original game seems to ONLY check this when the mouse cursor moves or is clicked (in other words, on input).
     //TODO: Maybe we should do that too?
-    if(!gInputManager.MouseLocked())
+    if(!gInputManager.IsMouseLocked())
     {
         // Only allow scene interaction if pointer isn't over a UI widget.
         if(!UICanvas::DidWidgetEatInput())

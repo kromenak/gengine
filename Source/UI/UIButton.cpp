@@ -260,7 +260,7 @@ void UIButton::ShowTooltip()
 {
     if(!mTooltipText.empty())
     {
-        Tooltip::Get()->Show(mTooltipText);
+        Tooltip::Get()->Show(mTooltipText, this);
     }
 }
 

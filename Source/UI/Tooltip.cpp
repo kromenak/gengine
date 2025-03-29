@@ -108,8 +108,11 @@ Tooltip::Tooltip() : Actor("Tooltip", TransformType::RectTransform)
     mRoot->GetOwner()->SetActive(false);
 }
 
-void Tooltip::Show(const std::string& text, bool debug)
+void Tooltip::Show(const std::string& text, UIWidget* hoverWidget, bool debug)
 {
+    // Set font based on debug or not.
+    mLabel->SetFont(debug ? mDebugFont : mFont);
+
     // Set text. Tooltip may be localized - if so, these localizations are defined in the global loc file.
     mLabel->SetText(gLocalizer.GetText(text));
 
@@ -127,14 +130,10 @@ void Tooltip::Show(const std::string& text, bool debug)
 
     // Rather than show the tooltip right away, we apply a short delay.
     // The length of this delay depends on how long the tooltip has been hidden since it was last shown.
-    if(mHiddenTimer < 0.5f)
-    {
-        mShowDelayTimer = mQuickShowDelay;
-    }
-    else
-    {
-        mShowDelayTimer = mShowDelay;
-    }
+    mShowDelayTimer = mHiddenTimer < 0.5f ? mQuickShowDelay : mShowDelay;
+
+    // Save hover widget so we can track if the widget stays hovered or not.
+    mHoverWidget = hoverWidget;
 }
 
 void Tooltip::Hide()
@@ -144,6 +143,9 @@ void Tooltip::Hide()
 
     // Clear show delay timer to stop errantly showing after timer expires.
     mShowDelayTimer = 0.0f;
+
+    // Clear hover widget.
+    mHoverWidget = nullptr;
 }
 
 void Tooltip::OnUpdate(float deltaTime)
@@ -183,5 +185,17 @@ void Tooltip::OnUpdate(float deltaTime)
     if(!mRoot->GetOwner()->IsActive())
     {
         mHiddenTimer += deltaTime;
+    }
+
+    // If there's an associated hover widget, stop showing the tooltip if the widget is no longer hovered.
+    // This is necessary so that tooltips stop hiding when hover stops, even if UICanvas isn't updating due to loading or an action playing.
+    if(mHoverWidget != nullptr)
+    {
+        // An obvious case is when the hover widget's rect no longer contains the mouse pointer.
+        // However, when mouse is locked, the mouse technically doesn't move, so is still in the rect...BUT the pointer is gone, so consider that "no longer hovered."
+        if(!mHoverWidget->GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition()) || gInputManager.IsMouseLocked())
+        {
+            Hide();
+        }
     }
 }

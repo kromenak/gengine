@@ -1,7 +1,6 @@
 #include "InputManager.h"
 
 #include "Tools.h"
-#include "UICanvas.h"
 #include "Window.h"
 
 InputManager gInputManager;
@@ -32,6 +31,11 @@ void InputManager::Update()
         SDL_memcpy(mPrevKeyboardState, mCurrKeyboardState, mNumKeys);
     }
 
+    // Point current keyboard state to either prev state or new state.
+    // If the tool is eating inputs, we just "reuse" prev keyboard state until the tool is done.
+    // Again, this just stops the game from using inputs meant for the tool.
+    mCurrKeyboardState = (Tools::EatingKeyboardInputs() ? mPrevKeyboardState : mKeyboardState);
+    
     // Copy previous mouse state each frame.
     mPrevMouseButtonState = mMouseButtonState;
 
@@ -41,12 +45,7 @@ void InputManager::Update()
     // This queries device state from the OS.
     // Marks switch from "last frame values" to "current frame values".
     SDL_PumpEvents();
-
-    // Copy current keyboard state over.
-    // If the tool is eating inputs, we just "reuse" prev keyboard state until the tool is done.
-    // Again, this just stops the game from using inputs meant for the tool.
-    mCurrKeyboardState = (Tools::EatingKeyboardInputs() ? mPrevKeyboardState : mKeyboardState);
-
+    
     // Update mouse state. This differs base on whether a tool is using mouse inputs.
     if(!Tools::EatingMouseInputs())
     {
@@ -84,9 +83,6 @@ void InputManager::Update()
             // After delta calc, set mouse position.
             mMousePosition.x = mouseX;
             mMousePosition.y = mouseY;
-
-            // Handle UI input.
-            UICanvas::UpdateInput();
         }
     }
     else // a tool overlay is using the mouse

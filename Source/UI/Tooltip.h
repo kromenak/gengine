@@ -12,6 +12,7 @@
 class Font;
 class RectTransform;
 class UILabel;
+class UIWidget;
 
 class Tooltip : public Actor
 {
@@ -20,7 +21,7 @@ public:
 
     Tooltip();
 
-    void Show(const std::string& text, bool debug = false);
+    void Show(const std::string& text, UIWidget* hoverWidget = nullptr, bool debug = false);
     void Hide();
 
 protected:
@@ -50,4 +51,8 @@ private:
 
     // How long the tooltip has been hidden.
     float mHiddenTimer = 0.0f;
+
+    // If set, the tooltip is associated with a specific widget that the mouse must be hovering.
+    // If the mouse is no longer hovering this widget, the tooltip hides itself.
+    UIWidget* mHoverWidget = nullptr;
 };
