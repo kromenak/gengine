@@ -374,7 +374,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
                 Vector3 toNext = (mPath.front() - GetOwner()->GetPosition()).Normalize();
                 if(Vector3::Dot(GetOwner()->GetForward(), toNext) < -0.5f)
                 {
-                     // For initial direction to turn, let's use the goal node direction.
+                    // For initial direction to turn, let's use the goal node direction.
                     // Just thinking about the real world...you usually turn towards your goal, right?
                     Vector3 toLastDir = (mPath.front() - GetOwner()->GetPosition()).Normalize();
                     Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toLastDir);

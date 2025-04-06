@@ -41,7 +41,7 @@ std::string Scene::mEgoName;
 
 /*static*/ Animator* Scene::GetGlobalAnimator()
 {
-    // Otherwise, use a global animator instance.
+    // Create and return a global animator that persists between scenes.
     static Animator* globalAnimator = nullptr;
     if(globalAnimator == nullptr)
     {
@@ -315,7 +315,7 @@ void Scene::Update(float deltaTime)
     if(mPaused) { return; }
 
     //TEMP: for debug visualization of BSP ambient light sources.
-    //mSceneData->GetBSP()->DebugDrawAmbientLights(mEgo->GetPosition());
+    //GetBSP()->DebugDrawAmbientLights(mEgo->GetPosition());
 
     // Update ambient lighting on actors.
     ApplyAmbientLightColorToActors();
@@ -513,7 +513,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
     
     // Raycast against all BSP.
     RaycastHit bspHitInfo;
-    if(mSceneData->GetBSP()->RaycastNearest(ray, bspHitInfo) && bspHitInfo.t < result.hitInfo.t)
+    if(GetBSP()->RaycastNearest(ray, bspHitInfo) && bspHitInfo.t < result.hitInfo.t)
     {
         // If we get here, some BSP is DEFINITELY closer to the screen than anything the ray has hit before.
         //printf("Raycast hit BSP %s, t=%f\n", bspHitInfo.name.c_str(), bspHitInfo.t);
@@ -576,7 +576,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 	// If interacted object is null, see if we hit the floor, in which case we want to walk.
 	if(interacted == nullptr)
 	{
-		BSP* bsp = mSceneData->GetBSP();
+        BSP* bsp = GetBSP();
 		if(bsp != nullptr)
 		{
 			// Cast ray against scene BSP to see if it intersects with anything.
@@ -733,32 +733,37 @@ const ScenePosition* Scene::GetPosition(const std::string& positionName) const
 
 float Scene::GetFloorY(const Vector3& position) const
 {
-    if(mSceneData == nullptr || mSceneData->GetBSP() == nullptr) { return 0.0f; }
+    if(GetBSP() == nullptr) { return 0.0f; }
 
     float height = 0.0f;
     Texture* texture = nullptr;
-    mSceneData->GetBSP()->GetFloorInfo(position, height, texture);
+    GetBSP()->GetFloorInfo(position, height, texture);
     return height;
+}
+
+void Scene::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture)
+{
+    GetBSP()->GetFloorInfo(position, outHeight, outTexture);
 }
 
 void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* texture)
 {
-	mSceneData->GetBSP()->SetTexture(modelName, texture);
+    GetBSP()->SetTexture(modelName, texture);
 }
 
 void Scene::SetSceneModelVisibility(const std::string& modelName, bool visible)
 {
-	mSceneData->GetBSP()->SetVisible(modelName, visible);
+    GetBSP()->SetVisible(modelName, visible);
 }
 
 bool Scene::IsSceneModelVisible(const std::string& modelName) const
 {
-	return mSceneData->GetBSP()->IsVisible(modelName);
+	return GetBSP()->IsVisible(modelName);
 }
 
 bool Scene::DoesSceneModelExist(const std::string& modelName) const
 {
-	return mSceneData->GetBSP()->Exists(modelName);
+	return GetBSP()->Exists(modelName);
 }
 
 void Scene::SetGameTimer(const std::string& noun, const std::string& verb, float seconds)
@@ -896,6 +901,24 @@ void Scene::UninspectObject(std::function<void()> finishCallback)
     mCamera->Uninspect(finishCallback);
 }
 
+void Scene::SetOverrideBSP(BSP* bsp)
+{
+    // Store override BSP.
+    mOverrideBSP = bsp;
+
+    // Change BSP rendered by renderer.
+    gRenderer.SetBSP(bsp);
+}
+
+void Scene::ClearOverrideBSP()
+{
+    // Clear override BSP.
+    mOverrideBSP = nullptr;
+
+    // Revert to rendering the original scene's BSP.
+    gRenderer.SetBSP(mSceneData != nullptr ? mSceneData->GetBSP() : nullptr);
+}
+
 void Scene::ApplyAmbientLightColorToActors()
 {
     // Apply ambient light to actors.
@@ -903,7 +926,7 @@ void Scene::ApplyAmbientLightColorToActors()
     {
         // Use the "model position" rather than the "actor position" for more accurate lighting.
         // For example, in RC1, Buthane's actor position is way outside the map (dark color), but her model is near the van.
-        Color32 ambientColor = mSceneData->GetBSP()->CalculateAmbientLightColor(actor->GetFloorPosition());
+        Color32 ambientColor = GetBSP()->CalculateAmbientLightColor(actor->GetFloorPosition());
         for(Material& material : actor->GetMeshRenderer()->GetMaterials())
         {
             material.SetColor("uAmbientColor", ambientColor);
@@ -911,6 +934,12 @@ void Scene::ApplyAmbientLightColorToActors()
     }
 
     //TODO: Should we also do props here?
+}
+
+BSP* Scene::GetBSP() const
+{
+    if(mOverrideBSP != nullptr) { return mOverrideBSP; }
+    return mSceneData != nullptr ? mSceneData->GetBSP() : nullptr;
 }
 
 void Scene::ExecuteAction(const Action* action)
@@ -1011,7 +1040,7 @@ void Scene::ExecuteAction(const Action* action)
 			}
 			else
 			{
-				modelPosition = mSceneData->GetBSP()->GetPosition(action->target);
+				modelPosition = GetBSP()->GetPosition(action->target);
 			}
 
 			// Get vector from Ego to model.

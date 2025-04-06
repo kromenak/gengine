@@ -649,9 +649,9 @@ void GKActor::SetModelRotationToActorRotation()
 void GKActor::RefreshFloorInfo()
 {
     Scene* scene = gSceneManager.GetScene();
-    if(scene != nullptr && scene->GetSceneData() != nullptr && scene->GetSceneData()->GetBSP() != nullptr)
+    if(scene != nullptr)
     {
-        scene->GetSceneData()->GetBSP()->GetFloorInfo(GetPosition(), mFloorHeight, mFloorTexture);
+        scene->GetFloorInfo(GetPosition(), mFloorHeight, mFloorTexture);   
     }
 }
 

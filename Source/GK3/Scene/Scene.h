@@ -77,6 +77,7 @@ public:
 	
 	const ScenePosition* GetPosition(const std::string& positionName) const;
     float GetFloorY(const Vector3& position) const;
+    void GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture);
 	
 	void ApplyTextureToSceneModel(const std::string& modelName, Texture* texture);
 	void SetSceneModelVisibility(const std::string& modelName, bool visible);
@@ -90,6 +91,9 @@ public:
     void InspectActiveObject(std::function<void()> finishCallback);
     void InspectObject(const std::string& noun, std::function<void()> finishCallback);
     void UninspectObject(std::function<void()> finishCallback);
+
+    void SetOverrideBSP(BSP* bsp);
+    void ClearOverrideBSP();
 
     SceneData* GetSceneData() const { return mSceneData; }
 	Animator* GetAnimator() const { return mAnimator; }
@@ -111,6 +115,9 @@ private:
 	// Contains scene data references for the current location/timeblock.
 	// If not null, means we're loaded!
 	SceneData* mSceneData = nullptr;
+
+    // On rare occasions (binocs), the scene's BSP gets overridden with another scene's BSP.
+    BSP* mOverrideBSP = nullptr;
 	
 	// The animation player for the scene.
 	Animator* mAnimator = nullptr;
@@ -168,6 +175,7 @@ private:
     SceneConstruction mConstruction;
 
     void ApplyAmbientLightColorToActors();
+    BSP* GetBSP() const;
 	void ExecuteAction(const Action* action);
 };
 

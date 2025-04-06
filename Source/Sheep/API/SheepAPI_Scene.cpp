@@ -207,34 +207,26 @@ RegFunc1(HideModel, void, string, IMMEDIATE, REL_FUNC);
 
 int DoesSceneModelExist(const std::string& modelName)
 {
-    //TODO: To support Binocular logic, we need to get the BSP directly from the Renderer. Is this the best approach?
-    return gRenderer.GetBSP()->Exists(modelName) ? 1 : 0;
-    //return gSceneManager.GetScene()->DoesSceneModelExist(modelName) ? 1 : 0;
+    return gSceneManager.GetScene()->DoesSceneModelExist(modelName) ? 1 : 0;
 }
 RegFunc1(DoesSceneModelExist, int, string, IMMEDIATE, REL_FUNC);
 
 int IsSceneModelVisible(const std::string& modelName)
 {
-    //TODO: To support Binocular logic, we need to get the BSP directly from the Renderer. Is this the best approach?
-    return gRenderer.GetBSP()->IsVisible(modelName) ? 1 : 0;
-    //return gSceneManager.GetScene()->IsSceneModelVisible(modelName) ? 1 : 0;
+    return gSceneManager.GetScene()->IsSceneModelVisible(modelName) ? 1 : 0;
 }
 RegFunc1(IsSceneModelVisible, int, string, IMMEDIATE, REL_FUNC);
 
 shpvoid ShowSceneModel(const std::string& modelName)
 {
-    //TODO: To support Binocular logic, we need to get the BSP directly from the Renderer. Is this the best approach?
-    gRenderer.GetBSP()->SetVisible(modelName, true);
-    //gSceneManager.GetScene()->SetSceneModelVisibility(modelName, true);
+    gSceneManager.GetScene()->SetSceneModelVisibility(modelName, true);
     return 0;
 }
 RegFunc1(ShowSceneModel, void, string, IMMEDIATE, REL_FUNC);
 
 shpvoid HideSceneModel(const std::string& modelName)
 {
-    //TODO: To support Binocular logic, we need to get the BSP directly from the Renderer. Is this the best approach?
-    gRenderer.GetBSP()->SetVisible(modelName, false);
-    //gSceneManager.GetScene()->SetSceneModelVisibility(modelName, false);
+    gSceneManager.GetScene()->SetSceneModelVisibility(modelName, false);
     return 0;
 }
 RegFunc1(HideSceneModel, void, string, IMMEDIATE, REL_FUNC);

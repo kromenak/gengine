@@ -409,13 +409,12 @@ void BinocsOverlay::OnZoomInButtonPressed()
 
     // Remember the camera's current position, for when we zoom back out.
     mZoomedOutCameraPos = mGameCamera->GetPosition();
-
+    
     // Temporarily change the BSP used to that of the zoomed location.
-    mZoomedOutBSP = gRenderer.GetBSP();
     SceneGeometryData geometryData;
     geometryData.Load(mCurrentZoomLocation->sceneAssetName);
     geometryData.GetBSP()->SetFloorObjectName(mCurrentZoomLocation->floorModelName);
-    gRenderer.SetBSP(geometryData.GetBSP());
+    gSceneManager.GetScene()->SetOverrideBSP(geometryData.GetBSP());
 
     // Update the camera position and angle for this zoom location.
     mGameCamera->SetPosition(mCurrentZoomLocation->cameraPos);
@@ -449,7 +448,7 @@ void BinocsOverlay::OnZoomInButtonPressed()
 void BinocsOverlay::OnZoomOutButtonPressed()
 {
     // Go back to the normal scene BSP.
-    gRenderer.SetBSP(mZoomedOutBSP);
+    gSceneManager.GetScene()->ClearOverrideBSP();
 
     // Set camera back to the zoomed out position and angle.
     mGameCamera->SetPosition(mZoomedOutCameraPos);
