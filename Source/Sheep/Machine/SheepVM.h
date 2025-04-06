@@ -124,8 +124,8 @@ public:
 	SheepVM() = default;
 	~SheepVM();
     
-	void Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag = "");
-	void Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag = "");
+	SheepThreadId Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag = "");
+    SheepThreadId Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag = "");
 	
     bool Evaluate(SheepScript* script, int n, int v);
 
@@ -134,8 +134,13 @@ public:
 
 	SheepThread* GetCurrentThread() const { return mCurrentThread; }
 	bool IsAnyThreadRunning() const;
+    bool IsThreadRunning(SheepThreadId id) const;
 
 private:
+    // Each time we execute a Sheepscript, we assign the execution thread a unique ID.
+    // This stores what the next ID should be.
+    SheepThreadId mNextExecutionId = 1;
+
     // Instances of SheepScripts that have been created for execution.
 	std::vector<SheepInstance*> mSheepInstances;
 

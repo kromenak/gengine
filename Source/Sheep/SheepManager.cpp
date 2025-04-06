@@ -23,22 +23,22 @@ SheepScript* SheepManager::Compile(const std::string& name, std::istream& stream
     return compiler.CompileToAsset(name, stream);
 }
 
-void SheepManager::Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag)
+SheepThreadId SheepManager::Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag)
 {
     // If no tag is provided, fall back on using the current layer's name.
     const std::string& realTag = tag.empty() ? gLayerManager.GetTopLayerName() : tag;
 
     // Pass to VM for execution.
-	mVirtualMachine.Execute(script, finishCallback, realTag);
+	return mVirtualMachine.Execute(script, finishCallback, realTag);
 }
 
-void SheepManager::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
+SheepThreadId SheepManager::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
 {
     // If no tag is provided, fall back on using the current layer's name.
     const std::string& realTag = tag.empty() ? gLayerManager.GetTopLayerName() : tag;
 
     // Pass to VM for execution.
-	mVirtualMachine.Execute(script, functionName, finishCallback, realTag);
+	return mVirtualMachine.Execute(script, functionName, finishCallback, realTag);
 }
 
 SheepScript* SheepManager::CompileEval(const std::string& sheep)

@@ -19,8 +19,8 @@ public:
     SheepScript* Compile(const std::string& name, std::istream& stream);
 	
     // Execution - execute a compiled SheepScript.
-	void Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag = "");
-	void Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag = "");
+	SheepThreadId Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag = "");
+    SheepThreadId Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag = "");
 
     // Evaluation - special form of SheepScript; only boolean logic is allowed, must evaluate to true or false. Waiting/callbacks are not allowed.
     SheepScript* CompileEval(const std::string& sheep);
@@ -34,6 +34,7 @@ public:
     // VM State Queries
 	SheepThread* GetCurrentThread() const { return mVirtualMachine.GetCurrentThread(); }
 	bool IsAnyThreadRunning() const { return mVirtualMachine.IsAnyThreadRunning(); }
+    bool IsThreadRunning(SheepThreadId threadId) const { return mVirtualMachine.IsThreadRunning(threadId); }
 	
 private:
 	// Executes binary bytecode sheep scripts.

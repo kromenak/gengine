@@ -13,6 +13,10 @@
 class SheepVM;
 struct SheepInstance;
 
+// A handle/ID for a specific SheepThread execution.
+// Allows external systems to store/query thread state without being able to muck around with state variables.
+typedef uint64_t SheepThreadId;
+
 struct SheepThread
 {
 	// Reference to this thread's virtual machine.
@@ -56,6 +60,10 @@ struct SheepThread
     // Tags are inherited - if a thread starts another thread, that "child" thread gets the same tag.
     // (this is similar to the "owning layer" in the original game, but a bit more generalized)
     std::string mTag;
+
+    // A "thread ID" is a unique number assigned to each executing thread.
+    // Threads are reused, but each time a thread is used, it is guaranteed to have a unique ID that never repeats.
+    SheepThreadId mId = 0;
 
     void Reset();
 

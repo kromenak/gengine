@@ -62,17 +62,18 @@ SheepVM::~SheepVM()
     }
 }
 
-void SheepVM::Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag)
+SheepThreadId SheepVM::Execute(SheepScript* script, std::function<void()> finishCallback, const std::string& tag)
 {
     // This function assumes a byte offset of 0, which is just the first function in the SheepScript.
     // Try to ascertain what the function name is...
     const std::string* firstFuncName = script->GetFunctionAtOffset(0);
 
 	// Execute from bytecode offset 0. There should always be a valid function name, but if not, fallback on a generic "X$".
-    StartExecution(GetInstance(script), 0, (firstFuncName != nullptr ? *firstFuncName : "X$"), finishCallback, tag);
+    SheepThread* thread = StartExecution(GetInstance(script), 0, (firstFuncName != nullptr ? *firstFuncName : "X$"), finishCallback, tag);
+    return thread->mId;
 }
 
-void SheepVM::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
+SheepThreadId SheepVM::Execute(SheepScript* script, const std::string& functionName, std::function<void()> finishCallback, const std::string& tag)
 {
 	// We need a valid script.
 	if(script == nullptr)
@@ -81,7 +82,7 @@ void SheepVM::Execute(SheepScript* script, const std::string& functionName, std:
 		{
 			finishCallback();
 		}
-		return;
+        return 0;
 	}
 	
 	// Get bytecode offset for this function. If less than zero,
@@ -94,11 +95,12 @@ void SheepVM::Execute(SheepScript* script, const std::string& functionName, std:
 		{
 			finishCallback();
 		}
-		return;
+        return 0;
 	}
 	
 	// Execute at bytecode offset.
-	StartExecution(GetInstance(script), bytecodeOffset, functionName, finishCallback, tag);
+	SheepThread* thread = StartExecution(GetInstance(script), bytecodeOffset, functionName, finishCallback, tag);
+    return thread->mId;
 }
 
 bool SheepVM::Evaluate(SheepScript* script, int n, int v)
@@ -187,11 +189,23 @@ void SheepVM::StopExecution(const std::string& tag)
 
 bool SheepVM::IsAnyThreadRunning() const
 {
-	for(auto& thread : mSheepThreads)
+	for(SheepThread* thread : mSheepThreads)
 	{
 		if(thread->mRunning) { return true; }
 	}
 	return false;
+}
+
+bool SheepVM::IsThreadRunning(SheepThreadId id) const
+{
+    for(SheepThread* thread : mSheepThreads)
+    {
+        if(thread->mId == id)
+        {
+            return thread->mRunning;
+        }
+    }
+    return false;
 }
 
 SheepInstance* SheepVM::GetInstance(SheepScript* script)
@@ -413,6 +427,10 @@ SheepThread* SheepVM::StartExecution(SheepInstance* instance, int bytecodeOffset
 	thread->mContext = instance;
 	thread->mWaitCallback = finishCallback;
 	thread->mCodeOffset = bytecodeOffset;
+
+    // Assign a unique execution ID.
+    thread->mId = mNextExecutionId;
+    ++mNextExecutionId;
 
     // Save the tag so we can identify later.
     thread->mTag = tag;
