@@ -1,5 +1,6 @@
 #include "BinocsOverlay.h"
 
+#include "ActionManager.h"
 #include "Animator.h"
 #include "AssetManager.h"
 #include "BSP.h"
@@ -296,11 +297,8 @@ void BinocsOverlay::Hide()
     // Without this, Gabe/Grace just continue to stand with the binocs up to their faces!
     if(mCurrentUseCase != nullptr)
     {
-        Animation* anim = gAssetManager.LoadAnimation(mCurrentUseCase->exitAnimName);
-        if(anim != nullptr)
-        {
-            gSceneManager.GetScene()->GetAnimator()->Start(anim);
-        }
+        // Do this in an action so the player can skip if they want.
+        gActionManager.ExecuteSheepAction(StringUtil::Format("wait StartAnimation(\"%s\")", mCurrentUseCase->exitAnimName.c_str()));
     }
 }
 
