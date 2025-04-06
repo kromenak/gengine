@@ -10,6 +10,7 @@
 #include <string>
 
 #include "Rect.h"
+#include "SheepThread.h"
 #include "StringUtil.h"
 #include "Vector2.h"
 #include "Vector3.h"
@@ -92,6 +93,10 @@ private:
     // The current use case, based on location binocs were used from.
     UseCase* mCurrentUseCase = nullptr;
 
+    // If you rapidly zoom the binocs in/out quickly, a bug arises where entry script executions may overlap one another.
+    // To "fix" this, we track any executing sheep thread and force a "fast-forward" if you zoom in while something's already executing.
+    SheepThreadId mZoomInSheepThreadId = 0;
+
     // For the life of me, I could not decipher the ZOOMRECT/VORECT fields in BINOCS.TXT and how they correlate to the view angle of the binoculars.
     // So...as an alt approach, I recorded approximate angles that should allow you to zoom to certain locations.
     struct ZoomAngles
@@ -127,6 +132,8 @@ private:
     // Are we currently zoomed in?
     bool mIsZoomedIn = false;
 
+    // Stores the range of allowed camera angles while zoomed in.
+    // This is variable because it changes depending on which location you zoom to.
     ZoomAngles mZoomedInCameraAngleLimits;
 
     // The camera angle when the camera is zoomed in.

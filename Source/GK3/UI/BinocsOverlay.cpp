@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
+#include "GEngine.h"
 #include "IniParser.h"
 #include "LocationManager.h"
 #include "Renderer.h"
@@ -429,14 +430,20 @@ void BinocsOverlay::OnZoomInButtonPressed()
     mSavedCameraFov = mGameCamera->GetCamera()->GetCameraFovDegrees();
     mGameCamera->GetCamera()->SetCameraFovDegrees(30.0f);
 
-    // Play the entry Sheep.
-    if(!mCurrentZoomLocation->enterSheepFunctionName.empty())
+    // Similar to action skip, if we're zooming in, but a zoom in Sheepscript is still playing, fast forward to finish it before moving on!
+    while(gSheepManager.IsThreadRunning(mZoomInSheepThreadId))
     {
-        // BINOCS.SHP *may* also have an "all" version of the enter script. This should be called if it exists.
-        std::string allFuncName = gLocationManager.GetLocation() + "all" + mCamZoomToLocCode + "ent$";
-        gSheepManager.Execute(mBinocsScript, allFuncName, nullptr);
-        gSheepManager.Execute(mBinocsScript, mCurrentZoomLocation->enterSheepFunctionName, nullptr);
+        GEngine::Instance()->UpdateGameWorld(10.0f);
     }
+
+    // BINOCS.SHP *may* also have an "all" version of the enter script. This should be called if it exists.
+    std::string allFuncName = gLocationManager.GetLocation() + "all" + mCamZoomToLocCode + "ent$";
+    mZoomInSheepThreadId = gSheepManager.Execute(mBinocsScript, allFuncName, [this](){
+        if(!mCurrentZoomLocation->enterSheepFunctionName.empty())
+        {
+            mZoomInSheepThreadId = gSheepManager.Execute(mBinocsScript, mCurrentZoomLocation->enterSheepFunctionName, nullptr);
+        }
+    });
 
     // We are zoomed in!
     printf("Zoom to %s\n", mCamZoomToLocCode.c_str());
