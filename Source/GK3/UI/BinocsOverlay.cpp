@@ -106,8 +106,8 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
         exitButton->SetHoverTexture(gAssetManager.LoadTexture("BINOCBTNEXITHOV.BMP"));
         exitButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNEXITD.BMP"));
         exitButton->SetDisabledTexture(gAssetManager.LoadTexture("BINOCBTNEXITDIS.BMP"));
-        exitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        exitButton->GetRectTransform()->SetAnchoredPosition(95.0f, 62.0f);
+        exitButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        exitButton->GetRectTransform()->SetAnchoredPosition(95.0f, -389.0f);
         exitButton->SetPressCallback([this](UIButton* button){
             Hide();
         });
@@ -121,8 +121,8 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
         zoomInButton->SetHoverTexture(gAssetManager.LoadTexture("BINOCBTNZOOMINHOV.BMP"));
         zoomInButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNZOOMIND.BMP"));
         zoomInButton->SetDisabledTexture(gAssetManager.LoadTexture("BINOCBTNZOOMINDIS.BMP"));
-        zoomInButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
-        zoomInButton->GetRectTransform()->SetAnchoredPosition(-95.0f, 62.0f);
+        zoomInButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        zoomInButton->GetRectTransform()->SetAnchoredPosition(399.0f, -389.0f);
         zoomInButton->SetPressCallback([this](UIButton* button){
             OnZoomInButtonPressed();
         });
@@ -134,8 +134,8 @@ BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTrans
         zoomOutButton->SetHoverTexture(gAssetManager.LoadTexture("BINOCBTNZOOMOUTHOV.BMP"));
         zoomOutButton->SetDownTexture(gAssetManager.LoadTexture("BINOCBTNZOOMOUTD.BMP"));
         zoomOutButton->SetDisabledTexture(gAssetManager.LoadTexture("BINOCBTNZOOMOUTDIS.BMP"));
-        zoomOutButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
-        zoomOutButton->GetRectTransform()->SetAnchoredPosition(-95.0f, 62.0f);
+        zoomOutButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+        zoomOutButton->GetRectTransform()->SetAnchoredPosition(399.0f, -389.0f);
         zoomOutButton->SetPressCallback([this](UIButton* button){
             OnZoomOutButtonPressed();
         });
