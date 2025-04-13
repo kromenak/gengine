@@ -22,6 +22,7 @@ Skybox* GeneralBlock::CreateSkybox()
 	skybox->SetFrontTexture(gAssetManager.LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene));
 	skybox->SetDownTexture(gAssetManager.LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene));
 	skybox->SetUpTexture(gAssetManager.LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene));
+    skybox->LoadMaskTextures();
 	return skybox;
 }
 

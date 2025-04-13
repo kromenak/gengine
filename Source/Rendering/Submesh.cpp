@@ -118,19 +118,33 @@ bool Submesh::Raycast(const Ray& ray, float& outRayT)
     outRayT = FLT_MAX;
 
     // This function doesn't support certain submesh configurations yet.
-	if(mRenderMode != RenderMode::Triangles || mIndexes == nullptr)
+	if(mRenderMode != RenderMode::Triangles)
 	{
-		std::cout << "Submesh::Raycast only supports Triangle meshes with indexes for now - aborting." << std::endl;
+		std::cout << "Submesh::Raycast only supports 'Triangles' RenderMode - aborting." << std::endl;
 		return false;
 	}
 
     // Check whether the ray hits any triangles in this submesh.
     // Even if hit occurs, can't early out! Must check all triangles in case a closer one (lower t value) is found.
-	for(uint32_t i = 0; i < mVertexArray.GetIndexCount(); i += 3)
+    int elementCount = mIndexes != nullptr ? mVertexArray.GetIndexCount() : mVertexArray.GetVertexCount();
+    Vector3 vert1;
+    Vector3 vert2;
+    Vector3 vert3;
+	for(uint32_t i = 0; i < elementCount; i += 3)
 	{
-		Vector3 vert1 = GetVertexPosition(mIndexes[i]);
-		Vector3 vert2 = GetVertexPosition(mIndexes[i + 1]);
-		Vector3 vert3 = GetVertexPosition(mIndexes[i + 2]);
+        if(mIndexes != nullptr)
+        {
+            vert1 = GetVertexPosition(mIndexes[i]);
+            vert2 = GetVertexPosition(mIndexes[i + 1]);
+            vert3 = GetVertexPosition(mIndexes[i + 2]);
+        }
+        else
+        {
+            vert1 = GetVertexPosition(i);
+            vert2 = GetVertexPosition(i + 1);
+            vert3 = GetVertexPosition(i + 2);
+        }
+	
         float t = FLT_MAX;
 		if(Intersect::TestRayTriangle(ray, vert1, vert2, vert3, t))
 		{
@@ -140,7 +154,7 @@ bool Submesh::Raycast(const Ray& ray, float& outRayT)
             }
 		}
 	}
-	
+
 	// Return whether we hit anything.
 	return outRayT < FLT_MAX;
 }

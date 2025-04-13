@@ -26,6 +26,7 @@
 #include "Renderer.h"
 #include "ReportManager.h"
 #include "SceneFunctions.h"
+#include "Skybox.h"
 #include "SoundtrackPlayer.h"
 #include "StatusOverlay.h"
 #include "StringUtil.h"
@@ -174,24 +175,37 @@ void Scene::Load()
         // "HitTest" type models should be hidden, but still interactive.
         case SceneModel::Type::HitTest:
         {
-            BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
-            if(actor == nullptr) { break; }
-
-            mBSPActors.push_back(actor);
-            mHitTestActors.push_back(actor);
-
-            actor->SetNoun(modelDef->noun);
-            actor->SetVerb(modelDef->verb);
-
-            mSceneData->GetBSP()->SetHitTest(modelDef->name, true);
-
-            // Hit test actors are never *visible* (unless you enable a debug option).
-            actor->SetVisible(false);
-
-            // However, if hidden flag is true, it also means the actor is not interactable.
-            if(modelDef->hidden)
+            // if this is a skybox hit test, it requires special processing.
+            if(StringUtil::StartsWithIgnoreCase(modelDef->name, "skybox_"))
             {
-                actor->SetInteractive(false);
+                GKObject* obj = new GKObject();
+                obj->SetNoun(modelDef->noun);
+
+                uint8_t paletteIndex = static_cast<uint8_t>(StringUtil::ToInt(modelDef->name.substr(7)));
+                mSkyboxHitTests[paletteIndex] = obj;
+            }
+            else
+            {
+                // Otherwise, this hit test should be in the BSP.
+                BSPActor* actor = mSceneData->GetBSP()->CreateBSPActor(modelDef->name);
+                if(actor == nullptr) { break; }
+
+                mBSPActors.push_back(actor);
+                mHitTestActors.push_back(actor);
+
+                actor->SetNoun(modelDef->noun);
+                actor->SetVerb(modelDef->verb);
+
+                mSceneData->GetBSP()->SetHitTest(modelDef->name, true);
+
+                // Hit test actors are never *visible* (unless you enable a debug option).
+                actor->SetVisible(false);
+
+                // However, if hidden flag is true, it also means the actor is not interactable.
+                if(modelDef->hidden)
+                {
+                    actor->SetInteractive(false);
+                }
             }
             break;
         }
@@ -542,6 +556,29 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
                 else
                 {
                     result.hitObject = object;
+                }
+            }
+        }
+    }
+
+    // In addition to 3D models and BSP, GK3 occasionally allows clicking on objects in the skybox.
+    // So if we didn't hit anything else, check if we hit something interesting in the skybox.
+    if(result.hitInfo.t == FLT_MAX)
+    {
+        Skybox* skybox = mSceneData->GetSkybox();
+        if(skybox != nullptr)
+        {
+            // Skybox raycasts are unusual - the ray hits a mask texture, and the palette index at the hit pixel is returned.
+            // In SIF files, the noun associated with that part of the skybox is mapped to that palette index.
+            uint8_t paletteIndex = skybox->Raycast(ray);
+            if(paletteIndex > 0)
+            {
+                auto it = mSkyboxHitTests.find(paletteIndex);
+                if(it != mSkyboxHitTests.end())
+                {
+                    // We hit something in the skybox, and there is a noun associated with it - consider that a hit.
+                    result.hitObject = it->second;
+                    //printf("Sky hittest %s\n", result.hitObject->GetNoun().c_str());
                 }
             }
         }

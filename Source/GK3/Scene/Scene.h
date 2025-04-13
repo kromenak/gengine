@@ -146,6 +146,10 @@ private:
 
     // Actors that are marked as hit test models.
     std::vector<BSPActor*> mHitTestActors;
+
+    // The skyboxes can also have hit tests, but they use a different system!
+    // In this case, a palette index is mapped to a simple object with a noun.
+    std::unordered_map<uint8_t, GKObject*> mSkyboxHitTests;
 	
 	// The Actor the player is controlling in this scene.
     const SceneActor* mEgoSceneActor = nullptr;

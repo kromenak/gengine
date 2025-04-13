@@ -419,18 +419,17 @@ TextureHandle GAPI_OpenGL::CreateCubemap(const CubemapParams& params)
 
     // Create each texture for the cubemap.
     // Note that we MUST create 6 textures, or the cubemap will not display properly.
-    // Also, Front is -Z and Back is +Z. Not sure if this indicates a bug, or a conversion done in the original game, or what?
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, params.right.width, params.right.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, params.right.pixels);
-
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, params.left.width, params.left.height, 0,
-                 GL_RGBA, GL_UNSIGNED_BYTE, params.left.pixels);
-
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, params.front.width, params.front.height, 0,
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGBA, params.front.width, params.front.height, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, params.front.pixels);
 
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, params.back.width, params.back.height, 0,
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGBA, params.back.width, params.back.height, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, params.back.pixels);
+
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGBA, params.right.width, params.right.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, params.right.pixels);
+
+    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGBA, params.left.width, params.left.height, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, params.left.pixels);
 
     glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGBA, params.top.width, params.top.height, 0,
                  GL_RGBA, GL_UNSIGNED_BYTE, params.top.pixels);

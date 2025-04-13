@@ -4,7 +4,6 @@
 // A static class to easily access collision checks between a variety of primitives.
 //
 #pragma once
-
 #include <cfloat>
 #include <string>
 

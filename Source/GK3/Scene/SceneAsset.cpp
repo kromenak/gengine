@@ -75,7 +75,14 @@ void SceneAsset::ParseFromData(uint8_t* data, uint32_t dataLength)
                     Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
                     mSkybox->SetDownTexture(texture);
                 }
+                else if(StringUtil::EqualsIgnoreCase(entry.key, "azimuth"))
+                {
+                    mSkybox->SetAzimuth(Math::ToRadians(entry.GetValueAsFloat()));
+                }
             }
+
+            // Make sure any skybox mask textures are also loaded.
+            mSkybox->LoadMaskTextures();
         }
         else if(StringUtil::EqualsIgnoreCase(section.name, "Lights") || StringUtil::EqualsIgnoreCase(section.name, "Models"))
         {
