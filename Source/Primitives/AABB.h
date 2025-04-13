@@ -10,15 +10,20 @@
 class AABB
 {
 public:
+    static AABB FromMinMax(const Vector3& min, const Vector3& max);
+    static AABB FromPoints(const Vector3& pointA, const Vector3& pointB);
+    static AABB FromCenterAndExtents(const Vector3& center, const Vector3& extents);
+    static AABB FromCenterAndSize(const Vector3& center, const Vector3& size);
+
     AABB() = default;
 	AABB(const Vector3& min, const Vector3& max);
-    AABB(const Vector3& center, float extentsX, float extentsY, float extentsZ);
 	
 	Vector3 GetMin() const { return mMin; }
 	Vector3 GetMax() const { return mMax; }
 	
 	Vector3 GetCenter() const { return mMin + ((mMax - mMin) * 0.5f); }
 	Vector3 GetExtents() const { return ((mMax - mMin) * 0.5f); }
+    Vector3 GetSize() const { return mMax - mMin; }
 	
 	void GrowToContain(const Vector3& point);
 	

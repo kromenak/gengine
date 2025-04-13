@@ -254,7 +254,7 @@ void Debug::DrawPlane(const Plane& plane, const Vector3& point, const Color32& c
     Vector3 pointOnPlane = plane.GetClosestPoint(point);
 
     // Draw a box at that point, then a short line indicating direction of the normal.
-    DrawAABB(AABB(pointOnPlane, 4.0f, 4.0f, 4.0f), color, duration, transformMatrix);
+    DrawAABB(AABB::FromCenterAndExtents(pointOnPlane, Vector3::One * 2.0f), color, duration, transformMatrix);
     DrawLine(pointOnPlane, pointOnPlane + plane.normal * 10.0f, color, duration);
 }
 

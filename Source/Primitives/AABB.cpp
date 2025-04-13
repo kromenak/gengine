@@ -1,17 +1,37 @@
 #include "AABB.h"
 
+/*static*/ AABB AABB::FromMinMax(const Vector3& min, const Vector3& max)
+{
+    return AABB(min, max);
+}
+
+/*static*/ AABB AABB::FromPoints(const Vector3& pointA, const Vector3& pointB)
+{
+    // The difference here is that we don't know which point is the min or max.
+    // But we can let GrowToContain figure it out for us!
+    AABB aabb(pointA, pointA);
+    aabb.GrowToContain(pointB);
+    return aabb;
+}
+
+/*static*/ AABB AABB::FromCenterAndExtents(const Vector3& center, const Vector3& extents)
+{
+    AABB aabb;
+    aabb.mMin = center - extents;
+    aabb.mMax = center + extents;
+    return aabb;
+}
+
+/*static*/ AABB AABB::FromCenterAndSize(const Vector3& center, const Vector3& size)
+{
+    return FromCenterAndExtents(center, size * 0.5f);
+}
+
 AABB::AABB(const Vector3& min, const Vector3& max) :
     mMin(min),
     mMax(max)
 {
     
-}
-
-AABB::AABB(const Vector3& center, float extentsX, float extentsY, float extentsZ)
-{
-    Vector3 halfExtents(extentsX * 0.5f, extentsY * 0.5f, extentsZ * 0.5f);
-    mMin = center - halfExtents;
-    mMax = center + halfExtents;
 }
 
 void AABB::GrowToContain(const Vector3& point)

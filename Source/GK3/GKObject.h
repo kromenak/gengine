@@ -42,7 +42,7 @@ public:
     virtual void StopAnimation(VertexAnimation* anim = nullptr) { }
     virtual MeshRenderer* GetMeshRenderer() const { return nullptr;  }
 
-    virtual AABB GetAABB() { return AABB(GetPosition(), 1.0f, 1.0f, 1.0f); }
+    virtual AABB GetAABB() { return AABB::FromCenterAndSize(GetPosition(), Vector3::One); }
 
     Vector3 GetAudioPosition() const;
 	
