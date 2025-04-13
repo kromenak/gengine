@@ -101,6 +101,9 @@ public:
 
     // Image Modifications
     void FlipVertically();
+    void FlipHorizontally();
+    void RotateClockwise();
+    void RotateCounterclockwise();
     void Resize(uint32_t width, uint32_t height);
     void Crop(uint32_t width, uint32_t height, bool centered = false);
     void Crop(uint32_t x, uint32_t y, uint32_t width, uint32_t height);

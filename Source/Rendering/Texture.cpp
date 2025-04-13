@@ -325,19 +325,77 @@ void Texture::ApplyAlphaChannel(const Texture& alphaTexture, bool useRGB)
 
 void Texture::FlipVertically()
 {
+    // Iterate the top half of the image, swapping each row with its counterpart at the bottom of the image.
     for(uint32_t y = 0; y < mHeight / 2; ++y)
     {
         uint32_t otherY = mHeight - y - 1;
 
         uint8_t* rowAData = mPixels + (y * mWidth * 4);
         uint8_t* rowBData = mPixels + (otherY * mWidth * 4);
-        for(uint32_t xByte = 0; xByte < mWidth * 4; ++xByte)
+        for(uint32_t x = 0; x < mWidth; ++x)
         {
-            uint8_t byte = rowAData[xByte];
-            rowAData[xByte] = rowBData[xByte];
-            rowBData[xByte] = byte;
+            std::swap(reinterpret_cast<uint32_t*>(rowAData)[x],
+                      reinterpret_cast<uint32_t*>(rowBData)[x]);
         }
     }
+
+    // The pixels are dirty.
+    mDirtyFlags |= DirtyFlags::Pixels;
+}
+
+void Texture::FlipHorizontally()
+{
+    // Go row by row and swap pixels across the center of each line.
+    for(uint32_t y = 0; y < mHeight; ++y)
+    {
+        uint8_t* rowPixels = mPixels + (y * mWidth * 4);
+        for(uint32_t x = 0; x < mWidth / 2; ++x)
+        {
+            std::swap(reinterpret_cast<uint32_t*>(rowPixels)[x],
+                      reinterpret_cast<uint32_t*>(rowPixels)[mWidth - x - 1]);
+        }
+    }
+
+    // This dirties the pixels.
+    mDirtyFlags |= DirtyFlags::Pixels;
+}
+
+void Texture::RotateClockwise()
+{
+    // We transpose the pixels "matrix," only processing the upper triangular portion.
+    // This does rotate the image, BUT it leaves it mirrored as well...
+    for(int y = 0; y < mHeight; ++y)
+    {
+        for(int x = y + 1; x < mWidth; ++x)
+        {
+            int offset1 = (y * mWidth + x);
+            int offset2 = (x * mWidth + y);
+            std::swap(reinterpret_cast<uint32_t*>(mPixels)[offset1],
+                      reinterpret_cast<uint32_t*>(mPixels)[offset2]);
+        }
+    }
+
+    // We can resolve the mirrored-ness by flipping (this also dirties the pixels for us).
+    FlipHorizontally();
+}
+
+void Texture::RotateCounterclockwise()
+{
+    // Similar to above, transpose the upper triangular of the pixel matrix.
+    // This is mirrored in the same way as rotating clockwise...
+    for(int y = 0; y < mHeight; ++y)
+    {
+        for(int x = y + 1; x < mWidth; ++x)
+        {
+            int offset1 = (y * mWidth + x);
+            int offset2 = (x * mWidth + y);
+            std::swap(reinterpret_cast<uint32_t*>(mPixels)[offset1],
+                      reinterpret_cast<uint32_t*>(mPixels)[offset2]);
+        }
+    }
+
+    // But flipping vertically gives us a correct counter-clockwise rotation (and also dirties the pixels).
+    FlipVertically();
 }
 
 void Texture::Resize(uint32_t width, uint32_t height)
