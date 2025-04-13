@@ -243,116 +243,145 @@ void Renderer::Render()
 	if(mCamera != nullptr)
 	{
         PROFILER_BEGIN_SAMPLE("Renderer Generate Matrices")
-        // We'll need the projection and view matrix for the camera a few times below.
-        projectionMatrix = mCamera->GetProjectionMatrix();
-        viewMatrix = mCamera->GetLookAtMatrix();
+        {
+            // We'll need the projection and view matrix for the camera a few times below.
+            projectionMatrix = mCamera->GetProjectionMatrix();
+            viewMatrix = mCamera->GetLookAtMatrix();
+        }
         PROFILER_END_SAMPLE();
 
         PROFILER_BEGIN_SAMPLE("Render Skybox");
-        // SKYBOX RENDERING
-        // Draw the skybox first, which is just a little cube around the camera.
-        // Don't write to depth mask, or else you can ONLY see skybox (b/c again, little cube).
-        GAPI::Get()->SetDepthWriteEnabled(false);
-        if(mSkybox != nullptr)
         {
-            // To get the "infinite distance" skybox effect, we need to use a look-at
-            // matrix that doesn't take the camera's position into account.
-            Material::SetViewMatrix(mCamera->GetLookAtMatrixNoTranslate());
+            // SKYBOX RENDERING
+            // Draw the skybox first, which is just a little cube around the camera.
+            // Don't write to depth mask, or else you can ONLY see skybox (b/c again, little cube).
+            GAPI::Get()->SetDepthWriteEnabled(false);
+            if(mSkybox != nullptr)
+            {
+                // To get the "infinite distance" skybox effect, we need to use a look-at
+                // matrix that doesn't take the camera's position into account.
+                Material::SetViewMatrix(mCamera->GetLookAtMatrixNoTranslate());
+                Material::SetProjMatrix(projectionMatrix);
+                mSkybox->Render();
+            }
+            GAPI::Get()->SetDepthWriteEnabled(true);
+        }
+        PROFILER_END_SAMPLE();
+
+        PROFILER_BEGIN_SAMPLE("Render Opaque World Geometry")
+        {
+            // All opaque rendering uses alpha test and culls back faces.
+            Material::UseAlphaTest(true);
+            GAPI::Get()->SetPolygonCullMode(GAPI::CullMode::Back);
+
+            // Set the view & projection matrices for normal 3D camera-oriented rendering.
+            Material::SetViewMatrix(viewMatrix);
             Material::SetProjMatrix(projectionMatrix);
-            mSkybox->Render();
+
+            PROFILER_BEGIN_SAMPLE("Render Opaque BSP");
+            // Render BSP before normal mesh renderers, since it has a tendency to completely cover most of the screen.
+            // This can help reduce overdraw.
+            if(mBSP != nullptr)
+            {
+                mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition(), mCamera->GetOwner()->GetForward());
+            }
+            PROFILER_END_SAMPLE();
+
+            PROFILER_BEGIN_SAMPLE("Render Opaque Meshes");
+            // Render opaque meshes (no particular order).
+            // Sorting is probably not worthwhile b/c BSP likely mostly filled the z-buffer at this point.
+            // And with the z-buffer, we can render opaque meshed correctly regardless of order.
+            for(MeshRenderer* meshRenderer : mMeshRenderers)
+            {
+                meshRenderer->Render(true, false);
+            }
+            PROFILER_END_SAMPLE();
         }
-        GAPI::Get()->SetDepthWriteEnabled(true);
         PROFILER_END_SAMPLE();
 
-        PROFILER_BEGIN_SAMPLE("Render BSP");
-        // OPAQUE BSP RENDERING
-        // All opaque world rendering uses alpha test.
-        Material::UseAlphaTest(true);
-        GAPI::Get()->SetPolygonCullMode(GAPI::CullMode::Back);
-
-        // Set the view & projection matrices for normal 3D camera-oriented rendering.
-        Material::SetViewMatrix(viewMatrix);
-        Material::SetProjMatrix(projectionMatrix);
-
-        // Render opaque BSP. This should occur front-to-back, which has no overdraw.
-        if(mBSP != nullptr)
+        PROFILER_BEGIN_SAMPLE("Render Translucent World Geometry")
         {
-            mBSP->RenderOpaque(mCamera->GetOwner()->GetPosition(), mCamera->GetOwner()->GetForward());
-        }
-        PROFILER_END_SAMPLE();
+            // For translucent rendering, we don't use alpha test.
+            // We also don't want to cull polygons.
+            Material::UseAlphaTest(false);
+            GAPI::Get()->SetPolygonCullMode(GAPI::CullMode::None);
 
-        PROFILER_BEGIN_SAMPLE("Render Objects");
-        // OPAQUE MESH RENDERING
-        // Render opaque meshes (no particular order).
-        // Sorting is probably not worthwhile b/c BSP likely mostly filled the z-buffer at this point.
-        // And with the z-buffer, we can render opaque meshed correctly regardless of order.
-        for(auto& meshRenderer : mMeshRenderers)
-        {
-            meshRenderer->Render();
-        }
+            GAPI::Get()->SetBlendEnabled(true);       // enable blending
+            GAPI::Get()->SetDepthWriteEnabled(false); // don't write to depth buffer
+            GAPI::Get()->SetDepthTestEnabled(true);   // do still test depth buffer
 
-        // Turn off alpha test.
-        Material::UseAlphaTest(false);
-        GAPI::Get()->SetPolygonCullMode(GAPI::CullMode::None);
-        PROFILER_END_SAMPLE();
+            // Currently, all translucent rendering in the world is lightmaps/shadows/decals. These work great with "Multiply" blend mode.
+            //TODO: This seems like a bad global assumption to make, and perhaps the blend mode should be specified by the material.
+            GAPI::Get()->SetBlendMode(GAPI::BlendMode::Multiply);
 
-        PROFILER_BEGIN_SAMPLE("Render Translucent BSP");
-        // TRANSLUCENT WORLD RENDERING
-        GAPI::Get()->SetBlendEnabled(true);       // enable blending
-        GAPI::Get()->SetDepthWriteEnabled(false); // don't write to depth buffer
-        GAPI::Get()->SetDepthTestEnabled(true);   // do still test depth buffer
+            PROFILER_BEGIN_SAMPLE("Render Translucent BSP");
+            // Render translucent BSP (only lightmaps currently).
+            if(mBSP != nullptr)
+            {
+                mBSP->RenderTranslucent();
+            }
+            PROFILER_END_SAMPLE();
 
-        // Currently all translucent BSP are shadow textures or decals, which look great with Multiply blend mode.
-        GAPI::Get()->SetBlendMode(GAPI::BlendMode::Multiply);
-        if(mBSP != nullptr)
-        {
-            mBSP->RenderTranslucent();
+            PROFILER_BEGIN_SAMPLE("Render Translucent Meshes");
+            // Render all translucent meshes.
+            //TODO: Probably about 99% of these meshes are opaque only; it seems a bit wasteful to iterate them again. But maybe it's OK?
+            for(MeshRenderer* meshRenderer : mMeshRenderers)
+            {
+                meshRenderer->Render(false, true);
+            }
+            PROFILER_END_SAMPLE();
         }
         PROFILER_END_SAMPLE();
     }
 
     PROFILER_BEGIN_SAMPLE("Render UI");
-    // UI RENDERING (TRANSLUCENT)
-    GAPI::Get()->SetBlendEnabled(true);       // enable blending
-    GAPI::Get()->SetDepthWriteEnabled(false); // don't write to depth buffer
-    GAPI::Get()->SetDepthTestEnabled(false);  // no depth test b/c UI draws over everything
-    GAPI::Get()->SetBlendMode(GAPI::BlendMode::AlphaBlend);
+    {
+        // UI RENDERING (TRANSLUCENT)
+        GAPI::Get()->SetBlendEnabled(true);       // enable blending
+        GAPI::Get()->SetDepthWriteEnabled(false); // don't write to depth buffer
+        GAPI::Get()->SetDepthTestEnabled(false);  // no depth test b/c UI draws over everything
 
-    // UI uses a view/proj setup for now - world space for UI maps to pixel size of screen.
-    // Bottom-left corner of screen is origin, +x is right, +y is up.
-    Material::SetViewMatrix(Matrix4::Identity);
-    Material::SetProjMatrix(RenderTransforms::MakeOrthoBottomLeft(static_cast<float>(Window::GetWidth()), static_cast<float>(Window::GetHeight())));
+        // UI uses proper alpha blending.
+        GAPI::Get()->SetBlendMode(GAPI::BlendMode::AlphaBlend);
 
-    // Render UI elements.
-    // Any renderable UI element is contained within a Canvas.
-    UICanvas::RenderCanvases();
+        // UI uses a view/proj setup for now - world space for UI maps to pixel size of screen.
+        // Bottom-left corner of screen is origin, +x is right, +y is up.
+        Material::SetViewMatrix(Matrix4::Identity);
+        Material::SetProjMatrix(RenderTransforms::MakeOrthoBottomLeft(static_cast<float>(Window::GetWidth()), static_cast<float>(Window::GetHeight())));
+
+        // Render UI elements.
+        // Any renderable UI element is contained within a Canvas.
+        UICanvas::RenderCanvases();
+    }
     PROFILER_END_SAMPLE();
 
     PROFILER_BEGIN_SAMPLE("Render Debug");
-    // OPAQUE DEBUG RENDERING
-    // Switch back to opaque rendering for debug rendering.
-    // Debug rendering happens after all else, so any previous function can ask for debug draws successfully.
-    GAPI::Get()->SetBlendEnabled(false); // do opaque rendering
-
-    // If depth test is enabled, debug visualizations will be obscured by geometry.
-    // This is sometimes helpful, sometimes not...so toggle it on/off as needed.
-    GAPI::Get()->SetDepthTestEnabled(true);
-
-    // Gotta reset view/proj again...
-    if(mCamera != nullptr)
     {
-        Material::SetViewMatrix(viewMatrix);
-        Material::SetProjMatrix(projectionMatrix);
+        // OPAQUE DEBUG RENDERING
+        // Switch back to opaque rendering for debug rendering.
+        // Debug rendering happens after all else, so any previous function can ask for debug draws successfully.
+        GAPI::Get()->SetBlendEnabled(false); // do opaque rendering
+
+        // If depth test is enabled, debug visualizations will be obscured by geometry.
+        // This is sometimes helpful, sometimes not...so toggle it on/off as needed.
+        GAPI::Get()->SetDepthTestEnabled(!Debug::GetFlag("DrawDebugShapesOverGeometry"));
+
+        // Gotta reset view/proj again...
+        if(mCamera != nullptr)
+        {
+            Material::SetViewMatrix(viewMatrix);
+            Material::SetProjMatrix(projectionMatrix);
+        }
+
+        #if defined(_DEBUG)
+        // Render an axis at the world origin.
+        Debug::DrawAxes(Vector3::Zero);
+        #endif
+
+        // Render debug elements.
+        // Any debug commands from earlier are queued internally, and only drawn when this is called!
+        Debug::Render();
     }
-
-    #if defined(_DEBUG)
-    // Render an axis at the world origin.
-    Debug::DrawAxes(Vector3::Zero);
-    #endif
-
-    // Render debug elements.
-    // Any debug commands from earlier are queued internally, and only drawn when this is called!
-    Debug::Render();
     PROFILER_END_SAMPLE();
 }
 

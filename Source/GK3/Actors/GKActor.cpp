@@ -19,6 +19,13 @@
 #include "VertexAnimator.h"
 #include "Walker.h"
 
+extern Mesh* quad;
+
+namespace
+{
+    const float kShadowSize = 30.0f;
+}
+
 TYPEINFO_INIT(GKActor, GKObject, 33)
 {
 
@@ -44,8 +51,7 @@ GKActor::GKActor(const SceneActor* actorDef) :
 
     // Add 3D model renderer using lit textured shader.
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
-    // Shader must be applied first
-    mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit"));
+    mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit")); // Shader must be applied first
     mMeshRenderer->SetModel(mActorDef->model);
     
     // Add vertex animator so the 3D model can be animated.
@@ -61,6 +67,25 @@ GKActor::GKActor(const SceneActor* actorDef) :
     // Add a walker to this actor.
     mWalker = AddComponent<Walker>();
     mWalker->SetCharacterConfig(config);
+
+    // Create blob shadow under actor.
+    // It must be rotated 90 degrees, since the template quad we're using is on the X/Y plane.
+    // It must be scaled to match the approximate scale of the character models in the game.
+    mShadowActor = new Actor(GetName() + "_Shadow");
+    mShadowActor->SetRotation(Quaternion(Vector3::UnitX, Math::kPiOver2));
+    mShadowActor->SetScale(Vector3(kShadowSize, kShadowSize, 0.0f));
+
+    MeshRenderer* shadowMeshRenderer = mShadowActor->AddComponent<MeshRenderer>();
+    shadowMeshRenderer->SetMesh(quad);
+
+    // The shadow texture is similar to a BSP lightmap texture, so we'll render it in the same way.
+    Material m(gAssetManager.LoadShader("3D-Lightmap"));
+    m.SetDiffuseTexture(&Texture::White);
+    m.SetTexture("uLightmap", gAssetManager.LoadSceneTexture("SHADOW.BMP"));
+    m.SetVector4("uLightmapScaleOffset", Vector4::One);
+    m.SetFloat("uLightmapMultiplier", 2.1f); // higher value makes the shadow less noticeable
+    m.SetTranslucent(true);
+    shadowMeshRenderer->SetMaterial(0, m);
 }
 
 void GKActor::Init(const SceneData& sceneData)
@@ -304,24 +329,9 @@ Vector3 GKActor::GetHeadPosition() const
 
 Vector3 GKActor::GetFloorPosition() const
 {
-    // Get hip pos and convert to world space.
-    // To do this, multiply the mesh->local with local->world to get a mesh->world matrix for transforming.
-    Vector3 meshHipPos = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
-    Vector3 worldHipPos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshHipPos);
-
-    // Get left/right shoe positions.
-    Vector3 meshLeftShoePos = mMeshRenderer->GetMesh(mCharConfig->leftShoeAxesMeshIndex)->GetSubmesh(mCharConfig->leftShoeAxesGroupIndex)->GetVertexPosition(mCharConfig->leftShoeAxesPointIndex);
-    Vector3 worldLeftShoePos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->leftShoeAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshLeftShoePos);
-
-    Vector3 meshRightShoePos = mMeshRenderer->GetMesh(mCharConfig->rightShoeAxesMeshIndex)->GetSubmesh(mCharConfig->rightShoeAxesGroupIndex)->GetVertexPosition(mCharConfig->rightShoeAxesPointIndex);
-    Vector3 worldRightShoePos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->rightShoeAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshRightShoePos);
-
-    // Use left/right shoe positions to determine our floor position.
-    // We're assuming that the actor's lowest foot, minus show thickness, is the floor height.
-    Vector3 floorPos = worldHipPos;
-    floorPos.y = Math::Min(worldLeftShoePos.y, worldRightShoePos.y);
-    floorPos.y -= mCharConfig->shoeThickness;
-    return floorPos;
+    Vector3 leftShoeWorldPos;
+    Vector3 rightShoeWorldPos;
+    return GetModelFloorAndShoePositions(leftShoeWorldPos, rightShoeWorldPos);
 }
 
 void GKActor::SetPosition(const Vector3& position)
@@ -475,7 +485,10 @@ void GKActor::OnUpdate(float deltaTime)
     //Debug::DrawAxes(GetTransform()->GetLocalToWorldMatrix());
 
     // Set actor position to match model's floor position.
-    GetTransform()->SetPosition(GetFloorPosition());
+    Vector3 leftShoeWorldPos;
+    Vector3 rightShoeWorldPos;
+    Vector3 floorPosition = GetModelFloorAndShoePositions(leftShoeWorldPos, rightShoeWorldPos);
+    GetTransform()->SetPosition(floorPosition);
 
     // Set actor facing direction to match the model's facing direction.
     {
@@ -494,6 +507,25 @@ void GKActor::OnUpdate(float deltaTime)
         // Rotate desired direction and amount.
         GetTransform()->Rotate(Vector3::UnitY, angleRadians);
     }
+
+    // Have the blob shadow always be underneath the model's floor position.
+    // Move the shadow up slightly to avoid z-fighting with floor (or rendering under floor).
+    mShadowActor->SetPosition(floorPosition + Vector3::UnitY);
+
+    // Update the scale of the shadow based on how much floor area the actor is taking up. This is mostly affected by walk animations.
+    // We can estimate how big the shadow should be based on shoe positions. Farther apart shoes means more floor covered means bigger shadow.
+    AABB aabb = AABB::FromPoints(leftShoeWorldPos, rightShoeWorldPos);
+
+    // The left/right shoe positions are typically pretty small, but they do give the general shape.
+    // But add the shadow size to this to give shadow buffer around the edges.
+    Vector3 aabbSizeWithBuffer = aabb.GetSize() + Vector3(kShadowSize, 0.0f, kShadowSize);
+    mShadowActor->SetScale(Vector3(aabbSizeWithBuffer.x, aabbSizeWithBuffer.z, 1.0f));
+
+    // Can be used to visualize the size of the final shadow rectangle on the floor.
+    /*
+    aabbSizeWithBuffer.y = 0.0f;
+    Debug::DrawAABB(AABB::FromCenterAndSize(aabb.GetCenter(), aabbSizeWithBuffer), Color32::Red);
+    */
 
     // Update floor info based on updated position.
     RefreshFloorInfo();
@@ -597,6 +629,30 @@ Vector3 GKActor::GetModelFacingDirection() const
 
     //Debug::DrawLine(GetPosition(), GetPosition() + facingDir * 10.0f, Color32::Blue);
     return facingDir;
+}
+
+Vector3 GKActor::GetModelFloorAndShoePositions(Vector3& leftShoeWorldPos, Vector3& rightShoeWorldPos) const
+{
+    // Get hip pos and convert to world space.
+    // To do this, multiply the mesh->local with local->world to get a mesh->world matrix for transforming.
+    Vector3 meshHipPos = mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetSubmesh(mCharConfig->hipAxesGroupIndex)->GetVertexPosition(mCharConfig->hipAxesPointIndex);
+    Vector3 worldHipPos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshHipPos);
+
+    // Get left/right shoe positions.
+    Vector3 meshLeftShoePos = mMeshRenderer->GetMesh(mCharConfig->leftShoeAxesMeshIndex)->GetSubmesh(mCharConfig->leftShoeAxesGroupIndex)->GetVertexPosition(mCharConfig->leftShoeAxesPointIndex);
+    Vector3 worldLeftShoePos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->leftShoeAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshLeftShoePos);
+    leftShoeWorldPos = worldLeftShoePos;
+
+    Vector3 meshRightShoePos = mMeshRenderer->GetMesh(mCharConfig->rightShoeAxesMeshIndex)->GetSubmesh(mCharConfig->rightShoeAxesGroupIndex)->GetVertexPosition(mCharConfig->rightShoeAxesPointIndex);
+    Vector3 worldRightShoePos = (mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->rightShoeAxesMeshIndex)->GetMeshToLocalMatrix()).TransformPoint(meshRightShoePos);
+    rightShoeWorldPos = worldRightShoePos;
+
+    // Use left/right shoe positions to determine our floor position.
+    // We're assuming that the actor's lowest foot, minus show thickness, is the floor height.
+    Vector3 floorPos = worldHipPos;
+    floorPos.y = Math::Min(worldLeftShoePos.y, worldRightShoePos.y);
+    floorPos.y -= mCharConfig->shoeThickness;
+    return floorPos;
 }
 
 void GKActor::SetModelPositionToActorPosition()

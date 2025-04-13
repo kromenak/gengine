@@ -135,10 +135,14 @@ private:
     // So, we must save the start position/rotation for that purpose.
     Vector3 mStartVertexAnimPosition;
     Quaternion mStartVertexAnimRotation;
+
+    // A blob shadow that displays under the actor.
+    Actor* mShadowActor = nullptr;
     
     void OnVertexAnimationStop();
 
     Vector3 GetModelFacingDirection() const;
+    Vector3 GetModelFloorAndShoePositions(Vector3& leftShoeWorldPos, Vector3& rightShoeWorldPos) const;
     void SetModelPositionToActorPosition();
     void SetModelRotationToActorRotation();
 

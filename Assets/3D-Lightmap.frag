@@ -9,10 +9,15 @@ out vec4 oColor;
 uniform float gAlphaTest;
 
 // Uniforms
+// The diffuse/color texture that the lightmap is applied onto.
 uniform sampler2D uDiffuse;
 uniform float uDiffuseVisible = 1.0f; // 1 = diffuse visible, 0 = only lightmap visible
 
+// The lightmap texture that is overlaid on the color texture.
 uniform sampler2D uLightmap;
+
+// A multiplier for the lightmap's RGB.
+// Because lightmaps use "multiply" blend type, a higher multiplier actually makes the shadows weaker/fainter.
 uniform float uLightmapMultiplier = 2.0f;
 
 void main()

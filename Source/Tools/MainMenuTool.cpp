@@ -37,6 +37,10 @@ void MainMenuTool::Render()
         // VIEW menu
         if(ImGui::BeginMenu("View"))
         {
+            if(ImGui::MenuItem("Draw Debug Shapes Over Geometry", nullptr, Debug::GetFlag("DrawDebugShapesOverGeometry")))
+            {
+                Debug::ToggleFlag("DrawDebugShapesOverGeometry");
+            }
             if(ImGui::MenuItem("Bounding Boxes", nullptr, Debug::GetFlag("ShowBoundingBoxes")))
             {
                 Debug::ToggleFlag("ShowBoundingBoxes");
