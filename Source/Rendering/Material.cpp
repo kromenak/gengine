@@ -12,17 +12,17 @@ Matrix4 Material::sCurrentProjMatrix;
 
 float Material::sAlphaTestValue = 0.0f;
 
-void Material::SetViewMatrix(const Matrix4& viewMatrix)
+/*static*/ void Material::SetViewMatrix(const Matrix4& viewMatrix)
 {
 	sCurrentViewMatrix = viewMatrix;
 }
 
-void Material::SetProjMatrix(const Matrix4& projMatrix)
+/*static*/ void Material::SetProjMatrix(const Matrix4& projMatrix)
 {
 	sCurrentProjMatrix = projMatrix;
 }
 
-void Material::UseAlphaTest(bool use)
+/*static*/ void Material::UseAlphaTest(bool use)
 {
 	sAlphaTestValue = use ? 0.1f : 0.0f;
 }
@@ -72,6 +72,12 @@ void Material::Activate(const Matrix4& objectToWorldMatrix)
         }
     }
 
+    // Set user-defined float values.
+    for(auto& entry : mFloats)
+    {
+        mShader->SetUniformFloat(entry.first.c_str(), entry.second);
+    }
+
     // Set user-defined vector values.
     for(auto& entry : mVectors)
     {
@@ -111,13 +117,12 @@ Texture* Material::GetTexture(const std::string& name) const
     return nullptr;
 }
 
+void Material::SetFloat(const std::string& name, float value)
+{
+    mFloats[name] = value;
+}
+
 void Material::SetVector4(const std::string& name, const Vector4& vector)
 {
     mVectors[name] = vector;
-}
-
-bool Material::IsTranslucent()
-{
-	//TODO: Maybe use render queue value for this?
-	return false;
 }

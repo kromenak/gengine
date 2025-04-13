@@ -181,7 +181,7 @@ void MeshRenderer::AddMesh(Mesh* mesh)
 	}
 }
 
-void MeshRenderer::SetMaterial(int index, Material material)
+void MeshRenderer::SetMaterial(int index, const Material& material)
 {
 	if(index >= 0 && index < mMaterials.size())
 	{

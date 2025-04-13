@@ -36,6 +36,7 @@ public:
     void SetTexture(const std::string& name, Texture* texture);
     Texture* GetTexture(const std::string& name) const;
 
+    void SetFloat(const std::string& name, float value);
     void SetVector4(const std::string& name, const Vector4& vector);
     
     // Helpers for setting/getting frequently accessed shader uniforms.
@@ -43,8 +44,9 @@ public:
     
     void SetDiffuseTexture(Texture* texture) { SetTexture("uDiffuse", texture); }
     Texture* GetDiffuseTexture() const { return GetTexture("uDiffuse"); }
-    
-	bool IsTranslucent();
+
+    void SetTranslucent(bool translucent) { mTranslucent = translucent; }
+    bool IsTranslucent() const { return mTranslucent; }
 	
 private:
 	static Matrix4 sCurrentViewMatrix;
@@ -59,6 +61,8 @@ private:
     std::unordered_map<std::string, Color32> mColors;
     std::unordered_map<std::string, Texture*> mTextures;
     std::unordered_map<std::string, Vector4> mVectors;
-    
-    //TODO: Opaque vs. transparent? Render queue value?
+    std::unordered_map<std::string, float> mFloats;
+
+    // If true, this material renders as translucent.
+    bool mTranslucent = false;
 };

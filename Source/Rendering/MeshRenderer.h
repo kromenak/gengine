@@ -38,7 +38,7 @@ public:
     const std::vector<Mesh*>& GetMeshes() const { return mMeshes; }
     Mesh* GetMesh(int index) const;
 	
-	void SetMaterial(int index, Material material);
+	void SetMaterial(int index, const Material& material);
 	Material* GetMaterial(int index);
 	Material* GetMaterial(int meshIndex, int submeshIndex);
     std::vector<Material>& GetMaterials() { return mMaterials; }
