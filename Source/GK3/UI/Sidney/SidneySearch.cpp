@@ -885,11 +885,9 @@ void SidneySearch::TriggerWebPageEvents(const std::string& pageName)
         // Second, you must be within the required LSR steps min/max inclusive.
         if(metAllRequirements)
         {
-            if(dialogueIt->second.lsrMin >= 0 || dialogueIt->second.lsrMax >= 0)
-            {
-                int currentLsrStep = SidneyUtil::GetCurrentLSRStep();
-                metAllRequirements = currentLsrStep >= dialogueIt->second.lsrMin && currentLsrStep <= dialogueIt->second.lsrMax;
-            }
+            int currentLsrStep = SidneyUtil::GetCurrentLSRStep();
+            metAllRequirements = (dialogueIt->second.lsrMin < 0 || currentLsrStep >= dialogueIt->second.lsrMin) &&
+                                 (dialogueIt->second.lsrMax < 0 || currentLsrStep <= dialogueIt->second.lsrMax);
         }
 
         // Finally, any flag conditions must be met.

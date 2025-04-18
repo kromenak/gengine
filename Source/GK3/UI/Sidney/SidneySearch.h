@@ -119,6 +119,7 @@ private:
         { "Solomon.html", "e_sidney_search_solomon" },
         { "StVincent.html", "e_sidney_search_st_vincent" },
         { "TempleEntry.html", "e_sidney_search_temple_solomon" },
+        { "TempleFloorPlan.html", "e_sidney_analysis_send_email_for_floor_plan" },
         { "Soul.html", "e_sidney_search_soul" },
         { "Hexagram.html", "e_sidney_search_hexagram" },
         { "Seal.html", "e_sidney_search_seal" },
