@@ -251,6 +251,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
         mTranslations.back().fileId = SidneyFileIds::kArcadiaText;
         mTranslations.back().language = Language::Latin;
         mTranslations.back().locPrefix = "ArcadiaText";
+        mTranslations.back().alreadyTranslatedLocPrefix = "ArcSUMText";
         mTranslations.back().progressFlag = "ArcadiaTranslated";
         mTranslations.back().scoreEvent = "e_sidney_translate_arcadia";
     }
@@ -374,12 +375,33 @@ std::string SidneyTranslate::GenerateBodyText(const std::string& locPrefix)
 
 void SidneyTranslate::AppendTranslatedText(TranslationAction* action)
 {
-    // Ok, we are going to do the translation!
-    std::string text = mTranslateTextLabel->GetText();
-    text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(),
-        SidneyUtil::GetTranslateLocalizer().GetText(GetLocKeyForLanguage(action->language)).c_str());
-    text += "\n\n" + GenerateBodyText(action->locPrefix + "T");
-    mTranslateTextLabel->SetText(text);
+    // The first line will say "Translating from X to English...".
+    // Figure out what to fill in for X there!
+    std::string toLanguage = SidneyUtil::GetTranslateLocalizer().GetText(GetLocKeyForLanguage(action->language));
+
+    // Generate the first line with the to-language filled in.
+    std::string text = "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(), toLanguage.c_str());
+
+    // Add the body text for this translate action.
+    if(gGameProgress.GetFlag(action->progressFlag) && !action->alreadyTranslatedLocPrefix.empty())
+    {
+        text += "\n\n" + GenerateBodyText(action->alreadyTranslatedLocPrefix + "T");
+    }
+    else
+    {
+        text += "\n\n" + GenerateBodyText(action->locPrefix + "T");
+    }
+
+    // Append final text to translate text buffer.
+    AppendTranslatedText(text);
+}
+
+void SidneyTranslate::AppendTranslatedText(const std::string& text)
+{
+    // Add the new text onto the existing text.
+    mTranslateTextLabel->SetText(mTranslateTextLabel->GetText() + text);
+
+    // Resize the label so its RectTransform fits the text.
     mTranslateTextLabel->GetRectTransform()->SetSizeDeltaY(mTranslateTextLabel->GetTextHeight());
 
     // Theoretically, we're supposed to set the scroll rect to the exact position where the newly translated text was added.
@@ -414,7 +436,14 @@ void SidneyTranslate::OpenFile(int fileId)
     TranslationAction* action = GetTranslationAction(mTranslateFileId);
     if(action != nullptr)
     {
-        bodyText = GenerateBodyText(action->locPrefix);
+        if(gGameProgress.GetFlag(action->progressFlag) && !action->alreadyTranslatedLocPrefix.empty())
+        {
+            bodyText = GenerateBodyText(action->alreadyTranslatedLocPrefix);
+        }
+        else
+        {
+            bodyText = GenerateBodyText(action->locPrefix);
+        }
     }
 
     // Populate translate text with combination of those texts.
@@ -502,17 +531,21 @@ void SidneyTranslate::OnTranslateButtonPressed()
     // For the Arcadia text, there's some additional logic needed.
     if(mTranslateFileId == SidneyFileIds::kArcadiaText)
     {
-        // We translated to/from the right languages, but the translation is missing a word.
-        // Show "sentence incomplete - do you want to add words?" popup.
-        mPopup->ResetToDefaults();
-        mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("Subject") + "\n" + SidneyUtil::GetTranslateLocalizer().GetText("Question"));
-        mPopup->SetTextAlignment(HorizontalAlignment::Left);
-        mPopup->SetWindowPosition(Vector2(88.0f, 135.0f));
-        mPopup->SetWindowSize(Vector2(280.0f, 120.0f));
-        mPopup->ShowTwoButton([this](){
-            // Show the UI flow (popups) to allow the player to enter the missing word.
-            PromptForMissingWord();
-        });
+        // If we've already successfully translated this before, we don't need to enter the missing word.
+        if(!gGameProgress.GetFlag("ArcadiaComplete"))
+        {
+            // We translated to/from the right languages, but the translation is missing a word.
+            // Show "sentence incomplete - do you want to add words?" popup.
+            mPopup->ResetToDefaults();
+            mPopup->SetText(SidneyUtil::GetTranslateLocalizer().GetText("Subject") + "\n" + SidneyUtil::GetTranslateLocalizer().GetText("Question"));
+            mPopup->SetTextAlignment(HorizontalAlignment::Left);
+            mPopup->SetWindowPosition(Vector2(88.0f, 135.0f));
+            mPopup->SetWindowSize(Vector2(280.0f, 120.0f));
+            mPopup->ShowTwoButton([this](){
+                // Show the UI flow (popups) to allow the player to enter the missing word.
+                PromptForMissingWord();
+            });
+        }
     }
 
     // The file is translated.
@@ -532,12 +565,11 @@ void SidneyTranslate::PromptForMissingWord()
         if(StringUtil::EqualsIgnoreCase(input, "sum"))
         {
             // The translation appends to the text output on screen.
-            std::string text = mTranslateTextLabel->GetText();
-            text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("ArcSUMText1");
+            std::string text = "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("ArcSUMText1");
             text += "\n\n" + StringUtil::Format(SidneyUtil::GetTranslateLocalizer().GetText("Translating").c_str(), SidneyUtil::GetTranslateLocalizer().GetText("Latin").c_str());
             text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("ArcSUMTextT1");
             text += "\n\n" + SidneyUtil::GetTranslateLocalizer().GetText("Updating");
-            mTranslateTextLabel->SetText(text);
+            AppendTranslatedText(text);
 
             // Grace says "BINGO we got it!"
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02OFS2ZPF5\", 1)");

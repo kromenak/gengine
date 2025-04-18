@@ -4,6 +4,7 @@
 #include "Actor.h"
 #include "AssetManager.h"
 #include "SidneyFiles.h"
+#include "SidneyTranslate.h"
 #include "SidneyUtil.h"
 #include "UIImage.h"
 #include "UINineSlice.h"
@@ -84,7 +85,8 @@ void SidneyAnalyze::AnalyzeText_OnAnalyzeButtonPressed()
 
 void SidneyAnalyze::AnalyzeText_OnTranslateButtonPressed()
 {
-
+    Hide();
+    mSidneyTranslate->Show(mAnalyzeFileId);
 }
 
 void SidneyAnalyze::AnalyzeText_OnAnagramParserPressed()

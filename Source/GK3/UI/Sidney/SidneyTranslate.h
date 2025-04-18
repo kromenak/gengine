@@ -74,13 +74,16 @@ private:
         // File being translated.
         int fileId = -1;
 
-        // Language to translate this file fromt.
+        // Language to translate this file from.
         Language language;
 
         // A prefix used to generate the unlocalized and localized text.
         std::string locPrefix;
 
-        // If set, this flag is set upon successful translation;
+        // In some cases, a different loc prefix is used if you successfully translated an item before.
+        std::string alreadyTranslatedLocPrefix;
+
+        // If set, this flag is set upon successful translation.
         std::string progressFlag;
 
         // If set, this score event triggers upon successful translation.
@@ -95,6 +98,7 @@ private:
     std::string GetLocKeyForLanguage(Language language);
     std::string GenerateBodyText(const std::string& locPrefix);
     void AppendTranslatedText(TranslationAction* action);
+    void AppendTranslatedText(const std::string& text);
 
     void OpenFile(int fileId);
     void OnTranslateButtonPressed();

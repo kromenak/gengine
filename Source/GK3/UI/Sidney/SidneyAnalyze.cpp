@@ -71,12 +71,13 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
 
         // "Translate" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item2"), [this](){
-            Hide();
-            mSidneyTranslate->Show(mAnalyzeFileId);
+            AnalyzeText_OnTranslateButtonPressed();
         });
 
         // "Anagram Parser" choice.
-        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item3"), nullptr);
+        mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item3"), [this](){
+            AnalyzeText_OnAnagramParserPressed();
+        });
 
         // "Analyze Text" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu2Item4"), [this](){
