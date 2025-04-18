@@ -460,6 +460,46 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
             gGameProgress.ChangeScore("e_sidney_analysis_view_words_poussin");
         });
     }
+    else if(mAnalyzeFileId == SidneyFileIds::kTeniersPostcard2)
+    {
+        // Play zoom in video.
+        AnalyzeImage_PlayVideo("Tenierzoom.avi", mAnalyzeVideoImages[2], "", [this](){
+
+            // Turn off video image once this video finishes.
+            mAnalyzeVideoImages[2]->SetEnabled(false);
+
+            // Zoom & Clarify shows a popup with a zoomed image containing a bible page.
+            // Show a popup with an embedded image and yes/no options.
+            mAnalyzePopup->ResetToDefaults();
+            mAnalyzePopup->SetWindowPosition(Vector2(-78.0f, 37.0f));
+
+            mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
+            mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("GetVerse"));
+
+            mAnalyzePopup->SetImage(gAssetManager.LoadTexture("TENIERS_ZOOM.BMP"));
+
+            // This popup has yes/no options.
+            // If yes is pressed, we "reach out to the internet" to get the text.
+            mAnalyzePopup->ShowTwoButton([this](){
+                
+                // Play a modem SFX, so it seems like we're reaching out to the internet...
+                gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDMODEM.WAV", AssetScope::Scene));
+                ShowAnalyzeMessage("RetrieveVerse", Vector2(), HorizontalAlignment::Center, true);
+
+                // The audio file is about six seconds long.
+                Timers::AddTimerSeconds(6.0f, [this](){
+
+                    // Show the verse and play some dialogue.
+                    // There are no points or flags associated with this action though.
+                    ShowAnalyzeMessage("Verse", Vector2(), HorizontalAlignment::Left);
+                    gActionManager.ExecuteDialogueAction("02OCB2ZQ35", 1);
+                });
+            });
+
+            // Add to score just for zooming in.
+            gGameProgress.ChangeScore("e_sidney_analysis_view_words_tenier");
+        });
+    }
 }
 
 void SidneyAnalyze::AnalyzeImage_ResetVideoImage(UIImage* image)
