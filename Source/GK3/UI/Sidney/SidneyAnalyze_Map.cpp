@@ -1823,7 +1823,7 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
         if(lermitagePoint != Vector2::Zero && poussinTombPoint != Vector2::Zero)
         {
             // Says "line passes through meridian at sunrise line."
-            ShowAnalyzeMessage("MapLine3Note");
+            ShowAnalyzeMessage("MapLine3Note", Vector2(), HorizontalAlignment::Center);
 
             // Remove points placed by the player.
             mMap.zoomedIn.points->RemovePoint(lermitagePoint);
@@ -1851,6 +1851,7 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
                                               mMap.ToZoomedOutPoint(kPoussinTombPoint));
 
                 // Leo is done!
+                gGameProgress.ChangeScore("e_sidney_map_poussin");
                 gGameProgress.SetFlag("Leo");
             }
         }
