@@ -11,7 +11,8 @@
 
 TYPEINFO_INIT(UILabel, UIWidget, 21)
 {
-
+    TYPEINFO_VAR(UILabel, VariableType::Asset, mFont);
+    TYPEINFO_VAR(UILabel, VariableType::String, mText);
 }
 
 UILabel::UILabel(Actor* owner) : UIWidget(owner)

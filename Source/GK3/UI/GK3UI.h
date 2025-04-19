@@ -11,6 +11,7 @@ class BinocsOverlay;
 class CaptionsOverlay;
 class DrivingScreen;
 class FingerprintScreen;
+class GPSOverlay;
 class ProgressBar;
 class SaveLoadScreen;
 class SceneTransitioner;
@@ -53,6 +54,9 @@ public:
     void ShowFingerprintInterface(const std::string& nounName);
     void ShowBinocsOverlay();
 
+    void ShowGPSOverlay();
+    void HideGPSOverlay();
+
     bool IsAnyKeyPressedOutsideTextInputAndConsole();
 
 private:
@@ -72,6 +76,7 @@ private:
 
     FingerprintScreen* mFingerprintScreen = nullptr;
     BinocsOverlay* mBinocsOverlay = nullptr;
+    GPSOverlay* mGPSOverlay = nullptr;
 };
 
 extern GK3UI gGK3UI;

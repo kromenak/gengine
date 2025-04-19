@@ -5,6 +5,7 @@
 #include "DrivingScreen.h"
 #include "FingerprintScreen.h"
 #include "FinishedScreen.h"
+#include "GPSOverlay.h"
 #include "InputManager.h"
 #include "ProgressBar.h"
 #include "SaveLoadScreen.h"
@@ -248,6 +249,24 @@ void GK3UI::ShowBinocsOverlay()
         mBinocsOverlay->SetIsDestroyOnLoad(false);
     }
     mBinocsOverlay->Show();
+}
+
+void GK3UI::ShowGPSOverlay()
+{
+    if(mGPSOverlay == nullptr)
+    {
+        mGPSOverlay = new GPSOverlay();
+        mGPSOverlay->SetIsDestroyOnLoad(false);
+    }
+    mGPSOverlay->Show();
+}
+
+void GK3UI::HideGPSOverlay()
+{
+    if(mGPSOverlay != nullptr)
+    {
+        mGPSOverlay->Hide();
+    }
 }
 
 bool GK3UI::IsAnyKeyPressedOutsideTextInputAndConsole()

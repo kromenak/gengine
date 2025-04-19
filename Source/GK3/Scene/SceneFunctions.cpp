@@ -3,6 +3,7 @@
 #include "ActionManager.h"
 #include "DialogueManager.h"
 #include "GameProgress.h"
+#include "GK3UI.h"
 #include "GKObject.h"
 #include "LaserHead.h"
 #include "LocationManager.h"
@@ -253,8 +254,21 @@ namespace
     {
         AddDot(3);
     }
+}
 
-    
+namespace
+{
+    // Strangely, the GPS interface is not shown via a dedicated Sheep API call.
+    // Instead, it hooks into the SceneFunctions system in a few scenes.
+    void GPS_On()
+    {
+        gGK3UI.ShowGPSOverlay();
+    }
+
+    void GPS_Off()
+    {
+        gGK3UI.HideGPSOverlay();
+    }
 }
 
 void SceneFunctions::Execute(const std::string& functionName)
@@ -285,6 +299,9 @@ void SceneFunctions::Execute(const std::string& functionName)
         sSceneFunctions["chu-angel4"] = CHU_Angel4;
         sSceneFunctions["chu-erase"] = CHU_Erase;
 
+        // LER
+        sSceneFunctions["ler-on"] = GPS_On;
+        sSceneFunctions["ler-off"] = GPS_Off;
         initialized = true;
     }
 
