@@ -16,6 +16,7 @@
 #include "Vector3.h"
 
 class Skybox;
+struct SkyboxTextures;
 
 /*
 // SCN assets often have fairly complex lighting definitions in them.
@@ -44,6 +45,8 @@ struct SceneLight
 class SceneAsset : public Asset
 {
 public:
+    static void FixGK3SkyboxTextures(SkyboxTextures& skyboxTextures);
+
     SceneAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 	~SceneAsset();
 

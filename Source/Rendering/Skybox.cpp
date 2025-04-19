@@ -64,6 +64,18 @@ namespace
     };
 }
 
+Skybox::Skybox(const SkyboxTextures& textures) : mTextures(textures)
+{
+    // Load any mask textures.
+    for(int i = 0; i < 6; ++i)
+    {
+        if(textures.array[i] != nullptr)
+        {
+            mMaskTextures.array[i] = gAssetManager.LoadSceneTexture(textures.array[i]->GetNameNoExtension() + "_MASK", textures.array[i]->GetScope());
+        }
+    }
+}
+
 Skybox::~Skybox()
 {
     // Delete skybox mesh.
@@ -78,75 +90,14 @@ Skybox::~Skybox()
 
 void Skybox::Render()
 {
-    // Generate submesh on the fly, if not yet generated.
+    // The first time we try to render, create all rendering objects.
+    // We can't do this stuff in the constructor because that might happen on a background loading thread.
+    // And OpenGL, for example, wants you to do rendering tasks on the main thread only.
     if(mSkyboxMesh == nullptr)
     {
-        MeshDefinition meshDefinition(MeshUsage::Static, 36);
-        meshDefinition.SetVertexLayout(VertexLayout::Packed);
-        meshDefinition.AddVertexData(VertexAttribute::Position, points);
-        meshDefinition.ownsData = false;
-        
-        mSkyboxMesh = new Mesh();
-        mSkyboxMesh->AddSubmesh(meshDefinition);
-        
-        // Also use this opportunity to set the shader on the material.
-        Shader* skyboxShader = gAssetManager.LoadShader("3D-Skybox");
-        mMaterial.SetShader(skyboxShader);
+        CreateMeshAndCubemap();
     }
 
-    // Generate cubemap texture, if not yet generated.
-    if(mCubemapHandle == nullptr)
-    {
-        GAPI::CubemapParams params;
-        if(mRightTexture != nullptr)
-        {
-            params.right.width = mRightTexture->GetWidth();
-            params.right.height = mRightTexture->GetHeight();
-            params.right.pixels = mRightTexture->GetPixelData();
-        }
-        if(mLeftTexture != nullptr)
-        {
-            params.left.width = mLeftTexture->GetWidth();
-            params.left.height = mLeftTexture->GetHeight();
-            params.left.pixels = mLeftTexture->GetPixelData();
-        }
-
-        // GK3 puts the front texture in the -Z direction, and the back texture in the +Z direction.
-        // I have no idea why this is the case, but even in the original game, this is true.
-        if(mFrontTexture != nullptr)
-        {
-            params.back.width = mFrontTexture->GetWidth();
-            params.back.height = mFrontTexture->GetHeight();
-            params.back.pixels = mFrontTexture->GetPixelData();
-        }
-        if(mBackTexture != nullptr)
-        {
-            params.front.width = mBackTexture->GetWidth();
-            params.front.height = mBackTexture->GetHeight();
-            params.front.pixels = mBackTexture->GetPixelData();
-        }
-
-        // GK3 up/down textures are rotated counter-clockwise 90 degrees.
-        // Not sure why this choice was made, but it's required for skybox seams to match up.
-        if(mUpTexture != nullptr)
-        {
-            mUpTexture->RotateCounterclockwise();
-
-            params.top.width = mUpTexture->GetWidth();
-            params.top.height = mUpTexture->GetHeight();
-            params.top.pixels = mUpTexture->GetPixelData();
-        }
-        if(mDownTexture != nullptr)
-        {
-            mDownTexture->RotateCounterclockwise();
-
-            params.bottom.width = mDownTexture->GetWidth();
-            params.bottom.height = mDownTexture->GetHeight();
-            params.bottom.pixels = mDownTexture->GetPixelData();
-        }
-        mCubemapHandle = GAPI::Get()->CreateCubemap(params);
-    }
-	
 	// Activate the material.
     mMaterial.Activate(mRotationMatrix);
 	
@@ -155,105 +106,6 @@ void Skybox::Render()
 
 	// Render the skybox.
     mSkyboxMesh->Render();
-}
-
-void Skybox::SetRightTexture(Texture* texture)
-{
-	if(texture == nullptr) { return; }
-	mRightTexture = texture;
-	SetDefaultTexture(texture);
-}
-
-void Skybox::SetLeftTexture(Texture* texture)
-{
-	if(texture == nullptr) { return; }
-	mLeftTexture = texture;
-	SetDefaultTexture(texture);
-}
-
-void Skybox::SetFrontTexture(Texture* texture)
-{
-	if(texture == nullptr) { return; }
-	mFrontTexture = texture;
-	SetDefaultTexture(texture);
-}
-
-void Skybox::SetBackTexture(Texture* texture)
-{
-	if(texture == nullptr) { return; }
-	mBackTexture = texture;
-	SetDefaultTexture(texture);
-}
-
-void Skybox::SetUpTexture(Texture* texture)
-{
-	if(texture == nullptr) { return; }
-	mUpTexture = texture;
-	SetDefaultTexture(texture);
-}
-
-void Skybox::SetDownTexture(Texture* texture)
-{
-	if(texture == nullptr) { return; }
-	mDownTexture = texture;
-	SetDefaultTexture(texture);
-}
-
-void Skybox::LoadMaskTextures()
-{
-    if(mRightTexture != nullptr)
-    {
-        Texture* maskTexture = gAssetManager.LoadSceneTexture(mRightTexture->GetNameNoExtension() + "_MASK", mRightTexture->GetScope());
-        if(maskTexture != nullptr)
-        {
-            SetRightMaskTexture(maskTexture);
-        }
-    }
-    if(mLeftTexture != nullptr)
-    {
-        Texture* maskTexture = gAssetManager.LoadSceneTexture(mLeftTexture->GetNameNoExtension() + "_MASK", mLeftTexture->GetScope());
-        if(maskTexture != nullptr)
-        {
-            SetLeftMaskTexture(maskTexture);
-        }
-    }
-    if(mFrontTexture != nullptr)
-    {
-        Texture* maskTexture = gAssetManager.LoadSceneTexture(mFrontTexture->GetNameNoExtension() + "_MASK", mFrontTexture->GetScope());
-        if(maskTexture != nullptr)
-        {
-            SetFrontMaskTexture(maskTexture);
-        }
-    }
-    if(mBackTexture != nullptr)
-    {
-        Texture* maskTexture = gAssetManager.LoadSceneTexture(mBackTexture->GetNameNoExtension() + "_MASK", mBackTexture->GetScope());
-        if(maskTexture != nullptr)
-        {
-            SetBackMaskTexture(maskTexture);
-        }
-    }
-    if(mUpTexture != nullptr)
-    {
-        Texture* maskTexture = gAssetManager.LoadSceneTexture(mUpTexture->GetNameNoExtension() + "_MASK", mUpTexture->GetScope());
-        if(maskTexture != nullptr)
-        {
-            SetUpMaskTexture(maskTexture);
-        }
-    }
-    if(mDownTexture != nullptr)
-    {
-        Texture* maskTexture = gAssetManager.LoadSceneTexture(mDownTexture->GetNameNoExtension() + "_MASK", mDownTexture->GetScope());
-        if(maskTexture != nullptr)
-        {
-            SetDownMaskTexture(maskTexture);
-        }
-    }
-}
-
-void Skybox::SetAzimuth(float radians)
-{
-    mRotationMatrix = Matrix4::MakeRotateY(radians);
 }
 
 uint8_t Skybox::Raycast(const Ray& ray)
@@ -268,12 +120,16 @@ uint8_t Skybox::Raycast(const Ray& ray)
     if(mSkyboxMesh == nullptr || mSkyboxMesh->GetSubmeshCount() == 0) { return 0; }
 
     // We can avoid doing any of this if no mask texture is defined.
-    if(mLeftMaskTexture == nullptr && mRightMaskTexture == nullptr &&
-       mBackMaskTexture == nullptr && mFrontMaskTexture == nullptr &&
-       mDownMaskTexture == nullptr && mUpMaskTexture == nullptr)
+    bool anyMaskTexture = false;
+    for(Texture* texture : mMaskTextures.array)
     {
-        return 0;
+        if(texture != nullptr)
+        {
+            anyMaskTexture = true;
+            break;
+        }
     }
+    if(!anyMaskTexture) { return 0; }
 
     // There is a mask, so we might hit it. Do the actual raycast logic.
 
@@ -321,43 +177,43 @@ uint8_t Skybox::Raycast(const Ray& ray)
             const float kSideDetectPrecision = 0.1f;
             Texture* maskTexture = nullptr;
             Vector2 finalUV;
-            if(Math::Approximately(hitPoint.x, kSkyboxSize, kSideDetectPrecision))
-            {
-                //printf("Right\n");
-                finalUV = Vector2(1.0f - pointUV.z, pointUV.y);
-                maskTexture = mRightMaskTexture;
-            }
-            else if(Math::Approximately(hitPoint.x, -kSkyboxSize, kSideDetectPrecision))
+            if(Math::Approximately(hitPoint.x, -kSkyboxSize, kSideDetectPrecision))
             {
                 //printf("Left\n");
                 finalUV = Vector2(pointUV.z, pointUV.y);
-                maskTexture = mLeftMaskTexture;
+                maskTexture = mMaskTextures.named.left;
             }
-            else if(Math::Approximately(hitPoint.y, kSkyboxSize, kSideDetectPrecision))
+            else if(Math::Approximately(hitPoint.x, kSkyboxSize, kSideDetectPrecision))
             {
-                //printf("Up\n");
-                finalUV = Vector2(1.0f - pointUV.z, 1.0f - pointUV.x);
-                maskTexture = mUpMaskTexture;
-            }
-            else if(Math::Approximately(hitPoint.y, -kSkyboxSize, kSideDetectPrecision))
-            {
-                //printf("Down\n");
-                finalUV = Vector2(1.0f - pointUV.z, pointUV.x);
-                maskTexture = mDownMaskTexture;
-            }
-            else if(Math::Approximately(hitPoint.z, kSkyboxSize, kSideDetectPrecision))
-            {
-                //printf("Front\n");
-                finalUV = Vector2(pointUV.x, pointUV.y);
-                maskTexture = mBackMaskTexture;
+                //printf("Right\n");
+                finalUV = Vector2(1.0f - pointUV.z, pointUV.y);
+                maskTexture = mMaskTextures.named.right;
             }
             else if(Math::Approximately(hitPoint.z, -kSkyboxSize, kSideDetectPrecision))
             {
                 //printf("Back\n");
                 finalUV = Vector2(1.0f - pointUV.x, pointUV.y);
-                maskTexture = mFrontMaskTexture;
+                maskTexture = mMaskTextures.named.front;
             }
-
+            else if(Math::Approximately(hitPoint.z, kSkyboxSize, kSideDetectPrecision))
+            {
+                //printf("Front\n");
+                finalUV = Vector2(pointUV.x, pointUV.y);
+                maskTexture = mMaskTextures.named.back;
+            }
+            else if(Math::Approximately(hitPoint.y, -kSkyboxSize, kSideDetectPrecision))
+            {
+                //printf("Down\n");
+                finalUV = Vector2(1.0f - pointUV.z, pointUV.x);
+                maskTexture = mMaskTextures.named.down;
+            }
+            else if(Math::Approximately(hitPoint.y, kSkyboxSize, kSideDetectPrecision))
+            {
+                //printf("Up\n");
+                finalUV = Vector2(1.0f - pointUV.z, 1.0f - pointUV.x);
+                maskTexture = mMaskTextures.named.up;
+            }
+            
             // Ok, our raycast did hit a side of the skybox, and we've determined which side.
             // If this side had a mask texture, we now need to check the mask texture to get a palette index.
             if(maskTexture != nullptr)
@@ -382,15 +238,82 @@ uint8_t Skybox::Raycast(const Ray& ray)
     return 0;
 }
 
-void Skybox::SetDefaultTexture(Texture* texture)
+void Skybox::CreateMeshAndCubemap()
 {
-	// The purpose of this is to ensure that each side of the skybox has a valid texture to use.
-	// Skyboxes have some requirements (in OpenGL, at least) about all sides being same size, mipmap level, and format.
-	// When any one side is set, we just make sure that ALL sides are set, if still null.
-	if(mRightTexture == nullptr) { mRightTexture = texture; }
-	if(mLeftTexture == nullptr) { mLeftTexture = texture; }
-	if(mFrontTexture == nullptr) { mFrontTexture = texture; }
-	if(mBackTexture == nullptr) { mBackTexture = texture; }
-	if(mUpTexture == nullptr) { mUpTexture = texture; }
-	if(mDownTexture == nullptr) { mDownTexture = texture; }
+    // Generate the mesh used to render the skybox.
+    {
+        MeshDefinition meshDefinition(MeshUsage::Static, 36);
+        meshDefinition.SetVertexLayout(VertexLayout::Packed);
+        meshDefinition.AddVertexData(VertexAttribute::Position, points);
+        meshDefinition.ownsData = false;
+
+        mSkyboxMesh = new Mesh();
+        mSkyboxMesh->AddSubmesh(meshDefinition);
+    }
+
+    // Use skybox shader to render the skybox.
+    mMaterial.SetShader(gAssetManager.LoadShader("3D-Skybox"));
+
+    // Generate cubemap from skybox textures.
+    {
+        // The caller doesn't necessarily need to provide all skybox textures.
+        // For example, the "down" texture is often unneeded.
+
+        // However, OpenGL *does* require we provide valid textures for all sides.
+        // AND they require that textures have the same width/height.
+
+        // First off, find ANY valid texture passed in. There must be at least one, or you get no skybox.
+        Texture* defaultTexture = nullptr;
+        for(Texture* texture : mTextures.array)
+        {
+            if(texture != nullptr)
+            {
+                defaultTexture = texture;
+                break;
+            }
+        }
+        if(defaultTexture == nullptr)
+        {
+            printf("Can't create skybox - no textures were provided!\n");
+            return;
+        }
+
+        // Then, set any null textures equal to that texture.
+        for(Texture*& texture : mTextures.array)
+        {
+            if(texture == nullptr)
+            {
+                texture = defaultTexture;
+            }
+        }
+
+        // Build cubemap params struct.
+        GAPI::CubemapParams params;
+        params.left.width = mTextures.named.left->GetWidth();
+        params.left.height = mTextures.named.left->GetHeight();
+        params.left.pixels = mTextures.named.left->GetPixelData();
+
+        params.right.width = mTextures.named.right->GetWidth();
+        params.right.height = mTextures.named.right->GetHeight();
+        params.right.pixels = mTextures.named.right->GetPixelData();
+
+        params.back.width = mTextures.named.back->GetWidth();
+        params.back.height = mTextures.named.back->GetHeight();
+        params.back.pixels = mTextures.named.back->GetPixelData();
+
+        params.front.width = mTextures.named.front->GetWidth();
+        params.front.height = mTextures.named.front->GetHeight();
+        params.front.pixels = mTextures.named.front->GetPixelData();
+
+        params.bottom.width = mTextures.named.down->GetWidth();
+        params.bottom.height = mTextures.named.down->GetHeight();
+        params.bottom.pixels = mTextures.named.down->GetPixelData();
+
+        params.top.width = mTextures.named.up->GetWidth();
+        params.top.height = mTextures.named.up->GetHeight();
+        params.top.pixels = mTextures.named.up->GetPixelData();
+
+        // Create cubemap from params.
+        mCubemapHandle = GAPI::Get()->CreateCubemap(params);
+    }   
 }

@@ -1,7 +1,10 @@
 //
 // Clark Kromenaker
 //
-// Data and routines used to display a skybox around the world.
+// A skybox displays up to six textures around the game's 3D world that are seemingly infinitely far away.
+//
+// This is accomplished internally by rendering a small cube centered on the camera at the start of a frame render.
+// Then, the world is rendered on top of the skybox to partially/mostly cover it.
 //
 #pragma once
 #include "GAPI.h"
@@ -13,51 +16,39 @@ class Ray;
 struct RaycastHit;
 class Texture;
 
+// To create a skybox, you must specify textures for each side.
+// At least one texture must be provided, and it's recommended to provide all (with down being the least important).
+struct SkyboxTextures
+{
+    // This union approach allows referencing textures by specific name, or via an array.
+    union
+    {
+        struct
+        {
+            Texture* left;
+            Texture* right;
+            Texture* back;
+            Texture* front;
+            Texture* down;
+            Texture* up;
+        } named;
+        Texture* array[6] = { 0 };
+    };
+};
+
 class Skybox
 {
 public:
+    Skybox(const SkyboxTextures& textures);
     ~Skybox();
 
     void Render();
     
-	void SetRightTexture(Texture* texture);
-	void SetLeftTexture(Texture* texture);
-	void SetFrontTexture(Texture* texture);
-	void SetBackTexture(Texture* texture);
-	void SetUpTexture(Texture* texture);
-	void SetDownTexture(Texture* texture);
-
-    void LoadMaskTextures();
-
-    void SetRightMaskTexture(Texture* texture) { mRightMaskTexture = texture; }
-    void SetLeftMaskTexture(Texture* texture) { mLeftMaskTexture = texture; }
-    void SetFrontMaskTexture(Texture* texture) { mFrontMaskTexture = texture; }
-    void SetBackMaskTexture(Texture* texture) { mBackMaskTexture = texture; }
-    void SetUpMaskTexture(Texture* texture) { mUpMaskTexture = texture; }
-    void SetDownMaskTexture(Texture* texture) { mDownMaskTexture = texture; }
-    
-    void SetAzimuth(float radians);
+    void SetAzimuth(float radians) { mRotationMatrix = Matrix4::MakeRotateY(radians); }
 
     uint8_t Raycast(const Ray& ray);
 
 private:
-    // Textures for various sides of the skybox.
-    Texture* mRightTexture = nullptr;
-    Texture* mLeftTexture = nullptr;
-    Texture* mFrontTexture = nullptr;
-    Texture* mBackTexture = nullptr;
-    Texture* mUpTexture = nullptr;
-    Texture* mDownTexture = nullptr;
-
-    // Each side of the skybox can potentially have a mask texture associated with it.
-    // The mask is used to identify regions of the skybox for raycasting purposes.
-    Texture* mRightMaskTexture = nullptr;
-    Texture* mLeftMaskTexture = nullptr;
-    Texture* mFrontMaskTexture = nullptr;
-    Texture* mBackMaskTexture = nullptr;
-    Texture* mUpMaskTexture = nullptr;
-    Texture* mDownMaskTexture = nullptr;
-    
     // Vertex array for the big cube we will render the skybox onto.
     Mesh* mSkyboxMesh = nullptr;
     
@@ -66,10 +57,17 @@ private:
 
     // In GK3, skyboxes can be rotated (via the azimuth keyword).
     // This is occasionally used to put landmarks on the skybox in correct spots in the sky.
-    Matrix4 mRotationMatrix;
+    Matrix4 mRotationMatrix = Matrix4::Identity;
 	
 	// Material used for rendering.
 	Material mMaterial;
-	
-	void SetDefaultTexture(Texture* texture);
+
+    // Textures used for the sides of the skybox.
+    SkyboxTextures mTextures;
+
+    // Each side of the skybox can optionally have a mask texture associated with it.
+    // The mask is used to identify regions of the skybox for raycasting purposes.
+    SkyboxTextures mMaskTextures;
+
+    void CreateMeshAndCubemap();
 };

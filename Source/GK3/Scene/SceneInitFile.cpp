@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "IniParser.h"
 #include "Model.h"
+#include "SceneAsset.h"
 #include "SheepManager.h"
 #include "Skybox.h"
 #include "StringUtil.h"
@@ -14,16 +15,19 @@ Skybox* GeneralBlock::CreateSkybox()
     || !skyboxBackTextureName.empty() || !skyboxFrontTextureName.empty()
 	|| !skyboxDownTextureName.empty() || !skyboxUpTextureName.empty();
 	if(!hasSkyboxData) { return nullptr; }
-	
-	Skybox* skybox = new Skybox();
-	skybox->SetLeftTexture(gAssetManager.LoadSceneTexture(skyboxLeftTextureName, AssetScope::Scene));
-	skybox->SetRightTexture(gAssetManager.LoadSceneTexture(skyboxRightTextureName, AssetScope::Scene));
-	skybox->SetBackTexture(gAssetManager.LoadSceneTexture(skyboxBackTextureName, AssetScope::Scene));
-	skybox->SetFrontTexture(gAssetManager.LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene));
-	skybox->SetDownTexture(gAssetManager.LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene));
-	skybox->SetUpTexture(gAssetManager.LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene));
-    skybox->LoadMaskTextures();
-	return skybox;
+
+    SkyboxTextures textures;
+    textures.named.left = gAssetManager.LoadSceneTexture(skyboxLeftTextureName, AssetScope::Scene);
+    textures.named.right = gAssetManager.LoadSceneTexture(skyboxRightTextureName, AssetScope::Scene);
+    textures.named.back = gAssetManager.LoadSceneTexture(skyboxBackTextureName, AssetScope::Scene);
+    textures.named.front = gAssetManager.LoadSceneTexture(skyboxFrontTextureName, AssetScope::Scene);
+    textures.named.down = gAssetManager.LoadSceneTexture(skyboxDownTextureName, AssetScope::Scene);
+    textures.named.up = gAssetManager.LoadSceneTexture(skyboxUpTextureName, AssetScope::Scene);
+
+    // GK3 does some non-standard stuff with the skybox textures.
+    SceneAsset::FixGK3SkyboxTextures(textures);
+
+	return new Skybox(textures);
 }
 
 void GeneralBlock::TakeOverridesFrom(const GeneralBlock& other)

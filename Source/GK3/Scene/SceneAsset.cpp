@@ -7,6 +7,26 @@
 #include "Skybox.h"
 #include "StringUtil.h"
 
+void SceneAsset::FixGK3SkyboxTextures(SkyboxTextures& textures)
+{
+    // GK3 puts the front texture in the -Z direction, and the back texture in the +Z direction.
+    // I have no idea why this is the case, but even in the original game, this is true.
+    std::swap(textures.named.back, textures.named.front);
+
+    // GK3 up/down textures are rotated counter-clockwise 90 degrees.
+    // Not sure why this choice was made, but it's required for skybox seams to match up.
+    // Note that we can ONLY do this operation here if the textures have SCENE scope.
+    // If not, then re-entering the scene would rotate the textures again, giving wrong results.
+    if(textures.named.down != nullptr && textures.named.down->GetScope() == AssetScope::Scene)
+    {
+        textures.named.down->RotateCounterclockwise();
+    }
+    if(textures.named.up != nullptr && textures.named.up->GetScope() == AssetScope::Scene)
+    {
+        textures.named.up->RotateCounterclockwise();
+    }
+}
+
 SceneAsset::~SceneAsset()
 {
 	delete mSkybox;
@@ -38,51 +58,50 @@ void SceneAsset::ParseFromData(uint8_t* data, uint32_t dataLength)
         }
         else if(StringUtil::EqualsIgnoreCase(section.name, "Skybox"))
         {
-            if(section.lines.size() > 0)
+            if(!section.lines.empty())
             {
-                mSkybox = new Skybox();
-            }
-            for(auto& line : section.lines)
-            {
-                IniKeyValue& entry = line.entries.front();
-                if(StringUtil::EqualsIgnoreCase(entry.key, "left"))
+                SkyboxTextures skyboxTextures;
+                float azimuth = 0.0f;
+                for(auto& line : section.lines)
                 {
-                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
-                    mSkybox->SetLeftTexture(texture);
+                    IniKeyValue& entry = line.entries.front();
+                    if(StringUtil::EqualsIgnoreCase(entry.key, "left"))
+                    {
+                        skyboxTextures.named.left = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "right"))
+                    {
+                        skyboxTextures.named.right = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "back"))
+                    {
+                        skyboxTextures.named.back = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "front"))
+                    {
+                        skyboxTextures.named.front = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "down"))
+                    {
+                        skyboxTextures.named.down = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "up"))
+                    {
+                        skyboxTextures.named.up = gAssetManager.LoadSceneTexture(entry.value, GetScope());
+                    }
+                    else if(StringUtil::EqualsIgnoreCase(entry.key, "azimuth"))
+                    {
+                        azimuth = Math::ToRadians(entry.GetValueAsFloat());
+                    }
                 }
-                else if(StringUtil::EqualsIgnoreCase(entry.key, "right"))
-                {
-                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
-                    mSkybox->SetRightTexture(texture);
-                }
-                else if(StringUtil::EqualsIgnoreCase(entry.key, "front"))
-                {
-                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
-                    mSkybox->SetFrontTexture(texture);
-                }
-                else if(StringUtil::EqualsIgnoreCase(entry.key, "back"))
-                {
-                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
-                    mSkybox->SetBackTexture(texture);
-                }
-                else if(StringUtil::EqualsIgnoreCase(entry.key, "up"))
-                {
-                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
-                    mSkybox->SetUpTexture(texture);
-                }
-                else if(StringUtil::EqualsIgnoreCase(entry.key, "down"))
-                {
-                    Texture* texture = gAssetManager.LoadSceneTexture(entry.value, GetScope());
-                    mSkybox->SetDownTexture(texture);
-                }
-                else if(StringUtil::EqualsIgnoreCase(entry.key, "azimuth"))
-                {
-                    mSkybox->SetAzimuth(Math::ToRadians(entry.GetValueAsFloat()));
-                }
-            }
 
-            // Make sure any skybox mask textures are also loaded.
-            mSkybox->LoadMaskTextures();
+                // GK3 does some non-standard stuff with the skybox textures.
+                FixGK3SkyboxTextures(skyboxTextures);
+
+                // Create the skybox.
+                mSkybox = new Skybox(skyboxTextures);
+                mSkybox->SetAzimuth(azimuth);
+            }
         }
         else if(StringUtil::EqualsIgnoreCase(section.name, "Lights") || StringUtil::EqualsIgnoreCase(section.name, "Models"))
         {
