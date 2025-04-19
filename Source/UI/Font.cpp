@@ -14,9 +14,19 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
     // After parsing, if we have no font texture, we can't do much more.
     if(mFontTexture == nullptr) { return; }
 
-    // The pixel color at (1, 0) seems to always be glyph indicator color.
-    Color32 glyphStartColor = mFontTexture->GetPixelColor32(1, 0);
-
+    // The top-left-most pixel of each glyph in the texture is a special color that signifies the start of a new glyph.
+    // Very often, this is (1, 0). But not always! We need to iterate from top-left to find the first non-transparent color.
+    Color32 glyphStartColor;
+    uint32_t currentX = 0;
+    for(; currentX < mFontTexture->GetWidth(); ++currentX)
+    {
+        glyphStartColor = mFontTexture->GetPixelColor32(currentX, 0);
+        if(glyphStartColor != Color32(255, 0, 255, 0))
+        {
+            break;
+        }
+    }
+    
     // The font texture may have the font glyphs in multiple vertical lines.
     // The height of each line can be calculated pretty easily.
     int lineHeight = mFontTexture->GetHeight() / mLineCount;
@@ -25,12 +35,9 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
     // The top pixel of each line is a "glyph indicator", used to determine where each glyph starts (ignore it).
     mGlyphHeight = lineHeight - 1;
 
-    // We'll start processing glyphs at (1, 0).
-    unsigned int currentX = 1;
-    unsigned int currentY = 0;
-    int currentLine = 1;
-
     // For each char, determine UV rect within the font texture for rendering the glyph.
+    uint32_t currentY = 0;
+    int currentLine = 1;
     for(size_t i = 0; i < mFontCharacters.size(); i++)
     {
         Glyph glyph;
