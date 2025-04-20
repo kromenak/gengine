@@ -302,6 +302,10 @@ void SceneFunctions::Execute(const std::string& functionName)
         // LER
         sSceneFunctions["ler-on"] = GPS_On;
         sSceneFunctions["ler-off"] = GPS_Off;
+
+        // MCF
+        sSceneFunctions["mcf-on"] = GPS_On;
+        sSceneFunctions["mcf-off"] = GPS_Off;
         initialized = true;
     }
 

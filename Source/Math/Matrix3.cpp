@@ -364,7 +364,7 @@ Vector2 Matrix3::TransformVector(const Vector2& point) const
 
 Vector2 Matrix3::TransformPoint(const Vector2& point) const
 {
-    // Assume Vector2 is not a point, so w = 1.
+    // Assume Vector2 is a point, so w = 1.
     return Vector2(mVals[0] * point[0] + mVals[3] * point[1] + mVals[6],
                    mVals[1] * point[0] + mVals[4] * point[1] + mVals[7]);
 }

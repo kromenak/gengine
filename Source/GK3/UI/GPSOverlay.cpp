@@ -1,68 +1,83 @@
 #include "GPSOverlay.h"
 
 #include "AssetManager.h"
+#include "Font.h"
+#include "GKActor.h"
 #include "IniParser.h"
+#include "LocationManager.h"
+#include "SceneManager.h"
 #include "TextAsset.h"
+#include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
 #include "UIUtil.h"
+#include "Window.h"
 
 GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
 {
+    // The data file GPS.TXT provides two important types of data:
+    // 1) The UI layout to use for different screen resolutions.
+    // 2) The mapping from world space to the GPS image and GPS coordinates for different locations in the game.
+    {
+        TextAsset* textAsset = gAssetManager.LoadText("GPS.TXT", AssetScope::Manual);
+        IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
+        parser.SetMultipleKeyValuePairsPerLine(false);
+
+        // Read each section in turn.
+        IniSection section;
+        while(parser.ReadNextSection(section))
+        {
+            // If a section isn't a layout, it's a location.
+            if(!ParseLayout(section))
+            {
+                ParseLocation(section);
+            }
+        }
+        delete textAsset;
+    }
+
+    // Next, build the UI. The GPS always appears in top-left corner.
     UICanvas* canvas = AddComponent<UICanvas>(-1);
     canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
-    UIImage* background = UIUtil::NewUIActorWithWidget<UIImage>(this);
-    background->SetTexture(gAssetManager.LoadTexture("GPSLER_L.BMP"), true);
-    background->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    background->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
+    // Create base map image in top-left.
+    // No image yet, since that's affected by both the location and layout used.
+    mMapImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
+    mMapImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+    mMapImage->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
 
-    mLonLabel = UIUtil::NewUIActorWithWidget<UILabel>(background->GetOwner());
-    mLonLabel->SetFont(gAssetManager.LoadFont("F_GPS_L.FON"));
-    mLonLabel->SetText("02°18'46.00\"");
-    mLonLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    mLonLabel->GetRectTransform()->SetAnchoredPosition(78.0f, -144.0f);
+    // Add latitude/longitude labels.
+    // Not yet positioned, since that changes based on the layout used.
+    mLatitudeLabel = UIUtil::NewUIActorWithWidget<UILabel>(mMapImage->GetOwner());
+    mLatitudeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+    
+    mLongitudeLabel = UIUtil::NewUIActorWithWidget<UILabel>(mMapImage->GetOwner());
+    mLongitudeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
-    mLatLabel = UIUtil::NewUIActorWithWidget<UILabel>(background->GetOwner());
-    mLatLabel->SetFont(gAssetManager.LoadFont("F_GPS_L.FON"));
-    mLatLabel->SetText("02°18'46.00\"");
-    mLatLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    mLatLabel->GetRectTransform()->SetAnchoredPosition(78.0f, -170.0f);
+    // Add target reticule square and vertical/horizontal lines.
+    // No image/position is yet set, since those are affected by which layout we use.
+    mTargetSquareImage = UIUtil::NewUIActorWithWidget<UIImage>(mMapImage->GetOwner());
+    mTargetSquareImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
-    mVerticalLine = UIUtil::NewUIActorWithWidget<UIImage>(background->GetOwner());
-    mVerticalLine->SetTexture(gAssetManager.LoadTexture("GPSVLINE_L.BMP"), true);
-    mVerticalLine->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    mVerticalLine->GetRectTransform()->SetAnchoredPosition(18.0f, -8.0f);
+    mVerticalLineImage = UIUtil::NewUIActorWithWidget<UIImage>(mMapImage->GetOwner());
+    mVerticalLineImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
-    mHorizontalLine = UIUtil::NewUIActorWithWidget<UIImage>(background->GetOwner());
-    mHorizontalLine->SetTexture(gAssetManager.LoadTexture("GPSHLINE_L.BMP"), true);
-    mHorizontalLine->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    mHorizontalLine->GetRectTransform()->SetAnchoredPosition(9.0f, -18.0f);
+    mHorizontalLineImage = UIUtil::NewUIActorWithWidget<UIImage>(mMapImage->GetOwner());
+    mHorizontalLineImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
-    mTargetSquare = UIUtil::NewUIActorWithWidget<UIImage>(background->GetOwner());
-    mTargetSquare->SetTexture(gAssetManager.LoadTexture("GPSTARGET_L.BMP"), true);
-    mTargetSquare->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    mTargetSquare->GetRectTransform()->SetAnchoredPosition(9.0f, -8.0f);
-
-    UIImage* powerOffImage = UIUtil::NewUIActorWithWidget<UIImage>(background->GetOwner());
-    powerOffImage->SetTexture(gAssetManager.LoadTexture("GPSPOWER_OFF_UP_L.BMP"), true);
-    powerOffImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
-    powerOffImage->GetRectTransform()->SetAnchoredPosition(-7.0f, 8.0f);
-
-    mPowerButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
-    mPowerButton->SetUpTexture(gAssetManager.LoadTexture("GPSPOWER_ON_UP_L.BMP"));
-    mPowerButton->SetDownTexture(gAssetManager.LoadTexture("GPSPOWER_ON_DOWN_L.BMP"));
-    mPowerButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomRight);
-    mPowerButton->GetRectTransform()->SetAnchoredPosition(-7.0f, 8.0f);
+    // Add power button.
+    // Again, position and exact textures aren't set because they depend on the layout used.
+    mPowerButton = UIUtil::NewUIActorWithWidget<UIButton>(mMapImage->GetOwner());
+    mPowerButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     mPowerButton->SetPressCallback([this](UIButton* button) {
         Hide();
     });
 
-    //TextAsset* textAsset = gAssetManager.LoadText("BINOCS.TXT", AssetScope::Manual);
-    //IniParser parser(textAsset->GetText(), textAsset->GetTextLength());
-    //parser.SetMultipleKeyValuePairsPerLine(false);
+    // For testing, apply one of the layouts and set the target reticule to a default spot.
+    //ApplyLayout(1);
+    //SetTargetReticuleTexturePos(Vector2::One * 10.0f);
 
     // Hide until shown.
     SetActive(false);
@@ -70,26 +85,63 @@ GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
 
 void GPSOverlay::Show()
 {
+    // Figure out our current location.
+    std::string location = gLocationManager.GetLocation();
+    auto it = mLocations.find(location);
+    if(it != mLocations.end())
+    {
+        mCurrentLocation = &it->second;
+    }
+    else if(!mLocations.empty())
+    {
+        // Fall back on the first one in the list.
+        mCurrentLocation = &mLocations.begin()->second;
+    }
+
+    // Figure out which UI layout to use, based on window resolution.
+    Vector2 windowSize = Window::GetSize();
+    int layoutIndex = 2;
+    if(windowSize.x <= 640)
+    {
+        layoutIndex = 0;
+    }
+    else if(windowSize.x <= 800)
+    {
+        layoutIndex = 1;
+    }
+
+    // Apply the desired layout.
+    ApplyLayout(layoutIndex);
+
+    // When initially showing the device, it shows in a powered-off state.
     SetPoweredOnUIVisible(false);
     SetActive(true);
+
+    // But after a moment, we'll show the powered-on state.
     mPowerDelayTimer = kPowerDelay;
     mPoweringOn = true;
 }
 
 void GPSOverlay::Hide()
 {
+    // When hiding the device, we briefly show it in a powered-off state.
     SetPoweredOnUIVisible(false);
+
+    // But after a moment, we hide the device entirely.
     mPowerDelayTimer = kPowerDelay;
     mPoweringOn = false;
 }
 
 void GPSOverlay::OnUpdate(float deltaTime)
 {
+    // Handle decrementign the power delay timer.
     if(mPowerDelayTimer > 0.0f)
     {
         mPowerDelayTimer -= deltaTime;
         if(mPowerDelayTimer <= 0.0f)
         {
+            // If powering on, show all the powered-on UI items.
+            // If powering off, hide the GPS UI entirely.
             if(mPoweringOn)
             {
                 SetPoweredOnUIVisible(true);
@@ -100,16 +152,309 @@ void GPSOverlay::OnUpdate(float deltaTime)
             }
         }
     }
+
+    // Handle updating the GPS target reticule as Ego moves around the scene.
+    if(mCurrentLocation != nullptr)
+    {
+        // Calculate ego's position in GPS texture space.
+        Vector2 textureTargetPos = WorldPosToGPSTexturePos(gSceneManager.GetScene()->GetEgo()->GetPosition());
+
+        SetTargetReticuleTexturePos(textureTargetPos);
+
+        // Calculate latitude and longitude for current spot.
+        {
+            // Get texture position of the reference world position.
+            Vector2 refTexturePos = WorldPosToGPSTexturePos(Vector3(652.0f, 0.0f, -101.0f));
+
+            // Get a vector from the reference pos to the target pos.
+            Vector2 refToTargetOffsetPixels = textureTargetPos - refTexturePos;
+
+            // Convert offset to meters.
+            // We have the world width in inches - convert that to meters and
+            float metersPerPixel = (3528.0f * 0.0254f) / 205.0f;
+            Vector2 refToTargetOffsetMeters = refToTargetOffsetPixels * metersPerPixel;
+
+            const float kMetersPerLatitudeSecond = 30.715f;
+            const float kMetersPerLongitudeSecond = 30.92f;
+            Vector2 seconds = Vector2(refToTargetOffsetMeters.x / kMetersPerLatitudeSecond,
+                                      refToTargetOffsetMeters.y / kMetersPerLongitudeSecond);
+            int minutesX = seconds.x / 60;
+            int minutesY = seconds.y / 60;
+            seconds.x -= minutesX * 60.0f;
+            seconds.y -= minutesY * 60.0f;
+
+            CoordinateAxis latitude;
+            latitude.degree = 42;
+            latitude.minute = 56 + minutesY;
+            latitude.second = 6.0f + seconds.y;
+
+            CoordinateAxis longitude;
+            longitude.degree = 2;
+            longitude.minute = 19 + minutesX;
+            longitude.second = 39 + seconds.x;
+
+            //02°18'46.00\"
+            mLongitudeLabel->SetText(StringUtil::Format("%02d°%02d'%05.2f\"", longitude.degree, longitude.minute, longitude.second));
+            mLatitudeLabel->SetText(StringUtil::Format("%02d°%02d'%05.2f\"", latitude.degree, latitude.minute, latitude.second));
+        }
+    }
 }
 
 void GPSOverlay::SetPoweredOnUIVisible(bool visible)
 {
-    mLonLabel->SetEnabled(visible);
-    mLatLabel->SetEnabled(visible);
+    // Show or hide UI elements that only appear when the device is "powered on."
+    mLongitudeLabel->SetEnabled(visible);
+    mLatitudeLabel->SetEnabled(visible);
 
-    mVerticalLine->SetEnabled(visible);
-    mHorizontalLine->SetEnabled(visible);
-    mTargetSquare->SetEnabled(visible);
+    mVerticalLineImage->SetEnabled(visible);
+    mHorizontalLineImage->SetEnabled(visible);
+    mTargetSquareImage->SetEnabled(visible);
 
-    mPowerButton->SetEnabled(visible);
+    mPowerButton->SetCanInteract(visible);
+}
+
+Vector2 GPSOverlay::WorldPosToGPSTexturePos(const Vector3& worldPos)
+{
+    const float mapWidth = mLayouts[mLayoutIndex].mapWidth;
+
+    // We can calculate which pixel, from the top-left corner of the map image, represents the world origin.
+    Vector2 worldOriginInMapPixels = mCurrentLocation->worldOriginPixelPercent * mapWidth;
+    worldOriginInMapPixels.x = Math::RoundToInt(worldOriginInMapPixels.x);
+    worldOriginInMapPixels.y = Math::RoundToInt(worldOriginInMapPixels.y);
+
+    // Take the passed in world pos and flatten it to 2D using just the x/z values.
+    // The z-component must also be negated to properly match the expected directions in texture space.
+    Vector2 originToPosPixels(worldPos.x, -worldPos.z);
+
+    // This value is in world units, so multiply it by a conversion factor (pixels per world unit) to get it in texture space.
+    const float kPixelsPerUnit = mapWidth / mCurrentLocation->worldWidth;
+    originToPosPixels *= kPixelsPerUnit;
+
+    // In the simplest case, the +x axis in the world correlates to the +x axis on the image. And the +z axis in the world correlates to the +y axis on the image.
+    // But in some cases, that angle needs to be modified so the 3D world maps correctly to the 2D image.
+    float rotAngle = mCurrentLocation->xAxisAngle;
+    Vector2 rotatedOriginToPosPixels = Matrix3::MakeRotateZ(rotAngle).TransformVector(originToPosPixels);
+
+    // Put it all together to calculate a texture pos for this world pos.
+    Vector2 result = (worldOriginInMapPixels + rotatedOriginToPosPixels);
+    result.x = static_cast<int>(result.x);
+    result.y = static_cast<int>(result.y);
+    return result;
+}
+
+void GPSOverlay::SetTargetReticuleTexturePos(const Vector2& texturePos)
+{
+    // The reticule is positioned from the top-left corner of the map, NOT the top-left corner of the GPS image!
+    // There's a border that must be taken into account.
+    // Confusingly, this value also includes the pixels outside the GPS image (buffer to top-left edge of window) - subtract (2,2) to account for that.
+    Vector2 borderSizeInPixels = mLayouts[mLayoutIndex].cornerSize - Vector2(2.0f, 2.0f);
+
+    // Update passed in position to account for those border pixels.
+    Vector2 actualTexturePos = texturePos + borderSizeInPixels;
+
+    // The target square is positioned from top-left corner, but we want it to be *centered* on the passed in position.
+    // Subtract half the texture width to achieve that!
+    const float kTargetHalfWidth = mLayouts[mLayoutIndex].targetSquareWidth / 2.0f;
+    Vector2 targetSquarePos = actualTexturePos - Vector2(kTargetHalfWidth, kTargetHalfWidth);
+
+    // Set target square to desired position.
+    mTargetSquareImage->GetRectTransform()->SetAnchoredPosition(targetSquarePos.x, -targetSquarePos.y + 1); // "+1" because this image has an extra empty line of pixels at top
+
+    // Set vertical/horizontal lines to correct positions as well.
+    mVerticalLineImage->GetRectTransform()->SetAnchoredPosition(actualTexturePos.x - 1, -borderSizeInPixels.y);
+    mHorizontalLineImage->GetRectTransform()->SetAnchoredPosition(borderSizeInPixels.x, -actualTexturePos.y + 1);
+}
+
+bool GPSOverlay::ParseLayout(const IniSection& section)
+{
+    if(StringUtil::EqualsIgnoreCase(section.name, "small") ||
+       StringUtil::EqualsIgnoreCase(section.name, "medium") ||
+       StringUtil::EqualsIgnoreCase(section.name, "large"))
+    {
+        // Figure out which layout we're parsing.
+        int index = 0;
+        if(StringUtil::EqualsIgnoreCase(section.name, "medium"))
+        {
+            index = 1;
+        }
+        else if(StringUtil::EqualsIgnoreCase(section.name, "large"))
+        {
+            index = 2;
+        }
+
+        Layout& uiSize = mLayouts[index];
+        for(const IniLine& line : section.lines)
+        {
+            const IniKeyValue& entry = line.entries[0];
+            if(StringUtil::EqualsIgnoreCase(entry.key, "nameExt"))
+            {
+                uiSize.textureSuffix = entry.value;
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "vLineFile"))
+            {
+                uiSize.verticalLineTexture = gAssetManager.LoadTexture(entry.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "hLineFile"))
+            {
+                uiSize.horizontalLineTexture = gAssetManager.LoadTexture(entry.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "targetFile"))
+            {
+                uiSize.targetSquareTexture = gAssetManager.LoadTexture(entry.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "fontFile"))
+            {
+                uiSize.font = gAssetManager.LoadFont(entry.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "cornerWidth"))
+            {
+                uiSize.cornerSize.x = entry.GetValueAsFloat();
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "cornerHeight"))
+            {
+                uiSize.cornerSize.y = entry.GetValueAsFloat();
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "mapWidth"))
+            {
+                uiSize.mapWidth = entry.GetValueAsFloat();
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "targetWidth"))
+            {
+                uiSize.targetSquareWidth = entry.GetValueAsFloat();
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "textStartWidth"))
+            {
+                uiSize.textStartX = entry.GetValueAsFloat();
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "latHeight"))
+            {
+                uiSize.latitudeStartY = -entry.GetValueAsFloat();
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "lngHeight"))
+            {
+                uiSize.longitudeStartY = -entry.GetValueAsFloat();
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnPos"))
+            {
+                uiSize.powerButtonPos = entry.GetValueAsVector2();
+                uiSize.powerButtonPos.y *= -1.0f;
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnUpSprite"))
+            {
+                uiSize.powerButtonUpTexture = gAssetManager.LoadTexture(entry.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnDownSprite"))
+            {
+                uiSize.powerButtonDownTexture = gAssetManager.LoadTexture(entry.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnHoverSprite"))
+            {
+                uiSize.powerButtonHoverTexture = gAssetManager.LoadTexture(entry.value);
+            }
+            else if(StringUtil::EqualsIgnoreCase(entry.key, "powerBtnDisabledSprite"))
+            {
+                uiSize.powerButtonDisabledTexture = gAssetManager.LoadTexture(entry.value);
+            }
+        }
+
+        // This IniSection did represent a layout.
+        return true;
+    }
+
+    // This IniSection did not represent a layout.
+    return false;
+}
+
+void GPSOverlay::ParseLocation(const IniSection& section)
+{
+    // Ignore the default section.
+    if(section.name.empty())
+    {
+        return;
+    }
+
+    LocationData& locationData = mLocations[section.name];
+    for(const IniLine& line : section.lines)
+    {
+        const IniKeyValue& entry = line.entries[0];
+        if(StringUtil::EqualsIgnoreCase(entry.key, "name"))
+        {
+            locationData.mapTextureName = entry.value;
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "angXtoN"))
+        {
+            locationData.xAxisAngle = Math::ToRadians(entry.GetValueAsFloat());
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "worldWidth"))
+        {
+            locationData.worldWidth = entry.GetValueAsFloat();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "mapOriginXPct"))
+        {
+            locationData.worldOriginPixelPercent.x = entry.GetValueAsFloat();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "mapOriginYPct"))
+        {
+            locationData.worldOriginPixelPercent.y = 1.0f - entry.GetValueAsFloat();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "sigx"))
+        {
+            locationData.referenceWorldPosition.x = entry.GetValueAsFloat();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "sigz"))
+        {
+            locationData.referenceWorldPosition.z = entry.GetValueAsFloat();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "sigLatDeg"))
+        {
+            locationData.referenceLatitude.degree = entry.GetValueAsInt();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "sigLatMin"))
+        {
+            locationData.referenceLatitude.minute = entry.GetValueAsInt();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "sigLatSec"))
+        {
+            locationData.referenceLatitude.second = entry.GetValueAsFloat();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "sigLngDeg"))
+        {
+            locationData.referenceLongitude.degree = entry.GetValueAsInt();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "sigLngMin"))
+        {
+            locationData.referenceLongitude.minute = entry.GetValueAsInt();
+        }
+        else if(StringUtil::EqualsIgnoreCase(entry.key, "sigLngSec"))
+        {
+            locationData.referenceLongitude.second = entry.GetValueAsFloat();
+        }
+    }
+}
+
+void GPSOverlay::ApplyLayout(int index)
+{
+    mLayoutIndex = index;
+
+    if(mCurrentLocation != nullptr)
+    {
+        mMapImage->SetTexture(gAssetManager.LoadTexture(mCurrentLocation->mapTextureName + mLayouts[index].textureSuffix, AssetScope::Scene), true);
+    }
+
+    mVerticalLineImage->SetTexture(mLayouts[index].verticalLineTexture, true);
+    mHorizontalLineImage->SetTexture(mLayouts[index].horizontalLineTexture, true); 
+    mTargetSquareImage->SetTexture(mLayouts[index].targetSquareTexture, true);
+
+    mLatitudeLabel->SetFont(mLayouts[index].font);
+    mLongitudeLabel->SetFont(mLayouts[index].font);
+    mLatitudeLabel->GetRectTransform()->SetAnchoredPosition(mLayouts[index].textStartX, mLayouts[index].latitudeStartY);
+    mLatitudeLabel->GetRectTransform()->SetSizeDeltaY(mLayouts[index].font->GetGlyphHeight());
+    mLongitudeLabel->GetRectTransform()->SetAnchoredPosition(mLayouts[index].textStartX, mLayouts[index].longitudeStartY);
+    mLongitudeLabel->GetRectTransform()->SetSizeDeltaY(mLayouts[index].font->GetGlyphHeight());
+
+    mPowerButton->GetRectTransform()->SetAnchoredPosition(mLayouts[index].powerButtonPos);
+    mPowerButton->SetUpTexture(mLayouts[index].powerButtonUpTexture);
+    mPowerButton->SetDownTexture(mLayouts[index].powerButtonDownTexture);
+    mPowerButton->SetHoverTexture(mLayouts[index].powerButtonHoverTexture);
+    mPowerButton->SetDisabledTexture(mLayouts[index].powerButtonDisabledTexture);
 }
