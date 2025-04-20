@@ -306,6 +306,10 @@ void SceneFunctions::Execute(const std::string& functionName)
         // MCF
         sSceneFunctions["mcf-on"] = GPS_On;
         sSceneFunctions["mcf-off"] = GPS_Off;
+
+        // BEC
+        sSceneFunctions["bec-on"] = GPS_On;
+        sSceneFunctions["bec-off"] = GPS_Off;
         initialized = true;
     }
 

@@ -123,6 +123,7 @@ private:
 
     Vector2 WorldPosToGPSTexturePos(const Vector3& worldPos);
     void SetTargetReticuleTexturePos(const Vector2& texturePos);
+    void SetLatLongFromTexturePos(const Vector2& texturePos);
 
     bool ParseLayout(const IniSection& section);
     void ParseLocation(const IniSection& section);

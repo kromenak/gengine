@@ -157,46 +157,12 @@ void GPSOverlay::OnUpdate(float deltaTime)
     if(mCurrentLocation != nullptr)
     {
         // Calculate ego's position in GPS texture space.
-        Vector2 textureTargetPos = WorldPosToGPSTexturePos(gSceneManager.GetScene()->GetEgo()->GetPosition());
+        Vector2 egoTexturePos = WorldPosToGPSTexturePos(gSceneManager.GetScene()->GetEgo()->GetPosition());
 
-        SetTargetReticuleTexturePos(textureTargetPos);
-
-        // Calculate latitude and longitude for current spot.
-        {
-            // Get texture position of the reference world position.
-            Vector2 refTexturePos = WorldPosToGPSTexturePos(Vector3(652.0f, 0.0f, -101.0f));
-
-            // Get a vector from the reference pos to the target pos.
-            Vector2 refToTargetOffsetPixels = textureTargetPos - refTexturePos;
-
-            // Convert offset to meters.
-            // We have the world width in inches - convert that to meters and
-            float metersPerPixel = (3528.0f * 0.0254f) / 205.0f;
-            Vector2 refToTargetOffsetMeters = refToTargetOffsetPixels * metersPerPixel;
-
-            const float kMetersPerLatitudeSecond = 30.715f;
-            const float kMetersPerLongitudeSecond = 30.92f;
-            Vector2 seconds = Vector2(refToTargetOffsetMeters.x / kMetersPerLatitudeSecond,
-                                      refToTargetOffsetMeters.y / kMetersPerLongitudeSecond);
-            int minutesX = seconds.x / 60;
-            int minutesY = seconds.y / 60;
-            seconds.x -= minutesX * 60.0f;
-            seconds.y -= minutesY * 60.0f;
-
-            CoordinateAxis latitude;
-            latitude.degree = 42;
-            latitude.minute = 56 + minutesY;
-            latitude.second = 6.0f + seconds.y;
-
-            CoordinateAxis longitude;
-            longitude.degree = 2;
-            longitude.minute = 19 + minutesX;
-            longitude.second = 39 + seconds.x;
-
-            //02°18'46.00\"
-            mLongitudeLabel->SetText(StringUtil::Format("%02d°%02d'%05.2f\"", longitude.degree, longitude.minute, longitude.second));
-            mLatitudeLabel->SetText(StringUtil::Format("%02d°%02d'%05.2f\"", latitude.degree, latitude.minute, latitude.second));
-        }
+        // Position reticule at ego's texture position.
+        // Also set latitude/longitude equal to ego's position.
+        SetTargetReticuleTexturePos(egoTexturePos);
+        SetLatLongFromTexturePos(egoTexturePos);
     }
 }
 
@@ -233,7 +199,7 @@ Vector2 GPSOverlay::WorldPosToGPSTexturePos(const Vector3& worldPos)
     // In the simplest case, the +x axis in the world correlates to the +x axis on the image. And the +z axis in the world correlates to the +y axis on the image.
     // But in some cases, that angle needs to be modified so the 3D world maps correctly to the 2D image.
     float rotAngle = mCurrentLocation->xAxisAngle;
-    Vector2 rotatedOriginToPosPixels = Matrix3::MakeRotateZ(rotAngle).TransformVector(originToPosPixels);
+    Vector2 rotatedOriginToPosPixels = Matrix3::MakeRotateZ(-rotAngle).TransformVector(originToPosPixels);
 
     // Put it all together to calculate a texture pos for this world pos.
     Vector2 result = (worldOriginInMapPixels + rotatedOriginToPosPixels);
@@ -263,6 +229,57 @@ void GPSOverlay::SetTargetReticuleTexturePos(const Vector2& texturePos)
     // Set vertical/horizontal lines to correct positions as well.
     mVerticalLineImage->GetRectTransform()->SetAnchoredPosition(actualTexturePos.x - 1, -borderSizeInPixels.y);
     mHorizontalLineImage->GetRectTransform()->SetAnchoredPosition(borderSizeInPixels.x, -actualTexturePos.y + 1);
+}
+
+void GPSOverlay::SetLatLongFromTexturePos(const Vector2& texturePos)
+{
+    // GENERAL NOTE: I don't feel incredibly confident that this math is correct. However, I think it's passable.
+    // The latitude and longitudes match pretty closely with the three instances you use the GPS in the original game.
+    // They aren't exact, but at least the values lead the player to the correct spots, and the values at the correct spots look very close to correct. 
+
+    // Convert reference world position to texture space.
+    Vector2 refTexturePos = WorldPosToGPSTexturePos(mCurrentLocation->referenceWorldPosition);
+
+    // Get an offset vector from the reference texture pos to the passed in texture pos.
+    // This is how far away, in pixels, the passed in texture pos is from the reference latitude/longitude reading.
+    Vector2 refToTargetTextureOffset = texturePos - refTexturePos;
+
+    // It's easier to calculate latitude/longitude values in world space. So, let's convert our offset to world space.
+    // The world width is supposedly in inches, but let's convert that to meters and get a "meters per pixel" value.
+    float metersPerPixel = (mCurrentLocation->worldWidth * 0.0254f) / mLayouts[mLayoutIndex].mapWidth;
+
+    // Convert offset to meters.
+    Vector2 refToTargetWorldOffset = refToTargetTextureOffset * metersPerPixel;
+
+    // These values are from wikipedia - approximate latitude/longitude seconds per meter in the real world.
+    const float kMetersPerLatitudeSecond = 30.715f;
+    const float kMetersPerLongitudeSecond = 30.92f;
+
+    // Based on our offset, calculate how many latitude/longitude seconds that is.
+    Vector2 seconds = Vector2(refToTargetWorldOffset.x / kMetersPerLatitudeSecond,
+                              refToTargetWorldOffset.y / kMetersPerLongitudeSecond);
+
+    // Convert any seconds over 60 into minutes.
+    int minutesX = seconds.x / 60;
+    int minutesY = seconds.y / 60;
+    seconds.x -= minutesX * 60.0f;
+    seconds.y -= minutesY * 60.0f;
+
+    // So the position is some offset from the reference. And we've calculated what that offset is in minutes/seconds.
+    // So, we can add that offset to the reference latitude and longitude to get the correct values.
+    CoordinateAxis latitude;
+    latitude.degree = mCurrentLocation->referenceLatitude.degree;
+    latitude.minute = mCurrentLocation->referenceLatitude.minute + minutesY;
+    latitude.second = mCurrentLocation->referenceLatitude.second + seconds.y;
+
+    CoordinateAxis longitude;
+    longitude.degree = mCurrentLocation->referenceLongitude.degree;
+    longitude.minute = mCurrentLocation->referenceLongitude.minute + minutesX;
+    longitude.second = mCurrentLocation->referenceLongitude.second + seconds.x;
+
+    // Format the text and display it on the GPS (whew)!
+    mLongitudeLabel->SetText(StringUtil::Format("%02d°%02d'%05.2f\"", longitude.degree, longitude.minute, longitude.second));
+    mLatitudeLabel->SetText(StringUtil::Format("%02d°%02d'%05.2f\"", latitude.degree, latitude.minute, latitude.second));
 }
 
 bool GPSOverlay::ParseLayout(const IniSection& section)
