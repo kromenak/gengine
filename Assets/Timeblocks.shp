@@ -54,6 +54,12 @@ code
 		{
 			wait Call("CheckTimeblockComplete202A$");
 		}
+
+        // DAY 3
+        else if(IsCurrentTime("307A"))
+        {
+            wait Call("CheckTimeblockComplete307A$");
+        }
 	}
 
 	CheckTimeblockComplete110A$()
@@ -405,4 +411,26 @@ code
 		// OK, go to Day 3, 7AM!
 		SetTime("307A");
 	}
+    
+    CheckTimeblockComplete307A$()
+    {
+        // The goal in this timeblock is to make progress on Le Serpent Rouge.
+        // The logic for completing this timeblock is actually mostly handled by other scripts.
+
+        // Other scripts will set a flag "End307a" and move to hallway when we should end the timeblock.
+        // Must be in HAL.
+		if(IsCurrentLocation("HAL") == 0)
+		{
+			return;
+		}
+
+        // Must have flag set.
+        if(!GetFlag("End307a"))
+        {
+            return;
+        }
+
+        // Ok, we can move to next timeblock.
+        SetTime("310A");
+    }
 }
