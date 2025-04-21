@@ -409,7 +409,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
         // We can completely skip the start anims, and just wait for the current walk anim to finish.
         if(currentWalkOp == WalkOp::FollowPath)
         {
-            while(GetCurrentWalkOp() < WalkOp::FollowPath)
+            while(GetCurrentWalkOp() < WalkOp::FollowPath && GetCurrentWalkOp() != WalkOp::None)
             {
                 mWalkActions.pop_back();
             }
