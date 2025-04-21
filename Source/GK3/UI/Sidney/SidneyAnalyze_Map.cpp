@@ -123,8 +123,8 @@ namespace
         for(int j = 0; j < 6; ++j)
         {
             float angle = j * kAngleInterval;
-            points[j].x = hexagram.center.x + hexagram.radius * Math::Sin(angle);
-            points[j].y = hexagram.center.y + hexagram.radius * Math::Cos(angle);
+            points[j].x = hexagram.radius * Math::Sin(angle);
+            points[j].y = hexagram.radius * Math::Cos(angle);
         }
 
         // Generate line segments for each one.
@@ -139,7 +139,8 @@ namespace
         for(int i = 0; i < 6; ++i)
         {
             Vector2 closestPoint = segments[i].GetClosestPoint(localPoint);
-            if((closestPoint - localPoint).GetLength() < 4)
+            float length = (closestPoint - localPoint).GetLengthSq();
+            if(length < 16)
             {
                 return true;
             }
@@ -538,7 +539,7 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
         {
             // You can only place a hexagram during Libra!
             const Vector2 kDefaultHexagramPos(599.0f, 770.0f);
-            const float kDefaultHexagramRadius = 200.0f;
+            const float kDefaultHexagramRadius = 400.0f;
             zoomedIn.hexagrams->AddHexagram(kDefaultHexagramPos, kDefaultHexagramRadius, 0.0f);
             zoomedOut.hexagrams->AddHexagram(ToZoomedOutPoint(kDefaultHexagramPos), (kDefaultHexagramRadius / kZoomedInMapSize) * kZoomedOutMapSize, 0.0f);
         }
@@ -685,7 +686,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             hexagramsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
 
             mMap.zoomedIn.lockedHexagrams = hexagramsActor->AddComponent<UIHexagrams>();
-            mMap.zoomedIn.lockedHexagrams->SetColor(kZoomedInLockedGridColor);
+            mMap.zoomedIn.lockedHexagrams->SetColor(kZoomedInLockedShapeColor);
 
             mMap.zoomedIn.lockedHexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedHexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -837,7 +838,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
             hexagramsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
 
             mMap.zoomedOut.lockedHexagrams = hexagramsActor->AddComponent<UIHexagrams>();
-            mMap.zoomedOut.lockedHexagrams->SetColor(kZoomedOutLockedGridColor);
+            mMap.zoomedOut.lockedHexagrams->SetColor(kZoomedOutLockedShapeColor);
 
             mMap.zoomedOut.lockedHexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedHexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
@@ -1237,14 +1238,29 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                    Math::Approximately(degrees, 270.0f, kCloseEnoughDegrees) ||
                    Math::Approximately(degrees, 330.0f, kCloseEnoughDegrees))
                 {
-                    // Show popup saying that the shape is in the right spot.
-                    ShowAnalyzeMessage("MapShapeLockNote", Vector2(), HorizontalAlignment::Center);
+                    // Clear click action, forcing the player to stop rotating the hexagram.
+                    mMap.zoomedOutClickAction = MapState::ClickAction::None;
+
+                    // Also clear the selection - hexagram can no longer be selected.
+                    mMap.selectedHexagramIndex = -1;
+
+                    // "Lock in" the correct hexagram.
+                    mMap.zoomedOut.hexagrams->ClearHexagrams();
+                    mMap.zoomedIn.hexagrams->ClearHexagrams();
+
+                    mMap.zoomedOut.lockedHexagrams->AddHexagram(kHexagramCenter, kHexagramRadius, Math::ToRadians(30.0f));
+                    mMap.zoomedIn.lockedHexagrams->AddHexagram(mMap.ToZoomedInPoint(kHexagramCenter),
+                                                         (kHexagramRadius / kZoomedOutMapSize)* kZoomedInMapSize,
+                                                         Math::ToRadians(30.0f));
 
                     // Grace says you got it right!
-                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O1K2ZC73, 1)");
+                    gActionManager.ExecuteDialogueAction("02O1K2ZC73", 2);
 
                     // And you just finished Libra.
+                    gGameProgress.ChangeScore("e_sidney_map_libra");
                     gGameProgress.SetFlag("Libra");
+                    gGameProgress.SetFlag("LockedHexagram");
+                    SidneyUtil::UpdateLSRState();
                 }
             }
             //printf("Center (%f, %f), Size (%f), Angle (%f)\n", hexagram.center.x, hexagram.center.y, hexagram.radius, angle);
@@ -1415,7 +1431,7 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
                 {
                     resizeShapeCursor = true;
                 }
-                else if((zoomedOutMapPos - hexagram.center).GetLengthSq() < hexagram.radius* hexagram.radius)
+                else if((zoomedOutMapPos - hexagram.center).GetLengthSq() < hexagram.radius * hexagram.radius)
                 {
                     moveShapeCursor = true;
                 }
@@ -1853,6 +1869,8 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
                 // Leo is done!
                 gGameProgress.ChangeScore("e_sidney_map_poussin");
                 gGameProgress.SetFlag("Leo");
+                gGameProgress.SetFlag("PlacedTombLine");
+                SidneyUtil::UpdateLSRState();
             }
         }
     }
@@ -1916,7 +1934,10 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
                 mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner4), mMap.ToZoomedOutPoint(kCorner1));
 
                 // Virgo is done!
+                gGameProgress.ChangeScore("e_sidney_map_virgo");
                 gGameProgress.SetFlag("Virgo");
+                gGameProgress.SetFlag("PlacedWalls");
+                SidneyUtil::UpdateLSRState();
             }
         }
     }
@@ -1969,7 +1990,7 @@ void SidneyAnalyze::AnalyzeMap_OnEraseShapePressed()
     }
     else
     {
-        ShowAnalyzeMessage("NoShapeNote");
+        ShowAnalyzeMessage("NoShapeNote", Vector2(), HorizontalAlignment::Center);
     }
 }
 

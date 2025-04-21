@@ -454,6 +454,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
             mAnalyzePopup->ShowTwoButton([this](){
                 mSidneyFiles->AddFile(SidneyFileIds::kArcadiaText);
                 ShowAnalyzeMessage("SavingArcadia", Vector2(), HorizontalAlignment::Center);
+                gGameProgress.SetFlag("SavedArcadiaText");
             });
 
             // Add to score.
