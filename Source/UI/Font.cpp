@@ -15,13 +15,14 @@ void Font::Load(uint8_t* data, uint32_t dataLength)
     if(mFontTexture == nullptr) { return; }
 
     // The top-left-most pixel of each glyph in the texture is a special color that signifies the start of a new glyph.
-    // Very often, this is (1, 0). But not always! We need to iterate from top-left to find the first non-transparent color.
+    // Very often, this is (1, 0). But not always! We need to iterate from top-left to find the first non-background-color pixel.
+    Color32 fontBackgroundColor = mFontTexture->GetPixelColor32(0, 0);
     Color32 glyphStartColor;
     uint32_t currentX = 0;
     for(; currentX < mFontTexture->GetWidth(); ++currentX)
     {
         glyphStartColor = mFontTexture->GetPixelColor32(currentX, 0);
-        if(glyphStartColor != Color32(255, 0, 255, 0))
+        if(glyphStartColor != fontBackgroundColor)
         {
             break;
         }
