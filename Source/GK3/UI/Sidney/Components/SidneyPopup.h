@@ -32,7 +32,7 @@ public:
     void SetImage(Texture* texture);
 
     void ShowNoButton();
-    void ShowOneButton();
+    void ShowOneButton(const std::function<void()>& callback = nullptr);
     void ShowTwoButton(const std::function<void()>& yesCallback);
     void ShowThreeButton(const std::function<void(int)>& callback);
     void ShowTextInput(const std::function<void(const std::string&)>& submitCallback);

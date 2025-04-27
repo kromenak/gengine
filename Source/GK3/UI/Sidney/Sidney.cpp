@@ -204,6 +204,7 @@ void Sidney::Hide()
     gLocationManager.ChangeLocation("R25", [](){
 
         // This special function warps Ego to the "sitting at desk" position and plays the stand up animation.
+        // It's also used to execute certain logic where exiting Sidney ends a timeblock or plays some other animation dependent on game state.
         gActionManager.ExecuteSheepAction("R25_ALL", "ExitSidney$");
     });
 }

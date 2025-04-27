@@ -55,4 +55,6 @@ public:
 
     static int GetCurrentLSRStep();
     static void UpdateLSRState();
+
+    static void CheckForceExitSidney307A();
 };

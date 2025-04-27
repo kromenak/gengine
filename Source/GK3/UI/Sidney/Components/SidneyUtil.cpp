@@ -1,8 +1,11 @@
 #include "SidneyUtil.h"
 
+#include "ActionManager.h"
 #include "Actor.h"
 #include "AssetManager.h"
 #include "GameProgress.h"
+#include "GK3UI.h"
+#include "Sidney.h"
 #include "SidneyButton.h"
 #include "TextAsset.h"
 #include "Texture.h"
@@ -260,4 +263,14 @@ void SidneyUtil::UpdateLSRState()
 {
     // Some game logic uses this variable to trigger time advances. So, keep it up to date!
     gGameProgress.SetGameVariable("LSRState", GetCurrentLSRStep());
+}
+
+void SidneyUtil::CheckForceExitSidney307A()
+{
+    // Day 3, 7AM has several timeblock end conditions that can be done in any order. Several of them are in Sidney.
+    // If it seems like doing this action did end the timeblock, force exit Sidney so the timeblock ends.
+    if(gActionManager.IsActionAllowed("SCENE", "ENTER", "END_TIME_BLOCK"))
+    {
+        gGK3UI.GetSidney()->Hide();
+    }
 }

@@ -45,6 +45,7 @@ public:
     const Action* GetAction(const std::string& noun, const std::string& verb) const;
     std::vector<const Action*> GetActions(const std::string& noun, VerbType verbType) const;
     bool HasTopicsLeft(const std::string& noun) const;
+    bool IsActionAllowed(const std::string& noun, const std::string& verb, const std::string& caseLabel);
 	
 	// Action Execution
 	bool ExecuteAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
@@ -53,7 +54,7 @@ public:
     void ExecuteSheepAction(const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
     void ExecuteCustomAction(const std::string& noun, const std::string& verb, const std::string& caseLabel,
                              const std::string& sheepScriptText, std::function<void(const Action*)> finishCallback = nullptr);
-    void ExecuteDialogueAction(const std::string& licensePlate, int lineCount = 1);
+    void ExecuteDialogueAction(const std::string& licensePlate, int lineCount = 1, std::function<void(const Action*)> finishCallback = nullptr);
 
     void QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
     void WaitForActionsToComplete(const std::function<void()> callback);

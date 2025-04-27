@@ -453,8 +453,17 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
             // If yes is pressed, we save the "arcadia" text as a file.
             mAnalyzePopup->ShowTwoButton([this](){
                 mSidneyFiles->AddFile(SidneyFileIds::kArcadiaText);
-                ShowAnalyzeMessage("SavingArcadia", Vector2(), HorizontalAlignment::Center);
                 gGameProgress.SetFlag("SavedArcadiaText");
+
+                // Show popup confirming saved text.
+                // This one needs some custom code to deal with callback on OK press.
+                mAnalyzePopup->ResetToDefaults();
+                mAnalyzePopup->SetTextAlignment(HorizontalAlignment::Center);
+                mAnalyzePopup->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("SavingArcadia"));
+                mAnalyzePopup->ShowOneButton([](){
+                    // This might end the timeblock.
+                    SidneyUtil::CheckForceExitSidney307A();
+                });
             });
 
             // Add to score.

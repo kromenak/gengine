@@ -920,7 +920,15 @@ void SidneySearch::TriggerWebPageEvents(const std::string& pageName)
         {
             // Play the dialogue.
             std::string command = StringUtil::Format("wait StartDialogue(\"%s\", 1)", dialogueIt->second.licensePlate.c_str());
-            gActionManager.ExecuteSheepAction(command);
+            gActionManager.ExecuteSheepAction(command, [](const Action* action){
+
+                // One of the conditions for ending Day 3, 7AM is to search for the temple floor plan. This causes some dialogue to play.
+                // SO, if this is the last condition met, after that dialogue plays, we should force end the timeblock by exiting Sidney.
+                if(gGameProgress.GetTimeblock() == Timeblock(3, 7))
+                {
+                    SidneyUtil::CheckForceExitSidney307A();
+                }
+            });
 
             // Set the flag.
             gGameProgress.SetFlag(dialogueIt->second.flagToSet);

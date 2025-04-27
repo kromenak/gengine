@@ -302,7 +302,7 @@ void SidneyPopup::ShowNoButton()
     mRightButton->SetActive(false);
 }
 
-void SidneyPopup::ShowOneButton()
+void SidneyPopup::ShowOneButton(const std::function<void()>& callback)
 {
     SetActive(true);
 
@@ -313,6 +313,14 @@ void SidneyPopup::ShowOneButton()
     mLeftButton->SetActive(false);
     mCenterButton->SetActive(false);
     mRightButton->SetActive(false);
+
+    mOKButton->SetPressCallback([this, callback](){
+        Hide();
+        if(callback != nullptr)
+        {
+            callback();
+        }
+    });
 }
 
 void SidneyPopup::ShowTwoButton(const std::function<void()>& yesCallback)

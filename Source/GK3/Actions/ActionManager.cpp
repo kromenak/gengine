@@ -258,9 +258,9 @@ void ActionManager::ExecuteCustomAction(const std::string& noun, const std::stri
     ExecuteAction(&mCustomAction, finishCallback);
 }
 
-void ActionManager::ExecuteDialogueAction(const std::string& licensePlate, int lineCount)
+void ActionManager::ExecuteDialogueAction(const std::string& licensePlate, int lineCount, std::function<void(const Action*)> finishCallback)
 {
-    ExecuteSheepAction(StringUtil::Format("wait StartDialogue(\"%s\", %d)", licensePlate.c_str(), lineCount));
+    ExecuteSheepAction(StringUtil::Format("wait StartDialogue(\"%s\", %d)", licensePlate.c_str(), lineCount), finishCallback);
 }
 
 void ActionManager::QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback)
@@ -518,6 +518,11 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
 bool ActionManager::HasTopicsLeft(const std::string &noun) const
 {
 	return GetActions(noun, VerbType::Topic).size() > 0;
+}
+
+bool ActionManager::IsActionAllowed(const std::string& noun, const std::string& verb, const std::string& caseLabel)
+{
+    return IsCaseMet(noun, verb, caseLabel);
 }
 
 std::string& ActionManager::GetNoun(int nounEnum)

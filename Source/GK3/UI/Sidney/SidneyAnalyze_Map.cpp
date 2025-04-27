@@ -525,14 +525,14 @@ void SidneyAnalyze::MapState::AddShape(const std::string& shapeName)
     }
     else if(StringUtil::EqualsIgnoreCase(shapeName, "Hexagram"))
     {
-        if(!gGameProgress.GetFlag("Virgo"))
+        if(!gGameProgress.GetFlag("Leo") || !gGameProgress.GetFlag("Virgo"))
         {
-            // If you haven't finished Virgo, Grace will say she's not ready for this shape.
+            // If you haven't finished Leo and Virgo, Grace will say she's not ready for this shape.
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27NG1\", 1)");
         }
         else if(gGameProgress.GetFlag("Libra"))
         {
-            // If you try to place after Lira, Grace says another one isn't needed.
+            // If you try to place after Libra, Grace says another one isn't needed.
             gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O0I27731\", 1)");
         }
         else
@@ -1042,6 +1042,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
     bool piscesDone = gGameProgress.GetFlag("Pisces");
     bool ariesDone = gGameProgress.GetFlag("Aries");
     bool taurusDone = gGameProgress.GetFlag("Taurus");
+    bool leoDone = gGameProgress.GetFlag("Leo");
     bool virgoDone = gGameProgress.GetFlag("Virgo");
     bool libraDone = gGameProgress.GetFlag("Libra");
     if(aquariusDone && !piscesDone)
@@ -1207,7 +1208,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
             }
         }
     }
-    else if(virgoDone && !libraDone)
+    else if(leoDone && virgoDone && !libraDone) // both Leo and Virgo must be done before you can complete Libra
     {
         // To complete Libra, the player must place a hexagram at a certain position, scale, and angle.
         const Vector2 kHexagramCenter(168.875f, 174.5f);
@@ -1254,7 +1255,11 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                                                          Math::ToRadians(30.0f));
 
                     // Grace says you got it right!
-                    gActionManager.ExecuteDialogueAction("02O1K2ZC73", 2);
+                    gActionManager.ExecuteDialogueAction("02O1K2ZC73", 2, [](const Action* action){
+
+                        // This might end the timeblock.
+                        SidneyUtil::CheckForceExitSidney307A();
+                    });
 
                     // And you just finished Libra.
                     gGameProgress.ChangeScore("e_sidney_map_libra");
@@ -1263,7 +1268,7 @@ void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
                     SidneyUtil::UpdateLSRState();
                 }
             }
-            //printf("Center (%f, %f), Size (%f), Angle (%f)\n", hexagram.center.x, hexagram.center.y, hexagram.radius, angle);
+            //printf("Center (%f, %f), Size (%f), Angle (%f)\n", h"Lexagram.center.x, hexagram.center.y, hexagram.radius, angle);
         }
     }
 }
@@ -1827,117 +1832,134 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
             }
         }
     }
-    else if(geminiDone && cancerDone && !leoDone) // working on Leo
+    else if(geminiDone && cancerDone && (!leoDone || !virgoDone)) // working on Leo or Virgo
     {
-        // Player must place two points near enough to these points and press "Analyze" to pass Leo.
-        const Vector2 kLermitagePoint(676.0f, 698.0f);
-        const Vector2 kPoussinTombPoint(938.0f, 1207.0f);
+        // Players are logically supposed to complete Leo before Virgo, but they can be done in either order.
 
-        // See if two placed points meet the criteria to finish Leo.
-        Vector2 lermitagePoint = mMap.zoomedIn.GetPlacedPointNearPoint(kLermitagePoint);
-        Vector2 poussinTombPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPoussinTombPoint);
-        if(lermitagePoint != Vector2::Zero && poussinTombPoint != Vector2::Zero)
+        // There's also the scenario to cover where the player placed the points for BOTH of these at the same time (tricky tricky).
+        // In that case, Leo should complete first, and then Virgo on another button press.
+
+        // First, checkif leo was completed, if not already done.
+        bool justCompletedLeo = false;
+        if(!leoDone)
         {
-            // Says "line passes through meridian at sunrise line."
-            ShowAnalyzeMessage("MapLine3Note", Vector2(), HorizontalAlignment::Center);
+            // Player must place two points near enough to these points and press "Analyze" to pass Leo.
+            const Vector2 kLermitagePoint(676.0f, 698.0f);
+            const Vector2 kPoussinTombPoint(938.0f, 1207.0f);
 
-            // Remove points placed by the player.
-            mMap.zoomedIn.points->RemovePoint(lermitagePoint);
-            mMap.zoomedIn.points->RemovePoint(poussinTombPoint);
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(lermitagePoint));
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(poussinTombPoint));
-
-            // It's possible for the player to place these points multiple times.
-            // But only the first placement elicits exclamations from Grace.
-            bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kLermitagePoint, true) != Vector2::Zero;
-            if(!alreadyPlacedPoints)
+            // See if two placed points meet the criteria to finish Leo.
+            Vector2 lermitagePoint = mMap.zoomedIn.GetPlacedPointNearPoint(kLermitagePoint);
+            Vector2 poussinTombPoint = mMap.zoomedIn.GetPlacedPointNearPoint(kPoussinTombPoint);
+            if(lermitagePoint != Vector2::Zero && poussinTombPoint != Vector2::Zero)
             {
-                // Grace says "Wow, it intersects the meridian at the same spot as the sunrise line!"
-                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZBY2\", 1)");
+                // Says "line passes through meridian at sunrise line."
+                ShowAnalyzeMessage("MapLine3Note", Vector2(), HorizontalAlignment::Center);
 
-                // Add locked points.
-                mMap.zoomedIn.lockedPoints->AddPoint(kLermitagePoint);
-                mMap.zoomedIn.lockedPoints->AddPoint(kPoussinTombPoint);
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kLermitagePoint));
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoussinTombPoint));
+                // Remove points placed by the player.
+                mMap.zoomedIn.points->RemovePoint(lermitagePoint);
+                mMap.zoomedIn.points->RemovePoint(poussinTombPoint);
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(lermitagePoint));
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(poussinTombPoint));
 
-                // Place a line segment between the points.
-                mMap.zoomedIn.lines->AddLine(kLermitagePoint, kPoussinTombPoint);
-                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kLermitagePoint),
-                                              mMap.ToZoomedOutPoint(kPoussinTombPoint));
+                // It's possible for the player to place these points multiple times.
+                // But only the first placement elicits exclamations from Grace.
+                bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kLermitagePoint, true) != Vector2::Zero;
+                if(!alreadyPlacedPoints)
+                {
+                    // Grace says "Wow, it intersects the meridian at the same spot as the sunrise line!"
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZBY2\", 1)");
 
-                // Leo is done!
-                gGameProgress.ChangeScore("e_sidney_map_poussin");
-                gGameProgress.SetFlag("Leo");
-                gGameProgress.SetFlag("PlacedTombLine");
-                SidneyUtil::UpdateLSRState();
+                    // Add locked points.
+                    mMap.zoomedIn.lockedPoints->AddPoint(kLermitagePoint);
+                    mMap.zoomedIn.lockedPoints->AddPoint(kPoussinTombPoint);
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kLermitagePoint));
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoussinTombPoint));
+
+                    // Place a line segment between the points.
+                    mMap.zoomedIn.lines->AddLine(kLermitagePoint, kPoussinTombPoint);
+                    mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kLermitagePoint),
+                                                  mMap.ToZoomedOutPoint(kPoussinTombPoint));
+
+                    // Leo is done!
+                    gGameProgress.ChangeScore("e_sidney_map_poussin");
+                    gGameProgress.SetFlag("Leo");
+                    gGameProgress.SetFlag("PlacedTombLine");
+                    SidneyUtil::UpdateLSRState();
+                    justCompletedLeo = true;
+                }
             }
         }
-    }
-    else if(leoDone && !virgoDone) // working on Virgo
-    {
-        // Player must place four points in the correct spots to pass Virgo.
-        const Vector2 kCorner1(360.0f, 312.0f);
-        const Vector2 kCorner2(578.0f, 210.0f);
-        const Vector2 kCorner3(992.0f, 1084.0f);
-        const Vector2 kCorner4(773.0f, 1188.0f);
 
-        // See if placed points meet the criteria to finish Virgo.
-        Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner1);
-        Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner2);
-        Vector2 point3 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner3);
-        Vector2 point4 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner4);
-        if(point1 != Vector2::Zero && point2 != Vector2::Zero && point3 != Vector2::Zero && point4 != Vector2::Zero)
+        // If we didn't finish Leo (or it was already done), check if we finished Virgo.
+        if(!virgoDone && !justCompletedLeo)
         {
-            // Says "points define 4-to-1 rectangle."
-            ShowAnalyzeMessage("MapRectNote", Vector2(), HorizontalAlignment::Center);
+            // Player must place four points in the correct spots to pass Virgo.
+            const Vector2 kCorner1(360.0f, 312.0f);
+            const Vector2 kCorner2(578.0f, 210.0f);
+            const Vector2 kCorner3(992.0f, 1084.0f);
+            const Vector2 kCorner4(773.0f, 1188.0f);
 
-            // Remove points placed by the player.
-            mMap.zoomedIn.points->RemovePoint(point1);
-            mMap.zoomedIn.points->RemovePoint(point2);
-            mMap.zoomedIn.points->RemovePoint(point3);
-            mMap.zoomedIn.points->RemovePoint(point4);
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point1));
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point2));
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point3));
-            mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point4));
-
-            // It's possible for the player to place these points multiple times.
-            // But only the first placement elicits exclamations from Grace.
-            bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner1, true) != Vector2::Zero;
-            if(!alreadyPlacedPoints)
+            // See if placed points meet the criteria to finish Virgo.
+            Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner1);
+            Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner2);
+            Vector2 point3 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner3);
+            Vector2 point4 = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner4);
+            if(point1 != Vector2::Zero && point2 != Vector2::Zero && point3 != Vector2::Zero && point4 != Vector2::Zero)
             {
-                // Grace says "That matches Wilkes seismic charts!"
-                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZKI2\", 1)");
+                // Says "points define 4-to-1 rectangle."
+                ShowAnalyzeMessage("MapRectNote", Vector2(), HorizontalAlignment::Center);
 
-                // Add locked points.
-                mMap.zoomedIn.lockedPoints->AddPoint(kCorner1);
-                mMap.zoomedIn.lockedPoints->AddPoint(kCorner2);
-                mMap.zoomedIn.lockedPoints->AddPoint(kCorner3);
-                mMap.zoomedIn.lockedPoints->AddPoint(kCorner4);
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner1));
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner2));
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner3));
-                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner4));
+                // Remove points placed by the player.
+                mMap.zoomedIn.points->RemovePoint(point1);
+                mMap.zoomedIn.points->RemovePoint(point2);
+                mMap.zoomedIn.points->RemovePoint(point3);
+                mMap.zoomedIn.points->RemovePoint(point4);
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point1));
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point2));
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point3));
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point4));
 
-                // Place line segments between the points.
-                mMap.zoomedIn.lines->AddLine(kCorner1, kCorner2);
-                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner1), mMap.ToZoomedOutPoint(kCorner2));
+                // It's possible for the player to place these points multiple times.
+                // But only the first placement elicits exclamations from Grace.
+                bool alreadyPlacedPoints = mMap.zoomedIn.GetPlacedPointNearPoint(kCorner1, true) != Vector2::Zero;
+                if(!alreadyPlacedPoints)
+                {
+                    // Grace says "That matches Wilkes seismic charts!"
+                    gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZKI2\", 1)", [](const Action* action){
 
-                mMap.zoomedIn.lines->AddLine(kCorner2, kCorner3);
-                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner2), mMap.ToZoomedOutPoint(kCorner3));
+                        // This might end the timeblock.
+                        SidneyUtil::CheckForceExitSidney307A();
+                    });
 
-                mMap.zoomedIn.lines->AddLine(kCorner3, kCorner4);
-                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner3), mMap.ToZoomedOutPoint(kCorner4));
+                    // Add locked points.
+                    mMap.zoomedIn.lockedPoints->AddPoint(kCorner1);
+                    mMap.zoomedIn.lockedPoints->AddPoint(kCorner2);
+                    mMap.zoomedIn.lockedPoints->AddPoint(kCorner3);
+                    mMap.zoomedIn.lockedPoints->AddPoint(kCorner4);
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner1));
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner2));
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner3));
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kCorner4));
 
-                mMap.zoomedIn.lines->AddLine(kCorner4, kCorner1);
-                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner4), mMap.ToZoomedOutPoint(kCorner1));
+                    // Place line segments between the points.
+                    mMap.zoomedIn.lines->AddLine(kCorner1, kCorner2);
+                    mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner1), mMap.ToZoomedOutPoint(kCorner2));
 
-                // Virgo is done!
-                gGameProgress.ChangeScore("e_sidney_map_virgo");
-                gGameProgress.SetFlag("Virgo");
-                gGameProgress.SetFlag("PlacedWalls");
-                SidneyUtil::UpdateLSRState();
+                    mMap.zoomedIn.lines->AddLine(kCorner2, kCorner3);
+                    mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner2), mMap.ToZoomedOutPoint(kCorner3));
+
+                    mMap.zoomedIn.lines->AddLine(kCorner3, kCorner4);
+                    mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner3), mMap.ToZoomedOutPoint(kCorner4));
+
+                    mMap.zoomedIn.lines->AddLine(kCorner4, kCorner1);
+                    mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kCorner4), mMap.ToZoomedOutPoint(kCorner1));
+
+                    // Virgo is done!
+                    gGameProgress.ChangeScore("e_sidney_map_virgo");
+                    gGameProgress.SetFlag("Virgo");
+                    gGameProgress.SetFlag("PlacedWalls");
+                    SidneyUtil::UpdateLSRState();
+                }
             }
         }
     }
