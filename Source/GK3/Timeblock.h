@@ -51,6 +51,8 @@ public:
     void OnPersist(PersistState& ps);
     #endif
 
+    static void ParseTimeblockRange(const std::string& name, Timeblock& start, Timeblock& end);
+
 private:
 	// The day; should be 1+.
 	int mDay = 1;

@@ -28,6 +28,14 @@ struct SheepScriptAndText
     SheepScript* script = nullptr;
 };
 
+enum class ActionType
+{
+    Global,
+    Day,
+    TimeblockRange,
+    Timeblock
+};
+
 struct Action
 {
 	// The noun is the thing we are interacting with.
@@ -65,6 +73,10 @@ struct Action
 	
 	// A script to run when this action is executed.
     SheepScriptAndText script;
+
+    // Actions are pulled from different types of NVC files - some are global, some are for specific timeblocks, etc.
+    // In some cases, this is relevant to resolve conflicts between actions. A more specific action overrides a global action for example.
+    ActionType type = ActionType::Global;
 	
 	std::string ToString() const { return "'" + noun + ":" + verb + ":" + caseLabel + "': " + script.text; }
 };

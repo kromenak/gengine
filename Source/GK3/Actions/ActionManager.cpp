@@ -597,60 +597,10 @@ void ActionManager::ShowTopicBar()
 
 bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const Timeblock& timeblock)
 {
-	// First three letters are always the location code.
-	// Arguably, we could care that the location code matches the current location, but that's kind of a given.
-	// So, we'll just ignore it.
-	std::size_t curIndex = 3;
-	
-	// Next, there mayyy be an underscore, but maybe not.
-	// Skip the underscore, in any case.
-	if(assetName[curIndex] == '_')
-	{
-		++curIndex;
-	}
-
-	// See if "all" is in the name.
-	// If so, it indicates that the actions are used for all timeblocks on one or more days.
-    std::string lowerName = StringUtil::ToLowerCopy(assetName);
-	std::size_t allPos = lowerName.find("all", curIndex);
-	if(allPos != std::string::npos)
-	{
-		// If "all" is at the current index, it means there's no day constraint - just ALWAYS load this one!
-		if(allPos == curIndex)
-		{
-			return true;
-		}
-		else
-		{
-			// "all" is later in the string, meaning intermediate characters indicate which
-			// days are OK to use this NVC. So, see if the current day is included!
-			for(std::size_t i = curIndex; i < allPos; ++i)
-			{
-				if(std::isdigit(lowerName[i]))
-				{
-					int day = std::stoi(std::string(1, lowerName[i]));
-					if(day == timeblock.GetDay())
-					{
-						return true;
-					}
-				}
-			}
-		}
-	}
-	else
-	{
-		// If "all" did not appear, we assume this is an action set for a specific timeblock ONLY!
-		// See if it's the current timeblock!
-		std::string currentTimeblock = timeblock.ToString();
-		StringUtil::ToLower(currentTimeblock);
-		if(lowerName.find(currentTimeblock) != std::string::npos)
-		{
-			return true;
-		}
-	}
-	
-	// Seemingly, this asset should not be used for the current timeblock.
-	return false;
+    Timeblock start;
+    Timeblock end;
+    Timeblock::ParseTimeblockRange(assetName, start, end);
+    return start <= timeblock && timeblock <= end;
 }
 
 bool ActionManager::IsCaseMet(const std::string& noun, const std::string& verb, const std::string& caseLabel, VerbType verbType) const
@@ -826,7 +776,7 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                 // OTR_TIME (or custom case with _OTR in it)
                 // DIALOGUE_TOPICS_LEFT / NOT_DIALOGUE_TOPICS_LEFT
                 // TIME_BLOCK_OVERRIDE
-                // Custom Logic - alphabetical order (very strange, imo)
+                // Custom Logic - action type, and then alphabetical order
                 // 1ST_TIME / 2CD_TIME / 3RD_TIME
                 int caseScore = 0;
                 if(StringUtil::EqualsIgnoreCase(entry.first, "ALL"))
@@ -871,17 +821,28 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
 
                     //TODO: This logic doesn't seem entirely accurate - for example, it doesn't work correctly with GABE_ALL_INV vs. IN_SIDNEY_ADD_DATA.
                     //TODO: Added custom logic above to deal with that, but...we may need to revise this!
+
+                    // If we already encountered a valid custom case, AND this case is also valid, we have a tie.
+                    // First, a new action that is from a more specific action type would win out.
+                    // If they have the same type, then we just do an alphabetical tie.
+                    
                     // If we've already encountered a valid custom case before, AND this custom case is also valid, ties are handled alphabetically.
                     // This seems strange to me, but then again, you've got to handle a tie somehow I guess?
                     if(action != nullptr && highestScore == 7)
                     {
-                        // If this new case comes first alphabetically, we'll use the new action instead.
-                        // No need to overwrite score, since it's still the same.
-                        std::string prevCase = StringUtil::ToLowerCopy(action->caseLabel);
-                        std::string newCase = StringUtil::ToLowerCopy(entry.first);
-                        if(strcmp(newCase.c_str(), prevCase.c_str()) < 0)
+                        if(entry.second->type > action->type)
                         {
                             action = entry.second;
+                        }
+                        else if(entry.second->type == action->type)
+                        {
+                            // If this new case comes first alphabetically, we'll use the new action instead.
+                            std::string prevCase = StringUtil::ToLowerCopy(action->caseLabel);
+                            std::string newCase = StringUtil::ToLowerCopy(entry.first);
+                            if(strcmp(newCase.c_str(), prevCase.c_str()) < 0)
+                            {
+                                action = entry.second;
+                            }
                         }
                     }
                 }

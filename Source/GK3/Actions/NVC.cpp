@@ -2,6 +2,7 @@
 
 #include "IniParser.h"
 #include "SheepManager.h"
+#include "Timeblock.h"
 
 void NVC::Load(uint8_t* data, uint32_t dataLength)
 {
@@ -71,12 +72,35 @@ void NVC::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
     IniParser parser(data, dataLength);
     parser.ParseAll();
+
+    // For all actions in this NVC, figure out what their priority will be.
+    // The rule is that a more specific NVC should override a less specific NVC.
+    ActionType type = ActionType::Global;
+    {
+        Timeblock start;
+        Timeblock end;
+        Timeblock::ParseTimeblockRange(mName, start, end);
+
+        if(start.GetDay() == end.GetDay() && start.GetHour24() == 0 && end.GetHour24() == 23)
+        {
+            type = ActionType::Day;
+        }
+        else if(start.GetDay() == end.GetDay() && start.GetHour24() != end.GetHour24())
+        {
+            type = ActionType::TimeblockRange;
+        }
+        else if(start == end)
+        {
+            type = ActionType::Timeblock;
+        }
+    }
     
     // Main section contains all the Noun/Verb/Cases on individual lines.
     IniSection mainSection = parser.GetSection("");
     for(auto& line : mainSection.lines)
     {
         Action action;
+        action.type = type;
         
         // The first entry is the noun.
 		IniKeyValue& first = line.entries.front();

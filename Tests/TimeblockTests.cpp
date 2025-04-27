@@ -115,3 +115,71 @@ TEST_CASE("Timeblock string constructor works")
 	REQUIRE(t3.GetAMPMSuffix() == 'P');
 	REQUIRE(t3.ToString() == "202P");
 }
+
+TEST_CASE("Timeblock filename parsing works")
+{
+    Timeblock default;
+
+    Timeblock start;
+    Timeblock end;
+
+    // Test empty string.
+    Timeblock::ParseTimeblockRange("", start, end);
+    REQUIRE(start.GetDay() == default.GetDay());
+    REQUIRE(start.GetHour24() == default.GetHour24());
+    REQUIRE(end.GetDay() == default.GetDay());
+    REQUIRE(end.GetHour24() == default.GetHour24());
+
+    // Test garbage case.
+    Timeblock::ParseTimeblockRange("dakdjaskldjakall", start, end);
+    REQUIRE(start.GetDay() == default.GetDay());
+    REQUIRE(start.GetHour24() == default.GetHour24());
+    REQUIRE(end.GetDay() == default.GetDay());
+    REQUIRE(end.GetHour24() == default.GetHour24());
+
+    // Test ALL cases.
+    Timeblock::ParseTimeblockRange("HAL_ALL.NVC", start, end);
+    REQUIRE(start.GetDay() == 1);
+    REQUIRE(start.GetHour24() == 0);
+    REQUIRE(end.GetDay() == 9);
+    REQUIRE(end.GetHour24() == 23);
+
+    Timeblock::ParseTimeblockRange("HALALL.NVC", start, end);
+    REQUIRE(start.GetDay() == 1);
+    REQUIRE(start.GetHour24() == 0);
+    REQUIRE(end.GetDay() == 9);
+    REQUIRE(end.GetHour24() == 23);
+
+    // Test day cases.
+    Timeblock::ParseTimeblockRange("HAL_1ALL.NVC", start, end);
+    REQUIRE(start.GetDay() == 1);
+    REQUIRE(start.GetHour24() == 0);
+    REQUIRE(end.GetDay() == 1);
+    REQUIRE(end.GetHour24() == 23);
+
+    Timeblock::ParseTimeblockRange("HAL_12ALL", start, end);
+    REQUIRE(start.GetDay() == 1);
+    REQUIRE(start.GetHour24() == 0);
+    REQUIRE(end.GetDay() == 2);
+    REQUIRE(end.GetHour24() == 23);
+
+    Timeblock::ParseTimeblockRange("HAL23ALL.NVC", start, end);
+    REQUIRE(start.GetDay() == 2);
+    REQUIRE(start.GetHour24() == 0);
+    REQUIRE(end.GetDay() == 3);
+    REQUIRE(end.GetHour24() == 23);
+
+    // Test specific timeblock case.
+    Timeblock::ParseTimeblockRange("HAL202P.NVC", start, end);
+    REQUIRE(start.GetDay() == 2);
+    REQUIRE(start.GetHour24() == 14);
+    REQUIRE(end.GetDay() == 2);
+    REQUIRE(end.GetHour24() == 14);
+
+    // Test timeblock range case.
+    Timeblock::ParseTimeblockRange("R25312P06P.NVC", start, end);
+    REQUIRE(start.GetDay() == 3);
+    REQUIRE(start.GetHour24() == 12);
+    REQUIRE(end.GetDay() == 3);
+    REQUIRE(end.GetHour24() == 18);
+}
