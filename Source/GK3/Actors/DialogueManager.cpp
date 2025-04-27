@@ -36,10 +36,14 @@ void DialogueManager::StartDialogue(const std::string& licensePlate, int numLine
     mDialogueLicensePlate = licensePlate;
     mDialogueLicensePlate.pop_back();
 	
-	// Save remaining lines and finish callback.
+	// Save remaining lines.
 	mRemainingDialogueLines = numLines;
+
+    // Save whether this dialogue plays fidgets.
 	mDialogueUsesFidgets = playFidgets;
-	mDialogueFinishCallback = finishCallback;
+
+    
+    mDialogueFinishCallbacks.push_back(finishCallback);
 	
 	// Play first line of dialogue.
 	PlayNextDialogueLine();
@@ -50,7 +54,7 @@ void DialogueManager::ContinueDialogue(int numLines, bool playFidgets, std::func
 	// This assumes that we've already previously specified a plate/sequence and we just want to continue the sequence.
 	mRemainingDialogueLines = numLines;
 	mDialogueUsesFidgets = playFidgets;
-	mDialogueFinishCallback = finishCallback;
+    mDialogueFinishCallbacks.push_back(finishCallback);
 	
 	// Play next line.
 	PlayNextDialogueLine();
@@ -62,14 +66,7 @@ void DialogueManager::TriggerDialogueCue()
 	if(mRemainingDialogueLines <= 0)
 	{
 		// Call finish callback.
-		if(mDialogueFinishCallback != nullptr)
-		{
-            // Executing the callback can itself cause the callback to be set (if multiple dialogs in a row).
-            // So, set member to null before executing it.
-            auto callback = mDialogueFinishCallback;
-			mDialogueFinishCallback = nullptr;
-            callback();
-		}
+        CallDialogueFinishedCallback();
 		return;
 	}
 	
@@ -292,6 +289,18 @@ void DialogueManager::PlayNextDialogueLine()
     yakAnimParams.animation = yak;
     yakAnimParams.isYak = true;
     gSceneManager.GetScene()->GetAnimator()->Start(yakAnimParams);
+}
+
+void DialogueManager::CallDialogueFinishedCallback()
+{
+    if(!mDialogueFinishCallbacks.empty())
+    {
+        if(mDialogueFinishCallbacks[0] != nullptr)
+        {
+            mDialogueFinishCallbacks[0]();
+        }
+        mDialogueFinishCallbacks.erase(mDialogueFinishCallbacks.begin());
+    }
 }
 
 void DialogueManager::CheckConversationAnimFinishCallback()

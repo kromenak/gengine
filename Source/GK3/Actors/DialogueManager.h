@@ -48,8 +48,8 @@ private:
 	// If not, we don't execute talk/listen fidgets on actors.
 	bool mDialogueUsesFidgets = false;
 	
-	// Callback to call when dialogue finishes.
-	std::function<void()> mDialogueFinishCallback = nullptr;
+	// Callbacks to call when dialogue finishes.
+    std::vector<std::function<void()>> mDialogueFinishCallbacks;
 	
 	// The current speaker. Whoever is speaking will play a "talk" animation.
 	// When someone else becomes the speaker, they'll play their "listen" animation.
@@ -72,6 +72,7 @@ private:
 	
 	void PlayNextDialogueLine();
 
+    void CallDialogueFinishedCallback();
     void CheckConversationAnimFinishCallback();
 };
 
