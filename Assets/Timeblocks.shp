@@ -60,6 +60,10 @@ code
         {
             wait Call("CheckTimeblockComplete307A$");
         }
+        else if(IsCurrentTime("310A"))
+        {
+            wait Call("CheckTimeblockComplete310A$");
+        }
 	}
 
 	CheckTimeblockComplete110A$()
@@ -432,5 +436,33 @@ code
 
         // Ok, we can move to next timeblock.
         SetTime("310A");
+    }
+
+    CheckTimeblockComplete310A$()
+    {
+        // In this timeblock, Gabe investigates Wilkes and digs into the details of the bloodline manuscript.
+        // This all culminates in a talk with Grace that ends the timeblock.
+
+        // Game code sets the location to R25 with various topic counts set when the timeblock should end.
+
+        // Must be in R25.
+		if(IsCurrentLocation("R25") == 0)
+		{
+			return;
+		}
+
+        // Must have talked to Grace about several topics.
+        if(GetTopicCount("GRACE", "T_FREEMASONS") == 0 ||
+           GetTopicCount("GRACE", "T_WILKES") == 0 ||
+           GetTopicCount("GRACE", "T_UNICORN") == 0 ||
+           GetTopicCount("GRACE", "T_THRONE") == 0 ||
+           GetTopicCount("GRACE", "T_PRINCE_JAMES_MEN") == 0 ||
+           GetTopicCount("GRACE", "T_MANUSCRIPT") == 0)
+        {
+            return;
+        }
+
+        // Ok, all good!
+        SetTime("312P");
     }
 }
