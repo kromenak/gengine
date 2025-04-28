@@ -63,12 +63,17 @@ private:
     // Represents one email that can be received.
     struct Email
     {
+        // Typical email fields.
         std::string from;
         std::string to;
         std::string cc;
         std::string date;
         std::string subject;
         std::vector<std::string> body;
+
+        // A score and flag that are set when viewing this email.
+        std::string scoreEvent;
+        std::string flag;
     };
 
     // Contains all emails that can be received and that are known by the game.

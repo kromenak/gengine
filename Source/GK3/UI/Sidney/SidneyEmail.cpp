@@ -345,6 +345,13 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
         }
     }
 
+    // Manually set a few email fields for score/flags.
+    mAllEmails["email4"].scoreEvent = "e_sidney_email_open_temple_diagram";
+    mAllEmails["email4"].flag = "OpenedTempleDiagram";
+
+    mAllEmails["email5"].scoreEvent = "e_sidney_email_open_symbols_from_serres";
+    mAllEmails["email5"].flag = "OpenedHermeticDiagram";
+    
     // Hide by default.
     Hide();
 }
@@ -587,6 +594,18 @@ void SidneyEmail::ViewEmail(const std::string& emailId, int emailIndex)
 
     // Mark this email as read.
     mReadEmails.insert(emailId);
+
+    // Add score if any.
+    if(!email.scoreEvent.empty())
+    {
+        gGameProgress.ChangeScore(email.scoreEvent);
+    }
+
+    // Apply flag if any.
+    if(!email.flag.empty())
+    {
+        gGameProgress.SetFlag(email.flag);
+    }
 }
 
 void SidneyEmail::OnNextEmailButtonPressed()
