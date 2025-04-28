@@ -179,6 +179,8 @@ private:
             UIHexagrams* hexagrams = nullptr;
             UIHexagrams* lockedHexagrams = nullptr;
 
+            UIImage* siteText[2] = { 0 };
+
             Vector2 GetLocalMousePos();
             Vector2 GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints = false);
 
@@ -226,6 +228,9 @@ private:
         void DrawGrid(uint8_t size, bool fillShape);
         void LockGrid();
         void ClearGrid();
+
+        // Images
+        void RefreshTheSiteLabels();
 
         void OnPersist(PersistState& ps);
     };

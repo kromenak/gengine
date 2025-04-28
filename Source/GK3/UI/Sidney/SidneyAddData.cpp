@@ -99,7 +99,6 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
             mFileNameLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -56.5f); // .5 to keep it pixel-perfect (since height of box is odd)
             mFileNameLabel->GetRectTransform()->SetSizeDelta(226.0f, 16.0f);
 
-            
             mInputCompleteOKButton = new SidneyButton(mInputCompleteBox);
             mInputCompleteOKButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
             mInputCompleteOKButton->SetText(SidneyUtil::GetAddDataLocalizer().GetText("OKButton"));

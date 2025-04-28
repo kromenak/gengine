@@ -22,6 +22,7 @@
 #include "UILines.h"
 #include "UIPoints.h"
 #include "UIRectangles.h"
+#include "UIUtil.h"
 
 namespace
 {
@@ -641,6 +642,16 @@ void SidneyAnalyze::MapState::ClearGrid()
     zoomedOut.grids->Clear();
 }
 
+void SidneyAnalyze::MapState::RefreshTheSiteLabels()
+{
+    bool visible = gGameProgress.GetFlag("MarkedTheSite");
+    zoomedIn.siteText[0]->SetEnabled(visible);
+    zoomedIn.siteText[1]->SetEnabled(visible);
+
+    zoomedOut.siteText[0]->SetEnabled(visible);
+    zoomedOut.siteText[1]->SetEnabled(visible);
+}
+
 void SidneyAnalyze::MapState::OnPersist(PersistState& ps)
 {
     ps.Xfer(PERSIST_VAR(zoomedOut));
@@ -679,6 +690,24 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedIn.mapImage = zoomedInMapBackground->AddComponent<UIImage>();
         mMap.zoomedIn.mapImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBIGMAP.BMP"), true);
         mMap.zoomedIn.mapImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+
+        // Add "the site" text.
+        // Do this before shapes/grids, since it should draw under those things.
+        {
+            mMap.zoomedIn.siteText[0] = UIUtil::NewUIActorWithWidget<UIImage>(zoomedInMapBackground);
+            mMap.zoomedIn.siteText[0]->SetTexture(gAssetManager.LoadTexture("MAPLG_THE.BMP"), true);
+            mMap.zoomedIn.siteText[0]->SetColor(Color32(255, 255, 255, 128));
+            mMap.zoomedIn.siteText[0]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.siteText[0]->GetRectTransform()->SetAnchoredPosition(823.0f, 1039.0f);
+            mMap.zoomedIn.siteText[0]->SetEnabled(false);
+
+            mMap.zoomedIn.siteText[1] = UIUtil::NewUIActorWithWidget<UIImage>(zoomedInMapBackground);
+            mMap.zoomedIn.siteText[1]->SetTexture(gAssetManager.LoadTexture("MAPLG_SITE.BMP"), true);
+            mMap.zoomedIn.siteText[1]->SetColor(Color32(255, 255, 255, 128));
+            mMap.zoomedIn.siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.siteText[1]->GetRectTransform()->SetAnchoredPosition(792.0f, 983.0f);
+            mMap.zoomedIn.siteText[1]->SetEnabled(false);
+        }
 
         // Create locked hexagrams renderer.
         {
@@ -831,6 +860,22 @@ void SidneyAnalyze::AnalyzeMap_Init()
         // The zoomed out map also needs a masking canvas so that moved shapes don't show outside the map border.
         UICanvas* zoomedOutMapCanvas = zoomedOutMapActor->AddComponent<UICanvas>(0);
         zoomedOutMapCanvas->SetMasked(true);
+
+        // Add "the site" text.
+        // Do this before shapes/grids, since it should draw under those things.
+        {
+            mMap.zoomedOut.siteText[0] = UIUtil::NewUIActorWithWidget<UIImage>(zoomedOutMapActor);
+            mMap.zoomedOut.siteText[0]->SetTexture(gAssetManager.LoadTexture("MAPSM_THE.BMP"), true);
+            mMap.zoomedOut.siteText[0]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.siteText[0]->GetRectTransform()->SetAnchoredPosition(204.0f, 254.0f);
+            mMap.zoomedOut.siteText[0]->SetEnabled(false);
+
+            mMap.zoomedOut.siteText[1] = UIUtil::NewUIActorWithWidget<UIImage>(zoomedOutMapActor);
+            mMap.zoomedOut.siteText[1]->SetTexture(gAssetManager.LoadTexture("MAPSM_SITE.BMP"), true);
+            mMap.zoomedOut.siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.siteText[1]->GetRectTransform()->SetAnchoredPosition(196.0f, 242.0f);
+            mMap.zoomedOut.siteText[1]->SetEnabled(false);
+        }
 
         // Create locked hexagrams renderer.
         {
@@ -1000,6 +1045,9 @@ void SidneyAnalyze::AnalyzeMap_EnterState()
     // Use & Erase Shape are enabled if we have any Shapes saved.
     mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_UseShapeIdx, mSidneyFiles->HasFileOfType(SidneyFileType::Shape));
     mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_EraseShapeIdx, mSidneyFiles->HasFileOfType(SidneyFileType::Shape));
+
+    // Refresh site label visibility on map.
+    mMap.RefreshTheSiteLabels();
 }
 
 void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
@@ -1715,12 +1763,45 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedInMap(float deltaTime)
 
             // When you place a point, the latitude/longitude of the point are displayed on-screen.
             AnalyzeMap_SetPointStatusText("MapEnterPointNote", zoomedInMapPos);
+
+            // There's one part (during Scorpio) when entering a point immediately illicits a response from Grace.
+            if(gGameProgress.GetFlag("Libra") && !gGameProgress.GetFlag("Scorpio") && gGameProgress.GetFlag("PlacedTempleDivisions"))
+            {
+                const Vector2 kSitePoint(830.0f, 1027.0f);
+                Vector2 sitePoint = mMap.zoomedIn.GetPlacedPointNearPoint(kSitePoint);
+                if(sitePoint != Vector2::Zero)
+                {
+                    // Replace placed point with locked actual point.
+                    mMap.zoomedIn.points->RemovePoint(zoomedInMapPos);
+                    mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(zoomedInMapPos));
+                    mMap.zoomedIn.lockedPoints->AddPoint(kSitePoint);
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kSitePoint));
+
+                    // Change score and apply flags.
+                    gGameProgress.ChangeScore("e_sidney_map_scorpio");
+                    gGameProgress.SetFlag("MarkedTheSite");
+                    gGameProgress.SetFlag("Scorpio");
+                    SidneyUtil::UpdateLSRState();
+
+                    // Grace says "that's it, that's the site, I'll write down the coords."
+                    gActionManager.ExecuteDialogueAction("02O8O2ZRA1", 2, [this](const Action* action){
+
+                        //TODO: Data entry box.
+
+                        // Refresh the map so "The Site" label appears.
+                        mMap.RefreshTheSiteLabels();
+                    });
+                }
+                
+            }
         }
     }
 }
 
 void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
 {
+    bool didValidAnalyzeAction = false;
+
     // The map analysis behavior depends on what part of the LSR riddle we're on.
     bool aquariusDone = gGameProgress.GetFlag("Aquarius");
     bool piscesDone = gGameProgress.GetFlag("Pisces");
@@ -1730,6 +1811,8 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
     bool cancerDone = gGameProgress.GetFlag("Cancer");
     bool leoDone = gGameProgress.GetFlag("Leo");
     bool virgoDone = gGameProgress.GetFlag("Virgo");
+    bool libraDone = gGameProgress.GetFlag("Libra");
+    bool scorpioDone = gGameProgress.GetFlag("Scorpio");
     if(!aquariusDone) // Working on Aquarius
     {
         // Player must place two points near enough to these points and press "Analyze" to pass Aquarius.
@@ -1963,9 +2046,70 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
             }
         }
     }
+    else if(libraDone && !scorpioDone)
+    {
+        // This can only be successfully done if the player has seen the Temple of Solomon email.
+        if(gGameProgress.GetFlag("OpenedTempleDiagram") && !gGameProgress.GetFlag("PlacedTempleDivisions"))
+        {
+            // Player must place four points in the correct spots to pass Scorpio.
+            const Vector2 kPoint1(670.0f, 969.0f);
+            const Vector2 kPoint2(889.0f, 866.0f);
+            const Vector2 kPoint3(463.0f, 531.0f);
+            const Vector2 kPoint4(680.0f, 429.0f);
+
+            // See if placed points meet the criteria to finish Virgo.
+            Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kPoint1);
+            Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kPoint2);
+            Vector2 point3 = mMap.zoomedIn.GetPlacedPointNearPoint(kPoint3);
+            Vector2 point4 = mMap.zoomedIn.GetPlacedPointNearPoint(kPoint4);
+            if(point1 != Vector2::Zero && point2 != Vector2::Zero && point3 != Vector2::Zero && point4 != Vector2::Zero)
+            {
+                // Remove points placed by the player.
+                mMap.zoomedIn.points->RemovePoint(point1);
+                mMap.zoomedIn.points->RemovePoint(point2);
+                mMap.zoomedIn.points->RemovePoint(point3);
+                mMap.zoomedIn.points->RemovePoint(point4);
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point1));
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point2));
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point3));
+                mMap.zoomedOut.points->RemovePoint(mMap.ToZoomedOutPoint(point4));
+
+                // Add locked points.
+                mMap.zoomedIn.lockedPoints->AddPoint(kPoint1);
+                mMap.zoomedIn.lockedPoints->AddPoint(kPoint2);
+                mMap.zoomedIn.lockedPoints->AddPoint(kPoint3);
+                mMap.zoomedIn.lockedPoints->AddPoint(kPoint4);
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoint1));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoint2));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoint3));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kPoint4));
+
+                // Place line segments between the points to create the temple layout.
+                mMap.zoomedIn.lines->AddLine(kPoint1, kPoint2);
+                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kPoint1), mMap.ToZoomedOutPoint(kPoint2));
+
+                mMap.zoomedIn.lines->AddLine(kPoint3, kPoint4);
+                mMap.zoomedOut.lines->AddLine(mMap.ToZoomedOutPoint(kPoint3), mMap.ToZoomedOutPoint(kPoint4));
+
+                // Grace says something like "that matches the temple diagram!"
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2ZR82\", 1)");
+
+                // This makes progress towards Scorpio, but it doesn't complete it.
+                gGameProgress.ChangeScore("e_sidney_map_temple");
+                gGameProgress.SetFlag("PlacedTempleDivisions");
+                didValidAnalyzeAction = true;
+            }
+        }
+    }
+
+    // If a popup was displayed, then we must have performed a valid/recognized analyze action.
+    if(mAnalyzePopup->IsActive())
+    {
+        didValidAnalyzeAction = true;
+    }
 
     // If you analyze the map, but there is not a more specific message to show, we always show this fallback at least.
-    if(!mAnalyzePopup->IsActive())
+    if(!didValidAnalyzeAction)
     {
         // If points are placed, the message is different.
         if(mMap.zoomedIn.points->GetPointsCount() > 0 || mMap.zoomedIn.lockedPoints->GetPointsCount() > 0)
