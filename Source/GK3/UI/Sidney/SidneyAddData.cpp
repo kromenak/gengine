@@ -8,6 +8,7 @@
 #include "Scene.h"
 #include "Sidney.h"
 #include "SidneyButton.h"
+#include "SidneyFakeInputPopup.h"
 #include "SidneyFiles.h"
 #include "SidneyUtil.h"
 #include "UIButton.h"
@@ -50,69 +51,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
     }
 
     // Add "Input Complete" dialog box.
-    {
-        mInputCompleteBox = new Actor("Add Data Complete", TransformType::RectTransform);
-        mInputCompleteBox->GetTransform()->SetParent(sidney->GetTransform());
-
-        UINineSlice* boxImage = mInputCompleteBox->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
-        boxImage->GetRectTransform()->SetSizeDelta(240.0f, 105.0f);
-
-        {
-            Actor* staticTextActor = new Actor(TransformType::RectTransform);
-            staticTextActor->GetTransform()->SetParent(mInputCompleteBox->GetTransform());
-
-            UILabel* staticTextLabel = staticTextActor->AddComponent<UILabel>();
-            staticTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-            staticTextLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("InputComplete"));
-            staticTextLabel->SetVerticalAlignment(VerticalAlignment::Top);
-
-            staticTextLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
-            staticTextLabel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-            staticTextLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -12.5f); // .5 to keep it pixel-perfect (since height of box is odd)
-            staticTextLabel->GetRectTransform()->SetSizeDelta(226.0f, 42.0f);
-        }
-        {
-            Actor* staticTextActor = new Actor(TransformType::RectTransform);
-            staticTextActor->GetTransform()->SetParent(mInputCompleteBox->GetTransform());
-
-            UILabel* staticTextLabel = staticTextActor->AddComponent<UILabel>();
-            staticTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-            staticTextLabel->SetText(SidneyUtil::GetAddDataLocalizer().GetText("InputPrompt"));
-            staticTextLabel->SetVerticalAlignment(VerticalAlignment::Top);
-
-            staticTextLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
-            staticTextLabel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-            staticTextLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -34.5f); // .5 to keep it pixel-perfect (since height of box is odd)
-            staticTextLabel->GetRectTransform()->SetSizeDelta(226.0f, 42.0f);
-        }
-        {
-            Actor* fileNameActor = new Actor(TransformType::RectTransform);
-            fileNameActor->GetTransform()->SetParent(mInputCompleteBox->GetTransform());
-
-            mFileNameLabel = fileNameActor->AddComponent<UILabel>();
-            mFileNameLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-            mFileNameLabel->SetText(" ");
-            mFileNameLabel->SetVerticalAlignment(VerticalAlignment::Top);
-
-            mFileNameLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
-            mFileNameLabel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-            mFileNameLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -56.5f); // .5 to keep it pixel-perfect (since height of box is odd)
-            mFileNameLabel->GetRectTransform()->SetSizeDelta(226.0f, 16.0f);
-
-            mInputCompleteOKButton = new SidneyButton(mInputCompleteBox);
-            mInputCompleteOKButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
-            mInputCompleteOKButton->SetText(SidneyUtil::GetAddDataLocalizer().GetText("OKButton"));
-            mInputCompleteOKButton->GetButton()->SetCanInteract(false);
-
-            mInputCompleteOKButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-            mInputCompleteOKButton->GetRectTransform()->SetAnchoredPosition(15.0f, -77.5f);
-            mInputCompleteOKButton->SetWidth(40.0f);
-            mInputCompleteOKButton->SetHeight(13.0f);
-        }
-
-        // Hide by default.
-        mInputCompleteBox->SetActive(false);
-    }
+    mInputCompletePopup = new SidneyFakeInputPopup(sidney, "Add Data Complete");
 }
 
 void SidneyAddData::Start()
@@ -211,15 +150,9 @@ void SidneyAddData::OnUpdate(float deltaTime)
 
                     // Hide "Add Data" box and show "Input Complete" box.
                     mAddDataBox->SetActive(false);
-                    mInputCompleteBox->SetActive(true);
-
-                    // Figure out name of this item, which will be added to the input box.
-                    mTextToType = SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(sidneyFileId + 1));
-
-                    // Reset type text.
-                    mFileNameLabel->SetText("");
-                    mTextToTypeIndex = 0;
-                    mTextToTypeTimer = Random::Range(kMinMaxTypeInterval.x, kMinMaxTypeInterval.y);
+                    mInputCompletePopup->Show(SidneyUtil::GetAddDataLocalizer().GetText("InputComplete"),
+                                              SidneyUtil::GetAddDataLocalizer().GetText("InputPrompt"),
+                                              SidneyUtil::GetAddDataLocalizer().GetText("ScanItem" + std::to_string(sidneyFileId + 1)));
                 });
             }
         }
@@ -241,53 +174,6 @@ void SidneyAddData::OnUpdate(float deltaTime)
                 mAddDataLabel->SetFont(mGreenFont);
             }
             mAddDataColorTimer = kAddDataColorToggleInterval;
-        }
-    }
-
-    // Update the "input complete" box.
-    if(mInputCompleteBox->IsActive())
-    {
-        // Wait until enough time has passed to type the next letter.
-        if(mTextToTypeTimer > 0.0f)
-        {
-            mTextToTypeTimer -= deltaTime;
-            if(mTextToTypeTimer <= 0.0f)
-            {
-                // We have more text to type?
-                if(mTextToTypeIndex < mTextToType.size())
-                {
-                    // Add a letter.
-                    mFileNameLabel->SetText(mTextToType.substr(0, mTextToTypeIndex + 1));
-                    ++mTextToTypeIndex;
-
-                    // Reroll timer for next letter.
-                    if(mTextToTypeIndex < mTextToType.size())
-                    {
-                        mTextToTypeTimer = Random::Range(kMinMaxTypeInterval.x, kMinMaxTypeInterval.y);
-                    }
-                    else
-                    {
-                        // When all letters are typed, always use a constant one-second delay before closing the box.
-                        mTextToTypeTimer = 1.0f;
-                    }
-
-                    // Play random "key press" SFX from set of sounds.
-                    int index = Random::Range(1, 5);
-                    Audio* audio = gAssetManager.LoadAudio("COMPKEYSIN" + std::to_string(index));
-                    gAudioManager.PlaySFX(audio);
-                }
-                else
-                {
-                    // We typed everything and waited a moment.
-                    // Programmatically press the OK button and hide the box.
-                    mInputCompleteOKButton->SetPressCallback([this](){
-                        mInputCompleteBox->SetActive(false);
-                        mInputCompleteOKButton->GetButton()->SetCanInteract(false);
-                    });
-                    mInputCompleteOKButton->GetButton()->SetCanInteract(true);
-                    mInputCompleteOKButton->Press();
-                }
-            }
         }
     }
 }

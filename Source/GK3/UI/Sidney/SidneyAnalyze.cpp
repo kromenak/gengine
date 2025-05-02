@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "Sidney.h"
 #include "SidneyButton.h"
+#include "SidneyFakeInputPopup.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
 #include "SidneyUtil.h"
@@ -180,6 +181,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
     // Analyze message box.
     mAnalyzePopup = new SidneyPopup(mRoot);
     mSecondaryAnalyzePopup = new SidneyPopup(mRoot);
+    mSetTextPopup = new SidneyFakeInputPopup(mRoot, "Set Text Popup");
     
     // Start in empty state.
     SetState(State::Empty);

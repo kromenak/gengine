@@ -12,6 +12,7 @@ class Actor;
 class Font;
 class Sidney;
 class SidneyButton;
+class SidneyFakeInputPopup;
 class SidneyFiles;
 class UIButton;
 class UILabel;
@@ -46,9 +47,7 @@ private:
     Font* mGreenFont = nullptr;
 
     // "Input complete" dialog box.
-    Actor* mInputCompleteBox = nullptr;
-    UILabel* mFileNameLabel = nullptr;
-    SidneyButton* mInputCompleteOKButton = nullptr;
+    SidneyFakeInputPopup* mInputCompletePopup = nullptr;
 
     // The in-game character "types" the name of the file before adding it.
     // We use these variables to track the state of the text being typed.

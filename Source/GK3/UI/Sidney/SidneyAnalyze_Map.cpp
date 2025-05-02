@@ -10,6 +10,7 @@
 #include "LocationManager.h"
 #include "RectTransform.h"
 #include "Sidney.h"
+#include "SidneyFakeInputPopup.h"
 #include "SidneyFiles.h"
 #include "SidneyPopup.h"
 #include "UIButton.h"
@@ -1786,10 +1787,19 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedInMap(float deltaTime)
                     // Grace says "that's it, that's the site, I'll write down the coords."
                     gActionManager.ExecuteDialogueAction("02O8O2ZRA1", 2, [this](const Action* action){
 
-                        //TODO: Data entry box.
+                        // This popup is displayed a bit off-center.
+                        RectTransform* popupRT = static_cast<RectTransform*>(mSetTextPopup->GetTransform());
+                        popupRT->SetAnchor(AnchorPreset::TopLeft);
+                        popupRT->SetAnchoredPosition(120.0f, -127.5f);
 
-                        // Refresh the map so "The Site" label appears.
-                        mMap.RefreshTheSiteLabels();
+                        // Show the popup.
+                        mSetTextPopup->Show(SidneyUtil::GetAnalyzeLocalizer().GetText("SiteTextTitle"),
+                                            SidneyUtil::GetAnalyzeLocalizer().GetText("SiteTextPrompt"),
+                                            SidneyUtil::GetAnalyzeLocalizer().GetText("SiteText"),
+                        [this](){
+                            // Refresh the map so "The Site" label appears.
+                            mMap.RefreshTheSiteLabels();
+                        });
                     });
                 }
                 

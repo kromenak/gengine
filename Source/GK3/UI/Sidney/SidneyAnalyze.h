@@ -12,6 +12,7 @@ class Actor;
 class PersistState;
 class Sidney;
 class SidneyButton;
+class SidneyFakeInputPopup;
 class SidneyFiles;
 struct SidneyFile;
 class SidneyPopup;
@@ -92,6 +93,9 @@ private:
 
     // There are times when we need to show two popups at once. Sigh.
     SidneyPopup* mSecondaryAnalyzePopup = nullptr;
+
+    // There's at least one time when a character enters input into a popup.
+    SidneyFakeInputPopup* mSetTextPopup = nullptr;
     
     void SetState(State state);
     void SetStateFromFile();
