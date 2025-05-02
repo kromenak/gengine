@@ -174,6 +174,7 @@ float UIScrollRect::GetContentHeight() const
     for(Transform* child : GetTransform()->GetChildren())
     {
         if(child->GetOwner() == mScrollbarActor) { continue; }
+        if(!child->IsActiveAndEnabled()) { continue; }
 
         RectTransform* rt = static_cast<RectTransform*>(child);
         Rect childWorldRect = rt->GetWorldRect(true);
