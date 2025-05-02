@@ -4,6 +4,7 @@
 // UI for the analyze subscreen of Sidney.
 //
 #pragma once
+#include "AudioManager.h"
 #include "SidneyMenuBar.h"
 #include "Vector2.h"
 #include "UILabel.h"
@@ -25,6 +26,7 @@ class UIImage;
 class UILines;
 class UIPoints;
 class UIRectangles;
+class UIScrollRect;
 
 class SidneyAnalyze
 {
@@ -129,10 +131,49 @@ private:
     UILabel* mAnalyzeTextFileNameLabel = nullptr;
     UILabel* mAnalyzeTextLabel = nullptr;
 
+    // Root of the anagram parser window.
+    Actor* mAnagramParserWindow = nullptr;
+
+    // A label showing the text currently being parsed by the parser.
+    UILabel* mAnagramParsingTextLabel = nullptr;
+
+    // One label per letter of the anagram text.
+    static const int kMaxAnagramLetters = 17;
+    UILabel* mAnagramLetterLabels[kMaxAnagramLetters] = { 0 };
+
+    // A label that shows feedback messages from the parser system.
+    UILabel* mAnagramMessagesLabel = nullptr;
+
+    // A scroll rect that contains the discovered anagram words.
+    UIScrollRect* mAnagramWordsScrollRect = nullptr;
+
+    // A set of selectable labels/buttons to choose words from.
+    static const int kMaxAnagramWords = 161;
+    UILabel* mAnagramWordLabels[kMaxAnagramWords] = { 0 };
+
+    // The anagram letters, with spaces stripped out.
+    std::string mAnagramLetters;
+
+    // A sound that plays when scrambling anagram letters.
+    PlayingSoundHandle mAnagramScrambleSoundHandle;
+
+    // A prefix for the words to populate in the anagram word list, how many to populate, and how many have been populated.
+    std::string mAnagramWordsPrefix;
+    int mAnagramWordsCount = 0;
+    int mAnagramWordsIndex = 0;
+
+    // Timers for how frequently we scamble the letters and how frequently we add a new word to the list.
+    const float kAnagramScrambleIntervalSeconds = 0.1f;
+    const float kAddAnagramWordInitialDelay = 4.0f;
+    const float kAddAnagramWordIntervalSeconds = 0.15f;
+    float mAnagramScrambleTimer = 0.0f;
+    float mAddAnagramWordTimer = 0.0f;
+
     void AnalyzeText_Init();
     void AnalyzeText_EnterState();
-    void AnalyzeText_OnAnalyzeButtonPressed();
+    void AnalyzeText_Update(float deltaTime);
 
+    void AnalyzeText_OnAnalyzeButtonPressed();
     void AnalyzeText_OnTranslateButtonPressed();
     void AnalyzeText_OnAnagramParserPressed();
 

@@ -214,6 +214,7 @@ void SidneyAnalyze::OnUpdate(float deltaTime)
 
     // Update analyze sub-views.
     AnalyzeMap_Update(deltaTime);
+    AnalyzeText_Update(deltaTime);
 }
 
 void SidneyAnalyze::OnPersist(PersistState& ps)
