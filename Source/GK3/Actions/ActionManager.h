@@ -59,7 +59,10 @@ public:
     void QueueAction(const std::string& noun, const std::string& verb, std::function<void(const Action*)> finishCallback = nullptr);
     void WaitForActionsToComplete(const std::function<void()> callback);
 
-	bool IsActionPlaying() const { return mCurrentAction != nullptr; }
+    void StartManualAction() { ++mManualActionCounter; }
+    void FinishManualAction() { mManualActionCounter = Math::Max(--mManualActionCounter, 0); }
+
+    bool IsActionPlaying() const { return mCurrentAction != nullptr || mManualActionCounter > 0; }
 
     void SkipCurrentAction() { mWantsActionSkip = true; }
     bool IsSkippingCurrentAction() const { return mWantsActionSkip || mSkipInProgress; }
@@ -146,6 +149,10 @@ private:
     
 	// The action that is currently playing/executing. Only one action may execute at a time.
 	const Action* mCurrentAction = nullptr;
+
+    // In addition to playing actual actions, we can also record "manual" actions that the game is performing.
+    // This allows most of the game to behave as though we're waiting on an action, even though it might not actually be happening through the Action system.
+    int mManualActionCounter = 0;
     
     // A callback to execute when the current action finishes executing.
     std::function<void(const Action*)> mCurrentActionFinishCallback = nullptr;

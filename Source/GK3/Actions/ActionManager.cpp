@@ -270,7 +270,7 @@ void ActionManager::QueueAction(const std::string& noun, const std::string& verb
     if(action == nullptr) { return; }
 
     // If no action is playing, we can just play it right now.
-    if(!IsActionPlaying())
+    if(mCurrentAction == nullptr)
     {
         ExecuteAction(action, finishCallback);
         return;
@@ -285,7 +285,7 @@ void ActionManager::QueueAction(const std::string& noun, const std::string& verb
 
 void ActionManager::WaitForActionsToComplete(const std::function<void()> callback)
 {
-    if(!IsActionPlaying() && !IsSkippingCurrentAction())
+    if(mCurrentAction == nullptr && !IsSkippingCurrentAction())
     {
         if(callback != nullptr) { callback(); }
         return;
@@ -303,7 +303,7 @@ void ActionManager::PerformPendingActionSkip()
     mWantsActionSkip = false;
 
     // Nothing to do if we don't have an action to skip!
-    if(!IsActionPlaying())
+    if(mCurrentAction == nullptr)
     {
         return;
     }
@@ -321,7 +321,7 @@ void ActionManager::PerformPendingActionSkip()
     // So, the game is essentially running in fast-forward, in the background, and not rendering anything until the action has resolved.
     Stopwatch stopwatch;
     int skipCount = 0;
-    while(IsActionPlaying())
+    while(mCurrentAction != nullptr)
     {
         // When testing the original game, they seem to fast forward in 10 second increments (which is part of the reason action skip breaks the "5 minute timer" part of the game).
         GEngine::Instance()->UpdateGameWorld(10.0f);
@@ -971,7 +971,7 @@ void ActionManager::OnActionExecuteFinished()
             ShowTopicBar(mLastAction->noun);
         }
     }
-    else if(!IsActionPlaying() && !mActionQueue.empty())
+    else if(mCurrentAction == nullptr && !mActionQueue.empty())
     {
         // Retrieve front item, but remove it BEFORE executing.
         ActionAndCallback front = mActionQueue.front();
@@ -983,7 +983,7 @@ void ActionManager::OnActionExecuteFinished()
 
     // If this action completed and didn't trigger any other action, we can send the "all actions finished" callbacks.
     // One exception: if doing an action skip DON'T trigger these here - instead trigger when action skip code finishes.
-    if(!IsActionPlaying() && !IsSkippingCurrentAction())
+    if(mCurrentAction == nullptr && !IsSkippingCurrentAction())
     {
         SendAllActionsFinishedCallbacks();
     }
