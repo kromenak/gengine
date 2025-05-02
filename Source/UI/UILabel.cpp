@@ -101,7 +101,7 @@ float UILabel::GetTextWidth()
 
     // Used generated mesh to find min/max x-positions of the glyphs.
     float smallestX = FLT_MAX;
-    float largestX = FLT_MIN;
+    float largestX = -FLT_MAX;
     for(auto& charInfo : mTextLayout.GetChars())
     {
         float minX = charInfo.pos.x;
@@ -133,7 +133,7 @@ float UILabel::GetTextHeight()
 
     // Used generated mesh to find min/max y-positions of the glyphs.
     float smallestY = FLT_MAX;
-    float largestY = FLT_MIN;
+    float largestY = -FLT_MAX;
     for(auto& charInfo : mTextLayout.GetChars())
     {
         float minY = charInfo.pos.y;
@@ -156,6 +156,11 @@ float UILabel::GetTextHeight()
 
     // The height is then the difference between the min/max y-positions.
     return Math::Abs(largestY - smallestY);
+}
+
+void UILabel::FitRectTransformToText()
+{
+    GetRectTransform()->SetSizeDelta(GetTextWidth(), GetTextHeight());
 }
 
 Vector2 UILabel::GetCharPos(int index) const

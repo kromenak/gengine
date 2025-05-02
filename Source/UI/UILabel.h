@@ -45,6 +45,7 @@ public:
     int GetLineCount();
     float GetTextWidth();
     float GetTextHeight();
+    void FitRectTransformToText();
 
     Vector2 GetCharPos(int index) const;
     Vector2 GetNextCharPos() const { return mTextLayout.GetNextCharPos(); }
