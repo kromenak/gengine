@@ -151,6 +151,10 @@ private:
     static const int kMaxAnagramWords = 161;
     UILabel* mAnagramWordLabels[kMaxAnagramWords] = { 0 };
 
+    // The anagram erase and exit buttons. Need to be enabled/disabled at certain times.
+    SidneyButton* mAnagramEraseButton = nullptr;
+    SidneyButton* mAnagramExitButton = nullptr;
+
     // The anagram letters, with spaces stripped out.
     std::string mAnagramLetters;
 
@@ -169,6 +173,16 @@ private:
     float mAnagramScrambleTimer = 0.0f;
     float mAddAnagramWordTimer = 0.0f;
 
+    // Labels to display each selected word.
+    static const int kMaxSelectedWords = 10;
+    UILabel* mAnagramSelectedWordLabels[kMaxSelectedWords] = { 0 };
+
+    // The indexes (in the word labels array) of words that have been selected by the player.
+    std::vector<int> mSelectedWordIndexes;
+
+    // A label that displays the deciphered text as one string.
+    UILabel* mAnagramDecipheredTextLabel = nullptr;
+
     void AnalyzeText_Init();
     void AnalyzeText_EnterState();
     void AnalyzeText_Update(float deltaTime);
@@ -176,6 +190,11 @@ private:
     void AnalyzeText_OnAnalyzeButtonPressed();
     void AnalyzeText_OnTranslateButtonPressed();
     void AnalyzeText_OnAnagramParserPressed();
+
+    void AnalyzeText_OnAnagramParserWordSelected(int index);
+    void AnalyzeText_OnAnagramEraseButtonPressed();
+    void AnalyzeTest_RefreshSelectedWordsAndAvailableWords();
+    void AnalyzeText_RefreshAvailableWordPositions();
 
     // ANALYZE MAP
     Actor* mAnalyzeMapWindow = nullptr;

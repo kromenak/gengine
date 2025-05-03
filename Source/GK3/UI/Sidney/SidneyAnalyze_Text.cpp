@@ -106,7 +106,7 @@ void SidneyAnalyze::AnalyzeText_Init()
 
             const float kLetterX = 88.0f;
             const float kLetterSpacing = 20.0f;
-            for(int i = 0; i < 17; ++i)
+            for(int i = 0; i < kMaxAnagramLetters; ++i)
             {
                 mAnagramLetterLabels[i] = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
                 mAnagramLetterLabels[i]->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
@@ -139,24 +139,21 @@ void SidneyAnalyze::AnalyzeText_Init()
                 scrollRect->SetScrollbarWidth(5.0f);
                 mAnagramWordsScrollRect = scrollRect;
 
-                const float kSelectLabelX = 14.0f;
-                const float kSelectLabelStartY = -25.5f;
-                const float kSelectLabelSpacing = 15.0f;
                 for(int i = 0; i < kMaxAnagramWords; ++i)
                 {
                     UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(scrollRect);
                     label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
                     label->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Word" + std::to_string(i + 1)));
                     label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-                    label->GetRectTransform()->SetAnchoredPosition(kSelectLabelX, kSelectLabelStartY - (i * kSelectLabelSpacing));
                     label->FitRectTransformToText();
                     mAnagramWordLabels[i] = label;
 
                     UIButton* button = label->GetOwner()->AddComponent<UIButton>();
-                    button->SetPressCallback([i](UIButton* button){
-                        printf("%s\n", SidneyUtil::GetAnalyzeLocalizer().GetText("Word" + std::to_string(i + 1)).c_str());
+                    button->SetPressCallback([this, i](UIButton* button){
+                        AnalyzeText_OnAnagramParserWordSelected(i);
                     });
                 }
+                AnalyzeText_RefreshAvailableWordPositions();
 
                 // Add header box
                 UINineSlice* box = UIUtil::NewUIActorWithWidget<UINineSlice>(scrollCanvas->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
@@ -200,9 +197,35 @@ void SidneyAnalyze::AnalyzeText_Init()
             label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             label->GetRectTransform()->SetAnchoredPosition(8.0f, -2.5f);
             label->FitRectTransformToText();
+
+            // Create "slots" for each selected word.
+            const float kSlotSpacing = 50.0f;
+            float slotX = 28.0f;
+            for(int i = 0; i < kMaxSelectedWords; ++i)
+            {
+                UIImage* underline = UIUtil::NewUIActorWithWidget<UIImage>(window->GetOwner());
+                underline->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
+                underline->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+                underline->GetRectTransform()->SetAnchoredPosition(slotX + kSlotSpacing * i, -264.0f);
+                underline->GetRectTransform()->SetSizeDelta(40.0f, 1.0f);
+
+                mAnagramSelectedWordLabels[i] = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+                mAnagramSelectedWordLabels[i]->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+                mAnagramSelectedWordLabels[i]->SetText("");
+                mAnagramSelectedWordLabels[i]->SetHorizonalAlignment(HorizontalAlignment::Center);
+                mAnagramSelectedWordLabels[i]->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+                mAnagramSelectedWordLabels[i]->GetRectTransform()->SetAnchoredPosition(slotX + kSlotSpacing * i, -264.0f + 14.5f);
+                mAnagramSelectedWordLabels[i]->GetRectTransform()->SetSizeDelta(40.0f, 14.5f);
+            }
+
+            mAnagramDecipheredTextLabel = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+            mAnagramDecipheredTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
+            mAnagramDecipheredTextLabel->SetText("");
+            mAnagramDecipheredTextLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+            mAnagramDecipheredTextLabel->GetRectTransform()->SetAnchoredPosition(slotX, -272.5f);
+            mAnagramDecipheredTextLabel->GetRectTransform()->SetSizeDelta(100.0f, 15.0f);
         }
-
-
+        
         // Create footer.
         {
             SidneyButton* eraseButton = SidneyUtil::CreateSmallButton(window->GetOwner());
@@ -211,9 +234,9 @@ void SidneyAnalyze::AnalyzeText_Init()
             eraseButton->SetWidth(60.0f);
             eraseButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("EraseButton"));
             eraseButton->SetPressCallback([this](){
-                printf("Erase\n");
+                AnalyzeText_OnAnagramEraseButtonPressed();
             });
-            eraseButton->GetButton()->SetCanInteract(false);
+            mAnagramEraseButton = eraseButton;
 
             SidneyButton* exitButton = SidneyUtil::CreateSmallButton(window->GetOwner());
             exitButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
@@ -223,6 +246,7 @@ void SidneyAnalyze::AnalyzeText_Init()
             exitButton->SetPressCallback([this](){
                 mAnagramParserWindow->SetActive(false);
             });
+            mAnagramExitButton = exitButton;
         }
 
         // Hide the anagram parser to start.
@@ -325,6 +349,9 @@ void SidneyAnalyze::AnalyzeText_Update(float deltaTime)
 
                 // Should be interactive again.
                 gActionManager.FinishManualAction();
+
+                // Enable the anagram exit button at this point.
+                mAnagramExitButton->GetButton()->SetCanInteract(true);
             }
         }
     }
@@ -354,6 +381,10 @@ void SidneyAnalyze::AnalyzeText_OnAnagramParserPressed()
             // Hide the analyze text window and show the parser window instead.
             mAnalyzeTextWindow->SetActive(false);
             mAnagramParserWindow->SetActive(true);
+
+            // Disable the erase/exit buttons until the scramble animation is over.
+            mAnagramEraseButton->GetButton()->SetCanInteract(false);
+            mAnagramExitButton->GetButton()->SetCanInteract(false);
 
             // Make sure all select words are turned off to start.
             for(int i = 0; i < kMaxAnagramWords; ++i)
@@ -433,5 +464,206 @@ void SidneyAnalyze::AnalyzeText_OnAnagramParserPressed()
     {
         // In this case, Grace says "I don't think I need to use that on this text" - or something along those lines.
         gActionManager.ExecuteSheepAction("wait StartDialogue(\"02O3H2Z951\", 1)");
+    }
+}
+
+void SidneyAnalyze::AnalyzeText_OnAnagramParserWordSelected(int index)
+{
+    if(mSelectedWordIndexes.size() < kMaxSelectedWords)
+    {
+        mSelectedWordIndexes.push_back(index);
+        AnalyzeTest_RefreshSelectedWordsAndAvailableWords();
+
+        // See if we've selected the correct words to solve the puzzle...
+        const int kWord1Index = 12;
+        const int kWord2Index = 40;
+        const int kWord3Index = 146;
+        if(mSelectedWordIndexes.size() == 3)
+        {
+            // The words can be in any order, so we just need to ensure they are contained in the list.
+            auto it1 = std::find(mSelectedWordIndexes.begin(), mSelectedWordIndexes.end(), kWord1Index);
+            auto it2 = std::find(mSelectedWordIndexes.begin(), mSelectedWordIndexes.end(), kWord2Index);
+            auto it3 = std::find(mSelectedWordIndexes.begin(), mSelectedWordIndexes.end(), kWord3Index);
+            if(it1 != mSelectedWordIndexes.end() && it2 != mSelectedWordIndexes.end() && it3 != mSelectedWordIndexes.end())
+            {
+                printf("YOU'RE WINNER!\n");
+            }
+        }
+        
+        // Since we have selected words, the erase button should be active.
+        mAnagramEraseButton->GetButton()->SetCanInteract(true);
+    }
+}
+
+void SidneyAnalyze::AnalyzeText_OnAnagramEraseButtonPressed()
+{
+    if(!mSelectedWordIndexes.empty())
+    {
+        mSelectedWordIndexes.pop_back();
+        AnalyzeTest_RefreshSelectedWordsAndAvailableWords();
+
+        // The erase button should be active as long as there are still selected words.
+        mAnagramEraseButton->GetButton()->SetCanInteract(!mSelectedWordIndexes.empty());
+    }
+}
+
+void SidneyAnalyze::AnalyzeTest_RefreshSelectedWordsAndAvailableWords()
+{
+    // Let's start off by assuming that all selectable words are active/enabled.
+    for(int i = 0; i < kMaxAnagramWords; ++i)
+    {
+        mAnagramWordLabels[i]->GetOwner()->SetActive(true);
+    }
+
+    // Refresh which words are displayed in each slot, and also build the deciphered text string.
+    std::string usedLetters;
+    std::string translatedText;
+    for(int i = 0; i < kMaxSelectedWords; ++i)
+    {
+        if(i < mSelectedWordIndexes.size())
+        {
+            int wordIndex = mSelectedWordIndexes[i];
+            std::string labelText = mAnagramWordLabels[wordIndex]->GetText();
+
+            // The Latin word and the English translation are in a single string.
+            // We need to divide them into separate strings, but using a space won't work (some of the words/translations have spaces in them).
+            // Instead, use the open parentheses character, which always occurs ONLY at the start of the translation.
+            std::vector<std::string> wordAndTranslation = StringUtil::Split(labelText, '(', true);
+            if(wordAndTranslation.size() != 2)
+            {
+                printf("Unexpected format for word/translation combo in anagram parser: %s\n", labelText.c_str());
+                continue;
+            }
+
+            // Put the selected Latin word in the slot.
+            mAnagramSelectedWordLabels[i]->SetText(wordAndTranslation[0]);
+
+            // Remember that these letters are used.
+            usedLetters += wordAndTranslation[0];
+
+            // Get rid of any leading/trailing spaces.
+            StringUtil::Trim(wordAndTranslation[0]);
+            StringUtil::Trim(wordAndTranslation[1]);
+
+            // The split above removed the open parentheses - manually remove the close one.
+            wordAndTranslation[1].pop_back();
+
+            // Add translation to end of translated text.
+            if(!translatedText.empty())
+            {
+                translatedText.push_back(' ');
+            }
+            translatedText += wordAndTranslation[1];
+
+            // This selectable word label should definitely be disabled, since it's in one of the slots.
+            mAnagramWordLabels[wordIndex]->GetOwner()->SetActive(false);
+        }
+        else
+        {
+            // This slot is empty, so just clear anything in it.
+            mAnagramSelectedWordLabels[i]->SetText("");
+        }
+    }
+
+    // Set the deciphered text label with what we've generated.
+    mAnagramDecipheredTextLabel->SetText(translatedText);
+
+    // Ok...now here's some fun! Based on the letters used so far, figure out what letters are remaining from the original letters.
+    StringUtil::ToUpper(usedLetters);
+    std::string remainingLetters = mAnagramLetters;
+    for(char c : usedLetters)
+    {
+        size_t index = remainingLetters.rfind(c);
+        if(index != std::string::npos)
+        {
+            remainingLetters.erase(index, 1);
+        }
+    }
+    printf("Remaining letters: %s\n", remainingLetters.c_str());
+
+    // AND NOW...go through every selectable word, and disable any one that can't be spelled with the remaining letters.
+    for(int i = 0; i < kMaxAnagramWords; ++i)
+    {
+        // Skip already disabled ones.
+        if(!mAnagramWordLabels[i]->IsActiveAndEnabled())
+        {
+            continue;
+        }
+
+        // Get the label and figure out where the Latin word ends (at the space).
+        const std::string& labelText = mAnagramWordLabels[i]->GetText();
+        size_t wordEndIndex = labelText.find('(') - 1;
+
+        // If the word has more letters than are remaining, we definitely can't spell it. Disable it.
+        if(wordEndIndex > remainingLetters.size())
+        {
+            mAnagramWordLabels[i]->GetOwner()->SetActive(false);
+            continue;
+        }
+
+        // There are enough letters remaining, but now we have to see if they're the RIGHT letters.
+        // This is somewhat inefficient, but make a copy of the remaining letters, and go one-by-one to make sure we have all the needed letters.
+        std::string letters = remainingLetters;
+        for(int j = 0; j < wordEndIndex; ++j)
+        {
+            size_t index = letters.find(std::toupper(labelText[j]));
+            if(index != std::string::npos)
+            {
+                // If one of the word's letters list, remove it as used.
+                letters.erase(index, 1);
+            }
+            else
+            {
+                // A letter was missing, so this word is out. We can also break at this point.
+                mAnagramWordLabels[i]->GetOwner()->SetActive(false);
+                break;
+            }
+        }
+    }
+    AnalyzeText_RefreshAvailableWordPositions();
+
+    // Finally, refresh the remaining letters in the letter labels.
+    // The easiest way to do this is to mark them all inactive, then go back and reactive the remaining ones.
+    Font* availableFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
+    Font* unavailableFont = gAssetManager.LoadFont("SID_TEXT_14_UL.FON");
+    for(int i = 0; i < kMaxAnagramLetters; ++i)
+    {
+        mAnagramLetterLabels[i]->SetFont(unavailableFont);
+    }
+
+    // For each remaining letter...
+    for(int i = 0; i < remainingLetters.length(); ++i)
+    {
+        // Find a label with that same letter, that is active/enabled, and has the unavailable font...make it available!
+        for(int j = 0; j < kMaxAnagramLetters; ++j)
+        {
+            if(mAnagramLetterLabels[j]->IsActiveAndEnabled() &&
+               mAnagramLetterLabels[j]->GetFont() == unavailableFont &&
+               mAnagramLetterLabels[j]->GetText()[0] == remainingLetters[i])
+            {
+                mAnagramLetterLabels[j]->SetFont(availableFont);
+                break;
+            }
+        }
+    }
+}
+
+void SidneyAnalyze::AnalyzeText_RefreshAvailableWordPositions()
+{
+    // Reset to top.
+    mAnagramWordsScrollRect->SetNormalizedScrollValue(0.0f);
+
+    // Reposition active words from the top, one after another.
+    const float kSelectLabelX = 14.0f;
+    const float kSelectLabelStartY = -25.5f;
+    const float kSelectLabelSpacing = 15.0f;
+    int activeWordIndex = 0;
+    for(int i = 0; i < kMaxAnagramWords; ++i)
+    {
+        if(mAnagramWordLabels[i]->IsActiveAndEnabled())
+        {
+            mAnagramWordLabels[i]->GetRectTransform()->SetAnchoredPosition(kSelectLabelX, kSelectLabelStartY - (activeWordIndex * kSelectLabelSpacing));
+            ++activeWordIndex;
+        }
     }
 }
