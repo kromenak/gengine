@@ -12,6 +12,7 @@
 class Actor;
 class PersistState;
 class Sidney;
+class SidneyAnagramParser;
 class SidneyButton;
 class SidneyFakeInputPopup;
 class SidneyFiles;
@@ -131,70 +132,15 @@ private:
     UILabel* mAnalyzeTextFileNameLabel = nullptr;
     UILabel* mAnalyzeTextLabel = nullptr;
 
-    // Root of the anagram parser window.
-    Actor* mAnagramParserWindow = nullptr;
-
-    // A label showing the text currently being parsed by the parser.
-    UILabel* mAnagramParsingTextLabel = nullptr;
-
-    // One label per letter of the anagram text.
-    static const int kMaxAnagramLetters = 17;
-    UILabel* mAnagramLetterLabels[kMaxAnagramLetters] = { 0 };
-
-    // A label that shows feedback messages from the parser system.
-    UILabel* mAnagramMessagesLabel = nullptr;
-
-    // A scroll rect that contains the discovered anagram words.
-    UIScrollRect* mAnagramWordsScrollRect = nullptr;
-
-    // A set of selectable labels/buttons to choose words from.
-    static const int kMaxAnagramWords = 161;
-    UILabel* mAnagramWordLabels[kMaxAnagramWords] = { 0 };
-
-    // The anagram erase and exit buttons. Need to be enabled/disabled at certain times.
-    SidneyButton* mAnagramEraseButton = nullptr;
-    SidneyButton* mAnagramExitButton = nullptr;
-
-    // The anagram letters, with spaces stripped out.
-    std::string mAnagramLetters;
-
-    // A sound that plays when scrambling anagram letters.
-    PlayingSoundHandle mAnagramScrambleSoundHandle;
-
-    // A prefix for the words to populate in the anagram word list, how many to populate, and how many have been populated.
-    std::string mAnagramWordsPrefix;
-    int mAnagramWordsCount = 0;
-    int mAnagramWordsIndex = 0;
-
-    // Timers for how frequently we scamble the letters and how frequently we add a new word to the list.
-    const float kAnagramScrambleIntervalSeconds = 0.1f;
-    const float kAddAnagramWordInitialDelay = 4.0f;
-    const float kAddAnagramWordIntervalSeconds = 0.15f;
-    float mAnagramScrambleTimer = 0.0f;
-    float mAddAnagramWordTimer = 0.0f;
-
-    // Labels to display each selected word.
-    static const int kMaxSelectedWords = 10;
-    UILabel* mAnagramSelectedWordLabels[kMaxSelectedWords] = { 0 };
-
-    // The indexes (in the word labels array) of words that have been selected by the player.
-    std::vector<int> mSelectedWordIndexes;
-
-    // A label that displays the deciphered text as one string.
-    UILabel* mAnagramDecipheredTextLabel = nullptr;
-
+    // The anagram parser.
+    SidneyAnagramParser* mAnagramParser = nullptr;
+    
     void AnalyzeText_Init();
     void AnalyzeText_EnterState();
-    void AnalyzeText_Update(float deltaTime);
 
     void AnalyzeText_OnAnalyzeButtonPressed();
     void AnalyzeText_OnTranslateButtonPressed();
     void AnalyzeText_OnAnagramParserPressed();
-
-    void AnalyzeText_OnAnagramParserWordSelected(int index);
-    void AnalyzeText_OnAnagramEraseButtonPressed();
-    void AnalyzeTest_RefreshSelectedWordsAndAvailableWords();
-    void AnalyzeText_RefreshAvailableWordPositions();
 
     // ANALYZE MAP
     Actor* mAnalyzeMapWindow = nullptr;
