@@ -661,7 +661,10 @@ void SidneyAnagramParser::StopScramble()
     mScrambleTimer = 0.0f;
 
     // Show message indicating that all words have been found and now you have to choose them.
-    AppendMessageText("SelectMsg");
+    if(mState == State::InitialScramble)
+    {
+        AppendMessageText("SelectMsg");
+    }
 
     // Should be interactive again.
     gActionManager.FinishManualAction();
