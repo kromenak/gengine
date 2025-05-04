@@ -152,26 +152,42 @@ void Animator::OnUpdate(float deltaTime)
 			
 			// If looping, wrap around the current frame when we reach the end!
 			// Note the "-1" because first and last frames are the same for a looping anim!
-			if(mActiveAnimations[i].params.loop)
-			{
+            if(mActiveAnimations[i].params.loop)
+            {
                 mActiveAnimations[i].currentFrame %= mActiveAnimations[i].params.animation->GetFrameCount() - 1;
-			}
+            }
 
-            // Break out of loop if the animation has ended.
+            if(mActiveAnimations[i].params.animation->GetName() == "E0VJ5M39291.YAK")
+            {
+                printf("On frame %d\n", mActiveAnimations[i].currentFrame);
+                if(mActiveAnimations[i].currentFrame == 39 || mActiveAnimations[i].currentFrame == 38)
+                {
+                    printf("Break!\n");
+                }
+            }
+            
+            // Break out of loop if the animation has ended. Valid frame indexes are 0 to (frameCount - 1), so a frame AT "frameCount" would be invalid.
             // In extreme cases, the timer could be large enough to cover frames that don't exist - just ignore that!
             if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount())
             {
                 break;
             }
-			
-			// Execute any actions/anim nodes on the current frame.
-			ExecuteFrame(i, mActiveAnimations[i].currentFrame);
+
+            // Execute any actions/anim nodes on the current frame.
+            ExecuteFrame(i, mActiveAnimations[i].currentFrame);
 		}
 
 		// If the animation has finished, mark it as done.
+        // We know the animation is finished when the last frame, at index (frameCount - 1), has executed.
         if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount() - 1)
         {
             mActiveAnimations[i].done = true;
+
+            // HACK: In at least one case (E0VJ5M39291.YAK), GK3 specifies a final animation node that is errantly beyond the length of the animation.
+            // For example, the animation has length 39 (valid frame indexes are 0-38), but it specifies a node on frame 39.
+            // To deal with that, we will attempt to execute any "final frame nodes" here.
+            mActiveAnimations[i].currentFrame = mActiveAnimations[i].params.animation->GetFrameCount();
+            ExecuteFrame(i, mActiveAnimations[i].params.animation->GetFrameCount());
         }
     }
 
