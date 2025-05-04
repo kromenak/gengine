@@ -643,14 +643,17 @@ void SidneyAnalyze::MapState::ClearGrid()
     zoomedOut.grids->Clear();
 }
 
-void SidneyAnalyze::MapState::RefreshTheSiteLabels()
+void SidneyAnalyze::MapState::RefreshImages()
 {
-    bool visible = gGameProgress.GetFlag("MarkedTheSite");
-    zoomedIn.siteText[0]->SetEnabled(visible);
-    zoomedIn.siteText[1]->SetEnabled(visible);
+    bool siteVisible = gGameProgress.GetFlag("MarkedTheSite");
+    zoomedIn.siteText[0]->SetEnabled(siteVisible);
+    zoomedIn.siteText[1]->SetEnabled(siteVisible);
+    zoomedOut.siteText[0]->SetEnabled(siteVisible);
+    zoomedOut.siteText[1]->SetEnabled(siteVisible);
 
-    zoomedOut.siteText[0]->SetEnabled(visible);
-    zoomedOut.siteText[1]->SetEnabled(visible);
+    bool serpentVisible = gGameProgress.GetFlag("PlacedSerpent");
+    zoomedIn.serpentImage->SetEnabled(serpentVisible);
+    zoomedOut.serpentImage->SetEnabled(serpentVisible);
 }
 
 void SidneyAnalyze::MapState::OnPersist(PersistState& ps)
@@ -708,6 +711,16 @@ void SidneyAnalyze::AnalyzeMap_Init()
             mMap.zoomedIn.siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.siteText[1]->GetRectTransform()->SetAnchoredPosition(792.0f, 983.0f);
             mMap.zoomedIn.siteText[1]->SetEnabled(false);
+        }
+
+        // Add serpent images.
+        // Again, before shapes/grids so they appear above it.
+        {
+            mMap.zoomedIn.serpentImage = UIUtil::NewUIActorWithWidget<UIImage>(zoomedInMapBackground);
+            mMap.zoomedIn.serpentImage->SetTexture(gAssetManager.LoadTexture("SERPENT.BMP"), true);
+            mMap.zoomedIn.serpentImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedIn.serpentImage->GetRectTransform()->SetAnchoredPosition(724.0f, 1159.0f);
+            mMap.zoomedIn.serpentImage->SetEnabled(false);
         }
 
         // Create locked hexagrams renderer.
@@ -876,6 +889,16 @@ void SidneyAnalyze::AnalyzeMap_Init()
             mMap.zoomedOut.siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.siteText[1]->GetRectTransform()->SetAnchoredPosition(196.0f, 242.0f);
             mMap.zoomedOut.siteText[1]->SetEnabled(false);
+        }
+
+        // Add serpent images.
+        // Again, before shapes/grids so they appear above it.
+        {
+            mMap.zoomedOut.serpentImage = UIUtil::NewUIActorWithWidget<UIImage>(zoomedOutMapActor);
+            mMap.zoomedOut.serpentImage->SetTexture(gAssetManager.LoadTexture("SERPLITMAP.BMP"), true);
+            mMap.zoomedOut.serpentImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+            mMap.zoomedOut.serpentImage->GetRectTransform()->SetAnchoredPosition(178.0f, 290.0f);
+            mMap.zoomedOut.serpentImage->SetEnabled(false);
         }
 
         // Create locked hexagrams renderer.
@@ -1048,7 +1071,7 @@ void SidneyAnalyze::AnalyzeMap_EnterState()
     mMenuBar.SetDropdownChoiceEnabled(kGraphicDropdownIdx, kGraphicDropdown_EraseShapeIdx, mSidneyFiles->HasFileOfType(SidneyFileType::Shape));
 
     // Refresh site label visibility on map.
-    mMap.RefreshTheSiteLabels();
+    mMap.RefreshImages();
 }
 
 void SidneyAnalyze::AnalyzeMap_Update(float deltaTime)
@@ -1798,7 +1821,7 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedInMap(float deltaTime)
                                             SidneyUtil::GetAnalyzeLocalizer().GetText("SiteText"),
                         [this](){
                             // Refresh the map so "The Site" label appears.
-                            mMap.RefreshTheSiteLabels();
+                            mMap.RefreshImages();
                         });
                     });
                 }
@@ -1823,6 +1846,8 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
     bool virgoDone = gGameProgress.GetFlag("Virgo");
     bool libraDone = gGameProgress.GetFlag("Libra");
     bool scorpioDone = gGameProgress.GetFlag("Scorpio");
+    bool ophiuchusDone = gGameProgress.GetFlag("Ophiuchus");
+    bool sagitariusDone = gGameProgress.GetFlag("Sagittarius");
     if(!aquariusDone) // Working on Aquarius
     {
         // Player must place two points near enough to these points and press "Analyze" to pass Aquarius.
@@ -2108,6 +2133,93 @@ void SidneyAnalyze::AnalyzeMap_OnAnalyzeButtonPressed()
                 gGameProgress.ChangeScore("e_sidney_map_temple");
                 gGameProgress.SetFlag("PlacedTempleDivisions");
                 didValidAnalyzeAction = true;
+            }
+        }
+    }
+
+    // Sagitarius functions a bit differently from other LSR steps, in that you can try to do it at any time, and the game does give a response if it's the wrong time for it.
+    // (I'm not sure if this was a bug in the original game, but let's mimic that behavior).
+    if(!sagitariusDone)
+    {
+        // The "Red Serpent" is a winding trail near the top of the map. Your goal here is to put points on the trail to mark it on the map.
+        // You can place a lot of points here, but the only two required ones are at the start and end of the trail.
+        // If you DO place additional points, a few optional points will also be locked in.
+        const Vector2 kRedSerpentTailPoint(875.0f, 1163.0f);
+        const Vector2 kRedSerpentHeadPoint(735.0f, 1365.0f);
+        const Vector2 kOptionalPoint1(875.0f, 1206.0f);
+        const Vector2 kOptionalPoint2(837.0f, 1238.0f);
+        const Vector2 kOptionalPoint3(801.0f, 1267.0f);
+        const Vector2 kOptionalPoint4(765.0f, 1301.0f);
+
+        // See if we did the required points.
+        Vector2 point1 = mMap.zoomedIn.GetPlacedPointNearPoint(kRedSerpentTailPoint);
+        Vector2 point2 = mMap.zoomedIn.GetPlacedPointNearPoint(kRedSerpentHeadPoint);
+        if(point1 != Vector2::Zero && point2 != Vector2::Zero)
+        {
+            didValidAnalyzeAction = true;
+
+            // If you haven't completed Ophiuchus, the game allows you to place these points, but just responds with "I don't think I'm ready for that shape yet."
+            // And your map points get cleared out.
+            if(!ophiuchusDone)
+            {
+                mMap.zoomedIn.points->ClearPoints();
+                mMap.zoomedOut.points->ClearPoints();
+                gActionManager.ExecuteDialogueAction("02O0I27NG1", 1);
+            }
+            else
+            {
+                // Otherwise, wow, you solved Sagitarius.
+
+                // Add required locked points.
+                mMap.zoomedIn.lockedPoints->AddPoint(kRedSerpentTailPoint);
+                mMap.zoomedIn.lockedPoints->AddPoint(kRedSerpentHeadPoint);
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kRedSerpentTailPoint));
+                mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kRedSerpentHeadPoint));
+
+                // If the player placed points near the optional points, those also get locked.
+                Vector2 optPoint1 = mMap.zoomedIn.GetPlacedPointNearPoint(kOptionalPoint1);
+                if(optPoint1 != Vector2::Zero)
+                {
+                    mMap.zoomedIn.lockedPoints->AddPoint(kOptionalPoint1);
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kOptionalPoint1));
+                }
+                Vector2 optPoint2 = mMap.zoomedIn.GetPlacedPointNearPoint(kOptionalPoint2);
+                if(optPoint2 != Vector2::Zero)
+                {
+                    mMap.zoomedIn.lockedPoints->AddPoint(kOptionalPoint2);
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kOptionalPoint2));
+                }
+                Vector2 optPoint3 = mMap.zoomedIn.GetPlacedPointNearPoint(kOptionalPoint3);
+                if(optPoint3 != Vector2::Zero)
+                {
+                    mMap.zoomedIn.lockedPoints->AddPoint(kOptionalPoint3);
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kOptionalPoint3));
+                }
+                Vector2 optPoint4 = mMap.zoomedIn.GetPlacedPointNearPoint(kOptionalPoint4);
+                if(optPoint4 != Vector2::Zero)
+                {
+                    mMap.zoomedIn.lockedPoints->AddPoint(kOptionalPoint4);
+                    mMap.zoomedOut.lockedPoints->AddPoint(mMap.ToZoomedOutPoint(kOptionalPoint4));
+                }
+
+                // Remove points placed by the player after locking all needed points.
+                mMap.zoomedIn.points->ClearPoints();
+                mMap.zoomedOut.points->ClearPoints();
+
+                // Play Grace dialogue.
+                gActionManager.ExecuteDialogueAction("0273H2ZRS2", 1);
+
+                // Display analyze message.
+                ShowAnalyzeMessage("MapLine4Note", Vector2(), HorizontalAlignment::Center);
+
+                // Update score and flags.
+                gGameProgress.ChangeScore("e_sidney_map_saggittarius");
+                gGameProgress.SetFlag("PlacedSerpent");
+                gGameProgress.SetFlag("Sagittarius");
+                SidneyUtil::UpdateLSRState();
+
+                // Refresh map so serpent image appears.
+                mMap.RefreshImages();
             }
         }
     }

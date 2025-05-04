@@ -190,6 +190,7 @@ private:
             UIHexagrams* lockedHexagrams = nullptr;
 
             UIImage* siteText[2] = { 0 };
+            UIImage* serpentImage = nullptr;
 
             Vector2 GetLocalMousePos();
             Vector2 GetPlacedPointNearPoint(const Vector2& point, bool useLockedPoints = false);
@@ -240,7 +241,7 @@ private:
         void ClearGrid();
 
         // Images
-        void RefreshTheSiteLabels();
+        void RefreshImages();
 
         void OnPersist(PersistState& ps);
     };
