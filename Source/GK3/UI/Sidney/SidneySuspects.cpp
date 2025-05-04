@@ -347,6 +347,9 @@ void SidneySuspects::Init(Actor* parent, SidneyFiles* sidneyFiles)
         mMALinkToSuspectButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mMALinkToSuspectButton->GetRectTransform()->SetAnchoredPosition(12.0f, 10.0f);
         mMALinkToSuspectButton->GetRectTransform()->SetSizeDelta(112.0f, 13.0f);
+        mMALinkToSuspectButton->SetPressCallback([this](){
+            OnLinkToSuspectPressed();
+        });
 
         mMACloseButton = new SidneyButton(windowBorder->GetOwner());
         mMACloseButton->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchClose"));
@@ -602,7 +605,10 @@ void SidneySuspects::RefreshEnabledMenuChoices()
     mMenuBar.SetDropdownChoiceEnabled(2, 1, suspectOpen && fileOpen);
 
     // The final option is only available if specific files are opened.
-    mMenuBar.SetDropdownChoiceEnabled(2, 2, mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint);
+    mMenuBar.SetDropdownChoiceEnabled(2, 2, mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint ||
+                                            mOpenedFileId == SidneyFileIds::kManuscriptPrint1 ||
+                                            mOpenedFileId == SidneyFileIds::kManuscriptPrint2 ||
+                                            mOpenedFileId == SidneyFileIds::kManuscriptPrint3);
 }
 
 bool SidneySuspects::IsSuspectFingerprintLinked(int suspectIndex)
@@ -699,6 +705,10 @@ void SidneySuspects::OnLinkToSuspectPressed()
 
     // Re-show this suspect to refresh the UI.
     ShowSuspect(mOpenedSuspectIndex);
+
+    // This action *may* be called from the "match analysis" popup, if it's open.
+    // In that case, it should close that popup.
+    mMatchAnalysisWindow->SetActive(false);
 }
 
 void SidneySuspects::OnUnlinkToSuspectPressed()
@@ -757,6 +767,27 @@ void SidneySuspects::OnMatchAnalysisPressed()
         videoName = "EstLSRScan.avi";
         matchSuspectIndex = 5;
     }
+    else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint1)
+    {
+        fingerprintTexture = gAssetManager.LoadTexture("BUCH_BLD_PRINT.BMP", AssetScope::Scene);
+        compareTexture = gAssetManager.LoadTexture("BUCH_BLD_COMPARE.BMP", AssetScope::Scene);
+        videoName = "BuchBldScan.avi";
+        matchSuspectIndex = 1;
+    }
+    else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint2)
+    {
+        fingerprintTexture = gAssetManager.LoadTexture("BUTH_BLD_PRINT.BMP", AssetScope::Scene);
+        compareTexture = gAssetManager.LoadTexture("BUTH_BLD_COMPARE.BMP", AssetScope::Scene);
+        videoName = "ButhBldScan.avi";
+        matchSuspectIndex = 0;
+    }
+    else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint3)
+    {
+        fingerprintTexture = gAssetManager.LoadTexture("MOS_BLD_PRINT.BMP", AssetScope::Scene);
+        compareTexture = gAssetManager.LoadTexture("MOS_BLD_COMPARE.BMP", AssetScope::Scene);
+        videoName = "MosBldScan.avi";
+        matchSuspectIndex = 9;
+    }
 
     // Show popup in its initial state.
     mMAFingerprintImage->SetTexture(fingerprintTexture);
@@ -779,10 +810,7 @@ void SidneySuspects::OnMatchAnalysisPressed()
 
             // Now we move on to compare mode...
             mMAActionLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchCompare"));
-
             OnMatchAnalysisCheckSuspect(0, matchSuspectIndex);
-
-
             mMACloseButton->GetButton()->SetCanInteract(true);
         });
     });
@@ -825,11 +853,41 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
         // If we found a match, say so!
         if(currentIndex == matchIndex)
         {
+            // Say that we found a match.
             mMAActionLabel->SetText(SidneyUtil::GetSuspectsLocalizer().GetText("MatchFound"));
+
+            // Allow pressing either link or close buttons.
             mMALinkToSuspectButton->GetButton()->SetCanInteract(true);
             mMACloseButton->GetButton()->SetCanInteract(true);
 
-            //TODO: Any custom logic/score/dialogue here.
+            // Disable the video image.
+            mMAFingerprintVideoImage->SetEnabled(false);
+
+            // Open the suspect's page.
+            ShowSuspect(currentIndex);
+
+            // Do some action that depends on the file matched.
+            if(mOpenedFileId == SidneyFileIds::kManuscriptPrint1)
+            {
+                // Grace says "Buchelli's a sneak!"
+                gActionManager.ExecuteDialogueAction("027X65Q3L2");
+                gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_buchelli");
+                mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("BUCH_RED_BLD_PRINT.BMP", AssetScope::Scene));
+            }
+            else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint2)
+            {
+                // Grace says "Madeline had her hands on the manuscript!"
+                gActionManager.ExecuteDialogueAction("027X65Q3L1");
+                gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_buthane");
+                mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("BUTH_RED_BLD_PRINT.BMP", AssetScope::Scene));
+            }
+            else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint3)
+            {
+                // Grace says "Mosely! Gabriel was right!"
+                gActionManager.ExecuteDialogueAction("027X65Q3L3");
+                gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_mosley");
+                mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("MOS_RED_BLD_PRINT.BMP", AssetScope::Scene));
+            }
         }
         else
         {
