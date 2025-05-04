@@ -68,6 +68,10 @@ code
         {
             wait Call("CheckTimeblockComplete312P$");
         }
+        else if(IsCurrentTime("303P"))
+        {
+            wait Call("CheckTimeblockComplete303P$");
+        }
 	}
 
 	CheckTimeblockComplete110A$()
@@ -489,5 +493,26 @@ code
 
         // Looks good, next timeblock.
         SetTime("303P");
+    }
+
+    CheckTimeblockComplete303P$()
+    {
+        // Gabe does a bit more investigating in this chapter, ultimately culminating in uncovering the kidnappers.
+        // Game scripts handle playing a closing cutscene and movie. We just need to detect the cutscene occurring and warping to R25.
+
+        // Must be in R25.
+		if(IsCurrentLocation("R25") == 0)
+		{
+			return;
+		}
+
+        // Must have seen closing cutscene. The only way I see to check this is a noun/verb count.
+        if(GetNounVerbCount("CEILING", "INSPECT") == 0)
+        {
+            return;
+        }
+
+        // Looks good, next timeblock.
+        SetTime("306P");
     }
 }
