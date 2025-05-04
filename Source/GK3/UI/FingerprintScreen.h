@@ -49,12 +49,7 @@ private:
 
     // Image of brush in the kit. Turned on and off when you select it.
     UIImage* mBrushImage = nullptr;
-
-    static const int kMaxFingerprintImages = 3;
-    UIImage* mFingerprintImages[kMaxFingerprintImages] = { 0 };
-    UIButton* mFingerprintButtons[kMaxFingerprintImages] = { 0 };
-    float mFingerprintAlpha[kMaxFingerprintImages] = { 0.0f };
-
+    
     // Represents one object that can be dusted for prints.
     struct FingerprintObject
     {
@@ -69,9 +64,6 @@ private:
         // This is the list of each fingerprint instance on the object.
         struct Fingerprint
         {
-            // If set, this fingerprint only appears on this timeblock. The default value here means "not set, ignore".
-            Timeblock timeblock = Timeblock(1, 0);
-
             // The name of the texture that corresponds to this fingerprint.
             std::string textureName;
 
@@ -91,7 +83,6 @@ private:
 
             // Dialogue that plays when uncovering and collecting this print.
             std::string uncoverPrintLicensePlate;
-            std::string collectPrintLicensePlate;
 
             // In some cases, a fingerprint has more complex logic.
             std::function<void()> onCollectCustomLogicFunc = nullptr;
@@ -100,12 +91,36 @@ private:
 
         // Dialogue that plays if you dust the object and find no prints.
         std::string noPrintLicensePlate;
+
+        // Dialogue to play when collecting each print.
+        // These are separate from the Fingerprint struct because these are played *in order* regardless of which FP you collect first/middle/last/etc.
+        std::vector<std::string> collectPrintLicensePlates;
     };
     std::string_map_ci<FingerprintObject> mObjects;
 
     // The object being actively dusted.
     FingerprintObject* mActiveObject = nullptr;
 
+    // The prints that can be collected from the active object.
+    // Usually, objects only have one print to collect, but occasionally there can be as many as three!
+    static const int kMaxFingerprintImages = 3;
+    struct PrintToCollect
+    {
+        // The image/button that corresponds to this print.
+        UIImage* image = nullptr;
+        UIButton* button = nullptr;
+
+        // The current print alpha; this increases as you dust the print, until it is completely exposed.
+        float alpha = 0.0f;
+
+        // Whether the print has been collected or not.
+        bool collected = false;
+    };
+    PrintToCollect mPrintsToCollect[kMaxFingerprintImages];
+
+    // The number of prints we've collected for the current object.
+    int mCollectedPrintCount = 0;
+    
     // The cursor on this screen is pretty complex and changes based on whether you're holding the brush, holding tape, etc.
     enum class CursorState
     {
@@ -132,9 +147,10 @@ private:
     void OnDustButtonPressed();
     void OnTapeButtonPressed();
     void OnClothButtonPressed();
-
+    
     void OnRightPanelPressed();
-    void OnFingerprintPressed(int index);
+    void OnFingerprintPressed(int printToCollectIndex);
+    void OnCollectedFingerprint(int printToCollectIndex);
 
     void GrantInvItemFlagAndScore(const FingerprintObject::Fingerprint& fp);
 
