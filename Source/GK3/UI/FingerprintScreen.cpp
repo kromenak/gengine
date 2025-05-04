@@ -355,11 +355,12 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     {
         FingerprintObject& object = mObjects["WATER_BOTTLE_ON_MOPED"];
         object.textureName = "FP_WATBTL.BMP";
-        //TODO: VOs for this one?
+        object.anchor = AnchorPreset::Center;
+        object.collectPrintLicensePlates.push_back("0A89N052H2");
 
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_WATBTL_P1.BMP";
-        object.fingerprints.back().position = Vector2(65.0f, 279.0f); //TODO: Verify Position
+        object.fingerprints.back().position = Vector2(132.0f, 278.0f);
         object.fingerprints.back().invItemName = "ESTELLES_FINGERPRINT";
         object.fingerprints.back().flagName = "GotWaterBottleEstellePrint";
         object.fingerprints.back().flagNameGrace = "GotWaterBottleEstellePrintGrace";
