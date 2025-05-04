@@ -137,6 +137,7 @@ private:
     
     void AnalyzeText_Init();
     void AnalyzeText_EnterState();
+    void AnalyzeText_ExitState();
 
     void AnalyzeText_OnAnalyzeButtonPressed();
     void AnalyzeText_OnTranslateButtonPressed();

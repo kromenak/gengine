@@ -93,6 +93,12 @@ void SidneyAnalyze::AnalyzeText_EnterState()
     }
 }
 
+void SidneyAnalyze::AnalyzeText_ExitState()
+{
+    // Make sure the anagram parser is hidden when exiting to a different state.
+    mAnagramParser->Hide();
+}
+
 void SidneyAnalyze::AnalyzeText_OnAnalyzeButtonPressed()
 {
     if(mAnalyzeFileId == SidneyFileIds::kArcadiaText)

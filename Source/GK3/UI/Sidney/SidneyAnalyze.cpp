@@ -240,6 +240,17 @@ void SidneyAnalyze::SetState(State state)
     mMenuBar.SetDropdownEnabled(kGraphicDropdownIdx, false);
     mMenuBar.SetDropdownEnabled(kMapDropdownIdx, false);
 
+    // If needed, notify state that we're leaving.
+    switch(mState)
+    {
+    case State::Text:
+        AnalyzeText_ExitState();
+        break;
+
+    default:
+        break;
+    }
+
     // Save the state.
     mState = state;
 
