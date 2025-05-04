@@ -872,6 +872,7 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
                 // Grace says "Buchelli's a sneak!"
                 gActionManager.ExecuteDialogueAction("027X65Q3L2");
                 gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_buchelli");
+                gGameProgress.SetFlag("MatchedBuchelli");
                 mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("BUCH_RED_BLD_PRINT.BMP", AssetScope::Scene));
             }
             else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint2)
@@ -879,6 +880,7 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
                 // Grace says "Madeline had her hands on the manuscript!"
                 gActionManager.ExecuteDialogueAction("027X65Q3L1");
                 gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_buthane");
+                gGameProgress.SetFlag("MatchedButhane");
                 mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("BUTH_RED_BLD_PRINT.BMP", AssetScope::Scene));
             }
             else if(mOpenedFileId == SidneyFileIds::kManuscriptPrint3)
@@ -886,6 +888,7 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
                 // Grace says "Mosely! Gabriel was right!"
                 gActionManager.ExecuteDialogueAction("027X65Q3L3");
                 gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_mosley");
+                gGameProgress.SetFlag("MatchedMosely");
                 mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("MOS_RED_BLD_PRINT.BMP", AssetScope::Scene));
             }
         }
