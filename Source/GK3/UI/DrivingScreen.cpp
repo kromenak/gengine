@@ -113,14 +113,12 @@ void DrivingScreen::Show(FollowMode followMode)
         // BEC (Bottom of Hexagram) is only available after discovering it via Le Serpent Rouge.
         // MCB (Top of Hexagram) is the same.
         // TRE (Treasure) as well.
-        // TODO!
-        mLocationButtons["BEC"]->SetEnabled(false);
-        mLocationButtons["MCB"]->SetEnabled(false);
-        mLocationButtons["TRE"]->SetEnabled(false);
+        mLocationButtons["BEC"]->SetEnabled(gGameProgress.GetFlag("PlacedTempleDivisions"));
+        mLocationButtons["MCB"]->SetEnabled(gGameProgress.GetFlag("PlacedTempleDivisions"));
+        mLocationButtons["TRE"]->SetEnabled(gGameProgress.GetFlag("MarkedTheSite"));
 
         // BMB (Red Rock) is only available after spying on Buchelli from Blanchefort.
-        //TODO!
-        mLocationButtons["BMB"]->SetEnabled(false);
+        mLocationButtons["BMB"]->SetEnabled(gGameProgress.GetNounVerbCount("VIEW_OF_ORANGE_ROCK", "BINOCULARS") > 0);
 
         // CSD (Coume Sourde) only available after following Madeline (or on/after Day 1, 4PM).
         // LHM (Lhomme Mort) is in the same boat.
@@ -136,6 +134,7 @@ void DrivingScreen::Show(FollowMode followMode)
 
         // WOD (Woods) only available after following Estelle on Day 2.
         bool showWOD = gGameProgress.GetNounVerbCount("ESTELLE", "FOLLOW") > 0 && followMode != FollowMode::Estelle;
+        showWOD = showWOD || currentTimeblock >= Timeblock(2, 5, Timeblock::PM);
         mLocationButtons["WOD"]->SetEnabled(showWOD);
 
         // Make sure the map fits snugly in the window area, with aspect ratio preserved.
@@ -276,6 +275,19 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
 
     // On press, go to the map location.
     button->SetPressCallback([this, locationCode](UIButton* button) {
+
+        // Grace doesn't like to go to the train station. Says there's nothing of interest there.
+        if(locationCode == "TR1")
+        {
+            if(gGameProgress.GetTimeblock() == Timeblock(3, 7) ||
+               gGameProgress.GetTimeblock() == Timeblock(3, 12))
+            {
+                gActionManager.ExecuteDialogueAction("21LP362PF1", 1);
+                return;
+            }
+        }
+        
+        // Play button sound effect.
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("MAPBUTTON.WAV"));
 
         // Check conditions under which we would NOT allow going to this location.
@@ -290,47 +302,54 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
             }
         }
 
+        // The location code assigned to the map button is not always the location we actually go to.
+        // For one, attempting to go to the "Treasure Site" actually goes to PLO!
+        std::string realLocationCode = locationCode;
+        if(locationCode == "TRE")
+        {
+            realLocationCode = "PLO";
+        }
+
         // Whenever you go to a location on the driving map, it's assumed that your bike also moves there.
         // Each location has it's own integer code (of course) that is rather arbitrary.
         int bikeLocation = -1;
-        std::string realLocationCode = locationCode;
-        if(locationCode == "PL5")
+        if(realLocationCode == "PL5")
         {
             bikeLocation = 0;
         }
-        else if(locationCode == "PL4")
+        else if(realLocationCode == "PL4")
         {
             bikeLocation = 1;
         }
-        else if(locationCode == "VGR")
+        else if(realLocationCode == "VGR")
         {
             bikeLocation = 2;
         }
-        else if(locationCode == "PL2")
+        else if(realLocationCode == "PL2")
         {
             bikeLocation = 3;
         }
-        else if(locationCode == "PL1")
+        else if(realLocationCode == "PL1")
         {
             bikeLocation = 4;
         }
-        else if(locationCode == "PL3")
+        else if(realLocationCode == "PL3")
         {
             bikeLocation = 5;
         }
-        else if(locationCode == "BEC")
+        else if(realLocationCode == "BEC")
         {
             bikeLocation = 6;
         }
-        else if(locationCode == "MCB")
+        else if(realLocationCode == "MCB")
         {
             bikeLocation = 7;
         }
-        else if(locationCode == "POU")
+        else if(realLocationCode == "POU")
         {
             bikeLocation = 8;
         }
-        else if(locationCode == "PL6")
+        else if(realLocationCode == "PL6")
         {
             // One complication: Cheateau de Serres sometimes has its gate opened.
             // In which case, the bike is parked inside the gate.
@@ -344,23 +363,23 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
                 bikeLocation = 9; // outside the gate
             }
         }
-        else if(locationCode == "MOP")
+        else if(realLocationCode == "MOP")
         {
             bikeLocation = 10;
         }
-        else if(locationCode == "LHE")
+        else if(realLocationCode == "LHE")
         {
             bikeLocation = 11;
         }
-        else if(locationCode == "PLO")
+        else if(realLocationCode == "PLO")
         {
             bikeLocation = 12;
         }
-        else if(locationCode == "RL1")
+        else if(realLocationCode == "RL1")
         {
             bikeLocation = 13;
         }
-        else if(locationCode == "TR1")
+        else if(realLocationCode == "TR1")
         {
             bikeLocation = 14;
         }
