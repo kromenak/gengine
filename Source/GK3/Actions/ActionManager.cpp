@@ -946,12 +946,16 @@ void ActionManager::OnActionExecuteFinished()
         mCurrentActionFinishCallback = nullptr;
         callback(mLastAction);
     }
-	
-	// When a "talk" action ends, try to show the topic bar.
-	if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "TALK"))
-	{
-		ShowTopicBar(mLastAction->noun);
-	}
+
+    // When a "talk" action ends, try to show the topic bar.
+    if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "TALK"))
+    {
+        ShowTopicBar(mLastAction->noun);
+    }
+    else if(!mLastAction->talkTo.empty())
+    {
+        ShowTopicBar(mLastAction->talkTo);
+    }
 	else if(gVerbManager.IsTopic(mLastAction->verb))
 	{
 		ShowTopicBar(mLastAction->noun);
