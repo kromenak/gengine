@@ -64,6 +64,10 @@ code
         {
             wait Call("CheckTimeblockComplete310A$");
         }
+        else if(IsCurrentTime("312P"))
+        {
+            wait Call("CheckTimeblockComplete312P$");
+        }
 	}
 
 	CheckTimeblockComplete110A$()
@@ -464,5 +468,26 @@ code
 
         // Ok, all good!
         SetTime("312P");
+    }
+
+    CheckTimeblockComplete312P$()
+    {
+        // Grace completes more of LSR and also recovers the lost bloodlines manuscript.
+        // After certain flags are set, and Grace goes to R25, a short cutscene plays. The script then moves the player to the dining room.
+
+        // Must be in dining room.
+        if(IsCurrentLocation("DIN") == 0)
+		{
+			return;
+		}
+
+        // Not 100% sure about this, but the end of timeblock cutscene seems to set this to indicate that we should move on.
+        if(GetNounVerbCount("VIEW_OF_ORANGE_ROCK", "BINOCULARS") != 2)
+        {
+            return;
+        }
+
+        // Looks good, next timeblock.
+        SetTime("303P");
     }
 }
