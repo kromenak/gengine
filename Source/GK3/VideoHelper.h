@@ -8,6 +8,7 @@
 
 #include "AssetManager.h"
 #include "Animator.h"
+#include "FileSystem.h"
 #include "GK3UI.h"
 #include "Scene.h"
 #include "VideoPlayer.h"
@@ -21,7 +22,7 @@ namespace VideoHelper
 
             // If the video ends naturally, any associated captions will also end naturally.
             // But in case of skipping the video, be sure to stop captions prematurely as well.
-            Animation* captionsAnim = gAssetManager.LoadYak(videoName, AssetScope::Scene);
+            Animation* captionsAnim = gAssetManager.LoadYak(Path::GetFileNameNoExtension(videoName), AssetScope::Scene);
             if(captionsAnim != nullptr)
             {
                 Scene::GetGlobalAnimator()->Stop(captionsAnim);
@@ -41,7 +42,7 @@ namespace VideoHelper
         // If video is playing, attempt to play associated captions.
         if(gVideoPlayer.IsPlaying())
         {
-            Animation* captionsAnim = gAssetManager.LoadYak(videoName, AssetScope::Scene);
+            Animation* captionsAnim = gAssetManager.LoadYak(Path::GetFileNameNoExtension(videoName), AssetScope::Scene);
             if(captionsAnim != nullptr)
             {
                 AnimParams yakAnimParams;
