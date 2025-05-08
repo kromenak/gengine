@@ -421,12 +421,15 @@ void SidneySuspects::Show()
         });
 
         // Also automatically link the fingerprint.
-        mSuspectInfos[9].linkedFileIds.push_back(SidneyFileIds::kMoselyFingerprint);
-        mSuspectInfos[9].selectedLinkedFileIndex = 0;
+        if(!IsSuspectFingerprintLinked(9))
+        {
+            mSuspectInfos[9].linkedFileIds.push_back(SidneyFileIds::kMoselyFingerprint);
+            mSuspectInfos[9].selectedLinkedFileIndex = 0;
 
-        // Also show Mosely and his fingerprint as the opened data.
-        mOpenedSuspectIndex = 9;
-        mOpenedFileId = SidneyFileIds::kMoselyFingerprint;
+            // Also show Mosely and his fingerprint as the opened data.
+            mOpenedSuspectIndex = 9;
+            mOpenedFileId = SidneyFileIds::kMoselyFingerprint;
+        }
     }
 
     // Show the root.
@@ -890,6 +893,14 @@ void SidneySuspects::OnMatchAnalysisCheckSuspect(int currentIndex, int matchInde
                 gGameProgress.ChangeScore("e_sidney_analysis_link_manuscript_prints_mosley");
                 gGameProgress.SetFlag("MatchedMosely");
                 mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("MOS_RED_BLD_PRINT.BMP", AssetScope::Scene));
+            }
+            else if(mOpenedFileId == SidneyFileIds::kUnknownLSRFingerprint)
+            {
+                // Grace says "Estelle!? WTH???"
+                gActionManager.ExecuteDialogueAction("02OX660SJ1");
+                gGameProgress.ChangeScore("e_sidney_suspect_link_fingerprint_lsr_unknown");
+                gGameProgress.SetFlag("MatchedEstelle");
+                mMAFingerprintImage->SetTexture(gAssetManager.LoadTexture("EST_RED_LSR_PRINT.BMP", AssetScope::Scene));
             }
         }
         else
