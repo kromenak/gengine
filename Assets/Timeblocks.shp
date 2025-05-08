@@ -72,6 +72,10 @@ code
         {
             wait Call("CheckTimeblockComplete303P$");
         }
+        else if(IsCurrentTime("306P"))
+        {
+            wait Call("CheckTimeblockComplete306P$");
+        }   
 	}
 
 	CheckTimeblockComplete110A$()
@@ -514,5 +518,25 @@ code
 
         // Looks good, next timeblock.
         SetTime("306P");
+    }
+
+    CheckTimeblockComplete306P$()
+    {
+        // Grace ties up some loose ends. There's a long video at the end of this timeblock, which dumps you back at R25.
+
+        // Must be in R25.
+		if(IsCurrentLocation("R25") == 0)
+		{
+			return;
+		}
+
+        // Must have visited R27, to talk with Emilio and see giant cutscene.
+        if(GetEgoLocationCount("R27") == 0)
+        {
+            return;
+        }
+
+        // Seems like we can move on!
+        SetTime("309P");
     }
 }
