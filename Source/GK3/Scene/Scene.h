@@ -83,9 +83,7 @@ public:
 	void SetSceneModelVisibility(const std::string& modelName, bool visible);
 	bool IsSceneModelVisible(const std::string& modelName) const;
 	bool DoesSceneModelExist(const std::string& modelName) const;
-
-    void SetGameTimer(const std::string& noun, const std::string& verb, float seconds);
-
+    
     void SetPaused(bool paused);
 
     void InspectActiveObject(std::function<void()> finishCallback);
@@ -162,15 +160,6 @@ private:
     // The most recently "active" object.
     // In other words, the last object the action bar was shown for.
     GKObject* mActiveObject = nullptr;
-
-    // Timers that tick down and execute a specific noun/verb combo action when done.
-    struct GameTimer
-    {
-        float secondsRemaining = 0.0f;
-        std::string noun;
-        std::string verb;
-    };
-    std::vector<GameTimer> mGameTimers;
 
     // If true, the scene is paused (won't update).
     bool mPaused = false;

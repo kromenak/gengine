@@ -15,6 +15,7 @@
 #include "Debug.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
+#include "GameTimers.h"
 #include "GKActor.h"
 #include "GKProp.h"
 #include "InventoryManager.h"
@@ -353,18 +354,8 @@ void Scene::Update(float deltaTime)
         }
     }
 
-    // Decrement any game timers.
-    for(int i = mGameTimers.size() - 1; i >= 0; --i)
-    {
-        mGameTimers[i].secondsRemaining -= deltaTime;
-
-        // If another action is already playing, we wait until it is finished before executing this one (and removing it from the list).
-        if(mGameTimers[i].secondsRemaining <= 0.0f && !gActionManager.IsActionPlaying())
-        {
-            gActionManager.ExecuteAction(mGameTimers[i].noun, mGameTimers[i].verb);
-            mGameTimers.erase(mGameTimers.begin() + i);
-        }
-    }
+    // Update any game timers.
+    GameTimers::Update(deltaTime);
 }
 
 bool Scene::InitEgoPosition(const std::string& positionName)
@@ -801,14 +792,6 @@ bool Scene::IsSceneModelVisible(const std::string& modelName) const
 bool Scene::DoesSceneModelExist(const std::string& modelName) const
 {
 	return GetBSP()->Exists(modelName);
-}
-
-void Scene::SetGameTimer(const std::string& noun, const std::string& verb, float seconds)
-{
-    mGameTimers.emplace_back();
-    mGameTimers.back().secondsRemaining = seconds;
-    mGameTimers.back().noun = noun;
-    mGameTimers.back().verb = verb;
 }
 
 void Scene::SetPaused(bool paused)
