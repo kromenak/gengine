@@ -117,7 +117,7 @@ BSPActor* BSP::CreateBSPActor(const std::string& objectName)
     return actor;
 }
 
-bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
+bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo, bool forWalk)
 {
 	// Values for tracking closest found hit.
     outHitInfo.t = FLT_MAX;
@@ -129,20 +129,21 @@ bool BSP::RaycastNearest(const Ray& ray, RaycastHit& outHitInfo)
     {
         // Ignore polygons that are part of non-interactive surfaces.
         BSPSurface& surface = mSurfaces[polygon.surfaceIndex];
-        if(!surface.interactive) { continue; }
-
-        // Do the raycast against the polygon.
-        RaycastHit hitInfo;
-        if(RaycastPolygon(ray, &polygon, hitInfo))
+        if(surface.interactive || (forWalk && surface.walkHitTest))
         {
-            // Is it closer than any other polygon so far? Then it's our nearest hit.
-            if(hitInfo.t < outHitInfo.t)
+            // Do the raycast against the polygon.
+            RaycastHit hitInfo;
+            if(RaycastPolygon(ray, &polygon, hitInfo))
             {
-                // Save closest distance.
-                outHitInfo.t = hitInfo.t;
+                // Is it closer than any other polygon so far? Then it's our nearest hit.
+                if(hitInfo.t < outHitInfo.t)
+                {
+                    // Save closest distance.
+                    outHitInfo.t = hitInfo.t;
 
-                // Track name of closest object hit.
-                closest = &mObjectNames[surface.objectIndex];
+                    // Track name of closest object hit.
+                    closest = &mObjectNames[surface.objectIndex];
+                }
             }
         }
     }
@@ -218,6 +219,15 @@ bool BSP::RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& 
 void BSP::SetFloorObjectName(const std::string& floorObjectName)
 {
     mFloorObjectIndex = GetObjectIndex(floorObjectName);
+
+    // Flag all surfaces for this object to be walk hit tests.
+    for(BSPSurface& surface : mSurfaces)
+    {
+        if(surface.objectIndex == mFloorObjectIndex)
+        {
+            surface.walkHitTest = true;
+        }
+    }
 }
 
 void BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture)

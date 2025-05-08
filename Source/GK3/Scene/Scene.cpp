@@ -610,7 +610,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 			// Cast ray against scene BSP to see if it intersects with anything.
 			// If so, it means we clicked on that thing.
 			RaycastHit hitInfo;
-			if(bsp->RaycastNearest(ray, hitInfo))
+			if(bsp->RaycastNearest(ray, hitInfo, true))
 			{
 				// Clicked on the floor - move ego to position.
 				if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))

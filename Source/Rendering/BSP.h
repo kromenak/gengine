@@ -106,6 +106,9 @@ struct BSPSurface
     // This means we need to do a bit more processing for raycasts, to ensure they hit a visible pixel on the 3D object.
     bool hitTest = false;
 
+    // If true, this surface is a hit test for walking.
+    bool walkHitTest = false;
+
     // If not using true BSP rendering, it's efficient to store the polygons directly in the surface.
     #if !defined(USE_TRUE_BSP_RENDERING)
     std::vector<BSPPolygon> polygons;
@@ -141,7 +144,7 @@ public:
     void Load(uint8_t* data, uint32_t dataLength);
     
     // Raycasting
-    bool RaycastNearest(const Ray& ray, RaycastHit& outHitInfo);
+    bool RaycastNearest(const Ray& ray, RaycastHit& outHitInfo, bool forWalk = false);
 	bool RaycastPolygon(const Ray& ray, const BSPPolygon* polygon, RaycastHit& outHitInfo);
 
     // Floors
