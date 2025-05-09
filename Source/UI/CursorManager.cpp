@@ -52,6 +52,15 @@ void CursorManager::UseDefaultCursor()
     }
 }
 
+void CursorManager::UseRedHighlightCursor()
+{
+    if(mHighlightRedCursor != nullptr && mActiveCursor != mHighlightRedCursor)
+    {
+        mActiveCursor = mHighlightRedCursor;
+        mActiveCursor->Activate();
+    }
+}
+
 void CursorManager::UseHighlightCursor()
 {
     // To help visualize interactable objects that are very close to one another,

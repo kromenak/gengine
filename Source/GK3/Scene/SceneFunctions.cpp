@@ -8,6 +8,7 @@
 #include "GKObject.h"
 #include "LaserHead.h"
 #include "LocationManager.h"
+#include "Pendulum.h"
 #include "SceneManager.h"
 #include "SoundtrackPlayer.h"
 
@@ -288,6 +289,18 @@ namespace
     void TE1_BadLand() { chessboard->BadLand(); }
 }
 
+namespace
+{
+    void TE3_Init()
+    {
+        GKObject* pendulumActor = gSceneManager.GetScene()->GetSceneObjectByModelName("te3_pendulum_center_code");
+        if(pendulumActor != nullptr)
+        {
+            pendulumActor->AddComponent<Pendulum>();
+        }
+    }
+}
+
 void SceneFunctions::Execute(const std::string& functionName)
 {
     // If haven't initialized the function map, do it now.
@@ -338,6 +351,9 @@ void SceneFunctions::Execute(const std::string& functionName)
         sSceneFunctions["te1-fell"] = TE1_Fell;
         sSceneFunctions["te1-centerme"] = TE1_CenterMe;
         sSceneFunctions["te1-badland"] = TE1_BadLand;
+
+        // TE3
+        sSceneFunctions["te3-init"] = TE3_Init;
         initialized = true;
     }
 

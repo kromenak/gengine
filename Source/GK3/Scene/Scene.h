@@ -87,6 +87,7 @@ public:
     void SetPaused(bool paused);
 
     void InspectActiveObject(std::function<void()> finishCallback);
+    GKObject* GetActiveObject() { return mActiveObject; }
     void InspectObject(const std::string& noun, std::function<void()> finishCallback);
     void UninspectObject(std::function<void()> finishCallback);
 

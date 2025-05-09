@@ -15,6 +15,7 @@ public:
     void Update(float deltaTime);
 
     void UseDefaultCursor();
+    void UseRedHighlightCursor();
     void UseHighlightCursor();
     void UseWaitCursor();
     void UseLoadCursor();
