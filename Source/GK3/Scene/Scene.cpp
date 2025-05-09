@@ -314,12 +314,12 @@ void Scene::Init()
         mSoundtrackPlayer->Play(soundtrack);
     }
 
-    // Check for and run "scene enter" actions.
-    gActionManager.ExecuteAction("SCENE", "ENTER");
-
     // If there's an "Init" SceneFunction for this Scene, execute it.
     SceneFunctions::Execute("Init");
 
+    // Check for and run "scene enter" actions.
+    gActionManager.ExecuteAction("SCENE", "ENTER");
+    
     // Make sure light colors are applied to all actors correctly before our first render.
     // Doing this here avoids a 1-frame render with bad lighting. Do this after SCENE/ENTER action executes, since that may change actor positions.
     ApplyAmbientLightColorToActors();

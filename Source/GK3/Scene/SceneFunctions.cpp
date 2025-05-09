@@ -1,6 +1,7 @@
 #include "SceneFunctions.h"
 
 #include "ActionManager.h"
+#include "Chessboard.h"
 #include "DialogueManager.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
@@ -271,6 +272,22 @@ namespace
     }
 }
 
+namespace
+{
+    // TE1 has a giant chessboard puzzle. All the logic is encompassed in this Chessboard class.
+    Chessboard* chessboard = nullptr;
+
+    void TE1_Init() { chessboard = new Chessboard(); }
+    void TE1_ClearTiles() { chessboard->Reset(false); }
+    void TE1_Reset() { chessboard->Reset(true); }
+    void TE1_Takeoff() { chessboard->Takeoff(); }
+    void TE1_Landed() { chessboard->Landed(); }
+    void TE1_HideCurrentTile() { chessboard->HideCurrentTile(); } 
+    void TE1_Fell() { /*TODO: Does this actually do anything? Maybe reset state?*/ }
+    void TE1_CenterMe() { chessboard->CenterEgo(); }
+    void TE1_BadLand() { chessboard->BadLand(); }
+}
+
 void SceneFunctions::Execute(const std::string& functionName)
 {
     // If haven't initialized the function map, do it now.
@@ -310,6 +327,17 @@ void SceneFunctions::Execute(const std::string& functionName)
         // BEC
         sSceneFunctions["bec-on"] = GPS_On;
         sSceneFunctions["bec-off"] = GPS_Off;
+
+        // TE1
+        sSceneFunctions["te1-init"] = TE1_Init;
+        sSceneFunctions["te1-cleartiles"] = TE1_ClearTiles;
+        sSceneFunctions["te1-reset"] = TE1_Reset;
+        sSceneFunctions["te1-landed"] = TE1_Landed;
+        sSceneFunctions["te1-takeoff"] = TE1_Takeoff;
+        sSceneFunctions["te1-hidecurrenttile"] = TE1_HideCurrentTile;
+        sSceneFunctions["te1-fell"] = TE1_Fell;
+        sSceneFunctions["te1-centerme"] = TE1_CenterMe;
+        sSceneFunctions["te1-badland"] = TE1_BadLand;
         initialized = true;
     }
 
