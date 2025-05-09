@@ -24,11 +24,15 @@ void Animator::Start(Animation* animation, std::function<void()> finishCallback)
     Start(params);
 }
 
-void Animator::Start(const AnimParams& animParams)
+void Animator::Start(const AnimParams& animParams, std::function<void()> finishCallback)
 {
     if(animParams.animation == nullptr)
     {
-        if(animParams.finishCallback != nullptr)
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        else if(animParams.finishCallback != nullptr)
         {
             animParams.finishCallback();
         }
@@ -39,6 +43,12 @@ void Animator::Start(const AnimParams& animParams)
     // Create anim state for animation with appropriate "allow move" value.
     mActiveAnimations.emplace_back();
     mActiveAnimations.back().params = animParams;
+
+    // If a callback was passed in, use that as the anim callback instead of what was in the AnimParams.
+    if(finishCallback != nullptr)
+    {
+        mActiveAnimations.back().params.finishCallback = finishCallback;
+    }
 
     // Immediately execute start frame of the animation.
     // Frames execute at the BEGINNING of the time slice for that frame, so frame 0 executes at t=0.
