@@ -116,6 +116,11 @@ void GameCamera::Uninspect(std::function<void()> callback)
     }
 }
 
+GKObject* GameCamera::RaycastIntoScene(bool interactiveOnly)
+{
+    return RaycastIntoScene(GetSceneRayAtMousePos(), interactiveOnly);
+}
+
 void GameCamera::SaveFov()
 {
     mSavedCameraFOV = mCamera->GetCameraFovRadians();
@@ -534,20 +539,11 @@ void GameCamera::SceneUpdateInteract(float deltaTime)
         // Only allow scene interaction if pointer isn't over a UI widget.
         if(!UICanvas::DidWidgetEatInput())
         {
-            // Calculate mouse click ray.
-            Vector2 mousePos = gInputManager.GetMousePosition();
-            Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
-            Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
-            Vector3 dir = (worldPos2 - worldPos).Normalize();
-            Ray ray(worldPos, dir);
-
-            // Cast into the scene to see if we're over an interactive object.
-            SceneCastResult result = gSceneManager.GetScene()->Raycast(ray, true);
-
             // If we can interact with whatever we are pointing at, highlight the cursor.
             // Note we call "UseHighlightCursor" when start hovering OR we switch hover to new object.
             // This toggles red/blue highlight.
-            GKObject* hovering = result.hitObject;
+            Ray ray = GetSceneRayAtMousePos();
+            GKObject* hovering = RaycastIntoScene(ray, true);
             if(hovering != nullptr)
             {
                 if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
@@ -589,6 +585,25 @@ void GameCamera::SceneUpdateInteract(float deltaTime)
             mLastHoveredNoun.clear();
         }
     }
+}
+
+Ray GameCamera::GetSceneRayAtMousePos()
+{
+    // Get mouse position, in screen space.
+    Vector2 mousePos = gInputManager.GetMousePosition();
+
+    // Get near and far plane world points corresponding to that screen point.
+    Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
+    Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
+
+    // Create a ray extending from the near plane point towards the far plane point.
+    return Ray(worldPos, (worldPos2 - worldPos).Normalize());
+}
+
+GKObject* GameCamera::RaycastIntoScene(const Ray& ray, bool interactiveOnly)
+{
+    // Cast that ray into the scene, returning any result.
+    return gSceneManager.GetScene()->Raycast(GetSceneRayAtMousePos(), interactiveOnly).hitObject;
 }
 
 Vector3 GameCamera::ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset)

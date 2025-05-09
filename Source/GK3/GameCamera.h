@@ -12,6 +12,8 @@
 #include <functional>
 #include <vector>
 
+#include "Ray.h"
+
 class Camera;
 class GKObject;
 class Model;
@@ -44,6 +46,8 @@ public:
     void Inspect(const std::string& noun, const Vector3& position, const Vector2& angle, std::function<void()> callback);
     void Uninspect(std::function<void()> callback);
     const std::string& GetInspectNoun() const { return mInspectNoun; }
+
+    GKObject* RaycastIntoScene(bool interactiveOnly);
 
 	Camera* GetCamera() { return mCamera; }
     
@@ -161,6 +165,9 @@ private:
     void SceneUpdate(float deltaTime);
     void SceneUpdateMovement(float deltaTime);
     void SceneUpdateInteract(float deltaTime);
+
+    Ray GetSceneRayAtMousePos();
+    GKObject* RaycastIntoScene(const Ray& ray, bool interactiveOnly);
 
     Vector3 ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset);
 };
