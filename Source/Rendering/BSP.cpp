@@ -230,14 +230,14 @@ void BSP::SetFloorObjectName(const std::string& floorObjectName)
     }
 }
 
-void BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture)
+bool BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture)
 {
     // Didn't hit anything by default.
     outHeight = 0.0f;
     outTexture = nullptr;
 
     // No floor was defined - early out.
-    if(mFloorObjectIndex == UINT32_MAX) { return; }
+    if(mFloorObjectIndex == UINT32_MAX) { return false; }
 
     // Calculate ray origin using passed position, but really high in the air!
     Vector3 rayOrigin = position;
@@ -269,6 +269,9 @@ void BSP::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outT
             }
         }
     }
+
+    // Return whether we hit anything.
+    return nearestT != FLT_MAX;
 }
 
 void BSP::SetVisible(const std::string& objectName, bool visible)

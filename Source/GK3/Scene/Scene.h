@@ -77,7 +77,7 @@ public:
 	
 	const ScenePosition* GetPosition(const std::string& positionName) const;
     float GetFloorY(const Vector3& position) const;
-    void GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture);
+    bool GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture);
 	
 	void ApplyTextureToSceneModel(const std::string& modelName, Texture* texture);
 	void SetSceneModelVisibility(const std::string& modelName, bool visible);

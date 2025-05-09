@@ -99,7 +99,8 @@ private:
 	Walker* mWalker = nullptr;
 
     // Currently detected floor height and texture.
-    float mFloorHeight = 0.0f;
+    const float kNoFloorValue = FLT_MAX;
+    float mFloorHeight = kNoFloorValue;
     Texture* mFloorTexture = nullptr;
 	
 	// The actor's face control.

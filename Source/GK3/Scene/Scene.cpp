@@ -769,9 +769,9 @@ float Scene::GetFloorY(const Vector3& position) const
     return height;
 }
 
-void Scene::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture)
+bool Scene::GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture)
 {
-    GetBSP()->GetFloorInfo(position, outHeight, outTexture);
+    return GetBSP()->GetFloorInfo(position, outHeight, outTexture);
 }
 
 void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* texture)

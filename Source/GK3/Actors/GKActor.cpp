@@ -292,9 +292,12 @@ Vector3 GKActor::GetWalkDestination() const
 
 void GKActor::SnapToFloor()
 {
-    Vector3 pos = GetPosition();
-    pos.y = mFloorHeight;
-    SetPosition(pos);
+    if(mFloorHeight != kNoFloorValue)
+    {
+        Vector3 pos = GetPosition();
+        pos.y = mFloorHeight;
+        SetPosition(pos);
+    }
 }
 
 const std::string& GKActor::GetShoeType() const
@@ -707,7 +710,11 @@ void GKActor::RefreshFloorInfo()
     Scene* scene = gSceneManager.GetScene();
     if(scene != nullptr)
     {
-        scene->GetFloorInfo(GetPosition(), mFloorHeight, mFloorTexture);   
+        bool success = scene->GetFloorInfo(GetPosition(), mFloorHeight, mFloorTexture);
+        if(!success)
+        {
+            mFloorHeight = kNoFloorValue;
+        }
     }
 }
 

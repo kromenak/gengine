@@ -149,7 +149,7 @@ public:
 
     // Floors
     void SetFloorObjectName(const std::string& floorObjectName);
-    void GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture);
+    bool GetFloorInfo(const Vector3& position, float& outHeight, Texture*& outTexture);
 
     // Object Modification
     BSPActor* CreateBSPActor(const std::string& objectName);
