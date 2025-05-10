@@ -2,6 +2,7 @@
 
 #include "BinocsOverlay.h"
 #include "CaptionsOverlay.h"
+#include "DeathScreen.h"
 #include "DrivingScreen.h"
 #include "FingerprintScreen.h"
 #include "FinishedScreen.h"
@@ -48,6 +49,16 @@ void GK3UI::ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::fu
         mTimeblockScreen->SetIsDestroyOnLoad(false);
     }
     mTimeblockScreen->Show(timeblock, timer, callback);
+}
+
+void GK3UI::ShowDeathScreen()
+{
+    if(mDeathScreen == nullptr)
+    {
+        mDeathScreen = new DeathScreen();
+        mDeathScreen->SetIsDestroyOnLoad(false);
+    }
+    mDeathScreen->Show();
 }
 
 void GK3UI::ShowFinishedScreen()

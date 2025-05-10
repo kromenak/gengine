@@ -24,4 +24,6 @@ shpvoid SetPamphletPage(int page);
 shpvoid TurnLSRPageLeft();
 shpvoid TurnLSRPageRight();
 
+shpvoid ShowDeathLayer();
+
 shpvoid FinishedScreen();

@@ -9,6 +9,7 @@
 
 class BinocsOverlay;
 class CaptionsOverlay;
+class DeathScreen;
 class DrivingScreen;
 class FingerprintScreen;
 class GPSOverlay;
@@ -27,6 +28,7 @@ public:
     void HideTitleScreen();
 
     void ShowTimeblockScreen(const Timeblock& timeblock, float timer, std::function<void()> callback);
+    void ShowDeathScreen();
     void ShowFinishedScreen();
 
     void ShowSaveScreen();
@@ -62,6 +64,7 @@ public:
 private:
     TitleScreen* mTitleScreen = nullptr;
     TimeblockScreen* mTimeblockScreen = nullptr;
+    DeathScreen* mDeathScreen = nullptr;
     SaveLoadScreen* mSaveLoadScreen = nullptr;
 
     ProgressBar* mProgressBar = nullptr;

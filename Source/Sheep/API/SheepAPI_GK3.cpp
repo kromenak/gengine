@@ -86,6 +86,13 @@ shpvoid TurnLSRPageRight()
 }
 RegFunc0(TurnLSRPageRight, void, IMMEDIATE, REL_FUNC);
 
+shpvoid ShowDeathLayer()
+{
+    gGK3UI.ShowDeathScreen();
+    return 0;
+}
+RegFunc0(ShowDeathLayer, void, IMMEDIATE, REL_FUNC);
+
 shpvoid FinishedScreen()
 {
     gGK3UI.ShowFinishedScreen();
