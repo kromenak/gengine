@@ -61,14 +61,19 @@ void VertexAnimNode::Play(AnimationState* animState)
             if(!absolute)
             {
                 // e.g. Grab the "ROX" from "ROX_SPRAYANDWIPE2.ANM".
-                std::string prefix = animState->params.animation->GetName().substr(0, 3);
-
-                // If a parent exists, and it isn't ourselves, use it!
-                GKObject* parent = gSceneManager.GetScene()->GetSceneObjectByModelName(prefix);
-                if(parent != nullptr && parent != obj)
+                const std::string& animName = animState->params.animation->GetName();
+                std::size_t prefixSeparatorOffset = animName.find('_');
+                if(prefixSeparatorOffset != std::string::npos)
                 {
-                    params.parent = parent->GetMeshRenderer()->GetOwner();
-                    //printf("Found parent %s for %s\n", parent->GetName().c_str(), obj->GetName().c_str());
+                    std::string prefix = animName.substr(0, prefixSeparatorOffset);
+
+                    // If a parent exists, and it isn't ourselves, use it!
+                    GKObject* parent = gSceneManager.GetScene()->GetSceneObjectByModelName(prefix);
+                    if(parent != nullptr && parent != obj)
+                    {
+                        params.parent = parent->GetMeshRenderer()->GetOwner();
+                        //printf("Found parent %s for %s\n", parent->GetName().c_str(), obj->GetName().c_str());
+                    }
                 }
             }
 
