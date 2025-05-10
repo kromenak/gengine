@@ -48,6 +48,7 @@ public:
     const std::string& GetInspectNoun() const { return mInspectNoun; }
 
     GKObject* RaycastIntoScene(bool interactiveOnly);
+    void SetSceneInteractEnabled(bool enabled) { mSceneInteractEnabled = enabled; }
 
 	Camera* GetCamera() { return mCamera; }
     
@@ -82,6 +83,9 @@ private:
     // To combat this, we remember the FOV pre-action and revert it afterwards.
     // (After some testing, even the original game does this!)
     float mSavedCameraFOV = 0.0f;
+
+    // If true, normal raycasting and interacting logic with the scene is enabled and allowed.
+    bool mSceneInteractEnabled = true;
 
     //////////////////
     // MOVEMENT
