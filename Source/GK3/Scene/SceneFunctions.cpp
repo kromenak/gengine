@@ -293,11 +293,7 @@ namespace
 {
     void TE3_Init()
     {
-        GKObject* pendulumActor = gSceneManager.GetScene()->GetSceneObjectByModelName("te3_pendulum_center_code");
-        if(pendulumActor != nullptr)
-        {
-            pendulumActor->AddComponent<Pendulum>();
-        }
+        new Pendulum();
     }
 }
 

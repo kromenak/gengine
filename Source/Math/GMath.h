@@ -13,13 +13,13 @@
 namespace Math
 {
     // Floating-point numbers within 0.000001 units are considered equal to one another.
-    static const float kEpsilon = 1.0e-6f;
+    static constexpr float kEpsilon = 1.0e-6f;
 
     // Pi constants.
-    static const float kPi = 3.1415926535897932384626433832795f;
-    static const float k2Pi = 2.0f * kPi;
-    static const float kPiOver2 = kPi / 2.0f;
-    static const float kPiOver4 = kPi / 4.0f;
+    static constexpr float kPi = 3.1415926535897932384626433832795f;
+    static constexpr float k2Pi = 2.0f * kPi;
+    static constexpr float kPiOver2 = kPi / 2.0f;
+    static constexpr float kPiOver4 = kPi / 4.0f;
 
     inline float Sqrt(float val)
     {
@@ -172,12 +172,12 @@ namespace Math
 		return std::copysign(mag, sign);
 	}
 
-    inline float ToDegrees(float radians)
+    inline constexpr float ToDegrees(float radians)
     {
         return (radians * (180.0f / kPi));
     }
 
-    inline float ToRadians(float degrees)
+    inline constexpr float ToRadians(float degrees)
     {
         return (degrees * (kPi / 180.0f));
     }

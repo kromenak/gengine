@@ -7,19 +7,20 @@
 // as well as the logic related to moving between platforms, jumping to the pendulum, getting killed by the pendulum, etc.
 //
 #pragma once
-#include "Component.h"
+#include "Actor.h"
 
 #include "Animator.h"
 #include "GMath.h"
 #include "Vector3.h"
 
 class Animation;
+class Cursor;
 class GKObject;
 
-class Pendulum : public Component
+class Pendulum : public Actor
 {
 public:
-    Pendulum(Actor* owner);
+    Pendulum();
 
 protected:
     void OnUpdate(float deltaTime) override;
@@ -29,22 +30,45 @@ private:
     // PENDULUM SWINGING
     // 
     // The approximate radius of the pendulum arm.
-    static constexpr float kArmRadius = 2000.0f;
+    static constexpr float kPendulumArmRadius = 2000.0f;
+
+    // The scene contains two pendulums - one without Gabe, one with Gabe.
+    // Hold references to both so we can easily swap between the two.
+    GKObject* mNormalPendulumActor = nullptr;
+    GKObject* mGabePendulumActor = nullptr;
+
+    // The object being used as the pendulum. This changes when Gabe is riding it.
+    Actor* mPendulumActor = nullptr;
 
     // The point around which the pendulum is pivoting.
-    Vector3 mPivotPoint;
+    Vector3 mPendulumPivotPoint;
 
     // The max angle of rotation (the minimum is the negative of this).
-    float mMaxAngle = 0.0f;
+    float mPendulumMaxAngle = 0.0f;
 
     // How long it takes for a pendulum to complete one cycle (swing from min to max angle and back again).
-    float mCycleDuration = 0.0f;
+    float mPendulumCycleDuration = 0.0f;
 
     // Times how far the pendulum is into its current cycle.
-    float mCycleTimer = 0.0f;
+    float mPendulumCycleTimer = 0.0f;
 
+    // Tracks whether the pendulum is in the "danger zones" on the left/right side of the swing arc.
+    // When in these zones, the pendulum CAN kill Gabe, but it's also when you can grab the pendulum and ride it.
+    enum class PendulumState
+    {
+        Swinging,
+        InDangerZoneLeft,
+        InDangerZoneRight
+    };
+    PendulumState mPendulumState = PendulumState::Swinging;
+    
     void UpdatePendulum(float deltaTime);
-    void SetAngle(float angle);
+
+    void SetPendulumActorRotation(float angle);
+    float GetPendulumAngle();
+
+    void UseNormalPendulum();
+    void UseGabePendulum();
 
     //
     // PENDULUM PLATFORMS
@@ -57,6 +81,9 @@ private:
     // Based on this, we can calculate how many radians of the 2pi total are used by each platform.
     static constexpr float kRadiansPerPlatform = Math::k2Pi / kPlatformCount;
 
+    // Speed of platform rotation, in radians per second.
+    float mPlatformRotationSpeed = 0.0f;
+
     // Platforms rotate around the room, using the same angle value for all.
     // Stored here for convenience, to avoid converting to/from quaternion when we need it.
     float mPlatformRotation = 0.0f;
@@ -66,25 +93,43 @@ private:
     int GetIndexOfPlatformAtEntryway();
     int GetIndexOfPlatformAtLeftPendulumSlot();
     int GetIndexOfPlatformAtRightPendulumSlot();
-    Vector3 GetPlatformPosition(int index);
+    Vector3 GetPlatformPosition(int platformIndex);
 
     //
     // PLAYER LOGIC
     //
-    GKObject* mPlayer = nullptr;
-    GKObject* mPlayerBlood = nullptr;
+    // Gabe himself.
+    GKObject* mGabeActor = nullptr;
 
-    // Cached start position for the player.
-    Vector3 mPlayerStartPosition;
+    // The Mic is attached to Gabe's head, and the blood is used in some death sequences.
+    GKObject* mGabeMicActor = nullptr;
+    GKObject* mGabeBloodActor = nullptr;
+
+    // The altar is used as a click target when dropping off the pendulum.
+    GKObject* mAltarActor = nullptr;
+
+    // Cached start position for Gabe.
+    Vector3 mGabeStartPosition;
     
-    // The index of the platform the player is currently on.
-    int mPlayerPlatformIndex = -1;
+    // The index of the platform Gabe is currently on.
+    int mGabePlatformIndex = -1;
 
-    // If true, we set the player's rotation to match the platform they're on.
-    bool mSetPlayerRotationOnPlatform = false;
+    // This room's puzzle is fairly complex, and we need to manage Gabe's state in code.
+    enum class GabeState
+    {
+        InEntryway,
+        Jumping,
+        OnPlatform,
+        OnPendulum,
+        AtAltar,
+        Done,
+        Dying,
+        DeadOnPlatform,
+    };
+    GabeState mGabeState = GabeState::InEntryway;
 
-    // Set to true when Gabe dies.
-    bool mPlayerDead = false;
+    // Cached grab cursor.
+    Cursor* mGrabCursor = nullptr;
 
     // Animations used for player idle and jumping in different directions.
     Animation* mIdleAnim = nullptr;
@@ -109,9 +154,21 @@ private:
     int mJumpToPlatformIndex = -1;
     float mJumpTimer = 0.0f;
 
-    void UpdatePlayer(float deltaTime);
+    // When dropping to the altar, some parameters for when dropping is allowed, and what's considered a "safe" drop.
+    static constexpr float kAllowedDropAngle = Math::ToRadians(15.0f);
+    static constexpr float kSafeDropAngle = Math::ToRadians(3.0f);
+
+    void UpdateGabe(float deltaTime);
+    void UpdateGabeInteract();
+
+    void ResetAtEntryway();
     
     void OnForwardJumpStarted();
     void OnLeftJumpStarted(int toPlatformIndex);
     void OnRightJumpStarted(int toPlatformIndex);
+
+    void OnPendulumPlatformDeath(bool onLeftSide, bool pendulumMovingLeft);
+
+    void OnFallToDeath();
+    void OnFallToAltar();
 };
