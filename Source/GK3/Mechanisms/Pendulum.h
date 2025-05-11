@@ -128,6 +128,10 @@ private:
     };
     GabeState mGabeState = GabeState::InEntryway;
 
+    // If true, Gabe died and we've shown the death layer.
+    // Now we're waiting for respawn to continue.
+    bool mDeadAndWaitingForRetry = false;
+
     // Cached grab cursor.
     Cursor* mGrabCursor = nullptr;
 
@@ -168,6 +172,8 @@ private:
     void OnRightJumpStarted(int toPlatformIndex);
 
     void OnPendulumPlatformDeath(bool onLeftSide, bool pendulumMovingLeft);
+
+    void OnGrabPendulum();
 
     void OnFallToDeath();
     void OnFallToAltar();

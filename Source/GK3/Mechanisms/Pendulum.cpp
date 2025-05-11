@@ -93,6 +93,10 @@ Pendulum::Pendulum() : Actor("Pendulum Puzzle")
     // Because this Pendulum sequence is so complex, all animations are controlled in this class, as opposed to via the fidget or walk systems.
     // Start by looping Gabe's idle animation.
     gSceneManager.GetScene()->GetAnimator()->Start(mIdleAnimParams);
+
+    // The floor is kind of weird in this level (only the center altar area).
+    // To avoid some weirdness with the camera height-adjusting, ignore height for camera in this scene.
+    gSceneManager.GetScene()->GetCamera()->SetIgnoreFloor(true);
 }
 
 void Pendulum::OnUpdate(float deltaTime)
@@ -100,6 +104,14 @@ void Pendulum::OnUpdate(float deltaTime)
     UpdateGabe(deltaTime);
     UpdatePendulum(deltaTime);
     UpdatePlatforms(deltaTime);
+
+    // If waiting for retry, the top layer will be the Death Layer.
+    // When it turns back to the Scene Layer, we can call the "PostDeath$" function, which restarts scene audio.
+    if(mDeadAndWaitingForRetry && gLayerManager.IsTopLayer("SceneLayer"))
+    {
+        mDeadAndWaitingForRetry = false;
+        gActionManager.ExecuteSheepAction("wait CallSheep(\"TE3\", \"PostDeath$\")");
+    }
 }
 
 void Pendulum::UpdatePendulum(float deltaTime)
@@ -137,7 +149,7 @@ void Pendulum::UpdatePendulum(float deltaTime)
     // If the pendulum is near the wall slots on either the left or right sides of the room, we need to check if Gabe is going to die.
     // The "5 degrees" here is not from the original game - I just eyeballed it.
     float maxAngleDiff = Math::Abs(mPendulumMaxAngle - Math::Abs(angle));
-    bool inDangerZone = maxAngleDiff < Math::ToRadians(5.0f);
+    bool inDangerZone = maxAngleDiff < Math::ToRadians(8.0f);
     if(inDangerZone)
     {
         bool onLeftSide = angle > 0.0f;
@@ -149,7 +161,7 @@ void Pendulum::UpdatePendulum(float deltaTime)
             if((onLeftSide && GetIndexOfPlatformAtLeftPendulumSlot() == mGabePlatformIndex) ||
                (!onLeftSide && GetIndexOfPlatformAtRightPendulumSlot() == mGabePlatformIndex))
             {
-                OnPendulumPlatformDeath(onLeftSide, mPendulumCycleDuration > (mPendulumCycleTimer * 0.5f));
+                OnPendulumPlatformDeath(onLeftSide, mPendulumCycleTimer > (mPendulumCycleDuration * 0.5f));
             }
         }
     }
@@ -203,6 +215,9 @@ void Pendulum::UseNormalPendulum()
     // Turn on Gabe and his mic.
     mGabeActor->SetActive(true);
     mGabeMicActor->SetActive(true);
+
+    // Make sure pendulum is at correct rotation after swap.
+    SetPendulumActorRotation(GetPendulumAngle());
 }
 
 void Pendulum::UseGabePendulum()
@@ -216,6 +231,20 @@ void Pendulum::UseGabePendulum()
     gSceneManager.GetScene()->GetAnimator()->Stop(mIdleAnim);
     mGabeActor->SetActive(false);
     mGabeMicActor->SetActive(false);
+
+    // If Gabe grabs the pendulum on the right side, he grabs it from the back instead of the front.
+    // An easy way to make this work is to simply flip the z-scale of the pendulum actor in that case.
+    if(mPendulumState == PendulumState::InDangerZoneRight)
+    {
+        mGabePendulumActor->SetScale(Vector3(1.0f, 1.0f, -1.0f));
+    }
+    else
+    {
+        mGabePendulumActor->SetScale(Vector3::One);
+    }
+
+    // Make sure pendulum is at correct rotation after swap.
+    SetPendulumActorRotation(GetPendulumAngle());
 }
 
 void Pendulum::UpdatePlatforms(float deltaTime)
@@ -350,8 +379,8 @@ void Pendulum::UpdateGabeInteract()
     // Always enable scene interaction by default.
     gSceneManager.GetScene()->GetCamera()->SetSceneInteractEnabled(true);
 
-    // Early out of interaction under certain circumstances.
-    if(gActionManager.IsActionPlaying() || gInputManager.IsMouseLocked() || UICanvas::DidWidgetEatInput())
+    // Early out of interaction if scene interact is disabled (due to mouse lock, action playing, etc).
+    if(!gSceneManager.GetScene()->GetCamera()->IsSceneInteractAllowed())
     {
         return;
     }
@@ -448,22 +477,7 @@ void Pendulum::UpdateGabeInteract()
                 // If clicked, you grab the pendulum!
                 if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
                 {
-                    mGabeState = GabeState::OnPendulum;
-
-                    // Do a camera cut to hide the model swap shenanigans we're attempting here.
-                    gSceneManager.GetScene()->SetCameraPosition(mPendulumState == PendulumState::InDangerZoneLeft ? "KILL_HIGH" : "KILL_LOW");
-
-                    // Swap to version of pendulum with Gabe holding on.
-                    UseGabePendulum();
-
-                    // Play the animation of Gabe jumping up onto the pendulum.
-                    Animation* grabPendulumAnim = gAssetManager.LoadAnimation("GABJMPPNDULM", AssetScope::Scene);
-                    gSceneManager.GetScene()->GetAnimator()->Start(grabPendulumAnim, [this](){
-
-                        // After the anim, change to a set camera position of the altar.
-                        gSceneManager.GetScene()->SetCameraPosition("LONG_ALTAR");
-
-                    });
+                    OnGrabPendulum();
                 }
             }
         }
@@ -473,11 +487,11 @@ void Pendulum::UpdateGabeInteract()
     if(mGabeState == GabeState::OnPendulum)
     {
         // In this mode, normal scene interaction isn't allowed.
-        //TODO: The cursor still highlights, and you can still click on things, but a canned response occurs.
         gSceneManager.GetScene()->GetCamera()->SetSceneInteractEnabled(false);
 
         // Check if the altar is hovered by the cursor.
         bool useGrabCursor = false;
+        bool useHighlightCursor = false;
         GKObject* hoveredObject = gSceneManager.GetScene()->GetCamera()->RaycastIntoScene(false);
         if(hoveredObject != nullptr && hoveredObject == mAltarActor)
         {
@@ -511,11 +525,23 @@ void Pendulum::UpdateGabeInteract()
                 }
             }
         }
+        else if(hoveredObject != nullptr && hoveredObject->CanInteract())
+        {
+            useHighlightCursor = true;
+            if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
+            {
+                gActionManager.ExecuteDialogueAction("1SERM44V51");
+            }
+        }
 
         // Update cursor.
         if(useGrabCursor)
         {
             gCursorManager.UseCustomCursor(mGrabCursor);
+        }
+        else if(useHighlightCursor)
+        {
+            gCursorManager.UseRedHighlightCursor();
         }
         else
         {
@@ -529,6 +555,7 @@ void Pendulum::ResetAtEntryway()
     // Call to Sheepscript to let them know we died and are resetting.
     // The Sheep code shows the death overlay and resets various anims.
     gActionManager.ExecuteSheepAction("wait CallSheep(\"TE3\", \"Die$\")");
+    mDeadAndWaitingForRetry = true;
 
     // Back to entryway.
     mGabeState = GabeState::InEntryway;
@@ -543,6 +570,13 @@ void Pendulum::ResetAtEntryway()
 
     // Go back to idling.
     gSceneManager.GetScene()->GetAnimator()->Start(mIdleAnimParams);
+
+    // Make sure forced cinematics are disabled, in case Gabe died falling from pedulum.
+    gSceneManager.GetScene()->GetCamera()->SetForcedCinematicMode(false);
+
+    // Make sure door is opened again.
+    Animation* doorCloseAnim = gAssetManager.LoadAnimation("TE3_DOORCLOSE", AssetScope::Scene);
+    gSceneManager.GetScene()->GetAnimator()->Sample(doorCloseAnim, 0);
 }
 
 void Pendulum::OnForwardJumpStarted()
@@ -564,6 +598,10 @@ void Pendulum::OnForwardJumpStarted()
         mGabeActor->SetPosition(GetPlatformPosition(platformIndex));
         mGabePlatformIndex = platformIndex;
 
+        // Play animation of entry door closing.
+        Animation* doorCloseAnim = gAssetManager.LoadAnimation("TE3_DOORCLOSE", AssetScope::Scene);
+        gSceneManager.GetScene()->GetAnimator()->Start(doorCloseAnim);
+
         // Play jump end animation.
         mJumpAnimParams.animation = mJumpForwardEndAnim;
         gSceneManager.GetScene()->GetAnimator()->Start(mJumpAnimParams, [this](){
@@ -583,6 +621,12 @@ void Pendulum::OnLeftJumpStarted(int toPlatformIndex)
 
     // Stop idle anim.
     gSceneManager.GetScene()->GetAnimator()->Stop(mIdleAnim);
+
+    // This is kind of a HACK to ensure the jump anim looks as smooth as possible.
+    // I noticed Gabe's 3D model would glitch for one frame to the wrong location. Probably some complexity of the interplay between the GKActor and its Model Actor...
+    // A quick fix is to just force both to the correct position at this time.
+    mGabeActor->SetPosition(GetPlatformPosition(mGabePlatformIndex));
+    mGabeActor->GetMeshRenderer()->GetOwner()->SetPosition(GetPlatformPosition(mGabePlatformIndex));
 
     // Play the start jump anim.
     mJumpAnimParams.animation = mJumpLeftStartAnim;
@@ -618,6 +662,12 @@ void Pendulum::OnRightJumpStarted(int toPlatformIndex)
 
     // Stop idle anim.
     gSceneManager.GetScene()->GetAnimator()->Stop(mIdleAnim);
+
+    // This is kind of a HACK to ensure the jump anim looks as smooth as possible.
+    // I noticed Gabe's 3D model would glitch for one frame to the wrong location. Probably some complexity of the interplay between the GKActor and its Model Actor...
+    // A quick fix is to just force both to the correct position at this time.
+    mGabeActor->SetPosition(GetPlatformPosition(mGabePlatformIndex));
+    mGabeActor->GetMeshRenderer()->GetOwner()->SetPosition(GetPlatformPosition(mGabePlatformIndex));
 
     // Play the start jump anim.
     mJumpAnimParams.animation = mJumpRightStartAnim;
@@ -678,11 +728,34 @@ void Pendulum::OnPendulumPlatformDeath(bool onLeftSide, bool pendulumMovingLeft)
 
         // Cut to high camera and wait a beat, so you can feel bad.
         gSceneManager.GetScene()->SetCameraPosition(onLeftSide ? "AFTERKILL_HIGH" : "AFTERKILL_LOW");
-        Timers::AddTimerSeconds(3.0f, [this](){
+        Timers::AddTimerSeconds(2.0f, [this](){
 
             // Reset ego at entryway, so the player can try again if they choose "retry" on the death screen.
             ResetAtEntryway();
         });
+    });
+}
+
+void Pendulum::OnGrabPendulum()
+{
+    mGabeState = GabeState::OnPendulum;
+
+    // Do a camera cut to hide the model swap shenanigans we're attempting here.
+    gSceneManager.GetScene()->SetCameraPosition(mPendulumState == PendulumState::InDangerZoneLeft ? "KILL_HIGH" : "KILL_LOW");
+
+    // From this point on, the camera is locked, and the player can't move it around.
+    gSceneManager.GetScene()->GetCamera()->SetForcedCinematicMode(true);
+
+    // Swap to version of pendulum with Gabe holding on.
+    UseGabePendulum();
+
+    // Play the animation of Gabe jumping up onto the pendulum.
+    Animation* grabPendulumAnim = gAssetManager.LoadAnimation("GABJMPPNDULM", AssetScope::Scene);
+    gSceneManager.GetScene()->GetAnimator()->Start(grabPendulumAnim, [this](){
+
+        // After the anim, change to a set camera position of the altar.
+        // From here, the player must try to drop off the pendulum and land on the altar.
+        gSceneManager.GetScene()->SetCameraPosition("LONG_ALTAR");
     });
 }
 
@@ -708,8 +781,12 @@ void Pendulum::OnFallToDeath()
     Animation* fallDeathAnim = gAssetManager.LoadAnimation("GABEFALLDEATH", AssetScope::Scene);
     gSceneManager.GetScene()->GetAnimator()->Start(fallDeathAnim, [this](){
 
-        // Reset ego at entryway, so the player can try again if they choose "retry" on the death screen.
-        ResetAtEntryway();
+        // Wait a beat so you can see your mistake.
+        Timers::AddTimerSeconds(2.0f, [this](){
+
+            // Reset ego at entryway, so the player can try again if they choose "retry" on the death screen.
+            ResetAtEntryway();
+        });
     });
 }
 
@@ -725,6 +802,9 @@ void Pendulum::OnFallToAltar()
 
     // Switch to a different camera angle, to hide the transition.
     gSceneManager.GetScene()->SetCameraPosition("ALTAR_UP");
+
+    // From here, the player is allowed to move the camera around again.
+    gSceneManager.GetScene()->GetCamera()->SetForcedCinematicMode(false);
 
     // We're now on the altar.
     mGabeState = GabeState::AtAltar;

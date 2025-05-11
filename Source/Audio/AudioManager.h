@@ -46,7 +46,7 @@ private:
     FMOD::Sound* sound = nullptr;
     
     // Callback to execute when sound finishes playing (either naturally or via stop).
-    std::function<void()> mFinishCallback;
+    std::function<void()> mFinishCallback = nullptr;
 
     // The frame this sound started on.
     uint32_t mStartFrame = 0;

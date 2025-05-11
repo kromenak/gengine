@@ -28,7 +28,11 @@ void PlayingSoundHandle::Pause()
 {
     if(channel != nullptr)
     {
-        channel->setPaused(true);
+        FMOD_RESULT result = channel->setPaused(true);
+        if(result != FMOD_OK)
+        {
+            std::cout << FMOD_ErrorString(result) << std::endl;
+        }
     }
 }
 
@@ -36,7 +40,11 @@ void PlayingSoundHandle::Resume()
 {
     if(channel != nullptr)
     {
-        channel->setPaused(false);
+        FMOD_RESULT result = channel->setPaused(false);
+        if(result != FMOD_OK)
+        {
+            std::cout << FMOD_ErrorString(result) << std::endl;
+        }
     }
 }
 

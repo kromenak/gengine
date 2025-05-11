@@ -78,6 +78,7 @@ void DeathScreen::Show()
     gLayerManager.PushLayer(&mLayer);
     SetActive(true);
 
+    // Play death stinger sound effect.
     PlayAudioParams params;
     params.audio = gAssetManager.LoadAudio("TEMPLEDEATHTAG.WAV", AssetScope::Scene);
     params.audioType = AudioType::Music;
