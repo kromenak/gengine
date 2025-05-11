@@ -49,7 +49,7 @@ public:
 
 	void LockMouse();
 	void UnlockMouse();
-	bool IsMouseLocked() const { return mMouseLocked; }
+	bool IsMouseLocked() const { return mMouseLocked || mWantMouseLocked; }
 
 	// Text Input
 	void StartTextInput(TextInput* textInput);
@@ -87,6 +87,7 @@ private:
 
 	// Is the mouse locked?
 	bool mMouseLocked = false;
+    bool mWantMouseLocked = false;
 	Vector2 mLockedMousePosition;
 
 	// TEXT INPUT

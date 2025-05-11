@@ -111,43 +111,47 @@ void InputManager::Update()
     {
         SDL_StopTextInput();
     }
+
+    // Handle enabling or disabling mouse lock.
+    if(mWantMouseLocked && !mMouseLocked)
+    {
+        // Save position of mouse when we locked it.
+        int x = 0;
+        int y = 0;
+        SDL_GetMouseState(&x, &y);
+        mLockedMousePosition.x = x;
+        mLockedMousePosition.y = y;
+
+        // Enable relative mode.
+        // Call GetState once to clear any store deltas.
+        SDL_SetRelativeMouseMode(SDL_TRUE);
+        SDL_GetRelativeMouseState(nullptr, nullptr);
+
+        // Mouse is locked!
+        mMouseLocked = true;
+    }
+    else if(!mWantMouseLocked && mMouseLocked)
+    {
+        // Disable relative mode.
+        SDL_SetRelativeMouseMode(SDL_FALSE);
+
+        // Move mouse back to position it was locked at.
+        // Ensures mouse cursor position doesn't change from when we entered mouse lock to left it.
+        SDL_WarpMouseInWindow(nullptr, mLockedMousePosition.x, mLockedMousePosition.y);
+
+        // No longer locked.
+        mMouseLocked = false;
+    }
 }
 
 void InputManager::LockMouse()
 {
-	if(!mMouseLocked)
-	{
-		// Save position of mouse when we locked it.
-		int x = 0;
-		int y = 0;
-		SDL_GetMouseState(&x, &y);
-		mLockedMousePosition.x = x;
-		mLockedMousePosition.y = y;
-
-		// Enable relative mode.
-		// Call GetState once to clear any store deltas.
-		SDL_SetRelativeMouseMode(SDL_TRUE);
-		SDL_GetRelativeMouseState(nullptr, nullptr);
-
-		// Mouse is locked!
-		mMouseLocked = true;
-	}
+    mWantMouseLocked = true;
 }
 
 void InputManager::UnlockMouse()
 {
-	if(mMouseLocked)
-	{
-		// Disable relative mode.
-		SDL_SetRelativeMouseMode(SDL_FALSE);
-
-		// Move mouse back to position it was locked at.
-		// Ensures mouse cursor position doesn't change from when we entered mouse lock to left it.
-		SDL_WarpMouseInWindow(nullptr, mLockedMousePosition.x, mLockedMousePosition.y);
-
-		// No longer locked.
-		mMouseLocked = false;
-	}
+    mWantMouseLocked = false;
 }
 
 void InputManager::StartTextInput(TextInput* textInput)
