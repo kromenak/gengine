@@ -121,6 +121,16 @@ GKObject* GameCamera::RaycastIntoScene(bool interactiveOnly)
     return RaycastIntoScene(GetSceneRayAtMousePos(), interactiveOnly);
 }
 
+bool GameCamera::IsSceneInteractAllowed() const
+{
+    // There are various conditions under which scene interaction is disabled.
+    // 1) We explicitly disable it.
+    // 2) An action is playing.
+    // 3) The mouse is locked (for mouse-based camera movement).
+    // 4) The mouse cursor is over a UI element.
+    return mSceneInteractEnabled && !gActionManager.IsActionPlaying() && !gInputManager.IsMouseLocked() && !UICanvas::DidWidgetEatInput();
+}
+
 void GameCamera::SaveFov()
 {
     mSavedCameraFOV = mCamera->GetCameraFovRadians();
@@ -273,7 +283,7 @@ void GameCamera::SceneUpdate(float deltaTime)
 
     // It's possible our height was changed due to a script moving the camera.
     // Make sure height is correct before we do our updates.
-    float startFloorY = gSceneManager.GetScene()->GetFloorY(GetPosition());
+    float startFloorY = mIgnoreFloor ? 0.0f : gSceneManager.GetScene()->GetFloorY(GetPosition());
     mHeight = GetPosition().y - startFloorY;
 
     // Update camera movement/rotation.
@@ -286,7 +296,7 @@ void GameCamera::SceneUpdate(float deltaTime)
     if(scene != nullptr)
     {
         Vector3 pos = GetPosition();
-        float floorY = scene->GetFloorY(pos);
+        float floorY = mIgnoreFloor ? 0.0f : scene->GetFloorY(pos);
         pos.y = floorY + mHeight;
         SetPosition(pos);
     }
@@ -492,9 +502,9 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
 
     // Calculate new desired height and apply that to position y.
     float height = mHeight + verticalSpeed * deltaTime;
-    float floorY = gSceneManager.GetScene()->GetFloorY(position);
+    float floorY = mIgnoreFloor ? 0.0f : gSceneManager.GetScene()->GetFloorY(position);
     position.y = floorY + height;
-
+    
     // Determine offset from start to end position.
     Vector3 moveOffset = position - GetPosition();
 
@@ -506,7 +516,7 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
 
     // Height may also be affected by collision. After resolving,
     // we can see if our height changed and save it.
-    float newFloorY = gSceneManager.GetScene()->GetFloorY(position);
+    float newFloorY = mIgnoreFloor ? 0.0f : gSceneManager.GetScene()->GetFloorY(position);
     float heightForReal = position.y - newFloorY;
     mHeight = heightForReal;
 
@@ -525,71 +535,51 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
 
 void GameCamera::SceneUpdateInteract(float deltaTime)
 {
-    // Never allowed to interact while an action is playing.
-    if(gActionManager.IsActionPlaying())
+    // Early out if not allowed to interact, for various reasons.
+    if(!IsSceneInteractAllowed())
     {
+        mLastHoveredNoun.clear();
         return;
     }
 
-    // Disallow if explicitly disabled.
-    if(!mSceneInteractEnabled)
+    // If we can interact with whatever we are pointing at, highlight the cursor.
+    // We call "UseHighlightCursor" when start hovering OR we switch hover to new object - this toggles the red/blue highlight.
+    Ray ray = GetSceneRayAtMousePos();
+    GKObject* hovering = RaycastIntoScene(ray, true);
+    if(hovering != nullptr)
     {
-        return;
-    }
-
-    // Handle hovering and clicking on scene objects.
-    //TODO: Original game seems to ONLY check this when the mouse cursor moves or is clicked (in other words, on input).
-    //TODO: Maybe we should do that too?
-    if(!gInputManager.IsMouseLocked())
-    {
-        // Only allow scene interaction if pointer isn't over a UI widget.
-        if(!UICanvas::DidWidgetEatInput())
+        if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
         {
-            // If we can interact with whatever we are pointing at, highlight the cursor.
-            // Note we call "UseHighlightCursor" when start hovering OR we switch hover to new object.
-            // This toggles red/blue highlight.
-            Ray ray = GetSceneRayAtMousePos();
-            GKObject* hovering = RaycastIntoScene(ray, true);
-            if(hovering != nullptr)
+            // See if the hovered item has a custom verb with an associated custom cursor.
+            Cursor* customCursor = nullptr;
+            if(!hovering->GetVerb().empty())
             {
-                if(!StringUtil::EqualsIgnoreCase(hovering->GetNoun(), mLastHoveredNoun))
-                {
-                    // See if the hovered item has a custom verb with an associated custom cursor.
-                    Cursor* customCursor = nullptr;
-                    if(!hovering->GetVerb().empty())
-                    {
-                        customCursor = gVerbManager.GetVerbIcon(hovering->GetVerb()).cursor;
-                    }
+                customCursor = gVerbManager.GetVerbIcon(hovering->GetVerb()).cursor;
+            }
 
-                    // Set cursor appropriately.
-                    if(customCursor != nullptr)
-                    {
-                        gCursorManager.UseCustomCursor(customCursor);
-                    }
-                    else
-                    {
-                        gCursorManager.UseHighlightCursor();
-                    }
-                    mLastHoveredNoun = hovering->GetNoun();
-                }
+            // Set cursor appropriately.
+            if(customCursor != nullptr)
+            {
+                gCursorManager.UseCustomCursor(customCursor);
             }
             else
             {
-                gCursorManager.UseDefaultCursor();
-                mLastHoveredNoun.clear();
+                gCursorManager.UseHighlightCursor();
             }
+            mLastHoveredNoun = hovering->GetNoun();
+        }
+    }
+    else
+    {
+        gCursorManager.UseDefaultCursor();
+        mLastHoveredNoun.clear();
+    }
 
-            // If left mouse button is released, try to interact with whatever it is over.
-            // Need to do this, even if canInteract==false, because floor can be clicked to move around.
-            if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
-            {
-                gSceneManager.GetScene()->Interact(ray, hovering);
-            }
-        }
-        else
-        {
-            mLastHoveredNoun.clear();
-        }
+    // If left mouse button is released, try to interact with whatever it is over.
+    // Need to do this, even if canInteract==false, because floor can be clicked to move around.
+    if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
+    {
+        gSceneManager.GetScene()->Interact(ray, hovering);
     }
 }
 

@@ -48,11 +48,12 @@ public:
     const std::string& GetInspectNoun() const { return mInspectNoun; }
 
     GKObject* RaycastIntoScene(bool interactiveOnly);
+    bool IsSceneInteractAllowed() const;
     void SetSceneInteractEnabled(bool enabled) { mSceneInteractEnabled = enabled; }
+    void SetSceneActive(bool active) { mSceneActive = active; }
+    void SetIgnoreFloor(bool ignoreFloor) { mIgnoreFloor = true; }
 
 	Camera* GetCamera() { return mCamera; }
-    
-    void SetSceneActive(bool active) { mSceneActive = active; }
     
     void SaveFov();
     void RestoreFov();
@@ -124,6 +125,9 @@ private:
 	// Default value is derived from trial and error!
 	const float kDefaultHeight = 60.0f;
 	float mHeight = kDefaultHeight;
+
+    // If true, the camera code doesn't care about floor height and pretty much just ignores it entirely.
+    bool mIgnoreFloor = false;
 
     //////////////////
     // COLLISION
