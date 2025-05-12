@@ -69,6 +69,7 @@ public:
     void SkipCurrentAction();
     
 	GKActor* GetEgo() const { return mEgo; }
+    void SetEgo(const std::string& actorName);
 
     BSPActor* GetHitTestObjectByModelName(const std::string& modelName) const;
 	GKObject* GetSceneObjectByModelName(const std::string& modelName) const;

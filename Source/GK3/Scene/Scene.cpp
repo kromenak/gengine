@@ -682,6 +682,15 @@ void Scene::SkipCurrentAction()
     }
 }
 
+void Scene::SetEgo(const std::string& actorName)
+{
+    GKActor* actor = GetActorByNoun(actorName);
+    if(actor != nullptr)
+    {
+        mEgo = actor;
+    }
+}
+
 BSPActor* Scene::GetHitTestObjectByModelName(const std::string& modelName) const
 {
     for(auto& object : mHitTestActors)

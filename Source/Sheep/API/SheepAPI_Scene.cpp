@@ -33,6 +33,14 @@ shpvoid SetScene(const std::string& sceneName)
     return 0;
 }
 RegFunc1(SetScene, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid SetEgo(const std::string& actorName)
+{
+    gSceneManager.GetScene()->SetEgo(actorName);
+    return 0;
+}
+RegFunc1(SetEgo, void, string, IMMEDIATE, REL_FUNC);
+
 int IsCurrentEgo(const std::string& actorName)
 {
     const std::string& egoName = Scene::GetEgoName();
