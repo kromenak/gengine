@@ -13,10 +13,10 @@
 #include "Matrix4.h"
 #include "Quaternion.h"
 #include "Submesh.h"
+#include "Vector2.h"
 #include "Vector3.h"
 
 class Ray;
-struct RaycastHit;
 
 class Mesh
 {
@@ -40,8 +40,8 @@ public:
 	int GetSubmeshCount() const { return static_cast<int>(mSubmeshes.size()); }
 	
 	const std::vector<Submesh*>& GetSubmeshes() const { return mSubmeshes; }
-	
-	bool Raycast(const Ray& ray, float& outRayT);
+
+	bool Raycast(const Ray& ray, float& outRayT, int& outSubmeshIndex, Vector2& outUV);
 	
 private:
     // A mesh is really just a container for one or more submeshes.

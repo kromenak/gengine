@@ -38,11 +38,12 @@ public:
 	unsigned int GetVertexCount() const { return mVertexArray.GetVertexCount(); }
 	Vector3 GetVertexPosition(int index) const;
     Vector3 GetVertexNormal(int index) const;
+    Vector2 GetVertexUV(int index) const;
 	
 	int GetTriangleCount() const;
 	bool GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) const;
-	
-	bool Raycast(const Ray& ray, float& outRayT);
+    
+	bool Raycast(const Ray& ray, float& outRayT, Vector2& outUV);
     
     void SetPositions(float* positions);
     float* GetPositions() { return mPositions; }

@@ -39,7 +39,7 @@ Submesh* Mesh::AddSubmesh(const MeshDefinition& meshDefinition)
     return submesh;
 }
 
-bool Mesh::Raycast(const Ray& ray, float& outRayT)
+bool Mesh::Raycast(const Ray& ray, float& outRayT, int& outSubmeshIndex, Vector2& outUV)
 {
     // Ensure t value is at default.
     outRayT = FLT_MAX;
@@ -52,14 +52,15 @@ bool Mesh::Raycast(const Ray& ray, float& outRayT)
 		// If hit the AABB, do a per-triangle check as well for more precise detection.
 		// For example, Gabe's AABBs are pretty rough, so you can select him when clicking nowhere near him (a foot left of his arm).
 		// This isn't how the original game works, so I think they must do a per-triangle check as well.
-		for(Submesh* submesh : mSubmeshes)
+		for(int i = 0; i < mSubmeshes.size(); ++i)
 		{
             float submeshRayT = FLT_MAX;
-			if(submesh->Raycast(ray, submeshRayT))
+			if(mSubmeshes[i]->Raycast(ray, submeshRayT, outUV))
 			{
                 if(submeshRayT < outRayT)
                 {
                     outRayT = submeshRayT;
+                    outSubmeshIndex = i;
                 }
 			}
 		}

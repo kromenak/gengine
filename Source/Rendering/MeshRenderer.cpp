@@ -248,18 +248,38 @@ bool MeshRenderer::Raycast(const Ray& ray, RaycastHit& hitInfo)
 		
 		// See if the local ray intersects the local space triangles of the mesh.
         float meshRayT = FLT_MAX;
-		if(mesh->Raycast(localRay, meshRayT))
+        int submeshIndex = -1;
+        Vector2 uvCoord;
+		if(mesh->Raycast(localRay, meshRayT, submeshIndex, uvCoord))
 		{
-            // The "t" value calculated in Raycast is in mesh space, but caller probably needs it in world space.
-            // So, convert "t" back to world space before returning.
-            Vector3 hitPoint = localRay.GetPoint(meshRayT);
-            Vector3 hitPointWorldPos = meshToWorldMatrix.TransformPoint(hitPoint);
-            //Debug::DrawSphere(Sphere(hitPointWorldPos, 1.0f), Color32::Red, 1.0f);
+            bool wasAHit = true;
 
-            float worldT = (ray.origin - hitPointWorldPos).GetLength();
-            if(worldT < hitInfo.t)
+            // The ray definitely hit a submesh of this mesh.
+            // However, we should still ignore the hit IF it hit a transparent pixel on the submesh.
+            // For example, if a mesh is a water surface with a leaf on it, the leaf blocks the ray, but other see-through pixels would not.
+            int materialIndex = Math::Min(submeshIndex, mMaterials.size() - 1);
+            Material& material = mMaterials[materialIndex];
+            Texture* texture = material.GetDiffuseTexture();
+            if(texture != nullptr && texture->GetRenderType() != Texture::RenderType::Opaque)
             {
-                hitInfo.t = worldT;
+                Vector2 pixelPos(uvCoord.x * texture->GetWidth(), uvCoord.y * texture->GetHeight());
+                Color32 color = texture->GetPixelColor32(pixelPos.x, pixelPos.y);
+                wasAHit = (color.a > 0);
+            }
+
+            if(wasAHit)
+            {
+                // The "t" value calculated in Raycast is in mesh space, but caller probably needs it in world space.
+                // So, convert "t" back to world space before returning.
+                Vector3 hitPoint = localRay.GetPoint(meshRayT);
+                Vector3 hitPointWorldPos = meshToWorldMatrix.TransformPoint(hitPoint);
+                //Debug::DrawSphere(Sphere(hitPointWorldPos, 1.0f), Color32::Red, 1.0f);
+
+                float worldT = (ray.origin - hitPointWorldPos).GetLength();
+                if(worldT < hitInfo.t)
+                {
+                    hitInfo.t = worldT;
+                }
             }
 		}
 	}

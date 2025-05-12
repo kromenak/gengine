@@ -81,6 +81,15 @@ Vector3 Submesh::GetVertexNormal(int index) const
     return Vector3(mNormals[offset], mNormals[offset + 1], mNormals[offset + 2]);
 }
 
+Vector2 Submesh::GetVertexUV(int index) const
+{
+    if(mUV1 == nullptr) { return Vector2::Zero; }
+    if(index < 0 || index >= mVertexArray.GetVertexCount()) { return Vector2::Zero; }
+
+    int offset = index * 2;
+    return Vector2(mUV1[offset], mUV1[offset + 1]);
+}
+
 int Submesh::GetTriangleCount() const
 {
 	if(mRenderMode == RenderMode::Triangles)
@@ -112,7 +121,7 @@ bool Submesh::GetTriangle(int index, Vector3& p0, Vector3& p1, Vector3& p2) cons
 	return false;
 }
 
-bool Submesh::Raycast(const Ray& ray, float& outRayT)
+bool Submesh::Raycast(const Ray& ray, float& outRayT, Vector2& outUV)
 {
     // Ensure out value is at default.
     outRayT = FLT_MAX;
@@ -146,11 +155,40 @@ bool Submesh::Raycast(const Ray& ray, float& outRayT)
         }
 	
         float t = FLT_MAX;
-		if(Intersect::TestRayTriangle(ray, vert1, vert2, vert3, t))
+        float u = 0.0f;
+        float v = 0.0f;
+		if(Intersect::TestRayTriangle(ray, vert1, vert2, vert3, t, u, v))
 		{
             if(t < outRayT)
             {
                 outRayT = t;
+
+                // The calling code sometimes needs to know the UV coordinate where the ray hit.
+                // First, get the three UVs that correspond to these three triangle vertices.
+                //TODO: There is similar code to this here, in skybox, and in BSP. Probably they can be consolidated!
+                Vector2 uv0;
+                Vector2 uv1;
+                Vector2 uv2;
+                if(mIndexes != nullptr)
+                {
+                    uv0 = GetVertexUV(mIndexes[i]);
+                    uv1 = GetVertexUV(mIndexes[i + 1]);
+                    uv2 = GetVertexUV(mIndexes[i + 2]);
+                }
+                else
+                {
+                    uv0 = GetVertexUV(i);
+                    uv1 = GetVertexUV(i + 1);
+                    uv2 = GetVertexUV(i + 2);
+                }
+
+                // Calculate the point UV.
+                //TODO: This math doesn't totally make sense to me, and I think it needs more scrutinizing.
+                //TODO: Why do u/v/w not correlate to uv0/uv1/uv2 here? Why do we need to negate and flop the UVs?
+                Vector2 pointUV = uv1 * u + uv2 * v + uv0 * (1.0f - u - v);
+                pointUV.y *= -1.0f;
+                pointUV.y = 1.0f - pointUV.y;
+                outUV = pointUV;
             }
 		}
 	}
