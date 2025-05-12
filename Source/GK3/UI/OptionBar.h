@@ -41,6 +41,7 @@ private:
 
     UIButton* mInventoryButton = nullptr;
     UIButton* mHintButton = nullptr;
+    UIButton* mRadioButton = nullptr;
     UIButton* mCamerasButton = nullptr;
     UIButton* mCinematicsOffButton = nullptr;
     UIButton* mCinematicsOnButton = nullptr;
@@ -93,6 +94,9 @@ private:
     void CreateGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
     void CreateAdvancedGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
     void CreateGameOptionsSection(std::unordered_map<std::string, IniKeyValue>& config);
+
+    void OnRadioButtonPressed();
+    void RefreshRadioButtonState();
 
     void OnCinematicsButtonPressed(UIButton* button);
     void RefreshCinematicsButtonState();

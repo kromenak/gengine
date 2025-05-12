@@ -10,6 +10,7 @@
 #include "GK3UI.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
+#include "LocationManager.h"
 #include "Renderer.h"
 #include "TextAsset.h"
 #include "UIButton.h"
@@ -76,6 +77,7 @@ void OptionBar::Show()
                                             gGameProgress.GetMaxScore()));
 
     // Make sure any immediately visible buttons reflect the correct state.
+    RefreshRadioButtonState();
     RefreshCinematicsButtonState();
 
     // Position option bar over mouse.
@@ -339,6 +341,12 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     mHintButton = CreateButton(config, "hint", optionBar);
     mHintButton->SetPressCallback([](UIButton* button) {
         std::cout << "Hint!" << std::endl;
+    });
+
+    // Add radio button.
+    mRadioButton = CreateButton(config, "radio", optionBar);
+    mRadioButton->SetPressCallback([this](UIButton* button){
+        OnRadioButtonPressed();
     });
 
     // Add camera button.
@@ -731,6 +739,18 @@ void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyV
     controlsButton->SetPressCallback([](UIButton* button) {
         std::cout << "Controls" << std::endl;
     });
+}
+
+void OptionBar::OnRadioButtonPressed()
+{
+    Hide();
+    std::string sheepScript = StringUtil::Format("wait CallSheep(\"%s\", \"RadioButton$\")", gLocationManager.GetLocation().c_str());
+    gActionManager.ExecuteSheepAction(sheepScript);
+}
+
+void OptionBar::RefreshRadioButtonState()
+{
+    mRadioButton->SetEnabled(gGameProgress.GetTimeblock() == Timeblock(3, 21));
 }
 
 void OptionBar::OnCinematicsButtonPressed(UIButton* button)
