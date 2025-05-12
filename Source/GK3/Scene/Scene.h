@@ -84,11 +84,12 @@ public:
 	void SetSceneModelVisibility(const std::string& modelName, bool visible);
 	bool IsSceneModelVisible(const std::string& modelName) const;
 	bool DoesSceneModelExist(const std::string& modelName) const;
+
+    void SetFixedModelLighting(const std::string& modelName, const Color32& color);
     
     void SetPaused(bool paused);
 
     void InspectActiveObject(std::function<void()> finishCallback);
-    GKObject* GetActiveObject() { return mActiveObject; }
     void InspectObject(const std::string& noun, std::function<void()> finishCallback);
     void UninspectObject(std::function<void()> finishCallback);
 

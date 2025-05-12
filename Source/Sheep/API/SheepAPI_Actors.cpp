@@ -436,3 +436,12 @@ shpvoid LookitModelX(std::string actorName, std::string modelName, int mesh,
 
 //LookitCancel
 */
+
+shpvoid SetModelLighting(const std::string& modelName, float ambientRange, int red, int green, int blue)
+{
+    // The "ambient range" argument is possibly not needed for non-software renderers.
+    // The docs say "this is only needed because the software model shader cannot shade smoothly so this prevents models from looking angular and robotic."
+    gSceneManager.GetScene()->SetFixedModelLighting(modelName, Color32(red, green, blue));
+    return 0;
+}
+RegFunc5(SetModelLighting, void, string, float, int, int, int, IMMEDIATE, REL_FUNC);

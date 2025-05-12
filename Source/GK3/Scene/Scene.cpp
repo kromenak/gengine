@@ -803,6 +803,15 @@ bool Scene::DoesSceneModelExist(const std::string& modelName) const
 	return GetBSP()->Exists(modelName);
 }
 
+void Scene::SetFixedModelLighting(const std::string& modelName, const Color32& color)
+{
+    GKObject* object = GetSceneObjectByModelName(modelName);
+    if(object != nullptr)
+    {
+        object->SetFixedLightingColor(color);
+    }
+}
+
 void Scene::SetPaused(bool paused)
 {
     mPaused = paused;

@@ -84,13 +84,14 @@ shpvoid LookitLock(const std::string& actorName, const std::string& componentsSp
 shpvoid LookitUnlock(const std::string& actorName, const std::string& componentsSpec);
 
 // MODELS
-shpvoid SetModelShadowTexture(std::string modelName, std::string textureName);
-shpvoid ClearModelShadowTexture(std::string modelName);
-shpvoid DumpModel(std::string modelName); // DEV
+shpvoid SetModelLighting(const std::string& modelName, float ambientRange, int red, int green, int blue);
+shpvoid SetModelShadowTexture(const std::string& modelName, const std::string& textureName);
+shpvoid ClearModelShadowTexture(const std::string& modelName);
+shpvoid DumpModel(const std::string& modelName); // DEV
 
 // PROPS
-shpvoid SetPropGas(std::string modelName, std::string gasName);
-shpvoid ClearPropGas(std::string modelName);
+shpvoid SetPropGas(const std::string& modelName, const std::string& gasName);
+shpvoid ClearPropGas(const std::string& modelName);
 
-shpvoid StartPropFidget(std::string modelName);
-shpvoid StopPropFidget(std::string modelName);
+shpvoid StartPropFidget(const std::string& modelName);
+shpvoid StopPropFidget(const std::string& modelName);
