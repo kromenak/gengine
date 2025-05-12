@@ -9,6 +9,7 @@
 
 shpvoid ReEnter(); // DEV, WAIT
 shpvoid CallSceneFunction(const std::string& parameter); // WAIT
+shpvoid SetScene(const std::string& sceneName);
 
 // EGO
 shpvoid SetEgo(const std::string& actorName);

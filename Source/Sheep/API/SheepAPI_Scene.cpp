@@ -11,6 +11,7 @@
 #include "SceneManager.h"
 #include "SceneData.h"
 #include "SceneFunctions.h"
+#include "SceneGeometryData.h"
 #include "StringUtil.h"
 #include "WalkerBoundary.h"
 
@@ -23,6 +24,15 @@ shpvoid CallSceneFunction(const std::string& parameter)
 }
 RegFunc1(CallSceneFunction, void, string, WAITABLE, REL_FUNC);
 
+shpvoid SetScene(const std::string& sceneName)
+{
+    SceneGeometryData geometryData;
+    geometryData.Load(sceneName);
+    geometryData.GetBSP()->SetFloorObjectName(gSceneManager.GetScene()->GetSceneData()->GetFloorModelName());
+    gSceneManager.GetScene()->SetOverrideBSP(geometryData.GetBSP());
+    return 0;
+}
+RegFunc1(SetScene, void, string, IMMEDIATE, REL_FUNC);
 int IsCurrentEgo(const std::string& actorName)
 {
     const std::string& egoName = Scene::GetEgoName();
