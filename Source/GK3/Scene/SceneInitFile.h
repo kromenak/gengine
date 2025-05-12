@@ -14,6 +14,7 @@
 
 #include <vector>
 
+#include "Color32.h"
 #include "Heading.h"
 #include "Quaternion.h"
 #include "Rect.h"
@@ -198,6 +199,10 @@ struct SceneModel
     
     // If true, the model is hidden at creation.
     bool hidden = false;
+
+    // If set, this model uses "fixed" lighting - just use this color directly.
+    // All other scene or global lighting is ignored.
+    Color32 fixedLightingColor = Color32::Magenta;
 };
 
 struct SceneConversation

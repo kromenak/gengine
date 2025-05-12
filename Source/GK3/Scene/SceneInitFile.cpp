@@ -658,6 +658,17 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                 {
                     model.gas = gAssetManager.LoadGAS(keyValue.value);
                 }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "fullColor"))
+                {
+                    // In this instance, the color is specified as a 3D vector. So, parse and convert to color.
+                    Vector3 colorVec = keyValue.GetValueAsVector3();
+                    model.fixedLightingColor = Color32(static_cast<int>(colorVec.x), static_cast<int>(colorVec.y), static_cast<int>(colorVec.z));
+                }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "ambientrange"))
+                {
+                    //TODO: This might not be needed at all, as it seems to only be used in the software renderer in the original game?
+                    //model.ambient = keyValue.GetValueAsFloat();
+                }
 			}
             
             // After parsing all the data, if this is a prop, load the model.

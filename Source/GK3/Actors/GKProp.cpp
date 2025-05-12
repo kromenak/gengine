@@ -54,6 +54,12 @@ GKProp::GKProp(const SceneModel& modelDef) : GKProp(modelDef.model)
 
     // If it should be hidden by default, hide it.
     SetActive(!modelDef.hidden);
+
+    // If a fixed lighting color was specified, set it right away.
+    if(modelDef.fixedLightingColor != Color32::Magenta)
+    {
+        SetFixedLightingColor(modelDef.fixedLightingColor);
+    }
 }
 
 void GKProp::Init(const SceneData& sceneData)
@@ -62,7 +68,12 @@ void GKProp::Init(const SceneData& sceneData)
     for(Material& material : mMeshRenderer->GetMaterials())
     {
         material.SetVector4("uLightPos", Vector4(sceneData.GetGlobalLightPosition(), 1.0f));
-        material.SetColor("uAmbientColor", Color32(126, 126, 126, 0));
+
+        // Only set ambient light color if not already set (due to fixed lighting color applied in constructor).
+        if(material.GetColor("uAmbientColor") == nullptr)
+        {
+            material.SetColor("uAmbientColor", Color32(126, 126, 126));
+        }
     }
 }
 

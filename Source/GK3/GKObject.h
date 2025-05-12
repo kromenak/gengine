@@ -12,6 +12,7 @@
 #include "AABB.h"
 #include "Heading.h"
 
+class Color32;
 class MeshRenderer;
 class VertexAnimation;
 struct VertexAnimParams;
@@ -41,6 +42,7 @@ public:
     virtual void SampleAnimation(VertexAnimParams& animParams, int frame) { }
     virtual void StopAnimation(VertexAnimation* anim = nullptr) { }
     virtual MeshRenderer* GetMeshRenderer() const { return nullptr;  }
+    void SetFixedLightingColor(const Color32& color);
 
     virtual AABB GetAABB() { return AABB::FromCenterAndSize(GetPosition(), Vector3::One); }
 
