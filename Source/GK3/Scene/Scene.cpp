@@ -31,6 +31,7 @@
 #include "SoundtrackPlayer.h"
 #include "StatusOverlay.h"
 #include "StringUtil.h"
+#include "VideoPlayer.h"
 #include "Walker.h"
 #include "WalkerBoundary.h"
 
@@ -668,6 +669,12 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 
 void Scene::SkipCurrentAction()
 {
+    if(gVideoPlayer.IsPlaying())
+    {
+        gVideoPlayer.Stop();
+        return;
+    }
+
     // If an action is playing, this should skip the action.
     if(gActionManager.IsActionPlaying() && !gActionManager.IsSkippingCurrentAction())
     {
