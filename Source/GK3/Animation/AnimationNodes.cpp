@@ -183,15 +183,26 @@ void ModelTextureAnimNode::Play(AnimationState* animState)
 	{
 		// Grab the material used to render this meshIndex/submeshIndex pair.
 		Material* material = obj->GetMeshRenderer()->GetMaterial(meshIndex, submeshIndex);
-		if(material != nullptr)
-		{
-			// Apply the texture to that material.
-			Texture* texture = gAssetManager.LoadSceneTexture(textureName, AssetScope::Scene);
-			if(texture != nullptr)
-			{
-				material->SetDiffuseTexture(texture);
-			}
-		}
+
+        // HACK: This *seems* quite silly, but in one case (TE4 mirror anims), the animation doesn't function correctly unless I do this.
+        // HACK: When Gabe steps on a pedestal, the mirror changes its texture. But the anim specifies submesh 0, and that isn't the right one!
+        // HACK: To get it to work, I need to say: "change submesh 0, and all subsequent submeshes, that use the same original texture."
+        // HACK: This is likely a bug in how I parse mesh materials...maybe the original game consolidates multiple submeshes to share a material in some cases? If so, all 5 submeshes of the mirror would share one material.
+        Texture* originalTexture = material->GetDiffuseTexture();
+        int currentSubmeshIndex = submeshIndex;
+        while(material != nullptr && material->GetDiffuseTexture() == originalTexture)
+        {
+            // Apply the texture to that material.
+            Texture* texture = gAssetManager.LoadSceneTexture(textureName, AssetScope::Scene);
+            if(texture != nullptr)
+            {
+                material->SetDiffuseTexture(texture);
+            }
+
+            // Iterate to next material.
+            ++currentSubmeshIndex;
+            material = obj->GetMeshRenderer()->GetMaterial(meshIndex, currentSubmeshIndex);
+        }
 	}
 }
 
