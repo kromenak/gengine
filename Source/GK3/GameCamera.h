@@ -48,6 +48,7 @@ public:
     const std::string& GetInspectNoun() const { return mInspectNoun; }
 
     GKObject* RaycastIntoScene(bool interactiveOnly);
+    Ray GetSceneRayAtMousePos();
     bool IsSceneInteractAllowed() const;
     void SetSceneInteractEnabled(bool enabled) { mSceneInteractEnabled = enabled; }
     void SetSceneActive(bool active) { mSceneActive = active; }
@@ -173,8 +174,7 @@ private:
     void SceneUpdate(float deltaTime);
     void SceneUpdateMovement(float deltaTime);
     void SceneUpdateInteract(float deltaTime);
-
-    Ray GetSceneRayAtMousePos();
+    
     GKObject* RaycastIntoScene(const Ray& ray, bool interactiveOnly);
 
     Vector3 ResolveCollisions(const Vector3& startPosition, const Vector3& moveOffset);

@@ -121,6 +121,19 @@ GKObject* GameCamera::RaycastIntoScene(bool interactiveOnly)
     return RaycastIntoScene(GetSceneRayAtMousePos(), interactiveOnly);
 }
 
+Ray GameCamera::GetSceneRayAtMousePos()
+{
+    // Get mouse position, in screen space.
+    Vector2 mousePos = gInputManager.GetMousePosition();
+
+    // Get near and far plane world points corresponding to that screen point.
+    Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
+    Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
+
+    // Create a ray extending from the near plane point towards the far plane point.
+    return Ray(worldPos, (worldPos2 - worldPos).Normalize());
+}
+
 bool GameCamera::IsSceneInteractAllowed() const
 {
     // There are various conditions under which scene interaction is disabled.
@@ -581,19 +594,6 @@ void GameCamera::SceneUpdateInteract(float deltaTime)
     {
         gSceneManager.GetScene()->Interact(ray, hovering);
     }
-}
-
-Ray GameCamera::GetSceneRayAtMousePos()
-{
-    // Get mouse position, in screen space.
-    Vector2 mousePos = gInputManager.GetMousePosition();
-
-    // Get near and far plane world points corresponding to that screen point.
-    Vector3 worldPos = mCamera->ScreenToWorldPoint(mousePos, 0.0f);
-    Vector3 worldPos2 = mCamera->ScreenToWorldPoint(mousePos, 1.0f);
-
-    // Create a ray extending from the near plane point towards the far plane point.
-    return Ray(worldPos, (worldPos2 - worldPos).Normalize());
 }
 
 GKObject* GameCamera::RaycastIntoScene(const Ray& ray, bool interactiveOnly)

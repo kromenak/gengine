@@ -6,6 +6,7 @@
 #include "GameProgress.h"
 #include "GKActor.h"
 #include "GKObject.h"
+#include "InputManager.h"
 #include "SceneManager.h"
 #include "Timers.h"
 
@@ -61,6 +62,7 @@ void Chessboard::Reset(bool swordsGlow)
     mLandedCounts[4][4] = 2;
 
     // No swords yet.
+    gGameProgress.SetGameVariable("Te1SwordCount", 0);
     mSwordCount = 0;
 }
 
@@ -106,6 +108,7 @@ void Chessboard::Landed()
         // Increment swords landed on.
         // Once we land on 16, we've got all the swords, which may finish the puzzle.
         ++mSwordCount;
+        gGameProgress.SetGameVariable("Te1SwordCount", mSwordCount);
         if(mSwordCount == kSwordTileCount)
         {
             // Sheep code checks this flag to see if the puzzle was completed.
@@ -144,6 +147,9 @@ void Chessboard::CenterEgo()
     {
         gSceneManager.GetScene()->GetEgo()->SetPosition(tile->GetPosition());
     }
+
+    // Also reset Gabe to be looking straight ahead.
+    gSceneManager.GetScene()->GetEgo()->SetHeading(Heading::FromDegrees(0.0f));
 }
 
 void Chessboard::BadLand()
@@ -161,9 +167,15 @@ void Chessboard::OnUpdate(float deltaTime)
     // That code is here (rather than directly in Scene::Interact) to avoid polluting the Scene class with scene-specific logic.
     // We want to do these updates before the player clicks on a tile, but once they do, we should stop until the action bar is gone and any subsequent action is done.
     if(gActionManager.IsActionBarShowing() || gActionManager.IsActionPlaying()) { return; }
+    gSceneManager.GetScene()->GetCamera()->SetSceneInteractEnabled(true);
 
     // Get the object hovered by the mouse cursor, if any.
-    GKObject* hoveredObject = gSceneManager.GetScene()->GetCamera()->RaycastIntoScene(false);
+    Ray ray = gSceneManager.GetScene()->GetCamera()->GetSceneRayAtMousePos();
+    SceneCastResult result = gSceneManager.GetScene()->Raycast(ray, false);
+    
+    const int kValidMoveType = 1;
+    const int kInvalidMoveType = 2;
+    GKObject* hoveredObject = result.hitObject;
     if(hoveredObject != nullptr)
     {
         // We're interested if the hovered object is one of the floor tiles.
@@ -185,8 +197,6 @@ void Chessboard::OnUpdate(float deltaTime)
             
             // Here's an easy case for the start of the puzzle:
             // If Gabe's not yet on the board, the only valid move is to the first row.
-            const int kValidMoveType = 1;
-            const int kInvalidMoveType = 2;
             if(gabeRow < 0)
             {
                 if(row == 0)
@@ -319,6 +329,32 @@ void Chessboard::OnUpdate(float deltaTime)
                 //printf("Move code %d\n", moveCode);
                 gGameProgress.SetGameVariable("Te1MoveCode", moveCode);
             }
+        }
+    }
+
+    // Handle edge case where Gabe is on the chessboard, but wants to jump off.
+    // This can be a method for the player to reset the puzzle.
+    // Player must be on the board, and must hover over the floor outside the chessboard area.
+    if(gGameProgress.GetGameVariable("Te1GabeRow") >= 0 && StringUtil::EqualsIgnoreCase(result.hitInfo.name, "te1tilefloor"))
+    {
+        // Turn off normal scene interaction so that clicking doesn't elicit the normal walk behavior.
+        gSceneManager.GetScene()->GetCamera()->SetSceneInteractEnabled(false);
+
+        // If a click is done, attempt to jump off the chessboard, back to safety.
+        if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
+        {
+            // If not in the first row, it's impossible to jump back. Set as an invalid move.
+            if(gGameProgress.GetGameVariable("Te1GabeRow") == 0)
+            {
+                gGameProgress.SetGameVariable("Te1MoveType", kValidMoveType);
+            }
+            else
+            {
+                gGameProgress.SetGameVariable("Te1MoveType", kInvalidMoveType);
+            }
+
+            // Execute the scene jump action, which will either send you to safety or illicit an "it's too far away" response.
+            gActionManager.ExecuteAction(gActionManager.GetAction("SCENE", "JUMP"));
         }
     }
 }
