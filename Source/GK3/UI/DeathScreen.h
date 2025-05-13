@@ -19,4 +19,6 @@ public:
 private:
     // This screen's layer.
     Layer mLayer;
+
+    void OnRetryButtonPressed();
 };

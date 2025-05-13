@@ -104,14 +104,6 @@ void Pendulum::OnUpdate(float deltaTime)
     UpdateGabe(deltaTime);
     UpdatePendulum(deltaTime);
     UpdatePlatforms(deltaTime);
-
-    // If waiting for retry, the top layer will be the Death Layer.
-    // When it turns back to the Scene Layer, we can call the "PostDeath$" function, which restarts scene audio.
-    if(mDeadAndWaitingForRetry && gLayerManager.IsTopLayer("SceneLayer"))
-    {
-        mDeadAndWaitingForRetry = false;
-        gActionManager.ExecuteSheepAction("wait CallSheep(\"TE3\", \"PostDeath$\")");
-    }
 }
 
 void Pendulum::UpdatePendulum(float deltaTime)
@@ -555,7 +547,6 @@ void Pendulum::ResetAtEntryway()
     // Call to Sheepscript to let them know we died and are resetting.
     // The Sheep code shows the death overlay and resets various anims.
     gActionManager.ExecuteSheepAction("wait CallSheep(\"TE3\", \"Die$\")");
-    mDeadAndWaitingForRetry = true;
 
     // Back to entryway.
     mGabeState = GabeState::InEntryway;

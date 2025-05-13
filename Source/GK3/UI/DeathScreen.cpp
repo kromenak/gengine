@@ -1,9 +1,11 @@
 #include "DeathScreen.h"
 
-#include "AudioManager.h"
+#include "ActionManager.h"
 #include "AssetManager.h"
+#include "AudioManager.h"
 #include "GK3UI.h"
 #include "GEngine.h"
+#include "LocationManager.h"
 #include "Texture.h"
 #include "UIButton.h"
 #include "UICanvas.h"
@@ -37,7 +39,7 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         retryButton->SetDownTexture(gAssetManager.LoadTexture("DS_RTRY_D.BMP"));
         retryButton->SetDisabledTexture(gAssetManager.LoadTexture("DS_RTRY_X.BMP"));
         retryButton->SetPressCallback([this](UIButton* button){
-            Hide();
+            OnRetryButtonPressed();
         });
         retryButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         retryButton->GetRectTransform()->SetAnchoredPosition(181.0f, 24.0f);
@@ -90,4 +92,14 @@ void DeathScreen::Hide()
     // Pop layer off of stack.
     gLayerManager.PopLayer(&mLayer);
     SetActive(false);
+}
+
+void DeathScreen::OnRetryButtonPressed()
+{
+    Hide();
+
+    // If a scene would like to know when the "Retry" button is pressed, they can optionally specify a function in their Sheepscript called "PostDeath$".
+    // For example, in the TE3 location, the function should be in the TE3.SHP file.
+    std::string scriptStr = StringUtil::Format("wait CallSheep(\"%s\", \"PostDeath$\")", gLocationManager.GetLocation().c_str());
+    gActionManager.ExecuteSheepAction(scriptStr);
 }
