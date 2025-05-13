@@ -50,6 +50,7 @@ void VideoPlayer::Initialize()
     Actor* videoActor = new Actor(TransformType::RectTransform);
     videoActor->GetTransform()->SetParent(mVideoCanvasActor->GetTransform());
     mVideoImage = videoActor->AddComponent<UIImage>();
+    mVideoImage->SetTexture(&Texture::Black);
     
     // Disable video UI until a movie is played.
     mVideoCanvasActor->SetActive(false);
@@ -222,6 +223,11 @@ void VideoPlayer::Play(const std::string& name, bool fullscreen, bool autoclose,
     // If we got here, movie seems to be playing ok!
     // Lock the mouse so it isn't visible and doesn't change position.
     gInputManager.LockMouse();
+
+    // Show the video canvas and set the image black to start.
+    // Doing this right away avoids a potential one-frame rendering the 3D scene before the movie starts.
+    mVideoCanvasActor->SetActive(true);
+    mVideoImage->SetTexture(&Texture::Black);
 }
 
 void VideoPlayer::Play(const std::string& name, Color32* transparentColor, UIImage* image, const std::function<void()>& callback)
