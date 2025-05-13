@@ -748,6 +748,10 @@ void Pendulum::OnGrabPendulum()
         // From here, the player must try to drop off the pendulum and land on the altar.
         gSceneManager.GetScene()->SetCameraPosition("LONG_ALTAR");
     });
+
+    // You get some points for this action!
+    // Note that, if you die and retry after this point, you still have these points. This is how the original game functioned too.
+    gGameProgress.ChangeScore("e_temple_grab_pendulum");
 }
 
 void Pendulum::OnFallToDeath()
