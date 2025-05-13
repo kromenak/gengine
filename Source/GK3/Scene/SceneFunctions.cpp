@@ -1,6 +1,7 @@
 #include "SceneFunctions.h"
 
 #include "ActionManager.h"
+#include "Bridge.h"
 #include "Chessboard.h"
 #include "DialogueManager.h"
 #include "GameProgress.h"
@@ -297,6 +298,14 @@ namespace
     }
 }
 
+namespace
+{
+    void TE5_Init()
+    {
+        new Bridge();
+    }
+}
+
 void SceneFunctions::Execute(const std::string& functionName)
 {
     // If haven't initialized the function map, do it now.
@@ -350,6 +359,9 @@ void SceneFunctions::Execute(const std::string& functionName)
 
         // TE3
         sSceneFunctions["te3-init"] = TE3_Init;
+
+        // TE5
+        sSceneFunctions["te5-init"] = TE5_Init;
         initialized = true;
     }
 
