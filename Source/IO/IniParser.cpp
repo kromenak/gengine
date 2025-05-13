@@ -20,7 +20,8 @@ namespace
         for(int i = 0; i < vectorString.length(); ++i)
         {
             // Also need to check '-' for symbol preceding negative numbers.
-            if(std::isdigit(vectorString[i]) || vectorString[i] == '-')
+            // Also also need to check for '.' symbol for shorthand like ".42"
+            if(std::isdigit(vectorString[i]) || vectorString[i] == '-' || vectorString[i] == '.')
             {
                 firstNumIndex = i;
                 break;
