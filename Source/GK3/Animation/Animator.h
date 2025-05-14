@@ -36,6 +36,9 @@ struct AnimParams
     // If true, the animation loops!
     bool loop = false;
 
+    // If true, this anim will not do any parenting, even if it would otherwise be autodetected and applied.
+    bool noParenting = false;
+
     // A callback to fire on animation finish.
     std::function<void()> finishCallback = nullptr;
 };

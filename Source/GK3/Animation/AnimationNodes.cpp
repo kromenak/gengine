@@ -58,22 +58,18 @@ void VertexAnimNode::Play(AnimationState* animState)
             // If so...we will treat that model as our parent (so, we move/rotate to match them).
             // (This feels like a HACK, but the original game also does this parenting, but the assets themselves have no flags/indicators about it.)
             // (So, they must do it in some similar way to this, unless I'm missing something?)
-            if(!absolute)
+            if(!absolute && !animState->params.noParenting)
             {
                 // e.g. Grab the "ROX" from "ROX_SPRAYANDWIPE2.ANM".
                 const std::string& animName = animState->params.animation->GetName();
-                std::size_t prefixSeparatorOffset = animName.find('_');
-                if(prefixSeparatorOffset != std::string::npos)
-                {
-                    std::string prefix = animName.substr(0, prefixSeparatorOffset);
+                std::string prefix = animName.substr(0, 3);
 
-                    // If a parent exists, and it isn't ourselves, use it!
-                    GKObject* parent = gSceneManager.GetScene()->GetSceneObjectByModelName(prefix);
-                    if(parent != nullptr && parent != obj)
-                    {
-                        params.parent = parent->GetMeshRenderer()->GetOwner();
-                        //printf("Found parent %s for %s\n", parent->GetName().c_str(), obj->GetName().c_str());
-                    }
+                // If a parent exists, and it isn't ourselves, use it!
+                GKObject* parent = gSceneManager.GetScene()->GetSceneObjectByModelName(prefix);
+                if(parent != nullptr && parent != obj)
+                {
+                    params.parent = parent->GetMeshRenderer()->GetOwner();
+                    //printf("Found parent %s for %s\n", parent->GetName().c_str(), obj->GetName().c_str());
                 }
             }
 

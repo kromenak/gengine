@@ -359,6 +359,7 @@ void Pendulum::UpdateGabe(float deltaTime)
         // To look correct, after dying on platforms, Gabe's body (and the blood splatter) continue to move with the platforms as they rotate.
         Quaternion rotQuat(Vector3::UnitY, mPlatformRotationSpeed * deltaTime);
         mGabeActor->GetMeshRenderer()->GetOwner()->GetTransform()->RotateAround(Vector3::Zero, rotQuat);
+        mGabeMicActor->GetTransform()->RotateAround(Vector3::Zero, rotQuat);
         mGabeBloodActor->GetTransform()->RotateAround(Vector3::Zero, rotQuat);
     }
 
@@ -499,8 +500,10 @@ void Pendulum::UpdateGabeInteract()
                 if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
                 {
                     // Show a short animation of Gabe jumping off the pendulum.
-                    Animation* jumpOffPendulumAnim = gAssetManager.LoadAnimation("GABJMPOFFPEN", AssetScope::Scene);
-                    gSceneManager.GetScene()->GetAnimator()->Start(jumpOffPendulumAnim, [this](){
+                    AnimParams jumpOffPendulumParams;
+                    jumpOffPendulumParams.animation = gAssetManager.LoadAnimation("GABJMPOFFPEN", AssetScope::Scene);
+                    jumpOffPendulumParams.noParenting = true;
+                    gSceneManager.GetScene()->GetAnimator()->Start(jumpOffPendulumParams, [this](){
 
                         // At the end of Gabe's jumping off anim, it should be pretty clear visually whether he would or wouldn't land on the platform.
                         // We try to match that "look" with an angle range that should allow a safe fall.
@@ -741,8 +744,10 @@ void Pendulum::OnGrabPendulum()
     UseGabePendulum();
 
     // Play the animation of Gabe jumping up onto the pendulum.
-    Animation* grabPendulumAnim = gAssetManager.LoadAnimation("GABJMPPNDULM", AssetScope::Scene);
-    gSceneManager.GetScene()->GetAnimator()->Start(grabPendulumAnim, [this](){
+    AnimParams grabPendulumParams;
+    grabPendulumParams.animation = gAssetManager.LoadAnimation("GABJMPPNDULM", AssetScope::Scene);
+    grabPendulumParams.noParenting = true;
+    gSceneManager.GetScene()->GetAnimator()->Start(grabPendulumParams, [this](){
 
         // After the anim, change to a set camera position of the altar.
         // From here, the player must try to drop off the pendulum and land on the altar.
