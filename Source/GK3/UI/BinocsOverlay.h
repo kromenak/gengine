@@ -107,14 +107,18 @@ private:
         ZoomAngles(const Vector2& min, const Vector2& max) : minAngles(min), maxAngles(max) { }
     };
     std::string_map_ci<std::string_map_ci<ZoomAngles>> mZoomAngles = {
+        // Chateau de Blanchefort
         { "CD1", {
-            { "PL3", ZoomAngles(Vector2(52.13f, 0.10f), Vector2(60.75f, 4.77f)) },
-            { "LHM", ZoomAngles(Vector2(88.44f, -1.54f), Vector2(105.63f, 13.73f)) },
-            { "MA3", ZoomAngles(Vector2(154.48f, -1.54f), Vector2(168.80f, 11.82f)) },
-            { "CSD", ZoomAngles(Vector2(90.16f, 7.05f), Vector2(96.85f, 13.73f)) }
+            { "PL3", ZoomAngles(Vector2(73.0f, 0.0f), Vector2(80.0f, 5.0f)) },      // Red Rock
+            { "LHM", ZoomAngles(Vector2(108.0f, 11.0f), Vector2(121.0f, 14.0f)) },  // L'Homme Mort
+            { "CSD", ZoomAngles(Vector2(108.0f, 2.0f), Vector2(120.0f, 11.0f)) },   // Coume Sourde
+            { "MA3", ZoomAngles(Vector2(174.0f, 1.0f), Vector2(190.0f, 7.0f)) }     // Tour Magdala
+           
         }},
+
+        // Tour Magadala
         { "MA3", {
-            { "CD1", ZoomAngles(Vector2(332.02f, -9.31f), Vector2(350.17f, 5.11f)) }
+            { "CD1", ZoomAngles(Vector2(355.0f, -5.0f), Vector2(360.0f, 0.0f)) } // Chateau de Blanchefort
         }}
     };
     

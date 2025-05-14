@@ -380,19 +380,6 @@ void BinocsOverlay::OnUpdate(float deltaTime)
         // Zoom in button is interactable if we have a location we could zoom to.
         mZoomInButton->SetCanInteract(!mCamZoomToLocCode.empty());
     }
-
-    /*
-    * Camera angle ranges (degrees) for each focus location.
-    *
-    * AT CD1:
-    *   - PL3: MinX: 52.13f, MaxX: 60.75f, MinY: 0.10f , MaxY: 4.77f
-    *   - LHM: MinX: 88.44f, MaxX: 105.63f, MinY: -1.54f, MaxY: 13.73f
-    *   - MA3: MinX: 154.48f, MaxX: 168.80f, MinY: -1.54f, MaxY: 11.82f
-    *   - CSD: MinX: 90.16f, MaxX: 96.85f, MinY: 7.05f, MaxY: 13.73f
-    *
-    * At MA3:
-    *   - CD1: MinX: 332.02f, MaxX: 350.17f, MinY: -9.31f, MaxY: 5.11f
-    */
 }
 
 void BinocsOverlay::OnZoomInButtonPressed()
