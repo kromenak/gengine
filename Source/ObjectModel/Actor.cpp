@@ -71,12 +71,9 @@ void Actor::Update(float deltaTime)
 		OnUpdate(localDeltaTime);
 		
 		// Update all components.
-		for(auto& component : mComponents)
+		for(Component* component : mComponents)
 		{
-            if(component->IsEnabled())
-            {
-                component->Update(localDeltaTime);
-            }
+            component->Update(localDeltaTime);
 		}
 		
         // If enabled, render axes at actor position.
@@ -85,6 +82,24 @@ void Actor::Update(float deltaTime)
 			Debug::DrawAxes(mTransform->GetLocalToWorldMatrix());
 		}
 	}
+}
+
+void Actor::LateUpdate(float deltaTime)
+{
+    if(IsActive() && mUpdateEnabled)
+    {
+        // Calculate actor's local delta time, based on time scale.
+        float localDeltaTime = deltaTime * mTimeScale;
+
+        // Do my own update (subclasses can override).
+        OnLateUpdate(localDeltaTime);
+
+        // Update all components.
+        for(Component* component : mComponents)
+        {
+            component->LateUpdate(localDeltaTime);
+        }
+    }
 }
 
 void Actor::SetActive(bool active)

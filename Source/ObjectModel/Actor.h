@@ -38,6 +38,7 @@ public:
     virtual ~Actor();
     
 	void Update(float deltaTime);
+    void LateUpdate(float deltaTime);
     
     template<class T> T* AddComponent();
     template<class T, class... Args> T* AddComponent(Args&&... args);
@@ -91,6 +92,7 @@ protected:
 	virtual void OnInactive() { }
 	
 	virtual void OnUpdate(float deltaTime) { }
+    virtual void OnLateUpdate(float deltaTime) { }
     
 private:
     // The actor's name - meant for debugging purposes.

@@ -5,6 +5,8 @@
 #include "Loader.h"
 #include "Profiler.h"
 
+#include "VertexAnimator.h"
+
 SceneManager gSceneManager;
 
 void SceneManager::Shutdown()
@@ -36,6 +38,14 @@ void SceneManager::Update(float deltaTime)
     for(size_t i = 0; i < size; ++i)
     {
         mActors[i]->Update(deltaTime);
+    }
+
+    // Do a late update step on all actors.
+    // Why is this needed? In some cases, an Actor must update after some other actor has updated.
+    // An easy way to enable this is to do another update pass after the original update pass.
+    for(size_t i = 0; i < size; ++i)
+    {
+        mActors[i]->LateUpdate(deltaTime);
     }
 
     // Delete any destroyed actors.

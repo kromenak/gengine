@@ -90,14 +90,17 @@ void VertexAnimator::OnUpdate(float deltaTime)
 		{
 			Stop(mCurrentParams.vertexAnimation);
 		}
-
-        // Position relative to parent.
-        if(mCurrentParams.parent != nullptr)
-        {
-            GetOwner()->GetTransform()->SetPosition(mCurrentParams.parent->GetPosition());
-            GetOwner()->GetTransform()->SetRotation(mCurrentParams.parent->GetRotation());
-        }
 	}
+}
+
+void VertexAnimator::OnLateUpdate(float deltaTime)
+{
+    // Position relative to parent.
+    if(mCurrentParams.parent != nullptr)
+    {
+        GetOwner()->GetTransform()->SetPosition(mCurrentParams.parent->GetPosition());
+        GetOwner()->GetTransform()->SetRotation(mCurrentParams.parent->GetRotation());
+    }
 }
 
 void VertexAnimator::TakeSample(VertexAnimation* animation, int frame)

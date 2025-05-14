@@ -64,6 +64,7 @@ protected:
     void OnEnable() override;
     void OnDisable() override;
 	void OnUpdate(float deltaTime) override;
+    void OnLateUpdate(float deltaTime) override;
 	
 private:
 	// The mesh renderer that will be animated.

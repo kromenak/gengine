@@ -16,6 +16,7 @@ public:
     virtual ~Component() = default;
     
 	void Update(float deltaTime);
+    void LateUpdate(float deltaTime);
     
     Actor* GetOwner() const { return mOwner; }
 	
@@ -28,6 +29,7 @@ protected:
     virtual void OnEnable() { }
     virtual void OnDisable() { }
 	virtual void OnUpdate(float deltaTime) { }
+    virtual void OnLateUpdate(float deltaTime) { }
 	
 private:
 	// The component's owner.
@@ -45,4 +47,12 @@ inline void Component::Update(float deltaTime)
 	{
 		OnUpdate(deltaTime);
 	}
+}
+
+inline void Component::LateUpdate(float deltaTime)
+{
+    if(mEnabled)
+    {
+        OnLateUpdate(deltaTime);
+    }
 }
