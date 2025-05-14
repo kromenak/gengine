@@ -224,17 +224,6 @@ void Pendulum::UseGabePendulum()
     mGabeActor->SetActive(false);
     mGabeMicActor->SetActive(false);
 
-    // If Gabe grabs the pendulum on the right side, he grabs it from the back instead of the front.
-    // An easy way to make this work is to simply flip the z-scale of the pendulum actor in that case.
-    if(mPendulumState == PendulumState::InDangerZoneRight)
-    {
-        mGabePendulumActor->SetScale(Vector3(1.0f, 1.0f, -1.0f));
-    }
-    else
-    {
-        mGabePendulumActor->SetScale(Vector3::One);
-    }
-
     // Make sure pendulum is at correct rotation after swap.
     SetPendulumActorRotation(GetPendulumAngle());
 }
@@ -742,6 +731,17 @@ void Pendulum::OnGrabPendulum()
 
     // Swap to version of pendulum with Gabe holding on.
     UseGabePendulum();
+
+    // If Gabe grabs the pendulum on the right side, he grabs it from the back instead of the front.
+    // An easy way to make this work is to simply flip the z-scale of the pendulum actor in that case.
+    if(mPendulumState == PendulumState::InDangerZoneRight)
+    {
+        mGabePendulumActor->SetScale(Vector3(1.0f, 1.0f, -1.0f));
+    }
+    else
+    {
+        mGabePendulumActor->SetScale(Vector3::One);
+    }
 
     // Play the animation of Gabe jumping up onto the pendulum.
     AnimParams grabPendulumParams;
