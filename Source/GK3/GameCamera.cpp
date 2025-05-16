@@ -18,6 +18,7 @@
 #include "SceneManager.h"
 #include "Sphere.h"
 #include "StringUtil.h"
+#include "Tools.h"
 #include "Triangle.h"
 #include "VerbManager.h"
 #include "UICanvas.h"
@@ -327,11 +328,25 @@ void GameCamera::SceneUpdate(float deltaTime)
 
 void GameCamera::SceneUpdateMovement(float deltaTime)
 {
+    bool allowCameraMovement = true;
+
     // No movements are allowed during forced cinematic mode.
-    if(mForcedCinematicMode) { return; }
+    if(mForcedCinematicMode) { allowCameraMovement = false; }
 
     // Movement is not allowed during actions UNLESS cinematic camera is disabled.
     if(gActionManager.IsActionPlaying() && AreCinematicsEnabled())
+    {
+        allowCameraMovement = false;
+    }
+
+    // However, if tools are enabled, DO allow camera movement, even if otherwise not allowed.
+    if(Tools::Active())
+    {
+        allowCameraMovement = true;
+    }
+
+    // If no camera movement allowed, we can early out now.
+    if(!allowCameraMovement)
     {
         return;
     }

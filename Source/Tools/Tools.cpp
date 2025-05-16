@@ -95,6 +95,11 @@ void Tools::SetActive(bool active)
     toolsActive = active;
 }
 
+bool Tools::Active()
+{
+    return toolsActive;
+}
+
 void Tools::ProcessEvent(const SDL_Event& event)
 {
     ImGui_ImplSDL2_ProcessEvent(&event);
