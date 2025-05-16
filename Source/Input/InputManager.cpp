@@ -93,9 +93,6 @@ void InputManager::Update()
 
         mMousePosition = Vector2::Zero;
         mMousePositionDelta = Vector2::Zero;
-
-        mMouseLocked = false;
-        mLockedMousePosition = Vector2::Zero;
     }
 
     // Tools always require SDL "text input" mode to be active (or else keyboard inputs don't work in the tools).
