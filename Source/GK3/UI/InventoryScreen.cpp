@@ -21,7 +21,7 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
     mLayer.OverrideAudioState(true, true, false);
 
     // Add canvas for rendering UI elements.
-	AddComponent<UICanvas>(0);
+	AddComponent<UICanvas>(5);
 
 	// Add translucent background image that tints the scene.
 	UIImage* background = AddComponent<UIImage>();

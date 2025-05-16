@@ -349,7 +349,7 @@ void SidneySearch::Init(Actor* parent)
         resultsPanel->GetRectTransform()->SetSizeDelta(kWebpageWidth, 254.0f);
         mWebPageRoot = resultsPanel->GetOwner();
         
-        mWebPageWidgetsCanvas = UIUtil::NewUIActorWithCanvas(resultsPanel->GetOwner(), -1);
+        mWebPageWidgetsCanvas = UIUtil::NewUIActorWithCanvas(resultsPanel->GetOwner(), 1);
         mWebPageWidgetsCanvas->SetMasked(true);
         mWebPageWidgetsCanvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
         mWebPageWidgetsCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);

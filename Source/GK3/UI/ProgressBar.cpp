@@ -13,7 +13,7 @@ ProgressBar::ProgressBar() : Actor(TransformType::RectTransform),
     mLayer.OverrideAudioState(true);
 
     // Order should be pretty high, since this displays over almost everything.
-    const int kCanvasOrder = 10;
+    const int kCanvasOrder = 50;
     UIUtil::AddCanvas(this, kCanvasOrder);
 
     // The background of the UI consists of a fullscreen clickable button area.

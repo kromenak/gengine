@@ -14,7 +14,7 @@
 
 SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& name) : Actor(name, TransformType::RectTransform)
 {
-    AddComponent<UICanvas>(1);
+    AddComponent<UICanvas>(2);
     GetTransform()->SetParent(parent->GetTransform());
 
     // The size is consistent in all use-cases in the game.

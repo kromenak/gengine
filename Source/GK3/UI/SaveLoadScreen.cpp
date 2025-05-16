@@ -39,7 +39,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
     mLoadLayer.OverrideAudioState(true, true, false);
 
     // Needs a high canvas order so it appears above the in-game options bar.
-    UIUtil::AddColorCanvas(this, 10, Color32::Black);
+    UIUtil::AddColorCanvas(this, 21, Color32::Black);
 
     // Add load/save background image.
     UIImage* background = UIUtil::NewUIActorWithWidget<UIImage>(this);

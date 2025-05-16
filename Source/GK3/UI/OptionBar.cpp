@@ -33,7 +33,7 @@ OptionBar::OptionBar() : Actor("OptionBar", TransformType::RectTransform)
     std::unordered_map<std::string, IniKeyValue> optionBarConfig = parser.ParseAllAsMap();
 
     // Create canvas, to contain the UI components.
-    AddComponent<UICanvas>(6);
+    AddComponent<UICanvas>(11);
 
     // Canvas rect fills the entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();

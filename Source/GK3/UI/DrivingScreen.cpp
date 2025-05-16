@@ -21,7 +21,7 @@
 DrivingScreen::DrivingScreen() : Actor(TransformType::RectTransform)
 {
     // Driving screen should draw above scene transitioner so it doesn't appear on this screen.
-    AddComponent<UICanvas>(4);
+    AddComponent<UICanvas>(5);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();

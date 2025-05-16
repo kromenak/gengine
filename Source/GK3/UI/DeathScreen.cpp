@@ -18,7 +18,7 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
     mLayer.OverrideAudioState(true);
 
     // Canvas takes up the entire screen.
-    UICanvas* canvas = AddComponent<UICanvas>(1);
+    UICanvas* canvas = AddComponent<UICanvas>(20);
     canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
     canvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
 

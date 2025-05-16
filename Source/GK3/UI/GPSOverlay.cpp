@@ -39,7 +39,7 @@ GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
     }
 
     // Next, build the UI. The GPS always appears in top-left corner.
-    UICanvas* canvas = AddComponent<UICanvas>(-1);
+    UICanvas* canvas = AddComponent<UICanvas>(0);
     canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
     // Create base map image in top-left.

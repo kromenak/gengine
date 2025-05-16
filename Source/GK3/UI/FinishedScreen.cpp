@@ -8,7 +8,7 @@
 
 FinishedScreen::FinishedScreen() : Actor(TransformType::RectTransform)
 {
-    AddComponent<UICanvas>(1);
+    AddComponent<UICanvas>(20);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();

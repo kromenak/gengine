@@ -25,7 +25,7 @@
 BinocsOverlay::BinocsOverlay() : Actor("BinocsOverlay", TransformType::RectTransform)
 {
     // Add canvas to render UI elements.
-    AddComponent<UICanvas>(1);
+    AddComponent<UICanvas>(5);
 
     // Add base binocs image with cutout center.
     UIImage* baseImage = UIUtil::NewUIActorWithWidget<UIImage>(this);

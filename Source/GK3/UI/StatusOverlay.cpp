@@ -13,7 +13,7 @@
 StatusOverlay::StatusOverlay() : Actor("Status", TransformType::RectTransform)
 {
     // Needs to be a canvas so it can render stuff.
-    AddComponent<UICanvas>(2);
+    AddComponent<UICanvas>(10);
     
     // Take up full screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();

@@ -680,7 +680,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedIn.button = zoomedInMapWindow->AddComponent<UIButton>();
 
         // Put a canvas on it with masking! This allows us to move around the child map background and have it be masked outside the window area.
-        UICanvas* zoomedInMapCanvas = zoomedInMapWindow->AddComponent<UICanvas>(0);
+        UICanvas* zoomedInMapCanvas = zoomedInMapWindow->AddComponent<UICanvas>(1);
         zoomedInMapCanvas->SetMasked(true);
         zoomedInMapCanvas->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         zoomedInMapCanvas->GetRectTransform()->SetAnchoredPosition(9.0f, 73.0f);
@@ -872,7 +872,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
         mMap.zoomedOut.button = zoomedOutMapActor->AddComponent<UIButton>();
 
         // The zoomed out map also needs a masking canvas so that moved shapes don't show outside the map border.
-        UICanvas* zoomedOutMapCanvas = zoomedOutMapActor->AddComponent<UICanvas>(0);
+        UICanvas* zoomedOutMapCanvas = zoomedOutMapActor->AddComponent<UICanvas>(1);
         zoomedOutMapCanvas->SetMasked(true);
 
         // Add "the site" text.

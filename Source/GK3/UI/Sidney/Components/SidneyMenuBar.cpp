@@ -23,7 +23,7 @@ void SidneyMenuBar::Init(Actor* parent, const std::string& label, float labelWid
 
     Actor* menuBarCanvasActor = new Actor("Menu Bar", TransformType::RectTransform);
     menuBarCanvasActor->GetTransform()->SetParent(parent->GetTransform());
-    UIUtil::AddCanvas(menuBarCanvasActor, 2);
+    UIUtil::AddCanvas(menuBarCanvasActor, 3);
 
     // Bar that stretches across entire screen.
     {

@@ -38,7 +38,7 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
 {
     // Sidney will be layered near the bottom.
     // A lot of stuff needs to appear above it (inventory, status overlay, etc).
-    AddComponent<UICanvas>(-2);
+    AddComponent<UICanvas>(0);
 
     // Canvas takes up entire screen.
     RectTransform* rectTransform = GetComponent<RectTransform>();

@@ -333,8 +333,11 @@ void LocationManager::OnPersist(PersistState& ps)
 
 void LocationManager::ChangeLocationInternal(const std::string& location, std::function<void()> callback)
 {
-    // Show scene transitioner.
-    gGK3UI.ShowSceneTransitioner();
+    // Show scene transitioner (except when transitioning from the Map screen).
+    if(!StringUtil::EqualsIgnoreCase(mLocation, "map"))
+    {
+        gGK3UI.ShowSceneTransitioner();
+    }
 
     // Set new location.
     // This is important to do BEFORE checking for timeblock completion, as that logic looks for locations sometimes.

@@ -103,7 +103,7 @@ void SidneyTranslate::Init(Actor* parent, SidneyFiles* sidneyFiles)
         centerBackground->GetRectTransform()->SetAnchoredPosition(1, -18.0f);
 
         // Add scroll area.
-        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(centerBackground->GetOwner(), -1);
+        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(centerBackground->GetOwner(), 1);
         canvas->SetMasked(true);
         canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
         canvas->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);

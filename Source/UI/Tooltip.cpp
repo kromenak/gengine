@@ -31,7 +31,7 @@ Tooltip* Tooltip::Get()
 
 Tooltip::Tooltip() : Actor("Tooltip", TransformType::RectTransform)
 {
-    UICanvas* canvas = AddComponent<UICanvas>(100);
+    UICanvas* canvas = AddComponent<UICanvas>(101);
     canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
     canvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
     canvas->GetRectTransform()->SetPixelPerfect(true);
@@ -193,7 +193,9 @@ void Tooltip::OnUpdate(float deltaTime)
     {
         // An obvious case is when the hover widget's rect no longer contains the mouse pointer.
         // However, when mouse is locked, the mouse technically doesn't move, so is still in the rect...BUT the pointer is gone, so consider that "no longer hovered."
-        if(!mHoverWidget->GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition()) || gInputManager.IsMouseLocked())
+        if(!mHoverWidget->IsActiveAndEnabled() ||
+           !mHoverWidget->GetRectTransform()->GetWorldRect().Contains(gInputManager.GetMousePosition()) ||
+           gInputManager.IsMouseLocked())
         {
             Hide();
         }

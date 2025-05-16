@@ -292,7 +292,7 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
     // Add dialog background.
     {
         // Create a root actor for the dialog.
-        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(parent, 1);
+        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(parent, 2);
         mWindowRoot = canvas->GetOwner();
         mWindowRoot->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
 

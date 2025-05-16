@@ -88,7 +88,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
             background->GetRectTransform()->SetAnchoredPosition(1.0f, -62.0f);
             background->GetRectTransform()->SetSizeDelta(182.0f, 169.0f);
 
-            UICanvas* scrollCanvas = UIUtil::NewUIActorWithCanvas(window->GetOwner(), -1);
+            UICanvas* scrollCanvas = UIUtil::NewUIActorWithCanvas(window->GetOwner(), 1);
             scrollCanvas->SetMasked(true);
             scrollCanvas->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             scrollCanvas->GetRectTransform()->SetAnchoredPosition(1.0f, -62.0f);

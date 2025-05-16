@@ -188,7 +188,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
         // Create the body area.
         {
             // Create body canvas, for masking.
-            UICanvas* bodyCanvas = UIUtil::NewUIActorWithCanvas(emailWindow->GetOwner(), -1);
+            UICanvas* bodyCanvas = UIUtil::NewUIActorWithCanvas(emailWindow->GetOwner(), 1);
             bodyCanvas->SetMasked(true);
             bodyCanvas->GetRectTransform()->SetAnchor(AnchorPreset::Top);
             bodyCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, -100.0f);
@@ -271,7 +271,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
     {
         // This label appears on all subscreens, as long as you have new email.
         // So we need to put the label above other UI elements by using a different canvas.
-        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(newEmailParent, -1);
+        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(newEmailParent, 2);
         canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
         canvas->GetRectTransform()->SetAnchoredPosition(-4.0f, -3.0f);
         canvas->GetRectTransform()->SetSizeDelta(100.0f, 20.0f);

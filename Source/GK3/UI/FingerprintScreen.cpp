@@ -17,7 +17,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     mLayer("FingerprintLayer")
 {
     // Add canvas to render UI elements.
-	AddComponent<UICanvas>(1);
+	AddComponent<UICanvas>(5);
 	
 	// Add black background image that blocks out the scene entirely.
     UIImage* background = AddComponent<UIImage>();

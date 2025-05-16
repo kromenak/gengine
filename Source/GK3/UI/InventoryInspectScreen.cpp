@@ -19,7 +19,7 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
     mLayer.OverrideAudioState(true, true, false);
 
     // Add canvas to render UI elements.
-	AddComponent<UICanvas>(1);
+	AddComponent<UICanvas>(6);
 	
 	// Add black background image that blocks out the scene entirely.
     {
