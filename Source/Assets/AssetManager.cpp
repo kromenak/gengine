@@ -39,6 +39,38 @@ AssetManager gAssetManager;
 
 void AssetManager::Init()
 {
+    // Not my favorite thing, but we need to init each of these in turn.
+    // See AssetCache constructor for reasoning. Hope to fix this later!
+    mAudioCache.Init();
+    mSoundtrackCache.Init();
+    mYakCache.Init();
+
+    mModelCache.Init();
+    mTextureCache.Init();
+
+    mAnimationCache.Init();
+    mMomAnimationCache.Init();
+    mSequenceCache.Init();
+    mVertexAnimationCache.Init();
+    mGasCache.Init();
+
+    mSifCache.Init();
+    mSceneAssetCache.Init();
+    mNvcCache.Init();
+
+    mBspCache.Init();
+    mBspLightmapCache.Init();
+
+    mSheepCache.Init();
+
+    mCursorCache.Init();
+    mFontCache.Init();
+
+    mTextAssetCache.Init();
+    mConfigCache.Init();
+
+    mShaderCache.Init();
+
     // Load GK3.ini from the root directory so we can bootstrap asset search paths.
     mSearchPaths.push_back("");
     Config* config = LoadConfig("GK3.ini");

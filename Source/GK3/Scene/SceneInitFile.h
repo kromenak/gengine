@@ -237,6 +237,7 @@ struct ConditionalBlock
 
 class SceneInitFile : public Asset
 {
+    TYPEINFO_SUB(SceneInitFile, Asset);
 public:
     SceneInitFile(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 	~SceneInitFile();

@@ -44,7 +44,8 @@ struct SceneLight
 
 class SceneAsset : public Asset
 {
-public:
+    TYPEINFO_SUB(SceneAsset, Asset);
+public:   
     static void FixGK3SkyboxTextures(SkyboxTextures& skyboxTextures);
 
     SceneAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }

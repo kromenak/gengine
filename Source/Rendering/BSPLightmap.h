@@ -20,6 +20,7 @@ class Texture;
 
 class BSPLightmap : public Asset
 {
+    TYPEINFO_SUB(BSPLightmap, Asset);
 public:
     BSPLightmap(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~BSPLightmap();

@@ -7,6 +7,16 @@
 #include "StringUtil.h"
 #include "Texture.h"
 
+TYPEINFO_INIT(Font, Asset, GENERATE_TYPE_ID)
+{
+    TYPEINFO_VAR(Font, VariableType::String, mFontCharacters);
+    TYPEINFO_VAR(Font, VariableType::Asset, mFontTexture);
+    TYPEINFO_VAR(Font, VariableType::Int, mLineCount);
+    TYPEINFO_VAR(Font, VariableType::Int, mExtraCharacterSpacing);
+    TYPEINFO_VAR(Font, VariableType::Int, mExtraLineSpacing);
+    TYPEINFO_VAR(Font, VariableType::Int, mGlyphHeight);
+}
+
 void Font::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);

@@ -139,6 +139,7 @@ struct BSPAmbientLight
 
 class BSP : public Asset
 {
+    TYPEINFO_SUB(BSP, Asset);
 public:
     BSP(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     void Load(uint8_t* data, uint32_t dataLength);

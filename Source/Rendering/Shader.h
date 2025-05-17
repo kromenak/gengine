@@ -47,6 +47,7 @@ struct Uniform
 
 class Shader : public Asset
 {
+    TYPEINFO_SUB(Shader, Asset);
 public:
     Shader(const std::string& name, TextAsset* vertShaderBytes, TextAsset* fragShaderBytes);
     ~Shader();

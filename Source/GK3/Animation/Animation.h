@@ -18,6 +18,7 @@ struct VertexAnimNode;
 
 class Animation : public Asset
 {
+    TYPEINFO_SUB(Animation, Asset);
 public:
     Animation(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Animation();

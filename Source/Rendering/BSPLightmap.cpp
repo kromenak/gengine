@@ -3,6 +3,11 @@
 #include "BinaryReader.h"
 #include "Texture.h"
 
+TYPEINFO_INIT(BSPLightmap, Asset, GENERATE_TYPE_ID)
+{
+    
+}
+
 BSPLightmap::~BSPLightmap()
 {
     // This class owns the textures created in the constructor, so we must delete them.

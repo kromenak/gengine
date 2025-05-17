@@ -113,6 +113,7 @@ struct PrsNode : public SoundtrackNode
 
 class Soundtrack : public Asset
 {
+    TYPEINFO_SUB(Soundtrack, Asset);
 public:
     Soundtrack(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Soundtrack();

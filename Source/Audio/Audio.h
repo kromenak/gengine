@@ -10,6 +10,7 @@
 
 class Audio : public Asset
 {
+    TYPEINFO_SUB(Audio, Asset);
 public:
     Audio(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 	~Audio() override;

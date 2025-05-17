@@ -17,6 +17,7 @@ struct GasNode;
 
 class GAS : public Asset
 {
+    TYPEINFO_SUB(GAS, Asset);
 public:
     GAS(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~GAS();

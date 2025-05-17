@@ -5,7 +5,26 @@
 #include "Asset.h"
 #include "AssetManager.h"
 #include "InspectorUtil.h"
+
+#include "Animation.h"
+#include "Audio.h"
+#include "BSP.h"
+#include "BSPLightmap.h"
+#include "Config.h"
+#include "Cursor.h"
+#include "Font.h"
+#include "GAS.h"
+#include "Model.h"
+#include "NVC.h"
+#include "SceneAsset.h"
+#include "SceneInitFile.h"
+#include "Sequence.h"
+#include "Shader.h"
+#include "SheepScript.h"
+#include "Soundtrack.h"
+#include "TextAsset.h"
 #include "Texture.h"
+#include "VertexAnimation.h"
 
 void AssetsTool::Render(bool& toolActive)
 {
@@ -38,52 +57,27 @@ void AssetsTool::Render(bool& toolActive)
         const bool assetsAvailable = ImGui::BeginChild(ImGui::GetID("Hierarchy"), ImVec2(panelWidth, ImGui::GetContentRegionAvail().y), true, 0);
         if(assetsAvailable)
         {
-            // Use asset type as an ID.
-            ImGui::PushID("Textures");
-
-            // For all nodes, only expand the tree if you click on the arrow.
-            ImGuiTreeNodeFlags assetTypeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
-
-            // Draw the tree node.
-            bool node_open = ImGui::TreeNodeEx("Textures", assetTypeFlags, "Textures");
-
-            // If open, draw all the loaded assets of this type.
-            if(node_open)
-            {
-                for(auto& entry : gAssetManager.GetLoadedTextures())
-                {
-                    ImGui::PushID(entry.second);
-
-                    ImGuiTreeNodeFlags assetFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
-
-                    // If selected, draw as selected.
-                    if(mSelectedAsset == entry.second)
-                    {
-                        assetFlags |= ImGuiTreeNodeFlags_Selected;
-                    }
-
-                    // Draw the tree node.
-                    bool assetNodeOpen = ImGui::TreeNodeEx("Object", assetFlags, "%s", entry.second->GetName().c_str());
-
-                    // If this item is clicked (and not being toggled open with arrow), set it to selected.
-                    if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
-                    {
-                        mSelectedAsset = entry.second;
-                    }
-
-                    if(assetNodeOpen)
-                    {
-                        ImGui::TreePop();
-                    }
-
-                    // No longer drawing GUI for this asset.
-                    ImGui::PopID();
-                }
-                ImGui::TreePop();
-            }
-
-            // No longer working on this asset type.
-            ImGui::PopID();
+            AddAssetList<Animation>("ANM");
+            AddAssetList<Audio>();
+            AddAssetList<BSP>();
+            AddAssetList<BSPLightmap>();
+            AddAssetList<Config>();
+            AddAssetList<Cursor>();
+            AddAssetList<Font>();
+            AddAssetList<GAS>();
+            AddAssetList<Model>();
+            AddAssetList<Animation>("MOM");
+            AddAssetList<NVC>();
+            AddAssetList<SceneAsset>();
+            AddAssetList<SceneInitFile>();
+            AddAssetList<Sequence>();
+            AddAssetList<Shader>();
+            AddAssetList<SheepScript>();
+            AddAssetList<Soundtrack>();
+            AddAssetList<TextAsset>("");
+            AddAssetList<Texture>();
+            AddAssetList<VertexAnimation>();
+            AddAssetList<Animation>("YAK");
         }
         ImGui::EndChild();
     }
@@ -117,4 +111,74 @@ void AssetsTool::Render(bool& toolActive)
 
     // End window.
     ImGui::End();
+}
+
+template<typename T>
+void AssetsTool::AddAssetList(const std::string& id)
+{
+    // Generate an asset ID based on the asset type and extension.
+    const char* typeName = T::StaticTypeName();
+    std::string assetId = std::string(typeName) + id;
+
+    // Use asset type as an ID.
+    ImGui::PushID(assetId.c_str());
+
+     // Get list of loaded assets of this type, so we can display them in a giant tree view.
+    const std::string_map_ci<T*>* loadedAssets = gAssetManager.GetLoadedAssets<T>(id);
+    if(loadedAssets == nullptr)
+    {
+        return;
+    }
+
+    // For all nodes, only expand the tree if you click on the arrow.
+    ImGuiTreeNodeFlags assetTypeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
+    
+    // Draw the tree node.
+    bool node_open;
+    if(id.empty())
+    {
+        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s (%d)", typeName, loadedAssets->size());
+    }
+    else
+    {
+        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s %s (%d)", id.c_str(), typeName, loadedAssets->size());
+    }
+
+    // If open, draw all the loaded assets of this type.
+    if(node_open)
+    {
+        for(auto& entry : *loadedAssets)
+        {
+            ImGui::PushID(entry.second);
+
+            ImGuiTreeNodeFlags assetFlags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_Bullet;
+
+            // If selected, draw as selected.
+            if(mSelectedAsset == entry.second)
+            {
+                assetFlags |= ImGuiTreeNodeFlags_Selected;
+            }
+
+            // Draw the tree node.
+            bool assetNodeOpen = ImGui::TreeNodeEx("Object", assetFlags, "%s", entry.second->GetName().c_str());
+
+            // If this item is clicked (and not being toggled open with arrow), set it to selected.
+            if(ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+            {
+                mSelectedAsset = entry.second;
+            }
+
+            if(assetNodeOpen)
+            {
+                ImGui::TreePop();
+            }
+
+            // No longer drawing GUI for this asset.
+            ImGui::PopID();
+        }
+        ImGui::TreePop();
+    }
+
+    // No longer working on this asset type.
+    ImGui::PopID();
 }

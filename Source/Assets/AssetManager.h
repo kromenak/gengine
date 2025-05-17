@@ -10,6 +10,7 @@
 #include <vector>
 
 #include "Asset.h"
+#include "AssetCache.h"
 #include "BarnFile.h"
 #include "StringUtil.h"
 
@@ -102,6 +103,9 @@ public:
     // Unloading Assets
     void UnloadAssets(AssetScope scope);
 
+    // Querying Assets
+    template<typename T> const std::string_map_ci<T*>* GetLoadedAssets(const std::string& id = "");
+
 private:
     // A list of paths to search for assets.
     // In priority order, since we'll search in order, and stop when we find the item.
@@ -116,67 +120,15 @@ private:
     BarnSearchPriority mHighestBarnSearchPriority = BarnSearchPriority::Low;
 
     // A list of loaded assets, so we can just return existing assets if already loaded.
-    template<typename T>
-    struct AssetCache
-    {
-        std::string_map_ci<T*> cache;
-
-        // A mutex is required since we allow loading assets on any thread.
-        // We don't want multiple threads modifying the cache at the same time.
-        std::mutex mutex;
-
-        T* Get(const std::string& name)
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            auto it = cache.find(name);
-            return it != cache.end() ? it->second : nullptr;
-        }
-
-        void Set(const std::string& name, T* asset)
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            cache[name] = asset;
-        }
-
-        void Unload(AssetScope scope = AssetScope::Global)
-        {
-            std::lock_guard<std::mutex> lock(mutex);
-            if(scope == AssetScope::Global)
-            {
-                // When unloading at global scope, we're really deleting everything and clearing the entire cache.
-                for(auto& entry : cache)
-                {
-                    delete entry.second;
-                }
-                cache.clear();
-            }
-            else
-            {
-                // Otherwise, we are picking and choosing what we want to get rid of.
-                for(auto it = cache.begin(); it != cache.end();)
-                {
-                    if((*it).second->GetScope() == scope)
-                    {
-                        delete (*it).second;
-                        it = cache.erase(it);
-                    }
-                    else
-                    {
-                        ++it;
-                    }
-                }
-            }
-        }
-    };
     AssetCache<Audio> mAudioCache;
     AssetCache<Soundtrack> mSoundtrackCache;
-    AssetCache<Animation> mYakCache;
+    AssetCache<Animation> mYakCache { "yak" };
 
     AssetCache<Model> mModelCache;
     AssetCache<Texture> mTextureCache;
 
-    AssetCache<Animation> mAnimationCache;
-    AssetCache<Animation> mMomAnimationCache;
+    AssetCache<Animation> mAnimationCache { "anm" };
+    AssetCache<Animation> mMomAnimationCache { "mom" };
     AssetCache<Sequence> mSequenceCache;
     AssetCache<VertexAnimation> mVertexAnimationCache;
     AssetCache<GAS> mGasCache;
@@ -218,3 +170,18 @@ private:
 };
 
 extern AssetManager gAssetManager;
+
+template<typename T>
+const std::string_map_ci<T*>* AssetManager::GetLoadedAssets(const std::string& id)
+{
+    AssetCacheBase* baseAssetCache = AssetCacheBase::GetAssetCache(T::StaticTypeId(), id);
+    if(baseAssetCache != nullptr)
+    {
+        AssetCache<T>* assetCache = dynamic_cast<AssetCache<T>*>(baseAssetCache);
+        if(assetCache != nullptr)
+        {
+            return &assetCache->cache;
+        }
+    }
+    return nullptr;
+}

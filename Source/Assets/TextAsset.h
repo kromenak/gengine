@@ -9,6 +9,7 @@
 
 class TextAsset : public Asset
 {
+    TYPEINFO_SUB(TextAsset, Asset);
 public:
     TextAsset(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~TextAsset() override;

@@ -33,6 +33,7 @@ struct Glyph
 
 class Font : public Asset
 {
+    TYPEINFO_SUB(Font, Asset);
 public:
     Font(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     void Load(uint8_t* data, uint32_t dataLength);

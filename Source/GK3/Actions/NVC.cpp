@@ -4,6 +4,11 @@
 #include "SheepManager.h"
 #include "Timeblock.h"
 
+TYPEINFO_INIT(NVC, Asset, GENERATE_TYPE_ID)
+{
+    
+}
+
 void NVC::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);

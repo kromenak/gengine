@@ -27,6 +27,11 @@ void SceneAsset::FixGK3SkyboxTextures(SkyboxTextures& textures)
     }
 }
 
+TYPEINFO_INIT(SceneAsset, Asset, GENERATE_TYPE_ID)
+{
+    TYPEINFO_VAR(SceneAsset, VariableType::String, mBspName);
+}
+
 SceneAsset::~SceneAsset()
 {
 	delete mSkybox;

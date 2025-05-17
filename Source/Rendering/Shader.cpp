@@ -3,7 +3,12 @@
 #include "GAPI.h"
 #include "TextAsset.h"
 
-Shader::Shader(const std::string& name, TextAsset* vertShaderBytes, TextAsset* fragShaderBytes) : Asset(name)
+TYPEINFO_INIT(Shader, Asset, GENERATE_TYPE_ID)
+{
+
+}
+
+Shader::Shader(const std::string& name, TextAsset* vertShaderBytes, TextAsset* fragShaderBytes) : Asset(name, AssetScope::Manual)
 {
     mShaderHandle = GAPI::Get()->CreateShader(vertShaderBytes->GetText(),
                                               fragShaderBytes->GetText());

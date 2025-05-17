@@ -10,6 +10,12 @@
 #include "StringUtil.h"
 #include "VertexAnimation.h"
 
+TYPEINFO_INIT(Animation, Asset, GENERATE_TYPE_ID)
+{
+    TYPEINFO_VAR(Animation, VariableType::Int, mFrameCount);
+    TYPEINFO_VAR(Animation, VariableType::Int, mFramesPerSecond);
+}
+
 Animation::~Animation()
 {
     // Be sure to delete dynamically allocated memory.

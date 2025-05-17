@@ -6,6 +6,11 @@
 #include "AudioManager.h"
 #include "BinaryReader.h"
 
+TYPEINFO_INIT(Audio, Asset, GENERATE_TYPE_ID)
+{
+    
+}
+
 Audio::~Audio()
 {
 	delete[] mDataBuffer;

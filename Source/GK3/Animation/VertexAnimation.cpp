@@ -81,6 +81,13 @@ void VertexAnimationPose::GetForTime(float time, int framesPerSecond, VertexAnim
     }
 }
 
+
+TYPEINFO_INIT(VertexAnimation, Asset, GENERATE_TYPE_ID)
+{
+    TYPEINFO_VAR(VertexAnimation, VariableType::Int, mFrameCount);
+    TYPEINFO_VAR(VertexAnimation, VariableType::String, mModelName);
+}
+
 VertexAnimation::~VertexAnimation()
 {
     for(auto& outerEntry : mVertexPoses)

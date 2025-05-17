@@ -3,6 +3,11 @@
 #include "StringUtil.h"
 #include "TextWriter.h"
 
+TYPEINFO_INIT(Config, Asset, GENERATE_TYPE_ID)
+{
+
+}
+
 void Config::Load(uint8_t* data, uint32_t dataLength)
 {
     // Read in each section and store it.

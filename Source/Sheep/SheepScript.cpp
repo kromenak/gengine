@@ -10,6 +10,11 @@
 #include "SheepScriptBuilder.h"
 #include "StringUtil.h"
 
+TYPEINFO_INIT(SheepScript, Asset, GENERATE_TYPE_ID)
+{
+    
+}
+
 /*static*/ bool SheepScript::IsSheepDataCompiled(uint8_t* data, uint32_t dataLength)
 {
     // If the first 8 bytes of the data is GK3Sheep, we'll assume this is valid compiled Sheepscript data.
@@ -17,7 +22,7 @@
     return dataLength >= 8 && memcmp(data, "GK3Sheep", 8) == 0;
 }
 
-SheepScript::SheepScript(const std::string& name, SheepScriptBuilder& builder) : Asset(name)
+SheepScript::SheepScript(const std::string& name, SheepScriptBuilder& builder) : Asset(name, AssetScope::Manual)
 {
     Load(builder);
 }

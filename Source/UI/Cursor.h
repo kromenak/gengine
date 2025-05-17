@@ -12,6 +12,7 @@ struct SDL_Cursor;
 
 class Cursor : public Asset
 {
+    TYPEINFO_SUB(Cursor, Asset);
 public:
     Cursor(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Cursor();

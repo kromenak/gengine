@@ -93,6 +93,11 @@ void GeneralBlock::TakeOverridesFrom(const GeneralBlock& other)
 	}
 }
 
+TYPEINFO_INIT(SceneInitFile, Asset, GENERATE_TYPE_ID)
+{
+    
+}
+
 SceneInitFile::~SceneInitFile()
 {
 	//TODO: delete any block conditions - we own them after compiling!

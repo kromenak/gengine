@@ -19,6 +19,7 @@ class SheepScriptBuilder;
 
 class SheepScript : public Asset
 {
+    TYPEINFO_SUB(SheepScript, Asset);
 public:
     static bool IsSheepDataCompiled(uint8_t* data, uint32_t dataLength);
 

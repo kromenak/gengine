@@ -20,6 +20,7 @@ class Mesh;
 
 class Model : public Asset
 {
+    TYPEINFO_SUB(Model, Asset);
 public:
     Model(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~Model();

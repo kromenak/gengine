@@ -92,6 +92,11 @@ int PrsNode::Execute(Soundtrack* soundtrack, SoundtrackNodeResults& outResults)
     return soundNodes[randomIndex]->Execute(soundtrack, outResults);
 }
 
+TYPEINFO_INIT(Soundtrack, Asset, GENERATE_TYPE_ID)
+{
+
+}
+
 Soundtrack::~Soundtrack()
 {
     // Delete dynamically allocated nodes.

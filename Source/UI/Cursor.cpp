@@ -7,6 +7,12 @@
 #include "StringUtil.h"
 #include "Texture.h"
 
+TYPEINFO_INIT(Cursor, Asset, GENERATE_TYPE_ID)
+{
+    TYPEINFO_VAR(Cursor, VariableType::Bool, mAnimate);
+    TYPEINFO_VAR(Cursor, VariableType::Int, mFramesPerSecond);
+}
+
 Cursor::~Cursor()
 {
     for(auto& frame : mCursorFrames)

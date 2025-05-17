@@ -6,6 +6,11 @@
 #include "IniParser.h"
 #include "StringUtil.h"
 
+TYPEINFO_INIT(Sequence, Asset, GENERATE_TYPE_ID)
+{
+    TYPEINFO_VAR(Sequence, VariableType::Int, mFramesPerSecond);
+}
+
 void Sequence::Load(uint8_t* data, uint32_t dataLength)
 {
     IniParser parser(data, dataLength);

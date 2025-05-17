@@ -20,6 +20,11 @@
 #define DEBUG_SUBMESH_OUTPUT
 #endif
 
+TYPEINFO_INIT(Model, Asset, GENERATE_TYPE_ID)
+{
+    TYPEINFO_VAR(Model, VariableType::Bool, mBillboard);
+}
+
 Model::~Model()
 {
     for(auto& mesh : mMeshes)

@@ -9,7 +9,7 @@
 #include "PNGCodec.h"
 #include "ThreadUtil.h"
 
-TYPEINFO_INIT(Texture, Asset, 101)
+TYPEINFO_INIT(Texture, Asset, GENERATE_TYPE_ID)
 {
     TYPEINFO_VAR(Texture, VariableType::Int, mWidth);
     TYPEINFO_VAR(Texture, VariableType::Int, mHeight);
@@ -19,7 +19,7 @@ TYPEINFO_INIT(Texture, Asset, 101)
 Texture Texture::White(1, 1, Color32::White);
 Texture Texture::Black(1, 1, Color32::Black);
 
-Texture::Texture(uint32_t width, uint32_t height) : Asset(""),
+Texture::Texture(uint32_t width, uint32_t height) : Asset("", AssetScope::Manual),
     mWidth(width),
     mHeight(height)
 {
@@ -28,7 +28,7 @@ Texture::Texture(uint32_t width, uint32_t height) : Asset(""),
     mPixels = new uint8_t[pixelsSize];
 }
 
-Texture::Texture(uint32_t width, uint32_t height, Color32 color) : Asset(""),
+Texture::Texture(uint32_t width, uint32_t height, Color32 color) : Asset("", AssetScope::Manual),
 	mWidth(width),
 	mHeight(height)
 {
@@ -46,7 +46,7 @@ Texture::Texture(uint32_t width, uint32_t height, Color32 color) : Asset(""),
 	}
 }
 
-Texture::Texture(BinaryReader& reader) : Asset("")
+Texture::Texture(BinaryReader& reader) : Asset("", AssetScope::Manual)
 {
     ParseFromData(reader);
 }

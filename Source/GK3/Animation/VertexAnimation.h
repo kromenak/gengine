@@ -36,6 +36,7 @@ struct VertexAnimationTransformPose : public VertexAnimationPose
 
 class VertexAnimation : public Asset
 {
+    TYPEINFO_SUB(VertexAnimation, Asset);
 public:
     VertexAnimation(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     ~VertexAnimation();

@@ -23,6 +23,7 @@ class Texture;
 
 class Sequence : public Asset
 {
+    TYPEINFO_SUB(Sequence, Asset);
 public:
     Sequence(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     void Load(uint8_t* data, uint32_t dataLength);

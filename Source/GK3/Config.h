@@ -16,6 +16,7 @@
 
 class Config : public Asset
 {
+    TYPEINFO_SUB(Config, Asset);
 public:
     Config(const std::string& name, AssetScope scope) : Asset(name, scope) { }
     void Load(uint8_t* data, uint32_t dataLength);

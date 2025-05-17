@@ -16,6 +16,11 @@
 #include "StringTokenizer.h"
 #include "StringUtil.h"
 
+TYPEINFO_INIT(GAS, Asset, GENERATE_TYPE_ID)
+{
+    
+}
+
 GAS::~GAS()
 {
     for(auto& node : mNodes)

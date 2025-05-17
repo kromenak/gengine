@@ -56,6 +56,11 @@ void BSPSurface::Activate(const Material& material)
     material.GetShader()->SetUniformVector4("uLightmapScaleOffset", lightmapUvScaleOffset);
 }
 
+TYPEINFO_INIT(BSP, Asset, GENERATE_TYPE_ID)
+{
+
+}
+
 void BSP::Load(uint8_t* data, uint32_t dataLength)
 {
     ParseFromData(data, dataLength);

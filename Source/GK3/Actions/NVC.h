@@ -83,6 +83,7 @@ struct Action
 
 class NVC : public Asset
 {
+    TYPEINFO_SUB(NVC, Asset);
 public:
     NVC(const std::string& name, AssetScope scope) : Asset(name, scope) { }
 
