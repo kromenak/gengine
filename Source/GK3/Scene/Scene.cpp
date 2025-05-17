@@ -236,9 +236,20 @@ void Scene::Load()
 
 void Scene::Unload()
 {
+    // On scene unload (or maybe de-init?), stop all soundtracks that were defined in the scene data.
+    // A "force" flag is used here to indicate that any soundtrack that started on scene init should stop here, even if stop mode is "PlayToEnd".
+    // This is required in at least one spot (KITCHEN soundtrack) - not sure if that was intentional on the original developers' part.
+    const std::vector<Soundtrack*>& soundtracks = mSceneData->GetSoundtracks();
+    for(auto& soundtrack : soundtracks)
+    {
+        mSoundtrackPlayer->Stop(soundtrack, true);
+    }
+
+    // Clear scene assets used in renderer/
 	gRenderer.SetBSP(nullptr);
 	gRenderer.SetSkybox(nullptr);
 
+    // We're done with the scene data.
 	delete mSceneData;
 	mSceneData = nullptr;
 }

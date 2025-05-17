@@ -54,7 +54,7 @@ public:
     ~SoundtrackPlayer();
     
     void Play(Soundtrack* soundtrack);
-    void Stop(Soundtrack* soundtrack);
+    void Stop(Soundtrack* soundtrack, bool force = false);
     void Stop(const std::string& soundtrackName);
     void StopAll(bool force = false);
 	

@@ -108,7 +108,12 @@ SoundtrackPlayer::SoundtrackPlayer(Actor* owner) : Component(owner)
 
 SoundtrackPlayer::~SoundtrackPlayer()
 {
-    StopAll(true);
+    // When a soundtrack player is destructed, all its playing soundtracks should stop.
+    // This causes audio to either end immediately or fade out.
+    // 
+    // For sounds with a stop mode of "PlayToEnd", they WILL actually continue to play - that's expected!
+    // Any "PlayToEnd" sound that should be stopped when the player is destroyed should have Stop explicitly called with the force flag set.
+    StopAll();
 }
 
 void SoundtrackPlayer::Play(Soundtrack* soundtrack)
@@ -129,7 +134,7 @@ void SoundtrackPlayer::Play(Soundtrack* soundtrack)
     mPlaying.back().Play();
 }
 
-void SoundtrackPlayer::Stop(Soundtrack* soundtrack)
+void SoundtrackPlayer::Stop(Soundtrack* soundtrack, bool force)
 {
     if(soundtrack == nullptr) { return; }
 
@@ -140,7 +145,7 @@ void SoundtrackPlayer::Stop(Soundtrack* soundtrack)
         {
             // Stop the soundtrack.
             // How the audio stops depends on the "Stop Method" of the current soundtrack node.
-            it->Stop();
+            it->Stop(force);
 
             // Erase from list.
             mPlaying.erase(it);
