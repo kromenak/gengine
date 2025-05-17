@@ -779,14 +779,45 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                 // Custom Logic - action type, and then alphabetical order
                 // 1ST_TIME / 2CD_TIME / 3RD_TIME
                 int caseScore = 0;
-                if(StringUtil::EqualsIgnoreCase(entry.first, "ALL"))
+                auto caseLogicIt = mCaseLogic.find(entry.first);
+                if(caseLogicIt != mCaseLogic.end())
+                {
+                    // Custom case logic is only overridden by 1st/2nd/3rd time cases.
+                    caseScore = 7;
+
+                    //TODO: This logic doesn't seem entirely accurate - for example, it doesn't work correctly with GABE_ALL_INV vs. IN_SIDNEY_ADD_DATA.
+                    //TODO: Added custom logic above to deal with that, but...we may need to revise this!
+
+                    // If we already encountered a valid custom case, AND this custom case is also valid, we have a tie.
+                    // Each action has a type - more specific types (e.g. timeblock vs global) win out.
+                    //
+                    // But what if we have two valid custom actions, same type?
+                    // Incredibly, the game seems to just do an alphabetical check at that point!
+                    // The action that is farther in the alphabet gets chosen. This was verified by testing  GABE_ALL_INV vs. IN_SIDNEY_ADD_DATA in INV_ALL.NVC
+                    if(action != nullptr && highestScore == 7)
+                    {
+                        if(entry.second->type > action->type)
+                        {
+                            action = entry.second;
+                        }
+                        else if(entry.second->type == action->type)
+                        {
+                            // If this new case comes SECOND alphabetically, we'll use the new action instead.
+                            std::string prevCase = StringUtil::ToLowerCopy(action->caseLabel);
+                            std::string newCase = StringUtil::ToLowerCopy(entry.first);
+                            if(strcmp(prevCase.c_str(), newCase.c_str()) < 0)
+                            {
+                                action = entry.second;
+                            }
+                        }
+                    }
+                }
+                else if(StringUtil::EqualsIgnoreCase(entry.first, "ALL"))
                 {
                     caseScore = 1;
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.first, "GABE_ALL") ||
-                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL") ||
-                        StringUtil::EqualsIgnoreCase(entry.first, "GABE_ALL_INV") ||
-                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL_INV"))
+                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL"))
                 {
                     caseScore = 2;
                 }
@@ -794,8 +825,7 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                 {
                     caseScore = 3;
                 }
-                else if(StringUtil::EqualsIgnoreCase(entry.first, "OTR_TIME") ||
-                        StringUtil::ContainsIgnoreCase(entry.first, "_OTR")) // Custom logic with _OTR also get this priority.
+                else if(StringUtil::EqualsIgnoreCase(entry.first, "OTR_TIME"))
                 {
                     caseScore = 4;
                 }
@@ -814,37 +844,9 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                 {
                     caseScore = 8;
                 }
-                else // This must be custom case logic.
+                else
                 {
-                    // Custom case logic is only overridden by 1st/2nd/3rd time cases.
-                    caseScore = 7;
-
-                    //TODO: This logic doesn't seem entirely accurate - for example, it doesn't work correctly with GABE_ALL_INV vs. IN_SIDNEY_ADD_DATA.
-                    //TODO: Added custom logic above to deal with that, but...we may need to revise this!
-
-                    // If we already encountered a valid custom case, AND this case is also valid, we have a tie.
-                    // First, a new action that is from a more specific action type would win out.
-                    // If they have the same type, then we just do an alphabetical tie.
-                    
-                    // If we've already encountered a valid custom case before, AND this custom case is also valid, ties are handled alphabetically.
-                    // This seems strange to me, but then again, you've got to handle a tie somehow I guess?
-                    if(action != nullptr && highestScore == 7)
-                    {
-                        if(entry.second->type > action->type)
-                        {
-                            action = entry.second;
-                        }
-                        else if(entry.second->type == action->type)
-                        {
-                            // If this new case comes first alphabetically, we'll use the new action instead.
-                            std::string prevCase = StringUtil::ToLowerCopy(action->caseLabel);
-                            std::string newCase = StringUtil::ToLowerCopy(entry.first);
-                            if(strcmp(newCase.c_str(), prevCase.c_str()) < 0)
-                            {
-                                action = entry.second;
-                            }
-                        }
-                    }
+                    printf("Unaccounted for case label %s!\n", entry.first.c_str());
                 }
 
                 // If we found a case with a higher score, we'll use that instead.
