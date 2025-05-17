@@ -22,7 +22,7 @@ struct GasNode
     // Chance that this node will execute. 0 = no chance, 100 = definitely
     int random = 100;
 
-    virtual ~GasNode() { }
+    virtual ~GasNode() = default;
     virtual float Execute(GasPlayer* player) = 0;
 };
 
