@@ -531,7 +531,8 @@ bool SidneyAnagramParser::RefreshSelectedAndAvailableWords()
         std::string letters = mRemainingLetters;
         for(int j = 0; j < wordEndIndex; ++j)
         {
-            size_t index = letters.find(std::toupper(labelText[j]));
+            char upperChar = static_cast<char>(std::toupper(labelText[j]));
+            size_t index = letters.find(upperChar);
             if(index != std::string::npos)
             {
                 // If one of the word's letters list, remove it as used.

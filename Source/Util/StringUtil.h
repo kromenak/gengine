@@ -214,7 +214,7 @@ namespace StringUtil
 
         // I believe if we only search from the beginning up to the size of the search string, it'll only
         // return a result IF the string starts with the search string.
-        auto searchEndIt = str.begin() + startsWith.size();
+        auto searchEndIt = str.begin() + static_cast<int>(startsWith.size());
         return std::search(str.begin(), searchEndIt, startsWith.begin(), startsWith.end(), iequal()) != searchEndIt;
     }
 
@@ -251,8 +251,8 @@ namespace StringUtil
     inline size_t FindIgnoreCase(const std::string& str, const std::string& toFind, size_t pos = 0)
     {
         if(str.size() - pos < toFind.size()) { return std::string::npos; }
-        auto it = std::search(str.begin() + pos, str.end(), toFind.begin(), toFind.end(), iequal());
-        if(it != str.end()) { return it - str.begin(); }
+        auto it = std::search(str.begin() + static_cast<int>(pos), str.end(), toFind.begin(), toFind.end(), iequal());
+        if(it != str.end()) { return static_cast<size_t>(it - str.begin()); }
         return std::string::npos;
     }
 
@@ -280,7 +280,12 @@ namespace StringUtil
 		// Calling snprintf with nullptr & 0 buff_size let's you determine the expected size of the result.
 		// Per: https://en.cppreference.com/w/cpp/io/c/fprintf
 		// +1 for the \0 null terminator.
-		size_t size = snprintf(nullptr, 0, format, args ...) + 1;
+        int res = snprintf(nullptr, 0, format, args ...) + 1;
+        if(res < 0)
+        {
+            return std::string();
+        }
+        size_t size = static_cast<size_t>(res);
 
 		// Allocate a buffer to hold the formatted text.
 		// Using unique_ptr for auto-delete on return or exception.

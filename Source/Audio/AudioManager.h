@@ -192,10 +192,10 @@ private:
     // Volume multipliers for each audio type. This changes the range of possible volumes for a particular type of audio.
     // For example, if 0.8 is used, it means that "max volume" for that audio type is actually 80% of the "true max".
     // This is just helpful for achieving a good sounding mix. In particular, music tends to overpower SFX/VO, so compensate for that.
-    const float kSFXVolumeMultiplier = 1.0f;
-    const float kVOVolumeMultiplier = 1.0f;
-    const float kAmbientVolumeMultiplier = 1.0f;
-    const float kMusicVolumeMultiplier = 0.6f;
+    static constexpr float kSFXVolumeMultiplier = 1.0f;
+    static constexpr float kVOVolumeMultiplier = 1.0f;
+    static constexpr float kAmbientVolumeMultiplier = 1.0f;
+    static constexpr float kMusicVolumeMultiplier = 0.6f;
 
     // Default min/max distances for 3D sound volumes.
     // If calling code doesn't provide specific min/max 3D dists, we'll use these.

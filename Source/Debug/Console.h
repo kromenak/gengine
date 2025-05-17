@@ -27,7 +27,7 @@ public:
 
 private:
 	// Max scrollback lines we will store.
-	const uint32_t kMaxScrollbackLength = 1000;
+	static const uint32_t kMaxScrollbackLength = 1000;
 
 	// The scrollback buffer. Split into individual lines.
     // Newest items are at the end of the list.

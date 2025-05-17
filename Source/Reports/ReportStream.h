@@ -60,11 +60,11 @@ ENUM_CLASS_FLAGS(ReportContent);
 class ReportStream
 {
 public:
-	ReportStream(std::string name);
+    ReportStream() = default;
+	ReportStream(const std::string& name);
 	
-	ReportStream() = default;
 	//ReportStream(const ReportStream& other) = default;
-	ReportStream(ReportStream&& other) = default;
+	//ReportStream(ReportStream&& other) = default;
 	//ReportStream& operator=(const ReportStream& other) = default;
 	
 	void Log(std::string content);
@@ -115,9 +115,6 @@ private:
 	//std::string mBuffer;
 	//int mBlockLevel = 0;
 	//bool mReporting = false;
-	
-	// If a file is used as output, the output file stream.
-	std::ofstream mFileOut;
 	
 	std::string BuildOutputString(const std::string& content);
 };

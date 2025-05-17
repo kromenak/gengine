@@ -12,7 +12,8 @@ class Scene;
 class SceneLayer : public Layer
 {
 public:
-    SceneLayer(Scene* scene);
+    SceneLayer();
+    void SetScene(Scene* scene) { mScene = scene; }
     
 protected:
     void OnEnter(Layer* fromLayer) override;

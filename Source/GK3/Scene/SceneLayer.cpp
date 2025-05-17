@@ -4,8 +4,7 @@
 #include "SoundtrackPlayer.h"
 #include "StringUtil.h"
 
-SceneLayer::SceneLayer(Scene* scene) : Layer("SceneLayer"),
-    mScene(scene)
+SceneLayer::SceneLayer() : Layer("SceneLayer")
 {
     
 }

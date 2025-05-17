@@ -10,7 +10,7 @@
 #include "LocationManager.h"
 #include "SystemUtil.h"
 
-ReportStream::ReportStream(std::string name) :
+ReportStream::ReportStream(const std::string& name) :
 	mName(name),
 	mFilename(name + ".log")
 {

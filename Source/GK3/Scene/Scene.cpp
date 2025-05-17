@@ -56,10 +56,11 @@ std::string Scene::mEgoName;
 }
 
 Scene::Scene(const std::string& name) :
-	mLocation(name),
-	mTimeblock(gGameProgress.GetTimeblock()),
-    mLayer(this)
+    mLocation(name),
+    mTimeblock(gGameProgress.GetTimeblock())
 {
+    mLayer.SetScene(this);
+
 	// Create game camera.
 	mCamera = new GameCamera();
 

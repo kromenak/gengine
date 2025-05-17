@@ -185,7 +185,7 @@ void SidneyMenuBar::AddDropdownChoice(const std::string& label, const std::funct
 
 void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& label, const std::function<void()>& pressCallback)
 {
-    assert(dropdownIndex >= 0 && dropdownIndex < mDropdowns.size());
+    assert(dropdownIndex < mDropdowns.size());
     Dropdown& dropdown = mDropdowns[dropdownIndex];
 
     // Create button with desired text.

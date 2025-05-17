@@ -123,30 +123,33 @@ if(MSVC)
     target_compile_options(gk3 PRIVATE /Wall # Enable ALL warnings...
         # But disable some.
         /wd4005 # macro redefinition
-        /wd4061 # unhandled case in switch with default
+        /wd4061 # unhandled case in switch with default (triggered by fmod)
         /wd4065 # switch contains default and no cases
         /wd4100 # unreferenced formal parameter
-        /wd4191 # unsafe conversion (used by imgui)
-        /wd4242 # type conversion may result in loss of data
+        /wd4127 # conditional expression is constant (triggered by Flex/Bison)
+        /wd4191 # unsafe conversion (triggered by imgui)
+        /wd4242 /wd4244 # type conversion may result in loss of data (triggered by everything)
         /wd4263 /wd4264 # virtual function in base class has same name & different signature
-        /wd4355 # 'this' used in base member init list
-        /wd4365 # signed/unsigned mismatch
-        /wd4505 # unreferenced function with internal linkage
+        /wd4296 # expression is always false (triggered by Flex/Bison)
+        /wd4355 # 'this' used in base member init list (triggered by imgui)
+        /wd4365 /wd4018 /wd4389 /wd4245 # signed/unsigned mismatch
+        /wd4505 # unreferenced function with internal linkage (library code sometimes does this)
         /wd4514 # unused function
-        /wd4611 # use of _setjmp
+        /wd4611 # use of _setjmp (used by libpng)
         /wd4625 # copy constructor implicitly deleted
         /wd4626 # assignment operator implicitly deleted
         /wd4668 # preprocessor macro not defined
         /wd4710 # function was not inlined
         /wd4711 # function was automatically inlined
-        /wd4774 # snprintf format not literal (this might be good to fix)
+        /wd4774 # snprintf format not literal (the only spot this occurs seems tricky to fix)
         /wd4820 # padding added
         /wd5026 # move constructor implicitly deleted
         /wd5027 # move assignment operator implicitly deleted
-        /wd5039 # pointer to potentially throwing extern c function
-        /wd5045 # Spectre mitigation
-        /wd5219 # implicit conversion from x to y
+        /wd5039 # pointer to potentially throwing extern c function (triggered by fmod)
+        /wd5045 # warns when scenario when Spectre mitigation would be applied to code if /QSpectre flag is set
+        /wd5219 # implicit conversion from x to y (triggered by everything)
         /wd5245 # unreferenced function with internal linkage has been removed
+        /wd5267 # implicit copy constructor is deprecated with user-provided destructor
     )
 else() # GCC/Clang
     target_compile_options(gk3 PRIVATE -Wall -Wextra # Enable ALL warnings...
