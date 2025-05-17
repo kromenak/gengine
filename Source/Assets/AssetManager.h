@@ -148,7 +148,6 @@ private:
     AssetCache<TextAsset> mTextAssetCache;
     AssetCache<Config> mConfigCache;
 
-    AssetCache<TextAsset> mShaderFileCache;
     AssetCache<Shader> mShaderCache;
 
 	// Retrieve a barn bundle by name, or by contained asset.

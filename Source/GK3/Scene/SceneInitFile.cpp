@@ -571,15 +571,15 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "idle"))
                 {
-                    actor.idleGas = gAssetManager.LoadGAS(keyValue.value);
+                    actor.idleGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "talk"))
                 {
-                    actor.talkGas = gAssetManager.LoadGAS(keyValue.value);
+                    actor.talkGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "listen"))
                 {
-                    actor.listenGas = gAssetManager.LoadGAS(keyValue.value);
+                    actor.listenGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "initAnim"))
                 {
@@ -661,7 +661,7 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "gas"))
                 {
-                    model.gas = gAssetManager.LoadGAS(keyValue.value);
+                    model.gas = gAssetManager.LoadGAS(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "fullColor"))
                 {
@@ -811,11 +811,11 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "talk"))
                 {
-                    convo.talkGas = gAssetManager.LoadGAS(keyValue.value);
+                    convo.talkGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "listen"))
                 {
-                    convo.listenGas = gAssetManager.LoadGAS(keyValue.value);
+                    convo.listenGas = gAssetManager.LoadGAS(keyValue.value, GetScope());
                 }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "enter"))
                 {

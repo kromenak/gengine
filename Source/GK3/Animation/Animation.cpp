@@ -58,8 +58,6 @@ VertexAnimNode* Animation::GetVertexAnimationOnFrameForModel(int frameNumber, co
 
 void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
 {
-    bool isYak = Path::HasExtension(GetName(), ".yak");
-
     IniParser parser(data, dataLength);
     IniSection section;
     while(parser.ReadNextSection(section))
@@ -297,14 +295,7 @@ void Animation::ParseFromData(uint8_t* data, uint32_t dataLength)
 				// Create node.
 				SoundAnimNode* node = new SoundAnimNode();
 				node->frameNumber = frameNumber;
-                if(isYak)
-                {
-                    node->audio = gAssetManager.LoadAudio(soundName, AssetScope::Scene);
-                }
-                else
-                {
-                    node->audio = gAssetManager.LoadAudio(soundName);
-                }
+                node->audio = gAssetManager.LoadAudio(soundName, GetScope());
 				node->volume = volume;
 
                 // Remaining arguments are optional.

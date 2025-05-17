@@ -240,7 +240,7 @@ void FaceController::DoExpression(const std::string& expression)
 	// Expressions are named as combination of identifier and expression string.
 	// E.g. Gabriel Frown becomes GABFROWN.ANM.
 	std::string animName = mCharacterConfig->faceConfig->identifier + expression;
-	Animation* animation = gAssetManager.LoadAnimation(animName);
+	Animation* animation = gAssetManager.LoadAnimation(animName, AssetScope::Scene);
 	if(animation != nullptr)
 	{
 		gSceneManager.GetScene()->GetAnimator()->Start(animation);
@@ -259,8 +259,8 @@ void FaceController::SetMood(const std::string& mood)
 	std::string moodOffName = mCharacterConfig->faceConfig->identifier + mood + "off";
 	
 	// Make sure mood animations exist.
-	Animation* enterAnimation = gAssetManager.LoadAnimation(moodOnName);
-	Animation* exitAnimation = gAssetManager.LoadAnimation(moodOffName);
+	Animation* enterAnimation = gAssetManager.LoadAnimation(moodOnName, AssetScope::Scene);
+	Animation* exitAnimation = gAssetManager.LoadAnimation(moodOffName, AssetScope::Scene);
 	if(enterAnimation == nullptr || exitAnimation == nullptr)
 	{
 		//TODO: Log error?

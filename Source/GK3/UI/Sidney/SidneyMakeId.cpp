@@ -340,7 +340,7 @@ void SidneyMakeId::PrintId()
                     gActionManager.ExecuteSheepAction(vo);
 
                     // Play a print SFX.
-                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDPRINTID.WAV"));
+                    gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDPRINTID.WAV", AssetScope::Scene));
 
                     // Grant the inventory item.
                     gInventoryManager.AddInventoryItem(invItemName);

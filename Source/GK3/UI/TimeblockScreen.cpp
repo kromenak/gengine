@@ -122,7 +122,7 @@ void TimeblockScreen::Show(const Timeblock& timeblock, float timer, std::functio
     }
 
     // Load sequence containing animation.
-    mAnimSequence = gAssetManager.LoadSequence("D" + timeblockString);
+    mAnimSequence = gAssetManager.LoadSequence("D" + timeblockString, AssetScope::Scene);
     mTextImage->SetEnabled(mAnimSequence != nullptr);
     mAnimTimer = 0.0f;
 

@@ -392,7 +392,7 @@ void FaceTexAnimNode::Play(AnimationState* animState)
 	if(actor != nullptr)
 	{
 		// In this case, the texture name is what it is.
-		Texture* texture = gAssetManager.LoadTexture(textureName);
+		Texture* texture = gAssetManager.LoadTexture(textureName, animState->params.animation->GetScope());
 		if(texture != nullptr)
 		{
 			actor->GetFaceController()->Set(faceElement, texture);
@@ -427,7 +427,7 @@ void LipSyncAnimNode::Play(AnimationState* animState)
 	if(actor != nullptr)
 	{
 		// The mouth texture name is based on the current face config for the character.
-		Texture* mouthTexture = gAssetManager.LoadTexture(actor->GetConfig()->faceConfig->identifier + "_" + mouthTextureName);
+		Texture* mouthTexture = gAssetManager.LoadTexture(actor->GetConfig()->faceConfig->identifier + "_" + mouthTextureName, animState->params.animation->GetScope());
 		if(mouthTexture != nullptr)
 		{
 			actor->GetFaceController()->SetMouth(mouthTexture);

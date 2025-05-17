@@ -16,9 +16,8 @@ LocationManager gLocationManager;
 
 void LocationManager::Init()
 {
-	TextAsset* textFile = gAssetManager.LoadText("Locations.txt");
-	
 	// Parse as INI file.
+    TextAsset* textFile = gAssetManager.LoadText("Locations.txt", AssetScope::Manual);
 	IniParser parser(textFile->GetText(), textFile->GetTextLength());
 	parser.ParseAll();
 	
@@ -28,6 +27,7 @@ void LocationManager::Init()
 		IniKeyValue& entry = line.entries.front();
 		mLocCodeShortToLocCodeLong[entry.key] = entry.value;
     }
+    delete textFile;
     
     //TEMP: Kind of handy to read in all BSPs at once - to test unknown values and such.
     /*

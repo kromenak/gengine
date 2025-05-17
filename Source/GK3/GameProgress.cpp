@@ -19,7 +19,7 @@ GameProgress gGameProgress;
 void GameProgress::Init()
 {
     // Parse valid score events (and score amount) into map of score events.
-    TextAsset* textFile = gAssetManager.LoadText("Scores.txt");
+    TextAsset* textFile = gAssetManager.LoadText("Scores.txt", AssetScope::Manual);
     IniParser parser(textFile->GetText(), textFile->GetTextLength());
     IniSection section;
     while(parser.ReadNextSection(section))
@@ -33,6 +33,7 @@ void GameProgress::Init()
             }
         }
     }
+    delete textFile;
 
     // Load max score from config file.
     Config* config = gAssetManager.LoadConfig("GAME.CFG");

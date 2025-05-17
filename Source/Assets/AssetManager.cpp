@@ -389,11 +389,15 @@ Shader* AssetManager::LoadShader(const std::string& vertName, const std::string&
 
     // Ok, we have to actually load this shader...
     // Load the vertex and fragment shader files from the disk.
-    TextAsset* vertShader = LoadAsset<TextAsset>(vertName + ".vert", AssetScope::Global, &mShaderFileCache, false);
-    TextAsset* fragShader = LoadAsset<TextAsset>(fragName + ".frag", AssetScope::Global, &mShaderFileCache, false);
+    TextAsset* vertShader = LoadAsset<TextAsset>(vertName + ".vert", AssetScope::Manual, nullptr, false);
+    TextAsset* fragShader = LoadAsset<TextAsset>(fragName + ".frag", AssetScope::Manual, nullptr, false);
 
     // Create the shader from the text assets.
     Shader* shader = new Shader(shaderName, vertShader, fragShader);
+
+    // Text assets are no longer needed.
+    delete vertShader;
+    delete fragShader;
 
 	// Cache and return.
     mShaderCache.Set(shaderName, shader);
