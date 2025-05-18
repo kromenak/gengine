@@ -64,7 +64,7 @@ public:
     const std::vector<SaveSummary>& GetSaves();
 
     void Save(const std::string& saveDescription, int saveIndex = -1);
-    void Load(const std::string& loadPath);
+    void Load(const std::string& loadPathOrDescription);
     void HandlePendingSavesAndLoads();
 
 private:

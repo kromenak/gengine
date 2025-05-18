@@ -70,9 +70,20 @@ void SaveManager::Save(const std::string& saveDescription, int saveIndex)
     mPendingSaveIndex = saveIndex;
 }
 
-void SaveManager::Load(const std::string& loadPath)
+void SaveManager::Load(const std::string& loadPathOrDescription)
 {
-    mPendingLoadPath = loadPath;
+    // Allow specifying a save to load via user description.
+    for(SaveSummary& save : mSaves)
+    {
+        if(StringUtil::EqualsIgnoreCase(save.saveInfo.userDescription, loadPathOrDescription))
+        {
+            mPendingLoadPath = save.filePath;
+            return;
+        }
+    }
+
+    // Worst case, assume the passed in string is the path of a save to load.
+    mPendingLoadPath = loadPathOrDescription;
 }
 
 void SaveManager::HandlePendingSavesAndLoads()
