@@ -119,6 +119,16 @@ void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const
         mExitRegionCallback = nullptr;
         callback();
     }
+
+    // If already not in region, we don't have anything to do.
+    if(mWalkerBoundary == nullptr || mWalkerBoundary->GetRegionIndex(GetOwner()->GetPosition()) != regionIndex)
+    {
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        return;
+    }
     
     // Save exit region and callback.
     mExitRegionIndex = regionIndex;
