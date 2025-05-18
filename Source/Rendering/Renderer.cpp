@@ -242,7 +242,7 @@ void Renderer::Render()
     Matrix4 viewMatrix;
 	if(mCamera != nullptr)
 	{
-        PROFILER_BEGIN_SAMPLE("Renderer Generate Matrices")
+        PROFILER_BEGIN_SAMPLE("Renderer Generate Matrices");
         {
             // We'll need the projection and view matrix for the camera a few times below.
             projectionMatrix = mCamera->GetProjectionMatrix();
@@ -268,7 +268,7 @@ void Renderer::Render()
         }
         PROFILER_END_SAMPLE();
 
-        PROFILER_BEGIN_SAMPLE("Render Opaque World Geometry")
+        PROFILER_BEGIN_SAMPLE("Render Opaque World Geometry");
         {
             // All opaque rendering uses alpha test and culls back faces.
             Material::UseAlphaTest(true);
@@ -299,7 +299,7 @@ void Renderer::Render()
         }
         PROFILER_END_SAMPLE();
 
-        PROFILER_BEGIN_SAMPLE("Render Translucent World Geometry")
+        PROFILER_BEGIN_SAMPLE("Render Translucent World Geometry");
         {
             // For translucent rendering, we don't use alpha test.
             // We also don't want to cull polygons.

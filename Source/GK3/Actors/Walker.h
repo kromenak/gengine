@@ -137,7 +137,7 @@ private:
     bool IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const;
     
     void CalculatePath(const Vector3& startPos, const Vector3& endPos);
-    bool CalculateShortenedPath();
+    bool SkipPathNodesOutsideFrustum();
     void RemoveExcessPathNodes();
     bool AdvancePath();
     
