@@ -323,83 +323,98 @@ int WalkerBoundary::GetRegionForTexturePos(const Vector2& texturePos) const
     return mTexture->GetPaletteIndex(texturePos.x, texturePos.y);
 }
 
-bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const
+namespace
 {
+    // The nodes used to track state during pathfinding search.
     struct Node
     {
-        Vector2 value;
-        Node* parent = nullptr;
+        // Index (in nodes list) of parent of this node.
+        size_t parentIndex = 0;
+
+        // Is this node closed/explored in the current search?
         bool closed = false;
     };
+    std::vector<Node> nodes;
 
-    // Create set of nodes for searching.
-    // Since a lot of texture pixels are unwalkable (in most cases), this does waste a bit of memory.
-    // But it works fine (for the moment). Perhaps it can be optimized by allocating the memory one time rather than each time this function is called.
-    int width = mTexture->GetWidth();
-    int height = mTexture->GetHeight();
-    int nodeCount = width * height;
+    // The open set when doing a pathfinding search.
+    // Each element is an index into the nodes array.
+    ResizableQueue<size_t> openSet;
+}
 
-    Node* nodes = new Node[nodeCount];
-    for(int y = 0; y < height; ++y)
+bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const
+{
+    // Figure out how many nodes we need for the current walker boundary texture.
+    uint32_t width = mTexture->GetWidth();
+    uint32_t height = mTexture->GetHeight();
+    uint32_t nodeCount = width * height;
+    if(nodeCount == 0) { return false; }
+
+    // Make sure node set is the right size. When entering a new scene, a resize up or down will likely be needed.
+    // Note that resizing doesn't ever reduce capacity, so this will eventually be the size of the largest texture in the current play session.
+    if(nodes.size() != nodeCount)
     {
-        for(int x = 0; x < width; ++x)
-        {
-            nodes[y * width + x].value = Vector2(x, y);
-        }
+        nodes.resize(nodeCount);
     }
 
-    // The open set when doing the search.
-    // This does some dynamic allocation that could maybe be optimized if needed.
-    ResizableQueue<Node*> openSet(nodeCount);
+    // Regardless of whether a resize occurred, we need to reset the working variables in each node.
+    memset(&nodes[0], 0, sizeof(nodes[0]) * nodes.size());
+
+    // Make sure open set is empty.
+    openSet.Clear();
 
     // Put start node on the open set, mark as closed/explored.
-    Node* startNode = &nodes[static_cast<int>(start.y * width + start.x)];
-    startNode->closed = true;
-    openSet.Push(startNode);
+    size_t startIndex = static_cast<size_t>(start.y * width + start.x);
+    nodes[startIndex].closed = true;
+    openSet.Push(startIndex);
+
+    // Cache goal index to quickly check if we reached the goal.
+    size_t goalIndex = static_cast<size_t>(goal.y * width + goal.x);
 
     // Iterate until we either find the goal, or the open set is empty.
     while(!openSet.Empty())
     {
         // If we find the goal, we purposely don't pop the node off the open set.
         // This is used after the while-loop to check success/failure of the search.
-        Node* current = openSet.Front();
-        if(current->value == goal) { break; }
+        size_t currentIndex = openSet.Front();
+        if(currentIndex == goalIndex) { break; }
 
         // Create neighbors array - including diagonals!
+        Vector2 currentValue(currentIndex % width, currentIndex / width);
         Vector2 neighbors[8];
-        neighbors[0] = current->value + Vector2(0, 1);
-        neighbors[1] = current->value + Vector2(0, -1);
-        neighbors[2] = current->value + Vector2(1, 0);
-        neighbors[3] = current->value + Vector2(-1, 0);
+        neighbors[0] = currentValue + Vector2(0, 1);
+        neighbors[1] = currentValue + Vector2(0, -1);
+        neighbors[2] = currentValue + Vector2(1, 0);
+        neighbors[3] = currentValue + Vector2(-1, 0);
 
-        neighbors[4] = current->value + Vector2(1, 1);
-        neighbors[5] = current->value + Vector2(1, -1);
-        neighbors[6] = current->value + Vector2(-1, 1);
-        neighbors[7] = current->value + Vector2(-1, -1);
+        neighbors[4] = currentValue + Vector2(1, 1);
+        neighbors[5] = currentValue + Vector2(1, -1);
+        neighbors[6] = currentValue + Vector2(-1, 1);
+        neighbors[7] = currentValue + Vector2(-1, -1);
 
         // See if we should add neighbors to open set.
-        for(auto& neighbor : neighbors)
+        for(Vector2& neighbor : neighbors)
         {
-            // Ignore any neighbor that has pixel color black (not walkable).
+            // Ignore any neighbor that is not walkable.
             if(!IsTexturePosWalkable(neighbor))
             {
                 continue;
             }
 
-            // Ignore closed/explored neighbors.
-            int nodeIndex = static_cast<int>(neighbor.y * width + neighbor.x);
-            if(nodeIndex < 0 || nodeIndex >= width * height)
+            // Ignore any x/y that appears to be out of bounds.
+            if(neighbor.x < 0 || neighbor.x >= width || neighbor.y < 0 || neighbor.y >= height)
             {
                 continue;
             }
 
-            Node* neighborNode = &nodes[nodeIndex];
-            if(neighborNode->closed) { continue; }
+            // Ignore closed/explored neighbors.
+            int neighborNodeIndex = static_cast<int>(neighbor.y * width + neighbor.x);
+            Node& neighborNode = nodes[neighborNodeIndex];
+            if(neighborNode.closed) { continue; }
 
             // Add to open set.
-            neighborNode->parent = current;
-            neighborNode->closed = true;
-            openSet.Push(neighborNode);
+            neighborNode.parentIndex = currentIndex;
+            neighborNode.closed = true;
+            openSet.Push(neighborNodeIndex);
         }
 
         // Done with this node - remove from open set.
@@ -409,20 +424,19 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
     // If open set is empty, we did not find the goal. No path can be generated.
     if(openSet.Empty())
     {
-        delete[] nodes;
         return false;
     }
 
     // Iterate back to start, pushing world position of each node onto our path.
     // This leaves the path with start node at back, goal node at front - caller can traverse back-to-front.
-    Node* current = openSet.Front();
-    while(current != nullptr)
+    size_t current = openSet.Front();
+    while(current != startIndex)
     {
-        outPath.push_back(current->value);
-        current = current->parent;
+        outPath.push_back(Vector2(current % width, current / width));
+        current = nodes[current].parentIndex;
     }
+    outPath.push_back(start);
 
     // We found a path! Noice.
-    delete[] nodes;
     return true;
 }

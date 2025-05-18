@@ -41,6 +41,8 @@ public:
     Iterator begin() { return Iterator(mHead, mSize, reinterpret_cast<T*>(mData), mCapacity); }
     Iterator end() { return Iterator(mTail, 0, reinterpret_cast<T*>(mData), mCapacity); }
 
+    ResizableQueue() = default;
+
     ResizableQueue(uint32_t initialCapacity) :
         mCapacity(initialCapacity)
     {
@@ -188,7 +190,14 @@ private:
     {
         // Let's just double capacity each time.
         uint32_t oldCapacity = mCapacity;
-        mCapacity *= 2;
+        if(mCapacity == 0)
+        {
+            mCapacity = 1;
+        }
+        else
+        {
+            mCapacity *= 2;
+        }
 
         // Create a new array for elements.
         uint8_t* newData = new uint8_t[mCapacity * sizeof(T)];
