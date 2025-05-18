@@ -53,39 +53,71 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
         {
             // We should ignore the first few nodes and last few nodes when doing conditioning.
             // This is because start/end nodes are _exact_ destinations (i.e. character starts here and wants to get there - don't mess with it).
-            const int kFuzzyIgnore = 4;
+            const int kFuzzyIgnore = 1;
             if(i > path.size() - kFuzzyIgnore) { continue; }
             if(i < kFuzzyIgnore) { break; }
 
-            // See if a neighbor is more walkable.
+            // Palette indexes on walker boundary textures provide some indication of how "walkable" the current position is.
+            // Palette index 255 (black) is completely unwalkable, and should already have been discarded by the BFS.
+            // Palette indexes 127 or less are walkable, but a lower index is preferrable if available.
+            // Palette indexes 128 or greater are conditionally walkable (the game can turn them on or off). But if walkable, they should be considered walkable as-is (BFS figures that out).
+
+            // ANYWAY, here's the idea: if the current index is less than 128, see if a neighbor is a lower palette index.
+            // If so, we will want to walk there instead. If no, this is a less than ideal place to walk, but at least it is walkable.
             int index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
-            while(index != 0)
+            if(index < 128)
             {
-                if(mTexture->GetPaletteIndex(path[i].x + 1, path[i].y) < index)
+                while(true)
                 {
-                    path[i].x += 1;
+                    // If any up/down/left/right has a lower palette index, go there!
+                    if(mTexture->GetPaletteIndex(path[i].x + 1, path[i].y) < index)
+                    {
+                        path[i].x += 1;
+                    }
+                    else if(mTexture->GetPaletteIndex(path[i].x - 1, path[i].y) < index)
+                    {
+                        path[i].x -= 1;
+                    }
+                    else if(mTexture->GetPaletteIndex(path[i].x, path[i].y + 1) < index)
+                    {
+                        path[i].y += 1;
+                    }
+                    else if(mTexture->GetPaletteIndex(path[i].x, path[i].y - 1) < index)
+                    {
+                        path[i].y -= 1;
+                    }
+                    else if(mTexture->GetPaletteIndex(path[i].x + 1, path[i].y + 1) < index)
+                    {
+                        path[i].x += 1;
+                        path[i].y += 1;
+                    }
+                    else if(mTexture->GetPaletteIndex(path[i].x + 1, path[i].y - 1) < index)
+                    {
+                        path[i].x += 1;
+                        path[i].y -= 1;
+                    }
+                    else if(mTexture->GetPaletteIndex(path[i].x - 1, path[i].y - 1) < index)
+                    {
+                        path[i].x -= 1;
+                        path[i].y -= 1;
+                    }
+                    else if(mTexture->GetPaletteIndex(path[i].x - 1, path[i].y + 1) < index)
+                    {
+                        path[i].x -= 1;
+                        path[i].y += 1;
+                    }
+                    else
+                    {
+                        // No neighbor is more walkable, so break out of this loop.
+                        break;
+                    }
+
+                    // Update index being considered for next run through loop.
+                    index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
                 }
-                else if(mTexture->GetPaletteIndex(path[i].x - 1, path[i].y) < index)
-                {
-                    path[i].x -= 1;
-                }
-                else if(mTexture->GetPaletteIndex(path[i].x, path[i].y + 1) < index)
-                {
-                    path[i].y += 1;
-                }
-                else if(mTexture->GetPaletteIndex(path[i].x, path[i].y - 1) < index)
-                {
-                    path[i].y -= 1;
-                }
-                else
-                {
-                    // No neighbor is more walkable, so break out of this loop.
-                    break;
-                }
-                index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
             }
         }
-
+        
         // Convert texture-space path to world-space path.
         for(auto& node : path)
         {

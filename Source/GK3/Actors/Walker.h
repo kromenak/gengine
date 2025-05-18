@@ -138,6 +138,7 @@ private:
     
     void CalculatePath(const Vector3& startPos, const Vector3& endPos);
     bool CalculateShortenedPath();
+    void RemoveExcessPathNodes();
     bool AdvancePath();
     
     bool TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSpeed);
