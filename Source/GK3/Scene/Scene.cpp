@@ -965,6 +965,17 @@ void Scene::SetOverrideBSP(BSP* bsp)
 
     // Change BSP rendered by renderer.
     gRenderer.SetBSP(bsp);
+
+    // In some cases, the override BSP is a different variant of the current scene, but with the same hit tests present (e.g. CEM in Day 1, 6PM).
+    // In those cases, we need to re-enable the hit tests in the new scene, or else certain scene interactions may not work.
+    if(mOverrideBSP != nullptr)
+    {
+        for(BSPActor* hitTest : mHitTestActors)
+        {
+            mOverrideBSP->SetVisible(hitTest->GetName(), false);
+            mOverrideBSP->SetHitTest(hitTest->GetName(), true);
+        }
+    }
 }
 
 void Scene::ClearOverrideBSP()
