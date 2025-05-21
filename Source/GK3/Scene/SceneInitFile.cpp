@@ -669,6 +669,10 @@ void SceneInitFile::ParseFromData(uint8_t* data, uint32_t dataLength)
                     Vector3 colorVec = keyValue.GetValueAsVector3();
                     model.fixedLightingColor = Color32(static_cast<int>(colorVec.x), static_cast<int>(colorVec.y), static_cast<int>(colorVec.z));
                 }
+                else if(StringUtil::EqualsIgnoreCase(keyValue.key, "fullLighting"))
+                {
+                    model.fixedLightingColor = Color32::White;
+                }
                 else if(StringUtil::EqualsIgnoreCase(keyValue.key, "ambientrange"))
                 {
                     //TODO: This might not be needed at all, as it seems to only be used in the software renderer in the original game?
