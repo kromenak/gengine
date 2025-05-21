@@ -166,15 +166,6 @@ void Animator::OnUpdate(float deltaTime)
             {
                 mActiveAnimations[i].currentFrame %= mActiveAnimations[i].params.animation->GetFrameCount() - 1;
             }
-
-            if(mActiveAnimations[i].params.animation->GetName() == "E0VJ5M39291.YAK")
-            {
-                printf("On frame %d\n", mActiveAnimations[i].currentFrame);
-                if(mActiveAnimations[i].currentFrame == 39 || mActiveAnimations[i].currentFrame == 38)
-                {
-                    printf("Break!\n");
-                }
-            }
             
             // Break out of loop if the animation has ended. Valid frame indexes are 0 to (frameCount - 1), so a frame AT "frameCount" would be invalid.
             // In extreme cases, the timer could be large enough to cover frames that don't exist - just ignore that!

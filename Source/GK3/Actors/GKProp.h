@@ -46,5 +46,8 @@ private:
     // Autoscripts can drive animation on "GAS Props".
     GasPlayer* mGasPlayer = nullptr;
 
+    // If this is a "GAS Prop," the gas being used/played.
+    GAS* mFidgetGas = nullptr;
+
     void OnVertexAnimationStop();
 };

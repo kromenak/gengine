@@ -320,9 +320,7 @@ void Scene::Init()
     // Create soundtrack player and get it playing!
     Actor* actor = new Actor("SoundtrackPlayer");
     mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
-
-    const std::vector<Soundtrack*>& soundtracks = mSceneData->GetSoundtracks();
-    for(auto& soundtrack : soundtracks)
+    for(auto& soundtrack : mSceneData->GetSoundtracks())
     {
         mSoundtrackPlayer->Play(soundtrack);
     }

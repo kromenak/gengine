@@ -48,6 +48,11 @@ void GasPlayer::Play(GAS* gas)
     mTalkCleanupAnims.clear();
 
     mDistanceConditionNodes.clear();
+
+    // Execute at least the first node immediately.
+    // We don't want to wait until Update is called, since that may not happen until next frame (depending on order of operations).
+    // And that could result in a single rendered frame with the wrong anim for example.
+    ProcessNextNode();
 }
 
 void GasPlayer::Stop(std::function<void()> callback)
@@ -71,9 +76,14 @@ void GasPlayer::SetNodeIndex(int index)
     mNodeIndex = index - 1;
 }
 
-void GasPlayer::NextNode()
+void GasPlayer::NextNode(int forExecutionCounter)
 {
-    ProcessNextNode();
+    // If the execution counters don't match, it means this GAS Player started doing something else, and is no longer waiting for this callback.
+    // So...ignore it!
+    if(mExecutionCounter == forExecutionCounter)
+    {
+        ProcessNextNode();
+    }
 }
 
 void GasPlayer::StartAnimation(Animation* anim, std::function<void()> finishCallback)
@@ -97,7 +107,7 @@ void GasPlayer::OnUpdate(float deltaTime)
     if(mPaused) { return; }
 
     // Decrement timer. When it gets to zero, we move onto the next node.
-    if(mTimer >= 0.0f)
+    if(mTimer > 0.0f)
     {
         mTimer -= deltaTime;
         if(mTimer <= 0.0f)
@@ -130,22 +140,37 @@ void GasPlayer::ProcessNextNode()
         mTimer = 0.0f;
         return;
     }
-    
-    // First, update the node index and loop if necessary.
-    ++mNodeIndex;
-    mNodeIndex %= mGas->GetNodeCount();
-    
-    // Grab the node from the list.
-    GasNode* node = mGas->GetNode(mNodeIndex);
-    if(node == nullptr)
-    {
-        mTimer = 0.0f;
-        return;
-    }
 
-    // Execute the node, which returns amount of time it will take to perform the node.
-    // Note that a negative time can be returned here - this means the node will use the callback mechanism (NextNode()) instead of a timer.
-    mTimer = node->Execute(this);
+    // We at least want to execute one node - the next one.
+    // But if multiple nodes have zero duration, we should execute them all at once.
+    // So, keep looping until we either hit a non-zero-duration node, OR we execute too many nodes (500 is an arbitrary number - could be larger if needed).
+    int executeCount = 0;
+    while(executeCount < 500)
+    {
+        // First, update the node index and loop if necessary.
+        ++mNodeIndex;
+        mNodeIndex %= mGas->GetNodeCount();
+
+        // Grab the node from the list.
+        GasNode* node = mGas->GetNode(mNodeIndex);
+        if(node == nullptr)
+        {
+            mTimer = 0.0f;
+            return;
+        }
+
+        // Execute the node, which returns amount of time it will take to perform the node.
+        // Note that a negative time can be returned here - this means the node will use the callback mechanism (NextNode()) instead of a timer.
+        ++executeCount;
+        ++mExecutionCounter;
+        mTimer = node->Execute(this);
+        
+        // This node set a non-zero timer duration, so we can break out of this loop for now.
+        if(mTimer != 0.0f)
+        {
+            break;
+        }
+    }
 }
 
 void GasPlayer::PerformCleanups()

@@ -28,12 +28,14 @@ public:
 	void Resume() { mPaused = false; }
     void Stop(std::function<void()> callback = nullptr);
 
+    int GetExecutionCounter() const { return mExecutionCounter; }
+
     // Below here: GAS Node Helpers
     void SetVar(char var, int value) { mVariables[var - 'A'] = value; }
     int GetVar(char var) { return mVariables[var - 'A']; }
 
     void SetNodeIndex(int index);
-    void NextNode();
+    void NextNode(int forExecutionCounter);
     
     void StartAnimation(Animation* anim, std::function<void()> finishCallback = nullptr);
 
@@ -60,6 +62,10 @@ private:
 	
 	// If true, gas player is paused.
 	bool mPaused = true;
+
+    // Counts how many GAS node executions have occurred.
+    // This is particularly important so that, when we receive a callback, we can ensure it's still relevant to the player.
+    int mExecutionCounter = 0;
 
     // Variables for running autoscript.
     // Note that autoscript variables MUST be named uppercase A-Z.

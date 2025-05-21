@@ -19,17 +19,13 @@ float AnimGasNode::Execute(GasPlayer* player)
     if(animation == nullptr) { return 0; }
 
     // Play the animation!
-    player->StartAnimation(animation);
+    int executionCounter = player->GetExecutionCounter();
+    player->StartAnimation(animation, [player, executionCounter](){
+        player->NextNode(executionCounter);
+    });
 
-    // HACK: When the EXACT anim duration is used, pure looping anims (like lobby fans) have a noticeable pause between loops.
-    // To combat this, let's try reducing the anim duration just a tiny bit.
-    // Unclear whether this will cause problems elsewhere...may have to revisit.
-    // Also, is the pause due to the way the anim is authored, or is it caused by a calculation error somewhere?
-    const float kAnimDurationFudge = 0.05f;
-    float duration = animation->GetDuration() - kAnimDurationFudge;
-
-    //std::cout << "Playing animation " << animation->GetName() << " for " << duration << " seconds." << std::endl;
-    return duration;
+    // Return -1 to disable timer system and just wait for callback.
+    return -1.0f;
 }
 
 OneOfGasNode::~OneOfGasNode()
@@ -135,7 +131,10 @@ float WalkToGasNode::Execute(GasPlayer* player)
 
     // Start walk to.
     // Must use special "gas" version, or the walk/animation system will cause the current GAS script to be stopped/restarted.
-    actor->WalkToGas(walkToPos, walkToHeading, std::bind(&GasPlayer::NextNode, player));
+    int executionCounter = player->GetExecutionCounter();
+    actor->WalkToGas(walkToPos, walkToHeading, [player, executionCounter](){
+        player->NextNode(executionCounter);
+    });
 
     // Return -1 to disable timer system and just wait for callback.
     return -1.0f;
@@ -173,7 +172,10 @@ float ChooseWalkGasNode::Execute(GasPlayer* player)
     if(scenePosition == nullptr) { return 0; }
     
     // Start walk to.
-    actor->WalkToGas(scenePosition->position, scenePosition->heading, std::bind(&GasPlayer::NextNode, player));
+    int executionCounter = player->GetExecutionCounter();
+    actor->WalkToGas(scenePosition->position, scenePosition->heading, [player, executionCounter](){
+        player->NextNode(executionCounter);
+    });
 
     // Return -1 to disable timer system and just wait for callback.
     return -1.0f;
@@ -268,9 +270,12 @@ float DialogueGasNode::Execute(GasPlayer* player)
     // Just play the thing! Use callback method for signaling when done.
     AnimParams params;
     params.animation = yakAnimation;
-    params.finishCallback = std::bind(&GasPlayer::NextNode, player);
     params.isYak = true;
-    gSceneManager.GetScene()->GetAnimator()->Start(params);
+
+    int executionCounter = player->GetExecutionCounter();
+    gSceneManager.GetScene()->GetAnimator()->Start(params, [player, executionCounter](){
+        player->NextNode(executionCounter);
+    });
     return -1.0f;
 }
 

@@ -46,10 +46,9 @@ GKProp::GKProp(const SceneModel& modelDef) : GKProp(modelDef.model)
     SetVerb(modelDef.verb);
 
     // If it's a "gas prop", use provided gas as the fidget for the actor.
-    //TODO: Ideally, start fidget during init, not construction.
     if(modelDef.type == SceneModel::Type::GasProp)
     {
-        StartFidget(modelDef.gas);
+        mFidgetGas = modelDef.gas;
     }
 
     // If it should be hidden by default, hide it.
@@ -75,6 +74,13 @@ void GKProp::Init(const SceneData& sceneData)
             material.SetColor("uAmbientColor", Color32(126, 126, 126));
         }
     }
+
+    // Play this prop's GAS, if any.
+    if(mFidgetGas != nullptr)
+    {
+        StartFidget(mFidgetGas);
+    }
+    
     // If this is a billboard, force-update it right away.
     // Doing this on Init, and not waiting for Billboard::OnUpdate to run, avoids a single rendered frame with billboards facing the wrong way.
     Billboard* billboard = GetComponent<Billboard>();
