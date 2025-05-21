@@ -4,10 +4,20 @@
 #include "MeshRenderer.h"
 #include "SceneManager.h"
 
+TYPEINFO_INIT(Billboard, Component, GENERATE_TYPE_ID)
+{
+
+}
+
 Billboard::Billboard(Actor* owner) : Component(owner)
 {
     mMeshRenderer = GetOwner()->GetComponent<MeshRenderer>();
     mInitialPos = GetRotatePosition();
+}
+
+void Billboard::ForceUpdate()
+{
+    Billboard::OnUpdate(0.0f);
 }
 
 void Billboard::OnUpdate(float deltaTime)

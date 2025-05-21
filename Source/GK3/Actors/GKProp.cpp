@@ -75,6 +75,13 @@ void GKProp::Init(const SceneData& sceneData)
             material.SetColor("uAmbientColor", Color32(126, 126, 126));
         }
     }
+    // If this is a billboard, force-update it right away.
+    // Doing this on Init, and not waiting for Billboard::OnUpdate to run, avoids a single rendered frame with billboards facing the wrong way.
+    Billboard* billboard = GetComponent<Billboard>();
+    if(billboard != nullptr)
+    {
+        billboard->ForceUpdate();
+    }
 }
 
 void GKProp::StartFidget(GAS* gas)

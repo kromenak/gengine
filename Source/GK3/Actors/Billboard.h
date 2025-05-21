@@ -19,8 +19,11 @@ class MeshRenderer;
 
 class Billboard : public Component
 {
+    TYPEINFO_SUB(Billboard, Component);
 public:
     Billboard(Actor* owner);
+
+    void ForceUpdate();
 
 protected:
     void OnUpdate(float deltaTime) override;
