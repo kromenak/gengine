@@ -807,7 +807,28 @@ void Scene::ApplyTextureToSceneModel(const std::string& modelName, Texture* text
 
 void Scene::SetSceneModelVisibility(const std::string& modelName, bool visible)
 {
-    GetBSP()->SetVisible(modelName, visible);
+    // If there's a BSPActor for this model, set visibility through that API.
+    GKObject* obj = GetSceneObjectByModelName(modelName);
+    if(obj != nullptr && obj->IsA<BSPActor>())
+    {
+        // If this is a hit test, we just need to toggle visibility on.
+        // For BSPActors that aren't hit tests, this should activate the entire thing.
+        //TODO: Review diff between BSPActor and HitTests...this can probably be simpler.
+        BSPActor* bspActor = static_cast<BSPActor*>(obj);
+        if(GetHitTestObjectByModelName(modelName) == nullptr)
+        {
+            bspActor->SetActive(visible);
+        }
+        else
+        {
+            bspActor->SetVisible(visible);
+        }
+    }
+    else
+    {
+        // No BSPActor, so just go directly to the BSP.
+        GetBSP()->SetVisible(modelName, visible);
+    }
 }
 
 bool Scene::IsSceneModelVisible(const std::string& modelName) const
