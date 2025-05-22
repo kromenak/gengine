@@ -81,6 +81,9 @@ DrivingScreen::~DrivingScreen()
 
 void DrivingScreen::Show(FollowMode followMode)
 {
+    // Wherever we are right now, that's where we are driving from.
+    mDrivingFromLocation = gLocationManager.GetLocation();
+
     // The map shows as a special location called "Map".
     // Unload the current scene and set the location as such.
     gLocationManager.ChangeLocation("MAP", [this, followMode]() {
@@ -547,7 +550,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
     // Start player at current location. During normal play, this'll always be a node that exists on the map.
     // When debugging and such, you might show the driving interface at some unusual spot. We'll fall back on showing player at MOP in that case.
     mBlips[kEgoIndex]->SetMapPosition("MOP");
-    mBlips[kEgoIndex]->SetMapPosition(gLocationManager.GetLastLocation());
+    mBlips[kEgoIndex]->SetMapPosition(mDrivingFromLocation);
 
     // The other blips are only present in some circumstances. Deactivate them by default.
     mBlips[kNpc1Index]->SetActive(false);
@@ -728,8 +731,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
 
             // So, there are two spots we can follow Lady Howard from, and in both cases, we want to do a complete circuit :P
             // Let's write this out...
-            std::string currLocation = gLocationManager.GetLocation();
-            if(StringUtil::EqualsIgnoreCase(currLocation, "PLO"))
+            if(StringUtil::EqualsIgnoreCase(mDrivingFromLocation, "PLO"))
             {
                 mBlips[kNpc1Index]->AddPathNode("PLO");
                 mBlips[kNpc1Index]->AddPathNode("PL3");
@@ -761,13 +763,13 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             }
 
             // Just play a piece of dialogue after following the path and go back to previous location.
-            mBlips[kNpc1Index]->SetPathCompleteCallback([this, currLocation]() {
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
                 OnFollowDone();
 
                 // Play dialogue ("they're just driving around the valley - forget that").
-                gActionManager.ExecuteSheepAction("wait StartDialogue(\"21A6L3WLX1\", 1)", [this, currLocation](const Action* action){
+                gActionManager.ExecuteSheepAction("wait StartDialogue(\"21A6L3WLX1\", 1)", [this](const Action* action){
                     // This one automatically puts you back where you started.
-                    ExitToLocation(currLocation);
+                    ExitToLocation(mDrivingFromLocation);
                 });
             });
         }
@@ -778,8 +780,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             // This one's got a couple possible follow locations:
             // If from PLO or LER, we use one path.
             // If from RLC, we use another path. We can assume this is the "else" case.
-            std::string currLocation = gLocationManager.GetLocation();
-            if(StringUtil::EqualsIgnoreCase(currLocation, "PLO") || StringUtil::EqualsIgnoreCase(currLocation, "LER"))
+            if(StringUtil::EqualsIgnoreCase(mDrivingFromLocation, "PLO") || StringUtil::EqualsIgnoreCase(mDrivingFromLocation, "LER"))
             {
                 // Do a complete circuit starting at LHE.
                 mBlips[kNpc1Index]->AddPathNode("LHE");
@@ -845,7 +846,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
         }
 
         // On the path defined for the NPC, always skip to wherever we are along that route, so it looks like we followed from the correct spot.
-        mBlips[kNpc1Index]->SkipToPathNode(gLocationManager.GetLocation());
+        mBlips[kNpc1Index]->SkipToPathNode(mDrivingFromLocation);
 
         // Ego follows this blip.
         mBlips[kEgoIndex]->SetFollow(mBlips[kNpc1Index]);

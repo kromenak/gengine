@@ -97,6 +97,9 @@ private:
     // If we're following someone, this will be set appropriately.
     FollowMode mFollowMode = FollowMode::None;
 
+    // The location code for the place we are driving from.
+    std::string mDrivingFromLocation;
+
     // Colors for blips.
     const Color32 kEgoColor = Color32::Green;
     const Color32 kButhaneColor = Color32(198, 182, 255); // Pink
