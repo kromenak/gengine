@@ -113,9 +113,6 @@ void GKActor::Init(const SceneData& sceneData)
     // If we should be hidden by default, set inactive.
     SetActive(!mActorDef->hidden);
 
-    // Start in idle state.
-    StartFidget(GKActor::FidgetType::Idle);
-
     // Tell actor to use this scene's walker boundary.
     mWalker->SetWalkerBoundary(sceneData.GetWalkerBoundary());
 
@@ -164,6 +161,10 @@ void GKActor::Init(const SceneData& sceneData)
 
     // Sample an init anim (if any) that poses the GKActor as needed for scene start.
     gSceneManager.GetScene()->GetAnimator()->Sample(mActorDef->initAnim, 0);
+
+    // If an init anim was defined, we should make sure to sync the actor to the updated model position/rotation.
+    // The init anim can move the model to a very different pose/location, so we want things to be synced before starting another anim.
+    SyncActorToModelPositionAndRotation();
 }
 
 void GKActor::StartFidget(FidgetType type)
@@ -186,6 +187,9 @@ void GKActor::StartFidget(FidgetType type)
     GAS* newFidget = GetGasForFidget(type);
     if(newFidget != nullptr)
     {
+        // This seems to help with how some fidgets interact with the walker system.
+        SetModelRotationToActorRotation();
+
         //printf("%s: starting fidget %s\n", GetNoun().c_str(), newFidget->GetName().c_str());
         mGasPlayer->Play(newFidget);
         mActiveFidget = type;
@@ -281,7 +285,7 @@ void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finish
 
     // To visualize walk position/heading.
     //Debug::DrawLine(walkPos, walkPos + Vector3::UnitY * 10.0f, Color32::Orange, 10.0f);
-    //Debug::DrawLine(walkPos, walkPos + heading.ToVector() * 10.0f, Color32::Red, 10.0f);
+    //Debug::DrawLine(walkPos, walkPos + heading.ToDirection() * 10.0f, Color32::Red, 10.0f);
 }
 
 Vector3 GKActor::GetWalkDestination() const
@@ -482,37 +486,28 @@ void GKActor::OnInactive()
     mModelActor->SetActive(false);
 }
 
-void GKActor::OnUpdate(float deltaTime)
+void GKActor::OnLateUpdate(float deltaTime)
 {
+    // If the fidget hasn't been set yet, start the idle fidget.
+    // TODO: Ideally, it would be great to do this in Init(), but I found it led to some undesirable behavior (see Lady Howard in Museum during Day 1, 10AM for example).
+    // TODO: It would be good to dive into that deeper and understand what's happening -
+    // TODO: it seems like maybe if an "init anim" is applied, the fidget shouldn't be applied until the VertexAnimator has updated once? Maybe?
+    if(mActiveFidget == FidgetType::Unset)
+    {
+        StartFidget(GKActor::FidgetType::Idle);
+    }
+
     // OPTIONAL: draw axes to visualize Actor position and facing.
     //Debug::DrawAxes(GetTransform()->GetLocalToWorldMatrix());
 
-    // Set actor position to match model's floor position.
+    // Set actor position/rotation to match model's floor position/rotation.
+    SyncActorToModelPositionAndRotation();
+    
+    // Have the blob shadow always be underneath the model's floor position.
+    // Move the shadow up slightly to avoid z-fighting with floor (or rendering under floor).
     Vector3 leftShoeWorldPos;
     Vector3 rightShoeWorldPos;
     Vector3 floorPosition = GetModelFloorAndShoePositions(leftShoeWorldPos, rightShoeWorldPos);
-    GetTransform()->SetPosition(floorPosition);
-
-    // Set actor facing direction to match the model's facing direction.
-    {
-        // Get mine and model's facing directions.
-        Vector3 myFacingDir = GetHeading().ToDirection();
-        Vector3 modelFacingDir = GetModelFacingDirection();
-
-        // Calculate angle I should rotate to match model's direction.
-        // Use cross product to determine clockwise or counter-clockwise rotation.
-        float angleRadians = Math::Acos(Math::Clamp(Vector3::Dot(myFacingDir, modelFacingDir), -1.0f, 1.0f));
-        if(Vector3::Cross(myFacingDir, modelFacingDir).y < 0)
-        {
-            angleRadians *= -1;
-        }
-
-        // Rotate desired direction and amount.
-        GetTransform()->Rotate(Vector3::UnitY, angleRadians);
-    }
-
-    // Have the blob shadow always be underneath the model's floor position.
-    // Move the shadow up slightly to avoid z-fighting with floor (or rendering under floor).
     mShadowActor->SetPosition(floorPosition + Vector3::UnitY);
 
     // Update the scale of the shadow based on how much floor area the actor is taking up. This is mostly affected by walk animations.
@@ -702,6 +697,33 @@ void GKActor::SetModelRotationToActorRotation()
     if(mModelFacingHelper != nullptr)
     {
         mModelFacingHelper->SetRotation(mModelActor->GetRotation());
+    }
+}
+
+void GKActor::SyncActorToModelPositionAndRotation()
+{
+    // Set actor position to match model's floor position.
+    Vector3 leftShoeWorldPos;
+    Vector3 rightShoeWorldPos;
+    Vector3 floorPosition = GetModelFloorAndShoePositions(leftShoeWorldPos, rightShoeWorldPos);
+    GetTransform()->SetPosition(floorPosition);
+
+    // Set actor facing direction to match the model's facing direction.
+    {
+        // Get mine and model's facing directions.
+        Vector3 myFacingDir = GetHeading().ToDirection();
+        Vector3 modelFacingDir = GetModelFacingDirection();
+
+        // Calculate angle I should rotate to match model's direction.
+        // Use cross product to determine clockwise or counter-clockwise rotation.
+        float angleRadians = Math::Acos(Math::Clamp(Vector3::Dot(myFacingDir, modelFacingDir), -1.0f, 1.0f));
+        if(Vector3::Cross(myFacingDir, modelFacingDir).y < 0)
+        {
+            angleRadians *= -1;
+        }
+
+        // Rotate desired direction and amount.
+        GetTransform()->Rotate(Vector3::UnitY, angleRadians);
     }
 }
 

@@ -84,6 +84,7 @@ public:
 	
 protected:
 	void OnUpdate(float deltaTime) override;
+    void OnLateUpdate(float deltaTime) override;
 	
 private:
 	// Animations that are currently active.

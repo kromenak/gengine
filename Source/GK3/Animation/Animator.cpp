@@ -191,11 +191,14 @@ void Animator::OnUpdate(float deltaTime)
             ExecuteFrame(i, mActiveAnimations[i].params.animation->GetFrameCount());
         }
     }
+}
 
+void Animator::OnLateUpdate(float deltaTime)
+{
     // Process any finish callbacks.
     // FYI: This can lead to recursive sorts of things where new active animations are added or scene is changed (destroying the Animator!).
     // So, gotta be a bit careful here...
-    size = mActiveAnimations.size();
+    int size = mActiveAnimations.size();
     for(int i = 0; i < size; ++i)
     {
         if(mActiveAnimations[i].done && mActiveAnimations[i].params.finishCallback != nullptr)

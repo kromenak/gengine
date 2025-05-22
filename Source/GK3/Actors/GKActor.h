@@ -34,6 +34,7 @@ public:
     // Fidgets
     enum class FidgetType
     {
+        Unset = -1, // The fidget has not yet ever been set.
         None,
         Idle,
         Talk,
@@ -86,7 +87,7 @@ public:
 protected:
     void OnActive() override;
     void OnInactive() override;
-	void OnUpdate(float deltaTime) override;
+	void OnLateUpdate(float deltaTime) override;
     
 private:
     // The "definition" used to construct this GKActor.
@@ -107,7 +108,7 @@ private:
 	FaceController* mFaceController = nullptr;
     
     // The fidget the actor is currently playing.
-    FidgetType mActiveFidget = FidgetType::None;
+    FidgetType mActiveFidget = FidgetType::Unset;
 
     // GAS scripts to use when actor is idle, talking, or listening.
     GAS* mIdleFidget = nullptr;
@@ -146,6 +147,8 @@ private:
     Vector3 GetModelFloorAndShoePositions(Vector3& leftShoeWorldPos, Vector3& rightShoeWorldPos) const;
     void SetModelPositionToActorPosition();
     void SetModelRotationToActorRotation();
+
+    void SyncActorToModelPositionAndRotation();
 
     void RefreshFloorInfo();
 
