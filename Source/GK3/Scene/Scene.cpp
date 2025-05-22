@@ -1102,10 +1102,14 @@ void Scene::ExecuteAction(const Action* action)
 			GKObject* obj = GetSceneObjectByModelName(action->target);
 			if(obj != nullptr)
 			{
-				modelPosition = obj->GetPosition();
+                // The AABB center seems to give better results than just "GetPosition".
+                // This is because some models have their visuals displaced from the actual position (coffee cups in Dining Room for example).
+                modelPosition = obj->GetAABB().GetCenter();
 			}
 			else
 			{
+                // BSP that had a BSPActor generated will actually still use the above AABB code.
+                // Worst case though, if we have some target that only exists in BSP, get its position directly.
 				modelPosition = GetBSP()->GetPosition(action->target);
 			}
 
