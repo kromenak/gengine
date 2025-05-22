@@ -14,6 +14,7 @@
 
 class BSPActor : public GKObject
 {
+    TYPEINFO_SUB(BSPActor, GKObject);
 public:
 	BSPActor(BSP* bsp, const std::string& name);
 	

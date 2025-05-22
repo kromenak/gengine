@@ -596,6 +596,57 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
 	return result;
 }
 
+SceneCastResult Scene::RaycastAABBs(const Ray& ray, GKObject** ignore, int ignoreCount) const
+{
+    SceneCastResult result;
+    for(GKObject* object : mPropsAndActors)
+    {
+        // Ignore inactive objects.
+        if(!object->IsActive()) { continue; }
+
+        // Completely ignore anything in the ignore list. It doesn't exist to us.
+        if(IsInIgnoreList(ignore, ignoreCount, object)) { continue; }
+
+        // See if the ray hits this object's 3D model.
+        float t;
+        if(Intersect::TestRayAABB(ray, object->GetAABB(), t))
+        {
+            if(t < result.hitInfo.t)
+            {
+                result.hitObject = object;
+                result.hitInfo.t = t;
+            }
+        }
+    }
+
+    // Raycast against all BSP.
+    for(BSPActor* object : mBSPActors)
+    {
+        // Ignore inactive objects.
+        if(!object->IsActive()) { continue; }
+
+        // Completely ignore anything in the ignore list. It doesn't exist to us.
+        if(IsInIgnoreList(ignore, ignoreCount, object)) { continue; }
+
+        float t;
+        if(Intersect::TestRayAABB(ray, object->GetAABB(), t))
+        {
+            if(t < result.hitInfo.t)
+            {
+                result.hitObject = object;
+                result.hitInfo.t = t;
+            }
+        }
+    }
+
+    if(result.hitObject != nullptr)
+    {
+        result.hitInfo.name = result.hitObject->GetNoun();
+        result.hitInfo.actor = result.hitObject;
+    }
+    return result;
+}
+
 void Scene::Interact(const Ray& ray, GKObject* interactHint)
 {
 	// Ignore scene interaction while the action bar is showing.

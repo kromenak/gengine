@@ -42,7 +42,7 @@ public:
 
     void WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const Heading& exitHeading, std::function<void()> finishCallback);
 
-    void SkipToEnd();
+    void SkipToEnd(bool alsoSkipWalkEndAnim = false);
 
     bool AtPosition(const Vector3& position);
     bool IsWalking() const { return mWalkActions.size() > 0; }
@@ -58,9 +58,11 @@ private:
     static constexpr float kAtNodeDistSq = kAtNodeDist * kAtNodeDist;
     static constexpr float kAtHeadingRadians = Math::ToRadians(4.0f);
     
-    // Turn speeds. A faster speed is used for turning in place when not walking.
-    static constexpr const float kWalkTurnSpeed = Math::kPi;
-    static constexpr const float kTurnSpeed = Math::k2Pi;
+    // Turn speeds. When walking, turn faster when the next path node is very close - slower when farther away.
+    // A faster speed is used for turning in place when not walking.
+    static constexpr float kWalkTurnSpeedMin = Math::kPiOver2;
+    static constexpr float kWalkTurnSpeedMax = Math::k2Pi;
+    static constexpr float kTurnSpeed = Math::k2Pi;
 
     // CONFIG
     // Walker's owner, as a GKActor.
@@ -78,6 +80,9 @@ private:
     Animation* mWalkLoopAnim = nullptr;
     Animation* mWalkStartTurnLeftAnim = nullptr;
     Animation* mWalkStartTurnRightAnim = nullptr;
+
+    // If true, the walk anims are overridden, and don't match the "walk end" anim.
+    bool mUsingOverrideWalkAnims = false;
 
     // WALK PLANNING
     // When a walk begins, a "plan" is generated and stored in the walk ops vector.
@@ -139,8 +144,11 @@ private:
     void CalculatePath(const Vector3& startPos, const Vector3& endPos);
     bool SkipPathNodesOutsideFrustum();
     void RemoveExcessPathNodes();
+
     bool AdvancePath();
-    
+    void UpdateNextNodesYPos();
+
+    float GetWalkTurnSpeed(Vector3 toNext);
     bool TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSpeed);
 
     void StopAllWalkAnimations();

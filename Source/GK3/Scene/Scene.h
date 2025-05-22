@@ -65,6 +65,7 @@ public:
     void GlideToCameraPosition(const std::string& cameraName, std::function<void()> finishCallback);
 	
 	SceneCastResult Raycast(const Ray& ray, bool interactiveOnly, GKObject** ignore = nullptr, int ignoreCount = 1) const;
+    SceneCastResult RaycastAABBs(const Ray& ray, GKObject** ignore = nullptr, int ignoreCount = 1) const;
     void Interact(const Ray& ray, GKObject* interactHint = nullptr);
     void SkipCurrentAction();
     

@@ -9,6 +9,7 @@
 #include "Frustum.h"
 #include "GKActor.h"
 #include "Heading.h"
+#include "Interpolate.h"
 #include "LineSegment.h"
 #include "Ray.h"
 #include "Renderer.h"
@@ -47,6 +48,7 @@ void Walker::SetWalkAnims(Animation* startAnim, Animation* loopAnim,
     mWalkLoopAnim = loopAnim;
     mWalkStartTurnLeftAnim = startTurnLeftAnim;
     mWalkStartTurnRightAnim = startTurnRightAnim;
+    mUsingOverrideWalkAnims = mWalkStartAnim != mCharConfig->walkStartAnim && mWalkLoopAnim != mCharConfig->walkLoopAnim;
 }
 
 void Walker::WalkTo(const Vector3& position, std::function<void()> finishCallback)
@@ -84,10 +86,15 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
         // Time to create a new walk plan.
         mWalkActions.clear();
 
-        // We definitely need a turn-to-face.
-        mTurnToFaceDir = facingDir;
-        mWalkActions.push_back(WalkOp::TurnToFace);
-
+        // We don't need the item to be *exactly* in front of our face.
+        // We only need to turn if the item is fairly far from our current facing direction.
+        float dot = Vector3::Dot(mGKOwner->GetForward(), facingDir);
+        if(dot < 0.5f)
+        {
+            mTurnToFaceDir = facingDir;
+            mWalkActions.push_back(WalkOp::TurnToFace);
+        }
+        
         // If we were walking, we no longer need to!
         // We should stop our walk, play walk end anim, and do the turn to face.
         if(currentWalkOp > WalkOp::None && currentWalkOp < WalkOp::FollowPathEnd)
@@ -101,6 +108,10 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
         if(currentWalkOp != GetCurrentWalkOp())
         {
             NextAction();
+        }
+        else if(GetCurrentWalkOp() == WalkOp::None)
+        {
+            OnWalkToFinished();
         }
     }
     else
@@ -140,11 +151,15 @@ void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const
     WalkTo(exitPosition, exitHeading, nullptr);
 }
 
-void Walker::SkipToEnd()
+void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
 {
     // If not walking, or at the end of the walk, nothing to skip.
     WalkOp currentWalkOp = GetCurrentWalkOp();
-    if(currentWalkOp == WalkOp::None || currentWalkOp == WalkOp::FollowPathEnd || currentWalkOp == WalkOp::TurnToFace)
+    if(currentWalkOp == WalkOp::None)
+    {
+        return;
+    }
+    if(!alsoSkipWalkEndAnim && (currentWalkOp == WalkOp::FollowPathEnd || currentWalkOp == WalkOp::TurnToFace))
     {
         return;
     }
@@ -158,31 +173,61 @@ void Walker::SkipToEnd()
     // Warp actor to end of path.
     if(!mPath.empty())
     {
+        mPath.front().y = gSceneManager.GetScene()->GetFloorY(mPath.front());
+
         //Debug::DrawLine(mPath.front(), mPath.front() + Vector3::UnitY * 10.0f, Color32::Blue, 10.0f);
+        Vector3 oldPos = mGKOwner->GetPosition();
         mGKOwner->SetPosition(mPath.front());
-        if(mPath.size() > 1)
+
+        // Figure out a facing direction at the end of the path.
+        Vector3 facingDir;
+        if(mWalkToSeeTarget != nullptr)
+        {
+            AABB targetAABB = mWalkToSeeTarget->GetAABB();
+            Vector3 dir = (targetAABB.GetCenter() - mPath.front()).Normalize();
+            mGKOwner->SetHeading(Heading::FromDirection(dir));
+            mTurnToFaceDir = mGKOwner->GetHeading().ToDirection();
+        }
+        else if(mWalkActions.front() == WalkOp::TurnToFace)
+        {
+            mGKOwner->SetHeading(Heading::FromDirection(mTurnToFaceDir));
+        } 
+        else if(mPath.size() > 1)
         {
             //Debug::DrawLine(mPath.front(), mPath.front() + Vector3::Normalize(mPath.front() - mPath[1]) * 10.0f, Color32::Green, 10.0f);
             mGKOwner->SetHeading(Heading::FromDirection(Vector3::Normalize(mPath.front() - mPath[1])));
+        }
+        else
+        {
+            mGKOwner->SetHeading(Heading::FromDirection(Vector3::Normalize(mPath.front() - oldPos)));
         }
     }
 
     // Clear the path - we don't need to follow it anymore.
     mPath.clear();
 
-    // Move actor back by "at position" amount, so end walk anim puts us in right spot.
-    mGKOwner->SetPosition(mGKOwner->GetPosition() - (mGKOwner->GetForward() * kAtNodeDist));
-
-    // Remove all walk ops except for the "follow path end" op.
-    bool poppedAction = false;
-    while(!mWalkActions.empty() && mWalkActions.back() != WalkOp::FollowPathEnd)
+    // If we also wanted to skip the end walk anim, we're done - clear all walk actions and fire callback.
+    if(alsoSkipWalkEndAnim)
     {
-        mWalkActions.pop_back();
-        poppedAction = true;
+        mWalkActions.clear();
+        OnWalkToFinished();
     }
-    if(poppedAction)
+    else // even though we skipped, still want to play "end walk" anim.
     {
-        NextAction();
+        // Move actor back by "at position" amount, so end walk anim puts us in right spot.
+        mGKOwner->SetPosition(mGKOwner->GetPosition() - (mGKOwner->GetForward() * kAtNodeDist));
+
+        // Remove all walk ops except for the "follow path end" op.
+        bool poppedAction = false;
+        while(!mWalkActions.empty() && mWalkActions.back() != WalkOp::FollowPathEnd)
+        {
+            mWalkActions.pop_back();
+            poppedAction = true;
+        }
+        if(poppedAction)
+        {
+            NextAction();
+        }
     }
 }
 
@@ -219,7 +264,8 @@ void Walker::OnUpdate(float deltaTime)
         //TODO: *Probably* a better way to handle this, with a substantial refactor...
         if(gActionManager.IsSkippingCurrentAction())
         {
-            SkipToEnd();
+            SkipToEnd(true);
+            return;
 
             // Be sure to update the current op, since the skip action may have changed it.
             currentWalkOp = GetCurrentWalkOp();
@@ -235,7 +281,14 @@ void Walker::OnUpdate(float deltaTime)
         if(currentWalkOp == WalkOp::FollowPathStart)
         {
             // Possible to finish path while still in the start phase, for very short paths.
-            if(AdvancePath())
+            Vector3 facingDir;
+            if(IsWalkToSeeTargetInView(facingDir))
+            {
+                // Make sure final action is a "turn to face" using this facing dir.
+                mTurnToFaceDir = facingDir;
+                PopAndNextAction();
+            }
+            else if(AdvancePath())
             {
                 // In this case, we want to skip all follow path bits and go right to "follow path end".
                 while(GetCurrentWalkOp() != WalkOp::FollowPathEnd)
@@ -248,12 +301,19 @@ void Walker::OnUpdate(float deltaTime)
             {
                 Vector3 toNext = mPath.back() - GetOwner()->GetPosition();
                 toNext.y = 0.0f;
-                TurnToFace(deltaTime, toNext.Normalize(), kWalkTurnSpeed);
+                TurnToFace(deltaTime, toNext.Normalize(), GetWalkTurnSpeed(toNext));
             }
         }
         else if(currentWalkOp == WalkOp::FollowPathStartTurnLeft || currentWalkOp == WalkOp::FollowPathStartTurnRight)
         {
-            if(!AdvancePath())
+            Vector3 facingDir;
+            if(IsWalkToSeeTargetInView(facingDir))
+            {
+                // Make sure final action is a "turn to face" using this facing dir.
+                mTurnToFaceDir = facingDir;
+                PopAndNextAction();
+            }
+            else if(!AdvancePath())
             {
                 // HACK: Wait until the "turn" anim has the character put its foot down before starting to turn to the target.
                 // About 0.66s seems to look OK, but could probably be finessed a bit.
@@ -261,7 +321,7 @@ void Walker::OnUpdate(float deltaTime)
                 {
                     Vector3 toNext = mPath.back() - GetOwner()->GetPosition();
                     toNext.y = 0.0f;
-                    TurnToFace(deltaTime, toNext.Normalize(), kWalkTurnSpeed);
+                    TurnToFace(deltaTime, toNext.Normalize(), GetWalkTurnSpeed(toNext));
                 }
             }
         }
@@ -307,7 +367,14 @@ void Walker::OnUpdate(float deltaTime)
                 // Still following path - turn to face next node in path.
                 Vector3 toNext = mPath.back() - GetOwner()->GetPosition();
                 toNext.y = 0.0f;
-                TurnToFace(deltaTime, toNext.Normalize(), kWalkTurnSpeed);
+                TurnToFace(deltaTime, toNext.Normalize(), GetWalkTurnSpeed(toNext));
+            }
+        }
+        else if(currentWalkOp == WalkOp::FollowPathEnd)
+        {
+            if(mWalkActions.front() == WalkOp::TurnToFace)
+            {
+                TurnToFace(deltaTime, mTurnToFaceDir, kTurnSpeed);
             }
         }
         else if(currentWalkOp == WalkOp::TurnToFace)
@@ -366,11 +433,27 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
         // Calculate a path.
         CalculatePath(GetOwner()->GetPosition(), position);
 
+        // Make sure first node is at the right y-pos.
+        UpdateNextNodesYPos();
+        for(int i = 0; i < mPath.size() - 2; ++i)
+        {
+            mPath[i].y = mPath.back().y;
+        }
+
         // Attempt to shorten the path, if applicable, to speed up the walk process.
         bool shortened = SkipPathNodesOutsideFrustum();
 
-        // Look at the set of path nodes and try a few heuristics to get rid of excess nodes, for more direct paths.
-        RemoveExcessPathNodes();
+        // Again, since the skip path nodes code may have removed some nodes.
+        UpdateNextNodesYPos();
+
+        /*
+        Debug::DrawLine(GetOwner()->GetPosition(), GetOwner()->GetPosition() + Vector3::UnitY * 100.0f, Color32::Blue, 10.0f);
+        Debug::DrawLine(mPath.back(), mPath.back() + Vector3::UnitY * 100.0f, Color32::Magenta, 10.0f);
+        for(int i = 1; i < mPath.size(); ++i)
+        {
+            Debug::DrawLine(mPath[i - 1], mPath[i], Color32::Red, 10.0f);
+        }
+        */
 
         // We will walk, so there's always a "walk end" action.
         mWalkActions.push_back(WalkOp::FollowPathEnd);
@@ -388,20 +471,23 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
             bool hasTurnToStartAnims = mWalkStartTurnLeftAnim != nullptr && mWalkStartTurnRightAnim != nullptr;
             if(hasTurnToStartAnims)
             {
-                Vector3 toNext = (mPath.front() - GetOwner()->GetPosition()).Normalize();
-                if(Vector3::Dot(GetOwner()->GetForward(), toNext) < -0.5f)
+                Vector3 currToGoal = (mPath.front() - GetOwner()->GetPosition());
+                if(currToGoal.GetLengthSq() > 30.0f * 30.0f)
                 {
-                    // For initial direction to turn, let's use the goal node direction.
-                    // Just thinking about the real world...you usually turn towards your goal, right?
-                    Vector3 toLastDir = (mPath.front() - GetOwner()->GetPosition()).Normalize();
-                    Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toLastDir);
-                    if(cross.y > 0)
+                    Vector3 toGoal = currToGoal.Normalize();
+                    if(Vector3::Dot(GetOwner()->GetForward(), toGoal) <= 0.0f)
                     {
-                        startOp = WalkOp::FollowPathStartTurnRight;
-                    }
-                    else
-                    {
-                        startOp = WalkOp::FollowPathStartTurnLeft;
+                        // For initial direction to turn, let's use the goal node direction.
+                        // Just thinking about the real world...you usually turn towards your goal, right?
+                        Vector3 cross = Vector3::Cross(GetOwner()->GetForward(), toGoal);
+                        if(cross.y > 0)
+                        {
+                            startOp = WalkOp::FollowPathStartTurnRight;
+                        }
+                        else
+                        {
+                            startOp = WalkOp::FollowPathStartTurnLeft;
+                        }
                     }
                 }
             }
@@ -482,7 +568,12 @@ void Walker::NextAction()
         animParams.animation = mWalkStartAnim;
         animParams.allowMove = true;
         animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+        animParams.finishCallback = [this](){
+            if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStart)
+            {
+                PopAndNextAction();
+            }
+        };
         gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::FollowPathStartTurnLeft)
@@ -495,7 +586,12 @@ void Walker::NextAction()
         animParams.animation = mWalkStartTurnLeftAnim;
         animParams.allowMove = true;
         animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+        animParams.finishCallback = [this](){
+            if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStartTurnLeft)
+            {
+                PopAndNextAction();
+            }
+        };
         gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::FollowPathStartTurnRight)
@@ -508,7 +604,12 @@ void Walker::NextAction()
         animParams.animation = mWalkStartTurnRightAnim;
         animParams.allowMove = true;
         animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+        animParams.finishCallback = [this](){
+            if(!mWalkActions.empty() && mWalkActions.back() == WalkOp::FollowPathStartTurnRight)
+            {
+                PopAndNextAction();
+            }
+        };
         gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::FollowPath)
@@ -540,12 +641,20 @@ void Walker::NextAction()
         gSceneManager.GetScene()->GetAnimator()->Stop(mWalkLoopAnim);
 
         // Play walk stop anim.
-        AnimParams animParams;
-        animParams.animation = mCharConfig->walkStopAnim;
-        animParams.allowMove = true;
-        animParams.fromAutoScript = mFromAutoscript;
-        animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
-        gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+        if(mUsingOverrideWalkAnims)
+        {
+            mWalkActions.clear();
+            NextAction();
+        }
+        else
+        {
+            AnimParams animParams;
+            animParams.animation = mCharConfig->walkStopAnim;
+            animParams.allowMove = true;
+            animParams.fromAutoScript = mFromAutoscript;
+            animParams.finishCallback = std::bind(&Walker::PopAndNextAction, this);
+            gSceneManager.GetScene()->GetAnimator()->Start(animParams);
+        }
     }
     else if(currentWalkOp == WalkOp::TurnToFace)
     {
@@ -613,16 +722,30 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
 
     // Cast a ray from our head in the direction of the target AABB.
     GKObject* obj = static_cast<GKObject*>(mGKOwner);
-    SceneCastResult result = gSceneManager.GetScene()->Raycast(ray, false, &obj);
+    SceneCastResult result = gSceneManager.GetScene()->RaycastAABBs(ray, &obj, 1);
 
     // If hit the target with the ray, it must be in view.
     if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
-       StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()))
+       StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
+       result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun()))
     {
         // Convert ray direction to a "facing" direction,
         dir.y = 0.0f;
         outTurnToFaceDir = dir.Normalize();
         return true;
+    }
+    else
+    {
+        result = gSceneManager.GetScene()->Raycast(ray, false, &obj, 1);
+        if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
+           StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
+           result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun()))
+        {
+            // Convert ray direction to a "facing" direction,
+            dir.y = 0.0f;
+            outTurnToFaceDir = dir.Normalize();
+            return true;
+        }
     }
     return false;
 }
@@ -654,7 +777,7 @@ bool Walker::SkipPathNodesOutsideFrustum()
     Vector3 lastPoppedPathPos;
     Camera* camera = gRenderer.GetCamera();
     Frustum frustum = camera->GetWorldSpaceViewFrustum();
-    while(mPath.size() > 1)
+    while(mPath.size() > 2)
     {
         // Most basic check: skip path node if not within the frustum.
         bool skipPathNode = false;
@@ -696,15 +819,37 @@ bool Walker::SkipPathNodesOutsideFrustum()
         }
         else
         {
-            // This path node WAS NOT skipped, stop shortening path!
-            // But push the last popped position back onto the path (so that walker starts walking _just_ off-screen).
-            if(mPath.size() < originalPathSize)
-            {
-                mPath.push_back(lastPoppedPathPos);
-            }
             break;
         }
     }
+
+    // This path node WAS NOT skipped, stop shortening path!
+    // But push the last popped position back onto the path (so that walker starts walking _just_ off-screen).
+    if(mPath.size() < originalPathSize)
+    {
+        if((mPath.back() - lastPoppedPathPos).GetLengthSq() > 20.0f * 20.0f)
+        {
+            LineSegment ls(mPath.back(), lastPoppedPathPos);
+            int outSideFrustumCounter = 0;
+            for(float t = 0.1f; t <= 1.0f; t += 0.1f)
+            {
+                if(!frustum.ContainsPoint(ls.GetPoint(t)))
+                {
+                    ++outSideFrustumCounter;
+                    if(outSideFrustumCounter >= 5 || t == 1.0f)
+                    {
+                        mPath.push_back(ls.GetPoint(t));
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            mPath.push_back(lastPoppedPathPos);
+        }
+    }
+    //Debug::DrawLine(mPath.back(), mPath[mPath.size() - 2], Color32::Orange, 30.0f);
 
     // If path was shortened, warp walker directly to last spot.
     bool pathWasShortened = mPath.size() < originalPathSize;
@@ -745,78 +890,6 @@ void Walker::RemoveExcessPathNodes()
             }
         }
     }
-
-    // Try to detect and get rid of intermediate path nodes that aren't needed.
-    // One way to do this: if node 0 and node 2 have a walkable straight line between them, node 1 is clearly not needed, right?
-    if(mPath.size() > 2)
-    {
-        int startNodeIndex = 0;
-        int endNodeIndex = startNodeIndex + 2;
-
-        while(endNodeIndex < mPath.size())
-        {
-            bool lineSegmentIsWalkable = true;
-            LineSegment ls(mPath[startNodeIndex], mPath[endNodeIndex]);
-            for(float t = 0.05f; t < 1.0f; t += 0.05f)
-            {
-                if(!mWalkerBoundary->IsWorldPosWalkable(ls.GetPoint(t), 10.0f))
-                {
-                    lineSegmentIsWalkable = false;
-                    break;
-                }
-            }
-
-            if(lineSegmentIsWalkable)
-            {
-                // In this case, we erase the intermediate node.
-                // "endNodeIndex" stays the same, and we try again with the next three positions in the path.
-                mPath.erase(mPath.begin() + startNodeIndex + 1);
-            }
-            else
-            {
-                // In this case, there wasn't a straight line between start/end, so the middle node was important for the path.
-                // Move up to that middle node, and do checks from there now.
-                startNodeIndex++;
-                endNodeIndex = startNodeIndex + 2;
-            }
-        }
-    }
-    /*
-    if(mPath.size() > 2)
-    {
-        int startNodeIndex = mPath.size() - 1;
-        int endNodeIndex = startNodeIndex - 2;
-        while(endNodeIndex >= 0)
-        {
-            bool lineSegmentIsWalkable = true;
-            LineSegment ls(mPath[startNodeIndex], mPath[endNodeIndex]);
-            for(float t = 0.05f; t < 1.0f; t += 0.05f)
-            {
-                if(!mWalkerBoundary->IsWorldPosWalkable(ls.GetPoint(t), 10.0f))
-                {
-                    lineSegmentIsWalkable = false;
-                    break;
-                }
-            }
-
-            if(lineSegmentIsWalkable)
-            {
-                // In this case, we erase the intermediate node.
-                // "endNodeIndex" stays the same, and we try again with the next three positions in the path.
-                mPath.erase(mPath.begin() + startNodeIndex - 1);
-                startNodeIndex--;
-                endNodeIndex = startNodeIndex - 2;
-            }
-            else
-            {
-                // In this case, there wasn't a straight line between start/end, so the middle node was important for the path.
-                // Move up to that middle node, and do checks from there now.
-                startNodeIndex--;
-                endNodeIndex = startNodeIndex - 2;
-            }
-        }
-    }
-    */
 }
 
 bool Walker::AdvancePath()
@@ -842,19 +915,32 @@ bool Walker::AdvancePath()
             while(mPath.size() > atNode)
             {
                 mPath.pop_back();
-
-                // When we're about to walk to a path node, make sure it's y-pos is accurate.
-                // The pathing system operates on the XZ plane, but the world being navigated has height!
-                if(!mPath.empty())
-                {
-                    mPath.back().y = gSceneManager.GetScene()->GetFloorY(mPath.back());
-                }
             }
+
+            // When we're about to walk to a path node, make sure it's y-pos is accurate.
+            // The pathing system operates on the XZ plane, but the world being navigated has height!
+            UpdateNextNodesYPos();
         }
     }
     
     // Return whether path is completed.
     return mPath.empty();
+}
+
+void Walker::UpdateNextNodesYPos()
+{
+    if(!mPath.empty())
+    {
+        mPath.back().y = gSceneManager.GetScene()->GetFloorY(mPath.back());
+    }
+}
+
+float Walker::GetWalkTurnSpeed(Vector3 toNext)
+{
+    const float kFastestTurnSpeedDist = 30.0f;
+    const float kSlowestTurnSpeedDist = 100.0f;
+    float t = Math::Clamp((toNext.GetLength() - kFastestTurnSpeedDist) / (kSlowestTurnSpeedDist - kFastestTurnSpeedDist), 0.0f, 1.0f);
+    return Interpolate::CubicOut(kWalkTurnSpeedMax, kWalkTurnSpeedMin, t);
 }
 
 bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSpeed)

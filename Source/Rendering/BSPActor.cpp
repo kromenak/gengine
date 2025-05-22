@@ -2,6 +2,11 @@
 
 #include "Debug.h"
 
+TYPEINFO_INIT(BSPActor, GKObject, GENERATE_TYPE_ID)
+{
+
+}
+
 BSPActor::BSPActor(BSP* bsp, const std::string& name) : GKObject(),
 	mBSP(bsp)
 {
