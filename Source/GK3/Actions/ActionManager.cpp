@@ -773,51 +773,22 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                 // ALL
                 // GABE_ALL / GRACE_ALL
                 // TIME_BLOCK
-                // OTR_TIME (or custom case with _OTR in it)
+                // OTR_TIME
                 // DIALOGUE_TOPICS_LEFT / NOT_DIALOGUE_TOPICS_LEFT
                 // TIME_BLOCK_OVERRIDE
                 // Custom Logic - action type, and then alphabetical order
-                // 1ST_TIME / 2CD_TIME / 3RD_TIME
+                // 1ST_TIME / 2CD_TIME / 2ND_TIME / 3RD_TIME
                 int caseScore = 0;
                 auto caseLogicIt = mCaseLogic.find(entry.first);
-                if(caseLogicIt != mCaseLogic.end())
-                {
-                    // Custom case logic is only overridden by 1st/2nd/3rd time cases.
-                    caseScore = 7;
-
-                    //TODO: This logic doesn't seem entirely accurate - for example, it doesn't work correctly with GABE_ALL_INV vs. IN_SIDNEY_ADD_DATA.
-                    //TODO: Added custom logic above to deal with that, but...we may need to revise this!
-
-                    // If we already encountered a valid custom case, AND this custom case is also valid, we have a tie.
-                    // Each action has a type - more specific types (e.g. timeblock vs global) win out.
-                    //
-                    // But what if we have two valid custom actions, same type?
-                    // Incredibly, the game seems to just do an alphabetical check at that point!
-                    // The action that is farther in the alphabet gets chosen. This was verified by testing  GABE_ALL_INV vs. IN_SIDNEY_ADD_DATA in INV_ALL.NVC
-                    if(action != nullptr && highestScore == 7)
-                    {
-                        if(entry.second->type > action->type)
-                        {
-                            action = entry.second;
-                        }
-                        else if(entry.second->type == action->type)
-                        {
-                            // If this new case comes SECOND alphabetically, we'll use the new action instead.
-                            std::string prevCase = StringUtil::ToLowerCopy(action->caseLabel);
-                            std::string newCase = StringUtil::ToLowerCopy(entry.first);
-                            if(strcmp(prevCase.c_str(), newCase.c_str()) < 0)
-                            {
-                                action = entry.second;
-                            }
-                        }
-                    }
-                }
-                else if(StringUtil::EqualsIgnoreCase(entry.first, "ALL"))
+                if(StringUtil::EqualsIgnoreCase(entry.first, "ALL") ||
+                   StringUtil::EqualsIgnoreCase(entry.first, "ALL_INV"))
                 {
                     caseScore = 1;
                 }
                 else if(StringUtil::EqualsIgnoreCase(entry.first, "GABE_ALL") ||
-                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL"))
+                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL") ||
+                        StringUtil::EqualsIgnoreCase(entry.first, "GABE_ALL_INV") ||
+                        StringUtil::EqualsIgnoreCase(entry.first, "GRACE_ALL_INV"))
                 {
                     caseScore = 2;
                 }
@@ -838,11 +809,86 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                 {
                     caseScore = 6;
                 }
-                else if(StringUtil::EqualsIgnoreCase(entry.first, "1ST_TIME") ||
-                        StringUtil::EqualsIgnoreCase(entry.first, "2CD_TIME") ||
-                        StringUtil::EqualsIgnoreCase(entry.first, "3RD_TIME"))
+                else if(StringUtil::StartsWithIgnoreCase(entry.first, "1ST_TIME") ||
+                        StringUtil::StartsWithIgnoreCase(entry.first, "2CD_TIME") ||
+                        StringUtil::StartsWithIgnoreCase(entry.first, "2ND_TIME") ||
+                        StringUtil::StartsWithIgnoreCase(entry.first, "3RD_TIME"))
                 {
                     caseScore = 8;
+                }
+                else if(caseLogicIt != mCaseLogic.end())
+                {
+                    // Custom case logic is only overridden by 1st/2nd/3rd time cases.
+                    caseScore = 7;
+                
+                    // If we already encountered a valid custom case, AND this custom case is also valid, we have a tie.
+                    // Each action has a type - more specific types (e.g. timeblock vs global) win out.
+                    //
+                    // But what if we have two valid custom actions, same type?
+                    // Incredibly, the game seems to just do an alphabetical check at that point (with some customizations).
+                    if(action != nullptr && highestScore == 7)
+                    {
+                        if(entry.second->type > action->type)
+                        {
+                            action = entry.second;
+                        }
+                        else if(entry.second->type == action->type)
+                        {
+                            if(StringUtil::EqualsIgnoreCase(action->caseLabel, entry.first))
+                            {
+                                // This would be a weird edge case (two actions with the exact same noun/verb/case?).
+                                // In that scenario, I guess just use the new action.
+                                action = entry.second;
+                            }
+                            else
+                            {
+                                // Cases differ, so we need to compare them alphabetically.
+                                // We can't just use strcmp because the sorting logic is a bit more complex.
+                                // Basically, numbers sort before underscores, and underscores sort before letters.
+                                std::string prevCase = StringUtil::ToUpperCopy(action->caseLabel);
+                                std::string newCase = StringUtil::ToUpperCopy(entry.first);
+                                size_t prevCaseLength = prevCase.length();
+                                size_t newCaseLength = newCase.length();
+
+                                int length = prevCaseLength > newCaseLength ? prevCaseLength : newCaseLength;
+                                for(int i = 0; i < length; ++i)
+                                {
+                                    // The two have identical prefixes, but one is longer than the other.
+                                    // In this case, the shorter action is used.
+                                    if(i >= prevCaseLength)
+                                    {
+                                        break;
+                                    }
+                                    else if(i >= newCaseLength)
+                                    {
+                                        action = entry.second;
+                                        break;
+                                    }
+                                    else if(prevCase[i] != newCase[i])
+                                    {
+                                        // When the characters don't match, we use the one that comes first in an alphabetical sorting.
+                                        // However, the sorting used does have some special logic.
+                                        // A number 0-9 takes priority over a non-number.
+                                        // If both are numbers, the smaller number takes priority.
+                                        // Underscore takes priority over non-underscore.
+                                        // If both are letters, an earlier letter in alphabet takes priority.
+                                        bool prevIsDigit = std::isdigit(prevCase[i]);
+                                        bool newIsDigit = std::isdigit(newCase[i]);
+
+                                        bool useNewCase = (newIsDigit && !prevIsDigit) ||
+                                            (newIsDigit && prevIsDigit && newCase[i] < prevCase[i]) ||
+                                            (newCase[i] == '_' && prevCase[i] != '_' && !prevIsDigit) ||
+                                            (newCase[i] < prevCase[i] && prevCase[i] != '_' && !prevIsDigit);
+                                        if(useNewCase)
+                                        {
+                                            action = entry.second;
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 else
                 {
