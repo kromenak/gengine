@@ -1067,7 +1067,7 @@ void Scene::ExecuteAction(const Action* action)
                 // HACK: To help alleviate that (for now), let's calculate a "near" position in the direction of Ego.
                 // HACK: This "hints" to the walk system that the walk pos should be walkable from Ego's position.
                 Vector3 modelToEgoDir = Vector3::Normalize(mEgo->GetPosition() - obj->GetPosition());
-                Vector3 nearPos = obj->GetPosition() + modelToEgoDir * 25.0f;
+                Vector3 nearPos = obj->GetPosition() + modelToEgoDir * 50.0f;
                 Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(nearPos);
 
                 // We also want "turn to" behavior if already at the walk pos.
