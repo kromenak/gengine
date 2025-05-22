@@ -17,7 +17,7 @@ class Texture;
 class WalkerBoundary
 {
 public:
-	bool FindPath(const Vector3& fromWorldPos, const Vector3& toWorldPos, std::vector<Vector3>& outPath) const;
+	bool FindPath(const Vector3& fromWorldPos, const Vector3& toWorldPos, std::vector<Vector3>& outPath);
 	Vector3 FindNearestWalkablePosition(const Vector3& worldPos) const;
 	
 	void SetTexture(Texture* texture) { mTexture = texture; }
@@ -54,6 +54,10 @@ private:
 
     // Rectangular areas that are blocked and unwalkable.
     std::vector<std::pair<std::string, Rect>> mUnwalkableRects;
+
+    // The pathfinding grids are quite dense, and we can save some time by skipping over some nodes in the grid.
+    // This value starts higher, but is cut in half when we can't find a path.
+    int mPathfindingNodeSkip = 4;
 	
 	bool IsWorldPosWalkable(const Vector3& worldPos) const;
 	bool IsTexturePosWalkable(const Vector2& texturePos) const;
@@ -65,5 +69,6 @@ private:
 	
 	Vector2 FindNearestWalkableTexturePosToWorldPos(const Vector3& worldPos) const;
     
-    bool FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const;
+    bool FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath, int graphFidelity = 1) const;
+    bool FindPathAStar(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const;
 };

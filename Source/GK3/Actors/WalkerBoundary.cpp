@@ -6,10 +6,10 @@
 
 #include "Debug.h"
 #include "GMath.h"
-#include "Texture.h"
 #include "ResizableQueue.h"
+#include "Texture.h"
 
-bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorldPos, std::vector<Vector3>& outPath) const
+bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorldPos, std::vector<Vector3>& outPath)
 {
 	// Make sure path vector is empty.
 	outPath.clear();
@@ -39,13 +39,36 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
 		// Walker will move from current (unwalkable) position to this position when it starts walking.
 		start = FindNearestWalkableTexturePosToWorldPos(fromWorldPos);
 	}
-    
+
     // Use BFS to find a path.
-    // I found that BFS resulted in way better performance than A*, and similar results.
+    // I have implementations of both BFS and A* below - I've consistently found BFS to have better performance and results than A*.
     // In hindsight, I think this is because: a) the graph has a ton of nodes, and b) edges between nodes _aren't really_ weighted.
+
+    // The loop here is to try using sparser graphs (and save a lot of time) if we can.
+    // In a complex scene with a large walker boundary texture, the number of grid nodes is very large (170k in one case).
+    // Usually, the system can successfully find a path when skipping a lot of those nodes. But worst case, we can use all nodes.
+    bool foundPath = false;
     std::vector<Vector2> path;
-    if(FindPathBFS(start, goal, path))
-    // if(FindPathAStar(start, goal, path))
+    while(!foundPath)
+    {
+        foundPath = FindPathBFS(start, goal, path, mPathfindingNodeSkip);
+        if(!foundPath)
+        {
+            if(mPathfindingNodeSkip > 1)
+            {
+                printf("Failed to find path - trying again with higher fidelity\n");
+                mPathfindingNodeSkip /= 2;
+            }
+            else
+            {
+                // If skip interval is already 1, we can't get any higher fidelity - the path just doesn't exist.
+                break;
+            }
+        }
+    }
+
+    // If we found a path, do some processing on it.
+    if(!path.empty())
     {
         // Ok, we found a path, but it's probably too close to walls and such.
         // So, let's try to condition it a little bit to fix that.
@@ -54,7 +77,7 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
             // We should ignore the first few nodes and last few nodes when doing conditioning.
             // This is because start/end nodes are _exact_ destinations (i.e. character starts here and wants to get there - don't mess with it).
             const int kFuzzyIgnore = 1;
-            if(i > path.size() - kFuzzyIgnore) { continue; }
+            if(i >= path.size() - kFuzzyIgnore) { continue; }
             if(i < kFuzzyIgnore) { break; }
 
             // Palette indexes on walker boundary textures provide some indication of how "walkable" the current position is.
@@ -114,6 +137,83 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
 
                     // Update index being considered for next run through loop.
                     index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
+                    if(index < 6)
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // This is a sort of "string pulling" algorithm:
+        // Given three points, if we can walk directly between the first and third point, we can get rid of the second point.
+        if(path.size() > 2)
+        {
+            int startNodeIndex = 0;
+            int endNodeIndex = startNodeIndex + 2;
+            int erasedNodeCount = 0;
+
+            while(endNodeIndex < path.size())
+            {
+                Vector2 current = path[startNodeIndex];
+                Vector2 end = path[endNodeIndex];
+
+                bool canWalk = true;
+                while(current != end)
+                {
+                    if(current.x < end.x)
+                    {
+                        current.x += 1;
+                    }
+                    else if(current.x > end.x)
+                    {
+                        current.x -= 1;
+                    }
+                    if(current.y < end.y)
+                    {
+                        current.y += 1;
+                    }
+                    else if(current.y > end.y)
+                    {
+                        current.y -= 1;
+                    }
+
+                    if(!IsTexturePosWalkable(current))
+                    {
+                        canWalk = false;
+                        break;
+                    }
+                    else
+                    {
+                        int paletteIndex = mTexture->GetPaletteIndex(current.x, current.y);
+                        if(paletteIndex > 6 && paletteIndex < 128)
+                        {
+                            canWalk = false;
+                            break;
+                        }
+                    }
+                }
+
+                if(canWalk)
+                {
+                    // In this case, we erase the intermediate node.
+                    // "endNodeIndex" stays the same, and we try again with the next three positions in the path.
+                    path.erase(path.begin() + startNodeIndex + 1);
+                    ++erasedNodeCount;
+                }
+
+                // In this case, there wasn't a straight line between start/end, so the middle node was important for the path.
+                // Move up to that middle node, and do checks from there now.
+                if(!canWalk)
+                {
+                    ++startNodeIndex;
+                    endNodeIndex = startNodeIndex + 2;
+                }
+                else if(erasedNodeCount > 3) // don't erase TOO many points - set a limit before moving on
+                {
+                    ++startNodeIndex;
+                    endNodeIndex = startNodeIndex + 2;
+                    erasedNodeCount = 0;
                 }
             }
         }
@@ -373,8 +473,10 @@ namespace
     ResizableQueue<size_t> openSet;
 }
 
-bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const
+bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath, int nodeSkipInterval) const
 {
+    //TIMER_SCOPED("BFS");
+
     // Figure out how many nodes we need for the current walker boundary texture.
     uint32_t width = mTexture->GetWidth();
     uint32_t height = mTexture->GetHeight();
@@ -394,15 +496,49 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
     // Make sure open set is empty.
     openSet.Clear();
 
-    // Put start node on the open set, mark as closed/explored.
-    size_t startIndex = static_cast<size_t>(start.y * width + start.x);
+    // What do we mean by "fidelity"?
+    // These walker graphs are very dense (1 pixel equals one node). By skipping some pixels, we get a simpler graph, and a faster algorithm.
+    // A fidelity of 2 only uses every other pixel, 3 only uses every third pixel, and so on.
+    
+    // Calculate start point index, ensuring it aligns with the desired graph fidelity.
+    uint32_t startX = static_cast<uint32_t>(start.x);
+    uint32_t startY = static_cast<uint32_t>(start.y);
+    if(startX % nodeSkipInterval != 0)
+    {
+        startX = startX / nodeSkipInterval * nodeSkipInterval;
+    }
+    if(startY % nodeSkipInterval != 0)
+    {
+        startY = startY / nodeSkipInterval * nodeSkipInterval;
+    }
+    size_t startIndex = static_cast<size_t>(startY * width + startX);
+
+    // Close start node, put it on the open set.
     nodes[startIndex].closed = true;
     openSet.Push(startIndex);
 
-    // Cache goal index to quickly check if we reached the goal.
-    size_t goalIndex = static_cast<size_t>(goal.y * width + goal.x);
+    // Cache goal index to quickly check if we reached the goal. Same idea with the fidelity here.
+    uint32_t goalX = static_cast<uint32_t>(goal.x);
+    uint32_t goalY = static_cast<uint32_t>(goal.y);
+    if(goalX % nodeSkipInterval != 0)
+    {
+        goalX = goalX / nodeSkipInterval * nodeSkipInterval;
+    }
+    if(goalY % nodeSkipInterval != 0)
+    {
+        goalY = goalY / nodeSkipInterval * nodeSkipInterval;
+    }
+    size_t goalIndex = static_cast<size_t>(goalY * width + goalX);
+
+    // If start and goal are the same point, we can early out.
+    if(startIndex == goalIndex)
+    {
+        outPath.clear();
+        return true;
+    }
 
     // Iterate until we either find the goal, or the open set is empty.
+    Vector2 neighbors[8];
     while(!openSet.Empty())
     {
         // If we find the goal, we purposely don't pop the node off the open set.
@@ -412,26 +548,19 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
 
         // Create neighbors array - including diagonals!
         Vector2 currentValue(currentIndex % width, currentIndex / width);
-        Vector2 neighbors[8];
-        neighbors[0] = currentValue + Vector2(0, 1);
-        neighbors[1] = currentValue + Vector2(0, -1);
-        neighbors[2] = currentValue + Vector2(1, 0);
-        neighbors[3] = currentValue + Vector2(-1, 0);
+        neighbors[0] = currentValue + Vector2(0, nodeSkipInterval);
+        neighbors[1] = currentValue + Vector2(0, -nodeSkipInterval);
+        neighbors[2] = currentValue + Vector2(nodeSkipInterval, 0);
+        neighbors[3] = currentValue + Vector2(-nodeSkipInterval, 0);
 
-        neighbors[4] = currentValue + Vector2(1, 1);
-        neighbors[5] = currentValue + Vector2(1, -1);
-        neighbors[6] = currentValue + Vector2(-1, 1);
-        neighbors[7] = currentValue + Vector2(-1, -1);
+        neighbors[4] = currentValue + Vector2(nodeSkipInterval, nodeSkipInterval);
+        neighbors[5] = currentValue + Vector2(nodeSkipInterval, -nodeSkipInterval);
+        neighbors[6] = currentValue + Vector2(-nodeSkipInterval, nodeSkipInterval);
+        neighbors[7] = currentValue + Vector2(-nodeSkipInterval, -nodeSkipInterval);
 
         // See if we should add neighbors to open set.
         for(Vector2& neighbor : neighbors)
         {
-            // Ignore any neighbor that is not walkable.
-            if(!IsTexturePosWalkable(neighbor))
-            {
-                continue;
-            }
-
             // Ignore any x/y that appears to be out of bounds.
             if(neighbor.x < 0 || neighbor.x >= width || neighbor.y < 0 || neighbor.y >= height)
             {
@@ -443,6 +572,12 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
             Node& neighborNode = nodes[neighborNodeIndex];
             if(neighborNode.closed) { continue; }
 
+            // Ignore any neighbor that is not walkable.
+            if(!IsTexturePosWalkable(neighbor))
+            {
+                continue;
+            }
+            
             // Add to open set.
             neighborNode.parentIndex = currentIndex;
             neighborNode.closed = true;
@@ -459,13 +594,169 @@ bool WalkerBoundary::FindPathBFS(const Vector2& start, const Vector2& goal, std:
         return false;
     }
 
+    // Make sure the actual goal is the first point on the path.
+    outPath.push_back(goal);
+
     // Iterate back to start, pushing world position of each node onto our path.
     // This leaves the path with start node at back, goal node at front - caller can traverse back-to-front.
-    size_t current = openSet.Front();
+    size_t current = nodes[openSet.Front()].parentIndex;
     while(current != startIndex)
     {
         outPath.push_back(Vector2(current % width, current / width));
         current = nodes[current].parentIndex;
+    }
+
+    // Make sure the actual start is the last point on the path.
+    outPath.push_back(start);
+
+    // We found a path! Noice.
+    return true;
+}
+
+namespace
+{
+    // A subclass of the built-in priority queue that provides a "clear" function, and orders elements appropriately for A*
+    typedef std::pair<uint32_t, size_t> CostAndIndex;
+    class AStarPriorityQueue : public std::priority_queue<CostAndIndex, std::vector<CostAndIndex>, std::greater<CostAndIndex>>
+    {
+    public:
+        void clear()
+        {
+            this->c.clear();
+        }
+    };
+    AStarPriorityQueue openSetAS;
+
+    // Maps each node index to its parent.
+    std::vector<size_t> parents;
+
+    // The g(x) cost to each node, and the f(x) priority for each node.
+    std::vector<uint32_t> g;
+    std::vector<uint32_t> f;
+}
+
+bool WalkerBoundary::FindPathAStar(const Vector2& start, const Vector2& goal, std::vector<Vector2>& outPath) const
+{
+    //TIMER_SCOPED("A*");
+
+    // Figure out how many nodes we need for the current walker boundary texture.
+    uint32_t width = mTexture->GetWidth();
+    uint32_t height = mTexture->GetHeight();
+    uint32_t nodeCount = width * height;
+    if(nodeCount == 0) { return false; }
+
+    // Make sure node set is the right size. When entering a new scene, a resize up or down will likely be needed.
+    // Note that resizing doesn't ever reduce capacity, so this will eventually be the size of the largest texture in the current play session.
+    if(parents.size() != nodeCount)
+    {
+        parents.resize(nodeCount);
+        g.resize(nodeCount);
+        f.resize(nodeCount);
+    }
+
+    // Regardless of whether a resize occurred, we need to reset the working variables in each node.
+    memset(&parents[0], 0, sizeof(parents[0]) * parents.size());
+    memset(&g[0], 0, sizeof(g[0]) * g.size());
+    memset(&f[0], 0, sizeof(f[0]) * f.size());
+
+    // Make sure open set is empty.
+    openSetAS.clear();
+
+    // Cache goal index to quickly check if we reached the goal.
+    size_t goalIndex = static_cast<size_t>(goal.y * width + goal.x);
+    bool foundPath = false;
+
+    // Add start node.
+    size_t startIndex = static_cast<size_t>(start.y * width + start.x);
+    openSetAS.emplace(0, startIndex);
+
+    Vector2 neighbors[4];
+    while(!openSetAS.empty())
+    {
+        uint32_t topPriority = openSetAS.top().first;
+        size_t currentIndex = openSetAS.top().second;
+        openSetAS.pop();
+
+        // If the priority for this entry doesn't match the latest priority for that index, skip it.
+        // This means we updated the priority of this node at some point, so this old entry is stale and can be ignored.
+        if(topPriority != f[currentIndex])
+        {
+            continue;
+        }
+
+        // If we find the goal, break out of the loop.
+        // This leaves the goal on the open set.
+        if(currentIndex == goalIndex)
+        {
+            foundPath = true;
+            break;
+        }
+
+        // Create neighbors array - including diagonals!
+        Vector2 currentValue(currentIndex % width, currentIndex / width);
+        neighbors[0] = currentValue + Vector2(0, 1);
+        neighbors[1] = currentValue + Vector2(0, -1);
+        neighbors[2] = currentValue + Vector2(1, 0);
+        neighbors[3] = currentValue + Vector2(-1, 0);
+
+        // See if we should add neighbors to open set.
+        for(Vector2& neighbor : neighbors)
+        {
+            // Ignore any x/y that appears to be out of bounds.
+            if(neighbor.x < 0 || neighbor.x >= width || neighbor.y < 0 || neighbor.y >= height)
+            {
+                continue;
+            }
+
+            // Ignore any neighbor that is not walkable.
+            if(!IsTexturePosWalkable(neighbor))
+            {
+                continue;
+            }
+
+            // The new cost for this node is current node plus one (all edges are cost 1 in this graph).
+            uint32_t newCost = g[currentIndex] + 1;
+
+            // This node is in the closed set if it's "g" value has already been calculated.
+            // One notable exception is the start index, which is always zero, but is also always in the closed set.
+            int neighborIndex = static_cast<int>(neighbor.y * width + neighbor.x);
+            bool inClosedSet = g[neighborIndex] > 0 || neighborIndex == startIndex;
+
+            // We'll process this node if it's either a node we've never seen before, OR if the new cost is less than what we previously recorded.
+            if(!inClosedSet || newCost < g[neighborIndex])
+            {
+                // Update to new cost.
+                g[neighborIndex] = newCost;
+
+                // Calculate a new f(x) - this is the nodes priority.
+                uint32_t heuristic = static_cast<uint32_t>(Math::Abs(goal.x - neighbor.x) + Math::Abs(goal.y - neighbor.y));
+                uint32_t priority = newCost + heuristic;
+                f[neighborIndex] = priority;
+
+                // Put in open set with this priority.
+                // Note that duplicate entries are possible with this approach. There might be multiple open set entries for a single node with different priorities.
+                // But we catch this at the top of the while loop, and ignore stale priorities.
+                openSetAS.emplace(priority, neighborIndex);
+
+                // Update parent of this neighbor to the current node.
+                parents[neighborIndex] = currentIndex;
+            }
+        }
+    }
+
+    // If open set is empty, we did not find the goal. No path can be generated.
+    if(!foundPath)
+    {
+        return false;
+    }
+
+    // Iterate back to start, pushing world position of each node onto our path.
+    // This leaves the path with start node at back, goal node at front - caller can traverse back-to-front.
+    size_t currentIndex = goalIndex;
+    while(currentIndex != startIndex)
+    {
+        outPath.push_back(Vector2(currentIndex % width, currentIndex / width));
+        currentIndex = parents[currentIndex];
     }
     outPath.push_back(start);
 
