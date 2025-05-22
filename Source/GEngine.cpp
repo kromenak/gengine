@@ -521,7 +521,6 @@ void GEngine::Update()
     //printf("%f ms\n", deltaTime);
 
     // In debug, calculate an average FPS and display it in the window's title bar.
-    #if defined(DEBUG)
     {
         // Current FPS is inverse of delta time.
         float currentFps = 1.0f / deltaTime;
@@ -562,7 +561,6 @@ void GEngine::Update()
         // Set title to show updated value.
         Window::SetTitle(StringUtil::Format("Gabriel Knight 3 (%.2f FPS)", averageFps).c_str());
     }
-    #endif
 
     if(!Loader::IsLoading())
     {
