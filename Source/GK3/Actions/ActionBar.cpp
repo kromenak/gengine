@@ -74,12 +74,14 @@ struct SortActions
     }
 };
 
-void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback)
+void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions,
+                     std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback,
+                     bool centerOnPointer)
 {
 	// Hide if not already hidden (make sure buttons are freed).
 	Hide();
 	
-	// If we don't have any actions, don't need to do anything!
+	// Sort actions based on some criteria, so they appear in a deterministic order when the bar is shown.
     std::sort(actions.begin(), actions.end(), SortActions());
 
     // Save cancel callback.
@@ -197,10 +199,13 @@ void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<con
 	// Refresh layout after adding all buttons to position everything correctly.
 	RefreshButtonLayout();
 	
-	// Position action bar at pointer.
-	// This also makes sure it doesn't go offscreen.
-	CenterOnPointer();
-    
+	// If desired, center the action bar under the pointer's current position.
+    // This typically only happens when the action bar is shown due to a click input.
+    if(centerOnPointer)
+    {
+        CenterOnPointer();
+    }
+
 	// It's showing now!
 	mButtonHolder->GetOwner()->SetActive(true);
     
@@ -365,8 +370,9 @@ void ActionBar::CenterOnPointer()
 {
 	// Position action bar at mouse position.
 	mButtonHolder->SetAnchoredPosition(gInputManager.GetMousePosition());
-	
-	// Keep inside the screen.
+
+    // Moving the button holder may put it offscreen, if the pointer is near the screen edge.
+    // So, move it back on-screen in that case.
     mButtonHolder->MoveInsideRect(Window::GetRect());
 }
 

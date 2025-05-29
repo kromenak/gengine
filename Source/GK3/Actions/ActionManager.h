@@ -74,8 +74,7 @@ public:
 	
 	// Action Bar
 	void ShowActionBar(const std::string& noun, std::function<void(const Action*)> selectCallback);
-	void ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback = nullptr);
-	void ShowTopicBar();
+	void ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback = nullptr, bool centerOnPointer = true);
 	bool IsActionBarShowing() const;
 	ActionBar* GetActionBar() const { return mActionBar; }
     void HideActionBar() const;

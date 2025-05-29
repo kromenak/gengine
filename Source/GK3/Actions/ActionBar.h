@@ -25,7 +25,9 @@ class ActionBar : public Actor
 public:
 	ActionBar();
 	
-	void Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions, std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback);
+	void Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions,
+              std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback,
+              bool centerOnPointer = true);
 	void Hide();
 	
 	bool IsShowing() const;

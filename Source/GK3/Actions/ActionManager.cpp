@@ -541,6 +541,21 @@ void ActionManager::ShowActionBar(const std::string& noun, std::function<void(co
 	mActionBar->Show(noun, VerbType::Normal, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
 }
 
+void ActionManager::ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback, bool centerOnPointer)
+{
+    // See if we have any more topics to discuss with this noun (person).
+    // If not, we will pre-emptively cancel the bar and return.
+    auto actions = GetActions(noun, VerbType::Topic);
+    if(actions.size() == 0)
+    {
+        OnActionBarCanceled();
+        return;
+    }
+
+    // Show topics.
+    mActionBar->Show(noun, VerbType::Topic, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this), centerOnPointer);
+}
+
 bool ActionManager::IsActionBarShowing() const
 {
 	return mActionBar->IsShowing();
@@ -558,41 +573,6 @@ void ActionManager::OnPersist(PersistState& ps)
 
     // Since we aren't going to allow saving/loading during actions,
     // we don't have to worry about saving/loading *most* stuff in here...I hope.
-}
-
-void ActionManager::ShowTopicBar(const std::string& noun, std::function<void(const Action*)> selectCallback)
-{
-	// See if we have any more topics to discuss with this noun (person).
-	// If not, we will pre-emptively cancel the bar and return.
-	auto actions = GetActions(noun, VerbType::Topic);
-	if(actions.size() == 0)
-    {
-        OnActionBarCanceled();
-        return;
-    }
-	
-	// Show topics.
-	mActionBar->Show(noun, VerbType::Topic, actions, selectCallback, std::bind(&ActionManager::OnActionBarCanceled, this));
-}
-
-void ActionManager::ShowTopicBar()
-{
-	// Attempt to derive noun from current or last action.
-	std::string noun;
-	if(mCurrentAction != nullptr)
-	{
-		noun = mCurrentAction->noun;
-	}
-	else if(mLastAction != nullptr)
-	{
-		noun = mLastAction->noun;
-	}
-	
-	// Couldn't derive noun to use...so fail.
-	if(noun.empty()) { return; }
-	
-	// Show topic bar with same noun again.
-	ShowTopicBar(noun);
 }
 
 bool ActionManager::IsActionSetForTimeblock(const std::string& assetName, const Timeblock& timeblock)
@@ -872,8 +852,8 @@ Action* ActionManager::GetHighestPriorityAction(const std::string& noun, const s
                                         // If both are numbers, the smaller number takes priority.
                                         // Underscore takes priority over non-underscore.
                                         // If both are letters, an earlier letter in alphabet takes priority.
-                                        bool prevIsDigit = std::isdigit(prevCase[i]);
-                                        bool newIsDigit = std::isdigit(newCase[i]);
+                                        bool prevIsDigit = std::isdigit(prevCase[i]) != 0;
+                                        bool newIsDigit = std::isdigit(newCase[i]) != 0;
 
                                         bool useNewCase = (newIsDigit && !prevIsDigit) ||
                                             (newIsDigit && prevIsDigit && newCase[i] < prevCase[i]) ||
@@ -998,15 +978,15 @@ void ActionManager::OnActionExecuteFinished()
     // When a "talk" action ends, try to show the topic bar.
     if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "TALK"))
     {
-        ShowTopicBar(mLastAction->noun);
+        ShowTopicBar(mLastAction->noun, nullptr, true);
     }
     else if(!mLastAction->talkTo.empty())
     {
-        ShowTopicBar(mLastAction->talkTo);
+        ShowTopicBar(mLastAction->talkTo, nullptr, true);
     }
 	else if(gVerbManager.IsTopic(mLastAction->verb))
 	{
-		ShowTopicBar(mLastAction->noun);
+		ShowTopicBar(mLastAction->noun, nullptr, false);
 	}
     else if(StringUtil::EqualsIgnoreCase(mLastAction->verb, "Z_CHAT")) // chatting always seems to end the current convo/action bar.
     {
@@ -1016,11 +996,11 @@ void ActionManager::OnActionExecuteFinished()
     {
         if(!mLastAction->talkTo.empty())
         {
-            ShowTopicBar(mLastAction->talkTo);
+            ShowTopicBar(mLastAction->talkTo, nullptr, true);
         }
         else
         {
-            ShowTopicBar(mLastAction->noun);
+            ShowTopicBar(mLastAction->noun, nullptr, true);
         }
     }
     else if(mCurrentAction == nullptr && !mActionQueue.empty())
