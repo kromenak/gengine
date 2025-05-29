@@ -266,9 +266,6 @@ void Walker::OnUpdate(float deltaTime)
         {
             SkipToEnd(true);
             return;
-
-            // Be sure to update the current op, since the skip action may have changed it.
-            currentWalkOp = GetCurrentWalkOp();
         }
 
         // Increase current action timer.
@@ -419,6 +416,21 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
     // Time to create a new walk plan.
     WalkOp currentWalkOp = GetCurrentWalkOp();
     mWalkActions.clear();
+
+    // If action skipping, we don't need to find a path or do anything - just put the walker directly at the desired position/heading!
+    if(gActionManager.IsSkippingCurrentAction())
+    {
+        mGKOwner->SetPosition(position);
+        if(heading.IsValid())
+        {
+            mGKOwner->SetHeading(heading);
+        }
+        if(finishCallback != nullptr)
+        {
+            finishCallback();
+        }
+        return;
+    }
     
     // If heading is specified, save "turn to face" action.
     if(heading.IsValid())
@@ -765,8 +777,9 @@ void Walker::CalculatePath(const Vector3& startPos, const Vector3& endPos)
 
 bool Walker::SkipPathNodesOutsideFrustum()
 {
-    // Autoscript paths should NOT be shortened (or...should this be non-ego paths?).
-    if(mFromAutoscript)
+    // Skipping path nodes outside the view frustum is mainly meant for user-initiated walk actions.
+    // Don't do this for AI walkers (autoscript), if this isn't the Ego, or if we're in a cutscene/action.
+    if(mFromAutoscript || mGKOwner != gSceneManager.GetScene()->GetEgo() || gActionManager.IsActionPlaying())
     {
         return false;
     }
