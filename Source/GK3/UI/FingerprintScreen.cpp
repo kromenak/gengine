@@ -405,6 +405,9 @@ void FingerprintScreen::Show(const std::string& nounName)
         mFingerprintObjectImage->SetTexture(&Texture::Black);
     }
 
+    // Reset collected print count for new object.
+    mCollectedPrintCount = 0;
+
     // Position fingerprint images and hide them to start.
     int imageIndex = 0;
     if(mActiveObject != nullptr)
@@ -418,21 +421,31 @@ void FingerprintScreen::Show(const std::string& nounName)
                 continue;
             }
 
-            // Skip this fingerprint if not the right timeblock.
+            // Set fingerprint texture on the image.
             FingerprintObject::Fingerprint& fp = mActiveObject->fingerprints[fpIndex];
-
             Texture* printTexture = gAssetManager.LoadTexture(fp.textureName);
             printTexture->SetTransparentColor(Color32::Black);
             //Texture* alphaTexture = gAssetManager.LoadTexture(printTexture->GetNameNoExtension() + "A");
             //printTexture->ApplyAlphaChannel(*alphaTexture, true);
-
             mPrintsToCollect[imageIndex].image->SetTexture(printTexture, true);
+
+            // Enable the image and position it correctly.
             mPrintsToCollect[imageIndex].image->SetEnabled(true);
             mPrintsToCollect[imageIndex].image->GetRectTransform()->SetAnchoredPosition(fp.position);
 
+            // Set alpha to zero so it's initially invisible.
             mPrintsToCollect[imageIndex].image->SetColor(Color32(0, 0, 0, 0));
             mPrintsToCollect[imageIndex].alpha = 0.0f;
 
+            // Set "collected" flag appropriately.
+            // If you've already gotten this print before, its associated flag(s) will be set.
+            mPrintsToCollect[imageIndex].collected = gGameProgress.GetFlag(fp.flagName) || gGameProgress.GetFlag(fp.flagNameGrace);
+            if(mPrintsToCollect[imageIndex].collected)
+            {
+                ++mCollectedPrintCount;
+            }
+
+            // Hook up some action to take when collecting this print.
             mPrintsToCollect[imageIndex].button->SetPressCallback([this, imageIndex](UIButton* button){
                 OnFingerprintPressed(imageIndex);
             });
