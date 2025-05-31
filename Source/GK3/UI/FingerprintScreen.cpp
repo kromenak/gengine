@@ -151,7 +151,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_LHOMIR_P1.BMP";
-        object.fingerprints.back().position = Vector2(163.0f, 135.0f);
+        object.fingerprints.back().position = Vector2(160.0f, 134.0f);
         object.fingerprints.back().uncoverPrintLicensePlate = "2O8A805PF1";
         object.fingerprints.back().invItemName = "HOWARDS_FINGERPRINT";
         object.fingerprints.back().flagName = "GotMirrorHowardPrint";
@@ -178,7 +178,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_CIGS_P1.BMP";
-        object.fingerprints.back().position = Vector2(112.0f, 200.0f);
+        object.fingerprints.back().position = Vector2(101.0f, 201.0f);
         object.fingerprints.back().uncoverPrintLicensePlate = "0D83M05ML1";
         object.fingerprints.back().invItemName = "ABBE_FINGERPRINT";
         object.fingerprints.back().flagName = "GotCigPackAbbePrint";
@@ -265,7 +265,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
 
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_SODA_P1.BMP";
-        object.fingerprints.back().position = Vector2(150.0f, 153.0f);
+        object.fingerprints.back().position = Vector2(147.0f, 150.0f);
         object.fingerprints.back().invItemName = ""; // No inventory item added for this one.
         object.fingerprints.back().flagName = "GotPMoselyPrint";
         object.fingerprints.back().scoreName = "e_202p_r25_fingerprint_kit_soda_bottle";
@@ -312,7 +312,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         // The first fingerprint, collected during 302A.
         object.fingerprints.emplace_back();
         object.fingerprints.back().textureName = "FP_BLOMAN_P6.BMP";
-        object.fingerprints.back().position = Vector2(206.0f, 310.0f);
+        object.fingerprints.back().position = Vector2(206.0f, 301.0f);
         object.fingerprints.back().invItemName = "LARRYS_FINGERPRINT";
         object.fingerprints.back().flagName = "GotMLarryPrint";
         object.fingerprints.back().scoreName = "e_302a_inventory_fingerprint_kit_manuscript";
