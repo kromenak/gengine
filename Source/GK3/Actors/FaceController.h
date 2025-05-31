@@ -7,6 +7,8 @@
 #pragma once
 #include "Component.h"
 
+#include <string>
+
 #include "Vector2.h"
 
 class Animation;
@@ -79,7 +81,6 @@ private:
 	Texture* mCurrentMouthTexture = nullptr;
 	Texture* mCurrentEyelidsTexture = nullptr;
 	Texture* mCurrentForeheadTexture = nullptr;
-	
 	Texture* mCurrentLeftEyeTexture = nullptr;
 	Texture* mCurrentRightEyeTexture = nullptr;
 	
@@ -87,14 +88,12 @@ private:
 	Texture* mDefaultMouthTexture = nullptr;
 	Texture* mDefaultEyelidsTexture = nullptr;
 	Texture* mDefaultForeheadTexture = nullptr;
-	
 	Texture* mDefaultLeftEyeTexture = nullptr;
 	Texture* mDefaultRightEyeTexture = nullptr;
 
-    // Eye textures are fairly large (100x104) and are downsampled to ~1/4th the size.
-    // Exactly 1/4th would be 25x26, BUT that height is too big for some faces - 22 seems to work pretty well.
+    // Eye textures are fairly large (100x104) and are downsampled to 1/4th the size before being copied to the final face texture.
     const int kDownSampledEyeWidth = 25;
-    const int kDownSampledEyeHeight = 22;
+    const int kDownSampledEyeHeight = 26;
 	Texture* mDownsampledLeftEyeTexture = nullptr;
 	Texture* mDownsampledRightEyeTexture = nullptr;
 	
@@ -102,12 +101,11 @@ private:
 	// Set randomly based on interval specified in face config.
 	float mBlinkTimer = 0.0f;
 	
-	// If eye jitter is enabled, apply some jitter within a range (based on character config)
-	// before downsampling eyes to construct the face.
+	// If true, eyes move slightly every few seconds, to make the character feel more real/alive.
+    // The offset is a small amount of movement applied to the eye's current position right before downsampling.
 	bool mEyeJitterEnabled = true;
 	float mEyeJitterTimer = 0.0f;
-	float mEyeJitterX = 0.0f;
-	float mEyeJitterY = 0.0f;
+    Vector2 mEyeJitterOffset;
 	
 	// A mood for the actor, if any. Default is "no mood" (aka "normal").
 	// Actors can enter and exit moods. This requires "on" and "off" anims to exist.
@@ -119,5 +117,6 @@ private:
 	void RollEyeJitterTimer();
 
 	void UpdateFaceTexture();
+    void UpdateEyeOnFaceTexture(Texture* eyeTexture, Texture* downsampledTexture, const Vector2& offset, const Vector2& bias);
     void DownsampleEyeTexture(Texture* src, Texture* dst, const Vector2& offset);
 };

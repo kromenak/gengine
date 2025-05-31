@@ -17,8 +17,7 @@ TYPEINFO_INIT(FaceController, Component, 6)
     TYPEINFO_VAR(FaceController, VariableType::Float, mBlinkTimer);
     TYPEINFO_VAR(FaceController, VariableType::Bool, mEyeJitterEnabled);
     TYPEINFO_VAR(FaceController, VariableType::Float, mEyeJitterTimer);
-    TYPEINFO_VAR(FaceController, VariableType::Float, mEyeJitterX);
-    TYPEINFO_VAR(FaceController, VariableType::Float, mEyeJitterY);
+    TYPEINFO_VAR(FaceController, VariableType::Vector2, mEyeJitterOffset);
     TYPEINFO_VAR(FaceController, VariableType::String, mMood);
 }
 
@@ -223,15 +222,14 @@ void FaceController::SetEyeJitterEnabled(bool enabled)
 
 void FaceController::EyeJitter()
 {
-	//TODO: This eye jitter behavior doesn't seem quite right...
-	//TODO: Maybe I have to limit x/y between max, but ALSO only allow at most 2px movement each time?
-	//TODO: Or something else...anyway, it can definitely be better.
-	float maxX = mCharacterConfig->faceConfig->maxEyeJitterDistance.x;
-	mEyeJitterX = Random::Range(-maxX, maxX);
-	
-	float maxY = mCharacterConfig->faceConfig->maxEyeJitterDistance.y;
-	mEyeJitterY = Random::Range(-maxY, maxY);
-	
+	// The eye jitter is defined in sub-pixels.
+    // Since we downsample to 25% size, this means each subpixel is 1/4th of a pixel.
+    float maxX = mCharacterConfig->faceConfig->maxEyeJitterDistance.x / 4.0f;
+    float maxY = mCharacterConfig->faceConfig->maxEyeJitterDistance.y / 4.0f;
+    mEyeJitterOffset = Vector2(Random::Range(-maxX, maxX),
+                               Random::Range(-maxY, maxY));
+
+    // Changing the eye jitter causes the face to change - update it.
 	UpdateFaceTexture();
 }
 
@@ -352,25 +350,9 @@ void FaceController::UpdateFaceTexture()
 		Texture::BlendPixels(*mCurrentMouthTexture, *mFaceTexture, mouthOffset.x, mouthOffset.y);
 	}
 		
-	// Downsample & copy left eye.
-	if(mCurrentLeftEyeTexture != nullptr)
-	{
-        Vector2 offset;
-        DownsampleEyeTexture(mCurrentLeftEyeTexture, mDownsampledLeftEyeTexture, offset);
-
-		const Vector2& leftEyeOffset = mCharacterConfig->faceConfig->leftEyeOffset;
-		Texture::BlendPixels(*mDownsampledLeftEyeTexture, *mFaceTexture, leftEyeOffset.x, leftEyeOffset.y);
-	}
-	
-	// Downsample & copy right eye.
-	if(mCurrentRightEyeTexture != nullptr)
-	{
-        Vector2 offset;
-        DownsampleEyeTexture(mCurrentRightEyeTexture, mDownsampledRightEyeTexture, offset);
-
-		const Vector2& rightEyeOffset = mCharacterConfig->faceConfig->rightEyeOffset;
-		Texture::BlendPixels(*mDownsampledRightEyeTexture, *mFaceTexture, rightEyeOffset.x, rightEyeOffset.y);
-	}
+	// Copy eye textures.
+    UpdateEyeOnFaceTexture(mCurrentLeftEyeTexture, mDownsampledLeftEyeTexture, mCharacterConfig->faceConfig->leftEyeOffset, mCharacterConfig->faceConfig->leftEyeBias);
+    UpdateEyeOnFaceTexture(mCurrentRightEyeTexture, mDownsampledRightEyeTexture, mCharacterConfig->faceConfig->rightEyeOffset, mCharacterConfig->faceConfig->rightEyeBias);
 	
 	// Copy eyelids texture.
 	if(mCurrentEyelidsTexture != nullptr)
@@ -390,8 +372,46 @@ void FaceController::UpdateFaceTexture()
 	mFaceTexture->UploadToGPU();
 }
 
+void FaceController::UpdateEyeOnFaceTexture(Texture* eyeTexture, Texture* downsampledTexture, const Vector2& offset, const Vector2& bias)
+{
+    if(eyeTexture == nullptr || downsampledTexture == nullptr || mFaceTexture == nullptr) { return; }
+
+    // Before downsampling the 100x104 eye texture to 25% resolution, we need to calculate an "offset" for the downsample.
+    // This offset allows us to adjust the eye position at the sub-pixel level. During downsample, the offset "nudges" the eye slightly left/right/down/up.
+
+    // After some experimentation, I found that with no bias and no eye jitter, the value (0.5, 1) matches what you'd see in the original game.
+    Vector2 downsampleOffset(0.5f, 1.0f);
+
+    // Apply the bias from the character's config file. This can be thought of as a global nudge from the initial/default offset.
+    // From testing, this value needs to be subtracted, rather than added, to get the correct result (likely a mismatch between their conventions and sbt's conventions).
+    downsampleOffset -= bias;
+
+    // Eye jitter is an additional offset, which gets recalculated every few seconds. Add that as well.
+    // (It may be that the most correct would be to also subtract this, but it's already randomized, so it doesn't really matter...)
+    downsampleOffset += mEyeJitterOffset;
+
+    // Downsample the eye to the smaller texture.
+    DownsampleEyeTexture(eyeTexture, downsampledTexture, downsampleOffset);
+
+    // Slap the downsampled texture onto the face texture at the correct pixel offset.
+    Texture::BlendPixels(*downsampledTexture, *mFaceTexture, offset.x, offset.y);
+}
+
 void FaceController::DownsampleEyeTexture(Texture* src, Texture* dst, const Vector2& offset)
 {
+    // The downsample scale can be derived from the sizes of the source and dest textures.
+    float scaleX = static_cast<float>(dst->GetWidth()) / static_cast<float>(src->GetWidth());
+    float scaleY = static_cast<float>(dst->GetHeight()) / static_cast<float>(src->GetHeight());
+
+    // The offset is a normalized value that affects what set of subpixels are used during downscaling.
+    // For example, if we're downscaling to 25%, each pixel in the dest texture corresponds to a 4x4 block of pixels in the source texture.
+    // The pixel in the dest texture can average all those pixels equally (a 0,0 offset), or we can nudge it left/right/up/down a bit with the offset.
+    //
+    // It's important to clamp this to -1 to 1. Using values outside this range will actually crash the game (seems like memory corruption in stb).
+    // Somewhat unintuitively, -1.0f corresponds to further down/right, and 1.0f corresponds to further up/left.
+    float offsetX = Math::Clamp(offset.x, -1.0f, 1.0f);
+    float offsetY = Math::Clamp(offset.y, -1.0f, 1.0f);
+
     // Resize source image to fit into dst.
     stbir_resize_subpixel(src->GetPixelData(), src->GetWidth(), src->GetHeight(), 0,    // input image data
                           dst->GetPixelData(), dst->GetWidth(), dst->GetHeight(), 0,    // output image data
@@ -403,6 +423,6 @@ void FaceController::DownsampleEyeTexture(Texture* src, Texture* dst, const Vect
                           STBIR_FILTER_CATMULLROM, STBIR_FILTER_CATMULLROM,             // horizontal & vertical filter mode
                           STBIR_COLORSPACE_LINEAR,                                      // colorspace
                           nullptr,                                                      // alloc context (???)
-                          0.25f, 0.25f,                                                 // x/y scale
-                          offset.x, offset.y);                                          // x/y offset
+                          scaleX, scaleY,                                               // x/y scale
+                          offsetX, offsetY);                                            // x/y offset
 }

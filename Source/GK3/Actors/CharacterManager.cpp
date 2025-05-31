@@ -137,7 +137,7 @@ void CharacterManager::Init()
                         }
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Max Jitter Distance"))
                         {
-                            faceConfig.maxEyeLookDistance = entry.GetValueAsVector2();
+                            faceConfig.maxEyeJitterDistance = entry.GetValueAsVector2();
                         }
                         else if(StringUtil::EqualsIgnoreCase(entry.key, "Eye Field of View"))
                         {
