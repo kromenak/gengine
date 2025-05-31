@@ -160,7 +160,14 @@ void GKActor::Init(const SceneData& sceneData)
     }
 
     // Sample an init anim (if any) that poses the GKActor as needed for scene start.
-    gSceneManager.GetScene()->GetAnimator()->Sample(mActorDef->initAnim, 0);
+    if(mActorDef->initAnim != nullptr)
+    {
+        gSceneManager.GetScene()->GetAnimator()->Sample(mActorDef->initAnim, 0, mActorDef->model->GetNameNoExtension());
+    }
+    else
+    {
+        StartFidget(GKActor::FidgetType::Idle);
+    }
 
     // If an init anim was defined, we should make sure to sync the actor to the updated model position/rotation.
     // The init anim can move the model to a very different pose/location, so we want things to be synced before starting another anim.
@@ -745,6 +752,7 @@ GAS* GKActor::GetGasForFidget(FidgetType type)
     GAS* gas = nullptr;
     switch(type)
     {
+    default:
     case FidgetType::None:
         break;
     case FidgetType::Idle:
