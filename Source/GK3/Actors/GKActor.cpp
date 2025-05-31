@@ -629,7 +629,14 @@ Vector3 GKActor::GetModelFacingDirection() const
         // Get the hip axis, convert y-axis to a facing direction.
         // Remember, models are facing down negative z-axis, so need to negate the axis we get back here.
         Matrix4 hipMeshToWorldMatrix = mModelActor->GetTransform()->GetLocalToWorldMatrix() * mMeshRenderer->GetMesh(mCharConfig->hipAxesMeshIndex)->GetMeshToLocalMatrix();
-        facingDir = -hipMeshToWorldMatrix.GetYAxis();
+        if(StringUtil::EqualsIgnoreCase(GetName(), "EM2"))
+        {
+            facingDir = hipMeshToWorldMatrix.GetYAxis();
+        }
+        else
+        {
+            facingDir = -hipMeshToWorldMatrix.GetYAxis();
+        }
     }
 
     //Debug::DrawLine(GetPosition(), GetPosition() + facingDir * 10.0f, Color32::Blue);
