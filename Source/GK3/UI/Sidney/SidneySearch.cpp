@@ -290,6 +290,9 @@ void SidneySearch::Init(Actor* parent)
         mTextInput->SetVerticalAlignment(VerticalAlignment::Bottom);
         mTextInput->SetText("");
 
+        // The user isn't allowed to unfocus this text input.
+        mTextInput->AllowInputToChangeFocus(false);
+
         // Create text input field caret.
         UIImage* caretImage = UIUtil::NewUIActorWithWidget<UIImage>(searchInputPanel->GetOwner());
         caretImage->SetTexture(&Texture::White);
@@ -452,7 +455,11 @@ void SidneySearch::Show()
 
 void SidneySearch::Hide()
 {
+    // Hide the screen.
     mRoot->SetActive(false);
+
+    // Make sure the input is not focused.
+    mTextInput->Unfocus();
 }
 
 void SidneySearch::OnUpdate(float deltaTime)
