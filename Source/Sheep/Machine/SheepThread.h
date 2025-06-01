@@ -5,6 +5,7 @@
 // different bytecode sequence at a different state of execution.
 //
 #pragma once
+#include <cstdint>
 #include <functional>
 #include <string>
 

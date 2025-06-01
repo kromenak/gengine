@@ -1,5 +1,7 @@
 #include "Timeblock.h"
 
+#include <climits>
+
 #include "StringUtil.h"
 
 #if !defined(TESTS)
