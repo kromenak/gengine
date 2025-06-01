@@ -118,24 +118,24 @@ TEST_CASE("Timeblock string constructor works")
 
 TEST_CASE("Timeblock filename parsing works")
 {
-    Timeblock default;
+    Timeblock def;
 
     Timeblock start;
     Timeblock end;
 
     // Test empty string.
     Timeblock::ParseTimeblockRange("", start, end);
-    REQUIRE(start.GetDay() == default.GetDay());
-    REQUIRE(start.GetHour24() == default.GetHour24());
-    REQUIRE(end.GetDay() == default.GetDay());
-    REQUIRE(end.GetHour24() == default.GetHour24());
+    REQUIRE(start.GetDay() == def.GetDay());
+    REQUIRE(start.GetHour24() == def.GetHour24());
+    REQUIRE(end.GetDay() == def.GetDay());
+    REQUIRE(end.GetHour24() == def.GetHour24());
 
     // Test garbage case.
     Timeblock::ParseTimeblockRange("dakdjaskldjakall", start, end);
-    REQUIRE(start.GetDay() == default.GetDay());
-    REQUIRE(start.GetHour24() == default.GetHour24());
-    REQUIRE(end.GetDay() == default.GetDay());
-    REQUIRE(end.GetHour24() == default.GetHour24());
+    REQUIRE(start.GetDay() == def.GetDay());
+    REQUIRE(start.GetHour24() == def.GetHour24());
+    REQUIRE(end.GetDay() == def.GetDay());
+    REQUIRE(end.GetHour24() == def.GetHour24());
 
     // Test ALL cases.
     Timeblock::ParseTimeblockRange("HAL_ALL.NVC", start, end);
