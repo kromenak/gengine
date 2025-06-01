@@ -1,5 +1,7 @@
 #include "UILabel.h"
 
+#include <cfloat>
+
 #include "Actor.h"
 #include "Debug.h"
 #include "Camera.h"

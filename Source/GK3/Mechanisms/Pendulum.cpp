@@ -747,7 +747,7 @@ void Pendulum::OnGrabPendulum()
     AnimParams grabPendulumParams;
     grabPendulumParams.animation = gAssetManager.LoadAnimation("GABJMPPNDULM", AssetScope::Scene);
     grabPendulumParams.noParenting = true;
-    gSceneManager.GetScene()->GetAnimator()->Start(grabPendulumParams, [this](){
+    gSceneManager.GetScene()->GetAnimator()->Start(grabPendulumParams, [](){
 
         // After the anim, change to a set camera position of the altar.
         // From here, the player must try to drop off the pendulum and land on the altar.

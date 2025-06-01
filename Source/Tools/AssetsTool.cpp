@@ -132,16 +132,16 @@ void AssetsTool::AddAssetList(const std::string& id)
 
     // For all nodes, only expand the tree if you click on the arrow.
     ImGuiTreeNodeFlags assetTypeFlags = ImGuiTreeNodeFlags_OpenOnArrow;
-    
+
     // Draw the tree node.
     bool node_open;
     if(id.empty())
     {
-        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s (%d)", typeName, loadedAssets->size());
+        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s (%zu)", typeName, loadedAssets->size());
     }
     else
     {
-        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s %s (%d)", id.c_str(), typeName, loadedAssets->size());
+        node_open = ImGui::TreeNodeEx(assetId.c_str(), assetTypeFlags, "%s %s (%zu)", id.c_str(), typeName, loadedAssets->size());
     }
 
     // If open, draw all the loaded assets of this type.

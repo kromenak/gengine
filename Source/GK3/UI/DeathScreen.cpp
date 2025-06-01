@@ -50,7 +50,7 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         restoreButton->SetHoverTexture(gAssetManager.LoadTexture("DS_REST_H.BMP"));
         restoreButton->SetDownTexture(gAssetManager.LoadTexture("DS_REST_D.BMP"));
         restoreButton->SetDisabledTexture(gAssetManager.LoadTexture("DS_REST_X.BMP"));
-        restoreButton->SetPressCallback([this](UIButton* button){
+        restoreButton->SetPressCallback([](UIButton* button){
             gGK3UI.ShowLoadScreen();
         });
         restoreButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
@@ -62,7 +62,7 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         quitButton->SetHoverTexture(gAssetManager.LoadTexture("DS_QUIT_H.BMP"));
         quitButton->SetDownTexture(gAssetManager.LoadTexture("DS_QUIT_D.BMP"));
         quitButton->SetDisabledTexture(gAssetManager.LoadTexture("DS_QUIT_X.BMP"));
-        quitButton->SetPressCallback([this](UIButton* button){
+        quitButton->SetPressCallback([](UIButton* button){
             //TODO: Should show "are you sure?" prompt.
             GEngine::Instance()->Quit();
         });

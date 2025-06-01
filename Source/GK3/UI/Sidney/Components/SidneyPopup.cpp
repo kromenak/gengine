@@ -356,13 +356,13 @@ void SidneyPopup::ShowThreeButton(const std::function<void(int)>& callback)
 
     // Set button press callbacks.
     // For the one use of this in the game thus far, pressing these buttons *should not* hide the popup automatically.
-    mLeftButton->SetPressCallback([this, callback](){
+    mLeftButton->SetPressCallback([callback](){
         callback(0);
     });
-    mCenterButton->SetPressCallback([this, callback](){
+    mCenterButton->SetPressCallback([callback](){
         callback(1);
     });
-    mRightButton->SetPressCallback([this, callback](){
+    mRightButton->SetPressCallback([callback](){
         callback(2);
     });
 }

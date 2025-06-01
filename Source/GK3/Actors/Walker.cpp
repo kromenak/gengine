@@ -180,7 +180,6 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
         mGKOwner->SetPosition(mPath.front());
 
         // Figure out a facing direction at the end of the path.
-        Vector3 facingDir;
         if(mWalkToSeeTarget != nullptr)
         {
             AABB targetAABB = mWalkToSeeTarget->GetAABB();
@@ -739,7 +738,7 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
     // If hit the target with the ray, it must be in view.
     if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
        StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
-       result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun()))
+        (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())))
     {
         // Convert ray direction to a "facing" direction,
         dir.y = 0.0f;
@@ -751,7 +750,7 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
         result = gSceneManager.GetScene()->Raycast(ray, false, &obj, 1);
         if(StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetNoun()) ||
            StringUtil::EqualsIgnoreCase(result.hitInfo.name, mWalkToSeeTarget->GetName()) ||
-           result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun()))
+            (result.hitObject != nullptr && StringUtil::EqualsIgnoreCase(result.hitObject->GetNoun(), mWalkToSeeTarget->GetNoun())))
         {
             // Convert ray direction to a "facing" direction,
             dir.y = 0.0f;

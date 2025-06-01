@@ -7,6 +7,7 @@
 #pragma once
 #include "GKObject.h"
 
+#include <cfloat>
 #include <string>
 
 #include "Heading.h"
