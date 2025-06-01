@@ -5,6 +5,7 @@
 // It indicates the shader to use and any input parameters for the shader (texture, color, etc).
 //
 #pragma once
+#include <map>
 #include <unordered_map>
 #include <vector>
 
@@ -59,9 +60,16 @@ private:
     // Material properties/attributes. Maps a uniform variable name to a value.
     // These will be passed to the vertex/fragment shaders during rendering.
     std::unordered_map<std::string, Color32> mColors;
-    std::unordered_map<std::string, Texture*> mTextures;
     std::unordered_map<std::string, Vector4> mVectors;
     std::unordered_map<std::string, float> mFloats;
+    
+    //TODO/HACK: This is a map instead of an unordered map to fix a bug with blob shadows on Mac.
+    // On Mac, the textures used for blob shadow get mixed up: uDiffuse goes to texture unit 1 and uLightmap goes to texture unit 0.
+    // The reason they get mixed up is not a bug: unordered maps don't guarantee an order.
+    // This shouldn't really be a problem - it should still work - but it doesn't! Swapping the texture units causes a bunch of graphical glitches.
+    // An easy HACK fix is to use a map instead, since uDiffuse just so happens to sort before uLightmap.
+    // BUT...it would be good to get to the root of WHY swapping texture units breaks this...because it shouldn't!
+    std::map<std::string, Texture*> mTextures;
 
     // If true, this material renders as translucent.
     bool mTranslucent = false;
