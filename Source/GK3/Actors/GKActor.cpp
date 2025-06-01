@@ -198,7 +198,9 @@ void GKActor::StartFidget(FidgetType type)
         SetModelRotationToActorRotation();
 
         //printf("%s: starting fidget %s\n", GetNoun().c_str(), newFidget->GetName().c_str());
-        mGasPlayer->Play(newFidget);
+        mGasPlayer->Stop([this, newFidget](){
+            mGasPlayer->Play(newFidget);
+        });
         mActiveFidget = type;
     }
 }
