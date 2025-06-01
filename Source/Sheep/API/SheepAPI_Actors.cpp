@@ -3,6 +3,7 @@
 #include "AssetManager.h"
 #include "FaceController.h"
 #include "GKActor.h"
+#include "GKProp.h"
 #include "ReportManager.h"
 #include "SceneManager.h"
 
@@ -475,3 +476,41 @@ shpvoid DisableModelShadow(const std::string& modelName)
     return 0;
 }
 RegFunc1(DisableModelShadow, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid StartPropFidget(const std::string& modelName)
+{
+    // Though this function is supposed to reference props by model name, there are production instances where it uses the noun instead.
+    // So, we must check the noun as a backup if we don't find anything with that model name.
+    GKProp* prop = gSceneManager.GetScene()->GetPropByModelName(modelName);
+    if(prop == nullptr)
+    {
+        prop = gSceneManager.GetScene()->GetPropByNoun(modelName);
+        if(prop == nullptr)
+        {
+            ExecError();
+            return 0;
+        }
+    }
+    prop->StartFidget();
+    return 0;
+}
+RegFunc1(StartPropFidget, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid StopPropFidget(const std::string& modelName)
+{
+    // Though this function is supposed to reference props by model name, there are production instances where it uses the noun instead.
+    // So, we must check the noun as a backup if we don't find anything with that model name.
+    GKProp* prop = gSceneManager.GetScene()->GetPropByModelName(modelName);
+    if(prop == nullptr)
+    {
+        prop = gSceneManager.GetScene()->GetPropByNoun(modelName);
+        if(prop == nullptr)
+        {
+            ExecError();
+            return 0;
+        }
+    }
+    prop->StopFidget(AddWait());
+    return 0;
+}
+RegFunc1(StopPropFidget, void, string, WAITABLE, REL_FUNC);

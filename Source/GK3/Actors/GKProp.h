@@ -28,6 +28,7 @@ public:
     void Init(const SceneData& sceneData);
     
     void StartFidget(GAS* gas);
+    void StartFidget();
     void StopFidget(std::function<void()> callback = nullptr);
 
     void StartAnimation(VertexAnimParams& animParams) override;

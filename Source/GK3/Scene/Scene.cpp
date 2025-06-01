@@ -790,6 +790,18 @@ GKObject* Scene::GetSceneObjectByModelName(const std::string& modelName) const
 	return nullptr;
 }
 
+GKProp* Scene::GetPropByModelName(const std::string& modelName) const
+{
+    for(auto& prop : mProps)
+    {
+        if(StringUtil::EqualsIgnoreCase(prop->GetName(), modelName))
+        {
+            return prop;
+        }
+    }
+    return nullptr;
+}
+
 GKObject* Scene::GetSceneObjectByNoun(const std::string& noun) const
 {
     for(auto& object : mPropsAndActors)
@@ -804,6 +816,18 @@ GKObject* Scene::GetSceneObjectByNoun(const std::string& noun) const
         if(StringUtil::EqualsIgnoreCase(object->GetNoun(), noun))
         {
             return object;
+        }
+    }
+    return nullptr;
+}
+
+GKProp* Scene::GetPropByNoun(const std::string& noun) const
+{
+    for(auto& prop : mProps)
+    {
+        if(StringUtil::EqualsIgnoreCase(prop->GetNoun(), noun))
+        {
+            return prop;
         }
     }
     return nullptr;

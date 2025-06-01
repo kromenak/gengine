@@ -74,7 +74,10 @@ public:
 
     BSPActor* GetHitTestObjectByModelName(const std::string& modelName) const;
 	GKObject* GetSceneObjectByModelName(const std::string& modelName) const;
+    GKProp* GetPropByModelName(const std::string& modelName) const;
+
     GKObject* GetSceneObjectByNoun(const std::string& noun) const;
+    GKProp* GetPropByNoun(const std::string& noun) const;
 	GKActor* GetActorByNoun(const std::string& noun) const;
 	
 	const ScenePosition* GetPosition(const std::string& positionName) const;

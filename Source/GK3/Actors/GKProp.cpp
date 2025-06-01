@@ -95,6 +95,11 @@ void GKProp::StartFidget(GAS* gas)
     mGasPlayer->Play(gas);
 }
 
+void GKProp::StartFidget()
+{
+    mGasPlayer->Play(mFidgetGas);
+}
+
 void GKProp::StopFidget(std::function<void()> callback)
 {
     mGasPlayer->Stop(callback);
