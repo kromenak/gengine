@@ -85,6 +85,8 @@ shpvoid LookitUnlock(const std::string& actorName, const std::string& components
 
 // MODELS
 shpvoid SetModelLighting(const std::string& modelName, float ambientRange, int red, int green, int blue);
+shpvoid EnableModelShadow(const std::string& modelName);
+shpvoid DisableModelShadow(const std::string& modelName);
 shpvoid SetModelShadowTexture(const std::string& modelName, const std::string& textureName);
 shpvoid ClearModelShadowTexture(const std::string& modelName);
 shpvoid DumpModel(const std::string& modelName); // DEV

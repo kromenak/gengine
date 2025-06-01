@@ -83,6 +83,8 @@ public:
     const CharacterConfig* GetConfig() const { return mCharConfig; }
 
     void SetModelFacingHelper(GKProp* helper) { mModelFacingHelper = helper; }
+
+    void SetShadowEnabled(bool enabled) { mShadowActor->SetActive(enabled); }
 	
 protected:
     void OnActive() override;

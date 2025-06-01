@@ -445,3 +445,33 @@ shpvoid SetModelLighting(const std::string& modelName, float ambientRange, int r
     return 0;
 }
 RegFunc5(SetModelLighting, void, string, float, int, int, int, IMMEDIATE, REL_FUNC);
+
+shpvoid EnableModelShadow(const std::string& modelName)
+{
+    GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
+    if(obj == nullptr || !obj->IsA<GKActor>())
+    {
+        ExecError();
+        return 0;
+    }
+
+    GKActor* actor = static_cast<GKActor*>(obj);
+    actor->SetShadowEnabled(true);
+    return 0;
+}
+RegFunc1(EnableModelShadow, void, string, IMMEDIATE, REL_FUNC);
+
+shpvoid DisableModelShadow(const std::string& modelName)
+{
+    GKObject* obj = gSceneManager.GetScene()->GetSceneObjectByModelName(modelName);
+    if(obj == nullptr || !obj->IsA<GKActor>())
+    {
+        ExecError();
+        return 0;
+    }
+
+    GKActor* actor = static_cast<GKActor*>(obj);
+    actor->SetShadowEnabled(false);
+    return 0;
+}
+RegFunc1(DisableModelShadow, void, string, IMMEDIATE, REL_FUNC);
