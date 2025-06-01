@@ -689,7 +689,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 
                     // Make an image with the horizontal rule.
                     UIImage* hrImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageScrollRect);
-                    hrImage->SetTexture(gAssetManager.LoadTexture("HORIZONTALRULE.BMP", AssetScope::Scene), true);
+                    hrImage->SetTexture(gAssetManager.LoadTexture("HORIZONTALRULE.BMP"), true);
                     hrImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     hrImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
                     hrImage->GetRectTransform()->SetSizeDeltaX(kWebpageContentsWidth);
