@@ -324,7 +324,8 @@ void ActionManager::PerformPendingActionSkip()
     while(mCurrentAction != nullptr)
     {
         // When testing the original game, they seem to fast forward in 10 second increments (which is part of the reason action skip breaks the "5 minute timer" part of the game).
-        GEngine::Instance()->UpdateGameWorld(10.0f);
+        //TODO: Changed this to one when testing, things seemed to work better in some cases. Need to re-investigate the best time here.
+        GEngine::Instance()->UpdateGameWorld(1.0f);
         ++skipCount;
     }
     gReportManager.Log("Console", StringUtil::Format("skipped %i times, skip duration: %i msec", skipCount, static_cast<int>(stopwatch.GetMilliseconds())));
