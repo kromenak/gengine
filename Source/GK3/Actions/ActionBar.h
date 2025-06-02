@@ -33,8 +33,10 @@ public:
 	bool IsShowing() const;
 
     bool HasVerb(const std::string& verb) const;
-	void AddVerbToFront(const std::string& verb, std::function<void()> callback);
-	void AddVerbToBack(const std::string& verb, std::function<void()> callback);
+    int GetVerbIndex(const std::string& verb) const;
+	void AddVerbToFront(const std::string& verb, const std::function<void()>& callback);
+	void AddVerbToBack(const std::string& verb, const std::function<void()>& callback);
+    void AddVerbAtIndex(const std::string& verb, int index, const std::function<void()>& callback);
     void SetVerbEnabled(const std::string& verb, bool enabled);
 
     void SetAllowCancel(bool allowCancel) { mAllowCancel = allowCancel; }

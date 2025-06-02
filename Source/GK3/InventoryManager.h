@@ -40,6 +40,7 @@ public:
 
     std::string GetActiveInventoryItem() const;
 	std::string GetActiveInventoryItem(const std::string& actorName) const;
+    void SetActiveInventoryItem(const std::string& itemName);
 	void SetActiveInventoryItem(const std::string& actorName, const std::string& itemName);
 	
     void ShowInventory();

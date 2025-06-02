@@ -13,6 +13,30 @@
 #include "VerbManager.h"
 #include "Window.h"
 
+namespace
+{
+    struct SortActions
+    {
+        bool operator()(const Action* a, const Action* b)
+        {
+            // First off, if a or b is INSPECT or INSPECT_UNDO, it should always come first.
+            bool aIsInspect = StringUtil::EqualsIgnoreCase(a->verb, "INSPECT") || StringUtil::EqualsIgnoreCase(a->verb, "INSPECT_UNDO");
+            bool bIsInspect = StringUtil::EqualsIgnoreCase(b->verb, "INSPECT") || StringUtil::EqualsIgnoreCase(b->verb, "INSPECT_UNDO");
+            if(aIsInspect && !bIsInspect)
+            {
+                return true;
+            }
+            if(!aIsInspect && bIsInspect)
+            {
+                return false;
+            }
+
+            // Remaining ones can just be sorted by verb.
+            return a->verb < b->verb;
+        }
+    };
+}
+
 ActionBar::ActionBar() : Actor("ActionBar", TransformType::RectTransform)
 {
 	// Create canvas, to contain the UI components.
@@ -52,27 +76,6 @@ ActionBar::ActionBar() : Actor("ActionBar", TransformType::RectTransform)
 	// Hide by default.
 	Hide();
 }
-
-struct SortActions
-{
-    bool operator()(const Action* a, const Action* b)
-    {
-        // First off, if a or b is INSPECT or INSPECT_UNDO, it should always come first.
-        bool aIsInspect = StringUtil::EqualsIgnoreCase(a->verb, "INSPECT") || StringUtil::EqualsIgnoreCase(a->verb, "INSPECT_UNDO");
-        bool bIsInspect = StringUtil::EqualsIgnoreCase(b->verb, "INSPECT") || StringUtil::EqualsIgnoreCase(b->verb, "INSPECT_UNDO");
-        if(aIsInspect && !bIsInspect)
-        {
-            return true;
-        }
-        if(!aIsInspect && bIsInspect)
-        {
-            return false;
-        }
-
-        // Remaining ones can just be sorted by verb.
-        return a->verb < b->verb;
-    }
-};
 
 void ActionBar::Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions,
                      std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback,
@@ -237,54 +240,53 @@ bool ActionBar::IsShowing() const
 
 bool ActionBar::HasVerb(const std::string& verb) const
 {
-    for(auto& button : mButtons)
+    return GetVerbIndex(verb) >= 0;
+}
+
+int ActionBar::GetVerbIndex(const std::string& verb) const
+{
+    for(int i = 0; i < mButtons.size(); ++i)
     {
-        if(StringUtil::EqualsIgnoreCase(button.verb, verb))
+        if(StringUtil::EqualsIgnoreCase(mButtons[i].verb, verb))
         {
-            return true;
+            return i;
         }
     }
-    return false;
+    return -1;
 }
 
-void ActionBar::AddVerbToFront(const std::string& verb, std::function<void()> callback)
+void ActionBar::AddVerbToFront(const std::string& verb, const std::function<void()>& callback)
 {
-	// Add button at index 0.
-	VerbIcon& icon = gVerbManager.GetVerbIcon(verb);
-	UIButton* button = AddButton(0, icon, verb);
-	button->SetPressCallback([this, callback](UIButton* button) {
-		this->Hide();
-		callback();
-	});
-    button->SetTooltipText("v_" + verb);
-	
-	// Refresh button positions and move bar to pointer.
-	RefreshButtonLayout();
-	CenterOnPointer();
+    AddVerbAtIndex(verb, 0, callback);
 }
 
-void ActionBar::AddVerbToBack(const std::string& verb, std::function<void()> callback)
+void ActionBar::AddVerbToBack(const std::string& verb, const std::function<void()>& callback)
 {
-	VerbIcon& icon = gVerbManager.GetVerbIcon(verb);
-	
 	// Action bar order is always [INSPECT][VERBS][INV_ITEM][CANCEL]
 	// So, skip 1 for cancel button, and maybe skip another one if inventory item is shown.
-	int skipCount = 1;
-	if(mHasInventoryItemButton)
-	{
-		skipCount = 2;
-	}
-	
-	// Add button with callback at index.
-	UIButton* button = AddButton(static_cast<int>(mButtons.size() - skipCount), icon, verb);
-	button->SetPressCallback([this, callback](UIButton* button) {
-		this->Hide();
-		callback();
-	});
-	
-	// Refresh button positions and move bar to pointer.
-	RefreshButtonLayout();
-	CenterOnPointer();
+	int skipCount = mHasInventoryItemButton ? 2 : 1;
+
+    // Put verb at desired index.
+    AddVerbAtIndex(verb, static_cast<int>(mButtons.size() - skipCount), callback);
+}
+
+void ActionBar::AddVerbAtIndex(const std::string& verb, int index, const std::function<void()>& callback)
+{
+    VerbIcon& icon = gVerbManager.GetVerbIcon(verb);
+
+    // Add button with callback at index.
+    UIButton* button = AddButton(index, icon, verb);
+    button->SetPressCallback([this, callback](UIButton* button){
+        this->Hide();
+        callback();
+    });
+
+    // Set tooltip text.
+    button->SetTooltipText("v_" + verb);
+
+    // Refresh button positions and move bar to pointer.
+    RefreshButtonLayout();
+    CenterOnPointer();
 }
 
 void ActionBar::SetVerbEnabled(const std::string& verb, bool enabled)
@@ -334,6 +336,8 @@ UIButton* ActionBar::AddButton(int index, const VerbIcon& buttonIcon, const std:
     button->GetOwner()->SetName(verb);
 	
 	// Put into buttons array at desired position.
+    // Note that "one past the last index" is a valid index here - that'll put the thing on the end of the list.
+    index = Math::Clamp(index, 0, mButtons.size());
     mButtons.insert(mButtons.begin() + index, { verb, button });
 	
 	// Set size correctly.

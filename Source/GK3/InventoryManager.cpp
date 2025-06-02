@@ -145,6 +145,11 @@ std::string InventoryManager::GetActiveInventoryItem(const std::string& actorNam
 	return it->second;
 }
 
+void InventoryManager::SetActiveInventoryItem(const std::string& itemName)
+{
+    SetActiveInventoryItem(Scene::GetEgoName(), itemName);
+}
+
 void InventoryManager::SetActiveInventoryItem(const std::string& actorName, const std::string& itemName)
 {
 	mActiveInventoryItems[actorName] = itemName;

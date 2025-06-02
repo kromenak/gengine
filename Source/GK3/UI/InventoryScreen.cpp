@@ -220,12 +220,14 @@ void InventoryScreen::OnItemClicked(UIButton* button, std::string itemName)
     gActionManager.ShowActionBar(itemName, nullptr);
 
 	// We want to add a "pickup" verb, which means to make the item the active inventory item.
+    // This should go after the "LOOK" verb, but if there's no "LOOK" verb, it'll go at the beginning.
 	ActionBar* actionBar = gActionManager.GetActionBar();
-	actionBar->AddVerbToBack("PICKUP", [this, itemName]() {
+	actionBar->AddVerbAtIndex("PICKUP", actionBar->GetVerbIndex("LOOK") + 1, [this, itemName]() {
         gInventoryManager.SetActiveInventoryItem(this->mCurrentActorName, itemName);
 	});
 
-	// We want to add an "inspect" verb, which means to show the close-up of the item.
+	// We want to also add an "inspect" verb, which means to show the close-up of the item.
+    // This always goes at the front of the existing action bar.
 	actionBar->AddVerbToFront("INSPECT", [itemName]() {
 		gInventoryManager.InventoryInspect(itemName);
 	});
