@@ -67,7 +67,7 @@ void InventoryManager::Init()
 	// Give Grace starting inventory items.
     AddInventoryItem("GRACE", "GRACE_WALLET");
     AddInventoryItem("GRACE", "GRACES_PASSPORT");
-    AddInventoryItem("GRACE", "R25_ROOM_KEY");
+    AddInventoryItem("GRACE", "R25_ROOM_KEY_GRACE");
     AddInventoryItem("GRACE", "SKETCHPAD");
 }
 
