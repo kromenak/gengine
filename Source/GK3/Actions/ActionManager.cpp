@@ -494,6 +494,17 @@ std::vector<const Action*> ActionManager::GetActions(const std::string& noun, Ve
         }
     }
 
+    // When clicking on an LSR passage (e.g. "LSR_VIRGO"), we also show the actions for LSR as a whole.
+    if(StringUtil::StartsWithIgnoreCase(noun, "LSR_"))
+    {
+        verbToActionSpecific.clear();
+        AddActionsToMap("LSR", verbType, verbToActionSpecific);
+        for(auto& entry : verbToActionSpecific)
+        {
+            verbToAction[entry.first] = entry.second;
+        }
+    }
+
     // The "Chat" action is only valid if the "Talk" option is not present. Remove "Chat" if "Talk" is present.
     // Not sure where else to check that - this seems like an OK spot.
     auto talkIt = verbToAction.find("TALK");
