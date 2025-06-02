@@ -196,7 +196,7 @@ void InventoryScreen::RefreshLayout()
         if(StringUtil::EqualsIgnoreCase(item, activeInventoryItem))
         {
             RectTransform* activeHighlightRT = mActiveHighlightImage->GetRectTransform();
-            activeHighlightRT->SetAnchoredPosition(x + kActiveHighlightXOffset, y);
+            activeHighlightRT->SetAnchoredPosition(x + kActiveHighlightXOffset, y + 2); // nudge up slightly for better positioning
             mActiveHighlightImage->SetEnabled(true);
         }
 
