@@ -24,7 +24,6 @@ SidneyButton::SidneyButton(Actor* parent) : Actor("SidneyButton", TransformType:
     mLabel = labelActor->AddComponent<UILabel>();
     mLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
     mLabel->SetVerticalAlignment(VerticalAlignment::Center);
-    mLabel->SetMasked(true);
 
     mLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
     mLabel->GetRectTransform()->SetSizeDelta(-12.0f, 0.0f);

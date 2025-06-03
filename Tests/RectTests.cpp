@@ -196,7 +196,7 @@ TEST_CASE("RectUtil::CalcChildRect works")
     
 	Rect rect = RectUtil::CalcLocalRect(parentRect, anchorMin, anchorMax, sizeDelta, pivot);
 	//REQUIRE(rect == Rect(-298.0f, -8.79459857f, 596.0f, 43.9729919f));
-    REQUIRE(rect == Rect(-298.0f, -9.0f, 596.0f, 44.0f)); // since CalcLocalRect now rounds for pixel-perfect placement
+    REQUIRE(rect == Rect(-298.0f, -9.0f, 596.0f, 43.0f)); // since CalcLocalRect now rounds for pixel-perfect placement
     
 	Rect parentRect2(-512.0f, -384.0f, 1024.0f, 768.0f);
 	Vector2 anchorMin2(0.5f, 0.5f);

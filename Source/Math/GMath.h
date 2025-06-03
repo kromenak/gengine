@@ -130,6 +130,11 @@ namespace Math
         return static_cast<int>(Round(val));
     }
 
+    inline float Truncate(float val)
+    {
+        return static_cast<float>(static_cast<int>(val));
+    }
+
     inline float Clamp(float value, float min, float max)
     {
         return std::fmin(max, std::fmax(value, min));

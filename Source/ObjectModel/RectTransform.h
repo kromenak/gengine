@@ -108,6 +108,6 @@ private:
 	// This can usually be set as desired, but it may be overridden by anchor logic in some cases.
 	Vector2 mSizeDelta = Vector2(100.0f, 100.0f);
 
-    // If true, the RectTransform will only use whole numbers for the x/y local position.
-    bool mPixelPerfect = false;
+    // If true, the RectTransform will only use whole numbers for the x/y local position and rect size calculations.
+    bool mPixelPerfect = true;
 };

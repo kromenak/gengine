@@ -544,7 +544,7 @@ void FingerprintScreen::OnUpdate(float deltaTime)
                     currentAlpha += gInputManager.GetMouseDelta().GetLength() * deltaTime * 0.2f;
                     currentAlpha = Math::Clamp(currentAlpha, 0.0f, 1.0f);
                     mPrintsToCollect[i].alpha = currentAlpha;
-                    printf("Alpha %f\n", currentAlpha);
+                    //printf("Alpha %f\n", currentAlpha);
 
                     mPrintsToCollect[i].image->SetColor(Color32(255, 255, 255, currentAlpha * 255));
 

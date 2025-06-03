@@ -104,6 +104,9 @@ void UINineSlice::SetTexturesAndColors(const UINineSliceParams& params, bool res
     mCenterImage->SetTexture(params.centerTexture, resizeTextures);
     mCenterImage->SetColor(params.centerColor);
 
+    // Because the center image is "center stretch" anchor mode, we want to keep the size delta at (0, 0).
+    mCenterImage->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+
     mTopLeftImage->SetTexture(params.topLeftTexture, resizeTextures);
     mTopLeftImage->SetColor(params.topLeftColor);
 

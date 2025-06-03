@@ -172,7 +172,13 @@ void TextLayout::AddLine(const std::string& line)
         //TODO: this currently only works for single line labels! Need to factor in mLineCount too.
         break;
     }
-	
+
+    // Let's assume that we want pixel-perfect text rendering, so we should align x/y pos to a whole number.
+    // If we ever didn't want this, we could pass in a "pixel perfect" flag?
+    // Also, we're currently just truncating, but we could use round/floor/ceil if there was a need?
+    xPos = Math::Truncate(xPos);
+    yPos = Math::Truncate(yPos);
+
     // OK, we know x/y to start the line at.
     // Determine CharInfo for each text character: the glyph and position of the glyph for rendering.
 	for(size_t i = 0; i < actualLineLength; ++i)
