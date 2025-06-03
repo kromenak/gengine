@@ -1121,8 +1121,11 @@ void Scene::ExecuteAction(const Action* action)
 			if(scenePos != nullptr)
 			{
 				//Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
-				mEgo->WalkTo(scenePos->position, scenePos->heading, [action]() -> void {
-					gActionManager.ExecuteAction(action, nullptr, false);
+				mEgo->WalkTo(scenePos->position, scenePos->heading, [action]() {
+                    if(!gActionManager.IsActionBarShowing())
+                    {
+                        gActionManager.ExecuteAction(action, nullptr, false);
+                    }
 				});
 			}
 			else
@@ -1136,8 +1139,11 @@ void Scene::ExecuteAction(const Action* action)
 			Animation* anim = gAssetManager.LoadAnimation(action->target, AssetScope::Scene);
 			if(anim != nullptr)
 			{
-				mEgo->WalkToAnimationStart(anim, [action]() -> void {
-					gActionManager.ExecuteAction(action, nullptr, false);
+				mEgo->WalkToAnimationStart(anim, [action]() {
+                    if(!gActionManager.IsActionBarShowing())
+                    {
+                        gActionManager.ExecuteAction(action, nullptr, false);
+                    }
 				});
 			}
 			else
@@ -1171,7 +1177,10 @@ void Scene::ExecuteAction(const Action* action)
 
                 // Walk there, then do the action.
                 mEgo->WalkTo(walkPos, walkHeading, [action](){
-                    gActionManager.ExecuteAction(action, nullptr, false);
+                    if(!gActionManager.IsActionBarShowing())
+                    {
+                        gActionManager.ExecuteAction(action, nullptr, false);
+                    }
                 });
             }
             else
@@ -1216,7 +1225,10 @@ void Scene::ExecuteAction(const Action* action)
 			// Do a "turn to" heading.
 			Heading turnToHeading = Heading::FromDirection(egoToModel);
 			mEgo->TurnTo(turnToHeading, [action]() -> void {
-				gActionManager.ExecuteAction(action, nullptr, false);
+                if(!gActionManager.IsActionBarShowing())
+                {
+                    gActionManager.ExecuteAction(action, nullptr, false);
+                }
 			});
 			break;
 		}
@@ -1229,8 +1241,11 @@ void Scene::ExecuteAction(const Action* action)
             // If didn't find it, print a warning/error and just execute right away.
             if(obj != nullptr)
             {
-                mEgo->WalkToSee(obj, [action]() -> void{
-                    gActionManager.ExecuteAction(action, nullptr, false);
+                mEgo->WalkToSee(obj, [action]() {
+                    if(!gActionManager.IsActionBarShowing())
+                    {
+                        gActionManager.ExecuteAction(action, nullptr, false);
+                    }
                 });
             }
             else
