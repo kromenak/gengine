@@ -22,7 +22,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
         GetTransform()->SetParent(parent->GetTransform());
 
         // Add a UICanvas, so we can force this to display above other things.
-        AddComponent<UICanvas>(2);
+        AddComponent<UICanvas>(4);
 
         // Stretch to fill the parent container and add a button.
         // This causes us to act as an invisible input blocker over the parent area.
