@@ -104,7 +104,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
             AnalyzeImage_OnZoomClarifyButtonPressed();
         });
 
-        //TODO: Add a divider/empty space here. (Menu3Item4)
+        mMenuBar.AddDropdownChoiceSeparator();
 
         // "Use Shape" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu3Item5"), [this](){
@@ -132,7 +132,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
             AnalyzeMap_OnClearPointsPressed();
         });
 
-        //TODO: Add a divider/empty space here. (Menu4Item3)
+        mMenuBar.AddDropdownChoiceSeparator();
 
         // "Draw Grid" choice.
         mMenuBar.AddDropdownChoice(SidneyUtil::GetAnalyzeLocalizer().GetText("Menu4Item4"), [this](){

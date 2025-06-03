@@ -116,6 +116,11 @@ void SidneyMenuBar::Update()
                         break;
                     }
                 }
+
+                if(!showOptions && dropdown.background->IsHovered())
+                {
+                    showOptions = true;
+                }
             }
         }
 
@@ -124,6 +129,7 @@ void SidneyMenuBar::Update()
         {
             option->SetActive(showOptions);
         }
+        dropdown.background->GetOwner()->SetActive(showOptions);
     }
 }
 
@@ -148,9 +154,8 @@ void SidneyMenuBar::AddDropdown(const std::string& label)
     dropdownLabel->SetHorizonalAlignment(HorizontalAlignment::Left);
     dropdownLabel->SetVerticalAlignment(VerticalAlignment::Center);
 
-    dropdownLabel->GetRectTransform()->SetPivot(0.0f, 0.0f);
-    dropdownLabel->GetRectTransform()->SetAnchor(0.0f, 0.0f);
-    dropdownLabel->GetRectTransform()->SetAnchoredPosition(mNextDropdownPosition, 1.0f);
+    dropdownLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+    dropdownLabel->GetRectTransform()->SetAnchoredPosition(mNextDropdownPosition, 0.0f);
 
     float labelWidth = dropdownLabel->GetTextWidth() + 16.0f;
     dropdownLabel->GetRectTransform()->SetSizeDelta(labelWidth, 13.0f);
@@ -170,10 +175,19 @@ void SidneyMenuBar::AddDropdown(const std::string& label)
         downArrowImage->GetRectTransform()->SetSizeDelta(7.0f, 6.0f);
     }
 
+    // Add dropdown background image.
+    UIImage* background = UIUtil::NewUIActorWithWidget<UIImage>(dropdownActor);
+    background->SetColor(Color32(66, 65, 66, 255));
+    background->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+    background->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+    background->GetRectTransform()->SetAnchoredPosition(1.0f, -13.0f); // the +1 ensures that menu items hang off the background just a bit
+    background->GetOwner()->SetActive(false);
+
     mDropdowns.emplace_back();
     mDropdowns.back().rootButton = dropdownActor->AddComponent<UIButton>();
     mDropdowns.back().rootLabel = dropdownLabel;
     mDropdowns.back().rootArrow = downArrowImage;
+    mDropdowns.back().background = background->GetOwner()->AddComponent<UIButton>();
     mNextDropdownPosition += labelWidth + mDropdownSpacing;
 }
 
@@ -196,7 +210,14 @@ void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& l
 
     // Figure out desired width/height of this button.
     // It should have a minimum size, but be bigger to fit its text, but also match any bigger item defined previously.
-    float labelWidth = Math::Max(80.0f, button->GetLabel()->GetTextWidth() + 24.0f);
+    int labelWidth = Math::TruncateToInt(Math::Max(80.0f, button->GetLabel()->GetTextWidth() + 24.0f));
+
+    // Perhaps due to pixel-perfect math, these buttons don't look correct unless they are even.
+    if(labelWidth % 2 != 0)
+    {
+        ++labelWidth;
+    }
+    
     for(SidneyButton* option : dropdown.options)
     {
         if(option->GetWidth() > labelWidth)
@@ -233,7 +254,8 @@ void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& l
 
     // Position button in the list.
     button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-    button->GetRectTransform()->SetAnchoredPosition(0.0f, -13.0f + dropdown.options.size() * -13.0f);
+    button->GetRectTransform()->SetAnchoredPosition(0.0f, -13.0f + dropdown.nextChoiceYPos);
+    dropdown.nextChoiceYPos -= 14.0f;
 
     // Add to list of options.
     dropdown.options.emplace_back(button);
@@ -246,6 +268,16 @@ void SidneyMenuBar::AddDropdownChoice(size_t dropdownIndex, const std::string& l
             option->SetWidth(labelWidth);
         }
     }
+
+    // Resize the dropdown background to encompass all buttons in the dropdown.
+    dropdown.background->GetRectTransform()->SetSizeDeltaX(labelWidth - 2);
+    dropdown.background->GetRectTransform()->SetSizeDeltaY(Math::Abs(dropdown.nextChoiceYPos + 1));
+}
+
+void SidneyMenuBar::AddDropdownChoiceSeparator()
+{
+    assert(!mDropdowns.empty());
+    mDropdowns.back().nextChoiceYPos -= 13.0f;
 }
 
 void SidneyMenuBar::SetDropdownEnabled(size_t index, bool enabled)
