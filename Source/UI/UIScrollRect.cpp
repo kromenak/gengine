@@ -110,7 +110,16 @@ float UIScrollRect::GetScrollbarWidth() const
 
 void UIScrollRect::SetNormalizedScrollValue(float normalizedScrollValue)
 {
-    mSlider->SetValue(normalizedScrollValue);
+    // Slider only calls the "value changed" callback if the value actually changes.
+    // If slider is set to its existing value, we should still fire the value change callback, to ensure scroll rect contents are updated.
+    if(!Math::AreEqual(mSlider->GetValue(), normalizedScrollValue))
+    {
+        mSlider->SetValue(normalizedScrollValue);
+    }
+    else
+    {
+        OnSliderValueChanged(normalizedScrollValue);
+    }
 }
 
 void UIScrollRect::OnUpdate(float deltaTime)
