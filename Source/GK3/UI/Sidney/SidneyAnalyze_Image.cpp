@@ -231,6 +231,9 @@ void SidneyAnalyze::AnalyzeImage_OnAnalyzeTextPressed()
 {
     if(mAnalyzeFileId == SidneyFileIds::kParchment2)
     {
+        // The game should be in hands-off mode during this short cutscene of "reaching out to the internet" to get data.
+        gActionManager.StartManualAction();
+
         // Play a modem SFX, so it seems like we're reaching out to the internet...
         gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDMODEM.WAV", AssetScope::Scene));
 
@@ -244,6 +247,9 @@ void SidneyAnalyze::AnalyzeImage_OnAnalyzeTextPressed()
 
                 Timers::AddTimerSeconds(3.0f, [this](){
                     mAnalyzePopup->Hide();
+
+                    // Hands-off mode is done, the user has control again.
+                    gActionManager.FinishManualAction();
 
                     // The last popup asks us to choose a language for extracting a hidden message from the text.
                     // As with the other parchment, the hidden message is in French.
@@ -283,7 +289,9 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
     if(mAnalyzeFileId == SidneyFileIds::kParchment1)
     {
         // Play analyze video.
+        gActionManager.StartManualAction();
         AnalyzeImage_PlayVideo("Parch1Geo.avi", mAnalyzeVideoImages[0], "GEOMPARCH1FINAL.BMP", [this](){
+            gActionManager.FinishManualAction();
 
             // Show a popup explaining the result.
             ShowAnalyzeMessage("GeometryParch1", Vector2(180.0f, -4.0f), HorizontalAlignment::Center);
@@ -301,7 +309,9 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
     else if(mAnalyzeFileId == SidneyFileIds::kParchment2)
     {
         // Play analyze video.
+        gActionManager.StartManualAction();
         AnalyzeImage_PlayVideo("Parch2Geo.avi", mAnalyzeVideoImages[0], "GEOMPARCH2FINAL.BMP", [this](){
+            gActionManager.FinishManualAction();
 
             // Show a popup explaining the result.
             ShowAnalyzeMessage("GeometryParch2", Vector2(180.0f, -4.0f), HorizontalAlignment::Center);
@@ -327,7 +337,9 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
         mAnalyzeVideoImages[0]->GetRectTransform()->SetAnchoredPosition(videoImagePos);
 
         // Play analyze video.
+        gActionManager.StartManualAction();
         AnalyzeImage_PlayVideo("Poussingeo.avi", mAnalyzeVideoImages[0], "GEOMPOUSSINFINAL.BMP", [this](){
+            gActionManager.FinishManualAction();
 
             // Show a popup explaining the result.
             ShowAnalyzeMessage("GeometryPous", Vector2(180.0f, 0.0f), HorizontalAlignment::Center);
@@ -357,6 +369,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
         ShowAnalyzeMessage("GeometryTenier1", Vector2(190.0f, -160.0f), HorizontalAlignment::Center);
 
         // Play initial video.
+        gActionManager.StartManualAction();
         AnalyzeImage_PlayVideo("TenierGeoA.avi", mAnalyzeVideoImages[0], "TENIERGEOA.BMP", [this](){
             mAnalyzeVideoImages[0]->GetTexture()->SetTransparentColor(Color32(0, 255, 0));
 
@@ -383,6 +396,7 @@ void SidneyAnalyze::AnalyzeImage_OnViewGeometryButtonPressed()
 
                             // Final video.
                             AnalyzeImage_PlayVideo("TenierGeoD.avi", mAnalyzeVideoImages[1], "GEOMTENNIERSFINAL.BMP", [this](){
+                                gActionManager.FinishManualAction();
                                 ShowAnalyzeMessage("GeometryTenier5", Vector2(190.0f, -160.0f), HorizontalAlignment::Center);
 
                                 // Grace says "I already know about the tilted square!"
@@ -406,7 +420,9 @@ void SidneyAnalyze::AnalyzeImage_OnRotateShapeButtonPressed()
     if(mAnalyzeFileId == SidneyFileIds::kParchment2)
     {
         // Play zoom in video.
+        gActionManager.StartManualAction();
         AnalyzeImage_PlayVideo("Parch2Zoom.avi", mAnalyzeVideoImages[2], "", [this](){
+            gActionManager.FinishManualAction();
 
             // Turn off video image once this video finishes.
             mAnalyzeVideoImages[2]->SetEnabled(false);
@@ -434,7 +450,9 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
     if(mAnalyzeFileId == SidneyFileIds::kPoussinPostcard)
     {
         // Play zoom in video.
+        gActionManager.StartManualAction();
         AnalyzeImage_PlayVideo("poussinzoom.avi", mAnalyzeVideoImages[2], "", [this](){
+            gActionManager.FinishManualAction();
 
             // Turn off video image once this video finishes.
             mAnalyzeVideoImages[2]->SetEnabled(false);
@@ -473,7 +491,9 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
     else if(mAnalyzeFileId == SidneyFileIds::kTeniersPostcard2)
     {
         // Play zoom in video.
+        gActionManager.StartManualAction();
         AnalyzeImage_PlayVideo("Tenierzoom.avi", mAnalyzeVideoImages[2], "", [this](){
+            gActionManager.FinishManualAction();
 
             // Turn off video image once this video finishes.
             mAnalyzeVideoImages[2]->SetEnabled(false);
@@ -493,6 +513,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
             mAnalyzePopup->ShowTwoButton([this](){
                 
                 // Play a modem SFX, so it seems like we're reaching out to the internet...
+                gActionManager.StartManualAction();
                 gAudioManager.PlaySFX(gAssetManager.LoadAudio("SIDMODEM.WAV", AssetScope::Scene));
                 ShowAnalyzeMessage("RetrieveVerse", Vector2(), HorizontalAlignment::Center, true);
 
@@ -501,6 +522,7 @@ void SidneyAnalyze::AnalyzeImage_OnZoomClarifyButtonPressed()
 
                     // Show the verse and play some dialogue.
                     // There are no points or flags associated with this action though.
+                    gActionManager.FinishManualAction();
                     ShowAnalyzeMessage("Verse", Vector2(), HorizontalAlignment::Left);
                     gActionManager.ExecuteDialogueAction("02OCB2ZQ35", 1);
                 });
