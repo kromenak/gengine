@@ -114,6 +114,7 @@ void OptionBar::OnUpdate(float deltaTime)
     mActiveInventoryItemButton->SetCanInteract(!actionActive);
     mInventoryButton->SetCanInteract(!actionActive);
     mHintButton->SetCanInteract(!actionActive); //TODO: also base this on whether a hint is currently available...
+    mRadioButton->SetCanInteract(!actionActive);
     mCamerasButton->SetCanInteract(!actionActive);
     mHelpButton->SetCanInteract(!actionActive);
     mOptionsButton->SetCanInteract(!actionActive);
