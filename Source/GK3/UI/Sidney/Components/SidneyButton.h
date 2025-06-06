@@ -25,6 +25,7 @@ class UINineSlice;
 class SidneyButton : public Actor
 {
 public:
+    SidneyButton(const std::string& name, Actor* parent);
     SidneyButton(Actor* parent);
     void PrepareToDestroy();
     

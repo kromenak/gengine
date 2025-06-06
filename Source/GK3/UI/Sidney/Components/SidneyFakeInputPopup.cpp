@@ -21,11 +21,11 @@ SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& nam
     GetComponent<RectTransform>()->SetSizeDelta(240.0f, 105.0f);
 
     // Add a box with border around it.
-    UINineSlice* boxImage = UIUtil::NewUIActorWithWidget<UINineSlice>(this, SidneyUtil::GetGrayBoxParams(Color32::Black));
+    UINineSlice* boxImage = UI::CreateWidgetActor<UINineSlice>("Box", this, SidneyUtil::GetGrayBoxParams(Color32::Black));
     boxImage->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
 
     {
-        mHeaderLabel = UIUtil::NewUIActorWithWidget<UILabel>(this);
+        mHeaderLabel = UI::CreateWidgetActor<UILabel>("HeaderLabel", this);
         mHeaderLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mHeaderLabel->SetText("");
         mHeaderLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -35,7 +35,7 @@ SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& nam
         mHeaderLabel->GetRectTransform()->SetSizeDelta(226.0f, 42.0f);
     }
     {
-        mPromptLabel = UIUtil::NewUIActorWithWidget<UILabel>(this);
+        mPromptLabel = UI::CreateWidgetActor<UILabel>("PromptLabel", this);
         mPromptLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mPromptLabel->SetText("");
         mPromptLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -45,7 +45,7 @@ SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& nam
         mPromptLabel->GetRectTransform()->SetSizeDelta(226.0f, 42.0f);
     }
     {
-        mInputLabel = UIUtil::NewUIActorWithWidget<UILabel>(this);
+        mInputLabel = UI::CreateWidgetActor<UILabel>("InputLabel", this);
         mInputLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mInputLabel->SetText("");
         mInputLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -54,7 +54,7 @@ SidneyFakeInputPopup::SidneyFakeInputPopup(Actor* parent, const std::string& nam
         mInputLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -56.5f); // .5 to keep it pixel-perfect (since height of box is odd)
         mInputLabel->GetRectTransform()->SetSizeDelta(226.0f, 16.0f);
 
-        mOKButton = new SidneyButton(this);
+        mOKButton = new SidneyButton("OKButton", this);
         mOKButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
         mOKButton->SetText(SidneyUtil::GetAddDataLocalizer().GetText("OKButton"));
         mOKButton->GetButton()->SetCanInteract(false);

@@ -245,7 +245,7 @@ void SidneySearch::Init(Actor* parent)
     
     // Add menu bar.
     // This menu bar only has one dropdown (web page history) that is oddly positioned...
-    mMenuBar.Init(mRoot, SidneyUtil::GetSearchLocalizer().GetText("ScreenName"), 100.0f);
+    mMenuBar.Init(mRoot, SidneyUtil::GetSearchLocalizer().GetText("ScreenName"));
     mMenuBar.SetFirstDropdownPosition(405.0f);
     mMenuBar.AddDropdown("History");
 
@@ -255,7 +255,7 @@ void SidneySearch::Init(Actor* parent)
     // Add search bar (top area).
     {
         // Background w/ border.
-        UINineSlice* searchBarPanel = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
+        UINineSlice* searchBarPanel = UI::CreateWidgetActor<UINineSlice>("SearchBarBox", mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
         searchBarPanel->GetRectTransform()->SetPivot(0.0f, 1.0f);
         searchBarPanel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
         searchBarPanel->GetRectTransform()->SetAnchoredPosition(60.0f, -88.0f);
@@ -263,6 +263,7 @@ void SidneySearch::Init(Actor* parent)
         
         // Reset button.
         SidneyButton* resetButton = SidneyUtil::CreateSmallButton(searchBarPanel->GetOwner());
+        resetButton->SetName("ResetButton");
         resetButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         resetButton->GetRectTransform()->SetAnchoredPosition(14.0f, -17.0f);
         resetButton->SetText(SidneyUtil::GetSearchLocalizer().GetText("Reset"));
@@ -272,6 +273,7 @@ void SidneySearch::Init(Actor* parent)
 
         // Search button.
         SidneyButton* searchButton = SidneyUtil::CreateSmallButton(searchBarPanel->GetOwner());
+        searchButton->SetName("SearchButton");
         searchButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         searchButton->GetRectTransform()->SetAnchoredPosition(426.0f, -17.0f);
         searchButton->SetText(SidneyUtil::GetSearchLocalizer().GetText("Search"));
@@ -280,7 +282,7 @@ void SidneySearch::Init(Actor* parent)
         });
 
         // Text input field.
-        UINineSlice* searchInputPanel = UIUtil::NewUIActorWithWidget<UINineSlice>(searchBarPanel->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
+        UINineSlice* searchInputPanel = UI::CreateWidgetActor<UINineSlice>("SearchBar", searchBarPanel, SidneyUtil::GetGrayBoxParams(Color32::Black));
         searchInputPanel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         searchInputPanel->GetRectTransform()->SetAnchoredPosition(100.0f, -17.0f);
         searchInputPanel->GetRectTransform()->SetSizeDelta(320.0f, 15.0f);
@@ -294,7 +296,7 @@ void SidneySearch::Init(Actor* parent)
         mTextInput->AllowInputToChangeFocus(false);
 
         // Create text input field caret.
-        UIImage* caretImage = UIUtil::NewUIActorWithWidget<UIImage>(searchInputPanel->GetOwner());
+        UIImage* caretImage = UI::CreateWidgetActor<UIImage>("Caret", searchInputPanel);
         caretImage->SetTexture(&Texture::White);
         caretImage->GetRectTransform()->SetAnchor(AnchorPreset::LeftStretch, false);
         caretImage->GetRectTransform()->SetPivot(0.0f, 0.0f);
@@ -307,7 +309,7 @@ void SidneySearch::Init(Actor* parent)
     // Add navigation bar (bottom area).
     {
         // Background.
-        UINineSlice* navBarPanel = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
+        UINineSlice* navBarPanel = UI::CreateWidgetActor<UINineSlice>("NavBox", mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
         navBarPanel->GetRectTransform()->SetPivot(0.0f, 1.0f);
         navBarPanel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
         navBarPanel->GetRectTransform()->SetAnchoredPosition(60.0f, -390.0f);
@@ -315,6 +317,7 @@ void SidneySearch::Init(Actor* parent)
 
         // Back button.
         mHistoryBackButton = SidneyUtil::CreateSmallButton(navBarPanel->GetOwner());
+        mHistoryBackButton->SetName("BackButton");
         mHistoryBackButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mHistoryBackButton->GetRectTransform()->SetAnchoredPosition(63.0f, -8.0f);
         mHistoryBackButton->SetText(SidneyUtil::GetSearchLocalizer().GetText("Back"));
@@ -325,6 +328,7 @@ void SidneySearch::Init(Actor* parent)
 
         // Forward button.
         mHistoryForwardButton = SidneyUtil::CreateSmallButton(navBarPanel->GetOwner());
+        mHistoryForwardButton->SetName("ForwardButton");
         mHistoryForwardButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mHistoryForwardButton->GetRectTransform()->SetAnchoredPosition(155.0f, -8.0f);
         mHistoryForwardButton->SetText(SidneyUtil::GetSearchLocalizer().GetText("Forward"));
@@ -334,7 +338,7 @@ void SidneySearch::Init(Actor* parent)
         mHistoryForwardButton->GetButton()->SetCanInteract(false);
 
         // Hovered link target label.
-        mLinkTargetLabel = UIUtil::NewUIActorWithWidget<UILabel>(navBarPanel->GetOwner());
+        mLinkTargetLabel = UI::CreateWidgetActor<UILabel>("HoveredLinkLabel", navBarPanel->GetOwner());
         mLinkTargetLabel->GetRectTransform()->SetAnchor(AnchorPreset::Right);
         mLinkTargetLabel->GetRectTransform()->SetAnchoredPosition(-5.0f, 0.0f);
         mLinkTargetLabel->GetRectTransform()->SetSizeDelta(0.0f, 28.0f);
@@ -345,14 +349,14 @@ void SidneySearch::Init(Actor* parent)
 
     // Add search results web page area (middle).
     {
-        UIImage* resultsPanel = UIUtil::NewUIActorWithWidget<UIImage>(mRoot);
+        UIImage* resultsPanel = UI::CreateWidgetActor<UIImage>("WebPageBackground", mRoot);
         resultsPanel->SetColor(Color32(0, 0, 0, 128));
         resultsPanel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         resultsPanel->GetRectTransform()->SetAnchoredPosition(60.0f, -136.0f);
         resultsPanel->GetRectTransform()->SetSizeDelta(kWebpageWidth, 254.0f);
         mWebPageRoot = resultsPanel->GetOwner();
         
-        mWebPageWidgetsCanvas = UIUtil::NewUIActorWithCanvas(resultsPanel->GetOwner(), 1);
+        mWebPageWidgetsCanvas = UI::CreateCanvas("WebPage", resultsPanel, 1);
         mWebPageWidgetsCanvas->SetMasked(true);
         mWebPageWidgetsCanvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
         mWebPageWidgetsCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
@@ -668,7 +672,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                         resultsPos.y -= kLineBreakHeight;
                     }
 
-                    UIImage* bulletImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageScrollRect);
+                    UIImage* bulletImage = UI::CreateWidgetActor<UIImage>("BulletPoint", mWebPageScrollRect);
                     bulletImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBULLET.BMP", AssetScope::Scene), true);
                     bulletImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     bulletImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
@@ -688,7 +692,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                     resultsPos.y -= kLineBreakHeight;
 
                     // Make an image with the horizontal rule.
-                    UIImage* hrImage = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageScrollRect);
+                    UIImage* hrImage = UI::CreateWidgetActor<UIImage>("HR", mWebPageScrollRect);
                     hrImage->SetTexture(gAssetManager.LoadTexture("HORIZONTALRULE.BMP"), true);
                     hrImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     hrImage->GetRectTransform()->SetAnchoredPosition(resultsPos);
@@ -704,7 +708,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
                 else if(StringUtil::EqualsIgnoreCase(element.tagOrData, "IMG"))
                 {
                     // Create the image at the appropriate size.
-                    UIImage* image = UIUtil::NewUIActorWithWidget<UIImage>(mWebPageScrollRect);
+                    UIImage* image = UI::CreateWidgetActor<UIImage>("Image", mWebPageScrollRect);
                     image->SetTexture(gAssetManager.LoadTexture(element.attributes[0].value, AssetScope::Scene), true);
                     image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                     image->GetRectTransform()->SetAnchoredPosition(resultsPos);
@@ -839,7 +843,7 @@ void SidneySearch::ShowWebPage(const std::string& pageName)
 UILabel* SidneySearch::CreateWebPageText(const std::string& text, Font* font, const Vector2& pos, float width, std::string& link)
 {
     // Create a label with the appropriate font and text.
-    UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(mWebPageScrollRect);
+    UILabel* label = UI::CreateWidgetActor<UILabel>("PageText", mWebPageScrollRect);
     label->SetFont(font);
     label->SetText(text);
 

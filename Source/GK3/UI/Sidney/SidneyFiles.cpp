@@ -292,7 +292,7 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
     // Add dialog background.
     {
         // Create a root actor for the dialog.
-        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(parent, 2);
+        UICanvas* canvas = UI::CreateCanvas("SidneyFiles", parent, 2);
         mWindowRoot = canvas->GetOwner();
         mWindowRoot->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
 
@@ -312,13 +312,13 @@ void SidneyFiles::FileListWindow::Init(Actor* parent, bool forShapes)
     // Add title/header.
     {
         // Add one line divider for bottom of header.
-        UIImage* headerDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(mWindowRoot);
+        UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("Divider", mWindowRoot);
         headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -20.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
-        UILabel* titleLabel = UIUtil::NewUIActorWithWidget<UILabel>(mWindowRoot);
+        UILabel* titleLabel = UI::CreateWidgetActor<UILabel>("Title", mWindowRoot);
         titleLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         titleLabel->GetRectTransform()->SetAnchoredPosition(0.0f, -2.0f);
         titleLabel->GetRectTransform()->SetSizeDelta(0.0f, 20.0f);

@@ -13,17 +13,14 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UIUtil.h"
 
 namespace
 {
     UIButton* CreateMainButton(Actor* parent, const std::string& buttonId, float xPos)
     {
-        Actor* actor = new Actor(TransformType::RectTransform);
-        actor->GetTransform()->SetParent(parent->GetTransform());
-        UIButton* button = actor->AddComponent<UIButton>();
-
-        button->GetRectTransform()->SetPivot(0.0f, 1.0f);
-        button->GetRectTransform()->SetAnchor(0.0f, 1.0f);
+        UIButton* button = UI::CreateWidgetActor<UIButton>(buttonId, parent);
+        button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         button->GetRectTransform()->SetAnchoredPosition(xPos, -24.0f);
 
         button->SetUpTexture(gAssetManager.LoadTexture("B_" + buttonId + "_U.BMP"));
@@ -38,28 +35,16 @@ Sidney::Sidney() : Actor("Sidney", TransformType::RectTransform)
 {
     // Sidney will be layered near the bottom.
     // A lot of stuff needs to appear above it (inventory, status overlay, etc).
-    AddComponent<UICanvas>(0);
-
-    // Canvas takes up entire screen.
-    RectTransform* rectTransform = GetComponent<RectTransform>();
-    rectTransform->SetSizeDelta(0.0f, 0.0f);
-    rectTransform->SetAnchorMin(Vector2::Zero);
-    rectTransform->SetAnchorMax(Vector2::One);
-
-    // Add black background that eats input.
-    UIImage* background = AddComponent<UIImage>();
-    background->SetTexture(&Texture::Black);
-    background->SetReceivesInput(true);
+    UI::AddCanvas(this, 0, Color32::Black);
 
     // Add desktop background image.
-    Actor* desktopBackground = new Actor(TransformType::RectTransform);
-    desktopBackground->GetTransform()->SetParent(GetTransform());
-    UIImage* desktopBackgroundImage = desktopBackground->AddComponent<UIImage>();
+    UIImage* desktopBackgroundImage = UI::CreateWidgetActor<UIImage>("Desktop", this);
     desktopBackgroundImage->SetTexture(gAssetManager.LoadTexture("S_MAIN_SCN.BMP"), true);
+    Actor* desktopBackground = desktopBackgroundImage->GetOwner();
 
     // Add exit button as child of desktop background.
     {
-        SidneyButton* button = new SidneyButton(desktopBackground);
+        SidneyButton* button = new SidneyButton("ExitButton", desktopBackground);
         button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
         button->SetText(SidneyUtil::GetMainScreenLocalizer().GetText("MenuItem9"));
         button->SetWidth(80.0f);

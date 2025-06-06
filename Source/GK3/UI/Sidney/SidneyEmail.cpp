@@ -31,23 +31,23 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
     });
 
     // Add menu bar.
-    mMenuBar.Init(mRoot, SidneyUtil::GetEmailLocalizer().GetText("ScreenName"), 84.0f);
+    mMenuBar.Init(mRoot, SidneyUtil::GetEmailLocalizer().GetText("ScreenName"));
 
     // Create email list window.
     {
-        UINineSlice* emailListWindow = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(Color32::Black));
+        UINineSlice* emailListWindow = UI::CreateWidgetActor<UINineSlice>("EmailListWindow", mRoot, SidneyUtil::GetGrayBoxParams(Color32::Black));
         emailListWindow->GetRectTransform()->SetSizeDelta(250.0f, 170.0f);
         mEmailListWindow = emailListWindow->GetOwner();
 
         // Add one line for the box header.
-        UIImage* headerDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(emailListWindow->GetOwner());
+        UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("Divider", emailListWindow);
         headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -20.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         // Add header text.
-        UILabel* headerLabel = UIUtil::NewUIActorWithWidget<UILabel>(emailListWindow->GetOwner());
+        UILabel* headerLabel = UI::CreateWidgetActor<UILabel>("HeaderLabel", emailListWindow);
         headerLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
         headerLabel->SetText(SidneyUtil::GetEmailLocalizer().GetText("EMailList"));
         headerLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
@@ -64,19 +64,19 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
     // Create single email view.
     {
         // Create window around entire area.
-        UINineSlice* emailWindow = UIUtil::NewUIActorWithWidget<UINineSlice>(mRoot, SidneyUtil::GetGrayBoxParams(Color32::Black));
+        UINineSlice* emailWindow = UI::CreateWidgetActor<UINineSlice>("EmailWindow", mRoot, SidneyUtil::GetGrayBoxParams(Color32::Black));
         emailWindow->GetRectTransform()->SetSizeDelta(531.0f, 358.0f);
         mEmailWindow = emailWindow->GetOwner();
 
         // Create header divider line.
-        UIImage* headerDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(emailWindow->GetOwner());
+        UIImage* headerDividerImage = UI::CreateWidgetActor<UIImage>("HeaderDivider", emailWindow);
         headerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
         headerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         headerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -100.0f);
         headerDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         // Create footer divider line.
-        UIImage* footerDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(emailWindow->GetOwner());
+        UIImage* footerDividerImage = UI::CreateWidgetActor<UIImage>("FooterDivider", emailWindow);
         footerDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
         footerDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomStretch);
         footerDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, 29.0f);
@@ -87,19 +87,19 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
         {
             // From
             {
-                UILabel* fromLabel = UIUtil::NewUIActorWithWidget<UILabel>(emailWindow->GetOwner());
+                UILabel* fromLabel = UI::CreateWidgetActor<UILabel>("FromLabel", emailWindow);
                 fromLabel->SetFont(font);
                 fromLabel->SetText(SidneyUtil::GetEmailLocalizer().GetText("From"));
                 fromLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 fromLabel->GetRectTransform()->SetAnchoredPosition(10.0f, -11.0f);
                 fromLabel->GetRectTransform()->SetSizeDelta(fromLabel->GetTextWidth(), font->GetGlyphHeight());
 
-                UINineSlice* fromBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(emailWindow->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
+                UINineSlice* fromBorder = UI::CreateWidgetActor<UINineSlice>("FromBox", emailWindow, SidneyUtil::GetGrayBoxParams(Color32::Black));
                 fromBorder->GetRectTransform()->SetSizeDelta(202.0f, 18.0f);
                 fromBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 fromBorder->GetRectTransform()->SetAnchoredPosition(90.0f, -9.0f);
 
-                mFromLabel = UIUtil::NewUIActorWithWidget<UILabel>(fromBorder->GetOwner());
+                mFromLabel = UI::CreateWidgetActor<UILabel>("FromValueLabel", fromBorder);
                 mFromLabel->SetFont(font);
                 mFromLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
                 mFromLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
@@ -107,19 +107,19 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
             // To
             {
-                UILabel* toLabel = UIUtil::NewUIActorWithWidget<UILabel>(emailWindow->GetOwner());
+                UILabel* toLabel = UI::CreateWidgetActor<UILabel>("ToLabel", emailWindow);
                 toLabel->SetFont(font);
                 toLabel->SetText(SidneyUtil::GetEmailLocalizer().GetText("To"));
                 toLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 toLabel->GetRectTransform()->SetAnchoredPosition(10.0f, -30.0f);
                 toLabel->GetRectTransform()->SetSizeDelta(toLabel->GetTextWidth(), font->GetGlyphHeight());
 
-                UINineSlice* toBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(emailWindow->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
+                UINineSlice* toBorder = UI::CreateWidgetActor<UINineSlice>("ToBox", emailWindow, SidneyUtil::GetGrayBoxParams(Color32::Black));
                 toBorder->GetRectTransform()->SetSizeDelta(202.0f, 18.0f);
                 toBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 toBorder->GetRectTransform()->SetAnchoredPosition(90.0f, -28.0f);
 
-                mToLabel = UIUtil::NewUIActorWithWidget<UILabel>(toBorder->GetOwner());
+                mToLabel = UI::CreateWidgetActor<UILabel>("ToValueLabel", toBorder);
                 mToLabel->SetFont(font);
                 mToLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
                 mToLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
@@ -127,19 +127,19 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
             // CC
             {
-                UILabel* ccLabel = UIUtil::NewUIActorWithWidget<UILabel>(emailWindow->GetOwner());
+                UILabel* ccLabel = UI::CreateWidgetActor<UILabel>("CCLabel", emailWindow);
                 ccLabel->SetFont(font);
                 ccLabel->SetText(SidneyUtil::GetEmailLocalizer().GetText("CC"));
                 ccLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 ccLabel->GetRectTransform()->SetAnchoredPosition(10.0f, -49.0f);
                 ccLabel->GetRectTransform()->SetSizeDelta(ccLabel->GetTextWidth(), font->GetGlyphHeight());
 
-                UINineSlice* ccBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(emailWindow->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
+                UINineSlice* ccBorder = UI::CreateWidgetActor<UINineSlice>("CCBox", emailWindow, SidneyUtil::GetGrayBoxParams(Color32::Black));
                 ccBorder->GetRectTransform()->SetSizeDelta(202.0f, 18.0f);
                 ccBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 ccBorder->GetRectTransform()->SetAnchoredPosition(90.0f, -47.0f);
 
-                mCCLabel = UIUtil::NewUIActorWithWidget<UILabel>(ccBorder->GetOwner());
+                mCCLabel = UI::CreateWidgetActor<UILabel>("CCValueLabel", ccBorder);
                 mCCLabel->SetFont(font);
                 mCCLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
                 mCCLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
@@ -147,19 +147,19 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
             // Subject
             {
-                UILabel* subjectLabel = UIUtil::NewUIActorWithWidget<UILabel>(emailWindow->GetOwner());
+                UILabel* subjectLabel = UI::CreateWidgetActor<UILabel>("SubjectLabel", emailWindow);
                 subjectLabel->SetFont(font);
                 subjectLabel->SetText(SidneyUtil::GetEmailLocalizer().GetText("Subject"));
                 subjectLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 subjectLabel->GetRectTransform()->SetAnchoredPosition(10.0f, -78.0f);
                 subjectLabel->GetRectTransform()->SetSizeDelta(subjectLabel->GetTextWidth(), font->GetGlyphHeight());
 
-                UINineSlice* subjectBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(emailWindow->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
+                UINineSlice* subjectBorder = UI::CreateWidgetActor<UINineSlice>("SubjectBox", emailWindow, SidneyUtil::GetGrayBoxParams(Color32::Black));
                 subjectBorder->GetRectTransform()->SetSizeDelta(202.0f, 18.0f);
                 subjectBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 subjectBorder->GetRectTransform()->SetAnchoredPosition(90.0f, -76.0f);
 
-                mSubjectLabel = UIUtil::NewUIActorWithWidget<UILabel>(subjectBorder->GetOwner());
+                mSubjectLabel = UI::CreateWidgetActor<UILabel>("SubjectValueLabel", subjectBorder);
                 mSubjectLabel->SetFont(font);
                 mSubjectLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
                 mSubjectLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
@@ -167,19 +167,19 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
             // Date
             {
-                UINineSlice* dateBorder = UIUtil::NewUIActorWithWidget<UINineSlice>(emailWindow->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
+                UINineSlice* dateBorder = UI::CreateWidgetActor<UINineSlice>("DateBox", emailWindow, SidneyUtil::GetGrayBoxParams(Color32::Black));
                 dateBorder->GetRectTransform()->SetSizeDelta(136.0f, 18.0f);
                 dateBorder->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 dateBorder->GetRectTransform()->SetAnchoredPosition(303.0f, -28.0f);
 
-                mDateLabel = UIUtil::NewUIActorWithWidget<UILabel>(dateBorder->GetOwner());
+                mDateLabel = UI::CreateWidgetActor<UILabel>("DateLabel", dateBorder);
                 mDateLabel->SetFont(font);
                 mDateLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
                 mDateLabel->GetRectTransform()->SetSizeDelta(-8.0f, -3.0f);
             }
 
             // Schattenjaeger logo.
-            UIImage* logoImage = UIUtil::NewUIActorWithWidget<UIImage>(emailWindow->GetOwner());
+            UIImage* logoImage = UI::CreateWidgetActor<UIImage>("Logo", emailWindow);
             logoImage->SetTexture(gAssetManager.LoadTexture("S_SCHAT_LOGO.BMP"), true);
             logoImage->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
             logoImage->GetRectTransform()->SetAnchoredPosition(-7.0f, -13.0f);
@@ -188,7 +188,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
         // Create the body area.
         {
             // Create body canvas, for masking.
-            UICanvas* bodyCanvas = UIUtil::NewUIActorWithCanvas(emailWindow->GetOwner(), 1);
+            UICanvas* bodyCanvas = UI::CreateCanvas("Body", emailWindow, 1);
             bodyCanvas->SetMasked(true);
             bodyCanvas->GetRectTransform()->SetAnchor(AnchorPreset::Top);
             bodyCanvas->GetRectTransform()->SetAnchoredPosition(0.0f, -100.0f);
@@ -203,7 +203,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
 
         // In the footer, create all the buttons.
         {
-            SidneyButton* nextButton = new SidneyButton(emailWindow->GetOwner());
+            SidneyButton* nextButton = new SidneyButton("NextButton", emailWindow->GetOwner());
             nextButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Next"));
             nextButton->SetWidth(66.0f);
             nextButton->SetHeight(13.0f);
@@ -214,7 +214,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
             });
             mNextButton = nextButton;
 
-            SidneyButton* prevButton = new SidneyButton(emailWindow->GetOwner());
+            SidneyButton* prevButton = new SidneyButton("PrevButton", emailWindow->GetOwner());
             prevButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Previous"));
             prevButton->SetWidth(66.0f);
             prevButton->SetHeight(13.0f);
@@ -225,7 +225,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
             });
             mPrevButton = prevButton;
 
-            SidneyButton* replyButton = new SidneyButton(emailWindow->GetOwner());
+            SidneyButton* replyButton = new SidneyButton("ReplyButton", emailWindow->GetOwner());
             replyButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Reply"));
             replyButton->SetWidth(66.0f);
             replyButton->SetHeight(13.0f);
@@ -235,7 +235,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
                 OnReplyButtonPressed();
             });
 
-            SidneyButton* composeButton = new SidneyButton(emailWindow->GetOwner());
+            SidneyButton* composeButton = new SidneyButton("ComposeButton", emailWindow->GetOwner());
             composeButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Compose"));
             composeButton->SetWidth(66.0f);
             composeButton->SetHeight(13.0f);
@@ -245,7 +245,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
                 OnComposeButtonPressed();
             });
 
-            SidneyButton* printButton = new SidneyButton(emailWindow->GetOwner());
+            SidneyButton* printButton = new SidneyButton("PrintButton", emailWindow->GetOwner());
             printButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Print"));
             printButton->SetWidth(66.0f);
             printButton->SetHeight(13.0f);
@@ -255,7 +255,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
                 OnPrintButtonPressed();
             });
 
-            SidneyButton* closeButton = new SidneyButton(emailWindow->GetOwner());
+            SidneyButton* closeButton = new SidneyButton("CloseButton", emailWindow->GetOwner());
             closeButton->SetText(SidneyUtil::GetEmailLocalizer().GetText("Exit"));
             closeButton->SetWidth(50.0f);
             closeButton->SetHeight(13.0f);
@@ -271,7 +271,7 @@ void SidneyEmail::Init(Actor* parent, Actor* newEmailParent)
     {
         // This label appears on all subscreens, as long as you have new email.
         // So we need to put the label above other UI elements by using a different canvas.
-        UICanvas* canvas = UIUtil::NewUIActorWithCanvas(newEmailParent, 2);
+        UICanvas* canvas = UI::CreateCanvas("NewEmail", newEmailParent, 2);
         canvas->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
         canvas->GetRectTransform()->SetAnchoredPosition(-4.0f, -3.0f);
         canvas->GetRectTransform()->SetSizeDelta(100.0f, 20.0f);
@@ -482,7 +482,7 @@ void SidneyEmail::ShowEmailList()
         }
         else
         {
-            label = UIUtil::NewUIActorWithWidget<UILabel>(mEmailListWindow);
+            label = UI::CreateWidgetActor<UILabel>("EmailListItem", mEmailListWindow);
             label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             label->GetOwner()->AddComponent<UIButton>();
             mEmailListItems.push_back(label);
@@ -560,7 +560,7 @@ void SidneyEmail::ViewEmail(const std::string& emailId, int emailIndex)
             }
             else
             {
-                label = UIUtil::NewUIActorWithWidget<UILabel>(mBodyScrollRect);
+                label = UI::CreateWidgetActor<UILabel>("EmailBodyLabel", mBodyScrollRect);
                 label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
                 label->GetRectTransform()->SetSizeDelta(510.0f, yellowFont->GetGlyphHeight());
                 label->SetFont(yellowFont);

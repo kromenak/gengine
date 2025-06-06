@@ -16,7 +16,7 @@
 void SidneyAnalyze::AnalyzeImage_Init()
 {
     // Create a parent that contains all the image analysis stuff.
-    mAnalyzeImageWindow = new Actor(TransformType::RectTransform);
+    mAnalyzeImageWindow = new Actor("AnalyzeImageWindow", TransformType::RectTransform);
     mAnalyzeImageWindow->GetTransform()->SetParent(mRoot->GetTransform());
     static_cast<RectTransform*>(mAnalyzeImageWindow->GetTransform())->SetAnchor(AnchorPreset::CenterStretch);
     static_cast<RectTransform*>(mAnalyzeImageWindow->GetTransform())->SetAnchoredPosition(0.0f, 0.0f);
@@ -24,10 +24,7 @@ void SidneyAnalyze::AnalyzeImage_Init()
 
     // Create image that is being analyzed.
     {
-        Actor* imageActor = new Actor(TransformType::RectTransform);
-        imageActor->GetTransform()->SetParent(mAnalyzeImageWindow->GetTransform());
-
-        mAnalyzeImage = imageActor->AddComponent<UIImage>();
+        mAnalyzeImage = UI::CreateWidgetActor<UIImage>("AnalyzeImage", mAnalyzeImageWindow);
         mAnalyzeImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mAnalyzeImage->GetRectTransform()->SetAnchoredPosition(10.0f, -50.0f);
     }
@@ -36,7 +33,7 @@ void SidneyAnalyze::AnalyzeImage_Init()
     {
         for(UIImage*& image : mAnalyzeVideoImages)
         {
-            image = UIUtil::NewUIActorWithWidget<UIImage>(mAnalyzeImageWindow);
+            image = UI::CreateWidgetActor<UIImage>("VideoImage", mAnalyzeImageWindow);
             image->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             AnalyzeImage_ResetVideoImage(image);
         }

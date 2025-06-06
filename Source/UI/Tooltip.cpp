@@ -90,13 +90,13 @@ Tooltip::Tooltip() : Actor("Tooltip", TransformType::RectTransform)
     params.centerColor = backgroundColor;
 
     // Create border and window for the tooltip.
-    UINineSlice* window = UIUtil::NewUIActorWithWidget<UINineSlice>(this, params);
+    UINineSlice* window = UI::CreateWidgetActor<UINineSlice>("Box", this, params);
     mRoot = window->GetRectTransform();
     mRoot->SetPixelPerfect(true);
     mRoot->SetAnchor(AnchorPreset::BottomLeft);
 
     // Create text label inside the window.
-    mLabel = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+    mLabel = UI::CreateWidgetActor<UILabel>("Label", window);
     mLabel->SetFont(mFont);
     mLabel->SetHorizonalAlignment(HorizontalAlignment::Left);
     mLabel->SetHorizontalOverflow(HorizontalOverflow::Overflow);

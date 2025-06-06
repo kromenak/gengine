@@ -24,25 +24,25 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
 
     // Lay out divider lines for the various areas of the anagram parser window.
     {
-        UIImage* dividerImage = UIUtil::NewUIActorWithWidget<UIImage>(window->GetOwner());
+        UIImage* dividerImage = UI::CreateWidgetActor<UIImage>("Divider", window);
         dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
         dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         dividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -61.0f);
         dividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
-        dividerImage = UIUtil::NewUIActorWithWidget<UIImage>(window->GetOwner());
+        dividerImage = UI::CreateWidgetActor<UIImage>("Divider", window);
         dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
         dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         dividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -231.0f);
         dividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
-        dividerImage = UIUtil::NewUIActorWithWidget<UIImage>(window->GetOwner());
+        dividerImage = UI::CreateWidgetActor<UIImage>("Divider", window);
         dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
         dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         dividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -291.0f);
         dividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
-        dividerImage = UIUtil::NewUIActorWithWidget<UIImage>(window->GetOwner());
+        dividerImage = UI::CreateWidgetActor<UIImage>("Divider", window);
         dividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_SIDE.BMP"), true);
         dividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         dividerImage->GetRectTransform()->SetAnchoredPosition(183.0f, -61.0f);
@@ -51,29 +51,29 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
 
     // Create labels in the header area.
     {
-        UILabel* titleLabel = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+        UILabel* titleLabel = UI::CreateWidgetActor<UILabel>("TitleLabel", window);
         titleLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         titleLabel->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("AnagramTitle"));
         titleLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        titleLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -9.5f);
+        titleLabel->GetRectTransform()->SetAnchoredPosition(15.0f, -9.0f);
         titleLabel->FitRectTransformToText();
 
-        mParsingHeaderLabel = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+        mParsingHeaderLabel = UI::CreateWidgetActor<UILabel>("ParsingLabel", window);
         mParsingHeaderLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mParsingHeaderLabel->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Parsing"));
         mParsingHeaderLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        mParsingHeaderLabel->GetRectTransform()->SetAnchoredPosition(161.0f, -9.5f);
+        mParsingHeaderLabel->GetRectTransform()->SetAnchoredPosition(161.0f, -9.0f);
         mParsingHeaderLabel->FitRectTransformToText();
 
         const float kLetterX = 88.0f;
         const float kLetterSpacing = 20.0f;
         for(int i = 0; i < kMaxAnagramLetters; ++i)
         {
-            mLetterLabels[i] = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+            mLetterLabels[i] = UI::CreateWidgetActor<UILabel>("AnagramLetter" + std::to_string(i), window);
             mLetterLabels[i]->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
             mLetterLabels[i]->SetText("A");
             mLetterLabels[i]->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-            mLetterLabels[i]->GetRectTransform()->SetAnchoredPosition(kLetterX + i * kLetterSpacing, -34.5f);
+            mLetterLabels[i]->GetRectTransform()->SetAnchoredPosition(kLetterX + i * kLetterSpacing, -34.0f);
             mLetterLabels[i]->FitRectTransformToText();
         }
     }
@@ -82,13 +82,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
     {
         // Add scroll area
         {
-            UIImage* background = UIUtil::NewUIActorWithWidget<UIImage>(window->GetOwner());
-            background->SetColor(Color32(0, 0, 0, 255));
-            background->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-            background->GetRectTransform()->SetAnchoredPosition(1.0f, -62.0f);
-            background->GetRectTransform()->SetSizeDelta(182.0f, 169.0f);
-
-            UICanvas* scrollCanvas = UIUtil::NewUIActorWithCanvas(window->GetOwner(), 1);
+            UICanvas* scrollCanvas = UI::CreateCanvas("WordSelectCanvas", window, 1, Color32::Black);
             scrollCanvas->SetMasked(true);
             scrollCanvas->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             scrollCanvas->GetRectTransform()->SetAnchoredPosition(1.0f, -62.0f);
@@ -102,7 +96,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
 
             for(int i = 0; i < kMaxAnagramWords; ++i)
             {
-                UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(scrollRect);
+                UILabel* label = UI::CreateWidgetActor<UILabel>("AnagramWord" + std::to_string(i), scrollRect);
                 label->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
                 label->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Word" + std::to_string(i + 1)));
                 label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
@@ -117,24 +111,24 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
             RefreshAvailableWordsScrollList();
 
             // Add header box
-            UINineSlice* box = UIUtil::NewUIActorWithWidget<UINineSlice>(scrollCanvas->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
+            UINineSlice* box = UI::CreateWidgetActor<UINineSlice>("HeaderBox", scrollCanvas, SidneyUtil::GetGrayBoxParams(Color32::Black));
             box->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             box->GetRectTransform()->SetAnchoredPosition(-1.0f, 1.0f);
             box->GetRectTransform()->SetSizeDelta(60.0f, 14.0f);
 
             // Add header label.
-            UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(box->GetOwner());
+            UILabel* label = UI::CreateWidgetActor<UILabel>("SelectLabel", box);
             label->SetFont(gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
             label->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("SelectText"));
             label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-            label->GetRectTransform()->SetAnchoredPosition(8.0f, -2.5f);
+            label->GetRectTransform()->SetAnchoredPosition(8.0f, -2.0f);
             label->FitRectTransformToText();
         }
     }
 
     // Create message area.
     {
-        mMessagesLabel = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+        mMessagesLabel = UI::CreateWidgetActor<UILabel>("MessageLabel", window);
         mMessagesLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mMessagesLabel->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("LatinMsg") + "\n" + SidneyUtil::GetAnalyzeLocalizer().GetText("Latin2Msg"));
         mMessagesLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -146,17 +140,17 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
     // Create "phrase building area."
     {
         // Add header box.
-        UINineSlice* box = UIUtil::NewUIActorWithWidget<UINineSlice>(window->GetOwner(), SidneyUtil::GetGrayBoxParams(Color32::Black));
+        UINineSlice* box = UI::CreateWidgetActor<UINineSlice>("HeaderBox", window, SidneyUtil::GetGrayBoxParams(Color32::Black));
         box->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         box->GetRectTransform()->SetAnchoredPosition(0.0f, -231.0f);
         box->GetRectTransform()->SetSizeDelta(160.0f, 14.0f);
 
         // Add header label.
-        UILabel* label = UIUtil::NewUIActorWithWidget<UILabel>(box->GetOwner());
+        UILabel* label = UI::CreateWidgetActor<UILabel>("PhraseBuildingLabel", box);
         label->SetFont(gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
         label->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("PhraseText"));
         label->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        label->GetRectTransform()->SetAnchoredPosition(8.0f, -2.5f);
+        label->GetRectTransform()->SetAnchoredPosition(8.0f, -2.0f);
         label->FitRectTransformToText();
 
         // Create "slots" for each selected word.
@@ -164,32 +158,33 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
         float slotX = 28.0f;
         for(int i = 0; i < kMaxSelectedWords; ++i)
         {
-            UIImage* underline = UIUtil::NewUIActorWithWidget<UIImage>(window->GetOwner());
+            UIImage* underline = UI::CreateWidgetActor<UIImage>("Slot" + std::to_string(i), window);
             underline->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
             underline->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-            underline->GetRectTransform()->SetAnchoredPosition(slotX + kSlotSpacing * i, -264.0f);
+            underline->GetRectTransform()->SetAnchoredPosition(slotX + kSlotSpacing * i, -262.0f);
             underline->GetRectTransform()->SetSizeDelta(40.0f, 1.0f);
 
-            mSelectedWordLabels[i] = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+            mSelectedWordLabels[i] = UI::CreateWidgetActor<UILabel>("SlotWord" + std::to_string(i), window);
             mSelectedWordLabels[i]->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
             mSelectedWordLabels[i]->SetText("");
             mSelectedWordLabels[i]->SetHorizonalAlignment(HorizontalAlignment::Center);
             mSelectedWordLabels[i]->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-            mSelectedWordLabels[i]->GetRectTransform()->SetAnchoredPosition(slotX + kSlotSpacing * i, -264.0f + 14.5f);
-            mSelectedWordLabels[i]->GetRectTransform()->SetSizeDelta(40.0f, 14.5f);
+            mSelectedWordLabels[i]->GetRectTransform()->SetAnchoredPosition(slotX + kSlotSpacing * i, -262.0f + 16.0f);
+            mSelectedWordLabels[i]->GetRectTransform()->SetSizeDelta(40.0f, 15.0f);
         }
 
-        mTranslatedTextLabel = UIUtil::NewUIActorWithWidget<UILabel>(window->GetOwner());
+        mTranslatedTextLabel = UI::CreateWidgetActor<UILabel>("TranslatedTextLabel", window);
         mTranslatedTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mTranslatedTextLabel->SetText("");
         mTranslatedTextLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
-        mTranslatedTextLabel->GetRectTransform()->SetAnchoredPosition(slotX, -272.5f);
+        mTranslatedTextLabel->GetRectTransform()->SetAnchoredPosition(slotX, -270.0f);
         mTranslatedTextLabel->GetRectTransform()->SetSizeDelta(100.0f, 15.0f);
     }
 
     // Create footer.
     {
         SidneyButton* eraseButton = SidneyUtil::CreateSmallButton(window->GetOwner());
+        eraseButton->SetName("EraseButton");
         eraseButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         eraseButton->GetRectTransform()->SetAnchoredPosition(10.0f, -299.0f);
         eraseButton->SetWidth(60.0f);
@@ -200,6 +195,7 @@ SidneyAnagramParser::SidneyAnagramParser(Actor* parent) : Actor("Anagram Parser"
         mEraseButton = eraseButton;
 
         SidneyButton* exitButton = SidneyUtil::CreateSmallButton(window->GetOwner());
+        exitButton->SetName("ExitButton");
         exitButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         exitButton->GetRectTransform()->SetAnchoredPosition(83.0f, -299.0f);
         exitButton->SetWidth(60.0f);
@@ -594,7 +590,7 @@ void SidneyAnagramParser::RefreshAvailableWordsScrollList()
 
     // Reposition active words from the top, one after another.
     const float kSelectLabelX = 14.0f;
-    const float kSelectLabelStartY = -25.5f;
+    const float kSelectLabelStartY = -23.0f;
     const float kSelectLabelSpacing = 15.0f;
     int activeWordIndex = 0;
     for(int i = 0; i < kMaxAnagramWords; ++i)

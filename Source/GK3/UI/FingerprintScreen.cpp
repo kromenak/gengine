@@ -32,12 +32,12 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     });
 
     // Add base background image, which shows the fingerprint box up-close.
-    UIImage* baseImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
+    UIImage* baseImage = UI::CreateWidgetActor<UIImage>("Background", this);
     baseImage->SetTexture(gAssetManager.LoadTexture("FP_BASE.BMP"), true);
 	
 	// Add exit button to bottom-left corner of screen.
     {
-        UIButton* exitButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", baseImage);
         exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
         exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
         exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
@@ -54,7 +54,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
 
     // Add brush image along with button to pick up brush.
     {
-        mBrushImage = UIUtil::NewUIActorWithWidget<UIImage>(baseImage->GetOwner());
+        mBrushImage = UI::CreateWidgetActor<UIImage>("Brush", baseImage);
         mBrushImage->SetTexture(gAssetManager.LoadTexture("FP_BRUSH.BMP"), true);
         mBrushImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mBrushImage->GetRectTransform()->SetAnchoredPosition(128.0f, 90.0f);
@@ -67,7 +67,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
 
     // Add button for dipping brush in the dust area.
     {
-        UIButton* dustButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        UIButton* dustButton = UI::CreateWidgetActor<UIButton>("DustButton", baseImage);
         dustButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         dustButton->GetRectTransform()->SetAnchoredPosition(149.0f, 480.0f - 337.0f);
         dustButton->GetRectTransform()->SetSizeDelta(127.0f, 108.0f);
@@ -78,7 +78,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
 
     // Add button for tape dispenser.
     {
-        UIButton* tapeButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        UIButton* tapeButton = UI::CreateWidgetActor<UIButton>("TapeButton", baseImage);
         tapeButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         tapeButton->GetRectTransform()->SetAnchoredPosition(278.0f, 103.0f);
         tapeButton->GetRectTransform()->SetSizeDelta(106.0f, 154.0f);
@@ -89,7 +89,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
 
     // Add button for fingerprint cloth.
     {
-        UIButton* clothButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        UIButton* clothButton = UI::CreateWidgetActor<UIButton>("ClothButton", baseImage);
         clothButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         clothButton->GetRectTransform()->SetAnchoredPosition(0.0f, 94.0f);
         clothButton->GetRectTransform()->SetSizeDelta(140.0f, 160.0f);
@@ -102,7 +102,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     {
         // Create a button that takes up the whole right-panel area of the interface.
         // This has two purposes: to catch input when clicking/dragging in this area. And to help center the closeup image.
-        mRightPanelButton = UIUtil::NewUIActorWithWidget<UIButton>(baseImage->GetOwner());
+        mRightPanelButton = UI::CreateWidgetActor<UIButton>("RightPanelButton", baseImage);
         mRightPanelButton->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
         mRightPanelButton->GetRectTransform()->SetAnchoredPosition(-2.0f, -2.0f);
         mRightPanelButton->GetRectTransform()->SetSizeDelta(249.0f, 476.0f);
@@ -111,7 +111,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         });
 
         // Add image to show the object being fingerprinted.
-        mFingerprintObjectImage = UIUtil::NewUIActorWithWidget<UIImage>(mRightPanelButton->GetOwner());
+        mFingerprintObjectImage = UI::CreateWidgetActor<UIImage>("FingerprintObjectImage", mRightPanelButton);
         mFingerprintObjectImage->SetTexture(&Texture::Black);
         mFingerprintObjectImage->GetRectTransform()->SetAnchor(AnchorPreset::Left);
         mFingerprintObjectImage->GetRectTransform()->SetAnchoredPosition(0.0f, -8.0f);
@@ -119,7 +119,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
          // Create a set of images used to display fingerprints.
         for(int i = 0; i < kMaxFingerprintImages; ++i)
         {
-            UIImage* image = UIUtil::NewUIActorWithWidget<UIImage>(mRightPanelButton->GetOwner());
+            UIImage* image = UI::CreateWidgetActor<UIImage>("Fingerprint" + std::to_string(i), mRightPanelButton);
             image->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             image->SetEnabled(false);
             mPrintsToCollect[i].image = image;

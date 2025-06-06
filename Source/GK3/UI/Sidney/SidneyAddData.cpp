@@ -39,7 +39,7 @@ void SidneyAddData::Init(Sidney* sidney, SidneyFiles* sidneyFiles)
         mGreenFont = gAssetManager.LoadFont("SID_TEXT_14_GRN.FON");
         mYellowFont = gAssetManager.LoadFont("SID_TEXT_14.FON");
 
-        mAddDataLabel = UIUtil::NewUIActorWithWidget<UILabel>(innerBoxImage->GetOwner());
+        mAddDataLabel = UI::CreateWidgetActor<UILabel>("AddDataLabel", innerBoxImage);
         mAddDataLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mAddDataLabel->SetFont(mGreenFont);
         mAddDataLabel->SetMasked(true);

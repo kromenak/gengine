@@ -21,7 +21,99 @@
 #include "UILabel.h"
 #include "UISlider.h"
 #include "UIToggle.h"
+#include "UIUtil.h"
 #include "Window.h"
+
+namespace
+{
+    UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, Actor* parent, bool setSprites = true)
+    {
+        UIButton* button = UI::CreateWidgetActor<UIButton>(buttonId, parent);
+        button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+
+        Vector2 buttonPos = config[buttonId + "Pos"].GetValueAsVector2();
+        buttonPos.y *= -1;
+        button->GetRectTransform()->SetAnchoredPosition(buttonPos);
+
+        button->SetTooltipText("tb_" + buttonId);
+
+        if(setSprites)
+        {
+            auto it = config.find(buttonId + "SpriteUp");
+            if(it != config.end())
+            {
+                button->SetUpTexture(gAssetManager.LoadTexture(it->second.value));
+            }
+
+            it = config.find(buttonId + "SpriteDown");
+            if(it != config.end())
+            {
+                button->SetDownTexture(gAssetManager.LoadTexture(it->second.value));
+            }
+
+            it = config.find(buttonId + "SpriteDis");
+            if(it != config.end())
+            {
+                button->SetDisabledTexture(gAssetManager.LoadTexture(it->second.value));
+            }
+
+            it = config.find(buttonId + "SpriteHov");
+            if(it != config.end())
+            {
+                button->SetHoverTexture(gAssetManager.LoadTexture(it->second.value));
+            }
+        }
+        return button;
+    }
+
+    UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, const std::string& toggleId, Actor* parent)
+    {
+        UIToggle* toggle = UI::CreateWidgetActor<UIToggle>(toggleId, parent);
+        toggle->GetRectTransform()->SetAnchor(0.0f, 1.0f);
+        toggle->GetRectTransform()->SetPivot(0.0f, 1.0f);
+
+        Vector2 togglePos = config[toggleId + "Pos"].GetValueAsVector2();
+        togglePos.y *= -1;
+        toggle->GetRectTransform()->SetAnchoredPosition(togglePos);
+
+        toggle->SetTooltipText("tb_" + toggleId);
+
+        toggle->SetOnTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDown"].value));
+        toggle->SetOffTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteUp"].value));
+        toggle->SetDisabledTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDis"].value));
+        return toggle;
+    }
+
+    UISlider* CreateSlider(std::unordered_map<std::string, IniKeyValue>& config, const std::string& sliderId, Actor* parent)
+    {
+        UISlider* slider = UI::CreateWidgetActor<UISlider>(sliderId, parent);
+        slider->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
+
+        // Set slider min/max positions.
+        // This makes the slider's rect transform the exact width required for the min/max slider positions.
+        Vector2 minPos = config[sliderId + "Min"].GetValueAsVector2();
+        minPos.y *= -1;
+        slider->GetRectTransform()->SetAnchoredPosition(minPos);
+
+        Vector2 maxPos = config[sliderId + "Max"].GetValueAsVector2();
+        maxPos.y *= -1;
+
+        // Add handle image.
+        UIImage* handleImage = UI::CreateWidgetActor<UIImage>("Handle", slider);
+        handleImage->SetTexture(gAssetManager.LoadTexture("RC_SO_SLIDER"), true);
+        slider->SetHandleActor(handleImage->GetOwner());
+
+        // Set slider's vertical size to be exactly equal to handle size.
+        // This should make it so the handle can only move left/right.
+        Vector2 handleSize = handleImage->GetRectTransform()->GetSize();
+        slider->GetRectTransform()->SetSizeDeltaY(handleSize.y);
+
+        // Slider's horizontal size is slider width, PLUS width of the handle itself.
+        float sliderWidth = (maxPos.x - minPos.x);
+        slider->GetRectTransform()->SetSizeDeltaX(sliderWidth + handleSize.x);
+        return slider;
+    }
+}
 
 OptionBar::OptionBar() : Actor("OptionBar", TransformType::RectTransform)
 {
@@ -33,13 +125,7 @@ OptionBar::OptionBar() : Actor("OptionBar", TransformType::RectTransform)
     std::unordered_map<std::string, IniKeyValue> optionBarConfig = parser.ParseAllAsMap();
 
     // Create canvas, to contain the UI components.
-    AddComponent<UICanvas>(11);
-
-    // Canvas rect fills the entire screen.
-    RectTransform* rectTransform = GetComponent<RectTransform>();
-    rectTransform->SetSizeDelta(0.0f, 0.0f);
-    rectTransform->SetAnchorMin(Vector2::Zero);
-    rectTransform->SetAnchorMax(Vector2::One);
+    UI::AddCanvas(this, 11);
 
     // The background of the action bar consists of a fullscreen clickable button area.
     // This stops interaction with the scene while action bar is visible.
@@ -135,127 +221,16 @@ void OptionBar::KeepOnScreen()
     mOptionBarRoot->MoveInsideRect(Window::GetRect());
 }
 
-UIButton* CreateButton(std::unordered_map<std::string, IniKeyValue>& config, const std::string& buttonId, Actor* parent, bool setSprites = true)
-{
-    Actor* buttonActor = new Actor(TransformType::RectTransform);
-    buttonActor->GetTransform()->SetParent(parent->GetTransform());
-    UIButton* button = buttonActor->AddComponent<UIButton>();
-    button->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-    button->GetRectTransform()->SetPivot(0.0f, 1.0f);
-
-    Vector2 buttonPos = config[buttonId + "Pos"].GetValueAsVector2();
-    buttonPos.y *= -1;
-    button->GetRectTransform()->SetAnchoredPosition(buttonPos);
-
-    button->SetTooltipText("tb_" + buttonId);
-
-    if(setSprites)
-    {
-        auto it = config.find(buttonId + "SpriteUp");
-        if(it != config.end())
-        {
-            button->SetUpTexture(gAssetManager.LoadTexture(it->second.value));
-        }
-
-        it = config.find(buttonId + "SpriteDown");
-        if(it != config.end())
-        {
-            button->SetDownTexture(gAssetManager.LoadTexture(it->second.value));
-        }
-
-        it = config.find(buttonId + "SpriteDis");
-        if(it != config.end())
-        {
-            button->SetDisabledTexture(gAssetManager.LoadTexture(it->second.value));
-        }
-
-        it = config.find(buttonId + "SpriteHov");
-        if(it != config.end())
-        {
-            button->SetHoverTexture(gAssetManager.LoadTexture(it->second.value));
-        }
-    }
-    return button;
-}
-
-UIToggle* CreateToggle(std::unordered_map<std::string, IniKeyValue>& config, const std::string& toggleId, Actor* parent)
-{
-    Actor* toggleActor = new Actor(TransformType::RectTransform);
-    toggleActor->GetTransform()->SetParent(parent->GetTransform());
-
-    UIToggle* toggle = toggleActor->AddComponent<UIToggle>();
-    toggle->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-    toggle->GetRectTransform()->SetPivot(0.0f, 1.0f);
-
-    Vector2 togglePos = config[toggleId + "Pos"].GetValueAsVector2();
-    togglePos.y *= -1;
-    toggle->GetRectTransform()->SetAnchoredPosition(togglePos);
-
-    toggle->SetTooltipText("tb_" + toggleId);
-
-    toggle->SetOnTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDown"].value));
-    toggle->SetOffTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteUp"].value));
-    toggle->SetDisabledTexture(gAssetManager.LoadTexture(config[toggleId + "SpriteDis"].value));
-    return toggle;
-}
-
-UISlider* CreateSlider(std::unordered_map<std::string, IniKeyValue>& config, const std::string& sliderId, Actor* parent)
-{
-    // Create slider.
-    Actor* sliderActor = new Actor(TransformType::RectTransform);
-    sliderActor->GetTransform()->SetParent(parent->GetTransform());
-
-    UISlider* slider = sliderActor->AddComponent<UISlider>();
-    slider->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-    slider->GetRectTransform()->SetPivot(0.0f, 1.0f);
-
-    // Set slider min/max positions.
-    // This makes the slider's rect transform the exact width required for the min/max slider positions.
-    Vector2 minPos = config[sliderId + "Min"].GetValueAsVector2();
-    minPos.y *= -1;
-    slider->GetRectTransform()->SetAnchoredPosition(minPos);
-
-    Vector2 maxPos = config[sliderId + "Max"].GetValueAsVector2();
-    maxPos.y *= -1;
-
-    // Create slider handle actor.
-    Actor* handleActor = new Actor(TransformType::RectTransform);
-    slider->SetHandleActor(handleActor);
-
-    // Add handle image.
-    UIImage* handleImage = handleActor->AddComponent<UIImage>();
-    handleImage->SetTexture(gAssetManager.LoadTexture("RC_SO_SLIDER"), true);
-
-    // Set slider's vertical size to be exactly equal to handle size.
-    // This should make it so the handle can only move left/right.
-    Vector2 handleSize = handleImage->GetRectTransform()->GetSize();
-    slider->GetRectTransform()->SetSizeDeltaY(handleSize.y);
-
-    // Slider's horizontal size is slider width, PLUS width of the handle itself.
-    float sliderWidth = (maxPos.x - minPos.x);
-    slider->GetRectTransform()->SetSizeDeltaX(sliderWidth + handleSize.x);
-    return slider;
-}
-
 void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
-    // Create "root" actor for action bar.
-    Actor* optionBar = new Actor(TransformType::RectTransform);
-    mOptionBarRoot = optionBar->GetComponent<RectTransform>();
-    mOptionBarRoot->SetParent(GetTransform());
-
     // Add background image.
-    UIImage* backgroundImage = optionBar->AddComponent<UIImage>();
+    UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("Window", this);
     backgroundImage->SetTexture(gAssetManager.LoadTexture(config["backSprite"].value), true);
-
-    // Some positioning code would be easier if this was (0.5, 0.5) BUT that causes some rendering problems b/c the rect is no longer pixel perfect.
-    // Mayyybe we can fix that in the RectTransform/Rect code directly...with a bit of work.
-    backgroundImage->GetRectTransform()->SetPivot(Vector2::Zero);
-    backgroundImage->GetRectTransform()->SetAnchor(Vector2::Zero);
-    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
+    mOptionBarRoot = backgroundImage->GetRectTransform();
+    mOptionBarRoot->SetAnchor(AnchorPreset::BottomLeft);
 
     // The background is draggable.
-    UIDrag* drag = optionBar->AddComponent<UIDrag>();
+    UIDrag* drag = backgroundImage->GetOwner()->AddComponent<UIDrag>();
     drag->SetBoundaryRectTransform(GetComponent<RectTransform>());
     drag->SetUseHighlightCursor(false); // but don't highlight cursor when hovering it
 
@@ -263,13 +238,9 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     Font* font = gAssetManager.LoadFont(config["statusFont"].value);
 
     // Add score text.
-    Actor* scoreActor = new Actor(TransformType::RectTransform);
-    scoreActor->GetTransform()->SetParent(mOptionBarRoot);
-    mScoreLabel = scoreActor->AddComponent<UILabel>();
-
+    mScoreLabel = UI::CreateWidgetActor<UILabel>("ScoreLabel", mOptionBarRoot);
     mScoreLabel->GetRectTransform()->SetSizeDelta(config["scoreSize"].GetValueAsVector2());
-    mScoreLabel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
-    mScoreLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
+    mScoreLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
     Vector2 scorePos = config["scorePos"].GetValueAsVector2();
     scorePos.y *= -1;
@@ -287,10 +258,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     StringUtil::Trim(dayAndTimeStrings[1]);
 
     // Add day text.
-    Actor* dayActor = new Actor(TransformType::RectTransform);
-    dayActor->GetTransform()->SetParent(mOptionBarRoot);
-    UILabel* dayLabel = dayActor->AddComponent<UILabel>();
-
+    UILabel* dayLabel = UI::CreateWidgetActor<UILabel>("Day", mOptionBarRoot);
     dayLabel->GetRectTransform()->SetSizeDelta(config["daySize"].GetValueAsVector2());
     dayLabel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
     dayLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
@@ -306,10 +274,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     dayLabel->SetMasked(true);
 
     // Add time text.
-    Actor* timeActor = new Actor(TransformType::RectTransform);
-    timeActor->GetTransform()->SetParent(mOptionBarRoot);
-    UILabel* timeLabel = timeActor->AddComponent<UILabel>();
-
+    UILabel* timeLabel = UI::CreateWidgetActor<UILabel>("Time", mOptionBarRoot);
     timeLabel->GetRectTransform()->SetSizeDelta(config["timeSize"].GetValueAsVector2());
     timeLabel->GetRectTransform()->SetAnchor(0.0f, 1.0f);
     timeLabel->GetRectTransform()->SetPivot(0.0f, 1.0f);
@@ -325,33 +290,33 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     timeLabel->SetMasked(true);
 
     // Add active inventory item button.
-    mActiveInventoryItemButton = CreateButton(config, "currInv", optionBar);
+    mActiveInventoryItemButton = CreateButton(config, "currInv", mOptionBarRoot->GetOwner());
     mActiveInventoryItemButton->SetPressCallback([this](UIButton* button) {
         Hide();
         gInventoryManager.InventoryInspect();
     });
 
     // Add inventory button.
-    mInventoryButton = CreateButton(config, "closed", optionBar);
+    mInventoryButton = CreateButton(config, "closed", mOptionBarRoot->GetOwner());
     mInventoryButton->SetPressCallback([this](UIButton* button) {
         Hide();
         gInventoryManager.ShowInventory();
     });
 
     // Add hint button.
-    mHintButton = CreateButton(config, "hint", optionBar);
+    mHintButton = CreateButton(config, "hint", mOptionBarRoot->GetOwner());
     mHintButton->SetPressCallback([](UIButton* button) {
         std::cout << "Hint!" << std::endl;
     });
 
     // Add radio button.
-    mRadioButton = CreateButton(config, "radio", optionBar);
+    mRadioButton = CreateButton(config, "radio", mOptionBarRoot->GetOwner());
     mRadioButton->SetPressCallback([this](UIButton* button){
         OnRadioButtonPressed();
     });
 
     // Add camera button.
-    mCamerasButton = CreateButton(config, "camera", optionBar);
+    mCamerasButton = CreateButton(config, "camera", mOptionBarRoot->GetOwner());
     mCamerasButton->SetPressCallback([this](UIButton* button) {
         mCamerasSection->SetActive(!mCamerasSection->IsActive());
         mOptionsSection->SetActive(false);
@@ -359,21 +324,21 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     });
 
     // Add cinematics button.
-    mCinematicsOffButton = CreateButton(config, "cine", optionBar);
+    mCinematicsOffButton = CreateButton(config, "cine", mOptionBarRoot->GetOwner());
     mCinematicsOffButton->SetPressCallback(std::bind(&OptionBar::OnCinematicsButtonPressed, this, std::placeholders::_1));
 
-    mCinematicsOnButton = CreateButton(config, "cineoff", optionBar);
+    mCinematicsOnButton = CreateButton(config, "cineoff", mOptionBarRoot->GetOwner());
     mCinematicsOnButton->SetPressCallback(std::bind(&OptionBar::OnCinematicsButtonPressed, this, std::placeholders::_1));
     RefreshCinematicsButtonState();
 
     // Add help button.
-    mHelpButton = CreateButton(config, "help", optionBar);
+    mHelpButton = CreateButton(config, "help", mOptionBarRoot->GetOwner());
     mHelpButton->SetPressCallback([](UIButton* button) {
         std::cout << "Help!" << std::endl;
     });
 
     // Add options button.
-    mOptionsButton = CreateButton(config, "options", optionBar);
+    mOptionsButton = CreateButton(config, "options", mOptionBarRoot->GetOwner());
     mOptionsButton->SetPressCallback([this](UIButton* button) {
         mCamerasSection->SetActive(false);
         mOptionsSection->SetActive(!mOptionsSection->IsActive());
@@ -382,7 +347,7 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     });
 
     // Add close button.
-    UIButton* closeButton = CreateButton(config, "exit", optionBar);
+    UIButton* closeButton = CreateButton(config, "exit", mOptionBarRoot->GetOwner());
     closeButton->SetPressCallback([this](UIButton* button) {
         Hide();
     });
@@ -390,35 +355,27 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
 
 void OptionBar::CreateCamerasSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
-    // Make this a child of the "main section" root.
-    mCamerasSection = new Actor(TransformType::RectTransform);
-    mCamerasSection->GetTransform()->SetParent(mOptionBarRoot);
-
     // Add background image.
-    UIImage* backgroundImage = mCamerasSection->AddComponent<UIImage>();
+    UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("CamerasSection", mOptionBarRoot);
     backgroundImage->SetTexture(gAssetManager.LoadTexture(config["camBackSprite"].value), true);
+    mCamerasSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
 }
 
 void OptionBar::CreateOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
-    // Make this a child of the "main section" root.
-    mOptionsSection = new Actor(TransformType::RectTransform);
-    mOptionsSection->GetTransform()->SetParent(mOptionBarRoot);
-
     // Add background image.
-    UIImage* backgroundImage = mOptionsSection->AddComponent<UIImage>();
+    UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("OptionsSection", mOptionBarRoot);
     backgroundImage->SetTexture(gAssetManager.LoadTexture(config["optBackSprite"].value), true);
+    mOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
 
     // Create volume slider.
@@ -460,18 +417,14 @@ void OptionBar::CreateOptionsSection(std::unordered_map<std::string, IniKeyValue
 
 void OptionBar::CreateAdvancedOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
-    // Make this a child of the "options section" root.
-    mAdvancedOptionsSection = new Actor(TransformType::RectTransform);
-    mAdvancedOptionsSection->GetTransform()->SetParent(mOptionsSection->GetTransform());
-
     // Add background image.
-    UIImage* backgroundImage = mAdvancedOptionsSection->AddComponent<UIImage>();
+    UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("AdvOptionsSection", mOptionsSection);
     backgroundImage->SetTexture(gAssetManager.LoadTexture(config["advOptBackSprite"].value), true);
+    mAdvancedOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
 
     // Create sound options button.
@@ -494,18 +447,14 @@ void OptionBar::CreateAdvancedOptionsSection(std::unordered_map<std::string, Ini
 
 void OptionBar::CreateSoundOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
-    // Make this a child of the "options section" root.
-    mSoundOptionsSection = new Actor(TransformType::RectTransform);
-    mSoundOptionsSection->GetTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
-
     // Add background image.
-    UIImage* backgroundImage = mSoundOptionsSection->AddComponent<UIImage>();
+    UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("SoundOptions", mAdvancedOptionsSection);
     backgroundImage->SetTexture(gAssetManager.LoadTexture(config["soundOptBackSprite"].value), true);
+    mSoundOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
 
     // Create global volume slider.
@@ -567,18 +516,14 @@ void OptionBar::CreateSoundOptionsSection(std::unordered_map<std::string, IniKey
 
 void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
-    // Make this a child of the "options section" root.
-    mGraphicOptionsSection = new Actor(TransformType::RectTransform);
-    mGraphicOptionsSection->GetTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
-
     // Add background image.
-    UIImage* backgroundImage = mGraphicOptionsSection->AddComponent<UIImage>();
+    UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("GraphicsOptions", mAdvancedOptionsSection);
     backgroundImage->SetTexture(gAssetManager.LoadTexture(config["graphicsOptBackSprite"].value), true);
+    mGraphicOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
 
     //TODO: Gamma slider
@@ -613,13 +558,11 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
     CreateAdvancedGraphicOptionsSection(config);
 
     // Resolution dropdown (create after other elements so dropdown box draws above everything).
-    mResolutionDropdown = new UIDropdown(this);
+    mResolutionDropdown = new UIDropdown("ResolutionDropdown", this);
     mResolutionDropdown->SetMaxVisibleChoices(5);
     RectTransform* resolutionDropdownRT = mResolutionDropdown->GetComponent<RectTransform>();
-
     resolutionDropdownRT->SetParent(mGraphicOptionsSection->GetTransform());
-    resolutionDropdownRT->SetAnchor(0.0f, 1.0f);
-    resolutionDropdownRT->SetPivot(0.0f, 1.0f);
+    resolutionDropdownRT->SetAnchor(AnchorPreset::TopLeft);
 
     // Dropdown sizes in the config file seem wrong, at least based on what I'm expecting.
     // e.g. this one says height is 39, but the area in the art is clearly 15...
@@ -645,18 +588,14 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
 
 void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
-    // Make this a child of the "options section" root.
-    mAdvancedGraphicOptionsSection = new Actor(TransformType::RectTransform);
-    mAdvancedGraphicOptionsSection->GetTransform()->SetParent(mGraphicOptionsSection->GetTransform());
-
     // Add background image.
-    UIImage* backgroundImage = mAdvancedGraphicOptionsSection->AddComponent<UIImage>();
+    UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("AdvancedGraphicSection", mGraphicOptionsSection);
     backgroundImage->SetTexture(gAssetManager.LoadTexture(config["advGraphOptBackSprite"].value), true);
+    mAdvancedGraphicOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
 
     //TODO: Texture quality dropdown
@@ -709,18 +648,14 @@ void OptionBar::CreateAdvancedGraphicOptionsSection(std::unordered_map<std::stri
 
 void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyValue>& config)
 {
-    // Make this a child of the "options section" root.
-    mGameOptionsSection = new Actor(TransformType::RectTransform);
-    mGameOptionsSection->GetTransform()->SetParent(mAdvancedOptionsSection->GetTransform());
-
     // Add background image.
-    UIImage* backgroundImage = mGameOptionsSection->AddComponent<UIImage>();
+    UIImage* backgroundImage = UI::CreateWidgetActor<UIImage>("GameOptionsSection", mAdvancedOptionsSection);
     backgroundImage->SetTexture(gAssetManager.LoadTexture(config["gameOptBackSprite"].value), true);
+    mGameOptionsSection = backgroundImage->GetOwner();
 
     // Position directly below main section.
     backgroundImage->GetRectTransform()->SetAnchor(0.0f, 0.0f);
     backgroundImage->GetRectTransform()->SetPivot(0.0f, 1.0f);
-    backgroundImage->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
     backgroundImage->SetReceivesInput(true);
 
     // Create glide camera toggle.
@@ -745,8 +680,7 @@ void OptionBar::CreateGameOptionsSection(std::unordered_map<std::string, IniKeyV
 void OptionBar::OnRadioButtonPressed()
 {
     Hide();
-    std::string sheepScript = StringUtil::Format("wait CallSheep(\"%s\", \"RadioButton$\")", gLocationManager.GetLocation().c_str());
-    gActionManager.ExecuteSheepAction(sheepScript);
+    gActionManager.ExecuteSheepAction(StringUtil::Format("wait CallSheep(\"%s\", \"RadioButton$\")", gLocationManager.GetLocation().c_str()));
 }
 
 void OptionBar::RefreshRadioButtonState()
@@ -759,12 +693,10 @@ void OptionBar::OnCinematicsButtonPressed(UIButton* button)
     if(button == mCinematicsOffButton)
     {
         GameCamera::SetCinematicsEnabled(false);
-        printf("Cinematics OFF\n");
     }
     else if(button == mCinematicsOnButton)
     {
         GameCamera::SetCinematicsEnabled(true);
-        printf("Cinematics ON\n");
     }
     RefreshCinematicsButtonState();
 }

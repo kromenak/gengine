@@ -7,14 +7,14 @@
 #include "UIImage.h"
 #include "UIUtil.h"
 
-ProgressBar::ProgressBar() : Actor(TransformType::RectTransform),
+ProgressBar::ProgressBar() : Actor("Progress Bar", TransformType::RectTransform),
     mLayer("ProgressBar")
 {
     mLayer.OverrideAudioState(true);
 
     // Order should be pretty high, since this displays over almost everything.
     const int kCanvasOrder = 50;
-    UIUtil::AddCanvas(this, kCanvasOrder);
+    UI::AddCanvas(this, kCanvasOrder);
 
     // The background of the UI consists of a fullscreen clickable button area.
     // This stops interaction with whatever is below this UI.
@@ -22,11 +22,11 @@ ProgressBar::ProgressBar() : Actor(TransformType::RectTransform),
     button->SetPressCallback([](UIButton* button){});
 
     // Create background image. Default anchor properties (centered on screen) should be fine.
-    mBackground = UIUtil::NewUIActorWithWidget<UIImage>(this);
+    mBackground = UI::CreateWidgetActor<UIImage>("Background", this);
     mBackground->SetTexture(gAssetManager.LoadTexture("PROGRESS_GENERIC.BMP"), true);
 
     // Create label for progress bar. Typically shows something like "Saving..." or "Restoring..."
-    //UILabel* mLabel = UIUtil::NewUIActorWithWidget<UILabel>(background->GetOwner());
+    //UILabel* mLabel = UI::CreateWidgetActor<UILabel>(background->GetOwner());
     //mLabel->SetFont(gAssetManager.LoadFont("F_TEMPUS_A10.FON"));
     //mLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
     //mLabel->SetVerticalAlignment(VerticalAlignment::Center);
@@ -35,13 +35,13 @@ ProgressBar::ProgressBar() : Actor(TransformType::RectTransform),
 
     // Create canvas to contain the progress bar image.
     // Using a canvas here allows us to mask the progress bar image.
-    mProgressBarCanvas = UIUtil::NewUIActorWithCanvas(mBackground->GetOwner(), kCanvasOrder + 1);
+    mProgressBarCanvas = UI::CreateCanvas("BarImageCanvas", mBackground->GetOwner(), kCanvasOrder + 1);
     mProgressBarCanvas->SetMasked(true);
     mProgressBarCanvas->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
     mProgressBarCanvas->GetRectTransform()->SetAnchoredPosition(40.0f, 52.0f);
     mProgressBarCanvas->GetRectTransform()->SetSizeDelta(513.0f, 50.0f);
 
-    mProgressBarImage = UIUtil::NewUIActorWithWidget<UIImage>(mProgressBarCanvas->GetOwner());
+    mProgressBarImage = UI::CreateWidgetActor<UIImage>("BarImage", mProgressBarCanvas->GetOwner());
     mProgressBarImage->SetTexture(gAssetManager.LoadTexture("PROGRESS_SLIDER.BMP"), true);
 }
 

@@ -34,7 +34,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
     AnalyzeText_Init();
 
     // Add menu bar.
-    mMenuBar.Init(mRoot, SidneyUtil::GetAnalyzeLocalizer().GetText("ScreenName"), 120.0f);
+    mMenuBar.Init(mRoot, SidneyUtil::GetAnalyzeLocalizer().GetText("ScreenName"));
     mMenuBar.SetFirstDropdownPosition(24.0f);
     mMenuBar.SetDropdownSpacing(26.0f);
 
@@ -148,6 +148,7 @@ void SidneyAnalyze::Init(Sidney* sidney, SidneyFiles* sidneyFiles, SidneyTransla
     // Add analyze button.
     {
         SidneyButton* analyzeButton = SidneyUtil::CreateBigButton(mRoot);
+        analyzeButton->SetName("AnalyzeButton");
         analyzeButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("MenuItem2"));
         float labelWidth = analyzeButton->GetLabel()->GetTextWidth() + 12.0f;
         analyzeButton->SetWidth(labelWidth);

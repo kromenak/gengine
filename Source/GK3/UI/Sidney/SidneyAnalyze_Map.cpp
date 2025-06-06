@@ -676,7 +676,6 @@ void SidneyAnalyze::AnalyzeMap_Init()
         // Create an actor that represents the zoomed in window area.
         Actor* zoomedInMapWindow = new Actor("Zoomed In Map", TransformType::RectTransform);
         zoomedInMapWindow->GetTransform()->SetParent(mAnalyzeMapWindow->GetTransform());
-
         mMap.zoomedIn.button = zoomedInMapWindow->AddComponent<UIButton>();
 
         // Put a canvas on it with masking! This allows us to move around the child map background and have it be masked outside the window area.
@@ -688,24 +687,21 @@ void SidneyAnalyze::AnalyzeMap_Init()
 
         // Create big background image at full size.
         // Note that only a portion is visible due to the parent's canvas masking.
-        Actor* zoomedInMapBackground = new Actor(TransformType::RectTransform);
-        zoomedInMapBackground->GetTransform()->SetParent(zoomedInMapWindow->GetTransform());
-
-        mMap.zoomedIn.mapImage = zoomedInMapBackground->AddComponent<UIImage>();
+        mMap.zoomedIn.mapImage = UI::CreateWidgetActor<UIImage>("MapImage", zoomedInMapWindow);
         mMap.zoomedIn.mapImage->SetTexture(gAssetManager.LoadTexture("SIDNEYBIGMAP.BMP"), true);
         mMap.zoomedIn.mapImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
 
         // Add "the site" text.
         // Do this before shapes/grids, since it should draw under those things.
         {
-            mMap.zoomedIn.siteText[0] = UIUtil::NewUIActorWithWidget<UIImage>(zoomedInMapBackground);
+            mMap.zoomedIn.siteText[0] = UI::CreateWidgetActor<UIImage>("SiteText1", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.siteText[0]->SetTexture(gAssetManager.LoadTexture("MAPLG_THE.BMP"), true);
             mMap.zoomedIn.siteText[0]->SetColor(Color32(255, 255, 255, 128));
             mMap.zoomedIn.siteText[0]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.siteText[0]->GetRectTransform()->SetAnchoredPosition(823.0f, 1039.0f);
             mMap.zoomedIn.siteText[0]->SetEnabled(false);
 
-            mMap.zoomedIn.siteText[1] = UIUtil::NewUIActorWithWidget<UIImage>(zoomedInMapBackground);
+            mMap.zoomedIn.siteText[1] = UI::CreateWidgetActor<UIImage>("SiteText2", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.siteText[1]->SetTexture(gAssetManager.LoadTexture("MAPLG_SITE.BMP"), true);
             mMap.zoomedIn.siteText[1]->SetColor(Color32(255, 255, 255, 128));
             mMap.zoomedIn.siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
@@ -716,7 +712,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
         // Add serpent images.
         // Again, before shapes/grids so they appear above it.
         {
-            mMap.zoomedIn.serpentImage = UIUtil::NewUIActorWithWidget<UIImage>(zoomedInMapBackground);
+            mMap.zoomedIn.serpentImage = UI::CreateWidgetActor<UIImage>("Serpent", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.serpentImage->SetTexture(gAssetManager.LoadTexture("SERPENT.BMP"), true);
             mMap.zoomedIn.serpentImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.serpentImage->GetRectTransform()->SetAnchoredPosition(724.0f, 1159.0f);
@@ -725,132 +721,88 @@ void SidneyAnalyze::AnalyzeMap_Init()
 
         // Create locked hexagrams renderer.
         {
-            Actor* hexagramsActor = new Actor(TransformType::RectTransform);
-            hexagramsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.lockedHexagrams = hexagramsActor->AddComponent<UIHexagrams>();
+            mMap.zoomedIn.lockedHexagrams = UI::CreateWidgetActor<UIHexagrams>("LockedHexagrams", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.lockedHexagrams->SetColor(kZoomedInLockedShapeColor);
-
             mMap.zoomedIn.lockedHexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedHexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create hexagrams renderer.
         {
-            Actor* hexagramsActor = new Actor(TransformType::RectTransform);
-            hexagramsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.hexagrams = hexagramsActor->AddComponent<UIHexagrams>();
+            mMap.zoomedIn.hexagrams = UI::CreateWidgetActor<UIHexagrams>("Hexagrams", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.hexagrams->SetColor(kZoomedInShapeColor);
-
             mMap.zoomedIn.hexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.hexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create locked grids renderer.
         {
-            Actor* gridsActor = new Actor(TransformType::RectTransform);
-            gridsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.lockedGrids = gridsActor->AddComponent<UIGrids>();
+            mMap.zoomedIn.lockedGrids = UI::CreateWidgetActor<UIGrids>("LockedGrids", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.lockedGrids->SetColor(kZoomedInLockedGridColor);
-
             mMap.zoomedIn.lockedGrids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedGrids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create grids renderer.
         {
-            Actor* gridsActor = new Actor(TransformType::RectTransform);
-            gridsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.grids = gridsActor->AddComponent<UIGrids>();
+            mMap.zoomedIn.grids = UI::CreateWidgetActor<UIGrids>("Grids", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.grids->SetColor(kZoomedInShapeColor);
-
             mMap.zoomedIn.grids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.grids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create locked rectangles renderer.
         {
-            Actor* rectanglesActor = new Actor(TransformType::RectTransform);
-            rectanglesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.lockedRectangles = rectanglesActor->AddComponent<UIRectangles>();
+            mMap.zoomedIn.lockedRectangles = UI::CreateWidgetActor<UIRectangles>("LockedRectangles", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.lockedRectangles->SetColor(kZoomedInLockedShapeColor);
-
             mMap.zoomedIn.lockedRectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedRectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create rectangles renderer.
         {
-            Actor* rectanglesActor = new Actor(TransformType::RectTransform);
-            rectanglesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.rectangles = rectanglesActor->AddComponent<UIRectangles>();
+            mMap.zoomedIn.rectangles = UI::CreateWidgetActor<UIRectangles>("Rectangles", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.rectangles->SetColor(kZoomedInShapeColor);
-
             mMap.zoomedIn.rectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.rectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create locked circles renderer.
         {
-            Actor* circlesActor = new Actor(TransformType::RectTransform);
-            circlesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.lockedCircles = circlesActor->AddComponent<UICircles>();
+            mMap.zoomedIn.lockedCircles = UI::CreateWidgetActor<UICircles>("LockedCircles", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.lockedCircles->SetColor(kZoomedInLockedShapeColor);
-
             mMap.zoomedIn.lockedCircles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedCircles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create circles renderer.
         {
-            Actor* circlesActor = new Actor(TransformType::RectTransform);
-            circlesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.circles = circlesActor->AddComponent<UICircles>();
+            mMap.zoomedIn.circles = UI::CreateWidgetActor<UICircles>("Circles", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.circles->SetColor(kZoomedInShapeColor);
-
             mMap.zoomedIn.circles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.circles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create lines renderer.
         {
-            Actor* linesActor = new Actor(TransformType::RectTransform);
-            linesActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.lines = linesActor->AddComponent<UILines>();
+            mMap.zoomedIn.lines = UI::CreateWidgetActor<UILines>("Lines", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.lines->SetColor(kZoomedInLineColor);
-
             mMap.zoomedIn.lines->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lines->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create locked points renderer.
         {
-            Actor* pointsActor = new Actor(TransformType::RectTransform);
-            pointsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.lockedPoints = pointsActor->AddComponent<UIPoints>();
+            mMap.zoomedIn.lockedPoints = UI::CreateWidgetActor<UIPoints>("LockedPoints", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.lockedPoints->SetColor(kZoomedInLockedShapeColor);
-
             mMap.zoomedIn.lockedPoints->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.lockedPoints->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create points renderer.
         {
-            Actor* pointsActor = new Actor(TransformType::RectTransform);
-            pointsActor->GetTransform()->SetParent(zoomedInMapBackground->GetTransform());
-
-            mMap.zoomedIn.points = pointsActor->AddComponent<UIPoints>();
+            mMap.zoomedIn.points = UI::CreateWidgetActor<UIPoints>("Points", mMap.zoomedIn.mapImage);
             mMap.zoomedIn.points->SetColor(kZoomedInShapeColor);
-
             mMap.zoomedIn.points->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedIn.points->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
@@ -878,13 +830,13 @@ void SidneyAnalyze::AnalyzeMap_Init()
         // Add "the site" text.
         // Do this before shapes/grids, since it should draw under those things.
         {
-            mMap.zoomedOut.siteText[0] = UIUtil::NewUIActorWithWidget<UIImage>(zoomedOutMapActor);
+            mMap.zoomedOut.siteText[0] = UI::CreateWidgetActor<UIImage>("SiteText1", zoomedOutMapActor);
             mMap.zoomedOut.siteText[0]->SetTexture(gAssetManager.LoadTexture("MAPSM_THE.BMP"), true);
             mMap.zoomedOut.siteText[0]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.siteText[0]->GetRectTransform()->SetAnchoredPosition(204.0f, 254.0f);
             mMap.zoomedOut.siteText[0]->SetEnabled(false);
 
-            mMap.zoomedOut.siteText[1] = UIUtil::NewUIActorWithWidget<UIImage>(zoomedOutMapActor);
+            mMap.zoomedOut.siteText[1] = UI::CreateWidgetActor<UIImage>("SiteText2", zoomedOutMapActor);
             mMap.zoomedOut.siteText[1]->SetTexture(gAssetManager.LoadTexture("MAPSM_SITE.BMP"), true);
             mMap.zoomedOut.siteText[1]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.siteText[1]->GetRectTransform()->SetAnchoredPosition(196.0f, 242.0f);
@@ -894,7 +846,7 @@ void SidneyAnalyze::AnalyzeMap_Init()
         // Add serpent images.
         // Again, before shapes/grids so they appear above it.
         {
-            mMap.zoomedOut.serpentImage = UIUtil::NewUIActorWithWidget<UIImage>(zoomedOutMapActor);
+            mMap.zoomedOut.serpentImage = UI::CreateWidgetActor<UIImage>("Serpent", zoomedOutMapActor);
             mMap.zoomedOut.serpentImage->SetTexture(gAssetManager.LoadTexture("SERPLITMAP.BMP"), true);
             mMap.zoomedOut.serpentImage->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.serpentImage->GetRectTransform()->SetAnchoredPosition(178.0f, 290.0f);
@@ -903,132 +855,88 @@ void SidneyAnalyze::AnalyzeMap_Init()
 
         // Create locked hexagrams renderer.
         {
-            Actor* hexagramsActor = new Actor(TransformType::RectTransform);
-            hexagramsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.lockedHexagrams = hexagramsActor->AddComponent<UIHexagrams>();
+            mMap.zoomedOut.lockedHexagrams = UI::CreateWidgetActor<UIHexagrams>("LockedHexagrams", zoomedOutMapActor);
             mMap.zoomedOut.lockedHexagrams->SetColor(kZoomedOutLockedShapeColor);
-
             mMap.zoomedOut.lockedHexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedHexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create hexagrams renderer.
         {
-            Actor* hexagramsActor = new Actor(TransformType::RectTransform);
-            hexagramsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.hexagrams = hexagramsActor->AddComponent<UIHexagrams>();
+            mMap.zoomedOut.hexagrams = UI::CreateWidgetActor<UIHexagrams>("Hexagrams", zoomedOutMapActor);
             mMap.zoomedOut.hexagrams->SetColor(kZoomedOutShapeColor);
-
             mMap.zoomedOut.hexagrams->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.hexagrams->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create locked grids renderer.
         {
-            Actor* gridsActor = new Actor(TransformType::RectTransform);
-            gridsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.lockedGrids = gridsActor->AddComponent<UIGrids>();
+            mMap.zoomedOut.lockedGrids = UI::CreateWidgetActor<UIGrids>("LockedGrids", zoomedOutMapActor);
             mMap.zoomedOut.lockedGrids->SetColor(kZoomedOutLockedGridColor);
-
             mMap.zoomedOut.lockedGrids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedGrids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create grids renderer.
         {
-            Actor* gridsActor = new Actor(TransformType::RectTransform);
-            gridsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.grids = gridsActor->AddComponent<UIGrids>();
+            mMap.zoomedOut.grids = UI::CreateWidgetActor<UIGrids>("Grids", zoomedOutMapActor);
             mMap.zoomedOut.grids->SetColor(kZoomedOutShapeColor);
-
             mMap.zoomedOut.grids->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.grids->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create locked rectangles renderer.
         {
-            Actor* rectanglesActor = new Actor(TransformType::RectTransform);
-            rectanglesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.lockedRectangles = rectanglesActor->AddComponent<UIRectangles>();
+            mMap.zoomedOut.lockedRectangles = UI::CreateWidgetActor<UIRectangles>("LockedRectangles", zoomedOutMapActor);
             mMap.zoomedOut.lockedRectangles->SetColor(kZoomedOutLockedShapeColor);
-
             mMap.zoomedOut.lockedRectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedRectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create rectangles renderer.
         {
-            Actor* rectanglesActor = new Actor(TransformType::RectTransform);
-            rectanglesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.rectangles = rectanglesActor->AddComponent<UIRectangles>();
+            mMap.zoomedOut.rectangles = UI::CreateWidgetActor<UIRectangles>("Rectangles", zoomedOutMapActor);
             mMap.zoomedOut.rectangles->SetColor(kZoomedOutShapeColor);
-
             mMap.zoomedOut.rectangles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.rectangles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create locked circles renderer.
         {
-            Actor* circlesActor = new Actor(TransformType::RectTransform);
-            circlesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.lockedCircles = circlesActor->AddComponent<UICircles>();
+            mMap.zoomedOut.lockedCircles = UI::CreateWidgetActor<UICircles>("LockedCircles", zoomedOutMapActor);
             mMap.zoomedOut.lockedCircles->SetColor(kZoomedOutLockedShapeColor);
-
             mMap.zoomedOut.lockedCircles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedCircles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create circles renderer.
         {
-            Actor* circlesActor = new Actor(TransformType::RectTransform);
-            circlesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.circles = circlesActor->AddComponent<UICircles>();
+            mMap.zoomedOut.circles = UI::CreateWidgetActor<UICircles>("Circles", zoomedOutMapActor);
             mMap.zoomedOut.circles->SetColor(kZoomedOutShapeColor);
-
             mMap.zoomedOut.circles->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.circles->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create lines renderer.
         {
-            Actor* linesActor = new Actor(TransformType::RectTransform);
-            linesActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.lines = linesActor->AddComponent<UILines>();
+            mMap.zoomedOut.lines = UI::CreateWidgetActor<UILines>("Lines", zoomedOutMapActor);
             mMap.zoomedOut.lines->SetColor(kZoomedOutLineColor);
-
             mMap.zoomedOut.lines->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lines->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create locked points renderer.
         {
-            Actor* pointsActor = new Actor(TransformType::RectTransform);
-            pointsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.lockedPoints = pointsActor->AddComponent<UIPoints>();
+            mMap.zoomedOut.lockedPoints = UI::CreateWidgetActor<UIPoints>("LockedPoints", zoomedOutMapActor);
             mMap.zoomedOut.lockedPoints->SetColor(kZoomedOutLockedShapeColor);
-
             mMap.zoomedOut.lockedPoints->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.lockedPoints->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
 
         // Create active points renderer.
         {
-            Actor* pointsActor = new Actor(TransformType::RectTransform);
-            pointsActor->GetTransform()->SetParent(zoomedOutMapActor->GetTransform());
-
-            mMap.zoomedOut.points = pointsActor->AddComponent<UIPoints>();
+            mMap.zoomedOut.points = UI::CreateWidgetActor<UIPoints>("Points", zoomedOutMapActor);
             mMap.zoomedOut.points->SetColor(kZoomedOutShapeColor);
-
             mMap.zoomedOut.points->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
             mMap.zoomedOut.points->GetRectTransform()->SetAnchoredPosition(Vector2::Zero);
         }
@@ -1036,12 +944,8 @@ void SidneyAnalyze::AnalyzeMap_Init()
 
     // Create status text label.
     {
-        Actor* statusTextActor = new Actor(TransformType::RectTransform);
-        statusTextActor->GetTransform()->SetParent(mAnalyzeMapWindow->GetTransform());
-
-        mMapStatusLabel = statusTextActor->AddComponent<UILabel>();
+        mMapStatusLabel = UI::CreateWidgetActor<UILabel>("MapStatus", mAnalyzeMapWindow);
         mMapStatusLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14_GRN.FON"));
-
         mMapStatusLabel->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         mMapStatusLabel->GetRectTransform()->SetAnchoredPosition(4.0f, 13.0f);
         mMapStatusLabel->SetEnabled(false);

@@ -3,8 +3,6 @@
 #include "Actor.h"
 #include "UIImage.h"
 
-#include "AssetManager.h"
-
 TYPEINFO_INIT(UINineSlice, UIWidget, 23)
 {
 

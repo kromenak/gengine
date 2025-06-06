@@ -44,32 +44,32 @@ GPSOverlay::GPSOverlay() : Actor("GPSOverlay", TransformType::RectTransform)
 
     // Create base map image in top-left.
     // No image yet, since that's affected by both the location and layout used.
-    mMapImage = UIUtil::NewUIActorWithWidget<UIImage>(this);
+    mMapImage = UI::CreateWidgetActor<UIImage>("Map", this);
     mMapImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     mMapImage->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
 
     // Add latitude/longitude labels.
     // Not yet positioned, since that changes based on the layout used.
-    mLatitudeLabel = UIUtil::NewUIActorWithWidget<UILabel>(mMapImage->GetOwner());
+    mLatitudeLabel = UI::CreateWidgetActor<UILabel>("Latitude", mMapImage);
     mLatitudeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     
-    mLongitudeLabel = UIUtil::NewUIActorWithWidget<UILabel>(mMapImage->GetOwner());
+    mLongitudeLabel = UI::CreateWidgetActor<UILabel>("Longitude", mMapImage);
     mLongitudeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
     // Add target reticule square and vertical/horizontal lines.
     // No image/position is yet set, since those are affected by which layout we use.
-    mTargetSquareImage = UIUtil::NewUIActorWithWidget<UIImage>(mMapImage->GetOwner());
+    mTargetSquareImage = UI::CreateWidgetActor<UIImage>("TargetSquare", mMapImage);
     mTargetSquareImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
-    mVerticalLineImage = UIUtil::NewUIActorWithWidget<UIImage>(mMapImage->GetOwner());
+    mVerticalLineImage = UI::CreateWidgetActor<UIImage>("TargetVertLine", mMapImage);
     mVerticalLineImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
-    mHorizontalLineImage = UIUtil::NewUIActorWithWidget<UIImage>(mMapImage->GetOwner());
+    mHorizontalLineImage = UI::CreateWidgetActor<UIImage>("TargetHorizLine", mMapImage);
     mHorizontalLineImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
     // Add power button.
     // Again, position and exact textures aren't set because they depend on the layout used.
-    mPowerButton = UIUtil::NewUIActorWithWidget<UIButton>(mMapImage->GetOwner());
+    mPowerButton = UI::CreateWidgetActor<UIButton>("PowerButton", mMapImage);
     mPowerButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     mPowerButton->SetPressCallback([this](UIButton* button) {
         Hide();

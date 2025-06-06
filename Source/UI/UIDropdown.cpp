@@ -6,38 +6,32 @@
 #include "UIButton.h"
 #include "UIImage.h"
 #include "UILabel.h"
+#include "UIUtil.h"
 
-UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
+UIDropdown::UIDropdown(const std::string& name, Actor* parent) : Actor(name, TransformType::RectTransform)
 {
     GetTransform()->SetParent(parent->GetTransform());
 
     // Create expand button.
     {
-        Actor* expandButtonActor = new Actor(TransformType::RectTransform);
-        expandButtonActor->GetTransform()->SetParent(GetTransform());
-
-        mExpandButton = expandButtonActor->AddComponent<UIButton>();
+        mExpandButton = UI::CreateWidgetActor<UIButton>("ExpandButton", this);
 
         // Position from top-right corner. Nudge 1 pixel to the left for correct look.
-        mExpandButton->GetRectTransform()->SetAnchor(1.0f, 1.0f);
-        mExpandButton->GetRectTransform()->SetPivot(1.0f, 1.0f);
+        mExpandButton->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
         mExpandButton->GetRectTransform()->SetAnchoredPosition(-1.0f, 0.0f);
 
         mExpandButton->SetUpTexture(gAssetManager.LoadTexture("RC_ARW_R.BMP"));
         mExpandButton->SetDownTexture(gAssetManager.LoadTexture("RC_ARW_DWN.BMP"));
         mExpandButton->SetHoverTexture(gAssetManager.LoadTexture("RC_ARW_HI.BMP"));
 
-        mExpandButton->SetPressCallback([this](UIButton* button) {
+        mExpandButton->SetPressCallback([this](UIButton* button){
             OnExpandButtonPressed();
         });
     }
 
     // Create current choice field.
     {
-        Actor* currentChoiceActor = new Actor(TransformType::RectTransform);
-        currentChoiceActor->GetTransform()->SetParent(GetTransform());
-
-        mCurrentChoiceLabel = currentChoiceActor->AddComponent<UILabel>();
+        mCurrentChoiceLabel = UI::CreateWidgetActor<UILabel>("CurrentChoiceLabel", this);
 
         // Anchor to fill size of parent, but put pivot to bottom-left.
         // Then, decrease horizontal size by width of expand button. Because pivot is on left, all size decrease occurs on the right!
@@ -56,28 +50,20 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
 
     // Create downdown expand box.
     {
-        Actor* boxActor = new Actor(TransformType::RectTransform);
-        boxActor->GetTransform()->SetParent(GetTransform());
-
-        // The expand box is anchored to the bottom edge of the dropdown's rect.
-        mBoxRT = boxActor->GetComponent<RectTransform>();
-        mBoxRT->SetAnchorMin(Vector2::Zero);
-        mBoxRT->SetAnchorMax(Vector2(1.0f, 0.0f));
-        mBoxRT->SetPivot(0.0f, 1.0f);
-        mBoxRT->SetSizeDelta(0.0f, 50.0f);
-
         // Put a gray background inside the box.
-        UIImage* background = boxActor->AddComponent<UIImage>();
+        UIImage* background = UI::CreateWidgetActor<UIImage>("Background", this);
         background->SetColor(Color32::Gray);
+        background->GetRectTransform()->SetAnchorMin(Vector2::Zero);
+        background->GetRectTransform()->SetAnchorMax(Vector2(1.0f, 0.0f));
+        background->GetRectTransform()->SetPivot(0.0f, 1.0f);
+        background->GetRectTransform()->SetSizeDelta(0.0f, 50.0f);
+        mBoxRT = background->GetRectTransform();
 
         // Create border images for bottom/top/left/right.
         // I'm going to skip the corner images because...they don't seem necessary!
         for(int i = 0; i < 4; ++i)
         {
-            Actor* sideActor = new Actor(TransformType::RectTransform);
-            sideActor->GetTransform()->SetParent(boxActor->GetTransform());
-
-            UIImage* image = sideActor->AddComponent<UIImage>();
+            UIImage* image = UI::CreateWidgetActor<UIImage>("Side", background);
 
             // Set texture.
             Texture* texture = nullptr;
@@ -125,8 +111,13 @@ UIDropdown::UIDropdown(Actor* parent) : Actor(TransformType::RectTransform)
         }
 
         // Hide box by default.
-        boxActor->SetActive(false);
+        background->GetOwner()->SetActive(false);
     }
+}
+
+UIDropdown::UIDropdown(Actor* parent) : UIDropdown("Dropdown", parent)
+{
+    
 }
 
 void UIDropdown::SetChoices(const std::vector<std::string>& choices)
@@ -199,33 +190,29 @@ void UIDropdown::RefreshChoicesUI()
         // We may need to create a new selection.
         if(choiceUIIndex >= mChoiceUIs.size())
         {
-            Actor* buttonActor = new Actor(TransformType::RectTransform);
-            buttonActor->GetTransform()->SetParent(mBoxRT);
-
             // NOTE: Changing the button's texture currently updates the RectTransform's size. So do this before changing RT properties.
-            UIButton* button = buttonActor->AddComponent<UIButton>();
+            UIButton* button = UI::CreateWidgetActor<UIButton>("Choice" + std::to_string(i), mBoxRT);
             button->SetUpTexture(nullptr, Color32::Gray);
             button->SetHoverTexture(nullptr, Color32(200, 200, 200, 255));
             button->SetDownTexture(nullptr, Color32(200, 200, 200, 255));
             button->SetPressCallback(std::bind(&UIDropdown::OnSelectionPressed, this, std::placeholders::_1));
 
             // Expand to fill width, anchor to top of box, and set pivot to top-left.
-            RectTransform* buttonRT = buttonActor->GetComponent<RectTransform>();
-            buttonRT->SetAnchorMin(Vector2(0.0f, 1.0f));
-            buttonRT->SetAnchorMax(Vector2::One);
-            buttonRT->SetPivot(0.0f, 1.0f);
+            button->GetRectTransform()->SetAnchorMin(Vector2(0.0f, 1.0f));
+            button->GetRectTransform()->SetAnchorMax(Vector2::One);
+            button->GetRectTransform()->SetPivot(0.0f, 1.0f);
 
             // Height of each button is the same as the height of the dropdown itself.
-            buttonRT->SetSizeDelta(0.0f, static_cast<RectTransform*>(GetTransform())->GetSize().y);
+            button->GetRectTransform()->SetSizeDelta(0.0f, static_cast<RectTransform*>(GetTransform())->GetSize().y);
 
             // Create center-aligned label.
-            UILabel* label = buttonActor->AddComponent<UILabel>();
+            UILabel* label = button->GetOwner()->AddComponent<UILabel>();
             label->SetFont(gAssetManager.LoadFont("F_ARIAL_T8"));
             label->SetHorizonalAlignment(HorizontalAlignment::Center);
             label->SetVerticalAlignment(VerticalAlignment::Center);
             
             mChoiceUIs.emplace_back();
-            mChoiceUIs.back().transform = buttonRT;
+            mChoiceUIs.back().transform = button->GetRectTransform();
             mChoiceUIs.back().button = button;
             mChoiceUIs.back().label = label;
         }

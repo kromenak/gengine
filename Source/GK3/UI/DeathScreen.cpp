@@ -27,13 +27,13 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
     blackBackground->SetTexture(&Texture::Black);
 
     // Add death screen background image.
-    UIImage* background = UIUtil::NewUIActorWithWidget<UIImage>(this);
+    UIImage* background = UI::CreateWidgetActor<UIImage>("Background", this);
     background->SetTexture(gAssetManager.LoadTexture("DEATHSCREEN.BMP"), true);
     background->SetReceivesInput(true);
 
     // Add buttons for retry, replay, and quit.
     {
-        UIButton* retryButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
+        UIButton* retryButton = UI::CreateWidgetActor<UIButton>("RetryButton", background);
         retryButton->SetUpTexture(gAssetManager.LoadTexture("DS_RTRY_N.BMP"));
         retryButton->SetHoverTexture(gAssetManager.LoadTexture("DS_RTRY_H.BMP"));
         retryButton->SetDownTexture(gAssetManager.LoadTexture("DS_RTRY_D.BMP"));
@@ -45,7 +45,7 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         retryButton->GetRectTransform()->SetAnchoredPosition(181.0f, 24.0f);
     }
     {
-        UIButton* restoreButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
+        UIButton* restoreButton = UI::CreateWidgetActor<UIButton>("RestoreButton", background);
         restoreButton->SetUpTexture(gAssetManager.LoadTexture("DS_REST_N.BMP"));
         restoreButton->SetHoverTexture(gAssetManager.LoadTexture("DS_REST_H.BMP"));
         restoreButton->SetDownTexture(gAssetManager.LoadTexture("DS_REST_D.BMP"));
@@ -57,7 +57,7 @@ DeathScreen::DeathScreen() : Actor("Death Screen", TransformType::RectTransform)
         restoreButton->GetRectTransform()->SetAnchoredPosition(280.0f, 24.0f);
     }
     {
-        UIButton* quitButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
+        UIButton* quitButton = UI::CreateWidgetActor<UIButton>("QuitButton", background);
         quitButton->SetUpTexture(gAssetManager.LoadTexture("DS_QUIT_N.BMP"));
         quitButton->SetHoverTexture(gAssetManager.LoadTexture("DS_QUIT_H.BMP"));
         quitButton->SetDownTexture(gAssetManager.LoadTexture("DS_QUIT_D.BMP"));

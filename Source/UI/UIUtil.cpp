@@ -6,33 +6,41 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 
-void UIUtil::AddCanvas(Actor* canvasActor, int canvasOrder)
+UICanvas* UI::AddCanvas(Actor* actor, int canvasOrder, const Color32& color)
 {
     // Add canvas.
-    canvasActor->AddComponent<UICanvas>(canvasOrder);
+    UICanvas* canvas = actor->AddComponent<UICanvas>(canvasOrder);
 
-    // Canvas takes up entire screen.
-    RectTransform* rectTransform = canvasActor->GetComponent<RectTransform>();
-    rectTransform->SetAnchor(AnchorPreset::CenterStretch);
-    rectTransform->SetSizeDelta(0.0f, 0.0f);
+    // Let's assume that the majority of canvases are going to be "Center Stretch" - essentially taking up all space of their parent.
+    // This is what we want in a lot of cases. The caller can of course change this after the canvas is returned.
+    canvas->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+    canvas->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
+
+    // If a color is needed, add an image with the desired color.
+    if(color != Color32::Clear)
+    {
+        // Add background image that fills the entire canvas with desired color.
+        UIImage* background = actor->AddComponent<UIImage>();
+        background->SetTexture(&Texture::White);
+        background->SetColor(color);
+
+        // Eat input so below UI or 3D scene don't react to inputs.
+        background->SetReceivesInput(true);
+    }
+    return canvas;
 }
 
-void UIUtil::AddColorCanvas(Actor* canvasActor, int canvasOrder, const Color32& color)
+UICanvas* UI::CreateCanvas(const std::string& name, Actor* parent, int canvasOrder, const Color32& color)
 {
-    AddCanvas(canvasActor, canvasOrder);
-
-    // Add background image that fills the entire canvas with desired color.
-    UIImage* background = canvasActor->AddComponent<UIImage>();
-    background->SetTexture(&Texture::White);
-    background->SetColor(color);
-
-    // Eat input so below UI or 3D scene don't react to inputs.
-    background->SetReceivesInput(true);
+    Actor* uiActor = new Actor(name, TransformType::RectTransform);
+    if(parent != nullptr)
+    {
+        uiActor->GetTransform()->SetParent(parent->GetTransform());
+    }
+    return AddCanvas(uiActor, canvasOrder, color);
 }
 
-UICanvas* UIUtil::NewUIActorWithCanvas(Actor* parent, int canvasOrder)
+UICanvas* UI::CreateCanvas(const std::string& name, Component* parent, int canvasOrder, const Color32& color)
 {
-    Actor* uiActor = new Actor(TransformType::RectTransform);
-    uiActor->GetTransform()->SetParent(parent->GetTransform());
-    return uiActor->AddComponent<UICanvas>(canvasOrder);
+    return CreateCanvas(name, parent != nullptr ? parent->GetOwner() : nullptr, canvasOrder, color);
 }

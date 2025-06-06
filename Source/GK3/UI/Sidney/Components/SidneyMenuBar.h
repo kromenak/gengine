@@ -20,7 +20,7 @@ class UILabel;
 class SidneyMenuBar
 {
 public:
-    void Init(Actor* parent, const std::string& label, float labelWidth);
+    void Init(Actor* parent, const std::string& label);
     void Update();
 
     void SetInteractive(bool interactive) { mInteractive = interactive; }

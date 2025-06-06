@@ -35,7 +35,7 @@ Actor* SidneyUtil::CreateBackground(Actor* parent)
 
 void SidneyUtil::CreateMainMenuButton(Actor* parent, const std::function<void()>& pressCallback)
 {
-    SidneyButton* button = new SidneyButton(parent);
+    SidneyButton* button = new SidneyButton("MainMenuButton", parent);
     button->SetFont(gAssetManager.LoadFont("SID_TEXT_18.FON"));
     button->SetText(GetMainScreenLocalizer().GetText("HomeButton"));
     button->SetWidth(94.0f);
@@ -50,7 +50,7 @@ void SidneyUtil::CreateMainMenuButton(Actor* parent, const std::function<void()>
 
 UIButton* SidneyUtil::CreateCloseWindowButton(Actor* parent, const std::function<void()>& pressCallback)
 {
-    UIButton* closeButton = UIUtil::NewUIActorWithWidget<UIButton>(parent);
+    UIButton* closeButton = UI::CreateWidgetActor<UIButton>("CloseButton", parent);
     closeButton->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
     closeButton->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
     
@@ -83,20 +83,20 @@ SidneyButton* SidneyUtil::CreateSmallButton(Actor* parent)
 FilePreviewWindow SidneyUtil::CreateFilePreviewWindow(Actor* parent)
 {
     // Add window border.
-    UINineSlice* border = UIUtil::NewUIActorWithWidget<UINineSlice>(parent, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
+    UINineSlice* border = UI::CreateWidgetActor<UINineSlice>("FilePreviewWindow", parent, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
     border->GetRectTransform()->SetSizeDelta(153.0f, 167.0f);
 
     // Add one line for the box header.
-    UIImage* boxHeaderDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(border->GetOwner());
+    UIImage* boxHeaderDividerImage = UI::CreateWidgetActor<UIImage>("Divider", border);
     boxHeaderDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
     boxHeaderDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
     boxHeaderDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -17.0f);
     boxHeaderDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
     // Add header label.
-    UILabel* headerLabel = UIUtil::NewUIActorWithWidget<UILabel>(border->GetOwner());
+    UILabel* headerLabel = UI::CreateWidgetActor<UILabel>("HeaderLabel", border);
     headerLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
-    headerLabel->SetText("Map");
+    headerLabel->SetText("");
     headerLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
     headerLabel->SetVerticalAlignment(VerticalAlignment::Top);
     headerLabel->SetMasked(true);
@@ -106,8 +106,8 @@ FilePreviewWindow SidneyUtil::CreateFilePreviewWindow(Actor* parent)
     headerLabel->GetRectTransform()->SetSizeDeltaY(14.0f);
 
     // Add item image.
-    UIImage* image = UIUtil::NewUIActorWithWidget<UIImage>(border->GetOwner());
-    image->SetTexture(gAssetManager.LoadTexture("MAP9.BMP"), true);
+    UIImage* image = UI::CreateWidgetActor<UIImage>("Image", border);
+    //image->SetTexture(gAssetManager.LoadTexture("MAP9.BMP"), true);
     image->GetRectTransform()->SetAnchoredPosition(0.0f, -8.0f);
 
     FilePreviewWindow window;

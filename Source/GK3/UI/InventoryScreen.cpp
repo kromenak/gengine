@@ -12,6 +12,7 @@
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
+#include "UIUtil.h"
 #include "Window.h"
 
 InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::RectTransform),
@@ -20,24 +21,11 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
     // Inventory overrides SFX/VO, but continues ambient audio from scene.
     mLayer.OverrideAudioState(true, true, false);
 
-    // Add canvas for rendering UI elements.
-	AddComponent<UICanvas>(5);
-
-	// Add translucent background image that tints the scene.
-	UIImage* background = AddComponent<UIImage>();
-	background->SetTexture(&Texture::Black);
-	background->SetColor(Color32(0, 0, 0, 128));
-
-	RectTransform* inventoryRectTransform = GetComponent<RectTransform>();
-	inventoryRectTransform->SetSizeDelta(0.0f, 0.0f);
-	inventoryRectTransform->SetAnchorMin(Vector2::Zero);
-	inventoryRectTransform->SetAnchorMax(Vector2::One);
-
+    // Add canvas for rendering UI elements with a tinted color.
+    UI::AddCanvas(this, 5, Color32(0, 0, 0, 128));
+    
 	// Add exit button to bottom-left corner of screen.
-	Actor* exitButtonActor = new Actor(TransformType::RectTransform);
-    exitButtonActor->GetTransform()->SetParent(GetTransform());
-	UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
-
+    UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", this);
 	exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
 	exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
 	exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
@@ -46,26 +34,15 @@ InventoryScreen::InventoryScreen() : Actor("InventoryScreen", TransformType::Rec
         Hide();
     });
     exitButton->SetTooltipText("inventoryexit");
+    exitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+    exitButton->GetRectTransform()->SetAnchoredPosition(10.0f, 10.0f);
     mExitButton = exitButton;
 
-	RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
-	exitButtonRectTransform->SetParent(inventoryRectTransform);
-	exitButtonRectTransform->SetSizeDelta(58.0f, 26.0f); // texture width/height
-	exitButtonRectTransform->SetAnchor(Vector2::Zero);
-	exitButtonRectTransform->SetAnchoredPosition(10.0f, 10.0f);
-	exitButtonRectTransform->SetPivot(0.0f, 0.0f);
-
 	// Create active inventory item highlight, but hide by default.
-	Actor* activeHighlightActor = new Actor(TransformType::RectTransform);
-    activeHighlightActor->GetTransform()->SetParent(GetTransform());
-	mActiveHighlightImage = activeHighlightActor->AddComponent<UIImage>();
+    mActiveHighlightImage = UI::CreateWidgetActor<UIImage>("ActiveHighlight", this);
 	mActiveHighlightImage->SetTexture(gAssetManager.LoadTexture("INV_HIGHLIGHT.BMP"), true);
 	mActiveHighlightImage->SetEnabled(false);
-
-	RectTransform* activeHighlightRectTransform = mActiveHighlightImage->GetRectTransform();
-	activeHighlightRectTransform->SetParent(inventoryRectTransform);
-	activeHighlightRectTransform->SetAnchor(0.0f, 1.0f);
-	activeHighlightRectTransform->SetPivot(0.0f, 1.0f);
+    mActiveHighlightImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
 
 	// Hide inventory UI by default.
     SetActive(false);
@@ -157,31 +134,22 @@ void InventoryScreen::RefreshLayout()
 
         // Either reuse an already created button or create a new one.
         UIButton* button = nullptr;
-        RectTransform* buttonRT = nullptr;
         if(counter < mItemButtons.size())
         {
             button = mItemButtons[counter];
             button->SetEnabled(true);
-
-            buttonRT = button->GetOwner()->GetComponent<RectTransform>();
         }
         else
         {
-            Actor* itemActor = new Actor(TransformType::RectTransform);
-            itemActor->GetTransform()->SetParent(GetTransform());
-            button = itemActor->AddComponent<UIButton>();
-
-            buttonRT = itemActor->GetComponent<RectTransform>();
-            buttonRT->SetAnchor(Vector2(0.0f, 1.0f));
-            buttonRT->SetPivot(0.0f, 1.0f);
-
+            button = UI::CreateWidgetActor<UIButton>("InvItem", this);
+            button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             mItemButtons.push_back(button);
         }
         ++counter;
 
         // Set position/size for button.
-        buttonRT->SetAnchoredPosition(x, y);
-        buttonRT->SetSizeDelta(itemTexture->GetWidth(), itemTexture->GetHeight());
+        button->GetRectTransform()->SetAnchoredPosition(x, y);
+        button->GetRectTransform()->SetSizeDelta(itemTexture->GetWidth(), itemTexture->GetHeight());
 
         // Set texture for button.
         button->SetUpTexture(itemTexture);

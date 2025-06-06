@@ -39,15 +39,15 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
     mLoadLayer.OverrideAudioState(true, true, false);
 
     // Needs a high canvas order so it appears above the in-game options bar.
-    UIUtil::AddColorCanvas(this, 21, Color32::Black);
+    UI::AddCanvas(this, 21, Color32::Black);
 
     // Add load/save background image.
-    UIImage* background = UIUtil::NewUIActorWithWidget<UIImage>(this);
+    UIImage* background = UI::CreateWidgetActor<UIImage>("Background", this);
     background->SetTexture(gAssetManager.LoadTexture("LOADSAVE.BMP"), true);
 
     // Create exit button.
     {
-        mExitButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
+        mExitButton = UI::CreateWidgetActor<UIButton>("ExitButton", background);
         mExitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
         mExitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
         mExitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
@@ -65,7 +65,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
 
     // Create save & load buttons.
     {
-        mSaveButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
+        mSaveButton = UI::CreateWidgetActor<UIButton>("SaveButton", background);
         mSaveButton->SetUpTexture(gAssetManager.LoadTexture("SAVEN.BMP"));
         mSaveButton->SetDownTexture(gAssetManager.LoadTexture("SAVED.BMP"));
         mSaveButton->SetHoverTexture(gAssetManager.LoadTexture("SAVEHOV.BMP"));
@@ -81,7 +81,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
         mSaveButton->SetTooltipText("savegame");
     }
     {
-        mLoadButton = UIUtil::NewUIActorWithWidget<UIButton>(background->GetOwner());
+        mLoadButton = UI::CreateWidgetActor<UIButton>("LoadButton", background);
         mLoadButton->SetUpTexture(gAssetManager.LoadTexture("RESTOREN.BMP"));
         mLoadButton->SetDownTexture(gAssetManager.LoadTexture("RESTORED.BMP"));
         mLoadButton->SetHoverTexture(gAssetManager.LoadTexture("RESTOREHOV.BMP"));
@@ -113,18 +113,18 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
         mHighlight->SetAnchor(AnchorPreset::TopLeft);
         mHighlight->SetSizeDelta(kSaveListWidth, kRowHeight);
 
-        UIImage* leftHighlight = UIUtil::NewUIActorWithWidget<UIImage>(highlightActor);
+        UIImage* leftHighlight = UI::CreateWidgetActor<UIImage>("LeftHighlight", highlightActor);
         leftHighlight->SetColor(Color32::Gray);
         leftHighlight->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         leftHighlight->GetRectTransform()->SetSizeDelta(kLeftColumnWidth, kRowHeight);
 
-        UIImage* middleHighlight = UIUtil::NewUIActorWithWidget<UIImage>(highlightActor);
+        UIImage* middleHighlight = UI::CreateWidgetActor<UIImage>("MiddleHighlight", highlightActor);
         middleHighlight->SetColor(Color32::Gray);
         middleHighlight->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         middleHighlight->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kColumnSeparatorWidth, 0.0f);
         middleHighlight->GetRectTransform()->SetSizeDelta(kMiddleColumnWidth, kRowHeight);
 
-        UIImage* rightHighlight = UIUtil::NewUIActorWithWidget<UIImage>(highlightActor);
+        UIImage* rightHighlight = UI::CreateWidgetActor<UIImage>("RightHighlight", highlightActor);
         rightHighlight->SetColor(Color32::Gray);
         rightHighlight->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         rightHighlight->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kMiddleColumnWidth + (2 * kColumnSeparatorWidth), 0.0f);
@@ -135,7 +135,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
 
     // Create input field for entering save names.
     {
-        mTextInput = UIUtil::NewUIActorWithWidget<UITextInput>(mListActor);
+        mTextInput = UI::CreateWidgetActor<UITextInput>("SaveNameTextInput", mListActor);
         mTextInput->SetFont(gAssetManager.LoadFont("F_SSERIF_T8.FON"));
         mTextInput->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
         mTextInput->GetRectTransform()->SetSizeDelta(kLeftColumnWidth, kRowHeight);
@@ -143,7 +143,7 @@ SaveLoadScreen::SaveLoadScreen() : Actor(TransformType::RectTransform),
 
     // Create image for showing save thumbnail.
     {
-        mThumbnailImage = UIUtil::NewUIActorWithWidget<UIImage>(background->GetOwner());
+        mThumbnailImage = UI::CreateWidgetActor<UIImage>("SaveThumbnail", background);
         mThumbnailImage->SetColor(Color32::White);
         mThumbnailImage->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
         mThumbnailImage->GetRectTransform()->SetAnchoredPosition(-14.0f, -120.0f);
@@ -251,7 +251,7 @@ void SaveLoadScreen::PopulateSaveList()
             entry = &mListEntries.back();
 
             // Parent container for the three labels.
-            UIButton* button = UIUtil::NewUIActorWithWidget<UIButton>(mListActor);
+            UIButton* button = UI::CreateWidgetActor<UIButton>("SaveEntry" + std::to_string(i), mListActor);
             button->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             button->GetRectTransform()->SetSizeDelta(kSaveListWidth, 14.0f);
             button->SetPressCallback([this, i](UIButton* button){
@@ -260,7 +260,7 @@ void SaveLoadScreen::PopulateSaveList()
             mListEntries.back().button = button;
 
             // Name label.
-            UILabel* nameLabel = UIUtil::NewUIActorWithWidget<UILabel>(button->GetOwner());
+            UILabel* nameLabel = UI::CreateWidgetActor<UILabel>("NameLabel", button);
             nameLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             nameLabel->GetRectTransform()->SetAnchoredPosition(2.0f, -2.0f);
             nameLabel->GetRectTransform()->SetSizeDelta(kLeftColumnWidth, 14.0f);
@@ -269,7 +269,7 @@ void SaveLoadScreen::PopulateSaveList()
             mListEntries.back().nameLabel = nameLabel;
 
             // Day & time label.
-            UILabel* dayTimeLabel = UIUtil::NewUIActorWithWidget<UILabel>(button->GetOwner());
+            UILabel* dayTimeLabel = UI::CreateWidgetActor<UILabel>("TimeblockLabel", button);
             dayTimeLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             dayTimeLabel->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kColumnSeparatorWidth + 2.0f, -2.0f);
             dayTimeLabel->GetRectTransform()->SetSizeDelta(kMiddleColumnWidth, 14.0f);
@@ -278,7 +278,7 @@ void SaveLoadScreen::PopulateSaveList()
             mListEntries.back().dayTimeLabel = dayTimeLabel;
 
             // Score label.
-            UILabel* scoreLabel = UIUtil::NewUIActorWithWidget<UILabel>(button->GetOwner());
+            UILabel* scoreLabel = UI::CreateWidgetActor<UILabel>("ScoreLabel", button);
             scoreLabel->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
             scoreLabel->GetRectTransform()->SetAnchoredPosition(kLeftColumnWidth + kMiddleColumnWidth + (2 * kColumnSeparatorWidth) + 2.0f, -2.0f);
             scoreLabel->GetRectTransform()->SetSizeDelta(kRightColumnWidth, 14.0f);

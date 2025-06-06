@@ -18,6 +18,7 @@ class UILabel;
 class UIDropdown : public Actor
 {
 public:
+    UIDropdown(const std::string& name, Actor* parent);
     UIDropdown(Actor* parent);
 
     void SetMaxVisibleChoices(int max) { mMaxVisibleChoices = max; }

@@ -7,6 +7,7 @@
 #include "Texture.h"
 #include "UICanvas.h"
 #include "UIImage.h"
+#include "UIUtil.h"
 #include "VideoState.h"
 #include "Window.h"
 
@@ -29,27 +30,18 @@ void VideoPlayer::Initialize()
     // Create canvas actor that sticks around forever.
     mVideoCanvasActor = new Actor("VideoPlayer", TransformType::RectTransform);
     mVideoCanvasActor->SetIsDestroyOnLoad(false);
-    mVideoCanvasActor->AddComponent<UICanvas>(15);
-    
-    // Size canvas rect so it always fills the entire screen.
-    RectTransform* canvasRectTransform = mVideoCanvasActor->GetComponent<RectTransform>();
-    canvasRectTransform->SetAnchorMin(Vector2::Zero);
-    canvasRectTransform->SetAnchorMax(Vector2::One);
-    canvasRectTransform->SetSizeDelta(Vector2::Zero);
+    UI::AddCanvas(mVideoCanvasActor, 15, Color32::Black);
     
     // When a video plays, a background image either tints or completely blocks whatever's behind the video.
-    mVideoBackgroundImage = mVideoCanvasActor->AddComponent<UIImage>();
+    // This is created along with the Canvas in AddCanvas - grab a reference to it here.
+    mVideoBackgroundImage = mVideoCanvasActor->GetComponent<UIImage>();
     
     // Create black background image, used for letterbox effect.
-    Actor* videoBackgroundActor = new Actor(TransformType::RectTransform);
-    videoBackgroundActor->GetTransform()->SetParent(mVideoCanvasActor->GetTransform());
-    mVideoLetterbox = videoBackgroundActor->AddComponent<UIImage>();
+    mVideoLetterbox = UI::CreateWidgetActor<UIImage>("Letterbox", mVideoCanvasActor);
     mVideoLetterbox->SetColor(Color32::Black);
     
     // Create video image, which shows actual video playback.
-    Actor* videoActor = new Actor(TransformType::RectTransform);
-    videoActor->GetTransform()->SetParent(mVideoCanvasActor->GetTransform());
-    mVideoImage = videoActor->AddComponent<UIImage>();
+    mVideoImage = UI::CreateWidgetActor<UIImage>("Video", mVideoCanvasActor);
     mVideoImage->SetTexture(&Texture::Black);
     
     // Disable video UI until a movie is played.

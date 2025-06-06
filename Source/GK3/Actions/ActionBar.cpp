@@ -61,7 +61,7 @@ ActionBar::ActionBar() : Actor("ActionBar", TransformType::RectTransform)
 	
 	// Create button holder - it holds the buttons and we move it around the screen.
     // Since we will set the action bar's position based on mouse position, set the anchor to the lower-left corner.
-	Actor* buttonHolderActor = new Actor("Button Holder", TransformType::RectTransform);
+	Actor* buttonHolderActor = new Actor("ButtonHolder", TransformType::RectTransform);
 	mButtonHolder = buttonHolderActor->GetComponent<RectTransform>();
 	mButtonHolder->SetParent(rectTransform);
 	mButtonHolder->SetAnchorMin(Vector2::Zero);

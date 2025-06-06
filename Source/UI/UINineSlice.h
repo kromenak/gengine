@@ -7,8 +7,9 @@
 // And some of the parts resize dynamically to fill the space.
 //
 #pragma once
-#include "Color32.h"
 #include "UIWidget.h"
+
+#include "Color32.h"
 
 class Texture;
 class UIImage;

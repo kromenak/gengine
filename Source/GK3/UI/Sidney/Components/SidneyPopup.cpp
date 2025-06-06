@@ -22,22 +22,14 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
         GetTransform()->SetParent(parent->GetTransform());
 
         // Add a UICanvas, so we can force this to display above other things.
-        AddComponent<UICanvas>(4);
-
-        // Stretch to fill the parent container and add a button.
-        // This causes us to act as an invisible input blocker over the parent area.
-        GetComponent<RectTransform>()->SetAnchor(AnchorPreset::CenterStretch);
-        AddComponent<UIButton>();
+        UI::AddCanvas(this, 4);
     }
 
     // Add the window itself.
     {
-        // A child of the this actor.
-        mWindow = new Actor(TransformType::RectTransform);
-        mWindow->GetTransform()->SetParent(GetTransform());
-
         // Add a border around the edge.
-        UINineSlice* border = mWindow->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Black));
+        UINineSlice* border = UI::CreateWidgetActor<UINineSlice>("Window", this, SidneyUtil::GetGrayBoxParams(Color32::Black));
+        mWindow = border->GetOwner();
 
         // Default to centered on-screen at a certain size.
         border->GetRectTransform()->SetSizeDelta(250.0f, 172.0f);
@@ -46,10 +38,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
     // Add message label.
     {
-        Actor* messageActor = new Actor(TransformType::RectTransform);
-        messageActor->GetTransform()->SetParent(mWindow->GetTransform());
-
-        mMessage = messageActor->AddComponent<UILabel>();
+        mMessage = UI::CreateWidgetActor<UILabel>("Message", mWindow);
         mMessage->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mMessage->SetHorizonalAlignment(HorizontalAlignment::Left);
         mMessage->SetHorizontalOverflow(HorizontalOverflow::Wrap);
@@ -61,7 +50,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
     // Add image element.
     {
-        mImage = UIUtil::NewUIActorWithWidget<UIImage>(mWindow);
+        mImage = UI::CreateWidgetActor<UIImage>("Image", mWindow);
         mImage->SetTexture(&Texture::White, true);
 
         mImage->GetRectTransform()->SetAnchor(AnchorPreset::TopLeft);
@@ -70,13 +59,13 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
     // Add a text input field.
     {
-        mTextInput = UIUtil::NewUIActorWithWidget<UITextInput>(mWindow);
+        mTextInput = UI::CreateWidgetActor<UITextInput>("TextInput", mWindow);
         mTextInput->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mTextInput->AllowInputToChangeFocus(false); // Can't click elsewhere to unfocus this input.
         mTextInput->SetMaxLength(8); // Don't allow too many characters to be added.
 
         // Create text input field caret.
-        UIImage* caretImage = UIUtil::NewUIActorWithWidget<UIImage>(mTextInput->GetOwner());
+        UIImage* caretImage = UI::CreateWidgetActor<UIImage>("Caret", mTextInput);
         caretImage->SetTexture(&Texture::White);
         caretImage->SetColor(Color32(198, 170, 41));
 
@@ -91,7 +80,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
     // Add OK button.
     {
-        mOKButton = new SidneyButton(mWindow);
+        mOKButton = new SidneyButton("OKButton", mWindow);
         mOKButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
         mOKButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("OKButton"));
         mOKButton->SetWidth(80.0f);
@@ -108,7 +97,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
     // Add YES button.
     {
-        mYesButton = new SidneyButton(mWindow);
+        mYesButton = new SidneyButton("YesButton", mWindow);
         mYesButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
         mYesButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("YesButton"));
         mYesButton->SetWidth(80.0f);
@@ -125,7 +114,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
 
     // Add NO button.
     {
-        mNoButton = new SidneyButton(mWindow);
+        mNoButton = new SidneyButton("NoButton", mWindow);
         mNoButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
         mNoButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("NoButton"));
         mNoButton->SetWidth(80.0f);
@@ -143,7 +132,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
     // Add buttons for three button layout.
     {
         {
-            mLeftButton = new SidneyButton(mWindow);
+            mLeftButton = new SidneyButton("LeftButton", mWindow);
             mLeftButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
             mLeftButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("French"));
             mLeftButton->SetWidth(60.0f);
@@ -153,7 +142,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
             mLeftButton->GetRectTransform()->SetAnchoredPosition(-70.0f, 8.0f);
         }
         {
-            mCenterButton = new SidneyButton(mWindow);
+            mCenterButton = new SidneyButton("CenterButton", mWindow);
             mCenterButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
             mCenterButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("English"));
             mCenterButton->SetWidth(60.0f);
@@ -163,7 +152,7 @@ SidneyPopup::SidneyPopup(Actor* parent) : Actor("Sidney Popup", TransformType::R
             mCenterButton->GetRectTransform()->SetAnchoredPosition(0.0f, 8.0f);
         }
         {
-            mRightButton = new SidneyButton(mWindow);
+            mRightButton = new SidneyButton("RightButton", mWindow);
             mRightButton->SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"));
             mRightButton->SetText(SidneyUtil::GetAnalyzeLocalizer().GetText("Latin"));
             mRightButton->SetWidth(60.0f);

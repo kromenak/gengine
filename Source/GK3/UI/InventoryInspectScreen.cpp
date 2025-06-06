@@ -11,6 +11,7 @@
 #include "UICanvas.h"
 #include "UIButton.h"
 #include "UIImage.h"
+#include "UIUtil.h"
 
 InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen", TransformType::RectTransform),
     mLayer("CloseUpLayer")
@@ -19,25 +20,11 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
     mLayer.OverrideAudioState(true, true, false);
 
     // Add canvas to render UI elements.
-	AddComponent<UICanvas>(6);
-	
-	// Add black background image that blocks out the scene entirely.
-    {
-        UIImage* background = AddComponent<UIImage>();
-        background->SetTexture(&Texture::Black);
-
-        RectTransform* inventoryRectTransform = GetComponent<RectTransform>();
-        inventoryRectTransform->SetSizeDelta(0.0f, 0.0f);
-        inventoryRectTransform->SetAnchorMin(Vector2::Zero);
-        inventoryRectTransform->SetAnchorMax(Vector2::One);
-    }
+    UI::AddCanvas(this, 6, Color32::Black);
 	
 	// Add exit button to bottom-left corner of screen.
     {
-        Actor* exitButtonActor = new Actor("Exit Button", TransformType::RectTransform);
-        exitButtonActor->GetTransform()->SetParent(GetTransform());
-        UIButton* exitButton = exitButtonActor->AddComponent<UIButton>();
-
+        UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", this);
         exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
         exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
         exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
@@ -46,31 +33,20 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
             Hide();
         });
         exitButton->SetTooltipText("closeupexit");
+        
+        exitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        exitButton->GetRectTransform()->SetAnchoredPosition(10.0f, 10.0f);
         mExitButton = exitButton;
-
-        RectTransform* exitButtonRectTransform = exitButtonActor->GetComponent<RectTransform>();
-        exitButtonRectTransform->SetSizeDelta(58.0f, 26.0f); // texture width/height
-        exitButtonRectTransform->SetAnchor(Vector2::Zero);
-        exitButtonRectTransform->SetAnchoredPosition(10.0f, 10.0f);
-        exitButtonRectTransform->SetPivot(0.0f, 0.0f);
     }
 	
 	// Create closeup image. It's just positioned at center of screen, which is default.
-    {
-        Actor* closeupActor = new Actor("Closeup Button", TransformType::RectTransform);
-        closeupActor->GetTransform()->SetParent(GetTransform());
-
-        mCloseupImage = closeupActor->AddComponent<UIButton>();
-    }
+    mCloseupImage = UI::CreateWidgetActor<UIButton>("CloseupButton", this);
 
     // Create extra LSR buttons, which are only used by the LSR inventory item.
     {
         for(int i = 0; i < 3; ++i)
         {
-            Actor* lsrActor = new Actor("LSR", TransformType::RectTransform);
-            lsrActor->GetTransform()->SetParent(mCloseupImage->GetRectTransform());
-
-            mLSRButtons[i] = lsrActor->AddComponent<UIButton>();
+            mLSRButtons[i] = UI::CreateWidgetActor<UIButton>("LsrStanza" + std::to_string(i), mCloseupImage);
             mLSRButtons[i]->SetEnabled(false);
             mLSRButtons[i]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         }

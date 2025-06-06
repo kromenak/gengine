@@ -21,21 +21,19 @@ void SidneyAnalyze::AnalyzeText_Init()
 {
     // Create window for analyzing text.
     {
-        mAnalyzeTextWindow = new Actor(TransformType::RectTransform);
-        mAnalyzeTextWindow->GetTransform()->SetParent(mRoot->GetTransform());
-
-        UINineSlice* border = mAnalyzeTextWindow->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
+        UINineSlice* border = UI::CreateWidgetActor<UINineSlice>("AnalyzeTextWindow", mRoot, SidneyUtil::GetGrayBoxParams(SidneyUtil::TransBgColor));
         border->GetRectTransform()->SetSizeDelta(300.0f, 104.0f);
+        mAnalyzeTextWindow = border->GetOwner();
 
         // Add divider line for box header.
-        UIImage* boxHeaderDividerImage = UIUtil::NewUIActorWithWidget<UIImage>(mAnalyzeTextWindow);
+        UIImage* boxHeaderDividerImage = UI::CreateWidgetActor<UIImage>("Divider", mAnalyzeTextWindow);
         boxHeaderDividerImage->SetTexture(gAssetManager.LoadTexture("S_BOX_TOP.BMP"), true);
         boxHeaderDividerImage->GetRectTransform()->SetAnchor(AnchorPreset::TopStretch);
         boxHeaderDividerImage->GetRectTransform()->SetAnchoredPosition(0.0f, -17.0f);
         boxHeaderDividerImage->GetRectTransform()->SetSizeDeltaX(0.0f);
 
         // Add header label.
-        mAnalyzeTextFileNameLabel = UIUtil::NewUIActorWithWidget<UILabel>(mAnalyzeTextWindow);
+        mAnalyzeTextFileNameLabel = UI::CreateWidgetActor<UILabel>("FileNameLabel", mAnalyzeTextWindow);
         mAnalyzeTextFileNameLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mAnalyzeTextFileNameLabel->SetHorizonalAlignment(HorizontalAlignment::Right);
         mAnalyzeTextFileNameLabel->SetVerticalAlignment(VerticalAlignment::Top);
@@ -46,7 +44,7 @@ void SidneyAnalyze::AnalyzeText_Init()
         mAnalyzeTextFileNameLabel->GetRectTransform()->SetSizeDeltaY(14.0f);
 
         // Add text label.
-        mAnalyzeTextLabel = UIUtil::NewUIActorWithWidget<UILabel>(mAnalyzeTextWindow);
+        mAnalyzeTextLabel = UI::CreateWidgetActor<UILabel>("TextLabel", mAnalyzeTextWindow);
         mAnalyzeTextLabel->SetFont(gAssetManager.LoadFont("SID_TEXT_14.FON"));
         mAnalyzeTextLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
         mAnalyzeTextLabel->SetVerticalAlignment(VerticalAlignment::Center);

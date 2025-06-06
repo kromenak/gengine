@@ -9,7 +9,7 @@
 #include "UISlider.h"
 #include "UIUtil.h"
 
-UIScrollRect::UIScrollRect(Actor* parent) : Actor(TransformType::RectTransform)
+UIScrollRect::UIScrollRect(Actor* parent) : Actor("ScrollRect", TransformType::RectTransform)
 {
     GetTransform()->SetParent(parent->GetTransform());
 
@@ -33,7 +33,7 @@ UIScrollRect::UIScrollRect(Actor* parent) : Actor(TransformType::RectTransform)
 
     // Create backing behind scroll area.
     // Size it such that it takes up all the scrollbar area except space at top/bottom for the two buttons.
-    UIImage* backing = UIUtil::NewUIActorWithWidget<UIImage>(mScrollbarActor);
+    UIImage* backing = UI::CreateWidgetActor<UIImage>("Backing", mScrollbarActor);
     backing->SetTexture(&Texture::Black);
     backing->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
     backing->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
@@ -42,7 +42,7 @@ UIScrollRect::UIScrollRect(Actor* parent) : Actor(TransformType::RectTransform)
 
     // Create up button.
     {
-        UIButton* upButton = UIUtil::NewUIActorWithWidget<UIButton>(mScrollbarActor);
+        UIButton* upButton = UI::CreateWidgetActor<UIButton>("UpButton", mScrollbarActor);
         upButton->SetUpTexture(upTexture);
         upButton->SetPressCallback([this](UIButton* button){
             OnUpButtonPressed();
@@ -52,7 +52,7 @@ UIScrollRect::UIScrollRect(Actor* parent) : Actor(TransformType::RectTransform)
 
     // Create down button.
     {
-        UIButton* downButton = UIUtil::NewUIActorWithWidget<UIButton>(mScrollbarActor);
+        UIButton* downButton = UI::CreateWidgetActor<UIButton>("DownButton", mScrollbarActor);
         downButton->SetUpTexture(downTexture);
         downButton->SetPressCallback([this](UIButton* button){
             OnDownButtonPressed();
@@ -78,7 +78,7 @@ UIScrollRect::UIScrollRect(Actor* parent) : Actor(TransformType::RectTransform)
         params.leftColor = params.topColor = params.topLeftColor = Color32(181, 125, 0);
         params.rightColor = params.bottomColor = params.bottomLeftColor = params.bottomRightColor = params.topRightColor = Color32(90, 28, 33);
 
-        UINineSlice* handle = UIUtil::NewUIActorWithWidget<UINineSlice>(backing->GetOwner(), params);
+        UINineSlice* handle = UI::CreateWidgetActor<UINineSlice>("Handle", backing, params);
         handle->GetRectTransform()->SetAnchor(AnchorPreset::TopRight);
         handle->GetRectTransform()->SetAnchoredPosition(0.0f, 0.0f);
         handle->GetRectTransform()->SetSizeDelta(backing->GetRectTransform()->GetRect().width, 25.0f);

@@ -8,8 +8,9 @@
 #include "UICanvas.h"
 #include "UIImage.h"
 #include "UINineSlice.h"
+#include "UIUtil.h"
 
-SidneyButton::SidneyButton(Actor* parent) : Actor("SidneyButton", TransformType::RectTransform)
+SidneyButton::SidneyButton(const std::string& name, Actor* parent) : Actor(name, TransformType::RectTransform)
 {
     // Set as a child of the passed in parent right away (so UI components get added to canvas).
     GetTransform()->SetParent(parent->GetTransform());
@@ -19,26 +20,20 @@ SidneyButton::SidneyButton(Actor* parent) : Actor("SidneyButton", TransformType:
     backgroundImage->SetColor(Color32::Black);
 
     // Add label.
-    Actor* labelActor = new Actor(TransformType::RectTransform);
-    labelActor->GetTransform()->SetParent(GetTransform());
-    mLabel = labelActor->AddComponent<UILabel>();
+    mLabel = UI::CreateWidgetActor<UILabel>("Label", this);
     mLabel->SetHorizonalAlignment(HorizontalAlignment::Center);
     mLabel->SetVerticalAlignment(VerticalAlignment::Center);
-
     mLabel->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
     mLabel->GetRectTransform()->SetSizeDelta(-12.0f, 0.0f);
 
     // Add outer border box in gray.
-    Actor* topActor = new Actor(TransformType::RectTransform);
-    topActor->GetTransform()->SetParent(GetTransform());
-
-    mBorder = topActor->AddComponent<UINineSlice>(SidneyUtil::GetGrayBoxParams(Color32::Clear));
+    mBorder = UI::CreateWidgetActor<UINineSlice>("Box", this, SidneyUtil::GetGrayBoxParams(Color32::Clear));
     mBorder->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
     mBorder->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
 
     // Add button over the entire thing.
-    mButton = topActor->AddComponent<UIButton>();
-    mButton->SetPressCallback([this](UIButton* button) {
+    mButton = mBorder->GetOwner()->AddComponent<UIButton>();
+    mButton->SetPressCallback([this](UIButton* button){
         Press();
     });
 
@@ -47,6 +42,11 @@ SidneyButton::SidneyButton(Actor* parent) : Actor("SidneyButton", TransformType:
 
     // Set default fonts.
     SetFont(gAssetManager.LoadFont("SID_PDN_10_L.FON"), gAssetManager.LoadFont("SID_PDN_10_UL.FON"));
+}
+
+SidneyButton::SidneyButton(Actor* parent) : SidneyButton("SidneyButton", parent)
+{
+    
 }
 
 void SidneyButton::PrepareToDestroy()
