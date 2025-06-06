@@ -411,7 +411,7 @@ void Pendulum::UpdateGabeInteract()
         if(hoveredPlatformIndex >= 0)
         {
             // Show interact cursor. This one always uses the RED version.
-            gCursorManager.UseRedHighlightCursor();
+            gCursorManager.UseRedHighlightCursor(1);
 
             // On click release, we commit to interacting with this platform.
             if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
@@ -453,7 +453,7 @@ void Pendulum::UpdateGabeInteract()
             {
                 // If you can grab it, use the grab cursor.
                 // Also disable normal scene interaction, so that clicking doesn't show the verb bar for the pendulum in this case.
-                gCursorManager.UseCustomCursor(mGrabCursor);
+                gCursorManager.UseCustomCursor(mGrabCursor, 10);
                 gSceneManager.GetScene()->GetCamera()->SetSceneInteractEnabled(false);
 
                 // If clicked, you grab the pendulum!
@@ -521,11 +521,11 @@ void Pendulum::UpdateGabeInteract()
         // Update cursor.
         if(useGrabCursor)
         {
-            gCursorManager.UseCustomCursor(mGrabCursor);
+            gCursorManager.UseCustomCursor(mGrabCursor, 10);
         }
         else if(useHighlightCursor)
         {
-            gCursorManager.UseRedHighlightCursor();
+            gCursorManager.UseRedHighlightCursor(1);
         }
         else
         {

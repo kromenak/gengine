@@ -15,24 +15,29 @@ public:
     void Update(float deltaTime);
 
     void UseDefaultCursor();
-    void UseRedHighlightCursor();
-    void UseHighlightCursor();
+    void UseRedHighlightCursor(int priority = 0);
+    void UseHighlightCursor(int priority = 0);
     void UseWaitCursor();
     void UseLoadCursor();
-    void UseCustomCursor(Cursor* cursor);
-
-    bool IsDefaultCursor() const { return mActiveCursor == mDefaultCursor; }
-    bool IsHighlightCursor() const { return mActiveCursor == mHighlightRedCursor || mActiveCursor == mHighlightBlueCursor; }
+    void UseCustomCursor(Cursor* cursor, int priority = 0);
 
 private:
-    // The cursor that is currently active.
+    // The cursor that is active and rendering.
     Cursor* mActiveCursor = nullptr;
+
+    // The desired cursor, based on priority amongst potentially many competing game systems.
+    // Tracking a desired cursor with priority allows many different systems to request a cursor, but for only one to win out.
+    Cursor* mDesiredCursor = nullptr;
+    int mDesiredCursorPriority = -1;
+    bool mDesiredCursorAnimate = true;
 
     // Cursors assets used in various situations.
     Cursor* mDefaultCursor = nullptr;
     Cursor* mHighlightRedCursor = nullptr;
     Cursor* mHighlightBlueCursor = nullptr;
     Cursor* mWaitCursor = nullptr;
+
+    void SetDesiredCursor(Cursor* cursor,int priority, bool animate = true);
 };
 
 extern CursorManager gCursorManager;

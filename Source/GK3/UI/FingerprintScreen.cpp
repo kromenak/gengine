@@ -493,19 +493,19 @@ void FingerprintScreen::OnUpdate(float deltaTime)
         break;
 
     case CursorState::Brush:
-        gCursorManager.UseCustomCursor(mBrushCursor);
+        gCursorManager.UseCustomCursor(mBrushCursor, 10);
         break;
 
     case CursorState::DustedBrush:
-        gCursorManager.UseCustomCursor(mDustedBrushCursor);
+        gCursorManager.UseCustomCursor(mDustedBrushCursor, 10);
         break;
 
     case CursorState::Tape:
-        gCursorManager.UseCustomCursor(mTapeCursor);
+        gCursorManager.UseCustomCursor(mTapeCursor, 10);
         break;
 
     case CursorState::TapeWithPrint:
-        gCursorManager.UseCustomCursor(mUsedTapeCursor);
+        gCursorManager.UseCustomCursor(mUsedTapeCursor, 10);
         break;
     }
 

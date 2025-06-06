@@ -86,10 +86,7 @@ void UIDrag::UpdateCursor()
 {
     if(mUseHighlightCursor && (mDragging || mPointerHovering))
     {
-        if(gCursorManager.IsDefaultCursor())
-        {
-            gCursorManager.UseHighlightCursor();
-        }
+        gCursorManager.UseHighlightCursor();
     }
     else
     {

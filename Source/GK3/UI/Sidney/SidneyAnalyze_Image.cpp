@@ -543,15 +543,15 @@ void SidneyAnalyze::AnalyzeImage_PlayVideo(const std::string& videoName, UIImage
     // Make sure image is enabled.
     image->SetEnabled(true);
 
-    // Show loading cursor during movie.
-    gCursorManager.UseLoadCursor();
+    // Play a manual action during the movie.
+    gActionManager.StartManualAction();
 
     // Play video on video image. The video uses a green chromakey background.
     Color32 transparentColor(3, 251, 3);
     gVideoPlayer.Play(videoName, &transparentColor, image, [image, finalTextureName, finishCallback](){
 
-        // Back to normal cursor.
-        gCursorManager.UseDefaultCursor();
+        // Manual action is done.
+        gActionManager.FinishManualAction();
 
         // Set a final texture if specified.
         Texture* finalTexture = gAssetManager.LoadTexture(finalTextureName, AssetScope::Scene);

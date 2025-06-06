@@ -19,7 +19,7 @@ void CursorManager::Init()
 void CursorManager::Update(float deltaTime)
 {
     //TODO: Don't really like the coupling to Loader/ActionManager here.
-    // If a sheep is running, show "wait" cursor. If not, go back to normal cursor.
+    // If loading or playing an action, the load/wait cursors are higher priority than anything else.
     if(Loader::IsLoading())
     {
         UseLoadCursor();
@@ -30,10 +30,26 @@ void CursorManager::Update(float deltaTime)
     }
     else
     {
-        if(mActiveCursor == mWaitCursor)
+        if(mWaitCursor == mActiveCursor)
         {
             UseDefaultCursor();
         }
+    }
+
+    // If there's a desired cursor, use it.
+    if(mDesiredCursor != nullptr)
+    {
+        // If the desired cursor differs from the active cursor (or animation mode is different), change active cursor.
+        if(mDesiredCursor != mActiveCursor || mDesiredCursorAnimate != mActiveCursor->IsAnimating())
+        {
+            mActiveCursor = mDesiredCursor;
+            mActiveCursor->Activate(mDesiredCursorAnimate);
+        }
+
+        // Reset desired cursor tracking vars.
+        mDesiredCursor = nullptr;
+        mDesiredCursorPriority = -1;
+        mDesiredCursorAnimate = true;
     }
 
     // Update active cursor.
@@ -45,23 +61,16 @@ void CursorManager::Update(float deltaTime)
 
 void CursorManager::UseDefaultCursor()
 {
-    if(mDefaultCursor != nullptr && mActiveCursor != mDefaultCursor)
-    {
-        mActiveCursor = mDefaultCursor;
-        mActiveCursor->Activate();
-    }
+    // The default cursor has low priority - only use it if nothing of higher priority is specified.
+    SetDesiredCursor(mDefaultCursor, 0);
 }
 
-void CursorManager::UseRedHighlightCursor()
+void CursorManager::UseRedHighlightCursor(int priority)
 {
-    if(mHighlightRedCursor != nullptr && mActiveCursor != mHighlightRedCursor)
-    {
-        mActiveCursor = mHighlightRedCursor;
-        mActiveCursor->Activate();
-    }
+    SetDesiredCursor(mHighlightRedCursor, priority);
 }
 
-void CursorManager::UseHighlightCursor()
+void CursorManager::UseHighlightCursor(int priority)
 {
     // To help visualize interactable objects that are very close to one another,
     // the highlight cursor toggles from red to blue if activated when highlight is already active.
@@ -70,38 +79,34 @@ void CursorManager::UseHighlightCursor()
     {
         useCursor = mHighlightBlueCursor;
     }
-
-    if(useCursor != nullptr)
-    {
-        mActiveCursor = useCursor;
-        mActiveCursor->Activate();
-    }
+    SetDesiredCursor(useCursor, priority);
 }
 
 void CursorManager::UseWaitCursor()
 {
     // "Wait" cursor is just the "loading" cursor, but it doesn't animate.
-    if(mWaitCursor != nullptr)
-    {
-        mActiveCursor = mWaitCursor;
-        mActiveCursor->Activate(false);
-    }
+    // It always has a very high priority.
+    SetDesiredCursor(mWaitCursor, 100, false);
 }
 
 void CursorManager::UseLoadCursor()
 {
-    if(mWaitCursor != nullptr && mActiveCursor != mWaitCursor)
-    {
-        mActiveCursor = mWaitCursor;
-        mActiveCursor->Activate();
-    }
+    // Like the wait cursor, always has a high priority.
+    SetDesiredCursor(mWaitCursor, 100);
 }
 
-void CursorManager::UseCustomCursor(Cursor* cursor)
+void CursorManager::UseCustomCursor(Cursor* cursor, int priority)
 {
-    if(cursor != nullptr && mActiveCursor != cursor)
+    SetDesiredCursor(cursor, priority);
+}
+
+void CursorManager::SetDesiredCursor(Cursor* cursor, int priority, bool animate)
+{
+    // Switch to the passed in cursor if the associated priority is greater or equal to anything we've yet been asked to use.
+    if(priority >= mDesiredCursorPriority)
     {
-        mActiveCursor = cursor;
-        mActiveCursor->Activate();
+        mDesiredCursor = cursor;
+        mDesiredCursorPriority = priority;
+        mDesiredCursorAnimate = animate;
     }
 }

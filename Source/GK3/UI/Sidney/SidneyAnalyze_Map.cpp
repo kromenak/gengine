@@ -1425,15 +1425,15 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
 
         if(resizeShapeCursor || mMap.zoomedOutClickAction == MapState::ClickAction::ResizeShape)
         {
-            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGRESIZED1.CUR"));
+            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGRESIZED1.CUR"), 1);
         }
         else if(moveShapeCursor || mMap.zoomedOutClickAction == MapState::ClickAction::MoveShape)
         {
-            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGMOVE.CUR"));
+            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_DRAGMOVE.CUR"), 1);
         }
         else if(rotateShapeCursor || mMap.zoomedOutClickAction == MapState::ClickAction::RotateShape)
         {
-            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_TURNRIGHT.CUR"));
+            gCursorManager.UseCustomCursor(gAssetManager.LoadCursor("C_TURNRIGHT.CUR"), 1);
         }
         else
         {

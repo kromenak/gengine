@@ -504,7 +504,7 @@ void Bridge::UpdateInteract()
     {
         if(hoveredTileIndex == 0)
         {
-            gCursorManager.UseRedHighlightCursor();
+            gCursorManager.UseRedHighlightCursor(1);
             if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
             {
                 JumpToTile(hoveredTileIndex);
@@ -517,7 +517,7 @@ void Bridge::UpdateInteract()
         // If it's a bad choice though, he might not make the jump...
         if(hoveredTileIndex >= 0 && hoveredTileIndex != mGabeTileIndex)
         {
-            gCursorManager.UseRedHighlightCursor();
+            gCursorManager.UseRedHighlightCursor(1);
             if(gInputManager.IsMouseButtonTrailingEdge(InputManager::MouseButton::Left))
             {
                 JumpToTile(hoveredTileIndex);

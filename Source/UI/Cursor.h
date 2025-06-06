@@ -22,6 +22,8 @@ public:
     void Activate(bool animate = true);
     
     void Update(float deltaTime);
+
+    bool IsAnimating() const { return mAnimate; }
     
 private:
     // The frames making up the cursor.
