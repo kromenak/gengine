@@ -129,6 +129,20 @@ void UINineSlice::SetTexturesAndColors(const UINineSliceParams& params, bool res
     mTopImage->SetTexture(params.topTexture, resizeTextures);
     mTopImage->SetColor(params.topColor);
 
+    if(params.borderWidth > 0 && resizeTextures)
+    {
+        mTopImage->GetRectTransform()->SetSizeDeltaY(params.borderWidth);
+        mBottomImage->GetRectTransform()->SetSizeDeltaY(params.borderWidth);
+
+        mLeftImage->GetRectTransform()->SetSizeDeltaX(params.borderWidth);
+        mRightImage->GetRectTransform()->SetSizeDeltaX(params.borderWidth);
+
+        mTopLeftImage->GetRectTransform()->SetSizeDelta(params.borderWidth, params.borderWidth);
+        mTopRightImage->GetRectTransform()->SetSizeDelta(params.borderWidth, params.borderWidth);
+        mBottomRightImage->GetRectTransform()->SetSizeDelta(params.borderWidth, params.borderWidth);
+        mBottomLeftImage->GetRectTransform()->SetSizeDelta(params.borderWidth, params.borderWidth);
+    }
+
     // When setting the textures, we resize the RectTransform to match the texture size.
     // But for stretched RectTransforms, this sets the stretched axis to an undesirable value. Reset to zero to fix. 
     mLeftImage->GetRectTransform()->SetSizeDeltaY(0.0f);

@@ -43,6 +43,8 @@ struct UINineSliceParams
 
     Texture* topTexture = nullptr;
     Color32  topColor = Color32::White;
+
+    int borderWidth = 0;
 };
 
 class UINineSlice : public UIWidget
