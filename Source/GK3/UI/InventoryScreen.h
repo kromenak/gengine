@@ -15,6 +15,7 @@
 
 class UIButton;
 class UIImage;
+class UIScrollbar;
 
 class InventoryScreen : public Actor
 {
@@ -39,6 +40,9 @@ private:
     // The exit button on this screen.
     UIButton* mExitButton = nullptr;
 
+    // Scrollbar on the right side of the screen; allows scrolling when too many items for one screen.
+    UIScrollbar* mScrollbar = nullptr;
+
 	// Created item buttons - can reuse on repeat visits.
 	std::vector<UIButton*> mItemButtons;
 	
@@ -48,6 +52,17 @@ private:
 	// Actor and inventory we are looking at.
 	std::string mCurrentActorName;
     const std::set<std::string>* mCurrentInventory = nullptr;
+
+    // The offset for which row of inventory items is at the top of the inventory screen.
+    // When there are too many items to fit on one screen, you can "scroll down" to see off-screen rows.
+    int mScrollRowOffset = 0;
+
+    // The maximum scroll row offset that's allowed. At this offset, you're seeing the last page of inventory items.
+    int mMaxScrollRowOffset = 0;
 	
-	void OnItemClicked(UIButton* button, std::string itemName);
+	void OnItemClicked(UIButton* button, const std::string& itemName);
+
+    void OnScrollbarUpArrowPressed();
+    void OnScrollbarDownArrowPressed();
+    void OnScrollbarValueChanged(float value);
 };

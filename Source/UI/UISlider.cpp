@@ -71,7 +71,7 @@ void UISlider::SetValue(float value)
     // Save old value, to see if it changed.
     float oldValue = mValue;
 
-    // Value must be 0 to 1.   
+    // Value must be 0 to 1.
     mValue = Math::Clamp(value, 0.0f, 1.0f);
 
     // Issue callback if value changed.
@@ -83,7 +83,7 @@ void UISlider::SetValue(float value)
 
 void UISlider::SetValueSilently(float value)
 {
-    // Value must be 0 to 1.   
+    // Value must be 0 to 1.
     mValue = Math::Clamp(value, 0.0f, 1.0f);
 }
 
@@ -91,8 +91,8 @@ void UISlider::OnUpdate(float deltaTime)
 {
     if(mHandle != nullptr)
     {
-        // If handle is being dragged, the value is driven by slider position.
-        // If handle is not dragged, slider position is driven by value.
+        // If handle is being dragged, the value is driven by handle position.
+        // If handle is not dragged, handle position is driven by value.
         if(mHandle->IsDragging())
         {
             SetValueFromHandle();

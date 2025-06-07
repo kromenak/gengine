@@ -25,12 +25,10 @@ class UISlider : public UIWidget
 public:
     UISlider(Actor* owner);
 
-    void Render() override { }
-
     void SetOrientation(SliderOrientation orientation);
     void SetHandleActor(Actor* handle);
 
-    void SetValueChangeCallback(std::function<void(float)> callback) { mValueChangeCallback = callback; }
+    void SetValueChangeCallback(const std::function<void(float)>& callback) { mValueChangeCallback = callback; }
 
     void SetValue(float value);
     void SetValueSilently(float value);
@@ -47,10 +45,10 @@ private:
     UIDrag* mHandle = nullptr;
 
     // The *normalized* value of the slider.
-    float mValue = 1.0f;
+    float mValue = 0.0f;
 
     // Called when the value of the slider changes.
-    std::function<void(float)> mValueChangeCallback;
+    std::function<void(float)> mValueChangeCallback = nullptr;
 
     void SetHandleFromValue();
     void SetValueFromHandle();
