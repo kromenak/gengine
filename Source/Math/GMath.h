@@ -72,7 +72,8 @@ namespace Math
 
     inline float Asin(float ratio)
     {
-        return ::asinf(ratio);
+        // See comment in acos below.
+        return ::asinf(std::fmin(1.0f, std::fmax(ratio, -1.0f)));
     }
 
     inline float Cos(float radians)
@@ -82,7 +83,10 @@ namespace Math
 
     inline float Acos(float ratio)
     {
-        return ::acosf(ratio);
+        // Even if passed in ratio should be in valid range (e.g. dot product of two normalized vectors),
+        // There's a chance it'll be *just* outside that range, due to floating point imprecision.
+        // It's safer to clamp the range here than to allow NaN to propagate in the program!
+        return ::acosf(std::fmin(1.0f, std::fmax(ratio, -1.0f)));
     }
 
     inline float Tan(float radians)
