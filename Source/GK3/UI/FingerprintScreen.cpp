@@ -4,6 +4,7 @@
 #include "AssetManager.h"
 #include "CursorManager.h"
 #include "GameProgress.h"
+#include "GK3UI.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
 #include "Scene.h"
@@ -17,13 +18,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     mLayer("FingerprintLayer")
 {
     // Add canvas to render UI elements.
-	AddComponent<UICanvas>(7);
-	
-	// Add black background image that blocks out the scene entirely.
-    UIImage* background = AddComponent<UIImage>();
-    background->SetTexture(&Texture::Black);
-    background->GetRectTransform()->SetSizeDelta(0.0f, 0.0f);
-    background->GetRectTransform()->SetAnchor(AnchorPreset::CenterStretch);
+    UI::AddCanvas(this, 7, Color32::Black);
 
     // The background has a button so we can capture clicks on it.
     UIButton* backgroundButton = AddComponent<UIButton>();
@@ -34,8 +29,8 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
     // Add base background image, which shows the fingerprint box up-close.
     UIImage* baseImage = UI::CreateWidgetActor<UIImage>("Background", this);
     baseImage->SetTexture(gAssetManager.LoadTexture("FP_BASE.BMP"), true);
-	
-	// Add exit button to bottom-left corner of screen.
+    
+    // Add exit button to bottom-left corner of screen.
     {
         UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", baseImage);
         exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
@@ -367,7 +362,7 @@ FingerprintScreen::FingerprintScreen() : Actor("FingerprintScreen", TransformTyp
         object.fingerprints.back().scoreName = "e_303p_wod_fingerprint_kit_water_bottle";
     }
     
-	// Hide by default.
+    // Hide by default.
     SetActive(false);
 }
 
@@ -466,14 +461,14 @@ void FingerprintScreen::Show(const std::string& nounName)
     mDistanceDusted = 0.0f;
     mTapePrintIndex = -1;
 
-	// Actually show the stuff!
-	SetActive(true);
+    // Actually show the stuff!
+    SetActive(true);
 }
 
 void FingerprintScreen::Hide()
 {
     if(!IsActive()) { return; }
-	SetActive(false);
+    SetActive(false);
     gLayerManager.PopLayer(&mLayer);
 }
 
@@ -561,7 +556,7 @@ void FingerprintScreen::OnUpdate(float deltaTime)
     }
 
     // Check for exit button shortcut.
-    if(gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE) && !gActionManager.IsActionPlaying() && !gActionManager.IsSkippingCurrentAction())
+    if(gGK3UI.CanExitScreen(mLayer) && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
     {
         mExitButton->AnimatePress();
     }

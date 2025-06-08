@@ -1,5 +1,6 @@
 #include "GK3UI.h"
 
+#include "ActionManager.h"
 #include "BinocsOverlay.h"
 #include "CaptionsOverlay.h"
 #include "DeathScreen.h"
@@ -288,4 +289,11 @@ bool GK3UI::IsAnyKeyPressedOutsideTextInputAndConsole()
     // 2) The ~ (GRAVE) key opens/closes the console, so it is ignored.
     //TODO: This technically also cancels any key pressed WHILE ~ is held down. Close enough, but can be improved!
     return !gInputManager.IsTextInput() && gInputManager.IsAnyKeyLeadingEdge() && !gInputManager.IsKeyPressed(SDL_SCANCODE_GRAVE);
+}
+
+bool GK3UI::CanExitScreen(const Layer& layer)
+{
+    return gLayerManager.IsTopLayer(&layer) &&          // must be on the given layer
+        !gActionManager.IsActionPlaying() &&            // must not be playing an action
+        !gActionManager.IsSkippingCurrentAction();      // must not be skipping an action
 }

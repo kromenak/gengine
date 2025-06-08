@@ -5,12 +5,11 @@
 #include "AssetManager.h"
 #include "GameProgress.h"
 #include "GEngine.h"
+#include "GK3UI.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
 #include "Texture.h"
-#include "UICanvas.h"
 #include "UIButton.h"
-#include "UIImage.h"
 #include "UIUtil.h"
 
 InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen", TransformType::RectTransform),
@@ -150,7 +149,7 @@ void InventoryInspectScreen::TurnLSRPageRight()
 void InventoryInspectScreen::OnUpdate(float deltaTime)
 {
     // Escape key is a shortcut to exit. But be sure this screen's on the top of all others and no action is playing.
-    if(gLayerManager.IsTopLayer(&mLayer) && !gActionManager.IsActionPlaying() && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    if(gGK3UI.CanExitScreen(mLayer) && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
     {
         mExitButton->AnimatePress();
     }

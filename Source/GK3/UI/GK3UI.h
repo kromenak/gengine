@@ -13,6 +13,7 @@ class DeathScreen;
 class DrivingScreen;
 class FingerprintScreen;
 class GPSOverlay;
+class Layer;
 class ProgressBar;
 class SaveLoadScreen;
 class SceneTransitioner;
@@ -60,6 +61,7 @@ public:
     void HideGPSOverlay();
 
     bool IsAnyKeyPressedOutsideTextInputAndConsole();
+    bool CanExitScreen(const Layer& layer);
 
 private:
     TitleScreen* mTitleScreen = nullptr;

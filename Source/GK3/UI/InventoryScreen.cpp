@@ -3,6 +3,7 @@
 #include "ActionBar.h"
 #include "ActionManager.h"
 #include "AssetManager.h"
+#include "GK3UI.h"
 #include "InputManager.h"
 #include "InventoryManager.h"
 #include "RectTransform.h"
@@ -220,8 +221,7 @@ void InventoryScreen::RefreshLayout()
 
     // After iterating all inventory items, we can calculate how many rows of items ARE NOT on screen.
     // If there are any, then we must show the scrollbar!
-    int rowsNotOnScreen =
-        firstOnScreenRowIndex + (rowIndex - lastOnScreenRowIndex);
+    int rowsNotOnScreen = firstOnScreenRowIndex + (rowIndex - lastOnScreenRowIndex);
     mScrollbar->GetOwner()->SetActive(rowsNotOnScreen > 0);
 
     // Remember how many rows aren't on screen, as that's the maximum row offset we can use for scrolling.
@@ -236,16 +236,14 @@ void InventoryScreen::RefreshLayout()
         mScrollbar->SetHandleNormalizedSize(normalizedScrollbarHandleSize);
 
         // Make sure scrollbar is in the correct spot.
-        mScrollbar->SetValueSilently(static_cast<float>(mScrollRowOffset) /
-                                     mMaxScrollRowOffset);
+        mScrollbar->SetValueSilently(static_cast<float>(mScrollRowOffset) / mMaxScrollRowOffset);
     }
 }
 
 void InventoryScreen::OnUpdate(float deltaTime)
 {
     // Escape key is a shortcut to exit. But be sure this screen's on the top of all others and no action is playing.
-    if(gLayerManager.IsTopLayer(&mLayer) && !gActionManager.IsActionPlaying() &&
-        gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
+    if(gGK3UI.CanExitScreen(mLayer) && gInputManager.IsKeyLeadingEdge(SDL_SCANCODE_ESCAPE))
     {
         mExitButton->AnimatePress();
     }
@@ -253,8 +251,7 @@ void InventoryScreen::OnUpdate(float deltaTime)
     // If scrollbar is active, and not being dragged, snap the scrollbar to the value corresponding to the current row offset.
     if(mScrollbar->IsActiveAndEnabled() && !mScrollbar->IsHandleBeingDragged())
     {
-        mScrollbar->SetValueSilently(static_cast<float>(mScrollRowOffset) /
-                                     mMaxScrollRowOffset);
+        mScrollbar->SetValueSilently(static_cast<float>(mScrollRowOffset) / mMaxScrollRowOffset);
     }
 }
 
