@@ -27,8 +27,7 @@ StatusOverlay::StatusOverlay() : Actor("Status", TransformType::RectTransform)
 
     // Make tall enough to fit the text.
     // Reduce horizontal space a bit to give some padding on left/right edges of screen.
-    mStatusLabel->GetRectTransform()->SetSizeDeltaY(20.0f);
-    mStatusLabel->GetRectTransform()->SetSizeDeltaX(-8.0f);
+    mStatusLabel->GetRectTransform()->SetSizeDelta(-8.0f, 20.0f);
 
     // Move down a little bit to give padding on top.
     mStatusLabel->GetRectTransform()->SetAnchoredPosition(0.0f, -6.0f);
@@ -47,10 +46,17 @@ void StatusOverlay::Refresh()
                                                gGameProgress.GetScore(),
                                                gGameProgress.GetMaxScore());
     
-    std::string statusText = StringUtil::Format("%s, %s, %s",
-                                                locationName.c_str(),
-                                                timeblockName.c_str(),
-                                                scoreText.c_str());
+    // Set status label using retrieved location, timeblock, and score data.
+    // In one case (map), there is no location name, so exclude the location name if it's invalid!
+    std::string statusText;
+    if(StringUtil::StartsWithIgnoreCase(locationName, "loc_"))
+    {
+        statusText = StringUtil::Format("%s, %s", timeblockName.c_str(), scoreText.c_str());
+    }
+    else
+    {
+        statusText = StringUtil::Format("%s, %s, %s", locationName.c_str(), timeblockName.c_str(), scoreText.c_str());
+    }
     mStatusLabel->SetText(statusText);
     
     // Refreshing the text should force the overlay to show.
