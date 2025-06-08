@@ -1,5 +1,6 @@
 #include "LocationManager.h"
 
+#include "ActionManager.h"
 #include "AssetManager.h"
 #include "GameProgress.h"
 #include "GK3UI.h"
@@ -338,6 +339,9 @@ void LocationManager::ChangeLocationInternal(const std::string& location, std::f
     {
         gGK3UI.ShowSceneTransitioner();
     }
+
+    // If the action bar is up, it should close on a scene change.
+    gActionManager.HideActionBar();
 
     // Set new location.
     // This is important to do BEFORE checking for timeblock completion, as that logic looks for locations sometimes.
