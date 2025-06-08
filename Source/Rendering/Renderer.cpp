@@ -1,8 +1,5 @@
 #include "Renderer.h"
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -14,7 +11,6 @@
 #include "GAPI.h"
 #include "Matrix4.h"
 #include "MeshRenderer.h"
-#include "Model.h"
 #include "Paths.h"
 #include "Profiler.h"
 #include "RectTransform.h"
@@ -26,6 +22,7 @@
 #include "Skybox.h"
 #include "Texture.h"
 #include "UICanvas.h"
+#include "UIWidget.h"
 
 #include "OpenGL/GAPI_OpenGL.h"
 
@@ -457,11 +454,21 @@ void Renderer::ChangeResolution(const Window::Resolution& resolution)
     GAPI::Get()->SetViewport(0, 0, resolution.width, resolution.height);
 
     // Because some RectTransforms may rely on the window size, we need to dirty all root RectTransforms in the scene.
+    std::vector<UIWidget*> widgets;
     for(auto& actor : gSceneManager.GetActors())
     {
         if(actor->GetTransform()->GetParent() == nullptr && actor->GetTransform()->IsA<RectTransform>())
         {
             actor->GetTransform()->SetDirty();
+            
+            // Likewise, some UI widgets may rely on window size for positioning/presentation.
+            // For example, a UILabel that is in a RectTransform that stretches to the window size.
+            // Notify UI widgets that the window size has changed, so they should recalculate too.
+            actor->GetComponents<UIWidget>(widgets, true);
+            for(UIWidget* widget : widgets)
+            {
+                widget->SetDirty();
+            }
         }
     }
 }
