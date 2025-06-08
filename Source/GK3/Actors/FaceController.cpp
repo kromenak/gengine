@@ -23,206 +23,206 @@ TYPEINFO_INIT(FaceController, Component, 6)
 
 FaceController::FaceController(Actor* owner) : Component(owner)
 {
-	mDownsampledLeftEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black);
-	mDownsampledRightEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black);
+    mDownsampledLeftEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black);
+    mDownsampledRightEyeTexture = new Texture(kDownSampledEyeWidth, kDownSampledEyeHeight, Color32::Black);
 }
 
 FaceController::~FaceController()
 {
-	delete mDownsampledLeftEyeTexture;
-	delete mDownsampledRightEyeTexture;
+    delete mDownsampledLeftEyeTexture;
+    delete mDownsampledRightEyeTexture;
 }
 
 void FaceController::SetCharacterConfig(const CharacterConfig& characterConfig)
 {
-	// Save character config.
-	mCharacterConfig = &characterConfig;
+    // Save character config.
+    mCharacterConfig = &characterConfig;
 
-	// Save reference to face texture.
-	mFaceTexture = mCharacterConfig->faceConfig->faceTexture;
-	
-	// Grab references to default mouth/eyelids/forehead textures.
+    // Save reference to face texture.
+    mFaceTexture = mCharacterConfig->faceConfig->faceTexture;
+    
+    // Grab references to default mouth/eyelids/forehead textures.
     mDefaultMouthTexture = mCharacterConfig->faceConfig->mouthTexture;
-	mDefaultEyelidsTexture = mCharacterConfig->faceConfig->eyelidsTexture;
-	mDefaultForeheadTexture = mCharacterConfig->faceConfig->foreheadTexture;
-	mDefaultLeftEyeTexture = mCharacterConfig->faceConfig->leftEyeTexture;
-	mDefaultRightEyeTexture = mCharacterConfig->faceConfig->rightEyeTexture;
-	
-	// Currents are just the defaults...uhh, by default.
-	mCurrentMouthTexture = mDefaultMouthTexture;
-	mCurrentEyelidsTexture = mDefaultEyelidsTexture;
-	mCurrentForeheadTexture = mDefaultForeheadTexture;
-	mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
-	mCurrentRightEyeTexture = mDefaultRightEyeTexture;
-	
-	// Roll a random blink time in the near future.
-	RollBlinkTimer();
+    mDefaultEyelidsTexture = mCharacterConfig->faceConfig->eyelidsTexture;
+    mDefaultForeheadTexture = mCharacterConfig->faceConfig->foreheadTexture;
+    mDefaultLeftEyeTexture = mCharacterConfig->faceConfig->leftEyeTexture;
+    mDefaultRightEyeTexture = mCharacterConfig->faceConfig->rightEyeTexture;
+    
+    // Currents are just the defaults...uhh, by default.
+    mCurrentMouthTexture = mDefaultMouthTexture;
+    mCurrentEyelidsTexture = mDefaultEyelidsTexture;
+    mCurrentForeheadTexture = mDefaultForeheadTexture;
+    mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
+    mCurrentRightEyeTexture = mDefaultRightEyeTexture;
+    
+    // Roll a random blink time in the near future.
+    RollBlinkTimer();
 }
 
 void FaceController::Set(FaceElement element, Texture* texture)
 {
-	switch(element)
-	{
-		case FaceElement::Mouth:
-			SetMouth(texture);
-			break;
-		case FaceElement::Eyelids:
-			SetEyelids(texture);
-			break;
-		case FaceElement::Forehead:
-			SetForehead(texture);
-			break;
-	}
+    switch(element)
+    {
+        case FaceElement::Mouth:
+            SetMouth(texture);
+            break;
+        case FaceElement::Eyelids:
+            SetEyelids(texture);
+            break;
+        case FaceElement::Forehead:
+            SetForehead(texture);
+            break;
+    }
 }
 
 void FaceController::Clear(FaceElement element)
 {
-	switch(element)
-	{
-		case FaceElement::Mouth:
-			ClearMouth();
-			break;
-		case FaceElement::Eyelids:
-			ClearEyelids();
-			break;
-		case FaceElement::Forehead:
-			ClearForehead();
-			break;
-	}
+    switch(element)
+    {
+        case FaceElement::Mouth:
+            ClearMouth();
+            break;
+        case FaceElement::Eyelids:
+            ClearEyelids();
+            break;
+        case FaceElement::Forehead:
+            ClearForehead();
+            break;
+    }
 }
 
 void FaceController::SetMouth(Texture* texture)
 {
-	mCurrentMouthTexture = texture;
-	UpdateFaceTexture();
+    mCurrentMouthTexture = texture;
+    UpdateFaceTexture();
 }
 
 void FaceController::ClearMouth()
 {
-	mCurrentMouthTexture = mDefaultMouthTexture;
-	UpdateFaceTexture();
+    mCurrentMouthTexture = mDefaultMouthTexture;
+    UpdateFaceTexture();
 }
 
 void FaceController::SetEyelids(Texture* texture)
 {
-	mCurrentEyelidsTexture = texture;
-	UpdateFaceTexture();
+    mCurrentEyelidsTexture = texture;
+    UpdateFaceTexture();
 }
 
 void FaceController::ClearEyelids()
 {
-	mCurrentEyelidsTexture = mDefaultEyelidsTexture;
-	UpdateFaceTexture();
+    mCurrentEyelidsTexture = mDefaultEyelidsTexture;
+    UpdateFaceTexture();
 }
 
 void FaceController::SetForehead(Texture* texture)
 {
-	mCurrentForeheadTexture = texture;
-	UpdateFaceTexture();
+    mCurrentForeheadTexture = texture;
+    UpdateFaceTexture();
 }
 
 void FaceController::ClearForehead()
 {
-	mCurrentForeheadTexture = mDefaultForeheadTexture;
-	UpdateFaceTexture();
+    mCurrentForeheadTexture = mDefaultForeheadTexture;
+    UpdateFaceTexture();
 }
 
 void FaceController::SetEyes(Texture* texture)
 {
-	mCurrentLeftEyeTexture = texture;
-	mCurrentRightEyeTexture = texture;
-	UpdateFaceTexture();
+    mCurrentLeftEyeTexture = texture;
+    mCurrentRightEyeTexture = texture;
+    UpdateFaceTexture();
 }
 
 void FaceController::ClearEyes()
 {
-	mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
-	mCurrentRightEyeTexture = mDefaultRightEyeTexture;
-	UpdateFaceTexture();
+    mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
+    mCurrentRightEyeTexture = mDefaultRightEyeTexture;
+    UpdateFaceTexture();
 }
 
 void FaceController::SetEye(EyeType eyeType, Texture* texture)
 {
-	if(eyeType == EyeType::Left)
-	{
-		mCurrentLeftEyeTexture = texture;
-	}
-	else
-	{
-		mCurrentRightEyeTexture = texture;
-	}
-	UpdateFaceTexture();
+    if(eyeType == EyeType::Left)
+    {
+        mCurrentLeftEyeTexture = texture;
+    }
+    else
+    {
+        mCurrentRightEyeTexture = texture;
+    }
+    UpdateFaceTexture();
 }
 
 void FaceController::ClearEye(EyeType eyeType)
 {
-	if(eyeType == EyeType::Left)
-	{
-		mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
-	}
-	else
-	{
-		mCurrentRightEyeTexture = mDefaultRightEyeTexture;
-	}
-	UpdateFaceTexture();
+    if(eyeType == EyeType::Left)
+    {
+        mCurrentLeftEyeTexture = mDefaultLeftEyeTexture;
+    }
+    else
+    {
+        mCurrentRightEyeTexture = mDefaultRightEyeTexture;
+    }
+    UpdateFaceTexture();
 }
 
 void FaceController::Blink()
 {
-	Animation* blinkAnim = nullptr;
-	
-	// We're really gonna need a config for this.
-	if(mCharacterConfig != nullptr)
-	{
-		// Get a random number from 0-100.
-		// Each blink anim has a probability between 0 and 100.
-		// So, we use this to decide which one to do.
-		int rand = Random::Range(0, 101);
-		if(rand < mCharacterConfig->faceConfig->blinkAnim1Probability)
-		{
-			blinkAnim = mCharacterConfig->faceConfig->blinkAnim1;
-		}
-		else
-		{
-			blinkAnim = mCharacterConfig->faceConfig->blinkAnim2;
-		}
-	}
-	
-	// Play it if you got it!
-	gSceneManager.GetScene()->GetAnimator()->Start(blinkAnim);
+    Animation* blinkAnim = nullptr;
+    
+    // We're really gonna need a config for this.
+    if(mCharacterConfig != nullptr)
+    {
+        // Get a random number from 0-100.
+        // Each blink anim has a probability between 0 and 100.
+        // So, we use this to decide which one to do.
+        int rand = Random::Range(0, 101);
+        if(rand < mCharacterConfig->faceConfig->blinkAnim1Probability)
+        {
+            blinkAnim = mCharacterConfig->faceConfig->blinkAnim1;
+        }
+        else
+        {
+            blinkAnim = mCharacterConfig->faceConfig->blinkAnim2;
+        }
+    }
+    
+    // Play it if you got it!
+    gSceneManager.GetScene()->GetAnimator()->Start(blinkAnim);
 }
 
 void FaceController::Blink(const std::string& animName)
 {
-	Animation* blinkAnim = mCharacterConfig->faceConfig->blinkAnim1;
-	if(!StringUtil::EqualsIgnoreCase(blinkAnim->GetNameNoExtension(), animName))
-	{
-		blinkAnim = mCharacterConfig->faceConfig->blinkAnim2;
-		if(!StringUtil::EqualsIgnoreCase(blinkAnim->GetNameNoExtension(), animName))
-		{
-			//TODO: This seems to be an AssetManager-level warning?
-			//TODO: So, maybe OG game finds and applies blink anim indescriminantly (which seems not good, tbh).
-			gReportManager.Log("Error", "gk3 animation '" + animName + ".anm' not found.");
-			//TODO: This also causes a warning OS dialog to appear (in debug, I guess)
-			//TODO: If a non-blink anim is specified, you get a cryptic error about "attempt to apply multiple actions"
-			return;
-		}
-	}
-	gSceneManager.GetScene()->GetAnimator()->Start(blinkAnim);
+    Animation* blinkAnim = mCharacterConfig->faceConfig->blinkAnim1;
+    if(!StringUtil::EqualsIgnoreCase(blinkAnim->GetNameNoExtension(), animName))
+    {
+        blinkAnim = mCharacterConfig->faceConfig->blinkAnim2;
+        if(!StringUtil::EqualsIgnoreCase(blinkAnim->GetNameNoExtension(), animName))
+        {
+            //TODO: This seems to be an AssetManager-level warning?
+            //TODO: So, maybe OG game finds and applies blink anim indescriminantly (which seems not good, tbh).
+            gReportManager.Log("Error", "gk3 animation '" + animName + ".anm' not found.");
+            //TODO: This also causes a warning OS dialog to appear (in debug, I guess)
+            //TODO: If a non-blink anim is specified, you get a cryptic error about "attempt to apply multiple actions"
+            return;
+        }
+    }
+    gSceneManager.GetScene()->GetAnimator()->Start(blinkAnim);
 }
 
 void FaceController::SetEyeJitterEnabled(bool enabled)
 {
-	mEyeJitterEnabled = enabled;
-	if(mEyeJitterEnabled)
-	{
-		RollEyeJitterTimer();
-	}
+    mEyeJitterEnabled = enabled;
+    if(mEyeJitterEnabled)
+    {
+        RollEyeJitterTimer();
+    }
 }
 
 void FaceController::EyeJitter()
 {
-	// The eye jitter is defined in sub-pixels.
+    // The eye jitter is defined in sub-pixels.
     // Since we downsample to 25% size, this means each subpixel is 1/4th of a pixel.
     float maxX = mCharacterConfig->faceConfig->maxEyeJitterDistance.x / 4.0f;
     float maxY = mCharacterConfig->faceConfig->maxEyeJitterDistance.y / 4.0f;
@@ -230,146 +230,146 @@ void FaceController::EyeJitter()
                                Random::Range(-maxY, maxY));
 
     // Changing the eye jitter causes the face to change - update it.
-	UpdateFaceTexture();
+    UpdateFaceTexture();
 }
 
 void FaceController::DoExpression(const std::string& expression)
 {
-	// Expressions are named as combination of identifier and expression string.
-	// E.g. Gabriel Frown becomes GABFROWN.ANM.
-	std::string animName = mCharacterConfig->faceConfig->identifier + expression;
-	Animation* animation = gAssetManager.LoadAnimation(animName, AssetScope::Scene);
-	if(animation != nullptr)
-	{
-		gSceneManager.GetScene()->GetAnimator()->Start(animation);
-	}
-	else
-	{
-		//TODO: This seems to be an AssetManager-level warning?
-		//TODO: So, maybe OG game finds and applies expression anim indescriminantly (which seems not good, tbh).
-		gReportManager.Log("Error", "gk3 animation '" + animName + ".anm' not found.");
-	}
+    // Expressions are named as combination of identifier and expression string.
+    // E.g. Gabriel Frown becomes GABFROWN.ANM.
+    std::string animName = mCharacterConfig->faceConfig->identifier + expression;
+    Animation* animation = gAssetManager.LoadAnimation(animName, AssetScope::Scene);
+    if(animation != nullptr)
+    {
+        gSceneManager.GetScene()->GetAnimator()->Start(animation);
+    }
+    else
+    {
+        //TODO: This seems to be an AssetManager-level warning?
+        //TODO: So, maybe OG game finds and applies expression anim indescriminantly (which seems not good, tbh).
+        gReportManager.Log("Error", "gk3 animation '" + animName + ".anm' not found.");
+    }
 }
 
 void FaceController::SetMood(const std::string& mood)
 {
-	std::string moodOnName = mCharacterConfig->faceConfig->identifier + mood + "on";
-	std::string moodOffName = mCharacterConfig->faceConfig->identifier + mood + "off";
-	
-	// Make sure mood animations exist.
-	Animation* enterAnimation = gAssetManager.LoadAnimation(moodOnName, AssetScope::Scene);
-	Animation* exitAnimation = gAssetManager.LoadAnimation(moodOffName, AssetScope::Scene);
-	if(enterAnimation == nullptr || exitAnimation == nullptr)
-	{
-		//TODO: Log error?
-		return;
-	}
-	
-	// Save mood.
-	mMood = mood;
-	mEnterMoodAnimation = enterAnimation;
-	mExitMoodAnimation = exitAnimation;
-	
-	// Play mood on animation.
-	gSceneManager.GetScene()->GetAnimator()->Start(mEnterMoodAnimation);
+    std::string moodOnName = mCharacterConfig->faceConfig->identifier + mood + "on";
+    std::string moodOffName = mCharacterConfig->faceConfig->identifier + mood + "off";
+    
+    // Make sure mood animations exist.
+    Animation* enterAnimation = gAssetManager.LoadAnimation(moodOnName, AssetScope::Scene);
+    Animation* exitAnimation = gAssetManager.LoadAnimation(moodOffName, AssetScope::Scene);
+    if(enterAnimation == nullptr || exitAnimation == nullptr)
+    {
+        //TODO: Log error?
+        return;
+    }
+    
+    // Save mood.
+    mMood = mood;
+    mEnterMoodAnimation = enterAnimation;
+    mExitMoodAnimation = exitAnimation;
+    
+    // Play mood on animation.
+    gSceneManager.GetScene()->GetAnimator()->Start(mEnterMoodAnimation);
 }
 
 void FaceController::ClearMood()
 {
-	// Mood is already clear!
-	if(mMood.empty()) { return; }
-	
-	// Play mood off animation.
-	gSceneManager.GetScene()->GetAnimator()->Start(mExitMoodAnimation);
-	
-	// Clear mood state.
-	mMood.clear();
-	mEnterMoodAnimation = nullptr;
-	mExitMoodAnimation = nullptr;
+    // Mood is already clear!
+    if(mMood.empty()) { return; }
+    
+    // Play mood off animation.
+    gSceneManager.GetScene()->GetAnimator()->Start(mExitMoodAnimation);
+    
+    // Clear mood state.
+    mMood.clear();
+    mEnterMoodAnimation = nullptr;
+    mExitMoodAnimation = nullptr;
 }
 
 void FaceController::OnUpdate(float deltaTime)
 {
-	// Count down and blink after some time.
-	mBlinkTimer -= deltaTime;
-	if(mBlinkTimer <= 0.0f)
-	{
-		Blink();
-		RollBlinkTimer();
-	}
-	
-	// Update eye jitter.
-	if(mEyeJitterEnabled)
-	{
-		mEyeJitterTimer -= deltaTime;
-		if(mEyeJitterTimer <= 0.0f)
-		{
-			EyeJitter();
-			RollEyeJitterTimer();
-		}
-	}
+    // Count down and blink after some time.
+    mBlinkTimer -= deltaTime;
+    if(mBlinkTimer <= 0.0f)
+    {
+        Blink();
+        RollBlinkTimer();
+    }
+    
+    // Update eye jitter.
+    if(mEyeJitterEnabled)
+    {
+        mEyeJitterTimer -= deltaTime;
+        if(mEyeJitterTimer <= 0.0f)
+        {
+            EyeJitter();
+            RollEyeJitterTimer();
+        }
+    }
 }
 
 void FaceController::RollBlinkTimer()
 {
-	// Calculate wait milliseconds for next blink.
-	int waitMs = 8000;
-	if(mCharacterConfig != nullptr)
-	{
-		const Vector2& blinkFrequency = mCharacterConfig->faceConfig->blinkFrequency;
-		waitMs = Random::Range((int)blinkFrequency.x, (int)blinkFrequency.y);
-	}
-	
-	// Convert to seconds and set timer.
-	mBlinkTimer = (float)waitMs / 1000.0f;
+    // Calculate wait milliseconds for next blink.
+    int waitMs = 8000;
+    if(mCharacterConfig != nullptr)
+    {
+        const Vector2& blinkFrequency = mCharacterConfig->faceConfig->blinkFrequency;
+        waitMs = Random::Range((int)blinkFrequency.x, (int)blinkFrequency.y);
+    }
+    
+    // Convert to seconds and set timer.
+    mBlinkTimer = (float)waitMs / 1000.0f;
 }
 
 void FaceController::RollEyeJitterTimer()
 {
-	// Calculate wait milliseconds for next jitter.
-	int waitMs = 0;
-	if(mCharacterConfig != nullptr)
-	{
-		const Vector2& jitterFrequency = mCharacterConfig->faceConfig->eyeJitterFrequency;
-		waitMs = Random::Range((int)jitterFrequency.x, (int)jitterFrequency.y);
-	}
-	
-	// Convert to seconds and set timer.
-	mEyeJitterTimer = (float)waitMs / 1000.0f;
+    // Calculate wait milliseconds for next jitter.
+    int waitMs = 0;
+    if(mCharacterConfig != nullptr)
+    {
+        const Vector2& jitterFrequency = mCharacterConfig->faceConfig->eyeJitterFrequency;
+        waitMs = Random::Range((int)jitterFrequency.x, (int)jitterFrequency.y);
+    }
+    
+    // Convert to seconds and set timer.
+    mEyeJitterTimer = (float)waitMs / 1000.0f;
 }
 
 void FaceController::UpdateFaceTexture()
 {
-	// Can't do much if face texture is missing!
-	if(mFaceTexture == nullptr) { return; }
-	
-	// Copy mouth texture.
-	if(mCurrentMouthTexture != nullptr)
-	{
-		const Vector2& mouthOffset = mCharacterConfig->faceConfig->mouthOffset;
-		Texture::BlendPixels(*mCurrentMouthTexture, *mFaceTexture, mouthOffset.x, mouthOffset.y);
-	}
-		
-	// Copy eye textures.
+    // Can't do much if face texture is missing!
+    if(mFaceTexture == nullptr) { return; }
+    
+    // Copy mouth texture.
+    if(mCurrentMouthTexture != nullptr)
+    {
+        const Vector2& mouthOffset = mCharacterConfig->faceConfig->mouthOffset;
+        Texture::BlendPixels(*mCurrentMouthTexture, *mFaceTexture, mouthOffset.x, mouthOffset.y);
+    }
+        
+    // Copy eye textures.
     UpdateEyeOnFaceTexture(mCurrentLeftEyeTexture, mDownsampledLeftEyeTexture, mCharacterConfig->faceConfig->leftEyeOffset, mCharacterConfig->faceConfig->leftEyeBias);
     UpdateEyeOnFaceTexture(mCurrentRightEyeTexture, mDownsampledRightEyeTexture, mCharacterConfig->faceConfig->rightEyeOffset, mCharacterConfig->faceConfig->rightEyeBias);
-	
-	// Copy eyelids texture.
-	if(mCurrentEyelidsTexture != nullptr)
-	{
-		const Vector2& eyelidsOffset = mCharacterConfig->faceConfig->eyelidsOffset;
-		Texture::BlendPixels(*mCurrentEyelidsTexture, *mFaceTexture, eyelidsOffset.x, eyelidsOffset.y);
-	}
-	
-	// Copy forehead texture.
-	if(mCurrentForeheadTexture != nullptr)
-	{
-		const Vector2& foreheadOffset = mCharacterConfig->faceConfig->foreheadOffset;
-		Texture::BlendPixels(*mCurrentForeheadTexture, *mFaceTexture, foreheadOffset.x, foreheadOffset.y);
-	}
-		
-	// Upload all changes to the GPU.
-	mFaceTexture->UploadToGPU();
+    
+    // Copy eyelids texture.
+    if(mCurrentEyelidsTexture != nullptr)
+    {
+        const Vector2& eyelidsOffset = mCharacterConfig->faceConfig->eyelidsOffset;
+        Texture::BlendPixels(*mCurrentEyelidsTexture, *mFaceTexture, eyelidsOffset.x, eyelidsOffset.y);
+    }
+    
+    // Copy forehead texture.
+    if(mCurrentForeheadTexture != nullptr)
+    {
+        const Vector2& foreheadOffset = mCharacterConfig->faceConfig->foreheadOffset;
+        Texture::BlendPixels(*mCurrentForeheadTexture, *mFaceTexture, foreheadOffset.x, foreheadOffset.y);
+    }
+        
+    // Upload all changes to the GPU.
+    mFaceTexture->UploadToGPU();
 }
 
 void FaceController::UpdateEyeOnFaceTexture(Texture* eyeTexture, Texture* downsampledTexture, const Vector2& offset, const Vector2& bias)
@@ -393,8 +393,17 @@ void FaceController::UpdateEyeOnFaceTexture(Texture* eyeTexture, Texture* downsa
     // Downsample the eye to the smaller texture.
     DownsampleEyeTexture(eyeTexture, downsampledTexture, downsampleOffset);
 
+    // In some cases (Buthane), the eye texture is slightly larger than the eyelids texture, so you get an "under eye face paint" effect.
+    // To fix this, don't write any eye texture pixels that would extend beyond the eyelid texture height.
+    uint32_t blendHeight = downsampledTexture->GetHeight();
+    if(mCurrentEyelidsTexture != nullptr && mCurrentEyelidsTexture->GetHeight() < blendHeight)
+    {
+        blendHeight = mCurrentEyelidsTexture->GetHeight();
+    }
+
     // Slap the downsampled texture onto the face texture at the correct pixel offset.
-    Texture::BlendPixels(*downsampledTexture, *mFaceTexture, offset.x, offset.y);
+    Texture::BlendPixels(*downsampledTexture, 0, 0, downsampledTexture->GetWidth(), blendHeight,
+                         *mFaceTexture, offset.x, offset.y);
 }
 
 void FaceController::DownsampleEyeTexture(Texture* src, Texture* dst, const Vector2& offset)
