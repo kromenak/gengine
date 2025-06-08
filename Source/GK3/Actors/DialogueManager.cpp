@@ -15,63 +15,62 @@ DialogueManager gDialogueManager;
 
 void DialogueManager::StartDialogue(const std::string& licensePlate, int numLines, bool playFidgets, std::function<void()> finishCallback)
 {
-	// We need a valid license plate.
-	if(licensePlate.empty()) { return; }
-	//TODO: Can we assume/expect a certain length for license plates?
-	
-	// The last character is always the sequence number, but it can be 0-9 or A-Z.
+    // We need a valid license plate.
+    if(licensePlate.empty()) { return; }
+    //TODO: Can we assume/expect a certain length for license plates?
+
+    // The last character is always the sequence number, but it can be 0-9 or A-Z.
     // Convert it to a normal integer.
-	char sequenceChar = licensePlate.back();
-	if(std::isdigit(sequenceChar)) // Number 0-9
-	{
-		mDialogueSequenceNumber = sequenceChar - '0';
-	}
-	else // Alpha character A-Z
-	{
+    char sequenceChar = licensePlate.back();
+    if(std::isdigit(sequenceChar)) // Number 0-9
+    {
+        mDialogueSequenceNumber = sequenceChar - '0';
+    }
+    else // Alpha character A-Z
+    {
         mDialogueSequenceNumber = (sequenceChar - 'A');
         mDialogueSequenceNumber += 10;
-	}
-	
-	// Save the license plate, but chop off the sequence number.
+    }
+
+    // Save the license plate, but chop off the sequence number.
     mDialogueLicensePlate = licensePlate;
     mDialogueLicensePlate.pop_back();
-	
-	// Save remaining lines.
-	mRemainingDialogueLines = numLines;
+
+    // Save remaining lines.
+    mRemainingDialogueLines = numLines;
 
     // Save whether this dialogue plays fidgets.
-	mDialogueUsesFidgets = playFidgets;
+    mDialogueUsesFidgets = playFidgets;
 
-    
     mDialogueFinishCallbacks.push_back(finishCallback);
-	
-	// Play first line of dialogue.
-	PlayNextDialogueLine();
+
+    // Play first line of dialogue.
+    PlayNextDialogueLine();
 }
 
 void DialogueManager::ContinueDialogue(int numLines, bool playFidgets, std::function<void()> finishCallback)
 {
-	// This assumes that we've already previously specified a plate/sequence and we just want to continue the sequence.
-	mRemainingDialogueLines = numLines;
-	mDialogueUsesFidgets = playFidgets;
+    // This assumes that we've already previously specified a plate/sequence and we just want to continue the sequence.
+    mRemainingDialogueLines = numLines;
+    mDialogueUsesFidgets = playFidgets;
     mDialogueFinishCallbacks.push_back(finishCallback);
-	
-	// Play next line.
-	PlayNextDialogueLine();
+
+    // Play next line.
+    PlayNextDialogueLine();
 }
 
 void DialogueManager::TriggerDialogueCue()
 {
-	// If we've done all the lines of dialogue we're interested in...
-	if(mRemainingDialogueLines <= 0)
-	{
-		// Call finish callback.
+    // If we've done all the lines of dialogue we're interested in...
+    if(mRemainingDialogueLines <= 0)
+    {
+        // Call finish callback.
         CallDialogueFinishedCallback();
-		return;
-	}
-	
-	// We still have dialogue to execute!
-	PlayNextDialogueLine();
+        return;
+    }
+
+    // We still have dialogue to execute!
+    PlayNextDialogueLine();
 }
 
 void DialogueManager::SetSpeaker(const std::string& noun)
@@ -82,36 +81,73 @@ void DialogueManager::SetSpeaker(const std::string& noun)
     {
         return;
     }
-    
-	// If someone is no longer the speaker, have them transition to listening.
+
+    // If someone is no longer the speaker, have them transition to listening.
     bool isUnknownSpeaker = StringUtil::EqualsIgnoreCase(mSpeaker, "UNKNOWN");
-	if(!mSpeaker.empty() && !isUnknownSpeaker && mDialogueUsesFidgets)
-	{
-		GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(mSpeaker);
-		if(actor != nullptr)
-		{
-			actor->StartFidget(GKActor::FidgetType::Listen);
-		}
-	}
-	
-	// Set new speaker.
-	mSpeaker = noun;
-	
-	// Have the new speaker play talk animation.
-	if(mDialogueUsesFidgets && !isUnknownSpeaker)
-	{
-		GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(mSpeaker);
-		if(actor != nullptr)
-		{
-			actor->StartFidget(GKActor::FidgetType::Talk);
-		}
-	}
+    if(!mSpeaker.empty() && !isUnknownSpeaker && mDialogueUsesFidgets)
+    {
+        // When in a conversation, the behavior appears to be to only transition to listen fidget if one was specified for the conversation.
+        bool playListenFidget = true;
+        if(!mConversation.empty())
+        {
+            playListenFidget = false;
+            for(auto& pair : mSavedListenFidgets)
+            {
+                if(StringUtil::EqualsIgnoreCase(pair.first->GetNoun(), mSpeaker))
+                {
+                    playListenFidget = true;
+                }
+            }
+        }
+
+        // Play listen fidget if desired.
+        if(playListenFidget)
+        {
+            GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(mSpeaker);
+            if(actor != nullptr)
+            {
+                actor->StartFidget(GKActor::FidgetType::Listen);
+            }
+        }
+    }
+
+    // Set new speaker.
+    mSpeaker = noun;
+
+    // Have the new speaker play talk animation.
+    isUnknownSpeaker = StringUtil::EqualsIgnoreCase(mSpeaker, "UNKNOWN");
+    if(mDialogueUsesFidgets && !isUnknownSpeaker)
+    {
+        // When in a conversation, the behavior appears to be to only transition to talk fidget if one was specified for the conversation.
+        bool playTalkFidget = true;
+        if(!mConversation.empty())
+        {
+            playTalkFidget = false;
+            for(auto& pair : mSavedTalkFidgets)
+            {
+                if(StringUtil::EqualsIgnoreCase(pair.first->GetNoun(), mSpeaker))
+                {
+                    playTalkFidget = true;
+                }
+            }
+        }
+
+        // Play talk fidget if desired.
+        if(playTalkFidget)
+        {
+            GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(mSpeaker);
+            if(actor != nullptr)
+            {
+                actor->StartFidget(GKActor::FidgetType::Talk);
+            }
+        }
+    }
 }
 
 void DialogueManager::SetConversation(const std::string& conversation, std::function<void()> finishCallback)
 {
     // Now in a conversation!
-	mConversation = conversation;
+    mConversation = conversation;
     //std::cout << "SetConversation " << conversation << std::endl;
 
     // Save callback.
@@ -167,7 +203,7 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
         if(settings->enterAnim != nullptr)
         {
             ++mConversationAnimWaitCount;
-            gSceneManager.GetScene()->GetAnimator()->Start(settings->enterAnim, [this]() {
+            gSceneManager.GetScene()->GetAnimator()->Start(settings->enterAnim, [this](){
                 --mConversationAnimWaitCount;
                 CheckConversationAnimFinishCallback();
             });
@@ -221,7 +257,7 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
         if(settings->exitAnim != nullptr)
         {
             ++mConversationAnimWaitCount;
-            gSceneManager.GetScene()->GetAnimator()->Start(settings->exitAnim, [this]() {
+            gSceneManager.GetScene()->GetAnimator()->Start(settings->exitAnim, [this](){
                 --mConversationAnimWaitCount;
                 CheckConversationAnimFinishCallback();
             });
@@ -242,13 +278,13 @@ void DialogueManager::EndConversation(std::function<void()> finishCallback)
 
     // No longer in this conversation.
     //std::cout << "EndConversation " << mConversation << std::endl;
-	mConversation.clear();
+    mConversation.clear();
 }
 
 void DialogueManager::PlayNextDialogueLine()
 {
-	// Playing a line, so decrement remaining lines.
-	mRemainingDialogueLines--;
+    // Playing a line, so decrement remaining lines.
+    mRemainingDialogueLines--;
 
     // NOTE: You might think we could early out here if an action skip was occurring, and save some time/effort.
     // NOTE: However, doing so could skip important anim nodes in the YAK file (such as starting a soundtrack) that should be executed even during an action skip.
@@ -267,10 +303,10 @@ void DialogueManager::PlayNextDialogueLine()
     // Increment sequence number.
     mDialogueSequenceNumber++;
 
-	// Load the YAK! If we can't find it for some reason, output an error and move on right away.
-	Animation* yak = gAssetManager.LoadYak(Localizer::GetLanguagePrefix() + yakName, AssetScope::Scene);
-	if(yak == nullptr)
-	{
+    // Load the YAK! If we can't find it for some reason, output an error and move on right away.
+    Animation* yak = gAssetManager.LoadYak(Localizer::GetLanguagePrefix() + yakName, AssetScope::Scene);
+    if(yak == nullptr)
+    {
         printf("Couldn't load yak %s%s - falling back on English (E%s).\n", Localizer::GetLanguagePrefix().c_str(), yakName.c_str(), yakName.c_str());
 
         // Attempt to load English version.
@@ -281,7 +317,7 @@ void DialogueManager::PlayNextDialogueLine()
             TriggerDialogueCue();
             return;
         }
-	}
+    }
 
     // Play the YAK.
     // To trigger the next line of dialogue, YAKs contain a DIALOGUECUE, which causes "TriggerDialogueCue" to be called.
