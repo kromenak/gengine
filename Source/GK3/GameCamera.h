@@ -116,6 +116,7 @@ private:
     // When mouse is clicked, this is start position of the click.
     // Used to determine when to enable mouse-based camera movement.
     Vector2 mClickStartPos;
+    bool mStartedClickForMouseLock = false;
 
     // Track if current mouse inputs were used for mouse lock. If so, must release all mouse buttons before doing other mouse actions.
     // This is helpful/necessary to avoid accidentally opening option bar when releasing mouse buttons after mouse lock.

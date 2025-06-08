@@ -456,8 +456,9 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
         if(gInputManager.IsMouseButtonLeadingEdge(InputManager::MouseButton::Left))
         {
             mClickStartPos = mousePosition;
+            mStartedClickForMouseLock = true;
         }
-        else if((mClickStartPos - mousePosition).GetLengthSq() > 5 * 5)
+        else if(mStartedClickForMouseLock && (mClickStartPos - mousePosition).GetLengthSq() > 5 * 5)
         {
             // Moved the mouse far enough, so enable mouse lock.
             mUsedMouseInputsForMouseLock = true;
@@ -504,6 +505,12 @@ void GameCamera::SceneUpdateMovement(float deltaTime)
                 turnSpeed += mouseDelta.x * kRotationSpeed;
             }
         }
+    }
+
+    // If left mouse isn't pressed, reset the started click tracking var.
+    if(!leftMousePressed)
+    {
+        mStartedClickForMouseLock = false;
     }
 
     // Alt keys just increase all speeds!
