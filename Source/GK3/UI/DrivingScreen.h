@@ -122,4 +122,6 @@ private:
     DrivingScreenBlip* CreateBlip();
     void PlaceBlips(FollowMode followMode);
     void OnFollowDone();
+
+    void OnLocationButtonPressed(const std::string& locationCode);
 };

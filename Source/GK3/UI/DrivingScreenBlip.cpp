@@ -2,7 +2,7 @@
 
 #include "StringUtil.h"
 
-DrivingScreenBlip::DrivingScreenBlip(const DrivingScreen::PathData& pathData) : Actor(TransformType::RectTransform),
+DrivingScreenBlip::DrivingScreenBlip(const DrivingScreen::PathData& pathData) : Actor("Blip", TransformType::RectTransform),
     mPathData(pathData)
 {
     // Position from top-left corner of map.
@@ -97,7 +97,7 @@ void DrivingScreenBlip::OnUpdate(float deltaTime)
 
     // Update blip to follow any path it is on.
     UpdatePathing(deltaTime);
-   
+
     // A follow blip overrides everything.
     if(mFollowBlip != nullptr)
     {

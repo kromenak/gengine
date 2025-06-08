@@ -16,32 +16,24 @@
 #include "UIButton.h"
 #include "UICanvas.h"
 #include "UIImage.h"
+#include "UIUtil.h"
 #include "Window.h"
 
-DrivingScreen::DrivingScreen() : Actor(TransformType::RectTransform)
+DrivingScreen::DrivingScreen() : Actor("DrivingScreen", TransformType::RectTransform)
 {
+    // Add fullscreen canvas with black background.
     // Driving screen should draw above scene transitioner so it doesn't appear on this screen.
-    AddComponent<UICanvas>(5);
-
-    // Canvas takes up entire screen.
-    RectTransform* rectTransform = GetComponent<RectTransform>();
-    rectTransform->SetSizeDelta(0.0f, 0.0f);
-    rectTransform->SetAnchorMin(Vector2::Zero);
-    rectTransform->SetAnchorMax(Vector2::One);
-    
-    // Add black background that eats input.
-    UIImage* background = AddComponent<UIImage>();
-    background->SetTexture(&Texture::Black);
-    background->SetReceivesInput(true);
+    UI::AddCanvas(this, 5, Color32::Black);
 
     // Add map background image.
-    mMapActor = new Actor("Map Background", TransformType::RectTransform);
-    mMapActor->GetTransform()->SetParent(GetTransform());
-    UIImage* mapImage = mMapActor->AddComponent<UIImage>();
     mMapTexture = gAssetManager.LoadTexture("DM_BASE.BMP");
-    mapImage->SetTexture(mMapTexture, true);
-    mMapImage = mapImage;
-    
+    mMapImage = UI::CreateWidgetActor<UIImage>("Map", this);
+    mMapImage->SetTexture(mMapTexture, true);
+    mMapActor = mMapImage->GetOwner();
+
+    // Due to how the map image scales with resolution, this seems to avoid some "off by one" pixel errors at some scales.
+    mMapImage->GetRectTransform()->SetPixelPerfect(false);
+
     // Add location buttons.
     AddLocation("VGR", "ARM", Vector2(458.0f, -225.0f));
     AddLocation("BEC", "BEC", Vector2(94.0f, -400.0f));
@@ -57,7 +49,7 @@ DrivingScreen::DrivingScreen() : Actor(TransformType::RectTransform)
     AddLocation("RL1", "RL1", Vector2(487.0f, -174.0f));
     AddLocation("MOP", "RLC", Vector2(193.0f, -119.0f));
     AddLocation("TR1", "TR1", Vector2(57.0f, -131.0f));
-    AddLocation("TRE", "TRE", Vector2(506.0f, -89.0f)); //TODO: This one doesn't work when you click it!
+    AddLocation("TRE", "TRE", Vector2(506.0f, -89.0f));
     AddLocation("PL5", "WOD", Vector2(44.0f, -218.0f));
 
     // Load paths for blip movements.
@@ -86,7 +78,7 @@ void DrivingScreen::Show(FollowMode followMode)
 
     // The map shows as a special location called "Map".
     // Unload the current scene and set the location as such.
-    gLocationManager.ChangeLocation("MAP", [this, followMode]() {
+    gLocationManager.ChangeLocation("MAP", [this, followMode](){
 
         // If changing to the map causes a timeblock change (such as at end of 102P), early out here.
         // The timeblock screen will show - we'll come back to the map screen after that!
@@ -143,6 +135,10 @@ void DrivingScreen::Show(FollowMode followMode)
         // Make sure the map fits snugly in the window area, with aspect ratio preserved.
         // We do this every time the UI shows in case resolution has changed.
         mMapImage->ResizeToFitPreserveAspect(Window::GetSize());
+
+        //HACK: Applying a slight "fudge" to the y-size fixes some issues with button positioning at high resolutions (where the image is way scaled up).
+        //HACK: Not 100% sure why that happens...
+        mMapImage->GetRectTransform()->SetSizeDeltaY(mMapImage->GetRectTransform()->GetSizeDelta().y + 0.5f);
 
         // Put all blips in starting positions, with paths set if needed.
         mFollowMode = followMode;
@@ -224,7 +220,7 @@ void DrivingScreen::SetLocationButtonsInteractive(bool interactive)
 void DrivingScreen::ExitToLocation(const std::string& locationCode)
 {
     // Change to the desired location.
-    gLocationManager.ChangeLocation(locationCode, [this]() {
+    gLocationManager.ChangeLocation(locationCode, [this](){
 
         // Hide the map screen after scene load is done.
         Hide();
@@ -233,17 +229,18 @@ void DrivingScreen::ExitToLocation(const std::string& locationCode)
 
 void DrivingScreen::AddLocation(const std::string& locationCode, const std::string& buttonId, const Vector2& buttonPos)
 {
-    // Create button actor & widget.
-    Actor* buttonActor = new Actor(buttonId, TransformType::RectTransform);
-    buttonActor->GetTransform()->SetParent(mMapActor->GetTransform());
-    UIButton* button = buttonActor->AddComponent<UIButton>();
+    // Create button.
+    UIButton* button = UI::CreateWidgetActor<UIButton>(buttonId, mMapActor);
+
+    // Due to how the map image scales with resolution, this seems to avoid some "off by one" pixel errors at some scales.
+    button->GetRectTransform()->SetPixelPerfect(false);
 
     // Set textures.
     Texture* upTexture = gAssetManager.LoadTexture("DM_" + buttonId + "_UL.BMP");
     button->SetUpTexture(upTexture);
     button->SetDownTexture(gAssetManager.LoadTexture("DM_" + buttonId + ".BMP"));
     button->SetHoverTexture(gAssetManager.LoadTexture("DM_" + buttonId + ".BMP"));
-    
+
     // The map scales up or down depending on window resolution.
     // In order for the buttons to appear at the correct positions and scales, we need to do some fancy anchoring...
     {
@@ -277,122 +274,8 @@ void DrivingScreen::AddLocation(const std::string& locationCode, const std::stri
     button->SetTooltipText("dm_" + buttonId);
 
     // On press, go to the map location.
-    button->SetPressCallback([this, locationCode](UIButton* button) {
-
-        // Grace doesn't like to go to the train station. Says there's nothing of interest there.
-        if(locationCode == "TR1")
-        {
-            if(gGameProgress.GetTimeblock() == Timeblock(3, 7) ||
-               gGameProgress.GetTimeblock() == Timeblock(3, 12))
-            {
-                gActionManager.ExecuteDialogueAction("21LP362PF1", 1);
-                return;
-            }
-        }
-        
-        // Play button sound effect.
-        gAudioManager.PlaySFX(gAssetManager.LoadAudio("MAPBUTTON.WAV"));
-
-        // Check conditions under which we would NOT allow going to this location.
-        // Don't allow going to Larry's place during timeblock 106P and 202A.
-        if(locationCode == "LHE")
-        {
-            if(gGameProgress.GetTimeblock() == Timeblock(1, 6, Timeblock::PM) ||
-               gGameProgress.GetTimeblock() == Timeblock(2, 2, Timeblock::AM))
-            {
-                gActionManager.ExecuteSheepAction("wait StartDialogue(\"21F4F625S1\", 1)");
-                return;
-            }
-        }
-
-        // The location code assigned to the map button is not always the location we actually go to.
-        // For one, attempting to go to the "Treasure Site" actually goes to PLO!
-        std::string realLocationCode = locationCode;
-        if(locationCode == "TRE")
-        {
-            realLocationCode = "PLO";
-        }
-
-        // Whenever you go to a location on the driving map, it's assumed that your bike also moves there.
-        // Each location has it's own integer code (of course) that is rather arbitrary.
-        int bikeLocation = -1;
-        if(realLocationCode == "PL5")
-        {
-            bikeLocation = 0;
-        }
-        else if(realLocationCode == "PL4")
-        {
-            bikeLocation = 1;
-        }
-        else if(realLocationCode == "VGR")
-        {
-            bikeLocation = 2;
-        }
-        else if(realLocationCode == "PL2")
-        {
-            bikeLocation = 3;
-        }
-        else if(realLocationCode == "PL1")
-        {
-            bikeLocation = 4;
-        }
-        else if(realLocationCode == "PL3")
-        {
-            bikeLocation = 5;
-        }
-        else if(realLocationCode == "BEC")
-        {
-            bikeLocation = 6;
-        }
-        else if(realLocationCode == "MCB")
-        {
-            bikeLocation = 7;
-        }
-        else if(realLocationCode == "POU")
-        {
-            bikeLocation = 8;
-        }
-        else if(realLocationCode == "PL6")
-        {
-            // One complication: Cheateau de Serres sometimes has its gate opened.
-            // In which case, the bike is parked inside the gate.
-            if(gGameProgress.GetTimeblock() == Timeblock("202P") || gGameProgress.GetTimeblock() == Timeblock("212P"))
-            {
-                bikeLocation = 15; // inside the gate
-                realLocationCode = "CSE";
-            }
-            else
-            {
-                bikeLocation = 9; // outside the gate
-            }
-        }
-        else if(realLocationCode == "MOP")
-        {
-            bikeLocation = 10;
-        }
-        else if(realLocationCode == "LHE")
-        {
-            bikeLocation = 11;
-        }
-        else if(realLocationCode == "PLO")
-        {
-            bikeLocation = 12;
-        }
-        else if(realLocationCode == "RL1")
-        {
-            bikeLocation = 13;
-        }
-        else if(realLocationCode == "TR1")
-        {
-            bikeLocation = 14;
-        }
-        if(bikeLocation != -1)
-        {
-            gGameProgress.SetGameVariable("BikeLocation", bikeLocation);
-        }
-
-        // Change to the desired location.
-        ExitToLocation(realLocationCode);
+    button->SetPressCallback([this, locationCode](UIButton* button){
+        OnLocationButtonPressed(locationCode);
     });
 
     // Cache button for later.
@@ -699,7 +582,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
 
             // Expose two new locations on the map once we're done following Buthane.
             // Also play a little piece of dialogue.
-            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this](){
                 OnFollowDone();
                 mLocationButtons["CSD"]->SetEnabled(true);
                 mLocationButtons["LHM"]->SetEnabled(true);
@@ -716,10 +599,10 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             mBlips[kNpc1Index]->AddPathNode("IN4");
             mBlips[kNpc1Index]->AddPathNode("VGR");
             mBlips[kNpc1Index]->AddPathNode("PL4");
-            
+
             // Expose one new location on the map once we're done following Wilkes.
             // Also play a little piece of dialogue.
-            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this](){
                 OnFollowDone();
                 mLocationButtons["LER"]->SetEnabled(true);
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"2196L3WLM1\", 1)");
@@ -763,7 +646,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             }
 
             // Just play a piece of dialogue after following the path and go back to previous location.
-            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this](){
                 OnFollowDone();
 
                 // Play dialogue ("they're just driving around the valley - forget that").
@@ -815,7 +698,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             }
 
             // Play dialogue once we reach LHE.
-            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this](){
                 OnFollowDone();
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"21F6L3WBH1\", 1)");
             });
@@ -838,7 +721,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
             mBlips[kNpc1Index]->AddPathNode("PL5");
 
             // Play dialogue and show new location once we reach PL5.
-            mBlips[kNpc1Index]->SetPathCompleteCallback([this]() {
+            mBlips[kNpc1Index]->SetPathCompleteCallback([this](){
                 OnFollowDone();
                 mLocationButtons["WOD"]->SetEnabled(true);
                 gActionManager.ExecuteSheepAction("wait StartDialogue(\"21K6L3WJI1\", 1)");
@@ -850,7 +733,7 @@ void DrivingScreen::PlaceBlips(FollowMode followMode)
 
         // Ego follows this blip.
         mBlips[kEgoIndex]->SetFollow(mBlips[kNpc1Index]);
-    }   
+    }
 }
 
 void DrivingScreen::OnFollowDone()
@@ -860,4 +743,122 @@ void DrivingScreen::OnFollowDone()
 
     // Blink ego blip again.
     mBlips[kEgoIndex]->SetBlinkEnabled(true);
+}
+
+void DrivingScreen::OnLocationButtonPressed(const std::string& locationCode)
+{
+    // Grace doesn't like to go to the train station. Says there's nothing of interest there.
+    if(locationCode == "TR1")
+    {
+        if(gGameProgress.GetTimeblock() == Timeblock(3, 7) ||
+           gGameProgress.GetTimeblock() == Timeblock(3, 12))
+        {
+            gActionManager.ExecuteDialogueAction("21LP362PF1", 1);
+            return;
+        }
+    }
+
+    // Play button sound effect.
+    gAudioManager.PlaySFX(gAssetManager.LoadAudio("MAPBUTTON.WAV"));
+
+    // Check conditions under which we would NOT allow going to this location.
+    // Don't allow going to Larry's place during timeblock 106P and 202A.
+    if(locationCode == "LHE")
+    {
+        if(gGameProgress.GetTimeblock() == Timeblock(1, 6, Timeblock::PM) ||
+           gGameProgress.GetTimeblock() == Timeblock(2, 2, Timeblock::AM))
+        {
+            gActionManager.ExecuteSheepAction("wait StartDialogue(\"21F4F625S1\", 1)");
+            return;
+        }
+    }
+
+    // The location code assigned to the map button is not always the location we actually go to.
+    // For one, attempting to go to the "Treasure Site" actually goes to PLO!
+    std::string realLocationCode = locationCode;
+    if(locationCode == "TRE")
+    {
+        realLocationCode = "PLO";
+    }
+
+    // Whenever you go to a location on the driving map, it's assumed that your bike also moves there.
+    // Each location has it's own integer code (of course) that is rather arbitrary.
+    int bikeLocation = -1;
+    if(realLocationCode == "PL5")
+    {
+        bikeLocation = 0;
+    }
+    else if(realLocationCode == "PL4")
+    {
+        bikeLocation = 1;
+    }
+    else if(realLocationCode == "VGR")
+    {
+        bikeLocation = 2;
+    }
+    else if(realLocationCode == "PL2")
+    {
+        bikeLocation = 3;
+    }
+    else if(realLocationCode == "PL1")
+    {
+        bikeLocation = 4;
+    }
+    else if(realLocationCode == "PL3")
+    {
+        bikeLocation = 5;
+    }
+    else if(realLocationCode == "BEC")
+    {
+        bikeLocation = 6;
+    }
+    else if(realLocationCode == "MCB")
+    {
+        bikeLocation = 7;
+    }
+    else if(realLocationCode == "POU")
+    {
+        bikeLocation = 8;
+    }
+    else if(realLocationCode == "PL6")
+    {
+        // One complication: Cheateau de Serres sometimes has its gate opened.
+        // In which case, the bike is parked inside the gate.
+        if(gGameProgress.GetTimeblock() == Timeblock("202P") || gGameProgress.GetTimeblock() == Timeblock("212P"))
+        {
+            bikeLocation = 15; // inside the gate
+            realLocationCode = "CSE";
+        }
+        else
+        {
+            bikeLocation = 9; // outside the gate
+        }
+    }
+    else if(realLocationCode == "MOP")
+    {
+        bikeLocation = 10;
+    }
+    else if(realLocationCode == "LHE")
+    {
+        bikeLocation = 11;
+    }
+    else if(realLocationCode == "PLO")
+    {
+        bikeLocation = 12;
+    }
+    else if(realLocationCode == "RL1")
+    {
+        bikeLocation = 13;
+    }
+    else if(realLocationCode == "TR1")
+    {
+        bikeLocation = 14;
+    }
+    if(bikeLocation != -1)
+    {
+        gGameProgress.SetGameVariable("BikeLocation", bikeLocation);
+    }
+
+    // Change to the desired location.
+    ExitToLocation(realLocationCode);
 }
