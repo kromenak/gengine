@@ -197,6 +197,10 @@ void ActionManager::ExecuteAction(const Action* action, std::function<void(const
 
     // Save frame this action was started on.
     mCurrentActionStartFrame = GEngine::Instance()->GetFrameNumber();
+
+    // Sometimes, an action can start that the user doesn't initiate (e.g. due to a timer expiring).
+    // In those cases, the action bar should close if it was still up.
+    HideActionBar();
 	
 	// If no script is associated with the action, that might be an error...
 	// But for now, we'll just treat it as action is immediately over.
