@@ -5,8 +5,6 @@
 // Includes mouse, keyboard, gamepads, etc.
 //
 #pragma once
-#include <string>
-
 #include <SDL.h>
 
 #include "Vector2.h"
@@ -47,15 +45,15 @@ public:
     void OnMouseWheelScroll(const Vector2& scroll) { mMouseWheelScrollDelta = scroll; }
     const Vector2& GetMouseWheelScrollDelta() const { return mMouseWheelScrollDelta; }
 
-	void LockMouse();
-	void UnlockMouse();
-	bool IsMouseLocked() const { return mMouseLocked || mWantMouseLocked; }
+    void LockMouse();
+    void UnlockMouse();
+    bool IsMouseLocked() const { return mMouseLocked || mWantMouseLocked; }
 
-	// Text Input
-	void StartTextInput(TextInput* textInput);
-	void StopTextInput();
-	bool IsTextInput() const { return mTextInput != nullptr; }
-	TextInput* GetTextInput() { return mTextInput; }
+    // Text Input
+    void StartTextInput(TextInput* textInput);
+    void StopTextInput();
+    bool IsTextInput() const { return mTextInput != nullptr; }
+    TextInput* GetTextInput() { return mTextInput; }
 
 private:
     // KEYBOARD
@@ -67,7 +65,7 @@ private:
     const uint8_t* mKeyboardState = nullptr;
 
     // A byte array where each byte indicates if a key is up or down.
-	// Current and previous states, so we can check for up or down moments.
+    // Current and previous states, so we can check for up or down moments.
     const uint8_t* mCurrKeyboardState = nullptr;
     uint8_t* mPrevKeyboardState = nullptr;
 
@@ -85,13 +83,13 @@ private:
     // Amount of scrolling on the mouse wheel detected this frame.
     Vector2 mMouseWheelScrollDelta;
 
-	// Is the mouse locked?
-	bool mMouseLocked = false;
+    // Is the mouse locked?
+    bool mMouseLocked = false;
     bool mWantMouseLocked = false;
-	Vector2 mLockedMousePosition;
+    Vector2 mLockedMousePosition;
 
-	// TEXT INPUT
-	TextInput* mTextInput = nullptr;
+    // TEXT INPUT
+    TextInput* mTextInput = nullptr;
 };
 
 extern InputManager gInputManager;

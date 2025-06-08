@@ -35,7 +35,7 @@ void InputManager::Update()
     // If the tool is eating inputs, we just "reuse" prev keyboard state until the tool is done.
     // Again, this just stops the game from using inputs meant for the tool.
     mCurrKeyboardState = (Tools::EatingKeyboardInputs() ? mPrevKeyboardState : mKeyboardState);
-    
+
     // Copy previous mouse state each frame.
     mPrevMouseButtonState = mMouseButtonState;
 
@@ -45,7 +45,7 @@ void InputManager::Update()
     // This queries device state from the OS.
     // Marks switch from "last frame values" to "current frame values".
     SDL_PumpEvents();
-    
+
     // Update mouse state. This differs base on whether a tool is using mouse inputs.
     if(!Tools::EatingMouseInputs())
     {
@@ -139,6 +139,18 @@ void InputManager::Update()
         // No longer locked.
         mMouseLocked = false;
     }
+
+    // When any mouse button is pressed, use SDL's "capture mouse" feature to keep getting mouse events, even if the mouse leaves the window.
+    // This fixes an issue where you can click a UI item, move the mouse outside the window, release the mouse button,
+    // and then the game doesn't know the mouse was released until you click the button again with the mouse inside the game window.
+    if(mMouseButtonState != 0)
+    {
+        SDL_CaptureMouse(SDL_TRUE);
+    }
+    else
+    {
+        SDL_CaptureMouse(SDL_FALSE);
+    }
 }
 
 void InputManager::LockMouse()
@@ -153,12 +165,12 @@ void InputManager::UnlockMouse()
 
 void InputManager::StartTextInput(TextInput* textInput)
 {
-	SDL_StartTextInput();
-	mTextInput = textInput;
+    SDL_StartTextInput();
+    mTextInput = textInput;
 }
 
 void InputManager::StopTextInput()
 {
-	SDL_StopTextInput();
-	mTextInput = nullptr;
+    SDL_StopTextInput();
+    mTextInput = nullptr;
 }
