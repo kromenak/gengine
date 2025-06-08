@@ -86,7 +86,12 @@ void SceneConstruction::Render()
     {
         for(auto& trigger : mSceneData->GetTriggers())
         {
-            Debug::DrawRectXZ(trigger->rect, mScene->GetFloorY(trigger->rect.GetCenter()) + 10.0f, Color32::Green);
+            // Get rect center point on xz plane.
+            Vector2 center = trigger->rect.GetCenter();
+            Vector3 centerXZ(center.x, 0.0f, center.y);
+
+            // Draw rect a bit above floor height.
+            Debug::DrawRectXZ(trigger->rect, mScene->GetFloorY(centerXZ) + 10.0f, Color32::Green);
         }
     }
 }
