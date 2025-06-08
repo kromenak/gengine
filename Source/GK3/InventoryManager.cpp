@@ -42,6 +42,10 @@ void InventoryManager::Init()
                 mInventoryItems.emplace(std::make_pair(entry.key, entry.value));
             }
         }
+
+        // Add special entry to map that's used when no entry exists for an inventory item.
+        mInventoryItems.emplace(std::make_pair("UNDEFINED", "UNDEFINED"));
+
         delete textFile;
     });
     
@@ -215,7 +219,10 @@ Texture* InventoryManager::GetInventoryItemIconTexture(const std::string& itemNa
 {
     // Find the item. If doesn't exist, return null.
     auto it = mInventoryItems.find(itemName);
-    if(it == mInventoryItems.end()) { return nullptr; }
+    if(it == mInventoryItems.end())
+    {
+        it = mInventoryItems.find("UNDEFINED");
+    }
 
     // Return cached texture if already loaded.
     if(it->second.iconTexture != nullptr) { return it->second.iconTexture; }
@@ -233,7 +240,10 @@ Texture* InventoryManager::GetInventoryItemListTexture(const std::string& itemNa
 {
     // Find the item. If doesn't exist, return null.
     auto it = mInventoryItems.find(itemName);
-    if(it == mInventoryItems.end()) { return nullptr; }
+    if(it == mInventoryItems.end())
+    {
+        it = mInventoryItems.find("UNDEFINED");
+    }
 
     // Return cached texture if already loaded.
     if(it->second.listTexture != nullptr) { return it->second.listTexture; }
@@ -266,7 +276,10 @@ Texture* InventoryManager::GetInventoryItemCloseupTexture(const std::string& ite
 {
     // Find the item. If doesn't exist, return null.
     auto it = mInventoryItems.find(itemName);
-    if(it == mInventoryItems.end()) { return nullptr; }
+    if(it == mInventoryItems.end())
+    {
+        it = mInventoryItems.find("UNDEFINED");
+    }
 
     // Return cached texture if already loaded.
     if(it->second.closeupTexture != nullptr) { return it->second.closeupTexture; }
