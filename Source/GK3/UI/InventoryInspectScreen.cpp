@@ -21,25 +21,8 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
 
     // Add canvas to render UI elements.
     UI::AddCanvas(this, 6, Color32::Black);
-	
-	// Add exit button to bottom-left corner of screen.
-    {
-        UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", this);
-        exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
-        exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
-        exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
-        exitButton->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
-        exitButton->SetPressCallback([this](UIButton* button){
-            Hide();
-        });
-        exitButton->SetTooltipText("closeupexit");
-        
-        exitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
-        exitButton->GetRectTransform()->SetAnchoredPosition(10.0f, 10.0f);
-        mExitButton = exitButton;
-    }
-	
-	// Create closeup image. It's just positioned at center of screen, which is default.
+
+    // Create closeup image. It's just positioned at center of screen, which is default.
     mCloseupImage = UI::CreateWidgetActor<UIButton>("CloseupButton", this);
 
     // Create extra LSR buttons, which are only used by the LSR inventory item.
@@ -51,8 +34,26 @@ InventoryInspectScreen::InventoryInspectScreen() : Actor("InventoryInspectScreen
             mLSRButtons[i]->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
         }
     }
-	
-	// Hide by default.
+
+    // Add exit button to bottom-left corner of screen.
+    // Do this AFTER creating closeup image, so the exit button renders above it.
+    {
+        UIButton* exitButton = UI::CreateWidgetActor<UIButton>("ExitButton", this);
+        exitButton->SetUpTexture(gAssetManager.LoadTexture("EXITN.BMP"));
+        exitButton->SetDownTexture(gAssetManager.LoadTexture("EXITD.BMP"));
+        exitButton->SetHoverTexture(gAssetManager.LoadTexture("EXITHOV.BMP"));
+        exitButton->SetDisabledTexture(gAssetManager.LoadTexture("EXITDIS.BMP"));
+        exitButton->SetPressCallback([this](UIButton* button){
+            Hide();
+        });
+        exitButton->SetTooltipText("closeupexit");
+
+        exitButton->GetRectTransform()->SetAnchor(AnchorPreset::BottomLeft);
+        exitButton->GetRectTransform()->SetAnchoredPosition(10.0f, 10.0f);
+        mExitButton = exitButton;
+    }
+
+    // Hide by default.
     SetActive(false);
 }
 
@@ -109,15 +110,15 @@ void InventoryInspectScreen::Show(const std::string& itemName)
             mLSRButtons[i]->SetEnabled(false);
         }
     }
-	
-	// Actually show the stuff!
-	SetActive(true);
+
+    // Actually show the stuff!
+    SetActive(true);
 }
 
 void InventoryInspectScreen::Hide()
 {
     if(!IsActive()) { return; }
-	SetActive(false);
+    SetActive(false);
     gLayerManager.PopLayer(&mLayer);
 }
 
@@ -201,7 +202,12 @@ void InventoryInspectScreen::OnClicked(const std::string& noun)
             gInventoryManager.InventoryUninspect();
         });
     }
-    
+
+    // When the inspect screen is not showing from the inventory screen, we shouldn't show the SCANNER verb action.
+    if(!gLayerManager.IsLayerInStack("InventoryLayer"))
+    {
+        actionBar->RemoveVerb("SCANNER");
+    }
 }
 
 bool InventoryInspectScreen::IsDemoIntro() const
@@ -262,7 +268,7 @@ void InventoryInspectScreen::InitLSR()
         mLSRButtons[1]->SetPressCallback([this](UIButton* button){
             OnClicked("LSR_PISCES");
         });
-        
+
         // Third button is unused (there's only two sections on this page).
         mLSRButtons[2]->SetEnabled(false);
     }

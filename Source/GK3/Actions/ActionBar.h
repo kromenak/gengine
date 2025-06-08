@@ -23,28 +23,29 @@ class UIButton;
 class ActionBar : public Actor
 {
 public:
-	ActionBar();
-	
-	void Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions,
+    ActionBar();
+
+    void Show(const std::string& noun, VerbType verbType, std::vector<const Action*> actions,
               std::function<void(const Action*)> executeCallback, std::function<void()> cancelCallback,
               bool centerOnPointer = true);
-	void Hide();
-	
-	bool IsShowing() const;
+    void Hide();
+
+    bool IsShowing() const;
 
     bool HasVerb(const std::string& verb) const;
     int GetVerbIndex(const std::string& verb) const;
-	void AddVerbToFront(const std::string& verb, const std::function<void()>& callback);
-	void AddVerbToBack(const std::string& verb, const std::function<void()>& callback);
+    void AddVerbToFront(const std::string& verb, const std::function<void()>& callback);
+    void AddVerbToBack(const std::string& verb, const std::function<void()>& callback);
     void AddVerbAtIndex(const std::string& verb, int index, const std::function<void()>& callback);
     void SetVerbEnabled(const std::string& verb, bool enabled);
+    void RemoveVerb(const std::string& verb);
 
     void SetAllowCancel(bool allowCancel) { mAllowCancel = allowCancel; }
     void SetAllowDismiss(bool allowDismiss) { mAllowDismiss = allowDismiss; }
-	
+
 protected:
-	void OnUpdate(float deltaTime) override;
-	
+    void OnUpdate(float deltaTime) override;
+
 private:
     // If true, a cancel button is displayed. Pressing it will hide the action bar.
     // This may be disabled in situations where the bar is not allowed to be canceled.
@@ -53,34 +54,34 @@ private:
     // If true, the bar can be dismissed by clicking outside of it, or pressing escape.
     // This may be disabled when the bar can't be dismissed (forced to make a choice).
     bool mAllowDismiss = true;
-    
+
     // A large clickable area behind the action bar that stops scene interaction while visible.
     UIButton* mSceneBlockerButton = nullptr;
-	
-	// A transform that is parent for all buttons.
-	RectTransform* mButtonHolder = nullptr;
-    
-	// Buttons that are created, but not shown. These can be reused when needed.
-	std::stack<UIButton*> mFreeButtons;
-	
-	// The buttons currently showing on the action bar, in order left-to-right.
+
+    // A transform that is parent for all buttons.
+    RectTransform* mButtonHolder = nullptr;
+
+    // Buttons that are created, but not shown. These can be reused when needed.
+    std::stack<UIButton*> mFreeButtons;
+
+    // The buttons currently showing on the action bar, in order left-to-right.
     struct ActionButton
     {
         std::string verb;
         UIButton* button = nullptr;
     };
-	std::vector<ActionButton> mButtons;
-	
-	// Currently showing inventory button?
-	bool mHasInventoryItemButton = false;
-	
-	// Callback that executes if the action bar is canceled.
+    std::vector<ActionButton> mButtons;
+
+    // Currently showing inventory button?
+    bool mHasInventoryItemButton = false;
+
+    // Callback that executes if the action bar is canceled.
     // This IS NOT the same as hiding! Cancel only happens if cancel button is pressed, click outside action bar, or press backspace.
-	std::function<void()> mCancelCallback = nullptr;
-	
-	UIButton* AddButton(int index, const VerbIcon& buttonIcon, const std::string& verb);
-	void RefreshButtonLayout();
-	void CenterOnPointer();
+    std::function<void()> mCancelCallback = nullptr;
+
+    UIButton* AddButton(int index, const VerbIcon& buttonIcon, const std::string& verb);
+    void RefreshButtonLayout();
+    void CenterOnPointer();
 
     void OnCancelButtonPressed();
 };
