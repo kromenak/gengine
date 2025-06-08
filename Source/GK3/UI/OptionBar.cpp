@@ -213,6 +213,10 @@ void OptionBar::OnUpdate(float deltaTime)
     {
         Hide();
     }
+
+    // The option bar should always stay on-screen, so run the "keep on screen" logic every frame.
+    // This also forces the bar to stay on screen if the resolution is changed by the player.
+    KeepOnScreen();
 }
 
 void OptionBar::KeepOnScreen()
@@ -320,7 +324,6 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     mCamerasButton->SetPressCallback([this](UIButton* button) {
         mCamerasSection->SetActive(!mCamerasSection->IsActive());
         mOptionsSection->SetActive(false);
-        KeepOnScreen();
     });
 
     // Add cinematics button.
@@ -342,7 +345,6 @@ void OptionBar::CreateMainSection(std::unordered_map<std::string, IniKeyValue>& 
     mOptionsButton->SetPressCallback([this](UIButton* button) {
         mCamerasSection->SetActive(false);
         mOptionsSection->SetActive(!mOptionsSection->IsActive());
-        KeepOnScreen();
         mGlobalVolumeSlider->SetValueSilently(gAudioManager.GetMasterVolume());
     });
 
@@ -546,7 +548,6 @@ void OptionBar::CreateGraphicOptionsSection(std::unordered_map<std::string, IniK
     UIButton* advGraphicsButton = CreateButton(config, "graphOptAdvanced", mGraphicOptionsSection);
     advGraphicsButton->SetPressCallback([this](UIButton* button) {
         mAdvancedGraphicOptionsSection->SetActive(!mAdvancedGraphicOptionsSection->IsActive());
-        KeepOnScreen();
 
         if(mAdvancedGraphicOptionsSection->IsActive())
         {
@@ -714,7 +715,6 @@ void OptionBar::OnSoundOptionsButtonPressed(UIButton* button)
     mSoundOptionsSection->SetActive(!mSoundOptionsSection->IsActive());
     mGraphicOptionsSection->SetActive(false);
     mGameOptionsSection->SetActive(false);
-    KeepOnScreen();
 
     // If active, refresh options in this section.
     if(mSoundOptionsSection->IsActive())
@@ -751,7 +751,6 @@ void OptionBar::OnGraphicsOptionsButtonPressed(UIButton* button)
     mSoundOptionsSection->SetActive(false);
     mGraphicOptionsSection->SetActive(!this->mGraphicOptionsSection->IsActive());
     mGameOptionsSection->SetActive(false);
-    KeepOnScreen();
 
     // Repopulate resolutions dropdown choices.
     // These could change if you move the game window to a new display.
@@ -773,7 +772,6 @@ void OptionBar::OnGameOptionsButtonPressed(UIButton* button)
     mSoundOptionsSection->SetActive(false);
     mGraphicOptionsSection->SetActive(false);
     mGameOptionsSection->SetActive(!this->mGameOptionsSection->IsActive());
-    KeepOnScreen();
 
     // Make sure toggles reflect the current preferences.
     mCameraGlideToggle->SetValue(GameCamera::IsCameraGlideEnabled());

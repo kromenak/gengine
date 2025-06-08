@@ -22,14 +22,14 @@ class UIToggle;
 class OptionBar : public Actor
 {
 public:
-	OptionBar();
-	
+    OptionBar();
+    
     void Show();
     void Hide();
     
 protected:
-	void OnUpdate(float deltaTime) override;
-	
+    void OnUpdate(float deltaTime) override;
+    
 private:
     // A large clickable area behind the action bar that stops scene interaction while visible.
     UIButton* mSceneBlockerButton = nullptr;
