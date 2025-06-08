@@ -126,6 +126,52 @@ namespace Window
         // Output display that window is currently showing on.
         SDL_Log("Current Display Index: %i\n", SDL_GetWindowDisplayIndex(dumpWindow));
     }
+
+    void PositionWindowSanely()
+    {
+        // If fullscreen, the window is not visible/moveable, so we don't need to do anything.
+        if(IsFullscreen()) { return; }
+
+        // Get the window size and the desktop screen resolution size.
+        int windowWidth = GetWidth();
+        int windowHeight = GetHeight();
+        SDL_DisplayMode mode;
+        SDL_GetDesktopDisplayMode(SDL_GetWindowDisplayIndex(window), &mode);
+
+        // One scenario to account for: the window size exactly matches the desktop size. This is like a "fullscreen window".
+        // In this case, just position the window at (0, 0) so it takes up the whole screen.
+        if(windowWidth == mode.w && windowHeight == mode.h)
+        {
+            SetPosition(0, 0);
+            return;
+        }
+
+        // Another scenario is that the game window is larger than the desktop resolution.
+        // This is kind of a weird state that isn't typically allowed. (TODO: We could force the window to the desktop resolution?)
+        if(windowWidth > mode.w || windowHeight > mode.h)
+        {
+            return;
+        }
+
+        // Otherwise, the window is smaller than the desktop, so the player can move it wherever they'd like.
+        
+        // In windowed mode, when fiddling with resolutions and fullscreen toggles, you can sometimes get in an unfortunate situation:
+        // The window title bar is off-screen, and you can't grab it anymore!
+        // Sure, you could maybe use a keyboard shortcut to reposition the window, but it's a tricky spot to be in.
+        // To alleviate the problem, we should try to keep the title bar on-screen.
+
+        // See if the y-position is off-screen at the top. If so, nudge the window down.
+        // "32" is kind of arbitrary, but is the height of the Windows title bar.
+        //TODO: May be able to use SDL_GetWindowBordersSize to get the title bar size from the OS?
+        const int kTitleBarHeight = 32;
+        int x;
+        int y;
+        SDL_GetWindowPosition(window, &x, &y);
+        if(y < kTitleBarHeight)
+        {
+            SetPosition(x, kTitleBarHeight);
+        }
+    }
 }
 
 void Window::Create(const char* title)
@@ -153,7 +199,7 @@ void Window::Create(const char* title)
     currentResolution.height = gSaveManager.GetPrefs()->GetInt(PREFS_ENGINE, PREF_SCREEN_HEIGHT, kDefaultHeight);
     
     // Determine flags.
-    Uint32 flags = 0; //TODO: is this flag even needed for OGL to work? Doesn't seem like it.
+    Uint32 flags = 0;
     if(fullscreen)
     {
         flags |= SDL_WINDOW_FULLSCREEN;
@@ -161,7 +207,7 @@ void Window::Create(const char* title)
     
     // These flags are just about the only thing tying window creation to specific graphics APIs.
     // They don't *seem* necessary on all platforms...but just pass them in case I suppose.
-    flags |= SDL_WINDOW_OPENGL;
+    flags |= SDL_WINDOW_OPENGL; //TODO: is this flag even needed for OGL to work? Doesn't seem like it.
     //flags |= SDL_WINDOW_VULKAN; // doesn't work on Mac
     
     // Create window from preferences.
@@ -193,6 +239,9 @@ void Window::Create(const char* title, int x, int y, int w, int h, Uint32 flags)
         printf("Failed to create SDL window! Error: %s\n", SDL_GetError());
     }
     //DumpVideoInfo(window);
+
+    // Make sure window is in a sane position.
+    PositionWindowSanely();
 }
 
 void Window::Destroy()
@@ -221,6 +270,9 @@ void Window::SetFullscreen(bool fullscreen)
 
     // Update supported resolutions list.
     DetectSupportedResolutions(fullscreen);
+
+    // Make sure window is in a sane position.
+    PositionWindowSanely();
 }
 
 bool Window::IsFullscreen()
@@ -251,13 +303,7 @@ void Window::SetResolution(const Resolution& resolution)
     
     // The way we set the window size depends on whether we're fullscreen or not.
     bool isFullscreen = SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN;
-    if(!isFullscreen)
-    {
-        // When not fullscreen, just set the window size.
-        // And there's no technical limitation on the window size really.
-        SDL_SetWindowSize(window, width, height);
-    }
-    else
+    if(isFullscreen)
     {
         // In fullscreen, we've got to use a resolution supported by the monitor.
         // Grab the display index the game is currently presenting on.
@@ -281,6 +327,10 @@ void Window::SetResolution(const Resolution& resolution)
         width = supportedMode.w;
         height = supportedMode.h;
     }
+
+    // Regardless of fullscreen or not, it *seems* that you must set the window size as well for the correct result.
+    // If you don't do this in fullscreen mode, changed resolutions are cropped or don't take up the full screen as expected.
+    SDL_SetWindowSize(window, width, height);
     
     // Save preference.
     gSaveManager.GetPrefs()->Set(PREFS_ENGINE, PREF_SCREEN_WIDTH, width);
@@ -289,6 +339,9 @@ void Window::SetResolution(const Resolution& resolution)
     // Save new resolution.
     currentResolution.width = width;
     currentResolution.height = height;
+
+    // Make sure window is in a sane position.
+    PositionWindowSanely();
 }
 
 void Window::SetPosition(int x, int y)
