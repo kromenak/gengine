@@ -18,32 +18,32 @@ class UIButton : public UIWidget
 {
     TYPEINFO_SUB(UIButton, UIWidget);
 public:
-	UIButton(Actor* actor);
-	
-	void Render() override;
-    
+    UIButton(Actor* actor);
+
+    void Render() override;
+
     void SetUpTexture(Texture* texture, const Color32& color = Color32::White);
     void SetDownTexture(Texture* texture, const Color32& color = Color32::White);
     void SetHoverTexture(Texture* texture, const Color32& color = Color32::White);
     void SetDisabledTexture(Texture* texture, const Color32& color = Color32::White);
 
-	void SetPressCallback(std::function<void(UIButton*)> callback) { mPressCallback = callback; }
+    void SetPressCallback(std::function<void(UIButton*)> callback) { mPressCallback = callback; }
 
     void SetHoverSound(Audio* sound) { mHoverSound = sound; }
     bool IsHovered() const { return mPointerOver; }
     bool IsPressedDown() const { return sDownButton == this; }
-	
-	void OnPointerEnter() override;
-	void OnPointerExit() override;
-	
-	void OnPointerDown() override;
-	void OnPointerUp() override;
-	
-	void Press();
+
+    void OnPointerEnter() override;
+    void OnPointerExit() override;
+
+    void OnPointerDown() override;
+    void OnPointerUp() override;
+
+    void Press();
     void AnimatePress(float duration = 0.25f);
-	
-	bool CanInteract() const { return mCanInteract; }
-	void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
+
+    bool CanInteract() const { return mCanInteract; }
+    void SetCanInteract(bool canInteract) { mCanInteract = canInteract; }
 
     void SetResizeBasedOnTexture(bool resize) { mResizeBasedOnTexture = resize; }
     void SetHighlightCursorOnHover(bool highlight) { mForceCursorHighlightOnHover = highlight; }
@@ -52,7 +52,7 @@ public:
 
 protected:
     void OnUpdate(float deltaTime) override;
-	
+
 private:
     // When a button is down, it gets some special treatment/logic. So, we need to keep track of it!
     static UIButton* sDownButton;
@@ -68,24 +68,24 @@ private:
     State mDownState;
     State mHoverState;
     State mDisabledState;
-	
-	// Is the button interactive?
-	// If not, it appears as a "disabled" button (e.g. grayed out) if a disabled texture is provided.
-	bool mCanInteract = true;
+
+    // Is the button interactive?
+    // If not, it appears as a "disabled" button (e.g. grayed out) if a disabled texture is provided.
+    bool mCanInteract = true;
 
     // If true, button is resized based on texture used for the current state.
     // If false, we assume the button size is manually set, or driven by anchors and parenting.
     bool mResizeBasedOnTexture = true;
 
-	// Material used for rendering.
-	Material mMaterial;
-	
-	// Callback to execute when the button is pressed.
-	std::function<void(UIButton*)> mPressCallback;
-	
-	// Tracks pointer enter/exit and up/down for visual state and press checks.
-	bool mPointerOver = false;
-	bool mPointerDown = false;
+    // Material used for rendering.
+    Material mMaterial;
+
+    // Callback to execute when the button is pressed.
+    std::function<void(UIButton*)> mPressCallback;
+
+    // Tracks pointer enter/exit and up/down for visual state and press checks.
+    bool mPointerOver = false;
+    bool mPointerDown = false;
 
     // Optional hover audio.
     Audio* mHoverSound = nullptr;
@@ -98,8 +98,8 @@ private:
 
     // If non-zero, the button should appear to be pressed to graphically show a programmatic press occurred.
     float mProgrammaticPressTimer = 0.0f;
-	
-	Texture* GetDefaultTexture();
+
+    Texture* GetDefaultTexture();
     void UpdateMaterial();
 
     void ShowTooltip();

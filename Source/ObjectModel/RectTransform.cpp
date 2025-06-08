@@ -16,41 +16,41 @@ TYPEINFO_INIT(RectTransform, Transform, 3)
 
 RectTransform::RectTransform(Actor* owner) : Transform(owner)
 {
-	
+
 }
 
 void RectTransform::SetSizeDelta(float x, float y)
 {
-	SetSizeDelta(Vector2(x, y));
+    SetSizeDelta(Vector2(x, y));
 }
 
 void RectTransform::SetSizeDelta(const Vector2& size)
 {
-	mSizeDelta = size;
-	SetDirty();
+    mSizeDelta = size;
+    SetDirty();
 }
 
 void RectTransform::SetSizeDeltaX(float x)
 {
-	mSizeDelta.x = x;
-	SetDirty();
+    mSizeDelta.x = x;
+    SetDirty();
 }
 
 void RectTransform::SetSizeDeltaY(float y)
 {
-	mSizeDelta.y = y;
-	SetDirty();
+    mSizeDelta.y = y;
+    SetDirty();
 }
 
 void RectTransform::SetPivot(float x, float y)
 {
-	SetPivot(Vector2(x, y));
+    SetPivot(Vector2(x, y));
 }
 
 void RectTransform::SetPivot(const Vector2& pivot)
 {
-	mPivot = pivot;
-	SetDirty();
+    mPivot = pivot;
+    SetDirty();
 }
 
 void RectTransform::SetAnchor(AnchorPreset preset, bool setPivot)
@@ -136,66 +136,66 @@ void RectTransform::SetAnchor(AnchorPreset preset, bool setPivot)
 
 void RectTransform::SetAnchor(const Vector2& anchor)
 {
-	 mAnchorMin = anchor;
-	 mAnchorMax = anchor;
-	 SetDirty();
+    mAnchorMin = anchor;
+    mAnchorMax = anchor;
+    SetDirty();
 }
 
 void RectTransform::SetAnchorMin(const Vector2& anchorMin)
 {
-	mAnchorMin = anchorMin;
-	SetDirty();
+    mAnchorMin = anchorMin;
+    SetDirty();
 }
 
 void RectTransform::SetAnchorMax(const Vector2& anchorMax)
 {
-	mAnchorMax = anchorMax;
-	SetDirty();
+    mAnchorMax = anchorMax;
+    SetDirty();
 }
 
 void RectTransform::SetAnchoredPosition(float x, float y)
 {
-	SetAnchoredPosition(Vector2(x, y));
+    SetAnchoredPosition(Vector2(x, y));
 }
 
 void RectTransform::SetAnchoredPosition(const Vector2& anchoredPosition)
 {
-	mAnchoredPosition = anchoredPosition;
-	SetDirty();
+    mAnchoredPosition = anchoredPosition;
+    SetDirty();
 }
 
 Rect RectTransform::GetRect() const
 {
-	Rect parentRect;
-	if(mParent == nullptr || !mParent->IsA<RectTransform>())
-	{
+    Rect parentRect;
+    if(mParent == nullptr || !mParent->IsA<RectTransform>())
+    {
         Vector2 windowSize = Window::GetSize();
-		parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
-	}
-	else
-	{
-		RectTransform* parent = static_cast<RectTransform*>(mParent);
-		parentRect = parent->GetRect();
-	}
-	return RectUtil::CalcLocalRect(parentRect, mAnchorMin, mAnchorMax, mSizeDelta, mPivot);
+        parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
+    }
+    else
+    {
+        RectTransform* parent = static_cast<RectTransform*>(mParent);
+        parentRect = parent->GetRect();
+    }
+    return RectUtil::CalcLocalRect(parentRect, mAnchorMin, mAnchorMax, mSizeDelta, mPivot, mPixelPerfect);
 }
 
 Rect RectTransform::GetWorldRect(bool includeChildren)
 {
-	Rect localRect = GetRect();
-	
-	// "min" and "max" here should correlate to the min and max of the quad used for rendering.
-	// Ex: A quad centered on origin should use min of -(mSize / 2) and max of (mSize / 2).
-	// Ex: A quad with bottom-left corner at origin should use (0, 0, 0) and mSize respectively.
-	// Our UI quad has a min of (0, 0) and a max of (1, 1).
-	Vector2 min = localRect.GetMin();
-	Vector2 max = localRect.GetMax();
-	
-	// Transform those points based on this transform's parents and scale/rotation/translation.
-	min = LocalToWorldPoint(min);
-	max = LocalToWorldPoint(max);
+    Rect localRect = GetRect();
+
+    // "min" and "max" here should correlate to the min and max of the quad used for rendering.
+    // Ex: A quad centered on origin should use min of -(mSize / 2) and max of (mSize / 2).
+    // Ex: A quad with bottom-left corner at origin should use (0, 0, 0) and mSize respectively.
+    // Our UI quad has a min of (0, 0) and a max of (1, 1).
+    Vector2 min = localRect.GetMin();
+    Vector2 max = localRect.GetMax();
+
+    // Transform those points based on this transform's parents and scale/rotation/translation.
+    min = LocalToWorldPoint(min);
+    max = LocalToWorldPoint(max);
     Rect worldRect(min, max);
-    
+
     // Let's say you want to get the world rect for a RectTransform, but it has a bunch of children that make up its contents.
     // This allows you to get a rect that contains all the children as well.
     if(includeChildren)
@@ -209,8 +209,8 @@ Rect RectTransform::GetWorldRect(bool includeChildren)
             }
         }
     }
-	
-	// Return the rect.
+
+    // Return the rect.
     return worldRect;
 }
 
@@ -218,10 +218,10 @@ void RectTransform::MoveInsideRect(const Rect& other)
 {
     // Calculate our rect, taking into account children.
     Rect ourRect = GetWorldRect(true);
-    
+
     Vector2 min = ourRect.GetMin();
     Vector2 max = ourRect.GetMax();
-    
+
     Vector2 otherMin = other.GetMin();
     Vector2 otherMax = other.GetMax();
 
@@ -252,29 +252,29 @@ void RectTransform::MoveInsideRect(const Rect& other)
 
 void RectTransform::CalcLocalPosition()
 {
-	Rect parentRect;
-	Vector2 parentPivot;
-	if(mParent == nullptr || !mParent->IsA<RectTransform>())
-	{
+    Rect parentRect;
+    Vector2 parentPivot;
+    if(mParent == nullptr || !mParent->IsA<RectTransform>())
+    {
         Vector2 windowSize = Window::GetSize();
-		parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
-		parentPivot = Vector2(0.0f, 0.0f);
-	}
-	else
-	{
-		RectTransform* parent = static_cast<RectTransform*>(mParent);
-		parentRect = parent->GetRect();
-		parentPivot = parent->GetPivot();
-	}
-	
-	Vector3 localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, mAnchorMin, mAnchorMax, mAnchoredPosition, mPivot);
-	
-	// Update local pos x/y components.
-	// Don't overwrite the z-component, which can be set freely.
+        parentRect = Rect(0.0f, 0.0f, windowSize.x, windowSize.y);
+        parentPivot = Vector2(0.0f, 0.0f);
+    }
+    else
+    {
+        RectTransform* parent = static_cast<RectTransform*>(mParent);
+        parentRect = parent->GetRect();
+        parentPivot = parent->GetPivot();
+    }
+
+    Vector3 localPos = RectUtil::CalcLocalPosition(parentRect, parentPivot, mAnchorMin, mAnchorMax, mAnchoredPosition, mPivot, mPixelPerfect);
+
+    // Update local pos x/y components.
+    // Don't overwrite the z-component, which can be set freely.
     if(mPixelPerfect)
     {
-        mLocalPosition.x = Math::RoundToInt(localPos.x);
-        mLocalPosition.y = Math::RoundToInt(localPos.y);
+        mLocalPosition.x = Math::Floor(localPos.x);
+        mLocalPosition.y = Math::Floor(localPos.y);
     }
     else
     {
@@ -285,15 +285,15 @@ void RectTransform::CalcLocalPosition()
 
 void RectTransform::OnUpdate(float deltaTime)
 {
-	// For debugging: visualize min/max of the rect calculated for this RectTransform.
-	if(Debug::RenderRectTransformRects() || debugVisualizeRect)
-	{
+    // For debugging: visualize min/max of the rect calculated for this RectTransform.
+    if(Debug::RenderRectTransformRects() || debugVisualizeRect)
+    {
         // For UI, "world space" is really "screen space". Confusing, I know.
-		Rect screenRect = GetWorldRect();
+        Rect screenRect = GetWorldRect();
         Debug::DrawScreenRect(screenRect, Color32::Cyan);
 
         // Also draw axes at pivot point.
         Vector2 pivotPos(screenRect.GetMin().x + screenRect.GetSize().x * mPivot.x, screenRect.GetMin().y + screenRect.GetSize().y * mPivot.y);
         Debug::DrawAxes(pivotPos);
-	}
+    }
 }
