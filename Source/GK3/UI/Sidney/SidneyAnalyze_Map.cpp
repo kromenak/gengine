@@ -1597,7 +1597,7 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
                     Vector2 centerToMouse = Vector2::Normalize(zoomedOutMapPos - mMap.zoomedOutClickShapeCenter);
                     mMap.zoomedOutClickActionPos = zoomedOutMapPos;
 
-                    float angle = Math::Acos(Math::Clamp(Vector2::Dot(prevCenterToMouse, centerToMouse), 0.0f, 1.0f));
+                    float angle = Math::Acos(Vector2::Dot(prevCenterToMouse, centerToMouse));
                     Vector3 cross = Vector3::Cross(prevCenterToMouse, centerToMouse);
                     if(cross.z < 0)
                     {
@@ -1621,7 +1621,7 @@ void SidneyAnalyze::AnalyzeMap_UpdateZoomedOutMap(float deltaTime)
                     Vector2 centerToMouse = Vector2::Normalize(zoomedOutMapPos - mMap.zoomedOutClickShapeCenter);
                     mMap.zoomedOutClickActionPos = zoomedOutMapPos;
 
-                    float angle = Math::Acos(Math::Clamp(Vector2::Dot(prevCenterToMouse, centerToMouse), 0.0f, 1.0f));
+                    float angle = Math::Acos(Vector2::Dot(prevCenterToMouse, centerToMouse));
                     Vector3 cross = Vector3::Cross(prevCenterToMouse, centerToMouse);
                     if(cross.z < 0)
                     {

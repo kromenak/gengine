@@ -698,7 +698,7 @@ void GKActor::SetModelRotationToActorRotation()
     //Debug::DrawLine(GetPosition(), GetPosition() + desiredDirection * 10.0f, Color32::Magenta, 60.0f);
         
     // Get the angle between the model's direction and the actor's direction.
-    float angleRadians = Math::Acos(Math::Clamp(Vector3::Dot(modelDirection, desiredDirection), -1.0f, 1.0f));
+    float angleRadians = Math::Acos(Vector3::Dot(modelDirection, desiredDirection));
 
     // Use cross product to determine clockwise or counter-clockwise angle between the two.
     if(Vector3::Cross(modelDirection, desiredDirection).y < 0)
@@ -732,7 +732,7 @@ void GKActor::SyncActorToModelPositionAndRotation()
 
         // Calculate angle I should rotate to match model's direction.
         // Use cross product to determine clockwise or counter-clockwise rotation.
-        float angleRadians = Math::Acos(Math::Clamp(Vector3::Dot(myFacingDir, modelFacingDir), -1.0f, 1.0f));
+        float angleRadians = Math::Acos(Vector3::Dot(myFacingDir, modelFacingDir));
         if(Vector3::Cross(myFacingDir, modelFacingDir).y < 0)
         {
             angleRadians *= -1;
