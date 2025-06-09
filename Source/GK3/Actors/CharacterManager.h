@@ -4,6 +4,7 @@
 // Provides configuration data about the various characters in the game.
 //
 #pragma once
+#include <cstdint>
 #include <set>
 #include <string>
 #include <utility>
