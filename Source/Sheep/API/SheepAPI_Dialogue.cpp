@@ -21,7 +21,7 @@ shpvoid StartYak(const std::string& yakAnimationName)
     params.animation = gAssetManager.LoadYak(yakAnimationName, AssetScope::Scene);
     params.finishCallback = AddWait();
     params.isYak = true;
-    gSceneManager.GetScene()->GetAnimator()->Start(params);
+    Scene::GetActiveAnimator()->Start(params);
     return 0;
 }
 RegFunc1(StartYak, void, string, WAITABLE, DEV_FUNC);

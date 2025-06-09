@@ -27,6 +27,7 @@
 #include "Renderer.h"
 #include "ReportManager.h"
 #include "SceneFunctions.h"
+#include "SceneManager.h"
 #include "Skybox.h"
 #include "SoundtrackPlayer.h"
 #include "StatusOverlay.h"
@@ -53,6 +54,23 @@ std::string Scene::mEgoName;
         globalAnimator = globalAnimatorActor->AddComponent<Animator>();
     }
     return globalAnimator;
+}
+
+/*static*/ Animator* Scene::GetActiveAnimator()
+{
+    // Use the scene animator, if it's active.
+    Scene* scene = gSceneManager.GetScene();
+    if(scene != nullptr)
+    {
+        Animator* sceneAnimator = scene->GetAnimator();
+        if(sceneAnimator != nullptr && sceneAnimator->IsActiveAndEnabled())
+        {
+            return sceneAnimator;
+        }
+    }
+
+    // Otherwise, fall back on global animator.
+    return GetGlobalAnimator();
 }
 
 Scene::Scene(const std::string& name) :
@@ -939,12 +957,10 @@ void Scene::SetPaused(bool paused)
     //TODO: You might expect that pausing the animator is necessary to effectively pause the scene.
     //TODO: However, doing so can break actions in inventory, since voice over actions rely on the Animator.
     //TODO: Not pausing animator seems to work fine for now, but if it's a problem later on, maybe we need to have a separate animator for non-scene stuff or something.
-    /*
     if(mAnimator != nullptr)
     {
         mAnimator->SetEnabled(!paused);
     }
-    */
 
     // Tell camera if the scene is active or not.
     // We don't want to set camera inactive, because we still want it to render.

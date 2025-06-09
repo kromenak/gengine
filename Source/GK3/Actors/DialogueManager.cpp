@@ -324,7 +324,10 @@ void DialogueManager::PlayNextDialogueLine()
     AnimParams yakAnimParams;
     yakAnimParams.animation = yak;
     yakAnimParams.isYak = true;
-    gSceneManager.GetScene()->GetAnimator()->Start(yakAnimParams);
+    
+    // It's important to get the "active" animator here, since dialogues are one of the few (only?) instances where animations can play while the scene is paused.
+    // For example, if you interact with items in the inventory, the scene is paused, but dialogue still needs to play - the global animator should be used if the scene one is paused.
+    Scene::GetActiveAnimator()->Start(yakAnimParams);
 }
 
 void DialogueManager::CallDialogueFinishedCallback()

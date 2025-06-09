@@ -42,6 +42,7 @@ shpvoid StopAnimation(const std::string& animationName)
     if(animation != nullptr)
     {
         gSceneManager.GetScene()->GetAnimator()->Stop(animation);
+        Scene::GetGlobalAnimator()->Stop(animation);
     }
     return 0;
 }
@@ -50,6 +51,7 @@ RegFunc1(StopAnimation, void, string, IMMEDIATE, REL_FUNC);
 shpvoid StopAllAnimations()
 {
     gSceneManager.GetScene()->GetAnimator()->StopAll();
+    Scene::GetGlobalAnimator()->StopAll();
     return 0;
 }
 RegFunc0(StopAllAnimations, void, IMMEDIATE, DEV_FUNC);
@@ -86,7 +88,6 @@ shpvoid StartMom(const std::string& momAnimationName)
     }
     if(animation != nullptr)
     {
-         //TODO: Any need to send flag that this is a MOM animation file? The formats/uses seem identical.
         gSceneManager.GetScene()->GetAnimator()->Start(animation, AddWait());
     }
     return 0;
