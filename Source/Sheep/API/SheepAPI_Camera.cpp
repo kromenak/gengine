@@ -240,7 +240,8 @@ RegFunc0(Uninspect, void, WAITABLE, REL_FUNC);
 
 shpvoid InspectModelUsingAngle(const std::string& modelName, const std::string& cameraName)
 {
-    printf("InspectModelUsingAngle(%s, %s)\n", modelName.c_str(), cameraName.c_str());
+    // Despite the argument being called "modelName" here, the docs mention this is actually supposed to be a "noun".
+    gSceneManager.GetScene()->InspectObject(modelName, cameraName, AddWait());
     return 0;
 }
 RegFunc2(InspectModelUsingAngle, void, string, string, IMMEDIATE, REL_FUNC);

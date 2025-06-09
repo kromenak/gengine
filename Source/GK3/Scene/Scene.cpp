@@ -416,15 +416,7 @@ bool Scene::InitEgoPosition(const std::string& positionName)
 void Scene::SetCameraPosition(const std::string& cameraName)
 {
 	// Find camera or fail. Any *named* camera type is valid.
-	const SceneCamera* camera = mSceneData->GetRoomCamera(cameraName);
-	if(camera == nullptr)
-	{
-		camera = mSceneData->GetCinematicCamera(cameraName);
-		if(camera == nullptr)
-		{
-			camera = mSceneData->GetDialogueCamera(cameraName);
-		}
-	}
+	const SceneCamera* camera = mSceneData->GetAnyCameraWithName(cameraName);
 
 	// If couldn't find a camera with this name, error out!
 	if(camera == nullptr)
@@ -456,15 +448,7 @@ void Scene::SetCameraPositionForConversation(const std::string& conversationName
 void Scene::GlideToCameraPosition(const std::string& cameraName, std::function<void()> finishCallback)
 {
     // Find camera or fail. Any *named* camera type is valid.
-    const SceneCamera* camera = mSceneData->GetRoomCamera(cameraName);
-    if(camera == nullptr)
-    {
-        camera = mSceneData->GetCinematicCamera(cameraName);
-        if(camera == nullptr)
-        {
-            camera = mSceneData->GetDialogueCamera(cameraName);
-        }
-    }
+    const SceneCamera* camera = mSceneData->GetAnyCameraWithName(cameraName);
 
     // If couldn't find a camera with this name, error out!
     if(camera == nullptr)
@@ -733,6 +717,10 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
             });
             actionBar->SetVerbEnabled("INSPECT_UNDO", !mCamera->IsForcedCinematicMode());
         }
+
+        // It's possible for INSPECT to be in the bar already, if it was a verb listed in NVC. 
+        // If so, we should remove it in this case - it's weird to have both INSPECT and INSPECT_UNDO options.
+        actionBar->RemoveVerb("INSPECT");
     }
     else
     {
@@ -743,6 +731,9 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
             });
             actionBar->SetVerbEnabled("INSPECT", !mCamera->IsForcedCinematicMode());
         }
+
+        // Similar to above, we shouldn't have both INSPECT and INSPECT_UNDO active at the same time.
+        actionBar->RemoveVerb("INSPECT_UNDO");
     }
 }
 
@@ -985,7 +976,7 @@ void Scene::SetPaused(bool paused)
     }
 }
 
-void Scene::InspectActiveObject(std::function<void()> finishCallback)
+void Scene::InspectActiveObject(const std::function<void()>& finishCallback)
 {
     // We need an active object, for one.
     if(mActiveObject == nullptr)
@@ -1001,7 +992,7 @@ void Scene::InspectActiveObject(std::function<void()> finishCallback)
     InspectObject(mActiveObject->GetNoun(), finishCallback);
 }
 
-void Scene::InspectObject(const std::string& noun, std::function<void()> finishCallback)
+void Scene::InspectObject(const std::string& noun, const std::function<void()>& finishCallback)
 {
     // Try to get inspect camera for this noun.
     const SceneCamera* inspectCamera = mSceneData->GetInspectCamera(noun);
@@ -1023,11 +1014,22 @@ void Scene::InspectObject(const std::string& noun, std::function<void()> finishC
             }
         }
     }
+    InspectObject(noun, inspectCamera, finishCallback);
+}
+
+void Scene::InspectObject(const std::string& noun, const std::string& cameraName, const std::function<void()>& finishCallback)
+{
+    InspectObject(noun, mSceneData->GetAnyCameraWithName(cameraName), finishCallback);
+}
+
+void Scene::InspectObject(const std::string& noun, const SceneCamera* camera, const std::function<void()>& finishCallback)
+{
+    //mActiveObject = GetSceneObjectByNoun(noun);
 
     // After all that, if we have an inspect camera, use it!
-    if(inspectCamera != nullptr)
+    if(camera != nullptr)
     {
-        mCamera->Inspect(noun, inspectCamera->position, inspectCamera->angle, finishCallback);
+        mCamera->Inspect(noun, camera->position, camera->angle, finishCallback);
     }
     else // No inspect camera for this noun
     {
@@ -1063,7 +1065,7 @@ void Scene::InspectObject(const std::string& noun, std::function<void()> finishC
     }
 }
 
-void Scene::UninspectObject(std::function<void()> finishCallback)
+void Scene::UninspectObject(const std::function<void()>& finishCallback)
 {
     mCamera->Uninspect(finishCallback);
 }

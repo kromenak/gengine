@@ -95,9 +95,11 @@ public:
     
     void SetPaused(bool paused);
 
-    void InspectActiveObject(std::function<void()> finishCallback);
-    void InspectObject(const std::string& noun, std::function<void()> finishCallback);
-    void UninspectObject(std::function<void()> finishCallback);
+    void InspectActiveObject(const std::function<void()>& finishCallback);
+    void InspectObject(const std::string& noun, const std::function<void()>& finishCallback);
+    void InspectObject(const std::string& noun, const std::string& cameraName, const std::function<void()>& finishCallback);
+    void InspectObject(const std::string& noun, const SceneCamera* camera, const std::function<void()>& finishCallback);
+    void UninspectObject(const std::function<void()>& finishCallback);
 
     void SetOverrideBSP(BSP* bsp);
     void ClearOverrideBSP();
