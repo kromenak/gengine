@@ -1,0 +1,12 @@
+// GEngine: copied from game assets to fix a bug.
+// The original file has a mismatch with the font characters - "ÌÍÎÏ" instead of "ÌÍÎ").
+
+Font=ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !@#$%^&*()-=_+[]\{}|;':",./<>?¡¢£¤¥¦§¨©ª«¬­®¯°±´µ·¸»¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎĞÑÒÓÔÕÖ×ØÙÚÛÜİŞßàáâãäåæçèéêëìíîïğñòóôõö÷øùúûüışÿ
+Bitmap Name=sid_pdn_12
+Line Count=3
+Char Extra=0
+Line Extra=2
+Default Char=
+Type=Alpha Blend
+Foreground Color=193/171/47
+Background Color=0/0/0
