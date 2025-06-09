@@ -14,12 +14,14 @@ public:
 
     void Update(float deltaTime);
 
-    void UseDefaultCursor();
+    void UseDefaultCursor(int priority = 0);
     void UseRedHighlightCursor(int priority = 0);
     void UseHighlightCursor(int priority = 0);
     void UseWaitCursor();
     void UseLoadCursor();
     void UseCustomCursor(Cursor* cursor, int priority = 0);
+
+    bool IsUsingWaitCursor() const { return mActiveCursor == mWaitCursor; }
 
 private:
     // The cursor that is active and rendering.
@@ -36,6 +38,10 @@ private:
     Cursor* mHighlightRedCursor = nullptr;
     Cursor* mHighlightBlueCursor = nullptr;
     Cursor* mWaitCursor = nullptr;
+
+    // If true, a wait cursor is shown when an action is playing.
+    // The game is also non-interactive as a result.
+    bool useWaitCursorWhenActionIsPlaying = false;
 
     void SetDesiredCursor(Cursor* cursor,int priority, bool animate = true);
 };

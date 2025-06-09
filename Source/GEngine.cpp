@@ -52,8 +52,8 @@ bool GEngine::Initialize()
     ThreadUtil::Init();
     ThreadPool::Init(4);
 
-	// Tell console to log itself to the "Console" report stream.
-	gConsole.SetReportStream(&gReportManager.GetReportStream("Console"));
+    // Tell console to log itself to the "Console" report stream.
+    gConsole.SetReportStream(&gReportManager.GetReportStream("Console"));
 
     // Init asset manager.
     gAssetManager.Init();
@@ -125,33 +125,33 @@ bool GEngine::Initialize()
     // Create localizer.
     gLocalizer.Load("STRINGS.TXT");
 
-	// Init verb manager.
+    // Init verb manager.
     gVerbManager.Init();
 
-	// Load character configs.
+    // Load character configs.
     gCharacterManager.Init();
 
-	// Load floor configs.
+    // Load floor configs.
     gFootstepManager.Init();
 
     // Init game progress.
     gGameProgress.Init();
 
-	// Init inventory manager.
+    // Init inventory manager.
     gInventoryManager.Init();
 
     // Init location manager.
     gLocationManager.Init();
 
-	// Create action manager.
+    // Create action manager.
     gActionManager.Init();
 
     // Create video player.
     gVideoPlayer.Initialize();
 
-	// Create console UI - this persists for the entire game.
-	ConsoleUI* consoleUI = new ConsoleUI(false);
-	consoleUI->SetIsDestroyOnLoad(false);
+    // Create console UI - this persists for the entire game.
+    ConsoleUI* consoleUI = new ConsoleUI(false);
+    consoleUI->SetIsDestroyOnLoad(false);
 
     // INIT DONE! Move on to starting the game flow.
     // Non-debug: do the full game presentation - company logos, intro movie, title screen.
@@ -175,22 +175,22 @@ bool GEngine::Initialize()
     });
     #endif
 
-	/*
-	TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
-	TODO: Maybe move this to some exporter class or something?
-	Model* gabMod = mAssetManager.LoadModel("GAB.MOD");
-	gabMod->WriteToObjFile("GAB.OBJ");
+    /*
+    TODO: This code allows writing out a vertex animation's frames as individual OBJ files.
+    TODO: Maybe move this to some exporter class or something?
+    Model* gabMod = mAssetManager.LoadModel("GAB.MOD");
+    gabMod->WriteToObjFile("GAB.OBJ");
 
-	GKActor* actor = new GKActor("GAB");
-	actor->GetMeshRenderer()->SetModel(gabMod);
+    GKActor* actor = new GKActor("GAB");
+    actor->GetMeshRenderer()->SetModel(gabMod);
 
-	VertexAnimation* anim = mAssetManager.LoadVertexAnimation("GAB_GABWALK.ACT");
-	for(int i = 0; i < anim->GetFrameCount(); ++i)
-	{
-		actor->SampleAnimation(anim, i);
-		actor->GetMeshRenderer()->GetModel()->WriteToObjFile("GAB_" + std::to_string(i) + ".OBJ");
-	}
-	*/
+    VertexAnimation* anim = mAssetManager.LoadVertexAnimation("GAB_GABWALK.ACT");
+    for(int i = 0; i < anim->GetFrameCount(); ++i)
+    {
+        actor->SampleAnimation(anim, i);
+        actor->GetMeshRenderer()->GetModel()->WriteToObjFile("GAB_" + std::to_string(i) + ".OBJ");
+    }
+    */
     return true;
 }
 
@@ -231,12 +231,12 @@ void GEngine::Run()
     {
         PROFILER_BEGIN_FRAME();
 
-		// Our main loop: inputs, updates, outputs.
+        // Our main loop: inputs, updates, outputs.
         ProcessInput();
         Update();
         GenerateOutputs();
 
-		// Check whether we need a scene change.
+        // Check whether we need a scene change.
         gSceneManager.UpdateLoading();
 
         // Frame is done, do any save or loads now.
@@ -328,7 +328,7 @@ void GEngine::ProcessInput()
     gInputManager.Update();
 
     // If the UI system can receive mouse input, update UI mouse input.
-    if(!Tools::EatingKeyboardInputs() && !gInputManager.IsMouseLocked() && !gActionManager.IsActionPlaying() && !Loader::IsLoading())
+    if(!Tools::EatingKeyboardInputs() && !gInputManager.IsMouseLocked() && (!gActionManager.IsActionPlaying() || mAllowInteractDuringActions) && !Loader::IsLoading())
     {
         UICanvas::UpdateMouseInput();
     }
@@ -342,65 +342,65 @@ void GEngine::ProcessInput()
 
         switch(event.type)
         {
-			case SDL_KEYDOWN:
-			{
+            case SDL_KEYDOWN:
+            {
                 // Ignore if tool overlay is eating keyboard inputs.
                 if(Tools::EatingKeyboardInputs()) { break; }
 
                 // When a text input is active, controls for manipulating text and cursor pos.
-				if(event.key.keysym.sym == SDLK_BACKSPACE)
-				{
-					TextInput* textInput = gInputManager.GetTextInput();
-					if(textInput != nullptr)
-					{
-						textInput->DeletePrev();
-					}
-				}
-				else if(event.key.keysym.sym == SDLK_DELETE)
-				{
-					TextInput* textInput = gInputManager.GetTextInput();
-					if(textInput != nullptr)
-					{
-						textInput->DeleteNext();
-					}
-				}
-				else if(event.key.keysym.sym == SDLK_LEFT)
-				{
-					TextInput* textInput = gInputManager.GetTextInput();
-					if(textInput != nullptr)
-					{
-						textInput->MoveCursorBack();
-					}
-				}
-				else if(event.key.keysym.sym == SDLK_RIGHT)
-				{
-					TextInput* textInput = gInputManager.GetTextInput();
-					if(textInput != nullptr)
-					{
-						textInput->MoveCursorForward();
-					}
-				}
-				else if(event.key.keysym.sym == SDLK_HOME)
-				{
-					TextInput* textInput = gInputManager.GetTextInput();
-					if(textInput != nullptr)
-					{
-						textInput->MoveCursorToStart();
-					}
-				}
-				else if(event.key.keysym.sym == SDLK_END)
-				{
-					TextInput* textInput = gInputManager.GetTextInput();
-					if(textInput != nullptr)
-					{
-						textInput->MoveCursorToEnd();
-					}
-				}
+                if(event.key.keysym.sym == SDLK_BACKSPACE)
+                {
+                    TextInput* textInput = gInputManager.GetTextInput();
+                    if(textInput != nullptr)
+                    {
+                        textInput->DeletePrev();
+                    }
+                }
+                else if(event.key.keysym.sym == SDLK_DELETE)
+                {
+                    TextInput* textInput = gInputManager.GetTextInput();
+                    if(textInput != nullptr)
+                    {
+                        textInput->DeleteNext();
+                    }
+                }
+                else if(event.key.keysym.sym == SDLK_LEFT)
+                {
+                    TextInput* textInput = gInputManager.GetTextInput();
+                    if(textInput != nullptr)
+                    {
+                        textInput->MoveCursorBack();
+                    }
+                }
+                else if(event.key.keysym.sym == SDLK_RIGHT)
+                {
+                    TextInput* textInput = gInputManager.GetTextInput();
+                    if(textInput != nullptr)
+                    {
+                        textInput->MoveCursorForward();
+                    }
+                }
+                else if(event.key.keysym.sym == SDLK_HOME)
+                {
+                    TextInput* textInput = gInputManager.GetTextInput();
+                    if(textInput != nullptr)
+                    {
+                        textInput->MoveCursorToStart();
+                    }
+                }
+                else if(event.key.keysym.sym == SDLK_END)
+                {
+                    TextInput* textInput = gInputManager.GetTextInput();
+                    if(textInput != nullptr)
+                    {
+                        textInput->MoveCursorToEnd();
+                    }
+                }
 
                 // Ctrl + C: Copy text from text input.
                 // Ctrl + X: Cut text from text input.
                 // Ctrl + V: Past text from text input.
-				else if(event.key.keysym.sym == SDLK_c)
+                else if(event.key.keysym.sym == SDLK_c)
                 {
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_CTRL) != 0)
@@ -412,7 +412,7 @@ void GEngine::ProcessInput()
                         }
                     }
                 }
-				else if(event.key.keysym.sym == SDLK_x)
+                else if(event.key.keysym.sym == SDLK_x)
                 {
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_CTRL) != 0)
@@ -425,7 +425,7 @@ void GEngine::ProcessInput()
                         }
                     }
                 }
-				else if(event.key.keysym.sym == SDLK_v)
+                else if(event.key.keysym.sym == SDLK_v)
                 {
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_CTRL) != 0)
@@ -439,7 +439,7 @@ void GEngine::ProcessInput()
                 }
 
                 // Alt + Enter: toggle fullscreen mode
-				else if(event.key.keysym.sym == SDLK_RETURN)
+                else if(event.key.keysym.sym == SDLK_RETURN)
                 {
                     SDL_Keymod modState = SDL_GetModState();
                     if((modState & KMOD_ALT) != 0)
@@ -464,21 +464,21 @@ void GEngine::ProcessInput()
                     });
                 }
                 */
-				break;
-			}
+                break;
+            }
 
-			case SDL_TEXTINPUT:
-			{
+            case SDL_TEXTINPUT:
+            {
                 // Ignore if tool overlay is eating keyboard inputs.
                 if(Tools::EatingKeyboardInputs()) { break; }
 
-				TextInput* textInput = gInputManager.GetTextInput();
-				if(textInput != nullptr)
-				{
-					textInput->Insert(event.text.text);
-				}
-				break;
-			}
+                TextInput* textInput = gInputManager.GetTextInput();
+                if(textInput != nullptr)
+                {
+                    textInput->Insert(event.text.text);
+                }
+                break;
+            }
 
             case SDL_MOUSEWHEEL:
             {
@@ -571,6 +571,21 @@ void GEngine::Update()
         gActionManager.PerformPendingActionSkip();
     }
 
+    // Update cursor based on high-level game state.
+    // If loading or playing an action, the load/wait cursors are higher priority than anything else.
+    if(Loader::IsLoading())
+    {
+        gCursorManager.UseLoadCursor();
+    }
+    else if(gActionManager.IsActionPlaying() && !mAllowInteractDuringActions)
+    {
+        gCursorManager.UseWaitCursor();
+    }
+    else if(gCursorManager.IsUsingWaitCursor())
+    {
+        gCursorManager.UseDefaultCursor();
+    }
+
     // Update location system.
     gLocationManager.Update();
 
@@ -583,8 +598,8 @@ void GEngine::Update()
     // Update cursors.
     gCursorManager.Update(deltaTime);
 
-	// Update debug visualizations.
-	Debug::Update(deltaTime);
+    // Update debug visualizations.
+    Debug::Update(deltaTime);
 
     // Update tools.
     Tools::Update();

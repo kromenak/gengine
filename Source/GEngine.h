@@ -34,6 +34,7 @@ public:
     // GK-specific stuff here
     void StartGame() const;
     bool IsDemoMode() const { return mDemoMode; }
+    void SetAllowInteractDuringActions(bool allow) { mAllowInteractDuringActions = allow; }
 
     void OnPersist(PersistState& ps);
 
@@ -42,8 +43,8 @@ private:
     static GEngine* sInstance;
 
     // Is the game running? While true, we loop. When false, the game exits.
-	// False by default, but set to true after initialization.
-	bool mRunning = false;
+    // False by default, but set to true after initialization.
+    bool mRunning = false;
 
     // Tracks what frame the game is on. First full frame execution is frame 0.
     // Assuming 60FPS, it would take ~800 days for this value to wrap. Not too concerning.
@@ -58,6 +59,10 @@ private:
 
     // If true, the game runs as the "demo" version of the game.
     bool mDemoMode = false;
+
+    // If true, interacting is allowed during actions.
+    // Typically this isn't allowed, but it's overridden for the settings menu.
+    bool mAllowInteractDuringActions = false;
 
     void ShowOpeningMovies();
     void ShowTitleScreen();

@@ -18,24 +18,6 @@ void CursorManager::Init()
 
 void CursorManager::Update(float deltaTime)
 {
-    //TODO: Don't really like the coupling to Loader/ActionManager here.
-    // If loading or playing an action, the load/wait cursors are higher priority than anything else.
-    if(Loader::IsLoading())
-    {
-        UseLoadCursor();
-    }
-    else if(gActionManager.IsActionPlaying())
-    {
-        UseWaitCursor();
-    }
-    else
-    {
-        if(mWaitCursor == mActiveCursor)
-        {
-            UseDefaultCursor();
-        }
-    }
-
     // If there's a desired cursor, use it.
     if(mDesiredCursor != nullptr)
     {
@@ -59,10 +41,10 @@ void CursorManager::Update(float deltaTime)
     }
 }
 
-void CursorManager::UseDefaultCursor()
+void CursorManager::UseDefaultCursor(int priority)
 {
     // The default cursor has low priority - only use it if nothing of higher priority is specified.
-    SetDesiredCursor(mDefaultCursor, 0);
+    SetDesiredCursor(mDefaultCursor, priority);
 }
 
 void CursorManager::UseRedHighlightCursor(int priority)

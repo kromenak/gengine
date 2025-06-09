@@ -4,6 +4,7 @@
 #include "AssetManager.h"
 #include "AudioManager.h"
 #include "CaptionsOverlay.h"
+#include "CursorManager.h"
 #include "GameCamera.h"
 #include "GameProgress.h"
 #include "GEngine.h"
@@ -176,6 +177,9 @@ void OptionBar::Show()
 
     // Force to be fully on screen.
     KeepOnScreen();
+
+    // When the option bar is showing, you are allowed to interact with it, even during an action.
+    GEngine::Instance()->SetAllowInteractDuringActions(true);
 }
 
 void OptionBar::Hide()
@@ -191,6 +195,9 @@ void OptionBar::Hide()
 
     // Hide the main section.
     SetActive(false);
+
+    // Since we're closing this bar, stop allowing interacting during actions.
+    GEngine::Instance()->SetAllowInteractDuringActions(false);
 }
 
 void OptionBar::OnUpdate(float deltaTime)

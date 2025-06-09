@@ -16,11 +16,11 @@ int main(int argc, const char* argv[])
     printf("--------------------\n");
 
     // Create the engine.
-	GEngine engine;
-	
+    GEngine engine;
+    
     // If init succeeds, we can "run" the engine.
     // If init fails, the program ends immediately. Failing code will output an error of some kind.
-	bool initSucceeded = engine.Initialize();
+    bool initSucceeded = engine.Initialize();
     if(initSucceeded)
     {
         engine.Run();
