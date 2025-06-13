@@ -13,7 +13,7 @@ TYPEINFO_INIT(Animator, Component, 8)
 
 Animator::Animator(Actor* owner) : Component(owner)
 {
-    
+
 }
 
 void Animator::Start(Animation* animation, std::function<void()> finishCallback)
@@ -39,7 +39,7 @@ void Animator::Start(const AnimParams& animParams, std::function<void()> finishC
         return;
     }
     //printf("Start animation %s\n", animParams.animation->GetName().c_str());
-    
+
     // Create anim state for animation with appropriate "allow move" value.
     mActiveAnimations.emplace_back();
     mActiveAnimations.back().params = animParams;
@@ -89,7 +89,7 @@ void Animator::StopAll()
 void Animator::Sample(Animation* animation, int frame)
 {
 	if(animation == nullptr) { return; }
-	
+
 	// Sample any anim nodes for the desired frame.
 	std::vector<AnimNode*>* frameData = animation->GetFrame(frame);
 	if(frameData != nullptr)
@@ -130,43 +130,43 @@ void Animator::OnUpdate(float deltaTime)
 
         // Increment animation timer.
         mActiveAnimations[i].timer += deltaTime;
-		
+
 		/*
 		 Say we have a 6-frame animation:
 		 0----1----2----3----4----5-----
-		 
+
 		 Frame 0 executes immediately when the animation starts.
 		 After that, each frame executes after X seconds have passed.
-		 
+
 		 One issue that arises with "looped" animations particularly is that
 		 the first and last frames are the same pose (0/5 in above example). And in that
 		 case, you don't want that extra "time" after frame 5 to occur, or the
 		 looped animation stutters when it loops.
 		 That's why we use "-1" to decide when to loop/finish the anim.
 		*/
-		
+
 		// Based on how much time has passed, we may need to increment multiple frames of animation in one update loop.
 		// For example, if timer is 0.3, and timePerFrame is 0.1, we need to update 3 times.
 		float timePerFrame = mActiveAnimations[i].params.animation->GetFrameDuration();
 		while(mActiveAnimations[i].timer >= timePerFrame)
 		{
 			// WE ARE EXECUTING A FRAME!
-			
+
 			// Decrement timer by amount for one frame.
 			// "timer" now contains how much time we are ahead of the current frame.
             mActiveAnimations[i].timer -= timePerFrame;
-			
+
 			// Increment the frame.
 			// Frame 0 happens immediately on anim start. Each executed frame is then one more.
             mActiveAnimations[i].currentFrame++;
-			
+
 			// If looping, wrap around the current frame when we reach the end!
 			// Note the "-1" because first and last frames are the same for a looping anim!
             if(mActiveAnimations[i].params.loop)
             {
                 mActiveAnimations[i].currentFrame %= mActiveAnimations[i].params.animation->GetFrameCount() - 1;
             }
-            
+
             // Break out of loop if the animation has ended. Valid frame indexes are 0 to (frameCount - 1), so a frame AT "frameCount" would be invalid.
             // In extreme cases, the timer could be large enough to cover frames that don't exist - just ignore that!
             if(mActiveAnimations[i].currentFrame >= mActiveAnimations[i].params.animation->GetFrameCount())
@@ -221,7 +221,7 @@ void Animator::ExecuteFrame(int animIndex, int frameNumber)
 {
     // Save executing frame #.
     mActiveAnimations[animIndex].executingFrame = frameNumber;
-    
+
     // Get all anim nodes that begin on this frame and start them.
 	std::vector<AnimNode*>* animNodes = mActiveAnimations[animIndex].params.animation->GetFrame(frameNumber);
 	if(animNodes != nullptr)
@@ -234,7 +234,7 @@ void Animator::ExecuteFrame(int animIndex, int frameNumber)
             {
                 continue;
             }
-            
+
             // Play the node!
 			node->Play(&mActiveAnimations[animIndex]);
 		}

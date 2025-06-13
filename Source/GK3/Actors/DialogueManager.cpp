@@ -177,25 +177,33 @@ void DialogueManager::SetConversation(const std::string& conversation, std::func
             GKActor* actor = gSceneManager.GetScene()->GetActorByNoun(settings->actorName);
             if(actor != nullptr)
             {
-                if(settings->talkGas != nullptr)
-                {
-                    mSavedTalkFidgets.emplace_back(actor, actor->GetTalkFidget());
-                    actor->SetTalkFidget(settings->talkGas);
-                }
-                if(settings->listenGas != nullptr)
-                {
-                    mSavedListenFidgets.emplace_back(actor, actor->GetListenFidget());
-                    actor->SetListenFidget(settings->listenGas);
+                // The interrupt counts as a conversation anim that we must wait on.
+                ++mConversationAnimWaitCount;
+                actor->InterruptFidget(true, [this, settings, actor](){
+                    if(settings->talkGas != nullptr)
+                    {
+                        mSavedTalkFidgets.emplace_back(actor, actor->GetTalkFidget());
+                        actor->SetTalkFidget(settings->talkGas);
+                    }
+                    if(settings->listenGas != nullptr)
+                    {
+                        mSavedListenFidgets.emplace_back(actor, actor->GetListenFidget());
+                        actor->SetListenFidget(settings->listenGas);
 
-                    // Start with the listen fidget.
-                    actor->StartFidget(GKActor::FidgetType::Listen);
-                }
+                        // Start with the listen fidget.
+                        actor->StartFidget(GKActor::FidgetType::Listen);
+                    }
 
-                // Use the talk fidget by default if there were no listen fidget defined for some reason.
-                if(settings->talkGas != nullptr && settings->listenGas == nullptr)
-                {
-                    actor->StartFidget(GKActor::FidgetType::Talk);
-                }
+                    // Use the talk fidget by default if there were no listen fidget defined for some reason.
+                    if(settings->talkGas != nullptr && settings->listenGas == nullptr)
+                    {
+                        actor->StartFidget(GKActor::FidgetType::Talk);
+                    }
+
+                    // Finished one conversation anim - see if we're done entering the conversation.
+                    --mConversationAnimWaitCount;
+                    CheckConversationAnimFinishCallback();
+                });
             }
         }
 
@@ -324,7 +332,7 @@ void DialogueManager::PlayNextDialogueLine()
     AnimParams yakAnimParams;
     yakAnimParams.animation = yak;
     yakAnimParams.isYak = true;
-    
+
     // It's important to get the "active" animator here, since dialogues are one of the few (only?) instances where animations can play while the scene is paused.
     // For example, if you interact with items in the inventory, the scene is paused, but dialogue still needs to play - the global animator should be used if the scene one is paused.
     Scene::GetActiveAnimator()->Start(yakAnimParams);

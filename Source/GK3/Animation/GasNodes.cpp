@@ -170,7 +170,7 @@ float ChooseWalkGasNode::Execute(GasPlayer* player)
     // At this point, if we don't have a position to use, we have to just skip this node.
     // Means no walk position was usable.
     if(scenePosition == nullptr) { return 0; }
-    
+
     // Start walk to.
     int executionCounter = player->GetExecutionCounter();
     actor->WalkToGas(scenePosition->position, scenePosition->heading, [player, executionCounter](){
@@ -184,7 +184,16 @@ float ChooseWalkGasNode::Execute(GasPlayer* player)
 float UseIPosGasNode::Execute(GasPlayer* player)
 {
     // We'll just assume the position name provided is valid - or else null is set.
-    player->SetInterruptPosition(gSceneManager.GetScene()->GetPosition(positionName));
+    if(forTalk)
+    {
+        player->SetTalkInterruptPosition(gSceneManager.GetScene()->GetPosition(positionName));
+        player->SetTalkInterruptAnimation(animation);
+    }
+    else
+    {
+        player->SetInterruptPosition(gSceneManager.GetScene()->GetPosition(positionName));
+        player->SetInterruptAnimation(animation);
+    }
     return 0.0f;
 }
 
@@ -192,23 +201,40 @@ float UseCleanupGasNode::Execute(GasPlayer* player)
 {
     if(animationNeedingCleanup != nullptr && animationDoingCleanup != nullptr)
     {
-        player->SetCleanup(animationNeedingCleanup, animationDoingCleanup);
+        if(forTalk)
+        {
+            player->SetTalkCleanup(animationNeedingCleanup, animationDoingCleanup);
+        }
+        else
+        {
+            player->SetCleanup(animationNeedingCleanup, animationDoingCleanup);
+        }
     }
     return 0.0f;
 }
 
-float UseTalkIPosGasNode::Execute(GasPlayer* player)
+float UseNewIdleGasNode::Execute(GasPlayer* player)
 {
-    // We'll just assume the position name provided is valid - or else null is set.
-    player->SetTalkInterruptPosition(gSceneManager.GetScene()->GetPosition(positionName));
+    if(forTalk)
+    {
+        player->SetNewIdleOnTalkAction(newGas);
+    }
+    else
+    {
+        player->SetNewIdleOnAction(newGas);
+    }
     return 0.0f;
 }
 
-float UseTalkCleanupGasNode::Execute(GasPlayer* player)
+float UseClearFlagGasNode::Execute(GasPlayer* player)
 {
-    if(animationNeedingCleanup != nullptr && animationDoingCleanup != nullptr)
+    if(forTalk)
     {
-        player->SetTalkCleanup(animationNeedingCleanup, animationDoingCleanup);
+        player->SetTalkInterruptClearFlag(clearFlag);
+    }
+    else
+    {
+        player->SetInterruptClearFlag(clearFlag);
     }
     return 0.0f;
 }

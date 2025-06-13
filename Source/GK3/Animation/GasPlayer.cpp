@@ -1,9 +1,15 @@
 #include "GasPlayer.h"
 
+#include "ActionManager.h"
+#include "Actor.h"
+#include "Animation.h"
 #include "Animator.h"
+#include "GameProgress.h"
 #include "GAS.h"
 #include "GasNodes.h"
+#include "GKActor.h"
 #include "SceneManager.h"
+#include "Walker.h"
 
 TYPEINFO_INIT(GasPlayer, Component, 9)
 {
@@ -12,7 +18,7 @@ TYPEINFO_INIT(GasPlayer, Component, 9)
 
 GasPlayer::GasPlayer(Actor* owner) : Component(owner)
 {
-    
+
 }
 
 void GasPlayer::Play(GAS* gas)
@@ -22,6 +28,10 @@ void GasPlayer::Play(GAS* gas)
 
     // Set GAS.
     mGas = gas;
+
+    // Increment execution counter so that any anim callbacks from current GAS nodes are invalidated.
+    // Since the GAS has changed, those callbacks aren't valid anymore.
+    ++mExecutionCounter;
 
     // Treat a null GAS as a request to stop.
     if(mGas == nullptr)
@@ -33,6 +43,8 @@ void GasPlayer::Play(GAS* gas)
     mNodeIndex = -1;
     mTimer = 0.0f;
     mPaused = false;
+    mReceivedNextNodeRequestWhilePaused = false;
+    mCurrentAnimation = nullptr;
 
     // Reset all vars.
     for(int i = 0; i < kMaxVariables; i++)
@@ -40,14 +52,12 @@ void GasPlayer::Play(GAS* gas)
         mVariables[i] = 0;
     }
 
-    // Reset other state vars.
-    mInterruptPosition = nullptr;
-    mCleanupAnims.clear();
-
-    mTalkInterruptPosition = nullptr;
-    mTalkCleanupAnims.clear();
-
+    // Clear distance condition nodes.
     mDistanceConditionNodes.clear();
+
+    // Reset interrupt vars.
+    mInterruptConfig = InterruptConfig();
+    mTalkInterruptConfig = InterruptConfig();
 
     // Execute at least the first node immediately.
     // We don't want to wait until Update is called, since that may not happen until next frame (depending on order of operations).
@@ -55,17 +65,67 @@ void GasPlayer::Play(GAS* gas)
     ProcessNextNode();
 }
 
-void GasPlayer::Stop(std::function<void()> callback)
+void GasPlayer::Pause()
 {
-    // Save stop callback - we'll call this after all cleanups have completed.
-    mStopCallback = callback;
+    if(!mPaused)
+    {
+        mPaused = true;
+        mReceivedNextNodeRequestWhilePaused = false;
+    }
+}
 
+void GasPlayer::Resume()
+{
+    if(mPaused)
+    {
+        // No longer paused.
+        mPaused = false;
+
+        // Process the next node if we got that request while paused.
+        if(mReceivedNextNodeRequestWhilePaused)
+        {
+            mReceivedNextNodeRequestWhilePaused = false;
+            ProcessNextNode();
+        }
+    }
+}
+
+void GasPlayer::Stop(const std::function<void()>& callback)
+{
     // Clear GAS script, which stops any more nodes from executing.
     mGas = nullptr;
 
     // Perform cleanups.
     //TODO: if you stop a fidget due to an error (tried to set a null fidget), it's supposed to IMMEDIATELY STOP (leaving any anims mid-play) - no cleanups.
-    PerformCleanups();
+    PerformCleanups(false, callback);
+}
+
+void GasPlayer::Interrupt(bool forTalk, const std::function<void()>& callback)
+{
+    gActionManager.StartManualAction();
+
+    // We're interrupting playback, so pause.
+    // This also ensures no additional GAS nodes execute during cleanups/walks.
+    Pause();
+
+    // First, play any cleanups. This moves the Actor back to a default pose if in some weird pose.
+    PerformCleanups(forTalk, [this, forTalk, callback](){
+
+        // If there's a clear flag, clear it.
+        // Best to do this before walk code and new idle might clear/change the playing GAS.
+        ClearFlag(forTalk);
+
+        // Then, walk to interrupt position and play any interrupt animation.
+        WalkToInterruptPos(forTalk, [this, forTalk, callback](){
+
+            // Finally, change idle gas, if any is specified.
+            SetNewIdle(forTalk, callback);
+
+            Resume();
+
+            gActionManager.FinishManualAction();
+        });
+    });
 }
 
 void GasPlayer::SetNodeIndex(int index)
@@ -86,11 +146,9 @@ void GasPlayer::NextNode(int forExecutionCounter)
     }
 }
 
-void GasPlayer::StartAnimation(Animation* anim, std::function<void()> finishCallback)
+void GasPlayer::StartAnimation(Animation* anim, const std::function<void()>& finishCallback)
 {
     // Save playing animation so we know whether we need to do cleanups when stopping the autoscript.
-    //TODO: This _might_ not be a good way to do this b/c the animation system might choose to NOT play a GAS animation b/c some other higher priority anim is playing.
-    //TODO: In that case, no cleanups would be necessary. So, it might be better to somehow query the Animator or VertexAnimator to determine whether a cleanup is needed.
     mCurrentAnimation = anim;
 
     // Play the thing.
@@ -103,8 +161,7 @@ void GasPlayer::StartAnimation(Animation* anim, std::function<void()> finishCall
 
 void GasPlayer::OnUpdate(float deltaTime)
 {
-    if(mGas == nullptr) { return; }
-    if(mPaused) { return; }
+    if(mGas == nullptr || mPaused) { return; }
 
     // Decrement timer. When it gets to zero, we move onto the next node.
     if(mTimer > 0.0f)
@@ -141,6 +198,14 @@ void GasPlayer::ProcessNextNode()
         return;
     }
 
+    // We're paused, so we can't process any nodes.
+    // Remember that we got this request for when we unpause though.
+    if(mPaused)
+    {
+        mReceivedNextNodeRequestWhilePaused = true;
+        return;
+    }
+
     // We at least want to execute one node - the next one.
     // But if multiple nodes have zero duration, we should execute them all at once.
     // So, keep looping until we either hit a non-zero-duration node, OR we execute too many nodes (500 is an arbitrary number - could be larger if needed).
@@ -164,7 +229,7 @@ void GasPlayer::ProcessNextNode()
         ++executeCount;
         ++mExecutionCounter;
         mTimer = node->Execute(this);
-        
+
         // This node set a non-zero timer duration, so we can break out of this loop for now.
         if(mTimer != 0.0f)
         {
@@ -173,26 +238,135 @@ void GasPlayer::ProcessNextNode()
     }
 }
 
-void GasPlayer::PerformCleanups()
+void GasPlayer::PerformCleanups(bool forTalk, const std::function<void()>& callback)
 {
-    //TODO: Handle normal vs. talk cleanups.
+    // Get the correct cleanups set.
+    // For talk cleanups, the talk interrupt cleanups take priority, but we fall back on normal interrupt cleanups if empty.
+    std::unordered_map<Animation*, Animation*>* cleanups = nullptr;
+    if(forTalk)
+    {
+        cleanups = &mTalkInterruptConfig.cleanups;
+    }
+    if(cleanups == nullptr || cleanups->empty())
+    {
+        cleanups = &mInterruptConfig.cleanups;
+    }
 
     // See if the currently playing autoscript animation requires any cleanups.
-    auto it = mCleanupAnims.find(mCurrentAnimation);
-    if(it == mCleanupAnims.end())
+    auto it = cleanups->find(mCurrentAnimation);
+    if(it == cleanups->end())
     {
         // No cleanup anim found - we're done!
-        if(mStopCallback != nullptr)
+        if(callback != nullptr)
         {
-            auto callback = mStopCallback;
-            mStopCallback = nullptr;
             callback();
         }
         return;
     }
 
+    // This is a bit hacky, but since we're playing a cleanup anim, increment execution counter so no callbacks from previous anims cause additional nodes to execute.
+    ++mExecutionCounter;
+
     // Ok, let's do the cleanup!
     // When the cleanup finishes, this function re-calls itself, until all cleanups are done.
-    //std::cout << "Performing cleanup " << it->second->GetName() << " for anim " << it->first->GetName() << std::endl;
-    StartAnimation(it->second, std::bind(&GasPlayer::PerformCleanups, this));
+    StartAnimation(it->second, [this, forTalk, callback](){
+        PerformCleanups(forTalk, callback);
+    });
+}
+
+void GasPlayer::WalkToInterruptPos(bool forTalk, const std::function<void()>& callback)
+{
+    // Get the walker and have it walk to the interrupt pos.
+    Walker* walker = GetOwner()->GetComponent<Walker>();
+    if(walker != nullptr)
+    {
+        // Resolve which interrupt position to use.
+        // The talk interrupt position is used for talk interrupts, but falls back on normal interrupt position if not set.
+        const ScenePosition* interruptPos = nullptr;
+        if(forTalk)
+        {
+            interruptPos = mTalkInterruptConfig.position;
+        }
+        if(interruptPos == nullptr)
+        {
+            interruptPos = mInterruptConfig.position;
+        }
+
+        // Walk to the position if we have any.
+        if(interruptPos != nullptr)
+        {
+            walker->WalkTo(interruptPos->position, interruptPos->heading, [this, forTalk, callback](){
+
+                // Do interrupt anim after walk.
+                PlayInterruptAnimation(forTalk, callback);
+            });
+            return;
+        }
+    }
+
+    // If we get here, either there's no walker or there's no interrupt position.
+    // In either case, just skip ahead to play an interrupt anim, if any.
+    PlayInterruptAnimation(forTalk, callback);
+}
+
+void GasPlayer::PlayInterruptAnimation(bool forTalk, const std::function<void()>& callback)
+{
+    // Resolve which animation to play.
+    // As with others, the talk interrupt animation is used for talk interrupts, but falls back on normal interrupt animation if not set.
+    Animation* interruptAnimation = nullptr;
+    if(forTalk)
+    {
+        interruptAnimation = mTalkInterruptConfig.animation;
+    }
+    if(interruptAnimation == nullptr)
+    {
+        interruptAnimation = mInterruptConfig.animation;
+    }
+
+    // Play an animation if we have it.
+    if(interruptAnimation != nullptr)
+    {
+        // This is a bit hacky, but since we're playing a new anim, increment execution counter so no callbacks from previous anims cause additional nodes to execute.
+        ++mExecutionCounter;
+        StartAnimation(interruptAnimation, callback);
+    }
+    else
+    {
+        if(callback != nullptr)
+        {
+            callback();
+        }
+    }
+}
+
+void GasPlayer::SetNewIdle(bool forTalk, const std::function<void()>& callback)
+{
+    // Resolve new GAS to use.
+    GAS* newIdleGas = nullptr;
+    if(forTalk)
+    {
+        newIdleGas = mTalkInterruptConfig.newIdle;
+    }
+    else
+    {
+        newIdleGas = mInterruptConfig.newIdle;
+    }
+
+    // If we've got a new idle GAS, set it on our owner.
+    if(newIdleGas != nullptr && GetOwner()->IsA<GKActor>())
+    {
+        GKActor* gkOwner = static_cast<GKActor*>(GetOwner());
+        gkOwner->SetIdleFidget(newIdleGas);
+    }
+
+    // Whether we set one or not, do the callback.
+    if(callback != nullptr)
+    {
+        callback();
+    }
+}
+
+void GasPlayer::ClearFlag(bool forTalk)
+{
+    gGameProgress.ClearFlag(forTalk ? mTalkInterruptConfig.clearFlag : mInterruptConfig.clearFlag);
 }

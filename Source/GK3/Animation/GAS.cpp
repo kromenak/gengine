@@ -9,16 +9,14 @@
 #include "Animator.h"
 #include "AssetManager.h"
 #include "GasNodes.h"
-#include "GasPlayer.h"
 #include "Localizer.h"
 #include "mstream.h"
-#include "Scene.h"
 #include "StringTokenizer.h"
 #include "StringUtil.h"
 
 TYPEINFO_INIT(GAS, Asset, GENERATE_TYPE_ID)
 {
-    
+
 }
 
 GAS::~GAS()
@@ -32,7 +30,7 @@ GAS::~GAS()
 void GAS::Load(uint8_t* data, uint32_t dataLength)
 {
     imstream stream(reinterpret_cast<char*>(data), dataLength);
-    
+
     // Store any created "ONEOF" node, since they are generated over several lines.
     OneOfGasNode* oneOfNode = nullptr;
 
@@ -49,25 +47,25 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
     std::string line;
     while(StringUtil::GetLineSanitized(stream, line))
     {
-		// Ignore commented out lines (// format)
-		if(line[0] == '/' && line[1] == '/') { continue; }
-		
+        // Ignore commented out lines (// format)
+        if(line[0] == '/' && line[1] == '/') { continue; }
+
         // Split line into tokens based on spaces, commas, and parenthesis.
         StringTokenizer tokenizer(line, { ' ', ',', '(', ')' });
-        
+
         // Blank line? Just move to the next line.
         if(!tokenizer.HasNext()) { continue; }
-        
+
         // The first word will be the main command.
         std::string command = tokenizer.GetNext();
-        
+
         // We keep adding to the same "one of" node as long as they are appearing in a row.
         // But as soon as we reach a line that isn't a "ONEOF" line, we no longer want to add to that one anymore.
         if(oneOfNode != nullptr && !StringUtil::EqualsIgnoreCase(command, "ONEOF"))
         {
             oneOfNode = nullptr;
         }
-        
+
         // Parse remains of the line based on what the command is.
         if(StringUtil::EqualsIgnoreCase(command, "ANIM"))
         {
@@ -77,11 +75,11 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                 std::cout << "Missing anim name in GAS file!" << std::endl;
                 continue;
             }
-            
+
             // Read in the required field (anim name).
             AnimGasNode* node = new AnimGasNode();
             node->animation = gAssetManager.LoadAnimation(tokenizer.GetNext(), GetScope());
-            
+
             // Read in optional fields.
             if(tokenizer.HasNext())
             {
@@ -91,7 +89,7 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
             {
                 node->random = StringUtil::ToInt(tokenizer.GetNext());
             }
-            
+
             // Push onto node list.
             mNodes.push_back(node);
         }
@@ -103,18 +101,18 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                 std::cout << "Missing anim name in GAS file!" << std::endl;
                 continue;
             }
-            
+
             // If no "ONEOF" node is created (aka this is the first one), create it and push it onto the list.
             if(oneOfNode == nullptr)
             {
                 oneOfNode = new OneOfGasNode();
                 mNodes.push_back(oneOfNode);
             }
-            
+
             // Read in the required field (anim name).
             AnimGasNode* node = new AnimGasNode();
             node->animation = gAssetManager.LoadAnimation(tokenizer.GetNext(), GetScope());
-            
+
             // Read in optional fields.
             if(tokenizer.HasNext())
             {
@@ -124,7 +122,7 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
             {
                 node->random = StringUtil::ToInt(tokenizer.GetNext());
             }
-            
+
             // Instead of pushing onto main node list, we push onto the one of's vector.
             oneOfNode->animNodes.push_back(node);
         }
@@ -136,11 +134,11 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                 std::cout << "Missing min wait time in GAS file!" << std::endl;
                 continue;
             }
-            
+
             // Read in min wait time.
             WaitGasNode* node = new WaitGasNode();
             node->minWaitTimeSeconds = StringUtil::ToFloat(tokenizer.GetNext());
-            
+
             // Optional token (max wait time).
             if(tokenizer.HasNext())
             {
@@ -161,7 +159,7 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                 assert(tokenizer.HasNext());
                 node->random = StringUtil::ToInt(tokenizer.GetNext());
             }
-            
+
             // Push onto list.
             mNodes.push_back(node);
         }
@@ -298,7 +296,7 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                 std::cout << "Invalid operation in IF" << std::endl;
                 continue;
             }
-            
+
             // Create the node.
             IfGasNode* node = new IfGasNode();
             node->varName = varName[0];
@@ -371,18 +369,14 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                     continue;
                 }
 
-                if(isUseTalk)
+                UseIPosGasNode* node = new UseIPosGasNode();
+                node->positionName = tokenizer.GetNext();
+                node->forTalk = isUseTalk;
+                if(tokenizer.HasNext())
                 {
-                    UseTalkIPosGasNode* node = new UseTalkIPosGasNode();
-                    node->positionName = tokenizer.GetNext();
-                    mNodes.push_back(node);
+                    node->animation = gAssetManager.LoadAnimation(tokenizer.GetNext(), GetScope());
                 }
-                else
-                {
-                    UseIPosGasNode* node = new UseIPosGasNode();
-                    node->positionName = tokenizer.GetNext();
-                    mNodes.push_back(node);
-                }
+                mNodes.push_back(node);
             }
             else if(StringUtil::EqualsIgnoreCase(subcommand, "CLEANUP"))
             {
@@ -403,20 +397,11 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                 //TODO: I'm not sure if nodes are actually needed for defining cleanups like this...
                 //TODO: Mayyybe the cleanup mappings could just be defined in the GAS asset as static data.
                 //TODO: But I'm not sure yet whether autoscripts expect this mapping to dynamically update as the script plays or not...
-                if(isUseTalk)
-                {
-                    UseTalkCleanupGasNode* node = new UseTalkCleanupGasNode();
-                    node->animationNeedingCleanup = gAssetManager.LoadAnimation(animNeedingCleanupName, GetScope());
-                    node->animationDoingCleanup = gAssetManager.LoadAnimation(animDoingCleanupName, GetScope());
-                    mNodes.push_back(node);
-                }
-                else
-                {
-                    UseCleanupGasNode* node = new UseCleanupGasNode();
-                    node->animationNeedingCleanup = gAssetManager.LoadAnimation(animNeedingCleanupName, GetScope());
-                    node->animationDoingCleanup = gAssetManager.LoadAnimation(animDoingCleanupName, GetScope());
-                    mNodes.push_back(node);
-                }
+                UseCleanupGasNode* node = new UseCleanupGasNode();
+                node->animationNeedingCleanup = gAssetManager.LoadAnimation(animNeedingCleanupName, GetScope());
+                node->animationDoingCleanup = gAssetManager.LoadAnimation(animDoingCleanupName, GetScope());
+                node->forTalk = isUseTalk;
+                mNodes.push_back(node);
             }
             else if(StringUtil::EqualsIgnoreCase(subcommand, "NEWIDLE"))
             {
@@ -425,16 +410,24 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
                     std::cout << "Missing autoscript name in USE NEWIDLE" << std::endl;
                     continue;
                 }
-                std::string newIdleGasName = tokenizer.GetNext();
 
-                if(isUseTalk)
+                UseNewIdleGasNode* node = new UseNewIdleGasNode();
+                node->newGas = gAssetManager.LoadGAS(tokenizer.GetNext(), GetScope());
+                node->forTalk = isUseTalk;
+                mNodes.push_back(node);
+            }
+            else if(StringUtil::EqualsIgnoreCase(subcommand, "CLEARFLAG"))
+            {
+                if(!tokenizer.HasNext())
                 {
-                    //TODO: 
+                    std::cout << "Missing flag name in USE CLEARFLAG" << std::endl;
+                    continue;
                 }
-                else
-                {
-                    //TODO:
-                }
+
+                UseClearFlagGasNode* node = new UseClearFlagGasNode();
+                node->clearFlag = tokenizer.GetNext();
+                node->forTalk = isUseTalk;
+                mNodes.push_back(node);
             }
         }
         else if(StringUtil::EqualsIgnoreCase(command, "NEWIDLE"))
@@ -452,7 +445,7 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
         else if(StringUtil::EqualsIgnoreCase(command, "WHENNEAR") ||
                 StringUtil::EqualsIgnoreCase(command, "WHENNOLONGERNEAR"))
         {
-            // Get required parameters. 
+            // Get required parameters.
             if(!tokenizer.HasNext())
             {
                 std::cout << "Missing noun in WHENNEAR/WHENNOLONGERNEAR" << std::endl;
@@ -488,19 +481,19 @@ void GAS::Load(uint8_t* data, uint32_t dataLength)
             node->distance = distance;
             node->otherNoun = otherNoun;
             mNodes.push_back(node);
-            
+
             // Remember that we need to come back and hook up the label index later.
             whenNoLongerNearNodePairs.push_back(std::make_pair(label, node));
         }
         else if(StringUtil::EqualsIgnoreCase(command, "DLG"))
-        { 
+        {
             if(!tokenizer.HasNext())
             {
                 std::cout << "Missing yak in DLG" << std::endl;
                 continue;
             }
 
-            // Attempt to load YAK using current language. 
+            // Attempt to load YAK using current language.
             std::string yakName = tokenizer.GetNext();
             Animation* yakAnimation = gAssetManager.LoadYak(Localizer::GetLanguagePrefix() + yakName, GetScope());
             if(yakAnimation == nullptr)

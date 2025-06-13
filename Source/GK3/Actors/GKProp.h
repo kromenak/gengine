@@ -26,7 +26,7 @@ public:
     GKProp(const SceneModel& modelDef);
 
     void Init(const SceneData& sceneData);
-    
+
     void StartFidget(GAS* gas);
     void StartFidget();
     void StopFidget(std::function<void()> callback = nullptr);
@@ -36,7 +36,7 @@ public:
     void StopAnimation(VertexAnimation* anim = nullptr) override;
     MeshRenderer* GetMeshRenderer() const override { return mMeshRenderer; }
     AABB GetAABB() override;
-	
+
 private:
     // The prop's mesh renderer.
     MeshRenderer* mMeshRenderer = nullptr;

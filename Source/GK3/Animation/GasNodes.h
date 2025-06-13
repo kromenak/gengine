@@ -81,7 +81,7 @@ struct SetGasNode : public GasNode
 struct IncGasNode : public GasNode
 {
     char varName = 'A';
-    
+
     float Execute(GasPlayer* player) override;
 };
 
@@ -139,6 +139,8 @@ struct ChooseWalkGasNode : public GasNode
 struct UseIPosGasNode : public GasNode
 {
     std::string positionName;
+    Animation* animation = nullptr;
+    bool forTalk = false;
 
     float Execute(GasPlayer* player) override;
 };
@@ -148,36 +150,30 @@ struct UseCleanupGasNode : public GasNode
 {
     Animation* animationNeedingCleanup = nullptr;
     Animation* animationDoingCleanup = nullptr;
+    bool forTalk = false;
 
     float Execute(GasPlayer* player) override;
 };
 
-//TODO: UseNewIdle (used occasionally, maybe important)
-
-// A node that defines an interrupt spot to use specifically for talking.
-struct UseTalkIPosGasNode : public GasNode
+struct UseNewIdleGasNode : public GasNode
 {
-    std::string positionName;
+    GAS* newGas = nullptr;
+    bool forTalk = false;
 
     float Execute(GasPlayer* player) override;
 };
 
-// A node that defines an animation "cleanup" pair to use specifically when talking.
-struct UseTalkCleanupGasNode : public GasNode
+struct UseClearFlagGasNode : public GasNode
 {
-    Animation* animationNeedingCleanup = nullptr;
-    Animation* animationDoingCleanup = nullptr;
+    std::string clearFlag;
+    bool forTalk = false;
 
     float Execute(GasPlayer* player) override;
 };
-
-//TODO: UseTalkNewIdle (used occasionally, maybe important)
 
 //TODO: UseClearMood (never used in the game)
-//TODO: UseTalkClearMood (never used in the game)
 
 // A node that switches the actor to a new GAS script.
-//TODO: Despite the NEWIDLE keyword used in scripts, a better name for this might be like "ChangeScriptGasNode" or something.
 struct NewIdleGasNode : public GasNode
 {
     GAS* newGas = nullptr;

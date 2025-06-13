@@ -1024,8 +1024,6 @@ void Scene::InspectObject(const std::string& noun, const std::string& cameraName
 
 void Scene::InspectObject(const std::string& noun, const SceneCamera* camera, const std::function<void()>& finishCallback)
 {
-    //mActiveObject = GetSceneObjectByNoun(noun);
-
     // After all that, if we have an inspect camera, use it!
     if(camera != nullptr)
     {

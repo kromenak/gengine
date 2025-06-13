@@ -73,7 +73,7 @@ public:
     void IncNounVerbCount(const std::string& actor, const std::string& noun, const std::string& verb);
 
     void OnPersist(PersistState& ps);
-	
+
 private:
 	// Score tracking.
     int mMaxScore = 965;
@@ -84,24 +84,24 @@ private:
 
     // Tracks which score events the player has already triggered.
     std::string_map_ci<bool> mScoreEventFlags;
-	
+
 	// Current and last time blocks.
 	Timeblock mTimeblock;
 	Timeblock mLastTimeblock;
 
     // If true, we are currently changing timeblocks.
     bool mChangingTimeblock = false;
-	
+
 	// General-use true/false flags for game logic.
     FlagSet mGameFlags;
-	
+
 	// Tracks the number of times the player has chatted with a noun.
 	std::string_map_ci<int> mChatCounts;
-	
+
 	// Maps noun/topic combos to a count value.
 	// Tracks the number of times we've talked to a noun about a topic.
 	std::string_map_ci<int> mTopicCounts;
-	
+
 	// Maps noun/verb to a count value.
 	// Tracks the number of times we've triggered a verb on a noun.
 	std::string_map_ci<int> mNounVerbCounts;

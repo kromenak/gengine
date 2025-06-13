@@ -53,7 +53,7 @@ GKActor::GKActor(const SceneActor* actorDef) :
     mMeshRenderer = mModelActor->AddComponent<MeshRenderer>();
     mMeshRenderer->SetShader(gAssetManager.LoadShader("3D-Tex-Lit")); // Shader must be applied first
     mMeshRenderer->SetModel(mActorDef->model);
-    
+
     // Add vertex animator so the 3D model can be animated.
     mVertexAnimator = mModelActor->AddComponent<VertexAnimator>();
 
@@ -104,7 +104,7 @@ void GKActor::Init(const SceneData& sceneData)
             SetHeading(scenePos->heading);
         }
     }
-    
+
     // Set initial idle/talk/listen fidgets for this actor.
     SetIdleFidget(mActorDef->idleGas);
     SetTalkFidget(mActorDef->talkGas);
@@ -197,11 +197,13 @@ void GKActor::StartFidget(FidgetType type)
         // This seems to help with how some fidgets interact with the walker system.
         SetModelRotationToActorRotation();
 
-        //printf("%s: starting fidget %s\n", GetNoun().c_str(), newFidget->GetName().c_str());
-        mGasPlayer->Stop([this, newFidget](){
-            mGasPlayer->Play(newFidget);
-        });
+        // Play the fidget.
+        // You might ask: should we stop the previous fidget first, to ensure cleanups play? Maybe! This actually does help fix a bug when talking to the moped guy.
+        // On the other hand, stopping the previous fidget first errantly plays extra cleanups in other cases (Gabe talking to Mosely in R33).
+        // Not stopping the previous fidget for now, but may need to revisit this...
+        mGasPlayer->Play(newFidget);
         mActiveFidget = type;
+        //printf("%s: starting fidget %s\n", GetNoun().c_str(), newFidget->GetName().c_str());
     }
 }
 
@@ -229,37 +231,52 @@ void GKActor::SetListenFidget(GAS* fidget)
     CheckUpdateActiveFidget(FidgetType::Listen);
 }
 
+void GKActor::InterruptFidget(bool forTalk, const std::function<void()>& callback)
+{
+    mGasPlayer->Interrupt(forTalk, callback);
+}
+
 void GKActor::TurnTo(const Heading& heading, std::function<void()> finishCallback)
 {
-	mWalker->WalkTo(GetPosition(), heading, finishCallback);
+    InterruptFidget(false, [this, heading, finishCallback](){
+        mWalker->WalkTo(GetPosition(), heading, finishCallback);
+    });
 }
 
 void GKActor::WalkTo(const Vector3& position, std::function<void()> finishCallback)
 {
-    mWalker->WalkTo(position, finishCallback);
+    InterruptFidget(false, [this, position, finishCallback](){
+        mWalker->WalkTo(position, finishCallback);
+    });
 }
 
 void GKActor::WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
 {
-	mWalker->WalkTo(position, heading, finishCallback);
+    InterruptFidget(false, [this, position, heading, finishCallback](){
+        mWalker->WalkTo(position, heading, finishCallback);
+    });
 }
 
 void GKActor::WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
 {
     // This version of the function is needed just to tell the walker if this walk request is coming from a GAS script or not!
-    mWalker->WalkToGas(position, heading, finishCallback);
+    InterruptFidget(false, [this, position, heading, finishCallback](){
+        mWalker->WalkToGas(position, heading, finishCallback);
+    });
 }
 
 void GKActor::WalkToSee(GKObject* target, std::function<void()> finishCallback)
 {
-    mWalker->WalkToSee(target, finishCallback);
+    InterruptFidget(false, [this, target, finishCallback](){
+        mWalker->WalkToSee(target, finishCallback);
+    });
 }
 
 void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback)
 {
 	// Need a valid anim.
 	if(anim == nullptr) { return; }
-	
+
 	// GOAL: walk the actor to the initial position/rotation of this anim.
 	// Retrieve vertex animation that matches this actor's model.
 	// If no vertex anim exists, we can't walk to animation start! This is probably a developer error.
@@ -290,7 +307,9 @@ void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finish
     Heading heading = Heading::FromQuaternion(transformMatrix.GetRotation() * Quaternion(Vector3::UnitY, Math::kPi));
 
     // Walk to that position/heading.
-    mWalker->WalkTo(walkPos, heading, finishCallback);
+    InterruptFidget(false, [this, walkPos, heading, finishCallback](){
+        mWalker->WalkTo(walkPos, heading, finishCallback);
+    });
 
     // To visualize walk position/heading.
     //Debug::DrawLine(walkPos, walkPos + Vector3::UnitY * 10.0f, Color32::Orange, 10.0f);
@@ -415,7 +434,7 @@ void GKActor::StartAnimation(VertexAnimParams& animParams)
         mModelActor->SetPosition(animParams.absolutePosition);
         mModelActor->SetRotation(animParams.absoluteHeading.ToQuaternion());
     }
-    
+
     // Relative anims play with the 3D model starting at the Actor's current position/rotation.
     // So, do a sync to ensure the 3D model is at the Actor's position.
     if(!animParams.absolute)
@@ -511,7 +530,7 @@ void GKActor::OnLateUpdate(float deltaTime)
 
     // Set actor position/rotation to match model's floor position/rotation.
     SyncActorToModelPositionAndRotation();
-    
+
     // Have the blob shadow always be underneath the model's floor position.
     // Move the shadow up slightly to avoid z-fighting with floor (or rendering under floor).
     Vector3 leftShoeWorldPos;
@@ -696,7 +715,7 @@ void GKActor::SetModelRotationToActorRotation()
     Vector3 desiredDirection = GetHeading().ToDirection();
     //Debug::DrawLine(GetPosition(), GetPosition() + modelDirection * 10.0f, Color32::Magenta, 60.0f);
     //Debug::DrawLine(GetPosition(), GetPosition() + desiredDirection * 10.0f, Color32::Magenta, 60.0f);
-        
+
     // Get the angle between the model's direction and the actor's direction.
     float angleRadians = Math::Acos(Vector3::Dot(modelDirection, desiredDirection));
 
@@ -782,10 +801,9 @@ void GKActor::CheckUpdateActiveFidget(FidgetType changedType)
     // If we just changed the active fidget...
     if(mActiveFidget == changedType)
     {
-        GAS* fidget = GetGasForFidget(changedType);
-
         // If the gas file for the active fidget has changed to null, that forces fidget to stop.
         // Otherwise, we just immediately play the new gas file.
+        GAS* fidget = GetGasForFidget(changedType);
         if(fidget == nullptr)
         {
             StopFidget();
