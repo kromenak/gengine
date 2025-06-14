@@ -640,8 +640,19 @@ SceneCastResult Scene::RaycastAABBs(const Ray& ray, GKObject** ignore, int ignor
 
     if(result.hitObject != nullptr)
     {
-        result.hitInfo.name = result.hitObject->GetNoun();
-        result.hitInfo.actor = result.hitObject;
+        // If an object was hit, we should still check the BSP in general to see if some geometry is obscuring the object.
+        RaycastHit bspHitInfo;
+        if(GetBSP()->RaycastNearest(ray, bspHitInfo) && bspHitInfo.t < result.hitInfo.t)
+        {
+            result.hitObject = nullptr;
+            result.hitInfo = bspHitInfo;
+        }
+        else
+        {
+            // If no BSP is in the way, fill in that we definitely hit an object with the raycast.
+            result.hitInfo.name = result.hitObject->GetNoun();
+            result.hitInfo.actor = result.hitObject;
+        }
     }
     return result;
 }
