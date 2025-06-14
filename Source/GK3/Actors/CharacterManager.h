@@ -21,103 +21,103 @@ struct FaceConfig
 {
     std::string identifier;
 
-	// Default textures for face/eyelids/forehead.
-	Texture* faceTexture = nullptr;
-	Texture* eyelidsTexture = nullptr;
-	Texture* foreheadTexture = nullptr;
+    // Default textures for face/eyelids/forehead.
+    Texture* faceTexture = nullptr;
+    Texture* eyelidsTexture = nullptr;
+    Texture* foreheadTexture = nullptr;
     Texture* mouthTexture = nullptr;
-	
-	// Left and right eye textures.
-	Texture* leftEyeTexture = nullptr;
-	Texture* rightEyeTexture = nullptr;
-	
-	// Offset (in pixels) of top-left corner of eyes in the face texture.
-	Vector2 leftEyeOffset;
-	Vector2 rightEyeOffset;
-	
-	// ???
-	Vector2 leftEyeBias;
-	Vector2 rightEyeBias;
-	
-	// Max distance left/right eyes can move, in pixels.
-	Vector2 maxEyeLookDistance;
-	
-	// Frequency of eye jitters in milliseconds.
-	// And max jitter distance in each direction, in subpixels.
-	Vector2 eyeJitterFrequency;
-	Vector2 maxEyeJitterDistance;
-	
-	// Horizontal & vertical FOV, in degrees.
-	// Second one is used to determine whether to move head.
-	Vector2 eyeFieldOfView;
-	Vector2 eyeShortFieldOfView;
-	
-	// How far apart eyes are, in inches.
-	float eyeSeparation = 0.0f;
-	
-	// Approximate head radius, in inches.
-	// And an offset to "virtual" head center, in inches (everyone just uses (0,0,0)).
-	float headRadius = 0.0f;
-	Vector3 headCenterOffset;
-	
-	// Offset (in pixels) of top-left corner of forehead in the face texture.
-	Vector2 foreheadOffset;
-	
-	// Offset (in pixels) of top-left corner of eyelids in the face texture.
-	Vector2 eyelidsOffset;
-	
-	// An optional(?) alpha channel for the eyelids.
-	// Seems to be used to determine where eye textures should show?
-	Texture* eyelidsAlphaChannel = nullptr;
-	
-	// Up to two possible blink anims with different probabilities.
-	Animation* blinkAnim1 = nullptr;
-	int blinkAnim1Probability = 0;
-	Animation* blinkAnim2 = nullptr;
-	int blinkAnim2Probability = 0;
-	
-	// Min and max period between blinks, in milliseconds.
-	Vector2 blinkFrequency;
-	
-	// Offset (in pixels) of top-left corner of mouth in the face texture.
-	// Plus, mouth size? But mouth textures all match this size anyway.
-	Vector2 mouthOffset;
-	Vector2 mouthSize;
+
+    // Left and right eye textures.
+    Texture* leftEyeTexture = nullptr;
+    Texture* rightEyeTexture = nullptr;
+
+    // Offset (in pixels) of top-left corner of eyes in the face texture.
+    Vector2 leftEyeOffset;
+    Vector2 rightEyeOffset;
+
+    // ???
+    Vector2 leftEyeBias;
+    Vector2 rightEyeBias;
+
+    // Max distance left/right eyes can move, in pixels.
+    Vector2 maxEyeLookDistance;
+
+    // Frequency of eye jitters in milliseconds.
+    // And max jitter distance in each direction, in subpixels.
+    Vector2 eyeJitterFrequency;
+    Vector2 maxEyeJitterDistance;
+
+    // Horizontal & vertical FOV, in degrees.
+    // Second one is used to determine whether to move head.
+    Vector2 eyeFieldOfView;
+    Vector2 eyeShortFieldOfView;
+
+    // How far apart eyes are, in inches.
+    float eyeSeparation = 0.0f;
+
+    // Approximate head radius, in inches.
+    // And an offset to "virtual" head center, in inches (everyone just uses (0,0,0)).
+    float headRadius = 0.0f;
+    Vector3 headCenterOffset;
+
+    // Offset (in pixels) of top-left corner of forehead in the face texture.
+    Vector2 foreheadOffset;
+
+    // Offset (in pixels) of top-left corner of eyelids in the face texture.
+    Vector2 eyelidsOffset;
+
+    // An optional(?) alpha channel for the eyelids.
+    // Seems to be used to determine where eye textures should show?
+    Texture* eyelidsAlphaChannel = nullptr;
+
+    // Up to two possible blink anims with different probabilities.
+    Animation* blinkAnim1 = nullptr;
+    int blinkAnim1Probability = 0;
+    Animation* blinkAnim2 = nullptr;
+    int blinkAnim2Probability = 0;
+
+    // Min and max period between blinks, in milliseconds.
+    Vector2 blinkFrequency;
+
+    // Offset (in pixels) of top-left corner of mouth in the face texture.
+    // Plus, mouth size? But mouth textures all match this size anyway.
+    Vector2 mouthOffset;
+    Vector2 mouthSize;
 };
 
 struct CharacterConfig
 {
-	std::string identifier;
-	
-	int8_t headMeshIndex = -1;
-	Vector4 headFov; 			// left, top, right, bottom
-	Vector4 headComfortableFov;
-	
+    std::string identifier;
+
+    int8_t headMeshIndex = -1;
+    Vector4 headFov; 			// left, top, right, bottom
+    Vector4 headComfortableFov;
+
     int8_t hipAxesMeshIndex = -1;
     int8_t hipAxesGroupIndex = -1;
-	int16_t hipAxesPointIndex = -1;
-	
+    int16_t hipAxesPointIndex = -1;
+
     int8_t leftShoeAxesMeshIndex = -1;
     int8_t leftShoeAxesGroupIndex = -1;
     int16_t leftShoeAxesPointIndex = -1;
-	
+
     int8_t rightShoeAxesMeshIndex = -1;
     int8_t rightShoeAxesGroupIndex = -1;
     int16_t rightShoeAxesPointIndex = -1;
-	
-	float walkerHeight = 72.0f;
-	float shoeThickness = 0.75f;
-	std::string shoeType = "Male Boot";
-	
-	Animation* walkStartAnim = nullptr;
-	Animation* walkStartTurnRightAnim = nullptr;
-	Animation* walkStartTurnLeftAnim = nullptr;
-	
+
+    float walkerHeight = 72.0f;
+    float shoeThickness = 0.75f;
+    std::string shoeType = "Male Boot";
+
+    Animation* walkStartAnim = nullptr;
+    Animation* walkStartTurnRightAnim = nullptr;
+    Animation* walkStartTurnLeftAnim = nullptr;
+
     uint16_t walkStartTurnRightFrame = 0;
     uint16_t walkStartTurnLeftFrame = 0;
-	
-	Animation* walkLoopAnim = nullptr;
-	Animation* walkStopAnim = nullptr;
+
+    Animation* walkLoopAnim = nullptr;
+    Animation* walkStopAnim = nullptr;
 
     FaceConfig* faceConfig = nullptr;
 
@@ -135,14 +135,14 @@ class CharacterManager
 public:
     void Init();
 
-	CharacterConfig& GetCharacterConfig(const std::string& identifier);
-	
-	bool IsValidName(const std::string& name);
-	
+    CharacterConfig& GetCharacterConfig(const std::string& identifier);
+
+    bool IsValidName(const std::string& name);
+
 private:
-	// Set of valid nouns referring to characters.
-	// Used to verify sheep commands are valid.
-	std::set<std::string> mCharacterNouns;
+    // Set of valid nouns referring to characters.
+    // Used to verify sheep commands are valid.
+    std::set<std::string> mCharacterNouns;
 
     // Face configs, keyed by the 3-letter "face" identifiers.
     // Usually, the face identifier is equal to the character identifer (e.g. GAB/GAB, GRA/GRA).
@@ -150,11 +150,11 @@ private:
     std::string_map_ci<FaceConfig> mFaceConfigs;
     FaceConfig mDefaultFaceConfig;
 
-	// Character configs, keyed by the 3-letter character identifier.
-	std::string_map_ci<CharacterConfig> mCharacterConfigs;
-	
-	// A default character config, in case you request one that doesn't exist.
-	CharacterConfig mDefaultCharacterConfig;
+    // Character configs, keyed by the 3-letter character identifier.
+    std::string_map_ci<CharacterConfig> mCharacterConfigs;
+
+    // A default character config, in case you request one that doesn't exist.
+    CharacterConfig mDefaultCharacterConfig;
 };
 
 extern CharacterManager gCharacterManager;
