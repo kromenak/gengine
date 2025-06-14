@@ -160,7 +160,9 @@ bool WalkerBoundary::FindPath(const Vector3& fromWorldPos, const Vector3& toWorl
 
                     // Update index being considered for next run through loop.
                     index = mTexture->GetPaletteIndex(path[i].x, path[i].y);
-                    if(index < 6)
+
+                    // If the palette index is below some threshold, we're in an "acceptably walkable" zone, so we can stop iterating.
+                    if(index < 4)
                     {
                         break;
                     }
