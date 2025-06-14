@@ -236,28 +236,28 @@ void GKActor::InterruptFidget(bool forTalk, const std::function<void()>& callbac
     mGasPlayer->Interrupt(forTalk, callback);
 }
 
-void GKActor::TurnTo(const Heading& heading, std::function<void()> finishCallback)
+void GKActor::TurnTo(const Heading& heading, const std::function<void()>& finishCallback)
 {
     InterruptFidget(false, [this, heading, finishCallback](){
-        mWalker->WalkTo(GetPosition(), heading, finishCallback);
+        mWalker->WalkToExact(GetPosition(), heading, finishCallback);
     });
 }
 
-void GKActor::WalkTo(const Vector3& position, std::function<void()> finishCallback)
-{
-    InterruptFidget(false, [this, position, finishCallback](){
-        mWalker->WalkTo(position, finishCallback);
-    });
-}
-
-void GKActor::WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
+void GKActor::WalkToBestEffort(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
 {
     InterruptFidget(false, [this, position, heading, finishCallback](){
-        mWalker->WalkTo(position, heading, finishCallback);
+        mWalker->WalkToBestEffort(position, heading, finishCallback);
     });
 }
 
-void GKActor::WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
+void GKActor::WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
+{
+    InterruptFidget(false, [this, position, heading, finishCallback](){
+        mWalker->WalkToExact(position, heading, finishCallback);
+    });
+}
+
+void GKActor::WalkToGas(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
 {
     // This version of the function is needed just to tell the walker if this walk request is coming from a GAS script or not!
     InterruptFidget(false, [this, position, heading, finishCallback](){
@@ -265,14 +265,14 @@ void GKActor::WalkToGas(const Vector3& position, const Heading& heading, std::fu
     });
 }
 
-void GKActor::WalkToSee(GKObject* target, std::function<void()> finishCallback)
+void GKActor::WalkToSee(GKObject* target, const std::function<void()>& finishCallback)
 {
     InterruptFidget(false, [this, target, finishCallback](){
         mWalker->WalkToSee(target, finishCallback);
     });
 }
 
-void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finishCallback)
+void GKActor::WalkToAnimationStart(Animation* anim, const std::function<void()>& finishCallback)
 {
 	// Need a valid anim.
 	if(anim == nullptr) { return; }
@@ -308,7 +308,7 @@ void GKActor::WalkToAnimationStart(Animation* anim, std::function<void()> finish
 
     // Walk to that position/heading.
     InterruptFidget(false, [this, walkPos, heading, finishCallback](){
-        mWalker->WalkTo(walkPos, heading, finishCallback);
+        mWalker->WalkToExact(walkPos, heading, finishCallback);
     });
 
     // To visualize walk position/heading.

@@ -295,7 +295,7 @@ void GasPlayer::WalkToInterruptPos(bool forTalk, const std::function<void()>& ca
         // Walk to the position if we have any.
         if(interruptPos != nullptr)
         {
-            walker->WalkTo(interruptPos->position, interruptPos->heading, [this, forTalk, callback](){
+            walker->WalkToExact(interruptPos->position, interruptPos->heading, [this, forTalk, callback](){
 
                 // Do interrupt anim after walk.
                 PlayInterruptAnimation(forTalk, callback);

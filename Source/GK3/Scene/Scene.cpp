@@ -334,7 +334,7 @@ void Scene::Init()
             mAnimator->Sample(modelDef->initAnim, 0, modelDef->name);
         }
     }
-    
+
     // Create soundtrack player and get it playing!
     Actor* actor = new Actor("SoundtrackPlayer");
     mSoundtrackPlayer = actor->AddComponent<SoundtrackPlayer>();
@@ -348,7 +348,7 @@ void Scene::Init()
 
     // Check for and run "scene enter" actions.
     gActionManager.ExecuteAction("SCENE", "ENTER");
-    
+
     // Make sure light colors are applied to all actors correctly before our first render.
     // Doing this here avoids a 1-frame render with bad lighting. Do this after SCENE/ENTER action executes, since that may change actor positions.
     ApplyAmbientLightColorToActors();
@@ -528,7 +528,7 @@ SceneCastResult Scene::Raycast(const Ray& ray, bool interactiveOnly, GKObject** 
 	}
 
     // AT THIS POINT: we may or may not have hit a Prop or Actor with our ray. But now we need to see if any BSP geometry is closer.
-    
+
     // Raycast against all BSP.
     RaycastHit bspHitInfo;
     if(GetBSP()->RaycastNearest(ray, bspHitInfo) && bspHitInfo.t < result.hitInfo.t)
@@ -679,8 +679,14 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
 				// Clicked on the floor - move ego to position.
 				if(StringUtil::EqualsIgnoreCase(hitInfo.name, mSceneData->GetFloorModelName()))
 				{
-					// Check walker boundary to see whether we can walk to this spot.
-					mEgo->WalkTo(ray.GetPoint(hitInfo.t), nullptr);
+                    // When the player clicks somewhere on the floor, we try to walk to that spot.
+                    // However, we don't want to allow walking to unwalkable spots. So first find the nearest walkable spot on the walker boundary.
+                    Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(ray.GetPoint(hitInfo.t));
+
+                    // Attempt to walk to the clicked position.
+                    // It's 99% likely that a path exists to the walk pos, and the walk will succeed.
+                    // The only edge case is if the walk pos clicked is on an isolated subsection of the walker boundary, in which case ego will walk as close as possible before giving up.
+					mEgo->WalkToBestEffort(walkPos, Heading::None, nullptr);
 				}
 			}
 		}
@@ -718,7 +724,7 @@ void Scene::Interact(const Ray& ray, GKObject* interactHint)
             actionBar->SetVerbEnabled("INSPECT_UNDO", !mCamera->IsForcedCinematicMode());
         }
 
-        // It's possible for INSPECT to be in the bar already, if it was a verb listed in NVC. 
+        // It's possible for INSPECT to be in the bar already, if it was a verb listed in NVC.
         // If so, we should remove it in this case - it's weird to have both INSPECT and INSPECT_UNDO options.
         actionBar->RemoveVerb("INSPECT");
     }
@@ -1137,7 +1143,7 @@ void Scene::ExecuteAction(const Action* action)
 			if(scenePos != nullptr)
 			{
 				//Debug::DrawLine(mEgo->GetPosition(), scenePos->position, Color32::Green, 60.0f);
-				mEgo->WalkTo(scenePos->position, scenePos->heading, [action]() {
+				mEgo->WalkToExact(scenePos->position, scenePos->heading, [action]() {
                     if(!gActionManager.IsActionBarShowing())
                     {
                         gActionManager.ExecuteAction(action, nullptr, false);
@@ -1180,19 +1186,19 @@ void Scene::ExecuteAction(const Action* action)
             GKObject* obj = GetSceneObjectByModelName(action->target);
             if(obj != nullptr)
             {
-                // HACK: We need to find a walkable position near the model's position.
-                // HACK: However, "FindNearestWalkablePosition" (currently) can return walkable *but unreachable* positions.
-                // HACK: To help alleviate that (for now), let's calculate a "near" position in the direction of Ego.
-                // HACK: This "hints" to the walk system that the walk pos should be walkable from Ego's position.
-                Vector3 modelToEgoDir = Vector3::Normalize(mEgo->GetPosition() - obj->GetPosition());
-                Vector3 nearPos = obj->GetPosition() + modelToEgoDir * 50.0f;
-                Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(nearPos);
+                // Find nearest walkable pos to this object.
+                Vector3 walkPos = mSceneData->GetWalkerBoundary()->FindNearestWalkablePosition(obj->GetPosition());
 
                 // We also want "turn to" behavior if already at the walk pos.
-                Heading walkHeading = Heading::FromDirection(obj->GetPosition() - walkPos);
+                Heading walkHeading = Heading::None;
+                if((mEgo->GetPosition() - obj->GetPosition()).GetLengthSq() < 50.0f * 50.0f)
+                {
+                    walkPos = mEgo->GetPosition();
+                    walkHeading = Heading::FromDirection(obj->GetPosition() - mEgo->GetPosition());
+                }
 
-                // Walk there, then do the action.
-                mEgo->WalkTo(walkPos, walkHeading, [action](){
+                // Walk there, and then do the action.
+                mEgo->WalkToBestEffort(walkPos, walkHeading, [action](){
                     if(!gActionManager.IsActionBarShowing())
                     {
                         gActionManager.ExecuteAction(action, nullptr, false);

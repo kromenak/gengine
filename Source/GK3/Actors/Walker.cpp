@@ -31,7 +31,7 @@ TYPEINFO_INIT(Walker, Component, 7)
 Walker::Walker(Actor* owner) : Component(owner),
     mGKOwner(static_cast<GKActor*>(owner))
 {
-    
+
 }
 
 void Walker::SetCharacterConfig(const CharacterConfig& characterConfig)
@@ -51,22 +51,27 @@ void Walker::SetWalkAnims(Animation* startAnim, Animation* loopAnim,
     mUsingOverrideWalkAnims = mWalkStartAnim != mCharConfig->walkStartAnim && mWalkLoopAnim != mCharConfig->walkLoopAnim;
 }
 
-void Walker::WalkTo(const Vector3& position, std::function<void()> finishCallback)
+void Walker::WalkToBestEffort(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
 {
-    WalkTo(position, Heading::None, finishCallback);
+    // Since this is "best effort", it's OK to walk and not exactly get to the desired position.
+    // This version is used if a player requests a walk action, or if an action approach tells us to "walk near" some object.
+    WalkToInternal(position, heading, finishCallback, false, false);
 }
 
-void Walker::WalkTo(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
+void Walker::WalkToExact(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
 {
-    WalkToInternal(position, heading, finishCallback, false);
+    // This is "exact", which means it will always leave the walker at the exact position/heading specified.
+    // This version is used for specific ScenePositions, or when scripts demand a specific walk pos internally.
+    WalkToInternal(position, heading, finishCallback, false, true);
 }
 
-void Walker::WalkToGas(const Vector3& position, const Heading& heading, std::function<void()> finishCallback)
+void Walker::WalkToGas(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback)
 {
-    WalkToInternal(position, heading, finishCallback, true);
+    // We're going to assume that if an autoscript tells us to walk somewhere, they want it to be the exact position/heading!
+    WalkToInternal(position, heading, finishCallback, true, true);
 }
 
-void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
+void Walker::WalkToSee(GKObject* target, const std::function<void()>& finishCallback)
 {
     mWalkToSeeTarget = target;
 
@@ -94,7 +99,7 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
             mTurnToFaceDir = facingDir;
             mWalkActions.push_back(WalkOp::TurnToFace);
         }
-        
+
         // If we were walking, we no longer need to!
         // We should stop our walk, play walk end anim, and do the turn to face.
         if(currentWalkOp > WalkOp::None && currentWalkOp < WalkOp::FollowPathEnd)
@@ -118,11 +123,13 @@ void Walker::WalkToSee(GKObject* target, std::function<void()> finishCallback)
     {
         // Specify a "dummy" heading here so that the "turn to face" action is put into the walk plan.
         // Later on, when the object comes into view, we'll replace this with the actual direction to turn.
-        WalkToInternal(target->GetAABB().GetCenter(), Heading::FromDegrees(0.0f), finishCallback, false);
+        //
+        // This walk doesn't have to get us to the exact destination - the goal is to just want near it so we can see it.
+        WalkToInternal(target->GetAABB().GetCenter(), Heading::FromDegrees(0.0f), finishCallback, false, false);
     }
 }
 
-void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const Heading& exitHeading, std::function<void()> finishCallback)
+void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const Heading& exitHeading, const std::function<void()>& finishCallback)
 {
     // For now, we can only track one "exit region" request at a time. So clear other if set.
     if(mExitRegionCallback != nullptr)
@@ -141,14 +148,14 @@ void Walker::WalkOutOfRegion(int regionIndex, const Vector3& exitPosition, const
         }
         return;
     }
-    
+
     // Save exit region and callback.
     mExitRegionIndex = regionIndex;
     mExitRegionCallback = finishCallback;
 
     // Attempt to leave the region by moving towards the exit position/heading.
     // Even if already outside the region, we want to let this go for at least one frame. When Update is called, it'll get cleared.
-    WalkTo(exitPosition, exitHeading, nullptr);
+    WalkToExact(exitPosition, exitHeading, nullptr);
 }
 
 void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
@@ -190,7 +197,7 @@ void Walker::SkipToEnd(bool alsoSkipWalkEndAnim)
         else if(mWalkActions.front() == WalkOp::TurnToFace)
         {
             mGKOwner->SetHeading(Heading::FromDirection(mTurnToFaceDir));
-        } 
+        }
         else if(mPath.size() > 1)
         {
             //Debug::DrawLine(mPath.front(), mPath.front() + Vector3::Normalize(mPath.front() - mPath[1]) * 10.0f, Color32::Green, 10.0f);
@@ -351,7 +358,7 @@ void Walker::OnUpdate(float deltaTime)
                 if(mNeedContinueWalkAnim)
                 {
                     mNeedContinueWalkAnim = false;
-                    
+
                     AnimParams animParams;
                     animParams.animation = mWalkLoopAnim;
                     animParams.allowMove = true;
@@ -401,7 +408,7 @@ void Walker::OnUpdate(float deltaTime)
     }
 }
 
-void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std::function<void()> finishCallback, bool fromAutoscript)
+void Walker::WalkToInternal(const Vector3& position, const Heading& heading, const std::function<void()>& finishCallback, bool fromAutoscript, bool mustReachDestination)
 {
     // Clear continue walk anim flag. Since we're starting a new walk.
     mNeedContinueWalkAnim = false;
@@ -419,6 +426,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
     // If action skipping, we don't need to find a path or do anything - just put the walker directly at the desired position/heading!
     if(gActionManager.IsSkippingCurrentAction())
     {
+        StopAllWalkAnimations();
         mGKOwner->SetPosition(position);
         if(heading.IsValid())
         {
@@ -430,7 +438,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
         }
         return;
     }
-    
+
     // If heading is specified, save "turn to face" action.
     if(heading.IsValid())
     {
@@ -441,12 +449,41 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
     // Do we need to walk?
     if(!AtPosition(position))
     {
-        // Calculate a path.
-        CalculatePath(GetOwner()->GetPosition(), position);
+        mPath.clear();
+
+        // Attempt to find a path between current position and walk position.
+        Vector3 startPos = GetOwner()->GetPosition();
+        Vector3 endPos = position;
+        if(mWalkerBoundary != nullptr)
+        {
+            mWalkerBoundary->FindPath(startPos, endPos, mPath);
+        }
+
+        // Whether a path was found or not actually isn't that important here - even when a path isn't found, mPath contains a "best effort" to get close to the goal.
+        // What IS important is whether we MUST reach the goal or if "best effort" is good enough.
+        //
+        // If it's not important to reach our destination exactly, then there's nothing more to do - we already have a "best effort" path.
+        // If it is important though, we must ensure the path actually HAS the destination position present!
+        if(mustReachDestination)
+        {
+            // If the path is empty, and we must reach our destination, we've just gotta go straight there - that's the best we can do at this point.
+            if(mPath.empty())
+            {
+                mPath.push_back(endPos);
+                mPath.push_back(startPos);
+            }
+            else
+            {
+                // If a path exists, whether it's a full path or "best effort", we should make 100% sure the end pos is at the end of the path.
+                // The walker boundary goal position is always a "walkable" position on the grid, but the end pos can be something off the grid in some cases.
+                mPath.insert(mPath.begin(), endPos);
+            }
+        }
 
         // Make sure first node is at the right y-pos.
+        // Also put all other nodes in the path at the same y-pos for starters.
         UpdateNextNodesYPos();
-        for(int i = 0; i < mPath.size() - 2; ++i)
+        for(int i = 0; i < mPath.size(); ++i)
         {
             mPath[i].y = mPath.back().y;
         }
@@ -541,7 +578,7 @@ void Walker::WalkToInternal(const Vector3& position, const Heading& heading, std
         // In both cases, we don't really have to do anything. But we do want to play the next action.
     }
     OutputWalkerPlan();
-    
+
     // OK, walk sequence has been created - let's start doing it!
     //std::cout << "Walk Sequence Begin" << std::endl;
     if(doNextAction)
@@ -566,7 +603,7 @@ void Walker::PopAndNextAction()
 void Walker::NextAction()
 {
     mCurrentWalkActionTimer = 0.0f;
-    
+
     // Do next action in sequence, if any.
     WalkOp currentWalkOp = GetCurrentWalkOp();
     if(currentWalkOp == WalkOp::FollowPathStart)
@@ -640,7 +677,7 @@ void Walker::NextAction()
         {
             animParams.startFrame = 10;
         }
-            
+
         gSceneManager.GetScene()->GetAnimator()->Start(animParams);
     }
     else if(currentWalkOp == WalkOp::FollowPathEnd)
@@ -759,19 +796,6 @@ bool Walker::IsWalkToSeeTargetInView(Vector3& outTurnToFaceDir) const
         }
     }
     return false;
-}
-
-void Walker::CalculatePath(const Vector3& startPos, const Vector3& endPos)
-{
-    // Attempt to find a path between the two points. This should be possible in all scenarios that occur in the game.
-    // However, if no path is found, we'll have to just walk directly from the start to end position - this may look bad if obstacles are in the way.
-    bool foundPath = mWalkerBoundary != nullptr && mWalkerBoundary->FindPath(startPos, endPos, mPath);
-    if(!foundPath)
-    {
-        mPath.clear();
-        mPath.push_back(endPos);
-        mPath.push_back(startPos);
-    }
 }
 
 bool Walker::SkipPathNodesOutsideFrustum()
@@ -909,7 +933,7 @@ bool Walker::AdvancePath()
     if(!mPath.empty())
     {
         //Debug::DrawLine(GetOwner()->GetPosition(), mPath.back(), Color32::White);
-        
+
         // When walking, we're always mainly interested in getting to the end of the path.
         // Particularly, don't ONLY check distance to last node!
         // If we skipped a node (maybe overshot it), that's OK!
@@ -934,7 +958,7 @@ bool Walker::AdvancePath()
             UpdateNextNodesYPos();
         }
     }
-    
+
     // Return whether path is completed.
     return mPath.empty();
 }
@@ -959,7 +983,7 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSp
 {
     bool doneTurning = false;
     Vector3 currentDir = GetOwner()->GetForward();
-    
+
     // What angle do I need to rotate to face the desired direction?
     float currToDesiredAngle = Math::Acos(Vector3::Dot(currentDir, desiredDir));
     if(currToDesiredAngle > kAtHeadingRadians)
@@ -970,12 +994,12 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSp
             // Which way do I rotate to get to facing direction I want?
             // Can use y-axis of cross product to determine this.
             Vector3 cross = Vector3::Cross(currentDir, desiredDir);
-            
+
             // If y-axis is zero, it means vectors are parallel (either exactly facing or exactly NOT facing).
             // In that case, 1.0f default is fine. Otherwise, we want either 1.0f or -1.0f.
             rotateDirection = cross.y >= 0.0f ? 1.0f : -1.0f;
         }
-        
+
         // Determine how much we'll rotate this frame.
         // If it's enough to where our angle will be less than the "at heading" rotation, just set heading exactly.
         float thisFrameRotateAngle = turnSpeed * deltaTime;
@@ -984,10 +1008,10 @@ bool Walker::TurnToFace(float deltaTime, const Vector3& desiredDir, float turnSp
             thisFrameRotateAngle = currToDesiredAngle;
             doneTurning = true;
         }
-        
+
         // Factor direction into angle.
         thisFrameRotateAngle *= rotateDirection;
-        
+
         // Rotate actor's mesh to face the desired direction, rotating around the actor's position.
         // Remember, the GKActor follows the mesh's position during animations (based on hip bone placement). But the mesh itself may have a vastly different origin b/c of playing animation.
         mGKOwner->Rotate(thisFrameRotateAngle);

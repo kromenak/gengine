@@ -373,7 +373,7 @@ shpvoid WalkTo(const std::string& actorName, const std::string& positionName)
     }
 
     // Ok, we can actually do the walk to it seems!
-    actor->WalkTo(scenePosition->position, scenePosition->heading, AddWait());
+    actor->WalkToExact(scenePosition->position, scenePosition->heading, AddWait());
     return 0;
 }
 RegFunc2(WalkTo, void, string, string, WAITABLE, REL_FUNC);
